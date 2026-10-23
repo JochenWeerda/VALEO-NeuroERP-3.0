@@ -167,3 +167,8 @@ Freischaltstatus. Keine DDL oder Rechtevergabe. Bestehendes beleg_write und
 Tenant-/Akteurkontext. CLI studio entitaet-uebernehmen NAME speichert diese
 Definition ueber den bestehenden idempotenten Draftcommand. Anschliessend
 bestehender Review-/Plan-/Simulations-/Vier-Augen-Freigabeweg.
+
+
+## Verladung: explizite Mandantenbindung (2026-10-23)
+
+Die bestehenden `/api/v1/tours`-Wege verwenden den verifizierten Mandantenkontext fuer alle Tour- und Unterobjektrepositories. Loading-Start/-Ende und Dispatch verwenden den verifizierten Urheber; Status, Tourlog und Loading-Outbox werden gemeinsam bestaetigt. Schema-/Abnahmenachweis: [Verladung Mandant/Atomaritaet](../../../quality-assurance/loading-tenant-atomic-20261023.md). Keine neuen Endpoints oder Container.

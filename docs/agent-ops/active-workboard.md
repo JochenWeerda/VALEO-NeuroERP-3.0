@@ -19441,10 +19441,14 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 
 **Integration:** Hotfix d61993b9e separat auf main veroeffentlicht und als Elternstand im Reparaturzweig erhalten. Keine Gesamtfreigabe der UI-Migration; GitHub-Nachlauf steht aus.
 
-## LOADING-ATOMIC-ACTOR-20261023 - reserviert, Codex
+## LOADING-ATOMIC-ACTOR-20261023 - umgesetzt, Codex
 
 **Owner:** Codex. **Ziel:** vorhandene LOADING-Start/Ende-Anbindung atomar mit Log/Ausgangsereignis abschliessen und Urheber ausschliesslich aus gepruefter Anmeldung beziehen. **Besitz:** tours.py nur start/finish-loading und Outbox-Helfer; TourRepository nur optionale commit-Steuerung der genau zwei Loading-Wege/Update/add_event; OutboxPublisher nur optionale Unterdrueckung des vorzeitigen SSE-Spiegels fuer diesen Weg; neuer begrenzter Test/QA. Cursors Workspace/UI/Signalmapping und Tests bleiben unberuehrt. Kein pauschaler Tourenumbau/Schema-/DB-Reset. **Risiko:** domain_log.log_touren hat im ORM keine Mandantenspalte; dieser Slice darf keine systemweite Mandantenabnahme behaupten. Persistenz und Rollback werden gesondert geprueft.
 
 **LOADING-ATOMIC-ACTOR Mandanten-Erweiterung (Nutzerentscheid):** Besitz um verladung/models.py (Tour-Mandant), alle vier Verladungsrepositories (Pflichtkontext/Parent-Joins/Fremdreferenzguards), tours.py saemtliche Repoaufrufer, eine begrenzte Alembic-Migration und eigene Zwei-Mandanten-/Rollbacktests erweitert. Bestehende unzugeordnete Touren werden nicht einem Standardmandanten zugewiesen. Keine Anwendung auf gemeinsamem Pruefstand ohne Status-/Besitzpruefung; Cursor-Workspace und dessen Tests bleiben geschuetzt.
 
 **LOADING-ATOMIC-ACTOR Artefakt-Nebenbefund:** Der erforderliche Tabellenkatalog-Generator scheitert reproduzierbar bei Registry-Lazy-Initialisierung mit dictionary changed size during iteration. Besitz eng auf scripts/table_lineage.py load_native_screens und neuen isolierten Regressionstest erweitert: Registry vor Snapshot vervollstaendigen, wie beim bereits geprueften Agent-Handbuch. Kein Schwellenabbau.
+
+**LOADING-ATOMIC-ACTOR Ergebnis:** Pflichtmandant und Parent-Joins, FK-Stoppaar, gepruefter Loading-/Dispatchurheber, atomare Loading-Outbox und PATCH-/DTO-Schutz. Zwei regulare Probe-Revisionen angewandt ohne Fremdtransaktion/Datenverlust/Reset.30 SQLite-/PostgreSQLfaelle gruen; Katalog681 aktuell, OpenAPI3246 erhalten. Fahrerzuweisung ohne Eigentumsnachweis gesperrt; allgemeine Command-Idempotenz/Outboxworkerfragen nicht als geschlossen behauptet. QA loading-tenant-atomic-20261023.md. Frontend aufPort3000 laeuft noch mitImage16.10.; gezielter Neubau gestartet, keine behauptete Sichtabnahme.
+
+**Abschlussnachweis:**48 kombinierte Verladungs-/Katalogfaelle bestanden, darunter15 echte PostgreSQL-Verladungsfaelle mit Savepoints. Alle3246 OpenAPI-Pfade erhalten;681 Tabellenkatalog aktuell; Code-/Migrationsinventare nachgezogen. Die laufende Frontendaktualisierung ist ein separater Betriebsnachweis.

@@ -410671,24 +410671,6 @@
               "title": "Tour Id",
               "type": "string"
             }
-          },
-          {
-            "in": "query",
-            "name": "user_id",
-            "required": true,
-            "schema": {
-              "title": "User Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "user_name",
-            "required": true,
-            "schema": {
-              "title": "User Name",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -410780,7 +410762,7 @@
     },
     "/api/v1/tours/{tour_id}/finish-loading": {
       "post": {
-        "description": "Mark loading as finished, tour in transit",
+        "description": "Authenticated loading transition; status, audit and outbox commit together.",
         "operationId": "finish_loading_api_v1_tours__tour_id__finish_loading_post",
         "parameters": [
           {
@@ -410789,24 +410771,6 @@
             "required": true,
             "schema": {
               "title": "Tour Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "user_id",
-            "required": true,
-            "schema": {
-              "title": "User Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "user_name",
-            "required": true,
-            "schema": {
-              "title": "User Name",
               "type": "string"
             }
           }
@@ -410847,7 +410811,7 @@
     },
     "/api/v1/tours/{tour_id}/start-loading": {
       "post": {
-        "description": "Mark tour as loading",
+        "description": "Authenticated loading transition; status, audit and outbox commit together.",
         "operationId": "start_loading_api_v1_tours__tour_id__start_loading_post",
         "parameters": [
           {
@@ -410856,24 +410820,6 @@
             "required": true,
             "schema": {
               "title": "Tour Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "user_id",
-            "required": true,
-            "schema": {
-              "title": "User Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "user_name",
-            "required": true,
-            "schema": {
-              "title": "User Name",
               "type": "string"
             }
           }

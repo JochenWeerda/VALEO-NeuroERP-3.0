@@ -328,6 +328,8 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `lieferschein_status_bedingung_20260929` | Die Statusbedingung des Lieferscheins kennt die Zustaende, die es gibt. |
 | `lkw_annahme_queue_article_reference_20260328` | LKW-Annahme-Queue article reference |
 | `lkw_annahme_queue_klaerung_20260328` | LKW-Annahme-Queue Klaerungsdaten |
+| `loading_stop_fk_20261023` | Enforce delivery notes and stops belonging to the same tour. |
+| `loading_tenant_20261023` | Isolate legacy loading tours through their owning tenant. |
 | `log_carrier_invoices_20260618` | LOG-FRACHT-001: Spediteur-Rechnungen (carrier_invoices) |
 | `log_disposition_20260623` | DOM-LOG-004.2/.3: tour_disposition_checks + epod_settlements |
 | `log_frachtbriefe_20260626` | LOG-FRACHTBRIEF-001: Frachtbrief-Tabelle fuer /api/v1/logistik/frachtbriefe. |

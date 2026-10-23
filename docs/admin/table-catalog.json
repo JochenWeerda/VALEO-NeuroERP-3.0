@@ -12017,89 +12017,6 @@
             "id"
           ]
         },
-        "contacts": {
-          "columns": [
-            {
-              "name": "id",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "first_name",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "last_name",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "email",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "phone",
-              "nullable": true,
-              "type": "character varying"
-            },
-            {
-              "name": "position",
-              "nullable": true,
-              "type": "character varying"
-            },
-            {
-              "name": "department",
-              "nullable": true,
-              "type": "character varying"
-            },
-            {
-              "name": "customer_id",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "is_active",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "name": "created_at",
-              "nullable": true,
-              "type": "timestamp with time zone"
-            },
-            {
-              "name": "updated_at",
-              "nullable": true,
-              "type": "timestamp with time zone"
-            },
-            {
-              "name": "deleted_at",
-              "nullable": true,
-              "type": "timestamp with time zone"
-            }
-          ],
-          "foreign_keys": [
-            {
-              "column": "customer_id",
-              "references": "domain_crm.customers.id"
-            }
-          ],
-          "owner_domain": "crm",
-          "ownership_reason": "Custodian domain_crm / Domain crm.",
-          "placement": "native",
-          "primary_key": [
-            "id"
-          ],
-          "read_by": [
-            "app/api/v1/endpoints/compliance_dsgvo.py",
-            "app/infrastructure/models/__init__.py"
-          ],
-          "written_by": [
-            "app/api/v1/endpoints/compliance_dsgvo.py"
-          ]
-        },
         "credit_limits": {
           "columns": [
             {
@@ -12360,6 +12277,9 @@
             "app/api/v1/endpoints/crm_campaigns.py",
             "app/infrastructure/models/crm_campaign_models.py"
           ],
+          "screens": [
+            "crm/campaign"
+          ],
           "written_by": [
             "app/api/v1/endpoints/crm_campaigns.py"
           ]
@@ -12437,6 +12357,9 @@
           "read_by": [
             "app/api/v1/endpoints/crm_campaigns.py",
             "app/infrastructure/models/crm_campaign_models.py"
+          ],
+          "screens": [
+            "crm/campaign"
           ],
           "written_by": [
             "app/api/v1/endpoints/crm_campaigns.py"
@@ -12601,6 +12524,9 @@
             "app/api/v1/endpoints/crm_campaigns.py",
             "app/infrastructure/models/crm_campaign_models.py"
           ],
+          "screens": [
+            "crm/campaign"
+          ],
           "written_by": [
             "app/api/v1/endpoints/crm_campaigns.py"
           ]
@@ -12678,6 +12604,9 @@
           "read_by": [
             "app/api/v1/endpoints/crm_consents.py",
             "app/crm/router.py"
+          ],
+          "screens": [
+            "crm/consent"
           ],
           "written_by": [
             "app/crm/router.py"
@@ -12860,6 +12789,9 @@
           "read_by": [
             "app/api/v1/endpoints/crm_consents.py",
             "app/infrastructure/models/crm_consent.py"
+          ],
+          "screens": [
+            "crm/consent"
           ]
         },
         "crm_opportunities": {
@@ -14449,6 +14381,120 @@
             "app/api/v1/endpoints/sales_order_commands.py",
             "app/api/v1/endpoints/sales_orders.py",
             "app/services/webshop_integration_service.py"
+          ]
+        },
+        "studio_abnahme_20261021": {
+          "columns": [
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "uuid"
+            },
+            {
+              "name": "version",
+              "nullable": false,
+              "type": "integer"
+            },
+            {
+              "name": "deleted",
+              "nullable": false,
+              "type": "boolean"
+            },
+            {
+              "name": "created_by",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "created_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "name",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "quantity",
+              "nullable": false,
+              "type": "numeric"
+            },
+            {
+              "name": "active",
+              "nullable": true,
+              "type": "boolean"
+            }
+          ],
+          "foreign_keys": [
+            {
+              "column": "tenant_id",
+              "references": "domain_shared.tenants.id"
+            }
+          ],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
+          "primary_key": [
+            "tenant_id",
+            "id"
+          ]
+        },
+        "studio_abnahme_20261021_events": {
+          "columns": [
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "uuid"
+            },
+            {
+              "name": "actor",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "request_hash",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "result",
+              "nullable": false,
+              "type": "jsonb"
+            },
+            {
+              "name": "audit",
+              "nullable": false,
+              "type": "jsonb"
+            },
+            {
+              "name": "recorded_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [
+            {
+              "column": "tenant_id",
+              "references": "domain_shared.tenants.id"
+            }
+          ],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
+          "primary_key": [
+            "tenant_id",
+            "id"
           ]
         },
         "supplier_tax_profiles": {
@@ -22360,6 +22406,9 @@
             "app/services/wf_trigger_service.py"
           ],
           "screens": [
+            "disposition/strecken-disposition",
+            "fibu/op-skonto-auszifferung",
+            "fibu/zahlungsmeldungen",
             "sales/delivery-note"
           ],
           "written_by": [
@@ -28405,124 +28454,6 @@
             "app/services/supply_chain_trace_service.py"
           ]
         },
-        "article_alternative_eans": {
-          "columns": [
-            {
-              "name": "id",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "article_id",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "ean_code",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "bezeichnung",
-              "nullable": true,
-              "type": "character varying"
-            },
-            {
-              "name": "is_primary",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "name": "created_at",
-              "nullable": true,
-              "type": "timestamp with time zone"
-            },
-            {
-              "name": "updated_at",
-              "nullable": true,
-              "type": "timestamp with time zone"
-            }
-          ],
-          "foreign_keys": [
-            {
-              "column": "article_id",
-              "references": "domain_inventory.articles.id"
-            }
-          ],
-          "owner_domain": "inventory",
-          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
-          "placement": "native",
-          "primary_key": [
-            "id"
-          ],
-          "read_by": [
-            "app/infrastructure/models/__init__.py"
-          ]
-        },
-        "article_analyses": {
-          "columns": [
-            {
-              "name": "id",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "article_id",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "analyse_typ",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "bezeichnung",
-              "nullable": true,
-              "type": "character varying"
-            },
-            {
-              "name": "analyse_text",
-              "nullable": true,
-              "type": "text"
-            },
-            {
-              "name": "bild_datei",
-              "nullable": true,
-              "type": "character varying"
-            },
-            {
-              "name": "bild_vorschau",
-              "nullable": true,
-              "type": "character varying"
-            },
-            {
-              "name": "created_at",
-              "nullable": true,
-              "type": "timestamp with time zone"
-            },
-            {
-              "name": "updated_at",
-              "nullable": true,
-              "type": "timestamp with time zone"
-            }
-          ],
-          "foreign_keys": [
-            {
-              "column": "article_id",
-              "references": "domain_inventory.articles.id"
-            }
-          ],
-          "owner_domain": "inventory",
-          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
-          "placement": "native",
-          "primary_key": [
-            "id"
-          ],
-          "read_by": [
-            "app/infrastructure/models/__init__.py"
-          ]
-        },
         "article_batches": {
           "columns": [
             {
@@ -28767,65 +28698,6 @@
             "app/infrastructure/models/l3c_models.py"
           ]
         },
-        "article_print_settings": {
-          "columns": [
-            {
-              "name": "id",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "article_id",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "belegart",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "drucken",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "name": "druck_statt_artikel",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "name": "druck_zusaetzlich",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "name": "created_at",
-              "nullable": true,
-              "type": "timestamp with time zone"
-            },
-            {
-              "name": "updated_at",
-              "nullable": true,
-              "type": "timestamp with time zone"
-            }
-          ],
-          "foreign_keys": [
-            {
-              "column": "article_id",
-              "references": "domain_inventory.articles.id"
-            }
-          ],
-          "owner_domain": "inventory",
-          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
-          "placement": "native",
-          "primary_key": [
-            "id"
-          ],
-          "read_by": [
-            "app/infrastructure/models/__init__.py"
-          ]
-        },
         "article_selections": {
           "columns": [
             {
@@ -28986,75 +28858,6 @@
           "read_by": [
             "app/infrastructure/models/__init__.py",
             "app/services/rations_readiness_service.py"
-          ]
-        },
-        "article_units": {
-          "columns": [
-            {
-              "name": "id",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "article_id",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "einheit",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "umrechnungsfaktor",
-              "nullable": false,
-              "type": "numeric"
-            },
-            {
-              "name": "preiseinheit",
-              "nullable": true,
-              "type": "character varying"
-            },
-            {
-              "name": "gebinde_groesse",
-              "nullable": true,
-              "type": "numeric"
-            },
-            {
-              "name": "gebinde_einheit",
-              "nullable": true,
-              "type": "character varying"
-            },
-            {
-              "name": "is_primary",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "name": "created_at",
-              "nullable": true,
-              "type": "timestamp with time zone"
-            },
-            {
-              "name": "updated_at",
-              "nullable": true,
-              "type": "timestamp with time zone"
-            }
-          ],
-          "foreign_keys": [
-            {
-              "column": "article_id",
-              "references": "domain_inventory.articles.id"
-            }
-          ],
-          "owner_domain": "inventory",
-          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
-          "placement": "native",
-          "primary_key": [
-            "id"
-          ],
-          "read_by": [
-            "app/infrastructure/models/__init__.py"
           ]
         },
         "articles": {
@@ -29797,6 +29600,7 @@
             "app/infrastructure/models/futtermittel_models.py",
             "app/infrastructure/models/l3c_models.py",
             "app/seeds/inventory_seed.py",
+            "app/services/agri_flush_booking.py",
             "app/services/customer_reference.py",
             "app/services/feed_inventory_link_service.py",
             "app/services/inventory_auxiliary_service.py",
@@ -32049,6 +31853,7 @@
             "app/api/v1/endpoints/pos_retoure.py",
             "app/api/v1/endpoints/warehouse_transfers.py",
             "app/domains/inventory/api/storage_fees.py",
+            "app/services/agri_flush_booking.py",
             "app/services/agri_lot_link_booking_service.py",
             "app/services/agri_silo_material_flow_service.py",
             "app/services/feed_inventory_link_service.py",
@@ -32296,6 +32101,7 @@
             "app/services/mcp_execution_service.py"
           ],
           "written_by": [
+            "app/services/agri_flush_booking.py",
             "app/services/agri_silo_material_flow_service.py"
           ]
         },
@@ -32392,119 +32198,12 @@
           "read_by": [
             "app/api/v1/schemas/silo_material_flow_schemas.py",
             "app/infrastructure/models/wms_models.py",
+            "app/services/agri_flush_booking.py",
             "app/services/agri_silo_material_flow_service.py",
             "app/services/mcp_execution_service.py"
           ],
           "written_by": [
             "app/services/agri_silo_material_flow_service.py"
-          ]
-        },
-        "nawaro_area_sheet_rows": {
-          "columns": [
-            {
-              "name": "id",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "sheet_id",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "customer_name",
-              "nullable": true,
-              "type": "character varying"
-            },
-            {
-              "name": "name_1",
-              "nullable": true,
-              "type": "character varying"
-            },
-            {
-              "name": "name_2",
-              "nullable": true,
-              "type": "character varying"
-            },
-            {
-              "name": "postal_code",
-              "nullable": true,
-              "type": "character varying"
-            },
-            {
-              "name": "city",
-              "nullable": true,
-              "type": "character varying"
-            },
-            {
-              "name": "phone",
-              "nullable": true,
-              "type": "character varying"
-            },
-            {
-              "name": "fax",
-              "nullable": true,
-              "type": "character varying"
-            },
-            {
-              "name": "area_2022",
-              "nullable": true,
-              "type": "numeric"
-            },
-            {
-              "name": "area_2023",
-              "nullable": true,
-              "type": "numeric"
-            },
-            {
-              "name": "area_2024",
-              "nullable": true,
-              "type": "numeric"
-            },
-            {
-              "name": "area_2025",
-              "nullable": true,
-              "type": "numeric"
-            },
-            {
-              "name": "area_2026",
-              "nullable": true,
-              "type": "numeric"
-            },
-            {
-              "name": "row_order",
-              "nullable": false,
-              "type": "integer"
-            },
-            {
-              "name": "tenant_id",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "created_at",
-              "nullable": true,
-              "type": "timestamp with time zone"
-            }
-          ],
-          "foreign_keys": [
-            {
-              "column": "sheet_id",
-              "references": "domain_inventory.nawaro_area_sheets.id"
-            },
-            {
-              "column": "tenant_id",
-              "references": "domain_shared.tenants.id"
-            }
-          ],
-          "owner_domain": "inventory",
-          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
-          "placement": "native",
-          "primary_key": [
-            "id"
-          ],
-          "read_by": [
-            "app/infrastructure/models/l3c_models.py"
           ]
         },
         "nawaro_area_sheets": {
@@ -32561,99 +32260,6 @@
             }
           ],
           "foreign_keys": [
-            {
-              "column": "tenant_id",
-              "references": "domain_shared.tenants.id"
-            }
-          ],
-          "owner_domain": "inventory",
-          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
-          "placement": "native",
-          "primary_key": [
-            "id"
-          ],
-          "read_by": [
-            "app/infrastructure/models/l3c_models.py"
-          ]
-        },
-        "nawaro_contract_sheet_rows": {
-          "columns": [
-            {
-              "name": "id",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "sheet_id",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "contract_number",
-              "nullable": true,
-              "type": "character varying"
-            },
-            {
-              "name": "customer_name",
-              "nullable": true,
-              "type": "character varying"
-            },
-            {
-              "name": "name_1",
-              "nullable": true,
-              "type": "character varying"
-            },
-            {
-              "name": "total_area",
-              "nullable": true,
-              "type": "numeric"
-            },
-            {
-              "name": "standard_quantity",
-              "nullable": true,
-              "type": "numeric"
-            },
-            {
-              "name": "delivery_count",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "name": "delivery_resource",
-              "nullable": true,
-              "type": "character varying"
-            },
-            {
-              "name": "quantity_b",
-              "nullable": true,
-              "type": "numeric"
-            },
-            {
-              "name": "harvest_declaration",
-              "nullable": true,
-              "type": "character varying"
-            },
-            {
-              "name": "row_order",
-              "nullable": false,
-              "type": "integer"
-            },
-            {
-              "name": "tenant_id",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "created_at",
-              "nullable": true,
-              "type": "timestamp with time zone"
-            }
-          ],
-          "foreign_keys": [
-            {
-              "column": "sheet_id",
-              "references": "domain_inventory.nawaro_contract_sheets.id"
-            },
             {
               "column": "tenant_id",
               "references": "domain_shared.tenants.id"
@@ -32797,172 +32403,6 @@
             }
           ],
           "foreign_keys": [],
-          "owner_domain": "inventory",
-          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
-          "placement": "native",
-          "primary_key": [
-            "id"
-          ],
-          "read_by": [
-            "app/infrastructure/models/l3c_models.py"
-          ]
-        },
-        "nawaro_raps_balances": {
-          "columns": [
-            {
-              "name": "id",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "profile_id",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "booking_period",
-              "nullable": true,
-              "type": "character varying"
-            },
-            {
-              "name": "input_seed_tons",
-              "nullable": false,
-              "type": "numeric"
-            },
-            {
-              "name": "output_oil_tons",
-              "nullable": false,
-              "type": "numeric"
-            },
-            {
-              "name": "output_meal_tons",
-              "nullable": false,
-              "type": "numeric"
-            },
-            {
-              "name": "output_other_tons",
-              "nullable": false,
-              "type": "numeric"
-            },
-            {
-              "name": "allocation_oil_pct",
-              "nullable": true,
-              "type": "numeric"
-            },
-            {
-              "name": "allocation_meal_pct",
-              "nullable": true,
-              "type": "numeric"
-            },
-            {
-              "name": "heap_location",
-              "nullable": true,
-              "type": "character varying"
-            },
-            {
-              "name": "logistics_note",
-              "nullable": true,
-              "type": "text"
-            },
-            {
-              "name": "tenant_id",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "created_at",
-              "nullable": true,
-              "type": "timestamp with time zone"
-            }
-          ],
-          "foreign_keys": [
-            {
-              "column": "profile_id",
-              "references": "domain_inventory.nawaro_raps_profiles.id"
-            },
-            {
-              "column": "tenant_id",
-              "references": "domain_shared.tenants.id"
-            }
-          ],
-          "owner_domain": "inventory",
-          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
-          "placement": "native",
-          "primary_key": [
-            "id"
-          ],
-          "read_by": [
-            "app/infrastructure/models/l3c_models.py"
-          ]
-        },
-        "nawaro_raps_certificates": {
-          "columns": [
-            {
-              "name": "id",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "profile_id",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "scheme",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "certificate_number",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "chain_stage",
-              "nullable": true,
-              "type": "character varying"
-            },
-            {
-              "name": "valid_from",
-              "nullable": true,
-              "type": "date"
-            },
-            {
-              "name": "valid_until",
-              "nullable": true,
-              "type": "date"
-            },
-            {
-              "name": "issuer",
-              "nullable": true,
-              "type": "character varying"
-            },
-            {
-              "name": "status",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "tenant_id",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "created_at",
-              "nullable": true,
-              "type": "timestamp with time zone"
-            }
-          ],
-          "foreign_keys": [
-            {
-              "column": "profile_id",
-              "references": "domain_inventory.nawaro_raps_profiles.id"
-            },
-            {
-              "column": "tenant_id",
-              "references": "domain_shared.tenants.id"
-            }
-          ],
           "owner_domain": "inventory",
           "ownership_reason": "Custodian domain_inventory / Domain inventory.",
           "placement": "native",
@@ -33849,6 +33289,7 @@
             "app/api/v1/endpoints/silo_cells_readmodel.py",
             "app/api/v1/schemas/silo_material_flow_schemas.py",
             "app/infrastructure/models/wms_models.py",
+            "app/services/agri_flush_booking.py",
             "app/services/agri_lot_link_booking_service.py",
             "app/services/agri_qs_workflow_service.py",
             "app/services/agri_silo_lot_link_service.py",
@@ -33858,6 +33299,7 @@
           ],
           "written_by": [
             "app/api/v1/endpoints/agri_plc_stub.py",
+            "app/services/agri_flush_booking.py",
             "app/services/agri_lot_link_booking_service.py",
             "app/services/agri_qs_workflow_service.py",
             "app/services/agri_silo_lot_link_service.py",
@@ -35692,6 +35134,14 @@
               "references": "domain_log.log_tour_stops.id"
             },
             {
+              "column": "stop_id",
+              "references": "domain_log.log_tour_stops.id"
+            },
+            {
+              "column": "tour_id",
+              "references": "domain_log.log_tour_stops.tour_id"
+            },
+            {
               "column": "tour_id",
               "references": "domain_log.log_touren.id"
             }
@@ -35964,6 +35414,11 @@
             {
               "name": "updated_by",
               "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
               "type": "character varying"
             }
           ],
@@ -38650,6 +38105,11 @@
             "app/infrastructure/models/futtermittel_models.py",
             "app/services/feed_production_chain_service.py"
           ],
+          "screens": [
+            "agrar/qualitaet/ausnahmen",
+            "agrar/qualitaet/laborwerte",
+            "agrar/silo-qualitaet"
+          ],
           "written_by": [
             "app/api/v1/endpoints/quality_lot_binding.py",
             "app/services/inventory_compat_service.py"
@@ -38709,6 +38169,15 @@
           "placement": "prefix",
           "primary_key": [
             "id"
+          ],
+          "screens": [
+            "charge/mischung",
+            "charge/qualitaets-freigabe",
+            "charge/rueckruf",
+            "charge/stamm",
+            "charge/teilung",
+            "charge/zusammenfuehrung",
+            "lager/charge"
           ],
           "written_by": [
             "app/api/v1/endpoints/charges.py"
@@ -43041,6 +42510,11 @@
           "read_by": [
             "app/api/v1/endpoints/quality_lot_binding.py"
           ],
+          "screens": [
+            "agrar/qualitaet/ausnahmen",
+            "agrar/qualitaet/laborwerte",
+            "agrar/silo-qualitaet"
+          ],
           "written_by": [
             "app/api/v1/endpoints/quality_lot_binding.py"
           ]
@@ -43109,6 +42583,11 @@
           "placement": "native",
           "primary_key": [
             "id"
+          ],
+          "screens": [
+            "agrar/qualitaet/ausnahmen",
+            "agrar/qualitaet/laborwerte",
+            "agrar/silo-qualitaet"
           ],
           "written_by": [
             "app/api/v1/endpoints/quality_lot_binding.py"
@@ -46406,6 +45885,7 @@
             "app/services/warehouse_service.py"
           ],
           "screens": [
+            "admin/branches",
             "sales/delivery-note"
           ],
           "written_by": [
@@ -48810,6 +48290,9 @@
           "read_by": [
             "app/api/v1/endpoints/artikel_mengeneinheiten.py"
           ],
+          "screens": [
+            "stammdaten/mengeneinheit"
+          ],
           "written_by": [
             "app/api/v1/endpoints/artikel_mengeneinheiten.py"
           ]
@@ -48876,6 +48359,9 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/artikel_mengeneinheiten.py"
+          ],
+          "screens": [
+            "stammdaten/mengeneinheit"
           ],
           "written_by": [
             "app/api/v1/endpoints/artikel_mengeneinheiten.py"
@@ -49127,6 +48613,9 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/artikel_verpackung.py"
+          ],
+          "screens": [
+            "artikel/verpackungen"
           ],
           "written_by": [
             "app/api/v1/endpoints/artikel_verpackung.py"
@@ -49460,6 +48949,16 @@
           "read_by": [
             "app/api/v1/endpoints/betriebsstaetten.py"
           ],
+          "screens": [
+            "betrieb/standorte",
+            "stammdaten/artikel-stoffstrom",
+            "stammdaten/artikelbestandteile",
+            "stammdaten/artikelverpackung",
+            "stammdaten/betriebsstaetten",
+            "stammdaten/hausbanken",
+            "stammdaten/individuelle-artikelnummern",
+            "stammdaten/mengeneinheiten"
+          ],
           "written_by": [
             "app/api/v1/endpoints/betriebsstaetten.py"
           ]
@@ -49614,6 +49113,9 @@
             "app/infrastructure/models/einkauf_models.py",
             "app/infrastructure/models/l3c_models.py",
             "app/services/customer_reference.py"
+          ],
+          "screens": [
+            "admin/branches"
           ],
           "written_by": [
             "app/api/v1/endpoints/branches.py"
@@ -50256,6 +49758,9 @@
           "read_by": [
             "app/api/v1/endpoints/vertreterstamm.py"
           ],
+          "screens": [
+            "crm/vertreter"
+          ],
           "written_by": [
             "app/api/v1/endpoints/vertreterstamm.py"
           ]
@@ -50302,6 +49807,9 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/vertreterstamm.py"
+          ],
+          "screens": [
+            "crm/vertreter"
           ],
           "written_by": [
             "app/api/v1/endpoints/vertreterstamm.py"
@@ -50709,6 +50217,11 @@
               "name": "created_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [],
@@ -51338,6 +50851,9 @@
           "read_by": [
             "app/api/v1/endpoints/fibu_geschaeftsjahre.py"
           ],
+          "screens": [
+            "fibu/geschaeftsjahre"
+          ],
           "written_by": [
             "app/api/v1/endpoints/fibu_geschaeftsjahre.py"
           ]
@@ -51404,6 +50920,9 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/fibu_geschaeftsjahre.py"
+          ],
+          "screens": [
+            "fibu/geschaeftsjahre"
           ],
           "written_by": [
             "app/api/v1/endpoints/fibu_geschaeftsjahre.py"
@@ -51497,6 +51016,9 @@
           "read_by": [
             "app/api/v1/endpoints/fibu_geschaeftsjahre.py"
           ],
+          "screens": [
+            "fibu/geschaeftsjahre"
+          ],
           "written_by": [
             "app/api/v1/endpoints/fibu_geschaeftsjahre.py"
           ]
@@ -51583,6 +51105,9 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/fibu_zahlungsmeldungen.py"
+          ],
+          "screens": [
+            "fibu/zahlungsmeldungen"
           ],
           "written_by": [
             "app/api/v1/endpoints/fibu_zahlungsmeldungen.py"
@@ -53276,6 +52801,9 @@
           "read_by": [
             "app/api/v1/endpoints/warengruppen.py"
           ],
+          "screens": [
+            "artikel/kategorien"
+          ],
           "written_by": [
             "app/api/v1/endpoints/warengruppen.py"
           ]
@@ -54275,7 +53803,14 @@
             "app/api/v1/endpoints/kontrakt_mengenzeitraum.py"
           ],
           "screens": [
-            "agrar/kontrakte"
+            "agrar/kontrakt-detail",
+            "agrar/kontrakte",
+            "agrar/kontrakte/formular",
+            "agrar/vertraege/formular",
+            "disposition/kontrakt-abruf",
+            "kontrakte/KontraktAlarmDashboard",
+            "kontrakte/LstKontraktUebersicht",
+            "kontrakte/mengenzeitraeume"
           ],
           "written_by": [
             "app/api/v1/endpoints/kontrakt_mengenzeitraum.py"
@@ -54477,7 +54012,14 @@
             "app/api/v1/endpoints/kontrakt_mengenzeitraum.py"
           ],
           "screens": [
-            "agrar/kontrakte"
+            "agrar/kontrakt-detail",
+            "agrar/kontrakte",
+            "agrar/kontrakte/formular",
+            "agrar/vertraege/formular",
+            "disposition/kontrakt-abruf",
+            "kontrakte/KontraktAlarmDashboard",
+            "kontrakte/LstKontraktUebersicht",
+            "kontrakte/mengenzeitraeume"
           ],
           "written_by": [
             "app/api/v1/endpoints/kontrakt_mengenzeitraum.py"
@@ -54532,7 +54074,14 @@
             "app/api/v1/endpoints/kontrakt_mengenzeitraum.py"
           ],
           "screens": [
-            "agrar/kontrakte"
+            "agrar/kontrakt-detail",
+            "agrar/kontrakte",
+            "agrar/kontrakte/formular",
+            "agrar/vertraege/formular",
+            "disposition/kontrakt-abruf",
+            "kontrakte/KontraktAlarmDashboard",
+            "kontrakte/LstKontraktUebersicht",
+            "kontrakte/mengenzeitraeume"
           ],
           "written_by": [
             "app/api/v1/endpoints/kontrakt_mengenzeitraum.py"
@@ -55735,6 +55284,9 @@
           "read_by": [
             "app/api/v1/endpoints/warengruppen.py"
           ],
+          "screens": [
+            "artikel/kategorien"
+          ],
           "written_by": [
             "app/api/v1/endpoints/warengruppen.py"
           ]
@@ -55832,6 +55384,9 @@
           "read_by": [
             "app/api/v1/endpoints/op_skonto_auszifferung.py",
             "app/services/finance_clearing_service.py"
+          ],
+          "screens": [
+            "fibu/op-skonto-auszifferung"
           ],
           "written_by": [
             "app/api/v1/endpoints/op_skonto_auszifferung.py",
@@ -57784,6 +57339,10 @@
           "read_by": [
             "app/api/v1/endpoints/vermehrungsvertrag.py"
           ],
+          "screens": [
+            "agrar/saatgut/vermehrung",
+            "agrar/sorten-vermehrung"
+          ],
           "written_by": [
             "app/api/v1/endpoints/vermehrungsvertrag.py"
           ]
@@ -58129,6 +57688,9 @@
           "read_by": [
             "app/api/v1/endpoints/stuecklisten.py"
           ],
+          "screens": [
+            "artikel/stuecklisten"
+          ],
           "written_by": [
             "app/api/v1/endpoints/stuecklisten.py"
           ]
@@ -58205,6 +57767,9 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/stuecklisten.py"
+          ],
+          "screens": [
+            "artikel/stuecklisten"
           ],
           "written_by": [
             "app/api/v1/endpoints/stuecklisten.py"
@@ -59011,6 +58576,9 @@
           "read_by": [
             "app/api/v1/endpoints/stammdaten_bearbeiten.py",
             "app/api/v1/endpoints/warengruppen.py"
+          ],
+          "screens": [
+            "artikel/kategorien"
           ],
           "written_by": [
             "app/api/v1/endpoints/stammdaten_bearbeiten.py",
