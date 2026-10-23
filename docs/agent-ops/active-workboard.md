@@ -19540,3 +19540,5 @@ Abnahme sowie weitere Fachketten/gesamte Altmaskenmigration bleiben offen.
 ## SECURITY-PATCHES-20261023 — reserviert, Codex
 
 **Owner:** Codex. **Ziel:** Drei offiziell bestaetigte neue Sicherheitsluecken ohne die unvollstaendige Maskenmigration auf main schliessen. **Dateibesitz:** requirements.txt nur GitPython/Black/kohaerente OpenTelemetry-Gruppe; neuer isolierter OTel-Kompatibilitaetstest und QA, eigener Workboard-Absatz. **Abnahme:** frische Gesamtaufloesung155 Pakete ohne bekannte Schwachstellen; echte HTTP-/SQL-Spans ohne externe Uebertragung. Keine neue DB, kein Container, kein Reset; bestehende Rollen- und Mandantenvertraege unveraendert.
+
+**SECURITY-PATCHES-20261023 abgeschlossen:** Drei bestaetigte Advisory-Korrekturen als kohaerente Versionsgruppe. Frische155er-Gesamtaufloesung auditiert ohne bekannte Schwachstellen; echter HTTP-/SQL-Trace-Kompatibilitaetstest gruen. Keine Ausnahme, keine Datenbank-/Docker-Ressource. QA docs/quality-assurance/security-patches-20261023.md. Keine Aktivierung der unvollstaendigen Maskenmigration; separater kleiner main-Hotfix.
