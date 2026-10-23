@@ -1,19 +1,7 @@
-"""Vertragstest: ChromaDB wird ausschliesslich eingebettet betrieben.
+"""Optional remaining root adapter stays embedded; AI service has retired Chroma.
 
-Hintergrund (SECURITY-AGENT-CHROMADB-20260911): CVE-2026-45833 (CRITICAL,
-Code Injection), CVE-2026-45830 und CVE-2026-45831 (je HIGH, fehlende
-Mandanten-/Berechtigungspruefung) betreffen chromadb >= 0.4.17 bis
-einschliesslich 1.5.9 - das ist die neueste Version, ein Herstellerfix
-existiert nicht.
-
-Alle drei Angriffswege fuehren ueber die HTTP-API des ChromaDB-*Servers*
-(z. B. /api/v2/tenants/.../collections/{id} mit trust_remote_code). Wir
-betreiben ausschliesslich den eingebetteten Client ohne Server, womit diese
-Wege nicht erreichbar sind.
-
-Dieser Test haelt genau diese Voraussetzung fest. Schlaegt er fehl, ist die
-Risikobewertung hinfaellig und muss neu getroffen werden, bevor der Code
-gemergt wird.
+No vulnerable Chroma package or startup path may be reintroduced into the AI
+service. Existing local-only root code is not a reason to waive advisories.
 """
 
 from __future__ import annotations
@@ -28,7 +16,6 @@ REPO = Path(__file__).resolve().parents[1]
 # Produktivcode, der chromadb verwendet
 CALL_SITES = [
     Path("app/infrastructure/rag/vector_store.py"),
-    Path("services/ai/app/services/vector_store.py"),
 ]
 
 # Serverbetrieb: genau diese Formen waeren gefaehrlich
@@ -51,8 +38,7 @@ EMBEDDED_PATTERNS = [
 @pytest.mark.parametrize("rel", CALL_SITES, ids=lambda p: str(p))
 def test_call_site_uses_embedded_client(rel: Path) -> None:
     path = REPO / rel
-    if not path.exists():
-        pytest.skip(f"{rel} existiert nicht mehr")
+    assert path.exists(), "Verbleibenden Root-Vertrag nicht still ueberspringen"
     source = path.read_text(encoding="utf-8")
 
     for pattern in SERVER_PATTERNS:
@@ -77,3 +63,10 @@ def test_no_chroma_server_in_compose() -> None:
             f"{compose.name} startet einen ChromaDB-Server. Siehe Modul-Docstring: "
             "die Risikobewertung setzt den eingebetteten Betrieb voraus."
         )
+
+
+def test_ai_service_has_no_vulnerable_chroma_dependency_or_startup():
+    manifest = (REPO / 'services/ai/requirements.txt').read_text(encoding='utf-8')
+    assert not re.search(r'^\s*chromadb[=<>]', manifest, re.M | re.I)
+    assert not (REPO / 'services/ai/app/services/vector_store.py').exists()
+    assert 'initialize_vector_store' not in (REPO / 'services/ai/main.py').read_text(encoding='utf-8')

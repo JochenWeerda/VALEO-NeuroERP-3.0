@@ -7,7 +7,7 @@ from typing import List, Optional
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
-router = APIRouter()
+router = APIRouter(responses={503: {"description": "RAG backend is not configured"}})
 
 
 class SearchResult(BaseModel):
@@ -35,46 +35,11 @@ class RAGResponse(BaseModel):
 
 @router.post("/search", response_model=RAGResponse)
 async def semantic_search(request: RAGRequest) -> RAGResponse:
-    """
-    Semantische Suche über ERP-Wissensbasis
-    
-    Findet relevante:
-    - Dokumentation
-    - Policies
-    - Ähnliche Vorgänge
-    - Best Practices
-    """
-    
-    # Mock implementation - später mit ChromaDB + OpenAI
-    mock_sources = [
-        SearchResult(
-            content="SKR03 ist der Standard-Kontenrahmen für kleine und mittlere Unternehmen in Deutschland. Er wird besonders in der Landwirtschaft eingesetzt.",
-            source="docs/fibu/kontenrahmen.md",
-            score=0.92,
-            metadata={"domain": "finance", "type": "documentation"}
-        ),
-        SearchResult(
-            content="Bei Cross-Compliance müssen alle Feldmaßnahmen im Feldbuch dokumentiert werden. Verstöße führen zu Kürzungen der EU-Förderung.",
-            source="docs/agrar/compliance.md",
-            score=0.87,
-            metadata={"domain": "agrar", "type": "policy"}
-        )
-    ]
-    
-    # Filter by domain if specified
-    if request.domain:
-        mock_sources = [s for s in mock_sources if s.metadata.get("domain") == request.domain]
-    
-    # Generate answer (mock)
-    answer = None
-    if request.include_answer and mock_sources:
-        answer = f"Basierend auf {len(mock_sources)} Quellen: {mock_sources[0].content[:100]}..."
-    
-    return RAGResponse(
-        answer=answer,
-        sources=mock_sources[:request.top_k],
-        query=request.query
-    )
+    """Reject search until a tenant-isolated RAG backend is available."""
+    raise HTTPException(status_code=503, detail={
+        "code": "rag_backend_unavailable",
+        "message": "Semantische Suche ist nicht eingerichtet. Es werden keine Suchergebnisse simuliert.",
+    })
 
 
 @router.post("/index/document")
@@ -84,20 +49,16 @@ async def index_document(
     metadata: Optional[dict] = None
 ) -> dict:
     """
-    Indexiert Dokument in Vector Store für spätere Suche
+    Dokumentindexierung ist bis zur Backend-Integration nicht verfuegbar
     """
-    # Mock - später mit ChromaDB
-    return {
-        "status": "indexed",
-        "source": source,
-        "chunks": 3,
-        "vector_count": 12
-    }
+    raise HTTPException(status_code=503, detail={
+        "code": "rag_backend_unavailable", "message": "Dokumentindexierung ist nicht eingerichtet.",
+    })
 
 
 @router.delete("/index/{source}")
 async def remove_from_index(source: str) -> dict:
-    """Entfernt Dokument aus Vector Store"""
-    return {"status": "removed", "source": source}
+    """Ablehnung ohne verfuegbaren Dokumentindex"""
+    raise HTTPException(status_code=503, detail={"code": "rag_backend_unavailable", "message": "Kein Dokumentindex eingerichtet."})
 
 

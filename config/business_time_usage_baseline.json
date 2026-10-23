@@ -231,7 +231,7 @@
       "date.today": 1
     },
     "app/services/agri_silo_material_flow_service.py": {
-      "date.today": 2
+      "date.today": 1
     },
     "app/services/ai_engineering_metrics_service.py": {
       "datetime.now.date": 1
