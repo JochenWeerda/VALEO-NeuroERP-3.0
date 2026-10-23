@@ -26,7 +26,7 @@ Zwei regulare Revisionen: loading_tenant_20261023 folgt dms_inbox_tenant_2026102
 
 Beide Revisionen auf dem gemeinsamen valeo_probe angewandt: vorher jeweils keine fremden aktiven Transaktionen, strikte Vorgaengerpruefung, kurzer Locktimeout und atomarer Revisionsfortschritt. Vorher/Nachher jeweils null bestehende Tourzeilen; keine Zeilen geloescht. Damit ist noch kein Backfill an vorhandenen realen Tourdaten behauptet. Kein Reset, keine neue PostgreSQL-Datenbank/Container/Volume. SQL-Fachtests nutzen eigene Zeilen innerhalb einer aeusseren Rollbacktransaktion und Savepoints; fremde Outboxzeilen bleiben unberuehrt.
 
-Die laufende Entwicklungsdatenbank wurde durch diese Probeabnahme nicht migriert. Vor einem Neustart der dort eingebundenen Backendquellen sind die regulare Revisionskette und der Schema-Vorlauf zu pruefen; Probe und Laufzeit sind getrennt.
+Die Probeabnahme und die Laufzeitaktualisierung sind getrennte Schritte: Anschliessend wurde auch valeo_neuro_erp nach lokaler Sicherung und bestandenem Importtest regulaer ueber die neun ausstehenden Revisionen auf loading_stop_fk_20261023 gehoben. Keine Fachtests auf der Entwicklungsdatenbank. Der anschliessende gezielte Backend-Neustart/Sichtnachweis wird in local-frontend-refresh-20261023.md dokumentiert.
 
 ## Nachweise
 
