@@ -19452,3 +19452,8 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 **LOADING-ATOMIC-ACTOR Ergebnis:** Pflichtmandant und Parent-Joins, FK-Stoppaar, gepruefter Loading-/Dispatchurheber, atomare Loading-Outbox und PATCH-/DTO-Schutz. Zwei regulare Probe-Revisionen angewandt ohne Fremdtransaktion/Datenverlust/Reset.30 SQLite-/PostgreSQLfaelle gruen; Katalog681 aktuell, OpenAPI3246 erhalten. Fahrerzuweisung ohne Eigentumsnachweis gesperrt; allgemeine Command-Idempotenz/Outboxworkerfragen nicht als geschlossen behauptet. QA loading-tenant-atomic-20261023.md. Frontend aufPort3000 laeuft noch mitImage16.10.; gezielter Neubau gestartet, keine behauptete Sichtabnahme.
 
 **Abschlussnachweis:**48 kombinierte Verladungs-/Katalogfaelle bestanden, darunter15 echte PostgreSQL-Verladungsfaelle mit Savepoints. Alle3246 OpenAPI-Pfade erhalten;681 Tabellenkatalog aktuell; Code-/Migrationsinventare nachgezogen. Die laufende Frontendaktualisierung ist ein separater Betriebsnachweis.
+
+
+## RUNTIME-SOURCE-SYNC-20261023 - reserviert, Codex
+
+**Ziel:** laufende lokale Frontend-/Backendfassung mit nachgewiesenem Code synchronisieren. **Besitz:** lokales Frontendbuild/Neuerstellen ohne andereServices; gezielte Wiederanbindung belegter bereitscommitteter Dokumenten-Sicherheitsvertraege in app/documents/repository.py (aktueller Rootdiff entfernt ausschliesslich Exceptions, insert-only, Zeilensperre, Tenantunveraenderlichkeit und generische Fehlerlogs; keine neueFunktion). VorherigeArbeitskopie lokalgesichert. Keine blindenFremdreverts, keinDBreset. Backendimportpreflight vorNeustart; regulaererSchema-Vorlauf separat. QA local-frontend-refresh-20261023.md.
