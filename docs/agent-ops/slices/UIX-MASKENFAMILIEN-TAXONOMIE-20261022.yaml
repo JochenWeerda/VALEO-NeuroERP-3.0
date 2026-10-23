@@ -50,3 +50,42 @@ naechste_implementierung_getrennt:
   - KontrollWorklistParent Ausbau
   - StammListenParent Dual-Pfad Rest
   - Beleg ProcessBand/Ribbon (im Beleg-Slice)
+
+# CI-Metadaten vervollstaendigt; keine neue Fach-/Live-Abnahme behauptet.
+slice_id: UIX-MASKENFAMILIEN-TAXONOMIE-20261022
+file_ownership:
+  - docs/architecture/uix/maskenfamilien-taxonomie.md
+  - docs/architecture/uix/beleg-maskenfamilie-vererbung.md
+  - docs/architecture/uix/universal-mask-runtime-status.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/agent-ops/slices/UIX-MASKENFAMILIEN-TAXONOMIE-20261022.yaml
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/handshakes/maskenfamilien-taxonomie-20261022.md
+acceptance:
+  - Taxonomie-Dokument mit Kategorien, Parent-Verträgen, Child-Beispielen, Anti-Patterns
+  - Priorisierte Roadmap P0–P3 mit Inventar-Bezug (941 / ~61 runtime / ~120 legacy
+    / ~760 hand_built)
+  - Beleg-Slice und Codex-Claims unangetastet; Handshake dokumentiert
+  - Keine Implementierungspflicht / keine Page-Migration
+tests:
+  - node scripts/docs-markdown-check.cjs docs/architecture/uix/maskenfamilien-taxonomie.md
+risks:
+  - Dokumentation und Metadaten ersetzen weder Fachparitaet noch Browser- und Freigabeabnahme.
+external_gates: []
+ai_harness:
+  fachlicher_vertrag: 'Das Beleg-Vererbungsprinzip systemweit auf Ein-/Ausgabemasken
+    übertragen: Kategorien Beleg/Stamm/Liste/Worklist/Ausnahme, Parent-Verträge, reale
+    Child-Cluster aus Inventar und ScreenDefinitions, priorisierte Roadmap P0–P3.
+    Keine Groß-Migration von Pages in diesem Slice.'
+  architektur_vertrag: Bestehende ScreenDefinition-RenderPlan-Runtime-Kette bewahren;
+    kein zweites Maskensystem.
+  daten_vertrag: Metadaten vergeben keine Datenrechte und aktivieren keine Datenmigration
+    oder Geschaeftsbuchung.
+  test_vertrag: Vorhandene tests und acceptance dieses Slices pruefen; fehlende Live-Abnahme
+    bleibt offen.
+  security_vertrag: Mandanten-, Rollen-, Fachcommand- und Freigabegrenzen bleiben
+    verbindlich; Metadaten gewaehrleisten sie nicht allein.
+  betriebs_vertrag: Keine produktive Aktivierung durch diesen Metadaten-Nachtrag;
+    offene externe Gates bleiben offen.
+  dokumentations_vertrag: Bestehende Slice-Ziele, Risiken und Ergebnisse bleiben erhalten;
+    Migrationskorrektur siehe migration-parity-repair-20261022.md.

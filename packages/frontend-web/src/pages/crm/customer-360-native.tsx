@@ -1,7 +1,15 @@
-import { NativeListPage } from '@/components/mask-builder/NativeListPage'
+import { useParams, useSearchParams } from '@/app/routing/typed-router'
+import PartyNativePage, { readQueryParam, resolvePartyKind, resolvePartySectionKey } from '@/pages/crm/party-native'
 
-export default function Page(): JSX.Element {
+export default function Customer360NativePage(): JSX.Element {
+  const { id: routeId } = useParams<{ id?: string }>()
+  const [searchParams] = useSearchParams()
+  const id = routeId ?? readQueryParam(searchParams, 'id') ?? undefined
   return (
-    <NativeListPage screenId="crm/customer-360/:id" testId="screen-crm/customer-360/:id" />
+    <PartyNativePage
+      kind={resolvePartyKind(readQueryParam(searchParams, 'kind'))}
+      entityId={id}
+      requestedSectionKey={resolvePartySectionKey(readQueryParam(searchParams, 'tab'))}
+    />
   )
 }

@@ -38,3 +38,23 @@ risks:
   - Zwei Bestandsspeicher Compat vs domain_einkauf bleiben ausserhalb dieses Slices.
 external_gates: []
 test_database: Keine; reine Frontend-/Doku-Messung.
+
+# CI-Metadaten vervollstaendigt; keine neue Fach-/Live-Abnahme behauptet.
+ai_harness:
+  fachlicher_vertrag: 'Dual-Pfad Einkaufsbestellung schliessen: Rest-Einstiege (Anlegen-Resume,
+    Angebot-Stamm Folgebestellung), die noch Legacy-Plural /einkauf/bestellungen/:id
+    nutzten, auf /einkauf/bestellung/:id (SD einkauf/purchase-order). Primaerliste
+    war bereits NativeListPage mit row_route native (MASK-STUDIO-ROLLOUT). Neuanlage
+    bleibt Legacy. Paritaetsluecken dokumentieren; Rollback erhalten.'
+  architektur_vertrag: Bestehende ScreenDefinition-RenderPlan-Runtime-Kette bewahren;
+    kein zweites Maskensystem.
+  daten_vertrag: Metadaten vergeben keine Datenrechte und aktivieren keine Datenmigration
+    oder Geschaeftsbuchung.
+  test_vertrag: Vorhandene tests und acceptance dieses Slices pruefen; fehlende Live-Abnahme
+    bleibt offen.
+  security_vertrag: Mandanten-, Rollen-, Fachcommand- und Freigabegrenzen bleiben
+    verbindlich; Metadaten gewaehrleisten sie nicht allein.
+  betriebs_vertrag: Keine produktive Aktivierung durch diesen Metadaten-Nachtrag;
+    offene externe Gates bleiben offen.
+  dokumentations_vertrag: Bestehende Slice-Ziele, Risiken und Ergebnisse bleiben erhalten;
+    Migrationskorrektur siehe migration-parity-repair-20261022.md.

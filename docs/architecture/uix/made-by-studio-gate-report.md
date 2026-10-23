@@ -1,6 +1,6 @@
 # Made-by-Studio Gate-Report
 
-Stand: 2026-10-22 (erzeugt mit `python scripts/verify_made_by_studio_gates.py`).
+Stand: 2026-10-23 (erzeugt mit `python scripts/verify_made_by_studio_gates.py`).
 
 Bezug: [Made by Studio — Qualitätsversprechen](made-by-studio-qualitaetsversprechen.md).
 
@@ -8,14 +8,14 @@ Bezug: [Made by Studio — Qualitätsversprechen](made-by-studio-qualitaetsversp
 
 | Metrik | Wert |
 |--------|------|
-| Registrierte ScreenDefinitions | 856 |
-| Gate A (Meridian & Struktur) grün | 856 |
-| Gate B (Rechte & Aktionen) grün | 856 |
-| Gate C (Compiler & Kanal) grün | 836 |
-| Gate E (Runtime-Verdrahtung) grün | 804 |
+| Registrierte ScreenDefinitions | 857 |
+| Gate A (Meridian & Struktur) grün | 857 |
+| Gate B (Rechte & Aktionen) grün | 857 |
+| Gate C (Compiler & Kanal) grün | 837 |
+| Gate E (Runtime-Verdrahtung) grün | 803 |
 | Studio-Draft-Projektion ohne Violations | 5 |
 | Ø Advisory-Score (Gate-C-Metrik) | 0.99 |
-| Screen-IDs in runtime_wired-Routen (gesamt) | 2706 |
+| Screen-IDs in runtime_wired-Routen (gesamt) | 2691 |
 
 Gate D (Browser/Image) wird hier nicht automatisiert geprüft.
 
@@ -50,7 +50,7 @@ Keine — alle grün.
 - `stammdaten/individuelle-artikelnummer`: api_bindung:endpoint_nicht_in_openapi:/api/v1/individuelle-artikelnummern/{entity_id}
 - `stammdaten/mengeneinheit`: api_bindung:endpoint_nicht_in_openapi:/api/v1/artikel/mengeneinheiten/{entity_id}
 
-## Gate E — offene Screen-IDs (52)
+## Gate E — offene Screen-IDs (54)
 
 - `admin/control-center`: runtime:screen_id_nicht_runtime_wired
 - `admin/webhooks-liste`: runtime:screen_id_nicht_runtime_wired
@@ -64,6 +64,7 @@ Keine — alle grün.
 - `crm/campaign-template`: runtime:screen_id_nicht_runtime_wired
 - `crm/consent`: runtime:screen_id_nicht_runtime_wired
 - `crm/gdpr-request`: runtime:screen_id_nicht_runtime_wired
+- `crm/kunden-cockpit`: runtime:screen_id_nicht_runtime_wired
 - `crm/segment`: runtime:screen_id_nicht_runtime_wired
 - `fibu/anlage`: runtime:screen_id_nicht_runtime_wired
 - `fibu/debitoren`: runtime:screen_id_nicht_runtime_wired
@@ -87,6 +88,7 @@ Keine — alle grün.
 - `sales/lieferungen/neu`: runtime:screen_id_nicht_runtime_wired
 - `verkauf/auftraege/neu`: runtime:screen_id_nicht_runtime_wired
 - `verkauf/kunde`: runtime:screen_id_nicht_runtime_wired
+- `verkauf/kunden-stamm`: runtime:screen_id_nicht_runtime_wired
 - `verkauf/rechnungen`: runtime:screen_id_nicht_runtime_wired
 - `waage/liste`: runtime:screen_id_nicht_runtime_wired
 - `waage/neu`: runtime:screen_id_nicht_runtime_wired

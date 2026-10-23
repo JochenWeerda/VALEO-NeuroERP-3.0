@@ -57,3 +57,24 @@ related:
   - docs/agent-ops/slices/UIX-STAMM-OBJECTPAGE-PARENT-20261022.yaml
   - docs/architecture/uix/maskenfamilien-taxonomie.md
   - docs/architecture/uix/made-by-studio-qualitaetsversprechen.md
+
+# CI-Metadaten vervollstaendigt; keine neue Fach-/Live-Abnahme behauptet.
+ai_harness:
+  fachlicher_vertrag: Verbleibende Stamm-ObjectPage-ScreenDefinitions (finance/bankkonto,
+    lager/article-stock, crm/opportunity, crm/lead, futtermittel/einzelfuttermittel,
+    futtermittel/mischfuttermittel, artikel/stamm) auf build_stamm_object_page (StammObjectPageParent)
+    umstellen, Studio-Gates A-C fuer die gesamte 12er Stamm-Familie pruefen und zugehoerige
+    Stammdaten-Listen bei Zeilenklick auf die nativen Detailrouten umhaengen (Create
+    bleibt Legacy).
+  architektur_vertrag: Bestehende ScreenDefinition-RenderPlan-Runtime-Kette bewahren;
+    kein zweites Maskensystem.
+  daten_vertrag: Metadaten vergeben keine Datenrechte und aktivieren keine Datenmigration
+    oder Geschaeftsbuchung.
+  test_vertrag: Vorhandene tests und acceptance dieses Slices pruefen; fehlende Live-Abnahme
+    bleibt offen.
+  security_vertrag: Mandanten-, Rollen-, Fachcommand- und Freigabegrenzen bleiben
+    verbindlich; Metadaten gewaehrleisten sie nicht allein.
+  betriebs_vertrag: Keine produktive Aktivierung durch diesen Metadaten-Nachtrag;
+    offene externe Gates bleiben offen.
+  dokumentations_vertrag: Bestehende Slice-Ziele, Risiken und Ergebnisse bleiben erhalten;
+    Migrationskorrektur siehe migration-parity-repair-20261022.md.

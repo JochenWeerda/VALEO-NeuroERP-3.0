@@ -27,8 +27,11 @@ def test_suffix_cannot_hide_legacy_implementation(inventory_module):
     assert inventory_module.classify_source("return <form><input /></form>", filename="create-legacy.tsx") == "hand_built"
 
 
-def test_native_route_still_has_positive_runtime_evidence(inventory_module):
-    source = 'return <NativeListPage screenId="finance/datev-export" />'
+@pytest.mark.parametrize('source', [
+    'return <NativeListPage screenId="finance/datev-export" />',
+    'return <PartyNativePage kind="customer" entityId="record" />',
+])
+def test_native_route_still_has_positive_runtime_evidence(inventory_module, source):
     assert inventory_module.classify_source(source) == "runtime_wired"
     assert _source_has_runtime_marker(source)
 

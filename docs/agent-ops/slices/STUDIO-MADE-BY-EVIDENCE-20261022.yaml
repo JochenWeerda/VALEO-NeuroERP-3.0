@@ -25,3 +25,35 @@ acceptance:
   - Workboard Sync-Abschnitt + sichtbare Codex-Claims 20.–22.10.
   - Studio-Pfad-Dateien (valeo_cli, studio_entity_*) wieder vorhanden
   - Naechster Siegel-Schritt dokumentiert (eine Stamm-Parent-Maske)
+
+# CI-Metadaten vervollstaendigt; keine neue Fach-/Live-Abnahme behauptet.
+file_ownership:
+  - docs/architecture/uix/made-by-studio-qualitaetsversprechen.md
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/handshakes/maskenfamilien-taxonomie-20261022.md
+  - docs/architecture/uix/maskenfamilien-taxonomie.md
+  - docs/architecture/uix/universal-mask-runtime-status.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/agent-ops/slices/STUDIO-MADE-BY-EVIDENCE-20261022.yaml
+tests:
+  - node scripts/docs-markdown-check.cjs docs/architecture/uix/made-by-studio-qualitaetsversprechen.md
+risks:
+  - Dokumentation und Metadaten ersetzen weder Fachparitaet noch Browser- und Freigabeabnahme.
+external_gates: []
+ai_harness:
+  fachlicher_vertrag: 'Verbindlichen Nachweis-Katalog definieren, wann eine Maske
+    das Kennzeichen „made by studio“ tragen darf (CLI + Freigabe + Runtime + Browser).
+    Parallel: Codex-vs-Cursor-Sync am Workboard; WIP-Loeschungen am Studio-Pfad aus
+    HEAD wiederherstellen — ohne Codex-Dateibesitz.'
+  architektur_vertrag: Bestehende ScreenDefinition-RenderPlan-Runtime-Kette bewahren;
+    kein zweites Maskensystem.
+  daten_vertrag: Metadaten vergeben keine Datenrechte und aktivieren keine Datenmigration
+    oder Geschaeftsbuchung.
+  test_vertrag: Vorhandene tests und acceptance dieses Slices pruefen; fehlende Live-Abnahme
+    bleibt offen.
+  security_vertrag: Mandanten-, Rollen-, Fachcommand- und Freigabegrenzen bleiben
+    verbindlich; Metadaten gewaehrleisten sie nicht allein.
+  betriebs_vertrag: Keine produktive Aktivierung durch diesen Metadaten-Nachtrag;
+    offene externe Gates bleiben offen.
+  dokumentations_vertrag: Bestehende Slice-Ziele, Risiken und Ergebnisse bleiben erhalten;
+    Migrationskorrektur siehe migration-parity-repair-20261022.md.

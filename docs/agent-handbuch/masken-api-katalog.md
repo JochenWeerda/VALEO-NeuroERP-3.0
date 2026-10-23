@@ -4,14 +4,14 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-22
+last_reviewed: 2026-10-23
 version: 3.0.0
 description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions.
 ---
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (847 Masken).
+> Generiert aus `app/core/screen_definitions.py` (848 Masken).
 
 ## Übersicht
 
@@ -72,8 +72,8 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `agrar/ernte/kampagnenabschluss` | Kampagnenabschluss | agrar | niedrig | — | `GET /api/v1/masks/agrar/ernte/kampagnenabschluss/agent-contract` |
 | `agrar/feed-advice` | Fuetterungsberatung | agrar | niedrig | — | `GET /api/v1/masks/agrar/feed-advice/agent-contract` |
 | `agrar/feed-controlling` | Fuetterungscontrolling | agrar | niedrig | — | `GET /api/v1/masks/agrar/feed-controlling/agent-contract` |
-| `agrar/feed-readiness` | Futterversorgung | agrar | niedrig | — | `GET /api/v1/masks/agrar/feed-readiness/agent-contract` |
-| `agrar/feeding-actuals` | Komponentenbezogene Ist-Fuetterung | agrar | niedrig | — | `GET /api/v1/masks/agrar/feeding-actuals/agent-contract` |
+| `agrar/feed-readiness` | Futterversorgung | agrar | mittel | — | `GET /api/v1/masks/agrar/feed-readiness/agent-contract` |
+| `agrar/feeding-actuals` | Komponentenbezogene Ist-Fuetterung | agrar | mittel | — | `GET /api/v1/masks/agrar/feeding-actuals/agent-contract` |
 | `agrar/feeding-business` | Fuetterungsbetrieb | agrar | niedrig | — | `GET /api/v1/masks/agrar/feeding-business/agent-contract` |
 | `agrar/feeding-businesses` | Fuetterungsbetriebe | agrar | niedrig | — | `GET /api/v1/masks/agrar/feeding-businesses/agent-contract` |
 | `agrar/feeding-group` | Tiergruppe | agrar | niedrig | — | `GET /api/v1/masks/agrar/feeding-group/agent-contract` |
@@ -802,6 +802,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `tankstelle/adapter-inbox` | Tankanlagen-Eingang | agrar | niedrig | — | `GET /api/v1/masks/tankstelle/adapter-inbox/agent-contract` |
 | `tankstelle/zapfungen` | Zapfungen | tankstelle | niedrig | — | `GET /api/v1/masks/tankstelle/zapfungen/agent-contract` |
 | `tankstelle/zapfungen-liste` | Zapfungen | logistik | niedrig | — | `GET /api/v1/masks/tankstelle/zapfungen-liste/agent-contract` |
+| `transporte/fahrer` | Fahrer | logistics | niedrig | — | `GET /api/v1/masks/transporte/fahrer/agent-contract` |
 | `transporte/fahrer-liste` | Fahrer | logistik | niedrig | — | `GET /api/v1/masks/transporte/fahrer-liste/agent-contract` |
 | `transporte/fahrer/neu` | Fahrer liste | transporte | niedrig | — | `GET /api/v1/masks/transporte/fahrer/neu/agent-contract` |
 | `verkauf/auftraege` | Auftraege liste | verkauf | niedrig | — | `GET /api/v1/masks/verkauf/auftraege/agent-contract` |
@@ -2343,7 +2344,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `create_handoff` | An Einkauf uebergeben | confirm | nein | `—` |
+| `create_handoff` | An Einkauf uebergeben | moderate | nein | `—` |
 | `open_inventory` | Bestaende pflegen | safe | nein | `—` |
 
 ---
@@ -2388,8 +2389,8 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `export_csv` | CSV exportieren | safe | nein | `—` |
-| `create_measure` | Massnahme aus Abweichung | confirm | nein | `—` |
-| `configure_threshold` | Schwellen konfigurieren | confirm | nein | `—` |
+| `create_measure` | Massnahme aus Abweichung | moderate | nein | `—` |
+| `configure_threshold` | Schwellen konfigurieren | moderate | nein | `—` |
 | `open_mobile` | Ist-Fuetterung erfassen | safe | nein | `—` |
 
 ---
@@ -4063,8 +4064,8 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `approve` | Freigeben | moderate | ja | `/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/actions/approve` |
 | `schedule` | Fuetterungsbeginn planen | moderate | nein | `/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/actions/schedule` |
 | `activate` | Jetzt aktivieren | moderate | ja | `/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/actions/activate` |
-| `retire` | Fuetterung beenden | high | nein | `/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/actions/retire` |
-| `archive` | Archivieren | high | nein | `/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/actions/archive` |
+| `retire` | Fuetterung beenden | high | ja | `/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/actions/retire` |
+| `archive` | Archivieren | high | ja | `/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/actions/archive` |
 
 ---
 
@@ -10175,7 +10176,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `draft` | Neue Mail | low | nein | `—` |
+| `draft` | Neue Mail | safe | nein | `—` |
 
 ---
 
@@ -12861,8 +12862,8 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 |---|---|---|---|---|
 | `bearbeiten` | Bearbeiten | safe | nein | `/api/v1/einkauf/lieferanten/{entity_id}/actions/bearbeiten` |
 | `neue_bestellung` | Bestellung anlegen | safe | nein | `—` |
-| `sperren` | Sperren | high | nein | `/api/v1/einkauf/lieferanten/{entity_id}/actions/sperren` |
-| `entsperren` | Entsperren | high | nein | `/api/v1/einkauf/lieferanten/{entity_id}/actions/entsperren` |
+| `sperren` | Sperren | high | ja | `/api/v1/einkauf/lieferanten/{entity_id}/actions/sperren` |
+| `entsperren` | Entsperren | high | ja | `/api/v1/einkauf/lieferanten/{entity_id}/actions/entsperren` |
 
 ---
 
@@ -19205,10 +19206,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `create_count_sheet` | Zaehlliste | low | nein | `/api/v1/inventory/auxiliary/actions/create_count_sheet` |
-| `create_control` | Kontrolllauf | low | nein | `/api/v1/inventory/auxiliary/actions/create_control` |
-| `create_valuation` | Vorlaeufig bewerten | low | nein | `/api/v1/inventory/auxiliary/actions/create_valuation` |
-| `create_opening` | Bestandsvortrag | high | nein | `—` |
+| `create_count_sheet` | Zaehlliste | safe | nein | `/api/v1/inventory/auxiliary/actions/create_count_sheet` |
+| `create_control` | Kontrolllauf | safe | nein | `/api/v1/inventory/auxiliary/actions/create_control` |
+| `create_valuation` | Vorlaeufig bewerten | safe | nein | `/api/v1/inventory/auxiliary/actions/create_valuation` |
+| `create_opening` | Bestandsvortrag | high | ja | `—` |
 
 ---
 
@@ -21893,7 +21894,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `drucker` | Drucker einrichten | safe | nein | `Hinterlegt den Drucker an der Fahrzeugakte.` |
 | `drucken` | Drucken | safe | nein | `Druckt die Fahrzeugakte.` |
 | `unfall` | Unfall-Anzeige | moderate | nein | `Erfasst eine Unfallanzeige zum Fahrzeug.` |
-| `loeschen` | Fahrzeug löschen | high | nein | `/api/v1/fuhrpark/fahrzeuge/{entity_id}/actions/loeschen` |
+| `loeschen` | Fahrzeug löschen | high | ja | `/api/v1/fuhrpark/fahrzeuge/{entity_id}/actions/loeschen` |
 
 ---
 
@@ -22409,6 +22410,49 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **Beispiel-Prompts:**
 
 - Welche Touren sind noch geplant?
+
+---
+
+### `transporte/fahrer` — Fahrer
+
+**Zweck:** Fahrer nach Name und Status suchen. Touren heute ist die Zahl der heutigen Touren.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/transporte/fahrer/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/transporte/fahrer/agent-contract` |
+| Readiness | `GET /api/v1/masks/transporte/fahrer/readiness` |
+| Rollout-Route | `/mask-rollout/transporte__fahrer/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/transporte/fahrer`
+- `touren` → `/api/v1/logistik/tours`
+
+**MCP-Tools (Domäne):**
+
+- `logistik.frachttabelle.anlegen` — scope `logistics:write`, Risiko mittel
+- `logistik.tour.anlegen` — scope `logistics:write`, Risiko mittel
+- `logistik.fahrzeug.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.fahrzeug.loeschen` — scope `logistics:write`, Risiko hoch
+- `logistik.terminart.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.rechnung.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.ausgehendes_dokument.speichern` — scope `logistics:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche Fahrer sind heute unterwegs?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `neu` | Neuer Fahrer | safe | nein | `Oeffnet das bestehende Fahrerformular.` |
+| `verfuegbar` | Verfügbaren Fahrer öffnen | safe | nein | `Oeffnet den ersten verfuegbaren Fahrer.` |
+| `touren` | Tourenplanung | safe | nein | `Wechselt in die Tourenplanung.` |
+| `dokumente` | Dokumente | safe | nein | `Oeffnet die Dokumentenablage.` |
+| `export` | Export | safe | nein | `Exportiert die sichtbare Fahrerliste.` |
 
 ---
 
@@ -25476,7 +25520,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `create` | Neue Abfrage | low | nein | `—` |
+| `create` | Neue Abfrage | safe | nein | `—` |
 | `import` | Signiert importieren | moderate | nein | `/api/v1/query-center/actions/import` |
 
 ---

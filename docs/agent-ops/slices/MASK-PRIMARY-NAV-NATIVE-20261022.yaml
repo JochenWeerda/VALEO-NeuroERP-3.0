@@ -34,3 +34,21 @@ risks:
   - Studio-Entwurfzaehlung braucht Live-DB; ohne DATABASE_URL nicht gemessen.
 external_gates: []
 test_database: Keine; reine Frontend-/Doku-Messung.
+
+# CI-Metadaten vervollstaendigt; keine neue Fach-/Live-Abnahme behauptet.
+ai_harness:
+  fachlicher_vertrag: Aktuelles Masken-Routen-Inventar messen und niedrig-riskante
+    Stammdaten-Listen (Saatgut, Duenger, Lieferant) auf die bereits vorhandenen UniversalMaskRuntime-
+    Detailrouten umhaengen. Neuanlage bleibt Legacy bis Create-Paritaet.
+  architektur_vertrag: Bestehende ScreenDefinition-RenderPlan-Runtime-Kette bewahren;
+    kein zweites Maskensystem.
+  daten_vertrag: Metadaten vergeben keine Datenrechte und aktivieren keine Datenmigration
+    oder Geschaeftsbuchung.
+  test_vertrag: Vorhandene tests und acceptance dieses Slices pruefen; fehlende Live-Abnahme
+    bleibt offen.
+  security_vertrag: Mandanten-, Rollen-, Fachcommand- und Freigabegrenzen bleiben
+    verbindlich; Metadaten gewaehrleisten sie nicht allein.
+  betriebs_vertrag: Keine produktive Aktivierung durch diesen Metadaten-Nachtrag;
+    offene externe Gates bleiben offen.
+  dokumentations_vertrag: Bestehende Slice-Ziele, Risiken und Ergebnisse bleiben erhalten;
+    Migrationskorrektur siehe migration-parity-repair-20261022.md.

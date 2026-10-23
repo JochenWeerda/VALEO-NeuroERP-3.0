@@ -1,4 +1,4 @@
-# Masken-Studio-Inventar (2026-10-22)
+# Masken-Studio-Inventar (2026-10-23)
 
 Erzeugt mit `python scripts/mask_studio_inventory.py --markdown <datei>`. Ziel: nur Studio-generierte
 Masken; jede Maskenfunktion auch per CLI und MCP, in CI geprueft (Nutzerentscheid 2026-10-19).
@@ -8,9 +8,9 @@ Masken; jede Maskenfunktion auch per CLI und MCP, in CI geprueft (Nutzerentschei
 | Stufe | Routen | Anteil an Masken |
 |---|---:|---:|
 | studio_versioniert | 6 | 0.9 % |
-| screen_definition | 596 | 88.8 % |
+| screen_definition | 593 | 88.4 % |
 | builder_altmuster | 34 | 5.1 % |
-| handgebaut | 35 | 5.2 % |
+| handgebaut | 38 | 5.7 % |
 | weiterleitung | 0 |  |
 
 Gesamt 671 Routen, davon 671 Masken.
@@ -19,7 +19,7 @@ Gesamt 671 Routen, davon 671 Masken.
 
 | Befund | Anzahl |
 |---|---:|
-| Aktionen gesamt (ohne Doppel je Maske) | 1168 |
+| Aktionen gesamt (ohne Doppel je Maske) | 1173 |
 | davon serverwirksam | 245 |
 | … mit REST-Kommandoweg | 245 |
 | … mit eigenem MCP-Werkzeug | 45 |
@@ -29,12 +29,12 @@ Gesamt 671 Routen, davon 671 Masken.
 | … MCP unklassifiziert | 0 |
 | … mit CLI-Zugang | 245 |
 | nicht deklariert (kein Kommando, Endpunkt, Navigation) | 330 |
-| nicht verfuegbar (`stubReason`, die Maske nennt den Grund) | 25 |
+| nicht verfuegbar (`stubReason`, die Maske nennt den Grund) | 29 |
 
 ## Versionierte Familien
 
 - `beleg`: 9 Varianten — goods_receipt 1.2.0, purchase_credit_memo 1.2.0, purchase_invoice 1.2.0, purchase_order 1.2.0, sales_credit_memo 1.2.0, sales_delivery 1.2.0, sales_invoice 1.2.0, sales_offer 1.2.0, sales_order 1.2.0
-- `native_studio`: Release 1.0.0, 847 Screens (5 statisch geprueft; Browser-/Freigabenachweis nicht gemessen)
+- `native_studio`: Release 1.0.0, 848 Screens (5 statisch geprueft; Browser-/Freigabenachweis nicht gemessen)
 
 ## Studio-Katalog
 
@@ -113,6 +113,7 @@ Registrierte ScreenDefinitions ohne eigene Route: 461.
 | finance | 0 | 48 | 1 | 4 | 0 |
 | futtermittel | 0 | 28 | 0 | 3 | 0 |
 | sales | 0 | 27 | 0 | 3 | 0 |
+| verkauf | 0 | 13 | 0 | 3 | 0 |
 | waage | 0 | 2 | 0 | 3 | 0 |
 | annahme | 0 | 3 | 3 | 2 | 0 |
 | auth | 0 | 0 | 0 | 2 | 0 |
@@ -197,7 +198,6 @@ Registrierte ScreenDefinitions ohne eigene Route: 461.
 | tankstelle | 0 | 2 | 0 | 0 | 0 |
 | termine | 0 | 1 | 0 | 0 | 0 |
 | transporte | 0 | 2 | 0 | 0 | 0 |
-| verkauf | 0 | 16 | 0 | 0 | 0 |
 | verladung | 0 | 2 | 0 | 0 | 0 |
 | versand | 0 | 4 | 0 | 0 | 0 |
 | versicherungen | 0 | 1 | 0 | 0 | 0 |

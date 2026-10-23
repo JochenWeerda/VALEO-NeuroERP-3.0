@@ -5,6 +5,7 @@ import json
 import re
 import sys
 from collections import Counter
+from datetime import date
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -122,7 +123,7 @@ def main() -> None:
     lines = [
         "# Masken-Routen-Migrationsinventar",
         "",
-        "Stand: 2026-10-22 (Messung aus `route-inventory.gen.json` + Seitenquelltext).",
+        f"Stand: {date.today().isoformat()} (Messung aus `route-inventory.gen.json` + Seitenquelltext).",
         "",
         "> Studio-Entwuerfe in der DB sind **kein** Nachweis produktiver Ablösung.",
         "> Nur `runtime_wired` (ScreenDefinition → RenderPlan → useUniversalMaskRuntime /",

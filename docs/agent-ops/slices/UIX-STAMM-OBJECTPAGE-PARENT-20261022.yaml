@@ -44,3 +44,21 @@ related:
   - docs/architecture/uix/maskenfamilien-taxonomie.md
   - docs/architecture/uix/made-by-studio-qualitaetsversprechen.md
   - docs/agent-ops/slices/UIX-MASKENFAMILIEN-TAXONOMIE-20261022.yaml
+
+# CI-Metadaten vervollstaendigt; keine neue Fach-/Live-Abnahme behauptet.
+ai_harness:
+  fachlicher_vertrag: 'Taxonomie-P1 umsetzen: gemeinsamer Parent-Builder fuer Stamm-ObjectPages
+    (Meridian floorplan/density/anchors einmal), Pilot-Children aus Parent+Patch.
+    Keine Create-Paritaet, keine Massenmigration, kein Codex Gate-D-Besitz.'
+  architektur_vertrag: Bestehende ScreenDefinition-RenderPlan-Runtime-Kette bewahren;
+    kein zweites Maskensystem.
+  daten_vertrag: Metadaten vergeben keine Datenrechte und aktivieren keine Datenmigration
+    oder Geschaeftsbuchung.
+  test_vertrag: Vorhandene tests und acceptance dieses Slices pruefen; fehlende Live-Abnahme
+    bleibt offen.
+  security_vertrag: Mandanten-, Rollen-, Fachcommand- und Freigabegrenzen bleiben
+    verbindlich; Metadaten gewaehrleisten sie nicht allein.
+  betriebs_vertrag: Keine produktive Aktivierung durch diesen Metadaten-Nachtrag;
+    offene externe Gates bleiben offen.
+  dokumentations_vertrag: Bestehende Slice-Ziele, Risiken und Ergebnisse bleiben erhalten;
+    Migrationskorrektur siehe migration-parity-repair-20261022.md.

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-22",
+  "generatedAt": "2026-10-23",
   "schemaVersion": 1,
   "sources": [
     "app/core/flow_spine_registry.py",
@@ -1989,12 +1989,12 @@
       "agent_contract_url": "/api/v1/masks/agrar/feed-readiness/agent-contract",
       "screen_definition_url": "/api/v1/masks/agrar/feed-readiness/screen-definition",
       "readiness_url": "/api/v1/masks/agrar/feed-readiness/readiness",
-      "risk_summary": "low",
+      "risk_summary": "medium",
       "actions": [
         {
           "key": "create_handoff",
           "label": "An Einkauf uebergeben",
-          "dangerLevel": "confirm",
+          "dangerLevel": "moderate",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "futtermittel.rations.update",
@@ -2036,7 +2036,7 @@
       "agent_contract_url": "/api/v1/masks/agrar/feeding-actuals/agent-contract",
       "screen_definition_url": "/api/v1/masks/agrar/feeding-actuals/screen-definition",
       "readiness_url": "/api/v1/masks/agrar/feeding-actuals/readiness",
-      "risk_summary": "low",
+      "risk_summary": "medium",
       "actions": [
         {
           "key": "export_csv",
@@ -2052,7 +2052,7 @@
         {
           "key": "create_measure",
           "label": "Massnahme aus Abweichung",
-          "dangerLevel": "confirm",
+          "dangerLevel": "moderate",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "futtermittel.rations.update",
@@ -2063,7 +2063,7 @@
         {
           "key": "configure_threshold",
           "label": "Schwellen konfigurieren",
-          "dangerLevel": "confirm",
+          "dangerLevel": "moderate",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "futtermittel.rations.update",
@@ -3586,7 +3586,7 @@
           "key": "retire",
           "label": "Fuetterung beenden",
           "dangerLevel": "high",
-          "humanApprovalRequired": false,
+          "humanApprovalRequired": true,
           "requiresConfirmation": true,
           "permission": "futtermittel.rations.update",
           "commandEndpoint": "/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/actions/retire",
@@ -3597,7 +3597,7 @@
           "key": "archive",
           "label": "Archivieren",
           "dangerLevel": "high",
-          "humanApprovalRequired": false,
+          "humanApprovalRequired": true,
           "requiresConfirmation": true,
           "permission": "futtermittel.rations.update",
           "commandEndpoint": "/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/actions/archive",
@@ -8700,7 +8700,7 @@
         {
           "key": "draft",
           "label": "Neue Mail",
-          "dangerLevel": "low",
+          "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "crm.mail.write",
@@ -11157,7 +11157,7 @@
           "key": "sperren",
           "label": "Sperren",
           "dangerLevel": "high",
-          "humanApprovalRequired": false,
+          "humanApprovalRequired": true,
           "requiresConfirmation": true,
           "permission": "einkauf.lieferant.update",
           "commandEndpoint": "/api/v1/einkauf/lieferanten/{entity_id}/actions/sperren",
@@ -11168,7 +11168,7 @@
           "key": "entsperren",
           "label": "Entsperren",
           "dangerLevel": "high",
-          "humanApprovalRequired": false,
+          "humanApprovalRequired": true,
           "requiresConfirmation": true,
           "permission": "einkauf.lieferant.update",
           "commandEndpoint": "/api/v1/einkauf/lieferanten/{entity_id}/actions/entsperren",
@@ -16861,7 +16861,7 @@
         {
           "key": "create_count_sheet",
           "label": "Zaehlliste",
-          "dangerLevel": "low",
+          "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "inventory.aux.write",
@@ -16872,7 +16872,7 @@
         {
           "key": "create_control",
           "label": "Kontrolllauf",
-          "dangerLevel": "low",
+          "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "inventory.aux.write",
@@ -16883,7 +16883,7 @@
         {
           "key": "create_valuation",
           "label": "Vorlaeufig bewerten",
-          "dangerLevel": "low",
+          "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "inventory.aux.write",
@@ -16895,7 +16895,7 @@
           "key": "create_opening",
           "label": "Bestandsvortrag",
           "dangerLevel": "high",
-          "humanApprovalRequired": false,
+          "humanApprovalRequired": true,
           "requiresConfirmation": true,
           "permission": "inventory.aux.write",
           "commandEndpoint": null,
@@ -19318,7 +19318,7 @@
           "key": "loeschen",
           "label": "Fahrzeug löschen",
           "dangerLevel": "high",
-          "humanApprovalRequired": false,
+          "humanApprovalRequired": true,
           "requiresConfirmation": true,
           "permission": "logistics:write",
           "commandEndpoint": "/api/v1/fuhrpark/fahrzeuge/{entity_id}/actions/loeschen",
@@ -19853,6 +19853,84 @@
       "readiness_url": "/api/v1/masks/strecke/vorlaeufig/readiness",
       "risk_summary": "low",
       "actions": [],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "logistik.frachttabelle.anlegen",
+        "logistik.tour.anlegen",
+        "logistik.fahrzeug.speichern",
+        "logistik.fahrzeug.loeschen",
+        "logistik.terminart.speichern",
+        "logistik.rechnung.speichern",
+        "logistik.ausgehendes_dokument.speichern"
+      ]
+    },
+    {
+      "mask_id": "transporte/fahrer",
+      "title": "Fahrer",
+      "domain": "logistics",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/transporte__fahrer/:entityId",
+      "agent_contract_url": "/api/v1/masks/transporte/fahrer/agent-contract",
+      "screen_definition_url": "/api/v1/masks/transporte/fahrer/screen-definition",
+      "readiness_url": "/api/v1/masks/transporte/fahrer/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Neuer Fahrer",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet das bestehende Fahrerformular."
+        },
+        {
+          "key": "verfuegbar",
+          "label": "Verfügbaren Fahrer öffnen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet den ersten verfuegbaren Fahrer."
+        },
+        {
+          "key": "touren",
+          "label": "Tourenplanung",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt in die Tourenplanung."
+        },
+        {
+          "key": "dokumente",
+          "label": "Dokumente",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die Dokumentenablage."
+        },
+        {
+          "key": "export",
+          "label": "Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die sichtbare Fahrerliste."
+        }
+      ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "logistik.frachttabelle.anlegen",
@@ -22609,7 +22687,7 @@
         {
           "key": "create",
           "label": "Neue Abfrage",
-          "dangerLevel": "low",
+          "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "reporting.query.write",

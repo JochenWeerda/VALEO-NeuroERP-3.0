@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 535,
-    "screens_with_actions": 423,
+    "actions": 540,
+    "screens_with_actions": 424,
     "domains": 57
   },
   "actions": [
@@ -10032,6 +10032,106 @@
         "commandEndpoint": null,
         "navigationRoute": null,
         "command": "list.exportCsv",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:transporte/fahrer:dokumente",
+      "label": "Dokumente",
+      "description": "Dokumente (transporte/fahrer)",
+      "category": "mask-action",
+      "domain": "logistics",
+      "mask": "transporte/fahrer",
+      "intent_phrases": [
+        "Dokumente"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "transporte/fahrer",
+        "actionKey": "dokumente",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "driver.openDocuments",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:transporte/fahrer:export",
+      "label": "Export",
+      "description": "Export (transporte/fahrer)",
+      "category": "mask-action",
+      "domain": "logistics",
+      "mask": "transporte/fahrer",
+      "intent_phrases": [
+        "Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "transporte/fahrer",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "driver.export",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:transporte/fahrer:neu",
+      "label": "Neuer Fahrer",
+      "description": "Neuer Fahrer (transporte/fahrer)",
+      "category": "mask-action",
+      "domain": "logistics",
+      "mask": "transporte/fahrer",
+      "intent_phrases": [
+        "Neuer Fahrer"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "transporte/fahrer",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "driver.create",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:transporte/fahrer:touren",
+      "label": "Tourenplanung",
+      "description": "Tourenplanung (transporte/fahrer)",
+      "category": "mask-action",
+      "domain": "logistics",
+      "mask": "transporte/fahrer",
+      "intent_phrases": [
+        "Tourenplanung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "transporte/fahrer",
+        "actionKey": "touren",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "driver.openTours",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:transporte/fahrer:verfuegbar",
+      "label": "Verfügbaren Fahrer öffnen",
+      "description": "Verfügbaren Fahrer öffnen (transporte/fahrer)",
+      "category": "mask-action",
+      "domain": "logistics",
+      "mask": "transporte/fahrer",
+      "intent_phrases": [
+        "Verfügbaren Fahrer öffnen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "transporte/fahrer",
+        "actionKey": "verfuegbar",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "driver.openAvailable",
         "method": null
       }
     },

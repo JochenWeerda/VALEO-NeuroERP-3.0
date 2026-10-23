@@ -43,3 +43,37 @@ related:
   - docs/design/belegmaske-varianten-masterplan.md
   - docs/architecture/studio-native-migration.md
   - docs/MASKEN.md
+
+# CI-Metadaten vervollstaendigt; keine neue Fach-/Live-Abnahme behauptet.
+slice_id: UIX-BELEG-FAMILIE-VERERBUNG-20261022
+file_ownership:
+  - docs/architecture/uix/beleg-maskenfamilie-vererbung.md
+  - docs/design/beleg-studio-variantenmatrix.md
+  - docs/agent-ops/slices/UIX-BELEG-FAMILIE-VERERBUNG-20261022.yaml
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - Planartefakt beschreibt Familienbaum, Vererbung, Mapping, Migration, § Studio
+    vs Runtime
+  - Keine Kollision mit Codex STUDIO-BELEG-THEME Dateibesitz
+  - Keine Nav-/SD-Implementierung in diesem Slice
+tests:
+  - node scripts/docs-markdown-check.cjs docs/architecture/uix/beleg-maskenfamilie-vererbung.md
+risks:
+  - Dokumentation und Metadaten ersetzen weder Fachparitaet noch Browser- und Freigabeabnahme.
+external_gates: []
+ai_harness:
+  fachlicher_vertrag: Eingehende und ausgehende Belegfolgen als Variationen einer
+    Maskenfamilie (Parent-Schablone + Child-Overrides) verbindlich planen; Mapping
+    der Alt-Einstiege, Migrationsreihenfolge und Abgrenzung Studio-Import vs. Runtime-Verdrahtung.
+  architektur_vertrag: Bestehende ScreenDefinition-RenderPlan-Runtime-Kette bewahren;
+    kein zweites Maskensystem.
+  daten_vertrag: Metadaten vergeben keine Datenrechte und aktivieren keine Datenmigration
+    oder Geschaeftsbuchung.
+  test_vertrag: Vorhandene tests und acceptance dieses Slices pruefen; fehlende Live-Abnahme
+    bleibt offen.
+  security_vertrag: Mandanten-, Rollen-, Fachcommand- und Freigabegrenzen bleiben
+    verbindlich; Metadaten gewaehrleisten sie nicht allein.
+  betriebs_vertrag: Keine produktive Aktivierung durch diesen Metadaten-Nachtrag;
+    offene externe Gates bleiben offen.
+  dokumentations_vertrag: Bestehende Slice-Ziele, Risiken und Ergebnisse bleiben erhalten;
+    Migrationskorrektur siehe migration-parity-repair-20261022.md.

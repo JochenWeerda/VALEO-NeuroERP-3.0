@@ -150,3 +150,18 @@ def test_fail_over_exit_code(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) ->
         assert mod.main() == 1
     finally:
         sys.argv = old_argv
+
+
+def test_lazy_transitive_reachability_does_not_hide_orphan_cycles(tmp_path, monkeypatch):
+    import scripts.doc_drift_report as mod
+    pages = tmp_path / 'src/pages'
+    pages.mkdir(parents=True)
+    (pages / 'entry.tsx').write_text("// import('./orphan-legacy')\nconst example = \"import('./orphan-cycle')\"; export default () => import('./bridge')", encoding='utf-8')
+    (pages / 'bridge.tsx').write_text("export {default} from './working-legacy'", encoding='utf-8')
+    (pages / 'working-legacy.tsx').write_text('export default function Working() {}', encoding='utf-8')
+    (pages / 'orphan-legacy.tsx').write_text("export {default} from './orphan-cycle'", encoding='utf-8')
+    (pages / 'orphan-cycle.tsx').write_text("export {default} from './orphan-legacy'", encoding='utf-8')
+    monkeypatch.setattr(mod, 'REPO_ROOT', tmp_path)
+    monkeypatch.setattr(mod, 'PAGES_DIR', pages)
+    issues = mod.check_pages_without_route_or_nav('', {'@/pages/entry'}, set())
+    assert {item['module'] for item in issues} == {'@/pages/orphan-legacy', '@/pages/orphan-cycle'}

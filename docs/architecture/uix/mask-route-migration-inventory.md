@@ -1,6 +1,6 @@
 # Masken-Routen-Migrationsinventar
 
-Stand: 2026-10-22 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
+Stand: 2026-10-23 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 
 > Studio-Entwuerfe in der DB sind **kein** Nachweis produktiver Ablösung.
 > Nur `runtime_wired` (ScreenDefinition → RenderPlan → useUniversalMaskRuntime /
@@ -11,11 +11,11 @@ Stand: 2026-10-22 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 | Klasse | Anzahl |
 |--------|--------|
 | Gesamt Routen | 941 |
-| runtime_wired (UniversalMaskRuntime-Pfad) | 833 |
+| runtime_wired (UniversalMaskRuntime-Pfad) | 825 |
 | legacy_mask_pattern (ObjectPage/ListReport ohne Runtime) | 1 |
 | legacy_wrapper (laedt weiter die Altoberflaeche) | 50 |
 | technical_page (Anmeldung/Fehlerseite, keine Fachmaske) | 4 |
-| hand_built (weder Runtime noch ObjectPage/ListReport) | 53 |
+| hand_built (weder Runtime noch ObjectPage/ListReport) | 61 |
 | non_page_module (Layout/Redirect/sonstiges) | 0 |
 
 ## Seiten-Dateien (`src/pages/**/*.tsx`)
@@ -23,13 +23,13 @@ Stand: 2026-10-22 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 | Klasse | Anzahl |
 |--------|--------|
 | Gesamt TSX-Seiten | 1127 |
-| runtime_wired | 860 |
+| runtime_wired | 857 |
 | legacy_mask_pattern | 40 |
-| hand_built | 175 |
+| hand_built | 178 |
 
 ## ScreenDefinitions / Studio
 
-- Registrierte ScreenDefinition-Builder (`_SCREEN_DEFINITIONS`): **96**
+- Registrierte ScreenDefinition-Builder (`_SCREEN_DEFINITIONS`): **97**
 - Frontend capture/mask TS-Exports (`export const *Screen`): **31**
 - Studio-Draft-Zaehlung erfordert Live-DB (`screen_definition_drafts`); ohne DB hier nicht gemessen.
 
@@ -37,9 +37,9 @@ Stand: 2026-10-22 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 
 | Metrik | Frueher | Jetzt (2026-10-22) |
 |--------|---------|---------------------|
-| handgebaute Routen | 442 | 53 |
+| handgebaute Routen | 442 | 61 |
 | Routen mit alten Maskenmustern | 80 | 1 |
-| Runtime-verdrahtet | — | 833 |
+| Runtime-verdrahtet | — | 825 |
 | Studio-Entwuerfe | 154 | (DB, nicht gemessen) |
 
 Hinweis: Fruehere 442/80 bezogen sich vermutlich auf eine engere Routen-/Seitenbasis;
@@ -220,7 +220,6 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `controlling/timeseries-erfassung` ← `src/pages/controlling/timeseries-erfassung.tsx`
 - `controlling/widget-verwaltung` ← `src/pages/controlling/widget-verwaltung.tsx`
 - `copilot` ← `src/pages/analytics.tsx`
-- `crm` ← `src/pages/crm/kim/index.tsx`
 - `crm/aktivitaet-detail` ← `src/pages/crm/aktivitaet-detail.tsx`
 - `crm/aktivitaet/:id` ← `src/pages/crm/aktivitaet-detail.tsx`
 - `crm/audits/neu` ← `src/pages/crm/lieferanten-liste.tsx`
@@ -254,7 +253,6 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `crm/customer-360/:id` ← `src/pages/crm/customer-360-native.tsx`
 - `crm/customers` ← `src/pages/crm/kunden-liste.tsx`
 - `crm/customers/:id` ← `src/pages/crm/kunden-stamm.tsx`
-- `crm/customers/:id/articles` ← `src/pages/crm/kunden-cockpit.tsx`
 - `crm/dubletten` ← `src/pages/crm/dubletten.tsx`
 - `crm/durchdringungs-pipeline` ← `src/pages/crm/durchdringungs-pipeline.tsx`
 - `crm/gdpr-request-detail` ← `src/pages/crm/gdpr-request-detail.tsx`
@@ -262,7 +260,6 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `crm/gdpr-request/:id` ← `src/pages/crm/gdpr-request-detail.tsx`
 - `crm/gdpr-request/new` ← `src/pages/crm/gdpr-request-detail.tsx`
 - `crm/gdpr-requests` ← `src/pages/crm/gdpr-requests.tsx`
-- `crm/kim` ← `src/pages/crm/kim/index.tsx`
 - `crm/klaerfall-inbox` ← `src/pages/crm/klaerfall-inbox.tsx`
 - `crm/kontakt-detail` ← `src/pages/crm/kontakt-detail.tsx`
 - `crm/kontakt-management` ← `src/pages/crm/kontakt-management.tsx`
@@ -272,7 +269,6 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `crm/kontakte/:id` ← `src/pages/crm/kontakt-detail.tsx`
 - `crm/kontakte/new` ← `src/pages/crm/kontakt-detail.tsx`
 - `crm/kunden` ← `src/pages/crm/kunden-liste.tsx`
-- `crm/kunden-cockpit` ← `src/pages/crm/kunden-cockpit.tsx`
 - `crm/kunden-karte` ← `src/pages/crm/kunden-karte.tsx`
 - `crm/kunden-liste` ← `src/pages/crm/kunden-liste.tsx`
 - `crm/kunden-schnellauswahl` ← `src/pages/crm/kunden-schnellauswahl.tsx`
@@ -834,13 +830,9 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `verkauf/dauerauftraege` ← `src/pages/verkauf/dauerauftraege.tsx`
 - `verkauf/kommissions-auftraege` ← `src/pages/verkauf/kommissions-auftraege.tsx`
 - `verkauf/kunde-neu` ← `src/pages/verkauf/kunde-neu.tsx`
-- `verkauf/kunde/:id` ← `src/pages/verkauf/kunden-stamm.tsx`
-- `verkauf/kunde/neu` ← `src/pages/verkauf/kunden-stamm.tsx`
 - `verkauf/kunden-liste` ← `src/pages/verkauf/kunden-liste.tsx`
-- `verkauf/kunden-stamm` ← `src/pages/verkauf/kunden-stamm.tsx`
 - `verkauf/kunden-stamm-enhanced` ← `src/pages/verkauf/kunden-stamm-enhanced.tsx`
 - `verkauf/kunden-stamm-enhanced/:id` ← `src/pages/verkauf/kunden-stamm-enhanced.tsx`
-- `verkauf/kunden-stamm/:id` ← `src/pages/verkauf/kunden-stamm.tsx`
 - `verkauf/lieferschein-erfassung` ← `src/pages/verkauf/lieferschein-erfassung.tsx`
 - `verkauf/lieferschein-erfassung/:id` ← `src/pages/verkauf/lieferschein-erfassung.tsx`
 - `verkauf/rechnung/:id` ← `src/pages/verkauf/rechnung.tsx`
@@ -955,4 +947,4 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `annahme/warteschlange` ← `src/pages/annahme/warteschlange.tsx`
 - `auth/callback` ← `src/pages/auth/Callback.tsx`
 - `auth/login` ← `src/pages/auth/Login.tsx`
-- `crm/activities/neu` ← `src/pages/crm/aktivitaeten.tsx`
+- `crm` ← `src/pages/crm/kim/index.tsx`

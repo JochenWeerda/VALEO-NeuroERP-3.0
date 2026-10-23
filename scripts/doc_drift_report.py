@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -137,6 +138,60 @@ def check_services_without_docs(docs_text: str) -> list[dict]:
     return issues
 
 
+def reachable_page_modules(route_modules: set[str]) -> set[str]:
+    """Follow actual static/lazy imports; an orphan cycle is never a route."""
+    source = PAGES_DIR.parent.resolve()
+    pending: list[Path] = []
+    visited: set[Path] = set()
+    modules = set(route_modules)
+
+    def resolve(specifier: str, parent: Path) -> Path | None:
+        if specifier.startswith("@/"):
+            base = source / specifier[2:]
+        elif specifier.startswith("."):
+            base = parent / specifier
+        else:
+            return None
+        for candidate in [base, *[Path(str(base) + ext) for ext in (".tsx", ".ts", ".jsx", ".js")], base / "index.tsx", base / "index.ts"]:
+            candidate = candidate.resolve()
+            if candidate.is_relative_to(source) and candidate.is_file():
+                return candidate
+        return None
+
+    for module in sorted(route_modules):
+        target = resolve(module, source)
+        if target:
+            pending.append(target)
+    # Tokenize comments/strings first so examples and commented imports never create edges.
+    token_pattern = re.compile(r'''//[^\n]*|/\*[\s\S]*?\*/|'(?:\\.|[^'\\])*'|"(?:\\.|[^"\\])*"|`(?:\\.|[^`\\])*`|[A-Za-z_$][\w$]*|[^\s]''')
+
+    def imports(text: str):
+        tokens = [match.group() for match in token_pattern.finditer(text)
+                  if not match.group().startswith(("//", "/*"))]
+        for index, token in enumerate(tokens):
+            next_index = index + 1
+            if token == "import" and next_index < len(tokens) and tokens[next_index] == "(":
+                next_index += 1
+            elif token not in {"from", "import"}:
+                continue
+            if next_index < len(tokens):
+                literal = tokens[next_index]
+                if literal.startswith(("'", '\"')):
+                    yield literal[1:-1]
+    while pending:
+        path = pending.pop()
+        if path in visited:
+            continue
+        visited.add(path)
+        if path.is_relative_to(PAGES_DIR.resolve()):
+            modules.add(page_to_module(path))
+        for specifier in imports(_read(path)):
+            target = resolve(specifier, path.parent)
+            if target and target not in visited:
+                pending.append(target)
+    return modules
+
+
 def check_pages_without_route_or_nav(
     nav_text: str,
     route_modules: set[str],
@@ -145,6 +200,7 @@ def check_pages_without_route_or_nav(
     issues = []
     if not PAGES_DIR.exists():
         return issues
+    route_modules = reachable_page_modules(route_modules)
     for f in sorted(PAGES_DIR.rglob("*.tsx")):
         name = f.stem
         if name.startswith("_") or name in SKIP_PAGE_NAMES or name in SKIP_PAGE_NAMES_INDIRECT:

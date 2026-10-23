@@ -4953,6 +4953,7 @@ _SCREEN_DEFINITIONS: dict[str, Any] = {
     **IDENTITY_SCREEN_BUILDERS,
     **STUDIO_HISTORY_BUILDERS,
     **HARVEST_CONTROL_BUILDERS,
+    "transporte/fahrer": build_transporte_fahrer_screen_definition,
     "schnittstelle/legacy-adapter-monitor": lambda: {
         "schemaVersion": 1, "id": "schnittstelle/legacy-adapter-monitor", "domain": "integration", "mode": "list",
         "title": "Standard-/Unimet-Adapter", "subtitle": "Eingang, Fehlerkorb, Staging und Reconciliation",
@@ -6155,6 +6156,15 @@ def _apply_season_profile(definition: dict[str, Any], today: str | None) -> None
 def _hydrate_screen_definition(definition: dict[str, Any], mask_id: str, today: str | None) -> dict[str, Any]:
     definition = _with_meridian_action_contract(_with_meridian_identity(_with_meridian_layout(definition)))
     contract = definition.setdefault("agentContract", {})
+    # Metadata must reflect actual enforced action restrictions after parent/child merging.
+    # This projects existing policy; it never grants a command or permission.
+    dangerous = contract.setdefault("dangerousActions", [])
+    declared = {item["key"] for item in dangerous}
+    for action in definition.get("actions", []):
+        if action.get("forbiddenForAgents") and action.get("commandEndpoint") and not action.get("stubReason"):
+            if action["key"] not in declared:
+                dangerous.append({"key": action["key"], "reason": "Nur menschliche Ausfuehrung gemaess dem Fachaktionsvertrag."})
+                declared.add(action["key"])
     contract.setdefault("sensitiveFields", [])
     contract.setdefault("synonyms", _AGENT_SYNONYMS.get(mask_id, []))
     _resolve_tile_routes(definition)
