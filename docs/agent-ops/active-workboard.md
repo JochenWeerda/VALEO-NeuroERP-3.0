@@ -19494,3 +19494,6 @@ Nutzerauftrag: acht ausdruecklich benannte Root-Dateien pruefen (Framework/Event
 
 
 **ADAPTIVE-WORKSPACE-REVIEW Reparaturfreigabe:** Nutzer weiter autorisiert die neun belegten Korrekturen. Erster eng begrenzter Umsetzungsslice AW-R08: app/workspace/events.py nur mandantengebundene, erst nach erfolgreichem Broadcast wirksame Deduplizierung samt paralleler Wiederholung; eigene Regressionstests und QA. Fremde Signalzuordnungen unveraendert. Keine Datenbank-/Containeroperation. Weitere acht Befunde bleiben bis eigener Abnahme offen.
+
+
+**ADAPTIVE-WORKSPACE-REVIEW AW-R08 umgesetzt:** Mandantengebundene Erfolgsdeduplizierung, Retry nach Fehler/Abbruch, parallele Duplikate koordiniert.41 gezielte Tests gruen; kein DB-/Containerzugriff. Acht weitere Befunde bleiben offen. Nur eng gepruefte Eventsquelle und eigene Tests integriert, kein Gesamtabschluss. QA adaptive-workspace-review-20261023.md.

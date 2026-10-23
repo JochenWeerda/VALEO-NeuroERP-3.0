@@ -35,3 +35,10 @@ Geprueft: adaptive-workspace-framework.md, adaptive-workspace-events-mcp.md, tes
 Die gruenen Tests widerlegen die Befunde nicht: Es fehlen insbesondere manipulierter Freigebender, fremde Annahme, konkurrierende Finalisierung, Rollback ohne Live-Signal, fehlgeschlagener SSE-Retry, echte NATS-Serialisierung sowie Wiederverbindung mit frisch validierter Sitzung. Die Dokumentation nennt den Spiegel erreicht; dieses Wort muss zwischen lokalem Unit-Draht und produktionsgetreuem NATS-/Commit-Nachweis unterscheiden.
 
 Keine der acht geprueften Produktions-/Testdateien wurde fuer diese Pruefung korrigiert. Befunde sind offen; bereits vorhandene Reparaturarbeit wird vor Umsetzung integriert und nicht doppelt gebaut.
+
+
+## Reparatur AW-R08
+
+AW-R08 ist im Quellstand korrigiert: Ereignisidentitaet aus Mandant plus Ereignis-ID; erfolgreich erst nach Broadcast merken. Fehlversuche, unbekannte Typen und abgebrochene Versuche verbrauchen die Identitaet nicht. Gleichzeitige Duplikate teilen den laufenden Versuch; ein wartender Aufrufer kann ihn nicht abbrechen. Cache bleibt auf512 erfolgreiche Ereignisse begrenzt und pro Prozess best-effort, kein dauerhafter Nachrichtenzustellnachweis.
+
+Gemeinsame Abnahme:41 Tests bestanden (36 bestehende SSE-Vertraege plus5 neue Fehler-/Mandanten-/Parallel-/Abbruchfaelle), ohne Datenbank oder Container. Acht weitere Reviewbefunde bleiben offen. Die Workspacequelle lag bisher nur im geteilten Arbeitsbaum, nicht in HEAD; dieser eng gepruefte Ereignisspiegel wird erstmals im Reparaturzweig versioniert. Die gesamte fremde Workspaceimplementierung wird dabei nicht mitcommittet. Keine Live-NATS-/Browser- oder Gesamtfreigabe.
