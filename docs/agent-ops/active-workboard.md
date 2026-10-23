@@ -19485,3 +19485,7 @@ Nutzerklarstellung: Commit/Push bleiben freigegeben; die angehaengte NoCommit-No
 Lead uebernimmt Integration, generierte Artefakte, Workboard/QA, Commit/Push und CI-/Browser-/CLI-Abnahme. Tests verwenden ausschliesslich bestehenden valeo_probe mit eigenen Rollbacks oder SQLite im Speicher; keine neuen Datenbanken/Container und kein Reset. Kein Subagent editiert Root/Index oder committet selbst. Gepruefte Ansicht artifacts/migration-repair-source. Offene Risiken pro Maske nachweisen statt Gates zu senken.
 
 **STUDIO-CLOSURE-PARALLEL Harness-Ergaenzung:** Nutzer autorisiert dauerhaft aufgabenangepasste Modellwahl und parallele Subagenten fuer hoechste Tokeneffizienz. Lead-Besitz eng um AGENTS.md als dauerhaften Repository-Harness erweitert; keine Aenderung von Sicherheits-/Claim-/Abnahmeregeln. Aufgaben passendkleinteilen, kleinstehinreichendeModellstaerke, Review/Testbelege vorIntegration, bei echterKomplexitaet gezielteskalieren.
+
+## ADAPTIVE-WORKSPACE-REVIEW-20261023 - reserviert, Codex
+
+Nutzerauftrag: acht ausdruecklich benannte Root-Dateien pruefen (Framework/Events-Doku, Agrar-/SSE-Tests, live-signals, Workspaceevents, QualityAPI undRepository). Besitz nur neuer QA-Bericht und eigene Reproduktionsartefakte; keine fremden produktiven Workspacequellen aendern. Abnahme: belegte Befunde priorisieren, Tests gegen Root ausfuehren, bestehenden valeo_probe nur eigeneTestzeilen/keinReset. Studio-Slices bleiben eigenstaendige laufende Integration; Subagenten durch Nutzungslimit gestoppt, uncommittete Ergebnisse bewahren.
