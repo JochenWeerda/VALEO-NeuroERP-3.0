@@ -1,4 +1,4 @@
-﻿---
+---
 title: Active Workboard
 type: reference
 audience: [agent, entwickler]
@@ -19440,3 +19440,7 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 **SECURITY-PATCHES-20261023 abgeschlossen:** Drei bestaetigte Advisory-Korrekturen als kohaerente Versionsgruppe. Frische155er-Gesamtaufloesung auditiert ohne bekannte Schwachstellen; echter HTTP-/SQL-Trace-Kompatibilitaetstest gruen. Keine Ausnahme, keine Datenbank-/Docker-Ressource. QA docs/quality-assurance/security-patches-20261023.md. Keine Aktivierung der unvollstaendigen Maskenmigration; separater kleiner main-Hotfix.
 
 **Integration:** Hotfix d61993b9e separat auf main veroeffentlicht und als Elternstand im Reparaturzweig erhalten. Keine Gesamtfreigabe der UI-Migration; GitHub-Nachlauf steht aus.
+
+## LOADING-ATOMIC-ACTOR-20261023 - reserviert, Codex
+
+**Owner:** Codex. **Ziel:** vorhandene LOADING-Start/Ende-Anbindung atomar mit Log/Ausgangsereignis abschliessen und Urheber ausschliesslich aus gepruefter Anmeldung beziehen. **Besitz:** tours.py nur start/finish-loading und Outbox-Helfer; TourRepository nur optionale commit-Steuerung der genau zwei Loading-Wege/Update/add_event; OutboxPublisher nur optionale Unterdrueckung des vorzeitigen SSE-Spiegels fuer diesen Weg; neuer begrenzter Test/QA. Cursors Workspace/UI/Signalmapping und Tests bleiben unberuehrt. Kein pauschaler Tourenumbau/Schema-/DB-Reset. **Risiko:** domain_log.log_touren hat im ORM keine Mandantenspalte; dieser Slice darf keine systemweite Mandantenabnahme behaupten. Persistenz und Rollback werden gesondert geprueft.
