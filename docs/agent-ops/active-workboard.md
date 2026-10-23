@@ -19537,8 +19537,29 @@ Abnahme sowie weitere Fachketten/gesamte Altmaskenmigration bleiben offen.
 
 **MATERIAL-FLOW-SQL Teilabnahme:** Nutzerentscheid physische Spuelumlagerung umgesetzt;11 reale SQL-Faelle und bestehende Materialfluss-/Runnerfamilie zusammen40 gruen. QA agri-flush-physical-20261022.md. Claim bleibt fuer Transfer-/Lot-Link-SQL, Idempotenz und Outbox offen/in Arbeit; keine Gesamtfreigabe.
 
-## SECURITY-PATCHES-20261023 — reserviert, Codex
+## SECURITY-PATCHES-20261023 — abgeschlossen, Codex
 
 **Owner:** Codex. **Ziel:** Drei offiziell bestaetigte neue Sicherheitsluecken ohne die unvollstaendige Maskenmigration auf main schliessen. **Dateibesitz:** requirements.txt nur GitPython/Black/kohaerente OpenTelemetry-Gruppe; neuer isolierter OTel-Kompatibilitaetstest und QA, eigener Workboard-Absatz. **Abnahme:** frische Gesamtaufloesung155 Pakete ohne bekannte Schwachstellen; echte HTTP-/SQL-Spans ohne externe Uebertragung. Keine neue DB, kein Container, kein Reset; bestehende Rollen- und Mandantenvertraege unveraendert.
 
 **SECURITY-PATCHES-20261023 abgeschlossen:** Drei bestaetigte Advisory-Korrekturen als kohaerente Versionsgruppe. Frische155er-Gesamtaufloesung auditiert ohne bekannte Schwachstellen; echter HTTP-/SQL-Trace-Kompatibilitaetstest gruen. Keine Ausnahme, keine Datenbank-/Docker-Ressource. QA docs/quality-assurance/security-patches-20261023.md. Keine Aktivierung der unvollstaendigen Maskenmigration; separater kleiner main-Hotfix.
+
+## MAIN-CI-REPAIR-20261023 — umgesetzt, CI-Abnahme offen, Codex
+
+**Owner:** Codex. **Ziel:** bestaetigten main-Handbuchdrift und abgelaufenen KI-Service-Sicherheitsbefund schliessen. **Dateibesitz:** generierte Handbuchdatei/en und nur sinkende Business-Time-Baseline nach Ist-Pruefung; services/ai requirements, ungenutzter Chroma-Startpfad/-Modul/-Settings, RAG-Scheinantworten, README; gezielte Dienst-/Retirement-Tests und obsolet gewordene Chroma-Ausnahmen. **Entscheidung:** Alle neuesten Chroma-Versionen weiter betroffen; keine Ausnahme verlaengern. Der einzige Dienstaufrufer ist Startup, RAG-HTTP-Wege liefern bislang nur Mocks und nutzen den Store nicht. Ungenutzte verwundbare Abhaengigkeit entfernen; nicht implementierte RAG-Wege muessen ehrlich503 statt erfundener Such-/Indexerfolge liefern. Bestehende Dienstauthentifizierung bleibt verbindlich. Keine neue DB, kein Container, keine Datenmigration; unvollstaendige UI-Migration bleibt separat.
+
+**MAIN-CI-REPAIR Fastify-Erweiterung:** Offizieller neuer Header-Validierungsbefund GHSA-389g-gv7q-r4x8 betrifft5.12.5; Herstellerpatch5.12.6 verfuegbar. Besitz Root-package.json/pnpm-lock und bestehende npm-backport-reviews ausschliesslich neue Manifest-/Lock-Kontextfingerprints nach unveraenderter Pruefung der beiden bestehenden reparierten Quellen; keine neue Ausnahme/keine Majoranhebung/keine Fristverlaengerung. Gezielte Header-Regression und strikter NPM-Audit vor Freigabe.
+
+**MAIN-CI-REPAIR Entwicklungswerkzeuge:** Voller Audit entdeckt zusaetzlich Storybook-Code-Injection (GHSA-f2ph-cmg5-wxc8, GHSA-px85-f4q5-jh77). Herstellerpatch8.6.19 fuer die gesamte bestehende8.6-Kohorte verfuegbar und aufNPM bestaetigt. Besitz Frontend-package.json ausschliesslich diese zehn Dev-Pins, Lock und zugehoerige Regression-/Buildabnahme. Kein Majorwechsel, keine UI-Neugestaltung, keine neue Ausnahme. Ungefixte weitere Dev-Befunde bleiben sichtbar.
+
+**MAIN-CI-REPAIR Ergebnis:** Handbuch5 Artefakte aktuell, Kalender-Ratsche193 nur abgesenkt. AI-Audit0 ohne Ausnahme;6 Retirement-/HTTP-Vertraege gruen. Fastify5.12.7 real gegen alten Fehler nachgewiesen; strikter produktiver Node-Gate0 blockiert/2 nachgewiesen quellrepariert,27 Policyvertraege gruen. Storybook8.6.19, voller Audit0 critical; weitere Dev-Befunde bleiben offen. Keine laufenden Dienste/DB/Container veraendert. QA main-ci-repair-20261023.md. Normaler main-PR und dessen CI-Abnahme folgen.
+
+
+## MAIN-TENANT-INTEGRATION-20261023 - reserviert, Codex
+
+Eigener sauberer main-Folgezweig PR39: den bereits mit48 Faellen bestandenen Backend-Mandantenslice f3d747dec ohne UI-/Studio-Migrationshistorie integrieren (Tourmodel/-repositories/API, Outboxoption, zweiMigrationen, eigeneTests/QA). Tabellenkatalog aus dieser kanonischen main-Ansicht nachziehen, keineProjektion der848WIPMasken. Zusaetzlich CI-MCP-Prozessfixture fuer echteProzess-ID/Startupbudget robust machen; Timeouts/Fehlerfaelle bleiben verbindlich. KeinDB/Containerneuaufbau oderReset, keineFachwrites aufEntwicklungsdatenbank; vorhandenerProbe nurRollbackdaten. DelegierterAgent: Umsetzung ausschliesslich in artifacts/security-hotfix-source, keinroot/index/push.
+
+**MAIN-TENANT-INTEGRATION Ergebnis:**30 Loading-/Mandantenfaelle,19 MCP-Prozessfaelle und Registry-Stabilitaet gruen. Katalogcheck lokal681Tabellen gruen, aber frische CI688Tabellen: lokaler Katalog wird deshalb ausdruecklich nicht uebernommen. CI-Artefakt39908273247 gesichert, kanonische Neuernte nach diesen Migrationen im CI bleibt erforderlich. Kein zusaetzlicher DBaufbau/Reset.
+
+**MAIN-TENANT-INTEGRATION CI-Nachlauf:** frische CI deckte fehlende Vorgaengerrevision dms_inbox_tenant_20261022 auf. Additive bereits lokal angewandte DMS-Migration als notwendige Abhaengigkeit uebernommen; keine Aenderung/Neuanwendung bestehender Revisionen. Vollstaendiger Alembic-Graph ohne Datenbankzugriff validiert, Migrationsinventar aus vollstaendiger eigener Commitansicht nachgezogen. Noch keine frische CI-Erfolgsbehauptung.
+
+**MAIN-TENANT-INTEGRATION CI-Nachlauf:** notwendige additive DMS-Vorgaengerrevision ergaenzt; vollstaendiger Alembic-Graph ohne DBzugriff validiert, Migrationsinventar synchronisiert. Keine bereitsangewandte Revision geaendert.

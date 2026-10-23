@@ -101,7 +101,7 @@ def load_native_screens() -> list[dict[str, Any]]:
     except Exception:  # noqa: BLE001 — Generator darf ohne Maskenmodul weiterlaufen
         return []
     screens: list[dict[str, Any]] = []
-    for screen_id in SCREEN_DEFINITION_BUILDERS:
+    for screen_id in sorted(tuple(SCREEN_DEFINITION_BUILDERS)):
         definition = get_screen_definition(screen_id)
         if not definition:
             continue

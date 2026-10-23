@@ -40,7 +40,7 @@ class OutboxPublisher:
         self.db = db_session
         self.event_publisher = event_publisher
 
-    async def store_event(self, event: DomainEvent, tenant_id: Optional[str] = None) -> None:
+    async def store_event(self, event: DomainEvent, tenant_id: Optional[str] = None, *, mirror_on_store: bool = True) -> None:
         """Store event in outbox table (same DB transaction as caller)."""
         from dataclasses import asdict
 
@@ -56,6 +56,8 @@ class OutboxPublisher:
         )
         self.db.add(outbox_event)
         logger.debug("Event stored in outbox: %s", outbox_event.event_type)
+        if mirror_on_store:
+            await _mirror_workspace_sse(event, tenant_id=tenant_id or getattr(event, "tenant_id", None))
 
     async def publish_pending_events(self, limit: int = 100) -> int:
         """Publish pending outbox events and mark successful entries as published."""
@@ -80,6 +82,7 @@ class OutboxPublisher:
                 )
 
                 await self.event_publisher.publish(event)
+                await _mirror_workspace_sse(event, tenant_id=entry.tenant_id)
                 entry.published = True
                 entry.published_at = datetime.utcnow()
                 published_count += 1
@@ -107,3 +110,13 @@ class OutboxPublisher:
         self.db.commit()
         logger.info("Cleaned up %s old outbox event(s)", deleted)
         return deleted
+
+
+async def _mirror_workspace_sse(event: DomainEvent, *, tenant_id: Optional[str]) -> None:
+    """Best-effort Ist-Spiegel auf /api/events?stream=workspace. Kein WRITE."""
+    try:
+        from app.workspace.events import mirror_ist_event_to_workspace
+
+        await mirror_ist_event_to_workspace(event, tenant_id=tenant_id)
+    except Exception:
+        logger.debug("Workspace-SSE-Spiegel uebersprungen", exc_info=True)

@@ -2,6 +2,7 @@
 import asyncio
 import os
 import subprocess
+from unittest.mock import patch
 
 import pytest
 
@@ -53,16 +54,36 @@ def assert_stopped(pidfile):
 
 def run_call(server, mode, timeout=3):
     script, pidfile = server
-    result = asyncio.run(MCPClient(script, timeout=timeout).call_tool(
-        "local-probe", "probe", {"mode": mode, "pidfile": str(pidfile)}
-    ))
-    assert_stopped(pidfile)
+    async def invoke_with_parent_handle():
+        processes = []
+        create = asyncio.create_subprocess_exec
+
+        async def tracked_create(*args, **kwargs):
+            process = await create(*args, **kwargs)
+            processes.append(process)
+            return process
+
+        with patch("asyncio.create_subprocess_exec", new=tracked_create):
+            result = await MCPClient(script, timeout=timeout).call_tool(
+                "local-probe", "probe", {"mode": mode, "pidfile": str(pidfile)}
+            )
+        assert len(processes) == 1
+        # Check reaping from the parent handle even if timeout/shutdown wins
+        # before the child has written its pidfile.
+        assert processes[0].returncode is not None
+        return result
+
+    result = asyncio.run(invoke_with_parent_handle())
+    if pidfile.exists():
+        assert_stopped(pidfile)
+    else:
+        assert result is None
     return result
 
 
 @pytest.mark.parametrize("mode", ["success", "notification", "stderr"])
 def test_success_always_reaps_child(server, mode):
-    assert run_call(server, mode) == {"content": [{"type": "text", "text": "Grün"}]}
+    assert run_call(server, mode, timeout=10) == {"content": [{"type": "text", "text": "Grün"}]}
 
 
 @pytest.mark.parametrize("mode", ["bad-json", "wrong-id", "bool-id", "wrong-version", "error", "invalid-result", "exit"])

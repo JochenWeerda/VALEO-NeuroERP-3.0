@@ -30,7 +30,7 @@
       "fast-uri": "^3.1.8",
       "moment": "^2.31.0",
       "fast-xml-parser": "^5.8.0",
-      "fastify": "^5.12.5",
+      "fastify": "^5.12.6",
       "glob": "^10.5.0",
       "handlebars": "4.7.10",
       "jws": "^3.2.3",
