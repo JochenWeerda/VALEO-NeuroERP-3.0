@@ -26,7 +26,7 @@ def test_write_contract_passes_zero_as_decimal(monkeypatch, operation, field, va
     stored = protocol()
     captured = []
     class Repository:
-        def __init__(self, db):
+        def __init__(self, db, tenant_id):
             pass
         def get_by_id(self, protocol_id):
             return stored

@@ -19511,3 +19511,6 @@ Nutzerauftrag: sieben restliche Reviewbefunde AW-R01/02/03/04/05/06/09 schliesse
 
 
 **AW-R09 Integrationsbesitz erweitert:** Live-Signalquelle liegt bislang unversioniert im Root. Fuer einen eigenstaendig importierbaren Reparaturcommit werden die eng geprueften reinen Workspacebasisvertraege types/home-signals/registry/prioritization/user-context mitversioniert. Queue-Pfadmetadaten in kleine queue-contracts.ts zentral ausgliedern, sibling-slots nur Reexport desselben unveraenderten INBOX_SLOT, damit Live-Signale nicht den gesamten fremden Inbox-/Studio-UI-Baum importieren. Keine Fachaktion/Scope/Route aendern oder neue Freigabe behaupten. Unnoetige Live-Resolver-Abhaengigkeit entfernen; Catchverhalten unveraendert.
+
+
+**ADAPTIVE-WORKSPACE-CLOSURE-20261024 umgesetzt:** Alle sieben restlichen Reviewbefunde AW-R01/02/03/04/05/06/09 geschlossen, damit9/9.128 integrierte Backend-,8 echte PG- und11Frontendfaelle gruen; fokussierte Typpruefung gruen. EigeneRowsCleanup, keine neueDB/Container/Reset. Kanonische OpenAPI3246 aus sauberer HEAD-Quellansicht, nur Quality-Pfade/Schemas angepasst; Handbuch/Inventare konsistent. ForeignStudio-/API-WIP bewahrt. Keine Live-Broker-/Browser-/Studio-Gesamtfreigabe; separate Projekt-CI bleibt eigener Claim. QA adaptive-workspace-review-20261023.md sowie quality-protocol-aw-review-repair-20261024.md.

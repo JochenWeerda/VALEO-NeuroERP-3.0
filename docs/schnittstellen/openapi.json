@@ -134378,19 +134378,20 @@
         "title": "QualityProtocolCreateOut",
         "type": "object"
       },
-      "QualityProtocolFinalizeIn": {
-        "description": "Input-Model für Protokoll-Finalisierung.",
+      "QualityProtocolQueueOut": {
         "properties": {
-          "approved_by": {
-            "minLength": 1,
-            "title": "Approved By",
-            "type": "string"
+          "protocols": {
+            "items": {
+              "$ref": "#/components/schemas/app__api__v1__endpoints__quality_protocols__QualityProtocolOut"
+            },
+            "title": "Protocols",
+            "type": "array"
           }
         },
         "required": [
-          "approved_by"
+          "protocols"
         ],
-        "title": "QualityProtocolFinalizeIn",
+        "title": "QualityProtocolQueueOut",
         "type": "object"
       },
       "QualityProtocolUpdateIn": {
@@ -217651,6 +217652,33 @@
       }
     },
     "/api/v1/agrar/quality-protocols": {
+      "get": {
+        "operationId": "list_protocols_api_v1_agrar_quality_protocols_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QualityProtocolQueueOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Qualitaetsprotokolle auflisten",
+        "tags": [
+          "agrar",
+          "quality",
+          "protocols",
+          "labor"
+        ]
+      },
       "post": {
         "description": "Erstellt ein neues Qualitätsprotokoll.",
         "operationId": "create_protocol_api_v1_agrar_quality_protocols_post",
@@ -218018,7 +218046,7 @@
     },
     "/api/v1/agrar/quality-protocols/{protocol_id}/approve": {
       "post": {
-        "description": "Finalisiert ein Qualitätsprotokoll.",
+        "description": "Finalisiert ein Qualitaetsprotokoll und schreibt Outbox fuer Workspace-SSE.",
         "operationId": "finalize_protocol_api_v1_agrar_quality_protocols__protocol_id__approve_post",
         "parameters": [
           {
@@ -218031,16 +218059,6 @@
             }
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/QualityProtocolFinalizeIn"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "content": {
@@ -218079,7 +218097,7 @@
     },
     "/api/v1/agrar/quality-protocols/{protocol_id}/finalize": {
       "post": {
-        "description": "Finalisiert ein Qualitätsprotokoll.",
+        "description": "Finalisiert ein Qualitaetsprotokoll und schreibt Outbox fuer Workspace-SSE.",
         "operationId": "finalize_protocol_api_v1_agrar_quality_protocols__protocol_id__finalize_post",
         "parameters": [
           {
@@ -218092,16 +218110,6 @@
             }
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/QualityProtocolFinalizeIn"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "content": {

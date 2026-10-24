@@ -30,6 +30,7 @@ class IntegrationEvent(DomainEvent):
 
     event_type: str
     payload: Dict[str, Any] = field(default_factory=dict)
+    tenant_id: Optional[str] = None
 
 
 class IEventPublisher(ABC):
@@ -137,6 +138,9 @@ async def startup_event_consumer() -> None:
     nats_consumer.enabled = True
     nats_consumer.nats_url = nats_url
     register_core_event_handlers(nats_consumer)
+    from app.workspace.events import register_workspace_sse_mirror
+
+    register_workspace_sse_mirror(nats_consumer)
     await nats_consumer.start()
 
     try:

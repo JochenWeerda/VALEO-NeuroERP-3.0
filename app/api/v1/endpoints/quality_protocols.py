@@ -13,10 +13,13 @@ import base64
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Request
 from pydantic import BaseModel, Field, ConfigDict
 from sqlalchemy.orm import Session
+from app.infrastructure.models import QualityProtocol
 
 from app.core.data_quality_enforcement import build_dq_error_detail, evaluate_quality_protocol_datensatz
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
+from app.domains.shared.events import IntegrationEvent, get_event_publisher
+from app.infrastructure.eventbus.outbox import OutboxPublisher
 from modules.agrar.services.quality_protocol_service import (
     create_quality_protocol,
     update_quality_protocol,
@@ -27,11 +30,14 @@ from modules.agrar.services.quality_protocol_service import (
     QualityProtocolCreate,
     QualityProtocolUpdate,
 )
-from modules.agrar.repositories.quality_protocol_repo import QualityProtocolRepositoryImpl
+from modules.agrar.repositories.quality_protocol_repo import AcceptanceNotOwnedError, QualityProtocolRepositoryImpl
 
 from app.api.v1.schemas.base import BaseSchema
-from app.core.akteur import akteur_aus_request
+from app.core.akteur import akteur_aus_request, gepruefter_akteur
+from app.auth.deps import get_current_user
 from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
+
+QUALITY_PROTOCOL_COMPLETED_EVENT = "agrar.quality_protocol.completed"
 
 
 router = APIRouter()
@@ -100,11 +106,6 @@ class QualityProtocolUpdateIn(BaseModel):
     other_values: Optional[dict] = None
 
 
-class QualityProtocolFinalizeIn(BaseModel):
-    """Input-Model für Protokoll-Finalisierung."""
-    approved_by: str = Field(..., min_length=1)
-
-
 # ── Helper Functions ────────────────────────────────────────────────────────────
 
 def _get_user_id_from_request(request) -> Optional[str]:
@@ -141,6 +142,21 @@ def _to_out(protocol) -> QualityProtocolOut:
 
 # ── API Endpoints ───────────────────────────────────────────────────────────────
 
+class QualityProtocolQueueOut(BaseModel):
+    protocols: list[QualityProtocolOut]
+
+
+@router.get("", response_model=QualityProtocolQueueOut, summary="Qualitaetsprotokolle auflisten")
+async def list_protocols(
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> QualityProtocolQueueOut:
+    rows = db.query(QualityProtocol).filter(
+        QualityProtocol.tenant_id == tenant_id,
+    ).order_by(QualityProtocol.created_at.desc()).limit(200).all()
+    repo = QualityProtocolRepositoryImpl(db, tenant_id)
+    return QualityProtocolQueueOut(protocols=[_to_out(repo._to_service(row)) for row in rows])
+
 @router.post("", response_model=QualityProtocolOut, status_code=201, summary="Protocol anlegen", dependencies=SCHREIBEN["AGRAR"])
 async def create_protocol(
     payload: QualityProtocolCreateIn,
@@ -171,8 +187,11 @@ async def create_protocol(
         created_by=user_id,
     )
     
-    repo = QualityProtocolRepositoryImpl(db)
-    protocol = create_quality_protocol(repo, create_input)
+    repo = QualityProtocolRepositoryImpl(db, tenant_id)
+    try:
+        protocol = create_quality_protocol(repo, create_input)
+    except AcceptanceNotOwnedError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
     
     return _to_out(protocol)
 
@@ -184,7 +203,7 @@ async def get_protocol(
     tenant_id: str = Depends(get_tenant_id),
 ):
     """Ruft ein Qualitätsprotokoll ab."""
-    repo = QualityProtocolRepositoryImpl(db)
+    repo = QualityProtocolRepositoryImpl(db, tenant_id)
     protocol = repo.get_by_id(protocol_id)
     
     if not protocol:
@@ -203,8 +222,11 @@ async def get_protocols_by_harvest_acceptance(
     tenant_id: str = Depends(get_tenant_id),
 ):
     """Ruft alle Protokolle für eine Ernte-Annahme ab."""
-    repo = QualityProtocolRepositoryImpl(db)
-    protocols = repo.get_by_harvest_acceptance(harvest_acceptance_id)
+    repo = QualityProtocolRepositoryImpl(db, tenant_id)
+    try:
+        protocols = repo.get_by_harvest_acceptance(harvest_acceptance_id)
+    except AcceptanceNotOwnedError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
     
     # Filter nach tenant_id
     protocols = [p for p in protocols if p.tenant_id == tenant_id]
@@ -219,8 +241,11 @@ async def get_latest_protocol_for_harvest_acceptance(
     tenant_id: str = Depends(get_tenant_id),
 ):
     """Ruft das neueste Protokoll für eine Ernte-Annahme ab."""
-    repo = QualityProtocolRepositoryImpl(db)
-    protocol = get_latest_protocol(repo, harvest_acceptance_id)
+    repo = QualityProtocolRepositoryImpl(db, tenant_id)
+    try:
+        protocol = get_latest_protocol(repo, harvest_acceptance_id)
+    except AcceptanceNotOwnedError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
     
     if not protocol:
         raise HTTPException(status_code=404, detail=f"No quality protocol found for harvest acceptance {harvest_acceptance_id}")
@@ -242,7 +267,7 @@ async def update_protocol(
     """Aktualisiert ein Qualitätsprotokoll."""
     user_id = _get_user_id_from_request(request)
     
-    repo = QualityProtocolRepositoryImpl(db)
+    repo = QualityProtocolRepositoryImpl(db, tenant_id)
     protocol = repo.get_by_id(protocol_id)
     
     if not protocol:
@@ -261,7 +286,10 @@ async def update_protocol(
         updated_by=user_id,
     )
     
-    protocol = update_quality_protocol(repo, protocol_id, update_input)
+    try:
+        protocol = update_quality_protocol(repo, protocol_id, update_input)
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
     return _to_out(protocol)
 
 
@@ -269,12 +297,13 @@ async def update_protocol(
 @router.post("/{protocol_id}/finalize", response_model=QualityProtocolOut, summary="Protocol finalize", dependencies=SCHREIBEN["AGRAR"])
 async def finalize_protocol(
     protocol_id: str,
-    payload: QualityProtocolFinalizeIn,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
+    user: dict = Depends(get_current_user),
 ):
-    """Finalisiert ein Qualitätsprotokoll."""
-    repo = QualityProtocolRepositoryImpl(db)
+    """Finalisiert ein Qualitaetsprotokoll und schreibt Outbox fuer Workspace-SSE."""
+    approved_by = gepruefter_akteur(user)
+    repo = QualityProtocolRepositoryImpl(db, tenant_id)
     protocol = repo.get_by_id(protocol_id)
     
     if not protocol:
@@ -282,8 +311,39 @@ async def finalize_protocol(
     
     if protocol.tenant_id != tenant_id:
         raise HTTPException(status_code=403, detail="Access denied")
-    
-    protocol = finalize_quality_protocol(repo, protocol_id, payload.approved_by)
+
+    if protocol.is_final:
+        raise HTTPException(status_code=409, detail=f"Quality protocol {protocol_id} is already finalized")
+
+    try:
+        protocol = finalize_quality_protocol(repo, protocol_id, approved_by)
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+    now = datetime.utcnow()
+    event_payload = {
+        "protocol_id": protocol.id,
+        "acceptance_id": protocol.harvest_acceptance_id,
+        "approved_by": approved_by,
+        "is_final": True,
+    }
+    outbox = OutboxPublisher(db, get_event_publisher())
+    try:
+        await outbox.store_event(
+            IntegrationEvent(
+                aggregate_id=protocol.id,
+                timestamp=now,
+                event_type=QUALITY_PROTOCOL_COMPLETED_EVENT,
+                payload=event_payload,
+            ),
+            tenant_id=tenant_id,
+            mirror_on_store=False,
+        )
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+
     return _to_out(protocol)
 
 
@@ -327,7 +387,11 @@ async def import_protocol_from_csv(
     if not dq_result.bestanden:
         raise HTTPException(status_code=422, detail=build_dq_error_detail("Qualitaetsprotokoll", dq_result))
 
-    repo = QualityProtocolRepositoryImpl(db)
+    repo = QualityProtocolRepositoryImpl(db, tenant_id)
+    try:
+        repo.ensure_acceptance_owned(harvest_acceptance_id)
+    except AcceptanceNotOwnedError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
     protocol = import_from_csv(
         repo,
         tenant_id=tenant_id,
@@ -371,7 +435,11 @@ async def import_protocol_from_json(
     if not dq_result.bestanden:
         raise HTTPException(status_code=422, detail=build_dq_error_detail("Qualitaetsprotokoll", dq_result))
 
-    repo = QualityProtocolRepositoryImpl(db)
+    repo = QualityProtocolRepositoryImpl(db, tenant_id)
+    try:
+        repo.ensure_acceptance_owned(harvest_acceptance_id)
+    except AcceptanceNotOwnedError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
     protocol = import_from_json(
         repo,
         tenant_id=tenant_id,

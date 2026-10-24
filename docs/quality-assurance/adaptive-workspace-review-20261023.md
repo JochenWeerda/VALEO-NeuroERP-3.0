@@ -2,8 +2,8 @@
 title: Adaptive Workspace und Qualitaetsprotokolle - unabhaengige Pruefung
 type: reference
 owner: Codex
-status: befunde-offen
-last_reviewed: 2026-10-23
+status: reviewbefunde-behoben
+last_reviewed: 2026-10-24
 ---
 
 # Pruefung des angeforderten Root-Arbeitsstands
@@ -47,3 +47,37 @@ Gemeinsame Abnahme:41 Tests bestanden (36 bestehende SSE-Vertraege plus5 neue Fe
 ## Reparatur AW-R07
 
 Alle15 numerischen Konvertierungen fuer Ausgabe, Anlage und Aenderung unterscheiden jetzt None von0. Feuchte, Besatz, Hektolitergewicht, Protein und Mykotoxin verlieren gemessene Nullwerte nicht mehr.45 neue Vertragsfaelle bestanden: je Feld fehlend,0 und positiver Messwert fuer Ausgabe/Anlage/Aenderung. Die Schreibfaelle pruefen die echte Route bis zur Decimal-Uebergabe an den Fachservice; kein Datenbank-Persistenznachweis und keine Rollenabnahme behauptet. Vorhandene fremde GET-/Outbox-Aenderungen wurden erhalten und nicht mit diesem Commit vermischt. Zusammen mit AW-R08 sind zwei der neun Befunde korrigiert; sieben bleiben offen.
+
+
+## Abschluss der neun Reviewbefunde am 24.10.2026
+
+Alle neun Befunde sind im Reparaturzweig behoben. AW-R07/08 waren bereits
+separat gepusht; dieser Nachlauf schliesst AW-R01/02/03/04/05/06/09.
+
+- AW-R01: allein verifizierter Token-sub als Freigebender; echte RSA/JWKS-HTTP-Gegenproben fuer manipulierte Body-/Headerangaben, ungueltige Signatur und fehlende Fachrolle.
+- AW-R02: Pflichtmandant im Repository und allen Aufrufern, tenantgebundene Protokoll-/Parentabfragen auch fuer Importe; exklusiver Parentlock vor Versionsvergabe. Fremde Elternreferenz real auf PostgreSQL abgewiesen.
+- AW-R03: store_event erzeugt ausschliesslich Outboxzeilen, niemals vorzeitiges SSE. Explizites mirror_on_store=True wird abgelehnt. Finalisierung und Abschlussereignis liegen im selben Commit; echter gemeinsamer PostgreSQL-Rollback belegt.
+- AW-R04: IntegrationEvent traegt Tenantkontext; der echte NATS-Serializer uebertraegt Ist-Typ, unveraenderten Business-Payload, Ereignis-ID und Tenant. Outboxzeile ist fuehrend; widerspruechliche Payloads und direkte Tenantueberschreibungen werden abgewiesen. Transportfehler propagieren; auch nach drei Fehlern bleibt der Datensatz offen statt faelschlich veroeffentlicht. Bestehende domain-Subjects bleiben erhalten.
+- AW-R05: Zeilensperre mit populate_existing und Zustandspruefung im Repository verhindert konkurrierende Freigabe bzw. nachtraegliche Aenderung auch bei vorgeladenem ORM-Zustand.
+- AW-R06: dokumentierter GET auf die Protokollsammlung existiert, typisiert und auf maximal200 Datensaetze des angemeldeten Mandanten beschraenkt.
+- AW-R09: begrenzte Wiederverbindung mit frischem Token, erneutes autoritatives Queue-Lesen bei jedem Oeffnen und nach relevanten Ereignissen, Nullstandbereinigung und Timer-/Socket-Cleanup.
+
+Abnahme:128 Backendtests gemeinsam bestanden,5 neue echte PostgreSQL-Faelle
+plus3 bestehende Agrar-/Outbox-HTTP-Faelle ohne Skip und11 Frontendtests.
+Fokussierte TypeScript-Pruefung einschliesslich tatsaechlicher Importabhaengigkeiten
+und Test-Matcher gruen. Keine neue DB/Container, kein Reset; eigene PG-Zeilen
+gezielt entfernt. Sandbox-Asynclaeufe koennen unter Windows haengen; die
+aufgefuehrten erfolgreichen Laeufe liefen mit normalem Windows-Prozesszugriff.
+
+OpenAPI wurde aus sauberem HEAD plus genau sieben geprueften Produktionsdateien
+erzeugt: weiterhin3246 Pfade, nur drei Quality-Pfade geaendert; QueueOut neu und
+unvertrauenswuerdiger FinalizeIn entfernt. Agentenhandbuch und Inventare aus
+vollstaendigen versionierten Quellen nachgezogen. Fremde uncommittete API- und
+Studioarbeiten bleiben erhalten. Die reine Live-Signal-Importkette ist fuer den
+Commit eigenstaendig, ohne den fremden Inbox-/Studio-UI-Baum mitzupublizieren.
+
+Grenze: Dies schliesst diese neun Codebefunde, nicht die gesamte Studio-Migration
+oder alle Projekt-CI-Befunde. Der NATS-Transporttest verwendet den echten
+Serializer/Handler mit aufgezeichnetem JetStream-Transport; keine Live-Broker-
+oder Browserabnahme behauptet. SSE-Deduplizierung bleibt prozesslokal und
+begrenzt; verbindlicher Zustand wird ueber authentifizierte Reads nachgeladen.
