@@ -19528,3 +19528,6 @@ Nachlauf auf7bc7e37fa: CI rot in Migration/Backend/Frontend und Dependencysecuri
 
 
 **PR38-CI-FOLLOWUP CRM-Testvertrag umgesetzt:** Starre ternary-Pflicht entfernt, kein Fachtest entfallen: beide Definitionen bleiben Strukturvertrag;3 echte Renderfaelle pruefenLead/Kunde/Default plus Entity-/Abschnittweitergabe.49 Python- und8UI-Faelle gruen. Adapter unveraendert, Root-Sync erstnachHEAD-Diffpruefung. AndereFrontend-/Security-/Freshschemafaelle weiterinArbeit.
+
+
+**PR38-CI-FOLLOWUP Security-Dokumentation:** Lead-Besitz chroma-review-20261016.md und chroma-deploy-review-20261019.md nur fuer eindeutige Historisch-/Ablösekennzeichnung mit Verweis auf aktuellen AI-Retirementstand. Keine Loeschung historischer Nachweise oder Tests; alte Laufzeitannahmen duerfen nicht als aktueller Stand erscheinen.
