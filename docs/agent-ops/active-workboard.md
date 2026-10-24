@@ -19537,3 +19537,6 @@ Nachlauf auf7bc7e37fa: CI rot in Migration/Backend/Frontend und Dependencysecuri
 
 
 **PR38-CI-FOLLOWUP DocDrift-Erweiterung:** Nach geschlossenem Migrationsgraph blockiert Backend am page_no_route_or_nav-Gate. Besitzer entity_projection: scripts/doc_drift_report.py und eigene Regressionstests nur fuer nachgewiesene transitive Imports aus registrierten Routen. Kein pauschales Legacy-Suffix-Ignore und kein Glob-alle-Seiten-Als-erreichbar; verwaiste Seiten muessen weiter rot bleiben. Keine fremde Dashboard-/Studio-/Maskenimplementierung aendern. Zuerst verbleibende echte Orphans melden; nicht durch Loeschen oder Ausschliessen verdecken.
+
+
+**PR38-CI-FOLLOWUP Tabellenkatalog vorbereitet:** KanonischeCI39-Frischschema-Physik31Schemas/688Tabellen/9096Spalten nach vollstaendigerSchemaguellen-Gleichheitspruefung uebertragen. Consumer-Bezuege ausschliesslichsaubererHEAD-Export,10pendingWIP-Abweichungen entfernt;0fehlendeEntityTabellen,14statischeFaellegruen/1LiveDBFallohneQuelleuebersprungen. Keinlokaler681-Drift alsFrischschemaeingefuehrt, keineDBmutiert. DirekterPR38FreshCIvergleichausstehend,Backendvorheran272Dokumentationsorphansgestoppt. QA pr38-ci-migration-fresh-schema-20261024.md.
