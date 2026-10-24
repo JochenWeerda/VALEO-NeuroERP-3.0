@@ -159,6 +159,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `crm_ownership_log_20260610` | crm_ownership_log — Übergabe-/Zuordnungs-Audit (DOM-CRM-004.3) |
 | `crm_phase4_opportunity_links_20260305` | CRM Phase 4: Opportunity links to offer/order, loss_reason |
 | `desktop_runtime_repair_20260909` | Repair missing historical tables in a database already stamped at head. |
+| `dms_inbox_tenant_20261022` | dms_inbox: additive tenant_id fuer Queue-Isolation. |
 | `doc_allocations_20260915` | FSX-MENGENMODELL: positionsbezogene n:m-Zuordnung zwischen Belegen |
 | `doc_artifact_version_20260611` | DOM-DOC-004.2 — Artefakt-Versionierung + Freigabe-Status. |
 | `doc_followup_20260611` | DOM-DOC-004.3 — Bescheid/Rückmeldung + Wiedervorlage am Vorgang. |

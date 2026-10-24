@@ -19519,3 +19519,6 @@ Nutzerauftrag: sieben restliche Reviewbefunde AW-R01/02/03/04/05/06/09 schliesse
 ## PR38-CI-FOLLOWUP-20261024 - reserviert, Codex Lead
 
 Nachlauf auf7bc7e37fa: CI rot in Migration/Backend/Frontend und Dependencysecurity. Enger Besitz: api_contracts diagnostiziert und repariert fehlende Alembic-Vorgaenger und frisches Schema-/Inventardrift; entity_projection uebertraegt bereits abgenommene Securityfixes aus PR39 nach exaktem Quellenvergleich, keine Paketpauschalupdates; runtime_closure diagnostiziert echte Frontendregressionen und veraltete Strukturtests, entfernt keine fachliche Abnahme. Lead integriert, testet und aktualisiert Artefakte/QA/GitHub. Alle Edits in repair-view; Root nur nach Diffreview. Keine neueDB/Container/Reset, kein Tabellenkatalog aus unvollstaendiger lokaler DB. Vorhandene restliche Studioarbeit bewahren.
+
+
+**PR38-CI-FOLLOWUP Migrationsmeilenstein:** Fehlende dms_inbox_tenant_20261022 wiederhergestellt; Singlehead und Syntax geprueft,437 Migrationsdateien inhaltlich identisch zum separat abgenommenen PR39. Inventar und QA synchronisiert, keine DB-Mutation. Neue CI-Frischschemaabnahme folgt nach Push; Security/Frontend separat offen.
