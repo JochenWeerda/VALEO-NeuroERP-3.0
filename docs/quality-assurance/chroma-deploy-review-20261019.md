@@ -1,5 +1,7 @@
 # Chroma: geaendertes Deployment erneut bewertet
 
+> Historischer Nachweis, abgeloest am 24.10.2026: Der AI-Dienst verwendet Chroma nicht mehr. Die unten beschriebene Bewertung und ihre Frist sind keine aktuelle Freigabe. Siehe [aktueller Sicherheitsstand](pr38-security-backport-20261024.md).
+
 Stand19.10.2026, CHROMA-DEPLOY-REVIEW-20261019.
 
 Service-Security39263582553 blockierte drei bekannte Findings, weil sich der Fingerprint von docker-compose.yml nach der Bewertung vom16.10. geaendert hatte. Dies war eine wirksame Drift-Sperre.
