@@ -45,16 +45,6 @@ type ArticleOption = {
   label: string
 }
 
-const FALLBACK_ARTIKEL_OPTIONEN: ArticleOption[] = [
-  'Weizen',
-  'Gerste',
-  'Raps',
-  'Mais',
-  'Roggen',
-  'Hafer',
-  'Sonnenblumen',
-].map((label) => ({ id: label, label }))
-
 export default function LKWRegistrierungPage(): JSX.Element {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -70,7 +60,7 @@ export default function LKWRegistrierungPage(): JSX.Element {
     ankunftszeit: new Date().toISOString().slice(0, 16),
     prioritaet: 'normal',
   })
-  const [artikelOptionen, setArtikelOptionen] = useState<ArticleOption[]>(FALLBACK_ARTIKEL_OPTIONEN)
+  const [artikelOptionen, setArtikelOptionen] = useState<ArticleOption[]>([])
   const [attachmentIds, setAttachmentIds] = useState<string[]>([])
   const [uploading, setUploading] = useState(false)
   const [scanDialogField, setScanDialogField] = useState<'kennzeichen' | 'lieferscheinNr' | null>(null)

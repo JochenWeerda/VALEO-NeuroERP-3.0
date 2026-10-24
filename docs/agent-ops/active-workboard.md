@@ -19540,3 +19540,6 @@ Nachlauf auf7bc7e37fa: CI rot in Migration/Backend/Frontend und Dependencysecuri
 
 
 **PR38-CI-FOLLOWUP Tabellenkatalog vorbereitet:** KanonischeCI39-Frischschema-Physik31Schemas/688Tabellen/9096Spalten nach vollstaendigerSchemaguellen-Gleichheitspruefung uebertragen. Consumer-Bezuege ausschliesslichsaubererHEAD-Export,10pendingWIP-Abweichungen entfernt;0fehlendeEntityTabellen,14statischeFaellegruen/1LiveDBFallohneQuelleuebersprungen. Keinlokaler681-Drift alsFrischschemaeingefuehrt, keineDBmutiert. DirekterPR38FreshCIvergleichausstehend,Backendvorheran272Dokumentationsorphansgestoppt. QA pr38-ci-migration-fresh-schema-20261024.md.
+
+
+**PR38-CI-FOLLOWUP begrenzte Frontendtranche umgesetzt:** Falsche Bestelllisten-ScreenID und3Detail-/FlowResume-Ziele korrigiert; fehlenderSSEHelperexport jetztimCommitenthalten (allgemeinerSSEClientunveraendert); FakeArtikel-IDsausLegacykopieentfernt; BanktestpartialMock prueftweiterrealeRoutefactoryundnurDraftkeinAutoSave.7Dateien/33Frontendmodulefaelle gemeinsamgruen.3echteDashboardfaelle und214Quelltextvertraege bleibenungeklaert, keineGates/Testsentfernt. QA pr38-frontend-ci-followup-20261024.md.
