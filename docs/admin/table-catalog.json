@@ -12360,6 +12360,9 @@
             "app/api/v1/endpoints/crm_campaigns.py",
             "app/infrastructure/models/crm_campaign_models.py"
           ],
+          "screens": [
+            "crm/campaign"
+          ],
           "written_by": [
             "app/api/v1/endpoints/crm_campaigns.py"
           ]
@@ -12437,6 +12440,9 @@
           "read_by": [
             "app/api/v1/endpoints/crm_campaigns.py",
             "app/infrastructure/models/crm_campaign_models.py"
+          ],
+          "screens": [
+            "crm/campaign"
           ],
           "written_by": [
             "app/api/v1/endpoints/crm_campaigns.py"
@@ -12601,6 +12607,9 @@
             "app/api/v1/endpoints/crm_campaigns.py",
             "app/infrastructure/models/crm_campaign_models.py"
           ],
+          "screens": [
+            "crm/campaign"
+          ],
           "written_by": [
             "app/api/v1/endpoints/crm_campaigns.py"
           ]
@@ -12678,6 +12687,9 @@
           "read_by": [
             "app/api/v1/endpoints/crm_consents.py",
             "app/crm/router.py"
+          ],
+          "screens": [
+            "crm/consent"
           ],
           "written_by": [
             "app/crm/router.py"
@@ -12860,6 +12872,9 @@
           "read_by": [
             "app/api/v1/endpoints/crm_consents.py",
             "app/infrastructure/models/crm_consent.py"
+          ],
+          "screens": [
+            "crm/consent"
           ]
         },
         "crm_opportunities": {
@@ -22360,6 +22375,9 @@
             "app/services/wf_trigger_service.py"
           ],
           "screens": [
+            "disposition/strecken-disposition",
+            "fibu/op-skonto-auszifferung",
+            "fibu/zahlungsmeldungen",
             "sales/delivery-note"
           ],
           "written_by": [
@@ -29797,6 +29815,7 @@
             "app/infrastructure/models/futtermittel_models.py",
             "app/infrastructure/models/l3c_models.py",
             "app/seeds/inventory_seed.py",
+            "app/services/agri_flush_booking.py",
             "app/services/customer_reference.py",
             "app/services/feed_inventory_link_service.py",
             "app/services/inventory_auxiliary_service.py",
@@ -32049,6 +32068,7 @@
             "app/api/v1/endpoints/pos_retoure.py",
             "app/api/v1/endpoints/warehouse_transfers.py",
             "app/domains/inventory/api/storage_fees.py",
+            "app/services/agri_flush_booking.py",
             "app/services/agri_lot_link_booking_service.py",
             "app/services/agri_silo_material_flow_service.py",
             "app/services/feed_inventory_link_service.py",
@@ -32296,6 +32316,7 @@
             "app/services/mcp_execution_service.py"
           ],
           "written_by": [
+            "app/services/agri_flush_booking.py",
             "app/services/agri_silo_material_flow_service.py"
           ]
         },
@@ -32392,6 +32413,7 @@
           "read_by": [
             "app/api/v1/schemas/silo_material_flow_schemas.py",
             "app/infrastructure/models/wms_models.py",
+            "app/services/agri_flush_booking.py",
             "app/services/agri_silo_material_flow_service.py",
             "app/services/mcp_execution_service.py"
           ],
@@ -33849,6 +33871,7 @@
             "app/api/v1/endpoints/silo_cells_readmodel.py",
             "app/api/v1/schemas/silo_material_flow_schemas.py",
             "app/infrastructure/models/wms_models.py",
+            "app/services/agri_flush_booking.py",
             "app/services/agri_lot_link_booking_service.py",
             "app/services/agri_qs_workflow_service.py",
             "app/services/agri_silo_lot_link_service.py",
@@ -33858,6 +33881,7 @@
           ],
           "written_by": [
             "app/api/v1/endpoints/agri_plc_stub.py",
+            "app/services/agri_flush_booking.py",
             "app/services/agri_lot_link_booking_service.py",
             "app/services/agri_qs_workflow_service.py",
             "app/services/agri_silo_lot_link_service.py",
@@ -35692,6 +35716,14 @@
               "references": "domain_log.log_tour_stops.id"
             },
             {
+              "column": "stop_id",
+              "references": "domain_log.log_tour_stops.id"
+            },
+            {
+              "column": "tour_id",
+              "references": "domain_log.log_tour_stops.tour_id"
+            },
+            {
               "column": "tour_id",
               "references": "domain_log.log_touren.id"
             }
@@ -35964,6 +35996,11 @@
             {
               "name": "updated_by",
               "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
               "type": "character varying"
             }
           ],
@@ -38650,6 +38687,11 @@
             "app/infrastructure/models/futtermittel_models.py",
             "app/services/feed_production_chain_service.py"
           ],
+          "screens": [
+            "agrar/qualitaet/ausnahmen",
+            "agrar/qualitaet/laborwerte",
+            "agrar/silo-qualitaet"
+          ],
           "written_by": [
             "app/api/v1/endpoints/quality_lot_binding.py",
             "app/services/inventory_compat_service.py"
@@ -38709,6 +38751,15 @@
           "placement": "prefix",
           "primary_key": [
             "id"
+          ],
+          "screens": [
+            "charge/mischung",
+            "charge/qualitaets-freigabe",
+            "charge/rueckruf",
+            "charge/stamm",
+            "charge/teilung",
+            "charge/zusammenfuehrung",
+            "lager/charge"
           ],
           "written_by": [
             "app/api/v1/endpoints/charges.py"
@@ -43041,6 +43092,11 @@
           "read_by": [
             "app/api/v1/endpoints/quality_lot_binding.py"
           ],
+          "screens": [
+            "agrar/qualitaet/ausnahmen",
+            "agrar/qualitaet/laborwerte",
+            "agrar/silo-qualitaet"
+          ],
           "written_by": [
             "app/api/v1/endpoints/quality_lot_binding.py"
           ]
@@ -43109,6 +43165,11 @@
           "placement": "native",
           "primary_key": [
             "id"
+          ],
+          "screens": [
+            "agrar/qualitaet/ausnahmen",
+            "agrar/qualitaet/laborwerte",
+            "agrar/silo-qualitaet"
           ],
           "written_by": [
             "app/api/v1/endpoints/quality_lot_binding.py"
@@ -46406,6 +46467,7 @@
             "app/services/warehouse_service.py"
           ],
           "screens": [
+            "admin/branches",
             "sales/delivery-note"
           ],
           "written_by": [
@@ -48810,6 +48872,9 @@
           "read_by": [
             "app/api/v1/endpoints/artikel_mengeneinheiten.py"
           ],
+          "screens": [
+            "stammdaten/mengeneinheit"
+          ],
           "written_by": [
             "app/api/v1/endpoints/artikel_mengeneinheiten.py"
           ]
@@ -48876,6 +48941,9 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/artikel_mengeneinheiten.py"
+          ],
+          "screens": [
+            "stammdaten/mengeneinheit"
           ],
           "written_by": [
             "app/api/v1/endpoints/artikel_mengeneinheiten.py"
@@ -49127,6 +49195,9 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/artikel_verpackung.py"
+          ],
+          "screens": [
+            "artikel/verpackungen"
           ],
           "written_by": [
             "app/api/v1/endpoints/artikel_verpackung.py"
@@ -49460,6 +49531,16 @@
           "read_by": [
             "app/api/v1/endpoints/betriebsstaetten.py"
           ],
+          "screens": [
+            "betrieb/standorte",
+            "stammdaten/artikel-stoffstrom",
+            "stammdaten/artikelbestandteile",
+            "stammdaten/artikelverpackung",
+            "stammdaten/betriebsstaetten",
+            "stammdaten/hausbanken",
+            "stammdaten/individuelle-artikelnummern",
+            "stammdaten/mengeneinheiten"
+          ],
           "written_by": [
             "app/api/v1/endpoints/betriebsstaetten.py"
           ]
@@ -49614,6 +49695,9 @@
             "app/infrastructure/models/einkauf_models.py",
             "app/infrastructure/models/l3c_models.py",
             "app/services/customer_reference.py"
+          ],
+          "screens": [
+            "admin/branches"
           ],
           "written_by": [
             "app/api/v1/endpoints/branches.py"
@@ -50256,6 +50340,9 @@
           "read_by": [
             "app/api/v1/endpoints/vertreterstamm.py"
           ],
+          "screens": [
+            "crm/vertreter"
+          ],
           "written_by": [
             "app/api/v1/endpoints/vertreterstamm.py"
           ]
@@ -50302,6 +50389,9 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/vertreterstamm.py"
+          ],
+          "screens": [
+            "crm/vertreter"
           ],
           "written_by": [
             "app/api/v1/endpoints/vertreterstamm.py"
@@ -50709,6 +50799,11 @@
               "name": "created_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [],
@@ -51338,6 +51433,9 @@
           "read_by": [
             "app/api/v1/endpoints/fibu_geschaeftsjahre.py"
           ],
+          "screens": [
+            "fibu/geschaeftsjahre"
+          ],
           "written_by": [
             "app/api/v1/endpoints/fibu_geschaeftsjahre.py"
           ]
@@ -51404,6 +51502,9 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/fibu_geschaeftsjahre.py"
+          ],
+          "screens": [
+            "fibu/geschaeftsjahre"
           ],
           "written_by": [
             "app/api/v1/endpoints/fibu_geschaeftsjahre.py"
@@ -51497,6 +51598,9 @@
           "read_by": [
             "app/api/v1/endpoints/fibu_geschaeftsjahre.py"
           ],
+          "screens": [
+            "fibu/geschaeftsjahre"
+          ],
           "written_by": [
             "app/api/v1/endpoints/fibu_geschaeftsjahre.py"
           ]
@@ -51583,6 +51687,9 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/fibu_zahlungsmeldungen.py"
+          ],
+          "screens": [
+            "fibu/zahlungsmeldungen"
           ],
           "written_by": [
             "app/api/v1/endpoints/fibu_zahlungsmeldungen.py"
@@ -53276,6 +53383,9 @@
           "read_by": [
             "app/api/v1/endpoints/warengruppen.py"
           ],
+          "screens": [
+            "artikel/kategorien"
+          ],
           "written_by": [
             "app/api/v1/endpoints/warengruppen.py"
           ]
@@ -54275,7 +54385,14 @@
             "app/api/v1/endpoints/kontrakt_mengenzeitraum.py"
           ],
           "screens": [
-            "agrar/kontrakte"
+            "agrar/kontrakt-detail",
+            "agrar/kontrakte",
+            "agrar/kontrakte/formular",
+            "agrar/vertraege/formular",
+            "disposition/kontrakt-abruf",
+            "kontrakte/KontraktAlarmDashboard",
+            "kontrakte/LstKontraktUebersicht",
+            "kontrakte/mengenzeitraeume"
           ],
           "written_by": [
             "app/api/v1/endpoints/kontrakt_mengenzeitraum.py"
@@ -54477,7 +54594,14 @@
             "app/api/v1/endpoints/kontrakt_mengenzeitraum.py"
           ],
           "screens": [
-            "agrar/kontrakte"
+            "agrar/kontrakt-detail",
+            "agrar/kontrakte",
+            "agrar/kontrakte/formular",
+            "agrar/vertraege/formular",
+            "disposition/kontrakt-abruf",
+            "kontrakte/KontraktAlarmDashboard",
+            "kontrakte/LstKontraktUebersicht",
+            "kontrakte/mengenzeitraeume"
           ],
           "written_by": [
             "app/api/v1/endpoints/kontrakt_mengenzeitraum.py"
@@ -54532,7 +54656,14 @@
             "app/api/v1/endpoints/kontrakt_mengenzeitraum.py"
           ],
           "screens": [
-            "agrar/kontrakte"
+            "agrar/kontrakt-detail",
+            "agrar/kontrakte",
+            "agrar/kontrakte/formular",
+            "agrar/vertraege/formular",
+            "disposition/kontrakt-abruf",
+            "kontrakte/KontraktAlarmDashboard",
+            "kontrakte/LstKontraktUebersicht",
+            "kontrakte/mengenzeitraeume"
           ],
           "written_by": [
             "app/api/v1/endpoints/kontrakt_mengenzeitraum.py"
@@ -55735,6 +55866,9 @@
           "read_by": [
             "app/api/v1/endpoints/warengruppen.py"
           ],
+          "screens": [
+            "artikel/kategorien"
+          ],
           "written_by": [
             "app/api/v1/endpoints/warengruppen.py"
           ]
@@ -55832,6 +55966,9 @@
           "read_by": [
             "app/api/v1/endpoints/op_skonto_auszifferung.py",
             "app/services/finance_clearing_service.py"
+          ],
+          "screens": [
+            "fibu/op-skonto-auszifferung"
           ],
           "written_by": [
             "app/api/v1/endpoints/op_skonto_auszifferung.py",
@@ -57784,6 +57921,10 @@
           "read_by": [
             "app/api/v1/endpoints/vermehrungsvertrag.py"
           ],
+          "screens": [
+            "agrar/saatgut/vermehrung",
+            "agrar/sorten-vermehrung"
+          ],
           "written_by": [
             "app/api/v1/endpoints/vermehrungsvertrag.py"
           ]
@@ -58129,6 +58270,9 @@
           "read_by": [
             "app/api/v1/endpoints/stuecklisten.py"
           ],
+          "screens": [
+            "artikel/stuecklisten"
+          ],
           "written_by": [
             "app/api/v1/endpoints/stuecklisten.py"
           ]
@@ -58205,6 +58349,9 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/stuecklisten.py"
+          ],
+          "screens": [
+            "artikel/stuecklisten"
           ],
           "written_by": [
             "app/api/v1/endpoints/stuecklisten.py"
@@ -59011,6 +59158,9 @@
           "read_by": [
             "app/api/v1/endpoints/stammdaten_bearbeiten.py",
             "app/api/v1/endpoints/warengruppen.py"
+          ],
+          "screens": [
+            "artikel/kategorien"
           ],
           "written_by": [
             "app/api/v1/endpoints/stammdaten_bearbeiten.py",

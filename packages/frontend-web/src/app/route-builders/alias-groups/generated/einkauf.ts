@@ -74,6 +74,10 @@ export const entries: AliasGroupRouteEntry[] = [
     "path": "lieferanten"
   },
   {
+    "module": "@/pages/einkauf/lieferanten-stamm",
+    "path": "lieferanten/:id"
+  },
+  {
     "module": "@/pages/einkauf/lieferantenbewertung",
     "path": "lieferantenbewertung"
   },

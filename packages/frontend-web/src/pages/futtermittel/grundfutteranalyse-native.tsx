@@ -1,7 +1,7 @@
-import { useParams } from '@/app/routing/typed-router'
-import { FeedingAnalysisDetail } from '@/features/feed-advice/FeedingAnalysisDetail'
+import { NativeListPage } from '@/components/mask-builder/NativeListPage'
 
-export default function GrundfutteranalyseNativePage(): JSX.Element {
-  const { id } = useParams<{ id?: string }>()
-  return <FeedingAnalysisDetail analysisId={id} />
+export default function Page(): JSX.Element {
+  return (
+    <NativeListPage screenId="futtermittel/grundfutteranalysen/:id" testId="screen-futtermittel/grundfutteranalysen/:id" />
+  )
 }

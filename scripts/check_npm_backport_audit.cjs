@@ -72,8 +72,9 @@ if (require.main === module) {
     if (exitText === '0' && Object.keys(report.advisories || {}).length) throw new Error('Scanner exit contradicts report');
     if (exitText === '1' && !Object.keys(report.advisories || {}).length) throw new Error('Scanner failure without findings');
     result = assess(report);
-    const env = { ...process.env }; delete env.SECURITY_HIGH_RUNTIME; delete env.SECURITY_FOLLOW_REDIRECTS_RUNTIME; delete env.SECURITY_VITE_RUNTIME; delete env.SECURITY_MARKDOWN_RUNTIME;
+    const env = { ...process.env }; delete env.SECURITY_HIGH_RUNTIME; delete env.SECURITY_FOLLOW_REDIRECTS_RUNTIME; delete env.SECURITY_VITE_RUNTIME; delete env.SECURITY_MARKDOWN_RUNTIME; delete env.SECURITY_FASTIFY_RUNTIME;
     execFileSync(process.execPath, ['--test', path.join(__dirname, 'verify_node_high_backports.cjs')], { cwd: ROOT, env, stdio: 'inherit' });
+    execFileSync(process.execPath, ['--test', path.join(__dirname, 'verify_fastify_headers.cjs')], { cwd: ROOT, env, stdio: 'inherit' });
     execFileSync(process.execPath, ['--test', path.join(__dirname, 'verify_follow_redirects.cjs')], { cwd: ROOT, env, stdio: 'inherit' });
     execFileSync(process.execPath, ['--test', path.join(__dirname, 'verify_vite_editor.cjs')], { cwd: ROOT, env, stdio: 'inherit' });
     execFileSync(process.execPath, ['--test', path.join(__dirname, 'verify_markdown_security.cjs')], { cwd: ROOT, env, stdio: 'inherit' });

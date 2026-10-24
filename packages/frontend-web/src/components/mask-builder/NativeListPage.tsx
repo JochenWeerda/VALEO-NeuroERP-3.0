@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@/app/routing/typed-router'
 import { Button } from '@/components/ui/button'
@@ -12,15 +12,18 @@ import { exportToCSV } from '@/lib/export-utils'
 import { UniversalNativeCockpitPage } from './UniversalNativeCockpitPage'
 import { ActionInputDialog } from './renderers/ActionInputDialog'
 import { useScreenPermissions } from './runtime/screen-permissions'
+import { readDownload, saveReadDownload, type ReadDownloadResult } from './runtime/read-download'
 import type { ScreenActionDefinition, ScreenDefinition } from './schema'
 
 type Row = Record<string, unknown>
 type Aktion = Pick<ScreenActionDefinition, 'key' | 'label'> & {
+  permission?: string
   commandEndpoint?: string
   method?: 'POST' | 'PUT' | 'PATCH' | 'DELETE'
   navigationRoute?: string
   localEffect?: ScreenActionDefinition['localEffect']
   inputFields?: ScreenActionDefinition['inputFields']
+  download?: ScreenActionDefinition['download']
   requiresConfirmation?: boolean
   auditReasonRequired?: boolean
   dangerLevel?: string
@@ -68,6 +71,24 @@ export function NativeListPage({ screenId, testId }: { screenId: string; testId?
   const [stufe, setStufe] = useState<'eingabe' | 'bestaetigung' | null>(null)
   const [grund, setGrund] = useState('')
   const [sendet, setSendet] = useState(false)
+  const [downloadResult, setDownloadResult] = useState<ReadDownloadResult | null>(null)
+  const initialInputs = useMemo(() => ({ ...vorbelegung(auftrag?.aktion ?? { key: '', label: '' }, auftrag?.row ?? {}),
+    ...auftrag?.werte }), [auftrag])
+
+  async function herunterladen(aktion: Aktion, values: Row): Promise<void> {
+    if (laufend.current.has('read-download')) return
+    laufend.current.add('read-download')
+    setSendet(true)
+    try {
+      setDownloadResult(await readDownload(aktion as ScreenActionDefinition, values))
+      schliessen()
+    } catch (error) {
+      toast({ title: 'Export fehlgeschlagen', description: getAxiosErrorMessage(error), variant: 'destructive' })
+    } finally {
+      laufend.current.delete('read-download')
+      setSendet(false)
+    }
+  }
 
   function schliessen(): void {
     setAuftrag(null)
@@ -134,7 +155,12 @@ export function NativeListPage({ screenId, testId }: { screenId: string; testId?
 
   function handleAction(key: string, payload: Row): void {
     const aktion = findeAktion(schema, key)
-    if (!aktion) return
+    if (!aktion || (aktion.permission && !permissions.includes(aktion.permission))) return
+    if (aktion.download) {
+      setAuftrag({ aktion, row: payload, werte: {} })
+      setStufe('eingabe')
+      return
+    }
     if (aktion.localEffect === 'download' && !aktion.commandEndpoint) {
       void exportieren()
       return
@@ -160,14 +186,30 @@ export function NativeListPage({ screenId, testId }: { screenId: string; testId?
         <ActionInputDialog
           action={aktion as ScreenActionDefinition}
           // Zeilenaktionen beginnen mit den Werten der Zeile (Bearbeiten), Kopfaktionen leer.
-          initialValues={vorbelegung(aktion, auftrag?.row ?? {})}
+          initialValues={initialInputs}
           open
-          onCancel={schliessen}
+          onCancel={() => { if (!sendet) schliessen() }}
+          submitLabel={sendet ? 'Wird erstellt…' : aktion.download ? aktion.label : 'Weiter'}
           onSubmit={(werte) => {
             setAuftrag({ ...auftrag, werte })
+            if (aktion.download) { void herunterladen(aktion, werte); return }
             setStufe('bestaetigung')
           }}
         />
+      )}
+      {downloadResult && (
+        <Dialog open onOpenChange={(open) => { if (!open) setDownloadResult(null) }}>
+          <DialogContent aria-describedby="download-preview-description" className="max-w-3xl">
+            <DialogHeader><DialogTitle>Exportvorschau</DialogTitle>
+              <DialogDescription id="download-preview-description">{downloadResult.filename}</DialogDescription>
+            </DialogHeader>
+            <pre className="max-h-72 overflow-auto rounded bg-muted p-3 text-xs text-foreground">{downloadResult.content}</pre>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setDownloadResult(null)}>Schließen</Button>
+              <Button onClick={() => saveReadDownload(downloadResult)}>Datei herunterladen</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       )}
       {aktion && auftrag && stufe === 'bestaetigung' && (
         <Dialog open onOpenChange={(offen) => { if (!offen && !sendet) schliessen() }}>

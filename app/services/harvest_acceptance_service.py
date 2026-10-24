@@ -197,7 +197,7 @@ class HarvestAcceptanceService:
         obj = self._get_or_raise(acceptance_id)
 
         if not obj.quality_protocol_id:
-            quality_repo = QualityProtocolRepositoryImpl(self.db)
+            quality_repo = QualityProtocolRepositoryImpl(self.db, self.tenant_id)
             try:
                 protocol = get_latest_protocol(quality_repo, acceptance_id)
                 if protocol:
@@ -419,7 +419,7 @@ class HarvestAcceptanceService:
         from modules.agrar.repositories.quality_protocol_repo import QualityProtocolRepositoryImpl
         obj = self._get_or_raise(acceptance_id)
         if obj.quality_protocol_id:
-            quality_repo = QualityProtocolRepositoryImpl(self.db)
+            quality_repo = QualityProtocolRepositoryImpl(self.db, self.tenant_id)
             protocol = quality_repo.get_by_id(obj.quality_protocol_id)
             if protocol:
                 return _quality_protocol_to_qualitaetsprotokoll(protocol)
@@ -453,7 +453,7 @@ class HarvestAcceptanceService:
             source_type="manual",
             created_by=None,
         )
-        quality_repo = QualityProtocolRepositoryImpl(self.db)
+        quality_repo = QualityProtocolRepositoryImpl(self.db, self.tenant_id)
         protocol = create_quality_protocol(quality_repo, create_input)
         obj.quality_protocol_id = protocol.id
         bewertung = data.get("bewertung", "none")

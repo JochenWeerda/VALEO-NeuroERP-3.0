@@ -1,6 +1,6 @@
 import { NativeListPage } from '@/components/mask-builder/NativeListPage'
 
-/** Liste aus der ScreenDefinition `foerderung/liste`; Spalten und Aktionen stehen in der Definition. */
-export default function FoerderAntraegeListePage(): JSX.Element {
+/** Foerderantraege aus der ScreenDefinition `foerderung/liste`; Aktionen und Spalten stehen in der Definition. */
+export default function FoerderungListePage(): JSX.Element {
   return <NativeListPage screenId="foerderung/liste" testId="screen-foerderung/liste" />
 }

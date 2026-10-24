@@ -116,7 +116,7 @@ export default function AngeboteListePage(): JSX.Element {
       stringValue(angebot.nummer).toLowerCase().includes(searchTerm.toLowerCase()) ||
       stringValue(angebot.kunde).toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = statusFilter === 'alle' || angebot.status === statusFilter
-    
+
     // Erweiterte Filter
     if (filterValues.status && angebot.status !== filterValues.status) return false
     if (filterValues.kunde && !stringValue(angebot.kunde).toLowerCase().includes(stringValue(filterValues.kunde).toLowerCase())) return false
@@ -124,7 +124,7 @@ export default function AngeboteListePage(): JSX.Element {
       const angebotDate = new Date(angebot.datum).toISOString().split('T')[0]
       if (angebotDate !== filterValues.datum) return false
     }
-    
+
     return matchesSearch && matchesStatus
   })
 

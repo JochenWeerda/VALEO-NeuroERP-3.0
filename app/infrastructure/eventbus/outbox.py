@@ -40,11 +40,21 @@ class OutboxPublisher:
         self.db = db_session
         self.event_publisher = event_publisher
 
-    async def store_event(self, event: DomainEvent, tenant_id: Optional[str] = None) -> None:
+    async def store_event(self, event: DomainEvent, tenant_id: Optional[str] = None, *, mirror_on_store: bool = False) -> None:
         """Store event in outbox table (same DB transaction as caller)."""
         from dataclasses import asdict
 
+        if mirror_on_store:
+            raise ValueError("Events may only be mirrored by the committed outbox worker")
+        event_tenant = getattr(event, "tenant_id", None)
+        if tenant_id and event_tenant and str(tenant_id) != str(event_tenant):
+            raise ValueError("Outbox event tenant does not match its trusted context")
+        tenant_id = tenant_id or event_tenant
         event_dict = asdict(event)
+        business = event_dict.get("payload")
+        if isinstance(business, dict) and business.get("tenant_id") and str(business["tenant_id"]) != str(tenant_id):
+            raise ValueError("Outbox payload tenant does not match its trusted context")
+        event_dict["tenant_id"] = tenant_id
         outbox_event = OutboxEvent(
             id=event.event_id,
             event_type=getattr(event, "event_type", event.__class__.__name__),
@@ -71,25 +81,29 @@ class OutboxPublisher:
         for entry in pending:
             try:
                 payload = json.loads(entry.payload)
+                business = payload.get("payload")
+                for carried_tenant in (payload.get("tenant_id"), business.get("tenant_id") if isinstance(business, dict) else None):
+                    if carried_tenant and str(carried_tenant) != str(entry.tenant_id):
+                        raise ValueError("Stored event tenant disagrees with trusted outbox row")
                 event = IntegrationEvent(
                     aggregate_id=payload.get("aggregate_id") or entry.aggregate_id,
                     timestamp=datetime.fromisoformat(payload["timestamp"]) if isinstance(payload.get("timestamp"), str) else entry.timestamp,
                     event_id=payload.get("event_id") or entry.id,
                     event_type=entry.event_type,
+                    tenant_id=entry.tenant_id,
                     payload=payload.get("payload") if isinstance(payload.get("payload"), dict) else payload,
                 )
 
                 await self.event_publisher.publish(event)
+                await _mirror_workspace_sse(event, tenant_id=entry.tenant_id)
                 entry.published = True
                 entry.published_at = datetime.utcnow()
                 published_count += 1
             except Exception as exc:
                 logger.error("Failed to publish outbox event %s: %s", entry.id, exc, exc_info=True)
                 entry.retry_count += 1
-                if entry.retry_count >= 3:
-                    entry.published = True
-                    entry.published_at = datetime.utcnow()
-                    logger.error("Marked outbox event %s as failed after 3 retries", entry.id)
+                # Failed delivery remains pending, including after the third attempt.
+                # Never turn a transport outage into a successful delivery marker.
 
         self.db.commit()
         if published_count:
@@ -107,3 +121,13 @@ class OutboxPublisher:
         self.db.commit()
         logger.info("Cleaned up %s old outbox event(s)", deleted)
         return deleted
+
+
+async def _mirror_workspace_sse(event: DomainEvent, *, tenant_id: Optional[str]) -> None:
+    """Best-effort Ist-Spiegel auf /api/events?stream=workspace. Kein WRITE."""
+    try:
+        from app.workspace.events import mirror_ist_event_to_workspace
+
+        await mirror_ist_event_to_workspace(event, tenant_id=tenant_id)
+    except Exception:
+        logger.debug("Workspace-SSE-Spiegel uebersprungen", exc_info=True)

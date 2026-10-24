@@ -1746,7 +1746,7 @@
       "source": "navigation"
     },
     {
-      "module": "@/pages/einkauf/anlieferavis",
+      "module": "@/pages/einkauf/anlieferavis-liste",
       "path": "einkauf/anlieferavis",
       "source": "auto"
     },
@@ -1778,6 +1778,11 @@
     {
       "module": "@/pages/einkauf/auftragsbestaetigung-native",
       "path": "einkauf/auftragsbestaetigung/:id",
+      "source": "alias"
+    },
+    {
+      "module": "@/pages/einkauf/auftragsbestaetigung",
+      "path": "einkauf/auftragsbestaetigung/neu",
       "source": "alias"
     },
     {
@@ -1876,12 +1881,12 @@
       "source": "navigation"
     },
     {
-      "module": "@/pages/einkauf/supplier-native",
+      "module": "@/pages/einkauf/lieferanten-stamm",
       "path": "einkauf/lieferant/:id",
       "source": "alias"
     },
     {
-      "module": "@/pages/einkauf/supplier-native",
+      "module": "@/pages/einkauf/lieferanten-stamm",
       "path": "einkauf/lieferant/neu",
       "source": "alias"
     },
@@ -1898,6 +1903,11 @@
     {
       "module": "@/pages/einkauf/lieferanten-liste",
       "path": "einkauf/lieferanten-liste",
+      "source": "auto"
+    },
+    {
+      "module": "@/pages/einkauf/lieferanten-stamm",
+      "path": "einkauf/lieferanten-stamm",
       "source": "auto"
     },
     {
@@ -2033,6 +2043,16 @@
     {
       "module": "@/pages/einstellungen/system",
       "path": "einstellungen/system",
+      "source": "auto"
+    },
+    {
+      "module": "@/pages/energie/verbrauch",
+      "path": "energie",
+      "source": "alias"
+    },
+    {
+      "module": "@/pages/energie/verbrauch",
+      "path": "energie/verbrauch",
       "source": "auto"
     },
     {
@@ -2996,6 +3016,16 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/kasse/tagesabschluss",
+      "path": "kasse/historie",
+      "source": "alias"
+    },
+    {
+      "module": "@/pages/kasse/tagesabschluss",
+      "path": "kasse/tagesabschluss",
+      "source": "auto"
+    },
+    {
       "module": "@/pages/kontrakte/LstKontraktUebersicht",
       "path": "kontrakte",
       "source": "alias"
@@ -3806,8 +3836,18 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/reports/lagerbestand",
+      "path": "reports/lagerbestand",
+      "source": "auto"
+    },
+    {
       "module": "@/pages/reports/ReportsDashboardCharts",
       "path": "reports/ReportsDashboardCharts",
+      "source": "auto"
+    },
+    {
+      "module": "@/pages/reports/umsatz",
+      "path": "reports/umsatz",
       "source": "auto"
     },
     {
@@ -4131,6 +4171,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/statistik/bewegungen",
+      "path": "statistik/bewegungen",
+      "source": "auto"
+    },
+    {
       "module": "@/pages/stock-management",
       "path": "stock-management",
       "source": "auto"
@@ -4226,6 +4271,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/termine/kalender",
+      "path": "termine/kalender",
+      "source": "auto"
+    },
+    {
       "module": "@/pages/transporte/fahrer-liste",
       "path": "transporte/fahrer",
       "source": "alias"
@@ -4296,7 +4346,7 @@
       "source": "alias"
     },
     {
-      "module": "@/pages/verkauf/kunde-neu",
+      "module": "@/pages/verkauf/kunden-stamm",
       "path": "verkauf/kunde/neu",
       "source": "alias"
     },
@@ -4657,13 +4707,10 @@
     }
   ],
   "searchKeys": [
-    "anfrage_id",
     "angebot",
     "articleId",
     "articleName",
-    "article_id",
     "auftrag",
-    "campaign",
     "campaignEnd",
     "campaignId",
     "campaignName",
@@ -4673,24 +4720,17 @@
     "code_challenge_method",
     "contact_id",
     "contractId",
-    "count",
     "customerId",
     "customerName",
     "customerNumber",
-    "customer_id",
-    "date",
     "entryMode",
     "error",
     "filter_plan",
-    "flaeche",
-    "flik",
     "fromOffer",
     "id",
     "inbox",
     "initialName",
     "instanceId",
-    "invoiceId",
-    "kennzeichen",
     "kunde",
     "kundeName",
     "lieferschein",
@@ -4701,8 +4741,6 @@
     "opId",
     "partnerName",
     "pflege",
-    "process",
-    "productGroup",
     "qpResult",
     "qualityProtocolId",
     "queueEntryId",
@@ -4714,14 +4752,10 @@
     "rfqId",
     "search",
     "service_request_id",
-    "settlementId",
-    "source",
     "state",
     "subject",
-    "token",
     "vehiclePlate",
     "vorlage",
-    "warehouse_id",
     "workflowCase",
     "workflowInstanceId",
     "workflowLabel",

@@ -1,7 +1,7 @@
 /**
  * Finance Invoice Form
  * Formular zum Erstellen/Bearbeiten von Rechnungen im Finance-Modul
- * 
+ *
  * Basierend auf sales/invoice-editor.tsx, aber für Finance-Modul angepasst
  * M18: Echte Kunden-Suche über CRM Customers API
  */
@@ -116,7 +116,7 @@ export default function FinanceInvoiceFormPage(): JSX.Element {
     const net = lines.reduce((sum, line) => sum + line.netAmount, 0);
     const tax = lines.reduce((sum, line) => sum + line.taxAmount, 0);
     const gross = lines.reduce((sum, line) => sum + line.grossAmount, 0);
-    
+
     setSubtotalNet(net);
     setTotalTax(tax);
     setTotalGross(gross);
@@ -146,21 +146,21 @@ export default function FinanceInvoiceFormPage(): JSX.Element {
   const updateLine = (index: number, aenderung: Partial<InvoiceLine>) => {
     const updated = [...lines];
     updated[index] = { ...updated[index], ...aenderung };
-    
+
     // Berechne Beträge für diese Zeile
     const qty = updated[index].qty;
     const price = updated[index].price;
     const vatRate = updated[index].vatRate;
-    
+
     const netAmount = qty * price;
     // Ohne Steuerschluessel gibt es keine Steuer zu zeigen; gerechnet und gebucht wird auf dem Server.
     const taxAmount = vatRate === null ? 0 : netAmount * (vatRate / 100);
     const grossAmount = netAmount + taxAmount;
-    
+
     updated[index].netAmount = netAmount;
     updated[index].taxAmount = taxAmount;
     updated[index].grossAmount = grossAmount;
-    
+
     setLines(updated);
   };
 
@@ -515,4 +515,3 @@ export default function FinanceInvoiceFormPage(): JSX.Element {
     </div>
   );
 }
-

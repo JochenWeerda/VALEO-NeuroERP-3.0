@@ -3,12 +3,14 @@ title: ChromaDB Reachability-Nachweis beider Verbraucher
 type: qa
 audience: [entwickler, qa, sicherheit]
 owner: Codex
-status: active
+status: historisch
 last_reviewed: 2026-10-16
 version: 1.0.0
 ---
 
 # Befristete ChromaDB-Bewertung
+
+> Historischer Nachweis, abgeloest am 24.10.2026: Der AI-Dienst verwendet Chroma nicht mehr. Die unten beschriebene Bewertung und ihre Frist sind keine aktuelle Freigabe. Siehe [aktueller Sicherheitsstand](pr38-security-backport-20261024.md).
 
 Der Service-Security-Job blockierte wegen der am 15. Oktober abgelaufenen drei bestehenden Bewertungen fuer chromadb 0.5.23. Die Bewertung wurde anhand des unveraenderten Linux-pip-audit-Berichts, der kanonischen Quellen und der aktuellen Advisory-Eintraege erneuert. Die Advisories nennen weiterhin keine korrigierte Version: [Code Injection](https://github.com/advisories/GHSA-36p7-vc44-83pf), [Server-Grenzen](https://github.com/advisories/GHSA-2wm9-hf6c-p5cr), [Server-Autorisierung](https://github.com/advisories/GHSA-xph7-9rjv-w5fr).
 

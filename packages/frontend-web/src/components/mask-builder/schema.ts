@@ -225,6 +225,8 @@ export interface ScreenActionDefinition {
    * CLI und MCP lesen dieselben Daten ueber die Datenquellen der Maske.
    */
   localEffect?: 'form_reset' | 'navigation' | 'print' | 'download' | 'edit_mode' | 'refresh' | 'view'
+  /** Read-only server-produced file; never a domain write command. */
+  download?: { endpoint: string; contentField: string; filenameField: string; mediaType: 'text/csv;charset=utf-8' }
   method?: 'POST' | 'PUT' | 'PATCH' | 'DELETE'
   requiresConfirmation?: boolean
   dangerLevel?: ActionDangerLevel

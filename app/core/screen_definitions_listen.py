@@ -3,61 +3,29 @@
 Die Listen zu den nativen Objektmasken waren handgebaut oder Altmuster-Konfigurationen. Hier sind sie
 ScreenDefinitions: Spalten, Zeilenroute zur nativen Objektmaske und alle Aktionen mit ihrem Kommando-Weg. Die Seite
 ist ``NativeListPage`` und enthaelt keinen eigenen Code; Maske, CLI und MCP rufen dieselben Wege.
+
+Shell: ``StammListenParent`` in ``app.core.stamm_list_parent`` (``build_stamm_list_screen``).
 """
 from __future__ import annotations
 
 from typing import Any
 
+from app.core.stamm_list_parent import (
+    build_stamm_list_screen,
+    stamm_list_export_action,
+    stamm_list_neu_action,
+    stamm_list_status_visible,
+)
 
-def _liste(*, screen_id: str, domain: str, title: str, subtitle: str, endpoint: str, row_route: str | None,
-           columns: list[dict[str, Any]], actions: list[dict[str, Any]], row_actions: list[dict[str, Any]],
-           purpose: str, prompts: list[str], dangerous: list[dict[str, str]] | None = None,
-           bundle: str, no_workflow: str, fetch_limit: int = 500) -> dict[str, Any]:
-    agent: dict[str, Any] = {
-        "businessPurpose": purpose,
-        "examplePrompts": prompts,
-        "sensitiveFields": [],
-        "testSelectors": {"screenRoot": f"[data-testid='screen-{screen_id}']"},
-    }
-    if dangerous:
-        agent["dangerousActions"] = dangerous
-    return {
-        "schemaVersion": 1,
-        "id": screen_id,
-        "domain": domain,
-        "mode": "list",
-        "title": title,
-        "subtitle": subtitle,
-        "adapter": {"type": "native", "sourceId": screen_id, "temporary": False},
-        # Ohne Serverblaetterung laedt die Laufzeit einmal bis pageSize (Grenze des Dienstes beachten).
-        "dataSources": [{"key": "list", "endpoint": endpoint, "pageSize": fetch_limit}],
-        "actions": actions,
-        "tables": [{
-            "key": "list", "label": title, "dataSourceKey": "list", "serverPagination": False, "pageSize": 50,
-            "virtualized": True, "rowHeight": 40,
-            # Ohne Objektseite keine Zeilenroute (sonst toter Link).
-            **({"rowRouteTemplate": row_route} if row_route else {}),
-            "columns": columns, "rowActions": row_actions,
-        }],
-        "noWorkflowReason": no_workflow,
-        "agentContract": agent,
-        "layout": {"floorplan": "worklist", "preferredMode": "desktopDense", "mobileMode": "mobileStack",
-                   "touchTargetPx": 44},
-        "performance": {"initialPayloadBudgetKb": 60, "requiresLazyTabs": False, "requiresVirtualTables": True,
-                        "lookupMinChars": 2, "bundleGroup": bundle},
-    }
-
-
-#: CSV-Export der Liste mit ihren Spalten (NativeListPage, ohne Serverwirkung).
-_EXPORT = {"key": "export", "label": "CSV-Export", "kind": "secondary", "dangerLevel": "safe", "zone": "header",
-           "command": "list.exportCsv", "localEffect": "download", "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."}
+_EXPORT = stamm_list_export_action()
 
 
 def _neu(label: str, route: str) -> dict[str, Any]:
-    """Anlage oeffnen; Rechte prueft der Anlageweg der Zielmaske."""
-    return {"key": "neu", "label": label, "kind": "primary", "dangerLevel": "safe", "zone": "header",
-            "navigationRoute": route, "localEffect": "navigation",
-            "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."}
+    return stamm_list_neu_action(label, route)
+
+
+def _liste(**kwargs: Any) -> dict[str, Any]:
+    return build_stamm_list_screen(**kwargs)
 
 
 def build_einkauf_anfragen_liste() -> dict[str, Any]:
@@ -106,8 +74,7 @@ def build_einkauf_anfragen_liste() -> dict[str, Any]:
 
 
 def _status(*werte: str) -> dict[str, Any]:
-    """Sichtbarkeit nach Status; die Altdaten fuehren Status teils klein geschrieben."""
-    return {"field": "status", "values": [*werte, *(w.lower() for w in werte)]}
+    return stamm_list_status_visible(*werte)
 
 
 def build_einkauf_angebote_liste() -> dict[str, Any]:
@@ -431,7 +398,7 @@ def build_finance_debitoren_liste() -> dict[str, Any]:
     return _liste(
         screen_id="finance/debitoren-liste", domain="finance", title="Debitoren",
         subtitle="Kunden mit Forderungen, Kreditlimit und Mahnstufe", endpoint="/api/v1/finance/debitoren",
-        row_route="/finance/debitor/{id}", bundle="finance",
+        row_route="/finance/debitor/{id}", bundle="finance", table_profile="financial",
         columns=[
             {"key": "name", "label": "Debitor", "sortable": True, "filterable": True, "priority": "primary"},
             {"key": "debitoren_nr", "label": "Debitoren-Nr.", "sortable": True, "filterable": True,
@@ -472,7 +439,7 @@ def build_finance_kreditoren_liste() -> dict[str, Any]:
     return _liste(
         screen_id="finance/kreditoren-liste", domain="finance", title="Kreditoren",
         subtitle="Lieferanten als Kreditoren mit Steuer- und Zahlungsdaten", endpoint="/api/v1/finance/kreditoren",
-        row_route="/finance/kreditor/{id}", bundle="finance",
+        row_route="/finance/kreditor/{id}", bundle="finance", table_profile="financial",
         columns=[
             {"key": "name", "label": "Kreditor", "sortable": True, "filterable": True, "priority": "primary"},
             {"key": "kreditoren_nr", "label": "Kreditoren-Nr.", "sortable": True, "filterable": True,
@@ -801,7 +768,7 @@ def build_versicherungen_liste() -> dict[str, Any]:
     return _liste(
         screen_id="versicherungen/liste", domain="finance", title="Versicherungen",
         subtitle="Vertraege mit Praemie, Summe und Ablauf", endpoint="/api/v1/versicherungen", row_route=None,
-        bundle="finance",
+        bundle="finance", table_profile="financial",
         columns=[
             {"key": "art", "label": "Art", "sortable": True, "filterable": True, "priority": "primary"},
             {"key": "versicherer", "label": "Versicherer", "filterable": True, "priority": "primary"},
@@ -918,7 +885,7 @@ def build_schaeden_liste() -> dict[str, Any]:
     return _liste(
         screen_id="schaeden/liste", domain="finance", title="Schadenmeldungen",
         subtitle="Schaeden mit Meldefrist und Regulierung", endpoint="/api/v1/schaeden/meldungen",
-        row_route="/schaeden/{id}", bundle="finance",
+        row_route="/schaeden/{id}", bundle="finance", table_profile="financial",
         columns=[
             {"key": "meldungsnummer", "label": "Meldung", "sortable": True, "filterable": True, "priority": "primary"},
             {"key": "art", "label": "Art", "filterable": True, "priority": "primary"},
@@ -1013,8 +980,8 @@ def build_finance_wechselkurse_liste() -> dict[str, Any]:
     inaktiv = {"field": "active", "values": [False]}
     return _liste(
         screen_id="finance/wechselkurse", domain="finance", title="Wechselkurse",
-        subtitle="Kurse je Waehrungspaar und Stichtag", endpoint="/api/v1/finance/exchange-rates?active_only=false",
-        row_route=None, bundle="finance",
+        subtitle="Kurse je Waehrungspaar und Stichtag",         endpoint="/api/v1/finance/exchange-rates?active_only=false",
+        row_route=None, bundle="finance", table_profile="financial",
         columns=[
             {"key": "from_currency", "label": "Von", "filterable": True, "sortable": True, "priority": "primary"},
             {"key": "to_currency", "label": "Nach", "filterable": True, "sortable": True, "priority": "primary"},
@@ -1057,8 +1024,8 @@ def build_finance_buchungsvorlagen_liste() -> dict[str, Any]:
     """Buchungsvorlagen: anwenden (erzeugt einen Buchungsentwurf) und loeschen, wie die bisherige Seite."""
     return _liste(
         screen_id="finance/buchungsvorlagen", domain="finance", title="Buchungsvorlagen",
-        subtitle="Wiederkehrende Buchungen als Vorlage", endpoint="/api/v1/finance/booking-templates?active_only=false",
-        row_route=None, bundle="finance",
+        subtitle="Wiederkehrende Buchungen als Vorlage",         endpoint="/api/v1/finance/booking-templates?active_only=false",
+        row_route=None, bundle="finance", table_profile="financial",
         columns=[
             {"key": "name", "label": "Name", "sortable": True, "filterable": True, "priority": "primary"},
             {"key": "category", "label": "Kategorie", "filterable": True, "priority": "primary"},
@@ -1148,7 +1115,7 @@ def build_einkauf_zahlungsbedingungen_liste() -> dict[str, Any]:
     return _liste(
         screen_id="einkauf/zahlungsbedingungen", domain="finance", title="Zahlungsbedingungen",
         subtitle="Zahlungsziel und Skontostufen", endpoint="/api/v1/fibu/zahlungsbedingungen",
-        row_route=None, bundle="finance",
+        row_route=None, bundle="finance", table_profile="financial",
         columns=[
             {"key": "zabd_nr", "label": "Nr.", "sortable": True, "filterable": True, "priority": "primary"},
             {"key": "bezeichnung", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
@@ -1180,6 +1147,1377 @@ def build_einkauf_zahlungsbedingungen_liste() -> dict[str, Any]:
     )
 
 
+def build_agrar_biostimulanzien_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="agrar/biostimulanzien-liste", domain="agrar", title="Biostimulanzien",
+        subtitle="Agrarprodukte mit Zulassung und Bestand", endpoint="/api/v1/agrar/biostimulanzien",
+        row_route="/agrar/biostimulanzien-stamm/{id}", bundle="agrar",
+        columns=[
+            {"key": "artikelnummer", "label": "Artikel-Nr.", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "name", "label": "Name", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "typ", "label": "Typ", "filterable": True, "priority": "primary"},
+            {"key": "hersteller", "label": "Hersteller", "filterable": True, "priority": "secondary"},
+            {"key": "vk_preis", "label": "VK-Preis", "numeric": True, "renderKind": "currency", "sortable": True,
+             "priority": "secondary"},
+            {"key": "lagerbestand", "label": "Bestand", "numeric": True, "sortable": True, "priority": "secondary"},
+            {"key": "ist_aktiv", "label": "Aktiv", "renderKind": "boolean", "filterable": True, "priority": "tertiary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Biostimulanzien und Agrarprodukte mit Zulassung und Verfuegbarkeit finden.",
+        prompts=["Welche Biostimulanzien sind aktiv?", "Welche Zulassungen laufen ab?"],
+        no_workflow="Stammdatenliste ohne eigenen Ablauf.",
+    )
+
+
+def build_agrar_ernte_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="agrar/ernte-liste", domain="agrar", title="Ernte", subtitle="Ernten nach Schlag, Kultur und Menge",
+        endpoint="/api/v1/agrar/ernte", row_route="/agrar/ernte/{id}", bundle="agrar",
+        columns=[
+            {"key": "schlag", "label": "Schlag", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "kultur", "label": "Kultur", "filterable": True, "priority": "primary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+            {"key": "menge", "label": "Menge", "numeric": True, "sortable": True, "priority": "primary"},
+            {"key": "ertrag", "label": "Ertrag", "numeric": True, "sortable": True, "priority": "secondary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+        ],
+        actions=[_neu("Ernte erfassen", "/agrar/ernte/neu"), _EXPORT],
+        row_actions=[],
+        purpose="Ernten nach Schlag und Kultur verfolgen.",
+        prompts=["Welche Ernten laufen heute?", "Welche Schlaege sind abgeschlossen?"],
+        no_workflow="Der Stand steht an der Ernte; die Liste fuehrt keinen eigenen Ablauf.",
+    )
+
+
+def build_agrar_kulturpflanzen_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="agrar/kulturpflanzen-liste", domain="agrar", title="Kulturpflanzen",
+        subtitle="Kulturen mit Flaeche, Ertrag und Deckungsbeitrag", endpoint="/api/v1/agrar/kulturen",
+        row_route=None, bundle="agrar",
+        columns=[
+            {"key": "name", "label": "Kultur", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "kategorie", "label": "Kategorie", "filterable": True, "priority": "primary"},
+            {"key": "flaeche", "label": "Flaeche (ha)", "numeric": True, "sortable": True, "priority": "primary"},
+            {"key": "ertrag", "label": "Ertrag", "numeric": True, "sortable": True, "priority": "secondary"},
+            {"key": "preis", "label": "Preis", "numeric": True, "renderKind": "currency", "priority": "secondary"},
+            {"key": "deckungsbeitrag", "label": "DB", "numeric": True, "renderKind": "currency", "sortable": True,
+             "priority": "primary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Kulturen nach Flaeche und Deckungsbeitrag vergleichen.",
+        prompts=["Welche Kulturen haben den hoechsten Deckungsbeitrag?", "Wie viel Flaeche ist Weizen?"],
+        no_workflow="Auswertungsliste ohne eigenen Ablauf.",
+    )
+
+
+def build_zertifikate_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="zertifikate/liste", domain="qualitaet", title="Zertifikate",
+        subtitle="Zertifikate mit Standard, Nummer und Gueltigkeit", endpoint="/api/v1/zertifikate", row_route=None,
+        bundle="qualitaet",
+        columns=[
+            {"key": "art", "label": "Art", "filterable": True, "priority": "primary"},
+            {"key": "standard", "label": "Standard", "filterable": True, "priority": "primary"},
+            {"key": "nummer", "label": "Nummer", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "gueltigBis", "label": "Gueltig bis", "renderKind": "date", "sortable": True, "priority": "primary"},
+            {"key": "audit", "label": "Audit", "priority": "secondary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Zertifikate und ablaufende Nachweise im Blick behalten.",
+        prompts=["Welche Zertifikate laufen dieses Quartal ab?", "Welche QS-Nachweise sind gueltig?"],
+        no_workflow="Nachweisliste ohne eigenen Ablauf.",
+    )
+
+
+def build_benachrichtigungen_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="benachrichtigungen/liste", domain="platform", title="Benachrichtigungen",
+        subtitle="System- und Prozesshinweise", endpoint="/api/v1/benachrichtigungen", row_route=None,
+        bundle="platform",
+        columns=[
+            {"key": "titel", "label": "Titel", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "nachricht", "label": "Nachricht", "filterable": True, "priority": "primary"},
+            {"key": "typ", "label": "Typ", "filterable": True, "priority": "secondary"},
+            {"key": "zeitstempel", "label": "Zeit", "renderKind": "datetime", "sortable": True, "priority": "primary"},
+            {"key": "gelesen", "label": "Gelesen", "renderKind": "boolean", "filterable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Offene Hinweise und Warnungen sichten.",
+        prompts=["Welche Warnungen sind ungelesen?", "Was ist heute eingegangen?"],
+        no_workflow="Posteingang ohne eigenen Ablauf.",
+    )
+
+
+def build_qualitaet_labor_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="qualitaet/labor-liste", domain="qualitaet", title="Laborauftraege",
+        subtitle="Laborauftraege zu Chargen und Analysen", endpoint="/api/v1/qualitaet/labor-auftraege",
+        row_route="/qualitaet/labor-auftrag/{id}", bundle="qualitaet",
+        columns=[
+            {"key": "id", "label": "Auftrag", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "chargenId", "label": "Charge", "filterable": True, "priority": "primary"},
+            {"key": "labor", "label": "Labor", "filterable": True, "priority": "secondary"},
+            {"key": "analysen", "label": "Analysen", "numeric": True, "priority": "secondary"},
+            {"key": "auftragsdatum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+        ],
+        actions=[_neu("Laborauftrag anlegen", "/qualitaet/labor-auftrag"), _EXPORT],
+        row_actions=[],
+        purpose="Laborauftraege und Befunde nachverfolgen.",
+        prompts=["Welche Laborauftraege sind offen?", "Welche Charge wartet auf Befund?"],
+        no_workflow="Der Stand steht am Laborauftrag; die Liste fuehrt keinen eigenen Ablauf.",
+    )
+
+
+def build_disposition_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="disposition/liste", domain="lager", title="Disposition",
+        subtitle="Bestand, Mindestbestand und Beschaffungsempfehlung", endpoint="/api/v1/disposition",
+        row_route=None, bundle="lager",
+        columns=[
+            {"key": "artikel", "label": "Artikel", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "bestand", "label": "Bestand", "numeric": True, "sortable": True, "priority": "primary"},
+            {"key": "mindestbestand", "label": "Mindest", "numeric": True, "priority": "secondary"},
+            {"key": "bedarf", "label": "Bedarf", "numeric": True, "priority": "secondary"},
+            {"key": "empfehlung", "label": "Empfehlung", "filterable": True, "priority": "primary"},
+            {"key": "prioritaet", "label": "Prioritaet", "renderKind": "status", "filterable": True,
+             "priority": "primary"},
+        ],
+        actions=[_neu("Bestellvorschlaege", "/einkauf/bestellvorschlaege"), _EXPORT],
+        row_actions=[],
+        purpose="Unterdeckte Artikel finden und Bestellvorschlaege ausloesen.",
+        prompts=["Welche Artikel liegen unter Mindestbestand?", "Wo ist Bedarf hoch?"],
+        no_workflow="Empfehlungsliste ohne eigenen Ablauf.",
+    )
+
+
+def build_crm_kontakte_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="crm/kontakte-liste", domain="crm", title="Kontakte",
+        subtitle="Kontakte zu Kunden, Lieferanten und Landwirten", endpoint="/api/v1/crm/contacts",
+        row_route="/crm/kontakt/{id}", bundle="crm",
+        columns=[
+            {"key": "name", "label": "Name", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "company", "label": "Unternehmen", "filterable": True, "priority": "primary"},
+            {"key": "email", "label": "E-Mail", "filterable": True, "priority": "secondary"},
+            {"key": "phone", "label": "Telefon", "priority": "tertiary"},
+            {"key": "type", "label": "Typ", "filterable": True, "priority": "secondary"},
+        ],
+        actions=[_neu("Neuer Kontakt", "/crm/kontakt/neu"), _EXPORT],
+        row_actions=[],
+        purpose="Kontakte finden und die Kontaktakte oeffnen.",
+        prompts=["Welche Kontakte gehoeren zu diesem Kunden?", "Zeige Lieferanten-Kontakte."],
+        no_workflow="Stammdatenliste ohne eigenen Ablauf.",
+    )
+
+
+def build_crm_betriebsprofile_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="crm/betriebsprofile-liste", domain="crm", title="Betriebsprofile",
+        subtitle="Landwirtschaftliche Betriebe mit Flaeche und Zertifizierung",
+        endpoint="/api/v1/crm/betriebsprofile", row_route="/crm/betriebsprofile/{id}", bundle="crm",
+        columns=[
+            {"key": "farmName", "label": "Betrieb", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "owner", "label": "Inhaber", "filterable": True, "priority": "primary"},
+            {"key": "totalArea", "label": "Flaeche (ha)", "numeric": True, "sortable": True, "priority": "secondary"},
+            {"key": "createdAt", "label": "Angelegt", "renderKind": "date", "sortable": True, "priority": "tertiary"},
+        ],
+        actions=[_neu("Neues Betriebsprofil", "/crm/betriebsprofile/neu"), _EXPORT],
+        row_actions=[],
+        purpose="Betriebsprofile fuer Agrarberatung und CRM finden.",
+        prompts=["Welche Betriebe haben mehr als 200 ha?", "Zeige Betriebe mit Bio-Zertifikat."],
+        no_workflow="Stammdatenliste ohne eigenen Ablauf.",
+    )
+
+
+def build_sales_angebote_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="sales/angebote-liste", domain="sales", title="Verkaufsangebote",
+        subtitle="Angebote mit Kunde, Betrag und Gueltigkeit", endpoint="/api/v1/sales/offers/",
+        row_route="/sales/angebot/{id}", bundle="sales",
+        columns=[
+            {"key": "offer_number", "label": "Angebot-Nr.", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "customer_name", "label": "Kunde", "filterable": True, "priority": "primary"},
+            {"key": "subject", "label": "Betreff", "filterable": True, "priority": "secondary"},
+            {"key": "total_amount", "label": "Betrag", "numeric": True, "renderKind": "currency", "sortable": True,
+             "priority": "primary"},
+            {"key": "valid_until", "label": "Gueltig bis", "renderKind": "date", "sortable": True, "priority": "secondary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+        ],
+        actions=[_neu("Neues Angebot", "/sales/angebot/neu"), _EXPORT],
+        row_actions=[],
+        purpose="Verkaufsangebote nach Kunde und Status verfolgen.",
+        prompts=["Welche Angebote laufen diese Woche ab?", "Welche Angebote sind offen?"],
+        no_workflow="Der Status steht am Angebot; die Liste fuehrt keinen eigenen Ablauf.",
+    )
+
+
+def build_sales_auftraege_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="sales/auftraege-liste", domain="sales", title="Verkaufsauftraege",
+        subtitle="Auftraege mit Kunde, Betrag und Lieferstatus", endpoint="/api/v1/sales/orders/",
+        row_route="/sales/sales-order/{id}", bundle="sales",
+        columns=[
+            {"key": "order_number", "label": "Auftrag-Nr.", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "customer_name", "label": "Kunde", "filterable": True, "priority": "primary"},
+            {"key": "subject", "label": "Betreff", "filterable": True, "priority": "secondary"},
+            {"key": "total_amount", "label": "Betrag", "numeric": True, "renderKind": "currency", "sortable": True,
+             "priority": "primary"},
+            {"key": "delivery_date", "label": "Liefertermin", "renderKind": "date", "sortable": True,
+             "priority": "secondary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+        ],
+        actions=[_neu("Neuer Auftrag", "/sales/order-editor"), _EXPORT],
+        row_actions=[],
+        purpose="Verkaufsauftraege nach Kunde und Lieferstatus steuern.",
+        prompts=["Welche Auftraege sind noch offen?", "Welche Auftraege warten auf Lieferung?"],
+        no_workflow="Der Status steht am Auftrag; die Liste fuehrt keinen eigenen Ablauf.",
+    )
+
+
+def build_sales_lieferungen_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="sales/lieferungen-liste", domain="sales", title="Lieferscheine",
+        subtitle="Ausgehende Lieferungen und Versandstatus", endpoint="/api/v1/sales/delivery-notes",
+        row_route="/sales/delivery-note/{id}", bundle="sales",
+        columns=[
+            {"key": "delivery_number", "label": "Lieferschein-Nr.", "sortable": True, "filterable": True,
+             "priority": "primary"},
+            {"key": "customer_name", "label": "Kunde", "filterable": True, "priority": "primary"},
+            {"key": "delivery_date", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+            {"key": "shipping_method", "label": "Versandart", "filterable": True, "priority": "tertiary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+        ],
+        actions=[_neu("Lieferschein erfassen", "/sales/delivery-editor"), _EXPORT],
+        row_actions=[],
+        purpose="Lieferscheine und Versandstatus nachverfolgen.",
+        prompts=["Welche Lieferscheine sind heute offen?", "Welche Lieferungen sind unterwegs?"],
+        no_workflow="Der Status steht am Lieferschein; die Liste fuehrt keinen eigenen Ablauf.",
+    )
+
+
+def build_einkauf_rechnungseingaenge_liste() -> dict[str, Any]:
+    pfad = "/api/v1/einkauf/rechnungseingaenge/{entity_id}/"
+    return _liste(
+        screen_id="einkauf/rechnungseingaenge-liste", domain="einkauf", title="Rechnungseingaenge",
+        subtitle="Eingangsrechnungen vor Freigabe und Verbuchung", endpoint="/api/v1/einkauf/rechnungseingaenge",
+        row_route="/belege/purchase_invoice/{id}", bundle="einkauf",
+        columns=[
+            {"key": "rechnungsNummer", "label": "Rechnung-Nr.", "sortable": True, "filterable": True,
+             "priority": "primary"},
+            {"key": "lieferant", "label": "Lieferant", "filterable": True, "priority": "primary"},
+            {"key": "rechnungsDatum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+            {"key": "bruttoBetrag", "label": "Betrag", "numeric": True, "renderKind": "currency", "sortable": True,
+             "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+        ],
+        actions=[_neu("Rechnungseingang erfassen", "/einkauf/rechnungseingang/neu"), _EXPORT],
+        row_actions=[
+            {"key": "pruefen", "label": "Pruefen", "dangerLevel": "safe", "permission": "einkauf.rechnungseingang.pruefen",
+             "commandEndpoint": pfad + "pruefen", "method": "POST", "requiresConfirmation": True,
+             "visibleWhen": _status("OFFEN", "ERFASST", "ENTWURF")},
+            {"key": "freigeben", "label": "Freigeben", "dangerLevel": "moderate",
+             "permission": "einkauf.rechnungseingang.freigeben", "commandEndpoint": pfad + "freigeben", "method": "POST",
+             "requiresConfirmation": True, "humanApprovalRequired": True, "forbiddenForAgents": True,
+             "visibleWhen": _status("GEPRUEFT", "OFFEN")},
+            {"key": "verbuchen", "label": "Verbuchen", "dangerLevel": "high", "permission": "einkauf.rechnungseingang.verbuchen",
+             "commandEndpoint": pfad + "verbuchen", "method": "POST", "requiresConfirmation": True,
+             "auditReasonRequired": True, "forbiddenForAgents": True,
+             "visibleWhen": _status("FREIGEGEBEN", "GEPRUEFT")},
+        ],
+        dangerous=[
+            {"key": "freigeben", "reason": "Gibt eine Eingangsrechnung zur Verbuchung frei; nur Mensch."},
+            {"key": "verbuchen", "reason": "Verbucht eine Eingangsrechnung in der FIBU; nur Mensch mit Begruendung."},
+        ],
+        purpose="Eingangsrechnungen vor Pruefung und Verbuchung finden.",
+        prompts=["Welche Rechnungen warten auf Freigabe?", "Welche Eingangsrechnungen sind offen?"],
+        no_workflow="Der Status steht an der Rechnung; die Liste fuehrt keinen eigenen Ablauf.",
+    )
+
+
+def build_service_anfragen_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="service/anfragen-liste", domain="service", title="Serviceanfragen",
+        subtitle="Tickets mit Kunde, Prioritaet und Bearbeitungsstand", endpoint="/api/v1/service/anfragen",
+        row_route="/service/anfrage/{id}", bundle="service",
+        columns=[
+            {"key": "nummer", "label": "Ticket-Nr.", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "kunde", "label": "Kunde", "filterable": True, "priority": "primary"},
+            {"key": "betreff", "label": "Betreff", "filterable": True, "priority": "primary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+            {"key": "prioritaet", "label": "Prioritaet", "renderKind": "status", "filterable": True,
+             "priority": "secondary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+        ],
+        actions=[_neu("Neue Anfrage", "/service/anfrage-neu"), _EXPORT],
+        row_actions=[],
+        purpose="Service-Tickets nach Prioritaet und Status abarbeiten.",
+        prompts=["Welche Tickets sind hoch priorisiert?", "Was ist heute neu eingegangen?"],
+        no_workflow="Der Stand steht an der Anfrage; die Liste fuehrt keinen eigenen Ablauf.",
+    )
+
+
+def build_compliance_enni_meldungen_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="compliance/enni-meldungen-liste", domain="compliance", title="ENNI-Meldungen",
+        subtitle="Duenge-Meldungen mit VVVO und Naehrstoffen",         endpoint="/api/v1/compliance/enni-meldungen",
+        row_route=None, bundle="compliance",
+        columns=[
+            {"key": "typ", "label": "Typ", "filterable": True, "priority": "primary"},
+            {"key": "betrieb", "label": "Betrieb", "filterable": True, "priority": "primary"},
+            {"key": "vvvo", "label": "VVVO", "filterable": True, "priority": "secondary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+        ],
+        actions=[_neu("Neue Meldung", "/compliance/enni-neu"), _EXPORT],
+        row_actions=[],
+        purpose="ENNI-Meldungen und offene Entwuerfe verfolgen.",
+        prompts=["Welche Meldungen sind noch Entwurf?", "Welche VVVO-Meldungen sind faellig?"],
+        no_workflow="Der Status steht an der Meldung; die Liste fuehrt keinen eigenen Ablauf.",
+    )
+
+
+def build_qualitaet_reklamationen_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="qualitaet/reklamationen-liste", domain="qualitaet", title="Reklamationen",
+        subtitle="Beanstandungen mit Kunde, Artikel und Prioritaet", endpoint="/api/v1/qualitaet/reklamationen",
+        row_route="/qualitaet/reklamation/{id}", bundle="qualitaet",
+        columns=[
+            {"key": "nummer", "label": "Reklamation-Nr.", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "kunde", "label": "Kunde", "filterable": True, "priority": "primary"},
+            {"key": "artikel", "label": "Artikel", "filterable": True, "priority": "secondary"},
+            {"key": "grund", "label": "Grund", "filterable": True, "priority": "secondary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+            {"key": "prioritaet", "label": "Prioritaet", "renderKind": "status", "filterable": True,
+             "priority": "secondary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+        ],
+        actions=[_neu("Neue Reklamation", "/qualitaet/reklamation/neu"), _EXPORT],
+        row_actions=[],
+        purpose="Reklamationen nach Prioritaet und Bearbeitungsstand steuern.",
+        prompts=["Welche Reklamationen sind offen?", "Welche Faelle sind hoch priorisiert?"],
+        no_workflow="Der Stand steht an der Reklamation; die Liste fuehrt keinen eigenen Ablauf.",
+    )
+
+
+def build_crm_leads_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="crm/leads-liste", domain="crm", title="Leads", subtitle="Vertriebs-Leads und Qualifizierung",
+        endpoint="/api/v1/crm/leads", row_route="/crm/leads/{id}", bundle="crm",
+        columns=[
+            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_neu("Neu", "/crm/leads/neu"), _EXPORT],
+        row_actions=[],
+        purpose="Leads: Eintraege finden und Details oeffnen.",
+        prompts=["Welche offenen Leads?", "Zeige aktuelle Leads."],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+
+def build_crm_aktivitaeten_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="crm/aktivitaeten-liste", domain="crm", title="Aktivitaeten", subtitle="Kontakte, Termine und Follow-ups",
+        endpoint="/api/v1/crm/activities", row_route="/crm/aktivitaeten/{id}", bundle="crm",
+        columns=[
+            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Aktivitaeten: Eintraege finden und Details oeffnen.",
+        prompts=["Welche offenen Aktivitaeten?", "Zeige aktuelle Aktivitaeten."],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+
+def build_fibu_buchungsjournal_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="fibu/buchungsjournal-liste", domain="finance", title="Buchungsjournal", subtitle="Journalbuchungen und Belegnummern",
+        endpoint="/api/v1/journal-entries/", row_route="/fibu/buchungsjournal/{id}", bundle="finance",
+        columns=[
+            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Buchungsjournal: Eintraege finden und Details oeffnen.",
+        prompts=["Welche offenen Buchungsjournal?", "Zeige aktuelle Buchungsjournal."],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+
+def build_fibu_offene_posten_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="fibu/offene-posten-liste", domain="finance", title="Offene Posten", subtitle="Forderungen und Verbindlichkeiten offen",
+        endpoint="/api/v1/finance/open-items", row_route=None, bundle="finance",
+        columns=[
+            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Offene Posten: Eintraege finden und Details oeffnen.",
+        prompts=["Welche offenen Offene Posten?", "Zeige aktuelle Offene Posten."],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+
+def build_fibu_zahlungslaeufe_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="fibu/zahlungslaeufe-liste", domain="finance", title="Zahlungslaeufe", subtitle="SEPA-Laeufe und Freigaben",
+        endpoint="/api/v1/finance/payment-runs", row_route="/fibu/zahlungslaeufe/{id}", bundle="finance",
+        columns=[
+            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Zahlungslaeufe: Eintraege finden und Details oeffnen.",
+        prompts=["Welche offenen Zahlungslaeufe?", "Zeige aktuelle Zahlungslaeufe."],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+
+def build_fibu_kostenstellen_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="fibu/kostenstellen-liste", domain="finance", title="Kostenstellen", subtitle="Kostenstellen und Zuordnungen",
+        endpoint="/api/v1/finance/kostenstellen", row_route=None, bundle="finance",
+        columns=[
+            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Kostenstellen: Eintraege finden und Details oeffnen.",
+        prompts=["Welche offenen Kostenstellen?", "Zeige aktuelle Kostenstellen."],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+
+def build_fibu_zahlungseingaenge_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="fibu/zahlungseingaenge-liste", domain="finance", title="Zahlungseingaenge", subtitle="Bankkonten und Eingaenge",
+        endpoint="/api/v1/finance/bank-accounts", row_route=None, bundle="finance",
+        columns=[
+            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Zahlungseingaenge: Eintraege finden und Details oeffnen.",
+        prompts=["Welche offenen Zahlungseingaenge?", "Zeige aktuelle Zahlungseingaenge."],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+
+def build_fibu_kontenplan_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="fibu/kontenplan-liste", domain="finance", title="Kontenplan", subtitle="Sachkonten und Kontenklassen",
+        endpoint="/api/v1/finance/chart-of-accounts/", row_route=None, bundle="finance",
+        columns=[
+            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Kontenplan: Eintraege finden und Details oeffnen.",
+        prompts=["Welche offenen Kontenplan?", "Zeige aktuelle Kontenplan."],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+
+def build_genossenschaft_mitglieder_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="genossenschaft/mitglieder-liste", domain="genossenschaft", title="Mitglieder", subtitle="Genossenschaftsmitglieder und Anteile",
+        endpoint="/api/v1/genossenschaft/mitglieder", row_route="/genossenschaft/mitglieder/{id}", bundle="genossenschaft",
+        columns=[
+            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Mitglieder: Eintraege finden und Details oeffnen.",
+        prompts=["Welche offenen Mitglieder?", "Zeige aktuelle Mitglieder."],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+
+def build_kontrakte_kontraktklassen_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="kontrakte/kontraktklassen-liste", domain="agrar", title="Kontraktklassen", subtitle="Klassen fuer Kontraktarten",
+        endpoint="/api/v1/kontrakt-klassen", row_route=None, bundle="agrar",
+        columns=[
+            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Kontraktklassen: Eintraege finden und Details oeffnen.",
+        prompts=["Welche offenen Kontraktklassen?", "Zeige aktuelle Kontraktklassen."],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+
+def build_kontrakte_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="kontrakte/liste", domain="agrar", title="Kontrakte", subtitle="Einkaufs- und Verkaufskontrakte",
+        endpoint="/api/v1/kontrakte", row_route="/kontrakte/{id}", bundle="agrar",
+        columns=[
+            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_neu("Neuer Kontrakt", "/kontrakte/neu"), _EXPORT],
+        row_actions=[],
+        purpose="Kontrakte: Eintraege finden und Details oeffnen.",
+        prompts=["Welche offenen Kontrakte?", "Zeige aktuelle Kontrakte."],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+
+def build_lager_lagerbewegungen_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="lager/lagerbewegungen-liste", domain="lager", title="Lagerbewegungen", subtitle="Zugaenge, Abgaenge und Umbuchungen",
+        endpoint="/api/v1/inventory/stock-movements/", row_route="/lager/lagerbewegungen/{id}", bundle="lager",
+        columns=[
+            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Lagerbewegungen: Eintraege finden und Details oeffnen.",
+        prompts=["Welche offenen Lagerbewegungen?", "Zeige aktuelle Lagerbewegungen."],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+
+def build_lager_inventur_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="lager/inventur-liste", domain="lager", title="Inventur", subtitle="Inventurpositionen und Differenzen",
+        endpoint="/api/v1/inventory/inventur", row_route=None, bundle="lager",
+        columns=[
+            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Inventur: Eintraege finden und Details oeffnen.",
+        prompts=["Welche offenen Inventur?", "Zeige aktuelle Inventur."],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+
+def build_lager_partiestamm_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="lager/partiestamm-liste", domain="lager", title="Partiestamm", subtitle="Partien und Chargenstamm",
+        endpoint="/api/v1/lager/partien", row_route="/lager/partiestamm/{id}", bundle="lager",
+        columns=[
+            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Partiestamm: Eintraege finden und Details oeffnen.",
+        prompts=["Welche offenen Partiestamm?", "Zeige aktuelle Partiestamm."],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+
+def build_lager_silo_uebersicht_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="lager/silo-uebersicht-liste", domain="lager", title="Silo-Uebersicht", subtitle="Silozellen und Fuellstaende",
+        endpoint="/api/v1/lager/wms/agri/silo-cells", row_route=None, bundle="lager",
+        columns=[
+            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Silo-Uebersicht: Eintraege finden und Details oeffnen.",
+        prompts=["Welche offenen Silo-Uebersicht?", "Zeige aktuelle Silo-Uebersicht."],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+
+def build_qualitaet_ausnahmen_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="qualitaet/ausnahmen-liste", domain="qualitaet", title="Betriebsausnahmen", subtitle="Prozess- und Systemausnahmen",
+        endpoint="/api/v1/operations/exceptions", row_route=None, bundle="qualitaet",
+        columns=[
+            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Betriebsausnahmen: Eintraege finden und Details oeffnen.",
+        prompts=["Welche offenen Betriebsausnahmen?", "Zeige aktuelle Betriebsausnahmen."],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+
+def build_transporte_fahrer_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="transporte/fahrer-liste", domain="logistik", title="Fahrer", subtitle="Fahrerstamm fuer Transporte",
+        endpoint="/api/v1/transporte/fahrer", row_route="/transporte/fahrer/{id}", bundle="logistik",
+        columns=[
+            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Fahrer: Eintraege finden und Details oeffnen.",
+        prompts=["Welche offenen Fahrer?", "Zeige aktuelle Fahrer."],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+
+def build_einkauf_bestellvorschlaege_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="einkauf/bestellvorschlaege-liste", domain="einkauf", title="Bestellvorschlaege", subtitle="Bedarf aus Lager und Verkauf",
+        endpoint="/api/v1/einkauf/bestellvorschlaege", row_route=None, bundle="einkauf",
+        columns=[
+            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Bestellvorschlaege: Eintraege finden und Details oeffnen.",
+        prompts=["Welche offenen Bestellvorschlaege?", "Zeige aktuelle Bestellvorschlaege."],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+
+def build_einkauf_frachtauftraege_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="einkauf/frachtauftraege-liste", domain="einkauf", title="Frachtauftraege", subtitle="Fracht zu Einkaufslieferscheinen",
+        endpoint="/api/v1/einkauf/frachtauftraege", row_route=None, bundle="einkauf",
+        columns=[
+            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Frachtauftraege: Eintraege finden und Details oeffnen.",
+        prompts=["Welche offenen Frachtauftraege?", "Zeige aktuelle Frachtauftraege."],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+
+def build_compliance_intrastat_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="compliance/intrastat-liste", domain="compliance", title="Intrastat", subtitle="Intrastat-Meldungen",
+        endpoint="/api/v1/intrastat/meldungen", row_route=None, bundle="compliance",
+        columns=[
+            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Intrastat: Eintraege finden und Details oeffnen.",
+        prompts=["Welche offenen Intrastat?", "Zeige aktuelle Intrastat."],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+
+def build_compliance_gelangensbestaetigung_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="compliance/gelangensbestaetigung-liste", domain="compliance", title="Gelangensbestaetigungen", subtitle="Gelangensnachweise fuer innergemeinschaftliche Lieferungen",
+        endpoint="/api/v1/gelangensbestaetigung", row_route=None, bundle="compliance",
+        columns=[
+            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Gelangensbestaetigungen: Eintraege finden und Details oeffnen.",
+        prompts=["Welche offenen Gelangensbestaetigungen?", "Zeige aktuelle Gelangensbestaetigungen."],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+
+def build_compliance_lksg_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="compliance/lksg-liste", domain="compliance", title="LKSG Lieferanten", subtitle="Lieferanten-Risikobewertungen LKSG",
+        endpoint="/api/v1/compliance/lksg/supplier-risk-assessments", row_route=None, bundle="compliance",
+        columns=[
+            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="LKSG Lieferanten: Eintraege finden und Details oeffnen.",
+        prompts=["Welche offenen LKSG Lieferanten?", "Zeige aktuelle LKSG Lieferanten."],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+
+def build_compliance_qs_checkliste_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="compliance/qs-checkliste-liste", domain="compliance", title="QS-Checkliste", subtitle="QS-Pruefpunkte und Nachweise",
+        endpoint="/api/v1/compliance/qs-checkliste", row_route=None, bundle="compliance",
+        columns=[
+            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="QS-Checkliste: Eintraege finden und Details oeffnen.",
+        prompts=["Welche offenen QS-Checkliste?", "Zeige aktuelle QS-Checkliste."],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+
+def build_admin_audit_log_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="admin/audit-log-liste", domain="admin", title="Audit-Log", subtitle="System-Aktivitaeten und Aenderungen",
+        endpoint="/api/v1/admin/audit-log", row_route=None, bundle="admin",
+        columns=[
+            {"key": "zeitstempel", "label": "Zeitstempel", "sortable": True, "priority": "primary"},
+            {"key": "benutzer", "label": "Benutzer", "filterable": True, "priority": "primary"},
+            {"key": "aktion", "label": "Aktion", "filterable": True, "priority": "secondary"},
+            {"key": "objekt", "label": "Objekt", "filterable": True, "priority": "secondary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Audit-Ereignisse nachvollziehen und exportieren.",
+        prompts=["Welche Aenderungen gab es heute?", "Wer hat den Datensatz geaendert?"],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+
+def build_admin_webhooks_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="admin/webhooks-liste", domain="admin", title="Webhooks", subtitle="Webhook-Endpunkte und Bereiche",
+        endpoint="/api/v1/webhooks", row_route=None, bundle="admin",
+        columns=[
+            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Webhooks: Eintraege finden und Details oeffnen.",
+        prompts=["Welche offenen Webhooks?", "Zeige aktuelle Webhooks."],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+
+def build_finance_audit_trail_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="finance/audit-trail-liste", domain="finance", title="Audit-Trail", subtitle="Pruefpfad fuer Finanzbelege",
+        endpoint="/api/v1/audit/logs", row_route=None, bundle="finance",
+        columns=[
+            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Audit-Trail: Eintraege finden und Details oeffnen.",
+        prompts=["Welche offenen Audit-Trail?", "Zeige aktuelle Audit-Trail."],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+
+def build_finance_ap_invoices_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="finance/ap-invoices-liste", domain="finance", title="AP-Rechnungen", subtitle="Eingangsrechnungen zur Freigabe",
+        endpoint="/api/v1/finance/ap/invoices/", row_route="/belege/purchase_invoice/{id}", bundle="finance",
+        columns=[
+            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="AP-Rechnungen: Eintraege finden und Details oeffnen.",
+        prompts=["Welche offenen AP-Rechnungen?", "Zeige aktuelle AP-Rechnungen."],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+
+def build_finance_payment_matching_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="finance/payment-matching-liste", domain="finance", title="Zahlungsabgleich", subtitle="Unzugeordnete Zahlungen",
+        endpoint="/api/v1/finance/payments/unmatched", row_route=None, bundle="finance",
+        columns=[
+            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Zahlungsabgleich: Eintraege finden und Details oeffnen.",
+        prompts=["Welche offenen Zahlungsabgleich?", "Zeige aktuelle Zahlungsabgleich."],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+
+def build_finance_periods_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="finance/periods-liste", domain="finance", title="Buchungsperioden", subtitle="Offene und geschlossene Perioden",
+        endpoint="/api/v1/finance/periods/", row_route=None, bundle="finance",
+        columns=[
+            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Buchungsperioden: Eintraege finden und Details oeffnen.",
+        prompts=["Welche offenen Buchungsperioden?", "Zeige aktuelle Buchungsperioden."],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+
+def build_finance_skonto_optimizer_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="finance/skonto-optimizer-liste", domain="finance", title="Skonto-Optimierung", subtitle="Skontofaehige offene Posten",
+        endpoint="/api/v1/finance/open-items", row_route=None, bundle="finance",
+        columns=[
+            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Skonto-Optimierung: Eintraege finden und Details oeffnen.",
+        prompts=["Welche offenen Skonto-Optimierung?", "Zeige aktuelle Skonto-Optimierung."],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+
+def build_agrar_saatzucht_partien_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="agrar/saatzucht-partien-liste", domain="agrar", title="Saatzucht-Partien", subtitle="Partien in der Saatzucht",
+        endpoint="/api/v1/saatzucht/partien", row_route=None, bundle="agrar",
+        columns=[
+            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Saatzucht-Partien: Eintraege finden und Details oeffnen.",
+        prompts=["Welche offenen Saatzucht-Partien?", "Zeige aktuelle Saatzucht-Partien."],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+
+def build_agrar_vermehrungsvertraege_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="agrar/vermehrungsvertraege-liste", domain="agrar", title="Vermehrungsvertraege", subtitle="Saatzucht-Vermehrungsvertraege",
+        endpoint="/api/v1/saatzucht/vermehrungsvertraege", row_route=None, bundle="agrar",
+        columns=[
+            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Vermehrungsvertraege: Eintraege finden und Details oeffnen.",
+        prompts=["Welche offenen Vermehrungsvertraege?", "Zeige aktuelle Vermehrungsvertraege."],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+
+def build_agrar_feldbuch_massnahmen_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="agrar/feldbuch-massnahmen-liste", domain="agrar", title="Feldbuch-Massnahmen", subtitle="Massnahmen je Schlag",
+        endpoint="/api/v1/agrar/feldbuch/massnahmen", row_route=None, bundle="agrar",
+        columns=[
+            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Feldbuch-Massnahmen: Eintraege finden und Details oeffnen.",
+        prompts=["Welche offenen Feldbuch-Massnahmen?", "Zeige aktuelle Feldbuch-Massnahmen."],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+
+def build_agrar_feldbuch_schlagkartei_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="agrar/feldbuch-schlagkartei-liste", domain="agrar", title="Schlagkartei", subtitle="Schlaege und Flaechen",
+        endpoint="/api/v1/agrar/schlaege", row_route="/agrar/feldbuch/schlag/{id}", bundle="agrar",
+        columns=[
+            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Schlagkartei: Eintraege finden und Details oeffnen.",
+        prompts=["Welche offenen Schlagkartei?", "Zeige aktuelle Schlagkartei."],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+
+def build_banken_konten_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="banken/konten-liste", domain="finance", title="Bankkonten", subtitle="Hausbanken und Konten",
+        endpoint="/api/v1/banken/konten", row_route=None, bundle="finance",
+        columns=[
+            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Bankkonten: Eintraege finden und Details oeffnen.",
+        prompts=["Welche offenen Bankkonten?", "Zeige aktuelle Bankkonten."],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+
+def build_personal_zeiterfassung_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="personal/zeiterfassung-liste", domain="personal", title="Zeiterfassung", subtitle="Erfasste Arbeitszeiten",
+        endpoint="/api/v1/personal/zeiterfassung", row_route=None, bundle="personal",
+        columns=[
+            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Zeiterfassung: Eintraege finden und Details oeffnen.",
+        prompts=["Welche offenen Zeiterfassung?", "Zeige aktuelle Zeiterfassung."],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+
+def build_tankstelle_zapfungen_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="tankstelle/zapfungen-liste", domain="lager", title="Zapfungen", subtitle="Tankstellen-Zapfvorgaenge",
+        endpoint="/api/v1/tankstelle/zapfungen", row_route=None, bundle="lager",
+        columns=[
+            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Zapfungen: Eintraege finden und Details oeffnen.",
+        prompts=["Welche offenen Zapfungen?", "Zeige aktuelle Zapfungen."],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+
+def build_verladung_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="verladung/liste", domain="logistik", title="Verladungen", subtitle="Verladungen und Rampen",
+        endpoint="/api/v1/verladung", row_route="/verladung/{id}", bundle="logistik",
+        columns=[
+            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Verladungen: Eintraege finden und Details oeffnen.",
+        prompts=["Welche offenen Verladungen?", "Zeige aktuelle Verladungen."],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+
+def build_waage_hofliste_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="waage/hofliste", domain="agrar", title="Hofliste Waage", subtitle="Warteschlange und Annahmen am Hof",
+        endpoint="/api/v1/waage/hofliste", row_route=None, bundle="agrar",
+        columns=[
+            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Hofliste Waage: Eintraege finden und Details oeffnen.",
+        prompts=["Welche offenen Hofliste Waage?", "Zeige aktuelle Hofliste Waage."],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+
+def build_waage_waagen_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="waage/waagen-liste", domain="agrar", title="Waagen", subtitle="Waagenstamm und Eichung",
+        endpoint="/api/v1/waage/waagen", row_route="/waage/{id}", bundle="agrar",
+        columns=[
+            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Waagen: Eintraege finden und Details oeffnen.",
+        prompts=["Welche offenen Waagen?", "Zeige aktuelle Waagen."],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+
+def build_fuhrpark_rechnungen_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="fuhrpark/rechnungen-liste", domain="logistik", title="Fuhrpark-Rechnungen", subtitle="Rechnungen zum Fuhrpark",
+        endpoint="/api/v1/fuhrpark/rechnungen", row_route=None, bundle="logistik",
+        columns=[
+            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Fuhrpark-Rechnungen: Eintraege finden und Details oeffnen.",
+        prompts=["Welche offenen Fuhrpark-Rechnungen?", "Zeige aktuelle Fuhrpark-Rechnungen."],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+
+def build_fuhrpark_fahrzeuge_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="fuhrpark/fahrzeuge-liste", domain="logistik", title="Fuhrpark", subtitle="Fahrzeuge und Status",
+        endpoint="/api/v1/fuhrpark/fahrzeuge", row_route="/fuhrpark/fahrzeug/{id}", bundle="logistik",
+        columns=[
+            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Fuhrpark: Eintraege finden und Details oeffnen.",
+        prompts=["Welche offenen Fuhrpark?", "Zeige aktuelle Fuhrpark."],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+
+def build_waage_wiegungen_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="waage/wiegungen-liste", domain="agrar", title="Wiegescheine", subtitle="Waagen-Wiegescheine",
+        endpoint="/api/v1/weighing-tickets/", row_route="/waage/wiegeschein/{id}", bundle="agrar",
+        columns=[
+            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Wiegescheine: Eintraege finden und Details oeffnen.",
+        prompts=["Welche offenen Wiegescheine?", "Zeige aktuelle Wiegescheine."],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+
+def build_marketing_kampagnen_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="marketing/kampagnen-liste", domain="marketing", title="Marketingkampagnen",
+        subtitle="Kampagnen mit Zielgruppe, Budget und Laufzeit",         endpoint="/api/v1/marketing/kampagnen",
+        row_route="/marketing/kampagne/{id}", bundle="marketing",
+        columns=[
+            {"key": "name", "label": "Kampagne", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "typ", "label": "Typ", "filterable": True, "priority": "primary"},
+            {"key": "zielgruppe", "label": "Zielgruppe", "filterable": True, "priority": "secondary"},
+            {"key": "startdatum", "label": "Start", "renderKind": "date", "sortable": True, "priority": "secondary"},
+            {"key": "enddatum", "label": "Ende", "renderKind": "date", "sortable": True, "priority": "tertiary"},
+            {"key": "budget", "label": "Budget", "numeric": True, "renderKind": "currency", "sortable": True,
+             "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+        ],
+        actions=[_neu("Neue Kampagne", "/marketing/kampagne/neu"), _EXPORT],
+        row_actions=[],
+        purpose="Marketingkampagnen und Budgets verfolgen.",
+        prompts=["Welche Kampagnen laufen gerade?", "Welches Budget ist fuer Q2 geplant?"],
+        no_workflow="Kampagnenliste ohne eigenen Ablauf.",
+    )
+
+
+def build_crm_kunden_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="crm/kunden-liste", domain="crm", title="Kunden",
+        subtitle="Operativer Kundenstamm mit Umsatz und Status",
+        endpoint="/api/v1/crm/customers/lookup?q=&limit=1000", row_route="/crm/kunden/{id}", bundle="crm",
+        columns=[
+            {"key": "name", "label": "Firma / Name", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "kunden_nr", "label": "Kunden-Nr.", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "ort", "label": "Ort", "filterable": True, "priority": "secondary"},
+            {"key": "plz", "label": "PLZ", "filterable": True, "priority": "tertiary"},
+            {"key": "telefon", "label": "Telefon", "priority": "tertiary"},
+            {"key": "email", "label": "E-Mail", "filterable": True, "priority": "secondary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+        ],
+        actions=[_neu("Neuer Kunde", "/verkauf/kunde/neu"), _EXPORT],
+        row_actions=[],
+        purpose="Kunden im operativen Stamm finden und die Kundenakte oeffnen.",
+        prompts=["Welche Kunden sind in Hamburg?", "Zeige gesperrte Kunden."],
+        no_workflow="Stammdatenliste ohne eigenen Ablauf.",
+    )
+
+
+def build_crm_lieferanten_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="crm/lieferanten-liste", domain="crm", title="Lieferanten",
+        subtitle="Lieferanten und Einkaufskonditionen", endpoint="/api/v1/crm/suppliers",
+        row_route="/crm/lieferanten/{id}", bundle="crm",
+        columns=[
+            {"key": "firma", "label": "Firma", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "ort", "label": "Ort", "filterable": True, "priority": "secondary"},
+            {"key": "plz", "label": "PLZ", "filterable": True, "priority": "tertiary"},
+            {"key": "email", "label": "E-Mail", "filterable": True, "priority": "secondary"},
+            {"key": "zahlungsbedingungen", "label": "Zahlungsbedingungen", "priority": "tertiary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+        ],
+        actions=[_neu("Neuer Lieferant", "/crm/lieferanten/stamm/new"), _EXPORT],
+        row_actions=[],
+        purpose="Lieferanten finden und Stammdaten oeffnen.",
+        prompts=["Welche Lieferanten sind aktiv?", "Zeige Lieferanten mit Skonto."],
+        no_workflow="Stammdatenliste ohne eigenen Ablauf.",
+    )
+
+
+def build_banken_konten_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="banken/konten-liste", domain="finance", title="Bankkonten",
+        subtitle="Hausbankkonten mit Saldo und Status", endpoint="/api/v1/banken/konten",
+        row_route="/finance/bankkonto/{id}", bundle="finance", table_profile="financial",
+        columns=[
+            {"key": "iban", "label": "IBAN", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "bank", "label": "Bank", "filterable": True, "priority": "primary"},
+            {"key": "kontoart", "label": "Kontoart", "filterable": True, "priority": "secondary"},
+            {"key": "saldo", "label": "Saldo", "numeric": True, "renderKind": "currency", "sortable": True,
+             "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Bankkonten und Salden im Blick behalten.",
+        prompts=["Welches Konto hat den hoechsten Saldo?", "Welche Konten sind inaktiv?"],
+        no_workflow="Kontenliste ohne eigenen Ablauf.",
+    )
+
+
+def build_dokumente_ablage_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="dokumente/ablage-liste", domain="dms", title="Dokumentenablage",
+        subtitle="Dokumente nach Kategorie und Typ", endpoint="/api/v1/dokumente", row_route=None, bundle="dms",
+        columns=[
+            {"key": "name", "label": "Name", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "typ", "label": "Typ", "filterable": True, "priority": "primary"},
+            {"key": "kategorie", "label": "Kategorie", "filterable": True, "priority": "secondary"},
+            {"key": "groesse", "label": "Groesse", "numeric": True, "priority": "tertiary"},
+            {"key": "hochgeladen", "label": "Hochgeladen", "renderKind": "datetime", "sortable": True,
+             "priority": "secondary"},
+            {"key": "benutzer", "label": "Benutzer", "filterable": True, "priority": "tertiary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Dokumente in der Ablage finden und herunterladen.",
+        prompts=["Welche Dokumente wurden heute hochgeladen?", "Zeige Vertraege in der Ablage."],
+        no_workflow="DMS-Ablage ohne eigenen Ablauf.",
+    )
+
+
+def build_vertrag_rahmenvertraege_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="vertrag/rahmenvertraege-liste", domain="agrar", title="Rahmenvertraege",
+        subtitle="Kontraktuelle Rahmen mit Restmenge und Laufzeit", endpoint="/api/v1/vertrag/rahmenvertraege",
+        row_route=None, bundle="agrar",
+        columns=[
+            {"key": "nummer", "label": "Vertrag-Nr.", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "partner", "label": "Partner", "filterable": True, "priority": "primary"},
+            {"key": "typ", "label": "Typ", "filterable": True, "priority": "secondary"},
+            {"key": "artikel", "label": "Artikel", "filterable": True, "priority": "secondary"},
+            {"key": "menge", "label": "Menge", "numeric": True, "sortable": True, "priority": "primary"},
+            {"key": "restmenge", "label": "Restmenge", "numeric": True, "sortable": True, "priority": "primary"},
+            {"key": "laufzeitBis", "label": "Laufzeit bis", "renderKind": "date", "sortable": True, "priority": "secondary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Rahmenvertraege mit Restmenge und Laufzeit verfolgen.",
+        prompts=["Welche Rahmenvertraege laufen aus?", "Welche Restmengen sind kritisch?"],
+        no_workflow="Vertragsliste ohne eigenen Ablauf.",
+    )
+
+
+def build_tankstelle_zapfungen_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="tankstelle/zapfungen-liste", domain="logistik", title="Zapfungen",
+        subtitle="Tankstellen-Zapfungen mit Fahrer und Menge", endpoint="/api/v1/tankstelle/zapfungen",
+        row_route=None, bundle="logistik",
+        columns=[
+            {"key": "kennzeichen", "label": "Kennzeichen", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "artikel", "label": "Artikel", "filterable": True, "priority": "primary"},
+            {"key": "menge", "label": "Menge", "numeric": True, "sortable": True, "priority": "primary"},
+            {"key": "fahrer", "label": "Fahrer", "filterable": True, "priority": "secondary"},
+            {"key": "zeitstempel", "label": "Zeit", "renderKind": "datetime", "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Zapfungen der Tankstelle nachvollziehen.",
+        prompts=["Welche Zapfungen gab es heute?", "Welches Fahrzeug tankte Diesel?"],
+        no_workflow="Buchungsliste ohne eigenen Ablauf.",
+    )
+
+
+def build_waage_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="waage/liste", domain="logistik", title="Waagen",
+        subtitle="Standorte, Kapazitaet und Eichung", endpoint="/api/v1/waage/waagen", row_route=None, bundle="logistik",
+        columns=[
+            {"key": "standort", "label": "Standort", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "typ", "label": "Typ", "filterable": True, "priority": "primary"},
+            {"key": "maxKapazitaet", "label": "Max. Kapazitaet", "numeric": True, "sortable": True, "priority": "secondary"},
+            {"key": "letzteEichung", "label": "Letzte Eichung", "renderKind": "date", "sortable": True,
+             "priority": "secondary"},
+            {"key": "naechsteEichung", "label": "Naechste Eichung", "renderKind": "date", "sortable": True,
+             "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Waagenstandorte und Eichtermine im Blick behalten.",
+        prompts=["Welche Waage muss als naechstes geeicht werden?", "Welche Waagen sind in Wartung?"],
+        no_workflow="Geraeteliste ohne eigenen Ablauf.",
+    )
+
+
+def build_compliance_cross_compliance_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="compliance/cross-compliance-liste", domain="compliance", title="Cross-Compliance",
+        subtitle="Anforderungen und Nachweise je Bereich", endpoint="/api/v1/compliance/cross-compliance",
+        row_route=None, bundle="compliance",
+        columns=[
+            {"key": "bereich", "label": "Bereich", "filterable": True, "priority": "primary"},
+            {"key": "anforderung", "label": "Anforderung", "filterable": True, "priority": "primary"},
+            {"key": "erfuellt", "label": "Erfuellt", "renderKind": "boolean", "filterable": True, "priority": "primary"},
+            {"key": "nachweis", "label": "Nachweis", "priority": "secondary"},
+            {"key": "frist", "label": "Frist", "renderKind": "date", "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Cross-Compliance-Anforderungen und offene Nachweise pruefen.",
+        prompts=["Welche Anforderungen sind nicht erfuellt?", "Was ist diese Woche faellig?"],
+        no_workflow="Checklisten-Register ohne eigenen Ablauf.",
+    )
+
+
+def build_compliance_zulassungen_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="compliance/zulassungen-liste", domain="compliance", title="Zulassungsregister",
+        subtitle="Produktzulassungen mit Behoerde und Gueltigkeit",
+        endpoint="/api/v1/compliance/zulassungen-register", row_route=None, bundle="compliance",
+        columns=[
+            {"key": "produkt", "label": "Produkt", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "typ", "label": "Typ", "filterable": True, "priority": "secondary"},
+            {"key": "nummer", "label": "Nummer", "filterable": True, "priority": "primary"},
+            {"key": "behoerde", "label": "Behoerde", "filterable": True, "priority": "secondary"},
+            {"key": "gueltigBis", "label": "Gueltig bis", "renderKind": "date", "sortable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Produktzulassungen und Ablaufdaten im Blick behalten.",
+        prompts=["Welche Zulassungen laufen ab?", "Welche Produkte sind widerrufen?"],
+        no_workflow="Registerliste ohne eigenen Ablauf.",
+    )
+
+
+def build_compliance_vvvo_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="compliance/vvvo-liste", domain="compliance", title="VVVO-Register",
+        subtitle="Betriebe mit VVVO-Nummer und Tierart", endpoint="/api/v1/compliance/vvvo-register",
+        row_route=None, bundle="compliance",
+        columns=[
+            {"key": "betriebsname", "label": "Betrieb", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "vvvo", "label": "VVVO", "filterable": True, "priority": "primary"},
+            {"key": "bundesland", "label": "Bundesland", "filterable": True, "priority": "secondary"},
+            {"key": "tierart", "label": "Tierart", "filterable": True, "priority": "secondary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "letzteAktualisierung", "label": "Aktualisiert", "renderKind": "date", "sortable": True,
+             "priority": "tertiary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="VVVO-registrierte Betriebe finden und pruefen.",
+        prompts=["Welche Betriebe sind inaktiv?", "Zeige Betriebe in Niedersachsen."],
+        no_workflow="Registerliste ohne eigenen Ablauf.",
+    )
+
+
+def build_compliance_sachkunde_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="compliance/sachkunde-liste", domain="compliance", title="Sachkundenachweise",
+        subtitle="Nachweise mit Gueltigkeit und ausstellender Stelle",
+        endpoint="/api/v1/compliance/sachkunde-register", row_route=None, bundle="compliance",
+        columns=[
+            {"key": "kunde", "label": "Kunde", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "kundennr", "label": "Kunden-Nr.", "filterable": True, "priority": "secondary"},
+            {"key": "nachweisNr", "label": "Nachweis-Nr.", "filterable": True, "priority": "primary"},
+            {"key": "ausstellungsdatum", "label": "Ausgestellt", "renderKind": "date", "sortable": True,
+             "priority": "secondary"},
+            {"key": "gueltigBis", "label": "Gueltig bis", "renderKind": "date", "sortable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Sachkundenachweise und Ablaufdaten verfolgen.",
+        prompts=["Welche Nachweise laufen ab?", "Welche Kunden haben gueltige Sachkunde?"],
+        no_workflow="Registerliste ohne eigenen Ablauf.",
+    )
+
+
+def build_compliance_saatgut_nachbau_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="compliance/saatgut-nachbau-liste", domain="compliance", title="Saatgut-Nachbau",
+        subtitle="Nachbauflaechen und Gebuehren je Betrieb", endpoint="/api/v1/compliance/saatgut-nachbau",
+        row_route=None, bundle="compliance",
+        columns=[
+            {"key": "betrieb", "label": "Betrieb", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "sorte", "label": "Sorte", "filterable": True, "priority": "primary"},
+            {"key": "kultur", "label": "Kultur", "filterable": True, "priority": "secondary"},
+            {"key": "flaeche", "label": "Flaeche (ha)", "numeric": True, "sortable": True, "priority": "primary"},
+            {"key": "erntejahr", "label": "Erntejahr", "numeric": True, "sortable": True, "priority": "secondary"},
+            {"key": "gebuehr", "label": "Gebuehr", "numeric": True, "renderKind": "currency", "sortable": True,
+             "priority": "secondary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Saatgut-Nachbauflaechen und offene Gebuehren verfolgen.",
+        prompts=["Welche Nachbaugebuehren sind offen?", "Welche Sorten wurden nachgebaut?"],
+        no_workflow="Meldeliste ohne eigenen Ablauf.",
+    )
+
+
 def build_crm_wiedervorlagen_liste() -> dict[str, Any]:
     """Offene Wiedervorlagen ueber alle Kunden; erledigen mit optionalem Ergebnis (haengt an die Kontaktnotiz)."""
     return _liste(
@@ -1206,6 +2544,647 @@ def build_crm_wiedervorlagen_liste() -> dict[str, Any]:
         purpose="Faellige Rueckrufe und Aufgaben abarbeiten; das Ergebnis wird an die Kontaktnotiz angehaengt.",
         prompts=["Welche Wiedervorlagen sind ueberfaellig?", "Was steht diese Woche fuer Kunde X an?"],
         no_workflow="Erledigen schliesst die Wiedervorlage am Kontakt; kein eigener Ablauf.",
+    )
+
+
+def build_agrar_bodenproben_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="agrar/bodenproben-liste", domain="agrar", title="Bodenproben",
+        subtitle="Proben je Schlag und Labor", endpoint="/api/v1/labor/proben", row_route="/agrar/bodenprobe/{id}", bundle="agrar",
+        columns=[
+            {"key": "schlag", "label": "Schlag", "filterable": True, "priority": "primary"},
+            {"key": "datum", "label": "Datum", "sortable": True, "renderKind": "date", "priority": "primary"},
+            {"key": "labor", "label": "Labor", "filterable": True, "priority": "secondary"},
+            {"key": "status", "label": "Status", "filterable": True, "renderKind": "status", "priority": "primary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Bodenproben finden und Ergebnisse oeffnen.",
+        prompts=['Welche Proben warten auf Labor?', 'Zeige Proben fuer Schlag X.'],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+def build_agrar_ernte_annahme_energiemais_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="agrar/ernte-annahme-energiemais-liste", domain="agrar", title="Ernte Annahme Energiemais",
+        subtitle="Annahmen Energiemais", endpoint="/api/v1/agrar/ernte", row_route="/agrar/ernte/{id}", bundle="agrar",
+        columns=[
+            {"key": "schlag", "label": "Schlag", "filterable": True, "priority": "primary"},
+            {"key": "kultur", "label": "Kultur", "filterable": True, "priority": "primary"},
+            {"key": "menge", "label": "Menge", "sortable": True, "numeric": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "filterable": True, "renderKind": "status", "priority": "primary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Energiemais-Ernten in der Annahme verfolgen.",
+        prompts=['Welche Energiemais-Lieferungen sind offen?'],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+def build_agrar_feldbuch_flurstueck_kataster_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="agrar/feldbuch-flurstueck-kataster-liste", domain="agrar", title="Flurstueck-Kataster",
+        subtitle="Flurstuecke und Geometrie", endpoint="/api/v1/agrar/schlaege", row_route=None, bundle="agrar",
+        columns=[
+            {"key": "flurstueck", "label": "Flurstueck", "filterable": True, "priority": "primary"},
+            {"key": "schlag", "label": "Schlag", "filterable": True, "priority": "primary"},
+            {"key": "flaeche", "label": "Flaeche", "numeric": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Flurstuecke im Kataster finden.",
+        prompts=['Welche Flurstuecke gehoeren zu Schlag X?'],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+def build_agrar_kultur_stamm_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="agrar/kultur-stamm-liste", domain="agrar", title="Kulturen",
+        subtitle="Kultur-Stamm und Fruchtfolge", endpoint="/api/v1/agrar/kulturen", row_route="/agrar/kultur/{id}", bundle="agrar",
+        columns=[
+            {"key": "name", "label": "Kultur", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "code", "label": "Code", "filterable": True, "priority": "secondary"},
+            {"key": "status", "label": "Status", "filterable": True, "renderKind": "status", "priority": "primary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Kulturen im Stamm finden.",
+        prompts=['Welche Kulturen sind aktiv?'],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+def build_agrar_maschinen_auslastung_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="agrar/maschinen-auslastung-liste", domain="agrar", title="Maschinenauslastung",
+        subtitle="Maschinen und Stunden", endpoint="/api/v1/agrar/maschinen", row_route="/agrar/maschine/{id}", bundle="agrar",
+        columns=[
+            {"key": "name", "label": "Maschine", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "typ", "label": "Typ", "filterable": True, "priority": "secondary"},
+            {"key": "status", "label": "Status", "filterable": True, "renderKind": "status", "priority": "primary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Maschinenauslastung im Blick behalten.",
+        prompts=['Welche Maschinen sind in Wartung?'],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+def build_agrar_nachhaltigkeit_eudr_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="agrar/nachhaltigkeit-eudr-liste", domain="agrar", title="EUDR Nachhaltigkeit",
+        subtitle="Sorgfaltserklaerungen und Risiko", endpoint="/api/v1/eudr/sorgfaltserklaerungen", row_route=None, bundle="agrar",
+        columns=[
+            {"key": "referenz", "label": "Referenz", "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "filterable": True, "renderKind": "status", "priority": "primary"},
+            {"key": "datum", "label": "Datum", "sortable": True, "renderKind": "date", "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="EUDR-Sorgfaltserklaerungen verfolgen.",
+        prompts=['Welche Erklaerungen sind offen?'],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+def build_agrar_pflanzenschutz_applikationen_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="agrar/pflanzenschutz-applikationen-liste", domain="agrar", title="Pflanzenschutz-Applikationen",
+        subtitle="Ausbringungen je Schlag", endpoint="/api/v1/agrar/feldbuch/massnahmen", row_route=None, bundle="agrar",
+        columns=[
+            {"key": "schlag", "label": "Schlag", "filterable": True, "priority": "primary"},
+            {"key": "mittel", "label": "Mittel", "filterable": True, "priority": "primary"},
+            {"key": "datum", "label": "Datum", "sortable": True, "renderKind": "date", "priority": "secondary"},
+            {"key": "status", "label": "Status", "filterable": True, "renderKind": "status", "priority": "primary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Pflanzenschutz-Applikationen dokumentieren und finden.",
+        prompts=['Welche Applikationen diese Woche?'],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+def build_agrar_psm_abgabedokumentation_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="agrar/psm-abgabedokumentation-liste", domain="agrar", title="PSM Abgabedokumentation",
+        subtitle="Abgaben und Nachweise", endpoint="/api/v1/agrar/psm/", row_route="/agrar/psm/abgabedokumentation/{id}", bundle="agrar",
+        columns=[
+            {"key": "name", "label": "Mittel", "filterable": True, "priority": "primary"},
+            {"key": "kunde", "label": "Kunde", "filterable": True, "priority": "primary"},
+            {"key": "datum", "label": "Datum", "sortable": True, "renderKind": "date", "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="PSM-Abgabedokumentation finden.",
+        prompts=['Welche Abgaben fehlen noch?'],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+def build_agrar_psm_beratung_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="agrar/psm-beratung-liste", domain="agrar", title="PSM Beratung",
+        subtitle="Beratungsvorgaenge Pflanzenschutz", endpoint="/api/v1/agrar/psm/", row_route=None, bundle="agrar",
+        columns=[
+            {"key": "name", "label": "Mittel", "filterable": True, "priority": "primary"},
+            {"key": "wirkstoff", "label": "Wirkstoff", "filterable": True, "priority": "secondary"},
+            {"key": "status", "label": "Status", "filterable": True, "renderKind": "status", "priority": "primary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="PSM-Beratung mit Sortimentsdaten.",
+        prompts=['Welche Mittel fuer Weizen?'],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+def build_agrar_psm_sachkunde_register_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="agrar/psm-sachkunde-register-liste", domain="agrar", title="PSM Sachkunde",
+        subtitle="Sachkundenachweise Kunden", endpoint="/api/v1/compliance/sachkunde-register", row_route="/agrar/psm/sachkunde/{id}/edit", bundle="agrar",
+        columns=[
+            {"key": "kunde", "label": "Kunde", "filterable": True, "priority": "primary"},
+            {"key": "nachweisNr", "label": "Nachweis-Nr.", "filterable": True, "priority": "primary"},
+            {"key": "gueltigBis", "label": "Gueltig bis", "sortable": True, "renderKind": "date", "priority": "primary"},
+            {"key": "status", "label": "Status", "filterable": True, "renderKind": "status", "priority": "primary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Sachkundenachweise fuer PSM-Abgabe pruefen.",
+        prompts=['Welche Nachweise laufen ab?'],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+def build_agrar_psm_wasserschutz_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="agrar/psm-wasserschutz-liste", domain="agrar", title="Wasserschutz",
+        subtitle="Wasserschutz-Zonen und Auflagen", endpoint="/api/v1/agrar/psm/wasserschutz-zonen", row_route=None, bundle="agrar",
+        columns=[
+            {"key": "zone", "label": "Zone", "filterable": True, "priority": "primary"},
+            {"key": "typ", "label": "Typ", "filterable": True, "priority": "secondary"},
+            {"key": "status", "label": "Status", "filterable": True, "renderKind": "status", "priority": "primary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Wasserschutzzonen und PSM-Auflagen pruefen.",
+        prompts=['Welche Zonen sind betroffen?'],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+def build_agrar_saatgut_bestellungen_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="agrar/saatgut-bestellungen-liste", domain="agrar", title="Saatgut-Bestellungen",
+        subtitle="Bestellungen Sorten und Mengen", endpoint="/api/v1/agrar/saatgut/", row_route="/agrar/saatgut/bestellung/{id}", bundle="agrar",
+        columns=[
+            {"key": "sorte", "label": "Sorte", "filterable": True, "priority": "primary"},
+            {"key": "menge", "label": "Menge", "sortable": True, "numeric": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "filterable": True, "renderKind": "status", "priority": "primary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Saatgut-Bestellungen verfolgen.",
+        prompts=['Welche Bestellungen sind offen?'],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+def build_agrar_saatgut_sortenregister_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="agrar/saatgut-sortenregister-liste", domain="agrar", title="Sortenregister",
+        subtitle="Zugelassene Sorten", endpoint="/api/v1/agrar/varieties/", row_route="/agrar/saatgut/sorte/{id}", bundle="agrar",
+        columns=[
+            {"key": "name", "label": "Sorte", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "crop_type", "label": "Kultur", "filterable": True, "priority": "primary"},
+            {"key": "zuechter", "label": "Zuechter", "filterable": True, "priority": "secondary"},
+            {"key": "aktiv", "label": "Aktiv", "filterable": True, "renderKind": "boolean", "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Sortenregister durchsuchen.",
+        prompts=['Welche Sorten sind aktiv?'],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+def build_agrar_schlaege_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="agrar/schlaege-liste", domain="agrar", title="Schlaege",
+        subtitle="Schlagstamm und Flaechen", endpoint="/api/v1/agrar/schlaege", row_route="/agrar/schlag/{id}", bundle="agrar",
+        columns=[
+            {"key": "name", "label": "Schlag", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "flaeche", "label": "Flaeche", "sortable": True, "numeric": True, "priority": "primary"},
+            {"key": "kultur", "label": "Kultur", "filterable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Schlaege finden und oeffnen.",
+        prompts=['Welche Schlaege haben Weizen?'],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+def build_agrar_schlaege_karte_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="agrar/schlaege-karte-liste", domain="agrar", title="Schlagkarte",
+        subtitle="Schlaege auf der Karte", endpoint="/api/v1/agrar/schlaege", row_route="/agrar/schlag/{id}", bundle="agrar",
+        columns=[
+            {"key": "name", "label": "Schlag", "filterable": True, "priority": "primary"},
+            {"key": "flaeche", "label": "Flaeche", "numeric": True, "priority": "secondary"},
+            {"key": "kultur", "label": "Kultur", "filterable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Schlaege fuer die Kartenansicht laden.",
+        prompts=['Zeige alle Schlaege mit Geometrie.'],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+def build_agrar_schlaege_kulturhistorie_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="agrar/schlaege-kulturhistorie-liste", domain="agrar", title="Kulturhistorie",
+        subtitle="Fruchtfolge je Schlag", endpoint="/api/v1/agrar/schlaege", row_route="/agrar/schlag/{id}", bundle="agrar",
+        columns=[
+            {"key": "schlag", "label": "Schlag", "filterable": True, "priority": "primary"},
+            {"key": "kultur", "label": "Kultur", "filterable": True, "priority": "primary"},
+            {"key": "jahr", "label": "Jahr", "sortable": True, "numeric": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Kulturhistorie der Schlaege einsehen.",
+        prompts=['Welche Kultur war letztes Jahr auf Schlag X?'],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+def build_agrar_vertrag_kontingente_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="agrar/vertrag-kontingente-liste", domain="agrar", title="Vertrag-Kontingente",
+        subtitle="Restmengen und Kontingente", endpoint="/api/v1/kontrakte", row_route="/agrar/kontrakt/{id}", bundle="agrar",
+        columns=[
+            {"key": "nummer", "label": "Kontrakt", "filterable": True, "priority": "primary"},
+            {"key": "partner", "label": "Partner", "filterable": True, "priority": "primary"},
+            {"key": "restmenge", "label": "Restmenge", "sortable": True, "numeric": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "filterable": True, "renderKind": "status", "priority": "primary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Kontrakt-Kontingente und Restmengen pruefen.",
+        prompts=['Welche Kontingente sind ausgeschoepft?'],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+def build_charge_wareneingang_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="charge/wareneingang-liste", domain="lager", title="Wareneingang Chargen",
+        subtitle="Chargen aus Wareneingaengen", endpoint="/api/v1/chargen", row_route="/charge/stamm/{id}", bundle="lager",
+        columns=[
+            {"key": "charge", "label": "Charge", "filterable": True, "priority": "primary"},
+            {"key": "artikel", "label": "Artikel", "filterable": True, "priority": "primary"},
+            {"key": "menge", "label": "Menge", "sortable": True, "numeric": True, "priority": "secondary"},
+            {"key": "status", "label": "Status", "filterable": True, "renderKind": "status", "priority": "primary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Wareneingaenge als Chargen erfassen und finden.",
+        prompts=['Welche Chargen kamen heute rein?'],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+def build_compliance_bvl_umsatzmeldung_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="compliance/bvl-umsatzmeldung-liste", domain="compliance", title="BVL Umsatzmeldung",
+        subtitle="Pflanzenschutz-Umsatzmeldungen", endpoint="/api/v1/compliance/bvl-umsaetze", row_route=None, bundle="compliance",
+        columns=[
+            {"key": "periode", "label": "Periode", "filterable": True, "priority": "primary"},
+            {"key": "umsatz", "label": "Umsatz", "numeric": True, "renderKind": "currency", "priority": "primary"},
+            {"key": "status", "label": "Status", "filterable": True, "renderKind": "status", "priority": "primary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="BVL-Umsatzmeldungen verfolgen.",
+        prompts=['Welche Meldungen sind faellig?'],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+def build_compliance_eudr_compliance_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="compliance/eudr-compliance-liste", domain="compliance", title="EUDR Compliance",
+        subtitle="Sorgfalt und Lieferketten", endpoint="/api/v1/eudr/sorgfaltserklaerungen", row_route=None, bundle="compliance",
+        columns=[
+            {"key": "referenz", "label": "Referenz", "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "filterable": True, "renderKind": "status", "priority": "primary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="EUDR-Compliance-Faelle finden.",
+        prompts=['Welche Lieferketten sind ungeprueft?'],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+def build_compliance_export_pruefung_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="compliance/export-pruefung-liste", domain="compliance", title="Export-Pruefung",
+        subtitle="Exportfaehigkeit pruefen", endpoint="/api/v1/export/entities", row_route=None, bundle="compliance",
+        columns=[
+            {"key": "entity", "label": "Entitaet", "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "filterable": True, "renderKind": "status", "priority": "primary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Export-Pruefungen nachvollziehen.",
+        prompts=['Welche Exporte sind blockiert?'],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+def build_compliance_gefahrstoff_doku_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="compliance/gefahrstoff-doku-liste", domain="compliance", title="Gefahrstoff-Doku",
+        subtitle="Gefahrstoffdokumentation", endpoint="/api/v1/compliance/exports/gefahrstoffdoku", row_route=None, bundle="compliance",
+        columns=[
+            {"key": "produkt", "label": "Produkt", "filterable": True, "priority": "primary"},
+            {"key": "klasse", "label": "Klasse", "filterable": True, "priority": "secondary"},
+            {"key": "status", "label": "Status", "filterable": True, "renderKind": "status", "priority": "primary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Gefahrstoffdokumentation einsehen.",
+        prompts=['Welche Produkte brauchen Update?'],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+def build_controlling_plan_ist_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="controlling/plan-ist-liste", domain="controlling", title="Plan-Ist",
+        subtitle="KPIs Plan vs. Ist", endpoint="/api/v1/controlling/kpis", row_route=None, bundle="controlling",
+        columns=[
+            {"key": "name", "label": "KPI", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "kpi_code", "label": "Code", "filterable": True, "priority": "secondary"},
+            {"key": "status", "label": "Status", "filterable": True, "renderKind": "status", "priority": "primary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Plan-Ist-KPIs vergleichen.",
+        prompts=['Wo weicht Ist vom Plan ab?'],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+def build_crm_contact_detail_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="crm/contact-detail-liste", domain="crm", title="Kontakte",
+        subtitle="Kontaktliste zur Detailansicht", endpoint="/api/v1/crm/contacts", row_route="/crm/kontakt/{id}", bundle="crm",
+        columns=[
+            {"key": "name", "label": "Name", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "email", "label": "E-Mail", "filterable": True, "priority": "secondary"},
+            {"key": "status", "label": "Status", "filterable": True, "renderKind": "status", "priority": "primary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Kontakte finden und Detail oeffnen.",
+        prompts=['Welche Kontakte haben offene Aufgaben?'],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+def build_crm_kontakt_management_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="crm/kontakt-management-liste", domain="crm", title="Kontakt-Management",
+        subtitle="Kontakte und Follow-ups", endpoint="/api/v1/crm/contacts", row_route="/crm/kontakt/{id}", bundle="crm",
+        columns=[
+            {"key": "name", "label": "Name", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "firma", "label": "Firma", "filterable": True, "priority": "primary"},
+            {"key": "email", "label": "E-Mail", "filterable": True, "priority": "secondary"},
+            {"key": "prioritaet", "label": "Prioritaet", "filterable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Kontakte im Management finden.",
+        prompts=['Welche Kontakte sind ueberfaellig?'],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+def build_einkauf_anfragen_create_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="einkauf/anfragen-create-liste", domain="einkauf", title="Anfragen",
+        subtitle="Bedarfsanforderungen anlegen", endpoint="/api/v1/einkauf/anfragen", row_route="/einkauf/anfrage/{id}", bundle="einkauf",
+        columns=[
+            {"key": "anfrageNummer", "label": "Anfrage-Nr.", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "filterable": True, "renderKind": "status", "priority": "primary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Anfragen vor Anlage finden.",
+        prompts=['Welche Anfragen sind Entwurf?'],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+def build_einkauf_angebote_vergleich_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="einkauf/angebote-vergleich-liste", domain="einkauf", title="Angebotsvergleich",
+        subtitle="Lieferantenangebote vergleichen", endpoint="/api/v1/einkauf/angebote", row_route="/einkauf/angebot/{id}", bundle="einkauf",
+        columns=[
+            {"key": "angebotNummer", "label": "Angebot-Nr.", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "lieferant", "label": "Lieferant", "filterable": True, "priority": "primary"},
+            {"key": "preis", "label": "Preis", "numeric": True, "renderKind": "currency", "priority": "primary"},
+            {"key": "status", "label": "Status", "filterable": True, "renderKind": "status", "priority": "primary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Angebote zum Vergleich finden.",
+        prompts=['Welche Angebote zur Anfrage X?'],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+def build_einkauf_dienstleistungen_haltung_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="einkauf/dienstleistungen-haltung-liste", domain="einkauf", title="Dienstleistungen Haltung",
+        subtitle="DL-Bestellungen Tierhaltung", endpoint="/api/v1/einkauf/bestellungen", row_route="/einkauf/bestellung/{id}", bundle="einkauf",
+        columns=[
+            {"key": "bestellNummer", "label": "Bestell-Nr.", "filterable": True, "priority": "primary"},
+            {"key": "lieferant", "label": "Lieferant", "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "filterable": True, "renderKind": "status", "priority": "primary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Dienstleistungsbestellungen finden.",
+        prompts=['Welche DL-Bestellungen sind offen?'],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+def build_einkauf_einkauf_vorgang_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="einkauf/einkauf-vorgang-liste", domain="einkauf", title="Einkaufsvorgaenge",
+        subtitle="Vorgaenge im Einkauf", endpoint="/api/v1/einkauf/bestellungen", row_route="/einkauf/bestellung/{id}", bundle="einkauf",
+        columns=[
+            {"key": "nummer", "label": "Vorgang", "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "filterable": True, "renderKind": "status", "priority": "primary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Einkaufsvorgaenge finden.",
+        prompts=['Welche Vorgaenge warten auf Freigabe?'],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+def build_einkauf_kontrakte_service_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="einkauf/kontrakte-service-liste", domain="einkauf", title="Kontrakte Service",
+        subtitle="Einkaufskontrakte Service", endpoint="/api/v1/kontrakte", row_route="/einkauf/kontrakt/{id}", bundle="einkauf",
+        columns=[
+            {"key": "nummer", "label": "Kontrakt", "filterable": True, "priority": "primary"},
+            {"key": "partner", "label": "Partner", "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "filterable": True, "renderKind": "status", "priority": "primary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Service-Kontrakte im Einkauf finden.",
+        prompts=['Welche Kontrakte laufen aus?'],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+def build_einkauf_rechnung_abgleich_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="einkauf/rechnung-abgleich-liste", domain="einkauf", title="Rechnungsabgleich",
+        subtitle="Eingangsrechnungen abgleichen", endpoint="/api/v1/einkauf/rechnungseingaenge", row_route="/belege/purchase_invoice/{id}", bundle="einkauf",
+        columns=[
+            {"key": "rechnungsNummer", "label": "Rechnung-Nr.", "filterable": True, "priority": "primary"},
+            {"key": "lieferant", "label": "Lieferant", "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "filterable": True, "renderKind": "status", "priority": "primary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Rechnungen zum Abgleich finden.",
+        prompts=['Welche Rechnungen passen nicht zur Bestellung?'],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+def build_einkauf_retouren_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="einkauf/retouren-liste", domain="einkauf", title="Retouren",
+        subtitle="Einkaufsretouren", endpoint="/api/v1/einkauf/retouren", row_route="/einkauf/retouren/{id}", bundle="einkauf",
+        columns=[
+            {"key": "nummer", "label": "Retoure-Nr.", "filterable": True, "priority": "primary"},
+            {"key": "lieferant", "label": "Lieferant", "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "filterable": True, "renderKind": "status", "priority": "primary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Retouren verfolgen.",
+        prompts=['Welche Retouren sind offen?'],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+def build_etiketten_druck_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="etiketten/druck-liste", domain="lager", title="Etikettendruck",
+        subtitle="Druckauftraege Etiketten", endpoint="/api/v1/etiketten/druckauftrag", row_route=None, bundle="lager",
+        columns=[
+            {"key": "auftrag", "label": "Auftrag", "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "filterable": True, "renderKind": "status", "priority": "primary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Etikettendruck-Auftraege finden.",
+        prompts=['Welche Druckauftraege sind offen?'],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+def build_export_intrastat_meldung_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="export/intrastat-meldung-liste", domain="compliance", title="Intrastat-Meldung",
+        subtitle="Intrastat Meldezeitraeume", endpoint="/api/v1/intrastat/meldungen", row_route=None, bundle="compliance",
+        columns=[
+            {"key": "periode", "label": "Periode", "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "filterable": True, "renderKind": "status", "priority": "primary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Intrastat-Meldungen verfolgen.",
+        prompts=['Welche Meldungen sind faellig?'],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+def build_export_umsatzsteuer_voranmeldung_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="export/umsatzsteuer-voranmeldung-liste", domain="finance", title="USt-Voranmeldung",
+        subtitle="Umsatzsteuer-Voranmeldungen", endpoint="/api/v1/compliance/ustva", row_route=None, bundle="finance",
+        columns=[
+            {"key": "periode", "label": "Periode", "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "filterable": True, "renderKind": "status", "priority": "primary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="USt-Voranmeldungen einsehen.",
+        prompts=['Welche Voranmeldung ist faellig?'],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+def build_fibu_anlagen_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="fibu/anlagen-liste", domain="finance", title="Anlagen",
+        subtitle="Anlagevermoegen", endpoint="/api/v1/finance/fixed-assets/detail", row_route="/fibu/anlage/{id}", bundle="finance",
+        table_profile="financial",
+        columns=[
+            {"key": "anlagennr", "label": "Anlage-Nr.", "filterable": True, "priority": "primary"},
+            {"key": "bezeichnung", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "buchwert", "label": "Buchwert", "numeric": True, "renderKind": "currency", "priority": "primary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Anlagen finden und oeffnen.",
+        prompts=['Welche Anlagen haben niedrigen Buchwert?'],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+def build_fibu_debitoren_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="fibu/debitoren-liste", domain="finance", title="Debitoren OP",
+        subtitle="Offene Posten Debitoren", endpoint="/api/v1/finance/open-items?typ=debitor", row_route="/sales/invoice/{id}", bundle="finance",
+        table_profile="financial",
+        columns=[
+            {"key": "rechnungsnr", "label": "Rechnung", "filterable": True, "priority": "primary"},
+            {"key": "kunde", "label": "Kunde", "filterable": True, "priority": "primary"},
+            {"key": "offen", "label": "Offen", "numeric": True, "renderKind": "currency", "priority": "primary"},
+            {"key": "faelligkeit", "label": "Faellig", "sortable": True, "renderKind": "date", "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Offene Debitorenposten finden.",
+        prompts=['Welche Posten sind ueberfaellig?'],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+def build_fibu_hauptbuch_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="fibu/hauptbuch-liste", domain="finance", title="Hauptbuch",
+        subtitle="Hauptbuch-Buchungen", endpoint="/api/v1/journal-entries/", row_route=None, bundle="finance",
+        table_profile="financial",
+        columns=[
+            {"key": "belegnummer", "label": "Beleg", "filterable": True, "priority": "primary"},
+            {"key": "konto", "label": "Konto", "filterable": True, "priority": "primary"},
+            {"key": "soll", "label": "Soll", "numeric": True, "priority": "secondary"},
+            {"key": "haben", "label": "Haben", "numeric": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Hauptbuch-Buchungen einsehen.",
+        prompts=['Welche Buchungen auf Konto 1200?'],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+def build_fibu_kassenbuch_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="fibu/kassenbuch-liste", domain="finance", title="Kassenbuch",
+        subtitle="Kassenbuchungen", endpoint="/api/v1/kasse/tagesabschluss/aktuell", row_route=None, bundle="finance",
+        table_profile="financial",
+        columns=[
+            {"key": "datum", "label": "Datum", "sortable": True, "renderKind": "date", "priority": "primary"},
+            {"key": "saldo", "label": "Saldo", "numeric": True, "renderKind": "currency", "priority": "primary"},
+            {"key": "status", "label": "Status", "filterable": True, "renderKind": "status", "priority": "primary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Kassenbuch und Tagesabschluesse finden.",
+        prompts=['Ist der heutige Abschluss offen?'],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+def build_fibu_kreditoren_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="fibu/kreditoren-liste", domain="finance", title="Kreditoren OP",
+        subtitle="Offene Posten Kreditoren", endpoint="/api/v1/finance/open-items?typ=kreditor", row_route="/belege/purchase_invoice/{id}", bundle="finance",
+        table_profile="financial",
+        columns=[
+            {"key": "rechnungsnr", "label": "Rechnung", "filterable": True, "priority": "primary"},
+            {"key": "lieferant", "label": "Lieferant", "filterable": True, "priority": "primary"},
+            {"key": "offen", "label": "Offen", "numeric": True, "renderKind": "currency", "priority": "primary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Offene Kreditorenposten finden.",
+        prompts=['Welche Verbindlichkeiten sind faellig?'],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+def build_fibu_schnittstelle_fibu_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="fibu/schnittstelle-fibu-liste", domain="finance", title="FIBU-Schnittstelle",
+        subtitle="Buchungsuebergabe Exporte", endpoint="/api/v1/finance/connectors/profiles", row_route=None, bundle="finance",
+        columns=[
+            {"key": "typ", "label": "Typ", "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "filterable": True, "renderKind": "status", "priority": "primary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="FIBU-Schnittstellen-Exporte verfolgen.",
+        prompts=['Welcher Export ist fehlgeschlagen?'],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    )
+def build_fibu_verbindlichkeiten_liste() -> dict[str, Any]:
+    return _liste(
+        screen_id="fibu/verbindlichkeiten-liste", domain="finance", title="Verbindlichkeiten",
+        subtitle="Offene Verbindlichkeiten", endpoint="/api/v1/finance/open-items?typ=kreditor", row_route="/fibu/verbindlichkeit/{id}", bundle="finance",
+        table_profile="financial",
+        columns=[
+            {"key": "rechnungsNr", "label": "Rechnung", "filterable": True, "priority": "primary"},
+            {"key": "lieferant", "label": "Lieferant", "filterable": True, "priority": "primary"},
+            {"key": "offen", "label": "Offen", "numeric": True, "renderKind": "currency", "priority": "primary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Verbindlichkeiten finden.",
+        prompts=['Welche Verbindlichkeiten sind offen?'],
+        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
     )
 
 
@@ -1246,6 +3225,76 @@ LISTEN_SCREEN_BUILDERS = {
     "admin/benutzer-liste": build_admin_benutzer_liste,
     "compliance/pcn-liste": build_compliance_pcn_liste,
     "personal/stundenzettel-liste": build_personal_stundenzettel_liste,
+    "agrar/biostimulanzien-liste": build_agrar_biostimulanzien_liste,
+    "agrar/ernte-liste": build_agrar_ernte_liste,
+    "agrar/kulturpflanzen-liste": build_agrar_kulturpflanzen_liste,
+    "zertifikate/liste": build_zertifikate_liste,
+    "benachrichtigungen/liste": build_benachrichtigungen_liste,
+    "qualitaet/labor-liste": build_qualitaet_labor_liste,
+    "disposition/liste": build_disposition_liste,
+    "crm/kontakte-liste": build_crm_kontakte_liste,
+    "crm/betriebsprofile-liste": build_crm_betriebsprofile_liste,
+    "sales/angebote-liste": build_sales_angebote_liste,
+    "sales/auftraege-liste": build_sales_auftraege_liste,
+    "sales/lieferungen-liste": build_sales_lieferungen_liste,
+    "einkauf/rechnungseingaenge-liste": build_einkauf_rechnungseingaenge_liste,
+    "service/anfragen-liste": build_service_anfragen_liste,
+    "compliance/enni-meldungen-liste": build_compliance_enni_meldungen_liste,
+    "qualitaet/reklamationen-liste": build_qualitaet_reklamationen_liste,
+    "marketing/kampagnen-liste": build_marketing_kampagnen_liste,
+    "crm/kunden-liste": build_crm_kunden_liste,
+    "crm/lieferanten-liste": build_crm_lieferanten_liste,
+    "banken/konten-liste": build_banken_konten_liste,
+    "dokumente/ablage-liste": build_dokumente_ablage_liste,
+    "vertrag/rahmenvertraege-liste": build_vertrag_rahmenvertraege_liste,
+    "tankstelle/zapfungen-liste": build_tankstelle_zapfungen_liste,
+    "waage/liste": build_waage_liste,
+    "compliance/cross-compliance-liste": build_compliance_cross_compliance_liste,
+    "compliance/zulassungen-liste": build_compliance_zulassungen_liste,
+    "compliance/vvvo-liste": build_compliance_vvvo_liste,
+    "compliance/sachkunde-liste": build_compliance_sachkunde_liste,
+    "compliance/saatgut-nachbau-liste": build_compliance_saatgut_nachbau_liste,
+    "admin/audit-log-liste": build_admin_audit_log_liste,
+    "admin/webhooks-liste": build_admin_webhooks_liste,
+    "agrar/feldbuch-massnahmen-liste": build_agrar_feldbuch_massnahmen_liste,
+    "agrar/feldbuch-schlagkartei-liste": build_agrar_feldbuch_schlagkartei_liste,
+    "agrar/saatzucht-partien-liste": build_agrar_saatzucht_partien_liste,
+    "agrar/vermehrungsvertraege-liste": build_agrar_vermehrungsvertraege_liste,
+    "compliance/gelangensbestaetigung-liste": build_compliance_gelangensbestaetigung_liste,
+    "compliance/intrastat-liste": build_compliance_intrastat_liste,
+    "compliance/lksg-liste": build_compliance_lksg_liste,
+    "compliance/qs-checkliste-liste": build_compliance_qs_checkliste_liste,
+    "crm/aktivitaeten-liste": build_crm_aktivitaeten_liste,
+    "crm/leads-liste": build_crm_leads_liste,
+    "einkauf/bestellvorschlaege-liste": build_einkauf_bestellvorschlaege_liste,
+    "einkauf/frachtauftraege-liste": build_einkauf_frachtauftraege_liste,
+    "fibu/buchungsjournal-liste": build_fibu_buchungsjournal_liste,
+    "fibu/kontenplan-liste": build_fibu_kontenplan_liste,
+    "fibu/kostenstellen-liste": build_fibu_kostenstellen_liste,
+    "fibu/offene-posten-liste": build_fibu_offene_posten_liste,
+    "fibu/zahlungseingaenge-liste": build_fibu_zahlungseingaenge_liste,
+    "fibu/zahlungslaeufe-liste": build_fibu_zahlungslaeufe_liste,
+    "finance/ap-invoices-liste": build_finance_ap_invoices_liste,
+    "finance/audit-trail-liste": build_finance_audit_trail_liste,
+    "finance/payment-matching-liste": build_finance_payment_matching_liste,
+    "finance/periods-liste": build_finance_periods_liste,
+    "finance/skonto-optimizer-liste": build_finance_skonto_optimizer_liste,
+    "fuhrpark/fahrzeuge-liste": build_fuhrpark_fahrzeuge_liste,
+    "fuhrpark/rechnungen-liste": build_fuhrpark_rechnungen_liste,
+    "genossenschaft/mitglieder-liste": build_genossenschaft_mitglieder_liste,
+    "kontrakte/kontraktklassen-liste": build_kontrakte_kontraktklassen_liste,
+    "kontrakte/liste": build_kontrakte_liste,
+    "lager/inventur-liste": build_lager_inventur_liste,
+    "lager/lagerbewegungen-liste": build_lager_lagerbewegungen_liste,
+    "lager/partiestamm-liste": build_lager_partiestamm_liste,
+    "lager/silo-uebersicht-liste": build_lager_silo_uebersicht_liste,
+    "personal/zeiterfassung-liste": build_personal_zeiterfassung_liste,
+    "qualitaet/ausnahmen-liste": build_qualitaet_ausnahmen_liste,
+    "transporte/fahrer-liste": build_transporte_fahrer_liste,
+    "verladung/liste": build_verladung_liste,
+    "waage/hofliste": build_waage_hofliste_liste,
+    "waage/waagen-liste": build_waage_waagen_liste,
+    "waage/wiegungen-liste": build_waage_wiegungen_liste,    "agrar/bodenproben-liste": build_agrar_bodenproben_liste,    "agrar/ernte-annahme-energiemais-liste": build_agrar_ernte_annahme_energiemais_liste,    "agrar/feldbuch-flurstueck-kataster-liste": build_agrar_feldbuch_flurstueck_kataster_liste,    "agrar/kultur-stamm-liste": build_agrar_kultur_stamm_liste,    "agrar/maschinen-auslastung-liste": build_agrar_maschinen_auslastung_liste,    "agrar/nachhaltigkeit-eudr-liste": build_agrar_nachhaltigkeit_eudr_liste,    "agrar/pflanzenschutz-applikationen-liste": build_agrar_pflanzenschutz_applikationen_liste,    "agrar/psm-abgabedokumentation-liste": build_agrar_psm_abgabedokumentation_liste,    "agrar/psm-beratung-liste": build_agrar_psm_beratung_liste,    "agrar/psm-sachkunde-register-liste": build_agrar_psm_sachkunde_register_liste,    "agrar/psm-wasserschutz-liste": build_agrar_psm_wasserschutz_liste,    "agrar/saatgut-bestellungen-liste": build_agrar_saatgut_bestellungen_liste,    "agrar/saatgut-sortenregister-liste": build_agrar_saatgut_sortenregister_liste,    "agrar/schlaege-liste": build_agrar_schlaege_liste,    "agrar/schlaege-karte-liste": build_agrar_schlaege_karte_liste,    "agrar/schlaege-kulturhistorie-liste": build_agrar_schlaege_kulturhistorie_liste,    "agrar/vertrag-kontingente-liste": build_agrar_vertrag_kontingente_liste,    "charge/wareneingang-liste": build_charge_wareneingang_liste,    "compliance/bvl-umsatzmeldung-liste": build_compliance_bvl_umsatzmeldung_liste,    "compliance/eudr-compliance-liste": build_compliance_eudr_compliance_liste,    "compliance/export-pruefung-liste": build_compliance_export_pruefung_liste,    "compliance/gefahrstoff-doku-liste": build_compliance_gefahrstoff_doku_liste,    "controlling/plan-ist-liste": build_controlling_plan_ist_liste,    "crm/contact-detail-liste": build_crm_contact_detail_liste,    "crm/kontakt-management-liste": build_crm_kontakt_management_liste,    "einkauf/anfragen-create-liste": build_einkauf_anfragen_create_liste,    "einkauf/angebote-vergleich-liste": build_einkauf_angebote_vergleich_liste,    "einkauf/dienstleistungen-haltung-liste": build_einkauf_dienstleistungen_haltung_liste,    "einkauf/einkauf-vorgang-liste": build_einkauf_einkauf_vorgang_liste,    "einkauf/kontrakte-service-liste": build_einkauf_kontrakte_service_liste,    "einkauf/rechnung-abgleich-liste": build_einkauf_rechnung_abgleich_liste,    "einkauf/retouren-liste": build_einkauf_retouren_liste,    "etiketten/druck-liste": build_etiketten_druck_liste,    "export/intrastat-meldung-liste": build_export_intrastat_meldung_liste,    "export/umsatzsteuer-voranmeldung-liste": build_export_umsatzsteuer_voranmeldung_liste,    "fibu/anlagen-liste": build_fibu_anlagen_liste,    "fibu/debitoren-liste": build_fibu_debitoren_liste,    "fibu/hauptbuch-liste": build_fibu_hauptbuch_liste,    "fibu/kassenbuch-liste": build_fibu_kassenbuch_liste,    "fibu/kreditoren-liste": build_fibu_kreditoren_liste,    "fibu/schnittstelle-fibu-liste": build_fibu_schnittstelle_fibu_liste,    "fibu/verbindlichkeiten-liste": build_fibu_verbindlichkeiten_liste,
 }
 LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/einkauf/angebote",
                 "einkauf/anlieferavis-liste": "/einkauf/anlieferavis",
@@ -1281,7 +3330,95 @@ LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/
                 "schaeden/liste": "/schaeden",
                 "admin/benutzer-liste": "/admin/benutzer",
                 "compliance/pcn-liste": "/compliance/pcn-liste",
-                "personal/stundenzettel-liste": "/personal/stundenzettel-liste"}
+                "personal/stundenzettel-liste": "/personal/stundenzettel-liste",
+                "agrar/biostimulanzien-liste": "/agrar/biostimulanzien",
+                "agrar/ernte-liste": "/agrar/ernte",
+                "agrar/kulturpflanzen-liste": "/agrar/kulturpflanzen",
+                "zertifikate/liste": "/zertifikate",
+                "benachrichtigungen/liste": "/benachrichtigungen",
+                "qualitaet/labor-liste": "/qualitaet/labor-liste",
+                "disposition/liste": "/disposition",
+                "crm/kontakte-liste": "/crm/kontakte-liste",
+                "crm/betriebsprofile-liste": "/crm/betriebsprofile",
+                "sales/angebote-liste": "/sales/angebote-liste",
+                "sales/auftraege-liste": "/sales/auftraege-liste",
+                "sales/lieferungen-liste": "/sales/lieferungen-liste",
+                "einkauf/rechnungseingaenge-liste": "/einkauf/rechnungseingaenge-liste",
+                "service/anfragen-liste": "/service/anfragen",
+                "compliance/enni-meldungen-liste": "/compliance/enni-meldungen",
+                "qualitaet/reklamationen-liste": "/qualitaet/reklamationen",
+                "marketing/kampagnen-liste": "/marketing/kampagnen",
+                "crm/kunden-liste": "/crm/kunden-liste",
+                "crm/lieferanten-liste": "/crm/lieferanten-liste",
+                "banken/konten-liste": "/banken/konten",
+                "fuhrpark/rechnungen-liste": "/fuhrpark/fuhrpark-rechnungen",
+                "agrar/feldbuch-massnahmen-liste": "/agrar/feldbuch/massnahmen",
+                "agrar/saatzucht-partien-liste": "/agrar/saatzucht",
+                "einkauf/frachtauftraege-liste": "/einkauf/frachtauftraege-eingang",
+                "finance/ap-invoices-liste": "/finance/ap-invoices-list",
+                "finance/payment-matching-liste": "/finance/payment-matching",
+                "finance/bookings/new": "/finance/bookings/new",
+                "kontrakte/liste": "/kontrakte/LstKontraktUebersicht",
+                "dokumente/ablage-liste": "/dokumente/ablage",
+                "vertrag/rahmenvertraege-liste": "/vertrag/rahmenvertraege",
+                "tankstelle/zapfungen-liste": "/tankstelle/zapfungen",
+                "waage/liste": "/waage/liste",
+                "compliance/cross-compliance-liste": "/compliance/cross-compliance",
+                "compliance/zulassungen-liste": "/compliance/zulassungen-register",
+                "compliance/vvvo-liste": "/compliance/vvvo-register",
+                "compliance/sachkunde-liste": "/compliance/sachkunde-register",
+                "compliance/saatgut-nachbau-liste": "/compliance/saatgut-nachbau",
+                "admin/audit-log-liste": "/admin/audit-log",
+                "agrar/bodenproben-liste": "/agrar/bodenproben/liste",
+                "agrar/ernte-annahme-energiemais-liste": "/agrar/ernte-annahme-energiemais",
+                "agrar/feldbuch-schlagkartei-liste": "/agrar/feldbuch/ackerschlagkartei",
+                "agrar/feldbuch-flurstueck-kataster-liste": "/agrar/feldbuch/flurstueck-kataster",
+                "agrar/kultur-stamm-liste": "/agrar/kultur-stamm",
+                "agrar/maschinen-auslastung-liste": "/agrar/maschinen-auslastung",
+                "agrar/nachhaltigkeit-eudr-liste": "/agrar/nachhaltigkeit-eudr",
+                "agrar/pflanzenschutz-applikationen-liste": "/agrar/pflanzenschutz-applikationen",
+                "agrar/psm-abgabedokumentation-liste": "/agrar/psm/abgabedokumentation",
+                "agrar/psm-beratung-liste": "/agrar/psm/beratung",
+                "agrar/psm-sachkunde-register-liste": "/agrar/psm/sachkunde-register",
+                "agrar/psm-wasserschutz-liste": "/agrar/psm/wasserschutz",
+                "agrar/saatgut-bestellungen-liste": "/agrar/saatgut/bestellungen",
+                "agrar/saatgut-sortenregister-liste": "/agrar/saatgut/sortenregister",
+                "agrar/schlaege-liste": "/agrar/schlaege",
+                "agrar/schlaege-karte-liste": "/agrar/schlaege/karte",
+                "agrar/schlaege-kulturhistorie-liste": "/agrar/schlaege/kulturhistorie",
+                "agrar/vertrag-kontingente-liste": "/agrar/vertrag-kontingente",
+                "charge/wareneingang-liste": "/charge/wareneingang",
+                "compliance/bvl-umsatzmeldung-liste": "/compliance/bvl-umsatzmeldung",
+                "compliance/eudr-compliance-liste": "/compliance/eudr-compliance",
+                "compliance/export-pruefung-liste": "/compliance/export-pruefung",
+                "compliance/gefahrstoff-doku-liste": "/compliance/gefahrstoff-doku",
+                "compliance/qs-checkliste-liste": "/compliance/qs-checkliste",
+                "controlling/plan-ist-liste": "/controlling/plan-ist",
+                "crm/contact-detail-liste": "/crm/contact-detail",
+                "crm/kontakt-management-liste": "/crm/kontakt-management",
+                "crm/leads-liste": "/crm/lead-detail",
+                "einkauf/anfragen-create-liste": "/einkauf/anfragen-create",
+                "einkauf/angebote-vergleich-liste": "/einkauf/angebote-vergleich",
+                "einkauf/bestellvorschlaege-liste": "/einkauf/bestellvorschlaege",
+                "einkauf/dienstleistungen-haltung-liste": "/einkauf/dienstleistungen-haltung",
+                "einkauf/einkauf-vorgang-liste": "/einkauf/vorgang",
+                "einkauf/kontrakte-service-liste": "/einkauf/kontrakte-service",
+                "einkauf/rechnung-abgleich-liste": "/einkauf/rechnung-abgleich",
+                "einkauf/retouren-liste": "/einkauf/retouren",
+                "etiketten/druck-liste": "/etiketten/druck",
+                "export/intrastat-meldung-liste": "/export/intrastat-meldung",
+                "export/umsatzsteuer-voranmeldung-liste": "/export/umsatzsteuer-voranmeldung",
+                "fibu/anlagen-liste": "/fibu/anlagen",
+                "fibu/buchungsjournal-liste": "/fibu/buchungsjournal",
+                "fibu/debitoren-liste": "/fibu/debitoren",
+                "fibu/hauptbuch-liste": "/fibu/hauptbuch",
+                "fibu/kassenbuch-liste": "/fibu/kassenbuch",
+                "fibu/kostenstellen-liste": "/fibu/kostenstellenrechnung",
+                "fibu/kreditoren-liste": "/fibu/kreditoren",
+                "fibu/offene-posten-liste": "/fibu/offene-posten",
+                "fibu/schnittstelle-fibu-liste": "/fibu/schnittstelle-fibu",
+                "fibu/verbindlichkeiten-liste": "/fibu/verbindlichkeiten",
+                "fibu/zahlungslaeufe-liste": "/fibu/zahlungslaeufe"}
 LISTEN_SYNONYME = {"einkauf/anfragen": ["anfragen", "bedarfsanforderungen", "banf"],
                    "einkauf/angebote": ["angebote", "lieferantenangebote", "preisvergleich"],
                    "einkauf/anlieferavis-liste": ["avise", "lieferavise", "anlieferungen"],
@@ -1312,4 +3449,84 @@ LISTEN_SYNONYME = {"einkauf/anfragen": ["anfragen", "bedarfsanforderungen", "ban
                    "schaeden/liste": ["schaeden", "schadenmeldungen", "versicherungsschaeden"],
                    "admin/benutzer-liste": ["benutzer", "nutzer", "konten"],
                    "compliance/pcn-liste": ["pcn", "ufi", "giftinformation"],
-                   "personal/stundenzettel-liste": ["stundenzettel", "fahrerzeiten", "arbeitszeit"]}
+                   "personal/stundenzettel-liste": ["stundenzettel", "fahrerzeiten", "arbeitszeit"],
+                   "agrar/biostimulanzien-liste": ["biostimulanzien", "agrarprodukte", "stimulanzien"],
+                   "agrar/ernte-liste": ["ernte", "ernten", "ernteliste"],
+                   "agrar/kulturpflanzen-liste": ["kulturpflanzen", "kulturen", "fruchtfolge"],
+                   "zertifikate/liste": ["zertifikate", "zertifizierung", "qs nachweis"],
+                   "benachrichtigungen/liste": ["benachrichtigungen", "hinweise", "warnungen inbox"],
+                   "qualitaet/labor-liste": ["laborauftraege", "labor liste", "analysenauftrag"],
+                   "disposition/liste": ["disposition", "bestellvorschlag", "mindestbestand"],
+                   "crm/kontakte-liste": ["kontakte", "ansprechpartner", "kontaktliste"],
+                   "crm/betriebsprofile-liste": ["betriebsprofile", "landwirt", "farm profile"],
+                   "sales/angebote-liste": ["verkaufsangebote", "kundenangebote", "sales offers"],
+                   "sales/auftraege-liste": ["verkaufsauftraege", "kundenauftraege", "sales orders"],
+                   "sales/lieferungen-liste": ["lieferscheine", "auslieferungen", "delivery notes"],
+                   "einkauf/rechnungseingaenge-liste": ["rechnungseingang", "eingangsrechnungen", "ap liste"],
+                   "service/anfragen-liste": ["service", "tickets", "serviceanfragen"],
+                   "compliance/enni-meldungen-liste": ["enni", "duengemeldung", "naehrstoffmeldung"],
+                   "qualitaet/reklamationen-liste": ["reklamationen", "beanstandungen", "maengel"],
+                   "marketing/kampagnen-liste": ["marketing kampagnen", "werbekampagnen", "kampagne marketing"],
+                   "crm/kunden-liste": ["kundenliste", "kundenstamm", "kunden"],
+                   "crm/lieferanten-liste": ["lieferantenliste", "lieferanten crm", "einkaufspartner"],
+                   "banken/konten-liste": ["bankkonten", "hausbank", "konten"],
+                   "dokumente/ablage-liste": ["dokumentenablage", "dms ablage", "dokumente"],
+                   "vertrag/rahmenvertraege-liste": ["rahmenvertraege", "kontrakt rahmen", "restmenge"],
+                   "tankstelle/zapfungen-liste": ["tankstelle", "zapfungen", "diesel zapfung"],
+                   "waage/liste": ["waagen", "eichung", "brueckenwaage"],
+                   "compliance/cross-compliance-liste": ["cross compliance", "direktzahlungen", "gaep"],
+                   "compliance/zulassungen-liste": ["zulassungsregister", "produktzulassung"],
+                   "compliance/vvvo-liste": ["vvvo register", "tierhaltung register"],
+                   "compliance/sachkunde-liste": ["sachkundenachweis", "psm sachkunde"],
+                   "compliance/saatgut-nachbau-liste": ["saatgut nachbau", "nachbauflaeche"],
+                   "admin/audit-log-liste": ['audit-log', 'audit-log'],
+                   "agrar/bodenproben-liste": ['Bodenproben', 'bodenproben-liste'],
+                   "agrar/ernte-annahme-energiemais-liste": ['Ernte Annahme Energiemais', 'ernte-annahme-energiemais-liste'],
+                   "agrar/feldbuch-schlagkartei-liste": ['Ackerschlagkartei', 'feldbuch-schlagkartei-liste'],
+                   "agrar/feldbuch-flurstueck-kataster-liste": ['Flurstueck-Kataster', 'feldbuch-flurstueck-kataster-liste'],
+                   "agrar/kultur-stamm-liste": ['Kulturen', 'kultur-stamm-liste'],
+                   "agrar/maschinen-auslastung-liste": ['Maschinenauslastung', 'maschinen-auslastung-liste'],
+                   "agrar/nachhaltigkeit-eudr-liste": ['EUDR Nachhaltigkeit', 'nachhaltigkeit-eudr-liste'],
+                   "agrar/pflanzenschutz-applikationen-liste": ['Pflanzenschutz-Applikationen', 'pflanzenschutz-applikationen-liste'],
+                   "agrar/psm-abgabedokumentation-liste": ['PSM Abgabedokumentation', 'psm-abgabedokumentation-liste'],
+                   "agrar/psm-beratung-liste": ['PSM Beratung', 'psm-beratung-liste'],
+                   "agrar/psm-sachkunde-register-liste": ['PSM Sachkunde', 'psm-sachkunde-register-liste'],
+                   "agrar/psm-wasserschutz-liste": ['Wasserschutz', 'psm-wasserschutz-liste'],
+                   "agrar/saatgut-bestellungen-liste": ['Saatgut-Bestellungen', 'saatgut-bestellungen-liste'],
+                   "agrar/saatgut-sortenregister-liste": ['Sortenregister', 'saatgut-sortenregister-liste'],
+                   "agrar/schlaege-liste": ['Schlaege', 'schlaege-liste'],
+                   "agrar/schlaege-karte-liste": ['Schlagkarte', 'schlaege-karte-liste'],
+                   "agrar/schlaege-kulturhistorie-liste": ['Kulturhistorie', 'schlaege-kulturhistorie-liste'],
+                   "agrar/vertrag-kontingente-liste": ['Vertrag-Kontingente', 'vertrag-kontingente-liste'],
+                   "charge/wareneingang-liste": ['Wareneingang Chargen', 'wareneingang-liste'],
+                   "compliance/bvl-umsatzmeldung-liste": ['BVL Umsatzmeldung', 'bvl-umsatzmeldung-liste'],
+                   "compliance/eudr-compliance-liste": ['EUDR Compliance', 'eudr-compliance-liste'],
+                   "compliance/export-pruefung-liste": ['Export-Pruefung', 'export-pruefung-liste'],
+                   "compliance/gefahrstoff-doku-liste": ['Gefahrstoff-Doku', 'gefahrstoff-doku-liste'],
+                   "compliance/qs-checkliste-liste": ['QS-Checkliste', 'qs-checkliste-liste'],
+                   "controlling/plan-ist-liste": ['Plan-Ist', 'plan-ist-liste'],
+                   "crm/contact-detail-liste": ['Kontakte', 'contact-detail-liste'],
+                   "crm/kontakt-management-liste": ['Kontakt-Management', 'kontakt-management-liste'],
+                   "crm/leads-liste": ['Leads', 'leads-liste'],
+                   "einkauf/anfragen-create-liste": ['Anfragen', 'anfragen-create-liste'],
+                   "einkauf/angebote-vergleich-liste": ['Angebotsvergleich', 'angebote-vergleich-liste'],
+                   "einkauf/bestellvorschlaege-liste": ['Bestellvorschlaege', 'bestellvorschlaege-liste'],
+                   "einkauf/dienstleistungen-haltung-liste": ['Dienstleistungen Haltung', 'dienstleistungen-haltung-liste'],
+                   "einkauf/einkauf-vorgang-liste": ['Einkaufsvorgaenge', 'einkauf-vorgang-liste'],
+                   "einkauf/kontrakte-service-liste": ['Kontrakte Service', 'kontrakte-service-liste'],
+                   "einkauf/rechnung-abgleich-liste": ['Rechnungsabgleich', 'rechnung-abgleich-liste'],
+                   "einkauf/retouren-liste": ['Retouren', 'retouren-liste'],
+                   "etiketten/druck-liste": ['Etikettendruck', 'druck-liste'],
+                   "export/intrastat-meldung-liste": ['Intrastat-Meldung', 'intrastat-meldung-liste'],
+                   "export/umsatzsteuer-voranmeldung-liste": ['USt-Voranmeldung', 'umsatzsteuer-voranmeldung-liste'],
+                   "fibu/anlagen-liste": ['Anlagen', 'anlagen-liste'],
+                   "fibu/buchungsjournal-liste": ['Buchungsjournal', 'buchungsjournal-liste'],
+                   "fibu/debitoren-liste": ['Debitoren OP', 'debitoren-liste'],
+                   "fibu/hauptbuch-liste": ['Hauptbuch', 'hauptbuch-liste'],
+                   "fibu/kassenbuch-liste": ['Kassenbuch', 'kassenbuch-liste'],
+                   "fibu/kostenstellen-liste": ['Kostenstellen', 'kostenstellen-liste'],
+                   "fibu/kreditoren-liste": ['Kreditoren OP', 'kreditoren-liste'],
+                   "fibu/offene-posten-liste": ['Offene Posten', 'offene-posten-liste'],
+                   "fibu/schnittstelle-fibu-liste": ['FIBU-Schnittstelle', 'schnittstelle-fibu-liste'],
+                   "fibu/verbindlichkeiten-liste": ['Verbindlichkeiten', 'verbindlichkeiten-liste'],
+                   "fibu/zahlungslaeufe-liste": ['Zahlungslaeufe', 'zahlungslaeufe-liste']}

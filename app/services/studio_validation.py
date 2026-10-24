@@ -243,7 +243,7 @@ def validate_studio_draft(
         elif _DANGER_RANK[draft_danger] < _DANGER_RANK[base["dangerLevel"]]:
             violations.append(f"action_dangerLevel_gesenkt:{key}")
         # Transport identifiers cannot select an alternative command or human form.
-        for field in ("command", "commandBinding", "inputFlow", "navigationRoute"):
+        for field in ("command", "commandBinding", "inputFlow", "navigationRoute", "download"):
             if field in action and action[field] != base.get(field):
                 violations.append(f"action_fremder_{field}:{key}")
         if action.get("method", "POST") != base.get("method", "POST"):

@@ -1,0 +1,689 @@
+import { useState, useEffect } from 'react'
+import { useNavigate, useParams } from '@/app/routing/typed-router'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
+import { ObjectPage } from '@/components/mask-builder'
+import { useMaskData } from '@/components/mask-builder/hooks'
+import { MaskConfig } from '@/components/mask-builder/types'
+import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { toast } from '@/hooks/use-toast'
+import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
+import { CheckCircle, XCircle, ShoppingCart, Send, Mail } from 'lucide-react'
+import { Checkbox } from '@/components/ui/checkbox'
+import { apiClient } from '@/lib/api-client'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { renderValue, stringValue } from '@/lib/record-utils'
+
+const createAnfrageConfig = (t: TFunction, entityTypeLabel: string): MaskConfig => ({
+  title: entityTypeLabel,
+  subtitle: t('crud.actions.create'),
+  type: 'object-page',
+  tabs: [
+    {
+      key: 'stammdaten',
+      label: t('crud.detail.basicInfo'),
+      fields: [
+        {
+          name: 'anfrageNummer',
+          label: t('crud.fields.number'),
+          type: 'text',
+          required: true,
+          readonly: true
+        },
+        {
+          name: 'typ',
+          label: t('crud.fields.type'),
+          type: 'select',
+          required: true,
+          options: [
+            { value: 'BANF', label: `${t('crud.entities.purchaseRequest')} (BANF)` },
+            { value: 'ANF', label: `${t('crud.entities.purchaseRequest')} (ANF)` }
+          ]
+        },
+        {
+          name: 'anforderer',
+          label: t('crud.fields.requestedBy'),
+          type: 'text',
+          required: true
+        },
+        {
+          name: 'status',
+          label: t('crud.fields.status'),
+          type: 'select',
+          required: true,
+          options: [
+            { value: 'ENTWURF', label: t('status.draft') },
+            { value: 'FREIGEGEBEN', label: t('status.approved') },
+            { value: 'ANGEBOTSPHASE', label: t('status.pending') },
+            { value: 'BESTELLT', label: t('status.completed') },
+            { value: 'ABGELEHNT', label: t('status.rejected') }
+          ],
+          readonly: true // Status wird nur über Actions geändert
+        }
+      ]
+    },
+    {
+      key: 'bedarf',
+      label: t('crud.fields.requirement'),
+      fields: [
+        {
+          name: 'artikel',
+          label: t('crud.fields.product'),
+          type: 'lookup',
+          required: true,
+          endpoint: '/api/v1/articles',
+          displayField: 'name',
+          valueField: 'id'
+        },
+        {
+          name: 'menge',
+          label: t('crud.fields.quantity'),
+          type: 'number',
+          required: true
+        },
+        {
+          name: 'einheit',
+          label: t('crud.fields.unit'),
+          type: 'select',
+          required: true,
+          options: [
+            { value: 'kg', label: 'kg' },
+            { value: 't', label: 't' },
+            { value: 'l', label: 'l' },
+            { value: 'Stk', label: 'Stk' }
+          ]
+        },
+        {
+          name: 'prioritaet',
+          label: t('crud.fields.priority'),
+          type: 'select',
+          required: true,
+          options: [
+            { value: 'niedrig', label: t('crud.fields.priorityLow') },
+            { value: 'normal', label: t('crud.fields.priorityNormal') },
+            { value: 'hoch', label: t('crud.fields.priorityHigh') },
+            { value: 'dringend', label: t('crud.fields.priorityUrgent') }
+          ]
+        },
+        {
+          name: 'faelligkeit',
+          label: t('crud.fields.dueDate'),
+          type: 'date',
+          required: true
+        }
+      ]
+    },
+    {
+      key: 'details',
+      label: t('crud.detail.additionalInfo'),
+      fields: [
+        {
+          name: 'begruendung',
+          label: t('crud.fields.reason'),
+          type: 'textarea',
+          required: true,
+          placeholder: t('crud.tooltips.placeholders.reason')
+        },
+        {
+          name: 'kostenstelle',
+          label: t('crud.fields.costCenter'),
+          type: 'lookup',
+          endpoint: '/api/cost-centers',
+          displayField: 'name',
+          valueField: 'id'
+        },
+        {
+          name: 'projekt',
+          label: t('crud.fields.project'),
+          type: 'lookup',
+          endpoint: '/api/projects',
+          displayField: 'name',
+          valueField: 'id'
+        },
+        {
+          name: 'bemerkungen',
+          label: t('crud.fields.notes'),
+          type: 'textarea',
+          placeholder: t('crud.tooltips.placeholders.notes')
+        }
+      ]
+    }
+  ],
+  actions: [], // Actions werden in Komponente implementiert
+  api: {
+    baseUrl: '/api/v1/einkauf/anfragen',
+    endpoints: {
+      list: '/api/v1/einkauf/anfragen',
+      get: '/api/v1/einkauf/anfragen/{id}',
+      create: '/api/v1/einkauf/anfragen',
+      update: '/api/v1/einkauf/anfragen/{id}',
+      delete: '/api/v1/einkauf/anfragen/{id}'
+    }
+  },
+  permissions: ['einkauf.read', 'einkauf.write']
+})
+
+export default function AnfrageStammPage(): JSX.Element {
+  const { t } = useTranslation()
+  const navigate = useNavigate()
+  const { id } = useParams<{ id: string }>()
+  const [loading, setLoading] = useState(false)
+  const [approveDialogOpen, setApproveDialogOpen] = useState(false)
+  const [rejectDialogOpen, setRejectDialogOpen] = useState(false)
+  const [rejectReason, setRejectReason] = useState('')
+  const [convertDialogOpen, setConvertDialogOpen] = useState(false)
+  const [sendRfqDialogOpen, setSendRfqDialogOpen] = useState(false)
+  const [selectedSuppliers, setSelectedSuppliers] = useState<string[]>([])
+  const [availableSuppliers, setAvailableSuppliers] = useState<Record<string, unknown>[]>([])
+  const entityType = 'purchaseRequest'
+  const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Anfrage')
+  const anfrageConfig = createAnfrageConfig(t, entityTypeLabel)
+
+  const { data, saveData, loadData } = useMaskData({
+    apiUrl: anfrageConfig.api.baseUrl,
+    id: id || undefined
+  })
+
+  // Lade verfügbare Lieferanten
+  useEffect(() => {
+    const loadSuppliers = async () => {
+      try {
+        const suppliers = (await apiClient.get<Record<string, unknown>[] | { data?: Record<string, unknown>[] }>('/api/v1/crm/business-partners?type=supplier')).data
+        setAvailableSuppliers(Array.isArray(suppliers) ? suppliers : suppliers?.data || [])
+      } catch {
+        // Lieferantenliste im RFQ-Dialog bleibt leer — kein Blocker für den Nutzer
+      }
+    }
+    if (sendRfqDialogOpen) {
+      loadSuppliers()
+    }
+  }, [sendRfqDialogOpen])
+
+  const handleSave = async (formData: Record<string, unknown>) => {
+    setLoading(true)
+    try {
+      // Status-Transition validieren
+      const currentStatus = stringValue(data?.status)
+      const nextStatus = stringValue(formData.status)
+      if (data && nextStatus !== currentStatus) {
+        const allowedTransitions: Record<string, string[]> = {
+          'ENTWURF': ['FREIGEGEBEN'],
+          'FREIGEGEBEN': ['ANGEBOTSPHASE', 'BESTELLT', 'ABGELEHNT'],
+          'ANGEBOTSPHASE': ['BESTELLT', 'ABGELEHNT'],
+          'BESTELLT': [],
+          'ABGELEHNT': [],
+        }
+
+        const allowed = allowedTransitions[currentStatus] || []
+        if (!allowed.includes(nextStatus)) {
+          toast({
+            variant: 'destructive',
+            title: t('crud.messages.validationError'),
+            description: `Ungueltiger Status-Uebergang: ${currentStatus} -> ${nextStatus}`,
+          })
+          setLoading(false)
+          return
+        }
+      }
+
+      await saveData(formData)
+      toast({
+        title: t('crud.messages.updateSuccess', { entityType: entityTypeLabel }),
+      })
+      navigate('/einkauf/anfragen')
+    } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
+      toast({
+        variant: 'destructive',
+        title: t('crud.messages.updateError', { entityType: entityTypeLabel }),
+        description: error.response?.data?.detail || error.message,
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleCancel = () => {
+    if (confirm(t('crud.messages.discardChanges'))) {
+      navigate('/einkauf/anfragen')
+    }
+  }
+
+  const handleApprove = async () => {
+    if (!data || !id) return
+
+    setLoading(true)
+    try {
+      const updateData = {
+        ...data,
+        status: 'FREIGEGEBEN',
+      }
+
+      await saveData(updateData)
+
+      toast({
+        title: t('crud.messages.approveSuccess', { entityType: entityTypeLabel }),
+        description: 'Die Anfrage wurde freigegeben',
+      })
+
+      setApproveDialogOpen(false)
+      loadData()
+    } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
+      toast({
+        variant: 'destructive',
+        title: t('crud.messages.approveError', { entityType: entityTypeLabel }),
+        description: error.response?.data?.detail || error.message,
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleReject = async () => {
+    if (!rejectReason || rejectReason.length < 10) {
+      toast({
+        variant: 'destructive',
+        title: t('crud.messages.validationError'),
+        description: t('crud.messages.reasonMinLength'),
+      })
+      return
+    }
+
+    if (!data || !id) return
+
+    setLoading(true)
+    try {
+      const updateData = {
+        ...data,
+        status: 'ABGELEHNT',
+        ablehnungsgrund: rejectReason,
+      }
+
+      await saveData(updateData)
+
+      toast({
+        title: t('crud.messages.cancelSuccess', { entityType: entityTypeLabel }),
+        description: 'Die Anfrage wurde abgelehnt',
+      })
+
+      setRejectDialogOpen(false)
+      setRejectReason('')
+      loadData()
+    } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
+      toast({
+        variant: 'destructive',
+        title: t('crud.messages.cancelError', { entityType: entityTypeLabel }),
+        description: error.response?.data?.detail || error.message,
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleConvertToOrder = async () => {
+    if (!data || !id) return
+
+    setLoading(true)
+    try {
+      // Update Status auf BESTELLT
+      const updateData = {
+        ...data,
+        status: 'BESTELLT',
+      }
+
+      await saveData(updateData)
+
+      // Navigate to create PO from requisition
+      navigate(`/einkauf/bestellungen/neu?requisitionId=${id}`)
+
+      toast({
+        title: t('crud.messages.createSuccess', { entityType: entityTypeLabel }),
+        description: 'Bitte vervollständigen Sie die Bestellung',
+      })
+
+      setConvertDialogOpen(false)
+    } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
+      toast({
+        variant: 'destructive',
+        title: t('crud.messages.createError', { entityType: entityTypeLabel }),
+        description: error.response?.data?.detail || error.message,
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSendRfq = async () => {
+    if (!data || !id || selectedSuppliers.length === 0) {
+      toast({
+        variant: 'destructive',
+        title: t('crud.messages.validationError'),
+        description: t('crud.messages.selectAtLeastOneSupplier'),
+      })
+      return
+    }
+
+    setLoading(true)
+    try {
+      // Der Server mailt jedem Lieferanten (Postfach "einkauf") und setzt erst danach
+      // ANGEBOTSPHASE; ohne Postfach oder Adresse kommt ein Fehler mit Grund zurueck.
+      const res = await apiClient.post<{ count: number; versand?: { name: string; status: string; fehler?: string | null }[] }>(
+        `/api/v1/einkauf/anfragen/${encodeURIComponent(String(id))}/send`,
+        { supplierIds: selectedSuppliers, method: 'email' },
+      )
+      const nichtErreicht = (res.data.versand ?? []).filter((v) => v.status !== 'gesendet')
+      toast({
+        title: t('crud.messages.rfqSentSuccess'),
+        description: [
+          t('crud.messages.rfqSentToSuppliers', { count: res.data.count }),
+          ...nichtErreicht.map((v) => `${v.name}: ${v.fehler ?? v.status}`),
+        ].join(' · '),
+      })
+
+      setSendRfqDialogOpen(false)
+      setSelectedSuppliers([])
+      loadData()
+    } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
+      toast({
+        variant: 'destructive',
+        title: t('crud.messages.rfqSendError'),
+        description: error.response?.data?.detail ?? error.message,
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const status = stringValue(data?.status)
+  const canApprove = status === 'ENTWURF'
+  const canReject = status === 'ENTWURF' || status === 'FREIGEGEBEN'
+  const canConvert = status === 'FREIGEGEBEN' || status === 'ANGEBOTSPHASE'
+  const canSendRfq = status === 'FREIGEGEBEN'
+  const operationalStatus = normalizeOperationalStatus(status)
+  const operationalBlocker = status === 'ABGELEHNT'
+    ? 'Die Anfrage ist abgelehnt und braucht eine neue fachliche Entscheidung.'
+    : status === 'FREIGEGEBEN' && selectedSuppliers.length === 0
+      ? 'Fuer die Angebotsphase sind noch keine Lieferanten ausgewaehlt.'
+      : null
+  const contextSections = data ? [
+    {
+      title: 'Bedarf',
+      items: [
+        { label: 'Artikel', value: renderValue(data.artikel, 'Noch offen') },
+        { label: 'Menge', value: data.menge ? `${renderValue(data.menge)} ${renderValue(data.einheit)}`.trim() : 'Noch offen' },
+        { label: 'Faelligkeit', value: renderValue(data.faelligkeit, 'Nicht gesetzt') },
+      ],
+    },
+    {
+      title: 'Wirtschaft',
+      items: [
+        { label: 'Prioritaet', value: renderValue(data.prioritaet, 'normal') },
+        { label: 'Kostenstelle', value: renderValue(data.kostenstelle, 'Nicht zugeordnet') },
+        { label: 'Projekt', value: renderValue(data.projekt, 'Kein Projekt') },
+      ],
+    },
+    {
+      title: 'Governance',
+      items: [
+        { label: 'Anforderer', value: renderValue(data.anforderer, 'Unbekannt') },
+        { label: 'Status', value: status || 'offen' },
+        { label: 'Lieferanten bereit', value: availableSuppliers.length > 0 ? `${availableSuppliers.length}` : 'keine geladen' },
+      ],
+    },
+  ] : []
+  const timelineItems = data ? [
+    { label: 'Anfrage angelegt', detail: renderValue(data.anfrageNummer, renderValue(data.id, 'Unnummeriert')) },
+    { label: 'Aktueller Status', detail: status || 'ENTWURF' },
+    ...(data.faelligkeit ? [{ label: 'Bedarf faellig', detail: renderValue(data.faelligkeit) }] : []),
+  ] : []
+
+  return (
+    <div className="space-y-6">
+      <ModuleToolbar backTarget="/einkauf/anfragen" closeTarget="/einkauf/anfragen" title={entityTypeLabel} />
+      {id && data ? (
+        <div className="space-y-4">
+          <OperationalCaseHeader
+            title="Beschaffungsanfrage steuern"
+            description="Die Anfrage zeigt nur den freizugebenden Bedarf, den wirtschaftlichen Kontext und die naechste zulassige Folgeaktion."
+            status={operationalStatus}
+            owner={renderValue(data.anforderer, 'Einkauf')}
+            blocker={operationalBlocker}
+            nextAction={
+              status === 'ENTWURF'
+                ? 'Freigeben oder fachlich ablehnen'
+                : status === 'FREIGEGEBEN'
+                  ? 'Lieferanten fuer RFQ auswaehlen'
+                  : status === 'ANGEBOTSPHASE'
+                    ? 'In Bestellung ueberfuehren oder ablehnen'
+                    : 'Vorgang nachhalten'
+            }
+            caseLabel={renderValue(data.anfrageNummer, 'Anfrage')}
+            tags={['Einkauf', 'Bedarf']}
+          />
+          <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+            <OperationalTimeline title="Vorgangsverlauf" items={timelineItems} />
+            <OperationalContextPanel title="Anfragekontext" sections={contextSections} />
+          </div>
+        </div>
+      ) : null}
+      <ObjectPage
+        config={anfrageConfig}
+        data={data}
+        onSave={handleSave}
+        onCancel={handleCancel}
+        isLoading={loading}
+      />
+
+      {/* Action Buttons */}
+      {id && data && (
+        <div className="fixed bottom-6 right-6 flex flex-col gap-2">
+          {canApprove && (
+            <Button
+              onClick={() => setApproveDialogOpen(true)}
+              className="shadow-lg"
+              size="lg"
+            >
+              <CheckCircle className="h-4 w-4 mr-2" />
+              {t('crud.actions.approve')}
+            </Button>
+          )}
+          {canReject && (
+            <Button
+              variant="destructive"
+              onClick={() => setRejectDialogOpen(true)}
+              className="shadow-lg"
+              size="lg"
+            >
+              <XCircle className="h-4 w-4 mr-2" />
+              {t('crud.actions.reject')}
+            </Button>
+          )}
+          {canSendRfq && (
+            <Button
+              variant="default"
+              onClick={() => setSendRfqDialogOpen(true)}
+              className="shadow-lg"
+              size="lg"
+            >
+              <Send className="h-4 w-4 mr-2" />
+              {t('crud.actions.sendRfq')}
+            </Button>
+          )}
+          {canConvert && (
+            <Button
+              variant="default"
+              onClick={() => setConvertDialogOpen(true)}
+              className="shadow-lg"
+              size="lg"
+            >
+              <ShoppingCart className="h-4 w-4 mr-2" />
+              {t('crud.actions.convertToOrder')}
+            </Button>
+          )}
+        </div>
+      )}
+
+      {/* Approve Dialog */}
+      <Dialog open={approveDialogOpen} onOpenChange={setApproveDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('crud.actions.approve')}</DialogTitle>
+            <DialogDescription>
+              Möchten Sie diese Anfrage wirklich freigeben?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setApproveDialogOpen(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button onClick={handleApprove} disabled={loading}>
+              {loading ? t('common.loading') : t('crud.actions.approve')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reject Dialog */}
+      <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('crud.actions.reject')}</DialogTitle>
+            <DialogDescription>
+              Bitte geben Sie einen Grund für die Ablehnung an (mindestens 10 Zeichen).
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="rejectReason">{t('crud.dialogs.cancel.reasonRequired')}</Label>
+              <Textarea
+                id="rejectReason"
+                value={rejectReason}
+                onChange={(e) => setRejectReason(e.target.value)}
+                placeholder={t('crud.dialogs.cancel.reasonPlaceholder')}
+                required
+                minLength={10}
+                rows={4}
+              />
+              <p className="text-sm text-muted-foreground mt-1">
+                {t('crud.dialogs.cancel.reasonMinLength')}
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRejectDialogOpen(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleReject}
+              disabled={loading || rejectReason.length < 10}
+            >
+              {loading ? t('common.loading') : t('crud.actions.reject')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Convert to Order Dialog */}
+      <Dialog open={convertDialogOpen} onOpenChange={setConvertDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('crud.actions.convertToOrder')}</DialogTitle>
+            <DialogDescription>
+              Möchten Sie aus dieser Anfrage eine Bestellung erstellen?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConvertDialogOpen(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button onClick={handleConvertToOrder} disabled={loading}>
+              {loading ? t('common.loading') : t('crud.actions.convertToOrder')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Send RFQ Dialog */}
+      <Dialog open={sendRfqDialogOpen} onOpenChange={setSendRfqDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{t('crud.actions.sendRfq')}</DialogTitle>
+            <DialogDescription>
+              {t('crud.dialogs.sendRfq.description')}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>{t('crud.fields.selectSuppliers')}</Label>
+              <div className="border rounded-md p-4 max-h-64 overflow-y-auto space-y-2">
+                {availableSuppliers.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">{t('crud.messages.noSuppliersAvailable')}</p>
+                ) : (
+                  availableSuppliers.map((supplier) => {
+                    const supplierId = stringValue(supplier.id)
+                    const supplierName = stringValue(supplier.name, stringValue(supplier.legalName, supplierId))
+                    const supplierEmail = stringValue(supplier.email)
+                    return (
+                    <div key={supplierId} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`supplier-${supplierId}`}
+                        checked={selectedSuppliers.includes(supplierId)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setSelectedSuppliers([...selectedSuppliers, supplierId])
+                          } else {
+                            setSelectedSuppliers(selectedSuppliers.filter((id) => id !== supplierId))
+                          }
+                        }}
+                      />
+                      <Label
+                        htmlFor={`supplier-${supplierId}`}
+                        className="flex-1 cursor-pointer"
+                      >
+                        {supplierName}
+                        {supplierEmail && (
+                          <span className="text-sm text-muted-foreground ml-2">
+                            ({supplierEmail})
+                          </span>
+                        )}
+                      </Label>
+                    </div>
+                  )})
+                )}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSendRfqDialogOpen(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button
+              onClick={handleSendRfq}
+              disabled={loading || selectedSuppliers.length === 0}
+            >
+              {loading ? t('common.loading') : (
+                <>
+                  <Mail className="h-4 w-4 mr-2" />
+                  {t('crud.actions.sendRfq')}
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  )
+}
+

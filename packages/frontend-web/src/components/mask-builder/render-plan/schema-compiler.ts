@@ -220,7 +220,7 @@ export function compileTwin(schema: ScreenDefinition): RenderTwinPlan | undefine
 function schemaVolatility(schema: ScreenDefinition): string {
   // Studio edits retain the same screen ID/version until they are saved. All
   // editable field/table/tab/layout contracts must participate in this cache.
-  const structure = JSON.stringify({ documentVariant: schema.documentVariant, fields: schema.fields, tables: schema.tables, tabs: schema.tabs, layout: schema.layout, dataSources: schema.dataSources })
+  const structure = JSON.stringify({ actions: schema.actions, documentVariant: schema.documentVariant, fields: schema.fields, tables: schema.tables, tabs: schema.tabs, layout: schema.layout, dataSources: schema.dataSources })
   const summary = (schema.summary ?? []).map((item) => `${item.key}:${String(item.value)}`).join(',')
   const options = (schema.fields ?? []).map((field) => (
     // Auch die Beschriftung: Eine Auswahl kann bei gleichen Werten neu beschriftet werden (Vorschlagshinweis).

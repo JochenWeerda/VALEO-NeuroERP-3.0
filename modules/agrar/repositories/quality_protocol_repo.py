@@ -10,7 +10,7 @@ from typing import Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, desc
 
-from app.infrastructure.models import QualityProtocol
+from app.infrastructure.models import HarvestAcceptance, QualityProtocol
 from modules.agrar.services.quality_protocol_service import (
     QualityProtocol as ServiceQualityProtocol,
     QualityProtocolRepository,
@@ -18,11 +18,32 @@ from modules.agrar.services.quality_protocol_service import (
 )
 
 
+class AcceptanceNotOwnedError(ValueError):
+    """The referenced acceptance does not exist in the active tenant."""
+
+
 class QualityProtocolRepositoryImpl:
     """SQLAlchemy-Implementierung des Quality Protocol Repository."""
     
-    def __init__(self, db: Session):
+    def __init__(self, db: Session, tenant_id: str):
+        if not tenant_id:
+            raise ValueError("Tenant context required for quality protocols")
         self.db = db
+        self.tenant_id = tenant_id
+
+    def ensure_acceptance_owned(self, acceptance_id: str | None, *, lock: bool = False) -> None:
+        if acceptance_id is None:
+            return
+        query = self.db.query(HarvestAcceptance).filter(
+            HarvestAcceptance.id == acceptance_id,
+            HarvestAcceptance.tenant_id == self.tenant_id,
+        )
+        # Serializes version allocation for one acceptance; ordinary reads stay nonblocking.
+        if lock:
+            query = query.with_for_update().populate_existing()
+        parent = query.first()
+        if parent is None:
+            raise AcceptanceNotOwnedError("Harvest acceptance not found for tenant")
     
     def _to_service(self, db_model: QualityProtocol) -> ServiceQualityProtocol:
         """Konvertiert DB-Model zu Service-Model."""
@@ -80,6 +101,9 @@ class QualityProtocolRepositoryImpl:
     
     def create(self, protocol: ServiceQualityProtocol) -> ServiceQualityProtocol:
         """Erstellt ein neues Qualitätsprotokoll."""
+        if protocol.tenant_id != self.tenant_id:
+            raise ValueError("Quality protocol tenant mismatch")
+        self.ensure_acceptance_owned(protocol.harvest_acceptance_id)
         db_model = self._from_service(protocol)
         self.db.add(db_model)
         self.db.commit()
@@ -89,7 +113,8 @@ class QualityProtocolRepositoryImpl:
     def get_by_id(self, protocol_id: str) -> Optional[ServiceQualityProtocol]:
         """Ruft ein Protokoll anhand der ID ab."""
         db_model = self.db.query(QualityProtocol).filter(
-            QualityProtocol.id == protocol_id
+            QualityProtocol.id == protocol_id,
+            QualityProtocol.tenant_id == self.tenant_id,
         ).first()
         
         if not db_model:
@@ -99,16 +124,20 @@ class QualityProtocolRepositoryImpl:
     
     def get_by_harvest_acceptance(self, harvest_acceptance_id: str) -> list[ServiceQualityProtocol]:
         """Ruft alle Protokolle für eine Ernte-Annahme ab."""
+        self.ensure_acceptance_owned(harvest_acceptance_id)
         db_models = self.db.query(QualityProtocol).filter(
-            QualityProtocol.harvest_acceptance_id == harvest_acceptance_id
+            QualityProtocol.harvest_acceptance_id == harvest_acceptance_id,
+            QualityProtocol.tenant_id == self.tenant_id,
         ).order_by(QualityProtocol.version.asc()).all()
         
         return [self._to_service(m) for m in db_models]
     
     def get_latest(self, harvest_acceptance_id: str) -> Optional[ServiceQualityProtocol]:
         """Ruft das neueste Protokoll für eine Ernte-Annahme ab."""
+        self.ensure_acceptance_owned(harvest_acceptance_id)
         db_model = self.db.query(QualityProtocol).filter(
-            QualityProtocol.harvest_acceptance_id == harvest_acceptance_id
+            QualityProtocol.harvest_acceptance_id == harvest_acceptance_id,
+            QualityProtocol.tenant_id == self.tenant_id,
         ).order_by(desc(QualityProtocol.version)).first()
         
         if not db_model:
@@ -119,11 +148,14 @@ class QualityProtocolRepositoryImpl:
     def update(self, protocol_id: str, update: QualityProtocolUpdate) -> ServiceQualityProtocol:
         """Aktualisiert ein Protokoll."""
         db_model = self.db.query(QualityProtocol).filter(
-            QualityProtocol.id == protocol_id
-        ).first()
+            QualityProtocol.id == protocol_id,
+            QualityProtocol.tenant_id == self.tenant_id,
+        ).with_for_update().populate_existing().first()
         
         if not db_model:
             raise ValueError(f"Quality protocol {protocol_id} not found")
+        if db_model.is_final:
+            raise ValueError(f"Quality protocol {protocol_id} is finalized and cannot be updated")
         
         # Update Felder
         if update.moisture_pct is not None:
@@ -149,18 +181,22 @@ class QualityProtocolRepositoryImpl:
     def finalize(self, protocol_id: str, approved_by: str) -> ServiceQualityProtocol:
         """Finalisiert ein Protokoll."""
         db_model = self.db.query(QualityProtocol).filter(
-            QualityProtocol.id == protocol_id
-        ).first()
+            QualityProtocol.id == protocol_id,
+            QualityProtocol.tenant_id == self.tenant_id,
+        ).with_for_update().populate_existing().first()
         
         if not db_model:
             raise ValueError(f"Quality protocol {protocol_id} not found")
+        if db_model.is_final:
+            raise ValueError(f"Quality protocol {protocol_id} is already finalized")
         
         db_model.is_final = True
         db_model.approved_by = approved_by
         db_model.approved_at = datetime.now()
         db_model.updated_at = datetime.now()
         
-        self.db.commit()
+        # The API inserts the completion outbox event before committing this transaction.
+        self.db.flush()
         self.db.refresh(db_model)
         return self._to_service(db_model)
 

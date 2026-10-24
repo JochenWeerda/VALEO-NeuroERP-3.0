@@ -442,7 +442,7 @@ export default function BankAbgleichPage(): JSX.Element {
           toast({
             variant: 'destructive',
             title: t('crud.messages.reconciliationNotBalanced'),
-            description: t('crud.messages.reconciliationNotBalancedDesc', { 
+            description: t('crud.messages.reconciliationNotBalancedDesc', {
               difference: result.balance_comparison.difference == null ? 'Nicht ermittelt' : Number(result.balance_comparison.difference).toFixed(2)
             }),
           })

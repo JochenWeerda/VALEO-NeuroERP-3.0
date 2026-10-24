@@ -222,7 +222,7 @@ function CollabRailSection({
             {note.mentions.length > 0 && (
               <div className="mt-2 flex flex-wrap gap-1">
                 {note.mentions.map((mention) => (
-                  <Badge key={mention.user_id} variant="secondary" className="text-[11px]">
+                  <Badge key={mention.user_id} variant="secondary" className="text-2xs">
                     @{mention.display ?? mention.user_id}
                   </Badge>
                 ))}

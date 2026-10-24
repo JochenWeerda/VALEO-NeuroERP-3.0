@@ -8,7 +8,7 @@ import logging
 from datetime import datetime
 from typing import Optional
 
-from app.domains.shared.events import DomainEvent, IEventPublisher
+from app.domains.shared.events import DomainEvent, IntegrationEvent, IEventPublisher
 
 logger = logging.getLogger(__name__)
 
@@ -35,15 +35,23 @@ class NATSEventPublisher(IEventPublisher):
     async def publish(self, event: DomainEvent) -> None:
         """Publish event to NATS JetStream or fallback to logging."""
 
+        if isinstance(event, IntegrationEvent):
+            payload_tenant = event.payload.get("tenant_id")
+            if payload_tenant and str(payload_tenant) != str(event.tenant_id):
+                raise ValueError("Integration event payload tenant disagrees with event context")
+
         event_data = {
-            "event_type": event.__class__.__name__,
+            "event_type": event.event_type if isinstance(event, IntegrationEvent) else event.__class__.__name__,
             "event_id": event.event_id,
             "aggregate_id": event.aggregate_id,
             "timestamp": event.timestamp.isoformat(),
-            "payload": self._serialize_event(event),
+            "payload": event.payload if isinstance(event, IntegrationEvent) else self._serialize_event(event),
+            "tenant_id": getattr(event, "tenant_id", None),
         }
 
         if not self._connected or self._js is None:
+            if self.enabled:
+                raise RuntimeError("Enabled NATS publisher is not connected")
             logger.info(
                 "Event (fallback): %s id=%s",
                 event.__class__.__name__,
@@ -63,7 +71,7 @@ class NATSEventPublisher(IEventPublisher):
             )
         except Exception as e:
             logger.error("Failed to publish event to NATS: %s", e, exc_info=True)
-            logger.warning("Event fallback-logged: %s", event.__class__.__name__)
+            raise
 
     def _serialize_event(self, event: DomainEvent) -> dict:
         from dataclasses import asdict
@@ -90,7 +98,6 @@ class NATSEventPublisher(IEventPublisher):
         except Exception as e:
             logger.error("Failed to connect to NATS: %s", e)
             self._connected = False
-            self.enabled = False
 
     async def disconnect(self) -> None:
         """Disconnect from NATS server."""

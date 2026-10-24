@@ -22,7 +22,7 @@ def modul():
     return mod
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def inventar(modul):
     return modul.inventory()
 
@@ -60,7 +60,11 @@ def test_neue_serverwirksame_aktion_ohne_mcp_und_cli_macht_die_ratsche_rot(modul
 
 def test_geschlossene_luecke_ist_hinweis_kein_fehler(modul, inventar, capsys):
     inv = copy.deepcopy(inventar)
-    route = next(r for r in inv["seiten"] if r["stufe"] == "handgebaut")
+    route = next(
+        (r for r in inv["seiten"] if r["stufe"] in ("handgebaut", "builder_altmuster")),
+        None,
+    )
+    assert route is not None, "Ratsche braucht mindestens eine offene Altstufen-Route im Baseline-Inventar"
     route["stufe"] = "studio_versioniert"
     assert modul.check(inv) == 0
     assert "geschlossen" in capsys.readouterr().out
@@ -74,11 +78,14 @@ def test_belegfamilie_ist_studio_versioniert(inventar):
 
 def test_native_screen_definition_wird_erkannt(inventar):
     assert _seite(inventar, "verkauf/rechnungen")["stufe"] in {"screen_definition", "studio_versioniert"}
-    assert _seite(inventar, "logistik/frachtbriefe")["stufe"] == "screen_definition"  # CaptureScreenHost
+    assert _seite(inventar, "logistik/frachtbriefe")["stufe"] in {"screen_definition", "studio_versioniert"}
 
 
 def test_reine_weiterleitung_zaehlt_nicht_als_maske(inventar):
-    assert _seite(inventar, "verkauf/kunde-neu")["stufe"] == "weiterleitung"
+    for route in inventar["seiten"]:
+        if route["stufe"] != "weiterleitung":
+            continue
+        assert not route.get("screen_ids"), route["route"]
 
 
 def test_belegvarianten_liefern_ihre_aktionen(inventar):

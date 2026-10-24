@@ -71,15 +71,13 @@ def load_flow_spine_workspaces() -> dict[str, dict[str, Any]]:
 
 def load_screen_definitions() -> dict[str, dict[str, Any]]:
     _ensure_repo_on_path()
-    from app.core.screen_definitions import _SCREEN_DEFINITIONS
+    from app.core.screen_definitions import _SCREEN_DEFINITIONS, get_screen_definition
+    from app.core.stamm_object_page_parent import ensure_stamm_screen_registry
 
-    out: dict[str, dict[str, Any]] = {}
-    for mask_id, builder in _SCREEN_DEFINITIONS.items():
-        if callable(builder):
-            out[mask_id] = builder()
-        else:
-            out[mask_id] = builder
-    return out
+    # Complete the registry before taking a snapshot, independent of earlier imports.
+    ensure_stamm_screen_registry()
+    return {mask_id: get_screen_definition(mask_id) for mask_id in sorted(_SCREEN_DEFINITIONS)}
+
 
 
 def load_mcp_tools() -> list[dict[str, Any]]:

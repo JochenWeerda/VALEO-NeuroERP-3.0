@@ -22,7 +22,7 @@ export const entries: AutoGroupRouteEntry[] = [
     "path": "angebote-liste"
   },
   {
-    "module": "@/pages/einkauf/anlieferavis",
+    "module": "@/pages/einkauf/anlieferavis-liste",
     "path": "anlieferavis"
   },
   {
@@ -88,6 +88,10 @@ export const entries: AutoGroupRouteEntry[] = [
   {
     "module": "@/pages/einkauf/lieferanten-liste",
     "path": "lieferanten-liste"
+  },
+  {
+    "module": "@/pages/einkauf/lieferanten-stamm",
+    "path": "lieferanten-stamm"
   },
   {
     "module": "@/pages/einkauf/lieferantenbewertung",

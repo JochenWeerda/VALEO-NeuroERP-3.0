@@ -14,8 +14,9 @@ in CI geprueft sein. Dieses Skript misst den Abstand dazu, ohne etwas zu aendern
 **Seiten** (jede Route aus ``route-aliases.json``) bekommen genau eine Stufe:
 
 ``studio_versioniert``
-    Rendert eine ScreenDefinition einer versionierten Familie (``config/document_screen_versions.json``).
-``screen_definition``
+    Rendert eine ScreenDefinition mit Studio-Release-Nachweis (``config/studio_screen_versions.json`` oder
+    versionierte Belegfamilie in ``config/document_screen_versions.json``).
+``screen_definition`` (Inventar auch: ``builder_runtime``)
     Rendert eine ScreenDefinition ueber die Builder-Kette (``UniversalNative*Page``, ``UniversalMaskRenderer``,
     ``useScreenDefinition``). Ueber den Studio-Import als Ausgangsfassung uebernehmbar, aber nicht versioniert.
 ``builder_altmuster``
@@ -52,6 +53,7 @@ import re
 import sys
 from collections import Counter, defaultdict
 from datetime import date
+from functools import lru_cache
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -60,6 +62,7 @@ sys.path.insert(0, str(ROOT))
 SRC = ROOT / "packages/frontend-web/src"
 ROUTES = SRC / "app/route-aliases.json"
 FAMILIES = ROOT / "config/document_screen_versions.json"
+STUDIO_VERSIONS = ROOT / "config/studio_screen_versions.json"
 MCP_MAP = ROOT / "config/mcp_mask_action_map.yaml"
 RATCHET = ROOT / "config/mask_studio_ratchet.json"
 
@@ -71,9 +74,22 @@ MCP_GESPERRT = {"blocked_human_only"}
 MCP_OHNE_SERVERWIRKUNG = {"local_ui"}
 
 _IMPORT = re.compile(r"""(?:import|export)\s[^'"]*?from\s+['"]([^'"]+)['"]|import\(\s*['"]([^'"]+)['"]\s*\)""")
-_SCREEN_ID = re.compile(r"""screenId\s*=\s*(?:\{\s*)?[`'"]([^`'"]+)[`'"]|useScreenDefinition\(\s*[`'"]([^`'"]+)[`'"]""")
-_BUILDER = re.compile(r"\b(UniversalNative(?:Detail|Create|Cockpit)Page|NativeListPage|UniversalMaskRenderer|useScreenDefinition|"
-                      r"compileRenderPlanFromScreenDefinition|CaptureScreenHost)\b")
+_SCREEN_ID = re.compile(
+    r"""screenId\s*=\s*(?:\{\s*)?[`'"]([^`'"]+)[`'"]|useScreenDefinition\(\s*[`'"]([^`'"]+)[`'"]"""
+)
+_SCREEN_ID_CONST = re.compile(
+    r"""const\s+(SCREEN_ID|screenId)\s*=\s*[`'"]([^`'"]+)[`'"]"""
+)
+_SCREEN_ID_PROP = re.compile(r"""screenId=\{([A-Za-z_][A-Za-z0-9_]*)\}""")
+_BUILDER = re.compile(
+    r"\b(UniversalNative(?:Detail|Create|Cockpit)Page|NativeListPage|UniversalMaskRenderer|useScreenDefinition|"
+    r"compileRenderPlanFromScreenDefinition|CaptureScreenHost|"
+    r"MadeByStudio(?:List|Cockpit|Detail)RuntimeWire|"
+    r"createStammNative(?:Detail|List|Create)Page)\b"
+)
+_STAMM_FACTORY_SCREEN = re.compile(
+    r"""createStammNative(?:Detail|List|Create)Page\s*\(\s*[`'"]([^`'"]+)[`'"]"""
+)
 _ALTMUSTER = re.compile(r"""from\s+['"]@/components/(?:mask-builder/(?:ObjectPage|ListReport|Wizard|Worklist|OverviewPage)"""
                         r"""|patterns/(?:ListReport|Wizard)|mask-builder['"])""")
 _BELEG_ROUTE = re.compile(r"angebot|auftrag(?!s?-?positionen)|bestellung|lieferschein|wareneingang|(?<!kostenstellen)rechnung|gutschrift")
@@ -101,6 +117,45 @@ def _followable(path: Path) -> bool:
     return rel.startswith(("pages/", "features/")) and "__tests__" not in rel
 
 
+def _screen_ids_from_text(text: str) -> set[str]:
+    ids = {m.group(1) or m.group(2) for m in _SCREEN_ID.finditer(text)}
+    ids.update(m.group(1) for m in _STAMM_FACTORY_SCREEN.finditer(text))
+    consts = {m.group(1): m.group(2) for m in _SCREEN_ID_CONST.finditer(text)}
+    for match in _SCREEN_ID_PROP.finditer(text):
+        bound = consts.get(match.group(1))
+        if bound:
+            ids.add(bound)
+    return ids
+
+
+@lru_cache(maxsize=1)
+def _screen_id_aliases() -> dict[str, str]:
+    from app.core import screen_definitions as sd_mod
+    from app.core.screen_definitions import SCREEN_DEFINITION_BUILDERS
+    from app.core.stamm_object_page_parent import ensure_stamm_screen_registry
+
+    ensure_stamm_screen_registry()
+    aliases: dict[str, str] = {"start-dashboard": "workspace/start-dashboard"}
+    for canonical in SCREEN_DEFINITION_BUILDERS:
+        aliases[canonical] = canonical
+        aliases.setdefault(canonical.rsplit("/", 1)[-1], canonical)
+    for canonical, syns in getattr(sd_mod, "_AGENT_SYNONYMS", {}).items():
+        for syn in syns:
+            aliases[syn] = canonical
+            aliases[syn.lower()] = canonical
+    try:
+        from app.core.screen_definitions_listen import LISTEN_SYNONYME
+
+        for canonical, syns in LISTEN_SYNONYME.items():
+            aliases[canonical] = canonical
+            for syn in syns:
+                aliases[syn] = canonical
+                aliases[syn.lower()] = canonical
+    except ImportError:
+        pass
+    return aliases
+
+
 def _page_sources(entry: Path, depth: int = 4) -> list[Path]:
     seen: dict[Path, None] = {}
     todo = [(entry, 0)]
@@ -118,14 +173,79 @@ def _page_sources(entry: Path, depth: int = 4) -> list[Path]:
     return list(seen)
 
 
-def classify_page(entry: Path, family_prefixes: tuple[str, ...]) -> dict:
+def _studio_versioned_ids() -> frozenset[str]:
+    """Alle Screen-IDs im Studio-Katalog (Hash-Nachweis gegen Builder)."""
+    if not STUDIO_VERSIONS.is_file():
+        return frozenset()
+    from app.core.studio_screen_versions import load_registry, released_screen_ids
+    from app.core.studio_release import definition_hash
+    from app.services.made_by_studio_gates import load_registered_definitions
+    entries = load_registry().get("screens", {})
+    definitions = load_registered_definitions()
+    return frozenset(sid for sid in released_screen_ids() if sid in definitions
+                     and definition_hash(definitions[sid]) == entries[sid].get("definition_hash"))
+
+
+def _expand_screen_ids(screen_ids: list[str]) -> set[str]:
+    """Loest Kurz-IDs (screenId-Prop) auf die kanonische ScreenDefinition-ID auf."""
+    from app.core.screen_definitions import get_screen_definition
+
+    aliases = _screen_id_aliases()
+    expanded: set[str] = set(screen_ids)
+    for sid in screen_ids:
+        expanded.add(aliases.get(sid, sid))
+        expanded.add(aliases.get(sid.lower(), sid))
+        if sid.endswith("/liste"):
+            expanded.add(f"{sid.rsplit('/', 1)[0]}-liste")
+        definition = get_screen_definition(sid) or get_screen_definition(aliases.get(sid, sid))
+        if not definition:
+            continue
+        canonical = definition.get("id")
+        if isinstance(canonical, str):
+            expanded.add(canonical)
+        adapter = definition.get("adapter")
+        if isinstance(adapter, dict):
+            source_id = adapter.get("sourceId")
+            if isinstance(source_id, str):
+                expanded.add(source_id)
+    return expanded
+
+
+def _route_catalog_candidates(route: str) -> set[str]:
+    path = route.lstrip("/")
+    if not path:
+        return {"workspace/start-dashboard", "start-dashboard"}
+    candidates = {path}
+    if path.endswith("/liste"):
+        candidates.add(f"{path.rsplit('/', 1)[0]}-liste")
+    return candidates
+
+
+def _page_is_studio_versioned(
+    screen_ids: list[str],
+    *,
+    beleg_prefix: str,
+    studio_ids: frozenset[str],
+    route: str = "",
+) -> bool:
+    expanded = _expand_screen_ids(screen_ids)
+    expanded.update(_route_catalog_candidates(route))
+    return any(sid.startswith(beleg_prefix) or sid in studio_ids for sid in expanded)
+
+
+def classify_page(entry: Path, *, beleg_prefix: str, studio_ids: frozenset[str], route: str = "") -> dict:
     sources = _page_sources(entry)
     texts = {p: p.read_text(encoding="utf-8", errors="replace") for p in sources}
-    screen_ids = sorted({m.group(1) or m.group(2) for t in texts.values() for m in _SCREEN_ID.finditer(t)})
-    builder = any(_BUILDER.search(t) for t in texts.values())
+    screen_ids = sorted({sid for t in texts.values() for sid in _screen_ids_from_text(t)})
+    from app.core.mask_runtime_evidence import has_visible_runtime
+    builder = any(has_visible_runtime(t) for t in texts.values())
     altmuster = any(_ALTMUSTER.search(t) for t in texts.values())
     entry_text = texts[entry]
-    if builder and any(sid.startswith(family_prefixes) for sid in screen_ids):
+    if "createLegacyMaskPage" in entry_text:
+        stufe = "builder_altmuster"
+    elif builder and _page_is_studio_versioned(
+        screen_ids, beleg_prefix=beleg_prefix, studio_ids=studio_ids, route=route
+    ):
         stufe = "studio_versioniert"
     elif builder:
         stufe = "screen_definition"
@@ -136,10 +256,11 @@ def classify_page(entry: Path, family_prefixes: tuple[str, ...]) -> dict:
     else:
         stufe = "handgebaut"
     return {"stufe": stufe, "screen_ids": screen_ids,
+            "legacy_creation": "createStammNativeDetailPage" in entry_text,
             "dateien": [p.relative_to(ROOT).as_posix() for p in sources]}
 
 
-def pages(family_prefixes: tuple[str, ...]) -> list[dict]:
+def pages(*, beleg_prefix: str, studio_ids: frozenset[str]) -> list[dict]:
     rows = []
     for alias in json.loads(ROUTES.read_text(encoding="utf-8"))["aliases"]:
         entry = _resolve(alias["module"], ROUTES)
@@ -148,7 +269,7 @@ def pages(family_prefixes: tuple[str, ...]) -> list[dict]:
         if entry is None:
             row.update(stufe="handgebaut", screen_ids=[], dateien=[], fehler="modul_nicht_gefunden")
         else:
-            row.update(classify_page(entry, family_prefixes))
+            row.update(classify_page(entry, beleg_prefix=beleg_prefix, studio_ids=studio_ids, route=path))
         rows.append(row)
     return sorted(rows, key=lambda r: r["route"])
 
@@ -158,8 +279,11 @@ def pages(family_prefixes: tuple[str, ...]) -> list[dict]:
 def _definitions() -> dict[str, dict]:
     from app.core.screen_definitions import SCREEN_DEFINITION_BUILDERS, get_screen_definition
     from app.core.screen_definitions_beleg import BELEGARTEN, build_beleg_screen_definition, screen_id
+    from app.core.stamm_object_page_parent import ensure_stamm_screen_registry
 
-    defs = {sid: get_screen_definition(sid) or {} for sid in SCREEN_DEFINITION_BUILDERS}
+    ensure_stamm_screen_registry()
+    builder_ids = sorted(SCREEN_DEFINITION_BUILDERS)
+    defs = {sid: get_screen_definition(sid) or {} for sid in builder_ids}
     for art in BELEGARTEN:
         defs[screen_id(art)] = build_beleg_screen_definition(art)
     return defs
@@ -210,10 +334,12 @@ def actions() -> list[dict]:
             coverage = mcp.get(action_id)
             if navigation or coverage in MCP_OHNE_SERVERWIRKUNG:
                 art = "ohne_serverwirkung"
-            elif rest or action.get("command"):
+            elif rest:
                 art = "serverwirksam"
             elif action.get("stubReason"):
                 art = "nicht_verfuegbar"  # ehrlich deklariert: kein Weg, die Maske sagt es mit Grund
+            elif action.get("command"):
+                art = "serverwirksam"
             else:
                 art = "nicht_deklariert"
             block = agent_block(action)
@@ -279,14 +405,26 @@ def catalog() -> dict:
 
 def inventory() -> dict:
     families = json.loads(FAMILIES.read_text(encoding="utf-8"))
-    prefixes = (families["family"] + "/",)
-    page_rows = pages(prefixes)
+    beleg_prefix = families["family"] + "/"
+    studio_ids = _studio_versioned_ids()
+    page_rows = pages(beleg_prefix=beleg_prefix, studio_ids=studio_ids)
     action_rows = actions()
     routed = {sid for row in page_rows for sid in row["screen_ids"]}
     registered = sorted({row["maske"] for row in action_rows} | set(_definitions()))
+    native_studio: dict = {}
+    if STUDIO_VERSIONS.is_file():
+        from app.core.studio_screen_versions import load_registry
+
+        registry = load_registry()
+        native_studio = {
+            "releaseVersion": registry.get("releaseVersion"),
+            "count": len(registry.get("screens") or {}),
+            "structuralReady": len(studio_ids),
+            "liveReleaseEvidence": "not_measured",
+        }
     return {
         "stand": date.today().isoformat(),
-        "familien": {families["family"]: families["current"]},
+        "familien": {families["family"]: families["current"], "native_studio": native_studio},
         "seiten": page_rows,
         "aktionen": action_rows,
         "studio_katalog": catalog(),
@@ -369,8 +507,17 @@ def markdown(inv: dict) -> str:
               f"{sum(1 for a in inv['aktionen'] if a['art'] == 'nicht_verfuegbar')} |",
               "", "## Versionierte Familien", ""]
     for family, variants in inv["familien"].items():
-        lines.append(f"- `{family}`: {len(variants)} Varianten — " + ", ".join(
-            f"{k} {v}" for k, v in sorted(variants.items())))
+        if family == "native_studio" and isinstance(variants, dict):
+            lines.append(
+                f"- `native_studio`: Release {variants.get('releaseVersion', '?')}, "
+                f"{variants.get('count', 0)} Screens ({variants.get('structuralReady', 0)} statisch geprueft; Browser-/Freigabenachweis nicht gemessen)"
+            )
+            continue
+        if isinstance(variants, dict):
+            lines.append(f"- `{family}`: {len(variants)} Varianten — " + ", ".join(
+                f"{k} {v}" for k, v in sorted(variants.items())))
+        else:
+            lines.append(f"- `{family}`: {variants}")
     lines += ["", "## Studio-Katalog", "",
               "Studio-Masken tragen nur Katalogaktionen. Was hier bedienbar ist, ist es in jeder Studio-Maske.", "",
               "| Katalogaktion | Route | CLI | MCP |", "|---|---|---|---|"]
