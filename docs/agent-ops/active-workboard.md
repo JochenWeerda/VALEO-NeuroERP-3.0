@@ -19534,3 +19534,6 @@ Nachlauf auf7bc7e37fa: CI rot in Migration/Backend/Frontend und Dependencysecuri
 
 
 **PR38-CI-FOLLOWUP Security umgesetzt:** Exakte bereits abgenommene PR39-Paket-/Lock-/Configuebernahme, Fastify5.12.7 undStorybook8.6.19. Unbenutzter AI-Vectorstore entfernt, erfundeneRAG-Ergebnisse jetzt503; keine faelschliche Lieferzusage. Reviews anManifest-/Lockhashesgebunden, keine neue Ausnahme. GetrenntePruefungen7AI/23Triage/9Gate/15Node/2Fastifygruen; Runtimeprobe nutztvorhandenenPR39-Paketbestand, eigenerCIInstallnachweisfolgt. AlteChroma-Berichte explizithistorischmarkiert, keineNachweis-/Testloeschung. Root/Docker/DBnichtgeaendert.
+
+
+**PR38-CI-FOLLOWUP DocDrift-Erweiterung:** Nach geschlossenem Migrationsgraph blockiert Backend am page_no_route_or_nav-Gate. Besitzer entity_projection: scripts/doc_drift_report.py und eigene Regressionstests nur fuer nachgewiesene transitive Imports aus registrierten Routen. Kein pauschales Legacy-Suffix-Ignore und kein Glob-alle-Seiten-Als-erreichbar; verwaiste Seiten muessen weiter rot bleiben. Keine fremde Dashboard-/Studio-/Maskenimplementierung aendern. Zuerst verbleibende echte Orphans melden; nicht durch Loeschen oder Ausschliessen verdecken.
