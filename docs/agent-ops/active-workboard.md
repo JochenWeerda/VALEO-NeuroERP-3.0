@@ -19503,3 +19503,8 @@ Nutzerauftrag: acht ausdruecklich benannte Root-Dateien pruefen (Framework/Event
 
 
 **ADAPTIVE-WORKSPACE-REVIEW AW-R07 umgesetzt:**15 Wahrheitswertpruefungen durch explizites None ersetzt;45 neue Messwert-Vertragsfaelle gruen. Fremde API-Erweiterungen erhalten, nur begrenzter Patch gegen HEAD committet. Sieben weitere Reviewbefunde offen; kein Gesamtabschluss.
+
+
+## ADAPTIVE-WORKSPACE-CLOSURE-20261024 - reserviert, Codex Lead
+
+Nutzerauftrag: sieben restliche Reviewbefunde AW-R01/02/03/04/05/06/09 schliessen. Besitzer api_contracts: QualityAPI, QualityRepo, benoetigte Servicevertraege und eigene Tests fuer Tokenurheber, Pflichttenant/Parent, atomare Finalisierung/Updates und echten Listen-GET. Besitzer runtime_closure: live-signals.ts und eigene Wiederverbindungs-/Queue-/Auth-Tests. Lead: Outbox/NATS/IntegrationEvent und Workspace-Umschlag nur fuer Commitgrenze und tatsaechlichen Tenanttransport, eigene Serializer-/Rollbacktests, Integrationsartefakte/Doku/Commit/Push. Fremde Vorarbeiten erhalten; keine konkurrierende Bearbeitung derselben Abschnitte, Finalize-Outboxparameter mit API-Owner abstimmen. Keine neueDB/Container/Reset. Bestehender valeo_probe nur nach Status und eigene Daten/Rollbacks. Ziel: sieben belegte Befunde mit negativen und positiven Vertragen; keine fingierte Live-/Studio-Gesamtfreigabe.
