@@ -19522,3 +19522,6 @@ Nachlauf auf7bc7e37fa: CI rot in Migration/Backend/Frontend und Dependencysecuri
 
 
 **PR38-CI-FOLLOWUP Migrationsmeilenstein:** Fehlende dms_inbox_tenant_20261022 wiederhergestellt; Singlehead und Syntax geprueft,437 Migrationsdateien inhaltlich identisch zum separat abgenommenen PR39. Inventar und QA synchronisiert, keine DB-Mutation. Neue CI-Frischschemaabnahme folgt nach Push; Security/Frontend separat offen.
+
+
+**PR38-CI-FOLLOWUP Backendmasken:** Lead-Besitz test_uix051_legacy_route_migration.py nurCRM-Delegationsassertion und neuer party-native-render.test.tsx fuer beide Arten und Entity-/Sectionweitergabe. Adapterproduktion unveraendert. AlteTernarypflicht durch tatsaechlichen Rendervertrag ersetzen; keine Rollen-/Fachabnahme entfernen.
