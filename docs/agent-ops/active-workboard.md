@@ -19525,3 +19525,6 @@ Nachlauf auf7bc7e37fa: CI rot in Migration/Backend/Frontend und Dependencysecuri
 
 
 **PR38-CI-FOLLOWUP Backendmasken:** Lead-Besitz test_uix051_legacy_route_migration.py nurCRM-Delegationsassertion und neuer party-native-render.test.tsx fuer beide Arten und Entity-/Sectionweitergabe. Adapterproduktion unveraendert. AlteTernarypflicht durch tatsaechlichen Rendervertrag ersetzen; keine Rollen-/Fachabnahme entfernen.
+
+
+**PR38-CI-FOLLOWUP CRM-Testvertrag umgesetzt:** Starre ternary-Pflicht entfernt, kein Fachtest entfallen: beide Definitionen bleiben Strukturvertrag;3 echte Renderfaelle pruefenLead/Kunde/Default plus Entity-/Abschnittweitergabe.49 Python- und8UI-Faelle gruen. Adapter unveraendert, Root-Sync erstnachHEAD-Diffpruefung. AndereFrontend-/Security-/Freshschemafaelle weiterinArbeit.

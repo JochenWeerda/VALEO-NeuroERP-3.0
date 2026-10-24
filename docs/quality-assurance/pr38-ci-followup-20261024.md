@@ -48,3 +48,13 @@ Keine Umgehung, kein Commit/Push dieser vorbereiteten Aenderungen behauptet.
 Die zuvor gemeldete Resetzeit ist verstrichen. Der Migrationsvorgaenger und
 das aktualisierte Inventar werden als eigener Meilenstein integriert; die
 weiteren Security-/Frontendbefunde bleiben bis eigener Abnahme offen.
+
+
+## CRM-Adaptervertrag
+
+Die alte Vorgabe einer konkreten ternary-Schreibweise wurde durch eine
+Syntax-unabhaengige Definitionspruefung und echte Renderfaelle ersetzt. Lead,
+Kunde und Standardfall muessen die korrekte Definition und unveraendert
+Entity-ID, angefragten Abschnitt und Testkennung weitergeben. Der
+Produktionsadapter wurde nicht geaendert.49 Python-Routenfaelle und8
+Frontendfaelle (einschliesslich3 neuer Renderfaelle) bestanden.
