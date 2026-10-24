@@ -19514,3 +19514,8 @@ Nutzerauftrag: sieben restliche Reviewbefunde AW-R01/02/03/04/05/06/09 schliesse
 
 
 **ADAPTIVE-WORKSPACE-CLOSURE-20261024 umgesetzt:** Alle sieben restlichen Reviewbefunde AW-R01/02/03/04/05/06/09 geschlossen, damit9/9.128 integrierte Backend-,8 echte PG- und11Frontendfaelle gruen; fokussierte Typpruefung gruen. EigeneRowsCleanup, keine neueDB/Container/Reset. Kanonische OpenAPI3246 aus sauberer HEAD-Quellansicht, nur Quality-Pfade/Schemas angepasst; Handbuch/Inventare konsistent. ForeignStudio-/API-WIP bewahrt. Keine Live-Broker-/Browser-/Studio-Gesamtfreigabe; separate Projekt-CI bleibt eigener Claim. QA adaptive-workspace-review-20261023.md sowie quality-protocol-aw-review-repair-20261024.md.
+
+
+## PR38-CI-FOLLOWUP-20261024 - reserviert, Codex Lead
+
+Nachlauf auf7bc7e37fa: CI rot in Migration/Backend/Frontend und Dependencysecurity. Enger Besitz: api_contracts diagnostiziert und repariert fehlende Alembic-Vorgaenger und frisches Schema-/Inventardrift; entity_projection uebertraegt bereits abgenommene Securityfixes aus PR39 nach exaktem Quellenvergleich, keine Paketpauschalupdates; runtime_closure diagnostiziert echte Frontendregressionen und veraltete Strukturtests, entfernt keine fachliche Abnahme. Lead integriert, testet und aktualisiert Artefakte/QA/GitHub. Alle Edits in repair-view; Root nur nach Diffreview. Keine neueDB/Container/Reset, kein Tabellenkatalog aus unvollstaendiger lokaler DB. Vorhandene restliche Studioarbeit bewahren.
