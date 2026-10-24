@@ -19543,3 +19543,6 @@ Nachlauf auf7bc7e37fa: CI rot in Migration/Backend/Frontend und Dependencysecuri
 
 
 **PR38-CI-FOLLOWUP begrenzte Frontendtranche umgesetzt:** Falsche Bestelllisten-ScreenID und3Detail-/FlowResume-Ziele korrigiert; fehlenderSSEHelperexport jetztimCommitenthalten (allgemeinerSSEClientunveraendert); FakeArtikel-IDsausLegacykopieentfernt; BanktestpartialMock prueftweiterrealeRoutefactoryundnurDraftkeinAutoSave.7Dateien/33Frontendmodulefaelle gemeinsamgruen.3echteDashboardfaelle und214Quelltextvertraege bleibenungeklaert, keineGates/Testsentfernt. QA pr38-frontend-ci-followup-20261024.md.
+
+
+**PR38-CI-FOLLOWUP Agrar-Listenbindung:** Lead-Besitz ausschliesslich pages/agrar/psm/liste.tsx und eigener Definitions-Bindungsvertrag: registriertes agrar/psm-liste statt nicht vorhandenen agrar/psm/liste verwenden. Keine BVL-/Mandanten-/Schreibvertragsaenderung. PSM-Objektmaske und echter Duengebedarfsrechner bleiben eigene offene Fachmigration; Statistikliste ist kein Ersatz.
