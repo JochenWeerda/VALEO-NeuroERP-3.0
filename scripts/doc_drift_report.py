@@ -138,8 +138,87 @@ def check_services_without_docs(docs_text: str) -> list[dict]:
     return issues
 
 
+def _import_specifiers(text: str):
+    """Yield literal imports, never examples in comments or ordinary strings."""
+    token_pattern = re.compile(
+        r'''//[^\n]*|/\*[\s\S]*?\*/|'(?:\\.|[^'\\])*'|"(?:\\.|[^"\\])*"|`(?:\\.|[^`\\])*`|[A-Za-z_$][\w$]*|[^\s]'''
+    )
+    tokens: list[str] = []
+    skip_until = 0
+    # A slash in expression-start position begins a regex literal. Do not
+    # interpret its contents as source code; a slash after an operand remains
+    # division, so a genuine import() expression following it is still read.
+    regex_prefixes = {"=", "(", "[", "{", ":", ",", "!", "?", ";", ">", "return", "case"}
+    for match in token_pattern.finditer(text):
+        if match.start() < skip_until:
+            continue
+        token = match.group()
+        if token.startswith(("//", "/*")):
+            continue
+        if token == "/" and (not tokens or tokens[-1] in regex_prefixes):
+            escaped = False
+            in_class = False
+            for position in range(match.end(), len(text)):
+                char = text[position]
+                if char == "\n":
+                    break
+                if escaped:
+                    escaped = False
+                elif char == "\\":
+                    escaped = True
+                elif char == "[":
+                    in_class = True
+                elif char == "]":
+                    in_class = False
+                elif char == "/" and not in_class and position > match.end():
+                    skip_until = position + 1
+                    while skip_until < len(text) and text[skip_until].isalpha():
+                        skip_until += 1
+                    tokens.append("<regex>")
+                    break
+            if skip_until > match.start():
+                continue
+        tokens.append(token)
+
+    def literal(index: int) -> str | None:
+        if index >= len(tokens):
+            return None
+        value = tokens[index]
+        if len(value) < 2 or value[0] not in ("'", '"') or value[-1] != value[0]:
+            return None
+        return value[1:-1] if "\\" not in value else None
+
+    for index, token in enumerate(tokens):
+        if index and tokens[index - 1] == ".":
+            continue  # obj.import() / obj.require() are ordinary methods.
+        if token in {"import", "require"} and index + 3 < len(tokens) and tokens[index + 1] == "(":
+            specifier = literal(index + 2)
+            if specifier is not None and tokens[index + 3] == ")":
+                yield specifier
+            continue
+        if token == "import":
+            if index + 1 < len(tokens) and tokens[index + 1] == ".":
+                continue  # import.meta.glob does not establish a page edge.
+            specifier = literal(index + 1)
+            if specifier is not None:
+                yield specifier
+                continue
+        if token not in {"import", "export"}:
+            continue
+        # Static declarations may span lines. Do not cross into another statement.
+        for next_index in range(index + 1, min(index + 200, len(tokens) - 1)):
+            part = tokens[next_index]
+            if part in {";", "import", "export", "const", "let", "var", "function", "class"}:
+                break
+            if part == "from":
+                specifier = literal(next_index + 1)
+                if specifier is not None:
+                    yield specifier
+                break
+
+
 def reachable_page_modules(route_modules: set[str]) -> set[str]:
-    """Follow actual static/lazy imports; an orphan cycle is never a route."""
+    """Follow literal imports from inventory routes; orphan cycles stay orphaned."""
     source = PAGES_DIR.parent.resolve()
     pending: list[Path] = []
     visited: set[Path] = set()
@@ -162,22 +241,6 @@ def reachable_page_modules(route_modules: set[str]) -> set[str]:
         target = resolve(module, source)
         if target:
             pending.append(target)
-    # Tokenize comments/strings first so examples and commented imports never create edges.
-    token_pattern = re.compile(r'''//[^\n]*|/\*[\s\S]*?\*/|'(?:\\.|[^'\\])*'|"(?:\\.|[^"\\])*"|`(?:\\.|[^`\\])*`|[A-Za-z_$][\w$]*|[^\s]''')
-
-    def imports(text: str):
-        tokens = [match.group() for match in token_pattern.finditer(text)
-                  if not match.group().startswith(("//", "/*"))]
-        for index, token in enumerate(tokens):
-            next_index = index + 1
-            if token == "import" and next_index < len(tokens) and tokens[next_index] == "(":
-                next_index += 1
-            elif token not in {"from", "import"}:
-                continue
-            if next_index < len(tokens):
-                literal = tokens[next_index]
-                if literal.startswith(("'", '\"')):
-                    yield literal[1:-1]
     while pending:
         path = pending.pop()
         if path in visited:
@@ -185,7 +248,7 @@ def reachable_page_modules(route_modules: set[str]) -> set[str]:
         visited.add(path)
         if path.is_relative_to(PAGES_DIR.resolve()):
             modules.add(page_to_module(path))
-        for specifier in imports(_read(path)):
+        for specifier in _import_specifiers(_read(path)):
             target = resolve(specifier, path.parent)
             if target and target not in visited:
                 pending.append(target)

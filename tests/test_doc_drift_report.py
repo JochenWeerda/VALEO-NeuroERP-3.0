@@ -165,3 +165,72 @@ def test_lazy_transitive_reachability_does_not_hide_orphan_cycles(tmp_path, monk
     monkeypatch.setattr(mod, 'PAGES_DIR', pages)
     issues = mod.check_pages_without_route_or_nav('', {'@/pages/entry'}, set())
     assert {item['module'] for item in issues} == {'@/pages/orphan-legacy', '@/pages/orphan-cycle'}
+
+
+def test_inventory_seed_follows_static_dynamic_relative_and_alias_imports(tmp_path, monkeypatch):
+    import scripts.doc_drift_report as mod
+
+    pages = tmp_path / 'src/pages'
+    library = tmp_path / 'src/lib'
+    pages.mkdir(parents=True)
+    library.mkdir(parents=True)
+    (pages / 'entry.tsx').write_text(
+        "import '@/lib/route-bridge'\n"
+        "const loaded = require('./required-child')\n"
+        "export default () => import('./lazy-child')",
+        encoding='utf-8',
+    )
+    (library / 'route-bridge.ts').write_text(
+        "export { default } from '@/pages/static-child'", encoding='utf-8',
+    )
+    (pages / 'static-child.tsx').write_text(
+        "import { Detail } from './relative-child'\nexport default Detail",
+        encoding='utf-8',
+    )
+    for name in ('lazy-child', 'relative-child', 'required-child'):
+        (pages / f'{name}.tsx').write_text('export default function Detail() {}', encoding='utf-8')
+    (pages / 'true-orphan.tsx').write_text('export default function Orphan() {}', encoding='utf-8')
+    monkeypatch.setattr(mod, 'REPO_ROOT', tmp_path)
+    monkeypatch.setattr(mod, 'PAGES_DIR', pages)
+
+    issues = mod.check_pages_without_route_or_nav('', {'@/pages/entry'}, set())
+    assert [item['module'] for item in issues] == ['@/pages/true-orphan']
+
+
+def test_comments_strings_glob_and_unreachable_wrapper_are_not_route_edges(tmp_path, monkeypatch):
+    import scripts.doc_drift_report as mod
+
+    pages = tmp_path / 'src/pages'
+    pages.mkdir(parents=True)
+    (pages / 'entry.tsx').write_text(
+        "/import('./leading-regex')/.test('example')\n"
+        "// import('./commented')\n"
+        "/* export { default } from './block-commented' */\n"
+        "const example = \"import('./quoted')\"\n"
+        "const from = './unrelated-from'\n"
+        "const glob = import.meta.glob('./globbed*.tsx')\n"
+        "const regex = /import('./regex-fake')/\n"
+        "fake.import('./method-import')\n"
+        "fake.require('./method-require')\n"
+        "const real = import('./real-child')\n"
+        "export default function Entry() {}",
+        encoding='utf-8',
+    )
+    (pages / 'unreachable-wrapper.tsx').write_text(
+        "import './wrapped'\nexport default function Wrapper() {}", encoding='utf-8',
+    )
+    for name in ('leading-regex', 'commented', 'block-commented', 'quoted', 'unrelated-from',
+                 'globbed-child', 'regex-fake', 'method-import', 'method-require',
+                 'real-child', 'wrapped'):
+        (pages / f'{name}.tsx').write_text('export default function Page() {}', encoding='utf-8')
+    monkeypatch.setattr(mod, 'REPO_ROOT', tmp_path)
+    monkeypatch.setattr(mod, 'PAGES_DIR', pages)
+
+    issues = mod.check_pages_without_route_or_nav('', {'@/pages/entry'}, set())
+    assert {item['module'] for item in issues} == {
+        f'@/pages/{name}' for name in (
+            'leading-regex', 'commented', 'block-commented', 'quoted', 'unrelated-from',
+            'globbed-child', 'regex-fake', 'method-import', 'method-require',
+            'unreachable-wrapper', 'wrapped',
+        )
+    }

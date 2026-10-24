@@ -19546,3 +19546,5 @@ Nachlauf auf7bc7e37fa: CI rot in Migration/Backend/Frontend und Dependencysecuri
 
 
 **PR38-CI-FOLLOWUP Agrar-Listenbindung:** Lead-Besitz ausschliesslich pages/agrar/psm/liste.tsx und eigener Definitions-Bindungsvertrag: registriertes agrar/psm-liste statt nicht vorhandenen agrar/psm/liste verwenden. Keine BVL-/Mandanten-/Schreibvertragsaenderung. PSM-Objektmaske und echter Duengebedarfsrechner bleiben eigene offene Fachmigration; Statistikliste ist kein Ersatz.
+
+**PR38-CI-FOLLOWUP Erreichbarkeit und PSM-Liste umgesetzt:** Importanalyse ignoriert Kommentare, Strings, Regex und gleichnamige Methoden; nur echte Importketten ab registrierter Route gelten.13 Scannerfaelle gruen. PSM-Liste verwendet die tatsaechlich registrierte BVL-Definition agrar/psm-liste; eigener Bindungstest war zuvor rot und ist gruen. Gemeinsame Abnahme14 Tests.272 echte Erreichbarkeitsbefunde bleiben sichtbar; PSM-Stamm und Duengebedarfsrechner weiter offen. Keine Gateabsenkung/DBaenderung. QA pr38-doc-drift-route-reachability-20261024.md.
