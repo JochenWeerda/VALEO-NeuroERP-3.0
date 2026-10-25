@@ -43,7 +43,6 @@
     "health:check": "curl -f http://localhost:3080/health || exit 1",
     "ready:check": "curl -f http://localhost:3080/ready || exit 1",
     "smoke:test": "npm run health:check && npm run ready:check",
-    "performance:test": "artillery run tests/performance/load-test.yml",
     "security:audit": "npm audit --audit-level high",
     "security:scan": "snyk test",
     "docs:generate": "typedoc --out docs src",
@@ -92,7 +91,6 @@
     "prettier": "^3.3.0",
     "eslint": "^8.57.0",
     "typedoc": "^0.26.0",
-    "artillery": "^2.0.33",
     "snyk": "^1.1290.0",
     "http-server": "^14.1.1"
   },

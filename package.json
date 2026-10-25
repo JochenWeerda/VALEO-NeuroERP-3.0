@@ -84,7 +84,6 @@
       "decode-uri-component": "^0.5.0",
       "morgan": "^1.12.1",
       "fflate": "^0.8.3",
-      "stream-json": "1.9.1",
       "csv-parse": "^7.0.2",
       "@faker-js/faker": "^10.5.0",
       "diff@4": "^4.0.4",
@@ -106,8 +105,6 @@
       ]
     },
     "patchedDependencies": {
-      "stream-json@1.9.1": "config/security/npm-patches/stream-json@1.9.1.patch",
-      "artillery@2.0.33": "config/security/npm-patches/artillery@2.0.33.patch",
       "node-forge@1.4.0": "config/security/npm-patches/node-forge@1.4.0.patch",
       "braces@3.0.3": "config/security/npm-patches/braces@3.0.3.patch"
     }
