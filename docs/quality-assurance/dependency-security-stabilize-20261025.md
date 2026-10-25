@@ -144,3 +144,18 @@ Persistenzpfade beruehrt sind.
   gegenueber 28d85dedb; Codex-Bereich Maskenruntime).
 - Dependabot meldet auf `main` weitere Alerts; `main` ist nicht Gegenstand dieses Zweigs.
 - Keine Aussage ueber vollstaendige Sicherheit oder Gesamtprojektfreigabe.
+
+## CI-Abnahme auf 26fe42d6d
+
+Per `workflow_dispatch` auf `claude/dependency-security-20261025` (Trigger sonst nur `main`/`develop`),
+verglichen mit Quality Gate 40187054625 auf der Basis 28d85dedb:
+
+| Lauf | Job | Basis 28d85dedb | 26fe42d6d |
+| --- | --- | --- | --- |
+| Quality Gate 40191958140 | Dependency Scan (blocking high/critical) | failure | **success** |
+| | Frontend unit tests | 214 failed / 1506 passed | 214 failed / 1506 passed, **0 neue Fehlschlaege** (identische Fallmenge) |
+| | Backend: Doc-Drift-Gate | Drift 272 | Drift 272 (unveraendert, Python-Routen; `app/` nicht beruehrt) |
+| | uebrige 8 Pruefjobs | success | success |
+| Security Scan 40191960923 | Python/Node Audit, Trivy, Grype, Bandit, ZAP, Summary | - | alle success |
+
+Die roten Frontend- und Backend-Schritte sind vorbestehend und nicht Gegenstand dieses Slices.
