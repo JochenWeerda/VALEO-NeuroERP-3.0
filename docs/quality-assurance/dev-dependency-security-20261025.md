@@ -85,3 +85,11 @@ Keine Ausnahme, keine Severity-Aenderung, keine neue Override-Zwangsaufloesung.
 - hr-Schema: doppelte Indexnamen; hr-Tests nutzen testcontainers undeklariert und
   starten Docker-Container, was der Pruefstandsregel widerspricht. Beides offen.
 - Keine Aussage ueber vollstaendige Sicherheit oder Gesamtfreigabe.
+
+## CI-Abnahme
+
+| Lauf | Commit | Ergebnis |
+| --- | --- | --- |
+| Security Scan 40198322483 | 5f7a6b2de | alle Jobs success (Python/Node Audit, Trivy, Grype, Bandit, ZAP) |
+| Quality Gate 40198319893 | 5f7a6b2de | Improvement integrity rot (eigener Folgefehler, Coverage-Pin), behoben in 7e5e41674 |
+| Quality Gate 40198929357 | 7e5e41674 | Dependency Scan, Improvement integrity und 8 weitere Jobs success; Frontend-Unit 214/1506 mit identischer Fallmenge wie Basis 40187054625 (0 neu); Doc-Drift 272 wie Basis |
