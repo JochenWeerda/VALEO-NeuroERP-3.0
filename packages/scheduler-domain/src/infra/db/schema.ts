@@ -81,6 +81,10 @@ export const runs = pgTable('runs', {
   workerIdx: index('runs_worker_idx').on(table.workerId),
   startedIdx: index('runs_started_idx').on(table.startedAt),
   dedupeIdx: uniqueIndex('runs_dedupe_idx').on(table.dedupeKey),
+  // Composite indexes for performance; drizzle-orm 0.45 only accepts them inside the table callback
+  scheduleRunsIdx: index('schedule_runs_idx').on(table.scheduleId, table.status),
+  jobRunsIdx: index('job_runs_idx').on(table.jobId, table.status),
+  tenantTimeRangeIdx: index('runs_tenant_time_idx').on(table.tenantId, table.createdAt),
 }));
 
 // Workers table
@@ -122,11 +126,6 @@ export const calendars = pgTable('calendars', {
   tenantIdx: index('calendars_tenant_idx').on(table.tenantId),
   keyIdx: uniqueIndex('calendars_key_idx').on(table.key),
 }));
-
-// Indexes for performance
-export const scheduleRunsIdx = index('schedule_runs_idx').on(runs.scheduleId, runs.status);
-export const jobRunsIdx = index('job_runs_idx').on(runs.jobId, runs.status);
-export const tenantTimeRangeIdx = index('runs_tenant_time_idx').on(runs.tenantId, runs.createdAt);
 
 // Types for TypeScript
 export type Schedule = typeof schedules.$inferSelect;
