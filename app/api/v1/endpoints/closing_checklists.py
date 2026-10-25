@@ -3,13 +3,17 @@ Closing Checklists API
 FIBU-CLS-01: Abschlusschecklisten
 """
 
+from app.auth.deps import get_current_user
+from app.services.closing_checklist_validation import verified_closing_actor, validate_closing_item
 from app.auth.finance_roles import finance_admin, finance_read, finance_write
 from typing import Any, Dict, List, Optional
+from datetime import datetime
 from fastapi import Response, APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 import logging
 from app.core.uuid7 import uuid7
+from app.core.tenant import get_tenant_id
 
 from ....core.database import get_db
 from app.services.closing_checklists_service import (
@@ -39,7 +43,7 @@ router = APIRouter(prefix="/closing-checklists", tags=["finance", "closing"])
 async def list_checklist_templates(
     closing_type: Optional[str] = Query(None, description="Filter by closing type"),
     active_only: bool = Query(True, description="Show only active templates"),
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -68,7 +72,7 @@ async def list_checklist_templates(
         result = []
         for row in rows:
             import json
-            items_data = json.loads(row[4]) if row[4] else []
+            items_data = json.loads(row[4]) if isinstance(row[4], str) else (row[4] or [])
 
             result.append({
                 "id": str(row[0]),
@@ -266,7 +270,7 @@ async def list_checklist_templates(
 @router.post("/templates", response_model=ClosingChecklistsOut, status_code=201, summary="Checklist template anlegen", dependencies=[Depends(finance_write)])
 async def create_checklist_template(
     template: ChecklistTemplateCreate,
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -299,7 +303,7 @@ async def create_checklist_template(
         db.commit()
 
         import json
-        items_data = json.loads(row[4]) if row[4] else []
+        items_data = json.loads(row[4]) if isinstance(row[4], str) else (row[4] or [])
 
         return {
             "id": str(row[0]),
@@ -321,6 +325,7 @@ async def create_checklist_template(
 @router.post("", response_model=ClosingChecklistResponse, status_code=201, summary="Closing checklist anlegen", dependencies=[Depends(finance_write)])
 async def create_closing_checklist(
     checklist: ClosingChecklistCreate,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -341,13 +346,13 @@ async def create_closing_checklist(
 
             template_row = db.execute(template_query, {
                 "template_id": checklist.template_id,
-                "tenant_id": checklist.tenant_id
+                "tenant_id": tenant_id
             }).fetchone()
 
             if template_row:
                 template_id = str(template_row[0])
                 import json
-                items = json.loads(template_row[1]) if template_row[1] else []
+                items = json.loads(template_row[1]) if isinstance(template_row[1], str) else (template_row[1] or [])
 
         # If no template, use default items based on closing type
         if not items:
@@ -495,7 +500,7 @@ async def create_closing_checklist(
 
         row = db.execute(insert_query, {
             "id": checklist_id,
-            "tenant_id": checklist.tenant_id,
+            "tenant_id": tenant_id,
             "period": checklist.period,
             "closing_type": checklist.closing_type,
             "template_id": template_id,
@@ -511,7 +516,7 @@ async def create_closing_checklist(
         db.commit()
 
         import json
-        items_data = json.loads(row[10]) if row[10] else []
+        items_data = json.loads(row[10]) if isinstance(row[10], str) else (row[10] or [])
 
         return build_closing_checklist_response(row, items_data=items_data)
 
@@ -524,7 +529,7 @@ async def create_closing_checklist(
 @router.get("/{checklist_id}", response_model=ClosingChecklistResponse, summary="Closing checklist abrufen", dependencies=[Depends(finance_read)])
 async def get_closing_checklist(
     checklist_id: str,
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -548,7 +553,7 @@ async def get_closing_checklist(
             raise HTTPException(status_code=404, detail="Closing checklist not found")
 
         import json
-        items_data = json.loads(row[10]) if row[10] else []
+        items_data = json.loads(row[10]) if isinstance(row[10], str) else (row[10] or [])
 
         return build_closing_checklist_response(row, items_data=items_data)
 
@@ -565,7 +570,8 @@ async def complete_checklist_item(
     checklist_id: str,
     item_code: str,
     request: UpdateItemStatusRequest,
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
+    user: dict = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -583,7 +589,7 @@ async def complete_checklist_item(
             if item.get("item_code") == item_code:
                 item_found = True
                 item["status"] = request.status
-                item["completed_by"] = request.completed_by
+                item["completed_by"] = verified_closing_actor(user)
                 item["completed_at"] = datetime.now().isoformat()
                 if request.notes:
                     item["notes"] = request.notes
@@ -626,7 +632,7 @@ async def complete_checklist_item(
             "completed_required_items": completed_required,
             "progress_percentage": progress,
             "status": new_status,
-            "completed_by": request.completed_by
+            "completed_by": verified_closing_actor(user)
         })
 
         db.commit()
@@ -645,7 +651,8 @@ async def complete_checklist_item(
     response_model=ClosingChecklistsOut, dependencies=[Depends(finance_write)])
 async def validate_checklist_items(
     checklist_id: str,
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
+    user: dict = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -658,29 +665,18 @@ async def validate_checklist_items(
         validation_results = []
 
         for item in checklist.items:
-            if item.get("validation_type") == "automatic" and item.get("validation_query"):
+            if item.get("validation_type") == "automatic":
                 # Execute validation query
                 try:
-                    validation_query = item["validation_query"]
-                    # :period als gebundener Parameter â€” niemals per String-Ersatz interpolieren.
-                    result = db.execute(
-                        text(validation_query),
-                        {"period": checklist.period},
-                    ).fetchone()
-
-                    # Determine if validation passed (assumes query returns count or boolean)
-                    validation_passed = False
-                    if result:
-                        value = result[0] if isinstance(result, tuple) else result
-                        if isinstance(value, (int, float)):
-                            # If count is 0, validation passed (no issues found)
-                            validation_passed = (value == 0)
-                        elif isinstance(value, bool):
-                            validation_passed = value
+                    with db.begin_nested():
+                        validation_passed, value = validate_closing_item(
+                            db, item_code=item.get("item_code", ""),
+                            tenant_id=tenant_id, period=checklist.period,
+                        )
 
                     item["validation_result"] = {
                         "passed": validation_passed,
-                        "value": str(result[0]) if result else None,
+                        "value": str(value),
                         "validated_at": datetime.now().isoformat()
                     }
 
@@ -688,7 +684,7 @@ async def validate_checklist_items(
                     if validation_passed and item.get("status") == "pending":
                         item["status"] = "completed"
                         item["completed_at"] = datetime.now().isoformat()
-                        item["completed_by"] = "SYSTEM"
+                        item["completed_by"] = verified_closing_actor(user)
 
                     validation_results.append({
                         "item_code": item.get("item_code"),
@@ -699,13 +695,13 @@ async def validate_checklist_items(
                 except Exception as e:
                     item["validation_result"] = {
                         "passed": False,
-                        "error": str(e),
+                        "error": "Automatic validation unavailable",
                         "validated_at": datetime.now().isoformat()
                     }
                     validation_results.append({
                         "item_code": item.get("item_code"),
                         "passed": False,
-                        "message": f"Validation error: {str(e)}"
+                        "message": "Automatic validation unavailable"
                     })
 
             updated_items.append(item)
@@ -763,7 +759,7 @@ async def list_closing_checklists(
     period: Optional[str] = Query(None, description="Filter by period (YYYY-MM)"),
     closing_type: Optional[str] = Query(None, description="Filter by closing type"),
     status: Optional[str] = Query(None, description="Filter by status"),
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -803,7 +799,7 @@ async def list_closing_checklists(
         result = []
         for row in rows:
             import json
-            items_data = json.loads(row[10]) if row[10] else []
+            items_data = json.loads(row[10]) if isinstance(row[10], str) else (row[10] or [])
 
             result.append(build_closing_checklist_response(row, items_data=items_data))
 
@@ -816,7 +812,7 @@ async def list_closing_checklists(
 
 @router.get("/cockpit/summary", response_model=ClosingChecklistsOut, summary="Closing cockpit summary abrufen", dependencies=[Depends(finance_read)])
 async def get_closing_cockpit_summary(
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     period: Optional[str] = Query(None, description="Period in YYYY-MM"),
     db: Session = Depends(get_db),
 ):
@@ -922,8 +918,8 @@ async def get_closing_cockpit_summary(
 @router.post("/{checklist_id}/approve", response_model=ClosingChecklistResponse, summary="Closing checklist genehmigen", dependencies=[Depends(finance_admin)])
 async def approve_closing_checklist(
     checklist_id: str,
-    approved_by: str = Query("system", description="Approver user ID"),
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
+    user: dict = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """Approve a completed checklist (completed â†’ approved)."""
@@ -939,7 +935,7 @@ async def approve_closing_checklist(
             SET status = 'approved', completed_at = NOW(), completed_by = :approved_by, updated_at = NOW()
             WHERE id = :checklist_id AND tenant_id = :tenant_id
         """),
-        {"checklist_id": checklist_id, "tenant_id": tenant_id, "approved_by": approved_by},
+        {"checklist_id": checklist_id, "tenant_id": tenant_id, "approved_by": verified_closing_actor(user)},
     )
     db.commit()
     return await get_closing_checklist(checklist_id, tenant_id, db)
@@ -948,7 +944,7 @@ async def approve_closing_checklist(
 @router.delete("/{checklist_id}", status_code=204, response_class=Response, response_model=None, summary="Closing checklist lÃ¶schen", dependencies=[Depends(finance_admin)])
 async def delete_closing_checklist(
     checklist_id: str,
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Delete a draft or in_progress checklist."""
