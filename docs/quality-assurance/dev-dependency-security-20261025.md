@@ -71,6 +71,9 @@ Keine Ausnahme, keine Severity-Aenderung, keine neue Override-Zwangsaufloesung.
   (vitest 4.1.12) 214 failed / 1506 passed mit **identischer Fallmenge** wie CI 40187054625 (0 neue).
 - `verify_node_security_releases.cjs` 49/49, Prod-Gate 0 blocked, Review-Hashes nur neu gebunden.
 - `pnpm install --frozen-lockfile`: Exit 0, Lockfile byteidentisch.
+- Eigener Folgefehler in CI 40198319893: `tests/test_improvement_workflow_contract.py`
+  pinnt den Frontend-Coverage-Provider exakt; der Sollwert folgt der Versionsanhebung
+  auf `4.1.12` (exakte Pin-Pflicht unveraendert). Improvement-Suite lokal 97/97.
 - Keine Datenbank, kein Container; der drizzle-Lauf schrieb nur in ein Scratch-Verzeichnis.
 
 ## Restbefunde und Grenzen
