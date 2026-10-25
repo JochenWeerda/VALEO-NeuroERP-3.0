@@ -8,5 +8,4 @@ dist/
 coverage/
 .vscode/
 .idea/
-migrations/*.sql
 exports/

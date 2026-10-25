@@ -19,6 +19,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "migrate:gen": "drizzle-kit generate",
+    "migrate:apply": "drizzle-kit migrate",
     "migrate:push": "drizzle-kit push",
     "migrate:drop": "drizzle-kit drop",
     "lint": "eslint src --ext .ts",
