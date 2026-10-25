@@ -20,18 +20,18 @@ const timeEntrySourceSchema = z.enum(['Manual', 'Terminal', 'Mobile']);
 const timeEntryStatusSchema = z.enum(['Draft', 'Approved', 'Rejected']);
 
 export const TimeEntrySchema = z.object({
-  id: z.string().uuid(),
-  tenantId: z.string().uuid(),
-  employeeId: z.string().uuid(),
+  id: z.string().guid(),
+  tenantId: z.string().guid(),
+  employeeId: z.string().guid(),
   date: z.string().date(),
   start: z.string().datetime(),
   end: z.string().datetime(),
   breakMinutes: z.number().int().min(0).max(MAX_BREAK_MINUTES), // Max 8 hours break
-  projectId: z.string().uuid().optional(),
+  projectId: z.string().guid().optional(),
   costCenter: z.string().optional(),
   source: timeEntrySourceSchema,
   status: timeEntryStatusSchema,
-  approvedBy: z.string().uuid().optional(),
+  approvedBy: z.string().guid().optional(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
   version: z.number().int().min(INITIAL_VERSION),

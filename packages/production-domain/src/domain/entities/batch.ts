@@ -7,16 +7,16 @@ import { z } from 'zod';
 
 // Batch Input Schema
 const BatchInputSchema = z.object({
-  batchId: z.string().uuid(),
-  ingredientLotId: z.string().uuid(),
+  batchId: z.string().guid(),
+  ingredientLotId: z.string().guid(),
   plannedKg: z.number().positive(),
   actualKg: z.number().positive()
 });
 
 // Batch Output Lot Schema
 const BatchOutputLotSchema = z.object({
-  id: z.string().uuid(),
-  batchId: z.string().uuid(),
+  id: z.string().guid(),
+  batchId: z.string().guid(),
   lotNumber: z.string().min(1).max(100),
   qtyKg: z.number().positive(),
   packing: z.object({
@@ -30,15 +30,15 @@ const BatchOutputLotSchema = z.object({
 
 // Main Batch Schema
 export const BatchSchema = z.object({
-  id: z.string().uuid(),
-  tenantId: z.string().uuid(),
+  id: z.string().guid(),
+  tenantId: z.string().guid(),
   batchNumber: z.string().min(1).max(100),
-  mixOrderId: z.string().uuid(),
+  mixOrderId: z.string().guid(),
   producedQtyKg: z.number().positive(),
   startAt: z.string().datetime(),
   endAt: z.string().datetime().optional(),
   status: z.enum(['Released', 'Quarantine', 'Rejected']).default('Quarantine'),
-  parentBatches: z.array(z.string().uuid()).default([]),
+  parentBatches: z.array(z.string().guid()).default([]),
   labels: z.array(z.string()).default([]),
   inputs: z.array(BatchInputSchema).default([]),
   outputs: z.array(BatchOutputLotSchema).default([]),

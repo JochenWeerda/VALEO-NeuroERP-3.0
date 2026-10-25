@@ -13,10 +13,10 @@ export type InteractionTypeType = typeof InteractionType[keyof typeof Interactio
 
 // Interaction Entity Schema
 export const InteractionSchema = z.object({
-  id: z.string().uuid(),
-  tenantId: z.string().uuid(),
-  customerId: z.string().uuid(),
-  contactId: z.string().uuid().optional(),
+  id: z.string().guid(),
+  tenantId: z.string().guid(),
+  customerId: z.string().guid(),
+  contactId: z.string().guid().optional(),
   type: z.enum([
     InteractionType.CALL,
     InteractionType.EMAIL,
@@ -26,9 +26,9 @@ export const InteractionSchema = z.object({
   subject: z.string().min(1),
   content: z.string().min(1),
   occurredAt: z.date(),
-  createdBy: z.string().uuid(),
+  createdBy: z.string().guid(),
   attachments: z.array(z.object({
-    id: z.string().uuid(),
+    id: z.string().guid(),
     filename: z.string(),
     url: z.string().url(),
     size: z.number().nonnegative(),
@@ -57,7 +57,7 @@ export const UpdateInteractionInputSchema = z.object({
   content: z.string().min(1).optional(),
   occurredAt: z.date().optional(),
   attachments: z.array(z.object({
-    id: z.string().uuid(),
+    id: z.string().guid(),
     filename: z.string(),
     url: z.string().url(),
     size: z.number().nonnegative(),
@@ -69,7 +69,7 @@ export type UpdateInteractionInput = z.infer<typeof UpdateInteractionInputSchema
 
 // Attachment Schema for API responses
 export const AttachmentSchema = z.object({
-  id: z.string().uuid(),
+  id: z.string().guid(),
   filename: z.string(),
   url: z.string().url(),
   size: z.number().nonnegative(),

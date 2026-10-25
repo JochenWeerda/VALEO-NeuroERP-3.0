@@ -16,7 +16,7 @@ const CreateCalendarInputSchema = z.object({
   key: z.string().min(1, 'Calendar key is required'),
   name: z.string().min(1, 'Calendar name is required'),
   holidays: z.array(z.string().datetime()).default([]),
-  businessDays: BusinessDaysSchema.default({}),
+  businessDays: BusinessDaysSchema.prefault({}),
 });
 
 const UpdateCalendarInputSchema = z.object({
@@ -28,8 +28,8 @@ const UpdateCalendarInputSchema = z.object({
 const CalendarQuerySchema = z.object({
   key: z.string().optional(),
   name: z.string().optional(),
-  page: z.string().transform(val => parseInt(val)).default('1'),
-  pageSize: z.string().transform(val => Math.min(parseInt(val), 100)).default('20'),
+  page: z.string().transform(val => parseInt(val)).prefault('1'),
+  pageSize: z.string().transform(val => Math.min(parseInt(val), 100)).prefault('20'),
 });
 
 // Response schemas

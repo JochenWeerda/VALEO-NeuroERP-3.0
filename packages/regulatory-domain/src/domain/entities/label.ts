@@ -36,7 +36,7 @@ export type LabelStatus = z.infer<typeof LabelStatusEnum>;
  * Label - Zertifikat/Qualitätssiegel
  */
 export const LabelSchema = z.object({
-  id: z.string().uuid().optional(),
+  id: z.string().guid().optional(),
   tenantId: z.string().min(1, 'Tenant ID is required'),
   
   // Label-Info
@@ -52,7 +52,7 @@ export const LabelSchema = z.object({
   status: LabelStatusEnum.default('Pending'),
   
   // Evidenzen (Nachweise)
-  evidenceRefs: z.array(z.string().uuid()).default([]),
+  evidenceRefs: z.array(z.string().guid()).default([]),
   missingEvidences: z.array(z.string()).optional(), // Was fehlt noch?
   
   // Gültigkeit
@@ -67,7 +67,7 @@ export const LabelSchema = z.object({
   revokedReason: z.string().optional(),
   
   // Policy-Referenz
-  policyId: z.string().uuid().optional(),
+  policyId: z.string().guid().optional(),
   
   // Metadata
   createdAt: z.string().datetime().optional(),

@@ -13,7 +13,7 @@ export type InvoiceStatusType = typeof InvoiceStatus[keyof typeof InvoiceStatus]
 
 // Invoice Line Item Schema
 export const InvoiceLineSchema = z.object({
-  id: z.string().uuid(),
+  id: z.string().guid(),
   sku: z.string().min(1),
   name: z.string().min(1),
   description: z.string().optional(),
@@ -28,10 +28,10 @@ export type InvoiceLine = z.infer<typeof InvoiceLineSchema>;
 
 // Invoice Entity Schema
 export const InvoiceSchema = z.object({
-  id: z.string().uuid(),
-  tenantId: z.string().uuid(),
-  customerId: z.string().uuid(),
-  orderId: z.string().uuid().optional(), // Optional for ad-hoc invoices
+  id: z.string().guid(),
+  tenantId: z.string().guid(),
+  customerId: z.string().guid(),
+  orderId: z.string().guid().optional(), // Optional for ad-hoc invoices
   invoiceNumber: z.string().min(1),
   lines: z.array(InvoiceLineSchema),
   subtotalNet: z.number().nonnegative(),

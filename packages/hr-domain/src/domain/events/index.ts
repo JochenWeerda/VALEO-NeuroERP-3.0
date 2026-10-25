@@ -8,13 +8,13 @@ import { z } from 'zod';
 
 // Base Event Schema
 export const BaseEventSchema = z.object({
-  eventId: z.string().uuid(),
+  eventId: z.string().guid(),
   eventType: z.string(),
   eventVersion: z.number().int().min(1),
   occurredAt: z.string().datetime(),
-  tenantId: z.string().uuid(),
-  correlationId: z.string().uuid().optional(),
-  causationId: z.string().uuid().optional()
+  tenantId: z.string().guid(),
+  correlationId: z.string().guid().optional(),
+  causationId: z.string().guid().optional()
 });
 
 export type BaseEvent = z.infer<typeof BaseEventSchema>;
@@ -23,7 +23,7 @@ export type BaseEvent = z.infer<typeof BaseEventSchema>;
 export const EmployeeCreatedEventSchema = BaseEventSchema.extend({
   eventType: z.literal('hr.employee.created'),
   payload: z.object({
-    employeeId: z.string().uuid(),
+    employeeId: z.string().guid(),
     employeeNumber: z.string(),
     firstName: z.string(),
     lastName: z.string(),
@@ -36,8 +36,8 @@ export const EmployeeCreatedEventSchema = BaseEventSchema.extend({
 export const EmployeeUpdatedEventSchema = BaseEventSchema.extend({
   eventType: z.literal('hr.employee.updated'),
   payload: z.object({
-    employeeId: z.string().uuid(),
-    changes: z.record(z.any()),
+    employeeId: z.string().guid(),
+    changes: z.record(z.string(), z.any()),
     previousVersion: z.number().int()
   })
 });
@@ -45,7 +45,7 @@ export const EmployeeUpdatedEventSchema = BaseEventSchema.extend({
 export const EmployeeDeactivatedEventSchema = BaseEventSchema.extend({
   eventType: z.literal('hr.employee.deactivated'),
   payload: z.object({
-    employeeId: z.string().uuid(),
+    employeeId: z.string().guid(),
     reason: z.string().optional(),
     terminationDate: z.string().datetime().optional()
   })
@@ -54,7 +54,7 @@ export const EmployeeDeactivatedEventSchema = BaseEventSchema.extend({
 export const EmployeeReactivatedEventSchema = BaseEventSchema.extend({
   eventType: z.literal('hr.employee.reactivated'),
   payload: z.object({
-    employeeId: z.string().uuid(),
+    employeeId: z.string().guid(),
     reactivationDate: z.string().datetime()
   })
 });
@@ -63,7 +63,7 @@ export const EmployeeReactivatedEventSchema = BaseEventSchema.extend({
 export const RoleCreatedEventSchema = BaseEventSchema.extend({
   eventType: z.literal('hr.role.created'),
   payload: z.object({
-    roleId: z.string().uuid(),
+    roleId: z.string().guid(),
     key: z.string(),
     name: z.string(),
     permissions: z.array(z.string())
@@ -73,15 +73,15 @@ export const RoleCreatedEventSchema = BaseEventSchema.extend({
 export const RoleUpdatedEventSchema = BaseEventSchema.extend({
   eventType: z.literal('hr.role.updated'),
   payload: z.object({
-    roleId: z.string().uuid(),
-    changes: z.record(z.any())
+    roleId: z.string().guid(),
+    changes: z.record(z.string(), z.any())
   })
 });
 
 export const RoleDeletedEventSchema = BaseEventSchema.extend({
   eventType: z.literal('hr.role.deleted'),
   payload: z.object({
-    roleId: z.string().uuid(),
+    roleId: z.string().guid(),
     key: z.string()
   })
 });
@@ -90,8 +90,8 @@ export const RoleDeletedEventSchema = BaseEventSchema.extend({
 export const TimeEntryCreatedEventSchema = BaseEventSchema.extend({
   eventType: z.literal('hr.time_entry.created'),
   payload: z.object({
-    timeEntryId: z.string().uuid(),
-    employeeId: z.string().uuid(),
+    timeEntryId: z.string().guid(),
+    employeeId: z.string().guid(),
     date: z.string().date(),
     start: z.string().datetime(),
     end: z.string().datetime(),
@@ -103,9 +103,9 @@ export const TimeEntryCreatedEventSchema = BaseEventSchema.extend({
 export const TimeEntryApprovedEventSchema = BaseEventSchema.extend({
   eventType: z.literal('hr.time_entry.approved'),
   payload: z.object({
-    timeEntryId: z.string().uuid(),
-    employeeId: z.string().uuid(),
-    approvedBy: z.string().uuid(),
+    timeEntryId: z.string().guid(),
+    employeeId: z.string().guid(),
+    approvedBy: z.string().guid(),
     date: z.string().date(),
     workingMinutes: z.number().int()
   })
@@ -114,9 +114,9 @@ export const TimeEntryApprovedEventSchema = BaseEventSchema.extend({
 export const TimeEntryRejectedEventSchema = BaseEventSchema.extend({
   eventType: z.literal('hr.time_entry.rejected'),
   payload: z.object({
-    timeEntryId: z.string().uuid(),
-    employeeId: z.string().uuid(),
-    rejectedBy: z.string().uuid(),
+    timeEntryId: z.string().guid(),
+    employeeId: z.string().guid(),
+    rejectedBy: z.string().guid(),
     reason: z.string().optional()
   })
 });
@@ -125,8 +125,8 @@ export const TimeEntryRejectedEventSchema = BaseEventSchema.extend({
 export const LeaveRequestedEventSchema = BaseEventSchema.extend({
   eventType: z.literal('hr.leave.requested'),
   payload: z.object({
-    leaveRequestId: z.string().uuid(),
-    employeeId: z.string().uuid(),
+    leaveRequestId: z.string().guid(),
+    employeeId: z.string().guid(),
     type: z.string(),
     from: z.string().date(),
     to: z.string().date(),
@@ -137,9 +137,9 @@ export const LeaveRequestedEventSchema = BaseEventSchema.extend({
 export const LeaveApprovedEventSchema = BaseEventSchema.extend({
   eventType: z.literal('hr.leave.approved'),
   payload: z.object({
-    leaveRequestId: z.string().uuid(),
-    employeeId: z.string().uuid(),
-    approvedBy: z.string().uuid(),
+    leaveRequestId: z.string().guid(),
+    employeeId: z.string().guid(),
+    approvedBy: z.string().guid(),
     type: z.string(),
     from: z.string().date(),
     to: z.string().date(),
@@ -150,9 +150,9 @@ export const LeaveApprovedEventSchema = BaseEventSchema.extend({
 export const LeaveRejectedEventSchema = BaseEventSchema.extend({
   eventType: z.literal('hr.leave.rejected'),
   payload: z.object({
-    leaveRequestId: z.string().uuid(),
-    employeeId: z.string().uuid(),
-    rejectedBy: z.string().uuid(),
+    leaveRequestId: z.string().guid(),
+    employeeId: z.string().guid(),
+    rejectedBy: z.string().guid(),
     reason: z.string().optional()
   })
 });
@@ -161,7 +161,7 @@ export const LeaveRejectedEventSchema = BaseEventSchema.extend({
 export const ShiftCreatedEventSchema = BaseEventSchema.extend({
   eventType: z.literal('hr.shift.created'),
   payload: z.object({
-    shiftId: z.string().uuid(),
+    shiftId: z.string().guid(),
     name: z.string(),
     startsAt: z.string().datetime(),
     endsAt: z.string().datetime(),
@@ -172,18 +172,18 @@ export const ShiftCreatedEventSchema = BaseEventSchema.extend({
 export const ShiftAssignedEventSchema = BaseEventSchema.extend({
   eventType: z.literal('hr.shift.assigned'),
   payload: z.object({
-    shiftId: z.string().uuid(),
-    employeeId: z.string().uuid(),
-    assignedBy: z.string().uuid()
+    shiftId: z.string().guid(),
+    employeeId: z.string().guid(),
+    assignedBy: z.string().guid()
   })
 });
 
 export const ShiftUnassignedEventSchema = BaseEventSchema.extend({
   eventType: z.literal('hr.shift.unassigned'),
   payload: z.object({
-    shiftId: z.string().uuid(),
-    employeeId: z.string().uuid(),
-    unassignedBy: z.string().uuid()
+    shiftId: z.string().guid(),
+    employeeId: z.string().guid(),
+    unassignedBy: z.string().guid()
   })
 });
 
@@ -191,7 +191,7 @@ export const ShiftUnassignedEventSchema = BaseEventSchema.extend({
 export const PayrollPreparedEventSchema = BaseEventSchema.extend({
   eventType: z.literal('hr.payroll.prepared'),
   payload: z.object({
-    payrollRunId: z.string().uuid(),
+    payrollRunId: z.string().guid(),
     period: z.object({
       from: z.string().date(),
       to: z.string().date()
@@ -204,12 +204,12 @@ export const PayrollPreparedEventSchema = BaseEventSchema.extend({
 export const PayrollLockedEventSchema = BaseEventSchema.extend({
   eventType: z.literal('hr.payroll.locked'),
   payload: z.object({
-    payrollRunId: z.string().uuid(),
+    payrollRunId: z.string().guid(),
     period: z.object({
       from: z.string().date(),
       to: z.string().date()
     }),
-    lockedBy: z.string().uuid(),
+    lockedBy: z.string().guid(),
     employeeCount: z.number().int(),
     totalHours: z.number().positive()
   })
@@ -218,19 +218,19 @@ export const PayrollLockedEventSchema = BaseEventSchema.extend({
 export const PayrollExportedEventSchema = BaseEventSchema.extend({
   eventType: z.literal('hr.payroll.exported'),
   payload: z.object({
-    payrollRunId: z.string().uuid(),
+    payrollRunId: z.string().guid(),
     period: z.object({
       from: z.string().date(),
       to: z.string().date()
     }),
-    exportedBy: z.string().uuid(),
+    exportedBy: z.string().guid(),
     exportFormat: z.string(),
     exportLocation: z.string(),
     employeeCount: z.number().int(),
     totalHours: z.number().positive(),
     totalGrossAmount: z.number().min(0),
     items: z.array(z.object({
-      employeeId: z.string().uuid(),
+      employeeId: z.string().guid(),
       hours: z.number().positive(),
       grossAmount: z.number().min(0).optional()
     }))

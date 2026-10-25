@@ -22,8 +22,8 @@ export type AmendmentStatusValue = typeof AmendmentStatus[keyof typeof Amendment
 
 // Schema
 export const AmendmentSchema = z.object({
-  id: z.string().uuid().optional(),
-  contractId: z.string().uuid(),
+  id: z.string().guid().optional(),
+  contractId: z.string().guid(),
   tenantId: z.string(),
   type: z.enum([
     AmendmentType.QTY_CHANGE,
@@ -34,7 +34,7 @@ export const AmendmentSchema = z.object({
     AmendmentType.OTHER,
   ]),
   reason: z.string(),
-  changes: z.record(z.any()), // Flexible structure for different amendment types
+  changes: z.record(z.string(), z.any()), // Flexible structure for different amendment types
   approvedBy: z.string().optional(),
   approvedAt: z.string().datetime().optional(),
   status: z.enum([

@@ -31,11 +31,11 @@ export type CapaStatus = z.infer<typeof CapaStatusEnum>;
  * CAPA - Corrective and Preventive Action
  */
 export const CapaSchema = z.object({
-  id: z.string().uuid().optional(),
+  id: z.string().guid().optional(),
   tenantId: z.string().min(1, 'Tenant ID is required'),
   
   // Verknüpfte NCs
-  linkedNcIds: z.array(z.string().uuid()).default([]),
+  linkedNcIds: z.array(z.string().guid()).default([]),
   
   // CAPA-Identifikation
   capaNumber: z.string().min(1, 'CAPA number is required'), // z.B. "CAPA-2025-00045"

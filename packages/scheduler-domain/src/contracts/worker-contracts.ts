@@ -20,8 +20,8 @@ const WorkerHeartbeatInputSchema = z.object({
 const WorkerQuerySchema = z.object({
   status: z.enum(['Online', 'Offline', 'Maintenance']).optional(),
   name: z.string().optional(),
-  page: z.string().transform(val => parseInt(val)).default('1'),
-  pageSize: z.string().transform(val => Math.min(parseInt(val), 100)).default('20'),
+  page: z.string().transform(val => parseInt(val)).prefault('1'),
+  pageSize: z.string().transform(val => Math.min(parseInt(val), 100)).prefault('20'),
 });
 
 // Response schemas

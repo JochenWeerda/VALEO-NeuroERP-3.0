@@ -10,7 +10,7 @@
       "seroval": "1.6.3",
       "compression": "1.8.2",
       "source-map-js": "1.2.2",
-      "multer": "^2.4.0",
+      "multer": "^2.5.0",
       "image-size": "^2.0.3",
       "ws": "^8.21.0",
       "form-data": "^4.0.6",
@@ -27,7 +27,7 @@
       "defu": "^6.1.5",
       "drizzle-orm": "^0.45.2",
       "effect": "^3.20.0",
-      "fast-uri": "^3.1.8",
+      "fast-uri": "^3.1.9",
       "moment": "^2.31.0",
       "fast-xml-parser": "^5.8.0",
       "fastify": "^5.12.6",
@@ -37,7 +37,7 @@
       "lodash": "^4.18.1",
       "minimatch": "^9.0.7",
       "node-forge": "^1.4.0",
-      "nodemailer": "^10.0.2",
+      "nodemailer": "10.1.7",
       "path-to-regexp": "^0.1.13",
       "picomatch": "^4.0.4",
       "protobufjs": "^7.6.5",
@@ -48,7 +48,7 @@
       "tmp": "^0.2.6",
       "validator": "^13.15.22",
       "yaml": "^2.8.2",
-      "undici": "^7.29.0",
+      "undici": "^7.30.1",
       "@grpc/grpc-js": "^1.14.5",
       "linkify-it": "^5.0.2",
       "markdown-it": "14.3.3",
@@ -80,11 +80,10 @@
       "deepmerge-ts": "^8.0.0",
       "nanoid@3": "^3.3.18",
       "nanoid@5": "^5.1.16",
-      "body-parser": "^1.20.6",
+      "body-parser": "^1.20.9",
       "decode-uri-component": "^0.5.0",
       "morgan": "^1.12.1",
       "fflate": "^0.8.3",
-      "stream-json": "1.9.1",
       "csv-parse": "^7.0.2",
       "@faker-js/faker": "^10.5.0",
       "diff@4": "^4.0.4",
@@ -106,8 +105,6 @@
       ]
     },
     "patchedDependencies": {
-      "stream-json@1.9.1": "config/security/npm-patches/stream-json@1.9.1.patch",
-      "artillery@2.0.33": "config/security/npm-patches/artillery@2.0.33.patch",
       "node-forge@1.4.0": "config/security/npm-patches/node-forge@1.4.0.patch",
       "braces@3.0.3": "config/security/npm-patches/braces@3.0.3.patch"
     }
@@ -187,6 +184,6 @@
   "dependencies": {
     "better-sqlite3": "^12.4.1",
     "dotenv": "^17.2.3",
-    "zod": "^4.1.12"
+    "zod": "^4.6.7"
   }
 }

@@ -18,7 +18,7 @@ export const AttachmentSchema = z.object({
 });
 
 export const NotificationMessageSchema = z.object({
-  id: z.string().uuid().optional(),
+  id: z.string().guid().optional(),
   tenantId: z.string().min(1),
   channel: ChannelEnum,
   templateKey: z.string().optional(),

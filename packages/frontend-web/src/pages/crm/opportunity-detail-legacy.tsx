@@ -39,11 +39,11 @@ const createOpportunitySchema = (t: TFunction) => z.object({
   stage: z.string().default('initial_contact'),
   lead_source: z.string().optional(),
   source: z.string().optional(),
-  campaign_id: z.string().uuid().optional().or(z.literal('')),
+  campaign_id: z.string().guid().optional().or(z.literal('')),
   assigned_to: z.string().optional(),
   owner_id: z.string().optional(),
-  customer_id: z.string().uuid().optional().or(z.literal('')),
-  contact_id: z.string().uuid().optional().or(z.literal('')),
+  customer_id: z.string().guid().optional().or(z.literal('')),
+  contact_id: z.string().guid().optional().or(z.literal('')),
   notes: z.string().optional(),
 })
 
