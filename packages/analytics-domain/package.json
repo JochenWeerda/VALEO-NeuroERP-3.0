@@ -31,7 +31,6 @@
     "migrate:up": "drizzle-kit up",
     "migrate:status": "drizzle-kit check",
     "db:studio": "drizzle-kit studio",
-    "db:seed": "tsx scripts/seed-database.ts",
     "docker:build": "docker build -t analytics-domain .",
     "docker:run": "docker run -p 3005:3005 --env-file .env analytics-domain",
     "docker:push": "docker tag analytics-domain registry.valero-neuroerp.com/analytics-domain:latest && docker push registry.valero-neuroerp.com/analytics-domain:latest",

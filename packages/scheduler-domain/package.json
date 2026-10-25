@@ -31,7 +31,6 @@
     "migrate:up": "drizzle-kit up",
     "migrate:status": "drizzle-kit check",
     "db:studio": "drizzle-kit studio",
-    "db:seed": "tsx scripts/seed-database.ts",
     "docker:build": "docker build -t scheduler-domain .",
     "docker:run": "docker run -p 3080:3080 --env-file .env scheduler-domain",
     "docker:push": "docker tag scheduler-domain registry.valero-neuroerp.com/scheduler-domain:latest && docker push registry.valero-neuroerp.com/scheduler-domain:latest",
