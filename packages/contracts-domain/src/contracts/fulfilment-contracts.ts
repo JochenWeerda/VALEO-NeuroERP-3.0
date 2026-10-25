@@ -1,10 +1,7 @@
 import { z } from 'zod';
-import { extendZodWithOpenApi } from 'zod-openapi';
-
-extendZodWithOpenApi(z);
 
 export const FulfilmentResponseSchema = z.object({
-  contractId: z.string().uuid(),
+  contractId: z.string().guid(),
   tenantId: z.string(),
   deliveredQty: z.number(),
   pricedQty: z.number(),

@@ -1,5 +1,5 @@
 // Offline behaviour contracts for the 2026-10-23 advisory cohort (body-parser,
-// nodemailer, fast-uri). Each case is the advisory's own proof of concept,
+// nodemailer, fast-uri, zod). Each case is the advisory's own proof of concept,
 // paired with a normal input that must keep working. Local loopback HTTP only.
 const assert = require('node:assert/strict');
 const { test } = require('node:test');
@@ -101,4 +101,26 @@ test('fast-uri rejects encoded schemes, host smuggling and dot-segment rewriting
   // Normal API URLs keep working
   assert.equal(uri.normalize('HTTPS://Example.DE:443/api/v1/artikel?x=1'), 'https://example.de/api/v1/artikel?x=1');
   assert.equal(uri.resolve('https://erp.example/api/v1/', 'kunden/42'), 'https://erp.example/api/v1/kunden/42');
+});
+
+test('zod rejects an oversized bounded array before walking its elements (GHSA-mrhx-c7xc-m3w5)', () => {
+  const { z } = patched('zod');
+  assert.match(patched('zod/package.json').version, /^4\./);
+  const schema = z.array(z.string().guid()).max(100);
+  const result = schema.safeParse(Array(50000).fill(0));
+  assert.equal(result.success, false);
+  // compare the count first: a failing deepEqual over 50k issues would hang the diff
+  assert.equal(result.error.issues.length, 1);
+  assert.equal(result.error.issues[0].code, 'too_big');
+  // zod 3 uuid() semantics are kept through guid(): the system tenant id stays valid
+  assert.equal(z.string().guid().safeParse('00000000-0000-0000-0000-000000000001').success, true);
+  assert.equal(schema.safeParse(['550e8400-e29b-41d4-a716-446655440000']).success, true);
+  assert.equal(schema.safeParse(['no-id']).success, false);
+  // zod 3 .default() on a transform/object was parsed; the migrated prefault() keeps that
+  const query = z.object({
+    page: z.string().transform(Number).optional().prefault('1'),
+    days: z.object({ mon: z.boolean().default(true), sun: z.boolean().default(false) }).prefault({}),
+  });
+  assert.deepEqual(query.parse({}), { page: 1, days: { mon: true, sun: false } });
+  assert.deepEqual(query.parse({ page: '3' }), { page: 3, days: { mon: true, sun: false } });
 });

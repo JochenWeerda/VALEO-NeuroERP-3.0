@@ -69,7 +69,7 @@ export class ErrorHandlerMiddleware {
   }
 
   private handleZodError(zodError: ZodError): ApiError {
-    const validationErrors = zodError.errors.map(err => ({
+    const validationErrors = zodError.issues.map(err => ({
       field: err.path.join('.'),
       message: err.message,
       value: 'received' in err ? err.received : undefined

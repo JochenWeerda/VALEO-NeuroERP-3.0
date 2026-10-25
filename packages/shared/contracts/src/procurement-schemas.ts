@@ -131,7 +131,7 @@ export const RFQ = z.object({
     description: z.string(),
     quantity: z.number().positive(),
     unitOfMeasure: z.string(),
-    specifications: z.record(z.any()).optional()
+    specifications: z.record(z.string(), z.any()).optional()
   })),
 
   // Suppliers

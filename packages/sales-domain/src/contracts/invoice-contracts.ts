@@ -8,7 +8,7 @@ import {
 } from '../domain/entities';
 
 // OpenAPI schema for Invoice Line
-export const InvoiceLineContractSchema = InvoiceLineSchema.openapi({
+export const InvoiceLineContractSchema = InvoiceLineSchema.meta({
   description: 'Invoice line item',
   example: {
     id: '550e8400-e29b-41d4-a716-446655440001',
@@ -29,13 +29,13 @@ export const InvoiceStatusContractSchema = z.enum([
   InvoiceStatus.PAID,
   InvoiceStatus.OVERDUE,
   InvoiceStatus.CANCELLED
-]).openapi({
+]).meta({
   description: 'Invoice status',
   example: InvoiceStatus.ISSUED
 });
 
 // OpenAPI schema for Create Invoice
-export const CreateInvoiceContractSchema = CreateInvoiceInputSchema.openapi({
+export const CreateInvoiceContractSchema = CreateInvoiceInputSchema.meta({
   description: 'Invoice creation data',
   example: {
     tenantId: 'tenant-001',
@@ -60,7 +60,7 @@ export const CreateInvoiceContractSchema = CreateInvoiceInputSchema.openapi({
 });
 
 // OpenAPI schema for Update Invoice
-export const UpdateInvoiceContractSchema = UpdateInvoiceInputSchema.openapi({
+export const UpdateInvoiceContractSchema = UpdateInvoiceInputSchema.meta({
   description: 'Invoice update data',
   example: {
     status: InvoiceStatus.PAID,
@@ -69,7 +69,7 @@ export const UpdateInvoiceContractSchema = UpdateInvoiceInputSchema.openapi({
 });
 
 // OpenAPI schema for Invoice Response
-export const InvoiceResponseContractSchema = InvoiceSchema.omit({ tenantId: true }).openapi({
+export const InvoiceResponseContractSchema = InvoiceSchema.omit({ tenantId: true }).meta({
   description: 'Invoice information',
   example: {
     id: '550e8400-e29b-41d4-a716-446655440004',
@@ -107,8 +107,8 @@ export const InvoiceResponseContractSchema = InvoiceSchema.omit({ tenantId: true
 
 // Query parameters for listing invoices
 export const InvoiceQueryContractSchema = z.object({
-  customerId: z.string().uuid().optional(),
-  orderId: z.string().uuid().optional(),
+  customerId: z.string().guid().optional(),
+  orderId: z.string().guid().optional(),
   status: z.enum([
     InvoiceStatus.ISSUED,
     InvoiceStatus.PAID,
@@ -118,9 +118,9 @@ export const InvoiceQueryContractSchema = z.object({
   search: z.string().optional().describe('Search term for invoice number'),
   dueDateFrom: z.string().datetime().optional(),
   dueDateTo: z.string().datetime().optional(),
-  page: z.string().transform(Number).optional().default('1'),
-  pageSize: z.string().transform(Number).optional().default('20')
-}).openapi({
+  page: z.string().transform(Number).optional().prefault('1'),
+  pageSize: z.string().transform(Number).optional().prefault('20')
+}).meta({
   description: 'Query parameters for invoice listing'
 });
 
@@ -133,6 +133,6 @@ export const InvoiceListResponseContractSchema = z.object({
     total: z.number(),
     totalPages: z.number()
   })
-}).openapi({
+}).meta({
   description: 'Paginated invoice list response'
 });

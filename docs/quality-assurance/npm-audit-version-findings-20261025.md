@@ -49,3 +49,7 @@ Roh-Audit, Quellhash- und Laufzeitpruefung erneut erforderlich.
 Vertraege pruefen zwei Versionen in einem Advisory, eine unreviewte Version
 neben einer reviewten, falsche Severity-Zaehleinheiten sowie leere, doppelte
 und pfadlose Inventare. Keine Datenbank oder Container wurden benutzt.
+
+## Nachfolgestand
+
+Reparatur und Abnahme: [dependency-security-stabilize-20261025.md](dependency-security-stabilize-20261025.md).

@@ -14,7 +14,7 @@ export type QuoteStatusType = typeof QuoteStatus[keyof typeof QuoteStatus];
 
 // Quote Line Item Schema
 export const QuoteLineSchema = z.object({
-  id: z.string().uuid(),
+  id: z.string().guid(),
   sku: z.string().min(1),
   name: z.string().min(1),
   description: z.string().optional(),
@@ -29,9 +29,9 @@ export type QuoteLine = z.infer<typeof QuoteLineSchema>;
 
 // Quote Entity Schema
 export const QuoteSchema = z.object({
-  id: z.string().uuid(),
-  tenantId: z.string().uuid(),
-  customerId: z.string().uuid(),
+  id: z.string().guid(),
+  tenantId: z.string().guid(),
+  customerId: z.string().guid(),
   quoteNumber: z.string().min(1),
   lines: z.array(QuoteLineSchema),
   subtotalNet: z.number().nonnegative(),

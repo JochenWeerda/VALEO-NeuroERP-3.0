@@ -82,7 +82,7 @@
     "throttle": "^1.0.3",
     "uuid": "^11.1.1",
     "winston": "^3.11.0",
-    "zod": "^3.22.4"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@types/amqplib": "^0.10.7",

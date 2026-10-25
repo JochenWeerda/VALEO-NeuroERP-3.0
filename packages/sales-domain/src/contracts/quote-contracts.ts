@@ -1,7 +1,5 @@
 import { z } from 'zod';
-import { extendZodWithOpenApi } from 'zod-openapi';
 
-extendZodWithOpenApi(z);
 import {
   QuoteSchema,
   CreateQuoteInputSchema,
@@ -11,7 +9,7 @@ import {
 } from '../domain/entities';
 
 // OpenAPI schema for Quote Line
-export const QuoteLineContractSchema = QuoteLineSchema.openapi({
+export const QuoteLineContractSchema = QuoteLineSchema.meta({
   description: 'Quote line item',
   example: {
     id: '550e8400-e29b-41d4-a716-446655440001',
@@ -33,13 +31,13 @@ export const QuoteStatusContractSchema = z.enum([
   QuoteStatus.ACCEPTED,
   QuoteStatus.REJECTED,
   QuoteStatus.EXPIRED
-]).openapi({
+]).meta({
   description: 'Quote status',
   example: QuoteStatus.SENT
 });
 
 // OpenAPI schema for Create Quote
-export const CreateQuoteContractSchema = CreateQuoteInputSchema.openapi({
+export const CreateQuoteContractSchema = CreateQuoteInputSchema.meta({
   description: 'Quote creation data',
   example: {
     status: QuoteStatus.DRAFT,
@@ -64,7 +62,7 @@ export const CreateQuoteContractSchema = CreateQuoteInputSchema.openapi({
 });
 
 // OpenAPI schema for Update Quote
-export const UpdateQuoteContractSchema = UpdateQuoteInputSchema.openapi({
+export const UpdateQuoteContractSchema = UpdateQuoteInputSchema.meta({
   description: 'Quote update data',
   example: {
     status: QuoteStatus.SENT,
@@ -73,7 +71,7 @@ export const UpdateQuoteContractSchema = UpdateQuoteInputSchema.openapi({
 });
 
 // OpenAPI schema for Quote Response
-export const QuoteResponseContractSchema = QuoteSchema.omit({ tenantId: true }).openapi({
+export const QuoteResponseContractSchema = QuoteSchema.omit({ tenantId: true }).meta({
   description: 'Quote information',
   example: {
     id: '550e8400-e29b-41d4-a716-446655440002',
@@ -109,7 +107,7 @@ export const QuoteResponseContractSchema = QuoteSchema.omit({ tenantId: true }).
 
 // Query parameters for listing quotes
 export const QuoteQueryContractSchema = z.object({
-  customerId: z.string().uuid().optional(),
+  customerId: z.string().guid().optional(),
   status: z.enum([
     QuoteStatus.DRAFT,
     QuoteStatus.SENT,
@@ -120,9 +118,9 @@ export const QuoteQueryContractSchema = z.object({
   search: z.string().optional().describe('Search term for quote number or customer'),
   validUntilFrom: z.string().datetime().optional(),
   validUntilTo: z.string().datetime().optional(),
-  page: z.string().transform(Number).optional().default('1'),
-  pageSize: z.string().transform(Number).optional().default('20')
-}).openapi({
+  page: z.string().transform(Number).optional().prefault('1'),
+  pageSize: z.string().transform(Number).optional().prefault('20')
+}).meta({
   description: 'Query parameters for quote listing'
 });
 
@@ -135,6 +133,6 @@ export const QuoteListResponseContractSchema = z.object({
     total: z.number(),
     totalPages: z.number()
   })
-}).openapi({
+}).meta({
   description: 'Paginated quote list response'
 });

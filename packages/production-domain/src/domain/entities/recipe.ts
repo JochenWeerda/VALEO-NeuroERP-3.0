@@ -22,8 +22,8 @@ const QARequirementsSchema = z.object({
 
 // Main Recipe Schema
 export const RecipeSchema = z.object({
-  id: z.string().uuid(),
-  tenantId: z.string().uuid(),
+  id: z.string().guid(),
+  tenantId: z.string().guid(),
   code: z.string().min(1).max(50),
   name: z.string().min(1).max(200),
   version: z.number().int().min(1).default(1),

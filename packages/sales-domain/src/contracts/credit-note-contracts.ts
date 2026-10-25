@@ -8,7 +8,7 @@ import {
 } from '../domain/entities';
 
 // OpenAPI schema for Credit Note Line
-export const CreditNoteLineContractSchema = CreditNoteLineSchema.openapi({
+export const CreditNoteLineContractSchema = CreditNoteLineSchema.meta({
   description: 'Credit note line item',
   example: {
     id: '550e8400-e29b-41d4-a716-446655440001',
@@ -27,13 +27,13 @@ export const CreditNoteLineContractSchema = CreditNoteLineSchema.openapi({
 export const CreditNoteStatusContractSchema = z.enum([
   CreditNoteStatus.ISSUED,
   CreditNoteStatus.SETTLED
-]).openapi({
+]).meta({
   description: 'Credit note status',
   example: CreditNoteStatus.ISSUED
 });
 
 // OpenAPI schema for Create Credit Note
-export const CreateCreditNoteContractSchema = CreateCreditNoteInputSchema.openapi({
+export const CreateCreditNoteContractSchema = CreateCreditNoteInputSchema.meta({
   description: 'Credit note creation data',
   example: {
     tenantId: 'tenant-001',
@@ -58,7 +58,7 @@ export const CreateCreditNoteContractSchema = CreateCreditNoteInputSchema.openap
 });
 
 // OpenAPI schema for Update Credit Note
-export const UpdateCreditNoteContractSchema = UpdateCreditNoteInputSchema.openapi({
+export const UpdateCreditNoteContractSchema = UpdateCreditNoteInputSchema.meta({
   description: 'Credit note update data',
   example: {
     status: CreditNoteStatus.SETTLED,
@@ -67,7 +67,7 @@ export const UpdateCreditNoteContractSchema = UpdateCreditNoteInputSchema.openap
 });
 
 // OpenAPI schema for Credit Note Response
-export const CreditNoteResponseContractSchema = CreditNoteSchema.omit({ tenantId: true }).openapi({
+export const CreditNoteResponseContractSchema = CreditNoteSchema.omit({ tenantId: true }).meta({
   description: 'Credit note information',
   example: {
     id: '550e8400-e29b-41d4-a716-446655440005',
@@ -105,16 +105,16 @@ export const CreditNoteResponseContractSchema = CreditNoteSchema.omit({ tenantId
 
 // Query parameters for listing credit notes
 export const CreditNoteQueryContractSchema = z.object({
-  customerId: z.string().uuid().optional(),
-  invoiceId: z.string().uuid().optional(),
+  customerId: z.string().guid().optional(),
+  invoiceId: z.string().guid().optional(),
   status: z.enum([
     CreditNoteStatus.ISSUED,
     CreditNoteStatus.SETTLED
   ]).optional(),
   search: z.string().optional().describe('Search term for credit note number'),
-  page: z.string().transform(Number).optional().default('1'),
-  pageSize: z.string().transform(Number).optional().default('20')
-}).openapi({
+  page: z.string().transform(Number).optional().prefault('1'),
+  pageSize: z.string().transform(Number).optional().prefault('20')
+}).meta({
   description: 'Query parameters for credit note listing'
 });
 
@@ -127,6 +127,6 @@ export const CreditNoteListResponseContractSchema = z.object({
     total: z.number(),
     totalPages: z.number()
   })
-}).openapi({
+}).meta({
   description: 'Paginated credit note list response'
 });

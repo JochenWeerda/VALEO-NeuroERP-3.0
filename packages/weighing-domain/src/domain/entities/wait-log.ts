@@ -2,9 +2,9 @@ import { z } from 'zod';
 
 // Schema
 export const WaitLogSchema = z.object({
-  id: z.string().uuid().optional(),
+  id: z.string().guid().optional(),
   tenantId: z.string(),
-  ticketId: z.string().uuid(),
+  ticketId: z.string().guid(),
   licensePlate: z.string().optional(),
 
   // Timing
@@ -20,7 +20,7 @@ export const WaitLogSchema = z.object({
   // Gate & logistics
   gateId: z.string(),
   gateType: z.enum(['Inbound', 'Outbound', 'Weighing', 'Inspection']),
-  slotId: z.string().uuid().optional(),
+  slotId: z.string().guid().optional(),
 
   // Priority & categorization
   priority: z.number().min(1).max(10).default(5),
@@ -28,8 +28,8 @@ export const WaitLogSchema = z.object({
   isOvertime: z.boolean().optional(),
 
   // Context
-  contractId: z.string().uuid().optional(),
-  orderId: z.string().uuid().optional(),
+  contractId: z.string().guid().optional(),
+  orderId: z.string().guid().optional(),
   commodity: z.string().optional(),
   expectedWeight: z.number().optional(),
 

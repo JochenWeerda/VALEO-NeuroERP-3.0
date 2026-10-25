@@ -12,14 +12,14 @@ const EntityStatusSchema = z.enum(['active', 'inactive', 'pending', 'error']);
 export const CreateIntegrationRequestSchema = z.object({
   name: z.string().min(1).max(255),
   type: IntegrationTypeSchema,
-  config: z.record(z.unknown()),
+  config: z.record(z.string(), z.unknown()),
   description: z.string().optional(),
   tags: z.array(z.string()).default([])
 });
 
 export const UpdateIntegrationRequestSchema = z.object({
   name: z.string().min(1).max(255).optional(),
-  config: z.record(z.unknown()).optional(),
+  config: z.record(z.string(), z.unknown()).optional(),
   description: z.string().optional(),
   tags: z.array(z.string()).optional(),
   status: EntityStatusSchema.optional(),
@@ -43,7 +43,7 @@ export const IntegrationResponseSchema = z.object({
   name: z.string(),
   type: IntegrationTypeSchema,
   status: EntityStatusSchema,
-  config: z.record(z.unknown()),
+  config: z.record(z.string(), z.unknown()),
   description: z.string().nullable(),
   tags: z.array(z.string()),
   isActive: z.boolean(),

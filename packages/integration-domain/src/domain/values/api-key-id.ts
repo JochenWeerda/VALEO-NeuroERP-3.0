@@ -5,7 +5,7 @@
 import { z } from 'zod';
 import { generatePrefixedId, isValidId } from '@shared/utils/id-generator.js';
 
-const ApiKeyIdSchema = z.string().uuid();
+const ApiKeyIdSchema = z.string().guid();
 
 export class ApiKeyId {
   private readonly _value: string;

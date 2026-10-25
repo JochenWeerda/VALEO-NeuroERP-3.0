@@ -46,15 +46,15 @@ export type NonConformityStatus = z.infer<typeof NonConformityStatusEnum>;
  * Non-Conformity - Abweichung/Reklamation
  */
 export const NonConformitySchema = z.object({
-  id: z.string().uuid().optional(),
+  id: z.string().guid().optional(),
   tenantId: z.string().min(1, 'Tenant ID is required'),
   
   // Referenz - Wo trat die Abweichung auf?
-  batchId: z.string().uuid().optional(),
-  contractId: z.string().uuid().optional(),
-  sampleId: z.string().uuid().optional(),
-  lotId: z.string().uuid().optional(),
-  supplierId: z.string().uuid().optional(),
+  batchId: z.string().guid().optional(),
+  contractId: z.string().guid().optional(),
+  sampleId: z.string().guid().optional(),
+  lotId: z.string().guid().optional(),
+  supplierId: z.string().guid().optional(),
   
   // NC-Identifikation
   ncNumber: z.string().min(1, 'NC number is required'), // z.B. "NC-2025-00123"
@@ -80,7 +80,7 @@ export const NonConformitySchema = z.object({
   immediateAction: z.string().optional(), // Sofortmaßnahme
   
   // CAPA-Verknüpfung
-  capaId: z.string().uuid().optional(),
+  capaId: z.string().guid().optional(),
   
   // Kosten & Impact
   estimatedCost: z.number().optional(),

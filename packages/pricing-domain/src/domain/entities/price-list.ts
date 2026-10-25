@@ -49,7 +49,7 @@ export type PriceListLine = z.infer<typeof PriceListLineSchema>;
  * Price List - Preisliste
  */
 export const PriceListSchema = z.object({
-  id: z.string().uuid().optional(),
+  id: z.string().guid().optional(),
   tenantId: z.string().min(1, 'Tenant ID is required'),
   
   // Identifikation
