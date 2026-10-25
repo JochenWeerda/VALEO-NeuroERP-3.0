@@ -18,9 +18,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "migrate:gen": "drizzle-kit generate:pg",
-    "migrate:up": "drizzle-kit up:pg",
-    "migrate:down": "drizzle-kit down:pg",
+    "migrate:gen": "drizzle-kit generate",
+    "migrate:up": "drizzle-kit up",
     "lint": "echo 'lint placeholder'",
     "db:studio": "drizzle-kit studio"
   },
@@ -54,7 +53,7 @@
     "vitest": "^4.1.12",
     "supertest": "^7.1.4",
     "@vitest/coverage-v8": "^4.1.12",
-    "drizzle-kit": "^0.22.0",
+    "drizzle-kit": "^0.31.11",
     "@types/supertest": "^6.0.0"
   }
 }
