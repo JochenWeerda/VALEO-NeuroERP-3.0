@@ -19,25 +19,34 @@ function assess(report, root = ROOT, today = new Date().toISOString().slice(0, 1
     throw new Error('Missing, incomplete or muted audit inventory');
   }
   const rows = Object.values(report.advisories);
-  if (rows.some(row => !row || typeof row !== 'object')) throw new Error('Invalid audit finding');
+  if (rows.some(row => !row || typeof row !== 'object' || !row.github_advisory_id || !row.module_name ||
+      !Array.isArray(row.findings) || !row.findings.length || row.findings.some(f =>
+        !f || typeof f.version !== 'string' || !f.version || !Array.isArray(f.paths) || !f.paths.length ||
+        f.paths.some(p => typeof p !== 'string' || !p)) ||
+      new Set(row.findings.map(f => f.version)).size !== row.findings.length)) {
+    throw new Error('Invalid audit finding');
+  }
+  // pnpm groups affected installed versions under one advisory. Scanner
+  // severity metadata counts those findings, not the number of advisory rows.
+  const detected = rows.flatMap(row => row.findings.map(finding => ({ row, finding })));
   const counts = metadata.vulnerabilities;
   const severities = ['info', 'low', 'moderate', 'high', 'critical'];
   if (!counts || severities.some(s => !Number.isInteger(counts[s]) || counts[s] < 0) ||
-      severities.reduce((n, s) => n + counts[s], 0) !== rows.length ||
-      severities.some(s => rows.filter(row => row.severity === s).length !== counts[s])) {
+      severities.reduce((n, s) => n + counts[s], 0) !== detected.length ||
+      severities.some(s => detected.filter(({ row }) => row.severity === s).length !== counts[s])) {
     throw new Error('Audit severity counts contradict findings');
   }
   const policy = JSON.parse(fs.readFileSync(path.join(root, 'config/security/npm-backport-reviews.json'), 'utf8'));
   if (policy.schema_version !== 1 || !Array.isArray(policy.reviews)) throw new Error('Invalid backport policy');
   const manifest = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
   const installed = createRequire(path.join(root, 'node_modules/.pnpm/node_modules/package.json'));
-  const findings = rows.map(row => {
+  const findings = detected.map(({ row, finding }) => {
     let decision = 'blocked', reason = 'No exact source repair for this finding';
     try {
       const allowed = ALLOWED[row.github_advisory_id];
       const reviews = policy.reviews.filter(r => r.advisory === row.github_advisory_id);
-      if (!allowed || reviews.length !== 1 || row.module_name !== allowed.name || !Array.isArray(row.findings) ||
-          !row.findings.length || row.findings.some(f => f.version !== allowed.version)) throw new Error(reason);
+      if (!allowed || reviews.length !== 1 || row.module_name !== allowed.name ||
+          finding.version !== allowed.version) throw new Error(reason);
       const review = reviews[0];
       const from = Date.parse(review.reviewed_on), until = Date.parse(review.review_by), now = Date.parse(today);
       if (![review.reviewed_on, review.review_by, today].every(date => /^\d{4}-\d{2}-\d{2}$/.test(date)) ||
@@ -57,10 +66,12 @@ function assess(report, root = ROOT, today = new Date().toISOString().slice(0, 1
       }
       decision = 'source_backported'; reason = 'Exact reviewed source, patch, manifest, lock and installed hashes match';
     } catch (error) { reason = error.message; }
-    return { advisory: row.github_advisory_id, package: row.module_name, severity: row.severity, decision, reason };
+    return { advisory: row.github_advisory_id, package: row.module_name, version: finding.version,
+      severity: row.severity, decision, reason };
   });
   const blocked = findings.filter(f => f.decision === 'blocked').length;
-  return { scanner_findings: rows.length, source_backported: rows.length - blocked, blocked,
+  return { scanner_advisories: rows.length, scanner_findings: findings.length,
+    source_backported: findings.length - blocked, blocked,
     release_allowed: blocked === 0, findings };
 }
 if (require.main === module) {

@@ -29,7 +29,7 @@ function fixture(t) {
       review.installed_sha256[file] = hash(path.join(root, pkg, file));
     }
     advisories[review.advisory] = { github_advisory_id: review.advisory, module_name: review.package,
-      severity: 'high', findings: [{ version: review.version }] };
+      severity: 'high', findings: [{ version: review.version, paths: [`test > ${review.package}@${review.version}`] }] };
   }
   write('package.json', manifest); write('pnpm-lock.yaml', 'reviewed lock\n');
   for (const review of policy.reviews) {
@@ -54,6 +54,46 @@ test('unknown advisory blocks release', t => {
 test('new affected version blocks release', t => {
   const f = fixture(t); Object.values(f.report.advisories)[0].findings[0].version = '1.4.1';
   assert.equal(f.run().release_allowed, false);
+});
+test('one advisory with two installed versions produces two findings and preserves the new block', t => {
+  const f = fixture(t);
+  f.report.advisories['new-zod'] = { github_advisory_id: 'GHSA-new-zod', module_name: 'zod', severity: 'high',
+    findings: [{ version: '3.25.76', paths: ['test > zod@3.25.76'] },
+      { version: '4.1.12', paths: ['test > zod@4.1.12'] }] };
+  f.report.metadata.vulnerabilities.high = 4;
+  const result = f.run();
+  assert.equal(result.scanner_advisories, 3);
+  assert.equal(result.scanner_findings, 4);
+  assert.equal(result.source_backported, 2);
+  assert.equal(result.blocked, 2);
+  assert.equal(result.release_allowed, false);
+  assert.deepEqual(result.findings.filter(finding => finding.package === 'zod').map(finding => finding.version),
+    ['3.25.76', '4.1.12']);
+});
+test('a reviewed advisory never blesses an additional unreviewed version', t => {
+  const f = fixture(t), row = Object.values(f.report.advisories)[0];
+  row.findings.push({ version: '1.4.1', paths: ['test > node-forge@1.4.1'] });
+  f.report.metadata.vulnerabilities.high = 3;
+  const result = f.run();
+  assert.equal(result.source_backported, 2);
+  assert.equal(result.blocked, 1);
+  assert.equal(result.findings.find(finding => finding.version === '1.4.1').decision, 'blocked');
+});
+test('advisory-row severity counts cannot replace installed-version counts', t => {
+  const f = fixture(t), row = Object.values(f.report.advisories)[0];
+  row.findings.push({ version: '1.4.1', paths: ['test > node-forge@1.4.1'] });
+  assert.throws(f.run, /severity counts/);
+});
+test('empty, duplicate or pathless version inventories fail closed', t => {
+  for (const mutation of [
+    row => { row.findings = []; },
+    row => { row.findings.push({ ...row.findings[0] }); },
+    row => { row.findings[0].paths = []; },
+  ]) {
+    const f = fixture(t), row = Object.values(f.report.advisories)[0];
+    mutation(row);
+    assert.throws(f.run, /Invalid audit finding/);
+  }
 });
 for (const change of ['expiry', 'future review', 'duplicate', 'missing source', 'malformed date']) {
   test(`${change} review blocks release`, t => {
