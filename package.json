@@ -48,7 +48,7 @@
       "tmp": "^0.2.6",
       "validator": "^13.15.22",
       "yaml": "^2.8.2",
-      "undici": "^7.29.0",
+      "undici": "^7.30.1",
       "@grpc/grpc-js": "^1.14.5",
       "linkify-it": "^5.0.2",
       "markdown-it": "14.3.3",
