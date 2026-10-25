@@ -39,3 +39,9 @@ Regressionstest `tests/unit/db-schema.test.ts` laedt das Schema und prueft die d
   Indizes als `CREATE INDEX ... ("schedule_id","status")`, `("job_id","status")`,
   `("tenant_id","created_at")`; keine Warnung zu doppelten Indexnamen.
 - Keine Aussage ueber vollstaendige Sicherheit oder Gesamtfreigabe.
+
+## CI-Abnahme
+
+| Lauf | Commit | Ergebnis |
+| --- | --- | --- |
+| Quality Gate 40222509662 | 19c75865f | Dependency Scan, Improvement integrity, FSX, Secret Scan, SBOM, WCAG u. a. success; Frontend-Unit 214 Faelle mit identischer Fallmenge wie Basis 40187054625 (0 neu); Doc-Drift 272 wie Basis |
