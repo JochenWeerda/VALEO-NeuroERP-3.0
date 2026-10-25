@@ -103,7 +103,7 @@ export async function registerScheduleRoutes(
         });
 
         // Calculate next fire time
-        const nextFireAt = await schedulingService.calculateNextFireTime(schedule);
+        const nextFireAt = schedulingService.calculateNextFireTime(schedule);
 
         const created = await scheduleRepository.create(
           scheduleRepository.toDatabaseRecord({

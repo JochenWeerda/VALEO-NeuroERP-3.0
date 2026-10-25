@@ -31,9 +31,9 @@ export class SchedulingService {
   ) {}
 
   /**
-   * Calculate next fire time for a schedule
+   * Calculate next fire time for a schedule (pure calculation, no I/O)
    */
-  async calculateNextFireTime(schedule: ScheduleEntity): Promise<Date | null> {
+  calculateNextFireTime(schedule: ScheduleEntity): Date | null {
     const now = new Date();
 
     switch (schedule.trigger.type) {
@@ -78,25 +78,30 @@ export class SchedulingService {
       let success = false;
       let error: string | undefined;
 
-      switch (schedule.target.kind) {
-        case 'EVENT':
-          success = await this.executeEventTarget(schedule, runId, correlationId, context);
-          break;
+      // A failing target still records the fire attempt below and reports its reason
+      try {
+        switch (schedule.target.kind) {
+          case 'EVENT':
+            success = await this.executeEventTarget(schedule, runId, correlationId, context);
+            break;
 
-        case 'HTTP':
-          success = await this.executeHttpTarget(schedule, runId, correlationId, context);
-          break;
+          case 'HTTP':
+            success = await this.executeHttpTarget(schedule, runId, correlationId, context);
+            break;
 
-        case 'QUEUE':
-          success = await this.executeQueueTarget(schedule, runId, correlationId, context);
-          break;
+          case 'QUEUE':
+            success = await this.executeQueueTarget(schedule, runId, correlationId, context);
+            break;
 
-        default:
-          error = `Unsupported target type: ${schedule.target.kind}`;
+          default:
+            error = `Unsupported target type: ${schedule.target.kind}`;
+        }
+      } catch (targetError) {
+        error = targetError instanceof Error ? targetError.message : 'Unknown target error';
       }
 
       // Calculate next fire time
-      const nextFireAt = success ? await this.calculateNextFireTime(schedule) : null;
+      const nextFireAt = success ? this.calculateNextFireTime(schedule) : null;
 
       // Update schedule with next fire time
       const updateData: any = {
@@ -139,7 +144,7 @@ export class SchedulingService {
       throw new Error(`Schedule ${scheduleId} not found`);
     }
 
-    const nextFireAt = enabled ? await this.calculateNextFireTime(schedule) : null;
+    const nextFireAt = enabled ? this.calculateNextFireTime(schedule) : null;
 
     await this.scheduleRepository.update(scheduleId, {
       enabled,
@@ -227,27 +232,23 @@ export class SchedulingService {
     correlationId: string,
     context: ScheduleExecutionContext
   ): Promise<boolean> {
-    try {
-      const event = {
-        eventId: uuidv4(),
-        eventType: schedule.target.eventTopic!,
-        eventVersion: 1,
-        occurredAt: new Date().toISOString(),
-        tenantId: schedule.tenantId,
-        correlationId,
-        payload: {
-          scheduleId: schedule.id,
-          runId,
-          firedAt: new Date().toISOString(),
-        },
-      };
+    // Publish failures propagate so executeSchedule can report their reason
+    const event = {
+      eventId: uuidv4(),
+      eventType: schedule.target.eventTopic!,
+      eventVersion: 1,
+      occurredAt: new Date().toISOString(),
+      tenantId: schedule.tenantId,
+      correlationId,
+      payload: {
+        scheduleId: schedule.id,
+        runId,
+        firedAt: new Date().toISOString(),
+      },
+    };
 
-      await this.eventPublisher.publish(event);
-      return true;
-    } catch (error) {
-      console.error('Failed to publish event:', error);
-      return false;
-    }
+    await this.eventPublisher.publish(event);
+    return true;
   }
 
   private async executeHttpTarget(
