@@ -84,7 +84,9 @@ async function main() {
   // drizzle-kit does not export bin.cjs; take the declared bin next to its package entry.
   const kitDir = path.dirname(packageBin(pkgDir, 'drizzle-kit'));
   const kitBin = JSON.parse(fs.readFileSync(path.join(kitDir, 'package.json'), 'utf8')).bin['drizzle-kit'];
-  const run = spawnSync(process.execPath, [path.join(kitDir, kitBin), 'migrate'], { cwd: pkgDir, stdio: 'inherit' });
+  // PGAPPNAME marks the session so governance.ddl_events attributes the change to drizzle-kit.
+  const env = { ...process.env, PGAPPNAME: `drizzle-kit:${path.basename(pkgDir)}` };
+  const run = spawnSync(process.execPath, [path.join(kitDir, kitBin), 'migrate'], { cwd: pkgDir, stdio: 'inherit', env });
   process.exitCode = run.status ?? 1;
 }
 
@@ -92,4 +94,4 @@ if (require.main === module) {
   main().catch((error) => { console.error(`[drizzle-apply-guard] ${error.message}`); process.exitCode = 1; });
 }
 
-module.exports = { classify };
+module.exports = { classify, resolvedConfig };

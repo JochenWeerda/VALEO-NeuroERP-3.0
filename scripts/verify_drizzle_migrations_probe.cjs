@@ -91,7 +91,7 @@ function expectedCatalog(snapshot) {
   return tables;
 }
 
-async function actualCatalog(client) {
+async function actualCatalog(client, schema = CHECK_SCHEMA) {
   const columns = await client.query(`
     SELECT c.relname AS table_name, a.attname AS column_name, format_type(a.atttypid, a.atttypmod) AS type,
            a.attnotnull AS not_null, pg_get_expr(d.adbin, d.adrelid) AS default_expr,
@@ -99,7 +99,7 @@ async function actualCatalog(client) {
       FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
       JOIN pg_attribute a ON a.attrelid = c.oid AND a.attnum > 0 AND NOT a.attisdropped
       LEFT JOIN pg_attrdef d ON d.adrelid = c.oid AND d.adnum = a.attnum
-     WHERE n.nspname = $1 AND c.relkind = 'r'`, [CHECK_SCHEMA]);
+     WHERE n.nspname = $1 AND c.relkind = 'r'`, [schema]);
   const indexes = await client.query(`
     SELECT t.relname AS table_name, ic.relname AS index_name, i.indisunique AS is_unique,
            (SELECT string_agg(a.attname, ',' ORDER BY k.ord) FROM unnest(i.indkey) WITH ORDINALITY k(attnum, ord)
@@ -107,7 +107,7 @@ async function actualCatalog(client) {
       FROM pg_index i JOIN pg_class ic ON ic.oid = i.indexrelid JOIN pg_class t ON t.oid = i.indrelid
       JOIN pg_namespace n ON n.oid = t.relnamespace
      WHERE n.nspname = $1 AND NOT i.indisprimary
-       AND NOT EXISTS (SELECT 1 FROM pg_constraint k WHERE k.conindid = i.indexrelid)`, [CHECK_SCHEMA]);
+       AND NOT EXISTS (SELECT 1 FROM pg_constraint k WHERE k.conindid = i.indexrelid)`, [schema]);
   const constraints = await client.query(`
     SELECT t.relname AS table_name, k.conname, k.contype, rt.relname AS ref_table,
            k.confdeltype, k.confupdtype,
@@ -118,7 +118,7 @@ async function actualCatalog(client) {
            rn.nspname AS ref_schema
       FROM pg_constraint k JOIN pg_class t ON t.oid = k.conrelid JOIN pg_namespace n ON n.oid = t.relnamespace
       LEFT JOIN pg_class rt ON rt.oid = k.confrelid LEFT JOIN pg_namespace rn ON rn.oid = rt.relnamespace
-     WHERE n.nspname = $1 AND k.contype IN ('f', 'u')`, [CHECK_SCHEMA]);
+     WHERE n.nspname = $1 AND k.contype IN ('f', 'u')`, [schema]);
   const action = { a: 'no action', r: 'restrict', c: 'cascade', n: 'set null', d: 'set default' };
   const tables = {};
   for (const row of columns.rows) {
@@ -133,8 +133,8 @@ async function actualCatalog(client) {
   }
   for (const row of constraints.rows) {
     if (row.contype === 'f') {
-      // A reference outside the check schema would mean the constraint bound to a shared table.
-      const target = row.ref_schema === CHECK_SCHEMA ? row.ref_table : `${row.ref_schema}.${row.ref_table}`;
+      // A reference outside the inspected schema would mean the constraint bound to a foreign table.
+      const target = row.ref_schema === schema ? row.ref_table : `${row.ref_schema}.${row.ref_table}`;
       ensure(row.table_name).foreignKeys[row.conname] = {
         columns: row.columns, references: `${target}(${row.ref_columns})`,
         onDelete: action[row.confdeltype], onUpdate: action[row.confupdtype],
@@ -219,4 +219,4 @@ if (require.main === module) {
   main().catch((error) => { console.error(error.message); process.exitCode = 1; });
 }
 
-module.exports = { loadChain, expectedCatalog, diffCatalog, normalizeDefault, normalizeType, redirectToCheckSchema };
+module.exports = { loadChain, expectedCatalog, actualCatalog, diffCatalog, normalizeDefault, normalizeType, redirectToCheckSchema };

@@ -21,6 +21,7 @@
     "migrate:gen": "drizzle-kit generate",
     "migrate:apply": "node ../../scripts/drizzle_apply_guard.cjs",
     "migrate:check": "node ../../scripts/drizzle_apply_guard.cjs --check",
+    "migrate:drift": "node ../../scripts/check_drizzle_drift.cjs",
     "migrate:up": "drizzle-kit up",
     "lint": "echo 'lint placeholder'",
     "db:studio": "drizzle-kit studio"

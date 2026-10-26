@@ -67,6 +67,9 @@ Sie ersetzt nicht die fachliche Dokumentation, sondern legt die verbindliche Sta
   Volumes loeschen; kein pauschales Docker-Prune.
 - CI nutzt die vom Job bereits bereitgestellte Datenbank. Tests erzeugen darin
   keine weiteren Datenbanken oder Dockerinstanzen.
+- Direkte Datenbanksitzungen von Agenten (psql, Skripte, Treiber) setzen
+  `PGAPPNAME=agent:<agentname>`, damit `governance.ddl_events` ihre
+  Schemaaenderungen zuordnen kann ([DB-Governance](docs/architecture/db-governance-20261026.md)).
 
 Runbook: [Gemeinsamer Testpruefstand](docs/quality-assurance/test-database-resource-policy-20261001.md).
 

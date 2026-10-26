@@ -73,6 +73,9 @@ def main() -> None:
     # haben, additiv anlegen (create_all ist idempotent). Ohne diesen Schritt
     # fehlen auf frischen Installationen ORM-definierte Tabellen — Befund
     # RUNTIME-SWEEP-REPAIR-001 (77 Tabellen ausserhalb der Migrationskette).
+    # The ORM engine reads PGAPPNAME; governance.ddl_events then shows these tables as
+    # orm-create-all instead of an unknown source.
+    os.environ["PGAPPNAME"] = "orm-create-all"
     from app.core.database import create_tables
     create_tables()
     print("ORM metadata create_all applied (additive).")
