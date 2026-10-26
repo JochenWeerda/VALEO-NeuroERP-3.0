@@ -81,7 +81,10 @@ async function main() {
   console.log(`[drizzle-apply-guard] ${verdict.reason}: ${messages[verdict.reason]}`);
   if (!verdict.ok) { process.exitCode = 2; return; }
   if (checkOnly) return;
-  const run = spawnSync(process.execPath, [packageBin(pkgDir, 'drizzle-kit/bin.cjs'), 'migrate'], { cwd: pkgDir, stdio: 'inherit' });
+  // drizzle-kit does not export bin.cjs; take the declared bin next to its package entry.
+  const kitDir = path.dirname(packageBin(pkgDir, 'drizzle-kit'));
+  const kitBin = JSON.parse(fs.readFileSync(path.join(kitDir, 'package.json'), 'utf8')).bin['drizzle-kit'];
+  const run = spawnSync(process.execPath, [path.join(kitDir, kitBin), 'migrate'], { cwd: pkgDir, stdio: 'inherit' });
   process.exitCode = run.status ?? 1;
 }
 
