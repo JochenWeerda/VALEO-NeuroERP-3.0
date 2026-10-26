@@ -61,3 +61,10 @@ gemeinsame Pruefstand keine Revision kennt, die auf der Basis fehlt.
   (272) ab; bis dieser gruen ist, laeuft dort weder die Migration noch der neue Gate.
 - Event-Trigger ohne Superuser (Pfad nur per Code/Unit-Test abgedeckt).
 - Keine Aussage ueber vollstaendige Sicherheit oder Gesamtfreigabe.
+
+## CI-Abnahme
+
+| Lauf | Commit | Ergebnis |
+| --- | --- | --- |
+| Security Scan 40286824850 | 2cc3545c5 | alle Jobs success |
+| Quality Gate 40286821617 | 2cc3545c5 | Dependency Scan, Improvement integrity, FSX, Secret Scan, SBOM, WCAG, Production contract u. a. success; Frontend-Unit 214 Faelle mit identischer Fallmenge wie Basis-Lauf 40234161888 (0 neu); Backend bricht wie auf der Basis am Doc-Drift-Gate (272) ab, `init_db.py` und der neue Schritt "DDL provenance" laufen deshalb nicht |
