@@ -49,15 +49,32 @@ function redirectToCheckSchema(statement) {
   return { sql: redirected, references: (statement.match(PUBLIC_REFERENCE) || []).length };
 }
 
-const normalizeDefault = (value) => (value === undefined || value === null ? null
-  : String(value).replace(/::[a-z ]+(\[\])?/gi, '').replace(/^\((.*)\)$/, '$1').replace(/'/g, '').trim());
+// Only spelling differences between drizzle snapshots and format_type()/pg_get_expr() are
+// normalized: timestamp/time aliases, spaces in type modifiers and jsonb key order.
+const normalizeType = (type) => type
+  .replace(/^timestamp(\(\d+\))?$/, 'timestamp$1 without time zone')
+  .replace(/^time(\(\d+\))?$/, 'time$1 without time zone')
+  .replace(/^varchar/, 'character varying')
+  .replace(/,\s+/g, ',');
+
+const normalizeDefault = (value) => {
+  if (value === undefined || value === null) return null;
+  const text = String(value).replace(/::[a-z ]+(\[\])?/gi, '').replace(/^\((.*)\)$/, '$1').replace(/'/g, '').trim();
+  try {
+    const parsed = JSON.parse(text);
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      return JSON.stringify(Object.fromEntries(Object.keys(parsed).sort().map((k) => [k, parsed[k]])));
+    }
+  } catch { /* not JSON: keep the normalized text */ }
+  return text;
+};
 
 function expectedCatalog(snapshot) {
   const tables = {};
   for (const table of Object.values(snapshot.tables)) {
     tables[table.name] = {
       columns: Object.fromEntries(Object.values(table.columns).map((c) => [c.name, {
-        type: c.type, notNull: Boolean(c.notNull), primaryKey: Boolean(c.primaryKey), default: normalizeDefault(c.default),
+        type: normalizeType(c.type), notNull: Boolean(c.notNull), primaryKey: Boolean(c.primaryKey), default: normalizeDefault(c.default),
       }])),
       indexes: Object.fromEntries(Object.values(table.indexes).map((i) => [i.name, {
         columns: i.columns.map((c) => c.expression).join(','), unique: Boolean(i.isUnique),
@@ -107,7 +124,7 @@ async function actualCatalog(client) {
   for (const row of columns.rows) {
     tables[row.table_name] ??= { columns: {}, indexes: {}, foreignKeys: {}, uniqueConstraints: {} };
     tables[row.table_name].columns[row.column_name] = {
-      type: row.type, notNull: row.not_null, primaryKey: row.primary_key, default: normalizeDefault(row.default_expr),
+      type: normalizeType(row.type), notNull: row.not_null, primaryKey: row.primary_key, default: normalizeDefault(row.default_expr),
     };
   }
   const ensure = (name) => (tables[name] ??= { columns: {}, indexes: {}, foreignKeys: {}, uniqueConstraints: {} });
@@ -202,4 +219,4 @@ if (require.main === module) {
   main().catch((error) => { console.error(error.message); process.exitCode = 1; });
 }
 
-module.exports = { loadChain, expectedCatalog, diffCatalog, normalizeDefault, redirectToCheckSchema };
+module.exports = { loadChain, expectedCatalog, diffCatalog, normalizeDefault, normalizeType, redirectToCheckSchema };
