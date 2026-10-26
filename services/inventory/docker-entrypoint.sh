@@ -17,7 +17,8 @@ if [ -n "${INVENTORY_DATABASE_URL}" ]; then
   
   # Run Alembic migrations
   echo "📦 Führe Datenbank-Migrationen aus..."
-  if alembic -c /app/alembic.ini upgrade head 2>&1; then
+  # Migrationen mit der Migratorrolle (DB-Governance), die Anwendung laeuft als valeo_app
+  if INVENTORY_DATABASE_URL="${MIGRATION_DATABASE_URL:-$INVENTORY_DATABASE_URL}" alembic -c /app/alembic.ini upgrade head 2>&1; then
     echo "✅ Migrationen erfolgreich!"
   else
     echo "⚠️  Migration: Bereits aktuell oder Fehler"
