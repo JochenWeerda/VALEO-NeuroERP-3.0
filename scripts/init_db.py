@@ -20,7 +20,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from app.core.migration_session import migration_database_url  # noqa: E402
+from app.core.migration_session import migration_database_url, prepare_migration_session  # noqa: E402
 
 
 def _ensure_wide_version_table(database_url: str) -> None:
@@ -31,6 +31,7 @@ def _ensure_wide_version_table(database_url: str) -> None:
     """
     engine = create_engine(database_url)
     with engine.begin() as conn:
+        prepare_migration_session(conn, "alembic")
         conn.execute(text(
             "CREATE TABLE IF NOT EXISTS alembic_version ("
             "  version_num VARCHAR(128) NOT NULL, "

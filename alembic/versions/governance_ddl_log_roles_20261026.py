@@ -4,7 +4,7 @@ With scripts/provision_db_roles.py only valeo_owner/valeo_migrator may INSERT in
 Application and agent roles cannot run DDL, but their temporary tables still fire the event
 triggers; the functions now return before touching the log when no persistent object is
 involved, so those sessions neither need log privileges nor raise warnings. The log stays
-closed to PUBLIC.
+closed to PUBLIC. Sessions of scripts/provision_db_roles.py are logged as 'provisionierung'.
 """
 from alembic import op
 
@@ -18,6 +18,7 @@ _SOURCE = """
         WHEN current_setting('application_name') ILIKE 'alembic%' THEN 'alembic'
         WHEN current_setting('application_name') ILIKE 'drizzle-kit%' THEN 'drizzle-kit'
         WHEN current_setting('application_name') ILIKE 'orm-create-all%' THEN 'orm-create-all'
+        WHEN current_setting('application_name') ILIKE 'provision-db-roles%' THEN 'provisionierung'
         WHEN current_setting('application_name') ILIKE 'agent:%' THEN 'agent'
         ELSE 'unbekannt'
     END

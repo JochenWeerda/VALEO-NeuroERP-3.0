@@ -35,9 +35,16 @@ def migration_database_url(default: str | None = None) -> str | None:
 
 
 def owner_role_available(connection) -> bool:
+    """valeo_owner exists, the login may act as it, and THIS database is provisioned for it.
+
+    Roles are cluster-wide: a freshly created database (e.g. pruefstand_db.py) knows the role
+    but grants it nothing yet; migrating it as valeo_owner would fail on schema public. Such a
+    database is migrated by the login role and handed over later by provision_db_roles.py.
+    """
     return bool(connection.execute(text(
         "SELECT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = :role "
-        "AND pg_has_role(current_user, oid, 'MEMBER'))"
+        "AND pg_has_role(current_user, oid, 'MEMBER') "
+        "AND has_database_privilege(oid, current_database(), 'CREATE'))"
     ), {"role": OWNER_ROLE}).scalar())
 
 

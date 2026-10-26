@@ -33,6 +33,7 @@ def test_data_roles_get_dml_but_no_ddl():
     assert f'GRANT USAGE, CREATE ON SCHEMA "domain_crm" TO {OWNER}' in statements
     assert not any("CREATE ON SCHEMA" in s and APP in s for s in statements)
     assert "REVOKE CREATE ON SCHEMA public FROM PUBLIC" in statements
+    assert f'GRANT CONNECT, CREATE ON DATABASE "valeo_probe" TO {OWNER}' in statements
     # objects created later by the owner or the development superuser stay usable for the app
     assert any('FOR ROLE "valeo_dev" IN SCHEMA "domain_crm" GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES' in s
                for s in statements)

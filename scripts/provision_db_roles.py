@@ -80,6 +80,8 @@ def grant_statements(database: str, schemas: list[str], creators: list[str], gov
     statements = [
         f"GRANT CONNECT, TEMPORARY ON DATABASE {_ident(database)} TO {data}",
         f"GRANT CONNECT ON DATABASE {_ident(database)} TO {MIGRATOR}, {AUDIT}",
+        # Migrations create new schemas; the owner needs CREATE on the database for that.
+        f"GRANT CONNECT, CREATE ON DATABASE {_ident(database)} TO {OWNER}",
         "REVOKE CREATE ON SCHEMA public FROM PUBLIC",
     ]
     for schema in schemas:
