@@ -16,7 +16,8 @@ owner (plan, section 2.4).
 policies; ``NULLIF`` turns the empty setting into NULL so that no comparison matches.
 
 journal_entry_lines.tenant_id is nullable; rows without tenant take it from their entry
-(two rows on the grown database at the time of writing) before the policy applies.
+(two rows on the grown database at the time of writing) before the policy applies. Retention
+placeholders seeded as 'SYSTEM' become 'system', the shared tenant of the policies.
 Tables missing on a database (two L3 tables exist only on fresh installations) are skipped.
 """
 from __future__ import annotations
@@ -107,6 +108,11 @@ def upgrade() -> None:
         "UPDATE domain_erp.journal_entry_lines l SET tenant_id = e.tenant_id "
         "FROM domain_erp.journal_entries e "
         "WHERE l.journal_entry_id = e.id AND l.tenant_id IS NULL"
+    )
+    # gobd_aufbewahrungsfristen_20260301 seeded its placeholders as 'SYSTEM'; the shared tenant
+    # of the policies is 'system' (user decision 2026-10-26). The code reads per tenant only.
+    op.execute(
+        "UPDATE domain_finance.aufbewahrungsfristen SET tenant_id = 'system' WHERE tenant_id = 'SYSTEM'"
     )
     for table in PILOT_TABLES:
         enable_tenant_isolation(bind, table)
