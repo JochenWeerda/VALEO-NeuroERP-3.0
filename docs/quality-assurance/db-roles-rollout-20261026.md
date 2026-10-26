@@ -91,3 +91,10 @@ trotzdem die Rechte fuer `valeo_app`/`valeo_agent`.
   `scripts/provision_db_roles.py` (`_OBJECTS_SQL`) mit vertauschten Rollen.
 
 Keine Aussage ueber vollstaendige Sicherheit oder Gesamtfreigabe.
+
+## CI-Abnahme
+
+| Lauf | Commit | Ergebnis |
+| --- | --- | --- |
+| Security Scan 40296881565 | c087b2402 | alle Jobs success |
+| Quality Gate 40296874581 | c087b2402 | Improvement integrity, Dependency Scan, FSX, Secret Scan, SBOM, WCAG, Production contract u. a. success; Frontend-Unit 214 Faelle mit identischer Fallmenge wie Basis-Lauf 40234161888 (0 neu); Backend bricht wie auf der Basis am Doc-Drift-Gate (272) ab |
