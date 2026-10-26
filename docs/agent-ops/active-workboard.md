@@ -19716,3 +19716,5 @@ Nutzerauftrag: alle uebrigen offenen Aenderungen commit-/pushfaehig abschliessen
 ## RLS-PLAN-20261026 - reserviert, Claude Code
 
 **Owner:** Claude Code. **Basis:** `codex/migration-parity-repair-20261022`, Zweig `claude/rls-plan-20261026`. **Nutzerauftrag 2026-10-26:** Plan fuer datenbankseitige Mandantentrennung (PostgreSQL-RLS, SAP-Prinzip implizite Mandantenbindung) auf Basis eines Soll-Ist-Inventars. **Dateibesitz:** `docs/architecture/rls-mandantenkernel-plan.md`. **Grenzen:** nur Plan und lesendes Inventar; keine Code-, Schema- oder Datenaenderung.
+
+**RLS-PLAN-20261026 vorgelegt (Claude Code):** Plan `docs/architecture/rls-mandantenkernel-plan.md` mit lesendem Inventar (817 Tabellen, 683 mit tenant_id, 0 RLS; Kontext fail-open ueber DEFAULT_TENANT_ID; eine zentrale Engine; 3 297 Handfilter). Phasen P0-P7, Pilot-Vorschlag domain_finance; Entscheidungen beim Nutzer offen. Keine Code-/Schemaaenderung.
