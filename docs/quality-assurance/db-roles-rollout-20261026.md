@@ -18,7 +18,7 @@ pruefen. Konzept: [db-governance-20261026.md](../architecture/db-governance-2026
 | Schritt | Ergebnis |
 | --- | --- |
 | Vorab | 96 MB, 5 Verbindungen ohne aktive Abfrage, Revision `loading_stop_fk_20261023` |
-| Sicherung | `pg_dump --schema-only` (Eigentuemer und Rechte, 898 `OWNER TO`) und Rueckweg-Skript mit 899 `ALTER … OWNER TO valeo_dev` (Scratch, nicht im Repository); keine Datensicherung noetig, Daten unberuehrt |
+| Sicherung | `pg_dump --schema-only` (Eigentuemer und Rechte, 898 `OWNER TO`) und Rueckweg-Skript mit 899 `ALTER … OWNER TO valeo_dev` (beides nur im sitzungsgebundenen Scratch, nicht im Repository; Rueckweg siehe unten); keine Datensicherung noetig, Daten unberuehrt |
 | `.env` (Root, gitignoriert) | gesichert; ergaenzt um `VALEO_DB_PASSWORD_{MIGRATOR,APP,AGENT,AUDIT}` (zufaellig, `secrets.token_urlsafe(32)`), `MIGRATION_DATABASE_URL`, `VALEO_{APP,AGENT,AUDIT}_DATABASE_URL`; `DATABASE_URL` unveraendert; Werte nirgends ausgegeben |
 | 1 Rollen + Rechte | 6 Rollen; Login-Rollen mit Passwort; `valeo_migrator` mit `role = valeo_owner`; Nachtrag `CREATE ON DATABASE` fuer `valeo_owner` |
 | 2 Eigentum | 879 Objekte an `valeo_owner` (815 Tabellen/Sichten/Sequenzen, 30 Schemata, Funktionen, Typen) mit `lock_timeout=5s`; Backend vorher und nachher `healthy`, HTTP 200 |
@@ -84,6 +84,10 @@ trotzdem die Rechte fuer `valeo_app`/`valeo_agent`.
 - Codex migriert unveraendert als `valeo_dev` (Superuser, darf alles). Basis-Code liest
   `MIGRATION_DATABASE_URL` noch nicht; nach Merge von PR #48 migriert Alembic ueber
   `valeo_migrator`, sofern `DATABASE_URL` dieselbe Datenbank nennt.
-- Rueckweg Eigentum: Rueckweg-Skript (899 Anweisungen) bzw. Schema-Sicherung.
+- Rueckweg Eigentum: Vor der Uebertragung gehoerten alle 899 betroffenen Objekte `valeo_dev`
+  (Sicherung und Skript lagen nur im sitzungsgebundenen Scratch-Verzeichnis). Der Rueckweg
+  ist deshalb jederzeit exakt erzeugbar: alle Objekte mit Eigentuemer `valeo_owner` per
+  `ALTER … OWNER TO valeo_dev` zuruecksetzen, z. B. mit den Katalogabfragen aus
+  `scripts/provision_db_roles.py` (`_OBJECTS_SQL`) mit vertauschten Rollen.
 
 Keine Aussage ueber vollstaendige Sicherheit oder Gesamtfreigabe.
