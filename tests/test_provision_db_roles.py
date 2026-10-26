@@ -8,7 +8,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from provision_db_roles import (  # noqa: E402
-    AGENT, APP, AUDIT, GOVERNANCE, MIGRATOR, OWNER, grant_statements, ownership_statements, role_statements,
+    AGENT, APP, AUDIT, GOVERNANCE, MIGRATOR, OWNER, SYSTEM, grant_statements, ownership_statements, role_statements,
 )
 
 pytestmark = pytest.mark.unit
@@ -25,9 +25,17 @@ def test_roles_are_created_idempotently_without_superpowers_or_passwords():
     assert any(s.startswith(f"ALTER ROLE {OWNER} NOLOGIN") for s in statements)
 
 
+def test_only_the_system_role_bypasses_row_level_security():
+    statements = role_statements()
+    assert any(s.startswith(f"ALTER ROLE {SYSTEM} LOGIN") and "BYPASSRLS" in s and "NOBYPASSRLS" not in s
+               and "NOSUPERUSER" in s for s in statements)
+    bypass = [s for s in statements if s.startswith("ALTER ROLE") and " BYPASSRLS" in s]
+    assert bypass == [s for s in statements if s.startswith(f"ALTER ROLE {SYSTEM} ") and " BYPASSRLS" in s]
+
+
 def test_data_roles_get_dml_but_no_ddl():
     statements = grant_statements("valeo_probe", ["domain_crm"], ["valeo_owner", "valeo_dev"], governance=False)
-    data = f"{APP}, {AGENT}"
+    data = f"{APP}, {AGENT}, {SYSTEM}"
     assert f'GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA "domain_crm" TO {data}' in statements
     assert f'GRANT USAGE ON SCHEMA "domain_crm" TO {data}' in statements
     assert f'GRANT USAGE, CREATE ON SCHEMA "domain_crm" TO {OWNER}' in statements

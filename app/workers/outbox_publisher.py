@@ -8,7 +8,7 @@ import logging
 from typing import Optional
 from sqlalchemy.orm import Session
 
-from app.core.database import SessionLocal
+from app.core.database import system_session
 from app.core.tenant_context import cross_tenant_scope
 from ..core.config import settings
 from ..infrastructure.eventbus.outbox import OutboxPublisher
@@ -47,7 +47,7 @@ class OutboxPublisherWorker:
         """Publish a batch of pending events."""
         # Delivers events of every tenant, including rows without tenant: deliberately cross-tenant.
         with cross_tenant_scope("outbox-publisher"):
-            db: Session = SessionLocal()
+            db: Session = system_session()
             try:
                 event_publisher = get_event_publisher()
                 outbox = OutboxPublisher(db, event_publisher)
