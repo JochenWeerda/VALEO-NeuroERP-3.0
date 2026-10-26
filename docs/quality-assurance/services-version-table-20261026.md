@@ -84,10 +84,3 @@ Welche Seite fuehrt, ist eine Architekturentscheidung (vgl. `domain_inventory.in
 im Backend); eigener Slice.
 
 Keine Aussage ueber vollstaendige Sicherheit oder Gesamtfreigabe.
-
-## CI-Abnahme
-
-| Lauf | Ergebnis |
-| --- | --- |
-| Docs Build 40373715781 | success (nach Nachziehen von `docs/admin/migration-inventory.md`; die drei fehlenden Backend-Migrationen stammten aus #47/#49, Drift bestand auf der Basis) |
-| Quality Gate 40373528238 | Path Guard, FSX, Improvement integrity, Secret Scan, Dependency Scan, WCAG, Production contract success; SBOM nach GitHub-504 beim syft-Download neu gestartet: success; Backend bricht wie auf der Basis am Doc-Drift-Gate ab (272 Befunde, identisch); Frontend-Unit wie auf der Basis rot (keine Frontend-Aenderung) |

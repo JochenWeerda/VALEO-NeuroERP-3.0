@@ -57,4 +57,3 @@ Handshake mit. Dieser Handshake ist diese Mitteilung.
 - **Fuer dich:** neue Migrationen auf `runtime_ddl_to_migrations_20261026` aufsetzen; als
   Superuser weiter moeglich (Protokoll weist es aus). `crm-core`, `crm-sales`, `inventory`
   verbinden noch als `valeo_dev`.
-
