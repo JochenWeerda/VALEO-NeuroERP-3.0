@@ -141,3 +141,10 @@ Container. Zugangsdaten nur in der Prozessumgebung, nicht im Repository.
   denselben Ordner wie die Handmigration. Nicht Teil dieses Auftrags, offen.
 - analytics, contracts, crm, pricing, quality, regulatory, scheduler und weighing haben weiter keine eingecheckte Migrationskette.
 - Keine Aussage ueber vollstaendige Sicherheit oder Gesamtfreigabe.
+
+## CI-Abnahme
+
+| Lauf | Commit | Ergebnis |
+| --- | --- | --- |
+| Quality Gate 40273248149 | 14a8503f9 | Dependency Scan, Improvement integrity, FSX, Secret Scan, SBOM, WCAG, Production contract u. a. success; Frontend-Unit 214 Faelle mit identischer Fallmenge wie Basis-Lauf 40234161888 (`5ee0c882c`, 0 neu); Doc-Drift 272 wie Basis |
+| Security Scan 40273251199 | 14a8503f9 | Erstlauf: Trivy brach ab, weil die Schwachstellendatenbank nicht ladbar war (`mirror.gcr.io … 404`, kein Befund); als Scannerausfall blockierend gewertet und neu gestartet. Neulauf: alle Jobs success |
