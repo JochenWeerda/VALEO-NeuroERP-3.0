@@ -14,7 +14,7 @@ laesst eine Tabelle warten, ein uebersehener liesse Daten still verschwinden.
     mandant_ermitteln Code ermittelt den Mandanten aus der Tabelle (SELECT tenant_id FROM …)
     standardmandant   Datei mit Zugriff nutzt DEFAULT_TENANT_ID oder 'default' als Mandant
     mandant_null      Datei mit Zugriff fragt tenant_id IS NULL ab
-    uebergreifend     Zugriff aus mandantenuebergreifender Arbeit (cross_tenant_*; P6)
+    uebergreifend     mandantenuebergreifende Arbeit ohne Systemverbindung (system_session, P6)
     identitaet        Schluessel/Token/Sitzung: Nachschlagen vor der Mandantenbindung
 
     python scripts/rls_rollout.py            # schreiben
@@ -37,6 +37,8 @@ SKIP_PARTS = {"tests", "test", "node_modules", "__pycache__", "alembic"}
 DEFAULT_TENANT = re.compile(r"\bDEFAULT_TENANT_ID\b|tenant_id\s*(?:=|==|IN\s*\()\s*['\"]default['\"]|['\"]default['\"]\s*\)")
 TENANT_NULL = re.compile(r"tenant_id\s+IS\s+NULL", re.I)
 CROSS_TENANT = re.compile(r"\bcross_tenant_(?:scope|job)\(")
+# Cross-tenant code that connects as valeo_system (BYPASSRLS) is not blocked by RLS (P6).
+SYSTEM_CONNECTION = re.compile(r"\bsystem_session\(|\bcross_tenant_job\(")
 IDENTITY_NAME = re.compile(r"(?:token|api_key|session|credential|secret)", re.I)
 TABLENAME = re.compile(r"__tablename__\s*=\s*['\"]([a-z_0-9]+)['\"]")
 
@@ -128,7 +130,7 @@ def analyse(inventory: dict) -> dict:
                 reasons.add("standardmandant")
             if TENANT_NULL.search(text):
                 reasons.add("mandant_null")
-            if CROSS_TENANT.search(text):
+            if CROSS_TENANT.search(text) and not SYSTEM_CONNECTION.search(text):
                 reasons.add("uebergreifend")
         if reasons:
             pending[t] = sorted(reasons)

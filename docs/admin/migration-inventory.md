@@ -420,6 +420,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `repair_runtime_schema_20260610` | Bring runtime models that predate Alembic under the migration contract. |
 | `rls_pilot_finance_20261026` | Row-level security pilot: domain_finance and the posting journal (RLS plan P3). |
 | `rls_rollout_20261026` | Roll row-level security out to the class-A tables cleared by the analysis (RLS plan P5). |
+| `rls_system_role_20261026` | Row-level security for tables freed by the valeo_system connection (RLS plan P6). |
 | `runtime_ddl_to_migrations_20261026` | Move schema objects that the application created at request time into the migration chain. |
 | `runtime_sweep_repair_20260702` | RUNTIME-SWEEP-REPAIR-001: Fresh-DB-Drift schliessen (SPEC-P0-02). |
 | `sales_ab_preisabweichung_20260623` | DOM-SALES-004: sales_ab_status_log, lieferschein_close_log, sales_preisabweichungen |

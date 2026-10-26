@@ -7,7 +7,7 @@ from abc import ABC, abstractmethod
 from functools import wraps
 from typing import Any, Callable, Dict, TypeVar
 
-from app.core.database import get_db
+from app.core.database import get_db, system_session
 from app.core.tenant_context import (
     TenantContextMissing,
     cross_tenant_reason,
@@ -42,7 +42,8 @@ class BaseWorker(ABC):
             raise TenantContextMissing(
                 f"{type(self).__name__} ohne tenant_scope/cross_tenant_scope gestartet"
             )
-        self.db = next(get_db())
+        # Cross-tenant jobs connect as valeo_system (RLS plan P6); tenant work as the application.
+        self.db = system_session() if cross_tenant_reason() else next(get_db())
 
     async def _ensure_db(self) -> None:
         if not self.db:

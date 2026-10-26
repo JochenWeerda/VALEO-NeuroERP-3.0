@@ -8,7 +8,7 @@
    "C": 53,
    "D": 60
   },
-  "rls_enabled": 500,
+  "rls_enabled": 501,
   "tenant_types": {
    "character varying": 295,
    "character varying(100)": 9,
@@ -41,11 +41,9 @@
    "app/services/lkv_pipeline.py": 2,
    "app/services/scheduler_service.py": 2,
    "app/services/studio_draft_store.py": 2,
-   "app/workers/compliance_monitor.py": 1,
    "app/workers/herd_data_sync_worker.py": 1,
    "app/workers/low_stock_agent.py": 1,
    "app/workers/mail_poll_worker.py": 1,
-   "app/workers/outbox_publisher.py": 1,
    "app/workers/price_monitoring_worker.py": 1,
    "app/workers/rag_indexer.py": 1,
    "app/workers/ration_lifecycle_worker.py": 1,
@@ -68,7 +66,7 @@
    "services/compliance/zoll/main.py": 1
   },
   "new_engine": {
-   "app/core/database.py": 1,
+   "app/core/database.py": 2,
    "app/core/migration_session.py": 2,
    "app/services/studio_process_simulation.py": 1,
    "services/compliance/infrastat/app/db/session.py": 1,
@@ -1993,9 +1991,9 @@
    "table": "domain_erp.business_partners",
    "class": "A",
    "tenant_type": "character varying(64)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 1
   },
   {
    "table": "domain_erp.cash_movements",

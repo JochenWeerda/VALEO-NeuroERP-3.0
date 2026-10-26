@@ -43,6 +43,41 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
 
+_system_sessionmaker = None
+
+
+def system_session() -> Session:
+    """Session for deliberate cross-tenant work (RLS plan P6).
+
+    Only inside ``cross_tenant_scope``/``cross_tenant_job``. Connects as valeo_system
+    (``SYSTEM_DATABASE_URL``, BYPASSRLS); without that setting it falls back to the application
+    login, which under row-level security sees no tenant rows.
+    """
+    global _system_sessionmaker
+    from app.core.tenant_context import TenantContextMissing, cross_tenant_reason
+
+    if not cross_tenant_reason():
+        raise TenantContextMissing("system_session() nur innerhalb von cross_tenant_scope")
+    if _system_sessionmaker is None:
+        if settings.SYSTEM_DATABASE_URL:
+            system_engine = create_engine(
+                settings.SYSTEM_DATABASE_URL,
+                poolclass=QueuePool,
+                pool_size=5,
+                max_overflow=2,
+                pool_timeout=10,
+                pool_recycle=1800,
+                pool_pre_ping=True,
+                connect_args=postgres_connect_args(),
+            )
+        else:
+            logger.warning("SYSTEM_DATABASE_URL nicht gesetzt: mandantenuebergreifende Arbeit nutzt die "
+                           "Anwendungsanmeldung und sieht unter RLS keine Mandantenzeilen")
+            system_engine = engine
+        _system_sessionmaker = sessionmaker(autocommit=False, autoflush=False, bind=system_engine)
+    return _system_sessionmaker()
+
+
 def get_db() -> Session:
     """
     Dependency to get database session.
