@@ -1,7 +1,7 @@
 """Session setup shared by Alembic and scripts/init_db.py (DB-Governance).
 
-- ``migration_database_url``: MIGRATION_DATABASE_URL (valeo_migrator) before DATABASE_URL, so
-  application and migrations can use separate roles while existing setups keep working.
+- ``migration_database_url``: the migrator login (MIGRATION_DATABASE_URL) for the database that
+  DATABASE_URL names; DATABASE_URL always decides the target.
 - ``prepare_migration_session``: marks the session for governance.ddl_events and, once the
   roles from scripts/provision_db_roles.py exist, switches to valeo_owner so new objects are
   owned by it instead of the login role (superuser in development).
@@ -16,8 +16,22 @@ OWNER_ROLE = "valeo_owner"
 _SET_OWNER_ROLE = text("SET ROLE valeo_owner")  # literal: OWNER_ROLE, no interpolation into SQL
 
 
+def _same_target(left: str, right: str) -> bool:
+    from sqlalchemy.engine import make_url
+
+    a, b = make_url(left), make_url(right)
+    return (a.host, a.port or 5432, a.database) == (b.host, b.port or 5432, b.database)
+
+
 def migration_database_url(default: str | None = None) -> str | None:
-    return os.getenv("MIGRATION_DATABASE_URL") or os.getenv("DATABASE_URL") or default
+    """DATABASE_URL decides the target; MIGRATION_DATABASE_URL only supplies the migrator
+    login for that same database. A migrator URL for another database (e.g. the development
+    database from .env while pruefstand_db.py migrates valeo_probe) is ignored."""
+    target = os.getenv("DATABASE_URL")
+    migrator = os.getenv("MIGRATION_DATABASE_URL")
+    if migrator and (not target or _same_target(migrator, target)):
+        return migrator
+    return target or default
 
 
 def owner_role_available(connection) -> bool:
