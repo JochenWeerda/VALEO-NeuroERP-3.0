@@ -418,6 +418,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `repair_runtime_contract_columns_20260610` | Repair runtime columns required by current ORM and domain checks. |
 | `repair_runtime_model_alignment_20260610` | Align fresh installations with current CRM and article runtime models. |
 | `repair_runtime_schema_20260610` | Bring runtime models that predate Alembic under the migration contract. |
+| `rls_pilot_finance_20261026` | Row-level security pilot: domain_finance and the posting journal (RLS plan P3). |
 | `runtime_ddl_to_migrations_20261026` | Move schema objects that the application created at request time into the migration chain. |
 | `runtime_sweep_repair_20260702` | RUNTIME-SWEEP-REPAIR-001: Fresh-DB-Drift schliessen (SPEC-P0-02). |
 | `sales_ab_preisabweichung_20260623` | DOM-SALES-004: sales_ab_status_log, lieferschein_close_log, sales_preisabweichungen |
