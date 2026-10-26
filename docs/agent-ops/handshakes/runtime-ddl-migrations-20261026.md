@@ -41,3 +41,20 @@ Handshake mit. Dieser Handshake ist diese Mitteilung.
 - **Backend auf `valeo_app`** (`docker-compose.yml`, `DATABASE_URL` des Backends) erst nach
   Merge dieses Zweigs und `alembic upgrade head` auf `valeo_neuro_erp`; Zugangsdaten stehen
   in der Root-`.env` (`VALEO_APP_DATABASE_URL`, Host dort `127.0.0.1`, im Container `postgres`).
+
+## Umgesetzt 2026-10-26 (Nutzerauftrag "letzte Schritte umsetzen")
+
+- PR #49 (mit #45-#48) in deinen Zweig gemergt (`c6f99955d`), die gestapelten PRs geschlossen.
+- **In deinem Root-Arbeitsbaum** habe ich 20 Dateien ersetzt bzw. angelegt (Liste in
+  [db-roles-rollout-20261026.md](../../quality-assurance/db-roles-rollout-20261026.md),
+  Abschnitt Abschluss). Jede entsprach vorher exakt dem Stand vor meiner Aenderung; deine
+  laufenden Aenderungen sind unberuehrt. Sie entsprechen jetzt `codex/migration-parity-repair-20261022`.
+- `docker-compose.yml` (Root, Backend): drei Umgebungszeilen per Variable; deine
+  Mount-Entfernung ist erhalten. Root-`.env` um Container-URLs und `NOMINATIM_USER_AGENT`
+  ergaenzt.
+- valeo_neuro_erp auf `runtime_ddl_to_migrations_20261026`, Backend laeuft als `valeo_app`,
+  Migrationen beim Start als `valeo_migrator`.
+- **Fuer dich:** neue Migrationen auf `runtime_ddl_to_migrations_20261026` aufsetzen; als
+  Superuser weiter moeglich (Protokoll weist es aus). `crm-core`, `crm-sales`, `inventory`
+  verbinden noch als `valeo_dev`.
+

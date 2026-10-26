@@ -234,7 +234,11 @@ services:
     container_name: valeo-neuro-erp-backend
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql://valeo_dev:valeo_dev_2024@postgres:5432/valeo_neuro_erp
+      # DB-Governance (docs/architecture/db-governance-20261026.md): Anwendung als valeo_app, Migrationen
+      # in init_db.py als valeo_migrator. Werte aus .env; ohne sie bleibt der Superuser wie bisher.
+      DATABASE_URL: ${VALEO_APP_CONTAINER_DATABASE_URL:-postgresql://valeo_dev:valeo_dev_2024@postgres:5432/valeo_neuro_erp}
+      MIGRATION_DATABASE_URL: ${VALEO_MIGRATOR_CONTAINER_DATABASE_URL:-postgresql://valeo_dev:valeo_dev_2024@postgres:5432/valeo_neuro_erp}
+      NOMINATIM_USER_AGENT: ${NOMINATIM_USER_AGENT:-VALEO-NeuroERP-GeoSync/1.0}
       # Pruefstand fuer die Studio-Prozesssimulation (frische DB, nie die Entwicklungs-DB); siehe CLAUDE.md.
       TEST_DATABASE_URL: postgresql://valeo_dev:valeo_dev_2024@postgres:5432/valeo_probe
       REDIS_URL: redis://redis:6379/0
