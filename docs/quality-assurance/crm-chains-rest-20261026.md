@@ -62,3 +62,10 @@ Keine Aenderung. Die Dienste laufen nicht; beim ersten Start legt ihr Entrypoint
 ueber die Migrator-Anmeldung an.
 
 Keine Aussage ueber vollstaendige Sicherheit oder Gesamtfreigabe.
+
+## CI-Abnahme
+
+| Lauf | Ergebnis |
+| --- | --- |
+| Docs Build / Docs Governance (PR #54) | success |
+| Quality Gate 40393064436 | alle Jobs ausser zweien success; Backend bricht wie auf der Basis am Doc-Drift-Gate ab (272 Befunde, lokal gegengeprueft, identisch); Frontend-Unit wie auf der Basis rot (keine Frontend-Aenderung) |
