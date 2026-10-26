@@ -41,8 +41,8 @@ und Testfixture schreiben bereits die Dienstform (uuid-Strings, `'POSTED'`).
 
 ## Pruefung (valeo_probe, eine Transaktion je Fall, ROLLBACK)
 
-Prüfstand ohne fremde Sitzungen; Stand `loading_stop_fk_20261023` (fremde, in diesem Zweig
-nicht vorhandene Revision, unberuehrt). Modell-DDL der Dienstmodelle im Schema `vt_model`.
+Prüfstand ohne fremde Sitzungen; Stand `loading_stop_fk_20261023` (im Zweig enthalten, direkte
+Vorgaengerin von `governance_ddl_log_20261026`; der Pruefstand liegt nur hinter dem Kopf, unberuehrt). Modell-DDL der Dienstmodelle im Schema `vt_model`.
 
 | Fall | Ergebnis |
 | --- | --- |
