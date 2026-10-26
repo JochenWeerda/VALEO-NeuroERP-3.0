@@ -19,7 +19,8 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "migrate:gen": "drizzle-kit generate",
-    "migrate:apply": "drizzle-kit migrate",
+    "migrate:apply": "node ../../scripts/drizzle_apply_guard.cjs",
+    "migrate:check": "node ../../scripts/drizzle_apply_guard.cjs --check",
     "migrate:up": "drizzle-kit up",
     "lint": "eslint src/**/*.ts",
     "db:studio": "drizzle-kit studio"
