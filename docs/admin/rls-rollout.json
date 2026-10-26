@@ -1,0 +1,378 @@
+{
+ "_note": "Generiert von scripts/rls_rollout.py aus docs/admin/rls-inventory.json; nicht von Hand aendern.",
+ "summary": {
+  "ready": 0,
+  "pending": 111,
+  "reasons": {
+   "dienst": 10,
+   "mandant_ermitteln": 1,
+   "standardmandant": 80,
+   "mandant_null": 40,
+   "uebergreifend": 3,
+   "identitaet": 4
+  }
+ },
+ "ready": [],
+ "pending": {
+  "domain_agrar.agrar_biostimulanzien": [
+   "standardmandant"
+  ],
+  "domain_agrar.agrar_duenger": [
+   "standardmandant"
+  ],
+  "domain_agrar.agrar_psm": [
+   "standardmandant"
+  ],
+  "domain_agrar.agrar_saatgut": [
+   "dienst",
+   "standardmandant"
+  ],
+  "domain_agrar.agrar_sachkunde": [
+   "standardmandant"
+  ],
+  "domain_agrar.feeding_feed_products": [
+   "mandant_null"
+  ],
+  "domain_agrar.feeding_feed_reference_values": [
+   "mandant_null"
+  ],
+  "domain_agrar.feeding_feed_revisions": [
+   "mandant_null"
+  ],
+  "domain_agrar.feeding_groups": [
+   "mandant_null"
+  ],
+  "domain_agrar.feeding_logs": [
+   "standardmandant"
+  ],
+  "domain_agrar.feldbuch_schlaege": [
+   "standardmandant"
+  ],
+  "domain_agrar.nutrient_compositions": [
+   "standardmandant"
+  ],
+  "domain_agrar.seed_orders": [
+   "standardmandant"
+  ],
+  "domain_agrar.waagen_vorlagen": [
+   "standardmandant"
+  ],
+  "domain_audit.attestations": [
+   "standardmandant"
+  ],
+  "domain_compliance.data_erasure_requests": [
+   "mandant_null"
+  ],
+  "domain_compliance.intrastat_meldungen": [
+   "standardmandant"
+  ],
+  "domain_crm.business_partners": [
+   "mandant_null",
+   "standardmandant",
+   "uebergreifend"
+  ],
+  "domain_crm.credit_limits": [
+   "standardmandant"
+  ],
+  "domain_crm.crm_opportunities": [
+   "dienst",
+   "standardmandant"
+  ],
+  "domain_crm.crm_segments": [
+   "standardmandant"
+  ],
+  "domain_crm.sales_offers": [
+   "standardmandant"
+  ],
+  "domain_crm.sales_order_items": [
+   "mandant_null"
+  ],
+  "domain_crm.sales_orders": [
+   "mandant_null",
+   "standardmandant"
+  ],
+  "domain_dev_mock.mock_sessions": [
+   "identitaet"
+  ],
+  "domain_docflow.document_artifacts": [
+   "standardmandant"
+  ],
+  "domain_docflow.document_headers": [
+   "standardmandant"
+  ],
+  "domain_docflow.document_items": [
+   "standardmandant"
+  ],
+  "domain_docflow.invoice_xml_store": [
+   "standardmandant"
+  ],
+  "domain_docflow.pos_tse_devices": [
+   "standardmandant"
+  ],
+  "domain_einkauf.bestellungen": [
+   "mandant_null",
+   "standardmandant"
+  ],
+  "domain_einkauf.lieferanten": [
+   "mandant_null"
+  ],
+  "domain_erp.business_partners": [
+   "uebergreifend"
+  ],
+  "domain_erp.dunning_notices": [
+   "mandant_null"
+  ],
+  "domain_erp.gift_cards": [
+   "standardmandant"
+  ],
+  "domain_erp.offene_posten": [
+   "mandant_null",
+   "standardmandant"
+  ],
+  "domain_erp.open_items": [
+   "standardmandant"
+  ],
+  "domain_hr.onboarding_checklists": [
+   "mandant_null"
+  ],
+  "domain_hr.training_courses": [
+   "mandant_null"
+  ],
+  "domain_hr.work_plan_assignments": [
+   "standardmandant"
+  ],
+  "domain_inventory.agrar_contract_allocations": [
+   "standardmandant"
+  ],
+  "domain_inventory.agrar_contracts": [
+   "mandant_null",
+   "standardmandant"
+  ],
+  "domain_inventory.article_batches": [
+   "standardmandant"
+  ],
+  "domain_inventory.article_documents": [
+   "standardmandant"
+  ],
+  "domain_inventory.article_selections": [
+   "standardmandant"
+  ],
+  "domain_inventory.bin_stock": [
+   "standardmandant"
+  ],
+  "domain_inventory.epcis_events": [
+   "standardmandant"
+  ],
+  "domain_inventory.inventory_count_lines": [
+   "mandant_null"
+  ],
+  "domain_inventory.inventory_counts": [
+   "mandant_null"
+  ],
+  "domain_inventory.inventory_lots": [
+   "mandant_null"
+  ],
+  "domain_inventory.inventory_stock_movements": [
+   "mandant_null",
+   "standardmandant"
+  ],
+  "domain_inventory.material_flow_edges": [
+   "mandant_null"
+  ],
+  "domain_inventory.material_flow_nodes": [
+   "mandant_null"
+  ],
+  "domain_inventory.pick_lists": [
+   "standardmandant"
+  ],
+  "domain_inventory.preparation_list_lines": [
+   "standardmandant"
+  ],
+  "domain_inventory.preparation_lists": [
+   "standardmandant"
+  ],
+  "domain_inventory.shipping_units": [
+   "standardmandant"
+  ],
+  "domain_inventory.silo_cells": [
+   "mandant_null"
+  ],
+  "domain_inventory.silo_lot_movements": [
+   "mandant_null"
+  ],
+  "domain_inventory.silo_lots": [
+   "mandant_null"
+  ],
+  "domain_inventory.silos": [
+   "dienst",
+   "mandant_null"
+  ],
+  "domain_inventory.warehouse_bins": [
+   "standardmandant"
+  ],
+  "domain_inventory.warehouse_zones": [
+   "standardmandant"
+  ],
+  "domain_inventory.weighing_tickets": [
+   "mandant_null",
+   "standardmandant"
+  ],
+  "domain_log.log_touren": [
+   "dienst",
+   "mandant_null",
+   "standardmandant"
+  ],
+  "domain_logistics.carrier_invoices": [
+   "mandant_null"
+  ],
+  "domain_nachweisraum.gobd_exporte": [
+   "mandant_null"
+  ],
+  "domain_nachweisraum.nachweisraum_dokumente": [
+   "mandant_null"
+  ],
+  "domain_ops.kon_contract": [
+   "standardmandant"
+  ],
+  "domain_ops.ops_chargen": [
+   "dienst",
+   "standardmandant"
+  ],
+  "domain_ops.ops_fahrzeuge": [
+   "mandant_null"
+  ],
+  "domain_ops.ops_pcn_meldungen": [
+   "standardmandant"
+  ],
+  "domain_ops.reklamationen": [
+   "standardmandant"
+  ],
+  "domain_pricing.price_lists": [
+   "standardmandant"
+  ],
+  "domain_sales.delivery_notes": [
+   "mandant_null",
+   "standardmandant"
+  ],
+  "domain_sales.sales_credit_notes": [
+   "mandant_null"
+  ],
+  "domain_shared.admin_api_keys": [
+   "identitaet"
+  ],
+  "domain_shared.agrar_sorten": [
+   "standardmandant"
+  ],
+  "domain_shared.api_keys": [
+   "identitaet",
+   "standardmandant"
+  ],
+  "domain_shared.artikel_sperren": [
+   "standardmandant"
+  ],
+  "domain_shared.audit_logs": [
+   "mandant_null",
+   "standardmandant",
+   "uebergreifend"
+  ],
+  "domain_shared.branches": [
+   "standardmandant"
+  ],
+  "domain_shared.calendar_ics_tokens": [
+   "identitaet",
+   "mandant_ermitteln",
+   "standardmandant"
+  ],
+  "domain_shared.calendar_items": [
+   "standardmandant"
+  ],
+  "domain_shared.calendar_team_memberships": [
+   "standardmandant"
+  ],
+  "domain_shared.direct_debit_items": [
+   "standardmandant"
+  ],
+  "domain_shared.dispatchers": [
+   "standardmandant"
+  ],
+  "domain_shared.farmers": [
+   "standardmandant"
+  ],
+  "domain_shared.feeding_feed_analysis_findings": [
+   "standardmandant"
+  ],
+  "domain_shared.feeding_feed_analysis_revisions": [
+   "standardmandant"
+  ],
+  "domain_shared.feeding_feed_analysis_values": [
+   "standardmandant"
+  ],
+  "domain_shared.futtermittel_einzelfutter": [
+   "mandant_null",
+   "standardmandant"
+  ],
+  "domain_shared.futtermittel_mischfutter": [
+   "standardmandant"
+  ],
+  "domain_shared.futtermittel_produktionsauftraege": [
+   "standardmandant"
+  ],
+  "domain_shared.futtermittel_rezepte": [
+   "standardmandant"
+  ],
+  "domain_shared.grundfutter_analysen": [
+   "standardmandant"
+  ],
+  "domain_shared.internal_messages": [
+   "standardmandant"
+  ],
+  "domain_shared.knowledge_objects": [
+   "standardmandant"
+  ],
+  "domain_shared.logistik_frachttabellen": [
+   "mandant_null"
+  ],
+  "domain_shared.master_data_entries": [
+   "standardmandant"
+  ],
+  "domain_shared.rations_zugang": [
+   "standardmandant"
+  ],
+  "public.agent_proposals": [
+   "mandant_null"
+  ],
+  "public.crm_activities": [
+   "dienst",
+   "mandant_null",
+   "standardmandant"
+  ],
+  "public.crm_betriebsprofile": [
+   "standardmandant"
+  ],
+  "public.crm_contacts": [
+   "standardmandant"
+  ],
+  "public.crm_leads": [
+   "dienst",
+   "mandant_null",
+   "standardmandant"
+  ],
+  "public.einkauf_lieferscheine": [
+   "standardmandant"
+  ],
+  "public.finance_accounting_periods": [
+   "dienst"
+  ],
+  "public.inventory_goods_receipts": [
+   "dienst",
+   "standardmandant"
+  ],
+  "public.inventory_warehouses": [
+   "dienst",
+   "standardmandant"
+  ],
+  "public.mcp_tool_executions": [
+   "mandant_null"
+  ]
+ }
+}
