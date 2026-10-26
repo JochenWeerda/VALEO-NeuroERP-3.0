@@ -70,6 +70,9 @@ Sie ersetzt nicht die fachliche Dokumentation, sondern legt die verbindliche Sta
 - Direkte Datenbanksitzungen von Agenten (psql, Skripte, Treiber) setzen
   `PGAPPNAME=agent:<agentname>`, damit `governance.ddl_events` ihre
   Schemaaenderungen zuordnen kann ([DB-Governance](docs/architecture/db-governance-20261026.md)).
+- Wo die Rollen aus `scripts/provision_db_roles.py` eingerichtet sind, verbinden sich
+  Agenten als `valeo_agent` (Daten, kein DDL); Schemaaenderungen nur ueber
+  `valeo_migrator` bzw. Alembic/`migrate:apply` im abgestimmten Wartungsfenster.
 
 Runbook: [Gemeinsamer Testpruefstand](docs/quality-assurance/test-database-resource-policy-20261001.md).
 

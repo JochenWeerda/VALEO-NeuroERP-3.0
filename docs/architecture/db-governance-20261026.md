@@ -43,22 +43,50 @@ werkzeugunabhaengig sichtbar.
   [drizzle-apply-guard-20261026.md](../quality-assurance/drizzle-apply-guard-20261026.md)).
 - Die Laufzeitwege der Anwendung werden nicht gesperrt; das leistet erst die Rollentrennung.
 
-## Stufe 3: Rollentrennung (Konzept, nicht umgesetzt)
+## Stufe 3: Rollentrennung (Werkzeuge umgesetzt, Einfuehrung gestaffelt)
 
-Erst getrennte Rollen machen die Herkunft belastbar und Aenderungen durchsetzbar.
-Umsetzung nur nach Freigabe, weil sie Betrieb, Zugangsdaten und alle Verbindungen beruehrt.
+Entscheidungen nach Best Practice (Nutzerauftrag 2026-10-26); der Superuser bleibt fuer
+Entwicklung, Einrichtung und Anpassungen.
 
 | Rolle | Rechte | Nutzer |
 | --- | --- | --- |
-| `valeo_owner` (NOLOGIN) | Eigentuemer aller Schemata und Objekte | niemand direkt |
-| `valeo_migrator` | `SET ROLE valeo_owner`; DDL | Alembic, drizzle-kit (je eigene Login-Rolle moeglich) |
-| `valeo_app` | DML auf Fachtabellen, kein `CREATE`/`ALTER`/`DROP` | FastAPI, Domaenendienste |
-| `valeo_agent_<name>` | wie `valeo_app` bzw. nur lesend; DDL nur ueber `valeo_migrator` im Wartungsfenster | Agenten |
-| `valeo_audit` | nur `SELECT` auf `governance.*` | Pruefungen, Betrieb |
+| `valeo_owner` (NOLOGIN) | Eigentuemer der Fachschemata und -objekte; INSERT ins Protokoll | niemand direkt |
+| `valeo_migrator` | Mitglied von `valeo_owner`, Rollenvorgabe `role = valeo_owner` | Alembic, drizzle-kit, `init_db.py` |
+| `valeo_app` | DML auf allen Fachtabellen, Sequenzen, Funktionen; kein CREATE | FastAPI, Domaenendienste |
+| `valeo_agent` | wie `valeo_app`; DDL nur ueber `valeo_migrator` im Wartungsfenster | Agenten |
+| `valeo_audit` | nur `SELECT` auf `governance.ddl_events` | Pruefungen, Betrieb |
+| `valeo_governance` (NOLOGIN) | Eigentuemer des Protokolls | niemand direkt |
+| Superuser (`valeo_dev`) | unveraendert | Einrichtung, Anpassungen, Entwicklung |
 
-Dazu: `governance.ddl_events` nur fuer `valeo_owner` schreibbar (Trigger-Funktion
-`SECURITY DEFINER`), fuer alle anderen kein `UPDATE`/`DELETE`; Event-Trigger einmalig
-durch den Superuser. Offene Entscheidungen: Superuser-Zugriff im Betrieb, Verteilung der
-Zugangsdaten (Secrets-Quelle), Uebergang der bestehenden Objekte (`REASSIGN OWNED`), Folgen
-fuer `create_all` in `init_db.py` (braucht dann Migratorrechte oder entfaellt zugunsten
-echter Migrationen).
+Umsetzung:
+
+- `scripts/provision_db_roles.py`: Rollen clusterweit und idempotent (Rollen sind
+  Cluster-Objekte und gehoeren nicht in Migrationen), Rechte und Default Privileges je
+  Datenbank, `--eigentum` uebertraegt Fachobjekte gezielt per `ALTER … OWNER`
+  (`REASSIGN OWNED` scheidet aus: Bootstrap-Superuser, und es verschoebe ganze Datenbanken).
+  Ohne `--anwenden` nur Plan, `--rollback` als Probelauf. Passwoerter nur aus
+  `VALEO_DB_PASSWORD_{MIGRATOR,APP,AGENT,AUDIT}`, nie im Repository oder in Ausgaben.
+- `app/core/migration_session.py`: Alembic und `init_db.py` lesen `MIGRATION_DATABASE_URL`
+  (Rueckfall `DATABASE_URL`), markieren ihre Sitzung und handeln als `valeo_owner`, sobald
+  die Rolle existiert, damit neue Objekte nie einer Login-Rolle gehoeren.
+- Migration `governance_ddl_log_roles_20261026`: Protokoll fuer PUBLIC geschlossen;
+  temporaere Objekte von Rollen ohne Protokollrecht loesen keinen Schreibversuch aus.
+  Die Trigger-Anlage prueft die Login-Rolle und legt die Trigger mit `RESET ROLE` an.
+- `check_ddl_provenance.py`: Mit eingerichteten Rollen entscheidet die handelnde Rolle;
+  Superuser-DDL ist Hinweis (`--ohne-superuser`: Befund), eine Werkzeugquelle ohne
+  Migratorrolle gilt als vorgetaeuscht.
+- `create_tables()` beim Anwendungsstart prueft unter `valeo_app` nur noch; fehlende
+  Tabellen entstehen ueber Migrationen bzw. `init_db.py`.
+
+Einfuehrung (je Datenbank, als Superuser, im abgestimmten Fenster):
+
+1. `python scripts/provision_db_roles.py --url … --anwenden` (Rollen, Rechte; additiv).
+2. `… --anwenden --eigentum` (Eigentum an `valeo_owner`).
+3. Passwoerter setzen (Umgebung), `MIGRATION_DATABASE_URL` auf `valeo_migrator`,
+   `DATABASE_URL` der Anwendung auf `valeo_app`, Agenten auf `valeo_agent`.
+4. `check_ddl_provenance.py` regelmaessig; nach Abschluss der Entwicklungsphase
+   `--ohne-superuser`.
+
+Grenzen: Ein Superuser kann alles, auch das Protokoll aendern; das ist die bewusste
+Entscheidung fuer die Entwicklungsphase. Rollen gelten clusterweit; Rechte wirken erst in
+den Datenbanken, in denen Schritt 1 lief.
