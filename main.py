@@ -126,6 +126,16 @@ async def lifespan(app: FastAPI):
                 "In Produktion APP_ENV=production setzen!"
             )
 
+    # RLS plan P7: refuse (production) or flag (development) a connection that bypasses RLS.
+    try:
+        from app.core.database import engine as _rls_engine
+        from app.core.rls_guard import enforce_rls_effective
+        enforce_rls_effective(_rls_engine, settings.APP_ENV)
+    except RuntimeError:
+        raise
+    except Exception as exc:  # database unreachable at startup: readiness reports it separately
+        logger.warning("RLS-Pruefung beim Start nicht moeglich: %s", exc)
+
     # Startup
     logger.info("Starting VALEO-NeuroERP API server...")
 

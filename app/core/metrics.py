@@ -91,3 +91,9 @@ db_transactions_without_tenant_total = Counter(
     'Database transactions that ran without app.tenant_id',
     ['scope']
 )
+
+# RLS-Plan P7: 1, wenn die Anwendungsverbindung RLS umgeht (Superuser, BYPASSRLS, Eigentuemer)
+rls_ineffective_connection = Gauge(
+    'rls_ineffective_connection',
+    'Application database connection bypasses row-level security'
+)
