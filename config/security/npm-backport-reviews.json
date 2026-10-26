@@ -9,7 +9,7 @@
       "patch_sha256": "2798686e4488058ad81c3b8e32eb763c0feff21f4c717ce4d13b6ef2432cd5b8",
       "original_integrity": "sha512-LarFH0+6VfriEhqMMcLX2F7SwSXeWwnEAJEsYm5QKWchiVYVvJyV9v7UDvUv+w5HO23ZpQTXDv/GxdDdMyOuoQ==",
       "license": "(BSD-3-Clause OR GPL-2.0)",
-      "reviewed_on": "2026-10-21",
+      "reviewed_on": "2026-10-26",
       "review_by": "2026-10-28",
       "owner": "Codex-01a0f3fc",
       "source": "https://github.com/digitalbazaar/forge/pull/1152",
