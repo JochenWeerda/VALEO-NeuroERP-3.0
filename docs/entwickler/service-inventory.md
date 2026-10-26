@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, qa]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-24
+last_reviewed: 2026-10-26
 version: 3.0.0
 description: Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -56,6 +56,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `business_partner_service` | Service layer for BusinessPartner aggregate management. |
 | `calendar_projection_service` | UIX-063 planning calendar projections. |
 | `case_management` | Case Management Service — NC-08 |
+| `closing_checklist_validation` | Server-owned closing checks; persisted template text is never executable SQL. |
 | `closing_checklists_service` | Schemas and helpers for the Closing Checklists domain (FIBU-CLS-01). |
 | `command_handlers_finance` | AP kernel transport delegates to the same tenant-bound domain commands. |
 | `command_handlers_procurement` | Domain-Mutationen fuer Process-Kernel-Commands (Einkauf). |

@@ -261,9 +261,9 @@ docker build -t analytics-domain .
 
 ### Database Migrations
 ```bash
-npm run migrate:gen  # Generate migrations
-npm run migrate:up   # Apply migrations
-npm run migrate:down # Rollback migrations
+npm run migrate:gen    # Generate SQL migrations from the schema (drizzle-kit generate)
+npm run migrate:up     # Upgrade migration snapshots to the current drizzle-kit format
+npm run migrate:status # Check migration files for consistency (drizzle-kit check)
 ```
 
 ## 🤝 Contributing

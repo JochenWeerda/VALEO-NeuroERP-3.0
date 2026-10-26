@@ -136,8 +136,10 @@ describe('SchedulingService', () => {
       expect(result).toBeNull();
     });
 
-    it('should return null for invalid trigger config', () => {
-      const schedule = new ScheduleEntity({
+    // A CRON trigger without expression is not constructible (ScheduleEntity invariant),
+    // so no fire time can ever be calculated for it; the input is rejected instead.
+    it('should reject invalid trigger config before a fire time is calculated', () => {
+      const result = service.validateScheduleInput({
         tenantId: 'tenant-1',
         name: 'Test Schedule',
         tz: 'Europe/Berlin',
@@ -152,8 +154,8 @@ describe('SchedulingService', () => {
         enabled: true,
       });
 
-      const result = service.calculateNextFireTime(schedule);
-      expect(result).toBeNull();
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain('cron expression is required for CRON trigger');
     });
   });
 
@@ -274,8 +276,10 @@ describe('SchedulingService', () => {
       expect(result.errors).toContain('Invalid CRON expression');
     });
 
-    it('should detect missing RRULE', async () => {
-      const schedule = new ScheduleEntity({
+    // Required trigger/target fields are ScheduleEntity invariants; raw input is
+    // validated through validateScheduleInput, the path of the validate route.
+    it('should detect missing RRULE', () => {
+      const result = service.validateScheduleInput({
         tenantId: 'tenant-1',
         name: 'Test Schedule',
         tz: 'Europe/Berlin',
@@ -290,14 +294,12 @@ describe('SchedulingService', () => {
         enabled: true,
       });
 
-      const result = await service.validateSchedule(schedule);
-
       expect(result.valid).toBe(false);
-      expect(result.errors).toContain('RRULE is required');
+      expect(result.errors).toContain('rrule is required for RRULE trigger');
     });
 
-    it('should detect invalid FIXED_DELAY', async () => {
-      const schedule = new ScheduleEntity({
+    it('should detect invalid FIXED_DELAY', () => {
+      const result = service.validateScheduleInput({
         tenantId: 'tenant-1',
         name: 'Test Schedule',
         tz: 'Europe/Berlin',
@@ -312,14 +314,12 @@ describe('SchedulingService', () => {
         enabled: true,
       });
 
-      const result = await service.validateSchedule(schedule);
-
       expect(result.valid).toBe(false);
-      expect(result.errors).toContain('Delay must be positive');
+      expect(result.errors).toContain('delaySec must be positive for FIXED_DELAY trigger');
     });
 
-    it('should detect missing event topic', async () => {
-      const schedule = new ScheduleEntity({
+    it('should detect missing event topic', () => {
+      const result = service.validateScheduleInput({
         tenantId: 'tenant-1',
         name: 'Test Schedule',
         tz: 'Europe/Berlin',
@@ -334,10 +334,27 @@ describe('SchedulingService', () => {
         enabled: true,
       });
 
-      const result = await service.validateSchedule(schedule);
-
       expect(result.valid).toBe(false);
-      expect(result.errors).toContain('Event topic is required');
+      expect(result.errors).toContain('eventTopic is required for EVENT target');
+    });
+
+    it('should accept valid input through the input validation path', () => {
+      const result = service.validateScheduleInput({
+        tenantId: 'tenant-1',
+        name: 'Test Schedule',
+        tz: 'Europe/Berlin',
+        trigger: {
+          type: 'CRON',
+          cron: '0 9 * * *',
+        },
+        target: {
+          kind: 'EVENT',
+          eventTopic: 'test.topic',
+        },
+        enabled: true,
+      });
+
+      expect(result).toEqual({ valid: true, errors: [] });
     });
   });
 });
