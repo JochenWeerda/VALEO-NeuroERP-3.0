@@ -195,32 +195,6 @@ def _local_opportunities(
     return [_opportunity_from_local(dict(row)) for row in rows], int(total or 0)
 
 
-def _ensure_opp_columns(db: Session) -> None:
-    """Add missing columns to opportunities table (idempotent)."""
-    cols_sql = text(
-        "SELECT column_name FROM information_schema.columns "
-        "WHERE table_name='opportunities' AND table_schema='public'"
-    )
-    try:
-        existing = {r[0] for r in db.execute(cols_sql)}
-    except Exception:
-        return
-    migrations = [
-        ("stage", "ALTER TABLE opportunities ADD COLUMN stage TEXT DEFAULT 'LEAD'"),
-        ("probability", "ALTER TABLE opportunities ADD COLUMN probability FLOAT DEFAULT 25"),
-        ("expected_close_date", "ALTER TABLE opportunities ADD COLUMN expected_close_date DATE"),
-        ("amount", "ALTER TABLE opportunities ADD COLUMN amount NUMERIC"),
-        ("stage_history", "ALTER TABLE opportunities ADD COLUMN stage_history JSONB DEFAULT '[]'::jsonb"),
-    ]
-    for col, ddl in migrations:
-        if col not in existing:
-            try:
-                db.execute(text(ddl))
-                db.commit()
-            except Exception:
-                db.rollback()
-
-
 @router.get("/stages", response_model=list[OpportunitiesOut], summary="Stages auflisten")
 async def list_stages():
     """Pipeline-Stages fuer Kanban-Board."""
@@ -237,7 +211,6 @@ async def get_pipeline(
     db: Session = Depends(get_db),
 ):
     """Kanban-View: Opportunities gruppiert nach Stage."""
-    _ensure_opp_columns(db)
 
     try:
         sql = text(
@@ -313,7 +286,6 @@ async def get_forecast(
     db: Session = Depends(get_db),
 ):
     """Umsatz-Prognose: probability * amount, gruppiert nach Monat."""
-    _ensure_opp_columns(db)
 
     # Try DB-based forecast first
     try:
@@ -409,7 +381,6 @@ async def patch_opportunity_stage(
     if new_stage not in OPPORTUNITY_STAGES:
         raise HTTPException(status_code=422, detail=f"Ungueltige Stage. Erlaubt: {OPPORTUNITY_STAGES}")
 
-    _ensure_opp_columns(db)
 
     try:
         # Check exists

@@ -113,7 +113,7 @@ echo ""
 
 # 7. Run migrations (if database is available)
 echo "🗄️  Running database migrations..."
-if npm run migrate:up 2>/dev/null; then
+if npm run migrate:apply; then
     echo "✅ Migrations applied"
 else
     echo "⚠️  Could not run migrations (database might not be available)"

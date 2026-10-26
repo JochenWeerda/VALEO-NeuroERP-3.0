@@ -49,10 +49,9 @@ def test_rohwaren_vergleich_returns_naehrstoffe():
     db.execute.return_value.fetchall.return_value = rows
 
     import asyncio
-    with patch("app.api.v1.endpoints.futtermittel_rohwaren._ensure_tables"):
-        result = asyncio.run(
-            vergleich_rohwaren(ids="rm-1,rm-2", db=db, tenant_id="t-1")
-        )
+    result = asyncio.run(
+        vergleich_rohwaren(ids="rm-1,rm-2", db=db, tenant_id="t-1")
+    )
     assert "rohwaren" in result
     assert len(result["rohwaren"]) == 2
 
@@ -98,10 +97,9 @@ def test_naehrstoffanalyse_weighted_average():
     db.execute.side_effect = execute_side
 
     import asyncio
-    with patch("app.api.v1.endpoints.futtermittel_rezepte._ensure_tables"):
-        result = asyncio.run(
-            naehrstoffanalyse(rezept_id="r-1", db=db, tenant_id="t-1")
-        )
+    result = asyncio.run(
+        naehrstoffanalyse(rezept_id="r-1", db=db, tenant_id="t-1")
+    )
     # Should return a dict with naehrstoffe
     assert result is not None
 
@@ -146,10 +144,9 @@ def test_deklaration_contains_pflichtfelder():
     db.execute.side_effect = execute_side
 
     import asyncio
-    with patch("app.api.v1.endpoints.futtermittel_rezepte._ensure_tables"):
-        result = asyncio.run(
-            deklaration(rezept_id="r-1", db=db, tenant_id="t-1")
-        )
+    result = asyncio.run(
+        deklaration(rezept_id="r-1", db=db, tenant_id="t-1")
+    )
 
     # Must contain zutaten_liste and analytische_bestandteile
     assert "zutaten_liste" in result
@@ -184,10 +181,9 @@ def test_etikett_contains_eu_pflichtfelder():
     db.execute.side_effect = execute_side
 
     import asyncio
-    with patch("app.api.v1.endpoints.futtermittel_rezepte._ensure_tables"):
-        result = asyncio.run(
-            etikett(rezept_id="r-1", db=db, tenant_id="t-1")
-        )
+    result = asyncio.run(
+        etikett(rezept_id="r-1", db=db, tenant_id="t-1")
+    )
 
     # EU Pflichtfelder
     assert "produktname" in result

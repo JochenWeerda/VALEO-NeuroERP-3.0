@@ -131,8 +131,6 @@ class TestErs:
         body = ErsRunRequest(gr_id="gr-001", supplier_id="sup-001")
 
         with patch(
-            "app.api.v1.endpoints.ers_settlement._ensure_schema"
-        ), patch(
             "app.api.v1.endpoints.ers_settlement._fetch_gr_amount", return_value=950.0
         ):
             result = trigger_ers(body=body, db=db, tenant_id="tenant-1")
@@ -155,8 +153,7 @@ class TestErs:
 
         body = ErsRunRequest(gr_id="gr-002", supplier_id="sup-999")
 
-        with patch("app.api.v1.endpoints.ers_settlement._ensure_schema"):
-            result = trigger_ers(body=body, db=db, tenant_id="tenant-1")
+        result = trigger_ers(body=body, db=db, tenant_id="tenant-1")
 
         assert result["success"] is False
         assert "nicht ERS-qualifiziert" in result["reason"]

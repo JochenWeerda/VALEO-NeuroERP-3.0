@@ -142,6 +142,9 @@ Standardabläufe für **Programm-Updates** (Patch, Minor, Major, Hotfix, Migrati
    pnpm --filter @valero-neuroerp/<domain> exec drizzle-kit generate  # muss "No schema changes" melden
    ```
    - Meldet `generate` Aenderungen, fehlt eine eingecheckte Migration: Release stoppen.
+   - `pnpm --filter @valero-neuroerp/<domain> run migrate:check` gegen die Zieldatenbank:
+     verweigert Ziele, die keine Domaenendatenbank sind (z. B. die Backend-Datenbank ueber den
+     `DATABASE_URL`-Rueckfall) und Kettentabellen ohne Journal (Altbestand aus `push`).
    - Die SQL der Kette laesst sich ohne bleibende Aenderung auf dem Pruefstand
      abnehmen: `node scripts/verify_drizzle_migrations_probe.cjs packages/<domain>`
      (eine Transaktion, eigenes Schema, immer Rollback).
