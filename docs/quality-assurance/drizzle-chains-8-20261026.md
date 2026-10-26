@@ -78,3 +78,10 @@ Transaktionen mit Rollback, nichts festgeschrieben; kein Reset, keine neue DB, k
   im Repo belegt; nicht geprueft.
 - hr bleibt ohne Drizzle-Kette (Handmigration, `TIMESTAMPTZ`-Abweichung offen).
 - Keine Aussage ueber vollstaendige Sicherheit oder Gesamtfreigabe.
+
+## CI-Abnahme
+
+| Lauf | Commit | Ergebnis |
+| --- | --- | --- |
+| Security Scan 40279303829 | 8ff7bb483 | alle Jobs success |
+| Quality Gate 40279300491 | 8ff7bb483 | Dependency Scan, Improvement integrity, FSX, Secret Scan, SBOM, WCAG, Production contract u. a. success; Frontend-Unit 214 Faelle mit identischer Fallmenge wie Basis-Lauf 40234161888 (0 neu); Doc-Drift 272 wie Basis |
