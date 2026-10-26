@@ -3,7 +3,7 @@ title: Plan Mandantentrennung in der Datenbank (RLS)
 type: explanation
 audience: [entwickler, betrieb, agent]
 owner: Claude Code
-status: draft
+status: active
 last_reviewed: 2026-10-26
 ---
 
@@ -127,15 +127,21 @@ tragen die Indexnutzung. Entfernen ist kein Ziel dieses Plans.
 - **Gewachsene vs. frische DB.** RLS-Migrationen werden auf beiden geprueft; die gewachsene
   Datenbank hat Constraints verloren (CLAUDE.md, Pruefstand).
 
-## 5. Offene Entscheidungen
+## 5. Entscheidungen (Nutzer, 2026-10-26)
 
-| Frage | Empfehlung |
+| Frage | Entscheidung |
 | --- | --- |
-| Pilot-Domaene | `domain_finance` (klein, vollstaendig mit `tenant_id`, hoechster Schaden bei Fehler) |
-| Bedeutung der `system`-Zeilen | lesbar fuer alle Mandanten, schreibbar nur ueber Eigentuemer/Migration (Policy `USING (tenant_id IN (<ctx>, 'system'))`, `WITH CHECK (tenant_id = <ctx>)`) |
-| Mandantenuebergreifende Worker | eigene Rolle `valeo_system` mit `BYPASSRLS`, nur fuer namentlich freigegebene Worker, eigener Vertragstest |
+| Pilot-Domaene | `domain_finance` (18 Tabellen, alle `tenant_id` NOT NULL, hoechster Schaden bei Fehler) |
+| `system`-Zeilen (6 Tabellen) | lesbar fuer alle Mandanten, schreibbar nur ueber Eigentuemer/Migration: `USING (tenant_id IN (<ctx>, 'system'))`, `WITH CHECK (tenant_id = <ctx>)` |
+| Mandantenuebergreifende Worker | eigene Rolle `valeo_system` mit `BYPASSRLS` und eigener URL, nur fuer namentlich freigegebene Worker, per Vertragstest begrenzt |
+| Testreste in `valeo_neuro_erp` | in P4 nach Inventar und Sicherung loeschen, vor dem Ausrollen |
+
+Ohne gesonderte Rueckfrage festgelegt (aus dem Plan, nicht widersprochen):
+
+| Frage | Festlegung |
+| --- | --- |
 | `FORCE ROW LEVEL SECURITY` | nicht setzen; Schutz ueber Rollentrennung (Anwendung ist nie Eigentuemer) |
-| Typ von `tenant_id` vereinheitlichen | nicht als Voraussetzung; Textvergleich genuegt, Vereinheitlichung spaeter |
+| Typ von `tenant_id` vereinheitlichen | keine Voraussetzung; Textvergleich genuegt |
 
 ## 6. Bewusst nicht Teil dieses Plans
 
