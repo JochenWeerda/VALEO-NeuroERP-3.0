@@ -51,16 +51,6 @@ async def list_accruals_provisions(
     db: Session = Depends(get_db),
 ):
     """List accruals and provisions for a period."""
-    try:
-        db.execute(text("CREATE TABLE IF NOT EXISTS domain_erp.accruals_provisions ("
-                        "id VARCHAR(36) PRIMARY KEY, tenant_id VARCHAR(64), description VARCHAR(500), "
-                        "amount NUMERIC(18,4), account_number VARCHAR(20), counterpart_account VARCHAR(20), "
-                        "period VARCHAR(7), accrual_type VARCHAR(50), status VARCHAR(20) DEFAULT 'draft', "
-                        "created_at TIMESTAMPTZ DEFAULT NOW())"))
-        db.commit()
-    except Exception:
-        db.rollback()
-
     where = ["tenant_id = :tid"]
     params: dict = {"tid": tenant_id}
     if period:
@@ -97,16 +87,6 @@ async def create_accrual_provision(
     db: Session = Depends(get_db),
 ):
     """Create accrual or provision entry (draft)."""
-    try:
-        db.execute(text("CREATE TABLE IF NOT EXISTS domain_erp.accruals_provisions ("
-                        "id VARCHAR(36) PRIMARY KEY, tenant_id VARCHAR(64), description VARCHAR(500), "
-                        "amount NUMERIC(18,4), account_number VARCHAR(20), counterpart_account VARCHAR(20), "
-                        "period VARCHAR(7), accrual_type VARCHAR(50), status VARCHAR(20) DEFAULT 'draft', "
-                        "created_at TIMESTAMPTZ DEFAULT NOW())"))
-        db.commit()
-    except Exception:
-        db.rollback()
-
     item_id = uuid7()
     db.execute(
         text("""

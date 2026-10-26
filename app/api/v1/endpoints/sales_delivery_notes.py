@@ -861,7 +861,6 @@ async def create_invoice_from_delivery(
     inv_id = rechnung.invoice.id
     total = rechnung.invoice.net_amount
 
-    db.execute(text("CREATE SCHEMA IF NOT EXISTS domain_erp"))
     db.execute(
         text("""
             INSERT INTO domain_erp.journal_entries

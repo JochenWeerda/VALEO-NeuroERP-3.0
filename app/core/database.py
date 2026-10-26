@@ -52,10 +52,12 @@ def get_db() -> Session:
     finally:
         db.close()
 
-def create_tables():
+def create_tables(bind=None):
     """
-    Create all database tables
+    Create all database tables (bind: engine to use instead of the application engine,
+    e.g. the migration engine of scripts/init_db.py)
     """
+    target = bind if bind is not None else engine
     try:
         logger.info("Creating database tables...")
         outbox_models = None
@@ -117,13 +119,13 @@ def create_tables():
         except Exception as e:
             logger.warning(f"Studio draft models import failed: {e}")
 
-        Base.metadata.create_all(bind=engine)
+        Base.metadata.create_all(bind=target)
         logger.info("Database tables created successfully")
     except Exception as e:
         logger.error(f"Failed to create database tables: {e}")
         logger.warning("Trying essential table fallback creation...")
         try:
-            with engine.begin() as conn:
+            with target.begin() as conn:
                 conn.execute(text("CREATE SCHEMA IF NOT EXISTS domain_ops"))
                 conn.execute(text("CREATE SCHEMA IF NOT EXISTS domain_inventory"))
 
@@ -167,12 +169,12 @@ def create_tables():
 
             for table in essential_tables:
                 try:
-                    table.create(bind=engine, checkfirst=True)
+                    table.create(bind=target, checkfirst=True)
                     logger.info("Ensured table exists: %s", table.fullname)
                 except Exception as table_error:
                     logger.warning("Table create failed for %s, trying SQL fallback: %s", table.fullname, table_error)
                     if table.fullname == "domain_inventory.agrar_contracts":
-                        with engine.begin() as conn:
+                        with target.begin() as conn:
                             conn.execute(
                                 text(
                                     """
