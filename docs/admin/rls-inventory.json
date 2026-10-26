@@ -8,7 +8,7 @@
    "C": 53,
    "D": 60
   },
-  "rls_enabled": 0,
+  "rls_enabled": 22,
   "tenant_types": {
    "character varying": 295,
    "character varying(100)": 9,
@@ -2156,17 +2156,17 @@
    "table": "domain_erp.journal_entries",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 1
   },
   {
    "table": "domain_erp.journal_entry_lines",
    "class": "B",
    "tenant_type": "character varying(64)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 1
   },
   {
    "table": "domain_erp.lohn_import_runs",
@@ -2292,161 +2292,161 @@
    "table": "domain_finance.aufbewahrungsfristen",
    "class": "A",
    "tenant_type": "character varying(36)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 1
   },
   {
    "table": "domain_finance.billing_batch_audit",
    "class": "A",
    "tenant_type": "text",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 1
   },
   {
    "table": "domain_finance.billing_batch_lines",
    "class": "A",
    "tenant_type": "text",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 1
   },
   {
    "table": "domain_finance.billing_batches",
    "class": "A",
    "tenant_type": "text",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 1
   },
   {
    "table": "domain_finance.dispute_records",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 1
   },
   {
    "table": "domain_finance.ebilanz_exports",
    "class": "A",
    "tenant_type": "text",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 1
   },
   {
    "table": "domain_finance.finance_mahnstufen_audit",
    "class": "A",
    "tenant_type": "character varying(36)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 1
   },
   {
    "table": "domain_finance.finance_ratenzahlungsplaene",
    "class": "A",
    "tenant_type": "character varying(36)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 1
   },
   {
    "table": "domain_finance.finance_ratenzahlungsraten",
    "class": "A",
    "tenant_type": "character varying(36)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 1
   },
   {
    "table": "domain_finance.finance_sepa_batches",
    "class": "A",
    "tenant_type": "character varying(36)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 1
   },
   {
    "table": "domain_finance.finance_sepa_mandate",
    "class": "A",
    "tenant_type": "character varying(36)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 1
   },
   {
    "table": "domain_finance.fixed_assets",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 1
   },
   {
    "table": "domain_finance.kostenarten",
    "class": "A",
    "tenant_type": "character varying(36)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 1
   },
   {
    "table": "domain_finance.kostenstellen",
    "class": "A",
    "tenant_type": "character varying(36)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 1
   },
   {
    "table": "domain_finance.kostenstellen_buchungen",
    "class": "A",
    "tenant_type": "character varying(36)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 1
   },
   {
    "table": "domain_finance.kostenstellen_umlagen",
    "class": "A",
    "tenant_type": "character varying(36)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 1
   },
   {
    "table": "domain_finance.period_closure",
    "class": "B",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 1
   },
   {
    "table": "domain_finance.sales_order",
    "class": "B",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 1
   },
   {
    "table": "domain_finance.self_billing_invoices",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 1
   },
   {
    "table": "domain_finance.ustva_voranmeldungen",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 1
   },
   {
    "table": "domain_futtermittel.feed_produktion_log",
