@@ -1,4 +1,6 @@
 import { ScheduleEntity, TargetType, TriggerType } from '../entities';
+
+export type ScheduleProps = ConstructorParameters<typeof ScheduleEntity>[0];
 import { ScheduleRepository } from '../../infra/repo/schedule-repository';
 import { EventPublisher } from '../../infra/messaging/publisher';
 import { v4 as uuidv4 } from 'uuid';
@@ -153,59 +155,28 @@ export class SchedulingService {
   }
 
   /**
-   * Validate schedule configuration
+   * Validate raw schedule input. Required trigger/target fields are invariants of
+   * ScheduleEntity, so an input that cannot be constructed is reported here instead
+   * of being duplicated in validateSchedule.
    */
-  async validateSchedule(schedule: ScheduleEntity): Promise<{ valid: boolean; errors: string[] }> {
+  validateScheduleInput(props: ScheduleProps): { valid: boolean; errors: string[] } {
+    let schedule: ScheduleEntity;
+    try {
+      schedule = new ScheduleEntity(props);
+    } catch (error) {
+      return { valid: false, errors: [error instanceof Error ? error.message : 'Validation failed'] };
+    }
+    return this.validateSchedule(schedule);
+  }
+
+  /**
+   * Validate the configuration of a constructed schedule beyond its invariants
+   */
+  validateSchedule(schedule: ScheduleEntity): { valid: boolean; errors: string[] } {
     const errors: string[] = [];
 
-    // Validate trigger
-    switch (schedule.trigger.type) {
-      case 'CRON':
-        if (!schedule.trigger.cron) {
-          errors.push('CRON expression is required');
-        } else if (!this.isValidCronExpression(schedule.trigger.cron)) {
-          errors.push('Invalid CRON expression');
-        }
-        break;
-
-      case 'RRULE':
-        if (!schedule.trigger.rrule) {
-          errors.push('RRULE is required');
-        }
-        break;
-
-      case 'FIXED_DELAY':
-        if (!schedule.trigger.delaySec || schedule.trigger.delaySec <= 0) {
-          errors.push('Delay must be positive');
-        }
-        break;
-
-      case 'ONE_SHOT':
-        if (!schedule.trigger.startAt) {
-          errors.push('Start time is required for one-shot schedules');
-        }
-        break;
-    }
-
-    // Validate target
-    switch (schedule.target.kind) {
-      case 'EVENT':
-        if (!schedule.target.eventTopic) {
-          errors.push('Event topic is required');
-        }
-        break;
-
-      case 'HTTP':
-        if (!schedule.target.http?.url) {
-          errors.push('HTTP URL is required');
-        }
-        break;
-
-      case 'QUEUE':
-        if (!schedule.target.queue?.topic) {
-          errors.push('Queue topic is required');
-        }
-        break;
+    if (schedule.trigger.type === 'CRON' && !this.isValidCronExpression(schedule.trigger.cron!)) {
+      errors.push('Invalid CRON expression');
     }
 
     return {
