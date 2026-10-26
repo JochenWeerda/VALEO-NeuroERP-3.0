@@ -10,6 +10,8 @@ except ImportError:
     pass
 
 from sqlalchemy import engine_from_config, text
+
+from app.core.migration_session import migration_database_url, prepare_migration_session
 from sqlalchemy import pool
 from sqlalchemy import MetaData
 
@@ -30,7 +32,7 @@ metadata = MetaData()
 def _get_database_url() -> str:
     """DATABASE_URL-Umgebung, alembic.ini sqlalchemy.url oder App-Defaults (wie FastAPI)."""
     ini_url = (config.get_main_option("sqlalchemy.url") or "").strip()
-    url = (os.getenv("DATABASE_URL") or ini_url).strip()
+    url = (migration_database_url() or ini_url).strip()
     if url:
         return url
     try:
@@ -71,8 +73,8 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        # Mark the session so governance.ddl_events attributes its schema changes to Alembic
-        connection.execute(text("SET application_name = 'alembic'"))
+        # Mark the session for governance.ddl_events and act as valeo_owner once provisioned
+        prepare_migration_session(connection, "alembic")
         # Ensure version_num column is wide enough for long revision IDs
         connection.execute(text(
             "CREATE TABLE IF NOT EXISTS alembic_version ("

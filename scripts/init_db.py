@@ -12,12 +12,15 @@ import sys
 
 from alembic import command
 from alembic.config import Config
+
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import OperationalError
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
+
+from app.core.migration_session import migration_database_url  # noqa: E402
 
 
 def _ensure_wide_version_table(database_url: str) -> None:
@@ -45,8 +48,7 @@ def main() -> None:
     config_path = PROJECT_ROOT / "alembic.ini"
     alembic_cfg = Config(str(config_path))
 
-    database_url = os.environ.get(
-        "DATABASE_URL",
+    database_url = migration_database_url(
         "postgresql://valeo_dev:valeo_dev_2024@127.0.0.1:5432/valeo_neuro_erp",
     )
 
@@ -73,11 +75,15 @@ def main() -> None:
     # haben, additiv anlegen (create_all ist idempotent). Ohne diesen Schritt
     # fehlen auf frischen Installationen ORM-definierte Tabellen — Befund
     # RUNTIME-SWEEP-REPAIR-001 (77 Tabellen ausserhalb der Migrationskette).
-    # The ORM engine reads PGAPPNAME; governance.ddl_events then shows these tables as
-    # orm-create-all instead of an unknown source.
-    os.environ["PGAPPNAME"] = "orm-create-all"
+    # Run create_all through the migration connection: marked as orm-create-all for
+    # governance.ddl_events and, once roles are provisioned, owned by valeo_owner.
     from app.core.database import create_tables
-    create_tables()
+    from app.core.migration_session import migration_engine
+    orm_engine = migration_engine(database_url, "orm-create-all")
+    try:
+        create_tables(bind=orm_engine)
+    finally:
+        orm_engine.dispose()
     print("ORM metadata create_all applied (additive).")
 
 

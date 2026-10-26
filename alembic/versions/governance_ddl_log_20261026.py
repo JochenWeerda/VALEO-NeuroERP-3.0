@@ -6,7 +6,7 @@ source derived from it (alembic, drizzle-kit, orm-create-all, agent, unbekannt).
 stored, it may carry secrets. Temporary objects are skipped.
 
 application_name is declared by the client; the role columns are what the server knows.
-Event triggers need superuser rights; without them the log table and functions are created,
+Event triggers need a superuser login role; without it the log table and functions are created,
 the triggers are not, and scripts/check_ddl_provenance.py reports the missing triggers.
 """
 from alembic import op
@@ -93,10 +93,13 @@ def upgrade() -> None:
         """
     )
     conn = op.get_bind()
-    is_superuser = conn.execute(sa.text("SELECT rolsuper FROM pg_roles WHERE rolname = current_user")).scalar()
+    # The login role decides: migrations may run under SET ROLE valeo_owner (app.core.migration_session).
+    is_superuser = conn.execute(sa.text("SELECT rolsuper FROM pg_roles WHERE rolname = session_user")).scalar()
     if not is_superuser:
         op.execute("DO $$ BEGIN RAISE WARNING 'governance: event triggers need superuser rights and were not created'; END $$")
         return
+    acting_role = conn.execute(sa.text("SELECT current_user")).scalar()
+    op.execute("RESET ROLE")
     op.execute(
         "CREATE EVENT TRIGGER governance_ddl_command_end ON ddl_command_end "
         "EXECUTE FUNCTION governance.log_ddl_command_end()"
@@ -105,6 +108,8 @@ def upgrade() -> None:
         "CREATE EVENT TRIGGER governance_sql_drop ON sql_drop "
         "EXECUTE FUNCTION governance.log_sql_drop()"
     )
+    if acting_role != conn.execute(sa.text("SELECT session_user")).scalar():
+        op.execute(sa.text(f"SET ROLE {acting_role}"))
 
 
 def downgrade() -> None:
