@@ -64,3 +64,9 @@ Behebung: eigene `version_table` je Dienst und Abgleich ihrer Ketten mit dem vor
 Schema (stamp nach Strukturvergleich); eigener Slice.
 
 Keine Aussage ueber vollstaendige Sicherheit oder Gesamtfreigabe.
+
+## CI-Abnahme
+
+| Lauf | Ergebnis |
+| --- | --- |
+| Quality Gate 40326590660 | Improvement integrity, Dependency Scan, FSX, Secret Scan, SBOM, WCAG u. a. success; Frontend-Unit 214 Faelle identisch zur Basis (0 neu); Backend bricht wie auf der Basis am Doc-Drift-Gate (272) ab |
