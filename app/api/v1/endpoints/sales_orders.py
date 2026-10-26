@@ -819,7 +819,6 @@ async def create_delivery_from_order(
     dn_id = uuid7()
     dn_nr = f"LS-{order_row['order_number']}"
 
-    db.execute(text("CREATE SCHEMA IF NOT EXISTS domain_sales"))
     db.execute(
         text("""
             INSERT INTO domain_sales.delivery_notes

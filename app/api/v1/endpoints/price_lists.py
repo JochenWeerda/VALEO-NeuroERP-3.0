@@ -80,10 +80,6 @@ class PriceList(PriceListBase):
     updated_at: Optional[datetime] = None
 
 
-def _ensure_schema(db: Session) -> None:
-    db.execute(text("CREATE SCHEMA IF NOT EXISTS domain_pricing"))
-
-
 @router.post("/", response_model=PriceList, status_code=201, summary="Price list anlegen", dependencies=SCHREIBEN["VERKAUF"])
 async def create_price_list(
     payload: PriceListCreate,
@@ -91,7 +87,6 @@ async def create_price_list(
     db: Session = Depends(get_db),
 ):
     """Create a new price list with optional items."""
-    _ensure_schema(db)
     tid = payload.tenant_id or tenant_id
     pl_id = uuid7()
 
@@ -151,7 +146,6 @@ async def list_price_lists(
     db: Session = Depends(get_db),
 ):
     """List all price lists."""
-    _ensure_schema(db)
     where = ["tenant_id = :tid"]
     params: dict = {"tid": tenant_id}
     if is_active is not None:
@@ -186,7 +180,6 @@ async def get_price_list(
     db: Session = Depends(get_db),
 ):
     """Get price list by ID with items."""
-    _ensure_schema(db)
     row = db.execute(
         text("""
             SELECT id, tenant_id, name, description, currency, price_list_type,
