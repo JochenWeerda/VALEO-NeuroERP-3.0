@@ -67,3 +67,10 @@ exportiert `bin.cjs` nicht); behoben, Lauf im selben Fenster wiederholt.
 - Fuer `unjournaled-tables` gibt es bewusst keinen automatischen Abgleich, weil kein
   solcher Bestand existiert; der Fall stoppt mit Tabellenliste.
 - Keine Aussage ueber vollstaendige Sicherheit oder Gesamtfreigabe.
+
+## CI-Abnahme
+
+| Lauf | Commit | Ergebnis |
+| --- | --- | --- |
+| Security Scan 40284224057 | d3fa29fb8 | alle Jobs success |
+| Quality Gate 40284221002 | d3fa29fb8 | Dependency Scan, Improvement integrity, FSX, Secret Scan, SBOM, WCAG, Production contract u. a. success; Frontend-Unit 214 Faelle mit identischer Fallmenge wie Basis-Lauf 40234161888 (0 neu); Doc-Drift 272 wie Basis |
