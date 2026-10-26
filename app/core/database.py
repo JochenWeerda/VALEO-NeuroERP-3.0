@@ -34,6 +34,11 @@ engine = create_engine(
     echo=settings.DEBUG,
 )
 
+# RLS plan P2: every transaction carries app.tenant_id from the tenant context.
+from app.core.rls_session import install_tenant_setting  # noqa: E402
+
+install_tenant_setting(engine)
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
