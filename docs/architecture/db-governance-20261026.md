@@ -87,6 +87,14 @@ Einfuehrung (je Datenbank, als Superuser, im abgestimmten Fenster):
 4. `check_ddl_provenance.py` regelmaessig; nach Abschluss der Entwicklungsphase
    `--ohne-superuser`.
 
+Stand 2026-10-26 ([Einfuehrung](../quality-assurance/db-roles-rollout-20261026.md)):
+`valeo_neuro_erp` hat Schritte 1-2 hinter sich (Rollen, Rechte, Eigentum), die Zugangsdaten
+stehen in der Root-`.env`. Schritt 3 fuer das Backend ist blockiert, bis die Laufzeit-DDL
+einiger Endpunkte in Migrationen ueberfuehrt ist. Der Rollenwechsel auf `valeo_owner`
+erfolgt nur in Datenbanken, in denen `valeo_owner` `CREATE` hat; frische Datenbanken
+migriert die Login-Rolle, die Einrichtung uebertraegt danach. Quellen im Protokoll
+zusaetzlich: `provisionierung` (Einrichtungsskript).
+
 Grenzen: Ein Superuser kann alles, auch das Protokoll aendern; das ist die bewusste
 Entscheidung fuer die Entwicklungsphase. Rollen gelten clusterweit; Rechte wirken erst in
 den Datenbanken, in denen Schritt 1 lief.
