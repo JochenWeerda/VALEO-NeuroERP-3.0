@@ -105,7 +105,7 @@ Datenbank (Daten), siehe `docs/quality-assurance/pruefstand-datenbank.md`.
 | **P0 Inventar als Werkzeug** | Skript, das die Tabellen klassifiziert (A: `tenant_id` NOT NULL, B: nullbar, C: Kind per FK, D: global) und die Codepfade zaehlt; Ratschen-Vertragstest: neue Mandantentabelle ohne Klassifikation ist rot | nein | Inventar reproduziert die Zahlen oben |
 | **P1 Fail-closed-Kontext** | `get_current_tenant_id()` ohne Rueckfall fuer Datenzugriffe; `system_context()` fuer Worker; 21 Worker-Dateien darauf umstellen; Dev-Rueckfall der Middleware nur hinter ausdruecklicher Einstellung | ja, Fehler statt stiller Standardmandant | Worker-Tests; Negativtest: Zugriff ohne Kontext scheitert |
 | **P2 Kontext in die Datenbank** | Engine-Ereignis `begin` setzt `app.tenant_id`; Metrik fuer Transaktionen ohne Kontext | nein (noch keine Policy) | Test: Einstellung ist je Transaktion gesetzt und nach Commit leer |
-| **P3 Pilot** | RLS auf einer Domaene (Vorschlag: `domain_finance`, 18 Tabellen, alle mit `tenant_id` NOT NULL, Buchungen sind der teuerste Fehler); Cross-Tenant-Negativtests in CI (lesen, schreiben, aendern, loeschen fremder Zeilen) | ja, fuer diese Domaene | Gesamtsuite auf frischer DB gruen; gewachsene DB: Masken der Domaene abgenommen |
+| **P3 Pilot** | RLS auf `domain_finance` (frisch 20 Tabellen, davon 2 mit nullbarem `tenant_id`: `period_closure`, `sales_order`) **plus Buchungsjournal** `domain_erp.journal_entries` / `journal_entry_lines` (Zeilen: `tenant_id` nullbar, vorher klaeren); Cross-Tenant-Negativtests in CI (lesen, schreiben, aendern, loeschen fremder Zeilen) | ja, fuer diese Domaene | Gesamtsuite auf frischer DB gruen; gewachsene DB: Masken der Domaene abgenommen |
 | **P4 Bereinigung** | Testreste und `legacy-unassigned` aus der gewachsenen DB, `NULL`-Mandanten klaeren, Regel fuer `system`-Zeilen | Daten | Inventar zeigt nur echte Mandanten |
 | **P5 Ausrollen** | Domaene fuer Domaene per Ratsche (Liste der Tabellen ohne Policy darf nur schrumpfen); Kindtabellen mit `tenant_id` nachziehen | ja, schrittweise | je Domaene wie P3 |
 | **P6 Dienste und Querschnitt** | `services/*` mit demselben Ereignis; mandantenuebergreifende Worker auf eigene `BYPASSRLS`-Rolle; Studio-Simulation | ja | wie P3 je Dienst |
@@ -131,7 +131,7 @@ tragen die Indexnutzung. Entfernen ist kein Ziel dieses Plans.
 
 | Frage | Entscheidung |
 | --- | --- |
-| Pilot-Domaene | `domain_finance` (18 Tabellen, alle `tenant_id` NOT NULL, hoechster Schaden bei Fehler) |
+| Pilot-Domaene | `domain_finance` **plus Buchungsjournal** (`domain_erp.journal_entries`, `journal_entry_lines`). Korrektur nach P0: das Journal liegt nicht in `domain_finance`; Nutzer bestaetigt den erweiterten Zuschnitt (2026-10-26) |
 | `system`-Zeilen (6 Tabellen) | lesbar fuer alle Mandanten, schreibbar nur ueber Eigentuemer/Migration: `USING (tenant_id IN (<ctx>, 'system'))`, `WITH CHECK (tenant_id = <ctx>)` |
 | Mandantenuebergreifende Worker | eigene Rolle `valeo_system` mit `BYPASSRLS` und eigener URL, nur fuer namentlich freigegebene Worker, per Vertragstest begrenzt |
 | Testreste in `valeo_neuro_erp` | in P4 nach Inventar und Sicherung loeschen, vor dem Ausrollen |
