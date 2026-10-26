@@ -10,6 +10,7 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 
 from app.core.database import SessionLocal
+from app.core.tenant_context import cross_tenant_scope
 from app.agents.workflows.compliance_copilot import check_compliance
 from app.domains.shared.events import IntegrationEvent, get_event_publisher
 
@@ -50,6 +51,12 @@ class ComplianceMonitorWorker:
     
     async def _run_compliance_checks(self) -> None:
         """Run compliance checks on all entities."""
+        # Aggregates violations over all tenants into one alert: deliberately cross-tenant.
+        # Splitting per tenant would change the alert contract (follow-up, RLS plan P6).
+        with cross_tenant_scope("compliance-monitor"):
+            await self._run_compliance_checks_all_tenants()
+
+    async def _run_compliance_checks_all_tenants(self) -> None:
         db: Session = SessionLocal()
         
         try:

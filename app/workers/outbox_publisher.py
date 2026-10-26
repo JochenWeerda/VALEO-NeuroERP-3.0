@@ -9,6 +9,7 @@ from typing import Optional
 from sqlalchemy.orm import Session
 
 from app.core.database import SessionLocal
+from app.core.tenant_context import cross_tenant_scope
 from ..core.config import settings
 from ..infrastructure.eventbus.outbox import OutboxPublisher
 from ..domains.shared.events import get_event_publisher
@@ -44,19 +45,19 @@ class OutboxPublisherWorker:
     
     async def _publish_batch(self) -> None:
         """Publish a batch of pending events."""
-        db: Session = SessionLocal()
-        
-        try:
-            event_publisher = get_event_publisher()
-            outbox = OutboxPublisher(db, event_publisher)
-            
-            count = await outbox.publish_pending_events(limit=100)
-            
-            if count > 0:
-                logger.info(f"Published {count} events from outbox")
-        
-        finally:
-            db.close()
+        # Delivers events of every tenant, including rows without tenant: deliberately cross-tenant.
+        with cross_tenant_scope("outbox-publisher"):
+            db: Session = SessionLocal()
+            try:
+                event_publisher = get_event_publisher()
+                outbox = OutboxPublisher(db, event_publisher)
+
+                count = await outbox.publish_pending_events(limit=100)
+
+                if count > 0:
+                    logger.info(f"Published {count} events from outbox")
+            finally:
+                db.close()
 
 
 # Global worker instance

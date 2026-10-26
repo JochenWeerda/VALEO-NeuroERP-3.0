@@ -411,6 +411,13 @@ class TestMonthlyReportWorker:
 # ---------------------------------------------------------------------------
 
 class TestPriceMonitoringWorker:
+    @pytest.fixture(autouse=True)
+    def _tenant(self):
+        # The checks run per tenant inside tenant_scope (RLS plan P1); without it they fail closed.
+        from app.core.tenant_context import tenant_scope
+        with tenant_scope("00000000-0000-0000-0000-000000000001", "test"):
+            yield
+
 
     def _make_worker(self, db=None):
         from app.workers.price_monitoring_worker import PriceMonitoringWorker
