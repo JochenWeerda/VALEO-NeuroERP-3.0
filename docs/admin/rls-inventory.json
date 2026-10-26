@@ -58,6 +58,7 @@
    "app/agents/workflows/system_optimizer.py": 1,
    "app/core/database.py": 14,
    "app/core/health.py": 1,
+   "app/core/rls_guard.py": 1,
    "app/domains/inventory/api/storage_fees.py": 1,
    "app/seeds/inventory_seed.py": 1,
    "app/services/studio_entity_simulation.py": 2,
