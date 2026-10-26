@@ -70,3 +70,11 @@ Path-Guard erkannt); jetzt `NOMINATIM_USER_AGENT` aus der Umgebung, Platzhalter 
 - `create_tables()` beim Start: mit vollstaendigem Schema ohne DDL; fehlende ORM-Tabellen
   entstehen ueber `init_db.py` (Migrator).
 - Keine Aussage ueber vollstaendige Sicherheit oder Gesamtfreigabe.
+
+## CI-Abnahme
+
+| Lauf | Commit | Ergebnis |
+| --- | --- | --- |
+| Security Scan 40320127260 | fb52b9287 | alle Jobs success |
+| Quality Gate 40320121984 | fb52b9287 | eigener Folgefehler: Godfile-Ratsche verlangte, die Grenzlinie von `sales_orders.py` (1085 -> 1084) zu senken; in f8f016d86 nachgezogen |
+| Quality Gate 40321373513 | f8f016d86 | Improvement integrity, Dependency Scan, FSX, Secret Scan, SBOM, WCAG, Production contract u. a. success; Frontend-Unit 214 Faelle mit identischer Fallmenge wie Basis-Lauf 40234161888 (0 neu); Backend bricht wie auf der Basis am Doc-Drift-Gate (272) ab |
