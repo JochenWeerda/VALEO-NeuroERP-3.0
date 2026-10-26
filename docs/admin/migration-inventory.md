@@ -277,6 +277,8 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `gobd_archiv_erechnung_20260301` | GoBD: Archiv (document_artifacts) + E-Rechnung XML-Speicher |
 | `gobd_aufbewahrungsfristen_20260301` | GoBD: domain_finance.aufbewahrungsfristen (operative Fristentabelle) |
 | `gobd_journal_hash_chain_trigger_20260303` | GoBD Hash-Chain: Trigger für journal_entries (sequence_number, hash_prev, hash_current) |
+| `governance_ddl_log_20261026` | Record every schema change (DDL) independent of the tool that issues it. |
+| `governance_ddl_log_roles_20261026` | Prepare governance.ddl_events for separated database roles. |
 | `grundfutteranalysen_20260419` | Grundfutter-Laboranalysen: LUFA/VDLUFA-Prüfberichts-Schema (GfE-2023) |
 | `gutschrift_ust_20261012` | Gutschrift: Umsatzsteuer je Position, Netto/Steuer/Brutto getrennt, Erloeskonto je Steuerschluessel. |
 | `harvest_rule_store_20261015` | Append-only harvest rule, measurement, calculation and approval journal. |
@@ -415,6 +417,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `repair_runtime_contract_columns_20260610` | Repair runtime columns required by current ORM and domain checks. |
 | `repair_runtime_model_alignment_20260610` | Align fresh installations with current CRM and article runtime models. |
 | `repair_runtime_schema_20260610` | Bring runtime models that predate Alembic under the migration contract. |
+| `runtime_ddl_to_migrations_20261026` | Move schema objects that the application created at request time into the migration chain. |
 | `runtime_sweep_repair_20260702` | RUNTIME-SWEEP-REPAIR-001: Fresh-DB-Drift schliessen (SPEC-P0-02). |
 | `sales_ab_preisabweichung_20260623` | DOM-SALES-004: sales_ab_status_log, lieferschein_close_log, sales_preisabweichungen |
 | `sales_angebot_auftrag_tables_20260225` | Add sales_offers, sales_offer_items, sales_orders, sales_order_items to domain_crm |
