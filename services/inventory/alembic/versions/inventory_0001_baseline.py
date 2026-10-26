@@ -3,6 +3,11 @@
 Ersetzt die nie angewendeten Vorgaengerrevisionen (doppelte Enum-Anlage, Revisions-IDs
 laenger als version_num, Abweichung von den Modellen). Eigene Versionstabelle siehe env.py.
 
+Der Dienst fuehrt public.inventory_* (Nutzerentscheidung 2026-10-26, INVENTORY-OWNERSHIP);
+das Backend liest Wareneingaenge und legt dafuer vier Tabellen in derselben Form an
+(alembic/versions/inventory_service_shape_20261026.py). Deshalb entsteht hier nur, was fehlt;
+eine vorhandene Tabelle in fremder Form bricht ab, statt still weiterzulaufen.
+
 Revision ID: inventory_0001
 Revises:
 Create Date: 2026-10-26
@@ -20,7 +25,7 @@ branch_labels = None
 depends_on = None
 
 
-def upgrade() -> None:
+def _create_inventory_goods_receipts() -> None:
     op.create_table('inventory_goods_receipts',
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('tenant_id', sa.String(length=64), nullable=False),
@@ -41,6 +46,8 @@ def upgrade() -> None:
     op.create_index(op.f('ix_inventory_goods_receipts_gr_number'), 'inventory_goods_receipts', ['gr_number'], unique=True)
     op.create_index(op.f('ix_inventory_goods_receipts_po_number'), 'inventory_goods_receipts', ['po_number'], unique=False)
     op.create_index(op.f('ix_inventory_goods_receipts_tenant_id'), 'inventory_goods_receipts', ['tenant_id'], unique=False)
+
+def _create_inventory_lots() -> None:
     op.create_table('inventory_lots',
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('sku', sa.String(length=64), nullable=False),
@@ -50,6 +57,8 @@ def upgrade() -> None:
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
+
+def _create_inventory_warehouses() -> None:
     op.create_table('inventory_warehouses',
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('code', sa.String(length=32), nullable=False),
@@ -62,6 +71,8 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_inventory_warehouses_code'), 'inventory_warehouses', ['code'], unique=True)
+
+def _create_inventory_epcis_events() -> None:
     op.create_table('inventory_epcis_events',
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('tenant_id', sa.String(length=64), nullable=False),
@@ -81,6 +92,8 @@ def upgrade() -> None:
     op.create_index(op.f('ix_inventory_epcis_events_event_key'), 'inventory_epcis_events', ['event_key'], unique=True)
     op.create_index(op.f('ix_inventory_epcis_events_event_time'), 'inventory_epcis_events', ['event_time'], unique=False)
     op.create_index(op.f('ix_inventory_epcis_events_tenant_id'), 'inventory_epcis_events', ['tenant_id'], unique=False)
+
+def _create_inventory_locations() -> None:
     op.create_table('inventory_locations',
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('warehouse_id', sa.UUID(), nullable=False),
@@ -92,6 +105,8 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_inventory_locations_warehouse_id'), 'inventory_locations', ['warehouse_id'], unique=False)
+
+def _create_inventory_goods_receipt_lines() -> None:
     op.create_table('inventory_goods_receipt_lines',
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('goods_receipt_id', sa.UUID(), nullable=False),
@@ -113,6 +128,8 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_inventory_goods_receipt_lines_goods_receipt_id'), 'inventory_goods_receipt_lines', ['goods_receipt_id'], unique=False)
+
+def _create_inventory_stock_items() -> None:
     op.create_table('inventory_stock_items',
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('warehouse_id', sa.UUID(), nullable=False),
@@ -129,6 +146,8 @@ def upgrade() -> None:
     op.create_index(op.f('ix_inventory_stock_items_location_id'), 'inventory_stock_items', ['location_id'], unique=False)
     op.create_index(op.f('ix_inventory_stock_items_lot_id'), 'inventory_stock_items', ['lot_id'], unique=False)
     op.create_index(op.f('ix_inventory_stock_items_warehouse_id'), 'inventory_stock_items', ['warehouse_id'], unique=False)
+
+def _create_inventory_transactions() -> None:
     op.create_table('inventory_transactions',
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('stock_item_id', sa.UUID(), nullable=False),
@@ -144,6 +163,45 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_inventory_transactions_stock_item_id'), 'inventory_transactions', ['stock_item_id'], unique=False)
+
+
+_TABLES = (
+    ('inventory_goods_receipts', _create_inventory_goods_receipts),
+    ('inventory_lots', _create_inventory_lots),
+    ('inventory_warehouses', _create_inventory_warehouses),
+    ('inventory_epcis_events', _create_inventory_epcis_events),
+    ('inventory_locations', _create_inventory_locations),
+    ('inventory_goods_receipt_lines', _create_inventory_goods_receipt_lines),
+    ('inventory_stock_items', _create_inventory_stock_items),
+    ('inventory_transactions', _create_inventory_transactions),
+)
+
+
+def _id_type(bind, table: str) -> str | None:
+    return bind.execute(
+        sa.text(
+            "SELECT data_type FROM information_schema.columns "
+            "WHERE table_schema = current_schema() AND table_name = :t AND column_name = 'id'"
+        ),
+        {"t": table},
+    ).scalar()
+
+
+def upgrade() -> None:
+    if op.get_context().as_sql:
+        for _, create in _TABLES:
+            create()
+        return
+    bind = op.get_bind()
+    for table, create in _TABLES:
+        id_type = _id_type(bind, table)
+        if id_type is None:
+            create()
+        elif id_type != "uuid":
+            raise RuntimeError(
+                f"{table} existiert mit id vom Typ {id_type}, erwartet uuid; "
+                "Backend-Migration inventory_service_shape_20261026 zuerst anwenden"
+            )
 
 
 def downgrade() -> None:

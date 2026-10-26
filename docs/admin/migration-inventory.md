@@ -295,6 +295,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `inventory_auxiliary_20260821` | Inventory auxiliary batch governance. |
 | `inventory_charge_lineage_20260215` | inventory charge lineage links |
 | `inventory_operations_20260409` | Add source_document fields to stock_movements |
+| `inventory_service_shape_20261026` | Bring the public inventory compatibility tables into the inventory service's shape. |
 | `inventory_stock_movements_consignment_ownership_20260215` | add ownership/consignment fields to inventory_stock_movements |
 | `inventory_stock_movements_l3_fields_20260214` | extend inventory_stock_movements with l3 migration fields |
 | `job_runner_tables_repair_20260625` | Repair job runner tables for runtime sweep category A. |
