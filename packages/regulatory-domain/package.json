@@ -19,6 +19,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "migrate:gen": "drizzle-kit generate",
+    "migrate:apply": "drizzle-kit migrate",
     "migrate:up": "drizzle-kit up",
     "lint": "echo 'lint placeholder'",
     "db:studio": "drizzle-kit studio"

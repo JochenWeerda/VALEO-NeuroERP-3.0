@@ -3,7 +3,10 @@
 // shared test database (TEST_DATABASE_URL, i.e. valeo_probe), in a dedicated schema, compares
 // the resulting catalog with the package's latest snapshot and always rolls back.
 // Nothing persists on the shared database; no database, schema or container is created outside
-// the transaction. Usage: node scripts/verify_drizzle_migrations_probe.cjs packages/audit-domain ...
+// the transaction. drizzle-kit qualifies foreign key targets as "public"; inside the check schema
+// exactly these REFERENCES qualifiers are redirected (and counted), any other schema qualifier
+// aborts the check, so no constraint can bind to a table of the shared public schema.
+// Usage: node scripts/verify_drizzle_migrations_probe.cjs packages/audit-domain ...
 'use strict';
 const fs = require('node:fs');
 const path = require('node:path');
@@ -31,9 +34,19 @@ function loadChain(pkgDir) {
     return { tag: entry.tag, statements };
   });
   const last = journal.entries[journal.entries.length - 1];
-  const snapshotFile = path.join(dir, 'meta', `${String(last.idx).padStart(4, '0')}_snapshot.json`);
+  // Snapshot files carry the tag prefix: 0000_… (index) or 20261026061352_… (timestamp)
+  const snapshotFile = path.join(dir, 'meta', `${last.tag.split('_')[0]}_snapshot.json`);
   const snapshot = JSON.parse(fs.readFileSync(snapshotFile, 'utf8'));
   return { migrations, snapshot };
+}
+
+const PUBLIC_REFERENCE = /REFERENCES "public"\./g;
+
+function redirectToCheckSchema(statement) {
+  const redirected = statement.replace(PUBLIC_REFERENCE, `REFERENCES "${CHECK_SCHEMA}".`);
+  const qualified = redirected.replace(new RegExp(`"${CHECK_SCHEMA}"\.`, 'g'), '');
+  if (/"[A-Za-z0-9_]+"\."/.test(qualified)) throw new Error(`unsupported schema qualifier in: ${statement.slice(0, 120)}`);
+  return { sql: redirected, references: (statement.match(PUBLIC_REFERENCE) || []).length };
 }
 
 const normalizeDefault = (value) => (value === undefined || value === null ? null
@@ -48,6 +61,13 @@ function expectedCatalog(snapshot) {
       }])),
       indexes: Object.fromEntries(Object.values(table.indexes).map((i) => [i.name, {
         columns: i.columns.map((c) => c.expression).join(','), unique: Boolean(i.isUnique),
+      }])),
+      foreignKeys: Object.fromEntries(Object.values(table.foreignKeys || {}).map((f) => [f.name, {
+        columns: f.columnsFrom.join(','), references: `${f.tableTo}(${f.columnsTo.join(',')})`,
+        onDelete: (f.onDelete || 'no action').toLowerCase(), onUpdate: (f.onUpdate || 'no action').toLowerCase(),
+      }])),
+      uniqueConstraints: Object.fromEntries(Object.values(table.uniqueConstraints || {}).map((u) => [u.name, {
+        columns: u.columns.join(','),
       }])),
     };
   }
@@ -69,17 +89,42 @@ async function actualCatalog(client) {
               JOIN pg_attribute a ON a.attrelid = t.oid AND a.attnum = k.attnum) AS columns
       FROM pg_index i JOIN pg_class ic ON ic.oid = i.indexrelid JOIN pg_class t ON t.oid = i.indrelid
       JOIN pg_namespace n ON n.oid = t.relnamespace
-     WHERE n.nspname = $1 AND NOT i.indisprimary`, [CHECK_SCHEMA]);
+     WHERE n.nspname = $1 AND NOT i.indisprimary
+       AND NOT EXISTS (SELECT 1 FROM pg_constraint k WHERE k.conindid = i.indexrelid)`, [CHECK_SCHEMA]);
+  const constraints = await client.query(`
+    SELECT t.relname AS table_name, k.conname, k.contype, rt.relname AS ref_table,
+           k.confdeltype, k.confupdtype,
+           (SELECT string_agg(a.attname, ',' ORDER BY c.ord) FROM unnest(k.conkey) WITH ORDINALITY c(attnum, ord)
+              JOIN pg_attribute a ON a.attrelid = k.conrelid AND a.attnum = c.attnum) AS columns,
+           (SELECT string_agg(a.attname, ',' ORDER BY c.ord) FROM unnest(k.confkey) WITH ORDINALITY c(attnum, ord)
+              JOIN pg_attribute a ON a.attrelid = k.confrelid AND a.attnum = c.attnum) AS ref_columns,
+           rn.nspname AS ref_schema
+      FROM pg_constraint k JOIN pg_class t ON t.oid = k.conrelid JOIN pg_namespace n ON n.oid = t.relnamespace
+      LEFT JOIN pg_class rt ON rt.oid = k.confrelid LEFT JOIN pg_namespace rn ON rn.oid = rt.relnamespace
+     WHERE n.nspname = $1 AND k.contype IN ('f', 'u')`, [CHECK_SCHEMA]);
+  const action = { a: 'no action', r: 'restrict', c: 'cascade', n: 'set null', d: 'set default' };
   const tables = {};
   for (const row of columns.rows) {
-    tables[row.table_name] ??= { columns: {}, indexes: {} };
+    tables[row.table_name] ??= { columns: {}, indexes: {}, foreignKeys: {}, uniqueConstraints: {} };
     tables[row.table_name].columns[row.column_name] = {
       type: row.type, notNull: row.not_null, primaryKey: row.primary_key, default: normalizeDefault(row.default_expr),
     };
   }
+  const ensure = (name) => (tables[name] ??= { columns: {}, indexes: {}, foreignKeys: {}, uniqueConstraints: {} });
   for (const row of indexes.rows) {
-    tables[row.table_name] ??= { columns: {}, indexes: {} };
-    tables[row.table_name].indexes[row.index_name] = { columns: row.columns, unique: row.is_unique };
+    ensure(row.table_name).indexes[row.index_name] = { columns: row.columns, unique: row.is_unique };
+  }
+  for (const row of constraints.rows) {
+    if (row.contype === 'f') {
+      // A reference outside the check schema would mean the constraint bound to a shared table.
+      const target = row.ref_schema === CHECK_SCHEMA ? row.ref_table : `${row.ref_schema}.${row.ref_table}`;
+      ensure(row.table_name).foreignKeys[row.conname] = {
+        columns: row.columns, references: `${target}(${row.ref_columns})`,
+        onDelete: action[row.confdeltype], onUpdate: action[row.confupdtype],
+      };
+    } else {
+      ensure(row.table_name).uniqueConstraints[row.conname] = { columns: row.columns };
+    }
   }
   return tables;
 }
@@ -89,7 +134,7 @@ function diffCatalog(expected, actual) {
   const keys = (a, b) => [...new Set([...Object.keys(a), ...Object.keys(b)])].sort();
   for (const table of keys(expected, actual)) {
     if (!expected[table] || !actual[table]) { problems.push(`table ${table}: ${expected[table] ? 'missing' : 'unexpected'}`); continue; }
-    for (const kind of ['columns', 'indexes']) {
+    for (const kind of ['columns', 'indexes', 'foreignKeys', 'uniqueConstraints']) {
       const e = expected[table][kind]; const a = actual[table][kind];
       for (const name of keys(e, a)) {
         if (JSON.stringify(e[name]) !== JSON.stringify(a[name])) {
@@ -111,11 +156,20 @@ async function verifyPackage(Client, connectionString, pkg) {
     await client.query(`CREATE SCHEMA ${CHECK_SCHEMA}`);
     await client.query(`SET LOCAL search_path TO ${CHECK_SCHEMA}`);
     let statements = 0;
+    let redirectedReferences = 0;
     for (const migration of migrations) {
-      for (const statement of migration.statements) { await client.query(statement); statements += 1; }
+      for (const statement of migration.statements) {
+        const { sql, references } = redirectToCheckSchema(statement);
+        await client.query(sql);
+        statements += 1;
+        redirectedReferences += references;
+      }
     }
     const problems = diffCatalog(expectedCatalog(snapshot), await actualCatalog(client));
-    return { pkg, migrations: migrations.map((m) => m.tag), statements, tables: Object.keys(snapshot.tables).length, problems };
+    return {
+      pkg, migrations: migrations.map((m) => m.tag), statements, redirectedReferences,
+      tables: Object.keys(snapshot.tables).length, problems,
+    };
   } finally {
     await client.query('ROLLBACK').catch(() => undefined);
     await client.end();
@@ -148,4 +202,4 @@ if (require.main === module) {
   main().catch((error) => { console.error(error.message); process.exitCode = 1; });
 }
 
-module.exports = { loadChain, expectedCatalog, diffCatalog, normalizeDefault };
+module.exports = { loadChain, expectedCatalog, diffCatalog, normalizeDefault, redirectToCheckSchema };
