@@ -98,3 +98,21 @@ Keine Aussage ueber vollstaendige Sicherheit oder Gesamtfreigabe.
 | --- | --- | --- |
 | Security Scan 40296881565 | c087b2402 | alle Jobs success |
 | Quality Gate 40296874581 | c087b2402 | Improvement integrity, Dependency Scan, FSX, Secret Scan, SBOM, WCAG, Production contract u. a. success; Frontend-Unit 214 Faelle mit identischer Fallmenge wie Basis-Lauf 40234161888 (0 neu); Backend bricht wie auf der Basis am Doc-Drift-Gate (272) ab |
+
+## Abschluss 2026-10-26: Backend als valeo_app (Nutzerauftrag "letzte Schritte umsetzen")
+
+| Schritt | Ergebnis |
+| --- | --- |
+| Integration | PR #49 (enthaelt #45-#48) in `codex/migration-parity-repair-20261022` gemergt (`c6f99955d`); #41-#43, #45, #46, #48 als vollstaendig enthalten geschlossen, #47 automatisch gemergt |
+| Root-Arbeitsbaum | 20 Dateien (Migrationen, `alembic/env.py`, `app/core/{migration_session,schema_guard,database}.py`, 8 Endpunkte, 2 Pipelines, 3 Skripte) uebernommen; vorher geprueft: jede Root-Fassung entsprach exakt dem Stand vor der Aenderung (keine Codex-Arbeit ueberschrieben) |
+| `alembic upgrade head` auf valeo_neuro_erp | im Backend-Container als Superuser: `loading_stop_fk_20261023` -> `runtime_ddl_to_migrations_20261026`; Event-Trigger aktiv; neue Objekte `valeo_owner` |
+| Rechte | `provision_db_roles.py --anwenden --eigentum`: Protokoll an `valeo_governance`, `valeo_app` liest neue Tabellen, nicht das Protokoll; `valeo_audit` liest das Protokoll |
+| `docker-compose.yml` (Backend) | `DATABASE_URL: ${VALEO_APP_CONTAINER_DATABASE_URL:-…}`, `MIGRATION_DATABASE_URL: ${VALEO_MIGRATOR_CONTAINER_DATABASE_URL:-…}`, `NOMINATIM_USER_AGENT: ${NOMINATIM_USER_AGENT:-…}`; Werte nur in der Root-`.env`, Rueckfall auf bisherigen Superuser ohne Variablen; Codex' vorhandene Compose-Aenderung erhalten |
+| Neustart | `docker compose up -d --no-deps --no-build backend`: nach 126 s healthy, HTTP 200; `init_db.py` beim Start als `valeo_migrator` (Protokoll `alembic/valeo_migrator->valeo_owner`), Anwendung mit 4 Verbindungen als `valeo_app` |
+| Rauchtest im Container (Anwendungsverbindung, nur lesend) | ERS-Lieferanten/-Rechnungen, Futtermittel-Rezepte/-Rohwaren, Preislisten, Abgrenzungen, Opportunity-Pipeline, drei Pipeline-Pruefungen: alle OK |
+| Logs seit Neustart | 0 Rechtefehler, keine 5xx/Tracebacks |
+
+Rueckweg Backend: in `docker-compose.yml` die drei Zeilen auf den frueheren
+`DATABASE_URL`-Wert zurueck (oder die Variablen in der `.env` entfernen) und Backend neu
+erstellen. Weiter als Superuser verbunden sind `crm-core`, `crm-sales` und `inventory`
+(eigene Dienste; Folgeschritt).
