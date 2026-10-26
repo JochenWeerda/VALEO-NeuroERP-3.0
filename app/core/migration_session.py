@@ -13,6 +13,7 @@ import os
 from sqlalchemy import text
 
 OWNER_ROLE = "valeo_owner"
+_SET_OWNER_ROLE = text("SET ROLE valeo_owner")  # literal: OWNER_ROLE, no interpolation into SQL
 
 
 def migration_database_url(default: str | None = None) -> str | None:
@@ -31,7 +32,7 @@ def prepare_migration_session(connection, application_name: str) -> bool:
     connection.execute(text("SELECT set_config('application_name', :name, false)"), {"name": application_name})
     can_own = owner_role_available(connection)
     if can_own:
-        connection.execute(text(f"SET ROLE {OWNER_ROLE}"))
+        connection.execute(_SET_OWNER_ROLE)
     return can_own
 
 
