@@ -20,9 +20,9 @@ pytestmark = pytest.mark.unit
 ROOT = Path(__file__).resolve().parents[1]
 SERVICES = ROOT / "services"
 
-# Ratsche: Dienste ohne eigene Versionstabelle. Laufen derzeit nicht (crm-ai nur in Compose
-# definiert, die uebrigen gar nicht); ihre Ketten sind ungeprueft. Liste darf nur schrumpfen.
-OHNE_EIGENE_VERSIONSTABELLE = {"crm-ai", "crm-consent", "crm-gdpr", "crm-marketing"}
+# Ratsche: Dienste ohne eigene Versionstabelle. Seit CRM-CHAINS-REST-20261026 leer; ein neuer
+# Dienst gehoert nicht hierher, sondern bekommt seine Tabelle.
+OHNE_EIGENE_VERSIONSTABELLE: set[str] = set()
 
 VERSION_NUM_MAX = 32  # alembic_version.version_num ist varchar(32)
 
@@ -85,13 +85,7 @@ def _service_envs() -> list[Path]:
 
 
 def _service_revisions() -> list[Path]:
-    # Ketten der Ratschen-Dienste sind ungeprueft (crm-marketing legt Enums doppelt an) und
-    # werden mit ihrer Versionstabelle zusammen behoben.
-    return sorted(
-        p
-        for p in SERVICES.glob("*/alembic/versions/*.py")
-        if p.parents[2].name not in OHNE_EIGENE_VERSIONSTABELLE
-    )
+    return sorted(SERVICES.glob("*/alembic/versions/*.py"))
 
 
 # --- Selbsttest der Muster -------------------------------------------------------------

@@ -63,9 +63,9 @@ class Consent(Base):
     contact_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), nullable=False, index=True)
     
     # Consent details
-    channel: Mapped[ConsentChannel] = mapped_column(SQLEnum(ConsentChannel), nullable=False)
+    channel: Mapped[ConsentChannel] = mapped_column(SQLEnum(ConsentChannel), nullable=False, index=True)
     consent_type: Mapped[ConsentType] = mapped_column(SQLEnum(ConsentType), nullable=False)
-    status: Mapped[ConsentStatus] = mapped_column(SQLEnum(ConsentStatus), nullable=False, default=ConsentStatus.PENDING)
+    status: Mapped[ConsentStatus] = mapped_column(SQLEnum(ConsentStatus), nullable=False, default=ConsentStatus.PENDING, index=True)
     
     # Timestamps
     granted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
@@ -116,7 +116,7 @@ class ConsentHistory(Base):
     
     # Metadata
     changed_by: Mapped[str] = mapped_column(String(255), nullable=False)
-    changed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
+    changed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow, index=True)
     ip_address: Mapped[str | None] = mapped_column(String(45))
     user_agent: Mapped[str | None] = mapped_column(Text)
     

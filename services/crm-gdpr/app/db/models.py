@@ -4,7 +4,7 @@ from datetime import datetime
 from enum import Enum
 from uuid import UUID, uuid4
 
-from sqlalchemy import Boolean, DateTime, Enum as SQLEnum, ForeignKey, String, Text
+from sqlalchemy import Boolean, DateTime, Enum as SQLEnum, ForeignKey, Index, String, Text
 from sqlalchemy.dialects.postgresql import UUID as PGUUID, JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
@@ -57,11 +57,11 @@ class GDPRRequest(Base):
     tenant_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     
     # Request details
-    request_type: Mapped[GDPRRequestType] = mapped_column(SQLEnum(GDPRRequestType), nullable=False)
+    request_type: Mapped[GDPRRequestType] = mapped_column(SQLEnum(GDPRRequestType), nullable=False, index=True)
     contact_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), nullable=False, index=True)
     
     # Status
-    status: Mapped[GDPRRequestStatus] = mapped_column(SQLEnum(GDPRRequestStatus), nullable=False, default=GDPRRequestStatus.PENDING)
+    status: Mapped[GDPRRequestStatus] = mapped_column(SQLEnum(GDPRRequestStatus), nullable=False, default=GDPRRequestStatus.PENDING, index=True)
     
     # Timestamps
     requested_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
@@ -120,7 +120,7 @@ class GDPRRequestHistory(Base):
     
     # Metadata
     changed_by: Mapped[str] = mapped_column(String(255), nullable=False)
-    changed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
+    changed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow, index=True)
     
     # Relationships
     request: Mapped["GDPRRequest"] = relationship("GDPRRequest", back_populates="history")
@@ -130,6 +130,7 @@ class PrivacyErasureDecision(Base):
     """Aus evaluate: versionierte Policy-Decision (Referenz zu GDPR-Antrag)."""
 
     __tablename__ = "crm_privacy_erasure_decisions"
+    __table_args__ = (Index("ix_privacy_erasure_decision_tenant_req", "tenant_id", "gdpr_request_id"),)
 
     id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
     gdpr_request_id: Mapped[UUID] = mapped_column(
@@ -151,13 +152,14 @@ class PrivacyErasureDecision(Base):
     correlation_id_evaluate: Mapped[str] = mapped_column(String(128), nullable=False)
 
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
-    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, index=True)
 
 
 class PrivacyErasureAudit(Base):
     """Append-only Privacy/Erasure-Audit (keine Updates aus dem Anwendungscode)."""
 
     __tablename__ = "crm_privacy_erasure_audit"
+    __table_args__ = (Index("ix_privacy_erasure_audit_request_created", "gdpr_request_id", "created_at"),)
 
     id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
     gdpr_request_id: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True), index=True)
@@ -183,6 +185,7 @@ class PrivacyErasureExecution(Base):
     """Erfolgreiche Execute-Operationen für Idempotenz und Delete-Gate."""
 
     __tablename__ = "crm_privacy_erasure_executions"
+    __table_args__ = (Index("ix_privacy_erasure_exec_gate", "tenant_id", "gdpr_request_id", "subject_id"),)
 
     idempotency_key: Mapped[str] = mapped_column(String(512), primary_key=True)
     tenant_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
