@@ -61,3 +61,10 @@ No-op und wird mit dem naechsten regulaeren Backend-Upgrade gestempelt. inventor
 unveraendert auf `inventory_0001 (head)`.
 
 Keine Aussage ueber vollstaendige Sicherheit oder Gesamtfreigabe.
+
+## CI-Abnahme
+
+| Lauf | Ergebnis |
+| --- | --- |
+| Docs Build / Docs Governance (PR #53) | success |
+| Quality Gate 40385231751 | alle Jobs ausser zweien success; Backend bricht wie auf der Basis am Doc-Drift-Gate ab (272 Befunde, lokal gegengeprueft, identisch); Frontend-Unit wie auf der Basis rot (keine Frontend-Aenderung) |
