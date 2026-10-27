@@ -119,15 +119,15 @@ def test_expired_connection_closes_before_workflow_access(transport, monkeypatch
 
 def test_parallel_requests_keep_distinct_verified_contexts(probe):
     from concurrent.futures import ThreadPoolExecutor
-    from app.core.tenant_context import get_current_tenant_id
-    before = get_current_tenant_id()
+    from app.core.tenant_context import current_tenant_or_none
+    before = current_tenant_or_none()
     def exercise(tenant):
         result = probe.client.get('/api/probe', headers=probe.headers(tenant))
         assert result.status_code == 200
         assert result.json()['tenant'] == result.json()['header'] == tenant
     with ThreadPoolExecutor(max_workers=4) as pool:
         list(pool.map(exercise, ['tenant-a', 'tenant-b'] * 8))
-    assert get_current_tenant_id() == before
+    assert current_tenant_or_none() == before
 
 
 def test_production_inventory_covers_all_registered_protected_http_routes():

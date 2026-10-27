@@ -30,6 +30,7 @@ from typing import Any, Optional
 from sqlalchemy import text
 
 from app.core.database import SessionLocal
+from app.core.tenant_context import tenant_scope
 from app.services.connector_config import load_imap_config
 from app.services.mail_ingest_service import MailIngestService
 
@@ -62,7 +63,8 @@ def poll_all_tenants(only_tenant: Optional[str] = None) -> dict[str, Any]:
         result["tenants"] = len(tenants)
         for tid in tenants:
             try:
-                res = MailIngestService(db, tid).poll_once()
+                with tenant_scope(tid, "mail-poll"):
+                    res = MailIngestService(db, tid).poll_once()
             except Exception as exc:  # noqa: BLE001 — ein Mandant darf den Sweep nicht stoppen
                 db.rollback()
                 logger.error("[MAIL POLL] Tenant %s fehlgeschlagen: %s", tid, exc)
