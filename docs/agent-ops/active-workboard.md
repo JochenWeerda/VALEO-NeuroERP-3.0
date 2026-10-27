@@ -19755,3 +19755,6 @@ Nutzerauftrag: alle uebrigen offenen Aenderungen commit-/pushfaehig abschliessen
 
 
 **RLS-P3 umgesetzt (Claude Code):** Migration rls_pilot_finance_20261026: rls_current_tenant(), RLS + Policy tenant_isolation auf 22 Pilottabellen (domain_finance + Journal), Backfill journal_entry_lines.tenant_id; als valeo_app 8 Tests gruen, Negativprobe rot; live nicht angewendet, nur zusammen mit P1+P2 ausliefern (Handshake rls-p1-p3-20261026). QA docs/quality-assurance/rls-p3-pilot-20261026.md.
+
+
+**RLS-P4 umgesetzt (Claude Code):** live 2 080 Testrest-Zeilen in 51 Tabellen + 25 test-<hex>-Registereintraege geloescht (Sicherung C:/Users/Jochen/valeo-backups/rls-p4-20261026/, Skript scripts/rls_cleanup_test_tenants.py mit Trockenlauf/Savepoints/Klasse-C-Kindern); unklare Werte (NULL, legacy-unassigned, default, valeo, sd-*) dokumentiert mit Regel fuer P5; SYSTEM->system in P3. QA docs/quality-assurance/rls-p4-cleanup-20261026.md.
