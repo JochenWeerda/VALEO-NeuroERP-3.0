@@ -2,11 +2,11 @@
  "_note": "Generiert von scripts/rls_rollout.py aus docs/admin/rls-inventory.json; nicht von Hand aendern.",
  "summary": {
   "ready": 0,
-  "pending": 100,
+  "pending": 95,
   "reasons": {
    "dienst": 10,
    "mandant_ermitteln": 1,
-   "standardmandant": 75,
+   "standardmandant": 70,
    "mandant_null": 35,
    "uebergreifend": 0,
    "identitaet": 4
@@ -83,21 +83,6 @@
   ],
   "domain_dev_mock.mock_sessions": [
    "identitaet"
-  ],
-  "domain_docflow.document_artifacts": [
-   "standardmandant"
-  ],
-  "domain_docflow.document_headers": [
-   "standardmandant"
-  ],
-  "domain_docflow.document_items": [
-   "standardmandant"
-  ],
-  "domain_docflow.invoice_xml_store": [
-   "standardmandant"
-  ],
-  "domain_docflow.pos_tse_devices": [
-   "standardmandant"
   ],
   "domain_einkauf.bestellungen": [
    "mandant_null",

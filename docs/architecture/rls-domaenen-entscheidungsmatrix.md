@@ -134,7 +134,7 @@ ein Rückfall im Code bleibt trotzdem ein Befund.
 | hr | 5 (A3, B2) | referenzdaten, nullbar, standard (Fehltreffer) | Roh-SQL | 2 | Token | – | 0 Zeilen; `person`/`employment` nur frisch | getrennt, kein `system`; Verbund-FK der Kinder | **umgesetzt** (RLS-DOMAIN-HR-20261027) |
 | nachweisraum | 2 (A2) | referenzdaten (Fehltreffer MCP-Generik) | Roh-SQL | 1 | Kopfzeile → Token | – | 0 Zeilen | getrennt; Prüfprotokoll mit Verbund-FK | **umgesetzt** (RLS-DOMAIN-NACHWEISRAUM-20261027) |
 | audit / compliance | 4 (A3, B1) | standard, nullbar (Fehltreffer) | Roh-SQL | 4 | Token | – | 0 Zeilen | getrennt; PCN-Verlauf mit Verbund-FK | **umgesetzt** (RLS-DOMAIN-AUDIT-COMPLIANCE-20261027) |
-| docflow | 5 (A5) | standardmandant (`gobd_archiv.py:30`, `mask_frontend_bridges.py:972`) | Roh-SQL | 9 | Token, Rückfall | – | 63 Zeilen, sauber | getrennt | mittel: Belegkette Verkauf/Einkauf |
+| docflow | 5 (A5) | standardmandant (`gobd_archiv.py`) | Roh-SQL | 9 | Token (GoBD-Archiv vorher Query + Standardmandant) | – | 63 Zeilen, sauber | getrennt; Positionen/Artefakte/XML am Kopf, TSE am Terminal | **umgesetzt** (RLS-DOMAIN-DOCFLOW-20261027) |
 | ki | 2 (A2) | referenzdaten | ORM `agent_proposal_model` | 3 | Token, Nutzlast | – | 0 Zeilen | getrennt | mittel: Agentenpfade |
 | sales | 5 (A2, B1, C2) | position, referenzdaten | Roh-SQL | 10 | Token, Nutzlast, Rückfall | – | 7 Zeilen | getrennt; Positionen aus Kopf | mittel: Buchungskette |
 | einkauf | 14 (A3, B4, C7) | position, nullbar | ORM `einkauf_models` + Roh-SQL | 13 | Token | – | 197 Zeilen | getrennt; Positionen aus Kopf | mittel |

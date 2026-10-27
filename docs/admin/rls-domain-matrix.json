@@ -2,9 +2,9 @@
  "_note": "Generiert von scripts/rls_domain_matrix.py; nicht von Hand aendern.",
  "datenstand": "2026-10-27",
  "summary": {
-  "tabellen": 200,
+  "tabellen": 195,
   "nach_klasse": {
-   "A": 100,
+   "A": 95,
    "B": 48,
    "C": 52
   },
@@ -13,7 +13,7 @@
    "position": 50,
    "referenzdaten": 35,
    "mandant_nullbar": 36,
-   "standardmandant": 57,
+   "standardmandant": 52,
    "identitaet": 2
   },
   "nach_domain": {
@@ -33,9 +33,6 @@
    },
    "dev_mock": {
     "identitaet": 1
-   },
-   "docflow": {
-    "standardmandant": 5
    },
    "einkauf": {
     "mandant_nullbar": 4,
@@ -3031,213 +3028,6 @@
    },
    "bereinigung": [],
    "policy": "keine Mandanten-Policy: Nachschlagen vor der Mandantenbindung, Zugriff ueber valeo_system"
-  },
-  {
-   "table": "domain_docflow.document_artifacts",
-   "domain": "docflow",
-   "class": "A",
-   "tenant_type": "character varying(64)",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [
-    "standardmandant"
-   ],
-   "modell": [],
-   "leser": [
-    "app/core/dms_ocr_contracts.py",
-    "app/services/docflow_belegadapter.py",
-    "app/services/docflow_evidence_service.py",
-    "app/services/docflow_return_service.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/gobd_archiv.py",
-    "app/core/gobd_artifact.py",
-    "app/services/docflow_artifact_service.py",
-    "app/services/settlement_document_archive_service.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "standardmandant": 1
-   },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/gobd_archiv.py:30"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 2,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 1
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_docflow.document_headers",
-   "domain": "docflow",
-   "class": "A",
-   "tenant_type": "character varying(64)",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [
-    "standardmandant"
-   ],
-   "modell": [],
-   "leser": [
-    "app/api/v1/endpoints/admin_pos.py",
-    "app/api/v1/endpoints/gobd_archiv.py",
-    "app/core/dms_ocr_contracts.py",
-    "app/services/docflow_artifact_service.py",
-    "app/services/docflow_belegadapter.py",
-    "app/services/docflow_evidence_service.py",
-    "app/services/docflow_followup_service.py",
-    "app/services/docflow_freigabe.py",
-    "app/services/docflow_return_service.py",
-    "app/services/finance_freigabe.py",
-    "app/services/kontrollkorb.py",
-    "app/services/mcp_beleg_tools.py"
-   ],
-   "schreiber": [
-    "app/core/gobd_artifact.py",
-    "app/services/docflow_create_command.py",
-    "app/services/docflow_gobd_service.py",
-    "app/services/docflow_service.py",
-    "app/services/docflow_update_command.py",
-    "app/services/settlement_document_archive_service.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "standardmandant": 1,
-    "token": 1
-   },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/gobd_archiv.py:30"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 25,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 2
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_docflow.document_items",
-   "domain": "docflow",
-   "class": "A",
-   "tenant_type": "character varying(64)",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [
-    "standardmandant"
-   ],
-   "modell": [],
-   "leser": [
-    "app/api/v1/endpoints/gobd_archiv.py",
-    "app/core/dms_ocr_contracts.py",
-    "app/services/docflow_freigabe.py"
-   ],
-   "schreiber": [
-    "app/services/docflow_service.py",
-    "app/services/docflow_update_command.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "standardmandant": 1
-   },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/gobd_archiv.py:30"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 35,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 2
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_docflow.invoice_xml_store",
-   "domain": "docflow",
-   "class": "A",
-   "tenant_type": "character varying(64)",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [
-    "standardmandant"
-   ],
-   "modell": [],
-   "leser": [
-    "app/core/dms_ocr_contracts.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/gobd_archiv.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "standardmandant": 1
-   },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/gobd_archiv.py:30"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 1,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 1
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_docflow.pos_tse_devices",
-   "domain": "docflow",
-   "class": "A",
-   "tenant_type": "character varying(64)",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [
-    "standardmandant"
-   ],
-   "modell": [],
-   "leser": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/admin_pos.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "standardmandant": 1,
-    "token": 2
-   },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py:972"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
   },
   {
    "table": "domain_einkauf.bestellung_positionen",
@@ -7984,11 +7774,10 @@
     "app/workers/cleanup_worker.py"
    ],
    "identitaet": {
-    "standardmandant": 2,
-    "token": 9
+    "standardmandant": 1,
+    "token": 10
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/gobd_archiv.py:30",
     "app/api/v1/endpoints/mask_frontend_bridges.py:972"
    ],
    "null_stellen": [
