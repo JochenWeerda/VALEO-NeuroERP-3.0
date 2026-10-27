@@ -13,14 +13,13 @@ description: Generierte Entscheidungsmatrix der noch nicht abgesicherten Mandant
 
 Generiert von `scripts/rls_domain_matrix.py`; nicht von Hand aendern. Entscheidungen und Reihenfolge: `docs/architecture/rls-domaenen-entscheidungsmatrix.md`.
 
-Datenstand gewachsene Datenbank: 2026-10-27. Tabellen: 200.
+Datenstand gewachsene Datenbank: 2026-10-27. Tabellen: 195.
 
 | Domain | dienst | position | referenzdaten | mandant_nullbar | standardmandant | identitaet |
 |---|---|---|---|---|---|---|
 | agrar | 1 | 1 | 6 | 6 | 9 |  |
 | crm | 7 | 17 | 3 | 5 | 5 |  |
 | dev_mock |  |  |  |  |  | 1 |
-| docflow |  |  |  |  | 5 |  |
 | einkauf |  | 7 | 2 | 4 | 1 |  |
 | erp | 1 | 1 | 2 | 4 | 2 |  |
 | finance | 1 |  |  |  |  |  |
@@ -111,16 +110,6 @@ Datenstand gewachsene Datenbank: 2026-10-27. Tabellen: 200.
 | Tabelle | Kl. | Ursache | Modell | Schreiber | Leser | Worker | Identitaet | Daten | Bereinigung | Policy |
 |---|---|---|---|---|---|---|---|---|---|---|
 | `domain_dev_mock.mock_sessions` | A | identitaet | – | – | 0 | – | – | 0 Z., 0 Mand. | – | keine Mandanten-Policy: Nachschlagen vor der Mandantenbindung, Zugriff ueber valeo_system |
-
-## docflow
-
-| Tabelle | Kl. | Ursache | Modell | Schreiber | Leser | Worker | Identitaet | Daten | Bereinigung | Policy |
-|---|---|---|---|---|---|---|---|---|---|---|
-| `domain_docflow.document_artifacts` | A | standardmandant | – | `app/api/v1/endpoints/gobd_archiv.py`, `app/core/gobd_artifact.py`, `app/services/docflow_artifact_service.py`, `app/services/settlement_document_archive_service.py` | 4 | – | standardmandant 1 | 2 Z., 1 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
-| `domain_docflow.document_headers` | A | standardmandant | – | `app/core/gobd_artifact.py`, `app/services/docflow_create_command.py`, `app/services/docflow_gobd_service.py`, `app/services/docflow_service.py` (+2) | 12 | – | standardmandant 1, token 1 | 25 Z., 2 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
-| `domain_docflow.document_items` | A | standardmandant | – | `app/services/docflow_service.py`, `app/services/docflow_update_command.py` | 3 | – | standardmandant 1 | 35 Z., 2 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
-| `domain_docflow.invoice_xml_store` | A | standardmandant | – | `app/api/v1/endpoints/gobd_archiv.py` | 1 | – | standardmandant 1 | 1 Z., 1 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
-| `domain_docflow.pos_tse_devices` | A | standardmandant | – | `app/api/v1/endpoints/admin_pos.py` | 1 | – | standardmandant 1, token 2 | 0 Z., 0 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
 
 ## einkauf
 
@@ -295,7 +284,7 @@ Datenstand gewachsene Datenbank: 2026-10-27. Tabellen: 200.
 | `domain_shared.agrar_sorten` | A | standardmandant | `app/infrastructure/models/futtermittel_models.py` | `app/api/v1/endpoints/agrar_varieties.py` | 2 | – | standardmandant 1, token 1 | 5 Z., 1 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
 | `domain_shared.api_keys` | A | standardmandant, identitaet | – | `app/services/admin_core_service.py` | 0 | – | standardmandant 1 | 0 Z., 0 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
 | `domain_shared.artikel_sperren` | A | standardmandant | – | `app/api/v1/endpoints/compliance.py` | 0 | – | standardmandant 1, token 1 | 0 Z., 0 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
-| `domain_shared.audit_logs` | A | referenzdaten, mandant_nullbar, standardmandant | `app/infrastructure/models/__init__.py` | `app/api/v1/endpoints/ap_approval_workflow.py`, `app/api/v1/endpoints/audit.py`, `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/gdpr.py` (+9) | 8 | `app/workers/cleanup_worker.py` | standardmandant 2, token 9 | 2 Z., 2 Mand., 1 system | 1 'system'-Zeilen: gemeinsame Referenzdaten begruenden oder zuordnen | getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant |
+| `domain_shared.audit_logs` | A | referenzdaten, mandant_nullbar, standardmandant | `app/infrastructure/models/__init__.py` | `app/api/v1/endpoints/ap_approval_workflow.py`, `app/api/v1/endpoints/audit.py`, `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/gdpr.py` (+9) | 8 | `app/workers/cleanup_worker.py` | standardmandant 1, token 10 | 2 Z., 2 Mand., 1 system | 1 'system'-Zeilen: gemeinsame Referenzdaten begruenden oder zuordnen | getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant |
 | `domain_shared.branches` | A | standardmandant | `app/infrastructure/models/__init__.py` | `app/api/v1/endpoints/branches.py` | 4 | – | standardmandant 1 | 2 Z., 1 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
 | `domain_shared.calendar_ics_tokens` | A | standardmandant, identitaet | – | `app/services/calendar_projection_service.py` | 0 | – | standardmandant 1 | 9 Z., 1 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
 | `domain_shared.calendar_items` | A | standardmandant | – | `app/services/calendar_projection_service.py` | 0 | – | standardmandant 1 | 0 Z., 0 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
