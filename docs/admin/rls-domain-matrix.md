@@ -4,6 +4,8 @@ type: reference
 audience: [agent, entwickler]
 owner: Claude Code
 status: aktiv
+last_reviewed: 2026-10-27
+version: 1.0.0
 description: Generierte Entscheidungsmatrix der noch nicht abgesicherten Mandantentabellen je Domain.
 ---
 
