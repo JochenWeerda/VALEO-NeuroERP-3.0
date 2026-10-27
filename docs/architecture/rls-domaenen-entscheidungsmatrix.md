@@ -84,9 +84,10 @@ Die Altform `tenant_isolation` (eine ALL-Policy, USING eigen ODER `system`, WITH
 eigen) lässt Mandanten `system`-Zeilen **löschen** und per UPDATE **übernehmen**.
 WITH CHECK greift bei DELETE nicht, und UPDATE prüft nur das Ergebnis. Codex hat P3/P5/P6
 korrigiert (943ba2bb0, RLS-ORDERED-INTEGRATION-20261027): vier Policies
-`tenant_isolation_select/_insert/_update/_delete`, die Bestandstabellen lesen `system`
-weiter mit. Neue Tabellen bekommen dieselbe getrennte Form, `system`-Lesen aber nur mit
-Begründung:
+`tenant_isolation_select/_insert/_update/_delete`. Seit RLS-SYSTEMWIDE-SPLIT-20261027
+(`rls_system_read_justified_20261027`) gilt systemweit: SELECT liest `system` nur mit
+Begründung. Kein Lesepfad der 501 Bestandstabellen las `system`-Zeilen
+(`docs/admin/rls-system-read.json`). Alle Tabellen haben diese Form:
 
 ```sql
 ALTER TABLE t ENABLE ROW LEVEL SECURITY;                     -- kein FORCE (Plan 2.4)
@@ -112,12 +113,11 @@ CREATE POLICY tenant_isolation_delete ON t FOR DELETE USING (tenant_id = public.
 - RLS ersetzt keine Rollenprüfung. `SCHREIBEN[...]`/`require_roles` und die Fachcommands
   bleiben.
 
-Die Ratsche `tests/test_rls_policy_shape.py` erlaubt nur die getrennte Form und, als
-Altbestand, die ALL-Policy vor der Korrektur. Altbestand sind die ALL-Policy und das
-`system`-Lesen ohne Begründung; zusammen höchstens 501 Tabellen (`altbestand_hoechstens`),
-die Zahl darf nur sinken. Alles andere ist rot: eine zusätzliche ALL-Policy, eine restriktive
+Die Ratschen `tests/test_rls_policy_shape.py` und `tests/test_rls_p5_rollout.py` erlauben nur
+die getrennte Form. Altbestand (ALL-Policy oder `system`-Lesen ohne Begründung) ist auf 0
+gesetzt (`altbestand_hoechstens`). Alles andere ist rot: eine zusätzliche ALL-Policy, eine restriktive
 oder rollengebundene Policy, `system` in INSERT/UPDATE/DELETE, fehlendes WITH CHECK, FORCE.
-Die Namen folgen Codex' Korrektur.
+Die Namen folgen Codex' Korrektur (943ba2bb0).
 
 ## 4. Entscheidungsmatrix je Domain
 

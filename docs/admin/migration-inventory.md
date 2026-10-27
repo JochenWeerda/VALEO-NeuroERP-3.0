@@ -424,6 +424,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `rls_domain_pricing_20261027` | Row-level security for domain_pricing (RLS domain slice, first after P0-P7). |
 | `rls_pilot_finance_20261026` | Row-level security pilot: domain_finance and the posting journal (RLS plan P3). |
 | `rls_rollout_20261026` | Roll row-level security out to the class-A tables cleared by the analysis (RLS plan P5). |
+| `rls_system_read_justified_20261027` | Shared 'system' rows readable only where justified (RLS, system-wide). |
 | `rls_system_role_20261026` | Row-level security for tables freed by the valeo_system connection (RLS plan P6). |
 | `runtime_ddl_to_migrations_20261026` | Move schema objects that the application created at request time into the migration chain. |
 | `runtime_sweep_repair_20260702` | RUNTIME-SWEEP-REPAIR-001: Fresh-DB-Drift schliessen (SPEC-P0-02). |

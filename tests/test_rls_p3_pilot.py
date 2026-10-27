@@ -116,8 +116,10 @@ def test_alle_pilottabellen_haben_rls_ohne_force(conn):
     assert all(rls and not force and policies == 4 for _, rls, force, policies in rows), rows
 
 
-def test_lesen_nur_eigener_mandant_und_system(as_app, tenant_a):
-    assert _ids(as_app, "domain_finance.kostenstellen") == {f"ks-{A}", "ks-system"}
+def test_lesen_nur_eigener_mandant(as_app, tenant_a):
+    # Seit rls_system_read_justified_20261027 liest SELECT 'system' nur mit Begruendung
+    # (docs/admin/rls-exceptions.json -> system_lesbar); Kostenstellen haben keine.
+    assert _ids(as_app, "domain_finance.kostenstellen") == {f"ks-{A}"}
     assert _ids(as_app, "domain_erp.journal_entries") == {f"je-{A}"}
 
 
@@ -142,8 +144,8 @@ def test_fremde_zeilen_aendern_und_loeschen_trifft_nichts(as_app, tenant_a):
 
 
 
-def test_system_zeilen_lesbar_aber_nicht_aenderbar(as_app, tenant_a):
-    assert "ks-system" in _ids(as_app, "domain_finance.kostenstellen")
+def test_system_zeilen_weder_lesbar_noch_aenderbar(as_app, tenant_a):
+    assert "ks-system" not in _ids(as_app, "domain_finance.kostenstellen")
     assert as_app.execute(sa.text("UPDATE domain_finance.kostenstellen SET bezeichnung = 'x' WHERE id = 'ks-system'")).rowcount == 0
     assert as_app.execute(sa.text("DELETE FROM domain_finance.kostenstellen WHERE id = 'ks-system'")).rowcount == 0
     assert as_app.execute(sa.text("UPDATE domain_finance.kostenstellen SET tenant_id = :a WHERE id = 'ks-system'"), {"a": A}).rowcount == 0
@@ -156,6 +158,6 @@ def test_eigene_zeile_nicht_zu_fremdem_mandanten_verschieben(as_app, tenant_a):
 def test_ende_zu_ende_ueber_den_app_mechanismus(as_app):
     from app.core.tenant_context import tenant_scope
     with tenant_scope(B, "test"):
-        assert _ids(as_app, "domain_finance.kostenstellen") == {f"ks-{B}", "ks-system"}
+        assert _ids(as_app, "domain_finance.kostenstellen") == {f"ks-{B}"}
     with tenant_scope(A, "test"):
         assert _ids(as_app, "domain_erp.journal_entries") == {f"je-{A}"}

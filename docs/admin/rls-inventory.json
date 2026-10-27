@@ -152,7 +152,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "crm_subdomains.analytics_customer_scores",
@@ -160,7 +160,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "crm_subdomains.interaction_events",
@@ -168,7 +168,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "crm_subdomains.marketing_campaigns",
@@ -176,7 +176,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "crm_subdomains.sales_opportunities",
@@ -184,7 +184,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "crm_subdomains.service_tickets",
@@ -192,7 +192,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "crm_subdomains.sync_legacy_mappings",
@@ -224,7 +224,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.agrar_maschinen",
@@ -232,7 +232,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.agrar_partie_links",
@@ -248,7 +248,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.agrar_psm",
@@ -272,7 +272,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.agrar_sachkunde",
@@ -312,7 +312,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.consulting_case_measures",
@@ -320,7 +320,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.consulting_cases",
@@ -328,7 +328,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.consulting_observations",
@@ -336,7 +336,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.consulting_report_drafts",
@@ -344,7 +344,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.ernte_kampagnen",
@@ -352,7 +352,7 @@
    "tenant_type": "character varying(120)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.ernte_planung",
@@ -360,7 +360,7 @@
    "tenant_type": "character varying(120)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.esg_charge_footprint",
@@ -368,7 +368,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.evaluation_system_versions",
@@ -392,7 +392,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.feeding_actual_components",
@@ -400,7 +400,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.feeding_actual_measures",
@@ -408,7 +408,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.feeding_actual_records",
@@ -416,7 +416,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.feeding_assist_proposals",
@@ -424,7 +424,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.feeding_business_grants",
@@ -432,7 +432,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.feeding_businesses",
@@ -440,7 +440,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.feeding_controlling_daily",
@@ -448,7 +448,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.feeding_customer_recipes",
@@ -456,7 +456,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.feeding_deviation_policies",
@@ -464,7 +464,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.feeding_feed_products",
@@ -496,7 +496,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.feeding_groups",
@@ -512,7 +512,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.feeding_logs",
@@ -528,7 +528,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.feeding_measure_versions",
@@ -536,7 +536,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.feeding_mixer_feedback",
@@ -544,7 +544,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.feeding_mixing_instructions",
@@ -552,7 +552,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.feeding_notifications",
@@ -560,7 +560,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.feeding_nutrient_definitions",
@@ -576,7 +576,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.feeding_plans",
@@ -584,7 +584,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.feeding_recipe_deliveries",
@@ -592,7 +592,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.feeding_recipe_orders",
@@ -600,7 +600,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.feeding_recipe_versions",
@@ -608,7 +608,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.feeding_reference_revisions",
@@ -624,7 +624,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.feeding_supply_handoffs",
@@ -632,7 +632,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.feeding_tenant_policies",
@@ -640,7 +640,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.feeding_unit_definitions",
@@ -656,7 +656,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.feldbuch_schlaege",
@@ -680,7 +680,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.herd_data_observations",
@@ -688,7 +688,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.herd_data_sync_runs",
@@ -696,7 +696,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.herds",
@@ -704,7 +704,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.kontrakt_dispositionen",
@@ -712,7 +712,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.kontrakt_klassen",
@@ -720,7 +720,7 @@
    "tenant_type": "character varying(120)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.nutrient_compositions",
@@ -736,7 +736,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.ration_audit_events",
@@ -744,7 +744,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.ration_evaluations",
@@ -752,7 +752,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.ration_templates",
@@ -760,7 +760,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.ration_version_lifecycle",
@@ -768,7 +768,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.ration_versions",
@@ -776,7 +776,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.rations",
@@ -784,7 +784,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.rations_integration_imports",
@@ -792,7 +792,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.requirement_profiles",
@@ -800,7 +800,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.saatgut_partien",
@@ -808,7 +808,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.sammelabrechnungen",
@@ -816,7 +816,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.seed_orders",
@@ -843,7 +843,7 @@
    "tenant_type": "character varying(120)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.waagen_quittungen",
@@ -851,7 +851,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_agrar.waagen_vorlagen",
@@ -867,7 +867,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_audit.attestations",
@@ -883,7 +883,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_compliance.compliance_pcn_meldungen",
@@ -891,7 +891,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_compliance.compliance_pcn_status_log",
@@ -907,7 +907,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_compliance.compliance_vvvo_register",
@@ -915,7 +915,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_compliance.data_erasure_requests",
@@ -931,7 +931,7 @@
    "tenant_type": "character varying(80)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_compliance.eudr_geolokationen",
@@ -939,7 +939,7 @@
    "tenant_type": "character varying(80)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_compliance.eudr_vorgelagerte_erklaerungen",
@@ -947,7 +947,7 @@
    "tenant_type": "character varying(80)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_compliance.gelangensbestaetigung",
@@ -955,7 +955,7 @@
    "tenant_type": "character varying(80)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_compliance.intrastat_meldungen",
@@ -971,7 +971,7 @@
    "tenant_type": "character varying(80)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_compliance.sanctions_checks",
@@ -979,7 +979,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_compliance.sanctions_list",
@@ -995,7 +995,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_contracts.contract_obligations",
@@ -1003,7 +1003,7 @@
    "tenant_type": "character varying(80)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_contracts.contract_versions",
@@ -1011,7 +1011,7 @@
    "tenant_type": "character varying(80)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_contracts.contracts",
@@ -1019,7 +1019,7 @@
    "tenant_type": "character varying(80)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_controlling.controlling_actions",
@@ -1027,7 +1027,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_controlling.controlling_budget_status_log",
@@ -1035,7 +1035,7 @@
    "tenant_type": "character varying(100)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_controlling.controlling_budgets",
@@ -1043,7 +1043,7 @@
    "tenant_type": "character varying(100)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_controlling.controlling_ist_werte",
@@ -1051,7 +1051,7 @@
    "tenant_type": "character varying(100)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_controlling.controlling_kst_abschluss",
@@ -1059,7 +1059,7 @@
    "tenant_type": "character varying(100)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_controlling.dashboard_configs",
@@ -1067,7 +1067,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_controlling.dashboard_widgets",
@@ -1075,7 +1075,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_controlling.kpi_definitions",
@@ -1083,7 +1083,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_controlling.kpi_timeseries",
@@ -1091,7 +1091,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_crm.activities",
@@ -1304,7 +1304,7 @@
    "tenant_type": "character varying(120)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_crm.crm_action_audit_log",
@@ -1312,7 +1312,7 @@
    "tenant_type": "character varying(100)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_crm.crm_campaign_recipients",
@@ -1320,7 +1320,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_crm.crm_campaign_templates",
@@ -1328,7 +1328,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_crm.crm_campaigns",
@@ -1336,7 +1336,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_crm.crm_consents",
@@ -1344,7 +1344,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_crm.crm_contact_consent_history",
@@ -1363,7 +1363,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_crm.crm_opportunities",
@@ -1398,7 +1398,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_crm.customers",
@@ -1430,7 +1430,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_crm.mail_workspace_audit",
@@ -1438,7 +1438,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_crm.mail_workspace_messages",
@@ -1446,7 +1446,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_crm.opportunity",
@@ -1462,7 +1462,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_crm.sales_offers",
@@ -1494,7 +1494,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_dev_mock.mock_sessions",
@@ -1510,7 +1510,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_docflow.approvals",
@@ -1518,7 +1518,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_docflow.command_idempotency_keys",
@@ -1526,7 +1526,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_docflow.control_findings",
@@ -1534,7 +1534,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_docflow.create_request_idempotency",
@@ -1542,7 +1542,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_docflow.document_artifacts",
@@ -1558,7 +1558,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_docflow.document_followups",
@@ -1566,7 +1566,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_docflow.document_header_links",
@@ -1574,7 +1574,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_docflow.document_headers",
@@ -1598,7 +1598,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_docflow.document_postings",
@@ -1606,7 +1606,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_docflow.document_return_audit",
@@ -1614,7 +1614,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_docflow.document_return_cases",
@@ -1622,7 +1622,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_docflow.document_status_history",
@@ -1630,7 +1630,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_docflow.dsfinvk_exports",
@@ -1638,7 +1638,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_docflow.invoice_xml_store",
@@ -1654,7 +1654,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_docflow.pos_fiscal_closings",
@@ -1662,7 +1662,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_docflow.pos_fiscal_exports",
@@ -1670,7 +1670,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_docflow.pos_fiscal_provider_configs",
@@ -1678,7 +1678,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_docflow.pos_fiscal_transactions",
@@ -1686,7 +1686,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_docflow.pos_receipt_compliance",
@@ -1694,7 +1694,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_docflow.pos_regulatory_notices",
@@ -1702,7 +1702,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_docflow.pos_terminals",
@@ -1710,7 +1710,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_docflow.pos_tse_devices",
@@ -1726,7 +1726,7 @@
    "tenant_type": "character varying(120)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_docs.doc_allocations",
@@ -1734,7 +1734,7 @@
    "tenant_type": "character varying(120)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_einkauf.artikel_lager_parameter",
@@ -1742,7 +1742,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_einkauf.bestellung_kommunikation",
@@ -1750,7 +1750,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_einkauf.bestellung_positionen",
@@ -1777,7 +1777,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_einkauf.bestellvorschlag_positionen",
@@ -1814,7 +1814,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_einkauf.fremdwaren_einlagerung",
@@ -1822,7 +1822,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_einkauf.invoice_verification",
@@ -1849,7 +1849,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_einkauf.lager_kontenzuordnung",
@@ -1857,7 +1857,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_einkauf.lieferanten",
@@ -1873,7 +1873,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_einkauf.pfand_konto_buchungen",
@@ -1881,7 +1881,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_einkauf.procurement_ers_credits",
@@ -1889,7 +1889,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_einkauf.procurement_follow_up",
@@ -1897,7 +1897,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_einkauf.rfq_quotes",
@@ -1905,7 +1905,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_einkauf.rfq_requests",
@@ -1913,7 +1913,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_erp.accruals_provisions",
@@ -1921,7 +1921,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_erp.ap_approval_requests",
@@ -1929,7 +1929,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_erp.ap_approval_rules",
@@ -1937,7 +1937,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_erp.ap_approvals",
@@ -1945,7 +1945,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_erp.bank_accounts",
@@ -1961,7 +1961,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_erp.bank_statement_lines",
@@ -1969,7 +1969,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_erp.bank_statements",
@@ -1977,7 +1977,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_erp.booking_templates",
@@ -1985,7 +1985,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_erp.business_partners",
@@ -1993,7 +1993,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_erp.cash_movements",
@@ -2001,7 +2001,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_erp.chart_of_accounts",
@@ -2017,7 +2017,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_erp.closing_checklists",
@@ -2025,7 +2025,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_erp.collaterals",
@@ -2033,7 +2033,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_erp.connector_configs",
@@ -2041,7 +2041,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_erp.creditors",
@@ -2065,7 +2065,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_erp.delivery_notes",
@@ -2073,7 +2073,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_erp.druckauftraege",
@@ -2081,7 +2081,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_erp.drucker",
@@ -2089,7 +2089,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_erp.dunning_notices",
@@ -2105,7 +2105,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_erp.exchange_rates",
@@ -2113,7 +2113,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_erp.fibu_connector_profiles",
@@ -2121,7 +2121,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_erp.fibu_connector_run_items",
@@ -2140,7 +2140,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_erp.gift_cards",
@@ -2156,7 +2156,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_erp.journal_entry_lines",
@@ -2164,7 +2164,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_erp.lohn_import_runs",
@@ -2172,7 +2172,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_erp.matching_rules",
@@ -2180,7 +2180,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_erp.offene_posten",
@@ -2204,7 +2204,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_erp.payment_run_items",
@@ -2212,7 +2212,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_erp.payment_runs",
@@ -2220,7 +2220,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_erp.policy_rules",
@@ -2236,7 +2236,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_erp.pos_transactions",
@@ -2244,7 +2244,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_erp.schaden_meldungen",
@@ -2252,7 +2252,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_erp.serial_numbers",
@@ -2260,7 +2260,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_erp.tax_keys",
@@ -2268,7 +2268,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_erp.vat_returns",
@@ -2276,7 +2276,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_erp.versicherungen",
@@ -2284,7 +2284,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_finance.aufbewahrungsfristen",
@@ -2292,7 +2292,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_finance.billing_batch_audit",
@@ -2300,7 +2300,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_finance.billing_batch_lines",
@@ -2308,7 +2308,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_finance.billing_batches",
@@ -2316,7 +2316,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_finance.dispute_records",
@@ -2324,7 +2324,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_finance.ebilanz_exports",
@@ -2332,7 +2332,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_finance.finance_mahnstufen_audit",
@@ -2340,7 +2340,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_finance.finance_ratenzahlungsplaene",
@@ -2348,7 +2348,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_finance.finance_ratenzahlungsraten",
@@ -2356,7 +2356,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_finance.finance_sepa_batches",
@@ -2364,7 +2364,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_finance.finance_sepa_mandate",
@@ -2372,7 +2372,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_finance.fixed_assets",
@@ -2380,7 +2380,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_finance.kostenarten",
@@ -2388,7 +2388,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_finance.kostenstellen",
@@ -2396,7 +2396,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_finance.kostenstellen_buchungen",
@@ -2404,7 +2404,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_finance.kostenstellen_umlagen",
@@ -2412,7 +2412,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_finance.period_closure",
@@ -2420,7 +2420,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_finance.sales_order",
@@ -2428,7 +2428,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_finance.self_billing_invoices",
@@ -2436,7 +2436,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_finance.ustva_voranmeldungen",
@@ -2444,7 +2444,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_futtermittel.feed_produktion_log",
@@ -2452,7 +2452,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_futtermittel.feed_produktionsauftraege",
@@ -2460,7 +2460,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_futtermittel.feed_raw_materials",
@@ -2468,7 +2468,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_futtermittel.feed_recipes",
@@ -2476,7 +2476,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_futtermittel.feed_rezeptur_positionen",
@@ -2484,7 +2484,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_futtermittel.feed_rezepturen",
@@ -2492,7 +2492,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_futtermittel.raw_material_analyses",
@@ -2500,7 +2500,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_futtermittel.recipe_ingredients",
@@ -2508,7 +2508,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_hr.applications",
@@ -2516,7 +2516,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_hr.bewerbung_aufbewahrung",
@@ -2524,7 +2524,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_hr.bewerbung_einwilligungen",
@@ -2532,7 +2532,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_hr.bewerbung_einwilligungserklaerungen",
@@ -2540,7 +2540,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_hr.bewerbung_loeschlaeufe",
@@ -2548,7 +2548,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_hr.calendar_events",
@@ -2556,7 +2556,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_hr.campaign_capacity_plans",
@@ -2564,7 +2564,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_hr.driver_time_events",
@@ -2572,7 +2572,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_hr.driver_timesheets",
@@ -2580,7 +2580,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_hr.employee_certificates",
@@ -2588,7 +2588,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_hr.employee_file_documents",
@@ -2596,7 +2596,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_hr.employee_time_profiles",
@@ -2604,7 +2604,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_hr.employment",
@@ -2620,7 +2620,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_hr.hrm_operations_gate_audit",
@@ -2628,7 +2628,7 @@
    "tenant_type": "character varying(80)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_hr.hrm_operations_gate_evidence",
@@ -2636,7 +2636,7 @@
    "tenant_type": "character varying(80)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_hr.hrm_operations_gate_probes",
@@ -2644,7 +2644,7 @@
    "tenant_type": "character varying(80)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_hr.hrm_operations_gates",
@@ -2652,7 +2652,7 @@
    "tenant_type": "character varying(80)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_hr.onboarding_checklists",
@@ -2668,7 +2668,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_hr.org_units",
@@ -2676,7 +2676,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_hr.payroll_exports",
@@ -2684,7 +2684,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_hr.person",
@@ -2700,7 +2700,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_hr.shifts",
@@ -2708,7 +2708,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_hr.time_account_adjustments",
@@ -2716,7 +2716,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_hr.time_entries",
@@ -2724,7 +2724,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_hr.training_assignments",
@@ -2732,7 +2732,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_hr.training_courses",
@@ -2756,7 +2756,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_hrm.hrm_mitarbeiter_konten",
@@ -2764,7 +2764,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_hrm.hrm_zeitbuchungen",
@@ -2772,7 +2772,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_integration.legacy_adapter_audit",
@@ -2780,7 +2780,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_integration.legacy_adapter_batches",
@@ -2788,7 +2788,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_integration.legacy_adapter_profiles",
@@ -2796,7 +2796,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_integration.legacy_adapter_staging",
@@ -2804,7 +2804,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_inventory.agrar_contract_allocations",
@@ -2828,7 +2828,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_inventory.agrar_settlements",
@@ -2836,7 +2836,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_inventory.article_batches",
@@ -2860,7 +2860,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_inventory.article_selections",
@@ -2896,7 +2896,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_inventory.bin_stock",
@@ -2912,7 +2912,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_inventory.consignment_storage_fee_charges",
@@ -2920,7 +2920,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_inventory.consignment_storage_fee_runs",
@@ -2928,7 +2928,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_inventory.daily_prices",
@@ -2936,7 +2936,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_inventory.drying_rule_factor_ranges",
@@ -2966,7 +2966,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_inventory.epcis_events",
@@ -3005,7 +3005,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_inventory.harvest_control_events",
@@ -3013,7 +3013,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_inventory.inventory_auxiliary_audit",
@@ -3021,7 +3021,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_inventory.inventory_auxiliary_batches",
@@ -3029,7 +3029,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_inventory.inventory_count_lines",
@@ -3085,7 +3085,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_inventory.lot_eudr_erklaerungen",
@@ -3093,7 +3093,7 @@
    "tenant_type": "character varying(80)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_inventory.material_flow_edges",
@@ -3117,7 +3117,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_inventory.nawaro_contract_sheets",
@@ -3125,7 +3125,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_inventory.nawaro_print_notifications",
@@ -3141,7 +3141,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_inventory.pick_list_lines",
@@ -3149,7 +3149,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_inventory.pick_lists",
@@ -3181,7 +3181,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_inventory.quality_protocols",
@@ -3189,7 +3189,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_inventory.shipping_units",
@@ -3229,7 +3229,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_inventory.silo_systems",
@@ -3237,7 +3237,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_inventory.silos",
@@ -3253,7 +3253,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_inventory.stock_corrections",
@@ -3261,7 +3261,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_inventory.stock_item",
@@ -3304,7 +3304,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_inventory.supply_chain_events",
@@ -3312,7 +3312,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_inventory.warehouse_aisles",
@@ -3320,7 +3320,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_inventory.warehouse_bins",
@@ -3336,7 +3336,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_inventory.warehouse_transfers",
@@ -3344,7 +3344,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_inventory.warehouse_zones",
@@ -3368,7 +3368,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_inventory.weighing_ticket_lines",
@@ -3376,7 +3376,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_inventory.weighing_tickets",
@@ -3449,7 +3449,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_logistics.freight_tariffs",
@@ -3497,7 +3497,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_meldewesen.meldungen",
@@ -3505,7 +3505,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_mfg.bill_of_material",
@@ -3545,7 +3545,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_nachweisraum.nachweisraum_dokumente",
@@ -3561,7 +3561,7 @@
    "tenant_type": "character varying(120)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_ops.betriebs_kennzahlen",
@@ -3569,7 +3569,7 @@
    "tenant_type": "character varying(120)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_ops.document_control_audit",
@@ -3577,7 +3577,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_ops.document_control_exceptions",
@@ -3585,7 +3585,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_ops.edi_nachrichten",
@@ -3593,7 +3593,7 @@
    "tenant_type": "character varying(120)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_ops.edi_partner",
@@ -3601,7 +3601,7 @@
    "tenant_type": "character varying(120)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_ops.kon_audit_log",
@@ -3609,7 +3609,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_ops.kon_contract",
@@ -3625,7 +3625,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_ops.kon_contract_line",
@@ -3633,7 +3633,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_ops.kon_contract_movement",
@@ -3641,7 +3641,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_ops.kon_contract_reminder",
@@ -3649,7 +3649,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_ops.kon_number_range",
@@ -3657,7 +3657,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_ops.matif_quote",
@@ -3665,7 +3665,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_ops.mobile_event_queue",
@@ -3673,7 +3673,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_ops.mobile_event_queue_audit",
@@ -3681,7 +3681,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_bankkonten",
@@ -3689,7 +3689,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_chargen",
@@ -3705,7 +3705,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_compliance_items",
@@ -3816,7 +3816,7 @@
    "tenant_type": "character varying(120)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_flow_spine_instance_events",
@@ -3824,7 +3824,7 @@
    "tenant_type": "character varying(120)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_flow_spine_instances",
@@ -3832,7 +3832,7 @@
    "tenant_type": "character varying(120)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_foerderantraege",
@@ -3848,7 +3848,7 @@
    "tenant_type": "character varying(120)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_fuhrpark_rechnungen",
@@ -3856,7 +3856,7 @@
    "tenant_type": "character varying(120)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_fuhrpark_terminarten",
@@ -3864,7 +3864,7 @@
    "tenant_type": "character varying(120)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_labor_auftraege",
@@ -3904,7 +3904,7 @@
    "tenant_type": "character varying(120)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_projekte",
@@ -3912,7 +3912,7 @@
    "tenant_type": "character varying(120)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_qs_checks",
@@ -3952,7 +3952,7 @@
    "tenant_type": "character varying(120)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_verladungen",
@@ -3960,7 +3960,7 @@
    "tenant_type": "character varying(120)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_versicherungen",
@@ -3968,7 +3968,7 @@
    "tenant_type": "character varying(120)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_vvvo_register",
@@ -3992,7 +3992,7 @@
    "tenant_type": "character varying(120)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_wartungs_protokolle",
@@ -4000,7 +4000,7 @@
    "tenant_type": "character varying(120)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_wiegungen",
@@ -4016,7 +4016,7 @@
    "tenant_type": "character varying(120)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_zertifikate",
@@ -4032,7 +4032,7 @@
    "tenant_type": "character varying(120)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_zulassungen_register",
@@ -4048,7 +4048,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_ops.pos_position_rule",
@@ -4056,7 +4056,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_ops.pos_position_snapshot",
@@ -4064,7 +4064,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_ops.price_hedges",
@@ -4072,7 +4072,7 @@
    "tenant_type": "character varying(120)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_ops.pricing_sources",
@@ -4080,7 +4080,7 @@
    "tenant_type": "character varying(120)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_ops.process_e2e_chains",
@@ -4088,7 +4088,7 @@
    "tenant_type": "character varying(120)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_ops.production_operation_audit",
@@ -4096,7 +4096,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_ops.production_operations",
@@ -4104,7 +4104,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_ops.quality_lot_profiles",
@@ -4112,7 +4112,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_ops.quality_release_decisions",
@@ -4120,7 +4120,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_ops.recent_documents",
@@ -4128,7 +4128,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_ops.reklamationen",
@@ -4152,7 +4152,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_ops.tank_adapter_intake",
@@ -4160,7 +4160,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_ops.tank_delivery_note_outbox",
@@ -4168,7 +4168,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_ops.wf_trigger_log",
@@ -4176,7 +4176,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_portal.customer_contracts",
@@ -4184,7 +4184,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_portal.customer_order_history",
@@ -4192,7 +4192,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_portal.customer_order_items",
@@ -4211,7 +4211,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_portal.customer_pre_purchases",
@@ -4219,7 +4219,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_portal.empfehlungen",
@@ -4227,7 +4227,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_portal.kundenzugaenge",
@@ -4235,7 +4235,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_portal.lohndienst_auftraege",
@@ -4243,7 +4243,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_portal.lohndienst_ereignisse",
@@ -4251,7 +4251,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_pos.payment_methods",
@@ -4259,7 +4259,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_pos.pos_tagesabschluesse",
@@ -4267,7 +4267,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_pos.pos_tagesabschluss_log",
@@ -4275,7 +4275,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_pos.promotions",
@@ -4283,7 +4283,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_pricing.discount_rules",
@@ -4291,7 +4291,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_pricing.price_list_items",
@@ -4315,7 +4315,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_pricing.staffelrabatte",
@@ -4323,7 +4323,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_procurement.proc_bestellung_status_log",
@@ -4331,7 +4331,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_procurement.proc_purchase_orders",
@@ -4347,7 +4347,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_procurement.proc_wareneingaenge",
@@ -4355,7 +4355,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_procurement.procurement_match_results",
@@ -4363,7 +4363,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_reporting.l3_bonus_run_lines",
@@ -4371,7 +4371,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_reporting.l3_bonus_runs",
@@ -4379,7 +4379,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_reporting.l3_report_audit",
@@ -4387,7 +4387,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_reporting.l3_report_facts",
@@ -4395,7 +4395,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_reporting.query_center_audit",
@@ -4403,7 +4403,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_reporting.query_definitions",
@@ -4411,7 +4411,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_sales.delivery_note_positions",
@@ -4439,7 +4439,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_sales.sales_credit_note_lines",
@@ -4474,7 +4474,7 @@
    "tenant_type": "character varying(120)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_sales.sales_invoices",
@@ -4482,7 +4482,7 @@
    "tenant_type": "character varying(120)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_sales.sales_lieferschein_close_log",
@@ -4490,7 +4490,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_sales.sales_preisabweichungen",
@@ -4498,7 +4498,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_sales.sales_returns",
@@ -4506,7 +4506,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.admin_api_keys",
@@ -4522,7 +4522,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.admin_connector_events",
@@ -4530,7 +4530,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.admin_device_mappings",
@@ -4538,7 +4538,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.admin_devices",
@@ -4546,7 +4546,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.admin_mobile_devices",
@@ -4554,7 +4554,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.admin_output_profiles",
@@ -4562,7 +4562,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.admin_output_template_versions",
@@ -4570,7 +4570,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.admin_output_templates",
@@ -4578,7 +4578,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.admin_report_permissions",
@@ -4586,7 +4586,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.admin_routing_rules",
@@ -4594,7 +4594,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.admin_scan_profiles",
@@ -4602,7 +4602,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.admin_station_devices",
@@ -4610,7 +4610,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.admin_stations",
@@ -4618,7 +4618,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.agrar_sorten",
@@ -4650,7 +4650,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.artikel_bestandteile_zuordnung",
@@ -4658,7 +4658,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.artikel_folgeartikel",
@@ -4666,7 +4666,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.artikel_inventurgruppen",
@@ -4674,7 +4674,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.artikel_mengeneinheiten",
@@ -4682,7 +4682,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.artikel_mengeneinheitengruppen",
@@ -4690,7 +4690,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.artikel_sperren",
@@ -4706,7 +4706,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.artikel_verpackungen",
@@ -4714,7 +4714,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.audit_evidence",
@@ -4722,7 +4722,7 @@
    "tenant_type": "character varying(80)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.audit_logs",
@@ -4738,7 +4738,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.betriebsstaetten",
@@ -4746,7 +4746,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.blockchain_anchors",
@@ -4754,7 +4754,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.branches",
@@ -4794,7 +4794,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.channel_thread_audit_items",
@@ -4813,7 +4813,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.contract_amendments",
@@ -4821,7 +4821,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.crm_vertreter",
@@ -4829,7 +4829,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.crm_vertretergruppen",
@@ -4837,7 +4837,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.dauerauftraege",
@@ -4845,7 +4845,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.dauerauftrag_ausfuehrungen",
@@ -4853,7 +4853,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.dauerauftrag_positionen",
@@ -4861,7 +4861,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.direct_debit_items",
@@ -4885,7 +4885,7 @@
    "tenant_type": "character varying(120)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.entity_notes",
@@ -4893,7 +4893,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.erloeskennziffern",
@@ -4901,7 +4901,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.erloeskontenzuordnung",
@@ -4909,7 +4909,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.farmers",
@@ -4949,7 +4949,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.fibu_perioden",
@@ -4957,7 +4957,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.fibu_periodische_buchungen",
@@ -4965,7 +4965,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.fibu_zahlungsmeldungen",
@@ -4973,7 +4973,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.finance_followup_exports",
@@ -4981,7 +4981,7 @@
    "tenant_type": "character varying(120)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.forderungsgruppen",
@@ -4989,7 +4989,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.futtermittel_einzelfutter",
@@ -5005,7 +5005,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.futtermittel_mischfutter",
@@ -5029,7 +5029,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.futtermittel_rezept_komponenten",
@@ -5057,7 +5057,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.futtermittel_schnellerfassung",
@@ -5065,7 +5065,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.futtermittel_vlog_meldungen",
@@ -5073,7 +5073,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.genossenschaft_anteilsbewegungen",
@@ -5081,7 +5081,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.genossenschaft_mitglieder",
@@ -5089,7 +5089,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.grundfutter_analysen",
@@ -5105,7 +5105,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.hausbankenstamm",
@@ -5113,7 +5113,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.individualpreise",
@@ -5121,7 +5121,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.individuelle_artikelnummern",
@@ -5129,7 +5129,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.internal_messages",
@@ -5145,7 +5145,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.inventur_piv_positionen",
@@ -5153,7 +5153,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.job_artifacts",
@@ -5172,7 +5172,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.knowledge_improvement_proposals",
@@ -5180,7 +5180,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.knowledge_objects",
@@ -5207,7 +5207,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.kontrakt_zinsabrechnungen",
@@ -5215,7 +5215,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.kontrakt_zuabschlaege",
@@ -5223,7 +5223,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.kontrakt_zuabschlagsgruppen",
@@ -5231,7 +5231,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.kunden_bankverbindungen",
@@ -5239,7 +5239,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.leergutarten",
@@ -5247,7 +5247,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.lieferavise",
@@ -5255,7 +5255,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.logistik_frachttabellen",
@@ -5271,7 +5271,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.logistik_frachttabellen_zuordnung",
@@ -5279,7 +5279,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.mailkonten",
@@ -5287,7 +5287,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.master_data_entries",
@@ -5303,7 +5303,7 @@
    "tenant_type": "character varying(120)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.neuroassist_confidence_ledger",
@@ -5311,7 +5311,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.neuroassist_state_edges",
@@ -5319,7 +5319,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.neuroassist_state_nodes",
@@ -5327,7 +5327,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.neuroassist_state_transitions",
@@ -5335,7 +5335,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.number_ranges",
@@ -5343,7 +5343,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.nuts2_postal_codes",
@@ -5359,7 +5359,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.op_auszifferungen",
@@ -5367,7 +5367,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.open_items",
@@ -5375,7 +5375,7 @@
    "tenant_type": "character varying(80)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.partiegruppen",
@@ -5383,7 +5383,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.partiestamm",
@@ -5391,7 +5391,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.periodische_buchungen",
@@ -5399,7 +5399,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.policy_rules",
@@ -5415,7 +5415,7 @@
    "tenant_type": "character varying(80)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.portal_preise",
@@ -5423,7 +5423,7 @@
    "tenant_type": "character varying(80)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.preis_rabattgruppen",
@@ -5431,7 +5431,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.preis_rabattklassen",
@@ -5439,7 +5439,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.preis_rabattsaetze",
@@ -5447,7 +5447,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.process_projection_cursors",
@@ -5455,7 +5455,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.process_projection_registry",
@@ -5463,7 +5463,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.process_projection_snapshots",
@@ -5471,7 +5471,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.rations_zugang",
@@ -5487,7 +5487,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.rohware_abrechnungsschemata",
@@ -5495,7 +5495,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.rohware_analysewert_korrektur_zeilen",
@@ -5503,7 +5503,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.rohware_analysewert_korrekturen",
@@ -5511,7 +5511,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.rohware_massebilanz_bewegungen",
@@ -5519,7 +5519,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.rohware_massebilanzen",
@@ -5527,7 +5527,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.rohware_qualitaeten",
@@ -5535,7 +5535,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.rohware_za_staffel_zeilen",
@@ -5543,7 +5543,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.rohware_za_staffeln",
@@ -5551,7 +5551,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.rohwarengruppen",
@@ -5559,7 +5559,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.saatzucht_vermehrungsvertraege",
@@ -5567,7 +5567,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.schedules",
@@ -5575,7 +5575,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.screen_definition_drafts",
@@ -5583,7 +5583,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.screen_definition_history",
@@ -5591,7 +5591,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.sepa_mandates",
@@ -5599,7 +5599,7 @@
    "tenant_type": "character varying(80)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.stuecklisten",
@@ -5607,7 +5607,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.stuecklisten_positionen",
@@ -5615,7 +5615,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.system_properties",
@@ -5623,7 +5623,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.tenants",
@@ -5639,7 +5639,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.users",
@@ -5655,7 +5655,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.vertreter_provisionsgruppen",
@@ -5663,7 +5663,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.vertreter_provisionsstaffeln",
@@ -5690,7 +5690,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.waage_wiegungsgruppen",
@@ -5698,7 +5698,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.warengruppen",
@@ -5706,7 +5706,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.webhook_deliveries",
@@ -5714,7 +5714,7 @@
    "tenant_type": "character varying(80)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.webhook_registrations",
@@ -5722,7 +5722,7 @@
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.webshop_bestellungen",
@@ -5730,7 +5730,7 @@
    "tenant_type": "character varying(80)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.webshop_configs",
@@ -5738,7 +5738,7 @@
    "tenant_type": "character varying(80)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.webshop_sync_log",
@@ -5746,7 +5746,7 @@
    "tenant_type": "character varying(80)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.zahlungsbedingungen",
@@ -5754,7 +5754,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.zahlungsformulare",
@@ -5762,7 +5762,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.zinsgruppen",
@@ -5770,7 +5770,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.zu_abschlag_konditionen",
@@ -5790,7 +5790,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_shared.zu_abschlagklassen",
@@ -5798,7 +5798,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_workflow.wf_cockpit_blockers",
@@ -5806,7 +5806,7 @@
    "tenant_type": "character varying(100)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_workflow.wf_cockpit_events",
@@ -5814,7 +5814,7 @@
    "tenant_type": "character varying(100)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_workflow.wf_cockpit_instances",
@@ -5822,7 +5822,7 @@
    "tenant_type": "character varying(100)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "governance.ddl_events",
@@ -5881,7 +5881,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "public.archive_index",
@@ -5897,7 +5897,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "public.crm_activities",
@@ -5921,7 +5921,7 @@
    "tenant_type": "uuid",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "public.crm_contact_marketing_prefs",
@@ -5929,7 +5929,7 @@
    "tenant_type": "uuid",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "public.crm_contacts",
@@ -5945,7 +5945,7 @@
    "tenant_type": "uuid",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "public.crm_leads",
@@ -5969,7 +5969,7 @@
    "tenant_type": "uuid",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "public.crm_ownership_log",
@@ -6049,7 +6049,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "public.einkauf_anfragen_positionen",
@@ -6068,7 +6068,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "public.einkauf_angebote_positionen",
@@ -6087,7 +6087,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "public.einkauf_auftragsbestaetigungen",
@@ -6095,7 +6095,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "public.einkauf_frachtauftraege",
@@ -6103,7 +6103,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "public.einkauf_lieferschein_positionen",
@@ -6162,7 +6162,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "public.einkauf_zahlungslaeufe",
@@ -6170,7 +6170,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "public.einkauf_zahlungslauf_posten",
@@ -6197,7 +6197,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "public.gap_map_points",
@@ -6221,7 +6221,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "public.gdpr_requests",
@@ -6229,7 +6229,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "public.gobd_aufbewahrungsrichtlinien",
@@ -6237,7 +6237,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "public.gobd_loeschsperren",
@@ -6245,7 +6245,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "public.gobd_verfahrensdokumentation",
@@ -6253,7 +6253,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "public.inventory_goods_receipt_lines",
@@ -6300,7 +6300,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "public.kunden",
@@ -6316,7 +6316,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "public.kunden_adressen",
@@ -6380,7 +6380,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "public.kunden_kaeufer_profil",
@@ -6388,7 +6388,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "public.kunden_kontakte",
@@ -6396,7 +6396,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "public.kunden_milchvieh_profil",
@@ -6412,7 +6412,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "public.kunden_zahlung",
@@ -6444,7 +6444,7 @@
    "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "public.opportunities",
@@ -6468,7 +6468,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "public.tapi_calls",
@@ -6476,7 +6476,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "public.whatsapp_bestellungen",
@@ -6484,7 +6484,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "public.workflow_audit",
