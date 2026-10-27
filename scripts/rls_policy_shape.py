@@ -5,10 +5,10 @@ Zulaessig sind genau zwei Formen; alles andere ist ``abweichend``:
 
 ``getrennt``  vier permissive Policies fuer PUBLIC, eine je Befehl, keine weitere:
 
-    tenant_select  FOR SELECT USING (eigen)          bzw. (eigen OR system) -> ``getrennt_system``
-    tenant_insert  FOR INSERT WITH CHECK (eigen)
-    tenant_update  FOR UPDATE USING (eigen) WITH CHECK (eigen)
-    tenant_delete  FOR DELETE USING (eigen)
+    tenant_isolation_select  FOR SELECT USING (eigen)          bzw. (eigen OR system) -> ``getrennt_system``
+    tenant_isolation_insert  FOR INSERT WITH CHECK (eigen)
+    tenant_isolation_update  FOR UPDATE USING (eigen) WITH CHECK (eigen)
+    tenant_isolation_delete  FOR DELETE USING (eigen)
 
     eigen  = tenant_id = rls_current_tenant()
     system = tenant_id = 'system' AND rls_current_tenant() IS NOT NULL
@@ -18,9 +18,13 @@ Zulaessig sind genau zwei Formen; alles andere ist ``abweichend``:
     ``getrennt_system`` nur fuer Tabellen, deren Freigabe in docs/admin/rls-exceptions.json
     begruendet ist.
 
-``alt``  eine ALL-Policy ``tenant_isolation`` (P3/P5/P6). Sie laesst ``system``-Zeilen
-    loeschen und per UPDATE uebernehmen; die Korrektur liegt bei der Integration (Codex,
-    RLS-ORDERED-INTEGRATION-20261027). Ihre Zahl darf nur sinken.
+``alt``  eine ALL-Policy ``tenant_isolation`` (P3/P5/P6 vor der Korrektur). Sie laesst
+    ``system``-Zeilen loeschen und per UPDATE uebernehmen. Codex hat P3/P5/P6 in
+    RLS-ORDERED-INTEGRATION-20261027 auf die getrennte Form mit denselben Namen umgestellt
+    (943ba2bb0); dort lesen die 501 Bestandstabellen ``system`` noch pauschal mit.
+
+Altbestand = ``alt`` plus ``getrennt_system`` ohne Begruendung; seine Zahl darf nur sinken
+(``altbestand_hoechstens``), je Tabellenfamilie wird die Lesefreigabe begruendet oder entfernt.
 
 FORCE ROW LEVEL SECURITY bleibt aus (Plan 2.4: der Eigentuemer migriert).
 
@@ -36,12 +40,12 @@ from collections import Counter
 OWN = "tenant_id=rls_current_tenant"
 SHARED = "tenant_id=rls_current_tenantORtenant_id='system'ANDrls_current_tenantISNOTNULL"
 
-# Name -> (polcmd, USING, WITH CHECK); USING von tenant_select ist eigen oder eigen+system.
+# Name -> (polcmd, USING, WITH CHECK); USING von tenant_isolation_select ist eigen oder eigen+system.
 SPLIT = {
-    "tenant_select": ("r", (OWN, SHARED), None),
-    "tenant_insert": ("a", None, OWN),
-    "tenant_update": ("w", OWN, OWN),
-    "tenant_delete": ("d", OWN, None),
+    "tenant_isolation_select": ("r", (OWN, SHARED), None),
+    "tenant_isolation_insert": ("a", None, OWN),
+    "tenant_isolation_update": ("w", OWN, OWN),
+    "tenant_isolation_delete": ("d", OWN, None),
 }
 LEGACY = ("tenant_isolation", "*", SHARED, OWN)
 

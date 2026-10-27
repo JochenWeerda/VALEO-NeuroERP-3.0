@@ -24,17 +24,18 @@ keine Datei aus P0–P7 außer dem Workboard-Anhang.
 
 ## Überschneidungen — bitte bei der P3/P5-Korrektur berücksichtigen
 
-1. **Policy-Form.** Vorschlag für die korrigierte Altform: dieselben Namen und Ausdrücke wie
-   in `scripts/rls_policy_shape.py` (`tenant_select`/`_insert`/`_update`/`_delete`, kein
-   ALL, `system` nur in `tenant_select`). Bei anderen Namen passe ich die Ratsche an. Eine
-   gemeinsame Definition ist besser als zwei.
+1. **Policy-Form (Stand 27.10., nach 943ba2bb0).** Die Namen von Codex' Korrektur
+   (`tenant_isolation_select/_insert/_update/_delete`) gelten jetzt überall:
+   `scripts/rls_policy_shape.py` und die Domain-Migrationen. Es gibt nur noch eine Definition.
 2. **`tests/test_rls_p5_rollout.py::test_alle_rls_tabellen_tragen_genau_die_mandantenpolicy`**
-   verlangt genau `tenant_isolation`. Der Pricing-Slice führt die getrennte Form ein, der
-   Test wird dort rot. Ich ändere die Datei nicht (Codex-Besitz). Vorschlag: Die
-   Formprüfung wandert nach `tests/test_rls_policy_shape.py` (lässt beide Formen zu, die
-   Altform nur abnehmend), und P5 behält nur die Auswertung als `valeo_app`.
-3. **`altform_hoechstens`** in `docs/admin/rls-exceptions.json` (501) senkt die Korrektur
-   der Altform. Nach der Umstellung soll dort 0 stehen.
+   (Codex-Fassung) verlangt in `tenant_isolation_select` immer `'system'`. Neue Domains
+   lesen `system` aber nur mit Begründung (`rls-exceptions.json` → `system_lesbar`).
+   Vorschlag: SELECT-USING darf `eigen` oder `eigen OR system` sein, Letzteres nur für
+   begründete Tabellen und den Altbestand. Das prüft `tests/test_rls_policy_shape.py`
+   bereits so.
+3. **`altbestand_hoechstens`** (501) in `docs/admin/rls-exceptions.json` zählt ALL-Policy
+   plus unbegründetes `system`-Lesen. Er sinkt, sobald eine Tabellenfamilie ihr
+   `system`-Lesen begründet (Eintrag in `system_lesbar`) oder verliert.
 4. **`scripts/provision_db_roles.py`**: Dienstrollen je Dienst kämen aus dem
    Dienst-Vorschlag. Nichts geändert.
 
