@@ -19880,3 +19880,6 @@ Nutzerauftrag: alle uebrigen offenen Aenderungen commit-/pushfaehig abschliessen
 
 
 **QS-SECURITY-20261027 umgesetzt:** qs exakt6.16.1, gepinnterLocknurqsgeaendert, Paketintegritaetgeprueft. Gegenprobealt3rot/1gruen, neu4gruen. PermanenterTestimBackportGate. LockauditkeinQsBefund, bekannternode-forgeQuellpatchbefundbleibt; Backportbytesunveraendert, Hashbindungenaktualisiert, Frist28.10unveraendert. QA qs-security-20261027.md. ProduktionsbuilddesStudioIntegrationsstandsgruen; Gesamtabnahmeweiteroffen.
+
+
+**CLAUDE-RLS-74-78-INTEGRATION-20261027 - reserviert, Codex Lead:** NeueHandshakesKI/Sales/CRM/Inventory/Einkaufgelesen. IntegrationseriellKI74->Sales75->CRM76->Inventory77->EinkaufmitexaktenlokalenHeads. DateibesitzgelieferteQuellen/Migrationen/Tests,gemeinsamegenerierteArtefakteundIntegrationsQA. ViewWIP/OpenAPIerhalten,dreifachabgleichen. KeinLiveUpgradewegenDEMO-PO-001/002Fremdlieferant;keineDemodatenohneHerkunftspruefungveraendern. PruefstanderstnachaktuellemStatusundBesitzpruefung;historische0SessionskeineFreigabe. TerrareviewsDocDrift/FrontendnurAnalyse,EditsnachengerClaimzuweisung.
