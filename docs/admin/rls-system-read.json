@@ -868,7 +868,36 @@
    "live": 0,
    "code": []
   },
+  "domain_einkauf.bestellung_positionen": {
+   "frisch": 0,
+   "live": null,
+   "code": [
+    "app/services/procurement_service.py:405"
+   ]
+  },
+  "domain_einkauf.bestellungen": {
+   "frisch": 0,
+   "live": 0,
+   "code": [
+    "app/services/procurement_service.py:405"
+   ]
+  },
   "domain_einkauf.bestellvorschlaege": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_einkauf.bestellvorschlag_positionen": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "domain_einkauf.ers_invoices": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_einkauf.ers_suppliers": {
    "frisch": 0,
    "live": 0,
    "code": []
@@ -883,12 +912,27 @@
    "live": 0,
    "code": []
   },
+  "domain_einkauf.invoice_verification": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_einkauf.kontrakt_positionen": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
   "domain_einkauf.kontrakte": {
    "frisch": 0,
    "live": 0,
    "code": []
   },
   "domain_einkauf.lager_kontenzuordnung": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_einkauf.lieferanten": {
    "frisch": 0,
    "live": 0,
    "code": []
@@ -2098,6 +2142,11 @@
    "live": 0,
    "code": []
   },
+  "domain_procurement.proc_purchase_orders": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
   "domain_procurement.proc_rechnungspruefungen": {
    "frisch": 0,
    "live": 0,
@@ -2843,14 +2892,29 @@
    "live": 0,
    "code": []
   },
+  "public.einkauf_abgleich_ergebnisse": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
   "public.einkauf_anfragen": {
    "frisch": 0,
    "live": 0,
    "code": []
   },
+  "public.einkauf_anfragen_positionen": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
   "public.einkauf_angebote": {
    "frisch": 0,
    "live": 0,
+   "code": []
+  },
+  "public.einkauf_angebote_positionen": {
+   "frisch": 0,
+   "live": null,
    "code": []
   },
   "public.einkauf_anlieferavis": {
@@ -2868,6 +2932,36 @@
    "live": null,
    "code": []
   },
+  "public.einkauf_lieferschein_positionen": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "public.einkauf_lieferscheine": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "public.einkauf_rechnungseingaenge": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "public.einkauf_rechnungseingang_positionen": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "public.einkauf_wareneingaenge": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "public.einkauf_wareneingang_positionen": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
   "public.einkauf_warengruppen": {
    "frisch": 0,
    "live": 0,
@@ -2876,6 +2970,11 @@
   "public.einkauf_zahlungslaeufe": {
    "frisch": 0,
    "live": 0,
+   "code": []
+  },
+  "public.einkauf_zahlungslauf_posten": {
+   "frisch": 0,
+   "live": null,
    "code": []
   },
   "public.finance_erechnungen": {
@@ -2964,6 +3063,11 @@
    "code": []
   },
   "public.whatsapp_bestellungen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "public.zahlungslauf_kreditoren": {
    "frisch": 0,
    "live": 0,
    "code": []
