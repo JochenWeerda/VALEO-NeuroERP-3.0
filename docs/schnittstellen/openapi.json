@@ -167438,25 +167438,11 @@
         "title": "UsersOut",
         "type": "object"
       },
-      "VATReturnApprovalRequest": {
-        "properties": {
-          "approved_by": {
-            "minLength": 1,
-            "title": "Approved By",
-            "type": "string"
-          }
-        },
-        "required": [
-          "approved_by"
-        ],
-        "title": "VATReturnApprovalRequest",
-        "type": "object"
-      },
       "VATReturnCalculationRequest": {
         "description": "Request to calculate VAT return from journal entries",
         "properties": {
           "period": {
-            "description": "Period in YYYY-MM format",
+            "description": "Zeitraum YYYY-MM oder YYYY-Q1 bis YYYY-Q4",
             "title": "Period",
             "type": "string"
           },
@@ -167552,6 +167538,17 @@
             ],
             "title": "Calculated At"
           },
+          "calculated_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Calculated By"
+          },
           "created_at": {
             "format": "date-time",
             "title": "Created At",
@@ -167615,6 +167612,17 @@
             ],
             "title": "Submitted At"
           },
+          "submitted_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Submitted By"
+          },
           "tax_id": {
             "anyOf": [
               {
@@ -167627,8 +167635,15 @@
             "title": "Tax Id"
           },
           "taxpayer_name": {
-            "title": "Taxpayer Name",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Taxpayer Name"
           },
           "total_input_tax": {
             "title": "Total Input Tax",
@@ -167658,6 +167673,17 @@
               }
             ],
             "title": "Validated At"
+          },
+          "validated_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Validated By"
           },
           "vat_id": {
             "anyOf": [
@@ -167699,23 +167725,41 @@
         "type": "object"
       },
       "VATReturnSubmitRequest": {
+        "description": "Festhalten einer im ELSTER-Portal erfolgten Uebermittlung.",
         "properties": {
-          "submitted_by": {
-            "minLength": 1,
-            "title": "Submitted By",
+          "transferticket": {
+            "description": "Transferticket aus ELSTER",
+            "maxLength": 50,
+            "minLength": 5,
+            "title": "Transferticket",
             "type": "string"
           }
         },
         "required": [
-          "submitted_by"
+          "transferticket"
         ],
         "title": "VATReturnSubmitRequest",
         "type": "object"
       },
       "VATReturnVorberechnung": {
-        "description": "Pre-calculation result (not persisted)",
+        "description": "Vorberechnung (nicht gespeichert).",
         "properties": {
+          "klaerungen": {
+            "description": "Was sich nicht eindeutig zuordnen laesst",
+            "items": {
+              "type": "string"
+            },
+            "title": "Klaerungen",
+            "type": "array"
+          },
+          "offene_entwuerfe": {
+            "default": 0,
+            "description": "Ungebuchte Buchungsentwuerfe im Zeitraum",
+            "title": "Offene Entwuerfe",
+            "type": "integer"
+          },
           "positionen": {
+            "description": "Kennzahlen",
             "items": {
               "additionalProperties": true,
               "type": "object"
@@ -167725,25 +167769,25 @@
           },
           "umsatz_netto": {
             "default": 0,
-            "description": "Netto-Umsatz",
+            "description": "Summe der Bemessungsgrundlagen",
             "title": "Umsatz Netto",
             "type": "number"
           },
           "umsatzsteuer": {
             "default": 0,
-            "description": "Umsatzsteuer (19%)",
+            "description": "Umsatzsteuer laut Hauptbuch",
             "title": "Umsatzsteuer",
             "type": "number"
           },
           "vorsteuer": {
             "default": 0,
-            "description": "Abziehbare Vorsteuer",
+            "description": "Abziehbare Vorsteuer laut Hauptbuch",
             "title": "Vorsteuer",
             "type": "number"
           },
           "zahllast": {
             "default": 0,
-            "description": "Verbleibende USt-Zahllast",
+            "description": "Kennzahl 83: positiv Zahlung, negativ Erstattung",
             "title": "Zahllast",
             "type": "number"
           },
@@ -245333,11 +245377,11 @@
     },
     "/api/v1/compliance/ustva": {
       "get": {
-        "description": "UStVA-Bereitschaftsstatus — aggregiert aus gebuchten Journal-Einträgen der Periode.",
+        "description": "UStVA-Stand des Zeitraums: Zahlen aus dem Hauptbuch (``app.finance.ustva``), Uebermittlung aus der Anmeldung.\n\nBis 27.10.2026 stand hier ``EINGEREICHT``, sobald der Zeitraum keine Buchungsentwuerfe hatte — ohne dass\nirgendetwas uebermittelt war; der Mandant kam aus ``?tenant_id=`` mit ``default`` als Rueckfall, und ein\nLesefehler wurde zu Nullen. Uebermittelt ist jetzt nur, was mit ELSTER-Transferticket festgehalten ist.",
         "operationId": "get_ustva_status_api_v1_compliance_ustva_get",
         "parameters": [
           {
-            "description": "Meldezeitraum z.B. 2026-03",
+            "description": "Meldezeitraum z.B. 2026-03 oder 2026-Q1",
             "in": "query",
             "name": "periode",
             "required": false,
@@ -245350,7 +245394,7 @@
                   "type": "null"
                 }
               ],
-              "description": "Meldezeitraum z.B. 2026-03",
+              "description": "Meldezeitraum z.B. 2026-03 oder 2026-Q1",
               "title": "Periode"
             }
           }
@@ -309002,7 +309046,7 @@
     },
     "/api/v1/finance/vat-return": {
       "get": {
-        "description": "List all VAT returns.",
+        "description": "Anmeldungen des Mandanten. Ein Lesefehler ist 503, keine leere Liste.",
         "operationId": "list_vat_returns_api_v1_finance_vat_return_get",
         "parameters": [
           {
@@ -309068,7 +309112,7 @@
     },
     "/api/v1/finance/vat-return/calculate": {
       "post": {
-        "description": "Calculate VAT return from journal entries for a period.",
+        "description": "Anmeldung aus dem Hauptbuch anlegen. Mit offenen Klaerungen wird nichts angelegt (422).",
         "operationId": "calculate_vat_return_api_v1_finance_vat_return_calculate_post",
         "requestBody": {
           "content": {
@@ -309120,7 +309164,7 @@
     },
     "/api/v1/finance/vat-return/export/{return_id}": {
       "get": {
-        "description": "Download VAT return export (ELSTER XML). Alias for /{return_id}/elster-xml.",
+        "description": "Alias fuer /{return_id}/elster-xml.",
         "operationId": "export_vat_return_download_api_v1_finance_vat_return_export__return_id__get",
         "parameters": [
           {
@@ -309173,7 +309217,7 @@
     },
     "/api/v1/finance/vat-return/vorberechnung": {
       "get": {
-        "description": "Vorberechnung der UStVA aus gebuchten Journaleinträgen.\nGibt aggregierte Beträge zurück, ohne einen VAT-Return anzulegen.",
+        "description": "Vorberechnung der UStVA aus dem Hauptbuch, ohne eine Anmeldung anzulegen. Ein Lesefehler ist 503, keine Null.",
         "operationId": "vorberechnung_ustva_api_v1_finance_vat_return_vorberechnung_get",
         "parameters": [
           {
@@ -309228,7 +309272,6 @@
     },
     "/api/v1/finance/vat-return/{return_id}": {
       "get": {
-        "description": "Get a VAT return by ID.",
         "operationId": "get_vat_return_api_v1_finance_vat_return__return_id__get",
         "parameters": [
           {
@@ -309281,6 +309324,7 @@
     },
     "/api/v1/finance/vat-return/{return_id}/approve": {
       "post": {
+        "description": "Freigabe einer geprueften Anmeldung. Hat sich das Hauptbuch seit der Pruefung geaendert: 409.",
         "operationId": "approve_vat_return_api_v1_finance_vat_return__return_id__approve_post",
         "parameters": [
           {
@@ -309293,16 +309337,6 @@
             }
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/VATReturnApprovalRequest"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "content": {
@@ -309343,7 +309377,7 @@
     },
     "/api/v1/finance/vat-return/{return_id}/elster-xml": {
       "get": {
-        "description": "Export VAT return as ELSTER XML (Anmeldungssteuern, UStVA).\nFormat nach offiziellem ERiC-Schema, Encoding ISO-8859-15.\nReferenz: https://www.elster.de, JuryOberst/Elster (GitHub).",
+        "description": "Kennzahlen der Anmeldung als XML (Datenaustausch, z. B. Steuerberatung) — keine signierte ERiC-Uebermittlung.",
         "operationId": "export_elster_xml_api_v1_finance_vat_return__return_id__elster_xml_get",
         "parameters": [
           {
@@ -309396,6 +309430,7 @@
     },
     "/api/v1/finance/vat-return/{return_id}/submit": {
       "post": {
+        "description": "Haelt die im ELSTER-Portal erfolgte Uebermittlung mit ihrem Transferticket fest. Uebermittelt selbst nichts.",
         "operationId": "submit_vat_return_api_v1_finance_vat_return__return_id__submit_post",
         "parameters": [
           {
@@ -309458,7 +309493,7 @@
     },
     "/api/v1/finance/vat-return/{return_id}/validate": {
       "post": {
-        "description": "Validate VAT return against GL totals.",
+        "description": "Anmeldung gegen das aktuelle Hauptbuch pruefen. Gueltig nur ohne Abweichung, Klaerung und offene Entwuerfe.",
         "operationId": "validate_vat_return_api_v1_finance_vat_return__return_id__validate_post",
         "parameters": [
           {

@@ -220,7 +220,7 @@
     "token": 5
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/compliance.py:849",
+    "app/api/v1/endpoints/compliance.py:850",
     "app/seeds/inventory_seed.py:20"
    ],
    "null_stellen": [],
@@ -294,7 +294,7 @@
     "token": 7
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/compliance.py:849",
+    "app/api/v1/endpoints/compliance.py:850",
     "app/domains/agrar/api/saatgut.py:21",
     "app/seeds/inventory_seed.py:20"
    ],
@@ -351,7 +351,7 @@
     "token": 2
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/compliance.py:849",
+    "app/api/v1/endpoints/compliance.py:850",
     "app/services/calendar_projection_service.py:911"
    ],
    "null_stellen": [],
@@ -1745,7 +1745,6 @@
     "app/api/v1/endpoints/bank_accounts.py",
     "app/api/v1/endpoints/bank_reconciliation.py",
     "app/api/v1/endpoints/bulk_journal_import.py",
-    "app/api/v1/endpoints/compliance.py",
     "app/api/v1/endpoints/export_service.py",
     "app/api/v1/endpoints/finance_actions.py",
     "app/api/v1/endpoints/financial_reports.py",
@@ -1762,6 +1761,7 @@
     "app/domains/finance/domain/entities/account.py",
     "app/domains/shared/domain_events.py",
     "app/finance/export_sepa.py",
+    "app/finance/ustva.py",
     "app/infrastructure/models/__init__.py",
     "app/infrastructure/models/journal.py",
     "app/security/access_control.py",
@@ -1797,12 +1797,11 @@
     "dienst": 2,
     "kopfzeile": 2,
     "nutzlast": 3,
-    "standardmandant": 3,
-    "token": 13
+    "standardmandant": 2,
+    "token": 12
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/chart_of_accounts.py:36",
-    "app/api/v1/endpoints/compliance.py:849"
+    "app/api/v1/endpoints/chart_of_accounts.py:36"
    ],
    "null_stellen": [
     "app/api/v1/endpoints/compat.py:1859",
@@ -3568,7 +3567,7 @@
     "token": 14
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/compliance.py:849",
+    "app/api/v1/endpoints/compliance.py:850",
     "app/api/v1/endpoints/reklamation_api.py:121",
     "app/infrastructure/models/futtermittel_models.py:92"
    ],
@@ -3888,7 +3887,7 @@
     "token": 1
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/compliance.py:849"
+    "app/api/v1/endpoints/compliance.py:850"
    ],
    "null_stellen": [],
    "gemeinsam_stellen": [],
