@@ -9,13 +9,14 @@ from __future__ import annotations
 import logging
 from typing import Optional
 
+from app.core.tenant import get_tenant_id
+from app.core.tenant_context import SHARED_TENANT_ID
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import Response
 from pydantic import BaseModel
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
-from app.core.config import settings
 from app.core.database import get_db
 from app.core.uuid7 import uuid7
 from app.models.knowledge import KnowledgeObjectRecord, KnowledgeVersionRecord
@@ -30,6 +31,24 @@ from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-R
 
 class KnowledgeOut(BaseSchema):
     model_config = _ConfigDict(extra="allow")
+
+
+def _lesbare_mandanten(tenant_id: str) -> list[str]:
+    """Eigene Wissensobjekte und das gemeinsame Produktwissen (bis 27.10.2026: nur Standardmandant)."""
+    return [tenant_id, SHARED_TENANT_ID]
+
+
+def _eigenes_objekt(db: Session, knowledge_id: str, tenant_id: str) -> KnowledgeObjectRecord:
+    """Schreibwege: nur eigene Objekte. Gemeinsames Produktwissen pflegt nur die zentrale Pflege."""
+    record = db.execute(select(KnowledgeObjectRecord).where(
+        KnowledgeObjectRecord.knowledge_id == knowledge_id,
+        KnowledgeObjectRecord.tenant_id.in_(_lesbare_mandanten(tenant_id)),
+    )).unique().scalar_one_or_none()
+    if record is None:
+        raise HTTPException(status_code=404, detail="Wissensobjekt nicht gefunden")
+    if record.tenant_id != tenant_id:
+        raise HTTPException(status_code=403, detail="Gemeinsames Wissensobjekt: nur lesen, nicht aendern")
+    return record
 
 
 router = APIRouter()
@@ -128,13 +147,13 @@ def search_knowledge(
     q: str = Query("", description="Suchbegriff (ILIKE auf Titel und Inhalt)"),
     limit: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ) -> KnowledgeSearchResult:
     """Volltextsuche in Titeln und Versionsinhalten."""
     try:
-        tenant_id = settings.DEFAULT_TENANT_ID
         stmt = (
             select(KnowledgeObjectRecord)
-            .where(KnowledgeObjectRecord.tenant_id == tenant_id)
+            .where(KnowledgeObjectRecord.tenant_id.in_(_lesbare_mandanten(tenant_id)))
             .where(KnowledgeObjectRecord.status != "ARCHIVIERT")
         )
         if q.strip():
@@ -155,26 +174,25 @@ def search_knowledge(
 
 
 @router.get("/stats", response_model=KnowledgeStatsResponse, summary="Knowledge stats abrufen")
-def get_knowledge_stats(db: Session = Depends(get_db)) -> KnowledgeStatsResponse:
+def get_knowledge_stats(db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> KnowledgeStatsResponse:
     """Statistiken: Anzahl je Typ, Status und Format."""
     try:
-        tenant_id = settings.DEFAULT_TENANT_ID
 
         gesamt_result = db.execute(
             select(func.count()).select_from(KnowledgeObjectRecord).where(
-                KnowledgeObjectRecord.tenant_id == tenant_id
+                KnowledgeObjectRecord.tenant_id.in_(_lesbare_mandanten(tenant_id))
             )
         ).scalar_one()
 
         typ_rows = db.execute(
             select(KnowledgeObjectRecord.typ, func.count().label("n"))
-            .where(KnowledgeObjectRecord.tenant_id == tenant_id)
+            .where(KnowledgeObjectRecord.tenant_id.in_(_lesbare_mandanten(tenant_id)))
             .group_by(KnowledgeObjectRecord.typ)
         ).all()
 
         status_rows = db.execute(
             select(KnowledgeObjectRecord.status, func.count().label("n"))
-            .where(KnowledgeObjectRecord.tenant_id == tenant_id)
+            .where(KnowledgeObjectRecord.tenant_id.in_(_lesbare_mandanten(tenant_id)))
             .group_by(KnowledgeObjectRecord.status)
         ).all()
 
@@ -184,13 +202,13 @@ def get_knowledge_stats(db: Session = Depends(get_db)) -> KnowledgeStatsResponse
                 KnowledgeObjectRecord,
                 KnowledgeVersionRecord.knowledge_id == KnowledgeObjectRecord.knowledge_id,
             )
-            .where(KnowledgeObjectRecord.tenant_id == tenant_id)
+            .where(KnowledgeObjectRecord.tenant_id.in_(_lesbare_mandanten(tenant_id)))
             .group_by(KnowledgeVersionRecord.format)
         ).all()
 
         agenten_result = db.execute(
             select(func.count()).select_from(KnowledgeObjectRecord).where(
-                KnowledgeObjectRecord.tenant_id == tenant_id,
+                KnowledgeObjectRecord.tenant_id.in_(_lesbare_mandanten(tenant_id)),
                 KnowledgeObjectRecord.agentenfreigabe.is_(True),
                 KnowledgeObjectRecord.status == "FREIGEGEBEN",
             )
@@ -223,12 +241,12 @@ def list_knowledge(
     limit: int = Query(50, ge=1, le=500),
     offset: int = Query(0, ge=0),
     db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ) -> list[KnowledgeObjectResponse]:
     """Liste aller Wissensobjekte mit optionalen Filtern."""
     try:
-        tenant_id = settings.DEFAULT_TENANT_ID
         stmt = select(KnowledgeObjectRecord).where(
-            KnowledgeObjectRecord.tenant_id == tenant_id
+            KnowledgeObjectRecord.tenant_id.in_(_lesbare_mandanten(tenant_id))
         )
         if typ:
             stmt = stmt.where(KnowledgeObjectRecord.typ == typ)
@@ -264,9 +282,9 @@ def list_knowledge(
 def create_knowledge(
     payload: KnowledgeObjectCreate,
     db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ) -> KnowledgeObjectResponse:
-    """Neues Wissensobjekt mit initialer Version erstellen."""
-    tenant_id = settings.DEFAULT_TENANT_ID
+    """Neues Wissensobjekt mit initialer Version erstellen (Mandant aus dem Token, bis 27.10.2026 Standardmandant)."""
     repo = KnowledgeRepository(db)
     knowledge_id = str(uuid7())
     record = repo.create_object(
@@ -293,12 +311,12 @@ def create_knowledge(
 def get_knowledge(
     knowledge_id: str,
     db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ) -> KnowledgeObjectResponse:
     """Einzelnes Wissensobjekt mit allen Versionen abrufen."""
-    tenant_id = settings.DEFAULT_TENANT_ID
     stmt = select(KnowledgeObjectRecord).where(
         KnowledgeObjectRecord.knowledge_id == knowledge_id,
-        KnowledgeObjectRecord.tenant_id == tenant_id,
+        KnowledgeObjectRecord.tenant_id.in_(_lesbare_mandanten(tenant_id)),
     )
     record = db.execute(stmt).unique().scalar_one_or_none()
     if record is None:
@@ -311,16 +329,10 @@ def update_knowledge(
     knowledge_id: str,
     payload: KnowledgeObjectUpdate,
     db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ) -> KnowledgeObjectResponse:
     """Metadaten eines Wissensobjekts aktualisieren."""
-    tenant_id = settings.DEFAULT_TENANT_ID
-    stmt = select(KnowledgeObjectRecord).where(
-        KnowledgeObjectRecord.knowledge_id == knowledge_id,
-        KnowledgeObjectRecord.tenant_id == tenant_id,
-    )
-    record = db.execute(stmt).unique().scalar_one_or_none()
-    if record is None:
-        raise HTTPException(status_code=404, detail="Wissensobjekt nicht gefunden")
+    record = _eigenes_objekt(db, knowledge_id, tenant_id)
 
     if payload.titel is not None:
         record.titel = payload.titel
@@ -344,16 +356,10 @@ def update_knowledge(
 def archive_knowledge(
     knowledge_id: str,
     db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ) -> Response:
     """Wissensobjekt archivieren (Soft-Delete: Status → ARCHIVIERT)."""
-    tenant_id = settings.DEFAULT_TENANT_ID
-    stmt = select(KnowledgeObjectRecord).where(
-        KnowledgeObjectRecord.knowledge_id == knowledge_id,
-        KnowledgeObjectRecord.tenant_id == tenant_id,
-    )
-    record = db.execute(stmt).unique().scalar_one_or_none()
-    if record is None:
-        raise HTTPException(status_code=404, detail="Wissensobjekt nicht gefunden")
+    record = _eigenes_objekt(db, knowledge_id, tenant_id)
     record.status = "ARCHIVIERT"
     db.commit()
     return Response(status_code=204)
@@ -364,16 +370,10 @@ def add_version(
     knowledge_id: str,
     payload: KnowledgeVersionCreate,
     db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ) -> KnowledgeObjectResponse:
     """Neue Version zu einem Wissensobjekt hinzufügen."""
-    tenant_id = settings.DEFAULT_TENANT_ID
-    stmt = select(KnowledgeObjectRecord).where(
-        KnowledgeObjectRecord.knowledge_id == knowledge_id,
-        KnowledgeObjectRecord.tenant_id == tenant_id,
-    )
-    record = db.execute(stmt).unique().scalar_one_or_none()
-    if record is None:
-        raise HTTPException(status_code=404, detail="Wissensobjekt nicht gefunden")
+    record = _eigenes_objekt(db, knowledge_id, tenant_id)
 
     repo = KnowledgeRepository(db)
     updated = repo.add_version(

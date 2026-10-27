@@ -5,6 +5,7 @@ from datetime import date, datetime
 from decimal import Decimal
 from pydantic import BaseModel, ConfigDict, Field
 from app.api.v1.schemas.base import BaseSchema
+from app.core.tenant_context import get_current_tenant_id
 
 class DunningRuleCreate(BaseModel):
     """Schema for creating a dunning rule"""
@@ -78,7 +79,7 @@ class ProcessDunningRequest(BaseModel):
     debtor_id: Optional[str] = Field(None, description="Process for specific debtor")
     op_ids: Optional[List[str]] = Field(None, description="Process for specific open items")
     auto_apply_rules: bool = Field(default=True, description="Automatically apply dunning rules")
-    tenant_id: str = Field(default="system")
+    tenant_id: str = Field(default_factory=get_current_tenant_id)
     as_of_date: Optional[date] = Field(None, description="Stichtag für Überfälligkeit (default: heute)")
 
 

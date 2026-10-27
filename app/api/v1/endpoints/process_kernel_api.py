@@ -5667,6 +5667,7 @@ def hole_persistentes_knowledge_objekt(knowledge_id: str, version: int | None = 
 @router.post("/knowledge/store/objekte", status_code=201, tags=["process-kernel"], summary="Persistentes knowledge objekt erstelle",
     response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def erstelle_persistentes_knowledge_objekt(payload: dict, db=Depends(get_db)):
+    from app.core.tenant_context import get_current_tenant_id
     from app.core.blockchain_anchor_runtime import anchor_knowledge_object
     from app.repositories.knowledge_repository import KnowledgeRepository
 
@@ -5683,7 +5684,8 @@ def erstelle_persistentes_knowledge_objekt(payload: dict, db=Depends(get_db)):
         titel=payload["titel"],
         typ=payload["typ"],
         status=payload.get("status", "ENTWURF"),
-        tenant_id=payload.get("tenant_id", "system"),
+        # Mandant aus dem geprueften Kontext; gemeinsames Wissen nur ueber zentrale Pflege.
+        tenant_id=get_current_tenant_id(),
         beschreibung=payload.get("beschreibung", ""),
         tags=list(payload.get("tags", [])),
         zielrollen=list(payload.get("zielrollen", [])),

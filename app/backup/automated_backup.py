@@ -16,6 +16,7 @@ import os
 import shutil
 import json
 from app.core.uuid7 import uuid7
+from app.core.tenant_context import get_current_tenant_id
 
 logger = logging.getLogger(__name__)
 
@@ -566,9 +567,10 @@ class ISO27001AutomatedBackup:
         # In production, implement proper verification
         return True
 
-    def get_backup_status(self, tenant_id: str = "system") -> Dict[str, Any]:
+    def get_backup_status(self, tenant_id: str | None = None) -> Dict[str, Any]:
         """Get comprehensive backup system status"""
         # Filter data by tenant
+        tenant_id = tenant_id or get_current_tenant_id()
         tenant_jobs = [j for j in self.backup_jobs.values() if j.id.startswith(tenant_id)]
         tenant_executions = [e for e in self.backup_executions if e.job_id.startswith(tenant_id)]
         recent_executions = tenant_executions[-100:]  # Last 100 executions
@@ -751,8 +753,9 @@ class ISO27001AutomatedBackup:
 
         return alerts
 
-    def check_backup_compliance(self, tenant_id: str = "system") -> Dict[str, Any]:
+    def check_backup_compliance(self, tenant_id: str | None = None) -> Dict[str, Any]:
         """Check ISO 27001 backup compliance"""
+        tenant_id = tenant_id or get_current_tenant_id()
         jobs = [j for j in self.backup_jobs.values() if j.id.startswith(tenant_id)]
         executions = [e for e in self.backup_executions if e.job_id.startswith(tenant_id)]
 

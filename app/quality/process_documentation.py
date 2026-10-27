@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 import logging
 from app.core.uuid7 import uuid7
+from app.core.tenant_context import get_current_tenant_id
 
 logger = logging.getLogger(__name__)
 
@@ -545,9 +546,10 @@ class ISO9001ProcessDocumentation:
         logger.warning(f"Process metric deviation: {metric.metric_name} = {metric.value} "
                       f"(target: {metric.target_value}, deviation: {deviation:.1f}%)")
 
-    def get_process_documentation_status(self, tenant_id: str = "system") -> Dict[str, Any]:
+    def get_process_documentation_status(self, tenant_id: str | None = None) -> Dict[str, Any]:
         """Get comprehensive process documentation status"""
         # Filter documents by tenant
+        tenant_id = tenant_id or get_current_tenant_id()
         tenant_documents = [d for d in self.process_documents.values() if d.created_by == tenant_id]
 
         # Calculate documentation metrics
@@ -685,9 +687,10 @@ class ISO9001ProcessDocumentation:
 
         return round(score, 1)
 
-    def get_process_performance_dashboard(self, tenant_id: str = "system") -> Dict[str, Any]:
+    def get_process_performance_dashboard(self, tenant_id: str | None = None) -> Dict[str, Any]:
         """Get process performance dashboard"""
         # Filter data by tenant
+        tenant_id = tenant_id or get_current_tenant_id()
         tenant_executions = [e for e in self.process_executions if e.executed_by == tenant_id]
         tenant_metrics = [m for m in self.process_metrics if m.recorded_by == tenant_id]
         tenant_records = [r for r in self.quality_records if r.recorded_by == tenant_id]
@@ -814,8 +817,9 @@ class ISO9001ProcessDocumentation:
 
         return round(score, 1)
 
-    def generate_process_documentation_report(self, tenant_id: str = "system") -> Dict[str, Any]:
+    def generate_process_documentation_report(self, tenant_id: str | None = None) -> Dict[str, Any]:
         """Generate comprehensive process documentation report"""
+        tenant_id = tenant_id or get_current_tenant_id()
         documentation_status = self.get_process_documentation_status(tenant_id)
         performance_dashboard = self.get_process_performance_dashboard(tenant_id)
 

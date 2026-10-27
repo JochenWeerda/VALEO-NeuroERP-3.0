@@ -27,6 +27,7 @@ from app.core.neuro_state_graph import StateGraphService, StateNode, StateNodeTy
 from app.integrations.services.superglue_capability_service import SuperglueCapabilityService
 from app.services.neuro_tool_execution import NeuroToolExecutionService
 from app.services.neuro_verification_engine import verify_plan
+from app.core.tenant_context import get_current_tenant_id
 
 logger = logging.getLogger(__name__)
 
@@ -180,10 +181,11 @@ _GATE_BINDING = ToolBinding(
 def execute_plan(
     plan: ExecutionPlan,
     *,
-    tenant_id: str = "system",
+    tenant_id: str | None = None,
     context: Optional[dict[str, Any]] = None,
     db: Optional[Session] = None,
 ) -> dict[str, Any]:
+    tenant_id = tenant_id or get_current_tenant_id()
     broker = NeuroToolBroker()
     return broker.execute_plan(plan, tenant_id=tenant_id, context=context, db=db)
 
@@ -205,10 +207,11 @@ class NeuroToolBroker:
         self,
         plan: ExecutionPlan,
         *,
-        tenant_id: str = "system",
+        tenant_id: str | None = None,
         context: Optional[dict[str, Any]] = None,
         db: Optional[Session] = None,
     ) -> dict[str, Any]:
+        tenant_id = tenant_id or get_current_tenant_id()
         ctx = context or {}
         tool_trace: list[dict[str, Any]] = []
         executed_steps: list[dict[str, Any]] = []

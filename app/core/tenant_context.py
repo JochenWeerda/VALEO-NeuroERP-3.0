@@ -26,6 +26,11 @@ _tenant_id_ctx: ContextVar[Optional[str]] = ContextVar("tenant_id", default=None
 _cross_tenant_ctx: ContextVar[Optional[str]] = ContextVar("cross_tenant_reason", default=None)
 
 
+# Mandant gemeinsamer Referenzdaten (RLS: lesbar nur mit Begruendung in
+# docs/admin/rls-exceptions.json -> system_lesbar). Nie ein Rueckfall fuer fehlenden Kontext.
+SHARED_TENANT_ID = "system"
+
+
 class TenantContextMissing(RuntimeError):
     """Tenant-bound work was attempted without a tenant context."""
 

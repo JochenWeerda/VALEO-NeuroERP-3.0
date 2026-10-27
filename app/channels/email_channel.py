@@ -12,6 +12,7 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import Optional
 from uuid import uuid4
+from app.core.tenant_context import get_current_tenant_id
 
 logger = logging.getLogger(__name__)
 
@@ -127,9 +128,10 @@ def parse_incoming(
 
 async def process_incoming(
     email: IncomingEmail,
-    tenant_id: str = "system",
+    tenant_id: str | None = None,
     db=None,
 ) -> dict:
+    tenant_id = tenant_id or get_current_tenant_id()
     try:
         from app.services.guardrails import check_input
         guard_result = check_input(email.body_text)

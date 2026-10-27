@@ -13,6 +13,7 @@ from enum import Enum
 import logging
 import statistics
 from app.core.uuid7 import uuid7
+from app.core.tenant_context import get_current_tenant_id
 
 logger = logging.getLogger(__name__)
 
@@ -93,7 +94,7 @@ class QualityIssue:
     attachments: List[str] = field(default_factory=list)
 
     # Metadata
-    tenant_id: str = "system"
+    tenant_id: str = field(default_factory=get_current_tenant_id)
     tags: List[str] = field(default_factory=list)
 
 
@@ -105,7 +106,7 @@ class QualityMetricData:
     value: float
     timestamp: datetime
     component: str
-    tenant_id: str = "system"
+    tenant_id: str = field(default_factory=get_current_tenant_id)
     metadata: Dict[str, Any] = field(default_factory=dict)
 
 
@@ -298,12 +299,13 @@ class ISO9001QualityAssurance:
             })
 
     def record_quality_metric(self, metric: QualityMetric, value: float,
-                            component: str, tenant_id: str = "system",
+                            component: str, tenant_id: str | None = None,
                             metadata: Dict[str, Any] = None) -> str:
         """
         Record a quality metric data point
         Returns metric data ID
         """
+        tenant_id = tenant_id or get_current_tenant_id()
         metric_id = uuid7()
 
         metric_data = QualityMetricData(
@@ -361,11 +363,12 @@ class ISO9001QualityAssurance:
                       f"({severity} threshold: {thresholds[f'{severity.lower()}']})")
 
     def execute_quality_gate(self, gate: QualityGate, component: str,
-                           tenant_id: str = "system") -> QualityGateResult:
+                           tenant_id: str | None = None) -> QualityGateResult:
         """
         Execute a quality gate check
         Returns gate result
         """
+        tenant_id = tenant_id or get_current_tenant_id()
         start_time = datetime.utcnow()
 
         # Perform gate checks
@@ -532,9 +535,10 @@ class ISO9001QualityAssurance:
                 'timestamp': datetime.utcnow().isoformat()
             })
 
-    def get_quality_dashboard(self, tenant_id: str = "system") -> Dict[str, Any]:
+    def get_quality_dashboard(self, tenant_id: str | None = None) -> Dict[str, Any]:
         """Get quality management dashboard"""
         # Filter data by tenant
+        tenant_id = tenant_id or get_current_tenant_id()
         tenant_issues = [
             issue for issue in self.quality_issues.values()
             if issue.tenant_id == tenant_id
@@ -701,9 +705,10 @@ class ISO9001QualityAssurance:
 
         return alerts
 
-    def generate_quality_report(self, tenant_id: str = "system",
+    def generate_quality_report(self, tenant_id: str | None = None,
                               start_date: datetime = None, end_date: datetime = None) -> Dict[str, Any]:
         """Generate comprehensive quality report"""
+        tenant_id = tenant_id or get_current_tenant_id()
         if not start_date:
             start_date = datetime.utcnow() - timedelta(days=30)
         if not end_date:

@@ -7,10 +7,11 @@ from decimal import Decimal
 from typing import Any
 
 from pydantic import BaseModel, Field
+from app.core.tenant_context import get_current_tenant_id
 
 
 class BestellvorschlagRunInput(BaseModel):
-    tenant_id: str = Field(min_length=1, default="system")
+    tenant_id: str = Field(default_factory=get_current_tenant_id, min_length=1)
 
 
 class FinanceSkontoRunInput(BaseModel):
@@ -43,9 +44,10 @@ class OperationsExceptionRunInput(BaseModel):
 def validate_capability_input(
     capability_key: str,
     *,
-    tenant_id: str = "system",
+    tenant_id: str | None = None,
     parameters: dict[str, Any] | None = None,
 ) -> BaseModel:
+    tenant_id = tenant_id or get_current_tenant_id()
     payload = dict(parameters or {})
     if capability_key == "bestellvorschlag_assistant":
         return BestellvorschlagRunInput(tenant_id=tenant_id)

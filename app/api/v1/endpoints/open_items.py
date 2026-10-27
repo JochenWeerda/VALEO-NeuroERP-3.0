@@ -791,7 +791,7 @@ async def settle_open_item(
             dependencies=[Depends(open_items_read)])
 async def get_settlements(
     op_id: str,
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -840,7 +840,7 @@ async def reverse_settlement(
     op_id: str,
     settlement_id: str,
     reason: str = Query(..., min_length=10, description="Reason for reversal (min 10 chars)"),
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
     request: Request = None,
 ):
