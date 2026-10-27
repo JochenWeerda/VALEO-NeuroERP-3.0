@@ -364,10 +364,9 @@ async def get_article_suppliers(
     article = _get_article_or_404(db, article_id, tenant_id)
     
     # Query article suppliers
-    suppliers = db.query(ArticleSupplier).filter(
-        ArticleSupplier.article_id == article.id,
-        ArticleSupplier.tenant_id == tenant_id,
-    ).all()
+    # Der Artikel ist mandantengeprueft; seine Lieferanten haengen per (article_id, tenant_id) daran.
+    # Das Modell kennt tenant_id nicht: der Filter darauf brach jeden Abruf mit 500 ab.
+    suppliers = db.query(ArticleSupplier).filter(ArticleSupplier.article_id == article.id).all()
     
     return {
         "items": [
