@@ -419,6 +419,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `repair_runtime_model_alignment_20260610` | Align fresh installations with current CRM and article runtime models. |
 | `repair_runtime_schema_20260610` | Bring runtime models that predate Alembic under the migration contract. |
 | `rls_booking_templates_shared_20261027` | Shared booking templates: 'system' templates readable for every tenant. |
+| `rls_docflow_child_keys_20261027` | Tenant-bound keys for the children of the document backbone (P5 tables). |
 | `rls_domain_audit_compliance_20261027` | Row-level security for audit attestations and compliance records (RLS domain slice). |
 | `rls_domain_docflow_20261027` | Row-level security for the document backbone (RLS domain slice docflow). |
 | `rls_domain_hr_20261027` | Row-level security for domain_hr master data (RLS domain slice hr). |
