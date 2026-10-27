@@ -13,13 +13,11 @@ description: Generierte Entscheidungsmatrix der noch nicht abgesicherten Mandant
 
 Generiert von `scripts/rls_domain_matrix.py`; nicht von Hand aendern. Entscheidungen und Reihenfolge: `docs/architecture/rls-domaenen-entscheidungsmatrix.md`.
 
-Datenstand gewachsene Datenbank: 2026-10-27. Tabellen: 207.
+Datenstand gewachsene Datenbank: 2026-10-27. Tabellen: 203.
 
 | Domain | dienst | position | referenzdaten | mandant_nullbar | standardmandant | identitaet |
 |---|---|---|---|---|---|---|
 | agrar | 1 | 1 | 6 | 6 | 9 |  |
-| audit |  |  |  |  | 1 |  |
-| compliance |  |  | 1 | 1 | 1 |  |
 | crm | 7 | 17 | 3 | 5 | 5 |  |
 | dev_mock |  |  |  |  |  | 1 |
 | docflow |  |  |  |  | 5 |  |
@@ -66,20 +64,6 @@ Datenstand gewachsene Datenbank: 2026-10-27. Tabellen: 207.
 | `domain_agrar.seed_orders` | A | standardmandant | – | `app/api/v1/endpoints/mask_frontend_bridges.py` | 0 | – | standardmandant 1, token 1 | 0 Z., 0 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
 | `domain_agrar.silo_bewegungen` | C | position | `app/domains/operations/models.py` | `app/api/v1/endpoints/silo_operations_api.py` | 1 | – | – | 0 Z. | tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id) | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_agrar.silo_zellen |
 | `domain_agrar.waagen_vorlagen` | A | standardmandant | – | `app/api/v1/endpoints/mask_frontend_bridges.py`, `app/api/v1/endpoints/waagen_vorlagen.py` | 0 | – | standardmandant 1, token 2 | 0 Z., 0 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
-
-## audit
-
-| Tabelle | Kl. | Ursache | Modell | Schreiber | Leser | Worker | Identitaet | Daten | Bereinigung | Policy |
-|---|---|---|---|---|---|---|---|---|---|---|
-| `domain_audit.attestations` | A | standardmandant | – | `app/api/v1/endpoints/sales_delivery_notes.py` | 0 | – | standardmandant 1, token 1 | 0 Z., 0 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
-
-## compliance
-
-| Tabelle | Kl. | Ursache | Modell | Schreiber | Leser | Worker | Identitaet | Daten | Bereinigung | Policy |
-|---|---|---|---|---|---|---|---|---|---|---|
-| `domain_compliance.compliance_pcn_status_log` | B | mandant_nullbar | – | `app/services/compliance_pcn_lifecycle_service.py` | 0 | – | – | 0 Z., 0 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
-| `domain_compliance.data_erasure_requests` | A | referenzdaten, mandant_nullbar | – | `app/api/v1/endpoints/compliance_dsgvo.py` | 0 | – | token 1 | 0 Z., 0 Mand. | – | getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant |
-| `domain_compliance.intrastat_meldungen` | A | standardmandant | – | `app/api/v1/endpoints/intrastat.py` | 1 | – | standardmandant 1, token 2 | 0 Z., 0 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
 
 ## crm
 

@@ -2,18 +2,18 @@
  "_note": "Generiert von scripts/rls_domain_matrix.py; nicht von Hand aendern.",
  "datenstand": "2026-10-27",
  "summary": {
-  "tabellen": 207,
+  "tabellen": 203,
   "nach_klasse": {
-   "A": 106,
-   "B": 49,
+   "A": 103,
+   "B": 48,
    "C": 52
   },
   "nach_ursache": {
    "dienst": 20,
    "position": 50,
-   "referenzdaten": 39,
-   "mandant_nullbar": 36,
-   "standardmandant": 60,
+   "referenzdaten": 38,
+   "mandant_nullbar": 35,
+   "standardmandant": 58,
    "identitaet": 2
   },
   "nach_domain": {
@@ -23,14 +23,6 @@
     "position": 1,
     "referenzdaten": 6,
     "standardmandant": 9
-   },
-   "audit": {
-    "standardmandant": 1
-   },
-   "compliance": {
-    "mandant_nullbar": 1,
-    "referenzdaten": 1,
-    "standardmandant": 1
    },
    "crm": {
     "dienst": 7,
@@ -1081,145 +1073,6 @@
    },
    "standardmandant_stellen": [
     "app/api/v1/endpoints/mask_frontend_bridges.py:972"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_audit.attestations",
-   "domain": "audit",
-   "class": "A",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [
-    "standardmandant"
-   ],
-   "modell": [],
-   "leser": [],
-   "schreiber": [
-    "app/api/v1/endpoints/sales_delivery_notes.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "standardmandant": 1,
-    "token": 1
-   },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/sales_delivery_notes.py:54"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_compliance.compliance_pcn_status_log",
-   "domain": "compliance",
-   "class": "B",
-   "tenant_type": "character varying(36)",
-   "eltern": [],
-   "ursache": "mandant_nullbar",
-   "gruende": [
-    "mandant_nullbar"
-   ],
-   "modell": [],
-   "leser": [],
-   "schreiber": [
-    "app/services/compliance_pcn_lifecycle_service.py"
-   ],
-   "worker": [],
-   "identitaet": {},
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_compliance.data_erasure_requests",
-   "domain": "compliance",
-   "class": "A",
-   "tenant_type": "character varying(64)",
-   "eltern": [],
-   "ursache": "referenzdaten",
-   "gruende": [
-    "referenzdaten",
-    "mandant_nullbar"
-   ],
-   "modell": [],
-   "leser": [],
-   "schreiber": [
-    "app/api/v1/endpoints/compliance_dsgvo.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "token": 1
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [
-    "app/api/v1/endpoints/compliance_dsgvo.py:205"
-   ],
-   "gemeinsam_stellen": [
-    "app/api/v1/endpoints/compliance_dsgvo.py:205"
-   ],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_compliance.intrastat_meldungen",
-   "domain": "compliance",
-   "class": "A",
-   "tenant_type": "character varying(80)",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [
-    "standardmandant"
-   ],
-   "modell": [],
-   "leser": [
-    "app/api/v1/endpoints/compliance.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/intrastat.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "standardmandant": 1,
-    "token": 2
-   },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/compliance.py:846"
    ],
    "null_stellen": [],
    "gemeinsam_stellen": [],
