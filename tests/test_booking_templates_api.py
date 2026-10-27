@@ -200,8 +200,8 @@ def _make_row(
     ])
     now = datetime(2026, 5, 5, 8, 0)
     # Columns: id, name, description, category, trigger_type, trigger_config, lines,
-    #          default_amount, currency, active, created_at, updated_at
-    return (tid, name, None, category, "MANUAL", None, lines, None, "EUR", active, now, now)
+    #          default_amount, currency, active, created_at, updated_at, shared (gemeinsame Vorlage)
+    return (tid, name, None, category, "MANUAL", None, lines, None, "EUR", active, now, now, False)
 
 
 class _FakeResult:
