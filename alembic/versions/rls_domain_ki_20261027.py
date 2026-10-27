@@ -22,7 +22,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision = "rls_domain_ki_20261027"
-down_revision = "rls_docflow_child_keys_20261027"
+down_revision = "rls_verified_agrar_20261027"
 branch_labels = None
 depends_on = None
 

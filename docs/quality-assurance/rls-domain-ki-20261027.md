@@ -11,10 +11,18 @@ description: RLS-Domain KI (Agentenvorschläge, Werkzeugausführungen, Wissensve
 
 # QA RLS-DOMAIN-KI-20261027
 
-**Basis:** Integrationszweig `codex/migration-parity-repair-20261022` @ b9f22226e (Kette bis #73).
-Zweig `claude/rls-domain-ki-20261027`. Die Migration `rls_domain_ki_20261027` folgt auf
-`rls_docflow_child_keys_20261027`, den einzigen Head laut `alembic heads`. Codex'
-Agrar-Entwurf nennt denselben Vorgänger; die Einordnung steht im Handshake.
+**Basis:** Integrationszweig `codex/migration-parity-repair-20261022` @ ed77dded3. Das ist die
+Kette bis #73 plus Codex' `rls_verified_agrar_20261027`. Zweig `claude/rls-domain-ki-20261027`. Die
+Migration `rls_domain_ki_20261027` hängt nach der vereinbarten Regel hinter
+`rls_verified_agrar_20261027`; `alembic heads` zeigt einen einzigen Head.
+
+**Nachzug auf ed77dded3:**
+- `SharedKnowledgeReadOnly` erbt jetzt von `PermissionDeniedError` (zentraler 403-Handler).
+- `process_kernel_api.py` ist wieder identisch mit dem Integrationsstand, damit die
+  Größenratsche (6100) hält.
+- Prüfstandsfenster laut Codex frei (RLS-GESAMTABNAHME-20261027). Neu gelaufen: KI 11 passed;
+  RLS-Gesamtsuite mit Größenratsche 286 passed; Bestand 663 passed.
+- Inventar regeneriert: 190 zurückgestellt.
 
 **Status:** abgeschlossen. Prüfstandsfenster nach Freigabe durch Codex (27.10.2026): `valeo_probe`
 war auf `loading_stop_fk_20261023`, ohne fremde Sitzungen, `TEST_DATABASE_URL` gesetzt.
@@ -56,7 +64,7 @@ rls_inventory/rls_rollout/rls_domain_matrix regeneriert, generate_code_inventori
 | Fachkette Wissensbasis: Version am eigenen Objekt, Sperre am gemeinsamen, Anlage mit Version | `test_fachkette_wissensversionen` |
 | Policy-Formen | `test_policy_formen` |
 
-Inventar: 192 zurückgestellt (−3), `knowledge_versions` begründet in `system_lesbar`.
+Inventar: 190 zurückgestellt (−3 gegenüber dem Integrationsstand), `knowledge_versions` begründet in `system_lesbar`.
 
 ## Verbleibend / vor Live-Aktivierung
 

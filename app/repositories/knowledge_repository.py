@@ -24,6 +24,7 @@ from app.models.knowledge import (
     KnowledgeObjectRecord,
     KnowledgeVersionRecord,
 )
+from app.core.exceptions import PermissionDeniedError
 from app.core.tenant_context import current_tenant_or_none
 
 
@@ -31,8 +32,10 @@ def _utcnow() -> datetime:
     return datetime.now(timezone.utc)
 
 
-class SharedKnowledgeReadOnly(PermissionError):
-    """Ein Mandant aendert nur eigene Wissensobjekte; gemeinsames Produktwissen pflegt die zentrale Pflege."""
+class SharedKnowledgeReadOnly(PermissionDeniedError):
+    """Ein Mandant aendert nur eigene Wissensobjekte; gemeinsames Produktwissen pflegt die zentrale Pflege.
+
+    PermissionDeniedError bildet der zentrale Fehlerhandler auf 403 ab (app/core/exceptions.py)."""
 
 
 def _ensure_writable(record: KnowledgeObjectRecord) -> None:

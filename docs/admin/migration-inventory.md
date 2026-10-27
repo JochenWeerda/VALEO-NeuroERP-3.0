@@ -432,6 +432,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `rls_rollout_20261026` | Roll row-level security out to the class-A tables cleared by the analysis (RLS plan P5). |
 | `rls_system_read_justified_20261027` | Shared 'system' rows readable only where justified (RLS, system-wide). |
 | `rls_system_role_20261026` | Row-level security for tables freed by the valeo_system connection (RLS plan P6). |
+| `rls_verified_agrar_20261027` | RLS for two Agrar tables whose API tenant fallbacks have been removed. |
 | `runtime_ddl_to_migrations_20261026` | Move schema objects that the application created at request time into the migration chain. |
 | `runtime_sweep_repair_20260702` | RUNTIME-SWEEP-REPAIR-001: Fresh-DB-Drift schliessen (SPEC-P0-02). |
 | `sales_ab_preisabweichung_20260623` | DOM-SALES-004: sales_ab_status_log, lieferschein_close_log, sales_preisabweichungen |

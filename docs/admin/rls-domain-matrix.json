@@ -2,9 +2,9 @@
  "_note": "Generiert von scripts/rls_domain_matrix.py; nicht von Hand aendern.",
  "datenstand": "2026-10-27",
  "summary": {
-  "tabellen": 192,
+  "tabellen": 190,
   "nach_klasse": {
-   "A": 93,
+   "A": 91,
    "B": 48,
    "C": 51
   },
@@ -13,7 +13,7 @@
    "position": 49,
    "referenzdaten": 33,
    "mandant_nullbar": 36,
-   "standardmandant": 52,
+   "standardmandant": 50,
    "identitaet": 2
   },
   "nach_domain": {
@@ -22,7 +22,7 @@
     "mandant_nullbar": 6,
     "position": 1,
     "referenzdaten": 6,
-    "standardmandant": 9
+    "standardmandant": 8
    },
    "crm": {
     "dienst": 7,
@@ -58,7 +58,7 @@
     "mandant_nullbar": 4,
     "position": 6,
     "referenzdaten": 12,
-    "standardmandant": 12
+    "standardmandant": 11
    },
    "log": {
     "dienst": 1,
@@ -99,47 +99,6 @@
   }
  },
  "tables": [
-  {
-   "table": "domain_agrar.agrar_biostimulanzien",
-   "domain": "agrar",
-   "class": "A",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [
-    "standardmandant"
-   ],
-   "modell": [
-    "app/infrastructure/models/agrar_models.py"
-   ],
-   "leser": [
-    "app/api/v1/schemas/agrar.py",
-    "app/infrastructure/models/__init__.py",
-    "app/infrastructure/models/agrar_models.py"
-   ],
-   "schreiber": [
-    "app/domains/agrar/api/biostimulanzien.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "nutzlast": 1,
-    "standardmandant": 1
-   },
-   "standardmandant_stellen": [
-    "app/domains/agrar/api/biostimulanzien.py:33"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
   {
    "table": "domain_agrar.agrar_duenger",
    "domain": "agrar",
@@ -4162,49 +4121,6 @@
    "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_shared.users"
   },
   {
-   "table": "domain_inventory.agrar_contract_allocations",
-   "domain": "inventory",
-   "class": "A",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [
-    "standardmandant"
-   ],
-   "modell": [
-    "app/infrastructure/models/l3c_models.py"
-   ],
-   "leser": [
-    "app/core/database.py",
-    "app/infrastructure/models/__init__.py",
-    "app/infrastructure/models/l3c_models.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/agrar_contracts.py",
-    "app/api/v1/endpoints/weighing_tickets.py",
-    "app/services/agrar_contract_service.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "standardmandant": 1,
-    "token": 1
-   },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/weighing_tickets.py:30"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
    "table": "domain_inventory.agrar_contracts",
    "domain": "inventory",
    "class": "A",
@@ -4241,12 +4157,11 @@
    ],
    "worker": [],
    "identitaet": {
-    "standardmandant": 2,
-    "token": 4
+    "standardmandant": 1,
+    "token": 5
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py:972",
-    "app/api/v1/endpoints/weighing_tickets.py:30"
+    "app/api/v1/endpoints/mask_frontend_bridges.py:972"
    ],
    "null_stellen": [
     "app/services/mcp_execution_service.py:3155"
@@ -4539,8 +4454,8 @@
    "identitaet": {
     "dienst": 1,
     "nutzlast": 4,
-    "standardmandant": 8,
-    "token": 21
+    "standardmandant": 7,
+    "token": 22
    },
    "standardmandant_stellen": [
     "app/api/v1/endpoints/article_extensions.py:19",
@@ -4548,7 +4463,6 @@
     "app/api/v1/endpoints/compliance.py:846",
     "app/api/v1/endpoints/mask_frontend_bridges.py:972",
     "app/api/v1/endpoints/pos_retoure.py:20",
-    "app/api/v1/endpoints/weighing_tickets.py:30",
     "app/infrastructure/models/futtermittel_models.py:92",
     "app/seeds/inventory_seed.py:20"
    ],
@@ -5886,8 +5800,7 @@
    "ursache": "referenzdaten",
    "gruende": [
     "referenzdaten",
-    "mandant_nullbar",
-    "standardmandant"
+    "mandant_nullbar"
    ],
    "modell": [
     "app/infrastructure/models/l3c_models.py"
@@ -5910,18 +5823,16 @@
    "schreiber": [
     "app/api/v1/endpoints/nawaro_raps.py",
     "app/api/v1/endpoints/weighing_tickets.py",
+    "app/services/agrar_contract_service.py",
     "app/services/harvest_acceptance_service.py",
     "app/services/studio_process_simulation.py",
     "modules/agrar/services/harvest_rule_store.py"
    ],
    "worker": [],
    "identitaet": {
-    "standardmandant": 1,
-    "token": 2
+    "token": 3
    },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/weighing_tickets.py:30"
-   ],
+   "standardmandant_stellen": [],
    "null_stellen": [
     "app/services/mcp_execution_service.py:3155"
    ],

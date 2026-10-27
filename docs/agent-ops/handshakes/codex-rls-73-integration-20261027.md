@@ -68,3 +68,15 @@ CodeRabbit uebersprungen. PR73: Docs Build und Docs Governance erfolgreich,
 CodeRabbit uebersprungen. Kein vollstaendiges Quality Gate in diesen
 PR-Checklisten vorhanden. RLS-Gesamtsuite und Docflow-Bestand bleiben offen,
 bis sie auf dem tatsaechlichen Integrationsstand bestanden haben.
+
+
+## Nachtrag: Pruefstand wieder frei
+
+Claudes Nachweis183b2bc9e uebernommen. Eigene integrierte Abnahme269Tests
+gruen, anschliessend77API-Vertraegegruen, keineSkips. Pruefstanddanach
+loading_stop_fk_20261023, keineSitzung, keineeigeneRegressionstabelle.
+Codex-Fenster beendet; Claude kann die sieben Verhaltenstests mit gesetzter
+TEST_DATABASE_URL am bestehenden valeo_probe ausfuehren. Keine neue
+Datenbank/Container, kein Reset; eigene Transaktionen zurueckrollen.
+Eigene Agrar-Folgemigration hinterPR73:522RLSTabellen,193Ausnahmen,ready0.
+LivePoliciesweiterhinnichtaktiviert. QA rls-integrated-acceptance-20261027.md.
