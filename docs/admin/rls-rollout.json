@@ -2,12 +2,12 @@
  "_note": "Generiert von scripts/rls_rollout.py aus docs/admin/rls-inventory.json; nicht von Hand aendern.",
  "summary": {
   "ready": 0,
-  "pending": 80,
+  "pending": 66,
   "reasons": {
    "dienst": 10,
    "mandant_ermitteln": 1,
-   "standardmandant": 57,
-   "mandant_null": 28,
+   "standardmandant": 46,
+   "mandant_null": 24,
    "uebergreifend": 0,
    "identitaet": 4
   }
@@ -85,48 +85,11 @@
    "mandant_null",
    "standardmandant"
   ],
-  "domain_inventory.article_batches": [
-   "standardmandant"
-  ],
-  "domain_inventory.article_documents": [
-   "standardmandant"
-  ],
-  "domain_inventory.article_selections": [
-   "standardmandant"
-  ],
-  "domain_inventory.bin_stock": [
-   "standardmandant"
-  ],
-  "domain_inventory.epcis_events": [
-   "standardmandant"
-  ],
-  "domain_inventory.inventory_count_lines": [
-   "mandant_null"
-  ],
-  "domain_inventory.inventory_counts": [
-   "mandant_null"
-  ],
-  "domain_inventory.inventory_lots": [
-   "mandant_null"
-  ],
-  "domain_inventory.inventory_stock_movements": [
-   "mandant_null",
-   "standardmandant"
-  ],
   "domain_inventory.material_flow_edges": [
    "mandant_null"
   ],
   "domain_inventory.material_flow_nodes": [
    "mandant_null"
-  ],
-  "domain_inventory.preparation_list_lines": [
-   "standardmandant"
-  ],
-  "domain_inventory.preparation_lists": [
-   "standardmandant"
-  ],
-  "domain_inventory.shipping_units": [
-   "standardmandant"
   ],
   "domain_inventory.silo_cells": [
    "mandant_null"
@@ -140,12 +103,6 @@
   "domain_inventory.silos": [
    "dienst",
    "mandant_null"
-  ],
-  "domain_inventory.warehouse_bins": [
-   "standardmandant"
-  ],
-  "domain_inventory.warehouse_zones": [
-   "standardmandant"
   ],
   "domain_inventory.weighing_tickets": [
    "mandant_null"

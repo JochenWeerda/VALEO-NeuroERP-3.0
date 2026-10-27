@@ -1449,12 +1449,44 @@
    "live": 0,
    "code": []
   },
+  "domain_inventory.article_batches": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_inventory.article_documents": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
   "domain_inventory.article_price_thresholds": {
    "frisch": 0,
    "live": 0,
    "code": []
   },
+  "domain_inventory.article_selections": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_inventory.article_suppliers": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "domain_inventory.articles": {
+   "frisch": 0,
+   "live": 0,
+   "code": [
+    "app/services/procurement_service.py:405"
+   ]
+  },
   "domain_inventory.bin_locations": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_inventory.bin_stock": {
    "frisch": 0,
    "live": 0,
    "code": []
@@ -1479,9 +1511,34 @@
    "live": 0,
    "code": []
   },
+  "domain_inventory.drying_rule_factor_ranges": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "domain_inventory.drying_rule_lookup_rows": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
   "domain_inventory.drying_rule_sets": {
    "frisch": 0,
    "live": 0,
+   "code": []
+  },
+  "domain_inventory.epcis_events": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_inventory.harvest_acceptance_lines": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "domain_inventory.harvest_acceptance_positions": {
+   "frisch": 0,
+   "live": null,
    "code": []
   },
   "domain_inventory.harvest_acceptances": {
@@ -1504,6 +1561,33 @@
    "live": 0,
    "code": []
   },
+  "domain_inventory.inventory_count_lines": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_inventory.inventory_counts": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_inventory.inventory_lot_movements": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_inventory.inventory_lots": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_inventory.inventory_stock_movements": {
+   "frisch": 0,
+   "live": 0,
+   "code": [
+    "app/services/procurement_service.py:405"
+   ]
+  },
   "domain_inventory.lkw_annahme_queue": {
    "frisch": 0,
    "live": 0,
@@ -1524,6 +1608,11 @@
    "live": 0,
    "code": []
   },
+  "domain_inventory.nawaro_print_notifications": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
   "domain_inventory.nawaro_raps_profiles": {
    "frisch": 0,
    "live": 0,
@@ -1539,12 +1628,27 @@
    "live": 0,
    "code": []
   },
+  "domain_inventory.preparation_list_lines": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_inventory.preparation_lists": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
   "domain_inventory.price_adjustment_rules": {
    "frisch": 0,
    "live": 0,
    "code": []
   },
   "domain_inventory.quality_protocols": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_inventory.shipping_units": {
    "frisch": 0,
    "live": 0,
    "code": []
@@ -1569,6 +1673,26 @@
    "live": 0,
    "code": []
   },
+  "domain_inventory.stock_item": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "domain_inventory.stock_locations": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "domain_inventory.stock_movement": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "domain_inventory.stock_movements": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
   "domain_inventory.storage_fee_runs": {
    "frisch": 0,
    "live": null,
@@ -1584,12 +1708,27 @@
    "live": 0,
    "code": []
   },
+  "domain_inventory.warehouse_bins": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
   "domain_inventory.warehouse_transfer_lines": {
    "frisch": 0,
    "live": 0,
    "code": []
   },
   "domain_inventory.warehouse_transfers": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_inventory.warehouse_zones": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_inventory.warehouses": {
    "frisch": 0,
    "live": 0,
    "code": []

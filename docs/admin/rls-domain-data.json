@@ -331,125 +331,6 @@
    "system": 0,
    "mandanten": 1
   },
-  "domain_inventory.article_batches": {
-   "zeilen": 2,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 1
-  },
-  "domain_inventory.article_documents": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "domain_inventory.article_selections": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "domain_inventory.article_suppliers": {
-   "zeilen": 0,
-   "eltern_fk": [
-    "article_id -> domain_inventory.articles.id",
-    "partner_id -> domain_crm.business_partners.partner_id"
-   ],
-   "verwaist": 0,
-   "ohne_eltern": 0
-  },
-  "domain_inventory.articles": {
-   "zeilen": 131,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 2
-  },
-  "domain_inventory.bin_stock": {
-   "zeilen": 9,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 1
-  },
-  "domain_inventory.drying_rule_factor_ranges": {
-   "zeilen": 0,
-   "eltern_fk": [
-    "rule_set_id -> domain_inventory.drying_rule_sets.id"
-   ],
-   "verwaist": 0,
-   "ohne_eltern": 0
-  },
-  "domain_inventory.drying_rule_lookup_rows": {
-   "zeilen": 0,
-   "eltern_fk": [
-    "rule_set_id -> domain_inventory.drying_rule_sets.id"
-   ],
-   "verwaist": 0,
-   "ohne_eltern": 0
-  },
-  "domain_inventory.epcis_events": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "domain_inventory.harvest_acceptance_lines": {
-   "zeilen": 1,
-   "eltern_fk": [
-    "harvest_acceptance_id -> domain_inventory.harvest_acceptances.id"
-   ],
-   "verwaist": 0,
-   "ohne_eltern": 0
-  },
-  "domain_inventory.harvest_acceptance_positions": {
-   "zeilen": 8,
-   "eltern_fk": [
-    "article_id -> domain_inventory.articles.id",
-    "harvest_acceptance_id -> domain_inventory.harvest_acceptances.id"
-   ],
-   "verwaist": 0,
-   "ohne_eltern": 0
-  },
-  "domain_inventory.inventory_count_lines": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "domain_inventory.inventory_counts": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "domain_inventory.inventory_lot_movements": {
-   "zeilen": 2,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 1
-  },
-  "domain_inventory.inventory_lots": {
-   "zeilen": 1,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 1
-  },
-  "domain_inventory.inventory_stock_movements": {
-   "zeilen": 128,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 2
-  },
   "domain_inventory.material_flow_edges": {
    "zeilen": 0,
    "null": 0,
@@ -463,34 +344,6 @@
    "default": 0,
    "system": 0,
    "mandanten": 0
-  },
-  "domain_inventory.nawaro_print_notifications": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "domain_inventory.preparation_list_lines": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "domain_inventory.preparation_lists": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "domain_inventory.shipping_units": {
-   "zeilen": 37,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 1
   },
   "domain_inventory.silo_cells": {
    "zeilen": 0,
@@ -519,27 +372,6 @@
    "default": 0,
    "system": 0,
    "mandanten": 1
-  },
-  "domain_inventory.warehouse_bins": {
-   "zeilen": 1,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 1
-  },
-  "domain_inventory.warehouse_zones": {
-   "zeilen": 1,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 1
-  },
-  "domain_inventory.warehouses": {
-   "zeilen": 4,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 2
   },
   "domain_inventory.weighing_tickets": {
    "zeilen": 50,
