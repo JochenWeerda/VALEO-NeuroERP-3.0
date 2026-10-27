@@ -62,7 +62,7 @@ OpenAPI: nur /compliance/ustva und /finance/vat-return*; vorbestehende Drift (cl
 ruff/bandit: keine neuen Befunde (compliance.py hat vorbestehend 4 x E402)
 ```
 
-**Bestandsvergleich unvollstaendig:** Der Lauf ueber 246 betroffene Module (Basis #79 gegen Zweig, Pakete zu 40) wurde wegen Speichermangel abgebrochen. Basis Pakete 00–04: 5600 bestanden, 7 rot; die Zweigseite ist nicht gelaufen. Der Vergleich steht aus.
+**Bestand:** 246 betroffene Module auf dem Zweig (13 Pakete zu 20, nacheinander, mit Speicherpruefung): 8248 bestanden, 22 rot, 6 uebersprungen (auf der Basis ebenso). Die roten Module auf der Basis #79: 21 rot. **Nur im Zweig rot:** `test_gap_fixes_batch1::test_ustva_status_returns_200` — auf dem nicht migrierten Pruefstand fehlt `elster_transferticket`; gegen das migrierte Schema besteht er (siehe oben). 0 neu rot durch Code. Ein erster Lauf in Paketen zu 40 war wegen Speichermangel abgebrochen worden.
 
 **Pruefstand ohne Migration:** Auf `valeo_probe` (Stand `loading_stop_fk_20261023`, wird nicht migriert) antwortet
 `GET /compliance/ustva` mit 503, weil `elster_transferticket` fehlt. Mit migriertem Schema (wie in CI) bestehen
