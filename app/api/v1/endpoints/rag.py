@@ -10,12 +10,23 @@ from sqlalchemy.orm import Session
 from typing import List, Dict, Any, Optional
 
 from ....core.database import get_db
-from ....infrastructure.rag.vector_store import get_vector_store
-from ....infrastructure.rag.indexer import get_indexer
 from app.core.tenant import get_tenant_id
 from pydantic import Field
 
 logger = logging.getLogger(__name__)
+
+
+def get_vector_store():
+    """Erst beim Aufruf laden: chromadb/sentence-transformers sind schwer und optional."""
+    from ....infrastructure.rag.vector_store import get_vector_store as _get_vector_store
+
+    return _get_vector_store()
+
+
+def get_indexer():
+    from ....infrastructure.rag.indexer import get_indexer as _get_indexer
+
+    return _get_indexer()
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.rag_schemas import RagOut
@@ -58,8 +69,20 @@ class IndexResponse(BaseModel):
     status: str
 
 
+def tenant_where(tenant_id: str, filters: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Suchfilter, der immer an den Mandanten gebunden ist.
+
+    Die Collections enthalten Dokumente aller Mandanten (Mandant in den Metadaten). Bis 27.10.2026
+    kamen die Filter allein vom Aufrufer: ohne Filter fand die Suche Kunden und Artikel aller
+    Mandanten. Filter des Aufrufers schraenken weiter ein, ersetzen den Mandanten aber nie.
+    """
+    if not filters:
+        return {"tenant_id": tenant_id}
+    return {"$and": [{"tenant_id": tenant_id}, filters]}
+
+
 @router.post("/search", response_model=SearchResponse, summary="Search semantic")
-async def semantic_search(request: SearchRequest):
+async def semantic_search(request: SearchRequest, tenant_id: str = Depends(get_tenant_id)):
     """
     Perform semantic search across indexed documents.
     
@@ -74,7 +97,7 @@ async def semantic_search(request: SearchRequest):
             collection_name=request.collection,
             query=request.query,
             n_results=request.limit,
-            where=request.filters
+            where=tenant_where(tenant_id, request.filters)
         )
         
         # Format response

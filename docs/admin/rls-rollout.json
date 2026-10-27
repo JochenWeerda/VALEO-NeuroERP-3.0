@@ -2,12 +2,12 @@
  "_note": "Generiert von scripts/rls_rollout.py aus docs/admin/rls-inventory.json; nicht von Hand aendern.",
  "summary": {
   "ready": 0,
-  "pending": 93,
+  "pending": 91,
   "reasons": {
    "dienst": 10,
    "mandant_ermitteln": 1,
    "standardmandant": 67,
-   "mandant_null": 35,
+   "mandant_null": 33,
    "uebergreifend": 0,
    "identitaet": 4
   }
@@ -281,9 +281,6 @@
   "domain_shared.rations_zugang": [
    "standardmandant"
   ],
-  "public.agent_proposals": [
-   "mandant_null"
-  ],
   "public.crm_activities": [
    "dienst",
    "mandant_null",
@@ -313,9 +310,6 @@
   "public.inventory_warehouses": [
    "dienst",
    "standardmandant"
-  ],
-  "public.mcp_tool_executions": [
-   "mandant_null"
   ]
  }
 }

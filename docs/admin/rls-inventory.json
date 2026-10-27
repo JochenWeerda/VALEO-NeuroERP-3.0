@@ -3,14 +3,14 @@
  "summary": {
   "tables": 775,
   "by_class": {
-   "A": 612,
+   "A": 613,
    "B": 51,
-   "C": 52,
+   "C": 51,
    "D": 60
   },
-  "rls_enabled": 522,
+  "rls_enabled": 525,
   "tenant_types": {
-   "character varying": 296,
+   "character varying": 297,
    "character varying(100)": 9,
    "character varying(120)": 39,
    "character varying(128)": 1,
@@ -5188,14 +5188,11 @@
   },
   {
    "table": "domain_shared.knowledge_versions",
-   "class": "C",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying",
+   "rls": true,
    "force_rls": false,
-   "policies": 0,
-   "tenant_parents": [
-    "domain_shared.knowledge_objects"
-   ]
+   "policies": 4
   },
   {
    "table": "domain_shared.kontrakt_mengenzeitraeume",
@@ -5859,9 +5856,9 @@
    "table": "public.agent_proposals",
    "class": "A",
    "tenant_type": "character varying(128)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "public.alembic_version",
@@ -6422,9 +6419,9 @@
    "table": "public.mcp_tool_executions",
    "class": "A",
    "tenant_type": "character varying(100)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "public.number_series",

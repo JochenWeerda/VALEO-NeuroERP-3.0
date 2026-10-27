@@ -13,19 +13,18 @@ description: Generierte Entscheidungsmatrix der noch nicht abgesicherten Mandant
 
 Generiert von `scripts/rls_domain_matrix.py`; nicht von Hand aendern. Entscheidungen und Reihenfolge: `docs/architecture/rls-domaenen-entscheidungsmatrix.md`.
 
-Datenstand gewachsene Datenbank: 2026-10-27. Tabellen: 195.
+Datenstand gewachsene Datenbank: 2026-10-27. Tabellen: 190.
 
 | Domain | dienst | position | referenzdaten | mandant_nullbar | standardmandant | identitaet |
 |---|---|---|---|---|---|---|
-| agrar | 1 | 1 | 6 | 6 | 9 |  |
+| agrar | 1 | 1 | 6 | 6 | 8 |  |
 | crm | 7 | 17 | 3 | 5 | 5 |  |
 | dev_mock |  |  |  |  |  | 1 |
 | einkauf |  | 7 | 2 | 4 | 1 |  |
 | erp | 1 | 1 | 2 | 4 | 2 |  |
 | finance | 1 |  |  |  |  |  |
 | infrastructure |  | 1 |  |  |  |  |
-| inventory | 7 | 6 | 12 | 4 | 12 |  |
-| ki |  |  | 2 |  |  |  |
+| inventory | 7 | 6 | 12 | 4 | 11 |  |
 | log | 1 | 3 |  |  |  |  |
 | logistics |  |  | 2 | 5 |  |  |
 | mfg |  |  |  | 3 |  |  |
@@ -33,13 +32,12 @@ Datenstand gewachsene Datenbank: 2026-10-27. Tabellen: 195.
 | portal |  | 1 |  |  |  |  |
 | procurement |  |  |  | 1 |  |  |
 | sales |  | 2 | 2 | 1 |  |  |
-| shared | 1 | 6 | 3 | 3 | 20 | 1 |
+| shared | 1 | 5 | 3 | 3 | 20 | 1 |
 
 ## agrar
 
 | Tabelle | Kl. | Ursache | Modell | Schreiber | Leser | Worker | Identitaet | Daten | Bereinigung | Policy |
 |---|---|---|---|---|---|---|---|---|---|---|
-| `domain_agrar.agrar_biostimulanzien` | A | standardmandant | `app/infrastructure/models/agrar_models.py` | `app/domains/agrar/api/biostimulanzien.py` | 3 | – | nutzlast 1, standardmandant 1 | 0 Z., 0 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
 | `domain_agrar.agrar_duenger` | A | standardmandant | `app/infrastructure/models/agrar_models.py` | `app/api/v1/endpoints/agrar_feldbuch.py`, `app/api/v1/endpoints/agrar_stammdaten_kommandos.py`, `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/marketing.py` (+4) | 8 | – | standardmandant 2, token 4 | 0 Z., 0 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
 | `domain_agrar.agrar_partie_links` | B | mandant_nullbar | – | `app/services/agrar_partie_aggregate_service.py` | 0 | – | – | 0 Z., 0 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
 | `domain_agrar.agrar_psm` | A | standardmandant | `app/infrastructure/models/agrar_models.py` | `app/api/v1/endpoints/agrar_feldbuch.py`, `app/api/v1/endpoints/compliance.py`, `app/api/v1/endpoints/portal_feldbuch.py`, `app/core/screen_definitions.py` (+7) | 20 | – | standardmandant 4, token 5 | 0 Z., 0 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
@@ -161,13 +159,12 @@ Datenstand gewachsene Datenbank: 2026-10-27. Tabellen: 195.
 
 | Tabelle | Kl. | Ursache | Modell | Schreiber | Leser | Worker | Identitaet | Daten | Bereinigung | Policy |
 |---|---|---|---|---|---|---|---|---|---|---|
-| `domain_inventory.agrar_contract_allocations` | A | standardmandant | `app/infrastructure/models/l3c_models.py` | `app/api/v1/endpoints/agrar_contracts.py`, `app/api/v1/endpoints/weighing_tickets.py`, `app/services/agrar_contract_service.py` | 3 | – | standardmandant 1, token 1 | 0 Z., 0 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
-| `domain_inventory.agrar_contracts` | A | referenzdaten, mandant_nullbar, standardmandant | `app/infrastructure/models/l3c_models.py` | `app/api/v1/endpoints/agrar_contracts.py`, `app/api/v1/endpoints/nawaro_raps.py`, `app/api/v1/endpoints/weighing_tickets.py`, `app/routers/contracts_router.py` (+3) | 9 | – | standardmandant 2, token 4 | 3 Z., 1 Mand. | – | getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant |
+| `domain_inventory.agrar_contracts` | A | referenzdaten, mandant_nullbar, standardmandant | `app/infrastructure/models/l3c_models.py` | `app/api/v1/endpoints/agrar_contracts.py`, `app/api/v1/endpoints/nawaro_raps.py`, `app/api/v1/endpoints/weighing_tickets.py`, `app/routers/contracts_router.py` (+3) | 9 | – | standardmandant 1, token 5 | 3 Z., 1 Mand. | – | getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant |
 | `domain_inventory.article_batches` | A | standardmandant | `app/infrastructure/models/l3c_models.py` | `app/api/v1/endpoints/article_extensions.py`, `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/inventory_operations.py` | 3 | – | standardmandant 1, token 2 | 2 Z., 1 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
 | `domain_inventory.article_documents` | A | standardmandant | `app/infrastructure/models/__init__.py` | `app/api/v1/endpoints/articles.py`, `app/api/v1/endpoints/dms_images.py` | 1 | – | nutzlast 1, standardmandant 1 | 0 Z., 0 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
 | `domain_inventory.article_selections` | A | standardmandant | `app/infrastructure/models/l3c_models.py` | `app/api/v1/endpoints/article_extensions.py` | 2 | – | standardmandant 1 | 0 Z., 0 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
 | `domain_inventory.article_suppliers` | C | position, standardmandant | `app/infrastructure/models/__init__.py` | `app/api/v1/endpoints/articles.py`, `modules/einkauf/services/bestellvorschlag_service.py` | 2 | – | nutzlast 1, standardmandant 1 | 0 Z. | tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id) | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_crm.business_partners, domain_inventory.articles |
-| `domain_inventory.articles` | B | dienst, referenzdaten, mandant_nullbar, standardmandant | `app/infrastructure/models/__init__.py` | `app/agents/workflows/bestellvorschlag.py`, `app/api/v1/endpoints/article_extensions.py`, `app/api/v1/endpoints/articles.py`, `app/api/v1/endpoints/charges.py` (+24) | 45 | `app/workers/compliance_monitor.py` | dienst 1, nutzlast 4, standardmandant 8, token 21 | 131 Z., 2 Mand. | – | keine, bis der Dienst tokengebundene Identitaet hat (rls-dienste-identitaet-vorschlag.md) |
+| `domain_inventory.articles` | B | dienst, referenzdaten, mandant_nullbar, standardmandant | `app/infrastructure/models/__init__.py` | `app/agents/workflows/bestellvorschlag.py`, `app/api/v1/endpoints/article_extensions.py`, `app/api/v1/endpoints/articles.py`, `app/api/v1/endpoints/charges.py` (+24) | 45 | `app/workers/compliance_monitor.py` | dienst 1, nutzlast 4, standardmandant 7, token 22 | 131 Z., 2 Mand. | – | keine, bis der Dienst tokengebundene Identitaet hat (rls-dienste-identitaet-vorschlag.md) |
 | `domain_inventory.bin_stock` | A | standardmandant | `app/infrastructure/models/wms_models.py` | `app/api/v1/endpoints/pos_retoure.py`, `app/services/warehouse_service.py` | 3 | – | nutzlast 1, standardmandant 1 | 9 Z., 1 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
 | `domain_inventory.drying_rule_factor_ranges` | C | position | `app/infrastructure/models/l3c_models.py` | `app/api/v1/endpoints/agrar_drying_rules.py`, `app/services/agrar_drying_rule_service.py` | 5 | – | token 1 | 0 Z. | tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id) | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_inventory.drying_rule_sets |
 | `domain_inventory.drying_rule_lookup_rows` | C | position | `app/infrastructure/models/l3c_models.py` | `app/api/v1/endpoints/agrar_drying_rules.py`, `app/services/agrar_drying_rule_service.py` | 5 | – | token 1 | 0 Z. | tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id) | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_inventory.drying_rule_sets |
@@ -197,18 +194,11 @@ Datenstand gewachsene Datenbank: 2026-10-27. Tabellen: 195.
 | `domain_inventory.warehouse_bins` | A | standardmandant | `app/infrastructure/models/wms_models.py` | `app/services/warehouse_service.py` | 5 | – | nutzlast 1, standardmandant 1, token 1 | 1 Z., 1 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
 | `domain_inventory.warehouse_zones` | A | standardmandant | `app/infrastructure/models/wms_models.py` | `app/services/warehouse_service.py` | 4 | – | nutzlast 1, standardmandant 1 | 1 Z., 1 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
 | `domain_inventory.warehouses` | B | dienst, mandant_nullbar, standardmandant | `app/infrastructure/models/__init__.py` | `app/api/v1/endpoints/articles.py`, `app/api/v1/endpoints/warehouse_transfers.py`, `app/api/v1/endpoints/warehouses.py`, `app/domains/inventory/api/warehouses.py` (+9) | 20 | – | dienst 6, nutzlast 3, standardmandant 4, token 4 | 4 Z., 2 Mand. | – | keine, bis der Dienst tokengebundene Identitaet hat (rls-dienste-identitaet-vorschlag.md) |
-| `domain_inventory.weighing_tickets` | A | referenzdaten, mandant_nullbar, standardmandant | `app/infrastructure/models/l3c_models.py` | `app/api/v1/endpoints/nawaro_raps.py`, `app/api/v1/endpoints/weighing_tickets.py`, `app/services/harvest_acceptance_service.py`, `app/services/studio_process_simulation.py` (+1) | 13 | – | standardmandant 1, token 2 | 50 Z., 2 Mand. | – | getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant |
+| `domain_inventory.weighing_tickets` | A | referenzdaten, mandant_nullbar | `app/infrastructure/models/l3c_models.py` | `app/api/v1/endpoints/nawaro_raps.py`, `app/api/v1/endpoints/weighing_tickets.py`, `app/services/agrar_contract_service.py`, `app/services/harvest_acceptance_service.py` (+2) | 13 | – | token 3 | 50 Z., 2 Mand. | – | getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant |
 | `public.inventory_goods_receipt_lines` | C | dienst, position, standardmandant | `services/inventory/app/db/models.py` | `services/inventory/app/api/v1/endpoints/goods_receipt.py` | 2 | – | dienst 2, standardmandant 1 | 3 Z. | tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id) | keine, bis der Dienst tokengebundene Identitaet hat (rls-dienste-identitaet-vorschlag.md) |
 | `public.inventory_goods_receipts` | A | dienst, standardmandant | `services/inventory/app/db/models.py` | `services/inventory/app/api/v1/endpoints/goods_receipt.py` | 3 | – | dienst 2, standardmandant 1 | 2 Z., 1 Mand. | – | keine, bis der Dienst tokengebundene Identitaet hat (rls-dienste-identitaet-vorschlag.md) |
 | `public.inventory_locations` | C | dienst, position, standardmandant | `services/inventory/app/db/models.py` | `app/api/v1/endpoints/betriebsstaetten.py`, `app/api/v1/endpoints/compat.py`, `services/inventory/app/integration/subscribers.py`, `services/inventory/app/services/inventory_service.py` | 12 | – | dienst 6, kopfzeile 1, standardmandant 1, token 1 | 1 Z. | tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id) | keine, bis der Dienst tokengebundene Identitaet hat (rls-dienste-identitaet-vorschlag.md) |
 | `public.inventory_warehouses` | A | dienst, standardmandant | `services/inventory/app/db/models.py` | `app/api/v1/endpoints/articles.py`, `app/api/v1/endpoints/warehouse_transfers.py`, `app/api/v1/endpoints/warehouses.py`, `app/domains/inventory/api/warehouses.py` (+8) | 12 | – | dienst 6, nutzlast 2, standardmandant 2, token 2 | 1 Z., 1 Mand. | – | keine, bis der Dienst tokengebundene Identitaet hat (rls-dienste-identitaet-vorschlag.md) |
-
-## ki
-
-| Tabelle | Kl. | Ursache | Modell | Schreiber | Leser | Worker | Identitaet | Daten | Bereinigung | Policy |
-|---|---|---|---|---|---|---|---|---|---|---|
-| `public.agent_proposals` | A | referenzdaten, mandant_nullbar | `app/infrastructure/models/agent_proposal_model.py` | `app/api/v1/endpoints/sales_credit_notes.py`, `app/repositories/agent_proposal_repository.py`, `app/services/mcp_execution_service.py` | 1 | – | nutzlast 1, token 1 | 0 Z., 0 Mand. | – | getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant |
-| `public.mcp_tool_executions` | A | referenzdaten, mandant_nullbar | – | `app/services/mcp_execution_service.py` | 0 | – | – | 0 Z., 0 Mand. | – | getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant |
 
 ## log
 
@@ -304,7 +294,6 @@ Datenstand gewachsene Datenbank: 2026-10-27. Tabellen: 195.
 | `domain_shared.grundfutter_analysen` | A | standardmandant | `app/infrastructure/models/futtermittel_models.py` | `app/api/v1/endpoints/grundfutter_analysen.py`, `app/api/v1/endpoints/rations_optimization.py`, `app/services/feeding_feed_analysis_service.py` | 2 | – | kopfzeile 1, standardmandant 4, token 1 | 144 Z., 1 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
 | `domain_shared.internal_messages` | A | standardmandant | `app/infrastructure/models/l3c_models.py` | `app/api/v1/endpoints/collab_notes.py`, `app/api/v1/endpoints/messages.py` | 2 | – | nutzlast 1, standardmandant 1, token 1 | 0 Z., 0 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
 | `domain_shared.job_artifacts` | C | position | – | – | 1 | `app/api/v1/endpoints/job_runner.py` | token 1 | 0 Z. | tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id) | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_shared.jobs |
-| `domain_shared.knowledge_versions` | C | position | `app/models/knowledge.py` | `app/api/v1/endpoints/knowledge_api.py`, `app/repositories/knowledge_repository.py` | 1 | – | token 1 | 8 Z. | tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id) | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_shared.knowledge_objects |
 | `domain_shared.logistik_frachttabellen` | A | referenzdaten, mandant_nullbar | – | `app/api/v1/endpoints/logistik_frachttabellen.py` | 1 | – | kopfzeile 1 | 0 Z., 0 Mand. | – | getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant |
 | `domain_shared.master_data_entries` | A | standardmandant | `app/infrastructure/models/l3c_models.py` | `app/api/v1/endpoints/master_data.py` | 2 | – | standardmandant 1 | 0 Z., 0 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
 | `domain_shared.policy_rules` | B | mandant_nullbar | `app/infrastructure/models/__init__.py` | `app/services/policy_service.py` | 1 | – | – | 3 Z., 0 Mand., 3 null | 3 Zeilen ohne Mandant: Herkunft klaeren (blockiert die Migration) | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |

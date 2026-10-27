@@ -3,7 +3,8 @@
  "altbestand_hoechstens": 0,
  "system_lesbar": {
   "domain_erp.booking_templates": "Nutzerentscheidung 27.10.2026: gemeinsame Buchungsvorlagen (Standardkontenrahmen) fuer alle Mandanten; lesen und anwenden, nicht aendern (rls_booking_templates_shared_20261027)",
-  "domain_shared.knowledge_objects": "Gemeinsames Produktwissen (SOPs, Standards) fuer alle Mandanten; nur zentrale Pflege aendert es, Mandanten aendern eigene Objekte (rls_knowledge_objects_shared_20261027)"
+  "domain_shared.knowledge_objects": "Gemeinsames Produktwissen (SOPs, Standards) fuer alle Mandanten; nur zentrale Pflege aendert es, Mandanten aendern eigene Objekte (rls_knowledge_objects_shared_20261027)",
+  "domain_shared.knowledge_versions": "Versionen des gemeinsamen Produktwissens (gleiche Familie wie knowledge_objects); Mandanten aendern nur eigene (rls_domain_ki_20261027)"
  },
  "zurueckgestellt": {
   "domain_agrar.agrar_duenger": "standardmandant",
@@ -132,8 +133,6 @@
   "public.inventory_goods_receipts": "dienst",
   "public.inventory_locations": "dienst",
   "public.inventory_warehouses": "dienst",
-  "public.agent_proposals": "referenzdaten",
-  "public.mcp_tool_executions": "referenzdaten",
   "domain_log.log_tour_delivery_notes": "position",
   "domain_log.log_tour_events": "position",
   "domain_log.log_tour_stops": "position",
@@ -189,7 +188,6 @@
   "domain_shared.grundfutter_analysen": "standardmandant",
   "domain_shared.internal_messages": "standardmandant",
   "domain_shared.job_artifacts": "position",
-  "domain_shared.knowledge_versions": "position",
   "domain_shared.logistik_frachttabellen": "referenzdaten",
   "domain_shared.master_data_entries": "standardmandant",
   "domain_shared.policy_rules": "mandant_nullbar",
