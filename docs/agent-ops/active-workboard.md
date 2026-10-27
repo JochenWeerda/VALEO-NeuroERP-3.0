@@ -19752,3 +19752,6 @@ Nutzerauftrag: alle uebrigen offenen Aenderungen commit-/pushfaehig abschliessen
 
 
 **RLS-P2 umgesetzt (Claude Code):** app.tenant_id je Transaktion aus dem Kontext (Engine-Ereignis, Abgleich je Anweisung, Cache verworfen bei Commit/Rollback/Savepoint-Rollback/Checkout); Savepoint-Befund behoben; Metrik fuer Transaktionen ohne Mandant. 7 + 835 Tests gruen. QA docs/quality-assurance/rls-p2-db-context-20261026.md.
+
+
+**RLS-P3 umgesetzt (Claude Code):** Migration rls_pilot_finance_20261026: rls_current_tenant(), RLS + Policy tenant_isolation auf 22 Pilottabellen (domain_finance + Journal), Backfill journal_entry_lines.tenant_id; als valeo_app 8 Tests gruen, Negativprobe rot; live nicht angewendet, nur zusammen mit P1+P2 ausliefern (Handshake rls-p1-p3-20261026). QA docs/quality-assurance/rls-p3-pilot-20261026.md.
