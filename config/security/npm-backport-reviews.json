@@ -16,7 +16,7 @@
       "installed_sha256": {
         "lib/rsa.js": "c9b1e3799e230528b6d6815c1f6cd3c6058b9d45975264b55d995abb976589af"
       },
-      "lock_sha256": "6233f6474be66b0f744d1fc6ce614635e733e05ff051e0652c6a27f5bb1bec5d",
+      "lock_sha256": "5e939aef665a208b74476809a45d25f9e9a4c9fea175e116cd99000ab6e380ed",
       "manifest_sha256": "348b6130cc49601e8ffeee2f6febd455b55ba74c806cc105bf9eafd79ea8ec67"
     },
     {
@@ -37,7 +37,7 @@
         "lib/stringify.js": "1d059d40df3eea35ccecc8fafcd64fca67e02dcfb1edaf1e8e0c94fd88338fc9",
         "lib/parse.js": "540c920c9186405e6d059b468a2a440c247f5c9aa0fdbdae5cd3d0a021697549"
       },
-      "lock_sha256": "6233f6474be66b0f744d1fc6ce614635e733e05ff051e0652c6a27f5bb1bec5d",
+      "lock_sha256": "5e939aef665a208b74476809a45d25f9e9a4c9fea175e116cd99000ab6e380ed",
       "manifest_sha256": "348b6130cc49601e8ffeee2f6febd455b55ba74c806cc105bf9eafd79ea8ec67"
     }
   ]
