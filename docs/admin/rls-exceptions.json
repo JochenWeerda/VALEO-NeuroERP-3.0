@@ -152,8 +152,6 @@
   "domain_mfg.bill_of_material": "mandant_nullbar",
   "domain_mfg.production_event": "mandant_nullbar",
   "domain_mfg.production_order": "mandant_nullbar",
-  "domain_nachweisraum.gobd_exporte": "referenzdaten",
-  "domain_nachweisraum.nachweisraum_dokumente": "referenzdaten",
   "domain_ops.kon_contract": "standardmandant",
   "domain_ops.ops_chargen": "dienst",
   "domain_ops.ops_fahrer": "position",

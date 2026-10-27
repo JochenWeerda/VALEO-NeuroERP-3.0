@@ -351840,17 +351840,6 @@
     "/api/v1/nachweisraum/dokumente": {
       "post": {
         "operationId": "create_dokument_api_v1_nachweisraum_dokumente_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -351907,15 +351896,6 @@
               "title": "Dokument Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
           }
         ],
         "requestBody": {
@@ -351965,17 +351945,6 @@
     "/api/v1/nachweisraum/gobd-exporte": {
       "post": {
         "operationId": "create_gobd_export_api_v1_nachweisraum_gobd_exporte_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -352030,15 +351999,6 @@
             "required": true,
             "schema": {
               "title": "Export Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
               "type": "string"
             }
           }
