@@ -1,0 +1,1426 @@
+{
+ "_note": "Lesender Befund der gewachsenen Datenbank (scripts/rls_domain_matrix.py --data).",
+ "stand": "2026-10-27",
+ "tables": {
+  "domain_agrar.agrar_biostimulanzien": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_agrar.agrar_duenger": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_agrar.agrar_partie_links": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_agrar.agrar_psm": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_agrar.agrar_saatgut": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_agrar.agrar_sachkunde": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_agrar.agrar_selbstabrechnung_status_log": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_agrar.agrar_selbstabrechnungen": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_agrar.agrar_trocknung_abrechnungen": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_agrar.feeding_feed_products": {
+   "zeilen": 380,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_agrar.feeding_feed_reference_values": {
+   "zeilen": 1157,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_agrar.feeding_feed_revisions": {
+   "zeilen": 770,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_agrar.feeding_groups": {
+   "zeilen": 1298,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_agrar.feeding_logs": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_agrar.feeding_nutrient_definitions": {
+   "zeilen": 19,
+   "null": 19,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_agrar.feeding_reference_revisions": {
+   "zeilen": 22,
+   "null": 22,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_agrar.feeding_unit_definitions": {
+   "zeilen": 8,
+   "null": 8,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_agrar.feldbuch_schlaege": {
+   "zeilen": 24,
+   "null": 0,
+   "default": 1,
+   "system": 0,
+   "mandanten": 3
+  },
+  "domain_agrar.harvest_acceptances": {
+   "zeilen": 56,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_agrar.nutrient_compositions": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_agrar.seed_orders": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_agrar.silo_bewegungen": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "silo_id -> domain_agrar.silo_zellen.silo_id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_agrar.waagen_vorlagen": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_audit.attestations": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_compliance.compliance_pcn_status_log": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_compliance.data_erasure_requests": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_compliance.intrastat_meldungen": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_crm.activities": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_crm.business_partner_addresses": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "partner_id -> domain_crm.business_partners.partner_id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_crm.business_partner_billing_configs": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "partner_id -> domain_crm.business_partners.partner_id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_crm.business_partner_community_members": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "partner_id -> domain_crm.business_partners.partner_id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_crm.business_partner_contacts": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "partner_id -> domain_crm.business_partners.partner_id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_crm.business_partner_cooperative_memberships": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "partner_id -> domain_crm.business_partners.partner_id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_crm.business_partner_cpd_accounts": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "partner_id -> domain_crm.business_partners.partner_id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_crm.business_partner_discount_items": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "partner_id -> domain_crm.business_partners.partner_id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_crm.business_partner_dispatch_media": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "partner_id -> domain_crm.business_partners.partner_id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_crm.business_partner_email_distributions": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "partner_id -> domain_crm.business_partners.partner_id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_crm.business_partner_instructions": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "partner_id -> domain_crm.business_partners.partner_id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_crm.business_partner_interest_settings": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "partner_id -> domain_crm.business_partners.partner_id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_crm.business_partner_interface_profiles": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "partner_id -> domain_crm.business_partners.partner_id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_crm.business_partner_price_agreements": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "partner_id -> domain_crm.business_partners.partner_id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_crm.business_partner_pricing_rules": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "partner_id -> domain_crm.business_partners.partner_id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_crm.business_partner_profiles": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "partner_id -> domain_crm.business_partners.partner_id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_crm.business_partners": {
+   "zeilen": 7,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_crm.credit_limits": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_crm.crm_contact_consent_history": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "consent_id -> domain_crm.crm_contact_consents.id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_crm.crm_opportunities": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_crm.crm_segment_members": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "segment_id -> domain_crm.crm_segments.id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_crm.crm_segments": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_crm.customers": {
+   "zeilen": 6,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 2
+  },
+  "domain_crm.farm_profiles": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_crm.leads": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_crm.sales_offers": {
+   "zeilen": 3,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_crm.sales_order_items": {
+   "zeilen": 14,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_crm.sales_orders": {
+   "zeilen": 13,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_dev_mock.mock_sessions": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_docflow.document_artifacts": {
+   "zeilen": 2,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_docflow.document_headers": {
+   "zeilen": 25,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 2
+  },
+  "domain_docflow.document_items": {
+   "zeilen": 35,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 2
+  },
+  "domain_docflow.invoice_xml_store": {
+   "zeilen": 1,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_docflow.pos_tse_devices": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_einkauf.bestellung_positionen": {
+   "zeilen": 83,
+   "eltern_fk": [
+    "bestellung_id -> domain_einkauf.bestellungen.id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_einkauf.bestellungen": {
+   "zeilen": 16,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_einkauf.bestellvorschlag_positionen": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "kontrakt_id -> domain_einkauf.kontrakte.id",
+    "lieferant_id -> domain_einkauf.lieferanten.id",
+    "vorschlag_id -> domain_einkauf.bestellvorschlaege.id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_einkauf.ers_invoices": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_einkauf.ers_suppliers": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_einkauf.invoice_verification": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_einkauf.kontrakt_positionen": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "kontrakt_id -> domain_einkauf.kontrakte.id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_einkauf.lieferanten": {
+   "zeilen": 18,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 3
+  },
+  "domain_erp.bank_accounts": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_erp.chart_of_accounts": {
+   "zeilen": 49,
+   "null": 0,
+   "default": 0,
+   "system": 28,
+   "mandanten": 3
+  },
+  "domain_erp.creditors": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_erp.debitors": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_erp.dunning_notices": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_erp.fibu_connector_run_items": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "run_id -> domain_erp.fibu_connector_runs.id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_erp.gift_cards": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_erp.offene_posten": {
+   "zeilen": 25,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 2
+  },
+  "domain_erp.open_items": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_hr.onboarding_checklists": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_hr.training_courses": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_hr.work_plan_assignments": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_inventory.agrar_contract_allocations": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_inventory.agrar_contracts": {
+   "zeilen": 3,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_inventory.article_batches": {
+   "zeilen": 2,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_inventory.article_documents": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_inventory.article_selections": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_inventory.article_suppliers": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "article_id -> domain_inventory.articles.id",
+    "partner_id -> domain_crm.business_partners.partner_id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_inventory.articles": {
+   "zeilen": 131,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 2
+  },
+  "domain_inventory.bin_stock": {
+   "zeilen": 9,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_inventory.drying_rule_factor_ranges": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "rule_set_id -> domain_inventory.drying_rule_sets.id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_inventory.drying_rule_lookup_rows": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "rule_set_id -> domain_inventory.drying_rule_sets.id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_inventory.epcis_events": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_inventory.harvest_acceptance_lines": {
+   "zeilen": 1,
+   "eltern_fk": [
+    "harvest_acceptance_id -> domain_inventory.harvest_acceptances.id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_inventory.harvest_acceptance_positions": {
+   "zeilen": 8,
+   "eltern_fk": [
+    "article_id -> domain_inventory.articles.id",
+    "harvest_acceptance_id -> domain_inventory.harvest_acceptances.id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_inventory.inventory_count_lines": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_inventory.inventory_counts": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_inventory.inventory_lot_movements": {
+   "zeilen": 2,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_inventory.inventory_lots": {
+   "zeilen": 1,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_inventory.inventory_stock_movements": {
+   "zeilen": 128,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 2
+  },
+  "domain_inventory.material_flow_edges": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_inventory.material_flow_nodes": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_inventory.nawaro_print_notifications": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_inventory.pick_lists": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_inventory.preparation_list_lines": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_inventory.preparation_lists": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_inventory.shipping_units": {
+   "zeilen": 37,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_inventory.silo_cells": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_inventory.silo_lot_movements": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_inventory.silo_lots": {
+   "zeilen": 3,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_inventory.silos": {
+   "zeilen": 4,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_inventory.warehouse_bins": {
+   "zeilen": 1,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_inventory.warehouse_zones": {
+   "zeilen": 1,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_inventory.warehouses": {
+   "zeilen": 4,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 2
+  },
+  "domain_inventory.weighing_tickets": {
+   "zeilen": 50,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 2
+  },
+  "domain_log.log_tour_delivery_notes": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "tour_id -> domain_log.log_touren.id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_log.log_tour_events": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "tour_id -> domain_log.log_touren.id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_log.log_tour_stops": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "tour_id -> domain_log.log_touren.id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_log.log_touren": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_logistics.carrier_invoices": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_logistics.epod_settlements": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_logistics.freight_tariffs": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_logistics.tour_disposition_checks": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_logistics.tour_events": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_logistics.tour_stops": {
+   "zeilen": 2,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_logistics.tours": {
+   "zeilen": 2,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_nachweisraum.gobd_exporte": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_nachweisraum.nachweisraum_dokumente": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_ops.kon_contract": {
+   "zeilen": 4,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_ops.ops_chargen": {
+   "zeilen": 79,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_ops.ops_fahrer": {
+   "zeilen": 1,
+   "eltern_fk": [
+    "aktuelles_fahrzeug_id -> domain_ops.ops_fahrzeuge.id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_ops.ops_fahrzeug_bussgeld": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "fahrzeug_id -> domain_ops.ops_fahrzeuge.id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_ops.ops_fahrzeug_schaeden": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "fahrzeug_id -> domain_ops.ops_fahrzeuge.id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_ops.ops_fahrzeug_status_historie": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "fahrzeug_id -> domain_ops.ops_fahrzeuge.id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_ops.ops_fahrzeug_touren": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "fahrzeug_id -> domain_ops.ops_fahrzeuge.id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_ops.ops_fahrzeuge": {
+   "zeilen": 1,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_ops.ops_pcn_meldungen": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_ops.reklamationen": {
+   "zeilen": 15,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_portal.customer_order_items": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "order_id -> domain_portal.customer_orders.id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_pricing.price_list_items": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "price_list_id -> domain_pricing.price_lists.id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_pricing.price_lists": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_procurement.proc_purchase_orders": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_sales.delivery_note_positions": {
+   "zeilen": 4,
+   "eltern_fk": [
+    "delivery_note_id -> domain_sales.delivery_notes.id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_sales.delivery_notes": {
+   "zeilen": 3,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_sales.sales_credit_note_lines": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "credit_note_id -> domain_sales.sales_credit_notes.id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_sales.sales_credit_notes": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_sales.sales_delivery_notes": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_shared.agrar_sorten": {
+   "zeilen": 5,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_shared.api_keys": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_shared.artikel_sperren": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_shared.audit_logs": {
+   "zeilen": 2,
+   "null": 0,
+   "default": 0,
+   "system": 1,
+   "mandanten": 2
+  },
+  "domain_shared.branches": {
+   "zeilen": 2,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_shared.calendar_ics_tokens": {
+   "zeilen": 9,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_shared.calendar_items": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_shared.calendar_team_memberships": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_shared.channel_thread_audit_items": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "thread_id -> domain_shared.channel_process_threads.thread_id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_shared.direct_debit_items": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_shared.dispatchers": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_shared.farmers": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_shared.feeding_feed_analysis_findings": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_shared.feeding_feed_analysis_revisions": {
+   "zeilen": 464,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_shared.feeding_feed_analysis_values": {
+   "zeilen": 261,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_shared.futtermittel_einzelfutter": {
+   "zeilen": 743,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_shared.futtermittel_mischfutter": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_shared.futtermittel_produktionsauftraege": {
+   "zeilen": 2,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_shared.futtermittel_rezept_komponenten": {
+   "zeilen": 5,
+   "eltern_fk": [
+    "einzelfutter_id -> domain_shared.futtermittel_einzelfutter.id",
+    "rezept_id -> domain_shared.futtermittel_rezepte.id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_shared.futtermittel_rezepte": {
+   "zeilen": 2,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_shared.grundfutter_analysen": {
+   "zeilen": 144,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_shared.internal_messages": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_shared.job_artifacts": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "job_id -> domain_shared.jobs.id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_shared.knowledge_objects": {
+   "zeilen": 6,
+   "null": 0,
+   "default": 0,
+   "system": 6,
+   "mandanten": 1
+  },
+  "domain_shared.knowledge_versions": {
+   "zeilen": 8,
+   "eltern_fk": [
+    "knowledge_id -> domain_shared.knowledge_objects.knowledge_id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_shared.logistik_frachttabellen": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_shared.master_data_entries": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_shared.policy_rules": {
+   "zeilen": 3,
+   "null": 3,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_shared.rations_zugang": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_shared.users": {
+   "zeilen": 5,
+   "null": 0,
+   "default": 2,
+   "system": 2,
+   "mandanten": 3
+  },
+  "domain_shared.vertreter_provisionsstaffeln": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "gruppe_id -> domain_shared.vertreter_provisionsgruppen.id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_shared.zu_abschlag_konditionen": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "gruppe_id -> domain_shared.zu_abschlaggruppen.id",
+    "klasse_id -> domain_shared.zu_abschlagklassen.id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "public.agent_proposals": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "public.crm_activities": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "public.crm_betriebsprofile": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "public.crm_contacts": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "public.crm_leads": {
+   "zeilen": 97,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "public.crm_merge_log": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "public.crm_ownership_log": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "public.einkauf_anfragen_positionen": {
+   "zeilen": 0
+  },
+  "public.einkauf_angebote_positionen": {
+   "zeilen": 0
+  },
+  "public.einkauf_lieferschein_positionen": {
+   "zeilen": 72
+  },
+  "public.einkauf_lieferscheine": {
+   "zeilen": 8,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "public.einkauf_zahlungslauf_posten": {
+   "zeilen": 0
+  },
+  "public.finance_accounting_periods": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "public.inventory_goods_receipt_lines": {
+   "zeilen": 3
+  },
+  "public.inventory_goods_receipts": {
+   "zeilen": 2,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "public.inventory_locations": {
+   "zeilen": 1
+  },
+  "public.inventory_warehouses": {
+   "zeilen": 1,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "public.mcp_tool_executions": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "public.opportunities": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "public.outbox_events": {
+   "zeilen": 1407,
+   "null": 0,
+   "default": 8,
+   "system": 0,
+   "mandanten": 4
+  },
+  "public.zahlungslauf_kreditoren": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  }
+ }
+}
