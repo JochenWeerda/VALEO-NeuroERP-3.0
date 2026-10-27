@@ -199,67 +199,6 @@
    "system": 0,
    "mandanten": 0
   },
-  "domain_einkauf.bestellung_positionen": {
-   "zeilen": 83,
-   "eltern_fk": [
-    "bestellung_id -> domain_einkauf.bestellungen.id"
-   ],
-   "verwaist": 0,
-   "ohne_eltern": 0
-  },
-  "domain_einkauf.bestellungen": {
-   "zeilen": 16,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 1
-  },
-  "domain_einkauf.bestellvorschlag_positionen": {
-   "zeilen": 0,
-   "eltern_fk": [
-    "kontrakt_id -> domain_einkauf.kontrakte.id",
-    "lieferant_id -> domain_einkauf.lieferanten.id",
-    "vorschlag_id -> domain_einkauf.bestellvorschlaege.id"
-   ],
-   "verwaist": 0,
-   "ohne_eltern": 0
-  },
-  "domain_einkauf.ers_invoices": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "domain_einkauf.ers_suppliers": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "domain_einkauf.invoice_verification": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "domain_einkauf.kontrakt_positionen": {
-   "zeilen": 0,
-   "eltern_fk": [
-    "kontrakt_id -> domain_einkauf.kontrakte.id"
-   ],
-   "verwaist": 0,
-   "ohne_eltern": 0
-  },
-  "domain_einkauf.lieferanten": {
-   "zeilen": 18,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 3
-  },
   "domain_erp.bank_accounts": {
    "zeilen": 0,
    "null": 0,
@@ -543,13 +482,6 @@
    "verwaist": 0,
    "ohne_eltern": 0
   },
-  "domain_procurement.proc_purchase_orders": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
   "domain_shared.agrar_sorten": {
    "zeilen": 5,
    "null": 0,
@@ -781,25 +713,6 @@
    "system": 0,
    "mandanten": 1
   },
-  "public.einkauf_anfragen_positionen": {
-   "zeilen": 0
-  },
-  "public.einkauf_angebote_positionen": {
-   "zeilen": 0
-  },
-  "public.einkauf_lieferschein_positionen": {
-   "zeilen": 72
-  },
-  "public.einkauf_lieferscheine": {
-   "zeilen": 8,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 1
-  },
-  "public.einkauf_zahlungslauf_posten": {
-   "zeilen": 0
-  },
   "public.finance_accounting_periods": {
    "zeilen": 0,
    "null": 0,
@@ -833,13 +746,6 @@
    "default": 8,
    "system": 0,
    "mandanten": 4
-  },
-  "public.zahlungslauf_kreditoren": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
   }
  }
 }

@@ -52,9 +52,11 @@ _AVIS_FELDER = ("id, avis_nummer, bestell_nr AS bestellung_id, lieferant_name, s
 
 
 class EinkaufCompatService:
-    def __init__(self, db: Session, tenant_id: str) -> None:
+    def __init__(self, db: Session, tenant_id: str, actor: str | None = None) -> None:
         self.db = db
         self.tenant_id = tenant_id
+        # Gepruefter Bearbeiter (Token-sub) fuer Statuswechsel mit Pruefprotokoll.
+        self.actor = actor
 
     def _invalidate(self) -> None:
         try:
@@ -170,37 +172,17 @@ class EinkaufCompatService:
 
     def list_goods_receipts(self) -> list:
         from sqlalchemy import text
-        try:
-            rows = self.db.execute(text(
-                """
-                SELECT we.id, we.delivery_note_number AS nummer, we.received_date AS datum,
-                       we.quality_inspection_status AS status,
-                       COALESCE(po.subject, '') AS lieferant,
-                       COALESCE(SUM(pos.accepted_quantity * 0), 0) AS betrag
-                FROM einkauf_wareneingaenge we
-                LEFT JOIN einkauf_wareneingang_positionen pos ON pos.wareneingang_id = we.id
-                LEFT JOIN LATERAL (
-                    SELECT data::jsonb->>'subject' AS subject
-                    FROM docs_store
-                    WHERE doc_type = 'purchase_order'
-                      AND (data::jsonb->>'id' = we.purchase_order_id
-                           OR data::jsonb->>'purchaseOrderNumber' = we.purchase_order_id)
-                    ORDER BY updated_at DESC LIMIT 1
-                ) po ON TRUE
-                GROUP BY we.id, we.delivery_note_number, we.received_date,
-                         we.quality_inspection_status, po.subject
-                ORDER BY we.created_at DESC LIMIT 500
-                """
-            )).fetchall()
-        except Exception:
-            try:
-                rows = self.db.execute(text(
-                    "SELECT id, wareneingangs_nummer AS nummer, bestelldatum AS datum, "
-                    "status, lieferant_name AS lieferant, brutto_gesamt AS betrag "
-                    "FROM einkauf_wareneingaenge ORDER BY created_at DESC LIMIT 500"
-                )).fetchall()
-            except Exception:
-                return []
+        # Bis 27.10.2026 verband die Abfrage docs_store (gibt es in keiner Datenbank) und fiel dann auf
+        # Spalten zurueck, die einkauf_wareneingaenge nicht hat: die Liste war immer leer, ohne Mandantenfilter.
+        rows = self.db.execute(text(
+            """
+            SELECT we.id, we.delivery_note_number AS nummer, we.received_date AS datum,
+                   we.quality_inspection_status AS status, '' AS lieferant, 0 AS betrag
+            FROM einkauf_wareneingaenge we
+            WHERE we.tenant_id = :tid
+            ORDER BY we.created_at DESC LIMIT 500
+            """
+        ), {"tid": self.tenant_id}).fetchall()
         return [
             {
                 "id": str(r._mapping.get("id")),
@@ -234,11 +216,11 @@ class EinkaufCompatService:
         damage_report = payload.get("damageReport") or payload.get("damage_report")
         self.db.execute(text(
             "INSERT INTO einkauf_wareneingaenge "
-            "(id, purchase_order_id, delivery_note_number, received_date, received_by, "
+            "(id, tenant_id, purchase_order_id, delivery_note_number, received_date, received_by, "
             "received_location, quality_inspection_status, inspection_notes, damage_report, created_at, updated_at) "
-            "VALUES (:id, :po_id, :dn, :rd, :rb, :rl, :qs, :ins, :dmg, now(), now())"
+            "VALUES (:id, :tid, :po_id, :dn, :rd, :rb, :rl, :qs, :ins, :dmg, now(), now())"
         ), {
-            "id": receipt_id, "po_id": purchase_order_id, "dn": delivery_note_number,
+            "id": receipt_id, "tid": self.tenant_id, "po_id": purchase_order_id, "dn": delivery_note_number,
             "rd": received_date, "rb": received_by, "rl": received_location,
             "qs": quality_status, "ins": inspection_notes, "dmg": damage_report,
         })
@@ -250,11 +232,11 @@ class EinkaufCompatService:
             ord_qty = float(line.get("orderedQuantity") or line.get("ordered_quantity") or recv_qty)
             self.db.execute(text(
                 "INSERT INTO einkauf_wareneingang_positionen "
-                "(id, wareneingang_id, purchase_order_item_id, article_id, article_name, "
+                "(id, tenant_id, wareneingang_id, purchase_order_item_id, article_id, article_name, "
                 "ordered_quantity, received_quantity, accepted_quantity, rejected_quantity, condition, created_at, updated_at) "
-                "VALUES (:id, :wid, :poi, :aid, :an, :oq, :rq, :aq, :jq, :cond, now(), now())"
+                "VALUES (:id, :tid, :wid, :poi, :aid, :an, :oq, :rq, :aq, :jq, :cond, now(), now())"
             ), {
-                "id": pos_id, "wid": receipt_id,
+                "id": pos_id, "tid": self.tenant_id, "wid": receipt_id,
                 "poi": line.get("purchaseOrderItemId") or line.get("purchase_order_item_id"),
                 "aid": line.get("articleId") or line.get("article_id") or "",
                 "an": line.get("articleName") or line.get("article_name"),
@@ -636,8 +618,8 @@ class EinkaufCompatService:
             rows = self.db.execute(text(
                 "SELECT id, rechnungs_nummer, lieferant_name, bestellung_id, wareneingang_id, "
                 "status, brutto_betrag, rechnungs_datum, created_at "
-                "FROM einkauf_rechnungseingaenge ORDER BY created_at DESC LIMIT 500"
-            )).fetchall()
+                "FROM einkauf_rechnungseingaenge WHERE tenant_id = :tid ORDER BY created_at DESC LIMIT 500"
+            ), {"tid": self.tenant_id}).fetchall()
         except Exception:
             return []
         return [self._rechnung_row_to_dict(r._mapping) for r in rows]
@@ -646,8 +628,8 @@ class EinkaufCompatService:
         from sqlalchemy import text
         row = self.db.execute(text(
             "SELECT id, status FROM einkauf_rechnungseingaenge "
-            "WHERE id = :id OR rechnungs_nummer = :id"
-        ), {"id": rechnung_id}).mappings().first()
+            "WHERE (id = :id OR rechnungs_nummer = :id) AND tenant_id = :tid"
+        ), {"id": rechnung_id, "tid": self.tenant_id}).mappings().first()
         if not row:
             return None
         return (str(row["id"]), (row.get("status") or "").upper())
@@ -656,18 +638,15 @@ class EinkaufCompatService:
         self, rid: str, action: str, old_status: str, new_status: str
     ) -> None:
         from datetime import datetime as _dt
+        from app.core.akteur import bekannter_nutzer
         from app.core.logging import get_correlation_id
         from sqlalchemy import text
-        try:
-            row = self.db.execute(text(
-                "SELECT id, email FROM domain_shared.users "
-                "WHERE tenant_id = :tid AND (is_active IS NULL OR is_active = true) LIMIT 1"
-            ), {"tid": self.tenant_id}).mappings().first()
-            if not row or not row.get("id"):
-                return
-            user_id, user_email = str(row["id"]), str((row.get("email") or "unknown")[:100])
-        except Exception:
-            return
+        # Bis 27.10.2026 stand hier ein beliebiger aktiver Nutzer des Mandanten (LIMIT 1), Fehler wurden
+        # verschluckt: Pruefen, Freigeben und Verbuchen waren niemandem zurechenbar.
+        user_id = str(bekannter_nutzer(self.db, self.actor, tenant_id=self.tenant_id))
+        email = self.db.execute(text("SELECT email FROM domain_shared.users WHERE id = :id"),
+                                {"id": user_id}).scalar()
+        user_email = str(email or "")[:100]
         entry = AuditLog(
             id=uuid7(),
             timestamp=_dt.utcnow(),
@@ -702,8 +681,8 @@ class EinkaufCompatService:
         if old_status not in valid_statuses:
             raise ValidationFailedError(f"{err_msg}. Aktuell: {old_status}")
         self.db.execute(text(
-            "UPDATE einkauf_rechnungseingaenge SET status = :ns, updated_at = now() WHERE id = :id"
-        ), {"ns": new_status, "id": rid})
+            "UPDATE einkauf_rechnungseingaenge SET status = :ns, updated_at = now() WHERE id = :id AND tenant_id = :tid"
+        ), {"ns": new_status, "id": rid, "tid": self.tenant_id})
         self._write_rechnung_audit(rid, action, old_status, new_status)
         self.db.commit()
         self._invalidate()
@@ -713,8 +692,9 @@ class EinkaufCompatService:
             try:
                 import uuid as _uuid
                 rech_row = self.db.execute(text(
-                    "SELECT rechnungs_nummer, brutto_betrag, rechnungs_datum FROM einkauf_rechnungseingaenge WHERE id = :id"
-                ), {"id": rid}).fetchone()
+                    "SELECT rechnungs_nummer, brutto_betrag, rechnungs_datum FROM einkauf_rechnungseingaenge "
+                    "WHERE id = :id AND tenant_id = :tid"
+                ), {"id": rid, "tid": self.tenant_id}).fetchone()
                 if rech_row and rech_row[1]:
                     business_day = business_today()
                     today = business_day.isoformat()

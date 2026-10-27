@@ -45,6 +45,8 @@ def probe(tables: tuple[str, ...]):
         for role in APP_ROLES:
             for schema in sorted({t.split(".")[0] for t in tables}):
                 conn.execute(sa.text(f"GRANT USAGE ON SCHEMA {schema} TO {role}"))
+                # serial-Schluessel (z. B. ers_invoices.id) ziehen aus einer Sequenz
+                conn.execute(sa.text(f"GRANT USAGE ON ALL SEQUENCES IN SCHEMA {schema} TO {role}"))
             present = [t for t in tables if exists(conn, t)]
             conn.execute(sa.text(f"GRANT SELECT, INSERT, UPDATE, DELETE ON {', '.join(present)} TO {role}"))
         yield conn

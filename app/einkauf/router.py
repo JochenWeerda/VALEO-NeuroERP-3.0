@@ -453,11 +453,12 @@ async def confirm_ocr_import(
             db.execute(
                 text("""
                     INSERT INTO einkauf_rechnungseingang_positionen (
-                        id, rechnungseingang_id, artikel_name, menge, einzelpreis, gesamtpreis, mwst_satz
-                    ) VALUES (:id, :re_id, :art_name, :menge, :epreis, :gpreis, :mwst)
+                        id, tenant_id, rechnungseingang_id, artikel_name, menge, einzelpreis, gesamtpreis, mwst_satz
+                    ) VALUES (:id, :tenant_id, :re_id, :art_name, :menge, :epreis, :gpreis, :mwst)
                 """),
                 {
                     "id": pos_id,
+                    "tenant_id": tenant_id,
                     "re_id": rechnung_id,
                     "art_name": pos.get("artikel_name"),
                     "menge": pos.get("menge"),
@@ -996,15 +997,16 @@ async def create_rechnungseingang(
                 db.execute(
                     text("""
                         INSERT INTO einkauf_rechnungseingang_positionen (
-                            id, rechnungseingang_id, artikel_id, artikel_name,
+                            id, tenant_id, rechnungseingang_id, artikel_id, artikel_name,
                             menge, einzelpreis, gesamtpreis, mwst_satz
                         ) VALUES (
-                            :id, :re_id, :art_id, :art_name,
+                            :id, :tenant_id, :re_id, :art_id, :art_name,
                             :menge, :epreis, :gpreis, :mwst
                         )
                     """),
                     {
                         "id": pos_id,
+                        "tenant_id": tenant_id,
                         "re_id": rechnung_id,
                         "art_id": pos.artikelId,
                         "art_name": pos.artikelName,

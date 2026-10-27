@@ -13,14 +13,13 @@ description: Generierte Entscheidungsmatrix der noch nicht abgesicherten Mandant
 
 Generiert von `scripts/rls_domain_matrix.py`; nicht von Hand aendern. Entscheidungen und Reihenfolge: `docs/architecture/rls-domaenen-entscheidungsmatrix.md`.
 
-Datenstand gewachsene Datenbank: 2026-10-27. Tabellen: 127.
+Datenstand gewachsene Datenbank: 2026-10-27. Tabellen: 112.
 
 | Domain | dienst | position | referenzdaten | mandant_nullbar | standardmandant | identitaet |
 |---|---|---|---|---|---|---|
 | agrar | 1 | 1 | 6 | 6 | 8 |  |
 | crm | 7 |  |  |  |  |  |
 | dev_mock |  |  |  |  |  | 1 |
-| einkauf |  | 7 | 2 | 4 | 1 |  |
 | erp | 1 | 1 | 2 | 4 | 2 |  |
 | finance | 1 |  |  |  |  |  |
 | infrastructure |  | 1 |  |  |  |  |
@@ -30,7 +29,6 @@ Datenstand gewachsene Datenbank: 2026-10-27. Tabellen: 127.
 | mfg |  |  |  | 3 |  |  |
 | ops | 1 | 5 | 1 |  | 3 |  |
 | portal |  | 1 |  |  |  |  |
-| procurement |  |  |  | 1 |  |  |
 | shared | 1 | 5 | 3 | 3 | 20 | 1 |
 
 ## agrar
@@ -77,25 +75,6 @@ Datenstand gewachsene Datenbank: 2026-10-27. Tabellen: 127.
 | Tabelle | Kl. | Ursache | Modell | Schreiber | Leser | Worker | Identitaet | Daten | Bereinigung | Policy |
 |---|---|---|---|---|---|---|---|---|---|---|
 | `domain_dev_mock.mock_sessions` | A | identitaet | – | – | 0 | – | – | 0 Z., 0 Mand. | – | keine Mandanten-Policy: Nachschlagen vor der Mandantenbindung, Zugriff ueber valeo_system |
-
-## einkauf
-
-| Tabelle | Kl. | Ursache | Modell | Schreiber | Leser | Worker | Identitaet | Daten | Bereinigung | Policy |
-|---|---|---|---|---|---|---|---|---|---|---|
-| `domain_einkauf.bestellung_positionen` | C | position, standardmandant | `app/infrastructure/models/einkauf_models.py` | `app/agents/workflows/bestellvorschlag.py`, `app/api/v1/endpoints/einkauf_lieferschein.py`, `app/services/einkauf_compat_service.py`, `app/services/procurement_service.py` (+3) | 6 | – | nutzlast 1, standardmandant 1, token 3 | 83 Z. | tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id) | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_einkauf.bestellungen |
-| `domain_einkauf.bestellungen` | A | referenzdaten, mandant_nullbar, standardmandant | `app/infrastructure/models/einkauf_models.py` | `app/agents/workflows/bestellvorschlag.py`, `app/api/v1/endpoints/einkauf_lieferschein.py`, `app/services/einkauf_compat_service.py`, `app/services/procurement_service.py` (+3) | 13 | – | nutzlast 1, standardmandant 1, token 6 | 16 Z., 1 Mand. | – | getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant |
-| `domain_einkauf.bestellvorschlag_positionen` | C | position | `app/infrastructure/models/einkauf_models.py` | `modules/einkauf/services/bestellvorschlag_service.py` | 1 | – | – | 0 Z. | tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id) | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_einkauf.bestellvorschlaege, domain_einkauf.kontrakte, domain_einkauf.lieferanten |
-| `domain_einkauf.ers_invoices` | B | mandant_nullbar | – | `app/api/v1/endpoints/ers_settlement.py` | 0 | – | token 1 | 0 Z., 0 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
-| `domain_einkauf.ers_suppliers` | B | mandant_nullbar | – | `app/api/v1/endpoints/ers_settlement.py` | 0 | – | token 1 | 0 Z., 0 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
-| `domain_einkauf.invoice_verification` | B | mandant_nullbar | – | `app/api/v1/endpoints/purchase_invoice_verification.py` | 1 | – | token 2 | 0 Z., 0 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
-| `domain_einkauf.kontrakt_positionen` | C | position | `app/infrastructure/models/einkauf_models.py` | `app/services/procurement_service.py`, `modules/einkauf/services/bestellvorschlag_service.py` | 2 | – | token 1 | 0 Z. | tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id) | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_einkauf.kontrakte |
-| `domain_einkauf.lieferanten` | A | referenzdaten, mandant_nullbar | `app/infrastructure/models/einkauf_models.py` | `app/api/v1/endpoints/stammdaten_bearbeiten.py`, `app/services/procurement_service.py`, `modules/einkauf/services/bestellvorschlag_service.py` | 12 | – | token 3 | 18 Z., 3 Mand. | – | getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant |
-| `public.einkauf_anfragen_positionen` | C | position | – | `app/api/v1/endpoints/einkauf_anfrage_kommandos.py`, `app/einkauf/router.py` | 1 | – | nutzlast 1, token 1 | 0 Z. | tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id) | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus public.einkauf_anfragen |
-| `public.einkauf_angebote_positionen` | C | position, referenzdaten | – | – | 3 | – | token 1 | 0 Z. | tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id) | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus public.einkauf_angebote |
-| `public.einkauf_lieferschein_positionen` | C | position | – | `app/api/v1/endpoints/einkauf_lieferschein.py` | 0 | – | token 1 | 72 Z. | tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id) | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus public.einkauf_lieferscheine |
-| `public.einkauf_lieferscheine` | A | standardmandant | – | `app/api/v1/endpoints/einkauf_lieferschein.py`, `app/api/v1/endpoints/mask_frontend_bridges.py` | 0 | – | standardmandant 1, token 2 | 8 Z., 1 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
-| `public.einkauf_zahlungslauf_posten` | C | position | – | – | 0 | – | – | 0 Z. | tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id) | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus public.einkauf_zahlungslaeufe |
-| `public.zahlungslauf_kreditoren` | B | mandant_nullbar | – | – | 0 | – | – | 0 Z., 0 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
 
 ## erp
 
@@ -190,12 +169,6 @@ Datenstand gewachsene Datenbank: 2026-10-27. Tabellen: 127.
 | Tabelle | Kl. | Ursache | Modell | Schreiber | Leser | Worker | Identitaet | Daten | Bereinigung | Policy |
 |---|---|---|---|---|---|---|---|---|---|---|
 | `domain_portal.customer_order_items` | C | position | `app/infrastructure/models/portal_models.py` | `app/api/v1/endpoints/portal_shop.py` | 2 | – | token 1 | 0 Z. | tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id) | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_portal.customer_orders |
-
-## procurement
-
-| Tabelle | Kl. | Ursache | Modell | Schreiber | Leser | Worker | Identitaet | Daten | Bereinigung | Policy |
-|---|---|---|---|---|---|---|---|---|---|---|
-| `domain_procurement.proc_purchase_orders` | B | mandant_nullbar | – | `app/services/proc_bestellung_lifecycle_service.py`, `app/services/proc_wareneingang_service.py` | 1 | – | standardmandant 1, token 1 | 0 Z., 0 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
 
 ## shared
 
