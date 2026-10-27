@@ -2,12 +2,24 @@
  "_note": "Generiert von scripts/rls_system_read.py (frisch zurueckgerollt, live nur lesend).",
  "stand": "2026-10-27",
  "tables": {
+  "public.agent_proposals": {
+   "frisch": 0,
+   "live": 0,
+   "code": [
+    "app/api/v1/endpoints/sales_credit_notes.py:563"
+   ]
+  },
   "public.anlagen": {
    "frisch": 0,
    "live": 0,
    "code": []
   },
   "public.buchungen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "public.crm_betriebsprofile": {
    "frisch": 0,
    "live": 0,
    "code": []
@@ -22,12 +34,27 @@
    "live": 0,
    "code": []
   },
+  "public.crm_contacts": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
   "public.crm_gifts": {
    "frisch": 0,
    "live": 0,
    "code": []
   },
+  "public.crm_merge_log": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
   "public.crm_notifications": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "public.crm_ownership_log": {
    "frisch": 0,
    "live": 0,
    "code": []
@@ -60,6 +87,11 @@
   "crm_subdomains.service_tickets": {
    "frisch": 0,
    "live": null,
+   "code": []
+  },
+  "domain_agrar.agrar_biostimulanzien": {
+   "frisch": 0,
+   "live": 0,
    "code": []
   },
   "domain_agrar.agrar_duenger_mischungen": {
@@ -487,6 +519,96 @@
    "live": 0,
    "code": []
   },
+  "domain_crm.business_partner_addresses": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "domain_crm.business_partner_billing_configs": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "domain_crm.business_partner_community_members": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "domain_crm.business_partner_contacts": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "domain_crm.business_partner_cooperative_memberships": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "domain_crm.business_partner_cpd_accounts": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "domain_crm.business_partner_discount_items": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "domain_crm.business_partner_dispatch_media": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "domain_crm.business_partner_email_distributions": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "domain_crm.business_partner_instructions": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "domain_crm.business_partner_interest_settings": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "domain_crm.business_partner_interface_profiles": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "domain_crm.business_partner_price_agreements": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "domain_crm.business_partner_pricing_rules": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "domain_crm.business_partner_profiles": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "domain_crm.business_partners": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_crm.cancellation_reason": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "domain_crm.credit_limits": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
   "domain_crm.credit_overrides": {
    "frisch": 0,
    "live": 0,
@@ -517,7 +639,22 @@
    "live": 0,
    "code": []
   },
+  "domain_crm.crm_contact_consent_history": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
   "domain_crm.crm_contact_consents": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_crm.crm_segment_members": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "domain_crm.crm_segments": {
    "frisch": 0,
    "live": 0,
    "code": []
@@ -542,10 +679,34 @@
    "live": 0,
    "code": []
   },
+  "domain_crm.opportunity": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
   "domain_crm.sales_offer_items": {
    "frisch": 0,
    "live": 0,
    "code": []
+  },
+  "domain_crm.sales_offers": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_crm.sales_order_items": {
+   "frisch": 0,
+   "live": 0,
+   "code": [
+    "app/services/procurement_service.py:405"
+   ]
+  },
+  "domain_crm.sales_orders": {
+   "frisch": 0,
+   "live": 0,
+   "code": [
+    "app/services/procurement_service.py:405"
+   ]
   },
   "domain_crm.supplier_tax_profiles": {
    "frisch": 0,
@@ -577,6 +738,11 @@
    "live": 0,
    "code": []
   },
+  "domain_docflow.document_artifacts": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
   "domain_docflow.document_command_log": {
    "frisch": 0,
    "live": 0,
@@ -588,6 +754,16 @@
    "code": []
   },
   "domain_docflow.document_header_links": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_docflow.document_headers": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_docflow.document_items": {
    "frisch": 0,
    "live": 0,
    "code": []
@@ -618,6 +794,11 @@
    "code": []
   },
   "domain_docflow.dsfinvk_exports": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_docflow.invoice_xml_store": {
    "frisch": 0,
    "live": 0,
    "code": []
@@ -658,6 +839,11 @@
    "code": []
   },
   "domain_docflow.pos_terminals": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_docflow.pos_tse_devices": {
    "frisch": 0,
    "live": 0,
    "code": []
@@ -1248,6 +1434,11 @@
    "live": 0,
    "code": []
   },
+  "domain_inventory.agrar_contract_allocations": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
   "domain_inventory.agrar_settlement_deductions": {
    "frisch": 0,
    "live": 0,
@@ -1339,6 +1530,11 @@
    "code": []
   },
   "domain_inventory.pick_list_lines": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_inventory.pick_lists": {
    "frisch": 0,
    "live": 0,
    "code": []
@@ -1808,7 +2004,38 @@
    "live": 0,
    "code": []
   },
+  "domain_sales.delivery_note_positions": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "domain_sales.delivery_notes": {
+   "frisch": 0,
+   "live": 0,
+   "code": [
+    "app/api/v1/endpoints/sales_credit_notes.py:563"
+   ]
+  },
   "domain_sales.sales_ab_status_log": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_sales.sales_credit_note_lines": {
+   "frisch": 0,
+   "live": null,
+   "code": [
+    "app/api/v1/endpoints/sales_credit_notes.py:563"
+   ]
+  },
+  "domain_sales.sales_credit_notes": {
+   "frisch": 0,
+   "live": 0,
+   "code": [
+    "app/api/v1/endpoints/sales_credit_notes.py:563"
+   ]
+  },
+  "domain_sales.sales_delivery_notes": {
    "frisch": 0,
    "live": 0,
    "code": []
@@ -2128,6 +2355,16 @@
   "domain_shared.knowledge_improvement_proposals": {
    "frisch": 0,
    "live": 0,
+   "code": []
+  },
+  "domain_shared.knowledge_objects": {
+   "frisch": 0,
+   "live": 6,
+   "code": []
+  },
+  "domain_shared.knowledge_versions": {
+   "frisch": 0,
+   "live": null,
    "code": []
   },
   "domain_shared.kontrakt_mengenzeitraeume": {
@@ -2562,7 +2799,17 @@
    "live": 0,
    "code": []
   },
+  "public.mcp_tool_executions": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
   "public.offene_posten": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "public.opportunities": {
    "frisch": 0,
    "live": 0,
    "code": []

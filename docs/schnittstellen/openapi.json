@@ -249824,22 +249824,6 @@
               ],
               "title": "Status"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant"
-            }
           }
         ],
         "responses": {
@@ -249868,6 +249852,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "List Activities",
         "tags": [
           "CRM",
@@ -249877,24 +249866,6 @@
       "post": {
         "description": "Create new activity",
         "operationId": "create_activity_api_v1_crm_activities_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -250091,22 +250062,6 @@
               "title": "Activity Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant"
-            }
           }
         ],
         "responses": {
@@ -250147,22 +250102,6 @@
               "title": "Activity Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant"
-            }
           }
         ],
         "responses": {
@@ -250187,6 +250126,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Get Activity",
         "tags": [
           "CRM",
@@ -250204,22 +250148,6 @@
             "schema": {
               "title": "Activity Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant"
             }
           }
         ],
@@ -251425,24 +251353,6 @@
       "get": {
         "description": "List all Betriebsprofile",
         "operationId": "list_betriebsprofile_api_v1_crm_betriebsprofile_get",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -251457,18 +251367,13 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "List Betriebsprofile",
         "tags": [
           "CRM",
@@ -251478,24 +251383,6 @@
       "post": {
         "description": "Create new Betriebsprofil",
         "operationId": "create_betriebsprofil_api_v1_crm_betriebsprofile_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -251553,22 +251440,6 @@
               "title": "Profil Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant"
-            }
           }
         ],
         "responses": {
@@ -251609,22 +251480,6 @@
               "title": "Profil Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant"
-            }
           }
         ],
         "responses": {
@@ -251649,6 +251504,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Get Betriebsprofil",
         "tags": [
           "CRM",
@@ -251666,22 +251526,6 @@
             "schema": {
               "title": "Profil Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant"
             }
           }
         ],
@@ -258259,22 +258103,6 @@
               ],
               "title": "Channel"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant"
-            }
           }
         ],
         "responses": {
@@ -258303,6 +258131,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "List Consents",
         "tags": [
           "CRM",
@@ -258312,24 +258145,6 @@
       "post": {
         "description": "Record opt-in/opt-out consent for a partner (DSGVO Art. 6/7).",
         "operationId": "create_consent_api_v1_crm_consents_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -258945,22 +258760,6 @@
               "title": "Consent Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant"
-            }
           }
         ],
         "responses": {
@@ -259035,22 +258834,6 @@
               ],
               "title": "Search"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant"
-            }
           }
         ],
         "responses": {
@@ -259079,6 +258862,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "List Contacts",
         "tags": [
           "CRM",
@@ -259088,24 +258876,6 @@
       "post": {
         "description": "Create new contact",
         "operationId": "create_contact_api_v1_crm_contacts_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -259310,22 +259080,6 @@
               "title": "Contact Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant"
-            }
           }
         ],
         "responses": {
@@ -259366,22 +259120,6 @@
               "title": "Contact Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant"
-            }
           }
         ],
         "responses": {
@@ -259406,6 +259144,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Get Contact",
         "tags": [
           "CRM",
@@ -259423,22 +259166,6 @@
             "schema": {
               "title": "Contact Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant"
             }
           }
         ],
@@ -259525,22 +259252,6 @@
               "title": "Limit",
               "type": "integer"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant"
-            }
           }
         ],
         "responses": {
@@ -259570,6 +259281,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Get Contact Timeline",
         "tags": [
           "CRM",
@@ -264218,7 +263934,7 @@
     },
     "/api/v1/crm/gdpr/anonymize/{partner_id}": {
       "post": {
-        "description": "DSGVO Art. 17: Recht auf Löschung – anonymize partner data.",
+        "description": "DSGVO Art. 17: Loeschung laeuft ueber den protokollierten Loeschantrag.\n\nBis 27.10.2026 schrieb dieser Weg in ``domain_shared.business_partners`` (gibt es nicht) ohne\nMandant, schluckte den Fehler, die Transaktion war tot, und die Antwort meldete\n\"anonymisiert\". Eine Rechtspflicht galt als erfuellt, ohne dass ein Datensatz angefasst war.",
         "operationId": "gdpr_anonymize_api_v1_crm_gdpr_anonymize__partner_id__post",
         "parameters": [
           {
@@ -264240,22 +263956,6 @@
               "minLength": 10,
               "title": "Reason",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant"
             }
           }
         ],
@@ -264297,7 +263997,7 @@
     },
     "/api/v1/crm/gdpr/data-export/{partner_id}": {
       "get": {
-        "description": "DSGVO Art. 15: Auskunftsrecht – export all data for a partner.",
+        "description": "DSGVO Art. 15: Auskunftsrecht – export all data for a partner.\n\nLas bis 27.10.2026 ``domain_shared.business_partners`` ohne Mandant; die Tabelle gibt es nicht,\ndie Auskunft endete mit 500. Gefuehrt werden Partner in ``domain_crm.business_partners``.",
         "operationId": "gdpr_data_export_api_v1_crm_gdpr_data_export__partner_id__get",
         "parameters": [
           {
@@ -264307,22 +264007,6 @@
             "schema": {
               "title": "Partner Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant"
             }
           }
         ],
@@ -264350,6 +264034,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Gdpr Data Export",
         "tags": [
           "CRM",
@@ -267479,24 +267168,6 @@
       "post": {
         "description": "CRM-LED-03: Round-robin route unassigned leads to users from pool.",
         "operationId": "route_unassigned_leads_api_v1_crm_leads_route_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -267509,16 +267180,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -267806,22 +267467,6 @@
               "title": "Lead Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant"
-            }
           }
         ],
         "requestBody": {
@@ -267964,22 +267609,6 @@
               ],
               "title": "Assigned To"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant"
-            }
           }
         ],
         "responses": {
@@ -268008,6 +267637,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "List Opportunities",
         "tags": [
           "CRM",
@@ -268017,24 +267651,6 @@
       "post": {
         "description": "Create new opportunity.",
         "operationId": "create_opportunity_api_v1_crm_opportunities_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -268320,24 +267936,6 @@
       "get": {
         "description": "Pipeline summary: count and value per stage.",
         "operationId": "get_pipeline_summary_api_v1_crm_opportunities_pipeline_summary_get",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -268350,18 +267948,13 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Get Pipeline Summary",
         "tags": [
           "CRM",
@@ -268642,22 +268235,6 @@
               "title": "Opp Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant"
-            }
           }
         ],
         "responses": {
@@ -268698,22 +268275,6 @@
               "title": "Opp Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant"
-            }
           }
         ],
         "responses": {
@@ -268738,6 +268299,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Get Opportunity",
         "tags": [
           "CRM",
@@ -268755,22 +268321,6 @@
             "schema": {
               "title": "Opp Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant"
             }
           }
         ],
@@ -268831,22 +268381,6 @@
               "title": "Opp Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant"
-            }
           }
         ],
         "responses": {
@@ -268873,6 +268407,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Get Opportunity Belegkette",
         "tags": [
           "CRM",
@@ -268892,22 +268431,6 @@
             "schema": {
               "title": "Opp Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant"
             }
           }
         ],
@@ -269739,24 +269262,6 @@
       "get": {
         "description": "List all segments for a tenant.",
         "operationId": "list_segments_api_v1_crm_segments_get",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -269771,18 +269276,13 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "List Segments",
         "tags": [
           "CRM",
@@ -269792,24 +269292,6 @@
       "post": {
         "description": "Create a new marketing segment.",
         "operationId": "create_segment_api_v1_crm_segments_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -269867,22 +269349,6 @@
               "title": "Seg Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant"
-            }
           }
         ],
         "responses": {
@@ -269923,22 +269389,6 @@
               "title": "Seg Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant"
-            }
           }
         ],
         "responses": {
@@ -269963,6 +269413,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Get Segment",
         "tags": [
           "CRM",
@@ -269980,22 +269435,6 @@
             "schema": {
               "title": "Seg Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant"
             }
           }
         ],
@@ -270056,22 +269495,6 @@
               "title": "Seg Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant"
-            }
           }
         ],
         "responses": {
@@ -270101,6 +269524,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "List Segment Members",
         "tags": [
           "CRM",
@@ -270129,22 +269557,6 @@
               "description": "Partner ID to add",
               "title": "Partner Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant"
             }
           }
         ],
@@ -270196,22 +269608,6 @@
             "schema": {
               "title": "Seg Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant"
             }
           }
         ],
