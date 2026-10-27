@@ -9,7 +9,7 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
@@ -358,11 +358,10 @@ def bestellung_transition_endpoint(
     bestellung_id: str,
     body: BestellungTransitionIn,
     request: Request,
-    x_tenant_id: _Opt[str] = Header(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     from app.services.proc_bestellung_lifecycle_service import transition_bestellung_status, BestellungLifecycleError
-    tenant_id = x_tenant_id or "default"
     try:
         return transition_bestellung_status(db, bestellung_id, tenant_id, body.new_status,
                                              gepruefter_akteur_aus_request(request), body.reason)
@@ -375,11 +374,10 @@ def buche_wareneingang_endpoint(
     bestellung_id: str,
     body: WareneingangIn,
     request: Request,
-    x_tenant_id: _Opt[str] = Header(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     from app.services.proc_wareneingang_service import buche_wareneingang, WareneingangError
-    tenant_id = x_tenant_id or "default"
     try:
         return buche_wareneingang(db, bestellung_id, tenant_id, body.menge_erhalten,
                                    body.einheit, body.lager_id, gepruefter_akteur_aus_request(request),
@@ -393,11 +391,10 @@ def update_we_qs_endpoint(
     we_id: str,
     body: QSUpdateIn,
     request: Request,
-    x_tenant_id: _Opt[str] = Header(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     from app.services.proc_wareneingang_service import update_qs_status, WareneingangError
-    tenant_id = x_tenant_id or "default"
     try:
         return update_qs_status(db, we_id, tenant_id, body.qs_status, gepruefter_akteur_aus_request(request))
     except WareneingangError as exc:
@@ -408,11 +405,10 @@ def update_we_qs_endpoint(
 def rechnungspruefung_endpoint(
     bestellung_id: str,
     body: RechnungspruefungIn,
-    x_tenant_id: _Opt[str] = Header(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     from app.services.proc_rechnungspruefung_service import pruefe_rechnung, RechnungspruefungError
-    tenant_id = x_tenant_id or "default"
     try:
         return pruefe_rechnung(db, bestellung_id, tenant_id, body.rechnungs_nr,
                                 body.rechnungs_betrag_eur, body.bestell_preis_eur,
@@ -426,11 +422,10 @@ def rechnungsfreigabe_endpoint(
     pruefung_id: str,
     body: RechnungsFreigabeIn,
     request: Request,
-    x_tenant_id: _Opt[str] = Header(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     from app.services.proc_rechnungspruefung_service import freigabe_rechnungspruefung, RechnungspruefungError
-    tenant_id = x_tenant_id or "default"
     try:
         return freigabe_rechnungspruefung(db, pruefung_id, tenant_id, body.entscheidung,
                                            gepruefter_akteur_aus_request(request), body.grund)

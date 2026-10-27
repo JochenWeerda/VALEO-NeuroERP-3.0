@@ -3,21 +3,21 @@
  "summary": {
   "tables": 775,
   "by_class": {
-   "A": 651,
-   "B": 38,
-   "C": 26,
-   "D": 60
+   "A": 668,
+   "B": 33,
+   "C": 19,
+   "D": 55
   },
-  "rls_enabled": 588,
+  "rls_enabled": 608,
   "tenant_types": {
-   "character varying": 322,
+   "character varying": 330,
    "character varying(100)": 9,
    "character varying(120)": 39,
    "character varying(128)": 1,
    "character varying(255)": 1,
-   "character varying(36)": 80,
+   "character varying(36)": 82,
    "character varying(50)": 1,
-   "character varying(64)": 101,
+   "character varying(64)": 103,
    "character varying(80)": 24,
    "text": 107,
    "uuid": 4
@@ -1693,22 +1693,19 @@
   },
   {
    "table": "domain_einkauf.bestellung_positionen",
-   "class": "C",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying",
+   "rls": true,
    "force_rls": false,
-   "policies": 0,
-   "tenant_parents": [
-    "domain_einkauf.bestellungen"
-   ]
+   "policies": 4
   },
   {
    "table": "domain_einkauf.bestellungen",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_einkauf.bestellvorschlaege",
@@ -1720,32 +1717,27 @@
   },
   {
    "table": "domain_einkauf.bestellvorschlag_positionen",
-   "class": "C",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying",
+   "rls": true,
    "force_rls": false,
-   "policies": 0,
-   "tenant_parents": [
-    "domain_einkauf.bestellvorschlaege",
-    "domain_einkauf.kontrakte",
-    "domain_einkauf.lieferanten"
-   ]
+   "policies": 4
   },
   {
    "table": "domain_einkauf.ers_invoices",
-   "class": "B",
+   "class": "A",
    "tenant_type": "text",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_einkauf.ers_suppliers",
-   "class": "B",
+   "class": "A",
    "tenant_type": "text",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_einkauf.foreign_goods_audit",
@@ -1765,22 +1757,19 @@
   },
   {
    "table": "domain_einkauf.invoice_verification",
-   "class": "B",
+   "class": "A",
    "tenant_type": "text",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_einkauf.kontrakt_positionen",
-   "class": "C",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying",
+   "rls": true,
    "force_rls": false,
-   "policies": 0,
-   "tenant_parents": [
-    "domain_einkauf.kontrakte"
-   ]
+   "policies": 4
   },
   {
    "table": "domain_einkauf.kontrakte",
@@ -1802,9 +1791,9 @@
    "table": "domain_einkauf.lieferanten",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_einkauf.paletten_konto_buchungen",
@@ -4254,11 +4243,11 @@
   },
   {
    "table": "domain_procurement.proc_purchase_orders",
-   "class": "B",
+   "class": "A",
    "tenant_type": "character varying(36)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_procurement.proc_rechnungspruefungen",
@@ -5946,11 +5935,11 @@
   },
   {
    "table": "public.einkauf_abgleich_ergebnisse",
-   "class": "D",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying",
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "public.einkauf_anfragen",
@@ -5962,14 +5951,11 @@
   },
   {
    "table": "public.einkauf_anfragen_positionen",
-   "class": "C",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying(36)",
+   "rls": true,
    "force_rls": false,
-   "policies": 0,
-   "tenant_parents": [
-    "public.einkauf_anfragen"
-   ]
+   "policies": 4
   },
   {
    "table": "public.einkauf_angebote",
@@ -5981,14 +5967,11 @@
   },
   {
    "table": "public.einkauf_angebote_positionen",
-   "class": "C",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying(64)",
+   "rls": true,
    "force_rls": false,
-   "policies": 0,
-   "tenant_parents": [
-    "public.einkauf_angebote"
-   ]
+   "policies": 4
   },
   {
    "table": "public.einkauf_anlieferavis",
@@ -6016,54 +5999,51 @@
   },
   {
    "table": "public.einkauf_lieferschein_positionen",
-   "class": "C",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying(36)",
+   "rls": true,
    "force_rls": false,
-   "policies": 0,
-   "tenant_parents": [
-    "public.einkauf_lieferscheine"
-   ]
+   "policies": 4
   },
   {
    "table": "public.einkauf_lieferscheine",
    "class": "A",
    "tenant_type": "character varying(36)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "public.einkauf_rechnungseingaenge",
-   "class": "D",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying",
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "public.einkauf_rechnungseingang_positionen",
-   "class": "D",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying",
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "public.einkauf_wareneingaenge",
-   "class": "D",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying",
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "public.einkauf_wareneingang_positionen",
-   "class": "D",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying",
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "public.einkauf_warengruppen",
@@ -6083,14 +6063,11 @@
   },
   {
    "table": "public.einkauf_zahlungslauf_posten",
-   "class": "C",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying(64)",
+   "rls": true,
    "force_rls": false,
-   "policies": 0,
-   "tenant_parents": [
-    "public.einkauf_zahlungslaeufe"
-   ]
+   "policies": 4
   },
   {
    "table": "public.finance_accounting_periods",
@@ -6413,11 +6390,11 @@
   },
   {
    "table": "public.zahlungslauf_kreditoren",
-   "class": "B",
+   "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   }
  ]
 }
