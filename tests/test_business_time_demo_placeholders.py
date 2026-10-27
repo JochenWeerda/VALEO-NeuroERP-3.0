@@ -51,7 +51,7 @@ def test_atlas_exit_date_uses_business_day_and_keeps_event_timestamp_utc(
         lambda: date(2030, 1, 1),
     )
     monkeypatch.setattr(atlas_customs_service, "datetime", _FrozenUtcDatetime)
-    service = atlas_customs_service.ATLASCustomsService()
+    service = atlas_customs_service.ATLASCustomsService(tenant_id="tenant-1")
     monkeypatch.setattr(
         service,
         "_load_by_mrn",

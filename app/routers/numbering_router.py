@@ -9,6 +9,7 @@ from typing import Optional
 from datetime import datetime
 import logging
 
+from app.core.tenant import get_tenant_id
 from app.services.numbering_service_pg import NumberingServicePG, get_numbering_pg
 from app.auth.guards import require_scopes, require_all_scopes
 
@@ -20,7 +21,6 @@ router = APIRouter(prefix="/api/numbering", tags=["numbering"])
 class NextNumberRequest(BaseModel):
     """Request für next_number"""
     domain: str
-    tenant_id: str = "default"
     year: Optional[int] = None
 
 
@@ -44,6 +44,7 @@ class StatusResponse(BaseModel):
 @router.post("/next", response_model=NumberResponse)
 async def get_next_number(
     req: NextNumberRequest,
+    tenant_id: str = Depends(get_tenant_id),
     numbering: NumberingServicePG = Depends(get_numbering_pg),
     user: dict = Depends(require_scopes("docs:write", "sales:write", "purchase:write")),
 ):
@@ -68,7 +69,7 @@ async def get_next_number(
             if yearly_reset:
                 year = datetime.now().year
         
-        number = await numbering.next_number(req.domain, req.tenant_id, year)
+        number = await numbering.next_number(req.domain, tenant_id, year)
         
         return NumberResponse(ok=True, number=number)
     
@@ -80,7 +81,7 @@ async def get_next_number(
 @router.get("/status", response_model=StatusResponse)
 async def get_numbering_status(
     domain: str,
-    tenant_id: str = "default",
+    tenant_id: str = Depends(get_tenant_id),
     year: Optional[int] = None,
     numbering: NumberingServicePG = Depends(get_numbering_pg),
     user: dict = Depends(require_scopes("docs:read", "sales:read", "purchase:read")),
@@ -132,6 +133,7 @@ async def get_numbering_status(
 @router.post("/reset")
 async def reset_numbering(
     req: NextNumberRequest,
+    tenant_id: str = Depends(get_tenant_id),
     numbering: NumberingServicePG = Depends(get_numbering_pg),
     user: dict = Depends(require_all_scopes("admin:all")),
 ):
@@ -150,11 +152,11 @@ async def reset_numbering(
         Scope: admin:all
     """
     try:
-        await numbering.reset(req.domain, req.tenant_id, req.year)
+        await numbering.reset(req.domain, tenant_id, req.year)
         
         return {
             "ok": True,
-            "message": f"Number series reset for {req.domain}/{req.tenant_id}/{req.year}"
+            "message": f"Number series reset for {req.domain}/{tenant_id}/{req.year}"
         }
     
     except Exception as e:
@@ -165,6 +167,7 @@ async def reset_numbering(
 @router.post("/init-year")
 async def init_year(
     year: int,
+    tenant_id: str = Depends(get_tenant_id),
     numbering: NumberingServicePG = Depends(get_numbering_pg),
     user: dict = Depends(require_scopes("admin:all")),
 ):
@@ -176,7 +179,7 @@ async def init_year(
         initialized = 0
         
         for domain in domains:
-            await numbering.peek(domain, "default", year)
+            await numbering.peek(domain, tenant_id, year)
             initialized += 1
         
         return {
@@ -194,7 +197,6 @@ async def init_year(
 class NumberSeriesConfig(BaseModel):
     """Konfiguration eines Nummernkreises"""
     domain: str
-    tenant_id: str = "default"
     year: Optional[int] = None
     prefix: str
     width: int = 5
@@ -214,7 +216,7 @@ class NumberSeriesListItem(BaseModel):
 
 @router.get("/series", response_model=list[NumberSeriesListItem])
 async def list_number_series(
-    tenant_id: str = "default",
+    tenant_id: str = Depends(get_tenant_id),
     numbering: NumberingServicePG = Depends(get_numbering_pg),
     user: dict = Depends(require_scopes("admin:all")),
 ):
@@ -249,6 +251,7 @@ async def list_number_series(
 @router.post("/series", response_model=NumberSeriesListItem)
 async def create_or_update_number_series(
     config: NumberSeriesConfig,
+    tenant_id: str = Depends(get_tenant_id),
     numbering: NumberingServicePG = Depends(get_numbering_pg),
     user: dict = Depends(require_all_scopes("admin:all")),
 ):
@@ -261,7 +264,7 @@ async def create_or_update_number_series(
                 WHERE domain = :domain AND tenant_id = :tenant_id
                   AND (year = :year OR (:year IS NULL AND year IS NULL))
             """),
-            {"domain": config.domain, "tenant_id": config.tenant_id, "year": config.year}
+            {"domain": config.domain, "tenant_id": tenant_id, "year": config.year}
         )
         row = existing.fetchone()
 
@@ -272,7 +275,7 @@ async def create_or_update_number_series(
                     VALUES (:domain, :tenant_id, :year, :prefix, :counter, :width)
                 """),
                 {
-                    "domain": config.domain, "tenant_id": config.tenant_id,
+                    "domain": config.domain, "tenant_id": tenant_id,
                     "year": config.year, "prefix": config.prefix,
                     "counter": config.counter, "width": config.width,
                 }
@@ -286,7 +289,7 @@ async def create_or_update_number_series(
                       AND (year = :year OR (:year IS NULL AND year IS NULL))
                 """),
                 {
-                    "domain": config.domain, "tenant_id": config.tenant_id,
+                    "domain": config.domain, "tenant_id": tenant_id,
                     "year": config.year, "prefix": config.prefix, "width": config.width,
                 }
             )
@@ -295,7 +298,7 @@ async def create_or_update_number_series(
         counter = config.counter if row is None else row[0]
         next_num = f"{config.prefix}{counter + 1:0{config.width}d}"
         return NumberSeriesListItem(
-            domain=config.domain, tenant_id=config.tenant_id,
+            domain=config.domain, tenant_id=tenant_id,
             year=config.year, prefix=config.prefix,
             width=config.width, counter=counter, next_number=next_num,
         )

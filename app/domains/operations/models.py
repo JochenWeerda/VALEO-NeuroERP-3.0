@@ -7,7 +7,7 @@ from uuid import uuid4
 
 from sqlalchemy import Column, String, Integer, Float, DateTime, Date, Text, ForeignKey, DECIMAL, Boolean, Index, UniqueConstraint, text
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import backref, relationship
 from sqlalchemy.sql import func
 import enum
 
@@ -1169,7 +1169,7 @@ class Versicherung(Base):
     email = Column(String(255), nullable=True)
     notiz = Column(Text, nullable=True)
     status = Column(String(30), default=VersicherungStatus.AKTIV.value)
-    tenant_id = Column(String(120), nullable=False, default="default", index=True)
+    tenant_id = Column(String(120), nullable=False, index=True)  # Mandant setzt der Weg aus dem Token
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     created_by = Column(String(100))
@@ -1203,7 +1203,7 @@ class WartungAnlage(Base):
     verantwortlicher = Column(String(255), nullable=True)
     notiz = Column(Text, nullable=True)
     status = Column(String(30), default=WartungStatus.AKTIV.value)
-    tenant_id = Column(String(120), nullable=False, default="default", index=True)
+    tenant_id = Column(String(120), nullable=False, index=True)  # Mandant setzt der Weg aus dem Token
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     created_by = Column(String(100))
@@ -1223,11 +1223,12 @@ class WartungsProtokoll(Base):
     techniker = Column(String(255), nullable=True)
     kosten = Column(DECIMAL(14, 2), nullable=True)
     naechste_faellig = Column(DateTime(timezone=True), nullable=True)
-    tenant_id = Column(String(120), nullable=False, default="default", index=True)
+    tenant_id = Column(String(120), nullable=False, index=True)  # Mandant setzt der Weg aus dem Token
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     created_by = Column(String(100))
 
-    anlage = relationship("WartungAnlage", backref="protokolle")
+    # Die Datenbank loescht Protokolle mit der Anlage (ON DELETE CASCADE); das ORM soll sie nicht auf NULL setzen.
+    anlage = relationship("WartungAnlage", backref=backref("protokolle", passive_deletes=True))
 
 
 # ── TANKSTELLE / ZAPFUNGEN ────────────────────────────────────────────────────
@@ -1250,7 +1251,7 @@ class Zapfung(Base):
     gesamtpreis = Column(DECIMAL(14, 2), nullable=True)
     zeitstempel = Column(DateTime(timezone=True), nullable=False)
     notiz = Column(Text, nullable=True)
-    tenant_id = Column(String(120), nullable=False, default="default", index=True)
+    tenant_id = Column(String(120), nullable=False, index=True)  # Mandant setzt der Weg aus dem Token
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     created_by = Column(String(100))
 
@@ -1266,7 +1267,7 @@ class TankBestand(Base):
     kapazitaet_liter = Column(Float, nullable=False, default=0)
     min_bestand = Column(Float, default=0)
     letzte_befuellung = Column(DateTime(timezone=True), nullable=True)
-    tenant_id = Column(String(120), nullable=False, default="default", index=True)
+    tenant_id = Column(String(120), nullable=False, index=True)  # Mandant setzt der Weg aus dem Token
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
 
@@ -1304,7 +1305,7 @@ class Verladung(Base):
     datum = Column(DateTime(timezone=True), nullable=False)
     status = Column(String(30), default=VerladungStatus.GEPLANT.value)
     notiz = Column(Text, nullable=True)
-    tenant_id = Column(String(120), nullable=False, default="default", index=True)
+    tenant_id = Column(String(120), nullable=False, index=True)  # Mandant setzt der Weg aus dem Token
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     created_by = Column(String(100))
@@ -1341,7 +1342,7 @@ class Projekt(Base):
     status = Column(String(30), default=ProjektStatus.GEPLANT.value)
     prioritaet = Column(String(20), default="normal")  # niedrig|normal|hoch|kritisch
     notiz = Column(Text, nullable=True)
-    tenant_id = Column(String(120), nullable=False, default="default", index=True)
+    tenant_id = Column(String(120), nullable=False, index=True)  # Mandant setzt der Weg aus dem Token
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     created_by = Column(String(100))
@@ -1361,11 +1362,11 @@ class ProjektAufgabe(Base):
     faellig_am = Column(DateTime(timezone=True), nullable=True)
     erledigt_am = Column(DateTime(timezone=True), nullable=True)
     status = Column(String(30), default="offen")  # offen|in-bearbeitung|erledigt
-    tenant_id = Column(String(120), nullable=False, default="default", index=True)
+    tenant_id = Column(String(120), nullable=False, index=True)  # Mandant setzt der Weg aus dem Token
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
-    projekt = relationship("Projekt", backref="aufgaben")
+    projekt = relationship("Projekt", backref=backref("aufgaben", passive_deletes=True))
 
 
 # ── E2E-PROZESSKETTEN (Process Kernel) ───────────────────────────────────────
@@ -1410,7 +1411,7 @@ class EdiNachrichtDB(Base):
     status = Column(String(30), default="verarbeitet")
     fehler_beschreibung = Column(Text, nullable=True)
     dokument_id = Column(String(120), nullable=True)
-    tenant_id = Column(String(120), nullable=False, default="default", index=True)
+    tenant_id = Column(String(120), nullable=False, index=True)  # Mandant setzt der Weg aus dem Token
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 

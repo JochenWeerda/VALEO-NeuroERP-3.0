@@ -3,6 +3,7 @@ from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+from app.core.tenant import get_tenant_id
 
 from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
 from app.api.v1.endpoints import external_agent_integrations
@@ -92,6 +93,8 @@ def test_external_agent_integrations_surface_refresh_config_and_quarantine(monke
 
     app = FastAPI()
     app.include_router(external_agent_integrations.router)
+    # Der Mandant kommt aus dem Token; hier steht der gepruefte Mandant fuer die Anmeldung.
+    app.dependency_overrides[get_tenant_id] = lambda: "tenant-a"
     ersetze_nutzer(app, *ALLE_FACHROLLEN)
     client = TestClient(app)
 
@@ -132,6 +135,8 @@ def test_provision_superglue_pilot_tools_route(monkeypatch):
 
     app = FastAPI()
     app.include_router(external_agent_integrations.router)
+    # Der Mandant kommt aus dem Token; hier steht der gepruefte Mandant fuer die Anmeldung.
+    app.dependency_overrides[get_tenant_id] = lambda: "tenant-a"
     ersetze_nutzer(app, *ALLE_FACHROLLEN)
     client = TestClient(app)
 
@@ -149,6 +154,8 @@ def test_superglue_pilot_smoke_route(monkeypatch):
 
     app = FastAPI()
     app.include_router(external_agent_integrations.router)
+    # Der Mandant kommt aus dem Token; hier steht der gepruefte Mandant fuer die Anmeldung.
+    app.dependency_overrides[get_tenant_id] = lambda: "tenant-a"
     ersetze_nutzer(app, *ALLE_FACHROLLEN)
     client = TestClient(app)
 

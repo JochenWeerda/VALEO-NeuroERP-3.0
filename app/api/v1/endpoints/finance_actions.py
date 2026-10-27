@@ -8,7 +8,7 @@ from datetime import date, datetime, timezone
 from typing import Any, List, Optional
 from app.auth.finance_roles import finance_admin, finance_read, finance_write, open_items_read
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -650,11 +650,10 @@ class MahnstufeIn(_BM):
 @router.post("/sepa/mandate", response_model=SepaMandatOut, status_code=201, summary="SEPA-Mandat anlegen", dependencies=[Depends(finance_write)])
 def create_sepa_mandat_endpoint(
     body: SEPAMandatIn,
-    x_tenant_id: _Opt[str] = Header(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     from app.services.finance_sepa_service import create_sepa_mandat, SEPAError
-    tenant_id = x_tenant_id or "default"
     try:
         return create_sepa_mandat(db, tenant_id, body.glaeubiger_id, body.iban,
                                    body.bic or "", body.typ or "CORE", body.erteilung_am)
@@ -665,11 +664,10 @@ def create_sepa_mandat_endpoint(
 @router.post("/sepa/mandate/{mandat_id}/widerruf", response_model=SepaMandatOut, summary="SEPA-Mandat widerrufen", dependencies=[Depends(finance_write)])
 def widerruf_sepa_mandat_endpoint(
     mandat_id: str,
-    x_tenant_id: _Opt[str] = Header(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     from app.services.finance_sepa_service import widerruf_sepa_mandat, SEPAError
-    tenant_id = x_tenant_id or "default"
     try:
         return widerruf_sepa_mandat(db, mandat_id, tenant_id)
     except SEPAError as exc:
@@ -679,11 +677,10 @@ def widerruf_sepa_mandat_endpoint(
 @router.post("/sepa/batches", response_model=SepaBatchOut, status_code=201, summary="SEPA-Lastschrift-Batch erstellen", dependencies=[Depends(finance_admin)])
 def create_sepa_batch_endpoint(
     body: SEPABatchIn,
-    x_tenant_id: _Opt[str] = Header(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     from app.services.finance_sepa_service import create_sepa_batch, SEPAError
-    tenant_id = x_tenant_id or "default"
     try:
         return create_sepa_batch(db, tenant_id, body.faellig_am,
                                   [e.model_dump() for e in body.eintraege])
@@ -694,11 +691,10 @@ def create_sepa_batch_endpoint(
 @router.post("/ratenzahlung/plaene", response_model=RatenzahlungsplanOut, status_code=201, summary="Ratenzahlungsplan anlegen", dependencies=[Depends(finance_write)])
 def create_ratenzahlungsplan_endpoint(
     body: RatenzahlungPlanIn,
-    x_tenant_id: _Opt[str] = Header(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     from app.services.finance_ratenzahlung_service import create_ratenzahlungsplan, RatenzahlungError
-    tenant_id = x_tenant_id or "default"
     try:
         return create_ratenzahlungsplan(db, tenant_id, body.op_id, body.gesamt_eur,
                                         body.anzahl_raten, body.erste_faelligkeit)
@@ -710,11 +706,10 @@ def create_ratenzahlungsplan_endpoint(
 def buche_rate_endpoint(
     rate_id: str,
     body: RateBuchenIn,
-    x_tenant_id: _Opt[str] = Header(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     from app.services.finance_ratenzahlung_service import buche_rate, RatenzahlungError
-    tenant_id = x_tenant_id or "default"
     try:
         return buche_rate(db, rate_id, tenant_id, body.bezahlt_am)
     except RatenzahlungError as exc:
@@ -726,11 +721,10 @@ def eskaliere_mahnstufe_endpoint(
     rechnungsnr: str,
     body: MahnstufeIn,
     request: Request,
-    x_tenant_id: _Opt[str] = Header(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     from app.services.finance_mahnstufe_service import eskaliere_mahnstufe, MahnstufeError
-    tenant_id = x_tenant_id or "default"
     try:
         return eskaliere_mahnstufe(db, rechnungsnr, tenant_id, gepruefter_akteur_aus_request(request))
     except MahnstufeError as exc:
@@ -740,10 +734,9 @@ def eskaliere_mahnstufe_endpoint(
 @router.get("/mahnstufe/{rechnungsnr}/trail", response_model=MahnstufenTrailOut, summary="Mahnstufen-Trail abrufen", dependencies=[Depends(finance_read)])
 def get_mahnstufe_trail_endpoint(
     rechnungsnr: str,
-    x_tenant_id: _Opt[str] = Header(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     from app.services.finance_mahnstufe_service import get_mahnstufen_trail
-    tenant_id = x_tenant_id or "default"
     trail = get_mahnstufen_trail(db, rechnungsnr, tenant_id)
     return {"rechnungsnr": rechnungsnr, "trail": trail, "count": len(trail)}
