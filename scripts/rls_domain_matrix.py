@@ -314,7 +314,10 @@ def _daten(befund: dict | None) -> str:
 def render_markdown(matrix: dict) -> str:
     out = [
         "---", "title: RLS-Domain-Matrix (generiert)", "type: reference", "audience: [agent, entwickler]",
-        "owner: Claude Code", "status: aktiv", "description: Generierte Entscheidungsmatrix der noch nicht "
+        "owner: Claude Code", "status: aktiv",
+        # Datum des Datenbefunds statt Tagesdatum: die Seite bleibt reproduzierbar (--check).
+        f"last_reviewed: {matrix['datenstand'] or '2026-10-27'}", "version: 1.0.0",
+        "description: Generierte Entscheidungsmatrix der noch nicht "
         "abgesicherten Mandantentabellen je Domain.", "---", "",
         "# RLS-Domain-Matrix (generiert)", "",
         "Generiert von `scripts/rls_domain_matrix.py`; nicht von Hand aendern. Entscheidungen und "
