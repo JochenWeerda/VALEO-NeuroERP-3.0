@@ -102,7 +102,7 @@ export default function EinzelfuttermittelStammPage(): JSX.Element {
 
   const { data, loading, saveData } = useMaskData({
     apiUrl: futtermittelConfig.api.baseUrl,
-    id: 'new',
+    id: undefined,
   })
 
   const validate = (formData: Record<string, unknown>) => validateFields(getFieldsFromMaskConfig(futtermittelConfig), formData ?? {})

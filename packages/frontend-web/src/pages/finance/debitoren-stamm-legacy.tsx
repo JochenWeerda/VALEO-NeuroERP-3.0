@@ -279,7 +279,7 @@ export default function DebitorenStammPage(): JSX.Element {
 
   const { data, loading, saveData, updateData } = useMaskData({
     apiUrl: debitorenConfig.api.baseUrl,
-    id: 'new'
+    id: undefined
   })
 
 

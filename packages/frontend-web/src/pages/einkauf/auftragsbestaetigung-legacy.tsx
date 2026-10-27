@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from '@/app/routing/typed-router'
+import { isStammCreationEntityId, ObjectPage } from '@/components/mask-builder'
 import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
-import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig, type Field } from '@/components/mask-builder/types'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
@@ -118,7 +118,8 @@ const createAuftragsbestaetigungConfig = (t: TFunction, entityTypeLabel: string)
 export default function AuftragsbestaetigungPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { id } = useParams<{ id: string }>()
+  const { id: routeId } = useParams<{ id: string }>()
+  const id = isStammCreationEntityId(routeId) ? undefined : routeId
   const [loading, setLoading] = useState(false)
   const entityType = 'orderConfirmation'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Auftragsbestaetigung')

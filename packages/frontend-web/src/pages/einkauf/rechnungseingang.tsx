@@ -1,7 +1,7 @@
-import { NativeListPage } from '@/components/mask-builder/NativeListPage'
+import { createStammNativeDetailPage } from '@/components/mask-builder'
 
-export default function Page(): JSX.Element {
-  return (
-    <NativeListPage screenId="einkauf/rechnungseingang/neu" testId="screen-einkauf/rechnungseingang/neu" />
-  )
-}
+export default createStammNativeDetailPage(
+  'finance/ap-invoice',
+  'einkauf-rechnungseingang',
+  () => import('./rechnungseingang-legacy'),
+)

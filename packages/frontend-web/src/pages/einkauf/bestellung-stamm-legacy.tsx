@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams, useSearchParams } from '@/app/routing/typed-router'
+import { isStammCreationEntityId, ObjectPage } from '@/components/mask-builder'
 import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
-import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig, type Field } from '@/components/mask-builder/types'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
@@ -239,7 +239,8 @@ const createBestellungConfig = (t: TFunction, entityTypeLabel: string): MaskConf
 export default function BestellungStammPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { id } = useParams<{ id: string }>()
+  const { id: routeId } = useParams<{ id: string }>()
+  const id = isStammCreationEntityId(routeId) ? undefined : routeId
   const [searchParams] = useSearchParams()
   const { user } = useAuth()
   const { tenantId } = useTenant()

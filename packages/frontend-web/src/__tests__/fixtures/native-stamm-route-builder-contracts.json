@@ -1,0 +1,765 @@
+{
+  "agrar/saatgut-liste": {
+    "schemaVersion": 1,
+    "id": "agrar/saatgut-liste",
+    "domain": "agrar",
+    "mode": "list",
+    "title": "Saatgut",
+    "subtitle": "Sorten, Zulassungen und Bestand",
+    "adapter": {
+      "type": "native",
+      "sourceId": "agrar/saatgut-liste",
+      "temporary": false
+    },
+    "dataSources": [
+      {
+        "key": "list",
+        "endpoint": "/api/v1/agrar/saatgut/",
+        "pageSize": 200
+      }
+    ],
+    "actions": [
+      {
+        "key": "neu",
+        "label": "Neues Saatgut",
+        "kind": "primary",
+        "dangerLevel": "safe",
+        "zone": "header",
+        "navigationRoute": "/agrar/saatgut-stamm",
+        "localEffect": "navigation",
+        "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
+      },
+      {
+        "key": "export",
+        "label": "CSV-Export",
+        "kind": "secondary",
+        "dangerLevel": "safe",
+        "zone": "header",
+        "command": "list.exportCsv",
+        "localEffect": "download",
+        "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+      }
+    ],
+    "tables": [
+      {
+        "key": "list",
+        "label": "Saatgut",
+        "dataSourceKey": "list",
+        "serverPagination": false,
+        "pageSize": 50,
+        "virtualized": true,
+        "rowHeight": 40,
+        "columns": [
+          {
+            "key": "name",
+            "label": "Bezeichnung",
+            "sortable": true,
+            "filterable": true,
+            "priority": "primary"
+          },
+          {
+            "key": "artikelnummer",
+            "label": "Artikel-Nr.",
+            "sortable": true,
+            "filterable": true,
+            "priority": "primary"
+          },
+          {
+            "key": "sorte",
+            "label": "Sorte",
+            "filterable": true,
+            "sortable": true,
+            "priority": "primary"
+          },
+          {
+            "key": "art",
+            "label": "Kultur",
+            "filterable": true,
+            "priority": "secondary"
+          },
+          {
+            "key": "zuechter",
+            "label": "Zuechter",
+            "filterable": true,
+            "priority": "secondary"
+          },
+          {
+            "key": "bsa_zulassung",
+            "label": "BSA",
+            "renderKind": "boolean",
+            "priority": "tertiary"
+          },
+          {
+            "key": "eu_zulassung",
+            "label": "EU",
+            "renderKind": "boolean",
+            "priority": "tertiary"
+          },
+          {
+            "key": "vk_preis",
+            "label": "VK-Preis",
+            "numeric": true,
+            "renderKind": "currency",
+            "priority": "secondary"
+          },
+          {
+            "key": "verfuegbar",
+            "label": "Verfuegbar",
+            "numeric": true,
+            "sortable": true,
+            "priority": "secondary"
+          }
+        ],
+        "rowActions": [],
+        "rowRouteTemplate": "/agrar/saatgut/{id}"
+      }
+    ],
+    "noWorkflowReason": "Stammdatenliste ohne eigenen Ablauf.",
+    "agentContract": {
+      "businessPurpose": "Saatgut-Sorten mit Zulassung, Preis und verfuegbarem Bestand finden.",
+      "examplePrompts": [
+        "Welche Weizensorten haben BSA-Zulassung?",
+        "Welches Saatgut ist knapp?"
+      ],
+      "sensitiveFields": [],
+      "testSelectors": {
+        "screenRoot": "[data-testid='screen-agrar/saatgut-liste']"
+      }
+    },
+    "layout": {
+      "floorplan": "worklist",
+      "density": "compact",
+      "contextRail": "none",
+      "preferredMode": "desktopDense",
+      "mobileMode": "mobileStack",
+      "touchTargetPx": 44,
+      "tableProfile": "standard"
+    },
+    "performance": {
+      "initialPayloadBudgetKb": 60,
+      "requiresLazyTabs": false,
+      "requiresVirtualTables": true,
+      "lookupMinChars": 2,
+      "bundleGroup": "agrar"
+    }
+  },
+  "agrar/duenger-liste": {
+    "schemaVersion": 1,
+    "id": "agrar/duenger-liste",
+    "domain": "agrar",
+    "mode": "list",
+    "title": "Duenger",
+    "subtitle": "Duengemittel mit Naehrstoffen",
+    "adapter": {
+      "type": "native",
+      "sourceId": "agrar/duenger-liste",
+      "temporary": false
+    },
+    "dataSources": [
+      {
+        "key": "list",
+        "endpoint": "/api/v1/agrar/duenger/",
+        "pageSize": 200
+      }
+    ],
+    "actions": [
+      {
+        "key": "neu",
+        "label": "Neuer Duenger",
+        "kind": "primary",
+        "dangerLevel": "safe",
+        "zone": "header",
+        "navigationRoute": "/agrar/duenger-stamm",
+        "localEffect": "navigation",
+        "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
+      },
+      {
+        "key": "export",
+        "label": "CSV-Export",
+        "kind": "secondary",
+        "dangerLevel": "safe",
+        "zone": "header",
+        "command": "list.exportCsv",
+        "localEffect": "download",
+        "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+      }
+    ],
+    "tables": [
+      {
+        "key": "list",
+        "label": "Duenger",
+        "dataSourceKey": "list",
+        "serverPagination": false,
+        "pageSize": 50,
+        "virtualized": true,
+        "rowHeight": 40,
+        "columns": [
+          {
+            "key": "name",
+            "label": "Bezeichnung",
+            "sortable": true,
+            "filterable": true,
+            "priority": "primary"
+          },
+          {
+            "key": "artikelnummer",
+            "label": "Artikel-Nr.",
+            "sortable": true,
+            "filterable": true,
+            "priority": "primary"
+          },
+          {
+            "key": "typ",
+            "label": "Typ",
+            "filterable": true,
+            "priority": "primary"
+          },
+          {
+            "key": "hersteller",
+            "label": "Hersteller",
+            "filterable": true,
+            "priority": "secondary"
+          },
+          {
+            "key": "n_gehalt",
+            "label": "N %",
+            "numeric": true,
+            "sortable": true,
+            "priority": "secondary"
+          },
+          {
+            "key": "p_gehalt",
+            "label": "P %",
+            "numeric": true,
+            "priority": "secondary"
+          },
+          {
+            "key": "k_gehalt",
+            "label": "K %",
+            "numeric": true,
+            "priority": "secondary"
+          },
+          {
+            "key": "wassergefaehrdend",
+            "label": "Wassergefaehrdend",
+            "renderKind": "boolean",
+            "priority": "tertiary"
+          },
+          {
+            "key": "ist_aktiv",
+            "label": "Aktiv",
+            "renderKind": "boolean",
+            "filterable": true,
+            "priority": "tertiary"
+          }
+        ],
+        "rowActions": [
+          {
+            "key": "deaktivieren",
+            "label": "Deaktivieren",
+            "dangerLevel": "high",
+            "permission": "agrar.duenger.deactivate",
+            "commandEndpoint": "/api/v1/agrar/duenger/{entity_id}/actions/deaktivieren",
+            "method": "POST",
+            "requiresConfirmation": true,
+            "auditReasonRequired": true,
+            "visibleWhen": {
+              "field": "ist_aktiv",
+              "values": [
+                true
+              ]
+            }
+          }
+        ],
+        "rowRouteTemplate": "/agrar/duenger/{id}"
+      }
+    ],
+    "noWorkflowReason": "Stammdatenliste ohne eigenen Ablauf.",
+    "agentContract": {
+      "businessPurpose": "Duengemittel mit Naehrstoffgehalten finden, oeffnen und nicht mehr gefuehrte deaktivieren.",
+      "examplePrompts": [
+        "Welche Stickstoffduenger fuehren wir?",
+        "Welche Duenger sind wassergefaehrdend?"
+      ],
+      "sensitiveFields": [],
+      "testSelectors": {
+        "screenRoot": "[data-testid='screen-agrar/duenger-liste']"
+      }
+    },
+    "layout": {
+      "floorplan": "worklist",
+      "density": "compact",
+      "contextRail": "none",
+      "preferredMode": "desktopDense",
+      "mobileMode": "mobileStack",
+      "touchTargetPx": 44,
+      "tableProfile": "standard"
+    },
+    "performance": {
+      "initialPayloadBudgetKb": 60,
+      "requiresLazyTabs": false,
+      "requiresVirtualTables": true,
+      "lookupMinChars": 2,
+      "bundleGroup": "agrar"
+    }
+  },
+  "einkauf/lieferanten": {
+    "schemaVersion": 1,
+    "id": "einkauf/lieferanten",
+    "domain": "einkauf",
+    "mode": "list",
+    "title": "Lieferanten",
+    "subtitle": "Lieferanten suchen und oeffnen",
+    "adapter": {
+      "type": "native",
+      "sourceId": "einkauf/lieferanten",
+      "temporary": false
+    },
+    "dataSources": [
+      {
+        "key": "list",
+        "endpoint": "/api/v1/einkauf/lieferanten",
+        "pageSize": 500
+      }
+    ],
+    "actions": [
+      {
+        "key": "neu",
+        "label": "Neuer Lieferant",
+        "kind": "primary",
+        "dangerLevel": "safe",
+        "zone": "header",
+        "navigationRoute": "/einkauf/lieferant/neu",
+        "localEffect": "navigation",
+        "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
+      },
+      {
+        "key": "export",
+        "label": "CSV-Export",
+        "kind": "secondary",
+        "dangerLevel": "safe",
+        "zone": "header",
+        "command": "list.exportCsv",
+        "localEffect": "download",
+        "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+      }
+    ],
+    "tables": [
+      {
+        "key": "list",
+        "label": "Lieferanten",
+        "dataSourceKey": "list",
+        "serverPagination": false,
+        "pageSize": 50,
+        "virtualized": true,
+        "rowHeight": 40,
+        "columns": [
+          {
+            "key": "firmenname",
+            "label": "Lieferant",
+            "sortable": true,
+            "filterable": true,
+            "priority": "primary"
+          },
+          {
+            "key": "lieferantennummer",
+            "label": "Lieferantennr.",
+            "sortable": true,
+            "filterable": true,
+            "priority": "primary"
+          },
+          {
+            "key": "ort",
+            "label": "Ort",
+            "filterable": true,
+            "sortable": true,
+            "priority": "secondary"
+          },
+          {
+            "key": "telefon",
+            "label": "Telefon",
+            "priority": "tertiary"
+          },
+          {
+            "key": "email",
+            "label": "E-Mail",
+            "priority": "tertiary"
+          },
+          {
+            "key": "lieferzeit_tage",
+            "label": "Lieferzeit (Tage)",
+            "numeric": true,
+            "priority": "tertiary"
+          },
+          {
+            "key": "bewertung",
+            "label": "Bewertung",
+            "numeric": true,
+            "sortable": true,
+            "priority": "secondary"
+          },
+          {
+            "key": "aktiv",
+            "label": "Aktiv",
+            "renderKind": "boolean",
+            "filterable": true,
+            "priority": "secondary"
+          }
+        ],
+        "rowActions": [],
+        "rowRouteTemplate": "/einkauf/lieferanten/{id}"
+      }
+    ],
+    "noWorkflowReason": "Stammdatenliste ohne eigenen Ablauf.",
+    "agentContract": {
+      "businessPurpose": "Lieferanten finden und ihre Stammdaten, Bestellungen und Kontakte oeffnen.",
+      "examplePrompts": [
+        "Finde den Lieferanten Muehle Nord.",
+        "Welche Lieferanten sind inaktiv?"
+      ],
+      "sensitiveFields": [],
+      "testSelectors": {
+        "screenRoot": "[data-testid='screen-einkauf/lieferanten']"
+      }
+    },
+    "layout": {
+      "floorplan": "worklist",
+      "density": "compact",
+      "contextRail": "none",
+      "preferredMode": "desktopDense",
+      "mobileMode": "mobileStack",
+      "touchTargetPx": 44,
+      "tableProfile": "standard"
+    },
+    "performance": {
+      "initialPayloadBudgetKb": 60,
+      "requiresLazyTabs": false,
+      "requiresVirtualTables": true,
+      "lookupMinChars": 2,
+      "bundleGroup": "einkauf"
+    }
+  },
+  "banken/konten-liste": {
+    "schemaVersion": 1,
+    "id": "banken/konten-liste",
+    "domain": "finance",
+    "mode": "list",
+    "title": "Bankkonten",
+    "subtitle": "Hausbankkonten mit Saldo und Status",
+    "adapter": {
+      "type": "native",
+      "sourceId": "banken/konten-liste",
+      "temporary": false
+    },
+    "dataSources": [
+      {
+        "key": "list",
+        "endpoint": "/api/v1/banken/konten",
+        "pageSize": 500
+      }
+    ],
+    "actions": [
+      {
+        "key": "export",
+        "label": "CSV-Export",
+        "kind": "secondary",
+        "dangerLevel": "safe",
+        "zone": "header",
+        "command": "list.exportCsv",
+        "localEffect": "download",
+        "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+      }
+    ],
+    "tables": [
+      {
+        "key": "list",
+        "label": "Bankkonten",
+        "dataSourceKey": "list",
+        "serverPagination": false,
+        "pageSize": 50,
+        "virtualized": true,
+        "rowHeight": 40,
+        "columns": [
+          {
+            "key": "iban",
+            "label": "IBAN",
+            "sortable": true,
+            "filterable": true,
+            "priority": "primary"
+          },
+          {
+            "key": "bank",
+            "label": "Bank",
+            "filterable": true,
+            "priority": "primary"
+          },
+          {
+            "key": "kontoart",
+            "label": "Kontoart",
+            "filterable": true,
+            "priority": "secondary"
+          },
+          {
+            "key": "saldo",
+            "label": "Saldo",
+            "numeric": true,
+            "renderKind": "currency",
+            "sortable": true,
+            "priority": "primary"
+          },
+          {
+            "key": "status",
+            "label": "Status",
+            "renderKind": "status",
+            "filterable": true,
+            "priority": "primary"
+          }
+        ],
+        "rowActions": [],
+        "rowRouteTemplate": "/finance/bankkonto/{id}"
+      }
+    ],
+    "noWorkflowReason": "Kontenliste ohne eigenen Ablauf.",
+    "agentContract": {
+      "businessPurpose": "Bankkonten und Salden im Blick behalten.",
+      "examplePrompts": [
+        "Welches Konto hat den hoechsten Saldo?",
+        "Welche Konten sind inaktiv?"
+      ],
+      "sensitiveFields": [],
+      "testSelectors": {
+        "screenRoot": "[data-testid='screen-banken/konten-liste']"
+      }
+    },
+    "layout": {
+      "floorplan": "worklist",
+      "density": "compact",
+      "contextRail": "none",
+      "preferredMode": "desktopDense",
+      "mobileMode": "mobileStack",
+      "touchTargetPx": 44,
+      "tableProfile": "financial"
+    },
+    "performance": {
+      "initialPayloadBudgetKb": 60,
+      "requiresLazyTabs": false,
+      "requiresVirtualTables": true,
+      "lookupMinChars": 2,
+      "bundleGroup": "finance"
+    }
+  },
+  "agrar/saatgut": {
+    "schemaVersion": 1,
+    "id": "agrar/saatgut",
+    "domain": "agrar",
+    "mode": "detail",
+    "title": "Saatgut",
+    "subtitle": "Agrar / Saatgut-Stammdaten",
+    "adapter": {
+      "type": "native",
+      "sourceId": "agrar/saatgut",
+      "temporary": false
+    },
+    "dataSources": [
+      {
+        "key": "entity",
+        "endpoint": "/api/v1/agrar/saatgut/{entity_id}"
+      },
+      {
+        "key": "lagerbestaende",
+        "endpoint": "/api/v1/masks/agrar/saatgut/entity/{entity_id}/tabs/lagerbestaende",
+        "pageSize": 25
+      },
+      {
+        "key": "vertraege",
+        "endpoint": "/api/v1/masks/agrar/saatgut/entity/{entity_id}/tabs/vertraege",
+        "pageSize": 25
+      }
+    ],
+    "tabs": [
+      {
+        "key": "kopf",
+        "label": "Stammdaten",
+        "lazy": false,
+        "keepAlive": true,
+        "dataSourceKey": "entity",
+        "fields": [
+          {
+            "key": "artikelnummer",
+            "label": "Artikel-Nr.",
+            "type": "text",
+            "readOnly": true
+          },
+          {
+            "key": "name",
+            "label": "Bezeichnung",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "sorte",
+            "label": "Sorte",
+            "type": "text"
+          },
+          {
+            "key": "art",
+            "label": "Kulturart",
+            "type": "text"
+          },
+          {
+            "key": "zulassungsnummer",
+            "label": "Zulassungs-Nr.",
+            "type": "text"
+          },
+          {
+            "key": "tkm",
+            "label": "TKG (g)",
+            "type": "number"
+          },
+          {
+            "key": "is_active",
+            "label": "Aktiv",
+            "type": "boolean"
+          }
+        ]
+      },
+      {
+        "key": "lagerbestaende",
+        "label": "Lagerbestaende",
+        "lazy": true,
+        "keepAlive": false,
+        "tables": [
+          {
+            "key": "lagerbestaende",
+            "label": "Bestaende",
+            "dataSourceKey": "lagerbestaende",
+            "serverPagination": true,
+            "pageSize": 25,
+            "virtualized": true,
+            "rowHeight": 52,
+            "columns": [
+              {
+                "key": "lagerort",
+                "label": "Lagerort",
+                "sortable": true,
+                "filterable": true
+              },
+              {
+                "key": "menge",
+                "label": "Menge (kg)",
+                "numeric": true,
+                "sortable": true,
+                "renderKind": "number"
+              },
+              {
+                "key": "charge",
+                "label": "Charge",
+                "width": 120
+              },
+              {
+                "key": "lager_datum",
+                "label": "Eingelagert",
+                "renderKind": "date",
+                "width": 110
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "key": "vertraege",
+        "label": "Vertraege",
+        "lazy": true,
+        "keepAlive": false,
+        "tables": [
+          {
+            "key": "vertraege",
+            "label": "Anbauvertraege",
+            "dataSourceKey": "vertraege",
+            "serverPagination": true,
+            "pageSize": 25,
+            "virtualized": true,
+            "rowHeight": 52,
+            "columns": [
+              {
+                "key": "vertrag_nr",
+                "label": "Vertrag-Nr.",
+                "sortable": true
+              },
+              {
+                "key": "erzeuger",
+                "label": "Erzeuger",
+                "filterable": true
+              },
+              {
+                "key": "menge",
+                "label": "Menge (kg)",
+                "numeric": true,
+                "sortable": true,
+                "renderKind": "number"
+              },
+              {
+                "key": "ernte_jahr",
+                "label": "Erntejahr",
+                "width": 90
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "actions": [
+      {
+        "key": "edit",
+        "label": "Bearbeiten",
+        "kind": "primary",
+        "dangerLevel": "safe",
+        "permission": "agrar.saatgut.update"
+      }
+    ],
+    "agentContract": {
+      "businessPurpose": "Saatgut-Stammdaten: Sorteninfo, Lagerbestaende und Anbauvertraege fuer Saatgutplanung.",
+      "examplePrompts": [
+        "Welche Lagerbestaende hat Saatgut {entity_id}?",
+        "Zeige alle Anbauvertraege fuer Saatgut {entity_id}."
+      ],
+      "sensitiveFields": [],
+      "testSelectors": {
+        "screenRoot": "[data-testid='agrar-saatgut']",
+        "primaryAction": "[data-testid='action-edit']",
+        "summaryArea": "[data-testid='mask-summary']"
+      }
+    },
+    "layout": {
+      "preferredMode": "desktopDense",
+      "mobileMode": "mobileStack",
+      "touchTargetPx": 44,
+      "floorplan": "objectPage",
+      "columnNavigation": "single",
+      "sectionNavigation": "anchors",
+      "density": "compact",
+      "contextRail": "combined",
+      "summaryPlacement": "header",
+      "stickyHeader": true,
+      "stickyFooter": true
+    },
+    "performance": {
+      "initialPayloadBudgetKb": 36,
+      "requiresLazyTabs": true,
+      "requiresVirtualTables": false,
+      "lookupMinChars": 2,
+      "bundleGroup": "agrar"
+    },
+    "identityField": "artikelnummer",
+    "noWorkflowReason": "Saatgut-Stammdaten sind Referenzdaten ohne Prozess-Lebenszyklus.",
+    "noProcessChainReason": "Saatgut-Stammdaten sind Referenzdaten ohne Prozess-Lebenszyklus.",
+    "summary": [
+      {
+        "key": "artikelnummer",
+        "label": "Kennung",
+        "value": null,
+        "kind": "identity"
+      }
+    ]
+  }
+}

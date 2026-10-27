@@ -1,7 +1,7 @@
-import { NativeListPage } from '@/components/mask-builder/NativeListPage'
+import { createStammNativeDetailPage } from '@/components/mask-builder'
 
-export default function Page(): JSX.Element {
-  return (
-    <NativeListPage screenId="qualitaet/reklamation-detail" testId="screen-qualitaet/reklamation-detail" />
-  )
-}
+export default createStammNativeDetailPage(
+  'qualitaet/reklamation',
+  'qualitaet-reklamation-detail',
+  () => import('./reklamation-detail-legacy'),
+)

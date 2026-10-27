@@ -8,27 +8,29 @@ function read(rel: string): string {
   return readFileSync(resolve(pages, rel), 'utf8')
 }
 
-describe('StammListenParent Dual-Pfad (Detail native, Create Legacy)', () => {
+describe('Listenfamilien: aktuelles Routeninventar (Quellnachweis)', () => {
   it('Batch-3-Listen nutzen NativeListPage mit ScreenDefinition-IDs', () => {
     const batch3: Array<[string, string]> = [
       ['agrar/biostimulanzien-liste.tsx', 'agrar/biostimulanzien-liste'],
       ['agrar/ernte/liste.tsx', 'agrar/ernte-liste'],
-      ['sales/auftraege-liste.tsx', 'sales/auftraege-liste'],
-      ['qualitaet/reklamationen.tsx', 'qualitaet/reklamationen-liste'],
-      ['service/anfragen.tsx', 'service/anfragen-liste'],
+      ['sales/auftraege-liste.tsx', 'verkauf/auftraege'],
+      ['service/anfragen.tsx', 'service/anfragen'],
     ]
     for (const [file, screenId] of batch3) {
       const src = read(file)
       expect(src).toContain('NativeListPage')
       expect(src).toContain(`screenId="${screenId}"`)
     }
+    const rekl = read('qualitaet/reklamationen.tsx')
+    expect(rekl).toContain('useReklamationen')
+    expect(rekl).toContain('saveFlowSpineResumeCheckpoint')
   })
 
   it('Debitoren-, Mischfuttermittel-, Auftragsbestaetigungen- und Artikel-Listen nutzen NativeListPage', () => {
     expect(read('finance/debitoren-liste.tsx')).toContain('NativeListPage')
     expect(read('finance/debitoren-liste.tsx')).toContain('screenId="finance/debitoren-liste"')
-    expect(read('futtermittel/mischfuttermittel-liste.tsx')).toContain('screenId="futtermittel/mischfuttermittel-liste"')
-    expect(read('einkauf/auftragsbestaetigungen-liste.tsx')).toContain('screenId="einkauf/auftragsbestaetigungen"')
+    expect(read('futtermittel/mischfuttermittel-liste.tsx')).toContain('screenId="futtermittel/mischfuttermittel/liste"')
+    expect(read('einkauf/auftragsbestaetigungen-liste.tsx')).toContain('screenId="einkauf/auftragsbestaetigungen-liste"')
     expect(read('artikel/liste.tsx')).toContain('screenId="artikel/liste"')
   })
 
@@ -52,14 +54,15 @@ describe('StammListenParent Dual-Pfad (Detail native, Create Legacy)', () => {
     expect(listen).toContain('"/verkauf/kunde/neu"')
   })
 
-  it('Verkauf-Kunden-Liste teilt ScreenDefinition crm/kunden-liste', () => {
-    expect(read('verkauf/kunden-liste.tsx')).toContain('screenId="crm/kunden-liste"')
-    expect(read('verkauf/kunden-liste.tsx')).not.toContain('kunden-stamm')
+  it('Verkauf-Kunden-Liste bindet ihre eigene aktuelle ScreenDefinition', () => {
+    expect(read('verkauf/kunden-liste.tsx')).toContain('screenId="verkauf/kunden-liste"')
   })
 
   it('Sales-Auftraege- und Lieferungen-Listen nutzen NativeListPage', () => {
-    expect(read('sales/auftraege-liste.tsx')).toContain('screenId="sales/auftraege-liste"')
-    expect(read('sales/lieferungen-liste.tsx')).toContain('screenId="sales/lieferungen-liste"')
+    expect(read('sales/auftraege-liste.tsx')).toContain('screenId="verkauf/auftraege"')
+    const lieferungen = read('sales/lieferungen-liste.tsx')
+    expect(lieferungen).toContain('useLieferungen')
+    expect(lieferungen).toContain('RoleFocusBar')
     const listen = readFileSync(
       resolve(__dirname, '../../../../../app/core/screen_definitions_listen.py'),
       'utf8',
@@ -79,9 +82,8 @@ describe('StammListenParent Dual-Pfad (Detail native, Create Legacy)', () => {
 
   it('Batch-11-Listen nutzen NativeListPage mit ScreenDefinition-IDs', () => {
     const batch11: Array<[string, string]> = [
-      ['admin/audit-log.tsx', 'admin/audit-log-liste'],
+      ['admin/audit-log.tsx', 'admin/audit-log'],
       ['agrar/bodenproben/liste.tsx', 'agrar/bodenproben-liste'],
-      ['fibu/debitoren.tsx', 'fibu/debitoren-liste'],
       ['fibu/zahlungslaeufe.tsx', 'fibu/zahlungslaeufe-liste'],
       ['einkauf/bestellvorschlaege.tsx', 'einkauf/bestellvorschlaege-liste'],
       ['compliance/qs-checkliste.tsx', 'compliance/qs-checkliste-liste'],
@@ -93,6 +95,9 @@ describe('StammListenParent Dual-Pfad (Detail native, Create Legacy)', () => {
       expect(src).toContain('NativeListPage')
       expect(src).toContain(`screenId="${screenId}"`)
     }
+    const debitoren = read('fibu/debitoren.tsx')
+    expect(debitoren).toContain('useDebitorenOP')
+    expect(debitoren).toContain('exportToCSV')
   })
 
   it('Ausgangsrechnungen-Worklist (sales/invoices) zeigt auf Beleg-Detailroute', () => {

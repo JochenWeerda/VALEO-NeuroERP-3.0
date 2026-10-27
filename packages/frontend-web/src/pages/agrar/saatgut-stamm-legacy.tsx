@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from '@/app/routing/typed-router';
+import { isStammCreationEntityId } from '@/components/mask-builder';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -77,8 +78,8 @@ const SaatgutStammPage: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { tenantId } = useTenant();
-  const isEditing = !!id;
-  const readOnlyMode = searchParams.get('mode') === 'view' && !!id;
+  const isEditing = !isStammCreationEntityId(id);
+  const readOnlyMode = searchParams.get('mode') === 'view' && isEditing;
 
   // Form State
   const [formData, setFormData] = useState<SaatgutFormData>({

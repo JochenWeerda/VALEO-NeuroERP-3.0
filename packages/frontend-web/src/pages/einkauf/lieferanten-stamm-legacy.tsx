@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from '@/app/routing/typed-router'
+import { isStammCreationEntityId } from '@/components/mask-builder'
 import { useTranslation } from 'react-i18next'
 import { Callout } from '@/components/ui/callout'
 import { Badge } from '@/components/ui/badge'
@@ -213,7 +214,8 @@ export default function LieferantenStammPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const isTouch = useTouchDevice()
-  const { id } = useParams<{ id: string }>()
+  const { id: routeId } = useParams<{ id: string }>()
+  const id = isStammCreationEntityId(routeId) ? undefined : routeId
   const entityType = 'supplier'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Lieferant')
 

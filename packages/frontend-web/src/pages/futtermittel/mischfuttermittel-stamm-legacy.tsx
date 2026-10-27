@@ -144,7 +144,7 @@ export default function MischfuttermittelStammPage(): JSX.Element {
 
   const { data, loading, saveData } = useMaskData({
     apiUrl: mischfuttermittelConfig.api.baseUrl,
-    id: 'new',
+    id: undefined,
   })
 
   const validate = (formData: Record<string, unknown>) => validateFields(getFieldsFromMaskConfig(mischfuttermittelConfig), formData ?? {})

@@ -317,7 +317,7 @@ export default function KreditorenStammPage(): JSX.Element {
   const { tenantId } = useTenant()
   const { data, loading, saveData, setData } = useMaskData({
     apiUrl: kreditorenConfig.api.baseUrl,
-    id: 'new'
+    id: undefined
   })
 
   const validate = (formData: Record<string, unknown>) => validateFields(getFieldsFromMaskConfig(kreditorenConfig), formData ?? {})

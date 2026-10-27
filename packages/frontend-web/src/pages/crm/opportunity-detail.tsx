@@ -1,7 +1,7 @@
 import { createStammNativeDetailPage } from '@/components/mask-builder'
 
 export default createStammNativeDetailPage(
-  'crm/opportunity/new',
-  'crm-opportunity-new',
+  'crm/opportunity',
+  'crm-opportunity-detail',
   () => import('./opportunity-detail-legacy'),
 )

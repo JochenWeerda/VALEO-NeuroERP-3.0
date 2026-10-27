@@ -1,7 +1,7 @@
 import { createStammNativeDetailPage } from '@/components/mask-builder'
 
 export default createStammNativeDetailPage(
-  'finance/kreditoren-stamm',
+  'finance/kreditor',
   'finance-kreditoren-stamm',
   () => import('./kreditoren-stamm-legacy'),
 )

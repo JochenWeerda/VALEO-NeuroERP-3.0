@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
 import { toast } from '@/hooks/use-toast'
 import { useQuery } from '@tanstack/react-query'
-import { ObjectPage } from '@/components/mask-builder'
+import { ObjectPage, isStammCreationEntityId } from '@/components/mask-builder'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { getFieldsFromMaskConfig, validateFields } from '@/components/mask-builder/validation'
@@ -23,12 +23,12 @@ import { KundenBankverbindungenPanel } from '@/features/crm/components/KundenBan
 import { recordArrayFromResponse, stringValue } from '@/lib/record-utils'
 
 function resolveCustomerRouteId(params: { id?: string }, pathname: string): string | undefined {
-  if (params.id?.trim() && params.id !== 'neu') {
+  if (params.id?.trim() && !isStammCreationEntityId(params.id.trim())) {
     return params.id.trim()
   }
   const match = pathname.match(/\/kunden\/([^/]+)\/?$/)
   const segment = match?.[1]?.trim()
-  return segment && segment !== 'neu' ? segment : undefined
+  return segment && !isStammCreationEntityId(segment) ? segment : undefined
 }
 
 function resolveKundenNr(id: string, formData: Record<string, unknown> | null | undefined): string {
@@ -690,11 +690,11 @@ export default function KundenStammPage(): JSX.Element {
   const entityType = 'customer'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Kunde')
   const kundenConfig = createKundenConfig(t, entityTypeLabel)
-  const isNew = !id || id === 'neu'
+  const isNew = isStammCreationEntityId(id)
 
   const { data, loading, saveData } = useMaskData({
     apiUrl: kundenConfig.api.baseUrl,
-    id: id || 'new'
+    id
   })
 
   const validate = (formData: Record<string, unknown>) => validateFields(getFieldsFromMaskConfig(kundenConfig), formData ?? {})

@@ -1,7 +1,7 @@
-import { NativeListPage } from '@/components/mask-builder/NativeListPage'
+import { createStammNativeDetailPage } from '@/components/mask-builder'
 
-export default function Page(): JSX.Element {
-  return (
-    <NativeListPage screenId="einkauf/anlieferavis/neu" testId="screen-einkauf/anlieferavis/neu" />
-  )
-}
+export default createStammNativeDetailPage(
+  'einkauf/anlieferavis',
+  'einkauf-anlieferavis',
+  () => import('./anlieferavis-legacy'),
+)

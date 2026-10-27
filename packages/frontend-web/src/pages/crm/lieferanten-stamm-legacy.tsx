@@ -283,7 +283,7 @@ export default function LieferantenStammPage(): JSX.Element {
 
   const { data, loading, saveData } = useMaskData({
     apiUrl: lieferantenConfig.api.baseUrl,
-    id: 'new'
+    id: undefined
   })
 
   const validate = (formData: Record<string, unknown>) => validateFields(getFieldsFromMaskConfig(lieferantenConfig), formData ?? {})

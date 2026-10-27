@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from '@/app/routing/typed-router'
-import { ObjectPage } from '@/components/mask-builder'
+import { isStammCreationEntityId, ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig, type Field } from '@/components/mask-builder/types'
 import { Badge } from '@/components/ui/badge'
@@ -109,7 +109,8 @@ const anlieferavisConfig: MaskConfig = {
 
 export default function AnlieferavisPage(): JSX.Element {
   const navigate = useNavigate()
-  const { id } = useParams<{ id: string }>()
+  const { id: routeId } = useParams<{ id: string }>()
+  const id = isStammCreationEntityId(routeId) ? undefined : routeId
   const [loading, setLoading] = useState(false)
 
   const { data, saveData } = useMaskData({

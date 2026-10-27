@@ -1,10 +1,10 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate, useParams } from '@/app/routing/typed-router'
+import { isStammCreationEntityId, ObjectPage } from '@/components/mask-builder'
 import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
 import { useQuery } from '@tanstack/react-query'
 import { z } from 'zod'
-import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 
 import { MaskConfig } from '@/components/mask-builder/types'
@@ -426,7 +426,8 @@ function OpportunityQuotesTab({ opportunityId }: { opportunityId: string }) {
 export default function OpportunityDetailPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { id } = useParams<{ id: string }>()
+  const { id: routeId } = useParams<{ id: string }>()
+  const id = isStammCreationEntityId(routeId) ? undefined : routeId
   const [loading, setLoading] = useState(false)
   const entityType = 'opportunity'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Opportunity')
@@ -462,7 +463,7 @@ export default function OpportunityDetailPage(): JSX.Element {
   )
 
   const opportunityConfig = createOpportunityConfig(t, entityTypeLabel, customerOpts, contactOpts)
-  const isNew = !id || id === 'neu' || id === 'new'
+  const isNew = isStammCreationEntityId(id)
 
   const { data, saveData, isLoading: dataLoading } = useMaskData<Record<string, unknown>>({
     apiUrl: opportunityConfig.api.baseUrl,

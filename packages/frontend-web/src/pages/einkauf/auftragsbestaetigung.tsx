@@ -1,7 +1,7 @@
-import { NativeListPage } from '@/components/mask-builder/NativeListPage'
+import { createStammNativeDetailPage } from '@/components/mask-builder'
 
-export default function Page(): JSX.Element {
-  return (
-    <NativeListPage screenId="einkauf/auftragsbestaetigung/neu" testId="screen-einkauf/auftragsbestaetigung/neu" />
-  )
-}
+export default createStammNativeDetailPage(
+  'einkauf/auftragsbestaetigung',
+  'einkauf-auftragsbestaetigung',
+  () => import('./auftragsbestaetigung-legacy'),
+)
