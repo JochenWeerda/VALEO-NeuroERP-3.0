@@ -8,7 +8,7 @@
    "C": 52,
    "D": 60
   },
-  "rls_enabled": 515,
+  "rls_enabled": 520,
   "tenant_types": {
    "character varying": 296,
    "character varying(100)": 9,
@@ -98,7 +98,6 @@
    "app/api/v1/endpoints/crm_reports.py": 1,
    "app/api/v1/endpoints/customer_extensions.py": 1,
    "app/api/v1/endpoints/farm_profiles.py": 1,
-   "app/api/v1/endpoints/gobd_archiv.py": 1,
    "app/api/v1/endpoints/master_data.py": 1,
    "app/api/v1/endpoints/messages.py": 1,
    "app/api/v1/endpoints/nutrient_compositions.py": 1,
@@ -1547,9 +1546,9 @@
    "table": "domain_docflow.document_artifacts",
    "class": "A",
    "tenant_type": "character varying(64)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_docflow.document_command_log",
@@ -1579,17 +1578,17 @@
    "table": "domain_docflow.document_headers",
    "class": "A",
    "tenant_type": "character varying(64)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_docflow.document_items",
    "class": "A",
    "tenant_type": "character varying(64)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_docflow.document_links",
@@ -1643,9 +1642,9 @@
    "table": "domain_docflow.invoice_xml_store",
    "class": "A",
    "tenant_type": "character varying(64)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_docflow.number_series",
@@ -1715,9 +1714,9 @@
    "table": "domain_docflow.pos_tse_devices",
    "class": "A",
    "tenant_type": "character varying(64)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_docs.doc_allocation_sources",
