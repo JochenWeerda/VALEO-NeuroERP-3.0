@@ -131,7 +131,7 @@ ein Rückfall im Code bleibt trotzdem ein Befund.
 | Domain | Tabellen | Ursachen | Modell | Schreiber | Identität | Worker | Bereinigung | Policy | Risiko |
 |---|---|---|---|---|---|---|---|---|---|
 | **pricing** | 2 (A1, C1) | standardmandant, position | Roh-SQL (Migration) | 1 | Query-Parameter mit Standard, Nutzlast | – | 0 Zeilen | getrennt, kein `system`; Positionen aus `price_lists` | **umgesetzt** (RLS-DOMAIN-PRICING-20261027) |
-| hr | 5 (A3, B2) | referenzdaten, nullbar, standard | Roh-SQL | 2 | Token | – | 0 Zeilen; `person`/`employment` nur frisch | getrennt, kein `system` | niedrig |
+| hr | 5 (A3, B2) | referenzdaten, nullbar, standard (Fehltreffer) | Roh-SQL | 2 | Token | – | 0 Zeilen; `person`/`employment` nur frisch | getrennt, kein `system`; Verbund-FK der Kinder | **umgesetzt** (RLS-DOMAIN-HR-20261027) |
 | nachweisraum | 2 (A2) | referenzdaten (MCP-Generik) | Roh-SQL | 1 | – (Dienstfunktion) | – | 0 Zeilen | getrennt | niedrig, GoBD-Export prüfen |
 | audit / compliance | 4 (A3, B1) | standard, nullbar | Roh-SQL | 4 | Token, 1 Rückfall | – | 0 Zeilen | getrennt | niedrig |
 | docflow | 5 (A5) | standardmandant (`gobd_archiv.py:30`, `mask_frontend_bridges.py:972`) | Roh-SQL | 9 | Token, Rückfall | – | 63 Zeilen, sauber | getrennt | mittel: Belegkette Verkauf/Einkauf |

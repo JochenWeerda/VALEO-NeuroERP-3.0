@@ -3,12 +3,12 @@
  "summary": {
   "tables": 775,
   "by_class": {
-   "A": 609,
-   "B": 54,
+   "A": 611,
+   "B": 52,
    "C": 52,
    "D": 60
   },
-  "rls_enabled": 503,
+  "rls_enabled": 508,
   "tenant_types": {
    "character varying": 296,
    "character varying(100)": 9,
@@ -2608,11 +2608,11 @@
   },
   {
    "table": "domain_hr.employment",
-   "class": "B",
+   "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_hr.field_service_plans",
@@ -2658,9 +2658,9 @@
    "table": "domain_hr.onboarding_checklists",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_hr.onboarding_runs",
@@ -2688,11 +2688,11 @@
   },
   {
    "table": "domain_hr.person",
-   "class": "B",
+   "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_hr.qualification_profiles",
@@ -2738,17 +2738,17 @@
    "table": "domain_hr.training_courses",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_hr.work_plan_assignments",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_hrm.hrm_abwesenheiten",

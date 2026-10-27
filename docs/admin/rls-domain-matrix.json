@@ -2,18 +2,18 @@
  "_note": "Generiert von scripts/rls_domain_matrix.py; nicht von Hand aendern.",
  "datenstand": "2026-10-27",
  "summary": {
-  "tabellen": 212,
+  "tabellen": 207,
   "nach_klasse": {
-   "A": 109,
-   "B": 51,
+   "A": 106,
+   "B": 49,
    "C": 52
   },
   "nach_ursache": {
    "dienst": 20,
    "position": 50,
-   "referenzdaten": 41,
-   "mandant_nullbar": 38,
-   "standardmandant": 61,
+   "referenzdaten": 39,
+   "mandant_nullbar": 36,
+   "standardmandant": 60,
    "identitaet": 2
   },
   "nach_domain": {
@@ -60,11 +60,6 @@
    },
    "finance": {
     "dienst": 1
-   },
-   "hr": {
-    "mandant_nullbar": 2,
-    "referenzdaten": 2,
-    "standardmandant": 1
    },
    "infrastructure": {
     "position": 1
@@ -4539,169 +4534,6 @@
    },
    "bereinigung": [],
    "policy": "keine, bis der Dienst tokengebundene Identitaet hat (rls-dienste-identitaet-vorschlag.md)"
-  },
-  {
-   "table": "domain_hr.employment",
-   "domain": "hr",
-   "class": "B",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "mandant_nullbar",
-   "gruende": [
-    "mandant_nullbar"
-   ],
-   "modell": [],
-   "leser": [],
-   "schreiber": [],
-   "worker": [],
-   "identitaet": {},
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": null,
-   "bereinigung": [
-    "Datenbefund fehlt (Tabelle nicht in der gewachsenen Datenbank)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_hr.onboarding_checklists",
-   "domain": "hr",
-   "class": "A",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "referenzdaten",
-   "gruende": [
-    "referenzdaten",
-    "mandant_nullbar"
-   ],
-   "modell": [],
-   "leser": [
-    "app/api/v1/command_handlers/training.py",
-    "app/services/mcp_execution_service.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/training.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "token": 1
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [
-    "app/services/mcp_execution_service.py:3155"
-   ],
-   "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3155"
-   ],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_hr.person",
-   "domain": "hr",
-   "class": "B",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "mandant_nullbar",
-   "gruende": [
-    "mandant_nullbar"
-   ],
-   "modell": [],
-   "leser": [],
-   "schreiber": [],
-   "worker": [],
-   "identitaet": {},
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": null,
-   "bereinigung": [
-    "Datenbefund fehlt (Tabelle nicht in der gewachsenen Datenbank)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_hr.training_courses",
-   "domain": "hr",
-   "class": "A",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "referenzdaten",
-   "gruende": [
-    "referenzdaten",
-    "mandant_nullbar"
-   ],
-   "modell": [],
-   "leser": [
-    "app/api/v1/command_handlers/training.py",
-    "app/services/mcp_execution_service.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/training.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "token": 1
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [
-    "app/services/mcp_execution_service.py:3155"
-   ],
-   "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3155"
-   ],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_hr.work_plan_assignments",
-   "domain": "hr",
-   "class": "A",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [
-    "standardmandant"
-   ],
-   "modell": [],
-   "leser": [],
-   "schreiber": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "standardmandant": 1,
-    "token": 1
-   },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py:972"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
   },
   {
    "table": "infrastructure.audit_log",
