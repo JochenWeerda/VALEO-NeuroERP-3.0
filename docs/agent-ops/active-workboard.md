@@ -19871,3 +19871,6 @@ Nutzerauftrag: alle uebrigen offenen Aenderungen commit-/pushfaehig abschliessen
 
 
 **SESSION-CACHE-BOUNDARY-20261027 - reserviert, session_cache_low:** ReadReview zeigt InboxWidgetinterneStatebleibtbeiAuthwechselmontiert; DataBootstrap verwendetbisherglobalenQueryClientohneIdentitaetsgrenze. Besitzer nursrc/app/DataBootstrap.tsx, neuenengbenanntenSession-Cache-TestundQA. Sol/low. GegenprobevorFix: Token/Sub/Tenantwechsel+valeo-auth-changedbeiweiteremMount; keinealtenQuery-/WidgetStatewerte. ZentralerProviderresetnurbeiSub/Tenant/Rollen-/Scopewechsel, NICHTnormalemTokenrefresh, keineTokensalsCacheKey, keineAutorisierungsersetzung. EchteQueryClient-/ReactLifecycleTests,Transport/AuthMock,keineDB/Installation/Gesamtsuite. LeadcommitsserialisiertundvollerTypecheckspaeter.
+
+
+**STUDIO-INBOX-DELIVERY Nachlauf 20261027:** Sol/low-Reviews beendet; Sitzungsgrenze und Beschaffungslisten korrigiert. Vollstaendige Frontend-Typpruefung gruen; 79 gezielte Tests in elf Dateien gruen. Studio-Katalog 848 Definitionen synchron. YAML-Lockbindung samt unveraenderten Backportpatches geprueft; Sicherheitsfrist unveraendert. Kein eigener DB-Zugriff waehrend Claudes Fenster. Weitere gemeinsame Quelllieferung/Artefakte und Gesamt-CI bleiben offen; keine Gesamtfreigabe.

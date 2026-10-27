@@ -37,5 +37,9 @@ Dies ist kein Browser-/Serverauthentifizierungsnachweis.
 Sol mit geringer Denkleistung fuehrte den abgegrenzten Slice aus. Keine
 Datenbank, Installation oder breite Testsuite. Unter Windows lagen TEMP/TMP
 fuer den gezielten Vitest-Lauf im eigenen ignorierten Cache, um einen
-temporaeren EPERM-Rename zu vermeiden. Die volle Typpruefung erfolgt beim
-gemeinsamen Frontend-Nachlauf.
+temporaeren EPERM-Rename zu vermeiden. Die volle Typpruefung ist im gemeinsamen Frontend-Nachlauf bestanden
+(tsc Projektbuild und vollstaendige Frontend-Typpruefung).
+Der gezielte integrierte Nachlauf besteht mit 79 Tests in elf Dateien:
+Sitzungsgrenze, Entityprojektion, Inbox und Workspace-Zusammensetzung.
+Studio-Katalogcheck: 848 Definitionen synchron. Keine Datenbank verwendet.
+Dies ersetzt weder Browserabnahme noch die noch rote Gesamt-CI.
