@@ -19764,3 +19764,6 @@ Nutzerauftrag: alle uebrigen offenen Aenderungen commit-/pushfaehig abschliessen
 
 
 **RLS-P6 umgesetzt (Claude Code):** Rolle valeo_system (BYPASSRLS, live angelegt ohne Passwort), system_session() nur in cross_tenant_scope, uebergreifende Worker darauf umgestellt, Compose/.env.example; Analyse: uebergreifend blockiert nur ohne Systemverbindung -> rls_system_role_20261026 (business_partners), 501 Tabellen mit RLS. Dienste unter services/* bewusst ohne RLS (Mandant nicht tokengebunden), Vertrag: kein Dienst liest RLS-Tabelle. QA docs/quality-assurance/rls-p6-system-role-20261026.md.
+
+
+**RLS-P7 umgesetzt (Claude Code):** Startwaechter rls_guard (Produktion verweigert Start bei Superuser/BYPASSRLS/Eigentuemer, Entwicklung meldet), Engine-Freigabeliste, CODEOWNERS fuer RLS-Kern. Gesamtstand P0-P7 in docs/quality-assurance/rls-p7-guards-20261026.md: 501 Tabellen mit RLS im frischen Schema, live keine Policy aktiv bis zur Integration. RLS-P1..P7 abgeschlossen.
