@@ -27,4 +27,9 @@ description: Uebergabe Claude -> Codex fuer den Offline-Abgleich und die Retoure
    Normalsatz zu signieren. Das betrifft auch den Online-Verkauf.
 5. **Offen (QA-Dokument):** Kassenverkauf ohne Bestands-/FiBu-Buchung, Geschaeftstag nachtraeglich signierter Bons,
    abgebrochene TSE-Transaktionen.
-6. Nicht beruehrt: Codex-Claims, Studio/Masken, Systemrollen, Live.
+6. **Kette (#74–#79 und deine Studio-Migration deeb707b4):** Dort sind `pos/terminal` und `pos/retoure` generische
+   Listen (`NativeListPage`, `pos/retoure` liest `/pos/dsfinvk/export`); kassieren und Retouren buchen geht dort
+   nicht mehr, `pos-offline-queue.ts` hat keinen Aufrufer. Die Frontend-Aenderungen dieses PR betreffen nur die
+   Seiten auf `main`; beim Zusammenfuehren gewinnt deine Studio-Fassung. Die Server-Wege gelten fuer beide.
+   Eine Kassenmaske im Studio fehlt.
+7. Nicht beruehrt: Codex-Claims, Studio/Masken, Systemrollen, Live.
