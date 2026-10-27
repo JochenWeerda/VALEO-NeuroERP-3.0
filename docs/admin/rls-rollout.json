@@ -2,12 +2,12 @@
  "_note": "Generiert von scripts/rls_rollout.py aus docs/admin/rls-inventory.json; nicht von Hand aendern.",
  "summary": {
   "ready": 0,
-  "pending": 85,
+  "pending": 80,
   "reasons": {
    "dienst": 10,
    "mandant_ermitteln": 1,
-   "standardmandant": 62,
-   "mandant_null": 29,
+   "standardmandant": 57,
+   "mandant_null": 28,
    "uebergreifend": 0,
    "identitaet": 4
   }
@@ -54,18 +54,8 @@
   "domain_agrar.waagen_vorlagen": [
    "standardmandant"
   ],
-  "domain_crm.business_partners": [
-   "mandant_null",
-   "standardmandant"
-  ],
-  "domain_crm.credit_limits": [
-   "standardmandant"
-  ],
   "domain_crm.crm_opportunities": [
    "dienst",
-   "standardmandant"
-  ],
-  "domain_crm.crm_segments": [
    "standardmandant"
   ],
   "domain_dev_mock.mock_sessions": [
@@ -263,12 +253,6 @@
   "public.crm_activities": [
    "dienst",
    "mandant_null",
-   "standardmandant"
-  ],
-  "public.crm_betriebsprofile": [
-   "standardmandant"
-  ],
-  "public.crm_contacts": [
    "standardmandant"
   ],
   "public.crm_leads": [

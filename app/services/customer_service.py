@@ -16,7 +16,6 @@ from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.core.config import settings
 from app.core.data_quality_enforcement import build_dq_error_detail, evaluate_customer_datensatz
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
 from app.integrations.crm_core_client import (
@@ -163,9 +162,12 @@ def attach_mask_aliases(customer: dict[str, Any]) -> dict[str, Any]:
     return customer
 
 
-def _adapt_customer(core_customer: CRMCoreCustomer) -> dict[str, Any]:
-    """Map crm-core payload to the Customer schema dict."""
-    tenant_uuid = UUID(settings.DEFAULT_TENANT_ID)
+def _adapt_customer(core_customer: CRMCoreCustomer, tenant_id: str) -> dict[str, Any]:
+    """Map crm-core payload to the Customer schema dict.
+
+    Der Mandant ist der des Aufrufers (nur eigene Kunden werden abgebildet), nicht der Standardmandant.
+    """
+    tenant_uuid = _tenant_as_uuid(tenant_id)
     now = datetime.utcnow()
     customer_number = f"CRM-{core_customer.id[:8].upper()}"
     is_active = core_customer.status not in {"blacklisted", "former"}
@@ -691,11 +693,11 @@ class CustomerService:
         limit: int = 50,
         search: Optional[str] = None,
     ) -> tuple[list[dict[str, Any]], int]:
-        effective_tenant = self.tenant_id or _DEFAULT_TENANT
+        effective_tenant = self.tenant_id
         try:
             core_items, _ = await _crm_list(skip=skip, limit=limit, search=search)
             eigene = self._eigene_kunden({str(c.id) for c in core_items})
-            items = [_adapt_customer(c) for c in core_items if str(c.id) in eigene]
+            items = [_adapt_customer(c, self.tenant_id) for c in core_items if str(c.id) in eigene]
             items = self.merge_extensions_for_list(items)
             return items, self._anzahl_eigene_kunden()
         except Exception as exc:
@@ -717,7 +719,7 @@ class CustomerService:
                 logger.warning("crm-core get_customer failed, DB fallback: %s: %s", type(exc).__name__, exc)
                 customer = None
         if customer is not None and self._eigene_kunden({str(customer.id)}):
-            return self.merge_extensions(_adapt_customer(customer))
+            return self.merge_extensions(_adapt_customer(customer, self.tenant_id))
         row = self.get_from_db_any_key(customer_id)
         if row is None:
             raise EntityNotFoundError("Customer", customer_id)
@@ -932,7 +934,7 @@ class CustomerService:
             (created.display_name or customer_data.company_name or "Kunde").strip() or "Kunde",
             customer_data.customer_number or f"CRM-{created.id[:8].upper()}",
         )
-        d = _adapt_customer(created)
+        d = _adapt_customer(created, self.tenant_id)
         return self.merge_extensions(d)
 
     async def update_customer(self, customer_id: str, customer_data: Any) -> dict[str, Any]:
@@ -969,7 +971,7 @@ class CustomerService:
             if row is None:
                 raise EntityNotFoundError("Customer", customer_id)
             return self.merge_extensions(row)
-        d = _adapt_customer(updated)
+        d = _adapt_customer(updated, self.tenant_id)
         return self.merge_extensions(d)
 
     async def delete_customer(self, customer_id: str) -> None:

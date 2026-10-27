@@ -2,13 +2,6 @@
  "_note": "Lesender Befund der gewachsenen Datenbank (scripts/rls_domain_matrix.py --data).",
  "stand": "2026-10-27",
  "tables": {
-  "domain_agrar.agrar_biostimulanzien": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
   "domain_agrar.agrar_duenger": {
    "zeilen": 0,
    "null": 0,
@@ -164,34 +157,6 @@
    "system": 0,
    "mandanten": 0
   },
-  "domain_audit.attestations": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "domain_compliance.compliance_pcn_status_log": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "domain_compliance.data_erasure_requests": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "domain_compliance.intrastat_meldungen": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
   "domain_crm.activities": {
    "zeilen": 0,
    "null": 0,
@@ -199,164 +164,7 @@
    "system": 0,
    "mandanten": 0
   },
-  "domain_crm.business_partner_addresses": {
-   "zeilen": 0,
-   "eltern_fk": [
-    "partner_id -> domain_crm.business_partners.partner_id"
-   ],
-   "verwaist": 0,
-   "ohne_eltern": 0
-  },
-  "domain_crm.business_partner_billing_configs": {
-   "zeilen": 0,
-   "eltern_fk": [
-    "partner_id -> domain_crm.business_partners.partner_id"
-   ],
-   "verwaist": 0,
-   "ohne_eltern": 0
-  },
-  "domain_crm.business_partner_community_members": {
-   "zeilen": 0,
-   "eltern_fk": [
-    "partner_id -> domain_crm.business_partners.partner_id"
-   ],
-   "verwaist": 0,
-   "ohne_eltern": 0
-  },
-  "domain_crm.business_partner_contacts": {
-   "zeilen": 0,
-   "eltern_fk": [
-    "partner_id -> domain_crm.business_partners.partner_id"
-   ],
-   "verwaist": 0,
-   "ohne_eltern": 0
-  },
-  "domain_crm.business_partner_cooperative_memberships": {
-   "zeilen": 0,
-   "eltern_fk": [
-    "partner_id -> domain_crm.business_partners.partner_id"
-   ],
-   "verwaist": 0,
-   "ohne_eltern": 0
-  },
-  "domain_crm.business_partner_cpd_accounts": {
-   "zeilen": 0,
-   "eltern_fk": [
-    "partner_id -> domain_crm.business_partners.partner_id"
-   ],
-   "verwaist": 0,
-   "ohne_eltern": 0
-  },
-  "domain_crm.business_partner_discount_items": {
-   "zeilen": 0,
-   "eltern_fk": [
-    "partner_id -> domain_crm.business_partners.partner_id"
-   ],
-   "verwaist": 0,
-   "ohne_eltern": 0
-  },
-  "domain_crm.business_partner_dispatch_media": {
-   "zeilen": 0,
-   "eltern_fk": [
-    "partner_id -> domain_crm.business_partners.partner_id"
-   ],
-   "verwaist": 0,
-   "ohne_eltern": 0
-  },
-  "domain_crm.business_partner_email_distributions": {
-   "zeilen": 0,
-   "eltern_fk": [
-    "partner_id -> domain_crm.business_partners.partner_id"
-   ],
-   "verwaist": 0,
-   "ohne_eltern": 0
-  },
-  "domain_crm.business_partner_instructions": {
-   "zeilen": 0,
-   "eltern_fk": [
-    "partner_id -> domain_crm.business_partners.partner_id"
-   ],
-   "verwaist": 0,
-   "ohne_eltern": 0
-  },
-  "domain_crm.business_partner_interest_settings": {
-   "zeilen": 0,
-   "eltern_fk": [
-    "partner_id -> domain_crm.business_partners.partner_id"
-   ],
-   "verwaist": 0,
-   "ohne_eltern": 0
-  },
-  "domain_crm.business_partner_interface_profiles": {
-   "zeilen": 0,
-   "eltern_fk": [
-    "partner_id -> domain_crm.business_partners.partner_id"
-   ],
-   "verwaist": 0,
-   "ohne_eltern": 0
-  },
-  "domain_crm.business_partner_price_agreements": {
-   "zeilen": 0,
-   "eltern_fk": [
-    "partner_id -> domain_crm.business_partners.partner_id"
-   ],
-   "verwaist": 0,
-   "ohne_eltern": 0
-  },
-  "domain_crm.business_partner_pricing_rules": {
-   "zeilen": 0,
-   "eltern_fk": [
-    "partner_id -> domain_crm.business_partners.partner_id"
-   ],
-   "verwaist": 0,
-   "ohne_eltern": 0
-  },
-  "domain_crm.business_partner_profiles": {
-   "zeilen": 0,
-   "eltern_fk": [
-    "partner_id -> domain_crm.business_partners.partner_id"
-   ],
-   "verwaist": 0,
-   "ohne_eltern": 0
-  },
-  "domain_crm.business_partners": {
-   "zeilen": 7,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 1
-  },
-  "domain_crm.credit_limits": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "domain_crm.crm_contact_consent_history": {
-   "zeilen": 0,
-   "eltern_fk": [
-    "consent_id -> domain_crm.crm_contact_consents.id"
-   ],
-   "verwaist": 0,
-   "ohne_eltern": 0
-  },
   "domain_crm.crm_opportunities": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "domain_crm.crm_segment_members": {
-   "zeilen": 0,
-   "eltern_fk": [
-    "segment_id -> domain_crm.crm_segments.id"
-   ],
-   "verwaist": 0,
-   "ohne_eltern": 0
-  },
-  "domain_crm.crm_segments": {
    "zeilen": 0,
    "null": 0,
    "default": 0,
@@ -384,63 +192,7 @@
    "system": 0,
    "mandanten": 0
   },
-  "domain_crm.sales_offers": {
-   "zeilen": 3,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 1
-  },
-  "domain_crm.sales_order_items": {
-   "zeilen": 14,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 1
-  },
-  "domain_crm.sales_orders": {
-   "zeilen": 13,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 1
-  },
   "domain_dev_mock.mock_sessions": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "domain_docflow.document_artifacts": {
-   "zeilen": 2,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 1
-  },
-  "domain_docflow.document_headers": {
-   "zeilen": 25,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 2
-  },
-  "domain_docflow.document_items": {
-   "zeilen": 35,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 2
-  },
-  "domain_docflow.invoice_xml_store": {
-   "zeilen": 1,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 1
-  },
-  "domain_docflow.pos_tse_devices": {
    "zeilen": 0,
    "null": 0,
    "default": 0,
@@ -566,34 +318,6 @@
    "mandanten": 2
   },
   "domain_erp.open_items": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "domain_hr.onboarding_checklists": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "domain_hr.training_courses": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "domain_hr.work_plan_assignments": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "domain_inventory.agrar_contract_allocations": {
    "zeilen": 0,
    "null": 0,
    "default": 0,
@@ -741,13 +465,6 @@
    "mandanten": 0
   },
   "domain_inventory.nawaro_print_notifications": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "domain_inventory.pick_lists": {
    "zeilen": 0,
    "null": 0,
    "default": 0,
@@ -911,20 +628,6 @@
    "system": 0,
    "mandanten": 1
   },
-  "domain_nachweisraum.gobd_exporte": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "domain_nachweisraum.nachweisraum_dokumente": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
   "domain_ops.kon_contract": {
    "zeilen": 4,
    "null": 0,
@@ -1008,59 +711,7 @@
    "verwaist": 0,
    "ohne_eltern": 0
   },
-  "domain_pricing.price_list_items": {
-   "zeilen": 0,
-   "eltern_fk": [
-    "price_list_id -> domain_pricing.price_lists.id"
-   ],
-   "verwaist": 0,
-   "ohne_eltern": 0
-  },
-  "domain_pricing.price_lists": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
   "domain_procurement.proc_purchase_orders": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "domain_sales.delivery_note_positions": {
-   "zeilen": 4,
-   "eltern_fk": [
-    "delivery_note_id -> domain_sales.delivery_notes.id"
-   ],
-   "verwaist": 0,
-   "ohne_eltern": 0
-  },
-  "domain_sales.delivery_notes": {
-   "zeilen": 3,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 1
-  },
-  "domain_sales.sales_credit_note_lines": {
-   "zeilen": 0,
-   "eltern_fk": [
-    "credit_note_id -> domain_sales.sales_credit_notes.id"
-   ],
-   "verwaist": 0,
-   "ohne_eltern": 0
-  },
-  "domain_sales.sales_credit_notes": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "domain_sales.sales_delivery_notes": {
    "zeilen": 0,
    "null": 0,
    "default": 0,
@@ -1232,21 +883,6 @@
    "verwaist": 0,
    "ohne_eltern": 0
   },
-  "domain_shared.knowledge_objects": {
-   "zeilen": 6,
-   "null": 0,
-   "default": 0,
-   "system": 6,
-   "mandanten": 1
-  },
-  "domain_shared.knowledge_versions": {
-   "zeilen": 8,
-   "eltern_fk": [
-    "knowledge_id -> domain_shared.knowledge_objects.knowledge_id"
-   ],
-   "verwaist": 0,
-   "ohne_eltern": 0
-  },
   "domain_shared.logistik_frachttabellen": {
    "zeilen": 0,
    "null": 0,
@@ -1299,28 +935,7 @@
    "verwaist": 0,
    "ohne_eltern": 0
   },
-  "public.agent_proposals": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
   "public.crm_activities": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "public.crm_betriebsprofile": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "public.crm_contacts": {
    "zeilen": 0,
    "null": 0,
    "default": 0,
@@ -1333,20 +948,6 @@
    "default": 0,
    "system": 0,
    "mandanten": 1
-  },
-  "public.crm_merge_log": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "public.crm_ownership_log": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
   },
   "public.einkauf_anfragen_positionen": {
    "zeilen": 0
@@ -1393,20 +994,6 @@
    "default": 0,
    "system": 0,
    "mandanten": 1
-  },
-  "public.mcp_tool_executions": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "public.opportunities": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
   },
   "public.outbox_events": {
    "zeilen": 1407,

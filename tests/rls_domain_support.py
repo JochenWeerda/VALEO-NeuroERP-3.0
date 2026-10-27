@@ -10,6 +10,7 @@ von RLS betroffen), geprueft wird danach als valeo_app.
 from __future__ import annotations
 
 import os
+import re
 import sys
 import uuid
 from contextlib import contextmanager
@@ -97,17 +98,91 @@ def _value(conn, type_name: str, typtype: str, typid: int):
     raise AssertionError(f"kein Testwert fuer Typ {type_name}")
 
 
-def insert_row(conn, table: str, tenant: str | None, key: str = "id", **values) -> str:
-    """Insert a row with every required column filled; returns its key (tenant None: no tenant_id)."""
-    row = {"tenant_id": tenant, **values} if tenant is not None else dict(values)
-    for name, type_name, typtype, typid, not_null, has_default in conn.execute(sa.text(COLUMNS_SQL), {"t": table}):
-        if name in row or not not_null or (has_default and name != key):
+FKS_SQL = """
+SELECT k.conname, array_agg(a.attname ORDER BY u.ord), k.confrelid::regclass::text,
+       array_agg(af.attname ORDER BY u.ord)
+  FROM pg_constraint k
+  CROSS JOIN LATERAL unnest(k.conkey, k.confkey) WITH ORDINALITY AS u(ck, fk, ord)
+  JOIN pg_attribute a ON a.attrelid = k.conrelid AND a.attnum = u.ck
+  JOIN pg_attribute af ON af.attrelid = k.confrelid AND af.attnum = u.fk
+ WHERE k.contype = 'f' AND k.conrelid = to_regclass(:t)
+ GROUP BY k.conname, k.confrelid
+"""
+CHECK_CHOICE = re.compile(r"\(\(?(\w+)\)?(?:::\w+(?: \w+)?)? = ANY \(\(?ARRAY\['([^']*)'")
+UNIQUE_COLUMNS_SQL = """
+SELECT DISTINCT a.attname FROM pg_index i
+  JOIN pg_attribute a ON a.attrelid = i.indrelid AND a.attnum = ANY(i.indkey)
+ WHERE i.indrelid = to_regclass(:t) AND i.indisunique
+"""
+
+
+def _qualified(name: str) -> str:
+    return name if "." in name else f"public.{name}"
+
+
+def seed_row(conn, table: str, tenant: str | None, _depth: int = 0, _parents: bool = True, **values) -> dict:
+    """Insert a row with every required column filled, required parents created on the way.
+
+    Parents of NOT NULL foreign keys are seeded for the same tenant; valid values come from
+    CHECK constraints of the form ``col = ANY (ARRAY['a', ...])``. Returns the inserted row.
+    """
+    if _depth > 5:
+        raise AssertionError(f"Elternkette zu tief bei {table}")
+    columns = list(conn.execute(sa.text(COLUMNS_SQL), {"t": table}))
+    names = {c[0] for c in columns}
+    required = {c[0] for c in columns if c[4] and not c[5]}
+    row = dict(values)
+    if tenant is not None and "tenant_id" in names:
+        row.setdefault("tenant_id", tenant)
+    for _name, cols, parent, pcols in conn.execute(sa.text(FKS_SQL), {"t": table}):
+        parent = _qualified(parent)
+        if parent == "domain_shared.tenants":
+            # Mandanten registriert nur der Eigentuemer (Fixtures); valeo_app darf das nicht.
+            if row.get(cols[0]) is not None and conn.execute(sa.text("SELECT current_user")).scalar() != "valeo_app":
+                ensure_tenants(conn, row[cols[0]])
             continue
-        row[name] = _value(conn, type_name, typtype, typid)
-    columns = ", ".join(row)
+        missing = [c for c in cols if c not in row and c in required]
+        if not _parents or not missing or parent == _qualified(table):
+            continue
+        parent_cols = {c[0] for c in conn.execute(sa.text(COLUMNS_SQL), {"t": parent})}
+        parent_tenant = row.get("tenant_id", tenant) if "tenant_id" in parent_cols else None
+        given = {pc: row[c] for c, pc in zip(cols, pcols) if c in row}
+        parent_row = seed_row(conn, parent, parent_tenant, _depth + 1, **given)
+        for c, pc in zip(cols, pcols):
+            row.setdefault(c, parent_row[pc])
+    checks = conn.execute(sa.text(
+        "SELECT pg_get_constraintdef(oid) FROM pg_constraint WHERE conrelid = to_regclass(:t) AND contype = 'c'"),
+        {"t": table}).scalars().all()
+    for definition in checks:
+        for column, choice in CHECK_CHOICE.findall(definition):
+            if column in required and column not in row:
+                row[column] = choice
+    unique = set(conn.execute(sa.text(UNIQUE_COLUMNS_SQL), {"t": table}).scalars())
+    for name, type_name, typtype, typid, not_null, has_default in columns:
+        if name in row or not not_null or has_default:
+            continue
+        value = _value(conn, type_name, typtype, typid)
+        if isinstance(value, int) and not isinstance(value, bool) and name in unique:
+            value = uuid.uuid4().int % 900_000_000 + 1000
+        row[name] = value
+    cols = ", ".join(row)
     placeholders = ", ".join(f":{c}" for c in row)
-    return str(conn.execute(sa.text(
-        f"INSERT INTO {table} ({columns}) VALUES ({placeholders}) RETURNING {key}"), row).scalar())
+    return dict(conn.execute(sa.text(f"INSERT INTO {table} ({cols}) VALUES ({placeholders}) RETURNING *"),
+                             row).mappings().one())
+
+
+def primary_key(conn, table: str) -> str:
+    return conn.execute(sa.text(
+        "SELECT a.attname FROM pg_index i JOIN pg_attribute a ON a.attrelid = i.indrelid "
+        "AND a.attnum = i.indkey[0] WHERE i.indrelid = to_regclass(:t) AND i.indisprimary"), {"t": table}).scalar()
+
+
+def insert_row(conn, table: str, tenant: str | None, key: str = "id", _parents: bool = True, **values) -> str:
+    """Insert a row with every required column filled (parents included); returns its key."""
+    row = seed_row(conn, table, tenant, _parents=_parents, **values)
+    if key not in row:
+        key = primary_key(conn, table)
+    return str(row[key])
 
 
 def ensure_tenants(conn, *tenants: str) -> None:
@@ -193,7 +268,8 @@ def rejected_insert(conn, table: str, tenant: str, key: str = "id") -> str:
 def rejected_insert_with(conn, table: str, tenant: str, key: str = "id", **values) -> str:
     savepoint = conn.begin_nested()
     try:
-        insert_row(conn, table, tenant, key, **values)
+        # Ohne Elternsaetze: RLS prueft vor den Fremdschluesseln, Eltern anlegen waere hier selbst gesperrt.
+        insert_row(conn, table, tenant, key, _parents=False, **values)
     except sa.exc.DBAPIError as exc:
         savepoint.rollback()
         return str(exc.orig).splitlines()[0]

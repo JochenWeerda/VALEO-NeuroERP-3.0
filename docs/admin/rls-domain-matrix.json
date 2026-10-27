@@ -2,18 +2,18 @@
  "_note": "Generiert von scripts/rls_domain_matrix.py; nicht von Hand aendern.",
  "datenstand": "2026-10-27",
  "summary": {
-  "tabellen": 181,
+  "tabellen": 154,
   "nach_klasse": {
-   "A": 85,
-   "B": 47,
-   "C": 49
+   "A": 80,
+   "B": 42,
+   "C": 32
   },
   "nach_ursache": {
    "dienst": 20,
-   "position": 47,
-   "referenzdaten": 29,
-   "mandant_nullbar": 35,
-   "standardmandant": 48,
+   "position": 30,
+   "referenzdaten": 28,
+   "mandant_nullbar": 30,
+   "standardmandant": 44,
    "identitaet": 2
   },
   "nach_domain": {
@@ -25,11 +25,7 @@
     "standardmandant": 8
    },
    "crm": {
-    "dienst": 7,
-    "mandant_nullbar": 5,
-    "position": 17,
-    "referenzdaten": 1,
-    "standardmandant": 4
+    "dienst": 7
    },
    "dev_mock": {
     "identitaet": 1
@@ -233,12 +229,11 @@
    ],
    "worker": [],
    "identitaet": {
-    "standardmandant": 4,
+    "standardmandant": 3,
     "token": 5
    },
    "standardmandant_stellen": [
     "app/api/v1/endpoints/compliance.py:846",
-    "app/crm/seed.py:11",
     "app/domains/agrar/api/psm.py:30",
     "app/seeds/inventory_seed.py:20"
    ],
@@ -309,12 +304,11 @@
    "identitaet": {
     "dienst": 2,
     "kopfzeile": 1,
-    "standardmandant": 4,
+    "standardmandant": 3,
     "token": 7
    },
    "standardmandant_stellen": [
     "app/api/v1/endpoints/compliance.py:846",
-    "app/crm/seed.py:11",
     "app/domains/agrar/api/saatgut.py:21",
     "app/seeds/inventory_seed.py:20"
    ],
@@ -1077,11 +1071,10 @@
    "identitaet": {
     "dienst": 2,
     "nutzlast": 1,
-    "standardmandant": 3,
-    "token": 1
+    "standardmandant": 2,
+    "token": 2
    },
    "standardmandant_stellen": [
-    "app/crm/seed.py:11",
     "app/services/calendar_projection_service.py:911",
     "services/crm-core/app/api/v1/endpoints/activities.py:20"
    ],
@@ -1102,837 +1095,6 @@
    },
    "bereinigung": [],
    "policy": "keine, bis der Dienst tokengebundene Identitaet hat (rls-dienste-identitaet-vorschlag.md)"
-  },
-  {
-   "table": "domain_crm.business_partner_addresses",
-   "domain": "crm",
-   "class": "C",
-   "tenant_type": null,
-   "eltern": [
-    "domain_crm.business_partners"
-   ],
-   "ursache": "position",
-   "gruende": [
-    "position"
-   ],
-   "modell": [
-    "app/infrastructure/models/__init__.py"
-   ],
-   "leser": [
-    "app/api/v1/endpoints/crm_360_reads.py",
-    "app/infrastructure/models/__init__.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/business_partners.py",
-    "app/repositories/business_partner_repository.py",
-    "app/services/business_partner_service.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "token": 1
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "eltern_fk": [
-     "partner_id -> domain_crm.business_partners.partner_id"
-    ],
-    "verwaist": 0,
-    "ohne_eltern": 0
-   },
-   "bereinigung": [
-    "tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_crm.business_partners"
-  },
-  {
-   "table": "domain_crm.business_partner_billing_configs",
-   "domain": "crm",
-   "class": "C",
-   "tenant_type": null,
-   "eltern": [
-    "domain_crm.business_partners"
-   ],
-   "ursache": "position",
-   "gruende": [
-    "position",
-    "standardmandant"
-   ],
-   "modell": [
-    "app/infrastructure/models/__init__.py"
-   ],
-   "leser": [
-    "app/infrastructure/models/__init__.py",
-    "app/services/customer_service.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/business_partners.py",
-    "app/services/business_partner_service.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "standardmandant": 1,
-    "token": 1
-   },
-   "standardmandant_stellen": [
-    "app/services/customer_service.py:168"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "eltern_fk": [
-     "partner_id -> domain_crm.business_partners.partner_id"
-    ],
-    "verwaist": 0,
-    "ohne_eltern": 0
-   },
-   "bereinigung": [
-    "tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_crm.business_partners"
-  },
-  {
-   "table": "domain_crm.business_partner_community_members",
-   "domain": "crm",
-   "class": "C",
-   "tenant_type": null,
-   "eltern": [
-    "domain_crm.business_partners"
-   ],
-   "ursache": "position",
-   "gruende": [
-    "position"
-   ],
-   "modell": [
-    "app/infrastructure/models/__init__.py"
-   ],
-   "leser": [
-    "app/infrastructure/models/__init__.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/business_partners.py",
-    "app/services/business_partner_service.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "token": 1
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "eltern_fk": [
-     "partner_id -> domain_crm.business_partners.partner_id"
-    ],
-    "verwaist": 0,
-    "ohne_eltern": 0
-   },
-   "bereinigung": [
-    "tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_crm.business_partners"
-  },
-  {
-   "table": "domain_crm.business_partner_contacts",
-   "domain": "crm",
-   "class": "C",
-   "tenant_type": null,
-   "eltern": [
-    "domain_crm.business_partners"
-   ],
-   "ursache": "position",
-   "gruende": [
-    "position"
-   ],
-   "modell": [
-    "app/infrastructure/models/__init__.py"
-   ],
-   "leser": [
-    "app/api/v1/endpoints/crm_360_reads.py",
-    "app/infrastructure/models/__init__.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/business_partners.py",
-    "app/repositories/business_partner_repository.py",
-    "app/services/business_partner_service.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "token": 1
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "eltern_fk": [
-     "partner_id -> domain_crm.business_partners.partner_id"
-    ],
-    "verwaist": 0,
-    "ohne_eltern": 0
-   },
-   "bereinigung": [
-    "tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_crm.business_partners"
-  },
-  {
-   "table": "domain_crm.business_partner_cooperative_memberships",
-   "domain": "crm",
-   "class": "C",
-   "tenant_type": null,
-   "eltern": [
-    "domain_crm.business_partners"
-   ],
-   "ursache": "position",
-   "gruende": [
-    "position"
-   ],
-   "modell": [
-    "app/infrastructure/models/__init__.py"
-   ],
-   "leser": [
-    "app/infrastructure/models/__init__.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/business_partners.py",
-    "app/services/business_partner_service.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "token": 1
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "eltern_fk": [
-     "partner_id -> domain_crm.business_partners.partner_id"
-    ],
-    "verwaist": 0,
-    "ohne_eltern": 0
-   },
-   "bereinigung": [
-    "tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_crm.business_partners"
-  },
-  {
-   "table": "domain_crm.business_partner_cpd_accounts",
-   "domain": "crm",
-   "class": "C",
-   "tenant_type": null,
-   "eltern": [
-    "domain_crm.business_partners"
-   ],
-   "ursache": "position",
-   "gruende": [
-    "position"
-   ],
-   "modell": [
-    "app/infrastructure/models/__init__.py"
-   ],
-   "leser": [
-    "app/api/v1/endpoints/crm_360_reads.py",
-    "app/infrastructure/models/__init__.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/business_partners.py",
-    "app/services/business_partner_service.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "token": 1
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "eltern_fk": [
-     "partner_id -> domain_crm.business_partners.partner_id"
-    ],
-    "verwaist": 0,
-    "ohne_eltern": 0
-   },
-   "bereinigung": [
-    "tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_crm.business_partners"
-  },
-  {
-   "table": "domain_crm.business_partner_discount_items",
-   "domain": "crm",
-   "class": "C",
-   "tenant_type": null,
-   "eltern": [
-    "domain_crm.business_partners"
-   ],
-   "ursache": "position",
-   "gruende": [
-    "position",
-    "standardmandant"
-   ],
-   "modell": [
-    "app/infrastructure/models/__init__.py"
-   ],
-   "leser": [
-    "app/api/v1/endpoints/crm_360_reads.py",
-    "app/infrastructure/models/__init__.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/articles.py",
-    "app/api/v1/endpoints/business_partners.py",
-    "app/services/business_partner_service.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "nutzlast": 1,
-    "standardmandant": 1,
-    "token": 1
-   },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/articles.py:42"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "eltern_fk": [
-     "partner_id -> domain_crm.business_partners.partner_id"
-    ],
-    "verwaist": 0,
-    "ohne_eltern": 0
-   },
-   "bereinigung": [
-    "tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_crm.business_partners"
-  },
-  {
-   "table": "domain_crm.business_partner_dispatch_media",
-   "domain": "crm",
-   "class": "C",
-   "tenant_type": null,
-   "eltern": [
-    "domain_crm.business_partners"
-   ],
-   "ursache": "position",
-   "gruende": [
-    "position"
-   ],
-   "modell": [
-    "app/infrastructure/models/__init__.py"
-   ],
-   "leser": [
-    "app/infrastructure/models/__init__.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/business_partners.py",
-    "app/services/business_partner_service.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "token": 1
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "eltern_fk": [
-     "partner_id -> domain_crm.business_partners.partner_id"
-    ],
-    "verwaist": 0,
-    "ohne_eltern": 0
-   },
-   "bereinigung": [
-    "tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_crm.business_partners"
-  },
-  {
-   "table": "domain_crm.business_partner_email_distributions",
-   "domain": "crm",
-   "class": "C",
-   "tenant_type": null,
-   "eltern": [
-    "domain_crm.business_partners"
-   ],
-   "ursache": "position",
-   "gruende": [
-    "position"
-   ],
-   "modell": [
-    "app/infrastructure/models/__init__.py"
-   ],
-   "leser": [
-    "app/infrastructure/models/__init__.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/business_partners.py",
-    "app/services/business_partner_service.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "token": 1
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "eltern_fk": [
-     "partner_id -> domain_crm.business_partners.partner_id"
-    ],
-    "verwaist": 0,
-    "ohne_eltern": 0
-   },
-   "bereinigung": [
-    "tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_crm.business_partners"
-  },
-  {
-   "table": "domain_crm.business_partner_instructions",
-   "domain": "crm",
-   "class": "C",
-   "tenant_type": null,
-   "eltern": [
-    "domain_crm.business_partners"
-   ],
-   "ursache": "position",
-   "gruende": [
-    "position"
-   ],
-   "modell": [
-    "app/infrastructure/models/__init__.py"
-   ],
-   "leser": [
-    "app/api/v1/endpoints/crm_360_reads.py",
-    "app/infrastructure/models/__init__.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/business_partners.py",
-    "app/services/business_partner_service.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "token": 1
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "eltern_fk": [
-     "partner_id -> domain_crm.business_partners.partner_id"
-    ],
-    "verwaist": 0,
-    "ohne_eltern": 0
-   },
-   "bereinigung": [
-    "tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_crm.business_partners"
-  },
-  {
-   "table": "domain_crm.business_partner_interest_settings",
-   "domain": "crm",
-   "class": "C",
-   "tenant_type": null,
-   "eltern": [
-    "domain_crm.business_partners"
-   ],
-   "ursache": "position",
-   "gruende": [
-    "position"
-   ],
-   "modell": [
-    "app/infrastructure/models/__init__.py"
-   ],
-   "leser": [
-    "app/infrastructure/models/__init__.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/business_partners.py",
-    "app/services/business_partner_service.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "token": 1
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "eltern_fk": [
-     "partner_id -> domain_crm.business_partners.partner_id"
-    ],
-    "verwaist": 0,
-    "ohne_eltern": 0
-   },
-   "bereinigung": [
-    "tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_crm.business_partners"
-  },
-  {
-   "table": "domain_crm.business_partner_interface_profiles",
-   "domain": "crm",
-   "class": "C",
-   "tenant_type": null,
-   "eltern": [
-    "domain_crm.business_partners"
-   ],
-   "ursache": "position",
-   "gruende": [
-    "position"
-   ],
-   "modell": [
-    "app/infrastructure/models/__init__.py"
-   ],
-   "leser": [
-    "app/infrastructure/models/__init__.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/business_partners.py",
-    "app/services/business_partner_service.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "token": 1
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "eltern_fk": [
-     "partner_id -> domain_crm.business_partners.partner_id"
-    ],
-    "verwaist": 0,
-    "ohne_eltern": 0
-   },
-   "bereinigung": [
-    "tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_crm.business_partners"
-  },
-  {
-   "table": "domain_crm.business_partner_price_agreements",
-   "domain": "crm",
-   "class": "C",
-   "tenant_type": null,
-   "eltern": [
-    "domain_crm.business_partners"
-   ],
-   "ursache": "position",
-   "gruende": [
-    "position",
-    "standardmandant"
-   ],
-   "modell": [
-    "app/infrastructure/models/__init__.py"
-   ],
-   "leser": [
-    "app/api/v1/endpoints/crm_360_reads.py",
-    "app/infrastructure/models/__init__.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/articles.py",
-    "app/api/v1/endpoints/business_partners.py",
-    "app/services/business_partner_service.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "nutzlast": 1,
-    "standardmandant": 1,
-    "token": 1
-   },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/articles.py:42"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "eltern_fk": [
-     "partner_id -> domain_crm.business_partners.partner_id"
-    ],
-    "verwaist": 0,
-    "ohne_eltern": 0
-   },
-   "bereinigung": [
-    "tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_crm.business_partners"
-  },
-  {
-   "table": "domain_crm.business_partner_pricing_rules",
-   "domain": "crm",
-   "class": "C",
-   "tenant_type": null,
-   "eltern": [
-    "domain_crm.business_partners"
-   ],
-   "ursache": "position",
-   "gruende": [
-    "position"
-   ],
-   "modell": [
-    "app/infrastructure/models/__init__.py"
-   ],
-   "leser": [
-    "app/infrastructure/models/__init__.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/business_partners.py",
-    "app/services/business_partner_service.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "token": 1
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "eltern_fk": [
-     "partner_id -> domain_crm.business_partners.partner_id"
-    ],
-    "verwaist": 0,
-    "ohne_eltern": 0
-   },
-   "bereinigung": [
-    "tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_crm.business_partners"
-  },
-  {
-   "table": "domain_crm.business_partner_profiles",
-   "domain": "crm",
-   "class": "C",
-   "tenant_type": null,
-   "eltern": [
-    "domain_crm.business_partners"
-   ],
-   "ursache": "position",
-   "gruende": [
-    "position"
-   ],
-   "modell": [
-    "app/infrastructure/models/__init__.py"
-   ],
-   "leser": [
-    "app/infrastructure/models/__init__.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/business_partners.py",
-    "app/services/business_partner_service.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "token": 1
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "eltern_fk": [
-     "partner_id -> domain_crm.business_partners.partner_id"
-    ],
-    "verwaist": 0,
-    "ohne_eltern": 0
-   },
-   "bereinigung": [
-    "tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_crm.business_partners"
-  },
-  {
-   "table": "domain_crm.business_partners",
-   "domain": "crm",
-   "class": "A",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "referenzdaten",
-   "gruende": [
-    "referenzdaten",
-    "mandant_nullbar",
-    "standardmandant"
-   ],
-   "modell": [
-    "app/infrastructure/models/__init__.py"
-   ],
-   "leser": [
-    "app/api/v1/endpoints/crm_360.py",
-    "app/api/v1/endpoints/crm_360_sql.py",
-    "app/api/v1/endpoints/finance_invoices.py",
-    "app/api/v1/endpoints/mask_actions.py",
-    "app/infrastructure/models/__init__.py",
-    "app/infrastructure/models/einkauf_models.py",
-    "app/infrastructure/models/l3c_models.py",
-    "app/services/customer_reference.py",
-    "app/services/customer_service.py",
-    "app/services/docflow_belegadapter.py",
-    "app/services/docflow_source_proposals.py",
-    "app/services/finance_dunning_service.py",
-    "app/services/kontrakte_adapters.py",
-    "app/services/mcp_execution_service.py",
-    "app/services/rfq_service.py",
-    "app/services/whatsapp_intake_service.py",
-    "app/workers/compliance_check_worker.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/business_partners.py",
-    "app/api/v1/endpoints/flow_spines.py",
-    "app/api/v1/endpoints/self_billing.py",
-    "app/documents/router.py",
-    "app/repositories/business_partner_repository.py",
-    "app/services/agrar_settlement_service.py",
-    "app/services/business_partner_service.py",
-    "app/services/kunden_merge.py"
-   ],
-   "worker": [
-    "app/workers/compliance_check_worker.py"
-   ],
-   "identitaet": {
-    "nutzlast": 1,
-    "standardmandant": 1,
-    "token": 7
-   },
-   "standardmandant_stellen": [
-    "app/services/customer_service.py:168"
-   ],
-   "null_stellen": [
-    "app/api/v1/endpoints/finance_invoices.py:72",
-    "app/services/mcp_execution_service.py:3155"
-   ],
-   "gemeinsam_stellen": [
-    "app/api/v1/endpoints/finance_invoices.py:72",
-    "app/services/mcp_execution_service.py:3155"
-   ],
-   "daten": {
-    "zeilen": 7,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 1
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_crm.cancellation_reason",
-   "domain": "crm",
-   "class": "B",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "mandant_nullbar",
-   "gruende": [
-    "mandant_nullbar"
-   ],
-   "modell": [],
-   "leser": [],
-   "schreiber": [],
-   "worker": [],
-   "identitaet": {},
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": null,
-   "bereinigung": [
-    "Datenbefund fehlt (Tabelle nicht in der gewachsenen Datenbank)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_crm.credit_limits",
-   "domain": "crm",
-   "class": "A",
-   "tenant_type": "character varying(120)",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [
-    "standardmandant"
-   ],
-   "modell": [],
-   "leser": [
-    "app/api/v1/endpoints/crm_360.py",
-    "app/services/customer_service.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/credit_management.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "standardmandant": 1
-   },
-   "standardmandant_stellen": [
-    "app/services/customer_service.py:168"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_crm.crm_contact_consent_history",
-   "domain": "crm",
-   "class": "C",
-   "tenant_type": null,
-   "eltern": [
-    "domain_crm.crm_contact_consents"
-   ],
-   "ursache": "position",
-   "gruende": [
-    "position"
-   ],
-   "modell": [
-    "app/infrastructure/models/crm_consent.py"
-   ],
-   "leser": [
-    "app/infrastructure/models/crm_consent.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/crm_consents.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "nutzlast": 1,
-    "token": 1
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "eltern_fk": [
-     "consent_id -> domain_crm.crm_contact_consents.id"
-    ],
-    "verwaist": 0,
-    "ohne_eltern": 0
-   },
-   "bereinigung": [
-    "tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_crm.crm_contact_consents"
   },
   {
    "table": "domain_crm.crm_opportunities",
@@ -1977,7 +1139,7 @@
     "dienst": 3,
     "nutzlast": 1,
     "standardmandant": 2,
-    "token": 4
+    "token": 5
    },
    "standardmandant_stellen": [
     "app/api/v1/endpoints/crm_reports.py:27",
@@ -1994,86 +1156,6 @@
    },
    "bereinigung": [],
    "policy": "keine, bis der Dienst tokengebundene Identitaet hat (rls-dienste-identitaet-vorschlag.md)"
-  },
-  {
-   "table": "domain_crm.crm_segment_members",
-   "domain": "crm",
-   "class": "C",
-   "tenant_type": null,
-   "eltern": [
-    "domain_crm.crm_segments"
-   ],
-   "ursache": "position",
-   "gruende": [
-    "position",
-    "standardmandant"
-   ],
-   "modell": [],
-   "leser": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py"
-   ],
-   "schreiber": [
-    "app/crm/router.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "standardmandant": 1,
-    "token": 1
-   },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py:972"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "eltern_fk": [
-     "segment_id -> domain_crm.crm_segments.id"
-    ],
-    "verwaist": 0,
-    "ohne_eltern": 0
-   },
-   "bereinigung": [
-    "tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_crm.crm_segments"
-  },
-  {
-   "table": "domain_crm.crm_segments",
-   "domain": "crm",
-   "class": "A",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [
-    "standardmandant"
-   ],
-   "modell": [],
-   "leser": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py"
-   ],
-   "schreiber": [
-    "app/crm/router.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "standardmandant": 1,
-    "token": 1
-   },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py:972"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
   },
   {
    "table": "domain_crm.customers",
@@ -2201,8 +1283,8 @@
    "identitaet": {
     "dienst": 14,
     "nutzlast": 6,
-    "standardmandant": 11,
-    "token": 18
+    "standardmandant": 10,
+    "token": 19
    },
    "standardmandant_stellen": [
     "app/api/v1/endpoints/articles.py:42",
@@ -2210,7 +1292,6 @@
     "app/api/v1/endpoints/mask_frontend_bridges.py:972",
     "app/domains/crm/api/customers.py:19",
     "app/integrations/adapters/superglue/tool_sync.py:427",
-    "app/services/customer_service.py:168",
     "services/crm-core/app/api/v1/endpoints/activities.py:20",
     "services/crm-core/app/api/v1/endpoints/contacts.py:20",
     "services/crm-core/app/api/v1/endpoints/customers.py:23",
@@ -2381,14 +1462,13 @@
    "identitaet": {
     "dienst": 8,
     "nutzlast": 2,
-    "standardmandant": 6,
-    "token": 10
+    "standardmandant": 5,
+    "token": 11
    },
    "standardmandant_stellen": [
     "app/agents/agent_ops.py:829",
     "app/api/v1/endpoints/crm_reports.py:27",
     "app/api/v1/endpoints/customer_extensions.py:24",
-    "app/crm/seed.py:11",
     "app/domains/crm/api/leads.py:19",
     "services/crm-core/app/api/v1/endpoints/leads.py:32",
     "services/crm-core/app/api/v1/endpoints/leads.py:68",
@@ -2419,30 +1499,6 @@
    },
    "bereinigung": [],
    "policy": "keine, bis der Dienst tokengebundene Identitaet hat (rls-dienste-identitaet-vorschlag.md)"
-  },
-  {
-   "table": "domain_crm.opportunity",
-   "domain": "crm",
-   "class": "B",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "mandant_nullbar",
-   "gruende": [
-    "mandant_nullbar"
-   ],
-   "modell": [],
-   "leser": [],
-   "schreiber": [],
-   "worker": [],
-   "identitaet": {},
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": null,
-   "bereinigung": [
-    "Datenbefund fehlt (Tabelle nicht in der gewachsenen Datenbank)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
   },
   {
    "table": "public.crm_activities",
@@ -2484,10 +1540,10 @@
    "identitaet": {
     "dienst": 2,
     "nutzlast": 1,
-    "standardmandant": 2
+    "standardmandant": 1,
+    "token": 1
    },
    "standardmandant_stellen": [
-    "app/crm/seed.py:11",
     "services/crm-core/app/api/v1/endpoints/activities.py:20"
    ],
    "null_stellen": [
@@ -2505,86 +1561,6 @@
    },
    "bereinigung": [],
    "policy": "keine, bis der Dienst tokengebundene Identitaet hat (rls-dienste-identitaet-vorschlag.md)"
-  },
-  {
-   "table": "public.crm_betriebsprofile",
-   "domain": "crm",
-   "class": "A",
-   "tenant_type": "character varying(36)",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [
-    "standardmandant"
-   ],
-   "modell": [
-    "app/crm/models.py"
-   ],
-   "leser": [
-    "app/crm/models.py",
-    "app/crm/schemas.py"
-   ],
-   "schreiber": [
-    "app/crm/router.py",
-    "app/crm/seed.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "standardmandant": 1
-   },
-   "standardmandant_stellen": [
-    "app/crm/seed.py:11"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "public.crm_contacts",
-   "domain": "crm",
-   "class": "A",
-   "tenant_type": "character varying(36)",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [
-    "standardmandant"
-   ],
-   "modell": [
-    "app/crm/models.py"
-   ],
-   "leser": [
-    "app/crm/models.py",
-    "app/crm/schemas.py"
-   ],
-   "schreiber": [
-    "app/crm/router.py",
-    "app/crm/seed.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "standardmandant": 1
-   },
-   "standardmandant_stellen": [
-    "app/crm/seed.py:11"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
   },
   {
    "table": "public.crm_leads",
@@ -2660,14 +1636,13 @@
    "identitaet": {
     "dienst": 8,
     "nutzlast": 3,
-    "standardmandant": 6,
-    "token": 10
+    "standardmandant": 5,
+    "token": 11
    },
    "standardmandant_stellen": [
     "app/agents/agent_ops.py:829",
     "app/api/v1/endpoints/crm_reports.py:27",
     "app/api/v1/endpoints/customer_extensions.py:24",
-    "app/crm/seed.py:11",
     "app/domains/crm/api/leads.py:19",
     "services/crm-core/app/api/v1/endpoints/leads.py:32",
     "services/crm-core/app/api/v1/endpoints/leads.py:68",
@@ -2698,96 +1673,6 @@
    },
    "bereinigung": [],
    "policy": "keine, bis der Dienst tokengebundene Identitaet hat (rls-dienste-identitaet-vorschlag.md)"
-  },
-  {
-   "table": "public.crm_merge_log",
-   "domain": "crm",
-   "class": "B",
-   "tenant_type": "text",
-   "eltern": [],
-   "ursache": "mandant_nullbar",
-   "gruende": [
-    "mandant_nullbar"
-   ],
-   "modell": [],
-   "leser": [],
-   "schreiber": [
-    "app/services/crm_merge_service.py"
-   ],
-   "worker": [],
-   "identitaet": {},
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "public.crm_ownership_log",
-   "domain": "crm",
-   "class": "B",
-   "tenant_type": "text",
-   "eltern": [],
-   "ursache": "mandant_nullbar",
-   "gruende": [
-    "mandant_nullbar"
-   ],
-   "modell": [],
-   "leser": [],
-   "schreiber": [
-    "app/services/crm_ownership_service.py"
-   ],
-   "worker": [],
-   "identitaet": {},
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "public.opportunities",
-   "domain": "crm",
-   "class": "B",
-   "tenant_type": "character varying(64)",
-   "eltern": [],
-   "ursache": "mandant_nullbar",
-   "gruende": [
-    "mandant_nullbar"
-   ],
-   "modell": [],
-   "leser": [],
-   "schreiber": [
-    "app/api/v1/endpoints/opportunities.py"
-   ],
-   "worker": [],
-   "identitaet": {},
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
   },
   {
    "table": "domain_dev_mock.mock_sessions",
@@ -3781,7 +2666,7 @@
     "kopfzeile": 4,
     "nutzlast": 3,
     "standardmandant": 2,
-    "token": 21
+    "token": 22
    },
    "standardmandant_stellen": [
     "app/api/v1/endpoints/mask_frontend_bridges.py:972",

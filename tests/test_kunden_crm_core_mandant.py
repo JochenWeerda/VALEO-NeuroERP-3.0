@@ -82,7 +82,7 @@ def _dienst(db, haus=HAUS_A):
 @pytest.fixture(autouse=True)
 def flach():
     # Die Abbildung der crm-core-Felder ist hier nicht Gegenstand.
-    with patch("app.services.customer_service._adapt_customer", lambda c: {"id": str(c.id), "company_name": c.display_name}):
+    with patch("app.services.customer_service._adapt_customer", lambda c, _tenant: {"id": str(c.id), "company_name": c.display_name}):
         yield
 
 
