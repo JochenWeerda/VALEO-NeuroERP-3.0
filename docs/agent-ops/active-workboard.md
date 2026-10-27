@@ -19868,3 +19868,6 @@ Nutzerauftrag: alle uebrigen offenen Aenderungen commit-/pushfaehig abschliessen
 
 
 **STUDIO-INBOX-DELIVERY Modellnachsteuerung (Nutzer):** BisherigeReviews delivery_api_projection/delivery_inbox/delivery_inventory unterbrochen, Dateien erhalten. FortsetzungderselbenlesendenScopesdurch delivery_api_low unddelivery_inbox_low mit gpt-6.1-sol/low. RoutinedateiinventaruebernimmtLeadalsdeterministischesSkript,keinweitererLLMAgent. HoehereDenkstufen nurbeinachgewiesenerNotwendigkeit. Besitzergrenzen/DB-SperrefuerClaude/Gitserialisierungbleibenunveraendert. APIvorabDateidifferenzenvorhanden;keineunnuetigeWiederholungder77API-,269RLS-,65Frontendpruefungen.
+
+
+**SESSION-CACHE-BOUNDARY-20261027 - reserviert, session_cache_low:** ReadReview zeigt InboxWidgetinterneStatebleibtbeiAuthwechselmontiert; DataBootstrap verwendetbisherglobalenQueryClientohneIdentitaetsgrenze. Besitzer nursrc/app/DataBootstrap.tsx, neuenengbenanntenSession-Cache-TestundQA. Sol/low. GegenprobevorFix: Token/Sub/Tenantwechsel+valeo-auth-changedbeiweiteremMount; keinealtenQuery-/WidgetStatewerte. ZentralerProviderresetnurbeiSub/Tenant/Rollen-/Scopewechsel, NICHTnormalemTokenrefresh, keineTokensalsCacheKey, keineAutorisierungsersetzung. EchteQueryClient-/ReactLifecycleTests,Transport/AuthMock,keineDB/Installation/Gesamtsuite. LeadcommitsserialisiertundvollerTypecheckspaeter.
