@@ -7023,11 +7023,6 @@
             "minimum": 0.0,
             "title": "Monthly Budget Cents",
             "type": "integer"
-          },
-          "tenant_id": {
-            "default": "system",
-            "title": "Tenant Id",
-            "type": "string"
           }
         },
         "required": [
@@ -7291,11 +7286,6 @@
               }
             ],
             "title": "Stale After Hours"
-          },
-          "tenant_id": {
-            "default": "system",
-            "title": "Tenant Id",
-            "type": "string"
           }
         },
         "title": "AgentHeartbeatUpdateRequest",
@@ -7328,11 +7318,6 @@
           "requested_by": {
             "default": "admin-ui",
             "title": "Requested By",
-            "type": "string"
-          },
-          "tenant_id": {
-            "default": "system",
-            "title": "Tenant Id",
             "type": "string"
           }
         },
@@ -7801,11 +7786,6 @@
               }
             ],
             "title": "Stale After Hours"
-          },
-          "tenant_id": {
-            "default": "system",
-            "title": "Tenant Id",
-            "type": "string"
           }
         },
         "title": "AgentProfileUpdateRequest",
@@ -8052,11 +8032,6 @@
               }
             ],
             "title": "Skills"
-          },
-          "tenant_id": {
-            "default": "system",
-            "title": "Tenant Id",
-            "type": "string"
           }
         },
         "title": "AgentSkillPackUpdateRequest",
@@ -8068,11 +8043,6 @@
             "additionalProperties": true,
             "title": "Template",
             "type": "object"
-          },
-          "tenant_id": {
-            "default": "system",
-            "title": "Tenant Id",
-            "type": "string"
           }
         },
         "required": [
@@ -18178,11 +18148,6 @@
             ],
             "description": "Match specific statement",
             "title": "Statement Id"
-          },
-          "tenant_id": {
-            "default": "system",
-            "title": "Tenant Id",
-            "type": "string"
           }
         },
         "title": "AutoMatchRequest",
@@ -33850,7 +33815,6 @@
             "title": "Template Id"
           },
           "tenant_id": {
-            "default": "system",
             "title": "Tenant Id",
             "type": "string"
           }
@@ -37896,11 +37860,6 @@
             "default": "admin-ui",
             "title": "Requested By",
             "type": "string"
-          },
-          "tenant_id": {
-            "default": "system",
-            "title": "Tenant Id",
-            "type": "string"
           }
         },
         "required": [
@@ -37940,11 +37899,6 @@
           },
           "status": {
             "title": "Status",
-            "type": "string"
-          },
-          "tenant_id": {
-            "default": "system",
-            "title": "Tenant Id",
             "type": "string"
           },
           "title": {
@@ -102642,11 +102596,6 @@
             "exclusiveMinimum": 0.0,
             "title": "Mindestbestand",
             "type": "number"
-          },
-          "tenant_id": {
-            "default": "default",
-            "title": "Tenant Id",
-            "type": "string"
           }
         },
         "required": [
@@ -111977,11 +111926,6 @@
             "additionalProperties": true,
             "title": "Parameters",
             "type": "object"
-          },
-          "tenant_id": {
-            "default": "system",
-            "title": "Tenant Id",
-            "type": "string"
           }
         },
         "required": [
@@ -165954,12 +165898,6 @@
             ],
             "title": "Start Threshold Pct"
           },
-          "tenant_id": {
-            "default": "system",
-            "description": "Mandant",
-            "title": "Tenant Id",
-            "type": "string"
-          },
           "trocknungskosten_eur_per_pct_per_t": {
             "anyOf": [
               {
@@ -190432,18 +190370,6 @@
               "title": "Fmt",
               "type": "string"
             }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -192576,16 +192502,6 @@
               "title": "Q",
               "type": "string"
             }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -192612,6 +192528,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Search Articles",
         "tags": [
           "forms"
@@ -192630,16 +192551,6 @@
             "schema": {
               "default": "",
               "title": "Q",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
               "type": "string"
             }
           }
@@ -192668,6 +192579,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Search Customers",
         "tags": [
           "forms"
@@ -193161,20 +193077,6 @@
       "post": {
         "description": "Test-Simulator - testet Policy-Entscheidung gegen Alert\n\nArgs:\n    request: TestRequest mit alert und roles\n\nReturns:\n    TestResponse mit Decision",
         "operationId": "test_policy_api_mcp_policy_test_post",
-        "parameters": [
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -205611,18 +205513,6 @@
     "/api/v1/agents/neuroassist/ops/config-revisions": {
       "get": {
         "operationId": "list_neuroassist_config_revisions_api_v1_agents_neuroassist_ops_config_revisions_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -205637,16 +205527,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -205664,18 +205544,6 @@
     "/api/v1/agents/neuroassist/ops/control-center": {
       "get": {
         "operationId": "get_neuroassist_control_center_api_v1_agents_neuroassist_ops_control_center_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -205686,16 +205554,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -205713,18 +205571,6 @@
     "/api/v1/agents/neuroassist/ops/dashboard": {
       "get": {
         "operationId": "get_neuroassist_ops_dashboard_api_v1_agents_neuroassist_ops_dashboard_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -205735,16 +205581,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -205820,18 +205656,6 @@
     "/api/v1/agents/neuroassist/ops/incidents": {
       "get": {
         "operationId": "get_neuroassist_control_center_incidents_api_v1_agents_neuroassist_ops_incidents_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -205842,16 +205666,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -205927,18 +205741,6 @@
     "/api/v1/agents/neuroassist/ops/interventions": {
       "get": {
         "operationId": "list_neuroassist_interventions_api_v1_agents_neuroassist_ops_interventions_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -205953,16 +205755,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -205980,18 +205772,6 @@
     "/api/v1/agents/neuroassist/ops/mobile-overview": {
       "get": {
         "operationId": "get_neuroassist_mobile_ops_overview_api_v1_agents_neuroassist_ops_mobile_overview_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -206002,16 +205782,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -206029,18 +205799,6 @@
     "/api/v1/agents/neuroassist/ops/overview": {
       "get": {
         "operationId": "get_neuroassist_ops_overview_api_v1_agents_neuroassist_ops_overview_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -206051,16 +205809,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -206078,18 +205826,6 @@
     "/api/v1/agents/neuroassist/ops/persistence": {
       "get": {
         "operationId": "get_neuroassist_persistence_status_api_v1_agents_neuroassist_ops_persistence_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -206100,16 +205836,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -206127,18 +205853,6 @@
     "/api/v1/agents/neuroassist/ops/planning": {
       "get": {
         "operationId": "get_neuroassist_control_center_planning_api_v1_agents_neuroassist_ops_planning_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -206149,16 +205863,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -206223,18 +205927,6 @@
     "/api/v1/agents/neuroassist/ops/plugin-boundary-review": {
       "get": {
         "operationId": "get_neuroassist_plugin_boundary_review_api_v1_agents_neuroassist_ops_plugin_boundary_review_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -206245,16 +205937,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -206330,18 +206012,6 @@
     "/api/v1/agents/neuroassist/ops/skill-packs": {
       "get": {
         "operationId": "list_neuroassist_skill_packs_api_v1_agents_neuroassist_ops_skill_packs_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -206356,16 +206026,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -206442,16 +206102,6 @@
       "get": {
         "operationId": "export_neuroassist_template_api_v1_agents_neuroassist_ops_templates_export_get",
         "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          },
           {
             "in": "query",
             "name": "template_key",
@@ -206548,16 +206198,6 @@
       "get": {
         "operationId": "list_neuroassist_ops_tickets_api_v1_agents_neuroassist_ops_tickets_get",
         "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          },
           {
             "in": "query",
             "name": "include_closed",
@@ -215898,25 +215538,6 @@
         "description": "Import Proplanta PSM data into local ERP database.",
         "operationId": "import_proplanta_psm_to_local_api_v1_agrar_psm_proplanta_import_to_local_post",
         "parameters": [
-          {
-            "description": "Tenant ID for imported data",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "default": "system",
-              "description": "Tenant ID for imported data",
-              "title": "Tenant Id"
-            }
-          },
           {
             "description": "Update existing PSM records",
             "in": "query",
@@ -256920,16 +256541,6 @@
         "parameters": [
           {
             "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "state",
             "required": false,
             "schema": {
@@ -257002,18 +256613,6 @@
       "post": {
         "description": "Neue Kampagne anlegen (Status: draft)",
         "operationId": "create_campaign_api_v1_crm_campaigns_post",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -257064,16 +256663,6 @@
         "description": "Kampagnen-Vorlagen auflisten",
         "operationId": "list_templates_api_v1_crm_campaigns_templates_get",
         "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          },
           {
             "in": "query",
             "name": "is_active",
@@ -257132,18 +256721,6 @@
       "post": {
         "description": "Neue Kampagnen-Vorlage anlegen",
         "operationId": "create_template_api_v1_crm_campaigns_templates_post",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -257201,16 +256778,6 @@
               "title": "Template Id",
               "type": "string"
             }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -257249,16 +256816,6 @@
             "required": true,
             "schema": {
               "title": "Template Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
               "type": "string"
             }
           }
@@ -257306,16 +256863,6 @@
             "required": true,
             "schema": {
               "title": "Template Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
               "type": "string"
             }
           }
@@ -257377,16 +256924,6 @@
               "title": "Template Id",
               "type": "string"
             }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -257434,16 +256971,6 @@
             "required": true,
             "schema": {
               "title": "Template Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
               "type": "string"
             }
           }
@@ -257496,16 +257023,6 @@
               "title": "Template Id",
               "type": "string"
             }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -257555,16 +257072,6 @@
               "title": "Campaign Id",
               "type": "string"
             }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -257603,16 +257110,6 @@
             "required": true,
             "schema": {
               "title": "Campaign Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
               "type": "string"
             }
           }
@@ -257660,16 +257157,6 @@
             "required": true,
             "schema": {
               "title": "Campaign Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
               "type": "string"
             }
           }
@@ -257732,16 +257219,6 @@
               "title": "Campaign Id",
               "type": "string"
             }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -257790,16 +257267,6 @@
             "required": true,
             "schema": {
               "title": "Campaign Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
               "type": "string"
             }
           }
@@ -257852,16 +257319,6 @@
               "title": "Campaign Id",
               "type": "string"
             }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -257910,16 +257367,6 @@
             "required": true,
             "schema": {
               "title": "Campaign Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
               "type": "string"
             }
           }
@@ -257972,16 +257419,6 @@
               "title": "Campaign Id",
               "type": "string"
             }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -258030,16 +257467,6 @@
             "required": true,
             "schema": {
               "title": "Campaign Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
               "type": "string"
             }
           },
@@ -258108,16 +257535,6 @@
             "required": true,
             "schema": {
               "title": "Campaign Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
               "type": "string"
             }
           }
@@ -258189,16 +257606,6 @@
               "title": "Recipient Id",
               "type": "string"
             }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
           }
         ],
         "requestBody": {
@@ -258257,16 +257664,6 @@
             "required": true,
             "schema": {
               "title": "Campaign Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
               "type": "string"
             }
           }
@@ -289686,20 +289083,6 @@
       "get": {
         "description": "Anlagevermögen abrufen",
         "operationId": "get_anlagen_api_v1_fibu_anlagen_get",
-        "parameters": [
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -289714,18 +289097,13 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Get Anlagen",
         "tags": [
           "fibu"
@@ -289734,20 +289112,6 @@
       "post": {
         "description": "Neue Anlage erfassen",
         "operationId": "create_anlage_api_v1_fibu_anlagen_post",
-        "parameters": [
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -289814,18 +289178,6 @@
               "title": "Jahr",
               "type": "integer"
             }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -289848,6 +289200,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Berechne Afa",
         "tags": [
           "fibu"
@@ -289868,18 +289225,6 @@
               "title": "Stichtag",
               "type": "string"
             }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -289902,6 +289247,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Get Bilanz",
         "tags": [
           "fibu"
@@ -289962,18 +289312,6 @@
               ],
               "title": "Belegart"
             }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -290002,6 +289340,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Get Buchungen",
         "tags": [
           "fibu"
@@ -290010,20 +289353,6 @@
       "post": {
         "description": "Neue Buchung erstellen",
         "operationId": "create_buchung_api_v1_fibu_buchungen_post",
-        "parameters": [
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -290091,18 +289420,6 @@
               "title": "Jahr",
               "type": "integer"
             }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -290125,6 +289442,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Get Bwa",
         "tags": [
           "fibu"
@@ -290167,18 +289489,6 @@
               ],
               "title": "Mahn Stufe"
             }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -290207,6 +289517,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Get Debitoren",
         "tags": [
           "fibu"
@@ -290224,18 +289539,6 @@
             "required": true,
             "schema": {
               "title": "Id",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
               "type": "string"
             }
           }
@@ -290804,18 +290107,6 @@
               ],
               "title": "Datum Bis"
             }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -290838,6 +290129,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Export Datev",
         "tags": [
           "fibu"
@@ -291611,18 +290907,6 @@
               "title": "Periode",
               "type": "string"
             }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -291645,6 +290929,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Get Guv",
         "tags": [
           "fibu"
@@ -291670,18 +290959,6 @@
                 }
               ],
               "title": "Typ"
-            }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
             }
           }
         ],
@@ -291711,6 +290988,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Get Konten",
         "tags": [
           "fibu"
@@ -291728,18 +291010,6 @@
             "required": true,
             "schema": {
               "title": "Kontonummer",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
               "type": "string"
             }
           }
@@ -291766,6 +291036,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Get Konto",
         "tags": [
           "fibu"
@@ -291791,18 +291066,6 @@
                 }
               ],
               "title": "Zahlbar"
-            }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
             }
           }
         ],
@@ -291832,6 +291095,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Get Kreditoren",
         "tags": [
           "fibu"
@@ -291842,20 +291110,6 @@
       "post": {
         "description": "Zahlungslauf für ausgewählte Kreditoren durchführen",
         "operationId": "zahlungslauf_api_v1_fibu_kreditoren_zahlungslauf_post",
-        "parameters": [
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -292166,20 +291420,6 @@
       "get": {
         "description": "Offene Posten Übersicht (Debitoren + Kreditoren)",
         "operationId": "get_op_verwaltung_api_v1_fibu_op_verwaltung_get",
-        "parameters": [
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -292188,18 +291428,13 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Get Op Verwaltung",
         "tags": [
           "fibu"
@@ -293025,20 +292260,6 @@
       "get": {
         "description": "Fibu-Dashboard Statistiken",
         "operationId": "get_fibu_stats_api_v1_fibu_stats_get",
-        "parameters": [
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -293047,18 +292268,13 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Get Fibu Stats",
         "tags": [
           "fibu"
@@ -295824,18 +295040,6 @@
               "title": "Op Id",
               "type": "string"
             }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -295890,18 +295094,6 @@
               "title": "Active Only",
               "type": "boolean"
             }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -295948,20 +295140,6 @@
       "post": {
         "description": "Create a new matching rule.",
         "operationId": "create_matching_rule_api_v1_finance_auto_matching_rules_post",
-        "parameters": [
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -296023,18 +295201,6 @@
               "title": "Rule Id",
               "type": "string"
             }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -296077,18 +295243,6 @@
             "required": true,
             "schema": {
               "title": "Rule Id",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
               "type": "string"
             }
           }
@@ -296140,18 +295294,6 @@
             "required": true,
             "schema": {
               "title": "Rule Id",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
               "type": "string"
             }
           }
@@ -296225,18 +295367,6 @@
               ],
               "description": "Filter by statement ID",
               "title": "Statement Id"
-            }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
             }
           }
         ],
@@ -301844,24 +300974,6 @@
         "operationId": "list_debtors_api_v1_finance_debtors__get",
         "parameters": [
           {
-            "description": "Filter by tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter by tenant ID",
-              "title": "Tenant Id"
-            }
-          },
-          {
             "description": "Filter by active status",
             "in": "query",
             "name": "is_active",
@@ -303744,18 +302856,6 @@
               "description": "As of date (defaults to end of period)",
               "title": "As Of Date"
             }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -303805,16 +302905,6 @@
             "required": true,
             "schema": {
               "title": "Journal Entry Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
               "type": "string"
             }
           }
@@ -303868,18 +302958,6 @@
             "schema": {
               "description": "Accounting period (YYYY-MM)",
               "title": "Period",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
               "type": "string"
             }
           }
@@ -303944,18 +303022,6 @@
             "schema": {
               "description": "Accounting period (YYYY-MM)",
               "title": "Period",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
               "type": "string"
             }
           },
@@ -304048,18 +303114,6 @@
               "title": "Format",
               "type": "string"
             }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -304137,18 +303191,6 @@
             }
           },
           {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          },
-          {
             "in": "query",
             "name": "limit",
             "required": false,
@@ -304210,18 +303252,6 @@
             "schema": {
               "description": "Accounting period (YYYY-MM)",
               "title": "Period",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
               "type": "string"
             }
           }
@@ -308101,18 +307131,6 @@
               "title": "Reason",
               "type": "string"
             }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -308223,18 +307241,6 @@
             "required": true,
             "schema": {
               "title": "Op Id",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
               "type": "string"
             }
           }
@@ -329623,7 +328629,7 @@
         ]
       },
       "post": {
-        "description": "Neues Wissensobjekt mit initialer Version erstellen.",
+        "description": "Neues Wissensobjekt mit initialer Version erstellen (Mandant aus dem Token, bis 27.10.2026 Standardmandant).",
         "operationId": "create_knowledge_api_v1_knowledge__post",
         "requestBody": {
           "content": {
@@ -350360,20 +349366,6 @@
       "post": {
         "description": "Test-Simulator - testet Policy-Entscheidung gegen Alert\n\nArgs:\n    request: TestRequest mit alert und roles\n\nReturns:\n    TestResponse mit Decision",
         "operationId": "test_policy_api_v1_mcp_policy_test_post",
-        "parameters": [
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -408603,18 +407595,6 @@
             "required": true,
             "schema": {
               "title": "Zulassungsnummer",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Tenant context for mapping",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant context for mapping",
-              "title": "Tenant Id",
               "type": "string"
             }
           }

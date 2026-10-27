@@ -159,6 +159,7 @@ async def update_user(
     user_id: str,
     user_data: UserUpdate,
     oidc_user: OIDCUser = Depends(authenticated_user),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -169,8 +170,7 @@ async def update_user(
     try:
         user_repo = container.resolve(UserRepository)
 
-        # Extract tenant from OIDC claims
-        tenant_id = oidc_user.get("raw", {}).get("tenant_id", "system")
+        # Mandant aus dem geprueften Token (bis 27.10.2026 roher Claim mit Rueckfall "system")
 
         # Check for email conflicts if email is being updated
         if user_data.email:
@@ -193,6 +193,7 @@ async def update_user(
 async def delete_user(
     user_id: str,
     oidc_user: OIDCUser = Depends(authenticated_user),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -203,8 +204,7 @@ async def delete_user(
     try:
         user_repo = container.resolve(UserRepository)
 
-        # Extract tenant from OIDC claims
-        tenant_id = oidc_user.get("raw", {}).get("tenant_id", "system")
+        # Mandant aus dem geprueften Token (bis 27.10.2026 roher Claim mit Rueckfall "system")
 
         success = await user_repo.delete(user_id, tenant_id)
         if not success:

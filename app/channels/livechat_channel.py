@@ -12,6 +12,7 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Optional
 from uuid import uuid4
+from app.core.tenant_context import get_current_tenant_id
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +53,7 @@ class ChatMessage:
 class ChatSession:
     session_id: str = field(default_factory=lambda: str(uuid4()))
     user_id: str = ""
-    tenant_id: str = "system"
+    tenant_id: str = field(default_factory=get_current_tenant_id)
     status: str = "active"
     started_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     messages: list[ChatMessage] = field(default_factory=list)
@@ -76,7 +77,8 @@ class ChatSession:
 _SESSIONS: dict[str, ChatSession] = {}
 
 
-def create_session(user_id: str, tenant_id: str = "system", context: Optional[dict] = None) -> ChatSession:
+def create_session(user_id: str, tenant_id: str | None = None, context: Optional[dict] = None) -> ChatSession:
+    tenant_id = tenant_id or get_current_tenant_id()
     session = ChatSession(user_id=user_id, tenant_id=tenant_id, context=context or {})
     _SESSIONS[session.session_id] = session
     logger.info("Chat-Session %s erstellt fuer User %s", session.session_id, user_id)

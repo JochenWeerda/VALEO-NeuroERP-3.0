@@ -20,6 +20,7 @@ from app.integrations.services.superglue_quarantine import (
 
 from .agent_ops import get_agent_ops_service
 from .agent_ops_persistence import append_agent_ops_history_entry
+from app.core.tenant_context import get_current_tenant_id
 
 
 def _utcnow() -> str:
@@ -74,7 +75,8 @@ def _tenant_plan_state(payload: dict[str, Any], tenant_id: str) -> dict[str, Any
     return payload.setdefault("tenants", {}).setdefault(tenant_id, {"items": []})
 
 
-def build_control_center_planning(tenant_id: str = "system") -> dict[str, Any]:
+def build_control_center_planning(tenant_id: str | None = None) -> dict[str, Any]:
+    tenant_id = tenant_id or get_current_tenant_id()
     ops = get_agent_ops_service()
     overview = ops.build_overview(tenant_id)
     wizard = build_superglue_live_readiness(tenant_id)
@@ -157,7 +159,8 @@ def upsert_control_center_plan_item(
     return item
 
 
-def build_control_center_incidents(tenant_id: str = "system") -> dict[str, Any]:
+def build_control_center_incidents(tenant_id: str | None = None) -> dict[str, Any]:
+    tenant_id = tenant_id or get_current_tenant_id()
     ops = get_agent_ops_service()
     control_center = ops.build_control_center(tenant_id)
     readiness = build_superglue_live_readiness(tenant_id)

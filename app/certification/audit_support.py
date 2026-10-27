@@ -13,6 +13,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 import logging
 from app.core.uuid7 import uuid7
+from app.core.tenant_context import get_current_tenant_id
 
 logger = logging.getLogger(__name__)
 
@@ -783,9 +784,10 @@ class ISOCertificationAuditSupport:
         completed_items = sum(1 for item in checklist_items.values() if item.get('completed', False))
         return round((completed_items / len(checklist_items)) * 100, 1)
 
-    def get_certification_readiness_report(self, tenant_id: str = "system") -> Dict[str, Any]:
+    def get_certification_readiness_report(self, tenant_id: str | None = None) -> Dict[str, Any]:
         """Generate comprehensive certification readiness report"""
         # Get latest assessments
+        tenant_id = tenant_id or get_current_tenant_id()
         assessments = [a for a in self.compliance_assessments[-10:]]  # Last 10 assessments
 
         # Get active applications
@@ -937,8 +939,9 @@ class ISOCertificationAuditSupport:
 
         return next_steps
 
-    def check_audit_compliance(self, tenant_id: str = "system") -> Dict[str, Any]:
+    def check_audit_compliance(self, tenant_id: str | None = None) -> Dict[str, Any]:
         """Check overall audit and certification compliance"""
+        tenant_id = tenant_id or get_current_tenant_id()
         assessments = [a for a in self.compliance_assessments[-5:]]  # Last 5 assessments
         applications = list(self.certification_applications.values())
         plans = list(self.audit_plans.values())

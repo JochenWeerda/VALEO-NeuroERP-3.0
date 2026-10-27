@@ -7,6 +7,7 @@ Adapted to existing database schema (debitor_number, name, address JSONB)
 from app.auth.finance_roles import finance_admin, finance_write
 from typing import Optional
 import re
+from app.core.tenant import get_tenant_id
 from fastapi import Response, APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -199,18 +200,18 @@ async def create_debtor(
 
 @router.get("/", response_model=PaginatedResponse[Debtor], summary="Debtors auflisten")
 async def list_debtors(
-    tenant_id: Optional[str] = Query(None, description="Filter by tenant ID"),
     is_active: Optional[bool] = Query(None, description="Filter by active status"),
     search: Optional[str] = Query(None, description="Search in company name, debtor number"),
     skip: int = Query(0, ge=0, description="Number of items to skip"),
     limit: int = Query(100, ge=1, le=1000, description="Maximum number of items to return"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
     List debtors with pagination and filtering.
     """
     try:
-        effective_tenant_id = tenant_id or "system"
+        effective_tenant_id = tenant_id
         
         # Build query
         where_clauses = ["tenant_id = :tenant_id"]

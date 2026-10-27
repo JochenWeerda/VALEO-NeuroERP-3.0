@@ -25,6 +25,7 @@ from app.core.uuid7 import uuid7
 from app.api.v1.schemas.base import BaseSchema
 from pydantic import ConfigDict as _ConfigDict
 from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
+from app.core.tenant import get_tenant_id  # Mandant aus dem Token (bis 27.10.2026 ?tenant_id=system)
 
 
 class CrmCampaignOut(BaseSchema):
@@ -206,7 +207,7 @@ def _assert_transition(current: str, target: str) -> None:
 
 @router.get("/templates", response_model=list[CrmCampaignOut], summary="Templates auflisten")
 async def list_templates(
-    tenant_id: str = Query("system"),
+    tenant_id: str = Depends(get_tenant_id),
     is_active: Optional[bool] = Query(None),
     db: Session = Depends(get_db),
 ) -> List[dict]:
@@ -226,7 +227,7 @@ async def list_templates(
 @router.post("/templates", response_model=CrmCampaignOut, status_code=201, summary="Template anlegen", dependencies=SCHREIBEN["CRM"])
 async def create_template(
     payload: TemplateCreate,
-    tenant_id: str = Query("system"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     """Neue Kampagnen-Vorlage anlegen"""
@@ -259,7 +260,7 @@ async def create_template(
 @router.get("/templates/{template_id}", response_model=CrmCampaignOut, summary="Template abrufen")
 async def get_template(
     template_id: str,
-    tenant_id: str = Query("system"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     row = db.execute(
@@ -275,7 +276,7 @@ async def get_template(
 async def update_template(
     template_id: str,
     payload: TemplateUpdate,
-    tenant_id: str = Query("system"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     row = db.execute(
@@ -308,7 +309,7 @@ async def update_template(
 @router.post("/templates/{template_id}/duplicate", response_model=CrmCampaignOut, status_code=201, summary="Template duplicate", dependencies=SCHREIBEN["CRM"])
 async def duplicate_template(
     template_id: str,
-    tenant_id: str = Query("system"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     """Vorlage duplizieren"""
@@ -349,7 +350,7 @@ async def duplicate_template(
 @router.post("/templates/{template_id}/activate", response_model=CrmCampaignOut, summary="Template aktivieren", dependencies=SCHREIBEN["CRM"])
 async def activate_template(
     template_id: str,
-    tenant_id: str = Query("system"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     db.execute(
@@ -369,7 +370,7 @@ async def activate_template(
 @router.post("/templates/{template_id}/deactivate", response_model=CrmCampaignOut, summary="Template deaktivieren", dependencies=SCHREIBEN["CRM"])
 async def deactivate_template(
     template_id: str,
-    tenant_id: str = Query("system"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     db.execute(
@@ -389,7 +390,7 @@ async def deactivate_template(
 @router.delete("/templates/{template_id}", status_code=204, response_class=Response, summary="Template lÃ¶schen", dependencies=SCHREIBEN["CRM"])
 async def delete_template(
     template_id: str,
-    tenant_id: str = Query("system"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> Response:
     result = db.execute(
@@ -406,7 +407,7 @@ async def delete_template(
 
 @router.get("", response_model=list[CrmCampaignOut], summary="Campaigns auflisten")
 async def list_campaigns(
-    tenant_id: str = Query("system"),
+    tenant_id: str = Depends(get_tenant_id),
     state: Optional[str] = Query(None),
     campaign_type: Optional[str] = Query(None),
     db: Session = Depends(get_db),
@@ -430,7 +431,7 @@ async def list_campaigns(
 @router.post("", response_model=CrmCampaignOut, status_code=201, summary="Campaign anlegen", dependencies=SCHREIBEN["CRM"])
 async def create_campaign(
     payload: CampaignCreate,
-    tenant_id: str = Query("system"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     """Neue Kampagne anlegen (Status: draft)"""
@@ -479,7 +480,7 @@ async def create_campaign(
 @router.get("/{campaign_id}", response_model=CrmCampaignOut, summary="Campaign abrufen")
 async def get_campaign(
     campaign_id: str,
-    tenant_id: str = Query("system"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     row = db.execute(
@@ -495,7 +496,7 @@ async def get_campaign(
 async def update_campaign(
     campaign_id: str,
     payload: CampaignUpdate,
-    tenant_id: str = Query("system"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     row = db.execute(
@@ -530,7 +531,7 @@ async def update_campaign(
 @router.delete("/{campaign_id}", status_code=204, response_class=Response, summary="Campaign lÃ¶schen", dependencies=SCHREIBEN["CRM"])
 async def delete_campaign(
     campaign_id: str,
-    tenant_id: str = Query("system"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> Response:
     row = db.execute(
@@ -585,7 +586,7 @@ def _transition(campaign_id: str, tenant_id: str, target: str, db: Session) -> d
 
 @router.post("/{campaign_id}/activate", response_model=CrmCampaignOut, summary="Campaign aktivieren", dependencies=SCHREIBEN["CRM"])
 async def activate_campaign(
-    campaign_id: str, tenant_id: str = Query("system"), db: Session = Depends(get_db)
+    campaign_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict:
     """Kampagne aktivieren (draft/paused â†’ active)"""
     return _transition(campaign_id, tenant_id, "active", db)
@@ -593,7 +594,7 @@ async def activate_campaign(
 
 @router.post("/{campaign_id}/pause", response_model=CrmCampaignOut, summary="Campaign pausieren", dependencies=SCHREIBEN["CRM"])
 async def pause_campaign(
-    campaign_id: str, tenant_id: str = Query("system"), db: Session = Depends(get_db)
+    campaign_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict:
     """Kampagne pausieren (active â†’ paused)"""
     return _transition(campaign_id, tenant_id, "paused", db)
@@ -601,7 +602,7 @@ async def pause_campaign(
 
 @router.post("/{campaign_id}/resume", response_model=CrmCampaignOut, summary="Campaign fortsetzen", dependencies=SCHREIBEN["CRM"])
 async def resume_campaign(
-    campaign_id: str, tenant_id: str = Query("system"), db: Session = Depends(get_db)
+    campaign_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict:
     """Pausierte Kampagne fortsetzen (paused â†’ active)"""
     return _transition(campaign_id, tenant_id, "active", db)
@@ -609,7 +610,7 @@ async def resume_campaign(
 
 @router.post("/{campaign_id}/complete", response_model=CrmCampaignOut, summary="Campaign complete", dependencies=SCHREIBEN["CRM"])
 async def complete_campaign(
-    campaign_id: str, tenant_id: str = Query("system"), db: Session = Depends(get_db)
+    campaign_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict:
     """Kampagne abschlieÃŸen (active â†’ completed)"""
     return _transition(campaign_id, tenant_id, "completed", db)
@@ -617,7 +618,7 @@ async def complete_campaign(
 
 @router.post("/{campaign_id}/archive", response_model=CrmCampaignOut, summary="Campaign archivieren", dependencies=SCHREIBEN["CRM"])
 async def archive_campaign(
-    campaign_id: str, tenant_id: str = Query("system"), db: Session = Depends(get_db)
+    campaign_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict:
     """Kampagne archivieren"""
     return _transition(campaign_id, tenant_id, "archived", db)
@@ -628,7 +629,7 @@ async def archive_campaign(
 @router.get("/{campaign_id}/recipients", response_model=list[CrmCampaignOut], summary="Recipients auflisten")
 async def list_recipients(
     campaign_id: str,
-    tenant_id: str = Query("system"),
+    tenant_id: str = Depends(get_tenant_id),
     status_filter: Optional[str] = Query(None, alias="status"),
     db: Session = Depends(get_db),
 ) -> List[dict]:
@@ -656,7 +657,7 @@ async def list_recipients(
 async def add_recipient(
     campaign_id: str,
     payload: RecipientAdd,
-    tenant_id: str = Query("system"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     """EmpfÃ¤nger zu Kampagne hinzufÃ¼gen"""
@@ -689,7 +690,7 @@ async def update_recipient_status(
     campaign_id: str,
     recipient_id: str,
     payload: RecipientStatusUpdate,
-    tenant_id: str = Query("system"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     """EmpfÃ¤nger-Status aktualisieren (z.B. sent, opened, clicked, converted)"""
@@ -758,7 +759,7 @@ def _rebuild_kpis(campaign_id: str, tenant_id: str, db: Session) -> None:
 @router.get("/{campaign_id}/analytics", response_model=CrmCampaignOut, summary="Analytics abrufen")
 async def get_analytics(
     campaign_id: str,
-    tenant_id: str = Query("system"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     """Detaillierte Kampagnen-Analytik"""

@@ -22,6 +22,7 @@ from app.core.human_approval_gate import (
     HumanApprovalRequirement,
     record_approval_decision,
 )
+from app.core.tenant_context import get_current_tenant_id
 
 logger = logging.getLogger(__name__)
 
@@ -77,7 +78,7 @@ class ApprovalCase:
     created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     due_at: Optional[str] = None
     escalated_to: Optional[str] = None
-    tenant_id: str = "system"
+    tenant_id: str = field(default_factory=get_current_tenant_id)
 
     def to_dict(self) -> dict:
         return {
@@ -120,8 +121,9 @@ def create_case(
     instanz_id: str,
     agent_id: str,
     context: dict[str, Any],
-    tenant_id: str = "system",
+    tenant_id: str | None = None,
 ) -> ApprovalCase:
+    tenant_id = tenant_id or get_current_tenant_id()
     priority = _RISIKO_TO_PRIORITY.get(
         ApprovalRisikostufe(requirement.risiko_stufe.value
                             if hasattr(requirement.risiko_stufe, 'value')

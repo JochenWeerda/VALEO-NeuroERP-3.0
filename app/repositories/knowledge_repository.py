@@ -60,7 +60,7 @@ class KnowledgeRepository:
         titel: str,
         typ: str,
         status: str,
-        tenant_id: str = "system",
+        tenant_id: str,
         beschreibung: str = "",
         tags: list[str] | None = None,
         zielrollen: list[str] | None = None,

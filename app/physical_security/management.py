@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 import logging
 from app.core.uuid7 import uuid7
+from app.core.tenant_context import get_current_tenant_id
 
 logger = logging.getLogger(__name__)
 
@@ -770,9 +771,10 @@ class ISO27001PhysicalSecurity:
                 return True
         return False
 
-    def get_physical_security_dashboard(self, tenant_id: str = "system") -> Dict[str, Any]:
+    def get_physical_security_dashboard(self, tenant_id: str | None = None) -> Dict[str, Any]:
         """Generate comprehensive physical security dashboard"""
         # Get zone status
+        tenant_id = tenant_id or get_current_tenant_id()
         zone_status = {}
         for zone_id, zone in self.security_zones.items():
             recent_access = len([log for logs in self.access_logs.values() for log in logs
@@ -977,8 +979,9 @@ class ISO27001PhysicalSecurity:
 
         return recommendations
 
-    def check_physical_security_compliance(self, tenant_id: str = "system") -> Dict[str, Any]:
+    def check_physical_security_compliance(self, tenant_id: str | None = None) -> Dict[str, Any]:
         """Check ISO 27001 physical security compliance"""
+        tenant_id = tenant_id or get_current_tenant_id()
         compliance_checks = {
             'secure_areas': self._check_secure_areas_compliance(),
             'equipment_security': self._check_equipment_security_compliance(),
