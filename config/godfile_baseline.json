@@ -14,7 +14,7 @@
     "app/api/v1/endpoints/mask_frontend_bridges.py": 1416,
     "app/api/v1/endpoints/personal.py": 3081,
     "app/api/v1/endpoints/portal_feldbuch.py": 1945,
-    "app/api/v1/endpoints/process_kernel_api.py": 6108,
+    "app/api/v1/endpoints/process_kernel_api.py": 6100,
     "app/api/v1/endpoints/rations_optimization.py": 8855,
     "app/api/v1/endpoints/sales_orders.py": 1084
   }

@@ -8,7 +8,7 @@
    "C": 51,
    "D": 60
   },
-  "rls_enabled": 523,
+  "rls_enabled": 525,
   "tenant_types": {
    "character varying": 297,
    "character varying(100)": 9,
@@ -108,12 +108,10 @@
    "app/api/v1/endpoints/reklamation_api.py": 1,
    "app/api/v1/endpoints/sales_delivery_notes.py": 1,
    "app/api/v1/endpoints/webhooks.py": 3,
-   "app/api/v1/endpoints/weighing_tickets.py": 1,
    "app/core/channel_ingress.py": 2,
    "app/core/config.py": 1,
    "app/core/inventory_permissions.py": 1,
    "app/core/tenant_context.py": 1,
-   "app/domains/agrar/api/biostimulanzien.py": 1,
    "app/domains/agrar/api/duenger.py": 1,
    "app/domains/agrar/api/psm.py": 1,
    "app/domains/agrar/api/saatgut.py": 1,
@@ -204,9 +202,9 @@
    "table": "domain_agrar.agrar_biostimulanzien",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_agrar.agrar_duenger",
@@ -2808,9 +2806,9 @@
    "table": "domain_inventory.agrar_contract_allocations",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_inventory.agrar_contracts",

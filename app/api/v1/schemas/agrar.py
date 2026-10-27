@@ -342,7 +342,7 @@ class BiostimulanzBase(BaseSchema):
     ek_preis: Optional[Decimal] = Field(None, ge=0, description="Purchase price")
     vk_preis: Optional[Decimal] = Field(None, ge=0, description="Sales price")
     waehrung: str = Field(default="EUR", max_length=3, description="Currency")
-    lagerbestand: Decimal = Field(default=0, ge=0, description="Stock quantity")
+    lagerbestand: Decimal = Field(default=Decimal("0"), ge=0, description="Stock quantity")
 
 
 class BiostimulanzCreate(BiostimulanzBase):

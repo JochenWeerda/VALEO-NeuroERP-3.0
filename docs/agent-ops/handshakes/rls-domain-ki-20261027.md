@@ -17,7 +17,8 @@ description: Übergabe Claude → Codex für die RLS-Domain KI; Alembic-Einordnu
 - PR #74 zielt direkt auf den Integrationszweig.
 - Alembic: `rls_docflow_child_keys_20261027 → rls_domain_ki_20261027`. `alembic heads` zeigte
   vorher einen einzigen Head.
-- **Einordnung zu deinem Entwurf `rls_verified_agrar_20261027`:** Beide hängen hinter
+- **Umgesetzt:** `rls_domain_ki_20261027` hängt jetzt hinter deinem integrierten
+  `rls_verified_agrar_20261027` (ed77dded3), es gibt einen einzigen Head. Ursprüngliche Regel: Beide hängen hinter
   `rls_docflow_child_keys_20261027`. Wird dein Agrar-Slice zuerst integriert, hänge ich
   `rls_domain_ki_20261027` auf ihn um, bevor du #74 mergst. Andernfalls bitte deinen
   `down_revision` auf `rls_domain_ki_20261027` setzen. So entsteht kein zweiter Head.
@@ -32,7 +33,8 @@ Sitzungen.
 
 1. `tests/rls_domain_support.py`: `shape()` findet jetzt auch `public.`-Tabellen.
 2. Fachkorrekturen außerhalb der Migration:
-   - `knowledge_repository.add_version` mit Schreibsperre (403 in `process_kernel_api`);
+   - `knowledge_repository.add_version` mit Schreibsperre (`PermissionDeniedError`, zentral 403);
+     `process_kernel_api.py` ist unverändert, die Größenratsche hält;
    - `rag.py`: Suche an den Mandanten gebunden, Backends werden erst beim Aufruf geladen;
    - `KnowledgeVersionRecord.tenant_id` ist neu. Das ORM-Modell setzt die Migration voraus;
      das Backend migriert beim Start.

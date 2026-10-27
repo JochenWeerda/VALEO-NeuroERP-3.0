@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from app.api.v1.schemas.workflow_migration_input import WorkflowMigrationCheckIn
 from app.api.v1.schemas.data_quality_input import DataQualityCheckIn
+from app.api.v1.schemas.data_quality_output import dq_ruleset_public as _dq_ruleset_public
 from app.api.v1.schemas.slo_input import SloCheckIn, reject_nonfinite_slo_json
 from app.api.v1.schemas.advisory_input import PolicyEvaluationIn, ApprovalEvaluationIn
 
@@ -1347,17 +1348,6 @@ def get_mcp_tool_registry(domain: str = "") -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 # Wave 31 AP6: Datenqualitaets-Endpoints
 # ---------------------------------------------------------------------------
-
-def _dq_ruleset_public(ruleset: "DQRuleSet") -> dict:
-    """Serialisiert ein DQRuleSet ohne interne Implementierungsdetails."""
-    d = ruleset.as_dict()
-    for regel in d.get("regeln", []):
-        # format_regex und unique_felder sind Implementierungsdetails,
-        # nicht fuer externe Konsumenten bestimmt.
-        regel.pop("format_regex", None)
-        regel.pop("unique_felder", None)
-    return d
-
 
 @router.get("/data-quality/rulesets", response_model=ProcessKernelOut, summary="Dq rulesets abrufen")
 def get_dq_rulesets() -> dict[str, Any]:
@@ -5709,10 +5699,7 @@ def fuege_persistente_knowledge_version_hinzu(knowledge_id: str, payload: dict, 
     from app.repositories.knowledge_repository import KnowledgeRepository
 
     repo = KnowledgeRepository(db)
-    try:
-        record = repo.add_version(knowledge_id, payload)
-    except PermissionError as exc:
-        raise HTTPException(status_code=403, detail=str(exc)) from exc
+    record = repo.add_version(knowledge_id, payload)
     if record is None:
         raise HTTPException(status_code=404, detail=f"KnowledgeObject {knowledge_id!r} nicht gefunden")
     version = max((entry.version for entry in record.versionen), default=1)
@@ -5920,8 +5907,6 @@ def review_knowledge_improvement_proposal(proposal_id: str, payload: dict, db=De
             reviewer_rolle=payload.get("reviewer_rolle"),
             review_notiz=payload.get("review_notiz"),
         )
-    except PermissionError as exc:
-        raise HTTPException(status_code=403, detail=str(exc)) from exc
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 

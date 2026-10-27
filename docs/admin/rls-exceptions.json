@@ -7,7 +7,6 @@
   "domain_shared.knowledge_versions": "Versionen des gemeinsamen Produktwissens (gleiche Familie wie knowledge_objects); Mandanten aendern nur eigene (rls_domain_ki_20261027)"
  },
  "zurueckgestellt": {
-  "domain_agrar.agrar_biostimulanzien": "standardmandant",
   "domain_agrar.agrar_duenger": "standardmandant",
   "domain_agrar.agrar_partie_links": "mandant_nullbar",
   "domain_agrar.agrar_psm": "standardmandant",
@@ -94,7 +93,6 @@
   "domain_erp.policy_rules": "mandant_nullbar",
   "public.finance_accounting_periods": "dienst",
   "infrastructure.audit_log": "position",
-  "domain_inventory.agrar_contract_allocations": "standardmandant",
   "domain_inventory.agrar_contracts": "referenzdaten",
   "domain_inventory.article_batches": "standardmandant",
   "domain_inventory.article_documents": "standardmandant",
