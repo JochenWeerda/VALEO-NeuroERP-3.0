@@ -50,6 +50,10 @@ Verbund-FKs bzw. die neue Vorgabe, ihre Policies bleiben unverändert.
     Mandantenfilter. Eine fremde Rechnung ergibt jetzt 404.
   - Wareneingänge und ihre Positionen werden mit `tenant_id` angelegt.
 - **`app/einkauf/router.py`**: Rechnungseingangspositionen werden mit `tenant_id` angelegt.
+- **Prüfprotokoll der Rechnungseingänge** (`_write_rechnung_audit`): Als Akteur stand ein beliebiger aktiver Nutzer
+  des Mandanten (`LIMIT 1`), Fehler wurden verschluckt. Prüfen, Freigeben und Verbuchen waren damit niemandem
+  zurechenbar. Jetzt übergeben die drei Wege den geprüften Bearbeiter (Token-`sub`), `bekannter_nutzer` ordnet ihn
+  genau einem aktiven Nutzer des Mandanten zu; ohne eindeutige Zuordnung 403.
 
 ## Gewachsene DB (lesend) — Live-Blocker
 
@@ -65,9 +69,10 @@ Verbund-FKs bzw. die neue Vorgabe, ihre Policies bleiben unverändert.
 ## Nachweise
 
 ```
-pytest tests/test_rls_domain_einkauf.py -rs    -> 50 passed, 0 skipped (valeo_app, zurueckgerollt)
+pytest tests/test_rls_domain_einkauf.py -rs    -> 51 passed, 0 skipped (valeo_app, zurueckgerollt)
 Gegenprobe mit alten Einzel-FKs                -> 19 rot
-Gegenprobe mit altem Code                      -> 7 rot (alle Fach- und Tokenvertraege)
+Gegenprobe mit altem Code                      -> 8 rot (alle Fach-, Token- und Protokollvertraege)
+Nachtrag Pruefprotokoll: 30 betroffene Module -> 634 passed, 2 rot wie auf der Basis (0 neu rot)
 RLS-Gesamtsuite + Fallback-Vertrag             -> 481 passed, 0 skipped
 356 Bestandsmodule (conftest, Pruefstand, 9 Pakete nacheinander)
                                                -> 12454 passed; 41 rot wie auf der Basis #77 (0 neu rot)
@@ -84,6 +89,7 @@ Inventar/Rollout/Matrix/Systemlesen regeneriert, generate_code_inventories.py --
 | Kontextwechsel/Savepoint, Hintergrund, Pool | `test_kontextwechsel_savepoint_hintergrund_pool` |
 | Waren- und Rechnungseingänge nur eigen, fremd 404 | `test_fachkette_waren_und_rechnungseingaenge_nur_eigener_mandant` |
 | Bestellstatus nur an eigener Bestellung | `test_fachkette_bestellstatus_nur_eigene_bestellung` |
+| Prüfprotokoll trägt den angemeldeten Nutzer, ohne ihn 403 | `test_fachkette_rechnungspruefung_protokolliert_den_angemeldeten_nutzer` |
 | Beschaffungswege nehmen den Mandanten aus dem Token | `test_beschaffungswege_nehmen_den_mandanten_aus_dem_token` (5) |
 
 Die Fachketten laufen als Tabelleneigentümer (`RESET ROLE`), also ohne RLS: Sie prüfen den Code, nicht die
@@ -102,8 +108,6 @@ Schemata (serielle Schlüssel wie `ers_invoices.id`).
 ## Verbleibend / vor Live-Aktivierung
 
 - **DEMO-PO-001/002** klären (siehe oben); bis dahin bricht die Migration live ab.
-- **Identitätsbefund:** `_write_rechnung_audit` trägt als Akteur einen beliebigen aktiven Nutzer des Mandanten
-  ein, nicht den angemeldeten. Eigener Slice zur Identität im Prüfprotokoll.
 - **`einkauf_retouren`** gibt es nicht; Lieferantenretouren haben keine eigene Tabelle.
 - Die drei D-Tabellen fehlen in der gewachsenen DB; vor Live muss geklärt sein, ob sie angelegt werden
   (Migrationsstand) oder ob der Code dort auf andere Tabellen zeigt.

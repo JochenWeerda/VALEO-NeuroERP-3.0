@@ -9,7 +9,8 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any, List, Optional
 from uuid import uuid4
-from fastapi import APIRouter, Body, Depends, File, HTTPException, Query, UploadFile
+from fastapi import APIRouter, Body, Depends, File, HTTPException, Query, Request, UploadFile
+from app.core.akteur import gepruefter_akteur_aus_request
 from fastapi.responses import Response
 from starlette.concurrency import run_in_threadpool
 from pydantic import BaseModel, Field
@@ -905,10 +906,11 @@ async def einkauf_rechnungseingaenge_list(
 @router.post("/einkauf/rechnungseingaenge/{rechnung_id}/pruefen", summary="Rechnungseingang pruefen einkauf",
     response_model=EinkaufDocOut, dependencies=SCHREIBEN["EINKAUF"])
 async def einkauf_rechnungseingang_pruefen(
-    rechnung_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+    request: Request, rechnung_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict[str, Any]:
     try:
-        return EinkaufCompatService(db, tenant_id).pruefen_rechnung(rechnung_id)
+        actor = gepruefter_akteur_aus_request(request)
+        return EinkaufCompatService(db, tenant_id, actor=actor).pruefen_rechnung(rechnung_id)
     except EntityNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except ValidationFailedError as exc:
@@ -918,10 +920,11 @@ async def einkauf_rechnungseingang_pruefen(
 @router.post("/einkauf/rechnungseingaenge/{rechnung_id}/freigeben", summary="Rechnungseingang freigeben einkauf",
     response_model=EinkaufDocOut, dependencies=SCHREIBEN["EINKAUF"])
 async def einkauf_rechnungseingang_freigeben(
-    rechnung_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+    request: Request, rechnung_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict[str, Any]:
     try:
-        return EinkaufCompatService(db, tenant_id).freigeben_rechnung(rechnung_id)
+        actor = gepruefter_akteur_aus_request(request)
+        return EinkaufCompatService(db, tenant_id, actor=actor).freigeben_rechnung(rechnung_id)
     except EntityNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except ValidationFailedError as exc:
@@ -931,10 +934,11 @@ async def einkauf_rechnungseingang_freigeben(
 @router.post("/einkauf/rechnungseingaenge/{rechnung_id}/verbuchen", summary="Rechnungseingang verbuchen einkauf",
     response_model=EinkaufDocOut, dependencies=SCHREIBEN["EINKAUF"])
 async def einkauf_rechnungseingang_verbuchen(
-    rechnung_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+    request: Request, rechnung_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict[str, Any]:
     try:
-        return EinkaufCompatService(db, tenant_id).verbuchen_rechnung(rechnung_id)
+        actor = gepruefter_akteur_aus_request(request)
+        return EinkaufCompatService(db, tenant_id, actor=actor).verbuchen_rechnung(rechnung_id)
     except EntityNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except ValidationFailedError as exc:

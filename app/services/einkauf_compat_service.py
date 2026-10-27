@@ -52,9 +52,11 @@ _AVIS_FELDER = ("id, avis_nummer, bestell_nr AS bestellung_id, lieferant_name, s
 
 
 class EinkaufCompatService:
-    def __init__(self, db: Session, tenant_id: str) -> None:
+    def __init__(self, db: Session, tenant_id: str, actor: str | None = None) -> None:
         self.db = db
         self.tenant_id = tenant_id
+        # Gepruefter Bearbeiter (Token-sub) fuer Statuswechsel mit Pruefprotokoll.
+        self.actor = actor
 
     def _invalidate(self) -> None:
         try:
@@ -636,18 +638,15 @@ class EinkaufCompatService:
         self, rid: str, action: str, old_status: str, new_status: str
     ) -> None:
         from datetime import datetime as _dt
+        from app.core.akteur import bekannter_nutzer
         from app.core.logging import get_correlation_id
         from sqlalchemy import text
-        try:
-            row = self.db.execute(text(
-                "SELECT id, email FROM domain_shared.users "
-                "WHERE tenant_id = :tid AND (is_active IS NULL OR is_active = true) LIMIT 1"
-            ), {"tid": self.tenant_id}).mappings().first()
-            if not row or not row.get("id"):
-                return
-            user_id, user_email = str(row["id"]), str((row.get("email") or "unknown")[:100])
-        except Exception:
-            return
+        # Bis 27.10.2026 stand hier ein beliebiger aktiver Nutzer des Mandanten (LIMIT 1), Fehler wurden
+        # verschluckt: Pruefen, Freigeben und Verbuchen waren niemandem zurechenbar.
+        user_id = str(bekannter_nutzer(self.db, self.actor, tenant_id=self.tenant_id))
+        email = self.db.execute(text("SELECT email FROM domain_shared.users WHERE id = :id"),
+                                {"id": user_id}).scalar()
+        user_email = str(email or "")[:100]
         entry = AuditLog(
             id=uuid7(),
             timestamp=_dt.utcnow(),
