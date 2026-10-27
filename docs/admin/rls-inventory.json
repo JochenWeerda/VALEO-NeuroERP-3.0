@@ -3,14 +3,14 @@
  "summary": {
   "tables": 775,
   "by_class": {
-   "A": 608,
+   "A": 609,
    "B": 54,
-   "C": 53,
+   "C": 52,
    "D": 60
   },
-  "rls_enabled": 501,
+  "rls_enabled": 503,
   "tenant_types": {
-   "character varying": 295,
+   "character varying": 296,
    "character varying(100)": 9,
    "character varying(120)": 39,
    "character varying(128)": 1,
@@ -107,7 +107,6 @@
    "app/api/v1/endpoints/pick_lists.py": 1,
    "app/api/v1/endpoints/pos_retoure.py": 1,
    "app/api/v1/endpoints/preparation_lists.py": 1,
-   "app/api/v1/endpoints/price_lists.py": 1,
    "app/api/v1/endpoints/reklamation_api.py": 1,
    "app/api/v1/endpoints/sales_delivery_notes.py": 1,
    "app/api/v1/endpoints/webhooks.py": 3,
@@ -4296,22 +4295,19 @@
   },
   {
    "table": "domain_pricing.price_list_items",
-   "class": "C",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying",
+   "rls": true,
    "force_rls": false,
-   "policies": 0,
-   "tenant_parents": [
-    "domain_pricing.price_lists"
-   ]
+   "policies": 4
   },
   {
    "table": "domain_pricing.price_lists",
    "class": "A",
    "tenant_type": "character varying(64)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_pricing.staffelrabatt_artikel",
