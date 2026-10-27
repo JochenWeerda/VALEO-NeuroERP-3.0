@@ -13,7 +13,7 @@ description: Generierte Entscheidungsmatrix der noch nicht abgesicherten Mandant
 
 Generiert von `scripts/rls_domain_matrix.py`; nicht von Hand aendern. Entscheidungen und Reihenfolge: `docs/architecture/rls-domaenen-entscheidungsmatrix.md`.
 
-Datenstand gewachsene Datenbank: 2026-10-27. Tabellen: 212.
+Datenstand gewachsene Datenbank: 2026-10-27. Tabellen: 207.
 
 | Domain | dienst | position | referenzdaten | mandant_nullbar | standardmandant | identitaet |
 |---|---|---|---|---|---|---|
@@ -26,7 +26,6 @@ Datenstand gewachsene Datenbank: 2026-10-27. Tabellen: 212.
 | einkauf |  | 7 | 2 | 4 | 1 |  |
 | erp | 1 | 1 | 3 | 3 | 2 |  |
 | finance | 1 |  |  |  |  |  |
-| hr |  |  | 2 | 2 | 1 |  |
 | infrastructure |  | 1 |  |  |  |  |
 | inventory | 7 | 6 | 12 | 4 | 12 |  |
 | ki |  |  | 2 |  |  |  |
@@ -179,16 +178,6 @@ Datenstand gewachsene Datenbank: 2026-10-27. Tabellen: 212.
 | Tabelle | Kl. | Ursache | Modell | Schreiber | Leser | Worker | Identitaet | Daten | Bereinigung | Policy |
 |---|---|---|---|---|---|---|---|---|---|---|
 | `public.finance_accounting_periods` | A | dienst | – | `app/api/v1/endpoints/accounting_periods.py`, `app/services/finance_period_service.py` | 4 | – | dienst 1, nutzlast 1, token 2 | 0 Z., 0 Mand. | – | keine, bis der Dienst tokengebundene Identitaet hat (rls-dienste-identitaet-vorschlag.md) |
-
-## hr
-
-| Tabelle | Kl. | Ursache | Modell | Schreiber | Leser | Worker | Identitaet | Daten | Bereinigung | Policy |
-|---|---|---|---|---|---|---|---|---|---|---|
-| `domain_hr.employment` | B | mandant_nullbar | – | – | 0 | – | – | – | Datenbefund fehlt (Tabelle nicht in der gewachsenen Datenbank) | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
-| `domain_hr.onboarding_checklists` | A | referenzdaten, mandant_nullbar | – | `app/api/v1/endpoints/training.py` | 2 | – | token 1 | 0 Z., 0 Mand. | – | getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant |
-| `domain_hr.person` | B | mandant_nullbar | – | – | 0 | – | – | – | Datenbefund fehlt (Tabelle nicht in der gewachsenen Datenbank) | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
-| `domain_hr.training_courses` | A | referenzdaten, mandant_nullbar | – | `app/api/v1/endpoints/training.py` | 2 | – | token 1 | 0 Z., 0 Mand. | – | getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant |
-| `domain_hr.work_plan_assignments` | A | standardmandant | – | `app/api/v1/endpoints/mask_frontend_bridges.py` | 0 | – | standardmandant 1, token 1 | 0 Z., 0 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
 
 ## infrastructure
 
