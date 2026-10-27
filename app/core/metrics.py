@@ -84,3 +84,10 @@ critical_data_path_errors_total = Counter(
     'DB-/Schemafehler auf kritischen Daten-Endpoints (Finance/Bestand/Beleg)',
     ['endpoint', 'error_type'],
 )
+
+# RLS-Plan P2: Transaktionen ohne Mandant (fail-closed; unter RLS sehen sie keine Mandantenzeilen)
+db_transactions_without_tenant_total = Counter(
+    'db_transactions_without_tenant_total',
+    'Database transactions that ran without app.tenant_id',
+    ['scope']
+)
