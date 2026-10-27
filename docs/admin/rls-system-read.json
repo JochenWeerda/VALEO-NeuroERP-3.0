@@ -1,0 +1,2586 @@
+{
+ "_note": "Generiert von scripts/rls_system_read.py (frisch zurueckgerollt, live nur lesend).",
+ "stand": "2026-10-27",
+ "tables": {
+  "public.anlagen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "public.buchungen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "public.crm_capture_inbox": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "public.crm_contact_marketing_prefs": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "public.crm_gifts": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "public.crm_notifications": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "crm_subdomains.ai_assist_requests": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "crm_subdomains.analytics_customer_scores": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "crm_subdomains.interaction_events": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "crm_subdomains.marketing_campaigns": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "crm_subdomains.sales_opportunities": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "crm_subdomains.service_tickets": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "domain_agrar.agrar_duenger_mischungen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.agrar_maschinen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.agrar_partien": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.agrar_saatgut_lizenzen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.animal_group_snapshots": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.consulting_case_measures": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.consulting_cases": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.consulting_observations": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.consulting_report_drafts": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.ernte_kampagnen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.ernte_planung": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.esg_charge_footprint": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.farm_sites": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.feeding_actual_components": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.feeding_actual_measures": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.feeding_actual_records": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.feeding_assist_proposals": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.feeding_business_grants": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.feeding_businesses": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.feeding_controlling_daily": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.feeding_customer_recipes": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.feeding_deviation_policies": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.feeding_group_revisions": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.feeding_import_jobs": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.feeding_master_data_audit_events": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.feeding_measure_versions": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.feeding_mixer_feedback": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.feeding_mixing_instructions": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.feeding_notifications": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.feeding_plan_versions": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.feeding_plans": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.feeding_recipe_deliveries": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.feeding_recipe_orders": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.feeding_recipe_versions": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.feeding_reports": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.feeding_supply_handoffs": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.feeding_tenant_policies": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.feldbuch_massnahmen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.herd_data_connections": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.herd_data_observations": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.herd_data_sync_runs": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.herds": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.kontrakt_dispositionen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.kontrakt_klassen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.optimization_runs": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.ration_audit_events": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.ration_evaluations": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.ration_templates": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.ration_version_lifecycle": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.ration_versions": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.rations": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.rations_integration_imports": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.requirement_profiles": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.saatgut_partien": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.sammelabrechnungen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.silo_zellen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.waagen_quittungen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_agrar.weighing_tickets": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_audit.attestations": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_compliance.compliance_artikel_sperre_audit": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_compliance.compliance_pcn_meldungen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_compliance.compliance_pcn_status_log": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_compliance.compliance_sachkunde_register": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_compliance.compliance_vvvo_register": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_compliance.data_erasure_requests": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_compliance.eudr_due_diligence": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_compliance.eudr_geolokationen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_compliance.eudr_vorgelagerte_erklaerungen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_compliance.gelangensbestaetigung": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_compliance.intrastat_meldungen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_compliance.lksg_supplier_risk_assessments": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_compliance.sanctions_checks": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_compliance.whistleblower_reports": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_contracts.contract_obligations": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_contracts.contract_versions": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_contracts.contracts": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_controlling.controlling_actions": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_controlling.controlling_budget_status_log": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_controlling.controlling_budgets": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_controlling.controlling_ist_werte": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_controlling.controlling_kst_abschluss": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_controlling.dashboard_configs": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_controlling.dashboard_widgets": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_controlling.kpi_definitions": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_controlling.kpi_timeseries": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_crm.credit_overrides": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_crm.crm_action_audit_log": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_crm.crm_campaign_recipients": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_crm.crm_campaign_templates": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_crm.crm_campaigns": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_crm.crm_consents": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_crm.crm_contact_consents": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_crm.customer_inquiries": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "domain_crm.mail_workspace_attachments": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_crm.mail_workspace_audit": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_crm.mail_workspace_messages": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_crm.sales_offer_items": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_crm.supplier_tax_profiles": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_docflow.approval_log": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_docflow.approvals": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_docflow.command_idempotency_keys": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_docflow.control_findings": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_docflow.create_request_idempotency": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_docflow.document_command_log": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_docflow.document_followups": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_docflow.document_header_links": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_docflow.document_links": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_docflow.document_postings": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_docflow.document_return_audit": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_docflow.document_return_cases": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_docflow.document_status_history": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_docflow.dsfinvk_exports": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_docflow.number_series": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_docflow.pos_fiscal_closings": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_docflow.pos_fiscal_exports": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_docflow.pos_fiscal_provider_configs": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_docflow.pos_fiscal_transactions": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_docflow.pos_receipt_compliance": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_docflow.pos_regulatory_notices": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_docflow.pos_terminals": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_docs.doc_allocation_sources": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_docs.doc_allocations": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_einkauf.artikel_lager_parameter": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_einkauf.bestellung_kommunikation": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_einkauf.bestellvorschlaege": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_einkauf.foreign_goods_audit": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_einkauf.fremdwaren_einlagerung": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_einkauf.kontrakte": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_einkauf.lager_kontenzuordnung": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_einkauf.paletten_konto_buchungen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_einkauf.pfand_konto_buchungen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_einkauf.procurement_ers_credits": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_einkauf.procurement_follow_up": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_einkauf.rfq_quotes": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_einkauf.rfq_requests": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_erp.accruals_provisions": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_erp.ap_approval_requests": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_erp.ap_approval_rules": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_erp.ap_approvals": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_erp.bank_matches": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_erp.bank_statement_lines": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_erp.bank_statements": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_erp.booking_templates": {
+   "frisch": 0,
+   "live": 70,
+   "code": []
+  },
+  "domain_erp.business_partners": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_erp.cash_movements": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_erp.closing_checklist_templates": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_erp.closing_checklists": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_erp.collaterals": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_erp.connector_configs": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_erp.debtors": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_erp.delivery_notes": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_erp.druckauftraege": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_erp.drucker": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_erp.dunning_rules": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_erp.exchange_rates": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_erp.fibu_connector_profiles": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_erp.fibu_connector_runs": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_erp.journal_entries": {
+   "frisch": 0,
+   "live": 1,
+   "code": [
+    "app/api/v1/endpoints/sales_credit_notes.py:563"
+   ]
+  },
+  "domain_erp.journal_entry_lines": {
+   "frisch": 0,
+   "live": 0,
+   "code": [
+    "app/api/v1/endpoints/sales_credit_notes.py:563"
+   ]
+  },
+  "domain_erp.lohn_import_runs": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_erp.matching_rules": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_erp.payment_returns": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_erp.payment_run_items": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_erp.payment_runs": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_erp.pos_transaction_lines": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_erp.pos_transactions": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_erp.schaden_meldungen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_erp.serial_numbers": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_erp.tax_keys": {
+   "frisch": 0,
+   "live": 0,
+   "code": [
+    "app/finance/steuerschluessel.py:281"
+   ]
+  },
+  "domain_erp.vat_returns": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_erp.versicherungen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_finance.aufbewahrungsfristen": {
+   "frisch": 5,
+   "live": 0,
+   "code": []
+  },
+  "domain_finance.billing_batch_audit": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_finance.billing_batch_lines": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_finance.billing_batches": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_finance.dispute_records": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_finance.ebilanz_exports": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_finance.finance_mahnstufen_audit": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_finance.finance_ratenzahlungsplaene": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_finance.finance_ratenzahlungsraten": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_finance.finance_sepa_batches": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_finance.finance_sepa_mandate": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_finance.fixed_assets": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_finance.kostenarten": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_finance.kostenstellen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_finance.kostenstellen_buchungen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_finance.kostenstellen_umlagen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_finance.period_closure": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "domain_finance.sales_order": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "domain_finance.self_billing_invoices": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_finance.ustva_voranmeldungen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_futtermittel.feed_produktion_log": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_futtermittel.feed_produktionsauftraege": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_futtermittel.feed_raw_materials": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_futtermittel.feed_recipes": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_futtermittel.feed_rezeptur_positionen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_futtermittel.feed_rezepturen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_futtermittel.raw_material_analyses": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_futtermittel.recipe_ingredients": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_hr.applications": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_hr.bewerbung_aufbewahrung": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_hr.bewerbung_einwilligungen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_hr.bewerbung_einwilligungserklaerungen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_hr.bewerbung_loeschlaeufe": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_hr.calendar_events": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_hr.campaign_capacity_plans": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_hr.driver_time_events": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_hr.driver_timesheets": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_hr.employee_certificates": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_hr.employee_file_documents": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_hr.employee_time_profiles": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_hr.employment": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "domain_hr.field_service_plans": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_hr.hrm_operations_gate_audit": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_hr.hrm_operations_gate_evidence": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_hr.hrm_operations_gate_probes": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_hr.hrm_operations_gates": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_hr.onboarding_checklists": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_hr.onboarding_runs": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_hr.org_units": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_hr.payroll_exports": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_hr.person": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "domain_hr.qualification_profiles": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_hr.shifts": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_hr.time_account_adjustments": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_hr.time_entries": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_hr.training_assignments": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_hr.training_courses": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_hr.work_plan_assignments": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_hrm.hrm_abwesenheiten": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_hrm.hrm_mitarbeiter_konten": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_hrm.hrm_zeitbuchungen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_integration.legacy_adapter_audit": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_integration.legacy_adapter_batches": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_integration.legacy_adapter_profiles": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_integration.legacy_adapter_staging": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_inventory.agrar_settlement_deductions": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_inventory.agrar_settlements": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_inventory.article_price_thresholds": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_inventory.bin_locations": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_inventory.charge_lineage_links": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_inventory.consignment_storage_fee_charges": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_inventory.consignment_storage_fee_runs": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_inventory.daily_prices": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_inventory.drying_rule_sets": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_inventory.harvest_acceptances": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_inventory.harvest_control_events": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_inventory.inventory_auxiliary_audit": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_inventory.inventory_auxiliary_batches": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_inventory.lkw_annahme_queue": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_inventory.lot_eudr_erklaerungen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_inventory.nawaro_area_sheets": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_inventory.nawaro_contract_sheets": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_inventory.nawaro_raps_profiles": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_inventory.pick_list_lines": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_inventory.price_adjustment_rules": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_inventory.quality_protocols": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_inventory.silo_quality_snapshots": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_inventory.silo_systems": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_inventory.stock_correction_lines": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_inventory.stock_corrections": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_inventory.storage_fee_runs": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "domain_inventory.supply_chain_events": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_inventory.warehouse_aisles": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_inventory.warehouse_transfer_lines": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_inventory.warehouse_transfers": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_inventory.weighing_measurements": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_inventory.weighing_ticket_lines": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_logistics.frachtbriefe": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_meldewesen.meldung_log": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_meldewesen.meldungen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_nachweisraum.gobd_exporte": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_nachweisraum.nachweisraum_audit_log": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_nachweisraum.nachweisraum_dokumente": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.agent_contexts": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.betriebs_kennzahlen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.document_control_audit": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.document_control_exceptions": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.edi_nachrichten": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.edi_partner": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.kon_audit_log": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.kon_contract_fixing": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.kon_contract_line": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.kon_contract_movement": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.kon_contract_reminder": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.kon_number_range": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.matif_quote": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.mobile_event_queue": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.mobile_event_queue_audit": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.ops_bankkonten": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.ops_chargen_audit": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.ops_flow_spine_instance_documents": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.ops_flow_spine_instance_events": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.ops_flow_spine_instances": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.ops_fuhrpark_ausgehende_dokumente": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.ops_fuhrpark_rechnungen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.ops_fuhrpark_terminarten": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.ops_projekt_aufgaben": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.ops_projekte": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.ops_tank_bestand": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.ops_verladungen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.ops_versicherungen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.ops_wartung_anlagen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.ops_wartungs_protokolle": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.ops_zapfungen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.ops_zertifikate_api": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.pos_position_override": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.pos_position_rule": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.pos_position_snapshot": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.price_hedges": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.pricing_sources": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.process_e2e_chains": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.production_operation_audit": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.production_operations": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.quality_lot_profiles": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.quality_release_decisions": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.recent_documents": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.tank_adapter_audit": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.tank_adapter_intake": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.tank_delivery_note_outbox": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.wf_trigger_log": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_portal.customer_contracts": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_portal.customer_order_history": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_portal.customer_orders": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_portal.customer_pre_purchases": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_portal.empfehlungen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_portal.kundenzugaenge": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_portal.lohndienst_auftraege": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_portal.lohndienst_ereignisse": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_pos.payment_methods": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_pos.pos_tagesabschluesse": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_pos.pos_tagesabschluss_log": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_pos.promotions": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_pricing.discount_rules": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_pricing.price_list_items": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "domain_pricing.price_lists": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_pricing.staffelrabatt_artikel": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_pricing.staffelrabatte": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_procurement.proc_bestellung_status_log": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_procurement.proc_rechnungspruefungen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_procurement.proc_wareneingaenge": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_procurement.procurement_match_results": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_reporting.l3_bonus_run_lines": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_reporting.l3_bonus_runs": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_reporting.l3_report_audit": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_reporting.l3_report_facts": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_reporting.query_center_audit": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_reporting.query_definitions": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_sales.sales_ab_status_log": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_sales.sales_invoice_lines": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_sales.sales_invoices": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_sales.sales_lieferschein_close_log": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_sales.sales_preisabweichungen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_sales.sales_returns": {
+   "frisch": 0,
+   "live": 0,
+   "code": [
+    "app/api/v1/endpoints/sales_credit_notes.py:563"
+   ]
+  },
+  "domain_shared.admin_connector_configs": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.admin_connector_events": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.admin_device_mappings": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.admin_devices": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.admin_mobile_devices": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.admin_output_profiles": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.admin_output_template_versions": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.admin_output_templates": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.admin_report_permissions": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.admin_routing_rules": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.admin_scan_profiles": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.admin_station_devices": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.admin_stations": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.artikel_bestandteile_def": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.artikel_bestandteile_zuordnung": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.artikel_folgeartikel": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.artikel_inventurgruppen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.artikel_mengeneinheiten": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.artikel_mengeneinheitengruppen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.artikel_stoffstrom": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.artikel_verpackungen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.audit_evidence": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.beleg_vordrucke": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.betriebsstaetten": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.blockchain_anchors": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.channel_process_threads": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.connectors": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.contract_amendments": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.crm_vertreter": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.crm_vertretergruppen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.dauerauftraege": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.dauerauftrag_ausfuehrungen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.dauerauftrag_positionen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.dms_inbox": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.entity_notes": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.erloeskennziffern": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.erloeskontenzuordnung": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.fibu_geschaeftsjahre": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.fibu_perioden": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.fibu_periodische_buchungen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.fibu_zahlungsmeldungen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.finance_followup_exports": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.forderungsgruppen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.futtermittel_haccp_plaene": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "domain_shared.futtermittel_qs_pruefpunkte": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "domain_shared.futtermittel_rezepturgruppen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.futtermittel_schnellerfassung": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.futtermittel_vlog_meldungen": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "domain_shared.genossenschaft_anteilsbewegungen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.genossenschaft_mitglieder": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.hauptwarengruppen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.hausbankenstamm": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.individualpreise": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.individuelle_artikelnummern": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.inventur_piv_abschluesse": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.inventur_piv_positionen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.jobs": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.knowledge_improvement_proposals": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.kontrakt_mengenzeitraeume": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.kontrakt_zinsabrechnungen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.kontrakt_zuabschlaege": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.kontrakt_zuabschlagsgruppen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.kunden_bankverbindungen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.leergutarten": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.lieferavise": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.logistik_frachttabellen_positionen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.logistik_frachttabellen_zuordnung": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.mailkonten": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.neuro_step_audit_trace": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.neuroassist_confidence_ledger": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.neuroassist_state_edges": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.neuroassist_state_nodes": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.neuroassist_state_transitions": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.number_ranges": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.oberwarengruppen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.op_auszifferungen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.open_items": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.partiegruppen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.partiestamm": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.periodische_buchungen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.portal_interessenten": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.portal_preise": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.preis_rabattgruppen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.preis_rabattklassen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.preis_rabattsaetze": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.process_projection_cursors": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.process_projection_registry": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.process_projection_snapshots": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.reporting_units": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.rohware_abrechnungsschemata": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.rohware_analysewert_korrektur_zeilen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.rohware_analysewert_korrekturen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.rohware_massebilanz_bewegungen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.rohware_massebilanzen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.rohware_qualitaeten": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.rohware_za_staffel_zeilen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.rohware_za_staffeln": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.rohwarengruppen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.saatzucht_vermehrungsvertraege": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.schedules": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.screen_definition_drafts": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.screen_definition_history": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.sepa_mandates": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.stuecklisten": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.stuecklisten_positionen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.system_properties": {
+   "frisch": 0,
+   "live": 0,
+   "code": [
+    "app/finance/steuerschluessel.py:281"
+   ]
+  },
+  "domain_shared.user_screen_overlays": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.versandprofile": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.vertreter_provisionsgruppen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.waage_hofliste": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.waage_wiegungsgruppen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.warengruppen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.webhook_deliveries": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.webhook_registrations": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.webshop_bestellungen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.webshop_configs": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.webshop_sync_log": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.zahlungsbedingungen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.zahlungsformulare": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.zinsgruppen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.zu_abschlaggruppen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.zu_abschlagklassen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_workflow.wf_cockpit_blockers": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_workflow.wf_cockpit_events": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_workflow.wf_cockpit_instances": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "public.einkauf_anfragen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "public.einkauf_angebote": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "public.einkauf_anlieferavis": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "public.einkauf_auftragsbestaetigungen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "public.einkauf_frachtauftraege": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "public.einkauf_warengruppen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "public.einkauf_zahlungslaeufe": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "public.finance_erechnungen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "public.gdpr_request_history": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "public.gdpr_requests": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "public.gobd_aufbewahrungsrichtlinien": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "public.gobd_loeschsperren": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "public.gobd_verfahrensdokumentation": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "public.konten": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "public.kunden_ackerbau_profil": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "public.kunden_kaeufer_audit": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "public.kunden_kaeufer_profil": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "public.kunden_kontakte": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "public.kunden_produktgruppen_bezug": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "public.offene_posten": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "public.streckengeschaefte": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "public.tapi_calls": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "public.whatsapp_bestellungen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  }
+ }
+}
