@@ -14,7 +14,8 @@ Quality Gate 40488618550 meldete process_kernel_api.py mit 6110 statt maximal
 Die bestehende Aufbereitung oeffentlicher Datenqualitaets-Regelsets liegt nun
 in app/api/v1/schemas/data_quality_output.py. Der Router importiert dieselbe
 Funktion unter seinem bisherigen lokalen Namen; Routen, Antworten und
-Mandanten-/Rechtepruefungen bleiben unveraendert. Keine Baseline angehoben.
+Mandanten-/Rechtepruefungen bleiben unveraendert. Die Ratsche wurde nach der echten Auslagerung von 6108 auf 6100 gesenkt;
+keine Baseline angehoben.
 
 17 gezielte Faelle bestanden: oeffentliche Regelsets behalten die fachlichen
 Felder, geben weder format_regex noch unique_felder aus und veraendern nicht
