@@ -23,12 +23,14 @@ import re
 from datetime import date, datetime
 from typing import Any, Dict, List, Optional
 
-from fastapi import Response, APIRouter, Depends, File, Header, HTTPException, Query, UploadFile
+from fastapi import Response, APIRouter, Depends, File, Header, HTTPException, Query, Request, UploadFile
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
+from app.core.akteur import akteur_aus_request, gepruefte_email
 from app.core.database import get_db
+from app.core.tenant import get_tenant_id  # Mandant aus dem Token; bis 27.10.2026 X-Tenant-ID mit Rueckfall "default"
 from app.core.uuid7 import uuid7
 from app.infrastructure.models.futtermittel_models import GrundfutterAnalyse, RationsZugang
 from app.services.feeding_feed_analysis_service import FeedAnalysisConflict, FeedingFeedAnalysisService
@@ -502,11 +504,9 @@ def parse_lufa_csv(content: str, filename: str = "") -> GrundfutterAnalyseIn:
 # Helpers
 # ---------------------------------------------------------------------------
 
-def _get_tenant(x_tenant_id: Optional[str] = Header(default=None)) -> str:
-    return x_tenant_id or "default"
 
 
-def _is_portal_request(x_share_token: Optional[str], x_user_email: Optional[str]) -> bool:
+def _is_portal_request(x_share_token: Optional[str], email: Optional[str]) -> bool:
     """
     Heuristik: Ein Request gilt als Portal-Request (extern, DSGVO-pflichtig) wenn
     ein Share-Token vorliegt. Interne ERP-Nutzer senden keinen Share-Token und
@@ -518,7 +518,7 @@ def _is_portal_request(x_share_token: Optional[str], x_user_email: Optional[str]
 def _check_rations_read(
     tenant_id: str,
     db: Session,
-    x_user_email: Optional[str] = None,
+    email: Optional[str] = None,
     x_share_token: Optional[str] = None,
 ) -> None:
     """
@@ -526,7 +526,7 @@ def _check_rations_read(
     Interne ERP-Nutzer (OIDC-authentifiziert, kein Share-Token) haben immer Zugang
     zu den Daten ihres Mandanten.
     """
-    if not _is_portal_request(x_share_token, x_user_email):
+    if not _is_portal_request(x_share_token, email):
         return  # interner ERP-Request — OIDC-Auth reicht
 
     from datetime import timezone
@@ -545,7 +545,7 @@ def _check_rations_read(
 
     if x_share_token and _has_access([RationsZugang.share_token == x_share_token]):
         return
-    if x_user_email and _has_access([RationsZugang.empfaenger_email == x_user_email]):
+    if email and _has_access([RationsZugang.empfaenger_email == email]):
         return
 
     raise HTTPException(
@@ -557,23 +557,23 @@ def _check_rations_read(
 def _check_rations_write(
     tenant_id: str,
     db: Session,
-    x_user_email: Optional[str] = None,
+    email: Optional[str] = None,
     x_share_token: Optional[str] = None,
 ) -> None:
     """
     DSGVO-Schreibzugang: nur für Share-Token-basierte Portal-Zugriffe geprüft.
     Interne ERP-Nutzer schreiben immer (OIDC-authentifiziert).
     """
-    if not _is_portal_request(x_share_token, x_user_email):
+    if not _is_portal_request(x_share_token, email):
         return  # interner ERP-Request
 
     from datetime import timezone
     now = datetime.now(timezone.utc)
-    if not x_user_email:
+    if not email:
         raise HTTPException(status_code=403, detail="Authentifizierung erforderlich.")
     row = db.query(RationsZugang).filter(
         RationsZugang.tenant_id == tenant_id,
-        RationsZugang.empfaenger_email == x_user_email,
+        RationsZugang.empfaenger_email == email,
         RationsZugang.ist_aktiv.is_(True),
         RationsZugang.darf_grundfutter_anlegen.is_(True),
     ).first()
@@ -600,16 +600,16 @@ def _canonical_service(db: Session, tenant_id: str, actor: Optional[str]) -> Fee
     response_model=GrundfutterAnalysenOut
 )
 def list_analysen(
+    request: Request,
     probenart: Optional[str] = Query(default=None),
     verifiziert: Optional[bool] = Query(default=None),
     limit: int = Query(default=50, le=200),
     offset: int = Query(default=0),
     db: Session = Depends(get_db),
-    tenant_id: str = Depends(_get_tenant),
-    x_user_email: Optional[str] = Header(default=None),
+    tenant_id: str = Depends(get_tenant_id),
     x_share_token: Optional[str] = Header(default=None),
 ):
-    _check_rations_read(tenant_id, db, x_user_email, x_share_token)
+    _check_rations_read(tenant_id, db, gepruefte_email(request), x_share_token)
     q = db.query(GrundfutterAnalyse).filter(GrundfutterAnalyse.tenant_id == tenant_id)
     if probenart:
         q = q.filter(GrundfutterAnalyse.probenart == probenart)
@@ -624,13 +624,13 @@ def list_analysen(
     response_model=GrundfutterAnalysenOut
 )
 def get_analyse(
+    request: Request,
     analyse_id: str,
     db: Session = Depends(get_db),
-    tenant_id: str = Depends(_get_tenant),
-    x_user_email: Optional[str] = Header(default=None),
+    tenant_id: str = Depends(get_tenant_id),
     x_share_token: Optional[str] = Header(default=None),
 ):
-    _check_rations_read(tenant_id, db, x_user_email, x_share_token)
+    _check_rations_read(tenant_id, db, gepruefte_email(request), x_share_token)
     a = db.query(GrundfutterAnalyse).filter(
         GrundfutterAnalyse.id == analyse_id,
         GrundfutterAnalyse.tenant_id == tenant_id,
@@ -643,12 +643,12 @@ def get_analyse(
 @router.post("/grundfutter-analysen", status_code=201, summary="Analyse anlegen",
     response_model=GrundfutterAnalysenOut, dependencies=SCHREIBEN["AGRAR"])
 def create_analyse(
+    request: Request,
     data: GrundfutterAnalyseIn,
     db: Session = Depends(get_db),
-    tenant_id: str = Depends(_get_tenant),
-    x_user_email: Optional[str] = Header(default=None),
+    tenant_id: str = Depends(get_tenant_id),
 ):
-    _check_rations_write(tenant_id, db, x_user_email, None)
+    _check_rations_write(tenant_id, db, gepruefte_email(request), None)
 
     # Dublettenprüfung: gleiche Bezeichnung + Probe-Nr. im gleichen Mandanten?
     dupe_q = db.query(GrundfutterAnalyse).filter(
@@ -670,7 +670,7 @@ def create_analyse(
     a = GrundfutterAnalyse(id=uuid7(), tenant_id=tenant_id, **data.model_dump(exclude_none=True))
     db.add(a)
     db.flush()
-    _canonical_service(db, tenant_id, x_user_email).record_legacy_create(str(a.id))
+    _canonical_service(db, tenant_id, akteur_aus_request(request)).record_legacy_create(str(a.id))
     db.refresh(a)
     return _analyse_to_dict(a)
 
@@ -678,13 +678,13 @@ def create_analyse(
 @router.patch("/grundfutter-analysen/{analyse_id}", summary="Analyse aktualisieren",
     response_model=GrundfutterAnalysenOut, dependencies=SCHREIBEN["AGRAR"])
 def patch_analyse(
+    request: Request,
     analyse_id: str,
     data: GrundfutterAnalysePatch,
     db: Session = Depends(get_db),
-    tenant_id: str = Depends(_get_tenant),
-    x_user_email: Optional[str] = Header(default=None),
+    tenant_id: str = Depends(get_tenant_id),
 ):
-    _check_rations_write(tenant_id, db, x_user_email, None)
+    _check_rations_write(tenant_id, db, gepruefte_email(request), None)
     a = db.query(GrundfutterAnalyse).filter(
         GrundfutterAnalyse.id == analyse_id,
         GrundfutterAnalyse.tenant_id == tenant_id,
@@ -695,7 +695,7 @@ def patch_analyse(
         setattr(a, k, v)
     db.flush()
     try:
-        _canonical_service(db, tenant_id, x_user_email).record_legacy_update(
+        _canonical_service(db, tenant_id, akteur_aus_request(request)).record_legacy_update(
             str(a.id), verified=bool(data.verifiziert), reason="Korrektur ueber kompatible Grundfutteranalyse-API",
         )
     except FeedAnalysisConflict as exc:
@@ -707,19 +707,19 @@ def patch_analyse(
 
 @router.delete("/grundfutter-analysen/{analyse_id}", status_code=204, response_class=Response, response_model=None, summary="Analyse löschen", dependencies=SCHREIBEN["AGRAR"])
 def delete_analyse(
+    request: Request,
     analyse_id: str,
     db: Session = Depends(get_db),
-    tenant_id: str = Depends(_get_tenant),
-    x_user_email: Optional[str] = Header(default=None),
+    tenant_id: str = Depends(get_tenant_id),
 ):
-    _check_rations_write(tenant_id, db, x_user_email, None)
+    _check_rations_write(tenant_id, db, gepruefte_email(request), None)
     a = db.query(GrundfutterAnalyse).filter(
         GrundfutterAnalyse.id == analyse_id,
         GrundfutterAnalyse.tenant_id == tenant_id,
     ).first()
     if not a:
         raise HTTPException(404, "Analyse nicht gefunden")
-    service = _canonical_service(db, tenant_id, x_user_email)
+    service = _canonical_service(db, tenant_id, akteur_aus_request(request))
     try:
         current = service.get_analysis(str(a.id))
         service.transition(str(a.id), "rejected", int(current["revision"]),
@@ -734,11 +734,11 @@ def delete_analyse(
 @router.post("/grundfutter-analysen/upload-pdf", summary="Pdf hochladen",
     response_model=None, dependencies=SCHREIBEN["AGRAR"])
 async def upload_pdf(
+    request: Request,
     file: UploadFile = File(...),
     save: bool = Query(default=False, description="Direkt in DB speichern"),
     db: Session = Depends(get_db),
-    tenant_id: str = Depends(_get_tenant),
-    x_user_email: Optional[str] = Header(default=None),
+    tenant_id: str = Depends(get_tenant_id),
     x_share_token: Optional[str] = Header(default=None),
 ):
     """
@@ -748,7 +748,7 @@ async def upload_pdf(
     1. pdfplumber für Textextraktion (native Text-PDFs)
     2. Falls kein Text erkannt → Hinweis auf Claude Vision (erfordert ANTHROPIC_API_KEY)
     """
-    _check_rations_write(tenant_id, db, x_user_email, x_share_token)
+    _check_rations_write(tenant_id, db, gepruefte_email(request), x_share_token)
     if not file.filename or not file.filename.lower().endswith(".pdf"):
         raise HTTPException(400, "Nur PDF-Dateien erlaubt")
 
@@ -814,15 +814,15 @@ async def upload_pdf(
 @router.post("/grundfutter-analysen/upload-csv", summary="Csv hochladen",
     response_model=GrundfutterAnalysenOut, dependencies=SCHREIBEN["AGRAR"])
 async def upload_csv(
+    request: Request,
     file: UploadFile = File(...),
     save: bool = Query(default=False),
     db: Session = Depends(get_db),
-    tenant_id: str = Depends(_get_tenant),
-    x_user_email: Optional[str] = Header(default=None),
+    tenant_id: str = Depends(get_tenant_id),
     x_share_token: Optional[str] = Header(default=None),
 ):
     """LUFA-CSV-Export hochladen und parsen."""
-    _check_rations_write(tenant_id, db, x_user_email, x_share_token)
+    _check_rations_write(tenant_id, db, gepruefte_email(request), x_share_token)
     if not file.filename or not file.filename.lower().endswith(".csv"):
         raise HTTPException(400, "Nur CSV-Dateien erlaubt")
 
@@ -851,14 +851,14 @@ async def upload_csv(
 @router.post("/grundfutter-analysen/{analyse_id}/as-feed", summary="As feed promote",
     response_model=GrundfutterAnalysenOut, dependencies=SCHREIBEN["AGRAR"])
 def promote_as_feed(
+    request: Request,
     analyse_id: str,
     db: Session = Depends(get_db),
-    tenant_id: str = Depends(_get_tenant),
-    x_user_email: Optional[str] = Header(default=None),
+    tenant_id: str = Depends(get_tenant_id),
     x_share_token: Optional[str] = Header(default=None),
 ):
     """Übernimmt eine verifizierte Analyse als Einzelfuttermittel in die Futtermittel-DB."""
-    _check_rations_write(tenant_id, db, x_user_email, x_share_token)
+    _check_rations_write(tenant_id, db, gepruefte_email(request), x_share_token)
     from app.infrastructure.models.futtermittel_models import Einzelfuttermittel
 
     a = db.query(GrundfutterAnalyse).filter(

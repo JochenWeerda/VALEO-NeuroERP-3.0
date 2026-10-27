@@ -2320,6 +2320,11 @@
    "live": 0,
    "code": []
   },
+  "domain_shared.agrar_sorten": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
   "domain_shared.artikel_bestandteile_def": {
    "frisch": 0,
    "live": 0,
@@ -2346,6 +2351,11 @@
    "code": []
   },
   "domain_shared.artikel_mengeneinheitengruppen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.artikel_sperren": {
    "frisch": 0,
    "live": 0,
    "code": []
@@ -2380,9 +2390,29 @@
    "live": 0,
    "code": []
   },
+  "domain_shared.branches": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.calendar_items": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.calendar_team_memberships": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
   "domain_shared.channel_process_threads": {
    "frisch": 0,
    "live": 0,
+   "code": []
+  },
+  "domain_shared.channel_thread_audit_items": {
+   "frisch": 0,
+   "live": null,
    "code": []
   },
   "domain_shared.connectors": {
@@ -2420,6 +2450,16 @@
    "live": 0,
    "code": []
   },
+  "domain_shared.direct_debit_items": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.dispatchers": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
   "domain_shared.dms_inbox": {
    "frisch": 0,
    "live": 0,
@@ -2436,6 +2476,26 @@
    "code": []
   },
   "domain_shared.erloeskontenzuordnung": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.farmers": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.feeding_feed_analysis_findings": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.feeding_feed_analysis_revisions": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.feeding_feed_analysis_values": {
    "frisch": 0,
    "live": 0,
    "code": []
@@ -2470,14 +2530,39 @@
    "live": 0,
    "code": []
   },
+  "domain_shared.futtermittel_einzelfutter": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
   "domain_shared.futtermittel_haccp_plaene": {
    "frisch": 0,
    "live": null,
    "code": []
   },
+  "domain_shared.futtermittel_mischfutter": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.futtermittel_produktionsauftraege": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
   "domain_shared.futtermittel_qs_pruefpunkte": {
    "frisch": 0,
    "live": null,
+   "code": []
+  },
+  "domain_shared.futtermittel_rezept_komponenten": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "domain_shared.futtermittel_rezepte": {
+   "frisch": 0,
+   "live": 0,
    "code": []
   },
   "domain_shared.futtermittel_rezepturgruppen": {
@@ -2505,6 +2590,11 @@
    "live": 0,
    "code": []
   },
+  "domain_shared.grundfutter_analysen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
   "domain_shared.hauptwarengruppen": {
    "frisch": 0,
    "live": 0,
@@ -2525,6 +2615,11 @@
    "live": 0,
    "code": []
   },
+  "domain_shared.internal_messages": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
   "domain_shared.inventur_piv_abschluesse": {
    "frisch": 0,
    "live": 0,
@@ -2533,6 +2628,11 @@
   "domain_shared.inventur_piv_positionen": {
    "frisch": 0,
    "live": 0,
+   "code": []
+  },
+  "domain_shared.job_artifacts": {
+   "frisch": 0,
+   "live": null,
    "code": []
   },
   "domain_shared.jobs": {
@@ -2590,6 +2690,11 @@
    "live": 0,
    "code": []
   },
+  "domain_shared.logistik_frachttabellen": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
   "domain_shared.logistik_frachttabellen_positionen": {
    "frisch": 0,
    "live": 0,
@@ -2601,6 +2706,11 @@
    "code": []
   },
   "domain_shared.mailkonten": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.master_data_entries": {
    "frisch": 0,
    "live": 0,
    "code": []
@@ -2701,6 +2811,11 @@
    "code": []
   },
   "domain_shared.process_projection_snapshots": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_shared.rations_zugang": {
    "frisch": 0,
    "live": 0,
    "code": []
@@ -2812,6 +2927,16 @@
    "live": 0,
    "code": []
   },
+  "domain_shared.vertreter_provisionsstaffeln": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "domain_shared.vertreter_staffel_zeilen": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
   "domain_shared.waage_hofliste": {
    "frisch": 0,
    "live": 0,
@@ -2865,6 +2990,11 @@
   "domain_shared.zinsgruppen": {
    "frisch": 0,
    "live": 0,
+   "code": []
+  },
+  "domain_shared.zu_abschlag_konditionen": {
+   "frisch": 0,
+   "live": null,
    "code": []
   },
   "domain_shared.zu_abschlaggruppen": {
@@ -3040,6 +3170,11 @@
   "public.mcp_tool_executions": {
    "frisch": 0,
    "live": 0,
+   "code": []
+  },
+  "public.number_series": {
+   "frisch": 0,
+   "live": null,
    "code": []
   },
   "public.offene_posten": {
