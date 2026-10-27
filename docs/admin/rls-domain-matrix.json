@@ -2,18 +2,18 @@
  "_note": "Generiert von scripts/rls_domain_matrix.py; nicht von Hand aendern.",
  "datenstand": "2026-10-27",
  "summary": {
-  "tabellen": 201,
+  "tabellen": 200,
   "nach_klasse": {
-   "A": 101,
+   "A": 100,
    "B": 48,
    "C": 52
   },
   "nach_ursache": {
    "dienst": 20,
    "position": 50,
-   "referenzdaten": 36,
-   "mandant_nullbar": 35,
-   "standardmandant": 58,
+   "referenzdaten": 35,
+   "mandant_nullbar": 36,
+   "standardmandant": 57,
    "identitaet": 2
   },
   "nach_domain": {
@@ -45,9 +45,9 @@
    },
    "erp": {
     "dienst": 1,
-    "mandant_nullbar": 3,
+    "mandant_nullbar": 4,
     "position": 1,
-    "referenzdaten": 3,
+    "referenzdaten": 2,
     "standardmandant": 2
    },
    "finance": {
@@ -100,7 +100,7 @@
     "mandant_nullbar": 3,
     "position": 6,
     "referenzdaten": 3,
-    "standardmandant": 21
+    "standardmandant": 20
    }
   }
  },
@@ -286,7 +286,7 @@
    "worker": [],
    "identitaet": {
     "standardmandant": 4,
-    "token": 3
+    "token": 5
    },
    "standardmandant_stellen": [
     "app/api/v1/endpoints/compliance.py:846",
@@ -1858,9 +1858,9 @@
     "app/workers/compliance_check_worker.py"
    ],
    "identitaet": {
-    "nutzlast": 2,
+    "nutzlast": 1,
     "standardmandant": 1,
-    "token": 6
+    "token": 7
    },
    "standardmandant_stellen": [
     "app/services/customer_service.py:168"
@@ -1871,7 +1871,6 @@
    ],
    "gemeinsam_stellen": [
     "app/api/v1/endpoints/finance_invoices.py:72",
-    "app/services/agrar_settlement_service.py:222",
     "app/services/mcp_execution_service.py:3155"
    ],
    "daten": {
@@ -2255,7 +2254,7 @@
     "dienst": 14,
     "nutzlast": 6,
     "standardmandant": 11,
-    "token": 15
+    "token": 18
    },
    "standardmandant_stellen": [
     "app/api/v1/endpoints/articles.py:42",
@@ -2435,10 +2434,10 @@
     "dienst": 8,
     "nutzlast": 2,
     "standardmandant": 6,
-    "token": 9
+    "token": 10
    },
    "standardmandant_stellen": [
-    "app/agents/agent_ops.py:824",
+    "app/agents/agent_ops.py:829",
     "app/api/v1/endpoints/crm_reports.py:27",
     "app/api/v1/endpoints/customer_extensions.py:24",
     "app/crm/seed.py:11",
@@ -2877,10 +2876,10 @@
     "dienst": 8,
     "nutzlast": 3,
     "standardmandant": 6,
-    "token": 9
+    "token": 10
    },
    "standardmandant_stellen": [
-    "app/agents/agent_ops.py:824",
+    "app/agents/agent_ops.py:829",
     "app/api/v1/endpoints/crm_reports.py:27",
     "app/api/v1/endpoints/customer_extensions.py:24",
     "app/crm/seed.py:11",
@@ -3916,7 +3915,7 @@
     "kopfzeile": 2,
     "nutzlast": 3,
     "standardmandant": 3,
-    "token": 10
+    "token": 13
    },
    "standardmandant_stellen": [
     "app/api/v1/endpoints/chart_of_accounts.py:36",
@@ -3927,14 +3926,14 @@
     "app/api/v1/endpoints/compat.py:1862",
     "app/api/v1/endpoints/compat.py:1869",
     "app/api/v1/endpoints/compat.py:1892",
-    "app/api/v1/endpoints/financial_reports.py:177",
-    "app/api/v1/endpoints/financial_reports.py:281",
-    "app/api/v1/endpoints/financial_reports.py:324"
+    "app/api/v1/endpoints/financial_reports.py:178",
+    "app/api/v1/endpoints/financial_reports.py:282",
+    "app/api/v1/endpoints/financial_reports.py:325"
    ],
    "gemeinsam_stellen": [
-    "app/api/v1/endpoints/financial_reports.py:177",
-    "app/api/v1/endpoints/financial_reports.py:281",
-    "app/api/v1/endpoints/financial_reports.py:324",
+    "app/api/v1/endpoints/financial_reports.py:178",
+    "app/api/v1/endpoints/financial_reports.py:282",
+    "app/api/v1/endpoints/financial_reports.py:325",
     "app/api/v1/endpoints/sales_credit_notes.py:563",
     "app/finance/steuerschluessel.py:281"
    ],
@@ -3956,9 +3955,8 @@
    "class": "B",
    "tenant_type": "character varying",
    "eltern": [],
-   "ursache": "referenzdaten",
+   "ursache": "mandant_nullbar",
    "gruende": [
-    "referenzdaten",
     "mandant_nullbar"
    ],
    "modell": [],
@@ -3973,31 +3971,8 @@
     "nutzlast": 1
    },
    "standardmandant_stellen": [],
-   "null_stellen": [
-    "app/api/v1/endpoints/creditors.py:163",
-    "app/api/v1/endpoints/creditors.py:194",
-    "app/api/v1/endpoints/creditors.py:217",
-    "app/api/v1/endpoints/creditors.py:263",
-    "app/api/v1/endpoints/creditors.py:285",
-    "app/api/v1/endpoints/creditors.py:301",
-    "app/api/v1/endpoints/creditors.py:364",
-    "app/api/v1/endpoints/creditors.py:371",
-    "app/api/v1/endpoints/creditors.py:392",
-    "app/api/v1/endpoints/creditors.py:429",
-    "app/api/v1/endpoints/creditors.py:437"
-   ],
-   "gemeinsam_stellen": [
-    "app/api/v1/endpoints/creditors.py:194",
-    "app/api/v1/endpoints/creditors.py:217",
-    "app/api/v1/endpoints/creditors.py:263",
-    "app/api/v1/endpoints/creditors.py:285",
-    "app/api/v1/endpoints/creditors.py:301",
-    "app/api/v1/endpoints/creditors.py:364",
-    "app/api/v1/endpoints/creditors.py:371",
-    "app/api/v1/endpoints/creditors.py:392",
-    "app/api/v1/endpoints/creditors.py:429",
-    "app/api/v1/endpoints/creditors.py:437"
-   ],
+   "null_stellen": [],
+   "gemeinsam_stellen": [],
    "daten": {
     "zeilen": 0,
     "null": 0,
@@ -4006,7 +3981,7 @@
     "mandanten": 0
    },
    "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant"
+   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
   },
   {
    "table": "domain_erp.debitors",
@@ -4028,7 +4003,7 @@
    "worker": [],
    "identitaet": {
     "nutzlast": 1,
-    "token": 1
+    "token": 2
    },
    "standardmandant_stellen": [],
    "null_stellen": [],
@@ -4226,9 +4201,9 @@
    ],
    "identitaet": {
     "kopfzeile": 4,
-    "nutzlast": 4,
+    "nutzlast": 3,
     "standardmandant": 2,
-    "token": 18
+    "token": 21
    },
    "standardmandant_stellen": [
     "app/api/v1/endpoints/mask_frontend_bridges.py:972",
@@ -4239,34 +4214,12 @@
     "app/api/v1/endpoints/compat.py:1862",
     "app/api/v1/endpoints/compat.py:1869",
     "app/api/v1/endpoints/compat.py:1892",
-    "app/api/v1/endpoints/creditors.py:163",
-    "app/api/v1/endpoints/creditors.py:194",
-    "app/api/v1/endpoints/creditors.py:217",
-    "app/api/v1/endpoints/creditors.py:263",
-    "app/api/v1/endpoints/creditors.py:285",
-    "app/api/v1/endpoints/creditors.py:301",
-    "app/api/v1/endpoints/creditors.py:364",
-    "app/api/v1/endpoints/creditors.py:371",
-    "app/api/v1/endpoints/creditors.py:392",
-    "app/api/v1/endpoints/creditors.py:429",
-    "app/api/v1/endpoints/creditors.py:437",
     "app/api/v1/endpoints/finance_invoices.py:72",
     "app/services/mcp_execution_service.py:3155"
    ],
    "gemeinsam_stellen": [
-    "app/api/v1/endpoints/creditors.py:194",
-    "app/api/v1/endpoints/creditors.py:217",
-    "app/api/v1/endpoints/creditors.py:263",
-    "app/api/v1/endpoints/creditors.py:285",
-    "app/api/v1/endpoints/creditors.py:301",
-    "app/api/v1/endpoints/creditors.py:364",
-    "app/api/v1/endpoints/creditors.py:371",
-    "app/api/v1/endpoints/creditors.py:392",
-    "app/api/v1/endpoints/creditors.py:429",
-    "app/api/v1/endpoints/creditors.py:437",
     "app/api/v1/endpoints/finance_invoices.py:72",
     "app/api/v1/endpoints/sales_credit_notes.py:563",
-    "app/services/agrar_settlement_service.py:222",
     "app/services/mcp_execution_service.py:3155"
    ],
    "daten": {
@@ -4799,9 +4752,9 @@
    ],
    "identitaet": {
     "dienst": 1,
-    "nutzlast": 5,
+    "nutzlast": 4,
     "standardmandant": 8,
-    "token": 18
+    "token": 21
    },
    "standardmandant_stellen": [
     "app/api/v1/endpoints/article_extensions.py:19",
@@ -4825,7 +4778,6 @@
     "app/services/mcp_execution_service.py:3155"
    ],
    "gemeinsam_stellen": [
-    "app/services/agrar_settlement_service.py:222",
     "app/services/mcp_execution_service.py:3155"
    ],
    "daten": {
@@ -7644,7 +7596,7 @@
    "identitaet": {
     "nutzlast": 2,
     "standardmandant": 2,
-    "token": 3
+    "token": 4
    },
    "standardmandant_stellen": [
     "app/api/v1/endpoints/articles.py:42",
@@ -7713,7 +7665,7 @@
     "kopfzeile": 1,
     "nutzlast": 3,
     "standardmandant": 3,
-    "token": 7
+    "token": 8
    },
    "standardmandant_stellen": [
     "app/api/v1/endpoints/articles.py:42",
@@ -8033,7 +7985,7 @@
    ],
    "identitaet": {
     "standardmandant": 2,
-    "token": 8
+    "token": 9
    },
    "standardmandant_stellen": [
     "app/api/v1/endpoints/gobd_archiv.py:30",
@@ -8861,54 +8813,6 @@
    "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_shared.jobs"
   },
   {
-   "table": "domain_shared.knowledge_objects",
-   "domain": "shared",
-   "class": "A",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [
-    "standardmandant"
-   ],
-   "modell": [
-    "app/models/knowledge.py"
-   ],
-   "leser": [
-    "app/models/knowledge.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/knowledge_api.py",
-    "app/repositories/knowledge_repository.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "standardmandant": 1
-   },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/knowledge_api.py:134",
-    "app/api/v1/endpoints/knowledge_api.py:161",
-    "app/api/v1/endpoints/knowledge_api.py:229",
-    "app/api/v1/endpoints/knowledge_api.py:269",
-    "app/api/v1/endpoints/knowledge_api.py:298",
-    "app/api/v1/endpoints/knowledge_api.py:316",
-    "app/api/v1/endpoints/knowledge_api.py:349",
-    "app/api/v1/endpoints/knowledge_api.py:369"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 6,
-    "null": 0,
-    "default": 0,
-    "system": 6,
-    "mandanten": 1
-   },
-   "bereinigung": [
-    "6 'system'-Zeilen: gemeinsame Referenzdaten begruenden oder zuordnen"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
    "table": "domain_shared.knowledge_versions",
    "domain": "shared",
    "class": "C",
@@ -8918,8 +8822,7 @@
    ],
    "ursache": "position",
    "gruende": [
-    "position",
-    "standardmandant"
+    "position"
    ],
    "modell": [
     "app/models/knowledge.py"
@@ -8933,18 +8836,9 @@
    ],
    "worker": [],
    "identitaet": {
-    "standardmandant": 1
+    "token": 1
    },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/knowledge_api.py:134",
-    "app/api/v1/endpoints/knowledge_api.py:161",
-    "app/api/v1/endpoints/knowledge_api.py:229",
-    "app/api/v1/endpoints/knowledge_api.py:269",
-    "app/api/v1/endpoints/knowledge_api.py:298",
-    "app/api/v1/endpoints/knowledge_api.py:316",
-    "app/api/v1/endpoints/knowledge_api.py:349",
-    "app/api/v1/endpoints/knowledge_api.py:369"
-   ],
+   "standardmandant_stellen": [],
    "null_stellen": [],
    "gemeinsam_stellen": [],
    "daten": {
@@ -9287,7 +9181,7 @@
     "kopfzeile": 2,
     "nutzlast": 11,
     "standardmandant": 6,
-    "token": 61
+    "token": 67
    },
    "standardmandant_stellen": [
     "app/api/v1/endpoints/rations_optimization.py:6336",

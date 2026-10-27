@@ -11,7 +11,7 @@ description: Übergabe Claude → Codex: Mandanten-Rückfall "system" systemweit
 
 # Handshake SYSTEM-TENANT-FALLBACK-20261027 (Claude Code → Codex)
 
-Kette: `… → #69 → #70 → dieser PR`. Keine Migration.
+Kette: `… → #69 → #70 → dieser PR`. Eine Migration (Wissensobjekte, siehe Punkt 6).
 
 ## Was du wissen musst
 
@@ -32,6 +32,10 @@ Kette: `… → #69 → #70 → dieser PR`. Keine Migration.
    Mandant. Die Konstanten `SHARED_TENANT` in `booking_templates.py` und
    `chart_of_accounts.py` können darauf zeigen.
 
+6. **Migration `rls_knowledge_objects_shared_20261027`**: Die Wissensobjekte lesen eigene und
+   gemeinsame Objekte (`system_lesbar`) und schreiben nur eigene. Der Rückbau des
+   Standardmandanten hatte die Tabelle für den Rollout freigegeben.
+
 ## Nicht berührt
 
-Keine DB, keine Migration, keine Masken-/ScreenDefinitions, dein Arbeitsbaum.
+Keine DB, keine Masken-/ScreenDefinitions, dein Arbeitsbaum.

@@ -8,7 +8,7 @@
    "C": 52,
    "D": 60
   },
-  "rls_enabled": 514,
+  "rls_enabled": 515,
   "tenant_types": {
    "character varying": 296,
    "character varying(100)": 9,
@@ -99,7 +99,6 @@
    "app/api/v1/endpoints/customer_extensions.py": 1,
    "app/api/v1/endpoints/farm_profiles.py": 1,
    "app/api/v1/endpoints/gobd_archiv.py": 1,
-   "app/api/v1/endpoints/knowledge_api.py": 8,
    "app/api/v1/endpoints/master_data.py": 1,
    "app/api/v1/endpoints/messages.py": 1,
    "app/api/v1/endpoints/nutrient_compositions.py": 1,
@@ -5186,9 +5185,9 @@
    "table": "domain_shared.knowledge_objects",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_shared.knowledge_versions",

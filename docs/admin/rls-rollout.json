@@ -2,11 +2,11 @@
  "_note": "Generiert von scripts/rls_rollout.py aus docs/admin/rls-inventory.json; nicht von Hand aendern.",
  "summary": {
   "ready": 0,
-  "pending": 101,
+  "pending": 100,
   "reasons": {
    "dienst": 10,
    "mandant_ermitteln": 1,
-   "standardmandant": 76,
+   "standardmandant": 75,
    "mandant_null": 35,
    "uebergreifend": 0,
    "identitaet": 4
@@ -292,9 +292,6 @@
    "standardmandant"
   ],
   "domain_shared.internal_messages": [
-   "standardmandant"
-  ],
-  "domain_shared.knowledge_objects": [
    "standardmandant"
   ],
   "domain_shared.logistik_frachttabellen": [

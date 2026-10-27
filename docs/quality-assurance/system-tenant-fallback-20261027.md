@@ -59,6 +59,20 @@ Angepasste Tests:
 - `test_security_creditors`: neue SQL-Klausel.
 - `test_psm_proplanta_endpoints`: Mandant aus der Identität, nicht aus `?tenant_id=`.
 
+## Nachtrag: Wissensobjekte unter RLS
+
+Mit dem Rückbau des Standardmandanten in `knowledge_api.py` entfiel der Rückstellungsgrund
+von `domain_shared.knowledge_objects`. `rls_rollout.py` meldete die Tabelle als `ready`, die
+P5-Ratsche wäre rot gewesen. Sie ist deshalb in diesem PR abgesichert
+(`rls_knowledge_objects_shared_20261027`):
+- SELECT liest eigene und gemeinsame Objekte; das gemeinsame Produktwissen ist begründet in
+  `system_lesbar`.
+- Schreiben ist nur im eigenen Mandanten möglich.
+
+Live gibt es 6 `system`-Objekte, die bleiben. Tests: `tests/test_rls_knowledge_objects_shared.py`,
+3 passed als `valeo_app` (Lesen, Schreibsperren, Fachkette Wissens-API). RLS-Gesamtlauf: 198
+passed. Zurückgestellt sind jetzt 200 Tabellen.
+
 ## Verbleibend
 
 - **`"default"`-Rückfälle** (Standardmandant): 52 Stellen in 19 Dateien, eingefroren. Am
@@ -66,9 +80,9 @@ Angepasste Tests:
   `external_agent_integrations`, `service_anfragen`, `numbering_*`. Das ist der
   Matrix-Befund `standardmandant`; er wird mit den Domains abgebaut, die Ratsche verhindert
   Zuwachs.
-- **Wissensbasis:** `KnowledgeRepository.list_objects/get_object` lesen ohne Mandantenfilter
-  (globaler Bestand). Das kommt mit dem Domain-Slice `knowledge_objects` (RLS mit begründetem
-  `system`-Lesen).
+- **Wissensbasis:** `KnowledgeRepository.list_objects/get_object` lesen ohne Mandantenfilter.
+  Unter RLS sehen sie jetzt eigene plus gemeinsame Objekte. `knowledge_versions` (Klasse C)
+  ist noch zurückgestellt.
 - **Akteur aus dem Body:** `changed_by`/`requested_by` in den Agenten-Ops-Modellen ist ein
   eigener Identitätsbefund, nicht Teil dieses Slices.
 - **Nicht genutzte Module:** Die ISO-artigen Module (backup, certification, continuity,
