@@ -1,18 +1,18 @@
 {
  "_note": "Generiert von scripts/rls_inventory.py; nicht von Hand aendern. Plan: docs/architecture/rls-mandantenkernel-plan.md",
  "summary": {
-  "tables": 775,
+  "tables": 777,
   "by_class": {
-   "A": 675,
+   "A": 677,
    "B": 32,
    "C": 14,
    "D": 54
   },
-  "rls_enabled": 635,
+  "rls_enabled": 637,
   "tenant_types": {
    "character varying": 333,
    "character varying(100)": 9,
-   "character varying(120)": 39,
+   "character varying(120)": 41,
    "character varying(128)": 1,
    "character varying(255)": 1,
    "character varying(36)": 82,
@@ -4040,6 +4040,22 @@
    "rls": false,
    "force_rls": false,
    "policies": 0
+  },
+  {
+   "table": "domain_ops.service_anfrage_rueckmeldungen",
+   "class": "A",
+   "tenant_type": "character varying(120)",
+   "rls": true,
+   "force_rls": false,
+   "policies": 4
+  },
+  {
+   "table": "domain_ops.service_anfragen",
+   "class": "A",
+   "tenant_type": "character varying(120)",
+   "rls": true,
+   "force_rls": false,
+   "policies": 4
   },
   {
    "table": "domain_ops.strecke_speditionen_frachttarife",

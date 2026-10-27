@@ -1,6 +1,6 @@
 {
  "_note": "Generiert von scripts/rls_system_read.py (frisch zurueckgerollt, live nur lesend).",
- "stand": "2026-10-27",
+ "stand": "2026-10-28",
  "tables": {
   "public.agent_proposals": {
    "frisch": 0,
@@ -2030,6 +2030,16 @@
   "domain_ops.recent_documents": {
    "frisch": 0,
    "live": 0,
+   "code": []
+  },
+  "domain_ops.service_anfrage_rueckmeldungen": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "domain_ops.service_anfragen": {
+   "frisch": 0,
+   "live": null,
    "code": []
   },
   "domain_ops.tank_adapter_audit": {

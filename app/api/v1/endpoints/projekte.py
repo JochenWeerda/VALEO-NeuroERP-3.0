@@ -4,11 +4,13 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Any, Optional
 
-from fastapi import Response, APIRouter, Depends, HTTPException, Query
+from fastapi import Response, APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
+from app.core.akteur import gepruefter_akteur_aus_request
 from app.core.database import get_db
+from app.core.tenant import get_tenant_id
 from app.domains.operations.models import Projekt, ProjektAufgabe, ProjektStatus
 
 from app.api.v1.schemas.base import BaseSchema
@@ -50,7 +52,6 @@ class ProjektPayload(BaseModel):
     status: str = ProjektStatus.GEPLANT.value
     prioritaet: str = "normal"
     notiz: Optional[str] = None
-    tenant_id: str = "default"
 
 
 class ProjektPatch(BaseModel):
@@ -73,9 +74,10 @@ def list_projekte(
     status: Optional[str] = None,
     skip: int = Query(0, ge=0),
     limit: int = Query(100, le=500),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    q = db.query(Projekt)
+    q = db.query(Projekt).filter(Projekt.tenant_id == tenant_id)
     if status:
         q = q.filter(Projekt.status == status)
     return [_to_dict(p) for p in q.order_by(Projekt.name).offset(skip).limit(limit).all()]
@@ -84,8 +86,8 @@ def list_projekte(
 @router.get("/{projekt_id}", summary="Projekt abrufen",
     response_model=ProjekteOut
 )
-def get_projekt(projekt_id: str, db: Session = Depends(get_db)):
-    obj = db.query(Projekt).filter(Projekt.id == projekt_id).first()
+def get_projekt(projekt_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    obj = db.query(Projekt).filter(Projekt.tenant_id == tenant_id).filter(Projekt.id == projekt_id).first()
     if not obj:
         raise HTTPException(404, "Projekt nicht gefunden")
     data = _to_dict(obj)
@@ -95,8 +97,9 @@ def get_projekt(projekt_id: str, db: Session = Depends(get_db)):
 
 @router.post("", status_code=201, summary="Projekt anlegen",
     response_model=ProjekteOut, dependencies=SCHREIBEN["FACHLICH"])
-def create_projekt(payload: ProjektPayload, db: Session = Depends(get_db)):
-    obj = Projekt(**payload.model_dump())
+def create_projekt(payload: ProjektPayload, request: Request, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    obj = Projekt(**payload.model_dump(), tenant_id=tenant_id,
+        created_by=gepruefter_akteur_aus_request(request))
     db.add(obj)
     db.commit()
     db.refresh(obj)
@@ -105,12 +108,13 @@ def create_projekt(payload: ProjektPayload, db: Session = Depends(get_db)):
 
 @router.patch("/{projekt_id}", summary="Projekt aktualisieren",
     response_model=ProjekteOut, dependencies=SCHREIBEN["FACHLICH"])
-def update_projekt(projekt_id: str, payload: ProjektPatch, db: Session = Depends(get_db)):
-    obj = db.query(Projekt).filter(Projekt.id == projekt_id).first()
+def update_projekt(projekt_id: str, payload: ProjektPatch, request: Request, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    obj = db.query(Projekt).filter(Projekt.tenant_id == tenant_id).filter(Projekt.id == projekt_id).first()
     if not obj:
         raise HTTPException(404, "Projekt nicht gefunden")
     for field, value in payload.model_dump(exclude_unset=True).items():
         setattr(obj, field, value)
+    obj.updated_by = gepruefter_akteur_aus_request(request)
     obj.updated_at = datetime.utcnow()
     db.commit()
     db.refresh(obj)
@@ -118,8 +122,8 @@ def update_projekt(projekt_id: str, payload: ProjektPatch, db: Session = Depends
 
 
 @router.delete("/{projekt_id}", status_code=204, response_class=Response, response_model=None, summary="Projekt löschen", dependencies=SCHREIBEN["FACHLICH"])
-def delete_projekt(projekt_id: str, db: Session = Depends(get_db)):
-    obj = db.query(Projekt).filter(Projekt.id == projekt_id).first()
+def delete_projekt(projekt_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    obj = db.query(Projekt).filter(Projekt.tenant_id == tenant_id).filter(Projekt.id == projekt_id).first()
     if not obj:
         raise HTTPException(404, "Projekt nicht gefunden")
     db.delete(obj)
@@ -134,7 +138,6 @@ class AufgabePayload(BaseModel):
     verantwortlicher: Optional[str] = None
     faellig_am: Optional[datetime] = None
     status: str = "offen"
-    tenant_id: str = "default"
 
 
 class AufgabePatch(BaseModel):
@@ -149,10 +152,10 @@ class AufgabePatch(BaseModel):
 @router.get("/{projekt_id}/aufgaben", summary="Aufgaben auflisten",
     response_model=list[ProjekteOut]
 )
-def list_aufgaben(projekt_id: str, db: Session = Depends(get_db)):
+def list_aufgaben(projekt_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     return [
         _to_dict(a)
-        for a in db.query(ProjektAufgabe)
+        for a in db.query(ProjektAufgabe).filter(ProjektAufgabe.tenant_id == tenant_id)
         .filter(ProjektAufgabe.projekt_id == projekt_id)
         .order_by(ProjektAufgabe.faellig_am)
         .all()
@@ -161,11 +164,11 @@ def list_aufgaben(projekt_id: str, db: Session = Depends(get_db)):
 
 @router.post("/{projekt_id}/aufgaben", status_code=201, summary="Aufgabe anlegen",
     response_model=ProjekteOut, dependencies=SCHREIBEN["FACHLICH"])
-def create_aufgabe(projekt_id: str, payload: AufgabePayload, db: Session = Depends(get_db)):
-    projekt = db.query(Projekt).filter(Projekt.id == projekt_id).first()
+def create_aufgabe(projekt_id: str, payload: AufgabePayload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    projekt = db.query(Projekt).filter(Projekt.tenant_id == tenant_id).filter(Projekt.id == projekt_id).first()
     if not projekt:
         raise HTTPException(404, "Projekt nicht gefunden")
-    obj = ProjektAufgabe(projekt_id=projekt_id, **payload.model_dump())
+    obj = ProjektAufgabe(projekt_id=projekt_id, **payload.model_dump(), tenant_id=tenant_id)
     db.add(obj)
     db.commit()
     db.refresh(obj)
@@ -174,8 +177,8 @@ def create_aufgabe(projekt_id: str, payload: AufgabePayload, db: Session = Depen
 
 @router.patch("/{projekt_id}/aufgaben/{aufgabe_id}", summary="Aufgabe aktualisieren",
     response_model=ProjekteOut, dependencies=SCHREIBEN["FACHLICH"])
-def update_aufgabe(projekt_id: str, aufgabe_id: str, payload: AufgabePatch, db: Session = Depends(get_db)):
-    obj = db.query(ProjektAufgabe).filter(
+def update_aufgabe(projekt_id: str, aufgabe_id: str, payload: AufgabePatch, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    obj = db.query(ProjektAufgabe).filter(ProjektAufgabe.tenant_id == tenant_id).filter(
         ProjektAufgabe.id == aufgabe_id,
         ProjektAufgabe.projekt_id == projekt_id,
     ).first()
@@ -189,8 +192,8 @@ def update_aufgabe(projekt_id: str, aufgabe_id: str, payload: AufgabePatch, db: 
 
 
 @router.delete("/{projekt_id}/aufgaben/{aufgabe_id}", status_code=204, response_class=Response, response_model=None, summary="Aufgabe löschen", dependencies=SCHREIBEN["FACHLICH"])
-def delete_aufgabe(projekt_id: str, aufgabe_id: str, db: Session = Depends(get_db)):
-    obj = db.query(ProjektAufgabe).filter(
+def delete_aufgabe(projekt_id: str, aufgabe_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    obj = db.query(ProjektAufgabe).filter(ProjektAufgabe.tenant_id == tenant_id).filter(
         ProjektAufgabe.id == aufgabe_id,
         ProjektAufgabe.projekt_id == projekt_id,
     ).first()

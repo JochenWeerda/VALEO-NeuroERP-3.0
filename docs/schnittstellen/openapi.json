@@ -10890,11 +10890,6 @@
             "title": "Status",
             "type": "string"
           },
-          "tenant_id": {
-            "default": "default",
-            "title": "Tenant Id",
-            "type": "string"
-          },
           "typ": {
             "minLength": 2,
             "title": "Typ",
@@ -17375,11 +17370,6 @@
           "status": {
             "default": "offen",
             "title": "Status",
-            "type": "string"
-          },
-          "tenant_id": {
-            "default": "default",
-            "title": "Tenant Id",
             "type": "string"
           },
           "titel": {
@@ -59119,11 +59109,6 @@
             "title": "Payload Raw",
             "type": "string"
           },
-          "tenant_id": {
-            "default": "default",
-            "title": "Tenant Id",
-            "type": "string"
-          },
           "typ": {
             "title": "Typ",
             "type": "string"
@@ -59155,16 +59140,11 @@
           "name": {
             "title": "Name",
             "type": "string"
-          },
-          "tenant_id": {
-            "title": "Tenant Id",
-            "type": "string"
           }
         },
         "required": [
           "gln",
           "name",
-          "tenant_id",
           "aktive_nachrichtentypen"
         ],
         "title": "EdiPartnerCreateRequest",
@@ -64024,11 +64004,6 @@
           "status": {
             "default": "geplant",
             "title": "Status",
-            "type": "string"
-          },
-          "tenant_id": {
-            "default": "default",
-            "title": "Tenant Id",
             "type": "string"
           }
         },
@@ -112224,11 +112199,6 @@
             "title": "Domain",
             "type": "string"
           },
-          "tenant_id": {
-            "default": "default",
-            "title": "Tenant Id",
-            "type": "string"
-          },
           "year": {
             "anyOf": [
               {
@@ -112614,11 +112584,6 @@
           },
           "prefix": {
             "title": "Prefix",
-            "type": "string"
-          },
-          "tenant_id": {
-            "default": "default",
-            "title": "Tenant Id",
             "type": "string"
           },
           "width": {
@@ -131908,11 +131873,6 @@
             "default": "geplant",
             "title": "Status",
             "type": "string"
-          },
-          "tenant_id": {
-            "default": "default",
-            "title": "Tenant Id",
-            "type": "string"
           }
         },
         "required": [
@@ -132390,11 +132350,6 @@
               }
             ],
             "title": "Techniker"
-          },
-          "tenant_id": {
-            "default": "default",
-            "title": "Tenant Id",
-            "type": "string"
           }
         },
         "required": [
@@ -143437,6 +143392,7 @@
           "bewertet_von": {
             "anyOf": [
               {
+                "maxLength": 255,
                 "type": "string"
               },
               {
@@ -143448,6 +143404,8 @@
           "bewertung": {
             "anyOf": [
               {
+                "maximum": 5.0,
+                "minimum": 1.0,
                 "type": "integer"
               },
               {
@@ -143457,6 +143415,7 @@
             "title": "Bewertung"
           },
           "text": {
+            "minLength": 1,
             "title": "Text",
             "type": "string"
           }
@@ -150907,12 +150866,15 @@
             "title": "Beschreibung"
           },
           "betreff": {
+            "maxLength": 255,
+            "minLength": 1,
             "title": "Betreff",
             "type": "string"
           },
           "kategorie": {
             "anyOf": [
               {
+                "maxLength": 120,
                 "type": "string"
               },
               {
@@ -150922,12 +150884,15 @@
             "title": "Kategorie"
           },
           "kunde": {
+            "maxLength": 255,
+            "minLength": 1,
             "title": "Kunde",
             "type": "string"
           },
           "nummer": {
             "anyOf": [
               {
+                "maxLength": 40,
                 "type": "string"
               },
               {
@@ -150938,6 +150903,11 @@
           },
           "prioritaet": {
             "default": "normal",
+            "enum": [
+              "hoch",
+              "normal",
+              "niedrig"
+            ],
             "title": "Prioritaet",
             "type": "string"
           }
@@ -150965,6 +150935,8 @@
           "betreff": {
             "anyOf": [
               {
+                "maxLength": 255,
+                "minLength": 1,
                 "type": "string"
               },
               {
@@ -150976,6 +150948,7 @@
           "kategorie": {
             "anyOf": [
               {
+                "maxLength": 120,
                 "type": "string"
               },
               {
@@ -150987,6 +150960,8 @@
           "kunde": {
             "anyOf": [
               {
+                "maxLength": 255,
+                "minLength": 1,
                 "type": "string"
               },
               {
@@ -150998,6 +150973,11 @@
           "prioritaet": {
             "anyOf": [
               {
+                "enum": [
+                  "hoch",
+                  "normal",
+                  "niedrig"
+                ],
                 "type": "string"
               },
               {
@@ -151009,6 +150989,10 @@
           "status": {
             "anyOf": [
               {
+                "enum": [
+                  "neu",
+                  "in-bearbeitung"
+                ],
                 "type": "string"
               },
               {
@@ -168899,11 +168883,6 @@
             "title": "Status",
             "type": "string"
           },
-          "tenant_id": {
-            "default": "default",
-            "title": "Tenant Id",
-            "type": "string"
-          },
           "zielort": {
             "anyOf": [
               {
@@ -169916,11 +169895,6 @@
               }
             ],
             "title": "Telefon"
-          },
-          "tenant_id": {
-            "default": "default",
-            "title": "Tenant Id",
-            "type": "string"
           },
           "versicherer": {
             "minLength": 2,
@@ -177328,11 +177302,6 @@
               }
             ],
             "title": "Preis Liter"
-          },
-          "tenant_id": {
-            "default": "default",
-            "title": "Tenant Id",
-            "type": "string"
           },
           "zapfsaeule": {
             "anyOf": [
@@ -193384,18 +193353,6 @@
       "get": {
         "description": "Listet alle Nummernkreise eines Mandanten auf.",
         "operationId": "list_number_series_api_numbering_series_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "default",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -193410,16 +193367,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -193489,16 +193436,6 @@
             "required": true,
             "schema": {
               "title": "Domain",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "default",
-              "title": "Tenant Id",
               "type": "string"
             }
           },
@@ -203000,18 +202937,6 @@
     "/api/v1/agent/integrations/providers/superglue/admin-overview": {
       "get": {
         "operationId": "get_superglue_admin_overview_api_v1_agent_integrations_providers_superglue_admin_overview_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "default",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -203022,16 +202947,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -203080,18 +202995,6 @@
     "/api/v1/agent/integrations/providers/superglue/domain-rollouts": {
       "get": {
         "operationId": "get_superglue_domain_rollouts_api_v1_agent_integrations_providers_superglue_domain_rollouts_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "default",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -203102,16 +203005,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -203138,16 +203031,6 @@
             "required": true,
             "schema": {
               "title": "Domain Key",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "default",
-              "title": "Tenant Id",
               "type": "string"
             }
           }
@@ -203291,18 +203174,6 @@
     "/api/v1/agent/integrations/providers/superglue/live-readiness": {
       "get": {
         "operationId": "get_superglue_live_readiness_api_v1_agent_integrations_providers_superglue_live_readiness_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "default",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -203313,16 +203184,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -203342,24 +203203,6 @@
     "/api/v1/agent/integrations/providers/superglue/monitoring": {
       "get": {
         "operationId": "get_superglue_monitoring_api_v1_agent_integrations_providers_superglue_monitoring_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -203370,16 +203213,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -203399,18 +203232,6 @@
     "/api/v1/agent/integrations/providers/superglue/onboarding-pack": {
       "get": {
         "operationId": "get_superglue_onboarding_pack_api_v1_agent_integrations_providers_superglue_onboarding_pack_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "default",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -203421,16 +203242,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -247295,22 +247106,6 @@
               "title": "Periode",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "responses": {
@@ -247358,22 +247153,6 @@
             "schema": {
               "title": "Periode",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -247627,24 +247406,6 @@
     "/api/v1/controlling/budgets": {
       "post": {
         "operationId": "create_budget_api_v1_controlling_budgets_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -247700,22 +247461,6 @@
             "schema": {
               "title": "Budget Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -248059,24 +247804,6 @@
     "/api/v1/controlling/ist-werte": {
       "post": {
         "operationId": "buche_ist_wert_api_v1_controlling_ist_werte_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -248132,22 +247859,6 @@
             "schema": {
               "title": "Kostenstelle Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -275946,17 +275657,6 @@
     "/api/v1/edi/partner": {
       "get": {
         "operationId": "list_partner_api_v1_edi_partner_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": true,
-            "schema": {
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -275971,16 +275671,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -304868,22 +304558,6 @@
               "title": "Rechnungsnr",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "requestBody": {
@@ -304943,22 +304617,6 @@
             "schema": {
               "title": "Rechnungsnr",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -307501,24 +307159,6 @@
     "/api/v1/finance/ratenzahlung/plaene": {
       "post": {
         "operationId": "create_ratenzahlungsplan_endpoint_api_v1_finance_ratenzahlung_plaene_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -307576,22 +307216,6 @@
             "schema": {
               "title": "Rate Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -307968,24 +307592,6 @@
     "/api/v1/finance/sepa/batches": {
       "post": {
         "operationId": "create_sepa_batch_endpoint_api_v1_finance_sepa_batches_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -308035,24 +307641,6 @@
     "/api/v1/finance/sepa/mandate": {
       "post": {
         "operationId": "create_sepa_mandat_endpoint_api_v1_finance_sepa_mandate_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -308110,22 +307698,6 @@
             "schema": {
               "title": "Mandat Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -398545,18 +398117,6 @@
       "post": {
         "description": "Service-Fall abschließen.",
         "operationId": "close_service_case_api_v1_service_abschluss_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": false,
-            "schema": {
-              "default": "default",
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -398660,16 +398220,6 @@
               "title": "Limit",
               "type": "integer"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": false,
-            "schema": {
-              "default": "default",
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -398708,18 +398258,6 @@
       "post": {
         "description": "Neue Service-Anfrage anlegen.",
         "operationId": "create_anfrage_api_v1_service_anfragen_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": false,
-            "schema": {
-              "default": "default",
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -398766,7 +398304,7 @@
     },
     "/api/v1/service/anfragen/{anfrage_id}": {
       "delete": {
-        "description": "Service-Anfrage löschen.",
+        "description": "Service-Anfrage loeschen (mit ihren Rueckmeldungen).",
         "operationId": "delete_anfrage_api_v1_service_anfragen__anfrage_id__delete",
         "parameters": [
           {
@@ -398775,16 +398313,6 @@
             "required": true,
             "schema": {
               "title": "Anfrage Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": false,
-            "schema": {
-              "default": "default",
-              "title": "X-Tenant-Id",
               "type": "string"
             }
           }
@@ -398816,7 +398344,7 @@
         ]
       },
       "get": {
-        "description": "Detail einer Service-Anfrage.",
+        "description": "Detail einer Service-Anfrage mit ihren Rueckmeldungen.",
         "operationId": "get_anfrage_api_v1_service_anfragen__anfrage_id__get",
         "parameters": [
           {
@@ -398825,16 +398353,6 @@
             "required": true,
             "schema": {
               "title": "Anfrage Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": false,
-            "schema": {
-              "default": "default",
-              "title": "X-Tenant-Id",
               "type": "string"
             }
           }
@@ -398873,7 +398391,7 @@
         ]
       },
       "put": {
-        "description": "Service-Anfrage aktualisieren.",
+        "description": "Service-Anfrage aktualisieren. Eine erledigte Anfrage bleibt, wie sie abgeschlossen wurde.",
         "operationId": "update_anfrage_api_v1_service_anfragen__anfrage_id__put",
         "parameters": [
           {
@@ -398882,16 +398400,6 @@
             "required": true,
             "schema": {
               "title": "Anfrage Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": false,
-            "schema": {
-              "default": "default",
-              "title": "X-Tenant-Id",
               "type": "string"
             }
           }
@@ -398944,18 +398452,6 @@
       "post": {
         "description": "Rückmeldung zu einer Service-Anfrage erfassen.",
         "operationId": "create_rueckmeldung_api_v1_service_rueckmeldungen_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": false,
-            "schema": {
-              "default": "default",
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {

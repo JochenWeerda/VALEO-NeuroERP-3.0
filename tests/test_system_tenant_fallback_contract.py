@@ -28,24 +28,9 @@ CODE_ROOTS = ("app", "modules")
 NAMES = {"tenant_id", "x_tenant_id", "x_tenant", "mandant_id", "mandanten_id", "tenant"}
 LITERALS = ("system", "default")
 
-# Stand 27.10.2026; nur verkleinern. Neue Eintraege sind ein Rueckfall, kein Ausnahmefall.
-DEFAULT_BASELINE = {
-    "app/api/v1/endpoints/controlling_actions.py": 6,
-    "app/api/v1/endpoints/edi_api.py": 1,
-    "app/api/v1/endpoints/ernte_planung.py": 1,
-    "app/api/v1/endpoints/external_agent_integrations.py": 5,
-    "app/api/v1/endpoints/finance_actions.py": 7,
-    "app/api/v1/endpoints/service_anfragen.py": 7,
-    "app/api/v1/endpoints/projekte.py": 2,
-    "app/api/v1/endpoints/tankstelle.py": 1,
-    "app/api/v1/endpoints/verladung.py": 1,
-    "app/api/v1/endpoints/versicherungen.py": 1,
-    "app/api/v1/endpoints/wartung.py": 2,
-    "app/api/v1/schemas/agents_schemas.py": 1,
-    "app/routers/numbering_router.py": 4,
-    "app/services/atlas_customs_service.py": 1,
-    "app/services/numbering_service_pg.py": 3,
-}
+# Stand 27.10.2026: alle 43 eingefrorenen Rueckfaelle abgebaut (TENANT-FALLBACK-ABBAU-20261027). Die Liste bleibt
+# leer; ein neuer Eintrag ist ein Rueckfall, kein Ausnahmefall.
+DEFAULT_BASELINE: dict[str, int] = {}
 
 
 def _literal(node) -> str | None:

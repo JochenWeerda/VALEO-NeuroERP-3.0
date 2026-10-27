@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 
+from app.core.tenant import get_tenant_id
 from app.core.external_agent_catalog import (
     build_external_agent_install_pack,
     build_external_agent_integration_catalog,
@@ -197,28 +198,28 @@ def get_superglue_execution_journal(limit: int = Query(default=20, ge=1, le=100)
 @router.get("/providers/superglue/admin-overview", summary="Superglue Admin Overview",
     response_model=AgentIntegrationOut
 )
-def get_superglue_admin_overview(tenant_id: str = Query(default="default")) -> dict:
+def get_superglue_admin_overview(tenant_id: str = Depends(get_tenant_id)) -> dict:
     return build_superglue_admin_overview(tenant_id)
 
 
 @router.get("/providers/superglue/monitoring", summary="Superglue Monitoring Summary",
     response_model=AgentIntegrationOut
 )
-def get_superglue_monitoring(tenant_id: str | None = Query(default=None)) -> dict:
+def get_superglue_monitoring(tenant_id: str = Depends(get_tenant_id)) -> dict:
     return build_superglue_monitoring_summary(tenant_id)
 
 
 @router.get("/providers/superglue/live-readiness", summary="Superglue live readiness for tenant onboarding",
     response_model=AgentIntegrationOut
 )
-def get_superglue_live_readiness(tenant_id: str = Query(default="default")) -> dict:
+def get_superglue_live_readiness(tenant_id: str = Depends(get_tenant_id)) -> dict:
     return build_superglue_live_readiness(tenant_id)
 
 
 @router.get("/providers/superglue/onboarding-pack", summary="Superglue onboarding pack for tenant ops",
     response_model=AgentIntegrationOut
 )
-def get_superglue_onboarding_pack(tenant_id: str = Query(default="default")) -> dict:
+def get_superglue_onboarding_pack(tenant_id: str = Depends(get_tenant_id)) -> dict:
     return build_superglue_onboarding_pack(tenant_id)
 
 
@@ -322,7 +323,7 @@ def retry_superglue_quarantine(
 @router.get("/providers/superglue/domain-rollouts", summary="Superglue domain rollout summary",
     response_model=AgentIntegrationOut
 )
-def get_superglue_domain_rollouts(tenant_id: str = Query(default="default")) -> dict:
+def get_superglue_domain_rollouts(tenant_id: str = Depends(get_tenant_id)) -> dict:
     return build_superglue_domain_rollout_summary(tenant_id)
 
 
@@ -330,7 +331,7 @@ def get_superglue_domain_rollouts(tenant_id: str = Query(default="default")) -> 
     response_model=AgentIntegrationOut, dependencies=SCHREIBEN["BERECHNEN"])
 def run_superglue_domain_rollout_preview(
     domain_key: str,
-    tenant_id: str = Query(default="default"),
+    tenant_id: str = Depends(get_tenant_id),
     body: dict | None = None,
 ) -> dict:
     try:

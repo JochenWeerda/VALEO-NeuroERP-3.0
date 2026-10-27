@@ -1797,7 +1797,7 @@
     "dienst": 2,
     "kopfzeile": 2,
     "nutzlast": 3,
-    "standardmandant": 2,
+    "standardmandant": 1,
     "token": 12
    },
    "standardmandant_stellen": [
@@ -2133,7 +2133,7 @@
    "schreiber": [],
    "worker": [],
    "identitaet": {
-    "standardmandant": 2
+    "standardmandant": 1
    },
    "standardmandant_stellen": [
     "app/services/calendar_projection_service.py:911"

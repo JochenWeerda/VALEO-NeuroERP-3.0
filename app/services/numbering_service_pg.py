@@ -37,7 +37,7 @@ class NumberingServicePG:
     async def next_number(
         self,
         domain: str,
-        tenant_id: str = "default",
+        tenant_id: str,
         year: int | None = None,
     ) -> str:
         """
@@ -111,7 +111,7 @@ class NumberingServicePG:
     async def peek(
         self,
         domain: str,
-        tenant_id: str = "default",
+        tenant_id: str,
         year: int | None = None,
     ) -> str:
         """
@@ -138,7 +138,7 @@ class NumberingServicePG:
     async def reset(
         self,
         domain: str,
-        tenant_id: str = "default",
+        tenant_id: str,
         year: int | None = None,
     ) -> None:
         """
