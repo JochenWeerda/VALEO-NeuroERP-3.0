@@ -870,91 +870,64 @@ def test_finance_actions_closing_approve_delegates_to_checklist_workspace(monkey
     assert response["approval_status"] == "approved"
 
 
+def _vat_return_row(status: str, **mehr) -> dict:
+    zeile = {
+        "id": "vat-1", "period": "2026-03", "return_type": "monthly", "taxpayer_name": "Valero GmbH",
+        "tax_id": None, "vat_id": "DE123", "total_sales_net": 1000.0, "total_input_tax": 190.0,
+        "total_output_tax": 190.0, "vat_payable": 0.0, "positions": [], "status": status,
+        "calculated_at": datetime(2026, 3, 11, 9, 0, 0), "calculated_by": "rechner",
+        "validated_at": datetime(2026, 3, 11, 10, 0, 0), "validated_by": "pruefer",
+        "approved_at": None, "approved_by": None, "submitted_at": None, "submitted_by": None,
+        "elster_transferticket": None, "notes": None,
+        "created_at": datetime(2026, 3, 11, 8, 0, 0), "updated_at": datetime(2026, 3, 11, 10, 0, 0),
+    }
+    zeile.update(mehr)
+    return zeile
+
+
+def _vat_request(sub: str):
+    return SimpleNamespace(state=SimpleNamespace(token_claims={"sub": sub}))
+
+
+class _VatDb:
+    def __init__(self):
+        self.updates: list[dict] = []
+
+    def execute(self, query, params):
+        self.updates.append(dict(params))
+
+    def commit(self):
+        return None
+
+    def rollback(self):
+        return None
+
+
 def test_vat_return_response_returns_structured_approval_snapshot():
-    row = (
-        "vat-1",
-        "2026-03",
-        "monthly",
-        "Valero GmbH",
-        None,
-        "DE123",
-        1000.0,
-        190.0,
-        190.0,
-        0.0,
-        [],
-        "approved",
-        datetime(2026, 3, 11, 9, 0, 0),
-        datetime(2026, 3, 11, 10, 0, 0),
-        None,
-        None,
-        datetime(2026, 3, 11, 8, 0, 0),
-        datetime(2026, 3, 11, 10, 0, 0),
-    )
-    response = vat_return_export._build_vat_return_response(row, positions_data=[])
+    response = vat_return_export._build_vat_return_response(
+        _vat_return_row("approved", approved_by="chefin", approved_at=datetime(2026, 3, 11, 11, 0, 0)), positions_data=[])
 
     assert response.approval_status == "approved"
     assert response.approval_can_submit is True
+    assert response.approved_by == "chefin"
     assert response.approval_override_resolution.rule_id == "finance.vat_return.submission"
     assert response.approval_explainability.status == "allowed"
 
 
-def test_vat_return_approve_promotes_validated_return(monkeypatch):
-    async def fake_get_vat_return(return_id, tenant_id, db):
-        status = getattr(db, "status", "validated")
-        return vat_return_export.VATReturnResponse(
-            id=return_id,
-            period="2026-03",
-            return_type="monthly",
-            taxpayer_name="Valero GmbH",
-            tax_id=None,
-            vat_id="DE123",
-            total_sales_net=1000,
-            total_input_tax=190,
-            total_output_tax=190,
-            vat_payable=0,
-            positions=[],
-            status=status,
-            calculated_at=None,
-            validated_at=datetime(2026, 3, 11, 9, 0, 0),
-            approved_at=None,
-            approved_by=None,
-            submitted_at=None,
-            elster_reference=None,
-            approval_status=status,
-            approval_can_submit=status == "approved",
-            approval_override_resolution=vat_return_export.PolicyOverrideResolution(rule_id="finance.vat_return.submission"),
-            approval_explainability=vat_return_export.ExplainabilityView(status="approval-required", summary="pending"),
-            notes=None,
-            created_at=datetime(2026, 3, 11, 8, 0, 0),
-            updated_at=datetime(2026, 3, 11, 9, 0, 0),
-        )
-
-    class DummyDb:
-        status = "validated"
-
-        def execute(self, _query, _params):
-            self.status = "approved"
-            return None
-
-        def commit(self):
-            return None
-
-        def rollback(self):
-            raise AssertionError("rollback should not be called")
-
-    monkeypatch.setattr(vat_return_export, "get_vat_return", fake_get_vat_return)
-    response = asyncio.run(
-        vat_return_export.approve_vat_return(
-            "vat-1",
-            vat_return_export.VATReturnApprovalRequest(approved_by="tax@example.com"),
-            tenant_id="tenant-wave1",
-            db=DummyDb(),
-        )
-    )
+def test_vat_return_approve_takes_the_approver_from_the_token(monkeypatch):
+    """Der Freigebende kam aus dem Rumpf und wurde nicht gespeichert; jetzt kommt er aus der Anmeldung."""
+    zeilen = [_vat_return_row("validated"),
+              _vat_return_row("approved", approved_by="tax@example.com", approved_at=datetime(2026, 3, 11, 11, 0, 0))]
+    monkeypatch.setattr(vat_return_export, "_lies", lambda db, rid, tid, sperren=False: zeilen.pop(0))
+    monkeypatch.setattr(vat_return_export, "_stand", lambda db, tid, zeitraum: SimpleNamespace(klaerungen=[], offene_entwuerfe=0))
+    monkeypatch.setattr(vat_return_export, "_abweichungen", lambda gespeichert, stand: [])
+    db = _VatDb()
+    response = asyncio.run(vat_return_export.approve_vat_return(
+        "vat-1", _vat_request("tax@example.com"), tenant_id="tenant-wave1", db=db))
 
     assert response.status == "approved"
     assert response.approved_by == "tax@example.com"
+    assert db.updates == [{"return_id": "vat-1", "tenant_id": "tenant-wave1", "akteur": "tax@example.com"}]
 
 
 def test_ap_invoice_semantic_status_normalizes_document_and_workflow_status():
@@ -1099,62 +1072,26 @@ def test_ap_invoice_list_filter_uses_semantic_status(monkeypatch):
     assert response[0]["semantic_status"] == "FREIGEGEBEN"
 
 
-def test_vat_return_submit_requires_and_returns_submitted_snapshot(monkeypatch):
-    async def fake_get_vat_return(return_id, tenant_id, db):
-        status = getattr(db, "status", "approved")
-        return vat_return_export.VATReturnResponse(
-            id=return_id,
-            period="2026-03",
-            return_type="monthly",
-            taxpayer_name="Valero GmbH",
-            tax_id=None,
-            vat_id="DE123",
-            total_sales_net=1000,
-            total_input_tax=190,
-            total_output_tax=190,
-            vat_payable=0,
-            positions=[],
-            status=status,
-            calculated_at=None,
-            validated_at=datetime(2026, 3, 11, 9, 0, 0),
-            approved_at=datetime(2026, 3, 11, 10, 0, 0),
-            approved_by="tax@example.com",
-            submitted_at=None,
-            elster_reference=None,
-            approval_status=status,
-            approval_can_submit=status == "approved",
-            approval_override_resolution=vat_return_export.PolicyOverrideResolution(rule_id="finance.vat_return.submission"),
-            approval_explainability=vat_return_export.ExplainabilityView(status="allowed", summary="ready"),
-            notes=None,
-            created_at=datetime(2026, 3, 11, 8, 0, 0),
-            updated_at=datetime(2026, 3, 11, 10, 0, 0),
-        )
-
-    class DummyDb:
-        status = "approved"
-
-        def execute(self, _query, _params):
-            self.status = "submitted"
-            return None
-
-        def commit(self):
-            return None
-
-        def rollback(self):
-            raise AssertionError("rollback should not be called")
-
-    monkeypatch.setattr(vat_return_export, "get_vat_return", fake_get_vat_return)
-    response = asyncio.run(
-        vat_return_export.submit_vat_return(
-            "vat-1",
-            vat_return_export.VATReturnSubmitRequest(submitted_by="tax@example.com"),
-            tenant_id="tenant-wave1",
-            db=DummyDb(),
-        )
-    )
+def test_vat_return_submit_records_the_elster_transfer_ticket(monkeypatch):
+    """Ohne Transferticket keine Uebermittlung; eine Referenz wird nicht mehr erfunden."""
+    zeilen = [_vat_return_row("approved", approved_by="chefin", approved_at=datetime(2026, 3, 11, 11, 0, 0)),
+              _vat_return_row("submitted", approved_by="chefin", approved_at=datetime(2026, 3, 11, 11, 0, 0),
+                              submitted_by="tax@example.com", submitted_at=datetime(2026, 3, 12, 9, 0, 0),
+                              elster_transferticket="et1234567890")]
+    monkeypatch.setattr(vat_return_export, "_lies", lambda db, rid, tid, sperren=False: zeilen.pop(0))
+    db = _VatDb()
+    response = asyncio.run(vat_return_export.submit_vat_return(
+        "vat-1", vat_return_export.VATReturnSubmitRequest(transferticket="et1234567890"),
+        _vat_request("tax@example.com"), tenant_id="tenant-wave1", db=db))
 
     assert response.status == "submitted"
-    assert response.elster_reference == "ELSTER-2026-03-vat-1"
+    assert response.elster_reference == "et1234567890"
+    assert db.updates[0]["ticket"] == "et1234567890" and db.updates[0]["akteur"] == "tax@example.com"
+    import pydantic
+    import pytest
+
+    with pytest.raises(pydantic.ValidationError):
+        vat_return_export.VATReturnSubmitRequest(submitted_by="tax@example.com")
 
 
 def test_ap_invoice_semantic_status_preserves_extended_document_states():

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from decimal import Decimal
+from types import SimpleNamespace
 
 import pytest
 from fastapi import HTTPException
@@ -17,6 +18,15 @@ class _FakeResult:
         return self._rows[0] if self._rows else None
 
     def fetchall(self):
+        return self._rows
+
+    def mappings(self):
+        return self
+
+    def first(self):
+        return self.fetchone()
+
+    def all(self):
         return self._rows
 
 
@@ -40,26 +50,16 @@ class _CapturingDb:
 
 
 def _vat_row():
-    return (
-        "vat-1",
-        "2026-03",
-        "monthly",
-        "Company",
-        None,
-        None,
-        Decimal("100.00"),
-        Decimal("19.00"),
-        Decimal("19.00"),
-        Decimal("0.00"),
-        '[{"position_code":"81","description":"USt","net_amount":100.0,"tax_amount":19.0,"tax_rate":19.0}]',
-        "calculated",
-        datetime.utcnow(),
-        None,
-        None,
-        None,
-        datetime.utcnow(),
-        datetime.utcnow(),
-    )
+    jetzt = datetime.utcnow()
+    return {
+        "id": "vat-1", "period": "2026-03", "return_type": "monthly", "taxpayer_name": "Company",
+        "tax_id": None, "vat_id": None, "total_sales_net": Decimal("100.00"), "total_input_tax": Decimal("19.00"),
+        "total_output_tax": Decimal("19.00"), "vat_payable": Decimal("0.00"),
+        "positions": '[{"kennzahl":"81","seite":"umsatz","bemessungsgrundlage":"100.00","steuer":"19.00"}]',
+        "status": "calculated", "calculated_at": jetzt, "calculated_by": "rechner", "validated_at": None,
+        "validated_by": None, "approved_at": None, "approved_by": None, "submitted_at": None, "submitted_by": None,
+        "elster_transferticket": None, "notes": None, "created_at": jetzt, "updated_at": jetzt,
+    }
 
 
 @pytest.mark.asyncio
@@ -70,6 +70,7 @@ async def test_calculate_vat_return_rejects_payload_tenant_mismatch():
     with pytest.raises(HTTPException) as exc_info:
         await vat_return_export.calculate_vat_return(
             request=request,
+            http_request=SimpleNamespace(state=SimpleNamespace(token_claims={"sub": "rechner"})),
             tenant_id="tenant-a",
             db=db,
         )

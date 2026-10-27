@@ -464,6 +464,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `user_screen_overlays_uix071` | UIX-071 user screen overlays. |
 | `ustva_voranmeldungen_20260527` | UStVA Voranmeldungen Tabelle (§ 18 UStG ELSTER-Übertragung). |
 | `vat_codes_entfernt_20261012` | vat_codes entfaellt: Steuerschluessel kommen allein aus domain_erp.tax_keys. |
+| `vat_return_bearbeiter_20261027` | UStVA-Anmeldungen speichern, wer berechnet, geprueft, freigegeben und uebermittelt hat. |
 | `verkauf_fehlende_spalten_20260929` | Fuenf Spalten, die der Code schreibt und keine Migration anlegt. |
 | `versandwege_echt_20261008` | Versandwege: Anfragen mit Mandant, Mahnungen mit Versandweg. |
 | `warehouse_schema_repair_20260626` | WAREHOUSE-REPAIR-001: domain_inventory.warehouses fehlende Spalten nachziehen. |

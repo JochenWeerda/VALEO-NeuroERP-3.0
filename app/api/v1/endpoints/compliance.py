@@ -561,67 +561,68 @@ async def get_eudr_status(
 
 @router.get("/ustva", response_model=ComplianceOut, summary="Ustva status abrufen")
 async def get_ustva_status(
-    periode: Optional[str] = Query(None, description="Meldezeitraum z.B. 2026-03"),
-    db: Session = Depends(get_db),
+    periode: Optional[str] = Query(None, description="Meldezeitraum z.B. 2026-03 oder 2026-Q1"),
     tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
 ) -> dict:
-    """
-    UStVA-Bereitschaftsstatus — aggregiert aus gebuchten Journal-Einträgen der Periode.
+    """UStVA-Stand des Zeitraums: Zahlen aus dem Hauptbuch (``app.finance.ustva``), Uebermittlung aus der Anmeldung.
+
+    Bis 27.10.2026 stand hier ``EINGEREICHT``, sobald der Zeitraum keine Buchungsentwuerfe hatte — ohne dass
+    irgendetwas uebermittelt war; der Mandant kam aus ``?tenant_id=`` mit ``default`` als Rueckfall, und ein
+    Lesefehler wurde zu Nullen. Uebermittelt ist jetzt nur, was mit ELSTER-Transferticket festgehalten ist.
     """
     from datetime import timezone
-    from sqlalchemy import text as _text
-    current_period = periode or datetime.now(timezone.utc).strftime("%Y-%m")
-    tid = tenant_id
-    try:
-        row = db.execute(
-            _text("""
-                SELECT
-                    COALESCE(SUM(CASE WHEN jel.credit > 0 AND coa.account_type = 'revenue' THEN jel.credit ELSE 0 END), 0) AS umsatz,
-                    COALESCE(SUM(CASE WHEN jel.credit > 0 AND coa.account_number LIKE '17%' THEN jel.credit ELSE 0 END), 0) AS ust_soll,
-                    COALESCE(SUM(CASE WHEN jel.debit > 0 AND coa.account_number LIKE '15%' THEN jel.debit ELSE 0 END), 0) AS vorsteuer
-                FROM domain_erp.journal_entries je
-                JOIN domain_erp.journal_entry_lines jel ON jel.journal_entry_id = je.id
-                JOIN domain_erp.chart_of_accounts coa ON coa.id = jel.account_id
-                WHERE je.tenant_id = :tid
-                  AND je.status = 'posted'
-                  AND TO_CHAR(je.entry_date::date, 'YYYY-MM') = :period
-            """),
-            {"tid": tid, "period": current_period},
-        ).fetchone()
-        umsatz = float(row[0]) if row else 0.0
-        ust_soll = float(row[1]) if row else 0.0
-        vorsteuer = float(row[2]) if row else 0.0
-        zahllast = round(ust_soll - vorsteuer, 2)
-        offene = db.execute(
-            _text("""
-                SELECT COUNT(*) FROM domain_erp.journal_entries
-                WHERE tenant_id = :tid AND status = 'draft'
-                  AND TO_CHAR(entry_date::date, 'YYYY-MM') = :period
-            """),
-            {"tid": tid, "period": current_period},
-        ).scalar() or 0
-        readiness = min(100, int(100 * (1 - int(offene) / max(int(offene) + 1, 1))))
-        elster_status = "EINGEREICHT" if readiness == 100 else "AUSSTEHEND"
-    except Exception:
-        umsatz = ust_soll = vorsteuer = zahllast = 0.0
-        offene = 0
-        readiness = 0
-        elster_status = "AUSSTEHEND"
 
+    from sqlalchemy import text as _text
+    from sqlalchemy.exc import SQLAlchemyError
+
+    from app.finance.ustva import abgabefrist, berechne
+
+    current_period = periode or datetime.now(timezone.utc).strftime("%Y-%m")
+    try:
+        stand = berechne(db, tenant_id, current_period)
+        anmeldung = db.execute(
+            _text("""
+                SELECT status, elster_transferticket, submitted_at
+                FROM domain_erp.vat_returns
+                WHERE tenant_id = :tid AND period = :period
+                ORDER BY (status = 'submitted') DESC, updated_at DESC
+                LIMIT 1
+            """),
+            {"tid": tenant_id, "period": current_period},
+        ).mappings().first()
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except SQLAlchemyError as exc:
+        db.rollback()
+        raise HTTPException(status_code=503, detail="UStVA-Stand ist vorübergehend nicht verfügbar.") from exc
+
+    alle = stand.gebuchte_buchungen + stand.offene_entwuerfe
+    readiness = 100 if alle == 0 else int(100 * stand.gebuchte_buchungen / alle)
+    uebermittelt = bool(anmeldung and anmeldung["status"] == "submitted")
+    if uebermittelt:
+        status = "UEBERMITTELT"
+    elif stand.offene_entwuerfe == 0 and not stand.klaerungen:
+        status = "BEREIT"
+    else:
+        status = "IN_VORBEREITUNG"
     return {
         "periode": current_period,
-        "status": "BEREIT" if readiness >= 95 else "IN_VORBEREITUNG",
+        "status": status,
         "readiness_pct": readiness,
-        "steuerliche_bemessungsgrundlage": umsatz,
-        "ust_soll": ust_soll,
-        "vorsteuer": vorsteuer,
-        "zahllast": zahllast,
-        "offene_positionen": int(offene),
-        "elster_uebermittlung": elster_status,
-        "deadline": None,
-        "last_updated": datetime.utcnow().isoformat(),
+        "steuerliche_bemessungsgrundlage": float(stand.umsatz_netto),
+        "ust_soll": float(stand.umsatzsteuer),
+        "vorsteuer": float(stand.vorsteuer),
+        "zahllast": float(stand.zahllast),
+        "offene_positionen": stand.offene_entwuerfe,
+        "klaerungen": stand.klaerungen,
+        "anmeldung_status": anmeldung["status"] if anmeldung else None,
+        "elster_uebermittlung": "UEBERMITTELT" if uebermittelt else "NICHT_UEBERMITTELT",
+        "elster_transferticket": anmeldung["elster_transferticket"] if uebermittelt else None,
+        "deadline": abgabefrist(current_period).isoformat(),
+        "deadline_hinweis": "10. Tag nach Ablauf des Zeitraums, Wochenende verschoben; ohne Dauerfristverlängerung und Feiertage.",
+        "last_updated": datetime.now(timezone.utc).isoformat(),
     }
-
 
 # ── BVL-Umsatzmeldung (Pflanzenschutzmittel) ────────────────────────────────
 
