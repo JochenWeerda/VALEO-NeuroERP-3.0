@@ -24,10 +24,17 @@ NOTES, NOTE_POSITIONS = "domain_sales.delivery_notes", "domain_sales.delivery_no
 CREDITS, CREDIT_LINES = "domain_sales.sales_credit_notes", "domain_sales.sales_credit_note_lines"
 RECEIPTS = "domain_sales.sales_delivery_notes"
 PICK_LISTS = "domain_inventory.pick_lists"
+CUSTOMERS = "domain_crm.customers"
 HEADS = (OFFERS, ORDERS, NOTES, CREDITS, RECEIPTS)
 CHILDREN = {ORDER_ITEMS: ("order_id", ORDERS), NOTE_POSITIONS: ("delivery_note_id", NOTES),
             CREDIT_LINES: ("credit_note_id", CREDITS), OFFER_ITEMS: ("offer_id", OFFERS)}
 ISOLATED = HEADS + (ORDER_ITEMS, NOTE_POSITIONS, CREDIT_LINES)
+
+
+def _head_values(head: str, rows: dict, tenant: str) -> dict:
+    if head in (OFFERS, ORDERS, CREDITS):
+        return {"customer_id": rows["customer", tenant]}
+    return {}
 
 
 def _child_values(child: str, parent_id: str, n: int) -> dict:
@@ -49,8 +56,10 @@ def probe():
         support.ensure_tenants(conn, A, B, SYSTEM)
         rows = {}
         for tenant in (A, B, SYSTEM):
+            # Koepfe verweisen im frischen Schema per FK auf den Kundenstamm (Klasse B, zurueckgestellt).
+            rows["customer", tenant] = support.insert_row(conn, CUSTOMERS, tenant)
             for head in HEADS:
-                rows[head, tenant] = support.insert_row(conn, head, tenant)
+                rows[head, tenant] = support.insert_row(conn, head, tenant, **_head_values(head, rows, tenant))
             for child, (_column, parent) in CHILDREN.items():
                 rows[child, tenant] = support.insert_row(conn, child, tenant,
                                                          **_child_values(child, rows[parent, tenant], 0))
@@ -78,7 +87,8 @@ def test_policy_formen(db):
 @pytest.mark.parametrize("table", ISOLATED)
 def test_mandantengrenze_je_tabelle(db, table):
     conn, rows = db
-    new_row = None
+    def new_row(tenant):
+        return support.insert_row(conn, table, tenant, **_head_values(table, rows, tenant))
     if table in CHILDREN:
         _column, parent = CHILDREN[table]
 
@@ -95,7 +105,9 @@ def test_keine_position_unter_fremdem_kopf(db, child):
     with tenant_scope(A, "test"):
         message = support.rejected_insert_with(conn, child, A, **_child_values(child, foreign, 2))
         assert f"fk_{child.split('.')[1]}_{column}_tenant" in message, message
-        message = support.rejected(conn, f"UPDATE {child} SET {column} = :p WHERE id = :i",
+        extra = {ORDER_ITEMS: ", line_number = 999", OFFER_ITEMS: ", line_number = 999",
+                 CREDIT_LINES: ", line_number = 999", NOTE_POSITIONS: ", pos_nr = 999"}[child]
+        message = support.rejected(conn, f"UPDATE {child} SET {column} = :p{extra} WHERE id = :i",
                                    {"p": foreign, "i": rows[child, A]})
         assert f"fk_{child.split('.')[1]}_{column}_tenant" in message, message
 

@@ -2,18 +2,18 @@
  "_note": "Generiert von scripts/rls_domain_matrix.py; nicht von Hand aendern.",
  "datenstand": "2026-10-27",
  "summary": {
-  "tabellen": 190,
+  "tabellen": 181,
   "nach_klasse": {
-   "A": 91,
-   "B": 48,
-   "C": 51
+   "A": 85,
+   "B": 47,
+   "C": 49
   },
   "nach_ursache": {
    "dienst": 20,
-   "position": 49,
-   "referenzdaten": 33,
-   "mandant_nullbar": 36,
-   "standardmandant": 50,
+   "position": 47,
+   "referenzdaten": 29,
+   "mandant_nullbar": 35,
+   "standardmandant": 48,
    "identitaet": 2
   },
   "nach_domain": {
@@ -28,8 +28,8 @@
     "dienst": 7,
     "mandant_nullbar": 5,
     "position": 17,
-    "referenzdaten": 3,
-    "standardmandant": 5
+    "referenzdaten": 1,
+    "standardmandant": 4
    },
    "dev_mock": {
     "identitaet": 1
@@ -58,7 +58,7 @@
     "mandant_nullbar": 4,
     "position": 6,
     "referenzdaten": 12,
-    "standardmandant": 11
+    "standardmandant": 10
    },
    "log": {
     "dienst": 1,
@@ -82,11 +82,6 @@
    },
    "procurement": {
     "mandant_nullbar": 1
-   },
-   "sales": {
-    "mandant_nullbar": 1,
-    "position": 2,
-    "referenzdaten": 2
    },
    "shared": {
     "dienst": 1,
@@ -2448,168 +2443,6 @@
     "Datenbefund fehlt (Tabelle nicht in der gewachsenen Datenbank)"
    ],
    "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_crm.sales_offers",
-   "domain": "crm",
-   "class": "A",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [
-    "standardmandant"
-   ],
-   "modell": [],
-   "leser": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py",
-    "app/api/v1/endpoints/sales_reports.py",
-    "app/services/o2c_chain_service.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/sales_offers.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "nutzlast": 1,
-    "standardmandant": 1,
-    "token": 3
-   },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py:972"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 3,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 1
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_crm.sales_order_items",
-   "domain": "crm",
-   "class": "A",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "referenzdaten",
-   "gruende": [
-    "referenzdaten",
-    "mandant_nullbar"
-   ],
-   "modell": [],
-   "leser": [
-    "app/api/v1/endpoints/compat.py",
-    "app/api/v1/endpoints/sales_reports.py",
-    "app/services/docflow_service.py",
-    "app/services/ist_aggregation_service.py",
-    "app/services/mcp_execution_service.py",
-    "app/services/procurement_service.py",
-    "app/services/sales_match_service.py",
-    "modules/einkauf/services/bestellvorschlag_service.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/sales_offers.py",
-    "app/api/v1/endpoints/sales_orders.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "nutzlast": 2,
-    "token": 4
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [
-    "app/api/v1/endpoints/compat.py:1855",
-    "app/api/v1/endpoints/compat.py:1862",
-    "app/api/v1/endpoints/compat.py:1869",
-    "app/api/v1/endpoints/compat.py:1892",
-    "app/services/mcp_execution_service.py:3155"
-   ],
-   "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3155"
-   ],
-   "daten": {
-    "zeilen": 14,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 1
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_crm.sales_orders",
-   "domain": "crm",
-   "class": "A",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "referenzdaten",
-   "gruende": [
-    "referenzdaten",
-    "mandant_nullbar",
-    "standardmandant"
-   ],
-   "modell": [],
-   "leser": [
-    "app/api/v1/endpoints/compat.py",
-    "app/api/v1/endpoints/credit_management.py",
-    "app/api/v1/endpoints/crm_360.py",
-    "app/api/v1/endpoints/crm_360_reads.py",
-    "app/api/v1/endpoints/crm_kim.py",
-    "app/api/v1/endpoints/sales_reports.py",
-    "app/api/v1/endpoints/stammdaten_bearbeiten.py",
-    "app/services/customer_reference.py",
-    "app/services/docflow_service.py",
-    "app/services/ist_aggregation_service.py",
-    "app/services/mcp_execution_service.py",
-    "app/services/o2c_chain_service.py",
-    "app/services/procurement_service.py",
-    "app/services/sales_credit_service.py",
-    "app/services/sales_match_service.py",
-    "app/services/sales_storno_service.py",
-    "modules/einkauf/services/bestellvorschlag_service.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/collective_documents.py",
-    "app/api/v1/endpoints/pick_lists.py",
-    "app/api/v1/endpoints/sales_delivery_notes.py",
-    "app/api/v1/endpoints/sales_offers.py",
-    "app/api/v1/endpoints/sales_order_commands.py",
-    "app/api/v1/endpoints/sales_orders.py",
-    "app/services/webshop_integration_service.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "nutzlast": 2,
-    "standardmandant": 1,
-    "token": 9
-   },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/sales_delivery_notes.py:54"
-   ],
-   "null_stellen": [
-    "app/api/v1/endpoints/compat.py:1855",
-    "app/api/v1/endpoints/compat.py:1862",
-    "app/api/v1/endpoints/compat.py:1869",
-    "app/api/v1/endpoints/compat.py:1892",
-    "app/services/mcp_execution_service.py:3155"
-   ],
-   "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3155"
-   ],
-   "daten": {
-    "zeilen": 13,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 1
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant"
   },
   {
    "table": "public.crm_activities",
@@ -5135,47 +4968,6 @@
    "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
   },
   {
-   "table": "domain_inventory.pick_lists",
-   "domain": "inventory",
-   "class": "A",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [
-    "standardmandant"
-   ],
-   "modell": [
-    "app/infrastructure/models/l3c_models.py",
-    "app/infrastructure/models/wms_models.py"
-   ],
-   "leser": [
-    "app/api/v1/endpoints/pick_lists.py",
-    "app/api/v1/endpoints/warehouse_wms.py",
-    "app/infrastructure/models/__init__.py",
-    "app/infrastructure/models/l3c_models.py",
-    "app/infrastructure/models/wms_models.py"
-   ],
-   "schreiber": [
-    "app/services/warehouse_service.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "token": 2
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
    "table": "domain_inventory.preparation_list_lines",
    "domain": "inventory",
    "class": "A",
@@ -6194,8 +5986,7 @@
    "gruende": [
     "dienst",
     "referenzdaten",
-    "mandant_nullbar",
-    "standardmandant"
+    "mandant_nullbar"
    ],
    "modell": [
     "app/domains/verladung/models.py"
@@ -7160,250 +6951,6 @@
     "standardmandant": 1,
     "token": 1
    },
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_sales.delivery_note_positions",
-   "domain": "sales",
-   "class": "C",
-   "tenant_type": null,
-   "eltern": [
-    "domain_inventory.articles",
-    "domain_sales.delivery_notes"
-   ],
-   "ursache": "position",
-   "gruende": [
-    "position",
-    "referenzdaten",
-    "standardmandant"
-   ],
-   "modell": [],
-   "leser": [
-    "app/api/v1/endpoints/articles.py",
-    "app/api/v1/endpoints/sales_invoices.py",
-    "app/api/v1/endpoints/sustainability.py",
-    "app/services/docflow_service.py",
-    "app/services/mask_rollout_summary_service.py",
-    "app/services/mcp_execution_service.py",
-    "app/services/sales_match_service.py",
-    "app/services/warehouse_service.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/sales_delivery_notes.py",
-    "app/api/v1/endpoints/sales_orders.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "nutzlast": 2,
-    "standardmandant": 2,
-    "token": 4
-   },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/articles.py:42",
-    "app/api/v1/endpoints/sales_delivery_notes.py:54"
-   ],
-   "null_stellen": [
-    "app/services/mcp_execution_service.py:3155"
-   ],
-   "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3155"
-   ],
-   "daten": {
-    "zeilen": 4,
-    "eltern_fk": [
-     "delivery_note_id -> domain_sales.delivery_notes.id"
-    ],
-    "verwaist": 0,
-    "ohne_eltern": 0
-   },
-   "bereinigung": [
-    "tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_inventory.articles, domain_sales.delivery_notes"
-  },
-  {
-   "table": "domain_sales.delivery_notes",
-   "domain": "sales",
-   "class": "A",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "referenzdaten",
-   "gruende": [
-    "referenzdaten",
-    "mandant_nullbar",
-    "standardmandant"
-   ],
-   "modell": [],
-   "leser": [
-    "app/api/v1/endpoints/articles.py",
-    "app/api/v1/endpoints/branches.py",
-    "app/api/v1/endpoints/mask_actions.py",
-    "app/api/v1/endpoints/sales_invoices.py",
-    "app/api/v1/endpoints/sales_reports.py",
-    "app/api/v1/endpoints/sustainability.py",
-    "app/services/docflow_service.py",
-    "app/services/document_control_projection.py",
-    "app/services/logistics_disposition_service.py",
-    "app/services/mask_rollout_summary_service.py",
-    "app/services/o2c_chain_service.py",
-    "app/services/sales_credit_service.py",
-    "app/services/sales_match_service.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/collective_documents.py",
-    "app/api/v1/endpoints/finance_invoices.py",
-    "app/api/v1/endpoints/logistics_tours.py",
-    "app/api/v1/endpoints/sales_credit_notes.py",
-    "app/api/v1/endpoints/sales_delivery_notes.py",
-    "app/api/v1/endpoints/sales_orders.py",
-    "app/services/mcp_execution_service.py",
-    "app/services/sales_storno_service.py",
-    "app/services/warehouse_service.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "kopfzeile": 1,
-    "nutzlast": 3,
-    "standardmandant": 3,
-    "token": 8
-   },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/articles.py:42",
-    "app/api/v1/endpoints/branches.py:24",
-    "app/api/v1/endpoints/sales_delivery_notes.py:54"
-   ],
-   "null_stellen": [
-    "app/api/v1/endpoints/finance_invoices.py:72",
-    "app/services/mcp_execution_service.py:3155"
-   ],
-   "gemeinsam_stellen": [
-    "app/api/v1/endpoints/finance_invoices.py:72",
-    "app/api/v1/endpoints/sales_credit_notes.py:563",
-    "app/services/mcp_execution_service.py:3155"
-   ],
-   "daten": {
-    "zeilen": 3,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 1
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_sales.sales_credit_note_lines",
-   "domain": "sales",
-   "class": "C",
-   "tenant_type": null,
-   "eltern": [
-    "domain_sales.sales_credit_notes"
-   ],
-   "ursache": "position",
-   "gruende": [
-    "position",
-    "referenzdaten"
-   ],
-   "modell": [],
-   "leser": [],
-   "schreiber": [
-    "app/api/v1/endpoints/sales_credit_notes.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "nutzlast": 1,
-    "token": 1
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [
-    "app/api/v1/endpoints/sales_credit_notes.py:563"
-   ],
-   "daten": {
-    "zeilen": 0,
-    "eltern_fk": [
-     "credit_note_id -> domain_sales.sales_credit_notes.id"
-    ],
-    "verwaist": 0,
-    "ohne_eltern": 0
-   },
-   "bereinigung": [
-    "tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_sales.sales_credit_notes"
-  },
-  {
-   "table": "domain_sales.sales_credit_notes",
-   "domain": "sales",
-   "class": "A",
-   "tenant_type": "character varying(64)",
-   "eltern": [],
-   "ursache": "referenzdaten",
-   "gruende": [
-    "referenzdaten",
-    "mandant_nullbar"
-   ],
-   "modell": [],
-   "leser": [
-    "app/core/screen_definitions_capture.py",
-    "app/services/finance_freigabe.py",
-    "app/services/mcp_execution_service.py",
-    "app/services/sales_storno_service.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/sales_credit_notes.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "nutzlast": 1,
-    "token": 1
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [
-    "app/services/mcp_execution_service.py:3155"
-   ],
-   "gemeinsam_stellen": [
-    "app/api/v1/endpoints/sales_credit_notes.py:563",
-    "app/services/mcp_execution_service.py:3155"
-   ],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_sales.sales_delivery_notes",
-   "domain": "sales",
-   "class": "B",
-   "tenant_type": "character varying(36)",
-   "eltern": [],
-   "ursache": "mandant_nullbar",
-   "gruende": [
-    "mandant_nullbar"
-   ],
-   "modell": [],
-   "leser": [],
-   "schreiber": [
-    "app/services/sales_lieferschein_close_service.py"
-   ],
-   "worker": [],
-   "identitaet": {},
    "standardmandant_stellen": [],
    "null_stellen": [],
    "gemeinsam_stellen": [],
