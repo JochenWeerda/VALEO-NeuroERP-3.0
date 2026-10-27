@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-26
+last_reviewed: 2026-10-27
 version: 3.0.0
 description: Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Beschreibungen sind aus den Datei-Docstrings extrahiert.
 ---
@@ -418,6 +418,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `repair_runtime_contract_columns_20260610` | Repair runtime columns required by current ORM and domain checks. |
 | `repair_runtime_model_alignment_20260610` | Align fresh installations with current CRM and article runtime models. |
 | `repair_runtime_schema_20260610` | Bring runtime models that predate Alembic under the migration contract. |
+| `rls_domain_pricing_20261027` | Row-level security for domain_pricing (RLS domain slice, first after P0-P7). |
 | `rls_pilot_finance_20261026` | Row-level security pilot: domain_finance and the posting journal (RLS plan P3). |
 | `rls_rollout_20261026` | Roll row-level security out to the class-A tables cleared by the analysis (RLS plan P5). |
 | `rls_system_role_20261026` | Row-level security for tables freed by the valeo_system connection (RLS plan P6). |

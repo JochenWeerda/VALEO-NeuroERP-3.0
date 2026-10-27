@@ -13,7 +13,7 @@ description: Generierte Entscheidungsmatrix der noch nicht abgesicherten Mandant
 
 Generiert von `scripts/rls_domain_matrix.py`; nicht von Hand aendern. Entscheidungen und Reihenfolge: `docs/architecture/rls-domaenen-entscheidungsmatrix.md`.
 
-Datenstand gewachsene Datenbank: 2026-10-27. Tabellen: 214.
+Datenstand gewachsene Datenbank: 2026-10-27. Tabellen: 212.
 
 | Domain | dienst | position | referenzdaten | mandant_nullbar | standardmandant | identitaet |
 |---|---|---|---|---|---|---|
@@ -36,7 +36,6 @@ Datenstand gewachsene Datenbank: 2026-10-27. Tabellen: 214.
 | nachweisraum |  |  | 2 |  |  |  |
 | ops | 1 | 5 | 1 |  | 3 |  |
 | portal |  | 1 |  |  |  |  |
-| pricing |  | 1 |  |  | 1 |  |
 | procurement |  |  |  | 1 |  |  |
 | sales |  | 2 | 2 | 1 |  |  |
 | shared | 1 | 6 | 3 | 3 | 21 | 1 |
@@ -306,13 +305,6 @@ Datenstand gewachsene Datenbank: 2026-10-27. Tabellen: 214.
 | Tabelle | Kl. | Ursache | Modell | Schreiber | Leser | Worker | Identitaet | Daten | Bereinigung | Policy |
 |---|---|---|---|---|---|---|---|---|---|---|
 | `domain_portal.customer_order_items` | C | position | `app/infrastructure/models/portal_models.py` | `app/api/v1/endpoints/portal_shop.py` | 2 | – | token 1 | 0 Z. | tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id) | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_portal.customer_orders |
-
-## pricing
-
-| Tabelle | Kl. | Ursache | Modell | Schreiber | Leser | Worker | Identitaet | Daten | Bereinigung | Policy |
-|---|---|---|---|---|---|---|---|---|---|---|
-| `domain_pricing.price_list_items` | C | position, standardmandant | – | `app/api/v1/endpoints/price_lists.py` | 1 | – | nutzlast 1, standardmandant 1 | 0 Z. | tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id) | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_pricing.price_lists |
-| `domain_pricing.price_lists` | A | standardmandant | – | `app/api/v1/endpoints/price_lists.py` | 1 | – | nutzlast 1, standardmandant 1 | 0 Z., 0 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
 
 ## procurement
 

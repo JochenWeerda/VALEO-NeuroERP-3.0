@@ -128244,6 +128244,7 @@
         "type": "object"
       },
       "PriceListCreate": {
+        "description": "The tenant comes from the verified token, never from the request.",
         "properties": {
           "currency": {
             "default": "EUR",
@@ -128283,17 +128284,6 @@
             "default": "standard",
             "title": "Price List Type",
             "type": "string"
-          },
-          "tenant_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Tenant Id"
           },
           "valid_from": {
             "anyOf": [
@@ -372305,16 +372295,6 @@
         "parameters": [
           {
             "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "00000000-0000-0000-0000-000000000001",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "is_active",
             "required": false,
             "schema": {
@@ -372373,18 +372353,6 @@
       "post": {
         "description": "Create a new price list with optional items.",
         "operationId": "create_price_list_api_v1_price_lists__post",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "00000000-0000-0000-0000-000000000001",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {

@@ -2,11 +2,11 @@
  "_note": "Generiert von scripts/rls_rollout.py aus docs/admin/rls-inventory.json; nicht von Hand aendern.",
  "summary": {
   "ready": 0,
-  "pending": 110,
+  "pending": 109,
   "reasons": {
    "dienst": 10,
    "mandant_ermitteln": 1,
-   "standardmandant": 80,
+   "standardmandant": 79,
    "mandant_null": 40,
    "uebergreifend": 0,
    "identitaet": 4
@@ -241,9 +241,6 @@
    "standardmandant"
   ],
   "domain_ops.reklamationen": [
-   "standardmandant"
-  ],
-  "domain_pricing.price_lists": [
    "standardmandant"
   ],
   "domain_sales.delivery_notes": [

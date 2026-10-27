@@ -2,18 +2,18 @@
  "_note": "Generiert von scripts/rls_domain_matrix.py; nicht von Hand aendern.",
  "datenstand": "2026-10-27",
  "summary": {
-  "tabellen": 214,
+  "tabellen": 212,
   "nach_klasse": {
-   "A": 110,
+   "A": 109,
    "B": 51,
-   "C": 53
+   "C": 52
   },
   "nach_ursache": {
    "dienst": 20,
-   "position": 51,
+   "position": 50,
    "referenzdaten": 41,
    "mandant_nullbar": 38,
-   "standardmandant": 62,
+   "standardmandant": 61,
    "identitaet": 2
   },
   "nach_domain": {
@@ -101,10 +101,6 @@
    },
    "portal": {
     "position": 1
-   },
-   "pricing": {
-    "position": 1,
-    "standardmandant": 1
    },
    "procurement": {
     "mandant_nullbar": 1
@@ -7971,86 +7967,6 @@
     "tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id)"
    ],
    "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_portal.customer_orders"
-  },
-  {
-   "table": "domain_pricing.price_list_items",
-   "domain": "pricing",
-   "class": "C",
-   "tenant_type": null,
-   "eltern": [
-    "domain_pricing.price_lists"
-   ],
-   "ursache": "position",
-   "gruende": [
-    "position",
-    "standardmandant"
-   ],
-   "modell": [],
-   "leser": [
-    "app/services/preisfindung_service.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/price_lists.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "nutzlast": 1,
-    "standardmandant": 1
-   },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/price_lists.py:31"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "eltern_fk": [
-     "price_list_id -> domain_pricing.price_lists.id"
-    ],
-    "verwaist": 0,
-    "ohne_eltern": 0
-   },
-   "bereinigung": [
-    "tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_pricing.price_lists"
-  },
-  {
-   "table": "domain_pricing.price_lists",
-   "domain": "pricing",
-   "class": "A",
-   "tenant_type": "character varying(64)",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [
-    "standardmandant"
-   ],
-   "modell": [],
-   "leser": [
-    "app/services/preisfindung_service.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/price_lists.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "nutzlast": 1,
-    "standardmandant": 1
-   },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/price_lists.py:31"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
   },
   {
    "table": "domain_procurement.proc_purchase_orders",

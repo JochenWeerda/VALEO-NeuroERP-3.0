@@ -130,7 +130,7 @@ ein Rückfall im Code bleibt trotzdem ein Befund.
 
 | Domain | Tabellen | Ursachen | Modell | Schreiber | Identität | Worker | Bereinigung | Policy | Risiko |
 |---|---|---|---|---|---|---|---|---|---|
-| **pricing** | 2 (A1, C1) | standardmandant, position | Roh-SQL (Migration) | 1 | Query-Parameter mit Standard, Nutzlast | – | 0 Zeilen | getrennt, kein `system`; Positionen aus `price_lists` | **niedrig — erste Domain** |
+| **pricing** | 2 (A1, C1) | standardmandant, position | Roh-SQL (Migration) | 1 | Query-Parameter mit Standard, Nutzlast | – | 0 Zeilen | getrennt, kein `system`; Positionen aus `price_lists` | **umgesetzt** (RLS-DOMAIN-PRICING-20261027) |
 | hr | 5 (A3, B2) | referenzdaten, nullbar, standard | Roh-SQL | 2 | Token | – | 0 Zeilen; `person`/`employment` nur frisch | getrennt, kein `system` | niedrig |
 | nachweisraum | 2 (A2) | referenzdaten (MCP-Generik) | Roh-SQL | 1 | – (Dienstfunktion) | – | 0 Zeilen | getrennt | niedrig, GoBD-Export prüfen |
 | audit / compliance | 4 (A3, B1) | standard, nullbar | Roh-SQL | 4 | Token, 1 Rückfall | – | 0 Zeilen | getrennt | niedrig |
@@ -152,7 +152,7 @@ Jeder Slice bringt Migration, Fachkorrekturen, Verhaltenstests als `valeo_app`, 
 aktualisierte Inventar und die verkürzte Ausnahmeliste mit, dazu QA-Bericht und Handshake.
 Er stapelt auf dem vorigen.
 
-1. **RLS-DOMAIN-PRICING** — `price_lists` + `price_list_items`. Gewählt, weil: 0 Zeilen live
+1. **RLS-DOMAIN-PRICING** (umgesetzt, `docs/quality-assurance/rls-domain-pricing-20261027.md`) — `price_lists` + `price_list_items`. Gewählt, weil: 0 Zeilen live
    (keine Datenbereinigung), kein Worker, zwei Verbraucher (`price_lists.py`,
    `preisfindung_service.py`), ein Rückfall. Der Slice führt das schwierigste Muster
    vollständig ein: Positionen mit vom Kopf abgeleitetem Mandanten und Sperre gegen fremde
