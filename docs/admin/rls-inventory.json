@@ -3,14 +3,14 @@
  "summary": {
   "tables": 775,
   "by_class": {
-   "A": 613,
-   "B": 51,
-   "C": 51,
+   "A": 616,
+   "B": 50,
+   "C": 49,
    "D": 60
   },
-  "rls_enabled": 525,
+  "rls_enabled": 534,
   "tenant_types": {
-   "character varying": 297,
+   "character varying": 299,
    "character varying(100)": 9,
    "character varying(120)": 39,
    "character varying(128)": 1,
@@ -102,7 +102,6 @@
    "app/api/v1/endpoints/messages.py": 1,
    "app/api/v1/endpoints/nutrient_compositions.py": 1,
    "app/api/v1/endpoints/nve.py": 1,
-   "app/api/v1/endpoints/pick_lists.py": 1,
    "app/api/v1/endpoints/pos_retoure.py": 1,
    "app/api/v1/endpoints/preparation_lists.py": 1,
    "app/api/v1/endpoints/reklamation_api.py": 1,
@@ -1464,25 +1463,25 @@
    "table": "domain_crm.sales_offers",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_crm.sales_order_items",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_crm.sales_orders",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_crm.supplier_tax_profiles",
@@ -3151,9 +3150,9 @@
    "table": "domain_inventory.pick_lists",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_inventory.preparation_list_lines",
@@ -4411,23 +4410,19 @@
   },
   {
    "table": "domain_sales.delivery_note_positions",
-   "class": "C",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying",
+   "rls": true,
    "force_rls": false,
-   "policies": 0,
-   "tenant_parents": [
-    "domain_inventory.articles",
-    "domain_sales.delivery_notes"
-   ]
+   "policies": 4
   },
   {
    "table": "domain_sales.delivery_notes",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_sales.sales_ab_status_log",
@@ -4439,30 +4434,27 @@
   },
   {
    "table": "domain_sales.sales_credit_note_lines",
-   "class": "C",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying",
+   "rls": true,
    "force_rls": false,
-   "policies": 0,
-   "tenant_parents": [
-    "domain_sales.sales_credit_notes"
-   ]
+   "policies": 4
   },
   {
    "table": "domain_sales.sales_credit_notes",
    "class": "A",
    "tenant_type": "character varying(64)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_sales.sales_delivery_notes",
-   "class": "B",
+   "class": "A",
    "tenant_type": "character varying(36)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_sales.sales_invoice_lines",
