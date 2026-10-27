@@ -19767,3 +19767,6 @@ Nutzerauftrag: alle uebrigen offenen Aenderungen commit-/pushfaehig abschliessen
 
 
 **RLS-P7 umgesetzt (Claude Code):** Startwaechter rls_guard (Produktion verweigert Start bei Superuser/BYPASSRLS/Eigentuemer, Entwicklung meldet), Engine-Freigabeliste, CODEOWNERS fuer RLS-Kern. Gesamtstand P0-P7 in docs/quality-assurance/rls-p7-guards-20261026.md: 501 Tabellen mit RLS im frischen Schema, live keine Policy aktiv bis zur Integration. RLS-P1..P7 abgeschlossen.
+
+
+**RLS-ORDERED-INTEGRATION-20261027 Zwischenstand:** Plan55/P056/P157/P258/P359/P460/P561/P662/P763 seriell integriert. Sicherheitskorrektur 943ba2bb0 umfasst auch P6 business_partners: vier operationsgebundene Policies statt ALL. Alte Fassung durch echten valeo_app-DELETE-Test rot belegt, korrigiert 92 Tests gruen (darunter30 neue PG-Faelle). Probe unveraendert loading_stop_fk_20261023, eigene Tabelle entfernt durch Rollback. Lead reserviert ab jetzt kurzes exklusives Pruefstandsfenster fuer ausstehende Revisionen in EINER zurueckgerollten Transaktion sowie Inventar-/RLS-P3/P5/P6-Abnahme; vor Start keine fremden Sessions festgestellt. Kein Reset/Commit/Liveupgrade/P4-Cleanup. Native-Detail-Claim um eng begrenzte neu/new-ID-Erkennung in den zugehoerigen Legacy-Createformularen erweitert, damit echte /neu-Routen keine Detailabfrage ausloesen; keine weiteren Fachumbauten.
