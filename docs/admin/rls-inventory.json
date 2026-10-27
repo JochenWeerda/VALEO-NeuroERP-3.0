@@ -3,14 +3,14 @@
  "summary": {
   "tables": 775,
   "by_class": {
-   "A": 668,
-   "B": 33,
-   "C": 19,
-   "D": 55
+   "A": 675,
+   "B": 32,
+   "C": 14,
+   "D": 54
   },
-  "rls_enabled": 608,
+  "rls_enabled": 635,
   "tenant_types": {
-   "character varying": 330,
+   "character varying": 333,
    "character varying(100)": 9,
    "character varying(120)": 39,
    "character varying(128)": 1,
@@ -19,7 +19,7 @@
    "character varying(50)": 1,
    "character varying(64)": 103,
    "character varying(80)": 24,
-   "text": 107,
+   "text": 110,
    "uuid": 4
   }
  },
@@ -90,15 +90,11 @@
   },
   "driver_connect": {},
   "default_tenant": {
-   "app/api/v1/endpoints/agribusiness.py": 1,
    "app/api/v1/endpoints/articles.py": 1,
-   "app/api/v1/endpoints/branches.py": 1,
    "app/api/v1/endpoints/chart_of_accounts.py": 1,
    "app/api/v1/endpoints/crm_reports.py": 1,
    "app/api/v1/endpoints/customer_extensions.py": 1,
    "app/api/v1/endpoints/farm_profiles.py": 1,
-   "app/api/v1/endpoints/master_data.py": 1,
-   "app/api/v1/endpoints/messages.py": 1,
    "app/api/v1/endpoints/nutrient_compositions.py": 1,
    "app/api/v1/endpoints/reklamation_api.py": 1,
    "app/api/v1/endpoints/sales_delivery_notes.py": 1,
@@ -108,7 +104,6 @@
    "app/core/inventory_permissions.py": 1,
    "app/core/tenant_context.py": 1,
    "app/domains/agrar/api/duenger.py": 1,
-   "app/domains/agrar/api/psm.py": 1,
    "app/domains/agrar/api/saatgut.py": 1,
    "app/domains/crm/api/customers.py": 1,
    "app/domains/crm/api/leads.py": 1,
@@ -4525,9 +4520,9 @@
    "table": "domain_shared.agrar_sorten",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_shared.amendment_templates",
@@ -4597,9 +4592,9 @@
    "table": "domain_shared.artikel_sperren",
    "class": "A",
    "tenant_type": "character varying(36)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_shared.artikel_stoffstrom",
@@ -4661,9 +4656,9 @@
    "table": "domain_shared.branches",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_shared.calendar_ics_tokens",
@@ -4677,17 +4672,17 @@
    "table": "domain_shared.calendar_items",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_shared.calendar_team_memberships",
    "class": "A",
    "tenant_type": "text",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_shared.channel_process_threads",
@@ -4699,14 +4694,11 @@
   },
   {
    "table": "domain_shared.channel_thread_audit_items",
-   "class": "C",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying",
+   "rls": true,
    "force_rls": false,
-   "policies": 0,
-   "tenant_parents": [
-    "domain_shared.channel_process_threads"
-   ]
+   "policies": 4
   },
   {
    "table": "domain_shared.connectors",
@@ -4768,17 +4760,17 @@
    "table": "domain_shared.direct_debit_items",
    "class": "A",
    "tenant_type": "character varying(80)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_shared.dispatchers",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_shared.dms_inbox",
@@ -4816,33 +4808,33 @@
    "table": "domain_shared.farmers",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_shared.feeding_feed_analysis_findings",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_shared.feeding_feed_analysis_revisions",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_shared.feeding_feed_analysis_values",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_shared.fibu_geschaeftsjahre",
@@ -4896,9 +4888,9 @@
    "table": "domain_shared.futtermittel_einzelfutter",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_shared.futtermittel_haccp_plaene",
@@ -4912,17 +4904,17 @@
    "table": "domain_shared.futtermittel_mischfutter",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_shared.futtermittel_produktionsauftraege",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_shared.futtermittel_qs_pruefpunkte",
@@ -4934,23 +4926,19 @@
   },
   {
    "table": "domain_shared.futtermittel_rezept_komponenten",
-   "class": "C",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying",
+   "rls": true,
    "force_rls": false,
-   "policies": 0,
-   "tenant_parents": [
-    "domain_shared.futtermittel_einzelfutter",
-    "domain_shared.futtermittel_rezepte"
-   ]
+   "policies": 4
   },
   {
    "table": "domain_shared.futtermittel_rezepte",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_shared.futtermittel_rezepturgruppen",
@@ -4996,9 +4984,9 @@
    "table": "domain_shared.grundfutter_analysen",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_shared.hauptwarengruppen",
@@ -5036,9 +5024,9 @@
    "table": "domain_shared.internal_messages",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_shared.inventur_piv_abschluesse",
@@ -5058,14 +5046,11 @@
   },
   {
    "table": "domain_shared.job_artifacts",
-   "class": "C",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying",
+   "rls": true,
    "force_rls": false,
-   "policies": 0,
-   "tenant_parents": [
-    "domain_shared.jobs"
-   ]
+   "policies": 4
   },
   {
    "table": "domain_shared.jobs",
@@ -5159,9 +5144,9 @@
    "table": "domain_shared.logistik_frachttabellen",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_shared.logistik_frachttabellen_positionen",
@@ -5191,9 +5176,9 @@
    "table": "domain_shared.master_data_entries",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_shared.neuro_step_audit_trace",
@@ -5375,9 +5360,9 @@
    "table": "domain_shared.rations_zugang",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_shared.reporting_units",
@@ -5565,22 +5550,19 @@
   },
   {
    "table": "domain_shared.vertreter_provisionsstaffeln",
-   "class": "C",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "text",
+   "rls": true,
    "force_rls": false,
-   "policies": 0,
-   "tenant_parents": [
-    "domain_shared.vertreter_provisionsgruppen"
-   ]
+   "policies": 4
   },
   {
    "table": "domain_shared.vertreter_staffel_zeilen",
-   "class": "D",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "text",
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_shared.waage_hofliste",
@@ -5672,15 +5654,11 @@
   },
   {
    "table": "domain_shared.zu_abschlag_konditionen",
-   "class": "C",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "text",
+   "rls": true,
    "force_rls": false,
-   "policies": 0,
-   "tenant_parents": [
-    "domain_shared.zu_abschlaggruppen",
-    "domain_shared.zu_abschlagklassen"
-   ]
+   "policies": 4
   },
   {
    "table": "domain_shared.zu_abschlaggruppen",
@@ -6318,11 +6296,11 @@
   },
   {
    "table": "public.number_series",
-   "class": "B",
+   "class": "A",
    "tenant_type": "character varying(36)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "public.offene_posten",

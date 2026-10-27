@@ -2,12 +2,12 @@
  "_note": "Generiert von scripts/rls_rollout.py aus docs/admin/rls-inventory.json; nicht von Hand aendern.",
  "summary": {
   "ready": 0,
-  "pending": 63,
+  "pending": 43,
   "reasons": {
    "dienst": 10,
    "mandant_ermitteln": 1,
-   "standardmandant": 44,
-   "mandant_null": 22,
+   "standardmandant": 25,
+   "mandant_null": 20,
    "uebergreifend": 0,
    "identitaet": 4
   }
@@ -126,78 +126,17 @@
   "domain_shared.admin_api_keys": [
    "identitaet"
   ],
-  "domain_shared.agrar_sorten": [
-   "standardmandant"
-  ],
   "domain_shared.api_keys": [
    "identitaet",
-   "standardmandant"
-  ],
-  "domain_shared.artikel_sperren": [
    "standardmandant"
   ],
   "domain_shared.audit_logs": [
    "mandant_null",
    "standardmandant"
   ],
-  "domain_shared.branches": [
-   "standardmandant"
-  ],
   "domain_shared.calendar_ics_tokens": [
    "identitaet",
    "mandant_ermitteln",
-   "standardmandant"
-  ],
-  "domain_shared.calendar_items": [
-   "standardmandant"
-  ],
-  "domain_shared.calendar_team_memberships": [
-   "standardmandant"
-  ],
-  "domain_shared.direct_debit_items": [
-   "standardmandant"
-  ],
-  "domain_shared.dispatchers": [
-   "standardmandant"
-  ],
-  "domain_shared.farmers": [
-   "standardmandant"
-  ],
-  "domain_shared.feeding_feed_analysis_findings": [
-   "standardmandant"
-  ],
-  "domain_shared.feeding_feed_analysis_revisions": [
-   "standardmandant"
-  ],
-  "domain_shared.feeding_feed_analysis_values": [
-   "standardmandant"
-  ],
-  "domain_shared.futtermittel_einzelfutter": [
-   "mandant_null",
-   "standardmandant"
-  ],
-  "domain_shared.futtermittel_mischfutter": [
-   "standardmandant"
-  ],
-  "domain_shared.futtermittel_produktionsauftraege": [
-   "standardmandant"
-  ],
-  "domain_shared.futtermittel_rezepte": [
-   "standardmandant"
-  ],
-  "domain_shared.grundfutter_analysen": [
-   "standardmandant"
-  ],
-  "domain_shared.internal_messages": [
-   "standardmandant"
-  ],
-  "domain_shared.logistik_frachttabellen": [
-   "mandant_null"
-  ],
-  "domain_shared.master_data_entries": [
-   "standardmandant"
-  ],
-  "domain_shared.rations_zugang": [
    "standardmandant"
   ],
   "public.crm_activities": [

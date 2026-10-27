@@ -9,14 +9,15 @@ from fastapi import Response, APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from ....core.config import settings
 from ....core.database import get_db
+from ....core.tenant import get_tenant_id
 from ....infrastructure.models import MasterDataEntry, Dispatcher
 from ..schemas.base import PaginatedResponse, BaseSchema
 from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter()
-DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
+# Mandant aus der geprueften Anmeldung (get_tenant_id). Bis 27.10.2026 kam er aus ?tenant_id=
+# mit dem Standardmandanten als Rueckfall; Aendern und Loeschen filterten gar nicht nach Mandant.
 
 
 # ── Schemas ──────────────────────────────────────────────────────
@@ -57,13 +58,13 @@ class DispatcherCreate(BaseModel):
 @router.get("/", response_model=PaginatedResponse[MasterDataOut], summary="Master data auflisten")
 async def list_master_data(
     category: Optional[str] = Query(None, description="Filter by category"),
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=500),
     db: Session = Depends(get_db),
 ):
     """GET Stammdaten (Branchen, Bundesländer, Staaten, Versandarten, etc.)"""
-    tid = tenant_id or DEFAULT_TENANT
+    tid = tenant_id
     q = db.query(MasterDataEntry).filter(
         MasterDataEntry.tenant_id == tid,
         MasterDataEntry.is_active == True,  # noqa: E712
@@ -85,12 +86,12 @@ async def list_master_data(
 @router.post("/", response_model=MasterDataOut, status_code=201, summary="Master data anlegen", dependencies=SCHREIBEN["STAMMDATEN"])
 async def create_master_data(
     payload: MasterDataCreate,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """POST Stammdaten anlegen"""
     from app.core.uuid7 import uuid7
-    tid = tenant_id or DEFAULT_TENANT
+    tid = tenant_id
     obj = MasterDataEntry(
         id=uuid7(),
         category=payload.category,
@@ -108,9 +109,9 @@ async def create_master_data(
 # ── Convenience category endpoints ──────────────────────────────
 
 @router.get("/branches", response_model=list[MasterDataOut], summary="Branches auflisten")
-async def list_branches(tenant_id: Optional[str] = Query(None), db: Session = Depends(get_db)):
+async def list_branches(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     """GET Branchen"""
-    tid = tenant_id or DEFAULT_TENANT
+    tid = tenant_id
     items = db.query(MasterDataEntry).filter(
         MasterDataEntry.tenant_id == tid,
         MasterDataEntry.category == "branch",
@@ -120,9 +121,9 @@ async def list_branches(tenant_id: Optional[str] = Query(None), db: Session = De
 
 
 @router.get("/countries", response_model=list[MasterDataOut], summary="Countries auflisten")
-async def list_countries(tenant_id: Optional[str] = Query(None), db: Session = Depends(get_db)):
+async def list_countries(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     """GET Staaten ermitteln"""
-    tid = tenant_id or DEFAULT_TENANT
+    tid = tenant_id
     items = db.query(MasterDataEntry).filter(
         MasterDataEntry.tenant_id == tid,
         MasterDataEntry.category == "country",
@@ -132,9 +133,9 @@ async def list_countries(tenant_id: Optional[str] = Query(None), db: Session = D
 
 
 @router.get("/shipping-methods", response_model=list[MasterDataOut], summary="Shipping methods auflisten")
-async def list_shipping_methods(tenant_id: Optional[str] = Query(None), db: Session = Depends(get_db)):
+async def list_shipping_methods(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     """GET Versandarten"""
-    tid = tenant_id or DEFAULT_TENANT
+    tid = tenant_id
     items = db.query(MasterDataEntry).filter(
         MasterDataEntry.tenant_id == tid,
         MasterDataEntry.category == "shipping_method",
@@ -144,9 +145,9 @@ async def list_shipping_methods(tenant_id: Optional[str] = Query(None), db: Sess
 
 
 @router.get("/units", response_model=list[MasterDataOut], summary="Units of measure auflisten")
-async def list_units_of_measure(tenant_id: Optional[str] = Query(None), db: Session = Depends(get_db)):
+async def list_units_of_measure(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     """GET MengenEinheiten"""
-    tid = tenant_id or DEFAULT_TENANT
+    tid = tenant_id
     items = db.query(MasterDataEntry).filter(
         MasterDataEntry.tenant_id == tid,
         MasterDataEntry.category == "unit",
@@ -156,9 +157,9 @@ async def list_units_of_measure(tenant_id: Optional[str] = Query(None), db: Sess
 
 
 @router.get("/container-units", response_model=list[MasterDataOut], summary="Container units auflisten")
-async def list_container_units(tenant_id: Optional[str] = Query(None), db: Session = Depends(get_db)):
+async def list_container_units(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     """GET GebindeEinheiten"""
-    tid = tenant_id or DEFAULT_TENANT
+    tid = tenant_id
     items = db.query(MasterDataEntry).filter(
         MasterDataEntry.tenant_id == tid,
         MasterDataEntry.category == "container_unit",
@@ -168,9 +169,9 @@ async def list_container_units(tenant_id: Optional[str] = Query(None), db: Sessi
 
 
 @router.get("/contact-types", response_model=list[MasterDataOut], summary="Contact types auflisten")
-async def list_contact_types(tenant_id: Optional[str] = Query(None), db: Session = Depends(get_db)):
+async def list_contact_types(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     """GET Kontaktarten ermitteln"""
-    tid = tenant_id or DEFAULT_TENANT
+    tid = tenant_id
     items = db.query(MasterDataEntry).filter(
         MasterDataEntry.tenant_id == tid,
         MasterDataEntry.category == "contact_type",
@@ -182,12 +183,12 @@ async def list_contact_types(tenant_id: Optional[str] = Query(None), db: Session
 @router.post("/contact-types", response_model=MasterDataOut, status_code=201, summary="Contact type anlegen", dependencies=SCHREIBEN["STAMMDATEN"])
 async def create_contact_type(
     payload: MasterDataCreate,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """POST Kontaktart Anlegen"""
     from app.core.uuid7 import uuid7
-    tid = tenant_id or DEFAULT_TENANT
+    tid = tenant_id
     obj = MasterDataEntry(
         id=uuid7(),
         category="contact_type",
@@ -203,9 +204,13 @@ async def create_contact_type(
 
 
 @router.delete("/contact-types/{ct_id}", status_code=204, response_class=Response, response_model=None, summary="Contact type löschen", dependencies=SCHREIBEN["STAMMDATEN"])
-async def delete_contact_type(ct_id: str, db: Session = Depends(get_db)):
+async def delete_contact_type(
+    ct_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
+):
     """DEL Kontaktart Löschen"""
-    obj = db.query(MasterDataEntry).filter(MasterDataEntry.id == ct_id).first()
+    obj = db.query(MasterDataEntry).filter(
+        MasterDataEntry.id == ct_id, MasterDataEntry.tenant_id == tenant_id,
+    ).first()
     if not obj:
         raise HTTPException(404, "Contact type not found")
     db.delete(obj)
@@ -215,9 +220,9 @@ async def delete_contact_type(ct_id: str, db: Session = Depends(get_db)):
 # ── Dispatchers ──────────────────────────────────────────────────
 
 @router.get("/dispatchers", response_model=list[DispatcherOut], summary="Dispatchers auflisten")
-async def list_dispatchers(tenant_id: Optional[str] = Query(None), db: Session = Depends(get_db)):
+async def list_dispatchers(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     """GET Disponent ermitteln"""
-    tid = tenant_id or DEFAULT_TENANT
+    tid = tenant_id
     items = db.query(Dispatcher).filter(
         Dispatcher.tenant_id == tid,
         Dispatcher.is_active == True,  # noqa: E712
@@ -228,12 +233,12 @@ async def list_dispatchers(tenant_id: Optional[str] = Query(None), db: Session =
 @router.post("/dispatchers", response_model=DispatcherOut, status_code=201, summary="Dispatcher anlegen", dependencies=SCHREIBEN["STAMMDATEN"])
 async def create_dispatcher(
     payload: DispatcherCreate,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """POST Disponent anlegen"""
     from app.core.uuid7 import uuid7
-    tid = tenant_id or DEFAULT_TENANT
+    tid = tenant_id
     obj = Dispatcher(
         id=uuid7(),
         name=payload.name,
@@ -250,10 +255,11 @@ async def create_dispatcher(
 
 @router.put("/dispatchers/{disp_id}", response_model=DispatcherOut, summary="Dispatcher aktualisieren", dependencies=SCHREIBEN["STAMMDATEN"])
 async def update_dispatcher(
-    disp_id: str, payload: DispatcherCreate, db: Session = Depends(get_db),
+    disp_id: str, payload: DispatcherCreate, tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
 ):
     """PUT Disponent bearbeiten"""
-    obj = db.query(Dispatcher).filter(Dispatcher.id == disp_id).first()
+    obj = db.query(Dispatcher).filter(Dispatcher.id == disp_id, Dispatcher.tenant_id == tenant_id).first()
     if not obj:
         raise HTTPException(404, "Dispatcher not found")
     for f, v in payload.model_dump(exclude_unset=True).items():
@@ -264,9 +270,9 @@ async def update_dispatcher(
 
 
 @router.delete("/dispatchers/{disp_id}", status_code=204, response_class=Response, response_model=None, summary="Dispatcher löschen", dependencies=SCHREIBEN["STAMMDATEN"])
-async def delete_dispatcher(disp_id: str, db: Session = Depends(get_db)):
+async def delete_dispatcher(disp_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     """DEL Disponent löschen"""
-    obj = db.query(Dispatcher).filter(Dispatcher.id == disp_id).first()
+    obj = db.query(Dispatcher).filter(Dispatcher.id == disp_id, Dispatcher.tenant_id == tenant_id).first()
     if not obj:
         raise HTTPException(404, "Dispatcher not found")
     db.delete(obj)

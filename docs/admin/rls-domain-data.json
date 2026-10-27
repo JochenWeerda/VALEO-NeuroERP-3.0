@@ -482,21 +482,7 @@
    "verwaist": 0,
    "ohne_eltern": 0
   },
-  "domain_shared.agrar_sorten": {
-   "zeilen": 5,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 1
-  },
   "domain_shared.api_keys": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "domain_shared.artikel_sperren": {
    "zeilen": 0,
    "null": 0,
    "default": 0,
@@ -510,13 +496,6 @@
    "system": 1,
    "mandanten": 2
   },
-  "domain_shared.branches": {
-   "zeilen": 2,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 1
-  },
   "domain_shared.calendar_ics_tokens": {
    "zeilen": 9,
    "null": 0,
@@ -524,153 +503,9 @@
    "system": 0,
    "mandanten": 1
   },
-  "domain_shared.calendar_items": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "domain_shared.calendar_team_memberships": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "domain_shared.channel_thread_audit_items": {
-   "zeilen": 0,
-   "eltern_fk": [
-    "thread_id -> domain_shared.channel_process_threads.thread_id"
-   ],
-   "verwaist": 0,
-   "ohne_eltern": 0
-  },
-  "domain_shared.direct_debit_items": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "domain_shared.dispatchers": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "domain_shared.farmers": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "domain_shared.feeding_feed_analysis_findings": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "domain_shared.feeding_feed_analysis_revisions": {
-   "zeilen": 464,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 1
-  },
-  "domain_shared.feeding_feed_analysis_values": {
-   "zeilen": 261,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 1
-  },
-  "domain_shared.futtermittel_einzelfutter": {
-   "zeilen": 743,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 1
-  },
-  "domain_shared.futtermittel_mischfutter": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "domain_shared.futtermittel_produktionsauftraege": {
-   "zeilen": 2,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 1
-  },
-  "domain_shared.futtermittel_rezept_komponenten": {
-   "zeilen": 5,
-   "eltern_fk": [
-    "einzelfutter_id -> domain_shared.futtermittel_einzelfutter.id",
-    "rezept_id -> domain_shared.futtermittel_rezepte.id"
-   ],
-   "verwaist": 0,
-   "ohne_eltern": 0
-  },
-  "domain_shared.futtermittel_rezepte": {
-   "zeilen": 2,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 1
-  },
-  "domain_shared.grundfutter_analysen": {
-   "zeilen": 144,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 1
-  },
-  "domain_shared.internal_messages": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "domain_shared.job_artifacts": {
-   "zeilen": 0,
-   "eltern_fk": [
-    "job_id -> domain_shared.jobs.id"
-   ],
-   "verwaist": 0,
-   "ohne_eltern": 0
-  },
-  "domain_shared.logistik_frachttabellen": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "domain_shared.master_data_entries": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
   "domain_shared.policy_rules": {
    "zeilen": 3,
    "null": 3,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "domain_shared.rations_zugang": {
-   "zeilen": 0,
-   "null": 0,
    "default": 0,
    "system": 0,
    "mandanten": 0
@@ -681,23 +516,6 @@
    "default": 2,
    "system": 2,
    "mandanten": 3
-  },
-  "domain_shared.vertreter_provisionsstaffeln": {
-   "zeilen": 0,
-   "eltern_fk": [
-    "gruppe_id -> domain_shared.vertreter_provisionsgruppen.id"
-   ],
-   "verwaist": 0,
-   "ohne_eltern": 0
-  },
-  "domain_shared.zu_abschlag_konditionen": {
-   "zeilen": 0,
-   "eltern_fk": [
-    "gruppe_id -> domain_shared.zu_abschlaggruppen.id",
-    "klasse_id -> domain_shared.zu_abschlagklassen.id"
-   ],
-   "verwaist": 0,
-   "ohne_eltern": 0
   },
   "public.crm_activities": {
    "zeilen": 0,
