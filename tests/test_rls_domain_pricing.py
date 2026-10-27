@@ -334,8 +334,8 @@ def test_pool_wiederverwendung_uebertraegt_keinen_mandanten():
             pid = conn.execute(sa.text("SELECT pg_backend_pid()")).scalar()
             conn.execute(sa.text("CREATE TEMP TABLE rlsp_pool (tenant_id text NOT NULL, v int)"))
             conn.execute(sa.text("ALTER TABLE rlsp_pool ENABLE ROW LEVEL SECURITY"))
-            conn.execute(sa.text(f"CREATE POLICY tenant_select ON rlsp_pool FOR SELECT USING ({own})"))
-            conn.execute(sa.text(f"CREATE POLICY tenant_insert ON rlsp_pool FOR INSERT WITH CHECK ({own})"))
+            conn.execute(sa.text(f"CREATE POLICY tenant_isolation_select ON rlsp_pool FOR SELECT USING ({own})"))
+            conn.execute(sa.text(f"CREATE POLICY tenant_isolation_insert ON rlsp_pool FOR INSERT WITH CHECK ({own})"))
             conn.execute(sa.text("GRANT SELECT, INSERT ON rlsp_pool TO valeo_app"))
             conn.commit()
 

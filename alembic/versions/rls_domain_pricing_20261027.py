@@ -30,17 +30,18 @@ depends_on = None
 LISTS = "domain_pricing.price_lists"
 ITEMS = "domain_pricing.price_list_items"
 OWN = "tenant_id = public.rls_current_tenant()"
-POLICIES = ("tenant_select", "tenant_insert", "tenant_update", "tenant_delete")
+# Same names as the corrected P3/P5/P6 policies (943ba2bb0); one shape for all RLS tables.
+POLICIES = tuple(f"tenant_isolation_{kind}" for kind in ("select", "insert", "update", "delete"))
 
 
 def _enable_tenant_policies(table: str) -> None:
     op.execute(f"ALTER TABLE {table} ENABLE ROW LEVEL SECURITY")
     for name in POLICIES:
         op.execute(f"DROP POLICY IF EXISTS {name} ON {table}")
-    op.execute(f"CREATE POLICY tenant_select ON {table} FOR SELECT USING ({OWN})")
-    op.execute(f"CREATE POLICY tenant_insert ON {table} FOR INSERT WITH CHECK ({OWN})")
-    op.execute(f"CREATE POLICY tenant_update ON {table} FOR UPDATE USING ({OWN}) WITH CHECK ({OWN})")
-    op.execute(f"CREATE POLICY tenant_delete ON {table} FOR DELETE USING ({OWN})")
+    op.execute(f"CREATE POLICY tenant_isolation_select ON {table} FOR SELECT USING ({OWN})")
+    op.execute(f"CREATE POLICY tenant_isolation_insert ON {table} FOR INSERT WITH CHECK ({OWN})")
+    op.execute(f"CREATE POLICY tenant_isolation_update ON {table} FOR UPDATE USING ({OWN}) WITH CHECK ({OWN})")
+    op.execute(f"CREATE POLICY tenant_isolation_delete ON {table} FOR DELETE USING ({OWN})")
 
 
 def _disable_tenant_policies(table: str) -> None:
