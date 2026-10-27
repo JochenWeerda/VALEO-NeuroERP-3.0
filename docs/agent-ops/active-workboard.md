@@ -19735,3 +19735,10 @@ Nutzerauftrag: alle uebrigen offenen Aenderungen commit-/pushfaehig abschliessen
 
 
 **NATIVE-DETAIL-ROUTE-PARITY-20261027 - reserviert, native_batch_contracts:** Nutzerauftrag und Leaddelegation: 17 belegte Detailrouten fachlich an kanonische registrierte Detaildefinitionen binden. Besitz betroffene Page-Wrapper, drei eigene Routentests und eigene Fixtures/Paritaet/Mounts/QA; keine Backend-/RLS-/Inbox-/Vite-Dateien. Bestehende Soll-Intentionen erhalten; kein Gruenklassifizieren falscher APIs. Claim 6f2e7a0a hatte wegen gleichzeitiger privater Index-/Dateiverwendung eine leere Workboardfassung; vollstaendiger Stand df0f668e4 hier wiederhergestellt, ausschliesslich Lead serialisiert weitere Commits.
+
+
+## RLS-P0-INVENTORY-20261026 - reserviert, Claude Code
+
+**Owner:** Claude Code. **Basis:** `codex/migration-parity-repair-20261022` @ c3142eb1d, Zweig `claude/rls-p0-inventory-20261026`. **Plan:** `docs/architecture/rls-mandantenkernel-plan.md` (PR #55), Phase P0. **Ziel:** `scripts/rls_inventory.py` klassifiziert alle Tabellen der frischen Datenbank (A tenant_id NOT NULL, B nullbar, C Kind per FK, D ohne) und zaehlt die Datenzugriffswege im Code; Ergebnis `docs/admin/rls-inventory.json` mit `--check`; Vertragstests (statisch ohne DB, Schema gegen frische DB). Liegt valeo_probe hinter dem Kopf, spielt das Skript die fehlenden Revisionen in einer zurueckgerollten Transaktion ein (kein Reset, kein Stempeln). **Dateibesitz:** genannte Dateien, eigene Tests, QA. **Grenzen:** keine Code-/Schema-/Datenaenderung.
+
+**RLS-P0-INVENTORY-20261026 umgesetzt (Claude Code):** scripts/rls_inventory.py + docs/admin/rls-inventory.json (frisches Schema 775 Tabellen A608/B54/C53/D60, 0 RLS; Codepfade SessionLocal 27 Dateien, DEFAULT_TENANT_ID 55 Dateien), Pruefstand-Rueckstand zurueckgerollt eingespielt, valeo_probe unveraendert. Vertragstests 5 gruen, Negativproben rot. Befund: Buchungsjournal liegt in domain_erp, nicht domain_finance (Pilot-Rueckfrage). QA docs/quality-assurance/rls-p0-inventory-20261026.md.
