@@ -2,12 +2,12 @@
  "_note": "Generiert von scripts/rls_rollout.py aus docs/admin/rls-inventory.json; nicht von Hand aendern.",
  "summary": {
   "ready": 0,
-  "pending": 109,
+  "pending": 106,
   "reasons": {
    "dienst": 10,
    "mandant_ermitteln": 1,
-   "standardmandant": 79,
-   "mandant_null": 40,
+   "standardmandant": 78,
+   "mandant_null": 38,
    "uebergreifend": 0,
    "identitaet": 4
   }
@@ -126,15 +126,6 @@
    "standardmandant"
   ],
   "domain_erp.open_items": [
-   "standardmandant"
-  ],
-  "domain_hr.onboarding_checklists": [
-   "mandant_null"
-  ],
-  "domain_hr.training_courses": [
-   "mandant_null"
-  ],
-  "domain_hr.work_plan_assignments": [
    "standardmandant"
   ],
   "domain_inventory.agrar_contract_allocations": [
