@@ -182,7 +182,7 @@ def assert_tenant_isolation(conn, table: str, own: str, foreign: str, shared: st
         assert keys(conn, table, key) == set()
     # der Eigentuemer sieht alles unveraendert
     expected = {own, foreign} | ({shared} if shared else set())
-    assert {str(r[0]) for r in as_owner(conn, f"SELECT {key} FROM {table} WHERE {key} = ANY(:ks)",
+    assert {str(r[0]) for r in as_owner(conn, f"SELECT {key} FROM {table} WHERE {key}::text = ANY(:ks)",
                                          {"ks": list(expected)})} == expected
 
 

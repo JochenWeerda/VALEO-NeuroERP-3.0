@@ -13,7 +13,7 @@ description: Generierte Entscheidungsmatrix der noch nicht abgesicherten Mandant
 
 Generiert von `scripts/rls_domain_matrix.py`; nicht von Hand aendern. Entscheidungen und Reihenfolge: `docs/architecture/rls-domaenen-entscheidungsmatrix.md`.
 
-Datenstand gewachsene Datenbank: 2026-10-27. Tabellen: 203.
+Datenstand gewachsene Datenbank: 2026-10-27. Tabellen: 201.
 
 | Domain | dienst | position | referenzdaten | mandant_nullbar | standardmandant | identitaet |
 |---|---|---|---|---|---|---|
@@ -30,7 +30,6 @@ Datenstand gewachsene Datenbank: 2026-10-27. Tabellen: 203.
 | log | 1 | 3 |  |  |  |  |
 | logistics |  |  | 2 | 5 |  |  |
 | mfg |  |  |  | 3 |  |  |
-| nachweisraum |  |  | 2 |  |  |  |
 | ops | 1 | 5 | 1 |  | 3 |  |
 | portal |  | 1 |  |  |  |  |
 | procurement |  |  |  | 1 |  |  |
@@ -250,13 +249,6 @@ Datenstand gewachsene Datenbank: 2026-10-27. Tabellen: 203.
 | `domain_mfg.bill_of_material` | B | mandant_nullbar | – | – | 0 | – | – | – | Datenbefund fehlt (Tabelle nicht in der gewachsenen Datenbank) | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
 | `domain_mfg.production_event` | B | mandant_nullbar | – | – | 0 | – | – | – | Datenbefund fehlt (Tabelle nicht in der gewachsenen Datenbank) | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
 | `domain_mfg.production_order` | B | mandant_nullbar | – | – | 0 | – | – | – | Datenbefund fehlt (Tabelle nicht in der gewachsenen Datenbank) | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
-
-## nachweisraum
-
-| Tabelle | Kl. | Ursache | Modell | Schreiber | Leser | Worker | Identitaet | Daten | Bereinigung | Policy |
-|---|---|---|---|---|---|---|---|---|---|---|
-| `domain_nachweisraum.gobd_exporte` | A | referenzdaten, mandant_nullbar | – | `app/services/doc_nachweisraum_lifecycle_service.py` | 2 | – | – | 0 Z., 0 Mand. | – | getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant |
-| `domain_nachweisraum.nachweisraum_dokumente` | A | referenzdaten, mandant_nullbar | – | `app/services/doc_nachweisraum_lifecycle_service.py` | 2 | – | – | 0 Z., 0 Mand. | – | getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant |
 
 ## ops
 

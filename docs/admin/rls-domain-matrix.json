@@ -2,16 +2,16 @@
  "_note": "Generiert von scripts/rls_domain_matrix.py; nicht von Hand aendern.",
  "datenstand": "2026-10-27",
  "summary": {
-  "tabellen": 203,
+  "tabellen": 201,
   "nach_klasse": {
-   "A": 103,
+   "A": 101,
    "B": 48,
    "C": 52
   },
   "nach_ursache": {
    "dienst": 20,
    "position": 50,
-   "referenzdaten": 38,
+   "referenzdaten": 36,
    "mandant_nullbar": 35,
    "standardmandant": 58,
    "identitaet": 2
@@ -76,9 +76,6 @@
    },
    "mfg": {
     "mandant_nullbar": 3
-   },
-   "nachweisraum": {
-    "referenzdaten": 2
    },
    "ops": {
     "dienst": 1,
@@ -7018,82 +7015,6 @@
     "Datenbefund fehlt (Tabelle nicht in der gewachsenen Datenbank)"
    ],
    "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_nachweisraum.gobd_exporte",
-   "domain": "nachweisraum",
-   "class": "A",
-   "tenant_type": "text",
-   "eltern": [],
-   "ursache": "referenzdaten",
-   "gruende": [
-    "referenzdaten",
-    "mandant_nullbar"
-   ],
-   "modell": [],
-   "leser": [
-    "app/api/v1/schemas/docflow_bundle_schemas.py",
-    "app/services/mcp_execution_service.py"
-   ],
-   "schreiber": [
-    "app/services/doc_nachweisraum_lifecycle_service.py"
-   ],
-   "worker": [],
-   "identitaet": {},
-   "standardmandant_stellen": [],
-   "null_stellen": [
-    "app/services/mcp_execution_service.py:3155"
-   ],
-   "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3155"
-   ],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_nachweisraum.nachweisraum_dokumente",
-   "domain": "nachweisraum",
-   "class": "A",
-   "tenant_type": "text",
-   "eltern": [],
-   "ursache": "referenzdaten",
-   "gruende": [
-    "referenzdaten",
-    "mandant_nullbar"
-   ],
-   "modell": [],
-   "leser": [
-    "app/api/v1/schemas/docflow_bundle_schemas.py",
-    "app/services/mcp_execution_service.py"
-   ],
-   "schreiber": [
-    "app/services/doc_nachweisraum_lifecycle_service.py"
-   ],
-   "worker": [],
-   "identitaet": {},
-   "standardmandant_stellen": [],
-   "null_stellen": [
-    "app/services/mcp_execution_service.py:3155"
-   ],
-   "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3155"
-   ],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant"
   },
   {
    "table": "domain_ops.kon_contract",

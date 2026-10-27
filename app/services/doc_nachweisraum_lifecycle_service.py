@@ -66,8 +66,8 @@ def create_dokument(
     )
     db.commit()
     row = db.execute(
-        text("SELECT * FROM domain_nachweisraum.nachweisraum_dokumente WHERE id = :id"),
-        {"id": rec_id},
+        text("SELECT * FROM domain_nachweisraum.nachweisraum_dokumente WHERE id = :id AND tenant_id = :tid"),
+        {"id": rec_id, "tid": tenant_id},
     ).mappings().first()
     return dict(row)
 
@@ -130,8 +130,8 @@ def transition_dokument(
     )
     db.commit()
     updated = db.execute(
-        text("SELECT * FROM domain_nachweisraum.nachweisraum_dokumente WHERE id = :id"),
-        {"id": dokument_id},
+        text("SELECT * FROM domain_nachweisraum.nachweisraum_dokumente WHERE id = :id AND tenant_id = :tid"),
+        {"id": dokument_id, "tid": tenant_id},
     ).mappings().first()
     return dict(updated)
 
@@ -161,8 +161,8 @@ def create_gobd_export(
     )
     db.commit()
     row = db.execute(
-        text("SELECT * FROM domain_nachweisraum.gobd_exporte WHERE id = :id"),
-        {"id": rec_id},
+        text("SELECT * FROM domain_nachweisraum.gobd_exporte WHERE id = :id AND tenant_id = :tid"),
+        {"id": rec_id, "tid": tenant_id},
     ).mappings().first()
     return dict(row)
 
@@ -212,7 +212,7 @@ def transition_gobd_export(
     )
     db.commit()
     updated = db.execute(
-        text("SELECT * FROM domain_nachweisraum.gobd_exporte WHERE id = :id"),
-        {"id": export_id},
+        text("SELECT * FROM domain_nachweisraum.gobd_exporte WHERE id = :id AND tenant_id = :tid"),
+        {"id": export_id, "tid": tenant_id},
     ).mappings().first()
     return dict(updated)
