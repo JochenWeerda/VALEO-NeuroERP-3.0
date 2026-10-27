@@ -19758,3 +19758,6 @@ Nutzerauftrag: alle uebrigen offenen Aenderungen commit-/pushfaehig abschliessen
 
 
 **RLS-P4 umgesetzt (Claude Code):** live 2 080 Testrest-Zeilen in 51 Tabellen + 25 test-<hex>-Registereintraege geloescht (Sicherung C:/Users/Jochen/valeo-backups/rls-p4-20261026/, Skript scripts/rls_cleanup_test_tenants.py mit Trockenlauf/Savepoints/Klasse-C-Kindern); unklare Werte (NULL, legacy-unassigned, default, valeo, sd-*) dokumentiert mit Regel fuer P5; SYSTEM->system in P3. QA docs/quality-assurance/rls-p4-cleanup-20261026.md.
+
+
+**RLS-P5 umgesetzt (Claude Code):** scripts/rls_rollout.py (bereit vs. zurueckgestellt mit Grund), Migration rls_rollout_20261026 auf 478 Tabellen -> 500 mit RLS, 111 zurueckgestellt; Ratsche: ready leer; jede Policy als valeo_app ausgewertet. Heuristik und Grenzen in QA docs/quality-assurance/rls-p5-rollout-20261026.md; live nicht angewendet.
