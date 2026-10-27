@@ -21,6 +21,8 @@ export type PendingTransaction = {
     preis: number
     menge: number
     rabatt_pct?: number
+    /** Steuersatz der Position; fehlt er, nimmt der Server ihn aus dem Steuerschluessel des Artikels. */
+    vat_rate?: number
   }>
   zahlungen: Array<{
     art: string

@@ -33650,6 +33650,118 @@
         "title": "ChecklistTemplateCreate",
         "type": "object"
       },
+      "CheckoutRequest": {
+        "properties": {
+          "cart": {
+            "items": {
+              "$ref": "#/components/schemas/KassenPosition"
+            },
+            "minItems": 1,
+            "title": "Cart",
+            "type": "array"
+          },
+          "gesamt": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Gesamt"
+          },
+          "kassierer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kassierer"
+          },
+          "offline_id": {
+            "maxLength": 120,
+            "minLength": 8,
+            "title": "Offline Id",
+            "type": "string"
+          },
+          "timestamp": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timestamp"
+          },
+          "zahlungen": {
+            "items": {
+              "$ref": "#/components/schemas/KassenZahlung"
+            },
+            "minItems": 1,
+            "title": "Zahlungen",
+            "type": "array"
+          }
+        },
+        "required": [
+          "offline_id",
+          "cart",
+          "zahlungen",
+          "gesamt"
+        ],
+        "title": "CheckoutRequest",
+        "type": "object"
+      },
+      "CheckoutResponse": {
+        "properties": {
+          "bon_nr": {
+            "title": "Bon Nr",
+            "type": "string"
+          },
+          "gesamt": {
+            "title": "Gesamt",
+            "type": "number"
+          },
+          "offline_id": {
+            "title": "Offline Id",
+            "type": "string"
+          },
+          "signatur_zaehler": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Signatur Zaehler"
+          },
+          "simuliert": {
+            "default": false,
+            "title": "Simuliert",
+            "type": "boolean"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "bon_nr",
+          "status",
+          "offline_id",
+          "gesamt"
+        ],
+        "title": "CheckoutResponse",
+        "type": "object"
+      },
       "CheckpointRequest": {
         "properties": {
           "schema_version": {
@@ -89944,6 +90056,120 @@
         "title": "KasseUebernahmeResult",
         "type": "object"
       },
+      "KassenPosition": {
+        "properties": {
+          "artikelnr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artikelnr"
+          },
+          "bezeichnung": {
+            "title": "Bezeichnung",
+            "type": "string"
+          },
+          "ean": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ean"
+          },
+          "menge": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Menge"
+          },
+          "preis": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Preis"
+          },
+          "rabatt_pct": {
+            "anyOf": [
+              {
+                "maximum": 100.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "default": "0",
+            "title": "Rabatt Pct"
+          },
+          "vat_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vat Rate"
+          }
+        },
+        "required": [
+          "bezeichnung",
+          "preis",
+          "menge"
+        ],
+        "title": "KassenPosition",
+        "type": "object"
+      },
+      "KassenZahlung": {
+        "properties": {
+          "art": {
+            "title": "Art",
+            "type": "string"
+          },
+          "betrag": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Betrag"
+          }
+        },
+        "required": [
+          "art",
+          "betrag"
+        ],
+        "title": "KassenZahlung",
+        "type": "object"
+      },
       "KennzahlSubmitRequest": {
         "properties": {
           "einheit": {
@@ -125998,12 +126224,6 @@
         "title": "PosPaymentsPromotionsOut",
         "type": "object"
       },
-      "PosRetourOut": {
-        "additionalProperties": true,
-        "properties": {},
-        "title": "PosRetourOut",
-        "type": "object"
-      },
       "PosTerminalIn": {
         "properties": {
           "branch_code": {
@@ -141204,6 +141424,7 @@
       "RetourPosition": {
         "properties": {
           "artikelnr": {
+            "minLength": 1,
             "title": "Artikelnr",
             "type": "string"
           },
@@ -141223,8 +141444,16 @@
             "title": "Ean"
           },
           "einzelpreis": {
-            "title": "Einzelpreis",
-            "type": "number"
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Einzelpreis"
           },
           "grund": {
             "anyOf": [
@@ -141238,6 +141467,7 @@
             "title": "Grund"
           },
           "menge": {
+            "exclusiveMinimum": 0.0,
             "title": "Menge",
             "type": "integer"
           }
@@ -141254,12 +141484,27 @@
       "RetourRequest": {
         "properties": {
           "gesamt": {
-            "title": "Gesamt",
-            "type": "number"
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Gesamt"
           },
           "kassierer": {
-            "title": "Kassierer",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kassierer"
           },
           "original_bon_nr": {
             "anyOf": [
@@ -141276,19 +141521,15 @@
             "items": {
               "$ref": "#/components/schemas/RetourPosition"
             },
+            "minItems": 1,
             "title": "Positionen",
             "type": "array"
           },
-          "tenant_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Tenant Id"
+          "vorgang_id": {
+            "maxLength": 100,
+            "minLength": 8,
+            "title": "Vorgang Id",
+            "type": "string"
           },
           "zahlungsrueckerstattung": {
             "default": "bar",
@@ -141297,7 +141538,7 @@
           }
         },
         "required": [
-          "kassierer",
+          "vorgang_id",
           "positionen",
           "gesamt"
         ],
@@ -141321,6 +141562,22 @@
           "retoure_id": {
             "title": "Retoure Id",
             "type": "string"
+          },
+          "signatur_zaehler": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Signatur Zaehler"
+          },
+          "simuliert": {
+            "default": false,
+            "title": "Simuliert",
+            "type": "boolean"
           },
           "status": {
             "title": "Status",
@@ -367330,15 +367587,13 @@
     },
     "/api/v1/pos/checkout": {
       "post": {
-        "description": "POS Checkout — empfängt auch Offline-Queue-Transaktionen.",
+        "description": "Abgleich der Offline-Warteschlange: derselbe signierte Kassenbeleg wie beim Online-Verkauf.",
         "operationId": "pos_checkout_api_v1_pos_checkout_post",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "additionalProperties": true,
-                "title": "Data",
-                "type": "object"
+                "$ref": "#/components/schemas/CheckoutRequest"
               }
             }
           },
@@ -367349,7 +367604,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PosRetourOut"
+                  "$ref": "#/components/schemas/CheckoutResponse"
                 }
               }
             },
@@ -367371,7 +367626,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Checkout pos",
+        "summary": "Offline kassierten Bon nachtraeglich signieren",
         "tags": [
           "pos",
           "retoure"
@@ -368278,7 +368533,7 @@
     },
     "/api/v1/pos/retoure": {
       "post": {
-        "description": "Warenrückgabe / Retoure buchen.",
+        "description": "Warenrueckgabe: signierter Kassenbeleg mit negativen Betraegen, danach Bestandszugang je Position.",
         "operationId": "create_retoure_api_v1_pos_retoure_post",
         "requestBody": {
           "content": {

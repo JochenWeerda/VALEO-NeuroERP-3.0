@@ -16,6 +16,7 @@ import {
   CheckCircle2, AlertCircle, Star, Percent, RotateCcw,
   SplitSquareHorizontal, WifiOff, Printer,
 } from 'lucide-react'
+import { v4 as uuidv4 } from 'uuid'
 import { useFiskalyTSE, type PaymentType, type TSETransaction } from '@/lib/services/fiskaly-tse'
 import { ChangeCalculator } from '@/components/pos/ChangeCalculator'
 import { ArticleSearch } from '@/components/pos/ArticleSearch'
@@ -404,12 +405,16 @@ export default function POSTerminalPage(): JSX.Element {
       setShowSplitPayment(false); setSplitPayments([])
     } catch {
       // Offline-Queue
-      const offlineId = `offline-${Date.now()}`
+      // Die Kennung ist zugleich Transaktionskennung der spaeteren Signatur: eindeutig je Bon, nicht je Millisekunde.
+      const offlineId = `offline-${uuidv4()}`
       void (async () => {
         await posOfflineQueue.enqueue({
           id: offlineId,
           timestamp: new Date().toISOString(),
-          cart: cart.map((i) => ({ artikelnr: i.artikelnr, bezeichnung: i.bezeichnung, ean: i.ean, preis: i.preis, menge: i.menge })),
+          cart: cart.map((i) => ({
+            artikelnr: i.artikelnr, bezeichnung: i.bezeichnung, ean: i.ean, preis: i.preis, menge: i.menge,
+            rabatt_pct: i.rabatt_pct ?? 0, vat_rate: i.vat_rate,
+          })),
           zahlungen: splitEntries
             ? splitEntries.map((e) => ({ art: e.type, betrag: e.amount }))
             : [{ art: selectedMethod ?? 'bar', betrag: currentTotal }],

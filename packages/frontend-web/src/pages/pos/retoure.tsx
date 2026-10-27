@@ -4,7 +4,8 @@
  * Ermöglicht die Rücknahme von Artikeln mit negativem Bon und
  * Wahl der Rückerstattungsart (Bar, EC, Geschenkkarte).
  */
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import { v4 as uuidv4 } from 'uuid'
 import { useNavigate } from '@/app/routing/typed-router'
 import { useMutation } from '@tanstack/react-query'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -96,9 +97,12 @@ export default function RetourePage(): JSX.Element {
   }
 
   // ── Retoure buchen ──────────────────────────────────────────────────────────
+  // Eine Kennung je Retoure: Ein erneutes Senden nach einem Fehler signiert und bucht nicht doppelt.
+  const vorgangRef = useRef(uuidv4())
   const retoureMutation = useMutation({
     mutationFn: async () => {
       const res = await apiClient.post<{ retoure_bon_nr: string; gesamt: number }>('/api/v1/pos/retoure', {
+        vorgang_id: vorgangRef.current,
         original_bon_nr: originalBonNr || undefined,
         kassierer,
         positionen: positionen.map((p) => ({
@@ -115,6 +119,7 @@ export default function RetourePage(): JSX.Element {
       return res.data
     },
     onSuccess: (data) => {
+      vorgangRef.current = uuidv4()
       setSuccessData({ bonNr: data.retoure_bon_nr, gesamt: data.gesamt })
       setShowSuccess(true)
       toast({ title: 'Retoure gebucht', description: `Bon: ${data.retoure_bon_nr}` })
