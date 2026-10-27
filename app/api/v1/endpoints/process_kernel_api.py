@@ -5709,7 +5709,10 @@ def fuege_persistente_knowledge_version_hinzu(knowledge_id: str, payload: dict, 
     from app.repositories.knowledge_repository import KnowledgeRepository
 
     repo = KnowledgeRepository(db)
-    record = repo.add_version(knowledge_id, payload)
+    try:
+        record = repo.add_version(knowledge_id, payload)
+    except PermissionError as exc:
+        raise HTTPException(status_code=403, detail=str(exc)) from exc
     if record is None:
         raise HTTPException(status_code=404, detail=f"KnowledgeObject {knowledge_id!r} nicht gefunden")
     version = max((entry.version for entry in record.versionen), default=1)
@@ -5917,6 +5920,8 @@ def review_knowledge_improvement_proposal(proposal_id: str, payload: dict, db=De
             reviewer_rolle=payload.get("reviewer_rolle"),
             review_notiz=payload.get("review_notiz"),
         )
+    except PermissionError as exc:
+        raise HTTPException(status_code=403, detail=str(exc)) from exc
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
