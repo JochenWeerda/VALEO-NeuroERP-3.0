@@ -2,12 +2,12 @@
  "_note": "Generiert von scripts/rls_rollout.py aus docs/admin/rls-inventory.json; nicht von Hand aendern.",
  "summary": {
   "ready": 0,
-  "pending": 106,
+  "pending": 103,
   "reasons": {
    "dienst": 10,
    "mandant_ermitteln": 1,
-   "standardmandant": 78,
-   "mandant_null": 38,
+   "standardmandant": 76,
+   "mandant_null": 37,
    "uebergreifend": 0,
    "identitaet": 4
   }
@@ -55,15 +55,6 @@
    "standardmandant"
   ],
   "domain_agrar.waagen_vorlagen": [
-   "standardmandant"
-  ],
-  "domain_audit.attestations": [
-   "standardmandant"
-  ],
-  "domain_compliance.data_erasure_requests": [
-   "mandant_null"
-  ],
-  "domain_compliance.intrastat_meldungen": [
    "standardmandant"
   ],
   "domain_crm.business_partners": [

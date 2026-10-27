@@ -253,15 +253,21 @@ def update_meldung(
     params = {**updates, "id": meldung_id, "tenant_id": tenant_id}
 
     try:
-        db.execute(
+        updated = db.execute(
             text(
                 f"UPDATE domain_compliance.intrastat_meldungen "
                 f"SET {set_clauses} WHERE id = :id AND tenant_id = :tenant_id"  # nosec B608  # reviewed-safe: Bezeichner stammen aus einer Allowlist im Code, Werte sind gebunden
             ),
             params,
-        )
+        ).rowcount
+        if not updated:
+            # Fremde oder fehlende Meldung: bis 27.10.2026 meldete der Weg trotzdem "aktualisiert".
+            db.rollback()
+            raise HTTPException(status_code=404, detail="Meldung nicht gefunden")
         db.commit()
         return {"id": meldung_id, "status": "aktualisiert"}
+    except HTTPException:
+        raise
     except Exception as exc:
         db.rollback()
         raise HTTPException(
