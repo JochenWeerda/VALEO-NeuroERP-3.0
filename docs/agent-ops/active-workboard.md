@@ -19551,6 +19551,10 @@ Nachlauf auf7bc7e37fa: CI rot in Migration/Backend/Frontend und Dependencysecuri
 
 ## PENDING-INTEGRATION-20261024 - reserviert, Codex Lead
 
+### NATIVE-DETAIL-ROUTE-PARITY-20261027 - reserviert, native_batch_contracts
+
+Ziel: 19 historische Detailmasken-Routen gegen kanonische ScreenDefinitions und getrennte Anlage-/Entity-Vertraege pruefen; 17 nachgewiesene falsche oder unregistrierte Bindungen gezielt reparieren. Besitz nur der betroffenen Page-Wrapper, drei eigene Routenvertragstests, eigene Builder-Fixtures/Paritaets- und Mounttests sowie QA. Abnahme: bestehende Fach-/Create-Wege bleiben erhalten; mindestens zwei echte geroutete Mounts fuer Entity und Create; keine pauschale Native-Freigabe fuer fachlich offene Routen. Risiken: Customer-360 ist moeglicherweise Cockpit statt editierbare Detailmaske; fachlich unpassende Ersatzdefinitionen nicht umetikettieren. Keine Backend-, RLS-, Inbox-, Vite-, DB- oder Migrationsaenderung; nur private View.
+
 Nutzerauftrag: alle uebrigen offenen Aenderungen commit-/pushfaehig abschliessen; Uebernahme bisher fremder Arbeit ausdruecklich freigegeben. Lead inventarisiert Root und isolierte Commit-Ansicht, gleicht aktive Besitzer ab und integriert mit Dateimanifest und Tests. Bestehende STUDIO-CLOSURE-PARALLEL Owners wieder aktiviert: api_contracts API/Definitionsbindungen, entity_projection zentrale Antwortprojektion, runtime_closure Runtimeevidenz/Objekteinstiege. Lead besitzt generierte Artefakte, QA/Workboard und Integrationsdifferenzen; Dashboard/Workspace-Uebernahme erst nach Bestandspruefung. Kein pauschales Stage/Loeschen fehlender Dateien in der partiellen Commit-Ansicht. Keine neuen Datenbanken/Container, kein Reset. Fertige Teilstaende committen/pushen; offene Fachabnahmen sichtbar halten.
 
 **PENDING-INTEGRATION Intrastat-Erweiterung:** api_contracts besitzt intrastat.py fuer vorhandene Meldung als echten tenantgebundenen Detail-GET sowie screen_definitions_stamm_batch13.py ausschliesslich zugehoerige Definition und eigene Detailtests/QA. Bestehende Validierungsantwort ist keine Entitaet. Portal-Zertifikat bleibt vorerst Architekturpruefung: kein Zugriff auf internes Ops-Zertifikatsinventar ohne nachgewiesene Kunden-/Portalbeziehung; keine Gatefreigabe durch Tenantfilter allein.
@@ -19721,3 +19725,10 @@ Nutzerauftrag: alle uebrigen offenen Aenderungen commit-/pushfaehig abschliessen
 
 
 **RLS-ORDERED-INTEGRATION-20261027 - reserviert, Codex Lead:** Nutzeruebergabe PR55 (Plan), PR56 (P0), PR57 bis PR63 in Reihenfolge. Besitz importierter RLS-Kern, Policies/Migrationen P3/P5, dazu eigene Regressionen und Integrations-QA. Korrektur: gemeinsame system-Zeilen nur lesbar, keine DELETE-Wirkung oder UPDATE-Uebernahme durch Mandanten. Getrennte SELECT/INSERT/UPDATE/DELETE-Policies; keine permissive ALL-Policy. Neue Rolloutdomains bleiben separat bei Claude nach Nutzerprompt, bestehende P3/P5-Dateien nicht parallel editieren. Keine Live-Policyaktivierung, kein P4-Cleanup, kein Probe-Reset. Bestehende Studio-WIP und Claims bleiben erhalten. Vorgehen: Inhaltspreflight, geordnete Mergecommits, negative Policy-Vertraege und echte PG-Abnahme mit vorhandener valeo_probe und zurueckgerollten eigenen Testtabellen, nur nach Statuspruefung.
+
+
+## RLS-PLAN-20261026 - reserviert, Claude Code
+
+**Owner:** Claude Code. **Basis:** `codex/migration-parity-repair-20261022`, Zweig `claude/rls-plan-20261026`. **Nutzerauftrag 2026-10-26:** Plan fuer datenbankseitige Mandantentrennung (PostgreSQL-RLS, SAP-Prinzip implizite Mandantenbindung) auf Basis eines Soll-Ist-Inventars. **Dateibesitz:** `docs/architecture/rls-mandantenkernel-plan.md`. **Grenzen:** nur Plan und lesendes Inventar; keine Code-, Schema- oder Datenaenderung.
+
+**RLS-PLAN-20261026 vorgelegt (Claude Code):** Plan `docs/architecture/rls-mandantenkernel-plan.md` mit lesendem Inventar (817 Tabellen, 683 mit tenant_id, 0 RLS; Kontext fail-open ueber DEFAULT_TENANT_ID; eine zentrale Engine; 3 297 Handfilter). Phasen P0-P7, Pilot-Vorschlag domain_finance; Entscheidungen beim Nutzer offen. Keine Code-/Schemaaenderung.
