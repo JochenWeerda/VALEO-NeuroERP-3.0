@@ -26546,6 +26546,12 @@
             "title": "Name",
             "type": "string"
           },
+          "shared": {
+            "default": false,
+            "description": "Gemeinsame Vorlage fuer alle Mandanten (nur lesen und anwenden)",
+            "title": "Shared",
+            "type": "boolean"
+          },
           "trigger_config": {
             "anyOf": [
               {
