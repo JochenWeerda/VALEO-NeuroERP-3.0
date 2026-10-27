@@ -2,11 +2,11 @@
  "_note": "Generiert von scripts/rls_rollout.py aus docs/admin/rls-inventory.json; nicht von Hand aendern.",
  "summary": {
   "ready": 0,
-  "pending": 95,
+  "pending": 93,
   "reasons": {
    "dienst": 10,
    "mandant_ermitteln": 1,
-   "standardmandant": 70,
+   "standardmandant": 67,
    "mandant_null": 35,
    "uebergreifend": 0,
    "identitaet": 4
@@ -14,9 +14,6 @@
  },
  "ready": [],
  "pending": {
-  "domain_agrar.agrar_biostimulanzien": [
-   "standardmandant"
-  ],
   "domain_agrar.agrar_duenger": [
    "standardmandant"
   ],
@@ -104,9 +101,6 @@
   "domain_erp.open_items": [
    "standardmandant"
   ],
-  "domain_inventory.agrar_contract_allocations": [
-   "standardmandant"
-  ],
   "domain_inventory.agrar_contracts": [
    "mandant_null",
    "standardmandant"
@@ -177,8 +171,7 @@
    "standardmandant"
   ],
   "domain_inventory.weighing_tickets": [
-   "mandant_null",
-   "standardmandant"
+   "mandant_null"
   ],
   "domain_log.log_touren": [
    "dienst",
