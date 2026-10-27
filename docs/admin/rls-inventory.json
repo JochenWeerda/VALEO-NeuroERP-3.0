@@ -3,12 +3,12 @@
  "summary": {
   "tables": 775,
   "by_class": {
-   "A": 611,
-   "B": 52,
+   "A": 612,
+   "B": 51,
    "C": 52,
    "D": 60
   },
-  "rls_enabled": 508,
+  "rls_enabled": 512,
   "tenant_types": {
    "character varying": 296,
    "character varying(100)": 9,
@@ -873,9 +873,9 @@
    "table": "domain_audit.attestations",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_compliance.compliance_artikel_sperre_audit",
@@ -895,11 +895,11 @@
   },
   {
    "table": "domain_compliance.compliance_pcn_status_log",
-   "class": "B",
+   "class": "A",
    "tenant_type": "character varying(36)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_compliance.compliance_sachkunde_register",
@@ -921,9 +921,9 @@
    "table": "domain_compliance.data_erasure_requests",
    "class": "A",
    "tenant_type": "character varying(64)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_compliance.eudr_due_diligence",
@@ -961,9 +961,9 @@
    "table": "domain_compliance.intrastat_meldungen",
    "class": "A",
    "tenant_type": "character varying(80)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_compliance.lksg_supplier_risk_assessments",
