@@ -19761,3 +19761,6 @@ Nutzerauftrag: alle uebrigen offenen Aenderungen commit-/pushfaehig abschliessen
 
 
 **RLS-P5 umgesetzt (Claude Code):** scripts/rls_rollout.py (bereit vs. zurueckgestellt mit Grund), Migration rls_rollout_20261026 auf 478 Tabellen -> 500 mit RLS, 111 zurueckgestellt; Ratsche: ready leer; jede Policy als valeo_app ausgewertet. Heuristik und Grenzen in QA docs/quality-assurance/rls-p5-rollout-20261026.md; live nicht angewendet.
+
+
+**RLS-P6 umgesetzt (Claude Code):** Rolle valeo_system (BYPASSRLS, live angelegt ohne Passwort), system_session() nur in cross_tenant_scope, uebergreifende Worker darauf umgestellt, Compose/.env.example; Analyse: uebergreifend blockiert nur ohne Systemverbindung -> rls_system_role_20261026 (business_partners), 501 Tabellen mit RLS. Dienste unter services/* bewusst ohne RLS (Mandant nicht tokengebunden), Vertrag: kein Dienst liest RLS-Tabelle. QA docs/quality-assurance/rls-p6-system-role-20261026.md.

@@ -93,7 +93,7 @@ def test_for_each_tenant_isoliert_fehler(monkeypatch):
 # --- Vertrag: Worker ---------------------------------------------------------------------
 
 WORKER_FILES = sorted((ROOT / "app" / "workers").glob("*.py")) + [ROOT / "app" / "services" / "scheduler_service.py"]
-OPENS_DB = re.compile(r"\bSessionLocal\(\)|\bnext\(get_db\(\)\)")
+OPENS_DB = re.compile(r"\bSessionLocal\(\)|\bnext\(get_db\(\)\)|\bsystem_session\(\)")
 SCOPED = re.compile(r"\b(?:tenant_scope|cross_tenant_scope|for_each_tenant|cross_tenant_job)\(")
 FALLBACK = re.compile(r"\bDEFAULT_TENANT_ID\b|tenant_id[\"']?\s*,\s*[\"']default[\"']|tenant_id:\s*str\s*=\s*[\"']default[\"']")
 

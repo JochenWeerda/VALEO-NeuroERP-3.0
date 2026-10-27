@@ -9,7 +9,7 @@ from typing import Optional
 from datetime import datetime
 from sqlalchemy.orm import Session
 
-from app.core.database import SessionLocal
+from app.core.database import system_session
 from app.core.tenant_context import cross_tenant_scope
 from app.agents.workflows.compliance_copilot import check_compliance
 from app.domains.shared.events import IntegrationEvent, get_event_publisher
@@ -57,7 +57,7 @@ class ComplianceMonitorWorker:
             await self._run_compliance_checks_all_tenants()
 
     async def _run_compliance_checks_all_tenants(self) -> None:
-        db: Session = SessionLocal()
+        db: Session = system_session()
         
         try:
             from app.infrastructure.models import Customer, Article

@@ -14,6 +14,10 @@ Rollen (clusterweit, idempotent)
 - ``valeo_app``        LOGIN, Daten lesen/schreiben, keine Schemaaenderung
 - ``valeo_agent``      LOGIN, wie valeo_app (Agenten; DDL nur ueber valeo_migrator)
 - ``valeo_audit``      LOGIN, liest nur ``governance.ddl_events``
+- ``valeo_system``     LOGIN, Datenrechte wie valeo_app, als einzige Rolle ``BYPASSRLS``: nur fuer
+                       namentlich freigegebene mandantenuebergreifende Worker (RLS-Plan P6,
+                       Nutzerentscheidung 2026-10-26); ihre Verbindung oeffnet ausschliesslich
+                       ``app.core.database.system_session()`` innerhalb von ``cross_tenant_scope``
 - ``valeo_governance`` NOLOGIN, Eigentuemer des Protokolls; valeo_owner darf nur einfuegen
 
 Der Superuser bleibt fuer Entwicklung, Einrichtung und Anpassungen (Nutzerentscheidung
@@ -40,12 +44,15 @@ import os
 import sys
 from dataclasses import dataclass
 
-OWNER, GOVERNANCE, MIGRATOR, APP, AGENT, AUDIT = (
+OWNER, GOVERNANCE, MIGRATOR, APP, AGENT, AUDIT, SYSTEM = (
     "valeo_owner", "valeo_governance", "valeo_migrator", "valeo_app", "valeo_agent", "valeo_audit",
+    "valeo_system",
 )
-LOGIN_ROLES = {MIGRATOR: "MIGRATOR", APP: "APP", AGENT: "AGENT", AUDIT: "AUDIT"}
+LOGIN_ROLES = {MIGRATOR: "MIGRATOR", APP: "APP", AGENT: "AGENT", AUDIT: "AUDIT", SYSTEM: "SYSTEM"}
 NOLOGIN_ROLES = (OWNER, GOVERNANCE)
-DATA_ROLES = (APP, AGENT)
+DATA_ROLES = (APP, AGENT, SYSTEM)
+# The one role that row-level security does not filter (RLS plan P6).
+BYPASS_RLS_ROLES = (SYSTEM,)
 SKIPPED_SCHEMAS = ("governance", "information_schema")
 
 
@@ -68,7 +75,8 @@ def role_statements() -> list[str]:
             f"DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '{role}') "
             f"THEN CREATE ROLE {role} {login}; END IF; END $$"
         )
-        statements.append(f"ALTER ROLE {role} {login} NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS INHERIT")
+        rls = "BYPASSRLS" if role in BYPASS_RLS_ROLES else "NOBYPASSRLS"
+        statements.append(f"ALTER ROLE {role} {login} NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION {rls} INHERIT")
     statements.append(f"GRANT {OWNER} TO {MIGRATOR}")
     # Every migrator login acts as the owner, so new objects never belong to a login role.
     statements.append(f"ALTER ROLE {MIGRATOR} SET role = '{OWNER}'")

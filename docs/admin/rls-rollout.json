@@ -2,13 +2,13 @@
  "_note": "Generiert von scripts/rls_rollout.py aus docs/admin/rls-inventory.json; nicht von Hand aendern.",
  "summary": {
   "ready": 0,
-  "pending": 111,
+  "pending": 110,
   "reasons": {
    "dienst": 10,
    "mandant_ermitteln": 1,
    "standardmandant": 80,
    "mandant_null": 40,
-   "uebergreifend": 3,
+   "uebergreifend": 0,
    "identitaet": 4
   }
  },
@@ -68,8 +68,7 @@
   ],
   "domain_crm.business_partners": [
    "mandant_null",
-   "standardmandant",
-   "uebergreifend"
+   "standardmandant"
   ],
   "domain_crm.credit_limits": [
    "standardmandant"
@@ -115,9 +114,6 @@
   ],
   "domain_einkauf.lieferanten": [
    "mandant_null"
-  ],
-  "domain_erp.business_partners": [
-   "uebergreifend"
   ],
   "domain_erp.dunning_notices": [
    "mandant_null"
@@ -272,8 +268,7 @@
   ],
   "domain_shared.audit_logs": [
    "mandant_null",
-   "standardmandant",
-   "uebergreifend"
+   "standardmandant"
   ],
   "domain_shared.branches": [
    "standardmandant"
