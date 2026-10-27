@@ -1034,6 +1034,7 @@ def build_finance_buchungsvorlagen_liste() -> dict[str, Any]:
              "priority": "secondary"},
             {"key": "currency", "label": "Waehrung", "priority": "tertiary"},
             {"key": "active", "label": "Aktiv", "renderKind": "boolean", "filterable": True, "priority": "secondary"},
+            {"key": "shared", "label": "Gemeinsam", "renderKind": "boolean", "priority": "secondary"},
         ],
         actions=[_EXPORT],
         row_actions=[
@@ -1048,7 +1049,7 @@ def build_finance_buchungsvorlagen_liste() -> dict[str, Any]:
              ]},
             {"key": "loeschen", "label": "Loeschen", "dangerLevel": "high", "permission": "finance.buchungsvorlage.delete",
              "commandEndpoint": "/api/v1/finance/booking-templates/{entity_id}", "method": "DELETE",
-             "requiresConfirmation": True},
+             "requiresConfirmation": True, "visibleWhen": {"field": "shared", "values": [False]}},
         ],
         purpose="Wiederkehrende Buchungen als Entwurf erzeugen; der Entwurf geht durch die normale Buchungspruefung.",
         prompts=["Welche Buchungsvorlagen gibt es fuer Abschreibungen?", "Wende die Mietvorlage fuer Oktober an."],

@@ -68,3 +68,14 @@ Die 77 API-Vertraege bestaetigen vorbereitete Quellen der privaten
 Integrationsansicht; ihre gesamte Studio-/Projektionslieferung bleibt ein
 separater Integrationsslice. Generierte Gesamtartefakte duerfen nur gemeinsam
 mit ihren jeweiligen kanonischen Quellen veroeffentlicht werden.
+
+
+## Buchungsvorlagenmaske aus Claudes Handshake
+
+Der kanonische Builder kennzeichnet gemeinsame Vorlagen mit Gemeinsam und
+zeigt Loeschen nur bei shared=false. Anwenden bleibt fuer aktive gemeinsame
+Vorlagen moeglich. Der Buildervertrag ist Teil der 269 bestandenen Tests.
+Der gesamte Studio-Versionskatalog und das Agentenhandbuch werden mit dem
+noch ausstehenden Studio-/Projektions-Integrationsslice aus allen
+kanonischen Quellen neu erzeugt; hier wird kein neuer produktiver
+Studio-Release behauptet.
