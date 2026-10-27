@@ -561,9 +561,9 @@ async def get_eudr_status(
 
 @router.get("/ustva", response_model=ComplianceOut, summary="Ustva status abrufen")
 async def get_ustva_status(
-    tenant_id: Optional[str] = Query(None, description="Tenant context"),
     periode: Optional[str] = Query(None, description="Meldezeitraum z.B. 2026-03"),
     db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ) -> dict:
     """
     UStVA-Bereitschaftsstatus — aggregiert aus gebuchten Journal-Einträgen der Periode.
@@ -571,7 +571,7 @@ async def get_ustva_status(
     from datetime import timezone
     from sqlalchemy import text as _text
     current_period = periode or datetime.now(timezone.utc).strftime("%Y-%m")
-    tid = tenant_id or "default"
+    tid = tenant_id
     try:
         row = db.execute(
             _text("""
@@ -627,15 +627,15 @@ async def get_ustva_status(
 
 @router.get("/bvl-umsaetze", response_model=list[ComplianceOut], summary="Bvl umsaetze abrufen")
 async def get_bvl_umsaetze(
-    tenant_id: Optional[str] = Query(None, description="Tenant context"),
     db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ) -> list:
     """
     PSM-Umsaetze fuer BVL-Meldung aggregieren.
     Liefert Wirkstoffe mit Absatzmengen aus Lagerbewegungen/Rechnungen.
     """
     from sqlalchemy import text
-    tid = tenant_id or "default"
+    tid = tenant_id
     try:
         rows = db.execute(
             text("""
@@ -646,7 +646,7 @@ async def get_bvl_umsaetze(
                 JOIN domain_inventory.articles a ON a.id = sm.article_id
                 WHERE sm.tenant_id = :tid
                   AND sm.movement_type = 'out'
-                  AND a.article_group = 'PSM'
+                  AND a.pflanzenschutzmittel
                   AND EXTRACT(YEAR FROM sm.movement_date) = EXTRACT(YEAR FROM CURRENT_DATE) - 1
                 GROUP BY a.name, a.unit
                 ORDER BY menge DESC
@@ -654,8 +654,11 @@ async def get_bvl_umsaetze(
             {"tid": tid},
         ).fetchall()
         return [{"wirkstoff": r[0], "menge": float(r[1]), "einheit": r[2]} for r in rows]
-    except Exception:
-        return []
+    except Exception as exc:
+        # Bis 27.10.2026 lieferte ein Fehler (die Abfrage nannte die fehlende Spalte article_group) still eine leere
+        # Meldung; eine leere BVL-Meldung ist von "keine PSM verkauft" nicht zu unterscheiden.
+        logger.exception("BVL-Umsaetze konnten nicht ermittelt werden")
+        raise HTTPException(status_code=500, detail="BVL-Umsaetze konnten nicht ermittelt werden") from exc
 
 
 # ── COMP-SPERR-001: Artikel-Sperr-Engine ─────────────────────────────────────

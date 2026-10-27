@@ -3,14 +3,14 @@
  "summary": {
   "tables": 775,
   "by_class": {
-   "A": 638,
-   "B": 45,
-   "C": 32,
+   "A": 651,
+   "B": 38,
+   "C": 26,
    "D": 60
   },
-  "rls_enabled": 561,
+  "rls_enabled": 588,
   "tenant_types": {
-   "character varying": 316,
+   "character varying": 322,
    "character varying(100)": 9,
    "character varying(120)": 39,
    "character varying(128)": 1,
@@ -91,7 +91,6 @@
   "driver_connect": {},
   "default_tenant": {
    "app/api/v1/endpoints/agribusiness.py": 1,
-   "app/api/v1/endpoints/article_extensions.py": 1,
    "app/api/v1/endpoints/articles.py": 1,
    "app/api/v1/endpoints/branches.py": 1,
    "app/api/v1/endpoints/chart_of_accounts.py": 1,
@@ -101,9 +100,6 @@
    "app/api/v1/endpoints/master_data.py": 1,
    "app/api/v1/endpoints/messages.py": 1,
    "app/api/v1/endpoints/nutrient_compositions.py": 1,
-   "app/api/v1/endpoints/nve.py": 1,
-   "app/api/v1/endpoints/pos_retoure.py": 1,
-   "app/api/v1/endpoints/preparation_lists.py": 1,
    "app/api/v1/endpoints/reklamation_api.py": 1,
    "app/api/v1/endpoints/sales_delivery_notes.py": 1,
    "app/api/v1/endpoints/webhooks.py": 3,
@@ -2785,17 +2781,17 @@
    "table": "domain_inventory.article_batches",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_inventory.article_documents",
    "class": "A",
    "tenant_type": "text",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_inventory.article_price_thresholds",
@@ -2809,29 +2805,25 @@
    "table": "domain_inventory.article_selections",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_inventory.article_suppliers",
-   "class": "C",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying",
+   "rls": true,
    "force_rls": false,
-   "policies": 0,
-   "tenant_parents": [
-    "domain_crm.business_partners",
-    "domain_inventory.articles"
-   ]
+   "policies": 4
   },
   {
    "table": "domain_inventory.articles",
-   "class": "B",
+   "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_inventory.bin_locations",
@@ -2845,9 +2837,9 @@
    "table": "domain_inventory.bin_stock",
    "class": "A",
    "tenant_type": "character varying(64)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_inventory.charge_lineage_links",
@@ -2883,25 +2875,19 @@
   },
   {
    "table": "domain_inventory.drying_rule_factor_ranges",
-   "class": "C",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying",
+   "rls": true,
    "force_rls": false,
-   "policies": 0,
-   "tenant_parents": [
-    "domain_inventory.drying_rule_sets"
-   ]
+   "policies": 4
   },
   {
    "table": "domain_inventory.drying_rule_lookup_rows",
-   "class": "C",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying",
+   "rls": true,
    "force_rls": false,
-   "policies": 0,
-   "tenant_parents": [
-    "domain_inventory.drying_rule_sets"
-   ]
+   "policies": 4
   },
   {
    "table": "domain_inventory.drying_rule_sets",
@@ -2915,32 +2901,25 @@
    "table": "domain_inventory.epcis_events",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_inventory.harvest_acceptance_lines",
-   "class": "C",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying",
+   "rls": true,
    "force_rls": false,
-   "policies": 0,
-   "tenant_parents": [
-    "domain_inventory.harvest_acceptances"
-   ]
+   "policies": 4
   },
   {
    "table": "domain_inventory.harvest_acceptance_positions",
-   "class": "C",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying",
+   "rls": true,
    "force_rls": false,
-   "policies": 0,
-   "tenant_parents": [
-    "domain_inventory.articles",
-    "domain_inventory.harvest_acceptances"
-   ]
+   "policies": 4
   },
   {
    "table": "domain_inventory.harvest_acceptances",
@@ -2978,33 +2957,33 @@
    "table": "domain_inventory.inventory_count_lines",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_inventory.inventory_counts",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_inventory.inventory_lot_movements",
-   "class": "B",
+   "class": "A",
    "tenant_type": "character varying(36)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_inventory.inventory_lots",
    "class": "A",
    "tenant_type": "character varying(36)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_inventory.inventory_movement_types",
@@ -3018,9 +2997,9 @@
    "table": "domain_inventory.inventory_stock_movements",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_inventory.lkw_annahme_queue",
@@ -3072,11 +3051,11 @@
   },
   {
    "table": "domain_inventory.nawaro_print_notifications",
-   "class": "B",
+   "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_inventory.nawaro_raps_profiles",
@@ -3106,17 +3085,17 @@
    "table": "domain_inventory.preparation_list_lines",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_inventory.preparation_lists",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_inventory.price_adjustment_rules",
@@ -3138,9 +3117,9 @@
    "table": "domain_inventory.shipping_units",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_inventory.silo_cells",
@@ -3208,38 +3187,35 @@
   },
   {
    "table": "domain_inventory.stock_item",
-   "class": "B",
+   "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_inventory.stock_locations",
-   "class": "C",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying",
+   "rls": true,
    "force_rls": false,
-   "policies": 0,
-   "tenant_parents": [
-    "domain_inventory.warehouses"
-   ]
+   "policies": 4
   },
   {
    "table": "domain_inventory.stock_movement",
-   "class": "B",
+   "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_inventory.stock_movements",
-   "class": "B",
+   "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_inventory.storage_fee_runs",
@@ -3269,9 +3245,9 @@
    "table": "domain_inventory.warehouse_bins",
    "class": "A",
    "tenant_type": "character varying(64)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_inventory.warehouse_transfer_lines",
@@ -3293,17 +3269,17 @@
    "table": "domain_inventory.warehouse_zones",
    "class": "A",
    "tenant_type": "character varying(64)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_inventory.warehouses",
-   "class": "B",
+   "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_inventory.weighing_measurements",

@@ -9,14 +9,13 @@ from fastapi import Response, APIRouter, Depends, HTTPException, Query, UploadFi
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from ....core.config import settings
 from ....core.database import get_db
 from ....infrastructure.models import ArticleBatch, ArticleSelection
 from ..schemas.base import PaginatedResponse, BaseSchema
 from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
+from app.core.tenant import get_tenant_id
 
 router = APIRouter()
-DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 
 class BatchOut(BaseSchema):
@@ -55,14 +54,13 @@ class RecipeImportRequest(BaseModel):
 @router.get("/batches", response_model=PaginatedResponse[BatchOut], summary="Article batches auflisten")
 async def list_article_batches(
     article_id: Optional[str] = Query(None),
-    tenant_id: Optional[str] = Query(None),
     skip: int = Query(0, ge=0),
     limit: int = Query(25, ge=1, le=200),
     db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """GET Artikelbestand (Chargen)"""
-    tid = tenant_id or DEFAULT_TENANT
-    q = db.query(ArticleBatch).filter(ArticleBatch.tenant_id == tid)
+    q = db.query(ArticleBatch).filter(ArticleBatch.tenant_id == tenant_id)
     if article_id:
         q = q.filter(ArticleBatch.article_id == article_id)
     total = q.count()
@@ -105,30 +103,28 @@ async def import_recipe(payload: RecipeImportRequest):
 
 @router.get("/selections", response_model=list[SelectionOut], summary="Article selections auflisten")
 async def list_article_selections(
-    tenant_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """GET Artikel Selektionen ermitteln"""
-    tid = tenant_id or DEFAULT_TENANT
-    items = db.query(ArticleSelection).filter(ArticleSelection.tenant_id == tid).all()
+    items = db.query(ArticleSelection).filter(ArticleSelection.tenant_id == tenant_id).all()
     return [SelectionOut.model_validate(i) for i in items]
 
 
 @router.post("/selections", response_model=SelectionOut, status_code=201, summary="Article selection anlegen", dependencies=SCHREIBEN["STAMMDATEN"])
 async def create_article_selection(
     payload: SelectionCreate,
-    tenant_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """POST Artikel Selektionen anlegen"""
     from app.core.uuid7 import uuid7
-    tid = tenant_id or DEFAULT_TENANT
     obj = ArticleSelection(
         id=uuid7(),
         article_id=payload.article_id,
         selection_code=payload.selection_code,
         label=payload.label,
-        tenant_id=tid,
+        tenant_id=tenant_id,
     )
     db.add(obj)
     db.commit()
@@ -137,9 +133,13 @@ async def create_article_selection(
 
 
 @router.delete("/selections/{sel_id}", status_code=204, response_class=Response, response_model=None, summary="Article selection löschen", dependencies=SCHREIBEN["STAMMDATEN"])
-async def delete_article_selection(sel_id: str, db: Session = Depends(get_db)):
+async def delete_article_selection(
+    sel_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id),
+):
     """DEL Artikel Selektionen löschen"""
-    obj = db.query(ArticleSelection).filter(ArticleSelection.id == sel_id).first()
+    obj = db.query(ArticleSelection).filter(
+        ArticleSelection.id == sel_id, ArticleSelection.tenant_id == tenant_id
+    ).first()
     if not obj:
         raise HTTPException(404, "Selection not found")
     db.delete(obj)

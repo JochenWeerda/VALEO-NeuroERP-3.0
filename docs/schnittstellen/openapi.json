@@ -141220,17 +141220,6 @@
             "title": "Positionen",
             "type": "array"
           },
-          "tenant_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Tenant Id"
-          },
           "zahlungsrueckerstattung": {
             "default": "bar",
             "title": "Zahlungsrueckerstattung",
@@ -235254,22 +235243,6 @@
           },
           {
             "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          },
-          {
-            "in": "query",
             "name": "skip",
             "required": false,
             "schema": {
@@ -235565,24 +235538,6 @@
       "get": {
         "description": "GET Artikel Selektionen ermitteln",
         "operationId": "list_article_selections_api_v1_articles_selections_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -235597,16 +235552,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -235623,24 +235568,6 @@
       "post": {
         "description": "POST Artikel Selektionen anlegen",
         "operationId": "create_article_selection_api_v1_articles_selections_post",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -244594,26 +244521,6 @@
       "get": {
         "description": "PSM-Umsaetze fuer BVL-Meldung aggregieren.\nLiefert Wirkstoffe mit Absatzmengen aus Lagerbewegungen/Rechnungen.",
         "operationId": "get_bvl_umsaetze_api_v1_compliance_bvl_umsaetze_get",
-        "parameters": [
-          {
-            "description": "Tenant context",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Tenant context",
-              "title": "Tenant Id"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -244628,16 +244535,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -246308,24 +246205,6 @@
         "description": "UStVA-Bereitschaftsstatus — aggregiert aus gebuchten Journal-Einträgen der Periode.",
         "operationId": "get_ustva_status_api_v1_compliance_ustva_get",
         "parameters": [
-          {
-            "description": "Tenant context",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Tenant context",
-              "title": "Tenant Id"
-            }
-          },
           {
             "description": "Meldezeitraum z.B. 2026-03",
             "in": "query",
@@ -354807,22 +354686,6 @@
         "parameters": [
           {
             "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          },
-          {
-            "in": "query",
             "name": "skip",
             "required": false,
             "schema": {
@@ -354881,24 +354744,6 @@
       "post": {
         "description": "POST NVE anlegen",
         "operationId": "create_nve_api_v1_nve__post",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -366482,7 +366327,7 @@
     },
     "/api/v1/pos/retoure": {
       "post": {
-        "description": "Warenrückgabe / Retoure buchen.",
+        "description": "Warenrückgabe / Retoure buchen (Mandant aus dem Token, bis 27.10.2026 aus dem Rumpf).",
         "operationId": "create_retoure_api_v1_pos_retoure_post",
         "requestBody": {
           "content": {
@@ -369873,22 +369718,6 @@
         "description": "GET Rüstlisten ermitteln",
         "operationId": "list_preparation_lists_api_v1_preparation_lists__get",
         "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          },
           {
             "in": "query",
             "name": "skip",

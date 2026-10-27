@@ -30,7 +30,6 @@ LITERALS = ("system", "default")
 
 # Stand 27.10.2026; nur verkleinern. Neue Eintraege sind ein Rueckfall, kein Ausnahmefall.
 DEFAULT_BASELINE = {
-    "app/api/v1/endpoints/compliance.py": 2,
     "app/api/v1/endpoints/controlling_actions.py": 6,
     "app/api/v1/endpoints/edi_api.py": 1,
     "app/api/v1/endpoints/ernte_planung.py": 1,

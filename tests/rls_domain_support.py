@@ -163,12 +163,20 @@ def seed_row(conn, table: str, tenant: str | None, _depth: int = 0, _parents: bo
             continue
         value = _value(conn, type_name, typtype, typid)
         if isinstance(value, int) and not isinstance(value, bool) and name in unique:
-            value = uuid.uuid4().int % 900_000_000 + 1000
+            value = uuid.uuid4().int % _integer_room(type_name) + 1
         row[name] = value
     cols = ", ".join(row)
     placeholders = ", ".join(f":{c}" for c in row)
     return dict(conn.execute(sa.text(f"INSERT INTO {table} ({cols}) VALUES ({placeholders}) RETURNING *"),
                              row).mappings().one())
+
+
+def _integer_room(type_name: str) -> int:
+    """Groesster zufaellige Ganzzahlwert, der in den Typ passt (numeric(5,2) fasst nur 999)."""
+    match = re.match(r"numeric\((\d+),(\d+)\)", type_name)
+    if match:
+        return min(10 ** (int(match[1]) - int(match[2])) - 1, 900_000_000)
+    return 30_000 if type_name == "smallint" else 900_000_000
 
 
 def primary_key(conn, table: str) -> str:
@@ -223,18 +231,20 @@ def as_owner(conn, sql: str, params=None):
 
 
 def assert_tenant_isolation(conn, table: str, own: str, foreign: str, shared: str | None,
-                            key: str = "id", new_row=None) -> None:
+                            key: str = "id", new_row=None, values: dict | None = None) -> None:
     """Die Abnahmefaelle fuer eine Tabelle ohne system-Lesefreigabe.
 
     own/foreign/shared: Schluessel von Zeilen der Mandanten A, B und 'system'.
     new_row: callable(tenant) -> Schluessel einer neu angelegten Zeile (als valeo_app).
+    values: feste Spaltenwerte fuer jede Anlage (z. B. eine registrierte Belegart, die ein Trigger prueft).
     """
+    values = values or {}
     by_key = f"{key} = :k"
     with tenant_scope(A, "test"):
         assert keys(conn, table, key) >= {own}
         assert not keys(conn, table, key) & {foreign, shared}
         # eigener Mandant: anlegen, aendern, loeschen
-        created = (new_row or (lambda t: insert_row(conn, table, t, key)))(A)
+        created = (new_row or (lambda t: insert_row(conn, table, t, key, **values)))(A)
         assert affected(conn, f"UPDATE {table} SET tenant_id = tenant_id WHERE {by_key}", {"k": created}) == 1
         assert affected(conn, f"DELETE FROM {table} WHERE {by_key}", {"k": created}) == 1
         # fremder Mandant und system: nicht sichtbar, nicht aenderbar, nicht loeschbar
@@ -244,7 +254,7 @@ def assert_tenant_isolation(conn, table: str, own: str, foreign: str, shared: st
             assert affected(conn, f"DELETE FROM {table} WHERE {by_key}", {"k": other}) == 0
         # anlegen fuer fremden Mandanten oder system
         for tenant in (B, SYSTEM):
-            assert "row-level security" in rejected_insert(conn, table, tenant, key)
+            assert "row-level security" in rejected_insert_with(conn, table, tenant, key, **values)
         # tenant_id-Wechsel der eigenen Zeile
         for tenant in (B, SYSTEM):
             assert "row-level security" in rejected(
@@ -252,7 +262,7 @@ def assert_tenant_isolation(conn, table: str, own: str, foreign: str, shared: st
     # ohne Kontext: nichts sichtbar, nichts schreibbar
     assert keys(conn, table, key) == set()
     assert affected(conn, f"DELETE FROM {table}") == 0
-    rejected_insert(conn, table, A, key)
+    rejected_insert_with(conn, table, A, key, **values)
     with cross_tenant_scope("test: ohne Systemverbindung"):
         assert keys(conn, table, key) == set()
     # der Eigentuemer sieht alles unveraendert
