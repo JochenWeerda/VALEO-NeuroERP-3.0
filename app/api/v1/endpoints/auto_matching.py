@@ -16,6 +16,7 @@ import re
 from app.core.uuid7 import uuid7
 
 from ....core.database import get_db
+from app.core.tenant import get_tenant_id
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +79,6 @@ class AutoMatchRequest(BaseModel):
     bank_account: Optional[str] = Field(None, description="Match for specific bank account")
     auto_apply: bool = Field(default=False, description="Automatically apply high-confidence matches")
     min_confidence: float = Field(default=0.8, ge=0, le=1, description="Minimum confidence for auto-apply")
-    tenant_id: str = Field(default="system")
 
 
 class MatchingStatistics(BaseModel):
@@ -96,7 +96,7 @@ class MatchingStatistics(BaseModel):
 @router.get("/rules", response_model=List[MatchingRule], summary="Matching rules auflisten", dependencies=[Depends(finance_read)])
 async def list_matching_rules(
     active_only: bool = Query(True, description="Show only active rules"),
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -182,7 +182,7 @@ async def list_matching_rules(
 @router.post("/rules", response_model=MatchingRule, status_code=201, summary="Matching rule anlegen", dependencies=[Depends(finance_write)])
 async def create_matching_rule(
     rule: MatchingRuleCreate,
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -241,7 +241,7 @@ async def create_matching_rule(
 @router.get("/rules/{rule_id}", response_model=MatchingRule, summary="Matching rule abrufen", dependencies=[Depends(finance_read)])
 async def get_matching_rule(
     rule_id: str,
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Get a single matching rule by ID."""
@@ -274,7 +274,7 @@ async def get_matching_rule(
 async def update_matching_rule(
     rule_id: str,
     rule: MatchingRuleCreate,
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Update a matching rule."""
@@ -319,7 +319,7 @@ async def update_matching_rule(
 @router.delete("/rules/{rule_id}", status_code=204, response_class=Response, response_model=None, summary="Matching rule löschen", dependencies=[Depends(finance_admin)])
 async def delete_matching_rule(
     rule_id: str,
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Delete a matching rule."""
@@ -439,14 +439,15 @@ def _calculate_date_match_confidence(
 @router.post("/match", response_model=List[MatchResult], summary="Match auto", dependencies=[Depends(finance_write)])
 async def auto_match(
     request: AutoMatchRequest,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """
     Perform automatic matching of bank statement lines with open items.
     """
     try:
         # Get matching rules
-        rules = await list_matching_rules(active_only=True, tenant_id=request.tenant_id, db=db)
+        rules = await list_matching_rules(active_only=True, tenant_id=tenant_id, db=db)
         
         # Get unmatched bank statement lines
         if request.statement_id:
@@ -459,7 +460,7 @@ async def auto_match(
             """)
             lines_rows = db.execute(lines_query, {
                 "statement_id": request.statement_id,
-                "tenant_id": request.tenant_id
+                "tenant_id": tenant_id
             }).fetchall()
         else:
             lines_query = text("""
@@ -469,7 +470,7 @@ async def auto_match(
                 WHERE tenant_id = :tenant_id
                 AND (status = 'UNMATCHED' OR status IS NULL)
             """)
-            params = {"tenant_id": request.tenant_id}
+            params = {"tenant_id": tenant_id}
             
             if request.bank_account:
                 lines_query = text(str(lines_query) + " AND bank_account = :bank_account")  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
@@ -484,7 +485,7 @@ async def auto_match(
             WHERE tenant_id = :tenant_id AND offen > 0
         """)
         
-        op_rows = db.execute(op_query, {"tenant_id": request.tenant_id}).fetchall()
+        op_rows = db.execute(op_query, {"tenant_id": tenant_id}).fetchall()
         
         # Build open items lookup
         open_items = {}
@@ -663,7 +664,7 @@ async def auto_match(
                     db.execute(update_line_query, {
                         "line_id": line_id,
                         "op_id": matched_op_id,
-                        "tenant_id": request.tenant_id
+                        "tenant_id": tenant_id
                     })
                     
                     # Create match record
@@ -676,7 +677,7 @@ async def auto_match(
                     
                     db.execute(match_insert, {
                         "id": match_id,
-                        "tenant_id": request.tenant_id,
+                        "tenant_id": tenant_id,
                         "line_id": line_id,
                         "op_id": matched_op_id,
                         "confidence": best_confidence,
@@ -712,7 +713,7 @@ async def auto_match(
 async def apply_match(
     line_id: str,
     op_id: str = Query(..., description="Open item ID to match"),
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -772,7 +773,7 @@ async def apply_match(
 @router.get("/statistics", response_model=MatchingStatistics, summary="Matching statistics abrufen", dependencies=[Depends(finance_read)])
 async def get_matching_statistics(
     statement_id: Optional[str] = Query(None, description="Filter by statement ID"),
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """

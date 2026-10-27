@@ -2,7 +2,8 @@
  "_note": "Von Hand gepflegt, CODEOWNERS. Jede Mandantentabelle ohne RLS steht hier mit Ursache; eine neue fehlt und macht tests/test_rls_domain_matrix.py rot. Eintraege nur entfernen (Tabelle abgesichert), nie pauschal ergaenzen. Ursachen: scripts/rls_domain_matrix.py.",
  "altbestand_hoechstens": 0,
  "system_lesbar": {
-  "domain_erp.booking_templates": "Nutzerentscheidung 27.10.2026: gemeinsame Buchungsvorlagen (Standardkontenrahmen) fuer alle Mandanten; lesen und anwenden, nicht aendern (rls_booking_templates_shared_20261027)"
+  "domain_erp.booking_templates": "Nutzerentscheidung 27.10.2026: gemeinsame Buchungsvorlagen (Standardkontenrahmen) fuer alle Mandanten; lesen und anwenden, nicht aendern (rls_booking_templates_shared_20261027)",
+  "domain_shared.knowledge_objects": "Gemeinsames Produktwissen (SOPs, Standards) fuer alle Mandanten; nur zentrale Pflege aendert es, Mandanten aendern eigene Objekte (rls_knowledge_objects_shared_20261027)"
  },
  "zurueckgestellt": {
   "domain_agrar.agrar_biostimulanzien": "standardmandant",
@@ -195,7 +196,6 @@
   "domain_shared.grundfutter_analysen": "standardmandant",
   "domain_shared.internal_messages": "standardmandant",
   "domain_shared.job_artifacts": "position",
-  "domain_shared.knowledge_objects": "standardmandant",
   "domain_shared.knowledge_versions": "position",
   "domain_shared.logistik_frachttabellen": "referenzdaten",
   "domain_shared.master_data_entries": "standardmandant",

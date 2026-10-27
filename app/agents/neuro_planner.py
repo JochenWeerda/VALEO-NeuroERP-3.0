@@ -14,6 +14,7 @@ from typing import Any, Optional
 from uuid import uuid4
 
 from app.agents.neuro_intent_engine import IntentCategory, IntentResult, RiskClass
+from app.core.tenant_context import get_current_tenant_id
 
 logger = logging.getLogger(__name__)
 
@@ -314,11 +315,12 @@ def _generate_dynamic_steps(intent_result: IntentResult, context: dict[str, Any]
     ]
 
 
-def verify_plan(plan: ExecutionPlan, tenant_id: str = "system", db=None) -> ExecutionPlan:
+def verify_plan(plan: ExecutionPlan, tenant_id: str | None = None, db=None) -> ExecutionPlan:
     """
     Wave 2: Verifies ALL steps, not just the first one.
     Passes the full steps list to the Verification Engine for per-step checks.
     """
+    tenant_id = tenant_id or get_current_tenant_id()
     try:
         from app.services.neuro_verification_engine import verify_plan as _verify
 

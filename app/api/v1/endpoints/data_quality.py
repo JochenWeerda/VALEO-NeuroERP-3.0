@@ -126,7 +126,7 @@ def _run_duplicate_check(db: Session, rule: DuplicateRule, tenant_id: str) -> li
         f"""
         SELECT {cols}, COUNT(*) as cnt, array_agg({rule.id_column}) as ids
         FROM {full_table}
-        WHERE tenant_id = :tenant_id OR (:tenant_id = 'system' AND tenant_id IS NULL)
+        WHERE tenant_id = :tenant_id
         GROUP BY {cols}
         HAVING COUNT(*) > 1
         """  # nosec B608  # reviewed-safe: Bezeichner stammen aus einer Allowlist im Code, Werte sind gebunden
@@ -172,7 +172,7 @@ def _run_required_check(db: Session, rule: RequiredFieldRule, tenant_id: str) ->
         f"""
         SELECT id
         FROM {full_table}
-        WHERE (tenant_id = :tenant_id OR (:tenant_id = 'system' AND tenant_id IS NULL))
+        WHERE tenant_id = :tenant_id
           AND ({cond})
         LIMIT 100
         """  # nosec B608  # reviewed-safe: Bezeichner stammen aus einer Allowlist im Code, Werte sind gebunden
@@ -205,7 +205,7 @@ def _run_reference_check(db: Session, rule: ReferenceRule, tenant_id: str) -> li
         LEFT JOIN {tgt} t ON s."{rule.fk_column}" = t."{rule.target_pk}"
         WHERE s."{rule.fk_column}" IS NOT NULL
           AND t."{rule.target_pk}" IS NULL
-          AND (s.tenant_id = :tenant_id OR (:tenant_id = 'system' AND s.tenant_id IS NULL))
+          AND s.tenant_id = :tenant_id
         LIMIT 100
         """  # nosec B608  # reviewed-safe: Bezeichner stammen aus einer Allowlist im Code, Werte sind gebunden
     )

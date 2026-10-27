@@ -12,6 +12,8 @@ from typing import List, Dict, Any, Optional
 from ....core.database import get_db
 from ....infrastructure.rag.vector_store import get_vector_store
 from ....infrastructure.rag.indexer import get_indexer
+from app.core.tenant import get_tenant_id
+from pydantic import Field
 
 logger = logging.getLogger(__name__)
 
@@ -46,8 +48,7 @@ class SearchResponse(BaseModel):
 
 
 class IndexRequest(BaseModel):
-    """Indexing request."""
-    tenant_id: str = "system"
+    """Indexing request; der Mandant kommt aus dem Token (bis 27.10.2026 Feld mit Vorgabe "system")."""
 
 
 class IndexResponse(BaseModel):
@@ -100,14 +101,15 @@ async def semantic_search(request: SearchRequest):
 @router.post("/index/articles", response_model=IndexResponse, summary="Articles index")
 async def index_articles(
     request: IndexRequest,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """Manually trigger article indexing."""
-    logger.info(f"Manual article indexing triggered (tenant: {request.tenant_id})")
+    logger.info(f"Manual article indexing triggered (tenant: {tenant_id})")
     
     try:
         indexer = get_indexer()
-        count = await indexer.index_articles(db, request.tenant_id)
+        count = await indexer.index_articles(db, tenant_id)
         
         return IndexResponse(
             collection="articles",
@@ -123,14 +125,15 @@ async def index_articles(
 @router.post("/index/customers", response_model=IndexResponse, summary="Customers index")
 async def index_customers(
     request: IndexRequest,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """Manually trigger customer indexing."""
-    logger.info(f"Manual customer indexing triggered (tenant: {request.tenant_id})")
+    logger.info(f"Manual customer indexing triggered (tenant: {tenant_id})")
     
     try:
         indexer = get_indexer()
-        count = await indexer.index_customers(db, request.tenant_id)
+        count = await indexer.index_customers(db, tenant_id)
         
         return IndexResponse(
             collection="customers",

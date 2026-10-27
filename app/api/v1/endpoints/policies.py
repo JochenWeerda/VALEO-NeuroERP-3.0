@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 from app.api.v1.schemas.base import BaseSchema, StatusResponse
 from app.auth.deps import require_roles
 from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
+from app.core.tenant import get_tenant_id  # Mandant aus dem Token (bis 27.10.2026 ?tenant_id=system)
 
 
 router = APIRouter(tags=["policy"])
@@ -222,7 +223,7 @@ async def delete_policy(request: DeleteRequest) -> Dict[str, Any]:
 @router.post("/policy/test", response_model=TestResponse, summary="Policy testen", dependencies=SCHREIBEN["BERECHNEN"])
 async def test_policy(
     request: TestRequest,
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db=Depends(get_db),
 ) -> TestResponse:
     """

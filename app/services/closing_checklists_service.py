@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 
 from app.core.explainability import ExplainabilityView
 from app.core.policy_decisions import PolicyOverrideResolution
+from app.core.tenant_context import get_current_tenant_id
 
 
 class ChecklistItem(BaseModel):
@@ -45,7 +46,7 @@ class ClosingChecklistCreate(BaseModel):
     period: str = Field(..., description="Period in YYYY-MM format")
     closing_type: str = Field(..., description="monthly, quarterly, yearly")
     template_id: Optional[str] = None
-    tenant_id: str = Field(default="system")
+    tenant_id: str = Field(default_factory=get_current_tenant_id)
 
 
 class ClosingChecklistResponse(BaseModel):
@@ -73,7 +74,7 @@ class ClosingChecklistResponse(BaseModel):
 class ClosingWorkspaceRequest(BaseModel):
     period: str
     closing_type: str
-    tenant_id: str = "system"
+    tenant_id: str = Field(default_factory=get_current_tenant_id)
     actor: str = "system"
 
 
