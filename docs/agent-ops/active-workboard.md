@@ -19865,3 +19865,6 @@ Nutzerauftrag: alle uebrigen offenen Aenderungen commit-/pushfaehig abschliessen
 
 
 **NATIVE-PROCUREMENT-LIST-IDS-20261027 - reserviert, Codex Lead:** ZweiimUIXReviewbelegteproduktiveListenfordernnichtregistrierte-listeScreenIDs. Besitznur pages/einkauf/anfragen-liste.tsx undauftragsbestaetigungen-liste.tsx, eigenegezielteRegression/QA. ExistierendekanonischeIDs einkauf/anfragen undeinkauf/auftragsbestaetigungen verwenden;keineFachaktionen/Rollenumbauten. BestehendeMultiDomain-Mounttests mitunveraendertenkanonischenFixtures alsAbnahme. AlleAPI/InboxReviewslesenweiter,keineDB.
+
+
+**STUDIO-INBOX-DELIVERY Modellnachsteuerung (Nutzer):** BisherigeReviews delivery_api_projection/delivery_inbox/delivery_inventory unterbrochen, Dateien erhalten. FortsetzungderselbenlesendenScopesdurch delivery_api_low unddelivery_inbox_low mit gpt-6.1-sol/low. RoutinedateiinventaruebernimmtLeadalsdeterministischesSkript,keinweitererLLMAgent. HoehereDenkstufen nurbeinachgewiesenerNotwendigkeit. Besitzergrenzen/DB-SperrefuerClaude/Gitserialisierungbleibenunveraendert. APIvorabDateidifferenzenvorhanden;keineunnuetigeWiederholungder77API-,269RLS-,65Frontendpruefungen.
