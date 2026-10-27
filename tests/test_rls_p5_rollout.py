@@ -82,15 +82,25 @@ def test_alle_rls_tabellen_tragen_genau_die_mandantenpolicy():
                  WHERE c.relrowsecurity GROUP BY 1, 2""")).all()
             assert len(rows) == INVENTORY["summary"]["rls_enabled"]
             bad = []
+            expected = [f"tenant_isolation_{kind}" for kind in ("delete", "insert", "select", "update")]
             for table, force, names, quals, checks in rows:
-                if force or names != ["tenant_isolation"]:
+                if force or names != expected:
                     bad.append((table, "policy/force", names, force))
                     continue
-                qual, check = quals[0], checks[0]
-                if "rls_current_tenant()" not in qual or "'system'" not in qual or "IS NOT NULL" not in qual:
-                    bad.append((table, "using", qual))
-                if "rls_current_tenant()" not in check or "system" in check:
-                    bad.append((table, "check", check))
+                policy = dict(zip(names, zip(quals, checks)))
+                for kind, command in (("select", "r"), ("insert", "a"), ("update", "w"), ("delete", "d")):
+                    name = f"tenant_isolation_{kind}"
+                    actual = conn.execute(sa.text("SELECT polcmd FROM pg_policy WHERE polrelid=to_regclass(:t) AND polname=:n"), {"t": table, "n": name}).scalar()
+                    if actual != command:
+                        bad.append((table, "command", name, actual))
+                    qual, check = policy[name]
+                    if kind == "select":
+                        if not qual or "rls_current_tenant()" not in qual or "'system'" not in qual or "IS NOT NULL" not in qual or check is not None:
+                            bad.append((table, "select", qual, check))
+                    else:
+                        for expression in ([check] if kind == "insert" else [qual, check] if kind == "update" else [qual]):
+                            if not expression or "rls_current_tenant()" not in expression or "system" in expression or " OR " in expression:
+                                bad.append((table, kind, expression))
             assert not bad, bad[:5]
             # Jede Policy wird als valeo_app wirklich ausgewertet: Typvergleich, Funktionsrechte.
             schemas = {table.split(".")[0] for table, *_ in rows if "." in table} | {"public"}

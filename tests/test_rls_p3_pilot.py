@@ -108,12 +108,12 @@ def _fails(conn, sql: str, params: dict | None = None) -> bool:
 def test_alle_pilottabellen_haben_rls_ohne_force(conn):
     rows = conn.execute(sa.text(
         "SELECT c.oid::regclass::text, c.relrowsecurity, c.relforcerowsecurity, "
-        "(SELECT count(*) FROM pg_policy p WHERE p.polrelid = c.oid AND p.polname = 'tenant_isolation') "
+        "(SELECT count(*) FROM pg_policy p WHERE p.polrelid = c.oid AND p.polname IN ('tenant_isolation_select', 'tenant_isolation_insert', 'tenant_isolation_update', 'tenant_isolation_delete')) "
         "FROM pg_class c WHERE c.oid = ANY(:oids)"),
         {"oids": [conn.execute(sa.text("SELECT to_regclass(:t)::oid"), {"t": t}).scalar()
                   for t in PILOT.PILOT_TABLES if conn.execute(sa.text("SELECT to_regclass(:t)"), {"t": t}).scalar()]}).all()
     assert len(rows) == len(PILOT.PILOT_TABLES)
-    assert all(rls and not force and policies == 1 for _, rls, force, policies in rows), rows
+    assert all(rls and not force and policies == 4 for _, rls, force, policies in rows), rows
 
 
 def test_lesen_nur_eigener_mandant_und_system(as_app, tenant_a):
@@ -144,7 +144,9 @@ def test_fremde_zeilen_aendern_und_loeschen_trifft_nichts(as_app, tenant_a):
 
 def test_system_zeilen_lesbar_aber_nicht_aenderbar(as_app, tenant_a):
     assert "ks-system" in _ids(as_app, "domain_finance.kostenstellen")
-    assert _fails(as_app, "UPDATE domain_finance.kostenstellen SET bezeichnung = 'x' WHERE id = 'ks-system'")
+    assert as_app.execute(sa.text("UPDATE domain_finance.kostenstellen SET bezeichnung = 'x' WHERE id = 'ks-system'")).rowcount == 0
+    assert as_app.execute(sa.text("DELETE FROM domain_finance.kostenstellen WHERE id = 'ks-system'")).rowcount == 0
+    assert as_app.execute(sa.text("UPDATE domain_finance.kostenstellen SET tenant_id = :a WHERE id = 'ks-system'"), {"a": A}).rowcount == 0
 
 
 def test_eigene_zeile_nicht_zu_fremdem_mandanten_verschieben(as_app, tenant_a):
