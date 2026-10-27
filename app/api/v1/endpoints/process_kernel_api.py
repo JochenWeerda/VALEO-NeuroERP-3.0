@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from app.api.v1.schemas.workflow_migration_input import WorkflowMigrationCheckIn
 from app.api.v1.schemas.data_quality_input import DataQualityCheckIn
+from app.api.v1.schemas.data_quality_output import dq_ruleset_public as _dq_ruleset_public
 from app.api.v1.schemas.slo_input import SloCheckIn, reject_nonfinite_slo_json
 from app.api.v1.schemas.advisory_input import PolicyEvaluationIn, ApprovalEvaluationIn
 
@@ -1347,17 +1348,6 @@ def get_mcp_tool_registry(domain: str = "") -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 # Wave 31 AP6: Datenqualitaets-Endpoints
 # ---------------------------------------------------------------------------
-
-def _dq_ruleset_public(ruleset: "DQRuleSet") -> dict:
-    """Serialisiert ein DQRuleSet ohne interne Implementierungsdetails."""
-    d = ruleset.as_dict()
-    for regel in d.get("regeln", []):
-        # format_regex und unique_felder sind Implementierungsdetails,
-        # nicht fuer externe Konsumenten bestimmt.
-        regel.pop("format_regex", None)
-        regel.pop("unique_felder", None)
-    return d
-
 
 @router.get("/data-quality/rulesets", response_model=ProcessKernelOut, summary="Dq rulesets abrufen")
 def get_dq_rulesets() -> dict[str, Any]:
