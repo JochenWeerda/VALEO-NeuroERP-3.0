@@ -2626,11 +2626,10 @@
    "worker": [],
    "identitaet": {
     "nutzlast": 2,
-    "standardmandant": 2,
-    "token": 8
+    "standardmandant": 1,
+    "token": 9
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/pick_lists.py:20",
     "app/api/v1/endpoints/sales_delivery_notes.py:54"
    ],
    "null_stellen": [
@@ -5247,12 +5246,9 @@
    ],
    "worker": [],
    "identitaet": {
-    "standardmandant": 1,
-    "token": 1
+    "token": 2
    },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/pick_lists.py:20"
-   ],
+   "standardmandant_stellen": [],
    "null_stellen": [],
    "gemeinsam_stellen": [],
    "daten": {
@@ -6320,12 +6316,9 @@
     "dienst": 1,
     "kopfzeile": 1,
     "nutzlast": 1,
-    "standardmandant": 1,
-    "token": 2
+    "token": 3
    },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/pick_lists.py:20"
-   ],
+   "standardmandant_stellen": [],
    "null_stellen": [
     "app/api/v1/endpoints/logistics_freight.py:8",
     "app/api/v1/endpoints/logistics_freight.py:10",

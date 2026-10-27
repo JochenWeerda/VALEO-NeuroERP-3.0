@@ -360203,22 +360203,6 @@
         "parameters": [
           {
             "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          },
-          {
-            "in": "query",
             "name": "skip",
             "required": false,
             "schema": {
