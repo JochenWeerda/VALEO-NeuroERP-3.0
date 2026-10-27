@@ -406,9 +406,36 @@ def build_artikel_verpackungen() -> dict[str, Any]:
         edit_permission="artikel.verpackungen.update", bearbeiten_endpoint=None)
 
 def build_artikel_zoll_intrastat() -> dict[str, Any]:
-    return _batch13_stamm("artikel/zoll-intrastat", domain="lager", title="Zoll intrastat",
-        entity_endpoint="/api/v1/compliance/intrastat/meldungen/{entity_id}/validate", identity_field="bezeichnung",
-        edit_permission="artikel.zoll-intrastat.update", bearbeiten_endpoint=None)
+    return build_stamm_object_page(
+        screen_id="artikel/zoll-intrastat",
+        domain="lager",
+        title="Zoll Intrastat",
+        subtitle="EU-Handelsstatistik-Meldung",
+        identity_field="meldenummer",
+        data_sources=[stamm_entity_source("/api/v1/intrastat/meldungen/{entity_id}")],
+        tabs=[stamm_kopf_tab([
+            {"key": "meldenummer", "label": "Meldenummer", "type": "text", "readOnly": True},
+            {"key": "meldezeitraum", "label": "Meldezeitraum", "type": "text", "readOnly": True},
+            {"key": "meldungsart", "label": "Meldungsart", "type": "text", "readOnly": True},
+            {"key": "cn8_warennummer", "label": "CN8-Warennummer", "type": "text"},
+            {"key": "ursprungsland", "label": "Ursprungsland", "type": "text"},
+            {"key": "bestimmungsland", "label": "Bestimmungsland", "type": "text"},
+            {"key": "statistischer_wert_eur", "label": "Statistischer Wert", "type": "currency"},
+            {"key": "nettomasse_kg", "label": "Nettomasse", "type": "number"},
+            {"key": "menge", "label": "Menge", "type": "number"},
+            {"key": "mengeneinheit", "label": "Mengeneinheit", "type": "text"},
+            {"key": "geschaeftsvorgang_code", "label": "Geschaeftsvorgang", "type": "number"},
+            {"key": "status", "label": "Status", "type": "text", "readOnly": True},
+        ])],
+        edit_permission="artikel.zoll-intrastat.update",
+        no_workflow_reason="Die Meldung wird im autorisierten Intrastat-Fachweg bearbeitet und validiert.",
+        business_purpose="Gespeicherte Intrastat-Meldung mit ihren fachlichen Positionswerten lesen.",
+        example_prompts=["Zeige Intrastat-Meldung {entity_id}."],
+        test_id="artikel-zoll-intrastat",
+        density="compact",
+        context_rail="combined",
+        table_profile="standard",
+    )
 
 def build_auswertungen_abfrage_generator() -> dict[str, Any]:
     return _batch13_stamm("auswertungen/abfrage-generator", domain="reporting", title="Abfrage generator",

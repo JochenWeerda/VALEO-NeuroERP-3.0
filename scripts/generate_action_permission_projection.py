@@ -54,9 +54,8 @@ def _route(app, pfad: str, methode: str):  # noqa: ANN001
 
 
 def render() -> str:
-    os.environ.setdefault("DATABASE_URL", "postgresql://valeo_dev:valeo_dev_2024@127.0.0.1:5432/valeo_probe")
     from app.core.screen_definitions import _SCREEN_DEFINITIONS, get_screen_definition
-    from app.main import app
+    from main import app
     from app.core.stamm_object_page_parent import ensure_stamm_screen_registry
     ensure_stamm_screen_registry()
 

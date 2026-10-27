@@ -1,7 +1,7 @@
-# Architecture Index — generiert 2026-10-23
+# Architecture Index — generiert 2026-10-26
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-10-23T04:39:10Z'
+generated_at: '2026-10-26T06:46:23Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -1219,6 +1219,7 @@ domains:
     - ap_invoice_approval_service
     - ap_invoice_kernel_posting
     - billing_batch_service
+    - closing_checklist_validation
     - closing_checklists_service
     - command_handlers_finance
     - controlling_abweichung_service
@@ -1837,6 +1838,7 @@ domains:
     - knowledge_store
     - legacy_interface_adapter_service
     - llm_gateway
+    - made_by_studio_gates
     - mail_ingest_service
     - mail_versand
     - mailkonto_service
@@ -2141,14 +2143,13 @@ domains:
 mapping_stats:
   frontend_routes_total: 941
   frontend_routes_mapped: 941
-  backend_services_total: 317
-  backend_services_mapped: 316
+  backend_services_total: 318
+  backend_services_mapped: 318
   backend_endpoints_total: 473
   backend_endpoints_mapped: 473
 unmapped:
   frontend_routes: []
-  backend_services:
-  - made_by_studio_gates
+  backend_services: []
   backend_endpoints: []
 status:
   architecture_os_mvp: active

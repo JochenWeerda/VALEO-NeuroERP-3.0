@@ -19,6 +19,7 @@ import type {
   ScreenTableProfile,
   ScreenTwinMetricKind,
   ScreenVoiceProvider,
+  ScreenSpecializedComponent,
 } from '../schema'
 
 export type RenderComponentKind =
@@ -218,6 +219,7 @@ export interface RenderTablePlan {
     enabledWhen?: ScreenCondition
     visibleWhen?: { field: string; values: Array<string | number | boolean> }
     disabledWhen?: { field: string; values: Array<string | number | boolean> }
+    localRowPatch?: { identityField: string; field: string; value: string | number | boolean }
   }>
   bulkActions?: Array<{
     key: string
@@ -284,6 +286,7 @@ export interface RenderPlan {
   tiles: RenderTilePlan[]
   calendar?: RenderCalendarPlan
   sourceProposals?: { contextKey: string }
+  specialized?: ScreenSpecializedComponent
   twin?: RenderTwinPlan
   visibleTabs: RenderTabPlan[]
   tabContent: Record<string, RenderTabContentPlan>

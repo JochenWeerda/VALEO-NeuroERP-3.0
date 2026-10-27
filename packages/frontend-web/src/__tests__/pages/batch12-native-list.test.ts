@@ -1,6 +1,10 @@
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
+import { createElement } from 'react'
+import { screen } from '@testing-library/react'
+import { mountBatchList, transport } from '../native-batch11-12-contract-harness'
+import QuarantaenePage from '@/pages/admin/integrationen-quarantaene'
 
 const pages = resolve(__dirname, '../../pages')
 const kontrolleBatch12 = readFileSync(
@@ -12,7 +16,7 @@ function read(rel: string): string {
   return readFileSync(resolve(pages, rel), 'utf8')
 }
 
-/** Batch 12 (83 pages) — NativeListPage / UniversalNativeCockpitPage + screenId. */
+/** Historical Batch 12 route set (83 pages). The Control Center remains an operational page. */
 const BATCH12: Array<[string, string, string]> = [
   ['admin/compliance-dashboard.tsx', 'admin/compliance-dashboard', 'UniversalNativeCockpitPage'],
   ['admin/control-center/ai-approvals.tsx', 'admin/control-center/ai-approvals', 'NativeListPage'],
@@ -106,19 +110,39 @@ const KONTROLLE_DEF_EXCLUDE = new Set([
   'compliance/meldewesen-konsole',
 ])
 
-describe('Batch 12 NativeListPage migration', () => {
+describe('Batch 12 route inventory (source-level evidence only)', () => {
   it('deckt 83 Seiten ab', () => {
     expect(BATCH12).toHaveLength(83)
   })
 
   it.each(BATCH12)('%s → %s', (file, screenId, component) => {
     const src = read(file)
+    if (file === 'admin/control-center/index.tsx') {
+      // The routed control center still owns its planning, filtering and incident actions.
+      expect(src).toContain('ControlCenterPlanning')
+      expect(src).toContain('ControlCenterIncidents')
+      expect(src).toContain('actOnIncident')
+      return
+    }
     expect(src).toContain(component)
     expect(src).toContain(`screenId="${screenId}"`)
     expect(src).toContain(`testId="screen-${screenId}"`)
     if (component === 'NativeListPage' && !KONTROLLE_DEF_EXCLUDE.has(screenId)) {
       expect(kontrolleBatch12).toContain(`"${screenId}"`)
     }
+  })
+
+  it('mounts the routed quarantine worklist with protected retry and resolve actions', async () => {
+    mountBatchList(createElement(QuarantaenePage), 'admin/integrationen-quarantaene', {
+      id: 'synthetic-event', name: 'SYNTHETIC-QUARANTINE', status: 'offen', datum: '2026-10-26',
+    })
+    expect(await screen.findByText('SYNTHETIC-QUARANTINE')).toBeTruthy()
+    expect(transport.get).toHaveBeenCalledWith(
+      '/api/v1/masks/admin__integrationen-quarantaene/screen-definition', expect.anything(),
+    )
+    expect(screen.queryByRole('button', { name: 'Erneut versuchen' })).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Erledigen' })).toBeNull()
+    expect(transport.request).not.toHaveBeenCalled()
   })
 
   it('Quarantäne-Row-Actions mit permission in batch12', () => {

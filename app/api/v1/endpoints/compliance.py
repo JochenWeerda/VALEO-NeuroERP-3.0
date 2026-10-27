@@ -27,6 +27,7 @@ from app.domains.operations.models import (
 )
 from app.services.compliance_service import (
     dt as _dt,
+    pcn_to_dict as _pcn_to_dict,
     list_sales_deliveries as _list_sales_deliveries,
     extract_hazard_export_rows as _extract_hazard_export_rows,
     compute_nutrient_stream as _compute_nutrient_stream,
@@ -406,19 +407,6 @@ _UFI_PATTERN = _re.compile(r"^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$")
 _PCN_STATUS_VALUES = {"entwurf", "validiert", "eingereicht", "angenommen", "abgelehnt"}
 
 
-def _pcn_to_dict(m: PCNMeldung) -> dict:
-    return {
-        "meldung_id": m.id,
-        "produktname": m.produktname,
-        "ufi": m.ufi or "",
-        "cas_nummern": m.cas_nummern or "",
-        "gefahrenklassen": m.gefahrenklassen or [],
-        "verwendungskategorie": m.verwendungskategorie or "",
-        "pcnStatus": m.pcn_status,
-        "tenant_id": m.tenant_id,
-        "created_at": m.created_at.isoformat() if m.created_at else None,
-        "schema_version": 1,
-    }
 
 
 @router.post("/pcn-meldungen", response_model=ComplianceOut, status_code=201, summary="Pcn meldung anlegen", dependencies=SCHREIBEN["QUALITAET"])
@@ -601,12 +589,10 @@ async def get_ustva_status(
             {"tid": tid, "period": current_period},
         ).scalar() or 0
         readiness = min(100, int(100 * (1 - int(offene) / max(int(offene) + 1, 1))))
-        elster_status = "EINGEREICHT" if readiness == 100 else "AUSSTEHEND"
-    except Exception:
-        umsatz = ust_soll = vorsteuer = zahllast = 0.0
-        offene = 0
-        readiness = 0
+        # Aus Buchungsbereitschaft folgt kein Nachweis einer Uebermittlung.
         elster_status = "AUSSTEHEND"
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail="UStVA-Status konnte nicht ermittelt werden.") from exc
 
     return {
         "periode": current_period,

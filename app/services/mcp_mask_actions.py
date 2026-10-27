@@ -122,6 +122,26 @@ def _tool_mask_actions() -> dict[str, tuple[tuple[str, str], ...]]:
     return {tool: tuple(v) for tool, v in out.items()}
 
 
+def workspace_action_agent_block(action_id: str) -> str | None:
+    """Warum der Workspace-Katalog eine Fachaktion Agenten verbietet — oder ``None``.
+
+    Additive Sicht auf config/adaptive_workspace_fachaktionen.yaml. Aendert die
+    Maskengrenze nicht; die Maske bleibt Quelle fuer ``human_only_tool_call``.
+    """
+    from app.workspace.fachaktionen import load_catalog
+
+    action = load_catalog()["by_id"].get(action_id)
+    if not action:
+        return "unbekannt"
+    if action.get("forbidden_for_agents"):
+        return "fuer_agenten_gesperrt"
+    if action.get("access") == "write" and not action.get("enabled_for_agents"):
+        return "write_nicht_freigeschaltet"
+    if action.get("four_eyes") and action.get("risk_level") == "R4":
+        return "menschliche_genehmigung"
+    return None
+
+
 def human_only_tool_call(tool_name: str, parameters: dict[str, Any]) -> str | None:
     """Die Maskenaktion, die ein Spezialwerkzeug ausloest, wenn die Maske sie Menschen vorbehaelt — sonst ``None``.
 

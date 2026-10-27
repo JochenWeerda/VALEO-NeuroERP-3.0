@@ -1,10 +1,16 @@
 """Verifier für Made-by-Studio-Gates — Struktur und Batch-Lauf."""
 from __future__ import annotations
 
+import json
+import subprocess
+import sys
+from pathlib import Path
+
 import pytest
 
 from app.services.made_by_studio_gates import (
     CANONICAL_LAYOUT_KINDS,
+    _screen_ids_from_source,
     check_gate_a,
     check_gate_b,
     check_gate_e,
@@ -18,6 +24,34 @@ from app.services.made_by_studio_gates import (
 def test_registered_inventory_non_empty():
     defs = load_registered_definitions()
     assert len(defs) >= 100
+    # Stamm-Factories werden auch beim isolierten Gate-Aufruf registriert.
+    assert {"crm/campaign", "fibu/anlage", "verkauf/kunde"} <= defs.keys()
+
+
+def test_registered_inventory_is_independent_of_stamm_import_order():
+    repo = Path(__file__).resolve().parents[1]
+
+    def ids_after(prelude: str) -> list[str]:
+        program = "\n".join((
+            prelude,
+            "from app.services.made_by_studio_gates import load_registered_definitions",
+            "print('STUDIO_REGISTRY=' + json.dumps(sorted(load_registered_definitions())))",
+        ))
+        result = subprocess.run(
+            [sys.executable, "-c", "import json\n" + program],
+            cwd=repo,
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=90,
+        )
+        line = next(line for line in result.stdout.splitlines() if line.startswith("STUDIO_REGISTRY="))
+        return json.loads(line.removeprefix("STUDIO_REGISTRY="))
+
+    cold_ids = ids_after("")
+    warm_ids = ids_after("from app.core.screen_definitions_stamm import STAMM_SCREEN_BUILDERS")
+    assert cold_ids == warm_ids
+    assert {"crm/campaign", "fibu/anlage", "waage/wiegeschein"} <= set(cold_ids)
 
 
 def test_resolve_layout_kind_known_floorplans():
@@ -83,6 +117,24 @@ def test_gate_e_unknown_screen_fails():
 
 def test_gate_e_accepts_stamm_listen_alias_for_legacy_worklist():
     assert check_gate_e("transporte/fahrer").passed
+
+
+def test_runtime_evidence_resolves_both_visible_conditional_studio_definitions():
+    source = """
+    const screenId = comparisonId ? 'platform/studio-history-diff' : 'platform/studio-history'
+    const schema = useScreenDefinition(screenId)
+    const runtime = useUniversalMaskRuntime({ screenId, schema: schema.data })
+    return <UniversalMaskRenderer plan={runtime.plan} />
+    """
+    assert {"platform/studio-history", "platform/studio-history-diff"} <= _screen_ids_from_source(source)
+    assert not {"platform/studio-history", "platform/studio-history-diff"} & _screen_ids_from_source(
+        source.replace("useScreenDefinition(screenId)", "useScreenDefinition('other')")
+    )
+
+
+def test_real_studio_history_runtime_is_wired():
+    assert check_gate_e("platform/studio-history").passed
+    assert check_gate_e("platform/studio-history-diff").passed
 
 
 @pytest.mark.parametrize("gate", ["A", "B", "C", "E"])

@@ -19,7 +19,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import text
 
 from app.core.database import get_db
-from app.core.dependencies import get_tenant_id
+from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
@@ -69,6 +69,14 @@ class ZuAbschlagsGruppeCreate(BaseModel):
     gruppe_nr: str = Field(..., max_length=20)
     bezeichnung: str
     typ: str = Field(..., description="zuschlag oder abschlag")
+
+
+class ZuAbschlagsGruppeOut(BaseModel):
+    id: str
+    gruppe_nr: str
+    bezeichnung: str
+    typ: str
+    aktiv: bool
 
 
 class ZuAbschlagCreate(BaseModel):
@@ -124,6 +132,8 @@ def create_mengenzeitraum(
     """Mengenzeitraum anlegen."""
     if payload.zeitraum_bis < payload.zeitraum_von:
         raise HTTPException(422, "zeitraum_bis muss nach zeitraum_von liegen.")
+    if payload.kontrakt_nr != kontrakt_nr:
+        raise HTTPException(422, "kontrakt_nr im Pfad und Payload muss identisch sein.")
 
     new_id = uuid7()
     db.execute(text("""
@@ -141,8 +151,8 @@ def create_mengenzeitraum(
     })
     db.commit()
     row = db.execute(text("""
-        SELECT * FROM domain_shared.kontrakt_mengenzeitraeume WHERE id = :id
-    """), {"id": new_id}).fetchone()
+        SELECT * FROM domain_shared.kontrakt_mengenzeitraeume WHERE id = :id AND tenant_id = :tid
+    """), {"id": new_id, "tid": tenant_id}).fetchone()
     return MengenzeitraumOut(**dict(row._mapping))
 
 
@@ -164,7 +174,7 @@ def update_mengenzeitraum(
         raise HTTPException(404, "Mengenzeitraum nicht gefunden.")
 
     updates = []
-    params: dict = {"id": zeitraum_id}
+    params: dict = {"id": zeitraum_id, "tid": tenant_id, "ktr_nr": kontrakt_nr}
     if payload.menge_t is not None:
         updates.append("menge_t = :menge_t")
         params["menge_t"] = payload.menge_t
@@ -183,12 +193,13 @@ def update_mengenzeitraum(
         updates.append("updated_at = now()")
         db.execute(text(f"""
             UPDATE domain_shared.kontrakt_mengenzeitraeume
-            SET {', '.join(updates)} WHERE id = :id
+            SET {', '.join(updates)} WHERE id = :id AND tenant_id = :tid AND kontrakt_nr = :ktr_nr
         """), params)  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         db.commit()
     row = db.execute(text("""
-        SELECT * FROM domain_shared.kontrakt_mengenzeitraeume WHERE id = :id
-    """), {"id": zeitraum_id}).fetchone()
+        SELECT * FROM domain_shared.kontrakt_mengenzeitraeume
+        WHERE id = :id AND tenant_id = :tid AND kontrakt_nr = :ktr_nr
+    """), {"id": zeitraum_id, "tid": tenant_id, "ktr_nr": kontrakt_nr}).fetchone()
     return MengenzeitraumOut(**dict(row._mapping))
 
 
@@ -202,15 +213,16 @@ def delete_mengenzeitraum(
 ):
     row = db.execute(text("""
         SELECT status FROM domain_shared.kontrakt_mengenzeitraeume
-        WHERE id = :id AND tenant_id = :tid
-    """), {"id": zeitraum_id, "tid": tenant_id}).fetchone()
+        WHERE id = :id AND tenant_id = :tid AND kontrakt_nr = :ktr_nr
+    """), {"id": zeitraum_id, "tid": tenant_id, "ktr_nr": kontrakt_nr}).fetchone()
     if not row:
         raise HTTPException(404)
     if row.status == "erfuellt":
         raise HTTPException(409, "Erfüllte Mengenzeiträume können nicht gelöscht werden.")
     db.execute(text("""
-        DELETE FROM domain_shared.kontrakt_mengenzeitraeume WHERE id = :id
-    """), {"id": zeitraum_id})
+        DELETE FROM domain_shared.kontrakt_mengenzeitraeume
+        WHERE id = :id AND tenant_id = :tid AND kontrakt_nr = :ktr_nr
+    """), {"id": zeitraum_id, "tid": tenant_id, "ktr_nr": kontrakt_nr})
     db.commit()
     return Response(status_code=204)
 
@@ -286,7 +298,7 @@ def generiere_mengenzeitraeume(
 # ── Zu-/Abschläge Endpoints ──────────────────────────────────────────────────
 
 @router.get("/zuabschlagsgruppen", summary="Zuabschlagsgruppen auflisten",
-    response_model=list[KontraktMengenzeitraumOut]
+    response_model=list[ZuAbschlagsGruppeOut]
 )
 def list_zuabschlagsgruppen(
     typ: Optional[str] = Query(None, description="zuschlag oder abschlag"),
@@ -306,8 +318,20 @@ def list_zuabschlagsgruppen(
     return [dict(r._mapping) for r in rows]
 
 
+@router.get("/zuabschlagsgruppen/{gruppe_id}", response_model=ZuAbschlagsGruppeOut,
+    summary="Zuabschlagsgruppe abrufen")
+def get_zuabschlagsgruppe(gruppe_id: str, db=Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
+    row = db.execute(text("""
+        SELECT * FROM domain_shared.kontrakt_zuabschlagsgruppen
+        WHERE tenant_id = :tid AND id::text = :id AND aktiv = true
+    """), {"tid": tenant_id, "id": gruppe_id}).fetchone()
+    if row is None:
+        raise HTTPException(404, "Zu-/Abschlagsgruppe nicht gefunden.")
+    return ZuAbschlagsGruppeOut(**dict(row._mapping))
+
+
 @router.post("/zuabschlagsgruppen", status_code=201, summary="Zuabschlagsgruppe anlegen",
-    response_model=KontraktMengenzeitraumOut, dependencies=SCHREIBEN["KONTRAKT"])
+    response_model=ZuAbschlagsGruppeOut, dependencies=SCHREIBEN["KONTRAKT"])
 def create_zuabschlagsgruppe(
     payload: ZuAbschlagsGruppeCreate,
     db=Depends(get_db),
@@ -326,8 +350,8 @@ def create_zuabschlagsgruppe(
     })
     db.commit()
     row = db.execute(text("""
-        SELECT * FROM domain_shared.kontrakt_zuabschlagsgruppen WHERE id = :id
-    """), {"id": new_id}).fetchone()
+        SELECT * FROM domain_shared.kontrakt_zuabschlagsgruppen WHERE id = :id AND tenant_id = :tid
+    """), {"id": new_id, "tid": tenant_id}).fetchone()
     return dict(row._mapping)
 
 
@@ -365,8 +389,16 @@ def create_zuabschlag(
     db=Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
-    if not payload.betrag_eur and not payload.prozent:
+    if payload.gruppe_id != gruppe_id:
+        raise HTTPException(422, "gruppe_id im Pfad und Payload muss identisch sein.")
+    if payload.betrag_eur is None and payload.prozent is None:
         raise HTTPException(422, "Entweder betrag_eur oder prozent muss angegeben werden.")
+    owner = db.execute(text("""
+        SELECT 1 FROM domain_shared.kontrakt_zuabschlagsgruppen
+        WHERE id = :id AND tenant_id = :tid AND aktiv = true
+    """), {"id": gruppe_id, "tid": tenant_id}).first()
+    if owner is None:
+        raise HTTPException(404, "Zu-/Abschlagsgruppe nicht gefunden.")
     new_id = uuid7()
     db.execute(text("""
         INSERT INTO domain_shared.kontrakt_zuabschlaege
@@ -382,6 +414,6 @@ def create_zuabschlag(
     })
     db.commit()
     row = db.execute(text("""
-        SELECT * FROM domain_shared.kontrakt_zuabschlaege WHERE id = :id
-    """), {"id": new_id}).fetchone()
+        SELECT * FROM domain_shared.kontrakt_zuabschlaege WHERE id = :id AND tenant_id = :tid
+    """), {"id": new_id, "tid": tenant_id}).fetchone()
     return ZuAbschlagOut(**dict(row._mapping))

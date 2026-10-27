@@ -8210,6 +8210,39 @@
         "title": "AgentToolContractsOut",
         "type": "object"
       },
+      "AgrarChainOut": {
+        "description": "Exakte Antwort-Shape — keine Zusatzfelder.",
+        "properties": {
+          "contract_ref": {
+            "title": "Contract Ref",
+            "type": "string"
+          },
+          "next_step": {
+            "title": "Next Step",
+            "type": "string"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "source_model": {
+            "enum": [
+              "kon",
+              "agrar"
+            ],
+            "title": "Source Model",
+            "type": "string"
+          }
+        },
+        "required": [
+          "contract_ref",
+          "source_model",
+          "next_step",
+          "reason"
+        ],
+        "title": "AgrarChainOut",
+        "type": "object"
+      },
       "AgrarContractCreate": {
         "properties": {
           "article_id": {
@@ -24647,7 +24680,7 @@
             "type": "boolean"
           },
           "lagerbestand": {
-            "default": 0,
+            "default": "0",
             "description": "Stock quantity",
             "title": "Lagerbestand",
             "type": "string"
@@ -24816,7 +24849,7 @@
                 "type": "string"
               }
             ],
-            "default": 0,
+            "default": "0",
             "description": "Stock quantity",
             "title": "Lagerbestand"
           },
@@ -87466,6 +87499,79 @@
         "title": "IntrastatMeldungCreateOut",
         "type": "object"
       },
+      "IntrastatMeldungOut": {
+        "properties": {
+          "bestimmungsland": {
+            "title": "Bestimmungsland",
+            "type": "string"
+          },
+          "cn8_warennummer": {
+            "title": "Cn8 Warennummer",
+            "type": "string"
+          },
+          "geschaeftsvorgang_code": {
+            "title": "Geschaeftsvorgang Code",
+            "type": "integer"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "meldenummer": {
+            "title": "Meldenummer",
+            "type": "string"
+          },
+          "meldezeitraum": {
+            "title": "Meldezeitraum",
+            "type": "string"
+          },
+          "meldungsart": {
+            "title": "Meldungsart",
+            "type": "string"
+          },
+          "menge": {
+            "title": "Menge",
+            "type": "number"
+          },
+          "mengeneinheit": {
+            "title": "Mengeneinheit",
+            "type": "string"
+          },
+          "nettomasse_kg": {
+            "title": "Nettomasse Kg",
+            "type": "number"
+          },
+          "statistischer_wert_eur": {
+            "title": "Statistischer Wert Eur",
+            "type": "number"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "ursprungsland": {
+            "title": "Ursprungsland",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "meldenummer",
+          "meldezeitraum",
+          "meldungsart",
+          "cn8_warennummer",
+          "ursprungsland",
+          "bestimmungsland",
+          "statistischer_wert_eur",
+          "nettomasse_kg",
+          "menge",
+          "mengeneinheit",
+          "geschaeftsvorgang_code",
+          "status"
+        ],
+        "title": "IntrastatMeldungOut",
+        "type": "object"
+      },
       "IntrastatMeldungUpdate": {
         "properties": {
           "bestimmungsland": {
@@ -91477,13 +91583,6 @@
           "id"
         ],
         "title": "KontraktKlasseOut",
-        "type": "object"
-      },
-      "KontraktMengenzeitraumOut": {
-        "additionalProperties": true,
-        "description": "Response schema for kontrakt mengenzeitraum endpoints.",
-        "properties": {},
-        "title": "KontraktMengenzeitraumOut",
         "type": "object"
       },
       "KontraktOut": {
@@ -101630,55 +101729,6 @@
           }
         },
         "title": "LogCreateIn",
-        "type": "object"
-      },
-      "LoginBody": {
-        "description": "Login-Request Body",
-        "properties": {
-          "role": {
-            "default": "manager",
-            "title": "Role",
-            "type": "string"
-          },
-          "username": {
-            "title": "Username",
-            "type": "string"
-          }
-        },
-        "required": [
-          "username"
-        ],
-        "title": "LoginBody",
-        "type": "object"
-      },
-      "LoginResponse": {
-        "description": "Login-Response",
-        "properties": {
-          "access_token": {
-            "title": "Access Token",
-            "type": "string"
-          },
-          "ok": {
-            "title": "Ok",
-            "type": "boolean"
-          },
-          "token_type": {
-            "title": "Token Type",
-            "type": "string"
-          },
-          "user": {
-            "additionalProperties": true,
-            "title": "User",
-            "type": "object"
-          }
-        },
-        "required": [
-          "ok",
-          "access_token",
-          "token_type",
-          "user"
-        ],
-        "title": "LoginResponse",
         "type": "object"
       },
       "Logistics": {
@@ -172635,6 +172685,7 @@
       "WebhookPayload": {
         "properties": {
           "document_id": {
+            "exclusiveMinimum": 0.0,
             "title": "Document Id",
             "type": "integer"
           },
@@ -178662,6 +178713,39 @@
           "typ"
         ],
         "title": "ZuAbschlagsGruppeCreate",
+        "type": "object"
+      },
+      "ZuAbschlagsGruppeOut": {
+        "properties": {
+          "aktiv": {
+            "title": "Aktiv",
+            "type": "boolean"
+          },
+          "bezeichnung": {
+            "title": "Bezeichnung",
+            "type": "string"
+          },
+          "gruppe_nr": {
+            "title": "Gruppe Nr",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "typ": {
+            "title": "Typ",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "gruppe_nr",
+          "bezeichnung",
+          "typ",
+          "aktiv"
+        ],
+        "title": "ZuAbschlagsGruppeOut",
         "type": "object"
       },
       "ZugangCreate": {
@@ -189913,6 +189997,11 @@
             "description": "Successful Response"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Get Inbox",
         "tags": [
           "dms"
@@ -189998,6 +190087,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Get Inbox Document",
         "tags": [
           "dms"
@@ -190006,7 +190100,7 @@
     },
     "/api/dms/inbox/{inbox_id}/create": {
       "post": {
-        "description": "Erstellt Beleg aus Inbox-Dokument.",
+        "description": "Block fake booking; the purchase invoice mask owns the domain command.",
         "operationId": "create_from_inbox_api_dms_inbox__inbox_id__create_post",
         "parameters": [
           {
@@ -190019,18 +190113,6 @@
             }
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "additionalProperties": true,
-                "title": "Overrides",
-                "type": "object"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "content": {
@@ -191767,6 +191849,210 @@
         "summary": "Create Follow Up",
         "tags": [
           "documents"
+        ]
+      }
+    },
+    "/api/mcp/documents/inbox/queue": {
+      "get": {
+        "operationId": "inbox_queue_api_mcp_documents_inbox_queue_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Inbox Queue Api Mcp Documents Inbox Queue Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Inbox Queue",
+        "tags": [
+          "documents",
+          "documents-inbox"
+        ]
+      }
+    },
+    "/api/mcp/documents/inbox/{item_id}": {
+      "get": {
+        "operationId": "inbox_item_api_mcp_documents_inbox__item_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "title": "Item Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Inbox Item Api Mcp Documents Inbox  Item Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Inbox Item",
+        "tags": [
+          "documents",
+          "documents-inbox"
+        ]
+      }
+    },
+    "/api/mcp/documents/inbox/{item_id}/approve": {
+      "post": {
+        "description": "Freigabe bucht nicht. Der Client oeffnet die bestehende Belegmaske.",
+        "operationId": "inbox_approve_blocked_api_mcp_documents_inbox__item_id__approve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "title": "Item Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Inbox Approve Blocked Api Mcp Documents Inbox  Item Id  Approve Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Inbox Approve Blocked",
+        "tags": [
+          "documents",
+          "documents-inbox"
+        ]
+      }
+    },
+    "/api/mcp/documents/inbox/{item_id}/prepare": {
+      "post": {
+        "operationId": "inbox_prepare_api_mcp_documents_inbox__item_id__prepare_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "title": "Item Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Inbox Prepare Api Mcp Documents Inbox  Item Id  Prepare Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Inbox Prepare",
+        "tags": [
+          "documents",
+          "documents-inbox"
         ]
       }
     },
@@ -206519,24 +206805,6 @@
         "operationId": "list_biostimulanzien_api_v1_agrar_biostimulanzien_get",
         "parameters": [
           {
-            "description": "Filter by tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter by tenant ID",
-              "title": "Tenant Id"
-            }
-          },
-          {
             "description": "Suche in Name, Artikelnummer, Hersteller",
             "in": "query",
             "name": "search",
@@ -206649,24 +206917,6 @@
       },
       "post": {
         "operationId": "create_biostimulanz_api_v1_agrar_biostimulanzien_post",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -206736,22 +206986,6 @@
               "title": "Limit",
               "type": "integer"
             }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
           }
         ],
         "responses": {
@@ -206804,22 +207038,6 @@
               "title": "Item Id",
               "type": "string"
             }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
           }
         ],
         "responses": {
@@ -206863,22 +207081,6 @@
             "schema": {
               "title": "Item Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
             }
           }
         ],
@@ -234137,6 +234339,218 @@
         ]
       }
     },
+    "/api/v1/api/mcp/documents/inbox/queue": {
+      "get": {
+        "operationId": "inbox_queue_api_v1_api_mcp_documents_inbox_queue_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Inbox Queue Api V1 Api Mcp Documents Inbox Queue Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Inbox Queue",
+        "tags": [
+          "documents",
+          "sales",
+          "documents",
+          "documents-inbox"
+        ]
+      }
+    },
+    "/api/v1/api/mcp/documents/inbox/{item_id}": {
+      "get": {
+        "operationId": "inbox_item_api_v1_api_mcp_documents_inbox__item_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "title": "Item Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Inbox Item Api V1 Api Mcp Documents Inbox  Item Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Inbox Item",
+        "tags": [
+          "documents",
+          "sales",
+          "documents",
+          "documents-inbox"
+        ]
+      }
+    },
+    "/api/v1/api/mcp/documents/inbox/{item_id}/approve": {
+      "post": {
+        "description": "Freigabe bucht nicht. Der Client oeffnet die bestehende Belegmaske.",
+        "operationId": "inbox_approve_blocked_api_v1_api_mcp_documents_inbox__item_id__approve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "title": "Item Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Inbox Approve Blocked Api V1 Api Mcp Documents Inbox  Item Id  Approve Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Inbox Approve Blocked",
+        "tags": [
+          "documents",
+          "sales",
+          "documents",
+          "documents-inbox"
+        ]
+      }
+    },
+    "/api/v1/api/mcp/documents/inbox/{item_id}/prepare": {
+      "post": {
+        "operationId": "inbox_prepare_api_v1_api_mcp_documents_inbox__item_id__prepare_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "title": "Item Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Inbox Prepare Api V1 Api Mcp Documents Inbox  Item Id  Prepare Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Inbox Prepare",
+        "tags": [
+          "documents",
+          "sales",
+          "documents",
+          "documents-inbox"
+        ]
+      }
+    },
     "/api/v1/api/mcp/documents/payment_received": {
       "post": {
         "description": "Geschlossen: Zahlungseingaenge laufen ueber den Fachweg der Finanzbuchhaltung (Rollenpruefung, Auszifferung).",
@@ -237111,15 +237525,6 @@
               ],
               "title": "Artikel Nr"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -237160,17 +237565,6 @@
       },
       "post": {
         "operationId": "create_individuelle_nummer_api_v1_artikel_individuelle_nummern_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -237247,15 +237641,6 @@
               "title": "Partner Typ",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -237303,15 +237688,6 @@
               "title": "Indiv Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -237340,6 +237716,52 @@
           }
         ],
         "summary": "Individuelle nummer löschen",
+        "tags": [
+          "Artikelstamm - Individuelle Artikelnummern"
+        ]
+      },
+      "get": {
+        "description": "Single record for the shared Human/CLI/MCP screen data source.",
+        "operationId": "get_individuelle_nummer_api_v1_artikel_individuelle_nummern__indiv_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "indiv_id",
+            "required": true,
+            "schema": {
+              "title": "Indiv Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IndivArtikelNrOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Individuelle Artikelnummer lesen",
         "tags": [
           "Artikelstamm - Individuelle Artikelnummern"
         ]
@@ -237508,17 +237930,6 @@
     "/api/v1/artikel/mengeneinheiten/gruppen": {
       "get": {
         "operationId": "list_mengeneinheitengruppen_api_v1_artikel_mengeneinheiten_gruppen_get",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -237533,16 +237944,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -237557,17 +237958,6 @@
       },
       "post": {
         "operationId": "create_mengeneinheitengruppe_api_v1_artikel_mengeneinheiten_gruppen_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -237623,15 +238013,6 @@
               "title": "Gruppe Nr",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -237673,15 +238054,6 @@
             "required": true,
             "schema": {
               "title": "Gruppe Nr",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
               "type": "string"
             }
           }
@@ -237727,15 +238099,6 @@
             "required": true,
             "schema": {
               "title": "Gruppe Nr",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
               "type": "string"
             }
           }
@@ -237786,17 +238149,6 @@
     "/api/v1/artikel/mengeneinheiten/stamm": {
       "get": {
         "operationId": "list_mengeneinheiten_api_v1_artikel_mengeneinheiten_stamm_get",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -237811,16 +238163,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -237835,17 +238177,6 @@
       },
       "post": {
         "operationId": "create_mengeneinheit_api_v1_artikel_mengeneinheiten_stamm_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -237927,15 +238258,6 @@
               "title": "Nach Einheit",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -237981,15 +238303,6 @@
               "title": "Einheit Kuerzel",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -238022,8 +238335,9 @@
           "Artikelstamm - Mengeneinheiten & Gruppen"
         ]
       },
-      "put": {
-        "operationId": "update_mengeneinheit_api_v1_artikel_mengeneinheiten_stamm__einheit_kuerzel__put",
+      "get": {
+        "description": "Single record for the shared Human/CLI/MCP screen data source.",
+        "operationId": "get_mengeneinheit_api_v1_artikel_mengeneinheiten_stamm__einheit_kuerzel__get",
         "parameters": [
           {
             "in": "path",
@@ -238033,13 +238347,49 @@
               "title": "Einheit Kuerzel",
               "type": "string"
             }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MengeneinheitOut"
+                }
+              }
+            },
+            "description": "Successful Response"
           },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
           {
-            "in": "header",
-            "name": "X-Tenant-ID",
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Mengeneinheit lesen",
+        "tags": [
+          "Artikelstamm - Mengeneinheiten & Gruppen"
+        ]
+      },
+      "put": {
+        "operationId": "update_mengeneinheit_api_v1_artikel_mengeneinheiten_stamm__einheit_kuerzel__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "einheit_kuerzel",
             "required": true,
             "schema": {
-              "title": "X-Tenant-Id",
+              "title": "Einheit Kuerzel",
               "type": "string"
             }
           }
@@ -272503,7 +272853,7 @@
     },
     "/api/v1/dms/inbox/{inbox_id}/create": {
       "post": {
-        "description": "Erstellt einen Beleg aus einem Inbox-Dokument und markiert es als verarbeitet.",
+        "description": "OCR-Prefill is not a Beleg; submit the purchase invoice domain command.",
         "operationId": "create_from_inbox_api_v1_dms_inbox__inbox_id__create_post",
         "parameters": [
           {
@@ -272516,18 +272866,6 @@
             }
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "additionalProperties": true,
-                "default": {},
-                "title": "Overrides",
-                "type": "object"
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
             "content": {
@@ -289712,15 +290050,6 @@
               ],
               "title": "Status"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -289761,17 +290090,6 @@
       },
       "post": {
         "operationId": "create_geschaeftsjahr_api_v1_fibu_geschaeftsjahre_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -289815,6 +290133,53 @@
         ]
       }
     },
+    "/api/v1/fibu/geschaeftsjahre/detail/{jahr_id}": {
+      "get": {
+        "operationId": "get_geschaeftsjahr_api_v1_fibu_geschaeftsjahre_detail__jahr_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "jahr_id",
+            "required": true,
+            "schema": {
+              "title": "Jahr Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeschaeftsjahreOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Geschaeftsjahr abrufen",
+        "tags": [
+          "FIBU - Geschäftsjahre & Periodische Buchungen"
+        ]
+      }
+    },
     "/api/v1/fibu/geschaeftsjahre/periodisch": {
       "get": {
         "operationId": "list_periodische_buchungen_api_v1_fibu_geschaeftsjahre_periodisch_get",
@@ -289827,15 +290192,6 @@
               "default": true,
               "title": "Nur Aktive",
               "type": "boolean"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
             }
           }
         ],
@@ -289877,17 +290233,6 @@
       },
       "post": {
         "operationId": "create_periodische_buchung_api_v1_fibu_geschaeftsjahre_periodisch_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -289943,15 +290288,6 @@
               "title": "Buchung Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -289996,15 +290332,6 @@
             "required": true,
             "schema": {
               "title": "Buchung Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
               "type": "string"
             }
           }
@@ -290053,15 +290380,6 @@
             "schema": {
               "title": "Jahr Nr",
               "type": "integer"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
             }
           }
         ],
@@ -290123,15 +290441,6 @@
             "schema": {
               "title": "Periode Nr",
               "type": "integer"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
             }
           }
         ],
@@ -290483,15 +290792,6 @@
               ],
               "title": "Bis Datum"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -290533,17 +290833,6 @@
       "post": {
         "description": "OP mit Skonto ausgleichen.\n\nBei Skonto > 0 wird die Buchung aufgeteilt:\n- Zahlungsbetrag → Bankkonto/Debitorenkonto\n- Skontobetrag → Skontokonto (Erlösminderung)",
         "operationId": "create_auszifferung_api_v1_fibu_op_auszifferung_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -290634,6 +290923,53 @@
         ]
       }
     },
+    "/api/v1/fibu/op-auszifferung/{auszifferung_id}": {
+      "get": {
+        "operationId": "get_auszifferung_api_v1_fibu_op_auszifferung__auszifferung_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "auszifferung_id",
+            "required": true,
+            "schema": {
+              "title": "Auszifferung Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkontoAuszifferungOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Auszifferung abrufen",
+        "tags": [
+          "FIBU - OP Skonto-Auszifferung"
+        ]
+      }
+    },
     "/api/v1/fibu/op-auszifferung/{auszifferung_id}/stornieren": {
       "post": {
         "description": "Auszifferung stornieren — OP wird wieder geöffnet.",
@@ -290645,15 +290981,6 @@
             "required": true,
             "schema": {
               "title": "Auszifferung Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
               "type": "string"
             }
           }
@@ -291038,17 +291365,6 @@
     "/api/v1/fibu/stammdaten/leergutarten": {
       "get": {
         "operationId": "list_leergutarten_api_v1_fibu_stammdaten_leergutarten_get",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -291063,16 +291379,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -291087,17 +291393,6 @@
       },
       "post": {
         "operationId": "create_leergutart_api_v1_fibu_stammdaten_leergutarten_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -291153,15 +291448,6 @@
               "title": "Art Nr",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -291214,15 +291500,6 @@
               ],
               "title": "Formularklasse"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -291263,17 +291540,6 @@
       },
       "post": {
         "operationId": "create_zahlungsformular_api_v1_fibu_stammdaten_zahlungsformulare_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -291317,6 +291583,53 @@
         ]
       }
     },
+    "/api/v1/fibu/stammdaten/zahlungsformulare/{formular_id}": {
+      "get": {
+        "operationId": "get_zahlungsformular_api_v1_fibu_stammdaten_zahlungsformulare__formular_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "formular_id",
+            "required": true,
+            "schema": {
+              "title": "Formular Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ZahlungsformularOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Zahlungsformular abrufen",
+        "tags": [
+          "FIBU - Zusatzstammdaten"
+        ]
+      }
+    },
     "/api/v1/fibu/stammdaten/zahlungsformulare/{formular_nr}": {
       "delete": {
         "operationId": "delete_zahlungsformular_api_v1_fibu_stammdaten_zahlungsformulare__formular_nr__delete",
@@ -291327,15 +291640,6 @@
             "required": true,
             "schema": {
               "title": "Formular Nr",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
               "type": "string"
             }
           }
@@ -291374,17 +291678,6 @@
     "/api/v1/fibu/stammdaten/zinsgruppen": {
       "get": {
         "operationId": "list_zinsgruppen_api_v1_fibu_stammdaten_zinsgruppen_get",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -291399,16 +291692,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -291423,17 +291706,6 @@
       },
       "post": {
         "operationId": "create_zinsgruppe_api_v1_fibu_stammdaten_zinsgruppen_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -291487,15 +291759,6 @@
             "required": true,
             "schema": {
               "title": "Gruppe Nr",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
               "type": "string"
             }
           }
@@ -292019,15 +292282,6 @@
               ],
               "title": "Bis Datum"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -292068,17 +292322,6 @@
       },
       "post": {
         "operationId": "create_zahlungsmeldung_api_v1_fibu_zahlungsmeldungen_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -292126,17 +292369,6 @@
       "get": {
         "description": "Zusammenfassung der offenen Zahlungsmeldungen nach Kunden.",
         "operationId": "offene_meldungen_zusammenfassung_api_v1_fibu_zahlungsmeldungen_offen_zusammenfassung_get",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -292147,6 +292379,43 @@
                   },
                   "title": "Response Offene Meldungen Zusammenfassung Api V1 Fibu Zahlungsmeldungen Offen Zusammenfassung Get",
                   "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Meldungen zusammenfassung offene",
+        "tags": [
+          "FIBU - Zahlungsmeldungen"
+        ]
+      }
+    },
+    "/api/v1/fibu/zahlungsmeldungen/{meldung_id}": {
+      "get": {
+        "operationId": "get_zahlungsmeldung_api_v1_fibu_zahlungsmeldungen__meldung_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "meldung_id",
+            "required": true,
+            "schema": {
+              "title": "Meldung Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ZahlungsmeldungOut"
                 }
               }
             },
@@ -292168,7 +292437,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Meldungen zusammenfassung offene",
+        "summary": "Zahlungsmeldung abrufen",
         "tags": [
           "FIBU - Zahlungsmeldungen"
         ]
@@ -292185,15 +292454,6 @@
             "required": true,
             "schema": {
               "title": "Meldung Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
               "type": "string"
             }
           }
@@ -292242,15 +292502,6 @@
             "required": true,
             "schema": {
               "title": "Meldung Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
               "type": "string"
             }
           }
@@ -297579,18 +297830,6 @@
               "description": "Filter by status",
               "title": "Status"
             }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -297687,18 +297926,6 @@
         "operationId": "get_closing_cockpit_summary_api_v1_finance_closing_checklists_cockpit_summary_get",
         "parameters": [
           {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          },
-          {
             "description": "Period in YYYY-MM",
             "in": "query",
             "name": "period",
@@ -297787,18 +298014,6 @@
               "title": "Active Only",
               "type": "boolean"
             }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -297843,20 +298058,6 @@
       "post": {
         "description": "Create a new checklist template.",
         "operationId": "create_checklist_template_api_v1_finance_closing_checklists_templates_post",
-        "parameters": [
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -297916,18 +298117,6 @@
               "title": "Checklist Id",
               "type": "string"
             }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -297968,18 +298157,6 @@
             "required": true,
             "schema": {
               "title": "Checklist Id",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
               "type": "string"
             }
           }
@@ -298031,30 +298208,6 @@
             "required": true,
             "schema": {
               "title": "Checklist Id",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Approver user ID",
-            "in": "query",
-            "name": "approved_by",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Approver user ID",
-              "title": "Approved By",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
               "type": "string"
             }
           }
@@ -298117,18 +298270,6 @@
               "title": "Item Code",
               "type": "string"
             }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
           }
         ],
         "requestBody": {
@@ -298188,18 +298329,6 @@
             "required": true,
             "schema": {
               "title": "Checklist Id",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
               "type": "string"
             }
           }
@@ -322290,6 +322419,53 @@
           "Außenhandel"
         ]
       },
+      "get": {
+        "description": "Eine gespeicherte Meldung im verifizierten Mandanten lesen.",
+        "operationId": "get_meldung_api_v1_intrastat_meldungen__meldung_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "meldung_id",
+            "required": true,
+            "schema": {
+              "title": "Meldung Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntrastatMeldungOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Intrastat-Meldung abrufen",
+        "tags": [
+          "Intrastat",
+          "Außenhandel"
+        ]
+      },
       "put": {
         "operationId": "update_meldung_api_v1_intrastat_meldungen__meldung_id__put",
         "parameters": [
@@ -328913,15 +329089,6 @@
               "description": "zuschlag oder abschlag",
               "title": "Typ"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -328930,7 +329097,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/KontraktMengenzeitraumOut"
+                    "$ref": "#/components/schemas/ZuAbschlagsGruppeOut"
                   },
                   "title": "Response List Zuabschlagsgruppen Api V1 Kontrakte Zuabschlagsgruppen Get",
                   "type": "array"
@@ -328962,17 +329129,6 @@
       },
       "post": {
         "operationId": "create_zuabschlagsgruppe_api_v1_kontrakte_zuabschlagsgruppen_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -328988,7 +329144,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/KontraktMengenzeitraumOut"
+                  "$ref": "#/components/schemas/ZuAbschlagsGruppeOut"
                 }
               }
             },
@@ -329011,6 +329167,53 @@
           }
         ],
         "summary": "Zuabschlagsgruppe anlegen",
+        "tags": [
+          "Kontrakt - Mengenzeitraum & Zu-/Abschläge"
+        ]
+      }
+    },
+    "/api/v1/kontrakte/zuabschlagsgruppen/{gruppe_id}": {
+      "get": {
+        "operationId": "get_zuabschlagsgruppe_api_v1_kontrakte_zuabschlagsgruppen__gruppe_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "gruppe_id",
+            "required": true,
+            "schema": {
+              "title": "Gruppe Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ZuAbschlagsGruppeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Zuabschlagsgruppe abrufen",
         "tags": [
           "Kontrakt - Mengenzeitraum & Zu-/Abschläge"
         ]
@@ -329062,15 +329265,6 @@
               ],
               "title": "Stichtag"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -329118,15 +329312,6 @@
             "required": true,
             "schema": {
               "title": "Gruppe Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
               "type": "string"
             }
           }
@@ -330570,15 +330755,6 @@
               "title": "Kontrakt Nr",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -330627,15 +330803,6 @@
             "required": true,
             "schema": {
               "title": "Kontrakt Nr",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
               "type": "string"
             }
           }
@@ -330742,15 +330909,6 @@
               "title": "Variante",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -330805,15 +330963,6 @@
               "title": "Zeitraum Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -330865,15 +331014,6 @@
             "required": true,
             "schema": {
               "title": "Zeitraum Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
               "type": "string"
             }
           }
@@ -365379,7 +365519,7 @@
     },
     "/api/v1/pos/checkout": {
       "post": {
-        "description": "POS Checkout — empfängt auch Offline-Queue-Transaktionen.",
+        "description": "Checkout ist bis zur Anbindung einer echten Buchung nicht verfuegbar.",
         "operationId": "pos_checkout_api_v1_pos_checkout_post",
         "requestBody": {
           "content": {
@@ -368198,15 +368338,6 @@
               ],
               "title": "Gueltig Am"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -368247,17 +368378,6 @@
       },
       "post": {
         "operationId": "create_individualpreis_api_v1_preise_individualpreise_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -368374,15 +368494,6 @@
               ],
               "title": "Datum"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -368430,15 +368541,6 @@
               "title": "Preis Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -368467,6 +368569,51 @@
           }
         ],
         "summary": "Individualpreis löschen",
+        "tags": [
+          "Preise & Konditionen - Individualpreise"
+        ]
+      },
+      "get": {
+        "operationId": "get_individualpreis_api_v1_preise_individualpreise__preis_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "preis_id",
+            "required": true,
+            "schema": {
+              "title": "Preis Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IndividualpreisOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Individualpreis abrufen",
         "tags": [
           "Preise & Konditionen - Individualpreise"
         ]
@@ -368519,15 +368666,6 @@
               "description": "EK oder VK",
               "title": "Richtung"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -368568,17 +368706,6 @@
       },
       "post": {
         "operationId": "create_rabattgruppe_api_v1_preise_rabatte_gruppen_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -368634,15 +368761,6 @@
               "title": "Gruppe Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -368674,6 +368792,51 @@
         "tags": [
           "Preise - Rabattgruppen & Rabattklassen"
         ]
+      },
+      "get": {
+        "operationId": "get_rabattgruppe_api_v1_preise_rabatte_gruppen__gruppe_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "gruppe_id",
+            "required": true,
+            "schema": {
+              "title": "Gruppe Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RabattgruppeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Rabattgruppe abrufen",
+        "tags": [
+          "Preise - Rabattgruppen & Rabattklassen"
+        ]
       }
     },
     "/api/v1/preise/rabatte/klassen": {
@@ -368694,15 +368857,6 @@
                 }
               ],
               "title": "Richtung"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
             }
           }
         ],
@@ -368744,17 +368898,6 @@
       },
       "post": {
         "operationId": "create_rabattklasse_api_v1_preise_rabatte_klassen_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -368808,15 +368951,6 @@
             "required": true,
             "schema": {
               "title": "Klasse Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
               "type": "string"
             }
           }
@@ -368920,15 +369054,6 @@
               ],
               "title": "Stichtag"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -368969,17 +369094,6 @@
       },
       "post": {
         "operationId": "create_rabattsatz_api_v1_preise_rabatte_saetze_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -369090,15 +369204,6 @@
               ],
               "title": "Stichtag"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -369142,15 +369247,6 @@
             "required": true,
             "schema": {
               "title": "Satz Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
               "type": "string"
             }
           }
@@ -385439,17 +385535,6 @@
     "/api/v1/produktion/mischfutter/rezepturgruppen": {
       "get": {
         "operationId": "list_rezepturgruppen_api_v1_produktion_mischfutter_rezepturgruppen_get",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -385464,16 +385549,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -385488,17 +385563,6 @@
       },
       "post": {
         "operationId": "create_rezepturgruppe_api_v1_produktion_mischfutter_rezepturgruppen_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -385554,15 +385618,6 @@
               "title": "Gruppe Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -385596,17 +385651,16 @@
         ]
       }
     },
-    "/api/v1/produktion/mischfutter/schnellerfassung": {
+    "/api/v1/produktion/mischfutter/rezepturgruppen/{gruppe_nr}": {
       "get": {
-        "description": "Alle Schnellerfassungsvorlagen — für täglich wiederkehrende Produktionen.",
-        "operationId": "list_schnellerfassung_api_v1_produktion_mischfutter_schnellerfassung_get",
+        "operationId": "get_rezepturgruppe_api_v1_produktion_mischfutter_rezepturgruppen__gruppe_nr__get",
         "parameters": [
           {
-            "in": "header",
-            "name": "X-Tenant-ID",
+            "in": "path",
+            "name": "gruppe_nr",
             "required": true,
             "schema": {
-              "title": "X-Tenant-Id",
+              "title": "Gruppe Nr",
               "type": "string"
             }
           }
@@ -385616,11 +385670,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/SchnellerfassungOut"
-                  },
-                  "title": "Response List Schnellerfassung Api V1 Produktion Mischfutter Schnellerfassung Get",
-                  "type": "array"
+                  "$ref": "#/components/schemas/RezepturGruppeOut"
                 }
               }
             },
@@ -385642,6 +385692,37 @@
             "HTTPBearer": []
           }
         ],
+        "summary": "Rezepturgruppe abrufen",
+        "tags": [
+          "Produktion - Mischfutter"
+        ]
+      }
+    },
+    "/api/v1/produktion/mischfutter/schnellerfassung": {
+      "get": {
+        "description": "Alle Schnellerfassungsvorlagen — für täglich wiederkehrende Produktionen.",
+        "operationId": "list_schnellerfassung_api_v1_produktion_mischfutter_schnellerfassung_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SchnellerfassungOut"
+                  },
+                  "title": "Response List Schnellerfassung Api V1 Produktion Mischfutter Schnellerfassung Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Schnellerfassung auflisten",
         "tags": [
           "Produktion - Mischfutter"
@@ -385650,17 +385731,6 @@
       "post": {
         "description": "Neue Schnellerfassungsvorlage anlegen.",
         "operationId": "create_schnellerfassung_api_v1_produktion_mischfutter_schnellerfassung_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -385715,15 +385785,6 @@
             "required": true,
             "schema": {
               "title": "Vorlage Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
               "type": "string"
             }
           }
@@ -402205,15 +402266,6 @@
               ],
               "title": "Ober Id"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -402254,17 +402306,6 @@
       },
       "post": {
         "operationId": "create_warengruppe_api_v1_stammdaten_warengruppen_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -402311,17 +402352,6 @@
     "/api/v1/stammdaten/warengruppen/haupt": {
       "get": {
         "operationId": "list_hauptwarengruppen_api_v1_stammdaten_warengruppen_haupt_get",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -402336,16 +402366,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -402360,17 +402380,6 @@
       },
       "post": {
         "operationId": "create_hauptwarengruppe_api_v1_stammdaten_warengruppen_haupt_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -402426,15 +402435,6 @@
               "title": "Gruppe Nr",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -402476,15 +402476,6 @@
             "required": true,
             "schema": {
               "title": "Gruppe Nr",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
               "type": "string"
             }
           }
@@ -402551,15 +402542,6 @@
               ],
               "title": "Haupt Id"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -402600,17 +402582,6 @@
       },
       "post": {
         "operationId": "create_oberwarengruppe_api_v1_stammdaten_warengruppen_ober_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -402666,15 +402637,6 @@
               "title": "Gruppe Nr",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -402716,15 +402678,6 @@
             "required": true,
             "schema": {
               "title": "Gruppe Nr",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
               "type": "string"
             }
           }
@@ -402900,15 +402853,6 @@
               "title": "Gruppe Nr",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -402941,8 +402885,8 @@
           "Stammdaten - Warengruppen"
         ]
       },
-      "put": {
-        "operationId": "update_warengruppe_api_v1_stammdaten_warengruppen__gruppe_nr__put",
+      "get": {
+        "operationId": "get_warengruppe_api_v1_stammdaten_warengruppen__gruppe_nr__get",
         "parameters": [
           {
             "in": "path",
@@ -402952,13 +402896,49 @@
               "title": "Gruppe Nr",
               "type": "string"
             }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WarengruppeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
           },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
           {
-            "in": "header",
-            "name": "X-Tenant-ID",
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Warengruppe abrufen",
+        "tags": [
+          "Stammdaten - Warengruppen"
+        ]
+      },
+      "put": {
+        "operationId": "update_warengruppe_api_v1_stammdaten_warengruppen__gruppe_nr__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "gruppe_nr",
             "required": true,
             "schema": {
-              "title": "X-Tenant-Id",
+              "title": "Gruppe Nr",
               "type": "string"
             }
           }
@@ -403017,15 +402997,6 @@
             "required": true,
             "schema": {
               "title": "Gruppe Nr",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
               "type": "string"
             }
           }
@@ -409675,6 +409646,55 @@
           }
         ],
         "summary": "Course lÃ¶schen",
+        "tags": [
+          "training",
+          "hr",
+          "onboarding",
+          "training",
+          "hr"
+        ]
+      },
+      "get": {
+        "operationId": "get_course_api_v1_training_courses__item_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "title": "Item Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrainingOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Course abrufen",
         "tags": [
           "training",
           "hr",
@@ -418427,22 +418447,6 @@
         "parameters": [
           {
             "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          },
-          {
-            "in": "query",
             "name": "skip",
             "required": false,
             "schema": {
@@ -418501,24 +418505,6 @@
       "post": {
         "description": "POST Wiegescheine anlegen",
         "operationId": "create_weighing_ticket_api_v1_weighing_tickets__post",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -418567,24 +418553,6 @@
       "get": {
         "description": "Liefert die vorhandenen Artikelgruppen (DISTINCT warengruppe aus articles).",
         "operationId": "list_article_groups_api_v1_weighing_tickets_article_groups_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -418595,6 +418563,44 @@
                   },
                   "title": "Response List Article Groups Api V1 Weighing Tickets Article Groups Get",
                   "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Article groups auflisten",
+        "tags": [
+          "logistics",
+          "weighing"
+        ]
+      }
+    },
+    "/api/v1/weighing-tickets/{ticket_id}": {
+      "get": {
+        "operationId": "get_weighing_ticket_api_v1_weighing_tickets__ticket_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ticket_id",
+            "required": true,
+            "schema": {
+              "title": "Ticket Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WeighingTicketOut"
                 }
               }
             },
@@ -418616,14 +418622,12 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Article groups auflisten",
+        "summary": "Weighing ticket abrufen",
         "tags": [
           "logistics",
           "weighing"
         ]
-      }
-    },
-    "/api/v1/weighing-tickets/{ticket_id}": {
+      },
       "put": {
         "description": "PUT Wiegescheine ändern",
         "operationId": "update_weighing_ticket_api_v1_weighing_tickets__ticket_id__put",
@@ -421294,6 +421298,209 @@
         ]
       }
     },
+    "/api/v1/workspace/agrar-chain": {
+      "get": {
+        "description": "GET /api/v1/workspace/agrar-chain — nur Lesen, keine Buchung.",
+        "operationId": "get_agrar_chain_api_v1_workspace_agrar_chain_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "contract_ref",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 1,
+              "title": "Contract Ref",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "source_model",
+            "required": true,
+            "schema": {
+              "enum": [
+                "kon",
+                "agrar"
+              ],
+              "title": "Source Model",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "contract_status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Contract Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "disposition_status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Disposition Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "weighing_present",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Weighing Present",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "weighing_status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Weighing Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quality_is_final",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Quality Is Final",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "settlement_status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Settlement Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "allocation_status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Allocation Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "harvest_release_status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Harvest Release Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quality_status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Quality Status"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgrarChainOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Naechster Agrar-Prozessschritt (Read-Model)",
+        "tags": [
+          "workspace",
+          "agrar-chain"
+        ]
+      }
+    },
     "/api/v1/xrechnung/batch/export": {
       "get": {
         "description": "Exportiert alle Rechnungen einer Periode als XRechnung-ZIP.",
@@ -423049,105 +423256,6 @@
         "summary": "Do Transition",
         "tags": [
           "workflow"
-        ]
-      }
-    },
-    "/auth/demo-login": {
-      "post": {
-        "description": "Demo-Login-Endpoint (NUR FÜR ENTWICKLUNG!)\n\n⚠️ WARNUNG: Dieser Endpoint gibt jedem User die gewünschte Rolle!\n⚠️ In Production durch echtes Login mit User-DB ersetzen!\n\nArgs:\n    body: LoginBody mit username und role\n\nReturns:\n    LoginResponse mit access_token",
-        "operationId": "demo_login_auth_demo_login_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LoginBody"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LoginResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Demo Login",
-        "tags": [
-          "auth"
-        ]
-      }
-    },
-    "/auth/demo-multi-role": {
-      "post": {
-        "description": "Demo-Login mit mehreren Rollen (NUR FÜR ENTWICKLUNG!)\n\nArgs:\n    username: Username\n    roles: Liste von Rollen\n\nReturns:\n    LoginResponse mit access_token",
-        "operationId": "demo_multi_role_login_auth_demo_multi_role_post",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "username",
-            "required": true,
-            "schema": {
-              "title": "Username",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "items": {
-                  "type": "string"
-                },
-                "title": "Roles",
-                "type": "array"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LoginResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Demo Multi Role Login",
-        "tags": [
-          "auth"
         ]
       }
     },

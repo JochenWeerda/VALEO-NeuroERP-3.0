@@ -179,6 +179,29 @@ def list_meldungen(
         ) from exc
 
 
+@router.get("/meldungen/{meldung_id}", summary="Intrastat-Meldung abrufen",
+    response_model=IntrastatMeldungOut)
+def get_meldung(
+    meldung_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict:
+    """Eine gespeicherte Meldung im verifizierten Mandanten lesen."""
+    row = db.execute(
+        text(
+            "SELECT id, meldenummer, meldezeitraum, meldungsart, cn8_warennummer, "
+            "ursprungsland, bestimmungsland, statistischer_wert_eur, nettomasse_kg, "
+            "menge, mengeneinheit, geschaeftsvorgang_code, status "
+            "FROM domain_compliance.intrastat_meldungen "
+            "WHERE (id = :id OR meldenummer = :id) AND tenant_id = :tid LIMIT 1"
+        ),
+        {"id": meldung_id, "tid": tenant_id},
+    ).mappings().first()
+    if row is None:
+        raise HTTPException(status_code=404, detail="Intrastat-Meldung nicht gefunden")
+    return dict(row)
+
+
 @router.post("/meldungen", status_code=201, summary="Intrastat-Meldung erstellen",
     response_model=IntrastatMeldungCreateOut, dependencies=SCHREIBEN["FINANZ"])
 def create_meldung(

@@ -11,6 +11,18 @@ description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-02
 
 # Universal Mask Runtime — Plattformstatus
 
+**Aktueller Artefaktabgleich 2026-10-27:** 857 registrierte Definitionen,
+Gate A/B jeweils857, C856, E800 (57 Runtime-Luecken); 848 native
+Katalogeintraege, nur5 strukturell freigabefaehig. Browser-Gate D und
+Fachkettenabnahme bleiben eigenstaendig offen. Dies ersetzt die weiter unten
+zitierten frueheren Messwerte. Der strengere aktuelle Bericht ist fuehrend.
+
+**Verbindliches Ziel (Nutzer 2026-10-27):** Alle fachlichen Masken werden ueber
+Studio gebaut, versioniert und ueber die gemeinsame Runtime betrieben.
+Handgebaute Seiten und Legacy-Wrapper sind kein Endzustand. Abloesung erst mit
+nachgewiesener Fachparitaet, Rollen-/Mandantenpruefung und Human-/MCP-/CLI-Vertrag;
+Katalogeintrag allein erfuellt dieses Ziel nicht.
+
 > **Gepruefter Nachlauf 2026-10-27:** Der native Studio-Katalog ist mit **848**
 > Definitionen synchron. **79** gezielte Frontendtests in elf Dateien sowie die
 > vollstaendige Typpruefung sind gruen ([QA](../../quality-assurance/session-cache-boundary-20261027.md)).

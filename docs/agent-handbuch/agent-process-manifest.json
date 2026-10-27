@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-24",
+  "generatedAt": "2026-10-27",
   "schemaVersion": 1,
   "sources": [
     "app/core/flow_spine_registry.py",
@@ -12213,7 +12213,9 @@
           "stubReason": null
         }
       ],
-      "sensitive_fields": [],
+      "sensitive_fields": [
+        "bank_iban"
+      ],
       "mcp_tool_ids": []
     },
     {
@@ -14879,12 +14881,13 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "finance.hausbank.update",
-          "commandEndpoint": null,
-          "method": null,
+          "commandEndpoint": "/api/v1/stammdaten/hausbanken/{entity_id}",
+          "method": "PUT",
           "stubReason": null
         }
       ],
       "sensitive_fields": [
+        "iban",
         "bic"
       ],
       "mcp_tool_ids": [
@@ -17689,7 +17692,7 @@
     },
     {
       "mask_id": "artikel/zoll-intrastat",
-      "title": "Zoll intrastat",
+      "title": "Zoll Intrastat",
       "domain": "lager",
       "process_keys": [],
       "rollout_route": "/mask-rollout/artikel__zoll-intrastat/:entityId",
@@ -17699,7 +17702,7 @@
       "risk_summary": "low",
       "actions": [
         {
-          "key": "bearbeiten",
+          "key": "edit",
           "label": "Bearbeiten",
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
@@ -18752,14 +18755,14 @@
       "actions": [
         {
           "key": "edit",
-          "label": "Bearbeiten",
+          "label": "Bearbeiten nicht verfügbar",
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "stammdaten.individuelle_artikelnummer.update",
           "commandEndpoint": null,
           "method": null,
-          "stubReason": null
+          "stubReason": "Der bestehende API-Vertrag bietet für individuelle Artikelnummern keine Aktualisierung an."
         }
       ],
       "sensitive_fields": [],
@@ -18788,8 +18791,8 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "stammdaten.mengeneinheit.update",
-          "commandEndpoint": null,
-          "method": null,
+          "commandEndpoint": "/api/v1/artikel/mengeneinheiten/stamm/{entity_id}",
+          "method": "PUT",
           "stubReason": null
         }
       ],
@@ -21677,7 +21680,7 @@
     },
     {
       "mask_id": "portal/zertifikate",
-      "title": "{zertifikat.name}",
+      "title": "Zertifikate",
       "domain": "portal",
       "process_keys": [],
       "rollout_route": "/mask-rollout/portal__zertifikate/:entityId",
@@ -25796,7 +25799,10 @@
         }
       ],
       "sensitive_fields": [],
-      "mcp_tool_ids": []
+      "mcp_tool_ids": [
+        "workspace.fachaktion.katalog",
+        "workspace.fachaktion.resolve"
+      ]
     },
     {
       "mask_id": "inventory-reports",
@@ -25822,7 +25828,10 @@
         }
       ],
       "sensitive_fields": [],
-      "mcp_tool_ids": []
+      "mcp_tool_ids": [
+        "workspace.fachaktion.katalog",
+        "workspace.fachaktion.resolve"
+      ]
     },
     {
       "mask_id": "reports",
@@ -25848,7 +25857,10 @@
         }
       ],
       "sensitive_fields": [],
-      "mcp_tool_ids": []
+      "mcp_tool_ids": [
+        "workspace.fachaktion.katalog",
+        "workspace.fachaktion.resolve"
+      ]
     },
     {
       "mask_id": "start-dashboard",
@@ -25874,7 +25886,10 @@
         }
       ],
       "sensitive_fields": [],
-      "mcp_tool_ids": []
+      "mcp_tool_ids": [
+        "workspace.fachaktion.katalog",
+        "workspace.fachaktion.resolve"
+      ]
     },
     {
       "mask_id": "workspace/letzte-dokumente",
@@ -25892,7 +25907,10 @@
         "document_number",
         "route"
       ],
-      "mcp_tool_ids": []
+      "mcp_tool_ids": [
+        "workspace.fachaktion.katalog",
+        "workspace.fachaktion.resolve"
+      ]
     },
     {
       "mask_id": "workspace/start-dashboard",
@@ -25918,7 +25936,10 @@
         }
       ],
       "sensitive_fields": [],
-      "mcp_tool_ids": []
+      "mcp_tool_ids": [
+        "workspace.fachaktion.katalog",
+        "workspace.fachaktion.resolve"
+      ]
     },
     {
       "mask_id": "zertifikate/neu",
@@ -26528,6 +26549,24 @@
       "tool_id": "studio.migration.plan",
       "domain": "studio",
       "scope": "belege:write",
+      "idempotent": true,
+      "risk_class": "low",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "workspace.fachaktion.katalog",
+      "domain": "workspace",
+      "scope": "agent:read",
+      "idempotent": true,
+      "risk_class": "low",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "workspace.fachaktion.resolve",
+      "domain": "workspace",
+      "scope": "agent:read",
       "idempotent": true,
       "risk_class": "low",
       "human_approval_required": false,

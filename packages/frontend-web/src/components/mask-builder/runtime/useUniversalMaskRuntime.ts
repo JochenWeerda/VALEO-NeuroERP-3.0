@@ -203,8 +203,8 @@ export function useUniversalMaskRuntime({
 
   const binding = useMemo<DataBindingPlan | undefined>(() => {
     if (!plan) return undefined
-    return compileDataBindingPlan(plan, schema?.dataSources, tabEndpoints, entityId, tenantId)
-  }, [plan, schema?.dataSources, tabEndpoints, entityId, tenantId])
+    return compileDataBindingPlan(plan, schema?.dataSources, tabEndpoints, entityId, tenantId, schema?.entityProjection)
+  }, [plan, schema?.dataSources, schema?.entityProjection, tabEndpoints, entityId, tenantId])
 
   // Per-table query states
   const [tableQueryStates, setTableQueryStates] = useState<Record<string, TableQueryState>>({})
@@ -240,10 +240,14 @@ export function useUniversalMaskRuntime({
 
   // Entity query
   const entityQuery = useQuery({
-    queryKey: [screenId, entityId, 'entity'],
+    queryKey: [tenantId, screenId, entityId, 'entity'],
     queryFn: async () => {
-      const ep = binding?.entityBinding.entityEndpoint
+      const ep = binding?.entityBinding.sharedEntityEndpoint ?? binding?.entityBinding.entityEndpoint
       if (!ep) return {}
+      if (binding?.entityBinding.sharedEntityEndpoint) {
+        const res = await apiClient.get<{ data: Record<string, unknown> }>(ep)
+        return res.data.data
+      }
       const res = await apiClient.get<Record<string, unknown>>(ep)
       return res.data
     },

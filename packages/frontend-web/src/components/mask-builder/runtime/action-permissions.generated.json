@@ -813,6 +813,38 @@
         ]
       ]
     },
+    "dms/inbox": {
+      "dms.inbox.read": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "CRM_LESEN",
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "EINKAUF_LESEN",
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "FINANCE_LESEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "SALES_LESEN",
+          "admin"
+        ]
+      ],
+      "dms.inbox.write": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "einkauf/anfrage": {
       "einkauf.anfrage.update": [
         [
@@ -1340,6 +1372,38 @@
         ]
       ]
     },
+    "inbox": {
+      "dms.inbox.read": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "CRM_LESEN",
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "EINKAUF_LESEN",
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "FINANCE_LESEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "SALES_LESEN",
+          "admin"
+        ]
+      ],
+      "dms.inbox.write": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "lager/inventur-nebenlaeufe": {
       "inventory.aux.write": [
         [
@@ -1575,6 +1639,32 @@
         [
           "LAGER_ADMIN",
           "LAGER_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "stammdaten/hausbank": {
+      "finance.hausbank.update": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "stammdaten/mengeneinheit": {
+      "stammdaten.mengeneinheit.update": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
           "admin"
         ]
       ]

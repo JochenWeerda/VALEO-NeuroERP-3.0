@@ -1,6 +1,10 @@
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
+import { createElement } from 'react'
+import { fireEvent, screen } from '@testing-library/react'
+import { mountBatchList, transport } from '../native-batch11-12-contract-harness'
+import KundenListePage from '@/pages/crm/kunden-liste'
 
 const pages = resolve(__dirname, '../../pages')
 const listenPy = readFileSync(
@@ -12,7 +16,7 @@ function read(rel: string): string {
   return readFileSync(resolve(pages, rel), 'utf8')
 }
 
-/** Batch 11 (59 pages) — NativeListPage + LISTEN screen_id contract. */
+/** Historical Batch 11 route set (59 pages). Exceptions below retain their operational paths. */
 const BATCH11: Array<[string, string]> = [
   ['admin/audit-log.tsx', 'admin/audit-log-liste'],
   ['agrar/bodenproben/liste.tsx', 'agrar/bodenproben-liste'],
@@ -75,13 +79,45 @@ const BATCH11: Array<[string, string]> = [
   ['fibu/zahlungslaeufe.tsx', 'fibu/zahlungslaeufe-liste'],
 ]
 
-describe('Batch 11 NativeListPage migration', () => {
+describe('Batch 11 route inventory (source-level evidence only)', () => {
   it.each(BATCH11)('%s → %s', (file, screenId) => {
     const src = read(file)
+    if (file === 'admin/audit-log.tsx') {
+      // This route was consolidated onto the Batch 12 audit screen.
+      expect(src).toContain('screenId="admin/audit-log"')
+      expect(src).toContain('testId="screen-admin/audit-log"')
+      return
+    }
+    if (file === 'crm/lead-detail.tsx') {
+      // Entity and create paths are distinct; the former uses the Party native detail runtime.
+      expect(src).toContain('<PartyNativePage kind="lead" entityId={entityId} />')
+      expect(src).toContain('LeadMaskDetailPage')
+      expect(src).toContain('LegacyLeadDetailPage')
+      return
+    }
+    if (file === 'fibu/debitoren.tsx') {
+      // This operational finance page has not been certified as a native list.
+      expect(src).toContain('useDebitorenOP')
+      expect(src).toContain('<DataTable')
+      expect(src).toContain('exportToCSV')
+      return
+    }
     expect(src).toContain('NativeListPage')
     expect(src).toContain(`screenId="${screenId}"`)
     expect(src).toContain(`testId="screen-${screenId}"`)
     expect(listenPy).toContain(`"${screenId}"`)
+  })
+
+  it('mounts the routed Kundenliste through its real builder, runtime and table renderer', async () => {
+    mountBatchList(createElement(KundenListePage), 'crm/kunden-liste', {
+      id: 'synthetic-customer', name: 'SYNTHETIC-CUSTOMER', kunden_nr: 'K-001', ort: 'Bremen',
+    })
+    expect(await screen.findByText('SYNTHETIC-CUSTOMER')).toBeTruthy()
+    expect(transport.get).toHaveBeenCalledWith('/api/v1/masks/crm__kunden-liste/screen-definition', expect.anything())
+    fireEvent.click(screen.getByRole('button', { name: 'SYNTHETIC-CUSTOMER' }))
+    fireEvent.click(screen.getByRole('button', { name: 'In Vollansicht öffnen' }))
+    expect(window.location.pathname).toBe('/crm/kunden/synthetic-customer')
+    expect(transport.request).not.toHaveBeenCalled()
   })
 
   it('CRM- und Rechnungseingangs-Zeilenrouten in screen_definitions_listen', () => {

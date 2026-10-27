@@ -1,60 +1,28 @@
 ---
-title: PR38 CI-Nachlauf nach Workspace-Reparatur
+title: PR38 CI-Nachlauf und Integrationsstand
 type: reference
 owner: Codex
-status: migrationsfix-geprueft
+status: in-arbeit
 last_reviewed: 2026-10-24
 ---
 
-# Nachlauf auf 7bc7e37fa
+# Gepruefter Stand
 
-Die neun Workspace-Reviewbefunde sind als eigene Abnahme geschlossen. Der
-anschliessende Gesamt-CI-Lauf besitzt weitere, getrennt zu reparierende Befunde.
+Die neun Workspace-Reviewbefunde sind geschlossen. Der anschliessende Gesamt-CI-Lauf bleibt eine getrennte Abnahme.
 
-## Gesichert
+- `78aaecf5f`: fehlende Migration dms_inbox_tenant_20261022 wiederhergestellt. Alle437 Migrationsdateien stimmen nach LF-Normalisierung mit dem separat geprueften PR39 ueberein. Die nachfolgenden CI-Migrationen laufen durch; keine lokale DB wurde dafuer zurueckgesetzt.
+- `ae330988a`: CRM-Test prueft beide Definitionswege unabhaengig von der ternary-Schreibweise; drei echte Renderfaelle sichern Lead/Kunde/Default und Kontextweitergabe.49 Python- und8 Frontendfaelle bestanden.
+- `83bbfa774`: Fastify5.12.7, Storybook8.6.19 und abgegrenzte AI-Sicherheitskorrekturen integriert. Ungenutzter AI-Vectorstore entfernt; simulierte RAG-Ergebnisse durch ehrliches503 ersetzt. Historische Nachweise bleiben gekennzeichnet erhalten. Lokale Einzelpruefungen gruen; kein Docker-Rollout behauptet.
+- `9af9d7b2e`: Tabellenkatalog aus nachgewiesen gleichem Frischschema:31Schemas,688Tabellen,9096Spalten. Consumer-Bezuege aus sauberem HEAD statt pending WIP;14 statische Tests bestanden. Direkter PR38-Frischkatalogvergleich steht aus.
+- `7b5de73b8`: Bestellrouten, fehlender SSE-Helperexport, unechte Legacy-Artikel und Banktest-Mock korrigiert.33 Frontendtests gemeinsam bestanden.
+- `8b81d3408`: PSM-Liste an registrierte BVL-Definition gebunden und Erreichbarkeitsscanner gegen falsche Importtexte gehaertet.14 Tests erneut bestanden.272 Erreichbarkeitsbefunde bleiben sichtbar.
 
-- Mehrere Backend-, Strict-DB- und Service-Smoke-Jobs scheitern an derselben
-  fehlenden Revision dms_inbox_tenant_20261022. Die Datei liegt in der geprueften
-  Reparaturansicht, ist aber noch nicht in HEAD. Der Wiederherstellungsstand
-  besteht check_alembic_single_head und py_compile; einziges Head bleibt
-  loading_stop_fk_20261023. Keine Datenbank wurde migriert oder zurueckgesetzt.
-- Alle437 Migrationsdateien stimmen nach LF-Normalisierung byteinhaltlich mit
-  dem separat geprueften PR39-Stand ueberein. Das Migrationsinventar ist in der
-  Reparaturansicht synchronisiert. Ein neuer Frischschema-/CI-Nachweis nach dem
-  Commit bleibt erforderlich. Kein Tabellenkatalog wurde aus der lokalen Probe
-  blind als frisches Schema uebernommen.
-- Der Backendmaskenlauf hat genau einen Fehler: ein CRM-Strukturtest verlangt
-  die alte ternary-Schreibweise. Der aktuelle Adapter besitzt explizite Lead-
-  und Customer-Zweige. Der Test muss mit einem echten Rendervertrag fuer beide
-  Arten aktualisiert werden; bislang keine Testaenderung oder Abschwaechung.
+# Aktueller Nachlauf
 
-## Weiter offen
+Der GitHub-Lauf40115727623 auf8b81 erreicht nach erfolgreichem Migrationsgraph weiterhin den Doc-Drift-Fehler. Der strenge Datenbanklauf40115727664 ist gruen. Agrar-/Finanz-Smokes und weitere Frontendabnahmen sind nicht insgesamt gruen. Der Sicherheitslauf40115727683 scheitert beim Abgleich der Audit-Schweregradzahlen; die Ursache wird geprueft, keine Ausnahme oder Gateabsenkung ist genehmigt.
 
-Sicherheitsfixes aus PR39 nach Quellenvergleich nachziehen, Frontendfehler
-zwischen tatsaechlicher Funktionsluecke und veraltetem Strukturtest trennen,
-kanonische Artefakte nach Integration erzeugen und neue CI-Abnahme abwarten.
-Alte Studio-, API- und Fremdaenderungen bleiben erhalten.
+Die neue Nutzerfreigabe erlaubt die Integration bisher fremder Arbeit. Drei klar abgegrenzte Owners pruefen die noch nicht integrierten Studio-API-, Antwortprojektions- und Runtimeaenderungen. Aeltere gemeinsame Arbeitskopien duerfen keine bereits veroeffentlichten Sicherheits-/Fachkorrekturen zuruecknehmen. Fehlende Dateien der partiellen Commit-Ansicht sind keine beabsichtigten Loeschungen.
 
-## Ausfuehrungsgrenze
+# Offene Grenzen
 
-Der zusaetzliche Claim-Commit wurde nicht ausgefuehrt: automatische
-Freigabepruefung konnte wegen Nutzungslimit nicht abgeschlossen werden.
-Es war keine inhaltliche Ablehnung. Subagenten stoppten ebenfalls am Limit.
-Keine Umgehung, kein Commit/Push dieser vorbereiteten Aenderungen behauptet.
-
-
-## Fortsetzung
-
-Die zuvor gemeldete Resetzeit ist verstrichen. Der Migrationsvorgaenger und
-das aktualisierte Inventar werden als eigener Meilenstein integriert; die
-weiteren Security-/Frontendbefunde bleiben bis eigener Abnahme offen.
-
-
-## CRM-Adaptervertrag
-
-Die alte Vorgabe einer konkreten ternary-Schreibweise wurde durch eine
-Syntax-unabhaengige Definitionspruefung und echte Renderfaelle ersetzt. Lead,
-Kunde und Standardfall muessen die korrekte Definition und unveraendert
-Entity-ID, angefragten Abschnitt und Testkennung weitergeben. Der
-Produktionsadapter wurde nicht geaendert.49 Python-Routenfaelle und8
-Frontendfaelle (einschliesslich3 neuer Renderfaelle) bestanden.
+Keine Gesamtfreigabe fuer Studio, Browser oder vollstaendige Maskenmigration. Portal-Zertifikatsdetails besitzen bislang keine nachgewiesene autorisierte Kundenquelle. Interne Ops-Zertifikate werden nicht als Ersatz exponiert. Weitere Fachluecken und Erreichbarkeitsbefunde werden einzeln geprueft.

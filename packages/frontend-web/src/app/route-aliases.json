@@ -2683,6 +2683,14 @@
     {
       "module": "@/pages/futtermittel/fuetterungsdokumentation-mobil",
       "path": "futtermittel/fuetterungsdokumentation-mobil"
+    },
+    {
+      "module": "@/pages/disposition/touren-disposition",
+      "path": "disposition/touren-disposition"
+    },
+    {
+      "module": "@/pages/studio/workspace-composition-preview",
+      "path": "studio/workspace-composition-preview"
     }
   ]
 }

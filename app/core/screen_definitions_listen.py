@@ -1237,7 +1237,7 @@ def build_zertifikate_liste() -> dict[str, Any]:
 def build_benachrichtigungen_liste() -> dict[str, Any]:
     return _liste(
         screen_id="benachrichtigungen/liste", domain="platform", title="Benachrichtigungen",
-        subtitle="System- und Prozesshinweise", endpoint="/api/v1/benachrichtigungen", row_route=None,
+        subtitle="System- und Prozesshinweise — Lesestatus nur bis zum Verlassen dieser Ansicht", endpoint="/api/v1/benachrichtigungen", row_route=None,
         bundle="platform",
         columns=[
             {"key": "titel", "label": "Titel", "sortable": True, "filterable": True, "priority": "primary"},
@@ -1247,7 +1247,12 @@ def build_benachrichtigungen_liste() -> dict[str, Any]:
             {"key": "gelesen", "label": "Gelesen", "renderKind": "boolean", "filterable": True, "priority": "secondary"},
         ],
         actions=[_EXPORT],
-        row_actions=[],
+        row_actions=[{
+            "key": "mark_read_local", "label": "Als gelesen markieren",
+            "localEffect": "view", "readOnly": True, "dangerLevel": "safe",
+            "visibleWhen": {"field": "gelesen", "values": [False]},
+            "localRowPatch": {"identityField": "id", "field": "gelesen", "value": True},
+        }],
         purpose="Offene Hinweise und Warnungen sichten.",
         prompts=["Welche Warnungen sind ungelesen?", "Was ist heute eingegangen?"],
         no_workflow="Posteingang ohne eigenen Ablauf.",

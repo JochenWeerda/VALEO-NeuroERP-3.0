@@ -32,6 +32,20 @@ export type ScreenSummaryPlacement = 'header' | 'footer'
 export type ScreenActionZone = 'header' | 'footer' | 'commit'
 export type ScreenVoiceProvider = 'webspeech' | 'server'
 export type ScreenAdapterType = 'native' | 'maskConfig' | 'crmMaskJson' | 'formSchema' | 'specialized'
+/** Nur explizit registrierte Spezialkomponenten. Weitere Typen brauchen eigenen Dateibesitz. */
+export type SpecializedComponentType = 'disposition_board'
+
+export interface ScreenSpecializedComponent {
+  type: SpecializedComponentType
+  /** Stabile Registry-ID, z. B. `lkw-disposition-board`. */
+  id: string
+  /** Domain- und UX-Events, die die Komponente emittieren darf. */
+  events?: string[]
+  permissions?: string[]
+  /** Live-Kanal (SSE/NATS-Projektion), z. B. `disposition.board`. */
+  liveChannel?: string
+}
+
 export type ScreenFieldType =
   | 'text'
   | 'number'
@@ -135,6 +149,8 @@ export interface ScreenTableDefinition {
     /** Formular der Seite mit Sendeweg; nie automatisch abgeschickt (wie bei Kopfaktionen). */
     inputFlow?: { kind: 'humanForm'; submitEndpoint: string; method: 'POST' | 'PUT' | 'PATCH' | 'DELETE' }
     localEffect?: ScreenActionDefinition['localEffect']
+    /** Fluechtige Projektion einer einzelnen Zeile; keine Serveraenderung. */
+    localRowPatch?: { identityField: string; field: string; value: string | number | boolean }
     /** Deklarierte Eingaben vor dem Kommando (Dialog der Maske, nie automatisch abgeschickt). */
     inputFields?: ScreenActionInputField[]
     /** Reine Navigation; Platzhalter wie {id} kommen aus der Zeile. */
@@ -494,12 +510,16 @@ export interface ScreenDefinition {
   summaryEndpoint?: string
   summary?: ScreenSummaryItem[]
   dataSources?: ScreenDataSource[]
+  /** Registered scalar fields selected from the secured entity GET response. */
+  entityProjection?: Record<string, string>
   fields?: ScreenFieldDefinition[]
   tabs?: ScreenTabDefinition[]
   tables?: ScreenTableDefinition[]
   tiles?: ScreenTileDefinition[]
   calendar?: ScreenCalendarDefinition
   sourceProposals?: ScreenSourceProposals
+  /** Registrierte Spezialkomponente; derzeit nur `disposition_board`. */
+  specialized?: ScreenSpecializedComponent
   twin?: ScreenTwinDefinition
   processChain?: ScreenProcessChainRef
   processChains?: Record<string, ScreenProcessChainCatalogEntry>
@@ -539,7 +559,8 @@ export interface ScreenDefinition {
     lookupMinChars?: number
     bundleGroup?: string
   }
-  agentContract?: AgentMaskContract
+  /** Authoring metadata; the separate generated agent-contract endpoint returns the full contract. */
+  agentContract?: Partial<AgentMaskContract>
 }
 
 export function validateScreenDefinition(screen: ScreenDefinition): string[] {
@@ -622,6 +643,14 @@ export function validateScreenDefinition(screen: ScreenDefinition): string[] {
   if (screen.twin && !screen.twin.endpoint) {
     errors.push('twin.endpoint is required')
   }
+  if (screen.specialized) {
+    if (screen.specialized.type !== 'disposition_board') {
+      errors.push(`specialized.type is invalid: ${String(screen.specialized.type)}`)
+    }
+    if (!screen.specialized.id?.trim()) {
+      errors.push('specialized.id is required')
+    }
+  }
   if (screen.processChain) {
     if (!screen.processChain.chainId?.trim()) errors.push('processChain.chainId is required')
     if (!screen.processChain.stepKey?.trim()) errors.push('processChain.stepKey is required')
@@ -666,6 +695,33 @@ export function validateScreenDefinition(screen: ScreenDefinition): string[] {
     ])
     if (!fieldKeys.has(screen.identityField)) {
       errors.push(`identityField ${screen.identityField} is not a declared field`)
+    }
+  }
+
+  if (screen.entityProjection !== undefined) {
+    const projection = screen.entityProjection
+    const entries = projection && typeof projection === 'object' && !Array.isArray(projection)
+      ? Object.entries(projection) : []
+    const safeSegment = /^[A-Za-z][A-Za-z0-9_]{0,63}$/
+    const forbidden = new Set(['__proto__', 'prototype', 'constructor', '__class__', '__dict__', '__globals__'])
+    const fields = new Set([
+      ...(screen.fields ?? []).map((field) => field.key),
+      ...(screen.tabs ?? []).flatMap((tab) => (tab.fields ?? []).map((field) => field.key)),
+    ])
+    if (!entries.length || entries.length > 64 || !Object.prototype.hasOwnProperty.call(projection, 'id')) {
+      errors.push('entityProjection requires a bounded id mapping')
+    }
+    const entitySources = (screen.dataSources ?? []).filter((source) => source.key === 'entity')
+    if (entitySources.length !== 1 || (entitySources[0]?.method ?? 'GET') !== 'GET') {
+      errors.push('entityProjection requires one declared entity GET source')
+    }
+    for (const [key, path] of entries) {
+      const segments = typeof path === 'string' ? path.split('.') : []
+      if (!safeSegment.test(key) || forbidden.has(key.toLowerCase()) || !fields.has(key)
+        || !segments.length || segments.length > 8
+        || segments.some((segment) => !safeSegment.test(segment) || forbidden.has(segment.toLowerCase()))) {
+        errors.push(`entityProjection has an invalid field or path: ${key}`)
+      }
     }
   }
 

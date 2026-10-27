@@ -1134,7 +1134,7 @@ def build_disposition_strecken_disposition_screen_definition() -> dict[str, Any]
 
 
 def build_disposition_touren_disposition_screen_definition() -> dict[str, Any]:
-    return build_cockpit_overview_screen(
+    screen = build_cockpit_overview_screen(
         screen_id="disposition/touren-disposition",
         domain="logistics",
         title="Touren-Disposition",
@@ -1143,15 +1143,29 @@ def build_disposition_touren_disposition_screen_definition() -> dict[str, Any]:
         example_prompts=["Zeige Touren-Disposition.", "Was ist der aktuelle Stand?"],
         test_id="disposition-touren-disposition",
         summary=[
-            {"key": "total", "label": "Anzahl", "tone": "neutral"},
-            {"key": "open", "label": "Offen", "tone": "warning"},
+            {"key": "total", "label": "Anzahl", "tone": "neutral", "value": None},
+            {"key": "open", "label": "Offen", "tone": "warning", "value": None},
         ],
         data_sources=[cockpit_entity_source("/api/v1/logistik/tours")],
-        tiles=[cockpit_nav_tile("overview", "Uebersicht", target_route="/disposition/touren-disposition")],
+        tiles=[cockpit_nav_tile("overview", "Uebersicht", target_route="/disposition/touren-disposition", target_screen_id="disposition/touren-disposition")],
         table_profile="inventory",
         actions=[cockpit_refresh_action(permission="logistics.read")],
         context_rail="combined",
     )
+    # The routed page obtains this contract from the backend. The board is a
+    # read-only specialist preview until its mutation workflow is approved.
+    screen["specialized"] = {
+        "type": "disposition_board",
+        "id": "lkw-disposition-board",
+        "events": [
+            "logistik.tour.created",
+            "logistics.tour.quantity_posted",
+            "disposition.board.drop_proposed",
+        ],
+        "permissions": ["logistics.write"],
+        "liveChannel": "disposition.board",
+    }
+    return screen
 
 
 def build_disposition_umlagerungs_vorschlag_screen_definition() -> dict[str, Any]:

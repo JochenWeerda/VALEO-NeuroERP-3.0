@@ -138,8 +138,8 @@ def _batch8_builders() -> dict[str, Any]:
                 ("created_at", "Eingang", 150),
             ),
             "row_actions": [
-                {"key": "create_beleg", "label": "Beleg anlegen", "permission": "dms.inbox.write"},
-                {"key": "discard", "label": "Verwerfen", "dangerLevel": "moderate", "permission": "dms.inbox.write"},
+                {"key": "create_beleg", "label": "Belegmaske öffnen", "permission": "dms.inbox.read", "commandEndpoint": "/api/mcp/documents/inbox/{entity_id}/prepare", "method": "POST"},
+                {"key": "discard", "label": "Verwerfen", "dangerLevel": "moderate", "permission": "dms.inbox.write", "commandEndpoint": "/api/v1/dms/inbox/{entity_id}", "method": "DELETE"},
             ],
             "business_purpose": "Eingescannte Belege priorisieren und in den Belegfluss ueberfuehren.",
             "example_prompts": ["Welche Inbox-Dokumente haben niedrige OCR-Konfidenz?"],
@@ -407,8 +407,9 @@ def _batch8_builders() -> dict[str, Any]:
             "columns": _std_cols(
                 ("created_at", "Erfasst", 150),
                 ("harvest_acceptance_id", "Annahme", 140),
-                ("status", "Status", 110),
-                ("moisture", "Feuchte", 90),
+                ("protocol_number", "Protokoll", 130),
+                ("is_final", "Finalisiert", 110),
+                ("moisture_pct", "Feuchte %", 90),
             ),
             "business_purpose": "Qualitaetsprotokolle vor Freigabe sichten.",
             "example_prompts": ["Welche Protokolle sind noch offen?"],
@@ -543,8 +544,8 @@ def _batch8_builders() -> dict[str, Any]:
                 ("file_name", "Datei", 200),
             ),
             "row_actions": [
-                {"key": "create_beleg", "label": "Beleg anlegen", "permission": "dms.inbox.write"},
-                {"key": "discard", "label": "Verwerfen", "dangerLevel": "moderate", "permission": "dms.inbox.write"},
+                {"key": "create_beleg", "label": "Belegmaske öffnen", "permission": "dms.inbox.read", "commandEndpoint": "/api/mcp/documents/inbox/{entity_id}/prepare", "method": "POST"},
+                {"key": "discard", "label": "Verwerfen", "dangerLevel": "moderate", "permission": "dms.inbox.write", "commandEndpoint": "/api/v1/dms/inbox/{entity_id}", "method": "DELETE"},
             ],
             "business_purpose": "Kurzroute /inbox auf dieselbe DMS-Inbox-Queue.",
             "example_prompts": ["Was liegt im Posteingang?"],

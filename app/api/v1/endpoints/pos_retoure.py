@@ -1,6 +1,6 @@
 """POS Retoure (Return) Endpoint"""
 from typing import Optional, List
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from ....core.database import get_db
@@ -150,17 +150,5 @@ async def pos_checkout(
     data: dict,
     db: Session = Depends(get_db),
 ):
-    """POS Checkout — empfängt auch Offline-Queue-Transaktionen."""
-    import uuid
-    from datetime import datetime, timezone
-
-    # Offline-ID tracking (Idempotenz)
-    offline_id = data.get("offline_id")
-    bon_nr = f"BON-{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}-{str(uuid.uuid4())[:4].upper()}"
-
-    return {
-        "bon_nr": bon_nr,
-        "status": "completed",
-        "offline_id": offline_id,
-        "gesamt": data.get("gesamt", 0),
-    }
+    """Checkout ist bis zur Anbindung einer echten Buchung nicht verfuegbar."""
+    raise HTTPException(status_code=501, detail="POS-Checkout ist noch nicht angebunden.")

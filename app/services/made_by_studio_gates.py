@@ -312,15 +312,49 @@ def check_gate_b(definition: dict[str, Any]) -> GateResult:
     )
 
 
-@lru_cache(maxsize=1)
-def _openapi_route_keys() -> set[str]:
+@lru_cache(maxsize=8)
+def _openapi_route_keys(method: str = "GET") -> set[str]:
+    """Match the declared method; concrete variants need an explicit path enum.
+
+    An arbitrary parameter route cannot prove that a named operation exists
+    (e.g. /finance/{id} does not establish /finance/datev-export).
+    """
+    from itertools import product
+
     path = ROOT / "docs" / "schnittstellen" / "openapi.json"
     if not path.is_file():
         return set()
-    import re as _re
-
     data = json.loads(path.read_text(encoding="utf-8"))
-    return {_re.sub(r"\{[^}]+\}", "{}", p).rstrip("/") for p in data.get("paths", {})}
+    routes: set[str] = set()
+    for endpoint, item in data.get("paths", {}).items():
+        operation = item.get(method.lower())
+        if not isinstance(operation, dict):
+            continue
+        routes.add(_route_key(endpoint))
+        parameters = {
+            parameter.get("name"): parameter
+            for parameter in [*(item.get("parameters") or []), *(operation.get("parameters") or [])]
+            if isinstance(parameter, dict) and parameter.get("in") == "path"
+        }
+        variants: list[list[str]] = []
+        has_enum = False
+        for segment in endpoint.split("/"):
+            parameter = parameters.get(segment[1:-1]) if re.fullmatch(r"\{[^{}]+\}", segment) else None
+            schema = (parameter or {}).get("schema") or {}
+            if "$ref" in schema and schema["$ref"].startswith("#/components/schemas/"):
+                schema = data.get("components", {}).get("schemas", {}).get(schema["$ref"].rsplit("/", 1)[-1], {})
+            values = schema.get("enum")
+            if isinstance(values, list) and values:
+                # Only complete safe segments can describe concrete routes.
+                concrete = [str(value) for value in values if isinstance(value, (str, int))
+                            and not isinstance(value, bool) and re.fullmatch(r"[A-Za-z0-9_.~-]+", str(value))]
+                variants.append(concrete or [segment])
+                has_enum = has_enum or bool(concrete)
+            else:
+                variants.append([segment])
+        if has_enum:
+            routes.update(_route_key("/".join(parts)) for parts in product(*variants))
+    return routes
 
 
 def _route_key(path: str) -> str:
@@ -368,13 +402,14 @@ def check_gate_c(definition: dict[str, Any], *, screen_id: str) -> GateResult:
         for err in readiness.get("errors") or []:
             issues.append(f"compiler:{err}")
 
-    routes = _openapi_route_keys()
     missing_endpoints: list[str] = []
     for source in definition.get("dataSources") or []:
         if not isinstance(source, dict):
             continue
         endpoint = source.get("endpoint")
         if isinstance(endpoint, str) and endpoint.startswith("/api/"):
+            method = source.get("method", "GET")
+            routes = _openapi_route_keys(method) if isinstance(method, str) else set()
             if not _endpoint_in_openapi(endpoint, routes):
                 missing_endpoints.append(endpoint)
     for endpoint in missing_endpoints:
@@ -444,6 +479,16 @@ def _screen_ids_from_source(text: str) -> set[str]:
         ids.add(match.group(1))
     if re.search(r"screenId=\{SCREEN_ID\}", text) and "SCREEN_ID" in consts:
         ids.add(consts["SCREEN_ID"])
+    # Ein gerenderter Runtime-Host kann zwischen zwei echten Studio-Definitionen
+    # wechseln (z. B. Historie und Diff). Beide Zweige laden die jeweilige SD.
+    if re.search(r"\buseScreenDefinition\(\s*screenId\s*\)", text) and re.search(
+        r"\buseUniversalMaskRuntime\(\s*\{\s*screenId\b", text
+    ):
+        for match in re.finditer(
+            r"\bconst\s+screenId\s*=\s*[^?;\n]+\?\s*['\"]([^'\"]+)['\"]\s*:\s*['\"]([^'\"]+)['\"]",
+            text,
+        ):
+            ids.update(match.groups())
     if "sanktionspruefung-" in text and "SanktionsScopePage" in text:
         ids.update({"auswertungen/sanktionspruefung-kunden", "auswertungen/sanktionspruefung-personal"})
     if re.search(r"screenId=\{`beleg/\$\{", text) or "beleg/${variante}" in text:
@@ -551,9 +596,10 @@ def load_registered_definitions() -> dict[str, dict[str, Any]]:
     from app.core.screen_definitions_beleg import BELEGARTEN, build_beleg_screen_definition, screen_id as beleg_screen_id
     from app.core.stamm_object_page_parent import ensure_stamm_screen_registry
 
-    # Snapshot vor dynamischer STAMM-Nachregistrierung — Gate-Zaehlung bleibt stabil (~293 Batch 7–10).
-    ids = list(SCREEN_DEFINITION_BUILDERS)
+    # Der Gate-Lauf muss unabhaengig von der Import-Reihenfolge denselben
+    # kanonischen Bestand sehen wie Studio-Katalog, CLI und Agent-Handbuch.
     ensure_stamm_screen_registry()
+    ids = list(SCREEN_DEFINITION_BUILDERS)
     defs = {sid: get_screen_definition(sid) or {} for sid in ids}
     for art in BELEGARTEN:
         defs[beleg_screen_id(art)] = build_beleg_screen_definition(art)

@@ -4,7 +4,7 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-24
+last_reviewed: 2026-10-27
 version: 3.0.0
 description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions.
 ---
@@ -192,7 +192,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `artikel/texte-medien` | Texte medien | lager | niedrig | — | `GET /api/v1/masks/artikel/texte-medien/agent-contract` |
 | `artikel/umrechnungen` | Umrechnungen | lager | niedrig | — | `GET /api/v1/masks/artikel/umrechnungen/agent-contract` |
 | `artikel/verpackungen` | Verpackungen | lager | niedrig | — | `GET /api/v1/masks/artikel/verpackungen/agent-contract` |
-| `artikel/zoll-intrastat` | Zoll intrastat | lager | niedrig | — | `GET /api/v1/masks/artikel/zoll-intrastat/agent-contract` |
+| `artikel/zoll-intrastat` | Zoll Intrastat | lager | niedrig | — | `GET /api/v1/masks/artikel/zoll-intrastat/agent-contract` |
 | `auswertungen/abfrage-center` | Abfrage-Center | reporting | mittel | — | `GET /api/v1/masks/auswertungen/abfrage-center/agent-contract` |
 | `auswertungen/abfrage-generator` | Abfrage generator | reporting | niedrig | — | `GET /api/v1/masks/auswertungen/abfrage-generator/agent-contract` |
 | `auswertungen/aenderungshistorie` | Aenderungshistorie | audit | niedrig | — | `GET /api/v1/masks/auswertungen/aenderungshistorie/agent-contract` |
@@ -697,7 +697,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `portal/vertraege` | Vertraege | portal | niedrig | — | `GET /api/v1/masks/portal/vertraege/agent-contract` |
 | `portal/whatsapp-simulator` | Whatsapp simulator | portal | niedrig | — | `GET /api/v1/masks/portal/whatsapp-simulator/agent-contract` |
 | `portal/zertifikat` | Zertifikat | portal | niedrig | — | `GET /api/v1/masks/portal/zertifikat/agent-contract` |
-| `portal/zertifikate` | {zertifikat.name} | portal | niedrig | — | `GET /api/v1/masks/portal/zertifikate/agent-contract` |
+| `portal/zertifikate` | Zertifikate | portal | niedrig | — | `GET /api/v1/masks/portal/zertifikate/agent-contract` |
 | `pos/customer-display` | Customer display | pos | niedrig | — | `GET /api/v1/masks/pos/customer-display/agent-contract` |
 | `pos/gift-cards` | Gift cards | pos | niedrig | — | `GET /api/v1/masks/pos/gift-cards/agent-contract` |
 | `pos/promotionen` | Promotionen | pos | niedrig | — | `GET /api/v1/masks/pos/promotionen/agent-contract` |
@@ -13098,7 +13098,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/fibu/buchungen/{entity_id}`
+- `entity` → `/api/v1/finance/closing-checklists/{entity_id}`
 
 **Beispiel-Prompts:**
 
@@ -13504,7 +13504,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/fibu/geschaeftsjahre/{entity_id}`
+- `entity` → `/api/v1/fibu/geschaeftsjahre/detail/{entity_id}`
 
 **Beispiel-Prompts:**
 
@@ -14003,6 +14003,8 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - Oeffne Neues Zahlungsformular [FIZAF].
 - Bearbeite Stammdaten.
+
+**Sensible Felder:** `bank_iban`
 
 **Actions:**
 
@@ -14689,7 +14691,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/finance/assets/{entity_id}`
+- `entity` → `/api/v1/finance/asset-accounting/assets/{entity_id}`
 
 **MCP-Tools (Domäne):**
 
@@ -17055,7 +17057,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/hausbanken/{entity_id}`
+- `entity` → `/api/v1/stammdaten/hausbanken/{entity_id}`
 
 **MCP-Tools (Domäne):**
 
@@ -17067,13 +17069,13 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - Welche BLZ hat Hausbank {entity_id}?
 
-**Sensible Felder:** `bic`
+**Sensible Felder:** `iban, bic`
 
 **Actions:**
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `edit` | Bearbeiten | safe | nein | `—` |
+| `edit` | Bearbeiten | safe | nein | `/api/v1/stammdaten/hausbanken/{entity_id}` |
 
 ---
 
@@ -17606,7 +17608,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/futtermittel/einzelfuttermittel/{entity_id}`
+- `entity` → `/api/v1/futter/einzelfuttermittel/{entity_id}`
 
 **Beispiel-Prompts:**
 
@@ -17634,7 +17636,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/futtermittel/mischfuttermittel/{entity_id}`
+- `entity` → `/api/v1/futter/mischfuttermittel/{entity_id}`
 
 **Beispiel-Prompts:**
 
@@ -20092,9 +20094,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `artikel/zoll-intrastat` — Zoll intrastat
+### `artikel/zoll-intrastat` — Zoll Intrastat
 
-**Zweck:** Stamm- und Fachmaske fuer Zoll intrastat (artikel/zoll-intrastat).
+**Zweck:** Gespeicherte Intrastat-Meldung mit ihren fachlichen Positionswerten lesen.
 
 | | |
 |---|---|
@@ -20106,7 +20108,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/compliance/intrastat/meldungen/{entity_id}/validate`
+- `entity` → `/api/v1/intrastat/meldungen/{entity_id}`
 
 **MCP-Tools (Domäne):**
 
@@ -20117,13 +20119,13 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Beispiel-Prompts:**
 
-- Zeige Stammdaten fuer Zoll intrastat {entity_id}.
+- Zeige Intrastat-Meldung {entity_id}.
 
 **Actions:**
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `bearbeiten` | Bearbeiten | safe | nein | `—` |
+| `edit` | Bearbeiten | safe | nein | `—` |
 
 ---
 
@@ -20792,7 +20794,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/lager/bestaende/{entity_id}`
+- `entity` → `/api/v1/massebilanz/{entity_id}`
 
 **MCP-Tools (Domäne):**
 
@@ -20972,7 +20974,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/lager/bestaende/{entity_id}`
+- `entity` → `/api/v1/inventory/counts/{entity_id}`
 
 **MCP-Tools (Domäne):**
 
@@ -21298,7 +21300,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/individuelle-artikelnummern/{entity_id}`
+- `entity` → `/api/v1/artikel/individuelle-nummern/{entity_id}`
 
 **MCP-Tools (Domäne):**
 
@@ -21315,7 +21317,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `edit` | Bearbeiten | safe | nein | `—` |
+| `edit` | Bearbeiten nicht verfügbar | safe | nein | `Der bestehende API-Vertrag bietet für individuelle Artikelnummern keine Aktualisierung an.` |
 
 ---
 
@@ -21333,7 +21335,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/artikel/mengeneinheiten/{entity_id}`
+- `entity` → `/api/v1/artikel/mengeneinheiten/stamm/{entity_id}`
 
 **MCP-Tools (Domäne):**
 
@@ -21350,7 +21352,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `edit` | Bearbeiten | safe | nein | `—` |
+| `edit` | Bearbeiten | safe | nein | `/api/v1/artikel/mengeneinheiten/stamm/{entity_id}` |
 
 ---
 
@@ -23299,7 +23301,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/personal/absences/{entity_id}`
+- `entity` → `/api/v1/personal/mitarbeiter/{entity_id}`
 
 **Beispiel-Prompts:**
 
@@ -23357,7 +23359,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/personal/absences/{entity_id}`
+- `entity` → `/api/v1/training/courses/{entity_id}`
 
 **Beispiel-Prompts:**
 
@@ -24359,9 +24361,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `portal/zertifikate` — {zertifikat.name}
+### `portal/zertifikate` — Zertifikate
 
-**Zweck:** {zertifikat.name} im portal-Bereich finden und auswerten.
+**Zweck:** Zertifikate des zugeordneten Kundenkontos finden und auswerten.
 
 | | |
 |---|---|
@@ -24373,12 +24375,12 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `list` → `/api/v1/portal/anfragen`
+- `list` → `/api/v1/portal/zertifikate`
 
 **Beispiel-Prompts:**
 
-- Zeige {zertifikat.name}.
-- Filtere die Liste.
+- Zeige meine Zertifikate.
+- Filtere die Zertifikate.
 
 **Actions:**
 
@@ -24725,7 +24727,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/preise/historie/{entity_id}`
+- `entity` → `/api/v1/preise/individualpreise/{entity_id}`
 
 **Beispiel-Prompts:**
 
@@ -24783,7 +24785,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/preise/historie/{entity_id}`
+- `entity` → `/api/v1/preise/rabatte/gruppen/{entity_id}`
 
 **Beispiel-Prompts:**
 
@@ -24812,7 +24814,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/preise/historie/{entity_id}`
+- `entity` → `/api/v1/kontrakte/zuabschlagsgruppen/{entity_id}`
 
 **Beispiel-Prompts:**
 
@@ -24909,7 +24911,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/produktion/rezepturgruppen/{entity_id}`
+- `entity` → `/api/v1/produktion/mischfutter/rezepturgruppen/{entity_id}`
 
 **MCP-Tools (Domäne):**
 
@@ -24941,7 +24943,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/produktion/mischfutter/auftraege/{entity_id}`
+- `entity` → `/api/v1/produktion/mischfutter/rezepturgruppen/{entity_id}`
 
 **MCP-Tools (Domäne):**
 
@@ -28968,6 +28970,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `list` → `/api/v1/kontrakte`
 
+**MCP-Tools (Domäne):**
+
+- `workspace.fachaktion.katalog` — scope `agent:read`, Risiko niedrig
+- `workspace.fachaktion.resolve` — scope `agent:read`, Risiko niedrig
+
 **Beispiel-Prompts:**
 
 - Zeige Contracts v2.
@@ -28996,6 +29003,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **Data Sources:**
 
 - `entity` → `/api/v1/inventory/reports/stock-alerts`
+
+**MCP-Tools (Domäne):**
+
+- `workspace.fachaktion.katalog` — scope `agent:read`, Risiko niedrig
+- `workspace.fachaktion.resolve` — scope `agent:read`, Risiko niedrig
 
 **Beispiel-Prompts:**
 
@@ -29026,6 +29038,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `entity` → `/api/v1/agrar/rations-optimization/feeding/reports`
 
+**MCP-Tools (Domäne):**
+
+- `workspace.fachaktion.katalog` — scope `agent:read`, Risiko niedrig
+- `workspace.fachaktion.resolve` — scope `agent:read`, Risiko niedrig
+
 **Beispiel-Prompts:**
 
 - Zeige Reports.
@@ -29054,6 +29071,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **Data Sources:**
 
 - `entity` → `/api/v1/analytics/kpis`
+
+**MCP-Tools (Domäne):**
+
+- `workspace.fachaktion.katalog` — scope `agent:read`, Risiko niedrig
+- `workspace.fachaktion.resolve` — scope `agent:read`, Risiko niedrig
 
 **Beispiel-Prompts:**
 
@@ -29085,6 +29107,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `entity` → `/api/v1/recent-documents`
 - `documents` → `/api/v1/recent-documents`
 
+**MCP-Tools (Domäne):**
+
+- `workspace.fachaktion.katalog` — scope `agent:read`, Risiko niedrig
+- `workspace.fachaktion.resolve` — scope `agent:read`, Risiko niedrig
+
 **Beispiel-Prompts:**
 
 - Oeffne meinen letzten Lieferschein.
@@ -29109,6 +29136,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **Data Sources:**
 
 - `entity` → `/api/v1/analytics/kpis`
+
+**MCP-Tools (Domäne):**
+
+- `workspace.fachaktion.katalog` — scope `agent:read`, Risiko niedrig
+- `workspace.fachaktion.resolve` — scope `agent:read`, Risiko niedrig
 
 **Beispiel-Prompts:**
 

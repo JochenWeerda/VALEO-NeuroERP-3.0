@@ -4,7 +4,7 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-24
+last_reviewed: 2026-10-27
 version: 3.0.0
 description: MCP-Tools, Domain-Events und Automatisierungsregeln für Agenten.
 ---
@@ -94,6 +94,8 @@ Vollständige Referenz: [mcp-tools.md](../schnittstellen/mcp-tools.md)
 | `studio.migration.plan` | studio | `belege:write` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
 | `wms.cell.status` | inventory | `inventory:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
 | `wms.lot.trace` | inventory | `inventory:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
+| `workspace.fachaktion.katalog` | workspace | `agent:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
+| `workspace.fachaktion.resolve` | workspace | `agent:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
 
 ## Domain-Events (Auszug)
 

@@ -16,7 +16,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import text
 
 from app.core.database import get_db
-from app.core.dependencies import get_tenant_id
+from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
@@ -106,6 +106,17 @@ def list_rabattgruppen(
     sql += " ORDER BY richtung, gruppe_nr"
     rows = db.execute(text(sql), params).fetchall()
     return [RabattgruppeOut(**dict(r._mapping)) for r in rows]
+
+
+@router.get("/gruppen/{gruppe_id}", response_model=RabattgruppeOut, summary="Rabattgruppe abrufen")
+def get_rabattgruppe(gruppe_id: str, db=Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
+    row = db.execute(text("""
+        SELECT * FROM domain_shared.preis_rabattgruppen
+        WHERE id = :id AND tenant_id = :tid AND aktiv = true
+    """), {"id": gruppe_id, "tid": tenant_id}).fetchone()
+    if row is None:
+        raise HTTPException(404, "Rabattgruppe nicht gefunden.")
+    return RabattgruppeOut(**dict(row._mapping))
 
 
 @router.post("/gruppen", response_model=RabattgruppeOut, status_code=201, summary="Rabattgruppe anlegen", dependencies=SCHREIBEN["VERKAUF"])

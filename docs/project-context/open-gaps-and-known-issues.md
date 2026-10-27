@@ -13,6 +13,12 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 ## UIX-RUNTIME: Migrationsnachweise und Fachparitaet (2026-10-22)
 
+**Aktueller Gesamtartefaktstand 2026-10-27:** Gate A/B857/857,
+C856/857 (Portalzertifikat), E800/857 (57 Runtime-Luecken), 848 native
+Katalogeintraege und5 strukturell freigabefaehige Definitionen. Der frisch
+erzeugte Gate-Bericht hat Vorrang vor allen nachfolgenden historischen Zahlen.
+Ziel bleibt vollstaendige Studio-Erstellung und Fachparitaet aller Masken.
+
 **Nachlauf 2026-10-27:** 848 native Katalogeintraege synchron; 79 gezielte Tests
 in elf Dateien und vollstaendige Frontend-Typpruefung gruen. Das ist keine
 Gesamtmigration: gespeicherter Gate-Bericht vom 26.10. C 856/857, E 807/857;

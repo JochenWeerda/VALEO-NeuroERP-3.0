@@ -1621,6 +1621,11 @@
       "source": "alias"
     },
     {
+      "module": "@/pages/disposition/touren-disposition",
+      "path": "disposition/touren-disposition",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/docflow/artefakt-freigabe",
       "path": "docflow/artefakt-freigabe",
       "source": "alias"
@@ -4243,6 +4248,11 @@
     {
       "module": "@/pages/admin/studio-run",
       "path": "studio/run/:screenId",
+      "source": "alias"
+    },
+    {
+      "module": "@/pages/studio/workspace-composition-preview",
+      "path": "studio/workspace-composition-preview",
       "source": "alias"
     },
     {

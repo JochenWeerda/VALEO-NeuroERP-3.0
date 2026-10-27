@@ -239,6 +239,16 @@ async def list_courses(
     )
 
 
+@router.get("/courses/{item_id}", response_model=TrainingOut, summary="Course abrufen")
+async def get_course(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    return _load_optional_row(
+        db,
+        "SELECT * FROM domain_hr.training_courses WHERE tenant_id=:tenant_id AND id=:id",
+        {"tenant_id": tenant_id, "id": item_id},
+        not_found_detail="Schulung nicht gefunden",
+    )
+
+
 @router.post("/courses", response_model=TrainingOut, status_code=201, summary="Course anlegen", dependencies=SCHREIBEN["PERSONAL"])
 async def create_course(payload: Payload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     d = payload.data

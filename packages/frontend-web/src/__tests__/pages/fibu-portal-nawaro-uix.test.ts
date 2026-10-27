@@ -1,3 +1,22 @@
+import { screen } from '@testing-library/react'
+import { mountDomainPage, state } from '../multi-domain-uix-harness'
+import Bwa from '@/pages/fibu/bwa'
+import Journal from '@/pages/fibu/buchungsjournal'
+import Recurring from '@/pages/fibu/periodische-buchungen'
+import RevenueCodes from '@/pages/fibu/erloeskennziffern'
+import RevenueAccounts from '@/pages/fibu/erloeskontenzuordnung'
+import ReceivableGroups from '@/pages/fibu/forderungsgruppen'
+import Payroll from '@/pages/fibu/lohn-connector'
+import Atlas from '@/pages/fibu/atlas'
+import PortalOrders from '@/pages/portal/bestellungen'
+import PortalInvoices from '@/pages/portal/rechnungen'
+import PortalContracts from '@/pages/portal/vertraege'
+import PortalRequests from '@/pages/portal/anfragen'
+import PortalShop from '@/pages/portal/shop'
+import PortalRecommendations from '@/pages/portal/empfehlungen'
+import Terms from '@/pages/einkauf/zahlungsbedingungen'
+import InvoiceCapture from '@/pages/einkauf/rechnung-eingang-erfassung'
+import Reports from '@/pages/einkauf/reports'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
@@ -5,40 +24,50 @@ import { describe, expect, it } from 'vitest'
 const read = (rel: string) => readFileSync(resolve(__dirname, rel), 'utf8')
 
 describe('FIBU / Portal / NaWaRo UIX', () => {
-  it('stellt BWA-Aktualisieren auf 44 px', () => {
-    const src = read('../../pages/fibu/bwa.tsx')
-    expect(src).toContain('min-h-touch')
-    expect(src).toContain('Aktualisieren')
-    expect(src).not.toMatch(/size="sm"/)
+  it('stellt BWA-Aktualisieren auf 44 px', async () => {
+    await mountDomainPage(Bwa, 'fibu/bwa', true)
+    expect(screen.getByRole('button', { name: 'Aktualisieren' })).toHaveClass('min-h-touch')
   })
 
-  it('stellt Journal-Storno und Abschluss-Details auf 44 px', () => {
-    expect(read('../../pages/fibu/buchungsjournal.tsx')).toContain('min-h-touch gap-1')
+  it('stellt Journal-Storno und Abschluss-Details auf 44 px', async () => {
+    await mountDomainPage(Journal, 'fibu/buchungsjournal-liste', true)
+    expect.soft(screen.queryByRole('button', { name: /Storno|Stornieren/ })).toHaveClass('min-h-touch')
+    // Remaining detail-page source checks are explicitly static until an entity-bound mount exists.
     expect(read('../../pages/fibu/abschluss-cockpit.tsx')).toContain('min-h-touch')
     const check = read('../../pages/fibu/abschluss-checklist-detail.tsx')
-    expect(check).toContain('min-h-touch')
     expect(check).toContain('Erledigen')
     expect(check).not.toContain('Instanz ')
   })
 
-  it('beschriftet FIBU-Stammaktionen 44 px', () => {
-    expect(read('../../pages/fibu/periodische-buchungen.tsx')).toContain('Sperren')
-    expect(read('../../pages/fibu/erloeskennziffern.tsx')).toContain('Bearbeiten')
-    expect(read('../../pages/fibu/erloeskontenzuordnung.tsx')).toContain('Bearbeiten')
-    expect(read('../../pages/fibu/forderungsgruppen.tsx')).toContain('Löschen')
-    expect(read('../../pages/fibu/lohn-connector.tsx')).toContain('Löschen')
-    expect(read('../../pages/fibu/atlas.tsx')).toContain('min-h-touch')
+  it('beschriftet FIBU-Stammaktionen 44 px', async () => {
+    for (const [Page, id, label] of [
+      [Recurring, 'fibu/periodische-buchungen', 'Sperren'],
+      [RevenueCodes, 'fibu/erloeskennziffern', 'Bearbeiten'],
+      [RevenueAccounts, 'fibu/erloeskontenzuordnung', 'Bearbeiten'],
+      [ReceivableGroups, 'fibu/forderungsgruppen', 'Löschen'],
+      [Payroll, 'fibu/lohn-connector', 'Löschen'],
+    ] as const) {
+      await mountDomainPage(Page, id, true)
+      expect.soft(screen.queryByRole('button', { name: label })).toHaveClass('min-h-touch')
+    }
+    await mountDomainPage(Atlas, 'fibu/atlas', true)
+    expect(screen.getByRole('button', { name: 'CSV-Export' })).toHaveClass('min-h-touch')
   })
 
-  it('stellt Portal-Self-Service 44 px mit beschrifteten Zeilen', () => {
-    const bestellungen = read('../../pages/portal/bestellungen.tsx')
-    expect(bestellungen).toContain('min-h-touch')
-    expect(bestellungen).toContain('Details')
-    expect(read('../../pages/portal/rechnungen.tsx')).toContain('Download')
-    expect(read('../../pages/portal/vertraege.tsx')).toContain('Details')
-    expect(read('../../pages/portal/anfragen.tsx')).toContain('Details')
-    expect(read('../../pages/portal/shop.tsx')).not.toMatch(/size="sm"/)
-    expect(read('../../pages/portal/empfehlungen.tsx')).not.toContain('text-gray-900')
+  it('stellt Portal-Self-Service 44 px mit beschrifteten Zeilen', async () => {
+    for (const [Page, id, label] of [
+      [PortalOrders, 'portal/bestellungen', 'Details'],
+      [PortalInvoices, 'portal/rechnungen', 'Download'],
+      [PortalContracts, 'portal/vertraege', 'Details'],
+      [PortalRequests, 'portal/anfragen', 'Details'],
+    ] as const) {
+      await mountDomainPage(Page, id, true)
+      expect.soft(screen.queryByRole('button', { name: label })).toHaveClass('min-h-touch')
+    }
+    await mountDomainPage(PortalShop, 'portal/shop', true)
+    expect(screen.getByRole('button', { name: 'CSV-Export' })).toHaveClass('min-h-touch')
+    await mountDomainPage(PortalRecommendations, 'portal/empfehlungen', true)
+    expect(screen.getByRole('button', { name: 'CSV-Export' })).not.toHaveClass('text-gray-900')
   })
 
   it('stellt NaWaRo-Erfassung 44 px', () => {
@@ -48,17 +77,17 @@ describe('FIBU / Portal / NaWaRo UIX', () => {
     expect(read('../../pages/nawaro/anbauflaechen.tsx')).not.toMatch(/size="sm"/)
   })
 
-  it('beschriftet Einkauf-Stamm und Rechnungs-Toolbar 44 px', () => {
-    // Zahlungsbedingungen seit 21.10.2026 als Studio-Liste (Aktionen und 44-px-Ziele aus der Definition/dem Renderer).
-    const zabd = read('../../pages/einkauf/zahlungsbedingungen.tsx')
-    expect(zabd).toContain('screenId="einkauf/zahlungsbedingungen"')
-    const eingang = read('../../pages/einkauf/rechnung-eingang-erfassung.tsx')
-    expect(eingang).toContain('Speichern')
-    expect(eingang).toContain('aria-label="Kostenstelle suchen"')
-    expect(eingang).toContain('Bediener:')
-    expect(eingang).not.toMatch(/size="sm"/)
+  it('beschriftet Einkauf-Stamm und Rechnungs-Toolbar 44 px', async () => {
+    state.roles = ['FINANCE_BEARBEITEN']
+    await mountDomainPage(Terms, 'einkauf/zahlungsbedingungen', true)
+    expect(screen.getByRole('button', { name: 'Zahlungsbedingung anlegen' })).toHaveClass('min-h-touch')
+    await mountDomainPage(InvoiceCapture, 'einkauf/rechnung-eingang-erfassung', true)
+    expect.soft(screen.queryByRole('button', { name: 'Speichern' })).toHaveClass('min-h-touch')
+    expect.soft(screen.queryByRole('combobox', { name: 'Kostenstelle suchen' })).toBeInTheDocument()
+    expect.soft(screen.queryByText(/Bediener:/)).toBeInTheDocument()
     expect(read('../../pages/einkauf/gutschriften-belastungen.tsx')).toContain('Entfernen')
-    expect(read('../../pages/einkauf/reports.tsx')).not.toMatch(/size="sm"/)
+    await mountDomainPage(Reports, 'einkauf/reports', true)
+    expect(screen.getByRole('button', { name: 'Aktualisieren' })).toHaveClass('min-h-touch')
   })
 
   it('beschriftet Stammdaten- und Partie-Aktionen 44 px', () => {

@@ -20,7 +20,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import text
 
 from app.core.database import get_db
-from app.core.dependencies import get_tenant_id
+from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
@@ -309,3 +309,19 @@ def delete_mengeneinheitengruppe(
     """), {"tid": tenant_id, "nr": gruppe_nr})
     db.commit()
     return Response(status_code=204)
+
+
+@router.get("/stamm/{einheit_kuerzel}", response_model=MengeneinheitOut, summary="Mengeneinheit lesen")
+def get_mengeneinheit(
+    einheit_kuerzel: str,
+    db=Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
+    """Single record for the shared Human/CLI/MCP screen data source."""
+    row = db.execute(text("""
+        SELECT * FROM domain_shared.artikel_mengeneinheiten
+        WHERE tenant_id = :tid AND einheit_kuerzel = :key AND aktiv = true
+    """), {"tid": tenant_id, "key": einheit_kuerzel}).fetchone()
+    if row is None:
+        raise HTTPException(404, "Mengeneinheit nicht gefunden.")
+    return MengeneinheitOut(**dict(row._mapping))

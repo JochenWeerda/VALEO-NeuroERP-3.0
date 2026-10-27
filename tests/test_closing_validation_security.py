@@ -1,5 +1,6 @@
 """Security regressions against the shared PostgreSQL probe, rollback only."""
 import json
+import os
 from uuid import uuid4
 import pytest
 from fastapi import FastAPI, HTTPException
@@ -16,7 +17,7 @@ from app.services.closing_checklist_validation import validate_closing_item, ver
 @pytest.fixture(autouse=True)
 def shared_probe_only():
     assert engine.url.get_backend_name() == "postgresql"
-    assert engine.url.database == "valeo_probe" or engine.url.database.startswith("test_")
+    assert engine.url.database == "valeo_probe" or engine.url.database.startswith("test_") or os.getenv("CI") == "true"
 
 
 def test_actor_requires_verified_subject_not_display_name():

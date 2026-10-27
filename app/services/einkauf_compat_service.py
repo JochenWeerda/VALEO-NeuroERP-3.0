@@ -7,6 +7,7 @@ from typing import Any, Optional
 
 from sqlalchemy.orm import Session
 
+from app.core.akteur import bekannter_nutzer
 from app.core.business_time import business_date_after, business_today
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
 from app.core.uuid7 import uuid7
@@ -633,21 +634,16 @@ class EinkaufCompatService:
         return (str(row["id"]), (row.get("status") or "").upper())
 
     def _write_rechnung_audit(
-        self, rid: str, action: str, old_status: str, new_status: str
+        self, rid: str, action: str, old_status: str, new_status: str, actor: str
     ) -> None:
         from datetime import datetime as _dt
         from app.core.logging import get_correlation_id
         from sqlalchemy import text
-        try:
-            row = self.db.execute(text(
-                "SELECT id, email FROM domain_shared.users "
-                "WHERE tenant_id = :tid AND (is_active IS NULL OR is_active = true) LIMIT 1"
-            ), {"tid": self.tenant_id}).mappings().first()
-            if not row or not row.get("id"):
-                return
-            user_id, user_email = str(row["id"]), str((row.get("email") or "unknown")[:100])
-        except Exception:
-            return
+        user_id = bekannter_nutzer(self.db, actor, tenant_id=self.tenant_id)
+        row = self.db.execute(text(
+            "SELECT email FROM domain_shared.users WHERE id = :id AND tenant_id = :tid"
+        ), {"id": user_id, "tid": self.tenant_id}).mappings().one()
+        user_email = str((row.get("email") or "unknown")[:100])
         entry = AuditLog(
             id=uuid7(),
             timestamp=_dt.utcnow(),
@@ -664,7 +660,7 @@ class EinkaufCompatService:
         )
         self.db.add(entry)
 
-    def _transition_rechnung(self, rechnung_id: str, action: str) -> dict:
+    def _transition_rechnung(self, rechnung_id: str, action: str, actor: str) -> dict:
         from sqlalchemy import text
         allowed = {
             "pruefen": ({"ENTWURF", "ERFASST", "OFFEN"}, "GEPRUEFT",
@@ -681,11 +677,15 @@ class EinkaufCompatService:
         rid, old_status = pair
         if old_status not in valid_statuses:
             raise ValidationFailedError(f"{err_msg}. Aktuell: {old_status}")
-        self.db.execute(text(
-            "UPDATE einkauf_rechnungseingaenge SET status = :ns, updated_at = now() WHERE id = :id AND tenant_id = :tid"
-        ), {"ns": new_status, "id": rid, "tid": self.tenant_id})
-        self._write_rechnung_audit(rid, action, old_status, new_status)
-        self.db.commit()
+        try:
+            self._write_rechnung_audit(rid, action, old_status, new_status, actor)
+            self.db.execute(text(
+                "UPDATE einkauf_rechnungseingaenge SET status = :ns, updated_at = now() WHERE id = :id AND tenant_id = :tid"
+            ), {"ns": new_status, "id": rid, "tid": self.tenant_id})
+            self.db.commit()
+        except Exception:
+            self.db.rollback()
+            raise
         self._invalidate()
 
         # Belegbruch schließen: bei Verbuchung Kreditoren-OP anlegen
@@ -719,14 +719,14 @@ class EinkaufCompatService:
 
         return {"message": f"Rechnungseingang {action}t", "status": new_status}
 
-    def pruefen_rechnung(self, rechnung_id: str) -> dict:
-        return self._transition_rechnung(rechnung_id, "pruefen")
+    def pruefen_rechnung(self, rechnung_id: str, actor: str) -> dict:
+        return self._transition_rechnung(rechnung_id, "pruefen", actor)
 
-    def freigeben_rechnung(self, rechnung_id: str) -> dict:
-        return self._transition_rechnung(rechnung_id, "freigeben")
+    def freigeben_rechnung(self, rechnung_id: str, actor: str) -> dict:
+        return self._transition_rechnung(rechnung_id, "freigeben", actor)
 
-    def verbuchen_rechnung(self, rechnung_id: str) -> dict:
-        return self._transition_rechnung(rechnung_id, "verbuchen")
+    def verbuchen_rechnung(self, rechnung_id: str, actor: str) -> dict:
+        return self._transition_rechnung(rechnung_id, "verbuchen", actor)
 
     # ── Supplier Ratings & Reports ────────────────────────────────────────────
 

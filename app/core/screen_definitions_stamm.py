@@ -52,11 +52,13 @@ def _stamm(
     bundle: str | None = None,
     creation: dict[str, Any] | None = None,
     extra_actions: list[dict[str, Any]] | None = None,
+    edit_action_overrides: dict[str, Any] | None = None,
+    entity_projection: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     kopf = list(felder)
     if identity and not any(f["key"] == identity for f in kopf):
         kopf.insert(0, _feld(identity, "Kennung", readOnly=True))
-    return build_stamm_object_page(
+    definition = build_stamm_object_page(
         screen_id=screen_id,
         domain=domain,
         title=title,
@@ -72,7 +74,11 @@ def _stamm(
         bundle_group=bundle or domain,
         creation=creation,
         extra_actions=extra_actions,
+        edit_action_overrides=edit_action_overrides,
     )
+    if entity_projection is not None:
+        definition["entityProjection"] = entity_projection
+    return definition
 
 
 
@@ -605,17 +611,43 @@ def build_stammdaten_hausbank_stamm() -> dict[str, Any]:
         domain="finance",
         title="Hausbank",
         subtitle="Hausbank",
-        endpoint="/api/v1/hausbanken/{entity_id}",
-        identity="bankleitzahl",
+        endpoint="/api/v1/stammdaten/hausbanken/{entity_id}",
+        identity="bank_nr",
         felder=[
-        _feld("bankleitzahl", "BLZ"),
-        _feld("name", "Bank"),
+        _feld("bank_nr", "Bank-Nr.", readOnly=True),
+        _feld("bezeichnung", "Bezeichnung"),
+        _feld("iban", "IBAN"),
         _feld("bic", "BIC"),
+        _feld("bank_name", "Bankname"),
+        _feld("kontonummer", "Kontonummer"),
+        _feld("blz", "BLZ"),
+        _feld("waehrung", "Währung"),
+        _feld("erechnung_aktiv", "E-Rechnung aktiv", "boolean"),
+        _feld("sepa_glaeubiger_id", "SEPA-Gläubiger-ID"),
+        _feld("standard", "Standardbank", "boolean"),
+        _feld("aktiv", "Aktiv", "boolean", readOnly=True),
         ],
         edit_permission="finance.hausbank.update",
         test_id="stammdaten-hausbank-stamm",
         purpose="Hausbankenstamm.",
         prompts=['Welche BLZ hat Hausbank {entity_id}?'],
+        edit_action_overrides={
+            "commandEndpoint": "/api/v1/stammdaten/hausbanken/{entity_id}",
+            "method": "PUT",
+            "inputFields": [
+                _feld("bank_nr", "Bank-Nr.", readOnly=True),
+                _feld("bezeichnung", "Bezeichnung", required=True),
+                _feld("iban", "IBAN", required=True),
+                _feld("bic", "BIC"),
+                _feld("bank_name", "Bankname"),
+                _feld("kontonummer", "Kontonummer"),
+                _feld("blz", "BLZ"),
+                _feld("waehrung", "Währung"),
+                _feld("erechnung_aktiv", "E-Rechnung aktiv", "boolean"),
+                _feld("sepa_glaeubiger_id", "SEPA-Gläubiger-ID"),
+                _feld("standard", "Standardbank", "boolean"),
+            ],
+        },
     )
 
 
@@ -626,17 +658,31 @@ def build_stammdaten_mengeneinheit_stamm() -> dict[str, Any]:
         domain="lager",
         title="Mengeneinheit",
         subtitle="ME-Stamm",
-        endpoint="/api/v1/artikel/mengeneinheiten/{entity_id}",
-        identity="code",
+        endpoint="/api/v1/artikel/mengeneinheiten/stamm/{entity_id}",
+        identity="einheit_kuerzel",
         felder=[
-        _feld("code", "Code"),
+        _feld("einheit_kuerzel", "Einheit", readOnly=True),
         _feld("bezeichnung", "Bezeichnung"),
+        _feld("basis_einheit", "Basiseinheit"),
+        _feld("umrechnungsfaktor", "Umrechnungsfaktor", "number"),
         _feld("dezimalstellen", "Dezimalstellen", "number"),
+        _feld("aktiv", "Aktiv", "boolean", readOnly=True),
         ],
         edit_permission="stammdaten.mengeneinheit.update",
         test_id="stammdaten-mengeneinheit-stamm",
         purpose="Mengeneinheiten.",
         prompts=['Wie lautet Code von ME {entity_id}?'],
+        edit_action_overrides={
+            "commandEndpoint": "/api/v1/artikel/mengeneinheiten/stamm/{entity_id}",
+            "method": "PUT",
+            "inputFields": [
+                _feld("einheit_kuerzel", "Einheit", readOnly=True),
+                _feld("bezeichnung", "Bezeichnung", required=True),
+                _feld("basis_einheit", "Basiseinheit"),
+                _feld("umrechnungsfaktor", "Umrechnungsfaktor", "number"),
+                _feld("dezimalstellen", "Dezimalstellen", "number"),
+            ],
+        },
     )
 
 
@@ -668,7 +714,7 @@ def build_produktion_rezepturgruppe_stamm() -> dict[str, Any]:
         domain="produktion",
         title="Rezepturgruppe",
         subtitle="Produktion",
-        endpoint="/api/v1/produktion/rezepturgruppen/{entity_id}",
+        endpoint="/api/v1/produktion/mischfutter/rezepturgruppen/{entity_id}",
         identity="name",
         felder=[
         _feld("name", "Name"),
@@ -709,13 +755,20 @@ def build_fibu_anlage_stamm() -> dict[str, Any]:
         domain="finance",
         title="Anlage",
         subtitle="Anlagevermoegen",
-        endpoint="/api/v1/finance/assets/{entity_id}",
-        identity="inventar_nr",
+        endpoint="/api/v1/finance/asset-accounting/assets/{entity_id}",
+        identity="asset_number",
         felder=[
-        _feld("inventar_nr", "Inventar-Nr."),
-        _feld("bezeichnung", "Bezeichnung"),
-        _feld("anschaffungswert", "Anschaffungswert", "currency"),
+        _feld("id", "ID", readOnly=True),
+        _feld("asset_number", "Inventar-Nr."),
+        _feld("description", "Bezeichnung"),
+        _feld("acquisition_cost", "Anschaffungswert", "currency"),
         ],
+        entity_projection={
+            "id": "asset.id",
+            "asset_number": "asset.asset_number",
+            "description": "asset.description",
+            "acquisition_cost": "asset.acquisition_cost",
+        },
         edit_permission="finance.asset.update",
         test_id="fibu-anlage-stamm",
         purpose="Anlagevermoegen.",
@@ -725,23 +778,36 @@ def build_fibu_anlage_stamm() -> dict[str, Any]:
 
 
 def build_stammdaten_individuelle_artikelnummer_stamm() -> dict[str, Any]:
-    return _stamm(
+    definition = _stamm(
         screen_id="stammdaten/individuelle-artikelnummer",
         domain="lager",
         title="Individuelle Artikelnummer",
         subtitle="Artikelnummer",
-        endpoint="/api/v1/individuelle-artikelnummern/{entity_id}",
-        identity="nummer",
+        endpoint="/api/v1/artikel/individuelle-nummern/{entity_id}",
+        identity="id",
         felder=[
-        _feld("nummer", "Nummer"),
-        _feld("artikel_id", "Artikel"),
-        _feld("partner_id", "Partner"),
+        _feld("id", "ID", readOnly=True),
+        _feld("artikel_nr", "Artikel-Nr."),
+        _feld("partner_nr", "Partner-Nr."),
+        _feld("partner_typ", "Partner-Typ"),
+        _feld("indiv_artikel_nr", "Individuelle Artikel-Nr."),
+        _feld("indiv_bezeichnung", "Bezeichnung"),
+        _feld("gueltig_von", "Gültig von", "date"),
+        _feld("gueltig_bis", "Gültig bis", "date"),
+        _feld("aktiv", "Aktiv", "boolean", readOnly=True),
+        _feld("created_at", "Angelegt am", "datetime", readOnly=True),
         ],
         edit_permission="stammdaten.individuelle_artikelnummer.update",
         test_id="stammdaten-ind-artnr-stamm",
         purpose="Partner-spezifische Artikelnummern.",
         prompts=['Welcher Artikel steckt hinter Nummer {entity_id}?'],
+        edit_action_overrides={
+            "label": "Bearbeiten nicht verfügbar",
+            "disabled": True,
+            "stubReason": "Der bestehende API-Vertrag bietet für individuelle Artikelnummern keine Aktualisierung an.",
+        },
     )
+    return definition
 
 
 
@@ -795,7 +861,7 @@ def build_futter_einzel_stamm() -> dict[str, Any]:
         domain="futtermittel",
         title="Einzelfuttermittel",
         subtitle="Futter Einzel",
-        endpoint="/api/v1/futtermittel/einzelfuttermittel/{entity_id}",
+        endpoint="/api/v1/futter/einzelfuttermittel/{entity_id}",
         identity="artikel_nummer",
         felder=[
         _feld("artikel_nummer", "Artikel-Nr."),
@@ -816,7 +882,7 @@ def build_futter_misch_stamm() -> dict[str, Any]:
         domain="futtermittel",
         title="Mischfuttermittel",
         subtitle="Futter Misch",
-        endpoint="/api/v1/futtermittel/mischfuttermittel/{entity_id}",
+        endpoint="/api/v1/futter/mischfuttermittel/{entity_id}",
         identity="produkt_code",
         felder=[
         _feld("produkt_code", "Produktcode"),

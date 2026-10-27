@@ -23,7 +23,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import text
 
 from app.core.database import get_db
-from app.core.dependencies import get_tenant_id
+from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
@@ -94,6 +94,17 @@ def list_zahlungsmeldungen(
     sql += " ORDER BY zahlungsdatum DESC"
     rows = db.execute(text(sql), params).fetchall()
     return [ZahlungsmeldungOut(**dict(r._mapping)) for r in rows]
+
+
+@router.get("/{meldung_id}", response_model=ZahlungsmeldungOut, summary="Zahlungsmeldung abrufen", dependencies=[Depends(finance_read)])
+def get_zahlungsmeldung(meldung_id: str, db=Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
+    row = db.execute(text("""
+        SELECT * FROM domain_shared.fibu_zahlungsmeldungen
+        WHERE tenant_id = :tid AND id = :id
+    """), {"tid": tenant_id, "id": meldung_id}).fetchone()
+    if row is None:
+        raise HTTPException(404, "Zahlungsmeldung nicht gefunden.")
+    return ZahlungsmeldungOut(**dict(row._mapping))
 
 
 @router.post("", response_model=ZahlungsmeldungOut, status_code=201, summary="Zahlungsmeldung anlegen", dependencies=[Depends(finance_write)])
