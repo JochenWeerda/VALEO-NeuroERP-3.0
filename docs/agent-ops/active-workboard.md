@@ -19853,3 +19853,6 @@ Nutzerauftrag: alle uebrigen offenen Aenderungen commit-/pushfaehig abschliessen
 
 
 **RLS-GESAMTABNAHME-20261027 - reserviert, Codex Lead:** Nutzer/Claude hat Probe explizit freigegeben und pausiert eigene DB-Pruefungen. Nachweis183b2bc9e(PR73),228RLS+387Docflow/GoBDalsAutornachweisuebernommen, nurDokuaenderunggegenintegriertesPR73. LeadnutztjetztexklusivesFenster fuerintegrierteKetteplus2Agrartabellen,rollenrichtigeSchreibgrenzenundInventare. KeineDB/Container/Reset/LivePolicies. EigeneRevisionenimmeraeussererRollback. Ausnahmenratsche195auf193nurwegenzusaetzlicher2gesicherterTabellensenken. BisFensterendeClaudeKI/SalesnurAnalyse.
+
+
+**CI-PROCESS-KERNEL-SIZE-20261027 - reserviert, Codex Lead:** QualityGate40488618550meldetneuenGodfileverstoss process_kernel_api.py6108->6110durchTenantkontextimport. Besitznur _dq_ruleset_public-AuslagerungausdiesemEndpointindiezugehoerigeDataQualityAusgabeschemahilfe, bestehendeDatenqualitaetsvertraegeundQA. KeineBaselineanhebung/Leerzeilenkosmetik, keineTenant-/KI-Fachlogikaenderung. ClaudeKI/Salesbleibtseparat, nurdieserFormatterLeadbesitz.
