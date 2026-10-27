@@ -216,7 +216,7 @@ class ATLASCustomsService:
     # In-Memory-Fallback-Store (wenn DB-Tabelle nicht vorhanden)
     _fallback_store: dict[str, dict] = {}
 
-    def __init__(self, db=None, tenant_id: str = "default") -> None:
+    def __init__(self, db=None, *, tenant_id: str) -> None:
         self.db = db
         self.tenant_id = tenant_id
 

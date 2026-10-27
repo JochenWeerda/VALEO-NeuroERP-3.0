@@ -4,10 +4,11 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Any, Optional
 
-from fastapi import Response, APIRouter, Depends, HTTPException, Query
+from fastapi import Response, APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
+from app.core.akteur import gepruefter_akteur_aus_request
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.domains.operations.models import Verladung, VerladungStatus
@@ -53,7 +54,6 @@ class VerladungPayload(BaseModel):
     datum: datetime
     status: str = VerladungStatus.GEPLANT.value
     notiz: Optional[str] = None
-    tenant_id: str = "default"
 
 
 class VerladungPatch(BaseModel):
@@ -75,9 +75,10 @@ def list_verladungen(
     datum_von: Optional[str] = None,
     skip: int = Query(0, ge=0),
     limit: int = Query(100, le=500),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    q = db.query(Verladung)
+    q = db.query(Verladung).filter(Verladung.tenant_id == tenant_id)
     if status:
         q = q.filter(Verladung.status == status)
     return [_to_dict(v) for v in q.order_by(Verladung.datum.desc()).offset(skip).limit(limit).all()]
@@ -86,8 +87,8 @@ def list_verladungen(
 @router.get("/{verladung_id}", summary="Verladung abrufen",
     response_model=VerladungOut
 )
-def get_verladung(verladung_id: str, db: Session = Depends(get_db)):
-    obj = db.query(Verladung).filter(Verladung.id == verladung_id).first()
+def get_verladung(verladung_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    obj = db.query(Verladung).filter(Verladung.tenant_id == tenant_id).filter(Verladung.id == verladung_id).first()
     if not obj:
         raise HTTPException(404, "Verladung nicht gefunden")
     return _to_dict(obj)
@@ -97,10 +98,12 @@ def get_verladung(verladung_id: str, db: Session = Depends(get_db)):
     response_model=VerladungOut, dependencies=SCHREIBEN["LAGER"])
 def create_verladung(
     payload: VerladungPayload,
+    request: Request,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    obj = Verladung(**payload.model_dump())
+    obj = Verladung(**payload.model_dump(), tenant_id=tenant_id,
+        created_by=gepruefter_akteur_aus_request(request))
     db.add(obj)
     db.flush()
     generate_from_verladung(db, obj, tenant_id)
@@ -114,14 +117,16 @@ def create_verladung(
 def update_verladung(
     verladung_id: str,
     payload: VerladungPatch,
+    request: Request,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    obj = db.query(Verladung).filter(Verladung.id == verladung_id).first()
+    obj = db.query(Verladung).filter(Verladung.tenant_id == tenant_id).filter(Verladung.id == verladung_id).first()
     if not obj:
         raise HTTPException(404, "Verladung nicht gefunden")
     for field, value in payload.model_dump(exclude_unset=True).items():
         setattr(obj, field, value)
+    obj.updated_by = gepruefter_akteur_aus_request(request)
     obj.updated_at = datetime.utcnow()
     generate_from_verladung(db, obj, tenant_id)
     db.commit()
@@ -130,8 +135,8 @@ def update_verladung(
 
 
 @router.delete("/{verladung_id}", status_code=204, response_class=Response, response_model=None, summary="Verladung löschen", dependencies=SCHREIBEN["LAGER"])
-def delete_verladung(verladung_id: str, db: Session = Depends(get_db)):
-    obj = db.query(Verladung).filter(Verladung.id == verladung_id).first()
+def delete_verladung(verladung_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    obj = db.query(Verladung).filter(Verladung.tenant_id == tenant_id).filter(Verladung.id == verladung_id).first()
     if not obj:
         raise HTTPException(404, "Verladung nicht gefunden")
     db.delete(obj)

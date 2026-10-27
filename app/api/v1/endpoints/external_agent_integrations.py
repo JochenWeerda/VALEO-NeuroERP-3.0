@@ -3,6 +3,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 
+from app.core.tenant import get_tenant_id
 from app.core.external_agent_catalog import (
     build_external_agent_install_pack,
     build_external_agent_integration_catalog,
