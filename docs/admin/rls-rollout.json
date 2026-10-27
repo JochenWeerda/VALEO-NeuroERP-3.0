@@ -2,12 +2,12 @@
  "_note": "Generiert von scripts/rls_rollout.py aus docs/admin/rls-inventory.json; nicht von Hand aendern.",
  "summary": {
   "ready": 0,
-  "pending": 91,
+  "pending": 85,
   "reasons": {
    "dienst": 10,
    "mandant_ermitteln": 1,
-   "standardmandant": 67,
-   "mandant_null": 33,
+   "standardmandant": 62,
+   "mandant_null": 29,
    "uebergreifend": 0,
    "identitaet": 4
   }
@@ -66,16 +66,6 @@
    "standardmandant"
   ],
   "domain_crm.crm_segments": [
-   "standardmandant"
-  ],
-  "domain_crm.sales_offers": [
-   "standardmandant"
-  ],
-  "domain_crm.sales_order_items": [
-   "mandant_null"
-  ],
-  "domain_crm.sales_orders": [
-   "mandant_null",
    "standardmandant"
   ],
   "domain_dev_mock.mock_sessions": [
@@ -139,9 +129,6 @@
   "domain_inventory.material_flow_nodes": [
    "mandant_null"
   ],
-  "domain_inventory.pick_lists": [
-   "standardmandant"
-  ],
   "domain_inventory.preparation_list_lines": [
    "standardmandant"
   ],
@@ -175,8 +162,7 @@
   ],
   "domain_log.log_touren": [
    "dienst",
-   "mandant_null",
-   "standardmandant"
+   "mandant_null"
   ],
   "domain_logistics.carrier_invoices": [
    "mandant_null"
@@ -196,13 +182,6 @@
   ],
   "domain_ops.reklamationen": [
    "standardmandant"
-  ],
-  "domain_sales.delivery_notes": [
-   "mandant_null",
-   "standardmandant"
-  ],
-  "domain_sales.sales_credit_notes": [
-   "mandant_null"
   ],
   "domain_shared.admin_api_keys": [
    "identitaet"
