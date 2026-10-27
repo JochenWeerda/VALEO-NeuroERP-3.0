@@ -25,7 +25,7 @@ pytestmark = pytest.mark.unit
 
 ROOT = Path(__file__).resolve().parents[1]
 CODE_ROOTS = ("app", "modules")
-NAMES = {"tenant_id", "x_tenant_id", "mandant_id", "mandanten_id", "tenant"}
+NAMES = {"tenant_id", "x_tenant_id", "x_tenant", "mandant_id", "mandanten_id", "tenant"}
 LITERALS = ("system", "default")
 
 # Stand 27.10.2026; nur verkleinern. Neue Eintraege sind ein Rueckfall, kein Ausnahmefall.
@@ -45,7 +45,6 @@ DEFAULT_BASELINE = {
     "app/api/v1/endpoints/versicherungen.py": 1,
     "app/api/v1/endpoints/wartung.py": 2,
     "app/api/v1/schemas/agents_schemas.py": 1,
-    "app/crm/seed.py": 1,
     "app/routers/numbering_router.py": 4,
     "app/services/atlas_customs_service.py": 1,
     "app/services/numbering_service_pg.py": 3,

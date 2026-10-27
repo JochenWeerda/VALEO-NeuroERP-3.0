@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from . import models
 
 
-def seed_crm_data(db: Session, tenant_id: str = "default"):
+def seed_crm_data(db: Session, tenant_id: str):
     """Seed CRM tables with realistic data"""
     
     # 10+ Contacts (Kunden & Lieferanten)
