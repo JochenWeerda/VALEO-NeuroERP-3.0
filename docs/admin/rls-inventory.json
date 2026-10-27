@@ -8,7 +8,7 @@
    "C": 52,
    "D": 60
   },
-  "rls_enabled": 512,
+  "rls_enabled": 514,
   "tenant_types": {
    "character varying": 296,
    "character varying(100)": 9,
@@ -3535,9 +3535,9 @@
    "table": "domain_nachweisraum.gobd_exporte",
    "class": "A",
    "tenant_type": "text",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_nachweisraum.nachweisraum_audit_log",
@@ -3551,9 +3551,9 @@
    "table": "domain_nachweisraum.nachweisraum_dokumente",
    "class": "A",
    "tenant_type": "text",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_ops.agent_contexts",

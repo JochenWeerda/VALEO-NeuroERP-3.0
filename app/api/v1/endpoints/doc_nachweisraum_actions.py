@@ -4,7 +4,7 @@ from __future__ import annotations
 import logging
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 
 from app.api.v1.schemas.docflow_bundle_schemas import (
@@ -12,6 +12,7 @@ from app.api.v1.schemas.docflow_bundle_schemas import (
     NachweisDokumentOut,
 )
 from app.core.database import get_db
+from app.core.tenant import get_tenant_id  # Mandant aus dem Token (bis 27.10.2026 Kopf X-Tenant-ID)
 from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 from app.core.akteur import gepruefter_akteur_aus_request  # Bearbeiter aus dem Token
 
@@ -48,7 +49,7 @@ class GoBDExportTransitionRequest(BaseModel):
 def create_dokument(
     req: DokumentCreateRequest,
     request: Request,
-    x_tenant_id: str = Header(...),
+    tenant_id: str = Depends(get_tenant_id),
     db=Depends(get_db),
 ):
     from app.services.doc_nachweisraum_lifecycle_service import (
@@ -58,7 +59,7 @@ def create_dokument(
     try:
         return svc(
             db=db,
-            tenant_id=x_tenant_id,
+            tenant_id=tenant_id,
             dokument_typ=req.dokument_typ,
             bezeichnung=req.bezeichnung,
             referenz_id=req.referenz_id,
@@ -78,7 +79,7 @@ def transition_dokument(
     dokument_id: str,
     req: DokumentTransitionRequest,
     request: Request,
-    x_tenant_id: str = Header(...),
+    tenant_id: str = Depends(get_tenant_id),
     db=Depends(get_db),
 ):
     from app.services.doc_nachweisraum_lifecycle_service import (
@@ -90,7 +91,7 @@ def transition_dokument(
             db=db,
             dokument_id=dokument_id,
             new_status=req.new_status,
-            tenant_id=x_tenant_id,
+            tenant_id=tenant_id,
             operator=gepruefter_akteur_aus_request(request),
             kommentar=req.kommentar,
             wiedervorlage_datum=req.wiedervorlage_datum,
@@ -103,7 +104,7 @@ def transition_dokument(
 def create_gobd_export(
     req: GoBDExportCreateRequest,
     request: Request,
-    x_tenant_id: str = Header(...),
+    tenant_id: str = Depends(get_tenant_id),
     db=Depends(get_db),
 ):
     from app.services.doc_nachweisraum_lifecycle_service import (
@@ -113,7 +114,7 @@ def create_gobd_export(
     try:
         return svc(
             db=db,
-            tenant_id=x_tenant_id,
+            tenant_id=tenant_id,
             periode=req.periode,
             referenz_ids=req.referenz_ids,
             operator=gepruefter_akteur_aus_request(request),
@@ -130,7 +131,7 @@ def transition_gobd_export(
     export_id: str,
     req: GoBDExportTransitionRequest,
     request: Request,
-    x_tenant_id: str = Header(...),
+    tenant_id: str = Depends(get_tenant_id),
     db=Depends(get_db),
 ):
     from app.services.doc_nachweisraum_lifecycle_service import (
@@ -142,7 +143,7 @@ def transition_gobd_export(
             db=db,
             export_id=export_id,
             new_status=req.new_status,
-            tenant_id=x_tenant_id,
+            tenant_id=tenant_id,
             operator=gepruefter_akteur_aus_request(request),
             export_pfad=req.export_pfad,
             fehler=req.fehler,
