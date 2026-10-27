@@ -33,7 +33,9 @@ MIGRATION = _load("rls_system_read_justified_20261027")
 
 @pytest.mark.unit
 def test_begruendete_tabellen_stimmen_mit_der_ausnahmeliste_ueberein():
-    assert set(MIGRATION.KEEP_SYSTEM_READ) == set(EXCEPTIONS["system_lesbar"])
+    # Spaetere Migrationen geben einzelne Tabellen frei (z. B. rls_booking_templates_shared_20261027);
+    # jede Freigabe braucht eine Begruendung in system_lesbar.
+    assert set(MIGRATION.KEEP_SYSTEM_READ) <= set(EXCEPTIONS["system_lesbar"])
     assert EXCEPTIONS["altbestand_hoechstens"] == 0
 
 
