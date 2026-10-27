@@ -29,7 +29,7 @@ geprüft (`--check` OK).
 | | Zahl |
 |---|---|
 | Tabellen im frischen Schema | 775 |
-| mit RLS (Altform `tenant_isolation`, P3/P5/P6) | 501 |
+| mit RLS (P3/P5/P6; bei Codex auf getrennte Form korrigiert) | 501 |
 | **Mandantentabellen ohne RLS** | **214** |
 | davon Klasse A (tenant_id NOT NULL), zurückgestellt | 110 |
 | davon Klasse B (tenant_id nullbar) | 51 |
@@ -82,20 +82,23 @@ Domain-Slice am Code.
 
 Die Altform `tenant_isolation` (eine ALL-Policy, USING eigen ODER `system`, WITH CHECK
 eigen) lässt Mandanten `system`-Zeilen **löschen** und per UPDATE **übernehmen**.
-WITH CHECK greift bei DELETE nicht, und UPDATE prüft nur das Ergebnis. Die Korrektur der
-Altform liegt bei Codex. Neue Tabellen bekommen ausschließlich die getrennte Form:
+WITH CHECK greift bei DELETE nicht, und UPDATE prüft nur das Ergebnis. Codex hat P3/P5/P6
+korrigiert (943ba2bb0, RLS-ORDERED-INTEGRATION-20261027): vier Policies
+`tenant_isolation_select/_insert/_update/_delete`, die Bestandstabellen lesen `system`
+weiter mit. Neue Tabellen bekommen dieselbe getrennte Form, `system`-Lesen aber nur mit
+Begründung:
 
 ```sql
 ALTER TABLE t ENABLE ROW LEVEL SECURITY;                     -- kein FORCE (Plan 2.4)
-CREATE POLICY tenant_select ON t FOR SELECT USING (tenant_id = public.rls_current_tenant());
-CREATE POLICY tenant_insert ON t FOR INSERT WITH CHECK (tenant_id = public.rls_current_tenant());
-CREATE POLICY tenant_update ON t FOR UPDATE USING (tenant_id = public.rls_current_tenant())
+CREATE POLICY tenant_isolation_select ON t FOR SELECT USING (tenant_id = public.rls_current_tenant());
+CREATE POLICY tenant_isolation_insert ON t FOR INSERT WITH CHECK (tenant_id = public.rls_current_tenant());
+CREATE POLICY tenant_isolation_update ON t FOR UPDATE USING (tenant_id = public.rls_current_tenant())
                                             WITH CHECK (tenant_id = public.rls_current_tenant());
-CREATE POLICY tenant_delete ON t FOR DELETE USING (tenant_id = public.rls_current_tenant());
+CREATE POLICY tenant_isolation_delete ON t FOR DELETE USING (tenant_id = public.rls_current_tenant());
 ```
 
 - **`system`-Lesen** nur, wenn `docs/admin/rls-exceptions.json` → `system_lesbar` die Tabelle
-  begründet. Dann lautet `tenant_select` USING
+  begründet. Dann lautet `tenant_isolation_select` USING
   `tenant_id = rls_current_tenant() OR (tenant_id = 'system' AND rls_current_tenant() IS NOT NULL)`.
   Die drei schreibenden Policies bleiben unverändert. Deshalb ist eine `system`-Zeile lesbar,
   aber nicht änderbar, nicht löschbar und nicht übernehmbar. Neue `system`-Zeilen entstehen
@@ -109,12 +112,12 @@ CREATE POLICY tenant_delete ON t FOR DELETE USING (tenant_id = public.rls_curren
 - RLS ersetzt keine Rollenprüfung. `SCHREIBEN[...]`/`require_roles` und die Fachcommands
   bleiben.
 
-Die Ratsche `tests/test_rls_policy_shape.py` erlaubt nur zwei Formen: die getrennte Form
-(mit `system` nur auf begründeten Tabellen) und die Altform. Die Altform darf höchstens
-501-mal vorkommen, ihre Zahl nur sinken. Alles andere ist rot: eine zusätzliche ALL-Policy,
-eine restriktive oder rollengebundene Policy, `system` in INSERT/UPDATE/DELETE, fehlendes
-WITH CHECK, FORCE. Die Policy-Namen sind ein Vorschlag an Codex für die Korrektur der
-Altform (Handshake).
+Die Ratsche `tests/test_rls_policy_shape.py` erlaubt nur die getrennte Form und, als
+Altbestand, die ALL-Policy vor der Korrektur. Altbestand sind die ALL-Policy und das
+`system`-Lesen ohne Begründung; zusammen höchstens 501 Tabellen (`altbestand_hoechstens`),
+die Zahl darf nur sinken. Alles andere ist rot: eine zusätzliche ALL-Policy, eine restriktive
+oder rollengebundene Policy, `system` in INSERT/UPDATE/DELETE, fehlendes WITH CHECK, FORCE.
+Die Namen folgen Codex' Korrektur.
 
 ## 4. Entscheidungsmatrix je Domain
 

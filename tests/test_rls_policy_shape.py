@@ -31,10 +31,10 @@ SHARED_V = ("(((tenant_id)::text = rls_current_tenant()) OR (((tenant_id)::text 
 
 def _split(select_qual=OWN_V, **override):
     rows = {
-        "tenant_select": ("tenant_select", "r", True, "{0}", select_qual, None),
-        "tenant_insert": ("tenant_insert", "a", True, "{0}", None, OWN_V),
-        "tenant_update": ("tenant_update", "w", True, "{0}", OWN_V, OWN_V),
-        "tenant_delete": ("tenant_delete", "d", True, "{0}", OWN_V, None),
+        "tenant_isolation_select": ("tenant_isolation_select", "r", True, "{0}", select_qual, None),
+        "tenant_isolation_insert": ("tenant_isolation_insert", "a", True, "{0}", None, OWN_V),
+        "tenant_isolation_update": ("tenant_isolation_update", "w", True, "{0}", OWN_V, OWN_V),
+        "tenant_isolation_delete": ("tenant_isolation_delete", "d", True, "{0}", OWN_V, None),
     }
     rows.update(override)
     return [r for r in rows.values() if r is not None]
@@ -52,16 +52,16 @@ def test_formen_selbsttest():
 @pytest.mark.parametrize("policies, force", [
     # breite ALL-Policy neben den getrennten: PostgreSQL verknuepft permissive Policies mit OR
     (_split() + [("tenant_isolation", "*", True, "{0}", SHARED_V, OWN_V)], False),
-    (_split(tenant_delete=None), False),
+    (_split(tenant_isolation_delete=None), False),
     # DELETE oder UPDATE auf system-Zeilen
-    (_split(tenant_delete=("tenant_delete", "d", True, "{0}", SHARED_V, None)), False),
-    (_split(tenant_update=("tenant_update", "w", True, "{0}", SHARED_V, OWN_V)), False),
+    (_split(tenant_isolation_delete=("tenant_isolation_delete", "d", True, "{0}", SHARED_V, None)), False),
+    (_split(tenant_isolation_update=("tenant_isolation_update", "w", True, "{0}", SHARED_V, OWN_V)), False),
     # Schreiben ohne Pruefung des Ergebnisses
-    (_split(tenant_update=("tenant_update", "w", True, "{0}", OWN_V, None)), False),
-    (_split(tenant_insert=("tenant_insert", "a", True, "{0}", None, SHARED_V)), False),
-    (_split(tenant_select=("tenant_select", "r", False, "{0}", OWN_V, None)), False),
-    (_split(tenant_select=("tenant_select", "r", True, "{16384}", OWN_V, None)), False),
-    (_split(tenant_select=("tenant_select", "*", True, "{0}", OWN_V, None)), False),
+    (_split(tenant_isolation_update=("tenant_isolation_update", "w", True, "{0}", OWN_V, None)), False),
+    (_split(tenant_isolation_insert=("tenant_isolation_insert", "a", True, "{0}", None, SHARED_V)), False),
+    (_split(tenant_isolation_select=("tenant_isolation_select", "r", False, "{0}", OWN_V, None)), False),
+    (_split(tenant_isolation_select=("tenant_isolation_select", "r", True, "{16384}", OWN_V, None)), False),
+    (_split(tenant_isolation_select=("tenant_isolation_select", "*", True, "{0}", OWN_V, None)), False),
     (_split(), True),
     ([(None, None, None, None, None, None)], False),
 ])
@@ -86,7 +86,8 @@ def test_alle_rls_tabellen_tragen_eine_zulaessige_form():
     engine.dispose()
     bad = {t: d for t, (s, d) in result.items() if s == "abweichend"}
     assert not bad, list(bad.items())[:5]
-    shared = {t for t, (s, _) in result.items() if s == "getrennt_system"}
-    assert shared <= set(EXCEPTIONS["system_lesbar"]), f"system-Lesen ohne Begruendung: {sorted(shared - set(EXCEPTIONS['system_lesbar']))}"
+    unbegruendet = {t for t, (s, _) in result.items()
+                    if s == "getrennt_system" and t not in EXCEPTIONS["system_lesbar"]}
     counts = Counter(s for s, _ in result.values())
-    assert counts["alt"] <= EXCEPTIONS["altform_hoechstens"], counts
+    # Altbestand: ALL-Policy oder pauschales system-Lesen der Bestandstabellen (P3/P5/P6).
+    assert counts["alt"] + len(unbegruendet) <= EXCEPTIONS["altbestand_hoechstens"], (counts, len(unbegruendet))

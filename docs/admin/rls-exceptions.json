@@ -1,6 +1,6 @@
 {
  "_note": "Von Hand gepflegt, CODEOWNERS. Jede Mandantentabelle ohne RLS steht hier mit Ursache; eine neue fehlt und macht tests/test_rls_domain_matrix.py rot. Eintraege nur entfernen (Tabelle abgesichert), nie pauschal ergaenzen. Ursachen: scripts/rls_domain_matrix.py.",
- "altform_hoechstens": 501,
+ "altbestand_hoechstens": 501,
  "system_lesbar": {},
  "zurueckgestellt": {
   "domain_agrar.agrar_biostimulanzien": "standardmandant",

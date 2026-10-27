@@ -21,7 +21,7 @@ Zweig `claude/rls-domains-matrix-20261027`.
 | `scripts/rls_domain_matrix.py` | Matrix je Tabelle: Domain, Ursachen, Modell, Leser/Schreiber, Worker, Identität, Fundstellen Datei:Zeile, Bereinigung, Policy-Vorschlag; `--data` liest die gewachsene DB in einer Nur-Lese-Transaktion |
 | `docs/admin/rls-domain-matrix.json` / `.md` | generierte Matrix (214 Tabellen) |
 | `docs/admin/rls-domain-data.json` | Datenbefund der gewachsenen DB, Stand 27.10.2026 |
-| `docs/admin/rls-exceptions.json` | eingefrorene Ausnahmeliste (214, mit Ursache); `system_lesbar` leer; `altform_hoechstens` 501 |
+| `docs/admin/rls-exceptions.json` | eingefrorene Ausnahmeliste (214, mit Ursache); `system_lesbar` leer; `altbestand_hoechstens` 501 |
 | `scripts/rls_policy_shape.py` | zulässige Policy-Formen (getrennt / getrennt_system / alt) und Klassifizierung aus `pg_policy` |
 | `tests/test_rls_domain_matrix.py` | Matrix aktuell; jede ungeschützte Mandantentabelle ausdrücklich zurückgestellt; keine veralteten Einträge; Obergrenze 214 im Test; Selbsttest der Analyse |
 | `tests/test_rls_policy_shape.py` | 13 Negativ- und Positivfälle der Formen; alle RLS-Tabellen des Prüfstands in zulässiger Form |
