@@ -13,6 +13,15 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 ## UIX-RUNTIME: Migrationsnachweise und Fachparitaet (2026-10-22)
 
+**Nachlauf 2026-10-27:** 848 native Katalogeintraege synchron; 79 gezielte Tests
+in elf Dateien und vollstaendige Frontend-Typpruefung gruen. Das ist keine
+Gesamtmigration: gespeicherter Gate-Bericht vom 26.10. C 856/857, E 807/857;
+Browser-Gate D und Fachparitaet bleiben offen. Historische Vollstaendigkeitszahlen
+weiter unten gelten nur fuer ihren damaligen Messumfang. Details:
+[Session-/Integrations-QA](../quality-assurance/session-cache-boundary-20261027.md)
+und [Runtime-Status](../architecture/uix/universal-mask-runtime-status.md).
+
+
 Die behauptete Vollmigration ist nicht abgenommen. Lazy-Wrapper/unsichtbare Runtime und rein statische Katalogeintraege reichen nicht. Verlorene bestehende API-, Rollen-, Renderer- und Bedienvertraege werden im Slice MIGRATION-PARITY-REPAIR wiederhergestellt; neue Parent-Builder bleiben erhalten. Offene echte Endpunkte, volle native Fachparitaet, Browser-/Bildabnahme und GitHub-Nachlauf bleiben sichtbar. Siehe [Reparaturnachweis](../quality-assurance/migration-parity-repair-20261022.md).
 
 ## Fuhrpark und MCP Mandantengrenzen geschlossen (2026-10-09)

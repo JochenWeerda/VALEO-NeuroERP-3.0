@@ -6,10 +6,20 @@ owner: Codex
 status: aktiv
 last_reviewed: 2026-09-17
 version: 2.5.0
-description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-021…050) — Lieferstand, Gates, Governance. ActionRuntime produktiv. Alle nativen commandEndpoints verdrahtet (SPEC-P1-04).
+description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-021…050) — Lieferstand, Gates, Governance. Historische Lieferstaende und aktuelle Abnahmegrenzen getrennt ausgewiesen.
 ---
 
 # Universal Mask Runtime — Plattformstatus
+
+> **Gepruefter Nachlauf 2026-10-27:** Der native Studio-Katalog ist mit **848**
+> Definitionen synchron. **79** gezielte Frontendtests in elf Dateien sowie die
+> vollstaendige Typpruefung sind gruen ([QA](../../quality-assurance/session-cache-boundary-20261027.md)).
+> Der gespeicherte [Gate-Bericht](made-by-studio-gate-report.md) vom 26.10. weist
+> C **856/857**, E **807/857** aus; Browser-Gate D ist nicht automatisiert abgenommen.
+> `portal/zertifikat` benoetigt weiterhin eine kundenbezogene Zuordnung.
+> Die folgenden aelteren Zahlen sind historische Messungen begrenzter Scopes;
+> sie belegen weder vollstaendige Fachparitaet noch eine produktive Freigabe.
+> Gesamt-CI und reale Browser-/Fachkettenabnahmen bleiben offen.
 
 > **Korrektur 2026-10-22 — MIGRATION-PARITY-REPAIR:** Die bisherigen Vollmigrations-/Release-ready-Zahlen waren durch generische Legacy-Wrapper, versteckte Runtime-Aufrufe und fehlende Fachparitaet ueberhoeht. Neue Parent-Builder bleiben erhalten; funktionierende bestehende Einstiege bleiben bis echter Paritaet fuehrend. Katalogbindung belegt ausschliesslich strukturelle Evidenz, keine Live-Freigabe. Massgeblich sind die neu erzeugten Inventare und [Reparaturnachweis](../../quality-assurance/migration-parity-repair-20261022.md).
 
