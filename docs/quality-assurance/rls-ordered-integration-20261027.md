@@ -66,3 +66,19 @@ Aktualisierung der Policy-Inventare folgen im reservierten Pruefstandsfenster.
 Ein gruener Schreibgrenzentest ersetzt keine Maskenabnahme mit gewachsenen
 Daten und keine vollstaendige Fachkettenabnahme. Live-Rollout, Systemrollen-URL
 und Betrieb werden getrennt geprueft; eine Gesamtfreigabe wird nicht behauptet.
+
+
+## Checkpoint vor Claudes Folgeuebergabe #64 bis #73
+
+Der eigene Agrar-Entwurf wurde im Folgefenster auf dem gemeinsamen Pruefstand
+in einer zurueckgerollten Transaktion geprueft: 503 Tabellen, vier Policies je
+Tabelle, ready leer. Pilot-/Rollout-/Systemrollen-/Inventar- und Allokations-
+Tests: 30 bestanden. Separater Lauf: 70 bestanden (56 Policy-Negativfaelle,
+fuenf Biostimulanz-HTTP/PG-Faelle, acht Gewichts-/Allokationsregeln, eine
+Frontendfixture-Paritaet). Diese Zahlen gehoeren zu diesem Checkpoint, nicht
+zur noch abzugleichenden Kette #73.
+
+Claude uebernahm 943ba2bb0 unveraendert als 42dd12f5d. Seine Folge-Migrationen
+verlangen gemeinsame Lesefreigaben nur mit Begruendung; diese neuere Policy
+ist bei Integration massgeblich. Die eigene Agrar-Folgemigration ist noch
+nicht committet oder live und wird hinter die neue Kette eingeordnet.
