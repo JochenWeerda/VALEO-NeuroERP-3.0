@@ -42,20 +42,24 @@ def enable_tenant_isolation(bind, table: str) -> bool:
     if column is None:
         raise RuntimeError(f"{table} hat keine Spalte tenant_id")
     op.execute(f"ALTER TABLE {table} ENABLE ROW LEVEL SECURITY")
-    op.execute(f"DROP POLICY IF EXISTS tenant_isolation ON {table}")
-    op.execute(
-        f"CREATE POLICY tenant_isolation ON {table} "
-        f"USING ({column} = public.rls_current_tenant() "
-        f"OR ({column} = 'system' AND public.rls_current_tenant() IS NOT NULL)) "
-        f"WITH CHECK ({column} = public.rls_current_tenant())"
-    )
+    # SELECT may expose shared reference data. A permissive ALL policy would also
+    # authorize DELETE and allow UPDATE to take ownership of a visible system row.
+    owned = f"{column} = public.rls_current_tenant()"
+    readable = f"{owned} OR ({column} = 'system' AND public.rls_current_tenant() IS NOT NULL)"
+    for suffix in ("", "_select", "_insert", "_update", "_delete"):
+        op.execute(f"DROP POLICY IF EXISTS tenant_isolation{suffix} ON {table}")
+    op.execute(f"CREATE POLICY tenant_isolation_select ON {table} FOR SELECT USING ({readable})")
+    op.execute(f"CREATE POLICY tenant_isolation_insert ON {table} FOR INSERT WITH CHECK ({owned})")
+    op.execute(f"CREATE POLICY tenant_isolation_update ON {table} FOR UPDATE USING ({owned}) WITH CHECK ({owned})")
+    op.execute(f"CREATE POLICY tenant_isolation_delete ON {table} FOR DELETE USING ({owned})")
     return True
 
 
 def disable_tenant_isolation(bind, table: str) -> None:
     if bind.execute(sa.text("SELECT to_regclass(:t)"), {"t": table}).scalar() is None:
         return
-    op.execute(f"DROP POLICY IF EXISTS tenant_isolation ON {table}")
+    for suffix in ("", "_select", "_insert", "_update", "_delete"):
+        op.execute(f"DROP POLICY IF EXISTS tenant_isolation{suffix} ON {table}")
     op.execute(f"ALTER TABLE {table} DISABLE ROW LEVEL SECURITY")
 
 

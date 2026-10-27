@@ -18,13 +18,12 @@ Zulaessig sind genau zwei Formen; alles andere ist ``abweichend``:
     ``getrennt_system`` nur fuer Tabellen, deren Freigabe in docs/admin/rls-exceptions.json
     begruendet ist.
 
-``alt``  eine ALL-Policy ``tenant_isolation`` (P3/P5/P6 vor der Korrektur). Sie laesst
-    ``system``-Zeilen loeschen und per UPDATE uebernehmen. Codex hat P3/P5/P6 in
-    RLS-ORDERED-INTEGRATION-20261027 auf die getrennte Form mit denselben Namen umgestellt
-    (943ba2bb0); dort lesen die 501 Bestandstabellen ``system`` noch pauschal mit.
+``alt``  eine ALL-Policy ``tenant_isolation`` (P3/P5/P6 vor der Korrektur 943ba2bb0). Sie
+    laesst ``system``-Zeilen loeschen und per UPDATE uebernehmen.
 
-Altbestand = ``alt`` plus ``getrennt_system`` ohne Begruendung; seine Zahl darf nur sinken
-(``altbestand_hoechstens``), je Tabellenfamilie wird die Lesefreigabe begruendet oder entfernt.
+Altbestand = ``alt`` plus ``getrennt_system`` ohne Begruendung. Seit
+rls_system_read_justified_20261027 ist er 0 (``altbestand_hoechstens``): systemweit liest
+SELECT ``system`` nur noch, wo ``system_lesbar`` es begruendet.
 
 FORCE ROW LEVEL SECURITY bleibt aus (Plan 2.4: der Eigentuemer migriert).
 

@@ -81,16 +81,16 @@ def test_alle_rls_tabellen_tragen_genau_die_mandantenpolicy():
                   FROM pg_class c LEFT JOIN pg_policy p ON p.polrelid = c.oid
                  WHERE c.relrowsecurity GROUP BY 1, 2""")).all()
             assert len(rows) == INVENTORY["summary"]["rls_enabled"]
-            bad = []
-            for table, force, names, quals, checks in rows:
-                if force or names != ["tenant_isolation"]:
-                    bad.append((table, "policy/force", names, force))
-                    continue
-                qual, check = quals[0], checks[0]
-                if "rls_current_tenant()" not in qual or "'system'" not in qual or "IS NOT NULL" not in qual:
-                    bad.append((table, "using", qual))
-                if "rls_current_tenant()" not in check or "system" in check:
-                    bad.append((table, "check", check))
+            # Form je Tabelle: eine gemeinsame Definition (scripts/rls_policy_shape.py, uebernommen
+            # von Codex' Fassung am 27.10.2026). SELECT liest eigene Zeilen; gemeinsame
+            # 'system'-Zeilen nur, wo docs/admin/rls-exceptions.json (system_lesbar) es begruendet.
+            import rls_policy_shape
+            exceptions = json.loads((ROOT / "docs" / "admin" / "rls-exceptions.json").read_text(encoding="utf-8"))
+            shapes = rls_policy_shape.shapes(conn)
+            assert set(shapes) == {table for table, *_ in rows}
+            bad = [(t, s, d) for t, (s, d) in shapes.items()
+                   if s not in ("getrennt", "getrennt_system")
+                   or (s == "getrennt_system" and t not in exceptions["system_lesbar"])]
             assert not bad, bad[:5]
             # Jede Policy wird als valeo_app wirklich ausgewertet: Typvergleich, Funktionsrechte.
             schemas = {table.split(".")[0] for table, *_ in rows if "." in table} | {"public"}
