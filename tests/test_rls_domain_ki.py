@@ -91,7 +91,7 @@ def test_versionen_gemeinsam_lesbar_nur_eigene_schreibbar(db):
         message = support.rejected_insert_with(conn, VERSIONS, A, knowledge_id=rows[OBJECTS, B], version=9,
                                                format="MARKDOWN", inhalt="x")
         assert "fk_knowledge_versions_knowledge_tenant" in message, message
-        message = support.rejected(conn, f"UPDATE {VERSIONS} SET knowledge_id = :k WHERE id = :i",
+        message = support.rejected(conn, f"UPDATE {VERSIONS} SET knowledge_id = :k, version = 99 WHERE id = :i",
                                    {"k": rows[OBJECTS, B], "i": rows[VERSIONS, A]})
         assert "fk_knowledge_versions_knowledge_tenant" in message, message
         # Version ohne tenant_id erbt den Mandanten aus dem Kontext

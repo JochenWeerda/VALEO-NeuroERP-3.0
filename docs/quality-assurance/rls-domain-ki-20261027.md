@@ -3,10 +3,10 @@ title: QA RLS-DOMAIN-KI-20261027
 type: qa
 audience: [agent, entwickler]
 owner: Claude Code
-status: in-arbeit
+status: abgeschlossen
 last_reviewed: 2026-10-27
-version: 0.1.0
-description: RLS-Domain KI (Agentenvorschläge, Werkzeugausführungen, Wissensversionen) samt Prüfung von RAG, Caches und Agentenpfaden; Datenbankabnahme steht aus.
+version: 1.0.0
+description: RLS-Domain KI (Agentenvorschläge, Werkzeugausführungen, Wissensversionen) samt Prüfung von RAG, Caches und Agentenpfaden; Datenbankabnahme auf valeo_probe bestanden.
 ---
 
 # QA RLS-DOMAIN-KI-20261027
@@ -16,10 +16,9 @@ Zweig `claude/rls-domain-ki-20261027`. Die Migration `rls_domain_ki_20261027` fo
 `rls_docflow_child_keys_20261027`, den einzigen Head laut `alembic heads`. Codex'
 Agrar-Entwurf nennt denselben Vorgänger; die Einordnung steht im Handshake.
 
-**Status:** Codevorbereitung fertig, Datenbankabnahme offen. Codex hat `valeo_probe` noch
-nicht freigegeben, deshalb sind die 7 Verhaltenstests noch nicht gelaufen. Inventar,
-Ausnahmeliste und Obergrenze folgen nach der Abnahme, weil `rls_inventory.py` den Prüfstand
-braucht.
+**Status:** abgeschlossen. Prüfstandsfenster nach Freigabe durch Codex (27.10.2026): `valeo_probe`
+war auf `loading_stop_fk_20261023`, ohne fremde Sitzungen, `TEST_DATABASE_URL` gesetzt.
+Danach unverändert und ohne offene Sitzung.
 
 ## Analyse KI
 
@@ -36,20 +35,34 @@ braucht.
 | Systemverbindung | `system_session`/`cross_tenant_scope` kommen in Agenten-, MCP-, Neuro- und RAG-Pfaden nicht vor | – |
 | Read-Model-Cache | Schlüssel enthält `tenant_id` (`cached_read_model`) | – |
 
-## Nachweise bisher (ohne Datenbank)
+## Nachweise
 
 ```
-tests/test_rag_search_tenant.py                                   -> 4 passed
-tests/test_system_tenant_fallback_contract.py, test_rls_domain_matrix.py,
-  test_rls_policy_shape.py, test_rls_p5_rollout.py (ohne TEST_DATABASE_URL) -> passed, DB-Teile übersprungen
-tests/test_rls_domain_ki.py (7 Verhaltenstests)                   -> gesammelt, noch nicht gegen valeo_probe gelaufen
-rls_rollout.py --check, rls_domain_matrix.py, generate_code_inventories.py --check -> OK
+pytest tests/test_rls_domain_ki.py -rs                 -> 7 passed, 0 skipped (valeo_app, zurückgerollt)
+Gegenprobe ohne Verbund-FK/Policies auf den Versionen -> 3 rot
+pytest tests/test_rls_*.py tests/test_provision_db_roles.py tests/test_system_tenant_fallback_contract.py
+       tests/test_rag_search_tenant.py -rs             -> 239 passed, 0 skipped
+22 berührte Bestandsmodule (Wissensbasis, Prozesskern, MCP, Gutschriften, Operator-Agent; conftest, Prüfstand)
+                                                       -> 663 passed, wie auf der Basis b9f22226e; 0 neu rot
+rls_inventory/rls_rollout/rls_domain_matrix regeneriert, generate_code_inventories.py --check -> OK
 ```
 
-## Offen
+| Abnahmekriterium | Test |
+|---|---|
+| eigener Mandant; fremder Mandant für SELECT/INSERT/UPDATE/DELETE gesperrt; `system` nicht lesbar und nicht übernehmbar; kein `tenant_id`-Wechsel; fail-closed | `test_mandantengrenze_mandanteneigene_tabellen` (Vorschläge, Ausführungen) |
+| Versionen: eigene + gemeinsame lesbar, nur eigene änderbar; keine Version unter fremdem oder gemeinsamem Objekt, auch nicht umgehängt; Mandant aus dem Kontext | `test_versionen_gemeinsam_lesbar_nur_eigene_schreibbar` |
+| Objekt mit Versionen behält seinen Mandanten | `test_objekt_mit_versionen_behaelt_seinen_mandanten` |
+| Kontextwechsel/Savepoint, Hintergrund, Pool | `test_kontextwechsel_savepoint_hintergrund_pool` |
+| Fachkette Wissensbasis: Version am eigenen Objekt, Sperre am gemeinsamen, Anlage mit Version | `test_fachkette_wissensversionen` |
+| Policy-Formen | `test_policy_formen` |
 
-- 7 Verhaltenstests als `valeo_app` auf `valeo_probe` nach der Freigabe durch den Lead.
-- Danach Inventar regenerieren, `rls-exceptions.json` verkleinern (3 Tabellen austragen,
-  `knowledge_versions` in `system_lesbar`), Obergrenze senken, Bestandstests (Wissens-API,
-  Prozesskern, MCP, Gutschriften) gegen die Basis vergleichen.
-- Maskenabnahme: Agentenvorschläge/Gutschrift-Freigabe, Wissensbasis (Versionen), Operator-Agent.
+Inventar: 192 zurückgestellt (−3), `knowledge_versions` begründet in `system_lesbar`.
+
+## Verbleibend / vor Live-Aktivierung
+
+- Maskenabnahme: Gutschrift-Buchungsvorschläge (Freigabe/Ausführung), Wissensbasis
+  (Versionen, Verbesserungsvorschläge), Operator-Agent, jeweils mit zwei Mandanten.
+- RAG bleibt ausgehängt. Vor dem Einhängen: Router-Rechte festlegen, Abfragecache mit
+  Mandant im Schlüssel.
+- Die Übernahme von Verbesserungsvorschlägen an gemeinsamem Produktwissen ist nur noch
+  zentral möglich (`valeo_system`). Ein zentraler Fachcommand dafür fehlt.

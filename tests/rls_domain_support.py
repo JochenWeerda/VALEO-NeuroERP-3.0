@@ -283,4 +283,5 @@ def assert_pool_reuse_keeps_no_tenant() -> None:
 def shape(conn, table: str) -> tuple[str, str]:
     import rls_policy_shape
 
-    return rls_policy_shape.shapes(conn)[table]
+    # regclass nennt Tabellen im Suchpfad (public) ohne Schema.
+    return rls_policy_shape.shapes(conn)[table.removeprefix("public.")]

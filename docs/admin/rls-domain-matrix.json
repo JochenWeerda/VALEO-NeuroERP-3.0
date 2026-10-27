@@ -2,16 +2,16 @@
  "_note": "Generiert von scripts/rls_domain_matrix.py; nicht von Hand aendern.",
  "datenstand": "2026-10-27",
  "summary": {
-  "tabellen": 195,
+  "tabellen": 192,
   "nach_klasse": {
-   "A": 95,
+   "A": 93,
    "B": 48,
-   "C": 52
+   "C": 51
   },
   "nach_ursache": {
    "dienst": 20,
-   "position": 50,
-   "referenzdaten": 35,
+   "position": 49,
+   "referenzdaten": 33,
    "mandant_nullbar": 36,
    "standardmandant": 52,
    "identitaet": 2
@@ -60,9 +60,6 @@
     "referenzdaten": 12,
     "standardmandant": 12
    },
-   "ki": {
-    "referenzdaten": 2
-   },
    "log": {
     "dienst": 1,
     "position": 3
@@ -95,7 +92,7 @@
     "dienst": 1,
     "identitaet": 1,
     "mandant_nullbar": 3,
-    "position": 6,
+    "position": 5,
     "referenzdaten": 3,
     "standardmandant": 20
    }
@@ -6158,86 +6155,6 @@
    "policy": "keine, bis der Dienst tokengebundene Identitaet hat (rls-dienste-identitaet-vorschlag.md)"
   },
   {
-   "table": "public.agent_proposals",
-   "domain": "ki",
-   "class": "A",
-   "tenant_type": "character varying(128)",
-   "eltern": [],
-   "ursache": "referenzdaten",
-   "gruende": [
-    "referenzdaten",
-    "mandant_nullbar"
-   ],
-   "modell": [
-    "app/infrastructure/models/agent_proposal_model.py"
-   ],
-   "leser": [
-    "app/infrastructure/models/agent_proposal_model.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/sales_credit_notes.py",
-    "app/repositories/agent_proposal_repository.py",
-    "app/services/mcp_execution_service.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "nutzlast": 1,
-    "token": 1
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [
-    "app/services/mcp_execution_service.py:3155"
-   ],
-   "gemeinsam_stellen": [
-    "app/api/v1/endpoints/sales_credit_notes.py:563",
-    "app/services/mcp_execution_service.py:3155"
-   ],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "public.mcp_tool_executions",
-   "domain": "ki",
-   "class": "A",
-   "tenant_type": "character varying(100)",
-   "eltern": [],
-   "ursache": "referenzdaten",
-   "gruende": [
-    "referenzdaten",
-    "mandant_nullbar"
-   ],
-   "modell": [],
-   "leser": [],
-   "schreiber": [
-    "app/services/mcp_execution_service.py"
-   ],
-   "worker": [],
-   "identitaet": {},
-   "standardmandant_stellen": [],
-   "null_stellen": [
-    "app/services/mcp_execution_service.py:3155"
-   ],
-   "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3155"
-   ],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
    "table": "domain_log.log_tour_delivery_notes",
    "domain": "log",
    "class": "C",
@@ -8600,48 +8517,6 @@
     "tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id)"
    ],
    "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_shared.jobs"
-  },
-  {
-   "table": "domain_shared.knowledge_versions",
-   "domain": "shared",
-   "class": "C",
-   "tenant_type": null,
-   "eltern": [
-    "domain_shared.knowledge_objects"
-   ],
-   "ursache": "position",
-   "gruende": [
-    "position"
-   ],
-   "modell": [
-    "app/models/knowledge.py"
-   ],
-   "leser": [
-    "app/models/knowledge.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/knowledge_api.py",
-    "app/repositories/knowledge_repository.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "token": 2
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 8,
-    "eltern_fk": [
-     "knowledge_id -> domain_shared.knowledge_objects.knowledge_id"
-    ],
-    "verwaist": 0,
-    "ohne_eltern": 0
-   },
-   "bereinigung": [
-    "tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_shared.knowledge_objects"
   },
   {
    "table": "domain_shared.logistik_frachttabellen",
