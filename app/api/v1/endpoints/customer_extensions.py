@@ -6,12 +6,12 @@ Geo-radius search, lead-to-customer conversion, contact operator status.
 from typing import Optional
 import math
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from ....core.config import settings
 from ....core.database import get_db
+from ....core.tenant import get_tenant_id
 from ....infrastructure.models import Customer, Lead, Contact
 from ..schemas.base import BaseSchema
 
@@ -21,7 +21,6 @@ from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-R
 
 
 router = APIRouter()
-DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 
 class GeoSearchRequest(BaseModel):
@@ -58,11 +57,11 @@ def _haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
 @router.post("/geo-search", response_model=list[CustomerBrief], summary="Geo search customer", dependencies=SCHREIBEN["CRM"])
 async def customer_geo_search(
     payload: GeoSearchRequest,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """POST Kunde Umkreissuche"""
-    tid = tenant_id or DEFAULT_TENANT
+    tid = tenant_id
     # Note: Full GIS would use PostGIS; this is a simple in-memory filter
     customers = db.query(Customer).filter(
         Customer.tenant_id == tid,
@@ -75,14 +74,15 @@ async def customer_geo_search(
 @router.post("/convert-lead", response_model=CustomerBrief, summary="Lead to customer umwandeln", dependencies=SCHREIBEN["CRM"])
 async def convert_lead_to_customer(
     payload: ConvertLeadRequest,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """POST Interessent zu Kunde"""
     from app.core.uuid7 import uuid7
     from datetime import datetime, timezone
-    tid = tenant_id or DEFAULT_TENANT
-    lead = db.query(Lead).filter(Lead.id == payload.lead_id).first()
+    tid = tenant_id
+    # Bis 28.10.2026 ohne Mandantenfilter: ein fremder Lead liess sich zum eigenen Kunden machen.
+    lead = db.query(Lead).filter(Lead.id == payload.lead_id, Lead.tenant_id == tid).first()
     if not lead:
         raise HTTPException(404, "Lead not found")
     customer = Customer(

@@ -14,8 +14,8 @@ from pydantic import BaseModel
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from app.core.config import settings
 from app.core.database import get_db
+from app.core.tenant import get_tenant_id
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +24,6 @@ from app.api.v1.schemas.base import BaseSchema
 
 router = APIRouter(prefix="/crm/reports", tags=["crm", "reports"])
 
-DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 
 class PipelineFunnelStage(BaseModel):
@@ -62,7 +61,7 @@ class LeadSourceSummary(BaseModel):
 
 @router.get("/pipeline-funnel", response_model=PipelineFunnelReport, summary="Pipeline funnel report abrufen")
 async def get_pipeline_funnel_report(
-    tenant_id: str = Query(DEFAULT_TENANT),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Pipeline funnel with stage distribution and conversion rates."""
@@ -137,7 +136,7 @@ async def get_pipeline_funnel_report(
 async def get_win_loss_report(
     period_from: Optional[date] = None,
     period_to: Optional[date] = None,
-    tenant_id: str = Query(DEFAULT_TENANT),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Win/Loss analysis with loss reasons."""
@@ -201,7 +200,7 @@ async def get_win_loss_report(
 
 @router.get("/lead-sources", response_model=List[LeadSourceSummary], summary="Lead sources report abrufen")
 async def get_lead_sources_report(
-    tenant_id: str = Query(DEFAULT_TENANT),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Lead source analysis with conversion rates."""

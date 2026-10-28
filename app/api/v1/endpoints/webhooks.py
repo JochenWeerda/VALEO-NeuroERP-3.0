@@ -17,7 +17,6 @@ from fastapi import Response, APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, HttpUrl, field_validator
 from sqlalchemy.orm import Session
 
-from ....core.config import settings
 from ....core.database import get_db
 from ....core.outbound_security import (
     OutboundTargetPolicyError,
@@ -34,7 +33,6 @@ router = APIRouter()
 
 #: Nur noch Rueckfall fuer Aufrufer dieser Konstante — nicht mehr fuer die
 #: Bestimmung des Hauses.
-DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 #: Die alten Objektnamen dieses Moduls bleiben als Alias gueltig; das kanonische
 #: Vokabular steht im Dienst.

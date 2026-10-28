@@ -15,8 +15,15 @@ from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
 from fastapi.testclient import TestClient
 
 from app.api.v1.endpoints import channel_work_surfaces
+from app.core.tenant import get_tenant_id
 from app.core.config import settings
 from app.core.channel_ingress import format_slack_dispatch_result, normalize_slack_event
+
+
+
+def _normalisiere(payload: dict):
+    """Der Mandant ist der der Anmeldung, nicht der aus den Nachrichten-Metadaten."""
+    return normalize_slack_event(payload, tenant_id="t1")
 
 
 @pytest.fixture
@@ -24,6 +31,8 @@ def client() -> TestClient:
     app = FastAPI()
     ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(channel_work_surfaces.router)
+    # Der Mandant kommt aus der Anmeldung (bis 28.10.2026 aus Rumpf/Query bzw. Nachrichten-Metadaten).
+    app.dependency_overrides[get_tenant_id] = lambda: "t1"
     return TestClient(app)
 
 
@@ -231,7 +240,7 @@ def test_slack_event_returns_400_for_unknown_intent(client: TestClient, monkeypa
 
 
 def test_normalize_slack_event_strips_bot_mention():
-    envelope = normalize_slack_event(
+    envelope = _normalisiere(
         {
             "event": {
                 "text": "<@UAPP> oidc login",
@@ -244,7 +253,7 @@ def test_normalize_slack_event_strips_bot_mention():
 
 
 def test_normalize_slack_event_supports_direct_messages_without_mention():
-    envelope = normalize_slack_event(
+    envelope = _normalisiere(
         {
             "event": {
                 "type": "message",
@@ -261,7 +270,7 @@ def test_normalize_slack_event_supports_direct_messages_without_mention():
 
 
 def test_normalize_slack_event_maps_app_home_opened_to_help_query():
-    envelope = normalize_slack_event(
+    envelope = _normalisiere(
         {
             "event": {
                 "type": "app_home_opened",

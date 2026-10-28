@@ -8,7 +8,7 @@
    "C": 14,
    "D": 54
   },
-  "rls_enabled": 646,
+  "rls_enabled": 647,
   "tenant_types": {
    "character varying": 333,
    "character varying(100)": 9,
@@ -90,24 +90,12 @@
   },
   "driver_connect": {},
   "default_tenant": {
-   "app/api/v1/endpoints/articles.py": 1,
-   "app/api/v1/endpoints/chart_of_accounts.py": 1,
-   "app/api/v1/endpoints/crm_reports.py": 1,
-   "app/api/v1/endpoints/customer_extensions.py": 1,
    "app/api/v1/endpoints/farm_profiles.py": 1,
-   "app/api/v1/endpoints/nutrient_compositions.py": 1,
    "app/api/v1/endpoints/reklamation_api.py": 1,
-   "app/api/v1/endpoints/sales_delivery_notes.py": 1,
-   "app/api/v1/endpoints/webhooks.py": 3,
-   "app/core/channel_ingress.py": 2,
+   "app/api/v1/endpoints/webhooks.py": 2,
    "app/core/config.py": 1,
    "app/core/inventory_permissions.py": 1,
    "app/core/tenant_context.py": 1,
-   "app/domains/agrar/api/duenger.py": 1,
-   "app/domains/agrar/api/saatgut.py": 1,
-   "app/domains/crm/api/customers.py": 1,
-   "app/domains/crm/api/leads.py": 1,
-   "app/domains/inventory/api/inventory_auth.py": 1,
    "app/middleware/tenant_enforcement.py": 1,
    "app/seeds/inventory_seed.py": 1,
    "services/crm-ai/app/config/settings.py": 1,
@@ -711,9 +699,9 @@
    "table": "domain_agrar.nutrient_compositions",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_agrar.optimization_runs",

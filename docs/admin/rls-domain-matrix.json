@@ -2,9 +2,9 @@
  "_note": "Generiert von scripts/rls_domain_matrix.py; nicht von Hand aendern.",
  "datenstand": "2026-10-27",
  "summary": {
-  "tabellen": 77,
+  "tabellen": 76,
   "nach_klasse": {
-   "A": 40,
+   "A": 39,
    "B": 23,
    "C": 14
   },
@@ -13,7 +13,7 @@
    "position": 12,
    "referenzdaten": 17,
    "mandant_nullbar": 15,
-   "standardmandant": 13,
+   "standardmandant": 12,
    "identitaet": 2
   },
   "nach_domain": {
@@ -22,7 +22,7 @@
     "mandant_nullbar": 6,
     "position": 1,
     "referenzdaten": 6,
-    "standardmandant": 8
+    "standardmandant": 7
    },
    "crm": {
     "dienst": 7
@@ -108,11 +108,10 @@
    ],
    "worker": [],
    "identitaet": {
-    "standardmandant": 2,
+    "standardmandant": 1,
     "token": 4
    },
    "standardmandant_stellen": [
-    "app/domains/agrar/api/duenger.py:21",
     "app/seeds/inventory_seed.py:20"
    ],
    "null_stellen": [
@@ -286,12 +285,11 @@
    "identitaet": {
     "dienst": 2,
     "kopfzeile": 1,
-    "standardmandant": 3,
+    "standardmandant": 2,
     "token": 7
    },
    "standardmandant_stellen": [
     "app/api/v1/endpoints/compliance.py:850",
-    "app/domains/agrar/api/saatgut.py:21",
     "app/seeds/inventory_seed.py:20"
    ],
    "null_stellen": [
@@ -859,45 +857,6 @@
    "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
   },
   {
-   "table": "domain_agrar.nutrient_compositions",
-   "domain": "agrar",
-   "class": "A",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [
-    "standardmandant"
-   ],
-   "modell": [
-    "app/infrastructure/models/__init__.py"
-   ],
-   "leser": [
-    "app/infrastructure/models/__init__.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/nutrient_compositions.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "nutzlast": 1,
-    "standardmandant": 1
-   },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/nutrient_compositions.py:21"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
    "table": "domain_agrar.seed_orders",
    "domain": "agrar",
    "class": "A",
@@ -1120,11 +1079,10 @@
    "identitaet": {
     "dienst": 3,
     "nutzlast": 1,
-    "standardmandant": 2,
-    "token": 5
+    "standardmandant": 1,
+    "token": 6
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/crm_reports.py:27",
     "app/api/v1/endpoints/mask_frontend_bridges.py:978"
    ],
    "null_stellen": [],
@@ -1265,14 +1223,11 @@
    "identitaet": {
     "dienst": 14,
     "nutzlast": 6,
-    "standardmandant": 10,
+    "standardmandant": 7,
     "token": 19
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/articles.py:42",
-    "app/api/v1/endpoints/customer_extensions.py:24",
     "app/api/v1/endpoints/mask_frontend_bridges.py:978",
-    "app/domains/crm/api/customers.py:19",
     "app/integrations/adapters/superglue/tool_sync.py:427",
     "services/crm-core/app/api/v1/endpoints/activities.py:20",
     "services/crm-core/app/api/v1/endpoints/contacts.py:20",
@@ -1444,14 +1399,11 @@
    "identitaet": {
     "dienst": 8,
     "nutzlast": 2,
-    "standardmandant": 5,
-    "token": 11
+    "standardmandant": 2,
+    "token": 12
    },
    "standardmandant_stellen": [
     "app/agents/agent_ops.py:829",
-    "app/api/v1/endpoints/crm_reports.py:27",
-    "app/api/v1/endpoints/customer_extensions.py:24",
-    "app/domains/crm/api/leads.py:19",
     "services/crm-core/app/api/v1/endpoints/leads.py:32",
     "services/crm-core/app/api/v1/endpoints/leads.py:68",
     "services/crm-core/app/api/v1/endpoints/leads.py:72",
@@ -1618,14 +1570,11 @@
    "identitaet": {
     "dienst": 8,
     "nutzlast": 3,
-    "standardmandant": 5,
-    "token": 11
+    "standardmandant": 2,
+    "token": 12
    },
    "standardmandant_stellen": [
     "app/agents/agent_ops.py:829",
-    "app/api/v1/endpoints/crm_reports.py:27",
-    "app/api/v1/endpoints/customer_extensions.py:24",
-    "app/domains/crm/api/leads.py:19",
     "services/crm-core/app/api/v1/endpoints/leads.py:32",
     "services/crm-core/app/api/v1/endpoints/leads.py:68",
     "services/crm-core/app/api/v1/endpoints/leads.py:72",
@@ -1731,8 +1680,7 @@
    "gruende": [
     "dienst",
     "referenzdaten",
-    "mandant_nullbar",
-    "standardmandant"
+    "mandant_nullbar"
    ],
    "modell": [
     "app/infrastructure/models/__init__.py"
@@ -1793,12 +1741,9 @@
     "dienst": 2,
     "kopfzeile": 2,
     "nutzlast": 3,
-    "standardmandant": 1,
     "token": 12
    },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/chart_of_accounts.py:36"
-   ],
+   "standardmandant_stellen": [],
    "null_stellen": [
     "app/api/v1/endpoints/compat.py:1859",
     "app/api/v1/endpoints/compat.py:1866",
@@ -2080,12 +2025,11 @@
    "identitaet": {
     "kopfzeile": 4,
     "nutzlast": 3,
-    "standardmandant": 2,
+    "standardmandant": 1,
     "token": 22
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py:978",
-    "app/api/v1/endpoints/sales_delivery_notes.py:54"
+    "app/api/v1/endpoints/mask_frontend_bridges.py:978"
    ],
    "null_stellen": [
     "app/api/v1/endpoints/compat.py:1859",
@@ -2887,11 +2831,10 @@
    "identitaet": {
     "dienst": 6,
     "nutzlast": 2,
-    "standardmandant": 2,
+    "standardmandant": 1,
     "token": 2
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/articles.py:42",
     "services/inventory/app/db/models.py:32"
    ],
    "null_stellen": [],
@@ -4004,14 +3947,12 @@
     "dienst": 18,
     "kopfzeile": 2,
     "nutzlast": 11,
-    "standardmandant": 6,
+    "standardmandant": 4,
     "token": 67
    },
    "standardmandant_stellen": [
     "app/api/v1/endpoints/rations_optimization.py:6336",
-    "app/api/v1/endpoints/sales_delivery_notes.py:54",
     "app/core/inventory_permissions.py:85",
-    "app/domains/inventory/api/inventory_auth.py:85",
     "app/services/admin_core_service.py:1055",
     "services/crm-marketing/app/config/settings.py:23"
    ],

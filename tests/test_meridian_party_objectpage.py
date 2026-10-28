@@ -89,12 +89,15 @@ def test_attach_mask_aliases_fill_the_object_page_keys() -> None:
 
 
 def test_tenant_as_uuid_keeps_slug_tenants_from_crashing() -> None:
-    from uuid import UUID
+    """Kennungen bleiben, wie sie sind; bis 28.10.2026 wurde ``test-abc`` als Standardmandant ausgegeben."""
+    import pytest
 
-    from app.services.customer_service import _DEFAULT_TENANT, _tenant_as_uuid
+    from app.services.customer_service import _tenant_as_uuid
 
-    assert _tenant_as_uuid("test-abc") == UUID(_DEFAULT_TENANT)
-    assert _tenant_as_uuid(_DEFAULT_TENANT) == UUID(_DEFAULT_TENANT)
+    assert _tenant_as_uuid("test-abc") == "test-abc"
+    assert _tenant_as_uuid("00000000-0000-0000-0000-000000000002") == "00000000-0000-0000-0000-000000000002"
+    with pytest.raises(ValueError):
+        _tenant_as_uuid("")
 
 
 def test_stamm_object_pages_share_the_header_contract() -> None:

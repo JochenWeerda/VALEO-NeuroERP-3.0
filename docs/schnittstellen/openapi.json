@@ -32218,6 +32218,7 @@
         "type": "object"
       },
       "ChannelApprovalDecisionRequest": {
+        "description": "Entscheider ist der Angemeldete; ``approver_role`` muss eine seiner geprueften Rollen sein.",
         "properties": {
           "approver_role": {
             "title": "Approver Role",
@@ -32230,15 +32231,10 @@
           "decision": {
             "title": "Decision",
             "type": "string"
-          },
-          "entschieden_von": {
-            "title": "Entschieden Von",
-            "type": "string"
           }
         },
         "required": [
           "decision",
-          "entschieden_von",
           "approver_role",
           "begruendung"
         ],
@@ -32270,17 +32266,6 @@
           "rolle": {
             "title": "Rolle",
             "type": "string"
-          },
-          "tenant_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Tenant Id"
           }
         },
         "required": [
@@ -32365,14 +32350,9 @@
           "process_definition_key": {
             "title": "Process Definition Key",
             "type": "string"
-          },
-          "tenant_id": {
-            "title": "Tenant Id",
-            "type": "string"
           }
         },
         "required": [
-          "tenant_id",
           "process_definition_key",
           "command_name",
           "aggregate_type",
@@ -89976,17 +89956,6 @@
           "target_id": {
             "title": "Target Id",
             "type": "string"
-          },
-          "tenant_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Tenant Id"
           }
         },
         "required": [
@@ -186222,7 +186191,6 @@
           },
           "tenant_id": {
             "description": "Tenant ID",
-            "format": "uuid",
             "title": "Tenant Id",
             "type": "string"
           },
@@ -207833,24 +207801,6 @@
         "operationId": "list_duenger_api_v1_agrar_duenger__get",
         "parameters": [
           {
-            "description": "Filter by tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter by tenant ID",
-              "title": "Tenant Id"
-            }
-          },
-          {
             "description": "Search in name, article number, manufacturer",
             "in": "query",
             "name": "search",
@@ -208004,24 +207954,6 @@
       "post": {
         "description": "Create a new Dünger.",
         "operationId": "create_duenger_api_v1_agrar_duenger__post",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -208096,22 +208028,6 @@
               "title": "Limit",
               "type": "integer"
             }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
           }
         ],
         "responses": {
@@ -208156,24 +208072,6 @@
       "get": {
         "description": "Get Dünger statistics overview.",
         "operationId": "get_duenger_stats_api_v1_agrar_duenger_stats_overview_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -208182,16 +208080,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -208218,22 +208106,6 @@
             "schema": {
               "title": "Duenger Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
             }
           }
         ],
@@ -208274,22 +208146,6 @@
             "schema": {
               "title": "Duenger Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
             }
           }
         ],
@@ -208337,22 +208193,6 @@
             "schema": {
               "title": "Duenger Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
             }
           }
         ],
@@ -208410,22 +208250,6 @@
             "schema": {
               "title": "Duenger Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
             }
           }
         ],
@@ -226114,24 +225938,6 @@
         "operationId": "list_saatgut_api_v1_agrar_saatgut__get",
         "parameters": [
           {
-            "description": "Filter by tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter by tenant ID",
-              "title": "Tenant Id"
-            }
-          },
-          {
             "description": "Search in name, article number, variety",
             "in": "query",
             "name": "search",
@@ -226303,24 +226109,6 @@
       "post": {
         "description": "Create a new Saatgut.",
         "operationId": "create_saatgut_api_v1_agrar_saatgut__post",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -226395,22 +226183,6 @@
               "title": "Limit",
               "type": "integer"
             }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
           }
         ],
         "responses": {
@@ -226455,24 +226227,6 @@
       "get": {
         "description": "Get Saatgut statistics overview.",
         "operationId": "get_saatgut_stats_api_v1_agrar_saatgut_stats_overview_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -226481,16 +226235,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -226517,22 +226261,6 @@
             "schema": {
               "title": "Saatgut Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
             }
           }
         ],
@@ -226573,22 +226301,6 @@
             "schema": {
               "title": "Saatgut Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
             }
           }
         ],
@@ -226636,22 +226348,6 @@
             "schema": {
               "title": "Saatgut Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
             }
           }
         ],
@@ -226709,22 +226405,6 @@
             "schema": {
               "title": "Saatgut Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
             }
           }
         ],
@@ -241136,24 +240816,6 @@
     "/api/v1/channels/knowledge-graph": {
       "get": {
         "operationId": "get_knowledge_graph_api_v1_channels_knowledge_graph_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -241164,16 +240826,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -241199,22 +240851,6 @@
             "schema": {
               "title": "Node Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
             }
           }
         ],
@@ -241771,22 +241407,6 @@
           },
           {
             "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          },
-          {
-            "in": "query",
             "name": "status",
             "required": false,
             "schema": {
@@ -242036,6 +241656,7 @@
     },
     "/api/v1/channels/{channel}/process-actions/{thread_id}/decision": {
       "post": {
+        "description": "Freigabe oder Ablehnung. Bis 28.10.2026 kamen Entscheider und Freigaberolle aus dem Rumpf: jeder konnte sich\njede Rolle zuschreiben und unter fremdem Namen entscheiden, auch ueber Threads anderer Mandanten.",
         "operationId": "channel_process_decision_api_v1_channels__channel__process_actions__thread_id__decision_post",
         "parameters": [
           {
@@ -258029,24 +257650,6 @@
         "operationId": "list_customers_api_v1_crm_customers__get",
         "parameters": [
           {
-            "description": "Filter by tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter by tenant ID",
-              "title": "Tenant Id"
-            }
-          },
-          {
             "description": "Number of items to skip",
             "in": "query",
             "name": "skip",
@@ -258225,24 +257828,6 @@
       "post": {
         "description": "POST Interessent zu Kunde",
         "operationId": "convert_lead_to_customer_api_v1_crm_customers_convert_lead_post",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -258291,24 +257876,6 @@
       "post": {
         "description": "POST Kunde Umkreissuche",
         "operationId": "customer_geo_search_api_v1_crm_customers_geo_search_post",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -267752,18 +267319,6 @@
       "get": {
         "description": "Lead source analysis with conversion rates.",
         "operationId": "get_lead_sources_report_api_v1_crm_reports_lead_sources_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "00000000-0000-0000-0000-000000000001",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -267778,16 +267333,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -267808,18 +267353,6 @@
       "get": {
         "description": "Pipeline funnel with stage distribution and conversion rates.",
         "operationId": "get_pipeline_funnel_report_api_v1_crm_reports_pipeline_funnel_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "00000000-0000-0000-0000-000000000001",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -267830,16 +267363,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -267893,16 +267416,6 @@
                 }
               ],
               "title": "Period To"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "00000000-0000-0000-0000-000000000001",
-              "title": "Tenant Id",
-              "type": "string"
             }
           }
         ],
@@ -352301,24 +351814,6 @@
         "operationId": "list_nutrient_compositions_api_v1_nutrient_compositions__get",
         "parameters": [
           {
-            "description": "Filter by tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter by tenant ID",
-              "title": "Tenant Id"
-            }
-          },
-          {
             "description": "Search in name/number",
             "in": "query",
             "name": "search",
@@ -352472,22 +351967,6 @@
               "title": "Limit",
               "type": "integer"
             }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
           }
         ],
         "responses": {
@@ -352542,22 +352021,6 @@
               "title": "Composition Id",
               "type": "string"
             }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
           }
         ],
         "responses": {
@@ -352598,22 +352061,6 @@
             "schema": {
               "title": "Composition Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
             }
           }
         ],
@@ -352662,22 +352109,6 @@
             "schema": {
               "title": "Composition Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
             }
           }
         ],

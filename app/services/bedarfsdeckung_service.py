@@ -89,7 +89,9 @@ def _empfehlung(key: str, label: str, herd: int, kf_t_jahr: float, acker_ha: flo
 class BedarfsdeckungService:
     def __init__(self, db: Session, tenant_id: Optional[str] = None) -> None:
         self.db = db
-        self.tenant_id = tenant_id or "00000000-0000-0000-0000-000000000001"
+        if not tenant_id:  # kein Rueckfall auf den Standardmandanten (bis 28.10.2026)
+            raise ValueError("Mandant fehlt")
+        self.tenant_id = tenant_id
 
     # ── Stammdaten / Profile ──────────────────────────────────────────────
     def _milchvieh(self, kunden_nr: str) -> Optional[dict]:

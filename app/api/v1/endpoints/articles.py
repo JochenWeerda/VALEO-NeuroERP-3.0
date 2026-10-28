@@ -8,7 +8,6 @@ from pydantic import BaseModel as PydanticBaseModel
 from sqlalchemy import or_, text
 from sqlalchemy.orm import Session
 
-from ....core.config import settings
 from ....core.data_quality_enforcement import build_dq_error_detail, evaluate_article_datensatz
 from ....core.database import get_db
 from ....core.tenant import get_tenant_id
@@ -39,7 +38,6 @@ from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-R
 
 router = APIRouter()
 
-DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 
 @router.get("/", response_model=PaginatedResponse[Article], summary="Articles auflisten")
