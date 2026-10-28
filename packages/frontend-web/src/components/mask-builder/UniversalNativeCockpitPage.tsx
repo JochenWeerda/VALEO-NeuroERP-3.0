@@ -81,6 +81,7 @@ export function UniversalNativeCockpitPage({
       {experience?.workflowResume && <ListWorkflowBand />}
       <UniversalMaskRenderer
         plan={plan}
+        flowSpineCatalog={runtime.flowSpineCatalog}
         data={runtime.entityData}
         tables={runtime.tableRows}
           messages={runtime.messages}

@@ -1,3 +1,4 @@
+import { useFlowSpineCatalogRuntime, type FlowSpineCatalogState } from './useFlowSpineCatalogRuntime'
 import { readCompleteList } from './list-client-source'
 import type { ScreenMessage } from '../renderers/MessagePanelRenderer'
 import { useMemo, useState } from 'react'
@@ -70,6 +71,7 @@ export interface UseUniversalMaskRuntimeOptions {
 }
 
 export interface UseUniversalMaskRuntimeResult {
+  flowSpineCatalog: FlowSpineCatalogState
   messages: ScreenMessage[]
   plan: RenderPlan | undefined
   binding: DataBindingPlan | undefined
@@ -203,6 +205,8 @@ export function useUniversalMaskRuntime({
     await resetOverlayMutation.mutateAsync()
   }
 
+  const flowSpineCatalog = useFlowSpineCatalogRuntime(Boolean(enabled && plan?.flowSpineCatalog?.enabled), Boolean(plan?.flowSpineCatalog?.warmWorkspaces))
+
   const binding = useMemo<DataBindingPlan | undefined>(() => {
     if (!plan) return undefined
     return compileDataBindingPlan(plan, schema?.dataSources, tabEndpoints, entityId, tenantId, schema?.entityProjection)
@@ -335,6 +339,7 @@ export function useUniversalMaskRuntime({
   ]
 
   return {
+    flowSpineCatalog,
     messages,
     plan,
     binding,

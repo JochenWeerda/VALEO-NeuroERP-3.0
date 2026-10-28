@@ -486,6 +486,7 @@ export interface ListExperience {
 }
 
 export interface ScreenDefinition {
+  flowSpineCatalog?: { enabled: true; warmWorkspaces: boolean }
   listExperience?: ListExperience
   documentVariant?: DocumentScreenVariantRef
   /** Declared native creation; new/neu are never fetched as entity IDs. */
@@ -591,6 +592,14 @@ export function validateScreenDefinition(screen: ScreenDefinition): string[] {
     }
   }
   if (!screen.title) errors.push('title is required')
+  if (screen.flowSpineCatalog !== undefined) {
+    const c = screen.flowSpineCatalog
+    if (!c || typeof c !== 'object' || c.enabled !== true || typeof c.warmWorkspaces !== 'boolean'
+      || Object.keys(c).some(key => !['enabled', 'warmWorkspaces'].includes(key))
+      || screen.id !== 'workflow/flow-spine-studio' || screen.mode !== 'cockpit') {
+      errors.push('flowSpineCatalog is invalid')
+    }
+  }
   if (screen.listExperience !== undefined) {
     const x = screen.listExperience
     const str = (v: unknown): v is string => typeof v === 'string' && v.length > 0 && v.length <= 200

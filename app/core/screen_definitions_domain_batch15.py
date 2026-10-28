@@ -4769,22 +4769,26 @@ def build_workflow_flow_spine_service_to_customer_screen_definition() -> dict[st
 
 
 def build_workflow_flow_spine_studio_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="workflow/flow-spine-studio",
-        domain="workflow",
-        title="Flow spine studio",
-        subtitle="workflow",
-        endpoint="/api/v1/workflow/cockpit-db/dead-letter",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Flow spine studio im workflow-Bereich finden und auswerten.",
-        prompts=["Zeige Flow spine studio.", "Filtere die Liste."],
-        bundle="workflow",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
+    screen_id = "workflow/flow-spine-studio"
+    return {
+        "schemaVersion": 1,
+        "id": screen_id,
+        "domain": "workflow",
+        "mode": "cockpit",
+        "title": "Flow Spine Studio",
+        "subtitle": "Prozessräume",
+        "adapter": {"type": "native", "sourceId": screen_id, "temporary": False},
+        "layout": {"floorplan": "cockpit", "density": "expertDense", "contextRail": "workflow"},
+        "flowSpineCatalog": {"enabled": True, "warmWorkspaces": True},
+        "agentContract": {
+            "businessPurpose": "Prozessräume aus dem Flow-Spine-Katalog öffnen.",
+            "examplePrompts": ["Zeige die Prozessräume."],
+            "sensitiveFields": [],
+            "forbiddenAgentTasks": [],
+            "testSelectors": {"screenRoot": "[data-testid='workflow-flow-spine-studio']"},
+        },
+        "noWorkflowReason": "Der Katalog öffnet die jeweiligen Prozessräume.",
+    }
 
 
 def build_workflow_process_mining_analytics_screen_definition() -> dict[str, Any]:

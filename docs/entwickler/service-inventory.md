@@ -299,6 +299,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `settlement_pdf_service` | PDF generation and GoBD archiving for Agrar settlement self-billing documents. |
 | `silo_rule_engine_service` | WM-SILO-RULE-ENGINE-001 — Automatische Zielzellen-Vorschlaege fuer Einlagerung. |
 | `stt_client` | Speech-to-Text-Client (anbieterunabhängig, OpenAI-kompatibel). |
+| `studio_catalog_contracts` | Bounded metadata for the registered Flow Spine catalog cockpit. |
 | `studio_draft_store` | Studio drafts with tenant isolation, four-eyes publish, and optional Postgres. |
 | `studio_entity_commands` | Generated domain-command implementation. Only deployment-owned EntitySpec selects tables. |
 | `studio_entity_compiler` | Deterministic deployable entity bundle. Does not execute DDL or activate writes. |

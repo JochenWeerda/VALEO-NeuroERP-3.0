@@ -1,3 +1,5 @@
+import { FlowSpineCatalogRenderer } from './renderers/FlowSpineCatalogRenderer'
+import type { FlowSpineCatalogState } from './runtime/useFlowSpineCatalogRuntime'
 import { SourceProposalRenderer } from './renderers/SourceProposalRenderer'
 import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import { ColumnLayoutRenderer, type NavigationColumn } from './renderers/ColumnLayoutRenderer'
@@ -54,6 +56,7 @@ function documentIdentity(identityField: string | undefined, payload: Record<str
 }
 
 interface UniversalMaskRendererProps {
+  flowSpineCatalog?: FlowSpineCatalogState
   columns?: NavigationColumn[]
   messages?: ScreenMessage[]
   onRetry?: () => void
@@ -183,6 +186,7 @@ function renderLegacyFields(
 }
 
 function RenderFromPlan({
+  flowSpineCatalog,
   columns,
   messages = [],
   onRetry,
@@ -207,6 +211,7 @@ function RenderFromPlan({
   columns?: NavigationColumn[]
   messages?: ScreenMessage[]
   onRetry?: () => void
+  flowSpineCatalog?: FlowSpineCatalogState
   plan: RenderPlan
   payload: Record<string, unknown>
   entityId?: string
@@ -433,6 +438,7 @@ function RenderFromPlan({
 
       {statusAfterFields ? null : workflowNode}
       {!statusAfterFields && plan.shell.summaryPlacement === 'header' ? <FastSummaryRenderer items={plan.summaryItems} /> : null}
+      {plan.flowSpineCatalog && <FlowSpineCatalogRenderer state={flowSpineCatalog} />}
       <TileGridRenderer tiles={plan.tiles} />
       <CalendarRenderer calendar={plan.calendar} />
       <TwinReadModelRenderer twin={plan.twin} />
@@ -713,6 +719,7 @@ function RenderFromScreen({
 }
 
 export function UniversalMaskRenderer({
+  flowSpineCatalog,
   columns,
   messages,
   onRetry,
@@ -749,6 +756,7 @@ export function UniversalMaskRenderer({
     return (
       <LookupBindingContext.Provider value={lookupBindings ?? {}}>
         <RenderFromPlan
+          flowSpineCatalog={flowSpineCatalog}
           columns={columns}
           messages={messages}
           onRetry={onRetry}

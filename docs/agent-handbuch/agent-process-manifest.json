@@ -25453,7 +25453,7 @@
     },
     {
       "mask_id": "workflow/flow-spine-studio",
-      "title": "Flow spine studio",
+      "title": "Flow Spine Studio",
       "domain": "workflow",
       "process_keys": [],
       "rollout_route": "/mask-rollout/workflow__flow-spine-studio/:entityId",
@@ -25461,19 +25461,7 @@
       "screen_definition_url": "/api/v1/masks/workflow/flow-spine-studio/screen-definition",
       "readiness_url": "/api/v1/masks/workflow/flow-spine-studio/readiness",
       "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
+      "actions": [],
       "sensitive_fields": [],
       "mcp_tool_ids": []
     },

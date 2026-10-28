@@ -843,7 +843,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `workflow/flow-spine-order-to-cash` | Flow spine order to cash | workflow | niedrig | — | `GET /api/v1/masks/workflow/flow-spine-order-to-cash/agent-contract` |
 | `workflow/flow-spine-procure-to-pay` | Flow spine procure to pay | workflow | niedrig | — | `GET /api/v1/masks/workflow/flow-spine-procure-to-pay/agent-contract` |
 | `workflow/flow-spine-service-to-customer` | Flow spine service to customer | workflow | niedrig | — | `GET /api/v1/masks/workflow/flow-spine-service-to-customer/agent-contract` |
-| `workflow/flow-spine-studio` | Flow spine studio | workflow | niedrig | — | `GET /api/v1/masks/workflow/flow-spine-studio/agent-contract` |
+| `workflow/flow-spine-studio` | Flow Spine Studio | workflow | niedrig | — | `GET /api/v1/masks/workflow/flow-spine-studio/agent-contract` |
 | `workflow/leitstand` | Workflow-Leitstand | workflow | niedrig | — | `GET /api/v1/masks/workflow/leitstand/agent-contract` |
 | `workflow/process-mining` | Process Mining | workflow | niedrig | — | `GET /api/v1/masks/workflow/process-mining/agent-contract` |
 | `workflow/process-mining-analytics` | Process mining analytics | workflow | niedrig | — | `GET /api/v1/masks/workflow/process-mining-analytics/agent-contract` |
@@ -28577,9 +28577,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `workflow/flow-spine-studio` — Flow spine studio
+### `workflow/flow-spine-studio` — Flow Spine Studio
 
-**Zweck:** Flow spine studio im workflow-Bereich finden und auswerten.
+**Zweck:** Prozessräume aus dem Flow-Spine-Katalog öffnen.
 
 | | |
 |---|---|
@@ -28589,20 +28589,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/workflow__flow-spine-studio/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
-**Data Sources:**
-
-- `list` → `/api/v1/workflow/cockpit-db/dead-letter`
-
 **Beispiel-Prompts:**
 
-- Zeige Flow spine studio.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+- Zeige die Prozessräume.
 
 ---
 

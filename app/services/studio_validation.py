@@ -131,7 +131,8 @@ def validate_studio_draft(
     cat = catalog or load_studio_catalog()
     catalog_actions: dict[str, Any] = cat["actions"]
     from app.services.studio_list_contracts import validate_list_experience
-    violations: list[str] = validate_list_experience(definition)
+    from app.services.studio_catalog_contracts import validate_flow_spine_catalog
+    violations: list[str] = validate_list_experience(definition) + validate_flow_spine_catalog(definition)
 
     # ── Struktur (Minimalkontrakt) ───────────────────────────────────────────
     for req in ("schemaVersion", "id", "domain", "mode", "title"):

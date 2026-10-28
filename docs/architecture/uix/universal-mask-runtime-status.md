@@ -12,7 +12,7 @@ description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-02
 # Universal Mask Runtime — Plattformstatus
 
 **Aktueller Artefaktabgleich 2026-10-28:**853 registrierte Definitionen,
-Gate A/B jeweils853,C852,E801(52 Runtime-Punkte);844 native
+Gate A/B jeweils853,C852,E802(51 Runtime-Punkte);844 native
 Katalogeintraege und5 strukturell freigabefaehige Draft-Projektionen.
 Reklamationen nutzt nun die echte NativeListPage mit gemeinsamem Such-,
 Kennzahlen-, Export- und Workflow-Resume-Vertrag. Vier obsolete Identitaeten
@@ -20,6 +20,10 @@ sind bereinigt.108 gezielte Tests sind gruen; sechs visuelle Komponentenansichte
 (Hell/Dunkel,drei Desktopaufloesungen) und der gefilterte Browserdownload
 sind geprueft. Angemeldete E2E-/Gesamtfreigabe bleibt ein eigener Nachweis.
 [Abnahme](../../quality-assurance/studio-functional-lists-20261028.md).
+Der Prozesskatalog ist zusaetzlich funktional ueber die Runtime migriert;
+63 gezielte Nachlauffaelle, Typpruefung, Build und sechs synthetische
+Browser-Komponentenansichten sind gruen. Die neun Prozessraeume sind davon
+nicht umfasst. [Katalogabnahme](../../quality-assurance/studio-process-catalog-20261028.md).
 Diese Werte sind fuehrend; nachfolgende fruehere Zahlen sind historisch.
 
 **Verbindliches Ziel (Nutzer 2026-10-27):** Alle fachlichen Masken werden ueber

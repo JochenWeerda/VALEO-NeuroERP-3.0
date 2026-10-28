@@ -9037,11 +9037,12 @@
       "version": "1.0.0"
     },
     "workflow/flow-spine-studio": {
-      "definition_hash": "0aaf93f0adcdef612a6ad5c7ad21ee738d054c77b0a1e5072b9eba208a4aa185",
+      "definition_hash": "1f35250a68f488d752cd6ef71e314facbfe1fe1b10ca051f839af3eb69970229",
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
       "studio_draft_clean": false,
       "version": "1.0.0"

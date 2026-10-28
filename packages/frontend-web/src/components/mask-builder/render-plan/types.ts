@@ -1,4 +1,5 @@
 import type {
+  ScreenDefinition,
   DocumentScreenVariantRef,
   ListExperience,
   ScreenDomain,
@@ -277,6 +278,7 @@ export interface RenderPerformancePlan {
 }
 
 export interface RenderPlan {
+  flowSpineCatalog?: ScreenDefinition['flowSpineCatalog']
   listExperience?: ListExperience
   documentVariant?: DocumentScreenVariantRef
   cacheKey: string
