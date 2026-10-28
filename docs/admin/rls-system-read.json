@@ -1787,7 +1787,42 @@
    "live": 0,
    "code": []
   },
+  "domain_logistics.carrier_invoices": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_logistics.epod_settlements": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
   "domain_logistics.frachtbriefe": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_logistics.freight_tariffs": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_logistics.tour_disposition_checks": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_logistics.tour_events": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_logistics.tour_stops": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_logistics.tours": {
    "frisch": 0,
    "live": 0,
    "code": []

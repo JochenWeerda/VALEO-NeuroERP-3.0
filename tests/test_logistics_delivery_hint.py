@@ -35,7 +35,8 @@ def test_lookup_sales_delivery_note_formats_row():
     assert out["sales_order_id"] is None
 
 
-def test_resolve_sales_delivery_note_by_ref_requires_tenant():
+def test_resolve_sales_delivery_note_by_ref_uses_the_token_tenant():
+    """Der Mandant kommt aus der Anmeldung (nicht aus X-Tenant-ID); ein unbekannter Lieferschein ist 404."""
     from app.main import app
 
     client = TestClient(app, raise_server_exceptions=True)
@@ -43,4 +44,4 @@ def test_resolve_sales_delivery_note_by_ref_requires_tenant():
         "/api/v1/logistik/sales-delivery-note-by-ref?ref=2026000001",
         headers={"Authorization": "Bearer dev-token"},
     )
-    assert res.status_code == 422
+    assert res.status_code == 404
