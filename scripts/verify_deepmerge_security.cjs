@@ -1,11 +1,10 @@
 const assert = require('node:assert/strict');
 const { test } = require('node:test');
-const { createRequire } = require('node:module');
+const { resolveExactPackage } = require('./check_npm_backport_audit.cjs');
 const path = require('node:path');
-const installed = createRequire(path.resolve(__dirname, '../node_modules/.pnpm/node_modules/package.json'));
 const fs = require('node:fs');
 const vm = require('node:vm');
-const packageDir = process.env.SECURITY_DEEPMERGE_RUNTIME ? path.resolve(process.env.SECURITY_DEEPMERGE_RUNTIME) : path.dirname(installed.resolve('deepmerge/package.json'));
+const packageDir = process.env.SECURITY_DEEPMERGE_RUNTIME ? path.resolve(process.env.SECURITY_DEEPMERGE_RUNTIME) : path.dirname(resolveExactPackage(path.resolve(__dirname, '..'), 'deepmerge', '4.3.1'));
 const browser = {};
 vm.runInNewContext(fs.readFileSync(path.join(packageDir, 'dist/umd.js'), 'utf8'), browser);
 const entries = { cjs: require(path.join(packageDir, 'dist/cjs.js')), umd: require(path.join(packageDir, 'dist/umd.js')), browser: browser.deepmerge };

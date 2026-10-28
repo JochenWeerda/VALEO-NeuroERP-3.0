@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
-const { assess, hash } = require('./check_npm_backport_audit.cjs');
+const { assess, hash, resolveExactPackage } = require('./check_npm_backport_audit.cjs');
 const ROOT = path.resolve(__dirname, '..');
 
 function fixture(t) {
@@ -134,4 +134,21 @@ test('retired vulnerable forge release cannot regain a source exception', t => {
   const result = f.run();
   assert.equal(result.release_allowed, false);
   assert.equal(result.findings.find(finding => finding.package === 'node-forge').decision, 'blocked');
+});
+
+
+test('exact store resolution ignores an older hoisted package', t => {
+  const f = fixture(t), name = 'deepmerge';
+  f.write(`node_modules/.pnpm/node_modules/${name}/package.json`, { name, version: '3.3.0' });
+  const exact = 'node_modules/.pnpm/deepmerge@4.3.1_patch_hash=verified/node_modules/deepmerge/package.json';
+  f.write(exact, { name, version: '4.3.1' });
+  assert.equal(resolveExactPackage(f.root, name, '4.3.1'), fs.realpathSync(path.join(f.root, exact)));
+});
+test('missing or ambiguous exact installed versions fail closed', t => {
+  const f = fixture(t);
+  assert.throws(() => resolveExactPackage(f.root, 'deepmerge', '9.0.0'), /found 0/);
+  for (const suffix of ['first', 'second']) {
+    f.write(`node_modules/.pnpm/deepmerge@9.0.0_patch_hash=${suffix}/node_modules/deepmerge/package.json`, { name: 'deepmerge', version: '9.0.0' });
+  }
+  assert.throws(() => resolveExactPackage(f.root, 'deepmerge', '9.0.0'), /found 2/);
 });

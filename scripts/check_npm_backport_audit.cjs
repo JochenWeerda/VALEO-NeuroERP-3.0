@@ -12,6 +12,32 @@ const ALLOWED = {
 function hash(file) {
   return crypto.createHash('sha256').update(fs.readFileSync(file, 'utf8').replace(/\r\n/g, '\n')).digest('hex');
 }
+function resolveExactPackage(root, name, version) {
+  const store = path.join(root, 'node_modules/.pnpm');
+  const candidates = [];
+  const installed = createRequire(path.join(store, 'node_modules/package.json'));
+  try {
+    const active = installed.resolve(`${name}/package.json`);
+    const pkg = JSON.parse(fs.readFileSync(active, 'utf8'));
+    if (pkg.name === name && pkg.version === version) return fs.realpathSync(active);
+  } catch { /* inspect exact store below */ }
+  if (fs.existsSync(store)) {
+    const prefix = `${name.replace('/', '+')}@${version}`;
+    for (const entry of fs.readdirSync(store)) {
+      if (entry === prefix || entry.startsWith(prefix + '_') || entry.startsWith(prefix + '(')) {
+        candidates.push(path.join(store, entry, 'node_modules', name, 'package.json'));
+      }
+    }
+  }
+  const matches = new Set();
+  for (const file of candidates) {
+    if (!fs.existsSync(file)) continue;
+    const pkg = JSON.parse(fs.readFileSync(file, 'utf8'));
+    if (pkg.name === name && pkg.version === version) matches.add(fs.realpathSync(file));
+  }
+  if (matches.size !== 1) throw new Error(`Expected one exact installed ${name}@${version}, found ${matches.size}`);
+  return [...matches][0];
+}
 function assess(report, root = ROOT, today = new Date().toISOString().slice(0, 10)) {
   const metadata = report?.metadata;
   if (!report || report.error || !Number.isInteger(metadata?.dependencies) || metadata.dependencies < 1 ||
@@ -39,7 +65,6 @@ function assess(report, root = ROOT, today = new Date().toISOString().slice(0, 1
   const policy = JSON.parse(fs.readFileSync(path.join(root, 'config/security/npm-backport-reviews.json'), 'utf8'));
   if (policy.schema_version !== 1 || !Array.isArray(policy.reviews)) throw new Error('Invalid backport policy');
   const manifest = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
-  const installed = createRequire(path.join(root, 'node_modules/.pnpm/node_modules/package.json'));
   const findings = detected.map(({ row, finding }) => {
     let decision = 'blocked', reason = 'No exact source repair for this finding';
     try {
@@ -57,7 +82,7 @@ function assess(report, root = ROOT, today = new Date().toISOString().slice(0, 1
           manifest.pnpm?.patchedDependencies?.[`${allowed.name}@${allowed.version}`] !== patch ||
           hash(path.join(root, patch)) !== review.patch_sha256 || hash(path.join(root, 'pnpm-lock.yaml')) !== review.lock_sha256 ||
           hash(path.join(root, 'package.json')) !== review.manifest_sha256) throw new Error('Reviewed patch, manifest or lock evidence changed');
-      const pkgFile = installed.resolve(`${allowed.name}/package.json`);
+      const pkgFile = resolveExactPackage(root, allowed.name, allowed.version);
       const pkg = JSON.parse(fs.readFileSync(pkgFile, 'utf8'));
       if (pkg.name !== allowed.name || pkg.version !== allowed.version ||
           JSON.stringify(Object.keys(review.installed_sha256).sort()) !== JSON.stringify([...allowed.files].sort()) ||
@@ -97,4 +122,4 @@ if (require.main === module) {
   console.log(JSON.stringify(result, null, 2));
   process.exitCode = result.release_allowed ? 0 : 1;
 }
-module.exports = { assess, hash };
+module.exports = { assess, hash, resolveExactPackage };
