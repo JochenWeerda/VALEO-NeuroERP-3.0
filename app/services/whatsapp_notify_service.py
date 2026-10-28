@@ -153,9 +153,9 @@ def _persist_message(msg: OutboxMessage, db: Session, actor: str, key: str) -> O
                 "actor": actor, "payload": json.dumps({"request_hash": fingerprint, "message": payload}, ensure_ascii=False)})
         db.execute(sql_text("""
             INSERT INTO domain_shared.channel_thread_audit_items
-            (thread_id, position, audit_type, payload, recorded_at)
-            VALUES (:id, 0, 'whatsapp.notification.prepared', CAST(:payload AS JSONB), :at)
-        """), {"id": msg.msg_id, "payload": json.dumps({"actor": actor, "request_hash": fingerprint}), "at": msg.created_at})
+            (thread_id, tenant_id, position, audit_type, payload, recorded_at)
+            VALUES (:id, :tenant, 0, 'whatsapp.notification.prepared', CAST(:payload AS JSONB), :at)
+        """), {"id": msg.msg_id, "tenant": msg.tenant_id, "payload": json.dumps({"actor": actor, "request_hash": fingerprint}), "at": msg.created_at})
     return msg
 
 

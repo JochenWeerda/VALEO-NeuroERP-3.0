@@ -28,6 +28,7 @@ from app.core.tenant import get_tenant_id
 from app.infrastructure.models import Customer
 from app.infrastructure.models.agrar_models import FeldbuchSchlag
 from app.services.customer_reference import resolve_reference
+from app.services.pricing_condition_read import read_pricing_conditions
 from app.services.finance_datev_service import FinanceDatevService
 from app.services.finance_period_service import FinancePeriodService, PeriodError
 from app.services.vies_service import vies_service
@@ -875,14 +876,7 @@ def list_pos_rabatte(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> list[dict[str, Any]]:
-    rows = _safe_rows(
-        db,
-        # Konditionen tragen den Mandanten ueber ihre Gruppe; bis 27.10.2026 ohne Filter (alle Mandanten).
-        "SELECT k.* FROM domain_shared.zu_abschlag_konditionen k "
-        "JOIN domain_shared.zu_abschlaggruppen g ON g.id = k.gruppe_id "
-        "WHERE g.tenant_id = :t ORDER BY k.id LIMIT 200",
-        {"t": tenant_id},
-    )
+    rows = read_pricing_conditions(db, tenant_id, limit=200)
     return [
         {
             "id": str(r.get("id")),
@@ -964,14 +958,7 @@ def preise_konditionen(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict[str, Any]:
-    rows = _safe_rows(
-        db,
-        # Konditionen tragen den Mandanten ueber ihre Gruppe; bis 27.10.2026 ohne Filter (alle Mandanten).
-        "SELECT k.* FROM domain_shared.zu_abschlag_konditionen k "
-        "JOIN domain_shared.zu_abschlaggruppen g ON g.id = k.gruppe_id "
-        "WHERE g.tenant_id = :t ORDER BY k.id LIMIT 1",
-        {"t": tenant_id},
-    )
+    rows = read_pricing_conditions(db, tenant_id, limit=1)
     row = dict(rows[0]) if rows else {}
     today = date.today()
     return {

@@ -109,7 +109,6 @@ export function WorkspaceCompositionAuthoringDialog({
     setSaveMessage(null)
     onDraftChange?.(next.draft, next.mounted, next.issues)
     // Nur beim Oeffnen / Scope-Wechsel neu laden — nicht bei jedem onDraftChange.
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- absichtlich ohne onDraftChange
   }, [open, sub, tenantId, catalog, resolvedStorage])
 
   const commitDraft = useCallback(

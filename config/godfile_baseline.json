@@ -10,7 +10,7 @@
     "app/api/v1/endpoints/flow_spines.py": 1498,
     "app/api/v1/endpoints/kontrakte.py": 1088,
     "app/api/v1/endpoints/logistics_tours.py": 1010,
-    "app/api/v1/endpoints/mask_frontend_bridges.py": 1416,
+    "app/api/v1/endpoints/mask_frontend_bridges.py": 1409,
     "app/api/v1/endpoints/personal.py": 3081,
     "app/api/v1/endpoints/portal_feldbuch.py": 1945,
     "app/api/v1/endpoints/process_kernel_api.py": 6100,
