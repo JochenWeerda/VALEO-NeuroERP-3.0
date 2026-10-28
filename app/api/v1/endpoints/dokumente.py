@@ -3,10 +3,12 @@ Dokumente API - Dokumentenverwaltung (SQLAlchemy Version)
 """
 
 from typing import Optional
-from fastapi import Response, APIRouter, Depends, HTTPException, Query
+from fastapi import Response, APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 
+from app.core.akteur import gepruefter_akteur_aus_request
 from app.core.database import get_db
+from app.core.tenant import get_tenant_id
 from app.domains.operations.repository import DokumentRepository, DokumentVersionRepository
 
 from app.api.v1.schemas.base import BaseSchema
@@ -15,6 +17,13 @@ from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-R
 
 
 router = APIRouter(prefix="/dokumente", tags=["Dokumente"])
+
+# Urheber- und Loeschfelder setzt der Server aus dem Token; der Rumpf ist ein freies dict.
+_SERVERFELDER = {"hochgeladen_von", "created_by", "updated_by", "geloescht_von", "geloescht_am", "erstellt_von"}
+
+
+def _ohne_serverfelder(daten: dict) -> dict:
+    return {k: v for k, v in daten.items() if k not in _SERVERFELDER}
 
 
 # === DOKUMENT ENDPOINTS ===
@@ -26,10 +35,11 @@ async def list_dokumente(
     suche: Optional[str] = Query(None, description="Search in name"),
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """List all documents with filtering and pagination"""
-    repo = DokumentRepository(db)
+    repo = DokumentRepository(db, tenant_id)
     
     # Apply filters
     if kategorie:
@@ -54,17 +64,17 @@ async def list_dokumente(
 
 
 @router.get("/kategorien", response_model=DokumenteOut, summary="Kategorien abrufen")
-async def get_kategorien(db: Session = Depends(get_db)):
+async def get_kategorien(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     """Get all document categories with counts"""
-    repo = DokumentRepository(db)
+    repo = DokumentRepository(db, tenant_id)
     stats = repo.get_stats()
     return {"kategorien": stats.get("by_category", {})}
 
 
 @router.get("/{dokument_id}", response_model=DokumenteOut, summary="Dokument abrufen")
-async def get_dokument(dokument_id: str, db: Session = Depends(get_db)):
+async def get_dokument(dokument_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     """Get a single document by ID"""
-    repo = DokumentRepository(db)
+    repo = DokumentRepository(db, tenant_id)
     dokument = repo.get_by_id(dokument_id)
     if not dokument:
         raise HTTPException(status_code=404, detail=f"Dokument {dokument_id} not found")
@@ -74,14 +84,18 @@ async def get_dokument(dokument_id: str, db: Session = Depends(get_db)):
 @router.post("", response_model=DokumenteOut, status_code=201, summary="Dokument anlegen", dependencies=SCHREIBEN["BELEGE"])
 async def create_dokument(
     dokument_data: dict,
+    request: Request,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """Create a new document"""
-    repo = DokumentRepository(db)
+    repo = DokumentRepository(db, tenant_id)
+    akteur = gepruefter_akteur_aus_request(request)
     try:
-        dokument = repo.create(dokument_data)
+        dokument = repo.create({**_ohne_serverfelder(dokument_data), "hochgeladen_von": akteur, "created_by": akteur})
         return dokument
     except Exception as e:
+        db.rollback()
         raise HTTPException(status_code=400, detail=str(e))
 
 
@@ -89,11 +103,14 @@ async def create_dokument(
 async def update_dokument(
     dokument_id: str,
     dokument_data: dict,
+    request: Request,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """Update a document"""
-    repo = DokumentRepository(db)
-    dokument = repo.update(dokument_id, dokument_data)
+    repo = DokumentRepository(db, tenant_id)
+    dokument = repo.update(dokument_id, {**_ohne_serverfelder(dokument_data),
+                                         "updated_by": gepruefter_akteur_aus_request(request)})
     if not dokument:
         raise HTTPException(status_code=404, detail=f"Dokument {dokument_id} not found")
     return dokument
@@ -102,16 +119,18 @@ async def update_dokument(
 @router.delete("/{dokument_id}", status_code=204, response_class=Response, response_model=None, summary="Dokument löschen", dependencies=SCHREIBEN["BELEGE"])
 async def delete_dokument(
     dokument_id: str,
+    request: Request,
     hard_delete: bool = Query(False, description="Hard delete vs soft delete"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """Delete a document (soft delete by default)"""
-    repo = DokumentRepository(db)
+    repo = DokumentRepository(db, tenant_id)
     if hard_delete:
         if not repo.delete(dokument_id):
             raise HTTPException(status_code=404, detail=f"Dokument {dokument_id} not found")
     else:
-        if not repo.soft_delete(dokument_id):
+        if not repo.soft_delete(dokument_id, gepruefter_akteur_aus_request(request)):
             raise HTTPException(status_code=404, detail=f"Dokument {dokument_id} not found")
 
 
@@ -120,16 +139,17 @@ async def delete_dokument(
 @router.get("/{dokument_id}/versionen", response_model=list[DokumenteOut], summary="Versionen auflisten")
 async def list_versionen(
     dokument_id: str,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """List all versions of a document"""
     # Verify dokument exists
-    dok_repo = DokumentRepository(db)
+    dok_repo = DokumentRepository(db, tenant_id)
     dokument = dok_repo.get_by_id(dokument_id)
     if not dokument:
         raise HTTPException(status_code=404, detail=f"Dokument {dokument_id} not found")
     
-    repo = DokumentVersionRepository(db)
+    repo = DokumentVersionRepository(db, tenant_id)
     return repo.get_all(dokument_id)
 
 
@@ -137,19 +157,22 @@ async def list_versionen(
 async def create_version(
     dokument_id: str,
     version_data: dict,
+    request: Request,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """Create a new version of a document"""
     # Verify dokument exists
-    dok_repo = DokumentRepository(db)
+    dok_repo = DokumentRepository(db, tenant_id)
     dokument = dok_repo.get_by_id(dokument_id)
     if not dokument:
         raise HTTPException(status_code=404, detail=f"Dokument {dokument_id} not found")
     
+    version_data = {**_ohne_serverfelder(version_data), "erstellt_von": gepruefter_akteur_aus_request(request)}
     version_data["dokument_id"] = dokument_id
     
     # Auto-increment version number
-    ver_repo = DokumentVersionRepository(db)
+    ver_repo = DokumentVersionRepository(db, tenant_id)
     latest = ver_repo.get_latest(dokument_id)
     version_data["version"] = (latest.version + 1) if latest else 1
     
@@ -157,4 +180,5 @@ async def create_version(
         version = ver_repo.create(version_data)
         return version
     except Exception as e:
+        db.rollback()
         raise HTTPException(status_code=400, detail=str(e))

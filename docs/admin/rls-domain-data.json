@@ -308,38 +308,6 @@
    "verwaist": 0,
    "ohne_eltern": 0
   },
-  "domain_ops.ops_fahrzeug_bussgeld": {
-   "zeilen": 0,
-   "eltern_fk": [
-    "fahrzeug_id -> domain_ops.ops_fahrzeuge.id"
-   ],
-   "verwaist": 0,
-   "ohne_eltern": 0
-  },
-  "domain_ops.ops_fahrzeug_schaeden": {
-   "zeilen": 0,
-   "eltern_fk": [
-    "fahrzeug_id -> domain_ops.ops_fahrzeuge.id"
-   ],
-   "verwaist": 0,
-   "ohne_eltern": 0
-  },
-  "domain_ops.ops_fahrzeug_status_historie": {
-   "zeilen": 0,
-   "eltern_fk": [
-    "fahrzeug_id -> domain_ops.ops_fahrzeuge.id"
-   ],
-   "verwaist": 0,
-   "ohne_eltern": 0
-  },
-  "domain_ops.ops_fahrzeug_touren": {
-   "zeilen": 0,
-   "eltern_fk": [
-    "fahrzeug_id -> domain_ops.ops_fahrzeuge.id"
-   ],
-   "verwaist": 0,
-   "ohne_eltern": 0
-  },
   "domain_ops.ops_fahrzeuge": {
    "zeilen": 1,
    "null": 0,

@@ -190,7 +190,7 @@ async def list_contracts(
         items.append(_kon_to_item(k))
 
     # Rahmenverträge (domain_ops) – begrenzt hinzufügen, damit Gesamtlimit ungefähr eingehalten wird
-    repo = RahmenvertragRepository(db)
+    repo = RahmenvertragRepository(db, tenant_id)
     rahmen = repo.get_all(limit=limit, status=status)
     for v in rahmen:
         items.append(_rahmen_to_item(v))
@@ -211,7 +211,7 @@ async def get_contract(
 ) -> dict[str, Any]:
     """Einzelvertrag nach ID (Agrar oder Rahmenvertrag)."""
     if contract_id.startswith("RV-"):
-        repo = RahmenvertragRepository(db)
+        repo = RahmenvertragRepository(db, tenant_id)
         vertrag = repo.get_by_id(contract_id)
         if not vertrag:
             raise HTTPException(status_code=404, detail="Contract not found")
@@ -243,7 +243,7 @@ async def delete_contract(
 ):
     """Vertrag löschen (Rahmenvertrag) oder 404 (Agrar-Storno über cancel)."""
     if contract_id.startswith("RV-"):
-        repo = RahmenvertragRepository(db)
+        repo = RahmenvertragRepository(db, tenant_id)
         if not repo.delete(contract_id):
             raise HTTPException(status_code=404, detail="Contract not found")
         return {"ok": True}
@@ -268,7 +268,7 @@ async def cancel_contract(
 ) -> dict[str, Any]:
     """Vertrag stornieren (Status auf cancelled bzw. storniert)."""
     if contract_id.startswith("RV-"):
-        repo = RahmenvertragRepository(db)
+        repo = RahmenvertragRepository(db, tenant_id)
         vertrag = repo.get_by_id(contract_id)
         if not vertrag:
             raise HTTPException(status_code=404, detail="Contract not found")

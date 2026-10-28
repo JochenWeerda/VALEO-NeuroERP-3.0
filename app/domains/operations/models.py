@@ -300,6 +300,7 @@ class FahrzeugTour(Base):
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
     id = Column(String, primary_key=True, default=default_prefixed_id("TOUR"))
+    tenant_id = Column(String(120), nullable=False, index=True)
     
     # Referenzen
     fahrzeug_id = Column(String, ForeignKey("domain_ops.ops_fahrzeuge.id", ondelete="CASCADE"))
@@ -403,6 +404,7 @@ class SpeditionFrachttarif(Base):
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
     id = Column(String, primary_key=True, default=default_prefixed_id("SFT"))
+    tenant_id = Column(String(120), nullable=False, index=True)
     plz_von = Column(String(10), nullable=False)
     plz_bis = Column(String(10), nullable=False)
     spediteur = Column(String(255), nullable=False)
@@ -442,6 +444,7 @@ class Dokument(Base):
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
     id = Column(String, primary_key=True, default=default_prefixed_id("DOC"))
+    tenant_id = Column(String(120), nullable=False, index=True)
     
     # Stammdaten
     name = Column(String(255), nullable=False)
@@ -484,6 +487,7 @@ class DokumentVersion(Base):
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
     id = Column(String, primary_key=True, default=default_prefixed_id("VER"))
+    tenant_id = Column(String(120), nullable=False, index=True)
     
     # Referenz
     dokument_id = Column(String, ForeignKey("domain_ops.ops_dokumente.id", ondelete="CASCADE"))
@@ -589,10 +593,14 @@ class Rahmenvertrag(Base):
     Framework contract model used by contract management pages.
     """
     __tablename__ = "ops_rahmenvertraege"
-    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "nummer", name="uq_ops_rahmenvertraege_tenant_nummer"),
+        {"schema": "domain_ops", "extend_existing": True},
+    )
 
     id = Column(String, primary_key=True, default=default_prefixed_id("RV"))
-    nummer = Column(String(50), nullable=False, unique=True)
+    tenant_id = Column(String(120), nullable=False, index=True)
+    nummer = Column(String(50), nullable=False)
     partner = Column(String(255), nullable=False)
     partner_id = Column(String(100), nullable=False)
     typ = Column(String(50), nullable=False)

@@ -25,9 +25,19 @@ CASES = [
     ("ausgehende-dokumente", models.FuhrparkAusgehendesDokument, repository.FuhrparkAusgehendesDokumentRepository, {"beleg_typ":"TEST-PDF"}, "logistik.ausgehendes_dokument.speichern"),
 ]
 
-@pytest.fixture
-def db():
+@pytest.fixture(scope="module")
+def pruefstand():
+    """Eine Verbindung je Modul mit den ausstehenden Migrationen in einer offenen Transaktion.
+
+    Der frische Pruefstand steht auf einem aelteren Stand; wie ``rls_domain_support.probe`` werden die
+    ausstehenden Migrationen eingespielt und am Modulende zurueckgerollt (voll migriert ein No-op). Je Modul,
+    nicht je Prozess: die Migrationen halten Tabellensperren bis zum Rollback.
+    """
     from sqlalchemy.engine import make_url
+
+    import rls_domain_support  # noqa: F401 - setzt den scripts-Pfad
+    import rls_inventory
+
     is_github_job = os.environ.get("GITHUB_ACTIONS") == "true"
     raw = os.environ.get("TEST_DATABASE_URL") or (
         os.environ.get("DATABASE_URL") if is_github_job else None
@@ -39,13 +49,24 @@ def db():
         any(k in url.database for k in ("test", "probe", "pruefstand"))
         or (is_github_job and url.database == "valeo_neuro_erp")
     ), "Use only the shared probe or the database already provided by the GitHub job"
-    engine=create_engine(url, connect_args={"connect_timeout":5})
+    engine = create_engine(url, connect_args={"connect_timeout": 5})
     with engine.connect() as connection:
-        transaction=connection.begin()
-        with Session(bind=connection, join_transaction_mode="create_savepoint") as session:
-            yield session
-        transaction.rollback()
+        transaction = connection.begin()
+        try:
+            rls_inventory._pending_upgrade(connection)
+            yield connection
+        finally:
+            transaction.rollback()
     engine.dispose()
+
+
+@pytest.fixture
+def db(pruefstand):
+    savepoint = pruefstand.begin_nested()
+    with Session(bind=pruefstand, join_transaction_mode="create_savepoint") as session:
+        yield session
+    if savepoint.is_active:
+        savepoint.rollback()
 
 @pytest.fixture
 def seeded(db):
