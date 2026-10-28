@@ -657,6 +657,7 @@ class HarvestAcceptanceService:
             if existing_lines == 0:
                 lot_id = generate_lot_number(self.db, acceptance_id, self.tenant_id)
                 line = HarvestAcceptanceLine(
+                    tenant_id=self.tenant_id,
                     id=_uuid7(),
                     harvest_acceptance_id=acceptance_id,
                     line_number=1,
