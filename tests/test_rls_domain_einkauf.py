@@ -205,6 +205,32 @@ def test_fachkette_waren_und_rechnungseingaenge_nur_eigener_mandant(db):
         session.close()
 
 
+def test_fachkette_rechnungspruefung_protokolliert_den_angemeldeten_nutzer(db):
+    """Das Pruefprotokoll trug einen beliebigen aktiven Nutzer des Mandanten (LIMIT 1), Fehler wurden verschluckt."""
+    from fastapi import HTTPException
+    from sqlalchemy.orm import Session
+
+    from app.services.einkauf_compat_service import EinkaufCompatService
+
+    conn, rows = db
+    conn.execute(sa.text("RESET ROLE"))  # ohne RLS: der Code selbst muss zuordnen
+    users = [str(support.seed_row(conn, "domain_shared.users", A, is_active=True)["id"]) for _ in range(2)]
+    session = Session(bind=conn, join_transaction_mode="create_savepoint")
+    try:
+        with tenant_scope(A, "test"):
+            with pytest.raises(HTTPException) as caught:
+                EinkaufCompatService(session, A).pruefen_rechnung(rows[INVOICES, A])
+            assert caught.value.status_code == 403
+            session.rollback()
+            EinkaufCompatService(session, A, actor=users[1]).pruefen_rechnung(rows[INVOICES, A])
+        logged = conn.execute(sa.text(
+            "SELECT user_id FROM domain_shared.audit_logs WHERE entity_id = :i AND entity_type = 'rechnungseingang'"),
+            {"i": rows[INVOICES, A]}).scalars().all()
+        assert logged == [users[1]]
+    finally:
+        session.close()
+
+
 def test_fachkette_bestellstatus_nur_eigene_bestellung(db):
     from sqlalchemy.orm import Session
 

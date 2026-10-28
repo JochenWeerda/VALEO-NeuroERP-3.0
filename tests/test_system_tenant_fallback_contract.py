@@ -35,7 +35,6 @@ DEFAULT_BASELINE = {
     "app/api/v1/endpoints/ernte_planung.py": 1,
     "app/api/v1/endpoints/external_agent_integrations.py": 5,
     "app/api/v1/endpoints/finance_actions.py": 7,
-    "app/api/v1/endpoints/grundfutter_analysen.py": 1,
     "app/api/v1/endpoints/service_anfragen.py": 7,
     "app/api/v1/endpoints/projekte.py": 2,
     "app/api/v1/endpoints/tankstelle.py": 1,

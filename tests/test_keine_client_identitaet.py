@@ -42,6 +42,11 @@ def _code_zeilen(text: str):
         yield nummer, zeile.split("#", 1)[0]
 
 
+#: FastAPI leitet den Kopfnamen aus dem Parameter ab: ``x_user_email: str = Header(None)`` liest X-User-Email.
+#: Diese Form uebersah das Muster oben bis 27.10.2026 (Grundfutteranalysen, Rations-Zugaenge).
+PARAMETER = re.compile(r"\b(?P<name>x_user_id|x_user_email|x_user_name|x_roles)\s*:[^=]*=\s*Header\(")
+
+
 def test_kein_weg_liest_identitaet_aus_kopfzeilen():
     funde = []
     for datei in sorted(APP.rglob("*.py")):
@@ -49,20 +54,25 @@ def test_kein_weg_liest_identitaet_aus_kopfzeilen():
             for treffer in LESEN.finditer(code):
                 if treffer.group("name") in KOPFZEILEN:
                     funde.append(f"{datei.relative_to(APP.parent)}:{nummer}: {treffer.group('name')}")
+            for treffer in PARAMETER.finditer(code):
+                funde.append(f"{datei.relative_to(APP.parent)}:{nummer}: {treffer.group('name')}")
     assert funde == []
 
 
 def test_suchmuster_erkennt_die_alten_formen():
     for beispiel in ('request.headers.get("X-User-ID")', "headers['X-Roles']", 'Header(None, alias="X-User-ID")'):
         assert any(t.group("name") in KOPFZEILEN for t in LESEN.finditer(beispiel)), beispiel
+    for beispiel in ("x_user_email: Optional[str] = Header(default=None),", "x_user_id: str = Header(None)"):
+        assert PARAMETER.search(beispiel), beispiel
+    assert not PARAMETER.search("x_share_token: Optional[str] = Header(default=None),")
 
 
 #: Bearbeiter aus Feldern des Anfragekoerpers (19.10.2026: ``operator``/``actor``/``created_by`` in sieben Routern
 #: und im Compliance-Lebenszyklus, ``aktor_id`` in fuenf Reklamationswegen und deren Maskenaktion — derselbe Fehler
 #: wie ``X-User-ID``, nur im Body).
 BODY_URHEBER = re.compile(
-    r"\b(?:body|payload|req)\.(?:operator|actor|created_by|aktor_id)\b"
-    r"|\b(?:body|payload|req)\.get\(\s*[\"'](?:operator|actor|created_by|aktor_id)[\"']"
+    r"\b(?:body|payload|req)\.(?:operator|actor|created_by|aktor_id|sender_id)\b"
+    r"|\b(?:body|payload|req)\.get\(\s*[\"'](?:operator|actor|created_by|aktor_id|sender_id)[\"']"
 )
 
 
@@ -76,5 +86,6 @@ def test_kein_weg_nimmt_den_bearbeiter_aus_dem_body():
 
 
 def test_suchmuster_erkennt_bearbeiter_im_body():
-    for beispiel in ("req.aktor_id", 'payload.get("aktor_id")', "body.operator", "payload.get('actor')"):
+    for beispiel in ("req.aktor_id", 'payload.get("aktor_id")', "body.operator", "payload.get('actor')",
+                     "payload.sender_id"):
         assert BODY_URHEBER.search(beispiel), beispiel

@@ -877,8 +877,11 @@ def list_pos_rabatte(
 ) -> list[dict[str, Any]]:
     rows = _safe_rows(
         db,
-        "SELECT * FROM domain_shared.zu_abschlag_konditionen ORDER BY id LIMIT 200",
-        {},
+        # Konditionen tragen den Mandanten ueber ihre Gruppe; bis 27.10.2026 ohne Filter (alle Mandanten).
+        "SELECT k.* FROM domain_shared.zu_abschlag_konditionen k "
+        "JOIN domain_shared.zu_abschlaggruppen g ON g.id = k.gruppe_id "
+        "WHERE g.tenant_id = :t ORDER BY k.id LIMIT 200",
+        {"t": tenant_id},
     )
     return [
         {
@@ -963,8 +966,11 @@ def preise_konditionen(
 ) -> dict[str, Any]:
     rows = _safe_rows(
         db,
-        "SELECT * FROM domain_shared.zu_abschlag_konditionen ORDER BY id LIMIT 1",
-        {},
+        # Konditionen tragen den Mandanten ueber ihre Gruppe; bis 27.10.2026 ohne Filter (alle Mandanten).
+        "SELECT k.* FROM domain_shared.zu_abschlag_konditionen k "
+        "JOIN domain_shared.zu_abschlaggruppen g ON g.id = k.gruppe_id "
+        "WHERE g.tenant_id = :t ORDER BY k.id LIMIT 1",
+        {"t": tenant_id},
     )
     row = dict(rows[0]) if rows else {}
     today = date.today()

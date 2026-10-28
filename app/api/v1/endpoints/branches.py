@@ -12,7 +12,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.core.config import settings
+from app.core.tenant import get_tenant_id
 
 from app.api.v1.schemas.base import BaseSchema
 
@@ -21,7 +21,8 @@ router = APIRouter(prefix="/admin/branches", tags=["admin", "branches"])
 
 _NUR_ADMIN = [Depends(require_roles("admin"))]  # Konfiguration: wie admin_core
 
-DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
+# Mandant aus der geprueften Anmeldung (get_tenant_id). Bis 27.10.2026 kam er aus ?tenant_id=
+# mit dem Standardmandanten als Rueckfall.
 
 
 class BranchBase(BaseModel):
@@ -66,7 +67,7 @@ def _get_branch_or_404(db: Session, branch_id: str, tenant_id: str) -> dict:
 @router.post("", response_model=Branch, status_code=status.HTTP_201_CREATED, summary="Branch anlegen", dependencies=_NUR_ADMIN)
 async def create_branch(
     payload: BranchCreate,
-    tenant_id: str = Query(DEFAULT_TENANT),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Create a new branch."""
@@ -114,7 +115,7 @@ async def create_branch(
 
 @router.get("", response_model=list[Branch], summary="Branches auflisten")
 async def list_branches(
-    tenant_id: str = Query(DEFAULT_TENANT),
+    tenant_id: str = Depends(get_tenant_id),
     active_only: bool = Query(False),
     db: Session = Depends(get_db),
 ):
@@ -137,7 +138,7 @@ async def list_branches(
 @router.get("/{branch_id}", response_model=Branch, summary="Branch abrufen")
 async def get_branch(
     branch_id: str,
-    tenant_id: str = Query(DEFAULT_TENANT),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Get a branch by ID."""
@@ -149,7 +150,7 @@ async def get_branch(
 async def update_branch(
     branch_id: str,
     payload: BranchUpdate,
-    tenant_id: str = Query(DEFAULT_TENANT),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Update a branch."""
@@ -186,7 +187,7 @@ async def update_branch(
     response_model=None, dependencies=_NUR_ADMIN)
 async def delete_branch(
     branch_id: str,
-    tenant_id: str = Query(DEFAULT_TENANT),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Delete a branch."""

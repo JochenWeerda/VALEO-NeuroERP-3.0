@@ -53,9 +53,10 @@ _AVIS_FELDER = ("id, avis_nummer, bestell_nr AS bestellung_id, lieferant_name, s
 
 
 class EinkaufCompatService:
-    def __init__(self, db: Session, tenant_id: str) -> None:
+    def __init__(self, db: Session, tenant_id: str, actor: str | None = None) -> None:
         self.db = db
         self.tenant_id = tenant_id
+        self.actor = actor
 
     def _invalidate(self) -> None:
         try:
@@ -660,7 +661,7 @@ class EinkaufCompatService:
         )
         self.db.add(entry)
 
-    def _transition_rechnung(self, rechnung_id: str, action: str, actor: str) -> dict:
+    def _transition_rechnung(self, rechnung_id: str, action: str, actor: str | None) -> dict:
         from sqlalchemy import text
         allowed = {
             "pruefen": ({"ENTWURF", "ERFASST", "OFFEN"}, "GEPRUEFT",
@@ -678,7 +679,7 @@ class EinkaufCompatService:
         if old_status not in valid_statuses:
             raise ValidationFailedError(f"{err_msg}. Aktuell: {old_status}")
         try:
-            self._write_rechnung_audit(rid, action, old_status, new_status, actor)
+            self._write_rechnung_audit(rid, action, old_status, new_status, self.actor if actor is None else actor)
             self.db.execute(text(
                 "UPDATE einkauf_rechnungseingaenge SET status = :ns, updated_at = now() WHERE id = :id AND tenant_id = :tid"
             ), {"ns": new_status, "id": rid, "tid": self.tenant_id})
@@ -719,13 +720,13 @@ class EinkaufCompatService:
 
         return {"message": f"Rechnungseingang {action}t", "status": new_status}
 
-    def pruefen_rechnung(self, rechnung_id: str, actor: str) -> dict:
+    def pruefen_rechnung(self, rechnung_id: str, actor: str | None = None) -> dict:
         return self._transition_rechnung(rechnung_id, "pruefen", actor)
 
-    def freigeben_rechnung(self, rechnung_id: str, actor: str) -> dict:
+    def freigeben_rechnung(self, rechnung_id: str, actor: str | None = None) -> dict:
         return self._transition_rechnung(rechnung_id, "freigeben", actor)
 
-    def verbuchen_rechnung(self, rechnung_id: str, actor: str) -> dict:
+    def verbuchen_rechnung(self, rechnung_id: str, actor: str | None = None) -> dict:
         return self._transition_rechnung(rechnung_id, "verbuchen", actor)
 
     # ── Supplier Ratings & Reports ────────────────────────────────────────────

@@ -38,6 +38,7 @@ Danach steht `valeo_probe` unverändert auf `loading_stop_fk_20261023`, 0 offene
 5. OpenAPI nur für die fünf Beschaffungspfade. Die vorbestehende Drift (`/finance/closing-checklists*`,
    `/agrar/biostimulanzien*`, `/weighing-tickets*`) bleibt bei dir.
 6. `tests/rls_domain_support.py`: `probe` gewährt `USAGE` auf die Sequenzen der Schemata.
-7. Folgebefunde (QA-Dokument): Akteur im Rechnungsprotokoll ist ein beliebiger aktiver Nutzer; drei
-   D-Tabellen fehlen in der gewachsenen DB; keine Tabelle für Lieferantenretouren.
-8. Nicht berührt: Codex-Claims (Agrar, Allokationen, MATERIAL-FLOW-SQL), Studio/Masken, Systemrollen, Live.
+7. **Prüfprotokoll Rechnungseingang:** Akteur ist jetzt der angemeldete Nutzer (vorher ein beliebiger aktiver Nutzer
+   des Mandanten). Ohne eindeutige lokale Nutzerzuordnung antworten Prüfen/Freigeben/Verbuchen mit 403.
+8. Folgebefunde (QA-Dokument): drei D-Tabellen fehlen in der gewachsenen DB; keine Tabelle für Lieferantenretouren.
+9. Nicht berührt: Codex-Claims (Agrar, Allokationen, MATERIAL-FLOW-SQL), Studio/Masken, Systemrollen, Live.

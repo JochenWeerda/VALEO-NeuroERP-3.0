@@ -2,18 +2,18 @@
  "_note": "Generiert von scripts/rls_domain_matrix.py; nicht von Hand aendern.",
  "datenstand": "2026-10-27",
  "summary": {
-  "tabellen": 112,
+  "tabellen": 86,
   "nach_klasse": {
-   "A": 63,
-   "B": 30,
-   "C": 19
+   "A": 43,
+   "B": 29,
+   "C": 14
   },
   "nach_ursache": {
    "dienst": 18,
-   "position": 17,
-   "referenzdaten": 21,
-   "mandant_nullbar": 21,
-   "standardmandant": 33,
+   "position": 12,
+   "referenzdaten": 19,
+   "mandant_nullbar": 20,
+   "standardmandant": 15,
    "identitaet": 2
   },
   "nach_domain": {
@@ -70,10 +70,9 @@
    "shared": {
     "dienst": 1,
     "identitaet": 1,
-    "mandant_nullbar": 3,
-    "position": 5,
-    "referenzdaten": 3,
-    "standardmandant": 20
+    "mandant_nullbar": 2,
+    "referenzdaten": 1,
+    "standardmandant": 2
    }
   }
  },
@@ -188,7 +187,6 @@
     "app/core/gobd_retention.py",
     "app/core/psm_protokoll.py",
     "app/core/screen_definitions_listen.py",
-    "app/documents/position_extraction.py",
     "app/infrastructure/models/__init__.py",
     "app/infrastructure/models/agrar_models.py",
     "app/integrations/bvl_psm_client.py",
@@ -218,12 +216,11 @@
    ],
    "worker": [],
    "identitaet": {
-    "standardmandant": 3,
+    "standardmandant": 2,
     "token": 5
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/compliance.py:847",
-    "app/domains/agrar/api/psm.py:30",
+    "app/api/v1/endpoints/compliance.py:849",
     "app/seeds/inventory_seed.py:20"
    ],
    "null_stellen": [],
@@ -297,7 +294,7 @@
     "token": 7
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/compliance.py:847",
+    "app/api/v1/endpoints/compliance.py:849",
     "app/domains/agrar/api/saatgut.py:21",
     "app/seeds/inventory_seed.py:20"
    ],
@@ -354,7 +351,7 @@
     "token": 2
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/compliance.py:847",
+    "app/api/v1/endpoints/compliance.py:849",
     "app/services/calendar_projection_service.py:911"
    ],
    "null_stellen": [],
@@ -613,10 +610,10 @@
    },
    "standardmandant_stellen": [],
    "null_stellen": [
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3155"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3155"
    ],
    "daten": {
     "zeilen": 1298,
@@ -811,7 +808,7 @@
     "token": 5
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py:972"
+    "app/api/v1/endpoints/mask_frontend_bridges.py:978"
    ],
    "null_stellen": [],
    "gemeinsam_stellen": [],
@@ -925,7 +922,7 @@
     "token": 1
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py:972"
+    "app/api/v1/endpoints/mask_frontend_bridges.py:978"
    ],
    "null_stellen": [],
    "gemeinsam_stellen": [],
@@ -1000,7 +997,7 @@
     "token": 2
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py:972"
+    "app/api/v1/endpoints/mask_frontend_bridges.py:978"
    ],
    "null_stellen": [],
    "gemeinsam_stellen": [],
@@ -1069,11 +1066,11 @@
    ],
    "null_stellen": [
     "app/api/v1/endpoints/compliance_dsgvo.py:205",
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3155"
    ],
    "gemeinsam_stellen": [
     "app/api/v1/endpoints/compliance_dsgvo.py:205",
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3155"
    ],
    "daten": {
     "zeilen": 0,
@@ -1132,7 +1129,7 @@
    },
    "standardmandant_stellen": [
     "app/api/v1/endpoints/crm_reports.py:27",
-    "app/api/v1/endpoints/mask_frontend_bridges.py:972"
+    "app/api/v1/endpoints/mask_frontend_bridges.py:978"
    ],
    "null_stellen": [],
    "gemeinsam_stellen": [],
@@ -1278,7 +1275,7 @@
    "standardmandant_stellen": [
     "app/api/v1/endpoints/articles.py:42",
     "app/api/v1/endpoints/customer_extensions.py:24",
-    "app/api/v1/endpoints/mask_frontend_bridges.py:972",
+    "app/api/v1/endpoints/mask_frontend_bridges.py:978",
     "app/domains/crm/api/customers.py:19",
     "app/integrations/adapters/superglue/tool_sync.py:427",
     "services/crm-core/app/api/v1/endpoints/activities.py:20",
@@ -1309,11 +1306,11 @@
     "app/api/v1/endpoints/compat.py:1873",
     "app/api/v1/endpoints/compat.py:1896",
     "app/api/v1/endpoints/compliance_dsgvo.py:205",
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3155"
    ],
    "gemeinsam_stellen": [
     "app/api/v1/endpoints/compliance_dsgvo.py:205",
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3155"
    ],
    "daten": {
     "zeilen": 6,
@@ -1473,11 +1470,11 @@
     "app/api/v1/endpoints/compat.py:1873",
     "app/api/v1/endpoints/compat.py:1896",
     "app/api/v1/endpoints/compliance_dsgvo.py:205",
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3155"
    ],
    "gemeinsam_stellen": [
     "app/api/v1/endpoints/compliance_dsgvo.py:205",
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3155"
    ],
    "daten": {
     "zeilen": 0,
@@ -1536,10 +1533,10 @@
     "services/crm-core/app/api/v1/endpoints/activities.py:20"
    ],
    "null_stellen": [
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3155"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3155"
    ],
    "daten": {
     "zeilen": 0,
@@ -1647,11 +1644,11 @@
     "app/api/v1/endpoints/compat.py:1873",
     "app/api/v1/endpoints/compat.py:1896",
     "app/api/v1/endpoints/compliance_dsgvo.py:205",
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3155"
    ],
    "gemeinsam_stellen": [
     "app/api/v1/endpoints/compliance_dsgvo.py:205",
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3155"
    ],
    "daten": {
     "zeilen": 97,
@@ -1805,7 +1802,7 @@
    },
    "standardmandant_stellen": [
     "app/api/v1/endpoints/chart_of_accounts.py:36",
-    "app/api/v1/endpoints/compliance.py:847"
+    "app/api/v1/endpoints/compliance.py:849"
    ],
    "null_stellen": [
     "app/api/v1/endpoints/compat.py:1859",
@@ -1930,10 +1927,10 @@
    },
    "standardmandant_stellen": [],
    "null_stellen": [
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3155"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3155"
    ],
    "daten": {
     "zeilen": 0,
@@ -2006,7 +2003,7 @@
     "token": 2
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py:972"
+    "app/api/v1/endpoints/mask_frontend_bridges.py:978"
    ],
    "null_stellen": [],
    "gemeinsam_stellen": [],
@@ -2086,13 +2083,13 @@
     "app/services/scheduler_service.py"
    ],
    "identitaet": {
-    "kopfzeile": 2,
+    "kopfzeile": 4,
     "nutzlast": 3,
     "standardmandant": 2,
-    "token": 24
+    "token": 22
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py:972",
+    "app/api/v1/endpoints/mask_frontend_bridges.py:978",
     "app/api/v1/endpoints/sales_delivery_notes.py:54"
    ],
    "null_stellen": [
@@ -2101,12 +2098,12 @@
     "app/api/v1/endpoints/compat.py:1873",
     "app/api/v1/endpoints/compat.py:1896",
     "app/api/v1/endpoints/finance_invoices.py:72",
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3155"
    ],
    "gemeinsam_stellen": [
     "app/api/v1/endpoints/finance_invoices.py:72",
     "app/api/v1/endpoints/sales_credit_notes.py:563",
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3155"
    ],
    "daten": {
     "zeilen": 25,
@@ -2282,13 +2279,10 @@
     "app/api/v1/endpoints/mask_frontend_bridges.py",
     "app/api/v1/endpoints/supplier_portal.py",
     "app/core/database.py",
-    "app/documents/inbox_service.py",
     "app/infrastructure/models/__init__.py",
     "app/infrastructure/models/l3c_models.py",
     "app/services/customer_reference.py",
-    "app/services/mcp_execution_service.py",
-    "app/workspace/agrar_chain.py",
-    "app/workspace/agrar_chain_router.py"
+    "app/services/mcp_execution_service.py"
    ],
    "schreiber": [
     "app/api/v1/endpoints/agrar_contracts.py",
@@ -2302,16 +2296,16 @@
    "worker": [],
    "identitaet": {
     "standardmandant": 1,
-    "token": 6
+    "token": 5
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py:972"
+    "app/api/v1/endpoints/mask_frontend_bridges.py:978"
    ],
    "null_stellen": [
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3155"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3155"
    ],
    "daten": {
     "zeilen": 3,
@@ -2351,10 +2345,10 @@
    "identitaet": {},
    "standardmandant_stellen": [],
    "null_stellen": [
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3155"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3155"
    ],
    "daten": {
     "zeilen": 0,
@@ -2394,10 +2388,10 @@
    "identitaet": {},
    "standardmandant_stellen": [],
    "null_stellen": [
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3155"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3155"
    ],
    "daten": {
     "zeilen": 0,
@@ -2446,10 +2440,10 @@
    },
    "standardmandant_stellen": [],
    "null_stellen": [
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3155"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3155"
    ],
    "daten": {
     "zeilen": 0,
@@ -2494,10 +2488,10 @@
    },
    "standardmandant_stellen": [],
    "null_stellen": [
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3155"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3155"
    ],
    "daten": {
     "zeilen": 0,
@@ -2547,10 +2541,10 @@
    },
    "standardmandant_stellen": [],
    "null_stellen": [
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3155"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3155"
    ],
    "daten": {
     "zeilen": 3,
@@ -2632,10 +2626,10 @@
    },
    "standardmandant_stellen": [],
    "null_stellen": [
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3155"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3155"
    ],
    "daten": {
     "zeilen": 4,
@@ -2690,10 +2684,10 @@
    },
    "standardmandant_stellen": [],
    "null_stellen": [
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3155"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3155"
    ],
    "daten": {
     "zeilen": 50,
@@ -3095,12 +3089,12 @@
     "app/api/v1/endpoints/logistics_freight.py:165",
     "app/api/v1/endpoints/logistics_freight.py:218",
     "app/api/v1/endpoints/logistics_freight.py:233",
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3155"
    ],
    "gemeinsam_stellen": [
     "app/api/v1/endpoints/logistics_freight.py:68",
     "app/api/v1/endpoints/logistics_freight.py:162",
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3155"
    ],
    "daten": {
     "zeilen": 0,
@@ -3449,7 +3443,6 @@
    ],
    "leser": [
     "app/api/v1/endpoints/crm_360_reads.py",
-    "app/documents/inbox_service.py",
     "app/domains/operations/models.py",
     "app/services/calendar_projection_service.py",
     "app/services/contract_engagement_service.py",
@@ -3459,8 +3452,7 @@
     "app/services/docflow_source_proposals.py",
     "app/services/kontrakt_disposition_service.py",
     "app/services/position_service.py",
-    "app/services/preisfindung_service.py",
-    "app/workspace/agrar_chain.py"
+    "app/services/preisfindung_service.py"
    ],
    "schreiber": [
     "app/api/v1/endpoints/kontrakte.py",
@@ -3576,7 +3568,7 @@
     "token": 14
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/compliance.py:847",
+    "app/api/v1/endpoints/compliance.py:849",
     "app/api/v1/endpoints/reklamation_api.py:121",
     "app/infrastructure/models/futtermittel_models.py:92"
    ],
@@ -3856,10 +3848,10 @@
    },
    "standardmandant_stellen": [],
    "null_stellen": [
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3155"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3155"
    ],
    "daten": {
     "zeilen": 1,
@@ -3896,7 +3888,7 @@
     "token": 1
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/compliance.py:847"
+    "app/api/v1/endpoints/compliance.py:849"
    ],
    "null_stellen": [],
    "gemeinsam_stellen": [],
@@ -3937,7 +3929,7 @@
     "token": 3
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py:972",
+    "app/api/v1/endpoints/mask_frontend_bridges.py:978",
     "app/api/v1/endpoints/reklamation_api.py:121"
    ],
    "null_stellen": [],
@@ -4019,46 +4011,6 @@
    "policy": "keine Mandanten-Policy: Nachschlagen vor der Mandantenbindung, Zugriff ueber valeo_system"
   },
   {
-   "table": "domain_shared.agrar_sorten",
-   "domain": "shared",
-   "class": "A",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [
-    "standardmandant"
-   ],
-   "modell": [
-    "app/infrastructure/models/futtermittel_models.py"
-   ],
-   "leser": [
-    "app/infrastructure/models/__init__.py",
-    "app/infrastructure/models/futtermittel_models.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/agrar_varieties.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "standardmandant": 1,
-    "token": 1
-   },
-   "standardmandant_stellen": [
-    "app/infrastructure/models/futtermittel_models.py:92"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 5,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 1
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
    "table": "domain_shared.api_keys",
    "domain": "shared",
    "class": "A",
@@ -4080,41 +4032,6 @@
    },
    "standardmandant_stellen": [
     "app/services/admin_core_service.py:1055"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_shared.artikel_sperren",
-   "domain": "shared",
-   "class": "A",
-   "tenant_type": "character varying(36)",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [
-    "standardmandant"
-   ],
-   "modell": [],
-   "leser": [],
-   "schreiber": [
-    "app/api/v1/endpoints/compliance.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "standardmandant": 1,
-    "token": 1
-   },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/compliance.py:847"
    ],
    "null_stellen": [],
    "gemeinsam_stellen": [],
@@ -4176,7 +4093,7 @@
     "token": 10
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py:972"
+    "app/api/v1/endpoints/mask_frontend_bridges.py:978"
    ],
    "null_stellen": [
     "app/api/v1/endpoints/compat.py:1859",
@@ -4199,47 +4116,6 @@
     "1 'system'-Zeilen: gemeinsame Referenzdaten begruenden oder zuordnen"
    ],
    "policy": "getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_shared.branches",
-   "domain": "shared",
-   "class": "A",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [
-    "standardmandant"
-   ],
-   "modell": [
-    "app/infrastructure/models/__init__.py"
-   ],
-   "leser": [
-    "app/infrastructure/models/__init__.py",
-    "app/infrastructure/models/einkauf_models.py",
-    "app/infrastructure/models/l3c_models.py",
-    "app/services/customer_reference.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/branches.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "standardmandant": 1
-   },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/branches.py:24"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 2,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 1
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
   },
   {
    "table": "domain_shared.calendar_ics_tokens",
@@ -4272,806 +4148,6 @@
     "default": 0,
     "system": 0,
     "mandanten": 1
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_shared.calendar_items",
-   "domain": "shared",
-   "class": "A",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [
-    "standardmandant"
-   ],
-   "modell": [],
-   "leser": [],
-   "schreiber": [
-    "app/services/calendar_projection_service.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "standardmandant": 1
-   },
-   "standardmandant_stellen": [
-    "app/services/calendar_projection_service.py:911"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_shared.calendar_team_memberships",
-   "domain": "shared",
-   "class": "A",
-   "tenant_type": "text",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [
-    "standardmandant"
-   ],
-   "modell": [],
-   "leser": [
-    "app/services/calendar_projection_service.py"
-   ],
-   "schreiber": [],
-   "worker": [],
-   "identitaet": {
-    "standardmandant": 1
-   },
-   "standardmandant_stellen": [
-    "app/services/calendar_projection_service.py:911"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_shared.channel_thread_audit_items",
-   "domain": "shared",
-   "class": "C",
-   "tenant_type": null,
-   "eltern": [
-    "domain_shared.channel_process_threads"
-   ],
-   "ursache": "position",
-   "gruende": [
-    "position"
-   ],
-   "modell": [
-    "app/models/channel_threads.py"
-   ],
-   "leser": [
-    "app/models/channel_threads.py"
-   ],
-   "schreiber": [
-    "app/repositories/channel_thread_repository.py",
-    "app/services/whatsapp_notify_service.py"
-   ],
-   "worker": [],
-   "identitaet": {},
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "eltern_fk": [
-     "thread_id -> domain_shared.channel_process_threads.thread_id"
-    ],
-    "verwaist": 0,
-    "ohne_eltern": 0
-   },
-   "bereinigung": [
-    "tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_shared.channel_process_threads"
-  },
-  {
-   "table": "domain_shared.direct_debit_items",
-   "domain": "shared",
-   "class": "A",
-   "tenant_type": "character varying(80)",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [
-    "standardmandant"
-   ],
-   "modell": [],
-   "leser": [
-    "app/api/v1/endpoints/finance_followup.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/direct_debits.py",
-    "app/api/v1/endpoints/finance_actions.py",
-    "app/api/v1/endpoints/mask_frontend_bridges.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "standardmandant": 2,
-    "token": 1
-   },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py:972"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_shared.dispatchers",
-   "domain": "shared",
-   "class": "A",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [
-    "standardmandant"
-   ],
-   "modell": [
-    "app/infrastructure/models/l3c_models.py"
-   ],
-   "leser": [
-    "app/core/command_dispatcher.py",
-    "app/infrastructure/models/__init__.py",
-    "app/infrastructure/models/l3c_models.py",
-    "modules/einkauf/services/versand_service.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/master_data.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "standardmandant": 1
-   },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/master_data.py:19"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_shared.farmers",
-   "domain": "shared",
-   "class": "A",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [
-    "standardmandant"
-   ],
-   "modell": [
-    "app/infrastructure/models/agribusiness_models.py"
-   ],
-   "leser": [
-    "app/api/v1/api.py",
-    "app/api/v1/schemas/agrar.py",
-    "app/infrastructure/models/agribusiness_models.py",
-    "app/services/workflow_guards.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/agribusiness.py",
-    "app/domains/agrar/api/psm.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "standardmandant": 2
-   },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/agribusiness.py:16",
-    "app/domains/agrar/api/psm.py:30"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_shared.feeding_feed_analysis_findings",
-   "domain": "shared",
-   "class": "A",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [
-    "standardmandant"
-   ],
-   "modell": [],
-   "leser": [],
-   "schreiber": [
-    "app/services/feeding_feed_analysis_service.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "standardmandant": 1
-   },
-   "standardmandant_stellen": [
-    "app/services/feeding_feed_analysis_service.py:190"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_shared.feeding_feed_analysis_revisions",
-   "domain": "shared",
-   "class": "A",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [
-    "standardmandant"
-   ],
-   "modell": [],
-   "leser": [],
-   "schreiber": [
-    "app/services/feeding_feed_analysis_service.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "standardmandant": 1
-   },
-   "standardmandant_stellen": [
-    "app/services/feeding_feed_analysis_service.py:190"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 464,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 1
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_shared.feeding_feed_analysis_values",
-   "domain": "shared",
-   "class": "A",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [
-    "standardmandant"
-   ],
-   "modell": [],
-   "leser": [],
-   "schreiber": [
-    "app/services/feeding_feed_analysis_service.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "standardmandant": 1
-   },
-   "standardmandant_stellen": [
-    "app/services/feeding_feed_analysis_service.py:190"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 261,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 1
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_shared.futtermittel_einzelfutter",
-   "domain": "shared",
-   "class": "A",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "referenzdaten",
-   "gruende": [
-    "referenzdaten",
-    "mandant_nullbar",
-    "standardmandant"
-   ],
-   "modell": [
-    "app/infrastructure/models/futtermittel_models.py"
-   ],
-   "leser": [
-    "app/api/v1/endpoints/agrar_stammdaten_kommandos.py",
-    "app/api/v1/endpoints/export_service.py",
-    "app/core/screen_definitions_domain_batch15.py",
-    "app/core/screen_definitions_listen.py",
-    "app/infrastructure/models/__init__.py",
-    "app/infrastructure/models/futtermittel_models.py",
-    "app/infrastructure/rag/indexer.py",
-    "app/services/feeding_actual_measure_service.py",
-    "app/services/feeding_actual_service.py",
-    "app/services/feeding_assist_service.py",
-    "app/services/feeding_feed_analysis_service.py",
-    "app/services/feeding_supply_service.py",
-    "app/services/rations_readiness_service.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/compat.py",
-    "app/api/v1/endpoints/futter_stamm.py",
-    "app/api/v1/endpoints/grundfutter_analysen.py",
-    "app/api/v1/endpoints/produktion_mischfutter.py",
-    "app/core/screen_definitions.py",
-    "app/core/screen_definitions_stamm.py",
-    "app/services/feed_inventory_link_service.py",
-    "app/services/feed_production_chain_service.py",
-    "app/services/feeding_feed_catalog_service.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "standardmandant": 3,
-    "token": 5
-   },
-   "standardmandant_stellen": [
-    "app/infrastructure/models/futtermittel_models.py:92",
-    "app/services/feeding_feed_analysis_service.py:190"
-   ],
-   "null_stellen": [
-    "app/api/v1/endpoints/compat.py:1859",
-    "app/api/v1/endpoints/compat.py:1866",
-    "app/api/v1/endpoints/compat.py:1873",
-    "app/api/v1/endpoints/compat.py:1896",
-    "app/services/feeding_feed_catalog_service.py:63",
-    "app/services/feeding_feed_catalog_service.py:201"
-   ],
-   "gemeinsam_stellen": [
-    "app/services/feeding_feed_catalog_service.py:63",
-    "app/services/feeding_feed_catalog_service.py:201"
-   ],
-   "daten": {
-    "zeilen": 743,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 1
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_shared.futtermittel_mischfutter",
-   "domain": "shared",
-   "class": "A",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [
-    "standardmandant"
-   ],
-   "modell": [
-    "app/infrastructure/models/futtermittel_models.py"
-   ],
-   "leser": [
-    "app/api/v1/endpoints/export_service.py",
-    "app/core/screen_definitions_domain_batch15.py",
-    "app/core/screen_definitions_listen.py",
-    "app/infrastructure/models/__init__.py",
-    "app/infrastructure/models/futtermittel_models.py",
-    "modules/agrar/services/naehrwert_service.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/agrar_stammdaten_kommandos.py",
-    "app/api/v1/endpoints/compat.py",
-    "app/api/v1/endpoints/futter_stamm.py",
-    "app/api/v1/endpoints/mask_screen_definition.py",
-    "app/api/v1/endpoints/stammdaten_bearbeiten.py",
-    "app/core/screen_definitions.py",
-    "app/core/screen_definitions_stamm.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "standardmandant": 1,
-    "token": 5
-   },
-   "standardmandant_stellen": [
-    "app/infrastructure/models/futtermittel_models.py:92"
-   ],
-   "null_stellen": [
-    "app/api/v1/endpoints/compat.py:1859",
-    "app/api/v1/endpoints/compat.py:1866",
-    "app/api/v1/endpoints/compat.py:1873",
-    "app/api/v1/endpoints/compat.py:1896"
-   ],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_shared.futtermittel_produktionsauftraege",
-   "domain": "shared",
-   "class": "A",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [
-    "standardmandant"
-   ],
-   "modell": [
-    "app/infrastructure/models/futtermittel_models.py"
-   ],
-   "leser": [
-    "app/infrastructure/models/__init__.py",
-    "app/infrastructure/models/futtermittel_models.py",
-    "app/services/production_control_service.py",
-    "app/services/wf_trigger_service.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/produktion_mischfutter.py",
-    "app/api/v1/endpoints/produktion_rezepturgruppen.py",
-    "app/services/feed_production_chain_service.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "standardmandant": 1,
-    "token": 2
-   },
-   "standardmandant_stellen": [
-    "app/infrastructure/models/futtermittel_models.py:92"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 2,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 1
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_shared.futtermittel_rezept_komponenten",
-   "domain": "shared",
-   "class": "C",
-   "tenant_type": null,
-   "eltern": [
-    "domain_shared.futtermittel_einzelfutter",
-    "domain_shared.futtermittel_rezepte"
-   ],
-   "ursache": "position",
-   "gruende": [
-    "position",
-    "standardmandant"
-   ],
-   "modell": [
-    "app/infrastructure/models/futtermittel_models.py"
-   ],
-   "leser": [
-    "app/infrastructure/models/__init__.py",
-    "app/infrastructure/models/futtermittel_models.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/futter_stamm.py",
-    "app/services/feed_production_chain_service.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "standardmandant": 1,
-    "token": 1
-   },
-   "standardmandant_stellen": [
-    "app/infrastructure/models/futtermittel_models.py:92"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 5,
-    "eltern_fk": [
-     "einzelfutter_id -> domain_shared.futtermittel_einzelfutter.id",
-     "rezept_id -> domain_shared.futtermittel_rezepte.id"
-    ],
-    "verwaist": 0,
-    "ohne_eltern": 0
-   },
-   "bereinigung": [
-    "tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_shared.futtermittel_einzelfutter, domain_shared.futtermittel_rezepte"
-  },
-  {
-   "table": "domain_shared.futtermittel_rezepte",
-   "domain": "shared",
-   "class": "A",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [
-    "standardmandant"
-   ],
-   "modell": [
-    "app/infrastructure/models/futtermittel_models.py"
-   ],
-   "leser": [
-    "app/infrastructure/models/__init__.py",
-    "app/infrastructure/models/futtermittel_models.py",
-    "app/infrastructure/rag/indexer.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/futter_stamm.py",
-    "app/api/v1/endpoints/produktion_mischfutter.py",
-    "app/services/feed_production_chain_service.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "standardmandant": 1,
-    "token": 2
-   },
-   "standardmandant_stellen": [
-    "app/infrastructure/models/futtermittel_models.py:92"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 2,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 1
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_shared.grundfutter_analysen",
-   "domain": "shared",
-   "class": "A",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [
-    "standardmandant"
-   ],
-   "modell": [
-    "app/infrastructure/models/futtermittel_models.py"
-   ],
-   "leser": [
-    "app/infrastructure/models/futtermittel_models.py",
-    "app/services/rations_readiness_service.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/grundfutter_analysen.py",
-    "app/api/v1/endpoints/rations_optimization.py",
-    "app/services/feeding_feed_analysis_service.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "kopfzeile": 1,
-    "standardmandant": 4,
-    "token": 1
-   },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/rations_optimization.py:6336",
-    "app/infrastructure/models/futtermittel_models.py:92",
-    "app/services/feeding_feed_analysis_service.py:190"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 144,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 1
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_shared.internal_messages",
-   "domain": "shared",
-   "class": "A",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [
-    "standardmandant"
-   ],
-   "modell": [
-    "app/infrastructure/models/l3c_models.py"
-   ],
-   "leser": [
-    "app/infrastructure/models/__init__.py",
-    "app/infrastructure/models/l3c_models.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/collab_notes.py",
-    "app/api/v1/endpoints/messages.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "nutzlast": 1,
-    "standardmandant": 1,
-    "token": 1
-   },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/messages.py:19"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_shared.job_artifacts",
-   "domain": "shared",
-   "class": "C",
-   "tenant_type": null,
-   "eltern": [
-    "domain_shared.jobs"
-   ],
-   "ursache": "position",
-   "gruende": [
-    "position"
-   ],
-   "modell": [],
-   "leser": [
-    "app/api/v1/endpoints/job_runner.py"
-   ],
-   "schreiber": [],
-   "worker": [
-    "app/api/v1/endpoints/job_runner.py"
-   ],
-   "identitaet": {
-    "token": 1
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "eltern_fk": [
-     "job_id -> domain_shared.jobs.id"
-    ],
-    "verwaist": 0,
-    "ohne_eltern": 0
-   },
-   "bereinigung": [
-    "tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_shared.jobs"
-  },
-  {
-   "table": "domain_shared.logistik_frachttabellen",
-   "domain": "shared",
-   "class": "A",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "referenzdaten",
-   "gruende": [
-    "referenzdaten",
-    "mandant_nullbar"
-   ],
-   "modell": [],
-   "leser": [
-    "app/services/mcp_execution_service.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/logistik_frachttabellen.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "kopfzeile": 1
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [
-    "app/services/mcp_execution_service.py:3159"
-   ],
-   "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3159"
-   ],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_shared.master_data_entries",
-   "domain": "shared",
-   "class": "A",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [
-    "standardmandant"
-   ],
-   "modell": [
-    "app/infrastructure/models/l3c_models.py"
-   ],
-   "leser": [
-    "app/infrastructure/models/__init__.py",
-    "app/infrastructure/models/l3c_models.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/master_data.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "standardmandant": 1
-   },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/master_data.py:19"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
    },
    "bereinigung": [],
    "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
@@ -5110,42 +4186,6 @@
    "bereinigung": [
     "3 Zeilen ohne Mandant: Herkunft klaeren (blockiert die Migration)"
    ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_shared.rations_zugang",
-   "domain": "shared",
-   "class": "A",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [
-    "standardmandant"
-   ],
-   "modell": [
-    "app/infrastructure/models/futtermittel_models.py"
-   ],
-   "leser": [
-    "app/infrastructure/models/futtermittel_models.py"
-   ],
-   "schreiber": [],
-   "worker": [],
-   "identitaet": {
-    "standardmandant": 1
-   },
-   "standardmandant_stellen": [
-    "app/infrastructure/models/futtermittel_models.py:92"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
    "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
   },
   {
@@ -5295,6 +4335,7 @@
     "app/api/v1/endpoints/personal_bewerbungen.py",
     "app/api/v1/endpoints/process_kernel_api.py",
     "app/api/v1/endpoints/rations_optimization.py",
+    "app/api/v1/endpoints/rations_zugang.py",
     "app/api/v1/endpoints/recent_documents.py",
     "app/api/v1/endpoints/sales_delivery_notes.py",
     "app/api/v1/endpoints/self_billing.py",
@@ -5354,133 +4395,6 @@
     "2 'system'-Zeilen: gemeinsame Referenzdaten begruenden oder zuordnen"
    ],
    "policy": "keine, bis der Dienst tokengebundene Identitaet hat (rls-dienste-identitaet-vorschlag.md)"
-  },
-  {
-   "table": "domain_shared.vertreter_provisionsstaffeln",
-   "domain": "shared",
-   "class": "C",
-   "tenant_type": null,
-   "eltern": [
-    "domain_shared.vertreter_provisionsgruppen"
-   ],
-   "ursache": "position",
-   "gruende": [
-    "position"
-   ],
-   "modell": [],
-   "leser": [],
-   "schreiber": [
-    "app/api/v1/endpoints/vertreterprovisionen.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "kopfzeile": 1
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "eltern_fk": [
-     "gruppe_id -> domain_shared.vertreter_provisionsgruppen.id"
-    ],
-    "verwaist": 0,
-    "ohne_eltern": 0
-   },
-   "bereinigung": [
-    "tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_shared.vertreter_provisionsgruppen"
-  },
-  {
-   "table": "domain_shared.zu_abschlag_konditionen",
-   "domain": "shared",
-   "class": "C",
-   "tenant_type": null,
-   "eltern": [
-    "domain_shared.zu_abschlaggruppen",
-    "domain_shared.zu_abschlagklassen"
-   ],
-   "ursache": "position",
-   "gruende": [
-    "position",
-    "standardmandant"
-   ],
-   "modell": [],
-   "leser": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/zu_abschlaggruppen.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "kopfzeile": 1,
-    "standardmandant": 1,
-    "token": 1
-   },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py:972"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "eltern_fk": [
-     "gruppe_id -> domain_shared.zu_abschlaggruppen.id",
-     "klasse_id -> domain_shared.zu_abschlagklassen.id"
-    ],
-    "verwaist": 0,
-    "ohne_eltern": 0
-   },
-   "bereinigung": [
-    "tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_shared.zu_abschlaggruppen, domain_shared.zu_abschlagklassen"
-  },
-  {
-   "table": "public.number_series",
-   "domain": "shared",
-   "class": "B",
-   "tenant_type": "character varying(36)",
-   "eltern": [],
-   "ursache": "mandant_nullbar",
-   "gruende": [
-    "mandant_nullbar",
-    "standardmandant"
-   ],
-   "modell": [
-    "app/models/documents.py"
-   ],
-   "leser": [
-    "app/models/documents.py",
-    "app/services/numbering_service.py"
-   ],
-   "schreiber": [
-    "app/routers/numbering_router.py",
-    "app/services/numbering_service_pg.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "standardmandant": 3
-   },
-   "standardmandant_stellen": [
-    "app/models/documents.py:109",
-    "app/routers/numbering_router.py:23",
-    "app/routers/numbering_router.py:83",
-    "app/routers/numbering_router.py:197",
-    "app/routers/numbering_router.py:217",
-    "app/services/numbering_service_pg.py:40",
-    "app/services/numbering_service_pg.py:114",
-    "app/services/numbering_service_pg.py:141"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": null,
-   "bereinigung": [
-    "Datenbefund fehlt (Tabelle nicht in der gewachsenen Datenbank)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
   },
   {
    "table": "public.outbox_events",
