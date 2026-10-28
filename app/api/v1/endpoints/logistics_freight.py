@@ -3,15 +3,11 @@ Logistik – Frachtkostenberechnung (Feature 2)
 Thin-router pattern: sqlalchemy.text() SQL, domain_logistics schema.
 Schema/Tabelle ``freight_tariffs``: Alembic ``log_logistics_core_20260612``.
 
-Tenant: ``GET /freight-cost/simulate``, ``POST /freight-cost/calculate`` und ``POST /freight-tariffs`` verlangen
-``X-Tenant-ID`` (422). Tarifauswahl wie bei ``GET /freight-tariffs``:
-``tenant_id IS NULL`` (global) oder passende ``tenant_id``.
+Mandant aus der Anmeldung; jede Abfrage nur im eigenen Mandanten. Bis 28.10.2026 kam er aus ``X-Tenant-ID``, und
+Tarife mit ``tenant_id IS NULL`` galten als global fuer alle. Globale Tarife gab es live nicht, per API liessen sie sich
+nicht anlegen; ob es gemeinsame Tarife (Mandant ``system``) geben soll, ist eine fachliche Entscheidung.
 
-``GET /freight-tariffs``: ohne ``X-Tenant-ID`` nur Zeilen mit ``tenant_id IS NULL`` (kein
-Mandanten-Leak). Mit Header: eigener Mandant plus globale Tarife.
-
-Storno: ``POST /freight-tariffs/{id}/cancel`` (``X-Tenant-ID``) setzt ``status=STORNIERT``;
-nur Mandanten-Tarife (nicht ``tenant_id IS NULL``). Simulate/Calculate ignorieren stornierte Zeilen.
+Storno: ``POST /freight-tariffs/{id}/cancel`` setzt ``status=STORNIERT``. Simulate/Calculate ignorieren stornierte Zeilen.
 Alembic: ``log_freight_tariff_storno_20260613``.
 """
 
@@ -22,12 +18,13 @@ import uuid
 from datetime import datetime, timezone
 from typing import Optional, List, Any, Dict
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Header
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.tenant import get_tenant_id
 
 from app.api.v1.schemas.base import IDResponse, TypedObjectOut
 from app.api.v1.schemas.logistics_freight_schemas import LogisticsFreightOut
@@ -65,7 +62,7 @@ def _calculate(
         text("""
             SELECT * FROM domain_logistics.freight_tariffs
             WHERE carrier_id = :carrier_id
-              AND (tenant_id IS NULL OR tenant_id = :tenant_id)
+              AND tenant_id = :tenant_id
               AND COALESCE(status, 'AKTIV') = 'AKTIV'
               AND (zone_from IS NULL OR zone_from = :zone_from)
               AND (zone_to   IS NULL OR zone_to   = :zone_to)
@@ -144,25 +141,16 @@ class FreightTariffCancelIn(BaseModel):
 )
 def list_tariffs(
     carrier_id: Optional[str] = Query(None),
-    x_tenant_id: Optional[str] = Header(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> List[Dict[str, Any]]:
-    """Tarif-Liste, optional nach Spediteur gefiltert.
-
-    Ohne ``X-Tenant-ID``: nur globale Tarife (``tenant_id IS NULL``).
-    Mit Header: eigener Mandant plus globale Tarife.
-    """
+    """Tarif-Liste des Mandanten, optional nach Spediteur gefiltert."""
     try:
-        conditions = ["1=1"]
-        params: Dict[str, Any] = {}
+        conditions = ["tenant_id = :tenant_id"]
+        params: Dict[str, Any] = {"tenant_id": tenant_id}
         if carrier_id:
             conditions.append("carrier_id = :carrier_id")
             params["carrier_id"] = carrier_id
-        if x_tenant_id:
-            conditions.append("(tenant_id = :tenant_id OR tenant_id IS NULL)")
-            params["tenant_id"] = x_tenant_id
-        else:
-            conditions.append("tenant_id IS NULL")
         where = " AND ".join(conditions)
         rows = db.execute(
             text(f"SELECT * FROM domain_logistics.freight_tariffs WHERE {where} ORDER BY carrier_id, weight_from_kg"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
@@ -179,12 +167,10 @@ def list_tariffs(
     response_model=IDResponse, dependencies=SCHREIBEN["LOGISTIK"])
 def create_tariff(
     body: FreightTariffIn,
-    x_tenant_id: Optional[str] = Header(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> Dict[str, Any]:
     """Neuen Frachttarif anlegen."""
-    if not x_tenant_id:
-        raise HTTPException(status_code=422, detail="X-Tenant-ID erforderlich.")
     try:
         tariff_id = str(uuid.uuid4())
         db.execute(
@@ -195,10 +181,10 @@ def create_tariff(
                 VALUES (:id, :carrier_id, :zone_from, :zone_to, :weight_from_kg, :weight_to_kg,
                         :price_per_100kg, :min_charge, :tenant_id)
             """),
-            {"id": tariff_id, **body.model_dump(), "tenant_id": x_tenant_id},
+            {"id": tariff_id, **body.model_dump(), "tenant_id": tenant_id},
         )
         db.commit()
-        return {"id": tariff_id, **body.model_dump(), "tenant_id": x_tenant_id}
+        return {"id": tariff_id, **body.model_dump(), "tenant_id": tenant_id}
     except HTTPException:
         raise
     except Exception as exc:
@@ -212,28 +198,18 @@ def create_tariff(
 def cancel_tariff(
     tariff_id: str,
     body: FreightTariffCancelIn,
-    x_tenant_id: Optional[str] = Header(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> Dict[str, Any]:
-    """Tarifzeile auf STORNIERT setzen; globale Tarife (``tenant_id IS NULL``) sind geschuetzt."""
-    if not x_tenant_id:
-        raise HTTPException(status_code=422, detail="X-Tenant-ID erforderlich.")
+    """Tarifzeile des Mandanten auf STORNIERT setzen."""
     try:
         row = db.execute(
-            text("SELECT * FROM domain_logistics.freight_tariffs WHERE id = :id"),
-            {"id": tariff_id},
+            text("SELECT * FROM domain_logistics.freight_tariffs WHERE id = :id AND tenant_id = :tenant_id"),
+            {"id": tariff_id, "tenant_id": tenant_id},
         ).mappings().first()
         if not row:
             raise HTTPException(status_code=404, detail=f"Tarif {tariff_id} nicht gefunden.")
         t = dict(row)
-        tid = t.get("tenant_id")
-        if tid is None:
-            raise HTTPException(
-                status_code=403,
-                detail="Globale Tarife (tenant_id IS NULL) koennen per API nicht storniert werden.",
-            )
-        if tid != x_tenant_id:
-            raise HTTPException(status_code=403, detail="Tarif gehoert zu einem anderen Mandanten.")
         st = (t.get("status") or "AKTIV").upper()
         if st == "STORNIERT":
             raise HTTPException(status_code=409, detail="Tarif ist bereits storniert.")
@@ -245,19 +221,20 @@ def cancel_tariff(
                 SET status = 'STORNIERT',
                     storno_ts = :ts,
                     storno_grund = :grund
-                WHERE id = :id
+                WHERE id = :id AND tenant_id = :tenant_id
                 """
             ),
             {
                 "id": tariff_id,
+                "tenant_id": tenant_id,
                 "ts": datetime.now(timezone.utc),
                 "grund": grund[:2000],
             },
         )
         db.commit()
         out = db.execute(
-            text("SELECT * FROM domain_logistics.freight_tariffs WHERE id = :id"),
-            {"id": tariff_id},
+            text("SELECT * FROM domain_logistics.freight_tariffs WHERE id = :id AND tenant_id = :tenant_id"),
+            {"id": tariff_id, "tenant_id": tenant_id},
         ).mappings().first()
         return dict(out) if out else {}
     except HTTPException:
@@ -270,12 +247,10 @@ def cancel_tariff(
     response_model=LogisticsFreightOut, dependencies=SCHREIBEN["LOGISTIK"])
 def calculate_freight(
     body: FreightCalcIn,
-    x_tenant_id: Optional[str] = Header(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> Dict[str, Any]:
     """Frachtkosten berechnen (mit Buchung / Logging)."""
-    if not x_tenant_id:
-        raise HTTPException(status_code=422, detail="X-Tenant-ID erforderlich.")
     try:
         return _calculate(
             db,
@@ -284,7 +259,7 @@ def calculate_freight(
             body.postal_code_from,
             body.postal_code_to,
             body.distance_km,
-            tenant_id=x_tenant_id,
+            tenant_id=tenant_id,
         )
     except HTTPException:
         raise
@@ -301,12 +276,10 @@ def simulate_freight(
     weight_kg: float = Query(...),
     postal_code_from: str = Query(...),
     postal_code_to: str = Query(...),
-    x_tenant_id: Optional[str] = Header(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> Dict[str, Any]:
     """Frachtkosten simulieren (kein Buchungs-Seiteneffekt)."""
-    if not x_tenant_id:
-        raise HTTPException(status_code=422, detail="X-Tenant-ID erforderlich.")
     try:
         return _calculate(
             db,
@@ -315,7 +288,7 @@ def simulate_freight(
             postal_code_from,
             postal_code_to,
             distance_km,
-            tenant_id=x_tenant_id,
+            tenant_id=tenant_id,
         )
     except HTTPException:
         raise
@@ -347,12 +320,22 @@ class CarrierInvoiceIn(BaseModel):
     summary="Spediteur-Eingangsrechnung erfassen + FiBu-Buchung (LOG-FRACHT-001)", dependencies=SCHREIBEN["LOGISTIK"])
 def create_carrier_invoice(
     body: CarrierInvoiceIn,
-    x_tenant_id: Optional[str] = Header(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
-    """Erfasst Spediteur-Eingangsrechnung, verknüpft sie mit der Tour und bucht ins Hauptbuch."""
-    if not x_tenant_id:
-        raise HTTPException(status_code=422, detail="X-Tenant-ID erforderlich.")
+    """Erfasst Spediteur-Eingangsrechnung, verknüpft sie mit der Tour und bucht ins Hauptbuch.
+
+    Bis 28.10.2026: Eine doppelte Rechnungsnummer wurde still verworfen (``ON CONFLICT DO NOTHING``), gebucht wurde
+    trotzdem, und die Antwort meldete eine Rechnung, die es nicht gab; die Tour wurde nicht auf den Mandanten
+    geprueft; ein Buchungsfehler liess die Transaktion abgebrochen zurueck. Jetzt: 404 fuer eine fremde Tour, 409 fuer
+    eine vorhandene Nummer, der Buchungsentwurf in einem eigenen Savepoint (scheitert er, bleibt die Rechnung ``offen``).
+    Gemeldet wurde ``gebucht``, angelegt war nur ein Buchungsentwurf; der Status heisst jetzt ``entwurf``.
+    """
+    if not db.execute(
+        text("SELECT 1 FROM domain_logistics.tours WHERE id = :id AND tenant_id = :tenant_id"),
+        {"id": body.tour_id, "tenant_id": tenant_id},
+    ).first():
+        raise HTTPException(status_code=404, detail=f"Tour {body.tour_id} nicht gefunden")
 
     invoice_id = str(uuid.uuid4())
     gross = body.net_amount_eur + body.tax_amount_eur
@@ -360,7 +343,7 @@ def create_carrier_invoice(
 
     # 1) Spediteur-Rechnung persistieren (Tabelle muss via Migration existieren)
     try:
-        db.execute(text("""
+        eingefuegt = db.execute(text("""
             INSERT INTO domain_logistics.carrier_invoices
               (id, tenant_id, tour_id, carrier_id, invoice_number, invoice_date,
                net_amount_eur, tax_amount_eur, gross_amount_eur, currency, bemerkung,
@@ -372,7 +355,7 @@ def create_carrier_invoice(
             ON CONFLICT (tenant_id, invoice_number) DO NOTHING
         """), {
             "id": invoice_id,
-            "tenant_id": x_tenant_id,
+            "tenant_id": tenant_id,
             "tour_id": body.tour_id,
             "carrier_id": body.carrier_id,
             "invoice_number": body.invoice_number,
@@ -382,53 +365,61 @@ def create_carrier_invoice(
             "gross": gross,
             "currency": body.currency,
             "bemerkung": body.bemerkung,
-        })
+        }).rowcount
     except Exception as exc:
         db.rollback()
-        raise HTTPException(status_code=500, detail=f"DB-Fehler Carrier-Invoice: {exc}") from exc
+        raise HTTPException(status_code=503, detail=f"DB-Fehler Carrier-Invoice: {exc}") from exc
+    if eingefuegt != 1:
+        db.rollback()
+        raise HTTPException(status_code=409, detail=f"Spediteur-Rechnung {body.invoice_number} ist bereits erfasst.")
+    buchungsfehler: Optional[str] = None
 
     # 2) FiBu: Dr. Frachtkosten / Cr. AP Spediteur (+ Vorsteuer wenn > 0)
     try:
-        from app.services.finance_transaction_service import FinanceTransactionService
-        fin = FinanceTransactionService(db, x_tenant_id)
-        from datetime import date as _date
+        # Eigener Savepoint: scheitert die Buchung, bleibt die Rechnung gespeichert und 'offen'.
+        with db.begin_nested():
+            from app.services.finance_transaction_service import FinanceTransactionService
+            fin = FinanceTransactionService(db, tenant_id, commit_on_success=False)
+            from datetime import date as _date
 
-        inv_date = _date.fromisoformat(body.invoice_date)
-        lines = [
-            {"account_id": fin.account_id_for_number(body.debit_account), "debit_amount": body.net_amount_eur,
-             "credit_amount": 0.0,
-             "description": f"Frachtkosten Tour {body.tour_id} ({body.carrier_id})"},
-            {"account_id": fin.account_id_for_number(body.credit_account), "debit_amount": 0.0,
-             "credit_amount": gross,
-             "description": f"AP Spediteur {body.carrier_id} {body.invoice_number}"},
-        ]
-        if body.tax_amount_eur > 0:
-            lines.append({
-                "account_id": fin.account_id_for_number(body.tax_account),
-                "debit_amount": body.tax_amount_eur,
-                "credit_amount": 0.0,
-                "description": f"Vorsteuer 19% Fracht {body.invoice_number}",
-            })
+            inv_date = _date.fromisoformat(body.invoice_date)
+            lines = [
+                {"account_id": fin.account_id_for_number(body.debit_account), "debit_amount": body.net_amount_eur,
+                 "credit_amount": 0.0,
+                 "description": f"Frachtkosten Tour {body.tour_id} ({body.carrier_id})"},
+                {"account_id": fin.account_id_for_number(body.credit_account), "debit_amount": 0.0,
+                 "credit_amount": gross,
+                 "description": f"AP Spediteur {body.carrier_id} {body.invoice_number}"},
+            ]
+            if body.tax_amount_eur > 0:
+                lines.append({
+                    "account_id": fin.account_id_for_number(body.tax_account),
+                    "debit_amount": body.tax_amount_eur,
+                    "credit_amount": 0.0,
+                    "description": f"Vorsteuer 19% Fracht {body.invoice_number}",
+                })
 
-        je = fin.create(
-            entry_number=f"JE-FRACHT-{body.invoice_number}",
-            description=f"Spediteur-Rechnung {body.invoice_number} Tour {body.tour_id}",
-            entry_date=inv_date,
-            lines=lines,
-            reference=body.invoice_number,
-            source="logistics_freight",
-            document_type="carrier_invoice",
-            period=body.invoice_date[:7],
-        )
-        journal_ref = str(je.entry_number)
+            je = fin.create(
+                entry_number=f"JE-FRACHT-{body.invoice_number}",
+                description=f"Spediteur-Rechnung {body.invoice_number} Tour {body.tour_id}",
+                entry_date=inv_date,
+                lines=lines,
+                reference=body.invoice_number,
+                source="logistics_freight",
+                document_type="carrier_invoice",
+                period=body.invoice_date[:7],
+            )
+            journal_ref = str(je.entry_number)
 
-        db.execute(text("""
-            UPDATE domain_logistics.carrier_invoices
-               SET fibu_journal_ref = :ref, status = 'gebucht'
-             WHERE id = :id AND tenant_id = :tenant_id
-        """), {"ref": journal_ref, "id": invoice_id, "tenant_id": x_tenant_id})
+            db.execute(text("""
+                UPDATE domain_logistics.carrier_invoices
+                   SET fibu_journal_ref = :ref, status = 'entwurf'
+                 WHERE id = :id AND tenant_id = :tenant_id
+            """), {"ref": journal_ref, "id": invoice_id, "tenant_id": tenant_id})
 
     except Exception as exc:
+        journal_ref = None
+        buchungsfehler = str(exc)
         # Nicht blockierend: Rechnung ist gespeichert, Status bleibt 'offen' und
         # wird manuell nachgebucht. Der Fehlschlag wird gemeldet, damit die
         # fehlende Buchung nicht unbemerkt bleibt.
@@ -454,7 +445,9 @@ def create_carrier_invoice(
         "tax_amount_eur": body.tax_amount_eur,
         "gross_amount_eur": gross,
         "fibu_journal_ref": journal_ref,
-        "status": "gebucht" if journal_ref else "offen",
+        # Ein Buchungsentwurf, keine Buchung: gebucht wird in der FiBu (Freigaberegeln der Eingangsrechnung).
+        "status": "entwurf" if journal_ref else "offen",
+        "buchungsfehler": buchungsfehler,
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
 
@@ -467,15 +460,13 @@ def list_carrier_invoices(
     tour_id: Optional[str] = Query(None),
     carrier_id: Optional[str] = Query(None),
     limit: int = Query(50, ge=1, le=200),
-    x_tenant_id: Optional[str] = Header(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     """Spediteur-Rechnungen mit optionalem Filter auf Tour/Spediteur."""
-    if not x_tenant_id:
-        raise HTTPException(status_code=422, detail="X-Tenant-ID erforderlich.")
 
     where = "tenant_id = :tenant_id"
-    params: dict = {"tenant_id": x_tenant_id, "limit": limit}
+    params: dict = {"tenant_id": tenant_id, "limit": limit}
     if tour_id:
         where += " AND tour_id = :tour_id"
         params["tour_id"] = tour_id

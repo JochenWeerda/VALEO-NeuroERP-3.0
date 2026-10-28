@@ -3,12 +3,12 @@
  "summary": {
   "tables": 777,
   "by_class": {
-   "A": 677,
-   "B": 32,
+   "A": 683,
+   "B": 26,
    "C": 14,
    "D": 54
   },
-  "rls_enabled": 639,
+  "rls_enabled": 646,
   "tenant_types": {
    "character varying": 333,
    "character varying(100)": 9,
@@ -3334,17 +3334,17 @@
    "table": "domain_logistics.carrier_invoices",
    "class": "A",
    "tenant_type": "character varying(36)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_logistics.epod_settlements",
-   "class": "B",
+   "class": "A",
    "tenant_type": "character varying(36)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_logistics.frachtbriefe",
@@ -3356,43 +3356,43 @@
   },
   {
    "table": "domain_logistics.freight_tariffs",
-   "class": "B",
+   "class": "A",
    "tenant_type": "text",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_logistics.tour_disposition_checks",
-   "class": "B",
+   "class": "A",
    "tenant_type": "character varying(36)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_logistics.tour_events",
-   "class": "B",
+   "class": "A",
    "tenant_type": "text",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_logistics.tour_stops",
-   "class": "B",
+   "class": "A",
    "tenant_type": "text",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_logistics.tours",
-   "class": "B",
+   "class": "A",
    "tenant_type": "text",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_meldewesen.meldung_log",

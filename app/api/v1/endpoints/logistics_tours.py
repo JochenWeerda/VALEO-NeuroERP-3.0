@@ -3,6 +3,10 @@ Logistik – Tourenplanung-Engine (Feature 1 + Track & Trace / ePOD Feature 3)
 DOM-LOG-004: Disposition-Check (.2) + ePOD-Settlement (.3) added 2026-06-23.
 Thin-router pattern: sqlalchemy.text() SQL, domain_logistics schema.
 Schema/Tabellen: Alembic-Revision ``log_logistics_core_20260612`` (kein Runtime-DDL).
+
+Mandant aus der Anmeldung, jede Abfrage im eigenen Mandanten. Bis 28.10.2026 kam er aus ``X-Tenant-ID``; ohne Kopf
+lieferte die Liste die Touren aller Mandanten, Detail, Live-Status, Tracking, Optimierung und ePOD lasen gar nicht nach
+Mandant, Stopps und Ereignisse liessen sich an fremde Touren haengen.
 """
 
 from __future__ import annotations
@@ -12,14 +16,14 @@ import uuid
 from datetime import datetime
 from typing import Optional, List, Any, Dict
 
-from fastapi import APIRouter, Body, Depends, HTTPException, Query, Header, Request
+from fastapi import APIRouter, Body, Depends, HTTPException, Query, Request
 from pydantic import BaseModel
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.api.v1.command_handlers import logistics as command_handlers
 from app.core.database import get_db
-from app.core.dependencies import get_tenant_id
+from app.core.tenant import get_tenant_id
 from app.domains.logistik.strecke import touren_mit_stopps
 from app.services.mask_action_runtime_service import MaskActionResult
 
@@ -47,6 +51,17 @@ def _haversine(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
     dlambda = math.radians(lng2 - lng1)
     a = math.sin(dphi / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(dlambda / 2) ** 2
     return R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+
+def _eigene_tour(db: Session, tour_id: str, tenant_id: str) -> Dict[str, Any]:
+    """Die Tour des Mandanten oder 404 - auch fuer eine Tour, die es nur in einem anderen Mandanten gibt."""
+    row = db.execute(
+        text("SELECT * FROM domain_logistics.tours WHERE id = :id AND tenant_id = :tenant_id"),
+        {"id": tour_id, "tenant_id": tenant_id},
+    ).mappings().first()
+    if not row:
+        raise HTTPException(status_code=404, detail=f"Tour {tour_id} nicht gefunden")
+    return dict(row)
 
 
 def _safe_number(value: Any, default: float = 0.0) -> float:
@@ -143,17 +158,12 @@ class TourCancelIn(BaseModel):
 )
 def resolve_sales_delivery_note_by_ref(
     ref: str = Query(..., min_length=1, description="Lieferschein-ID oder delivery_note_number"),
-    x_tenant_id: Optional[str] = Header(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> Dict[str, Any]:
     """Read-only: Auflösung von ``delivery_note_ref`` gegen ``domain_sales.delivery_notes``."""
-    if not x_tenant_id:
-        raise HTTPException(
-            status_code=422,
-            detail="X-Tenant-ID erforderlich zur tenant-sicheren Auflösung.",
-        )
     try:
-        summary = _lookup_sales_delivery_note(db, ref, x_tenant_id)
+        summary = _lookup_sales_delivery_note(db, ref, tenant_id)
         if not summary:
             raise HTTPException(status_code=404, detail="Kein Lieferschein für diese Referenz")
         return summary
@@ -174,16 +184,13 @@ def list_tours(
     date: Optional[str] = Query(None),
     vehicle_id: Optional[str] = Query(None),
     status: Optional[str] = Query(None),
-    x_tenant_id: Optional[str] = Header(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> List[Dict[str, Any]]:
     """Liste aller Touren mit optionalen Filtern."""
     try:
-        conditions = ["1=1"]
-        params: Dict[str, Any] = {}
-        if x_tenant_id:
-            conditions.append("tenant_id = :tenant_id")
-            params["tenant_id"] = x_tenant_id
+        conditions = ["tenant_id = :tenant_id"]
+        params: Dict[str, Any] = {"tenant_id": tenant_id}
         if date:
             conditions.append("DATE(date) = :date")
             params["date"] = date
@@ -207,9 +214,9 @@ def list_tours(
             stopps = db.execute(
                 text(
                     f"SELECT tour_id, lat, lng FROM domain_logistics.tour_stops "  # nosec B608
-                    f"WHERE tour_id IN ({placeholders}) ORDER BY stop_order"
+                    f"WHERE tour_id IN ({placeholders}) AND tenant_id = :tenant_id ORDER BY stop_order"
                 ),
-                bind,
+                {**bind, "tenant_id": tenant_id},
             ).mappings().all()
         touren_mit_stopps(tour_rows, stopps)
         return tour_rows
@@ -239,16 +246,14 @@ def insert_tour(
     response_model=LogisticsTourOut, dependencies=SCHREIBEN["LOGISTIK"])
 def create_tour(
     body: TourIn,
-    x_tenant_id: Optional[str] = Header(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> Dict[str, Any]:
     """Tour anlegen inkl. Stopps."""
-    if not x_tenant_id or not str(x_tenant_id).strip():
-        raise HTTPException(403, "X-Tenant-ID required")
     try:
         return insert_tour(
             db,
-            tenant_id=str(x_tenant_id).strip(),
+            tenant_id=tenant_id,
             date_value=body.date,
             vehicle_id=body.vehicle_id,
             driver_id=body.driver_id,
@@ -288,29 +293,26 @@ def get_tour(
     tour_id: str,
     include_delivery_hints: bool = Query(
         False,
-        description="Wenn true und X-Tenant-ID: pro Stopp ``delivery_note_hint`` aus domain_sales",
+        description="Wenn true: pro Stopp ``delivery_note_hint`` aus domain_sales",
     ),
-    x_tenant_id: Optional[str] = Header(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> Dict[str, Any]:
     """Tour-Detail mit Stopps und Ereignissen."""
     try:
-        row = db.execute(
-            text("SELECT * FROM domain_logistics.tours WHERE id = :id"),
-            {"id": tour_id},
-        ).mappings().first()
-        if not row:
-            raise HTTPException(status_code=404, detail=f"Tour {tour_id} nicht gefunden")
+        row = _eigene_tour(db, tour_id, tenant_id)
         stops = db.execute(
-            text("SELECT * FROM domain_logistics.tour_stops WHERE tour_id = :tid ORDER BY stop_order"),
-            {"tid": tour_id},
+            text("SELECT * FROM domain_logistics.tour_stops WHERE tour_id = :tid AND tenant_id = :tenant_id "
+                 "ORDER BY stop_order"),
+            {"tid": tour_id, "tenant_id": tenant_id},
         ).mappings().all()
         events = db.execute(
-            text("SELECT * FROM domain_logistics.tour_events WHERE tour_id = :tid ORDER BY event_ts"),
-            {"tid": tour_id},
+            text("SELECT * FROM domain_logistics.tour_events WHERE tour_id = :tid AND tenant_id = :tenant_id "
+                 "ORDER BY event_ts"),
+            {"tid": tour_id, "tenant_id": tenant_id},
         ).mappings().all()
         stops_list: List[Dict[str, Any]] = [dict(s) for s in stops]
-        if include_delivery_hints and x_tenant_id:
+        if include_delivery_hints:
             cache: Dict[str, Optional[Dict[str, Any]]] = {}
             for s in stops_list:
                 rfn = (s.get("delivery_note_ref") or "").strip()
@@ -318,7 +320,7 @@ def get_tour(
                     s["delivery_note_hint"] = None
                     continue
                 if rfn not in cache:
-                    cache[rfn] = _lookup_sales_delivery_note(db, rfn, x_tenant_id)
+                    cache[rfn] = _lookup_sales_delivery_note(db, rfn, tenant_id)
                 s["delivery_note_hint"] = cache[rfn]
         return {**dict(row), "stops": stops_list, "events": [dict(e) for e in events]}
     except HTTPException:
@@ -336,17 +338,19 @@ def get_tour(
 def add_stop(
     tour_id: str,
     body: TourStopIn,
-    x_tenant_id: Optional[str] = Header(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> Dict[str, Any]:
     """Stopp zur Tour hinzufügen."""
     try:
+        _eigene_tour(db, tour_id, tenant_id)
         stop_id = str(uuid.uuid4())
         # auto-assign next stop_order
         if body.stop_order is None:
             result = db.execute(
-                text("SELECT COALESCE(MAX(stop_order), -1) + 1 AS next_order FROM domain_logistics.tour_stops WHERE tour_id = :tid"),
-                {"tid": tour_id},
+                text("SELECT COALESCE(MAX(stop_order), -1) + 1 AS next_order FROM domain_logistics.tour_stops "
+                     "WHERE tour_id = :tid AND tenant_id = :tenant_id"),
+                {"tid": tour_id, "tenant_id": tenant_id},
             ).scalar()
             stop_order = result if result is not None else 0
         else:
@@ -369,7 +373,7 @@ def add_stop(
                 "customer_id": body.customer_id,
                 "delivery_note_ref": body.delivery_note_ref,
                 "planned_arrival": body.planned_arrival,
-                "tenant_id": x_tenant_id,
+                "tenant_id": tenant_id,
             },
         )
         db.commit()
@@ -386,13 +390,13 @@ def patch_stop(
     tour_id: str,
     stop_id: str,
     body: TourStopPatch,
-    x_tenant_id: Optional[str] = Header(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> Dict[str, Any]:
     """Stopp-Status oder Ankunftszeit aktualisieren."""
     try:
         updates = []
-        params: Dict[str, Any] = {"stop_id": stop_id}
+        params: Dict[str, Any] = {"stop_id": stop_id, "tour_id": tour_id, "tenant_id": tenant_id}
         if body.status is not None:
             updates.append("status = :status")
             params["status"] = body.status
@@ -414,13 +418,15 @@ def patch_stop(
         if not updates:
             raise HTTPException(status_code=422, detail="Keine Felder zum Aktualisieren")
         db.execute(
-            text(f"UPDATE domain_logistics.tour_stops SET {', '.join(updates)} WHERE id = :stop_id"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
+            text(f"UPDATE domain_logistics.tour_stops SET {', '.join(updates)} "
+                 "WHERE id = :stop_id AND tour_id = :tour_id AND tenant_id = :tenant_id"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
             params,
         )
         db.commit()
         row = db.execute(
-            text("SELECT * FROM domain_logistics.tour_stops WHERE id = :stop_id"),
-            {"stop_id": stop_id},
+            text("SELECT * FROM domain_logistics.tour_stops WHERE id = :stop_id AND tour_id = :tour_id "
+                 "AND tenant_id = :tenant_id"),
+            {"stop_id": stop_id, "tour_id": tour_id, "tenant_id": tenant_id},
         ).mappings().first()
         if not row:
             raise HTTPException(status_code=404, detail=f"Stopp {stop_id} nicht gefunden")
@@ -438,22 +444,12 @@ def patch_stop(
 def cancel_tour(
     tour_id: str,
     body: TourCancelIn,
-    x_tenant_id: Optional[str] = Header(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> Dict[str, Any]:
     """Tour nur im Status GEPLANT stornieren; keine gelieferten Stopps (ABGELIEFERT)."""
-    if not x_tenant_id:
-        raise HTTPException(status_code=422, detail="X-Tenant-ID erforderlich.")
     try:
-        row = db.execute(
-            text("SELECT * FROM domain_logistics.tours WHERE id = :id"),
-            {"id": tour_id},
-        ).mappings().first()
-        if not row:
-            raise HTTPException(status_code=404, detail=f"Tour {tour_id} nicht gefunden")
-        t = dict(row)
-        if t.get("tenant_id") and t["tenant_id"] != x_tenant_id:
-            raise HTTPException(status_code=403, detail="Tenant passt nicht zur Tour.")
+        t = _eigene_tour(db, tour_id, tenant_id)
         st = (t.get("status") or "").upper()
         if st == "STORNIERT":
             raise HTTPException(status_code=409, detail="Tour ist bereits storniert.")
@@ -465,9 +461,9 @@ def cancel_tour(
         delivered = db.execute(
             text(
                 "SELECT COUNT(*)::int FROM domain_logistics.tour_stops "
-                "WHERE tour_id = :tid AND status = 'ABGELIEFERT'"
+                "WHERE tour_id = :tid AND tenant_id = :tenant_id AND status = 'ABGELIEFERT'"
             ),
-            {"tid": tour_id},
+            {"tid": tour_id, "tenant_id": tenant_id},
         ).scalar()
         if int(delivered or 0) > 0:
             raise HTTPException(
@@ -479,16 +475,13 @@ def cancel_tour(
         new_notes = (t.get("notes") or "") + note_append
         db.execute(
             text(
-                "UPDATE domain_logistics.tours SET status = 'STORNIERT', notes = :notes WHERE id = :id"
+                "UPDATE domain_logistics.tours SET status = 'STORNIERT', notes = :notes "
+                "WHERE id = :id AND tenant_id = :tenant_id"
             ),
-            {"id": tour_id, "notes": new_notes[:8000]},
+            {"id": tour_id, "notes": new_notes[:8000], "tenant_id": tenant_id},
         )
         db.commit()
-        out = db.execute(
-            text("SELECT * FROM domain_logistics.tours WHERE id = :id"),
-            {"id": tour_id},
-        ).mappings().first()
-        return dict(out) if out else {}
+        return _eigene_tour(db, tour_id, tenant_id)
     except HTTPException:
         raise
     except Exception as exc:
@@ -503,24 +496,20 @@ def cancel_stop(
     tour_id: str,
     stop_id: str,
     body: TourCancelIn,
-    x_tenant_id: Optional[str] = Header(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> Dict[str, Any]:
     """Stopp nur in frühen Status stornieren (GEPLANT, ANGEFAHREN)."""
-    if not x_tenant_id:
-        raise HTTPException(status_code=422, detail="X-Tenant-ID erforderlich.")
     try:
         srow = db.execute(
             text(
-                "SELECT * FROM domain_logistics.tour_stops WHERE id = :sid AND tour_id = :tid"
+                "SELECT * FROM domain_logistics.tour_stops WHERE id = :sid AND tour_id = :tid AND tenant_id = :tenant_id"
             ),
-            {"sid": stop_id, "tid": tour_id},
+            {"sid": stop_id, "tid": tour_id, "tenant_id": tenant_id},
         ).mappings().first()
         if not srow:
             raise HTTPException(status_code=404, detail="Stopp nicht gefunden")
         s = dict(srow)
-        if s.get("tenant_id") and s["tenant_id"] != x_tenant_id:
-            raise HTTPException(status_code=403, detail="Tenant passt nicht zum Stopp.")
         st = (s.get("status") or "").upper()
         if st == "STORNIERT":
             raise HTTPException(status_code=409, detail="Stopp ist bereits storniert.")
@@ -535,14 +524,14 @@ def cancel_stop(
         db.execute(
             text(
                 "UPDATE domain_logistics.tour_stops SET status = 'STORNIERT', "
-                "address = COALESCE(address,'') || :tag WHERE id = :sid"
+                "address = COALESCE(address,'') || :tag WHERE id = :sid AND tenant_id = :tenant_id"
             ),
-            {"sid": stop_id, "tag": f" [STORNO:{grund}]"[:200]},
+            {"sid": stop_id, "tag": f" [STORNO:{grund}]"[:200], "tenant_id": tenant_id},
         )
         db.commit()
         row = db.execute(
-            text("SELECT * FROM domain_logistics.tour_stops WHERE id = :sid"),
-            {"sid": stop_id},
+            text("SELECT * FROM domain_logistics.tour_stops WHERE id = :sid AND tenant_id = :tenant_id"),
+            {"sid": stop_id, "tenant_id": tenant_id},
         ).mappings().first()
         return dict(row) if row else {}
     except HTTPException:
@@ -564,11 +553,12 @@ def cancel_stop(
 def add_event(
     tour_id: str,
     body: TourEventIn,
-    x_tenant_id: Optional[str] = Header(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> Dict[str, Any]:
     """GPS-Event oder Fahrerereignis speichern."""
     try:
+        _eigene_tour(db, tour_id, tenant_id)
         event_id = str(uuid.uuid4())
         now = datetime.utcnow()
         db.execute(
@@ -586,7 +576,7 @@ def add_event(
                 "lng": body.lng,
                 "notes": body.notes,
                 "driver_ref": body.driver_ref,
-                "tenant_id": x_tenant_id,
+                "tenant_id": tenant_id,
             },
         )
         db.commit()
@@ -606,25 +596,27 @@ def add_event(
 )
 def live_status(
     tour_id: str,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> Dict[str, Any]:
     """Letzte GPS-Position, nächster Stopp, ETA."""
     try:
+        _eigene_tour(db, tour_id, tenant_id)
         last_gps = db.execute(
             text("""
                 SELECT * FROM domain_logistics.tour_events
-                WHERE tour_id = :tid AND event_type = 'GPS'
+                WHERE tour_id = :tid AND tenant_id = :tenant_id AND event_type = 'GPS'
                 ORDER BY event_ts DESC LIMIT 1
             """),
-            {"tid": tour_id},
+            {"tid": tour_id, "tenant_id": tenant_id},
         ).mappings().first()
         next_stop = db.execute(
             text("""
                 SELECT * FROM domain_logistics.tour_stops
-                WHERE tour_id = :tid AND status = 'GEPLANT'
+                WHERE tour_id = :tid AND tenant_id = :tenant_id AND status = 'GEPLANT'
                 ORDER BY stop_order LIMIT 1
             """),
-            {"tid": tour_id},
+            {"tid": tour_id, "tenant_id": tenant_id},
         ).mappings().first()
         return {
             "tour_id": tour_id,
@@ -648,13 +640,16 @@ def optimize_stops(
     tour_id: str,
     depot_lat: float = Query(0.0),
     depot_lng: float = Query(0.0),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> Dict[str, Any]:
     """Nearest-Neighbor-Optimierung der Stopp-Reihenfolge."""
     try:
+        _eigene_tour(db, tour_id, tenant_id)
         rows = db.execute(
-            text("SELECT * FROM domain_logistics.tour_stops WHERE tour_id = :tid ORDER BY stop_order"),
-            {"tid": tour_id},
+            text("SELECT * FROM domain_logistics.tour_stops WHERE tour_id = :tid AND tenant_id = :tenant_id "
+                 "ORDER BY stop_order"),
+            {"tid": tour_id, "tenant_id": tenant_id},
         ).mappings().all()
         if not rows:
             raise HTTPException(status_code=404, detail="Keine Stopps gefunden")
@@ -677,8 +672,8 @@ def optimize_stops(
         # Persist new order
         for new_order, stop in enumerate(ordered):
             db.execute(
-                text("UPDATE domain_logistics.tour_stops SET stop_order = :o WHERE id = :id"),
-                {"o": new_order, "id": stop["id"]},
+                text("UPDATE domain_logistics.tour_stops SET stop_order = :o WHERE id = :id AND tenant_id = :tenant_id"),
+                {"o": new_order, "id": stop["id"], "tenant_id": tenant_id},
             )
         db.commit()
         return {"tour_id": tour_id, "optimized_order": [s["id"] for s in ordered]}
@@ -697,36 +692,41 @@ def optimize_stops(
 )
 def public_tracking(
     tour_id: str,
-    share_token: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> Dict[str, Any]:
-    """Öffentlicher Tracking-Link – letzte GPS-Position, aktueller Stopp, ETA."""
+    """Tracking – letzte GPS-Position, aktueller Stopp, ETA.
+
+    Nur im eigenen Mandanten. ``share_token`` wurde angenommen, aber nie geprueft: Jeder angemeldete Nutzer konnte
+    jede Tour verfolgen. Ein oeffentlicher Link mit geprueftem Token ist nicht gebaut.
+    """
     try:
+        _eigene_tour(db, tour_id, tenant_id)
         last_gps = db.execute(
             text("""
                 SELECT lat, lng, event_ts FROM domain_logistics.tour_events
-                WHERE tour_id = :tid AND event_type = 'GPS'
+                WHERE tour_id = :tid AND tenant_id = :tenant_id AND event_type = 'GPS'
                 ORDER BY event_ts DESC LIMIT 1
             """),
-            {"tid": tour_id},
+            {"tid": tour_id, "tenant_id": tenant_id},
         ).mappings().first()
         current_stop = db.execute(
             text("""
                 SELECT id, address, status, planned_arrival, actual_arrival
                 FROM domain_logistics.tour_stops
-                WHERE tour_id = :tid AND status IN ('GEPLANT', 'ANGEFAHREN')
+                WHERE tour_id = :tid AND tenant_id = :tenant_id AND status IN ('GEPLANT', 'ANGEFAHREN')
                 ORDER BY stop_order LIMIT 1
             """),
-            {"tid": tour_id},
+            {"tid": tour_id, "tenant_id": tenant_id},
         ).mappings().first()
         delivery_status = db.execute(
             text("""
                 SELECT
                     COUNT(*) FILTER (WHERE status = 'ABGELIEFERT') AS delivered,
                     COUNT(*) AS total
-                FROM domain_logistics.tour_stops WHERE tour_id = :tid
+                FROM domain_logistics.tour_stops WHERE tour_id = :tid AND tenant_id = :tenant_id
             """),
-            {"tid": tour_id},
+            {"tid": tour_id, "tenant_id": tenant_id},
         ).mappings().first()
         return {
             "tour_id": tour_id,
@@ -751,32 +751,33 @@ def save_pod(
     tour_id: str,
     stop_id: str,
     body: PodIn,
-    x_tenant_id: Optional[str] = Header(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> Dict[str, Any]:
     """Proof of Delivery speichern – setzt Stopp-Status auf ABGELIEFERT."""
     try:
         import json
         pod_json = json.dumps(body.model_dump())
-        db.execute(
+        geaendert = db.execute(
             text("""
                 UPDATE domain_logistics.tour_stops
                 SET pod_data = CAST(:pod AS jsonb), status = 'ABGELIEFERT'
-                WHERE id = :stop_id AND tour_id = :tour_id
+                WHERE id = :stop_id AND tour_id = :tour_id AND tenant_id = :tenant_id
             """),
-            {"pod": pod_json, "stop_id": stop_id, "tour_id": tour_id},
-        )
+            {"pod": pod_json, "stop_id": stop_id, "tour_id": tour_id, "tenant_id": tenant_id},
+        ).rowcount
+        if geaendert != 1:
+            db.rollback()
+            raise HTTPException(status_code=404, detail=f"Stopp {stop_id} nicht gefunden")
         db.commit()
         row = db.execute(
-            text("SELECT * FROM domain_logistics.tour_stops WHERE id = :stop_id"),
-            {"stop_id": stop_id},
+            text("SELECT * FROM domain_logistics.tour_stops WHERE id = :stop_id AND tenant_id = :tenant_id"),
+            {"stop_id": stop_id, "tenant_id": tenant_id},
         ).mappings().first()
-        if not row:
-            raise HTTPException(status_code=404, detail=f"Stopp {stop_id} nicht gefunden")
 
         # Belegbruch schließen: Lieferschein-Status auf 'delivered' setzen
         dn_ref = row.get("delivery_note_ref")
-        if dn_ref and x_tenant_id:
+        if dn_ref:
             try:
                 db.execute(
                     text("""
@@ -786,11 +787,11 @@ def save_pod(
                           AND tenant_id = :tid
                           AND status NOT IN ('delivered', 'BERECHNET')
                     """),
-                    {"ref": dn_ref, "tid": x_tenant_id},
+                    {"ref": dn_ref, "tid": tenant_id},
                 )
                 db.commit()
             except Exception:  # noqa: BLE001 — Lieferschein-Update nicht kritisch für POD-Erfolg
-                pass
+                db.rollback()  # sonst bleibt die Sitzung in einer abgebrochenen Transaktion
 
         return dict(row)
     except HTTPException:
@@ -805,13 +806,15 @@ def save_pod(
 def get_pod(
     tour_id: str,
     stop_id: str,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> Dict[str, Any]:
     """ePOD abrufen."""
     try:
         row = db.execute(
-            text("SELECT pod_data FROM domain_logistics.tour_stops WHERE id = :stop_id AND tour_id = :tour_id"),
-            {"stop_id": stop_id, "tour_id": tour_id},
+            text("SELECT pod_data FROM domain_logistics.tour_stops WHERE id = :stop_id AND tour_id = :tour_id "
+                 "AND tenant_id = :tenant_id"),
+            {"stop_id": stop_id, "tour_id": tour_id, "tenant_id": tenant_id},
         ).mappings().first()
         if not row:
             raise HTTPException(status_code=404, detail=f"Stopp {stop_id} nicht gefunden")
@@ -835,16 +838,13 @@ def get_statistics(
     date_from: Optional[str] = Query(None),
     date_to: Optional[str] = Query(None),
     vehicle_id: Optional[str] = Query(None),
-    x_tenant_id: Optional[str] = Header(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> Dict[str, Any]:
     """Transportstatistik: Touren, Stopps, km, Pünktlichkeit."""
     try:
-        tour_conds = ["1=1"]
-        params: Dict[str, Any] = {}
-        if x_tenant_id:
-            tour_conds.append("t.tenant_id = :tenant_id")
-            params["tenant_id"] = x_tenant_id
+        tour_conds = ["t.tenant_id = :tenant_id"]
+        params: Dict[str, Any] = {"tenant_id": tenant_id}
         if date_from:
             tour_conds.append("t.date >= :date_from")
             params["date_from"] = date_from
@@ -870,7 +870,7 @@ def get_statistics(
                           AND s.actual_arrival <= s.planned_arrival
                     )                                                            AS on_time_stops
                 FROM domain_logistics.tours t
-                LEFT JOIN domain_logistics.tour_stops s ON s.tour_id = t.id
+                LEFT JOIN domain_logistics.tour_stops s ON s.tour_id = t.id AND s.tenant_id = t.tenant_id
                 WHERE {where}
             """),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
             params,
@@ -881,7 +881,7 @@ def get_statistics(
             text(f"""
                 SELECT e.lat, e.lng, e.event_ts
                 FROM domain_logistics.tour_events e
-                JOIN domain_logistics.tours t ON t.id = e.tour_id
+                JOIN domain_logistics.tours t ON t.id = e.tour_id AND t.tenant_id = e.tenant_id
                 WHERE e.event_type = 'GPS' AND {where}
                 ORDER BY e.tour_id, e.event_ts
             """),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
@@ -932,7 +932,7 @@ class DispositionCheckIn(BaseModel):
 def disposition_check(
     tour_id: str,
     body: DispositionCheckIn,
-    x_tenant_id: Optional[str] = Header(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> Dict[str, Any]:
     """Disposition-Check: Kapazitätsauslastung + Zeitfenster-Konsistenz.
@@ -940,8 +940,6 @@ def disposition_check(
     Persistiert ein Check-Record in tour_disposition_checks.
     422 bei Überbuchung oder Zeitfenster-Verletzung.
     """
-    if not x_tenant_id:
-        raise HTTPException(status_code=422, detail="X-Tenant-ID erforderlich.")
     from app.services.logistics_disposition_service import (
         DispositionError,
         check_tour_disposition,
@@ -950,7 +948,7 @@ def disposition_check(
         result = check_tour_disposition(
             db=db,
             tour_id=tour_id,
-            tenant_id=x_tenant_id,
+            tenant_id=tenant_id,
             capacity_kg=body.capacity_kg,
         )
         return result
@@ -981,22 +979,20 @@ def settle_epod_stop(
     tour_id: str,
     stop_id: str,
     body: EpodSettleIn,
-    x_tenant_id: Optional[str] = Header(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> Dict[str, Any]:
     """Ablieferungsbeleg abschließen (fail-closed: erfordert GELIEFERT/SIGNED-Status).
 
     Idempotent: wiederholter Aufruf gibt vorhandenen Settlement-Record zurück.
     """
-    if not x_tenant_id:
-        raise HTTPException(status_code=422, detail="X-Tenant-ID erforderlich.")
     from app.services.logistics_epod_service import EpodError, settle_epod
     try:
         result = settle_epod(
             db=db,
             tour_id=tour_id,
             stop_id=stop_id,
-            tenant_id=x_tenant_id,
+            tenant_id=tenant_id,
             recipient_name=body.recipient_name,
             delivered_at_iso=body.delivered_at,
             notes=body.notes,

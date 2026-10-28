@@ -9,7 +9,6 @@ from fastapi.testclient import TestClient
 from app.api.v1.endpoints import einkauf_bestellvorschlag, logistics_tours
 from app.api.v1.endpoints.mcp_tool_registry import get_current_user, get_db as mcp_get_db, router as mcp_router
 from app.core.database import get_db
-from app.core.dependencies import get_tenant_id as get_tenant_dep
 from app.core.tenant import get_tenant_id
 from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer, setze_identitaet
 
@@ -24,7 +23,8 @@ def _client_tours():
     db.execute.return_value.fetchone.return_value = None
     db.execute.return_value.mappings.return_value.first.return_value = None
     app.dependency_overrides[get_db] = lambda: db
-    app.dependency_overrides[get_tenant_dep] = lambda: "tenant-a"
+    # Die Tourenwege nehmen den Mandanten seit 28.10.2026 aus dem Token (app.core.tenant).
+    app.dependency_overrides[get_tenant_id] = lambda: "tenant-a"
     return TestClient(app), db
 
 
