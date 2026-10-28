@@ -52,3 +52,7 @@ Keine kuenstliche Aliasverdrahtung. Generierter Stand853/A853/B853/C852/E801;
 Nicht die unterbrochenen alten Reklamationsentwuerfe aus ignored artifacts blind
 zurueckkopieren:der jetzige Vertrag ist integriert und serverseitig abgesichert.
 Keine neue Testdatenbank/Container,kein Probe-Reset,keine persoenlichen Daten in Git.
+
+Lead-Nachlauf: 46 Frontendfaelle erneut gruen, vollstaendige Typpruefung und
+Produktionsbuild erfolgreich. Liefercommit 12e04024b; Push auf den bestehenden
+Integrationszweig, keine direkte Auslieferung nach main oder in die Laufzeit.

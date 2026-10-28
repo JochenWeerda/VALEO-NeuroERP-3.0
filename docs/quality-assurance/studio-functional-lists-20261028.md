@@ -60,7 +60,8 @@ Die fachlichen Create-/Update-Regeln und Bereichsrollen bleiben fuehrend.
 - 4 kanonische Identitaetsvertraege.
 - 4 Prozessraumfaelle: Fehler verhindert Navigation, Erfolg und Link funktionieren.
 
-Gesamt108 gezielte Faelle. Die vollstaendige Typpruefung ist Teil des Lead-Nachlaufs.
+Gesamt108 gezielte Faelle. Die vollstaendige Typpruefung und der Produktionsbuild
+sind ebenfalls erfolgreich abgeschlossen; keine Pruefgrenzen wurden gelockert.
 Protokolle liegen unter ignorierten artifacts/studio-list-*-20261028.log.
 Vier obsolete Screen-Identitaeten sind entfernt; aktive Routen und kanonische
 Detailbindungen bleiben erhalten. Der erzeugte Bericht zeigt853 Definitionen,
