@@ -8,7 +8,7 @@ import json
 from datetime import datetime, date
 from decimal import Decimal, ROUND_HALF_UP
 from typing import Any, Optional
-from fastapi import Response, APIRouter, Depends, HTTPException, Query
+from fastapi import Response, APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
 from app.core.uuid7 import uuid7
+from app.core.akteur import gepruefter_akteur_aus_request
 from app.core.tenant import get_tenant_id
 from app.services.business_partner_service import BusinessPartnerService
 from app.infrastructure.models import (
@@ -1211,8 +1212,7 @@ def _apply_payload(row: BusinessPartner, payload: BusinessPartnerPayload) -> Non
     row.contact_block_reason = gdpr.contact_block_reason
     row.anonymized_at = gdpr.anonymized_at
 
-    row.created_by = payload.audit.created_by
-    row.updated_by = payload.audit.updated_by
+    # created_by/updated_by setzt der Weg aus der Anmeldung; bis 28.10.2026 kamen sie aus payload.audit.
 
     legacy_values = payload.legacy_customer_fields.model_dump(exclude_none=True)
     for field_name in LEGACY_CUSTOMER_FIELD_NAMES:
@@ -1223,9 +1223,11 @@ def _apply_payload(row: BusinessPartner, payload: BusinessPartnerPayload) -> Non
 @router.post("/", response_model=BusinessPartnerEnvelope, status_code=201, summary="Business partner anlegen", dependencies=SCHREIBEN["CRM"])
 async def create_business_partner(
     payload: BusinessPartnerEnvelope,
+    request: Request,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
+    akteur = gepruefter_akteur_aus_request(request)
     svc = _svc(db, tenant_id)
     try:
         svc.check_partner_number_unique(payload.business_partner.core_identity.partner_number)
@@ -1234,6 +1236,7 @@ async def create_business_partner(
     partner_id = payload.business_partner.core_identity.partner_id or uuid7()
     row = BusinessPartner(partner_id=partner_id, tenant_id=tenant_id)
     _apply_payload(row, payload.business_partner)
+    row.created_by = row.updated_by = akteur
     svc.assign_account_numbers(row)
     try:
         row = svc.persist_new_partner(row)
@@ -1272,9 +1275,11 @@ async def get_business_partner(
 async def update_business_partner(
     partner_id: str,
     payload: BusinessPartnerEnvelope,
+    request: Request,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
+    akteur = gepruefter_akteur_aus_request(request)
     svc = _svc(db, tenant_id)
     try:
         row = svc.get_partner(partner_id)
@@ -1289,6 +1294,7 @@ async def update_business_partner(
         except ConflictError as exc:
             raise HTTPException(status_code=409, detail=exc.detail)
     _apply_payload(row, payload.business_partner)
+    row.updated_by = akteur
     row = svc.persist_updated_partner(row)
     return _to_out(row)
 
