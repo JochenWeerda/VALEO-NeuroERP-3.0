@@ -354,6 +354,7 @@ def test_import_run_endpoints_cover_upload_summary_items_and_workflow_actions(mo
         return run_id
 
     monkeypatch.setattr(fibu_connectors.workflow, "create_run", _create_run)
+    monkeypatch.setattr(fibu_connectors.workflow, "find_run", lambda *args, **kwargs: None)
     monkeypatch.setattr(fibu_connectors.workflow, "set_run_artifact", lambda *args, **kwargs: called.append(("artifact", "ok")))
     monkeypatch.setattr(fibu_connectors.workflow, "parse_run", lambda *args, **kwargs: called.append(("parse", "ok")))
     monkeypatch.setattr(fibu_connectors.workflow, "validate_run", lambda *args, **kwargs: db.runs.__setitem__("run-1", {**db.runs["run-1"], "status": "VALIDATED"}))

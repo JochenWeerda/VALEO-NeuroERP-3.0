@@ -199,7 +199,7 @@ def test_create_debtor_rejects_invalid_country_before_db_access():
     )
 
     with pytest.raises(HTTPException) as exc:
-        asyncio.run(create_debtor(payload, db=FailDB()))
+        asyncio.run(create_debtor(payload, tenant_id="tenant-1", db=FailDB()))
 
     assert exc.value.status_code == 422
     assert exc.value.detail["entity_typ"] == "Debitor"

@@ -18,6 +18,7 @@ from app.core.connectors.payroll_parser import PayrollParser
 from app.core.connectors.asset_ledger_parser import AssetLedgerParser
 from app.core.data_quality_enforcement import DQValidationException
 from app.core.gobd_artifact import sha256_hex
+from app.core import finance_periods
 from app.core.fibu_audit import log_fibu_audit
 
 logger = logging.getLogger(__name__)
@@ -48,6 +49,18 @@ def _item_to_payload(item: NormalizedItem) -> dict:
         "asset_name": item.asset_name,
         "posting_type": item.posting_type,
     }
+
+
+def find_run(db: Session, tenant_id: str, connector_type: str, idempotency_key: str) -> Optional[tuple]:
+    """(id, status) des Laufs mit diesem Idempotenzschluessel, sonst ``None``."""
+    row = db.execute(
+        text("""
+            SELECT id, status FROM domain_erp.fibu_connector_runs
+            WHERE tenant_id = :tid AND connector_type = :ct AND idempotency_key = :key
+        """),
+        {"tid": tenant_id, "ct": connector_type, "key": idempotency_key},
+    ).fetchone()
+    return (row[0], row[1]) if row else None
 
 
 def create_run(
@@ -123,8 +136,8 @@ def parse_run(db: Session, run_id: str, tenant_id: str, file_content: bytes) -> 
     settings, mapping = {}, {}
     if profile_id:
         pr = db.execute(
-            text("SELECT settings, mapping FROM domain_erp.fibu_connector_profiles WHERE id = :id"),
-            {"id": profile_id},
+            text("SELECT settings, mapping FROM domain_erp.fibu_connector_profiles WHERE id = :id AND tenant_id = :tid"),
+            {"id": profile_id, "tid": tenant_id},
         ).fetchone()
         if pr:
             settings = pr[0] or {}
@@ -174,11 +187,12 @@ def parse_run(db: Session, run_id: str, tenant_id: str, file_content: bytes) -> 
         db.execute(
             text("""
                 INSERT INTO domain_erp.fibu_connector_run_items
-                (id, run_id, line_no, item_type, payload, validation_errors, status)
-                VALUES (:id, :run_id, :line_no, 'JOURNAL_ENTRY_LINE', CAST(:payload AS jsonb), CAST(:validation_errors AS jsonb), :status)
+                (id, tenant_id, run_id, line_no, item_type, payload, validation_errors, status)
+                VALUES (:id, :tenant_id, :run_id, :line_no, 'JOURNAL_ENTRY_LINE', CAST(:payload AS jsonb), CAST(:validation_errors AS jsonb), :status)
             """),
             {
                 "id": item_id,
+                "tenant_id": tenant_id,
                 "run_id": run_id,
                 "line_no": i,
                 "payload": json.dumps(payload),
@@ -211,7 +225,7 @@ def validate_run(db: Session, run_id: str, tenant_id: str) -> None:
     """Setzt Status auf VALIDATED; Fehler bleiben in run_items."""
     run = db.execute(
         text("SELECT status, counts FROM domain_erp.fibu_connector_runs WHERE id = :id AND tenant_id = :tid"),
-        {"id": run_id, "tenant_id": tenant_id},
+        {"id": run_id, "tid": tenant_id},
     ).fetchone()
     if not run:
         raise ValueError("Run not found")
@@ -225,27 +239,32 @@ def validate_run(db: Session, run_id: str, tenant_id: str) -> None:
                 UPDATE domain_erp.fibu_connector_runs
                 SET status = 'VALIDATED', error_summary = :err WHERE id = :id AND tenant_id = :tid
             """),
-            {"err": f"{lines_err} Zeilen mit Fehlern", "id": run_id, "tenant_id": tenant_id},
+            {"err": f"{lines_err} Zeilen mit Fehlern", "id": run_id, "tid": tenant_id},
         )
     else:
         db.execute(
             text("""
                 UPDATE domain_erp.fibu_connector_runs SET status = 'VALIDATED' WHERE id = :id AND tenant_id = :tid
             """),
-            {"id": run_id, "tenant_id": tenant_id},
+            {"id": run_id, "tid": tenant_id},
         )
     db.commit()
     log_fibu_audit(db, tenant_id, "validate", "connector_run", run_id, {}, request=None)
 
 
 def post_run(db: Session, run_id: str, tenant_id: str, request: Any = None) -> None:
-    """Bucht alle OK-Items als Journal Entries; setzt source = connector_type, reference = run_id."""
+    """Bucht alle OK-Items als Journal Entries; setzt source = connector_type, reference = run_id.
+
+    Alles oder nichts: Erst werden alle Belege geprueft (Konto vorhanden, Soll = Haben, Periode offen,
+    Belegnummer frei), dann gebucht. Bis 28.10.2026 liess der Lauf Zeilen mit unbekanntem Konto weg
+    (der Beleg wurde unausgeglichen gebucht) und unausgeglichene Belege stillschweigend aus.
+    """
     run = db.execute(
         text("""
             SELECT connector_type, status, profile_id FROM domain_erp.fibu_connector_runs
             WHERE id = :id AND tenant_id = :tid
         """),
-        {"id": run_id, "tenant_id": tenant_id},
+        {"id": run_id, "tid": tenant_id},
     ).fetchone()
     if not run:
         raise ValueError("Run not found")
@@ -257,9 +276,9 @@ def post_run(db: Session, run_id: str, tenant_id: str, request: Any = None) -> N
     items = db.execute(
         text("""
             SELECT id, line_no, payload, status FROM domain_erp.fibu_connector_run_items
-            WHERE run_id = :run_id AND status = 'OK' ORDER BY line_no
+            WHERE run_id = :run_id AND tenant_id = :tid AND status = 'OK' ORDER BY line_no
         """),
-        {"run_id": run_id},
+        {"run_id": run_id, "tid": tenant_id},
     ).fetchall()
 
     # Gruppieren nach document_no + booking_date (ein Beleg = mehrere Zeilen)
@@ -271,34 +290,24 @@ def post_run(db: Session, run_id: str, tenant_id: str, request: Any = None) -> N
         key = f"{payload.get('booking_date')}_{payload.get('document_no')}"
         by_doc[key].append((item_id, payload))
 
+    belege = _plane_belege(db, run_id, tenant_id, by_doc)
+
     journal_entry_ids: List[str] = []
-    for key, group in by_doc.items():
-        if not group:
-            continue
-        first_payload = group[0][1]
-        booking_date = first_payload.get("booking_date")
-        document_no = first_payload.get("document_no") or f"IMP-{run_id[:8]}"
-        text_desc = first_payload.get("text", "")
-
-        all_lines: List[Dict] = []
-        for _, pl in group:
-            for ln in pl.get("lines", []):
-                all_lines.append(ln)
-
-        if not all_lines:
-            continue
-
-        total_debit = sum(Decimal(line_item.get("amount", 0)) for line_item in all_lines if line_item.get("dc") == "D")
-        total_credit = sum(Decimal(line_item.get("amount", 0)) for line_item in all_lines if line_item.get("dc") == "C")
-        if abs(total_debit - total_credit) > Decimal("0.01"):
-            continue
+    for beleg in belege:
+        group = beleg["group"]
+        booking_date = beleg["booking_date"]
+        document_no = beleg["document_no"]
+        text_desc = beleg["text"]
+        all_lines = beleg["lines"]
+        total_debit = beleg["debit"]
+        total_credit = beleg["credit"]
 
         entry_id = str(uuid4())
         db.execute(
             text("""
                 INSERT INTO domain_erp.journal_entries
-                (id, tenant_id, entry_number, entry_date, posting_date, description, reference, source, total_debit, total_credit, status, created_at, updated_at)
-                VALUES (:id, :tenant_id, :entry_number, :entry_date, :posting_date, :description, :reference, 'connector', :total_debit, :total_credit, 'posted', NOW(), NOW())
+                (id, tenant_id, entry_number, entry_date, posting_date, period, description, reference, source, total_debit, total_credit, status, created_at, updated_at)
+                VALUES (:id, :tenant_id, :entry_number, :entry_date, :posting_date, :period, :description, :reference, 'connector', :total_debit, :total_credit, 'posted', NOW(), NOW())
             """),
             {
                 "id": entry_id,
@@ -306,6 +315,7 @@ def post_run(db: Session, run_id: str, tenant_id: str, request: Any = None) -> N
                 "entry_number": document_no,
                 "entry_date": booking_date,
                 "posting_date": booking_date,
+                "period": beleg["period"],
                 "description": text_desc[:255] if text_desc else "Connector Import",
                 "reference": run_id,
                 "total_debit": total_debit,
@@ -315,13 +325,7 @@ def post_run(db: Session, run_id: str, tenant_id: str, request: Any = None) -> N
 
         # Kontonummer → account_id (chart_of_accounts)
         for line_no, ln in enumerate(all_lines, start=1):
-            acc_num = ln.get("account", "")
-            acc_row = db.execute(
-                text("SELECT id FROM domain_erp.chart_of_accounts WHERE tenant_id = :tid AND account_number = :num LIMIT 1"),
-                {"tid": tenant_id, "num": acc_num},
-            ).fetchone()
-            if not acc_row:
-                continue
+            account_id = beleg["accounts"][ln.get("account", "")]
             line_id = f"{entry_id}-L{line_no}"
             debit = Decimal(ln.get("amount", 0)) if ln.get("dc") == "D" else Decimal("0")
             credit = Decimal(ln.get("amount", 0)) if ln.get("dc") == "C" else Decimal("0")
@@ -335,7 +339,7 @@ def post_run(db: Session, run_id: str, tenant_id: str, request: Any = None) -> N
                     "id": line_id,
                     "tenant_id": tenant_id,
                     "journal_entry_id": entry_id,
-                    "account_id": acc_row[0],
+                    "account_id": account_id,
                     "debit": debit,
                     "credit": credit,
                     "line_number": line_no,
@@ -351,8 +355,9 @@ def post_run(db: Session, run_id: str, tenant_id: str, request: Any = None) -> N
         )
         for item_id, _ in group:
             db.execute(
-                text("UPDATE domain_erp.fibu_connector_run_items SET posted_entity_id = :eid, status = 'POSTED' WHERE id = :id"),
-                {"eid": entry_id, "id": item_id},
+                text("UPDATE domain_erp.fibu_connector_run_items SET posted_entity_id = :eid, status = 'POSTED' "
+                     "WHERE id = :id AND tenant_id = :tid"),
+                {"eid": entry_id, "id": item_id, "tid": tenant_id},
             )
 
     db.execute(
@@ -361,16 +366,69 @@ def post_run(db: Session, run_id: str, tenant_id: str, request: Any = None) -> N
             SET status = 'POSTED', counts = jsonb_set(COALESCE(counts, '{}'), '{journal_entries_created}', to_jsonb(CAST(:cnt AS int))), finished_at = NOW()
             WHERE id = :id AND tenant_id = :tid
         """),
-        {"id": run_id, "tenant_id": tenant_id, "cnt": len(journal_entry_ids)},
+        {"id": run_id, "tid": tenant_id, "cnt": len(journal_entry_ids)},
     )
     db.commit()
     log_fibu_audit(db, tenant_id, "post", "connector_run", run_id, {"journal_entries": len(journal_entry_ids), "source_system": source_system}, request=request)
 
 
+def _plane_belege(db: Session, run_id: str, tenant_id: str, by_doc: Dict[str, List[tuple]]) -> List[Dict[str, Any]]:
+    """Prueft alle Belege eines Laufs vor der ersten Buchung; ein Fehler bricht den ganzen Lauf ab."""
+    belege: List[Dict[str, Any]] = []
+    fehler: List[str] = []
+    nummern: set[str] = set()
+    for group in by_doc.values():
+        first_payload = group[0][1]
+        booking_date = str(first_payload.get("booking_date") or "")
+        document_no = first_payload.get("document_no") or f"IMP-{run_id[:8]}"
+        lines = [ln for _, pl in group for ln in pl.get("lines", [])]
+        if not lines:
+            continue
+        debit = sum(Decimal(str(ln.get("amount", 0))) for ln in lines if ln.get("dc") == "D")
+        credit = sum(Decimal(str(ln.get("amount", 0))) for ln in lines if ln.get("dc") == "C")
+        if abs(debit - credit) > Decimal("0.01"):
+            fehler.append(f"Beleg {document_no}: Soll {debit} ungleich Haben {credit}")
+        accounts: Dict[str, str] = {}
+        for nummer in sorted({str(ln.get("account", "")) for ln in lines}):
+            konto = db.execute(
+                text("SELECT id FROM domain_erp.chart_of_accounts WHERE tenant_id = :tid AND account_number = :num LIMIT 1"),
+                {"tid": tenant_id, "num": nummer},
+            ).fetchone()
+            if konto:
+                accounts[nummer] = konto[0]
+            else:
+                fehler.append(f"Beleg {document_no}: Konto {nummer or '(leer)'} fehlt im Kontenplan")
+        period = booking_date[:7]
+        try:
+            gesperrt = finance_periods.gesperrter_zustand(db, tenant_id, period, sperren=True)
+        except ValueError:
+            fehler.append(f"Beleg {document_no}: Buchungsdatum {booking_date or '(leer)'} ungueltig")
+            gesperrt = None
+        if gesperrt:
+            fehler.append(f"Beleg {document_no}: {finance_periods.meldung(period, gesperrt)}")
+        vergeben = db.execute(
+            text("SELECT 1 FROM domain_erp.journal_entries WHERE tenant_id = :tid AND entry_number = :nr LIMIT 1"),
+            {"tid": tenant_id, "nr": document_no},
+        ).fetchone()
+        if vergeben:
+            fehler.append(f"Beleg {document_no}: Belegnummer ist bereits gebucht")
+        if document_no in nummern:
+            fehler.append(f"Beleg {document_no}: Belegnummer kommt im Lauf mit verschiedenen Buchungsdaten vor")
+        nummern.add(document_no)
+        belege.append({
+            "group": group, "booking_date": booking_date, "document_no": document_no,
+            "text": first_payload.get("text", ""), "lines": lines, "debit": debit, "credit": credit,
+            "accounts": accounts, "period": period,
+        })
+    if fehler:
+        raise ValueError("Lauf nicht gebucht: " + "; ".join(fehler))
+    return belege
+
+
 def cancel_run(db: Session, run_id: str, tenant_id: str) -> None:
     run = db.execute(
         text("SELECT status FROM domain_erp.fibu_connector_runs WHERE id = :id AND tenant_id = :tid"),
-        {"id": run_id, "tenant_id": tenant_id},
+        {"id": run_id, "tid": tenant_id},
     ).fetchone()
     if not run:
         raise ValueError("Run not found")
@@ -378,7 +436,7 @@ def cancel_run(db: Session, run_id: str, tenant_id: str) -> None:
         raise ValueError(f"Cannot cancel run in status {run[0]}")
     db.execute(
         text("UPDATE domain_erp.fibu_connector_runs SET status = 'CANCELLED' WHERE id = :id AND tenant_id = :tid"),
-        {"id": run_id, "tenant_id": tenant_id},
+        {"id": run_id, "tid": tenant_id},
     )
     db.commit()
     log_fibu_audit(db, tenant_id, "cancel", "connector_run", run_id, {}, request=None)
@@ -388,7 +446,7 @@ def reverse_run(db: Session, run_id: str, tenant_id: str, request: Any = None) -
     """Erzeugt Gegenbuchungen für alle aus diesem Run erstellten Journal Entries (GoBD: kein Delete)."""
     run = db.execute(
         text("SELECT status FROM domain_erp.fibu_connector_runs WHERE id = :id AND tenant_id = :tid"),
-        {"id": run_id, "tenant_id": tenant_id},
+        {"id": run_id, "tid": tenant_id},
     ).fetchone()
     if not run:
         raise ValueError("Run not found")
@@ -396,19 +454,29 @@ def reverse_run(db: Session, run_id: str, tenant_id: str, request: Any = None) -
         raise ValueError(f"Only POSTED runs can be reversed, got {run[0]}")
 
     items = db.execute(
-        text("SELECT posted_entity_id FROM domain_erp.fibu_connector_run_items WHERE run_id = :run_id AND posted_entity_id IS NOT NULL"),
-        {"run_id": run_id},
+        text("SELECT posted_entity_id FROM domain_erp.fibu_connector_run_items "
+             "WHERE run_id = :run_id AND tenant_id = :tid AND posted_entity_id IS NOT NULL"),
+        {"run_id": run_id, "tid": tenant_id},
     ).fetchall()
-    entry_ids = list({r[0] for r in items if r[0]})
+    entry_ids = sorted({r[0] for r in items if r[0]})
+
+    perioden = db.execute(
+        text("SELECT DISTINCT period FROM domain_erp.journal_entries WHERE tenant_id = :tid AND id = ANY(:ids)"),
+        {"tid": tenant_id, "ids": entry_ids},
+    ).scalars().all() if entry_ids else []
+    for period in sorted(p for p in perioden if p):
+        gesperrt = finance_periods.gesperrter_zustand(db, tenant_id, period, sperren=True)
+        if gesperrt:
+            raise ValueError(f"Storno nicht gebucht: {finance_periods.meldung(period, gesperrt)}")
 
     for entry_id in entry_ids:
         # Gegenbuchung: gleiche Zeilen, Soll/Haben getauscht (Spalten: debit, credit wie journal_entry_lines)
         lines = db.execute(
             text("""
                 SELECT account_id, debit, credit, description FROM domain_erp.journal_entry_lines
-                WHERE journal_entry_id = :eid
+                WHERE journal_entry_id = :eid AND tenant_id = :tid
             """),
-            {"eid": entry_id},
+            {"eid": entry_id, "tid": tenant_id},
         ).fetchall()
         if not lines:
             continue
@@ -418,11 +486,11 @@ def reverse_run(db: Session, run_id: str, tenant_id: str, request: Any = None) -
         db.execute(
             text("""
                 INSERT INTO domain_erp.journal_entries
-                (id, tenant_id, entry_number, entry_date, posting_date, description, reference, source, total_debit, total_credit, status, created_at, updated_at)
-                SELECT :rev_id, tenant_id, 'STorno-' || entry_number, entry_date, posting_date, 'Storno: ' || description, :run_id, 'connector', total_credit, total_debit, 'posted', NOW(), NOW()
-                FROM domain_erp.journal_entries WHERE id = :eid
+                (id, tenant_id, entry_number, entry_date, posting_date, period, description, reference, source, total_debit, total_credit, status, reversed_entry_id, created_at, updated_at)
+                SELECT :rev_id, tenant_id, 'STORNO-' || entry_number, entry_date, posting_date, period, 'Storno: ' || description, :run_id, 'connector', total_credit, total_debit, 'posted', id, NOW(), NOW()
+                FROM domain_erp.journal_entries WHERE id = :eid AND tenant_id = :tid
             """),
-            {"rev_id": rev_id, "run_id": run_id, "eid": entry_id},
+            {"rev_id": rev_id, "run_id": run_id, "eid": entry_id, "tid": tenant_id},
         )
         for line_no, (acc_id, deb, cred, desc) in enumerate(lines, start=1):
             db.execute(
@@ -450,7 +518,7 @@ def reverse_run(db: Session, run_id: str, tenant_id: str, request: Any = None) -
 
     db.execute(
         text("UPDATE domain_erp.fibu_connector_runs SET status = 'REVERSED' WHERE id = :id AND tenant_id = :tid"),
-        {"id": run_id, "tenant_id": tenant_id},
+        {"id": run_id, "tid": tenant_id},
     )
     db.commit()
     log_fibu_audit(db, tenant_id, "reverse", "connector_run", run_id, {"reversed_entries": len(entry_ids)}, request=request)

@@ -4,7 +4,7 @@ type: reference
 audience: [agent, entwickler]
 owner: Claude Code
 status: aktiv
-last_reviewed: 2026-10-27
+last_reviewed: 2026-10-28
 version: 1.0.0
 description: Generierte Entscheidungsmatrix der noch nicht abgesicherten Mandantentabellen je Domain.
 ---
@@ -13,14 +13,14 @@ description: Generierte Entscheidungsmatrix der noch nicht abgesicherten Mandant
 
 Generiert von `scripts/rls_domain_matrix.py`; nicht von Hand aendern. Entscheidungen und Reihenfolge: `docs/architecture/rls-domaenen-entscheidungsmatrix.md`.
 
-Datenstand gewachsene Datenbank: 2026-10-27. Tabellen: 76.
+Datenstand gewachsene Datenbank: 2026-10-28. Tabellen: 69.
 
 | Domain | dienst | position | referenzdaten | mandant_nullbar | standardmandant | identitaet |
 |---|---|---|---|---|---|---|
 | agrar | 1 | 1 | 6 | 6 | 7 |  |
 | crm | 7 |  |  |  |  |  |
 | dev_mock |  |  |  |  |  | 1 |
-| erp | 1 | 1 | 2 | 4 | 2 |  |
+| erp | 1 |  | 1 | 1 |  |  |
 | finance | 1 |  |  |  |  |  |
 | infrastructure |  | 1 |  |  |  |  |
 | inventory | 5 |  | 7 |  |  |  |
@@ -78,15 +78,8 @@ Datenstand gewachsene Datenbank: 2026-10-27. Tabellen: 76.
 
 | Tabelle | Kl. | Ursache | Modell | Schreiber | Leser | Worker | Identitaet | Daten | Bereinigung | Policy |
 |---|---|---|---|---|---|---|---|---|---|---|
-| `domain_erp.bank_accounts` | B | mandant_nullbar | – | `app/api/v1/endpoints/bank_accounts.py` | 4 | – | token 2 | 0 Z., 0 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
 | `domain_erp.chart_of_accounts` | B | dienst, referenzdaten, mandant_nullbar | `app/infrastructure/models/__init__.py` | `app/api/v1/endpoints/accounts.py`, `app/api/v1/endpoints/banken.py`, `app/api/v1/endpoints/booking_templates.py`, `app/api/v1/endpoints/chart_of_accounts.py` (+11) | 32 | – | dienst 2, kopfzeile 2, nutzlast 3, token 12 | 49 Z., 3 Mand., 28 system | 28 'system'-Zeilen: gemeinsame Referenzdaten begruenden oder zuordnen | keine, bis der Dienst tokengebundene Identitaet hat (rls-dienste-identitaet-vorschlag.md) |
-| `domain_erp.creditors` | B | mandant_nullbar | – | `app/api/v1/endpoints/creditors.py` | 1 | – | nutzlast 1 | 0 Z., 0 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
-| `domain_erp.debitors` | B | mandant_nullbar | – | `app/api/v1/endpoints/debtors.py` | 1 | – | nutzlast 1, token 2 | 0 Z., 0 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
-| `domain_erp.dunning_notices` | A | referenzdaten, mandant_nullbar | – | `app/api/v1/endpoints/dunning.py`, `app/services/finance_dunning_service.py` | 2 | – | token 1 | 0 Z., 0 Mand. | – | getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant |
-| `domain_erp.fibu_connector_run_items` | C | position | – | `app/core/connectors/workflow.py` | 1 | – | token 1 | 0 Z. | tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id) | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_erp.fibu_connector_runs |
-| `domain_erp.gift_cards` | A | standardmandant | – | – | 2 | – | standardmandant 1, token 2 | 0 Z., 0 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
-| `domain_erp.offene_posten` | A | referenzdaten, mandant_nullbar, standardmandant | – | `app/api/v1/endpoints/collective_documents.py`, `app/api/v1/endpoints/credit_debit_memos.py`, `app/api/v1/endpoints/dauerauftraege.py`, `app/api/v1/endpoints/dunning.py` (+20) | 21 | `app/services/scheduler_service.py` | kopfzeile 4, nutzlast 3, standardmandant 1, token 22 | 25 Z., 2 Mand. | – | getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant |
-| `domain_erp.open_items` | A | standardmandant | – | – | 3 | – | standardmandant 1 | 0 Z., 0 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
+| `domain_erp.offene_posten` | A | referenzdaten, mandant_nullbar, standardmandant | – | `app/api/v1/endpoints/collective_documents.py`, `app/api/v1/endpoints/credit_debit_memos.py`, `app/api/v1/endpoints/dauerauftraege.py`, `app/api/v1/endpoints/dunning.py` (+20) | 19 | `app/services/scheduler_service.py` | kopfzeile 4, nutzlast 1, standardmandant 1, token 20 | 25 Z., 2 Mand. | – | getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant |
 | `domain_erp.policy_rules` | B | mandant_nullbar | `app/infrastructure/models/__init__.py` | `app/services/policy_service.py` | 1 | – | – | – | Datenbefund fehlt (Tabelle nicht in der gewachsenen Datenbank) | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
 
 ## finance

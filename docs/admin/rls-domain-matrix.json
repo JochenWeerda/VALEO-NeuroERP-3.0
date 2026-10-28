@@ -1,19 +1,19 @@
 {
  "_note": "Generiert von scripts/rls_domain_matrix.py; nicht von Hand aendern.",
- "datenstand": "2026-10-27",
+ "datenstand": "2026-10-28",
  "summary": {
-  "tabellen": 76,
+  "tabellen": 69,
   "nach_klasse": {
-   "A": 39,
-   "B": 23,
-   "C": 14
+   "A": 36,
+   "B": 20,
+   "C": 13
   },
   "nach_ursache": {
    "dienst": 18,
-   "position": 12,
-   "referenzdaten": 17,
-   "mandant_nullbar": 15,
-   "standardmandant": 12,
+   "position": 11,
+   "referenzdaten": 16,
+   "mandant_nullbar": 12,
+   "standardmandant": 10,
    "identitaet": 2
   },
   "nach_domain": {
@@ -32,10 +32,8 @@
    },
    "erp": {
     "dienst": 1,
-    "mandant_nullbar": 4,
-    "position": 1,
-    "referenzdaten": 2,
-    "standardmandant": 2
+    "mandant_nullbar": 1,
+    "referenzdaten": 1
    },
    "finance": {
     "dienst": 1
@@ -1634,43 +1632,6 @@
    "policy": "keine Mandanten-Policy: Nachschlagen vor der Mandantenbindung, Zugriff ueber valeo_system"
   },
   {
-   "table": "domain_erp.bank_accounts",
-   "domain": "erp",
-   "class": "B",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "mandant_nullbar",
-   "gruende": [
-    "mandant_nullbar"
-   ],
-   "modell": [],
-   "leser": [
-    "app/api/v1/endpoints/bank_reconciliation.py",
-    "app/api/v1/endpoints/bank_statement_import.py",
-    "app/api/v1/endpoints/liquidity_planning.py",
-    "app/api/v1/endpoints/subsidiary_ledger_reconciliation.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/bank_accounts.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "token": 2
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
    "table": "domain_erp.chart_of_accounts",
    "domain": "erp",
    "class": "B",
@@ -1773,191 +1734,6 @@
    "policy": "keine, bis der Dienst tokengebundene Identitaet hat (rls-dienste-identitaet-vorschlag.md)"
   },
   {
-   "table": "domain_erp.creditors",
-   "domain": "erp",
-   "class": "B",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "mandant_nullbar",
-   "gruende": [
-    "mandant_nullbar"
-   ],
-   "modell": [],
-   "leser": [
-    "app/api/v1/schemas/finance.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/creditors.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "nutzlast": 1
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_erp.debitors",
-   "domain": "erp",
-   "class": "B",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "mandant_nullbar",
-   "gruende": [
-    "mandant_nullbar"
-   ],
-   "modell": [],
-   "leser": [
-    "app/api/v1/endpoints/export_service.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/debtors.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "nutzlast": 1,
-    "token": 2
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_erp.dunning_notices",
-   "domain": "erp",
-   "class": "A",
-   "tenant_type": "character varying(64)",
-   "eltern": [],
-   "ursache": "referenzdaten",
-   "gruende": [
-    "referenzdaten",
-    "mandant_nullbar"
-   ],
-   "modell": [],
-   "leser": [
-    "app/api/v1/endpoints/export_service.py",
-    "app/services/mcp_execution_service.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/dunning.py",
-    "app/services/finance_dunning_service.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "token": 1
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [
-    "app/services/mcp_execution_service.py:3155"
-   ],
-   "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3155"
-   ],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_erp.fibu_connector_run_items",
-   "domain": "erp",
-   "class": "C",
-   "tenant_type": null,
-   "eltern": [
-    "domain_erp.fibu_connector_runs"
-   ],
-   "ursache": "position",
-   "gruende": [
-    "position"
-   ],
-   "modell": [],
-   "leser": [
-    "app/api/v1/endpoints/fibu_connectors.py"
-   ],
-   "schreiber": [
-    "app/core/connectors/workflow.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "token": 1
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "eltern_fk": [
-     "run_id -> domain_erp.fibu_connector_runs.id"
-    ],
-    "verwaist": 0,
-    "ohne_eltern": 0
-   },
-   "bereinigung": [
-    "tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_erp.fibu_connector_runs"
-  },
-  {
-   "table": "domain_erp.gift_cards",
-   "domain": "erp",
-   "class": "A",
-   "tenant_type": "character varying(64)",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [
-    "standardmandant"
-   ],
-   "modell": [],
-   "leser": [
-    "app/api/v1/endpoints/admin_pos.py",
-    "app/api/v1/endpoints/mask_frontend_bridges.py"
-   ],
-   "schreiber": [],
-   "worker": [],
-   "identitaet": {
-    "standardmandant": 1,
-    "token": 2
-   },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py:978"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
    "table": "domain_erp.offene_posten",
    "domain": "erp",
    "class": "A",
@@ -1974,11 +1750,8 @@
     "app/api/v1/endpoints/auto_matching.py",
     "app/api/v1/endpoints/bank_reconciliation.py",
     "app/api/v1/endpoints/compat.py",
-    "app/api/v1/endpoints/creditors.py",
     "app/api/v1/endpoints/crm_360.py",
     "app/api/v1/endpoints/crm_360_reads.py",
-    "app/api/v1/endpoints/debtors.py",
-    "app/api/v1/endpoints/export_service.py",
     "app/api/v1/endpoints/finance_invoices.py",
     "app/api/v1/endpoints/finance_stammdaten.py",
     "app/api/v1/endpoints/liquidity.py",
@@ -1986,6 +1759,7 @@
     "app/api/v1/endpoints/mask_frontend_bridges.py",
     "app/api/v1/endpoints/subsidiary_ledger_reconciliation.py",
     "app/crm/router.py",
+    "app/finance/op_saldo.py",
     "app/services/closing_checklist_validation.py",
     "app/services/finance_datev_service.py",
     "app/services/finance_op_service.py",
@@ -2024,9 +1798,9 @@
    ],
    "identitaet": {
     "kopfzeile": 4,
-    "nutzlast": 3,
+    "nutzlast": 1,
     "standardmandant": 1,
-    "token": 22
+    "token": 20
    },
    "standardmandant_stellen": [
     "app/api/v1/endpoints/mask_frontend_bridges.py:978"
@@ -2053,42 +1827,6 @@
    },
    "bereinigung": [],
    "policy": "getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_erp.open_items",
-   "domain": "erp",
-   "class": "A",
-   "tenant_type": "character varying(64)",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [
-    "standardmandant"
-   ],
-   "modell": [],
-   "leser": [
-    "app/api/v1/endpoints/crm_360.py",
-    "app/api/v1/endpoints/finance_actions.py",
-    "app/services/calendar_projection_service.py"
-   ],
-   "schreiber": [],
-   "worker": [],
-   "identitaet": {
-    "standardmandant": 1
-   },
-   "standardmandant_stellen": [
-    "app/services/calendar_projection_service.py:911"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
   },
   {
    "table": "domain_erp.policy_rules",

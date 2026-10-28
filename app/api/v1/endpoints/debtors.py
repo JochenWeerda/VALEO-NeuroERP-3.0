@@ -16,6 +16,8 @@ import json
 
 from ....core.data_quality_enforcement import build_dq_error_detail, evaluate_debtor_datensatz
 from ....core.database import get_db
+from ....core.uuid7 import uuid7
+from ....finance.op_saldo import OP_SALDO_SQL
 
 # EU/EWR USt-ID Format-Muster (optional; leeres Feld erlaubt)
 _VAT_PATTERNS = {
@@ -134,12 +136,18 @@ def _row_to_debtor(row) -> Debtor:
 @router.post("/", response_model=Debtor, status_code=201, summary="Debtor anlegen", dependencies=[Depends(finance_write)])
 async def create_debtor(
     debtor_data: DebtorCreate,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
     Create a new debtor.
+
+    Der Mandant kommt aus dem Token; ein abweichender ``tenant_id`` im Rumpf wird abgewiesen
+    (bis 28.10.2026 wurde der Debitor unter dem Mandanten aus dem Rumpf angelegt).
     """
     try:
+        if debtor_data.tenant_id != tenant_id:
+            raise HTTPException(status_code=403, detail="Tenant mismatch")
         _validate_vat_id_format(debtor_data.vat_id)
         dq_result = evaluate_debtor_datensatz(_build_debtor_dq_datensatz(debtor_data.model_dump()))
         if not dq_result.bestanden:
@@ -153,7 +161,7 @@ async def create_debtor(
             check_query,
             {
                 "debtor_number": debtor_data.debtor_number,
-                "tenant_id": debtor_data.tenant_id
+                "tenant_id": tenant_id
             }
         ).fetchone()
         
@@ -169,8 +177,8 @@ async def create_debtor(
         
         insert_query = text("""
             INSERT INTO domain_erp.debitors 
-            (tenant_id, debitor_number, name, address, payment_terms, credit_limit, is_active)
-            VALUES (:tenant_id, :debtor_number, :company_name, CAST(:address AS jsonb), :payment_terms, :credit_limit, :is_active)
+            (id, tenant_id, debitor_number, name, address, payment_terms, credit_limit, is_active)
+            VALUES (:id, :tenant_id, :debtor_number, :company_name, CAST(:address AS jsonb), :payment_terms, :credit_limit, :is_active)
             RETURNING id, tenant_id, debitor_number, name, address, payment_terms, credit_limit, 
                       is_active, created_at, updated_at
         """)
@@ -178,7 +186,9 @@ async def create_debtor(
         result = db.execute(
             insert_query,
             {
-                "tenant_id": debtor_data.tenant_id,
+                # ``id`` hat keine Vorgabe (auch live nicht): bis 28.10.2026 scheiterte jede Anlage mit 500.
+                "id": uuid7(),
+                "tenant_id": tenant_id,
                 "debtor_number": debtor_data.debtor_number,
                 "company_name": debtor_data.company_name,
                 "address": address_json,
@@ -264,6 +274,7 @@ async def list_debtors(
 @router.get("/{debtor_id}", response_model=Debtor, summary="Debtor abrufen")
 async def get_debtor(
     debtor_id: str,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -274,10 +285,10 @@ async def get_debtor(
             SELECT id, tenant_id, debitor_number, name, address, payment_terms, credit_limit, 
                    is_active, created_at, updated_at
             FROM domain_erp.debitors
-            WHERE id = :debtor_id
+            WHERE id = :debtor_id AND tenant_id = :tenant_id
         """)
-        
-        row = db.execute(query, {"debtor_id": debtor_id}).fetchone()
+
+        row = db.execute(query, {"debtor_id": debtor_id, "tenant_id": tenant_id}).fetchone()
         
         if not row:
             raise HTTPException(status_code=404, detail="Debtor not found")
@@ -293,6 +304,7 @@ async def get_debtor(
 async def update_debtor(
     debtor_id: str,
     debtor_data: DebtorUpdate,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -305,9 +317,9 @@ async def update_debtor(
             SELECT id, tenant_id, debitor_number, name, address, payment_terms, credit_limit,
                    is_active, created_at, updated_at
             FROM domain_erp.debitors
-            WHERE id = :debtor_id
+            WHERE id = :debtor_id AND tenant_id = :tenant_id
         """)
-        existing_row = db.execute(existing_query, {"debtor_id": debtor_id}).fetchone()
+        existing_row = db.execute(existing_query, {"debtor_id": debtor_id, "tenant_id": tenant_id}).fetchone()
         
         if not existing_row:
             raise HTTPException(status_code=404, detail="Debtor not found")
@@ -363,7 +375,7 @@ async def update_debtor(
         
         # Build update query
         update_fields = []
-        params = {"debtor_id": debtor_id}
+        params = {"debtor_id": debtor_id, "tenant_id": tenant_id}
         
         if debtor_data.company_name is not None:
             update_fields.append("name = :company_name")
@@ -391,7 +403,7 @@ async def update_debtor(
         update_query = text(f"""
             UPDATE domain_erp.debitors
             SET {', '.join(update_fields)}
-            WHERE id = :debtor_id
+            WHERE id = :debtor_id AND tenant_id = :tenant_id
             RETURNING id, tenant_id, debitor_number, name, address, payment_terms, credit_limit, 
                       is_active, created_at, updated_at
         """)  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
@@ -410,26 +422,28 @@ async def update_debtor(
 @router.get("/{debtor_id}/balance", response_model=DebtorsOut, summary="Debtor balance abrufen")
 async def get_debtor_balance(
     debtor_id: str,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
-    """OP-Saldo eines Debitors: offener Betrag, Anzahl OPs, ältester OP."""
+    """OP-Saldo eines Debitors: offener Betrag, Anzahl OPs, ältester OP.
+
+    Bis 28.10.2026 las die Abfrage ``amount``, ``paid_amount`` und ``status`` — Spalten, die
+    ``offene_posten`` nicht hat; jeder Aufruf endete mit 500. Die OP-Schreiber setzen den
+    Kunden (``kunde_id``), nicht den Debitor; beide Verweise zaehlen.
+    """
     try:
         existing = db.execute(
-            text("SELECT id FROM domain_erp.debitors WHERE id = :debtor_id"),
-            {"debtor_id": debtor_id}
+            text("SELECT id, customer_id FROM domain_erp.debitors WHERE id = :debtor_id AND tenant_id = :tenant_id"),
+            {"debtor_id": debtor_id, "tenant_id": tenant_id}
         ).fetchone()
         if not existing:
             raise HTTPException(status_code=404, detail="Debtor not found")
 
-        balance_query = text("""
-            SELECT
-                COALESCE(SUM(amount - COALESCE(paid_amount, 0)), 0) AS open_balance,
-                COUNT(*) AS open_item_count,
-                MIN(due_date) AS oldest_due_date
-            FROM domain_erp.offene_posten
-            WHERE debtor_id = :debtor_id AND status = 'open'
-        """)
-        row = db.execute(balance_query, {"debtor_id": debtor_id}).fetchone()
+        row = db.execute(
+            text(OP_SALDO_SQL.format(verweis="(debtor_id = :debtor_id OR (CAST(:customer_id AS text) IS NOT NULL AND kunde_id = CAST(:customer_id AS text)))")),
+            {"debtor_id": debtor_id, "customer_id": str(existing[1]) if existing[1] else None,
+             "tenant_id": tenant_id, "konto_typ": "debitoren"},
+        ).fetchone()
         return {
             "debtor_id": debtor_id,
             "open_balance": float(row[0]) if row else 0.0,
@@ -445,6 +459,7 @@ async def get_debtor_balance(
 @router.delete("/{debtor_id}", status_code=204, response_class=Response, response_model=None, summary="Debtor löschen", dependencies=[Depends(finance_admin)])
 async def delete_debtor(
     debtor_id: str,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -453,10 +468,10 @@ async def delete_debtor(
     try:
         # Check if debtor exists
         existing = db.execute(
-            text("SELECT id FROM domain_erp.debitors WHERE id = :debtor_id"),
-            {"debtor_id": debtor_id}
+            text("SELECT id FROM domain_erp.debitors WHERE id = :debtor_id AND tenant_id = :tenant_id"),
+            {"debtor_id": debtor_id, "tenant_id": tenant_id}
         ).fetchone()
-        
+
         if not existing:
             raise HTTPException(status_code=404, detail="Debtor not found")
         
@@ -464,10 +479,10 @@ async def delete_debtor(
         update_query = text("""
             UPDATE domain_erp.debitors
             SET is_active = false, updated_at = NOW()
-            WHERE id = :debtor_id
+            WHERE id = :debtor_id AND tenant_id = :tenant_id
         """)
-        
-        db.execute(update_query, {"debtor_id": debtor_id})
+
+        db.execute(update_query, {"debtor_id": debtor_id, "tenant_id": tenant_id})
         db.commit()
     except HTTPException:
         raise
