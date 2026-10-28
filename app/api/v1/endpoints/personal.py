@@ -8,14 +8,14 @@ from datetime import date, datetime, time
 from typing import Any, Literal
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Response
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.auth.deps import anmeldename, get_current_user, require_roles
-from app.core.akteur import gepruefter_akteur
+from app.core.akteur import gepruefter_akteur, gepruefter_akteur_aus_request
 from app.core.database import get_db
 from app.core.business_time import business_today
 from app.core.exceptions import ConflictError, EntityNotFoundError
@@ -245,7 +245,6 @@ class PayrollExportCreateIn(BaseModel):
     periodFrom: str
     periodTo: str
     targetSystem: str = Field(default="datev", max_length=40)
-    createdBy: str | None = Field(default=None, max_length=120)
 
 
 class PayrollExportItemOut(BaseModel):
@@ -2241,6 +2240,7 @@ async def list_payroll_exports(
 @router.post("/payroll-exports", response_model=PayrollExportOut, status_code=201, summary="Payroll export anlegen", dependencies=SCHREIBEN["PERSONAL"])
 async def create_payroll_export(
     payload: PayrollExportCreateIn,
+    request: Request,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
@@ -2260,7 +2260,7 @@ async def create_payroll_export(
         "status": "blocked" if blockers else "ready",
         "items": json.dumps([item.model_dump() for item in items]),
         "blockers": json.dumps([b.model_dump() for b in blockers]),
-        "created_by": payload.createdBy,
+        "created_by": gepruefter_akteur_aus_request(request),
     })
     return _payroll_export_from_row(row)
 

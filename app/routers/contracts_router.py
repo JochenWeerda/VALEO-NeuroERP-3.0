@@ -7,11 +7,12 @@ Liefert das von der Maske erwartete Format { items: [...] } in camelCase.
 from datetime import datetime
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.akteur import gepruefter_akteur_aus_request
 from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
 from app.infrastructure.models import AgrarContract, ContractAmendment, AmendmentTemplate
@@ -24,11 +25,9 @@ router = APIRouter(prefix="/api/contracts", tags=["contracts"])
 
 class AmendmentCreate(BaseModel):
     contractId: Optional[str] = Field(None, alias="contractId")
-    tenantId: Optional[str] = Field(None, alias="tenantId")
     type: str = Field("amendment")
     reason: str = Field(..., min_length=10)
     changes: dict[str, Any] = Field(default_factory=dict)
-    createdBy: Optional[str] = Field(None, alias="createdBy")
 
     model_config = {"populate_by_name": True}
 
@@ -314,11 +313,17 @@ async def list_amendments(
 async def create_amendment(
     contract_id: str,
     body: AmendmentCreate,
+    request: Request,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
-    """Amendment anlegen und zurückgeben (camelCase)."""
-    tid = body.tenantId or tenant_id
+    """Amendment anlegen und zurückgeben (camelCase).
+
+    Mandant und Urheber aus der Anmeldung; bis 28.10.2026 kamen sie aus dem Rumpf (``tenantId``, ``createdBy``), und
+    der Vertrag wurde nicht darauf geprueft, ob er dem Mandanten gehoert.
+    """
+    akteur = gepruefter_akteur_aus_request(request)
+    await get_contract(contract_id, db=db, tenant_id=tenant_id)  # 404, wenn der Vertrag nicht im Mandanten liegt
     if len(body.reason.strip()) < 10:
         raise HTTPException(status_code=400, detail="reason must be at least 10 characters")
     amendment = ContractAmendment(
@@ -328,8 +333,8 @@ async def create_amendment(
         reason=body.reason.strip(),
         status="pending",
         changes=body.changes or {},
-        tenant_id=tid,
-        created_by=body.createdBy,
+        tenant_id=tenant_id,
+        created_by=akteur,
     )
     db.add(amendment)
     db.commit()

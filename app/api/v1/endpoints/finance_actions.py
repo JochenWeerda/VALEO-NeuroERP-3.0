@@ -459,6 +459,7 @@ class BuchungsuebergabeExportSummary(BaseModel):
     response_model=BuchungsuebergabeExportOut, dependencies=[Depends(finance_read)])
 async def buchungsuebergabe_export(
     body: BuchungsuebergabeExportRequest,
+    request: Request,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
@@ -554,7 +555,7 @@ async def buchungsuebergabe_export(
         content_hash,
         storage_key_export,
         file_name=dateiname,
-        created_by=body.bediener,
+        created_by=gepruefter_akteur_aus_request(request),  # wer exportiert; bediener ist nur der Filter
         doc_type="fibu_export",
         content=content_bytes,
     )

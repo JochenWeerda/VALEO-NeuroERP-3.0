@@ -121095,18 +121095,6 @@
       },
       "PayrollExportCreateIn": {
         "properties": {
-          "createdBy": {
-            "anyOf": [
-              {
-                "maxLength": 120,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Createdby"
-          },
           "periodFrom": {
             "title": "Periodfrom",
             "type": "string"
@@ -188616,32 +188604,10 @@
             ],
             "title": "Contractid"
           },
-          "createdBy": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Createdby"
-          },
           "reason": {
             "minLength": 10,
             "title": "Reason",
             "type": "string"
-          },
-          "tenantId": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Tenantid"
           },
           "type": {
             "default": "amendment",
@@ -189231,7 +189197,7 @@
         ]
       },
       "post": {
-        "description": "Amendment anlegen und zurückgeben (camelCase).",
+        "description": "Amendment anlegen und zurückgeben (camelCase).\n\nMandant und Urheber aus der Anmeldung; bis 28.10.2026 kamen sie aus dem Rumpf (``tenantId``, ``createdBy``), und\nder Vertrag wurde nicht darauf geprueft, ob er dem Mandanten gehoert.",
         "operationId": "create_amendment_api_contracts__contract_id__amendments_post",
         "parameters": [
           {

@@ -19,6 +19,7 @@ from app.core.identity_context import current_identity
 
 from ....core.database import get_db
 from ....core.tenant import get_tenant_id
+from app.core.akteur import gepruefter_akteur_aus_request
 from ....core.config import settings
 from ....core.fibu_audit import log_fibu_audit
 from pydantic import BaseModel
@@ -964,11 +965,14 @@ async def reverse_settlement(
             dependencies=[Depends(finance_write)])
 async def action_mahnen(
     entity_id: str,
+    request: Request,
     body: dict = Body(default_factory=dict),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
     # Bis 07.10.2026 meldete diese Aktion "Mahnung erstellt", ohne etwas zu erstellen.
+    # Bis 28.10.2026 kam der Bearbeiter aus dem Rumpf ("operator", sonst "Maske"); jetzt aus der Anmeldung.
+    akteur = gepruefter_akteur_aus_request(request)
     from app.services.finance_mahnstufe_service import eskaliere_mahnstufe
     from app.services.mask_action_runtime_service import run_delegated_mask_action
 
@@ -985,7 +989,7 @@ async def action_mahnen(
         return [] if ok else [{"field": "_entity", "message": grund, "severity": "blocking"}]
 
     async def mahnen(db_: Session, payload: dict, eid: str, tid: str) -> str:
-        stufe = eskaliere_mahnstufe(db_, await nummer(db_, eid, tid), tid, str(payload.get("operator") or "Maske"))
+        stufe = eskaliere_mahnstufe(db_, await nummer(db_, eid, tid), tid, akteur)
         return f"Mahnstufe {stufe.get('stufe')} gesetzt."
 
     result = await run_delegated_mask_action(
