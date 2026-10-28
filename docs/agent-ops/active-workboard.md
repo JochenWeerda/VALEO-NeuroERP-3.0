@@ -19962,3 +19962,6 @@ Nutzerauftrag: alle uebrigen offenen Aenderungen commit-/pushfaehig abschliessen
 
 
 **NODE-FORGE-UPSTREAM-20261028 - reserviert, Codex Lead:** FaelligeReviewbelegtjetztNPMUpstream1.4.2. BesitzzielgenaueRootOverride/Lock,Retirementlokaler1.4.0Patch/Review/ALLOWED-SonderfallundderenTests. VorEntfernunggepatchteAngriffstestsgegenIntegritaetsgepruefteUpstreambytes ausfuehren;altesPaketalsGegenprobeerhalten. BracesPruefungseparat,keineFristverlaengerungohneinhaltlicheAbnahme. KeinProjektReinstallinfremdeModule/keinDB.
+
+
+**DEEPMERGE-SECURITY-20261028 - reserviert, Codex Lead:** FrischerLockauditnachForge1.4.2hatkeineHigh/Critical-Befunde,abereinenam27.10aktualisiertenLow-BefundGHSA-gcqx-w48m-w2h4(PrototypvergiftungreturnedObject,keinUpstreamfix). KeinSeverityIgnore. Besitzkleiner4.3.1QuellpatchbeiderEingaben,echteVorherNachher/Kompabilitaetstests,exaktgehashtePolicyundgepatchteLockbindung. AndereVersionen/API-Verbrauchernichtglobalhochziehen. KeineDB/ProjektmoduleandererAgentenaendern.
