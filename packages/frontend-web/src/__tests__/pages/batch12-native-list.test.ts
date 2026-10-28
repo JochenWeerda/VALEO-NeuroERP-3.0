@@ -35,7 +35,7 @@ const BATCH12: Array<[string, string, string]> = [
   ['admin/monitoring/historie.tsx', 'admin/monitoring/historie', 'NativeListPage'],
   ['admin/monitoring/regeln.tsx', 'admin/monitoring/regeln', 'NativeListPage'],
   ['admin/omnichannel-handelskonflikt.tsx', 'admin/omnichannel-handelskonflikt', 'NativeListPage'],
-  ['admin/AuditLogPage.tsx', 'admin/audit-log', 'NativeListPage'],
+  ['admin/audit-log.tsx', 'admin/audit-log', 'NativeListPage'],
   ['admin/BelegfolgekonfigPage.tsx', 'admin/belegfolgekonfig', 'NativeListPage'],
   ['agrar/daily-prices.tsx', 'agrar/daily-prices', 'NativeListPage'],
   ['agrar/duenger-rechner.tsx', 'agrar/duenger-rechner', 'NativeListPage'],
