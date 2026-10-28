@@ -120,10 +120,10 @@
     "app/seeds/inventory_seed.py:20"
    ],
    "null_stellen": [
-    "app/api/v1/endpoints/compat.py:1859",
-    "app/api/v1/endpoints/compat.py:1866",
-    "app/api/v1/endpoints/compat.py:1873",
-    "app/api/v1/endpoints/compat.py:1896"
+    "app/api/v1/endpoints/compat.py:1850",
+    "app/api/v1/endpoints/compat.py:1857",
+    "app/api/v1/endpoints/compat.py:1864",
+    "app/api/v1/endpoints/compat.py:1887"
    ],
    "gemeinsam_stellen": [],
    "daten": {
@@ -187,6 +187,7 @@
     "app/core/gobd_retention.py",
     "app/core/psm_protokoll.py",
     "app/core/screen_definitions_listen.py",
+    "app/documents/position_extraction.py",
     "app/infrastructure/models/__init__.py",
     "app/infrastructure/models/agrar_models.py",
     "app/integrations/bvl_psm_client.py",
@@ -220,7 +221,7 @@
     "token": 5
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/compliance.py:849",
+    "app/api/v1/endpoints/compliance.py:835",
     "app/seeds/inventory_seed.py:20"
    ],
    "null_stellen": [],
@@ -294,15 +295,15 @@
     "token": 7
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/compliance.py:849",
+    "app/api/v1/endpoints/compliance.py:835",
     "app/domains/agrar/api/saatgut.py:21",
     "app/seeds/inventory_seed.py:20"
    ],
    "null_stellen": [
-    "app/api/v1/endpoints/compat.py:1859",
-    "app/api/v1/endpoints/compat.py:1866",
-    "app/api/v1/endpoints/compat.py:1873",
-    "app/api/v1/endpoints/compat.py:1896"
+    "app/api/v1/endpoints/compat.py:1850",
+    "app/api/v1/endpoints/compat.py:1857",
+    "app/api/v1/endpoints/compat.py:1864",
+    "app/api/v1/endpoints/compat.py:1887"
    ],
    "gemeinsam_stellen": [],
    "daten": {
@@ -351,7 +352,7 @@
     "token": 2
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/compliance.py:849",
+    "app/api/v1/endpoints/compliance.py:835",
     "app/services/calendar_projection_service.py:911"
    ],
    "null_stellen": [],
@@ -610,10 +611,10 @@
    },
    "standardmandant_stellen": [],
    "null_stellen": [
-    "app/services/mcp_execution_service.py:3155"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3155"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "daten": {
     "zeilen": 1298,
@@ -808,7 +809,7 @@
     "token": 5
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py:978"
+    "app/api/v1/endpoints/mask_frontend_bridges.py:965"
    ],
    "null_stellen": [],
    "gemeinsam_stellen": [],
@@ -922,7 +923,7 @@
     "token": 1
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py:978"
+    "app/api/v1/endpoints/mask_frontend_bridges.py:965"
    ],
    "null_stellen": [],
    "gemeinsam_stellen": [],
@@ -997,7 +998,7 @@
     "token": 2
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py:978"
+    "app/api/v1/endpoints/mask_frontend_bridges.py:965"
    ],
    "null_stellen": [],
    "gemeinsam_stellen": [],
@@ -1066,11 +1067,11 @@
    ],
    "null_stellen": [
     "app/api/v1/endpoints/compliance_dsgvo.py:205",
-    "app/services/mcp_execution_service.py:3155"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "gemeinsam_stellen": [
     "app/api/v1/endpoints/compliance_dsgvo.py:205",
-    "app/services/mcp_execution_service.py:3155"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "daten": {
     "zeilen": 0,
@@ -1129,7 +1130,7 @@
    },
    "standardmandant_stellen": [
     "app/api/v1/endpoints/crm_reports.py:27",
-    "app/api/v1/endpoints/mask_frontend_bridges.py:978"
+    "app/api/v1/endpoints/mask_frontend_bridges.py:965"
    ],
    "null_stellen": [],
    "gemeinsam_stellen": [],
@@ -1275,7 +1276,7 @@
    "standardmandant_stellen": [
     "app/api/v1/endpoints/articles.py:42",
     "app/api/v1/endpoints/customer_extensions.py:24",
-    "app/api/v1/endpoints/mask_frontend_bridges.py:978",
+    "app/api/v1/endpoints/mask_frontend_bridges.py:965",
     "app/domains/crm/api/customers.py:19",
     "app/integrations/adapters/superglue/tool_sync.py:427",
     "services/crm-core/app/api/v1/endpoints/activities.py:20",
@@ -1301,16 +1302,16 @@
     "services/crm-core/app/api/v1/endpoints/leads.py:127"
    ],
    "null_stellen": [
-    "app/api/v1/endpoints/compat.py:1859",
-    "app/api/v1/endpoints/compat.py:1866",
-    "app/api/v1/endpoints/compat.py:1873",
-    "app/api/v1/endpoints/compat.py:1896",
+    "app/api/v1/endpoints/compat.py:1850",
+    "app/api/v1/endpoints/compat.py:1857",
+    "app/api/v1/endpoints/compat.py:1864",
+    "app/api/v1/endpoints/compat.py:1887",
     "app/api/v1/endpoints/compliance_dsgvo.py:205",
-    "app/services/mcp_execution_service.py:3155"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "gemeinsam_stellen": [
     "app/api/v1/endpoints/compliance_dsgvo.py:205",
-    "app/services/mcp_execution_service.py:3155"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "daten": {
     "zeilen": 6,
@@ -1465,16 +1466,16 @@
     "services/crm-core/app/api/v1/endpoints/leads.py:127"
    ],
    "null_stellen": [
-    "app/api/v1/endpoints/compat.py:1859",
-    "app/api/v1/endpoints/compat.py:1866",
-    "app/api/v1/endpoints/compat.py:1873",
-    "app/api/v1/endpoints/compat.py:1896",
+    "app/api/v1/endpoints/compat.py:1850",
+    "app/api/v1/endpoints/compat.py:1857",
+    "app/api/v1/endpoints/compat.py:1864",
+    "app/api/v1/endpoints/compat.py:1887",
     "app/api/v1/endpoints/compliance_dsgvo.py:205",
-    "app/services/mcp_execution_service.py:3155"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "gemeinsam_stellen": [
     "app/api/v1/endpoints/compliance_dsgvo.py:205",
-    "app/services/mcp_execution_service.py:3155"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "daten": {
     "zeilen": 0,
@@ -1533,10 +1534,10 @@
     "services/crm-core/app/api/v1/endpoints/activities.py:20"
    ],
    "null_stellen": [
-    "app/services/mcp_execution_service.py:3155"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3155"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "daten": {
     "zeilen": 0,
@@ -1639,16 +1640,16 @@
     "services/crm-core/app/api/v1/endpoints/leads.py:127"
    ],
    "null_stellen": [
-    "app/api/v1/endpoints/compat.py:1859",
-    "app/api/v1/endpoints/compat.py:1866",
-    "app/api/v1/endpoints/compat.py:1873",
-    "app/api/v1/endpoints/compat.py:1896",
+    "app/api/v1/endpoints/compat.py:1850",
+    "app/api/v1/endpoints/compat.py:1857",
+    "app/api/v1/endpoints/compat.py:1864",
+    "app/api/v1/endpoints/compat.py:1887",
     "app/api/v1/endpoints/compliance_dsgvo.py:205",
-    "app/services/mcp_execution_service.py:3155"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "gemeinsam_stellen": [
     "app/api/v1/endpoints/compliance_dsgvo.py:205",
-    "app/services/mcp_execution_service.py:3155"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "daten": {
     "zeilen": 97,
@@ -1802,13 +1803,13 @@
    },
    "standardmandant_stellen": [
     "app/api/v1/endpoints/chart_of_accounts.py:36",
-    "app/api/v1/endpoints/compliance.py:849"
+    "app/api/v1/endpoints/compliance.py:835"
    ],
    "null_stellen": [
-    "app/api/v1/endpoints/compat.py:1859",
-    "app/api/v1/endpoints/compat.py:1866",
-    "app/api/v1/endpoints/compat.py:1873",
-    "app/api/v1/endpoints/compat.py:1896",
+    "app/api/v1/endpoints/compat.py:1850",
+    "app/api/v1/endpoints/compat.py:1857",
+    "app/api/v1/endpoints/compat.py:1864",
+    "app/api/v1/endpoints/compat.py:1887",
     "app/api/v1/endpoints/financial_reports.py:178",
     "app/api/v1/endpoints/financial_reports.py:282",
     "app/api/v1/endpoints/financial_reports.py:325"
@@ -1927,10 +1928,10 @@
    },
    "standardmandant_stellen": [],
    "null_stellen": [
-    "app/services/mcp_execution_service.py:3155"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3155"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "daten": {
     "zeilen": 0,
@@ -2003,7 +2004,7 @@
     "token": 2
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py:978"
+    "app/api/v1/endpoints/mask_frontend_bridges.py:965"
    ],
    "null_stellen": [],
    "gemeinsam_stellen": [],
@@ -2083,27 +2084,27 @@
     "app/services/scheduler_service.py"
    ],
    "identitaet": {
-    "kopfzeile": 4,
+    "kopfzeile": 2,
     "nutzlast": 3,
     "standardmandant": 2,
-    "token": 22
+    "token": 24
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py:978",
+    "app/api/v1/endpoints/mask_frontend_bridges.py:965",
     "app/api/v1/endpoints/sales_delivery_notes.py:54"
    ],
    "null_stellen": [
-    "app/api/v1/endpoints/compat.py:1859",
-    "app/api/v1/endpoints/compat.py:1866",
-    "app/api/v1/endpoints/compat.py:1873",
-    "app/api/v1/endpoints/compat.py:1896",
+    "app/api/v1/endpoints/compat.py:1850",
+    "app/api/v1/endpoints/compat.py:1857",
+    "app/api/v1/endpoints/compat.py:1864",
+    "app/api/v1/endpoints/compat.py:1887",
     "app/api/v1/endpoints/finance_invoices.py:72",
-    "app/services/mcp_execution_service.py:3155"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "gemeinsam_stellen": [
     "app/api/v1/endpoints/finance_invoices.py:72",
     "app/api/v1/endpoints/sales_credit_notes.py:563",
-    "app/services/mcp_execution_service.py:3155"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "daten": {
     "zeilen": 25,
@@ -2279,10 +2280,13 @@
     "app/api/v1/endpoints/mask_frontend_bridges.py",
     "app/api/v1/endpoints/supplier_portal.py",
     "app/core/database.py",
+    "app/documents/inbox_service.py",
     "app/infrastructure/models/__init__.py",
     "app/infrastructure/models/l3c_models.py",
     "app/services/customer_reference.py",
-    "app/services/mcp_execution_service.py"
+    "app/services/mcp_execution_service.py",
+    "app/workspace/agrar_chain.py",
+    "app/workspace/agrar_chain_router.py"
    ],
    "schreiber": [
     "app/api/v1/endpoints/agrar_contracts.py",
@@ -2296,16 +2300,16 @@
    "worker": [],
    "identitaet": {
     "standardmandant": 1,
-    "token": 5
+    "token": 6
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py:978"
+    "app/api/v1/endpoints/mask_frontend_bridges.py:965"
    ],
    "null_stellen": [
-    "app/services/mcp_execution_service.py:3155"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3155"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "daten": {
     "zeilen": 3,
@@ -2345,10 +2349,10 @@
    "identitaet": {},
    "standardmandant_stellen": [],
    "null_stellen": [
-    "app/services/mcp_execution_service.py:3155"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3155"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "daten": {
     "zeilen": 0,
@@ -2388,10 +2392,10 @@
    "identitaet": {},
    "standardmandant_stellen": [],
    "null_stellen": [
-    "app/services/mcp_execution_service.py:3155"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3155"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "daten": {
     "zeilen": 0,
@@ -2440,10 +2444,10 @@
    },
    "standardmandant_stellen": [],
    "null_stellen": [
-    "app/services/mcp_execution_service.py:3155"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3155"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "daten": {
     "zeilen": 0,
@@ -2488,10 +2492,10 @@
    },
    "standardmandant_stellen": [],
    "null_stellen": [
-    "app/services/mcp_execution_service.py:3155"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3155"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "daten": {
     "zeilen": 0,
@@ -2541,10 +2545,10 @@
    },
    "standardmandant_stellen": [],
    "null_stellen": [
-    "app/services/mcp_execution_service.py:3155"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3155"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "daten": {
     "zeilen": 3,
@@ -2626,10 +2630,10 @@
    },
    "standardmandant_stellen": [],
    "null_stellen": [
-    "app/services/mcp_execution_service.py:3155"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3155"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "daten": {
     "zeilen": 4,
@@ -2684,10 +2688,10 @@
    },
    "standardmandant_stellen": [],
    "null_stellen": [
-    "app/services/mcp_execution_service.py:3155"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3155"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "daten": {
     "zeilen": 50,
@@ -2832,10 +2836,10 @@
     "services/inventory/app/db/models.py:32"
    ],
    "null_stellen": [
-    "app/api/v1/endpoints/compat.py:1859",
-    "app/api/v1/endpoints/compat.py:1866",
-    "app/api/v1/endpoints/compat.py:1873",
-    "app/api/v1/endpoints/compat.py:1896"
+    "app/api/v1/endpoints/compat.py:1850",
+    "app/api/v1/endpoints/compat.py:1857",
+    "app/api/v1/endpoints/compat.py:1864",
+    "app/api/v1/endpoints/compat.py:1887"
    ],
    "gemeinsam_stellen": [],
    "daten": {
@@ -3089,12 +3093,12 @@
     "app/api/v1/endpoints/logistics_freight.py:165",
     "app/api/v1/endpoints/logistics_freight.py:218",
     "app/api/v1/endpoints/logistics_freight.py:233",
-    "app/services/mcp_execution_service.py:3155"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "gemeinsam_stellen": [
     "app/api/v1/endpoints/logistics_freight.py:68",
     "app/api/v1/endpoints/logistics_freight.py:162",
-    "app/services/mcp_execution_service.py:3155"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "daten": {
     "zeilen": 0,
@@ -3443,6 +3447,7 @@
    ],
    "leser": [
     "app/api/v1/endpoints/crm_360_reads.py",
+    "app/documents/inbox_service.py",
     "app/domains/operations/models.py",
     "app/services/calendar_projection_service.py",
     "app/services/contract_engagement_service.py",
@@ -3452,7 +3457,8 @@
     "app/services/docflow_source_proposals.py",
     "app/services/kontrakt_disposition_service.py",
     "app/services/position_service.py",
-    "app/services/preisfindung_service.py"
+    "app/services/preisfindung_service.py",
+    "app/workspace/agrar_chain.py"
    ],
    "schreiber": [
     "app/api/v1/endpoints/kontrakte.py",
@@ -3568,15 +3574,15 @@
     "token": 14
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/compliance.py:849",
+    "app/api/v1/endpoints/compliance.py:835",
     "app/api/v1/endpoints/reklamation_api.py:121",
     "app/infrastructure/models/futtermittel_models.py:92"
    ],
    "null_stellen": [
-    "app/api/v1/endpoints/compat.py:1859",
-    "app/api/v1/endpoints/compat.py:1866",
-    "app/api/v1/endpoints/compat.py:1873",
-    "app/api/v1/endpoints/compat.py:1896"
+    "app/api/v1/endpoints/compat.py:1850",
+    "app/api/v1/endpoints/compat.py:1857",
+    "app/api/v1/endpoints/compat.py:1864",
+    "app/api/v1/endpoints/compat.py:1887"
    ],
    "gemeinsam_stellen": [
     "app/finance/steuerschluessel.py:281"
@@ -3848,10 +3854,10 @@
    },
    "standardmandant_stellen": [],
    "null_stellen": [
-    "app/services/mcp_execution_service.py:3155"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3155"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "daten": {
     "zeilen": 1,
@@ -3880,7 +3886,8 @@
     "app/domains/operations/models.py"
    ],
    "schreiber": [
-    "app/api/v1/endpoints/compliance.py"
+    "app/api/v1/endpoints/compliance.py",
+    "app/services/compliance_service.py"
    ],
    "worker": [],
    "identitaet": {
@@ -3888,7 +3895,7 @@
     "token": 1
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/compliance.py:849"
+    "app/api/v1/endpoints/compliance.py:835"
    ],
    "null_stellen": [],
    "gemeinsam_stellen": [],
@@ -3929,7 +3936,7 @@
     "token": 3
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py:978",
+    "app/api/v1/endpoints/mask_frontend_bridges.py:965",
     "app/api/v1/endpoints/reklamation_api.py:121"
    ],
    "null_stellen": [],
@@ -4093,13 +4100,13 @@
     "token": 10
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py:978"
+    "app/api/v1/endpoints/mask_frontend_bridges.py:965"
    ],
    "null_stellen": [
-    "app/api/v1/endpoints/compat.py:1859",
-    "app/api/v1/endpoints/compat.py:1866",
-    "app/api/v1/endpoints/compat.py:1873",
-    "app/api/v1/endpoints/compat.py:1896",
+    "app/api/v1/endpoints/compat.py:1850",
+    "app/api/v1/endpoints/compat.py:1857",
+    "app/api/v1/endpoints/compat.py:1864",
+    "app/api/v1/endpoints/compat.py:1887",
     "app/api/v1/endpoints/compliance_dsgvo.py:205"
    ],
    "gemeinsam_stellen": [

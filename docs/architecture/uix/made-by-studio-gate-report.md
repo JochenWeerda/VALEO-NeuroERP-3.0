@@ -1,6 +1,6 @@
 # Made-by-Studio Gate-Report
 
-Stand: 2026-10-27 (erzeugt mit `python scripts/verify_made_by_studio_gates.py`).
+Stand: 2026-10-28 (erzeugt mit `python scripts/verify_made_by_studio_gates.py`).
 
 Bezug: [Made by Studio — Qualitätsversprechen](made-by-studio-qualitaetsversprechen.md).
 
