@@ -992,6 +992,11 @@
    "live": 0,
    "code": []
   },
+  "domain_erp.bank_accounts": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
   "domain_erp.bank_matches": {
    "frisch": 0,
    "live": 0,
@@ -1042,6 +1047,16 @@
    "live": 0,
    "code": []
   },
+  "domain_erp.creditors": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_erp.debitors": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
   "domain_erp.debtors": {
    "frisch": 0,
    "live": 0,
@@ -1062,6 +1077,11 @@
    "live": 0,
    "code": []
   },
+  "domain_erp.dunning_notices": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
   "domain_erp.dunning_rules": {
    "frisch": 0,
    "live": 0,
@@ -1077,7 +1097,17 @@
    "live": 0,
    "code": []
   },
+  "domain_erp.fibu_connector_run_items": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
   "domain_erp.fibu_connector_runs": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_erp.gift_cards": {
    "frisch": 0,
    "live": 0,
    "code": []
@@ -1102,6 +1132,11 @@
    "code": []
   },
   "domain_erp.matching_rules": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_erp.open_items": {
    "frisch": 0,
    "live": 0,
    "code": []

@@ -3,19 +3,19 @@
  "summary": {
   "tables": 777,
   "by_class": {
-   "A": 683,
-   "B": 26,
-   "C": 14,
+   "A": 687,
+   "B": 23,
+   "C": 13,
    "D": 54
   },
-  "rls_enabled": 647,
+  "rls_enabled": 654,
   "tenant_types": {
    "character varying": 333,
    "character varying(100)": 9,
    "character varying(120)": 41,
    "character varying(128)": 1,
    "character varying(255)": 1,
-   "character varying(36)": 82,
+   "character varying(36)": 83,
    "character varying(50)": 1,
    "character varying(64)": 103,
    "character varying(80)": 24,
@@ -1860,11 +1860,11 @@
   },
   {
    "table": "domain_erp.bank_accounts",
-   "class": "B",
+   "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_erp.bank_matches",
@@ -1956,19 +1956,19 @@
   },
   {
    "table": "domain_erp.creditors",
-   "class": "B",
+   "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_erp.debitors",
-   "class": "B",
+   "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_erp.debtors",
@@ -2006,9 +2006,9 @@
    "table": "domain_erp.dunning_notices",
    "class": "A",
    "tenant_type": "character varying(64)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_erp.dunning_rules",
@@ -2036,14 +2036,11 @@
   },
   {
    "table": "domain_erp.fibu_connector_run_items",
-   "class": "C",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying(36)",
+   "rls": true,
    "force_rls": false,
-   "policies": 0,
-   "tenant_parents": [
-    "domain_erp.fibu_connector_runs"
-   ]
+   "policies": 4
   },
   {
    "table": "domain_erp.fibu_connector_runs",
@@ -2057,9 +2054,9 @@
    "table": "domain_erp.gift_cards",
    "class": "A",
    "tenant_type": "character varying(64)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_erp.journal_entries",
@@ -2105,9 +2102,9 @@
    "table": "domain_erp.open_items",
    "class": "A",
    "tenant_type": "character varying(64)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_erp.payment_returns",

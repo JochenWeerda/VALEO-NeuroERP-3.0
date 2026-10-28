@@ -65312,7 +65312,7 @@
         "type": "object"
       },
       "ExportListFilter": {
-        "description": "Optional filter for export (e.g. date_from, tenant_id).",
+        "description": "Optional filter for export (e.g. date_from).\n\n``tenant_id`` darf nur den eigenen Mandanten nennen; bis 28.10.2026 waehlte er den Mandanten\ndes Exports (Debitoren, Kreditoren, Nutzer, Prueflog eines fremden Mandanten).",
         "properties": {
           "action": {
             "anyOf": [
@@ -297903,7 +297903,7 @@
     },
     "/api/v1/finance/creditors/{creditor_id}/balance": {
       "get": {
-        "description": "OP-Saldo eines Kreditors: offener Betrag, Anzahl OPs, ältester OP.",
+        "description": "OP-Saldo eines Kreditors: offener Betrag, Anzahl OPs, ältester OP.\n\nBis 28.10.2026 las die Abfrage ``amount``, ``paid_amount`` und ``status`` — Spalten, die\n``offene_posten`` nicht hat; jeder Aufruf endete mit 500.",
         "operationId": "get_creditor_balance_api_v1_finance_creditors__creditor_id__balance_get",
         "parameters": [
           {
@@ -298692,7 +298692,7 @@
         ]
       },
       "post": {
-        "description": "Create a new debtor.",
+        "description": "Create a new debtor.\n\nDer Mandant kommt aus dem Token; ein abweichender ``tenant_id`` im Rumpf wird abgewiesen\n(bis 28.10.2026 wurde der Debitor unter dem Mandanten aus dem Rumpf angelegt).",
         "operationId": "create_debtor_api_v1_finance_debtors__post",
         "requestBody": {
           "content": {
@@ -298952,7 +298952,7 @@
     },
     "/api/v1/finance/debtors/{debtor_id}/balance": {
       "get": {
-        "description": "OP-Saldo eines Debitors: offener Betrag, Anzahl OPs, ältester OP.",
+        "description": "OP-Saldo eines Debitors: offener Betrag, Anzahl OPs, ältester OP.\n\nBis 28.10.2026 las die Abfrage ``amount``, ``paid_amount`` und ``status`` — Spalten, die\n``offene_posten`` nicht hat; jeder Aufruf endete mit 500. Die OP-Schreiber setzen den\nKunden (``kunde_id``), nicht den Debitor; beide Verweise zaehlen.",
         "operationId": "get_debtor_balance_api_v1_finance_debtors__debtor_id__balance_get",
         "parameters": [
           {

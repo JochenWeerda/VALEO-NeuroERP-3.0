@@ -2,12 +2,12 @@
  "_note": "Generiert von scripts/rls_rollout.py aus docs/admin/rls-inventory.json; nicht von Hand aendern.",
  "summary": {
   "ready": 0,
-  "pending": 39,
+  "pending": 36,
   "reasons": {
    "dienst": 10,
    "mandant_ermitteln": 1,
-   "standardmandant": 22,
-   "mandant_null": 19,
+   "standardmandant": 20,
+   "mandant_null": 18,
    "uebergreifend": 0,
    "identitaet": 4
   }
@@ -58,17 +58,8 @@
   "domain_dev_mock.mock_sessions": [
    "identitaet"
   ],
-  "domain_erp.dunning_notices": [
-   "mandant_null"
-  ],
-  "domain_erp.gift_cards": [
-   "standardmandant"
-  ],
   "domain_erp.offene_posten": [
    "mandant_null",
-   "standardmandant"
-  ],
-  "domain_erp.open_items": [
    "standardmandant"
   ],
   "domain_inventory.agrar_contracts": [

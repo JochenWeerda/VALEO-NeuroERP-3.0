@@ -15,6 +15,7 @@ from sqlalchemy import text
 
 from ....core.database import get_db
 from ....core.tenant import get_tenant_id
+from ....finance.op_saldo import OP_SALDO_SQL
 from ....core.data_quality_enforcement import (
     build_dq_error_detail,
     evaluate_creditor_datensatz,
@@ -386,7 +387,11 @@ async def get_creditor_balance(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    """OP-Saldo eines Kreditors: offener Betrag, Anzahl OPs, ältester OP."""
+    """OP-Saldo eines Kreditors: offener Betrag, Anzahl OPs, ältester OP.
+
+    Bis 28.10.2026 las die Abfrage ``amount``, ``paid_amount`` und ``status`` — Spalten, die
+    ``offene_posten`` nicht hat; jeder Aufruf endete mit 500.
+    """
     existing = db.execute(
         text(
             "SELECT id FROM domain_erp.creditors WHERE id = :id AND tenant_id = :tenant_id"
@@ -397,15 +402,8 @@ async def get_creditor_balance(
         raise HTTPException(status_code=404, detail="Kreditor nicht gefunden")
     try:
         row = db.execute(
-            text("""
-                SELECT
-                    COALESCE(SUM(amount - COALESCE(paid_amount, 0)), 0) AS open_balance,
-                    COUNT(*) AS open_item_count,
-                    MIN(due_date) AS oldest_due_date
-                FROM domain_erp.offene_posten
-                WHERE creditor_id = :creditor_id AND status = 'open'
-            """),
-            {"creditor_id": creditor_id},
+            text(OP_SALDO_SQL.format(verweis="creditor_id = :creditor_id")),
+            {"creditor_id": creditor_id, "tenant_id": tenant_id, "konto_typ": "kreditoren"},
         ).fetchone()
         return {
             "creditor_id": creditor_id,
