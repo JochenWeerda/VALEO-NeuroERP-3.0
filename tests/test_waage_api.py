@@ -21,7 +21,8 @@ from app.main import app
 from conftest import skip_if_db_unavailable
 from app.api.v1.endpoints.waage import _serialize_value, _to_list, router as waage_router
 from app.core.database import get_db
-from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
+from test_fuhrpark_isolation_effects import db, pruefstand  # noqa: F401  migrierter Pruefstand
+from testgrenze import ALLE_FACHROLLEN, ersetze_mandant, ersetze_nutzer
 
 _NOW = datetime(2026, 5, 5, 8, 0, tzinfo=timezone.utc)
 
@@ -68,7 +69,7 @@ class _WaageRepo:
         return next((i for i in self._items if i.id == eid), None)
 
     def create(self, data):
-        if data.get("_raise"):
+        if data.get("standort") == "boom":
             raise ValueError("boom")
         return _fw("W-new")
 
@@ -127,12 +128,13 @@ def _client_ctx(waagen=None, wiegungen=None):
     """Context manager that keeps repo patches alive for the lifetime of the client."""
     wr = _WaageRepo(waagen)
     wgr = _WiegungRepo(wiegungen)
-    with _mock_patch("app.api.v1.endpoints.waage.WaageRepository", lambda db: wr), \
-         _mock_patch("app.api.v1.endpoints.waage.WiegungRepository", lambda db: wgr), \
+    with _mock_patch("app.api.v1.endpoints.waage.WaageRepository", lambda db, tenant_id: wr), \
+         _mock_patch("app.api.v1.endpoints.waage.WiegungRepository", lambda db, tenant_id: wgr), \
          _mock_patch("app.api.v1.endpoints.waage._to_dict", _mock_to_dict):
         _app = FastAPI()
         _app.include_router(waage_router)
         ersetze_nutzer(_app, *ALLE_FACHROLLEN)  # Schreibwege pruefen die Bereichsrolle (19.10.2026)
+        ersetze_mandant(_app, "test-tenant")
         _app.dependency_overrides[get_db] = lambda: MagicMock()
         yield TestClient(_app), wgr
 
@@ -141,13 +143,14 @@ def _client(waagen=None, wiegungen=None):
     """Returns (client, wgr) with patches already entered (used inside `with` blocks in tests)."""
     wr = _WaageRepo(waagen)
     wgr = _WiegungRepo(wiegungen)
-    patcher_w = _mock_patch("app.api.v1.endpoints.waage.WaageRepository", lambda db: wr)
-    patcher_wg = _mock_patch("app.api.v1.endpoints.waage.WiegungRepository", lambda db: wgr)
+    patcher_w = _mock_patch("app.api.v1.endpoints.waage.WaageRepository", lambda db, tenant_id: wr)
+    patcher_wg = _mock_patch("app.api.v1.endpoints.waage.WiegungRepository", lambda db, tenant_id: wgr)
     patcher_w.start()
     patcher_wg.start()
     _app = FastAPI()
     _app.include_router(waage_router)
     ersetze_nutzer(_app, *ALLE_FACHROLLEN)  # Schreibwege pruefen die Bereichsrolle (19.10.2026)
+    ersetze_mandant(_app, "test-tenant")
     _app.dependency_overrides[get_db] = lambda: MagicMock()
     c = TestClient(_app)
     # Stop after client creation so patches stay active through requests made on c
@@ -162,9 +165,18 @@ client = TestClient(app, raise_server_exceptions=False)
 AUTH = {"Authorization": "Bearer dev-token", "X-Tenant-ID": "test-tenant"}
 
 
+@pytest.fixture
+def _migrierter_pruefstand(db):  # noqa: F811
+    """HTTP-Tests gegen ``app.main`` auf der migrierten Pruefstand-Verbindung (Savepoint je Test)."""
+    app.dependency_overrides[get_db] = lambda: db
+    yield
+    app.dependency_overrides.pop(get_db, None)
+
+
 # ── Waagen ──────────────────────────────────────────────────────
 
 
+@pytest.mark.usefixtures("_migrierter_pruefstand")
 class TestWaagenList:
     """GET /waage/waagen"""
 
@@ -186,6 +198,7 @@ class TestWaagenList:
         assert isinstance(r.json(), list)
 
 
+@pytest.mark.usefixtures("_migrierter_pruefstand")
 class TestWaagenCRUD:
     """POST/GET/PATCH/DELETE /waage/waagen"""
 
@@ -196,16 +209,18 @@ class TestWaagenCRUD:
 
     def test_create_waage(self):
         payload = {
-            "id": "WAAGE-TEST-001",
-            "waage_name": "Testwaage COV-INV-002",
             "standort": "Hauptlager",
+            "typ": "LKW-Waage",
             "status": "aktiv",
             "max_kapazitaet": 60000,
         }
-        r = client.post("/api/v1/waage/waagen", headers=AUTH, json=payload)
+        # Unbekannte Felder sind ein Eingabefehler (bis 28.10.2026 TypeError -> 400)
+        r = client.post("/api/v1/waage/waagen", headers=AUTH, json={**payload, "waage_name": "Testwaage"})
         skip_if_db_unavailable(r)
-        if r.status_code not in (201, 400, 500):
-            pytest.fail(f"Unexpected status {r.status_code}: {r.text}")
+        assert r.status_code == 422 and "waage_name" in r.text
+        r = client.post("/api/v1/waage/waagen", headers=AUTH, json=payload)
+        assert r.status_code == 201, r.text
+        assert r.json()["tenant_id"] == "test-tenant"
 
     def test_patch_nonexistent_404(self):
         r = client.patch(
@@ -225,6 +240,7 @@ class TestWaagenCRUD:
 # ── Wiegungen ───────────────────────────────────────────────────
 
 
+@pytest.mark.usefixtures("_migrierter_pruefstand")
 class TestWiegungenList:
     """GET /waage/wiegungen"""
 
@@ -250,6 +266,7 @@ class TestWiegungenList:
         assert r.status_code == 200
 
 
+@pytest.mark.usefixtures("_migrierter_pruefstand")
 class TestWiegungenCRUD:
     """POST/GET/DELETE /waage/wiegungen"""
 
@@ -260,16 +277,15 @@ class TestWiegungenCRUD:
 
     def test_create_wiegung(self):
         payload = {
-            "id": "WIEG-TEST-001",
             "waage_id": "WAAGE-001",
             "kennzeichen": "AB-CD-1234",
             "brutto": 25000,
             "tara": 12000,
         }
+        # Waage nicht im eigenen Mandanten: 404 statt Verweis ueber die Grenze
         r = client.post("/api/v1/waage/wiegungen", headers=AUTH, json=payload)
         skip_if_db_unavailable(r)
-        if r.status_code not in (201, 400, 500):
-            pytest.fail(f"Unexpected status {r.status_code}: {r.text}")
+        assert r.status_code == 404, r.text
 
     def test_delete_nonexistent_404(self):
         r = client.delete("/api/v1/waage/wiegungen/NONEXISTENT-WIEGUNG", headers=AUTH)
@@ -331,7 +347,7 @@ class TestWaagenUnit:
 
     def test_create_error_400(self):
         with _client_ctx() as (c, _):
-            assert c.post("/waage/waagen", json={"_raise": True}).status_code == 400
+            assert c.post("/waage/waagen", json={"standort": "boom"}).status_code == 400
 
     def test_update_not_found(self):
         with _client_ctx() as (c, _):

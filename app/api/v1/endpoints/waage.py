@@ -8,7 +8,7 @@ from datetime import date, datetime
 from decimal import Decimal
 from typing import Any, Dict, List, Optional
 
-from fastapi import Response, APIRouter, Depends, Form, HTTPException, Query, UploadFile
+from fastapi import Response, APIRouter, Depends, Form, HTTPException, Query, Request, UploadFile
 from pydantic import BaseModel
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -19,6 +19,8 @@ from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
 from app.services.frachtbrief_service import finalize_menge_from_outbound_weighing
 
+from app.core.akteur import gepruefter_akteur_aus_request
+from app.domains.operations.models import Waage, Wiegung
 from app.domains.operations.repository import WaageRepository, WiegungRepository
 
 from app.api.v1.schemas.base import BaseSchema
@@ -34,6 +36,18 @@ class WaageOut(BaseSchema):
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/waage", tags=["Waage"])
+
+# Schluessel, Mandant und Urheber setzt der Server; der Rumpf ist ein freies dict.
+_SERVERFELDER = {"id", "tenant_id", "mandanten_id", "created_by", "updated_by", "created_at", "updated_at"}
+
+
+def _spalten(model, daten: dict) -> dict:
+    """Nur Spalten des Modells; Unbekanntes ist ein Eingabefehler (422), kein TypeError (bis 28.10.2026: 400)."""
+    erlaubt = {c.key for c in model.__table__.columns} - _SERVERFELDER
+    fremd = sorted(set(daten) - erlaubt - _SERVERFELDER)
+    if fremd:
+        raise HTTPException(status_code=422, detail=f"Unbekannte Felder: {', '.join(fremd)}")
+    return {k: v for k, v in daten.items() if k in erlaubt}
 
 # ============================================================
 # PARTIE-PFLICHT-001 â€” Partiepflicht-Konfiguration
@@ -129,19 +143,20 @@ async def list_waagen(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
     status: Optional[str] = None,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """List all Waagen with optional filtering"""
-    repo = WaageRepository(db)
+    repo = WaageRepository(db, tenant_id)
     if status:
         return _to_list(repo.get_by_status(status))
     return _to_list(repo.get_all(skip=skip, limit=limit))
 
 
 @router.get("/waagen/{waage_id}", response_model=WaageOut, summary="Waage abrufen")
-async def get_waage(waage_id: str, db: Session = Depends(get_db)):
+async def get_waage(waage_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     """Get a single Waage by ID"""
-    repo = WaageRepository(db)
+    repo = WaageRepository(db, tenant_id)
     waage = repo.get_by_id(waage_id)
     if not waage:
         raise HTTPException(status_code=404, detail=f"Waage {waage_id} not found")
@@ -151,14 +166,18 @@ async def get_waage(waage_id: str, db: Session = Depends(get_db)):
 @router.post("/waagen", response_model=WaageOut, status_code=201, summary="Waage anlegen", dependencies=SCHREIBEN["LAGER"])
 async def create_waage(
     waage_data: dict,
+    request: Request,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """Create a new Waage"""
-    repo = WaageRepository(db)
+    repo = WaageRepository(db, tenant_id)
+    daten = {**_spalten(Waage, waage_data), "created_by": gepruefter_akteur_aus_request(request)}
     try:
-        waage = repo.create(waage_data)
+        waage = repo.create(daten)
         return _to_dict(waage)
     except Exception as e:
+        db.rollback()
         raise HTTPException(status_code=400, detail=str(e))
 
 
@@ -166,20 +185,22 @@ async def create_waage(
 async def update_waage(
     waage_id: str,
     waage_data: dict,
+    request: Request,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """Update a Waage"""
-    repo = WaageRepository(db)
-    waage = repo.update(waage_id, waage_data)
+    repo = WaageRepository(db, tenant_id)
+    waage = repo.update(waage_id, {**_spalten(Waage, waage_data), "updated_by": gepruefter_akteur_aus_request(request)})
     if not waage:
         raise HTTPException(status_code=404, detail=f"Waage {waage_id} not found")
     return _to_dict(waage)
 
 
 @router.delete("/waagen/{waage_id}", status_code=204, response_class=Response, response_model=None, summary="Waage lÃ¶schen", dependencies=SCHREIBEN["LAGER"])
-async def delete_waage(waage_id: str, db: Session = Depends(get_db)):
+async def delete_waage(waage_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     """Delete a Waage"""
-    repo = WaageRepository(db)
+    repo = WaageRepository(db, tenant_id)
     if not repo.delete(waage_id):
         raise HTTPException(status_code=404, detail=f"Waage {waage_id} not found")
 
@@ -192,10 +213,11 @@ async def list_wiegungen(
     limit: int = Query(100, ge=1, le=1000),
     waage_id: Optional[str] = None,
     kennzeichen: Optional[str] = None,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """List all Wiegungen with optional filtering"""
-    repo = WiegungRepository(db)
+    repo = WiegungRepository(db, tenant_id)
     
     if waage_id:
         return _to_list(repo.get_by_waage(waage_id))
@@ -205,9 +227,9 @@ async def list_wiegungen(
 
 
 @router.get("/wiegungen/{wiegung_id}", response_model=WaageOut, summary="Wiegung abrufen")
-async def get_wiegung(wiegung_id: str, db: Session = Depends(get_db)):
+async def get_wiegung(wiegung_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     """Get a single Wiegung by ID"""
-    repo = WiegungRepository(db)
+    repo = WiegungRepository(db, tenant_id)
     wiegung = repo.get_by_id(wiegung_id)
     if not wiegung:
         raise HTTPException(status_code=404, detail=f"Wiegung {wiegung_id} not found")
@@ -217,10 +239,12 @@ async def get_wiegung(wiegung_id: str, db: Session = Depends(get_db)):
 @router.post("/wiegungen", response_model=WaageOut, status_code=201, summary="Wiegung anlegen", dependencies=SCHREIBEN["LAGER"])
 async def create_wiegung(
     wiegung_data: dict,
+    request: Request,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """Create a new Wiegung"""
-    repo = WiegungRepository(db)
+    repo = WiegungRepository(db, tenant_id)
 
     # PARTIE-PFLICHT-001: Partiepflicht-Validierung
     wiegetyp = wiegung_data.get("wiegetyp") or wiegung_data.get("typ")
@@ -236,21 +260,34 @@ async def create_wiegung(
                 detail=f"Partie/Charge Pflichtfeld fÃ¼r Wiegetyp {wiegetyp}",
             )
 
+    # Partie und Wiegetyp sind Pruefangaben, keine Spalten: bis 28.10.2026 gingen sie in ``Wiegung(**daten)``
+    # und jede partiepflichtige Wiegung scheiterte mit einem TypeError. Die Partie wird zur Chargennummer.
+    wiegung_data = dict(wiegung_data)
+    partie = next((wiegung_data.pop(k) for k in ("partie_id", "charge_id", "lot_id") if wiegung_data.get(k)), None)
+    for k in ("partie_id", "charge_id", "lot_id", "wiegetyp", "typ"):
+        wiegung_data.pop(k, None)
+    if partie and not wiegung_data.get("chargennummer"):
+        wiegung_data["chargennummer"] = partie
+
     # Auto-calculate netto if not provided
     if "brutto" in wiegung_data and "tara" in wiegung_data and "netto" not in wiegung_data:
         wiegung_data["netto"] = wiegung_data["brutto"] - wiegung_data["tara"]
 
+    daten = {**_spalten(Wiegung, wiegung_data), "created_by": gepruefter_akteur_aus_request(request)}
+    if daten.get("waage_id") and not WaageRepository(db, tenant_id).get_by_id(daten["waage_id"]):
+        raise HTTPException(status_code=404, detail=f"Waage {daten['waage_id']} not found")
     try:
-        wiegung = repo.create(wiegung_data)
+        wiegung = repo.create(daten)
         return _to_dict(wiegung)
     except Exception as e:
+        db.rollback()
         raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.delete("/wiegungen/{wiegung_id}", status_code=204, response_class=Response, response_model=None, summary="Wiegung lÃ¶schen", dependencies=SCHREIBEN["LAGER"])
-async def delete_wiegung(wiegung_id: str, db: Session = Depends(get_db)):
+async def delete_wiegung(wiegung_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     """Delete a Wiegung"""
-    repo = WiegungRepository(db)
+    repo = WiegungRepository(db, tenant_id)
     if not repo.delete(wiegung_id):
         raise HTTPException(status_code=404, detail=f"Wiegung {wiegung_id} not found")
 

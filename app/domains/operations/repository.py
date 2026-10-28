@@ -29,26 +29,34 @@ from app.domains.operations.models import (
 )
 
 
+def _ohne_mandant(daten: dict) -> dict:
+    """Mandant und Schluessel kommen nie aus der Nutzlast (Repositories mit Mandant im Konstruktor)."""
+    return {k: v for k, v in daten.items() if k not in {"id", "tenant_id", "mandanten_id"}}
+
+
 class WaageRepository:
     """Repository for Waage operations"""
     
-    def __init__(self, db: Session):
+    def __init__(self, db: Session, tenant_id: str):
+        if not tenant_id:
+            raise ValueError("Mandant fehlt")
         self.db = db
+        self.tenant_id = tenant_id
+
+    def _q(self):
+        return self.db.query(Waage).filter(Waage.tenant_id == self.tenant_id)
     
     def get_all(self, skip: int = 0, limit: int = 100) -> List[Waage]:
-        return self.db.query(Waage).offset(skip).limit(limit).all()
+        return self._q().offset(skip).limit(limit).all()
     
     def get_by_id(self, waage_id: str) -> Optional[Waage]:
-        return self.db.query(Waage).filter(Waage.id == waage_id).first()
+        return self._q().filter(Waage.id == waage_id).first()
     
     def get_by_status(self, status: str) -> List[Waage]:
-        return self.db.query(Waage).filter(Waage.status == status).all()
+        return self._q().filter(Waage.status == status).all()
     
     def create(self, waage_data: dict) -> Waage:
-        waage = Waage(
-            id=f"W-{str(__import__('uuid').uuid4())[:8].upper()}",
-            **waage_data
-        )
+        waage = Waage(id=f"W-{str(__import__('uuid').uuid4())[:8].upper()}", tenant_id=self.tenant_id, **_ohne_mandant(waage_data))
         self.db.add(waage)
         self.db.commit()
         self.db.refresh(waage)
@@ -57,7 +65,7 @@ class WaageRepository:
     def update(self, waage_id: str, waage_data: dict) -> Optional[Waage]:
         waage = self.get_by_id(waage_id)
         if waage:
-            for key, value in waage_data.items():
+            for key, value in _ohne_mandant(waage_data).items():
                 setattr(waage, key, value)
             self.db.commit()
             self.db.refresh(waage)
@@ -75,26 +83,29 @@ class WaageRepository:
 class WiegungRepository:
     """Repository for Wiegung operations"""
     
-    def __init__(self, db: Session):
+    def __init__(self, db: Session, tenant_id: str):
+        if not tenant_id:
+            raise ValueError("Mandant fehlt")
         self.db = db
+        self.tenant_id = tenant_id
+
+    def _q(self):
+        return self.db.query(Wiegung).filter(Wiegung.tenant_id == self.tenant_id)
     
     def get_all(self, skip: int = 0, limit: int = 100) -> List[Wiegung]:
-        return self.db.query(Wiegung).order_by(desc(Wiegung.zeitstempel)).offset(skip).limit(limit).all()
+        return self._q().order_by(desc(Wiegung.zeitstempel)).offset(skip).limit(limit).all()
     
     def get_by_id(self, wiegung_id: str) -> Optional[Wiegung]:
-        return self.db.query(Wiegung).filter(Wiegung.id == wiegung_id).first()
+        return self._q().filter(Wiegung.id == wiegung_id).first()
     
     def get_by_waage(self, waage_id: str) -> List[Wiegung]:
-        return self.db.query(Wiegung).filter(Wiegung.waage_id == waage_id).all()
+        return self._q().filter(Wiegung.waage_id == waage_id).all()
     
     def get_by_kennzeichen(self, kennzeichen: str) -> List[Wiegung]:
-        return self.db.query(Wiegung).filter(Wiegung.kennzeichen == kennzeichen).all()
+        return self._q().filter(Wiegung.kennzeichen == kennzeichen).all()
     
     def create(self, wiegung_data: dict) -> Wiegung:
-        wiegung = Wiegung(
-            id=f"WG-{str(__import__('uuid').uuid4())[:8].upper()}",
-            **wiegung_data
-        )
+        wiegung = Wiegung(id=f"WG-{str(__import__('uuid').uuid4())[:8].upper()}", tenant_id=self.tenant_id, **_ohne_mandant(wiegung_data))
         self.db.add(wiegung)
         self.db.commit()
         self.db.refresh(wiegung)
@@ -238,26 +249,29 @@ class FahrerRepository:
 class FahrzeugTourRepository:
     """Repository for FahrzeugTour operations"""
     
-    def __init__(self, db: Session):
+    def __init__(self, db: Session, tenant_id: str):
+        if not tenant_id:
+            raise ValueError("Mandant fehlt")
         self.db = db
+        self.tenant_id = tenant_id
+
+    def _q(self):
+        return self.db.query(FahrzeugTour).filter(FahrzeugTour.tenant_id == self.tenant_id)
     
     def get_all(self, skip: int = 0, limit: int = 100) -> List[FahrzeugTour]:
-        return self.db.query(FahrzeugTour).offset(skip).limit(limit).all()
+        return self._q().offset(skip).limit(limit).all()
     
     def get_by_id(self, tour_id: str) -> Optional[FahrzeugTour]:
-        return self.db.query(FahrzeugTour).filter(FahrzeugTour.id == tour_id).first()
+        return self._q().filter(FahrzeugTour.id == tour_id).first()
     
     def get_by_fahrzeug(self, fahrzeug_id: str) -> List[FahrzeugTour]:
-        return self.db.query(FahrzeugTour).filter(FahrzeugTour.fahrzeug_id == fahrzeug_id).all()
+        return self._q().filter(FahrzeugTour.fahrzeug_id == fahrzeug_id).all()
     
     def get_by_fahrer(self, fahrer_id: str) -> List[FahrzeugTour]:
-        return self.db.query(FahrzeugTour).filter(FahrzeugTour.fahrer_id == fahrer_id).all()
+        return self._q().filter(FahrzeugTour.fahrer_id == fahrer_id).all()
     
     def create(self, tour_data: dict) -> FahrzeugTour:
-        tour = FahrzeugTour(
-            id=f"TOUR-{str(__import__('uuid').uuid4())[:8].upper()}",
-            **tour_data
-        )
+        tour = FahrzeugTour(id=f"TOUR-{str(__import__('uuid').uuid4())[:8].upper()}", tenant_id=self.tenant_id, **_ohne_mandant(tour_data))
         self.db.add(tour)
         self.db.commit()
         self.db.refresh(tour)
@@ -266,7 +280,7 @@ class FahrzeugTourRepository:
     def update(self, tour_id: str, tour_data: dict) -> Optional[FahrzeugTour]:
         tour = self.get_by_id(tour_id)
         if tour:
-            for key, value in tour_data.items():
+            for key, value in _ohne_mandant(tour_data).items():
                 setattr(tour, key, value)
             self.db.commit()
             self.db.refresh(tour)
@@ -510,20 +524,26 @@ class FuhrparkAusgehendesDokumentRepository:
 class SpeditionFrachttarifRepository:
     """Repository for SpeditionFrachttarif (PLZ-based freight prices)."""
 
-    def __init__(self, db: Session):
+    def __init__(self, db: Session, tenant_id: str):
+        if not tenant_id:
+            raise ValueError("Mandant fehlt")
         self.db = db
+        self.tenant_id = tenant_id
+
+    def _q(self):
+        return self.db.query(SpeditionFrachttarif).filter(SpeditionFrachttarif.tenant_id == self.tenant_id)
 
     def get_all(self, skip: int = 0, limit: int = 500, aktiv_only: bool = False) -> List[SpeditionFrachttarif]:
-        q = self.db.query(SpeditionFrachttarif)
+        q = self._q()
         if aktiv_only:
             q = q.filter(SpeditionFrachttarif.aktiv.is_(True))
         return q.order_by(SpeditionFrachttarif.spediteur.asc(), SpeditionFrachttarif.plz_von.asc()).offset(skip).limit(limit).all()
 
     def get_by_id(self, item_id: str) -> Optional[SpeditionFrachttarif]:
-        return self.db.query(SpeditionFrachttarif).filter(SpeditionFrachttarif.id == item_id).first()
+        return self._q().filter(SpeditionFrachttarif.id == item_id).first()
 
     def create(self, payload: dict) -> SpeditionFrachttarif:
-        row = SpeditionFrachttarif(id=f"SFT-{str(__import__('uuid').uuid4())[:8].upper()}", **payload)
+        row = SpeditionFrachttarif(id=f"SFT-{str(__import__('uuid').uuid4())[:8].upper()}", tenant_id=self.tenant_id, **_ohne_mandant(payload))
         self.db.add(row)
         self.db.commit()
         self.db.refresh(row)
@@ -532,7 +552,7 @@ class SpeditionFrachttarifRepository:
     def update(self, item_id: str, payload: dict) -> Optional[SpeditionFrachttarif]:
         row = self.get_by_id(item_id)
         if row:
-            for key, value in payload.items():
+            for key, value in _ohne_mandant(payload).items():
                 setattr(row, key, value)
             self.db.commit()
             self.db.refresh(row)
@@ -552,39 +572,42 @@ class SpeditionFrachttarifRepository:
 class DokumentRepository:
     """Repository for Dokument operations"""
     
-    def __init__(self, db: Session):
+    def __init__(self, db: Session, tenant_id: str):
+        if not tenant_id:
+            raise ValueError("Mandant fehlt")
         self.db = db
+        self.tenant_id = tenant_id
+
+    def _q(self):
+        return self.db.query(Dokument).filter(Dokument.tenant_id == self.tenant_id)
     
     def get_all(self, skip: int = 0, limit: int = 100) -> List[Dokument]:
-        return self.db.query(Dokument).filter(Dokument.status != DokumentStatus.GELOESCHT.value).offset(skip).limit(limit).all()
+        return self._q().filter(Dokument.status != DokumentStatus.GELOESCHT.value).offset(skip).limit(limit).all()
     
     def get_by_id(self, dokument_id: str) -> Optional[Dokument]:
-        return self.db.query(Dokument).filter(Dokument.id == dokument_id).first()
+        return self._q().filter(Dokument.id == dokument_id).first()
     
     def get_by_kategorie(self, kategorie: str) -> List[Dokument]:
-        return self.db.query(Dokument).filter(Dokument.kategorie == kategorie, Dokument.status != DokumentStatus.GELOESCHT.value).all()
+        return self._q().filter(Dokument.kategorie == kategorie, Dokument.status != DokumentStatus.GELOESCHT.value).all()
     
     def get_by_typ(self, typ: str) -> List[Dokument]:
-        return self.db.query(Dokument).filter(Dokument.typ == typ, Dokument.status != DokumentStatus.GELOESCHT.value).all()
+        return self._q().filter(Dokument.typ == typ, Dokument.status != DokumentStatus.GELOESCHT.value).all()
     
     def get_by_referenz(self, referenz_typ: str, referenz_id: str) -> List[Dokument]:
-        return self.db.query(Dokument).filter(
+        return self._q().filter(
             Dokument.referenz_typ == referenz_typ,
             Dokument.referenz_id == referenz_id,
             Dokument.status != DokumentStatus.GELOESCHT.value
         ).all()
     
     def search(self, query: str) -> List[Dokument]:
-        return self.db.query(Dokument).filter(
+        return self._q().filter(
             Dokument.name.contains(query),
             Dokument.status != DokumentStatus.GELOESCHT.value
         ).all()
     
     def create(self, dokument_data: dict) -> Dokument:
-        dokument = Dokument(
-            id=f"DOC-{str(__import__('uuid').uuid4())[:8].upper()}",
-            **dokument_data
-        )
+        dokument = Dokument(id=f"DOC-{str(__import__('uuid').uuid4())[:8].upper()}", tenant_id=self.tenant_id, **_ohne_mandant(dokument_data))
         self.db.add(dokument)
         self.db.commit()
         self.db.refresh(dokument)
@@ -593,19 +616,20 @@ class DokumentRepository:
     def update(self, dokument_id: str, dokument_data: dict) -> Optional[Dokument]:
         dokument = self.get_by_id(dokument_id)
         if dokument:
-            for key, value in dokument_data.items():
+            for key, value in _ohne_mandant(dokument_data).items():
                 setattr(dokument, key, value)
             self.db.commit()
             self.db.refresh(dokument)
         return dokument
     
-    def soft_delete(self, dokument_id: str) -> bool:
+    def soft_delete(self, dokument_id: str, akteur: Optional[str] = None) -> bool:
         """Soft delete - mark as deleted instead of removing"""
         dokument = self.get_by_id(dokument_id)
         if dokument:
             from datetime import datetime
             dokument.status = DokumentStatus.GELOESCHT.value
             dokument.geloescht_am = datetime.utcnow()
+            dokument.geloescht_von = akteur
             self.db.commit()
             return True
         return False
@@ -621,12 +645,12 @@ class DokumentRepository:
     
     def get_stats(self) -> dict:
         """Get document statistics"""
-        total = self.db.query(Dokument).filter(Dokument.status != DokumentStatus.GELOESCHT.value).count()
-        total_size = self.db.query(Dokument).filter(Dokument.status != DokumentStatus.GELOESCHT.value).with_entities(func.sum(Dokument.groesse)).scalar() or 0
+        total = self._q().filter(Dokument.status != DokumentStatus.GELOESCHT.value).count()
+        total_size = self._q().filter(Dokument.status != DokumentStatus.GELOESCHT.value).with_entities(func.sum(Dokument.groesse)).scalar() or 0
         
         # Group by category
         kategorien = {}
-        for d in self.db.query(Dokument).filter(Dokument.status != DokumentStatus.GELOESCHT.value).all():
+        for d in self._q().filter(Dokument.status != DokumentStatus.GELOESCHT.value).all():
             if d.kategorie not in kategorien:
                 kategorien[d.kategorie] = 0
             kategorien[d.kategorie] += 1
@@ -641,23 +665,26 @@ class DokumentRepository:
 class DokumentVersionRepository:
     """Repository for DokumentVersion operations"""
     
-    def __init__(self, db: Session):
+    def __init__(self, db: Session, tenant_id: str):
+        if not tenant_id:
+            raise ValueError("Mandant fehlt")
         self.db = db
+        self.tenant_id = tenant_id
+
+    def _q(self):
+        return self.db.query(DokumentVersion).filter(DokumentVersion.tenant_id == self.tenant_id)
     
     def get_all(self, dokument_id: str) -> List[DokumentVersion]:
-        return self.db.query(DokumentVersion).filter(DokumentVersion.dokument_id == dokument_id).order_by(DokumentVersion.version.desc()).all()
+        return self._q().filter(DokumentVersion.dokument_id == dokument_id).order_by(DokumentVersion.version.desc()).all()
     
     def get_by_id(self, version_id: str) -> Optional[DokumentVersion]:
-        return self.db.query(DokumentVersion).filter(DokumentVersion.id == version_id).first()
+        return self._q().filter(DokumentVersion.id == version_id).first()
     
     def get_latest(self, dokument_id: str) -> Optional[DokumentVersion]:
-        return self.db.query(DokumentVersion).filter(DokumentVersion.dokument_id == dokument_id).order_by(DokumentVersion.version.desc()).first()
+        return self._q().filter(DokumentVersion.dokument_id == dokument_id).order_by(DokumentVersion.version.desc()).first()
     
     def create(self, version_data: dict) -> DokumentVersion:
-        version = DokumentVersion(
-            id=f"VER-{str(__import__('uuid').uuid4())[:8].upper()}",
-            **version_data
-        )
+        version = DokumentVersion(id=f"VER-{str(__import__('uuid').uuid4())[:8].upper()}", tenant_id=self.tenant_id, **_ohne_mandant(version_data))
         self.db.add(version)
         self.db.commit()
         self.db.refresh(version)
@@ -853,11 +880,17 @@ class BankKontoRepository:
 class RahmenvertragRepository:
     """Repository for framework contracts."""
 
-    def __init__(self, db: Session):
+    def __init__(self, db: Session, tenant_id: str):
+        if not tenant_id:
+            raise ValueError("Mandant fehlt")
         self.db = db
+        self.tenant_id = tenant_id
+
+    def _q(self):
+        return self.db.query(Rahmenvertrag).filter(Rahmenvertrag.tenant_id == self.tenant_id)
 
     def get_all(self, limit: int = 100, status: Optional[str] = None, typ: Optional[str] = None) -> List[Rahmenvertrag]:
-        query = self.db.query(Rahmenvertrag)
+        query = self._q()
         if status:
             query = query.filter(Rahmenvertrag.status == status)
         if typ:
@@ -865,13 +898,13 @@ class RahmenvertragRepository:
         return query.order_by(desc(Rahmenvertrag.laufzeit_bis)).limit(limit).all()
 
     def get_by_id(self, vertrag_id: str) -> Optional[Rahmenvertrag]:
-        return self.db.query(Rahmenvertrag).filter(Rahmenvertrag.id == vertrag_id).first()
+        return self._q().filter(Rahmenvertrag.id == vertrag_id).first()
 
     def get_by_nummer(self, nummer: str) -> Optional[Rahmenvertrag]:
-        return self.db.query(Rahmenvertrag).filter(Rahmenvertrag.nummer == nummer).first()
+        return self._q().filter(Rahmenvertrag.nummer == nummer).first()
 
     def create(self, vertrag_data: dict) -> Rahmenvertrag:
-        vertrag = Rahmenvertrag(id=prefixed_id("RV"), **vertrag_data)
+        vertrag = Rahmenvertrag(id=prefixed_id("RV"), tenant_id=self.tenant_id, **_ohne_mandant(vertrag_data))
         self.db.add(vertrag)
         self.db.commit()
         self.db.refresh(vertrag)
@@ -880,7 +913,7 @@ class RahmenvertragRepository:
     def update(self, vertrag_id: str, vertrag_data: dict) -> Optional[Rahmenvertrag]:
         vertrag = self.get_by_id(vertrag_id)
         if vertrag:
-            for key, value in vertrag_data.items():
+            for key, value in _ohne_mandant(vertrag_data).items():
                 setattr(vertrag, key, value)
             self.db.commit()
             self.db.refresh(vertrag)

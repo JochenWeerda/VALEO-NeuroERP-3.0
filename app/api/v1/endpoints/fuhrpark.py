@@ -13,6 +13,7 @@ from sqlalchemy import text
 from sqlalchemy.inspection import inspect as sa_inspect
 from sqlalchemy.orm import Session
 
+from app.core.akteur import gepruefter_akteur_aus_request
 from app.core.database import get_db
 from app.auth.tenant import get_verified_tenant_id as get_tenant_id
 from app.domains.operations.repository import (
@@ -360,6 +361,7 @@ def _ensure_fahrzeug(fahrzeug_id: str, db: Session, tenant_id: str):
 async def change_fahrzeug_status(
     fahrzeug_id: str,
     payload: StatusWechselPayload,
+    request: Request,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
@@ -378,8 +380,8 @@ async def change_fahrzeug_status(
     db.execute(
         text("""
             INSERT INTO domain_ops.ops_fahrzeug_status_historie
-                (id, fahrzeug_id, von_status, zu_status, grund, benutzer, km_stand, timestamp)
-            VALUES (:id, :fid, :von, :zu, :grund, :benutzer, :km, NOW())
+                (id, tenant_id, fahrzeug_id, von_status, zu_status, grund, benutzer, km_stand, timestamp)
+            VALUES (:id, :tid, :fid, :von, :zu, :grund, :benutzer, :km, NOW())
         """),
         {
             "id": eintrag_id,
@@ -387,7 +389,8 @@ async def change_fahrzeug_status(
             "von": von_status,
             "zu": payload.zu_status,
             "grund": payload.grund,
-            "benutzer": payload.benutzer,
+            "tid": tenant_id,
+            "benutzer": gepruefter_akteur_aus_request(request),
             "km": payload.km_stand,
         },
     )
@@ -415,11 +418,11 @@ async def get_status_historie(
             SELECT id, fahrzeug_id, von_status, zu_status, grund, benutzer, km_stand,
                    timestamp
             FROM domain_ops.ops_fahrzeug_status_historie
-            WHERE fahrzeug_id = :fid
+            WHERE fahrzeug_id = :fid AND tenant_id = :tid
             ORDER BY timestamp DESC
             LIMIT :lim
         """),
-        {"fid": fahrzeug_id, "lim": limit},
+        {"fid": fahrzeug_id, "tid": tenant_id, "lim": limit},
     ).fetchall()
     return [dict(r._mapping) for r in rows]
 
@@ -438,8 +441,8 @@ async def list_schaeden(
     tenant_id: str = Depends(get_tenant_id),
 ):
     _ensure_fahrzeug(fahrzeug_id, db, tenant_id)
-    q = "SELECT * FROM domain_ops.ops_fahrzeug_schaeden WHERE fahrzeug_id = :fid"
-    params: dict = {"fid": fahrzeug_id}
+    q = "SELECT * FROM domain_ops.ops_fahrzeug_schaeden WHERE fahrzeug_id = :fid AND tenant_id = :tid"
+    params: dict = {"fid": fahrzeug_id, "tid": tenant_id}
     if status:
         q += " AND status = :status"
         params["status"] = status
@@ -456,6 +459,7 @@ async def list_schaeden(
 async def create_schaden(
     fahrzeug_id: str,
     payload: SchadenPayload,
+    request: Request,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
@@ -464,15 +468,16 @@ async def create_schaden(
     db.execute(
         text("""
             INSERT INTO domain_ops.ops_fahrzeug_schaeden
-                (id, fahrzeug_id, datum, ort, beschreibung, schadenhoehe_eur,
+                (id, tenant_id, fahrzeug_id, datum, ort, beschreibung, schadenhoehe_eur,
                  versicherung_gemeldet, versicherungs_nr, gegner_kennzeichen,
                  polizei_aktenzeichen, status, erstellt_von, created_at, updated_at)
             VALUES
-                (:id, :fid, :datum, :ort, :beschr, :hoehe, :vers_gem, :vers_nr,
+                (:id, :tid, :fid, :datum, :ort, :beschr, :hoehe, :vers_gem, :vers_nr,
                  :gegner, :polizei, :status, :von, NOW(), NOW())
         """),
         {
             "id": schaden_id,
+            "tid": tenant_id,
             "fid": fahrzeug_id,
             "datum": payload.datum,
             "ort": payload.ort,
@@ -483,13 +488,14 @@ async def create_schaden(
             "gegner": payload.gegner_kennzeichen,
             "polizei": payload.polizei_aktenzeichen,
             "status": payload.status,
-            "von": payload.erstellt_von,
+            # Urheber aus dem Token; bis 28.10.2026 ``erstellt_von`` aus dem Rumpf.
+            "von": gepruefter_akteur_aus_request(request),
         },
     )
     db.commit()
     row = db.execute(
-        text("SELECT * FROM domain_ops.ops_fahrzeug_schaeden WHERE id = :id"),
-        {"id": schaden_id},
+        text("SELECT * FROM domain_ops.ops_fahrzeug_schaeden WHERE id = :id AND tenant_id = :tid"),
+        {"id": schaden_id, "tid": tenant_id},
     ).fetchone()
     return dict(row._mapping)
 
@@ -507,8 +513,8 @@ async def update_schaden(
 ):
     _ensure_fahrzeug(fahrzeug_id, db, tenant_id)
     existing = db.execute(
-        text("SELECT id FROM domain_ops.ops_fahrzeug_schaeden WHERE id = :id AND fahrzeug_id = :fid"),
-        {"id": schaden_id, "fid": fahrzeug_id},
+        text("SELECT id FROM domain_ops.ops_fahrzeug_schaeden WHERE id = :id AND fahrzeug_id = :fid AND tenant_id = :tid"),
+        {"id": schaden_id, "fid": fahrzeug_id, "tid": tenant_id},
     ).fetchone()
     if not existing:
         raise HTTPException(status_code=404, detail="Schadensfall nicht gefunden")
@@ -519,14 +525,15 @@ async def update_schaden(
 
     set_clause = ", ".join(f"{k} = :{k}" for k in updates)
     updates["id"] = schaden_id
+    updates["tid"] = tenant_id
     db.execute(
-        text(f"UPDATE domain_ops.ops_fahrzeug_schaeden SET {set_clause}, updated_at = NOW() WHERE id = :id"),  # nosec B608  # reviewed-safe: set_clause is built only from Pydantic model field names.
+        text(f"UPDATE domain_ops.ops_fahrzeug_schaeden SET {set_clause}, updated_at = NOW() WHERE id = :id AND tenant_id = :tid"),  # nosec B608  # reviewed-safe: set_clause is built only from Pydantic model field names.
         updates,
     )
     db.commit()
     row = db.execute(
-        text("SELECT * FROM domain_ops.ops_fahrzeug_schaeden WHERE id = :id"),
-        {"id": schaden_id},
+        text("SELECT * FROM domain_ops.ops_fahrzeug_schaeden WHERE id = :id AND tenant_id = :tid"),
+        {"id": schaden_id, "tid": tenant_id},
     ).fetchone()
     return dict(row._mapping)
 
@@ -545,8 +552,8 @@ async def list_bussgeld(
     tenant_id: str = Depends(get_tenant_id),
 ):
     _ensure_fahrzeug(fahrzeug_id, db, tenant_id)
-    q = "SELECT * FROM domain_ops.ops_fahrzeug_bussgeld WHERE fahrzeug_id = :fid"
-    params: dict = {"fid": fahrzeug_id}
+    q = "SELECT * FROM domain_ops.ops_fahrzeug_bussgeld WHERE fahrzeug_id = :fid AND tenant_id = :tid"
+    params: dict = {"fid": fahrzeug_id, "tid": tenant_id}
     if status:
         q += " AND status = :status"
         params["status"] = status
@@ -571,14 +578,15 @@ async def create_bussgeld(
     db.execute(
         text("""
             INSERT INTO domain_ops.ops_fahrzeug_bussgeld
-                (id, fahrzeug_id, fahrer_id, datum, ort, tatbestand, betrag_eur,
+                (id, tenant_id, fahrzeug_id, fahrer_id, datum, ort, tatbestand, betrag_eur,
                  faellig_am, aktenzeichen, notiz, status, created_at, updated_at)
             VALUES
-                (:id, :fid, :fahrer, :datum, :ort, :tatbestand, :betrag,
+                (:id, :tid, :fid, :fahrer, :datum, :ort, :tatbestand, :betrag,
                  :faellig, :aktenzeichen, :notiz, 'offen', NOW(), NOW())
         """),
         {
             "id": bg_id,
+            "tid": tenant_id,
             "fid": fahrzeug_id,
             "fahrer": payload.fahrer_id,
             "datum": payload.datum,
@@ -592,8 +600,8 @@ async def create_bussgeld(
     )
     db.commit()
     row = db.execute(
-        text("SELECT * FROM domain_ops.ops_fahrzeug_bussgeld WHERE id = :id"),
-        {"id": bg_id},
+        text("SELECT * FROM domain_ops.ops_fahrzeug_bussgeld WHERE id = :id AND tenant_id = :tid"),
+        {"id": bg_id, "tid": tenant_id},
     ).fetchone()
     return dict(row._mapping)
 
@@ -611,8 +619,8 @@ async def update_bussgeld(
 ):
     _ensure_fahrzeug(fahrzeug_id, db, tenant_id)
     existing = db.execute(
-        text("SELECT id FROM domain_ops.ops_fahrzeug_bussgeld WHERE id = :id AND fahrzeug_id = :fid"),
-        {"id": bg_id, "fid": fahrzeug_id},
+        text("SELECT id FROM domain_ops.ops_fahrzeug_bussgeld WHERE id = :id AND fahrzeug_id = :fid AND tenant_id = :tid"),
+        {"id": bg_id, "fid": fahrzeug_id, "tid": tenant_id},
     ).fetchone()
     if not existing:
         raise HTTPException(status_code=404, detail="Bußgeld-Eintrag nicht gefunden")
@@ -623,14 +631,15 @@ async def update_bussgeld(
 
     set_clause = ", ".join(f"{k} = :{k}" for k in updates)
     updates["id"] = bg_id
+    updates["tid"] = tenant_id
     db.execute(
-        text(f"UPDATE domain_ops.ops_fahrzeug_bussgeld SET {set_clause}, updated_at = NOW() WHERE id = :id"),  # nosec B608  # reviewed-safe: set_clause is built only from Pydantic model field names.
+        text(f"UPDATE domain_ops.ops_fahrzeug_bussgeld SET {set_clause}, updated_at = NOW() WHERE id = :id AND tenant_id = :tid"),  # nosec B608  # reviewed-safe: set_clause is built only from Pydantic model field names.
         updates,
     )
     db.commit()
     row = db.execute(
-        text("SELECT * FROM domain_ops.ops_fahrzeug_bussgeld WHERE id = :id"),
-        {"id": bg_id},
+        text("SELECT * FROM domain_ops.ops_fahrzeug_bussgeld WHERE id = :id AND tenant_id = :tid"),
+        {"id": bg_id, "tid": tenant_id},
     ).fetchone()
     return dict(row._mapping)
 
@@ -715,6 +724,7 @@ async def get_wartung_vorhersage(
 async def leasing_rueckgabe(
     fahrzeug_id: str,
     payload: LeasingRueckgabePayload,
+    request: Request,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
@@ -736,15 +746,16 @@ async def leasing_rueckgabe(
     db.execute(
         text("""
             INSERT INTO domain_ops.ops_fahrzeug_status_historie
-                (id, fahrzeug_id, von_status, zu_status, grund, benutzer, km_stand, timestamp)
-            VALUES (:id, :fid, :von, 'ausgeschieden', :grund, :benutzer, :km, NOW())
+                (id, tenant_id, fahrzeug_id, von_status, zu_status, grund, benutzer, km_stand, timestamp)
+            VALUES (:id, :tid, :fid, :von, 'ausgeschieden', :grund, :benutzer, :km, NOW())
         """),
         {
             "id": historie_id,
             "fid": fahrzeug_id,
             "von": von_status,
             "grund": grund,
-            "benutzer": payload.benutzer,
+            "tid": tenant_id,
+            "benutzer": gepruefter_akteur_aus_request(request),
             "km": payload.km_stand_bei_rueckgabe,
         },
     )

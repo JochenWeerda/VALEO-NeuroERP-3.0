@@ -2,15 +2,15 @@
  "_note": "Generiert von scripts/rls_domain_matrix.py; nicht von Hand aendern.",
  "datenstand": "2026-10-28",
  "summary": {
-  "tabellen": 69,
+  "tabellen": 65,
   "nach_klasse": {
    "A": 36,
    "B": 20,
-   "C": 13
+   "C": 9
   },
   "nach_ursache": {
    "dienst": 18,
-   "position": 11,
+   "position": 7,
    "referenzdaten": 16,
    "mandant_nullbar": 12,
    "standardmandant": 10,
@@ -54,7 +54,7 @@
    },
    "ops": {
     "dienst": 1,
-    "position": 5,
+    "position": 1,
     "referenzdaten": 1,
     "standardmandant": 1
    },
@@ -2997,159 +2997,6 @@
     "zeilen": 1,
     "eltern_fk": [
      "aktuelles_fahrzeug_id -> domain_ops.ops_fahrzeuge.id"
-    ],
-    "verwaist": 0,
-    "ohne_eltern": 0
-   },
-   "bereinigung": [
-    "tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_ops.ops_fahrzeuge"
-  },
-  {
-   "table": "domain_ops.ops_fahrzeug_bussgeld",
-   "domain": "ops",
-   "class": "C",
-   "tenant_type": null,
-   "eltern": [
-    "domain_ops.ops_fahrzeuge"
-   ],
-   "ursache": "position",
-   "gruende": [
-    "position"
-   ],
-   "modell": [],
-   "leser": [],
-   "schreiber": [
-    "app/api/v1/endpoints/fuhrpark.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "token": 1
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "eltern_fk": [
-     "fahrzeug_id -> domain_ops.ops_fahrzeuge.id"
-    ],
-    "verwaist": 0,
-    "ohne_eltern": 0
-   },
-   "bereinigung": [
-    "tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_ops.ops_fahrzeuge"
-  },
-  {
-   "table": "domain_ops.ops_fahrzeug_schaeden",
-   "domain": "ops",
-   "class": "C",
-   "tenant_type": null,
-   "eltern": [
-    "domain_ops.ops_fahrzeuge"
-   ],
-   "ursache": "position",
-   "gruende": [
-    "position"
-   ],
-   "modell": [],
-   "leser": [],
-   "schreiber": [
-    "app/api/v1/endpoints/fuhrpark.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "token": 1
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "eltern_fk": [
-     "fahrzeug_id -> domain_ops.ops_fahrzeuge.id"
-    ],
-    "verwaist": 0,
-    "ohne_eltern": 0
-   },
-   "bereinigung": [
-    "tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_ops.ops_fahrzeuge"
-  },
-  {
-   "table": "domain_ops.ops_fahrzeug_status_historie",
-   "domain": "ops",
-   "class": "C",
-   "tenant_type": null,
-   "eltern": [
-    "domain_ops.ops_fahrzeuge"
-   ],
-   "ursache": "position",
-   "gruende": [
-    "position"
-   ],
-   "modell": [],
-   "leser": [],
-   "schreiber": [
-    "app/api/v1/endpoints/fuhrpark.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "token": 1
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "eltern_fk": [
-     "fahrzeug_id -> domain_ops.ops_fahrzeuge.id"
-    ],
-    "verwaist": 0,
-    "ohne_eltern": 0
-   },
-   "bereinigung": [
-    "tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_ops.ops_fahrzeuge"
-  },
-  {
-   "table": "domain_ops.ops_fahrzeug_touren",
-   "domain": "ops",
-   "class": "C",
-   "tenant_type": null,
-   "eltern": [
-    "domain_ops.ops_fahrzeuge"
-   ],
-   "ursache": "position",
-   "gruende": [
-    "position"
-   ],
-   "modell": [
-    "app/domains/operations/models.py"
-   ],
-   "leser": [
-    "app/core/database.py",
-    "app/domains/operations/models.py"
-   ],
-   "schreiber": [
-    "app/domains/operations/repository.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "nutzlast": 1
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "eltern_fk": [
-     "fahrzeug_id -> domain_ops.ops_fahrzeuge.id"
     ],
     "verwaist": 0,
     "ohne_eltern": 0

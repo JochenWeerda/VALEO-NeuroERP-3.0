@@ -1982,6 +1982,36 @@
    "live": 0,
    "code": []
   },
+  "domain_ops.ops_dokument_versionen": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "domain_ops.ops_dokumente": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "domain_ops.ops_fahrzeug_bussgeld": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "domain_ops.ops_fahrzeug_schaeden": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "domain_ops.ops_fahrzeug_status_historie": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "domain_ops.ops_fahrzeug_touren": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
   "domain_ops.ops_flow_spine_instance_documents": {
    "frisch": 0,
    "live": 0,
@@ -2027,6 +2057,11 @@
    "live": 0,
    "code": []
   },
+  "domain_ops.ops_rahmenvertraege": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
   "domain_ops.ops_tank_bestand": {
    "frisch": 0,
    "live": 0,
@@ -2042,6 +2077,11 @@
    "live": 0,
    "code": []
   },
+  "domain_ops.ops_waagen": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
   "domain_ops.ops_wartung_anlagen": {
    "frisch": 0,
    "live": 0,
@@ -2050,6 +2090,11 @@
   "domain_ops.ops_wartungs_protokolle": {
    "frisch": 0,
    "live": 0,
+   "code": []
+  },
+  "domain_ops.ops_wiegungen": {
+   "frisch": 0,
+   "live": null,
    "code": []
   },
   "domain_ops.ops_zapfungen": {
@@ -2123,6 +2168,11 @@
    "code": []
   },
   "domain_ops.service_anfragen": {
+   "frisch": 0,
+   "live": null,
+   "code": []
+  },
+  "domain_ops.strecke_speditionen_frachttarife": {
    "frisch": 0,
    "live": null,
    "code": []
