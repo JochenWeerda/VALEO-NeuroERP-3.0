@@ -6,7 +6,7 @@
       "version": "3.0.3",
       "advisory": "GHSA-vfj7-8cjw-p6xm",
       "patch": "config/security/npm-patches/braces@3.0.3.patch",
-      "patch_sha256": "ce6172c1415e5362c304bc03e2a3d5c8fd326073de144133defa9c499192ad12",
+      "patch_sha256": "803945b6b11ff5b6d9966ee59136eb23bf76953dbbcbc764740d0858c3eccb11",
       "original_integrity": "sha512-yQbXgO/OSZVD2IsiLlro+7Hf6Q18EJrKSEsdoMzKePKXct3gvD8oLcOQdIzGupr5Fj+EDe8gO/lxc1BzfMpxvA==",
       "license": "MIT",
       "reviewed_on": "2026-10-28",

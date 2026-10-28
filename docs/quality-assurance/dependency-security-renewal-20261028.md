@@ -52,3 +52,8 @@ The final pnpm-installed package passes all 21 cases. Diff files retain their
 required context prefix before original tabs; .gitattributes scopes the
 space-before-tab classification to these patch artifacts only. Source-code
 whitespace checks are unchanged. No failing intermediate was pushed.
+
+A final repeat exposed a CRLF/LF hash mismatch in the unchanged braces patch
+review. The binding now uses the gate hash function (normalized LF), matching
+its original reviewed source. Patch bytes are unchanged. All20 policy tests
+pass again, including both reviewed packages and tamper rejection.
