@@ -13,7 +13,7 @@ description: Generierte Entscheidungsmatrix der noch nicht abgesicherten Mandant
 
 Generiert von `scripts/rls_domain_matrix.py`; nicht von Hand aendern. Entscheidungen und Reihenfolge: `docs/architecture/rls-domaenen-entscheidungsmatrix.md`.
 
-Datenstand gewachsene Datenbank: 2026-10-27. Tabellen: 86.
+Datenstand gewachsene Datenbank: 2026-10-27. Tabellen: 84.
 
 | Domain | dienst | position | referenzdaten | mandant_nullbar | standardmandant | identitaet |
 |---|---|---|---|---|---|---|
@@ -27,7 +27,7 @@ Datenstand gewachsene Datenbank: 2026-10-27. Tabellen: 86.
 | log | 1 | 3 |  |  |  |  |
 | logistics |  |  | 2 | 5 |  |  |
 | mfg |  |  |  | 3 |  |  |
-| ops | 1 | 5 | 1 |  | 3 |  |
+| ops | 1 | 5 | 1 |  | 1 |  |
 | portal |  | 1 |  |  |  |  |
 | shared | 1 |  | 1 | 2 | 2 | 1 |
 
@@ -153,7 +153,6 @@ Datenstand gewachsene Datenbank: 2026-10-27. Tabellen: 86.
 
 | Tabelle | Kl. | Ursache | Modell | Schreiber | Leser | Worker | Identitaet | Daten | Bereinigung | Policy |
 |---|---|---|---|---|---|---|---|---|---|---|
-| `domain_ops.kon_contract` | A | standardmandant | `app/domains/operations/models.py` | `app/api/v1/endpoints/kontrakte.py`, `app/api/v1/endpoints/stammdaten_bearbeiten.py`, `app/domains/operations/repository.py`, `app/routers/contracts_router.py` (+3) | 11 | – | nutzlast 2, standardmandant 1, token 3 | 4 Z., 1 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
 | `domain_ops.ops_chargen` | A | dienst, referenzdaten, standardmandant | `app/domains/operations/models.py` | `app/api/v1/endpoints/beleg_vordrucke.py`, `app/api/v1/endpoints/charges.py`, `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/compliance.py` (+18) | 34 | – | dienst 3, kopfzeile 1, nutzlast 1, standardmandant 3, token 14 | 79 Z., 1 Mand. | – | keine, bis der Dienst tokengebundene Identitaet hat (rls-dienste-identitaet-vorschlag.md) |
 | `domain_ops.ops_fahrer` | C | position | `app/domains/operations/models.py` | `app/api/v1/endpoints/beleg_vordrucke.py`, `app/api/v1/endpoints/personal.py`, `app/api/v1/endpoints/sales_orders.py`, `app/api/v1/endpoints/transporte.py` (+2) | 10 | – | nutzlast 3, token 4 | 1 Z. | tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id) | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_ops.ops_fahrzeuge |
 | `domain_ops.ops_fahrzeug_bussgeld` | C | position | – | `app/api/v1/endpoints/fuhrpark.py` | 0 | – | token 1 | 0 Z. | tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id) | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_ops.ops_fahrzeuge |
@@ -161,7 +160,6 @@ Datenstand gewachsene Datenbank: 2026-10-27. Tabellen: 86.
 | `domain_ops.ops_fahrzeug_status_historie` | C | position | – | `app/api/v1/endpoints/fuhrpark.py` | 0 | – | token 1 | 0 Z. | tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id) | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_ops.ops_fahrzeuge |
 | `domain_ops.ops_fahrzeug_touren` | C | position | `app/domains/operations/models.py` | `app/domains/operations/repository.py` | 2 | – | nutzlast 1 | 0 Z. | tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id) | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_ops.ops_fahrzeuge |
 | `domain_ops.ops_fahrzeuge` | A | referenzdaten, mandant_nullbar | `app/domains/operations/models.py` | `app/api/v1/command_handlers/fuhrpark.py`, `app/api/v1/endpoints/fuhrpark.py`, `app/api/v1/endpoints/harvest_acceptance.py`, `app/api/v1/endpoints/hofliste.py` (+5) | 13 | – | kopfzeile 1, nutzlast 2, token 3 | 1 Z., 1 Mand. | – | getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant |
-| `domain_ops.ops_pcn_meldungen` | A | standardmandant | `app/domains/operations/models.py` | `app/api/v1/endpoints/compliance.py` | 1 | – | standardmandant 1, token 1 | 0 Z., 0 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
 | `domain_ops.reklamationen` | A | standardmandant | `app/domains/operations/models.py` | `app/api/v1/endpoints/reklamation_api.py` | 3 | – | standardmandant 2, token 3 | 15 Z., 1 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
 
 ## portal

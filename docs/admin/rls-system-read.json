@@ -1852,6 +1852,11 @@
    "live": 0,
    "code": []
   },
+  "domain_ops.kon_contract": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
   "domain_ops.kon_contract_fixing": {
    "frisch": 0,
    "live": 0,
@@ -1928,6 +1933,11 @@
    "code": []
   },
   "domain_ops.ops_fuhrpark_terminarten": {
+   "frisch": 0,
+   "live": 0,
+   "code": []
+  },
+  "domain_ops.ops_pcn_meldungen": {
    "frisch": 0,
    "live": 0,
    "code": []

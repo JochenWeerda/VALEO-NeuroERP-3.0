@@ -1151,12 +1151,15 @@ class VersicherungStatus(str, enum.Enum):
 class Versicherung(Base):
     """Betriebsversicherungen (Gebäude, Haftpflicht, Maschinen, Transport etc.)"""
     __tablename__ = "ops_versicherungen"
-    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "vertragsnummer", name="uq_ops_versicherungen_tenant_vertragsnummer"),  # je Mandant, nicht systemweit
+        {"schema": "domain_ops", "extend_existing": True},
+    )
 
     id = Column(String, primary_key=True, default=default_prefixed_id("VS"))
     art = Column(String(120), nullable=False)
     versicherer = Column(String(255), nullable=False)
-    vertragsnummer = Column(String(120), nullable=False, unique=True)
+    vertragsnummer = Column(String(120), nullable=False)
     praemie = Column(DECIMAL(14, 2), nullable=False, default=0)
     waehrung = Column(String(10), default="EUR")
     zahlungsweise = Column(String(30), default="jaehrlich")  # jaehrlich|halbjaehrlich|monatlich
@@ -1259,10 +1262,13 @@ class Zapfung(Base):
 class TankBestand(Base):
     """Aktueller Tankbestand je Kraftstoffsorte"""
     __tablename__ = "ops_tank_bestand"
-    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "artikel", name="uq_ops_tank_bestand_tenant_artikel"),  # je Mandant, nicht systemweit
+        {"schema": "domain_ops", "extend_existing": True},
+    )
 
     id = Column(String, primary_key=True, default=default_prefixed_id("TB"))
-    artikel = Column(String(120), nullable=False, unique=True)
+    artikel = Column(String(120), nullable=False)
     bestand_liter = Column(Float, nullable=False, default=0)
     kapazitaet_liter = Column(Float, nullable=False, default=0)
     min_bestand = Column(Float, default=0)
@@ -1398,10 +1404,13 @@ class E2EProcessChainDB(Base):
 class EdiNachrichtDB(Base):
     """EDI-Nachrichten (ORDERS, DESADV, INVOIC …) — ersetzt EdiNachrichtStore"""
     __tablename__ = "edi_nachrichten"
-    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "nachricht_id", name="uq_edi_nachrichten_tenant_nachricht_id"),  # je Mandant, nicht systemweit
+        {"schema": "domain_ops", "extend_existing": True},
+    )
 
     id = Column(String, primary_key=True, default=default_prefixed_id("EDI"))
-    nachricht_id = Column(String(120), nullable=False, unique=True, index=True)
+    nachricht_id = Column(String(120), nullable=False, index=True)
     typ = Column(String(50), nullable=False)
     absender_gln = Column(String(50), nullable=False)
     empfaenger_gln = Column(String(50), nullable=False)
@@ -1418,11 +1427,14 @@ class EdiNachrichtDB(Base):
 class EdiPartnerDB(Base):
     """EDI-Partner (GLN-basiert) — ersetzt EdiPartner im In-Memory-Store"""
     __tablename__ = "edi_partner"
-    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "gln", name="uq_edi_partner_tenant_gln"),  # je Mandant, nicht systemweit
+        {"schema": "domain_ops", "extend_existing": True},
+    )
 
     id = Column(String, primary_key=True, default=default_prefixed_id("EDIP"))
     partner_id = Column(String(120), nullable=False, unique=True, index=True)
-    gln = Column(String(50), nullable=False, unique=True)
+    gln = Column(String(50), nullable=False)
     name = Column(String(255), nullable=False)
     tenant_id = Column(String(120), nullable=False, index=True)
     aktive_nachrichtentypen = Column(JSONB, nullable=False, default=list)

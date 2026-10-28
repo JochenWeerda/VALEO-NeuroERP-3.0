@@ -8,7 +8,7 @@
    "C": 14,
    "D": 54
   },
-  "rls_enabled": 637,
+  "rls_enabled": 639,
   "tenant_types": {
    "character varying": 333,
    "character varying(100)": 9,
@@ -3518,9 +3518,9 @@
    "table": "domain_ops.kon_contract",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_ops.kon_contract_fixing",
@@ -3797,9 +3797,9 @@
    "table": "domain_ops.ops_pcn_meldungen",
    "class": "A",
    "tenant_type": "character varying(120)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_projekt_aufgaben",

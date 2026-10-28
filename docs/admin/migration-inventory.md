@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-27
+last_reviewed: 2026-10-28
 version: 3.0.0
 description: Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Beschreibungen sind aus den Datei-Docstrings extrahiert.
 ---
@@ -428,6 +428,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `rls_domain_inventory_20261027` | Row-level security for the inventory master data and stock documents (RLS domain slice inventory). |
 | `rls_domain_ki_20261027` | Row-level security for the AI domain: agent proposals, tool executions, knowledge versions. |
 | `rls_domain_nachweisraum_20261027` | Row-level security for the evidence room (RLS domain slice nachweisraum). |
+| `rls_domain_ops_20261028` | Row-level security for domain_ops, part 1 (schema only, no data change). |
 | `rls_domain_pricing_20261027` | Row-level security for domain_pricing (RLS domain slice, first after P0-P7). |
 | `rls_domain_sales_20261027` | Row-level security for the sales documents (RLS domain slice sales). |
 | `rls_domain_shared_20261027` | Row-level security for tenant tables in domain_shared (RLS domain slice shared). |
