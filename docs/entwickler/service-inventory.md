@@ -63,6 +63,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `compat_helpers` | Shared helpers for compat service classes. |
 | `compensation_engine` | Compensation Engine — NC-006 |
 | `competitor_monitor` | Competitor Price & Image Monitoring Service |
+| `complaint_list_read` | Tenant-scoped projection for the complaint list. |
 | `compliance_pcn_lifecycle_service` | DOM-COMPLIANCE-004.2 — PCN-Meldung Lifecycle Service (Status-Maschine). |
 | `compliance_service` | Helpers and PDF builder for the Compliance domain. |
 | `compliance_sperre_audit_service` | DOM-COMPLIANCE-004.4 — Artikel-Sperre Audit-Trail Service (append-only). |
@@ -306,6 +307,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `studio_entity_router` | One authenticated HTTP command adapter for generated master-data contracts. |
 | `studio_entity_simulation` | Real rollback-only CRUD simulation for an exact registered Studio entity definition. |
 | `studio_history_view` | Read-only, type-preserving comparison of immutable Studio snapshots. |
+| `studio_list_contracts` | Bounded declarative list behavior; no commands or executable expressions. |
 | `studio_migration` | Studio migration compiler: catalog wiring and reviewable additive Alembic artifacts. |
 | `studio_migration_store` | Revision-bound plans in the existing append-only Studio history, never DDL. |
 | `studio_native_import` | Version native masks through the existing Studio store, without activation. |

@@ -49,7 +49,7 @@ def project_rows(rows, table, query):
         if key not in columns or columns[key].get("filterable") is False:
             raise HTTPException(422, "Filterfeld ist in der Tabelle nicht freigegeben")
     search = _text(query.q).strip()
-    selected = [row for row in rows if not search or any(search in _text(row.get(key)) for key in columns)]
+    selected = [row for row in rows if not search or any(search in _text(row.get(key)) for key in table.get("searchFields", columns))]
     for key, filter in query.filter_plan.items():
         selected = [row for row in selected if _matches(row.get(key), filter)]
     if query.sort:
@@ -75,7 +75,17 @@ def table_definition(definition, query):
     walk(definition)
     if len(found) != 1 or found[0].get("dataSourceKey") != query.source_key:
         raise HTTPException(409, "Tabelle besitzt keine eindeutige Bindung an diese Quelle")
-    return found[0]
+    table = found[0]
+    experience = definition.get("listExperience")
+    if isinstance(experience, dict) and "searchFields" in experience:
+        fields = experience["searchFields"]
+        columns = {column.get("key") for column in table.get("columns", []) if isinstance(column, dict)}
+        if (not isinstance(fields, list) or not 1 <= len(fields) <= 100
+                or any(not isinstance(field, str) or field not in columns for field in fields)
+                or len(set(fields)) != len(fields)):
+            raise HTTPException(409, "Ungueltiger deklarierter Suchfeldvertrag")
+        table = {**table, "searchFields": fields}
+    return table
 
 
 class TableCollector:

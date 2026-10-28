@@ -1,6 +1,6 @@
-import { useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from '@/app/routing/typed-router'
+import { useNavigate, useSearchParams } from '@/app/routing/typed-router'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
@@ -14,8 +14,27 @@ import { ActionInputDialog } from './renderers/ActionInputDialog'
 import { useScreenPermissions } from './runtime/screen-permissions'
 import { readDownload, saveReadDownload, type ReadDownloadResult } from './runtime/read-download'
 import type { ScreenActionDefinition, ScreenDefinition } from './schema'
+import { saveFlowSpineResumeCheckpoint } from '@/lib/api/flow-spines'
+import { listNavigationTarget, listCSV } from './runtime/list-navigation'
+import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
+import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 type Row = Record<string, unknown>
+
+function ListWorkflowContext({ onChange }: { onChange: (query: URLSearchParams) => void }): null {
+  const [query] = useSearchParams()
+  useEffect(() => onChange(new URLSearchParams(query)), [query, onChange])
+  return null
+}
+
+function ListKeyboardNavigation({ onNew, surface }: { onNew: () => void; surface: RefObject<HTMLDivElement | null> }): JSX.Element | null {
+  const isTouch = useTouchDevice()
+  const shortcuts = buildCoreMaskShortcuts({ onNew, onSearch: () => surface.current?.querySelector<HTMLInputElement>('input[type="search"]')?.focus() })
+  useKeyboardShortcuts(shortcuts)
+  return isTouch ? null : <KeyboardShortcutBar shortcuts={shortcuts} />
+}
+
 type Aktion = Pick<ScreenActionDefinition, 'key' | 'label'> & {
   permission?: string
   commandEndpoint?: string
@@ -65,6 +84,11 @@ export function NativeListPage({ screenId, testId }: { screenId: string; testId?
   const { toast } = useToast()
   const schema = useScreenDefinition(screenId).data
   const permissions = useScreenPermissions(schema)
+  const surface = useRef<HTMLDivElement | null>(null)
+  const listData = useRef<Row[] | null>(null)
+  const workflowQuery = useRef(new URLSearchParams())
+  const captureRows = useCallback((rows: Row[]) => { listData.current = rows }, [])
+  const captureQuery = useCallback((query: URLSearchParams) => { workflowQuery.current = query }, [])
   const laufend = useRef(new Set<string>())
   const absicht = useRef<{ inhalt: string; id: string } | null>(null)
   const [auftrag, setAuftrag] = useState<{ aktion: Aktion; row: Row; werte: Row } | null>(null)
@@ -133,8 +157,41 @@ export function NativeListPage({ screenId, testId }: { screenId: string; testId?
     }
   }
 
+  async function navigateList(path: string, create: boolean): Promise<void> {
+    if (laufend.current.has('navigation')) return
+    laufend.current.add('navigation')
+    try {
+      const target = listNavigationTarget(path, workflowQuery.current, schema?.listExperience?.workflowResume, create)
+      if (target.checkpoint) {
+        const checkpoint = target.checkpoint
+        await saveFlowSpineResumeCheckpoint(checkpoint.process, checkpoint.instanceId, checkpoint.payload)
+      }
+      navigate(target.url)
+    } catch {
+      toast({ title: 'Vorgang konnte nicht geöffnet werden', description: 'Bitte erneut versuchen.', variant: 'destructive' })
+    } finally {
+      laufend.current.delete('navigation')
+    }
+  }
+
   async function exportieren(): Promise<void> {
-    // Export der Liste mit den Spalten der Definition (wie zuvor die handgebauten Listen, jetzt deklarativ).
+    if (schema?.listExperience) {
+      const rows = listData.current
+      if (!rows?.length) {
+        toast({ title: 'Keine Daten', description: 'Es gibt nichts zu exportieren.', variant: 'destructive' })
+        return
+      }
+      const declaration = schema.listExperience.export
+      const blob = new Blob([listCSV(rows, declaration.columns, declaration.delimiter)], { type: 'text/csv;charset=utf-8' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `${declaration.filenamePrefix}${new Date().toISOString().slice(0, 10)}.csv`
+      link.click()
+      URL.revokeObjectURL(url)
+      return
+    }
+    // Older definitions retain their existing export contract.
     const tabelle = schema?.tables?.[0]
     const quelle = schema?.dataSources?.find(ds => ds.key === tabelle?.dataSourceKey)
     if (!tabelle || !quelle?.endpoint) return
@@ -166,7 +223,9 @@ export function NativeListPage({ screenId, testId }: { screenId: string; testId?
       return
     }
     if (aktion.navigationRoute) {
-      navigate(zielRoute(aktion.navigationRoute, payload))
+      const path = zielRoute(aktion.navigationRoute, payload)
+      if (schema?.listExperience?.workflowResume) void navigateList(path, payload.id == null)
+      else navigate(path)
       return
     }
     if (!aktion.commandEndpoint) return
@@ -174,13 +233,19 @@ export function NativeListPage({ screenId, testId }: { screenId: string; testId?
     setStufe(aktion.inputFields?.length ? 'eingabe' : 'bestaetigung')
   }
 
+  const rowRoute = schema?.tables?.[0]?.rowRouteTemplate
   const aktion = auftrag?.aktion
   const grundPflicht = Boolean(aktion?.auditReasonRequired)
   const grundOk = !grundPflicht || grund.trim().length >= 5
 
   return (
-    <>
+    <div ref={surface}>
+      {schema?.listExperience?.workflowResume && <ListWorkflowContext onChange={captureQuery} />}
       <UniversalNativeCockpitPage screenId={screenId} testId={testId} permissions={permissions}
+        onListData={schema?.listExperience ? captureRows : undefined}
+        onRowSelect={schema?.listExperience?.workflowResume && rowRoute
+          ? (row) => { void navigateList(zielRoute(rowRoute, row), false) }
+          : undefined}
         onAction={(key, payload) => { handleAction(key, payload) }} />
       {aktion && stufe === 'eingabe' && (
         <ActionInputDialog
@@ -241,6 +306,8 @@ export function NativeListPage({ screenId, testId }: { screenId: string; testId?
           </DialogContent>
         </Dialog>
       )}
-    </>
+      {schema?.listExperience && <ListKeyboardNavigation surface={surface}
+        onNew={() => { const action = schema.actions?.find(item => item.kind === 'primary' && item.navigationRoute); if (action) handleAction(action.key, {}) }} />}
+    </div>
   )
 }

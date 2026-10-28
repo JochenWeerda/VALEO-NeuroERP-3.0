@@ -8,14 +8,14 @@ Bezug: [Made by Studio — Qualitätsversprechen](made-by-studio-qualitaetsversp
 
 | Metrik | Wert |
 |--------|------|
-| Registrierte ScreenDefinitions | 857 |
-| Gate A (Meridian & Struktur) grün | 857 |
-| Gate B (Rechte & Aktionen) grün | 857 |
-| Gate C (Compiler & Kanal) grün | 856 |
-| Gate E (Runtime-Verdrahtung) grün | 800 |
+| Registrierte ScreenDefinitions | 853 |
+| Gate A (Meridian & Struktur) grün | 853 |
+| Gate B (Rechte & Aktionen) grün | 853 |
+| Gate C (Compiler & Kanal) grün | 852 |
+| Gate E (Runtime-Verdrahtung) grün | 801 |
 | Studio-Draft-Projektion ohne Violations | 5 |
 | Ø Advisory-Score (Gate-C-Metrik) | 0.99 |
-| Screen-IDs in runtime_wired-Routen (gesamt) | 2652 |
+| Screen-IDs in runtime_wired-Routen (gesamt) | 2655 |
 
 Gate D (Browser/Image) wird hier nicht automatisiert geprüft.
 
@@ -31,7 +31,7 @@ Keine — alle grün.
 
 - `portal/zertifikat`: api_bindung:endpoint_nicht_in_openapi:/api/v1/portal/zertifikate/{entity_id}
 
-## Gate E — offene Screen-IDs (57)
+## Gate E — offene Screen-IDs (52)
 
 - `admin/control-center`: runtime:screen_id_nicht_runtime_wired
 - `admin/webhooks-liste`: runtime:screen_id_nicht_runtime_wired
@@ -51,10 +51,8 @@ Keine — alle grün.
 - `fibu/debitoren`: runtime:screen_id_nicht_runtime_wired
 - `fibu/debitoren-liste`: runtime:screen_id_nicht_runtime_wired
 - `finance/bank-abgleich`: runtime:screen_id_nicht_runtime_wired
-- `finance/bankkonten-stamm`: runtime:screen_id_nicht_runtime_wired
 - `finance/debitoren/new`: runtime:screen_id_nicht_runtime_wired
 - `finance/invoices/new`: runtime:screen_id_nicht_runtime_wired
-- `finance/kreditoren-stamm`: runtime:screen_id_nicht_runtime_wired
 - `futtermittel/einzelfuttermittel/stamm/new`: runtime:screen_id_nicht_runtime_wired
 - `futtermittel/fuetterungsdokumentation-mobil`: runtime:screen_id_nicht_runtime_wired
 - `futtermittel/mischfuttermittel/stamm/new`: runtime:screen_id_nicht_runtime_wired
@@ -64,9 +62,6 @@ Keine — alle grün.
 - `lager/materialfluss`: runtime:screen_id_nicht_runtime_wired
 - `mahnwesen/mahnlauf`: runtime:screen_id_nicht_runtime_wired
 - `portal/rationsoptimierung`: runtime:screen_id_nicht_runtime_wired
-- `qualitaet/reklamation-detail`: runtime:screen_id_nicht_runtime_wired
-- `qualitaet/reklamationen`: runtime:screen_id_nicht_runtime_wired
-- `qualitaet/reklamationen-liste`: runtime:screen_id_nicht_runtime_wired
 - `sales/angebote-liste`: runtime:screen_id_nicht_runtime_wired
 - `sales/credit-notes`: runtime:screen_id_nicht_runtime_wired
 - `sales/lieferungen-liste`: runtime:screen_id_nicht_runtime_wired

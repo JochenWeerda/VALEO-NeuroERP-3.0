@@ -5407,16 +5407,6 @@
       "studio_draft_clean": false,
       "version": "1.0.0"
     },
-    "finance/bankkonten-stamm": {
-      "definition_hash": "47417ba8ad6e736faafc830003668bb56afe956481b286897e3892d664decf39",
-      "gates_passed": [
-        "A",
-        "B",
-        "C"
-      ],
-      "studio_draft_clean": false,
-      "version": "1.0.0"
-    },
     "finance/bankkonto": {
       "definition_hash": "c004e57df269e70f90796a2a56f093a8e7443bf86867a80aab1ef2860bde889d",
       "gates_passed": [
@@ -5598,16 +5588,6 @@
         "B",
         "C",
         "E"
-      ],
-      "studio_draft_clean": false,
-      "version": "1.0.0"
-    },
-    "finance/kreditoren-stamm": {
-      "definition_hash": "702a6e460e1424556ff260d0653c373b7ad4eb130ba9793913e2470bde6340ec",
-      "gates_passed": [
-        "A",
-        "B",
-        "C"
       ],
       "studio_draft_clean": false,
       "version": "1.0.0"
@@ -7802,32 +7782,13 @@
       "studio_draft_clean": false,
       "version": "1.0.0"
     },
-    "qualitaet/reklamation-detail": {
-      "definition_hash": "8d58dada5a3b16d629d25bf8ccce515452b86029b525cca048c709d297525cea",
-      "gates_passed": [
-        "A",
-        "B",
-        "C"
-      ],
-      "studio_draft_clean": false,
-      "version": "1.0.0"
-    },
-    "qualitaet/reklamationen": {
-      "definition_hash": "23155d0f496cee41d142e2cab8aab787c8896f191fd20541b4994219a3dc0b0b",
-      "gates_passed": [
-        "A",
-        "B",
-        "C"
-      ],
-      "studio_draft_clean": false,
-      "version": "1.0.0"
-    },
     "qualitaet/reklamationen-liste": {
-      "definition_hash": "1344586e078a05be1a7c0d6218713091fdb0b51892a68cc8661be36b17e8743f",
+      "definition_hash": "04e5c7d0771c558e02afe4338846ab2878eb6d765af90629cd5c5b4bec79a56a",
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
       "studio_draft_clean": false,
       "version": "1.0.0"

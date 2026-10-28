@@ -1,5 +1,6 @@
 import type {
   DocumentScreenVariantRef,
+  ListExperience,
   ScreenDomain,
   ScreenColumnNavigation,
   ScreenCalendarView,
@@ -276,6 +277,7 @@ export interface RenderPerformancePlan {
 }
 
 export interface RenderPlan {
+  listExperience?: ListExperience
   documentVariant?: DocumentScreenVariantRef
   cacheKey: string
   screenId: string

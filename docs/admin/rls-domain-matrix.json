@@ -3923,20 +3923,19 @@
     "app/domains/operations/models.py"
    ],
    "leser": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py",
     "app/api/v1/endpoints/stammdaten_bearbeiten.py",
-    "app/domains/operations/models.py"
+    "app/domains/operations/models.py",
+    "app/services/complaint_list_read.py"
    ],
    "schreiber": [
     "app/api/v1/endpoints/reklamation_api.py"
    ],
    "worker": [],
    "identitaet": {
-    "standardmandant": 2,
-    "token": 3
+    "standardmandant": 1,
+    "token": 2
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py:965",
     "app/api/v1/endpoints/reklamation_api.py:121"
    ],
    "null_stellen": [],

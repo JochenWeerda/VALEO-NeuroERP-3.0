@@ -3,7 +3,7 @@ import type { FilterValue, TableQueryState } from './types'
 type Row = Record<string, unknown>
 
 function text(value: unknown): string {
-  return value == null ? '' : String(value).toLowerCase()
+  return value == null ? '' : String(value).toLowerCase().replace(/ß/g, 'ss').normalize('NFKD').replace(/\p{M}/gu, '')
 }
 
 function compare(left: unknown, right: unknown): number {
@@ -35,9 +35,9 @@ function matches(value: unknown, filter: FilterValue): boolean {
  * Vorher schickte die Laufzeit `page`/`limit`/`q` auch an Dienste, die das nicht auswerten: Die Suche lief ins Leere,
  * und der Renderer zeigte nur die erste Seite ohne Blaettern.
  */
-export function applyClientTableQuery(rows: Row[], state: TableQueryState): { rows: Row[]; total: number } {
+export function applyClientTableQuery(rows: Row[], state: TableQueryState, searchFields?: string[]): { rows: Row[]; filteredRows: Row[]; total: number } {
   const suche = text(state.q).trim()
-  let result = suche ? rows.filter((row) => Object.values(row).some((value) => text(value).includes(suche))) : rows
+  let result = suche ? rows.filter((row) => (searchFields ? searchFields.map(key => row[key]) : Object.values(row)).some((value) => text(value).includes(suche))) : rows
   for (const [key, filter] of Object.entries(state.filterPlan ?? {})) {
     result = result.filter((row) => matches(row[key], filter))
   }
@@ -47,5 +47,5 @@ export function applyClientTableQuery(rows: Row[], state: TableQueryState): { ro
     result = [...result].sort((left, right) => richtung * compare(left[key], right[key]))
   }
   const start = (Math.max(1, state.page) - 1) * state.pageSize
-  return { rows: result.slice(start, start + state.pageSize), total: result.length }
+  return { rows: result.slice(start, start + state.pageSize), filteredRows: result, total: result.length }
 }

@@ -1032,21 +1032,6 @@ def build_finance_bank_stamm_screen_definition() -> dict[str, Any]:
     )
 
 
-def build_finance_bankkonten_stamm_screen_definition() -> dict[str, Any]:
-    return build_stamm_object_page(
-        screen_id="finance/bankkonten-stamm",
-        domain="finance",
-        title="Bankkonten stamm",
-        subtitle="finance",
-        identity_field="grunddaten",
-        data_sources=[stamm_entity_source("/api/v1/finance/bank-accounts/{entity_id}")],
-        tabs=[stamm_kopf_tab([{"key": "grunddaten", "label": "Grunddaten", "type": "text"}, {"key": "save", "label": "Save", "type": "text"}, {"key": "validate", "label": "Validate", "type": "text"}, {"key": "export", "label": "Export", "type": "text"}])],
-        edit_permission="finance.write",
-        no_workflow_reason="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-        business_purpose="Bankkonten stamm als Stammblatt pflegen.",
-        example_prompts=["Oeffne Bankkonten stamm.", "Bearbeite Stammdaten."],
-        test_id="finance-bankkonten-stamm",
-    )
 
 
 def build_finance_bookings_new_screen_definition() -> dict[str, Any]:
@@ -1242,21 +1227,6 @@ def build_finance_kreditoren_screen_definition() -> dict[str, Any]:
     )
 
 
-def build_finance_kreditoren_stamm_screen_definition() -> dict[str, Any]:
-    return build_stamm_object_page(
-        screen_id="finance/kreditoren-stamm",
-        domain="finance",
-        title="Kreditoren stamm",
-        subtitle="finance",
-        identity_field="stammdaten",
-        data_sources=[stamm_entity_source("/api/v1/finance/creditors/{entity_id}")],
-        tabs=[stamm_kopf_tab([{"key": "stammdaten", "label": "Stammdaten", "type": "text"}, {"key": "kontakt", "label": "Kontakt", "type": "text"}, {"key": "bankverbindung", "label": "Bankverbindung", "type": "text"}, {"key": "konditionen", "label": "Konditionen", "type": "text"}, {"key": "compliance", "label": "Compliance", "type": "text"}, {"key": "notizen", "label": "Notizen", "type": "text"}])],
-        edit_permission="finance.write",
-        no_workflow_reason="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-        business_purpose="Kreditoren stamm als Stammblatt pflegen.",
-        example_prompts=["Oeffne Kreditoren stamm.", "Bearbeite Stammdaten."],
-        test_id="finance-kreditoren-stamm",
-    )
 
 
 def build_finance_lastschriften_debitoren_screen_definition() -> dict[str, Any]:
@@ -3489,42 +3459,6 @@ def build_qualitaet_labor_detail_screen_definition() -> dict[str, Any]:
     )
 
 
-def build_qualitaet_reklamation_detail_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="qualitaet/reklamation-detail",
-        domain="qualitaet",
-        title="Status geaendert",
-        subtitle="qualitaet",
-        endpoint="/api/v1/qualitaet/labor-auftraege",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Status geaendert im qualitaet-Bereich finden und auswerten.",
-        prompts=["Zeige Status geaendert.", "Filtere die Liste."],
-        bundle="qualitaet",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_qualitaet_reklamationen_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="qualitaet/reklamationen",
-        domain="qualitaet",
-        title="Reklamationen",
-        subtitle="qualitaet",
-        endpoint="/api/v1/qualitaet/labor-auftraege",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Reklamationen im qualitaet-Bereich finden und auswerten.",
-        prompts=["Zeige Reklamationen.", "Filtere die Liste."],
-        bundle="qualitaet",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
 
 
 def build_reports_screen_definition() -> dict[str, Any]:
@@ -5019,7 +4953,6 @@ BATCH15_SCREEN_BUILDERS: dict[str, Any] = {
     "finance/ap/invoices/new": build_finance_ap_invoices_new_screen_definition,
     "finance/bank-abgleich": build_finance_bank_abgleich_screen_definition,
     "finance/bank-stamm": build_finance_bank_stamm_screen_definition,
-    "finance/bankkonten-stamm": build_finance_bankkonten_stamm_screen_definition,
     "finance/bookings/new": build_finance_bookings_new_screen_definition,
     "finance/buchungserfassung": build_finance_buchungserfassung_screen_definition,
     "finance/buchungsimport": build_finance_buchungsimport_screen_definition,
@@ -5031,7 +4964,6 @@ BATCH15_SCREEN_BUILDERS: dict[str, Any] = {
     "finance/kasse": build_finance_kasse_screen_definition,
     "finance/kontenplan": build_finance_kontenplan_screen_definition,
     "finance/kreditoren": build_finance_kreditoren_screen_definition,
-    "finance/kreditoren-stamm": build_finance_kreditoren_stamm_screen_definition,
     "finance/lastschriften-debitoren": build_finance_lastschriften_debitoren_screen_definition,
     "finance/nebenbuch-abstimmung": build_finance_nebenbuch_abstimmung_screen_definition,
     "finance/offene-posten": build_finance_offene_posten_screen_definition,
@@ -5151,8 +5083,6 @@ BATCH15_SCREEN_BUILDERS: dict[str, Any] = {
     "prospecting/leads": build_prospecting_leads_screen_definition,
     "qualitaet/labor-auftrag": build_qualitaet_labor_auftrag_screen_definition,
     "qualitaet/labor-detail": build_qualitaet_labor_detail_screen_definition,
-    "qualitaet/reklamation-detail": build_qualitaet_reklamation_detail_screen_definition,
-    "qualitaet/reklamationen": build_qualitaet_reklamationen_screen_definition,
     "reports": build_reports_screen_definition,
     "reports/ReportsDashboardCharts": build_reports_reportsdashboardcharts_screen_definition,
     "reports/deckungsbeitrag": build_reports_deckungsbeitrag_screen_definition,

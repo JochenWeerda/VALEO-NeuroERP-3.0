@@ -1489,13 +1489,13 @@ def build_compliance_enni_meldungen_liste() -> dict[str, Any]:
 
 
 def build_qualitaet_reklamationen_liste() -> dict[str, Any]:
-    return _liste(
+    definition = _liste(
         screen_id="qualitaet/reklamationen-liste", domain="qualitaet", title="Reklamationen",
-        subtitle="Beanstandungen mit Kunde, Artikel und Prioritaet", endpoint="/api/v1/qualitaet/reklamationen",
+        subtitle="Beanstandungen mit Lieferant, Artikel und Bearbeitungsstand", endpoint="/api/v1/qualitaet/reklamationen",
         row_route="/qualitaet/reklamation/{id}", bundle="qualitaet",
         columns=[
             {"key": "nummer", "label": "Reklamation-Nr.", "sortable": True, "filterable": True, "priority": "primary"},
-            {"key": "kunde", "label": "Kunde", "filterable": True, "priority": "primary"},
+            {"key": "kunde", "label": "Lieferant", "filterable": True, "priority": "primary"},
             {"key": "artikel", "label": "Artikel", "filterable": True, "priority": "secondary"},
             {"key": "grund", "label": "Grund", "filterable": True, "priority": "secondary"},
             {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
@@ -1507,8 +1507,40 @@ def build_qualitaet_reklamationen_liste() -> dict[str, Any]:
         row_actions=[],
         purpose="Reklamationen nach Prioritaet und Bearbeitungsstand steuern.",
         prompts=["Welche Reklamationen sind offen?", "Welche Faelle sind hoch priorisiert?"],
-        no_workflow="Der Stand steht an der Reklamation; die Liste fuehrt keinen eigenen Ablauf.",
+        no_workflow="Die Liste verwaltet keinen eigenen Ablauf; uebergebener Prozesskontext bleibt erhalten.",
     )
+
+    definition["listExperience"] = {
+        "workflowResume": {"resumeNodeId": "complaint", "businessStatus": "reklamation_in_bearbeitung",
+                           "actionLabelPrefix": "Reklamation fortsetzen: ", "createScreen": "complaint-create",
+                           "detailScreen": "complaint-detail"},
+        "searchFields": ["nummer", "kunde", "grund", "artikel"],
+        "aggregates": [
+            {"key": "total", "label": "Reklamationen Gesamt", "conditions": []},
+            {"key": "neu", "label": "Neu", "conditions": [{"field": "status", "op": "eq", "value": "neu"}]},
+            {"key": "inBearbeitung", "label": "In Bearbeitung", "conditions": [{"field": "status", "op": "eq", "value": "in-bearbeitung"}]},
+            {"key": "geloest", "label": "Gelöst", "conditions": [{"field": "status", "op": "eq", "value": "geloest"}]},
+            {"key": "unbekanntePrioritaet", "label": "Ohne Prioritätsangabe", "conditions": [{"field": "prioritaet", "op": "eq", "value": ""}]},
+            {"key": "hochprio", "label": "Hohe Priorität offen", "conditions": [
+                {"field": "prioritaet", "op": "eq", "value": "hoch"},
+                {"field": "status", "op": "neq", "value": "geloest"},
+                {"field": "status", "op": "neq", "value": "abgelehnt"}]},
+        ],
+        "export": {"filenamePrefix": "Reklamationen_", "delimiter": ";", "columns": [
+            {"key": "nummer", "label": "Nummer"}, {"key": "kunde", "label": "Lieferant"},
+            {"key": "artikel", "label": "Artikel"}, {"key": "grund", "label": "Grund"},
+            {"key": "datum", "label": "Datum"}, {"key": "prioritaet", "label": "Prioritaet"},
+            {"key": "status", "label": "Status"}]},
+        "notice": {"aggregate": "neu", "text": "{neu} neue Reklamation(en)"},
+        "insightLines": [
+            {"label": "Stand", "variants": [{"when": {"aggregate": "neu", "op": "gt", "value": 0}, "text": "{neu} neue Reklamation(en)"}, {"when": {"aggregate": "inBearbeitung", "op": "gt", "value": 0}, "text": "Bearbeitung läuft"}, {"text": "Kein Fall mit Status Neu oder In Bearbeitung"}]},
+            {"label": "Rückstand", "variants": [{"when": {"aggregate": "neu", "op": "gt", "value": 0}, "text": "{neu} unbearbeitete Reklamation(en)"}, {"text": "Keine als neu markierten Fälle"}]},
+            {"label": "Risikobild", "variants": [{"when": {"aggregate": "hochprio", "op": "gt", "value": 0}, "text": "{hochprio} mit hoher Priorität – SLA beachten"}, {"when": {"aggregate": "unbekanntePrioritaet", "op": "gt", "value": 0}, "text": "{unbekanntePrioritaet} ohne Prioritätsangabe"}, {"text": "Kein erhöhtes Prioritätsrisiko erfasst"}]},
+            {"label": "Nächste Sammelaktion", "variants": [{"when": {"aggregate": "neu", "op": "gt", "value": 0}, "text": "Neue Reklamationen sichten und zuweisen"}, {"when": {"aggregate": "inBearbeitung", "op": "gt", "value": 0}, "text": "Laufende Fälle prüfen"}, {"text": "Fallstände bei Bedarf prüfen"}]},
+            {"label": "Datenbasis", "variants": [{"text": "Auswertung der bis zu 200 zuletzt erfassten Fälle."}]},
+        ],
+    }
+    return definition
 
 
 def build_crm_leads_liste() -> dict[str, Any]:

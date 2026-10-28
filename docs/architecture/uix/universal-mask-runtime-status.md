@@ -4,18 +4,23 @@ type: reference
 audience: [agent, entwickler, architektur, qa]
 owner: Codex
 status: aktiv
-last_reviewed: 2026-09-17
-version: 2.5.0
+last_reviewed: 2026-10-28
+version: 2.6.0
 description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-021…050) — Lieferstand, Gates, Governance. Historische Lieferstaende und aktuelle Abnahmegrenzen getrennt ausgewiesen.
 ---
 
 # Universal Mask Runtime — Plattformstatus
 
-**Aktueller Artefaktabgleich 2026-10-27:** 857 registrierte Definitionen,
-Gate A/B jeweils857, C856, E800 (57 Runtime-Luecken); 848 native
-Katalogeintraege, nur5 strukturell freigabefaehig. Browser-Gate D und
-Fachkettenabnahme bleiben eigenstaendig offen. Dies ersetzt die weiter unten
-zitierten frueheren Messwerte. Der strengere aktuelle Bericht ist fuehrend.
+**Aktueller Artefaktabgleich 2026-10-28:**853 registrierte Definitionen,
+Gate A/B jeweils853,C852,E801(52 Runtime-Punkte);844 native
+Katalogeintraege und5 strukturell freigabefaehige Draft-Projektionen.
+Reklamationen nutzt nun die echte NativeListPage mit gemeinsamem Such-,
+Kennzahlen-, Export- und Workflow-Resume-Vertrag. Vier obsolete Identitaeten
+sind bereinigt.108 gezielte Tests sind gruen; sechs visuelle Komponentenansichten
+(Hell/Dunkel,drei Desktopaufloesungen) und der gefilterte Browserdownload
+sind geprueft. Angemeldete E2E-/Gesamtfreigabe bleibt ein eigener Nachweis.
+[Abnahme](../../quality-assurance/studio-functional-lists-20261028.md).
+Diese Werte sind fuehrend; nachfolgende fruehere Zahlen sind historisch.
 
 **Verbindliches Ziel (Nutzer 2026-10-27):** Alle fachlichen Masken werden ueber
 Studio gebaut, versioniert und ueber die gemeinsame Runtime betrieben.

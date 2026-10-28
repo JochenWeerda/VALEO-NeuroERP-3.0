@@ -22,15 +22,15 @@ describe('Listenfamilien: aktuelles Routeninventar (Quellnachweis)', () => {
       expect(src).toContain(`screenId="${screenId}"`)
     }
     const rekl = read('qualitaet/reklamationen.tsx')
-    expect(rekl).toContain('useReklamationen')
-    expect(rekl).toContain('saveFlowSpineResumeCheckpoint')
+    expect(rekl).toContain('NativeListPage')
+    expect(rekl).toContain('screenId="qualitaet/reklamationen-liste"')
   })
 
   it('Debitoren-, Mischfuttermittel-, Auftragsbestaetigungen- und Artikel-Listen nutzen NativeListPage', () => {
     expect(read('finance/debitoren-liste.tsx')).toContain('NativeListPage')
     expect(read('finance/debitoren-liste.tsx')).toContain('screenId="finance/debitoren-liste"')
     expect(read('futtermittel/mischfuttermittel-liste.tsx')).toContain('screenId="futtermittel/mischfuttermittel/liste"')
-    expect(read('einkauf/auftragsbestaetigungen-liste.tsx')).toContain('screenId="einkauf/auftragsbestaetigungen-liste"')
+    expect(read('einkauf/auftragsbestaetigungen-liste.tsx')).toContain('screenId="einkauf/auftragsbestaetigungen"')
     expect(read('artikel/liste.tsx')).toContain('screenId="artikel/liste"')
   })
 

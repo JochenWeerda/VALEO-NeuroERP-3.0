@@ -1,0 +1,354 @@
+{
+  "schemaVersion": 1,
+  "id": "qualitaet/reklamationen-liste",
+  "domain": "qualitaet",
+  "mode": "list",
+  "title": "Reklamationen",
+  "subtitle": "Beanstandungen mit Lieferant, Artikel und Bearbeitungsstand",
+  "adapter": {
+    "type": "native",
+    "sourceId": "qualitaet/reklamationen-liste",
+    "temporary": false
+  },
+  "dataSources": [
+    {
+      "key": "list",
+      "endpoint": "/api/v1/qualitaet/reklamationen",
+      "pageSize": 500
+    }
+  ],
+  "actions": [
+    {
+      "key": "neu",
+      "label": "Neue Reklamation",
+      "kind": "primary",
+      "dangerLevel": "safe",
+      "zone": "header",
+      "navigationRoute": "/qualitaet/reklamation/neu",
+      "localEffect": "navigation",
+      "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
+    },
+    {
+      "key": "export",
+      "label": "CSV-Export",
+      "kind": "secondary",
+      "dangerLevel": "safe",
+      "zone": "header",
+      "command": "list.exportCsv",
+      "localEffect": "download",
+      "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+    }
+  ],
+  "tables": [
+    {
+      "key": "list",
+      "label": "Reklamationen",
+      "dataSourceKey": "list",
+      "serverPagination": false,
+      "pageSize": 50,
+      "virtualized": true,
+      "rowHeight": 40,
+      "columns": [
+        {
+          "key": "nummer",
+          "label": "Reklamation-Nr.",
+          "sortable": true,
+          "filterable": true,
+          "priority": "primary"
+        },
+        {
+          "key": "kunde",
+          "label": "Lieferant",
+          "filterable": true,
+          "priority": "primary"
+        },
+        {
+          "key": "artikel",
+          "label": "Artikel",
+          "filterable": true,
+          "priority": "secondary"
+        },
+        {
+          "key": "grund",
+          "label": "Grund",
+          "filterable": true,
+          "priority": "secondary"
+        },
+        {
+          "key": "datum",
+          "label": "Datum",
+          "renderKind": "date",
+          "sortable": true,
+          "priority": "secondary"
+        },
+        {
+          "key": "prioritaet",
+          "label": "Prioritaet",
+          "renderKind": "status",
+          "filterable": true,
+          "priority": "secondary"
+        },
+        {
+          "key": "status",
+          "label": "Status",
+          "renderKind": "status",
+          "filterable": true,
+          "priority": "primary"
+        }
+      ],
+      "rowActions": [],
+      "rowRouteTemplate": "/qualitaet/reklamation/{id}"
+    }
+  ],
+  "noWorkflowReason": "Die Liste verwaltet keinen eigenen Ablauf; uebergebener Prozesskontext bleibt erhalten.",
+  "agentContract": {
+    "businessPurpose": "Reklamationen nach Prioritaet und Bearbeitungsstand steuern.",
+    "examplePrompts": [
+      "Welche Reklamationen sind offen?",
+      "Welche Faelle sind hoch priorisiert?"
+    ],
+    "sensitiveFields": [],
+    "testSelectors": {
+      "screenRoot": "[data-testid='screen-qualitaet/reklamationen-liste']"
+    }
+  },
+  "layout": {
+    "floorplan": "worklist",
+    "density": "compact",
+    "contextRail": "none",
+    "preferredMode": "desktopDense",
+    "mobileMode": "mobileStack",
+    "touchTargetPx": 44,
+    "tableProfile": "audit"
+  },
+  "performance": {
+    "initialPayloadBudgetKb": 60,
+    "requiresLazyTabs": false,
+    "requiresVirtualTables": true,
+    "lookupMinChars": 2,
+    "bundleGroup": "qualitaet"
+  },
+  "listExperience": {
+    "workflowResume": {
+      "resumeNodeId": "complaint",
+      "businessStatus": "reklamation_in_bearbeitung",
+      "actionLabelPrefix": "Reklamation fortsetzen: ",
+      "createScreen": "complaint-create",
+      "detailScreen": "complaint-detail"
+    },
+    "searchFields": [
+      "nummer",
+      "kunde",
+      "grund",
+      "artikel"
+    ],
+    "aggregates": [
+      {
+        "key": "total",
+        "label": "Reklamationen Gesamt",
+        "conditions": []
+      },
+      {
+        "key": "neu",
+        "label": "Neu",
+        "conditions": [
+          {
+            "field": "status",
+            "op": "eq",
+            "value": "neu"
+          }
+        ]
+      },
+      {
+        "key": "inBearbeitung",
+        "label": "In Bearbeitung",
+        "conditions": [
+          {
+            "field": "status",
+            "op": "eq",
+            "value": "in-bearbeitung"
+          }
+        ]
+      },
+      {
+        "key": "geloest",
+        "label": "Gelöst",
+        "conditions": [
+          {
+            "field": "status",
+            "op": "eq",
+            "value": "geloest"
+          }
+        ]
+      },
+      {
+        "key": "unbekanntePrioritaet",
+        "label": "Ohne Prioritätsangabe",
+        "conditions": [
+          {
+            "field": "prioritaet",
+            "op": "eq",
+            "value": ""
+          }
+        ]
+      },
+      {
+        "key": "hochprio",
+        "label": "Hohe Priorität offen",
+        "conditions": [
+          {
+            "field": "prioritaet",
+            "op": "eq",
+            "value": "hoch"
+          },
+          {
+            "field": "status",
+            "op": "neq",
+            "value": "geloest"
+          },
+          {
+            "field": "status",
+            "op": "neq",
+            "value": "abgelehnt"
+          }
+        ]
+      }
+    ],
+    "export": {
+      "filenamePrefix": "Reklamationen_",
+      "delimiter": ";",
+      "columns": [
+        {
+          "key": "nummer",
+          "label": "Nummer"
+        },
+        {
+          "key": "kunde",
+          "label": "Lieferant"
+        },
+        {
+          "key": "artikel",
+          "label": "Artikel"
+        },
+        {
+          "key": "grund",
+          "label": "Grund"
+        },
+        {
+          "key": "datum",
+          "label": "Datum"
+        },
+        {
+          "key": "prioritaet",
+          "label": "Prioritaet"
+        },
+        {
+          "key": "status",
+          "label": "Status"
+        }
+      ]
+    },
+    "notice": {
+      "aggregate": "neu",
+      "text": "{neu} neue Reklamation(en)"
+    },
+    "insightLines": [
+      {
+        "label": "Stand",
+        "variants": [
+          {
+            "when": {
+              "aggregate": "neu",
+              "op": "gt",
+              "value": 0
+            },
+            "text": "{neu} neue Reklamation(en)"
+          },
+          {
+            "when": {
+              "aggregate": "inBearbeitung",
+              "op": "gt",
+              "value": 0
+            },
+            "text": "Bearbeitung läuft"
+          },
+          {
+            "text": "Kein Fall mit Status Neu oder In Bearbeitung"
+          }
+        ]
+      },
+      {
+        "label": "Rückstand",
+        "variants": [
+          {
+            "when": {
+              "aggregate": "neu",
+              "op": "gt",
+              "value": 0
+            },
+            "text": "{neu} unbearbeitete Reklamation(en)"
+          },
+          {
+            "text": "Keine als neu markierten Fälle"
+          }
+        ]
+      },
+      {
+        "label": "Risikobild",
+        "variants": [
+          {
+            "when": {
+              "aggregate": "hochprio",
+              "op": "gt",
+              "value": 0
+            },
+            "text": "{hochprio} mit hoher Priorität – SLA beachten"
+          },
+          {
+            "when": {
+              "aggregate": "unbekanntePrioritaet",
+              "op": "gt",
+              "value": 0
+            },
+            "text": "{unbekanntePrioritaet} ohne Prioritätsangabe"
+          },
+          {
+            "text": "Kein erhöhtes Prioritätsrisiko erfasst"
+          }
+        ]
+      },
+      {
+        "label": "Nächste Sammelaktion",
+        "variants": [
+          {
+            "when": {
+              "aggregate": "neu",
+              "op": "gt",
+              "value": 0
+            },
+            "text": "Neue Reklamationen sichten und zuweisen"
+          },
+          {
+            "when": {
+              "aggregate": "inBearbeitung",
+              "op": "gt",
+              "value": 0
+            },
+            "text": "Laufende Fälle prüfen"
+          },
+          {
+            "text": "Fallstände bei Bedarf prüfen"
+          }
+        ]
+      },
+      {
+        "label": "Datenbasis",
+        "variants": [
+          {
+            "text": "Auswertung der bis zu 200 zuletzt erfassten Fälle."
+          }
+        ]
+      }
+    ]
+  }
+}

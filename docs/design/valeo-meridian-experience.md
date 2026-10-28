@@ -415,3 +415,19 @@ Das echte Readiness-Gate und der signierte CLI-Lebenszyklus bleiben
 Freigabevoraussetzungen, keine Sonderfreigabe fuer Compiler-Ausgaben.
 Reale Theme-/Lesbarkeits-/Viewportabnahme bleibt ein eigener Nachweis vor
 einem umfassenden made-by-studio-Qualitaetsversprechen.
+
+## Deklarative Listen-Erlebnisse (28.10.2026)
+
+listExperience ist ein zentraler Vertrag der ScreenDefinition. Der Compiler
+uebernimmt die validierte Metadatenstruktur in den RenderPlan; die Runtime
+liefert gefilterte Daten vor der Seitenteilung. Gemeinsame Renderer erzeugen
+Kennzahlen und Fallhinweise. NativeListPage behandelt Export, Workflow-Resume,
+Tastatur und Zeilenaktionen; die fachliche Seite nennt nur ihre Definition.
+Damit werden weitere Listen ohne eine zweite Seitenarchitektur migrierbar.
+
+Suchfelder gelten gleichermassen in der gemeinsamen REST-/MCP-/CLI-Projektion.
+Server und Compiler pruefen Bounds und Referenzen. CSV und Kennzahlen duerfen
+keine unvollstaendige Seite als gesamten Bestand darstellen. Die aktuelle
+Reklamationsquelle benennt ihre fachliche Grenze von200 neuesten Faellen.
+Die Komponentenabnahme umfasst drei Desktop-Aufloesungen mit beiden Themes;
+Details stehen im [Abnahmenachweis](../quality-assurance/studio-functional-lists-20261028.md).

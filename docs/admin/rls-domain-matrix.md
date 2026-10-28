@@ -162,7 +162,7 @@ Datenstand gewachsene Datenbank: 2026-10-27. Tabellen: 86.
 | `domain_ops.ops_fahrzeug_touren` | C | position | `app/domains/operations/models.py` | `app/domains/operations/repository.py` | 2 | – | nutzlast 1 | 0 Z. | tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id) | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_ops.ops_fahrzeuge |
 | `domain_ops.ops_fahrzeuge` | A | referenzdaten, mandant_nullbar | `app/domains/operations/models.py` | `app/api/v1/command_handlers/fuhrpark.py`, `app/api/v1/endpoints/fuhrpark.py`, `app/api/v1/endpoints/harvest_acceptance.py`, `app/api/v1/endpoints/hofliste.py` (+5) | 13 | – | kopfzeile 1, nutzlast 2, token 3 | 1 Z., 1 Mand. | – | getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant |
 | `domain_ops.ops_pcn_meldungen` | A | standardmandant | `app/domains/operations/models.py` | `app/api/v1/endpoints/compliance.py`, `app/services/compliance_service.py` | 1 | – | standardmandant 1, token 1 | 0 Z., 0 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
-| `domain_ops.reklamationen` | A | standardmandant | `app/domains/operations/models.py` | `app/api/v1/endpoints/reklamation_api.py` | 3 | – | standardmandant 2, token 3 | 15 Z., 1 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
+| `domain_ops.reklamationen` | A | standardmandant | `app/domains/operations/models.py` | `app/api/v1/endpoints/reklamation_api.py` | 3 | – | standardmandant 1, token 2 | 15 Z., 1 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
 
 ## portal
 

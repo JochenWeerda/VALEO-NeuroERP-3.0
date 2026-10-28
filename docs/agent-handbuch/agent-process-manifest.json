@@ -13531,36 +13531,6 @@
       ]
     },
     {
-      "mask_id": "finance/bankkonten-stamm",
-      "title": "Bankkonten stamm",
-      "domain": "finance",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/finance__bankkonten-stamm/:entityId",
-      "agent_contract_url": "/api/v1/masks/finance/bankkonten-stamm/agent-contract",
-      "screen_definition_url": "/api/v1/masks/finance/bankkonten-stamm/screen-definition",
-      "readiness_url": "/api/v1/masks/finance/bankkonten-stamm/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "edit",
-          "label": "Bearbeiten",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "finance.write",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "finance.ap_invoice.propose",
-        "fibu.open_items.list",
-        "fibu.dunning.status"
-      ]
-    },
-    {
       "mask_id": "finance/bankkonto",
       "title": "Bankkonto",
       "domain": "finance",
@@ -14107,36 +14077,6 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "finance.ap_invoice.propose",
-        "fibu.open_items.list",
-        "fibu.dunning.status"
-      ]
-    },
-    {
-      "mask_id": "finance/kreditoren-stamm",
-      "title": "Kreditoren stamm",
-      "domain": "finance",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/finance__kreditoren-stamm/:entityId",
-      "agent_contract_url": "/api/v1/masks/finance/kreditoren-stamm/agent-contract",
-      "screen_definition_url": "/api/v1/masks/finance/kreditoren-stamm/screen-definition",
-      "readiness_url": "/api/v1/masks/finance/kreditoren-stamm/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "edit",
-          "label": "Bearbeiten",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "finance.write",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
         }
       ],
       "sensitive_fields": [],
@@ -22501,62 +22441,6 @@
           "commandEndpoint": "/api/v1/reklamationen/{entity_id}/actions/abschliessen",
           "method": "POST",
           "stubReason": null
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "qualitaet.reklamation.abschliessen"
-      ]
-    },
-    {
-      "mask_id": "qualitaet/reklamation-detail",
-      "title": "Status geaendert",
-      "domain": "qualitaet",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/qualitaet__reklamation-detail/:entityId",
-      "agent_contract_url": "/api/v1/masks/qualitaet/reklamation-detail/agent-contract",
-      "screen_definition_url": "/api/v1/masks/qualitaet/reklamation-detail/screen-definition",
-      "readiness_url": "/api/v1/masks/qualitaet/reklamation-detail/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "qualitaet.reklamation.abschliessen"
-      ]
-    },
-    {
-      "mask_id": "qualitaet/reklamationen",
-      "title": "Reklamationen",
-      "domain": "qualitaet",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/qualitaet__reklamationen/:entityId",
-      "agent_contract_url": "/api/v1/masks/qualitaet/reklamationen/agent-contract",
-      "screen_definition_url": "/api/v1/masks/qualitaet/reklamationen/screen-definition",
-      "readiness_url": "/api/v1/masks/qualitaet/reklamationen/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
         }
       ],
       "sensitive_fields": [],

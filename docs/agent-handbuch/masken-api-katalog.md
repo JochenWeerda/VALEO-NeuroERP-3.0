@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (848 Masken).
+> Generiert aus `app/core/screen_definitions.py` (844 Masken).
 
 ## Übersicht
 
@@ -510,7 +510,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `finance/bank-abgleich` | Objekt | finance | niedrig | — | `GET /api/v1/masks/finance/bank-abgleich/agent-contract` |
 | `finance/bank-account` | Bankkonto | finance | niedrig | — | `GET /api/v1/masks/finance/bank-account/agent-contract` |
 | `finance/bank-stamm` | Bank stamm | finance | niedrig | — | `GET /api/v1/masks/finance/bank-stamm/agent-contract` |
-| `finance/bankkonten-stamm` | Bankkonten stamm | finance | niedrig | — | `GET /api/v1/masks/finance/bankkonten-stamm/agent-contract` |
 | `finance/bankkonto` | Bankkonto | finance | mittel | — | `GET /api/v1/masks/finance/bankkonto/agent-contract` |
 | `finance/bookings/new` | Buchungsjournal | finance | niedrig | — | `GET /api/v1/masks/finance/bookings/new/agent-contract` |
 | `finance/buchungserfassung` | Vorgang | finance | niedrig | — | `GET /api/v1/masks/finance/buchungserfassung/agent-contract` |
@@ -528,7 +527,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `finance/kreditor` | Kreditor | finance | mittel | — | `GET /api/v1/masks/finance/kreditor/agent-contract` |
 | `finance/kreditoren` | Kreditoren liste | finance | niedrig | — | `GET /api/v1/masks/finance/kreditoren/agent-contract` |
 | `finance/kreditoren-liste` | Kreditoren | finance | niedrig | — | `GET /api/v1/masks/finance/kreditoren-liste/agent-contract` |
-| `finance/kreditoren-stamm` | Kreditoren stamm | finance | niedrig | — | `GET /api/v1/masks/finance/kreditoren-stamm/agent-contract` |
 | `finance/lastschriften-debitoren` | Debitorenlauf | finance | niedrig | — | `GET /api/v1/masks/finance/lastschriften-debitoren/agent-contract` |
 | `finance/nebenbuch-abstimmung` | Nebenbuch abstimmung | finance | niedrig | — | `GET /api/v1/masks/finance/nebenbuch-abstimmung/agent-contract` |
 | `finance/offene-posten` | Offene posten | finance | niedrig | — | `GET /api/v1/masks/finance/offene-posten/agent-contract` |
@@ -729,8 +727,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `qualitaet/labor-detail` | Labor detail | qualitaet | niedrig | — | `GET /api/v1/masks/qualitaet/labor-detail/agent-contract` |
 | `qualitaet/labor-liste` | Laborauftraege | qualitaet | niedrig | — | `GET /api/v1/masks/qualitaet/labor-liste/agent-contract` |
 | `qualitaet/reklamation` | Reklamation | qualitaet | mittel | `complaint-to-resolution` | `GET /api/v1/masks/qualitaet/reklamation/agent-contract` |
-| `qualitaet/reklamation-detail` | Status geaendert | qualitaet | niedrig | — | `GET /api/v1/masks/qualitaet/reklamation-detail/agent-contract` |
-| `qualitaet/reklamationen` | Reklamationen | qualitaet | niedrig | — | `GET /api/v1/masks/qualitaet/reklamationen/agent-contract` |
 | `qualitaet/reklamationen-liste` | Reklamationen | qualitaet | niedrig | — | `GET /api/v1/masks/qualitaet/reklamationen-liste/agent-contract` |
 | `reports` | Reports | workspace | niedrig | — | `GET /api/v1/masks/reports/agent-contract` |
 | `reports/ReportsDashboardCharts` | ReportsDashboardCharts | reports | niedrig | — | `GET /api/v1/masks/reports/ReportsDashboardCharts/agent-contract` |
@@ -15550,41 +15546,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `finance/bankkonten-stamm` — Bankkonten stamm
-
-**Zweck:** Bankkonten stamm als Stammblatt pflegen.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/finance/bankkonten-stamm/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/finance/bankkonten-stamm/agent-contract` |
-| Readiness | `GET /api/v1/masks/finance/bankkonten-stamm/readiness` |
-| Rollout-Route | `/mask-rollout/finance__bankkonten-stamm/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `entity` → `/api/v1/finance/bank-accounts/{entity_id}`
-
-**MCP-Tools (Domäne):**
-
-- `finance.ap_invoice.propose` — scope `finance:write`, Risiko hoch
-- `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
-- `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
-
-**Beispiel-Prompts:**
-
-- Oeffne Bankkonten stamm.
-- Bearbeite Stammdaten.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `edit` | Bearbeiten | safe | nein | `—` |
-
----
-
 ### `finance/bankkonto` — Bankkonto
 
 **Zweck:** Bankkonto-Stamm: Kontodaten und Buchungshistorie fuer Finanzbuchhaltung.
@@ -16194,41 +16155,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 |---|---|---|---|---|
 | `neu` | Neuer Kreditor | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
 | `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
-### `finance/kreditoren-stamm` — Kreditoren stamm
-
-**Zweck:** Kreditoren stamm als Stammblatt pflegen.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/finance/kreditoren-stamm/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/finance/kreditoren-stamm/agent-contract` |
-| Readiness | `GET /api/v1/masks/finance/kreditoren-stamm/readiness` |
-| Rollout-Route | `/mask-rollout/finance__kreditoren-stamm/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `entity` → `/api/v1/finance/creditors/{entity_id}`
-
-**MCP-Tools (Domäne):**
-
-- `finance.ap_invoice.propose` — scope `finance:write`, Risiko hoch
-- `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
-- `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
-
-**Beispiel-Prompts:**
-
-- Oeffne Kreditoren stamm.
-- Bearbeite Stammdaten.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `edit` | Bearbeiten | safe | nein | `—` |
 
 ---
 
@@ -25292,72 +25218,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 |---|---|---|---|---|
 | `bearbeiten` | Zustaendigkeit/Frist | safe | nein | `/api/v1/reklamationen/{entity_id}/actions/bearbeiten` |
 | `abschliessen` | Abschliessen | moderate | nein | `/api/v1/reklamationen/{entity_id}/actions/abschliessen` |
-
----
-
-### `qualitaet/reklamation-detail` — Status geaendert
-
-**Zweck:** Status geaendert im qualitaet-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/qualitaet/reklamation-detail/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/qualitaet/reklamation-detail/agent-contract` |
-| Readiness | `GET /api/v1/masks/qualitaet/reklamation-detail/readiness` |
-| Rollout-Route | `/mask-rollout/qualitaet__reklamation-detail/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/qualitaet/labor-auftraege`
-
-**MCP-Tools (Domäne):**
-
-- `qualitaet.reklamation.abschliessen` — scope `quality:write`, Risiko mittel
-
-**Beispiel-Prompts:**
-
-- Zeige Status geaendert.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
-### `qualitaet/reklamationen` — Reklamationen
-
-**Zweck:** Reklamationen im qualitaet-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/qualitaet/reklamationen/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/qualitaet/reklamationen/agent-contract` |
-| Readiness | `GET /api/v1/masks/qualitaet/reklamationen/readiness` |
-| Rollout-Route | `/mask-rollout/qualitaet__reklamationen/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/qualitaet/labor-auftraege`
-
-**MCP-Tools (Domäne):**
-
-- `qualitaet.reklamation.abschliessen` — scope `quality:write`, Risiko mittel
-
-**Beispiel-Prompts:**
-
-- Zeige Reklamationen.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
 
