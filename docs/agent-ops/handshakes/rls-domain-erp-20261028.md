@@ -15,7 +15,8 @@ description: Uebergabe Claude -> Codex fuer domain_erp Teil 1 unter RLS und die 
   Alembic `rls_nutrient_compositions_20261028 → rls_domain_erp_20261028`, ein Head.
   Live kein Abbruchgrund: alle sieben Tabellen 0 Zeilen, keine doppelten Nummern; die Migration legt
   `UNIQUE (id, tenant_id)` auf `domain_crm.customers` an (Sperre ACCESS EXCLUSIVE fuer die Dauer des Index).
-- **Live-relevant:** `POST /debtors` und `/export/list` weisen einen fremden `tenant_id` im Rumpf mit 403 ab;
+- **Live-relevant:** `POST /debtors` und `/export/list` weisen einen fremden `tenant_id` im Rumpf mit 403 ab (in der
+  Produktion fing das schon die zentrale Bindung ab; mandantenuebergreifend waren die Wege nach ID ohne Filter);
   Debitor anlegen, OP-Saldo und CSV-Export funktionieren erstmals (vorher immer 500); der Kreditoren-Export liefert
   den Kreditoren-Stamm statt einer leeren Datei.
 - **FiBu-Connector:** Pruefen/Buchen/Abbrechen/Stornieren liefen nie (Bindungsfehler). Buchen ist jetzt alles oder
