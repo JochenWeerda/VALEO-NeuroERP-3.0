@@ -35,7 +35,6 @@ from sqlalchemy.orm import Session
 
 logger = logging.getLogger("crm.ist_aggregation")
 
-TENANT_DEFAULT = "00000000-0000-0000-0000-000000000001"
 
 # ── Produkt-Klassifikator (rein, testbar) ─────────────────────────────────────
 # Gültige Zielschlüssel = die Produktgruppen aus dem Bedarfsdeckungs-Cockpit.
@@ -175,7 +174,9 @@ class IstAggregationService:
     def __init__(self, db: Session, tenant_id: Optional[str] = None,
                  sources: Optional[list[OrderSource]] = None) -> None:
         self.db = db
-        self.tenant_id = tenant_id or TENANT_DEFAULT
+        if not tenant_id:  # kein Rueckfall auf den Standardmandanten (bis 28.10.2026)
+            raise ValueError("Mandant fehlt")
+        self.tenant_id = tenant_id
         self.sources = sources if sources is not None else DEFAULT_SOURCES
 
     # ── Brücke 1: Kundenreferenz → kunden_nr ──────────────────────────────────

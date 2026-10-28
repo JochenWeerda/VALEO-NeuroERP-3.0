@@ -25,7 +25,6 @@
   "domain_agrar.feeding_unit_definitions": "referenzdaten",
   "domain_agrar.feldbuch_schlaege": "standardmandant",
   "domain_agrar.harvest_acceptances": "mandant_nullbar",
-  "domain_agrar.nutrient_compositions": "standardmandant",
   "domain_agrar.seed_orders": "standardmandant",
   "domain_agrar.silo_bewegungen": "position",
   "domain_agrar.waagen_vorlagen": "standardmandant",

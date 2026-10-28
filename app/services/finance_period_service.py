@@ -17,7 +17,6 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 from app.core import finance_periods
 
-_DEFAULT_TENANT = "00000000-0000-0000-0000-000000000001"
 
 
 def _f(v):
@@ -50,7 +49,9 @@ class PeriodError(Exception):
 class FinancePeriodService:
     def __init__(self, db: Session, tenant_id: Optional[str] = None) -> None:
         self.db = db
-        self.tenant_id = tenant_id or _DEFAULT_TENANT
+        if not tenant_id:  # kein Rueckfall auf den Standardmandanten (bis 28.10.2026)
+            raise ValueError("Mandant fehlt")
+        self.tenant_id = tenant_id
 
     def _stored(self) -> dict[str, dict]:
         rows = self.db.execute(
