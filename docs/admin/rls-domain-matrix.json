@@ -2,9 +2,9 @@
  "_note": "Generiert von scripts/rls_domain_matrix.py; nicht von Hand aendern.",
  "datenstand": "2026-10-27",
  "summary": {
-  "tabellen": 86,
+  "tabellen": 84,
   "nach_klasse": {
-   "A": 43,
+   "A": 41,
    "B": 29,
    "C": 14
   },
@@ -13,7 +13,7 @@
    "position": 12,
    "referenzdaten": 19,
    "mandant_nullbar": 20,
-   "standardmandant": 15,
+   "standardmandant": 13,
    "identitaet": 2
   },
   "nach_domain": {
@@ -62,7 +62,7 @@
     "dienst": 1,
     "position": 5,
     "referenzdaten": 1,
-    "standardmandant": 3
+    "standardmandant": 1
    },
    "portal": {
     "position": 1
@@ -3428,62 +3428,6 @@
    "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
   },
   {
-   "table": "domain_ops.kon_contract",
-   "domain": "ops",
-   "class": "A",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [
-    "standardmandant"
-   ],
-   "modell": [
-    "app/domains/operations/models.py"
-   ],
-   "leser": [
-    "app/api/v1/endpoints/crm_360_reads.py",
-    "app/domains/operations/models.py",
-    "app/services/calendar_projection_service.py",
-    "app/services/contract_engagement_service.py",
-    "app/services/contract_fixing_service.py",
-    "app/services/contract_fulfillment_service.py",
-    "app/services/contract_settlement_service.py",
-    "app/services/docflow_source_proposals.py",
-    "app/services/kontrakt_disposition_service.py",
-    "app/services/position_service.py",
-    "app/services/preisfindung_service.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/kontrakte.py",
-    "app/api/v1/endpoints/stammdaten_bearbeiten.py",
-    "app/domains/operations/repository.py",
-    "app/routers/contracts_router.py",
-    "app/services/kontrakt_movement_sync.py",
-    "app/services/kontrakt_position_service.py",
-    "app/services/kontrakte_service.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "nutzlast": 2,
-    "standardmandant": 1,
-    "token": 3
-   },
-   "standardmandant_stellen": [
-    "app/services/calendar_projection_service.py:911"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 4,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 1
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
    "table": "domain_ops.ops_chargen",
    "domain": "ops",
    "class": "A",
@@ -3861,45 +3805,6 @@
    },
    "bereinigung": [],
    "policy": "getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_ops.ops_pcn_meldungen",
-   "domain": "ops",
-   "class": "A",
-   "tenant_type": "character varying(120)",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [
-    "standardmandant"
-   ],
-   "modell": [
-    "app/domains/operations/models.py"
-   ],
-   "leser": [
-    "app/domains/operations/models.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/compliance.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "standardmandant": 1,
-    "token": 1
-   },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/compliance.py:850"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
   },
   {
    "table": "domain_ops.reklamationen",
