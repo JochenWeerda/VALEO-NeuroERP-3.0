@@ -87,10 +87,10 @@ def _po(db, lieferant_id: str, nummer: str, positionen: list[dict]) -> str:
     for p in positionen:
         db.execute(
             text("INSERT INTO domain_einkauf.bestellung_positionen "
-                 "(id, bestellung_id, pos_nr, artikel_nr, artikel_bezeichnung, menge, einheit, "
+                 "(id, tenant_id, bestellung_id, pos_nr, artikel_nr, artikel_bezeichnung, menge, einheit, "
                  "einzelpreis, netto_betrag, mwst_satz, status) "
-                 "VALUES (:id, :bid, :pos, :anr, :abez, :menge, :einheit, :preis, :netto, 19, 'offen')"),
-            {"id": str(uuid.uuid4()), "bid": pid, "pos": p["pos"], "anr": p["artikel_nr"],
+                 "VALUES (:id, :t, :bid, :pos, :anr, :abez, :menge, :einheit, :preis, :netto, 19, 'offen')"),
+            {"id": str(uuid.uuid4()), "t": TENANT, "bid": pid, "pos": p["pos"], "anr": p["artikel_nr"],
              "abez": p["bezeichnung"], "menge": p["menge"], "einheit": p["einheit"],
              "preis": p["einzelpreis"], "netto": round(p["menge"] * p["einzelpreis"], 2)},
         )

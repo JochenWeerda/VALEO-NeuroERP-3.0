@@ -326,6 +326,7 @@ class HarvestAcceptanceService:
         if payload.positions:
             for pos_in in payload.positions:
                 pos = HarvestAcceptancePosition(
+                    tenant_id=self.tenant_id,
                     id=uuid7(),
                     harvest_acceptance_id=obj.id,
                     position_number=pos_in.position_number,
@@ -1042,6 +1043,7 @@ class HarvestAcceptanceService:
                     existing_pos.calculation_formula = pos_result.calculation_formula
             else:
                 new_pos = HarvestAcceptancePosition(
+                    tenant_id=self.tenant_id,
                     id=_uuid7(),
                     harvest_acceptance_id=acceptance_id,
                     position_number=pos_result.position_number,

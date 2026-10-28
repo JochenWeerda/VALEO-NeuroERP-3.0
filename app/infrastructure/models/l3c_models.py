@@ -437,6 +437,7 @@ class HarvestAcceptancePosition(Base):
     __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
 
     id = Column(String, primary_key=True, default=uuid7)
+    tenant_id = Column(String, nullable=False)
     harvest_acceptance_id = Column(String, ForeignKey("domain_inventory.harvest_acceptances.id"), nullable=False)
     position_number = Column(Integer, nullable=False, comment="Positionsnummer (10, 15, 20, ...)")
     description = Column(String(200), nullable=False, comment="Bezeichnung (z.B. 'Angelieferte Menge', 'Windabgang', ...)")
