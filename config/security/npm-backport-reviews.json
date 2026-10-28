@@ -19,7 +19,7 @@
         "lib/stringify.js": "1d059d40df3eea35ccecc8fafcd64fca67e02dcfb1edaf1e8e0c94fd88338fc9",
         "lib/parse.js": "540c920c9186405e6d059b468a2a440c247f5c9aa0fdbdae5cd3d0a021697549"
       },
-      "lock_sha256": "a3fcb52b5b7d3288382ef60fe31e02f5dbd06d02de02d2766ecfbac113da4031",
+      "lock_sha256": "dc38194eb7738fd2288284ce626420ff2d6b4204b9966a142842d969e405dbd8",
       "manifest_sha256": "d23c95b05d8075beb9fb089541e7f043cca690813153993fe8633513ea2fc66b"
     },
     {
@@ -27,7 +27,7 @@
       "version": "4.3.1",
       "advisory": "GHSA-gcqx-w48m-w2h4",
       "patch": "config/security/npm-patches/deepmerge@4.3.1.patch",
-      "patch_sha256": "f0c089f8ff07f9c3b8261783a323eb8dbffb237fa327299ef60a29e78e24f0d1",
+      "patch_sha256": "06b3fb34ab98180e3564b6526b1527ce4f7905dd93ed92a52a2756caf5c939e2",
       "original_integrity": "sha512-3sUqbMEc77XqpdNO7FRyRog+eW3ph+GYCbj+rK+uYyRMuwsVy0rMiVtPn+QJlKFvWP/1PYpapqYn0Me2knFn+A==",
       "license": "MIT",
       "reviewed_on": "2026-10-28",
@@ -39,7 +39,7 @@
         "dist/cjs.js": "f07353a2be736978e8b1c013ba362251a1e5af89dcfdae50e1fcb93f0ae66664",
         "dist/umd.js": "92a1d0f76b7974f7e759cf170c8968fb58dfae5fc28f48b677ce9dd796e3000d"
       },
-      "lock_sha256": "a3fcb52b5b7d3288382ef60fe31e02f5dbd06d02de02d2766ecfbac113da4031",
+      "lock_sha256": "dc38194eb7738fd2288284ce626420ff2d6b4204b9966a142842d969e405dbd8",
       "manifest_sha256": "d23c95b05d8075beb9fb089541e7f043cca690813153993fe8633513ea2fc66b"
     }
   ]

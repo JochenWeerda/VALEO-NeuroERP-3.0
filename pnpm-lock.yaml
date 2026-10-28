@@ -103,7 +103,7 @@ patchedDependencies:
     hash: tf7mioebotwwnxnvjextir2bz4
     path: config/security/npm-patches/braces@3.0.3.patch
   deepmerge@4.3.1:
-    hash: 46qcr5rptzulltednx7n4b73rm
+    hash: fk7gcgarxyfhq3atemxq6wo5ii
     path: config/security/npm-patches/deepmerge@4.3.1.patch
 
 importers:
@@ -23722,7 +23722,7 @@ snapshots:
 
   deepmerge@3.3.0: {}
 
-  deepmerge@4.3.1(patch_hash=46qcr5rptzulltednx7n4b73rm): {}
+  deepmerge@4.3.1(patch_hash=fk7gcgarxyfhq3atemxq6wo5ii): {}
 
   default-gateway@4.2.0:
     dependencies:
@@ -25995,7 +25995,7 @@ snapshots:
       babel-jest: 29.7.0(@babel/core@7.29.7)
       chalk: 4.1.2
       ci-info: 3.9.0
-      deepmerge: 4.3.1(patch_hash=46qcr5rptzulltednx7n4b73rm)
+      deepmerge: 4.3.1(patch_hash=fk7gcgarxyfhq3atemxq6wo5ii)
       glob: 10.5.0
       graceful-fs: 4.2.11
       jest-circus: 29.7.0
@@ -26026,7 +26026,7 @@ snapshots:
       babel-jest: 29.7.0(@babel/core@7.29.7)
       chalk: 4.1.2
       ci-info: 3.9.0
-      deepmerge: 4.3.1(patch_hash=46qcr5rptzulltednx7n4b73rm)
+      deepmerge: 4.3.1(patch_hash=fk7gcgarxyfhq3atemxq6wo5ii)
       glob: 10.5.0
       graceful-fs: 4.2.11
       jest-circus: 29.7.0
@@ -26057,7 +26057,7 @@ snapshots:
       babel-jest: 29.7.0(@babel/core@7.29.7)
       chalk: 4.1.2
       ci-info: 3.9.0
-      deepmerge: 4.3.1(patch_hash=46qcr5rptzulltednx7n4b73rm)
+      deepmerge: 4.3.1(patch_hash=fk7gcgarxyfhq3atemxq6wo5ii)
       glob: 10.5.0
       graceful-fs: 4.2.11
       jest-circus: 29.7.0
@@ -26088,7 +26088,7 @@ snapshots:
       babel-jest: 29.7.0(@babel/core@7.29.7)
       chalk: 4.1.2
       ci-info: 3.9.0
-      deepmerge: 4.3.1(patch_hash=46qcr5rptzulltednx7n4b73rm)
+      deepmerge: 4.3.1(patch_hash=fk7gcgarxyfhq3atemxq6wo5ii)
       glob: 10.5.0
       graceful-fs: 4.2.11
       jest-circus: 29.7.0

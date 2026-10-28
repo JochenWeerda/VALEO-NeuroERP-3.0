@@ -43,3 +43,12 @@ check uses the real repository manifest/lock/policy and actual patched package
 bytes. It is not a full fresh workspace installation or deployment. CI must
 still confirm the frozen workspace installation on the published commit.
 No database, account or shared workspace modules were changed.
+
+## Final patch application check
+
+A zero-context patch representation failed the real pnpm application test: an
+insertion landed outside its callback. The complete-context patch was restored.
+The final pnpm-installed package passes all 21 cases. Diff files retain their
+required context prefix before original tabs; .gitattributes scopes the
+space-before-tab classification to these patch artifacts only. Source-code
+whitespace checks are unchanged. No failing intermediate was pushed.
