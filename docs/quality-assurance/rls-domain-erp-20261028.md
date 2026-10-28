@@ -18,11 +18,11 @@ description: domain_erp Teil 1 unter RLS (sieben Tabellen, Nummern je Mandant, V
 
 | Weg | Befund | Korrektur |
 |---|---|---|
-| `POST /debtors` | Mandant aus dem Rumpf (`DebtorCreate.tenant_id`): Debitor unter fremdem Mandanten anlegbar | Mandant aus dem Token, abweichender Rumpf 403 (wie Kreditoren) |
+| `POST /debtors` | Mandant aus dem Rumpf (`DebtorCreate.tenant_id`) — in der Produktion durch die zentrale Bindung abgefangen (s. u.), ungeschuetzt nur fuer Aufrufe ausserhalb von HTTP | Mandant aus dem Token, abweichender Rumpf 403 (wie Kreditoren) |
 | `POST /debtors` | `debitors.id` hat keine Vorgabe (frisch und live): **jede Anlage endete mit 500** | ID wird vergeben (uuid7) |
 | `GET/PUT/DELETE /debtors/{id}`, `/balance` | ohne Mandantenfilter: fremde Debitoren lesbar, aenderbar, deaktivierbar | Filter auf den Token-Mandanten, fremd 404 |
 | Debitoren-/Kreditoren-Saldo | las `amount`, `paid_amount`, `status` — Spalten, die `offene_posten` nicht hat: **immer 500**; Debitoren-OP tragen `kunde_id`, nicht `debtor_id` | gemeinsame Abfrage `app/finance/op_saldo.py`: `offen` (die Spalte, die alle Zahlungs-/Stornowege schreiben), `op_status` offen/teilweise, Mandant, Kontotyp; Debitor ueber `debtor_id` oder seinen Kunden |
-| `POST /export/list` | `filter.tenant_id` waehlte den Mandanten des Exports (Debitoren, Kreditoren, Nutzer, Prueflog, Mahnungen eines fremden Mandanten), Kommentar „admin use“ ohne Rollenpruefung | nur der eigene Mandant, fremder Filter 403 |
+| `POST /export/list` | `filter.tenant_id` sollte den Mandanten des Exports waehlen („admin use“, ohne Rollenpruefung) — in der Produktion durch die zentrale Bindung abgewiesen (verschachtelte Selektoren), im Code selbst ungeprueft | nur der eigene Mandant, fremder Filter 403 |
 | `POST /export/list` (CSV) | `TextIOWrapper` schloss beim Verlassen der Funktion den Puffer: **jeder CSV-Export endete mit 500** | `StringIO`, dann UTF-8 mit BOM |
 | Export Kreditoren | las Kreditoren-OP mit nicht vorhandenen Spalten (`konto_nr`, `op_betrag`, `saldo`, `mahn_stufe`), Fehler gefangen: **Datei immer leer** | Kreditoren-Stamm wie bei den Debitoren |
 | Export Futtermittel/Chargen | Artikel und Chargen **aller Mandanten**, Fehler gefangen (leere Datei) | Mandantenfilter, Fehler nicht mehr verschluckt |
@@ -32,6 +32,14 @@ description: domain_erp Teil 1 unter RLS (sieben Tabellen, Nummern je Mandant, V
 | Connector Upload | gleicher Idempotenzschluessel lieferte den Lauf, parste ihn aber **neu**: doppelte Positionen, Status zurueck auf PARSED — ein gebuchter Lauf liess sich erneut buchen | bestehender Lauf wird unveraendert gemeldet; unbekanntes/fremdes Profil 404 |
 | Connector Profil | Einstellungen des Profils ohne Mandantenfilter gelesen (fremde Zuordnung) | Filter |
 | `fibu_connector_run_items` | ohne Mandant; Positionen lasen nur nach Lauf | Mandant aus dem Lauf, Verbund-FK `(run_id, tenant_id)` |
+
+**Einordnung „Mandant aus dem Rumpf“:** Die Produktion (`uvicorn main:app`, Wurzel-`main.py`) installiert
+`app.core.tenant_binding.install_tenant_bindings` fuer alle Routen ausser den Health-Pfaden: Pfad-, Query-, Header-
+und (auch verschachtelte) Rumpf-Selektoren muessen dem verifizierten Mandanten entsprechen oder werden mit ihm
+gefuellt. Die beiden Rumpf-Befunde oben waren ueber HTTP daher **nicht** ausnutzbar; die Pruefung im Weg ist
+Verteidigung in der Tiefe (MCP/CLI/Direktaufruf, `app.main` der Tests ohne Bindung). Wirklich mandantenuebergreifend
+waren die Wege **ohne** Mandantenangabe: Debitor lesen/aendern/deaktivieren/Saldo nach ID, Futtermittel-/Chargen-Export,
+Connector-Positionen und -Profil.
 
 **Schema:** getrennte Policies fuer `domain_erp.bank_accounts`, `creditors`, `debitors`, `dunning_notices`,
 `gift_cards`, `open_items`, `fibu_connector_run_items`; `tenant_id` NOT NULL mit Vorgabe aus dem Kontext.
@@ -58,8 +66,8 @@ alembic heads 1; RLS-Inventar/Matrix/Systemlesen/Rollout und Code-Inventare neu 
 - `domain_erp.offene_posten` (30 Schreiber, live 25 Zeilen in 2 Mandanten), `chart_of_accounts` (28 `system`-Zeilen),
   `policy_rules` bleiben zurueckgestellt.
 - `dunning_notices.op_id`/`debtor_id` ohne Fremdschluessel (folgt mit `offene_posten`).
-- **Klasse „Mandant aus dem Rumpf“:** dieselbe Form wie bei Debitoren/Export steht noch in `background_jobs`,
-  `blockchain_runtime`, `supply_chain_blockchain`, `e2e_chain`, `process_sla`, `reporting_api`, `tenant_limits`,
-  `users`, `whatsapp_webhook`, `crm_consents` (`payload.tenant_id or tenant_id`) — eigener Slice mit Vertragstest.
+- Selektoren aus Rumpf/Pfad/Query/Header (145 Stellen in 46 Modulen, u. a. `X-Tenant-ID`-Parameter, `tenant_id` im
+  Pfad) faengt die zentrale Bindung der Produktions-App ab; kein eigener Slice. Hinweis: `app.main` (Tests) installiert
+  sie nicht — Tests gegen `app.main` pruefen diese Grenze nicht.
 - Buchungen entstehen an 12 Stellen per direktem `INSERT INTO domain_erp.journal_entries`; der Connector prueft
   jetzt Periode und Konten selbst, ein zentraler Buchungsweg (Hash-Kette, Nummernkreis) fehlt weiterhin.
