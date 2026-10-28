@@ -37,7 +37,7 @@ VALEO ist eine aktiv entwickelte Suite mit einem Python/FastAPI-Backend, einer R
 | Lieferstand und Prozesswellen | [Process Kernel Status](docs/architecture/process-kernel/STATUS.md) |
 | Laufende Arbeit | [Active Workboard](docs/agent-ops/active-workboard.md) |
 | Masken, Studio und Parität | [Universal Mask Runtime Status](docs/architecture/uix/universal-mask-runtime-status.md) · [Reparaturnachweis](docs/quality-assurance/migration-parity-repair-20261022.md) |
-| Offene Befunde | [Open Gaps](docs/project-context/open-gaps-and-known-issues.md) |
+| Entwicklungsplanung und nächste Ausbauschritte | [Entwicklungsübersicht](docs/project-context/open-gaps-and-known-issues.md) |
 | Betriebs- und externe Freigaben | [Production Readiness Runbook](docs/operations/production-readiness-runbook.md) |
 | Architektur und Agenten | [Architekturindex](config/architecture-index.yaml) · [Agent-Handbuch](docs/agent-handbuch/index.md) |
 
@@ -89,6 +89,6 @@ Our goal is to extend the transaction strength expected from premium ERP with a 
 
 ### Platform and next development goals
 
-VALEO is an actively developed suite with a Python/FastAPI backend, a React/TypeScript frontend and domain packages. The [Process Kernel Status](docs/architecture/process-kernel/STATUS.md) documents delivered process waves. The roadmap includes functional parity and release of further Studio screens, the adaptive workspace and expanded controlled agent actions. Scope and maturity vary by workflow; external operational and domain approvals require separate evidence. See the [runtime status](docs/architecture/uix/universal-mask-runtime-status.md), [open findings](docs/project-context/open-gaps-and-known-issues.md), [workboard](docs/agent-ops/active-workboard.md) and [production readiness runbook](docs/operations/production-readiness-runbook.md).
+VALEO is an actively developed suite with a Python/FastAPI backend, a React/TypeScript frontend and domain packages. The [Process Kernel Status](docs/architecture/process-kernel/STATUS.md) documents delivered process waves. The roadmap includes functional parity and release of further Studio screens, the adaptive workspace and expanded controlled agent actions. Scope and maturity vary by workflow; external operational and domain approvals require separate evidence. See the [runtime status](docs/architecture/uix/universal-mask-runtime-status.md), [development roadmap](docs/project-context/open-gaps-and-known-issues.md), [workboard](docs/agent-ops/active-workboard.md) and [production readiness runbook](docs/operations/production-readiness-runbook.md).
 
 For local setup, use the [commands above](#lokal-entwickeln) with Python 3.11, Node.js/Corepack, pnpm 9.12.0 and an already configured PostgreSQL development database. Configure the supplied environment templates first. For database tests, reuse the shared environment and follow the [resource policy](docs/quality-assurance/test-database-resource-policy-20261001.md). Start contributions with [AGENTS.md](AGENTS.md) and the [documentation overview](docs/README.md).

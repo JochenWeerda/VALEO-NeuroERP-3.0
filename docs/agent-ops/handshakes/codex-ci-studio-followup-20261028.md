@@ -60,3 +60,19 @@ Remaining: coordinated probe upgrade and strict SQL checks; fresh complete CI;
 portal certificate secure ownership relationship; functional Studio migration of
 remaining masks and real browser acceptance. Generated artifacts are refreshed
 from integrated sources; gate failures remain visible rather than baselines relaxed.
+
+## Update: SQL acceptance and probe released
+
+The coordinated preserving upgrade is complete. A compressed backup was taken
+first; no reset/new database/container. Current valeo_probe revision is
+rls_domain_shared_20261027 with635 RLS tables. Postflight:zero sessions.
+The maintenance window is released. Do not restore the obsolete loading_stop
+revision as routine preparation. The development database was not changed.
+
+All11 SQL failures on74ca are fixed:HarvestAcceptanceLine receives the service
+tenant;Wave73 has an explicit registered synthetic tenant and an outer rollback
+session. Targeted30 cases pass without skips. Full CI strict selection:633
+passed,4 skipped,zero failures,200.85 seconds. See sql11-closure-20261028.md.
+READMEDE/EN and docs/README now emphasize agricultural product value and the
+premium roadmap, with evidence linked and future capabilities clearly stated.
+The remaining Studio runtime migration and other CI suites remain separate work.
