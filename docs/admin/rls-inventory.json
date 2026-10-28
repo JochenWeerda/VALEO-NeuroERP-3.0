@@ -3,16 +3,16 @@
  "summary": {
   "tables": 777,
   "by_class": {
-   "A": 687,
+   "A": 697,
    "B": 23,
-   "C": 13,
-   "D": 54
+   "C": 9,
+   "D": 48
   },
-  "rls_enabled": 654,
+  "rls_enabled": 664,
   "tenant_types": {
    "character varying": 333,
    "character varying(100)": 9,
-   "character varying(120)": 41,
+   "character varying(120)": 51,
    "character varying(128)": 1,
    "character varying(255)": 1,
    "character varying(36)": 83,
@@ -3613,19 +3613,19 @@
   },
   {
    "table": "domain_ops.ops_dokument_versionen",
-   "class": "D",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying(120)",
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_dokumente",
-   "class": "D",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying(120)",
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_enni_meldungen",
@@ -3648,47 +3648,35 @@
   },
   {
    "table": "domain_ops.ops_fahrzeug_bussgeld",
-   "class": "C",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying(120)",
+   "rls": true,
    "force_rls": false,
-   "policies": 0,
-   "tenant_parents": [
-    "domain_ops.ops_fahrzeuge"
-   ]
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_fahrzeug_schaeden",
-   "class": "C",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying(120)",
+   "rls": true,
    "force_rls": false,
-   "policies": 0,
-   "tenant_parents": [
-    "domain_ops.ops_fahrzeuge"
-   ]
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_fahrzeug_status_historie",
-   "class": "C",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying(120)",
+   "rls": true,
    "force_rls": false,
-   "policies": 0,
-   "tenant_parents": [
-    "domain_ops.ops_fahrzeuge"
-   ]
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_fahrzeug_touren",
-   "class": "C",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying(120)",
+   "rls": true,
    "force_rls": false,
-   "policies": 0,
-   "tenant_parents": [
-    "domain_ops.ops_fahrzeuge"
-   ]
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_fahrzeuge",
@@ -3812,11 +3800,11 @@
   },
   {
    "table": "domain_ops.ops_rahmenvertraege",
-   "class": "D",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying(120)",
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_saatgut_nachbau",
@@ -3868,11 +3856,11 @@
   },
   {
    "table": "domain_ops.ops_waagen",
-   "class": "D",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying(120)",
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_wartung_anlagen",
@@ -3892,11 +3880,11 @@
   },
   {
    "table": "domain_ops.ops_wiegungen",
-   "class": "D",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying(120)",
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_zapfungen",
@@ -4044,11 +4032,11 @@
   },
   {
    "table": "domain_ops.strecke_speditionen_frachttarife",
-   "class": "D",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying(120)",
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_ops.tank_adapter_audit",

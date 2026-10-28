@@ -480,6 +480,7 @@ def create_tables(bind=None):
                                     """
                                     CREATE TABLE IF NOT EXISTS domain_ops.ops_dokumente (
                                         id VARCHAR PRIMARY KEY,
+                                        tenant_id VARCHAR(120) NOT NULL,
                                         name VARCHAR(255) NOT NULL,
                                         typ VARCHAR(20) NOT NULL,
                                         kategorie VARCHAR(100) NOT NULL,
@@ -512,6 +513,7 @@ def create_tables(bind=None):
                                     """
                                     CREATE TABLE IF NOT EXISTS domain_ops.ops_dokument_versionen (
                                         id VARCHAR PRIMARY KEY,
+                                        tenant_id VARCHAR(120) NOT NULL,
                                         dokument_id VARCHAR REFERENCES domain_ops.ops_dokumente(id) ON DELETE CASCADE,
                                         version INTEGER NOT NULL,
                                         name VARCHAR(255) NOT NULL,
@@ -532,7 +534,8 @@ def create_tables(bind=None):
                                     """
                                     CREATE TABLE IF NOT EXISTS domain_ops.ops_rahmenvertraege (
                                         id VARCHAR PRIMARY KEY,
-                                        nummer VARCHAR(50) UNIQUE NOT NULL,
+                                        tenant_id VARCHAR(120) NOT NULL,
+                                        nummer VARCHAR(50) NOT NULL,
                                         partner VARCHAR(255) NOT NULL,
                                         partner_id VARCHAR(100) NOT NULL,
                                         typ VARCHAR(50) NOT NULL,
@@ -546,7 +549,8 @@ def create_tables(bind=None):
                                         created_at TIMESTAMPTZ DEFAULT now(),
                                         updated_at TIMESTAMPTZ DEFAULT now(),
                                         created_by VARCHAR(100),
-                                        updated_by VARCHAR(100)
+                                        updated_by VARCHAR(100),
+                                        UNIQUE (tenant_id, nummer)
                                     )
                                     """
                                 )

@@ -432,6 +432,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `rls_domain_logistics_20261028` | Row-level security for domain_logistics (tours, stops, events, disposition checks, ePOD settlements, freight |
 | `rls_domain_nachweisraum_20261027` | Row-level security for the evidence room (RLS domain slice nachweisraum). |
 | `rls_domain_ops_20261028` | Row-level security for domain_ops, part 1 (schema only, no data change). |
+| `rls_domain_ops_teil2_20261028` | Row-level security for domain_ops part 2: the ten tables without a tenant column that are empty live. |
 | `rls_domain_pricing_20261027` | Row-level security for domain_pricing (RLS domain slice, first after P0-P7). |
 | `rls_domain_sales_20261027` | Row-level security for the sales documents (RLS domain slice sales). |
 | `rls_domain_shared_20261027` | Row-level security for tenant tables in domain_shared (RLS domain slice shared). |

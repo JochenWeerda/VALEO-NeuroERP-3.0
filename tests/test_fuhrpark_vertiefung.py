@@ -15,7 +15,7 @@ from app.api.v1.endpoints import fuhrpark
 from app.auth.deps_oidc import get_current_user
 from app.core.database import get_db
 from app.domains.operations.repository import FahrzeugRepository
-from test_fuhrpark_isolation_effects import db
+from test_fuhrpark_isolation_effects import db, pruefstand  # noqa: F401
 from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
 
 app = FastAPI()
