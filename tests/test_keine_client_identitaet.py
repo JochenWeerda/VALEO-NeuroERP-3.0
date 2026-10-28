@@ -10,6 +10,7 @@ Kommentaren und Docstrings sind erlaubt.
 """
 from __future__ import annotations
 
+import ast
 import re
 from pathlib import Path
 
@@ -26,20 +27,24 @@ LESEN = re.compile(
 
 
 def _code_zeilen(text: str):
-    """Zeilen ohne Kommentare und Docstrings (grob, aber fuer diese Suche ausreichend)."""
-    in_doc = False
+    """Zeilen ohne Kommentare und Docstrings.
+
+    Bis 28.10.2026 zaehlte diese Funktion dreifache Anfuehrungszeichen nur am Zeilenanfang; ein ``text(\"\"\"`` mitten
+    in der Zeile verschob die Zaehlung, und der Code dahinter galt als Docstring (so blieb ``payload.createdBy`` im
+    Lohnexport unentdeckt). Docstrings und alleinstehende Zeichenketten bestimmt jetzt der Syntaxbaum.
+    """
+    doc = set()
+    for knoten in ast.walk(ast.parse(text)):
+        if isinstance(knoten, ast.Expr) and isinstance(knoten.value, ast.Constant) and isinstance(knoten.value.value, str):
+            doc.update(range(knoten.lineno, knoten.end_lineno + 1))
     for nummer, zeile in enumerate(text.splitlines(), 1):
-        roh = zeile.strip()
-        zaehler = roh.count('"""') + roh.count("'''")
-        if in_doc:
-            if zaehler % 2 == 1:
-                in_doc = False
-            continue
-        if roh.startswith(('"""', "'''")):
-            if zaehler % 2 == 1:
-                in_doc = True
-            continue
-        yield nummer, zeile.split("#", 1)[0]
+        if nummer not in doc:
+            yield nummer, zeile.split("#", 1)[0]
+
+
+def test_code_zeilen_erkennt_docstrings_am_syntaxbaum():
+    quelle = 'def f():\n    """Doku: payload.createdBy"""\n    x = text("""SELECT 1""")\n    return payload.createdBy\n'
+    assert [n for n, c in _code_zeilen(quelle) if "payload.createdBy" in c] == [4]
 
 
 #: FastAPI leitet den Kopfnamen aus dem Parameter ab: ``x_user_email: str = Header(None)`` liest X-User-Email.
@@ -50,7 +55,7 @@ PARAMETER = re.compile(r"\b(?P<name>x_user_id|x_user_email|x_user_name|x_roles)\
 def test_kein_weg_liest_identitaet_aus_kopfzeilen():
     funde = []
     for datei in sorted(APP.rglob("*.py")):
-        for nummer, code in _code_zeilen(datei.read_text(encoding="utf-8")):
+        for nummer, code in _code_zeilen(datei.read_text(encoding="utf-8-sig")):
             for treffer in LESEN.finditer(code):
                 if treffer.group("name") in KOPFZEILEN:
                     funde.append(f"{datei.relative_to(APP.parent)}:{nummer}: {treffer.group('name')}")
@@ -70,16 +75,19 @@ def test_suchmuster_erkennt_die_alten_formen():
 #: Bearbeiter aus Feldern des Anfragekoerpers (19.10.2026: ``operator``/``actor``/``created_by`` in sieben Routern
 #: und im Compliance-Lebenszyklus, ``aktor_id`` in fuenf Reklamationswegen und deren Maskenaktion — derselbe Fehler
 #: wie ``X-User-ID``, nur im Body).
+#: Seit 28.10.2026 auch camelCase (``createdBy``: Vertragsnachtrag, Lohnexport), ein Audit-Unterobjekt
+#: (``payload.audit.created_by``: Geschaeftspartner) und die Router unter ``app/routers``.
+_URHEBERFELDER = r"(?:operator|actor|created_by|updated_by|createdBy|updatedBy|aktor_id|sender_id)"
 BODY_URHEBER = re.compile(
-    r"\b(?:body|payload|req)\.(?:operator|actor|created_by|aktor_id|sender_id)\b"
-    r"|\b(?:body|payload|req)\.get\(\s*[\"'](?:operator|actor|created_by|aktor_id|sender_id)[\"']"
+    rf"\b(?:body|payload|req)(?:\.audit)?\.{_URHEBERFELDER}\b"
+    rf"|\b(?:body|payload|req)\.get\(\s*[\"']{_URHEBERFELDER}[\"']"
 )
 
 
 def test_kein_weg_nimmt_den_bearbeiter_aus_dem_body():
     funde = []
-    for datei in sorted((APP / "api").rglob("*.py")):
-        for nummer, code in _code_zeilen(datei.read_text(encoding="utf-8")):
+    for datei in sorted([*(APP / "api").rglob("*.py"), *(APP / "routers").rglob("*.py")]):
+        for nummer, code in _code_zeilen(datei.read_text(encoding="utf-8-sig")):
             if BODY_URHEBER.search(code):
                 funde.append(f"{datei.relative_to(APP.parent)}:{nummer}")
     assert funde == []
@@ -87,5 +95,5 @@ def test_kein_weg_nimmt_den_bearbeiter_aus_dem_body():
 
 def test_suchmuster_erkennt_bearbeiter_im_body():
     for beispiel in ("req.aktor_id", 'payload.get("aktor_id")', "body.operator", "payload.get('actor')",
-                     "payload.sender_id"):
+                     "payload.sender_id", "body.createdBy", "payload.audit.created_by", "payload.audit.updated_by"):
         assert BODY_URHEBER.search(beispiel), beispiel
