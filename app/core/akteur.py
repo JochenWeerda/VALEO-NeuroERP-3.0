@@ -62,7 +62,9 @@ def gepruefte_email(request: Any) -> str | None:
     """E-Mail aus den geprueften Claims (fuer Zugaenge, die an eine E-Mail vergeben sind) — nie aus ``X-User-Email``."""
     state = getattr(request, "state", None)
     claims = getattr(state, "token_claims", None) if state is not None else None
-    email = claims.get("email") if isinstance(claims, dict) else None
+    if not isinstance(claims, dict) or claims.get("email_verified") is not True:
+        return None
+    email = claims.get("email")
     return email.strip() if isinstance(email, str) and email.strip() else None
 
 

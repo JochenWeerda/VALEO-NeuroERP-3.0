@@ -299,7 +299,10 @@ def test_rations_zugang_aufrufer_aus_dem_token():
     with pytest.raises(HTTPException) as caught:
         rations_zugang._caller_info(_Request({"sub": "u1"}))
     assert caught.value.status_code == 403
-    assert rations_zugang._caller_info(_Request({"sub": "u1", "email": "b@hof.de", "name": "B"})) == ("b@hof.de", "B")
+    with pytest.raises(HTTPException) as unverified:
+        rations_zugang._caller_info(_Request({"sub": "u1", "email": "b@hof.de", "email_verified": False}))
+    assert unverified.value.status_code == 403
+    assert rations_zugang._caller_info(_Request({"sub": "u1", "email": "b@hof.de", "email_verified": True, "name": "B"})) == ("b@hof.de", "B")
 
 
 @pytest.mark.parametrize("module", MODULES)
