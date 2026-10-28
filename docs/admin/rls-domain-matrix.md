@@ -13,7 +13,7 @@ description: Generierte Entscheidungsmatrix der noch nicht abgesicherten Mandant
 
 Generiert von `scripts/rls_domain_matrix.py`; nicht von Hand aendern. Entscheidungen und Reihenfolge: `docs/architecture/rls-domaenen-entscheidungsmatrix.md`.
 
-Datenstand gewachsene Datenbank: 2026-10-27. Tabellen: 84.
+Datenstand gewachsene Datenbank: 2026-10-27. Tabellen: 77.
 
 | Domain | dienst | position | referenzdaten | mandant_nullbar | standardmandant | identitaet |
 |---|---|---|---|---|---|---|
@@ -25,7 +25,6 @@ Datenstand gewachsene Datenbank: 2026-10-27. Tabellen: 84.
 | infrastructure |  | 1 |  |  |  |  |
 | inventory | 5 |  | 7 |  |  |  |
 | log | 1 | 3 |  |  |  |  |
-| logistics |  |  | 2 | 5 |  |  |
 | mfg |  |  |  | 3 |  |  |
 | ops | 1 | 5 | 1 |  | 1 |  |
 | portal |  | 1 |  |  |  |  |
@@ -127,19 +126,7 @@ Datenstand gewachsene Datenbank: 2026-10-27. Tabellen: 84.
 | `domain_log.log_tour_delivery_notes` | C | position | `app/domains/verladung/models.py` | `app/domains/verladung/repository.py` | 1 | – | nutzlast 1 | 0 Z. | tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id) | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_log.log_touren |
 | `domain_log.log_tour_events` | C | position | `app/domains/verladung/models.py` | `app/domains/verladung/repository.py` | 1 | – | nutzlast 1 | 0 Z. | tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id) | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_log.log_touren |
 | `domain_log.log_tour_stops` | C | position | `app/domains/verladung/models.py` | `app/domains/verladung/repository.py` | 1 | – | nutzlast 1 | 0 Z. | tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id) | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_log.log_touren |
-| `domain_log.log_touren` | A | dienst, referenzdaten, mandant_nullbar | `app/domains/verladung/models.py` | `app/api/v1/endpoints/tours.py`, `app/domains/verladung/repository.py` | 16 | – | dienst 1, kopfzeile 1, nutzlast 1, token 3 | 0 Z., 0 Mand. | – | keine, bis der Dienst tokengebundene Identitaet hat (rls-dienste-identitaet-vorschlag.md) |
-
-## logistics
-
-| Tabelle | Kl. | Ursache | Modell | Schreiber | Leser | Worker | Identitaet | Daten | Bereinigung | Policy |
-|---|---|---|---|---|---|---|---|---|---|---|
-| `domain_logistics.carrier_invoices` | A | referenzdaten, mandant_nullbar | – | `app/api/v1/endpoints/logistics_freight.py` | 0 | – | – | 0 Z., 0 Mand. | – | getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant |
-| `domain_logistics.epod_settlements` | B | mandant_nullbar | – | `app/services/logistics_epod_service.py` | 0 | – | – | 0 Z., 0 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
-| `domain_logistics.freight_tariffs` | B | referenzdaten, mandant_nullbar | – | `app/api/v1/endpoints/logistics_freight.py` | 0 | – | – | 0 Z., 0 Mand. | – | getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant |
-| `domain_logistics.tour_disposition_checks` | B | mandant_nullbar | – | `app/services/logistics_disposition_service.py` | 0 | – | – | 0 Z., 0 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
-| `domain_logistics.tour_events` | B | mandant_nullbar | – | `app/api/v1/endpoints/logistics_tours.py` | 0 | – | kopfzeile 1 | 0 Z., 0 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
-| `domain_logistics.tour_stops` | B | mandant_nullbar | – | `app/api/v1/command_handlers/logistics.py`, `app/api/v1/endpoints/logistics_tours.py`, `app/services/logistics_epod_service.py`, `app/services/mobile_sync_service.py` | 1 | – | kopfzeile 1 | 2 Z., 1 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
-| `domain_logistics.tours` | B | mandant_nullbar | – | `app/api/v1/command_handlers/logistics.py`, `app/api/v1/endpoints/logistics_tours.py` | 0 | – | kopfzeile 1 | 2 Z., 1 Mand. | – | getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant |
+| `domain_log.log_touren` | A | dienst, referenzdaten, mandant_nullbar | `app/domains/verladung/models.py` | `app/api/v1/endpoints/tours.py`, `app/domains/verladung/repository.py` | 16 | – | dienst 1, nutzlast 1, token 5 | 0 Z., 0 Mand. | – | keine, bis der Dienst tokengebundene Identitaet hat (rls-dienste-identitaet-vorschlag.md) |
 
 ## mfg
 

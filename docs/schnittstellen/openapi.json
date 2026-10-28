@@ -338229,24 +338229,6 @@
       "post": {
         "description": "Frachtkosten berechnen (mit Buchung / Logging).",
         "operationId": "calculate_freight_api_v1_logistik_freight_cost_calculate_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -338295,26 +338277,8 @@
     },
     "/api/v1/logistik/freight-cost/carrier-invoice": {
       "post": {
-        "description": "Erfasst Spediteur-Eingangsrechnung, verknüpft sie mit der Tour und bucht ins Hauptbuch.",
+        "description": "Erfasst Spediteur-Eingangsrechnung, verknüpft sie mit der Tour und bucht ins Hauptbuch.\n\nBis 28.10.2026: Eine doppelte Rechnungsnummer wurde still verworfen (``ON CONFLICT DO NOTHING``), gebucht wurde\ntrotzdem, und die Antwort meldete eine Rechnung, die es nicht gab; die Tour wurde nicht auf den Mandanten\ngeprueft; ein Buchungsfehler liess die Transaktion abgebrochen zurueck. Jetzt: 404 fuer eine fremde Tour, 409 fuer\neine vorhandene Nummer, der Buchungsentwurf in einem eigenen Savepoint (scheitert er, bleibt die Rechnung ``offen``).\nGemeldet wurde ``gebucht``, angelegt war nur ein Buchungsentwurf; der Status heisst jetzt ``entwurf``.",
         "operationId": "create_carrier_invoice_api_v1_logistik_freight_cost_carrier_invoice_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -338409,22 +338373,6 @@
               "title": "Limit",
               "type": "integer"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "responses": {
@@ -338512,22 +338460,6 @@
               "title": "Postal Code To",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "responses": {
@@ -338568,7 +338500,7 @@
     },
     "/api/v1/logistik/freight-tariffs": {
       "get": {
-        "description": "Tarif-Liste, optional nach Spediteur gefiltert.\n\nOhne ``X-Tenant-ID``: nur globale Tarife (``tenant_id IS NULL``).\nMit Header: eigener Mandant plus globale Tarife.",
+        "description": "Tarif-Liste des Mandanten, optional nach Spediteur gefiltert.",
         "operationId": "list_tariffs_api_v1_logistik_freight_tariffs_get",
         "parameters": [
           {
@@ -338585,22 +338517,6 @@
                 }
               ],
               "title": "Carrier Id"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -338646,24 +338562,6 @@
       "post": {
         "description": "Neuen Frachttarif anlegen.",
         "operationId": "create_tariff_api_v1_logistik_freight_tariffs_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -338712,7 +338610,7 @@
     },
     "/api/v1/logistik/freight-tariffs/{tariff_id}/cancel": {
       "post": {
-        "description": "Tarifzeile auf STORNIERT setzen; globale Tarife (``tenant_id IS NULL``) sind geschuetzt.",
+        "description": "Tarifzeile des Mandanten auf STORNIERT setzen.",
         "operationId": "cancel_tariff_api_v1_logistik_freight_tariffs__tariff_id__cancel_post",
         "parameters": [
           {
@@ -338722,22 +338620,6 @@
             "schema": {
               "title": "Tariff Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -338802,22 +338684,6 @@
               "minLength": 1,
               "title": "Ref",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -338909,22 +338775,6 @@
               ],
               "title": "Vehicle Id"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "responses": {
@@ -339015,22 +338865,6 @@
               ],
               "title": "Status"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "responses": {
@@ -339075,24 +338909,6 @@
       "post": {
         "description": "Tour anlegen inkl. Stopps.",
         "operationId": "create_tour_api_v1_logistik_tours_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -339143,17 +338959,6 @@
       "post": {
         "description": "CE fuer logistik/tourenplanung:anlegen — dryRun ohne INSERT; Token-Mandant.",
         "operationId": "action_tour_anlegen_api_v1_logistik_tours_actions_anlegen_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -339216,31 +339021,15 @@
             }
           },
           {
-            "description": "Wenn true und X-Tenant-ID: pro Stopp ``delivery_note_hint`` aus domain_sales",
+            "description": "Wenn true: pro Stopp ``delivery_note_hint`` aus domain_sales",
             "in": "query",
             "name": "include_delivery_hints",
             "required": false,
             "schema": {
               "default": false,
-              "description": "Wenn true und X-Tenant-ID: pro Stopp ``delivery_note_hint`` aus domain_sales",
+              "description": "Wenn true: pro Stopp ``delivery_note_hint`` aus domain_sales",
               "title": "Include Delivery Hints",
               "type": "boolean"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -339292,22 +339081,6 @@
             "schema": {
               "title": "Tour Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -339370,22 +339143,6 @@
               "title": "Tour Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "requestBody": {
@@ -339446,22 +339203,6 @@
             "schema": {
               "title": "Tour Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -339646,22 +339387,6 @@
               "title": "Tour Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "requestBody": {
@@ -339732,22 +339457,6 @@
               "title": "Stop Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "requestBody": {
@@ -339817,22 +339526,6 @@
             "schema": {
               "title": "Stop Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -339962,22 +339655,6 @@
               "title": "Stop Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "requestBody": {
@@ -340048,22 +339725,6 @@
               "title": "Stop Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "requestBody": {
@@ -340114,7 +339775,7 @@
     },
     "/api/v1/logistik/tracking/{tour_id}": {
       "get": {
-        "description": "Öffentlicher Tracking-Link – letzte GPS-Position, aktueller Stopp, ETA.",
+        "description": "Tracking – letzte GPS-Position, aktueller Stopp, ETA.\n\nNur im eigenen Mandanten. ``share_token`` wurde angenommen, aber nie geprueft: Jeder angemeldete Nutzer konnte\njede Tour verfolgen. Ein oeffentlicher Link mit geprueftem Token ist nicht gebaut.",
         "operationId": "public_tracking_api_v1_logistik_tracking__tour_id__get",
         "parameters": [
           {
@@ -340124,22 +339785,6 @@
             "schema": {
               "title": "Tour Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "share_token",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Share Token"
             }
           }
         ],

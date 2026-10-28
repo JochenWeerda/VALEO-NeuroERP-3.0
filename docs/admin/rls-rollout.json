@@ -2,12 +2,12 @@
  "_note": "Generiert von scripts/rls_rollout.py aus docs/admin/rls-inventory.json; nicht von Hand aendern.",
  "summary": {
   "ready": 0,
-  "pending": 41,
+  "pending": 40,
   "reasons": {
    "dienst": 10,
    "mandant_ermitteln": 1,
    "standardmandant": 23,
-   "mandant_null": 20,
+   "mandant_null": 19,
    "uebergreifend": 0,
    "identitaet": 4
   }
@@ -102,9 +102,6 @@
   ],
   "domain_log.log_touren": [
    "dienst",
-   "mandant_null"
-  ],
-  "domain_logistics.carrier_invoices": [
    "mandant_null"
   ],
   "domain_ops.ops_chargen": [

@@ -37,13 +37,14 @@ class TestLogPodDnBelegbruch:
         mappings_mock.first.return_value = stop_row
         execute_result = MagicMock()
         execute_result.mappings.return_value = mappings_mock
+        execute_result.rowcount = 1  # der Stopp gehoert zu Tour und Mandant
         db.execute.return_value = execute_result
 
         return save_pod(
             tour_id=TOUR_ID,
             stop_id=STOP_ID,
             body=body,
-            x_tenant_id=TENANT,
+            tenant_id=TENANT,
             db=db,
         )
 

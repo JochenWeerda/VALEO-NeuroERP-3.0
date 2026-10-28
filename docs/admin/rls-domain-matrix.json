@@ -2,17 +2,17 @@
  "_note": "Generiert von scripts/rls_domain_matrix.py; nicht von Hand aendern.",
  "datenstand": "2026-10-27",
  "summary": {
-  "tabellen": 84,
+  "tabellen": 77,
   "nach_klasse": {
-   "A": 41,
-   "B": 29,
+   "A": 40,
+   "B": 23,
    "C": 14
   },
   "nach_ursache": {
    "dienst": 18,
    "position": 12,
-   "referenzdaten": 19,
-   "mandant_nullbar": 20,
+   "referenzdaten": 17,
+   "mandant_nullbar": 15,
    "standardmandant": 13,
    "identitaet": 2
   },
@@ -50,10 +50,6 @@
    "log": {
     "dienst": 1,
     "position": 3
-   },
-   "logistics": {
-    "mandant_nullbar": 5,
-    "referenzdaten": 2
    },
    "mfg": {
     "mandant_nullbar": 3
@@ -3073,26 +3069,15 @@
    "worker": [],
    "identitaet": {
     "dienst": 1,
-    "kopfzeile": 1,
     "nutzlast": 1,
-    "token": 3
+    "token": 5
    },
    "standardmandant_stellen": [],
    "null_stellen": [
-    "app/api/v1/endpoints/logistics_freight.py:8",
-    "app/api/v1/endpoints/logistics_freight.py:10",
-    "app/api/v1/endpoints/logistics_freight.py:14",
-    "app/api/v1/endpoints/logistics_freight.py:68",
-    "app/api/v1/endpoints/logistics_freight.py:152",
-    "app/api/v1/endpoints/logistics_freight.py:162",
-    "app/api/v1/endpoints/logistics_freight.py:165",
-    "app/api/v1/endpoints/logistics_freight.py:218",
-    "app/api/v1/endpoints/logistics_freight.py:233",
+    "app/api/v1/endpoints/logistics_freight.py:7",
     "app/services/mcp_execution_service.py:3155"
    ],
    "gemeinsam_stellen": [
-    "app/api/v1/endpoints/logistics_freight.py:68",
-    "app/api/v1/endpoints/logistics_freight.py:162",
     "app/services/mcp_execution_service.py:3155"
    ],
    "daten": {
@@ -3104,256 +3089,6 @@
    },
    "bereinigung": [],
    "policy": "keine, bis der Dienst tokengebundene Identitaet hat (rls-dienste-identitaet-vorschlag.md)"
-  },
-  {
-   "table": "domain_logistics.carrier_invoices",
-   "domain": "logistics",
-   "class": "A",
-   "tenant_type": "character varying(36)",
-   "eltern": [],
-   "ursache": "referenzdaten",
-   "gruende": [
-    "referenzdaten",
-    "mandant_nullbar"
-   ],
-   "modell": [],
-   "leser": [],
-   "schreiber": [
-    "app/api/v1/endpoints/logistics_freight.py"
-   ],
-   "worker": [],
-   "identitaet": {},
-   "standardmandant_stellen": [],
-   "null_stellen": [
-    "app/api/v1/endpoints/logistics_freight.py:8",
-    "app/api/v1/endpoints/logistics_freight.py:10",
-    "app/api/v1/endpoints/logistics_freight.py:14",
-    "app/api/v1/endpoints/logistics_freight.py:68",
-    "app/api/v1/endpoints/logistics_freight.py:152",
-    "app/api/v1/endpoints/logistics_freight.py:162",
-    "app/api/v1/endpoints/logistics_freight.py:165",
-    "app/api/v1/endpoints/logistics_freight.py:218",
-    "app/api/v1/endpoints/logistics_freight.py:233"
-   ],
-   "gemeinsam_stellen": [
-    "app/api/v1/endpoints/logistics_freight.py:68",
-    "app/api/v1/endpoints/logistics_freight.py:162"
-   ],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_logistics.epod_settlements",
-   "domain": "logistics",
-   "class": "B",
-   "tenant_type": "character varying(36)",
-   "eltern": [],
-   "ursache": "mandant_nullbar",
-   "gruende": [
-    "mandant_nullbar"
-   ],
-   "modell": [],
-   "leser": [],
-   "schreiber": [
-    "app/services/logistics_epod_service.py"
-   ],
-   "worker": [],
-   "identitaet": {},
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_logistics.freight_tariffs",
-   "domain": "logistics",
-   "class": "B",
-   "tenant_type": "text",
-   "eltern": [],
-   "ursache": "referenzdaten",
-   "gruende": [
-    "referenzdaten",
-    "mandant_nullbar"
-   ],
-   "modell": [],
-   "leser": [],
-   "schreiber": [
-    "app/api/v1/endpoints/logistics_freight.py"
-   ],
-   "worker": [],
-   "identitaet": {},
-   "standardmandant_stellen": [],
-   "null_stellen": [
-    "app/api/v1/endpoints/logistics_freight.py:8",
-    "app/api/v1/endpoints/logistics_freight.py:10",
-    "app/api/v1/endpoints/logistics_freight.py:14",
-    "app/api/v1/endpoints/logistics_freight.py:68",
-    "app/api/v1/endpoints/logistics_freight.py:152",
-    "app/api/v1/endpoints/logistics_freight.py:162",
-    "app/api/v1/endpoints/logistics_freight.py:165",
-    "app/api/v1/endpoints/logistics_freight.py:218",
-    "app/api/v1/endpoints/logistics_freight.py:233"
-   ],
-   "gemeinsam_stellen": [
-    "app/api/v1/endpoints/logistics_freight.py:68",
-    "app/api/v1/endpoints/logistics_freight.py:162"
-   ],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_logistics.tour_disposition_checks",
-   "domain": "logistics",
-   "class": "B",
-   "tenant_type": "character varying(36)",
-   "eltern": [],
-   "ursache": "mandant_nullbar",
-   "gruende": [
-    "mandant_nullbar"
-   ],
-   "modell": [],
-   "leser": [],
-   "schreiber": [
-    "app/services/logistics_disposition_service.py"
-   ],
-   "worker": [],
-   "identitaet": {},
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_logistics.tour_events",
-   "domain": "logistics",
-   "class": "B",
-   "tenant_type": "text",
-   "eltern": [],
-   "ursache": "mandant_nullbar",
-   "gruende": [
-    "mandant_nullbar"
-   ],
-   "modell": [],
-   "leser": [],
-   "schreiber": [
-    "app/api/v1/endpoints/logistics_tours.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "kopfzeile": 1
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 0,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 0
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_logistics.tour_stops",
-   "domain": "logistics",
-   "class": "B",
-   "tenant_type": "text",
-   "eltern": [],
-   "ursache": "mandant_nullbar",
-   "gruende": [
-    "mandant_nullbar"
-   ],
-   "modell": [],
-   "leser": [
-    "app/services/logistics_disposition_service.py"
-   ],
-   "schreiber": [
-    "app/api/v1/command_handlers/logistics.py",
-    "app/api/v1/endpoints/logistics_tours.py",
-    "app/services/logistics_epod_service.py",
-    "app/services/mobile_sync_service.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "kopfzeile": 1
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 2,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 1
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_logistics.tours",
-   "domain": "logistics",
-   "class": "B",
-   "tenant_type": "text",
-   "eltern": [],
-   "ursache": "mandant_nullbar",
-   "gruende": [
-    "mandant_nullbar"
-   ],
-   "modell": [],
-   "leser": [],
-   "schreiber": [
-    "app/api/v1/command_handlers/logistics.py",
-    "app/api/v1/endpoints/logistics_tours.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "kopfzeile": 1
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 2,
-    "null": 0,
-    "default": 0,
-    "system": 0,
-    "mandanten": 1
-   },
-   "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
   },
   {
    "table": "domain_mfg.bill_of_material",

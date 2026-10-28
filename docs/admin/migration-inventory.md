@@ -427,6 +427,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `rls_domain_hr_20261027` | Row-level security for domain_hr master data (RLS domain slice hr). |
 | `rls_domain_inventory_20261027` | Row-level security for the inventory master data and stock documents (RLS domain slice inventory). |
 | `rls_domain_ki_20261027` | Row-level security for the AI domain: agent proposals, tool executions, knowledge versions. |
+| `rls_domain_logistics_20261028` | Row-level security for domain_logistics (tours, stops, events, disposition checks, ePOD settlements, freight |
 | `rls_domain_nachweisraum_20261027` | Row-level security for the evidence room (RLS domain slice nachweisraum). |
 | `rls_domain_ops_20261028` | Row-level security for domain_ops, part 1 (schema only, no data change). |
 | `rls_domain_pricing_20261027` | Row-level security for domain_pricing (RLS domain slice, first after P0-P7). |
