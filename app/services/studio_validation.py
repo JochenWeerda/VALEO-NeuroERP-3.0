@@ -217,6 +217,8 @@ def validate_studio_draft(
         if not isinstance(action, dict):
             violations.append("action_muss_objekt_sein")
             continue
+        if any(field in action for field in ("responseAdapter", "resultNavigationRoute", "inputPrefill")):
+            violations.append("nativer_ressourcenadapter_nicht_im_studio_katalog")
         key = action.get("key", "")
         if not isinstance(key, str):
             violations.append("action_key_muss_text_sein")

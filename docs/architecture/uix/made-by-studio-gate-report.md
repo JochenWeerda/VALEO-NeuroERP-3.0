@@ -12,10 +12,10 @@ Bezug: [Made by Studio — Qualitätsversprechen](made-by-studio-qualitaetsversp
 | Gate A (Meridian & Struktur) grün | 853 |
 | Gate B (Rechte & Aktionen) grün | 853 |
 | Gate C (Compiler & Kanal) grün | 852 |
-| Gate E (Runtime-Verdrahtung) grün | 802 |
+| Gate E (Runtime-Verdrahtung) grün | 804 |
 | Studio-Draft-Projektion ohne Violations | 5 |
 | Ø Advisory-Score (Gate-C-Metrik) | 0.99 |
-| Screen-IDs in runtime_wired-Routen (gesamt) | 2658 |
+| Screen-IDs in runtime_wired-Routen (gesamt) | 2661 |
 
 Gate D (Browser/Image) wird hier nicht automatisiert geprüft.
 
@@ -31,7 +31,7 @@ Keine — alle grün.
 
 - `portal/zertifikat`: api_bindung:endpoint_nicht_in_openapi:/api/v1/portal/zertifikate/{entity_id}
 
-## Gate E — offene Screen-IDs (51)
+## Gate E — offene Screen-IDs (49)
 
 - `admin/control-center`: runtime:screen_id_nicht_runtime_wired
 - `admin/webhooks-liste`: runtime:screen_id_nicht_runtime_wired
@@ -42,7 +42,6 @@ Keine — alle grün.
 - `auth/login`: runtime:screen_id_nicht_runtime_wired
 - `crm/aktivitaeten-liste`: runtime:screen_id_nicht_runtime_wired
 - `crm/campaign`: runtime:screen_id_nicht_runtime_wired
-- `crm/campaign-template`: runtime:screen_id_nicht_runtime_wired
 - `crm/consent`: runtime:screen_id_nicht_runtime_wired
 - `crm/gdpr-request`: runtime:screen_id_nicht_runtime_wired
 - `crm/kunden-cockpit`: runtime:screen_id_nicht_runtime_wired
@@ -58,7 +57,6 @@ Keine — alle grün.
 - `futtermittel/mischfuttermittel/stamm/new`: runtime:screen_id_nicht_runtime_wired
 - `futtermittel/rationseditor`: runtime:screen_id_nicht_runtime_wired
 - `futtermittel/rationsoptimierung`: runtime:screen_id_nicht_runtime_wired
-- `kontrakte/FrmKontraktProtokoll`: runtime:screen_id_nicht_runtime_wired
 - `lager/materialfluss`: runtime:screen_id_nicht_runtime_wired
 - `mahnwesen/mahnlauf`: runtime:screen_id_nicht_runtime_wired
 - `portal/rationsoptimierung`: runtime:screen_id_nicht_runtime_wired

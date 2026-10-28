@@ -4,7 +4,7 @@ import re
 _HIDDEN = re.compile(r'<(?:div|span)\b[^>]*(?:aria-hidden|sr-only)[^>]*>.*?</(?:div|span)>', re.S)
 _COMMENTS = re.compile(r'/\*.*?\*/|^\s*//[^\n]*', re.S | re.M)
 _VISIBLE_RUNTIME = re.compile(
-    r'<(?:UniversalMaskRenderer|UniversalNative(?:Detail|Create|Cockpit)Page|NativeListPage|'
+    r'<(?:UniversalMaskRenderer|UniversalNative(?:Detail|Create|Cockpit)Page|NativeListPage|NativeAuditListPage|'
     r'CaptureScreenHost|MadeByStudio(?:List|Detail|Cockpit)RuntimeWire|'
     r'DocumentControlScopePage|SanktionsScopePage|PartyNativePage|UniversalMaskRolloutPilotPage)\b'
     r'|\b(?:useUniversalMaskRuntime|createStammNative(?:Detail|Create|List)Page)\s*\('

@@ -2132,21 +2132,22 @@ def build_kasse_tagesabschluss_screen_definition() -> dict[str, Any]:
 
 
 def build_kontrakte_frmkontraktprotokoll_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
+    columns = [
+        {"key": "changed_at", "label": "Wann", "renderKind": "datetime", "filterable": False, "width": 220},
+        {"key": "changed_by", "label": "Benutzer", "filterable": True},
+        {"key": "field_name", "label": "Feld", "filterable": True},
+        {"key": "old_value", "label": "Alt", "renderKind": "text", "filterable": False},
+        {"key": "new_value", "label": "Neu", "renderKind": "text", "filterable": False},
+        {"key": "action", "label": "Aktion", "filterable": False},
+    ]
     return build_stamm_list_screen(
-        screen_id="kontrakte/FrmKontraktProtokoll",
-        domain="kontrakte",
-        title="FrmKontraktProtokoll",
-        subtitle="kontrakte",
-        endpoint="/api/v1/kontrakte",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="FrmKontraktProtokoll im kontrakte-Bereich finden und auswerten.",
-        prompts=["Zeige FrmKontraktProtokoll.", "Filtere die Liste."],
-        bundle="kontrakte",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
+        screen_id="kontrakte/FrmKontraktProtokoll", domain="kontrakte",
+        title="Kontraktprotokoll", subtitle="Änderungen am Kontrakt",
+        endpoint="/api/v1/kontrakte/{entity_id}/audit", row_route=None,
+        columns=columns, actions=[], row_actions=[], table_profile="audit",
+        purpose="Änderungen eines Kontrakts nachvollziehen.",
+        prompts=["Zeige das Kontraktprotokoll."], bundle="kontrakte",
+        no_workflow="Das unveränderliche Protokoll ist eine lesende Ansicht.",
     )
 
 

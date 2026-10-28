@@ -10,7 +10,7 @@ description: Ursprüngliche 52 offene Runtime-IDs und Anforderungen an ihre fach
 
 # Studio Runtime Gate E – Arbeitsinventar
 
-Dieses Inventar dokumentiert die 52 IDs des Gate-Reports aus Revision `452a8da5a` im akzeptierten Snapshot `artifacts/migration-repair-source`. Der zwischenzeitlich aktualisierte [Gate-Report](../architecture/uix/made-by-studio-gate-report.md) weist nach einer Katalogumstellung 51 offene IDs aus. Die Katalogmigration ist mit 63 gezielten Tests, Typpruefung, Build und visueller Komponentenabnahme belegt; siehe [Abnahme](studio-process-catalog-20261028.md). Die ursprüngliche Liste bleibt hier vollständig nachvollziehbar.
+Dieses Inventar dokumentiert die 52 IDs des Gate-Reports aus Revision `452a8da5a` im akzeptierten Snapshot `artifacts/migration-repair-source`. Der zwischenzeitlich aktualisierte [Gate-Report](../architecture/uix/made-by-studio-gate-report.md) weist nach einer Katalogumstellung 49 offene IDs aus. Die Katalogmigration ist mit 63 gezielten Tests, Typpruefung, Build und visueller Komponentenabnahme belegt; siehe [Abnahme](studio-process-catalog-20261028.md). Die ursprüngliche Liste bleibt hier vollständig nachvollziehbar.
 
 Status „offen“ bedeutet, dass die funktionale Runtime-Verdrahtung und fachliche Abnahme durch dieses Inventar nicht nachgewiesen sind. `auth/login` und `auth/callback` sind Infrastruktur- und Sicherheitsabläufe; sie benötigen eine gesonderte Prüfung.
 
@@ -25,7 +25,7 @@ Status „offen“ bedeutet, dass die funktionale Runtime-Verdrahtung und fachli
 | `auth/login` | Authentifizierung (Infrastruktur) | offen | – |
 | `crm/aktivitaeten-liste` | CRM | offen | – |
 | `crm/campaign` | CRM | offen | – |
-| `crm/campaign-template` | CRM | offen | – |
+| `crm/campaign-template` | CRM | abgenommen | Echte Detail/Create/Update/Duplicate-Runtime und SQL-Abnahme |
 | `crm/consent` | CRM | offen | – |
 | `crm/gdpr-request` | CRM | offen | – |
 | `crm/kunden-cockpit` | CRM | offen | – |
@@ -41,7 +41,7 @@ Status „offen“ bedeutet, dass die funktionale Runtime-Verdrahtung und fachli
 | `futtermittel/mischfuttermittel/stamm/new` | Futtermittel | offen | – |
 | `futtermittel/rationseditor` | Futtermittel | offen | – |
 | `futtermittel/rationsoptimierung` | Futtermittel | offen | – |
-| `kontrakte/FrmKontraktProtokoll` | Kontrakte | offen | – |
+| `kontrakte/FrmKontraktProtokoll` | Kontrakte | abgenommen | Auditkontext, Filter, signierte Kanaele und Browserkomponente geprueft |
 | `lager/materialfluss` | Lager | offen | – |
 | `mahnwesen/mahnlauf` | Mahnwesen | offen | – |
 | `portal/rationsoptimierung` | Portal | offen | – |
@@ -80,3 +80,5 @@ Jede Familie benötigt einen gesonderten Claim mit Dateibesitz und eine fachlich
 Eine gemeinsame Routendatei belegt keine identische Definition. Für `fibu/debitoren` und `fibu/debitoren-liste` sind unterschiedliche Datenquellen dokumentiert; ebenso für `waage/wiegungen` und `waage/wiegungen-liste`. `waage/liste` und `waage/waagen-liste` teilen eine Datenquelle, unterscheiden sich aber bei Feldern, Domäne und Detailroute. `verkauf/kunde` und `verkauf/kunden-stamm` sind unterschiedliche Definitionen. `sales/lieferungen/neu` wird auf die Lieferungen-Route umgeleitet; `waage/neu` wird aus der aktiven Waagenliste aufgerufen. Insbesondere eine neue Maskenidentität darf bei abweichendem Modus nicht allein wegen gemeinsamer Routendatei entfallen.
 
 Für keine dieser IDs ist eine Entfernung ohne Funktionsverlust nachgewiesen. Vor jeder kanonischen Bereinigung sind Definition, aktive Verbraucher, Studio- und MCP-Verträge sowie die vollständige Funktionsübernahme zu belegen. Eine Alias-Umkennzeichnung zur bloßen Verbesserung des Gate-Ergebnisses ist keine Abnahme.
+
+Kontraktprotokoll und Kampagnenvorlage sind durch die [gemeinsame Abnahme](studio-audit-template-20261028.md) belegt.49 Punkte bleiben offen; der urspruengliche52er-Umfang bleibt nachvollziehbar.

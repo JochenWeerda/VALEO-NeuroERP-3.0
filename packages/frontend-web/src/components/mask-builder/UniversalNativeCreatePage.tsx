@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button'
 import { useEffect, useMemo, useRef } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate, useSearchParams } from '@/app/routing/typed-router'
@@ -126,6 +127,12 @@ export function UniversalNativeCreatePage({ screenId, testId }: { screenId: stri
   if (initialized.current !== formContext) return <p role="status">Anlagemaske wird vorbereitet…</p>
   return (
     <div data-testid={testId}>
+      <Button type="button" variant="outline" onClick={() => {
+        const route = original.creation?.cancelRoute
+        if (route?.startsWith('/') && !route.startsWith('//') && !route.includes('\\')
+          && !Array.from(route).some(char => char.charCodeAt(0) < 32 || char.charCodeAt(0) === 127)) navigate(route)
+        else navigate(-1)
+      }}>Abbrechen</Button>
       <UniversalMaskRenderer plan={plan} formState={form} allowedPermissions={permissions} lookupBindings={lookupBindings} />
     </div>
   )

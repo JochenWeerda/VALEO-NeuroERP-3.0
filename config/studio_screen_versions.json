@@ -3294,11 +3294,12 @@
       "version": "1.0.0"
     },
     "crm/campaign-template": {
-      "definition_hash": "4a0fc928288c3ca770981c60b2d920980f2a2bea039525c0892b6713666c46d0",
+      "definition_hash": "84af1dac1afa035c328475d461fa5ddcfdc726e02e00dae22b812b0f17dd1e19",
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
       "studio_draft_clean": false,
       "version": "1.0.0"
@@ -6457,11 +6458,12 @@
       "version": "1.0.0"
     },
     "kontrakte/FrmKontraktProtokoll": {
-      "definition_hash": "31de77914aab0ebf18e2191ee186ff74343846b88f88aeed827f35041ec2221f",
+      "definition_hash": "be1cd2032e0efa1872ce2d2121b373f502a9888b53f9e52cc574915ce14bcbe8",
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
       "studio_draft_clean": false,
       "version": "1.0.0"

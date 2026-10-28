@@ -10,12 +10,13 @@ State Machine:
 from __future__ import annotations
 
 from datetime import datetime, date
+import json
 from decimal import Decimal
 from typing import List, Optional, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import Response
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 
@@ -50,11 +51,18 @@ class TemplateCreate(BaseModel):
 class TemplateUpdate(BaseModel):
     name: Optional[str] = Field(None, min_length=1, max_length=255)
     description: Optional[str] = None
-    campaign_type: Optional[str] = None
-    subject_line: Optional[str] = None
+    campaign_type: Optional[str] = Field(None, pattern=r"^(email|sms|post|event|webinar|push)$")
+    subject_line: Optional[str] = Field(None, max_length=500)
     message_body: Optional[str] = None
     is_active: Optional[bool] = None
     meta: Optional[dict] = None
+
+    @field_validator("name", "campaign_type", "is_active")
+    @classmethod
+    def non_nullable_update_fields(cls, value):
+        if value is None:
+            raise ValueError("Pflichtfeld darf nicht geleert werden")
+        return value
 
 
 class TemplateResponse(BaseModel):
@@ -246,13 +254,13 @@ async def create_template(
             "id": nid, "tid": tenant_id, "name": payload.name,
             "desc": payload.description, "ctype": payload.campaign_type,
             "subject": payload.subject_line, "body": payload.message_body,
-            "active": payload.is_active, "meta": str(payload.meta or {}), "now": now,
+            "active": payload.is_active, "meta": json.dumps(payload.meta or {}), "now": now,
         },
     )
     db.commit()
     row = db.execute(
-        text("SELECT * FROM domain_crm.crm_campaign_templates WHERE id = :id"),
-        {"id": nid},
+        text("SELECT * FROM domain_crm.crm_campaign_templates WHERE id = :id AND tenant_id = :tid"),
+        {"id": nid, "tid": tenant_id},
     ).fetchone()
     return _row_to_template(row)
 
@@ -286,11 +294,19 @@ async def update_template(
     if not row:
         raise HTTPException(status_code=404, detail="Vorlage nicht gefunden")
 
-    updates = {k: v for k, v in payload.model_dump(exclude_none=True).items()}
+    updates = {
+        key: value for key, value in payload.model_dump(exclude_unset=True).items()
+        if value is not None or key in {"description", "subject_line", "message_body"}
+    }
     if not updates:
         return _row_to_template(row)
 
-    set_clauses = ", ".join(f"{k} = :{k}" for k in updates)
+    if "meta" in updates:
+        updates["meta"] = json.dumps(updates["meta"] or {})
+    set_clauses = ", ".join(
+        f"{k} = CAST(:{k} AS jsonb)" if k == "meta" else f"{k} = :{k}"
+        for k in updates
+    )
     updates["id"] = template_id
     updates["tid"] = tenant_id
     updates["now"] = datetime.utcnow()
@@ -300,8 +316,8 @@ async def update_template(
     )
     db.commit()
     updated = db.execute(
-        text("SELECT * FROM domain_crm.crm_campaign_templates WHERE id = :id"),
-        {"id": template_id},
+        text("SELECT * FROM domain_crm.crm_campaign_templates WHERE id = :id AND tenant_id = :tid"),
+        {"id": template_id, "tid": tenant_id},
     ).fetchone()
     return _row_to_template(updated)
 
@@ -336,13 +352,13 @@ async def duplicate_template(
             "name": f"{row.name} (Kopie)",
             "desc": row.description, "ctype": row.campaign_type,
             "subject": row.subject_line, "body": row.message_body,
-            "active": False, "meta": str(row.meta or {}), "now": now,
+            "active": False, "meta": json.dumps(row.meta or {}), "now": now,
         },
     )
     db.commit()
     copy = db.execute(
-        text("SELECT * FROM domain_crm.crm_campaign_templates WHERE id = :id"),
-        {"id": nid},
+        text("SELECT * FROM domain_crm.crm_campaign_templates WHERE id = :id AND tenant_id = :tid"),
+        {"id": nid, "tid": tenant_id},
     ).fetchone()
     return _row_to_template(copy)
 

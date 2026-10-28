@@ -29,6 +29,7 @@ export interface ActionRequest {
 }
 
 export interface ActionResult {
+  resourceId?: string
   actionKey: string
   mode: ActionExecutionMode
   success: boolean

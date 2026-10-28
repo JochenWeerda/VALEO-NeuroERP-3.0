@@ -1,7 +1,7 @@
-import { NativeListPage } from '@/components/mask-builder/NativeListPage'
+import { useParams } from '@/app/routing/typed-router'
+import { UniversalNativeDetailPage } from '@/components/mask-builder/UniversalNativeDetailPage'
 
 export default function Page(): JSX.Element {
-  return (
-    <NativeListPage screenId="crm/campaign-template/new" testId="screen-crm/campaign-template/new" />
-  )
+  const { id } = useParams<{ id?: string }>()
+  return <UniversalNativeDetailPage screenId="crm/campaign-template" entityId={id} testId="crm-campaign-template-stamm" />
 }

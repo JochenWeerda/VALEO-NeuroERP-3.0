@@ -23,7 +23,7 @@ _RAW_COLOR_PATTERN = re.compile(
 
 _RUNTIME_MARKERS = re.compile(
     r"\b(useUniversalMaskRuntime|UniversalMaskRenderer|UniversalNativeDetailPage|"
-    r"UniversalNativeCreatePage|UniversalNativeCockpitPage|NativeListPage|CaptureScreenHost|"
+    r"UniversalNativeCreatePage|UniversalNativeCockpitPage|NativeListPage|NativeAuditListPage|CaptureScreenHost|"
     r"createStammNativeDetailPage|MadeByStudioListRuntimeWire|MadeByStudioDetailRuntimeWire|"
     r"MadeByStudioCockpitRuntimeWire|DocumentControlScopePage|SanktionsScopePage)\b"
 )
@@ -31,7 +31,7 @@ _SCREEN_ID_IN_SOURCE = re.compile(
     r"""screenId\s*=\s*(?:\{\s*)?[`'"]([^`'"]+)[`'"]|useScreenDefinition\(\s*[`'"]([^`'"]+)[`'"]"""
 )
 _RUNTIME_WRAPPER = re.compile(
-    r"\b(UniversalNativeCockpitPage|UniversalNativeDetailPage|NativeListPage|"
+    r"\b(UniversalNativeCockpitPage|UniversalNativeDetailPage|NativeListPage|NativeAuditListPage|"
     r"DocumentControlScopePage|SanktionsScopePage|UniversalMaskRolloutPilotPage|"
     r"createStammNativeDetailPage|MadeByStudioListRuntimeWire|MadeByStudioDetailRuntimeWire|"
     r"MadeByStudioCockpitRuntimeWire|CaptureScreenHost)\b"

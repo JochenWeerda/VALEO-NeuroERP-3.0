@@ -606,7 +606,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `inventory-reports` | Inventory reports | workspace | niedrig | — | `GET /api/v1/masks/inventory-reports/agent-contract` |
 | `inventory/epcis` | Index | inventory | niedrig | — | `GET /api/v1/masks/inventory/epcis/agent-contract` |
 | `kasse/tagesabschluss` | Tagesabschluss | kasse | niedrig | — | `GET /api/v1/masks/kasse/tagesabschluss/agent-contract` |
-| `kontrakte/FrmKontraktProtokoll` | FrmKontraktProtokoll | kontrakte | niedrig | — | `GET /api/v1/masks/kontrakte/FrmKontraktProtokoll/agent-contract` |
+| `kontrakte/FrmKontraktProtokoll` | Kontraktprotokoll | kontrakte | niedrig | — | `GET /api/v1/masks/kontrakte/FrmKontraktProtokoll/agent-contract` |
 | `kontrakte/KontraktAlarmDashboard` | KontraktAlarmDashboard | kontrakte | niedrig | — | `GET /api/v1/masks/kontrakte/KontraktAlarmDashboard/agent-contract` |
 | `kontrakte/LstKontraktUebersicht` | LstKontraktUebersicht | kontrakte | niedrig | — | `GET /api/v1/masks/kontrakte/LstKontraktUebersicht/agent-contract` |
 | `kontrakte/kontraktklassen` | Kontraktklassen | kontrakte | niedrig | — | `GET /api/v1/masks/kontrakte/kontraktklassen/agent-contract` |
@@ -8926,13 +8926,15 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Beispiel-Prompts:**
 
-- Welchen Kanal nutzt Vorlage {entity_id}?
+- Welchen Typ nutzt Vorlage {entity_id}?
 
 **Actions:**
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `edit` | Bearbeiten | safe | nein | `—` |
+| `edit` | Bearbeiten | safe | nein | `/api/v1/crm/campaigns/templates/{entity_id}` |
+| `duplicate` | Duplizieren | safe | nein | `/api/v1/crm/campaigns/templates/{entity_id}/duplicate` |
+| `back` | Zurück | safe | nein | `Oeffnet die Liste; keine Serverwirkung.` |
 
 ---
 
@@ -19205,9 +19207,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ## Domäne: kontrakte
 
-### `kontrakte/FrmKontraktProtokoll` — FrmKontraktProtokoll
+### `kontrakte/FrmKontraktProtokoll` — Kontraktprotokoll
 
-**Zweck:** FrmKontraktProtokoll im kontrakte-Bereich finden und auswerten.
+**Zweck:** Änderungen eines Kontrakts nachvollziehen.
 
 | | |
 |---|---|
@@ -19219,18 +19221,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `list` → `/api/v1/kontrakte`
+- `list` → `/api/v1/kontrakte/{entity_id}/audit`
 
 **Beispiel-Prompts:**
 
-- Zeige FrmKontraktProtokoll.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+- Zeige das Kontraktprotokoll.
 
 ---
 

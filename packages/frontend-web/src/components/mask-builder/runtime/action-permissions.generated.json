@@ -568,6 +568,17 @@
         ]
       ]
     },
+    "crm/campaign-template": {
+      "crm.campaign.update": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "crm/customer-360": {
       "crm.customer.update": [
         [

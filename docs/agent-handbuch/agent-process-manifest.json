@@ -7539,9 +7539,31 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "crm.campaign.update",
+          "commandEndpoint": "/api/v1/crm/campaigns/templates/{entity_id}",
+          "method": "PUT",
+          "stubReason": null
+        },
+        {
+          "key": "duplicate",
+          "label": "Duplizieren",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.campaign.update",
+          "commandEndpoint": "/api/v1/crm/campaigns/templates/{entity_id}/duplicate",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "back",
+          "label": "Zurück",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
           "commandEndpoint": null,
           "method": null,
-          "stubReason": null
+          "stubReason": "Oeffnet die Liste; keine Serverwirkung."
         }
       ],
       "sensitive_fields": [],
@@ -16905,7 +16927,7 @@
     },
     {
       "mask_id": "kontrakte/FrmKontraktProtokoll",
-      "title": "FrmKontraktProtokoll",
+      "title": "Kontraktprotokoll",
       "domain": "kontrakte",
       "process_keys": [],
       "rollout_route": "/mask-rollout/kontrakte__FrmKontraktProtokoll/:entityId",
@@ -16913,19 +16935,7 @@
       "screen_definition_url": "/api/v1/masks/kontrakte/FrmKontraktProtokoll/screen-definition",
       "readiness_url": "/api/v1/masks/kontrakte/FrmKontraktProtokoll/readiness",
       "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
+      "actions": [],
       "sensitive_fields": [],
       "mcp_tool_ids": []
     },

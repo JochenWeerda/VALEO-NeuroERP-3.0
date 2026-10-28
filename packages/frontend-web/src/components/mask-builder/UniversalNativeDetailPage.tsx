@@ -1,3 +1,4 @@
+import { prefillDeclaredInputs } from './runtime/resource-response-adapter'
 /**
  * Generic page wrapper for native ScreenDefinitions (temporary=False).
  * Replaces legacy handcrafted detail pages when a non-temporary SD is available.
@@ -220,6 +221,11 @@ function NativeExistingDetailPage({
     setValidationErrors([])
     const label = schemaQuery.data?.actions?.find((a: { key: string }) => a.key === actionKey)?.label ?? actionKey
     toast({ title: `${label} erfolgreich`, description: result.summary })
+    const action = schemaQuery.data?.actions?.find(candidate => candidate.key === actionKey)
+    if (action?.responseAdapter === 'resource.v1' && action.resultNavigationRoute === '/crm/campaign-template/{result_id}' && result.resourceId) {
+      void navigate({ to: action.resultNavigationRoute.replace('{result_id}', encodeURIComponent(result.resourceId)) as never })
+      return
+    }
     await runtime.refetch()
   }
 
@@ -275,6 +281,7 @@ function NativeExistingDetailPage({
 
     // Deklarierte Eingaben zuerst (Screen Definition -> ActionInputDialog).
     if (actionDef?.inputFields?.length) {
+      pending.payload = prefillDeclaredInputs(actionDef, runtime.entityData, pending.payload)
       if (isDocflowEdit(actionDef)) {
         if (!entityId || !permissions.includes('belege.preise')) {
           reportUnavailableAction()

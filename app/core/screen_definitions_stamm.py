@@ -349,24 +349,57 @@ def build_crm_campaign_stamm() -> dict[str, Any]:
 
 
 def build_crm_campaign_template_stamm() -> dict[str, Any]:
-    return _stamm(
+    fields = [
+        _feld("name", "Name", required=True),
+        _feld("description", "Beschreibung", "textarea"),
+        _feld("campaign_type", "Kampagnentyp", "select", required=True, options=[
+            {"value": value, "label": label} for value, label in [
+                ("email", "E-Mail"), ("sms", "SMS"), ("post", "Post"),
+                ("event", "Veranstaltung"), ("webinar", "Webinar"), ("push", "Push"),
+            ]
+        ]),
+        _feld("subject_line", "Betreff"),
+        _feld("message_body", "Nachricht", "textarea"),
+        _feld("is_active", "Aktiv", "boolean"),
+    ]
+    definition = _stamm(
         screen_id="crm/campaign-template",
         domain="crm",
         title="Kampagnenvorlage",
         subtitle="Vorlage",
         endpoint="/api/v1/crm/campaigns/templates/{entity_id}",
         identity="name",
-        felder=[
-        _feld("name", "Name"),
-        _feld("channel", "Kanal"),
-        _feld("subject", "Betreff"),
-        ],
+        felder=[*fields, _feld("created_by", "Erstellt von", readOnly=True),
+                _feld("created_at", "Erstellt am", "datetime", readOnly=True),
+                _feld("updated_at", "Geändert am", "datetime", readOnly=True)],
         edit_permission="crm.campaign.update",
         test_id="crm-campaign-template-stamm",
         purpose="Wiederverwendbare Kampagnenvorlage.",
-        prompts=['Welchen Kanal nutzt Vorlage {entity_id}?'],
+        prompts=['Welchen Typ nutzt Vorlage {entity_id}?'],
+        creation={"endpoint": "/api/v1/crm/campaigns/templates",
+                  "permission": "crm.campaign.update",
+                  "detailRoute": "/crm/campaign-template/{entity_id}",
+                  "cancelRoute": "/crm/campaign-templates",
+                  "defaults": {"campaign_type": "email", "is_active": True},
+                  "fields": fields},
+        edit_action_overrides={
+            "commandEndpoint": "/api/v1/crm/campaigns/templates/{entity_id}",
+            "method": "PUT", "forbiddenForAgents": True,
+            "responseAdapter": "resource.v1", "inputPrefill": "entity", "inputFields": fields,
+        },
+        extra_actions=[
+            {"key": "duplicate", "label": "Duplizieren", "kind": "secondary", "dangerLevel": "safe",
+             "permission": "crm.campaign.update", "forbiddenForAgents": True,
+             "commandEndpoint": "/api/v1/crm/campaigns/templates/{entity_id}/duplicate",
+             "method": "POST", "responseAdapter": "resource.v1",
+             "resultNavigationRoute": "/crm/campaign-template/{result_id}"},
+            {"key": "back", "label": "Zurück", "kind": "secondary", "dangerLevel": "safe",
+             "localEffect": "navigation", "stubReason": "Oeffnet die Liste; keine Serverwirkung.",
+             "navigationRoute": "/crm/campaign-templates"},
+        ],
     )
-
+    definition["summary"] = []
+    return definition
 
 
 def build_crm_consent_stamm() -> dict[str, Any]:

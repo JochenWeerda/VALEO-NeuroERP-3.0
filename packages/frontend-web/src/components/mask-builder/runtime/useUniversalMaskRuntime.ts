@@ -68,6 +68,7 @@ export interface UseUniversalMaskRuntimeOptions {
   permissions?: string[]
   tenantId?: string
   enabled?: boolean
+  completeClientTables?: boolean
 }
 
 export interface UseUniversalMaskRuntimeResult {
@@ -87,6 +88,7 @@ export interface UseUniversalMaskRuntimeResult {
   resetUserOverlay: () => Promise<void>
   lookupBindings: Record<string, LookupBinding>
   isEntityLoading: boolean
+  isTableLoading: boolean
   isOverlayLoading: boolean
   entityError: unknown
   refetch: () => Promise<void>
@@ -127,6 +129,7 @@ export function useUniversalMaskRuntime({
   permissions = [],
   tenantId,
   enabled = true,
+  completeClientTables = false,
 }: UseUniversalMaskRuntimeOptions): UseUniversalMaskRuntimeResult {
   const queryClient = useQueryClient()
   const overlayQuery = useUserScreenOverlay(screenId, { enabled: enabled && Boolean(schema) })
@@ -268,13 +271,13 @@ export function useUniversalMaskRuntime({
 
   const tableResults = useQueries({
     queries: tableEntries.map(([tableKey, tb]) => ({
-      queryKey: tb.clientQuery && plan?.listExperience
-        ? [tenantId, screenId, entityId, 'table', tableKey, { endpoint: tb.endpoint, sourceKey: tb.sourceKey, searchFields: plan.listExperience.searchFields }]
+      queryKey: tb.clientQuery && (plan?.listExperience || completeClientTables)
+        ? [tenantId, screenId, entityId, 'table', tableKey, { endpoint: tb.endpoint, sourceKey: tb.sourceKey, searchFields: plan?.listExperience?.searchFields, completeClientTables }]
         : tb.clientQuery && !tb.sourceKey
           ? [tenantId, screenId, entityId, 'table', tableKey]
           : [tenantId, screenId, entityId, 'table', tableKey, resolvedTableQueryStates[tableKey]],
       queryFn: async ({ signal }) => {
-        if (tb.clientQuery && tb.sourceKey && plan?.listExperience) {
+        if (tb.clientQuery && tb.sourceKey && (plan?.listExperience || completeClientTables)) {
           return readCompleteList(async (page) => {
             const state = { ...defaultTableQueryState(100), page }
             const url = tableSourceRequest(screenId, entityId, tb, state)
@@ -310,7 +313,7 @@ export function useUniversalMaskRuntime({
       const loaded = Array.isArray(data)
         ? data as Record<string, unknown>[]
         : Array.isArray((data as { items?: unknown }).items) ? (data as { items: Record<string, unknown>[] }).items : undefined
-      if (tb.clientQuery && (!tb.sourceKey || plan?.listExperience) && loaded) {
+      if (tb.clientQuery && (!tb.sourceKey || plan?.listExperience || completeClientTables) && loaded) {
         const state = resolvedTableQueryStates[tableKey] ?? defaultTableQueryState(25)
         const page = applyClientTableQuery(loaded, state, plan?.listExperience?.searchFields)
         rows[tableKey] = page.rows
@@ -324,7 +327,7 @@ export function useUniversalMaskRuntime({
       }
     })
     return { tableRows: rows, filteredTableRows: filtered, tableTotals: totals }
-  }, [tableEntries, tableResults, resolvedTableQueryStates, plan?.listExperience])
+  }, [tableEntries, tableResults, resolvedTableQueryStates, plan?.listExperience, completeClientTables])
 
   const messages: ScreenMessage[] = [
     ...(entityQuery.error ? [{
@@ -355,6 +358,7 @@ export function useUniversalMaskRuntime({
     resetUserOverlay,
     lookupBindings: binding?.lookupBindings ?? {},
     isEntityLoading: entityQuery.isLoading,
+    isTableLoading: tableResults.some(result => result.isLoading),
     isOverlayLoading: overlayQuery.isLoading,
     entityError: entityQuery.error,
     refetch: async () => {

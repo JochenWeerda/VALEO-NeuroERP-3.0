@@ -163227,6 +163227,7 @@
           "campaign_type": {
             "anyOf": [
               {
+                "pattern": "^(email|sms|post|event|webinar|push)$",
                 "type": "string"
               },
               {
@@ -163296,6 +163297,7 @@
           "subject_line": {
             "anyOf": [
               {
+                "maxLength": 500,
                 "type": "string"
               },
               {

@@ -203,6 +203,9 @@ export interface ScreenActionInputField extends ScreenFieldDefinition {
 }
 
 export interface ScreenActionDefinition {
+  responseAdapter?: 'resource.v1'
+  resultNavigationRoute?: string
+  inputPrefill?: 'entity'
   key: string
   label: string
   kind?: 'primary' | 'secondary' | 'danger' | 'workflow'
@@ -497,6 +500,7 @@ export interface ScreenDefinition {
     endpoint: string
     permission: string
     detailRoute: string
+    cancelRoute?: string
     defaults?: Record<string, unknown>
   }
   creationContext?: { screen_id: string; definition_hash: string }
