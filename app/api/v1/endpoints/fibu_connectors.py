@@ -109,8 +109,8 @@ async def create_profile(
         )
     db.commit()
     row = db.execute(
-        text("SELECT id, tenant_id, connector_type, name, is_default, settings, mapping, version, created_at, updated_at, created_by, updated_by FROM domain_erp.fibu_connector_profiles WHERE id = :id"),
-        {"id": profile_id},
+        text("SELECT id, tenant_id, connector_type, name, is_default, settings, mapping, version, created_at, updated_at, created_by, updated_by FROM domain_erp.fibu_connector_profiles WHERE id = :id AND tenant_id = :tid"),
+        {"id": profile_id, "tid": tenant_id},
     ).fetchone()
     return ConnectorProfile(
         id=row[0], tenant_id=row[1], connector_type=row[2], name=row[3], is_default=row[4] is True,
@@ -173,7 +173,8 @@ async def update_profile(
         params["mapping"] = json.dumps(payload.mapping)
     db.execute(text(f"UPDATE domain_erp.fibu_connector_profiles SET {', '.join(updates)} WHERE id = :id AND tenant_id = :tenant_id"), params)  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
     if payload.is_default is True:
-        prof = db.execute(text("SELECT connector_type FROM domain_erp.fibu_connector_profiles WHERE id = :id"), {"id": profile_id}).fetchone()
+        prof = db.execute(text("SELECT connector_type FROM domain_erp.fibu_connector_profiles WHERE id = :id AND tenant_id = :tid"),
+                          {"id": profile_id, "tid": tenant_id}).fetchone()
         if prof:
             db.execute(
                 text("UPDATE domain_erp.fibu_connector_profiles SET is_default = false WHERE tenant_id = :tid AND connector_type = :ct AND id != :id"),
@@ -221,6 +222,17 @@ async def create_import_run(
     content = await file.read()
     if not content:
         raise HTTPException(status_code=400, detail="Datei ist leer")
+    if profile_id and not db.execute(
+        text("SELECT 1 FROM domain_erp.fibu_connector_profiles WHERE id = :id AND tenant_id = :tid AND connector_type = :ct"),
+        {"id": profile_id, "tid": tenant_id, "ct": connector_type},
+    ).fetchone():
+        raise HTTPException(status_code=404, detail="Connector-Profil nicht gefunden")
+    # Gleicher Schluessel = derselbe Lauf, unveraendert. Bis 28.10.2026 wurde er neu geparst: doppelte
+    # Positionen, Status zurueck auf PARSED -- ein gebuchter Lauf liess sich ein zweites Mal buchen.
+    vorhanden = workflow.find_run(db, tenant_id, connector_type, idempotency_key) if idempotency_key else None
+    if vorhanden:
+        return ImportUploadResponse(run_id=vorhanden[0], status=vorhanden[1],
+                                    message="Lauf mit diesem Idempotenzschluessel besteht bereits; nicht neu eingelesen.")
     created_by = _user_from_request(request)
     run_id = workflow.create_run(db, tenant_id, connector_type, profile_id, idempotency_key, created_by)
     storage_key = f"fibu/connectors/{connector_type.lower()}/{run_id}"
@@ -274,9 +286,9 @@ async def list_run_items(
         raise HTTPException(status_code=404, detail="Import-Lauf nicht gefunden")
     q = """
         SELECT id, run_id, line_no, item_type, payload, validation_errors, posted_entity_id, status
-        FROM domain_erp.fibu_connector_run_items WHERE run_id = :run_id
+        FROM domain_erp.fibu_connector_run_items WHERE run_id = :run_id AND tenant_id = :tid
     """
-    params: dict = {"run_id": run_id}
+    params: dict = {"run_id": run_id, "tid": tenant_id}
     if only_errors:
         q += " AND status = 'ERROR'"
     q += " ORDER BY line_no LIMIT :limit"

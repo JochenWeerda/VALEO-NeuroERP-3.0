@@ -1,6 +1,6 @@
 {
  "_note": "Lesender Befund der gewachsenen Datenbank (scripts/rls_domain_matrix.py --data).",
- "stand": "2026-10-27",
+ "stand": "2026-10-28",
  "tables": {
   "domain_agrar.agrar_duenger": {
    "zeilen": 0,
@@ -128,13 +128,6 @@
    "system": 0,
    "mandanten": 1
   },
-  "domain_agrar.nutrient_compositions": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
   "domain_agrar.seed_orders": {
    "zeilen": 0,
    "null": 0,
@@ -199,13 +192,6 @@
    "system": 0,
    "mandanten": 0
   },
-  "domain_erp.bank_accounts": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
   "domain_erp.chart_of_accounts": {
    "zeilen": 49,
    "null": 0,
@@ -213,55 +199,12 @@
    "system": 28,
    "mandanten": 3
   },
-  "domain_erp.creditors": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "domain_erp.debitors": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "domain_erp.dunning_notices": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "domain_erp.fibu_connector_run_items": {
-   "zeilen": 0,
-   "eltern_fk": [
-    "run_id -> domain_erp.fibu_connector_runs.id"
-   ],
-   "verwaist": 0,
-   "ohne_eltern": 0
-  },
-  "domain_erp.gift_cards": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
   "domain_erp.offene_posten": {
    "zeilen": 25,
    "null": 0,
    "default": 0,
    "system": 0,
    "mandanten": 2
-  },
-  "domain_erp.open_items": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
   },
   "domain_inventory.agrar_contracts": {
    "zeilen": 3,
@@ -350,62 +293,6 @@
    "system": 0,
    "mandanten": 0
   },
-  "domain_logistics.carrier_invoices": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "domain_logistics.epod_settlements": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "domain_logistics.freight_tariffs": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "domain_logistics.tour_disposition_checks": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "domain_logistics.tour_events": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
-  },
-  "domain_logistics.tour_stops": {
-   "zeilen": 2,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 1
-  },
-  "domain_logistics.tours": {
-   "zeilen": 2,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 1
-  },
-  "domain_ops.kon_contract": {
-   "zeilen": 4,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 1
-  },
   "domain_ops.ops_chargen": {
    "zeilen": 79,
    "null": 0,
@@ -459,13 +346,6 @@
    "default": 0,
    "system": 0,
    "mandanten": 1
-  },
-  "domain_ops.ops_pcn_meldungen": {
-   "zeilen": 0,
-   "null": 0,
-   "default": 0,
-   "system": 0,
-   "mandanten": 0
   },
   "domain_ops.reklamationen": {
    "zeilen": 15,
