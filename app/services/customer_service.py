@@ -29,17 +29,15 @@ from app.integrations.crm_core_client import (
 
 logger = logging.getLogger(__name__)
 
-_DEFAULT_TENANT = "00000000-0000-0000-0000-000000000001"
+def _tenant_as_uuid(value: Any) -> str:
+    """Der Mandant der Zeile, wie er gespeichert ist.
 
-
-def _tenant_as_uuid(value: Any) -> UUID:
-    """Customer-Antwortmodell verlangt UUID; gewachsene Mandanten-IDs sind oft Slugs."""
-    if value is None or value == "":
-        return UUID(_DEFAULT_TENANT)
-    try:
-        return UUID(str(value))
-    except (ValueError, TypeError, AttributeError):
-        return UUID(_DEFAULT_TENANT)
+    Bis 28.10.2026 verlangte das Antwortmodell eine UUID, und jeder Mandant mit einer Kennung wie ``valeo`` (oder ohne
+    Wert) wurde in der Antwort als Standardmandant ausgegeben.
+    """
+    if value is None or str(value).strip() == "":
+        raise ValueError("Mandant fehlt")
+    return str(value)
 
 
 # ── pure helpers (module-level, no state) ─────────────────────────────────────

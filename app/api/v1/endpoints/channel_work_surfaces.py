@@ -22,6 +22,9 @@ from app.core.channel_process_actions import (
 )
 from app.core.channel_work_surfaces import build_channel_knowledge_response
 from app.core.database import get_db
+from app.core.tenant import get_tenant_id
+from app.core.akteur import gepruefter_akteur, verlange_rolle
+from app.auth.deps import get_current_user
 from app.core.human_approval_gate import ApprovalDecision
 from app.core.knowledge_core_contracts import KnowledgeChannel
 from app.core.knowledge_graph import build_runtime_knowledge_graph
@@ -42,13 +45,11 @@ router = APIRouter(prefix="/channels", tags=["channels", "knowledge"])
 class ChannelKnowledgeQueryRequest(BaseModel):
     rolle: str
     query: str
-    tenant_id: str | None = None
     capability_key: str | None = None
     limit: int = 4
 
 
 class ChannelProcessActionRequest(BaseModel):
-    tenant_id: str
     process_definition_key: str
     command_name: str
     aggregate_type: str
@@ -63,16 +64,23 @@ class ChannelProcessActionRequest(BaseModel):
 
 
 class ChannelApprovalDecisionRequest(BaseModel):
+    """Entscheider ist der Angemeldete; ``approver_role`` muss eine seiner geprueften Rollen sein."""
     decision: str
-    entschieden_von: str
     approver_role: str
     begruendung: str
 
 
 class KnowledgeGraphPathRequest(BaseModel):
-    tenant_id: str | None = None
     source_id: str
     target_id: str
+
+
+def _eigener_thread(store, thread_id: str, tenant_id: str):
+    """Thread des Mandanten oder 404 (bis 28.10.2026 lasen und entschieden die Wege jeden Thread nach ID)."""
+    thread = store.get(thread_id)
+    if thread is None or thread.tenant_id != tenant_id:
+        raise HTTPException(status_code=404, detail="Thread nicht gefunden")
+    return thread
 
 
 def _parse_supported_channel(channel: str) -> KnowledgeChannel:
@@ -84,7 +92,8 @@ def _parse_supported_channel(channel: str) -> KnowledgeChannel:
 
 @router.post("/{channel}/knowledge-query", summary="Knowledge query channel",
     response_model=ChannelWorkSurfaceOut, dependencies=SCHREIBEN["GERAET"])
-def channel_knowledge_query(channel: str, payload: ChannelKnowledgeQueryRequest, db=Depends(get_db)):
+def channel_knowledge_query(channel: str, payload: ChannelKnowledgeQueryRequest, db=Depends(get_db),
+                            tenant_id: str = Depends(get_tenant_id)):
     if not payload.rolle:
         raise HTTPException(status_code=400, detail="Feld 'rolle' ist erforderlich")
     if not payload.query.strip():
@@ -95,7 +104,7 @@ def channel_knowledge_query(channel: str, payload: ChannelKnowledgeQueryRequest,
         db=db,
         kanal=kanal,
         rolle=payload.rolle,
-        tenant_id=payload.tenant_id,
+        tenant_id=tenant_id,
         query=payload.query,
         capability_key=payload.capability_key,
         limit=payload.limit,
@@ -105,13 +114,14 @@ def channel_knowledge_query(channel: str, payload: ChannelKnowledgeQueryRequest,
 
 @router.post("/{channel}/process-actions/execute", summary="Process execute channel",
     response_model=ChannelWorkSurfaceOut, dependencies=SCHREIBEN["GERAET"])
-def channel_process_execute(channel: str, payload: ChannelProcessActionRequest, db=Depends(get_db)):
+def channel_process_execute(channel: str, payload: ChannelProcessActionRequest, db=Depends(get_db),
+                            tenant_id: str = Depends(get_tenant_id)):
     from app.core.blockchain_anchor_runtime import anchor_channel_process_thread
 
     kanal = _parse_supported_channel(channel)
     thread = execute_channel_process_action(
         kanal=kanal,
-        tenant_id=payload.tenant_id,
+        tenant_id=tenant_id,
         process_definition_key=payload.process_definition_key,
         command_name=payload.command_name,
         aggregate_type=payload.aggregate_type,
@@ -134,12 +144,10 @@ def channel_process_execute(channel: str, payload: ChannelProcessActionRequest, 
 @router.get("/{channel}/process-actions/{thread_id}", summary="Channel process thread abrufen",
     response_model=ChannelWorkSurfaceOut
 )
-def get_channel_process_thread(channel: str, thread_id: str, db=Depends(get_db)):
+def get_channel_process_thread(channel: str, thread_id: str, db=Depends(get_db),
+                               tenant_id: str = Depends(get_tenant_id)):
     _parse_supported_channel(channel)
-    thread = get_channel_process_thread_store(db).get(thread_id)
-    if thread is None:
-        raise HTTPException(status_code=404, detail="Thread nicht gefunden")
-    return thread.as_dict()
+    return _eigener_thread(get_channel_process_thread_store(db), thread_id, tenant_id).as_dict()
 
 
 @router.get("/{channel}/process-actions", summary="Channel process threads auflisten",
@@ -147,7 +155,7 @@ def get_channel_process_thread(channel: str, thread_id: str, db=Depends(get_db))
 )
 def list_channel_process_threads(
     channel: str,
-    tenant_id: str | None = None,
+    tenant_id: str = Depends(get_tenant_id),
     status: str | None = None,
     process_definition_key: str | None = None,
     limit: int = 50,
@@ -177,12 +185,11 @@ def list_channel_process_threads(
 @router.get("/{channel}/process-actions/{thread_id}/audit", summary="Channel process thread audit abrufen",
     response_model=ChannelWorkSurfaceOut
 )
-def get_channel_process_thread_audit(channel: str, thread_id: str, db=Depends(get_db)):
+def get_channel_process_thread_audit(channel: str, thread_id: str, db=Depends(get_db),
+                                     tenant_id: str = Depends(get_tenant_id)):
     _parse_supported_channel(channel)
     store = get_channel_process_thread_store(db)
-    thread = store.get(thread_id)
-    if thread is None:
-        raise HTTPException(status_code=404, detail="Thread nicht gefunden")
+    thread = _eigener_thread(store, thread_id, tenant_id)
     audit_trail = store.get_audit_trail(thread_id)
     return {
         "thread_id": thread_id,
@@ -194,10 +201,15 @@ def get_channel_process_thread_audit(channel: str, thread_id: str, db=Depends(ge
 
 @router.post("/{channel}/process-actions/{thread_id}/decision", summary="Process decision channel",
     response_model=ChannelWorkSurfaceOut, dependencies=SCHREIBEN["GERAET"])
-def channel_process_decision(channel: str, thread_id: str, payload: ChannelApprovalDecisionRequest, db=Depends(get_db)):
+def channel_process_decision(channel: str, thread_id: str, payload: ChannelApprovalDecisionRequest, db=Depends(get_db),
+                             tenant_id: str = Depends(get_tenant_id), user: dict = Depends(get_current_user)):
+    """Freigabe oder Ablehnung. Bis 28.10.2026 kamen Entscheider und Freigaberolle aus dem Rumpf: jeder konnte sich
+    jede Rolle zuschreiben und unter fremdem Namen entscheiden, auch ueber Threads anderer Mandanten."""
     from app.core.blockchain_anchor_runtime import anchor_channel_process_thread
 
     _parse_supported_channel(channel)
+    verlange_rolle(user, payload.approver_role)
+    _eigener_thread(get_channel_process_thread_store(db), thread_id, tenant_id)
     try:
         decision = ApprovalDecision(payload.decision.strip().upper())
     except ValueError as exc:
@@ -207,7 +219,7 @@ def channel_process_decision(channel: str, thread_id: str, payload: ChannelAppro
         thread = decide_channel_process_action(
             thread_id=thread_id,
             decision=decision,
-            entschieden_von=payload.entschieden_von,
+            entschieden_von=gepruefter_akteur(user),
             approver_role=payload.approver_role,
             begruendung=payload.begruendung,
             store=get_channel_process_thread_store(db),
@@ -225,7 +237,7 @@ def channel_process_decision(channel: str, thread_id: str, payload: ChannelAppro
 @router.get("/knowledge-graph", summary="Knowledge graph abrufen",
     response_model=ChannelWorkSurfaceOut
 )
-def get_knowledge_graph(tenant_id: str | None = None, db=Depends(get_db)):
+def get_knowledge_graph(tenant_id: str = Depends(get_tenant_id), db=Depends(get_db)):
     graph = build_runtime_knowledge_graph(db, tenant_id=tenant_id)
     return graph.as_dict()
 
@@ -233,7 +245,7 @@ def get_knowledge_graph(tenant_id: str | None = None, db=Depends(get_db)):
 @router.get("/knowledge-graph/nodes/{node_id}", summary="Knowledge graph node abrufen",
     response_model=ChannelWorkSurfaceOut
 )
-def get_knowledge_graph_node(node_id: str, tenant_id: str | None = None, db=Depends(get_db)):
+def get_knowledge_graph_node(node_id: str, tenant_id: str = Depends(get_tenant_id), db=Depends(get_db)):
     graph = build_runtime_knowledge_graph(db, tenant_id=tenant_id)
     node = graph.get_node(node_id)
     if node is None:
@@ -246,8 +258,9 @@ def get_knowledge_graph_node(node_id: str, tenant_id: str | None = None, db=Depe
 
 @router.post("/knowledge-graph/path", summary="Knowledge graph path abrufen",
     response_model=ChannelWorkSurfaceOut, dependencies=SCHREIBEN["GERAET"])
-def get_knowledge_graph_path(payload: KnowledgeGraphPathRequest, db=Depends(get_db)):
-    graph = build_runtime_knowledge_graph(db, tenant_id=payload.tenant_id)
+def get_knowledge_graph_path(payload: KnowledgeGraphPathRequest, db=Depends(get_db),
+                             tenant_id: str = Depends(get_tenant_id)):
+    graph = build_runtime_knowledge_graph(db, tenant_id=tenant_id)
     path = graph.find_path(payload.source_id, payload.target_id)
     return {
         "source_id": payload.source_id,
@@ -259,7 +272,7 @@ def get_knowledge_graph_path(payload: KnowledgeGraphPathRequest, db=Depends(get_
 
 @router.post("/slack/events", summary="Events slack",
     response_model=ChannelWorkSurfaceOut, dependencies=SCHREIBEN["GERAET"])
-async def slack_events(request: Request, db=Depends(get_db)):
+async def slack_events(request: Request, db=Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
     raw_body = await request.body()
     timestamp = request.headers.get("X-Slack-Request-Timestamp")
     signature = request.headers.get("X-Slack-Signature")
@@ -270,11 +283,13 @@ async def slack_events(request: Request, db=Depends(get_db)):
         return build_slack_url_verification_response(payload)
     if is_slack_ignorable_event(payload):
         return {"ignored": True, "reason": "bot_or_non_user_event"}
-    envelope = normalize_slack_event(payload)
+    envelope = normalize_slack_event(payload, tenant_id=tenant_id)
     try:
         result = dispatch_channel_ingress(db, envelope)
         await maybe_post_slack_response(payload, result)
         return result
+    except PermissionError as exc:
+        raise HTTPException(status_code=403, detail=str(exc)) from exc
     except KeyError as exc:
         raise HTTPException(status_code=400, detail=f"Pflichtfeld fehlt: {exc}") from exc
     except ValueError as exc:
@@ -283,15 +298,17 @@ async def slack_events(request: Request, db=Depends(get_db)):
 
 @router.post("/teams/events", summary="Events teams",
     response_model=ChannelWorkSurfaceOut, dependencies=SCHREIBEN["GERAET"])
-async def teams_events(request: Request, db=Depends(get_db)):
+async def teams_events(request: Request, db=Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
     raw_body = await request.body()
     signature = request.headers.get("X-Teams-Signature")
     if not verify_teams_signature(raw_body, signature):
         raise HTTPException(status_code=401, detail="Teams-Signatur ungueltig")
     payload = parse_json_body(raw_body)
-    envelope = normalize_teams_event(payload)
+    envelope = normalize_teams_event(payload, tenant_id=tenant_id)
     try:
         return dispatch_channel_ingress(db, envelope)
+    except PermissionError as exc:
+        raise HTTPException(status_code=403, detail=str(exc)) from exc
     except KeyError as exc:
         raise HTTPException(status_code=400, detail=f"Pflichtfeld fehlt: {exc}") from exc
     except ValueError as exc:

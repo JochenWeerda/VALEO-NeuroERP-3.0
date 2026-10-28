@@ -2,11 +2,11 @@
  "_note": "Generiert von scripts/rls_rollout.py aus docs/admin/rls-inventory.json; nicht von Hand aendern.",
  "summary": {
   "ready": 0,
-  "pending": 40,
+  "pending": 39,
   "reasons": {
    "dienst": 10,
    "mandant_ermitteln": 1,
-   "standardmandant": 23,
+   "standardmandant": 22,
    "mandant_null": 19,
    "uebergreifend": 0,
    "identitaet": 4
@@ -43,9 +43,6 @@
    "standardmandant"
   ],
   "domain_agrar.feldbuch_schlaege": [
-   "standardmandant"
-  ],
-  "domain_agrar.nutrient_compositions": [
    "standardmandant"
   ],
   "domain_agrar.seed_orders": [

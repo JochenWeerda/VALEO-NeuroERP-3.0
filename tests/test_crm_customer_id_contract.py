@@ -53,11 +53,15 @@ class TestLeseweg:
         kunde = Customer.model_validate(_zeile("DEMO-CUST-001"))
         assert isinstance(kunde.id, str)
 
-    def test_mandantengrenze_bleibt_streng(self):
-        """Bewusst nicht mitgelockert: eine nicht auswertbare tenant_id ist ein
-        Mandantenproblem und soll auffallen, nicht durchgereicht werden."""
+    @pytest.mark.parametrize("platzhalter", ["", "default", "system", "legacy-unassigned"])
+    def test_mandantengrenze_bleibt_streng(self, platzhalter):
+        """Bewusst nicht mitgelockert: ein Platzhalter-Mandant ist ein Mandantenproblem und soll auffallen.
+
+        Seit 28.10.2026 sind Kennungen wie ``valeo`` gueltig (sie gibt es live); vorher wurden sie als Standardmandant
+        ausgegeben, um die UUID-Pruefung zu bestehen."""
         with pytest.raises(ValidationError):
-            Customer.model_validate(_zeile("DEMO-CUST-001") | {"tenant_id": "kein-mandant"})
+            Customer.model_validate(_zeile("DEMO-CUST-001") | {"tenant_id": platzhalter})
+        assert Customer.model_validate(_zeile("DEMO-CUST-001") | {"tenant_id": "valeo"}).tenant_id == "valeo"
 
 
 class TestSchreibweg:

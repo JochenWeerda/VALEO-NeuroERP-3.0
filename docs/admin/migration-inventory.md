@@ -154,6 +154,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `crm_gifts_kim_s3_20260609` | crm_gifts — Kunden-Präsente (KIM-S3) |
 | `crm_kim_perf_indexes_20260612` | CRM/KIM Cockpit-Performance — fehlende Indizes. |
 | `crm_kreditlimite_20260917` | Kreditlimite und Freigaben je Kunde. |
+| `crm_leads_spalten_20261028` | Zehn Spalten von domain_crm.leads, die das Modell liest und keine Migration anlegt. |
 | `crm_merge_20260610` | crm_merge — Kunden-Zusammenführung (DOM-CRM-004.2) |
 | `crm_notifications_kim_l3_backend_20260609` | crm_notifications — internes Benachrichtigungs-/Postfach-System fuer KIM (KIM-L3-BACKEND-001) |
 | `crm_ownership_log_20260610` | crm_ownership_log — Übergabe-/Zuordnungs-Audit (DOM-CRM-004.3) |
@@ -434,6 +435,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `rls_domain_sales_20261027` | Row-level security for the sales documents (RLS domain slice sales). |
 | `rls_domain_shared_20261027` | Row-level security for tenant tables in domain_shared (RLS domain slice shared). |
 | `rls_knowledge_objects_shared_20261027` | Row-level security for knowledge objects: own objects plus shared product knowledge. |
+| `rls_nutrient_compositions_20261028` | Row-level security for domain_agrar.nutrient_compositions (Naehrstoffgehalte der Duengemittel). |
 | `rls_pilot_finance_20261026` | Row-level security pilot: domain_finance and the posting journal (RLS plan P3). |
 | `rls_rollout_20261026` | Roll row-level security out to the class-A tables cleared by the analysis (RLS plan P5). |
 | `rls_system_read_justified_20261027` | Shared 'system' rows readable only where justified (RLS, system-wide). |

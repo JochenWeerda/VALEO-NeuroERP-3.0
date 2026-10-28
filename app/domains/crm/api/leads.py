@@ -8,20 +8,19 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 
-from ....core.config import settings
 from ....core.database import get_db
+from ....core.tenant import get_tenant_id
 from ....infrastructure.models import Lead as LeadModel
 from ....api.v1.schemas.base import PaginatedResponse
 from ....api.v1.schemas.crm import Lead, LeadCreate, LeadUpdate
 
 router = APIRouter()
 
-DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 
 @router.get("/", response_model=PaginatedResponse[Lead])
 async def list_leads(
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     search: Optional[str] = Query(None, description="Search in company, contact person"),
     status: Optional[str] = Query(None, description="Filter by status"),
     skip: int = Query(0, ge=0),
@@ -29,7 +28,7 @@ async def list_leads(
     db: Session = Depends(get_db),
 ):
     """Return a paginated list of leads."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
 
     query = db.query(LeadModel).filter(LeadModel.tenant_id == effective_tenant)
     
@@ -64,11 +63,11 @@ async def list_leads(
 @router.get("/{lead_id}", response_model=Lead)
 async def get_lead(
     lead_id: str,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Get a single lead by ID."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
     
     lead = (
         db.query(LeadModel)
@@ -88,11 +87,11 @@ async def get_lead(
 @router.post("/", response_model=Lead, status_code=201)
 async def create_lead(
     lead_data: LeadCreate,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Create a new lead."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
     
     lead = LeadModel(
         **lead_data.model_dump(),
@@ -110,11 +109,11 @@ async def create_lead(
 async def update_lead(
     lead_id: str,
     lead_data: LeadUpdate,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Update an existing lead."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
     
     lead = (
         db.query(LeadModel)
@@ -141,11 +140,11 @@ async def update_lead(
 @router.delete("/{lead_id}", status_code=204)
 async def delete_lead(
     lead_id: str,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Delete a lead."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
     
     lead = (
         db.query(LeadModel)

@@ -24,7 +24,7 @@ pytestmark = pytest.mark.unit
 EXCEPTIONS = json.loads((ROOT / "docs" / "admin" / "rls-exceptions.json").read_text(encoding="utf-8"))
 INVENTORY = json.loads(matrix.INVENTORY.read_text(encoding="utf-8"))
 # Obergrenze im Test selbst: die Liste zu verlaengern braucht zwei bewusste Aenderungen.
-HOECHSTENS_ZURUECKGESTELLT = 77
+HOECHSTENS_ZURUECKGESTELLT = 76
 
 
 def test_matrix_ist_aktuell():

@@ -10,6 +10,7 @@ from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
 from fastapi.testclient import TestClient
 
 from app.api.v1.endpoints import channel_work_surfaces
+from app.core.tenant import get_tenant_id
 from app.core.action_idempotency import get_action_idempotency_store
 from app.core.channel_process_actions import get_channel_process_thread_store
 
@@ -44,8 +45,10 @@ def clear_channel_state():
 @pytest.fixture
 def client(require_db) -> TestClient:
     app = FastAPI()
-    ersetze_nutzer(app, *ALLE_FACHROLLEN)
+    ersetze_nutzer(app, *ALLE_FACHROLLEN, "teamleiter")
     app.include_router(channel_work_surfaces.router)
+    # Der Mandant kommt aus der Anmeldung (bis 28.10.2026 aus Rumpf/Query bzw. Nachrichten-Metadaten).
+    app.dependency_overrides[get_tenant_id] = lambda: "t1"
     return TestClient(app)
 
 

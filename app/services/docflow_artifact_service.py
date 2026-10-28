@@ -16,7 +16,6 @@ from typing import Any, Optional
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-_DEFAULT_TENANT = "00000000-0000-0000-0000-000000000001"
 
 # Erlaubte Artefakttypen (DB-CHECK chk_doc_artifact_type).
 _ALLOWED_TYPES = {"pdf", "xml", "html", "other"}
@@ -50,7 +49,9 @@ class ArtifactError(Exception):
 class DocflowArtifactService:
     def __init__(self, db: Session, tenant_id: Optional[str] = None) -> None:
         self.db = db
-        self.tenant_id = tenant_id or _DEFAULT_TENANT
+        if not tenant_id:  # kein Rueckfall auf den Standardmandanten (bis 28.10.2026)
+            raise ValueError("Mandant fehlt")
+        self.tenant_id = tenant_id
 
     def _header(self, doc: str) -> Optional[dict]:
         r = self.db.execute(
