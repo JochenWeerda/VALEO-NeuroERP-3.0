@@ -131,19 +131,25 @@ def test_erasure_deletes_only_matching_tenant_activities(data, monkeypatch):
     from app.api.v1.endpoints import compliance_dsgvo
     _, db, _, tenant, foreign, *_ = data
     connection = db.connection()
-    target = table(connection, "domain_crm", "activities")
-    ids = [str(uuid4()) for _ in range(3)]
+    ids = [str(uuid4()) for _ in range(5)]
+    subject_id, other_customer = str(uuid4()), str(uuid4())
     name = "Synthetic erasure " + str(uuid4())
     savepoint = connection.begin_nested()
     try:
-        for record_id, tid in zip(ids, (tenant, foreign, None)):
-            connection.execute(target.insert().values(id=record_id, tenant_id=tid, type="call", title="Synthetic", customer=name, contact_person="", date=datetime.now(timezone.utc), status="planned", assigned_to=""))
+        # The legacy-shape fixture keeps tenant nullable to exercise its old NULL
+        # escape hatch; add only the new optional reference inside our savepoint.
+        connection.execute(sa.text("ALTER TABLE domain_crm.activities ADD COLUMN IF NOT EXISTS customer_id varchar(64)"))
+        target = table(connection, "domain_crm", "activities")
+        for record_id, tid, linked, display in zip(ids, (tenant, foreign, None, tenant, tenant),
+                                                  (None, None, None, subject_id, other_customer),
+                                                  (name, name, name, "Synthetic previous customer name", name)):
+            connection.execute(target.insert().values(id=record_id, tenant_id=tid, customer_id=linked, type="call", title="Synthetic", customer=display, contact_person="", date=datetime.now(timezone.utc), status="planned", assigned_to=""))
         monkeypatch.setattr(compliance_dsgvo, "_namen_des_betroffenen", lambda *args: [name])
-        log = compliance_dsgvo._anonymize_subject(db, "CUSTOMER", str(uuid4()), tenant)
+        log = compliance_dsgvo._anonymize_subject(db, "CUSTOMER", subject_id, tenant)
         entry = next(item for item in log if item["table"] == "domain_crm.activities")
-        assert entry["rows_affected"] == 1 and "error" not in entry
+        assert entry["rows_affected"] == 2 and "error" not in entry
         remaining = set(connection.execute(sa.select(target.c.id).where(target.c.id.in_(ids))).scalars())
-        assert remaining == set(ids[1:])
+        assert remaining == {ids[1], ids[2], ids[4]}
     finally:
         savepoint.rollback()
 
