@@ -10,14 +10,14 @@ from datetime import date, datetime
 from decimal import Decimal
 from typing import List, Optional
 
-from fastapi import Response, APIRouter, Depends, HTTPException, Query
+from fastapi import Response, APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from app.core.config import settings
 from app.core.database import get_db
 from app.core.read_model_cache import cached_read_model, invalidate_tenant_prefix
+from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
 
 logger = logging.getLogger(__name__)
@@ -27,8 +27,6 @@ from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-R
 
 
 router = APIRouter(prefix="/price-lists", tags=["sales", "pricing"])
-
-DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 
 class PriceListItemInput(BaseModel):
@@ -59,7 +57,7 @@ class PriceListBase(BaseModel):
 
 
 class PriceListCreate(PriceListBase):
-    tenant_id: Optional[str] = None
+    """The tenant comes from the verified token, never from the request."""
 
 
 class PriceListUpdate(BaseModel):
@@ -80,19 +78,34 @@ class PriceList(PriceListBase):
     updated_at: Optional[datetime] = None
 
 
-def _ensure_schema(db: Session) -> None:
-    db.execute(text("CREATE SCHEMA IF NOT EXISTS domain_pricing"))
+def _insert_items(db: Session, tid: str, pl_id: str, items: List[PriceListItemInput]) -> None:
+    for item in items:
+        db.execute(
+            text("""
+                INSERT INTO domain_pricing.price_list_items
+                (id, price_list_id, tenant_id, article_id, article_number, unit_price,
+                 min_quantity, max_quantity, discount_percent, valid_from, valid_until)
+                VALUES (:id, :plid, :tid, :aid, :anr, :up,
+                        :minq, :maxq, :dp, :vf, :vu)
+            """),
+            {
+                "id": uuid7(), "plid": pl_id, "tid": tid,
+                "aid": item.article_id, "anr": item.article_number,
+                "up": item.unit_price, "minq": item.min_quantity,
+                "maxq": item.max_quantity, "dp": item.discount_percent,
+                "vf": item.valid_from, "vu": item.valid_until,
+            },
+        )
 
 
 @router.post("/", response_model=PriceList, status_code=201, summary="Price list anlegen", dependencies=SCHREIBEN["VERKAUF"])
 async def create_price_list(
     payload: PriceListCreate,
-    tenant_id: str = Query(DEFAULT_TENANT),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Create a new price list with optional items."""
-    _ensure_schema(db)
-    tid = payload.tenant_id or tenant_id
+    tid = tenant_id
     pl_id = uuid7()
 
     db.execute(
@@ -111,25 +124,7 @@ async def create_price_list(
             "active": payload.is_active,
         },
     )
-
-    for item in payload.items:
-        item_id = uuid7()
-        db.execute(
-            text("""
-                INSERT INTO domain_pricing.price_list_items
-                (id, price_list_id, article_id, article_number, unit_price,
-                 min_quantity, max_quantity, discount_percent, valid_from, valid_until)
-                VALUES (:id, :plid, :aid, :anr, :up,
-                        :minq, :maxq, :dp, :vf, :vu)
-            """),
-            {
-                "id": item_id, "plid": pl_id,
-                "aid": item.article_id, "anr": item.article_number,
-                "up": item.unit_price, "minq": item.min_quantity,
-                "maxq": item.max_quantity, "dp": item.discount_percent,
-                "vf": item.valid_from, "vu": item.valid_until,
-            },
-        )
+    _insert_items(db, tid, pl_id, payload.items)
 
     db.commit()
     invalidate_tenant_prefix("price_lists", tid)
@@ -146,12 +141,11 @@ async def create_price_list(
 @router.get("/", response_model=List[PriceList], summary="Price lists auflisten")
 @cached_read_model("price_lists", ttl=300)
 async def list_price_lists(
-    tenant_id: str = Query(DEFAULT_TENANT),
+    tenant_id: str = Depends(get_tenant_id),
     is_active: Optional[bool] = None,
     db: Session = Depends(get_db),
 ):
     """List all price lists."""
-    _ensure_schema(db)
     where = ["tenant_id = :tid"]
     params: dict = {"tid": tenant_id}
     if is_active is not None:
@@ -162,7 +156,8 @@ async def list_price_lists(
         text(f"""
             SELECT id, tenant_id, name, description, currency, price_list_type,
                    valid_from, valid_until, is_active, created_at, updated_at,
-                   (SELECT COUNT(*) FROM domain_pricing.price_list_items WHERE price_list_id = pl.id) AS item_count
+                   (SELECT COUNT(*) FROM domain_pricing.price_list_items
+                     WHERE price_list_id = pl.id AND tenant_id = pl.tenant_id) AS item_count
             FROM domain_pricing.price_lists pl
             WHERE {' AND '.join(where)}
             ORDER BY name
@@ -183,17 +178,17 @@ async def list_price_lists(
 @router.get("/{pl_id}", response_model=PriceList, summary="Price list abrufen")
 async def get_price_list(
     pl_id: str,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Get price list by ID with items."""
-    _ensure_schema(db)
     row = db.execute(
         text("""
             SELECT id, tenant_id, name, description, currency, price_list_type,
                    valid_from, valid_until, is_active, created_at, updated_at
-            FROM domain_pricing.price_lists WHERE id = :id
+            FROM domain_pricing.price_lists WHERE id = :id AND tenant_id = :tid
         """),
-        {"id": pl_id},
+        {"id": pl_id, "tid": tenant_id},
     ).fetchone()
     if not row:
         raise HTTPException(status_code=404, detail="Preisliste nicht gefunden")
@@ -202,10 +197,10 @@ async def get_price_list(
         text("""
             SELECT id, price_list_id, article_id, article_number, unit_price,
                    min_quantity, max_quantity, discount_percent, valid_from, valid_until
-            FROM domain_pricing.price_list_items WHERE price_list_id = :plid
+            FROM domain_pricing.price_list_items WHERE price_list_id = :plid AND tenant_id = :tid
             ORDER BY article_number
         """),
-        {"plid": pl_id},
+        {"plid": pl_id, "tid": tenant_id},
     ).fetchall()
 
     item_list = [
@@ -232,18 +227,20 @@ async def get_price_list(
 async def update_price_list(
     pl_id: str,
     payload: PriceListUpdate,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Update price list (header + items)."""
+    tid = tenant_id
     existing = db.execute(
-        text("SELECT id FROM domain_pricing.price_lists WHERE id = :id"),
-        {"id": pl_id},
+        text("SELECT id FROM domain_pricing.price_lists WHERE id = :id AND tenant_id = :tid"),
+        {"id": pl_id, "tid": tid},
     ).fetchone()
     if not existing:
         raise HTTPException(status_code=404, detail="Preisliste nicht gefunden")
 
     set_parts = ["updated_at = NOW()"]
-    params: dict = {"id": pl_id}
+    params: dict = {"id": pl_id, "tid": tid}
     for field in ("name", "description", "currency", "valid_from", "valid_until", "is_active"):
         val = getattr(payload, field, None)
         if val is not None:
@@ -251,46 +248,40 @@ async def update_price_list(
             params[field] = val
 
     db.execute(
-        text(f"UPDATE domain_pricing.price_lists SET {', '.join(set_parts)} WHERE id = :id"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
+        text(f"UPDATE domain_pricing.price_lists SET {', '.join(set_parts)} WHERE id = :id AND tenant_id = :tid"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         params,
     )
 
     if payload.items is not None:
         db.execute(
-            text("DELETE FROM domain_pricing.price_list_items WHERE price_list_id = :plid"),
-            {"plid": pl_id},
+            text("DELETE FROM domain_pricing.price_list_items WHERE price_list_id = :plid AND tenant_id = :tid"),
+            {"plid": pl_id, "tid": tid},
         )
-        for item in payload.items:
-            item_id = uuid7()
-            db.execute(
-                text("""
-                    INSERT INTO domain_pricing.price_list_items
-                    (id, price_list_id, article_id, article_number, unit_price,
-                     min_quantity, max_quantity, discount_percent, valid_from, valid_until)
-                    VALUES (:id, :plid, :aid, :anr, :up, :minq, :maxq, :dp, :vf, :vu)
-                """),
-                {
-                    "id": item_id, "plid": pl_id,
-                    "aid": item.article_id, "anr": item.article_number,
-                    "up": item.unit_price, "minq": item.min_quantity,
-                    "maxq": item.max_quantity, "dp": item.discount_percent,
-                    "vf": item.valid_from, "vu": item.valid_until,
-                },
-            )
+        _insert_items(db, tid, pl_id, payload.items)
 
     db.commit()
-    return await get_price_list(pl_id, db)
+    invalidate_tenant_prefix("price_lists", tid)
+    return await get_price_list(pl_id, tenant_id=tid, db=db)
 
 
 @router.delete("/{pl_id}", status_code=204, response_class=Response, response_model=None, summary="Price list löschen", dependencies=SCHREIBEN["VERKAUF"])
-async def delete_price_list(pl_id: str, db: Session = Depends(get_db)):
+async def delete_price_list(
+    pl_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
     """Delete price list and its items."""
+    params = {"id": pl_id, "tid": tenant_id}
     existing = db.execute(
-        text("SELECT id FROM domain_pricing.price_lists WHERE id = :id"),
-        {"id": pl_id},
+        text("SELECT id FROM domain_pricing.price_lists WHERE id = :id AND tenant_id = :tid"),
+        params,
     ).fetchone()
     if not existing:
         raise HTTPException(status_code=404, detail="Preisliste nicht gefunden")
-    db.execute(text("DELETE FROM domain_pricing.price_list_items WHERE price_list_id = :id"), {"id": pl_id})
-    db.execute(text("DELETE FROM domain_pricing.price_lists WHERE id = :id"), {"id": pl_id})
+    db.execute(
+        text("DELETE FROM domain_pricing.price_list_items WHERE price_list_id = :id AND tenant_id = :tid"),
+        params,
+    )
+    db.execute(text("DELETE FROM domain_pricing.price_lists WHERE id = :id AND tenant_id = :tid"), params)
     db.commit()
+    invalidate_tenant_prefix("price_lists", tenant_id)

@@ -80,6 +80,9 @@ class Settings(BaseSettings):
     # HINWEIS: In Docker-Umgebung muss host="postgres" sein (Service-Name aus docker-compose.yml)
     # In lokalen Umgebung ohne Docker kann 127.0.0.1 verwendet werden
     DATABASE_URL: str = Field(default_factory=_default_database_url)
+    # RLS plan P6: login of valeo_system (BYPASSRLS) for deliberate cross-tenant workers only.
+    # Unset: cross-tenant work uses the application login and sees no tenant rows (fail-closed).
+    SYSTEM_DATABASE_URL: Optional[str] = None
     DATABASE_CONNECT_ARGS: dict = {}
 
     # Redis Configuration

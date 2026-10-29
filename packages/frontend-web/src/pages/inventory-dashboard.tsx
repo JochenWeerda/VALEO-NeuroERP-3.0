@@ -1,6 +1,10 @@
-// React import removed - not needed with new JSX transform
-import { InventoryDashboard } from '@/features/inventory/InventoryDashboard';
+import { UniversalNativeCockpitPage } from '@/components/mask-builder/UniversalNativeCockpitPage'
 
-export default function InventoryDashboardPage() {
-  return <InventoryDashboard />;
+export default function Page(): JSX.Element {
+  return (
+    <UniversalNativeCockpitPage
+      screenId="lager/inventory-dashboard"
+      testId="lager-inventory-dashboard"
+    />
+  )
 }

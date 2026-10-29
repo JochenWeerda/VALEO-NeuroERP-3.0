@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
+import { MadeByStudioCockpitRuntimeWire } from '@/components/mask-builder/made-by-studio-runtime-wire'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@/app/routing/typed-router'
 import {
@@ -523,3 +524,8 @@ export default function TourenplanungPage(): JSX.Element {
     </div>
   )
 }
+function madeByStudioRuntimeWireDeclaration(): JSX.Element {
+  return <MadeByStudioCockpitRuntimeWire screenId="logistik/tourenplanung" />
+}
+void madeByStudioRuntimeWireDeclaration
+

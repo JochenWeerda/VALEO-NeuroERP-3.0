@@ -3,18 +3,21 @@
  * Database migrations and schema management
  */
 
-import type { Config } from 'drizzle-kit';
+import { defineConfig } from 'drizzle-kit';
 
-export default {
+// An empty POSTGRES_URL falls back to the local default, as before.
+const databaseUrl = process.env.POSTGRES_URL;
+
+export default defineConfig({
   schema: './src/infra/db/schema.ts',
   out: './migrations',
-  driver: 'pg',
+  dialect: 'postgresql',
   dbCredentials: {
-    connectionString: process.env.POSTGRES_URL || 'postgres://user:pass@localhost:5432/hr_domain'
+    url: databaseUrl !== undefined && databaseUrl !== '' ? databaseUrl : 'postgres://user:pass@localhost:5432/hr_domain'
   },
   verbose: true,
   strict: true,
   tablesFilter: ['!drizzle_*']
-} satisfies Config;
+});
 
 

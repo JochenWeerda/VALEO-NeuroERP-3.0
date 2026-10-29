@@ -34,9 +34,49 @@ engine = create_engine(
     echo=settings.DEBUG,
 )
 
+# RLS plan P2: every transaction carries app.tenant_id from the tenant context.
+from app.core.rls_session import install_tenant_setting  # noqa: E402
+
+install_tenant_setting(engine)
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
+
+_system_sessionmaker = None
+
+
+def system_session() -> Session:
+    """Session for deliberate cross-tenant work (RLS plan P6).
+
+    Only inside ``cross_tenant_scope``/``cross_tenant_job``. Connects as valeo_system
+    (``SYSTEM_DATABASE_URL``, BYPASSRLS); without that setting it falls back to the application
+    login, which under row-level security sees no tenant rows.
+    """
+    global _system_sessionmaker
+    from app.core.tenant_context import TenantContextMissing, cross_tenant_reason
+
+    if not cross_tenant_reason():
+        raise TenantContextMissing("system_session() nur innerhalb von cross_tenant_scope")
+    if _system_sessionmaker is None:
+        if settings.SYSTEM_DATABASE_URL:
+            system_engine = create_engine(
+                settings.SYSTEM_DATABASE_URL,
+                poolclass=QueuePool,
+                pool_size=5,
+                max_overflow=2,
+                pool_timeout=10,
+                pool_recycle=1800,
+                pool_pre_ping=True,
+                connect_args=postgres_connect_args(),
+            )
+        else:
+            logger.warning("SYSTEM_DATABASE_URL nicht gesetzt: mandantenuebergreifende Arbeit nutzt die "
+                           "Anwendungsanmeldung und sieht unter RLS keine Mandantenzeilen")
+            system_engine = engine
+        _system_sessionmaker = sessionmaker(autocommit=False, autoflush=False, bind=system_engine)
+    return _system_sessionmaker()
+
 
 def get_db() -> Session:
     """
@@ -52,10 +92,12 @@ def get_db() -> Session:
     finally:
         db.close()
 
-def create_tables():
+def create_tables(bind=None):
     """
-    Create all database tables
+    Create all database tables (bind: engine to use instead of the application engine,
+    e.g. the migration engine of scripts/init_db.py)
     """
+    target = bind if bind is not None else engine
     try:
         logger.info("Creating database tables...")
         outbox_models = None
@@ -117,13 +159,13 @@ def create_tables():
         except Exception as e:
             logger.warning(f"Studio draft models import failed: {e}")
 
-        Base.metadata.create_all(bind=engine)
+        Base.metadata.create_all(bind=target)
         logger.info("Database tables created successfully")
     except Exception as e:
         logger.error(f"Failed to create database tables: {e}")
         logger.warning("Trying essential table fallback creation...")
         try:
-            with engine.begin() as conn:
+            with target.begin() as conn:
                 conn.execute(text("CREATE SCHEMA IF NOT EXISTS domain_ops"))
                 conn.execute(text("CREATE SCHEMA IF NOT EXISTS domain_inventory"))
 
@@ -167,12 +209,12 @@ def create_tables():
 
             for table in essential_tables:
                 try:
-                    table.create(bind=engine, checkfirst=True)
+                    table.create(bind=target, checkfirst=True)
                     logger.info("Ensured table exists: %s", table.fullname)
                 except Exception as table_error:
                     logger.warning("Table create failed for %s, trying SQL fallback: %s", table.fullname, table_error)
                     if table.fullname == "domain_inventory.agrar_contracts":
-                        with engine.begin() as conn:
+                        with target.begin() as conn:
                             conn.execute(
                                 text(
                                     """

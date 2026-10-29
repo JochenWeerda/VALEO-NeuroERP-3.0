@@ -5,7 +5,7 @@
 import { z } from 'zod';
 import { generatePrefixedId, isValidId } from '@shared/utils/id-generator.js';
 
-const IntegrationIdSchema = z.string().uuid();
+const IntegrationIdSchema = z.string().guid();
 
 export class IntegrationId {
   private readonly _value: string;

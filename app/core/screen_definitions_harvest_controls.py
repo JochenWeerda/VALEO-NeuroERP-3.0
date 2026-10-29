@@ -53,6 +53,7 @@ def build_harvest_controls():
         "dataSources": [{"key": "rules", "endpoint": CONTROL + "/rules", "pageSize": 25, "staleTimeMs": 0},
             *[{"key": key, "endpoint": CONTROL + "/choices/" + kind, "minSearchChars": 2, "pageSize": 25}
               for key, kind in [("acceptances", "acceptance"), ("customers", "customer"), ("articles", "article"), ("contracts", "contract")]]],
+        "noProcessChainReason": "Ernte-Abrechnungssteuerung ohne ERP-Belegkette; Freigaben laufen ueber Regelversion und Messnachweis.",
         "tabs": [{"key": "rules", "label": "Vertragsfassungen", "fields": [
             field("rule_id", "Regelbezeichnung"), lookup("customer_id", "Kunde / Lieferant", "customers"),
             lookup("article_id", "Artikel", "articles"), lookup("contract_id", "Kontrakt (optional)", "contracts"),
@@ -63,7 +64,13 @@ def build_harvest_controls():
             field("quality_limit_pct", "Qualitätsgrenze Besatz (%) – keine Freigrenze", "percentage"),
         ], "tables": [{"key": "rules", "label": "Unveränderliche Regelversionen – Zeile zum Prüfen auswählen",
             "dataSourceKey": "rules", "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 44,
-            "rowActions": [{"key": "inspect_rule", "label": "Regelversion prüfen", "command": "harvest.control.inspect_rule", "localEffect": "view"}],
+            "rowActions": [{
+                "key": "inspect_rule",
+                "label": "Regelversion prüfen",
+                "command": "harvest.control.inspect_rule",
+                "permission": "agrar.harvest.control.inspect",
+                "stubReason": "Waehlt die Regelversion in der Maske zum Pruefen aus.",
+            }],
             "columns": [{"key": key, "label": label, "width": width} for key, label, width in [
                 ("rule_id", "Regel", 170), ("rule_version", "Fassung", 80),
                 ("status", "Genehmigung", 110), ("impurities_free_pct", "Abzugsfrei (%)", 110),

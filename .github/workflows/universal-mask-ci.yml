@@ -149,7 +149,7 @@ jobs:
 
       - name: TypeScript type-check
         working-directory: packages/frontend-web
-        run: pnpm exec tsc --noEmit --skipLibCheck
+        run: pnpm run type-check
 
       - name: Build frontend
         working-directory: packages/frontend-web

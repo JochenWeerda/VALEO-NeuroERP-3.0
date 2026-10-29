@@ -1126,6 +1126,10 @@ from app.api.v1.endpoints import mail_workspace  # noqa: E402
 
 api_router.include_router(mail_workspace.router)
 
+from app.workspace.agrar_chain_router import router as workspace_agrar_chain_router  # noqa: E402
+
+api_router.include_router(workspace_agrar_chain_router)
+
 from app.api.v1.endpoints import tank_adapter  # noqa: E402
 
 api_router.include_router(tank_adapter.router)

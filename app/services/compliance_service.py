@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 from app.documents.router_helpers import get_repository, list_from_store
 from app.domains.operations.models import (
     ComplianceEintrag,
+    PCNMeldung,
     ENNIMeldung,
     QSCheckEintrag,
     ZulassungRegister,
@@ -338,3 +339,18 @@ def build_compliance_pdf_bytes(stats: dict, cross_items: list[dict]) -> bytes:
     out.write(str(xref_start).encode())
     out.write(b"\n%%EOF\n")
     return out.getvalue()
+
+
+def pcn_to_dict(m: PCNMeldung) -> dict:
+    return {
+        "meldung_id": m.id,
+        "produktname": m.produktname,
+        "ufi": m.ufi or "",
+        "cas_nummern": m.cas_nummern or "",
+        "gefahrenklassen": m.gefahrenklassen or [],
+        "verwendungskategorie": m.verwendungskategorie or "",
+        "pcnStatus": m.pcn_status,
+        "tenant_id": m.tenant_id,
+        "created_at": m.created_at.isoformat() if m.created_at else None,
+        "schema_version": 1,
+    }

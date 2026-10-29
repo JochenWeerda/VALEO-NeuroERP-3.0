@@ -1,20 +1,24 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { useLocation } from '@/app/routing/typed-router'
 import { MemoryRouter } from '@/app/routing/test-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import FlowSpineOrderToCashPage from '@/pages/workflow/flow-spine-order-to-cash'
 
 const getMock = vi.hoisted(() => vi.fn())
+const postMock = vi.hoisted(() => vi.fn())
+const toastMock = vi.hoisted(() => vi.fn())
 
 vi.mock('@/lib/api-client', () => ({
   apiClient: {
     get: getMock,
-    post: vi.fn(),
+    post: postMock,
   },
 }))
 
 vi.mock('@/hooks/use-toast', () => ({
-  toast: vi.fn(),
+  toast: toastMock,
 }))
 
 vi.mock('@/components/agent', () => ({
@@ -91,12 +95,17 @@ function setupGetMock(): void {
   })
 }
 
+function LocationProbe(): JSX.Element {
+  return <div data-testid="location-probe">{useLocation().pathname}</div>
+}
+
 function renderPage(): void {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   render(
     <MemoryRouter>
       <QueryClientProvider client={queryClient}>
         <FlowSpineOrderToCashPage />
+        <LocationProbe />
       </QueryClientProvider>
     </MemoryRouter>,
   )
@@ -105,6 +114,9 @@ function renderPage(): void {
 describe('FlowSpineOrderToCashPage', () => {
   beforeEach(() => {
     getMock.mockReset()
+    postMock.mockReset()
+    toastMock.mockReset()
+    WORKSPACE_PAYLOAD.nodes[0].actions[0].api_path = '/api/v1/channels/slack/process-actions/execute'
     setupGetMock()
   })
 
@@ -115,5 +127,35 @@ describe('FlowSpineOrderToCashPage', () => {
     expect(getMock).toHaveBeenCalledWith('/api/v1/process/flow-spines/order-to-cash?lang=de')
     expect(screen.getByText('Auftrag bis Zahlung')).toBeInTheDocument()
     expect(screen.getByText('Lieferung')).toBeInTheDocument()
+  })
+})
+
+
+describe('Prozessaktion und Navigation', () => {
+  beforeEach(() => {
+    getMock.mockReset(); postMock.mockReset(); toastMock.mockReset()
+    WORKSPACE_PAYLOAD.nodes[0].actions[0].api_path = '/api/v1/channels/slack/process-actions/execute'
+    setupGetMock()
+  })
+  it('bleibt bei fehlgeschlagenem POST im Prozess und meldet den Fehler', async () => {
+    postMock.mockRejectedValueOnce(new Error('abgelehnt'))
+    renderPage()
+    await userEvent.click(await screen.findByRole('button', {name: /Lieferung starten/i}))
+    await waitFor(() => expect(toastMock).toHaveBeenCalledWith(expect.objectContaining({title:'Fehler', variant:'destructive'})))
+    expect(screen.getByTestId('location-probe')).toHaveTextContent('/')
+    expect(postMock).toHaveBeenCalledOnce()
+  })
+  it('öffnet das Ziel nach erfolgreichem POST', async () => {
+    postMock.mockResolvedValueOnce({data:{}})
+    renderPage()
+    await userEvent.click(await screen.findByRole('button', {name: /Lieferung starten/i}))
+    await waitFor(() => expect(screen.getByTestId('location-probe')).toHaveTextContent('/sales/delivery'))
+  })
+  it('öffnet einen reinen Link ohne POST', async () => {
+    WORKSPACE_PAYLOAD.nodes[0].actions[0].api_path = ''
+    renderPage()
+    await userEvent.click(await screen.findByRole('button', {name: /Lieferung starten/i}))
+    await waitFor(() => expect(screen.getByTestId('location-probe')).toHaveTextContent('/sales/delivery'))
+    expect(postMock).not.toHaveBeenCalled()
   })
 })

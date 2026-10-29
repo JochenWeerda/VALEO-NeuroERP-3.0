@@ -1,5 +1,7 @@
 import type {
+  ScreenDefinition,
   DocumentScreenVariantRef,
+  ListExperience,
   ScreenDomain,
   ScreenColumnNavigation,
   ScreenCalendarView,
@@ -19,6 +21,7 @@ import type {
   ScreenTableProfile,
   ScreenTwinMetricKind,
   ScreenVoiceProvider,
+  ScreenSpecializedComponent,
 } from '../schema'
 
 export type RenderComponentKind =
@@ -147,6 +150,7 @@ export interface RenderTabContentPlan {
 }
 
 export interface RenderFieldPlan {
+  currencyField?: string
   key: string
   label: string
   componentKind: RenderComponentKind
@@ -185,6 +189,7 @@ export interface RenderTableColumnPlan {
   sortable?: boolean
   filterable?: boolean
   renderKind?: RenderColumnKind
+  currencyField?: string
   defaultSort?: 'asc' | 'desc'
   priority?: RenderColumnPriority
 }
@@ -218,6 +223,7 @@ export interface RenderTablePlan {
     enabledWhen?: ScreenCondition
     visibleWhen?: { field: string; values: Array<string | number | boolean> }
     disabledWhen?: { field: string; values: Array<string | number | boolean> }
+    localRowPatch?: { identityField: string; field: string; value: string | number | boolean }
   }>
   bulkActions?: Array<{
     key: string
@@ -274,6 +280,8 @@ export interface RenderPerformancePlan {
 }
 
 export interface RenderPlan {
+  flowSpineCatalog?: ScreenDefinition['flowSpineCatalog']
+  listExperience?: ListExperience
   documentVariant?: DocumentScreenVariantRef
   cacheKey: string
   screenId: string
@@ -284,6 +292,7 @@ export interface RenderPlan {
   tiles: RenderTilePlan[]
   calendar?: RenderCalendarPlan
   sourceProposals?: { contextKey: string }
+  specialized?: ScreenSpecializedComponent
   twin?: RenderTwinPlan
   visibleTabs: RenderTabPlan[]
   tabContent: Record<string, RenderTabContentPlan>

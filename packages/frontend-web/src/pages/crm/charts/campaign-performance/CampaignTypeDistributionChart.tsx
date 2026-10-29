@@ -1,7 +1,7 @@
-import { SimpleDonutChart } from '@/components/charts/SimpleDonutChart'
+import { NativeListPage } from '@/components/mask-builder/NativeListPage'
 
-type DistributionPoint = { name: string; value: number }
-
-export default function CampaignTypeDistributionChart({ data }: { data: DistributionPoint[] }): JSX.Element {
-  return <SimpleDonutChart data={data} />
+export default function Page(): JSX.Element {
+  return (
+    <NativeListPage screenId="crm/charts/campaign-performance/CampaignTypeDistributionChart" testId="screen-crm/charts/campaign-performance/CampaignTypeDistributionChart" />
+  )
 }

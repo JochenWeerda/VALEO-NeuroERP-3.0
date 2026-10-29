@@ -4,7 +4,7 @@ export const ChannelEnum = z.enum(['Email', 'SMS', 'WhatsApp', 'Push', 'Webhook'
 export const TemplateStatusEnum = z.enum(['Draft', 'Active', 'Archived']);
 
 export const NotificationTemplateSchema = z.object({
-  id: z.string().uuid().optional(),
+  id: z.string().guid().optional(),
   tenantId: z.string().min(1),
   key: z.string().min(1), // e.g. "invoice_email_de"
   name: z.string().min(1),

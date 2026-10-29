@@ -103,3 +103,65 @@ def test_signed_three_channel_table_projection_and_foreign_tenant(channels,monke
         assert response.status_code==422 and marker not in response.text
     forged=client.get("/api/v1/masks/finance/debitoren-liste/data/list",params={**params,"tenant_id":foreign},headers=headers)
     assert forged.status_code==403
+
+
+def test_declared_list_search_fields_are_shared_by_all_adapters():
+    from app.services.mask_table_query import table_definition
+    table = {**TABLE, "columns": [*TABLE["columns"], {"key": "internal", "label": "Internal"}]}
+    definition = {"tables": [table], "listExperience": {"searchFields": ["name"]}}
+    body = query(q="needle")
+    resolved = table_definition(definition, body)
+    result = project_rows([{"name": "ordinary", "internal": "needle"}, {"name": "Needle", "internal": "other"}], resolved, body)
+    assert result["items"] == [{"name": "Needle", "internal": "other"}]
+    assert "searchFields" not in table
+
+
+@pytest.mark.parametrize("fields", [[], ["missing"], ["name", "name"], "name"])
+def test_invalid_declared_list_search_fields_fail_closed(fields):
+    from app.services.mask_table_query import table_definition
+    with pytest.raises(HTTPException) as failure:
+        table_definition({"tables": [TABLE], "listExperience": {"searchFields": fields}}, query())
+    assert failure.value.status_code == 409
+
+
+def test_signed_complaint_list_search_and_export_scope_match_across_channels(channels, monkeypatch):
+    import json
+    from datetime import date
+    from uuid import uuid4
+    from app.api.v1.endpoints import mask_frontend_bridges
+    from app.core.tenant_binding import install_tenant_bindings
+    from app.domains.operations.models import ReklamationDB
+    from main import BearerAuthMiddleware
+    from valeo_cli import cli
+    client, db, _, tenant, foreign, *_ = channels
+    client.app.include_router(mask_frontend_bridges.router, prefix="/api/v1")
+    install_tenant_bindings(client.app, public_paths=BearerAuthMiddleware.PUBLIC_PATHS)
+    marker = "SYNTH-REK-" + uuid4().hex[:8]
+    for owner, suffix in [(tenant, "1"), (tenant, "2"), (tenant, "10"), (foreign, "3")]:
+        db.add(ReklamationDB(id=str(uuid4()), reklamation_id=str(uuid4()), tenant_id=owner,
+            reklamation_nr=marker+suffix, lieferant_id="SYNTH-MISSING-SUPPLIER", typ="Qualitaet",
+            zustaendiger="synthetic-reviewer", frist_datum=date(2026, 10, 28), status="offen"))
+    db.flush()
+    headers = _headers(channels)
+    route = "/api/v1/masks/qualitaet/reklamationen-liste/data/list"
+    params = {"table_key": "list", "q": marker, "sort": "nummer", "page": 2, "limit": 1}
+    rest = client.get(route, params=params, headers=headers)
+    assert rest.status_code == 200, rest.text
+    expected = rest.json()["data"]
+    assert expected["total"] == 3
+    assert expected["items"][0]["nummer"] == marker+"2"
+    assert expected["items"][0]["prioritaet"] is None
+    mcp = client.post("/api/v1/mcp/tools/call", headers=headers, json={"tool_name":"mask.data.read", "mode":"dryRun", "parameters":{**params, "screen_id":"qualitaet/reklamationen-liste", "source_key":"list"}})
+    assert mcp.status_code == 200, mcp.text
+    assert mcp.json()["data"] == expected
+    monkeypatch.setenv("VALEO_ACCESS_TOKEN", headers["Authorization"][7:])
+    lines = []
+    assert cli.main(["daten", "qualitaet/reklamationen-liste", "list", "--tabelle", "list", "--suche", marker,
+        "--sortieren", "nummer", "--seite", "2", "--limit", "1"], http=client, out=lines.append) == 0
+    assert json.loads(lines[0])["data"] == expected
+    # Status is intentionally outside this screen's declared free-text search fields.
+    result = client.get(route, params={"table_key":"list", "q":"neu"}, headers=headers)
+    assert result.status_code == 200, result.text
+    assert result.json()["data"]["total"] == 0
+    forged = client.get(route, params={**params, "tenant_id": foreign}, headers=headers)
+    assert forged.status_code == 403

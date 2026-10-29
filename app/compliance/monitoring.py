@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 import logging
 from app.core.uuid7 import uuid7
+from app.core.tenant_context import get_current_tenant_id
 
 logger = logging.getLogger(__name__)
 
@@ -441,8 +442,9 @@ class ISOComplianceMonitoring:
         logger.info(f"Compliance report generated: {report.title} ({report.standard.value})")
         return report_id
 
-    def get_compliance_dashboard_data(self, dashboard_id: str, tenant_id: str = "system") -> Dict[str, Any]:
+    def get_compliance_dashboard_data(self, dashboard_id: str, tenant_id: str | None = None) -> Dict[str, Any]:
         """Get compliance dashboard data"""
+        tenant_id = tenant_id or get_current_tenant_id()
         if dashboard_id not in self.compliance_dashboards:
             return {'error': 'Dashboard not found'}
 
@@ -528,9 +530,10 @@ class ISOComplianceMonitoring:
         else:
             return 'stable'
 
-    def get_compliance_monitoring_report(self, tenant_id: str = "system") -> Dict[str, Any]:
+    def get_compliance_monitoring_report(self, tenant_id: str | None = None) -> Dict[str, Any]:
         """Generate comprehensive compliance monitoring report"""
         # Get all active metrics
+        tenant_id = tenant_id or get_current_tenant_id()
         active_metrics = [m for m in self.compliance_metrics.values() if m.is_active]
 
         # Get active alerts
@@ -682,8 +685,9 @@ class ISOComplianceMonitoring:
 
         return recommendations
 
-    def check_compliance_monitoring_health(self, tenant_id: str = "system") -> Dict[str, Any]:
+    def check_compliance_monitoring_health(self, tenant_id: str | None = None) -> Dict[str, Any]:
         """Check compliance monitoring system health"""
+        tenant_id = tenant_id or get_current_tenant_id()
         metrics_count = len([m for m in self.compliance_metrics.values() if m.is_active])
         rules_count = len([r for r in self.monitoring_rules.values() if r.is_active])
         alerts_count = len(self.active_alerts)

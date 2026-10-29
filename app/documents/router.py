@@ -27,10 +27,13 @@ from .router_helpers import (
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
+from .inbox_router import inbox_router
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/mcp/documents", tags=["documents"])
+# Inbox vor dem variablen Belegtyp registrieren.
+router.include_router(inbox_router)
 
 
 # Belegnummern sind im Dokumentspeicher systemweit eindeutig; der Speicher selbst kennt beim Einzelabruf keinen

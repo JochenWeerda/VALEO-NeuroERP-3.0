@@ -9,6 +9,8 @@ from typing import Any
 from sqlalchemy import text
 
 from app.core.database import SessionLocal
+from app.core.tenant_context import tenant_scope
+from app.core.tenant_registry import active_tenant_ids
 from app.services.rations_herd_data_sync_service import HerdDataSyncService, connection_from_row
 
 logger = logging.getLogger(__name__)
@@ -19,20 +21,25 @@ async def run_herd_data_syncs() -> dict[str, Any]:
     completed = 0
     failed = 0
     imported = 0
+    connections = 0
     try:
-        rows = db.execute(text("""SELECT * FROM domain_agrar.herd_data_connections
-          WHERE enabled=TRUE AND live_enabled=TRUE ORDER BY tenant_id,provider,herd_id""")).mappings().all()
         service = HerdDataSyncService(db)
-        for row in rows:
-            connection = connection_from_row(dict(row))
-            try:
-                result = await service.sync(connection)
-                completed += 1
-                imported += int(result["imported_count"])
-            except Exception as exc:  # connection isolation: one farm must not block the rest
-                failed += 1
-                logger.error("Herd-Data-Sync %s/%s failed: %s", connection.provider, connection.herd_id, exc)
-        return {"success": failed == 0, "connections": len(rows), "completed": completed,
+        for tenant_id in active_tenant_ids(db):
+            with tenant_scope(tenant_id, "herd-data-sync"):
+                rows = db.execute(text("""SELECT * FROM domain_agrar.herd_data_connections
+                  WHERE tenant_id=:tenant_id AND enabled=TRUE AND live_enabled=TRUE
+                  ORDER BY provider,herd_id"""), {"tenant_id": tenant_id}).mappings().all()
+                connections += len(rows)
+                for row in rows:
+                    connection = connection_from_row(dict(row))
+                    try:
+                        result = await service.sync(connection)
+                        completed += 1
+                        imported += int(result["imported_count"])
+                    except Exception as exc:  # connection isolation: one farm must not block the rest
+                        failed += 1
+                        logger.error("Herd-Data-Sync %s/%s failed: %s", connection.provider, connection.herd_id, exc)
+        return {"success": failed == 0, "connections": connections, "completed": completed,
                 "failed": failed, "imported_count": imported}
     finally:
         db.close()

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from app.core.tenant_context import current_tenant_or_none
+
 from decimal import Decimal
 from typing import Any, Optional
 
@@ -55,7 +57,8 @@ class SettlementDryingService:
         """
         inp = TrocknungsInput(
             settlement_id="calc",
-            tenant_id="system",
+            # reine Berechnung, nichts wird gespeichert: kein Rueckfall auf einen Mandanten
+            tenant_id=current_tenant_or_none() or "ohne-mandant",
             crop_code="GENERIC",
             rule_set_id="manual",
             rule_set_version=1,

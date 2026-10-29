@@ -10,11 +10,84 @@ import httpx
 from fastapi import HTTPException
 
 from app.api.v1.schemas.mask_data_contracts import MaskDataReadIn, MaskDataReadOut
-from app.core.screen_definitions import get_screen_definition
+from app.core.screen_definitions import SCREEN_DEFINITION_BUILDERS, get_screen_definition
 from app.services.studio_draft_store import StudioStorageUnavailable
 
 _MAX_BYTES = 2 * 1024 * 1024
 _IDENTITY_KEYS = {"tenant_id", "mandanten_id", "actor", "user_id", "performed_by", "authorization"}
+_PROJECTION_SEGMENT = re.compile(r"[A-Za-z][A-Za-z0-9_]{0,63}\Z")
+_FORBIDDEN_SEGMENTS = {"__proto__", "prototype", "constructor", "__class__", "__dict__", "__globals__"}
+
+
+def _entity_projection(body: MaskDataReadIn, tenant: str) -> dict[str, tuple[str, ...]] | None:
+    """Validate a registered entity projection before the secured source is called."""
+    if body.source_key != "entity" or body.table_key is not None:
+        return None
+    # Stamm builders join the canonical registry lazily; populate that same
+    # registry before deciding whether a projection came from native code.
+    from app.core.stamm_object_page_parent import ensure_stamm_screen_registry
+    ensure_stamm_screen_registry()
+    try:
+        definition = get_screen_definition(body.screen_id, tenant_id=tenant)
+    except StudioStorageUnavailable as error:
+        raise HTTPException(503, "Studio-Masken derzeit nicht verfuegbar") from error
+    if definition is None:
+        raise HTTPException(404, "Maske im Mandanten nicht gefunden")
+    declared = definition.get("entityProjection")
+    if declared is None:
+        return None
+    # Published tenant drafts may declare their own JSON. Until the Studio
+    # schema has a semantic projection policy, only canonical native builders
+    # may opt in to selecting fields from a secured domain response.
+    if body.screen_id not in SCREEN_DEFINITION_BUILDERS:
+        raise HTTPException(409, "Entity-Projektion ist nicht kanonisch registriert")
+    if not isinstance(declared, dict) or not 1 <= len(declared) <= 64 or "id" not in declared:
+        raise HTTPException(409, "Ungueltige Entity-Projektion")
+    if not body.entity_id:
+        raise HTTPException(422, "Entity-ID fuer Projektion fehlt")
+    fields = [*(definition.get("fields") or [])]
+    for tab in definition.get("tabs") or []:
+        if isinstance(tab, dict):
+            fields.extend(tab.get("fields") or [])
+    visible_keys = {field["key"] for field in fields
+                    if isinstance(field, dict) and isinstance(field.get("key"), str)}
+    if not set(declared) <= visible_keys:
+        raise HTTPException(409, "Entity-Projektion referenziert kein deklariertes Feld")
+    validated = {}
+    for key, path in declared.items():
+        if not isinstance(key, str) or not _PROJECTION_SEGMENT.fullmatch(key) or key.casefold() in _FORBIDDEN_SEGMENTS:
+            raise HTTPException(409, "Ungueltiger Projektionsschluessel")
+        if not isinstance(path, str):
+            raise HTTPException(409, "Ungueltiger Projektionspfad")
+        segments = path.split(".")
+        if not 1 <= len(segments) <= 8 or any(
+            not _PROJECTION_SEGMENT.fullmatch(segment) or segment.casefold() in _FORBIDDEN_SEGMENTS
+            for segment in segments
+        ):
+            raise HTTPException(409, "Ungueltiger Projektionspfad")
+        validated[key] = tuple(segments)
+    return validated
+
+
+def _project_entity(body: MaskDataReadIn, output: MaskDataReadOut,
+                    projection: dict[str, tuple[str, ...]] | None) -> MaskDataReadOut:
+    if projection is None:
+        return output
+    if not isinstance(output.data, dict):
+        raise HTTPException(502, "Entity-Projektion erwartet ein Objekt")
+    projected = {}
+    for key, segments in projection.items():
+        value = output.data
+        for segment in segments:
+            if not isinstance(value, dict) or segment not in value:
+                raise HTTPException(502, "Entity-Projektionspfad fehlt")
+            value = value[segment]
+        if isinstance(value, (dict, list)):
+            raise HTTPException(502, "Entity-Projektionswert ist nicht skalar")
+        projected[key] = value
+    if isinstance(projected["id"], bool) or projected["id"] is None or str(projected["id"]) != body.entity_id:
+        raise HTTPException(502, "Entity-Identitaet stimmt nicht ueberein")
+    return output.model_copy(update={"data": projected})
 
 
 def resolve_source(body: MaskDataReadIn, tenant: str) -> str:
@@ -149,8 +222,9 @@ def _page_path(path, page, limit, aliases):
 
 def _sequence(body, tenant):
     if body.table_key is None:
+        projection = _entity_projection(body, tenant)
         output = yield resolve_source(body, tenant)
-        return output
+        return _project_entity(body, output, projection)
     from app.services.mask_table_query import TableCollector, table_definition, project_rows
     try:
         definition = get_screen_definition(body.screen_id, tenant_id=tenant)

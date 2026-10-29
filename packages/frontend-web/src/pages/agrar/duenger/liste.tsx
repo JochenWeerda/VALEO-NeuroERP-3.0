@@ -1,2 +1,7 @@
-/** Route /agrar/duenger: dieselbe Studio-Liste wie /agrar/duenger-liste. */
-export { default } from '../duenger-liste'
+import { NativeListPage } from '@/components/mask-builder/NativeListPage'
+
+export default function Page(): JSX.Element {
+  return (
+    <NativeListPage screenId="agrar/duenger-liste" testId="screen-agrar/duenger/liste" />
+  )
+}

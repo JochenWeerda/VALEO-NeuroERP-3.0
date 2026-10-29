@@ -45,7 +45,9 @@ curl -X POST http://localhost:5000/api/v1/classify/document \
 ```
 
 ### 3. RAG API (`/api/v1/rag`)
-Semantic Search über ERP-Wissensbasis:
+**Nicht eingerichtet (Stand 2026-10-23):** Die folgenden RAG-Faehigkeiten sind geplant, nicht verfuegbar. Suche, Indexierung und Loeschen antworten mit HTTP503 und `rag_backend_unavailable`, statt Suchergebnisse oder Indexerfolge zu simulieren. Die ungenutzte Chroma-Abhaengigkeit und ihr Startpfad sind entfernt.
+
+Geplante Faehigkeiten:
 - Dokumentation durchsuchen
 - Policies finden
 - Ähnliche Vorgänge
@@ -203,8 +205,6 @@ OPENAI_MODEL=gpt-4o-mini
 OPENAI_EMBEDDING_MODEL=text-embedding-3-small
 
 # Vector Store
-CHROMA_PERSIST_DIR=/app/data/chroma
-CHROMA_COLLECTION_NAME=valeo_erp_knowledge
 
 # Backend Communication
 BACKEND_API_URL=http://backend:8000/api/v1
@@ -237,6 +237,8 @@ async def get_autocomplete(mask_id: str, field: str, query: str):
 
 ## Vector Store Management
 
+Diese Aufrufe liefern derzeit HTTP503; sie aendern keinen Index.
+
 ```bash
 # Dokument indexieren
 curl -X POST http://localhost:5000/api/v1/rag/index/document \
@@ -263,7 +265,7 @@ curl -X DELETE http://localhost:5000/api/v1/rag/index/docs/finance/skr03.md
 
 1. ✅ **Service läuft** (Mock-Implementierung)
 2. 🔄 **OpenAI Integration** - Echte LLM-Calls
-3. 🔄 **ChromaDB Integration** - Vector Store aktivieren
+3. 🔄 **Mandantensicherer RAG-Backendvertrag** - erst nach echter Implementierung freischalten
 4. 🔄 **LangGraph Workflows** - Komplexe Agents
 5. 🔄 **Training Data** - 181 Masken mit Beispielen
 

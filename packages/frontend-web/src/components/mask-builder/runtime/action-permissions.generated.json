@@ -2,21 +2,20 @@
   "schemaVersion": 1,
   "source": "require_roles der Kommandowege (scripts/generate_action_permission_projection.py)",
   "screens": {
-    "abrechnung/eb-lieferschein-kontrolle": {
-      "document_control.write": [
+    "admin/identity-budgets": {
+      "identity:quota:allocate": [
         [
-          "EINKAUF_ADMIN",
-          "EINKAUF_BEARBEITEN",
-          "FINANCE_ADMIN",
-          "FINANCE_BEARBEITEN",
-          "SALES_ADMIN",
-          "SALES_BEARBEITEN",
           "admin"
         ]
       ]
     },
-    "admin/identity-budgets": {
-      "identity:quota:allocate": [
+    "admin/integrationen-quarantaene": {
+      "admin.mobile.connector.retry": [
+        [
+          "admin"
+        ]
+      ],
+      "admin.mobile.connector.resolve": [
         [
           "admin"
         ]
@@ -29,6 +28,11 @@
         ]
       ],
       "admin.postfach.testen": [
+        [
+          "admin"
+        ]
+      ],
+      "admin.postfach.delete": [
         [
           "admin"
         ]
@@ -239,6 +243,27 @@
         ]
       ]
     },
+    "agrar/kontrakte/formular": {
+      "agrar.kontrakte.formular.update": [
+        [
+          "KONTRAKT_ADMIN",
+          "KONTRAKT_BEARBEITEN"
+        ]
+      ]
+    },
+    "agrar/probenehmer-stamm": {
+      "agrar.probenehmer-stamm.update": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "agrar/ration": {
       "futtermittel.rations.update": [
         [
@@ -250,6 +275,170 @@
           "HARVEST_BEARBEITEN",
           "KONTRAKT_ADMIN",
           "KONTRAKT_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "agrar/vertraege/formular": {
+      "agrar.vertraege.formular.update": [
+        [
+          "KONTRAKT_ADMIN",
+          "KONTRAKT_BEARBEITEN"
+        ]
+      ]
+    },
+    "artikel/bestandsuebersicht": {
+      "artikel.bestandsuebersicht.update": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "artikel/chargen-pflicht": {
+      "artikel.chargen-pflicht.update": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "artikel/ersatzteile": {
+      "artikel.ersatzteile.update": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "artikel/gebinde": {
+      "artikel.gebinde.update": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "artikel/gefahrgut": {
+      "artikel.gefahrgut.update": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "artikel/herkunft": {
+      "artikel.herkunft.update": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "artikel/kategorien": {
+      "artikel.kategorien.update": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "artikel/konditionen": {
+      "artikel.konditionen.update": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "artikel/lieferanten-artikel": {
+      "artikel.lieferanten-artikel.update": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "artikel/preisstaffeln": {
+      "artikel.preisstaffeln.update": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "artikel/qualitaetsmerkmale": {
+      "artikel.qualitaetsmerkmale.update": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "artikel/rabattgruppen": {
+      "artikel.rabattgruppen.update": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
           "admin"
         ]
       ]
@@ -267,6 +456,19 @@
         ]
       ],
       "artikel.create": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "artikel/texte-medien": {
+      "artikel.texte-medien.update": [
         [
           "EINKAUF_ADMIN",
           "EINKAUF_BEARBEITEN",
@@ -305,32 +507,6 @@
         ]
       ]
     },
-    "auswertungen/auftrags-kontrolle": {
-      "document_control.write": [
-        [
-          "EINKAUF_ADMIN",
-          "EINKAUF_BEARBEITEN",
-          "FINANCE_ADMIN",
-          "FINANCE_BEARBEITEN",
-          "SALES_ADMIN",
-          "SALES_BEARBEITEN",
-          "admin"
-        ]
-      ]
-    },
-    "auswertungen/beleg-kontrolle": {
-      "document_control.write": [
-        [
-          "EINKAUF_ADMIN",
-          "EINKAUF_BEARBEITEN",
-          "FINANCE_ADMIN",
-          "FINANCE_BEARBEITEN",
-          "SALES_ADMIN",
-          "SALES_BEARBEITEN",
-          "admin"
-        ]
-      ]
-    },
     "auswertungen/bonus-berechnung": {
       "reporting.bonus.write": [
         [
@@ -352,19 +528,6 @@
           "LAGER_BEARBEITEN",
           "PERSONAL_ADMIN",
           "PERSONAL_BEARBEITEN",
-          "SALES_ADMIN",
-          "SALES_BEARBEITEN",
-          "admin"
-        ]
-      ]
-    },
-    "auswertungen/lieferschein-kontrolle": {
-      "document_control.write": [
-        [
-          "EINKAUF_ADMIN",
-          "EINKAUF_BEARBEITEN",
-          "FINANCE_ADMIN",
-          "FINANCE_BEARBEITEN",
           "SALES_ADMIN",
           "SALES_BEARBEITEN",
           "admin"
@@ -399,6 +562,17 @@
           "FUTTERMITTEL_BEARBEITEN",
           "LAGER_ADMIN",
           "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "crm/campaign-template": {
+      "crm.campaign.update": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
           "SALES_ADMIN",
           "SALES_BEARBEITEN",
           "admin"
@@ -650,13 +824,32 @@
         ]
       ]
     },
-    "docflow/dokumenten-ruecklauf": {
-      "docflow.returns.write": [
+    "dms/inbox": {
+      "dms.inbox.read": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "CRM_LESEN",
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "EINKAUF_LESEN",
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "FINANCE_LESEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "SALES_LESEN",
+          "admin"
+        ]
+      ],
+      "dms.inbox.write": [
         [
           "EINKAUF_ADMIN",
           "EINKAUF_BEARBEITEN",
           "FINANCE_ADMIN",
           "FINANCE_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
           "SALES_ADMIN",
           "SALES_BEARBEITEN",
           "admin"
@@ -851,6 +1044,29 @@
         ]
       ]
     },
+    "einkauf/rechnungseingaenge-liste": {
+      "einkauf.rechnungseingang.pruefen": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "einkauf.rechnungseingang.freigeben": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "einkauf.rechnungseingang.verbuchen": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "einkauf/supplier": {
       "einkauf.lieferant.update": [
         [
@@ -965,6 +1181,16 @@
         ]
       ]
     },
+    "finance/datev-export": {
+      "finance.datev.export": [
+        [
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "FINANCE_LESEN",
+          "admin"
+        ]
+      ]
+    },
     "finance/debitor": {
       "finance.debitor.update": [
         [
@@ -1003,15 +1229,6 @@
       "finance.payment_run.freigabe": [
         [
           "FINANCE_ADMIN",
-          "admin"
-        ]
-      ]
-    },
-    "finance/rechnungstapel": {
-      "billing.batch.write": [
-        [
-          "FINANCE_ADMIN",
-          "FINANCE_BEARBEITEN",
           "admin"
         ]
       ]
@@ -1059,6 +1276,17 @@
           "SALES_BEARBEITEN",
           "admin"
         ]
+      ],
+      "fuhrpark.dokument.delete": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
       ]
     },
     "fuhrpark/fahrzeug-stamm": {
@@ -1085,10 +1313,32 @@
           "SALES_BEARBEITEN",
           "admin"
         ]
+      ],
+      "fuhrpark.rechnung.delete": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
       ]
     },
     "fuhrpark/terminarten": {
       "logistics:write": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "fuhrpark.terminart.delete": [
         [
           "EINKAUF_ADMIN",
           "EINKAUF_BEARBEITEN",
@@ -1133,11 +1383,34 @@
         ]
       ]
     },
-    "lager/fremdware": {
-      "inventory.foreign-goods.write": [
+    "inbox": {
+      "dms.inbox.read": [
         [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "CRM_LESEN",
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "EINKAUF_LESEN",
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "FINANCE_LESEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "SALES_LESEN",
+          "admin"
+        ]
+      ],
+      "dms.inbox.write": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
           "LAGER_ADMIN",
           "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
           "admin"
         ]
       ]
@@ -1171,10 +1444,32 @@
           "SALES_BEARBEITEN",
           "admin"
         ]
+      ],
+      "logistics.frachttabelle.delete": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
       ]
     },
     "logistik/tourenplanung": {
       "logistik.tour.create": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "logistics.tour.cancel": [
         [
           "EINKAUF_ADMIN",
           "EINKAUF_BEARBEITEN",
@@ -1191,6 +1486,12 @@
         [
           "PERSONAL_ADMIN",
           "PERSONAL_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "personal.bewerbung.delete": [
+        [
+          "PERSONAL_ADMIN",
           "admin"
         ]
       ]
@@ -1349,6 +1650,32 @@
         [
           "LAGER_ADMIN",
           "LAGER_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "stammdaten/hausbank": {
+      "finance.hausbank.update": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "stammdaten/mengeneinheit": {
+      "stammdaten.mengeneinheit.update": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
           "admin"
         ]
       ]

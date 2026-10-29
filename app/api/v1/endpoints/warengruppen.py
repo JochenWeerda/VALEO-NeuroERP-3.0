@@ -20,7 +20,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import text
 
 from app.core.database import get_db
-from app.core.dependencies import get_tenant_id
+from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
@@ -252,6 +252,17 @@ def list_warengruppen(
     sql += " ORDER BY gruppe_nr"
     rows = db.execute(text(sql), params).fetchall()
     return [WarengruppeOut(**dict(r._mapping)) for r in rows]
+
+
+@router.get("/{gruppe_nr}", response_model=WarengruppeOut, summary="Warengruppe abrufen")
+def get_warengruppe(gruppe_nr: str, db=Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
+    row = db.execute(text("""
+        SELECT * FROM domain_shared.warengruppen
+        WHERE tenant_id = :tid AND (id::text = :nr OR gruppe_nr = :nr) AND aktiv = true
+    """), {"tid": tenant_id, "nr": gruppe_nr}).fetchone()
+    if row is None:
+        raise HTTPException(404, "Warengruppe nicht gefunden.")
+    return WarengruppeOut(**dict(row._mapping))
 
 
 @router.post("", response_model=WarengruppeOut, status_code=201, summary="Warengruppe anlegen", dependencies=SCHREIBEN["STAMMDATEN"])

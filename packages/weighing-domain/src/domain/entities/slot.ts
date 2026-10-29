@@ -22,20 +22,20 @@ export type GateTypeValue = typeof GateType[keyof typeof GateType];
 
 // Schema
 export const SlotSchema = z.object({
-  id: z.string().uuid().optional(),
+  id: z.string().guid().optional(),
   tenantId: z.string(),
   gateId: z.string(),
   gateType: z.enum([GateType.INBOUND, GateType.OUTBOUND, GateType.WEIGHING, GateType.INSPECTION]),
   windowFrom: z.string().datetime(),
   windowTo: z.string().datetime(),
-  assignedVehicleId: z.string().uuid().optional(),
+  assignedVehicleId: z.string().guid().optional(),
   licensePlate: z.string().optional(),
   priority: z.number().min(1).max(10).default(5), // 1 = highest priority
   status: z.enum([SlotStatus.SCHEDULED, SlotStatus.ENTERED, SlotStatus.EXITED, SlotStatus.CANCELLED, SlotStatus.NO_SHOW]).default(SlotStatus.SCHEDULED),
 
   // Logistics
-  contractId: z.string().uuid().optional(),
-  orderId: z.string().uuid().optional(),
+  contractId: z.string().guid().optional(),
+  orderId: z.string().guid().optional(),
   commodity: z.string().optional(),
   expectedWeight: z.number().optional(),
 
@@ -181,7 +181,7 @@ export class Slot implements SlotEntity {
     }
 
     this.status = SlotStatus.CANCELLED;
-    if (reason) this.notes = (this.notes ? this.notes + '; ' : '') + `Cancelled: ${reason}`;
+    if (reason) this.notes = `${this.notes ? `${this.notes  }; ` : ''  }Cancelled: ${reason}`;
     this.updatedAt = new Date();
     this.version++;
   }

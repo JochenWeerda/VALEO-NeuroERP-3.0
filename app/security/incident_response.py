@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 import logging
 from app.core.uuid7 import uuid7
+from app.core.tenant_context import get_current_tenant_id
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +62,7 @@ class Incident:
     detected_at: datetime
     reported_by: str
     assigned_to: Optional[str] = None
-    tenant_id: str = "system"
+    tenant_id: str = field(default_factory=get_current_tenant_id)
 
     # Impact assessment
     affected_assets: List[str] = field(default_factory=list)

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from app.api.v1.schemas.workflow_migration_input import WorkflowMigrationCheckIn
 from app.api.v1.schemas.data_quality_input import DataQualityCheckIn
+from app.api.v1.schemas.data_quality_output import dq_ruleset_public as _dq_ruleset_public
 from app.api.v1.schemas.slo_input import SloCheckIn, reject_nonfinite_slo_json
 from app.api.v1.schemas.advisory_input import PolicyEvaluationIn, ApprovalEvaluationIn
 
@@ -1347,17 +1348,6 @@ def get_mcp_tool_registry(domain: str = "") -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 # Wave 31 AP6: Datenqualitaets-Endpoints
 # ---------------------------------------------------------------------------
-
-def _dq_ruleset_public(ruleset: "DQRuleSet") -> dict:
-    """Serialisiert ein DQRuleSet ohne interne Implementierungsdetails."""
-    d = ruleset.as_dict()
-    for regel in d.get("regeln", []):
-        # format_regex und unique_felder sind Implementierungsdetails,
-        # nicht fuer externe Konsumenten bestimmt.
-        regel.pop("format_regex", None)
-        regel.pop("unique_felder", None)
-    return d
-
 
 @router.get("/data-quality/rulesets", response_model=ProcessKernelOut, summary="Dq rulesets abrufen")
 def get_dq_rulesets() -> dict[str, Any]:
@@ -5667,6 +5657,7 @@ def hole_persistentes_knowledge_objekt(knowledge_id: str, version: int | None = 
 @router.post("/knowledge/store/objekte", status_code=201, tags=["process-kernel"], summary="Persistentes knowledge objekt erstelle",
     response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def erstelle_persistentes_knowledge_objekt(payload: dict, db=Depends(get_db)):
+    from app.core.tenant_context import get_current_tenant_id
     from app.core.blockchain_anchor_runtime import anchor_knowledge_object
     from app.repositories.knowledge_repository import KnowledgeRepository
 
@@ -5683,7 +5674,8 @@ def erstelle_persistentes_knowledge_objekt(payload: dict, db=Depends(get_db)):
         titel=payload["titel"],
         typ=payload["typ"],
         status=payload.get("status", "ENTWURF"),
-        tenant_id=payload.get("tenant_id", "system"),
+        # Mandant aus dem geprueften Kontext; gemeinsames Wissen nur ueber zentrale Pflege.
+        tenant_id=get_current_tenant_id(),
         beschreibung=payload.get("beschreibung", ""),
         tags=list(payload.get("tags", [])),
         zielrollen=list(payload.get("zielrollen", [])),

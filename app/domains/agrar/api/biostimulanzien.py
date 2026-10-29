@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 
 from ....api.v1.schemas.agrar import Biostimulanz, BiostimulanzCreate, BiostimulanzUpdate
 from ....api.v1.schemas.base import BaseSchema
-from ....core.config import settings
+from app.core.tenant import get_tenant_id
 from ....core.database import get_db
 from ....infrastructure.models import Biostimulanz as BiostimulanzModel
 from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
@@ -30,7 +30,6 @@ class BiostimulanzListOut(BaseSchema):
 
 router = APIRouter()
 
-DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 
 def _item_dict(row: BiostimulanzModel) -> dict[str, Any]:
@@ -58,7 +57,7 @@ def _item_dict(row: BiostimulanzModel) -> dict[str, Any]:
 @router.get("", response_model=BiostimulanzListOut, summary="Biostimulanzien auflisten")
 @router.get("/", response_model=BiostimulanzListOut, summary="Biostimulanzien auflisten", include_in_schema=False)
 async def list_biostimulanzien(
-    tenant_id: Optional[str] = Query(None, description="Filter by tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     search: Optional[str] = Query(None, description="Suche in Name, Artikelnummer, Hersteller"),
     typ: Optional[str] = Query(None, description="Filter nach Typ"),
     ist_aktiv: Optional[bool] = Query(None, description="Filter nach Aktiv-Status"),
@@ -66,7 +65,7 @@ async def list_biostimulanzien(
     limit: int = Query(25, ge=1, le=200),
     db: Session = Depends(get_db),
 ):
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
     query = db.query(BiostimulanzModel).filter(BiostimulanzModel.tenant_id == effective_tenant)
     if ist_aktiv is not None:
         query = query.filter(BiostimulanzModel.ist_aktiv == ist_aktiv)
@@ -100,10 +99,10 @@ async def list_biostimulanzien(
 async def search_biostimulanzien(
     q: str = Query(..., min_length=2),
     limit: int = Query(10, ge=1, le=50),
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
     like = f"%{q}%"
     rows = (
         db.query(BiostimulanzModel)
@@ -126,10 +125,10 @@ async def search_biostimulanzien(
 @router.get("/{item_id}", summary="Biostimulanz abrufen")
 async def get_biostimulanz(
     item_id: str,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
     row = (
         db.query(BiostimulanzModel)
         .filter(BiostimulanzModel.id == item_id, BiostimulanzModel.tenant_id == effective_tenant)
@@ -144,10 +143,10 @@ async def get_biostimulanz(
 @router.post("/", response_model=Biostimulanz, status_code=201, summary="Biostimulanz anlegen", include_in_schema=False, dependencies=SCHREIBEN["AGRAR"])
 async def create_biostimulanz(
     body: BiostimulanzCreate,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    effective_tenant = tenant_id or body.tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
     existing = (
         db.query(BiostimulanzModel)
         .filter(
@@ -173,10 +172,10 @@ async def create_biostimulanz(
 async def update_biostimulanz(
     item_id: str,
     body: BiostimulanzUpdate,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
     row = (
         db.query(BiostimulanzModel)
         .filter(BiostimulanzModel.id == item_id, BiostimulanzModel.tenant_id == effective_tenant)

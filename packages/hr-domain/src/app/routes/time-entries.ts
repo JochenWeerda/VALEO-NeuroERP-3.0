@@ -38,12 +38,12 @@ function ensureAuth(request: FastifyRequest, reply: FastifyReply): request is Au
 }
 
 const CreateTimeEntrySchema = z.object({
-  employeeId: z.string().uuid(),
+  employeeId: z.string().guid(),
   date: z.string().date(),
   start: z.string().datetime(),
   end: z.string().datetime(),
   breakMinutes: z.number().int().min(0).max(MAX_BREAK_MINUTES).optional(),
-  projectId: z.string().uuid().optional(),
+  projectId: z.string().guid().optional(),
   costCenter: z.string().optional(),
   source: z.enum(['Manual', 'Terminal', 'Mobile']).optional()
 });
@@ -52,19 +52,19 @@ const UpdateTimeEntrySchema = z.object({
   start: z.string().datetime().optional(),
   end: z.string().datetime().optional(),
   breakMinutes: z.number().int().min(0).max(MAX_BREAK_MINUTES).optional(),
-  projectId: z.string().uuid().optional(),
+  projectId: z.string().guid().optional(),
   costCenter: z.string().optional()
 });
 
 const TimeEntryFiltersSchema = z.object({
-  employeeId: z.string().uuid().optional(),
-  projectId: z.string().uuid().optional(),
+  employeeId: z.string().guid().optional(),
+  projectId: z.string().guid().optional(),
   costCenter: z.string().optional(),
   status: z.enum(['Draft', 'Approved', 'Rejected']).optional(),
   source: z.enum(['Manual', 'Terminal', 'Mobile']).optional(),
   dateFrom: z.string().date().optional(),
   dateTo: z.string().date().optional(),
-  approvedBy: z.string().uuid().optional(),
+  approvedBy: z.string().guid().optional(),
   page: z.number().int().min(1).optional(),
   pageSize: z.number().int().min(1).max(MAX_PAGE_SIZE).optional(),
   sortBy: z.string().optional(),

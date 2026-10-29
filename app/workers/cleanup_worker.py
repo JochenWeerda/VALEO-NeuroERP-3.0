@@ -7,7 +7,7 @@ from typing import Any, Dict
 
 from app.infrastructure.models import AuditLog
 
-from .base_worker import BaseWorker
+from .base_worker import BaseWorker, cross_tenant_job
 
 logger = logging.getLogger(__name__)
 
@@ -86,6 +86,7 @@ async def run_cleanup() -> Dict[str, Any]:
         await worker.cleanup()
 
 
+@cross_tenant_job("cleanup")
 def execute_cleanup() -> Dict[str, Any]:
     try:
         loop = asyncio.new_event_loop()

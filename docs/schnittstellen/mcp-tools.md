@@ -12,7 +12,7 @@ version: 3.0.0
 
 > Automatisch generiert aus `config/mcp_erp_tools.yaml` via `python scripts/generate_mcp_tool_reference.py`. **Nicht manuell bearbeiten.**
 
-Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 65 Tools in 21 Domaenen.
+Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 67 Tools in 22 Domaenen.
 
 ## Uebersicht
 
@@ -83,6 +83,8 @@ Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 65 Tools in 21 Domaenen.
 | `studio.migration.plan` | studio | `belege:write` | ja | niedrig | nein |
 | `wms.cell.status` | inventory | `inventory:read` | ja | niedrig | nein |
 | `wms.lot.trace` | inventory | `inventory:read` | ja | niedrig | nein |
+| `workspace.fachaktion.katalog` | workspace | `agent:read` | ja | niedrig | nein |
+| `workspace.fachaktion.resolve` | workspace | `agent:read` | ja | niedrig | nein |
 
 ## Domaene: agent
 
@@ -4243,5 +4245,121 @@ Versionierter Authoring-Command: erzeugt nur einen revisionsgebundenen Plan in d
 ```json
 {
   "type": "object"
+}
+```
+
+## Domaene: workspace
+
+### `workspace.fachaktion.katalog` — Fachaktionskatalog Adaptive Workspace
+
+Liefert den typisierten Fachaktionskatalog (permission, idempotency, audit, event-out, Aliase) aus config/adaptive_workspace_fachaktionen.yaml. Nur Lesen. parameters.access optional read|write. Scope agent:read. Kein tenant_id-Parameter.
+
+- **Scope:** `agent:read`
+- **Idempotent:** ja
+- **Risikoklasse:** niedrig
+- **Audit:** read
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "access": {
+      "type": "string",
+      "enum": [
+        "read",
+        "write"
+      ],
+      "description": "Optionaler Filter"
+    }
+  },
+  "required": []
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "registry_id": {
+      "type": "string"
+    },
+    "count": {
+      "type": "integer"
+    },
+    "actions": {
+      "type": "array"
+    },
+    "lead_contract": {
+      "type": "object"
+    },
+    "event_gaps": {
+      "type": "array"
+    }
+  }
+}
+```
+
+### `workspace.fachaktion.resolve` — Kurzkommando auf Fachaktion aufloesen
+
+Mappt ein natuerliches Kurzkommando deterministisch (Alias/Action-ID, kein LLM) auf eine typisierte Fachaktion und prueft Scope sowie Agenten-/Vier-Augen-Grenze. Nur Lesen, keine Ausfuehrung. parameters.command. Scope agent:read; die Zielaktion hat zusaetzlich ihre Fach-Scope. Writes werden nicht ausgeloest.
+
+- **Scope:** `agent:read`
+- **Idempotent:** ja
+- **Risikoklasse:** niedrig
+- **Audit:** read
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "command": {
+      "type": "string",
+      "description": "Kurzkommando oder Action-ID"
+    }
+  },
+  "required": [
+    "command"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "action_id": {
+      "type": "string",
+      "nullable": true
+    },
+    "authorized": {
+      "type": "boolean"
+    },
+    "reason": {
+      "type": "string"
+    },
+    "mcp_tool_id": {
+      "type": "string",
+      "nullable": true
+    },
+    "four_eyes": {
+      "type": "boolean"
+    },
+    "command_endpoint": {
+      "type": "string",
+      "nullable": true
+    }
+  }
 }
 ```

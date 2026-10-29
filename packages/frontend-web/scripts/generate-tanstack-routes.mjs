@@ -105,7 +105,9 @@ byPath.set('auth/callback', { module: '@/pages/auth/Callback', path: 'auth/callb
 byPath.set('fibu-suite/$', { module: '@runtime/fibu-suite', path: 'fibu-suite/$', source: 'system' })
 
 const entries = [...byPath.values()].sort((a, b) => a.path.localeCompare(b.path))
-const searchKeys = [...collectSearchKeys(sourceDir)].sort()
+// Published deep links remain part of the closed contract even after page migration.
+const publicSearchKeys = ['search']
+const searchKeys = [...new Set([...publicSearchKeys, ...collectSearchKeys(sourceDir)])].sort()
 const paramKeys = [
   ...new Set(
     entries.flatMap((entry) =>

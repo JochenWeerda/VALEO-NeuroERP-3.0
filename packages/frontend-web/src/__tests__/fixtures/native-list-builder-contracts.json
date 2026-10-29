@@ -1,0 +1,526 @@
+{
+  "einkauf/angebote": {
+    "schemaVersion": 1,
+    "id": "einkauf/angebote",
+    "domain": "einkauf",
+    "mode": "list",
+    "title": "Angebote",
+    "subtitle": "Lieferantenangebote zu Anfragen",
+    "adapter": {
+      "type": "native",
+      "sourceId": "einkauf/angebote",
+      "temporary": false
+    },
+    "dataSources": [
+      {
+        "key": "list",
+        "endpoint": "/api/v1/einkauf/angebote",
+        "pageSize": 500
+      }
+    ],
+    "actions": [
+      {
+        "key": "neu",
+        "label": "Neues Angebot",
+        "kind": "primary",
+        "dangerLevel": "safe",
+        "zone": "header",
+        "navigationRoute": "/einkauf/angebot",
+        "localEffect": "navigation",
+        "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
+      },
+      {
+        "key": "export",
+        "label": "CSV-Export",
+        "kind": "secondary",
+        "dangerLevel": "safe",
+        "zone": "header",
+        "command": "list.exportCsv",
+        "localEffect": "download",
+        "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+      }
+    ],
+    "tables": [
+      {
+        "key": "list",
+        "label": "Angebote",
+        "dataSourceKey": "list",
+        "serverPagination": false,
+        "pageSize": 50,
+        "virtualized": true,
+        "rowHeight": 40,
+        "columns": [
+          {
+            "key": "angebotNummer",
+            "label": "Angebot-Nr.",
+            "sortable": true,
+            "filterable": true,
+            "priority": "primary"
+          },
+          {
+            "key": "status",
+            "label": "Status",
+            "renderKind": "status",
+            "filterable": true,
+            "priority": "primary"
+          },
+          {
+            "key": "lieferant",
+            "label": "Lieferant",
+            "filterable": true,
+            "sortable": true,
+            "priority": "primary"
+          },
+          {
+            "key": "artikel",
+            "label": "Artikel",
+            "filterable": true,
+            "priority": "secondary"
+          },
+          {
+            "key": "preis",
+            "label": "Betrag",
+            "numeric": true,
+            "renderKind": "currency",
+            "sortable": true,
+            "priority": "secondary"
+          },
+          {
+            "key": "gueltigBis",
+            "label": "Gueltig bis",
+            "renderKind": "date",
+            "sortable": true,
+            "priority": "secondary"
+          },
+          {
+            "key": "lieferzeit",
+            "label": "Lieferzeit (Tage)",
+            "numeric": true,
+            "priority": "tertiary"
+          },
+          {
+            "key": "createdAt",
+            "label": "Erstellt",
+            "renderKind": "date",
+            "sortable": true,
+            "priority": "tertiary"
+          }
+        ],
+        "rowActions": [
+          {
+            "key": "pruefen",
+            "label": "Pruefen",
+            "dangerLevel": "safe",
+            "permission": "einkauf.angebot.review",
+            "commandEndpoint": "/api/v1/einkauf/angebote/{entity_id}/actions/pruefen",
+            "method": "POST",
+            "requiresConfirmation": true,
+            "visibleWhen": {
+              "field": "status",
+              "values": [
+                "ERFASST",
+                "OFFEN",
+                "ENTWURF",
+                "erfasst",
+                "offen",
+                "entwurf"
+              ]
+            }
+          },
+          {
+            "key": "genehmigen",
+            "label": "Genehmigen",
+            "dangerLevel": "moderate",
+            "permission": "einkauf.angebot.approve",
+            "commandEndpoint": "/api/v1/einkauf/angebote/{entity_id}/actions/genehmigen",
+            "method": "POST",
+            "requiresConfirmation": true,
+            "humanApprovalRequired": true,
+            "forbiddenForAgents": true,
+            "visibleWhen": {
+              "field": "status",
+              "values": [
+                "GEPRUEFT",
+                "geprueft"
+              ]
+            }
+          },
+          {
+            "key": "bestellen",
+            "label": "In Bestellung",
+            "dangerLevel": "moderate",
+            "permission": "einkauf.angebot.order",
+            "commandEndpoint": "/api/v1/einkauf/angebote/{entity_id}/actions/bestellen",
+            "method": "POST",
+            "requiresConfirmation": true,
+            "visibleWhen": {
+              "field": "status",
+              "values": [
+                "GEPRUEFT",
+                "GENEHMIGT",
+                "geprueft",
+                "genehmigt"
+              ]
+            }
+          },
+          {
+            "key": "ablehnen",
+            "label": "Ablehnen",
+            "dangerLevel": "high",
+            "permission": "einkauf.angebot.reject",
+            "commandEndpoint": "/api/v1/einkauf/angebote/{entity_id}/actions/ablehnen",
+            "method": "POST",
+            "requiresConfirmation": true,
+            "auditReasonRequired": true,
+            "visibleWhen": {
+              "field": "status",
+              "values": [
+                "ERFASST",
+                "OFFEN",
+                "ENTWURF",
+                "GEPRUEFT",
+                "GENEHMIGT",
+                "erfasst",
+                "offen",
+                "entwurf",
+                "geprueft",
+                "genehmigt"
+              ]
+            }
+          }
+        ],
+        "rowRouteTemplate": "/einkauf/angebot/{id}"
+      }
+    ],
+    "noWorkflowReason": "Der Status steht am Angebot; die Liste fuehrt keinen eigenen Ablauf.",
+    "agentContract": {
+      "businessPurpose": "Lieferantenangebote vergleichen, pruefen, genehmigen und in Bestellungen ueberfuehren.",
+      "examplePrompts": [
+        "Welche Angebote warten auf Pruefung?",
+        "Welche Angebote laufen diese Woche ab?"
+      ],
+      "sensitiveFields": [],
+      "testSelectors": {
+        "screenRoot": "[data-testid='screen-einkauf/angebote']"
+      },
+      "dangerousActions": [
+        {
+          "key": "genehmigen",
+          "reason": "Gibt ein Angebot zur Bestellung frei; nur Mensch."
+        }
+      ]
+    },
+    "layout": {
+      "floorplan": "worklist",
+      "density": "compact",
+      "contextRail": "none",
+      "preferredMode": "desktopDense",
+      "mobileMode": "mobileStack",
+      "touchTargetPx": 44,
+      "tableProfile": "standard"
+    },
+    "performance": {
+      "initialPayloadBudgetKb": 60,
+      "requiresLazyTabs": false,
+      "requiresVirtualTables": true,
+      "lookupMinChars": 2,
+      "bundleGroup": "einkauf"
+    }
+  },
+  "einkauf/lieferanten": {
+    "schemaVersion": 1,
+    "id": "einkauf/lieferanten",
+    "domain": "einkauf",
+    "mode": "list",
+    "title": "Lieferanten",
+    "subtitle": "Lieferanten suchen und oeffnen",
+    "adapter": {
+      "type": "native",
+      "sourceId": "einkauf/lieferanten",
+      "temporary": false
+    },
+    "dataSources": [
+      {
+        "key": "list",
+        "endpoint": "/api/v1/einkauf/lieferanten",
+        "pageSize": 500
+      }
+    ],
+    "actions": [
+      {
+        "key": "neu",
+        "label": "Neuer Lieferant",
+        "kind": "primary",
+        "dangerLevel": "safe",
+        "zone": "header",
+        "navigationRoute": "/einkauf/lieferant/neu",
+        "localEffect": "navigation",
+        "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
+      },
+      {
+        "key": "export",
+        "label": "CSV-Export",
+        "kind": "secondary",
+        "dangerLevel": "safe",
+        "zone": "header",
+        "command": "list.exportCsv",
+        "localEffect": "download",
+        "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+      }
+    ],
+    "tables": [
+      {
+        "key": "list",
+        "label": "Lieferanten",
+        "dataSourceKey": "list",
+        "serverPagination": false,
+        "pageSize": 50,
+        "virtualized": true,
+        "rowHeight": 40,
+        "columns": [
+          {
+            "key": "firmenname",
+            "label": "Lieferant",
+            "sortable": true,
+            "filterable": true,
+            "priority": "primary"
+          },
+          {
+            "key": "lieferantennummer",
+            "label": "Lieferantennr.",
+            "sortable": true,
+            "filterable": true,
+            "priority": "primary"
+          },
+          {
+            "key": "ort",
+            "label": "Ort",
+            "filterable": true,
+            "sortable": true,
+            "priority": "secondary"
+          },
+          {
+            "key": "telefon",
+            "label": "Telefon",
+            "priority": "tertiary"
+          },
+          {
+            "key": "email",
+            "label": "E-Mail",
+            "priority": "tertiary"
+          },
+          {
+            "key": "lieferzeit_tage",
+            "label": "Lieferzeit (Tage)",
+            "numeric": true,
+            "priority": "tertiary"
+          },
+          {
+            "key": "bewertung",
+            "label": "Bewertung",
+            "numeric": true,
+            "sortable": true,
+            "priority": "secondary"
+          },
+          {
+            "key": "aktiv",
+            "label": "Aktiv",
+            "renderKind": "boolean",
+            "filterable": true,
+            "priority": "secondary"
+          }
+        ],
+        "rowActions": [],
+        "rowRouteTemplate": "/einkauf/lieferanten/{id}"
+      }
+    ],
+    "noWorkflowReason": "Stammdatenliste ohne eigenen Ablauf.",
+    "agentContract": {
+      "businessPurpose": "Lieferanten finden und ihre Stammdaten, Bestellungen und Kontakte oeffnen.",
+      "examplePrompts": [
+        "Finde den Lieferanten Muehle Nord.",
+        "Welche Lieferanten sind inaktiv?"
+      ],
+      "sensitiveFields": [],
+      "testSelectors": {
+        "screenRoot": "[data-testid='screen-einkauf/lieferanten']"
+      }
+    },
+    "layout": {
+      "floorplan": "worklist",
+      "density": "compact",
+      "contextRail": "none",
+      "preferredMode": "desktopDense",
+      "mobileMode": "mobileStack",
+      "touchTargetPx": 44,
+      "tableProfile": "standard"
+    },
+    "performance": {
+      "initialPayloadBudgetKb": 60,
+      "requiresLazyTabs": false,
+      "requiresVirtualTables": true,
+      "lookupMinChars": 2,
+      "bundleGroup": "einkauf"
+    }
+  },
+  "agrar/duenger-liste": {
+    "schemaVersion": 1,
+    "id": "agrar/duenger-liste",
+    "domain": "agrar",
+    "mode": "list",
+    "title": "Duenger",
+    "subtitle": "Duengemittel mit Naehrstoffen",
+    "adapter": {
+      "type": "native",
+      "sourceId": "agrar/duenger-liste",
+      "temporary": false
+    },
+    "dataSources": [
+      {
+        "key": "list",
+        "endpoint": "/api/v1/agrar/duenger/",
+        "pageSize": 200
+      }
+    ],
+    "actions": [
+      {
+        "key": "neu",
+        "label": "Neuer Duenger",
+        "kind": "primary",
+        "dangerLevel": "safe",
+        "zone": "header",
+        "navigationRoute": "/agrar/duenger-stamm",
+        "localEffect": "navigation",
+        "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
+      },
+      {
+        "key": "export",
+        "label": "CSV-Export",
+        "kind": "secondary",
+        "dangerLevel": "safe",
+        "zone": "header",
+        "command": "list.exportCsv",
+        "localEffect": "download",
+        "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+      }
+    ],
+    "tables": [
+      {
+        "key": "list",
+        "label": "Duenger",
+        "dataSourceKey": "list",
+        "serverPagination": false,
+        "pageSize": 50,
+        "virtualized": true,
+        "rowHeight": 40,
+        "columns": [
+          {
+            "key": "name",
+            "label": "Bezeichnung",
+            "sortable": true,
+            "filterable": true,
+            "priority": "primary"
+          },
+          {
+            "key": "artikelnummer",
+            "label": "Artikel-Nr.",
+            "sortable": true,
+            "filterable": true,
+            "priority": "primary"
+          },
+          {
+            "key": "typ",
+            "label": "Typ",
+            "filterable": true,
+            "priority": "primary"
+          },
+          {
+            "key": "hersteller",
+            "label": "Hersteller",
+            "filterable": true,
+            "priority": "secondary"
+          },
+          {
+            "key": "n_gehalt",
+            "label": "N %",
+            "numeric": true,
+            "sortable": true,
+            "priority": "secondary"
+          },
+          {
+            "key": "p_gehalt",
+            "label": "P %",
+            "numeric": true,
+            "priority": "secondary"
+          },
+          {
+            "key": "k_gehalt",
+            "label": "K %",
+            "numeric": true,
+            "priority": "secondary"
+          },
+          {
+            "key": "wassergefaehrdend",
+            "label": "Wassergefaehrdend",
+            "renderKind": "boolean",
+            "priority": "tertiary"
+          },
+          {
+            "key": "ist_aktiv",
+            "label": "Aktiv",
+            "renderKind": "boolean",
+            "filterable": true,
+            "priority": "tertiary"
+          }
+        ],
+        "rowActions": [
+          {
+            "key": "deaktivieren",
+            "label": "Deaktivieren",
+            "dangerLevel": "high",
+            "permission": "agrar.duenger.deactivate",
+            "commandEndpoint": "/api/v1/agrar/duenger/{entity_id}/actions/deaktivieren",
+            "method": "POST",
+            "requiresConfirmation": true,
+            "auditReasonRequired": true,
+            "visibleWhen": {
+              "field": "ist_aktiv",
+              "values": [
+                true
+              ]
+            }
+          }
+        ],
+        "rowRouteTemplate": "/agrar/duenger/{id}"
+      }
+    ],
+    "noWorkflowReason": "Stammdatenliste ohne eigenen Ablauf.",
+    "agentContract": {
+      "businessPurpose": "Duengemittel mit Naehrstoffgehalten finden, oeffnen und nicht mehr gefuehrte deaktivieren.",
+      "examplePrompts": [
+        "Welche Stickstoffduenger fuehren wir?",
+        "Welche Duenger sind wassergefaehrdend?"
+      ],
+      "sensitiveFields": [],
+      "testSelectors": {
+        "screenRoot": "[data-testid='screen-agrar/duenger-liste']"
+      }
+    },
+    "layout": {
+      "floorplan": "worklist",
+      "density": "compact",
+      "contextRail": "none",
+      "preferredMode": "desktopDense",
+      "mobileMode": "mobileStack",
+      "touchTargetPx": 44,
+      "tableProfile": "standard"
+    },
+    "performance": {
+      "initialPayloadBudgetKb": 60,
+      "requiresLazyTabs": false,
+      "requiresVirtualTables": true,
+      "lookupMinChars": 2,
+      "bundleGroup": "agrar"
+    }
+  }
+}

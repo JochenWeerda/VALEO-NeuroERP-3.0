@@ -795,6 +795,10 @@ def execute_mcp_tool(db: Session, request: ToolExecutionRequest, user: dict, ten
         return _stock_movement_stornieren(db, request, actor, tenant)
     if request.tool_name == "agent.proposal.list":
         return _proposal_list(db, request, actor, tenant)
+    if request.tool_name in {"workspace.fachaktion.katalog", "workspace.fachaktion.resolve"}:
+        from app.workspace.fachaktionen import execute_mcp as _workspace_execute_mcp
+
+        return _workspace_execute_mcp(request, actor, tenant, user)
     raise HTTPException(501, "No verified execution adapter is connected for this tool")
 
 

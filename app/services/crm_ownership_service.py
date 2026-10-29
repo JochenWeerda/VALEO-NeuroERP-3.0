@@ -14,13 +14,14 @@ from typing import Optional
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-_DEFAULT_TENANT = "00000000-0000-0000-0000-000000000001"
-
 
 class CrmOwnershipService:
-    def __init__(self, db: Session, tenant_id: Optional[str] = None) -> None:
+    def __init__(self, db: Session, tenant_id: str) -> None:
+        # Mandant nur aus der Identitaet; kein Rueckfall auf den Standardmandanten (RLS-DOMAIN-CRM).
+        if not tenant_id:
+            raise ValueError("tenant_id required")
         self.db = db
-        self.tenant_id = tenant_id or _DEFAULT_TENANT
+        self.tenant_id = tenant_id
 
     def get(self, kunden_nr: str) -> dict:
         r = self.db.execute(
@@ -73,8 +74,8 @@ class CrmOwnershipService:
     def history(self, kunden_nr: str) -> list[dict]:
         rows = self.db.execute(
             text("SELECT feld, alt, neu, grund, bediener, created_at FROM public.crm_ownership_log "
-                 "WHERE kunden_nr = :k ORDER BY created_at DESC"),
-            {"k": kunden_nr},
+                 "WHERE kunden_nr = :k AND tenant_id = :t ORDER BY created_at DESC"),
+            {"k": kunden_nr, "t": self.tenant_id},
         ).mappings().all()
         return [{"feld": r["feld"], "alt": r["alt"], "neu": r["neu"], "grund": r["grund"],
                  "bediener": r["bediener"],

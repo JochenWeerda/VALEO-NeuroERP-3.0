@@ -61,7 +61,7 @@ export type PolicyRule = z.infer<typeof PolicyRuleSchema>;
  * Regulatory Policy - Compliance-Regelwerk
  */
 export const RegulatoryPolicySchema = z.object({
-  id: z.string().uuid().optional(),
+  id: z.string().guid().optional(),
   tenantId: z.string().min(1, 'Tenant ID is required'),
   
   // Policy-Identifikation

@@ -110,7 +110,7 @@ export function useMaskData<T extends object = Record<string, unknown>>({
 
   useEffect(() => {
     if (autoLoad && id) {
-      void loadData()
+      loadData()
     }
   }, [id, autoLoad])
 

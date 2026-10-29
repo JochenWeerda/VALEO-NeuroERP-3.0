@@ -49,7 +49,6 @@ export default defineConfig({
     'moment',
     'lodash',
     'joi',
-    'multer',
     'sharp',
     'tesseract.js',
     'pdf-parse',

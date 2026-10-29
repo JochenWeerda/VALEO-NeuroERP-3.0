@@ -26,6 +26,10 @@ from app.api.v1.schemas.base import BaseSchema
 
 router = APIRouter(prefix="/booking-templates", tags=["finance", "templates"])
 
+# Gemeinsame Vorlagen stehen allen Mandanten zur Verfuegung (Nutzerentscheidung 27.10.2026,
+# docs/admin/rls-exceptions.json -> system_lesbar). Lesen und Anwenden ja, Aendern nein.
+SHARED_TENANT = "system"
+
 
 class BookingTemplateLine(BaseModel):
     """Single line in a booking template"""
@@ -81,6 +85,7 @@ class BookingTemplateResponse(BaseModel):
     active: bool
     created_at: datetime
     updated_at: datetime
+    shared: bool = Field(default=False, description="Gemeinsame Vorlage fuer alle Mandanten (nur lesen und anwenden)")
 
 
 class ApplyTemplateRequest(BaseModel):
@@ -102,6 +107,16 @@ class ApplyTemplateResponse(BaseModel):
     applied_at: datetime
 
 
+def _reject_shared(db: Session, template_id: str) -> None:
+    """A shared template is visible but belongs to no tenant: changing it is refused, not 'not found'."""
+    shared = db.execute(
+        text("SELECT 1 FROM domain_erp.booking_templates WHERE id = :template_id AND tenant_id = :shared"),
+        {"template_id": template_id, "shared": SHARED_TENANT},
+    ).fetchone()
+    if shared:
+        raise HTTPException(status_code=403, detail="Gemeinsame Buchungsvorlage: nur lesen und anwenden, nicht aendern")
+
+
 @router.get("", response_model=List[BookingTemplateResponse], summary="Booking templates auflisten", dependencies=[Depends(finance_read)])
 async def list_booking_templates(
     category: Optional[str] = Query(None, description="Filter by category"),
@@ -115,12 +130,12 @@ async def list_booking_templates(
     try:
         query = text("""
             SELECT id, name, description, category, trigger_type, trigger_config, lines,
-                   default_amount, currency, active, created_at, updated_at
+                   default_amount, currency, active, created_at, updated_at, tenant_id = :shared
             FROM domain_erp.booking_templates
-            WHERE tenant_id = :tenant_id
+            WHERE tenant_id IN (:tenant_id, :shared)
         """)
         
-        params = {"tenant_id": tenant_id}
+        params = {"tenant_id": tenant_id, "shared": SHARED_TENANT}
         
         conditions = []
         
@@ -158,7 +173,8 @@ async def list_booking_templates(
                 currency=str(row[8]),
                 active=bool(row[9]),
                 created_at=row[10],
-                updated_at=row[11]
+                updated_at=row[11],
+                shared=bool(row[12]),
             ))
         
         return result
@@ -182,14 +198,17 @@ async def get_booking_template(
     try:
         query = text("""
             SELECT id, name, description, category, trigger_type, trigger_config, lines,
-                   default_amount, currency, active, created_at, updated_at
+                   default_amount, currency, active, created_at, updated_at, tenant_id = :shared
             FROM domain_erp.booking_templates
-            WHERE id = :template_id AND tenant_id = :tenant_id
+            WHERE id = :template_id AND tenant_id IN (:tenant_id, :shared)
+            ORDER BY tenant_id = :shared
+            LIMIT 1
         """)
         
         row = db.execute(query, {
             "template_id": template_id,
-            "tenant_id": tenant_id
+            "tenant_id": tenant_id,
+            "shared": SHARED_TENANT,
         }).fetchone()
         
         if not row:
@@ -213,7 +232,8 @@ async def get_booking_template(
             currency=str(row[8]),
             active=bool(row[9]),
             created_at=row[10],
-            updated_at=row[11]
+            updated_at=row[11],
+            shared=bool(row[12]),
         )
         
     except HTTPException:
@@ -386,15 +406,19 @@ async def apply_booking_template(
         # Create journal entry lines
         for line in template.lines:
             # Get account ID
+            # Eigenes Konto vor dem gemeinsamen Kontenrahmen (wie sales_credit_notes/steuerschluessel):
+            # gemeinsame Vorlagen nennen Konten des Standardkontenrahmens.
             account_query = text("""
                 SELECT id FROM domain_erp.chart_of_accounts
-                WHERE account_number = :account_number AND tenant_id = :tenant_id
+                WHERE account_number = :account_number AND tenant_id IN (:tenant_id, :shared)
+                ORDER BY tenant_id = :shared
                 LIMIT 1
             """)
             
             account_row = db.execute(account_query, {
                 "account_number": line.account_number,
-                "tenant_id": tenant_id
+                "tenant_id": tenant_id,
+                "shared": SHARED_TENANT,
             }).fetchone()
             
             if not account_row:
@@ -549,6 +573,7 @@ async def update_booking_template(
         row = db.execute(update_query, params).fetchone()
         
         if not row:
+            _reject_shared(db, template_id)
             raise HTTPException(status_code=404, detail="Booking template not found")
         
         db.commit()
@@ -604,6 +629,7 @@ async def delete_booking_template(
         })
         
         if result.rowcount == 0:
+            _reject_shared(db, template_id)
             raise HTTPException(status_code=404, detail="Booking template not found")
         
         db.commit()

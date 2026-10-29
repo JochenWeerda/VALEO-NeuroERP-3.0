@@ -38,7 +38,7 @@ export type EvidenceStatus = z.infer<typeof EvidenceStatusEnum>;
  * Evidence - Compliance-Nachweis
  */
 export const EvidenceSchema = z.object({
-  id: z.string().uuid().optional(),
+  id: z.string().guid().optional(),
   tenantId: z.string().min(1, 'Tenant ID is required'),
   
   // Evidenz-Info
@@ -71,7 +71,7 @@ export const EvidenceSchema = z.object({
   
   // Labels/Policies zu denen diese Evidenz beiträgt
   supportingLabels: z.array(z.string()).default([]), // Label-Codes
-  supportingPolicies: z.array(z.string().uuid()).default([]), // Policy-IDs
+  supportingPolicies: z.array(z.string().guid()).default([]), // Policy-IDs
   
   // Metadata
   createdAt: z.string().datetime().optional(),
@@ -96,7 +96,7 @@ export type CreateEvidence = z.infer<typeof CreateEvidenceSchema>;
  * Link Evidence DTO
  */
 export const LinkEvidenceSchema = z.object({
-  evidenceId: z.string().uuid(),
+  evidenceId: z.string().guid(),
   targetRef: z.object({
     type: z.enum(['Batch', 'Contract', 'Site', 'Supplier', 'Label']),
     id: z.string(),

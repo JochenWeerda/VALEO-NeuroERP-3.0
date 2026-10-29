@@ -16,6 +16,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.core.akteur import gepruefter_akteur
 from app.core.cache import cache_delete_prefix, cache_get_json, cache_set_json
 from app.core.config import settings
 from app.core.data_quality_enforcement import (
@@ -55,6 +56,7 @@ from app.services.inventory_compat_service import InventoryCompatService, Futter
 from app.services.annahme_service import AnnahmeService
 
 from app.api.v1.schemas.base import BaseSchema, StatusResponse
+from app.api.v1.schemas.compat_schemas import CsvImportResponse, PurchaseOrderListOut
 from pydantic import ConfigDict as _ConfigDict
 from app.api.v1.schemas.base import CompatBridgeOut
 from app.api.v1.schemas.mask_entity_contracts import (
@@ -72,18 +74,8 @@ from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-R
 # OpenAPI documentation for the known key columns.
 # ---------------------------------------------------------------------------
 
-class CsvImportResponse(BaseSchema):
-    created: int = 0
-    updated: int = 0
-    errors: list[str] = []
 
 
-class PurchaseOrderListOut(BaseSchema):
-    data: list[dict] = []
-    page: int = 1
-    pageSize: int = 50
-    total: int = 0
-    totalPages: int = 1
 
 
 class PurchaseOrderOut(BaseSchema):
@@ -905,10 +897,11 @@ async def einkauf_rechnungseingaenge_list(
 @router.post("/einkauf/rechnungseingaenge/{rechnung_id}/pruefen", summary="Rechnungseingang pruefen einkauf",
     response_model=EinkaufDocOut, dependencies=SCHREIBEN["EINKAUF"])
 async def einkauf_rechnungseingang_pruefen(
-    rechnung_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+    rechnung_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user)
 ) -> dict[str, Any]:
     try:
-        return EinkaufCompatService(db, tenant_id).pruefen_rechnung(rechnung_id)
+        return EinkaufCompatService(db, tenant_id).pruefen_rechnung(rechnung_id, gepruefter_akteur(user))
     except EntityNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except ValidationFailedError as exc:
@@ -918,10 +911,11 @@ async def einkauf_rechnungseingang_pruefen(
 @router.post("/einkauf/rechnungseingaenge/{rechnung_id}/freigeben", summary="Rechnungseingang freigeben einkauf",
     response_model=EinkaufDocOut, dependencies=SCHREIBEN["EINKAUF"])
 async def einkauf_rechnungseingang_freigeben(
-    rechnung_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+    rechnung_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user)
 ) -> dict[str, Any]:
     try:
-        return EinkaufCompatService(db, tenant_id).freigeben_rechnung(rechnung_id)
+        return EinkaufCompatService(db, tenant_id).freigeben_rechnung(rechnung_id, gepruefter_akteur(user))
     except EntityNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except ValidationFailedError as exc:
@@ -931,10 +925,11 @@ async def einkauf_rechnungseingang_freigeben(
 @router.post("/einkauf/rechnungseingaenge/{rechnung_id}/verbuchen", summary="Rechnungseingang verbuchen einkauf",
     response_model=EinkaufDocOut, dependencies=SCHREIBEN["EINKAUF"])
 async def einkauf_rechnungseingang_verbuchen(
-    rechnung_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+    rechnung_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user)
 ) -> dict[str, Any]:
     try:
-        return EinkaufCompatService(db, tenant_id).verbuchen_rechnung(rechnung_id)
+        return EinkaufCompatService(db, tenant_id).verbuchen_rechnung(rechnung_id, gepruefter_akteur(user))
     except EntityNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except ValidationFailedError as exc:

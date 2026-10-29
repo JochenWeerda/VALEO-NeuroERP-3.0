@@ -197,7 +197,7 @@ class HarvestAcceptanceService:
         obj = self._get_or_raise(acceptance_id)
 
         if not obj.quality_protocol_id:
-            quality_repo = QualityProtocolRepositoryImpl(self.db)
+            quality_repo = QualityProtocolRepositoryImpl(self.db, self.tenant_id)
             try:
                 protocol = get_latest_protocol(quality_repo, acceptance_id)
                 if protocol:
@@ -326,6 +326,7 @@ class HarvestAcceptanceService:
         if payload.positions:
             for pos_in in payload.positions:
                 pos = HarvestAcceptancePosition(
+                    tenant_id=self.tenant_id,
                     id=uuid7(),
                     harvest_acceptance_id=obj.id,
                     position_number=pos_in.position_number,
@@ -419,7 +420,7 @@ class HarvestAcceptanceService:
         from modules.agrar.repositories.quality_protocol_repo import QualityProtocolRepositoryImpl
         obj = self._get_or_raise(acceptance_id)
         if obj.quality_protocol_id:
-            quality_repo = QualityProtocolRepositoryImpl(self.db)
+            quality_repo = QualityProtocolRepositoryImpl(self.db, self.tenant_id)
             protocol = quality_repo.get_by_id(obj.quality_protocol_id)
             if protocol:
                 return _quality_protocol_to_qualitaetsprotokoll(protocol)
@@ -453,7 +454,7 @@ class HarvestAcceptanceService:
             source_type="manual",
             created_by=None,
         )
-        quality_repo = QualityProtocolRepositoryImpl(self.db)
+        quality_repo = QualityProtocolRepositoryImpl(self.db, self.tenant_id)
         protocol = create_quality_protocol(quality_repo, create_input)
         obj.quality_protocol_id = protocol.id
         bewertung = data.get("bewertung", "none")
@@ -656,6 +657,7 @@ class HarvestAcceptanceService:
             if existing_lines == 0:
                 lot_id = generate_lot_number(self.db, acceptance_id, self.tenant_id)
                 line = HarvestAcceptanceLine(
+                    tenant_id=self.tenant_id,
                     id=_uuid7(),
                     harvest_acceptance_id=acceptance_id,
                     line_number=1,
@@ -1042,6 +1044,7 @@ class HarvestAcceptanceService:
                     existing_pos.calculation_formula = pos_result.calculation_formula
             else:
                 new_pos = HarvestAcceptancePosition(
+                    tenant_id=self.tenant_id,
                     id=_uuid7(),
                     harvest_acceptance_id=acceptance_id,
                     position_number=pos_result.position_number,

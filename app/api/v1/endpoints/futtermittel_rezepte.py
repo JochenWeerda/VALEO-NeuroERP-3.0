@@ -46,43 +46,6 @@ class FuttermittelRezeptOut(BaseSchema):
 
 router = APIRouter(prefix="/futtermittel/rezepte", tags=["futtermittel", "rezepte"])
 
-_DDL = """
-CREATE SCHEMA IF NOT EXISTS domain_futtermittel;
-
-CREATE TABLE IF NOT EXISTS domain_futtermittel.feed_recipes (
-    id                TEXT PRIMARY KEY,
-    recipe_code       TEXT NOT NULL,
-    name              TEXT NOT NULL,
-    tierart           TEXT NOT NULL DEFAULT 'SONSTIGE',
-    produktionsphase  TEXT NOT NULL DEFAULT 'SONSTIGE',
-    status            TEXT NOT NULL DEFAULT 'ENTWURF',
-    version           INT NOT NULL DEFAULT 1,
-    erstellt_am       TIMESTAMPTZ DEFAULT NOW(),
-    erstellt_von      TEXT,
-    tenant_id         TEXT NOT NULL,
-    updated_at        TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS domain_futtermittel.recipe_ingredients (
-    id             TEXT PRIMARY KEY,
-    recipe_id      TEXT NOT NULL,
-    material_id    TEXT NOT NULL,
-    anteil_percent NUMERIC(8,4) NOT NULL,
-    min_anteil     NUMERIC(8,4),
-    max_anteil     NUMERIC(8,4),
-    sort_order     INT NOT NULL DEFAULT 0,
-    tenant_id      TEXT NOT NULL
-);
-"""
-
-
-def _ensure_tables(db: Session) -> None:
-    for stmt in _DDL.strip().split(";"):
-        stmt = stmt.strip()
-        if stmt:
-            db.execute(text(stmt))
-    db.commit()
-
 
 def _row_to_dict(row) -> dict:
     return dict(row._mapping)
@@ -160,7 +123,6 @@ async def list_rezepte(
     db: Session = Depends(get_db),
 ):
     try:
-        _ensure_tables(db)
         sql = text("""
             SELECT id, recipe_code, name, tierart, produktionsphase,
                    status, version, erstellt_am, erstellt_von, updated_at
@@ -189,7 +151,6 @@ async def create_rezept(
     if payload.produktionsphase not in PHASEN:
         raise HTTPException(status_code=422, detail=f"Ungültige Produktionsphase. Erlaubt: {sorted(PHASEN)}")
     try:
-        _ensure_tables(db)
         new_id = uuid7()
         sql = text("""
             INSERT INTO domain_futtermittel.feed_recipes
@@ -220,7 +181,6 @@ async def get_rezept(
     db: Session = Depends(get_db),
 ):
     try:
-        _ensure_tables(db)
         rezept = _get_recipe_or_404(db, rezept_id, tenant_id)
         rezept["zutaten"] = _get_ingredients(db, rezept_id, tenant_id)
         return rezept
@@ -240,7 +200,6 @@ async def add_ingredient(
     db: Session = Depends(get_db),
 ):
     try:
-        _ensure_tables(db)
         _get_recipe_or_404(db, rezept_id, tenant_id)
         new_id = uuid7()
         sql = text("""
@@ -279,7 +238,6 @@ async def update_ingredient(
     if not updates:
         raise HTTPException(status_code=422, detail="Keine Felder zum Aktualisieren angegeben")
     try:
-        _ensure_tables(db)
         set_clauses = ", ".join(f"{k} = :{k}" for k in updates)
         sql = text(f"""
             UPDATE domain_futtermittel.recipe_ingredients
@@ -306,7 +264,6 @@ async def delete_ingredient(
     db: Session = Depends(get_db),
 ):
     try:
-        _ensure_tables(db)
         db.execute(text("""
             DELETE FROM domain_futtermittel.recipe_ingredients
             WHERE id = :id AND recipe_id = :recipe_id AND tenant_id = :tenant_id
@@ -327,7 +284,6 @@ async def copy_rezept(
 ):
     """Kopie des Rezepts mit erhöhter Version erstellen."""
     try:
-        _ensure_tables(db)
         orig = _get_recipe_or_404(db, rezept_id, tenant_id)
         new_id = uuid7()
         new_version = (orig.get("version") or 1) + 1
@@ -389,7 +345,6 @@ async def activate_rezept(
 ):
     """Rezept von ENTWURF auf AKTIV setzen. Validiert: Anteile müssen 100% ergeben."""
     try:
-        _ensure_tables(db)
         rezept = _get_recipe_or_404(db, rezept_id, tenant_id)
         if rezept["status"] != "ENTWURF":
             raise HTTPException(status_code=409, detail=f"Rezept ist bereits '{rezept['status']}'. Nur ENTWURF kann aktiviert werden.")
@@ -434,7 +389,6 @@ async def naehrstoffanalyse(
     """Berechnetes Nährstoffprofil: Summe(anteil/100 * material.naehrstoff) je Nährstoff.
     Ergebnisse sind auf frische Substanz-Basis; DM-korrigierte Werte werden zusätzlich ausgegeben."""
     try:
-        _ensure_tables(db)
         _get_recipe_or_404(db, rezept_id, tenant_id)
 
         sql = text("""
@@ -493,7 +447,6 @@ async def deklaration(
     """EU-konforme Inhaltsangabe: Zutaten absteigend nach Anteil,
     analytische Bestandteile (RP, RFe, RFA, RA, ME)."""
     try:
-        _ensure_tables(db)
         rezept = _get_recipe_or_404(db, rezept_id, tenant_id)
 
         ingredients = db.execute(text("""
@@ -557,7 +510,6 @@ async def etikett(
 ):
     """Strukturierte Etikettdaten gem. EU 2017/2279."""
     try:
-        _ensure_tables(db)
         rezept = _get_recipe_or_404(db, rezept_id, tenant_id)
 
         ingredients = db.execute(text("""

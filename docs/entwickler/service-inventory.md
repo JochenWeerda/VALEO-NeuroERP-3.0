@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, qa]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-22
+last_reviewed: 2026-10-29
 version: 3.0.0
 description: Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -56,12 +56,14 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `business_partner_service` | Service layer for BusinessPartner aggregate management. |
 | `calendar_projection_service` | UIX-063 planning calendar projections. |
 | `case_management` | Case Management Service — NC-08 |
+| `closing_checklist_validation` | Server-owned closing checks; persisted template text is never executable SQL. |
 | `closing_checklists_service` | Schemas and helpers for the Closing Checklists domain (FIBU-CLS-01). |
 | `command_handlers_finance` | AP kernel transport delegates to the same tenant-bound domain commands. |
 | `command_handlers_procurement` | Domain-Mutationen fuer Process-Kernel-Commands (Einkauf). |
 | `compat_helpers` | Shared helpers for compat service classes. |
 | `compensation_engine` | Compensation Engine — NC-006 |
 | `competitor_monitor` | Competitor Price & Image Monitoring Service |
+| `complaint_list_read` | Tenant-scoped projection for the complaint list. |
 | `compliance_pcn_lifecycle_service` | DOM-COMPLIANCE-004.2 — PCN-Meldung Lifecycle Service (Status-Maschine). |
 | `compliance_service` | Helpers and PDF builder for the Compliance domain. |
 | `compliance_sperre_audit_service` | DOM-COMPLIANCE-004.4 — Artikel-Sperre Audit-Trail Service (append-only). |
@@ -199,11 +201,13 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `l3_report_catalog_service` | Fixed L3 report catalog with shared sums, export and document drilldown. |
 | `legacy_interface_adapter_service` | Versioned, non-executing adapter framework for L3 Standard and Unimet. |
 | `lieferschein_pdf` | Lieferschein PDF Generator |
+| `list_experience_metrics` | Read-only list metrics shared across registered human/MCP/CLI projections. |
 | `lkv_pipeline` | LKV-Pipeline – Download der LKV-Weser-Ems-Jahresberichte (Milchleistungsprüfung). |
 | `llm_gateway` | Anbieterunabhängiges LLM-Gateway. |
 | `logistics_disposition_service` | DOM-LOG-004.2 — Tour-Dispositions-Service (Kapazität + Zeitfenster). |
 | `logistics_epod_service` | DOM-LOG-004.3 — ePOD-Lifecycle-Service (Ablieferungsbeleg → Settlement). |
 | `lohn_service` | Payroll calculation and closeout contracts. |
+| `made_by_studio_gates` | Made-by-Studio Qualitätsgates A–C und E für registrierte ScreenDefinitions. |
 | `mail_ingest_service` | Server-seitiger IMAP-Mail-Ingest (per Tenant konfiguriert). |
 | `mail_versand` | E-Mail-Versand ueber SMTP — wirklich, oder mit klarer Absage. |
 | `mail_workspace_service` | Role-scoped ERP mail workspace on top of the canonical IMAP ingest. |
@@ -232,6 +236,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `numbering_service` | Numbering Service |
 | `numbering_service_pg` | Numbering Service (PostgreSQL) |
 | `o2c_chain_service` | Order-to-Cash-Kette (DOM-SALES-004) — Angebot → Auftrag → Lieferschein → Rechnung. |
+| `open_item_read_source` | Canonical open-item read source shared by the API and Studio detail summaries. |
 | `operator_agent_service` | OPERATOR-AGENT-001 — ERP-Operator-Agent: Proposal + kontrollierte LOW-Schreibaktionen. |
 | `ordrsp_service` | EDIFACT ORDRSP (Bestellantwort, D.96A) lesen und gegen die Bestellung abgleichen. |
 | `payment_run_freigabe` | Freigabe eines Zahlungslaufs: Mandant und Vier-Augen-Prinzip. |
@@ -255,6 +260,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `position_service` | Commodity Position Calculation Service. |
 | `position_snapshot_service` | Commodity Position Snapshot Service (optional cache for matrix performance). |
 | `preisfindung_service` | Die Preiskaskade — jede Stufe wird ausgewertet, jeder Fehlschlag gemeldet. |
+| `pricing_condition_read` | Tenant-bound read shared by the existing pricing and POS adapters. |
 | `proc_bestellung_lifecycle_service` | DOM-PROC-004.2 — Bestellung Lifecycle Service (Statusmaschine). |
 | `proc_rechnungspruefung_service` | DOM-PROC-004.4 — Rechnungsprüfung + ERS (Evaluated Receipt Settlement) Service. |
 | `proc_wareneingang_service` | DOM-PROC-004.3 — Wareneingangs-Buchung + QS Service. |
@@ -295,6 +301,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `settlement_pdf_service` | PDF generation and GoBD archiving for Agrar settlement self-billing documents. |
 | `silo_rule_engine_service` | WM-SILO-RULE-ENGINE-001 — Automatische Zielzellen-Vorschlaege fuer Einlagerung. |
 | `stt_client` | Speech-to-Text-Client (anbieterunabhängig, OpenAI-kompatibel). |
+| `studio_catalog_contracts` | Bounded metadata for the registered Flow Spine catalog cockpit. |
 | `studio_draft_store` | Studio drafts with tenant isolation, four-eyes publish, and optional Postgres. |
 | `studio_entity_commands` | Generated domain-command implementation. Only deployment-owned EntitySpec selects tables. |
 | `studio_entity_compiler` | Deterministic deployable entity bundle. Does not execute DDL or activate writes. |
@@ -303,6 +310,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `studio_entity_router` | One authenticated HTTP command adapter for generated master-data contracts. |
 | `studio_entity_simulation` | Real rollback-only CRUD simulation for an exact registered Studio entity definition. |
 | `studio_history_view` | Read-only, type-preserving comparison of immutable Studio snapshots. |
+| `studio_list_contracts` | Bounded declarative list behavior; no commands or executable expressions. |
 | `studio_migration` | Studio migration compiler: catalog wiring and reviewable additive Alembic artifacts. |
 | `studio_migration_store` | Revision-bound plans in the existing append-only Studio history, never DDL. |
 | `studio_native_import` | Version native masks through the existing Studio store, without activation. |

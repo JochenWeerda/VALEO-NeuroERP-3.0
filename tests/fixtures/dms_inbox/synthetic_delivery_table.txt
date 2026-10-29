@@ -1,0 +1,5 @@
+Lieferschein LS-SYNTH-1
+Pos Art-Nr Bezeichnung Menge ME Preis
+1 WW-100 Winterweizen A 12,50 t 215,00
+2 HA-200 Hafer 4,00 t 180,00
+3 RM-9 Rapsmehl 3,00 t 190,00

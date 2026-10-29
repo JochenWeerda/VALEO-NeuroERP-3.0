@@ -2,24 +2,6 @@
   "schema_version": 1,
   "reviews": [
     {
-      "package": "node-forge",
-      "version": "1.4.0",
-      "advisory": "GHSA-86w9-cpqp-85rv",
-      "patch": "config/security/npm-patches/node-forge@1.4.0.patch",
-      "patch_sha256": "2798686e4488058ad81c3b8e32eb763c0feff21f4c717ce4d13b6ef2432cd5b8",
-      "original_integrity": "sha512-LarFH0+6VfriEhqMMcLX2F7SwSXeWwnEAJEsYm5QKWchiVYVvJyV9v7UDvUv+w5HO23ZpQTXDv/GxdDdMyOuoQ==",
-      "license": "(BSD-3-Clause OR GPL-2.0)",
-      "reviewed_on": "2026-10-21",
-      "review_by": "2026-10-28",
-      "owner": "Codex-01a0f3fc",
-      "source": "https://github.com/digitalbazaar/forge/pull/1152",
-      "installed_sha256": {
-        "lib/rsa.js": "c9b1e3799e230528b6d6815c1f6cd3c6058b9d45975264b55d995abb976589af"
-      },
-      "lock_sha256": "3201b99ddc32d8161b78bcf41ca97016af476fffc4734e1f0e846c82e669d603",
-      "manifest_sha256": "fd02391c7509fe552bdad8bc39611c7b1763afc1e35d328ac7d79321191c2963"
-    },
-    {
       "package": "braces",
       "version": "3.0.3",
       "advisory": "GHSA-vfj7-8cjw-p6xm",
@@ -27,8 +9,8 @@
       "patch_sha256": "803945b6b11ff5b6d9966ee59136eb23bf76953dbbcbc764740d0858c3eccb11",
       "original_integrity": "sha512-yQbXgO/OSZVD2IsiLlro+7Hf6Q18EJrKSEsdoMzKePKXct3gvD8oLcOQdIzGupr5Fj+EDe8gO/lxc1BzfMpxvA==",
       "license": "MIT",
-      "reviewed_on": "2026-10-21",
-      "review_by": "2026-10-28",
+      "reviewed_on": "2026-10-28",
+      "review_by": "2026-10-30",
       "owner": "Codex-01a0f3fc",
       "source": "https://github.com/micromatch/braces/issues/70",
       "installed_sha256": {
@@ -37,8 +19,28 @@
         "lib/stringify.js": "1d059d40df3eea35ccecc8fafcd64fca67e02dcfb1edaf1e8e0c94fd88338fc9",
         "lib/parse.js": "540c920c9186405e6d059b468a2a440c247f5c9aa0fdbdae5cd3d0a021697549"
       },
-      "lock_sha256": "3201b99ddc32d8161b78bcf41ca97016af476fffc4734e1f0e846c82e669d603",
-      "manifest_sha256": "fd02391c7509fe552bdad8bc39611c7b1763afc1e35d328ac7d79321191c2963"
+      "lock_sha256": "c665b78965e536144ebb5a341b22ac0b7955ad94660a63cde5b1144bb3d590e1",
+      "manifest_sha256": "7c78a6e0c2f32c51cf1c7574d10848f7c4586d31bda288e215bb1070967ab482"
+    },
+    {
+      "package": "deepmerge",
+      "version": "4.3.1",
+      "advisory": "GHSA-gcqx-w48m-w2h4",
+      "patch": "config/security/npm-patches/deepmerge@4.3.1.patch",
+      "patch_sha256": "06b3fb34ab98180e3564b6526b1527ce4f7905dd93ed92a52a2756caf5c939e2",
+      "original_integrity": "sha512-3sUqbMEc77XqpdNO7FRyRog+eW3ph+GYCbj+rK+uYyRMuwsVy0rMiVtPn+QJlKFvWP/1PYpapqYn0Me2knFn+A==",
+      "license": "MIT",
+      "reviewed_on": "2026-10-28",
+      "review_by": "2026-10-30",
+      "owner": "Codex-01a0f3fc",
+      "source": "https://github.com/advisories/GHSA-gcqx-w48m-w2h4",
+      "installed_sha256": {
+        "index.js": "616af995c76262bfe7db13383074be44123d1a2f92f406f516bf8a1f016efa62",
+        "dist/cjs.js": "f07353a2be736978e8b1c013ba362251a1e5af89dcfdae50e1fcb93f0ae66664",
+        "dist/umd.js": "92a1d0f76b7974f7e759cf170c8968fb58dfae5fc28f48b677ce9dd796e3000d"
+      },
+      "lock_sha256": "c665b78965e536144ebb5a341b22ac0b7955ad94660a63cde5b1144bb3d590e1",
+      "manifest_sha256": "7c78a6e0c2f32c51cf1c7574d10848f7c4586d31bda288e215bb1070967ab482"
     }
   ]
 }

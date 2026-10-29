@@ -110,7 +110,7 @@ async def test_get_creditor_scopes_lookup_by_tenant():
 
     assert exc.value.status_code == 404
     statement, params = db.calls[0]
-    assert "WHERE id = :id AND (tenant_id = :tenant_id" in statement
+    assert "WHERE id = :id AND tenant_id = :tenant_id" in statement
     assert params == {"id": "cred-1", "tenant_id": "tenant-a"}
 
 
@@ -128,7 +128,7 @@ async def test_update_creditor_scopes_existing_row_by_tenant():
 
     assert exc.value.status_code == 404
     statement, params = db.calls[0]
-    assert "WHERE id = :id AND (tenant_id = :tenant_id" in statement
+    assert "WHERE id = :id AND tenant_id = :tenant_id" in statement
     assert params == {"id": "cred-1", "tenant_id": "tenant-a"}
 
 
@@ -145,7 +145,7 @@ async def test_balance_lookup_scopes_creditor_by_tenant():
 
     assert exc.value.status_code == 404
     statement, params = db.calls[0]
-    assert "WHERE id = :id AND (tenant_id = :tenant_id" in statement
+    assert "WHERE id = :id AND tenant_id = :tenant_id" in statement
     assert params == {"id": "cred-1", "tenant_id": "tenant-a"}
 
 
@@ -162,5 +162,5 @@ async def test_delete_creditor_scopes_lookup_by_tenant():
 
     assert exc.value.status_code == 404
     statement, params = db.calls[0]
-    assert "WHERE id = :id AND (tenant_id = :tenant_id" in statement
+    assert "WHERE id = :id AND tenant_id = :tenant_id" in statement
     assert params == {"id": "cred-1", "tenant_id": "tenant-a"}

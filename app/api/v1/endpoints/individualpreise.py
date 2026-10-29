@@ -27,7 +27,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import text
 
 from app.core.database import get_db
-from app.core.dependencies import get_tenant_id
+from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
@@ -108,6 +108,17 @@ def list_individualpreise(
     sql += " ORDER BY artikel_nr, partner_nr NULLS LAST, staffel_menge"
     rows = db.execute(text(sql), params).fetchall()
     return [IndividualpreisOut(**dict(r._mapping)) for r in rows]
+
+
+@router.get("/{preis_id}", response_model=IndividualpreisOut, summary="Individualpreis abrufen")
+def get_individualpreis(preis_id: str, db=Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
+    row = db.execute(text("""
+        SELECT * FROM domain_shared.individualpreise
+        WHERE id = :id AND tenant_id = :tid
+    """), {"id": preis_id, "tid": tenant_id}).fetchone()
+    if row is None:
+        raise HTTPException(404, "Individualpreis nicht gefunden.")
+    return IndividualpreisOut(**dict(row._mapping))
 
 
 @router.post("", response_model=IndividualpreisOut, status_code=201, summary="Individualpreis anlegen", dependencies=SCHREIBEN["VERKAUF"])

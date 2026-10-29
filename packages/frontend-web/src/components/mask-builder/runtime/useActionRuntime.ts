@@ -1,3 +1,4 @@
+import { checkResourceAction, resourceActionResult, resourceActionPayload } from './resource-response-adapter'
 import { identityBudgetInput } from './identity-budget-command-adapter'
 import { useCallback, useRef, useState } from 'react'
 import { apiClient } from '@/lib/api-client'
@@ -57,6 +58,12 @@ export function useActionRuntime(
           error: 'Diese Aktion erfordert die Eingabe und Bestaetigung in der Maske.' }
       }
 
+      if (actionDef.responseAdapter) {
+        try { checkResourceAction(actionDef, req, opts) } catch {
+          return { actionKey: req.actionKey, mode: req.mode, success: false, error: 'REST-Ressourcenaktion ist für diesen Aufruf gesperrt.' }
+        }
+      }
+
       // DocFlow exposes domain-command bodies, not the generic _mode envelope.
       // Until a versioned adapter is registered, a preview must never mutate a document.
       if (req.mode !== 'execute' && !actionDef.commandBinding && /^\/api\/v1\/docflow(?:\/|$)/.test(actionDef.commandEndpoint ?? '')) {
@@ -104,11 +111,11 @@ export function useActionRuntime(
         }
         const method = actionDef.method ?? 'POST'
         const endpoint = actionDef.commandEndpoint
-          .replace('{entity_id}', opts.entityId ?? '')
+          .replace('{entity_id}', actionDef.responseAdapter ? encodeURIComponent(opts.entityId ?? '') : opts.entityId ?? '')
           .replace('{screen_id}', opts.screenId)
 
         const body: Record<string, unknown> = {
-          ...identityBudgetInput(endpoint, req.payload ?? {}),
+          ...(actionDef.responseAdapter ? resourceActionPayload(actionDef, req.payload ?? {}) : identityBudgetInput(endpoint, req.payload ?? {})),
           ...(/^\/api\/v1\/studio\/entities\/studio_[a-z0-9_]+\/[^/]+\/actions\/(update|delete)$/.test(endpoint)
             && typeof req.expectedVersion === 'number' ? { expected_version: req.expectedVersion } : {}),
           ...(req.mode !== 'execute' ? { _mode: req.mode } : {}),
@@ -122,7 +129,7 @@ export function useActionRuntime(
           data: body,
         })
 
-        const result: ActionResult = response.data
+        const result: ActionResult = actionDef.responseAdapter ? resourceActionResult(actionDef, req, opts, response.data) : response.data
         setLastResult(result)
         return result
       } catch (err) {

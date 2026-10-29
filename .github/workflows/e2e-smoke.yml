@@ -111,7 +111,9 @@ jobs:
         run: bash scripts/ci/e2e_keycloak.sh
 
       - name: Migrate Test Database
-        run: python scripts/init_db.py
+        # The job-provided PostgreSQL is authoritative, including its login.
+        # Example .env files may contain a separate local migrator account.
+        run: MIGRATION_DATABASE_URL="$DATABASE_URL" python scripts/init_db.py
       
       - name: Build Application
         run: pnpm --filter @valero-neuroerp/frontend-web build
@@ -128,6 +130,9 @@ jobs:
         run: |
           pnpm --filter @valero-neuroerp/frontend-web preview -- --host 127.0.0.1 --port 4173 &
           timeout 60 bash -c 'until curl -fsS http://127.0.0.1:4173 >/dev/null; do sleep 2; done'
+
+      - name: Verify production frontend bootstrap
+        run: node packages/frontend-web/scripts/check-production-bootstrap.mjs
 
       - name: Run Smoke Tests - ${{ matrix.domain }}
         run: pnpm exec playwright test --grep "@smoke" --project=smoke specs/${{ matrix.domain }}/

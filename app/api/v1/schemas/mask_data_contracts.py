@@ -26,7 +26,7 @@ class MaskTableFilter(BaseModel):
 
 class MaskDataReadIn(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True, allow_inf_nan=False)
-    screen_id: str = Field(pattern=r"^[a-z0-9][a-z0-9_/-]{0,120}$")
+    screen_id: str = Field(pattern=r"^[A-Za-z0-9][A-Za-z0-9_/-]{0,120}$")
     source_key: str = Field(pattern=r"^[A-Za-z][A-Za-z0-9_-]{0,63}$")
     entity_id: str | None = Field(default=None, pattern=r"^[A-Za-z0-9][A-Za-z0-9_.:-]{0,119}$")
     page: int = Field(default=1, ge=1, le=1000000)

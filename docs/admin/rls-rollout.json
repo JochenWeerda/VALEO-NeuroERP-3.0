@@ -1,0 +1,164 @@
+{
+ "_note": "Generiert von scripts/rls_rollout.py aus docs/admin/rls-inventory.json; nicht von Hand aendern.",
+ "summary": {
+  "ready": 0,
+  "pending": 43,
+  "reasons": {
+   "dienst": 10,
+   "mandant_ermitteln": 1,
+   "standardmandant": 25,
+   "mandant_null": 20,
+   "uebergreifend": 0,
+   "identitaet": 4
+  }
+ },
+ "ready": [],
+ "pending": {
+  "domain_agrar.agrar_duenger": [
+   "standardmandant"
+  ],
+  "domain_agrar.agrar_psm": [
+   "standardmandant"
+  ],
+  "domain_agrar.agrar_saatgut": [
+   "dienst",
+   "standardmandant"
+  ],
+  "domain_agrar.agrar_sachkunde": [
+   "standardmandant"
+  ],
+  "domain_agrar.feeding_feed_products": [
+   "mandant_null"
+  ],
+  "domain_agrar.feeding_feed_reference_values": [
+   "mandant_null"
+  ],
+  "domain_agrar.feeding_feed_revisions": [
+   "mandant_null"
+  ],
+  "domain_agrar.feeding_groups": [
+   "mandant_null"
+  ],
+  "domain_agrar.feeding_logs": [
+   "standardmandant"
+  ],
+  "domain_agrar.feldbuch_schlaege": [
+   "standardmandant"
+  ],
+  "domain_agrar.nutrient_compositions": [
+   "standardmandant"
+  ],
+  "domain_agrar.seed_orders": [
+   "standardmandant"
+  ],
+  "domain_agrar.waagen_vorlagen": [
+   "standardmandant"
+  ],
+  "domain_crm.crm_opportunities": [
+   "dienst",
+   "standardmandant"
+  ],
+  "domain_dev_mock.mock_sessions": [
+   "identitaet"
+  ],
+  "domain_erp.dunning_notices": [
+   "mandant_null"
+  ],
+  "domain_erp.gift_cards": [
+   "standardmandant"
+  ],
+  "domain_erp.offene_posten": [
+   "mandant_null",
+   "standardmandant"
+  ],
+  "domain_erp.open_items": [
+   "standardmandant"
+  ],
+  "domain_inventory.agrar_contracts": [
+   "mandant_null",
+   "standardmandant"
+  ],
+  "domain_inventory.material_flow_edges": [
+   "mandant_null"
+  ],
+  "domain_inventory.material_flow_nodes": [
+   "mandant_null"
+  ],
+  "domain_inventory.silo_cells": [
+   "mandant_null"
+  ],
+  "domain_inventory.silo_lot_movements": [
+   "mandant_null"
+  ],
+  "domain_inventory.silo_lots": [
+   "mandant_null"
+  ],
+  "domain_inventory.silos": [
+   "dienst",
+   "mandant_null"
+  ],
+  "domain_inventory.weighing_tickets": [
+   "mandant_null"
+  ],
+  "domain_log.log_touren": [
+   "dienst",
+   "mandant_null"
+  ],
+  "domain_logistics.carrier_invoices": [
+   "mandant_null"
+  ],
+  "domain_ops.kon_contract": [
+   "standardmandant"
+  ],
+  "domain_ops.ops_chargen": [
+   "dienst",
+   "standardmandant"
+  ],
+  "domain_ops.ops_fahrzeuge": [
+   "mandant_null"
+  ],
+  "domain_ops.ops_pcn_meldungen": [
+   "standardmandant"
+  ],
+  "domain_ops.reklamationen": [
+   "standardmandant"
+  ],
+  "domain_shared.admin_api_keys": [
+   "identitaet"
+  ],
+  "domain_shared.api_keys": [
+   "identitaet",
+   "standardmandant"
+  ],
+  "domain_shared.audit_logs": [
+   "mandant_null",
+   "standardmandant"
+  ],
+  "domain_shared.calendar_ics_tokens": [
+   "identitaet",
+   "mandant_ermitteln",
+   "standardmandant"
+  ],
+  "public.crm_activities": [
+   "dienst",
+   "mandant_null",
+   "standardmandant"
+  ],
+  "public.crm_leads": [
+   "dienst",
+   "mandant_null",
+   "standardmandant"
+  ],
+  "public.finance_accounting_periods": [
+   "dienst"
+  ],
+  "public.inventory_goods_receipts": [
+   "dienst",
+   "standardmandant"
+  ],
+  "public.inventory_warehouses": [
+   "dienst",
+   "standardmandant"
+  ]
+ }
+}

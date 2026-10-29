@@ -27,6 +27,7 @@ from app.domains.operations.models import (
 )
 from app.services.compliance_service import (
     dt as _dt,
+    pcn_to_dict as _pcn_to_dict,
     list_sales_deliveries as _list_sales_deliveries,
     extract_hazard_export_rows as _extract_hazard_export_rows,
     compute_nutrient_stream as _compute_nutrient_stream,
@@ -406,19 +407,6 @@ _UFI_PATTERN = _re.compile(r"^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$")
 _PCN_STATUS_VALUES = {"entwurf", "validiert", "eingereicht", "angenommen", "abgelehnt"}
 
 
-def _pcn_to_dict(m: PCNMeldung) -> dict:
-    return {
-        "meldung_id": m.id,
-        "produktname": m.produktname,
-        "ufi": m.ufi or "",
-        "cas_nummern": m.cas_nummern or "",
-        "gefahrenklassen": m.gefahrenklassen or [],
-        "verwendungskategorie": m.verwendungskategorie or "",
-        "pcnStatus": m.pcn_status,
-        "tenant_id": m.tenant_id,
-        "created_at": m.created_at.isoformat() if m.created_at else None,
-        "schema_version": 1,
-    }
 
 
 @router.post("/pcn-meldungen", response_model=ComplianceOut, status_code=201, summary="Pcn meldung anlegen", dependencies=SCHREIBEN["QUALITAET"])
@@ -561,9 +549,9 @@ async def get_eudr_status(
 
 @router.get("/ustva", response_model=ComplianceOut, summary="Ustva status abrufen")
 async def get_ustva_status(
-    tenant_id: Optional[str] = Query(None, description="Tenant context"),
     periode: Optional[str] = Query(None, description="Meldezeitraum z.B. 2026-03"),
     db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ) -> dict:
     """
     UStVA-Bereitschaftsstatus — aggregiert aus gebuchten Journal-Einträgen der Periode.
@@ -571,7 +559,7 @@ async def get_ustva_status(
     from datetime import timezone
     from sqlalchemy import text as _text
     current_period = periode or datetime.now(timezone.utc).strftime("%Y-%m")
-    tid = tenant_id or "default"
+    tid = tenant_id
     try:
         row = db.execute(
             _text("""
@@ -601,12 +589,10 @@ async def get_ustva_status(
             {"tid": tid, "period": current_period},
         ).scalar() or 0
         readiness = min(100, int(100 * (1 - int(offene) / max(int(offene) + 1, 1))))
-        elster_status = "EINGEREICHT" if readiness == 100 else "AUSSTEHEND"
-    except Exception:
-        umsatz = ust_soll = vorsteuer = zahllast = 0.0
-        offene = 0
-        readiness = 0
+        # Aus Buchungsbereitschaft folgt kein Nachweis einer Uebermittlung.
         elster_status = "AUSSTEHEND"
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail="UStVA-Status konnte nicht ermittelt werden.") from exc
 
     return {
         "periode": current_period,
@@ -627,15 +613,15 @@ async def get_ustva_status(
 
 @router.get("/bvl-umsaetze", response_model=list[ComplianceOut], summary="Bvl umsaetze abrufen")
 async def get_bvl_umsaetze(
-    tenant_id: Optional[str] = Query(None, description="Tenant context"),
     db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ) -> list:
     """
     PSM-Umsaetze fuer BVL-Meldung aggregieren.
     Liefert Wirkstoffe mit Absatzmengen aus Lagerbewegungen/Rechnungen.
     """
     from sqlalchemy import text
-    tid = tenant_id or "default"
+    tid = tenant_id
     try:
         rows = db.execute(
             text("""
@@ -646,7 +632,7 @@ async def get_bvl_umsaetze(
                 JOIN domain_inventory.articles a ON a.id = sm.article_id
                 WHERE sm.tenant_id = :tid
                   AND sm.movement_type = 'out'
-                  AND a.article_group = 'PSM'
+                  AND a.pflanzenschutzmittel
                   AND EXTRACT(YEAR FROM sm.movement_date) = EXTRACT(YEAR FROM CURRENT_DATE) - 1
                 GROUP BY a.name, a.unit
                 ORDER BY menge DESC
@@ -654,8 +640,11 @@ async def get_bvl_umsaetze(
             {"tid": tid},
         ).fetchall()
         return [{"wirkstoff": r[0], "menge": float(r[1]), "einheit": r[2]} for r in rows]
-    except Exception:
-        return []
+    except Exception as exc:
+        # Bis 27.10.2026 lieferte ein Fehler (die Abfrage nannte die fehlende Spalte article_group) still eine leere
+        # Meldung; eine leere BVL-Meldung ist von "keine PSM verkauft" nicht zu unterscheiden.
+        logger.exception("BVL-Umsaetze konnten nicht ermittelt werden")
+        raise HTTPException(status_code=500, detail="BVL-Umsaetze konnten nicht ermittelt werden") from exc
 
 
 # ── COMP-SPERR-001: Artikel-Sperr-Engine ─────────────────────────────────────

@@ -612,7 +612,7 @@ export type AnlageDetail = {
 
 export type DebitOP = {
   id: string; rechnungsnr: string; kunde: string; kundennr: string; datum: string; faelligkeit: string
-  betrag: number; offen: number; ueberfaellig: boolean; mahnStufe: number
+  betrag: number; offen: number; ueberfaellig: boolean; mahnStufe: number; waehrung: string
 }
 
 export type KreditOP = {
@@ -642,25 +642,27 @@ export function useDebitorenOP() {
     queryKey: [...fibuKeys.debitoren(), 'op'],
     queryFn: async () => {
       const response = await apiClient.get<{ items: Record<string, unknown>[]; total: number }>(
-        '/api/v1/finance/open-items?typ=debitor'
+        '/api/v1/finance/open-items?konto_typ=debitoren&only_open=true&limit=5000&offset=0'
       )
-      return (response.data.items ?? []).map((item): DebitOP => ({
+      if (!Array.isArray(response.data.items) || !Number.isInteger(response.data.total) || response.data.items.length !== response.data.total) {
+        throw new Error('Offene Posten wurden nicht vollstaendig geladen.')
+      }
+      return response.data.items.map((item): DebitOP => ({
         id: stringValue(item.id),
-        rechnungsnr: stringValue(item.beleg_nummer ?? item.rechnungsnr),
-        kunde: stringValue(item.partner_name ?? item.kunde_name),
-        kundennr: stringValue(item.debitor_id),
-        datum: stringValue(item.faellig_am),
-        faelligkeit: stringValue(item.faellig_am),
-        betrag: Number(item.betrag ?? 0),
+        rechnungsnr: stringValue(item.rechnungsnr),
+        kunde: stringValue(item.kunde_name),
+        kundennr: stringValue(item.konto_nr),
+        datum: stringValue(item.rechnungsdatum),
+        faelligkeit: stringValue(item.faelligkeit),
+        betrag: Number(item.op_betrag ?? 0),
         offen: Number(item.offen ?? 0),
-        ueberfaellig: stringValue(item.faellig_am) ? new Date(stringValue(item.faellig_am)) < new Date() : false,
-        mahnStufe: Number(item.mahnstufe ?? 0),
+        ueberfaellig: item.ueberfaellig === true,
+        mahnStufe: Number(item.mahn_stufe ?? 0),
+        waehrung: stringValue(item.waehrung),
       }))
     },
-    initialData: [],
     // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
     // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
-    initialDataUpdatedAt: 0,
     staleTime: 2 * 60 * 1000,
   })
 }

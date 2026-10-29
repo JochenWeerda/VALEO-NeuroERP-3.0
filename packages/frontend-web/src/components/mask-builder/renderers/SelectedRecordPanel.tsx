@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button'
 import type { RenderTablePlan } from '../render-plan/types'
 import { navigateRowRoute, resolveRowRoute } from './row-identity'
+import { formatCellValue } from './FastTableRenderer'
 
 export function SelectedRecordPanel({
   table,
@@ -18,7 +19,7 @@ export function SelectedRecordPanel({
           return (
             <div key={column.key} className="grid grid-cols-[minmax(7rem,11rem)_1fr] gap-2">
               <dt className="text-muted-foreground">{column.label}</dt>
-              <dd className="min-w-0 truncate font-medium">{value == null || value === '' ? '–' : String(value)}</dd>
+              <dd className="min-w-0 truncate font-medium">{formatCellValue(value === '' ? null : value, column.renderKind, column.currencyField ? String(row[column.currencyField] ?? '') : 'EUR')}</dd>
             </div>
           )
         })}

@@ -23,7 +23,7 @@ const definition: ScreenDefinition = {
 } as ScreenDefinition
 
 vi.mock('@/lib/api/masks', () => ({ useScreenDefinition: () => ({ data: definition }) }))
-vi.mock('@/components/mask-builder/runtime/screen-permissions', () => ({ useScreenPermissions: () => [] }))
+vi.mock('@/components/mask-builder/runtime/screen-permissions', () => ({ useScreenPermissions: () => ['einkauf.anfrage.loeschen'] }))
 vi.mock('@/app/routing/typed-router', () => ({ useNavigate: () => navigate }))
 vi.mock('@/hooks/use-toast', () => ({ useToast: () => ({ toast }) }))
 vi.mock('@/lib/export-utils', () => ({ exportToCSV: csv }))

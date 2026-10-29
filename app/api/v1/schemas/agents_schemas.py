@@ -5,6 +5,7 @@ from typing import Any, Optional, List
 from pydantic import BaseModel, Field, ConfigDict
 from app.api.v1.schemas.base import BaseSchema
 from pydantic import ConfigDict as _ConfigDict
+from app.core.tenant_context import get_current_tenant_id
 
 
 class AgentOut(BaseSchema):
@@ -30,7 +31,7 @@ class CapabilityResponse(BaseModel):
 
 class NeuroAssistRunRequest(BaseModel):
     capability_key: str
-    tenant_id: str = "system"
+    tenant_id: str = Field(default_factory=get_current_tenant_id)
     parameters: dict = Field(default_factory=dict)
 
 
@@ -61,7 +62,7 @@ class NeuroAssistGateActionResponse(BaseModel):
 
 
 class AgentBudgetUpdateRequest(BaseModel):
-    tenant_id: str = "system"
+    tenant_id: str = Field(default_factory=get_current_tenant_id)
     monthly_budget_cents: int = Field(ge=0)
     changed_by: str = "admin-ui"
 
@@ -109,19 +110,19 @@ class AgentTicketResponse(BaseModel):
 
 
 class AgentInterventionRequest(BaseModel):
-    tenant_id: str = "system"
+    tenant_id: str = Field(default_factory=get_current_tenant_id)
     action: str
     requested_by: str = "admin-ui"
     note: str | None = None
 
 
 class AgentTemplateImportRequest(BaseModel):
-    tenant_id: str = "system"
+    tenant_id: str = Field(default_factory=get_current_tenant_id)
     template: dict
 
 
 class AgentHeartbeatUpdateRequest(BaseModel):
-    tenant_id: str = "system"
+    tenant_id: str = Field(default_factory=get_current_tenant_id)
     cadence: str | None = None
     enabled: bool | None = None
     stale_after_hours: int | None = Field(default=None, ge=1)
@@ -129,7 +130,7 @@ class AgentHeartbeatUpdateRequest(BaseModel):
 
 
 class AgentProfileUpdateRequest(BaseModel):
-    tenant_id: str = "system"
+    tenant_id: str = Field(default_factory=get_current_tenant_id)
     owner_role: str | None = None
     escalation_role: str | None = None
     review_sla_hours: int | None = Field(default=None, ge=1)
@@ -139,7 +140,7 @@ class AgentProfileUpdateRequest(BaseModel):
 
 
 class AgentSkillPackUpdateRequest(BaseModel):
-    tenant_id: str = "system"
+    tenant_id: str = Field(default_factory=get_current_tenant_id)
     skills: list[str] | None = None
     prompt_contracts: list[str] | None = None
     changed_by: str = "admin-ui"
@@ -169,7 +170,7 @@ class AgentPersistenceStatusResponse(BaseModel):
 
 
 class ControlCenterPlanItemRequest(BaseModel):
-    tenant_id: str = "system"
+    tenant_id: str = Field(default_factory=get_current_tenant_id)
     plan_id: str
     title: str
     kind: str
@@ -180,7 +181,7 @@ class ControlCenterPlanItemRequest(BaseModel):
 
 
 class ControlCenterIncidentActionRequest(BaseModel):
-    tenant_id: str = "system"
+    tenant_id: str = Field(default_factory=get_current_tenant_id)
     action: str
     requested_by: str = "admin-ui"
     note: str | None = None

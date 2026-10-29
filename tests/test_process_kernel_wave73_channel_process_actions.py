@@ -5,6 +5,7 @@ Wave 73 - Channel-native process execution, approvals and audit.
 from __future__ import annotations
 
 import pytest
+from collections.abc import Iterator
 from fastapi import FastAPI
 from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
 from fastapi.testclient import TestClient
@@ -42,11 +43,30 @@ def clear_channel_state():
 
 
 @pytest.fixture
-def client(require_db) -> TestClient:
+def client(require_db) -> Iterator[TestClient]:
     app = FastAPI()
     ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(channel_work_surfaces.router)
-    return TestClient(app)
+    from sqlalchemy import text
+    from sqlalchemy.orm import Session
+    from app.core.database import engine, get_db
+    from testgrenze import pruefstand_erlaubt
+    assert pruefstand_erlaubt(engine.url)
+    with engine.connect() as connection:
+        outer = connection.begin()
+        session = Session(bind=connection, join_transaction_mode="create_savepoint")
+        session.execute(text("INSERT INTO domain_shared.tenants(id,name,domain) "
+                             "VALUES ('t1','Synthetic Wave73','wave73.example.invalid') "
+                             "ON CONFLICT (id) DO NOTHING"))
+        session.commit()
+        app.dependency_overrides[get_db] = lambda: session
+        try:
+            with TestClient(app) as test_client:
+                yield test_client
+        finally:
+            session.close()
+            assert outer.is_active
+            outer.rollback()
 
 
 def test_channel_process_execute_accepts_direct_approval_flow(client: TestClient):

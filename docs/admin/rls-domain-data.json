@@ -1,0 +1,569 @@
+{
+ "_note": "Lesender Befund der gewachsenen Datenbank (scripts/rls_domain_matrix.py --data).",
+ "stand": "2026-10-27",
+ "tables": {
+  "domain_agrar.agrar_duenger": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_agrar.agrar_partie_links": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_agrar.agrar_psm": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_agrar.agrar_saatgut": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_agrar.agrar_sachkunde": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_agrar.agrar_selbstabrechnung_status_log": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_agrar.agrar_selbstabrechnungen": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_agrar.agrar_trocknung_abrechnungen": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_agrar.feeding_feed_products": {
+   "zeilen": 380,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_agrar.feeding_feed_reference_values": {
+   "zeilen": 1157,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_agrar.feeding_feed_revisions": {
+   "zeilen": 770,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_agrar.feeding_groups": {
+   "zeilen": 1298,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_agrar.feeding_logs": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_agrar.feeding_nutrient_definitions": {
+   "zeilen": 19,
+   "null": 19,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_agrar.feeding_reference_revisions": {
+   "zeilen": 22,
+   "null": 22,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_agrar.feeding_unit_definitions": {
+   "zeilen": 8,
+   "null": 8,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_agrar.feldbuch_schlaege": {
+   "zeilen": 24,
+   "null": 0,
+   "default": 1,
+   "system": 0,
+   "mandanten": 3
+  },
+  "domain_agrar.harvest_acceptances": {
+   "zeilen": 56,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_agrar.nutrient_compositions": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_agrar.seed_orders": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_agrar.silo_bewegungen": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "silo_id -> domain_agrar.silo_zellen.silo_id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_agrar.waagen_vorlagen": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_crm.activities": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_crm.crm_opportunities": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_crm.customers": {
+   "zeilen": 6,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 2
+  },
+  "domain_crm.farm_profiles": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_crm.leads": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_dev_mock.mock_sessions": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_erp.bank_accounts": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_erp.chart_of_accounts": {
+   "zeilen": 49,
+   "null": 0,
+   "default": 0,
+   "system": 28,
+   "mandanten": 3
+  },
+  "domain_erp.creditors": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_erp.debitors": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_erp.dunning_notices": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_erp.fibu_connector_run_items": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "run_id -> domain_erp.fibu_connector_runs.id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_erp.gift_cards": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_erp.offene_posten": {
+   "zeilen": 25,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 2
+  },
+  "domain_erp.open_items": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_inventory.agrar_contracts": {
+   "zeilen": 3,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_inventory.material_flow_edges": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_inventory.material_flow_nodes": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_inventory.silo_cells": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_inventory.silo_lot_movements": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_inventory.silo_lots": {
+   "zeilen": 3,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_inventory.silos": {
+   "zeilen": 4,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_inventory.weighing_tickets": {
+   "zeilen": 50,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 2
+  },
+  "domain_log.log_tour_delivery_notes": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "tour_id -> domain_log.log_touren.id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_log.log_tour_events": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "tour_id -> domain_log.log_touren.id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_log.log_tour_stops": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "tour_id -> domain_log.log_touren.id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_log.log_touren": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_logistics.carrier_invoices": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_logistics.epod_settlements": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_logistics.freight_tariffs": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_logistics.tour_disposition_checks": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_logistics.tour_events": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_logistics.tour_stops": {
+   "zeilen": 2,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_logistics.tours": {
+   "zeilen": 2,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_ops.kon_contract": {
+   "zeilen": 4,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_ops.ops_chargen": {
+   "zeilen": 79,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_ops.ops_fahrer": {
+   "zeilen": 1,
+   "eltern_fk": [
+    "aktuelles_fahrzeug_id -> domain_ops.ops_fahrzeuge.id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_ops.ops_fahrzeug_bussgeld": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "fahrzeug_id -> domain_ops.ops_fahrzeuge.id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_ops.ops_fahrzeug_schaeden": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "fahrzeug_id -> domain_ops.ops_fahrzeuge.id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_ops.ops_fahrzeug_status_historie": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "fahrzeug_id -> domain_ops.ops_fahrzeuge.id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_ops.ops_fahrzeug_touren": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "fahrzeug_id -> domain_ops.ops_fahrzeuge.id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_ops.ops_fahrzeuge": {
+   "zeilen": 1,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_ops.ops_pcn_meldungen": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_ops.reklamationen": {
+   "zeilen": 15,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_portal.customer_order_items": {
+   "zeilen": 0,
+   "eltern_fk": [
+    "order_id -> domain_portal.customer_orders.id"
+   ],
+   "verwaist": 0,
+   "ohne_eltern": 0
+  },
+  "domain_shared.api_keys": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_shared.audit_logs": {
+   "zeilen": 2,
+   "null": 0,
+   "default": 0,
+   "system": 1,
+   "mandanten": 2
+  },
+  "domain_shared.calendar_ics_tokens": {
+   "zeilen": 9,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "domain_shared.policy_rules": {
+   "zeilen": 3,
+   "null": 3,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "domain_shared.users": {
+   "zeilen": 5,
+   "null": 0,
+   "default": 2,
+   "system": 2,
+   "mandanten": 3
+  },
+  "public.crm_activities": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "public.crm_leads": {
+   "zeilen": 97,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "public.finance_accounting_periods": {
+   "zeilen": 0,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 0
+  },
+  "public.inventory_goods_receipt_lines": {
+   "zeilen": 3
+  },
+  "public.inventory_goods_receipts": {
+   "zeilen": 2,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "public.inventory_locations": {
+   "zeilen": 1
+  },
+  "public.inventory_warehouses": {
+   "zeilen": 1,
+   "null": 0,
+   "default": 0,
+   "system": 0,
+   "mandanten": 1
+  },
+  "public.outbox_events": {
+   "zeilen": 1407,
+   "null": 0,
+   "default": 8,
+   "system": 0,
+   "mandanten": 4
+  }
+ }
+}

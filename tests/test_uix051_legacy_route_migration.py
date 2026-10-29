@@ -65,8 +65,10 @@ class TestUIX051NativeWrapperPages:
             assert "readQueryParam(searchParams, 'tab')" in content
             delegated = (PAGES_DIR / "crm/party-native.tsx").read_text(encoding="utf-8")
             assert "<UniversalNativeDetailPage" in delegated
-            assert f"kind === 'lead' ? 'crm/lead' : '{expected_screen_id}'" in delegated
-            assert "screenId={screenId}" in delegated
+            # The render suite verifies actual Lead/Customer routing. Here only
+            # require both registered definitions, without fixing JS syntax.
+            assert '"crm/lead"' in delegated
+            assert f'"{expected_screen_id}"' in delegated
             assert "entityId={entityId}" in delegated
             assert "requestedSectionKey={requestedSectionKey}" in delegated
         else:

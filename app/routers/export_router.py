@@ -17,6 +17,7 @@ from app.core.sse import sse_hub
 from app.core.hintergrund import starte
 from app.repositories.document_repository import DocumentRepository
 from app.core.dependency_container import container
+from app.core.tenant import get_tenant_id  # Mandant aus dem Token (bis 27.10.2026 ?tenant_id=system)
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +40,7 @@ async def export_documents(
     from_date: str = Query(""),
     to_date: str = Query(""),
     fmt: str = Query("csv"),
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     user: dict = Depends(require_scopes("docs:export")),
 ) -> FileResponse:
     """

@@ -13,7 +13,7 @@ export type OrderStatusType = typeof OrderStatus[keyof typeof OrderStatus];
 
 // Order Line Item Schema
 export const OrderLineSchema = z.object({
-  id: z.string().uuid(),
+  id: z.string().guid(),
   sku: z.string().min(1),
   name: z.string().min(1),
   description: z.string().optional(),
@@ -28,9 +28,9 @@ export type OrderLine = z.infer<typeof OrderLineSchema>;
 
 // Order Entity Schema
 export const OrderSchema = z.object({
-  id: z.string().uuid(),
-  tenantId: z.string().uuid(),
-  customerId: z.string().uuid(),
+  id: z.string().guid(),
+  tenantId: z.string().guid(),
+  customerId: z.string().guid(),
   orderNumber: z.string().min(1),
   lines: z.array(OrderLineSchema),
   subtotalNet: z.number().nonnegative(),

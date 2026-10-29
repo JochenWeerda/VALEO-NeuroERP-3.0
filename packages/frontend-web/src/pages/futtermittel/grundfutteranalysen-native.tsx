@@ -1,5 +1,7 @@
-import { FeedingAnalysisWorklist } from '@/features/feed-advice/FeedingAnalysisWorklist'
+import { NativeListPage } from '@/components/mask-builder/NativeListPage'
 
-export default function GrundfutteranalysenNativePage(): JSX.Element {
-  return <FeedingAnalysisWorklist />
+export default function Page(): JSX.Element {
+  return (
+    <NativeListPage screenId="futtermittel/grundfutteranalysen" testId="screen-futtermittel/grundfutteranalysen" />
+  )
 }

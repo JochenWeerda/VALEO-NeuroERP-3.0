@@ -7,6 +7,16 @@ import asyncio
 import pytest
 
 
+@pytest.fixture(autouse=True)
+def _mandantenkontext():
+    """Dienste ohne ausdruecklichen Mandanten nehmen den des Kontexts; seit 27.10.2026 gibt es keinen Rueckfall "system"."""
+    from app.core.tenant_context import tenant_scope
+
+    with tenant_scope("test-mandant", "unit test"):
+        yield
+
+
+
 def _run(coro):
     return asyncio.new_event_loop().run_until_complete(coro)
 

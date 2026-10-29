@@ -1,15 +1,80 @@
-﻿---
+---
 title: Active Workboard
 type: reference
 audience: [agent, entwickler]
 owner: Claude Code
 status: aktiv
-last_reviewed: 2026-06-30
+last_reviewed: 2026-10-22
 version: 3.3.0
 description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — kanonisches Format mit Von/Owner/Stand/Ziel/Dateibesitz/Abnahme-Feldern.
 ---
 
 # Active Workboard
+
+## ADAPTIVE-WORKSPACE-20261022 — reserviert, Cursor Grok (Phase-1 Lead)
+
+**Owner:** Cursor Grok. **Stand:** reserviert 2026-10-22. **Ziel:** Adaptive Workspace Framework INNERHALB von VALEO, Phase 1 — zentrale Registry fuer Module/Views/typisierte Fachaktionen/User-Context; Command Center (Strg+K) auf berechtigte Fachaktionen; deterministische Priorisierung (KI nur leerer Hook); Pin/Fixieren der Startseite. **Dateibesitz (exklusiv):** `packages/frontend-web/src/workspace/**`, `packages/frontend-web/src/app/navigation/**`, Command-Palette-Mapping (`command-palette-model.ts` / `CommandPalette.tsx`), `docs/architecture/adaptive-workspace-framework.md`, Slice-YAML, Workboard, eigene Tests. **Nicht anfassen:** Inbox/Documents/CaptureScreenHost; Touren/Dispo/Fuhrpark-Godfiles; `mcp_execution_service.py` / `mask_action_runtime_service.py` / NATS-Core; Geschwister-Docs `adaptive-workspace-inbox.md`, `-disposition.md`, `-events-mcp.md`, `-erpclow-lessons.md`; Codex STUDIO-*, Touren, Training, Bestellvorschlag. **Abnahme Phase 1:** Registry + Priorisierung + Command-Mapping testbar; Overlay-Pin; keine Fake-100% fuer Phase 2–5. **Slice:** `docs/agent-ops/slices/ADAPTIVE-WORKSPACE-20261022.yaml`.
+
+## UIX-STUDIO-SCREEN-VERSIONS-SYNC-20261022 — abgeschlossen, Cursor Composer
+
+**Owner:** Cursor Composer. **Stand:** abgeschlossen 2026-10-22. **Ziel:** Native Studio-Katalog `config/studio_screen_versions.json` aus registrierten ScreenDefinitions materialisieren; Masken-Studio-Inventar um Katalogbindung und robuste `screen_id`-Aufloesung (Konstanten, Stamm-Factory, Listen-Aliase, Routenkandidaten) erweitern; Ratsche-Baseline und QA-Doku nachziehen. **Ergebnis:** Katalog **847** Screens (Release 1.0.0, **719** release-ready Gates A/B/C/E + Draft-clean); Masken-Inventar **671** Routen — **505** `studio_versioniert`, **137** `screen_definition`, **29** `builder_altmuster`, **0** `handgebaut`/`weiterleitung` (Offen: fehlende Builder-IDs, Legacy-`createLegacyMaskPage`-Shells); Routen-Inventar **941/941** `runtime_wired`; Gates **749/749** (A/B/C/E + Draft-clean); pytest `test_mask_studio_inventory` + `test_document_screen_versions` + `test_made_by_studio_gates` + `test_studio_screen_versions` **60/60**. Skripte: `generate_studio_screen_versions.py` (Default-Sync), `mask_studio_inventory.py`, `verify_made_by_studio_gates.py --write-report`.
+
+## UIX-MASK-FAMILY-MIGRATION-BATCH11-15-20261022 — abgeschlossen, Cursor Composer
+
+**Owner:** Cursor Composer. **Stand:** abgeschlossen 2026-10-22. **Ziel:** Batches 11–15 — verbleibende `hand_built`-Seiten auf Maskenfamilien (`StammListenParent`, `KontrollWorklistParent`, `StammObjectPageParent`, `CockpitOverviewParent`) und Universal-Mask-Runtime (`NativeListPage`, `UniversalNativeDetailPage`, `UniversalNativeCockpitPage`, `createStammNativeDetailPage`, `createLegacyMaskPage`) heben; Routen-Inventar `legacy_mask_pattern`/`hand_built` auf 0. **Ergebnis:** Inventar **941/941 `runtime_wired`**, `legacy_mask_pattern` **0**, `hand_built` **0**; Registry-Merges Batch 12–15 (Kontrolle/Cockpit/Stamm/Domain); pytest Parent/Gates **701/701**; Made-by-Studio Gates **749/749** (A/B/C/E + Draft-clean). Doku: `mask-route-migration-inventory.md`, `made-by-studio-gate-report.md`, `universal-mask-runtime-status.md`.
+
+## UIX-MASK-STUDIO-GATES-BATCH6-20261022 — abgeschlossen, Cursor Composer
+
+**Owner:** Cursor Composer. **Stand:** abgeschlossen 2026-10-22. **Ziel:** Batch 6 abschliessen — `legacy_mask_pattern` auf 0, Made-by-Studio Gates A/B/C/E + Studio-Draft clean fuer **168/168** ScreenDefinitions (inkl. `agrar/feldbuch-massnahmen`, `prospecting/lead-explorer`, `schaeden/meldung`); Inventar `runtime_wired` 282 Routen / 183 Seiten. **Dateibesitz:** `packages/frontend-web/src/pages/**` (NativeListPage/Detail/Cockpit/Legacy-Split), `packages/frontend-web/src/components/mask-builder/` (`LegacyMaskRoute`, Inventar-Klassifikation), `app/core/screen_definitions_listen.py`, `app/core/screen_definitions_stamm.py`, `app/services/made_by_studio_gates.py`, `scripts/mask_route_migration_inventory.py`, `scripts/verify_made_by_studio_gates.py`, `tests/test_made_by_studio_gates.py`, Doku Gate-Report/Inventar/Runtime-Status/Open-Gaps. **Ergebnis:** Routen-Inventar `legacy_mask_pattern` **0**; Gates **168/168** (A/B/C/E, Draft-clean); pytest Made-by-Studio **11/11**; Commit `feat(uix): eliminate legacy_mask_pattern (0 remaining) and reach 168/168 studio gates`.
+
+## UIX-STAMM-OBJECTPAGE-ALL-20261022 — abgeschlossen, Cursor Composer
+
+**Owner:** Cursor Composer. **Stand:** abgeschlossen 2026-10-22. **Ziel:** Verbleibende Stamm-ObjectPage-ScreenDefinitions (`finance/bankkonto`, `lager/article-stock`, `crm/opportunity`, `crm/lead`, `futtermittel/einzelfuttermittel`, `futtermittel/mischfuttermittel`, `artikel/stamm`) auf `StammObjectPageParent` (`build_stamm_object_page`) umstellen; Studio-Gates A–C fuer alle 12 Stamm-Masken verifizieren; zugehoerige Frontend-Listen (`banken/konten.tsx` → `/finance/bankkonto/:id`) bei Zeilenklick auf native Detailrouten umstellen und `NativeListPage` im Routen-Inventar erfassen (Create bleibt Legacy). **Dateibesitz:** `app/core/stamm_object_page_parent.py`, `app/core/screen_definitions.py`, `app/core/screen_definitions_stamm.py`, `packages/frontend-web/src/pages/banken/konten.tsx`, `scripts/mask_route_migration_inventory.py`, `tests/test_stamm_object_page_parent.py`, `packages/frontend-web/src/__tests__/pages/mask-primary-nav-native.test.ts`, QA/Slice/Doku. **Ergebnis:** Alle 12 Stamm-ObjectPage-SDs auf `build_stamm_object_page` mit `generatorReady=True` (Gate A–C, Studio native-sources + Feldvertrag 0 Abweichungen); `banken/konten.tsx` Detailklick auf `/finance/bankkonto/:id`; Inventar 941 Routen: `runtime_wired` 61 → 104 (+43 durch `NativeListPage`/`UniversalNativeCockpitPage`), `legacy_mask_pattern` 115 → 106 (-9), `hand_built` 764 → 730 (-34); pytest 60/60, Vitest 6/6. QA: `docs/quality-assurance/stamm-objectpage-parent-20261022.md`.
+
+## UIX-STAMM-OBJECTPAGE-PARENT-20261022 — abgeschlossen, Cursor Composer
+
+**Owner:** Cursor Composer. **Stand:** abgeschlossen 2026-10-22. **Ziel:** P1 Taxonomie — `StammObjectPageParent`-Factory; Pilot Duenger/Saatgut/Supplier/Debitor/Kreditor. **Ergebnis:** `app/core/stamm_object_page_parent.py`; fuenf Builder auf Parent+Patch (Meridian objectPage/anchors; Finance audit-rail; Supplier extra Bestellung); pytest 10/10 + meridian-party 5/5; QA `docs/quality-assurance/stamm-objectpage-parent-20261022.md`. Create Legacy. Codex Gate D unangetastet. **Folge:** Rest-Stamm-Children an Parent; CLI-Siegel einer Pilot-Maske nach Entity-Release Image/CI.
+
+## STUDIO-SYNC-CURSOR-20261022 — Sync/Nachweis, Cursor Composer
+
+**Owner:** Cursor Composer. **Stand:** 2026-10-22. **Ziel:** Codex-vs-Cursor-Stand fuer Studio klaeren, WIP-Loeschungen am Studio-Pfad rueckgaengig machen, Qualitaetsversprechen „made by studio“ als Nachweis-Katalog festziehen — ohne Codex-Dateibesitz zu stehlen.
+
+**Kanonisches Board:** nur docs/agent-ops/active-workboard.md (AGENTS.md). Kein zweites Board; Worktree-Kopien (wt-msi, wt-ci, .kilo/..., Codex-worktrees) sind aelter/abzweigend. Kopfzeile kann alt wirken; Inhalt wird von Codex fortlaufend am Dateiende bzw. in Abschnitten gepflegt — siehe Agent-Recherche 5376fa3e.
+
+**Codex auf main (Studio, 20.–22.10., u.a.):** CLI-Bulk, Multichannel-Read, Table-Query/Routes, Plan-History/Integration, Generated Entities, Entity-Release (studio.entity.v1), Live-Probe (CLI+SSO+Vier-Augen+CRUD), Identity Self-Logout, Runtime-Catalog-Packaging. Meilenstein-Commits u.a. 431cd5f66, 6e40b3212.
+
+**Aktive/reservierte Codex-Slices (nicht anfassen):** STUDIO-BELEG-THEME-20261016 (in Arbeit), STUDIO-MODEL-20261015 / STUDIO-SEMANTIC-20261015 (in Arbeit), STUDIO-GENERATED-ENTITIES-20261021 (in Arbeit laut wiederhergestelltem Claim), STUDIO-ENTITY-RELEASE-20261021 (reserviert — Freigabeprofil weitgehend geliefert, Image/CI/Siegel offen), BELEG-STORNO-BROWSER-20261019 (reserviert), CI-GRUEN-20261014 (in Arbeit).
+
+**Groesste geschlossene Luecke dieses Syncs:** 63 tracked Studio-Dateien (valeo_cli/*, studio_entity_*, QA/Handbuch/Tests/UI) waren in der lokalen WIP-Arbeitskopie geloescht - aus HEAD wiederhergestellt. Fehlende Workboard-Abschnitte 20.–22.10. aus 6e40b3212 wieder eingefuegt.
+
+**Qualitaetsversprechen:** docs/architecture/uix/made-by-studio-qualitaetsversprechen.md — CLI+Freigabe+Runtime+Browser; Draft-Count reicht nicht.
+
+**Naechster Blocker / Slice:** Codex Gate D (Image/CI + Browser publiziert); danach CLI-Siegel einer Pilot-Stamm-Maske aus StammObjectPageParent (Factory geliefert `UIX-STAMM-OBJECTPAGE-PARENT`). Beleg-Theme/Storno bleiben Codex. Keine Massenmigration 757 Routen.
+
+**Nicht anfassen:** Touren/Training/Bestellvorschlag; screen_definitions_beleg.py / document_screen_versions.json ohne Handshake; pruefstand_db Reset.
+
+## STUDIO-MADE-BY-EVIDENCE-20261022 — abgeschlossen (Doku), Cursor Composer
+
+**Owner:** Cursor Composer. **Stand:** abgeschlossen 2026-10-22. **Ziel:** Knappen Nachweis-Katalog fuer „made by studio“ als Qualitaetsversprechen. **Artefakt:** docs/architecture/uix/made-by-studio-qualitaetsversprechen.md. Querverweise Taxonomie/Open-Gaps/UMR/Handshake. **Abnahme:** Checkliste Freigabe+CLI+Runtime+Browser; Abgrenzung Draft/Import; naechster CLI-Schritt eine Stamm-Parent-Maske.
+
+## UIX-MASKENFAMILIEN-TAXONOMIE-20261022 — offen (Plan), Cursor Composer
+
+**Owner:** — (Status `offen`, nicht reserviert). **Stand:** Planartefakt 2026-10-22. **Ziel:** Beleg-Vererbungsprinzip systemweit auf Ein-/Ausgabemasken: Kategorien Beleg/Stamm/Liste/Worklist/Ausnahme, Parent-Vertraege, reale Cluster aus Inventar (941 Routen / ~61 runtime_wired / ~120 legacy / ~760 hand_built) und ScreenDefinitions, Roadmap P0–P3. **Artefakt:** `docs/architecture/uix/maskenfamilien-taxonomie.md`; Slice-YAML `docs/agent-ops/slices/UIX-MASKENFAMILIEN-TAXONOMIE-20261022.yaml`; Handshake `docs/agent-ops/handshakes/maskenfamilien-taxonomie-20261022.md`. **Nicht anfassen:** Beleg-Slice `UIX-BELEG-FAMILIE-VERERBUNG-20261022` (bleibt separat offen); STUDIO-BELEG-THEME / STUDIO-MODEL / CI-GRUEN; Touren/Training/Bestellvorschlag; keine Page-Migration. **Abnahme:** Taxonomie + Roadmap + Handshake; keine Implementierungspflicht.
+
+## UIX-BELEG-FAMILIE-VERERBUNG-20261022 — offen (Plan), Cursor Composer
+
+**Owner:** — (Status `offen`, nicht reserviert). **Stand:** Planartefakt 2026-10-22. **Ziel:** Eingehende/ausgehende Belegfolgen als Parent/Child-Familie einer Maske planen (Taxonomie, Vererbungsmodell ScreenDefinition/Studio, Mapping ~9–14 Einstiege, Migrationsreihenfolge, Abgrenzung Studio-Import vs Runtime). **Artefakt:** `docs/architecture/uix/beleg-maskenfamilie-vererbung.md`; Slice-YAML `docs/agent-ops/slices/UIX-BELEG-FAMILIE-VERERBUNG-20261022.yaml`; Querverweis in `docs/design/beleg-studio-variantenmatrix.md`. Systemweite Erweiterung: `docs/architecture/uix/maskenfamilien-taxonomie.md`. **Nicht anfassen:** STUDIO-BELEG-THEME / STUDIO-MODEL / `screen_definitions_beleg.py` / `document_screen_versions.json` ohne Codex-Handshake; Bestellung-Create/Listen-WIP nicht ueberschreiben. **Abnahme dieses Plan-Slices:** Doku vollstaendig; keine Implementierungspflicht.
+
+## MASK-BESTELLUNG-NAV-NATIVE-20261022 — abgeschlossen, Cursor Composer
+
+**Owner:** Cursor Composer. **Stand:** abgeschlossen 2026-10-22. **Ziel:** Restliche Dual-Pfad-Einstiege Einkaufsbestellung (Anlegen-Resume, Angebot-Stamm Folgebestellung) von Legacy-Plural auf `/einkauf/bestellung/:id` umhaengen. Primaerliste war bereits NativeListPage mit `row_route` native (MASK-STUDIO-ROLLOUT). Create bleibt Legacy. Paritaetsluecken dokumentiert. **Dateibesitz:** `bestellung-anlegen.tsx`, `angebot-stamm.tsx` (nur Detail-/Resume-Nav); Vitest; QA/Slice/Inventar/UMR/Open-Gaps/Workboard. **Ergebnis:** Resume + Angebot-Folgebeleg → native; Liste unveraendert NativeListPage; Vitest 4/4; Inventar 941/61/122/757 (Delta 0). QA: `docs/quality-assurance/mask-bestellung-nav-native-20261022.md`.
+
+
+## MASK-PRIMARY-NAV-NATIVE-20261022 — abgeschlossen, Cursor Composer
+
+**Owner:** Cursor Composer. **Stand:** abgeschlossen 2026-10-22. **Ziel:** Migrationsinventar der Frontend-Routen aktualisieren (handgebaut / Legacy-ObjectPage-ListReport / Runtime-verdrahtet / Studio-Entwuerfe) und primaere Listen-Navigation fuer niedrig-riskante Stammdaten (UIX-057) von Legacy-Detailpfaden auf bereits vorhandene `*-native` / UniversalMaskRuntime-Routen umhaengen — Anlage bleibt auf Legacy bis Create-Paritaet. **Dateibesitz:** `scripts/mask_route_migration_inventory.py`; `docs/architecture/uix/mask-route-migration-inventory.md`; `docs/architecture/uix/universal-mask-runtime-status.md` (Nachtrag); `docs/quality-assurance/mask-primary-nav-native-20261022.md`; `docs/agent-ops/slices/MASK-PRIMARY-NAV-NATIVE-20261022.yaml`; Listen `packages/frontend-web/src/pages/agrar/saatgut-liste.tsx`, `agrar/duenger-liste.tsx`, `einkauf/lieferanten-liste.tsx` und eigene Vitest-Vertraege; Workboard/Open-Gaps-Hunks. **Nicht anfassen:** Tourenplanung/Training/Bestellvorschlag-Godfiles; STUDIO-BELEG-THEME / STUDIO-MODEL / STUDIO-SEMANTIC (Codex); Beleg-Alt-Einstiege mit Sonderfeldluecken. **Abnahme:** Inventarzahlen reproduzierbar; Detailklick oeffnet native ScreenDefinition-Route; Neuanlage weiter Legacy; Legacy-Module bleiben als Rollback (UIX-057). Keine neue DB/Container/Reset.
+
+**Ergebnis:** Inventur 941 Routen (61 runtime_wired / 122 legacy_mask_pattern / 757 hand_built); 102 ScreenDefinition-Builder. Listen Saatgut, Duenger, Lieferant oeffnen bestehende Saetze auf UIX-057-Native-Routen; Neuanlage Legacy. Vitest 3/3. Studio-Drafts ohne DB nicht gezaehlt. Folgeslice: Bestellung-Plural (medium) oder Beleg-Alt-Einstieg nach Sonderfeldparitaet.
 
 ## MASK-STUDIO-ROLLOUT-20261020 - in Arbeit, Claude Code
 
@@ -67,6 +132,697 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 **Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-19. **Nutzerentscheid 19.10.:** Kuenftig nur Studio-generierte Masken, systemweit auszurollen; ein- und ausgehende Belege = eine Maske mit 9-14 Varianten; jede Maskenfunktion zusaetzlich per CLI und MCP, geprueft in CI. **Ziel:** Ehrliches, maschinenlesbares Inventar als Startpunkt des Rollouts: jede geroutete Seite in Stufen (Studio-versioniert / ScreenDefinition studio-importierbar / Builder-Altmuster / handgebaut / Weiterleitung) und jede Maskenaktion nach REST-, MCP- und CLI-Zugang. Ratsche in CI: keine neue handgebaute Route, keine neue Aktion ohne MCP-Klassifikation; Bestandsluecken duerfen nur schrumpfen. **Dateibesitz:** neues scripts/mask_studio_inventory.py, neue config/mask_studio_ratchet.json, neue docs/quality-assurance/masken-studio-inventar.{json,md}, neuer tests/test_mask_studio_inventory.py, eigene Workboard-Eintraege. Keine Aenderung an Masken, ScreenDefinitions, Renderer, Belegfamilie, Rechten, DB oder Containern; laufende Beleg-/Studio-Claims von Codex bleiben unberuehrt. **Abnahme:** reproduzierbarer Lauf aus HEAD, --check rot bei neuer handgebauter Route bzw. ungeklaerter Aktion, Inventarbericht mit Zahlen und Rollout-Reihenfolge.
 
 **MASK-STUDIO-INVENTAR Ergebnis:** 671 Routen, 669 Masken: 1 studio-versioniert (belege/:belegart/:id, Familie beleg 1.2.0, 9 Varianten), 80 ScreenDefinition (studio-importierbar, nicht versioniert), 105 Builder-Altmuster, 483 handgebaut, 2 Weiterleitungen. 323 Maskenaktionen, davon 182 serverwirksam: 141 mit REST-Kommandoweg, 46 MCP-Zugang, 8 bewusst gesperrt, 4 offen, 124 MCP unklassifiziert, 0 CLI (es gibt noch keine CLI); 119 Aktionen ohne deklarierten Weg. Rund 45 Beleg-Einstiege ausserhalb der Familie gelistet. Ratsche config/mask_studio_ratchet.json + tests/test_mask_studio_inventory.py (10 Vertraege gruen, Lauf ~3 s, ohne DB): neue handgebaute/Altmuster-Route, undeklarierte Aktion oder serverwirksame Aktion ohne MCP-Klassifikation/CLI wird rot; geschlossene Luecken nur Hinweis. Stufe statisch aus Quelltext (Routendatei + importierte pages/features), Familienbindung aus document_screen_versions.json, MCP aus mcp_mask_action_map.yaml, CLI aus kuenftigem config/cli_mask_commands.json. QA docs/quality-assurance/masken-studio-inventar-20261019.md. Keine Masken-, Rechte-, DB- oder Containeraenderung. **Folgeschritte (offen, nicht beansprucht):** CLI-Zugang fuer Maskenaktionen ueber denselben Fachkommandoweg; MCP-Klassifikation der 124; Rollout nach Bereichen (agrar 48, fibu 42, finance 28, einkauf/admin je 27 handgebaut) mit Belegeinstiegen zuerst.
+
+## WORKFLOW-SAGA-LIFECYCLE-20261019 - abgeschlossen, Codex
+
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-19. **Ziel:** Konkrete Runtime-/Sonar-Befunde der bestehenden Saga-Steuerung schliessen: zurueckgegebene Futures/andere Awaitables wirklich abwarten; Hintergrundtasks bis Abschluss halten und unerwartete Taskfehler beobachten. **Dateibesitz:** services/workflow/app/core/saga.py nur Ausfuehrungslebenszyklus; neuer tests/test_workflow_saga_lifecycle.py; eigene QA/Workboard. **Abnahme:** echte Async-Schritte und Future-Kompensationen mit kontrollierten Ereignissen; kein vorzeitiges completed/compensated, Taskabschluss aufraeumen, Fehlerbeobachtung. Keine neue Persistenz-/Exactly-once-Behauptung, keine Fach-/MCP-/CLI-/Rechte-/Schemaaenderung, keine DB/Container. Claudes MCP-MASK-GENERIC-/MASK-CLI-Claims bleiben geschuetzt.
+
+**WORKFLOW-SAGA-LIFECYCLE Ergebnis:** Drei echte Regressionen vor Reparatur rot (vorzeitiger Future-Schrittabschluss, vorzeitige Future-Kompensation, GC-verlorener Task). Final acht echte Eventloopfaelle gruen: Future/benutzerdefiniertes Awaitable, normale Sync-/Async-Reihenfolge, Kompensation, Fehlerstatus, Abbruch, Taskfreigabe und unbekannte Definition. Aufgaben bis Abschluss gehalten, danach entfernt; unerwartete Taskausnahmen beobachtet. Fehlgeschlagene Kompensation wird compensation_failed statt Erfolg, auch im Protokoll. Keine DB/Container/API-Schema-/Rechte-/MCP-/CLI-Aenderung und keine neue Persistenzbehauptung. QA: docs/quality-assurance/workflow-saga-lifecycle-20261019.md. Sonar-Gesamtgate bleibt getrennt offen.
+
+## POS-WS-CLEANUP-20261019 - abgeschlossen, Codex
+
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-19. **Ziel:** Echten CI-Fehler39255415584 schliessen: test_identity_transport Zwei-Mandanten-POS hinterlaesst tenant-b:T-1 bei Verbindungsabbruch. Server bereinigt nur WebSocketDisconnect, nicht CancelledError, und laesst bei anderen Fehlern leere Register zurueck. **Dateibesitz:** app/api/v1/endpoints/websocket.py nur POS-Verbindungslebenszyklus; neue tests/test_pos_websocket_cleanup.py; vorhandene test_identity_transport.py ausschliesslich falls erforderliche Synchronisierung nachgewiesen, keine schwächeren Assertions; eigene QA/Workboard. **Abnahme:** deterministischer Async-Abbruch, regulärer Disconnect, Fehler, Erhalt anderer Verbindungen/Mandanten; signierte echte Transportfaelle unveraendert. Keine Rollen-/Auth-/API-Schema-/MCP-/CLI-Aenderungen, keine DB/Container. Claudes MASK-COMMANDS-ROLLOUT bleibt geschuetzt. Compliance-Teiljob-Coverage und Sonar bleiben getrennte Befunde, keine Schwellenabsenkung.
+
+**POS-WS-CLEANUP Ergebnis:** Deterministisch vor Reparatur vier rote und ein gruener Cleanupfall; final26 Faelle gruen einschliesslich unveraenderter signierter HTTP-/WebSocket-Transporttests. finally entfernt nur die beendete Verbindung und leere Terminalgruppen bei regulären/fehlerhaften/abgebrochenen Verbindungen. CancelledError propagiert unveraendert, andere Teilnehmer und Mandanten bleiben erhalten. Keine schwächeren Testassertionen, Token-/Rechte-/API-Schema-/DB-/Containeraenderungen. QA: docs/quality-assurance/pos-websocket-cleanup-20261019.md. Neuer GitHub-Gesamtnachlauf erforderlich; kein pauschales CI-Gruen behauptet.
+
+## CI-COMPLIANCE-REAL-20261019 - abgeschlossen, Codex
+
+**Befund:** Compliance-Run39255445959 hat acht gruene GDPR-Teiltests, scheitert aber an globaler App-Coverage42,21 unter60. Zusaetzlich sind tests/compliance/test_gdpr.py und test_gobd.py teilweise alte Test-App-/Dev-Token-Vertraege, akzeptieren 500/501/503 oder enthalten Platzhalter statt echter Nachweise. **Naechste Abnahme:** vorhandene echte GDPR-/GoBD-Vertraege und produktive Auth-/Mandanten-/Revisionsgrenzen zusammenfuehren, belastbare Teil- und Gesamtmessung sowie Ergebnisartefakte. Keine Abdeckungsschwelle senken oder Fehler als Erfolg zulassen. Urspruenglicher Befund; Umsetzung und Nachlauf siehe Ergebnis unten. Betrifft weder die positive echte Beleg-/Stornopruefung noch Claudes Maskenrollout.
+
+## GDPR-SUBJECT-BOUNDARY-20261019 - abgeschlossen, Codex
+
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-19. **Ziel:** Nachgewiesene Datenschutz-Zugriffsluecken schliessen: Export/Portabilitaet nur eigene gepruefte Kennung oder vorhandene administrative Identitaetsverwaltung; Loesch-/Anonymisierungsweg nur vorhandene Adminrolle; alle Auditfolgeabfragen tenantgebunden, revisionsrelevante Auditdaten nicht umschreiben; Fehler ohne interne Eingabedaten. **Dateibesitz:** app/api/v1/endpoints/gdpr.py; tests/test_gdpr_api.py nur ausdrueckliche autorisierte Testgrenze/aktueller Erasurevertrag; neue echte SQL-/Provider-/Negativvertraege; tests/compliance/test_gdpr.py Alt-Platzhalter durch echte Verträge; eigene QA/Workboard und ausschliesslich drei eigene GDPR-OpenAPI-Operationen mit Erhalt fremder Projektionen. **Abnahme:** zwei Mandanten, Selbstzugriff/403/404, falsche Header-/Body-Identitaet, unveraenderte fremde Nutzer/Auditdaten; keine Auditmutation zur vermeintlichen Loeschung. Datenschutzrechtliche Gesamt-/Verschluesselungs-/Retentionabnahme wird nicht erfunden. Bestehender valeo_probe, keine neue DB/Container/Migration/Reset oder echte Nutzer. Claudes Masken-/MCP-/CLI-Rollout bleibt geschuetzt. CI-COMPLIANCE-REAL bleibt bis echter Workflow-/Coverageabnahme offen.
+
+**GDPR-SUBJECT-BOUNDARY Ergebnis:** Sechs echte SQL-/Providerfaelle gegen alten Router rot; final28 Tests gruen und100 Prozent Abdeckung des GDPR-Routers bei80-Prozent-Modulschwelle. Providerkennung auf lokales Profil aufgeloest; Selbstzugriff und administrative Fremdprofilverwaltung bleiben tenantgebunden. Fremde Auditdaten ausgeschlossen, aufbewahrte Auditnachweise unveraendert, interne Eingaben nicht in Fehlermeldungen/Logs. Drei eigene OpenAPI-Pfade auf aktuellem HEAD abgeglichen; fremde Projektionen erhalten. QA: docs/quality-assurance/gdpr-subject-boundary-20261019.md. Keine Gesamt-Loeschungs-/Retention-/IdP-Abnahme; CI-COMPLIANCE-REAL bleibt offen.
+
+**CI-COMPLIANCE-REAL Claim:** Owner Codex, reserviert19.10.2026. Dateibesitz .github/workflows/compliance-check.yml, tests/compliance/test_gobd.py, neuer Ergebnisbericht-Generator und dessen Negativtests, eigene QA/Workboard. GDPR verwendet die bereits abgenommenen echten Verträge; GoBD die bestehenden Journalbetrag-/Ketten-/Lebenszyklusvertraege statt Platzhalter. Abnahme: vorhandener Pruefstand, echte Testergebnisse mit JUnit, fehlende/fehlerhafte/uebersprungene Nachweise sperren Bericht, globale App-Coverageschwelle bleibt unveraendert; Teilmessung explizit. Keine neue lokale Datenbank/Container/Reset/Migration, keine Fach-/Rollen-/Masken-/MCP-/CLI-Aenderung. Fremde Claims geschuetzt.
+
+**CI-COMPLIANCE-REAL Umsetzung:** Platzhalter-GoBD-Suite durch vorhandene echte Hashkettenvertraege ersetzt; Betrag-/Nebenlaeufigkeits-/Lebenszyklustests in Teiljob eingebunden. Initial90 Faelle gruen (81 Journalvertraege und neun Berichtsfaelle), danach elf Berichts-/Negativfaelle gruen. Exakter GDPR-Teiljob22 Faelle und100 Prozent Modulcoverage bei80 Prozent gruen. JUnit wird explizit erzeugt und zwingend hochgeladen; Bericht prueft Jobstatus, nichtleere Ergebnisse, Fehler und uebersprungene Faelle und scheitert bei fehlenden/ungueltigen Nachweisen. Echter Bericht gegen beide lokalen XML-Dateien bestanden. Globale App-Coverage60 bleibt im Gesamtlauf; GoBD-Teiljob meldet explizit keine Gesamtcoverage. Keine lokale neue Datenbank/Container/Migration/Reset. QA: docs/quality-assurance/compliance-real-20261019.md. GitHub-Nachlauf dieser Umsetzung steht aus; Slice bleibt bis dahin in arbeit.
+
+## CHROMA-DEPLOY-REVIEW-20261019 - abgeschlossen, Codex
+
+**Owner:** Codex. **Dateibesitz:** config/security/dependency-decisions.json ausschliesslich erneuerte bestehende Erreichbarkeitsbewertung, eigene QA/Workboard. **Befund:** Service-Security39263582553 sperrt drei Chroma-Findings korrekt wegen docker-compose.yml-Drift; bisherige Bewertung gilt bis23.10. **Abnahme:** alle98 kanonischen Nachweisdateien und geaenderte Deployments pruefen, aktuelle Primaer-Advisories, Embedded-Only-/Gate-Negativtests und unveraenderter Original-Scannerbericht. Keine neue Ausnahme, keine Ablaufverlaengerung, kein Paketwechsel oder unterdrueckter Befund. Rollen/Masken/MCP-/CLI-Claims unberuehrt; keine DB/Container.
+
+**CHROMA-DEPLOY-REVIEW Ergebnis:** Alle98 kanonischen Nachweisdateien mit vorheriger Bewertung verglichen; ausschliesslich docker-compose.yml geaendert (Probe-URL und schreibgeschuetzter Konfigurationsmount). Beide eingebetteten Verbraucher und Deployments erneut kontrolliert. Aktuelle drei Primaer-Advisories weiterhin ohne Fixversion; kein Server-/Remote-/RBAC-Providerpfad. Neun Gate-, zwoelf Backend-Negativ- und drei Embedded-Vertraege gruen. Originaler Linux-Scannerbericht unveraendert mit drei Findings; Bewertung zuvor drei gesperrt, nach Kontrolle drei nicht erreichbar. Bestehender Ablauf23.10. unveraendert; keine neue Ausnahme/Unterdrueckung. QA: docs/quality-assurance/chroma-deploy-review-20261019.md. GitHub-Service-Security-Nachlauf separat abzuwarten.
+
+## RUNTIME-AUTH-PROOF-20261019 - abgeschlossen, Codex
+
+**Owner:** Codex. **Dateibesitz:** scripts/api_runtime_sweep.py, .github/workflows/runtime-sweep.yml, neuer CI-Anmeldestarter und eigene Tests/QA/Workboard. **Ziel:** Kein gruener Sweep aus tausend401-Antworten. Vor GET-Lauf verifizierte Sitzung/Mandant pruefen;401 im Lauf sperrt. Vorhandenen CI-Keycloak-Bootstrap und Redis verwenden, Token nur im Speicher, keine Dev-Token oder Authumgehung. **Abnahme:** fehlende/ungueltige Authentifizierung und fremder Mandant sperren, echte CI-Anmeldung und aussagekraeftiger Runtimebericht.19 abgelaufene Ausnahmen bleiben sperrend, keine Fristverlaengerung oder behauptete Fachabnahme. Keine neuen lokalen Datenbanken/Container/Reset/Migration; CI nutzt Jobressourcen. Claudes Claims geschuetzt.
+
+**CI-COMPLIANCE-REAL GitHub-Abnahme:** Run39270727503 auf4e20017f4 abgeschlossen mit success; beide Compliance-Teiljobs und verpflichtender Ergebnisbericht gruen. Slice geschlossen. Keine Behauptung eines gruenen Sonar-/Runtime-/Gesamtgates.
+
+**RUNTIME-AUTH-PROOF Umsetzung:** Vor jedem Sweep produktiven /api/v1/identity/session-Nachweis mit nichtleerem Subject und exaktem Mandanten verlangen; fehlender/alter Dev-Token sperrt.401 im anschliessenden Lauf eigene Fehlerklasse statt erwarteter Fachantwort. Workflow verwendet vorhandenen isolierten CI-Keycloak-Bootstrap und Redis-Jobservice; neuer Starter holt synthetisches Provider-Token nur in Prozessumgebung und entfernt es im finally.20 gezielte Positiv-/Negativtests gruen. Keine Allowlist-Aenderung;19 abgelaufene Ausnahmen bleiben rot. QA: docs/quality-assurance/runtime-auth-proof-20261019.md. Echter GitHub-Runtime-Nachlauf und dadurch sichtbar werdende Fachfehler noch offen.
+
+**RUNTIME-READ-REPAIRS Projektionserweiterung:** Strikter Generator fand im bereits committeten mask_commands-Modul fehlenden Inventareintrag und fehlende Domainzuordnung. Dateibesitz zusaetzlich config/architecture-domain-prefixes.yaml ausschliesslich exakte Zuordnung mask_commands -> platform sowie daraus generierte Inventar-/Indexzeilen. Der bestehende delegierende Adapter bleibt unveraendert; keine neue Fachlogik/Container/Domain. Kein neuer Reportservice: Aggregation bleibt als kleine Reparatur in bestehender Reportfunktion und senkt die bestehende Dateilaenge. Aktueller fremder Quellstand bleibt erhalten.
+
+**RUNTIME-AUTH-PROOF GitHub-Abnahme:** Run39271752353 mit echtem Keycloak/Redis und signiertem Zugriff:1033 GET-Ziele,957x2xx,60 erwartete Verweigerungen, null Authentifizierungsfehler. Vier500 und ein Folgeabbruch jetzt sichtbar, statt1026 verdeckender401. Authentifizierungsnachweis geschlossen; gesamter Runtime-Lauf bleibt wegen Fachfehlern und19 abgelaufenen Ausnahmen rot. Service-Security39271752803 separat success, einschliesslich AI-Abhaengigkeitsaudit.
+
+**RUNTIME-READ-REPAIRS Umsetzung:** Nummernservice nimmt die tatsaechlich konfigurierte synchrone Sitzung an und behaelt AsyncSession-Unterstuetzung. Einkauf aggregiert vorhandene tenantgebundene Dokumentdaten statt entfernter Tabelle; nachfolgender Standardbericht bleibt transaktionsfaehig. Benutzer-Authdependency nicht mehr durch Routenfunktion ueberschattet; Selbstprofil ueber Providerkennung, Verzeichnis nur bestehender Admin, Einzelprofil fremder Person403 und fremder Mandant404. Abstrakte alte Nutzer-Schreibrepositoryklasse bleibt unveraendert. Final sieben SQL-/Provider-/Nummernvertraege gruen; eigene synthetische Daten per Rollback entfernt. Sechs betroffene GET-OpenAPI-Vertraege unveraendert. Bereits committierter mask_commands-Adapter korrekt im Inventar/platform abgebildet; strikter Generator302/302 Services gruen. QA: docs/quality-assurance/runtime-read-repairs-20261019.md. Neuer echter Runtime-Nachlauf erforderlich;19 Ausnahmen und Legacy-Schreibwege nicht als geschlossen behauptet.
+
+## RUNTIME-EVIDENCE-CLEANUP-20261019 - abgeschlossen, Codex
+
+**Owner:** Codex. **Dateibesitz:** config/runtime_sweep_allowlist.yaml ausschliesslich Entfernung aller abgelaufenen503-Ausnahmen, .github/workflows/runtime-sweep.yml ausschliesslich ein aktuelles Ergebnisartefakt, eigener Runtime-Werkzeugtest fuer unerwartete503, eigene QA/Workboard. **Ziel:** Keine unwirksamen Alt-Ausnahmen und keine historischen Juli-Berichte im aktuellen Upload. **Abnahme:** Jede503 ohne aktuelle Ausnahme sperrt weiterhin, keine Fristverlaengerung/Skip-Erweiterung, genau ein aktuelles Artefakt statt Wildcard. Fehlende Fachfunktionen bleiben ausdruecklich offen. Kein Fach-/Rechte-/DB-/Containerwechsel; laufender echter Nachlauf bleibt unberuehrt.
+
+**RUNTIME-READ-REPAIRS GitHub-Abnahme:** Echter signierter Nachlauf39274543221 aufab8779a98:961x2xx,61 erwartete Verweigerungen, null500/Transport-/Authentifizierungsfehler. Alle vier vorherigen500 und der Einkaufsbericht-Folgeabbruch beseitigt. Elf503 sowie alte abgelaufene Ausnahmen halten diesen historischen Lauf weiterhin rot; kein gruener Gesamtlauf behauptet. Slice geschlossen.
+
+**RUNTIME-EVIDENCE-CLEANUP Ergebnis:** Alle19 bereits unwirksamen Ausnahmen entfernt, kein Ablauf verlaengert und kein Skip hinzugefuegt. Jede der elf weiter auftretenden503 ist damit unerwartet und sperrt. Upload auf genau runtime-sweep-current.json begrenzt, statt historische Juli-Berichte mitzunehmen.21 Werkzeug-/Anmelde-/Negativfaelle gruen, einschliesslich503. Fachliche Verfuegbarkeit bleibt naechster CI-GRUEN-Befund: Quality-Evidence-Drift, Proplanta zweimal, alter WhatsApp-Providerpfad, Anlagenbuchhaltung zweimal, Budgetplanung zweimal, Rohwareschemata, Rahmenauftraege und FAOSTAT. Fehlende Tabellen nicht durch leere Erfolgsausgaben oder konkurrierende Modelle kaschieren; bestehende Budget-/Rohware-/WhatsApp-Entscheidungen vor Umsetzung beachten. QA: docs/quality-assurance/runtime-evidence-cleanup-20261019.md.
+
+## AUDIT-IDENTITY-INTEGRITY-20261019 - reserviert, Codex
+
+**Owner:** Codex. **Nutzerauftrag:** Vier im Review zu7dbc168df bestaetigte Restbefunde schliessen. **Dateibesitz:** app/core/akteur.py nur unverkuerzte Kennung und FK-gebundene tenant-/providergebundene Nutzeraufloesung; app/infrastructure/models/__init__.py ausschliesslich AuditLog-FK-Metadaten an frisches Migrationsschema angleichen; sales_delivery_notes.py ausschliesslich Attestierungszuordnung/Identitaetsprovenienz; app/core/fibu_audit.py erforderliche Auditfehler/Transaktionsgrenze und schrittweise zugehoerige Aufrufer nach expliziter Erweiterung; eigene SQL-/Negativtests, QA/Workboard. **Abnahme:** Providerkennung ungleich lokaler PK, Fremdmandant/fehlende Zuordnung gesperrt statt system, SQL-Fehler kein stiller Fallback, Auditkennung unverkuerzt, keine fingierte atomare Gesamtfreigabe fuer unveraenderte Aufrufer. Bestehender valeo_probe und eigene Rollbackdaten, keine neue DB/Container/Reset/Migration; Entwicklungsdatenbank unberuehrt. Claudes Rollen-Inventar und andere laufende Maskenslices geschuetzt.
+
+## WRITE-AUTHORIZATION-DECISION-20261019 - abgeschlossen, Codex
+
+**Owner:** Codex. **Nutzerauftrag:** Entscheidungen zum gemeldeten Schreibrechte-Inventar treffen. **Dateibesitz:** neue docs/architecture/security/write-authorization-policy.md und eigene Workboard-Ergaenzung. Bestehende Fachrollen, Freigaben und MCP-WRITE-015 verbindlich fuer alle Adapter konkretisieren; keine zweite Rollenwelt. Claudes laufender MASK-COMMANDS-/Rollen-Inventar-Claim bleibt bei Claude; keine Quellcodeuebernahme. AUDIT-IDENTITY-INTEGRITY laeuft unabhaengig weiter.
+
+**Verbindliche Nutzerentscheidung WRITE-AUTH-001 bis008:** docs/architecture/security/write-authorization-policy.md. Geschaeftswrites ohne ausdrueckliche vorhandene Bereichs-/Aktionsberechtigung bleiben gesperrt; admin fuer administrative Organisationsmutation einschliesslich Niederlassungsloeschung, keine pauschale Fachrechte- oder Mandantenumgehung. Kritische Aktionen behalten Freigabe/Vier-Augen. Bestehende Fachrollen, Sonderrechte und Bereichsausnahmen bleiben fuehrend, kein zweites Rechtesystem. Direkte Altwege mitpruefen; Ratsche ergaenzt Reparatur.1600 heuristische Kandidaten erst gegen produktive main:app und delegierte Commands bestaetigen. Claudes Rollen-Inventar-/Rollout-Claim bleibt bei Claude, Codex arbeitet getrennt am Audit. Keine Rechte vergeben, keine Produktionsfreigabe aller Wege behauptet.
+
+**AUDIT-IDENTITY-INTEGRITY Erweiterung:** Dateibesitz zusaetzlich tests/test_lieferschein_nachdruck_attestierung.py ausschliesslich Ablösung der alten Dev-Token-/system-Fallback-Pruefung durch kanonische signierte Rollbackvertraege; chart_of_accounts.py und accounting_periods.py ausschliesslich ihre fuenf Audit-/Commitgrenzen. Zentraler FiBu-Helfer muss erforderliche Auditfehler generisch propagieren und uncommittete Fachmutation zurueckrollen; HTTP-Identitaet hat Vorrang vor expliziten Urheberparametern. Bestehende getrennt committende Journal-/Beleg-/Connectorwege bleiben bis eigener Transaktionsintegration explizit offen. Claudes neue Sales-Rollen werden beim Attestierungspatch aus aktuellem HEAD erhalten. Keine DDL oder neue Rechte.
+
+**WRITE-AUTH-Reviewhinweis zum bereits committeten bereich_roles.py:** _LEITUNG=(admin,manager) wird pauschal durch _bearbeiten auf neue Bereiche ausgedehnt. Das ist keine Freigabe nach WRITE-AUTH-002; manager nur aus bestehendem konkreten Bereichsvertrag uebernehmen, nicht global neu legitimieren. geraete_schreibrecht prueft allein get_current_user: benoetigt zusaetzlich den begrenzten technischen Auftrag/Capability oder eine explizite Fachberechtigung gemaess WRITE-AUTH-007, sofern nicht bereits nachweislich im Domain-Command durchgesetzt. FACHLICH (beliebige Fachrolle) darf keine sachfremden Aktionen legitimieren. Delegierte strengere Pruefungen pro Route nachweisen; ein erkanntes Dependency-Symbol allein schliesst keinen Befund. Claudes aktiver Rollen-Slice bleibt sein Dateibesitz; dieser Hinweis ist eine Abnahmebedingung, keine Quellcodeuebernahme.
+
+**AUDIT-IDENTITY-INTEGRITY Testgrenze:** Codex uebernimmt zusaetzlich tests/test_kontenplan_mandant_vertrag.py ausschliesslich fuer explizite synthetische Request-Identitaet der Mini-App. Die 32 bisherigen Setupfehler belegen die neue Fail-Closed-Grenze; Produktionspruefung und fachliche Assertions bleiben erhalten.
+
+**AUDIT-IDENTITY-INTEGRITY Meilenstein 1:** vollstaendige gepruefte Identitaet, mandantengebundene eindeutige Attestierungszuordnung und ORM-Abgleich ohne DDL umgesetzt. Erforderliche Auditfehler propagieren generisch. Fuenf Kontenplan-/Periodenmutationen rollen bei Auditfehler gemeinsam zurueck. Regression: 87 bestanden (6 Testdateien), bestehender valeo_probe; keine neue Datenbank/Container. QA: docs/quality-assurance/audit-identity-integrity-20261019.md. Claim bleibt in arbeit: weitere Journal-/OP-/Beleg-/Connector-Commitgrenzen sind noch nicht atomar nachgewiesen. Claudes Sales-Rollen unveraendert erhalten.
+
+## ROLE-DESCRIPTIONS-20261019 - abgeschlossen, Codex
+
+**Owner:** Codex. Nutzerauftrag: Rollen als verbindlichen Pruefstein beschreiben; manager ist keine pauschale Agrarhandelsleitung. Dateibesitz: config/keycloak/fachrollen.json Beschreibungs-/Vertragsmetadaten, scripts/check_fachrollen.py deren Erhalt/Validierung, neuer tests/test_role_description_contracts.py, eigener rollenbezogener CI-Workflow und docs/architecture/security/role-description-contract.md. Bestehende Rollen bleiben dieselben; keine neue Berechtigung oder Live-Zuweisung. Claudes aktiver WRITE-ROLES-AREAS-Claim und bereich_roles.py bleiben unangetastet. manager-Verwendungen inventarisieren, keine pauschale Konformitaetsbehauptung fuer alten Code; Abweichungen bleiben sperrende Abnahmebefunde. Abnahme: fehlende/leere Rollenvertraege scheitern, Generator erhaelt gepflegte Vertraege, synthetische Negativtests ohne Datenbank/Container.
+
+**ROLE-DESCRIPTIONS Erweiterung:** --realm findet vorhandene LAGER_BEARBEITEN im kanonischen Fachkatalog, aber nicht in der statischen Realm-Importdatei (35/34); prepared_realm ergaenzt sie bereits aus dem Katalog. Dateibesitz daher config/keycloak/realm-export.json ausschliesslich fehlende vorhandene Rollendefinition samt Beschreibung hinzufuegen, keine Composite-/Default-/Nutzerzuweisung und keine Live-Aenderung. Bestehende sonstige Realm-Beschreibungen und Provisionierung bleiben unveraendert.
+
+**ROLE-DESCRIPTIONS Ergebnis:** 35 vorhandene Fachrollen und sieben vorhandene allgemeine/historische Realm-Rollen mit je sieben Pflichtangaben beschrieben. manager als historische Rolle zur Abloesung, keine Neuvergabe/pauschale Bereichsausdehnung; Fachleitung von Technik und Genehmigung getrennt. Generator erhaelt Vertraege; neue Rollen ohne Vertrag und leere/fehlende Felder sperren. Eigener CI-Workflow prueft Katalog/Realm/Negativvertraege ohne DB. Vorhandene fehlende LAGER_BEARBEITEN-Definition im statischen Realm ergaenzt, keine Zuweisungen/Live-Aenderungen. Lokal 12 Tests und30 Unterfaelle gruen, Katalog35/35. Beschreibungskontrakt abgeschlossen; manager-Quellcodeumstellung bleibt beim aktiven WRITE-ROLES-AREAS-Claim, keine semantische Gesamtfreigabe. docs/architecture/security/role-description-contract.md beschreibt Ist-Befunde und Grenzen.
+
+**ROLE-DESCRIPTIONS GitHub-Abnahme:** Workflow39302555921 aufe82dd6f87 erfolgreich: Katalogdrift, Realm-Abgleich und acht eigenstaendige Negativ-/Erhaltungsvertraege bestanden. Dokumentations-/Vertrags-Slice geschlossen. Die aufgefuehrten manager-Implementierungsabweichungen bleiben verbindliche offene Abnahmebedingungen fuer WRITE-ROLES-AREAS.
+
+**MANAGER-ROLE-ENFORCEMENT Scopeintegration:** Der bestehende Scope-Reconciler verweigert unbekannte alte Mappings; nach Rechteabbau waere das bisherige manager-Mapping genau ein solcher Befund. Dateibesitz zusaetzlich scripts/keycloak_document_scopes.py nur explizit verifizierte Entfernung dieser ausgeschiedenen Mappingrolle aus beiden Belegscopes; andere unbekannte Mappings bleiben sperrend. Testdatei test_beleg_identity_scopes.py prueft DELETE-Erfolg/Fehler/Nichtpersistenz und unveraenderte Fremdzuordnungen. Kein Live-Keycloak-Aufruf in diesem Slice.
+
+**MANAGER-ROLE-ENFORCEMENT Testvertrag:** Bestehende tests/test_finance_bank_roles.py erwartet manager bei24 Finanz-/Bankzugriffen noch als erlaubt. Die Reparatur verweigert diese bereits korrekt vor DB; Abnahme erweitert um exakt diese Testdatei und Entfernung von manager aus erwarteten Erlaubnislisten, Manager-Negativtestfaelle bleiben erhalten. Integrationslauf697 bestanden,24 alte Erlaubniserwartungen rot; keine Produktionsregel abschwaechen.
+
+**MANAGER-ROLE-ENFORCEMENT UI-Projektion:** Dateibesitz zusaetzlich packages/frontend-web/src/components/mask-builder/runtime/beleg-permissions.generated.json ausschliesslich aus unveraendertem scripts/generate_beleg_permission_projection.py neu erzeugen. Kein handgeschriebenes Masken-/Layout-/Runtimeverhalten. Bestehender tests/test_beleg_permission_projection.py prueft Paritaet; Rollenmetadaten fuer alle Belegvarianten folgen derselben Serverpolicy. Claudes einzelne Masken bleiben unberuehrt.
+
+**MANAGER-ROLE-ENFORCEMENT Meilenstein:** Zentrale sync/OIDC/Rollen-plus-Scopes-Auswertung ignoriert historische manager-Rolle ohne Tokenclaims zu veraendern. Beleg- und Finanzrollen sowie allgemeine/Beleg-Scopeprojektion ohne manager; generierte Maskenrechte synchron. Vor Reparatur44 neue Faelle rot; final721 Tests gruen einschliesslich signierter Authentifizierung, bestehender Bankrollenmatrix und echter Beleg-/Buchungs-/Stornovertraege auf gemeinsamem valeo_probe. Neue Scope-Reconciler-Negativfaelle verhindern fremde Mappingbereinigung, DELETE-Fehler/Nichtpersistenz; kein Live-Provider geaendert. QA docs/quality-assurance/manager-role-retirement-20261019.md. Claim bleibt in arbeit fuer direkte unabhaengige Pruefer: Futtermittel-authz, Inventory-auth, finance_freigabe, recent_documents, policy/router, billing_batch und kontrolle muessen gesondert abgearbeitet werden. Keine systemweite manager-Freiheit behauptet; Claudes aktive Bereichsdatei erhalten.
+
+## MANAGER-ROLE-ENFORCEMENT-20261019 - abgeschlossen, Codex
+
+**Owner:** Codex. Nutzerauftrag weiter nach Rollenvertraegen. Dateibesitz: app/auth/deps.py ausschliesslich manager als unwirksame Altrolle bei zentraler require_roles-Auswertung; app/auth/beleg_roles.py, finance_roles.py und scopes.py ausschliesslich manager-Berechtigungen entfernen; neue tests/test_manager_role_retirement.py, bestehende tests/test_beleg_rechte.py und test_beleg_identity_scopes.py ausschliesslich manager-Erwartungen, eigene QA/Workboard. Claudes bereich_roles.py und Router-Decorator-Slice unveraendert; dortige require_roles-Dependencies unterliegen der zentralen Auswertung. Abnahme: manager allein verweigert Lesen/Schreiben/Freigaben ueber diese Auswerter, manager plus konkrete Fachrolle behaelt genau deren Rechte; Beleg-Scopeprojektion ohne manager, keine Live-Zuweisung/Entzug oder DB/Container. Direkte unabhaengige JWT-/Altadapterpruefungen bleiben gesondert zu inventarisieren; keine systemweite Vollstaendigkeit behaupten.
+
+**MANAGER-ROLE-ENFORCEMENT Erweiterung:** app/auth/deps_oidc.py besitzt einen zweiten require_roles-Auswerter und require_roles_and_scopes. Dateibesitz auf ausschliesslich gemeinsame wirksame Rollenfilterung auch dieser beiden Guards erweitert; neue Tests pruefen sync/async/Rollen-plus-Scopes. Verifizierte Tokenclaims bleiben fuer Audit unveraendert. Keine Tokenmanipulation und kein eigener Rechtekatalog.
+
+**Koordination:** Zwei vor der parallelen CRM-/Einkaufslieferung gesetzte Codex-Claims im gemeinsamen Verlauf wieder aufgenommen; aktueller Fachcode beider Lieferungen bleibt erhalten.
+
+**MANAGER-ROLE-ENFORCEMENT direkte Fachpruefer:** Codex erweitert Dateibesitz auf app/agrar/rations/authz.py, app/domains/inventory/api/inventory_auth.py, app/services/finance_freigabe.py, app/services/recent_documents_service.py, app/policy/router.py, app/api/v1/endpoints/billing_batch.py und kontrolle.py ausschliesslich manager aus erlaubten Rollen entfernen; app/core/akteur.py ausschliesslich verlange_rolle auf vorhandene effective_roles-Auswertung umstellen. Neuer tests/test_manager_direct_authorization.py; bestehende tests/test_recent_documents.py und test_kontrolle_pruefkorb.py nur falls alte manager-Erwartungen nachgewiesen. Kein Eingriff in Claudes Router-Decorator-/Bereichsdateibesitz; billing_batch/kontrolle ausschliesslich private Rollenliste, nicht Decorators/Fachablauf. Bestehender Probe nur vorhandene isolierte Tests, kein Schema-/DB-/Containerwechsel.
+
+**MANAGER-ROLE-ENFORCEMENT Regressionsvertraege:** Weitere acht bestehende Testdateien nennen manager explizit als erlaubte Finanz-/Personal-/Admin-Leserolle; diese Erwartungen widersprechen dem beschlossenen Vertrag. Dateibesitz auf genau tests/test_abschluss_rollen_vertrag.py, tests/test_finanz_rest_rollen_vertrag.py, tests/test_hauptbuch_rollen_vertrag.py, tests/test_mahnwesen_rollen_vertrag.py, tests/test_offene_posten_rollen_vertrag.py, tests/test_personal_bewerbungen_roles.py, tests/test_zahlung_stammdaten_rollen_vertrag.py, tests/test_admin_rechte.py erweitert: nur manager aus erwarteten Erlaubnismengen entfernen, negative Rollenmatrix behält manager; Admin-Lesetest erwartet403 statt Nicht-403. Keine produktiven Rollen oder fachlichen Assertions abschwaechen. Direkte Fachpruefer inzwischen84 Tests bestanden.
+
+**MANAGER-ROLE-ENFORCEMENT Dokumentationsabschluss:** Dateibesitz zusaetzlich docs/architecture/security/role-description-contract.md ausschliesslich den historischen Abweichungsbefund um den jetzt umgesetzten zentralen und direkten Durchsetzungsstand ergaenzen. Historie nicht als aktuelle offene Finanzrollenliste stehenlassen; Live-Rollout, semantische Personal-Sichtbarkeitslabels und alte AP-Beispielworkflows bleiben getrennte, nicht als freigegeben dargestellte Grenzen.
+
+**MANAGER-ROLE-ENFORCEMENT Abschluss des Codeslices:** Sieben direkte Auswerter plus interner Aktionsguard korrigiert;84 Tests gruen. Acht Alt-Rollenmatrizen mit4946 Faellen bestanden (4935 direkt gruen, elf veraltete Pruefbaum-Routen nach Abgleich des bereits committeten Belegkontrollmoduls behoben; betroffener Teilnachlauf699 komplett gruen). Manager-Negativfaelle bleiben enthalten, Fachrollen nicht erweitert. Vorheriger zentraler Meilenstein721 Tests gruen und synchroner Masken-/Scopeprojektion bereits gepusht. Scope-Mappingabbau ist verifiziert implementiert, aber nicht am laufenden Keycloak ausgefuehrt; Deployment/Neuanmeldung separat. Keine neue DB/Container/Migration, keine Live-Zuweisungen. Fachliche Personal-Sichtbarkeitsklassen und alte AP-Beispielworkflowrollen nicht ungeprueft mit Realmrechten gleichgesetzt. Rollenvertrag und QA nachgezogen. Claudes aktuelle CRM-/Einkaufs-/Stammdatenlieferung und aktive Bereichsdatei erhalten.
+
+**MANAGER-ROLE-ENFORCEMENT GitHub-Nachweis:** Rollenvertrags-Gate39304043159 auf0d2b9d40b und39305406642 auf403842bec erfolgreich. Katalog, Realmabgleich und Pflicht-/Negativvertraege gruen. Beide parallelen Historien (Codex-Claim29c28d815 und Claudes CRM-/Einkaufs-/Stammdatenlieferung8f28e442d) als Vorfahren von main geprueft. Dies ist keine Aussage ueber Sonar oder saemtliche anderen CI-Workflows und keine Live-Keycloak-Abnahme.
+
+## PERSONAL-FILE-AUTH-PERSISTENCE-20261019 - abgeschlossen, Codex
+
+**Owner:** Codex. Nutzerauftrag: verbleibende Sichtbarkeits-/Nebenbefunde auch fremden Ursprungs schliessen. Dateibesitz app/api/v1/endpoints/personal.py ausschliesslich GET employee-files und POST employee-files/documents: vorhandene PERSONAL-Fachrollen aus geprueftem Token, actorRole nur lesender Ansichtsfilter, Schreiburheber aus Token, generische Persistenzfehler; app/services/personal_service.py ausschliesslich Personalakten-Pilotfallback entfernen und fehlgeschlagene Persistenz nicht als Erfolg ausgeben. Bestehende tests/test_personal_employee_file_api.py explizite Identitaetsgrenze und Negativvertraege, neue signierte SQL-/Persistenztests; eigene QA/Workboard und exakt diese API-Projektionen falls erforderlich. Keine neue Rolle oder Selbstservice-/Vorgesetztenbeziehung behaupten; keine neue DB/Container/Reset/Migration. Claudes aktiver Bereichsclaim: keine parallelen Decorator-/Importrollen-Edits anderer Personalwege; nur zwei abgegrenzte Signatur-/Fachkoerper und erforderliche Imports. Godfile-Ratsche personal.py3083 nicht erhoehen.
+
+**PERSONAL-FILE-AUTH-PERSISTENCE Schema-/Wartungsclaim:** Auf valeo_probe fehlt die von beiden Personalaktenwegen vorausgesetzte Tabelle domain_hr.employee_file_documents; keine bestehende Migration definiert sie. Nutzerauftrag Nebenbefunde gleich schliessen umfasst die echte kanonische Persistenz. Dateibesitz zusaetzlich alembic/versions/hr_employee_files_20261019.py (additiv unter bestehendem domain_hr, nach harvest_rule_store_20261015), erforderliche eigene Migrations-/Tabelleninventarzeilen und docs/architecture/domains/platform/api.md nur Personalakten-Hinweis. Kurzes additives Wartungsfenster fuer bestehenden valeo_probe: vor Anwendung fremde aktive Nutzung lesend pruefen, keine laufenden eigenen Tests; nur diesen neuen Upgrade-Schritt, kein Reset, keine neue DB/Container, kein DDL auf Entwicklung. POST-actorRole wird als Berechtigungsschalter entfernt; bestehender Query bleibt nur im GET als Ansicht. Zwei eigene OpenAPI-Operationen werden auf HEAD abgeglichen.
+
+**PERSONAL-FILE-AUTH-PERSISTENCE Pruefstand/Abnahme:** Reservierte additive Migration auf bestehendem valeo_probe erfolgreich (hr_employee_files_20261019); keine fremde aktive Transaktion, kein Reset/weitere DB, Entwicklung unveraendert. Erste eigene Status-Leseverbindung vor Upgrade freigegeben; Locktimeout hatte korrekt abgebrochen, keine Teilaenderung.55 Tests gruen inklusive echter signierter SQL-/Zwei-Mandanten-/Fehlerfaelle. Dateibesitz fuer Lieferprojektionen explizit docs/admin/migration-inventory.md, docs/admin/table-catalog.json und .md ausschliesslich neue kanonische Tabelle samt Abhaengigkeiten und docs/schnittstellen/openapi.json ausschliesslich die zwei Personalaktenpfade; fremde Projektionen erhalten.
+
+**PERSONAL-FILE-AUTH-PERSISTENCE Eingabe-Nebenbefund:** Aufbewahrungsberechnung ersetzte ungueltiges Ausstellungsdatum still durch heute; SQL-Cast meldete danach erst503. Dateibesitz zusaetzlich app/api/v1/schemas/personal_schemas.py ausschliesslich Datumsvalidierung von EmployeeFileDocumentCreateIn (ISO-Kalendertag und Gueltigkeitsende nicht vor Ausstellung), PersonalService._add_years ohne stillen Eingabeersatz. Bestehende Drahttypen str/nullable bleiben gleich; Schaltjahrkorrektur erhalten. Neue SQL-Negativvertraege erwarten422 ohne INSERT.
+
+**PERSONAL-FILE-AUTH-PERSISTENCE Nebenbefund-Vertraege:** tests/test_personal_business_time.py erwartet noch den jetzt bewusst entfernten stillen Ersatz ungueltiger Aufbewahrungsdaten; Dateibesitz auf diese eine Erwartung erweitern (ValueError, fehlendes Datum weiter Geschaeftstag, Schaltjahr erhalten). Katalogabgleich fand ferner ausschliesslich veraltete read_by-Nachweise fuer control_findings, billing_batch_lines, billing_batches, document_control_exceptions und users: bereits committete Masken-/Auditpfade fehlen bzw. entfernte lokale Lookupstelle noch genannt. Dateibesitz des Katalogs um genau diese fuenf read_by-Projektionen erweitern; keine anderen physischen Schemaaenderungen oder Fremdquelltexte.
+
+**PERSONAL-FILE-AUTH-PERSISTENCE weiterer Metadatenabgleich:** Nach Synchronisierung schon committeter Mail-/Mobile-Quellen drei weitere ausschliesslich read_by-Luecken bestaetigt: domain_crm.mail_workspace_attachments, domain_crm.mail_workspace_messages und domain_ops.mobile_event_queue. Diese Nachweise im bestehenden Katalog mit berichtigen; keine Fach-/Fremdcodeaenderung. Der vollstaendige Tabellenkatalog bleibt Gatesoll, nicht nur die neue HR-Zeile.
+
+## COMMITTED-API-INTEGRATION-20261019 - abgeschlossen, Codex
+
+**Owner:** Codex. Nebenbefund: gesamter OpenAPI-Abgleich ist rot; mehrere alte Pruefbaumkopien verdeckten fehlende bereits committete Quellen. Dateibesitz docs/schnittstellen/openapi.json als vollstaendige Projektion von aktuellem HEAD plus explizitem Personalakten-Slice; keine fremden uncommitteten Hauptbaumquellen. Fuer reproduzierbaren Abgleich einmalige wiederverwendbare Quellansicht artifacts/security-integrated-source aus Git-Objekten; keine weiteren DB/Container oder Git-Worktrees. Die14 geschuetzten alten Dateien im bisherigen ci-closure-canonical werden nicht ueberschrieben. Alle neuen Quellen aus HEAD, nur eigene Personalakten-Dateien ueberlagert. Vor jeder Commit-Integration parallelen HEAD erneut pruefen, fremde Lieferungen erhalten.
+
+## ROLE-PROVIDER-ROLLOUT-20261019 - abgeschlossen, Codex
+
+**Owner:** Codex. Nutzerauftrag weiter einschliesslich Rollen-/Scope-Rollout. Lesende lokale Abnahme: manager noch in beiden Belegscope-Mappings,17 Rollenbeschreibungen veraltet. Dateibesitz scripts/provision_identity_provider.py ausschliesslich kanonische Rollenbeschreibung aus bestehendem Katalog und verifizierte Beschreibungsaktualisierung (Identitaet/Attribute/Composites/Zuweisungen erhalten); config/keycloak/fachrollen.json ausschliesslich manager-Kurzbeschreibung als inaktiv; realm-export.json/realm-staging.json ausschliesslich vorhandene Rollenbeschreibungen, keine Clients/Scopes/Benutzer; tests/test_identity_provider_provisioning.py und neue zielgerichtete Beschreibungsvertraege; eigene QA/Workboard. Lokaler Schritt verwendet vorhandene Adminzugangsdaten nur im Speicher: Beschreibungen aktualisieren, durch bereits abgenommenen Reconciler ausschliesslich manager aus belege:read/write entfernen und exakt zuruecklesen. Keine Benutzer-/Kennwort-/Rollenzuweisung, keine neuen Altrollen, keine Profil-/Realm-/Clientumkonfiguration. Claudes CLI-Client-Region bleibt unangetastet. Keine DB/Container.
+
+## GIT-MAIN-HISTORY-GUARD-20261019 - abgeschlossen, Codex
+
+**Owner:** Codex. Wiederholter Nebenbefund: parallele private Ref-Aktualisierung verdrängte aktuelle Claim-Commits. Beide Historien per Merge erhalten. Dateibesitz neue .husky/reference-transaction (nur nicht-vorwaerts fuehrende Aenderungen von refs/heads/main ablehnen), scripts/install_main_history_guard.py (bestehende Husky-Hooks erhalten, lokaler absoluter Hookpfad auch fuer private GIT_WORK_TREE-Ansichten), tests/test_git_main_history_guard.py, docs/agent-ops/parallel-work-protocol.md nur verpflichtender Vorwaerts-/CAS-Hinweis und Installationsnachweis. Keine globalen Git-Einstellungen, keine fremden Hooks ueberschreiben. Abnahme in kleinen temporaeren Git-Repositories: Vorwaerts/Integrationsmerge erlaubt, Ruecksprung/Divergenz/Loeschung von main verweigert, andere Branches unveraendert. Keine DB/Container.
+
+## PARALLEL-MIGRATION-MERGE-20261019 - abgeschlossen, Codex
+
+**Owner:** Codex. Neue committete Steuermigration tax_account_category_20261019 und eigene bereits gepruefte HR-Migration teilen harvest_rule_store_20261015 als Eltern. Dateibesitz neuer alembic/versions/merge_hr_tax_20261019.py, zugehoeriger DAG-Vertrag und Migrationsinventar. Bestehende Migrationen nicht umschreiben; additiver Mergekopf ohne eigenes Schema-DML, beide Zweige ausfuehren. Vor Anwendung auf bestehendem valeo_probe Nutzung pruefen; nur ausstehende Steuermigration plus Merge, kein Reset/neue DB. Claudes Steuerkategorienreparatur und alle anderen aktuellen Lieferungen bleiben erhalten.
+
+
+**GIT-MAIN-HISTORY-GUARD Abnahme:** Drei echte Git-Vertraege bestanden. Null-old-OID durch Lesen des tatsaechlichen aktuellen Ref abgesichert; Ruecksprung/Divergenz/Loeschung verweigert, Integration/andere Branches/fremde Hooks erhalten. Installation nach Commit aus versionierter Vorlage.
+
+
+**COMMITTED-API-INTEGRATION Katalognebenbefund:** Vollstaendige aktuelle Quellansicht bestaetigt sechs weitere ausschliessliche read_by-Luecken: document_return_cases, fremdwaren_einlagerung, legacy_adapter_batches, inventory_auxiliary_batches, production_operations, tank_adapter_intake. Katalogbesitz um diese sechs bereits committeten Lesepfade erweitert; keine Tabellen-/Fachcodeaenderung.
+
+
+**PERSONAL-FILE / COMMITTED-API / PARALLEL-MIGRATION Abschluss:** Integrierter Quellstand60 Personaltests gruen, alle Anwendungsmodule aus aktueller Git-Quellansicht, komplette API-Projektion wiederholbar stabil. Katalog673 Tabellen mit14 korrigierten Lesepfadnachweisen; andere Codeinventare unveraendert aktuell. Steuerzweig und HR-Zweig ueber merge_hr_tax_20261019 zusammengefuehrt, ein DAG-Vertrag bestanden; vor additivem Probe-Upgrade null fremde aktive Transaktionen. Keine Entwicklungs-DDL, keine weitere DB/Container, kein Reset. Laufender Backend-Rollout und Provider-Abnahme weiterhin getrennt offen.
+
+
+**Katalog-Korrektur vor Push:** Generator hatte neun bestehende Tabellen wegen physischer Probe-Abweichung entfernt. Eintraege wiederhergestellt; nur neue HR-Tabelle und14 Lesepfadkorrekturen liefern.682 dokumentierte Tabellen,673 im Probe. Vollstaendiger physischer Drift bleibt offen (CRM contacts; Inventory article_alternative_eans, article_analyses, article_print_settings, article_units sowie vier nawaro-Untertabellen). Keine behauptete Schema-Gesamtkonformitaet.
+
+
+**ROLE-PROVIDER-ROLLOUT Abschluss20.10.:** 36 Tests/36 Unterfaelle gruen; lokale42 Rollen verifiziert,17 Beschreibungen aktualisiert, ausschliesslich manager aus Belegscope-Mappings entfernt (read16/write9). Wiederholung null Updates, identischer Zustand. Keine Benutzer-/Kennwort-/Rollenzuweisung oder Clientaenderung; Zugangsdaten nur RAM. QA role-provider-rollout-20261020.md. Backenddeployment/Neuanmeldung gesondert offen. GIT-MAIN-HISTORY-GUARD lokal installiert und verifiziert, keine globalen Einstellungen.
+
+
+**Integration20.10.:** Parallele GitHub-Lieferungen bis b3bafe33b integriert. Personalakten-Test behaelt gezielte PERSONAL_BEARBEITEN-Identitaet und prueft fremde Urheberuebernahme/lesendes Schreibverbot; keine pauschale Alle-Rollen-Freigabe. Migrationsinventar-Datum20.10. Beide Elternverlaeufe erhalten; Arbeitsbaum/Index nicht ersetzt.
+
+
+**Integrations-Nebenbefund:** Alle354 Dateien bestehen Staged-/Dokumentations-/Lintguards. Abschliessender Whitespaceguard meldet zwei bereits gepushte Fremdstellen (route-aliases.json Leerzeile; test_stammdaten_bearbeiten.py EOF). Ausschliesslich Leerraum normalisiert, Funktion unveraendert; diese zwei Dateien in Integrationsbesitz aufgenommen.
+
+
+**Integrationsnachlauf20.10.:** Zusaetzliche parallele Qualitaetslieferung570d92fd4 ohne Inhaltskonflikt aufgenommen. Vorige Integration a6e4b2cf8 hatte356 Dateien samt regulaeren Guards bestanden; beide Codex-Meilensteine und saemtliche fremden Vorfahren erhalten.
+
+
+**Finale Integrationsabnahme20.10.:** 72e21039e nach main gepusht; remote identisch,570d92fd4 und900cd7309 als Vorfahren geprueft. Nach beiden parallelen Integrationen nochmals60 Personalaktenfaelle bestanden, alle app-Module nachweislich aus diesem Git-Stand. Gesamte erzeugte OpenAPI inhaltlich identisch zum Commit.36 Providervertraege/36 Unterfaelle, drei Git-Guard-Vertraege und ein Migrations-DAG-Vertrag bestanden. Rollenvertrags-CI auf72e21039e erfolgreich; andere GitHub-Suiten zum Abnahmezeitpunkt noch laufend/wartend. Nicht geschlossen: neun physische Katalogabweichungen, alte AP-Freigabewege, Backenddeployment und acht bestehende Dependabot-Meldungen; keine pauschale CI-/Sicherheitsfreigabe.
+
+## AP-WORKFLOW-SECURITY-20261020 - abgeschlossen, Codex
+
+**Owner:** Codex. Nutzerauftrag weiter und fremde Nebenbefunde mitbeheben. Bestaetigte offene AP-Pruef-/Freigabestufe: Rumpfantragsteller, fehlende Funktionstrennung/Regelrollen, Statusfreigabe bei unbekanntem Wert, fehlende Inhalts-/Antragsbindung, nichtatomarer Dokumentspeicher, veralteter Maskenaufruf. Dateibesitz app/api/v1/endpoints/ap_approval_workflow.py und neuer app/services/ap_approval_workflow_service.py sowie neue app/api/v1/schemas/ap_approval_workflow_schemas.py; app/core/ap_approval_status.py nur Antragsreferenz; app/auth/finance_roles.py nur vorhandene Finanzleitungsrollen als gemeinsame Konstante. ap_invoices.py ausschliesslich approve-/Maskenfreigabeintegration ohne automatische Selbstanfrage, bestehende Buchungsgrenze unveraendert. Zwei API-Frontendverbraucher und APInvoiceApprovalPanel nur serverseitige Antragsbindung/Entfernung freier Akteurswerte, kein Maskenlayout. Zugehoerige Backend-/Frontendvertraege und alte AP-Erwartungen aktualisieren, eigene QA, Finance-Domain-API, Workboard und erforderliche generierte API-/Inventar-/Handbuch-/Architekturprojektionen. Abnahme: echte Zwei-Mandanten-SQL-Faelle, gepruefte getrennte Personen, Wiederholung/Nebenlaeufigkeit/Fehlerrollback, stale oder fremder Antrag und geaenderter Beleg sperren. Bestehender valeo_probe, eigene Rollbackdaten, kein Schemawechsel/Reset/neue DB/Container. Bestehender zentraler FreigabeEngine-Buchungscheck bleibt verbindlich, diese AP-Vorstufe gewaehrt keine Buchungs-/Zahlungsrechte. Kein Eingriff in Claudes sonstige Fach-/Rollenarbeit.
+
+
+**AP-WORKFLOW-SECURITY Speichernebenbefund:** DocumentRepository.save_document protokolliert bei SQL-Fehlern den gesamten Treibertext samt Parameterwerten. Dateibesitz auf diese eine Logzeile in app/documents/repository.py erweitert: generische Fehlermeldung, Fehler weiterreichen und bestehende Rollback-/Commit-Semantik erhalten. Keine anderen Repository-Fach-/Mandantenregeln aendern.
+
+
+**AP-WORKFLOW-SECURITY Lebenszyklus-/Urhebererweiterung:** update_ap_invoice ersetzt bisher den gesamten Beleg und entfernt createdBy; gebuchte/bezahlte/stornierte Rechnungen bleiben aender-/loeschbar. Dateibesitz ap_invoices.py um create (nur verpflichtender gepruefter Ersteller), update (Ersteller erhalten, gepruefter letzter Bearbeiter, serverseitiger Entwurfsstatus und gesperrte Endzustaende) und delete (nur Entwurf/abgelehnt, gesperrte Endzustaende) erweitert. Gemeinsamer Service sperrt Dokument und prueft Status; keine Preis-/Steuerberechnung oder Buchungslogik umstellen. Entscheider ist auch vom letzten Inhaltsbearbeiter getrennt. Zugehoerige echte SQL-Negativvertraege; bestehende Buchungspruefungen weiter unveraendert.
+
+
+**AP-WORKFLOW-SECURITY native Maskenprojektion:** Dateibesitz zusaetzlich app/api/v1/schemas/mask_entity_contracts.py nur typisierte Antrags-ID/Entscheidungsberechtigung, app/core/screen_definitions.py ausschliesslich Aktion finance/ap-invoice.freigeben (enabledWhen auf Serverentscheidung, menschliche Freigabe/Agentensperre). Bestehender Renderer uebernimmt Referenz unveraendert aus entity/form payload; kein Einzelseitenlayout. AP-Status und Entity liefern dieselbe serverberechnete can_decide-Entscheidung (Mandant, Rolle, Funktionstrennung, technisches Konto, Stand, vorhandene Stimme). Erforderliche generierte MCP-/Maskenprojektionen nachziehen. docs/design/valeo-meridian-experience.md nur Integrationsnachweis, keine Renderer-/Themeaenderung.
+
+
+**AP-WORKFLOW-SECURITY Ausfallgrenze:** post_ap_invoice nutzt bei ImportError bisher einen blossen Dokumentstatus als Freigabeersatz. Ausschliesslich diese Ausfallgrenze schliessen:503 statt Fallback, bestehende zentrale Buchungs-/Steuer-/Perioden-/Ledgerlogik unveraendert. Ohne gueltige AP-Pruefung409. Negativvertrag prueft Abbruch vor Perioden-/Buchungspruefung.
+
+
+**AP-WORKFLOW-SECURITY Transaktions-/Anlageneingrenzung:** Bestaetigt: AP-post speichert Outbox erst nach Ledgercommit und liest den Beleg vor Buchung ohne Schreibsperre; create kann ueber einen parallelen Upsert einen zwischenzeitlich angelegten Beleg ersetzen. Dateibesitz ap_invoices.py um gemeinsame Dokumentzeilensperre beim Post und Outbox vor einzigem Abschlusscommit erweitert, bestehende Steuer-/Ledgerberechnung unveraendert. DocumentRepository.save_document/save nur optionale create_only-Semantik und unveraenderlicher Mandant bestehender Dokumente unter Zeilensperre; eigene SQL-Race-/Negativtests. AP-Anlage verlangt echte Persistenz und geprueften ungekürzten Urheber. Review-Ablauf gilt vor Buchung; danach Zahlungsbereitschaft nur mit referenzierter eigener tatsaechlich gebuchter Hauptbuchzeile, kein blosser Status. Keine neue Migration/DB/Container.
+
+
+**AP-WORKFLOW-SECURITY Audit-/Profilnebenbefund:** log_fibu_audit verwirft einen ausdruecklichen internen user_id, wenn keine E-Mail mitgegeben wird; AP-post nutzt ausserdem dessen Standardcommit. Dateibesitz app/core/fibu_audit.py nur expliziten Urheber unabhaengig von optionaler Mail erhalten (HTTP-Request bleibt vorrangig), tests/test_fibu_audit_atomic_boundaries.py gezielter Vertrag. FinanceTransactionService._resolve_user_id liest lokale Profile bisher ohne Mandant; Dateibesitz app/services/finance_transaction_service.py ausschliesslich diesen Lookup an eigenen Mandanten binden. Keine Finanzberechnung/-autorisierung umbauen, neue SQL-Negativfaelle pruefen fremde Profilzuordnung.
+
+
+**AP-WORKFLOW-SECURITY Namenskonvention:** Neuer Fachservice heisst app/services/ap_invoice_approval_service.py und nutzt das bestehende Finanz-Praefix ap_invoice; kein neues Domaenenmapping. Voriger Dateibesitzname ap_approval_workflow_service.py war ausschliesslich uncommitteter Arbeitsname.
+
+
+**AP-WORKFLOW-SECURITY Agentenklassifikation/Testgrenze:** Gemeinsame bestehende technisches_konto-Klassifikation in app/services/freigabe_engine.py ausschliesslich um bereits signierte Agenten-/Delegationsmerkmale erweitern (agent_id, actor_type, act); AP-Service verwendet denselben Helfer, keine zweite Klassifikation. Menschliche Mandanten-/Rollengrenze unveraendert; eigener negativer Helfervertrag. Der alte Zahlungs-Rollbacktest verdreht tenantId bisher ueber den nun korrekt gesperrten Repositoryweg. tests/test_payment_execution_atomicity.py setzt ausschliesslich diese absichtliche eigene Schema-/Datenkorruption per gebundener SQL-Fixture und behaelt alle Zahlungs-Rollbackassertionen. Vorher432 Faelle gruen, nur dieser unerlaubte Fixture-Aufbau rot; Schutzregel nicht abschwaechen.
+
+
+**AP-WORKFLOW-SECURITY MCP-Altadapter:** finance.ap_invoice.freigeben ruft eine veraltete Signatur mit einem selbstgebauten Nutzer ohne Rollen auf; ein Attrappen-Erfolgstest verdeckt das. Der Proposal ist nicht an Antrags-ID/Beleginhalt gebunden und darf keine menschliche Entscheidung ersetzen. Dateibesitz config/mcp_erp_tools.yaml nur diesen unabgenommenen Schreibadapter entfernen und Vorschlagsbeschreibung korrigieren; app/services/mcp_execution_service.py nur alten Dispatcherzweig, verwaisten Helper/Inputtyp entfernen und Vorschlag auf menschliche Maske verweisen (keine fremden Batch-/Fuhrparkregionen). scripts/generate_mcp_mask_action_map.py nur falschen statischen AP-Mapped-Eintrag entfernen. Tests test_mcp_execution.py nur vier AP-Altadapter-Vertraege gegen fail-closed ersetzen, test_mcp_tool_registry.py und test_mcp_mask_action_map.py nur AP-Erwartung; generierte MCP-Referenz/Map/Maskenkatalog/CLI-/Handbuchprojektionen nachziehen. Vorschlagsfunktion bleibt, keine neuen MCP-Writes oder Berechtigungen.
+
+**AP-WORKFLOW-SECURITY Kernel-Nebenwege:** Besitz erweitert um command_handlers_finance.py, ap_invoice_kernel_posting.py, action_execution_mutations.py und action_execution.py ausschliesslich reale AP-Ausfuehrung: direkte Statusmutation/verschluckte Buchungsfehler entfernen, gemeinsamen Fachservice und gepruefte Requestidentitaet verwenden, Replay vor Autorisierung verhindern. AP-Ablehnung ebenfalls anbinden. Kein neues Rollenmodell; bestehende reine Dispatchsimulation bleibt Metadatenpruefung ohne Schreibwirkung. Zugehoerige Kernel-/Steuer-/Freigabe-Vertraege nachziehen.
+
+**AP-Katalogkonvergenz:** business_commands.py nur Approve/Reject/PostAPInvoice auf bestehende FINANCE_ADMIN/admin und keine Agentenfreigabe umstellen; reale Rollen kommen aus geprueftem Principal, Bodyrollen bleiben wirkungslos. Reine Katalogtests auf diese bestehenden Rollen nachziehen.
+
+**AP-Kernel Replay-Router:** process_kernel_api.execute_action darf reale AP-Replays nicht vor der Fachautorisierung beantworten; nur diese Vorabcache-Verzweigung und Konfliktantwort an zentralen Ausfuehrungsservice anbinden. Generische API-Einheitstests pruefen Cachevertraege mit Harvest-Metadatenkommando; echte AP-Ausfuehrung hat eigene signierte HTTP/SQL-Vertraege statt MagicMock-Erfolgen.
+
+**AP-Stand nach Steueraufloesung:** Bei zwischenzeitlich geaenderter Steuer-/Betragsgrundlage darf der gemeinsame Buchungsservice keine anderen Betraege als den geprueften Belegstand festschreiben; Abgleich und Rollback409 nach gemeinsamer Berechnung. Kernel-Replay bestaetigt geaenderten Beleg nicht aus Altcache. Keine neue Steuerformel.
+
+**Integration:** AP-Meilenstein338b34973 und parallele Studio-Lieferungen bis e0a657298 werden ohne Ruecknahme zusammengefuehrt. Drei reine generierte Konflikte werden neu abgeleitet; AP-MCP-Vertrag prueft konkrete erlaubte/gesperrte Aktionen statt historischer Gesamtzahlen, da der Studio-Rollout neue Aktionen hinzufuegt.
+
+**Frontend-Abnahmenebenbefund:** Vollstaendige Node-Projekt-Typpruefung bestaetigt ungueltiges allowedHosts=all in vite.config.ts und ungenutzte vite.config.performance.ts mit nicht deklariertem rollup-plugin-visualizer. Keine Paketinstallation: Dateibesitz auf Vite-Konfiguration, tsconfig.node/json/eslint und einzige Ignore-Referenz in .eslintrc.json erweitert. Verbraucherpruefung git grep zeigt keinen Build-/Laufzeitaufruf des Alternativconfigs. Altconfig entfernen, regulaeres Config im Node-Projekt behalten, Standardhosts localhost/frontend-web und nur explizite VITE_ALLOWED_HOSTS konfigurieren. Tests/volle Typpruefung erneut ausfuehren; gemeinsame Arbeitskopien unangetastet.
+
+**Abnahme AP-WORKFLOW-SECURITY:** 572 integrierte Backendvertraege, sieben Frontendfaelle, alle ausgefuehrten Ratschen/Architekturgates gruen; stabile OpenAPI3222 Pfade, physisches Katalogschema unveraendert. Bestehender Pruefstand, keine neue DB/Container/Reset. Meilenstein338b34973 plus parallele Studio-Lieferungen bis e0a657298 erhalten. [QA und konkrete Betriebsgrenzen](../quality-assurance/ap-workflow-security-20261020.md). Live-Deployment/Browser und globale andere Kernel-/Studio-/Tabellenluecken bleiben getrennte offene Abnahmen.
+
+**Zusatzabnahme:** Weitere24 Einkaufslisten-/Rechteprojektions-/Studio-Ratschenfaelle gruen, insgesamt596 Backendfaelle. Vollstaendige Frontend-Typpruefung inklusive Node-Konfiguration und geladene Vite-Host-Allowlist gruen. Alle Quellmodule aus eingefrorener kanonischer Integrationsansicht.
+
+**Buildvertrag auf frischem Checkout:** packages/frontend-web/package.json nur type-check-Skript: regulaeren Node-Konfigurationsbuild vor die vollstaendige Anwendungs-Typpruefung schalten. Damit setzt diese keine zufaellig vorhandenen vite.config.d.ts-Artefakte mehr voraus. Keine Abhaengigkeits-/Lockfileaenderung. Beide Teilbefehle sind in der Abnahme geprueft; Paketkommando muss denselben Ablauf reproduzieren.
+
+**Katalogverbraucher:** Verbleibende reine Dispatch-/Kanalmetadaten-Vertraege test_process_kernel_wave5_commands.py und test_process_kernel_wave73_channel_process_actions.py verwenden noch die entfallenen AP-Aliasrollen; nur AP-Beispiele auf FINANCE_ADMIN vereinheitlichen. Keine Kanalgeschaeftslogik oder Berechtigung erweitern. Zusaetzliche Verbrauchersuiten pruefen, damit die CI den neuen Rollenvertrag vollstaendig abbildet.
+
+**Finale AP-Integration:** Parallele Lieferungen bis86d54acb1 erhalten.716 Backendpruefungen,19 Oberflaechenfaelle, vollstaendige Typpruefung/Node-Build und alle ausgefuehrten Gates gruen. Keine neue Datenbank/Container/Migration/Reset. Eigenen AP-Meilenstein338b34973 und Integrationscommit4405f1fca nicht zurueckgenommen; erneuter Main-Zusammenfuehrungscommit bewahrt beide Historien. [Abnahme und Grenzen](../quality-assurance/ap-workflow-security-20261020.md).
+
+## AP-CI-SELECTION-20261020 - abgeschlossen, Codex
+
+Ziel: AP-SQL-Vertraege muessen auch im verpflichtenden needs_live_db-Gate ausgewaehlt
+werden. Besitz: test_ap_workflow_security_contract.py nur gemeinsame case-Fixture,
+test_ap_workflow_concurrency.py nur require_db-Abhaengigkeit, QA und Workboard.
+Transitive require_db-Fixture nutzt die vorhandene strikte Sammlung in conftest;
+keine neue Datenbank, Container oder Workflow-Pipeline. Abnahme: strikte Gateauswahl
+fuehrt AP-, Kernel-, native und Parallelitaetsfaelle auf bestehendem valeo_probe aus.
+Geschaeftscode bleibt unveraendert. Vollsuite deckte sie bereits ab; der schnelle
+PostgreSQL-Pflichtlauf muss denselben Schutz explizit enthalten.
+
+**Abnahme AP-CI-SELECTION:** Exakter CI-Selektor needs_live_db mit PYTEST_REQUIRE_DB_STRICT=1:71 AP-/Kernel-/native-/Parallelitaetsfaelle bestanden,39 reine sonstige Faelle planmaessig abgewaehlt. Gemeinsame case-Fixture und beide Parallelitaetstests fordern require_db an; conftest markiert auch transitive Verbraucher. Keine Geschaeftscodeaenderung, DB/Container/Reset oder Migrationsaenderung.
+
+## AP-MASK-CONTRACT-CI-20261020 - abgeschlossen, Codex
+
+Bestaetigter CI-Befund39461895750: finance/ap-invoice.freigeben ist fuer Agenten
+gesperrt, fehlt aber in agentContract.dangerousActions. Besitz ausschliesslich
+build_finance_ap_invoice_screen_definition in app/core/screen_definitions.py:
+fehlende dangerousActions-Deklaration nachtragen, keine Rechte/Endpunkte/Layouts
+lockern. Agent-Handbuch aus Quelle erneuern; QA/Workboard aktualisieren.
+Abnahme: komplette test_uix046_048_command_endpoints_safety.py-Suite und MCP-Map
+sowie Handbuchdrift gruen. Keine Datenbank-/Container-/Geschaeftscodeaenderung.
+
+**Abnahme AP-MASK-CONTRACT-CI:** Fehlende dangerousActions-Deklaration nur fuer finance/ap-invoice.freigeben ergaenzt. Gesamte UIX-046/048-Sicherheitssuite und MCP-Map:797 bestanden auf unveraendertem Quellstand. Agent-Handbuch regeneriert und Driftpruefung gruen. Menschliche Freigabe/Agentensperre unveraendert; keine Layout-/Buchungs-/Rechteaenderung und keine zusaetzliche Datenbankressource.
+
+## STUDIO-CLI-BULK-20261020 - abgeschlossen, Codex
+
+Owner Codex. Nutzerauftrag: fehlende/handgebaute Masken ueber CLI in Studio
+ueberfuehren und abgeloeste Einzelmaskentests erst nach gleichwertigem Nachweis
+entfernen. Erster Meilenstein: vollstaendiger paginierter Quellenabruf, expliziter
+hashgebundener Uebernahmeplan und wiederholbare stapelweise Ausgangsimporte ueber
+die bestehende authentifizierte Studio-API. Besitz valeo_cli/studio.py, eigene
+CLI-Vertraege, docs/architecture/studio-native-migration.md und eigene QA.
+Keine Uebernahme von Claudes aktivem MASK-STUDIO-ROLLOUT-Seiten-/Builderbesitz.
+Keine automatische Publikation/Umleitung, keine Umgehung von Simulation/Freigabe.
+Keine Abschaffung fachlicher/Sicherheitspruefungen aufgrund eines Baselineimports.
+Abnahme: mehr als100 Quellen, vollstaendige eindeutige Planung, unveraenderte
+Quellhashes/Idempotenz bei Wiederaufnahme, Drift/Fehler sperren, nur registrierte
+API-Wege; klare Trennung importiert/aktiviert. Bestehender Pruefstand, keine neue
+Datenbank/Container/Reset. Weitere Fachmigration bleibt nach Inventarbefund offen.
+
+
+**STUDIO-CLI-BULK Erreichbarkeit, Nutzerauftrag:** IPv4 localhost:8000 health200,
+Studio native-sources401 (korrekte Authgrenze); IPv6 ::1 akzeptiert Verbindung,
+antwortet aber nicht. Keycloak-Discovery ebenfalls200 ueber IPv4. Zusatzbesitz
+valeo_cli/cli.py ausschliesslich localhost-Transport mit IPv4-Quellbindung;
+externe Hosts/Issuer/TLS/Tokenpruefung unveraendert. Keine Docker-/OS-weite
+Netzwerkaenderung oder Dienstneustarts. Lokale CLI-Sitzung fehlt weiterhin.
+
+
+**STUDIO-CLI-BULK Abnahme:** 63 CLI-/native Studio-Vertraege bestanden, darunter
+vollstaendiger registrierter Bestand (>100) ueber CLI/echt HTTP-Router/echt SQL,
+Idempotenz/History/Isolation/keine Publikation. Gemeinsamer valeo_probe, aeusserer
+Rollback; keine neue DB/Container/Reset. Reale PKCE-Anmeldung der vorher
+freigegebenen synthetischen Testkennung erfolgreich. Lokale117 Quellen abrufbar;
+115 neue Baselines per CLI importiert, zwei bestehende erhalten (eine
+abweichende bewusst nicht ersetzt). Alle117 laufenden Quellen haben nun eine
+Ausgangsfassung; neue Fassungen bleiben nicht freigabefaehige Entwuerfe.
+Lokaler Mountbestand ist aelter als aktueller Git-Stand. Vollstaendige
+Handmade-Abloesung, Aktivierung und Ersatz alter Einzelmaskentests sind weiter
+offen; keine Baseline als Produktionsabnahme ausgegeben. QA:
+docs/quality-assurance/studio-cli-bulk-20261020.md. localhost-Transport repariert,
+keine OS-/Docker-Netzwerkaenderung oder neuen Rollen.
+
+## STUDIO-MIGRATION-ENGINE-20261020 - in arbeit, Codex
+
+Nutzerentscheid: Funktionsmigration, automatische Verdrahtung und erforderliche
+Schema-/Tabellengenerierung werden funktionale Bestandteile des vorhandenen
+Studios. Owner Codex. Erster Lieferumfang: typisierter serverseitiger
+Migrationsplan, kataloggebundene automatische Bindung und additive versionierte
+Alembic-Artefakte, Zugriff ueber vorhandene Studio-API und CLI. Dateibesitz neue
+app/services/studio_migration.py, app/api/v1/schemas/studio_migration.py,
+studio_drafts.py ausschliesslich neuer Planweg/Kataloghinweis, valeo_cli/studio.py
+nur Planbefehl, eigene Tests, Architekturprefix, betroffene generierte
+API-/Inventar-/Handbuchprojektionen und Platform-Doku. Keine fremden
+MASK-STUDIO-ROLLOUT-Seiten/Builder. Abnahme: unregistrierte Commands/URLs,
+mehrdeutige Bindungen, SQL-/Namensinjektion und ueberschriebene Identitaetsfelder
+sperren; Artefakt-/Definitionshash bindet Freigabeplan; keine DDL-Ausfuehrung im
+Vorschlagsaufruf, vorhandene Freigabe/Simulation unveraendert. Tabellen verwenden
+gepruefte Mandantenstruktur. Schemaaktivierung nur ueber bestehenden geregelten
+Migrations-/Deploymentweg, kein neuer On-the-fly-DDL-Adapter oder eigener
+Geschaeftsdatenspeicher. Bestehender valeo_probe, eigene Rollbackdaten, kein Reset
+oder neue Datenbank/Container. Vollstaendige Aktivierung/UI-Abnahme und
+allgemeine Fachmigration bleiben separat nachzuweisen.
+
+
+**STUDIO-MIGRATION-ENGINE erster Meilenstein:** Serverplaner und CLI-Aufruf,
+kataloggebundene Verdrahtung, typisierte additive Alembic-Artefakte und
+Compiler-/Katalog-/Definitions-/Mandanten-/Urheber-/Headbindung umgesetzt.
+Vorlaeufig60 Faelle bestanden, inklusive echter generierter Tabelle auf bestehendem
+Pruefstand mit vollstaendigem Rollback. STUDIO-CHANNEL-001 ergaenzt: Human, CLI,
+MCP und echte Rollen-/Datensatz-/Mandanten-/Wiederholungsvertraege vor Aktivierung.
+Neue Plaene markieren diese Nachweise not_verified; kein selbstbestaetigter Pass.
+Claim bleibt in Arbeit fuer allgemeinen CRUD-/Capability-Generator, UI-Editor,
+persistierte Freigabeplanbindung und vollstaendiges Dreikanal-Releasegate.
+Kein pauschaler Backend-Rollout oder Austausch fremder Mountdateien.
+
+
+**STUDIO-MIGRATION-ENGINE Schlusspruefung erster Meilenstein:**64 Tests gruen,
+inklusive ausgefuehrtem Alembic-Artefakt mit eigener zurueckgerollter Tabelle;
+kanonische OpenAPI3230 Pfade wiederholbar stabil, alle vorherigen Pfade erhalten.
+Neue API ist typisiert und nutzt beleg_write/get_tenant_id/_actor. Der Compiler
+bindet auch seinen eigenen Quellhash, damit geaenderte Erzeugungslogik keinen
+unveraenderten Plan behauptet. Dreikanal-Abnahme bleibt absichtlich ein Blocker,
+bis echte aequivalente Rollen-/Mandanten-/Replayvertraege vorliegen. Keine
+pauschale Vollmigration oder Liveaktivierung behauptet.
+
+
+**Studio-Kataloggrenze:** Generischer Lineage-Nachlauf veraenderte zusaetzlich
+Ownership-/ORM-Metadaten und eine physische Spaltenbeschreibung aus dem Bestand;
+diese fachfremden Generatorfolgen werden nicht ausgeliefert. Beide Katalogdateien
+bleiben exakt auf dem vorherigen kanonischen Commit. Der Tabellen-FK in einem
+nur erzeugten Alembic-String ist ausserdem kein laufender Tabellenlesezugriff.
+Keine physische Tabelle/Spalte wurde fuer diesen Planer dauerhaft geaendert.
+## STUDIO-MULTICHANNEL-READ-20261020 - abgeschlossen, Codex
+
+Owner Codex. Fortsetzung des vollstaendigen Studio-Ziels: neue Masken muessen
+Daten und Aktionen ueber Human/CLI/MCP mit identischen Fachrechten und
+Mandantenbindung anbieten. Ist-Befund: generische Aktionsadapter vorhanden,
+gemeinsamer lesender Datenquellenweg fehlt. Besitz neuer
+app/services/mask_data_read.py und app/api/v1/schemas/mask_data_contracts.py,
+mask_screen_definition.py nur neuer async GET-Datenweg, mcp_mask_actions.py nur
+Read-Adapter ohne Aenderung des Writewegs, mcp_execution_service.py nur dessen
+Dispatch, config/mcp_erp_tools.yaml nur neues Lesewerkzeug, valeo_cli/cli.py nur
+Daten-Lesekommando. Eigene Tests und betroffene generierte Registry-/API-/CLI-/
+Inventar-/Architektur-/Handbuchprojektionen, Workboard/QA/Platform-Doku.
+Abnahme: echte Domain-Daten in drei Wegen, gleiche Fremdmandanten-/Rollen-404/403,
+keine Aufruferidentitaet aus Query/Payload, nur deklarierte lokale GET-Quellen,
+Bounded Paging, unbekannte Quellen/SSRF/Redirect/Stubantworten sperren.
+Gemeinsamer valeo_probe, eigene Rollbackdaten, kein Reset/neue DB/Container.
+Kein Eingriff in Claudes Seiten-/Builderbesitz; keine neuen Schreibfreigaben.
+
+
+**STUDIO-MULTICHANNEL-READ Abnahme:**100 Faelle gruen. Echte signierte
+Dreikanal-AP-Lesevertraege mit SQL/Domainroute/Rollen-/Zwei-Mandanten-404/403,
+Selector-/Tokennegativfaellen; alle eigenen Daten zurueckgerollt. REST async,
+CLI daten und mask.data.read verwenden denselben Resolver; nur Aufrufertoken,
+keine neuen Rollen/Writes. Antworten2MiB, kein Redirect/Stub oder fremder Weg.
+64 registrierte Tools; Katalogueberpruefung semantisch statt alter Gesamtzahl.
+Brittle Registrytest-Besitz um diese eine Erwartung erweitert. Kanonischer
+Tabellenkatalog exakt erhalten, Claudes Artikel-/Kundenmasken bis ef0b5b51c
+integriert. Kein allgemeines Qualitaetssiegel oder Live-Rollout behauptet.
+Offen: per-Version-Publikationsnachweise, gleichwertige Tabellenprojektionen und
+Paging-Aliasse sowie Fachketten fuer alle weiteren Quellen. Gesamtclaim
+STUDIO-MIGRATION-ENGINE bleibt in Arbeit. QA:
+docs/quality-assurance/studio-multichannel-read-20261020.md.
+
+
+## STUDIO-WB-SYNC-20261022 — Sync Cursor+Codex (Wiederherstellung)
+
+**Owner:** Cursor Composer (Koop Sync-Agent a0f22080). **Stand:** 2026-10-22.
+**Ursache:** Nachfolgende Workboard-Hunks haben Codex-Studio-Slices vom 20.–22.10. verdrängt (0 Treffer vs 6e40b3212).
+**Aktion:** Fehlende Abschnitte aus 6e40b3212 wieder eingefügt; Cursor-Kopf 22.10. behalten. Parallel 63 Studio-Pfade aus HEAD restored.
+**Nicht anfassen:** STUDIO-BELEG-THEME / STUDIO-MODEL / STUDIO-SEMANTIC.
+
+
+## STUDIO-TABLE-QUERY-20261020 - abgeschlossen, Codex
+
+Owner Codex. Unveraendertes Gesamtziel made by Studio: gleiche Tabellenfunktion
+in Human/CLI/MCP, kein Qualitaetssiegel aus blossen Metadaten. Besitz neue
+app/services/mask_table_query.py, bestehende mask_data_read.py und
+mask_data_contracts.py nur Tabellenprojektion, mask_screen_definition.py nur
+Query-Parameter, valeo_cli/cli.py und MCP-Readschema nur passende Leseparameter.
+Zentrale Runtime useUniversalMaskRuntime/compile-data-binding-plan/types nur
+explizite Datenquellenbindung ueber gemeinsamen Leseweg; keine fremden
+Seiten/ScreenBuilder. Eigene Backend-/Frontendvertraege, notwendige generierte
+Artefakte, QA/Workboard/Platform-Doku. Abnahme: Suche, neun Filteroperatoren,
+Sortierung, richtige zweite Seite, gleicher Domain-/Mandanten-/Rollenweg;
+unvollstaendige Quellen duerfen keinen vollstaendigen Tabellenstand behaupten.
+Keine neue DB/Container/Reset, bestehender valeo_probe mit Rollbackdaten.
+Bestehende Server-Paging-Vertraege werden nicht still auf lokal umgedeutet.
+
+
+Abnahme 21.10.2026: 103 Backendtests, sieben Frontendtests, TypeScript und alle
+lokalen Projektions-/Architekturgates gruen. Echte signierte drei-Kanal-
+Debitorenabfrage mit zwei Mandanten, zweite Seite, Filter, gleiche Ergebnisse.
+Quellen werden vor lokaler Projektion vollstaendig und begrenzt gesammelt;
+Wiederholungen/unvollstaendige Bestaende scheitern. Kein allgemeines
+Qualitaetssiegel: Serverpagination/alte Tab-Quellen, Snapshotstabilitaet,
+versionsgebundene Releaseevidenz, allgemeine CRUD-/Schema-Verdrahtung und
+Altmaskenmigration bleiben Folgearbeit. QA studio-table-query-20261021.md.
+CI-Nachlauf 7bb8e4858: Plattform/OpenAPI/SQL/Security-Agent gruen; Quality/CI-CD
+rot wegen Artikel-Zeilenformen/Identitaetstest; Security Scan wegen zwei neuen
+follow-redirects-Advisories. Incoming main seitdem weiterentwickelt, vor
+weiterer Korrektur integriert/pruefen. Keine Gates abgeschwaecht.
+
+
+Integrationsabnahme mit main bis a059c51bf: 205 Backendtests bestanden,
+einschliesslich der beiden zuvor roten Maskenvertraege (Zeilenformen und
+Belegidentitaet). Claudes Quell-/Testkorrekturen bleiben erhalten. Alle
+Projektions-/Architekturgates gruen; 3242 OpenAPI-Pfade, 931 Routen,
+307 Services, 472 Endpunktmodule. follow-redirects-Sicherheitsbefunde
+bleiben als eigener Folgeschritt offen. Kein pauschal gruener CI-Status.
+
+## STUDIO-TABLE-ROUTES-20261021 - abgeschlossen, Codex
+
+CI-Nachlauf 882ffbd9a zeigt eigene fehlende Suchschluessel-Projektion filter_plan.
+Besitz ausschliesslich generierte route-inventory.gen.json/route-tree.gen.tsx,
+Generator unveraendert, eigene QA/Workboard. Abnahme Regeneration byteidentisch,
+keine fehlende Route und zentrale Tabellenvertraege unveraendert. Keine DB.
+
+
+Abnahme beider Claims 21.10.2026: follow-redirects exakt1.16.1 und gezieltes
+Vite-6-Patch6.4.4 im regulaer generierten Lock. Paketbestand3012 unveraendert
+bis auf diese beiden Patchidentitaeten. 36 Workspaces frozen/ignore-scripts.
+Production-Audit: fuenf neue Befunde entfernt, verbleibend genau zwei bestehende
+High (node-forge/braces), nach erneuter Original-/Patch-/Installationspruefung
+beide source_backported, null blocked. Keine Severity-Ausnahme. 59 originale
+JS-Dateien geprueft; Original RSA/Braces3 normale Faelle gruen/9 Angriffe rot;
+reparierte Laufzeit plus fail-closed Pruefung und neue Redirect/Vite-Vertraege
+37/37 gruen. Reviewhashes an neuen Manifest/Lock gebunden, neue Abnahme21.10.,
+Wiedervorlage28.10. Regularem Audit-CLI beide neuen Runtimevertraege hinzugefuegt;
+Testpfad-Umgebungsvariablen dort entfernt. Full Frontendbuild Vite6.4.4 gruen
+45,47s; isoliertes Pruefumfeld musste den bereits installierten terser lesen.
+Gemeinsame node_modules unangetastet. Keine Datenbank/Container.
+Routenfolge: unveraenderter Generator, exakt zweimal +filter_plan,931 Routen,
+zweite Generierung byteidentisch. Vorheriger CI-Rotbefund korrekt nachgezogen;
+kein Gate angepasst. QA dependency-security-follow-vite-20261021.md und
+studio-table-query-20261021.md. Neuer GitHub-Nachlauf nach Push ausstehend.
+
+
+## STUDIO-PLAN-HISTORY-20261021 - abgeschlossen, Codex
+
+Fortsetzung des eigenen STUDIO-MIGRATION-ENGINE-Claims: Migrationsplan nur aus
+serverseitig gespeicherter Entwurfsfassung erzeugen und unveraenderbar in der
+bestehenden Studio-Historie speichern. Besitz neuer studio_migration_store.py,
+Migration-DTO nur gespeicherter Auftrag/Antwort, studio_drafts.py nur neuer
+POST drafts/{id}/migration-plan, CLI nur plan-speichern, eigene Tests und
+ADR084 Proposed/Platform-/QA-Doku, notwendige Projektionen/Architekturprefix.
+Kein Edit fremder Seiten/Builder oder Umdeuten bestehender Publikation.
+Abnahme erwartete Revision, Tenant/Actor nur Kontext, schluesselgebundene
+Wiederholung mit Inhaltsvergleich, reale Postgres-Historie und Rollback bei
+Fehler, Fremdmandant404; Plan bleibt blockiert fuer Aktivierung/DDL. Speicherung
+ist weder Freigabe noch vollstaendige Dreikanalabnahme. Bestehender valeo_probe
+mit eigenen Rollbackdaten, kein neuer DB/Container/Reset. C4 unveraendert.
+
+
+STUDIO-PLAN-HISTORY Abnahme:85 Tests bestanden (neuer gespeicherter Plan,
+Compiler, bestehende Revisionshistorie, Tokenidentitaet und CLI). Echte signierte
+REST-/CLI-Aufrufe mit Rollen-/Fremdmandanten-/Header-/Token-Negativfaellen und
+realer PostgreSQL-Historie; deren Mutation wird vom bestehenden Trigger blockiert.
+Ein Speicherfehler rollt vollstaendig zurueck. Alte Wiederholung liefert
+historischen Nachweis; neue Revision braucht neuen Auftrag.45 erste Tests plus
+85 erweiterte finale Tests gruen; Zaehler nicht addieren. Alle lokalen Drift- und
+Architekturgates gruen, OpenAPI3243 Pfade,308 Services,931 Frontendrouten,
+472 Endpunktmodule. Kanonischer Tabellenkatalog exakt erhalten. Kein neuer
+Container/DB/Reset und keine Schemaaktivierung/Publikation. Autorisierter
+Compiler-Command ueber bestehende beleg_write-/Tenantgrenze; kein MCP-Write neu
+freigeschaltet. ADR084 Proposed/QA studio-plan-history-20261021.md.
+Gesamtclaim bleibt offen fuer CRUD-/Capability-Generierung, UI-/MCP-Authoring und
+verpflichtende Auswertung aller revisionsgebundenen Nachweise im Publikationsgate.
+D8dee7717-Nachlauf: Security/ServiceSecurity/SQL/Smoke/critical/Docs gruen;
+Quality und CI/CD zum letzten Abruf noch nicht abgeschlossen.
+
+
+## STUDIO-PLAN-INTEGRATION-20261021 - abgeschlossen, Codex
+
+Nutzer: offene Publikations-/UI-/MCP-Anbindung abschliessen. Besitz bestehender
+studio_migration_store.py nur aktuelle Planpruefung, studio_release.py und
+studio_draft_store.py nur Pflicht-/Runtimebindung, simulation_artifact_hash nur
+Abhaengigkeitsliste. Studio-Oberflaeche/APIclient plus neue Plan-Komponente,
+zugehoerige Tests; neuer MCP-Transportadapter und explizites versioniertes
+Tool im vorhandenen Register, mcp_mask_actions.py nur Dispatch (kein Wachstum
+MCP-Godfile). Keine fremden Seiten/Builder. Vorhandene Rollen/Scopes bleiben
+fuehrend, MCP-Adapter schreibt niemals SQL oder publiziert; gleiche Authoring-
+Domainoperation wie HTTP/CLI. Autorisierter Nutzerauftrag ist Freigabe dieser
+eng begrenzten R1-Plan-Capability, keine neue Kontenrolle/Schemaausfuehrung.
+Abnahme: Plan fehlt/veraltet/manipuliert sperrt Publikation, SQL-/Memoryparitaet,
+auf Revision bezogene UI, drei gleiche Transportergebnisse und echte negative
+JWT-/Rollen-/Tenant-/Replayfaelle. Bestehende Lifecycle-Testhelfer werden fuer
+verpflichtenden Planschritt angepasst, keine Gateabschwaechung. Vollstaendige
+allgemeine Human/CLI/MCP-Fachkettenzertifizierung bleibt eigener Umfang;
+not_verified wird nicht zu bestanden umetikettiert. Bestehender valeo_probe,
+Rollback, kein Reset/DB/Container. Doku/ADR084/Projektionen nachziehen.
+
+Ergebnis: Pflichtplan in Memory-/SQL-Publikation und Runtime angebunden.
+Compiler-/Katalogdrift, manipulierte Belege, fehlende Revision, ungespeicherte
+Bindungen und Schemaaenderungen ohne Bereitstellungsnachweis sperren. Bestehende
+Studio-Oberflaeche haelt den aktuellen Plan ueber denselben Servercommand fest;
+CLI und explizit freigeschaltetes R1-MCP studio.migration.plan v1 liefern bei
+Wiederholung identisches Ergebnis. Vorhandene belege:write-/beleg_write- und
+Token-Tenantgrenzen bleiben verbindlich. Kein Agenten-SQL oder Publikationsrecht.
+107 eindeutige Backendtests (106 breiter Lauf + 16 ueberlappende Tests mit einem
+neuen SQL-Publikationsvertrag),14 UI/APIclienttests und TypeScript gruen.
+UI-Leerzustand und kollidierende React-Keys von Plan/Historie mitbehoben.
+Keine neue DB/Container/Reset; eigener SQL-Datenstand zurueckgerollt.
+QA studio-plan-integration-20261021.md; ADR084 weiterhin Proposed.
+Gesamtclaim STUDIO-MIGRATION-ENGINE-20261020 bleibt in arbeit: allgemeine
+CRUD-/Capability-Generierung, Schemaeditor/-bereitstellung und vollstaendige
+kanalweise Fachkettenabnahmen sind hiermit nicht behauptet. Bestehendes
+begrenzt read-only grain.v1-Profil und not_verified bleiben ehrlich ausgewiesen.
+
+
+## STUDIO-GENERATED-ENTITIES-20261021 - in arbeit, Codex
+
+Nutzerauftrag: allgemeine CRUD-/Tabellengenerierung und Fachkettenabnahme.
+Eigener Gesamtclaim STUDIO-MIGRATION-ENGINE wird fortgesetzt. Besitz neuer
+studio_entity_contracts/compiler/commands sowie eigener Tests; bestehender
+Migrationscompiler nur notwendige gemeinsame Schemagenerierung, eigene CLI-
+Unterbefehle und Studio-Authoringroute nur Anschluss. Keine fremden Fuhrpark-
+oder Maskenseiten. Gemeinsamer Vertrag generiert typisierte Domaincommands,
+Schemaartefakt, ScreenDefinition und Kanalspezifikationen. Ausschliesslich neue
+Studio-Stammdatentabellen; Fachbuchungen, Zahlungen und Bestaende bleiben in
+registrierten Fachcommands. Rollen aus bestehendem Bereichsmodell, Mandant aus
+verifizierter Identitaet, Idempotenz/Version/Audit transaktional. Keine freie
+SQL-Ausfuehrung oder Aktivierung durch MCP. Bestehende Register statt zweiter
+Rechteverwaltung; ungepruefte Writes bleiben deaktiviert. DDL-Abnahme nur eigene
+transaktionale Tabellen im vorhandenen valeo_probe, kein Reset/DB/Container.
+Abnahme mit zwei Mandanten, Replays, Konflikten, Rollback und echten SQL-Wirkungen;
+keine Umdeutung von Mocktests in volle Fachkettenabnahme. CI-Nachlauf und Doku
+werden als Integrationsvoraussetzung mitgeprueft.
+
+STUDIO-GENERATED-ENTITIES Meilenstein: typisierter Compiler fuer neue CRM-/Agrar-/
+Lager-Stammdaten, additive Tabellen-/Ereignismigration, zentraler Commandrouter,
+Masken-/Schema-/Katalog-/Registrierungsartefakte und Authoring-API/CLI umgesetzt.
+Vorhandener Studio-Katalog verdrahtet registrierte Routen/Quellen/Commands beim
+Start. Ausgaben bleiben writes_enabled=false und agent_roles=[]; Schema-/
+Laufzeitfingerprint sperrt fehlende/veraltete Bereitstellung. Kein Fachbuchungs-
+SQL oder offener Agenten-Write. Savepoint umfasst Row, unveraenderbare Receipt/
+Audit-Historie und bestehende Outbox; versioniertes Ersetzen und Deaktivieren.
+Zusaetzlicher enger Besitz: ActionRuntime nur gelesene Version an generierte
+Update-/Delete-Endpunkte; zugehoeriger Regressionstest. Keine fremden Maskenseiten.
+23 datenbankfreie Vertraege,24 Frontendtests, TypeScript und lokale Drift-/
+Architekturgates gruen. Erste SQL-Abnahme59 gruen/eine Status-Erwartung falsch;
+403 an Tenantgrenze statt422. Nach weiteren Schutz-/Verdrahtungsaenderungen
+breiten finalen SQL-Lauf wegen nicht mehr erreichbarem valeo_probe/Docker500
+beendet, nicht als bestanden gezaehlt. Keine DB/Container/Reset/Dienstneustarts.
+CI-Ausgangsfehler korrigiert: ADR-Navigation92 und drei veraltete SQL-/Status-
+Historienvertraege auf echten Pflichtplan erweitert. QA studio-generated-entities-
+20261021.md, ADR085 Proposed. Claim bleibt in arbeit: SQL-/CI-Nachlauf, positive
+Human/CLI/MCP-Fachkette und Schemaerweiterung bestehender Entity-Vertraege offen.
+Keine vollstaendige universelle Masken-/Fachkettenabnahme behauptet.
+
+
+STUDIO-GENERATED-ENTITIES Nachlauf: PostgreSQL-CI606 bestanden/5 andere
+uebersprungen, alle16 neuen SQL-Vertraege gruen. Quality-Gate39592332034:
+Besitz um generierte table-catalog.json/md erweitert; nur fehlendes read_by
+bei domain_shared.tenants nachgezogen, physischer Katalog unveraendert.
+Docker-Update laut Nutzer abgeschlossen; gemeinsamer valeo_probe erreichbar.
+Regulaeren Desktop-Neustart zuvor angefordert, keine erzwungene WSL-Beendigung
+oder Loeschung/Reset/neue Ressourcen. Positiver Dreikanalnachweis bleibt offen.
+
+
+STUDIO-GENERATED-ENTITIES Kanalabnahme: eigener Testbesitz um
+tests/test_studio_entity_channels.py erweitert. Synthetische registrierte
+Definition und explizit freigeschaltete Testcapability nur in Rollback-Fixture;
+echte signierte Identitaeten und vorhandener MCP-/CLI-/HTTP-Ausfuehrungsweg.
+Keine produktive Registrierung oder vorgetaeuschte Studio-Publikation.
+
+
+STUDIO-GENERATED-ENTITIES Schemaerweiterung: Besitz neuer
+studio_entity_evolution.py und eigener Unit-/SQL-Vertraege; bestehende
+Entity-Vertraege/Authoringroute/CLI nur typisierter Anschluss und Projektionen.
+Nur additive nullable Felder an serverseitig registrierter Studio-Entity;
+Basisfingerprint verpflichtend, kein vom Aufrufer vorgegebenes Altschema.
+DDL sperrt Zieltabellen und verifiziert Basis vor Aenderung. Keine automatische
+Ausfuehrung, Freischaltung, Typaenderung, Fremdtabelle oder Datenruecksetzung.
+
+
+STUDIO-GENERATED-ENTITIES Kanal-/Evolutionsmeilenstein:28 Unit- und27
+SQL-Vertraege gruen. HTTP-Anlage/CLI-Replay/MCP-Update mit echten signierten
+Identitaeten und SQL-/Audit-/Outboxnachweis. Additive nullable Erweiterung nur
+aus registriertem Basisvertrag, Migration mit Tabellenlock/Basisnachweis;
+Altdaten erhalten, alter Router sperrt, neue Fassung aendert korrekt.
+Authoring-API/CLI identisch und ohne DDL-Wirkung. Alle lokalen Driftgates gruen,
+OpenAPI ein neuer Pfad,314 Services vollstaendig zugeordnet.
+Claim bleibt in arbeit: echte Studio-Publikation/visuelle Browserabnahme und
+weitere Fachketten sind nicht durch synthetische Testregistrierung erledigt.
+SonarCloud-Gesamtnachlauf separat rot (S1226 cases.py, neue Coverage59,6%).
+
+
+## STUDIO-ENTITY-RELEASE-20261021 - reserviert, Codex
+
+Gesamtziel: Studio voll funktionsfaehig, alle Masken ueber CLI mit belastbarem
+Qualitaetsnachweis migrieren. Naechster Integrationsslice: eigenes
+studio.entity.v1-Freigabeprofil fuer registrierte generierte Stammdaten.
+Besitz: neues studio_entity_simulation.py, studio_release.py nur Profilauswahl/
+Nachweispruefung; studio_process_simulation.py nur Artefaktbindung; Entitycompiler
+nur Profil-/Registrierungsprojektion, Commandrouter/-service nur gemeinsamer
+Bereitstellungscheck. Eigene Unit-/SQL-/Freigabetests und generierte Projektionen.
+Kein pauschales Oeffnen von grain.v1, keine fremden Fachmasken oder Gateabsenkung.
+Simulation: vorhandener valeo_probe, echte Domaincommands und zurueckgerollte
+synthetische Daten/Outbox; kein neuer Container/DB/Reset. Testtabellen nur eigene
+eindeutig bezeichnete Artefakte, kontrollierte eigene Bereinigung.
+Abnahme: serverseitige Registrierung und exakter Definitions-/Vertragshash,
+reale CRUD-/Version-/Replay-/Tenancy-/Rollen-/Audit-/Outbox-/Rollbackkette,
+dauerhafte Evidenz und Vier-Augen-Publikation mit bestehendem Migrationsplan.
+Offen danach: reale visuelle Browserabnahme und Profilabdeckung weiterer
+Masken/Fachketten, keine vorgetaeuschte Gesamtmigration.
+
+
+STUDIO-ENTITY-RELEASE Laufzeitnebenbefund: Entitycompiler und Migrationsplan
+lesen den kanonischen physischen Tabellenkatalog; Dockerfile.backend liefert
+docs/admin/table-catalog.json bisher nicht aus, .dockerignore schliesst docs
+aus. Besitz auf diese drei exakten Bereitstellungsstellen erweitert:
+Dockerfile.backend (nur Katalog-COPY), .dockerignore (nur Katalog zulassen),
+docker-compose.yml (nur read-only Katalogmount); eigener Paketvertrag.
+Dateien aus Git HEAD in kanonischer Quellansicht, fremde physische
+Dockerfile-Arbeitskopie nicht ueberschreiben. Kein Containerneustart/Reset.
+
+
+STUDIO-ENTITY-RELEASE Meilenstein:43 Generator-/Profil-,41 SQL-/Freigabe-/
+Grain-/Kanalvertraege und2 Paketvertraege gruen. Neues studio.entity.v1 prueft
+exakte registrierte Definition und reale CRUD-/Audit-/Outbox-/Rollbackkette;
+bestehende gespeicherte Plaene, unveraenderliche Evidenz und Vier-Augen-Freigabe
+bleiben aktiv. Runtime-/Authorizer-/Tenantsourcen gebunden, alter geladener
+Router lehnt Quellwechsel vor SQL ab. Kanonischen Schema-Katalog gezielt
+ausliefern; identischen doppelten Config-COPY im Dockerfile entfernt.
+Alle lokalen Driftgates gruen, OpenAPI unveraendert, nur tenants-read_by
+im physischen Katalog nachgezogen.315 Services vollstaendig zugeordnet.
+QA studio-entity-release-20261021.md. CI/Image und reale visuelle Abnahme
+bleiben offen; kein universelles made-by-studio-Zertifikat oder Gesamtabschluss.
+
+
+STUDIO-ENTITY-RELEASE CLI-Integrationsluecke: serverseitig registrierte
+Definition muss ohne manuelle Paketmanipulation uebernehmbar sein. Enger Besitz
+um gemeinsamen Registrierungslookup, lesenden typisierten Authoring-Endpunkt
+und CLI entitaet-uebernehmen erweitert; dieselben bestehenden Draft-/Plan-/
+Simulations-/Publikationscommands. Eigener signierter HTTP-/CLI-Gesamttest
+einschliesslich Readiness, Vier-Augen und Ruecknahme. Keine Aktivierung durch
+den Lookup, keine zweite Registry oder andere Rollen.
+
+
+STUDIO-ENTITY-RELEASE echter CLI-Befund: definitionReady=false, weil generierte
+Aktionen keine permission deklarieren. Keine Readiness-Ausnahme. Besitz eng
+um generate_action_permission_projection.py, action-permissions.generated.json,
+zentralen runtime/screen-permissions.ts und eigenen Frontend-Vertrag erweitert.
+Generierte Entityrechte ausschliesslich aus require_roles des vorhandenen
+Entityrouters ableiten, Scope allein darf keine Bereichsrolle ersetzen.
+Kleine Stammdatentabellen erhalten sichtbaren Erstellzeitpunkt neben Version
+statt erfundener Fachspalten; bestehende Mindestspaltengrenze bleibt erhalten.
+
+
+STUDIO-ENTITY-RELEASE abschliessende CLI-Abnahme:44 datenbankfreie
+Generator-/Profil-/Readinessvertraege,42 SQL-/Freigabe-/Grain-/Kanalvertraege,
+30 UI-/Aktionsruntimefaelle und vollstaendige TypeScript-Pruefung gruen.
+Neuer typisierter lesender Authoringpfad entity-definitions/{name} und
+CLI entitaet-uebernehmen nutzen denselben idempotenten Draftcommand.
+Signierter CLI-Lebenszyklus mit Replay, Review, gespeichertem Plan, realer
+Simulation, gesperrter Eigenfreigabe, unabhaengiger Publikation,
+Fremdmandant404 und Ruecknahme bestanden. Rechte aus echten Entityrouter-
+Abhaengigkeiten in bestehender UI-Projektion;75 vorhandene Maskenprojektionen
+unveraendert. Neue Namespaceprojektion fuer CRM/Agrar/Lager.
+Readinessfehler behoben, keine Gateabsenkung. Zwei Paketvertraege gruen;
+Docker-Kontext erlaubt nur Katalogdatei, benachbarte Admin-Dokumente bleiben
+ausgeschlossen. Alle lokalen Driftgates gruen, ein neuer lesender Pfad,
+vorhandene OpenAPI-Pfade unveraendert. Gesamtziel und reale Browser-/Image-
+Abnahme sowie weitere Fachketten/gesamte Altmaskenmigration bleiben offen.
+
+
+## STUDIO-LIVE-PROBE-20261021 - abgeschlossen, Codex
+
+**Owner:** Codex. **Ziel:** echte lokale CLI-/Browserfreigabekette aus kanonischer Quellfassung am bestehenden valeo_probe, ohne neue Datenbank/Container und ohne Fachwrites auf Entwicklung. **Besitz:** studio_process_simulation.py ausschliesslich deklarierter APP_ENV=test-Probevertrag und eigener Test test_studio_probe_configuration.py; eigene lokale Laufzeit-/Abnahmeartefakte; QA und Workboard. **Annahme:** im ausdruecklichen Testbetrieb darf die App selbst am bereits konfigurierten valeo_probe arbeiten; Simulation bleibt getrennte Verbindung mit Rollback, Sperre und Nachkontrolle. Produktion/Entwicklung duerfen ihren Anwendungsbestand weiterhin nicht simulieren. Keine CI-Vortaeuschung, kein Authoverride; echte Keycloak-Identitaeten, Bereichsrollen und Vier-Augen-Pruefung. Eigener begrenzter synthetischer Entity-Vertrag, nur dessen Tabellenmigration nach Fremdnutzungspruefung. Vorhandene Container und geteilte Fremddaten bleiben unveraendert. **Abnahme:** negative Konfigurationsvertraege; signierte reale HTTP-/CLI-Kette mit Prozess-/Historiendaten, Browser-Darstellung in hell/dunkel, eigene temporare Berechtigungen zuruecknehmen.
+
+
+**STUDIO-LIVE-PROBE Erweiterung Dateibesitz:** reale Browserabnahme findet nach erfolgreicher echter CLI-Simulation/Freigabe fehlende Aktionsverdrahtung im StudioRunPage: keine Rechteprojektion und kein onAction. Besitz zusaetzlich pages/admin/studio-run.tsx, zentrale NativeListPage.tsx (generierte Versionspruefung und stabiler Wiederholungsschluessel), eigene UI-Regressionen. Keine individuelle neue Maskenoberflaeche; bestehende ScreenDefinition-/Runtime-/Renderer-/Dialogkette wiederverwenden. Abnahme echte Anlage/Aendern/Deaktivieren im Browser mit serverseitiger Versionierung.
+
+
+**STUDIO-LIVE-PROBE CLI-Nebenbefund/Besitz:** generischer CLI-Aufruf ohne --idempotenz sendet keinen Schluessel (generierter Command422); --version wird im generischen Zweig ignoriert. Besitz zusaetzlich valeo_cli/cli.py und __main__.py, eigene CLI-Regression. Automatischer UUID-Schluessel und Wiederholungshinweis fuer generierte Entity-Commands, verpflichtende gelesene Version beim Aendern/Deaktivieren; Windows-Ausgabe darf an einer Fehlerpfeil-Unicodeausgabe nicht abstuerzen. Keine allgemeine Freischaltung von Agent-Writes.
+
+
+**STUDIO-LIVE-PROBE Generator-/Paging-Nachzug:** Die generierte Worklist zeigt leere schreibgeschuetzt wirkende Formularfelder oberhalb der echten Eingabedialoge und teilt eine kleine Tabelle automatisch in Spalten. Compiler besitzt bereits diesen Slice; zusaetzliche Abnahme: reine Worklist ohne Scheinformular, einspaltig mit zentraler Zeilendetailfunktion. Beim Abgleich ist zudem page/skip-Drift festgestellt: Runtime sendet page, Router liest nur skip; Suche q ignoriert. Besitz zusaetzlich studio_entity_compiler.py, studio_entity_router.py und studio_entity_commands.py nur begrenzte parametrisierte Lesefilter/Seitengrenzen sowie eigene Generator-/SQL-Regressionen. Gleiche Mandanten-/Deaktiviertfilter fuer Liste und Trefferzahl; keine Frei-SQL- oder Feldnamen vom Aufrufer. Erste reale Pruefmaske regulaer retired, beide synthetischen Fachsaetze bereits regulaer deaktiviert; neue Abnahme nach geprueftem Runtime-Deploy.
+
+
+**STUDIO-LIVE-PROBE Identitaetshartung:** Router behandelt bislang nur identity_type=agent als Agent; service/fehlende Typen fallen auf human zurueck. Derselbe Routerbesitz erweitert auf ausdrueckliche menschliche Kennzeichnung, Agent-/Servicekonto nur bei aktivierter bestehender Bereichsrolle, unbekannter/fehlender Typ gesperrt. Eigene signierte Negativtests; synthetische menschliche Entity-Testtokens werden ausdruecklich human gekennzeichnet. Keine produktive Berechtigung erweitert.
+
+
+**STUDIO-LIVE-PROBE Historien-/Statusanzeige:** reale finale Sichtung zeigt gueltige aktive Veroeffentlichung in der Historie, waehrend der pauschale Gatesatz weiterhin erneute Freigabe fordert. Besitz zusaetzlich features/screen-studio/ScreenStudioPage.tsx, neue reine StudioGateSummary-Komponente und deren UI-Vertraege. Anzeige trennt gespeicherten Veroeffentlichungsstatus von erneuter Autorpruefung; fehlender Pruefbericht darf keinen gruenen Text liefern. Nur erwarteten non_temporary-Hinweis der unveraenderten bereits publizierten Autorvorlage erklaeren; keine Serverfreigabe oder sonstigen Fehler unterdruecken. Historien-Invalidierung auf den bestehenden mandantenpraefigierten Query-Key berichtigen.
+
+
+**STUDIO-LIVE-PROBE visuelle Zentralreparatur:** Reale Historien-Sichtpruefung bei1440x900 zeigt abgeschnittene Aktionsbuttons: Compiler erzwingt36px expertDense auch bei44px Touch-Zielen. Besitz zusaetzlich zentraler render-plan/schema-compiler.ts und dessen bestehende Vertraege; Zeilen mit sichtbaren Aktionen erhalten ausreichende Hoehe, reine Datenzeilen bleiben dicht. History-ScreenDefinition erhaelt ausdruecklich einspaltige Auditliste statt automatisch schmaler Mehrspaltenansicht. Keine individuelle React-Maske.
+
 
 ## HARVEST-RULE-STORE-20261015 — abgeschlossen, Codex
 
@@ -18645,900 +19401,662 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 
 **CI-Nachlauf 766451293:** Alle zwoelf unabhaengigen Quality-Gate-Pruefjobs gruen, ausschliesslich SonarCloud rot (39223041606). Oeffentliche Sonar-Abfrage19.10.: neue Coverage58,0 bei80,0, Duplikate3,2 bei3,0, ZuverlaessigkeitD/SicherheitC stattA, Hotspotreview0 bei100. Keine Ausnahmen oder Schwellenabsenkung. Neue Sonar-Befundinventur liegt lokal fuer getrennte priorisierte Reparaturen vor; Scannerhinweise zu XML-Namensraeumen nicht blind als Transport-URLs ersetzen.
 
-## WORKFLOW-SAGA-LIFECYCLE-20261019 - abgeschlossen, Codex
+## MIGRATION-PARITY-REPAIR-20261022 — reserviert, Codex
 
-**Owner:** Codex. **Stand:** abgeschlossen 2026-10-19. **Ziel:** Konkrete Runtime-/Sonar-Befunde der bestehenden Saga-Steuerung schliessen: zurueckgegebene Futures/andere Awaitables wirklich abwarten; Hintergrundtasks bis Abschluss halten und unerwartete Taskfehler beobachten. **Dateibesitz:** services/workflow/app/core/saga.py nur Ausfuehrungslebenszyklus; neuer tests/test_workflow_saga_lifecycle.py; eigene QA/Workboard. **Abnahme:** echte Async-Schritte und Future-Kompensationen mit kontrollierten Ereignissen; kein vorzeitiges completed/compensated, Taskabschluss aufraeumen, Fehlerbeobachtung. Keine neue Persistenz-/Exactly-once-Behauptung, keine Fach-/MCP-/CLI-/Rechte-/Schemaaenderung, keine DB/Container. Claudes MCP-MASK-GENERIC-/MASK-CLI-Claims bleiben geschuetzt.
+**Owner:** Codex. **Ziel:** Nachgewiesene Funktionsverluste und falsche Runtime-/Freigabezaehlung aus abgeschlossenen Cursor-Batches korrigieren. **Besitz:** DATEV-ScreenDefinition (eigener gezielter Builder statt generischer Nebenbuchliste), zentraler deklarativer Download-/Formularvertrag und zugehoerige Renderer/Compiler; Masken-Routen-Inventar und made_by_studio_gates ausschliesslich Nachweisstrenge fuer Legacy-Wrapper; neue gezielte Regressionen, QA/Workboard und betroffene generierte Projektionen. Adaptive Workspace, Touren/Training/Bestellvorschlag und fremde WIP bleiben unberuehrt. Keine neue DB/Container, keine pauschalen Reverts oder erfundenen Freigaben. **Abnahme:** echter DATEV-Transport mit Typauswahl/CSV/Fehler/Download, Wrapper allein ergibt nie Runtimefreigabe, Feld-/Transportparitaet und aktuelle Tests. Isolierte HEAD-Ansicht artifacts/migration-repair-source; alte security-integrated-source ist fuer die neuen Cursor-Aenderungen nicht massgeblich.
 
-**WORKFLOW-SAGA-LIFECYCLE Ergebnis:** Drei echte Regressionen vor Reparatur rot (vorzeitiger Future-Schrittabschluss, vorzeitige Future-Kompensation, GC-verlorener Task). Final acht echte Eventloopfaelle gruen: Future/benutzerdefiniertes Awaitable, normale Sync-/Async-Reihenfolge, Kompensation, Fehlerstatus, Abbruch, Taskfreigabe und unbekannte Definition. Aufgaben bis Abschluss gehalten, danach entfernt; unerwartete Taskausnahmen beobachtet. Fehlgeschlagene Kompensation wird compensation_failed statt Erfolg, auch im Protokoll. Keine DB/Container/API-Schema-/Rechte-/MCP-/CLI-Aenderung und keine neue Persistenzbehauptung. QA: docs/quality-assurance/workflow-saga-lifecycle-20261019.md. Sonar-Gesamtgate bleibt getrennt offen.
+**MIGRATION-PARITY-REPAIR Sicherheits-Erweiterung:** Gepruefter Diff deeb707b4 gegen seinen direkten Vorgaenger zeigt fachfremde Ruecknahmen in bestehenden app/api-Endpunkten/-Schemas (u.a. entfernte SCHREIBEN-Guards, alte AP-Urheberfelder, fehlendes ApprovalAction, geloeschter Masken-Lesevertrag). Keine dieser Dateien wurde in den unmittelbar vorhergehenden UI-Commits geaendert; neue futter_read bleibt erhalten. Besitz fuer ausschliessliche Wiederherstellung dieser bestehenden API-Dateien auf ihren direkten Stand vor dem fehlerhaften Batch und12 bestehende Core-Sicherheits-/Freigabevertraege erweitert. Neue Maskenfamilien/Builder bleiben erhalten, Readiness-Praefixkorrektur wird separat bewahrt. Manifest in QA dokumentieren, keine pauschale Commit-Ruecknahme. Vorhandene AP-/Rollen-/Studio-/Lagervertraege pruefen.
 
-## POS-WS-CLEANUP-20261019 - abgeschlossen, Codex
+**MIGRATION-PARITY-REPAIR Renderer-Erweiterung:** Derselbe Diff entfernt strukturierte Belegpositionen, Tabellenvalidierung, gepruefte Versionsuebergabe, mandantengebundene Tabellen-Cachekeys, Clientpaging sowie den bereits real abgeprueften Storno-Folgedialogschutz. Besitz fuer13 exakt benannte zentrale Vertragsdateien (Manifest) erweitert; deren geprueften Vorgaenger bewahren, neuen DATEV-Vertrag additiv nachziehen. Neue Layout-/Familienmodule und Seiteneinstiege nicht pauschal zuruecknehmen.
 
-**Owner:** Codex. **Stand:** abgeschlossen 2026-10-19. **Ziel:** Echten CI-Fehler39255415584 schliessen: test_identity_transport Zwei-Mandanten-POS hinterlaesst tenant-b:T-1 bei Verbindungsabbruch. Server bereinigt nur WebSocketDisconnect, nicht CancelledError, und laesst bei anderen Fehlern leere Register zurueck. **Dateibesitz:** app/api/v1/endpoints/websocket.py nur POS-Verbindungslebenszyklus; neue tests/test_pos_websocket_cleanup.py; vorhandene test_identity_transport.py ausschliesslich falls erforderliche Synchronisierung nachgewiesen, keine schwächeren Assertions; eigene QA/Workboard. **Abnahme:** deterministischer Async-Abbruch, regulärer Disconnect, Fehler, Erhalt anderer Verbindungen/Mandanten; signierte echte Transportfaelle unveraendert. Keine Rollen-/Auth-/API-Schema-/MCP-/CLI-Aenderungen, keine DB/Container. Claudes MASK-COMMANDS-ROLLOUT bleibt geschuetzt. Compliance-Teiljob-Coverage und Sonar bleiben getrennte Befunde, keine Schwellenabsenkung.
+**MIGRATION-PARITY-REPAIR Build-Erweiterung:** Voller Typecheck meldet62 Fehler aus falschen relativen Legacy-Imports, zu Seiten umgewandelten eingebetteten Charts/Dialogs (verlorene Props) und fehlender entityId. Besitz auf genau diese nachgewiesenen Import-/Komponentenvertraege unter pages und made-by-studio-runtime-wire erweitert; keine fachliche Neugestaltung oder breiter Seitenrueckbau. Legacy-Loader muss vorhandene Props erhalten; eingebettete Komponenten sind keine eigenstaendigen Maskenmigrationen. Business-Time-Ratsche nach der bereits abgebauten Spuelcharge-Stelle nur absenken.
 
-**POS-WS-CLEANUP Ergebnis:** Deterministisch vor Reparatur vier rote und ein gruener Cleanupfall; final26 Faelle gruen einschliesslich unveraenderter signierter HTTP-/WebSocket-Transporttests. finally entfernt nur die beendete Verbindung und leere Terminalgruppen bei regulären/fehlerhaften/abgebrochenen Verbindungen. CancelledError propagiert unveraendert, andere Teilnehmer und Mandanten bleiben erhalten. Keine schwächeren Testassertionen, Token-/Rechte-/API-Schema-/DB-/Containeraenderungen. QA: docs/quality-assurance/pos-websocket-cleanup-20261019.md. Neuer GitHub-Gesamtnachlauf erforderlich; kein pauschales CI-Gruen behauptet.
+**MIGRATION-PARITY-REPAIR Fachvertrag-Erweiterung:** Ausgefuehrter Vergleich kanonischer Builder aus8086c464f gegen aktuelle native Builder bestaetigt24 Masken mit verlorenen/geaenderten bestehenden Kommando-/Freigabe-/Anlagevertraegen (u.a. Kunde/Auftrag/Kontrakt/Lieferant, AP-Freigabe, Mahnen, Stammdaten, Futter, Inventur, Mail). Besitz screen_definitions.py ausschliesslich Wiederanbindung genau dieser bestehenden Aktions-/Anlagevertraege bei erhaltener neuer Parent-Shell; StudioRun wieder an gemeinsamen NativeListPage-Dispatcher. Kein pauschaler Builder-/Seitenrevert. Regressionsfixture mit Ursprungscommit; Rechteprojektion danach aus Backend neu erzeugen. Eltern-Test darf keinen beliebigen Aktionsnamen edit erzwingen, sondern muss reale Hauptaktion/Transport respektieren.
 
-## CI-COMPLIANCE-REAL-20261019 - abgeschlossen, Codex
+**MIGRATION-PARITY-REPAIR Bedienabnahme-Erweiterung:** Voller UI-Lauf belegt Rueckfaelle in OAuth-Callback (versteckte Runtime mit unauthentifizierten Requests), Bankabgleich-Sicherheitsablauf, Debitorensuche, Kontrollzentrum sowie Dokumentenruecklauf/Ordereditor-Routing. Besitz genau auth/Login.tsx, auth/Callback.tsx, finance/bank-abgleich.tsx, fibu/debitoren.tsx, admin/control-center/index.tsx, docflow/dokumenten-ruecklauf.tsx, sales/order-editor.tsx zur gezielten Wiederherstellung der geprueften Funktion aus8086c464f. Neue Parent-/ScreenDefinition-Kataloge bleiben erhalten; diese Einstiege gelten bis Funktionsparitaet als nicht abgeloest. Start-Dashboard/Adaptive Workspace bleibt fremdem aktivem Grok-Claim vorbehalten; drei dortige UI-Befunde werden im Handshake dokumentiert. Keine Testloeschung oder pauschale Ruecknahme von Cursor-Batches.
 
-**Befund:** Compliance-Run39255445959 hat acht gruene GDPR-Teiltests, scheitert aber an globaler App-Coverage42,21 unter60. Zusaetzlich sind tests/compliance/test_gdpr.py und test_gobd.py teilweise alte Test-App-/Dev-Token-Vertraege, akzeptieren 500/501/503 oder enthalten Platzhalter statt echter Nachweise. **Naechste Abnahme:** vorhandene echte GDPR-/GoBD-Vertraege und produktive Auth-/Mandanten-/Revisionsgrenzen zusammenfuehren, belastbare Teil- und Gesamtmessung sowie Ergebnisartefakte. Keine Abdeckungsschwelle senken oder Fehler als Erfolg zulassen. Urspruenglicher Befund; Umsetzung und Nachlauf siehe Ergebnis unten. Betrifft weder die positive echte Beleg-/Stornopruefung noch Claudes Maskenrollout.
+**MIGRATION-PARITY-REPAIR weitere echte Bedienregressionen:** Der diagnostische Volltest bestaetigt verlorene vorhandene Arbeitsablaeufe in Annahme/Waage, Rationen/Offline-Fuetterung, Belegkontrolle, Mahnversand/Rechnungsformular, Gutschrift und Flow-Spines. Gepruefter Besitz wird auf die exakt durch fehlschlagende echte Bedien-/Fachtests referenzierten bestehenden Einstiege erweitert (Manifest migration-functional-page-repairs). Fuer diese ist die neue generische Liste kein funktionsgleicher Ersatz; die zuvor gepruefte operative Fassung aus8086c464f bleibt bis echter Paritaet fuehrend. Neue Builder bleiben als Migrationsgrundlage erhalten; keine Testloeschung, keine ungepruefte598-Seiten-Ruecknahme. Start-Dashboard/aktive Fremdclaims bleiben geschuetzt.
 
-## GDPR-SUBJECT-BOUNDARY-20261019 - abgeschlossen, Codex
+**MIGRATION-PARITY-REPAIR Zwischenabnahme:** 196/196 gezielte UI-Faelle in54 Dateien bestanden, einschliesslich wiederhergestellter gemeinsamer DocumentControlScopePage und echter Fachcommands. Neue Katalog-/Inventarpruefungen unterscheiden strukturelle Evidenz von Live-Freigabe. Kein Gesamtmigrationsabschluss; aktiver Adaptive-Workspace-Claim bleibt unberuehrt. QA: docs/quality-assurance/migration-parity-repair-20261022.md. Backend-/SQL-/Typ-Endabnahme und GitHub-Nachlauf werden separat nachgetragen.
 
-**Owner:** Codex. **Stand:** abgeschlossen 2026-10-19. **Ziel:** Nachgewiesene Datenschutz-Zugriffsluecken schliessen: Export/Portabilitaet nur eigene gepruefte Kennung oder vorhandene administrative Identitaetsverwaltung; Loesch-/Anonymisierungsweg nur vorhandene Adminrolle; alle Auditfolgeabfragen tenantgebunden, revisionsrelevante Auditdaten nicht umschreiben; Fehler ohne interne Eingabedaten. **Dateibesitz:** app/api/v1/endpoints/gdpr.py; tests/test_gdpr_api.py nur ausdrueckliche autorisierte Testgrenze/aktueller Erasurevertrag; neue echte SQL-/Provider-/Negativvertraege; tests/compliance/test_gdpr.py Alt-Platzhalter durch echte Verträge; eigene QA/Workboard und ausschliesslich drei eigene GDPR-OpenAPI-Operationen mit Erhalt fremder Projektionen. **Abnahme:** zwei Mandanten, Selbstzugriff/403/404, falsche Header-/Body-Identitaet, unveraenderte fremde Nutzer/Auditdaten; keine Auditmutation zur vermeintlichen Loeschung. Datenschutzrechtliche Gesamt-/Verschluesselungs-/Retentionabnahme wird nicht erfunden. Bestehender valeo_probe, keine neue DB/Container/Migration/Reset oder echte Nutzer. Claudes Masken-/MCP-/CLI-Rollout bleibt geschuetzt. CI-COMPLIANCE-REAL bleibt bis echter Workflow-/Coverageabnahme offen.
+**MIGRATION-PARITY-REPAIR Meilenstein:** Endabnahme195 Backend-Vertraege +196 UI-Vertraege +76 echte SQL-Faelle bestanden; Typpruefung und exakte Godfile-Ratsche gruen. Artefakte neu erzeugt (3246 OpenAPI-Pfade,143 projizierte Aktionsrechte). Echte Bestandsgrenzen bleiben offen:833/941 Runtime-Routen sind kein Vollmigrationsnachweis;50 Legacy-Wrapper und53 handgebaute Routen bleiben sichtbar. Keine Browser-/Bild- oder GitHub-Gesamtabnahme behauptet. QA migration-parity-repair-20261022.md; fremde Arbeitskopien und aktiver Workspace-Claim geschuetzt.
 
-**GDPR-SUBJECT-BOUNDARY Ergebnis:** Sechs echte SQL-/Providerfaelle gegen alten Router rot; final28 Tests gruen und100 Prozent Abdeckung des GDPR-Routers bei80-Prozent-Modulschwelle. Providerkennung auf lokales Profil aufgeloest; Selbstzugriff und administrative Fremdprofilverwaltung bleiben tenantgebunden. Fremde Auditdaten ausgeschlossen, aufbewahrte Auditnachweise unveraendert, interne Eingaben nicht in Fehlermeldungen/Logs. Drei eigene OpenAPI-Pfade auf aktuellem HEAD abgeglichen; fremde Projektionen erhalten. QA: docs/quality-assurance/gdpr-subject-boundary-20261019.md. Keine Gesamt-Loeschungs-/Retention-/IdP-Abnahme; CI-COMPLIANCE-REAL bleibt offen.
+## MIGRATION-CI-REPAIR-20261023 — reserviert, Codex
 
-**CI-COMPLIANCE-REAL Claim:** Owner Codex, reserviert19.10.2026. Dateibesitz .github/workflows/compliance-check.yml, tests/compliance/test_gobd.py, neuer Ergebnisbericht-Generator und dessen Negativtests, eigene QA/Workboard. GDPR verwendet die bereits abgenommenen echten Verträge; GoBD die bestehenden Journalbetrag-/Ketten-/Lebenszyklusvertraege statt Platzhalter. Abnahme: vorhandener Pruefstand, echte Testergebnisse mit JUnit, fehlende/fehlerhafte/uebersprungene Nachweise sperren Bericht, globale App-Coverageschwelle bleibt unveraendert; Teilmessung explizit. Keine neue lokale Datenbank/Container/Reset/Migration, keine Fach-/Rollen-/Masken-/MCP-/CLI-Aenderung. Fremde Claims geschuetzt.
+**Owner:** Codex. **Ziel:** Bestaetigte PR38-CI-Regressionsursachen schliessen, keine Test-/Baseline-Abschwaechung. **Dateibesitz:** screen_definitions.py samt Registrierung und Agentenmetadaten; TanStack-Routengenerator/geschlossener Suchparametervertrag; generierte Nachweise, betroffene Slice-YAML nur CI-Metadaten, eigene QA/Handshake. Abhaengigkeiten zuerst offiziell verifizieren. **Abnahme:** bestehende795 Masken-Sicherheitsfaelle, frisch generierte Routentypen und Generatorchecks; Folge-CI. **Risiken:** aktive Workspace-Quelldateien bleiben fremdem Claim vorbehalten; keine neue DB/Container/Reset.
 
-**CI-COMPLIANCE-REAL Umsetzung:** Platzhalter-GoBD-Suite durch vorhandene echte Hashkettenvertraege ersetzt; Betrag-/Nebenlaeufigkeits-/Lebenszyklustests in Teiljob eingebunden. Initial90 Faelle gruen (81 Journalvertraege und neun Berichtsfaelle), danach elf Berichts-/Negativfaelle gruen. Exakter GDPR-Teiljob22 Faelle und100 Prozent Modulcoverage bei80 Prozent gruen. JUnit wird explizit erzeugt und zwingend hochgeladen; Bericht prueft Jobstatus, nichtleere Ergebnisse, Fehler und uebersprungene Faelle und scheitert bei fehlenden/ungueltigen Nachweisen. Echter Bericht gegen beide lokalen XML-Dateien bestanden. Globale App-Coverage60 bleibt im Gesamtlauf; GoBD-Teiljob meldet explizit keine Gesamtcoverage. Keine lokale neue Datenbank/Container/Migration/Reset. QA: docs/quality-assurance/compliance-real-20261019.md. GitHub-Nachlauf dieser Umsetzung steht aus; Slice bleibt bis dahin in arbeit.
+**MIGRATION-CI-REPAIR Erweiterung:** doc_drift_report.py nur echte transitive Importerreichbarkeit pruefen (positive und negative Regressionen, keine Suffix-Ausnahme fuer Legacy); requirements.txt nur offiziell bestaetigte Updates GitPython3.2.1/Black26.10.1 und zusammenpassende OpenTelemetry1.45.1/0.66b1. Sicherheitsadvisories und PyPI-Metadaten verifiziert; Abhaengigkeitsaufloesung und Import-/Instrumentierungsvertraege pruefen. Slice-YAML-Metadaten ohne erfundene Abnahme nachziehen.
 
-## CHROMA-DEPLOY-REVIEW-20261019 - abgeschlossen, Codex
+**MIGRATION-CI-REPAIR konkrete native Einstiegskorrektur:** Drei CRM-Native-Routen referenzieren unregistrierte IDs mit literalem /:id statt des bestehenden PartyNativePage-Vertrags; zwei Kontrollsichten umgehen erneut den gemeinsamen idempotenten Fachcommand; zwei Sanktionssichten duplizieren ihren bestehenden gemeinsamen Scope. Besitz genau customer-360-native, lead-native, lead-detail, auftrags-kontrolle, lieferschein-kontrolle, sanktionspruefung-kunden, sanktionspruefung-personal fuer Wiederanbindung aus8086c464f; bestehende zentrale Renderer/Parent-Builder bleiben erhalten. Keine pauschale Seitenruecknahme.
 
-**Owner:** Codex. **Dateibesitz:** config/security/dependency-decisions.json ausschliesslich erneuerte bestehende Erreichbarkeitsbewertung, eigene QA/Workboard. **Befund:** Service-Security39263582553 sperrt drei Chroma-Findings korrekt wegen docker-compose.yml-Drift; bisherige Bewertung gilt bis23.10. **Abnahme:** alle98 kanonischen Nachweisdateien und geaenderte Deployments pruefen, aktuelle Primaer-Advisories, Embedded-Only-/Gate-Negativtests und unveraenderter Original-Scannerbericht. Keine neue Ausnahme, keine Ablaufverlaengerung, kein Paketwechsel oder unterdrueckter Befund. Rollen/Masken/MCP-/CLI-Claims unberuehrt; keine DB/Container.
+**MIGRATION-CI-REPAIR CRM-Folge:** Vorhandener Party-Native-Vertrag bestaetigt verlorene KIM-/Kunden-Cockpit-Weiterleitung und Stammdateneinstieg (bestehende Kennung zur Akte, pflege explizit). Besitz drei genau referenzierte Adapter crm/kim/index.tsx, crm/kunden-cockpit.tsx, verkauf/kunden-stamm.tsx; geprueften8086-Transport bewahren, keine neue Handmade-Maske. Alte operative Pflege erst nach zentraler Funktionsparitaet abloesen.
 
-**CHROMA-DEPLOY-REVIEW Ergebnis:** Alle98 kanonischen Nachweisdateien mit vorheriger Bewertung verglichen; ausschliesslich docker-compose.yml geaendert (Probe-URL und schreibgeschuetzter Konfigurationsmount). Beide eingebetteten Verbraucher und Deployments erneut kontrolliert. Aktuelle drei Primaer-Advisories weiterhin ohne Fixversion; kein Server-/Remote-/RBAC-Providerpfad. Neun Gate-, zwoelf Backend-Negativ- und drei Embedded-Vertraege gruen. Originaler Linux-Scannerbericht unveraendert mit drei Findings; Bewertung zuvor drei gesperrt, nach Kontrolle drei nicht erreichbar. Bestehender Ablauf23.10. unveraendert; keine neue Ausnahme/Unterdrueckung. QA: docs/quality-assurance/chroma-deploy-review-20261019.md. GitHub-Service-Security-Nachlauf separat abzuwarten.
-
-## RUNTIME-AUTH-PROOF-20261019 - abgeschlossen, Codex
-
-**Owner:** Codex. **Dateibesitz:** scripts/api_runtime_sweep.py, .github/workflows/runtime-sweep.yml, neuer CI-Anmeldestarter und eigene Tests/QA/Workboard. **Ziel:** Kein gruener Sweep aus tausend401-Antworten. Vor GET-Lauf verifizierte Sitzung/Mandant pruefen;401 im Lauf sperrt. Vorhandenen CI-Keycloak-Bootstrap und Redis verwenden, Token nur im Speicher, keine Dev-Token oder Authumgehung. **Abnahme:** fehlende/ungueltige Authentifizierung und fremder Mandant sperren, echte CI-Anmeldung und aussagekraeftiger Runtimebericht.19 abgelaufene Ausnahmen bleiben sperrend, keine Fristverlaengerung oder behauptete Fachabnahme. Keine neuen lokalen Datenbanken/Container/Reset/Migration; CI nutzt Jobressourcen. Claudes Claims geschuetzt.
-
-**CI-COMPLIANCE-REAL GitHub-Abnahme:** Run39270727503 auf4e20017f4 abgeschlossen mit success; beide Compliance-Teiljobs und verpflichtender Ergebnisbericht gruen. Slice geschlossen. Keine Behauptung eines gruenen Sonar-/Runtime-/Gesamtgates.
-
-**RUNTIME-AUTH-PROOF Umsetzung:** Vor jedem Sweep produktiven /api/v1/identity/session-Nachweis mit nichtleerem Subject und exaktem Mandanten verlangen; fehlender/alter Dev-Token sperrt.401 im anschliessenden Lauf eigene Fehlerklasse statt erwarteter Fachantwort. Workflow verwendet vorhandenen isolierten CI-Keycloak-Bootstrap und Redis-Jobservice; neuer Starter holt synthetisches Provider-Token nur in Prozessumgebung und entfernt es im finally.20 gezielte Positiv-/Negativtests gruen. Keine Allowlist-Aenderung;19 abgelaufene Ausnahmen bleiben rot. QA: docs/quality-assurance/runtime-auth-proof-20261019.md. Echter GitHub-Runtime-Nachlauf und dadurch sichtbar werdende Fachfehler noch offen.
-
-**RUNTIME-READ-REPAIRS Projektionserweiterung:** Strikter Generator fand im bereits committeten mask_commands-Modul fehlenden Inventareintrag und fehlende Domainzuordnung. Dateibesitz zusaetzlich config/architecture-domain-prefixes.yaml ausschliesslich exakte Zuordnung mask_commands -> platform sowie daraus generierte Inventar-/Indexzeilen. Der bestehende delegierende Adapter bleibt unveraendert; keine neue Fachlogik/Container/Domain. Kein neuer Reportservice: Aggregation bleibt als kleine Reparatur in bestehender Reportfunktion und senkt die bestehende Dateilaenge. Aktueller fremder Quellstand bleibt erhalten.
-
-**RUNTIME-AUTH-PROOF GitHub-Abnahme:** Run39271752353 mit echtem Keycloak/Redis und signiertem Zugriff:1033 GET-Ziele,957x2xx,60 erwartete Verweigerungen, null Authentifizierungsfehler. Vier500 und ein Folgeabbruch jetzt sichtbar, statt1026 verdeckender401. Authentifizierungsnachweis geschlossen; gesamter Runtime-Lauf bleibt wegen Fachfehlern und19 abgelaufenen Ausnahmen rot. Service-Security39271752803 separat success, einschliesslich AI-Abhaengigkeitsaudit.
-
-**RUNTIME-READ-REPAIRS Umsetzung:** Nummernservice nimmt die tatsaechlich konfigurierte synchrone Sitzung an und behaelt AsyncSession-Unterstuetzung. Einkauf aggregiert vorhandene tenantgebundene Dokumentdaten statt entfernter Tabelle; nachfolgender Standardbericht bleibt transaktionsfaehig. Benutzer-Authdependency nicht mehr durch Routenfunktion ueberschattet; Selbstprofil ueber Providerkennung, Verzeichnis nur bestehender Admin, Einzelprofil fremder Person403 und fremder Mandant404. Abstrakte alte Nutzer-Schreibrepositoryklasse bleibt unveraendert. Final sieben SQL-/Provider-/Nummernvertraege gruen; eigene synthetische Daten per Rollback entfernt. Sechs betroffene GET-OpenAPI-Vertraege unveraendert. Bereits committierter mask_commands-Adapter korrekt im Inventar/platform abgebildet; strikter Generator302/302 Services gruen. QA: docs/quality-assurance/runtime-read-repairs-20261019.md. Neuer echter Runtime-Nachlauf erforderlich;19 Ausnahmen und Legacy-Schreibwege nicht als geschlossen behauptet.
-
-## RUNTIME-EVIDENCE-CLEANUP-20261019 - abgeschlossen, Codex
-
-**Owner:** Codex. **Dateibesitz:** config/runtime_sweep_allowlist.yaml ausschliesslich Entfernung aller abgelaufenen503-Ausnahmen, .github/workflows/runtime-sweep.yml ausschliesslich ein aktuelles Ergebnisartefakt, eigener Runtime-Werkzeugtest fuer unerwartete503, eigene QA/Workboard. **Ziel:** Keine unwirksamen Alt-Ausnahmen und keine historischen Juli-Berichte im aktuellen Upload. **Abnahme:** Jede503 ohne aktuelle Ausnahme sperrt weiterhin, keine Fristverlaengerung/Skip-Erweiterung, genau ein aktuelles Artefakt statt Wildcard. Fehlende Fachfunktionen bleiben ausdruecklich offen. Kein Fach-/Rechte-/DB-/Containerwechsel; laufender echter Nachlauf bleibt unberuehrt.
-
-**RUNTIME-READ-REPAIRS GitHub-Abnahme:** Echter signierter Nachlauf39274543221 aufab8779a98:961x2xx,61 erwartete Verweigerungen, null500/Transport-/Authentifizierungsfehler. Alle vier vorherigen500 und der Einkaufsbericht-Folgeabbruch beseitigt. Elf503 sowie alte abgelaufene Ausnahmen halten diesen historischen Lauf weiterhin rot; kein gruener Gesamtlauf behauptet. Slice geschlossen.
-
-**RUNTIME-EVIDENCE-CLEANUP Ergebnis:** Alle19 bereits unwirksamen Ausnahmen entfernt, kein Ablauf verlaengert und kein Skip hinzugefuegt. Jede der elf weiter auftretenden503 ist damit unerwartet und sperrt. Upload auf genau runtime-sweep-current.json begrenzt, statt historische Juli-Berichte mitzunehmen.21 Werkzeug-/Anmelde-/Negativfaelle gruen, einschliesslich503. Fachliche Verfuegbarkeit bleibt naechster CI-GRUEN-Befund: Quality-Evidence-Drift, Proplanta zweimal, alter WhatsApp-Providerpfad, Anlagenbuchhaltung zweimal, Budgetplanung zweimal, Rohwareschemata, Rahmenauftraege und FAOSTAT. Fehlende Tabellen nicht durch leere Erfolgsausgaben oder konkurrierende Modelle kaschieren; bestehende Budget-/Rohware-/WhatsApp-Entscheidungen vor Umsetzung beachten. QA: docs/quality-assurance/runtime-evidence-cleanup-20261019.md.
-
-## AUDIT-IDENTITY-INTEGRITY-20261019 - reserviert, Codex
-
-**Owner:** Codex. **Nutzerauftrag:** Vier im Review zu7dbc168df bestaetigte Restbefunde schliessen. **Dateibesitz:** app/core/akteur.py nur unverkuerzte Kennung und FK-gebundene tenant-/providergebundene Nutzeraufloesung; app/infrastructure/models/__init__.py ausschliesslich AuditLog-FK-Metadaten an frisches Migrationsschema angleichen; sales_delivery_notes.py ausschliesslich Attestierungszuordnung/Identitaetsprovenienz; app/core/fibu_audit.py erforderliche Auditfehler/Transaktionsgrenze und schrittweise zugehoerige Aufrufer nach expliziter Erweiterung; eigene SQL-/Negativtests, QA/Workboard. **Abnahme:** Providerkennung ungleich lokaler PK, Fremdmandant/fehlende Zuordnung gesperrt statt system, SQL-Fehler kein stiller Fallback, Auditkennung unverkuerzt, keine fingierte atomare Gesamtfreigabe fuer unveraenderte Aufrufer. Bestehender valeo_probe und eigene Rollbackdaten, keine neue DB/Container/Reset/Migration; Entwicklungsdatenbank unberuehrt. Claudes Rollen-Inventar und andere laufende Maskenslices geschuetzt.
-
-## WRITE-AUTHORIZATION-DECISION-20261019 - abgeschlossen, Codex
-
-**Owner:** Codex. **Nutzerauftrag:** Entscheidungen zum gemeldeten Schreibrechte-Inventar treffen. **Dateibesitz:** neue docs/architecture/security/write-authorization-policy.md und eigene Workboard-Ergaenzung. Bestehende Fachrollen, Freigaben und MCP-WRITE-015 verbindlich fuer alle Adapter konkretisieren; keine zweite Rollenwelt. Claudes laufender MASK-COMMANDS-/Rollen-Inventar-Claim bleibt bei Claude; keine Quellcodeuebernahme. AUDIT-IDENTITY-INTEGRITY laeuft unabhaengig weiter.
-
-**Verbindliche Nutzerentscheidung WRITE-AUTH-001 bis008:** docs/architecture/security/write-authorization-policy.md. Geschaeftswrites ohne ausdrueckliche vorhandene Bereichs-/Aktionsberechtigung bleiben gesperrt; admin fuer administrative Organisationsmutation einschliesslich Niederlassungsloeschung, keine pauschale Fachrechte- oder Mandantenumgehung. Kritische Aktionen behalten Freigabe/Vier-Augen. Bestehende Fachrollen, Sonderrechte und Bereichsausnahmen bleiben fuehrend, kein zweites Rechtesystem. Direkte Altwege mitpruefen; Ratsche ergaenzt Reparatur.1600 heuristische Kandidaten erst gegen produktive main:app und delegierte Commands bestaetigen. Claudes Rollen-Inventar-/Rollout-Claim bleibt bei Claude, Codex arbeitet getrennt am Audit. Keine Rechte vergeben, keine Produktionsfreigabe aller Wege behauptet.
-
-**AUDIT-IDENTITY-INTEGRITY Erweiterung:** Dateibesitz zusaetzlich tests/test_lieferschein_nachdruck_attestierung.py ausschliesslich Ablösung der alten Dev-Token-/system-Fallback-Pruefung durch kanonische signierte Rollbackvertraege; chart_of_accounts.py und accounting_periods.py ausschliesslich ihre fuenf Audit-/Commitgrenzen. Zentraler FiBu-Helfer muss erforderliche Auditfehler generisch propagieren und uncommittete Fachmutation zurueckrollen; HTTP-Identitaet hat Vorrang vor expliziten Urheberparametern. Bestehende getrennt committende Journal-/Beleg-/Connectorwege bleiben bis eigener Transaktionsintegration explizit offen. Claudes neue Sales-Rollen werden beim Attestierungspatch aus aktuellem HEAD erhalten. Keine DDL oder neue Rechte.
-
-**WRITE-AUTH-Reviewhinweis zum bereits committeten bereich_roles.py:** _LEITUNG=(admin,manager) wird pauschal durch _bearbeiten auf neue Bereiche ausgedehnt. Das ist keine Freigabe nach WRITE-AUTH-002; manager nur aus bestehendem konkreten Bereichsvertrag uebernehmen, nicht global neu legitimieren. geraete_schreibrecht prueft allein get_current_user: benoetigt zusaetzlich den begrenzten technischen Auftrag/Capability oder eine explizite Fachberechtigung gemaess WRITE-AUTH-007, sofern nicht bereits nachweislich im Domain-Command durchgesetzt. FACHLICH (beliebige Fachrolle) darf keine sachfremden Aktionen legitimieren. Delegierte strengere Pruefungen pro Route nachweisen; ein erkanntes Dependency-Symbol allein schliesst keinen Befund. Claudes aktiver Rollen-Slice bleibt sein Dateibesitz; dieser Hinweis ist eine Abnahmebedingung, keine Quellcodeuebernahme.
-
-**AUDIT-IDENTITY-INTEGRITY Testgrenze:** Codex uebernimmt zusaetzlich tests/test_kontenplan_mandant_vertrag.py ausschliesslich fuer explizite synthetische Request-Identitaet der Mini-App. Die 32 bisherigen Setupfehler belegen die neue Fail-Closed-Grenze; Produktionspruefung und fachliche Assertions bleiben erhalten.
-
-**AUDIT-IDENTITY-INTEGRITY Meilenstein 1:** vollstaendige gepruefte Identitaet, mandantengebundene eindeutige Attestierungszuordnung und ORM-Abgleich ohne DDL umgesetzt. Erforderliche Auditfehler propagieren generisch. Fuenf Kontenplan-/Periodenmutationen rollen bei Auditfehler gemeinsam zurueck. Regression: 87 bestanden (6 Testdateien), bestehender valeo_probe; keine neue Datenbank/Container. QA: docs/quality-assurance/audit-identity-integrity-20261019.md. Claim bleibt in arbeit: weitere Journal-/OP-/Beleg-/Connector-Commitgrenzen sind noch nicht atomar nachgewiesen. Claudes Sales-Rollen unveraendert erhalten.
-
-## ROLE-DESCRIPTIONS-20261019 - abgeschlossen, Codex
-
-**Owner:** Codex. Nutzerauftrag: Rollen als verbindlichen Pruefstein beschreiben; manager ist keine pauschale Agrarhandelsleitung. Dateibesitz: config/keycloak/fachrollen.json Beschreibungs-/Vertragsmetadaten, scripts/check_fachrollen.py deren Erhalt/Validierung, neuer tests/test_role_description_contracts.py, eigener rollenbezogener CI-Workflow und docs/architecture/security/role-description-contract.md. Bestehende Rollen bleiben dieselben; keine neue Berechtigung oder Live-Zuweisung. Claudes aktiver WRITE-ROLES-AREAS-Claim und bereich_roles.py bleiben unangetastet. manager-Verwendungen inventarisieren, keine pauschale Konformitaetsbehauptung fuer alten Code; Abweichungen bleiben sperrende Abnahmebefunde. Abnahme: fehlende/leere Rollenvertraege scheitern, Generator erhaelt gepflegte Vertraege, synthetische Negativtests ohne Datenbank/Container.
-
-**ROLE-DESCRIPTIONS Erweiterung:** --realm findet vorhandene LAGER_BEARBEITEN im kanonischen Fachkatalog, aber nicht in der statischen Realm-Importdatei (35/34); prepared_realm ergaenzt sie bereits aus dem Katalog. Dateibesitz daher config/keycloak/realm-export.json ausschliesslich fehlende vorhandene Rollendefinition samt Beschreibung hinzufuegen, keine Composite-/Default-/Nutzerzuweisung und keine Live-Aenderung. Bestehende sonstige Realm-Beschreibungen und Provisionierung bleiben unveraendert.
-
-**ROLE-DESCRIPTIONS Ergebnis:** 35 vorhandene Fachrollen und sieben vorhandene allgemeine/historische Realm-Rollen mit je sieben Pflichtangaben beschrieben. manager als historische Rolle zur Abloesung, keine Neuvergabe/pauschale Bereichsausdehnung; Fachleitung von Technik und Genehmigung getrennt. Generator erhaelt Vertraege; neue Rollen ohne Vertrag und leere/fehlende Felder sperren. Eigener CI-Workflow prueft Katalog/Realm/Negativvertraege ohne DB. Vorhandene fehlende LAGER_BEARBEITEN-Definition im statischen Realm ergaenzt, keine Zuweisungen/Live-Aenderungen. Lokal 12 Tests und30 Unterfaelle gruen, Katalog35/35. Beschreibungskontrakt abgeschlossen; manager-Quellcodeumstellung bleibt beim aktiven WRITE-ROLES-AREAS-Claim, keine semantische Gesamtfreigabe. docs/architecture/security/role-description-contract.md beschreibt Ist-Befunde und Grenzen.
-
-**ROLE-DESCRIPTIONS GitHub-Abnahme:** Workflow39302555921 aufe82dd6f87 erfolgreich: Katalogdrift, Realm-Abgleich und acht eigenstaendige Negativ-/Erhaltungsvertraege bestanden. Dokumentations-/Vertrags-Slice geschlossen. Die aufgefuehrten manager-Implementierungsabweichungen bleiben verbindliche offene Abnahmebedingungen fuer WRITE-ROLES-AREAS.
-
-**MANAGER-ROLE-ENFORCEMENT Scopeintegration:** Der bestehende Scope-Reconciler verweigert unbekannte alte Mappings; nach Rechteabbau waere das bisherige manager-Mapping genau ein solcher Befund. Dateibesitz zusaetzlich scripts/keycloak_document_scopes.py nur explizit verifizierte Entfernung dieser ausgeschiedenen Mappingrolle aus beiden Belegscopes; andere unbekannte Mappings bleiben sperrend. Testdatei test_beleg_identity_scopes.py prueft DELETE-Erfolg/Fehler/Nichtpersistenz und unveraenderte Fremdzuordnungen. Kein Live-Keycloak-Aufruf in diesem Slice.
-
-**MANAGER-ROLE-ENFORCEMENT Testvertrag:** Bestehende tests/test_finance_bank_roles.py erwartet manager bei24 Finanz-/Bankzugriffen noch als erlaubt. Die Reparatur verweigert diese bereits korrekt vor DB; Abnahme erweitert um exakt diese Testdatei und Entfernung von manager aus erwarteten Erlaubnislisten, Manager-Negativtestfaelle bleiben erhalten. Integrationslauf697 bestanden,24 alte Erlaubniserwartungen rot; keine Produktionsregel abschwaechen.
-
-**MANAGER-ROLE-ENFORCEMENT UI-Projektion:** Dateibesitz zusaetzlich packages/frontend-web/src/components/mask-builder/runtime/beleg-permissions.generated.json ausschliesslich aus unveraendertem scripts/generate_beleg_permission_projection.py neu erzeugen. Kein handgeschriebenes Masken-/Layout-/Runtimeverhalten. Bestehender tests/test_beleg_permission_projection.py prueft Paritaet; Rollenmetadaten fuer alle Belegvarianten folgen derselben Serverpolicy. Claudes einzelne Masken bleiben unberuehrt.
-
-**MANAGER-ROLE-ENFORCEMENT Meilenstein:** Zentrale sync/OIDC/Rollen-plus-Scopes-Auswertung ignoriert historische manager-Rolle ohne Tokenclaims zu veraendern. Beleg- und Finanzrollen sowie allgemeine/Beleg-Scopeprojektion ohne manager; generierte Maskenrechte synchron. Vor Reparatur44 neue Faelle rot; final721 Tests gruen einschliesslich signierter Authentifizierung, bestehender Bankrollenmatrix und echter Beleg-/Buchungs-/Stornovertraege auf gemeinsamem valeo_probe. Neue Scope-Reconciler-Negativfaelle verhindern fremde Mappingbereinigung, DELETE-Fehler/Nichtpersistenz; kein Live-Provider geaendert. QA docs/quality-assurance/manager-role-retirement-20261019.md. Claim bleibt in arbeit fuer direkte unabhaengige Pruefer: Futtermittel-authz, Inventory-auth, finance_freigabe, recent_documents, policy/router, billing_batch und kontrolle muessen gesondert abgearbeitet werden. Keine systemweite manager-Freiheit behauptet; Claudes aktive Bereichsdatei erhalten.
-
-## MANAGER-ROLE-ENFORCEMENT-20261019 - abgeschlossen, Codex
-
-**Owner:** Codex. Nutzerauftrag weiter nach Rollenvertraegen. Dateibesitz: app/auth/deps.py ausschliesslich manager als unwirksame Altrolle bei zentraler require_roles-Auswertung; app/auth/beleg_roles.py, finance_roles.py und scopes.py ausschliesslich manager-Berechtigungen entfernen; neue tests/test_manager_role_retirement.py, bestehende tests/test_beleg_rechte.py und test_beleg_identity_scopes.py ausschliesslich manager-Erwartungen, eigene QA/Workboard. Claudes bereich_roles.py und Router-Decorator-Slice unveraendert; dortige require_roles-Dependencies unterliegen der zentralen Auswertung. Abnahme: manager allein verweigert Lesen/Schreiben/Freigaben ueber diese Auswerter, manager plus konkrete Fachrolle behaelt genau deren Rechte; Beleg-Scopeprojektion ohne manager, keine Live-Zuweisung/Entzug oder DB/Container. Direkte unabhaengige JWT-/Altadapterpruefungen bleiben gesondert zu inventarisieren; keine systemweite Vollstaendigkeit behaupten.
-
-**MANAGER-ROLE-ENFORCEMENT Erweiterung:** app/auth/deps_oidc.py besitzt einen zweiten require_roles-Auswerter und require_roles_and_scopes. Dateibesitz auf ausschliesslich gemeinsame wirksame Rollenfilterung auch dieser beiden Guards erweitert; neue Tests pruefen sync/async/Rollen-plus-Scopes. Verifizierte Tokenclaims bleiben fuer Audit unveraendert. Keine Tokenmanipulation und kein eigener Rechtekatalog.
-
-**Koordination:** Zwei vor der parallelen CRM-/Einkaufslieferung gesetzte Codex-Claims im gemeinsamen Verlauf wieder aufgenommen; aktueller Fachcode beider Lieferungen bleibt erhalten.
-
-**MANAGER-ROLE-ENFORCEMENT direkte Fachpruefer:** Codex erweitert Dateibesitz auf app/agrar/rations/authz.py, app/domains/inventory/api/inventory_auth.py, app/services/finance_freigabe.py, app/services/recent_documents_service.py, app/policy/router.py, app/api/v1/endpoints/billing_batch.py und kontrolle.py ausschliesslich manager aus erlaubten Rollen entfernen; app/core/akteur.py ausschliesslich verlange_rolle auf vorhandene effective_roles-Auswertung umstellen. Neuer tests/test_manager_direct_authorization.py; bestehende tests/test_recent_documents.py und test_kontrolle_pruefkorb.py nur falls alte manager-Erwartungen nachgewiesen. Kein Eingriff in Claudes Router-Decorator-/Bereichsdateibesitz; billing_batch/kontrolle ausschliesslich private Rollenliste, nicht Decorators/Fachablauf. Bestehender Probe nur vorhandene isolierte Tests, kein Schema-/DB-/Containerwechsel.
-
-**MANAGER-ROLE-ENFORCEMENT Regressionsvertraege:** Weitere acht bestehende Testdateien nennen manager explizit als erlaubte Finanz-/Personal-/Admin-Leserolle; diese Erwartungen widersprechen dem beschlossenen Vertrag. Dateibesitz auf genau tests/test_abschluss_rollen_vertrag.py, tests/test_finanz_rest_rollen_vertrag.py, tests/test_hauptbuch_rollen_vertrag.py, tests/test_mahnwesen_rollen_vertrag.py, tests/test_offene_posten_rollen_vertrag.py, tests/test_personal_bewerbungen_roles.py, tests/test_zahlung_stammdaten_rollen_vertrag.py, tests/test_admin_rechte.py erweitert: nur manager aus erwarteten Erlaubnismengen entfernen, negative Rollenmatrix behält manager; Admin-Lesetest erwartet403 statt Nicht-403. Keine produktiven Rollen oder fachlichen Assertions abschwaechen. Direkte Fachpruefer inzwischen84 Tests bestanden.
-
-**MANAGER-ROLE-ENFORCEMENT Dokumentationsabschluss:** Dateibesitz zusaetzlich docs/architecture/security/role-description-contract.md ausschliesslich den historischen Abweichungsbefund um den jetzt umgesetzten zentralen und direkten Durchsetzungsstand ergaenzen. Historie nicht als aktuelle offene Finanzrollenliste stehenlassen; Live-Rollout, semantische Personal-Sichtbarkeitslabels und alte AP-Beispielworkflows bleiben getrennte, nicht als freigegeben dargestellte Grenzen.
-
-**MANAGER-ROLE-ENFORCEMENT Abschluss des Codeslices:** Sieben direkte Auswerter plus interner Aktionsguard korrigiert;84 Tests gruen. Acht Alt-Rollenmatrizen mit4946 Faellen bestanden (4935 direkt gruen, elf veraltete Pruefbaum-Routen nach Abgleich des bereits committeten Belegkontrollmoduls behoben; betroffener Teilnachlauf699 komplett gruen). Manager-Negativfaelle bleiben enthalten, Fachrollen nicht erweitert. Vorheriger zentraler Meilenstein721 Tests gruen und synchroner Masken-/Scopeprojektion bereits gepusht. Scope-Mappingabbau ist verifiziert implementiert, aber nicht am laufenden Keycloak ausgefuehrt; Deployment/Neuanmeldung separat. Keine neue DB/Container/Migration, keine Live-Zuweisungen. Fachliche Personal-Sichtbarkeitsklassen und alte AP-Beispielworkflowrollen nicht ungeprueft mit Realmrechten gleichgesetzt. Rollenvertrag und QA nachgezogen. Claudes aktuelle CRM-/Einkaufs-/Stammdatenlieferung und aktive Bereichsdatei erhalten.
-
-**MANAGER-ROLE-ENFORCEMENT GitHub-Nachweis:** Rollenvertrags-Gate39304043159 auf0d2b9d40b und39305406642 auf403842bec erfolgreich. Katalog, Realmabgleich und Pflicht-/Negativvertraege gruen. Beide parallelen Historien (Codex-Claim29c28d815 und Claudes CRM-/Einkaufs-/Stammdatenlieferung8f28e442d) als Vorfahren von main geprueft. Dies ist keine Aussage ueber Sonar oder saemtliche anderen CI-Workflows und keine Live-Keycloak-Abnahme.
-
-## PERSONAL-FILE-AUTH-PERSISTENCE-20261019 - abgeschlossen, Codex
-
-**Owner:** Codex. Nutzerauftrag: verbleibende Sichtbarkeits-/Nebenbefunde auch fremden Ursprungs schliessen. Dateibesitz app/api/v1/endpoints/personal.py ausschliesslich GET employee-files und POST employee-files/documents: vorhandene PERSONAL-Fachrollen aus geprueftem Token, actorRole nur lesender Ansichtsfilter, Schreiburheber aus Token, generische Persistenzfehler; app/services/personal_service.py ausschliesslich Personalakten-Pilotfallback entfernen und fehlgeschlagene Persistenz nicht als Erfolg ausgeben. Bestehende tests/test_personal_employee_file_api.py explizite Identitaetsgrenze und Negativvertraege, neue signierte SQL-/Persistenztests; eigene QA/Workboard und exakt diese API-Projektionen falls erforderlich. Keine neue Rolle oder Selbstservice-/Vorgesetztenbeziehung behaupten; keine neue DB/Container/Reset/Migration. Claudes aktiver Bereichsclaim: keine parallelen Decorator-/Importrollen-Edits anderer Personalwege; nur zwei abgegrenzte Signatur-/Fachkoerper und erforderliche Imports. Godfile-Ratsche personal.py3083 nicht erhoehen.
-
-**PERSONAL-FILE-AUTH-PERSISTENCE Schema-/Wartungsclaim:** Auf valeo_probe fehlt die von beiden Personalaktenwegen vorausgesetzte Tabelle domain_hr.employee_file_documents; keine bestehende Migration definiert sie. Nutzerauftrag Nebenbefunde gleich schliessen umfasst die echte kanonische Persistenz. Dateibesitz zusaetzlich alembic/versions/hr_employee_files_20261019.py (additiv unter bestehendem domain_hr, nach harvest_rule_store_20261015), erforderliche eigene Migrations-/Tabelleninventarzeilen und docs/architecture/domains/platform/api.md nur Personalakten-Hinweis. Kurzes additives Wartungsfenster fuer bestehenden valeo_probe: vor Anwendung fremde aktive Nutzung lesend pruefen, keine laufenden eigenen Tests; nur diesen neuen Upgrade-Schritt, kein Reset, keine neue DB/Container, kein DDL auf Entwicklung. POST-actorRole wird als Berechtigungsschalter entfernt; bestehender Query bleibt nur im GET als Ansicht. Zwei eigene OpenAPI-Operationen werden auf HEAD abgeglichen.
-
-**PERSONAL-FILE-AUTH-PERSISTENCE Pruefstand/Abnahme:** Reservierte additive Migration auf bestehendem valeo_probe erfolgreich (hr_employee_files_20261019); keine fremde aktive Transaktion, kein Reset/weitere DB, Entwicklung unveraendert. Erste eigene Status-Leseverbindung vor Upgrade freigegeben; Locktimeout hatte korrekt abgebrochen, keine Teilaenderung.55 Tests gruen inklusive echter signierter SQL-/Zwei-Mandanten-/Fehlerfaelle. Dateibesitz fuer Lieferprojektionen explizit docs/admin/migration-inventory.md, docs/admin/table-catalog.json und .md ausschliesslich neue kanonische Tabelle samt Abhaengigkeiten und docs/schnittstellen/openapi.json ausschliesslich die zwei Personalaktenpfade; fremde Projektionen erhalten.
-
-**PERSONAL-FILE-AUTH-PERSISTENCE Eingabe-Nebenbefund:** Aufbewahrungsberechnung ersetzte ungueltiges Ausstellungsdatum still durch heute; SQL-Cast meldete danach erst503. Dateibesitz zusaetzlich app/api/v1/schemas/personal_schemas.py ausschliesslich Datumsvalidierung von EmployeeFileDocumentCreateIn (ISO-Kalendertag und Gueltigkeitsende nicht vor Ausstellung), PersonalService._add_years ohne stillen Eingabeersatz. Bestehende Drahttypen str/nullable bleiben gleich; Schaltjahrkorrektur erhalten. Neue SQL-Negativvertraege erwarten422 ohne INSERT.
-
-**PERSONAL-FILE-AUTH-PERSISTENCE Nebenbefund-Vertraege:** tests/test_personal_business_time.py erwartet noch den jetzt bewusst entfernten stillen Ersatz ungueltiger Aufbewahrungsdaten; Dateibesitz auf diese eine Erwartung erweitern (ValueError, fehlendes Datum weiter Geschaeftstag, Schaltjahr erhalten). Katalogabgleich fand ferner ausschliesslich veraltete read_by-Nachweise fuer control_findings, billing_batch_lines, billing_batches, document_control_exceptions und users: bereits committete Masken-/Auditpfade fehlen bzw. entfernte lokale Lookupstelle noch genannt. Dateibesitz des Katalogs um genau diese fuenf read_by-Projektionen erweitern; keine anderen physischen Schemaaenderungen oder Fremdquelltexte.
-
-**PERSONAL-FILE-AUTH-PERSISTENCE weiterer Metadatenabgleich:** Nach Synchronisierung schon committeter Mail-/Mobile-Quellen drei weitere ausschliesslich read_by-Luecken bestaetigt: domain_crm.mail_workspace_attachments, domain_crm.mail_workspace_messages und domain_ops.mobile_event_queue. Diese Nachweise im bestehenden Katalog mit berichtigen; keine Fach-/Fremdcodeaenderung. Der vollstaendige Tabellenkatalog bleibt Gatesoll, nicht nur die neue HR-Zeile.
-
-## COMMITTED-API-INTEGRATION-20261019 - abgeschlossen, Codex
-
-**Owner:** Codex. Nebenbefund: gesamter OpenAPI-Abgleich ist rot; mehrere alte Pruefbaumkopien verdeckten fehlende bereits committete Quellen. Dateibesitz docs/schnittstellen/openapi.json als vollstaendige Projektion von aktuellem HEAD plus explizitem Personalakten-Slice; keine fremden uncommitteten Hauptbaumquellen. Fuer reproduzierbaren Abgleich einmalige wiederverwendbare Quellansicht artifacts/security-integrated-source aus Git-Objekten; keine weiteren DB/Container oder Git-Worktrees. Die14 geschuetzten alten Dateien im bisherigen ci-closure-canonical werden nicht ueberschrieben. Alle neuen Quellen aus HEAD, nur eigene Personalakten-Dateien ueberlagert. Vor jeder Commit-Integration parallelen HEAD erneut pruefen, fremde Lieferungen erhalten.
-
-## ROLE-PROVIDER-ROLLOUT-20261019 - abgeschlossen, Codex
-
-**Owner:** Codex. Nutzerauftrag weiter einschliesslich Rollen-/Scope-Rollout. Lesende lokale Abnahme: manager noch in beiden Belegscope-Mappings,17 Rollenbeschreibungen veraltet. Dateibesitz scripts/provision_identity_provider.py ausschliesslich kanonische Rollenbeschreibung aus bestehendem Katalog und verifizierte Beschreibungsaktualisierung (Identitaet/Attribute/Composites/Zuweisungen erhalten); config/keycloak/fachrollen.json ausschliesslich manager-Kurzbeschreibung als inaktiv; realm-export.json/realm-staging.json ausschliesslich vorhandene Rollenbeschreibungen, keine Clients/Scopes/Benutzer; tests/test_identity_provider_provisioning.py und neue zielgerichtete Beschreibungsvertraege; eigene QA/Workboard. Lokaler Schritt verwendet vorhandene Adminzugangsdaten nur im Speicher: Beschreibungen aktualisieren, durch bereits abgenommenen Reconciler ausschliesslich manager aus belege:read/write entfernen und exakt zuruecklesen. Keine Benutzer-/Kennwort-/Rollenzuweisung, keine neuen Altrollen, keine Profil-/Realm-/Clientumkonfiguration. Claudes CLI-Client-Region bleibt unangetastet. Keine DB/Container.
-
-## GIT-MAIN-HISTORY-GUARD-20261019 - abgeschlossen, Codex
-
-**Owner:** Codex. Wiederholter Nebenbefund: parallele private Ref-Aktualisierung verdrängte aktuelle Claim-Commits. Beide Historien per Merge erhalten. Dateibesitz neue .husky/reference-transaction (nur nicht-vorwaerts fuehrende Aenderungen von refs/heads/main ablehnen), scripts/install_main_history_guard.py (bestehende Husky-Hooks erhalten, lokaler absoluter Hookpfad auch fuer private GIT_WORK_TREE-Ansichten), tests/test_git_main_history_guard.py, docs/agent-ops/parallel-work-protocol.md nur verpflichtender Vorwaerts-/CAS-Hinweis und Installationsnachweis. Keine globalen Git-Einstellungen, keine fremden Hooks ueberschreiben. Abnahme in kleinen temporaeren Git-Repositories: Vorwaerts/Integrationsmerge erlaubt, Ruecksprung/Divergenz/Loeschung von main verweigert, andere Branches unveraendert. Keine DB/Container.
-
-## PARALLEL-MIGRATION-MERGE-20261019 - abgeschlossen, Codex
-
-**Owner:** Codex. Neue committete Steuermigration tax_account_category_20261019 und eigene bereits gepruefte HR-Migration teilen harvest_rule_store_20261015 als Eltern. Dateibesitz neuer alembic/versions/merge_hr_tax_20261019.py, zugehoeriger DAG-Vertrag und Migrationsinventar. Bestehende Migrationen nicht umschreiben; additiver Mergekopf ohne eigenes Schema-DML, beide Zweige ausfuehren. Vor Anwendung auf bestehendem valeo_probe Nutzung pruefen; nur ausstehende Steuermigration plus Merge, kein Reset/neue DB. Claudes Steuerkategorienreparatur und alle anderen aktuellen Lieferungen bleiben erhalten.
-
-
-**GIT-MAIN-HISTORY-GUARD Abnahme:** Drei echte Git-Vertraege bestanden. Null-old-OID durch Lesen des tatsaechlichen aktuellen Ref abgesichert; Ruecksprung/Divergenz/Loeschung verweigert, Integration/andere Branches/fremde Hooks erhalten. Installation nach Commit aus versionierter Vorlage.
-
-
-**COMMITTED-API-INTEGRATION Katalognebenbefund:** Vollstaendige aktuelle Quellansicht bestaetigt sechs weitere ausschliessliche read_by-Luecken: document_return_cases, fremdwaren_einlagerung, legacy_adapter_batches, inventory_auxiliary_batches, production_operations, tank_adapter_intake. Katalogbesitz um diese sechs bereits committeten Lesepfade erweitert; keine Tabellen-/Fachcodeaenderung.
-
-
-**PERSONAL-FILE / COMMITTED-API / PARALLEL-MIGRATION Abschluss:** Integrierter Quellstand60 Personaltests gruen, alle Anwendungsmodule aus aktueller Git-Quellansicht, komplette API-Projektion wiederholbar stabil. Katalog673 Tabellen mit14 korrigierten Lesepfadnachweisen; andere Codeinventare unveraendert aktuell. Steuerzweig und HR-Zweig ueber merge_hr_tax_20261019 zusammengefuehrt, ein DAG-Vertrag bestanden; vor additivem Probe-Upgrade null fremde aktive Transaktionen. Keine Entwicklungs-DDL, keine weitere DB/Container, kein Reset. Laufender Backend-Rollout und Provider-Abnahme weiterhin getrennt offen.
-
-
-**Katalog-Korrektur vor Push:** Generator hatte neun bestehende Tabellen wegen physischer Probe-Abweichung entfernt. Eintraege wiederhergestellt; nur neue HR-Tabelle und14 Lesepfadkorrekturen liefern.682 dokumentierte Tabellen,673 im Probe. Vollstaendiger physischer Drift bleibt offen (CRM contacts; Inventory article_alternative_eans, article_analyses, article_print_settings, article_units sowie vier nawaro-Untertabellen). Keine behauptete Schema-Gesamtkonformitaet.
-
-
-**ROLE-PROVIDER-ROLLOUT Abschluss20.10.:** 36 Tests/36 Unterfaelle gruen; lokale42 Rollen verifiziert,17 Beschreibungen aktualisiert, ausschliesslich manager aus Belegscope-Mappings entfernt (read16/write9). Wiederholung null Updates, identischer Zustand. Keine Benutzer-/Kennwort-/Rollenzuweisung oder Clientaenderung; Zugangsdaten nur RAM. QA role-provider-rollout-20261020.md. Backenddeployment/Neuanmeldung gesondert offen. GIT-MAIN-HISTORY-GUARD lokal installiert und verifiziert, keine globalen Einstellungen.
-
-
-**Integration20.10.:** Parallele GitHub-Lieferungen bis b3bafe33b integriert. Personalakten-Test behaelt gezielte PERSONAL_BEARBEITEN-Identitaet und prueft fremde Urheberuebernahme/lesendes Schreibverbot; keine pauschale Alle-Rollen-Freigabe. Migrationsinventar-Datum20.10. Beide Elternverlaeufe erhalten; Arbeitsbaum/Index nicht ersetzt.
-
-
-**Integrations-Nebenbefund:** Alle354 Dateien bestehen Staged-/Dokumentations-/Lintguards. Abschliessender Whitespaceguard meldet zwei bereits gepushte Fremdstellen (route-aliases.json Leerzeile; test_stammdaten_bearbeiten.py EOF). Ausschliesslich Leerraum normalisiert, Funktion unveraendert; diese zwei Dateien in Integrationsbesitz aufgenommen.
-
-
-**Integrationsnachlauf20.10.:** Zusaetzliche parallele Qualitaetslieferung570d92fd4 ohne Inhaltskonflikt aufgenommen. Vorige Integration a6e4b2cf8 hatte356 Dateien samt regulaeren Guards bestanden; beide Codex-Meilensteine und saemtliche fremden Vorfahren erhalten.
-
-
-**Finale Integrationsabnahme20.10.:** 72e21039e nach main gepusht; remote identisch,570d92fd4 und900cd7309 als Vorfahren geprueft. Nach beiden parallelen Integrationen nochmals60 Personalaktenfaelle bestanden, alle app-Module nachweislich aus diesem Git-Stand. Gesamte erzeugte OpenAPI inhaltlich identisch zum Commit.36 Providervertraege/36 Unterfaelle, drei Git-Guard-Vertraege und ein Migrations-DAG-Vertrag bestanden. Rollenvertrags-CI auf72e21039e erfolgreich; andere GitHub-Suiten zum Abnahmezeitpunkt noch laufend/wartend. Nicht geschlossen: neun physische Katalogabweichungen, alte AP-Freigabewege, Backenddeployment und acht bestehende Dependabot-Meldungen; keine pauschale CI-/Sicherheitsfreigabe.
-
-## AP-WORKFLOW-SECURITY-20261020 - abgeschlossen, Codex
-
-**Owner:** Codex. Nutzerauftrag weiter und fremde Nebenbefunde mitbeheben. Bestaetigte offene AP-Pruef-/Freigabestufe: Rumpfantragsteller, fehlende Funktionstrennung/Regelrollen, Statusfreigabe bei unbekanntem Wert, fehlende Inhalts-/Antragsbindung, nichtatomarer Dokumentspeicher, veralteter Maskenaufruf. Dateibesitz app/api/v1/endpoints/ap_approval_workflow.py und neuer app/services/ap_approval_workflow_service.py sowie neue app/api/v1/schemas/ap_approval_workflow_schemas.py; app/core/ap_approval_status.py nur Antragsreferenz; app/auth/finance_roles.py nur vorhandene Finanzleitungsrollen als gemeinsame Konstante. ap_invoices.py ausschliesslich approve-/Maskenfreigabeintegration ohne automatische Selbstanfrage, bestehende Buchungsgrenze unveraendert. Zwei API-Frontendverbraucher und APInvoiceApprovalPanel nur serverseitige Antragsbindung/Entfernung freier Akteurswerte, kein Maskenlayout. Zugehoerige Backend-/Frontendvertraege und alte AP-Erwartungen aktualisieren, eigene QA, Finance-Domain-API, Workboard und erforderliche generierte API-/Inventar-/Handbuch-/Architekturprojektionen. Abnahme: echte Zwei-Mandanten-SQL-Faelle, gepruefte getrennte Personen, Wiederholung/Nebenlaeufigkeit/Fehlerrollback, stale oder fremder Antrag und geaenderter Beleg sperren. Bestehender valeo_probe, eigene Rollbackdaten, kein Schemawechsel/Reset/neue DB/Container. Bestehender zentraler FreigabeEngine-Buchungscheck bleibt verbindlich, diese AP-Vorstufe gewaehrt keine Buchungs-/Zahlungsrechte. Kein Eingriff in Claudes sonstige Fach-/Rollenarbeit.
-
-
-**AP-WORKFLOW-SECURITY Speichernebenbefund:** DocumentRepository.save_document protokolliert bei SQL-Fehlern den gesamten Treibertext samt Parameterwerten. Dateibesitz auf diese eine Logzeile in app/documents/repository.py erweitert: generische Fehlermeldung, Fehler weiterreichen und bestehende Rollback-/Commit-Semantik erhalten. Keine anderen Repository-Fach-/Mandantenregeln aendern.
-
-
-**AP-WORKFLOW-SECURITY Lebenszyklus-/Urhebererweiterung:** update_ap_invoice ersetzt bisher den gesamten Beleg und entfernt createdBy; gebuchte/bezahlte/stornierte Rechnungen bleiben aender-/loeschbar. Dateibesitz ap_invoices.py um create (nur verpflichtender gepruefter Ersteller), update (Ersteller erhalten, gepruefter letzter Bearbeiter, serverseitiger Entwurfsstatus und gesperrte Endzustaende) und delete (nur Entwurf/abgelehnt, gesperrte Endzustaende) erweitert. Gemeinsamer Service sperrt Dokument und prueft Status; keine Preis-/Steuerberechnung oder Buchungslogik umstellen. Entscheider ist auch vom letzten Inhaltsbearbeiter getrennt. Zugehoerige echte SQL-Negativvertraege; bestehende Buchungspruefungen weiter unveraendert.
-
-
-**AP-WORKFLOW-SECURITY native Maskenprojektion:** Dateibesitz zusaetzlich app/api/v1/schemas/mask_entity_contracts.py nur typisierte Antrags-ID/Entscheidungsberechtigung, app/core/screen_definitions.py ausschliesslich Aktion finance/ap-invoice.freigeben (enabledWhen auf Serverentscheidung, menschliche Freigabe/Agentensperre). Bestehender Renderer uebernimmt Referenz unveraendert aus entity/form payload; kein Einzelseitenlayout. AP-Status und Entity liefern dieselbe serverberechnete can_decide-Entscheidung (Mandant, Rolle, Funktionstrennung, technisches Konto, Stand, vorhandene Stimme). Erforderliche generierte MCP-/Maskenprojektionen nachziehen. docs/design/valeo-meridian-experience.md nur Integrationsnachweis, keine Renderer-/Themeaenderung.
-
-
-**AP-WORKFLOW-SECURITY Ausfallgrenze:** post_ap_invoice nutzt bei ImportError bisher einen blossen Dokumentstatus als Freigabeersatz. Ausschliesslich diese Ausfallgrenze schliessen:503 statt Fallback, bestehende zentrale Buchungs-/Steuer-/Perioden-/Ledgerlogik unveraendert. Ohne gueltige AP-Pruefung409. Negativvertrag prueft Abbruch vor Perioden-/Buchungspruefung.
-
-
-**AP-WORKFLOW-SECURITY Transaktions-/Anlageneingrenzung:** Bestaetigt: AP-post speichert Outbox erst nach Ledgercommit und liest den Beleg vor Buchung ohne Schreibsperre; create kann ueber einen parallelen Upsert einen zwischenzeitlich angelegten Beleg ersetzen. Dateibesitz ap_invoices.py um gemeinsame Dokumentzeilensperre beim Post und Outbox vor einzigem Abschlusscommit erweitert, bestehende Steuer-/Ledgerberechnung unveraendert. DocumentRepository.save_document/save nur optionale create_only-Semantik und unveraenderlicher Mandant bestehender Dokumente unter Zeilensperre; eigene SQL-Race-/Negativtests. AP-Anlage verlangt echte Persistenz und geprueften ungekürzten Urheber. Review-Ablauf gilt vor Buchung; danach Zahlungsbereitschaft nur mit referenzierter eigener tatsaechlich gebuchter Hauptbuchzeile, kein blosser Status. Keine neue Migration/DB/Container.
-
-
-**AP-WORKFLOW-SECURITY Audit-/Profilnebenbefund:** log_fibu_audit verwirft einen ausdruecklichen internen user_id, wenn keine E-Mail mitgegeben wird; AP-post nutzt ausserdem dessen Standardcommit. Dateibesitz app/core/fibu_audit.py nur expliziten Urheber unabhaengig von optionaler Mail erhalten (HTTP-Request bleibt vorrangig), tests/test_fibu_audit_atomic_boundaries.py gezielter Vertrag. FinanceTransactionService._resolve_user_id liest lokale Profile bisher ohne Mandant; Dateibesitz app/services/finance_transaction_service.py ausschliesslich diesen Lookup an eigenen Mandanten binden. Keine Finanzberechnung/-autorisierung umbauen, neue SQL-Negativfaelle pruefen fremde Profilzuordnung.
-
-
-**AP-WORKFLOW-SECURITY Namenskonvention:** Neuer Fachservice heisst app/services/ap_invoice_approval_service.py und nutzt das bestehende Finanz-Praefix ap_invoice; kein neues Domaenenmapping. Voriger Dateibesitzname ap_approval_workflow_service.py war ausschliesslich uncommitteter Arbeitsname.
-
-
-**AP-WORKFLOW-SECURITY Agentenklassifikation/Testgrenze:** Gemeinsame bestehende technisches_konto-Klassifikation in app/services/freigabe_engine.py ausschliesslich um bereits signierte Agenten-/Delegationsmerkmale erweitern (agent_id, actor_type, act); AP-Service verwendet denselben Helfer, keine zweite Klassifikation. Menschliche Mandanten-/Rollengrenze unveraendert; eigener negativer Helfervertrag. Der alte Zahlungs-Rollbacktest verdreht tenantId bisher ueber den nun korrekt gesperrten Repositoryweg. tests/test_payment_execution_atomicity.py setzt ausschliesslich diese absichtliche eigene Schema-/Datenkorruption per gebundener SQL-Fixture und behaelt alle Zahlungs-Rollbackassertionen. Vorher432 Faelle gruen, nur dieser unerlaubte Fixture-Aufbau rot; Schutzregel nicht abschwaechen.
-
-
-**AP-WORKFLOW-SECURITY MCP-Altadapter:** finance.ap_invoice.freigeben ruft eine veraltete Signatur mit einem selbstgebauten Nutzer ohne Rollen auf; ein Attrappen-Erfolgstest verdeckt das. Der Proposal ist nicht an Antrags-ID/Beleginhalt gebunden und darf keine menschliche Entscheidung ersetzen. Dateibesitz config/mcp_erp_tools.yaml nur diesen unabgenommenen Schreibadapter entfernen und Vorschlagsbeschreibung korrigieren; app/services/mcp_execution_service.py nur alten Dispatcherzweig, verwaisten Helper/Inputtyp entfernen und Vorschlag auf menschliche Maske verweisen (keine fremden Batch-/Fuhrparkregionen). scripts/generate_mcp_mask_action_map.py nur falschen statischen AP-Mapped-Eintrag entfernen. Tests test_mcp_execution.py nur vier AP-Altadapter-Vertraege gegen fail-closed ersetzen, test_mcp_tool_registry.py und test_mcp_mask_action_map.py nur AP-Erwartung; generierte MCP-Referenz/Map/Maskenkatalog/CLI-/Handbuchprojektionen nachziehen. Vorschlagsfunktion bleibt, keine neuen MCP-Writes oder Berechtigungen.
-
-**AP-WORKFLOW-SECURITY Kernel-Nebenwege:** Besitz erweitert um command_handlers_finance.py, ap_invoice_kernel_posting.py, action_execution_mutations.py und action_execution.py ausschliesslich reale AP-Ausfuehrung: direkte Statusmutation/verschluckte Buchungsfehler entfernen, gemeinsamen Fachservice und gepruefte Requestidentitaet verwenden, Replay vor Autorisierung verhindern. AP-Ablehnung ebenfalls anbinden. Kein neues Rollenmodell; bestehende reine Dispatchsimulation bleibt Metadatenpruefung ohne Schreibwirkung. Zugehoerige Kernel-/Steuer-/Freigabe-Vertraege nachziehen.
-
-**AP-Katalogkonvergenz:** business_commands.py nur Approve/Reject/PostAPInvoice auf bestehende FINANCE_ADMIN/admin und keine Agentenfreigabe umstellen; reale Rollen kommen aus geprueftem Principal, Bodyrollen bleiben wirkungslos. Reine Katalogtests auf diese bestehenden Rollen nachziehen.
-
-**AP-Kernel Replay-Router:** process_kernel_api.execute_action darf reale AP-Replays nicht vor der Fachautorisierung beantworten; nur diese Vorabcache-Verzweigung und Konfliktantwort an zentralen Ausfuehrungsservice anbinden. Generische API-Einheitstests pruefen Cachevertraege mit Harvest-Metadatenkommando; echte AP-Ausfuehrung hat eigene signierte HTTP/SQL-Vertraege statt MagicMock-Erfolgen.
-
-**AP-Stand nach Steueraufloesung:** Bei zwischenzeitlich geaenderter Steuer-/Betragsgrundlage darf der gemeinsame Buchungsservice keine anderen Betraege als den geprueften Belegstand festschreiben; Abgleich und Rollback409 nach gemeinsamer Berechnung. Kernel-Replay bestaetigt geaenderten Beleg nicht aus Altcache. Keine neue Steuerformel.
-
-**Integration:** AP-Meilenstein338b34973 und parallele Studio-Lieferungen bis e0a657298 werden ohne Ruecknahme zusammengefuehrt. Drei reine generierte Konflikte werden neu abgeleitet; AP-MCP-Vertrag prueft konkrete erlaubte/gesperrte Aktionen statt historischer Gesamtzahlen, da der Studio-Rollout neue Aktionen hinzufuegt.
-
-**Frontend-Abnahmenebenbefund:** Vollstaendige Node-Projekt-Typpruefung bestaetigt ungueltiges allowedHosts=all in vite.config.ts und ungenutzte vite.config.performance.ts mit nicht deklariertem rollup-plugin-visualizer. Keine Paketinstallation: Dateibesitz auf Vite-Konfiguration, tsconfig.node/json/eslint und einzige Ignore-Referenz in .eslintrc.json erweitert. Verbraucherpruefung git grep zeigt keinen Build-/Laufzeitaufruf des Alternativconfigs. Altconfig entfernen, regulaeres Config im Node-Projekt behalten, Standardhosts localhost/frontend-web und nur explizite VITE_ALLOWED_HOSTS konfigurieren. Tests/volle Typpruefung erneut ausfuehren; gemeinsame Arbeitskopien unangetastet.
-
-**Abnahme AP-WORKFLOW-SECURITY:** 572 integrierte Backendvertraege, sieben Frontendfaelle, alle ausgefuehrten Ratschen/Architekturgates gruen; stabile OpenAPI3222 Pfade, physisches Katalogschema unveraendert. Bestehender Pruefstand, keine neue DB/Container/Reset. Meilenstein338b34973 plus parallele Studio-Lieferungen bis e0a657298 erhalten. [QA und konkrete Betriebsgrenzen](../quality-assurance/ap-workflow-security-20261020.md). Live-Deployment/Browser und globale andere Kernel-/Studio-/Tabellenluecken bleiben getrennte offene Abnahmen.
-
-**Zusatzabnahme:** Weitere24 Einkaufslisten-/Rechteprojektions-/Studio-Ratschenfaelle gruen, insgesamt596 Backendfaelle. Vollstaendige Frontend-Typpruefung inklusive Node-Konfiguration und geladene Vite-Host-Allowlist gruen. Alle Quellmodule aus eingefrorener kanonischer Integrationsansicht.
-
-**Buildvertrag auf frischem Checkout:** packages/frontend-web/package.json nur type-check-Skript: regulaeren Node-Konfigurationsbuild vor die vollstaendige Anwendungs-Typpruefung schalten. Damit setzt diese keine zufaellig vorhandenen vite.config.d.ts-Artefakte mehr voraus. Keine Abhaengigkeits-/Lockfileaenderung. Beide Teilbefehle sind in der Abnahme geprueft; Paketkommando muss denselben Ablauf reproduzieren.
-
-**Katalogverbraucher:** Verbleibende reine Dispatch-/Kanalmetadaten-Vertraege test_process_kernel_wave5_commands.py und test_process_kernel_wave73_channel_process_actions.py verwenden noch die entfallenen AP-Aliasrollen; nur AP-Beispiele auf FINANCE_ADMIN vereinheitlichen. Keine Kanalgeschaeftslogik oder Berechtigung erweitern. Zusaetzliche Verbrauchersuiten pruefen, damit die CI den neuen Rollenvertrag vollstaendig abbildet.
-
-**Finale AP-Integration:** Parallele Lieferungen bis86d54acb1 erhalten.716 Backendpruefungen,19 Oberflaechenfaelle, vollstaendige Typpruefung/Node-Build und alle ausgefuehrten Gates gruen. Keine neue Datenbank/Container/Migration/Reset. Eigenen AP-Meilenstein338b34973 und Integrationscommit4405f1fca nicht zurueckgenommen; erneuter Main-Zusammenfuehrungscommit bewahrt beide Historien. [Abnahme und Grenzen](../quality-assurance/ap-workflow-security-20261020.md).
-
-## AP-CI-SELECTION-20261020 - abgeschlossen, Codex
-
-Ziel: AP-SQL-Vertraege muessen auch im verpflichtenden needs_live_db-Gate ausgewaehlt
-werden. Besitz: test_ap_workflow_security_contract.py nur gemeinsame case-Fixture,
-test_ap_workflow_concurrency.py nur require_db-Abhaengigkeit, QA und Workboard.
-Transitive require_db-Fixture nutzt die vorhandene strikte Sammlung in conftest;
-keine neue Datenbank, Container oder Workflow-Pipeline. Abnahme: strikte Gateauswahl
-fuehrt AP-, Kernel-, native und Parallelitaetsfaelle auf bestehendem valeo_probe aus.
-Geschaeftscode bleibt unveraendert. Vollsuite deckte sie bereits ab; der schnelle
-PostgreSQL-Pflichtlauf muss denselben Schutz explizit enthalten.
-
-**Abnahme AP-CI-SELECTION:** Exakter CI-Selektor needs_live_db mit PYTEST_REQUIRE_DB_STRICT=1:71 AP-/Kernel-/native-/Parallelitaetsfaelle bestanden,39 reine sonstige Faelle planmaessig abgewaehlt. Gemeinsame case-Fixture und beide Parallelitaetstests fordern require_db an; conftest markiert auch transitive Verbraucher. Keine Geschaeftscodeaenderung, DB/Container/Reset oder Migrationsaenderung.
-
-## AP-MASK-CONTRACT-CI-20261020 - abgeschlossen, Codex
-
-Bestaetigter CI-Befund39461895750: finance/ap-invoice.freigeben ist fuer Agenten
-gesperrt, fehlt aber in agentContract.dangerousActions. Besitz ausschliesslich
-build_finance_ap_invoice_screen_definition in app/core/screen_definitions.py:
-fehlende dangerousActions-Deklaration nachtragen, keine Rechte/Endpunkte/Layouts
-lockern. Agent-Handbuch aus Quelle erneuern; QA/Workboard aktualisieren.
-Abnahme: komplette test_uix046_048_command_endpoints_safety.py-Suite und MCP-Map
-sowie Handbuchdrift gruen. Keine Datenbank-/Container-/Geschaeftscodeaenderung.
-
-**Abnahme AP-MASK-CONTRACT-CI:** Fehlende dangerousActions-Deklaration nur fuer finance/ap-invoice.freigeben ergaenzt. Gesamte UIX-046/048-Sicherheitssuite und MCP-Map:797 bestanden auf unveraendertem Quellstand. Agent-Handbuch regeneriert und Driftpruefung gruen. Menschliche Freigabe/Agentensperre unveraendert; keine Layout-/Buchungs-/Rechteaenderung und keine zusaetzliche Datenbankressource.
-
-## STUDIO-CLI-BULK-20261020 - abgeschlossen, Codex
-
-Owner Codex. Nutzerauftrag: fehlende/handgebaute Masken ueber CLI in Studio
-ueberfuehren und abgeloeste Einzelmaskentests erst nach gleichwertigem Nachweis
-entfernen. Erster Meilenstein: vollstaendiger paginierter Quellenabruf, expliziter
-hashgebundener Uebernahmeplan und wiederholbare stapelweise Ausgangsimporte ueber
-die bestehende authentifizierte Studio-API. Besitz valeo_cli/studio.py, eigene
-CLI-Vertraege, docs/architecture/studio-native-migration.md und eigene QA.
-Keine Uebernahme von Claudes aktivem MASK-STUDIO-ROLLOUT-Seiten-/Builderbesitz.
-Keine automatische Publikation/Umleitung, keine Umgehung von Simulation/Freigabe.
-Keine Abschaffung fachlicher/Sicherheitspruefungen aufgrund eines Baselineimports.
-Abnahme: mehr als100 Quellen, vollstaendige eindeutige Planung, unveraenderte
-Quellhashes/Idempotenz bei Wiederaufnahme, Drift/Fehler sperren, nur registrierte
-API-Wege; klare Trennung importiert/aktiviert. Bestehender Pruefstand, keine neue
-Datenbank/Container/Reset. Weitere Fachmigration bleibt nach Inventarbefund offen.
-
-
-**STUDIO-CLI-BULK Erreichbarkeit, Nutzerauftrag:** IPv4 localhost:8000 health200,
-Studio native-sources401 (korrekte Authgrenze); IPv6 ::1 akzeptiert Verbindung,
-antwortet aber nicht. Keycloak-Discovery ebenfalls200 ueber IPv4. Zusatzbesitz
-valeo_cli/cli.py ausschliesslich localhost-Transport mit IPv4-Quellbindung;
-externe Hosts/Issuer/TLS/Tokenpruefung unveraendert. Keine Docker-/OS-weite
-Netzwerkaenderung oder Dienstneustarts. Lokale CLI-Sitzung fehlt weiterhin.
-
-
-**STUDIO-CLI-BULK Abnahme:** 63 CLI-/native Studio-Vertraege bestanden, darunter
-vollstaendiger registrierter Bestand (>100) ueber CLI/echt HTTP-Router/echt SQL,
-Idempotenz/History/Isolation/keine Publikation. Gemeinsamer valeo_probe, aeusserer
-Rollback; keine neue DB/Container/Reset. Reale PKCE-Anmeldung der vorher
-freigegebenen synthetischen Testkennung erfolgreich. Lokale117 Quellen abrufbar;
-115 neue Baselines per CLI importiert, zwei bestehende erhalten (eine
-abweichende bewusst nicht ersetzt). Alle117 laufenden Quellen haben nun eine
-Ausgangsfassung; neue Fassungen bleiben nicht freigabefaehige Entwuerfe.
-Lokaler Mountbestand ist aelter als aktueller Git-Stand. Vollstaendige
-Handmade-Abloesung, Aktivierung und Ersatz alter Einzelmaskentests sind weiter
-offen; keine Baseline als Produktionsabnahme ausgegeben. QA:
-docs/quality-assurance/studio-cli-bulk-20261020.md. localhost-Transport repariert,
-keine OS-/Docker-Netzwerkaenderung oder neuen Rollen.
-
-
-## STUDIO-MIGRATION-ENGINE-20261020 - in arbeit, Codex
-
-Nutzerentscheid: Funktionsmigration, automatische Verdrahtung und erforderliche
-Schema-/Tabellengenerierung werden funktionale Bestandteile des vorhandenen
-Studios. Owner Codex. Erster Lieferumfang: typisierter serverseitiger
-Migrationsplan, kataloggebundene automatische Bindung und additive versionierte
-Alembic-Artefakte, Zugriff ueber vorhandene Studio-API und CLI. Dateibesitz neue
-app/services/studio_migration.py, app/api/v1/schemas/studio_migration.py,
-studio_drafts.py ausschliesslich neuer Planweg/Kataloghinweis, valeo_cli/studio.py
-nur Planbefehl, eigene Tests, Architekturprefix, betroffene generierte
-API-/Inventar-/Handbuchprojektionen und Platform-Doku. Keine fremden
-MASK-STUDIO-ROLLOUT-Seiten/Builder. Abnahme: unregistrierte Commands/URLs,
-mehrdeutige Bindungen, SQL-/Namensinjektion und ueberschriebene Identitaetsfelder
-sperren; Artefakt-/Definitionshash bindet Freigabeplan; keine DDL-Ausfuehrung im
-Vorschlagsaufruf, vorhandene Freigabe/Simulation unveraendert. Tabellen verwenden
-gepruefte Mandantenstruktur. Schemaaktivierung nur ueber bestehenden geregelten
-Migrations-/Deploymentweg, kein neuer On-the-fly-DDL-Adapter oder eigener
-Geschaeftsdatenspeicher. Bestehender valeo_probe, eigene Rollbackdaten, kein Reset
-oder neue Datenbank/Container. Vollstaendige Aktivierung/UI-Abnahme und
-allgemeine Fachmigration bleiben separat nachzuweisen.
-
-
-**STUDIO-MIGRATION-ENGINE erster Meilenstein:** Serverplaner und CLI-Aufruf,
-kataloggebundene Verdrahtung, typisierte additive Alembic-Artefakte und
-Compiler-/Katalog-/Definitions-/Mandanten-/Urheber-/Headbindung umgesetzt.
-Vorlaeufig60 Faelle bestanden, inklusive echter generierter Tabelle auf bestehendem
-Pruefstand mit vollstaendigem Rollback. STUDIO-CHANNEL-001 ergaenzt: Human, CLI,
-MCP und echte Rollen-/Datensatz-/Mandanten-/Wiederholungsvertraege vor Aktivierung.
-Neue Plaene markieren diese Nachweise not_verified; kein selbstbestaetigter Pass.
-Claim bleibt in Arbeit fuer allgemeinen CRUD-/Capability-Generator, UI-Editor,
-persistierte Freigabeplanbindung und vollstaendiges Dreikanal-Releasegate.
-Kein pauschaler Backend-Rollout oder Austausch fremder Mountdateien.
-
-
-**STUDIO-MIGRATION-ENGINE Schlusspruefung erster Meilenstein:**64 Tests gruen,
-inklusive ausgefuehrtem Alembic-Artefakt mit eigener zurueckgerollter Tabelle;
-kanonische OpenAPI3230 Pfade wiederholbar stabil, alle vorherigen Pfade erhalten.
-Neue API ist typisiert und nutzt beleg_write/get_tenant_id/_actor. Der Compiler
-bindet auch seinen eigenen Quellhash, damit geaenderte Erzeugungslogik keinen
-unveraenderten Plan behauptet. Dreikanal-Abnahme bleibt absichtlich ein Blocker,
-bis echte aequivalente Rollen-/Mandanten-/Replayvertraege vorliegen. Keine
-pauschale Vollmigration oder Liveaktivierung behauptet.
-
-
-**Studio-Kataloggrenze:** Generischer Lineage-Nachlauf veraenderte zusaetzlich
-Ownership-/ORM-Metadaten und eine physische Spaltenbeschreibung aus dem Bestand;
-diese fachfremden Generatorfolgen werden nicht ausgeliefert. Beide Katalogdateien
-bleiben exakt auf dem vorherigen kanonischen Commit. Der Tabellen-FK in einem
-nur erzeugten Alembic-String ist ausserdem kein laufender Tabellenlesezugriff.
-Keine physische Tabelle/Spalte wurde fuer diesen Planer dauerhaft geaendert.
-
-
-## STUDIO-MULTICHANNEL-READ-20261020 - abgeschlossen, Codex
-
-Owner Codex. Fortsetzung des vollstaendigen Studio-Ziels: neue Masken muessen
-Daten und Aktionen ueber Human/CLI/MCP mit identischen Fachrechten und
-Mandantenbindung anbieten. Ist-Befund: generische Aktionsadapter vorhanden,
-gemeinsamer lesender Datenquellenweg fehlt. Besitz neuer
-app/services/mask_data_read.py und app/api/v1/schemas/mask_data_contracts.py,
-mask_screen_definition.py nur neuer async GET-Datenweg, mcp_mask_actions.py nur
-Read-Adapter ohne Aenderung des Writewegs, mcp_execution_service.py nur dessen
-Dispatch, config/mcp_erp_tools.yaml nur neues Lesewerkzeug, valeo_cli/cli.py nur
-Daten-Lesekommando. Eigene Tests und betroffene generierte Registry-/API-/CLI-/
-Inventar-/Architektur-/Handbuchprojektionen, Workboard/QA/Platform-Doku.
-Abnahme: echte Domain-Daten in drei Wegen, gleiche Fremdmandanten-/Rollen-404/403,
-keine Aufruferidentitaet aus Query/Payload, nur deklarierte lokale GET-Quellen,
-Bounded Paging, unbekannte Quellen/SSRF/Redirect/Stubantworten sperren.
-Gemeinsamer valeo_probe, eigene Rollbackdaten, kein Reset/neue DB/Container.
-Kein Eingriff in Claudes Seiten-/Builderbesitz; keine neuen Schreibfreigaben.
-
-
-**STUDIO-MULTICHANNEL-READ Abnahme:**100 Faelle gruen. Echte signierte
-Dreikanal-AP-Lesevertraege mit SQL/Domainroute/Rollen-/Zwei-Mandanten-404/403,
-Selector-/Tokennegativfaellen; alle eigenen Daten zurueckgerollt. REST async,
-CLI daten und mask.data.read verwenden denselben Resolver; nur Aufrufertoken,
-keine neuen Rollen/Writes. Antworten2MiB, kein Redirect/Stub oder fremder Weg.
-64 registrierte Tools; Katalogueberpruefung semantisch statt alter Gesamtzahl.
-Brittle Registrytest-Besitz um diese eine Erwartung erweitert. Kanonischer
-Tabellenkatalog exakt erhalten, Claudes Artikel-/Kundenmasken bis ef0b5b51c
-integriert. Kein allgemeines Qualitaetssiegel oder Live-Rollout behauptet.
-Offen: per-Version-Publikationsnachweise, gleichwertige Tabellenprojektionen und
-Paging-Aliasse sowie Fachketten fuer alle weiteren Quellen. Gesamtclaim
-STUDIO-MIGRATION-ENGINE bleibt in Arbeit. QA:
-docs/quality-assurance/studio-multichannel-read-20261020.md.
-
-
-## STUDIO-TABLE-QUERY-20261020 - abgeschlossen, Codex
-
-Owner Codex. Unveraendertes Gesamtziel made by Studio: gleiche Tabellenfunktion
-in Human/CLI/MCP, kein Qualitaetssiegel aus blossen Metadaten. Besitz neue
-app/services/mask_table_query.py, bestehende mask_data_read.py und
-mask_data_contracts.py nur Tabellenprojektion, mask_screen_definition.py nur
-Query-Parameter, valeo_cli/cli.py und MCP-Readschema nur passende Leseparameter.
-Zentrale Runtime useUniversalMaskRuntime/compile-data-binding-plan/types nur
-explizite Datenquellenbindung ueber gemeinsamen Leseweg; keine fremden
-Seiten/ScreenBuilder. Eigene Backend-/Frontendvertraege, notwendige generierte
-Artefakte, QA/Workboard/Platform-Doku. Abnahme: Suche, neun Filteroperatoren,
-Sortierung, richtige zweite Seite, gleicher Domain-/Mandanten-/Rollenweg;
-unvollstaendige Quellen duerfen keinen vollstaendigen Tabellenstand behaupten.
-Keine neue DB/Container/Reset, bestehender valeo_probe mit Rollbackdaten.
-Bestehende Server-Paging-Vertraege werden nicht still auf lokal umgedeutet.
-
-
-Abnahme 21.10.2026: 103 Backendtests, sieben Frontendtests, TypeScript und alle
-lokalen Projektions-/Architekturgates gruen. Echte signierte drei-Kanal-
-Debitorenabfrage mit zwei Mandanten, zweite Seite, Filter, gleiche Ergebnisse.
-Quellen werden vor lokaler Projektion vollstaendig und begrenzt gesammelt;
-Wiederholungen/unvollstaendige Bestaende scheitern. Kein allgemeines
-Qualitaetssiegel: Serverpagination/alte Tab-Quellen, Snapshotstabilitaet,
-versionsgebundene Releaseevidenz, allgemeine CRUD-/Schema-Verdrahtung und
-Altmaskenmigration bleiben Folgearbeit. QA studio-table-query-20261021.md.
-CI-Nachlauf 7bb8e4858: Plattform/OpenAPI/SQL/Security-Agent gruen; Quality/CI-CD
-rot wegen Artikel-Zeilenformen/Identitaetstest; Security Scan wegen zwei neuen
-follow-redirects-Advisories. Incoming main seitdem weiterentwickelt, vor
-weiterer Korrektur integriert/pruefen. Keine Gates abgeschwaecht.
-
-
-Integrationsabnahme mit main bis a059c51bf: 205 Backendtests bestanden,
-einschliesslich der beiden zuvor roten Maskenvertraege (Zeilenformen und
-Belegidentitaet). Claudes Quell-/Testkorrekturen bleiben erhalten. Alle
-Projektions-/Architekturgates gruen; 3242 OpenAPI-Pfade, 931 Routen,
-307 Services, 472 Endpunktmodule. follow-redirects-Sicherheitsbefunde
-bleiben als eigener Folgeschritt offen. Kein pauschal gruener CI-Status.
-
-
-## NODE-FOLLOW-REDIRECTS-20261021 - abgeschlossen, Codex
-
-Ziel: zwei neue High-Advisories GHSA-q3jh-wrc6-jgq8 und GHSA-8r9p-f939-6h3c
-mit Herstellerfassung 1.16.1 beheben. Vor Umsetzung Primaerquellen geprueft;
-keine vorhandene offene Zustaendigkeit fuer diese Befunde gefunden.
-Besitz root package.json nur follow-redirects-Override, pnpm-lock.yaml nur
-zugehoerige Aufloesung, bestehende Backport-Reviewhashes nur nach erneuter
-Verifikation des unveraenderten Quellpatches, eigener Runtimevertrag/QA/Workboard.
-Abnahme: echter Production-Audit, boesartige Arrayheader/Regex-Headernamen und
-normale Redirects, bestehende Backport-Failclosed-Vertraege, frozen Lock.
-Keine Severity-/Workflowausnahme, kein Eingriff in gemeinsame node_modules,
-keine DB/Container. Andere Agenten behalten ihre Fach-/Maskenclaims.
-
-
-NODE-FOLLOW-REDIRECTS-20261021 Besitz vor Erweiterung: frischer Production-Audit
-meldet zusaetzlich Vite 6.4.3 (ein High, zwei Moderate; gebuendeltes launch-editor).
-Gleicher Slice umfasst nun gezielten root Override nur fuer betroffene Vite-6-
-Versionen auf Hersteller-Patch 6.4.4, zugehoerige Lockeintraege und isolierte
-Vite-Build-/Editor-Negativabnahme. Vite 7/8 werden nicht herabgestuft. Bestehender
-Audit-CLI-Einstieg ruft den neuen Redirect-Runtimevertrag verbindlich mit auf;
-keine Workflow-/Schwellen-/Ausnahmeregel aendern. Keine gemeinsame Installation.
-
-
-## STUDIO-TABLE-ROUTES-20261021 - abgeschlossen, Codex
-
-CI-Nachlauf 882ffbd9a zeigt eigene fehlende Suchschluessel-Projektion filter_plan.
-Besitz ausschliesslich generierte route-inventory.gen.json/route-tree.gen.tsx,
-Generator unveraendert, eigene QA/Workboard. Abnahme Regeneration byteidentisch,
-keine fehlende Route und zentrale Tabellenvertraege unveraendert. Keine DB.
-
-
-Abnahme beider Claims 21.10.2026: follow-redirects exakt1.16.1 und gezieltes
-Vite-6-Patch6.4.4 im regulaer generierten Lock. Paketbestand3012 unveraendert
-bis auf diese beiden Patchidentitaeten. 36 Workspaces frozen/ignore-scripts.
-Production-Audit: fuenf neue Befunde entfernt, verbleibend genau zwei bestehende
-High (node-forge/braces), nach erneuter Original-/Patch-/Installationspruefung
-beide source_backported, null blocked. Keine Severity-Ausnahme. 59 originale
-JS-Dateien geprueft; Original RSA/Braces3 normale Faelle gruen/9 Angriffe rot;
-reparierte Laufzeit plus fail-closed Pruefung und neue Redirect/Vite-Vertraege
-37/37 gruen. Reviewhashes an neuen Manifest/Lock gebunden, neue Abnahme21.10.,
-Wiedervorlage28.10. Regularem Audit-CLI beide neuen Runtimevertraege hinzugefuegt;
-Testpfad-Umgebungsvariablen dort entfernt. Full Frontendbuild Vite6.4.4 gruen
-45,47s; isoliertes Pruefumfeld musste den bereits installierten terser lesen.
-Gemeinsame node_modules unangetastet. Keine Datenbank/Container.
-Routenfolge: unveraenderter Generator, exakt zweimal +filter_plan,931 Routen,
-zweite Generierung byteidentisch. Vorheriger CI-Rotbefund korrekt nachgezogen;
-kein Gate angepasst. QA dependency-security-follow-vite-20261021.md und
-studio-table-query-20261021.md. Neuer GitHub-Nachlauf nach Push ausstehend.
-
-
-## Nachlauf und getrennte Dependabot-Meldungen
-
-Korrekturen a9f454271 nach main gepusht. GitHub-Nachlauf gestartet, noch keine
-Gesamtfreigabe. GitHub-Dependabot-API meldet am21.10. zusaetzlich offene Alerts
-in pnpm-lock.yaml: markdown-it692/691/690, sprintf-js677, stream-json666/665,
-http-cache-semantics653 sowie den bekannten node-forge651. Ausserdem chromadb
-in services/ai/requirements.txt502(Critical),501/500(High), ohne dort angegebene
-Patchversion. Diese Meldungen werden durch einen reinen pnpm-Production-Audit
-nicht vollstaendig abgedeckt; Abhaengigkeits-/Verbraucherpfade und Python-
-Altbestand sind separat zu klaeren. Keine Entwarnung aus einem einzelnen Scan,
-keine Alert-Schliessung oder unsicheren Major-Overrides vorgenommen.
-
-
-## CRM-CASE-OUTAGE-CONTRACT-20261021 - abgeschlossen, Codex
-
-Nachlauf a9f454271: Security Scan, Universal Mask Platform und SQL-Gate gruen;
-CI/CD scheitert einzig am alten direkten Aufruf des Cases-Listenhandlers ohne
-Router-Mandantenabhaengigkeit (ContextVar LookupError). Besitz nur betreffender
-Test in tests/test_runtime_sweep_category_d.py, eigene QA/Workboard. Handler und
-Mandantenbindung bleiben unveraendert. Abnahme realer HTTP-Router mit expliziter
-isolierter Testmandantengrenze, Downstream-Verbindungsabbruch, leerer gepruefter
-Antwort und Nachweis des weitergereichten Kontextmandanten; bestehende
-Faelle-/Betriebsprofile-/Aktivitaeten-Isolationsvertraege bleiben gruen.
-Keine Authumgehung in Produktionsapp, keine DB/Container.
-
-
-## NODE-MARKDOWN-20261021 - abgeschlossen, Codex
-
-Vollscan des kanonischen Locks bestaetigt drei neue markdown-it-Befunde gegen
-14.3.1 (GHSA-gfr2-rv44-r23c, GHSA-vfgh-jcmw-g37q, GHSA-r7fv-28h4-cvq7).
-Primaeradvisories gelesen, Herstellerpatch14.3.3 vorhanden. Besitz root
-package.json nur vorhandener markdown-it-Override, Lock nur dieser Patch und
-Referenzen; bestehende Backportmanifest-/Lockhashes nach unveraenderten
-Quell-/Runtimepruefungen; neuer scripts/verify_markdown_security.cjs und dessen
-verbindlicher Aufruf im bestehenden Audit-CLI, eigene QA/Workboard. Keine
-Gate-/Workflowabsenkung oder neue Ausnahme. Abnahme Normalrendering und
-abgebrochene Referenzen, Quotes und vier HTML-Varianten in zeit-/speicherbegrenzten
-Unterprozessen, Auditvollscan ohne diese Befunde, frozen36 Workspaces. Keine
-geteilte Installation, kein neuer DB/Container. Andere offene Pakete gesondert.
-
-CRM-CASE-OUTAGE-CONTRACT Abnahme:22 Tests gruen (Runtime-Sweep D, Faelle und
-Betriebsprofile). HTTP statt direktem Handleraufruf, zwei explizite Testmandanten
-und weitergereichter Kontext geprueft. Produktionscode unveraendert. QA
-crm-case-outage-contract-20261021.md. Keine DB/Container angelegt.
-
-
-NODE-MARKDOWN Abnahme21.10.: Herstellerpatch14.3.3, offizielle SHA512-Archive
-und jeweils57 installierte JS/MJS/CJS-Quelldateien von14.3.1/14.3.3 verifiziert.
-Originale2/8 gruen; sechs Angriffe im8s-Unterprozesslimit abgebrochen. Repariert
-8/8, einschliesslich normalem Rendering und sieben begrenzten Problemformen.
-Gemeinsame Quell-/Audit-/Redirect-/Vite-/Markdownvertraege45/45; Production-Audit
-weiter2 High als bereits gepruefte Quellreparaturen/0 blocked; Vollscan von10
-auf7 Findings (3 High/4 Moderate), alle3 Markdownbefunde entfernt. Keine
-paketfremden Aufloesungen:3012 Pakete,36 Workspaces frozen. Bestehende Review-
-Quellhashes und Fristen unveraendert; nur Manifest-/Lockbindung nach erneuter
-Runtimepruefung aktualisiert. Audit-CLI erzwingt neuen Vertrag ohne Testpfad-
-Override. QA node-markdown-security-20261021.md. Keine gemeinsame Installation.
-
-Chroma-Nachpruefung ohne neue Bewertung: bestehende3 Reviews (bis23.10.) mit
-allen98 kanonischen Quell-/Deploydateien und Embeddedkontrolle exakt bestaetigt;
-12 vorhandene Failclosed-Vertraege bestanden. Keine Fristverlaengerung oder
-Alertschliessung. Nicht mit Herstellerreparatur oder neuem Scannerlauf verwechseln.
-
-
-## STUDIO-PLAN-HISTORY-20261021 - abgeschlossen, Codex
-
-Fortsetzung des eigenen STUDIO-MIGRATION-ENGINE-Claims: Migrationsplan nur aus
-serverseitig gespeicherter Entwurfsfassung erzeugen und unveraenderbar in der
-bestehenden Studio-Historie speichern. Besitz neuer studio_migration_store.py,
-Migration-DTO nur gespeicherter Auftrag/Antwort, studio_drafts.py nur neuer
-POST drafts/{id}/migration-plan, CLI nur plan-speichern, eigene Tests und
-ADR084 Proposed/Platform-/QA-Doku, notwendige Projektionen/Architekturprefix.
-Kein Edit fremder Seiten/Builder oder Umdeuten bestehender Publikation.
-Abnahme erwartete Revision, Tenant/Actor nur Kontext, schluesselgebundene
-Wiederholung mit Inhaltsvergleich, reale Postgres-Historie und Rollback bei
-Fehler, Fremdmandant404; Plan bleibt blockiert fuer Aktivierung/DDL. Speicherung
-ist weder Freigabe noch vollstaendige Dreikanalabnahme. Bestehender valeo_probe
-mit eigenen Rollbackdaten, kein neuer DB/Container/Reset. C4 unveraendert.
-
-
-STUDIO-PLAN-HISTORY Abnahme:85 Tests bestanden (neuer gespeicherter Plan,
-Compiler, bestehende Revisionshistorie, Tokenidentitaet und CLI). Echte signierte
-REST-/CLI-Aufrufe mit Rollen-/Fremdmandanten-/Header-/Token-Negativfaellen und
-realer PostgreSQL-Historie; deren Mutation wird vom bestehenden Trigger blockiert.
-Ein Speicherfehler rollt vollstaendig zurueck. Alte Wiederholung liefert
-historischen Nachweis; neue Revision braucht neuen Auftrag.45 erste Tests plus
-85 erweiterte finale Tests gruen; Zaehler nicht addieren. Alle lokalen Drift- und
-Architekturgates gruen, OpenAPI3243 Pfade,308 Services,931 Frontendrouten,
-472 Endpunktmodule. Kanonischer Tabellenkatalog exakt erhalten. Kein neuer
-Container/DB/Reset und keine Schemaaktivierung/Publikation. Autorisierter
-Compiler-Command ueber bestehende beleg_write-/Tenantgrenze; kein MCP-Write neu
-freigeschaltet. ADR084 Proposed/QA studio-plan-history-20261021.md.
-Gesamtclaim bleibt offen fuer CRUD-/Capability-Generierung, UI-/MCP-Authoring und
-verpflichtende Auswertung aller revisionsgebundenen Nachweise im Publikationsgate.
-D8dee7717-Nachlauf: Security/ServiceSecurity/SQL/Smoke/critical/Docs gruen;
-Quality und CI/CD zum letzten Abruf noch nicht abgeschlossen.
-
-
-## STUDIO-PLAN-INTEGRATION-20261021 - abgeschlossen, Codex
-
-Nutzer: offene Publikations-/UI-/MCP-Anbindung abschliessen. Besitz bestehender
-studio_migration_store.py nur aktuelle Planpruefung, studio_release.py und
-studio_draft_store.py nur Pflicht-/Runtimebindung, simulation_artifact_hash nur
-Abhaengigkeitsliste. Studio-Oberflaeche/APIclient plus neue Plan-Komponente,
-zugehoerige Tests; neuer MCP-Transportadapter und explizites versioniertes
-Tool im vorhandenen Register, mcp_mask_actions.py nur Dispatch (kein Wachstum
-MCP-Godfile). Keine fremden Seiten/Builder. Vorhandene Rollen/Scopes bleiben
-fuehrend, MCP-Adapter schreibt niemals SQL oder publiziert; gleiche Authoring-
-Domainoperation wie HTTP/CLI. Autorisierter Nutzerauftrag ist Freigabe dieser
-eng begrenzten R1-Plan-Capability, keine neue Kontenrolle/Schemaausfuehrung.
-Abnahme: Plan fehlt/veraltet/manipuliert sperrt Publikation, SQL-/Memoryparitaet,
-auf Revision bezogene UI, drei gleiche Transportergebnisse und echte negative
-JWT-/Rollen-/Tenant-/Replayfaelle. Bestehende Lifecycle-Testhelfer werden fuer
-verpflichtenden Planschritt angepasst, keine Gateabschwaechung. Vollstaendige
-allgemeine Human/CLI/MCP-Fachkettenzertifizierung bleibt eigener Umfang;
-not_verified wird nicht zu bestanden umetikettiert. Bestehender valeo_probe,
-Rollback, kein Reset/DB/Container. Doku/ADR084/Projektionen nachziehen.
-
-Ergebnis: Pflichtplan in Memory-/SQL-Publikation und Runtime angebunden.
-Compiler-/Katalogdrift, manipulierte Belege, fehlende Revision, ungespeicherte
-Bindungen und Schemaaenderungen ohne Bereitstellungsnachweis sperren. Bestehende
-Studio-Oberflaeche haelt den aktuellen Plan ueber denselben Servercommand fest;
-CLI und explizit freigeschaltetes R1-MCP studio.migration.plan v1 liefern bei
-Wiederholung identisches Ergebnis. Vorhandene belege:write-/beleg_write- und
-Token-Tenantgrenzen bleiben verbindlich. Kein Agenten-SQL oder Publikationsrecht.
-107 eindeutige Backendtests (106 breiter Lauf + 16 ueberlappende Tests mit einem
-neuen SQL-Publikationsvertrag),14 UI/APIclienttests und TypeScript gruen.
-UI-Leerzustand und kollidierende React-Keys von Plan/Historie mitbehoben.
-Keine neue DB/Container/Reset; eigener SQL-Datenstand zurueckgerollt.
-QA studio-plan-integration-20261021.md; ADR084 weiterhin Proposed.
-Gesamtclaim STUDIO-MIGRATION-ENGINE-20261020 bleibt in arbeit: allgemeine
-CRUD-/Capability-Generierung, Schemaeditor/-bereitstellung und vollstaendige
-kanalweise Fachkettenabnahmen sind hiermit nicht behauptet. Bestehendes
-begrenzt read-only grain.v1-Profil und not_verified bleiben ehrlich ausgewiesen.
-
-
-## STUDIO-GENERATED-ENTITIES-20261021 - in arbeit, Codex
-
-Nutzerauftrag: allgemeine CRUD-/Tabellengenerierung und Fachkettenabnahme.
-Eigener Gesamtclaim STUDIO-MIGRATION-ENGINE wird fortgesetzt. Besitz neuer
-studio_entity_contracts/compiler/commands sowie eigener Tests; bestehender
-Migrationscompiler nur notwendige gemeinsame Schemagenerierung, eigene CLI-
-Unterbefehle und Studio-Authoringroute nur Anschluss. Keine fremden Fuhrpark-
-oder Maskenseiten. Gemeinsamer Vertrag generiert typisierte Domaincommands,
-Schemaartefakt, ScreenDefinition und Kanalspezifikationen. Ausschliesslich neue
-Studio-Stammdatentabellen; Fachbuchungen, Zahlungen und Bestaende bleiben in
-registrierten Fachcommands. Rollen aus bestehendem Bereichsmodell, Mandant aus
-verifizierter Identitaet, Idempotenz/Version/Audit transaktional. Keine freie
-SQL-Ausfuehrung oder Aktivierung durch MCP. Bestehende Register statt zweiter
-Rechteverwaltung; ungepruefte Writes bleiben deaktiviert. DDL-Abnahme nur eigene
-transaktionale Tabellen im vorhandenen valeo_probe, kein Reset/DB/Container.
-Abnahme mit zwei Mandanten, Replays, Konflikten, Rollback und echten SQL-Wirkungen;
-keine Umdeutung von Mocktests in volle Fachkettenabnahme. CI-Nachlauf und Doku
-werden als Integrationsvoraussetzung mitgeprueft.
-
-STUDIO-GENERATED-ENTITIES Meilenstein: typisierter Compiler fuer neue CRM-/Agrar-/
-Lager-Stammdaten, additive Tabellen-/Ereignismigration, zentraler Commandrouter,
-Masken-/Schema-/Katalog-/Registrierungsartefakte und Authoring-API/CLI umgesetzt.
-Vorhandener Studio-Katalog verdrahtet registrierte Routen/Quellen/Commands beim
-Start. Ausgaben bleiben writes_enabled=false und agent_roles=[]; Schema-/
-Laufzeitfingerprint sperrt fehlende/veraltete Bereitstellung. Kein Fachbuchungs-
-SQL oder offener Agenten-Write. Savepoint umfasst Row, unveraenderbare Receipt/
-Audit-Historie und bestehende Outbox; versioniertes Ersetzen und Deaktivieren.
-Zusaetzlicher enger Besitz: ActionRuntime nur gelesene Version an generierte
-Update-/Delete-Endpunkte; zugehoeriger Regressionstest. Keine fremden Maskenseiten.
-23 datenbankfreie Vertraege,24 Frontendtests, TypeScript und lokale Drift-/
-Architekturgates gruen. Erste SQL-Abnahme59 gruen/eine Status-Erwartung falsch;
-403 an Tenantgrenze statt422. Nach weiteren Schutz-/Verdrahtungsaenderungen
-breiten finalen SQL-Lauf wegen nicht mehr erreichbarem valeo_probe/Docker500
-beendet, nicht als bestanden gezaehlt. Keine DB/Container/Reset/Dienstneustarts.
-CI-Ausgangsfehler korrigiert: ADR-Navigation92 und drei veraltete SQL-/Status-
-Historienvertraege auf echten Pflichtplan erweitert. QA studio-generated-entities-
-20261021.md, ADR085 Proposed. Claim bleibt in arbeit: SQL-/CI-Nachlauf, positive
-Human/CLI/MCP-Fachkette und Schemaerweiterung bestehender Entity-Vertraege offen.
-Keine vollstaendige universelle Masken-/Fachkettenabnahme behauptet.
-
-
-STUDIO-GENERATED-ENTITIES Nachlauf: PostgreSQL-CI606 bestanden/5 andere
-uebersprungen, alle16 neuen SQL-Vertraege gruen. Quality-Gate39592332034:
-Besitz um generierte table-catalog.json/md erweitert; nur fehlendes read_by
-bei domain_shared.tenants nachgezogen, physischer Katalog unveraendert.
-Docker-Update laut Nutzer abgeschlossen; gemeinsamer valeo_probe erreichbar.
-Regulaeren Desktop-Neustart zuvor angefordert, keine erzwungene WSL-Beendigung
-oder Loeschung/Reset/neue Ressourcen. Positiver Dreikanalnachweis bleibt offen.
-
-
-STUDIO-GENERATED-ENTITIES Kanalabnahme: eigener Testbesitz um
-tests/test_studio_entity_channels.py erweitert. Synthetische registrierte
-Definition und explizit freigeschaltete Testcapability nur in Rollback-Fixture;
-echte signierte Identitaeten und vorhandener MCP-/CLI-/HTTP-Ausfuehrungsweg.
-Keine produktive Registrierung oder vorgetaeuschte Studio-Publikation.
-
-
-STUDIO-GENERATED-ENTITIES Schemaerweiterung: Besitz neuer
-studio_entity_evolution.py und eigener Unit-/SQL-Vertraege; bestehende
-Entity-Vertraege/Authoringroute/CLI nur typisierter Anschluss und Projektionen.
-Nur additive nullable Felder an serverseitig registrierter Studio-Entity;
-Basisfingerprint verpflichtend, kein vom Aufrufer vorgegebenes Altschema.
-DDL sperrt Zieltabellen und verifiziert Basis vor Aenderung. Keine automatische
-Ausfuehrung, Freischaltung, Typaenderung, Fremdtabelle oder Datenruecksetzung.
-
-
-STUDIO-GENERATED-ENTITIES Kanal-/Evolutionsmeilenstein:28 Unit- und27
-SQL-Vertraege gruen. HTTP-Anlage/CLI-Replay/MCP-Update mit echten signierten
-Identitaeten und SQL-/Audit-/Outboxnachweis. Additive nullable Erweiterung nur
-aus registriertem Basisvertrag, Migration mit Tabellenlock/Basisnachweis;
-Altdaten erhalten, alter Router sperrt, neue Fassung aendert korrekt.
-Authoring-API/CLI identisch und ohne DDL-Wirkung. Alle lokalen Driftgates gruen,
-OpenAPI ein neuer Pfad,314 Services vollstaendig zugeordnet.
-Claim bleibt in arbeit: echte Studio-Publikation/visuelle Browserabnahme und
-weitere Fachketten sind nicht durch synthetische Testregistrierung erledigt.
-SonarCloud-Gesamtnachlauf separat rot (S1226 cases.py, neue Coverage59,6%).
-
-
-## SONAR-CASES-IDENTITY-20261021 - reserviert, Codex
-
-Ziel: konkreter Sonar-Neubefund S1226 cases.py list_cases. Besitz nur lokale
-Variable fuer geprueften Mandanten statt Ueberschreiben des ignorierten
-Kompatibilitaetsparameters; eigener direkter Kontext-/Weiterleitungsvertrag,
-QA/Workboard. HTTP-Vertrag, Rechte und Mandantenisolation unveraendert.
-Keine Datenbank-/Container-/Schemaaenderung, keine Sonar-Ausnahme.
-
-
-## SONAR-TEST-CLASSIFICATION-20261021 - reserviert, Codex
-
-Befund: Sonar new_uncovered_lines zaehlt mindestens668 Zeilen einer
-Frontend-Testdatei als ungetesteten Produktionscode. sonar.test.exclusions
-schliesst bisher alle Testmuster aus dem Testbereich aus. Besitz ausschliesslich
-sonar-project.properties, eigener Klassifikationsvertrag und QA/Workboard.
-Ziel: Tests positiv als Tests klassifizieren, Produktivcode weiter analysieren;
-keine Coverage-Grenze, Baseline oder Produktivcode-Coverage-Ausnahme veraendern.
-Quelle: offizielle Sonar-Dokumentation zu test.inclusions und Quell-/Testscope.
-
-
-SONAR-CASES-IDENTITY und SONAR-TEST-CLASSIFICATION Implementierungsabnahme:
-25 direkte Kontext-/Scope-/Sonar-Runtimevertraege gruen. Separater
-verified_tenant statt Queryparameter-Wiederzuweisung; HTTP-/Rechtevertrag
-unveraendert. Positive Testklassifikation statt Testausschluss; Produktionsscope,
-Coverage-Ausnahmen und Schwellen unveraendert. QA sonar-scope-and-cases-20261021.md.
-Neuer CI-/Sonar-Nachlauf bleibt abzuwarten; echte globale Coverage-Luecken
-werden weder verdeckt noch als geschlossen behauptet.
-
-
-## STUDIO-ENTITY-RELEASE-20261021 - reserviert, Codex
-
-Gesamtziel: Studio voll funktionsfaehig, alle Masken ueber CLI mit belastbarem
-Qualitaetsnachweis migrieren. Naechster Integrationsslice: eigenes
-studio.entity.v1-Freigabeprofil fuer registrierte generierte Stammdaten.
-Besitz: neues studio_entity_simulation.py, studio_release.py nur Profilauswahl/
-Nachweispruefung; studio_process_simulation.py nur Artefaktbindung; Entitycompiler
-nur Profil-/Registrierungsprojektion, Commandrouter/-service nur gemeinsamer
-Bereitstellungscheck. Eigene Unit-/SQL-/Freigabetests und generierte Projektionen.
-Kein pauschales Oeffnen von grain.v1, keine fremden Fachmasken oder Gateabsenkung.
-Simulation: vorhandener valeo_probe, echte Domaincommands und zurueckgerollte
-synthetische Daten/Outbox; kein neuer Container/DB/Reset. Testtabellen nur eigene
-eindeutig bezeichnete Artefakte, kontrollierte eigene Bereinigung.
-Abnahme: serverseitige Registrierung und exakter Definitions-/Vertragshash,
-reale CRUD-/Version-/Replay-/Tenancy-/Rollen-/Audit-/Outbox-/Rollbackkette,
-dauerhafte Evidenz und Vier-Augen-Publikation mit bestehendem Migrationsplan.
-Offen danach: reale visuelle Browserabnahme und Profilabdeckung weiterer
-Masken/Fachketten, keine vorgetaeuschte Gesamtmigration.
-
-
-STUDIO-ENTITY-RELEASE Laufzeitnebenbefund: Entitycompiler und Migrationsplan
-lesen den kanonischen physischen Tabellenkatalog; Dockerfile.backend liefert
-docs/admin/table-catalog.json bisher nicht aus, .dockerignore schliesst docs
-aus. Besitz auf diese drei exakten Bereitstellungsstellen erweitert:
-Dockerfile.backend (nur Katalog-COPY), .dockerignore (nur Katalog zulassen),
-docker-compose.yml (nur read-only Katalogmount); eigener Paketvertrag.
-Dateien aus Git HEAD in kanonischer Quellansicht, fremde physische
-Dockerfile-Arbeitskopie nicht ueberschreiben. Kein Containerneustart/Reset.
-
-
-STUDIO-ENTITY-RELEASE Meilenstein:43 Generator-/Profil-,41 SQL-/Freigabe-/
-Grain-/Kanalvertraege und2 Paketvertraege gruen. Neues studio.entity.v1 prueft
-exakte registrierte Definition und reale CRUD-/Audit-/Outbox-/Rollbackkette;
-bestehende gespeicherte Plaene, unveraenderliche Evidenz und Vier-Augen-Freigabe
-bleiben aktiv. Runtime-/Authorizer-/Tenantsourcen gebunden, alter geladener
-Router lehnt Quellwechsel vor SQL ab. Kanonischen Schema-Katalog gezielt
-ausliefern; identischen doppelten Config-COPY im Dockerfile entfernt.
-Alle lokalen Driftgates gruen, OpenAPI unveraendert, nur tenants-read_by
-im physischen Katalog nachgezogen.315 Services vollstaendig zugeordnet.
-QA studio-entity-release-20261021.md. CI/Image und reale visuelle Abnahme
-bleiben offen; kein universelles made-by-studio-Zertifikat oder Gesamtabschluss.
-
-
-STUDIO-ENTITY-RELEASE CLI-Integrationsluecke: serverseitig registrierte
-Definition muss ohne manuelle Paketmanipulation uebernehmbar sein. Enger Besitz
-um gemeinsamen Registrierungslookup, lesenden typisierten Authoring-Endpunkt
-und CLI entitaet-uebernehmen erweitert; dieselben bestehenden Draft-/Plan-/
-Simulations-/Publikationscommands. Eigener signierter HTTP-/CLI-Gesamttest
-einschliesslich Readiness, Vier-Augen und Ruecknahme. Keine Aktivierung durch
-den Lookup, keine zweite Registry oder andere Rollen.
-
-
-STUDIO-ENTITY-RELEASE echter CLI-Befund: definitionReady=false, weil generierte
-Aktionen keine permission deklarieren. Keine Readiness-Ausnahme. Besitz eng
-um generate_action_permission_projection.py, action-permissions.generated.json,
-zentralen runtime/screen-permissions.ts und eigenen Frontend-Vertrag erweitert.
-Generierte Entityrechte ausschliesslich aus require_roles des vorhandenen
-Entityrouters ableiten, Scope allein darf keine Bereichsrolle ersetzen.
-Kleine Stammdatentabellen erhalten sichtbaren Erstellzeitpunkt neben Version
-statt erfundener Fachspalten; bestehende Mindestspaltengrenze bleibt erhalten.
-
-
-STUDIO-ENTITY-RELEASE abschliessende CLI-Abnahme:44 datenbankfreie
-Generator-/Profil-/Readinessvertraege,42 SQL-/Freigabe-/Grain-/Kanalvertraege,
-30 UI-/Aktionsruntimefaelle und vollstaendige TypeScript-Pruefung gruen.
-Neuer typisierter lesender Authoringpfad entity-definitions/{name} und
-CLI entitaet-uebernehmen nutzen denselben idempotenten Draftcommand.
-Signierter CLI-Lebenszyklus mit Replay, Review, gespeichertem Plan, realer
-Simulation, gesperrter Eigenfreigabe, unabhaengiger Publikation,
-Fremdmandant404 und Ruecknahme bestanden. Rechte aus echten Entityrouter-
-Abhaengigkeiten in bestehender UI-Projektion;75 vorhandene Maskenprojektionen
-unveraendert. Neue Namespaceprojektion fuer CRM/Agrar/Lager.
-Readinessfehler behoben, keine Gateabsenkung. Zwei Paketvertraege gruen;
-Docker-Kontext erlaubt nur Katalogdatei, benachbarte Admin-Dokumente bleiben
-ausgeschlossen. Alle lokalen Driftgates gruen, ein neuer lesender Pfad,
-vorhandene OpenAPI-Pfade unveraendert. Gesamtziel und reale Browser-/Image-
-Abnahme sowie weitere Fachketten/gesamte Altmaskenmigration bleiben offen.
-
-
-## SONAR-TEST-ASSERTIONS-20261021 - implementiert, Codex
-
-**Owner:** Codex. **Ziel:** sieben konkrete Zuverlaessigkeitsbefunde aus Quality-Lauf 39600314443 beheben, ohne Tests auszublenden oder Qualitaetsschwellen zu senken. **Dateibesitz:** tests/test_slice_yaml_contracts.py, test_service_units_wave99.py, test_service_units_wave77.py, test_docflow_artifact.py, test_process_kernel_wave58_cost_audit.py, test_process_kernel_wave42_schema_compensation.py; eigene QA und Workboard. **Abnahme:** YAML-Fehler sammeln ohne verschluckte Assertions; Hash-Tests gegen unabhaengige bekannte Werte statt Selbstvergleich; vollstaendige sechs Testsuiten gruen ohne DB. Bestehende fachliche Hashimplementierungen bleiben unveraendert. **Offen:** neue Coverage 63,6 unter80; Browserdienst3001 derzeit nicht erreichbar; Gesamtziel bleibt aktiv.
-
-
-**SONAR-TEST-ASSERTIONS Abnahme:**268 Tests der sechs Suiten gruen (27,20s); YAML-Fehler explizit gesammelt, fuenf Hash-Selbstvergleiche durch feste Referenzwerte ersetzt. Bestehende Audit-Enum-Serialisierung erhalten. Keine Produktcode-Ausnahme/Schwellenaenderung. Vorheriger Quality39600314443: alle12 Vorjobs gruen, cases.py-Bug geschlossen; neue Testklassifikation wirksam, Coverage63,6 unter80. Testreparatur-Rescan und Coverage offen. QA sonar-scope-and-cases-20261021.md.
-
-**STUDIO-ENTITY-RELEASE Lieferstand:**431cd5f66 nach main gepusht; alle31 Commitdateien stimmen mit getesteter Quellfassung ueberein. Neuer CI-Lauf gestartet. Docker-Dienste gesund; separate Browserabnahme3001 noch offen (Dienst bisher nicht gestartet, lokaler kopierter Vite-Wrapper verweist auf falsches node_modules). Kein neuer Container/keine Datenbank.
-
-
-**STUDIO-ENTITY-RELEASE reale Sichtpruefung:** Frontend3001 aus gepruefter Fassung bereitgestellt, fehlende lokale PostCSS-/Public-Dateien aus HEAD ergaenzt. Synthetische SSO-Anmeldung bis Arbeitsplatz und Screen-Studio erfolgreich; Themewechsel hell/dunkel sichtbar, Studio uebernimmt Dark Mode. Keine Rollenaenderung/Publikation. Vorhandener temporary-Adapter bleibt korrekt gesperrt; neue Entity-Live-Freigabekette und allgemeine Kontrastabnahme nicht damit erledigt. Screenshot lokal artifacts/studio-dark-browser-20261021.png; QA studio-entity-release-20261021.md. Testfehlerreparatur1f449c8d0 gepusht; CI-Nachlauf offen.
-
-
-## STUDIO-LIVE-PROBE-20261021 - abgeschlossen, Codex
-
-**Owner:** Codex. **Ziel:** echte lokale CLI-/Browserfreigabekette aus kanonischer Quellfassung am bestehenden valeo_probe, ohne neue Datenbank/Container und ohne Fachwrites auf Entwicklung. **Besitz:** studio_process_simulation.py ausschliesslich deklarierter APP_ENV=test-Probevertrag und eigener Test test_studio_probe_configuration.py; eigene lokale Laufzeit-/Abnahmeartefakte; QA und Workboard. **Annahme:** im ausdruecklichen Testbetrieb darf die App selbst am bereits konfigurierten valeo_probe arbeiten; Simulation bleibt getrennte Verbindung mit Rollback, Sperre und Nachkontrolle. Produktion/Entwicklung duerfen ihren Anwendungsbestand weiterhin nicht simulieren. Keine CI-Vortaeuschung, kein Authoverride; echte Keycloak-Identitaeten, Bereichsrollen und Vier-Augen-Pruefung. Eigener begrenzter synthetischer Entity-Vertrag, nur dessen Tabellenmigration nach Fremdnutzungspruefung. Vorhandene Container und geteilte Fremddaten bleiben unveraendert. **Abnahme:** negative Konfigurationsvertraege; signierte reale HTTP-/CLI-Kette mit Prozess-/Historiendaten, Browser-Darstellung in hell/dunkel, eigene temporare Berechtigungen zuruecknehmen.
-
-
-**STUDIO-LIVE-PROBE Erweiterung Dateibesitz:** reale Browserabnahme findet nach erfolgreicher echter CLI-Simulation/Freigabe fehlende Aktionsverdrahtung im StudioRunPage: keine Rechteprojektion und kein onAction. Besitz zusaetzlich pages/admin/studio-run.tsx, zentrale NativeListPage.tsx (generierte Versionspruefung und stabiler Wiederholungsschluessel), eigene UI-Regressionen. Keine individuelle neue Maskenoberflaeche; bestehende ScreenDefinition-/Runtime-/Renderer-/Dialogkette wiederverwenden. Abnahme echte Anlage/Aendern/Deaktivieren im Browser mit serverseitiger Versionierung.
-
-
-**STUDIO-LIVE-PROBE CLI-Nebenbefund/Besitz:** generischer CLI-Aufruf ohne --idempotenz sendet keinen Schluessel (generierter Command422); --version wird im generischen Zweig ignoriert. Besitz zusaetzlich valeo_cli/cli.py und __main__.py, eigene CLI-Regression. Automatischer UUID-Schluessel und Wiederholungshinweis fuer generierte Entity-Commands, verpflichtende gelesene Version beim Aendern/Deaktivieren; Windows-Ausgabe darf an einer Fehlerpfeil-Unicodeausgabe nicht abstuerzen. Keine allgemeine Freischaltung von Agent-Writes.
-
-
-**STUDIO-LIVE-PROBE Generator-/Paging-Nachzug:** Die generierte Worklist zeigt leere schreibgeschuetzt wirkende Formularfelder oberhalb der echten Eingabedialoge und teilt eine kleine Tabelle automatisch in Spalten. Compiler besitzt bereits diesen Slice; zusaetzliche Abnahme: reine Worklist ohne Scheinformular, einspaltig mit zentraler Zeilendetailfunktion. Beim Abgleich ist zudem page/skip-Drift festgestellt: Runtime sendet page, Router liest nur skip; Suche q ignoriert. Besitz zusaetzlich studio_entity_compiler.py, studio_entity_router.py und studio_entity_commands.py nur begrenzte parametrisierte Lesefilter/Seitengrenzen sowie eigene Generator-/SQL-Regressionen. Gleiche Mandanten-/Deaktiviertfilter fuer Liste und Trefferzahl; keine Frei-SQL- oder Feldnamen vom Aufrufer. Erste reale Pruefmaske regulaer retired, beide synthetischen Fachsaetze bereits regulaer deaktiviert; neue Abnahme nach geprueftem Runtime-Deploy.
-
-
-**STUDIO-LIVE-PROBE Identitaetshartung:** Router behandelt bislang nur identity_type=agent als Agent; service/fehlende Typen fallen auf human zurueck. Derselbe Routerbesitz erweitert auf ausdrueckliche menschliche Kennzeichnung, Agent-/Servicekonto nur bei aktivierter bestehender Bereichsrolle, unbekannter/fehlender Typ gesperrt. Eigene signierte Negativtests; synthetische menschliche Entity-Testtokens werden ausdruecklich human gekennzeichnet. Keine produktive Berechtigung erweitert.
-
-
-**STUDIO-LIVE-PROBE Historien-/Statusanzeige:** reale finale Sichtung zeigt gueltige aktive Veroeffentlichung in der Historie, waehrend der pauschale Gatesatz weiterhin erneute Freigabe fordert. Besitz zusaetzlich features/screen-studio/ScreenStudioPage.tsx, neue reine StudioGateSummary-Komponente und deren UI-Vertraege. Anzeige trennt gespeicherten Veroeffentlichungsstatus von erneuter Autorpruefung; fehlender Pruefbericht darf keinen gruenen Text liefern. Nur erwarteten non_temporary-Hinweis der unveraenderten bereits publizierten Autorvorlage erklaeren; keine Serverfreigabe oder sonstigen Fehler unterdruecken. Historien-Invalidierung auf den bestehenden mandantenpraefigierten Query-Key berichtigen.
-
-
-**STUDIO-LIVE-PROBE visuelle Zentralreparatur:** Reale Historien-Sichtpruefung bei1440x900 zeigt abgeschnittene Aktionsbuttons: Compiler erzwingt36px expertDense auch bei44px Touch-Zielen. Besitz zusaetzlich zentraler render-plan/schema-compiler.ts und dessen bestehende Vertraege; Zeilen mit sichtbaren Aktionen erhalten ausreichende Hoehe, reine Datenzeilen bleiben dicht. History-ScreenDefinition erhaelt ausdruecklich einspaltige Auditliste statt automatisch schmaler Mehrspaltenansicht. Keine individuelle React-Maske.
-
-
-## IDENTITY-SELF-LOGOUT-20261021 - abgeschlossen, Codex
-
-**Owner:** Codex. **Befund:** eigener Sitzungslogout erhielt beim breiten Schreibrollen-Rollout dependencies=SCHREIBEN[PLATTFORM] (nuradmin). Normale Mitarbeitende koennen damit die eigene Serversitzung nicht widerrufen; bestehender signierter Test verwendet FINANCE_BEARBEITEN. **Besitz:** identity_management.py ausschliesslich eigener session/logout; check_write_routes_roles.py exakter begruendeter Delegationsvertrag; test_identity_sessions.py signierte rollenlose/Leser-/Fremdselector-/Widerrufstests. **Entscheidung:** jede authentifizierte Person darf ausschliesslich die aus ihrem Token bestimmte eigene Sitzung beenden, ohne Fachrolle. Kein Eingabefeld fuer Zielidentitaet. subjects/revoke bleibtadmin. Keine pauschale Identity-Prefix-Ausnahme oder Baselineerhoehung. Vorhandenes Redis und valeo_probe, keine neuen Ressourcen. **Abnahme:** alte Route reproduzierbar403; korrigierte Route204, erneute Tokenverwendung401; fremde Sitzungen unveraendert.
-
-
-**IDENTITY-SELF-LOGOUT Besitznachtrag 22.10.:** TopBar.tsx und auth/topbar-identity.test.tsx: lokale Abmeldung muss auch bei abgelaufener Sitzung mit zwischengespeicherter Identitaet bedienbar bleiben; anonyme Anzeige bleibt ohne Abmeldeaktion.
-
-## PHP-SECURITY-20261022 - abgeschlossen (lokaler Projektumfang), Codex
-
-**Owner:** Codex. **Ziel:** PHP-Sicherheitsmeldung vom21.10. gegen tatsaechliche lokale Laufzeiten pruefen, vorhandene betroffene Installation aktualisieren. **Besitz:** eigene QA php-security-20261022.md und Workboard; kein blindes Hinzufuegen einer PHP-Abhaengigkeit. **Abnahme:** offizielles Advisory, bestehende Container/Host/Projekt pruefen; gefundene Runtime versionsgerecht patchen und nachpruefen. Keine neuen Container/Datenbanken, kein pauschales Prune.
-
-
-**PHP-SECURITY Ergebnis:** offizielles Advisory bestaetigt;25 laufende Container ohne PHP, einziger gestoppter Container Java-Keycloak. Windows-Suchpfad, bekannte Installationsorte, laufende Webserver und registrierte Installationen ohne PHP-Treffer. Projekt-/Compose-/Dockerdefinitionen ohne PHP. Kein lokales Updateziel gefunden, deshalb kein Installationsnachweis erfunden. Portable Fremdinstallationen/externe Server nicht abgedeckt. QA php-security-20261022.md.
-
-
-**STUDIO-LIVE-PROBE / IDENTITY-SELF-LOGOUT Ergebnis22.10.:** reale CLI-/SSO-/Vier-Augen-/Simulations-/CRUD-Kette abgeschlossen, gefundene zentrale Runtime-/Paging-/Identitaets-/Wiederholungs-/Logoutfehler repariert.4 eigene Saetze deaktiviert,11 Receipts/11 Outbox, Freigaben retired, temporaere Rollen entzogen/Pruefer gesperrt, Registrybaseline wiederhergestellt.48 SQL-,76 CLI-,69 UI-,17 Redisfaelle gruen; letzte Nachtraege54 Backend/23 UI und TypeScript gruen. Handbuch mit6 Screenshots; QA studio-entity-release-20261021.md. Globale Maskenmigration und Sonar-Coverage63,6/80 bleiben offen; kein Gesamtabschluss behauptet.
-
-
-## SECURITY-CI-EVIDENCE-20261022 - abgeschlossen, CI gruen, Codex
-
-**Owner:** Codex. **Ziel:** Service-Security39732227258 ohne Ausnahmeausweitung schliessen. **Befund:** alle22 anderen Serviceaudits gruen; AI blockiert exakt drei bereits bewertete Chroma-Befunde wegen geaendertem docker-compose.yml. Gepruefter Diff431cd5f66 fuegt ausschliesslich read-only Studio-Schemakatalogmount hinzu. **Besitz:** config/security/dependency-decisions.json nur nachgewiesene Evidenz und Reviewbegruendung, QA/Workboard; vorhandene Negativtests. Keine Fristverlaengerung, kein neues accepted_risk, keine Abschwaechung der Kontrollen. Alle98 Evidenzdateien gegen Git-Stand abgleichen und eingebetteten Betrieb erneut pruefen.
-
-## COVERAGE-FACHOBERFLAECHEN-20261022 - reserviert, Codex
-
-**Owner:** Codex. **Ziel:** echte Funktions-/Negativabnahme bisher unzureichend gepruefter Fachoberflaechen, Coverage80 ohne Scope-/Schwellenaenderung erreichen. **Besitz:** neue gezielte Frontend-Vertraege fuer vorhandene zentrale Fachoberflaechen und eigene QA/Workboard; Produktdateien erst nach gesondertem Befund/Besitznachtrag. Kein bloesser Render-Snapshot oder Implementierungsspiegel; Eingaben, resultierende Auftraege, Fehler und Berechtigungen pruefen. Keine neuen Datenbanken/Container.
-
-
-**COVERAGE-FACHOBERFLAECHEN Produktbefund/Besitz:** neuer echter React-Demoablauf zeigt: Demoergebnis kann im Review normal in den Rationslebenszyklus eingereicht werden (Button aktiv). Besitz zusaetzlich pages/futtermittel/rationsoptimierung.tsx ausschliesslich Einreichgrenze fuer Demo/nicht optimale Ergebnisse, erkennbare Begruendung und Mutationsguard; normale Beratung bleibt bedienbar. Eigene neue Bedienvertragsdatei. Keine Backend-/Rollen-/Datenbankaenderung.
-
-
-**COVERAGE-FACHOBERFLAECHEN weiterer nachgewiesener Rationsbefund:** Einreich-Snapshot verwendet serverseitige Gruppenanzahl, berechnet Gesamtfuttermengen aber mit alter Wizardanzahl; abweichende bestaetigte Anzahl erzeugt widerspruechliche Daten. Besitz derselben Mutation fuer konsistente bestaetigte Gruppenmenge und positive sichere Anzahl. Review benoetigt sichtbaren Einreichfehler (Parent setzt error bislang nur fuer nicht sichtbare Workbench). Besitz Review-Fehleranzeige/Mutationsbeginn, zugehoerige negative/positive Bedienvertraege.
-
-
-## STUDIO-PROBE-BASELINES-20261022 - abgeschlossen, Codex
-
-**Owner:** Codex. **Ziel:** alle aktuell tatsaechlich registrierten nativen Quellen ueber den bestehenden CLI-Stapelweg im vorhandenen valeo_probe/Mandanten51 versionieren. Bestehende synthetische Anmeldung mit unveraenderten Rechten, PKCE, keine neuen Identitaeten/Rollen. Vorhandene bearbeitete Fassungen erhalten; identischer Plan bei Wiederholung ohne weitere Fassung/Historie. Kein Publish, keine Routingumschaltung, kein Geschaeftscommand. Besitz eigene QA/Workboard/Protokolle ohne Zugangsdaten. Ausgangsfassung ist kein Qualitaetszertifikat fuer alte handgebaute Seiten.
-
-**COVERAGE-FACHOBERFLAECHEN Erfassungsbefund/Besitz:** Sonar prueft app/modules/services, pytest.ini erfasst ausschliesslich app. Damit fehlen trotz vorhandener Fachtests die Python-Nachweise fuer modules/services. Besitz pytest.ini ausschliesslich Erfassung dieser vorhandenen Produktivwurzeln und neuer Konfigurationsvertrag; keine Quellen-/Coverage-Ausnahmen oder Schwellenabsenkung. Full-CI mit derselben Testsuite und unveraendertem60-Prozent-Gesamtminimum, Sonar80 bleibt verbindlich.
-
-
-**Nachweise22.10.:**154 native Ausgangsfassungen per realer signierter CLI angelegt; Wiederholung ohne Aenderung, SQL154 Entwuerfe/154 Historien. PKCE-Sitzung abgemeldet, keine neuen Rechte/DB/Container/Aktivierungen. QA studio-probe-baselines-20261022.md. Service-Security:98 Dateien abgeglichen, nur read-only Studio-Mount aktualisiert;12 Tests/9 Subtests und echter CI-Bericht0blocked, Ablauf23.10. unveraendert. Node-Patchlaufzeiten22/22, Originalkontrolle9 Angriffsausfaelle; Rohmeldungen sichtbar. Rationsberatung10 neue UI-Vertraege gruen; Demo-Einreichung, Mengenwiderspruch und unsichtbarer Speicherfehler behoben. QA rations-bedienvertrag-20261022.md. Coverage-Erfassung ueber drei Produktwurzeln korrigiert;60/80 unveraendert, neuer Voll-CI erforderlich. Globale Altmaskenablaese bleibt offen.
-
-
-**COVERAGE-FACHOBERFLAECHEN Demo-Uebergang:** zusaetzlicher roter Bedienvertrag: Neue Ration laesst altes Ergebnis aktiv, obwohl neue Eingaben beginnen; Demoindikator bleibt zudem gesetzt. Derselbe Besitz erweitert auf openWizardFresh und dessen Navigation: neue Beratung verwirft alte Ergebnis-/Vorschaubindung und beendet Demo, Nachoptimierung behaelt bestehenden Kontext. Kein Einreichen eines alten Demoergebnisses durch Umbenennen des Modus.
-
-
-**COVERAGE-FACHOBERFLAECHEN Abnahme:**11 neue echte UI-Bedienvertraege plus10 bestehende Mengen-/Patchfaelle gemeinsam21 gruen. Vollstaendige Frontend-Coverage1487/293 gruen vor letztem Demo-Neustartnachtrag; letzter gezielter Regressionsteil danach21 gruen. Erfassung app/modules/services gleicht Sonar an, reporter und60/80 unveraendert. Globaler Sonar-Nachweis und Altmaskenabwaertsablaese bleiben offen; keine Erfuellung durch Baselineimporte behauptet.
-
-
-## AGRI-FLOW-VERIFIED-ACTOR-20261022 - abgeschlossen, Codex
-
-**Owner:** Codex. **Befund:** vier Lagerbuchungswege (Transfer, Spuelcharge, Lot-Verknuepfung und automatische Lotbuchung) verwenden booked_by aus dem Request oder system; trotz gepruefter Bereichsrolle kann der Aufrufer den dauerhaften Buchungsurheber faelschen. **Besitz:** endpoints/agri_silo_material_flow.py und agri_lot_link_booking.py nur gepruefte Auth-Abhaengigkeit/Urheberprojektion; neue signierte HTTP-Negativvertraege und QA/Workboard. Vorhandene Domainservices/Transaktionen, Mandantenpruefung, Rollen, Requestkompatibilitaet unveraendert. Legacy booked_by wird ignoriert, Token-sub entscheidet. Keine neue DB/Container/Migration. **Abnahme:** echte RSA/JWKS-Verifikation; gefaelschter Rumpf/Header, fehlender Rumpfwert, Rollen-/Mandanten-/Signaturfehler, kein Folgeaufruf bei Ablehnung. Bestehende Fachtests erhalten.
-
-
-## DOCFLOW-EDIT-ASYNC-CI-20261022 - abgeschlossen, Codex
-
-**Owner:** Codex. **Befund:** Quality39737807365 genau ein roter UI-Vertrag in native-docflow-edit.test.tsx: Test wartet auf Dialoghuelle, greift dann synchron auf noch nicht initialisierte Tabellenzeile zu. **Besitz:** ausschliesslich diese Testdatei fuer feld-/fehlergebundene async-Abnahme, eigene QA/Workboard. Produktvertraege und alle Wiederholungs-/Metadatenbehauptungen unveraendert; keine Sleeps/Timeoutaufweitung.
-
-
-**Ergebnisse22.10. (Fortsetzung):** Service Security39737807058 vollstaendig gruen, Backend39737807365 mit app/modules/services-Coverage gruen. Einzelner alter DocFlow-UI-Test an Feld-/Fehlerinitialisierung gebunden;12 DocFlow-/Materialflussfaelle und Typpruefung gruen. Vier Buchungsurheber gegen Token gebunden;24 signierte Negativ-/Positivvertraege, gemeinsam63 bestehende Fach-/Authentifizierungsfaelle gruen. OpenAPI nur4 Legacyfeldbeschreibungen, alle3246 Pfade erhalten; Rollen0 und Godfile gruen. QA agri-flow-actor-20261022.md. Keine reale Lagerbuchung mit diesen Spies behauptet; vollstaendige Lager-Transaktions-/Fachkettenabnahme und allgemeine Altmaskenmigration bleiben gesondert.
-
-
-## KI-SERVICE-COVERAGE-20261022 - abgeschlossen, Codex
-
-**Owner:** Codex. **Befund:** vorhandene KI-Service-Fachtests liegen ausserhalb tests und werden im Root-Qualitaetslauf nicht ausgefuehrt; die reine Erfassung services ersetzt ihre Ausfuehrung nicht. **Ziel:** vorhandene isolierte Servicevertraege ausfuehren und deren echte Coverage verlustfrei mit dem bestaetigten Backendreport vereinigen. **Besitz:** neuer begrenzter scripts/run_ki_service_coverage.py und seine gezielten Runnervertraege; quality-gate.yml ausschliesslich zusaetzlicher Service-/Coverage-Schritt vor kritischer Coverage und Seal; QA/Workboard. Vorhandene Hauptsuite/Schwellen/Sonar-Scope unveraendert; keine neue DB/Container, keine schweren optionalen STT/TTS-Pakete. Testfehler blockieren.
-
-## MATERIAL-FLOW-SQL-20261022 - reserviert, Codex
-
-**Nachzupruefender Befund:** reale Pruefschema-Inspektion zeigt previous_stock/new_stock verpflichtend und ownership_type nur owned/consigned; alte Transfer-/Spuel-/Lot-Link-SQLs senden keine Bestands-Snapshots, Spuelcharge sendet flush als Eigentumsart. Dazu fehlen Lagerbindung/Zeilensperren beim Transfer und validate_route commitet im aufrufenden Buchungsablauf. Reale positive SQL-Abnahme ist vor einer Gesamtfreigabe erforderlich; bisherige Mockvertraege sind dafuer kein Ersatz. Noch keine Fachregel-/Schemaaenderung oder Produktionsbuchung vorgenommen.
-
-**Dateibesitz/Fachentscheid:** Spuelcharge im Materialflussservice und neuer interner SQL-Buchungshelfer, eigene reale SQL-Vertraege und QA. Nutzerentscheid: echte Umlagerung Quelle minus Menge/Ziel plus Menge. Geordnete Zellensperren, Lager-/Mandantenbindung, Bestands-Snapshots, Kapazitaet und atomarer Abschluss; keine neue Datenbank/Container/Migration. Andere Transfer-/Lot-Link-Befunde bleiben explizit offen bis eigener Abnahme.
-
-**KI-Service Ergebnis:**142 bestehende Servicefaelle isoliert gruen;8 echte Runnerfaelle inklusive Branch-/Scope-/Fehlererhalt. CI-Schritt vor kritischer Coverage/Seal, Schwellen unveraendert. QA ki-service-coverage-20261022.md.
-
-**MATERIAL-FLOW-SQL Teilabnahme:** Nutzerentscheid physische Spuelumlagerung umgesetzt;11 reale SQL-Faelle und bestehende Materialfluss-/Runnerfamilie zusammen40 gruen. QA agri-flush-physical-20261022.md. Claim bleibt fuer Transfer-/Lot-Link-SQL, Idempotenz und Outbox offen/in Arbeit; keine Gesamtfreigabe.
+**MIGRATION-CI-REPAIR Meilenstein:** Registry/Agentenvertrag, echter Routengenerator-Vertrag, kanonische CRM-Einstiege und sieben Slice-Metadaten repariert.849 Backend-Vertraege,12 gezielte UI/Routingfaelle,9 Runtime-Evidenzfaelle und gepatchter OTel-/Generatorlauf21 gruen; Typpruefung nach echter Routenneuerzeugung gruen.155 frisch aufgeloeste Abhaengigkeiten ohne bekannte Schwachstellen. Fuenf Generatorchecks gruen. Voll-UI weiterhin218 Fehler (215 Quelltext-Assertions,3 aktive fremde Dashboard-Bedienbefunde), Doku-Erreichbarkeit272 offen; keine Tests geloescht/Baseline erhoeht. QA docs/quality-assurance/migration-ci-repair-20261023.md. PR38 bleibt Entwurf.
 
 ## SECURITY-PATCHES-20261023 — reserviert, Codex
 
 **Owner:** Codex. **Ziel:** Drei offiziell bestaetigte neue Sicherheitsluecken ohne die unvollstaendige Maskenmigration auf main schliessen. **Dateibesitz:** requirements.txt nur GitPython/Black/kohaerente OpenTelemetry-Gruppe; neuer isolierter OTel-Kompatibilitaetstest und QA, eigener Workboard-Absatz. **Abnahme:** frische Gesamtaufloesung155 Pakete ohne bekannte Schwachstellen; echte HTTP-/SQL-Spans ohne externe Uebertragung. Keine neue DB, kein Container, kein Reset; bestehende Rollen- und Mandantenvertraege unveraendert.
 
 **SECURITY-PATCHES-20261023 abgeschlossen:** Drei bestaetigte Advisory-Korrekturen als kohaerente Versionsgruppe. Frische155er-Gesamtaufloesung auditiert ohne bekannte Schwachstellen; echter HTTP-/SQL-Trace-Kompatibilitaetstest gruen. Keine Ausnahme, keine Datenbank-/Docker-Ressource. QA docs/quality-assurance/security-patches-20261023.md. Keine Aktivierung der unvollstaendigen Maskenmigration; separater kleiner main-Hotfix.
+
+**Integration:** Hotfix d61993b9e separat auf main veroeffentlicht und als Elternstand im Reparaturzweig erhalten. Keine Gesamtfreigabe der UI-Migration; GitHub-Nachlauf steht aus.
+
+## LOADING-ATOMIC-ACTOR-20261023 - umgesetzt, Codex
+
+**Owner:** Codex. **Ziel:** vorhandene LOADING-Start/Ende-Anbindung atomar mit Log/Ausgangsereignis abschliessen und Urheber ausschliesslich aus gepruefter Anmeldung beziehen. **Besitz:** tours.py nur start/finish-loading und Outbox-Helfer; TourRepository nur optionale commit-Steuerung der genau zwei Loading-Wege/Update/add_event; OutboxPublisher nur optionale Unterdrueckung des vorzeitigen SSE-Spiegels fuer diesen Weg; neuer begrenzter Test/QA. Cursors Workspace/UI/Signalmapping und Tests bleiben unberuehrt. Kein pauschaler Tourenumbau/Schema-/DB-Reset. **Risiko:** domain_log.log_touren hat im ORM keine Mandantenspalte; dieser Slice darf keine systemweite Mandantenabnahme behaupten. Persistenz und Rollback werden gesondert geprueft.
+
+**LOADING-ATOMIC-ACTOR Mandanten-Erweiterung (Nutzerentscheid):** Besitz um verladung/models.py (Tour-Mandant), alle vier Verladungsrepositories (Pflichtkontext/Parent-Joins/Fremdreferenzguards), tours.py saemtliche Repoaufrufer, eine begrenzte Alembic-Migration und eigene Zwei-Mandanten-/Rollbacktests erweitert. Bestehende unzugeordnete Touren werden nicht einem Standardmandanten zugewiesen. Keine Anwendung auf gemeinsamem Pruefstand ohne Status-/Besitzpruefung; Cursor-Workspace und dessen Tests bleiben geschuetzt.
+
+**LOADING-ATOMIC-ACTOR Artefakt-Nebenbefund:** Der erforderliche Tabellenkatalog-Generator scheitert reproduzierbar bei Registry-Lazy-Initialisierung mit dictionary changed size during iteration. Besitz eng auf scripts/table_lineage.py load_native_screens und neuen isolierten Regressionstest erweitert: Registry vor Snapshot vervollstaendigen, wie beim bereits geprueften Agent-Handbuch. Kein Schwellenabbau.
+
+**LOADING-ATOMIC-ACTOR Ergebnis:** Pflichtmandant und Parent-Joins, FK-Stoppaar, gepruefter Loading-/Dispatchurheber, atomare Loading-Outbox und PATCH-/DTO-Schutz. Zwei regulare Probe-Revisionen angewandt ohne Fremdtransaktion/Datenverlust/Reset.30 SQLite-/PostgreSQLfaelle gruen; Katalog681 aktuell, OpenAPI3246 erhalten. Fahrerzuweisung ohne Eigentumsnachweis gesperrt; allgemeine Command-Idempotenz/Outboxworkerfragen nicht als geschlossen behauptet. QA loading-tenant-atomic-20261023.md. Frontend aufPort3000 laeuft noch mitImage16.10.; gezielter Neubau gestartet, keine behauptete Sichtabnahme.
+
+**Abschlussnachweis:**48 kombinierte Verladungs-/Katalogfaelle bestanden, darunter15 echte PostgreSQL-Verladungsfaelle mit Savepoints. Alle3246 OpenAPI-Pfade erhalten;681 Tabellenkatalog aktuell; Code-/Migrationsinventare nachgezogen. Die laufende Frontendaktualisierung ist ein separater Betriebsnachweis.
+
+
+## RUNTIME-SOURCE-SYNC-20261023 - reserviert, Codex
+
+**Ziel:** laufende lokale Frontend-/Backendfassung mit nachgewiesenem Code synchronisieren. **Besitz:** lokales Frontendbuild/Neuerstellen ohne andereServices; gezielte Wiederanbindung belegter bereitscommitteter Dokumenten-Sicherheitsvertraege in app/documents/repository.py (aktueller Rootdiff entfernt ausschliesslich Exceptions, insert-only, Zeilensperre, Tenantunveraenderlichkeit und generische Fehlerlogs; keine neueFunktion). VorherigeArbeitskopie lokalgesichert. Keine blindenFremdreverts, keinDBreset. Backendimportpreflight vorNeustart; regulaererSchema-Vorlauf separat. QA local-frontend-refresh-20261023.md.
+
+**RUNTIME-SOURCE-SYNC Zwischenstand:** Frontend auf3000 ersetzt, Image9dc7e71d9f4f healthy/HTTP200, neueStartflaeche real sichtbar. Vier Backendimport-Vertragsbrueche und belegte Auth-/Dokument-Rechteruecknahmen gezielt auf veroeffentlichten Stand synchronisiert, Inbox-Mount erhalten; vorabArbeitskopien lokalgesichert. Importpreflight true/Inboxregistriert. Entwicklungsdatenbank nach5.4MBBackup regulaer neunRevisionen aufloading_stop_fk_20261023 aktualisiert; keinReset/keineFachtests dort. NurBackend neu gestartet, Readiness-/Inboxnachlauf offen.
+
+**RUNTIME-SOURCE-SYNC Ressourcenprofil:** Nach Dockerunterbrechung16GBHost bis400MBfrei, vierBackendworkerinitialisierenparallel, PostgreSQLrejects. EngerBesitz neuer docker-compose.local-preview.yml: vorhandenesBackend mitgenaueinemWorker, zusaetzlichLoopbackalias3001aufdieselbebestehendeFrontendinstanz. KeineAbschwaechungvonAuth/Tenant. VorNeuerstellen: keinegeändertenDependenciesimWritableLayer, nurleereappdataVerzeichnisselokalgesichert; Env/ImageausalterComposekonfigurationstimmenexakt. KeineanderenServices/DB/Volumesneuaufbauen.
+
+**RUNTIME-SOURCE-SYNC HTTP-Abnahme:** bestehendes Backend mit einem Worker healthy, /health200; Inbox ohne Anmeldung401 statt404. Frontend3000/3001 jeweils healthz200. Regulaere Schemaaktualisierung abgeschlossen. Sichtabnahme bleibt wegen Browser-URL-Sicherheitsablehnung offen; keine Umgehung und kein Gesamtabschluss des Workspace behauptet. QA local-frontend-refresh-20261023.md.
+
+## STUDIO-CANONICAL-BINDINGS-20261023 - reserviert, Codex
+
+Ziel: reale falsche Stamm-API-/Feldbindungen und OpenAPI-Pfadtemplateabgleich zentral korrigieren. Besitz: app/core/screen_definitions_stamm.py ausschliesslich Hausbank, Mengeneinheit, individuelleArtikelnummer, Anlage; app/services/made_by_studio_gates.py nur OpenAPI-Routenmatching; jeweils eigene gezielte Regressionstests und QA. Aenderungen in gepruefter PR38-Ansicht, Root nur nach Diffpruefung synchronisieren. Bestehende Domainrouter/Rechte bleiben fuehrend, keine Ersatzendpunkte oder fingierte Migrationsfreigabe. Fachliche Editvertraege nur bei vorhandenem autorisierten Domaincommand; fehlende Paritaet sichtbar lassen. Kein DB/Container/Reset, keine fremden Workspace-Dateien.
+
+**STUDIO-CANONICAL-BINDINGS API-Erweiterung:** Zwei echte Detail-Lesevertraege fehlen bisher vollstaendig. Besitz eng um GET in bestehenden artikel_mengeneinheiten.py und individuelle_artikelnummern.py erweitert (gleiche Auth-/Tenantabhaengigkeit wie bestehende Liste; Fremd-/fehlende/inaktive Datensaetze404), eigene HTTP-/Tenanttests. Keine Collection-als-Entity-Taeuschung, keine neuen Schreibfreischaltungen. API-/Architekturartefakte nachziehen.
+
+**STUDIO-CANONICAL-BINDINGS Zwischenabnahme:**3 Stammdefinitionen korrektgebunden;2 fehlende Detail-GETs mit direktverifiziertem Mandanten ergaenzt.181 kombinierte Tests gruen, OpenAPI/Rechte-/Quellkatalog/Handbuch aktualisiert. Strenger GET-Nachweis laesst23 C- und54 E-Luecken sichtbar; kein gesamtesMade-by-Studio-Siegel. Vier Rootquellen waren exaktkanonisch und wurden erstnachDiffpruefung synchronisiert; keine Fremdarbeit ueberschrieben. Nutzerauftrag abAnlage: keinCommit/Push, Browser0VersucheSTOPamgesperrtenFehler-Tab. QA studio-canonical-bindings-20261023.md.
+
+**STUDIO-CANONICAL-BINDINGS methodischer Nachlauf:** ausdrueckliche POST-Berechnungsquelle gegenPOST, DefaultlesequelleweitergegenGET;23 gezielteFaelle gruen. Endbericht C835/857 (22offen), E803/857 (54offen),848 nativeQuellkatalogeintraege.181 kombinierteVertraege vor diesem begrenzten Nachtrag gruen. BrowsernachmanuellemHTTP-Neuaufruf wiederzugaenglich, aberSSOstartfuehrtenichtzurKennwortmaske:einKlick,keineZugangsdatenuebertragung,STOPundScreenshotimADAPTIVEHandoff. KeinCommitPush nachNutzervorgabe.
+
+## STUDIO-CLOSURE-PARALLEL-20261023 - reserviert, Codex Lead
+
+Nutzerklarstellung: Commit/Push bleiben freigegeben; die angehaengte NoCommit-Notiz war keine neue Nutzervorgabe. Ziel bleibt vollstaendige Studio-Funktion und CLI-Migration aller Masken mit echter Fachparitaet.
+
+- API-CONTRACTS, delegierter Owner api_contracts:22 offene Datenquellenvertraege; Besitz betroffene bestehende Domainrouter sowie ScreenDefinition-Builderdateien stamm/capture/batch13/batch15 nur fuer die22 konkret gemeldeten Bindungen. Asset-Projektion mit folgendem Slice abstimmen. Vorhandene Fachmodelle/Rollen/Commands fuehrend, kein erfundenes Mapping und kein paralleles CRUD.
+- RUNTIME-EVIDENCE, delegierter Owner runtime_closure:54 konkret gemeldete Runtimewege; Besitz betroffene Frontend-Seiteneinstiege und zentrale Runtime-Evidenzanalyse samt eigenen Tests. Keine generischen Legacy-Wrapper/unsichtbaren Runtime-Alibis, kein Verlust bestehender Fachfunktionen. Gesperrte fremde Workspace-/Einkaufsseiten bleiben unberuehrt. Technische Auth-/Workflowwege nicht durch Ausblenden zertifizieren.
+- SHARED-ENTITY-PROJECTION, delegierter Owner entity_projection: deklarative gepruefte Antwortprojektion bestehender verschachtelter Entity-APIs (Asset) zentral gleichwertig fuer Human/CLI/MCP. Besitz mask_data_read.py, MaskData-Vertraege/Governance, Frontend-Schema/Datenbindungsplan/Entity-Loader und eigene Kanaltests. ScreenDefinition-Builder beim API-Owner. Keine Aenderung kanonischer Domainantworten oder Rechte, keine beliebigen Transformationsskripte.
+
+Lead uebernimmt Integration, generierte Artefakte, Workboard/QA, Commit/Push und CI-/Browser-/CLI-Abnahme. Tests verwenden ausschliesslich bestehenden valeo_probe mit eigenen Rollbacks oder SQLite im Speicher; keine neuen Datenbanken/Container und kein Reset. Kein Subagent editiert Root/Index oder committet selbst. Gepruefte Ansicht artifacts/migration-repair-source. Offene Risiken pro Maske nachweisen statt Gates zu senken.
+
+**STUDIO-CLOSURE-PARALLEL Harness-Ergaenzung:** Nutzer autorisiert dauerhaft aufgabenangepasste Modellwahl und parallele Subagenten fuer hoechste Tokeneffizienz. Lead-Besitz eng um AGENTS.md als dauerhaften Repository-Harness erweitert; keine Aenderung von Sicherheits-/Claim-/Abnahmeregeln. Aufgaben passendkleinteilen, kleinstehinreichendeModellstaerke, Review/Testbelege vorIntegration, bei echterKomplexitaet gezielteskalieren.
+
+## ADAPTIVE-WORKSPACE-REVIEW-20261023 - reserviert, Codex
+
+Nutzerauftrag: acht ausdruecklich benannte Root-Dateien pruefen (Framework/Events-Doku, Agrar-/SSE-Tests, live-signals, Workspaceevents, QualityAPI undRepository). Besitz nur neuer QA-Bericht und eigene Reproduktionsartefakte; keine fremden produktiven Workspacequellen aendern. Abnahme: belegte Befunde priorisieren, Tests gegen Root ausfuehren, bestehenden valeo_probe nur eigeneTestzeilen/keinReset. Studio-Slices bleiben eigenstaendige laufende Integration; Subagenten durch Nutzungslimit gestoppt, uncommittete Ergebnisse bewahren.
+
+**ADAPTIVE-WORKSPACE-REVIEW Ergebnis:** Pruefung abgeschlossen,9 Befunde offen (5P1/4P2).76Unit+3echtePG+4Frontendfaelle bestanden; eigeneReproducer bestaetigen405,Nullwertverlust,SSEvorCommit,Retryverlust undNATS-Umschlagbruch. Keine derachtQuellenkorrigiert, keinReset/neueDB. QA adaptive-workspace-review-20261023.md; Vollfreigabenichtgegeben.
+
+
+**ADAPTIVE-WORKSPACE-REVIEW Reparaturfreigabe:** Nutzer weiter autorisiert die neun belegten Korrekturen. Erster eng begrenzter Umsetzungsslice AW-R08: app/workspace/events.py nur mandantengebundene, erst nach erfolgreichem Broadcast wirksame Deduplizierung samt paralleler Wiederholung; eigene Regressionstests und QA. Fremde Signalzuordnungen unveraendert. Keine Datenbank-/Containeroperation. Weitere acht Befunde bleiben bis eigener Abnahme offen.
+
+
+**ADAPTIVE-WORKSPACE-REVIEW AW-R08 umgesetzt:** Mandantengebundene Erfolgsdeduplizierung, Retry nach Fehler/Abbruch, parallele Duplikate koordiniert.41 gezielte Tests gruen; kein DB-/Containerzugriff. Acht weitere Befunde bleiben offen. Nur eng gepruefte Eventsquelle und eigene Tests integriert, kein Gesamtabschluss. QA adaptive-workspace-review-20261023.md.
+
+
+**ADAPTIVE-WORKSPACE-REVIEW AW-R07 Claim:** Besitz QualityAPI ausschliesslich15 numerische None-Pruefungen in Ausgabe/Anlage/Aenderung; eigene Vertragsfaelle. Bestehende uncommittete API-GET-/Outbox-Arbeit bleibt erhalten und wird nicht ungeprueft mitgeliefert. Kein Schema-, Rollen- oder Datenbankeingriff.
+
+
+**ADAPTIVE-WORKSPACE-REVIEW AW-R07 umgesetzt:**15 Wahrheitswertpruefungen durch explizites None ersetzt;45 neue Messwert-Vertragsfaelle gruen. Fremde API-Erweiterungen erhalten, nur begrenzter Patch gegen HEAD committet. Sieben weitere Reviewbefunde offen; kein Gesamtabschluss.
+
+
+## ADAPTIVE-WORKSPACE-CLOSURE-20261024 - reserviert, Codex Lead
+
+Nutzerauftrag: sieben restliche Reviewbefunde AW-R01/02/03/04/05/06/09 schliessen. Besitzer api_contracts: QualityAPI, QualityRepo, benoetigte Servicevertraege und eigene Tests fuer Tokenurheber, Pflichttenant/Parent, atomare Finalisierung/Updates und echten Listen-GET. Besitzer runtime_closure: live-signals.ts und eigene Wiederverbindungs-/Queue-/Auth-Tests. Lead: Outbox/NATS/IntegrationEvent und Workspace-Umschlag nur fuer Commitgrenze und tatsaechlichen Tenanttransport, eigene Serializer-/Rollbacktests, Integrationsartefakte/Doku/Commit/Push. Fremde Vorarbeiten erhalten; keine konkurrierende Bearbeitung derselben Abschnitte, Finalize-Outboxparameter mit API-Owner abstimmen. Keine neueDB/Container/Reset. Bestehender valeo_probe nur nach Status und eigene Daten/Rollbacks. Ziel: sieben belegte Befunde mit negativen und positiven Vertragen; keine fingierte Live-/Studio-Gesamtfreigabe.
+
+
+**AW-R09 Integrationsbesitz erweitert:** Live-Signalquelle liegt bislang unversioniert im Root. Fuer einen eigenstaendig importierbaren Reparaturcommit werden die eng geprueften reinen Workspacebasisvertraege types/home-signals/registry/prioritization/user-context mitversioniert. Queue-Pfadmetadaten in kleine queue-contracts.ts zentral ausgliedern, sibling-slots nur Reexport desselben unveraenderten INBOX_SLOT, damit Live-Signale nicht den gesamten fremden Inbox-/Studio-UI-Baum importieren. Keine Fachaktion/Scope/Route aendern oder neue Freigabe behaupten. Unnoetige Live-Resolver-Abhaengigkeit entfernen; Catchverhalten unveraendert.
+
+
+**ADAPTIVE-WORKSPACE-CLOSURE-20261024 umgesetzt:** Alle sieben restlichen Reviewbefunde AW-R01/02/03/04/05/06/09 geschlossen, damit9/9.128 integrierte Backend-,8 echte PG- und11Frontendfaelle gruen; fokussierte Typpruefung gruen. EigeneRowsCleanup, keine neueDB/Container/Reset. Kanonische OpenAPI3246 aus sauberer HEAD-Quellansicht, nur Quality-Pfade/Schemas angepasst; Handbuch/Inventare konsistent. ForeignStudio-/API-WIP bewahrt. Keine Live-Broker-/Browser-/Studio-Gesamtfreigabe; separate Projekt-CI bleibt eigener Claim. QA adaptive-workspace-review-20261023.md sowie quality-protocol-aw-review-repair-20261024.md.
+
+
+## PR38-CI-FOLLOWUP-20261024 - reserviert, Codex Lead
+
+Nachlauf auf7bc7e37fa: CI rot in Migration/Backend/Frontend und Dependencysecurity. Enger Besitz: api_contracts diagnostiziert und repariert fehlende Alembic-Vorgaenger und frisches Schema-/Inventardrift; entity_projection uebertraegt bereits abgenommene Securityfixes aus PR39 nach exaktem Quellenvergleich, keine Paketpauschalupdates; runtime_closure diagnostiziert echte Frontendregressionen und veraltete Strukturtests, entfernt keine fachliche Abnahme. Lead integriert, testet und aktualisiert Artefakte/QA/GitHub. Alle Edits in repair-view; Root nur nach Diffreview. Keine neueDB/Container/Reset, kein Tabellenkatalog aus unvollstaendiger lokaler DB. Vorhandene restliche Studioarbeit bewahren.
+
+
+**PR38-CI-FOLLOWUP Migrationsmeilenstein:** Fehlende dms_inbox_tenant_20261022 wiederhergestellt; Singlehead und Syntax geprueft,437 Migrationsdateien inhaltlich identisch zum separat abgenommenen PR39. Inventar und QA synchronisiert, keine DB-Mutation. Neue CI-Frischschemaabnahme folgt nach Push; Security/Frontend separat offen.
+
+
+**PR38-CI-FOLLOWUP Backendmasken:** Lead-Besitz test_uix051_legacy_route_migration.py nurCRM-Delegationsassertion und neuer party-native-render.test.tsx fuer beide Arten und Entity-/Sectionweitergabe. Adapterproduktion unveraendert. AlteTernarypflicht durch tatsaechlichen Rendervertrag ersetzen; keine Rollen-/Fachabnahme entfernen.
+
+
+**PR38-CI-FOLLOWUP CRM-Testvertrag umgesetzt:** Starre ternary-Pflicht entfernt, kein Fachtest entfallen: beide Definitionen bleiben Strukturvertrag;3 echte Renderfaelle pruefenLead/Kunde/Default plus Entity-/Abschnittweitergabe.49 Python- und8UI-Faelle gruen. Adapter unveraendert, Root-Sync erstnachHEAD-Diffpruefung. AndereFrontend-/Security-/Freshschemafaelle weiterinArbeit.
+
+
+**PR38-CI-FOLLOWUP Security-Dokumentation:** Lead-Besitz chroma-review-20261016.md und chroma-deploy-review-20261019.md nur fuer eindeutige Historisch-/Ablösekennzeichnung mit Verweis auf aktuellen AI-Retirementstand. Keine Loeschung historischer Nachweise oder Tests; alte Laufzeitannahmen duerfen nicht als aktueller Stand erscheinen.
+
+
+**PR38-CI-FOLLOWUP Security umgesetzt:** Exakte bereits abgenommene PR39-Paket-/Lock-/Configuebernahme, Fastify5.12.7 undStorybook8.6.19. Unbenutzter AI-Vectorstore entfernt, erfundeneRAG-Ergebnisse jetzt503; keine faelschliche Lieferzusage. Reviews anManifest-/Lockhashesgebunden, keine neue Ausnahme. GetrenntePruefungen7AI/23Triage/9Gate/15Node/2Fastifygruen; Runtimeprobe nutztvorhandenenPR39-Paketbestand, eigenerCIInstallnachweisfolgt. AlteChroma-Berichte explizithistorischmarkiert, keineNachweis-/Testloeschung. Root/Docker/DBnichtgeaendert.
+
+
+**PR38-CI-FOLLOWUP DocDrift-Erweiterung:** Nach geschlossenem Migrationsgraph blockiert Backend am page_no_route_or_nav-Gate. Besitzer entity_projection: scripts/doc_drift_report.py und eigene Regressionstests nur fuer nachgewiesene transitive Imports aus registrierten Routen. Kein pauschales Legacy-Suffix-Ignore und kein Glob-alle-Seiten-Als-erreichbar; verwaiste Seiten muessen weiter rot bleiben. Keine fremde Dashboard-/Studio-/Maskenimplementierung aendern. Zuerst verbleibende echte Orphans melden; nicht durch Loeschen oder Ausschliessen verdecken.
+
+
+**PR38-CI-FOLLOWUP Tabellenkatalog vorbereitet:** KanonischeCI39-Frischschema-Physik31Schemas/688Tabellen/9096Spalten nach vollstaendigerSchemaguellen-Gleichheitspruefung uebertragen. Consumer-Bezuege ausschliesslichsaubererHEAD-Export,10pendingWIP-Abweichungen entfernt;0fehlendeEntityTabellen,14statischeFaellegruen/1LiveDBFallohneQuelleuebersprungen. Keinlokaler681-Drift alsFrischschemaeingefuehrt, keineDBmutiert. DirekterPR38FreshCIvergleichausstehend,Backendvorheran272Dokumentationsorphansgestoppt. QA pr38-ci-migration-fresh-schema-20261024.md.
+
+
+**PR38-CI-FOLLOWUP begrenzte Frontendtranche umgesetzt:** Falsche Bestelllisten-ScreenID und3Detail-/FlowResume-Ziele korrigiert; fehlenderSSEHelperexport jetztimCommitenthalten (allgemeinerSSEClientunveraendert); FakeArtikel-IDsausLegacykopieentfernt; BanktestpartialMock prueftweiterrealeRoutefactoryundnurDraftkeinAutoSave.7Dateien/33Frontendmodulefaelle gemeinsamgruen.3echteDashboardfaelle und214Quelltextvertraege bleibenungeklaert, keineGates/Testsentfernt. QA pr38-frontend-ci-followup-20261024.md.
+
+
+**PR38-CI-FOLLOWUP Agrar-Listenbindung:** Lead-Besitz ausschliesslich pages/agrar/psm/liste.tsx und eigener Definitions-Bindungsvertrag: registriertes agrar/psm-liste statt nicht vorhandenen agrar/psm/liste verwenden. Keine BVL-/Mandanten-/Schreibvertragsaenderung. PSM-Objektmaske und echter Duengebedarfsrechner bleiben eigene offene Fachmigration; Statistikliste ist kein Ersatz.
+
+**PR38-CI-FOLLOWUP Erreichbarkeit und PSM-Liste umgesetzt:** Importanalyse ignoriert Kommentare, Strings, Regex und gleichnamige Methoden; nur echte Importketten ab registrierter Route gelten.13 Scannerfaelle gruen. PSM-Liste verwendet die tatsaechlich registrierte BVL-Definition agrar/psm-liste; eigener Bindungstest war zuvor rot und ist gruen. Gemeinsame Abnahme14 Tests.272 echte Erreichbarkeitsbefunde bleiben sichtbar; PSM-Stamm und Duengebedarfsrechner weiter offen. Keine Gateabsenkung/DBaenderung. QA pr38-doc-drift-route-reachability-20261024.md.
+
+## PENDING-INTEGRATION-20261024 - reserviert, Codex Lead
+
+### NATIVE-DETAIL-ROUTE-PARITY-20261027 - reserviert, native_batch_contracts
+
+Ziel: 19 historische Detailmasken-Routen gegen kanonische ScreenDefinitions und getrennte Anlage-/Entity-Vertraege pruefen; 17 nachgewiesene falsche oder unregistrierte Bindungen gezielt reparieren. Besitz nur der betroffenen Page-Wrapper, drei eigene Routenvertragstests, eigene Builder-Fixtures/Paritaets- und Mounttests sowie QA. Abnahme: bestehende Fach-/Create-Wege bleiben erhalten; mindestens zwei echte geroutete Mounts fuer Entity und Create; keine pauschale Native-Freigabe fuer fachlich offene Routen. Risiken: Customer-360 ist moeglicherweise Cockpit statt editierbare Detailmaske; fachlich unpassende Ersatzdefinitionen nicht umetikettieren. Keine Backend-, RLS-, Inbox-, Vite-, DB- oder Migrationsaenderung; nur private View.
+
+Nutzerauftrag: alle uebrigen offenen Aenderungen commit-/pushfaehig abschliessen; Uebernahme bisher fremder Arbeit ausdruecklich freigegeben. Lead inventarisiert Root und isolierte Commit-Ansicht, gleicht aktive Besitzer ab und integriert mit Dateimanifest und Tests. Bestehende STUDIO-CLOSURE-PARALLEL Owners wieder aktiviert: api_contracts API/Definitionsbindungen, entity_projection zentrale Antwortprojektion, runtime_closure Runtimeevidenz/Objekteinstiege. Lead besitzt generierte Artefakte, QA/Workboard und Integrationsdifferenzen; Dashboard/Workspace-Uebernahme erst nach Bestandspruefung. Kein pauschales Stage/Loeschen fehlender Dateien in der partiellen Commit-Ansicht. Keine neuen Datenbanken/Container, kein Reset. Fertige Teilstaende committen/pushen; offene Fachabnahmen sichtbar halten.
+
+**PENDING-INTEGRATION Intrastat-Erweiterung:** api_contracts besitzt intrastat.py fuer vorhandene Meldung als echten tenantgebundenen Detail-GET sowie screen_definitions_stamm_batch13.py ausschliesslich zugehoerige Definition und eigene Detailtests/QA. Bestehende Validierungsantwort ist keine Entitaet. Portal-Zertifikat bleibt vorerst Architekturpruefung: kein Zugriff auf internes Ops-Zertifikatsinventar ohne nachgewiesene Kunden-/Portalbeziehung; keine Gatefreigabe durch Tenantfilter allein.
+
+**PENDING-INTEGRATION Portal-Listenbindung:** api_contracts besitzt die Listen-ScreenDefinition portal/zertifikate ausschliesslich zum Wechsel vom fachfremden Anfragenweg auf den vorhandenen portal_recht(AUSWERTUNGEN)-geschuetzten Zertifikatslistenweg, plus eigene Bindungs-/Negativtests und QA. Detail bleibt mangels kanonischer Kunden-/Mandantenzuordnung explizit offen (TENANT-DOC-001); interne Opsdaten sind kein Ersatz.
+
+**PENDING-INTEGRATION Adaptive-Workspace-Uebernahme:** Nutzer hat fremde Aenderungen ausdruecklich zur Integration freigegeben. Vorheriger Cursor-Claim wird fuer Integration vom Lead uebernommen; aktuell aktive Subagenten besitzen ausschliesslich die oben getrennten Studio-Slices. Umfang: bisher unversionierte app/workspace- und app/documents-Inbox-Module, Dispositionszuweisung, ihre zentralen Router-Mounts sowie zugehoerige Workspace/Inbox/Disposition/Composition-UI und Tests aus dem gemeinsamen Baum. Bereits reparierte Quality-/Outbox-/SSE-/Tokenvertraege bleiben fuehrend; keine Ruecknahme durch aeltere Rootkopien. Exaktes Integrationsmanifest folgt vor Liefercommit. Coverageausgaben, temporaere Dateien und persoenliche OCR-/Rechnungsbeispiele sind keine Lieferquellen. Fachluecken ohne kanonische Quelle bleiben dokumentiert; keine Gesamtfreigabe durch blosse Einbindung.
+
+**PENDING-INTEGRATION Audit-Parser-Nachlauf:** entity_projection besitzt nach Abschluss der Datenprojektion ausschliesslich scripts/check_npm_backport_audit.cjs und dessen eigene Regressionstests/QA fuer nachweislich korrekte Audit-Zaehleinheiten. Rohreport aus CI40115727683:11Advisories,12Versionsbefunde; Schweregradzahlen duerfen nicht durch Weglassen angepasst werden. Neue unbekannte Advisories bleiben blockierend, Paket-/Reviewausnahmen nicht automatisch erweitern. Neue Nutzerklarstellung: Datenbankabnahmen gegen echtes PostgreSQL im vorhandenen valeo_probe; isolierte Transport-/Unitpruefungen sind kein Persistenznachweis, keine SQLite-Abnahme als Ersatz.
+
+**PENDING-INTEGRATION DMS-Sicherheitsintegration:** Lead besitzt dms_webhook_router.py fuer Tenantfilter aller Inboxwege, Beibehaltung vorhandener Schreibguards, tenantgebundene konfliktfreie Webhook-Identitaet und ehrliche Fehler-/Createantwort sowie bereits vorhandene Positionsanreicherung; dazu eigene PostgreSQL-/HTTP-Negativtests und DMS-Domaenendoku. Keine Hardcode-Lieferantenliste/privaten OCR-Trainingsrechnungen uebernehmen. Bestehende Rechte nie durch Rootkopie entfernen. Kein fingierter Belegabschluss aus Inbox; Domainbelegmaske bleibt fuehrend. Gleiche externe Dokumentnummer verschiedener Mandanten darf keine fremde Zeile aktualisieren.
+
+**PENDING-INTEGRATION Audit-Parser umgesetzt (2026-10-25):** Inventar wird je findings-Version statt je Advisoryzeile abgeglichen. Echter CI-Rohreport:11Advisories/12Versionsbefunde, Zod zweimal.19Regressionen gruen; unbekannte/ungepruefte Befunde bleiben blockiert. Keine Ausnahme oder Paket-/Lockaenderung. QA npm-audit-version-findings-20261025.md. Security-Gesamtgate daher weiterhin offen.
+
+**PENDING-INTEGRATION DMS-Delegation:** Der geclaimte DMS-Router/Tests/QA-Umfang wird an entity_projection delegiert; Lead editiert diese Dateien waehrenddessen nicht. Ziel bleibt nachgewiesene Tenant-/Rollenbindung, keine fremde Inboxueberschreibung und kein fingiertes Create. Gemeinsamer PostgreSQL-Pruefstand, keine SQLite-Abnahme/NeueDB/Reset.
+
+**PENDING-INTEGRATION DMS-Zugangsparitaet:** entity_projection besitzt zusaetzlich app/api/v1/endpoints/dms_inbox.py sowie einen bei Bedarf gemeinsamen schmalen Inbox-Sicherheitshelfer und eigene Kanaltests: vorhandener zweiter Router darf Tenant-/Rollenfilter oder den ehrlichen Create-Stopp nicht umgehen. Beide Adapter verwenden dieselbe kanonische Inbox; keine parallelen Fachmodelle/Tabellen, keine Migration ohne eigenen Claim. Lead editiert diese Dateien nicht.
+
+**PENDING-INTEGRATION Tenant-Nachlauf der beruehrten Router:** api_contracts besitzt weighing_tickets.py und kontrakt_mengenzeitraum.py nun fuer den konsistenten verifizierten Mandantenkontext aller vorhandenen Geschwisterwege, nicht nur der neuen Details. Header-/Querywerte sind kein autorisierter Kontext. Bestehende Fachrollen, gemeinsame Stammdatenleserechte und Commands bleiben fuehrend; Payload darf Mandantenidentitaet nicht ueberschreiben. Vorhandene Verbraucher/Tests mitpruefen, eigene HTTP-/PostgreSQL-Negativbelege; keine neueDB/Schema/Reset.
+
+**PENDING-INTEGRATION Abschlusschecklisten Kontextparitaet:** api_contracts besitzt closing_checklists.py ebenfalls fuer alle Geschwisterwege mit bisherigem Query-Standardmandant. Interne Aufrufe des gehaerteten Detail-GET duerfen keine frei gewaehlten Querymandanten einschleusen. Bestehende Finanzrollen/Freigaben erhalten; eigener negativer HTTP-/PG-Vertrag fuer Lesen und Aendern fremder Checklisten. Keine Schemaaenderung.
+
+**PENDING-INTEGRATION aktiver DMS-UI-Verbraucher:** runtime_closure besitzt zusaetzlich pages/inbox/index.tsx und eigene Tests fuer den bestehenden Create-Aufrufer. Bisheriger Erfolg ohne echten Beleg entfaellt; UI muss vorhandenes prepare nutzen und bei erlaubtem serverseitigem Ziel die Belegmaske mit Inboxkontext oeffnen. Unbekannte Art/fehlendes Recht sperrt, kein automatisches Buchen/processed. Bestehende Rollen-/Tenantregeln und kanonische Launcherkomponenten wiederverwenden.
+
+**PENDING-INTEGRATION API-Router durchgaengiger Kontext:** Der api_contracts-Besitz wird fuer die bereits bearbeiteten Dateien fibu_zahlungsmeldungen.py, fibu_stammdaten.py, individualpreise.py, warengruppen.py, preis_rabattgruppen.py, produktion_rezepturgruppen.py, op_skonto_auszifferung.py, fibu_geschaeftsjahre.py, artikel_mengeneinheiten.py und individuelle_artikelnummern.py auf konsistent verifizierte Tenantabhaengigkeiten aller Listen-/Detail-/Schreibwege erweitert. Vorhandene Fachrechte/Commands/Shared-Masterdata-Semantik erhalten, Clientwerte duerfen den eigenen Kontext nicht ersetzen. Eigene negative HTTP-/PostgreSQL-Abnahme und betroffene bestehende Tests; kein bloesser Gate-C-Sicherheitsclaim, keine Schema-/DB-Neuanlage oder Reset.
+
+**PENDING-INTEGRATION Inbox-Definitionslabel:** api_contracts besitzt screen_definitions_kontrolle.py im bestehenden Inbox-Block ausschliesslich zur ehrlichen Aktion Belegmaske oeffnen/Vorschlag pruefen statt fingiertem Beleg anlegen. Bestehender Aktionskey kann fuer den NativeCockpit-Handler erhalten bleiben. Runtime-Owner verwendet frisches serverseitiges prepare fuer exakte Row-ID und wirkliche Benutzerrechte; kein neues Formularframework oder eigenstaendiger Belegcommand.
+
+## DEPENDENCY-SECURITY-STABILIZE-20261025 - reserviert, Claude Code
+
+**Owner:** Claude Code. **Basis:** `codex/migration-parity-repair-20261022` @ 28d85dedb (Auditparser ebd1fb474), eigener Zweig `claude/dependency-security-20261025`, Worktree ausserhalb Root. **Ziel:** Verbleibende Node-/Python-Abhaengigkeitsbefunde (zuletzt zod 3.x/4.x, body-parser, multer, nodemailer, fast-uri; frischer Audit massgeblich) durch echte kompatible Updates bzw. getestete Verbrauchermigration beheben; Installation aus Lockfile, Sicherheits-, Typ-, Build- und CI-Abnahme. **Dateibesitz:** package.json, pnpm-lock.yaml, betroffene Paketmanifeste; requirements-Dateien nur bei belegten Python-Befunden; zugehoerige Sicherheitspatches, Regressionstests, QA-/Sicherheitsdoku; config/security nur fuer belegte Reparaturen und konsistente Hashnachweise. **Nicht:** Studio-API-Vertraege, Entity-Projektion, Maskenruntime, Adaptive Workspace, DMS, Disposition (Codex) - noetige Verbraucheranpassungen dort nur nach Handshake. Fastify-/Storybook-Korrektur und AI-Vectorstore-Rueckbau bereits integriert, nicht wiederholen. **Grenzen:** keine Scan-Ausnahmen/Severity-Absenkung/Testentfernung, unbekannte Befunde blockieren, keine neue DB/Docker, DB-Abnahme nur valeo_probe nach --status, kein Push nach main; PR gegen codex/migration-parity-repair-20261022.
+
+**DEPENDENCY-SECURITY-STABILIZE-20261025 umgesetzt (Claude Code):** M1 5c18f23f1 body-parser1.20.9, nodemailer10.1.7 (exakt), fast-uri3.1.9, ungenutztes multer aus procurement entfernt. M2 zod4.6.7 in allen 27 Manifesten (Nutzerempfehlung ^4.6.7), zod-openapi0.9 entfernt (.meta), echte Verbrauchermigration in 87 Quellen statt zod/v3-Umweg (Upstreamfix nur v4). Verhaltensregeln: .uuid()->.guid() (System-ID 00000000-...-0001 bleibt gueltig), .default() hinter transform/Objekt ->.prefault() (27 Stellen, gegen 3.25.76 gleich). Prod-Audit 11/12->1/1, Gate 0 blocked/release_allowed true, Laufzeitvertraege60/60, Parser19/19, pip-audit154/0. Testzahlen aller 25 Zod-Pakete und src-Typfehlermengen identisch zur Basis (sales +63 nur in zod-.d.cts ohne esModuleInterop); frontend typecheck0/build gruen; frozen install lock byteidentisch. Reviews nur Lock-/Manifesthash neu gebunden; node-forge review_by 2026-10-28 (Codex). Dev-only-Restbefunde und vorbestehend rote mask-objectpage-stamm-native-route offen. QA docs/quality-assurance/dependency-security-stabilize-20261025.md, Handshake docs/agent-ops/handshakes/dependency-security-stabilize-20261025.md. Keine DB/Docker.
+
+**DEPENDENCY-SECURITY-STABILIZE-20261025 CI (abgeschlossen, Review offen):** M2 26fe42d6d, PR #40 gegen codex/migration-parity-repair-20261022. Quality Gate 40191958140: Dependency Scan success (Basis 40187054625 failure); Frontend-Unit 214/1506 identische Fallmenge wie Basis, Doc-Drift 272 wie Basis, uebrige gruen. Security Scan 40191960923 komplett success. Kein Merge durch Claude.
+
+## DEV-DEPENDENCY-SECURITY-20261025 - reserviert, Claude Code
+
+**Owner:** Claude Code. **Basis:** `claude/dependency-security-20261025` @ ee8a27f37 (PR #40), eigener Zweig `claude/dev-dependency-security-20261025`, PR gegen PR-#40-Zweig. **Ziel:** Die im vollen `pnpm audit` (inkl. devDependencies) verbleibenden Befunde ausserhalb des Prod-Gates (zuletzt drizzle-kit0.21/zod3, undici, @azure/msal-node, http-cache-semantics, @vitest/mocker, stream-json) durch kompatible Updates oder Rueckbau ungenutzter Werkzeuge beheben; Verbraucher testen. **Dateibesitz:** package.json, pnpm-lock.yaml, betroffene Paketmanifeste, zugehoerige Regressionen/QA, config/security nur fuer konsistente Hashbindung bzw. belegte Patchreparatur. **Nicht:** Codex-Bereiche (Studio-API, Entity-Projektion, Maskenruntime, Adaptive Workspace, DMS, Disposition). **Grenzen:** wie DEPENDENCY-SECURITY-STABILIZE: keine Ausnahmen/Severity-Absenkung/Testentfernung, keine erzwungenen Overrides mit ungeklaerter API, keine neue DB/Docker, kein Push nach main.
+
+**DEV-DEPENDENCY-SECURITY-20261025 umgesetzt (Claude Code):** M1 3fe0fa632 undici7.30.1 (Override), vitest/coverage/ui4.1.12, hr drizzle-kit0.31.11 (passend zu orm0.45, neues Config-Format), toter drizzle-kit in production entfernt. M2 tote artillery (analytics/scheduler, Szenariodatei fehlt) und detox (mobile-app, keine Konfiguration) samt Patches stream-json/artillery, Override, Provenance, README und elf zugehoerigen Verifierfaellen entfernt. Voller Audit inkl. dev 16->1 (node-forge, Prod, gebunden). Prod-Gate 0 blocked, Verifier 49/49, Testzahlen/Typfehler aller Pakete identisch, Frontend tsc0/build/Vitest identische Fallmenge, frozen install byteidentisch. Offen: 12 Pakete drizzle-kit0.22 (gegen orm0.45 nicht lauffaehig), hr-Schema doppelte Indexnamen, hr-Tests testcontainers undeklariert. QA docs/quality-assurance/dev-dependency-security-20261025.md, Handshake docs/agent-ops/handshakes/dev-dependency-security-20261025.md.
+
+**DEV-DEPENDENCY-SECURITY-20261025 CI (abgeschlossen, Review offen):** PR #41 (gestapelt auf #40). Security Scan 40198322483 success; Quality Gate 40198929357 auf 7e5e41674: Dependency Scan und Improvement integrity success, Frontend-Unit identische Fallmenge wie Basis, Doc-Drift 272 wie Basis. Eigener Folgefehler (Coverage-Pin-Vertrag) in 7e5e41674 behoben. Kein Merge durch Claude.
+
+**PENDING-INTEGRATION Claude-Security uebernommen:** Quelle5468de5ce einschliesslich PR40/41 gegen gemeinsameBasis28d85dedb geprueft,146Pfade konfliktfrei; aktiveStudio/DMS/Workspace-WIPnichtueberschrieben.49 Sicherheitsregressionen erneutgruen; Security-CI40198322483 und Dependency/Integrity-CI40198929357 direktverifiziert. Keine eigenen Ausnahmen oder Wiedereinfuehrung toterWerkzeuge. Gesamt-CI weiteroffen; @dnd-kit/core alsfehlendeWorkspaceAbhaengigkeit erkannt, separaterNachlauf. QA claude-security-integration-20261025.md.
+
+**PENDING-INTEGRATION fehlende Workspace-Abhaengigkeit:** Lead besitzt packages/frontend-web/package.json und pnpm-lock.yaml ausschliesslich zur bereits im Root-WIP vorhandenen @dnd-kit/core-Bindung6.3.1 fuer die uebernommene Dispositionstafel. Claudes Securitybasis11d47f9f6 bleibt fuehrend. Lockfile in isolierter Manifestansicht erzeugen, keine gemeinsame Installation veraendern; eingefrorene Installation/Frontendtests und Roh-Audit nachpruefen. Bestehende Backport-Hashbindungen nur nach unveraenderter Quellpatchpruefung neu binden, keine Ausnahme/Fristverlaengerung. Keine neueDB/Container/Reset.
+
+**PENDING-INTEGRATION Lead-Fortsetzung nach Agentenlimit:** Delegierte Laeufe am Nutzungslimit gestoppt, WIP bewahrt; Lead uebernimmt die begonnenen Dateien bis erneuter Besitzabstimmung. Inbox-Definitionen deklarieren den tatsaechlichen vorbereitenden POST und bestaetigtes DELETE explizit, sodass bestehende Rechteprojektion die realen Serverrollen ableitet. Kein neues Rollenmodell oder Schemaattribut. Neuer Inboxrouter verwendet dieselbe beleg_read-Untergrenze. generate_action_permission_projection.py wird an die produktive main:app statt Testapp gebunden und verliert den hartcodierten Datenbank-Credentialfallback. UI bleibt NativeCockpit mit zentraler useScreenPermissions-Projektion, frischem prepare pro Row-ID und ohne Scheinerfolg. Eigene Positiv-/Negativtests und Generatorabgleich vor Lieferung.
+
+**CLOSING-VALIDATION-SECURITY-20261025 - reserviert, Codex:** Lead fuehrt den bereits geclaimten Abschlusschecklisten-Nachlauf fort; zusaetzlicher Besitz app/services/closing_checklist_validation.py und tests/test_closing_validation_security.py. Urheber nur gepruefte sub, gespeicherte SQL-Texte niemals ausfuehren; kanonische automatische Pruefungen fest im Code, Tenant/Periode binden, unbekannte Pruefungen sperren. Echte PG-Negativtests mit bestehenden valeo_probe, kein Reset/DDL/neuer Container. Claudes Drizzle-Betriebsfolgeauftrag unberuehrt.
+
+**CLOSING-VALIDATION-SECURITY-20261025 umgesetzt:** verifizierte Urheber fuer Abschluss/Freigabe/automatische Pruefung, gespeichertes SQL nie ausgefuehrt, vier feste Tenant-Pruefungen und Savepoints. JSONB-/datetime-/Tenant-Nachlauf im selben Router integriert.20 kombinierte Vertraege gruen, eigene Suite5Faelle davon4PG; nur eigener Rollback. QA closing-validation-security-20261025.md. Gemeinsame Studio-Artefaktsynchronisierung/Gesamt-CI bleibt offen; kein Doppelclaim fuer Claudes Betriebsfolgeauftrag.
+
+**SCHEDULER-PR43-INTEGRATION-20261025 - reserviert, Codex:** Besitz ausschliesslich scheduler-domain/src/infra/db/schema.ts, tests/unit/db-schema.test.ts und zugehoerige QA. Zwei Quellpfade aus PR43 gegen HEAD und lokale Ansicht vor Uebernahme pruefen, bestehende ORM-Version verwenden. PR42-Lockfile nicht blind uebernehmen, da DND-Vertrag erhalten bleiben muss; separate Abhaengigkeitsintegration. Keine Migration/DB/Container. Claudes neuer Folgeauftrag bleibt unberuehrt.
+
+**SCHEDULER-PR43-INTEGRATION-20261025 umgesetzt:** zwei exakte konfliktgepruefte Quellen aus bbd7d577a uebernommen; Schemaimport/Indexvertrag1/1 lokal gruen. Kein Lockfile-/Manifestoverwrite, keine Migration oder DB. QA scheduler-pr43-integration-20261025.md; PR42 separat offen.
+
+**PR44-INTEGRATION-20261026 - reserviert, Codex Lead:** Exakten PR44-Stand21eaa30cd gegen Basis5ee0c882c integrieren;39Pfade vorgeprueft, keine lokalen Konflikte. Besitz PR44-Dateien und separater QA-Nachweis, Serviceinventar nur aus sauberer Commitansicht erzeugen. Acht neue Migrationsketten analytics/contracts/crm/pricing/quality/regulatory/scheduler/weighing sind exklusiv Claude zugewiesen und werden hier nicht erstellt. Keine DB-Migration/Reset/Container. Node-forge-Review bleibt eigener Lead-Nachlauf, Frist unveraendert.
+
+## DRIZZLE-KIT-031-20261025 - reserviert, Claude Code
+
+**Owner:** Claude Code. **Basis:** `claude/dev-dependency-security-20261025` @ 5468de5ce (PR #41), eigener Zweig `claude/drizzle-kit-031-20261025`, PR gegen PR-#41-Zweig. **Ziel:** Die 13 TS-Domaenenpakete, deren drizzle-kit 0.22 gegen drizzle-orm 0.45 nicht lauffaehig ist, auf drizzle-kit `^0.31.11` heben (wie hr-domain in PR #41): Manifest, `drizzle.config.ts` im `dialect`/`url`-Format, nicht mehr existierende `:pg`-Befehle durch gueltige ersetzen; Pakete ohne Schema/Konfiguration verlieren das tote Werkzeug. Offline pruefen (Konfig/Schema laden, `generate`/`check` in Wegwerfverzeichnis). **Dateibesitz:** Paketmanifeste und `drizzle.config.ts` der betroffenen Pakete, pnpm-lock.yaml, config/security nur fuer Hashbindung, zugehoerige QA/Handshake. **Nicht:** Schemadateien und vorhandene Migrationen (Befunde werden gemeldet, nicht nebenbei repariert), Codex-Bereiche. **Grenzen:** keine Datenbank, kein Docker, kein `push`/`migrate` gegen eine DB, keine Ausnahmen/Severity-Absenkung/Testentfernung, kein Push nach main.
+
+**DRIZZLE-KIT-031-20261025 umgesetzt (Claude Code):** 12 Pakete auf drizzle-kit ^0.31.11 (analytics, audit, contracts, crm, document, notifications, pricing, quality, regulatory, sales, scheduler, weighing), `:pg`-Befehle auf generate/up/check, nie existentes `down:pg` samt `db:reset` entfernt, crm-Konfiguration auf dialect/url; delivery ohne Schema: drizzle-kit entfernt. Offline-generate: 7 Pakete Initialmigration, audit/document/notifications/sales "No schema changes" gegen eingecheckte Snapshots. Typfehler/Tests aller 13 Pakete identisch zur Basis, frozen install byteidentisch, Gate 0 blocked, Verifier 49/49, voller Audit 1 (node-forge). Nur lock_sha256 neu gebunden. Befunde offen: scheduler-Schema wirft beim Import unter orm 0.45 (schema.ts:127-129, Dienststart betroffen), fehlende 0000_*.sql in audit/document/notifications, db:seed ohne Skript, RELEASE-RUNBOOK migrate:down. QA docs/quality-assurance/drizzle-kit-031-20261025.md, Handshake docs/agent-ops/handshakes/drizzle-kit-031-20261025.md. Keine DB/Docker.
+
+## SCHEDULER-SCHEMA-INDEXES-20261025 - reserviert, Claude Code
+
+**Owner:** Claude Code. **Basis:** `claude/drizzle-kit-031-20261025` @ 68fab0da7 (PR #42), eigener Zweig `claude/scheduler-schema-indexes-20261025`, PR gegen PR-#42-Zweig. **Ziel:** `packages/scheduler-domain/src/infra/db/schema.ts` wirft unter drizzle-orm 0.45 beim Modulimport (drei Indizes ausserhalb der Tabellendefinition, Zeilen 127-129); `connection.ts` importiert das Schema, der Dienst kann nicht starten. Indizes in den Tabellen-Callback von `runs` verschieben (keine Migrationen vorhanden), Import und Generator offline pruefen, Importfaehigkeit aller drizzle-Schemata der Domaenenpakete einmal messen. **Dateibesitz:** diese Schemadatei, ggf. ein Regressionstest im Paket, QA/Handshake. **Nicht:** die 9 vorbestehend roten scheduler-Tests (andere Ursache), andere Schemata, Codex-Bereiche. **Grenzen:** keine Datenbank, kein Docker, kein Push nach main.
+
+**SCHEDULER-SCHEMA-INDEXES-20261025 umgesetzt (Claude Code):** drei lose Indizes in den `runs`-Callback verschoben (Namen/Spalten unveraendert), Schema laedt unter drizzle-orm 0.45 wieder, Dienststart nicht mehr am Import blockiert. Regressionstest db-schema.test.ts (alt rot, neu gruen); Suite 9 failed/24 passed (9 vorbestehend, andere Ursache), tsc identisch, generate offline ok. Importmessung aller 13 Domaenenschemata: nur scheduler betroffen. QA docs/quality-assurance/scheduler-schema-indexes-20261025.md. Keine DB/Docker.
+
+## DRIZZLE-MIGRATIONS-OPS-20261025 - reserviert, Claude Code
+
+**Owner:** Claude Code. **Basis:** `codex/migration-parity-repair-20261022` @ 8aaaacbcf, eigener Zweig `claude/drizzle-migrations-ops-20261025` (enthaelt die offenen Vorstufen PR #42 drizzle-kit 0.31 und PR #43 scheduler-Schema), PR gegen `codex/migration-parity-repair-20261022`. **Ziel (Nutzerauftrag "Drizzle-Migrationen und Betriebsfaehigkeit"):** (1) audit/document/notifications: fehlende `0000_*.sql` gegen Journal und Schema pruefen, konsistente nachvollziehbare Migrationskette; (2) RELEASE-RUNBOOK: nicht existentes `migrate:down` durch geprueftes Wiederherstellungsverfahren ersetzen; (3) analytics/scheduler: fehlende Seed-Einstiege reparieren oder belegt tote Befehle samt Doku entfernen, keine erfundenen Daten; (4) hr: doppelte Indexnamen beheben, Testcontainers durch gemeinsamen Pruefstand mit eigenen Transaktionen/Testdatensaetzen ersetzen; (5) scheduler: neun rote Tests an der Ursache beheben (Date/Promise-Vertrag, Validierung). **Dateibesitz:** `packages/{audit,document,notifications}-domain/migrations/**`, `packages/{analytics,scheduler,hr}-domain/**` soweit fuer die Punkte noetig, `RELEASE-RUNBOOK.md`, zugehoerige QA/Handshake. **Nicht:** Studio, Inbox, Adaptive Workspace, zentrale API-Vertraege und deren generierte Artefakte, node-forge-Review (Codex, Frist unveraendert). **Grenzen:** DB-Abnahme nur auf bestehendem `valeo_probe` nach `pruefstand_db.py --status` und abgestimmtem Wartungsfenster, ausschliesslich in eigenen Transaktionen/Schemata mit Rollback; keine neue DB, kein Container, kein Reset, keine Journalbereinigung allein zum Gruenmachen, keine Testabschwaechung, kein Push nach main.
+
+**DRIZZLE-MIGRATIONS-OPS-20261025 umgesetzt (Claude Code, Review offen):** (1) audit/document/notifications: fehlende 0000_*.sql (per Paket-.gitignore ausgeschlossen, in keinem Commit) aus dem Schema erzeugt, Snapshot semantisch identisch zum eingecheckten, Journal/IDs unveraendert, `migrate:apply`; Kette auf valeo_probe in Transaktion mit Rollback = Snapshot (0 Abweichungen, Negativprobe trifft). (2) RELEASE-RUNBOOK: migrate:down/--dry-run ersetzt durch Sicherung vor Release, check/generate, Rollback a/b/c; Restore-Probe (dump -> drop -> restore -> migrate idempotent) auf eigenem Schema bestanden, Ganz-DB-Restore/RTO-Drill Betriebsaufgabe. (3) analytics/scheduler db:seed (Skript nie committet) entfernt. (4) hr: doppelte Indexnamen behoben (time_entries = Namen der vorhandenen Migration), Testcontainers durch valeo_probe-Transaktion ersetzt, UUID-Testdaten; 5/5 auf Pruefstand. (5) scheduler 9 rot -> 34/34: synchrones calculateNextFireTime, Publish-Fehler gemeldet, Nutzerentscheidung Entitaet = Invariante mit validateScheduleInput. tsc aller sechs Pakete identisch zur Basis 5ee0c882c. Wartungsfenster vom Nutzer freigegeben, Restkontrolle 0, kein Reset/neue DB/Container. QA docs/quality-assurance/drizzle-migrations-ops-20261025.md, Handshake docs/agent-ops/handshakes/drizzle-migrations-ops-20261025.md.
+
+## DRIZZLE-CHAINS-8-20261026 - reserviert, Claude Code
+
+**Owner:** Claude Code. **Basis:** `claude/drizzle-migrations-ops-20261025` @ 21eaa30cd (PR #44), eigener Zweig `claude/drizzle-chains-8-20261026`, PR gegen PR-#44-Zweig. **Ziel:** Fuer analytics, contracts, crm, pricing, quality, regulatory, scheduler und weighing eine eingecheckte, nachvollziehbare Drizzle-Migrationskette (Initialmigration aus dem aktuellen Schema, Journal, Snapshot, `migrate:apply`), Schemafehler, die die Erzeugung oder Anwendung verhindern, an der Ursache beheben; Abnahme offline (`check`/`generate`) und auf valeo_probe mit `verify_drizzle_migrations_probe.cjs` (Transaktion, eigenes Schema, Rollback), dafuer Pruefskript um Fremdschluessel/Unique-Constraints erweitern. **Dateibesitz:** `packages/{analytics,contracts,crm,pricing,quality,regulatory,scheduler,weighing}-domain/{migrations,src/infra/db,drizzle.config.ts,package.json,.gitignore}`, `scripts/verify_drizzle_migrations_probe.cjs`, QA/Handshake. **Nicht:** sales (Kette vorhanden), hr (Handmigration, eigener Punkt), Codex-Bereiche. **Grenzen:** DB-Abnahme nur nach erneuter Freigabe eines Wartungsfensters und `pruefstand_db.py --status`; kein Reset, keine neue DB, kein Container, keine Testabschwaechung, kein Push nach main.
+
+**DRIZZLE-CHAINS-8-20261026 umgesetzt (Claude Code, Review offen):** Initialketten fuer analytics, contracts, crm, pricing, quality, regulatory, scheduler, weighing (drizzle-kit 0.31.11, check/generate sauber, `migrate:apply`). Pruefskript vergleicht jetzt FK/Unique, lenkt drizzles `REFERENCES "public".` gezaehlt ins Pruefschema um (anderer Qualifizierer bricht ab), normalisiert nur Schreibweisen (129 Erstlaufmeldungen alle klassifiziert, 0 strukturell). valeo_probe (Nutzerfreigabe, nur Rollback): 11 Ketten 0 Abweichungen, Negativprobe FK/Zeitzone trifft, Restkontrolle 0. QA docs/quality-assurance/drizzle-chains-8-20261026.md.
+
+## DRIZZLE-APPLY-GUARD-20261026 - reserviert, Claude Code
+
+**Owner:** Claude Code. **Basis:** `claude/drizzle-chains-8-20261026` @ d89897a7a (PR #45), eigener Zweig `claude/drizzle-apply-guard-20261026`, PR gegen PR-#45-Zweig. **Befund (lesend geprueft):** Kein Push-Altbestand (keine Domaenendatenbanken, keine Drizzle-Tabelle in Drizzle-Form vorhanden). Neun drizzle.config.ts fallen auf `DATABASE_URL` (Backend-Hauptdatenbank) zurueck; dort liegen `public.documents`/`public.opportunities` des Backends. `migrate:apply` wuerde fremde Tabellen in die Hauptdatenbank schreiben bzw. halb scheitern. quality `scripts/setup.sh` ruft `migrate:up` (Snapshot-Upgrade) in der Absicht, Migrationen anzuwenden. **Ziel:** Vorpruefung vor `drizzle-kit migrate`: Ziel muss Domaenen-Schema sein (keine fremden Tabellen, kein `alembic_version`), Journal vorhanden -> inkrementell, leer -> frisch, Kettentabellen ohne Journal -> Abbruch mit Liste (Altbestand, Abgleich noetig). `migrate:apply` laeuft darueber; quality setup.sh auf `migrate:apply`. **Dateibesitz:** neues `scripts/drizzle_apply_guard.cjs`, `migrate:apply` in den elf Paketmanifesten, `packages/quality-domain/scripts/setup.sh`, QA/Handshake, Runbook-Abschnitt. **Nicht:** Laufzeit-Verbindungen der Dienste, Codex-Bereiche. **Grenzen:** DB-Tests nur lesend bzw. auf valeo_probe nach Freigabe; kein Reset, keine neue DB, kein Container.
+
+**DRIZZLE-APPLY-GUARD-20261026 umgesetzt (Claude Code, Review offen):** Kein Push-Altbestand; reales Risiko DATABASE_URL-Rueckfall auf Backend-DB in neun Configs. migrate:apply ueber scripts/drizzle_apply_guard.cjs (foreign-target/unjournaled-tables -> Abbruch, fresh/incremental -> drizzle-kit migrate), migrate:check, quality setup.sh migrate:up->migrate:apply, Runbook Phase 2. Abnahme: 5/5 offline, 11x Ablehnung gegen valeo_neuro_erp (lesend), Positivpfade fresh/incremental/unjournaled auf valeo_probe (Nutzerfreigabe), Restkontrolle 0. QA docs/quality-assurance/drizzle-apply-guard-20261026.md.
+**PR44-INTEGRATION-20261026 umgesetzt:**39Pfade konfliktgeprueft, DND/Backportbindungen erhalten; Scheduler34/34, Auditparser19/19, Quellvertraege12/12 gruen. Frischer Docs-Build scheiterte am Serviceinventar; dreiInventare aus sauberem HEAD erzeugt undcheckgruen. QA pr44-integration-20261026.md. Acht Paketketten bleiben exklusiv Claude, node-forge-Frist28.10 unveraendert; keine DB-Aenderung/Gesamtfreigabe.
+
+**NODE-FORGE-REVIEW-20261026 - reserviert, Codex:** bestehende Quellreparatur gegen exakten Upstream-Commit, Paketregistry, aktuellen Roh-Audit, Hashbindungen und Laufzeitvertraege neu pruefen. Besitz Reviewnachweis und reviewed_on von node-forge nur bei bestandener Evidenz; review_by28.10 unveraendert, keine automatische Verlaengerung/Schwellensenkung. Acht Migrationsketten Claude unberuehrt.
+
+**NODE-FORGE-REVIEW-20261026 umgesetzt:** Registry1.4.0/Originalintegritaet bestaetigt, offener Upstreamkopfceba344 und lokaler RSA-Hunk identisch. Frischer Prod-Audit1High, strikter Gate1quellrepariert/0blockiert,32 eingebundene Laufzeitvertraege gruen. reviewed_on26.10, Frist28.10 unveraendert. QA node-forge-review-20261026.md. Docs-CI40278987427 auf94c483cc0 success, keine Gesamtfreigabe.
+
+## DB-GOVERNANCE-20261026 - reserviert, Claude Code
+
+**Owner:** Claude Code. **Basis:** `claude/drizzle-apply-guard-20261026` @ 2c67f33f4 (PR #46, darunter #45) plus `codex/migration-parity-repair-20261022` (enthaelt #44), eigener Zweig `claude/db-governance-20261026`, PR gegen `codex/migration-parity-repair-20261022`. **Ziel:** Werkzeugunabhaengige Datenbank-Governance: (1) DDL-Protokoll per Event-Trigger (`ddl_command_end`, `sql_drop`) in eigenem Schema mit Herkunft (Rolle, `application_name`, abgeleitete Quelle alembic/drizzle-kit/agent/unbekannt), Alembic-Migration auf dem Head `loading_stop_fk_20261023`; Alembic und der drizzle-Waechter kennzeichnen ihre Sitzungen; (2) Pruefwerkzeuge: Herkunftsbericht/Gate fuer das Protokoll, Drizzle-Drift einer bestehenden Domaenendatenbank gegen den Snapshot; CI-Gate nach `alembic upgrade`; (3) Rollentrennung nur als Konzept, Umsetzung erst nach Nutzerfreigabe. **Dateibesitz:** neue Migration, `alembic/env.py` (nur Sitzungskennung), `scripts/check_ddl_provenance.py`, Drizzle-Pruefskripte, CI-Schritt in `quality-gate.yml`, Tests, QA/Handshake/Konzept, AGENTS.md DB-Abschnitt (eine Kennzeichnungsregel). **Nicht:** Rollen/Rechte/Zugangsdaten aendern, Codex-Bereiche. **Grenzen:** Migration auf valeo_probe nur nach abgestimmtem Wartungsfenster (`--keep`), sonst Abnahme in Transaktion mit Rollback; kein Reset, keine neue DB, kein Container, kein Push nach main.
+
+**DB-GOVERNANCE-20261026 umgesetzt (Claude Code, Review offen):** Migration governance_ddl_log_20261026 (neuer Head): Event-Trigger ddl_command_end/sql_drop -> governance.ddl_events mit Rolle, application_name, Quelle (alembic/drizzle-kit/orm-create-all/agent/unbekannt), fail-open mit WARNING. Kennzeichnung in alembic/env.py, drizzle-Waechter, init_db.py, AGENTS.md (PGAPPNAME=agent:<name>). check_ddl_provenance.py + CI-Schritt, migrate:drift fuer Drizzle-Domaenen. valeo_probe (Nutzerfreigabe, upgrade() ohne alembic_version, danach downgrade()): agent/unbekannt/drizzle-kit/alembic korrekt zugeordnet, Gate Exit 1/0, pytest-Integrationstest gruen, Drift 0 bzw. 2 nach Handaenderung, Restkontrolle 0. Offen: echter alembic upgrade (CI blockiert durch Doc-Drift), Rollentrennung nur Konzept. QA docs/quality-assurance/db-governance-20261026.md.
+
+## DB-ROLES-20261026 - reserviert, Claude Code
+
+**Owner:** Claude Code. **Basis:** `claude/db-governance-20261026` @ 928fcde7f (PR #47), eigener Zweig `claude/db-roles-20261026`, PR gegen PR-#47-Zweig. **Nutzerentscheidung 2026-10-26:** Entscheidungen nach Best Practice; Superuser bleibt fuer Entwicklungsphase, Einrichtung und Anpassungen. **Ziel:** Stufe 3 der DB-Governance: idempotentes Einrichtungsskript fuer Cluster-Rollen (`valeo_owner`, `valeo_migrator`, `valeo_app`, `valeo_agent`, `valeo_audit`, `valeo_governance`) und Rechte je Datenbank (DML ohne DDL fuer App/Agent, Default Privileges, Protokoll nur INSERT fuer Migratoren, SELECT fuer Audit), optionale Eigentumsuebertragung; Passwoerter nur aus der Umgebung. `check_ddl_provenance.py` setzt Rollen durch (Superuser getrennt ausgewiesen, vorgetaeuschte Quelle erkannt). Alembic liest `MIGRATION_DATABASE_URL` (Rueckfall `DATABASE_URL`). **Dateibesitz:** neues `scripts/provision_db_roles.py`, `scripts/check_ddl_provenance.py`, `alembic/env.py` (URL-Wahl), `scripts/init_db.py` (URL-Wahl), Tests, Konzept/QA/Handshake/Runbook, AGENTS.md-DB-Abschnitt. **Nicht:** Umstellung der laufenden Entwicklungsdatenbank oder der Root-`.env` (Abstimmung mit Codex), Codex-Bereiche. **Grenzen:** DB-Abnahme nur in Transaktionen mit Rollback auf valeo_probe nach Freigabe; kein Reset, keine neue DB, kein Container, kein Push nach main.
+
+**DB-ROLES-20261026 umgesetzt (Claude Code, Review offen):** provision_db_roles.py (valeo_owner/governance NOLOGIN, migrator mit role=valeo_owner, app/agent DML ohne DDL, audit nur Protokoll; Plan/--anwenden/--eigentum/--rollback; Passwoerter nur aus Umgebung), migration_session (MIGRATION_DATABASE_URL, SET ROLE valeo_owner), Folgemigration governance_ddl_log_roles_20261026, rollenbewusstes check_ddl_provenance.py. valeo_probe: Einrichtung komplett per Rollback, Integrationstests Rollen/Governance gruen, Zustand danach unveraendert. Einfuehrung auf valeo_neuro_erp offen (Abstimmung Codex). QA docs/quality-assurance/db-roles-20261026.md.
+
+## DB-ROLES-ROLLOUT-20261026 - reserviert, Claude Code
+
+**Owner:** Claude Code. **Zweig:** `claude/db-roles-20261026` (PR #48). **Nutzerauftrag 2026-10-26:** Einfuehrung auf valeo_neuro_erp uebernehmen, echte Anmeldung testen, echten `alembic upgrade` auf frischer DB pruefen. **Vorgehen:** (1) Rollen/Rechte auf valeo_neuro_erp additiv, Passwoerter zufaellig erzeugt, nur in der gitignorierten Root-`.env`; (2) Eigentum an valeo_owner nach Schema-Sicherung (pg_dump -s) und Rueckweg-Skript; Codex migriert weiter als Superuser; (3) echte Logins valeo_migrator/app/agent/audit; (4) frischer `init_db.py`-Lauf auf valeo_probe im Fenster, danach Rueckbau auf Basis-Head; (5) Backend auf valeo_app erst nach Ueberfuehrung der Laufzeit-DDL (Endpunkte mit CREATE SCHEMA/TABLE IF NOT EXISTS) in Migrationen. **Dateibesitz:** Root-`.env` (nur neue Variablen, DATABASE_URL unveraendert), Rollen/Rechte/Eigentum der DB, QA/Handshake. **Nicht:** docker-compose.yml und Endpunkte (Codex-WIP), Codex-Bereiche. **Grenzen:** keine neue DB, kein Container, Prüfstand-Reset nur im Fenster mit Rueckbau.
+
+**DB-ROLES-ROLLOUT-20261026 umgesetzt (Claude Code):** valeo_neuro_erp: Schema-Sicherung + Rueckweg-Skript, Rollen/Rechte, Eigentum 879 Objekte an valeo_owner (Backend durchgehend healthy), Passwoerter zufaellig nur in Root-.env, DATABASE_URL unveraendert. Echte Logins migrator/app/agent/audit 0 Abweichungen. Frischer alembic upgrade auf valeo_probe: Erstlauf scheiterte (Rollenwechsel in nicht eingerichteter DB, fehlendes CREATE ON DATABASE) -> sofort zurueckgebaut, korrigiert; Zweitlauf gruen inkl. init_db, Einrichtung, Herkunft, Integrationstests; danach auf Basis-Head zurueckgebaut. Blocker Backend->valeo_app: Laufzeit-DDL in 12 Dateien (Liste in QA). QA docs/quality-assurance/db-roles-rollout-20261026.md.
+
+## RUNTIME-DDL-MIGRATIONS-20261026 - reserviert, Claude Code
+
+**Owner:** Claude Code. **Basis:** `claude/db-roles-20261026` (PR #48), eigener Zweig `claude/runtime-ddl-migrations-20261026`, PR gegen PR-#48-Zweig. **Ziel:** Laufzeit-DDL der Anwendung (CREATE SCHEMA/TABLE IF NOT EXISTS, ALTER ADD COLUMN zur Request-/Startzeit) in Alembic-Migrationen ueberfuehren bzw. entfernen, wo Migrationen die Objekte schon anlegen, damit das Backend als `valeo_app` (ohne DDL-Recht) laufen kann; danach Backend-Verbindung umstellen. Strukturen exakt uebernehmen, keine Fachaenderung. **Dateibesitz:** `app/api/v1/endpoints/{accruals_provisions,compliance_whistleblower,ers_settlement,futtermittel_rezepte,futtermittel_rohwaren,opportunities,price_lists,sales_delivery_notes,sales_orders}.py`, `app/api/v1/schemas/wf_cockpit_persist_schemas.py`, `app/services/{geo_pipeline,lkv_pipeline}.py`, `app/core/database.py` (Rueckfall), neue Migration, Tests, QA/Handshake; `docker-compose.yml` nur fuer `DATABASE_URL` des Backends nach Abnahme. **Pruefung Codex-WIP:** Root-Arbeitsbaum zeigt fuer diese Dateien keine inhaltlichen Aenderungen (nur Zeilenenden). **Grenzen:** Migration auf valeo_probe nur frisch im Fenster mit Rueckbau; keine neue DB, kein Container, kein Push nach main.
+
+**RUNTIME-DDL-MIGRATIONS-20261026 umgesetzt (Claude Code, Review offen):** Laufzeit-DDL in 8 Endpunkten und 2 Pipelines entfernt bzw. in Migration runtime_ddl_to_migrations_20261026 ueberfuehrt (6 Tabellen, 4 Indizes ohne bisherige Migration; Strukturen unveraendert, IF NOT EXISTS, Downgrade leer); schema_guard fuer Pipelines; Nominatim-Kontakt aus Code in Umgebung (Path-Guard). valeo_probe, 41 Testdateien: Basis 21 rot; PR als Superuser und als valeo_app nach zwei Testanpassungen (Aufrufreihenfolge, Drift-Test ueber Migrator) gleiche Fallmenge -> Anwendung ohne DDL-Recht lauffaehig. Rueckbau auf Basis. Backend-Umstellung nach Merge. Handshake an Codex. QA docs/quality-assurance/runtime-ddl-migrations-20261026.md.
+
+**DB-ROLES-GO-LIVE-20261026 umgesetzt (Claude Code, Nutzerauftrag):** PR #49 (mit #45-#48) gemergt c6f99955d; 20 Dateien in Root uebernommen (vorher je identisch zum Ausgangsstand, keine Codex-Arbeit ueberschrieben); valeo_neuro_erp alembic upgrade auf runtime_ddl_to_migrations_20261026 (Trigger aktiv); Rechte nachgezogen; docker-compose Backend DATABASE_URL/MIGRATION_DATABASE_URL/NOMINATIM_USER_AGENT per .env-Variablen; Backend neu erstellt: healthy, Anwendung als valeo_app, init_db als valeo_migrator; Rauchtest der umgebauten Lesewege OK, 0 Rechtefehler. Offen: crm-core, crm-sales, inventory noch valeo_dev. Handshake docs/agent-ops/handshakes/runtime-ddl-migrations-20261026.md.
+
+## SERVICES-DB-ROLES-20261026 - reserviert, Claude Code
+
+**Owner:** Claude Code. **Basis:** `codex/migration-parity-repair-20261022` @ 1ed106684, Zweig `claude/services-db-roles-20261026`. **Ziel:** Die zehn Dienste mit Superuser-Verbindung auf valeo_neuro_erp (crm-analytics, crm-communication, crm-core, crm-multichannel, crm-sales, crm-security, crm-service, crm-workflow, dms-adapter, inventory-service) auf `valeo_app` umstellen (Compose-Umgebung per .env-Variablen, Rueckfall Superuser), Start-Migrationen kuenftig ueber `MIGRATION_DATABASE_URL` (Entrypoints), inventory `create_all` ueber den Migrator; Befund: crm-analytics/-communication/-multichannel/-workflow nutzen die Versionstabelle des Backends. **Dateibesitz:** `docker-compose.yml` (Umgebung dieser Dienste), `services/*/docker-entrypoint.sh`, `services/inventory/main.py`, `.env.example`, QA/Handshake. **Grenzen:** keine Image-Neubauten ohne Abstimmung, kein neuer Container, nur Neustart der betroffenen Dienste; Rueckweg ueber .env.
+
+**SERVICES-DB-ROLES-20261026 umgesetzt (Claude Code):** zehn Dienste live auf valeo_app (Compose per .env-Variablen, kein Neubau, alle healthy, 0 Superuser-Verbindungen, 0 Rechtefehler). Entrypoints migrieren kuenftig ueber MIGRATION_DATABASE_URL (crm-sales live geprueft), inventory create_all ueber Migrator. Zwischenfall: inventory ~3 min Startschleife durch eigenen docker-cp-Test, aus Image wiederhergestellt. Befund offen: crm-analytics/-communication/-multichannel/-workflow und inventory nutzen public.alembic_version des Backends, Start-Migrationen scheitern still. QA docs/quality-assurance/services-db-roles-20261026.md.
+
+## SERVICES-VERSION-TABLE-20261026 - reserviert, Claude Code
+
+**Owner:** Claude Code. **Basis:** `codex/migration-parity-repair-20261022` @ 9e7d33a03, Zweig `claude/services-version-table-20261026`. **Ziel:** Befund aus SERVICES-DB-ROLES-20261026 beheben: crm-analytics, crm-communication, crm-multichannel, crm-workflow und inventory bekommen je eine eigene Alembic-Versionstabelle (`<dienst>_alembic_version`, wie crm-core/-sales/-service) statt `public.alembic_version` des Backends. Ketten vorher in einer zurueckgerollten Transaktion in eigenem Schema auf valeo_probe pruefen; inventory (Tabelle per `create_all` vorhanden) erst nach Strukturvergleich stempeln. **Dateibesitz:** `services/{crm-analytics,crm-communication,crm-multichannel,crm-workflow,inventory}/alembic/env.py`, eigene Tests, QA/Handshake. **Grenzen:** `public.alembic_version` des Backends bleibt unberuehrt; keine Image-Neubauten ohne Abstimmung; Live-DDL nur ueber die Migrator-Anmeldung, Rueckweg dokumentiert.
+
+**SERVICES-VERSION-TABLE-20261026 umgesetzt (Claude Code):** fuenf Dienst-Ketten mit eigener Versionstabelle; Altketten (doppelte Enum-Anlage, Revisions-IDs > 32 Zeichen, Abweichung von den Modellen, nie angewendet) durch modelltreue Basisrevisionen ersetzt, auf valeo_probe gegen Modell-DDL verglichen und zurueckgerollt. Live: vier CRM-Ketten auf Head, inventory nach Strukturvergleich gestempelt, public.alembic_version unberuehrt. crm-sales/-service auch offline mit eigener Versionstabelle. Vertragstest mit Ratsche (crm-ai/-consent/-gdpr/-marketing). Befund offen: zwei Eigentuemer fuer public.inventory_*. QA docs/quality-assurance/services-version-table-20261026.md.
+
+## INVENTORY-OWNERSHIP-20261026 - reserviert, Claude Code
+
+**Owner:** Claude Code. **Basis:** `claude/services-version-table-20261026` @ 5fc8d7713 (PR #52), Zweig `claude/inventory-ownership-20261026`. **Nutzerentscheidung 2026-10-26:** der inventory-Dienst fuehrt `public.inventory_*`, das Backend liest nur. **Ziel:** neue Backend-Migration ersetzt leere Kompatibilitaetstabellen in TEXT-Form (`wms_material_flow_stock_link_20260619`) durch die Dienstform, mit Daten Abbruch; inventory-Basis legt nur fehlende Tabellen an und bricht bei fremder Form ab; Gleichlauftest beider Definitionen. **Dateibesitz:** neue Datei unter `alembic/versions/`, `services/inventory/alembic/versions/inventory_0001_baseline.py`, eigene Tests, Inventare, QA/Handshake. **Grenzen:** live (`valeo_neuro_erp`, uuid-Form) keine Aenderung ausser Versionsstand; valeo_probe nur nach `pruefstand_db.py --status` und ohne fremde Sitzungen.
+
+**INVENTORY-OWNERSHIP-20261026 umgesetzt (Claude Code):** inventory-Dienst fuehrt public.inventory_* (Nutzerentscheidung). Backend-Migration inventory_service_shape_20261026 ersetzt leere TEXT-Kompatibilitaetstabellen durch die Dienstform, Abbruch bei Zeilen; Dienstbasis legt nur fehlende Tabellen an und bricht bei fremder Form ab; AST-Gleichlauftest. valeo_probe in vier Faellen zurueckgerollt geprueft, alle 8 Tabellen modellgleich. Live keine Aenderung. QA docs/quality-assurance/inventory-ownership-20261026.md.
+
+
+
+
+**STUDIO-INBOX-CI-CLOSURE-20261026 - reserviert, Codex Lead:** Nutzerauftrag Integration und Gesamt-CI. Vorhandene API/DMS/Frontend-WIP-Slices zur abschliessenden Abnahme an studio_api_finish/inbox_finish/frontend_ci_finish delegiert, bestehende Themenbesitze fortgefuehrt. Lead besitzt Routingmounts, ScreenDefinitions, MCPkatalog/Dispatcher, generierte OpenAPI/Rechte/StudioVersionen/Handbuch/Inventare/Architekturartefakte und Doc-Drift-Analyse samt eigenen Regressionen. Keine parallelen Edits an delegierten Quellen. Keine Gateabsenkung/Testloeschung; echte Fachluecken sichtbar. Acht Paketmigrationsketten bleiben exklusiv Claude. Keine DB/Container/Reset, gemeinsame valeo_probe fuer isolierte Datenabnahme.
+
+**STUDIO-INBOX-CI Abhaengigkeitsnachlauf:** Leadbesitz packages/frontend-web/package.json und pnpm-lock.yaml auf fehlende js-yaml-Testabhaengigkeit4.3.2 erweitert; vorhandene Workspace-YAMLtests muessen aus frozenInstallation laufen. Nur3Lockzeilen im Frontendimporter, keine Versionsaenderung bestehenderPakete. Isolierte Manifestansicht/frozenOfflineInstall ohneScripts/Downloads geprueft; bestehende Backporthashbindungen nur nach unveraendertenPatch-/Manifestnachweisen anpassen. Parsererweiterung app/integrations/dms_parser.py fuer Inboxowner autorisiert, nur generische gemeinsame Positionsextraktion und eigene synthetischeFixtures.
+
+**STUDIO-INBOX-CI Frontend-Nativvertraege:** frontend_ci_finish bindet drei geroutete Listen an existierende kanonische IDs (Einkauf Angebote/Lieferanten, Duenger-Alias), integriert die fehlende berechtigte Fachaktionsprojektion in CommandPalette-Modell und Session-Scopes ohne Ruecknahme des neueren Live-Resolvers. Drei Quelltexttests durch echte NativeListPage/Runtime/Renderer-Mounts ersetzt; HTTP/Auth ersetzt, unveraenderte Builderfixtures plus Paritaetstest. Erste drei Mounts und vier Command-Mapping-Tests gruen; positiver Duenger-Pflichtgrundtest und Gesamtlauf folgen. QA frontend-native-contracts-20261026.md. Keine Legacy-Reaktivierung, Datenbank oder Dispositionswrite-Freigabe.
+
+**STUDIO-INBOX-CI Dispositions-Renderbindung:** native_batch_contracts besitzt ausschliesslich build_disposition_touren_disposition_screen_definition im kanonischen Batch14-Builder und eigene Regression/Fixturekopplung zur lokalen disposition-board-screen.ts. Die wirklich geroutete UniversalNativeCockpitPage muss specialized.disposition_board vom Backend erhalten; keine zweite lokaleWahrheit, keine Schreibfreigabe. BestehendeListenquelle/Layout/Rollen erhalten. Frontendcompiler/-renderer bleibt frontend_ci_finish, LeadArtefakte nachQuellstabilitaet nachziehen.
+
+**STUDIO-INBOX-CI Handshakeabgleich 20261026:** Claude-Handshakes drizzle-chains-8, drizzle-apply-guard, db-governance, db-roles, runtime-ddl-migrations und services-db-roles sowie offene PR52/53 gelesen. Remotezweigistauf9e7d33a03vorgerueckt. LeadintegriertbereitsgemergtePR45-51 vorweitererStudioLieferung, ohneihreQuellenzurreparierenoderMigrationenaufProbeanzuwenden. Kontext: Backend/Dienstevaleo_app, Migrationenseparat, keineLaufzeitDDL; public.inventory_* sollInventorydienstfuehren (PR53offen). VorEigencodesynchronisierung Inhaltspreflight undWorkboardappendmerge; keinForcepush.
+
+**STUDIO-INBOX-CI Lead-Fortsetzung nach Modellkapazitaet:** Zwei delegierte Folge-Turns standen ohne Fortgang auf pending_init; gezielt unterbrochen, bestehende Dateien erhalten, Leaduebernimmtgenauihre begonnenenRender-/UIX-Vertraege. Dispositionstestbelegt neueSpezialkomponente, echteRoutenregistrierungfehltebislang (Dispo/StudioPreview), jetztkanonischeAliase/Gerator. Backenddefinition liefert Agent-Metadatenfragment; esistnichtdervollstaendige AgentMaskContract des separatenVertragsendpunkts. Leadbesitz schema.ts ausschliesslich zurkorrekten Partial-Metadatentypisierung; vollerAgentMaskContractbleibtunveraendert. KeineAutorisierungwird darausabgeleitet.
+
+**STUDIO-INBOX-CI echter Prefill-Fachweg - reserviert, inbox_prefill_chain:** Zwei belegteIntegrationsluecken: Ziel/einkauf/rechnung-eingang-erfassung/neu istungeroutet; sessionStorage-Prefill hatkeinenproduktivenConsumerundkeineSitzungsbindung. Besitz UniversalNativeCreatePage.tsx, Inboxcontract/Widget/types undpages/inbox/index.tsx sowieeigeneFrontendtests/QA. KanonischeBelegroute/belege/purchase_invoice/neu verwenden. Maskeholtfrischenauth-/tenantgebundenenprepareperInbox-ID, prueftArt/Rechte/ID/bookingfalseunduebernimmtnur erlaubteKopffeldervorBenutzereingabe. KeineGeschaeftsdatenalsNavigationscache, keineautomatischeAnlage/Buchung. BestehendeCreationkontext-/Idempotenz-/Responsepruefungenbleiben. LeadAPI/Artefakte/Git, keineDB/Container.
+
+**CLAUDE-PR52-53-INTEGRATION-20261026 - reserviert, Codex Lead:** Nutzeruebergabe: #53 nach #52 integrieren. GemeinsameBasis9e7d33a03,28Pfade inbeidenPRs ohne Inhaltskonflikte mitStudio/Inbox. Besitz exaktegelieferteSourcepfade, eigenerQA und Sicherheitsnachlauf nur inventory_service_shape_20261026 gegen DML-RennenbeimLeerheitstest/Drop (Tabellenlocks vorLeerheitspruefung), eigeneUnitregression. KeinDatenbankupgrade/Reset. Migrationinventar ausaktuellenQuellenregenerieren, WorkboardbeideAnhaengeerhalten. VierCRM-FolgekettenbleibenClaude; node-forge-Frist28.10unveraendert.
+
+**STUDIO-INBOX-CI Agrar-Nebenbefund Mandantenbindung - reserviert, Codex Lead:** app/domains/agrar/api/biostimulanzien.py waehltinListe/Suche/Detail/Create/PatchnochQuery-/BodymandantoderDefault, obwohlMainMiddlewareverifiziertenKontextbereitstellt. BesitzdieseDateiundtests/test_biostimulanzien_verified_tenant.py samtQA, keineSchemaaenderung. AlleWegeanbestehendesget_tenant_idbinden, bisherigeBereichsrollenbeibehalten; eigenePG-ZeilenmitRollbackundHTTPNegativfaelle. KeineFreigabeneuerMCPWritesodernichtvorhandenerDetailmasken.
+
+**CLAUDE-PR52-53-INTEGRATION-20261026 umgesetzt:** PR52zuerst3dbaee930integriert/GitHubMERGEDbestaetigt, PR53BasisdanachkorrektaufIntegrationszweiggesetzt. Source53mitzusatzlichemACCESS-EXCLUSIVE-KonversionsguardvorLeerheitstest/Drop;allUUIDbleibtlockfreierNo-op, Schemakopienunveraendert.21Unitvertraegegruen;keineDB-Migration/Reset. QA pr52-53-integration-20261026.md. VermerkfremdeProbeRevision fueraktuellenZweig korrigiert(loading_stop_fk_20261023vorhanden). VierCRM-FolgekettenundRLSseparat.
+
+**STUDIO-INBOX-CI Vite-Konfigurationsquelle - reserviert, vite_config_cleanup:** GepruefterNebenbefund: eingechecktegeneriertevite.config.js/.d.ts konkurrierenmitvite.config.ts, JSenthaeltveraltetenTestsetup-Pfad. BesitznurFrontendvite.config.js/.d.ts Rueckbau, tsconfig.node.json Emit-AusgabeausQuellwurzelweglenken, eigenerQA/Regression. KeineBusiness-/Renderer-/Paket-/Lockdateien. EinzigeKonfigurationsquelleTS, gemeinsameTestinitialisierungnichtproTestduplizieren. Typecheck/BuildmitbestehenderprivateInstallation, keineInstall/DB/Container. LeadGitundGesamtintegration.
+
+**STUDIO-INBOX-CI NativeRoutenvertraege - reserviert, native_batch_contracts:** NeueengeTestgruppe ausschliesslich mask-objectpage-stamm-native-route.test.ts, mask-listen-family-nav.test.ts, mask-primary-nav-native.test.ts plus eigeneFixtures/Helper/Pythonparitaet/QA. BestehendeMappingsbleiben; veralteteImportspelling-Checks gegenrealenaktuellenRouten-/ScreenID-/Detail-/Createvertragpruefen, mindzweiwirklicheRendererMounts, statischenNachweisnichtalsNativeFreigabezaehlen. KeinEditproduktiverPages/Backend/Vite/Inbox/Dispo, keineTestloeschung/Gatesenkung. FruehererDispositionsscopebleibtjetztbeimLead.
+
+**STUDIO-INBOX-CI UIX-Mehrbereichsvertraege - reserviert, frontend_ci_finish:** Besitz ausschliesslich packages/frontend-web/src/__tests__/pages/crm-fibu-logistik-uix.test.ts, fibu-portal-nawaro-uix.test.ts und leitung-controlling-admin-uix.test.ts sowie eigene Fixtures, Helper, Pythonparitaet und QA. Veraltete Quelltext-JSX/CSS-Checks durch echte zentrale Renderer-, Such-, Touch-, Beschriftungs-, CSV-/Export- und Arbeitsbereich-Vertraege ersetzen. Testintentionen und vorhandene Fachaktionen erhalten; fehlende kanonische Aktionen an Lead melden statt wegklassifizieren. Keine Produktionsseiten/Builder/Inbox/Dispo/Vite/Batchtests, keine DB/Container/Installation oder breite Parallelsuite. Claimcommit vor Testedits.
+
+
+**RLS-ORDERED-INTEGRATION-20261027 - reserviert, Codex Lead:** Nutzeruebergabe PR55 (Plan), PR56 (P0), PR57 bis PR63 in Reihenfolge. Besitz importierter RLS-Kern, Policies/Migrationen P3/P5, dazu eigene Regressionen und Integrations-QA. Korrektur: gemeinsame system-Zeilen nur lesbar, keine DELETE-Wirkung oder UPDATE-Uebernahme durch Mandanten. Getrennte SELECT/INSERT/UPDATE/DELETE-Policies; keine permissive ALL-Policy. Neue Rolloutdomains bleiben separat bei Claude nach Nutzerprompt, bestehende P3/P5-Dateien nicht parallel editieren. Keine Live-Policyaktivierung, kein P4-Cleanup, kein Probe-Reset. Bestehende Studio-WIP und Claims bleiben erhalten. Vorgehen: Inhaltspreflight, geordnete Mergecommits, negative Policy-Vertraege und echte PG-Abnahme mit vorhandener valeo_probe und zurueckgerollten eigenen Testtabellen, nur nach Statuspruefung.
+
+
+## RLS-PLAN-20261026 - reserviert, Claude Code
+
+**Owner:** Claude Code. **Basis:** `codex/migration-parity-repair-20261022`, Zweig `claude/rls-plan-20261026`. **Nutzerauftrag 2026-10-26:** Plan fuer datenbankseitige Mandantentrennung (PostgreSQL-RLS, SAP-Prinzip implizite Mandantenbindung) auf Basis eines Soll-Ist-Inventars. **Dateibesitz:** `docs/architecture/rls-mandantenkernel-plan.md`. **Grenzen:** nur Plan und lesendes Inventar; keine Code-, Schema- oder Datenaenderung.
+
+**RLS-PLAN-20261026 vorgelegt (Claude Code):** Plan `docs/architecture/rls-mandantenkernel-plan.md` mit lesendem Inventar (817 Tabellen, 683 mit tenant_id, 0 RLS; Kontext fail-open ueber DEFAULT_TENANT_ID; eine zentrale Engine; 3 297 Handfilter). Phasen P0-P7, Pilot-Vorschlag domain_finance; Entscheidungen beim Nutzer offen. Keine Code-/Schemaaenderung.
+
+
+**NATIVE-DETAIL-ROUTE-PARITY-20261027 - reserviert, native_batch_contracts:** Nutzerauftrag und Leaddelegation: 17 belegte Detailrouten fachlich an kanonische registrierte Detaildefinitionen binden. Besitz betroffene Page-Wrapper, drei eigene Routentests und eigene Fixtures/Paritaet/Mounts/QA; keine Backend-/RLS-/Inbox-/Vite-Dateien. Bestehende Soll-Intentionen erhalten; kein Gruenklassifizieren falscher APIs. Claim 6f2e7a0a hatte wegen gleichzeitiger privater Index-/Dateiverwendung eine leere Workboardfassung; vollstaendiger Stand df0f668e4 hier wiederhergestellt, ausschliesslich Lead serialisiert weitere Commits.
+
+
+## RLS-P0-INVENTORY-20261026 - reserviert, Claude Code
+
+**Owner:** Claude Code. **Basis:** `codex/migration-parity-repair-20261022` @ c3142eb1d, Zweig `claude/rls-p0-inventory-20261026`. **Plan:** `docs/architecture/rls-mandantenkernel-plan.md` (PR #55), Phase P0. **Ziel:** `scripts/rls_inventory.py` klassifiziert alle Tabellen der frischen Datenbank (A tenant_id NOT NULL, B nullbar, C Kind per FK, D ohne) und zaehlt die Datenzugriffswege im Code; Ergebnis `docs/admin/rls-inventory.json` mit `--check`; Vertragstests (statisch ohne DB, Schema gegen frische DB). Liegt valeo_probe hinter dem Kopf, spielt das Skript die fehlenden Revisionen in einer zurueckgerollten Transaktion ein (kein Reset, kein Stempeln). **Dateibesitz:** genannte Dateien, eigene Tests, QA. **Grenzen:** keine Code-/Schema-/Datenaenderung.
+
+**RLS-P0-INVENTORY-20261026 umgesetzt (Claude Code):** scripts/rls_inventory.py + docs/admin/rls-inventory.json (frisches Schema 775 Tabellen A608/B54/C53/D60, 0 RLS; Codepfade SessionLocal 27 Dateien, DEFAULT_TENANT_ID 55 Dateien), Pruefstand-Rueckstand zurueckgerollt eingespielt, valeo_probe unveraendert. Vertragstests 5 gruen, Negativproben rot. Befund: Buchungsjournal liegt in domain_erp, nicht domain_finance (Pilot-Rueckfrage). QA docs/quality-assurance/rls-p0-inventory-20261026.md.
+
+
+## RLS-P1..P7-20261026 - reserviert, Claude Code
+
+**Owner:** Claude Code. **Nutzerauftrag 2026-10-26:** RLS-Plan (PR #55) Phasen P1 bis P7 autonom durcharbeiten. Je Phase eigener Zweig `claude/rls-pN-*-20261026`, gestapelt ab `claude/rls-p0-inventory-20261026`. **Dateibesitz (gesamt):** `app/core/tenant_context.py`, `app/core/database.py` (Ereignis), `app/workers/*` und `app/services/scheduler_service.py` (nur Mandantenkontext), neue Alembic-Revisionen `rls_*`, `scripts/rls_inventory.py`, Tests `tests/test_rls_*`, `.github/CODEOWNERS`, QA/Handshakes. **Grenzen:** Live-RLS auf valeo_neuro_erp erst, wenn der Code im laufenden Backend steckt; Pruefung auf valeo_probe nur zurueckgerollt; P4-Loeschung der Testreste live nach Sicherung (Nutzerentscheidung).
+
+**RLS-P1 umgesetzt (Claude Code):** Mandantenkontext fail-closed (kein DEFAULT_TENANT_ID-Rueckfall), tenant_scope/cross_tenant_scope, Mandantenregister fuer Worker; 8 Worker je Mandant, 8 bewusst mandantenuebergreifend markiert; BaseWorker verweigert Start ohne Kontext. Nebenbefund: rag_indexer-Abfrage konnte nie gelingen. Tests 26 + 206 + 571 gruen. QA docs/quality-assurance/rls-p1-fail-closed-20261026.md.
+
+
+**RLS-P2 umgesetzt (Claude Code):** app.tenant_id je Transaktion aus dem Kontext (Engine-Ereignis, Abgleich je Anweisung, Cache verworfen bei Commit/Rollback/Savepoint-Rollback/Checkout); Savepoint-Befund behoben; Metrik fuer Transaktionen ohne Mandant. 7 + 835 Tests gruen. QA docs/quality-assurance/rls-p2-db-context-20261026.md.
+
+
+**RLS-P3 umgesetzt (Claude Code):** Migration rls_pilot_finance_20261026: rls_current_tenant(), RLS + Policy tenant_isolation auf 22 Pilottabellen (domain_finance + Journal), Backfill journal_entry_lines.tenant_id; als valeo_app 8 Tests gruen, Negativprobe rot; live nicht angewendet, nur zusammen mit P1+P2 ausliefern (Handshake rls-p1-p3-20261026). QA docs/quality-assurance/rls-p3-pilot-20261026.md.
+
+
+**RLS-P4 umgesetzt (Claude Code):** live 2 080 Testrest-Zeilen in 51 Tabellen + 25 test-<hex>-Registereintraege geloescht (Sicherung C:/Users/Jochen/valeo-backups/rls-p4-20261026/, Skript scripts/rls_cleanup_test_tenants.py mit Trockenlauf/Savepoints/Klasse-C-Kindern); unklare Werte (NULL, legacy-unassigned, default, valeo, sd-*) dokumentiert mit Regel fuer P5; SYSTEM->system in P3. QA docs/quality-assurance/rls-p4-cleanup-20261026.md.
+
+
+**RLS-P5 umgesetzt (Claude Code):** scripts/rls_rollout.py (bereit vs. zurueckgestellt mit Grund), Migration rls_rollout_20261026 auf 478 Tabellen -> 500 mit RLS, 111 zurueckgestellt; Ratsche: ready leer; jede Policy als valeo_app ausgewertet. Heuristik und Grenzen in QA docs/quality-assurance/rls-p5-rollout-20261026.md; live nicht angewendet.
+
+
+**RLS-P6 umgesetzt (Claude Code):** Rolle valeo_system (BYPASSRLS, live angelegt ohne Passwort), system_session() nur in cross_tenant_scope, uebergreifende Worker darauf umgestellt, Compose/.env.example; Analyse: uebergreifend blockiert nur ohne Systemverbindung -> rls_system_role_20261026 (business_partners), 501 Tabellen mit RLS. Dienste unter services/* bewusst ohne RLS (Mandant nicht tokengebunden), Vertrag: kein Dienst liest RLS-Tabelle. QA docs/quality-assurance/rls-p6-system-role-20261026.md.
+
+
+**RLS-P7 umgesetzt (Claude Code):** Startwaechter rls_guard (Produktion verweigert Start bei Superuser/BYPASSRLS/Eigentuemer, Entwicklung meldet), Engine-Freigabeliste, CODEOWNERS fuer RLS-Kern. Gesamtstand P0-P7 in docs/quality-assurance/rls-p7-guards-20261026.md: 501 Tabellen mit RLS im frischen Schema, live keine Policy aktiv bis zur Integration. RLS-P1..P7 abgeschlossen.
+
+
+**RLS-ORDERED-INTEGRATION-20261027 Zwischenstand:** Plan55/P056/P157/P258/P359/P460/P561/P662/P763 seriell integriert. Sicherheitskorrektur 943ba2bb0 umfasst auch P6 business_partners: vier operationsgebundene Policies statt ALL. Alte Fassung durch echten valeo_app-DELETE-Test rot belegt, korrigiert 92 Tests gruen (darunter30 neue PG-Faelle). Probe unveraendert loading_stop_fk_20261023, eigene Tabelle entfernt durch Rollback. Lead reserviert ab jetzt kurzes exklusives Pruefstandsfenster fuer ausstehende Revisionen in EINER zurueckgerollten Transaktion sowie Inventar-/RLS-P3/P5/P6-Abnahme; vor Start keine fremden Sessions festgestellt. Kein Reset/Commit/Liveupgrade/P4-Cleanup. Native-Detail-Claim um eng begrenzte neu/new-ID-Erkennung in den zugehoerigen Legacy-Createformularen erweitert, damit echte /neu-Routen keine Detailabfrage ausloesen; keine weiteren Fachumbauten.
+
+
+**AGRAR-ALLOCATION-REFERENCE-20261027 - reserviert, agrar_allocation_guard:** Im RLS-Nachlauf gefundene echte Referenzluecke: AgrarContractService.allocate bindet Vertrag an Mandant, akzeptiert jedoch ticket_id ohne Mandantenpruefung. Besitz ausschliesslich app/services/agrar_contract_service.py, neue eigene Negativ-/Positivtests und QA. Vor jeder Restmengenmutation optionalen Wiegeschein mandanteneigen nachschlagen, fremd/fehlend einheitlich ablehnen; bestehende Fachregeln erhalten. Keine Backendendpoint-/RLS-/Frontenddateien. Lead Git/Workboard, keine weiteren Eigencommits. Pruefstandfenster bleibt Lead; bis Freigabe keine PG-Schreibtests, keine Migrationen.
+
+
+**STUDIO-INBOX-CI Vite-Abnahme und Matcher-Nachlauf - reserviert, Codex Lead:** vite_config_cleanup hat veraltete JS-Konfiguration entfernt, Typecheck und Produktionsbuild erfolgreich sowie InboxWidget21/21. Lead prueft/committet diesen Slice; enger Folge-Dateibesitz tests/components/workflow/ProcessStatusPanel.test.tsx: vi.resetModules zerlegt gemeinsame Vitest-Matcherinitialisierung, Mockzustand statt Modulreset bei unveraenderten drei fachlichen Dichteassertionen. Keine Produktrechte-/Rollenaenderung. RLS bereit gewordene Tabellen domain_agrar.agrar_biostimulanzien und domain_inventory.agrar_contract_allocations bleiben fuer diesen Integrationsnachlauf beim Lead; neue Domain-Rollouts bei Claude davon abgrenzen. Noch keine zusaetzliche Policyaktivierung.
+
+
+**CLAUDE-RLS-64-73-INTEGRATION-20261027 - reserviert, Codex Lead:** Nutzeruebergabe und Handshakes Matrix/Pricing/HR/AuditCompliance/Nachweisraum/systemwide/sharedBooking/systemFallback/docflow/childKeys gelesen. Kette #64->#65->#66->#67->#68->#69->#70->#71->#72->#73 nach #63. Claude hat 943ba2bb0 als42dd12f5d uebernommen; keine zweite Policykorrektur. Neuere SELECT-Begruendungsratsche und P5-Formpruefung fuehrend. Dateibesitz exakte gelieferten Sourcepfade plus Integrations-QA/Generierungen; fremde eigene WIP bei Intrastat/OpenAPI/Inventaren dreifach abgleichen und erhalten. Vier generierte .husky/_-LFS-Hooks nicht als fachliche Quellen uebernehmen. Eigenentwurf rls_verified_agrar_20261027 noch uncommittet, erst hinter #73 einordnen und OHNE system-Lesefreigabe, neue begruendete Freigabepolitik beachten. Voriges Pruefstandfenster beendet: 30 weitere Tests gruen, neuerEntwurf503Tabellen/ready0 transaktional zurueckgerollt, keinLiveupgrade. Neues Fenster fuer #73-Gesamtabnahme separat vorStart mitStatus/Sitzungen pruefen. #70-73: vorhandene DocsJobsgruen, keinvollstaendigerQualityGateNachweis; #73RLSGesamtsuite/DocflowBestandnochLeadpflicht.
+
+
+## RLS-DOMAIN-MATRIX-20261027 - reserviert, Claude Code
+
+**Owner:** Claude Code. **Basis:** `claude/rls-p7-guards-20261026` (#63, Integrationszweig @ c3142eb1d), Zweig `claude/rls-domains-matrix-20261027`. **Nutzerauftrag 2026-10-27:** Vorbereitung der offenen RLS-Domains; Codex bleibt Lead fuer Integration #55-#63, Korrektur der P3/P5-Policies, laufendes Backend und Live-Aktivierung (RLS-ORDERED-INTEGRATION-20261027). **Ziel:** Inventar der zurueckgestellten Tabellen am tatsaechlichen Stand, Gruppierung nach Ursache (Standardmandant, nullbarer Mandant, Positionen ohne tenant_id, gemeinsame Referenzdaten, Dienste ohne tokengebundene Identitaet), Entscheidungsmatrix je Domain, Vorschlag der ersten risikoarmen Domain, Architekturvorschlag fuer `services/*`, Ratschen gegen neue ungeschuetzte Mandantentabellen und abweichende Policy-Strukturen. Neue Policies getrennt nach SELECT/INSERT/UPDATE/DELETE, keine ALL-Policy, `system`-Lesen nur je begruendeter Tabellenfamilie. **Dateibesitz (neu):** `scripts/rls_domain_matrix.py`, `docs/admin/rls-domain-matrix.json`, `docs/admin/rls-exceptions.json`, `app/core/rls_policies.py`, `docs/architecture/rls-domaenen-entscheidungsmatrix.md`, `docs/architecture/rls-dienste-identitaet-vorschlag.md`, `tests/test_rls_domain_matrix.py`, `tests/test_rls_policy_shape.py`, QA/Handshake; danach je Domain-Slice eigene Migration, Fachkorrekturen und Tests (eigener Claim je Slice). **Nicht anfassen:** P0-P7-Kern und deren Tests, `rls_pilot_finance_20261026`, `rls_rollout_20261026`, `rls_system_role_20261026`, `tests/test_rls_p*`. **Grenzen:** keine Live-Policy, kein P4-Cleanup, keine Rollenkennwoerter, keine neue DB/Container, valeo_probe nur nach `--status` in zurueckgerollten Transaktionen, gewachsene DB nur lesend.
+
+**RLS-DOMAIN-MATRIX-20261027 umgesetzt (Claude Code):** Luecke sind 214 Mandantentabellen ohne RLS (A 110, B 51, C 53), nicht 110. Ursachen: standardmandant 62, position 51, referenzdaten 41, mandant_nullbar 38, dienst 20, identitaet 2. Generator scripts/rls_domain_matrix.py (Matrix je Tabelle mit Fundstellen, --data liest die gewachsene DB nur lesend), eingefrorene Ausnahmeliste docs/admin/rls-exceptions.json mit Ratsche, Policy-Form-Ratsche scripts/rls_policy_shape.py (getrennt je Befehl, system nur lesend und begruendet, Altform nur abnehmend). Entscheidungsmatrix docs/architecture/rls-domaenen-entscheidungsmatrix.md, erste Domain pricing; Dienst-Identitaet als Vorschlag. Ueberschneidung mit Codex (P5-Formtest, Policy-Namen) im Handshake. Keine Live-Aenderung. QA docs/quality-assurance/rls-domain-matrix-20261027.md.
+
+
+## RLS-DOMAIN-PRICING-20261027 - reserviert, Claude Code
+
+**Owner:** Claude Code. **Basis:** `claude/rls-domains-matrix-20261027` (RLS-DOMAIN-MATRIX-20261027), Zweig `claude/rls-domain-pricing-20261027`. **Ziel:** erste Domain nach der Entscheidungsmatrix: `domain_pricing.price_lists` + `price_list_items` mit getrennten Policies je Befehl (kein `system`-Lesen); Positionen bekommen `tenant_id` aus dem Kopf (NOT NULL, Default aus dem Kontext, Verbund-FK gegen fremde Elternbelege). Fachkorrektur `app/api/v1/endpoints/price_lists.py`: Mandant tokengebunden statt Query-Parameter mit Standard, Lesen/Aendern/Loeschen mit Mandantenfilter, Rollenpruefung bleibt. **Dateibesitz:** neue Migration `alembic/versions/rls_domain_pricing_20261027.py`, `app/api/v1/endpoints/price_lists.py`, `tests/test_rls_domain_pricing.py`, Inventare `docs/admin/rls-*.json`/`rls-domain-matrix.md` (nur Regeneration), `docs/admin/rls-exceptions.json` (zwei Eintraege austragen), QA/Handshake. **Nicht anfassen:** P0-P7, `preisfindung_service.py` (nur lesend geprueft), `tests/test_rls_p*`. **Grenzen:** keine Live-Migration, valeo_probe nur zurueckgerollt.
+
+**RLS-DOMAIN-PRICING-20261027 umgesetzt (Claude Code):** domain_pricing mit getrennten Policies je Befehl (kein system-Lesen), price_list_items.tenant_id aus dem Kopf mit Verbund-FK gegen fremde Elternbelege, Migration rls_domain_pricing_20261027. Fachbefund: price_lists.py las/aenderte/loeschte mandantenuebergreifend per ID und nahm den Mandanten aus Query-Parameter mit Standard; jetzt tokengebunden mit Mandantenfilter. 13 Tests als valeo_app (inkl. Pool, Savepoint, Hintergrund, Fachkette mit Preisfindung), Mutationsgegenprobe. 503 Tabellen mit RLS, 212 zurueckgestellt. P5-Formtest (Codex) auf dem Pruefstand rot fuer die neue Form, im Handshake. QA docs/quality-assurance/rls-domain-pricing-20261027.md.
+
+
+## RLS-DOMAIN-HR-20261027 - reserviert, Claude Code
+
+**Owner:** Claude Code. **Basis:** `claude/rls-domain-pricing-20261027` (#65), Zweig `claude/rls-domain-hr-20261027`. **Nutzerauftrag 2026-10-27:** naechste Domains hr, audit/compliance, nachweisraum (je eigener Slice); Codex pausiert bis ca. 4 h, Teilaufgaben von Codex nur mit Handshake. **Ziel:** `domain_hr.onboarding_checklists`, `training_courses`, `work_plan_assignments`, `person`, `employment` mit getrennten Policies (`tenant_isolation_*`, kein `system`-Lesen); `person`/`employment` tenant_id NOT NULL (Abbruch bei NULL-Zeilen); Verbund-FKs der Kindtabellen `onboarding_runs`, `training_assignments` (P5-Tabellen, nur FK, Policies unberuehrt) und `employment` gegen fremde Elternbelege. Gemeinsame Testhilfe `tests/rls_domain_support.py` fuer die folgenden Domain-Slices. **Dateibesitz:** neue Migration `alembic/versions/rls_domain_hr_20261027.py`, `tests/rls_domain_support.py`, `tests/test_rls_domain_hr.py`, Inventare (Regeneration), `docs/admin/rls-exceptions.json` (austragen), QA/Handshake. **Nicht anfassen:** `app/api/v1/endpoints/training.py` (nur gelesen; Code filtert bereits tokengebunden), P0-P7, Codex-Arbeitsbaum. **Grenzen:** keine Live-Migration, valeo_probe nur zurueckgerollt.
+
+**RLS-DOMAIN-HR-20261027 umgesetzt (Claude Code):** fuenf domain_hr-Tabellen mit getrennten Policies (tenant_isolation_*, kein system-Lesen), person/employment NOT NULL, Verbund-FKs der Kinder onboarding_runs/training_assignments/employment. Keine Fachkorrektur noetig (training.py tokengebunden; Matrix-Fundstellen waren Fehltreffer). Gemeinsame Pruefhilfe tests/rls_domain_support.py. 14 Tests als valeo_app inkl. Fachkette, Mutationsgegenprobe. 508 mit RLS, 207 zurueckgestellt. Policy-Namen an Codex 943ba2bb0 angeglichen (#64/#65 nachgezogen). QA docs/quality-assurance/rls-domain-hr-20261027.md.
+
+
+## RLS-DOMAIN-AUDIT-COMPLIANCE-20261027 - reserviert, Claude Code
+
+**Owner:** Claude Code. **Basis:** `claude/rls-domain-hr-20261027` (#66), Zweig `claude/rls-domain-audit-compliance-20261027`. **Ziel:** `domain_audit.attestations`, `domain_compliance.compliance_pcn_status_log`, `data_erasure_requests`, `intrastat_meldungen` mit getrennten Policies (`tenant_isolation_*`, kein `system`-Lesen); `compliance_pcn_status_log.tenant_id` NOT NULL und Verbund-FK auf `compliance_pcn_meldungen` (P5-Tabelle, nur FK/UNIQUE, Policies unberuehrt); Abbruch bei Platzhalter-Mandanten, verwaisten oder fremden Logzeilen. **Fachkorrekturen:** `app/services/compliance_pcn_lifecycle_service.py` (Lesen/Aendern nur im eigenen Mandanten, fremde ID = nicht gefunden statt Existenzhinweis), `app/api/v1/endpoints/intrastat.py` (PUT auf fremde/fehlende Meldung 404 statt Erfolg). **Dateibesitz:** neue Migration `alembic/versions/rls_domain_audit_compliance_20261027.py`, die zwei genannten Quelldateien, `tests/test_rls_domain_audit_compliance.py`, Inventare (Regeneration), `docs/admin/rls-exceptions.json`, QA/Handshake. **Nicht anfassen:** `sales_delivery_notes.py` (ungenutzte Konstante DEFAULT_TENANT nur gemeldet), `compliance_dsgvo.py`, P0-P7. **Grenzen:** keine Live-Migration, valeo_probe nur zurueckgerollt.
+
+**RLS-DOMAIN-AUDIT-COMPLIANCE-20261027 umgesetzt (Claude Code):** attestations, compliance_pcn_status_log, data_erasure_requests, intrastat_meldungen mit getrennten Policies (kein system-Lesen); PCN-Verlauf NOT NULL + Verbund-FK auf compliance_pcn_meldungen (ohne CASCADE). Fachkorrekturen: PCN-Dienst liest/aendert nur im eigenen Mandanten (kein Existenzhinweis mehr), Intrastat-PUT auf fremde Meldung 404 statt Schein-Erfolg. 12 Tests als valeo_app inkl. drei Fachketten; Bestandsvertraege 63 passed. 512 mit RLS, 203 zurueckgestellt. QA docs/quality-assurance/rls-domain-audit-compliance-20261027.md.
+
+
+## RLS-DOMAIN-NACHWEISRAUM-20261027 - reserviert, Claude Code
+
+**Owner:** Claude Code. **Basis:** `claude/rls-domain-audit-compliance-20261027` (#67), Zweig `claude/rls-domain-nachweisraum-20261027`. **Ziel:** `domain_nachweisraum.nachweisraum_dokumente` und `gobd_exporte` mit getrennten Policies (`tenant_isolation_*`, kein `system`-Lesen); Verbund-FK `nachweisraum_audit_log (dokument_id, tenant_id) -> nachweisraum_dokumente` (P5-Tabelle, nur FK, Policies unberuehrt). **Fachkorrekturen:** `app/api/v1/endpoints/doc_nachweisraum_actions.py` Mandant aus `get_tenant_id` (Token) statt `Header(x_tenant_id)`; `app/services/doc_nachweisraum_lifecycle_service.py` Wiederlesen nach Schreiben mit Mandantenfilter. **Dateibesitz:** neue Migration `alembic/versions/rls_domain_nachweisraum_20261027.py`, die zwei Quelldateien, `tests/test_rls_domain_nachweisraum.py`, Inventare (Regeneration), `docs/admin/rls-exceptions.json`, OpenAPI nur fuer `/nachweisraum/*`, QA/Handshake. **Nicht anfassen:** `mcp_execution_service.py` (liest bereits tokengebunden), P0-P7. **Grenzen:** keine Live-Migration, valeo_probe nur zurueckgerollt.
+
+**RLS-DOMAIN-NACHWEISRAUM-20261027 umgesetzt (Claude Code):** nachweisraum_dokumente und gobd_exporte mit getrennten Policies (kein system-Lesen), Verbund-FK des Pruefprotokolls (ohne CASCADE). Fachkorrektur: doc_nachweisraum_actions.py Mandant aus dem Token statt Header(x_tenant_id), Wiederlesen mit Mandantenfilter. 10 Tests (inkl. Quelltextvertrag, Fachkette Dokument/GoBD-Export); RLS-Gesamtlauf 153 passed, 1 bekannter P5-Formtest (Codex). 514 mit RLS, 201 zurueckgestellt. Domain-Kette #64-#68 im Handshake. QA docs/quality-assurance/rls-domain-nachweisraum-20261027.md.
+
+
+## RLS-SYSTEMWIDE-SPLIT-20261027 - reserviert, Claude Code (uebernimmt Codex-Teilaufgabe)
+
+**Owner:** Claude Code. **Nutzerauftrag 2026-10-27:** Codex pausiert (Nutzungslimit); Claude uebernimmt den P5-Formtest und rollt die Umstellung systemweit aus, mit Handshake an Codex. **Basis:** `claude/rls-domain-nachweisraum-20261027` (#68), Zweig `claude/rls-systemwide-split-20261027`. **Ziel:** (1) Codex' Korrektur 943ba2bb0 (getrennte Policies fuer P3/P5/P6, nur lokal auf Codex-main) per Cherry-pick in die Kette uebernehmen, Autor Codex. (2) `tests/test_rls_p5_rollout.py` uebernehmen: Formpruefung ueber `scripts/rls_policy_shape.py` (getrennt; system-Lesen nur fuer begruendete Tabellen). (3) Systemweit: system-Lesen der 501 Bestandstabellen nur behalten, wo Daten oder Code es belegen (Begruendung je Tabelle in `docs/admin/rls-exceptions.json` -> `system_lesbar`); alle uebrigen auf eigenes SELECT umstellen (neue Migration), `altbestand_hoechstens` -> 0. **Dateibesitz:** Cherry-pick-Dateien von 943ba2bb0, `tests/test_rls_p5_rollout.py`, neue Migration `alembic/versions/rls_system_read_justified_20261027.py`, `docs/admin/rls-exceptions.json`, `scripts/rls_policy_shape.py`, `tests/test_rls_policy_shape.py`, eigene Tests, Inventare, QA/Handshake. **Grenzen:** keine Live-Migration, kein Push auf Codex-main, valeo_probe nur zurueckgerollt, gewachsene DB nur lesend.
+
+**RLS-SYSTEMWIDE-SPLIT-20261027 umgesetzt (Claude Code, uebernimmt Codex-Teilaufgabe):** Codex 943ba2bb0 per Cherry-pick in die Kette (Autor Codex). P5-Formtest uebernommen: Formpruefung ueber scripts/rls_policy_shape.py, system-Lesen nur fuer system_lesbar. Systemweit: rls_system_read_justified_20261027 stellt SELECT der 501 Bestandstabellen auf eigenen Mandanten (Befund docs/admin/rls-system-read.json: kein Lesepfad las system-Zeilen; einziger echter Leser chart_of_accounts noch ohne RLS). altbestand_hoechstens 0, Inventar regeneriert. RLS-Gesamtlauf 188 passed, kein roter Test mehr. Folgebefund: 49 Dateien mit tenant_id-Vorgabe "system". QA docs/quality-assurance/rls-systemwide-split-20261027.md, Handshake an Codex.
+
+
+## RLS-SHARED-BOOKING-TEMPLATES-20261027 - reserviert, Claude Code
+
+**Owner:** Claude Code. **Nutzerentscheidung 2026-10-27:** System-Buchungsvorlagen stehen allen Mandanten zur Verfuegung. **Basis:** `claude/rls-systemwide-split-20261027` (#69), Zweig `claude/rls-shared-booking-templates-20261027`. **Ziel:** `domain_erp.booking_templates` als erste begruendete `system_lesbar`-Tabelle (Migration `rls_booking_templates_shared_20261027`: SELECT eigen + system, Schreiben unveraendert nur eigen); `app/api/v1/endpoints/booking_templates.py`: Liste/Abruf zeigen eigene und gemeinsame Vorlagen (Kennzeichen `shared`), Anwenden einer gemeinsamen Vorlage bucht im eigenen Mandanten mit eigenem Konto vor gemeinsamem Kontenrahmen, Aendern/Loeschen gemeinsamer Vorlagen 403. **Dateibesitz:** neue Migration, `booking_templates.py`, `docs/admin/rls-exceptions.json`, `tests/test_rls_shared_booking_templates.py`, Anpassung `tests/test_rls_system_read_justified.py`, OpenAPI nur `/booking-templates*`, Inventare, QA/Handshake. **Grenzen:** keine Live-Migration, valeo_probe nur zurueckgerollt.
+
+**RLS-SHARED-BOOKING-TEMPLATES-20261027 umgesetzt (Claude Code):** Nutzerentscheidung: System-Buchungsvorlagen fuer alle Mandanten. booking_templates erste begruendete system_lesbar-Tabelle (Migration rls_booking_templates_shared_20261027, SELECT eigen+system, Schreiben eigen). booking_templates.py: Liste/Abruf mit Kennzeichen shared, Anwenden bucht im eigenen Mandanten (eigenes Konto vor gemeinsamem Kontenrahmen), Aendern/Loeschen gemeinsamer Vorlagen 403. 3 RLS-Tests, Bestandstests 847 gruen, RLS-Gesamtlauf 191. Maskenanpassung (Spalte Gemeinsam, Loeschen ausblenden) an Codex im Handshake. QA docs/quality-assurance/rls-shared-booking-templates-20261027.md.
+
+
+## SYSTEM-TENANT-FALLBACK-20261027 - reserviert, Claude Code
+
+**Owner:** Claude Code. **Nutzerauftrag 2026-10-27:** Befund aus RLS-SYSTEMWIDE-SPLIT schliessen: 157 Stellen in 56 Dateien setzen `tenant_id = "system"` als Vorgabe/Rueckfall. **Basis:** `claude/rls-shared-booking-templates-20261027` (#70), Zweig `claude/system-tenant-fallback-20261027`. **Ziel:** HTTP-Eingaenge nehmen den Mandanten nur aus dem Token (`get_tenant_id`), Request-Modelle ohne `tenant_id`-Vorgabe; interne Funktionen/Modelle nehmen den expliziten Mandanten oder den des Kontexts (`get_current_tenant_id`, fail-closed), nie `system`; SQL-Klauseln, die NULL-Zeilen dem Mandanten `system` zuschlagen, entfallen; Vertragstest/Ratsche gegen neue Rueckfaelle. **Dateibesitz:** die 56 Fundstellen-Dateien (nur die Mandantenstellen), `tests/test_system_tenant_fallback_contract.py`, betroffene Bestandstests, OpenAPI nur fuer geaenderte Pfade/Schemas, QA/Handshake. **Grenzen:** keine fachliche Umgestaltung darueber hinaus, keine DB-Aenderung.
+
+**SYSTEM-TENANT-FALLBACK-20261027 umgesetzt (Claude Code):** 216 Stellen in 65 Dateien mit Mandanten-Rueckfall "system" geschlossen (AST-Zaehlung): HTTP-Eingaenge nehmen den Mandanten aus dem Token (Depends(get_tenant_id), Request-Modelle ohne tenant_id, ?tenant_id= entfaellt), interne Funktionen/Modelle den des Kontexts (get_current_tenant_id, fail-closed), SQL ordnet NULL-Zeilen nicht mehr 'system' zu. Gemeinsamer Mandant benannt (SHARED_TENANT_ID); Produktwissen ausdruecklich gemeinsam, Wissens-API liest eigen+gemeinsam, schreibt nur eigen (403). Agenten-Ops-Routen jetzt tokengebunden. Ratsche tests/test_system_tenant_fallback_contract.py (system 0, default je Datei eingefroren). Betroffene Tests gegen Basis verglichen: 0 neu rot. OpenAPI nachgezogen (closing-checklists-Drift unveraendert). QA docs/quality-assurance/system-tenant-fallback-20261027.md.
+
+
+## RLS-DOMAIN-DOCFLOW-20261027 - reserviert, Claude Code
+
+**Owner:** Claude Code. **Nutzerauftrag 2026-10-27:** naechste Domains. **Basis:** `claude/system-tenant-fallback-20261027` (#71), Zweig `claude/rls-domain-docflow-20261027`. **Ziel:** `domain_docflow.document_headers`, `document_items`, `document_artifacts`, `invoice_xml_store`, `pos_tse_devices` mit getrennten Policies (`tenant_isolation_*`, kein `system`-Lesen); Verbund-FKs `document_items`/`document_artifacts`/`invoice_xml_store` -> `document_headers` und `pos_tse_devices` -> `pos_terminals` (P5-Tabelle, nur UNIQUE); Abbruch bei Platzhalter-Mandanten oder fremden Elternsaetzen. **Fachkorrektur:** `app/api/v1/endpoints/gobd_archiv.py` Mandant aus dem Token statt `?tenant_id=` mit Standardmandant. **Dateibesitz:** neue Migration `alembic/versions/rls_domain_docflow_20261027.py`, `gobd_archiv.py`, `tests/test_rls_domain_docflow.py`, Inventare, `docs/admin/rls-exceptions.json`, OpenAPI nur `/gobd/*`, QA/Handshake. **Grenzen:** weitere Kinder von `document_headers` (Links, Buchungen, Rueckgaben, POS-Belegpruefung) nur als Folgebefund; keine Live-Migration.
+
+**RLS-DOMAIN-DOCFLOW-20261027 umgesetzt (Claude Code):** document_headers, document_items, document_artifacts, invoice_xml_store, pos_tse_devices mit getrennten Policies (kein system-Lesen), Verbund-FKs Positionen/Artefakte/XML -> Kopf und TSE -> Terminal. gobd_archiv.py: Mandant aus dem Token statt ?tenant_id= mit Standardmandant (8 Wege). 15 Tests als valeo_app inkl. Fachkette E-Rechnung/Archiv; 31 Bestandsmodule 402 gruen; RLS-Gesamtlauf 213. 195 zurueckgestellt. Folgebefund: weitere Kinder von document_headers (P5) ohne Verbund-FK. QA docs/quality-assurance/rls-domain-docflow-20261027.md.
+
+
+## RLS-DOCFLOW-CHILD-KEYS-20261027 - reserviert, Claude Code (uebernimmt Codex-Tabellen)
+
+**Owner:** Claude Code. **Nutzerauftrag 2026-10-27 ("uebernehme"):** Folgebefund aus RLS-DOMAIN-DOCFLOW. Die Kinder von `document_headers`, `document_items`, `document_artifacts` und `pos_tse_devices` sind P5-Tabellen (Codex-Besitz) mit einfachen Fremdschluesseln. **Basis:** `claude/rls-domain-docflow-20261027` (#72), Zweig `claude/rls-docflow-child-keys-20261027`. **Ziel:** Verbund-FKs `(eltern, tenant_id)` fuer `document_header_links` (von/nach), `document_links` (Kopf und Position, von/nach), `document_postings`, `document_return_cases` (Kopf, Artefakt), `pos_receipt_compliance` (Kopf, Originalkopf) und `pos_regulatory_notices` (TSE). ON-DELETE-Verhalten bleibt; SET NULL nur fuer die Verweisspalte (PG15). Dazu `UNIQUE (id, tenant_id)` an Positionen, Artefakten und TSE. Policies der P5-Tabellen bleiben unveraendert. **Dateibesitz:** neue Migration `alembic/versions/rls_docflow_child_keys_20261027.py`, `tests/test_rls_docflow_child_keys.py`, Inventare, QA/Handshake. **Grenzen:** keine Live-Migration, valeo_probe nur zurueckgerollt; Handshake an Codex.
+
+
+**CLAUDE-RLS-64-73-INTEGRATION-20261027 Quellintegration umgesetzt:** Alle10Handshakesgelesen und PR64..73 seriellmitMergecommits, Endstandb802b79ac. Uebernommene943ba2bb0/42dd12f5derkannt, neuereSELECT-Begruendungsratschefuehrend. Intrastat3waymerged, eigenerOpenAPI-/Inventar-WIPerhalten;viergenerierte.husky/_-LFSHooksnichtintegriert. SystemrollelokalkonfiguriertundAnmeldunggeprueft,Secretsnurignorierte.env,LiveRLS0unveraendert. FullRLS/DocflowAbnahmenichtgestartet, weilagent:claude-rls-domainsaktivaufProbe;keinefremdeSitzungangefasst. Lead-Slicesagrar_biostimulanzien/agrar_contract_allocations samtEntwurfbleibenreserviert;EntwurfhinterPR73undohnesystem-Lesen. Native17Detail/16CreateFixesfb4d0c1dc,65Frontendtests+vollerTypecheckgruen. Vite548fa8304abgenommen,Matcher3Faelegeheilt. KeinGesamtgruen. Handshake codex-rls-73-integration-20261027.md.
+
+## RLS-DOMAIN-KI-20261027 - reserviert, Claude Code
+
+**Owner:** Claude Code. **Nutzerauftrag 2026-10-27:** Domains KI und Sales als getrennte PRs; KI zuerst (fachlich eindeutiger). **Basis:** Integrationszweig `codex/migration-parity-repair-20261022` @ b9f22226e (Kette bis #73), Zweig `claude/rls-domain-ki-20261027`. **Ziel:** `public.agent_proposals`, `public.mcp_tool_executions` mit getrennten Policies (kein `system`-Lesen); `domain_shared.knowledge_versions` (Klasse C) bekommt `tenant_id` aus dem Wissensobjekt, NOT NULL, Verbund-FK `(knowledge_id, tenant_id)` und dieselbe begruendete Lesefreigabe wie `knowledge_objects` (Familie gemeinsames Produktwissen). **Fachkorrekturen:** `app/api/v1/endpoints/rag.py` Suche nur im Token-Mandanten (Filter des Aufrufers koennen ihn nicht ersetzen); `app/models/knowledge.py`/`app/repositories/knowledge_repository.py` Versionen tragen den Mandanten ihres Objekts. **Dateibesitz:** neue Migration `alembic/versions/rls_domain_ki_20261027.py`, die genannten Quelldateien, `tests/test_rls_domain_ki.py`, `tests/test_rag_search_tenant.py`, Inventare/Ausnahmen (nach Pruefstandsfreigabe), QA/Handshake. **Nicht anfassen:** Codex-Lead-Slices (agrar_biostimulanzien, agrar_contract_allocations, rls_verified_agrar_20261027, Allokationsservice), Studio/Masken, Systemrollen-Konfiguration, Live. **Grenzen:** Datenbanktests erst nach Freigabe des Pruefstands durch den Lead; Alembic-Einordnung hinter dem kanonischen Head, Abgleich mit Codex' Agrar-Entwurf im Handshake.
+
+**RLS-DOMAIN-KI-20261027 umgesetzt (Claude Code):** agent_proposals, mcp_tool_executions getrennte Policies (kein system-Lesen); knowledge_versions mit tenant_id aus dem Objekt, Verbund-FK, begruendete gemeinsame Lesefreigabe (Produktwissen). Fachkorrekturen: Wissensbasis aendert mit Mandantenkontext nur eigene Objekte (vorher Versionen an gemeinsamem Produktwissen moeglich, jetzt 403); RAG-Suche an den Token-Mandanten gebunden (latent, Router ausgehaengt). Pruefstandsfenster nach Codex-Freigabe: 7 Verhaltenstests ohne Uebersprung, RLS-Gesamtsuite 239, Bestandstests 663 wie Basis. 192 zurueckgestellt. Einordnung zu rls_verified_agrar_20261027 im Handshake. QA docs/quality-assurance/rls-domain-ki-20261027.md.
+
+**RLS-GESAMTABNAHME-20261027 - reserviert, Codex Lead:** Nutzer/Claude hat Probe explizit freigegeben und pausiert eigene DB-Pruefungen. Nachweis183b2bc9e(PR73),228RLS+387Docflow/GoBDalsAutornachweisuebernommen, nurDokuaenderunggegenintegriertesPR73. LeadnutztjetztexklusivesFenster fuerintegrierteKetteplus2Agrartabellen,rollenrichtigeSchreibgrenzenundInventare. KeineDB/Container/Reset/LivePolicies. EigeneRevisionenimmeraeussererRollback. Ausnahmenratsche195auf193nurwegenzusaetzlicher2gesicherterTabellensenken. BisFensterendeClaudeKI/SalesnurAnalyse.
+
+
+**CI-PROCESS-KERNEL-SIZE-20261027 - reserviert, Codex Lead:** QualityGate40488618550meldetneuenGodfileverstoss process_kernel_api.py6108->6110durchTenantkontextimport. Besitznur _dq_ruleset_public-AuslagerungausdiesemEndpointindiezugehoerigeDataQualityAusgabeschemahilfe, bestehendeDatenqualitaetsvertraegeundQA. KeineBaselineanhebung/Leerzeilenkosmetik, keineTenant-/KI-Fachlogikaenderung. ClaudeKI/Salesbleibtseparat, nurdieserFormatterLeadbesitz.
+
+
+**RLS-GESAMTABNAHME-20261027 abgeschlossen, Pruefstand freigegeben:** IntegrierteKettePR73plusAgrarFolge269Testspassed/keineSkips, weitere77API-Vertraegepassed. VollerSchemaReplaynurRollback:522RLSTabellen,193Ausnahmen,ready0. DanachRevisionloading_stop_fk_20261023unveraendert,keineSessions,keineRegressionstabelle. ClaudeDBFensterabjetztfrei; siebenVerhaltenstestsmitgesetzterTEST_DATABASE_URL,keineSkipsalsAbnahme. OwnAgrarQuellen/InventarealsMeilensteinliefern;GesamtStudio-Projektion/API77Quelllieferungseparat. QualityGate40488618550Frontend189rot/DocDrift263rot,neueRouterGroessenregressionausgelagertundRatsche6100gruen. KeineLiveRLSaktivierung. QA rls-integrated-acceptance-20261027.md.
+
+
+**STUDIO-INBOX-DELIVERY-20261027 - reserviert, Codex Lead:** NachRLS-MeilensteinfolgtdieZusammenfuehrungbereitsgepruefter77API-/EntityprojektionsvertraegeundInboxslice. DelegierteengeAudits: delivery_api_projection besitztlesendenSicherheits-/Abhaengigkeitsreviewder14APIQuellen,mask_data_read,EntityprojectionCompiler/Schema/RuntimeundzugehoerigenTests,keineEdits. delivery_inbox besitztlesendenReviewDMS/InboxBackendundNativeCreate-Prefill,gezielteTestsOHNEPostgres,keineProduktedits. delivery_inventory besitztnurartifacts-DateiinventarandererWIPUnterschiede/Neudateien,keineProjektquellen/Git/DB. LeadalleEdits,ArtefaktgenerierungundCommitsserialisiert. TestDBbleibtClaudePR74freigegeben;keineeigenenPGTestsbisneuemFenster. KeinMergenaktiverPR74, keineDispositionswriteFreigabe, keineLegacyFunktionloeschung.
+
+
+**NATIVE-PROCUREMENT-LIST-IDS-20261027 - reserviert, Codex Lead:** ZweiimUIXReviewbelegteproduktiveListenfordernnichtregistrierte-listeScreenIDs. Besitznur pages/einkauf/anfragen-liste.tsx undauftragsbestaetigungen-liste.tsx, eigenegezielteRegression/QA. ExistierendekanonischeIDs einkauf/anfragen undeinkauf/auftragsbestaetigungen verwenden;keineFachaktionen/Rollenumbauten. BestehendeMultiDomain-Mounttests mitunveraendertenkanonischenFixtures alsAbnahme. AlleAPI/InboxReviewslesenweiter,keineDB.
+
+
+**STUDIO-INBOX-DELIVERY Modellnachsteuerung (Nutzer):** BisherigeReviews delivery_api_projection/delivery_inbox/delivery_inventory unterbrochen, Dateien erhalten. FortsetzungderselbenlesendenScopesdurch delivery_api_low unddelivery_inbox_low mit gpt-6.1-sol/low. RoutinedateiinventaruebernimmtLeadalsdeterministischesSkript,keinweitererLLMAgent. HoehereDenkstufen nurbeinachgewiesenerNotwendigkeit. Besitzergrenzen/DB-SperrefuerClaude/Gitserialisierungbleibenunveraendert. APIvorabDateidifferenzenvorhanden;keineunnuetigeWiederholungder77API-,269RLS-,65Frontendpruefungen.
+
+
+**SESSION-CACHE-BOUNDARY-20261027 - reserviert, session_cache_low:** ReadReview zeigt InboxWidgetinterneStatebleibtbeiAuthwechselmontiert; DataBootstrap verwendetbisherglobalenQueryClientohneIdentitaetsgrenze. Besitzer nursrc/app/DataBootstrap.tsx, neuenengbenanntenSession-Cache-TestundQA. Sol/low. GegenprobevorFix: Token/Sub/Tenantwechsel+valeo-auth-changedbeiweiteremMount; keinealtenQuery-/WidgetStatewerte. ZentralerProviderresetnurbeiSub/Tenant/Rollen-/Scopewechsel, NICHTnormalemTokenrefresh, keineTokensalsCacheKey, keineAutorisierungsersetzung. EchteQueryClient-/ReactLifecycleTests,Transport/AuthMock,keineDB/Installation/Gesamtsuite. LeadcommitsserialisiertundvollerTypecheckspaeter.
+
+
+**STUDIO-INBOX-DELIVERY Nachlauf 20261027:** Sol/low-Reviews beendet; Sitzungsgrenze und Beschaffungslisten korrigiert. Vollstaendige Frontend-Typpruefung gruen; 79 gezielte Tests in elf Dateien gruen. Studio-Katalog 848 Definitionen synchron. YAML-Lockbindung samt unveraenderten Backportpatches geprueft; Sicherheitsfrist unveraendert. Kein eigener DB-Zugriff waehrend Claudes Fenster. Weitere gemeinsame Quelllieferung/Artefakte und Gesamt-CI bleiben offen; keine Gesamtfreigabe.
+
+
+**QS-SECURITY-20261027 - reserviert, Codex Lead:** Aktueller CI-Befund GHSA-6pq8-jhm2-2vcw fuer qs6.16.0. Besitz Root-package.json qs-Override, pnpm-lock.yaml, Backport-Review ausschliesslich Hashbindung und eigene QA. Upstream6.16.1 verwenden, keine Ausnahme/Fristverlaengerung. Lockaenderungen auf erforderliche Aufloesungen begrenzen; bestehende Patchbytes/Privatdaten schuetzen. Kein DB-Zugriff. Terra-Unteragenten nur lesende Recherche abgeschlossen.
+
+
+**QS-SECURITY-20261027 umgesetzt:** qs exakt6.16.1, gepinnterLocknurqsgeaendert, Paketintegritaetgeprueft. Gegenprobealt3rot/1gruen, neu4gruen. PermanenterTestimBackportGate. LockauditkeinQsBefund, bekannternode-forgeQuellpatchbefundbleibt; Backportbytesunveraendert, Hashbindungenaktualisiert, Frist28.10unveraendert. QA qs-security-20261027.md. ProduktionsbuilddesStudioIntegrationsstandsgruen; Gesamtabnahmeweiteroffen.
+
+
+**CLAUDE-RLS-74-78-INTEGRATION-20261027 - reserviert, Codex Lead:** NeueHandshakesKI/Sales/CRM/Inventory/Einkaufgelesen. IntegrationseriellKI74->Sales75->CRM76->Inventory77->EinkaufmitexaktenlokalenHeads. DateibesitzgelieferteQuellen/Migrationen/Tests,gemeinsamegenerierteArtefakteundIntegrationsQA. ViewWIP/OpenAPIerhalten,dreifachabgleichen. KeinLiveUpgradewegenDEMO-PO-001/002Fremdlieferant;keineDemodatenohneHerkunftspruefungveraendern. PruefstanderstnachaktuellemStatusundBesitzpruefung;historische0SessionskeineFreigabe. TerrareviewsDocDrift/FrontendnurAnalyse,EditsnachengerClaimzuweisung.
+
+## RLS-DOMAIN-SALES-20261027 - reserviert, Claude Code
+
+**Owner:** Claude Code. **Nutzerauftrag 2026-10-27:** Domain Sales nach KI. **Basis:** `claude/rls-domain-ki-20261027` (#74), Zweig `claude/rls-domain-sales-20261027`. **Ziel:** Koepfe `domain_crm.sales_offers`, `sales_orders`, `domain_sales.delivery_notes`, `sales_credit_notes` und `sales_delivery_notes` (B, NOT NULL) mit getrennten Policies (kein `system`-Lesen); Positionen `domain_crm.sales_order_items`, `domain_sales.delivery_note_positions` (C), `sales_credit_note_lines` (C) mit Mandant vom Kopf und Verbund-FK; `sales_offer_items` (P5) Verbund-FK zum Angebot. **Fachkorrektur:** `app/api/v1/endpoints/pick_lists.py` Mandant aus dem Token statt `?tenant_id=` mit Standardmandant. **Dateibesitz:** neue Migration `alembic/versions/rls_domain_sales_20261027.py`, `pick_lists.py`, `tests/test_rls_domain_sales.py`, Inventare/Ausnahmen, OpenAPI nur `/pick-lists`, QA/Handshake. **Nicht anfassen:** Codex-Lead-Slices (Agrar), Studio/Masken, Fachcommands/Freigaben/Buchungsregeln (nur gelesen). **Grenzen:** Datenbanktests erst nach erneuter Pruefstandsfreigabe; Artikel-FK der Lieferscheinpositionen bleibt einfach (Artikelstamm Klasse B, zurueckgestellt).
+
+
+**RLS-DOMAIN-SALES-20261027 umgesetzt (Claude Code):** Angebote, Auftraege, Lieferscheine, Gutschriften, Quittierungen und Picklisten mit getrennten Policies, Positionen per Verbund-FK am Kopf (Lieferschein-/Gutschriftpositionen erhalten tenant_id). Fachbefund pick_lists.py mandantenoffen (fremde Auftraege auf in_delivery) behoben. valeo_probe: 17 Verhaltenstests ohne Uebersprung, RLS-Gesamtsuite 303, Bestand 0 neu rot. 181 zurueckgestellt. QA docs/quality-assurance/rls-domain-sales-20261027.md.
+
+
+**NOTIFICATION-LOCAL-PARITY-20261027 - reserviert, terra_frontend_closure:** BestehendeAlsGelesenHandlungnachMigrationwiederherstellen. Besitzbuild_benachrichtigungen_listeinapp/core/screen_definitions_listen.py,deklarativerlokalerZeilenaktionindenzentralenMaskenschema/NativeListPage/Rendererdateiennurfallsnoetig;vorhandenerUIXVerhaltenstest/Harness/FixtureundeigeneQA. KeinePersistenzvortaeuschung,keinServerwrite,keineRollenveraenderung. Funktionserhalt/zweizeiligeIsolierung/Resettesten. LeadhatandereOwnerausediesenDateienausgeschlossen;Git/Generierungzentral. KeineDB.
+
+
+
+## RLS-DOMAIN-CRM-20261027 - reserviert, Claude Code
+
+**Owner:** Claude Code. **Nutzerauftrag 2026-10-27 ("alle offenen Punkte schliessen"):** Domain CRM nach Sales, ohne die Tabellen der Dienste unter `services/*` (activities, customers, farm_profiles, leads, crm_activities, crm_leads, crm_opportunities; die folgen nach der Token-Pruefung in den Diensten). **Basis:** `claude/rls-domain-sales-20261027` (#75), Zweig `claude/rls-domain-crm-20261027`. **Ziel:** getrennte Policies (kein `system`-Lesen) fuer `domain_crm.business_partners`, `credit_limits`, `crm_segments`, `cancellation_reason`, `opportunity`, `public.crm_contacts`, `crm_betriebsprofile`, `crm_merge_log`, `crm_ownership_log`, `opportunities`; Kinder ohne Mandant (16 `business_partner_*`, `crm_contact_consent_history`, `crm_segment_members`) erhalten `tenant_id` vom Eltern, NOT NULL, Default aus dem Kontext, Verbund-FK. **Fachkorrekturen:** `app/crm/router.py` (live ueber `main.py`) Mandant aus dem Token statt `X-Tenant`-Header mit `default`; `crm_merge_service.py`/`crm_ownership_service.py` ohne Standardmandant; `customer_service._adapt_customer` ohne `DEFAULT_TENANT_ID`; `app/crm/seed.py`. **Dateibesitz:** neue Migration `alembic/versions/rls_domain_crm_20261027.py`, die genannten Quelldateien, `tests/test_rls_domain_crm.py`, `tests/rls_domain_support.py` (Ausbau: Pflicht-Eltern automatisch), Inventare/Ausnahmen, OpenAPI nur `/crm/*`, QA/Handshake. **Nicht anfassen:** Dienst-Tabellen und `services/*`, Codex-Lead-Slices (Agrar), Studio/Masken. **Grenzen:** keine Live-Migration, valeo_probe nur zurueckgerollt.
+
+**RLS-DOMAIN-CRM-20261027 umgesetzt (Claude Code):** business_partners samt 15 Detailtabellen, credit_limits, crm_segments(+Mitglieder), Einwilligungshistorie, crm_contacts, crm_betriebsprofile, cancellation_reason, opportunity, opportunities, Merge-/Ownership-Protokoll mit getrennten Policies (kein system-Lesen); Kinder mit Mandant vom Eltern und Verbund-FK (auch supplier_tax_profiles). Fachbefunde behoben: app/crm/router.py (live) nahm X-Tenant-Header mit Rueckfall "default" -> Token; DSGVO-Kurzweg meldete "anonymisiert" ohne Wirkung -> 409 mit Verweis auf Loeschantrag; Auskunft las nicht existierende Tabelle -> domain_crm, mandantengebunden; Merge/Ownership ohne Standardmandant. valeo_probe: 58 Verhaltenstests ohne Uebersprung, Gegenprobe 21 rot. 154 zurueckgestellt. QA docs/quality-assurance/rls-domain-crm-20261027.md.
+
+
+
+## RLS-DOMAIN-INVENTORY-20261027 - reserviert, Claude Code
+
+**Owner:** Claude Code. **Nutzerauftrag 2026-10-27 ("alle offenen Punkte schliessen", "weiter mit Domain inventory"):** Lagerstamm und Lagerbelege nach CRM. **Basis:** `claude/rls-domain-crm-20261027` (#76), Zweig `claude/rls-domain-inventory-20261027`. **Ziel:** getrennte Policies (kein `system`-Lesen) fuer `domain_inventory.articles`, `article_batches`, `article_documents`, `article_selections`, `article_suppliers`, `warehouses`, `warehouse_zones`, `warehouse_bins`, `bin_stock`, `stock_locations`, `stock_item`, `stock_movement`, `stock_movements`, `inventory_stock_movements`, `inventory_counts`(+`_lines`), `inventory_lots`, `inventory_lot_movements`, `preparation_lists`(+`_lines`), `shipping_units`, `epcis_events`, `nawaro_print_notifications`, Kinder `drying_rule_factor_ranges`/`_lookup_rows` und `harvest_acceptance_lines`/`_positions`; Kinder ohne Mandant erhalten `tenant_id` vom Eltern (NOT NULL, Default aus dem Kontext); Verbund-FKs `(schluessel, tenant_id)` auf Artikel, Lager, Zonen, Plaetze, Kopfbelege, auch aus P5-Tabellen (nur Schluessel, deren Policies unveraendert) und `harvest_acceptances` -> `business_partners` (CRM-Folgebefund); ON DELETE wie bisher, SET NULL nur fuer die Verweisspalte. **Fachkorrekturen:** `article_extensions.py`, `preparation_lists.py`, `nve.py` Mandant aus dem Token statt `?tenant_id=` mit Standardmandant (inkl. Einzelabruf/Aendern/Loeschen ohne Mandantenfilter); `pos_retoure.py` Mandant aus dem Token statt Body, kein Schein-Erfolg bei gescheiterter Buchung; `compliance.py` `/bvl-umsaetze`, `/ustva` Token statt `?tenant_id=` mit `default`; `app/seeds/inventory_seed.py` ohne Standardmandant. **Dateibesitz:** neue Migration `alembic/versions/rls_domain_inventory_20261027.py`, die genannten Quelldateien, `tests/test_rls_domain_inventory.py`, Inventare/Ausnahmen, OpenAPI nur fuer die geaenderten Pfade, QA/Handshake. **Nicht anfassen:** Silo-/Materialflusstabellen (`silos`, `silo_cells`, `silo_lots`, `silo_lot_movements`, `silo_systems`, `material_flow_*`; Codex-Claim MATERIAL-FLOW-SQL offen), `agrar_contracts`, `weighing_tickets`, `agrar_contract_allocations` (Codex/Agrar), `public.inventory_*` und `services/*` (Dienst-Identitaet), Studio/Masken. **Grenzen:** keine Live-Migration, valeo_probe nur zurueckgerollt, gewachsene DB nur lesend.
+
+**RLS-DOMAIN-INVENTORY-20261027 umgesetzt (Claude Code):** 27 Lagertabellen (Artikel samt Chargen/Dokumente/Selektionen/Lieferanten, Lager/Zonen/Plaetze/Platzbestand, Bewegungen, Inventuren, Lose, Ruestlisten, NVE, EPCIS, NaWaRo-Druck, Trocknungsregel- und Ernteannahme-Kinder) mit getrennten Policies (kein system-Lesen); Kinder ohne Mandant erben ihn vom Eltern; Verbund-FKs auf Artikel/Lager/Zonen/Plaetze/Kopfbelege auch aus P5-Tabellen, Ernteannahme -> Geschaeftspartner und Lieferscheinposition -> Artikel (CRM-/Sales-Folgebefunde); SET NULL nur fuer die Verweisspalte. Fachbefunde behoben: Ruestlisten/NVE/Artikelerweiterungen ?tenant_id= mit Standardmandant (Einzelwege ohne Filter) -> Token; POS-Retoure Mandant aus dem Rumpf und Schein-Erfolg -> Token, 422/500; BVL-PSM-Meldung immer leer (fehlende Spalte) -> pflanzenschutzmittel, Fehler 500; Lieferantenregister immer 500 -> Filter ueber Artikel. valeo_probe: 100 Verhaltenstests ohne Uebersprung, Gegenprobe 55 rot, RLS-Gesamtsuite 431, Bestand 0 neu rot. 127 zurueckgestellt. Silo/Materialfluss bleibt bis MATERIAL-FLOW-SQL (Codex). QA docs/quality-assurance/rls-domain-inventory-20261027.md.
+
+
+
+## RLS-DOMAIN-EINKAUF-20261027 - reserviert, Claude Code
+
+**Owner:** Claude Code. **Nutzerauftrag 2026-10-27 ("beide domains erledigen": einkauf und shared):** Domain einkauf zuerst, shared folgt als eigener Slice. **Basis:** `claude/rls-domain-inventory-20261027` (#77), Zweig `claude/rls-domain-einkauf-20261027`. **Ziel:** getrennte Policies (kein `system`-Lesen) fuer `domain_einkauf.bestellungen`, `lieferanten`, `ers_invoices`, `ers_suppliers`, `invoice_verification`, `domain_procurement.proc_purchase_orders`, `public.einkauf_lieferscheine`, `zahlungslauf_kreditoren`; Positionen ohne Mandant (`bestellung_positionen`, `bestellvorschlag_positionen`, `kontrakt_positionen`, `einkauf_anfragen_positionen`, `einkauf_angebote_positionen`, `einkauf_lieferschein_positionen`, `einkauf_zahlungslauf_posten`) erhalten `tenant_id` vom Kopf; mandantenlose Belege `einkauf_rechnungseingaenge`, `einkauf_wareneingaenge` (+Positionen) und `einkauf_abgleich_ergebnisse` (Klasse D, Code filtert bereits nach tenant_id) erhalten `tenant_id` (NOT NULL, Default aus dem Kontext); Verbund-FKs Kopf/Lieferant/Kontrakt/Vorschlag, auch aus P5-Tabellen (nur Schluessel); `DEFAULT 'default'` der P5-Tabellen `einkauf_angebote`, `_anlieferavis`, `_auftragsbestaetigungen`, `_warengruppen`, `_zahlungslaeufe` -> Kontext. **Fachkorrekturen:** `procurement_match.py` (5 Wege) Mandant aus dem Token statt `X-Tenant-ID` mit `default`; `proc_bestellung_lifecycle_service.py` liest nur eigene Bestellung; `einkauf_compat_service.py` Waren-/Rechnungseingaenge nur eigener Mandant (Liste, Pruefen/Freigeben/Verbuchen). **Dateibesitz:** neue Migration `alembic/versions/rls_domain_einkauf_20261027.py`, die genannten Quelldateien, `tests/test_rls_domain_einkauf.py`, Inventare/Ausnahmen, Fallback-Baseline, OpenAPI nur geaenderte Pfade, QA/Handshake. **Nicht anfassen:** Studio/Masken, Codex-Lead-Slices, `services/*`. **Grenzen:** keine Live-Migration, valeo_probe nur zurueckgerollt, gewachsene DB nur lesend.
+
+**RLS-DOMAIN-EINKAUF-20261027 umgesetzt (Claude Code):** 20 Einkaufstabellen (Bestellungen, Lieferanten, ERS, Rechnungspruefung, Bestellungen Beschaffung, Lieferscheine, Kreditoren-Zahlungslauf, 7 Positionstabellen, Waren-/Rechnungseingaenge mit Positionen, Abgleich) mit getrennten Policies (kein system-Lesen); Positionen und D-Koepfe erhalten tenant_id (NOT NULL, Default aus dem Kontext); Verbund-FKs Kopf/Lieferant/Kontrakt/Vorschlag auch aus P5-Tabellen; fuenf P5-Tabellen Default 'default' -> Kontext. Fachbefunde behoben: procurement_match.py X-Tenant-ID mit default -> Token (-5 Baseline); Bestellstatus ohne Mandantenfilter; Rechnungseingaenge pruefen/freigeben/verbuchen mandantenuebergreifend; Wareneingangsliste immer leer (Join auf fehlendes docs_store). valeo_probe: 50 Verhaltenstests ohne Uebersprung, Gegenproben 19/7 rot, RLS-Gesamtsuite 481, Bestand 12454 passed, 0 neu rot. 112 zurueckgestellt. **Live-Blocker:** DEMO-PO-001/002 verweisen auf Lieferanten des Mandanten valeo, Migration bricht live absichtlich ab. QA docs/quality-assurance/rls-domain-einkauf-20261027.md.
+
+
+**NOTIFICATION-LOCAL-PARITY-20261027 - reserviert, terra_frontend_closure:** BestehendeAlsGelesenHandlungnachMigrationwiederherstellen. Besitzbuild_benachrichtigungen_listeinapp/core/screen_definitions_listen.py,deklarativerlokalerZeilenaktionindenzentralenMaskenschema/NativeListPage/Rendererdateiennurfallsnoetig;vorhandenerUIXVerhaltenstest/Harness/FixtureundeigeneQA. KeinePersistenzvortaeuschung,keinServerwrite,keineRollenveraenderung. Funktionserhalt/zweizeiligeIsolierung/Resettesten. LeadkeineparallelenEditsindiesenDateien;Git/Generierungzentral. KeineDB.
+
+
+**DOMAIN-HONEST-OUTCOME-20261027 - reserviert, terra_claude_handoffs:** POScheckoutinpos_retoure.pyundUStVAincompliance.pybehauptenWirkungohneBuchung/Versand. EngerBesitznurbetroffeneFunktionen,zugehoerigeSchematestsundQA;keinneuerFachweg/keineRollenveraenderung. RealevorhandeneCommandspruefen,sonstkeinenErfolgbehauptenundFehlerdurchreichen. **INVOICE-AUDIT-ACTOR-20261027 - reserviert, terra_doc_drift_fix:** einkauf_compat_service.pyundcompat.pyRechnungstransitionenausschliesslichgepruefteTokenidentitaetansAudit,keinebeliebigenNutzer/verschlucktenAuditfehler. AlleAufruferpruefen,engerechteActor/RollbacktestsundQA. KeineDBwährendClaudeShared;keineWorkboardedits/GitdurchSubagenten. LeadArtefakteundIntegration.
+
+
+**STUDIO-INBOX-DELIVERY Quellabschluss 20261027, Gesamtziel offen:** Exaktes255PfadmanifestohneDiagnosedumps/Scratch/Dispositionswrites. Claudes74..78geordnetintegriert,608RLSTabellen/112zurueckgestelltlautInventar,keineLivePolicies. Entityprojektion/API/Inbox/Workspacezusammenhaengendliefern;Notificationlokal+GateBgruen,Audit5Unit/POSUStVA3Funktionskoerpertestsgruen. VollerTypecheckgruen,Artefaktesynchron149Rechte/848Katalog. GesamtgatesA/B857,C856,E800mit57RuntimeLuecken;keineGesamtfreigabe. NutzerendzielalleMaskenStudio-buildverbindlich,keineWrapperalsAbschluss. QA studio-inbox-coherent-delivery-20261027.md.
+
+
+**STUDIO-DELIVERY-GATE-REPAIRS-20261027 - reserviert, Codex Lead:** Staging-Lintmeldet9NichtNullAssertioneninworkspace-composition-authoring/overlayundagrar-chain;Besitzan terra_frontend_closure fuerexpliziteGuards/TypeNarrowingundengereTests,keineRegelausnahme. LeadGodfileNachlauf:compat.pyCsvImportResponseDuplikatdurchbestehendesschemas/compat_schemas.pyersetzen;compliance.py_pcn_to_dictindenbestehendencompliance_service.pyverschieben,unveraenderteAusgabegezielttesten. KeineLOC-Anhebung/Leerzeilenkosmetik,keineFachrechteaenderung. GenerierteArtefakteLeadnachziehen.
+
+
+**STUDIO-REKLAMATION-PARITY-20261027 - reserviert, Codex Lead:** NutzerendzielallefachlichenMaskenStudio-build. ErstefunktionaleAblosungReklamationslisteunterErhaltSuche/Spalten/Export/Kennzahlen/Workflowband/atomarerResumeVorNavigation/Fehlerzustand. terra_frontend_closure besitztzentraleFrontendSchema/RenderPlan/Runtime/NativeListPageundneueengeRuntimeTestsfuerdeklarativeWorkflowNavigation/Kennzahlen/sichtbareExportdaten;keineSeiten-/Builderedits. terra_claude_handoffs besitztnurReklamationsBuilder/SeiteneinstiegundbestehendeReklamationsBedientests,AbstimmungmitzentralemOwner,dannMigrationohneFallback/keinFunktionverlust. LeadGit/Artefakte/Handshakes. ErstImplementierungnachgemeinsamenexaktemVertrag;keineDB/Installs/Rollenumbauten. Sol/TerralowmitengemKontext.
+
+
+**STUDIO-AUDITLOG-DUPLICATE-20261027 - reserviert, terra_doc_drift_fix:** Belegteidentischeungerouteteadmin/AuditLogPage.tsxgegenkanonischeadmin/audit-log.tsx,keineSrcVerbraucherlautInventur. VorEntfernungalleCode/Test/NavVerbraucherpruefen,zugehoerigenBatch12VertragnursameScreenIDaufkanonischeDateiumstellen,keineAssertloeschung. BesitznuralteDuplikatdateiundeinzelnerbelegterTestverweis+QA,keineallgemeinenDriftausnahmen/Routeschemaaenderungen. LeadGit,keineDB/Installs.
+
+
+**Fortsetzung20261028 Lead:** TerraAgentsdurchNutzungslimitabgebrochen. LeadsetztbestehendeClaimsReklamation/AuditDuplikatfort;unfertigeRuntimeSchema/ListExperienceQuellenerhaltenundnochnichtgeliefert. NutzerzielalleFachmaskenStudio-buildunveraendert. NeuerSharedHandshakeClaudegelesen:63eigeneRLSFaelle,548Gesamtsuite,86zurueckgestellt;Source3d31a3145hinterEinkauf,keineLivePolicies. LeadreserviertQuellintegrationShared79mitdreifachemWIPAbgleich,keinPruefstand-/LiveUpgradebisaktuelleskoordiniertesFenster.
+
+
+## RLS-DOMAIN-SHARED-20261027 - reserviert, Claude Code
+
+**Owner:** Claude Code. **Nutzerauftrag 2026-10-27 ("beide domains erledigen", zweiter Teil).** **Basis:** `claude/rls-domain-einkauf-20261027` (#78), Zweig `claude/rls-domain-shared-20261027`. **Ziel:** getrennte Policies (kein `system`-Lesen) fuer die mandantenbezogenen shared-Tabellen: `agrar_sorten`, `artikel_sperren`, `branches`, `calendar_items`, `calendar_team_memberships`, `channel_thread_audit_items`, `direct_debit_items`, `dispatchers`, `farmers`, `feeding_feed_analysis_*`, `futtermittel_*` (Einzel-/Mischfutter, Produktionsauftraege, Rezepte mit Komponenten), `grundfutter_analysen`, `internal_messages`, `job_artifacts`, `logistik_frachttabellen`, `master_data_entries`, `rations_zugang`, `vertreter_provisionsstaffeln`, `zu_abschlag_konditionen`, `public.number_series`; Kinder ohne Mandant erben ihn vom Eltern, Verbund-FKs. **Bewusst nicht:** Identitaet (`users`, `admin_api_keys`, `api_keys`, `calendar_ics_tokens`), `outbox_events` (Publisher liest mandantenuebergreifend), `audit_logs`, `policy_rules` (globale Regeln) - Begruendung im QA-Dokument. **Fachkorrekturen:** `?tenant_id=`/`Query(DEFAULT_TENANT)`-Rueckfaelle in `branches.py`, `master_data.py`, `messages.py`, `agribusiness.py`, `app/domains/agrar/api/psm.py`, Nummernkreise -> Token. **Dateibesitz:** neue Migration `alembic/versions/rls_domain_shared_20261027.py`, die genannten Quelldateien, `tests/test_rls_domain_shared.py`, Inventare/Ausnahmen, Fallback-Baseline, OpenAPI nur geaenderte Pfade, QA/Handshake. **Nicht anfassen:** Studio/Masken, Codex-Lead-Slices (Agrar-Allokationen, MATERIAL-FLOW-SQL), Systemrollen, `services/*`. **Grenzen:** keine Live-Migration, valeo_probe nur zurueckgerollt, gewachsene DB nur lesend.
+
+**RLS-DOMAIN-SHARED-20261027 umgesetzt (Claude Code):** 27 shared-Tabellen (Niederlassungen, Stammdaten, Disponenten, Landwirte, Kalender, Nachrichten, Lastschriftposten, Futtermittel/Rezepte/Analysen, Rations-Zugang, Frachttabellen, Konditionen, Provisionsstaffeln, Nummernkreise) mit getrennten Policies (kein system-Lesen); Kinder ohne Mandant erben ihn vom Eltern; Verbund-FKs auch aus domain_sales/domain_inventory/domain_agrar (nur Schluessel). Fachbefunde behoben: ?tenant_id=/Kopf mit Standardmandant in branches, master_data, messages, agribusiness, grundfutter_analysen, psm (49 Wege) -> Token; Disponent aendern/loeschen und Kontaktart loeschen ohne Mandantenfilter; POS-Rabatte/Preiskondition lasen alle Mandanten; Nachrichtenabsender aus dem Rumpf, Rations-Zugang und Grundfutter-Portal aus X-User-Email -> gepruefte Claims; Identitaets-Vertragstest erkennt jetzt implizite Header-Parameter und sender_id. valeo_probe: 63 Verhaltenstests ohne Uebersprung, Gegenproben 20/13 rot, RLS-Gesamtsuite 548, Bestand 5416 passed, 0 neu rot. 86 zurueckgestellt. QA docs/quality-assurance/rls-domain-shared-20261027.md.
+
+
+**RLS-SHARED-INTEGRATED-ACCEPTANCE-20261028 - reserviert, Codex Lead:** SharedAutornachweisabgeschlossen/0Sitzungen;aktuellerReadOnlyVorcheckebenfalls0fremdeSitzungenundloading_stop_fk_20261023. Leadnutztbestehendenvaleo_probefuerEinkauf/SharedIntegrationsfaellealsvaleo_app,MigrationennurinaeusseremRollback,keineDB/Container/Reset/LiveAenderung. EigeneSessionsagent:codex-shared-acceptance,Lock/StatementTimeout. NachEndeRevision/SitzungenpruefenundFensterfreigeben. AnderePruefstandclaimsduerfenbisFreigabenichtstarten.
+
+
+**RLS-SHARED-INTEGRATED-ACCEPTANCE-20261028 abgeschlossen, Pruefstandfrei:**114Einkauf/SharedTestsgruen,0Skips;635RLSTabellenimSnapshot,86zurueckgestellt. Nachherloading_stop_fk_20261023,0Sitzungen,0temporaereSharedBranchPolicies;keineLiveAenderung. ParallelAuditfixharmonisiert:expliziterRouteactorundConstructorvertrag,weiterhinmandantenbezogen/atomar. **EMAIL-OWNERSHIP-20261028 - reserviert, Codex Lead:** gepruefte_emailverwendetemaileinengesigntenaberunbestaetigtenClaimsalsZugangskennung;KeycloakProfil erlaubtNutzernEmailaenderung. Besitznurapp/core/akteur.pygepruefte_email,engeClaimtestsundgueltigeEmailFixturesSharedtests. FueremailbasierteBerechtigungenemail_verifiedboolTrueverlangen,ohneRueckfallaufHeader. KeineKeycloakKontenaenderung/Secrets/DB/Roleaenderung.
+
+
+**CI-FOLLOWUP-20261028 - reserviert, Codex Lead:** AktuelleCI-Logs8a77belegenGodfilemask_frontend_bridges1422>1416,ungenutzteseslint-disableWorkspaceDialog,TS6305imuniversal-mask-ciwegfehlendemReferenzprojektbuild,strictSQLKindzeilenohneneuenMandanten. BesitznurbetroffeneSQLKonditionenabfragen(gemeinsameServicehilfe+Tests),einDirective,CITypecheckAufrufaufvorhandenenProjekt-Task,WhatsApp/ChannelAuditKindpersistenzundbetroffeneseedFixturesnachEinzelbefund. KeineRegellockerung/DBreset/Testsloeschung. Node-forgePrueffrist28wirdseparatinhaltlichnachgeprueft,keineblindeVerlaengerung.
+
+
+**NODE-FORGE-UPSTREAM-20261028 - reserviert, Codex Lead:** FaelligeReviewbelegtjetztNPMUpstream1.4.2. BesitzzielgenaueRootOverride/Lock,Retirementlokaler1.4.0Patch/Review/ALLOWED-SonderfallundderenTests. VorEntfernunggepatchteAngriffstestsgegenIntegritaetsgepruefteUpstreambytes ausfuehren;altesPaketalsGegenprobeerhalten. BracesPruefungseparat,keineFristverlaengerungohneinhaltlicheAbnahme. KeinProjektReinstallinfremdeModule/keinDB.
+
+
+**DEEPMERGE-SECURITY-20261028 - reserviert, Codex Lead:** FrischerLockauditnachForge1.4.2hatkeineHigh/Critical-Befunde,abereinenam27.10aktualisiertenLow-BefundGHSA-gcqx-w48m-w2h4(PrototypvergiftungreturnedObject,keinUpstreamfix). KeinSeverityIgnore. Besitzkleiner4.3.1QuellpatchbeiderEingaben,echteVorherNachher/Kompabilitaetstests,exaktgehashtePolicyundgepatchteLockbindung. AndereVersionen/API-Verbrauchernichtglobalhochziehen. KeineDB/ProjektmoduleandererAgentenaendern.
+
+
+**PROBE-CANONICAL-UPGRADE-20261028 - reserviert, Codex Lead:** FuerstrictSQLCIAbnahmebelegteKindtenantRegressionenmussgemeinsamerPruefstandeinmalaufintegriertenSharedHead. KoordiniertesWartungsfenster:vorher0fremdeSitzungenpruefen,komprimiertepg_dumpSicherunginignoriertenartifacts,danneinmalpruefstand_db.py--keep(KEINReset/keineKopieDB/keinContainer),nurvaleo_probe. Migrationentransaktionalbereitsin114FaellenReplaygeprueft. DanachHead+RLS635verifizieren,betroffeneSQLTestsmitigenenZeilen/Cleanup. EntwicklungsDBundfremdeRessourcenunveraendert. AndereAgentenbisFreigabekeinProbeZugriff;neuerSchemaHeadwirdbeiFreigabeexplizitdokumentiert.
+
+
+**CI-CHILD-TENANTS-20261028 - reserviert, Codex Lead:** StrictCIzeigtRezeptkomponentenAltfixtures,BestellpositionenSeedfactoryundHarvestAcceptancePositionService/ORMohneerforderlichenKindmandanten. Besitztests/test_feed_production_chain.py/test_feed_chain_004.pynurSeedSQL, scripts/seed_demo_procurement.pynur_poKindtenant,app/infrastructure/models/l3c_models.pyHarvestAcceptancePositionundzweiErzeugerimharvest_acceptance_service.py. ExpliziteAbleitungvomgeprueftenKopf/Servicekontext;keineStandardmandanten/Schemaabsenkung/Assertentfernung. RealeSQLAbnahmenachfreigegebenemkanonischemPruefstand.
+
+**DEPENDENCY-SECURITY-20261028 umgesetzt:** Forge1.4.2 ersetzt lokalen1.4.0Patch. Braces unveraenderten Patch inhaltlich neu geprueft; Deepmerge4.3.1 exakter Drei-Entrypoint-Patch mit21gruen/Original12rot. Gate20gruen, roher Audit1low/0high/0critical bleibt erhalten; exakte Quellentscheidung0blockiert. Review beider verbleibenden Backports30.10. QA dependency-security-renewal-20261028.md. Frozen-Gesamtinstallation/CI weiter offen. Pruefstandwartung weiterhin angehalten: fremde Claude-Sitzung, keine Sicherung/Migration begonnen.
+
+**CI/STUDIO-Nachlauf20261028:** Sicherheits-, E-Mail-, konkreteCI-, Auditpersistenz- und Kindtenantkorrekturen committet; focused25/Harvest14/Audit4 gruen, volleFrontendTyppruefung gruen. KindtenantSQLAbnahme bleibt offen: fremdeSitzung agent:claude-rls-domains aufProbe, keineMigration/Sicherung/Resetgestartet. PROBE-CANONICAL-UPGRADE wartet bis koordinierterFreigabe. UnfertigerReklamationsBuilder ebenfalls bytegesichert und ausLieferquellen entfernt; Originalseite funktionsfaehig erhalten. Artefakte werden erneut ohneunfertigeMetadaten generiert. Handshake codex-ci-studio-followup-20261028.md. Nutzerziel alleFachmaskenStudio bleibt inArbeit;57Runtimewege,Portal-Zertifikat und Browserabnahme offen.
+
+**CI-EXACT-PATCH-RESOLUTION-20261028 - reserviert, Codex Lead:** ExakteCI74cazeigtdeepmergeRuntimeprueferloest3.3.0stattgepatchtem4.3.1auf. Besitzcheck_npm_backport_audit.cjs/verify_deepmerge_security.cjsundengeResolverTests/QA. VersionsgenaueinstalliertePaketwahl,Mehrdeutigkeitfailclosed,keinglobalesUpgradealterVerbraucher/keineScanausnahme.
+
+**SQL11-README-20261028 - reserviert:** Codex Lead besitzt HarvestAcceptanceLine Erzeuger/ORM, Wave73 Kanal-Testmandantfixture und Studio-SQL-Abnahme samtTests/QA. Ziel11konkreteSQLFehlerauf74ca schliessen,keineConstraintlockerung/Skips. readme_investor(Terra/low) besitzt ausschliesslich RootREADME*.md+QAreadme-positioning-20261028.mdinderQuellansicht;ausHEADmaterialisieren,positivundbelegtmitklarenEntwicklungszielen,keineerfundenenPremium-Ueberlegenheitsbehauptungen. LeadGit/Integration/Pruefstandkoordination.
+
+**SQL11-README-20261028 gezielt abgenommen:**30realeSQLTestsgruen/0Skips,alle11CI-Fehlfaelleenthalten. HarvestAcceptanceLinePflichtmandantORM/Erzeugerergänzt;Wave73TestmandantundSessionueberaussereRollbackgrenze. READMEDE/ENunddocsREADMEpositivaufAgrar-Premiumziel/Studio/Agenten/Arbeitsraeumeaktualisiert,keineungepruefteMarktueberlegenheit. Vorher0fremdeSessions,dannkomprimiertesBackupundbestehendenvaleo_probeohneResetper--keepauf rls_domain_shared_20261027 aktualisiert. EntwicklungsDBunveraendert. BreiterStrictSQLNachlauflaeuft;PruefstandfensterbleibtbeimLeadbisFreigabe. QA sql11-closure-20261028.md.
+
+**SQL11-README-20261028 abgeschlossen / Pruefstand FREI:** gezielte30SQLFaellegruen;vollstaendigerCI-StrictNachlauf633passed/4skipped/0Fehler,637ausgewaehlt,200.85s. KeineTestausschlussoptionen/Constraintlockerungen. Nachkontrolle0Sessions,635RLSTabellen,neuerkanonischerPruefstandhead rls_domain_shared_20261027. Nichtaufaltenloading_stopHeadzuruecksetzen. BackupvorUpdatevorhanden;keineLiveAenderung. READMEDE/EN+docsREADMEpositivundbelegtaktualisiertundveroeffentlicht. QA sql11-closure-20261028.md/readme-positioning-20261028.md. AndereStudio-/CI-Arbeitbleibtseparat,nichtalsGesamtabschlussbehauptet.
+
+**SMOKE-MIGRATOR-20261028 - reserviert,Codex Lead:** CI9bdSmokealleDomaenenbrechenvorBrowserbeimMigratorLoginab:BeispielenvueberschreibtJobloginmitMIGRATION_DATABASE_URL. Besitznure2e-smoke.ymlMigrationsschritt+QA. ExpliziteBindungandiebereitgestellteJobDB,keineAuthlockerung/Secrets/BetriebsDBAenderung.
+
+**SMOKE-MIGRATOR-20261028 umgesetzt:** Migrationsprozess explizitaufJobDATABASE_URLgebunden,Beispiel-Migratoruebernahmeverhindert. 3bestehendeMigrationSessionTestsgruen,YAMLgeprueft. NeuerGitHubSmokenachlauf erforderlich;keineBrowserfreigabevorweggenommen. QA smoke-migrator-environment-20261028.md.
+
+**STUDIO-FUNCTIONAL-LISTS-20261028 - abgeschlossen,Codex Lead:** ParitaetReklamationslistealsrealeersteFunktionsmigration. ZentraleListenExperiencefuerSuche/gefilterteKennzahlen/CSV/WorkflowResumevorNavigation,keineSeitenwrapper. LeadbesitztNativeListPage.tsxundSeite/BuilderReklamationen+WorkflowTests;centralagentSchemas/Compiler/Runtime/CockpitunterengemVertrag;BackendagentReklamationsRead/PersistenznurkonkreteFeldparitaet. ErstUmschaltennachIntegrationundRegression;keinFreigabelabelvorBrowser/Kanalabnahme. ParallelIdentitaetsbereinigungnurnachVerbraucherpruefungimseparatenScope,keineGateAusnahme.
+
+**STUDIO-FUNCTIONAL-LISTS shared-query Ergaenzung:** Echtruntime-TestzeigtdassKennzahlenbeigeteiltenQuellenbishernurdiegeladeneSeitesahen. Leadbesitztzusaetzlichapp/services/mask_table_query.pySuchfeldvertrag+tests/test_mask_table_query.pyundfrontendruntime/list-client-source.tsmitTests. BoundedCollectionueberbestehendeMaskDataQuelle(max5000),keinneuerEndpoint/Container/Schreibweg. DeklarierteSuchfelderinHuman/MCP/CLIgleichanwenden,unvollstaendige/wechselndeQuellenablehnen.
+
+**STUDIO-FUNCTIONAL-LISTS SQL-Testfenster:** Leadnutztbestehendenfreigegebenenvaleo_probe(SharedHead)fuerbestehendenundneuen signiertenHuman/MCP/CLIListenvertrag,SubdatenineigeneraussereRollbacktransaktion. VorherSessionslesendpruefen,keineMigration/Reset/Container. KeineparallelenDBAgenten.
+
+**STUDIO-CANONICAL-IDENTITIES-20261028 - abgeschlossen,studio_admin_inventory:** AusschliesslichdreibestaetigteveralteteDefinitionenfinance/bankkonten-stamm,finance/kreditoren-stamm,qualitaet/reklamation-detailinBatch15mitRegistrierungsstellenundengeVertragstests/QA. VorEditalleaktivenVerbraucherpruefen;kanonischeIDsfinance/bankkonto,finance/kreditor,qualitaet/reklamationundRoutenunveraendert. HistorischeVersionendokumentationerhalten,keinekuenstlichenAliases/GateAusnahmen. KeineanderenBatch15Funktionen/FrontendRuntime/DB/Git. LeadgenerierteKataloge/Git.
+
+**STUDIO-FUNCTIONAL-LISTS Theme/Verbraucher-Nachlauf:** LeadbesitztzusaetzlichKeyboardShortcutBar.tsxnursemantischeThemeTokens,lib/api/misc-modules.tsReklamationpriority/statusTypwahrheitundaltenListenfamilien-QuellvertragnurReklamations-Einstieg. KeinDesignseitenfork/keinefachlichenAenderungenandererListen. BediennachweiseersetzenveralteteHandmadeQuellannahmen.
+
+**STUDIO-CANONICAL-IDENTITIES Ergaenzung:** VerbrauchersichtungbestaetigtvierteveralteteBatch15Definition qualitaet/reklamationen(falschaufLaborauftraegegebunden). SeitfunktionalerMigrationistqualitaet/reklamationen-listekanonisch;aktiveURLbleibtqualitaet/reklamationen. LeadentferntnurdieseungenutzteDefinition/RegistryundprueftPage+kanonischenBuilder. KeineanderenWaage-/Debitoren-/KundenstammDefinitionenohneParitaetsnachweisloeschen.
+
+**STUDIO-FUNCTIONAL-LISTS serverseitigerMetadatavertrag:** Leadbesitztzusaetzlichapp/services/studio_list_contracts.py+studio_validation.py(nurAufrufderListenvalidierung)undeigeneNegativtests. BeigeneriertenStudioEntwuerfenListExperienceauchserverseitigtypisieren/bounds/prototypekeys/Feld-/Aggregatreferenzenpruefen,keinInvalidMetadataCrash. FrontendCompilerprueftdenselbenTeilvordemCache;keineLockerungandererGates. KeineDB/Schema/Endpoints.
+
+**STUDIO-WORKFLOW-ACTION-ERROR-20261028 - abgeschlossen,studio_sales_inventory:** ImFamilieninventarbelegterFehlerFlowSpineWorkspace.handleActionnavigiertauchbeifehlgeschlagenemAPIPost. BesitznurdieseFunktion(ggfengerHelper)undgezielterVerhaltenstest/QA. BackendFreigaben/Berechtigungen/Endpunkte/Start-/LifecycleRegelnunveraendert;beiFehlerkeineNavigation,funktionierenderWegerhalten. KeineGesamtmigrationbehaupten/keinWrapper/keineDB/GitdurchAgent.
+
+**STUDIO-FUNCTIONAL-LISTS-20261028 abgenommen:** ReklamationslistefunktionalNativeListPage;Suche/Kennzahlen/CSVvorSeitenschnitt,WorkflowCheckpointvorNavigation,Doppelklickschutz,Keyboard/Touch,Fehler503stattLeer-Erfolg. Client/ServerMetadatenvalidierunginkl.Bounds/Referenzen;signierteREST/MCP/CLI-Paritaet.46Frontend+62Backend=108gezielteFaellegruen.6synthetischeBrowserKomponentenansichtenHell/Dunkelbei3DesktopbreitenohneUeberlauf/axeWCAG2A-AA-Befund;echtergefilterterBrowserdownloadgeprueft. KeinangemeldeterE2EGesamtstempel. VierobsoleteIdentitaetenbereinigt;853Definitionen,844native,C852/E801,52RuntimepunkteweiterinArbeit. GodfilecapBruecke1409->1371,keineRatschenlockerung. FlowSpineAktionsfehlerbehebtNavigationnachFehler(4Tests). PruefstandSharedHead,0Sessions,Fensterfrei;keineLiveaenderung. QA/Handshake studio-functional-lists-20261028.md.
+
+**STUDIO-FUNCTIONAL-LISTS finaler Nachlauf:** 46 Frontendfaelle erneut gruen, vollstaendige Typpruefung und Produktionsbuild erfolgreich. Liefercommit12e04024b. Die drei belegten Claims sind abgeschlossen; das Gesamtziel restliche Masken bleibt in Arbeit.
+
+**STUDIO-RUNTIME52-CATALOG-20261028 - abgeschlossen, Codex Lead:** Nutzerauftrag 52 Runtime-Punkte funktional schliessen. Lead besitzt zentrale flowSpineCatalog-Vertraege in Schema/Compiler/Runtime/Renderer, dynamische Kacheln und echten Katalogeinstieg samt Tests. Kein Wrapper der Legacyseite; Daten, Sprache, Fehler/Leerzustand, Navigation und Cache-Warmup erhalten. Backend-Definition/Validierung separat delegiert nach explizitem Vertrag. Inventaragent nur lesend; keine DB/Container. Erst nach Funktionsnachweis als migriert zaehlen.
+
+**STUDIO-RUNTIME52-CATALOG-20261028 abgenommen:** Echter dynamischer Katalog ueber Definition/Compiler/Runtime/Renderer; keine Dead-Letter-Liste oder Legacywrapper. Sprachcache konsistent, Warmup-Timer-Cleanup, Keyboard/Theme/Fehler/Retry/Leerzustand.29Frontend+34Backend gruen, volleTyppruefung/Produktionsbuild gruen,6synthetischeBrowseransichten ohne axeWCAG2A/AA-Befund/Ueberlauf. GateE802/853,51weiteroffen;9Prozessraeume nicht mitabgenommen. KeineDB/Liveaenderung. QA studio-process-catalog-20261028.md. Gesamtauftrag52bleibtinArbeit.
+
+**STUDIO-CONTRACT-AUDIT-20261028 - abgeschlossen, Codex Lead:** Funktionale Migration kontrakte/FrmKontraktProtokoll. Besitz Runtime/Builder/Definition dieser Auditansicht, gemeinsame deklarative Feldfilter wenn erforderlich, eingebetteter Tab und Standalone-ID-Kontext mit Tests. Bestehende GET Audit/Fremdmandantgrenzen unveraendert; kein erfundener Auditbestand/keine generische Kontraktliste als Ersatz. Fehlender Kontext sichtbar blockieren. Subagent implementiert nur abgegrenzten Auftrag nach Besitzvorgabe. Keine DB/Migration/Container.
+
+**STUDIO-CRM-TEMPLATE-20261028 - abgeschlossen, Codex Lead:** Vollstaendige fachliche CRM-Kampagnenvorlage ueber kanonische Detail/Create/Action-Runtime statt statischer /new-Liste. Besitz Detailseite, nur Vorlagenbuilder in screen_definitions_stamm.py, enge Vorlagen-Endpunktkorrekturen crm_campaigns.py und eigene Tests/QA. Bestehender Backendvertrag campaign_type/subject_line/message_body ist fuehrend; keine erfundenen UI-Felder. Rechte vom Bereich, bestehende UI-Projektion aktualisieren; MCP-Schreiben ohne Domaincommand bleibt gesperrt. Kein DBreset/Container; reale SQL-Abnahme nur koordiniert durchLead.
+
+**STUDIO-CRM-TEMPLATE gemeinsame Runtime-Ergaenzung:** Lead besitzt zusaetzlich UniversalNativeDetailPage, schema.ts, runtime/ActionRuntime.ts/useActionRuntime.ts und neuen resource-response-adapter.ts fuer explizite human-only REST-Ressourcenantworten. Projektierte deklarierte Editfelder vorbefuellen, nur gebundene Methoden/Endpunkte, Fehler/Preview/Agentaufruf fail-closed, Ergebnisnavigation aus gepruefter Kopie-ID. Keine neue schreibende Agentencapability. Auditagent besitzt nur isTableLoading/completeClientTables in useUniversalMaskRuntime; keine Ueberschneidung.
+
+**STUDIO-CONTRACT-AUDIT Kanalvertrag-Ergaenzung:** Reale signierte SQL-Abnahme meldet422, weil MaskDataReadIn entgegen der bestehenden Registry keine Grossbuchstaben in nativen Masken-IDs zulaesst (FrmKontraktProtokoll). Lead besitzt eng app/api/v1/schemas/mask_data_contracts.py, Syntax erlaubt kanonische ASCII-Grossbuchstaben; Registry-/Mandanten-/Source-Whitelist unveraendert. Positiv-/Traversal-/Unknown-ID-Negativtests und OpenAPI/Artefaktabgleich erforderlich. Kein Gate/Role/Scope-Bypass.
+
+**STUDIO-CONTRACT-AUDIT statische Evidenz:** Der neue zentrale NativeAuditListPage-Host besitzt echte Runtime/Compiler/Renderer-Anbindung; Lead ergaenzt nach Verhaltensnachweis nur dessen JSX-Aufruf in mask_runtime_evidence.py und made_by_studio_gates.py. Import/Kommentar/versteckte Markierung bleibt wirkungslos; kein Alias oder Legacywrapper. Eigene Negativtests sichern die Erkennung.
+
+**STUDIO Audit/Vorlage Abschluss20261028:** 36Frontend+20Unit/Negativ/Struktur+2realeSQLKanaelfaelle=58verschiedeneFaellegruen. VollstaendigeTyppruefung/Produktionsbuildgruen;12synthetischeBrowseransichtenHell/Dunkel3BreitenohneaxeWCAG2A/AA-Befund/Ueberlauf. AuditueberREST/MCP/CLIgleich,Foreign404/Deny403;VorlagenCreate/Update/DuplicateechtesJSON/Mandantenisolation. KeineAgentenwritefreigabe:resource.v1bleibthumanonly,untrustedStudioMetadatengesperrt. KanonischerMaskenreadakzeptiertbestehendeGrossbuchstaben,Registry/Source/Tenantpruefungbleibt. A/B853,C852,E804,49Runtimepunkteweiteroffen. PruefstandnachSQLfrei0Sessions,SharedHeadunveraendert,keineLiveaenderung. Vorschau3011beendet,tempEinstiegeentfernt. QA studio-audit-template-20261028.md. AkzeptierteQuellebleibtartifacts/migration-repair-source;versehentlicheRooteditsdesVorlagenagentenwurdennichtblindzurueckgesetzt.
+
+**STUDIO-REMAINING-LISTS-20261028 - reserviert, Codex Lead:** Nutzerauftrag alle49 Runtime-Punkte fortlaufend abschliessen. Teilfamilien CRM-Aktivitaeten, Debitoren-OP und Lieferliste werden parallel mit klarer Dateigrenze umgesetzt. Lead besitzt gemeinsame ListExperience-/Filter-Vertraege, Compiler/Runtime/Renderer, Integration/Git/Generatoren/SQL-Fenster. Agenten besitzen jeweils nur ihren Builderabschnitt/Seite/enge fachliche Readprojektion/Tests/QA. Keine Adapter zum Kaschieren fehlender Funktionen, keine Datenquellenattrappen, keine DB-/Container-Neuanlage. Jede Familie braucht echte Bedienparitaet, Fehler-/Rechte-/Mandantennachweis.
+
+**STUDIO-REMAINING-LISTS Debitoren-Unterclaim20261029:** Lead mit kleinem Read-Audit bestaetigt falsche Legacyfelder/ignorierten typ-Filter und unvollstaendige OP-Quelle. Besitz aufgeteilt: fibu_read_projection nur open_items.py Listenschema/Listendpoint-Pagination/total/only_open/abgeleitetueberfaellig+engeTests; zweiterAgent nur DebitorenSeite/Listenbuilder/useDebitorenOP+Tests. Lead ListExperience-Summation/zentralerKPI-Renderer/Schema/Validator. Keine neuen Rollen/Endpunkte/Migrationen/Container, Schuldnerquelle konto_typ=debitoren. Existierende API bleibt kompatibel, konservative Null-/Fehlerbehandlung.
+
+**STUDIO-Debitoren Kontext-Nachlauf20261029:** Readonly-Pruefstandsmetadaten bestaetigen API public.offene_posten vs fehlerhafte AR-Zusammenfassung domain_erp mit nicht vorhandenen beleg_nr/offener_betrag/faellig_am Feldern. Lead besitzt gemeinsame neue open_item_read_source.py, Extraktion bestehender Tabellenresolver/_expr und Settlement-Read aus open_items.py (keineWrites), _ar_open_item_summary/_tabs in mask_rollout_summary_service.py, zwei OP-Waehrungsfeldmetadaten in screen_definitions.py sowie optionale field.currencyField im zentralenCompiler/FastForm/FieldRenderer. Bestehende Rollen/Mandant/Actions unveraendert, Settlementparent vor Read pruefen. Zusaetzlich falschgenerierte ungenutzteIDfibu/debitoren nachbelegterkanonischerMigration entfernen(URL/APIerhalten), OP-VerwaltungfalscheAnlagenquellealsgleichenListenfamilienReadkorrigieren. Keine DB/Schemaaenderung.
+
+**STUDIO-DEBTOR-VISUAL-CURRENCY-20261029 - reserviert, Codex Lead:** Sichtabnahme zeigt rohe Geldzahlen im zentralen SelectedRecordPanel/RowDetailBand. Lead besitzt ausschliesslich deren Wertformatierung, Wiederverwendung des vorhandenen formatCellValue inklusive currencyField und enge Tests/QA. Keine neue Einzelmaske/Schreibrechte/DB; native Tabellenwerte, Datum und Geld muessen dieselbe deklarierte Darstellung erhalten.
+
+**STUDIO-PORTAL-CERTIFICATE-PHANTOM-20261029 - reserviert, Codex Lead:** Readonly-Verbraucher-/Quellpruefung bestaetigt verwaisten Detailbuilder portal/zertifikat ohne Endpoint und ohne kundenautorisierte Zertifikatsquelle. Besitz screen_definitions_stamm.py nur Funktion/Registry/Routen/Alias dieser ID, dazu exakter Ratschen-/Generatorkatalogeintrag und Regressionstest. Bestehende sichere Liste portal/zertifikate bleibt erhalten; kein neuer Detail-/Schreib-/Downloadweg. Nicht als neue Fachfunktion zaehlen.
+
+**STUDIO-DEBITOREN-20261029 - abgenommen:** Debitoren-Unterclaim und Kontext-Nachlauf abgeschlossen. NativeListPage mit kanonischer OP-Quelle, korrekt gezaehlter Pagination, exakten waehrungsgebundenen Kennzahlen/CSV/Detailnavigation. Gemeinsame OP-Verwaltung, Zusammenfassung und Audit-verknuepfte Ausgleichshistorie korrigiert. 81 gezielte Tests (30 Backend inkl Portalidentitaet,5CRM,45Frontend/Compiler,1signiertesSQL-Szenario) bestehen; Typecheck/Produktionsbuild gruen. 12 synthetische Komponentenansichten EUR/Mixed,Hell/Dunkel,dreiBreiten ohne axe/Overflow/JS-Befund. STUDIO-DEBTOR-VISUAL-CURRENCY und STUDIO-PORTAL-CERTIFICATE-PHANTOM abgeschlossen. Sichere Portalliste erhalten, unbelegte Detaildefinition entfernt; keine neue Fachfunktion vortaeuschen. Gategesamt A/B/C851,E804/851,842native,47Runtime offen. Nur eigene SQL-Daten zurueckgerollt;0Pruefstandsitzungen,keineMigration/DB/Containerneuanlage. Eigener Vorschauprozess beendet. QA/Handshake studio-debtor-op-20261029.md. STUDIO-REMAINING-LISTS bleibt in Arbeit; naechste echte Familie CRM-Aktivitaeten mit vollstaendigen Filtern/Paging.
+
+**STUDIO-CI-LIST-LOAD-CONTRACTS-20261029 - reserviert, Codex Lead:** Konkrete CI-Logs dca5062f8 belegen limit500 gegen APImax200 und CLI-/RouteGeneratorDrift. Besitz stamm_list_parent.py nur fetch_limit-Vertrag, enge Liste/API-Ladegrenzenpruefung, davon betroffene buildergenerierte Testfixtures sowie CLI/Routen-/Katalog-/Handbuch-Artefakte. Keine APIlimits anheben, keine fachlichen Filter oder Vollstaendigkeit entfernen, keine Schwellen lockern. Arbeitsweise erst OpenAPI-Abgleich, dann begrenzte Quellseiten mit bestehendem vollständigem Collector. Agent fuer engeReadanalyse/Generatortests erlaubt, keineDB-Neuanlage. Andere rote CI-Cluster bleiben konkret getrennt in Arbeit.
+
+**STUDIO-CI-LIST-LOAD-CONTRACTS Erweiterung20261029:** Routingintegritaet findet unreferenzierte Altdatei pages/portal/zertifikate-legacy.tsx. rgprueftsrc/tests ohneImportverweis; aktive zertifikate.tsx nutztNativeListPage, sichereQuelle hat keinenDownloadvertrag. Lead besitzt Entfernung ausschliesslich dieser Altdatei und engenRegressionsnachweis, keinAliasfuerungenutzteSeiteerfinden. Das ist Altlastbereinigung nach Nutzerfreigabe, keine Funktionslieferung.
+
+**STUDIO-CI-LIST-LOAD-CONTRACTS-20261029 - abgeschlossen:** Parentdefault100 statt500,15API-Maxverletzungen nachgewiesen und beseitigt; erlaubte200erOverrides erhalten. Komplette Sammlung/Filter/Export unveraendert,31Collectorvertraege gruen. Insgesamt68gezielteFaelle,Typecheck,CLI-/Nav-/Routingchecks gruen. CLI/Routenartefakte synchron, unreferenzierte Portalaltdatei entfernt. KeineDB/Container/Reset/Limit- oder Gate-Lockerung. GatesA/B/C851,E804/851,47Runtimepunkteweiteroffen. QA/Handshake studio-ci-list-load-contracts-20261029.md; naechsterSlice konkreteCI-Render-/Inventarfehler.
+
+**FRONTEND-PRODUCTION-REACT-BOOT-20261029 - reserviert, Codex Lead:** RealeCI-SmokeArtefakte belegen HTTP200 aufsales/angebote,blankeSeite,TypeError Cannot set properties of undefined(setting Children) imvendor-reactChunk. Kein belegterAnmelde-/Backendstartfehler. Leadbesitzt packages/frontend-web/vite.config.ts nurgetVendorChunk/React-Foundation-Aufteilung, engeProduction-Browserregression/QA. React/RDOM/Scheduler/CommonJS-GrundlagenvonRouter-Verbraucherntrennen,keineAuth-/Fach-/Rollenlockerung. VorCodeedit Reproduktiongegenvorhandenesdist,danachBuild/Browserabnahme;keineDB/Containerneu. AndereSlicesunveraendert.
+
+**FRONTEND-PRODUCTION-REACT-BOOT CI-Schutz-Erweiterung20261029:** UnveraenderterAltbuildreproduziertChildren-PageErrorundrootTextLength0; korrigierterBuildzeigtSSO-AnmeldungohnePageError. Leadbesitz umfasst neues packages/frontend-web/scripts/check-production-bootstrap.mjs und einen gezieltenSchrittin.github/workflows/e2e-smoke.yml, umdiesenechtenProduktionsstartvordenFach-Smokeszupruefen. NurfrischerBrowserkontext,oeffentlicheLoginmaske,blockierteexterneRequestsundsynthetische401APIantworten;keineKennungen/Token/Rollen/DB. Fehlerbleibenausloesend,keineReadiness-Abschwaechung.
+
+**FRONTEND-PRODUCTION-REACT-BOOT-20261029 - abgeschlossen:** CI-Artefaktbefund lokal amechtenAltbuildreproduziert: /loginleer,Children-PageError,Roottext0. Reactfoundation/CommonJS-Interop vonRouterverbraucherngetrennt; neuerProduktionsbuild ohneReact-Store-Chunkzyklus,SSO-Schaltflaechebedienbar,keinePageErrors,Roottext210. WiederholbarerProduction-BrowsercheckvorFach-SmokesinCIverdrahtet;keineAuth-/Fach-/Readiness-Lockerung. VollerTypecheck/BuildundWorkflow-YAML-Reihenfolgegruen. Vorher/NachherScreens/JSONimQA,keineCI-Rohtraces/Tokensgeliefert. EigenerPreview3012beendet;keineDB/Container-/Rollenveraenderung. QA/Handshake production-react-bootstrap-20261029.md. WeitereCI-/47RuntimebefundebleibenseparatinArbeit.
+
+**SECURITY-PROD-PATCHES-20261029 - reserviert, Codex Lead:** NeuerNode-Audit auf9d09356b6 meldet7blocked-Befunde fuer seroval1.6.3 undi18next-http-backend4.0.2. UpstreamAdvisoriesbestaetigenFixes1.6.11/4.0.4. BesitzRootpackage.json,Frontendpackage.json,pnpm-lock.yaml,gebundeneBackportreviewHashesnurmitQuell-/Patchnachweis,engeSecuritytests/QA/Generatorabgleich. EigeneisolierteAbhaengigkeitsumgebung, bestehende node_modules-Junctions/Instanzennichtinstallierenoderveraendern. KeineAllowlist/Schwellenlockerung,keineDB/Container.
+**CI-OP-READ-INVARIANTS-20261029 - reserviert, Codex Lead:** OwnFollowupImprovementGate sql-fstrings/business-time detailliertpruefen. Besitzopen_items.py nurberechneterGeschaeftstag,open_item_read_source.py nurstrengbegrenzteSchemaidentifier/Reviewmarkers,mask_rollout_summary_service.py nurSQLIdentifierreview,engeTests/QA. KeineFachwrites/DB/Migration. Kanonischesbusiness_todayverwenden,keineBaselineserhoehen.
+**CI-DISPOSITION-LIST-A11Y-20261029 - reserviert, Codex Lead:** Aktuelleraxe listBefundbeiDispo-Fehlerdarstellung. Besitz src/components/mask-builder/specialized/disposition-board.tsx nurexakteUL/LI/AlertSemantikundfokussierteTests. KeinWorkspace-/Events-/Domainlogikedit,gueltigeListensemantikauchbeimFehler.
+**CI-DEBTOR-TEST-PARITY-20261029 - reserviert, Codex Lead:** FuenfeigeneCI-TestregressionennachkanonischerOP-Migration. Besitz tests/pages/fibu/debitoren.test.tsx undBatch11nurderDebitorenfall;vorhandeneechteNativeRuntime5TestsalsParitaetsgrundlage. KeineProduktfunktionzurueckbauenundkeineAssertionsbloessausstreichen;veraltetenHookmockaufrealenBuilder/Transportmigrieren.
+
+**CI-OP-READ-INVARIANTS Baselinesenkung20261029:** GezielterGate-NachlaufbestaetigtausschliesslichAbbauvon2bestehenden date.today-Aufrufenimopen_items.py;computedueberfaelligverwendetebenfallskanonischenGeschaeftstag. Leadbesitzerweitertumconfig/business_time_usage_baseline.jsonnurAbsenkungperoffiziellemGenerator --update-baseline. KeineZunahmen/Ausnahmenzulassen. SQLfstringGuardbereitsgruenmitbegruendetemidentifierReviewundstrengemSchemaallowlist.
+
+**SECURITY-PROD-PATCHES Regressionserweiterung20261029:** Leadbesitz scripts/verify_node_security_releases.cjs umzweiengeVerhaltensfaelleerweitert: typed-array ownconstructorNamesicherignorierenmitkorrektemRoundtrip(seroval) und SprachwertAmpersand/GleichheitszeichenbeiQuery-loadPathvorRequestabweisen(i18next). KeineVersionsvergleichs-Scheinassertion,keineNetzabfrageimTest. PrivateInstallationgelungen,nur2PaketversionenimLockfileersetzt,ProdAudit0Finding/0blocked;vorhandenePatchquellenidentischgeprueftundReviewfristunveraendert.
+
+**SECURITY-PROD-PATCHES-20261029 - abgeschlossen:** seroval1.6.11/i18next-http-backend4.0.4 exaktgepinnt,Lockfileersetztausschliesslichdiese2Versionen. FrozenInstallineigenerRuntimeerfolgreich;Bestands-Junctionsunveraendert. ProdAudit0Advisories/0Findings/0blocked,release_allowedtrue;76Securitytestsinkl2neuerVerhaltensgegenprobengegenAltpaketerot/neuePaketegruen. RootManifest-/LockReviewbindungnurbeiidentischeninstalliertenbrace/deepmerge-Reparaturquellenneu,Reviewfristenunveraendert. VollerTypecheck/Produktionsbuild/Browser-LoginbootstrapmitrealenPatchpaketengruen;Preview3012beendet. KeineAllowlist-/Gate-Lockerung/DB/Container/Rollenveraenderung.
+**CI-OP-READ-INVARIANTS-20261029 - abgeschlossen:** business_today stattSystemdatum,16gezielteBackendvertraegegruen;Schemaallowlistpublic/domain_erpvorSQLIdentifierverwendung,ReviewedSafeMarkermitBegruendung. SQLfstrings/BusinessTime/BaselineIntegritaet/ToolchainGuardsgruen. Business-Time-Ratscheum2abgesenktauf191,nichtgelockert.
+**CI-DISPOSITION-LIST-A11Y-20261029 und CI-DEBTOR-TEST-PARITY-20261029 - abgeschlossen:** ul/li-SemantikauchbeiAbruf-/Operationsfehler,Alertinnen;20DispoTestsinklaxe-Gruppenbefundgruen. LegacyDebitorentestsaufkanonischenBuilder/Transport/NativeRuntimeumgestellt;Batch11+alte/neueOPtests70gruen. Zusammen90FrontendfaelleinderneuenPatchinstallationgruen. Insgesamt182gezielteTestsdiesesIntegrationsslices. QA/Handshake security-prod-patches-ci-20261029.md. Gesamtziel47RuntimepunkteundweitereCI-/SQL-/SeitenparitaetsbefundebleibenausdruecklichinArbeit.

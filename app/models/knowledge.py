@@ -51,6 +51,8 @@ class KnowledgeVersionRecord(Base):
         nullable=False,
         index=True,
     )
+    # Mandant des Wissensobjekts (rls_domain_ki_20261027, Verbund-FK in der Datenbank).
+    tenant_id = Column(String, nullable=False)
     version = Column(Integer, nullable=False)
     format = Column(String(32), nullable=False)
     inhalt = Column(Text, nullable=False)

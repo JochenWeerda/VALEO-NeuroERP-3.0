@@ -28,6 +28,7 @@ from app.core.tenant import get_tenant_id
 from app.infrastructure.models import Customer
 from app.infrastructure.models.agrar_models import FeldbuchSchlag
 from app.services.customer_reference import resolve_reference
+from app.services.pricing_condition_read import read_pricing_conditions
 from app.services.finance_datev_service import FinanceDatevService
 from app.services.finance_period_service import FinancePeriodService, PeriodError
 from app.services.vies_service import vies_service
@@ -875,11 +876,7 @@ def list_pos_rabatte(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> list[dict[str, Any]]:
-    rows = _safe_rows(
-        db,
-        "SELECT * FROM domain_shared.zu_abschlag_konditionen ORDER BY id LIMIT 200",
-        {},
-    )
+    rows = read_pricing_conditions(db, tenant_id, limit=200)
     return [
         {
             "id": str(r.get("id")),
@@ -961,11 +958,7 @@ def preise_konditionen(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict[str, Any]:
-    rows = _safe_rows(
-        db,
-        "SELECT * FROM domain_shared.zu_abschlag_konditionen ORDER BY id LIMIT 1",
-        {},
-    )
+    rows = read_pricing_conditions(db, tenant_id, limit=1)
     row = dict(rows[0]) if rows else {}
     today = date.today()
     return {
@@ -986,47 +979,9 @@ def list_qualitaet_reklamationen(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> list[dict[str, Any]]:
-    rows = _safe_rows(
-        db,
-        "SELECT * FROM domain_ops.reklamationen WHERE tenant_id = :t ORDER BY erstellt_am DESC LIMIT 200",
-        {"t": tenant_id},
-    )
-    # Die Liste kennt vier Stufen; die Zustandsmaschine (ReklamationsStatus) sechs.
-    status_map = {
-        "offen": "neu",
-        "in_pruefung": "in-bearbeitung",
-        "teilweise_anerkannt": "in-bearbeitung",
-        "anerkannt": "in-bearbeitung",
-        "geschlossen": "geloest",
-        "abgelehnt": "abgelehnt",
-    }
-    lieferanten: dict[str, str] = {}
-    result = []
-    for r in rows:
-        lieferant_ref = str(r.get("lieferant_id") or "")
-        if lieferant_ref not in lieferanten:
-            lieferant = resolve_reference(db, tenant_id, "supplier", lieferant_ref)
-            lieferanten[lieferant_ref] = lieferant.name or lieferant.number or ""
-        positionen = r.get("positionen") or []
-        if isinstance(positionen, str):
-            try:
-                positionen = json.loads(positionen)
-            except json.JSONDecodeError:
-                positionen = []
-        first = positionen[0] if isinstance(positionen, list) and positionen else {}
-        result.append(
-            {
-                "id": r.get("reklamation_id") or r.get("id"),
-                "nummer": r.get("reklamation_nr") or "",
-                "kunde": lieferanten[lieferant_ref],
-                "artikel": first.get("artikel") or first.get("bezeichnung") or r.get("typ") or "",
-                "grund": r.get("typ") or "",
-                "datum": _iso(r.get("erstellt_am") or r.get("frist_datum")) or "",
-                "prioritaet": "normal",
-                "status": status_map.get(str(r.get("status") or "offen"), "neu"),
-            }
-        )
-    return result
+    from app.services.complaint_list_read import read_complaint_list
+
+    return read_complaint_list(db, tenant_id, iso=_iso)
 
 
 @router.get("/operations/exceptions", response_model=list[BridgeOut], summary="Betriebsausnahmen auflisten")

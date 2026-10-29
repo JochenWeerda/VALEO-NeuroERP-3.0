@@ -1,3 +1,5 @@
+import { FlowSpineCatalogRenderer } from './renderers/FlowSpineCatalogRenderer'
+import type { FlowSpineCatalogState } from './runtime/useFlowSpineCatalogRuntime'
 import { SourceProposalRenderer } from './renderers/SourceProposalRenderer'
 import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import { ColumnLayoutRenderer, type NavigationColumn } from './renderers/ColumnLayoutRenderer'
@@ -32,6 +34,7 @@ import {
   type PageSection,
 } from './renderers'
 import { UnsavedChangesGuard } from './renderers/UnsavedChangesGuard'
+import { SpecializedComponentHost } from './specialized/SpecializedComponentHost'
 import { conditionRoot, dispatchScreenAction, type ScreenContext } from './governance/screen-context'
 
 const PROCESS_FLOW_SECTION_KEY = 'belegfluss'
@@ -53,6 +56,7 @@ function documentIdentity(identityField: string | undefined, payload: Record<str
 }
 
 interface UniversalMaskRendererProps {
+  flowSpineCatalog?: FlowSpineCatalogState
   columns?: NavigationColumn[]
   messages?: ScreenMessage[]
   onRetry?: () => void
@@ -182,12 +186,13 @@ function renderLegacyFields(
 }
 
 function RenderFromPlan({
+  flowSpineCatalog,
   columns,
   messages = [],
   onRetry,
   plan,
   payload,
-  tables,
+  tables: sourceTables,
   tableQueryStates,
   tableTotals,
   onTableQueryChange,
@@ -206,6 +211,7 @@ function RenderFromPlan({
   columns?: NavigationColumn[]
   messages?: ScreenMessage[]
   onRetry?: () => void
+  flowSpineCatalog?: FlowSpineCatalogState
   plan: RenderPlan
   payload: Record<string, unknown>
   entityId?: string
@@ -225,6 +231,24 @@ function RenderFromPlan({
   screenContext?: ScreenContext
 }): JSX.Element {
   const container = useRef<HTMLDivElement>(null)
+  const [localRows, setLocalRows] = useState<Record<string, Record<string, Record<string, unknown>>>>({})
+  useEffect(() => { setLocalRows({}) }, [plan.screenId])
+  const tables = Object.fromEntries(Object.entries(sourceTables).map(([tableKey, rows]) => [
+    tableKey, rows.map(row => {
+      const patches = localRows[tableKey]
+      if (!patches) return row
+      const identityFields = new Set((plan.tablesByKey[tableKey]?.rowActions ?? [])
+        .map(action => action.localRowPatch?.identityField).filter((field): field is string => Boolean(field)))
+      let result = row
+      for (const field of identityFields) {
+        const id = row[field]
+        if (typeof id !== 'string' && typeof id !== 'number') continue
+        const patch = patches[JSON.stringify([field, id])]
+        if (patch) result = { ...result, ...patch }
+      }
+      return result
+    }),
+  ]))
   const [activeTab, setActiveTab] = useState<string | undefined>(requestedSectionKey)
   const [locateField, setLocateField] = useState<string | undefined>(undefined)
   useEffect(() => {
@@ -283,9 +307,19 @@ function RenderFromPlan({
   const deriveColumns = shouldDeriveColumns(plan, columns)
   const onePage = plan.shell.sectionNavigation === 'anchors' && !deriveColumns && !columns
   const boundRoot = conditionRoot(screenContext)
-  const dispatchAction = (key: string, actionPayload: Record<string, unknown>) => (
-    dispatchScreenAction(screenContext, declaredAction(plan, key), actionPayload, onAction)
-  )
+  const dispatchAction = (key: string, actionPayload: Record<string, unknown>) => {
+    for (const [tableKey, table] of Object.entries(plan.tablesByKey)) {
+      const patch = table.rowActions?.find(action => action.key === key)?.localRowPatch
+      if (!patch) continue
+      const id = actionPayload[patch.identityField]
+      if ((typeof id !== 'string' && typeof id !== 'number') || id === '') return
+      const identity = JSON.stringify([patch.identityField, id])
+      setLocalRows(current => ({ ...current, [tableKey]: { ...current[tableKey],
+        [identity]: { ...current[tableKey]?.[identity], [patch.field]: patch.value } } }))
+      return
+    }
+    return dispatchScreenAction(screenContext, declaredAction(plan, key), actionPayload, onAction)
+  }
 
   const renderHeader = (condensed: boolean, sticky: boolean): JSX.Element => (
     <ActionBarRenderer
@@ -404,9 +438,11 @@ function RenderFromPlan({
 
       {statusAfterFields ? null : workflowNode}
       {!statusAfterFields && plan.shell.summaryPlacement === 'header' ? <FastSummaryRenderer items={plan.summaryItems} /> : null}
+      {plan.flowSpineCatalog && <FlowSpineCatalogRenderer state={flowSpineCatalog} />}
       <TileGridRenderer tiles={plan.tiles} />
       <CalendarRenderer calendar={plan.calendar} />
       <TwinReadModelRenderer twin={plan.twin} />
+      <SpecializedComponentHost specialized={plan.specialized} onAction={dispatchAction} />
       {plan.sourceProposals ? <SourceProposalRenderer context={effectivePayload[plan.sourceProposals.contextKey]} /> : null}
 
       {deriveColumns ? null : (
@@ -683,6 +719,7 @@ function RenderFromScreen({
 }
 
 export function UniversalMaskRenderer({
+  flowSpineCatalog,
   columns,
   messages,
   onRetry,
@@ -719,6 +756,7 @@ export function UniversalMaskRenderer({
     return (
       <LookupBindingContext.Provider value={lookupBindings ?? {}}>
         <RenderFromPlan
+          flowSpineCatalog={flowSpineCatalog}
           columns={columns}
           messages={messages}
           onRetry={onRetry}

@@ -20,8 +20,6 @@ from typing import Optional
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-_DEFAULT_TENANT = "00000000-0000-0000-0000-000000000001"
-
 # 1:n-Historientabellen, deren kunden_nr auf den Master umgehängt wird.
 _MOVABLE = [
     "kunden_kontakte", "kunden_ansprechpartner", "crm_gifts", "crm_capture_inbox",
@@ -35,9 +33,12 @@ class MergeError(Exception):
 
 
 class CrmMergeService:
-    def __init__(self, db: Session, tenant_id: Optional[str] = None) -> None:
+    def __init__(self, db: Session, tenant_id: str) -> None:
+        # Mandant nur aus der Identitaet; kein Rueckfall auf den Standardmandanten (RLS-DOMAIN-CRM).
+        if not tenant_id:
+            raise ValueError("tenant_id required")
         self.db = db
-        self.tenant_id = tenant_id or _DEFAULT_TENANT
+        self.tenant_id = tenant_id
 
     def _kunde(self, nr: str) -> Optional[dict]:
         r = self.db.execute(

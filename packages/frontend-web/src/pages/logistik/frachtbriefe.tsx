@@ -1,19 +1,7 @@
-import { useNavigate } from '@/app/routing/typed-router'
-import { CaptureScreenHost } from '@/masks/capture-screen-host'
-import { logistikFrachtbriefScreen } from '@/masks/capture-screens'
+import { NativeListPage } from '@/components/mask-builder/NativeListPage'
 
-/** Transportbeleg aus der ScreenDefinition `logistik/frachtbrief`. */
-export default function FrachtbriefePage(): JSX.Element {
-  const navigate = useNavigate()
+export default function Page(): JSX.Element {
   return (
-    <CaptureScreenHost
-      screenId="logistik/frachtbrief"
-      fallback={logistikFrachtbriefScreen}
-      loading="Frachtbriefe werden geladen…"
-      error="Frachtbriefe konnten nicht geladen werden."
-      onAction={async (key) => {
-        if (key === 'verladung') navigate('/verladung')
-      }}
-    />
+    <NativeListPage screenId="logistik/frachtbriefe" testId="screen-logistik/frachtbriefe" />
   )
 }

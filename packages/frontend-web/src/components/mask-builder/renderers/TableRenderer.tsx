@@ -13,9 +13,11 @@ export function TableRenderer({
 }): JSX.Element {
   return (
     <Card>
-      {suppressHeading ? null : (<CardHeader>
-        <CardTitle className="text-base">{table.label}</CardTitle>
-      </CardHeader>)}
+      {suppressHeading ? null : (
+        <CardHeader>
+          <CardTitle className="text-base">{table.label}</CardTitle>
+        </CardHeader>
+      )}
       <CardContent>
         <VirtualDataTable
           data={rows}

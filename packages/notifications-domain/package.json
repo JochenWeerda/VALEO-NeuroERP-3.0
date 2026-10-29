@@ -19,7 +19,10 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "migrate:gen": "drizzle-kit generate",
+    "migrate:apply": "node ../../scripts/drizzle_apply_guard.cjs",
     "migrate:push": "drizzle-kit push",
+    "migrate:check": "node ../../scripts/drizzle_apply_guard.cjs --check",
+    "migrate:drift": "node ../../scripts/check_drizzle_drift.cjs",
     "migrate:drop": "drizzle-kit drop",
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
@@ -34,8 +37,7 @@
     "fastify": "^5.7.2",
     "@fastify/swagger": "^8.0.0",
     "@fastify/swagger-ui": "^4.0.0",
-    "zod": "^3.23.8",
-    "zod-openapi": "^0.9.0",
+    "zod": "^4.6.7",
     "drizzle-orm": "^0.45.2",
     "postgres": "^3.4.0",
     "pg": "^8.11.0",
@@ -53,7 +55,7 @@
     "uuid": "^11.1.1",
     "dotenv": "^17.2.3",
     "handlebars": "^4.7.8",
-    "nodemailer": "^10.0.2",
+    "nodemailer": "^10.1.7",
     "twilio": "^5.3.4",
     "axios": "^1.6.0"
   },
@@ -69,10 +71,10 @@
     "prettier": "^3.2.5",
     "tsx": "^4.19.0",
     "typescript": "^5.6.3",
-    "vitest": "^4.1.11",
+    "vitest": "^4.1.12",
     "supertest": "^7.1.4",
-    "@vitest/coverage-v8": "^4.1.11",
-    "drizzle-kit": "^0.22.0",
+    "@vitest/coverage-v8": "^4.1.12",
+    "drizzle-kit": "^0.31.11",
     "@types/supertest": "^6.0.0"
   }
 }

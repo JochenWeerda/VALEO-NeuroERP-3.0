@@ -58,6 +58,28 @@ def gepruefter_akteur_aus_request(request: Any) -> str:
     return akteur
 
 
+def gepruefte_email(request: Any) -> str | None:
+    """E-Mail aus den geprueften Claims (fuer Zugaenge, die an eine E-Mail vergeben sind) — nie aus ``X-User-Email``."""
+    state = getattr(request, "state", None)
+    claims = getattr(state, "token_claims", None) if state is not None else None
+    if not isinstance(claims, dict) or claims.get("email_verified") is not True:
+        return None
+    email = claims.get("email")
+    return email.strip() if isinstance(email, str) and email.strip() else None
+
+
+def gepruefter_name(request: Any) -> str | None:
+    """Anzeigename aus den geprueften Claims (``name``, sonst ``preferred_username``)."""
+    state = getattr(request, "state", None)
+    claims = getattr(state, "token_claims", None) if state is not None else None
+    if not isinstance(claims, dict):
+        return None
+    for key in ("name", "preferred_username"):
+        if isinstance(claims.get(key), str) and claims[key].strip():
+            return claims[key].strip()
+    return None
+
+
 def bekannter_nutzer(db: Any, akteur: str | None, *, tenant_id: str) -> str:
     """Resolve a verified subject to exactly one active tenant-local profile.
 

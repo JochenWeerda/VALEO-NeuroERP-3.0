@@ -4,8 +4,8 @@ import { ChannelEnum } from './notification-template';
 export const DeliveryStatusEnum = z.enum(['Delivered', 'Bounced', 'Read', 'Clicked', 'Failed']);
 
 export const DeliveryReceiptSchema = z.object({
-  id: z.string().uuid().optional(),
-  messageId: z.string().uuid(),
+  id: z.string().guid().optional(),
+  messageId: z.string().guid(),
   channel: ChannelEnum,
   provider: z.string(),
   status: DeliveryStatusEnum,

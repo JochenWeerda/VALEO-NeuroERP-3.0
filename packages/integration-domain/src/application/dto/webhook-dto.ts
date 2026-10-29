@@ -11,11 +11,11 @@ const EntityStatusSchema = z.enum(['active', 'inactive', 'pending', 'error']);
 // Request DTOs
 export const CreateWebhookRequestSchema = z.object({
   name: z.string().min(1).max(255),
-  integrationId: z.string().uuid(),
+  integrationId: z.string().guid(),
   config: z.object({
     url: z.string().url(),
     method: HttpMethodSchema,
-    headers: z.record(z.string()).optional(),
+    headers: z.record(z.string(), z.string()).optional(),
     timeout: z.number().min(1000).max(300000).optional(),
     retryPolicy: z.object({
       maxRetries: z.number().min(0).max(10),
@@ -23,7 +23,7 @@ export const CreateWebhookRequestSchema = z.object({
     }).optional(),
     authentication: z.object({
       type: z.enum(['bearer', 'basic', 'api-key']),
-      credentials: z.record(z.string())
+      credentials: z.record(z.string(), z.string())
     }).optional()
   }),
   events: z.array(z.string()).min(1),
@@ -36,7 +36,7 @@ export const UpdateWebhookRequestSchema = z.object({
   config: z.object({
     url: z.string().url(),
     method: HttpMethodSchema,
-    headers: z.record(z.string()).optional(),
+    headers: z.record(z.string(), z.string()).optional(),
     timeout: z.number().min(1000).max(300000).optional(),
     retryPolicy: z.object({
       maxRetries: z.number().min(0).max(10),
@@ -44,7 +44,7 @@ export const UpdateWebhookRequestSchema = z.object({
     }).optional(),
     authentication: z.object({
       type: z.enum(['bearer', 'basic', 'api-key']),
-      credentials: z.record(z.string())
+      credentials: z.record(z.string(), z.string())
     }).optional()
   }).optional(),
   events: z.array(z.string()).min(1).optional(),
@@ -55,7 +55,7 @@ export const UpdateWebhookRequestSchema = z.object({
 });
 
 export const TriggerWebhookRequestSchema = z.object({
-  payload: z.record(z.unknown()),
+  payload: z.record(z.string(), z.unknown()),
   event: z.string().optional()
 });
 
@@ -64,7 +64,7 @@ export const WebhookQuerySchema = z.object({
   limit: z.number().min(1).max(100).default(10),
   sortBy: z.string().optional(),
   sortOrder: z.enum(['asc', 'desc']).default('desc'),
-  integrationId: z.string().uuid().optional(),
+  integrationId: z.string().guid().optional(),
   event: z.string().optional(),
   status: EntityStatusSchema.optional(),
   isActive: z.boolean().optional()
@@ -75,7 +75,7 @@ export const WebhookResponseSchema = z.object({
   id: z.string(),
   name: z.string(),
   integrationId: z.string(),
-  config: z.record(z.unknown()),
+  config: z.record(z.string(), z.unknown()),
   events: z.array(z.string()),
   status: EntityStatusSchema,
   isActive: z.boolean(),
@@ -102,7 +102,7 @@ export const WebhookListResponseSchema = z.object({
 export const WebhookTriggerResponseSchema = z.object({
   success: z.boolean(),
   statusCode: z.number().optional(),
-  response: z.record(z.unknown()).optional(),
+  response: z.record(z.string(), z.unknown()).optional(),
   error: z.string().optional(),
   executionTime: z.number()
 });

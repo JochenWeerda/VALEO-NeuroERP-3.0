@@ -4,7 +4,7 @@ CRUD für Contacts, Leads, Activities, Betriebsprofile, Opportunities, Consent, 
 """
 
 import logging
-from fastapi import APIRouter, Depends, HTTPException, Header, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from typing import List, Optional
@@ -12,17 +12,14 @@ from datetime import datetime
 from app.core.uuid7 import uuid7
 
 from app.core.database import get_db
+# Mandant nur aus der verifizierten Identitaet; vorher X-Tenant-Header mit Rueckfall "default" (RLS-DOMAIN-CRM).
+from app.core.tenant import get_tenant_id
 from . import models, schemas
 from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/crm", tags=["CRM"])
-
-
-def get_tenant_id(x_tenant: Optional[str] = Header(None)) -> str:
-    """Extract Tenant ID from Header"""
-    return x_tenant or "default"
 
 
 # --- CONTACTS ---
@@ -736,14 +733,18 @@ async def gdpr_data_export(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
-    """DSGVO Art. 15: Auskunftsrecht – export all data for a partner."""
-    result: dict = {"partner_id": partner_id, "tenant_id": tenant_id}
+    """DSGVO Art. 15: Auskunftsrecht – export all data for a partner.
 
+    Las bis 27.10.2026 ``domain_shared.business_partners`` ohne Mandant; die Tabelle gibt es nicht,
+    die Auskunft endete mit 500. Gefuehrt werden Partner in ``domain_crm.business_partners``.
+    """
     bp_row = db.execute(
-        text("SELECT * FROM domain_shared.business_partners WHERE partner_id = :pid LIMIT 1"),
-        {"pid": partner_id},
+        text("SELECT * FROM domain_crm.business_partners WHERE partner_id = :pid AND tenant_id = :tid"),
+        {"pid": partner_id, "tid": tenant_id},
     ).mappings().first()
-    result["business_partner"] = dict(bp_row) if bp_row else None
+    if bp_row is None:
+        raise HTTPException(status_code=404, detail="Partner not found")
+    result: dict = {"partner_id": partner_id, "tenant_id": tenant_id, "business_partner": dict(bp_row)}
 
     consent_rows = db.execute(
         text("SELECT * FROM domain_crm.crm_consents WHERE partner_id = :pid AND tenant_id = :tid"),
@@ -751,23 +752,19 @@ async def gdpr_data_export(
     ).mappings().all()
     result["consents"] = [dict(r) for r in consent_rows]
 
-    try:
-        activity_rows = db.execute(
-            text("SELECT * FROM domain_crm.crm_activities WHERE contact_id = :pid AND tenant_id = :tid"),
-            {"pid": partner_id, "tid": tenant_id},
-        ).mappings().all()
-        result["activities"] = [dict(r) for r in activity_rows]
-    except Exception:
-        result["activities"] = []
-
-    try:
-        op_rows = db.execute(
-            text("SELECT * FROM domain_erp.offene_posten WHERE kunde_id = :pid AND tenant_id = :tid"),
-            {"pid": partner_id, "tid": tenant_id},
-        ).mappings().all()
-        result["open_items"] = [dict(r) for r in op_rows]
-    except Exception:
-        result["open_items"] = []
+    # Aktivitaeten und offene Posten fehlen in manchen Installationen; der Savepoint haelt die
+    # Transaktion fuer die naechste Abfrage am Leben.
+    for key, sql in (
+        ("activities", "SELECT * FROM domain_crm.crm_activities WHERE contact_id = :pid AND tenant_id = :tid"),
+        ("open_items", "SELECT * FROM domain_erp.offene_posten WHERE kunde_id = :pid AND tenant_id = :tid"),
+    ):
+        try:
+            with db.begin_nested():
+                rows = db.execute(text(sql), {"pid": partner_id, "tid": tenant_id}).mappings().all()
+            result[key] = [dict(r) for r in rows]
+        except Exception as exc:  # noqa: BLE001 — optionale Quelle, Auskunft bleibt vollstaendig fuer den Rest
+            logger.warning("DSGVO-Auskunft %s nicht lesbar: %s", key, type(exc).__name__)
+            result[key] = []
 
     return result
 
@@ -776,34 +773,19 @@ async def gdpr_data_export(
 async def gdpr_anonymize(
     partner_id: str,
     reason: str = Query(..., min_length=10, description="Reason for anonymization"),
-    db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
-    """DSGVO Art. 17: Recht auf Löschung – anonymize partner data."""
-    try:
-        db.execute(
-            text("""
-                UPDATE domain_shared.business_partners
-                SET name = 'ANONYMISIERT', email = NULL, phone = NULL,
-                    address = NULL, anonymized_at = NOW()
-                WHERE partner_id = :pid
-            """),
-            {"pid": partner_id},
-        )
-    except Exception as e:  # noqa: BLE001
-        logger.warning("DSGVO-Löschoperation fehlgeschlagen (best-effort): %s", e)
+    """DSGVO Art. 17: Loeschung laeuft ueber den protokollierten Loeschantrag.
 
-    try:
-        db.execute(
-            text("UPDATE domain_crm.crm_consents SET granted = FALSE, revoked_at = NOW() WHERE partner_id = :pid AND tenant_id = :tid"),
-            {"pid": partner_id, "tid": tenant_id},
-        )
-    except Exception as e:  # noqa: BLE001
-        logger.warning("DSGVO-Löschoperation fehlgeschlagen (best-effort): %s", e)
-
-    db.commit()
-    logger.info("GDPR anonymization for partner %s by tenant %s: %s", partner_id, tenant_id, reason)
-    return {"ok": True, "message": f"Partner {partner_id} anonymisiert", "reason": reason}
+    Bis 27.10.2026 schrieb dieser Weg in ``domain_shared.business_partners`` (gibt es nicht) ohne
+    Mandant, schluckte den Fehler, die Transaktion war tot, und die Antwort meldete
+    "anonymisiert". Eine Rechtspflicht galt als erfuellt, ohne dass ein Datensatz angefasst war.
+    """
+    logger.info("DSGVO-Kurzweg abgewiesen fuer Partner %s (Mandant %s)", partner_id, tenant_id)
+    raise HTTPException(
+        status_code=409,
+        detail="Loeschung nach Art. 17 nur ueber den Loeschantrag: POST /api/v1/compliance/dsgvo/erasure-requests",
+    )
 
 
 # ---------------------------------------------------------------------------

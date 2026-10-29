@@ -573,7 +573,7 @@
       "path": "sales/orders/new"
     },
     {
-      "module": "@/pages/verkauf/kunde-neu",
+      "module": "@/pages/verkauf/kunden-stamm",
       "path": "verkauf/kunde/neu"
     },
     {
@@ -1005,6 +1005,10 @@
       "path": "einkauf/lieferanten"
     },
     {
+      "module": "@/pages/einkauf/lieferanten-stamm",
+      "path": "einkauf/lieferanten/:id"
+    },
+    {
       "module": "@/pages/einkauf/lieferantenbewertung",
       "path": "einkauf/lieferantenbewertung"
     },
@@ -1047,6 +1051,10 @@
     {
       "module": "@/pages/einkauf/zahlungsbedingungen",
       "path": "einkauf/zahlungsbedingungen"
+    },
+    {
+      "module": "@/pages/energie/verbrauch",
+      "path": "energie/verbrauch"
     },
     {
       "module": "@/pages/errors/NotFound",
@@ -1213,11 +1221,11 @@
       "path": "crm/betrieb/:id"
     },
     {
-      "module": "@/pages/einkauf/supplier-native",
+      "module": "@/pages/einkauf/lieferanten-stamm",
       "path": "einkauf/lieferant/neu"
     },
     {
-      "module": "@/pages/einkauf/supplier-native",
+      "module": "@/pages/einkauf/lieferanten-stamm",
       "path": "einkauf/lieferant/:id"
     },
     {
@@ -1371,6 +1379,10 @@
     {
       "module": "@/pages/inventory-reports",
       "path": "inventory-reports"
+    },
+    {
+      "module": "@/pages/kasse/tagesabschluss",
+      "path": "kasse/tagesabschluss"
     },
     {
       "module": "@/pages/labor/proben-liste",
@@ -1761,6 +1773,14 @@
       "path": "reports/deckungsbeitrag"
     },
     {
+      "module": "@/pages/reports/lagerbestand",
+      "path": "reports/lagerbestand"
+    },
+    {
+      "module": "@/pages/reports/umsatz",
+      "path": "reports/umsatz"
+    },
+    {
       "module": "@/pages/reports",
       "path": "reports"
     },
@@ -1833,6 +1853,10 @@
       "path": "silo"
     },
     {
+      "module": "@/pages/energie/verbrauch",
+      "path": "energie"
+    },
+    {
       "module": "@/pages/genossenschaft/mitglieder",
       "path": "genossenschaft/mitglieder"
     },
@@ -1843,6 +1867,10 @@
     {
       "module": "@/pages/tankstelle/zapfungen",
       "path": "tankstelle"
+    },
+    {
+      "module": "@/pages/statistik/bewegungen",
+      "path": "statistik/bewegungen"
     },
     {
       "module": "@/pages/stock-management",
@@ -1859,6 +1887,10 @@
     {
       "module": "@/pages/tankstelle/zapfungen",
       "path": "tankstelle/zapfungen"
+    },
+    {
+      "module": "@/pages/termine/kalender",
+      "path": "termine/kalender"
     },
     {
       "module": "@/pages/transporte/fahrer-liste",
@@ -2137,6 +2169,10 @@
       "path": "crm/customers"
     },
     {
+      "module": "@/pages/einkauf/auftragsbestaetigung",
+      "path": "einkauf/auftragsbestaetigung/neu"
+    },
+    {
       "module": "@/pages/einkauf/rechnungseingaenge-liste",
       "path": "einkauf/rechnungseingaenge-liste"
     },
@@ -2219,6 +2255,10 @@
     {
       "module": "@/pages/sales/invoice-editor",
       "path": "verkauf/rechnungen/neu"
+    },
+    {
+      "module": "@/pages/kasse/tagesabschluss",
+      "path": "kasse/historie"
     },
     {
       "module": "@/pages/workflow/workflow-monitoring",
@@ -2643,6 +2683,14 @@
     {
       "module": "@/pages/futtermittel/fuetterungsdokumentation-mobil",
       "path": "futtermittel/fuetterungsdokumentation-mobil"
+    },
+    {
+      "module": "@/pages/disposition/touren-disposition",
+      "path": "disposition/touren-disposition"
+    },
+    {
+      "module": "@/pages/studio/workspace-composition-preview",
+      "path": "studio/workspace-composition-preview"
     }
   ]
 }

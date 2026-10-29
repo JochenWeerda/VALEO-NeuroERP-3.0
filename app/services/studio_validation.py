@@ -130,7 +130,9 @@ def validate_studio_draft(
     """
     cat = catalog or load_studio_catalog()
     catalog_actions: dict[str, Any] = cat["actions"]
-    violations: list[str] = []
+    from app.services.studio_list_contracts import validate_list_experience
+    from app.services.studio_catalog_contracts import validate_flow_spine_catalog
+    violations: list[str] = validate_list_experience(definition) + validate_flow_spine_catalog(definition)
 
     # ── Struktur (Minimalkontrakt) ───────────────────────────────────────────
     for req in ("schemaVersion", "id", "domain", "mode", "title"):
@@ -215,6 +217,8 @@ def validate_studio_draft(
         if not isinstance(action, dict):
             violations.append("action_muss_objekt_sein")
             continue
+        if any(field in action for field in ("responseAdapter", "resultNavigationRoute", "inputPrefill")):
+            violations.append("nativer_ressourcenadapter_nicht_im_studio_katalog")
         key = action.get("key", "")
         if not isinstance(key, str):
             violations.append("action_key_muss_text_sein")
@@ -243,7 +247,7 @@ def validate_studio_draft(
         elif _DANGER_RANK[draft_danger] < _DANGER_RANK[base["dangerLevel"]]:
             violations.append(f"action_dangerLevel_gesenkt:{key}")
         # Transport identifiers cannot select an alternative command or human form.
-        for field in ("command", "commandBinding", "inputFlow", "navigationRoute"):
+        for field in ("command", "commandBinding", "inputFlow", "navigationRoute", "download"):
             if field in action and action[field] != base.get(field):
                 violations.append(f"action_fremder_{field}:{key}")
         if action.get("method", "POST") != base.get("method", "POST"):

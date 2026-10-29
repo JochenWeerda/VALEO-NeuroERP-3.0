@@ -5,7 +5,7 @@
 import { z } from 'zod';
 import { generatePrefixedId, isValidId } from '@shared/utils/id-generator.js';
 
-const SyncJobIdSchema = z.string().uuid();
+const SyncJobIdSchema = z.string().guid();
 
 export class SyncJobId {
   private readonly _value: string;

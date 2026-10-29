@@ -10,6 +10,8 @@ from pydantic import BaseModel
 from app.core.dependency_container import container
 from app.finance.repositories import OffenerPostenRepository, BuchungRepository, KontoRepository, AnlageRepository
 from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
+from fastapi import Depends
+from app.core.tenant import get_tenant_id  # Mandant aus dem Token (bis 27.10.2026 ?tenant_id=system)
 
 router = APIRouter(prefix="/fibu", tags=["fibu"])
 
@@ -90,14 +92,14 @@ class GuVData(BaseModel):
 async def get_debitoren(
     ueberfaellig: Optional[bool] = Query(None),
     mahn_stufe: Optional[int] = Query(None),
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """Offene Posten Kunden abrufen"""
     op_repo = container.resolve(OffenerPostenRepository)
     return op_repo.get_debitoren(tenant_id, ueberfaellig, mahn_stufe)
 
 @router.post("/debitoren/{id}/mahnen", dependencies=SCHREIBEN["FINANZ"])
-async def mahnen(id: str, tenant_id: str = Query("system", description="Tenant ID")):
+async def mahnen(id: str, tenant_id: str = Depends(get_tenant_id)):
     """Mahnung für offenen Posten erstellen"""
     op_repo = container.resolve(OffenerPostenRepository)
     new_stufe = op_repo.get_by_id(id, tenant_id).mahn_stufe + 1 if op_repo.get_by_id(id, tenant_id) else 0
@@ -107,13 +109,13 @@ async def mahnen(id: str, tenant_id: str = Query("system", description="Tenant I
 
 # Kreditoren
 @router.get("/kreditoren", response_model=List[OffenerPosten])
-async def get_kreditoren(zahlbar: Optional[bool] = Query(None), tenant_id: str = Query("system", description="Tenant ID")):
+async def get_kreditoren(zahlbar: Optional[bool] = Query(None), tenant_id: str = Depends(get_tenant_id)):
     """Offene Posten Lieferanten abrufen"""
     op_repo = container.resolve(OffenerPostenRepository)
     return op_repo.get_kreditoren(tenant_id, zahlbar)
 
 @router.post("/kreditoren/zahlungslauf", dependencies=SCHREIBEN["FINANZ"])
-async def zahlungslauf(ids: List[str], tenant_id: str = Query("system", description="Tenant ID")):
+async def zahlungslauf(ids: List[str], tenant_id: str = Depends(get_tenant_id)):
     """Zahlungslauf für ausgewählte Kreditoren durchführen"""
     op_repo = container.resolve(OffenerPostenRepository)
     gezahlt = []
@@ -130,14 +132,14 @@ async def get_buchungen(
     datum_von: Optional[date] = Query(None),
     datum_bis: Optional[date] = Query(None),
     belegart: Optional[str] = Query(None),
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """Buchungsjournal abrufen"""
     buchung_repo = container.resolve(BuchungRepository)
     return buchung_repo.get_by_filters(tenant_id, datum_von, datum_bis, belegart)
 
 @router.post("/buchungen", response_model=Buchung, dependencies=SCHREIBEN["FINANZ"])
-async def create_buchung(buchung: Buchung, tenant_id: str = Query("system", description="Tenant ID")):
+async def create_buchung(buchung: Buchung, tenant_id: str = Depends(get_tenant_id)):
     """Neue Buchung erstellen"""
     buchung_repo = container.resolve(BuchungRepository)
     created_buchung = buchung_repo.create(buchung.model_dump(), tenant_id)
@@ -147,13 +149,13 @@ async def create_buchung(buchung: Buchung, tenant_id: str = Query("system", desc
 
 # Kontenplan
 @router.get("/konten", response_model=List[Konto])
-async def get_konten(typ: Optional[str] = Query(None), tenant_id: str = Query("system", description="Tenant ID")):
+async def get_konten(typ: Optional[str] = Query(None), tenant_id: str = Depends(get_tenant_id)):
     """Kontenplan abrufen"""
     konto_repo = container.resolve(KontoRepository)
     return konto_repo.get_all(tenant_id, typ)
 
 @router.get("/konten/{kontonummer}", response_model=Konto)
-async def get_konto(kontonummer: str, tenant_id: str = Query("system", description="Tenant ID")):
+async def get_konto(kontonummer: str, tenant_id: str = Depends(get_tenant_id)):
     """Einzelnes Konto abrufen"""
     konto_repo = container.resolve(KontoRepository)
     konto = konto_repo.get_by_nummer(kontonummer, tenant_id)
@@ -163,19 +165,19 @@ async def get_konto(kontonummer: str, tenant_id: str = Query("system", descripti
 
 # Anlagenbuchhaltung
 @router.get("/anlagen", response_model=List[Anlage])
-async def get_anlagen(tenant_id: str = Query("system", description="Tenant ID")):
+async def get_anlagen(tenant_id: str = Depends(get_tenant_id)):
     """Anlagevermögen abrufen"""
     anlage_repo = container.resolve(AnlageRepository)
     return anlage_repo.get_all(tenant_id)
 
 @router.post("/anlagen", response_model=Anlage, dependencies=SCHREIBEN["FINANZ"])
-async def create_anlage(anlage: Anlage, tenant_id: str = Query("system", description="Tenant ID")):
+async def create_anlage(anlage: Anlage, tenant_id: str = Depends(get_tenant_id)):
     """Neue Anlage erfassen"""
     anlage_repo = container.resolve(AnlageRepository)
     return anlage_repo.create(anlage.model_dump(), tenant_id)
 
 @router.get("/anlagen/{id}/afa")
-async def berechne_afa(id: str, jahr: int = Query(default=2025), tenant_id: str = Query("system", description="Tenant ID")):
+async def berechne_afa(id: str, jahr: int = Query(default=2025), tenant_id: str = Depends(get_tenant_id)):
     """AfA für eine Anlage berechnen"""
     anlage_repo = container.resolve(AnlageRepository)
     result = anlage_repo.berechne_afa(id, tenant_id, jahr)
@@ -185,7 +187,7 @@ async def berechne_afa(id: str, jahr: int = Query(default=2025), tenant_id: str 
 
 # Bilanz
 @router.get("/bilanz")
-async def get_bilanz(stichtag: str = Query(default="2024-12-31"), tenant_id: str = Query("system", description="Tenant ID")):
+async def get_bilanz(stichtag: str = Query(default="2024-12-31"), tenant_id: str = Depends(get_tenant_id)):
     """Bilanz abrufen"""
     konto_repo = container.resolve(KontoRepository)
     konten = konto_repo.get_all(tenant_id)
@@ -229,7 +231,7 @@ async def get_bilanz(stichtag: str = Query(default="2024-12-31"), tenant_id: str
 @router.get("/guv")
 async def get_guv(
     periode: str = Query(default="2024"),
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """Gewinn- und Verlustrechnung aus Buchungsdaten berechnen (SKR-basiert)."""
     from datetime import date
@@ -274,7 +276,7 @@ async def get_guv(
 
 # BWA
 @router.get("/bwa")
-async def get_bwa(monat: int = Query(default=10), jahr: int = Query(default=2025), tenant_id: str = Query("system", description="Tenant ID")):
+async def get_bwa(monat: int = Query(default=10), jahr: int = Query(default=2025), tenant_id: str = Depends(get_tenant_id)):
     """Betriebswirtschaftliche Auswertung abrufen"""
     buchung_repo = container.resolve(BuchungRepository)
 
@@ -341,7 +343,7 @@ async def get_bwa(monat: int = Query(default=10), jahr: int = Query(default=2025
 
 # OP-Verwaltung
 @router.get("/op-verwaltung")
-async def get_op_verwaltung(tenant_id: str = Query("system", description="Tenant ID")):
+async def get_op_verwaltung(tenant_id: str = Depends(get_tenant_id)):
     """Offene Posten Übersicht (Debitoren + Kreditoren)"""
     op_repo = container.resolve(OffenerPostenRepository)
     konto_repo = container.resolve(KontoRepository)
@@ -383,7 +385,7 @@ async def export_datev(
     typ: str = Query(..., description="buchungen, debitoren, kreditoren, anlagen"),
     datum_von: Optional[date] = Query(None),
     datum_bis: Optional[date] = Query(None),
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """DATEV-Export (CSV-Format)"""
     if typ == "buchungen":
@@ -406,7 +408,7 @@ async def export_datev(
 
 # Dashboard/Statistik
 @router.get("/stats")
-async def get_fibu_stats(tenant_id: str = Query("system", description="Tenant ID")):
+async def get_fibu_stats(tenant_id: str = Depends(get_tenant_id)):
     """Fibu-Dashboard Statistiken"""
     op_repo = container.resolve(OffenerPostenRepository)
     buchung_repo = container.resolve(BuchungRepository)

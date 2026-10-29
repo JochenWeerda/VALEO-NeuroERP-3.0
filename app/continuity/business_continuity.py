@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 import logging
 from app.core.uuid7 import uuid7
+from app.core.tenant_context import get_current_tenant_id
 
 logger = logging.getLogger(__name__)
 
@@ -455,9 +456,10 @@ class ISO22301BusinessContinuity:
                 # Add test results to plan improvement actions
                 logger.info(f"Continuity plan {plan.name} flagged for review based on test results")
 
-    def calculate_business_continuity_metrics(self, tenant_id: str = "system") -> Dict[str, Any]:
+    def calculate_business_continuity_metrics(self, tenant_id: str | None = None) -> Dict[str, Any]:
         """Calculate business continuity performance metrics"""
         # Filter incidents by tenant
+        tenant_id = tenant_id or get_current_tenant_id()
         tenant_incidents = [i for i in self.incident_records if i.id.startswith(tenant_id)]
 
         # Calculate metrics
@@ -534,8 +536,9 @@ class ISO22301BusinessContinuity:
             'unresolved_incidents': unresolved_incidents
         }
 
-    def generate_continuity_report(self, tenant_id: str = "system") -> Dict[str, Any]:
+    def generate_continuity_report(self, tenant_id: str | None = None) -> Dict[str, Any]:
         """Generate comprehensive business continuity report"""
+        tenant_id = tenant_id or get_current_tenant_id()
         metrics = self.calculate_business_continuity_metrics(tenant_id)
 
         # Get recent incidents

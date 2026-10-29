@@ -11,6 +11,30 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## UIX-RUNTIME: Migrationsnachweise und Fachparitaet (2026-10-22)
+
+**Aktueller Gesamtartefaktstand 2026-10-29:** Gate A/B/C851/851,
+E804/851(47 Runtime-Punkte),842 native
+Katalogeintraege und5 strukturell freigabefaehige Draft-Projektionen.
+Die Reklamationsliste ist funktional ueber Studio umgesetzt; vier obsolete
+Definitionen sind bereinigt.108 gezielte Tests und die visuelle
+Komponentenmatrix fuer beide Themes sind gruen. Fuer die verbleibenden
+Familien werden fehlende zentrale Bedienprimitive ergaenzt; siehe
+[Listenabnahme](../quality-assurance/studio-functional-lists-20261028.md) und
+[Prozessraumplan](../quality-assurance/studio-workflow-migration-plan-20261028.md).
+Der aktuelle Bericht ist fuehrend, die folgenden Messwerte sind historisch.
+
+**Nachlauf 2026-10-27:** 848 native Katalogeintraege synchron; 79 gezielte Tests
+in elf Dateien und vollstaendige Frontend-Typpruefung gruen. Das ist keine
+Gesamtmigration: gespeicherter Gate-Bericht vom 26.10. C 856/857, E 807/857;
+Browser-Gate D und Fachparitaet bleiben offen. Historische Vollstaendigkeitszahlen
+weiter unten gelten nur fuer ihren damaligen Messumfang. Details:
+[Session-/Integrations-QA](../quality-assurance/session-cache-boundary-20261027.md)
+und [Runtime-Status](../architecture/uix/universal-mask-runtime-status.md).
+
+
+Die behauptete Vollmigration ist nicht abgenommen. Lazy-Wrapper/unsichtbare Runtime und rein statische Katalogeintraege reichen nicht. Verlorene bestehende API-, Rollen-, Renderer- und Bedienvertraege werden im Slice MIGRATION-PARITY-REPAIR wiederhergestellt; neue Parent-Builder bleiben erhalten. Offene echte Endpunkte, volle native Fachparitaet, Browser-/Bildabnahme und GitHub-Nachlauf bleiben sichtbar. Siehe [Reparaturnachweis](../quality-assurance/migration-parity-repair-20261022.md).
+
 ## Fuhrpark und MCP Mandantengrenzen geschlossen (2026-10-09)
 
 Fuenf Fuhrpark-Commands jetzt mit kanonischer Mandantentrennung integriert:
@@ -71,15 +95,21 @@ Tenant, CE-Payload-Strip, Adapter-SQL Token-scoped; Positions-SELECT bei
 Reads+Writes in `tests/test_mcp_tenant_isolation_all.py`.
 [QA](../quality-assurance/mcp-tenant-isolation-read-write-20261009.md).
 
+## Fuhrpark Tenant CE abgeschlossen (2026-10-09)
+
+Additive `tenant_id` + Mandanten-SQL + 5× CE/MCP fuer ehemals
+`blocked_missing_tenant`. Map: mapped **41** / blocked_missing_tenant **0** /
+blocked_no_endpoint **0** / local_ui **13**; Registry **56**.
+Probe Revision `fuhrpark_tenant_ce_20261009`.
+[QA](../quality-assurance/fuhrpark-tenant-ce-20261009.md).
+**Weiter offen:** FIN-CLOSE ADR-076; Zahlauf open_high; Stufe-2-SUS live.
+
 ## MCP Mask-CE Batch4 abgeschlossen (2026-10-09)
 
-Onboarding/Qualifikation/Schulung CE+MCP (Training+Mandant). Fuhrpark neu
-`blocked_missing_tenant` (5) — Gap: additive `tenant_id` + Mandanten-SQL, dann CE
-(Folge-Claim, keine Migration in Batch4). Map: mapped **36** /
-blocked_missing_tenant **5** / blocked_no_endpoint **0** / local_ui **13**;
-Registry **51**. [QA Batch4](../quality-assurance/mcp-mask-ce-batch4-20261009.md).
-**Weiter offen:** FIN-CLOSE ADR-076; Zahlauf open_high; Fuhrpark-Tenant-Claim;
-Stufe-2-SUS live.
+Onboarding/Qualifikation/Schulung CE+MCP (Training+Mandant). Fuhrpark damals
+`blocked_missing_tenant` (5) — inzwischen geschlossen durch
+`FUHRPARK-TENANT-CE-20261009`. Historisch mapped **36** / Registry **51**.
+[QA Batch4](../quality-assurance/mcp-mask-ce-batch4-20261009.md).
 
 ## MCP Mask-CE Batch3 abgeschlossen (2026-10-09)
 
@@ -336,12 +366,14 @@ Registry **45**. [QA](../quality-assurance/mcp-mask-ce-batch2-20261009.md).
 CE+MCP; Fuhrpark Isolation-Blocker; Map blocked **8**, mapped **33**, local_ui **13**,
 Registry **48**. [QA](../quality-assurance/mcp-mask-ce-batch3-20261009.md).
 **Geschlossen (MCP-MASK-CE-BATCH4-20261009):** Personal Training CE+MCP;
-Fuhrpark `blocked_missing_tenant` ×5; Map mapped **36**, blocked_no_endpoint **0**,
-Registry **51**. [QA](../quality-assurance/mcp-mask-ce-batch4-20261009.md).
+Fuhrpark damals `blocked_missing_tenant` ×5; Map mapped **36**, Registry **51**.
+[QA](../quality-assurance/mcp-mask-ce-batch4-20261009.md).
+**Geschlossen (FUHRPARK-TENANT-CE-20261009):** Fuhrpark tenant_id+CE+MCP;
+Map mapped **41**, blocked_missing_tenant **0**, Registry **56**.
+[QA](../quality-assurance/fuhrpark-tenant-ce-20261009.md).
 **Weiter offen:** FIN-CLOSE/agentic Finance (P0, ADR-076 — kein Scheinabschluss;
 Claim frei nur fuer Doku/Pruefung); 1× Mask `open_high` (Zahlauf-Freigabe
-forbiddenForAgents/ADR-076-nah — nicht verdrahten); 5× `blocked_missing_tenant`
-(Fuhrpark tenant_id Folge-Claim); Stufe-2-SUS live.
+forbiddenForAgents/ADR-076-nah — nicht verdrahten); Stufe-2-SUS live.
 
 ## GAP-HUB — Archiv 2025 ersetzt (2026-10-07)
 
@@ -1446,6 +1478,69 @@ Status: **geschlossen**. `domain_shared.screen_definition_drafts` persistiert St
 `published_temp` hängt in `get_screen_definition` / Omnibox / `/studio/run/:screenId`.
 Native Screen-IDs bleiben unbeschattet. JSON-Schema-Drift bleibt bei UIX-090.
 
+## UIX-RUNTIME — Masken-Routen-Migration (Nachtrag 2026-10-22)
+
+**Studio-Katalog + Masken-Inventar (2026-10-22):** `config/studio_screen_versions.json`
+Release **1.0.0** mit **847** nativen Screens (**719** release-ready); Generator
+`scripts/generate_studio_screen_versions.py`. Masken-Studio-Inventar: **505/671**
+Routen `studio_versioniert` (Katalog + Belegfamilie), **137** `screen_definition`,
+**29** `builder_altmuster` (Legacy-Shell/`ObjectPage`), **0** `handgebaut` — Ziel
+669/669 erfordert Nachzug fehlender ScreenDefinition-Builder und Legacy-Wrapper.
+pytest Inventar/Gates/Katalog **60/60**.
+
+**Batches 11–15 (Abschluss, 2026-10-22):** Routen-Inventar **941/941 `runtime_wired`**,
+**`legacy_mask_pattern` 0**, **`hand_built` 0** (`mask_route_migration_inventory.py`).
+Registry erweitert um Batch-12-Kontrolle, Batch-13-Stamm, Batch-14-Cockpit, Batch-15-Domain
+sowie Batch-11-Listen-NativeListPage. Made-by-Studio-Gates **749/749** ScreenDefinitions (A/B/C/E + Draft-clean; Report:
+[`made-by-studio-gate-report.md`](../architecture/uix/made-by-studio-gate-report.md));
+Gate-E-Nachzug fuer neu verdrahtete Listen-/Cockpit-IDs in Folge-Slices. pytest
+Parent/Gates **701/701**.
+
+**Batch 6 (Studio-Gates, 2026-10-22):** `legacy_mask_pattern` **0** Routen (Create-only
+`-legacy.tsx` ausgenommen). Prozessmasken ohne native SD: Implementierung in `*-legacy.tsx`,
+Routen duenn via `createLegacyMaskPage`.
+
+Messung `scripts/mask_route_migration_inventory.py` / `mask-route-migration-inventory.md`
+(vor Batch 6): **941** Routen — **61** UniversalMaskRuntime-Pfad, **122** ObjectPage/ListReport ohne
+Runtime, **757** sonst handgebaut. Frueherer Stand 442/80/154 (Studio-Entwuerfe) ist
+kein 1:1-Vergleich (andere Basis) und **kein** Ablösenachweis. Slice
+`MASK-PRIMARY-NAV-NATIVE-20261022`: Listen Saatgut/Duenger/Lieferant → native
+Detailrouten; Create Legacy. Slice `MASK-BESTELLUNG-NAV-NATIVE-20261022`: Bestellung
+Primaernav + Folgebelege → `/einkauf/bestellung/:id`; Create Legacy; Paritaetsluecken
+CaseBand/Allokation/Freigabe-Detail/Komm-Senden dokumentiert. Offen: Beleg-Alt-Einstiege
+(Sonderfeldparitaet), Studio-Draft-Zaehlung gegen Live-DB, restliche Dual-Pfade,
+Bestellung-Detail-Paritaet (Actions/CaseBand).
+
+**Familien-Taxonomie (Plan 2026-10-22):** Systemweite Parent/Child-Ordnung
+Beleg/Stamm/Liste/Worklist/Ausnahme und Cluster-Roadmap P0–P3 in
+[`maskenfamilien-taxonomie.md`](../architecture/uix/maskenfamilien-taxonomie.md);
+Beleg-Spezialfall [`beleg-maskenfamilie-vererbung.md`](../architecture/uix/beleg-maskenfamilie-vererbung.md).
+Slices `UIX-MASKENFAMILIEN-TAXONOMIE-20261022` und `UIX-BELEG-FAMILIE-VERERBUNG-20261022`
+beide **offen** (Plan, nicht reserviert). **StammObjectPageParent-Rollout abgeschlossen**
+(`UIX-STAMM-OBJECTPAGE-PARENT-20261022` + `UIX-STAMM-OBJECTPAGE-ALL-20261022`): Factory + alle 12 Stamm-ObjectPage-Children (Gates A–C gruen) + 6 weitere Listen-Detailklicks auf native Routen; QA
+[`stamm-objectpage-parent-20261022.md`](../quality-assurance/stamm-objectpage-parent-20261022.md).
+Naechste Cluster: KontrollWorklist-Ausbau, weitere Listen Dual-Pfad;
+Codex STUDIO-BELEG-THEME / Touren/Training/Bestellvorschlag unangetastet.
+
+## STUDIO — Made-by-Studio Qualitätslücke (Nachtrag 2026-10-22)
+
+Nachweis-Katalog: [`made-by-studio-qualitaetsversprechen.md`](../architecture/uix/made-by-studio-qualitaetsversprechen.md).
+Entity-CLI-Freigabe (`studio.entity.v1`) auf main weitgehend; **größter offener Gate-Blocker
+für das Qualitätskennzeichen:** Image-/CI-Nachlauf + reale Browserabnahme der
+*publizierten* Entity-Maske (Gate D) — nicht Massenmigration. Workboard-Sync
+`STUDIO-WB-SYNC-20261022` stellt verdrängte Codex-Slices (GENERATED/ENTITY-RELEASE/LIVE-PROBE)
+wieder her; 63 lokal gelöschte Studio-Pfade aus HEAD restored. Codex-Claims
+STUDIO-GENERATED-ENTITIES / ENTITY-RELEASE / BELEG-THEME / MODEL unangetastet.
+
+**Made-by-Studio Qualitätsversprechen (2026-10-22):** Nachweis-Katalog
+[`made-by-studio-qualitaetsversprechen.md`](../architecture/uix/made-by-studio-qualitaetsversprechen.md).
+Draft-/Import-Zaehlung reicht nicht. Codex hat `studio.entity.v1` CLI/SQL/Live-Probe auf main
+(`431cd5f66`/`6e40b3212`); Siegel pro Maske braucht Image-/CI-Nachlauf + Browser der
+*publizierten* Fassung. Cursor-Sync: WIP hatte 63 Studio-Dateien lokal geloescht (wiederhergestellt);
+Workboard-Abschnitte 20.–22.10. wieder sichtbar (`STUDIO-SYNC-CURSOR-20261022`).
+StammObjectPageParent-Pilot (Shell) steht; naechster freier Schritt nach Gate D:
+CLI-Lebenszyklus einer der fuenf Pilot-Masken → Siegel — nicht 757 Routen.
+
 ## UIX-RUNTIME-022…030 — Universal Mask Runtime Platform (2026-06-29)
 
 Status: **abgeschlossen** — alle Phasen implementiert, getestet und gepusht (`81d706da8` bis `e6cabb380`).
@@ -2121,24 +2216,16 @@ Formale Projekt- und Lieferstaende liegen weiterhin in:
 - [Process Kernel Status](../architecture/process-kernel/STATUS.md)
 - `docs/project-context/operational-rollout-scope-2026-04-09.md`
 
+
 ## STUDIO-SEMANTIC-001 — Restumfang nach manueller Referenzmaske (2026-10-15)
 
 Fachkatalog, kataloggefuehrter Dialog, optionale kontingentierte Modellinterpretation und isolierte Domain-Kalkulation sind implementiert und gezielt geprueft. Offen: reale Modellabnahme mit vorhandenem eigenem Kontingent; Betriebsabstimmung bei unbekanntem Providerabschluss/Overrun; fachliche Lieferanten-/Kontrakt-/Waagenbindung, Controllerbenachrichtigung und konfigurierte Trocknungsregeln mit eigenen Prozessvarianten. Die manuelle Vorschau bleibt im Release-Gate gesperrt, bis ihre vollstaendige Variante nachgewiesen ist. Bestehender grain.v1-Nachweis ersetzt diese Abnahme nicht. [QA und konkrete Grenzen](../quality-assurance/studio-semantic-20261015.md). Bekannte fremde CI-/Security- und develop-Identitaetsbefunde bleiben bestehen.
 
 **Praezisierung Wind/Besatz:** Qualitaetsgrenze und explizite Freigrenze bleiben getrennt. Der implizite Standard ist entfernt; der operative HarvestAcceptanceService verwendet die persistente mandantengebundene Regelaufloesung mit Genehmigungs- und Messnachweisen. Kein automatischer zusaetzlicher Windabzug wird aus ungeklaerten Fraktionen abgeleitet. Abnahmeumfang siehe HARVEST-RULE-STORE-20261015. [HARVEST-DEDUCTION-001](../architecture/harvest-deduction-contract-standard.md).
 
+
 ## HARVEST-DEDUCTION-001 — Persistenter Versionsspeicher und verbleibende Abnahme (2026-10-15)
 
 Der implizite Zwei-Prozent-Standard ist entfernt. Persistenter append-only Versionsspeicher, getrennte menschliche Genehmigung, Messprovenienz, Berechnungsnachweis und finanzielle Freigabebindung sind im Produktionsrouter integriert. Fehlende, manipulierte, widerrufene oder veraltete Nachweise sperren; Altbetraege umgehen die Grenze nicht. Nichtfinanzielle Warenannahme bleibt getrennt. 31 Backend-, 47 Frontend- und vier reale SQL-Prozessfaelle bestanden; lokale additive Migration integriert.
 
 Offen bleiben finanzielle Browserabnahme, begrenzter Modellaufruf, Liefer-/CI-Nachlauf und vollstaendige operative Abnahme. Hash/Formeltext oder eine vom Aufrufer gelieferte Behauptung sind kein Genehmigungsnachweis. Slice HARVEST-RULE-STORE-20261015 bleibt in Arbeit. Nicht unterstuetzte alternative Abzugsmodelle bleiben bewusst deaktiviert. [Standard](../architecture/harvest-deduction-contract-standard.md), [aktueller QA-Stand](../quality-assurance/harvest-rule-store-20261015.md).
-
-## AP-WORKFLOW-SECURITY-20261020 — verbindliche Sicherheitsgrenze
-
-AP-Antraege/Entscheidungen sind an gepruefte Urheber, Mandant, Inhalt, Antrags-ID,
-Funktionstrennung und bestehende Finanzrollen gebunden. HTTP, native Maske und reale
-Kernel-Kommandos verwenden dieselbe Fachgrenze; der obsolete direkte MCP-Freigabeadapter
-ist entfernt. Buchung umfasst Journal/OP/Dokument/Audit/Outbox in einer Transaktion.
-[Nachweise und verbleibende Betriebsgrenzen](../quality-assurance/ap-workflow-security-20261020.md).
-Dies ersetzt weder lokale Auslieferung noch Browserabnahme oder die separat offenen
-Studio-/Tabellen-/Providerbefunde.

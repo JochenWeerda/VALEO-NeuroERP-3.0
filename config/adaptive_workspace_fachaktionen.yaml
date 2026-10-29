@@ -1,0 +1,769 @@
+apiVersion: valeo.erp/v1
+kind: AdaptiveWorkspaceFachaktionen
+schema_version: "1.0"
+registry_id: AW-FACHAKTIONEN-001
+mcp_write_standard: docs/architecture/mcp-write-standard.md
+description: >
+  Typisierte Fachaktionen fuer Adaptive Workspace (Command Center / Agenten).
+  Natuerliche Kurzkommandos werden deterministisch auf Action-IDs abgebildet.
+  Agenten schreiben nicht in die Datenbank. Writes laufen ausschliesslich ueber
+  vorhandene Domain-Commands bzw. MCP-Tools (MCP-WRITE-001 bis 015).
+  Vier-Augen gilt fuer jede WRITE-Klasse R3/R4.
+
+lead_contract:
+  catalog_path: config/adaptive_workspace_fachaktionen.yaml
+  mcp_tools:
+    katalog: workspace.fachaktion.katalog
+    resolve: workspace.fachaktion.resolve
+  transport: POST /api/v1/mcp/tools/call
+  frontend_catalog_id: action_id
+  notes: >
+    Der Frontend-Lead konsumiert diesen Katalog (YAML) oder das MCP-Lesewerkzeug.
+    Frontend catalogId zeigt 1:1 auf YAML action_id. Keine Launcher-UI in diesem Slice.
+
+canonical_events:
+  assignment_confirmed:
+    soll: assignment_confirmed
+    nats_subject: tenant.{tenantId}.workspace.assignment_confirmed
+    sse_channel: workspace
+    description: Disposition / Freigabe / Zuordnung verbindlich bestaetigt.
+  document_proposed:
+    soll: document_proposed
+    nats_subject: tenant.{tenantId}.workspace.document_proposed
+    sse_channel: workspace
+    description: Beleg- oder Buchungsvorschlag liegt vor (noch nicht gebucht).
+  document_posted:
+    soll: document_posted
+    nats_subject: tenant.{tenantId}.workspace.document_posted
+    sse_channel: workspace
+    description: Beleg oder Wareneingang ist festgeschrieben.
+
+# Ist-NATS/Outbox-Topics (nicht umbenannt). Spiegel IST_TO_SOLL in app/workspace/events.py.
+# Publisher bleiben bei den Fachmodulen; YAML listet nur die verdrahteten Ist-Typen.
+event_gaps:
+  - soll: assignment_confirmed
+    ist:
+      - logistik.tour.created
+      - lkw.registered
+      - LOADING_STARTED
+      - LOADING_FINISHED
+      - finance.ap_invoice.approved
+      - finance.ap_invoice.approval_granted
+    wired_in_workspace: mapping_and_outbox
+    notes: >
+      Kein Publisher umbenannt. Tour-created bleibt logistik.tour.created.
+      LOADING_* Outbox in app/api/v1/endpoints/tours.py (start/finish_loading).
+  - soll: document_proposed
+    ist:
+      - finance.ap_invoice.approval_requested
+      - sales.invoice.proposed
+      - sales.gutschrift.proposed
+    missing:
+      - sales.offer.proposed
+      - agrar.contract.reminder.proposed
+    wired_in_workspace: mapping_only
+    notes: Sales-Angebot und Kontraktmahnung haben keine Outbox-Events.
+  - soll: document_posted
+    ist:
+      - goods_receipt.created
+      - finance.ap_invoice.posted
+      - docflow.document.posted
+      - sales.invoice.posted
+      - lager.einlagerung.created
+      - agrar.weighing_ticket.allocated
+      - agrar.quality_protocol.completed
+    missing:
+      - einkauf.anlieferavis.wareneingang.posted
+    wired_in_workspace: mapping_and_outbox
+    notes: >
+      WE aus Avis bucht Bestand, emittiert goods_receipt.created sofern Compat-Pfad.
+      Wiegeschein-Outbox in weighing_tickets.py.
+
+actions:
+
+  # ── 1. Nicht disponierte LKW ─────────────────────────────────────────────
+  - action_id: logistik.undispatched_vehicles.list
+    example_query: nicht disponierte LKW
+    domain: logistics
+    access: read
+    risk_level: R0
+    enabled: true
+    enabled_for_agents: true
+    forbidden_for_agents: false
+    four_eyes: false
+    permission:
+      scope: logistics:read
+      tenant_isolation: required
+    idempotency: not_required
+    audit: read
+    event_out: []
+    mcp_tool_id: null
+    mask_action_id: null
+    command_endpoint: GET /api/v1/logistik/tours?status=GEPLANT
+    related_endpoints:
+      - GET /api/v1/fuhrpark/fahrzeuge
+      - GET /api/v1/logistik/tours
+    screen_id: disposition/touren-disposition
+    route_path: /disposition/touren-disposition
+    follow_up_writes:
+      - logistik.tour.anlegen
+    aliases:
+      - nicht disponierte lkw
+      - nicht disponierte lastwagen
+      - lkw nicht disponiert
+      - undispatched trucks
+      - fahrzeuge ohne tour
+    notes: >
+      Lesende Arbeitliste auf der Dispo-Tafel (Slice Absicht). Kein toter
+      status=undispatched-Query. WRITE nur ueber logistik.tour.anlegen.
+
+  - action_id: logistik.tour.anlegen
+    example_query: tour anlegen
+    domain: logistics
+    access: write
+    risk_level: R2
+    enabled: true
+    enabled_for_agents: true
+    forbidden_for_agents: false
+    four_eyes: false
+    permission:
+      scope: logistics:write
+      tenant_isolation: required
+    idempotency: required
+    audit: write
+    event_out:
+      - ist: logistik.tour.created
+        soll: assignment_confirmed
+    mcp_tool_id: logistik.tour.anlegen
+    mask_action_id: mask:logistik/tourenplanung:anlegen
+    command_endpoint: POST /api/v1/logistik/tours/actions/anlegen
+    screen_id: logistik/tourenplanung
+    route_path: /logistik/tourenplanung
+    aliases:
+      - tour anlegen
+      - lkw disponieren
+      - fahrzeug einer tour zuordnen
+    notes: Vorhandener MCP-Write. Agenten fuehren denselben Command aus wie die Maske.
+
+  # ── 2. Ueberfaellige Kontrakte ────────────────────────────────────────────
+  - action_id: agrar.contract.overdue.list
+    example_query: ueberfaellige Kontrakte
+    domain: agrar
+    access: read
+    risk_level: R0
+    enabled: true
+    enabled_for_agents: true
+    forbidden_for_agents: false
+    four_eyes: false
+    permission:
+      scope: agrar:read
+      tenant_isolation: required
+    idempotency: not_required
+    audit: read
+    event_out: []
+    mcp_tool_id: agrar.contract.get
+    mask_action_id: null
+    command_endpoint: GET /api/v1/contracts/dunning/candidates
+    related_endpoints:
+      - GET /api/v1/contracts/engagement
+    screen_id: agrar/kontrakt-erfuellung
+    route_path: /agrar/kontrakt-erfuellung
+    follow_up_writes:
+      - agrar.contract.reminder.create
+    aliases:
+      - ueberfaellige kontrakte
+      - ueberfaellige vertraege
+      - kontraktmahnung
+      - overdue contracts
+    notes: >
+      agrar.contract.get liest einen Kontrakt. Die Arbeitliste der Ueberfaelligen
+      ist die Kontrakt-Erfuellungsmaske (kein Detail-:id). Kein MCP-List-Adapter.
+
+  - action_id: agrar.contract.reminder.create
+    example_query: kontrakt mahnen
+    domain: agrar
+    access: write
+    risk_level: R2
+    enabled: true
+    enabled_for_agents: false
+    forbidden_for_agents: true
+    four_eyes: false
+    permission:
+      scope: agrar:write
+      tenant_isolation: required
+    idempotency: required
+    audit: write
+    event_out:
+      - ist: null
+        soll: document_proposed
+        gap: missing_outbox
+    mcp_tool_id: null
+    mask_action_id: null
+    command_endpoint: POST /api/v1/contracts/dunning
+    screen_id: agrar/kontrakte
+    route_path: /agrar/kontrakte
+    aliases:
+      - kontrakt mahnen
+      - mahnung kontrakt
+    notes: >
+      Append-only Kontraktmahnung. Kein MCP-Write, keine Outbox. Agenten gesperrt
+      bis ein versionierter Domain-Command existiert (MCP-WRITE-002/014).
+
+  # ── 3. Angebot Kunde ──────────────────────────────────────────────────────
+  - action_id: sales.customer_quote.list
+    example_query: Angebot Kunde
+    domain: sales
+    access: read
+    risk_level: R0
+    enabled: true
+    enabled_for_agents: true
+    forbidden_for_agents: false
+    four_eyes: false
+    permission:
+      scope: sales:read
+      tenant_isolation: required
+    idempotency: not_required
+    audit: read
+    event_out: []
+    mcp_tool_id: crm.customer.open
+    mask_action_id: null
+    command_endpoint: GET /api/v1/sales/offers
+    related_endpoints:
+      - POST /api/v1/mcp/tools/call  # crm.customer.open, crm.customer.search
+    screen_id: sales/angebote-liste
+    route_path: /sales/angebote-liste
+    follow_up_writes:
+      - sales.customer_quote.create
+    aliases:
+      - angebot kunde
+      - kundenangebot
+      - verkaufsangebot
+      - angebote kunde
+      - quote customer
+    notes: >
+      Lesen der Kundenangebote (Listenmaske). Kundenkontext ueber crm.customer.open.
+      Anlegen ist ein separater Write ohne MCP-Adapter.
+
+  - action_id: sales.customer_quote.create
+    example_query: angebot anlegen
+    domain: sales
+    access: write
+    risk_level: R1
+    enabled: true
+    enabled_for_agents: false
+    forbidden_for_agents: true
+    four_eyes: false
+    permission:
+      scope: sales:write
+      tenant_isolation: required
+    idempotency: required
+    audit: write
+    event_out:
+      - ist: null
+        soll: document_proposed
+        gap: missing_outbox
+    mcp_tool_id: null
+    mask_action_id: null
+    command_endpoint: POST /api/v1/sales/offers
+    screen_id: sales/angebote/neu
+    route_path: /sales/angebot/neu
+    aliases:
+      - angebot anlegen
+      - neues angebot
+      - verkaufsangebot anlegen
+    notes: >
+      REST-Anlage existiert, MCP-Write und Outbox fehlen. Agenten gesperrt
+      (MCP-WRITE-002/014). Menschliche Maske bleibt der Zugang.
+
+  # ── 4. WE Mengenabweichung ────────────────────────────────────────────────
+  - action_id: einkauf.goods_receipt.quantity_variance.list
+    example_query: WE Mengenabweichung
+    domain: einkauf
+    access: read
+    risk_level: R0
+    enabled: true
+    enabled_for_agents: true
+    forbidden_for_agents: false
+    four_eyes: false
+    permission:
+      scope: einkauf:read
+      tenant_isolation: required
+    idempotency: not_required
+    audit: read
+    event_out: []
+    mcp_tool_id: einkauf.bestellung.status
+    mask_action_id: null
+    command_endpoint: GET /api/v1/procurement/match
+    related_endpoints:
+      - GET /api/v1/procurement/match/three-way
+      - GET /api/v1/procurement/match/results
+    screen_id: einkauf/anlieferavis
+    route_path: /einkauf/anlieferavis
+    follow_up_writes:
+      - einkauf.anlieferavis.wareneingang
+    aliases:
+      - we mengenabweichung
+      - wareneingang mengenabweichung
+      - mengenabweichung we
+      - quantity variance
+      - 3-wege-match abweichung
+    notes: >
+      3-Wege-Match macht Mengenabweichung sichtbar. Buchen bleibt der
+      vorhandene MCP-Write einkauf.anlieferavis.wareneingang.
+
+  - action_id: einkauf.anlieferavis.wareneingang
+    example_query: wareneingang buchen
+    domain: einkauf
+    access: write
+    risk_level: R2
+    enabled: true
+    enabled_for_agents: true
+    forbidden_for_agents: false
+    four_eyes: false
+    permission:
+      scope: einkauf:write
+      tenant_isolation: required
+    idempotency: required
+    audit: write
+    event_out:
+      - ist: goods_receipt.created
+        soll: document_posted
+    mcp_tool_id: einkauf.anlieferavis.wareneingang
+    mask_action_id: mask:einkauf/anlieferavis:wareneingang
+    command_endpoint: POST /api/v1/einkauf/anlieferavis/actions/wareneingang
+    screen_id: einkauf/anlieferavis
+    route_path: /einkauf/anlieferavis
+    aliases:
+      - wareneingang buchen
+      - we buchen
+      - avis wareneingang
+    notes: Vorhandener MCP-Write. Kein FIBU-Journal. Bestand + Bestellung in einer Transaktion.
+
+  # ── 5. Rechnungen Freigabe ────────────────────────────────────────────────
+  - action_id: finance.ap_invoice.approval.worklist
+    example_query: Rechnungen Freigabe
+    domain: finance
+    access: read
+    risk_level: R0
+    enabled: true
+    enabled_for_agents: true
+    forbidden_for_agents: false
+    four_eyes: false
+    permission:
+      scope: finance:read
+      tenant_isolation: required
+    idempotency: not_required
+    audit: read
+    event_out: []
+    mcp_tool_id: agent.proposal.list
+    mask_action_id: null
+    command_endpoint: POST /api/v1/mcp/tools/call
+    related_endpoints:
+      - GET /api/v1/finance/ap/invoices
+      - GET /api/v1/workflows/approvals
+    screen_id: workflows/approval
+    route_path: /workflows/approval
+    follow_up_writes:
+      - finance.ap_invoice.propose
+      - finance.ap_invoice.freigeben
+    aliases:
+      - rechnungen freigabe
+      - rechnungsfreigabe
+      - ap freigabe
+      - eingangsrechnungen freigabe
+    notes: >
+      Arbeitliste Freigabe-Workflow. WRITE nur propose (Vorschlag) dann
+      menschliche Freigabe dann finance.ap_invoice.freigeben (Vier-Augen).
+
+  - action_id: finance.ap_invoice.propose
+    example_query: rechnungsfreigabe vorschlagen
+    domain: finance
+    access: write
+    risk_level: R3
+    enabled: true
+    enabled_for_agents: true
+    forbidden_for_agents: false
+    four_eyes: true
+    permission:
+      scope: finance:write
+      tenant_isolation: required
+    idempotency: required
+    audit: write
+    event_out:
+      - ist: finance.ap_invoice.approval_requested
+        soll: document_proposed
+    mcp_tool_id: finance.ap_invoice.propose
+    mask_action_id: null
+    command_endpoint: POST /api/v1/mcp/tools/call
+    screen_id: finance/ap-invoice
+    route_path: /finance/ap-invoice
+    aliases:
+      - rechnungsfreigabe vorschlagen
+      - ap freigabe vorschlagen
+    notes: >
+      Legt agent_proposals an. execute des Freigabe-Commands ist nicht dieser Tool.
+      human_approval_required im MCP-Katalog.
+
+  - action_id: finance.ap_invoice.freigeben
+    example_query: rechnungen freigeben
+    domain: finance
+    access: write
+    risk_level: R4
+    enabled: true
+    enabled_for_agents: false
+    forbidden_for_agents: true
+    four_eyes: true
+    permission:
+      scope: finance:write
+      tenant_isolation: required
+    idempotency: required
+    audit: write
+    event_out:
+      - ist: finance.ap_invoice.approved
+        soll: assignment_confirmed
+      - ist: finance.ap_invoice.posted
+        soll: document_posted
+    mcp_tool_id: finance.ap_invoice.freigeben
+    mask_action_id: mask:finance/ap-invoice:freigeben
+    command_endpoint: POST /api/v1/finance/ap/invoices/{entity_id}/actions/freigeben
+    screen_id: finance/ap-invoice
+    route_path: /finance/ap-invoice
+    aliases:
+      - rechnungen freigeben
+      - rechnung freigeben
+      - ap rechnung freigeben
+    notes: >
+      Vier-Augen. Agent darf vorschlagen, nicht selbst freigeben. Freigabe nur
+      nach approved Proposal und menschlicher Identitaet (MCP-WRITE-008/013/014).
+
+  # ── Handshake Phase-1-Lead: Frontend catalogId ohne YAML-action_id ────────
+  - action_id: harvest.intake-queue
+    example_query: Annahme-Warteschlange
+    domain: agrar
+    access: read
+    risk_level: R0
+    enabled: true
+    enabled_for_agents: true
+    forbidden_for_agents: false
+    four_eyes: false
+    executable: true
+    permission:
+      scope: logistics:read
+      tenant_isolation: required
+    idempotency: not_required
+    audit: read
+    event_out: []
+    mcp_tool_id: null
+    mask_action_id: null
+    command_endpoint: GET /api/v1/annahme/warteschlange
+    screen_id: annahme/warteschlange
+    route_path: /annahme/warteschlange
+    follow_up_writes: []
+    aliases:
+      - harvest.intake-queue
+      - annahme warteschlange
+      - warteschlange
+      - waage annahme
+      - ernte annahme
+      - hof warteschlange
+      - intake queue
+    notes: >
+      Frontend catalogId harvest.intake-queue. Lesende Ernte-Annahme-Queue,
+      bestehender Endpunkt. Kein WRITE, keine Dispo-Tafel.
+
+  - action_id: workspace.document-inbox
+    example_query: Beleg-Inbox
+    domain: documents
+    access: read
+    risk_level: R0
+    enabled: true
+    enabled_for_agents: true
+    forbidden_for_agents: false
+    four_eyes: false
+    executable: true
+    permission:
+      scope: dms:read
+      tenant_isolation: required
+    idempotency: not_required
+    audit: read
+    event_out: []
+    mcp_tool_id: null
+    mask_action_id: null
+    command_endpoint: GET /api/mcp/documents/inbox/queue
+    related_endpoints:
+      - GET /api/mcp/documents/inbox/queue
+    screen_id: inbox
+    route_path: /inbox
+    follow_up_writes:
+      - document.capture.open
+    aliases:
+      - workspace.document-inbox
+      - beleg inbox
+      - beleg-inbox
+      - dokumenteneingang
+      - eingehende belege
+      - document inbox
+    notes: >
+      Frontend catalogId workspace.document-inbox. Nur Queue lesen.
+      Capture-Command bleibt document.capture.open mit executable false.
+
+  - action_id: document.capture.open
+    example_query: document.capture.open
+    domain: documents
+    access: write
+    risk_level: R1
+    enabled: true
+    enabled_for_agents: false
+    forbidden_for_agents: true
+    four_eyes: false
+    executable: false
+    permission:
+      scope: dms:read
+      tenant_isolation: required
+    idempotency: required
+    audit: write
+    event_out: []
+    mcp_tool_id: null
+    mask_action_id: null
+    command_endpoint: POST /api/mcp/documents/inbox/{item_id}/prepare
+    screen_id: inbox
+    route_path: /inbox
+    aliases:
+      - document.capture.open
+      - document capture open
+      - beleg capture
+    notes: >
+      Fachvorschlag der Document-Inbox. executable bleibt false, kein Auto-Approve,
+      keine Buchung (app/documents/inbox_contract.py prepare_command).
+
+  - action_id: agrar.qualitaets-handlungsbedarf
+    example_query: Qualitaets-Handlungsbedarf
+    domain: agrar
+    access: read
+    risk_level: R0
+    enabled: true
+    enabled_for_agents: true
+    forbidden_for_agents: false
+    four_eyes: false
+    executable: true
+    permission:
+      scope: agrar:read
+      tenant_isolation: required
+    idempotency: not_required
+    audit: read
+    event_out: []
+    mcp_tool_id: null
+    mask_action_id: null
+    command_endpoint: GET /api/v1/agrar/quality-protocols
+    screen_id: annahme/qualitaets-check
+    route_path: /annahme/qualitaets-check
+    follow_up_writes: []
+    aliases:
+      - agrar.qualitaets-handlungsbedarf
+      - qualitaets handlungsbedarf
+      - qualitaets-check
+      - qualitaetsprotokoll
+      - handlungsbedarf
+    notes: >
+      Frontend catalogId agrar.qualitaets-handlungsbedarf. Lesende Qualitaets-Queue
+      (screen_definitions_kontrolle queue_endpoint). executable nur Lesen/Navigation,
+      keine Buchung, Agenten duerfen lesen.
+
+  # ── Inbox-Uebersichten ohne Beleg-ID (Gutschrift / Wiegeschein) ─────────────
+  - action_id: sales.credit_note.list
+    example_query: Gutschriften Verkauf
+    domain: sales
+    access: read
+    risk_level: R0
+    enabled: true
+    enabled_for_agents: true
+    forbidden_for_agents: false
+    four_eyes: false
+    executable: true
+    permission:
+      scope: sales:read
+      tenant_isolation: required
+    idempotency: not_required
+    audit: read
+    event_out: []
+    mcp_tool_id: null
+    mask_action_id: null
+    command_endpoint: GET /api/v1/sales/credit-notes
+    screen_id: sales/gutschrift
+    route_path: /sales/credit-notes
+    follow_up_writes: []
+    aliases:
+      - sales.credit_note.list
+      - gutschriften verkauf
+      - verkauf gutschriften
+      - credit notes
+      - ausgehende gutschrift
+    notes: >
+      Frontend catalogId sales.credit_note.list. Uebersicht outgoing unter
+      /sales/credit-notes. Kein Einzelbeleg, kein Prefill. Inbox-Label
+      „Zur Übersicht“ bei proposal.direction=outgoing.
+
+  - action_id: einkauf.gutschrift.list
+    example_query: Gutschriften Einkauf
+    domain: einkauf
+    access: read
+    risk_level: R0
+    enabled: true
+    enabled_for_agents: true
+    forbidden_for_agents: false
+    four_eyes: false
+    executable: true
+    permission:
+      scope: einkauf:read
+      tenant_isolation: required
+    idempotency: not_required
+    audit: read
+    event_out: []
+    mcp_tool_id: null
+    mask_action_id: null
+    command_endpoint: null
+    screen_id: einkauf/gutschriften-belastungen
+    route_path: /einkauf/gutschriften-belastungen
+    follow_up_writes: []
+    aliases:
+      - einkauf.gutschrift.list
+      - gutschriften einkauf
+      - einkauf gutschriften
+      - gutschriften belastungen
+      - eingehende gutschrift
+    notes: >
+      Frontend catalogId einkauf.gutschrift.list. Uebersicht incoming unter
+      /einkauf/gutschriften-belastungen. Navigation-only; kein geratener
+      REST-List-Endpunkt. Inbox „Zur Übersicht“ bei direction=incoming.
+      pages/einkauf unangetastet.
+
+  - action_id: weighing.tickets.list
+    example_query: Wiegescheine
+    domain: logistics
+    access: read
+    risk_level: R0
+    enabled: true
+    enabled_for_agents: true
+    forbidden_for_agents: false
+    four_eyes: false
+    executable: true
+    permission:
+      scope: logistics:read
+      tenant_isolation: required
+    idempotency: not_required
+    audit: read
+    event_out: []
+    mcp_tool_id: null
+    mask_action_id: null
+    command_endpoint: GET /api/v1/weighing-tickets
+    screen_id: weighing
+    route_path: /weighing
+    follow_up_writes: []
+    aliases:
+      - weighing.tickets.list
+      - wiegescheine
+      - wiegeschein liste
+      - weighing tickets
+      - waage liste
+    notes: >
+      Frontend catalogId weighing.tickets.list. Uebersicht unter /weighing.
+      Inbox „Zur Übersicht“; „Beleg öffnen“ nur mit linked_document_id auf
+      /waage/wiegeschein/:id. pages/waage unangetastet.
+
+  - action_id: einkauf.lieferschein.list
+    example_query: Lieferscheine Einkauf
+    domain: einkauf
+    access: read
+    risk_level: R0
+    enabled: true
+    enabled_for_agents: true
+    forbidden_for_agents: false
+    four_eyes: false
+    executable: true
+    permission:
+      scope: einkauf:read
+      tenant_isolation: required
+    idempotency: not_required
+    audit: read
+    event_out: []
+    mcp_tool_id: null
+    mask_action_id: null
+    command_endpoint: null
+    screen_id: einkauf/lieferschein-erfassung
+    route_path: /einkauf/lieferschein-erfassung
+    follow_up_writes: []
+    aliases:
+      - einkauf.lieferschein.list
+      - lieferscheine einkauf
+      - einkauf lieferscheine
+      - lieferschein erfassung
+      - eingang lieferschein
+    notes: >
+      Frontend catalogId einkauf.lieferschein.list. Uebersicht unter
+      /einkauf/lieferschein-erfassung. Kein Prefill, kein Einzelbeleg.
+      Inbox „Zur Übersicht“. pages/einkauf unangetastet.
+
+  - action_id: einkauf.lieferant.create
+    example_query: Lieferant anlegen
+    domain: einkauf
+    access: write
+    risk_level: R2
+    enabled: true
+    enabled_for_agents: false
+    forbidden_for_agents: true
+    four_eyes: false
+    executable: false
+    permission:
+      scope: einkauf:write
+      tenant_isolation: required
+    idempotency: required
+    audit: write
+    event_out: []
+    mcp_tool_id: null
+    mask_action_id: null
+    command_endpoint: POST /api/v1/einkauf/lieferanten
+    screen_id: einkauf/lieferanten
+    route_path: /einkauf/lieferanten
+    follow_up_writes: []
+    aliases:
+      - einkauf.lieferant.create
+      - lieferant anlegen
+      - lieferantenstamm
+      - kreditor anlegen
+    notes: >
+      prepare-command nur. Inbox liefert Stammdaten-Vorschlag bei
+      partner_nicht_gefunden; Anlegen ausschliesslich ueber vorhandene
+      Domänen-API / Maske. Kein MCP-WRITE, kein Inbox-Direct-Write.
+
+  - action_id: artikel.stamm.create
+    example_query: Artikel anlegen
+    domain: inventory
+    access: write
+    risk_level: R2
+    enabled: true
+    enabled_for_agents: false
+    forbidden_for_agents: true
+    four_eyes: false
+    executable: false
+    permission:
+      scope: stammdaten:write
+      tenant_isolation: required
+    idempotency: required
+    audit: write
+    event_out: []
+    mcp_tool_id: null
+    mask_action_id: null
+    command_endpoint: POST /api/v1/articles/
+    screen_id: artikel/stamm
+    route_path: /artikel/neu
+    follow_up_writes: []
+    aliases:
+      - artikel.stamm.create
+      - artikel anlegen
+      - artikelstamm
+      - neuer artikel
+    notes: >
+      prepare-command nur. Inbox liefert Artikel-Vorschlag nur bei echten
+      Positionszeilen im Extrakt; sonst STOP keine_positionszeilen_im_extrakt.
+      Bild-Research ueber vorhandenes article_image_enrichment /
+      POST /api/v1/articles/enrich-images — Inbox startet keinen Download.

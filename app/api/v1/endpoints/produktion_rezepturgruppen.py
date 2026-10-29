@@ -19,7 +19,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import text
 
 from app.core.database import get_db
-from app.core.dependencies import get_tenant_id
+from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
@@ -90,6 +90,17 @@ def list_rezepturgruppen(
         ORDER BY gruppe_nr
     """), {"tid": tenant_id}).fetchall()
     return [RezepturGruppeOut(**dict(r._mapping)) for r in rows]
+
+
+@router.get("/rezepturgruppen/{gruppe_nr}", response_model=RezepturGruppeOut, summary="Rezepturgruppe abrufen")
+def get_rezepturgruppe(gruppe_nr: str, db=Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
+    row = db.execute(text("""
+        SELECT * FROM domain_shared.futtermittel_rezepturgruppen
+        WHERE tenant_id = :tid AND (id::text = :nr OR gruppe_nr = :nr) AND aktiv = true
+    """), {"tid": tenant_id, "nr": gruppe_nr}).fetchone()
+    if row is None:
+        raise HTTPException(404, "Rezepturgruppe nicht gefunden.")
+    return RezepturGruppeOut(**dict(row._mapping))
 
 
 @router.post("/rezepturgruppen", response_model=RezepturGruppeOut, status_code=201, summary="Rezepturgruppe anlegen", dependencies=SCHREIBEN["PRODUKTION"])

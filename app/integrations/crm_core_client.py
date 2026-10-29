@@ -226,12 +226,15 @@ async def delete_lead(lead_id: str) -> None:
 
 
 async def list_activities(
+    tenant_id: str,
     activity_type: str | None = None,
     status: str | None = None,
     skip: int = 0,
     limit: int = 50,
 ) -> Tuple[list[CRMCoreActivity], int]:
-    params: dict[str, Any] = {"skip": skip, "limit": limit}
+    if not tenant_id or not tenant_id.strip():
+        raise ValueError("tenant_id is required")
+    params: dict[str, Any] = {"tenant_id": tenant_id, "skip": skip, "limit": min(limit, 200)}
     if activity_type:
         params["type"] = activity_type
     if status:

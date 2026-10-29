@@ -613,6 +613,7 @@ exact_service_stems:
   studio_semantic_model: platform
   mask_table_query: platform
   mask_data_read: platform
+  made_by_studio_gates: platform
   studio_entity_compiler: platform
   studio_entity_contracts: platform
   studio_entity_commands: platform

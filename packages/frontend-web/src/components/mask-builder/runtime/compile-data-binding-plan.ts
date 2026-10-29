@@ -21,6 +21,7 @@ export function compileDataBindingPlan(
   tabEndpoints: Record<string, string> | undefined,
   entityId?: string,
   tenantId?: string,
+  entityProjection?: Record<string, string>,
 ): DataBindingPlan {
   const vars = makeVars(entityId, tenantId)
   const dsMap = new Map((dataSources ?? []).map((ds) => [ds.key, ds]))
@@ -28,7 +29,13 @@ export function compileDataBindingPlan(
   // Entity binding
   const entityDs = dsMap.get('entity')
   const entityBinding: EntityBinding = entityDs
-    ? { entityId, entityEndpoint: resolveEndpoint(entityDs.endpoint, vars) }
+    ? {
+        entityId,
+        entityEndpoint: resolveEndpoint(entityDs.endpoint, vars),
+        sharedEntityEndpoint: entityProjection && entityId
+          ? `/api/v1/masks/${encodeURIComponent(plan.screenId)}/data/entity?${new URLSearchParams({ entity_id: entityId }).toString()}`
+          : undefined,
+      }
     : {}
 
   // Table bindings

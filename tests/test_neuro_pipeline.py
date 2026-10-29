@@ -4,6 +4,16 @@ import pytest
 from app.agents.neuro_pipeline import run_pipeline
 
 
+@pytest.fixture(autouse=True)
+def _mandantenkontext():
+    """Dienste ohne ausdruecklichen Mandanten nehmen den des Kontexts; seit 27.10.2026 gibt es keinen Rueckfall "system"."""
+    from app.core.tenant_context import tenant_scope
+
+    with tenant_scope("test-mandant", "unit test"):
+        yield
+
+
+
 class TestPipelineClassification:
     def test_known_intent_returns_plan(self):
         result = run_pipeline("Bestellung anlegen fuer Mais")

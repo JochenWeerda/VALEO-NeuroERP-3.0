@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const NumberSeriesSchema = z.object({
-  id: z.string().uuid().optional(),
+  id: z.string().guid().optional(),
   tenantId: z.string().min(1),
   scope: z.string().min(1), // "invoice", "delivery_note", "weighing_ticket"
   pattern: z.string().min(1), // "INV-{YYYY}-{seq5}"

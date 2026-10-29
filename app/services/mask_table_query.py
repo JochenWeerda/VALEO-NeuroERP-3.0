@@ -49,7 +49,7 @@ def project_rows(rows, table, query):
         if key not in columns or columns[key].get("filterable") is False:
             raise HTTPException(422, "Filterfeld ist in der Tabelle nicht freigegeben")
     search = _text(query.q).strip()
-    selected = [row for row in rows if not search or any(search in _text(row.get(key)) for key in columns)]
+    selected = [row for row in rows if not search or any(search in _text(row.get(key)) for key in table.get("searchFields", columns))]
     for key, filter in query.filter_plan.items():
         selected = [row for row in selected if _matches(row.get(key), filter)]
     if query.sort:
@@ -57,9 +57,21 @@ def project_rows(rows, table, query):
         selected = sorted(selected, key=cmp_to_key(lambda a,b: direction * _compare(a.get(query.sort), b.get(query.sort))))
     total = len(selected)
     start = (query.page - 1) * query.limit
-    return {"items": selected[start:start+query.limit], "total": total, "page": query.page, "size": query.limit,
-            "pages": math.ceil(total/query.limit) if total else 1, "has_next": start+query.limit < total,
-            "has_prev": query.page > 1}
+    result = {"items": selected[start:start+query.limit], "total": total, "page": query.page, "size": query.limit,
+              "pages": math.ceil(total/query.limit) if total else 1, "has_next": start+query.limit < total,
+              "has_prev": query.page > 1}
+    if table.get("listExperience"):
+        from app.services.list_experience_metrics import list_metrics, metric_currencies
+        try:
+            result["aggregates"] = list_metrics(table["listExperience"], selected)
+            currencies = metric_currencies(table["listExperience"], selected)
+            if currencies:
+                result["aggregate_currencies"] = currencies
+        except HTTPException as error:
+            if error.status_code != 409:
+                raise
+            result["aggregate_error"] = "Listenkennzahlen konnten nicht sicher berechnet werden"
+    return result
 
 
 def table_definition(definition, query):
@@ -75,7 +87,17 @@ def table_definition(definition, query):
     walk(definition)
     if len(found) != 1 or found[0].get("dataSourceKey") != query.source_key:
         raise HTTPException(409, "Tabelle besitzt keine eindeutige Bindung an diese Quelle")
-    return found[0]
+    table = found[0]
+    experience = definition.get("listExperience")
+    if isinstance(experience, dict) and "searchFields" in experience:
+        fields = experience["searchFields"]
+        columns = {column.get("key") for column in table.get("columns", []) if isinstance(column, dict)}
+        if (not isinstance(fields, list) or not 1 <= len(fields) <= 100
+                or any(not isinstance(field, str) or field not in columns for field in fields)
+                or len(set(fields)) != len(fields)):
+            raise HTTPException(409, "Ungueltiger deklarierter Suchfeldvertrag")
+        table = {**table, "searchFields": fields, "listExperience": definition["listExperience"]}
+    return table
 
 
 class TableCollector:

@@ -167,3 +167,31 @@ def test_calculate_frachtkosten_basic():
     result = svc.calculate_frachtkosten("id-1", data)
     assert "frachtkosten_eur" in result
     assert result["gewicht_kg"] == 20000
+
+
+@pytest.mark.parametrize("tenant", ["harvest-tenant-a", "harvest-tenant-b"])
+def test_create_position_inherits_service_tenant(tenant):
+    from datetime import date
+    from app.api.v1.endpoints.harvest_acceptance import HarvestAcceptanceCreate
+    from app.infrastructure.models.l3c_models import HarvestAcceptance, HarvestAcceptancePosition
+
+    service, db = _make_svc(tenant)
+    query = _stub_get(db, None)
+    query.first.side_effect = [object(), None]  # own customer, no duplicate acceptance
+    payload = HarvestAcceptanceCreate(
+        acceptance_number="SYNTH-TENANT-POSITION",
+        customer_id="own-customer",
+        delivery_date=date(2026, 10, 28),
+        positions=[{"position_number": 10, "description": "Synthetisches Getreide", "quantity_kg": 100}],
+    )
+    with patch("app.services.harvest_acceptance_service._to_dict_with_positions", return_value={}):
+        service.create_acceptance(payload, "synthetic-actor")
+
+    added = [call.args[0] for call in db.add.call_args_list]
+    head = next(row for row in added if isinstance(row, HarvestAcceptance))
+    position = next(row for row in added if isinstance(row, HarvestAcceptancePosition))
+    assert head.tenant_id == tenant
+    assert position.tenant_id == tenant
+    assert position.harvest_acceptance_id == head.id
+    assert position.quantity_kg == 100
+    db.commit.assert_called_once()

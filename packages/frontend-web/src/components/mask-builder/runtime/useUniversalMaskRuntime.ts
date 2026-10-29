@@ -1,3 +1,5 @@
+import { useFlowSpineCatalogRuntime, type FlowSpineCatalogState } from './useFlowSpineCatalogRuntime'
+import { readCompleteList } from './list-client-source'
 import type { ScreenMessage } from '../renderers/MessagePanelRenderer'
 import { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueries, useQueryClient } from '@tanstack/react-query'
@@ -66,13 +68,16 @@ export interface UseUniversalMaskRuntimeOptions {
   permissions?: string[]
   tenantId?: string
   enabled?: boolean
+  completeClientTables?: boolean
 }
 
 export interface UseUniversalMaskRuntimeResult {
+  flowSpineCatalog: FlowSpineCatalogState
   messages: ScreenMessage[]
   plan: RenderPlan | undefined
   binding: DataBindingPlan | undefined
   entityData: Record<string, unknown>
+  filteredTableRows: Record<string, Record<string, unknown>[]>
   tableRows: Record<string, Record<string, unknown>[]>
   tableTotals: Record<string, number>
   tableQueryStates: Record<string, TableQueryState>
@@ -83,6 +88,7 @@ export interface UseUniversalMaskRuntimeResult {
   resetUserOverlay: () => Promise<void>
   lookupBindings: Record<string, LookupBinding>
   isEntityLoading: boolean
+  isTableLoading: boolean
   isOverlayLoading: boolean
   entityError: unknown
   refetch: () => Promise<void>
@@ -123,6 +129,7 @@ export function useUniversalMaskRuntime({
   permissions = [],
   tenantId,
   enabled = true,
+  completeClientTables = false,
 }: UseUniversalMaskRuntimeOptions): UseUniversalMaskRuntimeResult {
   const queryClient = useQueryClient()
   const overlayQuery = useUserScreenOverlay(screenId, { enabled: enabled && Boolean(schema) })
@@ -201,10 +208,12 @@ export function useUniversalMaskRuntime({
     await resetOverlayMutation.mutateAsync()
   }
 
+  const flowSpineCatalog = useFlowSpineCatalogRuntime(Boolean(enabled && plan?.flowSpineCatalog?.enabled), Boolean(plan?.flowSpineCatalog?.warmWorkspaces))
+
   const binding = useMemo<DataBindingPlan | undefined>(() => {
     if (!plan) return undefined
-    return compileDataBindingPlan(plan, schema?.dataSources, tabEndpoints, entityId, tenantId)
-  }, [plan, schema?.dataSources, tabEndpoints, entityId, tenantId])
+    return compileDataBindingPlan(plan, schema?.dataSources, tabEndpoints, entityId, tenantId, schema?.entityProjection)
+  }, [plan, schema?.dataSources, schema?.entityProjection, tabEndpoints, entityId, tenantId])
 
   // Per-table query states
   const [tableQueryStates, setTableQueryStates] = useState<Record<string, TableQueryState>>({})
@@ -240,10 +249,14 @@ export function useUniversalMaskRuntime({
 
   // Entity query
   const entityQuery = useQuery({
-    queryKey: [screenId, entityId, 'entity'],
+    queryKey: [tenantId, screenId, entityId, 'entity'],
     queryFn: async () => {
-      const ep = binding?.entityBinding.entityEndpoint
+      const ep = binding?.entityBinding.sharedEntityEndpoint ?? binding?.entityBinding.entityEndpoint
       if (!ep) return {}
+      if (binding?.entityBinding.sharedEntityEndpoint) {
+        const res = await apiClient.get<{ data: Record<string, unknown> }>(ep)
+        return res.data.data
+      }
       const res = await apiClient.get<Record<string, unknown>>(ep)
       return res.data
     },
@@ -258,10 +271,21 @@ export function useUniversalMaskRuntime({
 
   const tableResults = useQueries({
     queries: tableEntries.map(([tableKey, tb]) => ({
-      queryKey: tb.clientQuery && !tb.sourceKey
-        ? [tenantId, screenId, entityId, 'table', tableKey]
-        : [tenantId, screenId, entityId, 'table', tableKey, resolvedTableQueryStates[tableKey]],
-      queryFn: async () => {
+      queryKey: tb.clientQuery && (plan?.listExperience || completeClientTables)
+        ? [tenantId, screenId, entityId, 'table', tableKey, { endpoint: tb.endpoint, sourceKey: tb.sourceKey, searchFields: plan?.listExperience?.searchFields, completeClientTables }]
+        : tb.clientQuery && !tb.sourceKey
+          ? [tenantId, screenId, entityId, 'table', tableKey]
+          : [tenantId, screenId, entityId, 'table', tableKey, resolvedTableQueryStates[tableKey]],
+      queryFn: async ({ signal }) => {
+        if (tb.clientQuery && tb.sourceKey && (plan?.listExperience || completeClientTables)) {
+          return readCompleteList(async (page) => {
+            const state = { ...defaultTableQueryState(100), page }
+            const url = tableSourceRequest(screenId, entityId, tb, state)
+            if (!url) throw new Error('Gemeinsame Listenquelle fehlt.')
+            const result = await apiClient.get<{ data: { items: Record<string, unknown>[]; total: number } }>(url, { signal })
+            return result.data.data
+          }, signal)
+        }
         const shared = tableSourceRequest(screenId, entityId, tb, resolvedTableQueryStates[tableKey] ?? defaultTableQueryState(25))
         if (shared) {
           const res = await apiClient.get<{ data: { items: Record<string, unknown>[]; total: number } }>(shared)
@@ -279,29 +303,31 @@ export function useUniversalMaskRuntime({
     })),
   })
 
-  const { tableRows, tableTotals } = useMemo(() => {
+  const { tableRows, filteredTableRows, tableTotals } = useMemo(() => {
     const rows: Record<string, Record<string, unknown>[]> = {}
     const totals: Record<string, number> = {}
+    const filtered: Record<string, Record<string, unknown>[]> = {}
     tableEntries.forEach(([tableKey, tb], i) => {
       const data = tableResults[i]?.data
       if (!data) return
       const loaded = Array.isArray(data)
         ? data as Record<string, unknown>[]
         : Array.isArray((data as { items?: unknown }).items) ? (data as { items: Record<string, unknown>[] }).items : undefined
-      if (tb.clientQuery && !tb.sourceKey && loaded) {
+      if (tb.clientQuery && (!tb.sourceKey || plan?.listExperience || completeClientTables) && loaded) {
         const state = resolvedTableQueryStates[tableKey] ?? defaultTableQueryState(25)
-        const page = applyClientTableQuery(loaded, state)
+        const page = applyClientTableQuery(loaded, state, plan?.listExperience?.searchFields)
         rows[tableKey] = page.rows
+        filtered[tableKey] = page.filteredRows
         totals[tableKey] = page.total
         return
       }
-      if (loaded) rows[tableKey] = loaded
+      if (loaded) { rows[tableKey] = loaded; filtered[tableKey] = loaded }
       if (!Array.isArray(data) && typeof (data as { total?: unknown }).total === 'number') {
         totals[tableKey] = (data as { total: number }).total
       }
     })
-    return { tableRows: rows, tableTotals: totals }
-  }, [tableEntries, tableResults, resolvedTableQueryStates])
+    return { tableRows: rows, filteredTableRows: filtered, tableTotals: totals }
+  }, [tableEntries, tableResults, resolvedTableQueryStates, plan?.listExperience, completeClientTables])
 
   const messages: ScreenMessage[] = [
     ...(entityQuery.error ? [{
@@ -316,11 +342,13 @@ export function useUniversalMaskRuntime({
   ]
 
   return {
+    flowSpineCatalog,
     messages,
     plan,
     binding,
     entityData: (entityQuery.data as Record<string, unknown>) ?? {},
     tableRows,
+    filteredTableRows,
     tableTotals,
     tableQueryStates: resolvedTableQueryStates,
     setTableQuery,
@@ -330,6 +358,7 @@ export function useUniversalMaskRuntime({
     resetUserOverlay,
     lookupBindings: binding?.lookupBindings ?? {},
     isEntityLoading: entityQuery.isLoading,
+    isTableLoading: tableResults.some(result => result.isLoading),
     isOverlayLoading: overlayQuery.isLoading,
     entityError: entityQuery.error,
     refetch: async () => {

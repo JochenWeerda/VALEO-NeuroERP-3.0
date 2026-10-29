@@ -54,6 +54,7 @@ export interface LookupBinding {
 export interface EntityBinding {
   entityId?: string
   entityEndpoint?: string
+  sharedEntityEndpoint?: string
 }
 
 export interface ActionBinding {

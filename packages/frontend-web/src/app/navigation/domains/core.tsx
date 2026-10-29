@@ -379,6 +379,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         mcp: { businessDomain: 'admin', scope: 'admin:write' },
       },
       {
+        id: 'workspace-composition-preview',
+        label: 'Workspace-Preview',
+        icon: LayoutGrid,
+        module: '@/pages/studio/workspace-composition-preview',
+        preferredPath: 'studio/workspace-composition-preview',
+        keywords: ['studio', 'workspace', 'composition', 'preview', 'inbox', 'dispo'],
+        mcp: { businessDomain: 'admin', scope: 'admin:read' },
+      },
+      {
         id: 'superglue-control-center',
         label: 'Superglue Ops',
         icon: Zap,

@@ -527,7 +527,6 @@ class TrocknungsAbrechnungPreviewRequest(BaseModel):
     rule_set_id: str = Field(default="default", description="Regelwerk-Referenz (für Audit-Hash)")
     rule_set_version: int = Field(default=1, ge=1, description="Regelwerk-Version")
     settlement_id: str = Field(default="preview", description="Settlement-ID (für Audit-Hash)")
-    tenant_id: str = Field(default="system", description="Mandant")
     # Optionale Überschreibung der Berechnungsparameter (sonst Branchenrichtwerte)
     start_threshold_pct: Optional[float] = Field(default=None, ge=0, le=100)
     trocknungskosten_eur_per_pct_per_t: Optional[float] = Field(default=None, ge=0)

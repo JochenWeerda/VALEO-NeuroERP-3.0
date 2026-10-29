@@ -1,0 +1,229 @@
+{
+  "agrar/bodenproben-liste": {
+    "schemaVersion": 1,
+    "id": "agrar/bodenproben-liste",
+    "domain": "agrar",
+    "mode": "list",
+    "title": "Bodenproben",
+    "subtitle": "Proben je Schlag und Labor",
+    "adapter": {
+      "type": "native",
+      "sourceId": "agrar/bodenproben-liste",
+      "temporary": false
+    },
+    "dataSources": [
+      {
+        "key": "list",
+        "endpoint": "/api/v1/labor/proben",
+        "pageSize": 500
+      }
+    ],
+    "actions": [
+      {
+        "key": "export",
+        "label": "CSV-Export",
+        "kind": "secondary",
+        "dangerLevel": "safe",
+        "zone": "header",
+        "command": "list.exportCsv",
+        "localEffect": "download",
+        "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+      }
+    ],
+    "tables": [
+      {
+        "key": "list",
+        "label": "Bodenproben",
+        "dataSourceKey": "list",
+        "serverPagination": false,
+        "pageSize": 50,
+        "virtualized": true,
+        "rowHeight": 40,
+        "columns": [
+          {
+            "key": "schlag",
+            "label": "Schlag",
+            "filterable": true,
+            "priority": "primary"
+          },
+          {
+            "key": "datum",
+            "label": "Datum",
+            "sortable": true,
+            "renderKind": "date",
+            "priority": "primary"
+          },
+          {
+            "key": "labor",
+            "label": "Labor",
+            "filterable": true,
+            "priority": "secondary"
+          },
+          {
+            "key": "status",
+            "label": "Status",
+            "filterable": true,
+            "renderKind": "status",
+            "priority": "primary"
+          }
+        ],
+        "rowActions": [],
+        "rowRouteTemplate": "/agrar/bodenprobe/{id}"
+      }
+    ],
+    "noWorkflowReason": "Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    "agentContract": {
+      "businessPurpose": "Bodenproben finden und Ergebnisse oeffnen.",
+      "examplePrompts": [
+        "Welche Proben warten auf Labor?",
+        "Zeige Proben fuer Schlag X."
+      ],
+      "sensitiveFields": [],
+      "testSelectors": {
+        "screenRoot": "[data-testid='screen-agrar/bodenproben-liste']"
+      }
+    },
+    "layout": {
+      "floorplan": "worklist",
+      "density": "compact",
+      "contextRail": "none",
+      "preferredMode": "desktopDense",
+      "mobileMode": "mobileStack",
+      "touchTargetPx": 44,
+      "tableProfile": "standard"
+    },
+    "performance": {
+      "initialPayloadBudgetKb": 60,
+      "requiresLazyTabs": false,
+      "requiresVirtualTables": true,
+      "lookupMinChars": 2,
+      "bundleGroup": "agrar"
+    }
+  },
+  "agrar/ernte-liste": {
+    "schemaVersion": 1,
+    "id": "agrar/ernte-liste",
+    "domain": "agrar",
+    "mode": "list",
+    "title": "Ernte",
+    "subtitle": "Ernten nach Schlag, Kultur und Menge",
+    "adapter": {
+      "type": "native",
+      "sourceId": "agrar/ernte-liste",
+      "temporary": false
+    },
+    "dataSources": [
+      {
+        "key": "list",
+        "endpoint": "/api/v1/agrar/ernte",
+        "pageSize": 500
+      }
+    ],
+    "actions": [
+      {
+        "key": "neu",
+        "label": "Ernte erfassen",
+        "kind": "primary",
+        "dangerLevel": "safe",
+        "zone": "header",
+        "navigationRoute": "/agrar/ernte/neu",
+        "localEffect": "navigation",
+        "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
+      },
+      {
+        "key": "export",
+        "label": "CSV-Export",
+        "kind": "secondary",
+        "dangerLevel": "safe",
+        "zone": "header",
+        "command": "list.exportCsv",
+        "localEffect": "download",
+        "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+      }
+    ],
+    "tables": [
+      {
+        "key": "list",
+        "label": "Ernte",
+        "dataSourceKey": "list",
+        "serverPagination": false,
+        "pageSize": 50,
+        "virtualized": true,
+        "rowHeight": 40,
+        "columns": [
+          {
+            "key": "schlag",
+            "label": "Schlag",
+            "sortable": true,
+            "filterable": true,
+            "priority": "primary"
+          },
+          {
+            "key": "kultur",
+            "label": "Kultur",
+            "filterable": true,
+            "priority": "primary"
+          },
+          {
+            "key": "datum",
+            "label": "Datum",
+            "renderKind": "date",
+            "sortable": true,
+            "priority": "secondary"
+          },
+          {
+            "key": "menge",
+            "label": "Menge",
+            "numeric": true,
+            "sortable": true,
+            "priority": "primary"
+          },
+          {
+            "key": "ertrag",
+            "label": "Ertrag",
+            "numeric": true,
+            "sortable": true,
+            "priority": "secondary"
+          },
+          {
+            "key": "status",
+            "label": "Status",
+            "renderKind": "status",
+            "filterable": true,
+            "priority": "primary"
+          }
+        ],
+        "rowActions": [],
+        "rowRouteTemplate": "/agrar/ernte/{id}"
+      }
+    ],
+    "noWorkflowReason": "Der Stand steht an der Ernte; die Liste fuehrt keinen eigenen Ablauf.",
+    "agentContract": {
+      "businessPurpose": "Ernten nach Schlag und Kultur verfolgen.",
+      "examplePrompts": [
+        "Welche Ernten laufen heute?",
+        "Welche Schlaege sind abgeschlossen?"
+      ],
+      "sensitiveFields": [],
+      "testSelectors": {
+        "screenRoot": "[data-testid='screen-agrar/ernte-liste']"
+      }
+    },
+    "layout": {
+      "floorplan": "worklist",
+      "density": "compact",
+      "contextRail": "none",
+      "preferredMode": "desktopDense",
+      "mobileMode": "mobileStack",
+      "touchTargetPx": 44,
+      "tableProfile": "standard"
+    },
+    "performance": {
+      "initialPayloadBudgetKb": 60,
+      "requiresLazyTabs": false,
+      "requiresVirtualTables": true,
+      "lookupMinChars": 2,
+      "bundleGroup": "agrar"
+    }
+  }
+}

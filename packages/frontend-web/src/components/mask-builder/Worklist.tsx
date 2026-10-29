@@ -153,11 +153,11 @@ const Worklist: React.FC<WorklistProps> = ({
   )
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">{config.title}</h1>
+          <h1 className="text-xl font-semibold tracking-tight">{config.title}</h1>
           {config.subtitle && (
             <p className="text-muted-foreground">{config.subtitle}</p>
           )}
@@ -270,7 +270,7 @@ const Worklist: React.FC<WorklistProps> = ({
               <div className="text-sm text-muted-foreground">Ausstehend</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">
+              <div className="text-2xl font-bold text-primary">
                 {items.filter(i => i.status === 'in-progress').length}
               </div>
               <div className="text-sm text-muted-foreground">In Bearbeitung</div>
