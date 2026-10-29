@@ -17,6 +17,7 @@ from app.core.exceptions import kontosperre_meldung
 from app.auth.finance_roles import finance_admin, finance_write, open_items_read
 from app.core.uuid7 import uuid7
 from app.core.identity_context import current_identity
+from app.core.business_time import business_today
 
 from ....core.database import get_db
 from ....core.tenant import get_tenant_id
@@ -149,7 +150,7 @@ class OpenItem(OpenItemBase):
     @computed_field
     @property
     def ueberfaellig(self) -> bool:
-        return self.offen > 0 and self.faelligkeit < date.today()
+        return self.offen > 0 and self.faelligkeit < business_today()
 
 
 class OpenItemListResponse(BaseModel):
@@ -245,7 +246,7 @@ async def list_open_items(
 
     where_sql = " AND ".join(where_clauses)
     total = db.execute(
-        text(f"SELECT COUNT(*) FROM {table_ref} WHERE {where_sql}"),
+        text(f"SELECT COUNT(*) FROM {table_ref} WHERE {where_sql}"),  # nosec B608  # reviewed-safe: relation is allowlisted and where clauses are code-controlled; values are bound
         {key: value for key, value in params.items() if key != "limit"},
     ).scalar_one()
 
@@ -298,11 +299,12 @@ async def list_open_items(
         params,
     ).mappings().all()
     items = [_normalize_open_item(r) for r in rows]
+    business_day = business_today()
     summary = {
         "count": len(items),
         "op_summe": float(sum((item.op_betrag for item in items), Decimal("0.00"))),
-        "faellig": float(sum((item.offen for item in items if item.faelligkeit <= date.today()), Decimal("0.00"))),
-        "nicht_faellig": float(sum((item.offen for item in items if item.faelligkeit > date.today()), Decimal("0.00"))),
+        "faellig": float(sum((item.offen for item in items if item.faelligkeit <= business_day), Decimal("0.00"))),
+        "nicht_faellig": float(sum((item.offen for item in items if item.faelligkeit > business_day), Decimal("0.00"))),
         "letzte_bewegung_am": max((item.letzte_bewegung_am for item in items if item.letzte_bewegung_am), default=None),
     }
     return OpenItemListResponse(items=items, summary=summary, total=total)

@@ -5,6 +5,7 @@ import { createElement } from 'react'
 import { fireEvent, screen } from '@testing-library/react'
 import { mountBatchList, transport } from '../native-batch11-12-contract-harness'
 import KundenListePage from '@/pages/crm/kunden-liste'
+import debitorenDefinition from '../fixtures/fibu-debitoren-builder-contract.json'
 
 const pages = resolve(__dirname, '../../pages')
 const listenPy = readFileSync(
@@ -96,10 +97,17 @@ describe('Batch 11 route inventory (source-level evidence only)', () => {
       return
     }
     if (file === 'fibu/debitoren.tsx') {
-      // This operational finance page has not been certified as a native list.
-      expect(src).toContain('useDebitorenOP')
-      expect(src).toContain('<DataTable')
-      expect(src).toContain('exportToCSV')
+      // The canonical route delegates to the real builder/runtime; runtime evidence lives in
+      // debitoren-native.test.tsx and the prior list behavior is exercised in debitoren.test.tsx.
+      expect(src).toContain('NativeListPage')
+      expect(src).toContain(`screenId="${screenId}"`)
+      expect(src).toContain(`testId="screen-${screenId}"`)
+      expect(src).not.toContain('useDebitorenOP')
+      expect(listenPy).toContain(`"${screenId}"`)
+      expect(debitorenDefinition.id).toBe(screenId)
+      expect(debitorenDefinition.dataSources[0].endpoint).toBe(
+        '/api/v1/finance/open-items?konto_typ=debitoren&only_open=true',
+      )
       return
     }
     expect(src).toContain('NativeListPage')

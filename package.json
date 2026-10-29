@@ -7,7 +7,7 @@
     "overrides": {
       "@fastify/busboy": "3.2.2",
       "proxy-addr": "2.0.8",
-      "seroval": "1.6.3",
+      "seroval": "1.6.11",
       "compression": "1.8.2",
       "source-map-js": "1.2.2",
       "multer": "^2.5.0",
@@ -88,7 +88,7 @@
       "@faker-js/faker": "^10.5.0",
       "diff@4": "^4.0.4",
       "fast-copy": "3.1.0",
-      "i18next-http-backend": "4.0.2",
+      "i18next-http-backend": "4.0.4",
       "@opentelemetry/instrumentation-pg": "0.73.0",
       "@opentelemetry/instrumentation-mysql2": "0.67.0",
       "@opentelemetry/instrumentation-knex": "0.65.0",

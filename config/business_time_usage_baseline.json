@@ -104,9 +104,6 @@
     "app/api/v1/endpoints/mask_frontend_bridges.py": {
       "date.today": 7
     },
-    "app/api/v1/endpoints/open_items.py": {
-      "date.today": 2
-    },
     "app/api/v1/endpoints/periodische_buchungen.py": {
       "date.today": 1
     },

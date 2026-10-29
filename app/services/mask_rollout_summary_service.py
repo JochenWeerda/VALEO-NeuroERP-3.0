@@ -362,7 +362,7 @@ class MaskRolloutSummaryService:
                   "faellig_am": _expr(columns, "faelligkeit", "faellig_am"),
                   "status": _expr(columns, "op_status", "status")}
         select = ", ".join(f"{expression} AS {name}" for name, expression in fields.items())
-        row = self.db.execute(text(f"SELECT id, konto_nr, konto_name, konto_typ, {select} FROM {relation} WHERE tenant_id=:tenant_id AND id=:op_id"),
+        row = self.db.execute(text(f"SELECT id, konto_nr, konto_name, konto_typ, {select} FROM {relation} WHERE tenant_id=:tenant_id AND id=:op_id"),  # nosec B608  # reviewed-safe: relation is allowlisted and column expressions/aliases are fixed; values are bound
                               {"tenant_id": self.tenant_id, "op_id": entity_id}).mappings().first()
         if not row:
             raise HTTPException(status_code=404, detail="Open item not found")

@@ -3,11 +3,15 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 
+_ALLOWED_OPEN_ITEM_SCHEMAS = frozenset({"public", "domain_erp"})
+
 
 def _get_open_items_relation(db: Session) -> tuple[str, set[str]]:
     schema = str(db.execute(text("""SELECT n.nspname FROM pg_class c
         JOIN pg_namespace n ON n.oid=c.relnamespace
         WHERE c.oid=to_regclass('offene_posten')""")).scalar() or "public")
+    if schema not in _ALLOWED_OPEN_ITEM_SCHEMAS:
+        raise HTTPException(status_code=503, detail="Open-item source schema is not allowed")
     rows = db.execute(text("""SELECT column_name FROM information_schema.columns
         WHERE table_name='offene_posten' AND table_schema=:table_schema"""),
         {"table_schema":schema}).fetchall()
@@ -26,7 +30,7 @@ def read_settlements(db: Session, op_id: str, tenant_id: str) -> list[dict]:
     if not tenant_id:
         raise HTTPException(403, "Verifizierter Mandant fehlt")
     relation, _ = _get_open_items_relation(db)
-    parent = db.execute(text(f"SELECT id FROM {relation} WHERE tenant_id=:tenant AND id=:id"),
+    parent = db.execute(text(f"SELECT id FROM {relation} WHERE tenant_id=:tenant AND id=:id"),  # nosec B608  # reviewed-safe: schema is allowlisted, table name is fixed, and values are bound
                         {"tenant":tenant_id,"id":op_id}).mappings().first()
     if not parent:
         raise HTTPException(404,"Open item not found")

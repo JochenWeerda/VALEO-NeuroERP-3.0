@@ -7,7 +7,7 @@ settings:
 overrides:
   '@fastify/busboy': 3.2.2
   proxy-addr: 2.0.8
-  seroval: 1.6.3
+  seroval: 1.6.11
   compression: 1.8.2
   source-map-js: 1.2.2
   multer: ^2.5.0
@@ -88,7 +88,7 @@ overrides:
   '@faker-js/faker': ^10.5.0
   diff@4: ^4.0.4
   fast-copy: 3.1.0
-  i18next-http-backend: 4.0.2
+  i18next-http-backend: 4.0.4
   '@opentelemetry/instrumentation-pg': 0.73.0
   '@opentelemetry/instrumentation-mysql2': 0.67.0
   '@opentelemetry/instrumentation-knex': 0.65.0
@@ -1423,8 +1423,8 @@ importers:
         specifier: ^8.2.0
         version: 8.2.0
       i18next-http-backend:
-        specifier: 4.0.2
-        version: 4.0.2
+        specifier: 4.0.4
+        version: 4.0.4
       jwt-decode:
         specifier: ^4.0.0
         version: 4.0.0
@@ -10997,8 +10997,8 @@ packages:
   i18next-browser-languagedetector@8.2.0:
     resolution: {integrity: sha512-P+3zEKLnOF0qmiesW383vsLdtQVyKtCNA9cjSoKCppTKPQVfKd2W8hbVo5ZhNJKDqeM7BOcvNoKJOjpHh4Js9g==}
 
-  i18next-http-backend@4.0.2:
-    resolution: {integrity: sha512-oay62dIB2kL7+WHzoUXBjWfL3+mwijD3pQkQkIEaRLhy6kjXxUhrRenV0gInwlCASAaJaDy94+XvYizK+cAGdA==}
+  i18next-http-backend@4.0.4:
+    resolution: {integrity: sha512-nG9OQKvUsPiTVUBg1rCGmvmWhzxC9GOxVbGdTYyejHVMSUjutt1hiBNVSzhB/ZE7keL9Xkb880kUfhDovV5T5g==}
     engines: {node: '>=18'}
 
   i18next@25.5.3:
@@ -13973,10 +13973,10 @@ packages:
     resolution: {integrity: sha512-S0xQPhUTefAhNvNWFg0c1J8qJArHt5KdtJ/cFAofo06KD1MVSeFWyl4iiu+ApDIuw0WhjpOfCdgConOfAnLgkw==}
     engines: {node: '>=10'}
     peerDependencies:
-      seroval: 1.6.3
+      seroval: 1.6.11
 
-  seroval@1.6.3:
-    resolution: {integrity: sha512-5PwLbVPpT4DEki1hYVSSsoxWY6xCNMVucAVLK/CH0mXSDfp/I4KaAex72q80GNt5hpn7CCMGdSpIg4YGqH/wXQ==}
+  seroval@1.6.11:
+    resolution: {integrity: sha512-hpb6XnMCGN/A+79Uf8V7/iTGkyyyazNn5X0CoCAp7Uy9vT3RT8jZ9GLcnxGoVjg3P8AArbe4ZVHq6C8oT2a0kA==}
     engines: {node: '>=10'}
 
   serve-static@1.16.2:
@@ -21039,8 +21039,8 @@ snapshots:
     dependencies:
       '@tanstack/history': 1.162.0
       cookie-es: 3.1.1
-      seroval: 1.6.3
-      seroval-plugins: 1.5.4(seroval@1.6.3)
+      seroval: 1.6.11
+      seroval-plugins: 1.5.4(seroval@1.6.11)
 
   '@tanstack/store@0.9.3': {}
 
@@ -25509,7 +25509,7 @@ snapshots:
     dependencies:
       '@babel/runtime': 7.28.4
 
-  i18next-http-backend@4.0.2: {}
+  i18next-http-backend@4.0.4: {}
 
   i18next@25.5.3(typescript@5.9.2):
     dependencies:
@@ -29215,11 +29215,11 @@ snapshots:
     dependencies:
       type-fest: 0.13.1
 
-  seroval-plugins@1.5.4(seroval@1.6.3):
+  seroval-plugins@1.5.4(seroval@1.6.11):
     dependencies:
-      seroval: 1.6.3
+      seroval: 1.6.11
 
-  seroval@1.6.3: {}
+  seroval@1.6.11: {}
 
   serve-static@1.16.2:
     dependencies:

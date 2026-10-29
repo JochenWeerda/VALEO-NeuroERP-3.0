@@ -378,8 +378,10 @@ export function DispositionBoard({
             {live && abrufeQuery.isLoading ? (
               <li className="text-sm text-muted-foreground">Abrufe werden geladen…</li>
             ) : live && abrufeQuery.isError ? (
-              <li className="text-sm text-status-error" role="alert" data-testid="dispo-orders-error">
-                {abrufeQuery.error instanceof Error ? abrufeQuery.error.message : 'Abrufe nicht lesbar.'}
+              <li className="text-sm text-status-error" data-testid="dispo-orders-error">
+                <p role="alert">
+                  {abrufeQuery.error instanceof Error ? abrufeQuery.error.message : 'Abrufe nicht lesbar.'}
+                </p>
               </li>
             ) : derived.orders.length === 0 ? (
               <li className="text-sm text-muted-foreground" data-testid="dispo-orders-empty">
@@ -472,8 +474,10 @@ export function DispositionBoard({
           <h2 id="dispo-ops-heading" className="text-2xs tracking-wide uppercase text-muted-foreground">Betriebszustände</h2>
           <ul className="mt-2 space-y-2">
             {live && occupancyQuery.isError ? (
-              <li className="text-sm text-status-error" role="alert" data-testid="dispo-ops-error">
-                {occupancyQuery.error instanceof Error ? occupancyQuery.error.message : OPS_AUTH_ERROR}
+              <li className="text-sm text-status-error" data-testid="dispo-ops-error">
+                <p role="alert">
+                  {occupancyQuery.error instanceof Error ? occupancyQuery.error.message : OPS_AUTH_ERROR}
+                </p>
               </li>
             ) : null}
             {live && occupancyQuery.isLoading && liveOps.length === 0 ? (

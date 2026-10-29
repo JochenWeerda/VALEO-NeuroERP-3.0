@@ -1,4 +1,5 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
+import { createRequire } from 'node:module'
 import { AxiosError } from 'axios'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -26,6 +27,14 @@ import {
 
 const toast = vi.hoisted(() => vi.fn())
 const authToken = vi.hoisted(() => ({ value: 'dispo-fixture-jwt' as string | null }))
+
+type AxeResult = { violations: Array<{ id: string }> }
+type AxeApi = {
+  run: (context: Element, options: { runOnly: { type: 'rule'; values: string[] } }) => Promise<AxeResult>
+}
+const testRequire = createRequire(import.meta.url)
+const axePlaywrightRequire = createRequire(testRequire.resolve('@axe-core/playwright'))
+const axe = axePlaywrightRequire('axe-core') as AxeApi
 const authUser = vi.hoisted(() => ({
   value: {
     sub: 'dispatcher', name: 'Dispatcher', email: 'dispatcher@example.invalid',
@@ -329,6 +338,41 @@ describe('disposition_board specialized component', () => {
     expect(await screen.findByTestId('dispo-orders-error')).toHaveTextContent(
       'Abrufe nicht lesbar: Recht oder Anmeldung fehlt.',
     )
+  })
+
+  it('behält Listensemantik und innere Alerts bei Abruf- und Waagenfehlern', async () => {
+    const error = new AxiosError('Forbidden')
+    error.response = {
+      status: 403,
+      statusText: 'Forbidden',
+      headers: {},
+      config: {} as never,
+      data: { detail: 'denied' },
+    }
+    vi.spyOn(apiClient, 'get').mockImplementation(async (url: string) => {
+      if (String(url).startsWith('/api/v1/kontrakte') || url === WEIGHING_TICKETS_ENDPOINT) {
+        throw error
+      }
+      return { data: [] } as never
+    })
+
+    const { container } = render(wrap(
+      <DispositionBoard contract={dispositionBoardScreen.specialized!} />,
+    ))
+    const ordersError = await screen.findByTestId('dispo-orders-error')
+    const operationsError = await screen.findByTestId('dispo-ops-error')
+
+    for (const errorItem of [ordersError, operationsError]) {
+      expect(errorItem.tagName).toBe('LI')
+      expect(errorItem.closest('ul')).toBeTruthy()
+      expect(errorItem.getAttribute('role')).not.toBe('alert')
+      expect(errorItem.querySelector('[role="alert"]')).toBeTruthy()
+    }
+
+    const { violations } = await axe.run(container, {
+      runOnly: { type: 'rule', values: ['list', 'listitem', 'aria-required-children'] },
+    })
+    expect(violations).toEqual([])
   })
 
   it('lädt Aufträge und Ressourcen nach SSE logistik.tour.created neu', async () => {
