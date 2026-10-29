@@ -193,14 +193,14 @@ def cmd_ausfuehren(args, http, token, out, ask: Callable[[str], str], stdin) -> 
             result["idempotenz"] = key
     else:
         generated = bool(re.fullmatch(r'/api/v1/studio/entities/studio_[a-z0-9_]+/(?:\{entity_id\}/)?actions/(?:create|update|delete)', action.get('commandEndpoint', '')))
-        if generated and action['commandEndpoint'].endswith(('/update', '/delete')):
+        if action.get('requiresExpectedVersion') or (generated and action['commandEndpoint'].endswith(('/update', '/delete'))):
             version = args.version if args.version is not None else payload.get('expected_version')
             if type(version) is not int or version < 1:
                 raise UsageError('Diese Aktion braucht die gelesene Version (--version).')
             if 'expected_version' in payload and payload['expected_version'] != version:
                 raise UsageError('Widerspruechliche Versionsangaben.')
             payload = {**payload, 'expected_version': version}
-        key = args.idempotenz or (str(uuid.uuid4()) if generated else None)
+        key = args.idempotenz or (str(uuid.uuid4()) if generated or action.get('requiresIdempotencyKey') else None)
         method, path, body = support.build_request(
             action, screen_id=args.maske, entity_id=args.id, payload=payload, mode=args.modus,
             audit_reason=args.grund, idempotency_key=key)

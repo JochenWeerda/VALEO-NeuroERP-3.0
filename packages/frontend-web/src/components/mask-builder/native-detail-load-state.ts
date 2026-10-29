@@ -5,12 +5,14 @@ export function nativeDetailLoadState(input: {
   entityId?: string
   schemaError: unknown
   entityError: unknown
+  entityLoading?: boolean
   hasPlan: boolean
   schemaFetching: boolean
   hasSchema: boolean
 }): NativeDetailLoadState {
   if (!input.entityId) return 'empty'
   if (input.schemaError || input.entityError) return 'error'
+  if (input.entityLoading) return 'loading'
   if (input.hasPlan) return 'ready'
   if (input.schemaFetching) return 'loading'
   if (!input.hasSchema) return 'error'

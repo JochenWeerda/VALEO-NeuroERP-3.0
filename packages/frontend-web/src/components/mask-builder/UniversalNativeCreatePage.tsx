@@ -74,6 +74,11 @@ export function UniversalNativeCreatePage({ screenId, testId }: { screenId: stri
         if (intentRef.current?.signature !== signature) intentRef.current = { signature, key: crypto.randomUUID() }
         payload = prepareDocflowCreation(original, payload, intentRef.current.key)
       }
+      if (original.creation.requiresIdempotencyKey && original.creation.adapter !== 'docflow.create.v1') {
+        const signature = JSON.stringify([screenId, original.creation.endpoint, payload])
+        if (intentRef.current?.signature !== signature) intentRef.current = {signature, key: crypto.randomUUID()}
+        payload = {...payload, idempotency_key: intentRef.current.key}
+      }
       const response = await apiClient.post<{ id: string; doc_type?: string; status?: string; version?: number; screen_context?: { screen_id: string; definition_hash: string } }>(original.creation.endpoint, payload)
       if (!response.data?.id) throw new Error('Anlageantwort enthält keine Datensatz-ID.')
       if (original.creation.adapter === 'docflow.create.v1' && (response.data.doc_type !== original.documentVariant?.variantId ||

@@ -8,7 +8,7 @@ from math import ceil
 from typing import Any, Optional
 
 import httpx
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
@@ -143,23 +143,8 @@ def _local_opportunity(db: Session, opportunity_id: str, tenant_id: str) -> dict
 
 
 async def _opportunity_im_mandanten(db: Session, opportunity_id: str, tenant_id: str) -> dict[str, Any]:
-    """Die Opportunity dieses Mandanten — aus crm-sales oder lokal — sonst 404.
-
-    Bis 07.10.2026 wurde crm-sales ohne Mandant gefragt und die lokale Tabelle ohne
-    Filter gelesen. Der Vergleich gilt fuer beide Quellen; eine Opportunity ohne
-    Mandant sieht niemand.
-    """
-    try:
-        opportunity = await crm_get_opportunity(opportunity_id)
-    except httpx.HTTPStatusError as exc:
-        if exc.response.status_code != 404:
-            raise HTTPException(status_code=exc.response.status_code, detail=exc.response.text) from exc
-        opportunity = _local_opportunity(db, opportunity_id, tenant_id)
-    except (httpx.RequestError, RuntimeError):
-        opportunity = _local_opportunity(db, opportunity_id, tenant_id)
-    if not opportunity or str(opportunity.get("tenant_id") or "") != tenant_id:
-        raise HTTPException(status_code=404, detail="Opportunity not found")
-    return opportunity
+    from app.services.crm_opportunity_reference import require_opportunity
+    return await require_opportunity(opportunity_id,tenant_id,lambda:_local_opportunity(db,opportunity_id,tenant_id))
 
 
 def _local_opportunities(
@@ -437,54 +422,28 @@ async def patch_opportunity_stage(
              tags=["crm", "opportunities"], summary="Opportunity activity hinzufügen", dependencies=SCHREIBEN["CRM"])
 async def add_opportunity_activity(
     opportunity_id: str,
-    activity_type: str = Query("NOTE", description="Aktivitätstyp (NOTE/CALL/EMAIL/MEETING)"),
-    subject: str = Query(..., description="Betreff"),
-    notes: Optional[str] = Query(None),
-    assigned_to: Optional[str] = Query(None),
+    activity_type: str = Query("NOTE", description="Aktivitaetstyp"),
+    subject: str = Query(..., min_length=1, max_length=200, description="Betreff"),
+    notes: Optional[str] = Query(None,max_length=10000),
+    assigned_to: Optional[str] = Query(None,max_length=100),
+    idempotency_key: str = Header(...,alias="Idempotency-Key",min_length=1,max_length=200),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
-):
-    """Aktivität zur Opportunity hinzufügen.
-
-    Bis 07.10.2026 ohne Mandant und in eine Tabelle ``activities`` mit
-    ``opportunity_id``, die keine Migration anlegt. Jetzt: nur im eigenen Mandanten,
-    in ``domain_crm.activities`` — dort liest der Reiter der Opportunity-Maske.
-    """
-    opportunity = await _opportunity_im_mandanten(db, opportunity_id, tenant_id)
+) -> dict[str, Any]:
+    from pydantic import ValidationError
+    from starlette.concurrency import run_in_threadpool
+    from app.domains.crm.activity_contracts import ActivityCreateCommand, normalize_legacy_activity_type
+    from app.services.crm_activity_service import execute_activity
     try:
-        result = db.execute(
-            text(
-                """
-                INSERT INTO domain_crm.activities
-                    (id, tenant_id, opportunity_id, type, title, customer, contact_person,
-                     date, status, assigned_to, description, created_at, updated_at)
-                VALUES (gen_random_uuid()::text, :tid, :oid, :atype, :subject, :customer, :person,
-                        NOW(), 'offen', :assigned_to, :notes, NOW(), NOW())
-                RETURNING id, created_at
-                """
-            ),
-            {
-                "tid": tenant_id,
-                "oid": opportunity_id,
-                "atype": activity_type.upper()[:20],
-                "subject": subject[:200],
-                "customer": str(opportunity.get("customer_name") or opportunity.get("customer_id") or "")[:100],
-                "person": (assigned_to or "Opportunity")[:100],
-                "assigned_to": (assigned_to or "")[:100],
-                "notes": notes,
-            },
-        ).fetchone()
-        db.commit()
-    except Exception as exc:
-        db.rollback()
-        raise HTTPException(status_code=500, detail=f"Aktivitaet konnte nicht erstellt werden: {exc}") from exc
-    return {
-        "id": str(result[0]),
-        "opportunity_id": opportunity_id,
-        "activity_type": activity_type.upper(),
-        "subject": subject,
-        "created_at": str(result[1]),
-    }
+        command=ActivityCreateCommand(type=normalize_legacy_activity_type(activity_type),title=subject,
+            opportunity_id=opportunity_id,
+            assigned_to=assigned_to or "",description=notes,idempotency_key=idempotency_key)
+    except (ValidationError,ValueError) as error:
+        raise HTTPException(422,"Invalid activity parameters") from error
+    result=await run_in_threadpool(execute_activity,db,tenant_id,"create",command)
+    row=result["activity"]
+    return {"id":row["id"],"opportunity_id":row["opportunity_id"],"activity_type":row["type"],
+            "subject":row["title"],"created_at":row["created_at"],"version":row["version"]}
 
 
 @router.get("/{opportunity_id}", response_model=Opportunity, summary="Opportunity abrufen")

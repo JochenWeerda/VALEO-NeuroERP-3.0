@@ -43,14 +43,21 @@ export interface Lead {
 
 export interface Activity {
   id: string
-  type: 'meeting' | 'call' | 'email' | 'note'
+  type: 'meeting' | 'call' | 'email' | 'note' | 'visit' | 'task'
   title: string
   customer: string
   contactPerson: string
   date: string
-  status: 'planned' | 'completed' | 'overdue'
+  status: 'planned' | 'completed' | 'cancelled'
   assignedTo: string
-  description?: string
+  description?: string | null
+  customerId?: string | null
+  contactId?: string | null
+  opportunityId?: string | null
+  version?: number
+  overdue?: boolean
+  createdBy?: string | null
+  updatedBy?: string | null
   mainTopics?: string[]
   ordersPlaced?: string[]
   followUpActions?: string[]
@@ -104,18 +111,57 @@ function transformActivity(apiData: Record<string, unknown>): Activity {
     id: String(apiData.id ?? ''),
     type: (apiData.type as Activity['type']) || 'note',
     title: String(apiData.title ?? ''),
-    customer: String(apiData.customer ?? apiData.customer_name ?? ''),
-    contactPerson: String(apiData.contact_person ?? apiData.contactPerson ?? ''),
-    date: String(apiData.date ?? apiData.scheduled_at ?? ''),
+    customer: String(apiData.customer ?? ''),
+    contactPerson: String(apiData.contact_person ?? ''),
+    date: String(apiData.date ?? ''),
     status: (apiData.status as Activity['status']) || 'planned',
-    assignedTo: String(apiData.assigned_to ?? apiData.assignedTo ?? ''),
-    description: apiData.description !== undefined ? String(apiData.description) : undefined,
-    mainTopics: ((apiData.main_topics ?? apiData.mainTopics ?? []) as unknown[]).map((item) => String(item)),
-    ordersPlaced: ((apiData.orders_placed ?? apiData.ordersPlaced ?? []) as unknown[]).map((item) => String(item)),
-    followUpActions: ((apiData.follow_up_actions ?? apiData.followUpActions ?? []) as unknown[]).map((item) => String(item)),
-    createdAt: String(apiData.created_at ?? apiData.createdAt ?? ''),
-    updatedAt: String(apiData.updated_at ?? apiData.updatedAt ?? ''),
+    assignedTo: String(apiData.assigned_to ?? ''),
+    description: apiData.description == null ? null : String(apiData.description),
+    customerId: apiData.customer_id == null ? null : String(apiData.customer_id),
+    contactId: apiData.contact_id == null ? null : String(apiData.contact_id),
+    opportunityId: apiData.opportunity_id == null ? null : String(apiData.opportunity_id),
+    version: typeof apiData.version === 'number' ? apiData.version : undefined,
+    overdue: apiData.overdue === true,
+    createdBy: apiData.created_by == null ? null : String(apiData.created_by),
+    updatedBy: apiData.updated_by == null ? null : String(apiData.updated_by),
+    mainTopics: ((apiData.main_topics ?? []) as unknown[]).map((item) => String(item)),
+    ordersPlaced: ((apiData.orders_placed ?? []) as unknown[]).map((item) => String(item)),
+    followUpActions: ((apiData.follow_up_actions ?? []) as unknown[]).map((item) => String(item)),
+    createdAt: String(apiData.created_at ?? ''),
+    updatedAt: String(apiData.updated_at ?? ''),
   }
+}
+
+export type ActivityWrite = Partial<Pick<Activity, 'type' | 'title' | 'customer' | 'contactPerson' | 'date' | 'status' | 'assignedTo' | 'description' | 'customerId' | 'contactId' | 'opportunityId' | 'mainTopics' | 'ordersPlaced' | 'followUpActions'>>
+
+type ActivityIntent = { idempotencyKey: string }
+type ActivityVersionedIntent = ActivityIntent & { expectedVersion: number }
+
+function activityPayload(data: ActivityWrite): Record<string, unknown> {
+  const names: Record<string, string> = {
+    type: 'type', title: 'title', customer: 'customer', contactPerson: 'contact_person',
+    date: 'date', status: 'status', assignedTo: 'assigned_to', description: 'description',
+    customerId: 'customer_id', contactId: 'contact_id', opportunityId: 'opportunity_id',
+    mainTopics: 'main_topics', ordersPlaced: 'orders_placed', followUpActions: 'follow_up_actions',
+  }
+  const result: Record<string, unknown> = {}
+  for (const [key, name] of Object.entries(names)) {
+    const value = data[key as keyof ActivityWrite]
+    if (value !== undefined) result[name] = key === 'date' && value === '' ? null : key === 'date' && typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) ? `${value}T00:00:00Z` : value
+  }
+  return result
+}
+
+function requireIntent(options: ActivityIntent): string {
+  if (!options?.idempotencyKey?.trim()) throw new Error('Ein Idempotenzschlüssel ist erforderlich.')
+  return options.idempotencyKey
+}
+
+function requireVersion(options: ActivityVersionedIntent): number {
+  if (!Number.isInteger(options?.expectedVersion) || options.expectedVersion < 1) {
+    throw new Error('Die aktuelle Version der Aktivität fehlt. Bitte erneut laden.')
+  }
+  return options.expectedVersion
 }
 
 function unwrapItem<T>(payload: unknown): T {
@@ -199,18 +245,18 @@ export const crmService = {
     return transformActivity(unwrapItem<Record<string, unknown>>(response.data))
   },
 
-  async createActivity(data: Omit<Activity, 'id' | 'createdAt' | 'updatedAt'>) {
-    const response = await apiClient.post<Record<string, unknown>>('/api/v1/crm/activities', data)
+  async createActivity(data: ActivityWrite, options: ActivityIntent) {
+    const response = await apiClient.post<Record<string, unknown>>('/api/v1/crm/activities', { ...activityPayload(data), idempotency_key: requireIntent(options) })
     return transformActivity(unwrapItem<Record<string, unknown>>(response.data))
   },
 
-  async updateActivity(id: string, data: Partial<Omit<Activity, 'id' | 'createdAt' | 'updatedAt'>>) {
-    const response = await apiClient.put<Record<string, unknown>>(`/api/v1/crm/activities/${id}`, data)
+  async updateActivity(id: string, data: ActivityWrite, options: ActivityVersionedIntent) {
+    const response = await apiClient.put<Record<string, unknown>>(`/api/v1/crm/activities/${id}`, { ...activityPayload(data), expected_version: requireVersion(options), idempotency_key: requireIntent(options) })
     return transformActivity(unwrapItem<Record<string, unknown>>(response.data))
   },
 
-  async deleteActivity(id: string) {
-    await apiClient.delete(`/api/v1/crm/activities/${id}`)
+  async deleteActivity(id: string, options: ActivityVersionedIntent) {
+    await apiClient.delete(`/api/v1/crm/activities/${id}`, { headers: { 'If-Match': `"${requireVersion(options)}"`, 'Idempotency-Key': requireIntent(options) } })
   },
 
   // Betriebsprofile (Farm Profiles)
@@ -286,38 +332,4 @@ export const crmService = {
     }
   },
 
-  async syncActivitySubResources(
-    id: string,
-    collections: {
-      mainTopics?: string[]
-      ordersPlaced?: string[]
-      followUpActions?: string[]
-    },
-  ) {
-    const syncStringList = async (basePath: string, targetItems: string[]) => {
-      const currentResponse = await apiClient.get<string[]>(basePath)
-      const currentItems = currentResponse.data || []
-      const commonLength = Math.min(currentItems.length, targetItems.length)
-
-      for (let index = 0; index < commonLength; index += 1) {
-        await apiClient.put(`${basePath}/${index}`, { value: targetItems[index] })
-      }
-      for (let index = commonLength; index < targetItems.length; index += 1) {
-        await apiClient.post(basePath, { value: targetItems[index] })
-      }
-      for (let index = currentItems.length - 1; index >= targetItems.length; index -= 1) {
-        await apiClient.delete(`${basePath}/${index}`)
-      }
-    }
-
-    if (collections.mainTopics) {
-      await syncStringList(`/api/v1/crm/activities/${id}/main-topics`, collections.mainTopics)
-    }
-    if (collections.ordersPlaced) {
-      await syncStringList(`/api/v1/crm/activities/${id}/orders-placed`, collections.ordersPlaced)
-    }
-    if (collections.followUpActions) {
-      await syncStringList(`/api/v1/crm/activities/${id}/follow-up-actions`, collections.followUpActions)
-    }
-  },
 }

@@ -202,7 +202,7 @@ def _anonymize_subject(db: Session, subject_type: str, subject_id: str, tenant_i
             schritte.append((
                 "domain_crm.activities",
                 "DELETE FROM domain_crm.activities"
-                " WHERE customer = :kunde AND (tenant_id IS NULL OR tenant_id::text = :tid)",
+                " WHERE customer = :kunde AND tenant_id::text = :tid",
                 {**basis, "kunde": name},
             ))
         return schritte

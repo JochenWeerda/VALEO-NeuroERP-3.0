@@ -144,6 +144,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `controlling_budget_abschluss_20260623` | DOM-CONTROLLING-004 — controlling_budgets, ist_werte, kst_abschluss. |
 | `controlling_module_initial_20260215` | controlling module initial tables |
 | `crm360_o2c_delivery_20260608` | Repair canonical sales delivery-note tables for CRM360 O2C. |
+| `crm_activity_canonical_20261029` | Unify the existing domain_crm.activities aggregate; preserve source provenance. |
 | `crm_campaigns_20260524` | CRM: campaign_templates, campaigns, campaign_recipients |
 | `crm_capture_inbox_kim_20260609` | crm_capture_inbox — Klärfall-Inbox für nicht zuordenbare Auto-Captures (KIM) |
 | `crm_consent_segments_20260305` | CRM: consent, segments and segment_members tables |

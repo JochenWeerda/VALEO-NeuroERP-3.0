@@ -79,6 +79,7 @@ class ListPreset(Contract):
     options: list[PresetOption] = Field(min_length=2, max_length=20)
     completionField: Key | None = None
     completionValue: Text = "completed"
+    completionValues: list[Text] | None = Field(default=None,min_length=1,max_length=20)
 
     @model_validator(mode="after")
     def shape(self):
@@ -89,7 +90,7 @@ class ListPreset(Contract):
             raise ValueError("invalid date preset")
         if self.kind == "actor" and not set(values) <= {"all", "mine"}:
             raise ValueError("invalid actor preset")
-        if self.kind != "date" and self.completionField is not None:
+        if self.kind != "date" and (self.completionField is not None or self.completionValues is not None):
             raise ValueError("completion field only allowed for date preset")
         return self
 

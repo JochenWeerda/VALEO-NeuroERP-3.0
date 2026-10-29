@@ -23,7 +23,7 @@ def business_instant(value):
 def is_business_overdue(value, status, now=None):
     instant = business_instant(value)
     day = (now or business_now()).date()
-    return instant is not None and instant.date() < day and str(status).casefold() != "completed"
+    return instant is not None and instant.date() < day and str(status).casefold() not in {"completed", "cancelled"}
 
 
 def registered_presets(experience):
@@ -68,7 +68,7 @@ def apply_list_presets(rows, experience, selections):
                 if instant is None:
                     continue
                 if value == "overdue":
-                    done = group.completionField and str(row.get(group.completionField) or "").casefold() == group.completionValue.casefold()
+                    done = group.completionField and str(row.get(group.completionField) or "").casefold() in {value.casefold() for value in (group.completionValues or [group.completionValue])}
                     keep = instant < today and not done
                 else:
                     keep = start <= instant < end

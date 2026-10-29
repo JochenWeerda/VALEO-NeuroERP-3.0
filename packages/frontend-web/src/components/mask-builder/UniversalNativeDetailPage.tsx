@@ -173,7 +173,7 @@ function NativeExistingDetailPage({
 
   function actionIsAvailable(actionKey: string): boolean {
     const action = schemaQuery.data?.actions?.find(candidate => candidate.key === actionKey)
-    return Boolean(action && (!action.permission || permissions.includes(action.permission))
+    return Boolean(!runtime.isEntityLoading && !runtime.entityError && action && (!action.permission || permissions.includes(action.permission))
       && actionIsEnabled(action, runtime.entityData))
   }
 
@@ -384,6 +384,7 @@ function NativeExistingDetailPage({
     entityId,
     schemaError: schemaQuery.error,
     entityError: runtime.entityError,
+    entityLoading: runtime.isEntityLoading,
     hasPlan: Boolean(runtime.plan),
     schemaFetching: schemaQuery.isFetching,
     hasSchema: Boolean(schemaQuery.data),

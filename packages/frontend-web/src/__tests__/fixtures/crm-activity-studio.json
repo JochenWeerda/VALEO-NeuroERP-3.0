@@ -1,0 +1,456 @@
+{
+  "schemaVersion": 1,
+  "id": "crm/aktivitaet",
+  "domain": "crm",
+  "mode": "detail",
+  "title": "Aktivitaet",
+  "subtitle": "Termin und dokumentierte Kundeninteraktion",
+  "adapter": {
+    "type": "native",
+    "sourceId": "crm/aktivitaet",
+    "temporary": false
+  },
+  "dataSources": [
+    {
+      "key": "entity",
+      "endpoint": "/api/v1/crm/activities/{entity_id}"
+    }
+  ],
+  "tabs": [
+    {
+      "key": "kopf",
+      "label": "Stammdaten",
+      "lazy": false,
+      "keepAlive": true,
+      "dataSourceKey": "entity",
+      "fields": [
+        {
+          "key": "title",
+          "label": "Betreff",
+          "type": "text",
+          "required": true,
+          "readOnly": true
+        },
+        {
+          "key": "type",
+          "label": "Typ",
+          "type": "select",
+          "required": true,
+          "options": [
+            {
+              "value": "call",
+              "label": "Anruf"
+            },
+            {
+              "value": "meeting",
+              "label": "Besprechung"
+            },
+            {
+              "value": "visit",
+              "label": "Besuch"
+            },
+            {
+              "value": "email",
+              "label": "E-Mail"
+            },
+            {
+              "value": "task",
+              "label": "Aufgabe"
+            },
+            {
+              "value": "note",
+              "label": "Notiz"
+            }
+          ],
+          "readOnly": true
+        },
+        {
+          "key": "status",
+          "label": "Status",
+          "type": "select",
+          "options": [
+            {
+              "value": "planned",
+              "label": "Geplant"
+            },
+            {
+              "value": "completed",
+              "label": "Erledigt"
+            },
+            {
+              "value": "cancelled",
+              "label": "Abgesagt"
+            }
+          ],
+          "readOnly": true
+        },
+        {
+          "key": "date",
+          "label": "Termin",
+          "type": "datetime",
+          "readOnly": true
+        },
+        {
+          "key": "customer",
+          "label": "Kunde",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "contact_person",
+          "label": "Ansprechpartner",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "assigned_to",
+          "label": "Zustaendig",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "description",
+          "label": "Beschreibung",
+          "type": "textarea",
+          "readOnly": true
+        },
+        {
+          "key": "main_topics",
+          "label": "Besprochene Themen",
+          "type": "stringList",
+          "helpText": "Ein Thema pro Zeile.",
+          "readOnly": true
+        },
+        {
+          "key": "orders_placed",
+          "label": "Besprochene Bestellungen",
+          "type": "stringList",
+          "helpText": "Ein Eintrag pro Zeile; erzeugt keine Bestellung.",
+          "readOnly": true
+        },
+        {
+          "key": "follow_up_actions",
+          "label": "Naechste Schritte",
+          "type": "stringList",
+          "helpText": "Ein Schritt pro Zeile.",
+          "readOnly": true
+        },
+        {
+          "key": "version",
+          "label": "Version",
+          "type": "number",
+          "readOnly": true
+        },
+        {
+          "key": "created_by",
+          "label": "Erfasst durch",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "updated_by",
+          "label": "Geaendert durch",
+          "type": "text",
+          "readOnly": true
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "key": "update",
+      "label": "Bearbeiten",
+      "kind": "primary",
+      "dangerLevel": "safe",
+      "permission": "crm.activity.update",
+      "command": "crm.activity.update.v1",
+      "commandEndpoint": "/api/v1/crm/activities/{entity_id}/actions/update",
+      "method": "POST",
+      "inputFields": [
+        {
+          "key": "title",
+          "label": "Betreff",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "type",
+          "label": "Typ",
+          "type": "select",
+          "required": true,
+          "options": [
+            {
+              "value": "call",
+              "label": "Anruf"
+            },
+            {
+              "value": "meeting",
+              "label": "Besprechung"
+            },
+            {
+              "value": "visit",
+              "label": "Besuch"
+            },
+            {
+              "value": "email",
+              "label": "E-Mail"
+            },
+            {
+              "value": "task",
+              "label": "Aufgabe"
+            },
+            {
+              "value": "note",
+              "label": "Notiz"
+            }
+          ]
+        },
+        {
+          "key": "status",
+          "label": "Status",
+          "type": "select",
+          "options": [
+            {
+              "value": "planned",
+              "label": "Geplant"
+            },
+            {
+              "value": "completed",
+              "label": "Erledigt"
+            },
+            {
+              "value": "cancelled",
+              "label": "Abgesagt"
+            }
+          ]
+        },
+        {
+          "key": "date",
+          "label": "Termin",
+          "type": "datetime"
+        },
+        {
+          "key": "customer",
+          "label": "Kunde",
+          "type": "text"
+        },
+        {
+          "key": "contact_person",
+          "label": "Ansprechpartner",
+          "type": "text"
+        },
+        {
+          "key": "assigned_to",
+          "label": "Zustaendig",
+          "type": "text"
+        },
+        {
+          "key": "description",
+          "label": "Beschreibung",
+          "type": "textarea"
+        },
+        {
+          "key": "main_topics",
+          "label": "Besprochene Themen",
+          "type": "stringList",
+          "helpText": "Ein Thema pro Zeile."
+        },
+        {
+          "key": "orders_placed",
+          "label": "Besprochene Bestellungen",
+          "type": "stringList",
+          "helpText": "Ein Eintrag pro Zeile; erzeugt keine Bestellung."
+        },
+        {
+          "key": "follow_up_actions",
+          "label": "Naechste Schritte",
+          "type": "stringList",
+          "helpText": "Ein Schritt pro Zeile."
+        }
+      ],
+      "inputPrefill": "entity",
+      "requiresExpectedVersion": true,
+      "requiresIdempotencyKey": true,
+      "forbiddenForAgents": true
+    },
+    {
+      "key": "delete",
+      "label": "Aktivitaet loeschen",
+      "kind": "danger",
+      "dangerLevel": "high",
+      "permission": "crm.activity.update",
+      "command": "crm.activity.delete.v1",
+      "commandEndpoint": "/api/v1/crm/activities/{entity_id}/actions/delete",
+      "method": "POST",
+      "requiresConfirmation": true,
+      "requiresExpectedVersion": true,
+      "requiresIdempotencyKey": true,
+      "forbiddenForAgents": true
+    }
+  ],
+  "agentContract": {
+    "businessPurpose": "Aktivitaeten aus derselben kanonischen Quelle lesen und versioniert bearbeiten.",
+    "examplePrompts": [
+      "Wann ist Aktivitaet {entity_id} faellig?"
+    ],
+    "sensitiveFields": [],
+    "testSelectors": {
+      "screenRoot": "[data-testid='crm-aktivitaet-stamm']",
+      "primaryAction": "[data-testid='action-edit']",
+      "summaryArea": "[data-testid='mask-summary']"
+    }
+  },
+  "layout": {
+    "preferredMode": "desktopDense",
+    "mobileMode": "mobileStack",
+    "touchTargetPx": 44,
+    "floorplan": "objectPage",
+    "columnNavigation": "single",
+    "sectionNavigation": "anchors",
+    "density": "compact",
+    "contextRail": "combined",
+    "summaryPlacement": "header",
+    "stickyHeader": true,
+    "stickyFooter": true
+  },
+  "performance": {
+    "initialPayloadBudgetKb": 36,
+    "requiresLazyTabs": true,
+    "requiresVirtualTables": false,
+    "lookupMinChars": 2,
+    "bundleGroup": "crm"
+  },
+  "identityField": "title",
+  "noWorkflowReason": "Aktivitaet ist ein Verwaltungsobjekt ohne Beleg-Lebenszyklus.",
+  "noProcessChainReason": "Aktivitaet ist ein Verwaltungsobjekt ohne Beleg-Lebenszyklus.",
+  "summary": [
+    {
+      "key": "title",
+      "label": "Kennung",
+      "value": null,
+      "kind": "identity"
+    }
+  ],
+  "creation": {
+    "endpoint": "/api/v1/crm/activities",
+    "permission": "crm.activity.update",
+    "detailRoute": "/crm/aktivitaet/{entity_id}",
+    "cancelRoute": "/crm/aktivitaeten",
+    "requiresIdempotencyKey": true,
+    "fields": [
+      {
+        "key": "title",
+        "label": "Betreff",
+        "type": "text",
+        "required": true
+      },
+      {
+        "key": "type",
+        "label": "Typ",
+        "type": "select",
+        "required": true,
+        "options": [
+          {
+            "value": "call",
+            "label": "Anruf"
+          },
+          {
+            "value": "meeting",
+            "label": "Besprechung"
+          },
+          {
+            "value": "visit",
+            "label": "Besuch"
+          },
+          {
+            "value": "email",
+            "label": "E-Mail"
+          },
+          {
+            "value": "task",
+            "label": "Aufgabe"
+          },
+          {
+            "value": "note",
+            "label": "Notiz"
+          }
+        ]
+      },
+      {
+        "key": "status",
+        "label": "Status",
+        "type": "select",
+        "options": [
+          {
+            "value": "planned",
+            "label": "Geplant"
+          },
+          {
+            "value": "completed",
+            "label": "Erledigt"
+          },
+          {
+            "value": "cancelled",
+            "label": "Abgesagt"
+          }
+        ]
+      },
+      {
+        "key": "date",
+        "label": "Termin",
+        "type": "datetime"
+      },
+      {
+        "key": "customer",
+        "label": "Kunde",
+        "type": "text"
+      },
+      {
+        "key": "contact_person",
+        "label": "Ansprechpartner",
+        "type": "text"
+      },
+      {
+        "key": "assigned_to",
+        "label": "Zustaendig",
+        "type": "text"
+      },
+      {
+        "key": "description",
+        "label": "Beschreibung",
+        "type": "textarea"
+      },
+      {
+        "key": "main_topics",
+        "label": "Besprochene Themen",
+        "type": "stringList",
+        "helpText": "Ein Thema pro Zeile."
+      },
+      {
+        "key": "orders_placed",
+        "label": "Besprochene Bestellungen",
+        "type": "stringList",
+        "helpText": "Ein Eintrag pro Zeile; erzeugt keine Bestellung."
+      },
+      {
+        "key": "follow_up_actions",
+        "label": "Naechste Schritte",
+        "type": "stringList",
+        "helpText": "Ein Schritt pro Zeile."
+      }
+    ],
+    "defaults": {
+      "type": "call",
+      "title": "",
+      "status": "planned",
+      "customer": "",
+      "contact_person": "",
+      "assigned_to": "",
+      "date": null,
+      "description": null,
+      "main_topics": [],
+      "orders_placed": [],
+      "follow_up_actions": []
+    }
+  }
+}

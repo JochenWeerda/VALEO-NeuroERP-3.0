@@ -1,0 +1,331 @@
+{
+  "schemaVersion": 1,
+  "id": "crm/aktivitaeten-liste",
+  "domain": "crm",
+  "mode": "list",
+  "title": "Aktivitaeten",
+  "subtitle": "Kontakte, Termine und naechste Schritte",
+  "adapter": {
+    "type": "native",
+    "sourceId": "crm/aktivitaeten-liste",
+    "temporary": false
+  },
+  "dataSources": [
+    {
+      "key": "list",
+      "endpoint": "/api/v1/crm/activities",
+      "pageSize": 100
+    }
+  ],
+  "actions": [
+    {
+      "key": "neu",
+      "label": "Neue Aktivitaet",
+      "kind": "primary",
+      "dangerLevel": "safe",
+      "zone": "header",
+      "navigationRoute": "/crm/aktivitaet/neu",
+      "localEffect": "navigation",
+      "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg.",
+      "permission": "crm.activity.update"
+    },
+    {
+      "key": "export",
+      "label": "CSV-Export",
+      "kind": "secondary",
+      "dangerLevel": "safe",
+      "zone": "header",
+      "command": "list.exportCsv",
+      "localEffect": "download",
+      "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+    }
+  ],
+  "tables": [
+    {
+      "key": "list",
+      "label": "Aktivitaeten",
+      "dataSourceKey": "list",
+      "serverPagination": false,
+      "pageSize": 50,
+      "virtualized": true,
+      "rowHeight": 40,
+      "columns": [
+        {
+          "key": "type",
+          "label": "Typ",
+          "filterable": true,
+          "priority": "primary"
+        },
+        {
+          "key": "title",
+          "label": "Betreff",
+          "sortable": true,
+          "filterable": true,
+          "priority": "primary"
+        },
+        {
+          "key": "customer",
+          "label": "Kunde",
+          "sortable": true,
+          "filterable": true,
+          "priority": "primary"
+        },
+        {
+          "key": "contact_person",
+          "label": "Ansprechpartner",
+          "filterable": true,
+          "priority": "secondary"
+        },
+        {
+          "key": "date",
+          "label": "Termin",
+          "renderKind": "date",
+          "sortable": true,
+          "priority": "primary"
+        },
+        {
+          "key": "status",
+          "label": "Status",
+          "renderKind": "status",
+          "filterable": true,
+          "priority": "primary"
+        },
+        {
+          "key": "assigned_to",
+          "label": "Zustaendig",
+          "filterable": true,
+          "priority": "secondary"
+        },
+        {
+          "key": "overdue",
+          "label": "Ueberfaellig",
+          "renderKind": "boolean",
+          "priority": "secondary"
+        }
+      ],
+      "rowActions": [],
+      "rowRouteTemplate": "/crm/aktivitaet/{id}"
+    }
+  ],
+  "noWorkflowReason": "Aktivitaeten sind keine Buchungsbelege; Folgeaufgaben werden dokumentiert.",
+  "agentContract": {
+    "businessPurpose": "Aktivitaeten vollstaendig suchen, filtern, auswerten und versioniert bearbeiten.",
+    "examplePrompts": [
+      "Welche offenen Aktivitaeten?",
+      "Zeige meine Termine dieser Woche."
+    ],
+    "sensitiveFields": [],
+    "testSelectors": {
+      "screenRoot": "[data-testid='screen-crm/aktivitaeten-liste']"
+    }
+  },
+  "layout": {
+    "floorplan": "worklist",
+    "density": "compact",
+    "contextRail": "none",
+    "preferredMode": "desktopDense",
+    "mobileMode": "mobileStack",
+    "touchTargetPx": 44,
+    "tableProfile": "standard"
+  },
+  "performance": {
+    "initialPayloadBudgetKb": 60,
+    "requiresLazyTabs": false,
+    "requiresVirtualTables": true,
+    "lookupMinChars": 2,
+    "bundleGroup": "crm"
+  },
+  "listExperience": {
+    "searchFields": [
+      "title",
+      "customer",
+      "contact_person",
+      "assigned_to"
+    ],
+    "presets": [
+      {
+        "key": "type",
+        "label": "Typ",
+        "field": "type",
+        "kind": "choice",
+        "options": [
+          {
+            "value": "all",
+            "label": "Alle Typen"
+          },
+          {
+            "value": "call",
+            "label": "Anruf"
+          },
+          {
+            "value": "meeting",
+            "label": "Besprechung"
+          },
+          {
+            "value": "visit",
+            "label": "Besuch"
+          },
+          {
+            "value": "email",
+            "label": "E-Mail"
+          },
+          {
+            "value": "task",
+            "label": "Aufgabe"
+          },
+          {
+            "value": "note",
+            "label": "Notiz"
+          }
+        ]
+      },
+      {
+        "key": "status",
+        "label": "Status",
+        "field": "status",
+        "kind": "choice",
+        "options": [
+          {
+            "value": "all",
+            "label": "Alle Status"
+          },
+          {
+            "value": "planned",
+            "label": "Geplant"
+          },
+          {
+            "value": "completed",
+            "label": "Erledigt"
+          },
+          {
+            "value": "cancelled",
+            "label": "Abgesagt"
+          }
+        ]
+      },
+      {
+        "key": "owner",
+        "label": "Zustaendigkeit",
+        "field": "assigned_to",
+        "kind": "actor",
+        "options": [
+          {
+            "value": "all",
+            "label": "Alle Aktivitaeten"
+          },
+          {
+            "value": "mine",
+            "label": "Meine Aktivitaeten"
+          }
+        ]
+      },
+      {
+        "key": "when",
+        "label": "Zeitraum",
+        "field": "date",
+        "kind": "date",
+        "options": [
+          {
+            "value": "all",
+            "label": "Alle Termine"
+          },
+          {
+            "value": "today",
+            "label": "Heute"
+          },
+          {
+            "value": "week",
+            "label": "Diese Woche"
+          },
+          {
+            "value": "overdue",
+            "label": "Ueberfaellig"
+          }
+        ],
+        "completionField": "status",
+        "completionValues": [
+          "completed",
+          "cancelled"
+        ]
+      }
+    ],
+    "aggregates": [
+      {
+        "key": "total",
+        "label": "Aktivitaeten Gesamt",
+        "conditions": []
+      },
+      {
+        "key": "planned",
+        "label": "Geplant",
+        "conditions": [
+          {
+            "field": "status",
+            "op": "eq",
+            "value": "planned"
+          }
+        ]
+      },
+      {
+        "key": "completed",
+        "label": "Erledigt",
+        "conditions": [
+          {
+            "field": "status",
+            "op": "eq",
+            "value": "completed"
+          }
+        ]
+      },
+      {
+        "key": "overdue",
+        "label": "Ueberfaellig",
+        "conditions": [
+          {
+            "field": "overdue",
+            "op": "eq",
+            "value": "true"
+          }
+        ]
+      }
+    ],
+    "export": {
+      "filenamePrefix": "aktivitaeten-",
+      "delimiter": ";",
+      "columns": [
+        {
+          "key": "type",
+          "label": "Typ"
+        },
+        {
+          "key": "title",
+          "label": "Betreff"
+        },
+        {
+          "key": "customer",
+          "label": "Kunde"
+        },
+        {
+          "key": "contact_person",
+          "label": "Ansprechpartner"
+        },
+        {
+          "key": "date",
+          "label": "Termin"
+        },
+        {
+          "key": "status",
+          "label": "Status"
+        },
+        {
+          "key": "assigned_to",
+          "label": "Zustaendig"
+        },
+        {
+          "key": "overdue",
+          "label": "Ueberfaellig"
+        }
+      ]
+    }
+  }
+}

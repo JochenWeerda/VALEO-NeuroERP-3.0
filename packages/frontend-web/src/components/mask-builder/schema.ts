@@ -55,6 +55,7 @@ export type ScreenFieldType =
   | 'select'
   | 'multiselect'
   | 'textarea'
+  | 'stringList'
   | 'file'
   | 'lookup'
   | 'table'
@@ -205,6 +206,8 @@ export interface ScreenActionInputField extends ScreenFieldDefinition {
 }
 
 export interface ScreenActionDefinition {
+  requiresExpectedVersion?: boolean
+  requiresIdempotencyKey?: boolean
   responseAdapter?: 'resource.v1'
   resultNavigationRoute?: string
   inputPrefill?: 'entity'
@@ -489,6 +492,7 @@ export interface ListPreset {
   options: { value: string; label: string }[]
   completionField?: string
   completionValue?: string
+  completionValues?: string[]
 }
 
 export interface ListExperience {
@@ -508,6 +512,7 @@ export interface ScreenDefinition {
   /** Declared native creation; new/neu are never fetched as entity IDs. */
   creation?: {
     adapter?: 'docflow.create.v1'
+    requiresIdempotencyKey?: boolean
     fields?: ScreenFieldDefinition[]
     dataSources?: ScreenDataSource[]
     endpoint: string
@@ -636,7 +641,7 @@ export function validateScreenDefinition(screen: ScreenDefinition): string[] {
       valid = Array.isArray(x.presets) && x.presets.length <= 8
         && x.presets.every(p => obj(p) && key(p.key) && str(p.label) && key(p.field)
           && ['choice', 'date', 'actor'].includes(p.kind)
-          && Object.keys(p).every(k => ['key','label','field','kind','options','completionField','completionValue'].includes(k))
+          && Object.keys(p).every(k => ['key','label','field','kind','options','completionField','completionValue','completionValues'].includes(k))
           && Array.isArray(p.options) && p.options.length >= 2 && p.options.length <= 20
           && p.options.every(o => obj(o) && str(o.value) && str(o.label) && Object.keys(o).every(k => ['value','label'].includes(k)))
           && new Set(p.options.map(o => o.value)).size === p.options.length
@@ -644,7 +649,8 @@ export function validateScreenDefinition(screen: ScreenDefinition): string[] {
           && (p.kind !== 'date' || p.options.every(o => ['all','today','week','overdue'].includes(o.value)))
           && (p.kind !== 'actor' || p.options.every(o => ['all','mine'].includes(o.value)))
           && (p.completionField === undefined || (p.kind === 'date' && key(p.completionField)))
-          && (p.completionValue === undefined || str(p.completionValue)))
+          && (p.completionValue === undefined || str(p.completionValue))
+          && (p.completionValues === undefined || (p.kind === 'date' && Array.isArray(p.completionValues) && p.completionValues.length > 0 && p.completionValues.length <= 20 && p.completionValues.every(str))))
         && new Set(x.presets.map(p => p.key)).size === x.presets.length
         && (!x.presets.length || screen.tables?.[0]?.serverPagination !== true)
     }

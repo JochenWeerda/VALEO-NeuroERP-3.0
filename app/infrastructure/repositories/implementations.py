@@ -149,7 +149,8 @@ class ActivityRepositoryImpl(BaseRepositoryImpl[Activity, dict, dict], ContactRe
     
     async def get_all(self, tenant_id: str, skip: int = 0, limit: int = 100, **kwargs) -> list[Activity]:
         """Get all activities with filtering"""
-        query = self.session.query(Activity)
+        if not tenant_id or not tenant_id.strip():raise ValueError("Activity tenant required")
+        query = self.session.query(Activity).filter(Activity.tenant_id == tenant_id)
         
         # Apply filters
         if 'type' in kwargs and kwargs['type']:
@@ -161,7 +162,8 @@ class ActivityRepositoryImpl(BaseRepositoryImpl[Activity, dict, dict], ContactRe
     
     async def count(self, tenant_id: str, **kwargs) -> int:
         """Count activities"""
-        query = self.session.query(Activity)
+        if not tenant_id or not tenant_id.strip():raise ValueError("Activity tenant required")
+        query = self.session.query(Activity).filter(Activity.tenant_id == tenant_id)
         
         if 'type' in kwargs and kwargs['type']:
             query = query.filter(Activity.type == kwargs['type'])

@@ -7057,6 +7057,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -7090,6 +7092,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -7102,17 +7106,28 @@
       "agent_contract_url": "/api/v1/masks/crm/aktivitaet/agent-contract",
       "screen_definition_url": "/api/v1/masks/crm/aktivitaet/screen-definition",
       "readiness_url": "/api/v1/masks/crm/aktivitaet/readiness",
-      "risk_summary": "low",
+      "risk_summary": "high",
       "actions": [
         {
-          "key": "edit",
+          "key": "update",
           "label": "Bearbeiten",
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "crm.activity.update",
-          "commandEndpoint": null,
-          "method": null,
+          "commandEndpoint": "/api/v1/crm/activities/{entity_id}/actions/update",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "delete",
+          "label": "Aktivitaet loeschen",
+          "dangerLevel": "high",
+          "humanApprovalRequired": true,
+          "requiresConfirmation": true,
+          "permission": "crm.activity.update",
+          "commandEndpoint": "/api/v1/crm/activities/{entity_id}/actions/delete",
+          "method": "POST",
           "stubReason": null
         }
       ],
@@ -7123,6 +7138,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -7137,6 +7154,17 @@
       "readiness_url": "/api/v1/masks/crm/aktivitaeten-liste/readiness",
       "risk_summary": "low",
       "actions": [
+        {
+          "key": "neu",
+          "label": "Neue Aktivitaet",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
+        },
         {
           "key": "export",
           "label": "CSV-Export",
@@ -7156,6 +7184,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -7189,6 +7219,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -7222,6 +7254,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -7255,6 +7289,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -7276,6 +7312,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -7309,6 +7347,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -7342,6 +7382,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -7375,6 +7417,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -7419,6 +7463,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -7452,6 +7498,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -7485,6 +7533,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -7518,6 +7568,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -7573,6 +7625,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -7606,6 +7660,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -7639,6 +7695,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -7672,6 +7730,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -7705,6 +7765,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -7738,6 +7800,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -7802,6 +7866,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -7835,6 +7901,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -7868,6 +7936,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -7901,6 +7971,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -7945,6 +8017,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -7978,6 +8052,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -8011,6 +8087,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -8044,6 +8122,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -8077,6 +8157,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -8110,6 +8192,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -8143,6 +8227,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -8176,6 +8262,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -8220,6 +8308,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -8264,6 +8354,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -8297,6 +8389,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -8318,6 +8412,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -8351,6 +8447,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -8384,6 +8482,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -8417,6 +8517,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -8461,6 +8563,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -8494,6 +8598,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -8538,6 +8644,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -8584,6 +8692,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -8628,6 +8738,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -8661,6 +8773,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -8705,6 +8819,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -8744,6 +8860,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -8799,6 +8917,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -8848,6 +8968,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -8881,6 +9003,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -8925,6 +9049,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -8958,6 +9084,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -8991,6 +9119,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -9024,6 +9154,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -9057,6 +9189,8 @@
         "crm.customer.open",
         "crm.contact.log",
         "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
         "crm.lead.qualify"
       ]
     },
@@ -25855,6 +25989,24 @@
       "domain": "crm",
       "scope": "crm:write",
       "idempotent": true,
+      "risk_class": "low",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "crm.activity.update",
+      "domain": "crm",
+      "scope": "crm:write",
+      "idempotent": true,
+      "risk_class": "medium",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "crm.activity.delete",
+      "domain": "crm",
+      "scope": "crm:write",
+      "idempotent": true,
       "risk_class": "medium",
       "human_approval_required": false,
       "endpoint": "POST /api/v1/mcp/tools/call"
@@ -26418,5 +26570,5 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     }
   ],
-  "event_count": 135
+  "event_count": 134
 }

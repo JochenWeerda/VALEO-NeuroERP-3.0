@@ -143,9 +143,9 @@ def test_invalid_preset_rejected_before_any_source_request(monkeypatch,selection
     assert error.value.status_code == 422
 
 
-def test_unscheduled_activity_is_readable_without_weakening_creation():
+def test_unscheduled_activity_is_readable_but_read_identity_is_not_a_create_command():
     from app.api.v1.schemas.crm import Activity, ActivityCreate
-    payload=dict(id="aaaaaaaa-0000-4000-8000-00000000000a",type="call",title="Synthetic callback",
+    payload=dict(id="aaaaaaaa-0000-4000-8000-00000000000a",version=1,type="call",title="Synthetic callback",
                  customer="Synthetic customer", contact_person="-", status="planned", assigned_to="")
     assert Activity.model_validate(payload).model_dump()["overdue"] is False
     assert Activity.model_validate(payload).date is None
