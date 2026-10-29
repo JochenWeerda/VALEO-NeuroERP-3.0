@@ -13,8 +13,8 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 ## UIX-RUNTIME: Migrationsnachweise und Fachparitaet (2026-10-22)
 
-**Aktueller Gesamtartefaktstand 2026-10-28:** Gate A/B853/853,
-C852/853(Portalzertifikat),E804/853(49 Runtime-Punkte),844 native
+**Aktueller Gesamtartefaktstand 2026-10-29:** Gate A/B/C851/851,
+E804/851(47 Runtime-Punkte),842 native
 Katalogeintraege und5 strukturell freigabefaehige Draft-Projektionen.
 Die Reklamationsliste ist funktional ueber Studio umgesetzt; vier obsolete
 Definitionen sind bereinigt.108 gezielte Tests und die visuelle

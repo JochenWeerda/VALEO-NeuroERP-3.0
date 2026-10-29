@@ -57,9 +57,21 @@ def project_rows(rows, table, query):
         selected = sorted(selected, key=cmp_to_key(lambda a,b: direction * _compare(a.get(query.sort), b.get(query.sort))))
     total = len(selected)
     start = (query.page - 1) * query.limit
-    return {"items": selected[start:start+query.limit], "total": total, "page": query.page, "size": query.limit,
-            "pages": math.ceil(total/query.limit) if total else 1, "has_next": start+query.limit < total,
-            "has_prev": query.page > 1}
+    result = {"items": selected[start:start+query.limit], "total": total, "page": query.page, "size": query.limit,
+              "pages": math.ceil(total/query.limit) if total else 1, "has_next": start+query.limit < total,
+              "has_prev": query.page > 1}
+    if table.get("listExperience"):
+        from app.services.list_experience_metrics import list_metrics, metric_currencies
+        try:
+            result["aggregates"] = list_metrics(table["listExperience"], selected)
+            currencies = metric_currencies(table["listExperience"], selected)
+            if currencies:
+                result["aggregate_currencies"] = currencies
+        except HTTPException as error:
+            if error.status_code != 409:
+                raise
+            result["aggregate_error"] = "Listenkennzahlen konnten nicht sicher berechnet werden"
+    return result
 
 
 def table_definition(definition, query):
@@ -84,7 +96,7 @@ def table_definition(definition, query):
                 or any(not isinstance(field, str) or field not in columns for field in fields)
                 or len(set(fields)) != len(fields)):
             raise HTTPException(409, "Ungueltiger deklarierter Suchfeldvertrag")
-        table = {**table, "searchFields": fields}
+        table = {**table, "searchFields": fields, "listExperience": definition["listExperience"]}
     return table
 
 

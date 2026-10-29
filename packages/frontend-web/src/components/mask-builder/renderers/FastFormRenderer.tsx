@@ -21,6 +21,7 @@ function toScreenField(field: RenderFieldPlan): ScreenFieldDefinition {
     dataSourceKey: field.dataSourceKey,
     minSearchChars: field.minSearchChars,
     renderHint: field.renderHint,
+    currencyField: field.currencyField,
     rowFields: field.rowFields,
     tableEditing: field.tableEditing,
   }
@@ -82,6 +83,7 @@ const FastFieldItem = memo(function FastFieldItem({
       <FieldRenderer
         field={toScreenField(field)}
         value={value}
+        currency={field.currencyField ? String(getValue(payload, field.currencyField) ?? '') : 'EUR'}
         onChange={isEditable ? handleChange : undefined}
         voiceEnabled={voiceEnabled}
         voiceProvider={voiceProvider}

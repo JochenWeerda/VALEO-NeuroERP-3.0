@@ -23,14 +23,14 @@ function alsListe(value: unknown): string[] {
  * Anzeige eines Nur-Lese-Werts im deutschen Format. Ohne Formatregel oder bei
  * unlesbarem Wert bleibt der Rohwert stehen, damit nichts verschluckt wird.
  */
-export function formatReadOnlyValue(type: ScreenFieldDefinition['type'], value: unknown): string {
+export function formatReadOnlyValue(type: ScreenFieldDefinition['type'], value: unknown, currency = 'EUR'): string {
   const raw = renderValue(value)
   if (raw === '') return ''
   const number = Number(raw)
   switch (type) {
     case 'currency':
       return Number.isFinite(number)
-        ? new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(number)
+        ? /^[A-Z]{3}$/.test(currency) ? new Intl.NumberFormat('de-DE', { style: 'currency', currency }).format(number) : `${raw} (Währung fehlt)`
         : raw
     case 'number':
       return Number.isFinite(number) ? new Intl.NumberFormat('de-DE').format(number) : raw
@@ -60,9 +60,11 @@ export function FieldRenderer({
   onChange,
   voiceEnabled = true,
   voiceProvider,
+  currency = 'EUR',
 }: {
   field: ScreenFieldDefinition
   value: unknown
+  currency?: string
   onChange?: (_value: unknown) => void
   voiceEnabled?: boolean
   voiceProvider?: SttProvider | null
@@ -190,7 +192,7 @@ export function FieldRenderer({
           {...commonProps}
           ref={inputRef}
           type="text"
-          value={field.key === 'status' ? statusLabel(renderValue(value)) : formatReadOnlyValue(field.type, value)}
+          value={field.key === 'status' ? statusLabel(renderValue(value)) : formatReadOnlyValue(field.type, value, currency)}
         />
       ) : field.type === 'boolean' ? (
         <Checkbox

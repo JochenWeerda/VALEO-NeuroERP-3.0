@@ -120,24 +120,31 @@ async def list_activities(
     type_filter: str | None = Query(None, alias="type"),
     status_filter: str | None = Query(None, alias="status"),
     skip: int = Query(0, ge=0),
-    limit: int = Query(100, ge=1, le=1000),
+    limit: int = Query(100, ge=1, le=200),
 ):
+    tenant_id = _MANDANT.get()
+    if not tenant_id:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Activity list unavailable")
     try:
         activities, total = await crm_core_client.list_activities(
+            tenant_id=tenant_id,
             activity_type=type_filter,
             status=status_filter,
             skip=skip,
             limit=limit,
         )
-    except (httpx.RequestError, RuntimeError):
-        activities, total = [], 0
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"Failed to list activities: {exc}") from exc
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Activity list unavailable",
+        ) from exc
 
-    eigene = [activity for activity in activities if activity.tenant_id == _MANDANT.get()]
-    if len(eigene) != len(activities):
-        total = len(eigene)  # crm-core filterte nicht nach Mandant; die Seite zaehlt nur eigene
-    items = [_adapt_activity(activity) for activity in eigene]
+    if any(activity.tenant_id != tenant_id for activity in activities):
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="Activity list unavailable",
+        )
+    items = [_adapt_activity(activity) for activity in activities]
     return PaginatedResponse[Activity](
         items=[Activity.model_validate(item) for item in items],
         total=total,

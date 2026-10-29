@@ -3129,22 +3129,58 @@ def build_fibu_anlagen_liste() -> dict[str, Any]:
         no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
     )
 def build_fibu_debitoren_liste() -> dict[str, Any]:
-    return _liste(
+    back_navigation = _neu("Zurück zur OP-Verwaltung", "/fibu/op-verwaltung")
+    back_navigation.update({"key": "zurueck-op-verwaltung", "kind": "secondary"})
+    back_navigation["stubReason"] = "Oeffnet die OP-Verwaltung; deren Leseweg prueft Rolle und Mandant."
+    screen = _liste(
         screen_id="fibu/debitoren-liste", domain="finance", title="Debitoren OP",
-        subtitle="Offene Posten Debitoren", endpoint="/api/v1/finance/open-items?typ=debitor", row_route="/sales/invoice/{id}", bundle="finance",
-        table_profile="financial",
+        subtitle="Offene Posten Debitoren",
+        endpoint="/api/v1/finance/open-items?konto_typ=debitoren&only_open=true",
+        row_route="/finance/ar-open-item/{id}", bundle="finance",
+        table_profile="financial", table_page_size=50,
         columns=[
-            {"key": "rechnungsnr", "label": "Rechnung", "filterable": True, "priority": "primary"},
-            {"key": "kunde", "label": "Kunde", "filterable": True, "priority": "primary"},
-            {"key": "offen", "label": "Offen", "numeric": True, "renderKind": "currency", "priority": "primary"},
-            {"key": "faelligkeit", "label": "Faellig", "sortable": True, "renderKind": "date", "priority": "secondary"},
+            {"key": "rechnungsnr", "label": "Rechnung", "filterable": True, "sortable": True, "priority": "primary"},
+            {"key": "kunde_name", "label": "Kunde", "filterable": True, "priority": "primary"},
+            {"key": "konto_nr", "label": "Konto-Nr.", "filterable": True, "priority": "secondary"},
+            {"key": "rechnungsdatum", "label": "Rechnungsdatum", "sortable": True, "renderKind": "date", "priority": "secondary"},
+            {"key": "faelligkeit", "label": "Fälligkeit", "sortable": True, "renderKind": "date", "priority": "primary"},
+            {"key": "op_betrag", "label": "OP-Betrag", "numeric": True, "renderKind": "currency", "currencyField": "waehrung", "sortable": True, "priority": "secondary"},
+            {"key": "offen", "label": "Offen", "numeric": True, "renderKind": "currency", "currencyField": "waehrung", "sortable": True, "priority": "primary"},
+            {"key": "mahn_stufe", "label": "Mahnstufe", "numeric": True, "renderKind": "number", "sortable": True, "priority": "secondary"},
+            {"key": "ueberfaellig", "label": "Überfällig", "renderKind": "boolean", "sortable": True, "priority": "primary"},
+            {"key": "waehrung", "label": "Währung", "filterable": True, "priority": "secondary"},
         ],
-        actions=[_EXPORT],
-        row_actions=[],
-        purpose="Offene Debitorenposten finden.",
+        actions=[back_navigation, _EXPORT], row_actions=[],
+        purpose="Offene Debitorenposten finden und Rechnungen oeffnen.",
         prompts=['Welche Posten sind ueberfaellig?'],
         no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
     )
+    screen["listExperience"] = {
+        "searchFields": ["rechnungsnr", "kunde_name", "konto_nr"],
+        "aggregates": [
+            {"key": "all", "label": "Offene Posten", "conditions": [], "kind": "count"},
+            {"key": "open_amount", "label": "Gesamt offen", "conditions": [], "kind": "sum", "field": "offen", "format": "currency", "currencyField": "waehrung"},
+            {"key": "overdue", "label": "Überfällig", "conditions": [{"field": "ueberfaellig", "op": "eq", "value": "true"}], "kind": "count"},
+            {"key": "dunning", "label": "In Mahnung", "conditions": [{"field": "mahn_stufe", "op": "neq", "value": "0"}], "kind": "count"},
+        ],
+        "notice": {"aggregate": "overdue", "text": "{overdue} überfällige Rechnung(en)!"},
+        "export": {
+            "filenamePrefix": "debitoren-",
+            "delimiter": ";",
+            "columns": [
+                {"key": "rechnungsnr", "label": "Rechnung"},
+                {"key": "kunde_name", "label": "Kunde"},
+                {"key": "konto_nr", "label": "Konto-Nr."},
+                {"key": "rechnungsdatum", "label": "Rechnungsdatum"},
+                {"key": "faelligkeit", "label": "Fälligkeit"},
+                {"key": "op_betrag", "label": "OP-Betrag"},
+                {"key": "offen", "label": "Offen"},
+                {"key": "mahn_stufe", "label": "Mahnstufe"},
+                {"key": "waehrung", "label": "Währung"},
+            ],
+        },
+    }
+    return screen
 def build_fibu_hauptbuch_liste() -> dict[str, Any]:
     return _liste(
         screen_id="fibu/hauptbuch-liste", domain="finance", title="Hauptbuch",

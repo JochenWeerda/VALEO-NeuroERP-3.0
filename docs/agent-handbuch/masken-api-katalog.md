@@ -4,14 +4,14 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-28
+last_reviewed: 2026-10-29
 version: 3.0.0
 description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions.
 ---
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (844 Masken).
+> Generiert aus `app/core/screen_definitions.py` (842 Masken).
 
 ## Übersicht
 
@@ -459,7 +459,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `fibu/buchungsjournal-liste` | Buchungsjournal | finance | niedrig | — | `GET /api/v1/masks/fibu/buchungsjournal-liste/agent-contract` |
 | `fibu/buchungsuebernahme-connectors` | Buchungsuebernahme connectors | fibu | niedrig | — | `GET /api/v1/masks/fibu/buchungsuebernahme-connectors/agent-contract` |
 | `fibu/bwa` | Bwa | fibu | niedrig | — | `GET /api/v1/masks/fibu/bwa/agent-contract` |
-| `fibu/debitoren` | Debitoren | fibu | niedrig | — | `GET /api/v1/masks/fibu/debitoren/agent-contract` |
 | `fibu/debitoren-api` | Debitoren api | fibu | niedrig | — | `GET /api/v1/masks/fibu/debitoren-api/agent-contract` |
 | `fibu/debitoren-liste` | Debitoren OP | finance | niedrig | — | `GET /api/v1/masks/fibu/debitoren-liste/agent-contract` |
 | `fibu/elster-online` | Elster online | fibu | niedrig | — | `GET /api/v1/masks/fibu/elster-online/agent-contract` |
@@ -482,7 +481,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `fibu/monatswerte` | Monatswerte | fibu | niedrig | — | `GET /api/v1/masks/fibu/monatswerte/agent-contract` |
 | `fibu/offene-posten-liste` | Offene Posten | finance | niedrig | — | `GET /api/v1/masks/fibu/offene-posten-liste/agent-contract` |
 | `fibu/op-skonto-auszifferung` | Auszifferungen | fibu | niedrig | — | `GET /api/v1/masks/fibu/op-skonto-auszifferung/agent-contract` |
-| `fibu/op-verwaltung` | Op verwaltung | fibu | niedrig | — | `GET /api/v1/masks/fibu/op-verwaltung/agent-contract` |
+| `fibu/op-verwaltung` | OP-Verwaltung | finance | niedrig | — | `GET /api/v1/masks/fibu/op-verwaltung/agent-contract` |
 | `fibu/periodische-buchungen` | Periodische buchungen | fibu | niedrig | — | `GET /api/v1/masks/fibu/periodische-buchungen/agent-contract` |
 | `fibu/quadriga-connector` | Quadriga connector | fibu | niedrig | — | `GET /api/v1/masks/fibu/quadriga-connector/agent-contract` |
 | `fibu/sachkonto` | Sachkonto | fibu | niedrig | — | `GET /api/v1/masks/fibu/sachkonto/agent-contract` |
@@ -694,7 +693,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `portal/shop` | Shop | portal | niedrig | — | `GET /api/v1/masks/portal/shop/agent-contract` |
 | `portal/vertraege` | Vertraege | portal | niedrig | — | `GET /api/v1/masks/portal/vertraege/agent-contract` |
 | `portal/whatsapp-simulator` | Whatsapp simulator | portal | niedrig | — | `GET /api/v1/masks/portal/whatsapp-simulator/agent-contract` |
-| `portal/zertifikat` | Zertifikat | portal | niedrig | — | `GET /api/v1/masks/portal/zertifikat/agent-contract` |
 | `portal/zertifikate` | Zertifikate | portal | niedrig | — | `GET /api/v1/masks/portal/zertifikate/agent-contract` |
 | `pos/customer-display` | Customer display | pos | niedrig | — | `GET /api/v1/masks/pos/customer-display/agent-contract` |
 | `pos/gift-cards` | Gift cards | pos | niedrig | — | `GET /api/v1/masks/pos/gift-cards/agent-contract` |
@@ -13314,35 +13312,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `fibu/debitoren` — Debitoren
-
-**Zweck:** Debitoren im fibu-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/fibu/debitoren/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/fibu/debitoren/agent-contract` |
-| Readiness | `GET /api/v1/masks/fibu/debitoren/readiness` |
-| Rollout-Route | `/mask-rollout/fibu__debitoren/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/fibu/anlagen`
-
-**Beispiel-Prompts:**
-
-- Zeige Debitoren.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
 ### `fibu/debitoren-api` — Debitoren api
 
 **Zweck:** Debitoren api im fibu-Bereich finden und auswerten.
@@ -13775,35 +13744,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `edit` | Bearbeiten | safe | nein | `—` |
-
----
-
-### `fibu/op-verwaltung` — Op verwaltung
-
-**Zweck:** Op verwaltung im fibu-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/fibu/op-verwaltung/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/fibu/op-verwaltung/agent-contract` |
-| Readiness | `GET /api/v1/masks/fibu/op-verwaltung/readiness` |
-| Rollout-Route | `/mask-rollout/fibu__op-verwaltung/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/fibu/anlagen`
-
-**Beispiel-Prompts:**
-
-- Zeige Op verwaltung.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
 
@@ -14780,7 +14720,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ### `fibu/debitoren-liste` — Debitoren OP
 
-**Zweck:** Offene Debitorenposten finden.
+**Zweck:** Offene Debitorenposten finden und Rechnungen oeffnen.
 
 | | |
 |---|---|
@@ -14792,7 +14732,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `list` → `/api/v1/finance/open-items?typ=debitor`
+- `list` → `/api/v1/finance/open-items?konto_typ=debitoren&only_open=true`
 
 **MCP-Tools (Domäne):**
 
@@ -14808,6 +14748,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
+| `zurueck-op-verwaltung` | Zurück zur OP-Verwaltung | safe | nein | `Oeffnet die OP-Verwaltung; deren Leseweg prueft Rolle und Mandant.` |
 | `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
@@ -15010,6 +14951,40 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - Welche offenen Offene Posten?
 - Zeige aktuelle Offene Posten.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+
+---
+
+### `fibu/op-verwaltung` — OP-Verwaltung
+
+**Zweck:** Offene Posten mandantensicher pruefen und oeffnen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/fibu/op-verwaltung/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/fibu/op-verwaltung/agent-contract` |
+| Readiness | `GET /api/v1/masks/fibu/op-verwaltung/readiness` |
+| Rollout-Route | `/mask-rollout/fibu__op-verwaltung/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/finance/open-items?only_open=true`
+
+**MCP-Tools (Domäne):**
+
+- `finance.ap_invoice.propose` — scope `finance:write`, Risiko hoch
+- `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
+- `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Zeige offene Posten.
 
 **Actions:**
 
@@ -24251,34 +24226,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
-### `portal/zertifikat` — Zertifikat
-
-**Zweck:** Kundenportal-Zertifikat.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/portal/zertifikat/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/portal/zertifikat/agent-contract` |
-| Readiness | `GET /api/v1/masks/portal/zertifikat/readiness` |
-| Rollout-Route | `/mask-rollout/portal__zertifikat/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `entity` → `/api/v1/portal/zertifikate/{entity_id}`
-
-**Beispiel-Prompts:**
-
-- Bis wann ist Zertifikat {entity_id} gueltig?
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `edit` | Bearbeiten | safe | nein | `—` |
 
 ---
 

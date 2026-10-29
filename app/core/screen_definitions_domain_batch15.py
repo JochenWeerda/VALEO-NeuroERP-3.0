@@ -396,25 +396,6 @@ def build_fibu_bwa_screen_definition() -> dict[str, Any]:
     )
 
 
-def build_fibu_debitoren_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="fibu/debitoren",
-        domain="fibu",
-        title="Debitoren",
-        subtitle="fibu",
-        endpoint="/api/v1/fibu/anlagen",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Debitoren im fibu-Bereich finden und auswerten.",
-        prompts=["Zeige Debitoren.", "Filtere die Liste."],
-        bundle="fibu",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
 def build_fibu_debitoren_api_screen_definition() -> dict[str, Any]:
     columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
     return build_stamm_list_screen(
@@ -697,23 +678,30 @@ def build_fibu_op_skonto_auszifferung_screen_definition() -> dict[str, Any]:
 
 
 def build_fibu_op_verwaltung_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="fibu/op-verwaltung",
-        domain="fibu",
-        title="Op verwaltung",
-        subtitle="fibu",
-        endpoint="/api/v1/fibu/anlagen",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Op verwaltung im fibu-Bereich finden und auswerten.",
-        prompts=["Zeige Op verwaltung.", "Filtere die Liste."],
-        bundle="fibu",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
+    columns = [
+        {"key":"rechnungsnr","label":"Beleg","filterable":True,"priority":"primary"},
+        {"key":"konto_typ","label":"Kontotyp","filterable":True,"priority":"primary"},
+        {"key":"kunde_name","label":"Debitor","filterable":True},
+        {"key":"lieferant_name","label":"Kreditor","filterable":True},
+        {"key":"faelligkeit","label":"Faelligkeit","renderKind":"date","sortable":True},
+        {"key":"offen","label":"Offen","renderKind":"currency","currencyField":"waehrung","numeric":True,"priority":"primary"},
+        {"key":"waehrung","label":"Waehrung","filterable":True},
+        {"key":"ueberfaellig","label":"Ueberfaellig","renderKind":"boolean"},
+    ]
+    definition = build_stamm_list_screen(
+        screen_id="fibu/op-verwaltung", domain="finance", title="OP-Verwaltung",
+        subtitle="Offene Forderungen und Verbindlichkeiten", endpoint="/api/v1/finance/open-items?only_open=true",
+        row_route="/finance/ar-open-item/{id}", columns=columns, actions=[stamm_list_export_action()], row_actions=[],
+        table_profile="financial", purpose="Offene Posten mandantensicher pruefen und oeffnen.",
+        prompts=["Zeige offene Posten."], bundle="finance",
+        no_workflow="Ausgleich und Mahnung erfolgen am eigenen offenen Posten.",
     )
-
+    definition["listExperience"] = {
+        "searchFields":["rechnungsnr","kunde_name","lieferant_name","konto_typ"],
+        "aggregates":[{"key":"all","label":"Offene Posten","conditions":[]}],
+        "export":{"filenamePrefix":"Offene-Posten-","delimiter":";","columns":[{"key":c["key"],"label":c["label"]} for c in columns]},
+    }
+    return definition
 
 def build_fibu_periodische_buchungen_screen_definition() -> dict[str, Any]:
     columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
@@ -4924,7 +4912,6 @@ BATCH15_SCREEN_BUILDERS: dict[str, Any] = {
     "fibu/buchhaltungsuebersicht": build_fibu_buchhaltungsuebersicht_screen_definition,
     "fibu/buchungsuebernahme-connectors": build_fibu_buchungsuebernahme_connectors_screen_definition,
     "fibu/bwa": build_fibu_bwa_screen_definition,
-    "fibu/debitoren": build_fibu_debitoren_screen_definition,
     "fibu/debitoren-api": build_fibu_debitoren_api_screen_definition,
     "fibu/elster-online": build_fibu_elster_online_screen_definition,
     "fibu/erloeskennziffern": build_fibu_erloeskennziffern_screen_definition,

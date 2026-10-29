@@ -355,17 +355,15 @@ class MaskRolloutSummaryService:
         return row[0] if row else "domain_erp"
 
     def _ar_open_item_summary(self, spec: MaskRolloutSpec, entity_id: str) -> dict[str, Any]:
-        schema = self._resolve_op_schema()
-        row = self.db.execute(
-            text(
-                f"""
-                SELECT id, beleg_nr, konto_nr, konto_name, konto_typ, offener_betrag, faellig_am, status
-                FROM {schema}.offene_posten
-                WHERE tenant_id = :tenant_id AND id = :op_id
-                """  # nosec B608  # reviewed-safe: Schemaname stammt aus dem information_schema-Katalog, Werte sind gebunden
-            ),
-            {"tenant_id": self.tenant_id, "op_id": entity_id},
-        ).mappings().first()
+        from app.services.open_item_read_source import _get_open_items_relation, _expr
+        relation, columns = _get_open_items_relation(self.db)
+        fields = {"beleg_nr": _expr(columns, "rechnungsnr", "beleg_nr"),
+                  "offener_betrag": _expr(columns, "offen", "offener_betrag"),
+                  "faellig_am": _expr(columns, "faelligkeit", "faellig_am"),
+                  "status": _expr(columns, "op_status", "status")}
+        select = ", ".join(f"{expression} AS {name}" for name, expression in fields.items())
+        row = self.db.execute(text(f"SELECT id, konto_nr, konto_name, konto_typ, {select} FROM {relation} WHERE tenant_id=:tenant_id AND id=:op_id"),
+                              {"tenant_id": self.tenant_id, "op_id": entity_id}).mappings().first()
         if not row:
             raise HTTPException(status_code=404, detail="Open item not found")
         return build_screen_summary_payload(
@@ -402,31 +400,14 @@ class MaskRolloutSummaryService:
     ) -> dict[str, Any]:
         if tab_key != "ausgleich":
             return build_tab_page(tab_key=tab_key, table_key=tab_key, items=[], page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
-        schema = self._resolve_op_schema()
-        rows = self.db.execute(
-            text(
-                f"""
-                SELECT id, betrag, buchungs_datum, referenz, notiz
-                FROM {schema}.op_ausgleich
-                WHERE tenant_id = :tenant_id AND op_id = :op_id
-                ORDER BY buchungs_datum DESC NULLS LAST
-                """  # nosec B608  # reviewed-safe: Schemaname stammt aus dem information_schema-Katalog, Werte sind gebunden
-            ),
-            {"tenant_id": self.tenant_id, "op_id": entity_id},
-        ).mappings().all()
+        from app.services.open_item_read_source import read_settlements
         from app.api.v1.schemas.mask_entity_contracts import ar_open_item_ausgleich_aliases
-
-        items = [
-            ar_open_item_ausgleich_aliases(
-                {
-                    "betrag": float(r["betrag"] or 0),
-                    "buchungs_datum": format_optional_date(r["buchungs_datum"]),
-                    "referenz": r["referenz"] or "",
-                    "notiz": r["notiz"] or "",
-                }
-            )
-            for r in rows
-        ]
+        rows = read_settlements(self.db, entity_id, self.tenant_id)
+        items = [ar_open_item_ausgleich_aliases({
+            "id": row["id"], "betrag": row["payment_amount"], "buchungs_datum": row["payment_date"],
+            "referenz": row["payment_reference"] or "", "notiz": row["notes"] or "",
+            "zahlungsart": row["payment_type"], "waehrung": row["waehrung"],
+        }) for row in rows]
         return build_tab_page(tab_key=tab_key, table_key="settlements", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
 
     def _purchase_order_summary(self, spec: MaskRolloutSpec, entity_id: str) -> dict[str, Any]:

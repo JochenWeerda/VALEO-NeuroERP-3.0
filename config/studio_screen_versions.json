@@ -4850,16 +4850,6 @@
       "studio_draft_clean": false,
       "version": "1.0.0"
     },
-    "fibu/debitoren": {
-      "definition_hash": "29c35f34e210902c9e1e8361024c96002967da81e608855b03c1dbc76968dccd",
-      "gates_passed": [
-        "A",
-        "B",
-        "C"
-      ],
-      "studio_draft_clean": false,
-      "version": "1.0.0"
-    },
     "fibu/debitoren-api": {
       "definition_hash": "5eead8455ed7cb4bb5c43e82f508afee17172933da2297695a818ee22556d514",
       "gates_passed": [
@@ -4872,11 +4862,12 @@
       "version": "1.0.0"
     },
     "fibu/debitoren-liste": {
-      "definition_hash": "e57fe4a41f2f2d493ea4d5d3b6b57938cfadf2ce728236c199c92086ce31f845",
+      "definition_hash": "3b65a1742af1dd93df412d20956d4755133f74902e9d3b507dde63d0cb737c37",
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
       "studio_draft_clean": false,
       "version": "1.0.0"
@@ -5102,7 +5093,7 @@
       "version": "1.0.0"
     },
     "fibu/op-verwaltung": {
-      "definition_hash": "e9acaa6ca65df7d9de1c729f71ed9e1816d7318b0f85bf48dc1726d22a87685d",
+      "definition_hash": "14350ebcf3b9b7e39f5c00d69626e9c2402988967431f4a974bc4d52a9c42f6c",
       "gates_passed": [
         "A",
         "B",
@@ -5344,7 +5335,7 @@
       "version": "1.0.0"
     },
     "finance/ar-open-item": {
-      "definition_hash": "41317772d50b8713774cab6af6b1017d100f32708fa672917251bd84c5cc6f8e",
+      "definition_hash": "de182ef10f053d7b9e5e2d59bb9cb836c80bc6c6bccc4bb06ffcf77c310817fe",
       "gates_passed": [
         "A",
         "B",
@@ -7417,16 +7408,6 @@
         "A",
         "B",
         "C",
-        "E"
-      ],
-      "studio_draft_clean": false,
-      "version": "1.0.0"
-    },
-    "portal/zertifikat": {
-      "definition_hash": "ebf55312bfce3ebd0bbaf3b3d32710ab280b487bfa943277213206fbaf6b4dbb",
-      "gates_passed": [
-        "A",
-        "B",
         "E"
       ],
       "studio_draft_clean": false,

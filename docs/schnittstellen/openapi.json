@@ -113923,11 +113923,16 @@
             "additionalProperties": true,
             "title": "Summary",
             "type": "object"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
           }
         },
         "required": [
           "items",
-          "summary"
+          "summary",
+          "total"
         ],
         "title": "OpenItemListResponse",
         "type": "object"
@@ -183550,6 +183555,11 @@
             "title": "Tenant Id",
             "type": "string"
           },
+          "ueberfaellig": {
+            "readOnly": true,
+            "title": "Ueberfaellig",
+            "type": "boolean"
+          },
           "updated_at": {
             "format": "date-time",
             "title": "Updated At",
@@ -183587,7 +183597,8 @@
           "id",
           "tenant_id",
           "created_at",
-          "updated_at"
+          "updated_at",
+          "ueberfaellig"
         ],
         "title": "OpenItem",
         "type": "object"
@@ -249325,7 +249336,7 @@
             "required": false,
             "schema": {
               "default": 100,
-              "maximum": 1000,
+              "maximum": 200,
               "minimum": 1,
               "title": "Limit",
               "type": "integer"
@@ -305230,6 +305241,28 @@
               "minimum": 1,
               "title": "Limit",
               "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "maximum": 1000000,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "only_open",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Only Open",
+              "type": "boolean"
             }
           }
         ],

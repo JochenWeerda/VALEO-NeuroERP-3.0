@@ -12,6 +12,7 @@ from decimal import Decimal
 from datetime import datetime, date
 import json
 import logging
+from app.services.open_item_read_source import _get_open_items_relation, _expr, read_settlements
 from app.core.exceptions import kontosperre_meldung
 from app.auth.finance_roles import finance_admin, finance_write, open_items_read
 from app.core.uuid7 import uuid7
@@ -21,7 +22,7 @@ from ....core.database import get_db
 from ....core.tenant import get_tenant_id
 from ....core.config import settings
 from ....core.fibu_audit import log_fibu_audit
-from pydantic import BaseModel
+from pydantic import BaseModel, computed_field
 
 logger = logging.getLogger(__name__)
 
@@ -145,50 +146,20 @@ class OpenItem(OpenItemBase):
     created_at: datetime
     updated_at: datetime
 
+    @computed_field
+    @property
+    def ueberfaellig(self) -> bool:
+        return self.offen > 0 and self.faelligkeit < date.today()
+
 
 class OpenItemListResponse(BaseModel):
     items: List[OpenItem]
     summary: dict
+    total: int
 
 
 def _val(row: dict, key: str, default=None):
     return row.get(key, default)
-
-
-def _get_open_items_relation(db: Session) -> tuple[str, set[str]]:
-    rel = db.execute(
-        text(
-            """
-            SELECT n.nspname
-            FROM pg_class c
-            JOIN pg_namespace n ON n.oid = c.relnamespace
-            WHERE c.oid = to_regclass('offene_posten')
-            """
-        )
-    ).scalar()
-    schema = str(rel or "public")
-    table_ref = f"{schema}.offene_posten"
-
-    rows = db.execute(
-        text(
-            """
-            SELECT column_name
-            FROM information_schema.columns
-            WHERE table_name = 'offene_posten'
-              AND table_schema = :table_schema
-            """
-        ),
-        {"table_schema": schema},
-    ).fetchall()
-    return table_ref, {str(r[0]) for r in rows}
-
-
-def _expr(cols: set[str], primary: str, fallback: str | None = None, default_sql: str = "NULL") -> str:
-    if primary in cols:
-        return primary
-    if fallback and fallback in cols:
-        return fallback
-    return default_sql
 
 
 def _normalize_open_item(row: dict) -> OpenItem:
@@ -247,6 +218,8 @@ async def list_open_items(
     search: Optional[str] = Query(None),
     limit: int = Query(500, ge=1, le=5000),
     db: Session = Depends(get_db),
+    offset: int = Query(0, ge=0, le=1_000_000),
+    only_open: bool = Query(False),
 ):
     table_ref, cols = _get_open_items_relation(db)
     where_clauses = ["tenant_id = :tenant_id"]
@@ -263,6 +236,18 @@ async def list_open_items(
     if search:
         where_clauses.append("(rechnungsnr ILIKE :search OR COALESCE(kunde_name,'') ILIKE :search OR COALESCE(konto_name,'') ILIKE :search)")
         params["search"] = f"%{search}%"
+    if only_open:
+        where_clauses.append(f"{_expr(cols, 'offen', 'open_amount', default_sql='0')} > 0")
+        if "op_status" in cols:
+            where_clauses.append("op_status IN (:only_open_status, :partially_open_status)")
+            params["only_open_status"] = "offen"
+            params["partially_open_status"] = "teilweise"
+
+    where_sql = " AND ".join(where_clauses)
+    total = db.execute(
+        text(f"SELECT COUNT(*) FROM {table_ref} WHERE {where_sql}"),
+        {key: value for key, value in params.items() if key != "limit"},
+    ).scalar_one()
 
     select_sql = f"""
             SELECT
@@ -298,10 +283,13 @@ async def list_open_items(
                 {_expr(cols, "created_at")} AS created_at,
                 {_expr(cols, "updated_at")} AS updated_at
             FROM {table_ref}
-            WHERE {' AND '.join(where_clauses)}
-            ORDER BY {_expr(cols, "faelligkeit", "due_date")} ASC, rechnungsnr ASC
+            WHERE {where_sql}
+            ORDER BY {_expr(cols, "faelligkeit", "due_date")} ASC, rechnungsnr ASC, id ASC
             LIMIT :limit
+            OFFSET :offset
             """  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
+
+    params["offset"] = offset
 
     rows = db.execute(
         text(
@@ -317,7 +305,7 @@ async def list_open_items(
         "nicht_faellig": float(sum((item.offen for item in items if item.faelligkeit > date.today()), Decimal("0.00"))),
         "letzte_bewegung_am": max((item.letzte_bewegung_am for item in items if item.letzte_bewegung_am), default=None),
     }
-    return OpenItemListResponse(items=items, summary=summary)
+    return OpenItemListResponse(items=items, summary=summary, total=total)
 
 
 @router.get("/{op_id}", response_model=OpenItem, summary="Open item abrufen",
@@ -798,31 +786,9 @@ async def get_settlements(
     Get all settlements for an open item (audit trail).
     """
     try:
-        # Get settlements from journal entries related to this OP
-        query = text("""
-            SELECT id, entry_number, entry_date, description, total_debit, created_at
-            FROM domain_erp.journal_entries
-            WHERE description LIKE :op_pattern 
-            AND source = 'op_settlement'
-            AND tenant_id = :tenant_id
-            ORDER BY entry_date DESC, created_at DESC
-        """)
-        
-        op_pattern = f"%{op_id}%"
-        rows = db.execute(query, {"op_id": op_id, "tenant_id": tenant_id, "op_pattern": op_pattern}).fetchall()
-        
-        return [
-            {
-                "id": str(row[0]),
-                "payment_amount": float(row[4]) if row[4] else 0.0,
-                "payment_date": row[2].isoformat() if row[2] else None,
-                "payment_reference": row[1],  # Use entry_number as reference
-                "payment_type": "payment",
-                "notes": row[3],  # Use description as notes
-                "created_at": row[5].isoformat() if row[5] else None
-            }
-            for row in rows
-        ]
+        return read_settlements(db, op_id, tenant_id)
+    except HTTPException:
+        raise
     except Exception as e:
         # SPEC-P0-03: Finance darf bei DB-Fehlern nie still leere Daten liefern.
         from app.core.critical_data_path import raise_critical_data_unavailable

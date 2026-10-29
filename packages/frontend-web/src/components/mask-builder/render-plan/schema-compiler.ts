@@ -45,6 +45,7 @@ function compileField(
     dataSourceKey: field.dataSourceKey,
     minSearchChars: field.minSearchChars ?? performanceLookupMinChars,
     renderHint: field.renderHint,
+    currencyField: field.currencyField,
     rowFields: field.rowFields,
     tableEditing: field.tableEditing,
   }
@@ -91,6 +92,7 @@ function compileTable(
       sortable: column.sortable,
       filterable: column.filterable,
       renderKind: column.renderKind,
+      currencyField: column.currencyField,
       defaultSort: column.defaultSort,
       priority: column.priority,
     })),

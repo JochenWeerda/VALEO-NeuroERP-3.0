@@ -76,6 +76,7 @@ export interface ScreenDataSource {
 }
 
 export interface ScreenFieldDefinition {
+  currencyField?: string
   key: string
   label: string
   type: ScreenFieldType
@@ -112,6 +113,7 @@ export interface ScreenTableColumn {
   sortable?: boolean
   filterable?: boolean
   renderKind?: ScreenColumnRenderKind
+  currencyField?: string
   defaultSort?: 'asc' | 'desc'
   priority?: ScreenColumnPriority
   render?: (_value: unknown, _row: Record<string, unknown>) => ReactNode
@@ -481,7 +483,7 @@ export interface DocumentScreenVariantRef {
 
 export interface ListExperience {
   searchFields: string[]
-  aggregates: { key: string; label: string; conditions: { field: string; op: 'eq' | 'neq'; value: string }[] }[]
+  aggregates: { key: string; label: string; kind?: 'count' | 'sum'; field?: string; format?: 'currency'; currencyField?: string; conditions: { field: string; op: 'eq' | 'neq'; value: string }[] }[]
   export: { filenamePrefix: string; delimiter: ';'; columns: { key: string; label: string }[] }
   workflowResume?: { resumeNodeId: string; businessStatus: string; actionLabelPrefix: string; createScreen: string; detailScreen: string }
   notice?: { aggregate: string; text: string }
@@ -611,7 +613,7 @@ export function validateScreenDefinition(screen: ScreenDefinition): string[] {
     const key = (v: unknown): v is string => str(v) && !['__proto__', 'prototype', 'constructor'].includes(v.toLowerCase())
     const obj = (v: unknown): v is Record<string, unknown> => v !== null && typeof v === 'object' && !Array.isArray(v)
     let valid = obj(x) && arr(x.searchFields) && x.searchFields.length > 0 && x.searchFields.every(key)
-      && arr(x.aggregates) && x.aggregates.every(a => obj(a) && key(a.key) && str(a.label) && arr(a.conditions) && a.conditions.every(c => obj(c) && key(c.field) && ['eq', 'neq'].includes(c.op) && typeof c.value === 'string' && c.value.length <= 200))
+      && arr(x.aggregates) && x.aggregates.every(a => obj(a) && key(a.key) && str(a.label) && (a.kind === undefined || ['count', 'sum'].includes(a.kind)) && (a.kind !== 'sum' || key(a.field)) && (a.field === undefined || a.kind === 'sum') && (a.currencyField === undefined || (a.kind === 'sum' && key(a.currencyField))) && (a.format === undefined || (a.kind === 'sum' && a.format === 'currency')) && arr(a.conditions) && a.conditions.every(c => obj(c) && key(c.field) && ['eq', 'neq'].includes(c.op) && typeof c.value === 'string' && c.value.length <= 200))
       && obj(x.export) && str(x.export.filenamePrefix) && x.export.delimiter === ';' && arr(x.export.columns) && x.export.columns.length > 0 && x.export.columns.every(c => obj(c) && key(c.key) && str(c.label))
       && (x.workflowResume === undefined || (obj(x.workflowResume) && [x.workflowResume.resumeNodeId, x.workflowResume.businessStatus, x.workflowResume.actionLabelPrefix, x.workflowResume.createScreen, x.workflowResume.detailScreen].every(str)))
     if (valid) {
@@ -621,7 +623,7 @@ export function validateScreenDefinition(screen: ScreenDefinition): string[] {
     }
     const columns = new Set((screen.tables?.[0]?.columns ?? []).map(column => column.key))
     if (valid) valid = screen.mode === 'list' && columns.size > 0
-      && [...x.searchFields, ...x.export.columns.map(column => column.key), ...x.aggregates.flatMap(a => a.conditions.map(c => c.field))].every(field => columns.has(field))
+      && [...x.searchFields, ...x.export.columns.map(column => column.key), ...x.aggregates.flatMap(a => [...a.conditions.map(c => c.field), ...(a.field ? [a.field] : []), ...(a.currencyField ? [a.currencyField] : [])])].every(field => columns.has(field))
     if (!valid) errors.push('listExperience is invalid')
   }
 

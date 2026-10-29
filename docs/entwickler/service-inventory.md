@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, qa]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-28
+last_reviewed: 2026-10-29
 version: 3.0.0
 description: Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -201,6 +201,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `l3_report_catalog_service` | Fixed L3 report catalog with shared sums, export and document drilldown. |
 | `legacy_interface_adapter_service` | Versioned, non-executing adapter framework for L3 Standard and Unimet. |
 | `lieferschein_pdf` | Lieferschein PDF Generator |
+| `list_experience_metrics` | Read-only list metrics shared across registered human/MCP/CLI projections. |
 | `lkv_pipeline` | LKV-Pipeline – Download der LKV-Weser-Ems-Jahresberichte (Milchleistungsprüfung). |
 | `llm_gateway` | Anbieterunabhängiges LLM-Gateway. |
 | `logistics_disposition_service` | DOM-LOG-004.2 — Tour-Dispositions-Service (Kapazität + Zeitfenster). |
@@ -235,6 +236,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `numbering_service` | Numbering Service |
 | `numbering_service_pg` | Numbering Service (PostgreSQL) |
 | `o2c_chain_service` | Order-to-Cash-Kette (DOM-SALES-004) — Angebot → Auftrag → Lieferschein → Rechnung. |
+| `open_item_read_source` | Canonical open-item read source shared by the API and Studio detail summaries. |
 | `operator_agent_service` | OPERATOR-AGENT-001 — ERP-Operator-Agent: Proposal + kontrollierte LOW-Schreibaktionen. |
 | `ordrsp_service` | EDIFACT ORDRSP (Bestellantwort, D.96A) lesen und gegen die Bestellung abgleichen. |
 | `payment_run_freigabe` | Freigabe eines Zahlungslaufs: Mandant und Vier-Augen-Prinzip. |

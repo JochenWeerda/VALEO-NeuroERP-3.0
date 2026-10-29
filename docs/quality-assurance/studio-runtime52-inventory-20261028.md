@@ -10,7 +10,7 @@ description: Ursprüngliche 52 offene Runtime-IDs und Anforderungen an ihre fach
 
 # Studio Runtime Gate E – Arbeitsinventar
 
-Dieses Inventar dokumentiert die 52 IDs des Gate-Reports aus Revision `452a8da5a` im akzeptierten Snapshot `artifacts/migration-repair-source`. Der zwischenzeitlich aktualisierte [Gate-Report](../architecture/uix/made-by-studio-gate-report.md) weist nach einer Katalogumstellung 49 offene IDs aus. Die Katalogmigration ist mit 63 gezielten Tests, Typpruefung, Build und visueller Komponentenabnahme belegt; siehe [Abnahme](studio-process-catalog-20261028.md). Die ursprüngliche Liste bleibt hier vollständig nachvollziehbar.
+Dieses Inventar dokumentiert die 52 IDs des Gate-Reports aus Revision `452a8da5a` im akzeptierten Snapshot `artifacts/migration-repair-source`. Der zwischenzeitlich aktualisierte [Gate-Report](../architecture/uix/made-by-studio-gate-report.md) weist nach den funktionalen Katalog-, Protokoll-, Vorlagen- und Debitorenumstellungen 47 offene IDs aus. Die Katalogmigration ist mit 63 gezielten Tests, Typpruefung, Build und visueller Komponentenabnahme belegt; siehe [Abnahme](studio-process-catalog-20261028.md). Die ursprüngliche Liste bleibt hier vollständig nachvollziehbar.
 
 Status „offen“ bedeutet, dass die funktionale Runtime-Verdrahtung und fachliche Abnahme durch dieses Inventar nicht nachgewiesen sind. `auth/login` und `auth/callback` sind Infrastruktur- und Sicherheitsabläufe; sie benötigen eine gesonderte Prüfung.
 

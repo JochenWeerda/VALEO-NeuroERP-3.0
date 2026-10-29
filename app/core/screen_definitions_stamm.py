@@ -720,27 +720,6 @@ def build_stammdaten_mengeneinheit_stamm() -> dict[str, Any]:
 
 
 
-def build_portal_zertifikat_stamm() -> dict[str, Any]:
-    return _stamm(
-        screen_id="portal/zertifikat",
-        domain="portal",
-        title="Zertifikat",
-        subtitle="Portal-Zertifikat",
-        endpoint="/api/v1/portal/zertifikate/{entity_id}",
-        identity="typ",
-        felder=[
-        _feld("typ", "Typ"),
-        _feld("gueltig_bis", "Gueltig bis", "date"),
-        _feld("status", "Status"),
-        ],
-        edit_permission="portal.zertifikat.update",
-        test_id="portal-zertifikat-stamm",
-        purpose="Kundenportal-Zertifikat.",
-        prompts=['Bis wann ist Zertifikat {entity_id} gueltig?'],
-    )
-
-
-
 def build_produktion_rezepturgruppe_stamm() -> dict[str, Any]:
     return _stamm(
         screen_id="produktion/rezepturgruppe",
@@ -952,7 +931,6 @@ STAMM_SCREEN_BUILDERS = {
     "crm/vertreter": build_crm_vertreter_stamm,
     "stammdaten/hausbank": build_stammdaten_hausbank_stamm,
     "stammdaten/mengeneinheit": build_stammdaten_mengeneinheit_stamm,
-    "portal/zertifikat": build_portal_zertifikat_stamm,
     "produktion/rezepturgruppe": build_produktion_rezepturgruppe_stamm,
     "rezepte/rezept": build_rezepte_editor_stamm,
     "fibu/anlage": build_fibu_anlage_stamm,
@@ -987,7 +965,6 @@ STAMM_ROUTEN = {
     "crm/vertreter": "/crm/vertreterstamm",
     "stammdaten/hausbank": "/stammdaten/hausbanken",
     "stammdaten/mengeneinheit": "/stammdaten/mengeneinheiten",
-    "portal/zertifikat": "/portal/zertifikate",
     "produktion/rezepturgruppe": "/produktion/rezepturgruppen",
     "rezepte/rezept": "/rezepte/editor",
     "fibu/anlage": "/fibu/anlage",
@@ -1022,7 +999,6 @@ STAMM_SYNONYME = {
     "crm/vertreter": ['vertreter', 'vertreterstamm'],
     "stammdaten/hausbank": ['hausbank', 'hausbank'],
     "stammdaten/mengeneinheit": ['mengeneinheit', 'me-stamm'],
-    "portal/zertifikat": ['zertifikat', 'portal-zertifikat'],
     "produktion/rezepturgruppe": ['rezepturgruppe', 'produktion'],
     "rezepte/rezept": ['rezept', 'rezeptur'],
     "fibu/anlage": ['anlage', 'anlagevermoegen'],

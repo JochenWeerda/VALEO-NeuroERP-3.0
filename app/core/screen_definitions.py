@@ -1818,10 +1818,13 @@ def build_finance_ar_open_item_screen_definition() -> dict[str, Any]:
                 "fields": [
                     {"key": "rechnungsnr", "label": "Beleg-Nr.", "type": "text", "readOnly": True},
                     {"key": "kunde_name", "label": "Debitor", "type": "text", "readOnly": True},
+                    {"key": "lieferant_name", "label": "Kreditor", "type": "text", "readOnly": True},
+                    {"key": "konto_typ", "label": "Kontotyp", "type": "text", "readOnly": True},
+                    {"key": "waehrung", "label": "Waehrung", "type": "text", "readOnly": True},
                     {"key": "rechnungsdatum", "label": "Belegdatum", "type": "date", "readOnly": True},
                     {"key": "faelligkeit", "label": "Faellig am", "type": "date", "readOnly": True},
-                    {"key": "op_betrag", "label": "Betrag", "type": "currency", "readOnly": True},
-                    {"key": "offen", "label": "Offen", "type": "currency", "readOnly": True},
+                    {"key": "op_betrag", "label": "Betrag", "type": "currency", "currencyField": "waehrung", "readOnly": True},
+                    {"key": "offen", "label": "Offen", "type": "currency", "currencyField": "waehrung", "readOnly": True},
                     # Prozentsatz und Frist gehoeren zusammen — ein Skontobetrag
                     # stuende hier ohne Bezug.
                     {"key": "skonto_prozent", "label": "Skonto %", "type": "number", "readOnly": True},
@@ -1836,7 +1839,7 @@ def build_finance_ar_open_item_screen_definition() -> dict[str, Any]:
                             "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
                             "columns": [
                                 {"key": "datum", "label": "Datum", "sortable": True, "renderKind": "date", "width": 110},
-                                {"key": "betrag", "label": "Betrag", "numeric": True, "sortable": True, "renderKind": "currency"},
+                                {"key": "betrag", "label": "Betrag", "numeric": True, "sortable": True, "renderKind": "currency", "currencyField": "waehrung"},
                                 {"key": "zahlungsart", "label": "Zahlungsart", "width": 120, "filterable": True},
                                 {"key": "bank_ref", "label": "Bank-Referenz", "width": 160},
                             ]}],

@@ -11,8 +11,8 @@ description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-02
 
 # Universal Mask Runtime — Plattformstatus
 
-**Aktueller Artefaktabgleich 2026-10-28:**853 registrierte Definitionen,
-Gate A/B jeweils853,C852,E804(49 Runtime-Punkte);844 native
+**Aktueller Artefaktabgleich 2026-10-29:**851 registrierte Definitionen,
+Gate A/B/C jeweils851,E804(47 Runtime-Punkte);842 native
 Katalogeintraege und5 strukturell freigabefaehige Draft-Projektionen.
 Reklamationen nutzt nun die echte NativeListPage mit gemeinsamem Such-,
 Kennzahlen-, Export- und Workflow-Resume-Vertrag. Vier obsolete Identitaeten

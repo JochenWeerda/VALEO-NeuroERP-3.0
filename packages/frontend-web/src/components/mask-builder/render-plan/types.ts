@@ -150,6 +150,7 @@ export interface RenderTabContentPlan {
 }
 
 export interface RenderFieldPlan {
+  currencyField?: string
   key: string
   label: string
   componentKind: RenderComponentKind
@@ -188,6 +189,7 @@ export interface RenderTableColumnPlan {
   sortable?: boolean
   filterable?: boolean
   renderKind?: RenderColumnKind
+  currencyField?: string
   defaultSort?: 'asc' | 'desc'
   priority?: RenderColumnPriority
 }

@@ -1,6 +1,6 @@
 # Made-by-Studio Gate-Report
 
-Stand: 2026-10-28 (erzeugt mit `python scripts/verify_made_by_studio_gates.py`).
+Stand: 2026-10-29 (erzeugt mit `python scripts/verify_made_by_studio_gates.py`).
 
 Bezug: [Made by Studio — Qualitätsversprechen](made-by-studio-qualitaetsversprechen.md).
 
@@ -8,10 +8,10 @@ Bezug: [Made by Studio — Qualitätsversprechen](made-by-studio-qualitaetsversp
 
 | Metrik | Wert |
 |--------|------|
-| Registrierte ScreenDefinitions | 853 |
-| Gate A (Meridian & Struktur) grün | 853 |
-| Gate B (Rechte & Aktionen) grün | 853 |
-| Gate C (Compiler & Kanal) grün | 852 |
+| Registrierte ScreenDefinitions | 851 |
+| Gate A (Meridian & Struktur) grün | 851 |
+| Gate B (Rechte & Aktionen) grün | 851 |
+| Gate C (Compiler & Kanal) grün | 851 |
 | Gate E (Runtime-Verdrahtung) grün | 804 |
 | Studio-Draft-Projektion ohne Violations | 5 |
 | Ø Advisory-Score (Gate-C-Metrik) | 0.99 |
@@ -27,11 +27,11 @@ Keine — alle grün.
 
 Keine — alle grün.
 
-## Gate C — offene Screen-IDs (1)
+## Gate C — offene Screen-IDs (0)
 
-- `portal/zertifikat`: api_bindung:endpoint_nicht_in_openapi:/api/v1/portal/zertifikate/{entity_id}
+Keine — alle grün.
 
-## Gate E — offene Screen-IDs (49)
+## Gate E — offene Screen-IDs (47)
 
 - `admin/control-center`: runtime:screen_id_nicht_runtime_wired
 - `admin/webhooks-liste`: runtime:screen_id_nicht_runtime_wired
@@ -47,8 +47,6 @@ Keine — alle grün.
 - `crm/kunden-cockpit`: runtime:screen_id_nicht_runtime_wired
 - `crm/segment`: runtime:screen_id_nicht_runtime_wired
 - `einkauf/rechnungseingang/neu`: runtime:screen_id_nicht_runtime_wired
-- `fibu/debitoren`: runtime:screen_id_nicht_runtime_wired
-- `fibu/debitoren-liste`: runtime:screen_id_nicht_runtime_wired
 - `finance/bank-abgleich`: runtime:screen_id_nicht_runtime_wired
 - `finance/debitoren/new`: runtime:screen_id_nicht_runtime_wired
 - `finance/invoices/new`: runtime:screen_id_nicht_runtime_wired

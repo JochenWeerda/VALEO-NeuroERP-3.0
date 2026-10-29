@@ -1,0 +1,250 @@
+{
+  "schemaVersion": 1,
+  "id": "fibu/debitoren-liste",
+  "domain": "finance",
+  "mode": "list",
+  "title": "Debitoren OP",
+  "subtitle": "Offene Posten Debitoren",
+  "adapter": {
+    "type": "native",
+    "sourceId": "fibu/debitoren-liste",
+    "temporary": false
+  },
+  "dataSources": [
+    {
+      "key": "list",
+      "endpoint": "/api/v1/finance/open-items?konto_typ=debitoren&only_open=true",
+      "pageSize": 500
+    }
+  ],
+  "actions": [
+    {
+      "key": "zurueck-op-verwaltung",
+      "label": "Zurück zur OP-Verwaltung",
+      "kind": "secondary",
+      "dangerLevel": "safe",
+      "zone": "header",
+      "navigationRoute": "/fibu/op-verwaltung",
+      "localEffect": "navigation",
+      "stubReason": "Oeffnet die OP-Verwaltung; deren Leseweg prueft Rolle und Mandant."
+    },
+    {
+      "key": "export",
+      "label": "CSV-Export",
+      "kind": "secondary",
+      "dangerLevel": "safe",
+      "zone": "header",
+      "command": "list.exportCsv",
+      "localEffect": "download",
+      "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+    }
+  ],
+  "tables": [
+    {
+      "key": "list",
+      "label": "Debitoren OP",
+      "dataSourceKey": "list",
+      "serverPagination": false,
+      "pageSize": 50,
+      "virtualized": true,
+      "rowHeight": 40,
+      "columns": [
+        {
+          "key": "rechnungsnr",
+          "label": "Rechnung",
+          "filterable": true,
+          "sortable": true,
+          "priority": "primary"
+        },
+        {
+          "key": "kunde_name",
+          "label": "Kunde",
+          "filterable": true,
+          "priority": "primary"
+        },
+        {
+          "key": "konto_nr",
+          "label": "Konto-Nr.",
+          "filterable": true,
+          "priority": "secondary"
+        },
+        {
+          "key": "rechnungsdatum",
+          "label": "Rechnungsdatum",
+          "sortable": true,
+          "renderKind": "date",
+          "priority": "secondary"
+        },
+        {
+          "key": "faelligkeit",
+          "label": "Fälligkeit",
+          "sortable": true,
+          "renderKind": "date",
+          "priority": "primary"
+        },
+        {
+          "key": "op_betrag",
+          "label": "OP-Betrag",
+          "numeric": true,
+          "renderKind": "currency",
+          "currencyField": "waehrung",
+          "sortable": true,
+          "priority": "secondary"
+        },
+        {
+          "key": "offen",
+          "label": "Offen",
+          "numeric": true,
+          "renderKind": "currency",
+          "currencyField": "waehrung",
+          "sortable": true,
+          "priority": "primary"
+        },
+        {
+          "key": "mahn_stufe",
+          "label": "Mahnstufe",
+          "numeric": true,
+          "renderKind": "number",
+          "sortable": true,
+          "priority": "secondary"
+        },
+        {
+          "key": "ueberfaellig",
+          "label": "Überfällig",
+          "renderKind": "boolean",
+          "sortable": true,
+          "priority": "primary"
+        },
+        {
+          "key": "waehrung",
+          "label": "Währung",
+          "filterable": true,
+          "priority": "secondary"
+        }
+      ],
+      "rowActions": [],
+      "rowRouteTemplate": "/finance/ar-open-item/{id}"
+    }
+  ],
+  "noWorkflowReason": "Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+  "agentContract": {
+    "businessPurpose": "Offene Debitorenposten finden und Rechnungen oeffnen.",
+    "examplePrompts": [
+      "Welche Posten sind ueberfaellig?"
+    ],
+    "sensitiveFields": [],
+    "testSelectors": {
+      "screenRoot": "[data-testid='screen-fibu/debitoren-liste']"
+    }
+  },
+  "layout": {
+    "floorplan": "worklist",
+    "density": "compact",
+    "contextRail": "none",
+    "preferredMode": "desktopDense",
+    "mobileMode": "mobileStack",
+    "touchTargetPx": 44,
+    "tableProfile": "financial"
+  },
+  "performance": {
+    "initialPayloadBudgetKb": 60,
+    "requiresLazyTabs": false,
+    "requiresVirtualTables": true,
+    "lookupMinChars": 2,
+    "bundleGroup": "finance"
+  },
+  "listExperience": {
+    "searchFields": [
+      "rechnungsnr",
+      "kunde_name",
+      "konto_nr"
+    ],
+    "aggregates": [
+      {
+        "key": "all",
+        "label": "Offene Posten",
+        "conditions": [],
+        "kind": "count"
+      },
+      {
+        "key": "open_amount",
+        "label": "Gesamt offen",
+        "conditions": [],
+        "kind": "sum",
+        "field": "offen",
+        "format": "currency",
+        "currencyField": "waehrung"
+      },
+      {
+        "key": "overdue",
+        "label": "Überfällig",
+        "conditions": [
+          {
+            "field": "ueberfaellig",
+            "op": "eq",
+            "value": "true"
+          }
+        ],
+        "kind": "count"
+      },
+      {
+        "key": "dunning",
+        "label": "In Mahnung",
+        "conditions": [
+          {
+            "field": "mahn_stufe",
+            "op": "neq",
+            "value": "0"
+          }
+        ],
+        "kind": "count"
+      }
+    ],
+    "notice": {
+      "aggregate": "overdue",
+      "text": "{overdue} überfällige Rechnung(en)!"
+    },
+    "export": {
+      "filenamePrefix": "debitoren-",
+      "delimiter": ";",
+      "columns": [
+        {
+          "key": "rechnungsnr",
+          "label": "Rechnung"
+        },
+        {
+          "key": "kunde_name",
+          "label": "Kunde"
+        },
+        {
+          "key": "konto_nr",
+          "label": "Konto-Nr."
+        },
+        {
+          "key": "rechnungsdatum",
+          "label": "Rechnungsdatum"
+        },
+        {
+          "key": "faelligkeit",
+          "label": "Fälligkeit"
+        },
+        {
+          "key": "op_betrag",
+          "label": "OP-Betrag"
+        },
+        {
+          "key": "offen",
+          "label": "Offen"
+        },
+        {
+          "key": "mahn_stufe",
+          "label": "Mahnstufe"
+        },
+        {
+          "key": "waehrung",
+          "label": "Währung"
+        }
+      ]
+    }
+  }
+}

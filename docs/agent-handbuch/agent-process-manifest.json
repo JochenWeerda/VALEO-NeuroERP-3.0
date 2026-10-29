@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-28",
+  "generatedAt": "2026-10-29",
   "schemaVersion": 1,
   "sources": [
     "app/core/flow_spine_registry.py",
@@ -11615,32 +11615,6 @@
       "mcp_tool_ids": []
     },
     {
-      "mask_id": "fibu/debitoren",
-      "title": "Debitoren",
-      "domain": "fibu",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/fibu__debitoren/:entityId",
-      "agent_contract_url": "/api/v1/masks/fibu/debitoren/agent-contract",
-      "screen_definition_url": "/api/v1/masks/fibu/debitoren/screen-definition",
-      "readiness_url": "/api/v1/masks/fibu/debitoren/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
       "mask_id": "fibu/debitoren-api",
       "title": "Debitoren api",
       "domain": "fibu",
@@ -12025,32 +11999,6 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": null
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "fibu/op-verwaltung",
-      "title": "Op verwaltung",
-      "domain": "fibu",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/fibu__op-verwaltung/:entityId",
-      "agent_contract_url": "/api/v1/masks/fibu/op-verwaltung/agent-contract",
-      "screen_definition_url": "/api/v1/masks/fibu/op-verwaltung/screen-definition",
-      "readiness_url": "/api/v1/masks/fibu/op-verwaltung/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
         }
       ],
       "sensitive_fields": [],
@@ -12901,6 +12849,17 @@
       "risk_summary": "low",
       "actions": [
         {
+          "key": "zurueck-op-verwaltung",
+          "label": "Zurück zur OP-Verwaltung",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die OP-Verwaltung; deren Leseweg prueft Rolle und Mandant."
+        },
+        {
           "key": "export",
           "label": "CSV-Export",
           "dangerLevel": "safe",
@@ -13078,6 +13037,36 @@
       "agent_contract_url": "/api/v1/masks/fibu/offene-posten-liste/agent-contract",
       "screen_definition_url": "/api/v1/masks/fibu/offene-posten-liste/screen-definition",
       "readiness_url": "/api/v1/masks/fibu/offene-posten-liste/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "finance.ap_invoice.propose",
+        "fibu.open_items.list",
+        "fibu.dunning.status"
+      ]
+    },
+    {
+      "mask_id": "fibu/op-verwaltung",
+      "title": "OP-Verwaltung",
+      "domain": "finance",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/fibu__op-verwaltung/:entityId",
+      "agent_contract_url": "/api/v1/masks/fibu/op-verwaltung/agent-contract",
+      "screen_definition_url": "/api/v1/masks/fibu/op-verwaltung/screen-definition",
+      "readiness_url": "/api/v1/masks/fibu/op-verwaltung/readiness",
       "risk_summary": "low",
       "actions": [
         {
@@ -21597,32 +21586,6 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "portal/zertifikat",
-      "title": "Zertifikat",
-      "domain": "portal",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/portal__zertifikat/:entityId",
-      "agent_contract_url": "/api/v1/masks/portal/zertifikat/agent-contract",
-      "screen_definition_url": "/api/v1/masks/portal/zertifikat/screen-definition",
-      "readiness_url": "/api/v1/masks/portal/zertifikat/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "edit",
-          "label": "Bearbeiten",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "portal.zertifikat.update",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
         }
       ],
       "sensitive_fields": [],
