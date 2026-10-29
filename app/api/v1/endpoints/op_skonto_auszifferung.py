@@ -22,7 +22,7 @@ from pydantic import BaseModel, Field, model_validator
 from sqlalchemy import text
 
 from app.core.database import get_db
-from app.core.dependencies import get_tenant_id
+from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
@@ -137,6 +137,17 @@ def list_auszifferungen(
     sql += " ORDER BY zahlungsdatum DESC"
     rows = db.execute(text(sql), params).fetchall()
     return [SkontoAuszifferungOut(**dict(r._mapping)) for r in rows]
+
+
+@router.get("/{auszifferung_id}", response_model=SkontoAuszifferungOut, summary="Auszifferung abrufen", dependencies=[Depends(finance_read)])
+def get_auszifferung(auszifferung_id: str, db=Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
+    row = db.execute(text("""
+        SELECT * FROM domain_shared.op_auszifferungen
+        WHERE tenant_id = :tid AND id = :id AND NOT storniert
+    """), {"tid": tenant_id, "id": auszifferung_id}).fetchone()
+    if row is None:
+        raise HTTPException(404, "Auszifferung nicht gefunden.")
+    return SkontoAuszifferungOut(**dict(row._mapping))
 
 
 @router.post("", response_model=SkontoAuszifferungOut, status_code=201, summary="Auszifferung anlegen", dependencies=[Depends(finance_write)])

@@ -221,7 +221,7 @@ async def list_number_series(
     """Listet alle Nummernkreise eines Mandanten auf."""
     try:
         from sqlalchemy import text
-        result = await numbering.db.execute(
+        result = await numbering.execute(
             text("""
                 SELECT domain, tenant_id, year, prefix, width, counter
                 FROM number_series
@@ -255,7 +255,7 @@ async def create_or_update_number_series(
     """Erstellt oder aktualisiert einen Nummernkreis."""
     try:
         from sqlalchemy import text
-        existing = await numbering.db.execute(
+        existing = await numbering.execute(
             text("""
                 SELECT counter FROM number_series
                 WHERE domain = :domain AND tenant_id = :tenant_id
@@ -266,7 +266,7 @@ async def create_or_update_number_series(
         row = existing.fetchone()
 
         if row is None:
-            await numbering.db.execute(
+            await numbering.execute(
                 text("""
                     INSERT INTO number_series (domain, tenant_id, year, prefix, counter, width)
                     VALUES (:domain, :tenant_id, :year, :prefix, :counter, :width)
@@ -278,7 +278,7 @@ async def create_or_update_number_series(
                 }
             )
         else:
-            await numbering.db.execute(
+            await numbering.execute(
                 text("""
                     UPDATE number_series
                     SET prefix = :prefix, width = :width
@@ -291,7 +291,7 @@ async def create_or_update_number_series(
                 }
             )
 
-        await numbering.db.commit()
+        await numbering.commit()
         counter = config.counter if row is None else row[0]
         next_num = f"{config.prefix}{counter + 1:0{config.width}d}"
         return NumberSeriesListItem(

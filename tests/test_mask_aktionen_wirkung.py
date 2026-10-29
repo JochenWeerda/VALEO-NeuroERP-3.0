@@ -26,6 +26,7 @@ import uuid
 from datetime import date
 
 import pytest
+from fastapi import Request  # Modulebene: FastAPI loest die Annotation hier auf
 
 pytestmark = pytest.mark.integration
 
@@ -38,6 +39,7 @@ os.environ.setdefault("API_DEV_TOKEN", "dev-token")
 
 HAUS_A = f"mak-a-{uuid.uuid4().hex[:6]}"
 HAUS_B = f"mak-b-{uuid.uuid4().hex[:6]}"
+PRUEFER = f"pruefer-{uuid.uuid4().hex[:8]}"
 
 ZAHLUNGSLAUF = "/api/v1/finance/payment-runs/{}/actions/freigeben"
 LIEFERSCHEIN = "/api/v1/sales/delivery-notes/{}/actions/drucken"
@@ -92,15 +94,44 @@ def haeuser(engine):
                 text("INSERT INTO domain_shared.tenants (id, name) VALUES (:id, :n) ON CONFLICT (id) DO NOTHING"),
                 {"id": haus, "n": f"Pruefbetrieb {haus}"},
             )
+        # Seit AUDIT-IDENTITY-INTEGRITY braucht eine Attestierung eine eindeutige lokale Nutzerzuordnung der
+        # geprueften Identitaet im Mandanten; der gemeinsame Testnutzer ``dev`` gehoert keinem Testhaus.
+        v.execute(
+            text("INSERT INTO domain_shared.users (id, keycloak_id, username, email, tenant_id, is_active) "
+                 "VALUES (:id, :id, :id, :mail, :t, TRUE) ON CONFLICT DO NOTHING"),
+            {"id": PRUEFER, "mail": f"{PRUEFER}@pruefstand.invalid", "t": HAUS_A},
+        )
     yield
     aufraeumen(engine)
     with engine.begin() as v:
+        v.execute(text("DELETE FROM domain_shared.users WHERE id = :id"), {"id": PRUEFER})
         v.execute(text("DELETE FROM domain_shared.tenants WHERE id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
 
 
 @pytest.fixture(autouse=True)
 def leer(engine):
     aufraeumen(engine)
+    yield
+
+
+@pytest.fixture(autouse=True)
+def gepruefte_person():
+    """Nach ``tests/conftest.py`` (Identitaet ``dev``): eine Person mit lokalem Nutzer im Testhaus A."""
+    from app.auth.deps import get_current_user
+    from app.core.security import require_bearer_token
+    from app.main import app
+    from testgrenze import mandant_aus_kopf
+
+    def geprueft(request: Request) -> str:
+        tenant = mandant_aus_kopf(request)
+        request.state.tenant_id = tenant
+        request.state.tenant_verified = True
+        request.state.token_claims = {"sub": PRUEFER, "iss": "https://pruefstand.invalid/realms/valeo", "tenant_id": tenant,
+                                      "roles": ["admin"]}
+        return "pruefstand"
+
+    app.dependency_overrides[require_bearer_token] = geprueft
+    app.dependency_overrides[get_current_user] = lambda: {"sub": PRUEFER, "name": PRUEFER, "roles": ["admin"]}
     yield
 
 
@@ -215,7 +246,7 @@ class TestZahlungslauf:
         assert antwort["success"] is True, antwort
         assert wert(engine, "SELECT status FROM domain_erp.payment_runs WHERE id = :i", i=lauf) == "approved"
         # Freigeber ist der angemeldete Nutzer (Dev-Token), nicht "freigegeben_von" im Rumpf.
-        assert wert(engine, "SELECT approved_by FROM domain_erp.payment_runs WHERE id = :i", i=lauf) == "dev"
+        assert wert(engine, "SELECT approved_by FROM domain_erp.payment_runs WHERE id = :i", i=lauf) == PRUEFER
         assert spuren(engine, HAUS_A, "freigeben") == (1, 1)
 
     def test_ein_freigegebener_lauf_wird_nicht_nochmals_freigegeben(self, client, engine):
@@ -446,7 +477,7 @@ class TestStatisch:
                 ziel = aktion.get("commandEndpoint")
                 if not ziel:
                     continue
-                konkret = re.sub(r"\{[^}]+\}", "X", ziel)
+                konkret = re.sub(r"\{[^}]+\}", "X", ziel.split("?", 1)[0])
                 if not any(m.match(konkret) for m in muster):
                     fehlend.append(f"{screen_id}/{aktion['key']}: {ziel}")
         assert fehlend == []

@@ -14,13 +14,9 @@ test.describe('Agrar - PSM @smoke', () => {
   });
 
   test('PSM-Liste lädt ohne Fehler', async ({ adminPage }) => {
+    // Studio-Liste (MASK-STUDIO-ROLLOUT): Wurzel aus der ScreenDefinition; Tabelle oder Leerzustand je nach Daten.
+    await expect(adminPage.locator('[data-screen-definition="agrar/psm-liste"]')).toBeVisible({ timeout: 15000 });
     await expect(adminPage.locator('h1, h2').first()).toBeVisible();
-    
-    // Prüfe Tabelle oder Grid
-    const hasTable = await adminPage.locator('table').count() > 0;
-    const hasGrid = await adminPage.locator('[role="grid"]').count() > 0;
-    
-    expect(hasTable || hasGrid).toBeTruthy();
   });
 
   test('Export-Button funktioniert', async ({ adminPage, fallbackDetector }) => {

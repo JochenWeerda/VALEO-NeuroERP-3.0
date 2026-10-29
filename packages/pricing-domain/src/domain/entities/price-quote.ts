@@ -55,7 +55,7 @@ export type CalcQuoteInput = z.infer<typeof CalcQuoteInputSchema>;
  * Price Quote - Berechnetes Preisangebot
  */
 export const PriceQuoteSchema = z.object({
-  id: z.string().uuid().optional(),
+  id: z.string().guid().optional(),
   tenantId: z.string().min(1, 'Tenant ID is required'),
   
   // Input-Referenz

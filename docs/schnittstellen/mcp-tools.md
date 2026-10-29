@@ -12,7 +12,7 @@ version: 3.0.0
 
 > Automatisch generiert aus `config/mcp_erp_tools.yaml` via `python scripts/generate_mcp_tool_reference.py`. **Nicht manuell bearbeiten.**
 
-Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 62 Tools in 19 Domaenen.
+Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 67 Tools in 22 Domaenen.
 
 ## Uebersicht
 
@@ -48,7 +48,6 @@ Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 62 Tools in 19 Domaenen.
 | `einkauf.bestellung.versenden` | einkauf | `einkauf:write` | ja | mittel | nein |
 | `fibu.dunning.status` | finance | `finance:read` | ja | niedrig | nein |
 | `fibu.open_items.list` | finance | `finance:read` | ja | niedrig | nein |
-| `finance.ap_invoice.freigeben` | finance | `finance:write` | ja | hoch | ja |
 | `finance.ap_invoice.propose` | finance | `finance:write` | nein | hoch | ja |
 | `hr.bewerbung.speichern` | hr | `hr:write` | ja | mittel | nein |
 | `hr.einwilligung.anlegen` | hr | `hr:write` | ja | mittel | nein |
@@ -66,6 +65,9 @@ Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 62 Tools in 19 Domaenen.
 | `logistik.rechnung.speichern` | logistics | `logistics:write` | ja | mittel | nein |
 | `logistik.terminart.speichern` | logistics | `logistics:write` | ja | mittel | nein |
 | `logistik.tour.anlegen` | logistics | `logistics:write` | ja | mittel | nein |
+| `mask.action.execute` | masks | `masks:write` | ja | mittel | nein |
+| `mask.actions.list` | masks | `masks:read` | ja | niedrig | nein |
+| `mask.data.read` | masks | `masks:read` | ja | niedrig | nein |
 | `mobile.sync.process_pending` | mobile | `mobile:write` | ja | mittel | nein |
 | `planung.calendar.reproject` | planung | `planung:write` | ja | mittel | nein |
 | `produktion.control.sync` | produktion | `ops:write` | ja | mittel | nein |
@@ -78,8 +80,11 @@ Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 62 Tools in 19 Domaenen.
 | `sales.invoice.post` | sales | `sales:write` | ja | hoch | ja |
 | `sales.invoice.propose` | sales | `sales:write` | nein | hoch | ja |
 | `sales.order.status` | sales | `sales:read` | ja | niedrig | nein |
+| `studio.migration.plan` | studio | `belege:write` | ja | niedrig | nein |
 | `wms.cell.status` | inventory | `inventory:read` | ja | niedrig | nein |
 | `wms.lot.trace` | inventory | `inventory:read` | ja | niedrig | nein |
+| `workspace.fachaktion.katalog` | workspace | `agent:read` | ja | niedrig | nein |
+| `workspace.fachaktion.resolve` | workspace | `agent:read` | ja | niedrig | nein |
 
 ## Domaene: agent
 
@@ -1808,65 +1813,9 @@ Listet offene Forderungen oder Verbindlichkeiten im Authentifizierungs-Mandanten
 }
 ```
 
-### `finance.ap_invoice.freigeben` — AP-Rechnung aus freigegebenem Vorschlag freigeben
-
-Ruft den echten CommandEndpoint POST /api/v1/finance/ap/invoices/{id}/actions/freigeben nur nach freigegebenem agent_proposals-Datensatz (ap_invoice_freigabe) auf. Parameter nur proposal_id. Default dryRun. execute erfordert idempotency_key und approval_status=approved. Kein Freigabe-Boolean im Aufruf. Kein Journal-Post/FIN-CLOSE (fibu_journal=false). OIDC-Token mit finance:write und tenant_id erforderlich.
-
-- **Scope:** `finance:write`
-- **Idempotent:** ja
-- **Risikoklasse:** hoch
-- **Audit:** write
-- **Human-Approval erforderlich:** ja
-- **Endpoint:** `POST /api/v1/mcp/tools/call`
-
-**Eingabe-Schema:**
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "proposal_id": {
-      "type": "string",
-      "description": "entwurf_id aus finance.ap_invoice.propose"
-    }
-  },
-  "required": [
-    "proposal_id"
-  ]
-}
-```
-
-**Ausgabe-Schema:**
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "invoice_id": {
-      "type": "string"
-    },
-    "invoice_number": {
-      "type": "string"
-    },
-    "status": {
-      "type": "string"
-    },
-    "approved": {
-      "type": "boolean"
-    },
-    "route_path": {
-      "type": "string"
-    },
-    "screen_id": {
-      "type": "string"
-    }
-  }
-}
-```
-
 ### `finance.ap_invoice.propose` — AP-Freigabe vorschlagen
 
-Legt einen ausstehenden Freigabe-Vorschlag fuer eine Eingangsrechnung im Authentifizierungs-Mandanten an. HTTP-Aufruf mit tool_name=finance.ap_invoice.propose, parameters.invoice_id. Default dryRun liest nur Status/Brutto/route_path. propose speichert agent_proposals (ap_invoice_freigabe) mit approval_status pending und ruft den Freigabe-Endpoint nicht auf. execute ist nicht angebunden (nutze finance.ap_invoice.freigeben nach Freigabe). Ein Freigabe-Boolean im Aufruf wird abgewiesen. OIDC-Token mit finance:write und tenant_id erforderlich. Kein Journal/FIN-CLOSE.
+Legt einen ausstehenden Freigabe-Vorschlag fuer eine Eingangsrechnung im Authentifizierungs-Mandanten an. HTTP-Aufruf mit tool_name=finance.ap_invoice.propose, parameters.invoice_id. Default dryRun liest nur Status/Brutto/route_path. propose speichert agent_proposals (ap_invoice_freigabe) mit approval_status pending und ruft den Freigabe-Endpoint nicht auf. execute ist deaktiviert; die verbindliche Entscheidung trifft eine berechtigte unabhaengige Person in der AP-Maske. Ein freigegebener Vorschlag ist keine Belegfreigabe. Ein Freigabe-Boolean im Aufruf wird abgewiesen. OIDC-Token mit finance:write und tenant_id erforderlich. Kein Journal/FIN-CLOSE.
 
 - **Scope:** `finance:write`
 - **Idempotent:** nein
@@ -2988,6 +2937,250 @@ Legt eine Tour im Authentifizierungs-Mandanten an (Maske logistik/tourenplanung:
 }
 ```
 
+## Domaene: masks
+
+### `mask.action.execute` — Maskenaktion ausfuehren
+
+Fuehrt eine Maskenaktion ueber ihren deklarierten Kommando-Endpunkt aus (gleicher Umschlag wie die Maske). Gesperrt sind forbiddenForAgents, humanApprovalRequired, Command-Adapter und Eingabefluesse. Default dryRun; execute erfordert idempotency_key.
+
+- **Scope:** `masks:write`
+- **Idempotent:** ja
+- **Risikoklasse:** mittel
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "screen_id": {
+      "type": "string"
+    },
+    "action": {
+      "type": "string"
+    },
+    "entity_id": {
+      "type": "string",
+      "nullable": true
+    },
+    "input": {
+      "type": "object",
+      "nullable": true
+    },
+    "audit_reason": {
+      "type": "string",
+      "nullable": true
+    }
+  },
+  "required": [
+    "screen_id",
+    "action"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "screen_id": {
+      "type": "string"
+    },
+    "action": {
+      "type": "string"
+    },
+    "mode": {
+      "type": "string"
+    },
+    "result": {
+      "type": "object"
+    }
+  }
+}
+```
+
+### `mask.actions.list` — Maskenaktionen auflisten
+
+Liest die Aktionen einer Maske aus der mandantengenauen ScreenDefinition, mit Eingabefeldern und Befund, ob ein Agent sie ausfuehren darf. Nur Lesen.
+
+- **Scope:** `masks:read`
+- **Idempotent:** ja
+- **Risikoklasse:** niedrig
+- **Audit:** read
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "screen_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "screen_id"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "screen_id": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string",
+      "nullable": true
+    },
+    "actions": {
+      "type": "array"
+    }
+  }
+}
+```
+
+### `mask.data.read` — Maskendaten lesen
+
+Liest eine deklarierte GET-Datenquelle derselben mandantengenauen Maske wie Human-UI und CLI. Fachrollen und Objektzugriff prueft der Ziel-Endpunkt erneut mit dem Token des Aufrufers; keine freie URL oder Mandantenangabe.
+
+- **Scope:** `masks:read`
+- **Idempotent:** ja
+- **Risikoklasse:** niedrig
+- **Audit:** read
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "screen_id": {
+      "type": "string"
+    },
+    "source_key": {
+      "type": "string"
+    },
+    "entity_id": {
+      "type": "string",
+      "nullable": true
+    },
+    "page": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1000000
+    },
+    "limit": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100
+    },
+    "q": {
+      "type": "string",
+      "nullable": true,
+      "maxLength": 200
+    },
+    "table_key": {
+      "type": "string"
+    },
+    "sort": {
+      "type": "string"
+    },
+    "sort_dir": {
+      "type": "string",
+      "enum": [
+        "asc",
+        "desc"
+      ]
+    },
+    "filter_plan": {
+      "type": "object",
+      "maxProperties": 20,
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "op",
+          "value"
+        ],
+        "properties": {
+          "op": {
+            "type": "string",
+            "enum": [
+              "eq",
+              "neq",
+              "contains",
+              "lt",
+              "lte",
+              "gt",
+              "gte",
+              "in",
+              "between"
+            ]
+          },
+          "value": {},
+          "label": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 200
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "screen_id",
+    "source_key"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "screen_id": {
+      "type": "string"
+    },
+    "source_key": {
+      "type": "string"
+    },
+    "page": {
+      "type": "integer"
+    },
+    "limit": {
+      "type": "integer"
+    },
+    "data": {
+      "oneOf": [
+        {
+          "type": "object"
+        },
+        {
+          "type": "array"
+        }
+      ]
+    }
+  }
+}
+```
+
 ## Domaene: mobile
 
 ### `mobile.sync.process_pending` — MDE-Queue verarbeiten
@@ -3919,6 +4112,253 @@ Gibt Lifecycle-Status, offene Positionen, naechsten Schritt und kanonische Maske
     },
     "screen_id": {
       "type": "string"
+    }
+  }
+}
+```
+
+## Domaene: studio
+
+### `studio.migration.plan` — Studio-Aenderungsplan festhalten
+
+Versionierter Authoring-Command: erzeugt nur einen revisionsgebundenen Plan in der vorhandenen Historie; keine Freigabe, Schemaausfuehrung oder Geschaeftsbuchung. Fachrollen prueft derselbe HTTP-Endpunkt wie Human-UI/CLI.
+
+- **Scope:** `belege:write`
+- **Idempotent:** ja
+- **Risikoklasse:** niedrig
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "$defs": {
+    "StudioColumnIn": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "pattern": "^[a-z][a-z0-9_]{0,47}$",
+          "title": "Name",
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "text",
+            "integer",
+            "boolean",
+            "date",
+            "datetime",
+            "decimal",
+            "uuid"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "nullable": {
+          "default": true,
+          "title": "Nullable",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "name",
+        "type"
+      ],
+      "title": "StudioColumnIn",
+      "type": "object"
+    },
+    "StudioSchemaChangeIn": {
+      "additionalProperties": false,
+      "properties": {
+        "operation": {
+          "enum": [
+            "create_table",
+            "add_columns"
+          ],
+          "title": "Operation",
+          "type": "string"
+        },
+        "schema_name": {
+          "pattern": "^domain_[a-z][a-z0-9_]{0,35}$",
+          "title": "Schema Name",
+          "type": "string"
+        },
+        "table": {
+          "pattern": "^[a-z][a-z0-9_]{0,47}$",
+          "title": "Table",
+          "type": "string"
+        },
+        "columns": {
+          "items": {
+            "$ref": "#/$defs/StudioColumnIn"
+          },
+          "maxItems": 50,
+          "minItems": 1,
+          "title": "Columns",
+          "type": "array"
+        }
+      },
+      "required": [
+        "operation",
+        "schema_name",
+        "table",
+        "columns"
+      ],
+      "title": "StudioSchemaChangeIn",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "draft_id": {
+      "format": "uuid",
+      "title": "Draft Id",
+      "type": "string"
+    },
+    "expected_revision": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Expected Revision",
+      "type": "string"
+    },
+    "schema_changes": {
+      "items": {
+        "$ref": "#/$defs/StudioSchemaChangeIn"
+      },
+      "maxItems": 20,
+      "title": "Schema Changes",
+      "type": "array"
+    }
+  },
+  "required": [
+    "draft_id",
+    "expected_revision"
+  ],
+  "title": "StudioPlanParameters",
+  "type": "object"
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object"
+}
+```
+
+## Domaene: workspace
+
+### `workspace.fachaktion.katalog` — Fachaktionskatalog Adaptive Workspace
+
+Liefert den typisierten Fachaktionskatalog (permission, idempotency, audit, event-out, Aliase) aus config/adaptive_workspace_fachaktionen.yaml. Nur Lesen. parameters.access optional read|write. Scope agent:read. Kein tenant_id-Parameter.
+
+- **Scope:** `agent:read`
+- **Idempotent:** ja
+- **Risikoklasse:** niedrig
+- **Audit:** read
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "access": {
+      "type": "string",
+      "enum": [
+        "read",
+        "write"
+      ],
+      "description": "Optionaler Filter"
+    }
+  },
+  "required": []
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "registry_id": {
+      "type": "string"
+    },
+    "count": {
+      "type": "integer"
+    },
+    "actions": {
+      "type": "array"
+    },
+    "lead_contract": {
+      "type": "object"
+    },
+    "event_gaps": {
+      "type": "array"
+    }
+  }
+}
+```
+
+### `workspace.fachaktion.resolve` — Kurzkommando auf Fachaktion aufloesen
+
+Mappt ein natuerliches Kurzkommando deterministisch (Alias/Action-ID, kein LLM) auf eine typisierte Fachaktion und prueft Scope sowie Agenten-/Vier-Augen-Grenze. Nur Lesen, keine Ausfuehrung. parameters.command. Scope agent:read; die Zielaktion hat zusaetzlich ihre Fach-Scope. Writes werden nicht ausgeloest.
+
+- **Scope:** `agent:read`
+- **Idempotent:** ja
+- **Risikoklasse:** niedrig
+- **Audit:** read
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "command": {
+      "type": "string",
+      "description": "Kurzkommando oder Action-ID"
+    }
+  },
+  "required": [
+    "command"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "action_id": {
+      "type": "string",
+      "nullable": true
+    },
+    "authorized": {
+      "type": "boolean"
+    },
+    "reason": {
+      "type": "string"
+    },
+    "mcp_tool_id": {
+      "type": "string",
+      "nullable": true
+    },
+    "four_eyes": {
+      "type": "boolean"
+    },
+    "command_endpoint": {
+      "type": "string",
+      "nullable": true
     }
   }
 }

@@ -1,0 +1,61 @@
+[
+  {
+    "width": 1366,
+    "height": 768,
+    "theme": "light",
+    "background": "rgb(249, 250, 251)",
+    "foreground": "rgb(21, 26, 30)",
+    "horizontalOverflow": false,
+    "violations": []
+  },
+  {
+    "width": 1366,
+    "height": 768,
+    "theme": "dark",
+    "background": "rgb(21, 26, 30)",
+    "foreground": "rgb(249, 250, 251)",
+    "horizontalOverflow": false,
+    "violations": []
+  },
+  {
+    "width": 1440,
+    "height": 900,
+    "theme": "light",
+    "background": "rgb(249, 250, 251)",
+    "foreground": "rgb(21, 26, 30)",
+    "horizontalOverflow": false,
+    "violations": []
+  },
+  {
+    "width": 1440,
+    "height": 900,
+    "theme": "dark",
+    "background": "rgb(21, 26, 30)",
+    "foreground": "rgb(249, 250, 251)",
+    "horizontalOverflow": false,
+    "violations": []
+  },
+  {
+    "width": 1920,
+    "height": 1080,
+    "theme": "light",
+    "background": "rgb(249, 250, 251)",
+    "foreground": "rgb(21, 26, 30)",
+    "horizontalOverflow": false,
+    "violations": []
+  },
+  {
+    "width": 1920,
+    "height": 1080,
+    "theme": "dark",
+    "background": "rgb(21, 26, 30)",
+    "foreground": "rgb(249, 250, 251)",
+    "horizontalOverflow": false,
+    "violations": []
+  },
+  {
+    "interaction": "filtered browser CSV download",
+    "passed": true,
+    "filename": "Reklamationen_2026-10-28.csv"
+  }
+]

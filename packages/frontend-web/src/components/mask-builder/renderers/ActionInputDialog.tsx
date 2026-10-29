@@ -34,17 +34,24 @@ function zeilen(daten: unknown): Zeile[] {
 }
 
 function leer(wert: unknown): boolean {
+  if (Array.isArray(wert)) return false // An explicitly empty list clears existing rows.
   return wert === undefined || wert === null || String(wert).trim() === ''
 }
 
 export function ActionInputDialog({
   action,
   open,
+  initialValues,
+  error,
+  submitLabel = 'Weiter',
   onSubmit,
   onCancel,
 }: {
   action: ScreenActionDefinition
   open: boolean
+  initialValues?: Record<string, unknown>
+  error?: string
+  submitLabel?: string
   onSubmit: (_values: Record<string, unknown>) => void
   onCancel: () => void
 }): JSX.Element {
@@ -87,8 +94,8 @@ export function ActionInputDialog({
   const { resetForm } = form
 
   useEffect(() => {
-    if (open) resetForm({})
-  }, [open, resetForm])
+    if (open) resetForm(initialValues ?? {})
+  }, [open, resetForm, initialValues])
 
   const ladefehler = quellen
     .map((feld, index) => (optionen[index]?.isError ? `${feld.label}: Auswahl nicht geladen.` : null))
@@ -100,7 +107,11 @@ export function ActionInputDialog({
       return
     }
     const werte = Object.fromEntries(
-      Object.entries(form.values).filter(([, wert]) => !leer(wert)),
+      Object.entries(form.values)
+        .filter(([key, wert]) => !leer(wert) || wert === '' &&
+          Object.prototype.hasOwnProperty.call(initialValues ?? {}, key) &&
+          ['text', 'textarea'].includes(felder.find(field => field.key === key)?.type ?? ''))
+        .map(([key, wert]) => [key, felder.find((feld) => feld.key === key)?.type === 'number' ? Number(wert) : wert]),
     )
     onSubmit(werte)
   }
@@ -109,7 +120,7 @@ export function ActionInputDialog({
 
   return (
     <Dialog open={open} onOpenChange={(offen) => { if (!offen) onCancel() }}>
-      <DialogContent aria-describedby="action-input-beschreibung">
+      <DialogContent aria-describedby="action-input-beschreibung" className={felder.some(field => field.type === 'table') ? 'max-h-[90vh] max-w-[95vw] sm:max-w-[95vw] overflow-y-auto' : undefined}>
         <DialogHeader>
           <DialogTitle>{action.label}</DialogTitle>
           <DialogDescription id="action-input-beschreibung">
@@ -117,11 +128,12 @@ export function ActionInputDialog({
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
+          {error && <p role="alert" className="text-sm text-status-error">{error}</p>}
           {mitOptionen.map((feld) => (
             <div key={feld.key} className="space-y-1">
               <FieldRenderer
                 field={feld}
-                value={form.values[feld.key] ?? ''}
+                value={form.values[feld.key] ?? (feld.type === 'table' ? [] : '')}
                 onChange={(wert) => form.setValue(feld.key, wert)}
                 voiceEnabled={false}
               />
@@ -136,7 +148,7 @@ export function ActionInputDialog({
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onCancel}>Abbrechen</Button>
-          <Button onClick={weiter}>Weiter</Button>
+          <Button onClick={weiter}>{submitLabel}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

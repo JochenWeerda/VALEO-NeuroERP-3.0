@@ -270,7 +270,7 @@ const ListReport = <TItem extends object = Record<string, unknown>>({
   }
 
   return (
-    <div className="space-y-6 p-3 md:p-8">
+    <div className="space-y-4">
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-4 rounded-(--radius) border border-border bg-card p-4 shadow-sm md:p-6">
         <div>

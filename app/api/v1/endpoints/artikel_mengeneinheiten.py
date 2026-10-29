@@ -20,10 +20,11 @@ from pydantic import BaseModel, Field
 from sqlalchemy import text
 
 from app.core.database import get_db
-from app.core.dependencies import get_tenant_id
+from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/artikel/mengeneinheiten",
@@ -87,7 +88,7 @@ def list_mengeneinheiten(
     return [MengeneinheitOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/stamm", response_model=MengeneinheitOut, status_code=201, summary="Mengeneinheit anlegen")
+@router.post("/stamm", response_model=MengeneinheitOut, status_code=201, summary="Mengeneinheit anlegen", dependencies=SCHREIBEN["STAMMDATEN"])
 def create_mengeneinheit(
     payload: MengeneinheitCreate,
     db=Depends(get_db),
@@ -118,7 +119,7 @@ def create_mengeneinheit(
     return MengeneinheitOut(**dict(row._mapping))
 
 
-@router.put("/stamm/{einheit_kuerzel}", response_model=MengeneinheitOut, summary="Mengeneinheit aktualisieren")
+@router.put("/stamm/{einheit_kuerzel}", response_model=MengeneinheitOut, summary="Mengeneinheit aktualisieren", dependencies=SCHREIBEN["STAMMDATEN"])
 def update_mengeneinheit(
     einheit_kuerzel: str,
     payload: MengeneinheitCreate,
@@ -151,8 +152,7 @@ def update_mengeneinheit(
 
 
 @router.delete("/stamm/{einheit_kuerzel}", summary="Mengeneinheit löschen",
-    response_model=None
-)
+    response_model=None, dependencies=SCHREIBEN["STAMMDATEN"])
 def delete_mengeneinheit(
     einheit_kuerzel: str,
     db=Depends(get_db),
@@ -232,7 +232,7 @@ def get_mengeneinheitengruppe(
     return MengeneinheitengruppeOut(**dict(row._mapping))
 
 
-@router.post("/gruppen", response_model=MengeneinheitengruppeOut, status_code=201, summary="Mengeneinheitengruppe anlegen")
+@router.post("/gruppen", response_model=MengeneinheitengruppeOut, status_code=201, summary="Mengeneinheitengruppe anlegen", dependencies=SCHREIBEN["STAMMDATEN"])
 def create_mengeneinheitengruppe(
     payload: MengeneinheitengruppeCreate,
     db=Depends(get_db),
@@ -264,7 +264,7 @@ def create_mengeneinheitengruppe(
     return MengeneinheitengruppeOut(**dict(row._mapping))
 
 
-@router.put("/gruppen/{gruppe_nr}", response_model=MengeneinheitengruppeOut, summary="Mengeneinheitengruppe aktualisieren")
+@router.put("/gruppen/{gruppe_nr}", response_model=MengeneinheitengruppeOut, summary="Mengeneinheitengruppe aktualisieren", dependencies=SCHREIBEN["STAMMDATEN"])
 def update_mengeneinheitengruppe(
     gruppe_nr: str,
     payload: MengeneinheitengruppeCreate,
@@ -297,8 +297,7 @@ def update_mengeneinheitengruppe(
 
 
 @router.delete("/gruppen/{gruppe_nr}", summary="Mengeneinheitengruppe löschen",
-    response_model=None
-)
+    response_model=None, dependencies=SCHREIBEN["STAMMDATEN"])
 def delete_mengeneinheitengruppe(
     gruppe_nr: str,
     db=Depends(get_db),
@@ -310,3 +309,19 @@ def delete_mengeneinheitengruppe(
     """), {"tid": tenant_id, "nr": gruppe_nr})
     db.commit()
     return Response(status_code=204)
+
+
+@router.get("/stamm/{einheit_kuerzel}", response_model=MengeneinheitOut, summary="Mengeneinheit lesen")
+def get_mengeneinheit(
+    einheit_kuerzel: str,
+    db=Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
+    """Single record for the shared Human/CLI/MCP screen data source."""
+    row = db.execute(text("""
+        SELECT * FROM domain_shared.artikel_mengeneinheiten
+        WHERE tenant_id = :tid AND einheit_kuerzel = :key AND aktiv = true
+    """), {"tid": tenant_id, "key": einheit_kuerzel}).fetchone()
+    if row is None:
+        raise HTTPException(404, "Mengeneinheit nicht gefunden.")
+    return MengeneinheitOut(**dict(row._mapping))

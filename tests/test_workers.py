@@ -109,7 +109,8 @@ def test_base_worker_ensure_db_calls_initialize():
 
     db = _mock_db()
     w = _Concrete()
-    with patch("app.workers.base_worker.get_db", return_value=iter([db])):
+    from app.core.tenant_context import tenant_scope
+    with patch("app.workers.base_worker.get_db", return_value=iter([db])), tenant_scope("t-1", "test"):
         result = run(w.run())
     assert result["success"] is True
     assert w.db is db

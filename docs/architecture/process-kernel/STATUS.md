@@ -811,4 +811,98 @@ Alle 8 Neuro-Core Lanes (A-H) jetzt umgesetzt oder teilweise umgesetzt. Einzig N
 
 ## Studio-Abnahme 2026-10-15
 
-Revisionsgebundener serverseitiger Simulationsnachweis und zentrale Freigabesicherung, native Historie und zwei weitere advisory POST-Vertraege integriert. Das feste grain.v1-Profil prueft dreizehn Invarianten auf dem gemeinsamen Rollback-Pruefstand. Nicht modellierte Prozessvarianten bleiben gesperrt. Positive Browser-Vieraugenabnahme noch freigabeabhaengig; kein systemweiter CI-Abschluss. Nachweis: [Studio-Abschluss](../../quality-assurance/studio-closure-20261015.md).
+Revisionsgebundener serverseitiger Simulationsnachweis und zentrale Freigabesicherung, native Historie und zwei weitere advisory POST-Vertraege integriert. Das feste grain.v1-Profil prueft dreizehn Invarianten auf dem gemeinsamen Rollback-Pruefstand. Nicht modellierte Prozessvarianten bleiben gesperrt. Positive Vier-Augen-Browserabnahme, unveraenderte Freigaberevision und Ruecknahme der temporaeren Prueferrechte nachgewiesen; freigegebene Lesemaske mit der urspruenglichen Bearbeiterrolle geoeffnet. Bediennachweis: [Studio-Freigabe](../../benutzerhandbuch/studio-freigabe.md). Kein systemweiter CI-Abschluss. Nachweis: [Studio-Abschluss](../../quality-assurance/studio-closure-20261015.md).
+
+## Studio-Fachdialog 2026-10-15
+
+Versionierter manueller Agrar-Vorschauvertrag, fachsprachliche Rueckfragen, optionale Feldauswahl und interaktive Berechnung ueber die bestehende Meridian-Kette implementiert. Optionaler Modellaufruf nutzt vorhandenes Gateway, eigene Identitaetsquote und tatsaechlichen Anbieter-Verbrauch. Freigabe bleibt fuer diesen noch nicht vollintegrierten Vorschauvertrag gesperrt. 121 Backend-Vertraege, vier echte SQL-/Prozessnachweise und 28 Frontend-/Compilerfaelle bestanden. Positive reale Modellabnahme benoetigt zugewiesenes Testkontingent; Lieferanten-/Kontrakt-/Waagenbindung und weitere Prozessvarianten bleiben offen. [Abnahme und Restpunkte](../../quality-assurance/studio-semantic-20261015.md). Kein Gesamt-CI-Abschluss.
+
+Browserabnahme mit sieben Historienereignissen und sieben echten Handbuchbildern abgeschlossen. Getrennte Qualitaetsgrenze veraendert keinen Mengenabzug und erteilt keine Vertragsfreigabe. Operative versionierte Vertragsregelaufloesung bleibt offen; keine automatische Auslegung bereitgestellter Abrechnungsbedingungen.
+
+## Ernte-Abrechnungsregel: Sicherheitsgrenze 2026-10-15
+
+Implizite Besatzfreigrenze entfernt; Nullmesswerte und Nullpreise bleiben erhalten. Der Produktionsrouter verwendet jetzt den append-only Versionsspeicher mit getrennter menschlicher Regelgenehmigung, Messprovenienz und unveraenderlichem Berechnungsnachweis. Finanzielle Gegenpruefung und Ausfuehrung binden dieselbe konkrete Fassung; veraltete oder fehlende Nachweise sperren vor Geschaeftswirkung. 31 Backend-, 47 Frontend- und vier vollstaendige SQL-Prozessfaelle bestanden; Historienpagination zusaetzlich real geprueft. Lokale additive Migration integriert, reale synthetische Neuanmeldung erfolgreich. Finanzielle Browserabnahme, Modellkontingent-Abnahme und Lieferung bleiben offen. [Nachweise und Restumfang](../../quality-assurance/harvest-rule-store-20261015.md).
+
+## AP-Sicherheitsnachtrag 2026-10-20
+
+Reale ApproveAPInvoice/RejectAPInvoice/PostAPInvoice verwenden die gemeinsame
+gepruefte Identitaets-, Antrags-, Inhalts- und Transaktionsgrenze. Direkte Status-
+mutationen und still erfolgreiche Buchungsabbrueche sind entfernt. Dies ist keine
+Vollabnahme saemtlicher anderer Kernel-Domaenen. [716 integrierte Vertraege und Grenzen](../../quality-assurance/ap-workflow-security-20261020.md).
+
+
+### 2026-10-21: Studio-Planintegration
+
+STUDIO-PLAN-INTEGRATION-20261021: gespeicherter revisionsgebundener Plan ist
+Pflicht im bestehenden Freigabeweg und Runtimeabruf; UI, CLI und begrenztes
+R1-MCP-Authoring nutzen denselben Command mit bisherigen Rollen/Tenantgrenzen.
+107 eindeutige Backend- und14 Frontendvertraege gruen, TypeScript fehlerfrei.
+Details und Grenzen: docs/quality-assurance/studio-plan-integration-20261021.md.
+Allgemeine CRUD-/Schemaaktivierung und universelle Kanalzertifizierung bleiben
+im Gesamtclaim offen; keine Ausweitung des grain.v1-Releaseprofils.
+
+
+### 2026-10-21: Generierte Studio-Stammdaten (in arbeit)
+
+Compiler/Schema-/Command-/Maskenartefakte und bestehende Katalogverdrahtung fuer
+neue CRM-/Agrar-/Lager-Stammdaten implementiert, standardmaessig deaktiviert.
+23 reine Vertraege und24 Frontendtests gruen. Finale SQL-/Kanalabnahme wegen
+unerreichbarem gemeinsamem Docker-/PostgreSQL-Pruefstand noch offen; kein Reset
+oder Ersatz. Details: docs/quality-assurance/studio-generated-entities-20261021.md.
+Kein Abschluss der universellen CRUD-/Schema-/Fachkettenaufgabe behauptet.
+
+
+### Studio-Stammdaten: Nachlauf 2026-10-21
+
+SQL-CI606 bestanden/5 andere uebersprungen; alle16 neuen Generierungsvertraege
+bestanden. Nach Docker-Update lokale25 SQL-/Freigabe-/Statusvertraege gruen.
+Katalogkorrektur8c3dfac50 synchronisiert ausschliesslich den Leser-Verweis des
+Generators auf tenants. Keine physische Katalogersetzung aus aelterem Pruefstand.
+Positiver Kanalvertrag und Schemaerweiterungen bleiben im laufenden Claim;
+keine universelle Studio-Publikation oder vollstaendige Fachmigration behauptet.
+Details: [QA](../../quality-assurance/studio-generated-entities-20261021.md).
+
+
+Studio-Integration (21.10., Fortsetzung): additive nullable Erweiterungen
+registrierter Stammdaten ueber hashgebundenes Paket/API/CLI nachgewiesen.
+28 Unit-/27 SQL-Vertraege gruen, darunter HTTP-/CLI-/MCP-Commandkette und
+Altdatenerhalt mit gesperrtem alten Runtimevertrag nach Schemaerweiterung.
+Alle lokalen Driftgates bestanden. Schreibende Live-Studio-Publikation und
+visuelle Abnahme bleiben offen; SonarCloud separat rot, keine Gateabsenkung.
+
+
+### Studio: schreibendes Stammdaten-Freigabeprofil (21.10.2026)
+
+Eigenes studio.entity.v1 statt pauschaler Oeffnung von grain.v1. Exakter
+registrierter Vertrag und reale isolierte CRUD-/Audit-/Outbox-/Rollbackkette
+an bestehende unveraenderliche Evidenz, Migrationsplan und Vier-Augen-Publikation
+gebunden.43 Generator-/Profil- und41 SQL-/Freigabevertraege sowie2
+Paketvertraege gruen; alle lokalen Driftgates bestanden. Keine neue DB/Container.
+Laufzeitkatalog gezielt paketiert. CI/Image-/reale visuelle Abnahme und alle
+weiteren Fachketten/Altmaskenmigration bleiben im aktiven Gesamtziel offen.
+[Nachweise und Grenzen](../../quality-assurance/studio-entity-release-20261021.md).
+
+
+Studio-Entity-CLI-Fortsetzung:44 Generator-/Profil-/Readiness-,42 SQL-/
+Freigabe-/Kanal- und30 UI-Vertraege gruen; Typpruefung bestanden. Vollstaendiger
+signierter CLI-Lebenszyklus bis unabhaengiger Publikation und Ruecknahme
+nachgewiesen. Readiness/Rechteprojektion an vorhandene Backend-Rollen gebunden.
+Ein neuer lesender Metadatenpfad, bestehende API-Pfade unveraendert.
+Reale Browser-/Imageabnahme und komplette Maskenmigration bleiben offen.
+
+
+## Studio-Live-Abnahme 22.10.2026
+
+Generierte Stammdatenmaske real ueber CLI, SSO, unabhaengige Freigabe, rollbackgesicherte Simulation und Browser-Anlage/Aenderung/Deaktivierung geprueft. Zentrale Runtime-/Versions-/Idempotenz-/Mandanten-/Identitaetsgrenzen und eigene Sitzungsabmeldung nachgebessert. Temporaere Freigaben/Rechte zurueckgenommen, eigene Testdaten deaktiviert, unveraenderliche Historie erhalten. QA: [Studio-Entity-Release](../../quality-assurance/studio-entity-release-20261021.md); [Bedienhandbuch](../../benutzerhandbuch/studio-generierte-stammdaten.md). Lokale PHP-Pruefung ohne gefundene betroffene Runtime: [Sicherheitsnachweis](../../quality-assurance/php-security-20261022.md). Gesamte Altmaskenmigration und Sonar-Coverage80 bleiben offen.
+
+
+## Studio-/Sicherheitsfortsetzung22.10.2026
+
+Alle154 aktuell registrierten nativen Quellen im bestehenden Pruefmandanten ueber echte CLI versioniert, Wiederholung und SQL-Historie ohne Dublette bestaetigt. Keine vorweggenommene Freigabe oder globale Altmaskenablaese. [Nachweis](../../quality-assurance/studio-probe-baselines-20261022.md). Rations-Demo-/Einreichkonsistenz mit echten Bedienvertraegen repariert, Coverage-Erfassung auf bestehende Sonar-Pythonwurzeln abgestimmt; [Nachweis](../../quality-assurance/rations-bedienvertrag-20261022.md). Einzelner Service-Security-Drift nach vollstaendiger98-Dateien-Nachpruefung repariert, Ablaufdatum23.10. unveraendert. Neuer CI-Nachlauf erforderlich, Sonar80 und alte Maskenabnahmen bleiben verbindlich.
+
+
+Materialflussfortsetzung22.10.: vier Lagerbuchungswege speichern die gepruefte Providerkennung statt beliebiger booked_by-Rumpfwerte;63 Fach-/Signaturvertraege,12 DocFlow-/Materialfluss-UI-Vertraege und Typpruefung gruen. Alle3246 API-Pfade erhalten. Service-Security-Nachlauf vollstaendig gruen, kompletter Backendlauf mit drei Produktwurzeln gruen. [Abnahme und Grenzen](../../quality-assurance/agri-flow-actor-20261022.md). Finale Frontend-/Sonar- und reale Lagerkettenabnahme nicht dadurch ersetzt.
+
+## Teilabnahme 22.10.: KI-Messung und physische Spuelcharge
+
+142 vorhandene KI-Servicevertraege isoliert ausgefuehrt; verlustfreier Coverage-Zusammenlauf durch acht echte Unterprozessvertraege abgesichert und im Quality-Job vor Seal eingebunden. Spuelcharge gemaess Nutzerentscheid als echte Umlagerung, elf PostgreSQL-Faelle fuer Bestaende, Mandant/Lager, Route und Rueckrollen; gemeinsam40 Vertraege gruen. QA ki-service-coverage-20261022.md und agri-flush-physical-20261022.md. Transfer/Lot-Link-SQL, dauerhafte Idempotenz und allgemeine Outboxzustellung bleiben offen; Gesamt-Sonar und Altmaskenmigration weiterhin unabgenommen.

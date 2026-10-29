@@ -16,6 +16,7 @@ from uuid import uuid4
 
 from sqlalchemy import text
 from sqlalchemy.orm import Session
+from app.core.tenant_context import get_current_tenant_id
 
 logger = logging.getLogger(__name__)
 
@@ -68,8 +69,9 @@ def _store_key(tenant_id: str, domain: str, key: str) -> str:
 def store_knowledge(
     db: Optional[Session],
     entry: KnowledgeEntry,
-    tenant_id: str = "system",
+    tenant_id: str | None = None,
 ) -> KnowledgeEntry:
+    tenant_id = tenant_id or get_current_tenant_id()
     store_key = _store_key(tenant_id, entry.domain, entry.key)
 
     if db:
@@ -123,8 +125,9 @@ def get_knowledge(
     db: Optional[Session],
     domain: str,
     key: str,
-    tenant_id: str = "system",
+    tenant_id: str | None = None,
 ) -> Optional[KnowledgeEntry]:
+    tenant_id = tenant_id or get_current_tenant_id()
     if db:
         try:
             row = db.execute(text(
@@ -156,9 +159,10 @@ def search_knowledge(
     domain: Optional[str] = None,
     knowledge_type: Optional[KnowledgeType] = None,
     query: Optional[str] = None,
-    tenant_id: str = "system",
+    tenant_id: str | None = None,
     limit: int = 50,
 ) -> list[KnowledgeEntry]:
+    tenant_id = tenant_id or get_current_tenant_id()
     if db:
         try:
             conditions = ["active = true", "tenant_id = :tid"]
@@ -218,8 +222,9 @@ def delete_knowledge(
     db: Optional[Session],
     domain: str,
     key: str,
-    tenant_id: str = "system",
+    tenant_id: str | None = None,
 ) -> bool:
+    tenant_id = tenant_id or get_current_tenant_id()
     if db:
         try:
             result = db.execute(text(
@@ -240,8 +245,9 @@ def delete_knowledge(
 
 def get_knowledge_stats(
     db: Optional[Session],
-    tenant_id: str = "system",
+    tenant_id: str | None = None,
 ) -> dict:
+    tenant_id = tenant_id or get_current_tenant_id()
     if db:
         try:
             rows = db.execute(text(

@@ -1,7 +1,7 @@
-import { useParams } from '@tanstack/react-router'
-import { FeedingPlanDetail } from '@/features/feed-advice/FeedingPlanDetail'
+import { NativeListPage } from '@/components/mask-builder/NativeListPage'
 
-export default function FuetterungsplanNativePage(): JSX.Element {
-  const { id } = useParams({ strict: false }) as { id: string }
-  return <FeedingPlanDetail versionId={id} />
+export default function Page(): JSX.Element {
+  return (
+    <NativeListPage screenId="futtermittel/fuetterungsplan/:id" testId="screen-futtermittel/fuetterungsplan/:id" />
+  )
 }

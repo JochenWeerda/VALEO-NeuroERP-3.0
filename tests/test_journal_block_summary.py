@@ -16,7 +16,7 @@ from testgrenze import pruefstand_erlaubt
 
 @pytest.fixture
 def accounts():
-    raw = os.environ.get('TEST_DATABASE_URL')
+    raw = os.environ.get('TEST_DATABASE_URL') or os.environ.get('DATABASE_URL')
     assert raw, 'Existing shared probe connection required'
     url = make_url(raw)
     assert pruefstand_erlaubt(url), "Nur Pruefstand oder CI-Testdatenbank"

@@ -99,11 +99,11 @@ def feed_seed(feed_context, monkeypatch):
         db.execute(
             text(
                 "INSERT INTO domain_shared.futtermittel_rezept_komponenten "
-                "(id, rezept_id, komponente_name, anteil, einzelfutter_id, sortierung) VALUES "
-                "(:k1, :r, 'IT Weizen', 0.6, :ef1, 0), "
-                "(:k2, :r, 'IT Sojaschrot', 0.4, :ef2, 1)"
+                "(id, tenant_id, rezept_id, komponente_name, anteil, einzelfutter_id, sortierung) VALUES "
+                "(:k1, :t, :r, 'IT Weizen', 0.6, :ef1, 0), "
+                "(:k2, :t, :r, 'IT Sojaschrot', 0.4, :ef2, 1)"
             ),
-            {"k1": ids["k1"], "k2": ids["k2"],
+            {"t": TENANT_ID, "k1": ids["k1"], "k2": ids["k2"],
              "r": ids["rezept"], "ef1": ids["ef1"], "ef2": ids["ef2"]},
         )
         db.commit()

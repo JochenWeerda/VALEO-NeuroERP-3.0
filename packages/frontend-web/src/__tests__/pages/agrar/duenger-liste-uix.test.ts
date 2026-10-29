@@ -8,14 +8,10 @@ const src = readFileSync(
 )
 
 describe('Dünger-Liste UIX', () => {
-  it('öffnet Dünger per 44-px-Tipp, KPI nur Desktop', () => {
-    expect(src).toContain('useTouchDevice')
-    expect(src).toContain('Suche Dünger')
-    expect(src).toContain('min-h-11 font-medium text-primary')
-    expect(src).toContain('Anzeigen')
-    expect(src).toContain('Bearbeiten')
-    expect(src).toContain('{!isTouch ? (')
-    expect(src).not.toContain('text-blue-600')
-    expect(src).not.toContain('size="sm"')
+  it('ist eine Studio-Liste; Zeilen oeffnen die native Objektmaske', () => {
+    // MASK-STUDIO-ROLLOUT: 44-px-Zeilen, Suche und Touch-Verhalten liefert der universelle Renderer.
+    expect(src).toContain('NativeListPage')
+    expect(src).toContain('screenId="agrar/duenger-liste"')
+    expect(src).not.toContain('apiClient')
   })
 })

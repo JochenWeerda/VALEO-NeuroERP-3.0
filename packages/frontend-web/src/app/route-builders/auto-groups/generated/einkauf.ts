@@ -22,7 +22,7 @@ export const entries: AutoGroupRouteEntry[] = [
     "path": "angebote-liste"
   },
   {
-    "module": "@/pages/einkauf/anlieferavis",
+    "module": "@/pages/einkauf/anlieferavis-liste",
     "path": "anlieferavis"
   },
   {

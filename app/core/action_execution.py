@@ -205,10 +205,24 @@ class ActionExecutionService:
         aggregate_state: dict[str, Any] | None = None,
         db: Session | None = None,
     ) -> ActionExecutionResult:
+        verified_actor = None
+        ap_write = db is not None and request.command_name in {
+            "ApproveAPInvoice", "RejectAPInvoice", "PostAPInvoice"}
+        if ap_write:
+            from app.services.ap_invoice_kernel_posting import verified_ap_user
+            from app.services.ap_invoice_approval_service import APApprovalWorkflowService
+            user = verified_ap_user(request.tenant_id)
+            service = APApprovalWorkflowService(db, request.tenant_id)
+            verified_actor = service._reviewer(user)
+            from app.auth.finance_roles import FINANCE_APPROVAL_ROLES
+            role = next(role for role in FINANCE_APPROVAL_ROLES if role in user["roles"])
+            request = request.model_copy(update={"issuer_type": "human", "issuer_role": role})
         aggregate_definition = get_aggregate_definition(request.aggregate_type)
         command_definition = self._dispatcher.get_definition(request.command_name)
         process_contract_error, process_metadata = self._resolve_process_contract(request)
         command = request.to_business_command(**process_metadata)
+        if verified_actor is not None:
+            command.issued_by = "human:" + verified_actor
         if process_contract_error is not None:
             return ActionExecutionResult.from_dispatch(
                 command=command,
@@ -258,8 +272,20 @@ class ActionExecutionService:
         existing_record = idempotency_store.get_by_key(
             request.tenant_id, request.idempotency_key
         )
+        fingerprint = request.request_fingerprint()
+        if verified_actor is not None:
+            fingerprint = hashlib.sha256((verified_actor + ":" + fingerprint).encode()).hexdigest()
         if existing_record is not None:
-            # Return idempotent replay of previous execution
+            if ap_write and existing_record.request_fingerprint != fingerprint:
+                return ActionExecutionResult.from_dispatch(command=command,
+                    aggregate_definition=aggregate_definition, dispatch_status=CommandStatus.REJECTED,
+                    error=build_action_conflict_error())
+            if ap_write and request.command_name in {"ApproveAPInvoice", "RejectAPInvoice"}:
+                from app.api.v1.schemas.ap_approval_workflow_schemas import ApprovalAction
+                service.validate_decision(ApprovalAction(invoice_id=request.aggregate_id,
+                    approval_request_id=request.payload.get("approval_request_id"),
+                    action="approve" if request.command_name == "ApproveAPInvoice" else "reject",
+                    comment=request.payload.get("comment")), user)
             return existing_record.result.as_idempotent_replay()
 
         dispatch = self._dispatcher.dispatch(
@@ -287,7 +313,7 @@ class ActionExecutionService:
             idempotency_store.remember(
                 tenant_id=request.tenant_id,
                 idempotency_key=request.idempotency_key,
-                request_fingerprint=request.request_fingerprint(),
+                request_fingerprint=fingerprint,
                 result=result,
             )
 

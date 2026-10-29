@@ -513,6 +513,8 @@ domains:
       - mask_registry
       - mask_actions
       - mask_frontend_bridges
+      - preis_kalkulation_bridge
+      - stammdaten_bearbeiten
       - mask_rollout_
       - mask_screen_
       - beleg_vordrucke
@@ -587,6 +589,7 @@ domains:
 
 # Explizite Stem-Overrides (exakter Match, hoechste Prioritaet)
 exact_service_stems:
+  mask_commands: platform
   tenant_lifecycle_service: platform
   ebilanz_xbrl_service: finance
   bewerbung_service: hr
@@ -606,6 +609,24 @@ exact_service_stems:
   document_allocation_service: platform
   studio_draft_store: platform
   studio_propose: platform
+  studio_semantic: platform
+  studio_semantic_model: platform
+  mask_table_query: platform
+  mask_data_read: platform
+  made_by_studio_gates: platform
+  studio_entity_compiler: platform
+  studio_entity_contracts: platform
+  studio_entity_commands: platform
+  studio_entity_router: platform
+  studio_entity_evolution: platform
+  studio_entity_simulation: platform
+  mcp_studio_plans: platform
+  studio_migration_store: platform
+  studio_migration: platform
+  studio_native_import: platform
+  studio_history_view: platform
+  studio_process_simulation: platform
+  sepa_xml_generator: finance
   billing_batch_service: finance
   document_control_projection: dms-compliance
   document_control_service: dms-compliance
@@ -632,6 +653,7 @@ exact_service_stems:
   workflow_guards: platform
   workflow_cockpit_service: platform
   einkauf_compat_service: procurement
+  ordrsp_service: procurement
   wareneingang_avis_service: procurement
   bestell_kommunikation_service: procurement
   mail_versand: platform
@@ -646,6 +668,7 @@ exact_endpoint_stems:
   document_allocations: platform
   mailkonto: platform
   studio_drafts: platform
+  studio_native_import: platform
   billing_batch: finance
   document_control: dms-compliance
   foreign_goods_worklist: inventory

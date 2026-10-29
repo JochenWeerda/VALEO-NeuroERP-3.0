@@ -183,7 +183,7 @@ async def restore_from_backup(
 def _resolve_policy_ws_auth(websocket: WebSocket, query_token: str | None) -> dict:
     from app.core.security import verified_websocket_context
     context = verified_websocket_context(websocket, query_token)
-    if not {"admin", "manager"}.intersection(context["roles"]):
+    if not {"admin"}.intersection(context["roles"]):
         raise HTTPException(403, "Insufficient role")
     return context
 

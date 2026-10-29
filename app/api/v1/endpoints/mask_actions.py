@@ -17,7 +17,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import APIRouter, Body, Depends, HTTPException
+from fastapi import APIRouter, Body, Depends, HTTPException, Request
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
@@ -26,6 +26,8 @@ from app.auth.finance_roles import finance_admin
 from app.core.tenant import get_tenant_id
 from app.services.mask_action_runtime_service import MaskActionResult, run_delegated_mask_action
 from app.auth.deps import require_roles
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
+from app.core.akteur import gepruefter_akteur_aus_request  # Bearbeiter aus dem Token
 
 router = APIRouter(tags=["mask-actions"])
 
@@ -118,10 +120,10 @@ async def action_payment_run_freigeben(
 @router.post(
     "/sales/delivery-notes/{entity_id}/actions/drucken",
     response_model=MaskActionResult,
-    summary="Lieferschein drucken (SPEC-P1-04)",
-)
+    summary="Lieferschein drucken (SPEC-P1-04)", dependencies=SCHREIBEN["VERKAUF"])
 async def action_delivery_note_drucken(
     entity_id: str,
+    request: Request,
     body: dict[str, Any] = Body(default_factory=dict),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -146,7 +148,8 @@ async def action_delivery_note_drucken(
 
         await print_delivery_note(
             eid, attestation=str(payload.get("attestation") or "").strip() or None,
-            tenant_id=tid, db=db_, request=None,
+            # Die gepruefte Identitaet reist mit: Die Attestierung des Nachdrucks ordnet sie einem lokalen Nutzer zu.
+            tenant_id=tid, db=db_, request=request,
         )
         return "Lieferschein gedruckt."
 
@@ -170,10 +173,10 @@ async def action_delivery_note_drucken(
 @router.post(
     "/reklamationen/{entity_id}/actions/abschliessen",
     response_model=MaskActionResult,
-    summary="Reklamation abschliessen (SPEC-P1-04)",
-)
+    summary="Reklamation abschliessen (SPEC-P1-04)", dependencies=SCHREIBEN["QUALITAET"])
 async def action_reklamation_abschliessen(
     entity_id: str,
+    request: Request,
     body: dict[str, Any] = Body(default_factory=dict),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -195,19 +198,11 @@ async def action_reklamation_abschliessen(
         return []
 
     async def abschliessen(db_: Session, payload: dict[str, Any], eid: str, tid: str) -> str:
-        from app.api.v1.endpoints.reklamation_api import ReklamationTransitionRequest, transition_status
+        from app.api.v1.endpoints.reklamation_api import wechsle_status
         from app.core.reklamation import ReklamationsStatus
 
-        transition_status(
-            eid,
-            ReklamationTransitionRequest(
-                neuer_status=ReklamationsStatus.GESCHLOSSEN.value,
-                aktor_id=str(payload.get("aktor_id") or "Maske"),
-                kommentar=payload.get("kommentar"),
-            ),
-            db=db_,
-            tenant_id=tid,
-        )
+        wechsle_status(db_, tid, eid, ReklamationsStatus.GESCHLOSSEN.value,
+                       aktor=gepruefter_akteur_aus_request(request), kommentar=payload.get("kommentar"))
         return "Reklamation abgeschlossen."
 
     return await run_delegated_mask_action(
@@ -230,8 +225,7 @@ async def action_reklamation_abschliessen(
 @router.post(
     "/einkauf/angebote/{entity_id}/actions/bestellen",
     response_model=MaskActionResult,
-    summary="Bestellung aus Angebot erstellen (SPEC-P1-04)",
-)
+    summary="Bestellung aus Angebot erstellen (SPEC-P1-04)", dependencies=SCHREIBEN["EINKAUF"])
 async def action_angebot_bestellen(
     entity_id: str,
     body: dict[str, Any] = Body(default_factory=dict),
@@ -279,8 +273,7 @@ async def action_angebot_bestellen(
 @router.post(
     "/lager/stock-movements/{entity_id}/actions/stornieren",
     response_model=MaskActionResult,
-    summary="Lagerbewegung stornieren (SPEC-P1-04)",
-)
+    summary="Lagerbewegung stornieren (SPEC-P1-04)", dependencies=SCHREIBEN["LAGER"])
 async def action_lager_stornieren(
     entity_id: str,
     body: dict[str, Any] = Body(default_factory=dict),
@@ -349,8 +342,7 @@ _AKTIVITAETSARTEN = {"CALL", "EMAIL", "MEETING", "NOTE"}
 @router.post(
     "/crm/opportunities/{entity_id}/actions/create_activity",
     response_model=MaskActionResult,
-    summary="CRM-Aktivitaet fuer Opportunity anlegen (SPEC-P1-04)",
-)
+    summary="CRM-Aktivitaet fuer Opportunity anlegen (SPEC-P1-04)", dependencies=SCHREIBEN["CRM"])
 async def action_opportunity_create_activity(
     entity_id: str,
     body: dict[str, Any] = Body(default_factory=dict),
@@ -410,10 +402,10 @@ async def action_opportunity_create_activity(
 @router.post(
     "/einkauf/anlieferavis/{entity_id}/actions/wareneingang",
     response_model=MaskActionResult,
-    summary="Wareneingang aus dem Anlieferavis buchen (SPEC-P1-04)",
-)
+    summary="Wareneingang aus dem Anlieferavis buchen (SPEC-P1-04)", dependencies=SCHREIBEN["EINKAUF"])
 async def action_avis_wareneingang(
     entity_id: str,
+    request: Request,
     body: dict[str, Any] = Body(default_factory=dict),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -435,7 +427,8 @@ async def action_avis_wareneingang(
     async def buchen(db_: Session, payload: dict[str, Any], eid: str, tid: str) -> str:
         try:
             ergebnis = buche_wareneingang_aus_avis(
-                db_, eid, tid, str(payload["lager_id"]), str(payload["lieferschein_nr"]), payload.get("operator")
+                db_, eid, tid, str(payload["lager_id"]), str(payload["lieferschein_nr"]),
+                gepruefter_akteur_aus_request(request)
             )
         except WareneingangAvisError as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc

@@ -1,0 +1,257 @@
+{
+  "crm/kunden-liste": {
+    "schemaVersion": 1,
+    "id": "crm/kunden-liste",
+    "domain": "crm",
+    "mode": "list",
+    "title": "Kunden",
+    "subtitle": "Operativer Kundenstamm mit Umsatz und Status",
+    "adapter": {
+      "type": "native",
+      "sourceId": "crm/kunden-liste",
+      "temporary": false
+    },
+    "dataSources": [
+      {
+        "key": "list",
+        "endpoint": "/api/v1/crm/customers/lookup?q=&limit=1000",
+        "pageSize": 500
+      }
+    ],
+    "actions": [
+      {
+        "key": "neu",
+        "label": "Neuer Kunde",
+        "kind": "primary",
+        "dangerLevel": "safe",
+        "zone": "header",
+        "navigationRoute": "/verkauf/kunde/neu",
+        "localEffect": "navigation",
+        "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
+      },
+      {
+        "key": "export",
+        "label": "CSV-Export",
+        "kind": "secondary",
+        "dangerLevel": "safe",
+        "zone": "header",
+        "command": "list.exportCsv",
+        "localEffect": "download",
+        "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+      }
+    ],
+    "tables": [
+      {
+        "key": "list",
+        "label": "Kunden",
+        "dataSourceKey": "list",
+        "serverPagination": false,
+        "pageSize": 50,
+        "virtualized": true,
+        "rowHeight": 40,
+        "columns": [
+          {
+            "key": "name",
+            "label": "Firma / Name",
+            "sortable": true,
+            "filterable": true,
+            "priority": "primary"
+          },
+          {
+            "key": "kunden_nr",
+            "label": "Kunden-Nr.",
+            "sortable": true,
+            "filterable": true,
+            "priority": "primary"
+          },
+          {
+            "key": "ort",
+            "label": "Ort",
+            "filterable": true,
+            "priority": "secondary"
+          },
+          {
+            "key": "plz",
+            "label": "PLZ",
+            "filterable": true,
+            "priority": "tertiary"
+          },
+          {
+            "key": "telefon",
+            "label": "Telefon",
+            "priority": "tertiary"
+          },
+          {
+            "key": "email",
+            "label": "E-Mail",
+            "filterable": true,
+            "priority": "secondary"
+          },
+          {
+            "key": "status",
+            "label": "Status",
+            "renderKind": "status",
+            "filterable": true,
+            "priority": "primary"
+          }
+        ],
+        "rowActions": [],
+        "rowRouteTemplate": "/crm/kunden/{id}"
+      }
+    ],
+    "noWorkflowReason": "Stammdatenliste ohne eigenen Ablauf.",
+    "agentContract": {
+      "businessPurpose": "Kunden im operativen Stamm finden und die Kundenakte oeffnen.",
+      "examplePrompts": [
+        "Welche Kunden sind in Hamburg?",
+        "Zeige gesperrte Kunden."
+      ],
+      "sensitiveFields": [],
+      "testSelectors": {
+        "screenRoot": "[data-testid='screen-crm/kunden-liste']"
+      }
+    },
+    "layout": {
+      "floorplan": "worklist",
+      "density": "compact",
+      "contextRail": "none",
+      "preferredMode": "desktopDense",
+      "mobileMode": "mobileStack",
+      "touchTargetPx": 44,
+      "tableProfile": "standard"
+    },
+    "performance": {
+      "initialPayloadBudgetKb": 60,
+      "requiresLazyTabs": false,
+      "requiresVirtualTables": true,
+      "lookupMinChars": 2,
+      "bundleGroup": "crm"
+    }
+  },
+  "admin/integrationen-quarantaene": {
+    "schemaVersion": 1,
+    "id": "admin/integrationen-quarantaene",
+    "domain": "admin",
+    "mode": "list",
+    "title": "Integrationen quarantaene",
+    "subtitle": "Kontroll-Worklist Integrationen quarantaene",
+    "adapter": {
+      "type": "native",
+      "sourceId": "admin/integrationen-quarantaene",
+      "temporary": false
+    },
+    "dataSources": [
+      {
+        "key": "entity",
+        "endpoint": "/api/v1/admin/mobile/connector-events/quarantine",
+        "staleTimeMs": 10000
+      },
+      {
+        "key": "items",
+        "endpoint": "/api/v1/admin/mobile/connector-events/quarantine",
+        "pageSize": 50,
+        "staleTimeMs": 10000
+      }
+    ],
+    "tables": [
+      {
+        "key": "items",
+        "label": "Integrationen quarantaene",
+        "dataSourceKey": "items",
+        "serverPagination": true,
+        "pageSize": 50,
+        "virtualized": true,
+        "rowHeight": 44,
+        "columns": [
+          {
+            "key": "id",
+            "label": "ID",
+            "sortable": true,
+            "filterable": true,
+            "width": 120
+          },
+          {
+            "key": "name",
+            "label": "Bezeichnung",
+            "sortable": true,
+            "filterable": true,
+            "width": 220
+          },
+          {
+            "key": "status",
+            "label": "Status",
+            "renderKind": "status",
+            "sortable": true,
+            "filterable": true,
+            "width": 120
+          },
+          {
+            "key": "datum",
+            "label": "Datum",
+            "renderKind": "date",
+            "sortable": true,
+            "width": 130
+          }
+        ],
+        "rowActions": [
+          {
+            "key": "retry",
+            "label": "Erneut versuchen",
+            "permission": "admin.mobile.connector.retry",
+            "commandEndpoint": "/api/v1/admin/mobile/connector-events/{entity_id}/retry",
+            "method": "POST",
+            "dangerLevel": "moderate"
+          },
+          {
+            "key": "resolve",
+            "label": "Erledigen",
+            "permission": "admin.mobile.connector.resolve",
+            "commandEndpoint": "/api/v1/admin/mobile/connector-events/{entity_id}/resolve",
+            "method": "POST",
+            "dangerLevel": "moderate"
+          }
+        ],
+        "rowRouteTemplate": "{source_route}"
+      }
+    ],
+    "layout": {
+      "floorplan": "worklist",
+      "density": "expertDense",
+      "contextRail": "audit",
+      "tableProfile": "audit"
+    },
+    "performance": {
+      "initialPayloadBudgetKb": 48,
+      "requiresLazyTabs": false,
+      "requiresVirtualTables": true,
+      "lookupMinChars": 2,
+      "bundleGroup": "admin"
+    },
+    "agentContract": {
+      "businessPurpose": "Integrationen quarantaene mandantensicher als Kontroll-Worklist abarbeiten.",
+      "examplePrompts": [
+        "Zeige offene Integrationen quarantaene.",
+        "Was ist in Integrationen quarantaene faellig?"
+      ],
+      "sensitiveFields": [],
+      "forbiddenAgentTasks": [],
+      "testSelectors": {
+        "screenRoot": "[data-testid='admin-integrationen-quarantaene']",
+        "summaryArea": "[data-testid='mask-summary']"
+      }
+    },
+    "summary": [
+      {
+        "key": "total",
+        "label": "Eintraege",
+        "tone": "neutral"
+      },
+      {
+        "key": "offen",
+        "label": "Offen",
+        "tone": "warning"
+      }
+    ],
+    "noWorkflowReason": "Status und Freigaben stehen am Datensatz; die Liste priorisiert nur."
+  }
+}

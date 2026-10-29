@@ -38,6 +38,7 @@ from app.api.v1.schemas.eudr_register_schemas import (
     UebermittlungIn,
     VorgelagertePruefungOut,
 )
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/eudr/sorgfaltserklaerungen", tags=["EUDR", "Compliance"])
 logger = logging.getLogger(__name__)
@@ -54,8 +55,7 @@ logger = logging.getLogger(__name__)
 @router.post(
     "/{erklaerung_id}/uebermittlung",
     response_model=SorgfaltserklaerungOut,
-    summary="Ergebnis der Übermittlung festhalten (Art. 33, hinaus)",
-)
+    summary="Ergebnis der Übermittlung festhalten (Art. 33, hinaus)", dependencies=SCHREIBEN["AGRAR"])
 def uebermittlung_festhalten(
     erklaerung_id: str,
     payload: UebermittlungIn,
@@ -153,8 +153,7 @@ def uebermittlung_festhalten(
 @router.post(
     "/vorgelagerte/{vorgelagert_id}/pruefung",
     response_model=VorgelagertePruefungOut,
-    summary="Vorgelagerte Erklärung prüfen (Art. 4/5, herein)",
-)
+    summary="Vorgelagerte Erklärung prüfen (Art. 4/5, herein)", dependencies=SCHREIBEN["AGRAR"])
 def vorgelagerte_pruefung(
     vorgelagert_id: str,
     payload: PruefungIn,

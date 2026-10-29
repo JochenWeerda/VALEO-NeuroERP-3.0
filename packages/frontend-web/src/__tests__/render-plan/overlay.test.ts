@@ -49,7 +49,7 @@ describe('applyOverlay — Allowlist (Sicherheit)', () => {
     const overlay = Object.fromEntries(NON_OVERLAYABLE_KEYS.map((k) => [k, 'x'])) as Record<string, unknown>
     const before = plan()
     const result = applyOverlay(before, overlay)
-    expect(result.violations.sort()).toEqual([...NON_OVERLAYABLE_KEYS].sort())
+    expect(result.violations.sort((a, b) => a.localeCompare(b))).toEqual([...NON_OVERLAYABLE_KEYS].sort((a, b) => a.localeCompare(b)))
     // Plan-Sicherheitsfelder unveraendert
     expect(result.plan.shell.floorplan).toBe(before.shell.floorplan)
     expect(result.plan.shell.tableProfile).toBe(before.shell.tableProfile)

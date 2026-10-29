@@ -3,7 +3,6 @@ import asyncio
 import logging
 from decimal import Decimal
 from types import SimpleNamespace
-from unittest.mock import AsyncMock
 
 import pytest
 
@@ -30,24 +29,29 @@ def test_newsletter_failure_cannot_inject_logs_or_expose_recipient(monkeypatch, 
 
 def test_invoice_approver_comes_from_verified_user_not_query(monkeypatch):
     from app.api.v1.endpoints import ap_invoices as api
+    from app.api.v1.schemas.ap_approval_workflow_schemas import ApprovalDecisionReference
 
-    invoice = {"status": "ENTWURF", "tenantId": "unit-tenant"}
-    result = SimpleNamespace(status="approved", model_dump=lambda **k: {"status": "approved"})
-    gateway = SimpleNamespace(
-        get_status=AsyncMock(return_value=SimpleNamespace(status="not_requested")),
-        request_approval=AsyncMock(), approve_invoice=AsyncMock(return_value=result),
-    )
-    monkeypatch.setattr(api, "get_repository", lambda db: object())
-    monkeypatch.setattr(api, "_rechnung", lambda *a: invoice)
-    monkeypatch.setattr(api, "save_to_store", lambda *a: None)
-    monkeypatch.setattr(api.endpoint_gateways, "get_approval_workflow_gateway", lambda: gateway)
-    db = object()
+    entscheidungen = []
+
+    class Freigabe:
+        def __init__(self, db, tenant_id):
+            self.tenant_id = tenant_id
+
+        def decide(self, action, user):
+            entscheidungen.append((self.tenant_id, action, user))
+            return SimpleNamespace(model_dump=lambda **k: {"status": "approved"})
+
+    monkeypatch.setattr(api, "APApprovalWorkflowService", Freigabe)
+    # Kein Anfrageparameter fuer den Freigeber (20.10.2026): eine Faelschung ist gar nicht uebergebbar.
+    import inspect
+    assert "approved_by" not in inspect.signature(api.approve_ap_invoice).parameters
     asyncio.run(api.approve_ap_invoice(
-        "unit-invoice", approved_by="forged-user", db=db, tenant_id="unit-tenant", user={"sub": "verified-user"},
+        "unit-invoice", ApprovalDecisionReference(approval_request_id="req-1"), db=object(),
+        tenant_id="unit-tenant", user={"sub": "verified-user"},
     ))
-    gateway.request_approval.assert_awaited_once_with("unit-invoice", "unit-tenant", "verified-user", None, db)
-    gateway.approve_invoice.assert_awaited_once_with("unit-invoice", "unit-tenant", "verified-user", "approve", None, db)
-    assert invoice["approvedBy"] == "verified-user"
+    ((mandant, aktion, nutzer),) = entscheidungen
+    assert mandant == "unit-tenant" and nutzer == {"sub": "verified-user"}
+    assert (aktion.invoice_id, aktion.approval_request_id, aktion.action) == ("unit-invoice", "req-1", "approve")
 
 
 @pytest.mark.parametrize("turnover", [Decimal("0"), Decimal("-1")])

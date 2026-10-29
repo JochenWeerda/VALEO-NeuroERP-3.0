@@ -16,10 +16,11 @@ from pydantic import BaseModel, Field
 from sqlalchemy import text
 
 from app.core.database import get_db
-from app.core.dependencies import get_tenant_id
+from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/preise/rabatte", tags=["Preise - Rabattgruppen & Rabattklassen"])
@@ -107,7 +108,18 @@ def list_rabattgruppen(
     return [RabattgruppeOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/gruppen", response_model=RabattgruppeOut, status_code=201, summary="Rabattgruppe anlegen")
+@router.get("/gruppen/{gruppe_id}", response_model=RabattgruppeOut, summary="Rabattgruppe abrufen")
+def get_rabattgruppe(gruppe_id: str, db=Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
+    row = db.execute(text("""
+        SELECT * FROM domain_shared.preis_rabattgruppen
+        WHERE id = :id AND tenant_id = :tid AND aktiv = true
+    """), {"id": gruppe_id, "tid": tenant_id}).fetchone()
+    if row is None:
+        raise HTTPException(404, "Rabattgruppe nicht gefunden.")
+    return RabattgruppeOut(**dict(row._mapping))
+
+
+@router.post("/gruppen", response_model=RabattgruppeOut, status_code=201, summary="Rabattgruppe anlegen", dependencies=SCHREIBEN["VERKAUF"])
 def create_rabattgruppe(
     payload: RabattgruppeCreate,
     db=Depends(get_db),
@@ -135,8 +147,7 @@ def create_rabattgruppe(
 
 
 @router.delete("/gruppen/{gruppe_id}", summary="Rabattgruppe löschen",
-    response_model=None
-)
+    response_model=None, dependencies=SCHREIBEN["VERKAUF"])
 def delete_rabattgruppe(
     gruppe_id: str,
     db=Depends(get_db),
@@ -168,7 +179,7 @@ def list_rabattklassen(
     return [RabattklasseOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/klassen", response_model=RabattklasseOut, status_code=201, summary="Rabattklasse anlegen")
+@router.post("/klassen", response_model=RabattklasseOut, status_code=201, summary="Rabattklasse anlegen", dependencies=SCHREIBEN["VERKAUF"])
 def create_rabattklasse(
     payload: RabattklasseCreate,
     db=Depends(get_db),
@@ -196,8 +207,7 @@ def create_rabattklasse(
 
 
 @router.delete("/klassen/{klasse_id}", summary="Rabattklasse löschen",
-    response_model=None
-)
+    response_model=None, dependencies=SCHREIBEN["VERKAUF"])
 def delete_rabattklasse(
     klasse_id: str,
     db=Depends(get_db),
@@ -241,7 +251,7 @@ def list_rabattsaetze(
     return [RabattsatzOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/saetze", response_model=RabattsatzOut, status_code=201, summary="Rabattsatz anlegen")
+@router.post("/saetze", response_model=RabattsatzOut, status_code=201, summary="Rabattsatz anlegen", dependencies=SCHREIBEN["VERKAUF"])
 def create_rabattsatz(
     payload: RabattsatzCreate,
     db=Depends(get_db),
@@ -269,8 +279,7 @@ def create_rabattsatz(
 
 
 @router.delete("/saetze/{satz_id}", summary="Rabattsatz löschen",
-    response_model=None
-)
+    response_model=None, dependencies=SCHREIBEN["VERKAUF"])
 def delete_rabattsatz(
     satz_id: str,
     db=Depends(get_db),

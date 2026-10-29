@@ -11,6 +11,16 @@ from app.agents.neuroassist_service import NeuroAssistService
 
 
 @pytest.fixture(autouse=True)
+def _mandantenkontext():
+    """Dienste ohne ausdruecklichen Mandanten nehmen den des Kontexts; seit 27.10.2026 gibt es keinen Rueckfall "system"."""
+    from app.core.tenant_context import tenant_scope
+
+    with tenant_scope("test-mandant", "unit test"):
+        yield
+
+
+
+@pytest.fixture(autouse=True)
 def _reset_agent_ops_state():
     with patch("app.agents.agent_ops.load_agent_ops_tenant_snapshot", return_value=None):
         get_agent_ops_service().reset()
@@ -129,7 +139,7 @@ def test_neuroassist_service_runs_generic_finance_capability():
     assert result["result"]["context_resolution"]["process_definition_key"] == "settlement_to_finance"
     assert "process_audit_entry" not in result["result"]
 
-    overview = get_agent_ops_service().build_overview("system")
+    overview = get_agent_ops_service().build_overview("test-mandant")
     assert overview.monthly_run_count == 1
     assert overview.spent_total_cents > 0
     assert overview.cost_ledger[0].capability_key == "finance_skonto_assistant"
@@ -360,7 +370,7 @@ def test_neuroassist_service_rejects_invalid_generic_input_contract():
 
 def test_neuroassist_service_blocks_run_when_budget_is_exhausted():
     service = NeuroAssistService()
-    get_agent_ops_service().set_budget("system", "finance_skonto_assistant", 10)
+    get_agent_ops_service().set_budget("test-mandant", "finance_skonto_assistant", 10)
 
     with pytest.raises(ValueError, match="would be exceeded"):
         asyncio.run(
@@ -389,18 +399,18 @@ def test_agent_ops_service_supports_interventions_templates_and_mobile_views():
     ticket = ops.list_tickets()[0]
 
     intervention = ops.apply_intervention(
-        "system",
+        "test-mandant",
         ticket.ticket_id,
         action="escalate",
         requested_by="tester",
         note="Need owner review",
     )
-    dashboard = ops.build_dashboard("system")
-    mobile = ops.build_mobile_overview("system")
-    template = ops.export_template("system", template_key="default")
-    imported = ops.import_template("system", template)
-    skill_packs = ops.list_skill_packs("system")
-    boundary = ops.build_plugin_boundary_review("system")
+    dashboard = ops.build_dashboard("test-mandant")
+    mobile = ops.build_mobile_overview("test-mandant")
+    template = ops.export_template("test-mandant", template_key="default")
+    imported = ops.import_template("test-mandant", template)
+    skill_packs = ops.list_skill_packs("test-mandant")
+    boundary = ops.build_plugin_boundary_review("test-mandant")
 
     assert intervention.resulting_status == "escalated"
     assert dashboard.intervention_count == 1
@@ -413,7 +423,7 @@ def test_agent_ops_service_supports_interventions_templates_and_mobile_views():
 def test_agent_ops_service_builds_control_center_and_config_revisions():
     ops = get_agent_ops_service()
     ops.record_run(
-        tenant_id="system",
+        tenant_id="test-mandant",
         run_id="run-control-center",
         capability_key="finance_skonto_assistant",
         role_key="finance_action_assistant",
@@ -427,10 +437,10 @@ def test_agent_ops_service_builds_control_center_and_config_revisions():
         result={"current_stage_key": "analysis"},
     )
 
-    budget = ops.set_budget("system", "finance_skonto_assistant", 1100, changed_by="ops-admin")
-    heartbeat = ops.set_heartbeat("system", "finance_skonto_assistant", cadence="hourly", stale_after_hours=2, changed_by="ops-admin")
+    budget = ops.set_budget("test-mandant", "finance_skonto_assistant", 1100, changed_by="ops-admin")
+    heartbeat = ops.set_heartbeat("test-mandant", "finance_skonto_assistant", cadence="hourly", stale_after_hours=2, changed_by="ops-admin")
     profile = ops.set_profile(
-        "system",
+        "test-mandant",
         "finance_skonto_assistant",
         review_sla_hours=2,
         stale_after_hours=2,
@@ -438,12 +448,12 @@ def test_agent_ops_service_builds_control_center_and_config_revisions():
         changed_by="ops-admin",
     )
     skill_pack = ops.update_skill_pack(
-        "system",
+        "test-mandant",
         "finance_action_assistant.pack",
         skills=["policy_guardrails", "cost_control"],
         changed_by="ops-admin",
     )
-    control_center = ops.build_control_center("system")
+    control_center = ops.build_control_center("test-mandant")
 
     assert budget.version == 2
     assert heartbeat.version == 2

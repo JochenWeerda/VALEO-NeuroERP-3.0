@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "id": "disposition/touren-disposition",
+  "domain": "logistics",
+  "mode": "cockpit",
+  "title": "Touren-Disposition",
+  "subtitle": "Tourenplanung",
+  "adapter": {
+    "type": "native",
+    "sourceId": "disposition/touren-disposition",
+    "temporary": false
+  },
+  "layout": {
+    "floorplan": "cockpit",
+    "density": "expertDense",
+    "contextRail": "combined",
+    "preferredMode": "desktopDense",
+    "mobileMode": "mobileStack",
+    "touchTargetPx": 44,
+    "tableProfile": "inventory"
+  },
+  "performance": {
+    "initialPayloadBudgetKb": 32,
+    "requiresLazyTabs": false,
+    "requiresVirtualTables": false,
+    "lookupMinChars": 2,
+    "bundleGroup": "logistics"
+  },
+  "agentContract": {
+    "businessPurpose": "Touren-Disposition als Read-Model-Cockpit.",
+    "examplePrompts": [
+      "Zeige Touren-Disposition.",
+      "Was ist der aktuelle Stand?"
+    ],
+    "sensitiveFields": [],
+    "forbiddenAgentTasks": [],
+    "testSelectors": {
+      "screenRoot": "[data-testid='disposition-touren-disposition']"
+    }
+  },
+  "summary": [
+    {
+      "key": "total",
+      "label": "Anzahl",
+      "tone": "neutral",
+      "value": null
+    },
+    {
+      "key": "open",
+      "label": "Offen",
+      "tone": "warning",
+      "value": null
+    }
+  ],
+  "tiles": [
+    {
+      "key": "overview",
+      "label": "Uebersicht",
+      "tone": "neutral",
+      "targetScreenId": "disposition/touren-disposition",
+      "targetRoute": "/disposition/touren-disposition"
+    }
+  ],
+  "dataSources": [
+    {
+      "key": "entity",
+      "endpoint": "/api/v1/logistik/tours",
+      "staleTimeMs": 15000
+    }
+  ],
+  "actions": [
+    {
+      "key": "refresh",
+      "label": "Aktualisieren",
+      "kind": "secondary",
+      "zone": "header",
+      "dangerLevel": "safe",
+      "permission": "logistics.read",
+      "localEffect": "refetch"
+    }
+  ],
+  "noWorkflowReason": "Cockpit ist ein Read-Model- oder Navigations-Workspace ohne eigenen Objekt-Lebenszyklus; Statuswechsel erfolgen in den verlinkten Prozessmasken.",
+  "noProcessChainReason": "Aggregations-Cockpit ohne ERP-Belegkette; KPIs und Spruenge sind orientierend.",
+  "specialized": {
+    "type": "disposition_board",
+    "id": "lkw-disposition-board",
+    "events": [
+      "logistik.tour.created",
+      "logistics.tour.quantity_posted",
+      "disposition.board.drop_proposed"
+    ],
+    "permissions": [
+      "logistics.write"
+    ],
+    "liveChannel": "disposition.board"
+  }
+}

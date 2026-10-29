@@ -16,6 +16,7 @@ from app.auth.deps_oidc import get_current_user
 from app.core.database import get_db
 from app.domains.operations.repository import FahrzeugRepository
 from test_fuhrpark_isolation_effects import db
+from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
 
 app = FastAPI()
 app.include_router(fuhrpark.router, prefix="/api/v1")
@@ -34,6 +35,7 @@ def isolated_client(db):
         "sub": "fuhrpark-integration-test", "scopes": ["logistics:read", "logistics:write"],
         "raw": {"tenant_id": TENANT_ID},
     }
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)  # Schreibwege pruefen die Bereichsrolle (19.10.2026)
     yield
     app.dependency_overrides.clear()
 

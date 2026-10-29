@@ -6,7 +6,8 @@ import httpx
 from app.auth.beleg_roles import rollen_fuer
 from app.core.belegvertrag import BELEGARTEN
 
-ERP_CLIENT_IDS = frozenset({"valeo-neuro-erp-frontend", "valeo-neuro-erp-backend", "valeo-erp-staging"})
+ERP_CLIENT_IDS = frozenset({"valeo-neuro-erp-frontend", "valeo-neuro-erp-backend", "valeo-erp-staging",
+                            "valeo-neuro-erp-cli"})
 
 # Project the existing domain decisions; never maintain a parallel role list.
 DOCUMENT_SCOPE_ROLES = {
@@ -31,9 +32,23 @@ def reconcile_document_scope_roles(client: httpx.Client, headers: dict, realm: s
         route = f"/admin/realms/{realm}/client-scopes/{scopes[name]}/scope-mappings/realm"
         response = client.get(route, headers=headers)
         response.raise_for_status()
-        existing = {r["name"] for r in response.json()}
-        if existing - set(names):
+        records = response.json()
+        existing = {r["name"] for r in records}
+        # Explicit retirement, not a general cleanup of unknown permissions.
+        retired = [r for r in records if r["name"] == "manager" and r["name"] not in names]
+        if existing - set(names) - {r["name"] for r in retired}:
             raise RuntimeError("Document scope has undeclared role mappings")
+        if retired:
+            if any(not r.get("id") for r in retired):
+                raise RuntimeError("Retired document scope role was not verified")
+            removed = client.request("DELETE", route, headers=headers, json=retired)
+            if removed.status_code != 204:
+                raise RuntimeError("Retired document scope role removal failed")
+            response = client.get(route, headers=headers)
+            response.raise_for_status()
+            existing = {r["name"] for r in response.json()}
+            if existing - set(names):
+                raise RuntimeError("Retired document scope role removal did not persist")
         roles = []
         for role in names:
             response = client.get(f"/admin/realms/{realm}/roles/{role}", headers=headers)

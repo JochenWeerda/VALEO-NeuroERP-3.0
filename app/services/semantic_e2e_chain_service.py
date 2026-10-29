@@ -6,6 +6,7 @@ der ohne DB-Session betrieben werden kann (gut für Unit-Tests).
 """
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Optional
@@ -268,7 +269,7 @@ class FiBuChain:
         cleared = ctx.get("cleared_op", {})
         _assert_field(step, cleared, "op_status", expected="ausgeziffert")
         remaining = float(cleared.get("offen", 1))
-        if remaining != 0.0:
+        if not math.isclose(remaining, 0.0, abs_tol=1e-9):
             step.invariant_errors.append(
                 f"auszifferung: verbleibender Saldo {remaining:.2f} ≠ 0"
             )

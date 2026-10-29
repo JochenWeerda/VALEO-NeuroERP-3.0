@@ -314,6 +314,9 @@ jobs:
       - name: Migrate DB schema (Alembic)
         run: python scripts/init_db.py
 
+      - name: DDL provenance (DB-GOVERNANCE-20261026)
+        run: python scripts/check_ddl_provenance.py --erlaubt alembic orm-create-all
+
       - name: Check required ERP domain structure
         run: python scripts/check_required_domain_schemas.py
 
@@ -344,6 +347,9 @@ jobs:
 
       - name: Run tests
         run: pytest -q
+
+      - name: Run isolated KI service contracts and merge real coverage
+        run: python scripts/run_ki_service_coverage.py
 
       - name: Check critical backend coverage
         run: python scripts/check_critical_backend_coverage.py

@@ -4,6 +4,7 @@ Wave 71 - Slack/Teams work surfaces backed by the knowledge core.
 from __future__ import annotations
 
 from fastapi import FastAPI
+from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
 from fastapi.testclient import TestClient
 import pytest
 
@@ -13,6 +14,7 @@ from app.api.v1.endpoints import channel_work_surfaces
 @pytest.fixture
 def client(require_db) -> TestClient:
     app = FastAPI()
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(channel_work_surfaces.router)
     return TestClient(app)
 

@@ -17,7 +17,7 @@ from app.core.iot_telemetry import DeviceManifest, DeviceStatus, DeviceType
 from app.core.process_mining import build_process_mining_report
 from app.core.runtime_operations import ComponentHealth, RuntimeComponent, RuntimeHealthReport
 from app.core.tenant import get_tenant_id
-from testgrenze import ALLE_FACHROLLEN, ersetze_bearer, ersetze_mandant
+from testgrenze import ALLE_FACHROLLEN, ersetze_bearer, ersetze_mandant, ersetze_nutzer
 
 
 def test_external_agent_integration_catalog_surfaces_eleven_use_cases():
@@ -180,7 +180,7 @@ def test_runtime_shield_surfaces_rate_limits_and_cache_configs():
 def test_reklamation_e2e_overview_contains_crm_and_dms_links():
     app = FastAPI()
     ersetze_mandant(app)
-    ersetze_bearer(app, *ALLE_FACHROLLEN)
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(reklamation_api.router)
     client = TestClient(app)
 

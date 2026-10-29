@@ -66,20 +66,19 @@ def rollen_fuer(recht: str, belegart: str) -> frozenset[str]:
     """Die Rollen, die dieses Recht an dieser Belegart haben."""
     variante = BELEGARTEN[belegart]
     bereich = _BEREICH[variante.richtung]
-    manager = frozenset({"manager"})
     if recht == "preise":
-        return _IMMER | manager | bereich["lesen"] | _FINANZ_LESEN
+        return _IMMER | bereich["lesen"] | _FINANZ_LESEN
     if recht == "lesen":
         return rollen_fuer("preise", belegart) | _LAGER_LESEN
-    bearbeiten = _IMMER | manager | bereich["bearbeiten"] | (_LAGER_BEARBEITEN if belegart in _LAGERBELEGE else frozenset())
+    bearbeiten = _IMMER | bereich["bearbeiten"] | (_LAGER_BEARBEITEN if belegart in _LAGERBELEGE else frozenset())
     if recht in ("bearbeiten", "ausstellen"):
         return bearbeiten
     if recht == "buchen":
-        return _IMMER | manager | bereich["bearbeiten"] | _FINANZ_BUCHEN
+        return _IMMER | bereich["bearbeiten"] | _FINANZ_BUCHEN
     # Freigabe als zweite Person (APPROVAL-001): Leitung des Bereichs und Buchhaltung; ab R4 nur Leitung und
     # Finanzleitung. Die Funktionstrennung prueft die Approval Engine — sie gilt auch fuer ``admin``.
     if recht == "freigeben":
-        return _IMMER | manager | bereich["leitung"] | _FINANZ_BUCHEN | _CONTROLLING
+        return _IMMER | bereich["leitung"] | _FINANZ_BUCHEN | _CONTROLLING
     if recht == "freigeben_erhoeht":
         return _IMMER | bereich["leitung"] | frozenset({"FINANCE_ADMIN"}) | _CONTROLLING
     if recht == "stornieren":

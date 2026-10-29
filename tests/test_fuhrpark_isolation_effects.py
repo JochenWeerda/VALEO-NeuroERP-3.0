@@ -16,6 +16,7 @@ from app.core.database import get_db
 from app.domains.operations import models, repository
 from app.services import mcp_execution_service as mcp
 from app.services.mcp_tool_registry_service import mcp_tool_registry_service as registry
+from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
 
 CASES = [
     ("fahrzeuge", models.Fahrzeug, repository.FahrzeugRepository, {"kennzeichen":"TEST-01", "typ":"LKW"}, "logistik.fahrzeug.speichern"),
@@ -59,6 +60,7 @@ def seeded(db):
 
 def client(db, tenant):
     app=FastAPI();app.include_router(fuhrpark.router,prefix="/api/v1")
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)  # Schreibwege pruefen die Bereichsrolle (19.10.2026)
     app.dependency_overrides[get_db]=lambda:db
     app.dependency_overrides[get_current_user]=lambda:{"sub":"isolation-test", "scopes":["logistics:read","logistics:write"], "raw":{"tenant_id":tenant}}
     return TestClient(app)
@@ -185,7 +187,8 @@ def test_repository_cannot_change_primary_key_or_tenant(db,seeded,case):
 @pytest.mark.parametrize("mode", ["validate","dryRun","propose","execute"])
 def test_mcp_delete_rejects_actual_foreign_vehicle(db,seeded,mode):
     tenant,foreign,ids=seeded
-    user={"sub":"test", "scopes":["logistics:write"],"raw":{"tenant_id":tenant}}
+    # Mensch: Loeschen verlangt laut Maske menschliche Genehmigung; geprueft wird hier die Mandantentrennung.
+    user={"sub":"test", "scopes":["logistics:write"],"raw":{"tenant_id":tenant,"identity_type":"human"}}
     with pytest.raises(HTTPException) as error:
         mcp.execute_mcp_tool(db,mcp.ToolExecutionRequest(tool_name="logistik.fahrzeug.loeschen",parameters={"fahrzeug_id":ids["fahrzeuge"],"reason":"isolation"},mode=mode,idempotency_key="delete-test"),user,None)
     assert error.value.status_code==404

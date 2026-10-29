@@ -25,6 +25,7 @@ from app.core.metrics import strecke_operations_total
 from app.models.streckengeschaeft import Streckengeschaeft
 
 from app.api.v1.schemas.base import BaseSchema
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/strecke/streckengeschaefte", tags=["Strecke"])
@@ -197,7 +198,7 @@ async def get_streckengeschaeft(
     return _to_out(row)
 
 
-@router.post("", response_model=StreckengeschaeftOut, status_code=201, summary="Streckengeschaeft anlegen")
+@router.post("", response_model=StreckengeschaeftOut, status_code=201, summary="Streckengeschaeft anlegen", dependencies=SCHREIBEN["LOGISTIK"])
 async def create_streckengeschaeft(
     payload: StreckengeschaeftCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -242,7 +243,7 @@ async def create_streckengeschaeft(
     return _to_out(row)
 
 
-@router.patch("/{strecke_id}", response_model=StreckengeschaeftOut, summary="Streckengeschaeft aktualisieren")
+@router.patch("/{strecke_id}", response_model=StreckengeschaeftOut, summary="Streckengeschaeft aktualisieren", dependencies=SCHREIBEN["LOGISTIK"])
 async def update_streckengeschaeft(
     strecke_id: str,
     payload: StreckengeschaeftUpdate,
@@ -273,7 +274,7 @@ async def update_streckengeschaeft(
     return _to_out(row)
 
 
-@router.delete("/{strecke_id}", status_code=204, response_class=Response, response_model=None, summary="Streckengeschaeft löschen")
+@router.delete("/{strecke_id}", status_code=204, response_class=Response, response_model=None, summary="Streckengeschaeft löschen", dependencies=SCHREIBEN["LOGISTIK"])
 async def delete_streckengeschaeft(
     strecke_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -288,7 +289,7 @@ async def delete_streckengeschaeft(
     return Response(status_code=204)
 
 
-@router.post("/{strecke_id}/close", response_model=StreckengeschaeftOut, summary="Streckengeschaeft abschließen")
+@router.post("/{strecke_id}/close", response_model=StreckengeschaeftOut, summary="Streckengeschaeft abschließen", dependencies=SCHREIBEN["LOGISTIK"])
 async def close_streckengeschaeft(
     strecke_id: str,
     rechnungsnr: str = Query(..., description="Rechnungsnummer des Lieferanten"),

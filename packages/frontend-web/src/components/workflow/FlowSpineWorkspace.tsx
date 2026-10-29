@@ -706,6 +706,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
           description: `Aktion "${action.label}" konnte nicht ausgeführt werden.`,
           variant: 'destructive',
         })
+        return
       }
     }
     if (action.href) {

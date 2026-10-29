@@ -155,6 +155,7 @@ def test_gebuchtes_storniert_nur_buchhaltung_und_bereichsleitung():
 def test_ohne_rolle_und_mit_rolle_des_anderen_bereichs_gibt_es_den_beleg_nicht(http, satz):
     assert _beleg(http, satz, "vk-rechnung-1").status_code == 403
     assert _beleg(http, satz, "vk-rechnung-1", "sachbearbeitung").status_code == 403
+    assert _beleg(http, satz, "vk-rechnung-1", "manager").status_code == 403
     assert _beleg(http, satz, "vk-rechnung-1", "EINKAUF_ADMIN").status_code == 403
     assert _beleg(http, satz, "ek-rechnung-1", "SALES_ADMIN", "CRM_ADMIN").status_code == 403
     # Auch ein Beleg, den es nicht gibt, verraet sich nicht: erst das Recht, dann die Suche.
@@ -223,7 +224,7 @@ def test_docflow_liefert_preise_nur_mit_preisrecht(http, satz):
 def test_ohne_recht_wird_nichts_gebucht_storniert_angelegt_oder_umgewandelt(http, satz):
     vorher = _buchungen(satz)
     offen, gebucht = satz["vk-rechnung-2"]["id"], satz["vk-rechnung-1"]["id"]
-    for rollen in ((), ("SALES_LESEN",), ("LAGER_ADMIN",), ("EINKAUF_ADMIN",)):
+    for rollen in ((), ("manager",), ("SALES_LESEN",), ("LAGER_ADMIN",), ("EINKAUF_ADMIN",)):
         antwort = http(*rollen).post(f"/docflow/{offen}/post", json={"idempotency_key": f"recht-{uuid.uuid4()}"})
         assert antwort.status_code == 403, rollen
     for rollen in (("SALES_BEARBEITEN",), ("manager",), ("EINKAUF_ADMIN",)):
@@ -238,7 +239,8 @@ def test_ohne_recht_wird_nichts_gebucht_storniert_angelegt_oder_umgewandelt(http
     assert http("FINANCE_BEARBEITEN").post(f"/docflow/{gebucht}/convert", json=wandeln).status_code == 403
     assert http("SALES_LESEN").post(f"/docflow/{offen}/release", json={"idempotency_key": "recht-freigeben"}).status_code == 403
     assert http("SALES_LESEN").delete(f"/docflow/{offen}").status_code == 403
-    assert http("SALES_LESEN").put(f"/docflow/{offen}", json={}).status_code == 403
+    assert http("SALES_LESEN").put(f"/docflow/{offen}", json={
+        "expected_version": 1, "idempotency_key": "readonly-edit-denied"}).status_code == 403
     assert (_status(satz, "vk-rechnung-2"), _status(satz, "vk-rechnung-1")) == ("open", "posted")
     assert _buchungen(satz) == vorher
 

@@ -1,19 +1,28 @@
 from __future__ import annotations
 
 from typing import Any
+import pytest
 
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from app.api.v1.endpoints.personal import router
 from app.core.database import get_db
-from testgrenze import ersetze_mandant
+from testgrenze import ersetze_mandant, ersetze_nutzer
 
 
 _HEADERS = {"Authorization": "Bearer dev-token", "X-Tenant-ID": "tenant-hrm"}
 _APP = FastAPI()
 ersetze_mandant(_APP)
 _APP.include_router(router, prefix="/api/v1")
+
+
+@pytest.fixture(autouse=True)
+def personal_identity():
+    from app.auth.deps import get_current_user
+    ersetze_nutzer(_APP, "PERSONAL_BEARBEITEN")
+    yield
+    _APP.dependency_overrides.pop(get_current_user, None)
 
 
 class _Result:
@@ -155,11 +164,13 @@ def test_employee_file_document_create_persists_metadata_contract():
     assert insert_params["tenant_id"] == "tenant-hrm"
     assert insert_params["employee_ref"] == "emp-1"
     assert insert_params["dms_document_id"] == "dms-privacy-1"
+    assert insert_params["created_by"] == "5f0c2a9e"
 
 
-def test_employee_file_document_create_rejects_employee_role():
+def test_employee_file_document_create_rejects_personal_reader_even_with_hr_query():
+    ersetze_nutzer(_APP, "PERSONAL_LESEN")
     response = TestClient(_APP, raise_server_exceptions=False).post(
-        "/api/v1/personal/employee-files/emp-1/documents?actorRole=employee",
+        "/api/v1/personal/employee-files/emp-1/documents?actorRole=hr",
         headers=_HEADERS,
         json={"documentType": "certificate", "title": "Eigenes Dokument"},
     )

@@ -106,7 +106,7 @@ function CustomerMaskEditPage(): JSX.Element {
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm text-muted-foreground mb-1">CRM &gt; Kunden</p>
-          <h1 className="text-3xl font-bold">{customer?.name ?? 'Kundenstamm bearbeiten'}</h1>
+          <h1 className="text-xl font-semibold tracking-tight">{customer?.name ?? 'Kundenstamm bearbeiten'}</h1>
           <p className="text-muted-foreground">Mask Builder Formular (Beta)</p>
         </div>
         <div className="flex gap-2">

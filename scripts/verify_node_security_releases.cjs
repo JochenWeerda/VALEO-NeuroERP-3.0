@@ -110,3 +110,30 @@ require('./verify_node_dependency_security.cjs');
 require('./verify_node_high_backports.cjs');
 require('./test_npm_backport_audit.cjs');
 require('./verify_handlebars_security_release.cjs');
+require('./verify_dependency_advisories_20261025.cjs');
+
+test('seroval ignores untrusted typed-array constructor names and retains bytes', () => {
+  const { serialize, deserialize } = patched('seroval');
+  const input = new Uint8Array([7, 8]);
+  input.constructor = { name: 'VALEO_FORGED_TYPED_ARRAY' };
+  const output = serialize(input);
+  assert.equal(output.includes('VALEO_FORGED_TYPED_ARRAY'), false);
+  assert.deepEqual(Array.from(deserialize(output)), [7, 8]);
+});
+
+test('translation query URLs reject language parameter injection before any request', async () => {
+  const Backend = patched('i18next-http-backend');
+  const requests = [];
+  const backend = new Backend({ interpolator: { interpolate: (template, vars) =>
+    template.replace(/\{\{(lng|ns)\}\}/g, (_, key) => vars[key]) } }, {
+    loadPath: '/locales/resources.json?lng={{lng}}&ns={{ns}}',
+    request: (_options, url, _payload, done) => {
+      requests.push(url); done(null, { status: 200, data: '{}' });
+    },
+  });
+  const read = (lng) => new Promise(resolve => backend.read(lng, 'common', (error) => resolve(error)));
+  for (const language of ['de&ns=private', 'de=private']) assert.ok(await read(language));
+  assert.deepEqual(requests, []);
+  assert.equal(await read('de'), null);
+  assert.deepEqual(requests, ['/locales/resources.json?lng=de&ns=common']);
+});

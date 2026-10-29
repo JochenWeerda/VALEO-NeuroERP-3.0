@@ -456,6 +456,13 @@ describe('BestellungAnlegenPage', () => {
     const caseCreateCallIndex = postMock.mock.calls.findIndex((call) => String(call[0]).endsWith('/instances'))
     expect(purchaseOrderCallIndex).toBeGreaterThanOrEqual(0)
     expect(caseCreateCallIndex).toBeGreaterThan(purchaseOrderCallIndex)
+    expect(postMock).toHaveBeenCalledWith(
+      expect.stringMatching(/\/instances\/wf-new\/save$/),
+      expect.objectContaining({
+        resume_route: '/einkauf/bestellung/PO-TEST-1?purchaseOrderId=PO-TEST-1',
+      }),
+    )
+    expect(navigateMock).toHaveBeenCalledWith('/einkauf/bestellung/PO-TEST-1?purchaseOrderId=PO-TEST-1')
   })
 
   it.each(['Vorgang erneut verknuepfen', 'Abschliessen'])('wiederholt bei Teilfehler ueber %s nur die Fallanlage', async (buttonName) => {
@@ -499,5 +506,6 @@ describe('BestellungAnlegenPage', () => {
       expect(postMock.mock.calls.filter((call) => String(call[0]).endsWith('/instances')).length).toBeGreaterThan(1)
     })
     expect(postMock.mock.calls.filter((call) => String(call[0]).includes('/purchase-orders'))).toHaveLength(1)
+    expect(navigateMock).toHaveBeenCalledWith('/einkauf/bestellung/PO-TEST-1?purchaseOrderId=PO-TEST-1')
   })
 })

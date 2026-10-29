@@ -152,16 +152,22 @@ class SSEManager:
         logger.info("SSE heartbeat started")
     
     async def stop_heartbeat(self) -> None:
-        """Stop heartbeat task."""
-        if self._heartbeat_task:
-            self._heartbeat_task.cancel()
-            try:
-                await self._heartbeat_task
-            except asyncio.CancelledError:
-                pass
-            self._heartbeat_task = None
-            logger.info("SSE heartbeat stopped")
-    
+        """Cancel our child without swallowing cancellation of the caller."""
+        task = self._heartbeat_task
+        if task is None:
+            return
+        task.cancel()
+        try:
+            await task
+        except asyncio.CancelledError:
+            caller = asyncio.current_task()
+            if caller is not None and caller.cancelling():
+                raise
+        finally:
+            if self._heartbeat_task is task:
+                self._heartbeat_task = None
+        logger.info("SSE heartbeat stopped")
+
     async def _heartbeat_loop(self) -> None:
         """Send periodic pings to all connections."""
         while True:
@@ -180,7 +186,7 @@ class SSEManager:
                 logger.debug("Heartbeat sent to all connections")
                 
             except asyncio.CancelledError:
-                break
+                raise
             except Exception as e:
                 logger.error(f"Heartbeat loop error: {e}", exc_info=True)
     
@@ -247,6 +253,7 @@ async def sse_event_generator(request: Request, connection: SSEConnection):
             
     except asyncio.CancelledError:
         logger.info(f"SSE stream cancelled: {connection.client_id}")
+        raise
     except Exception as e:
         logger.error(f"SSE stream error: {e}", exc_info=True)
     finally:

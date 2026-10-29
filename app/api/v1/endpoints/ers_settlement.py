@@ -24,6 +24,7 @@ from app.core.business_time import business_date_after, business_today
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.ers_settlement_schemas import ErsSettlementOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/einkauf/ers", tags=["einkauf", "ers"])
@@ -45,32 +46,6 @@ class ErsRunRequest(BaseModel):
 # ─────────────────────────────────────────────────────────────────────────────
 # Helpers
 # ─────────────────────────────────────────────────────────────────────────────
-
-def _ensure_schema(db: Session) -> None:
-    db.execute(text("CREATE SCHEMA IF NOT EXISTS domain_einkauf"))
-    db.execute(text("""
-        CREATE TABLE IF NOT EXISTS domain_einkauf.ers_suppliers (
-            id                   BIGSERIAL PRIMARY KEY,
-            supplier_id          TEXT NOT NULL,
-            is_ers_qualified     BOOLEAN NOT NULL DEFAULT FALSE,
-            ers_tolerance_percent NUMERIC(10,4) DEFAULT 2.0,
-            tenant_id            TEXT,
-            UNIQUE (supplier_id, tenant_id)
-        )
-    """))
-    db.execute(text("""
-        CREATE TABLE IF NOT EXISTS domain_einkauf.ers_invoices (
-            id              BIGSERIAL PRIMARY KEY,
-            gr_id           TEXT NOT NULL,
-            supplier_id     TEXT NOT NULL,
-            amount          NUMERIC(18,4),
-            status          TEXT NOT NULL DEFAULT 'ERSTELLT',
-            auto_created_at TIMESTAMPTZ DEFAULT NOW(),
-            tenant_id       TEXT
-        )
-    """))
-    db.commit()
-
 
 def _fetch_gr_amount(db: Session, gr_id: str, tenant_id: str) -> Optional[float]:
     for table in [
@@ -103,7 +78,6 @@ def list_ers_suppliers(
 ) -> list[dict[str, Any]]:
     """ERS-qualifizierte Lieferanten auflisten."""
     try:
-        _ensure_schema(db)
         rows = db.execute(
             text("""
                 SELECT id, supplier_id, is_ers_qualified, ers_tolerance_percent
@@ -128,8 +102,7 @@ def list_ers_suppliers(
 
 
 @router.post("/suppliers/{supplier_id}/qualify", summary="Supplier qualify",
-    response_model=ErsSettlementOut
-)
+    response_model=ErsSettlementOut, dependencies=SCHREIBEN["EINKAUF"])
 def qualify_supplier(
     supplier_id: str,
     body: QualifyRequest,
@@ -138,7 +111,6 @@ def qualify_supplier(
 ) -> dict[str, Any]:
     """Lieferant als ERS-fähig markieren (INSERT OR UPDATE)."""
     try:
-        _ensure_schema(db)
         row = db.execute(
             text("""
                 INSERT INTO domain_einkauf.ers_suppliers
@@ -166,8 +138,7 @@ def qualify_supplier(
 
 
 @router.post("/trigger", summary="Ers auslösen",
-    response_model=ErsSettlementOut
-)
+    response_model=ErsSettlementOut, dependencies=SCHREIBEN["EINKAUF"])
 def trigger_ers(
     body: ErsRunRequest,
     db: Session = Depends(get_db),
@@ -178,7 +149,6 @@ def trigger_ers(
     Prüft ob Lieferant ERS-qualifiziert ist und erzeugt automatisch eine ap_invoice.
     """
     try:
-        _ensure_schema(db)
 
         # Lieferant ERS-Qualifikation prüfen
         supplier_row = db.execute(
@@ -276,7 +246,6 @@ def list_ers_invoices(
 ) -> list[dict[str, Any]]:
     """Liste aller ERS-erzeugten Rechnungen."""
     try:
-        _ensure_schema(db)
         rows = db.execute(
             text("""
                 SELECT id, gr_id, supplier_id, amount, status, auto_created_at

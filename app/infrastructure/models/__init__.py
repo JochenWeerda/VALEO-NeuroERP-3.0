@@ -1209,9 +1209,9 @@ class AuditLog(Base):
 
     id = Column(String, primary_key=True)
     timestamp = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
-    user_id = Column(String, ForeignKey("domain_shared.users.id"), nullable=False)
+    user_id = Column(String, nullable=False)
     user_email = Column(String(100), nullable=False)
-    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
+    tenant_id = Column(String, nullable=False)
     action = Column(String(50), nullable=False)
     entity_type = Column(String(50), nullable=False)
     entity_id = Column(String, nullable=False)
@@ -1322,3 +1322,6 @@ from app.infrastructure.models.wms_models import (  # noqa: E402,F401
     MaterialFlowNode,
     MaterialFlowEdge,
 )
+
+# Register persisted read models during regular database initialization.
+from .read_model_snapshots import ReadModelSnapshotRecord  # noqa: F401

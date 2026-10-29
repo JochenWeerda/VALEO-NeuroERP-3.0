@@ -6,13 +6,15 @@ from decimal import Decimal
 from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.orm import Session
 
 from app.api.v1.schemas.base import BaseSchema
+from app.auth.deps import get_current_user
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.agri_lot_link_booking_service import AgriLotLinkBookingService
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 class AgriLotLinkOut(BaseSchema):
@@ -24,14 +26,16 @@ class LotCellLinkIn(BaseModel):
     lot_id: str
     target_cell_id: str
     quantity_kg: Optional[Decimal] = None
-    booked_by: Optional[str] = None
+    booked_by: Optional[str] = Field(default=None, deprecated=True,
+        description="Ignored legacy input. The verified token subject is always recorded.")
     reference: Optional[str] = None
 
 
 class AutoBookIn(BaseModel):
     lot_id: str
     warehouse_id: Optional[str] = None
-    booked_by: Optional[str] = None
+    booked_by: Optional[str] = Field(default=None, deprecated=True,
+        description="Ignored legacy input. The verified token subject is always recorded.")
 
 
 router = APIRouter()
@@ -45,11 +49,11 @@ def _svc(db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id))
     "/material-flow/lot-link",
     response_model=AgriLotLinkOut,
     status_code=status.HTTP_200_OK,
-    summary="POST /material-flow/lot-link",
-)
+    summary="POST /material-flow/lot-link", dependencies=SCHREIBEN["LAGER"])
 def book_lot_to_cell(
     payload: LotCellLinkIn,
     svc: AgriLotLinkBookingService = Depends(_svc),
+    user: dict = Depends(get_current_user),
 ) -> Any:
     """Bucht ein aktives Waage/WE-Lot transaktional in eine Silozelle."""
     try:
@@ -58,7 +62,7 @@ def book_lot_to_cell(
             target_cell_id=payload.target_cell_id,
             warehouse_id=payload.warehouse_id,
             quantity_kg=payload.quantity_kg,
-            booked_by=payload.booked_by or "system",
+            booked_by=user["sub"],
             reference=payload.reference,
         )
     except ValueError as exc:
@@ -69,18 +73,18 @@ def book_lot_to_cell(
     "/material-flow/lot-link/auto-book",
     response_model=AgriLotLinkOut,
     status_code=status.HTTP_200_OK,
-    summary="POST /material-flow/lot-link/auto-book",
-)
+    summary="POST /material-flow/lot-link/auto-book", dependencies=SCHREIBEN["LAGER"])
 def auto_book_lot_link(
     payload: AutoBookIn,
     svc: AgriLotLinkBookingService = Depends(_svc),
+    user: dict = Depends(get_current_user),
 ) -> Any:
     """Vollautomatische LOT-LINK-Buchung: Lot → beste Silozelle via legacy_silo_id ohne manuelle Zell-Auswahl."""
     try:
         return svc.auto_book_lot_link_by_lot_id(
             lot_id=payload.lot_id,
             warehouse_id=payload.warehouse_id,
-            booked_by=payload.booked_by or "system",
+            booked_by=user["sub"],
         )
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc

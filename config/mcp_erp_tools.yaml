@@ -351,7 +351,7 @@ tools:
   - tool_id: finance.ap_invoice.propose
     domain: finance
     name: "AP-Freigabe vorschlagen"
-    description: "Legt einen ausstehenden Freigabe-Vorschlag fuer eine Eingangsrechnung im Authentifizierungs-Mandanten an. HTTP-Aufruf mit tool_name=finance.ap_invoice.propose, parameters.invoice_id. Default dryRun liest nur Status/Brutto/route_path. propose speichert agent_proposals (ap_invoice_freigabe) mit approval_status pending und ruft den Freigabe-Endpoint nicht auf. execute ist nicht angebunden (nutze finance.ap_invoice.freigeben nach Freigabe). Ein Freigabe-Boolean im Aufruf wird abgewiesen. OIDC-Token mit finance:write und tenant_id erforderlich. Kein Journal/FIN-CLOSE."
+    description: "Legt einen ausstehenden Freigabe-Vorschlag fuer eine Eingangsrechnung im Authentifizierungs-Mandanten an. HTTP-Aufruf mit tool_name=finance.ap_invoice.propose, parameters.invoice_id. Default dryRun liest nur Status/Brutto/route_path. propose speichert agent_proposals (ap_invoice_freigabe) mit approval_status pending und ruft den Freigabe-Endpoint nicht auf. execute ist deaktiviert; die verbindliche Entscheidung trifft eine berechtigte unabhaengige Person in der AP-Maske. Ein freigegebener Vorschlag ist keine Belegfreigabe. Ein Freigabe-Boolean im Aufruf wird abgewiesen. OIDC-Token mit finance:write und tenant_id erforderlich. Kein Journal/FIN-CLOSE."
     scope: finance:write
     idempotent: false
     risk_class: high
@@ -376,33 +376,6 @@ tools:
     endpoint: "POST /api/v1/mcp/tools/call"
     human_approval_required: true
 
-  - tool_id: finance.ap_invoice.freigeben
-    domain: finance
-    name: "AP-Rechnung aus freigegebenem Vorschlag freigeben"
-    description: "Ruft den echten CommandEndpoint POST /api/v1/finance/ap/invoices/{id}/actions/freigeben nur nach freigegebenem agent_proposals-Datensatz (ap_invoice_freigabe) auf. Parameter nur proposal_id. Default dryRun. execute erfordert idempotency_key und approval_status=approved. Kein Freigabe-Boolean im Aufruf. Kein Journal-Post/FIN-CLOSE (fibu_journal=false). OIDC-Token mit finance:write und tenant_id erforderlich."
-    scope: finance:write
-    idempotent: true
-    risk_class: high
-    data_classification: LOCAL_ONLY
-    input_schema:
-      type: object
-      properties:
-        proposal_id: { type: string, description: "entwurf_id aus finance.ap_invoice.propose" }
-      required: [proposal_id]
-    output_schema:
-      type: object
-      properties:
-        invoice_id: { type: string }
-        invoice_number: { type: string }
-        status: { type: string }
-        approved: { type: boolean }
-        route_path: { type: string }
-        screen_id: { type: string }
-    audit: write
-    endpoint: "POST /api/v1/mcp/tools/call"
-    human_approval_required: true
-
-  # ── FIBU ───────────────────────────────────────────────────────────────────
   - tool_id: fibu.open_items.list
     domain: finance
     name: "Offene Posten auflisten"
@@ -1663,6 +1636,263 @@ tools:
       properties:
         items: { type: array }
         count: { type: integer }
+    audit: read
+    endpoint: "POST /api/v1/mcp/tools/call"
+    human_approval_required: false
+
+  # ── Generische Maskenaktionen (MCP-MASK-GENERIC-20261019) ───
+  # Derselbe Kommando-Endpunkt wie die Maske, mit dem Token des Aufrufers. Agentensperren der
+  # ScreenDefinition gelten unveraendert; Rechte und Mandant prueft der Ziel-Endpunkt.
+  - tool_id: mask.actions.list
+    domain: masks
+    name: "Maskenaktionen auflisten"
+    description: "Liest die Aktionen einer Maske aus der mandantengenauen ScreenDefinition, mit Eingabefeldern und Befund, ob ein Agent sie ausfuehren darf. Nur Lesen."
+    scope: masks:read
+    idempotent: true
+    risk_class: low
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      properties:
+        screen_id: { type: string }
+      required: [screen_id]
+    output_schema:
+      type: object
+      properties:
+        screen_id: { type: string }
+        title: { type: string, nullable: true }
+        actions: { type: array }
+    audit: read
+    endpoint: "POST /api/v1/mcp/tools/call"
+    human_approval_required: false
+
+  - tool_id: mask.data.read
+    domain: masks
+    name: "Maskendaten lesen"
+    description: "Liest eine deklarierte GET-Datenquelle derselben mandantengenauen Maske wie Human-UI und CLI. Fachrollen und Objektzugriff prueft der Ziel-Endpunkt erneut mit dem Token des Aufrufers; keine freie URL oder Mandantenangabe."
+    scope: masks:read
+    idempotent: true
+    risk_class: low
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      additionalProperties: false
+      properties:
+        screen_id: { type: string }
+        source_key: { type: string }
+        entity_id: { type: string, nullable: true }
+        page: { type: integer, minimum: 1, maximum: 1000000 }
+        limit: { type: integer, minimum: 1, maximum: 100 }
+        q: { type: string, nullable: true, maxLength: 200 }
+        table_key: { type: string }
+        sort: { type: string }
+        sort_dir: { type: string, enum: [asc, desc] }
+        filter_plan:
+          type: object
+          maxProperties: 20
+          additionalProperties:
+            type: object
+            additionalProperties: false
+            required: [op, value]
+            properties:
+              op: { type: string, enum: [eq, neq, contains, lt, lte, gt, gte, in, between] }
+              value: {}
+              label: { type: string, nullable: true, maxLength: 200 }
+      required: [screen_id, source_key]
+    output_schema:
+      type: object
+      properties:
+        screen_id: { type: string }
+        source_key: { type: string }
+        page: { type: integer }
+        limit: { type: integer }
+        data:
+          oneOf:
+            - { type: object }
+            - { type: array }
+    audit: read
+    endpoint: "POST /api/v1/mcp/tools/call"
+    human_approval_required: false
+
+  - tool_id: mask.action.execute
+    domain: masks
+    name: "Maskenaktion ausfuehren"
+    description: "Fuehrt eine Maskenaktion ueber ihren deklarierten Kommando-Endpunkt aus (gleicher Umschlag wie die Maske). Gesperrt sind forbiddenForAgents, humanApprovalRequired, Command-Adapter und Eingabefluesse. Default dryRun; execute erfordert idempotency_key."
+    scope: masks:write
+    idempotent: true
+    risk_class: medium
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      properties:
+        screen_id: { type: string }
+        action: { type: string }
+        entity_id: { type: string, nullable: true }
+        input: { type: object, nullable: true }
+        audit_reason: { type: string, nullable: true }
+      required: [screen_id, action]
+    output_schema:
+      type: object
+      properties:
+        screen_id: { type: string }
+        action: { type: string }
+        mode: { type: string }
+        result: { type: object }
+    audit: write
+    endpoint: "POST /api/v1/mcp/tools/call"
+    human_approval_required: false
+
+  - tool_id: studio.migration.plan
+    domain: studio
+    name: Studio-Aenderungsplan festhalten
+    description: 'Versionierter Authoring-Command: erzeugt nur einen revisionsgebundenen
+      Plan in der vorhandenen Historie; keine Freigabe, Schemaausfuehrung oder Geschaeftsbuchung.
+      Fachrollen prueft derselbe HTTP-Endpunkt wie Human-UI/CLI.'
+    scope: belege:write
+    idempotent: true
+    risk_class: low
+    data_classification: LOCAL_ONLY
+    audit: write
+    endpoint: POST /api/v1/mcp/tools/call
+    human_approval_required: false
+    agent_write_enabled: true
+    domain_command: studio.migration_plan.prepare
+    command_version: 1
+    role_policy: beleg_write
+    input_schema:
+      $defs:
+        StudioColumnIn:
+          additionalProperties: false
+          properties:
+            name:
+              pattern: ^[a-z][a-z0-9_]{0,47}$
+              title: Name
+              type: string
+            type:
+              enum:
+              - text
+              - integer
+              - boolean
+              - date
+              - datetime
+              - decimal
+              - uuid
+              title: Type
+              type: string
+            nullable:
+              default: true
+              title: Nullable
+              type: boolean
+          required:
+          - name
+          - type
+          title: StudioColumnIn
+          type: object
+        StudioSchemaChangeIn:
+          additionalProperties: false
+          properties:
+            operation:
+              enum:
+              - create_table
+              - add_columns
+              title: Operation
+              type: string
+            schema_name:
+              pattern: ^domain_[a-z][a-z0-9_]{0,35}$
+              title: Schema Name
+              type: string
+            table:
+              pattern: ^[a-z][a-z0-9_]{0,47}$
+              title: Table
+              type: string
+            columns:
+              items:
+                $ref: '#/$defs/StudioColumnIn'
+              maxItems: 50
+              minItems: 1
+              title: Columns
+              type: array
+          required:
+          - operation
+          - schema_name
+          - table
+          - columns
+          title: StudioSchemaChangeIn
+          type: object
+      additionalProperties: false
+      properties:
+        draft_id:
+          format: uuid
+          title: Draft Id
+          type: string
+        expected_revision:
+          pattern: ^[0-9a-f]{64}$
+          title: Expected Revision
+          type: string
+        schema_changes:
+          items:
+            $ref: '#/$defs/StudioSchemaChangeIn'
+          maxItems: 20
+          title: Schema Changes
+          type: array
+      required:
+      - draft_id
+      - expected_revision
+      title: StudioPlanParameters
+      type: object
+    output_schema:
+      type: object
+
+  # ── Adaptive Workspace Fachaktionen (AW-FACHAKTIONEN-001) ───
+  # Nur Lesen: Katalog und deterministische Alias-Aufloesung. Kein DB-Write.
+  # Writes bleiben bei den vorhandenen Domain-Commands (MCP-WRITE-001 bis 015).
+  - tool_id: workspace.fachaktion.katalog
+    domain: workspace
+    name: "Fachaktionskatalog Adaptive Workspace"
+    description: "Liefert den typisierten Fachaktionskatalog (permission, idempotency, audit, event-out, Aliase) aus config/adaptive_workspace_fachaktionen.yaml. Nur Lesen. parameters.access optional read|write. Scope agent:read. Kein tenant_id-Parameter."
+    scope: agent:read
+    idempotent: true
+    risk_class: low
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      properties:
+        access: { type: string, enum: [read, write], description: "Optionaler Filter" }
+      required: []
+    output_schema:
+      type: object
+      properties:
+        registry_id: { type: string }
+        count: { type: integer }
+        actions: { type: array }
+        lead_contract: { type: object }
+        event_gaps: { type: array }
+    audit: read
+    endpoint: "POST /api/v1/mcp/tools/call"
+    human_approval_required: false
+
+  - tool_id: workspace.fachaktion.resolve
+    domain: workspace
+    name: "Kurzkommando auf Fachaktion aufloesen"
+    description: "Mappt ein natuerliches Kurzkommando deterministisch (Alias/Action-ID, kein LLM) auf eine typisierte Fachaktion und prueft Scope sowie Agenten-/Vier-Augen-Grenze. Nur Lesen, keine Ausfuehrung. parameters.command. Scope agent:read; die Zielaktion hat zusaetzlich ihre Fach-Scope. Writes werden nicht ausgeloest."
+    scope: agent:read
+    idempotent: true
+    risk_class: low
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      properties:
+        command: { type: string, description: "Kurzkommando oder Action-ID" }
+      required: [command]
+    output_schema:
+      type: object
+      properties:
+        action_id: { type: string, nullable: true }
+        authorized: { type: boolean }
+        reason: { type: string }
+        mcp_tool_id: { type: string, nullable: true }
+        four_eyes: { type: boolean }
+        command_endpoint: { type: string, nullable: true }
     audit: read
     endpoint: "POST /api/v1/mcp/tools/call"
     human_approval_required: false

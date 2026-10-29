@@ -1,7 +1,7 @@
-# Architecture Index — generiert 2026-10-15
+# Architecture Index — generiert 2026-10-26
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-10-14T22:07:52Z'
+generated_at: '2026-10-26T06:46:23Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -290,6 +290,7 @@ domains:
     - agrar_selbstabrechnung_lifecycle_service
     - agrar_settlement_service
     - agrar_trocknung_abrechnung_service
+    - agri_flush_booking
     - agri_lot_link_booking_service
     - agri_material_flow_trace_integration
     - agri_qs_workflow_service
@@ -356,6 +357,7 @@ domains:
     - agrar_maschinen
     - agrar_p0
     - agrar_settlements
+    - agrar_stammdaten_kommandos
     - agrar_varieties
     - agrar_wetter
     - agri_lot_link_booking
@@ -405,6 +407,7 @@ domains:
     - futtermittel_rohwaren
     - grundfutter_analysen
     - harvest_acceptance
+    - harvest_rules
     - hofliste
     - kontrakt_hedging
     - kontrakt_klassen
@@ -484,6 +487,9 @@ domains:
     - docs/adr/adr-077-leading-weighing-ticket.md
     - docs/adr/adr-078-canonical-lead-postgresql-pdf.md
     - docs/adr/adr-079-ebilanz-xbrl-drafts.md
+    - docs/adr/adr-085-studio-generated-master-data.md
+    - docs/adr/adr-harvest-deduction-resolver.md
+    - docs/adr/adr-studio-semantic-contracts.md
     status: active
   crm:
     owner: domain/crm
@@ -782,6 +788,7 @@ domains:
     - crm_kontakte
     - crm_kunden_map
     - crm_lead_gen
+    - crm_listen_kommandos
     - crm_mail_capture
     - crm_ownership
     - crm_partner_suche
@@ -817,6 +824,7 @@ domains:
     - sales_invoices
     - sales_match
     - sales_offers
+    - sales_order_commands
     - sales_orders
     - sales_reports
     - sales_shipping_ext
@@ -844,6 +852,7 @@ domains:
     - docs/adr/adr-072-mcp-execution-adapters.md
     - docs/adr/adr-078-canonical-lead-postgresql-pdf.md
     - docs/adr/adr-081-whatsapp-browser-notification-persistence.md
+    - docs/adr/adr-085-studio-generated-master-data.md
     status: pilot
   dms-compliance:
     owner: domain/dms-compliance
@@ -935,13 +944,17 @@ domains:
     - docflow_artifact_service
     - docflow_belegadapter
     - docflow_belegaktionen
+    - docflow_create_command
+    - docflow_creation_context
     - docflow_evidence_service
     - docflow_followup_service
     - docflow_freigabe
     - docflow_gobd_service
     - docflow_return_service
+    - docflow_screen_provenance
     - docflow_service
     - docflow_source_proposals
+    - docflow_update_command
     - document_control_projection
     - document_control_service
     - eudr_register_service
@@ -1203,8 +1216,10 @@ domains:
     - /statistik/bewegungen
     backend_services:
     - accounting_export_profiles
+    - ap_invoice_approval_service
     - ap_invoice_kernel_posting
     - billing_batch_service
+    - closing_checklist_validation
     - closing_checklists_service
     - command_handlers_finance
     - controlling_abweichung_service
@@ -1238,6 +1253,7 @@ domains:
     - pos_tagesabschluss_service
     - preisfindung_service
     - query_center_service
+    - sepa_xml_generator
     - tse_fiskaly_service
     - vies_service
     backend_endpoints:
@@ -1284,6 +1300,7 @@ domains:
     - finance_period
     - finance_read_models
     - finance_stammdaten
+    - finance_stammdaten_kommandos
     - financial_reports
     - forderungsgruppen
     - gelangensbestaetigung
@@ -1560,6 +1577,7 @@ domains:
     - docs/adr/adr-062-foreign-goods-operator-projection.md
     - docs/adr/adr-077-leading-weighing-ticket.md
     - docs/adr/adr-078-canonical-lead-postgresql-pdf.md
+    - docs/adr/adr-085-studio-generated-master-data.md
     status: active
   logistics:
     owner: domain/logistics
@@ -1649,6 +1667,7 @@ domains:
     - docs/adr/adr-078-canonical-lead-postgresql-pdf.md
     - docs/adr/adr-081-whatsapp-browser-notification-persistence.md
     - docs/adr/adr-082-verified-identity-transport.md
+    - docs/adr/adr-084-studio-migration-plan-history.md
   platform:
     owner: platform
     frontend_route_prefixes:
@@ -1819,13 +1838,19 @@ domains:
     - knowledge_store
     - legacy_interface_adapter_service
     - llm_gateway
+    - made_by_studio_gates
     - mail_ingest_service
     - mail_versand
     - mailkonto_service
     - mask_action_runtime_service
+    - mask_commands
+    - mask_data_read
     - mask_rollout_summary_service
+    - mask_table_query
     - mcp_beleg_tools
     - mcp_execution_service
+    - mcp_mask_actions
+    - mcp_studio_plans
     - mcp_tool_registry_service
     - mobile_sync_service
     - nats_event_handlers
@@ -1847,7 +1872,20 @@ domains:
     - security_observability
     - stt_client
     - studio_draft_store
+    - studio_entity_commands
+    - studio_entity_compiler
+    - studio_entity_contracts
+    - studio_entity_evolution
+    - studio_entity_router
+    - studio_entity_simulation
+    - studio_history_view
+    - studio_migration
+    - studio_migration_store
+    - studio_native_import
+    - studio_process_simulation
     - studio_propose
+    - studio_semantic
+    - studio_semantic_model
     - studio_validation
     - sync_scheduler
     - tenant_lifecycle_service
@@ -1934,6 +1972,7 @@ domains:
     - operational_governance
     - operator_agent
     - planung_kalender
+    - preis_kalkulation_bridge
     - process_kernel_api
     - process_map
     - process_mining_api
@@ -1949,7 +1988,9 @@ domains:
     - security_monitoring
     - service_anfragen
     - sla_escalation_api
+    - stammdaten_bearbeiten
     - studio_drafts
+    - studio_native_import
     - supply_chain_blockchain
     - system_metrics
     - tapi
@@ -2070,6 +2111,7 @@ domains:
     - bestell_kommunikation_service
     - command_handlers_procurement
     - einkauf_compat_service
+    - ordrsp_service
     - proc_bestellung_lifecycle_service
     - proc_rechnungspruefung_service
     - proc_wareneingang_service
@@ -2079,6 +2121,11 @@ domains:
     - rfq_service
     - wareneingang_avis_service
     backend_endpoints:
+    - einkauf_ab_erfassung
+    - einkauf_anfrage_kommandos
+    - einkauf_angebot_kommandos
+    - einkauf_avis_kommandos
+    - einkauf_bestellung_kommandos
     - einkauf_bestellvorschlag
     - einkauf_kpis
     - einkauf_lieferschein
@@ -2096,10 +2143,10 @@ domains:
 mapping_stats:
   frontend_routes_total: 941
   frontend_routes_mapped: 941
-  backend_services_total: 290
-  backend_services_mapped: 290
-  backend_endpoints_total: 460
-  backend_endpoints_mapped: 460
+  backend_services_total: 318
+  backend_services_mapped: 318
+  backend_endpoints_total: 473
+  backend_endpoints_mapped: 473
 unmapped:
   frontend_routes: []
   backend_services: []

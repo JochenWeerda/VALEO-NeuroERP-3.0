@@ -6,7 +6,6 @@ from datetime import date, datetime, timezone
 from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
-from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from ....core.database import get_db
@@ -17,14 +16,28 @@ from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFa
 from app.services.docflow_freigabe import DocflowFreigabe
 from app.services.docflow_service import DocflowService, POS_TYPES
 
-from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
 from app.api.v1.schemas.base import TypedObjectOut
 
 
-class DocflowOut(BaseSchema):
-    model_config = _ConfigDict(extra="allow")
-
+from app.api.v1.schemas.docflow_schemas import (
+    DocflowOut,
+    DocflowItemOut,
+    DocflowHeaderOut,
+    DocflowConvertRequest,
+    DocflowPostRequest,
+    DocflowReleaseRequest,
+    DocflowReverseRequest,
+    DocflowRecordPrintRequest,
+    DocflowRecordExportRequest,
+    DocflowCommandResult,
+    DocflowLineInput,
+    PosComplianceInput,
+    DocflowCreateRequest,
+    DocflowUpdateRequest,
+    DocflowApprovalRequest,
+    DocflowApprovalDecision,
+)
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter()
 
@@ -38,170 +51,13 @@ def _docflow_tenant(
     return verified_tenant
 
 
-# ── Pydantic schemas ──────────────────────────────────────────────────────────
-
-class DocflowItemOut(BaseModel):
-    id: str
-    line_number: int
-    source_line_id: Optional[str] = None
-    article_number: str
-    description: Optional[str] = None
-    quantity: float
-    unit: Optional[str] = None
-    unit_price: float
-    discount_percent: float
-    tax_code: Optional[str] = None
-    expense_account: Optional[str] = None
-    tax_rate: float
-    line_total_net: float
-    line_total_tax: float
-    line_total_gross: float
+# â”€â”€ Pydantic schemas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
-class DocflowHeaderOut(BaseModel):
-    id: str
-    tenant_id: str
-    doc_type: str
-    doc_number: str
-    status: str
-    source_system: str
-    source_ref: Optional[str] = None
-    customer_id: Optional[str] = None
-    supplier_id: Optional[str] = None
-    currency: str
-    total_net: float
-    total_tax: float
-    total_gross: float
-    document_date: datetime
-    posting_date: Optional[date] = None
-    version: int
-    created_at: datetime
-    updated_at: datetime
-    items: list[DocflowItemOut] = Field(default_factory=list)
-    pos_compliance: Optional[dict[str, Any]] = None
-    printed_at: Optional[datetime] = None
-    printed_by: Optional[str] = None
-    print_count: int = 0
-    exported_at: Optional[datetime] = None
-    exported_by: Optional[str] = None
-
-
-class DocflowConvertRequest(BaseModel):
-    target_doc_type: str = Field(..., min_length=3, max_length=40)
-    idempotency_key: str = Field(..., min_length=8, max_length=120)
-    quantities_by_source_item_id: dict[str, float] = Field(default_factory=dict)
-    expected_version: Optional[int] = Field(default=None, ge=1)
-    created_by: Optional[str] = Field(default=None, max_length=100)
-    dry_run: bool = False
-
-
-class DocflowPostRequest(BaseModel):
-    idempotency_key: str = Field(..., min_length=8, max_length=120)
-    expected_version: Optional[int] = Field(default=None, ge=1)
-    posting_date: Optional[date] = None
-    posted_by: Optional[str] = Field(default=None, max_length=100)
-
-
-class DocflowReleaseRequest(BaseModel):
-    idempotency_key: str = Field(..., min_length=8, max_length=120)
-    expected_version: Optional[int] = Field(default=None, ge=1)
-    released_by: Optional[str] = Field(default=None, max_length=100)
-
-
-class DocflowReverseRequest(BaseModel):
-    idempotency_key: str = Field(..., min_length=8, max_length=120)
-    reason: str = Field(..., min_length=3, max_length=300)
-    expected_version: Optional[int] = Field(default=None, ge=1)
-    reversed_by: Optional[str] = Field(default=None, max_length=100)
-
-
-class DocflowRecordPrintRequest(BaseModel):
-    printed_by: Optional[str] = Field(default=None, max_length=100)
-
-
-class DocflowRecordExportRequest(BaseModel):
-    exported_by: Optional[str] = Field(default=None, max_length=100)
-
-
-class DocflowCommandResult(BaseModel):
-    command: str
-    idempotent_hit: bool = False
-    source_doc_id: Optional[str] = None
-    target_doc_id: Optional[str] = None
-    posting_id: Optional[str] = None
-    status: str
-    payload: dict[str, Any] = Field(default_factory=dict)
-
-
-class DocflowLineInput(BaseModel):
-    article_number: str = Field(..., min_length=1, max_length=80)
-    description: Optional[str] = None
-    quantity: float = Field(default=0, ge=0)
-    unit: Optional[str] = Field(default=None, max_length=20)
-    unit_price: float = Field(default=0, ge=0)
-    discount_percent: float = Field(default=0, ge=0, le=100)
-    # Steuerschluessel des Mandanten (tax_keys.code). Mit ihm kommt der Satz vom Server; ein abweichend
-    # mitgeschickter Satz wird abgelehnt. Ohne ihn gilt der Satz der Anfrage — gebucht wird so nicht.
-    tax_code: Optional[str] = Field(default=None, max_length=2)
-    tax_rate: Optional[float] = Field(default=None, ge=0, le=100)
-    # Nur Einkaufsbelege: Aufwandskonto der Position; leer = das des Steuerschluessels.
-    expense_account: Optional[str] = Field(default=None, max_length=20)
-    batch_id: Optional[str] = Field(default=None, max_length=64)
-    charge: Optional[str] = Field(default=None, max_length=64)
-
-
-class PosComplianceInput(BaseModel):
-    terminal_id: str = Field(..., min_length=1, max_length=60)
-    cash_register_id: Optional[str] = Field(default=None, max_length=60)
-    transaction_type: str = Field(default="sale", min_length=4, max_length=20)
-    payment_breakdown: Optional[dict[str, Any]] = None
-    tse_transaction_id: str = Field(..., min_length=1, max_length=120)
-    tse_signature: str = Field(..., min_length=1)
-    tse_signature_counter: Optional[int] = None
-    transaction_started_at: datetime
-    transaction_ended_at: datetime
-    receipt_issued_at: datetime
-    dsfinvk_export_batch_id: Optional[str] = Field(default=None, max_length=120)
-    correction_type: Optional[str] = Field(default=None, max_length=20)
-    original_header_id: Optional[str] = Field(default=None, max_length=36)
-
-
-class DocflowCreateRequest(BaseModel):
-    doc_type: str = Field(..., min_length=3, max_length=40)
-    doc_number: str = Field(..., min_length=1, max_length=80)
-    status: str = Field(default="draft", min_length=3, max_length=20)
-    source_system: Optional[str] = Field(default=None, max_length=40)
-    source_ref: Optional[str] = Field(default=None, max_length=80)
-    customer_id: Optional[str] = None
-    supplier_id: Optional[str] = None
-    currency: str = Field(default="EUR", min_length=3, max_length=3)
-    document_date: Optional[datetime] = None
-    posting_date: Optional[date] = None
-    created_by: Optional[str] = Field(default=None, max_length=100)
-    items: list[DocflowLineInput] = Field(default_factory=list)
-    pos_compliance: Optional[PosComplianceInput] = None
-    idempotency_key: Optional[str] = Field(default=None, min_length=8, max_length=120)
-
-
-class DocflowUpdateRequest(BaseModel):
-    expected_version: Optional[int] = Field(default=None, ge=1)
-    status: Optional[str] = Field(default=None, min_length=3, max_length=20)
-    source_system: Optional[str] = Field(default=None, max_length=40)
-    source_ref: Optional[str] = Field(default=None, max_length=80)
-    customer_id: Optional[str] = None
-    supplier_id: Optional[str] = None
-    currency: Optional[str] = Field(default=None, min_length=3, max_length=3)
-    document_date: Optional[datetime] = None
-    posting_date: Optional[date] = None
-    updated_by: Optional[str] = Field(default=None, max_length=100)
-    items: Optional[list[DocflowLineInput]] = None
-    pos_compliance: Optional[PosComplianceInput] = None
-
-
-# ── helpers ───────────────────────────────────────────────────────────────────
+# â”€â”€ helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 def _akteur(nutzer: Any) -> Optional[str]:
-    """Die Kennung des angemeldeten Benutzers — aus der geprueften Anmeldung, nie aus der Anfrage."""
+    """Die Kennung des angemeldeten Benutzers â€” aus der geprueften Anmeldung, nie aus der Anfrage."""
     wert = nutzer.get("sub") if isinstance(nutzer, dict) else getattr(nutzer, "sub", None) or getattr(nutzer, "id", None)
     return str(wert).strip() or None if wert else None
 
@@ -214,7 +70,7 @@ def _recht(svc: DocflowService, doc_id: str, nutzer: Any, recht: str) -> None:
     """403 ohne das Recht an der Belegart dieses Belegs (``app/auth/beleg_roles.py``).
 
     Steht der Beleg noch nicht in DocFlow, ist er ein Auftrag oder Lieferschein des Verkaufs, der beim ersten
-    Zugriff nachgezogen wird — geprueft wird dann das Recht am Auftrag.
+    Zugriff nachgezogen wird â€” geprueft wird dann das Recht am Auftrag.
     """
     header = svc.fetch_header(doc_id)
     verlange(nutzer, recht, str(header["doc_type"]) if header else "sales_order")
@@ -233,13 +89,16 @@ def _validate_pos_compliance_requirements(doc_type: str, pos: Optional[PosCompli
         raise HTTPException(status_code=400, detail="original_header_id required for correction_type")
 
 
-def _row_to_header_out(svc: DocflowService, header_id: str) -> DocflowHeaderOut:
-    header = svc.fetch_header(header_id)
+def _row_to_header_out(svc: DocflowService, header_id: str, snapshot: Optional[dict[str, Any]] = None) -> DocflowHeaderOut:
+    header = snapshot["header"] if snapshot is not None else svc.fetch_header(header_id)
     if not header:
         raise HTTPException(status_code=404, detail="Document not found")
-    items = svc.fetch_items(header_id)
-    pos_compliance = svc.fetch_pos_compliance(header_id)
+    items = snapshot["items"] if snapshot is not None else svc.fetch_items(header_id)
+    pos_compliance = snapshot["pos_compliance"] if snapshot is not None else svc.fetch_pos_compliance(header_id)
+    from app.services.docflow_screen_provenance import read_screen_context
+    context = snapshot.get("screen_context") if snapshot is not None and "screen_context" in snapshot else read_screen_context(svc, header_id)
     return DocflowHeaderOut(
+        screen_context=context,
         id=str(header["id"]),
         tenant_id=str(header["tenant_id"]),
         doc_type=str(header["doc_type"]),
@@ -277,6 +136,8 @@ def _row_to_header_out(svc: DocflowService, header_id: str) -> DocflowHeaderOut:
                 discount_percent=float(i.get("discount_percent") or 0),
                 tax_code=i.get("tax_code"),
                 expense_account=i.get("expense_account"),
+                batch_id=i.get("batch_id"),
+                charge=i.get("charge"),
                 tax_rate=float(i.get("tax_rate") or 0),
                 line_total_net=float(i.get("line_total_net") or 0),
                 line_total_tax=float(i.get("line_total_tax") or 0),
@@ -287,7 +148,7 @@ def _row_to_header_out(svc: DocflowService, header_id: str) -> DocflowHeaderOut:
     )
 
 
-# ── routes ────────────────────────────────────────────────────────────────────
+# â”€â”€ routes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @router.get("/", response_model=list[DocflowHeaderOut], summary="Documents auflisten")
 async def list_documents(
@@ -329,8 +190,7 @@ async def get_document(
     status_code=status.HTTP_204_NO_CONTENT,
     response_class=Response,
     response_model=None,
-    summary="Ungebuchten Docflow-Entwurf loeschen",
-)
+    summary="Ungebuchten Docflow-Entwurf loeschen", dependencies=SCHREIBEN["BELEGE"])
 async def delete_draft_document(
     doc_id: str,
     tenant_id: str = Depends(_docflow_tenant),
@@ -382,7 +242,7 @@ async def get_pos_compliance(
     return payload
 
 
-@router.post("/", response_model=DocflowHeaderOut, summary="Document anlegen")
+@router.post("/", response_model=DocflowHeaderOut, summary="Document anlegen", dependencies=SCHREIBEN["BELEGE"])
 async def create_document(
     payload: DocflowCreateRequest,
     tenant_id: str = Depends(_docflow_tenant),
@@ -394,20 +254,24 @@ async def create_document(
     _validate_pos_compliance_requirements(payload.doc_type, payload.pos_compliance)
     svc = _svc(db, effective_tenant, _akteur(nutzer))
     try:
-        doc_id = svc.create_document(payload)
+        snapshot = svc.create_document_snapshot(payload)
+        doc_id = str(snapshot['header']['id'])
     except (EntityNotFoundError, ValidationFailedError) as exc:
         db.rollback()
         raise HTTPException(status_code=422, detail=exc.detail)
+    except ConflictError as exc:
+        db.rollback()
+        raise HTTPException(status_code=409, detail=exc.detail)
     except HTTPException:
         db.rollback()
         raise
     except Exception as exc:
         db.rollback()
-        raise HTTPException(status_code=500, detail=f"create failed: {exc}") from exc
-    return _row_to_header_out(svc, doc_id)
+        raise HTTPException(status_code=500, detail="Document create failed") from exc
+    return _row_to_header_out(svc, doc_id, snapshot)
 
 
-@router.put("/{doc_id}", response_model=DocflowHeaderOut, summary="Document aktualisieren")
+@router.put("/{doc_id}", response_model=DocflowHeaderOut, summary="Document aktualisieren", dependencies=SCHREIBEN["BELEGE"])
 async def update_document(
     doc_id: str,
     payload: DocflowUpdateRequest,
@@ -424,7 +288,7 @@ async def update_document(
     verlange(nutzer, "bearbeiten", effective_doc_type)
     _validate_pos_compliance_requirements(effective_doc_type, payload.pos_compliance)
     try:
-        svc.update_document(doc_id, payload)
+        snapshot = svc.update_document(doc_id, payload)
     except EntityNotFoundError as exc:
         db.rollback()
         raise HTTPException(status_code=404, detail=exc.detail)
@@ -439,20 +303,11 @@ async def update_document(
         raise
     except Exception as exc:
         db.rollback()
-        raise HTTPException(status_code=500, detail=f"update failed: {exc}") from exc
-    return _row_to_header_out(svc, doc_id)
+        raise HTTPException(status_code=500, detail="Document update failed") from exc
+    return _row_to_header_out(svc, doc_id, snapshot)
 
 
-# ── Freigaben (APPROVAL-001) ──────────────────────────────────────────────────
-
-class DocflowApprovalRequest(BaseModel):
-    action: str = Field(..., pattern="^(post|reverse)$")
-    reason: Optional[str] = Field(default=None, max_length=300)
-
-
-class DocflowApprovalDecision(BaseModel):
-    granted: bool
-    note: Optional[str] = Field(default=None, max_length=300)
+# â”€â”€ Freigaben (APPROVAL-001) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @router.get("/{doc_id}/approvals", response_model=list[TypedObjectOut], summary="Freigaben des Belegs")
@@ -469,7 +324,7 @@ def list_approvals(
     return DocflowFreigabe(db, tenant_id).liste(doc_id)
 
 
-@router.post("/{doc_id}/approvals", response_model=TypedObjectOut, summary="Freigabe durch eine zweite Person anfragen")
+@router.post("/{doc_id}/approvals", response_model=TypedObjectOut, summary="Freigabe durch eine zweite Person anfragen", dependencies=SCHREIBEN["BELEGE"])
 def request_approval(
     doc_id: str,
     payload: DocflowApprovalRequest,
@@ -493,7 +348,7 @@ def request_approval(
 
 
 @router.post("/{doc_id}/approvals/{approval_id}/decision", response_model=TypedObjectOut,
-             summary="Freigabe erteilen oder ablehnen")
+             summary="Freigabe erteilen oder ablehnen", dependencies=SCHREIBEN["FREIGABE"])
 def decide_approval(
     doc_id: str,
     approval_id: str,
@@ -516,7 +371,7 @@ def decide_approval(
         raise HTTPException(status_code=403, detail=exc.detail)
 
 
-@router.post("/{doc_id}/release", response_model=DocflowCommandResult, summary="Document freigeben")
+@router.post("/{doc_id}/release", response_model=DocflowCommandResult, summary="Document freigeben", dependencies=SCHREIBEN["BELEGE"])
 async def release_document(
     doc_id: str,
     payload: DocflowReleaseRequest,
@@ -543,7 +398,7 @@ async def release_document(
     return DocflowCommandResult(**result)
 
 
-@router.post("/{doc_id}/record-print", response_model=DocflowHeaderOut, summary="Print record")
+@router.post("/{doc_id}/record-print", response_model=DocflowHeaderOut, summary="Print record", dependencies=SCHREIBEN["BELEGE"])
 async def record_print(
     doc_id: str,
     payload: DocflowRecordPrintRequest,
@@ -564,7 +419,7 @@ async def record_print(
     return _row_to_header_out(svc, doc_id)
 
 
-@router.post("/{doc_id}/record-export", response_model=DocflowHeaderOut, summary="Export record")
+@router.post("/{doc_id}/record-export", response_model=DocflowHeaderOut, summary="Export record", dependencies=SCHREIBEN["BELEGE"])
 async def record_export(
     doc_id: str,
     payload: DocflowRecordExportRequest,
@@ -585,7 +440,7 @@ async def record_export(
     return _row_to_header_out(svc, doc_id)
 
 
-@router.post("/{doc_id}/convert", response_model=DocflowCommandResult, summary="Document umwandeln")
+@router.post("/{doc_id}/convert", response_model=DocflowCommandResult, summary="Document umwandeln", dependencies=SCHREIBEN["BELEGE"])
 async def convert_document(
     doc_id: str,
     payload: DocflowConvertRequest,
@@ -616,7 +471,7 @@ async def convert_document(
     return DocflowCommandResult(**result)
 
 
-@router.post("/{doc_id}/post", response_model=DocflowCommandResult, summary="Document erstellen")
+@router.post("/{doc_id}/post", response_model=DocflowCommandResult, summary="Document erstellen", dependencies=SCHREIBEN["BELEGE"])
 async def post_document(
     doc_id: str,
     payload: DocflowPostRequest,
@@ -643,7 +498,7 @@ async def post_document(
     return DocflowCommandResult(**result)
 
 
-@router.post("/{doc_id}/reverse", response_model=DocflowCommandResult, summary="Document reverse")
+@router.post("/{doc_id}/reverse", response_model=DocflowCommandResult, summary="Document reverse", dependencies=SCHREIBEN["BELEGE"])
 async def reverse_document(
     doc_id: str,
     payload: DocflowReverseRequest,
@@ -674,7 +529,7 @@ async def reverse_document(
 from app.services.docflow_source_proposals import DocflowSourceProposalService, SourceProposalRequest
 
 
-@router.post("/source-proposals", response_model=DocflowOut, summary="Kontrakt- und Fremdlagerquellen vorschlagen")
+@router.post("/source-proposals", response_model=DocflowOut, summary="Kontrakt- und Fremdlagerquellen vorschlagen", dependencies=SCHREIBEN["BELEGE"])
 def source_proposals(
     body: SourceProposalRequest,
     db: Session = Depends(get_db),

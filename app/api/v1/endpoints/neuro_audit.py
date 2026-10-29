@@ -19,6 +19,7 @@ from app.services.neuro_decision_protocol import (
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.neuro_audit_schemas import NeuroAuditOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(tags=["neuro-core", "audit"])
@@ -65,8 +66,7 @@ class RecordDecisionRequest(BaseModel):
 
 
 @router.post("/neuro/decisions", summary="Decision anlegen",
-    response_model=NeuroAuditOut
-)
+    response_model=NeuroAuditOut, dependencies=SCHREIBEN["FACHLICH"])
 async def create_decision(
     request: RecordDecisionRequest,
     tenant_id: str = Depends(get_tenant_id),

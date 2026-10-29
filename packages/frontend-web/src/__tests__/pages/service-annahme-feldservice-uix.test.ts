@@ -57,11 +57,11 @@ describe('Service/Annahme/Feldservice UIX', () => {
     expect(src).not.toContain('size="sm"')
   })
 
-  it('stellt Opportunities-Theater nur am Desktop', () => {
+  it('stellt Opportunities als Studio-Liste', () => {
+    // MASK-STUDIO-ROLLOUT: Spalten, Aktionen und Touch-Verhalten aus der ScreenDefinition crm/opportunities-liste.
     const src = read('../../pages/crm/opportunities-liste.tsx')
-    expect(src).toContain('useTouchDevice')
-    expect(src).toContain('{!isTouch ? (')
-    expect(src).toContain('ListReport')
+    expect(src).toContain('NativeListPage')
+    expect(src).toContain('screenId="crm/opportunities-liste"')
   })
 
   it('stellt QS-Checkliste ohne toten Audit-Start', () => {
@@ -117,15 +117,11 @@ describe('Service/Annahme/Feldservice UIX', () => {
     expect(src).toContain('min-h-touch')
   })
 
-  it('stellt Lieferantenstamm Theater nur am Desktop', () => {
-    const src = read('../../pages/einkauf/lieferanten-stamm.tsx')
-    expect(src).toContain('useTouchDevice')
-    expect(src).toContain('{!isTouch ? (')
-    expect(src).toContain('Tabs')
-    expect(src).toContain('min-h-touch')
-    expect(src).toContain('Löschen')
-    expect(src).not.toContain('size="sm"')
-    expect(src).not.toContain('text-orange-800')
+  it('stellt Lieferantenstamm als Studio-Maske dar', () => {
+    // Seit 20.10.2026 ScreenDefinition einkauf/supplier (Anlage, Bearbeiten, Sperren); die handgebaute Seite ist entfernt.
+    const src = read('../../pages/einkauf/supplier-native.tsx')
+    expect(src).toContain('UniversalNativeDetailPage')
+    expect(src).toContain('screenId="einkauf/supplier"')
   })
 
   it('stellt Dashboards ohne Theater auf Touch', () => {
@@ -163,8 +159,8 @@ describe('Service/Annahme/Feldservice UIX', () => {
   it('stellt Benutzer- und Rollenlisten 44 px', () => {
     const users = read('../../pages/admin/benutzer-liste.tsx')
     const roles = read('../../pages/admin/rollen-verwaltung.tsx')
-    expect(users).toContain('Suche Benutzer')
-    expect(users).toContain('min-h-11 font-medium text-primary')
+    // Benutzer: Studio-Liste (Suche und 44-px-Zeilen aus dem Renderer).
+    expect(users).toContain('screenId="admin/benutzer-liste"')
     expect(roles).toContain('Suche Rollen')
     expect(roles).toContain('{!isTouch ? (')
   })
@@ -352,13 +348,11 @@ describe('Service/Annahme/Feldservice UIX', () => {
     expect(src).not.toContain('size="sm"')
   })
 
-  it('stellt Wiedervorlagen mit Tokens und 44-px-Erledigen', () => {
+  it('stellt Wiedervorlagen als Studio-Liste dar', () => {
+    // Seit 21.10.2026 ScreenDefinition crm/wiedervorlagen (Erledigen mit Ergebnis, Zeile oeffnet die Kundenakte).
     const src = read('../../pages/crm/wiedervorlagen.tsx')
-    expect(src).toContain('min-h-touch')
-    expect(src).toContain('Erledigen')
-    expect(src).toContain('bg-status-error/10')
-    expect(src).not.toContain('bg-red-50')
-    expect(src).not.toContain('size="sm"')
+    expect(src).toContain('NativeListPage')
+    expect(src).toContain('screenId="crm/wiedervorlagen"')
   })
 
   it('stellt Saatgut-Stamm mit 44-px-Zurueck', () => {
@@ -644,12 +638,11 @@ describe('Service/Annahme/Feldservice UIX', () => {
     expect(src).not.toContain('size="sm"')
   })
 
-  it('stellt Artikel-Stamm ohne Icon-only Aktionen', () => {
+  it('stellt Artikel-Stamm als Studio-Maske dar', () => {
+    // Seit 20.10.2026 ScreenDefinition artikel/stamm: beschriftete Aktionen und 44-px-Ziele aus dem Renderer.
     const src = read('../../pages/artikel/stamm.tsx')
-    expect(src).toContain('min-h-touch')
-    expect(src).toContain('Herunterladen')
-    expect(src).toContain('Bearbeiten')
-    expect(src).not.toContain('size="sm"')
+    expect(src).toContain('UniversalNativeDetailPage')
+    expect(src).toContain('screenId="artikel/stamm"')
   })
 
   it('stellt Zeiterfassung Arbeit zuerst und 44 px', () => {
@@ -892,11 +885,12 @@ describe('Service/Annahme/Feldservice UIX', () => {
     expect(src).not.toContain('size="sm"')
   })
 
-  it('stellt Wechselkurse Loeschen beschriftet', () => {
+  it('stellt Wechselkurse als Studio-Liste dar', () => {
+    // Seit 20.10.2026 ScreenDefinition finance/wechselkurse; "Loeschen" rief einen nie vorhandenen Weg und ist durch
+    // Deaktivieren/Aktivieren mit Begruendung ersetzt.
     const src = read('../../pages/finance/wechselkurse.tsx')
-    expect(src).toContain('min-h-touch')
-    expect(src).toContain('Löschen')
-    expect(src).not.toContain('size="sm"')
+    expect(src).toContain('NativeListPage')
+    expect(src).toContain('screenId="finance/wechselkurse"')
   })
 
   it('stellt Sachkonto Aktualisieren beschriftet', () => {

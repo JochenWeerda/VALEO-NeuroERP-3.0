@@ -28,6 +28,7 @@ from app.core.knowledge_graph import build_runtime_knowledge_graph
 
 from app.api.v1.schemas.base import BaseSchema
 from pydantic import ConfigDict as _ConfigDict
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 class ChannelWorkSurfaceOut(BaseSchema):
@@ -82,8 +83,7 @@ def _parse_supported_channel(channel: str) -> KnowledgeChannel:
 
 
 @router.post("/{channel}/knowledge-query", summary="Knowledge query channel",
-    response_model=ChannelWorkSurfaceOut
-)
+    response_model=ChannelWorkSurfaceOut, dependencies=SCHREIBEN["GERAET"])
 def channel_knowledge_query(channel: str, payload: ChannelKnowledgeQueryRequest, db=Depends(get_db)):
     if not payload.rolle:
         raise HTTPException(status_code=400, detail="Feld 'rolle' ist erforderlich")
@@ -104,8 +104,7 @@ def channel_knowledge_query(channel: str, payload: ChannelKnowledgeQueryRequest,
 
 
 @router.post("/{channel}/process-actions/execute", summary="Process execute channel",
-    response_model=ChannelWorkSurfaceOut
-)
+    response_model=ChannelWorkSurfaceOut, dependencies=SCHREIBEN["GERAET"])
 def channel_process_execute(channel: str, payload: ChannelProcessActionRequest, db=Depends(get_db)):
     from app.core.blockchain_anchor_runtime import anchor_channel_process_thread
 
@@ -194,8 +193,7 @@ def get_channel_process_thread_audit(channel: str, thread_id: str, db=Depends(ge
 
 
 @router.post("/{channel}/process-actions/{thread_id}/decision", summary="Process decision channel",
-    response_model=ChannelWorkSurfaceOut
-)
+    response_model=ChannelWorkSurfaceOut, dependencies=SCHREIBEN["GERAET"])
 def channel_process_decision(channel: str, thread_id: str, payload: ChannelApprovalDecisionRequest, db=Depends(get_db)):
     from app.core.blockchain_anchor_runtime import anchor_channel_process_thread
 
@@ -247,8 +245,7 @@ def get_knowledge_graph_node(node_id: str, tenant_id: str | None = None, db=Depe
 
 
 @router.post("/knowledge-graph/path", summary="Knowledge graph path abrufen",
-    response_model=ChannelWorkSurfaceOut
-)
+    response_model=ChannelWorkSurfaceOut, dependencies=SCHREIBEN["GERAET"])
 def get_knowledge_graph_path(payload: KnowledgeGraphPathRequest, db=Depends(get_db)):
     graph = build_runtime_knowledge_graph(db, tenant_id=payload.tenant_id)
     path = graph.find_path(payload.source_id, payload.target_id)
@@ -261,8 +258,7 @@ def get_knowledge_graph_path(payload: KnowledgeGraphPathRequest, db=Depends(get_
 
 
 @router.post("/slack/events", summary="Events slack",
-    response_model=ChannelWorkSurfaceOut
-)
+    response_model=ChannelWorkSurfaceOut, dependencies=SCHREIBEN["GERAET"])
 async def slack_events(request: Request, db=Depends(get_db)):
     raw_body = await request.body()
     timestamp = request.headers.get("X-Slack-Request-Timestamp")
@@ -286,8 +282,7 @@ async def slack_events(request: Request, db=Depends(get_db)):
 
 
 @router.post("/teams/events", summary="Events teams",
-    response_model=ChannelWorkSurfaceOut
-)
+    response_model=ChannelWorkSurfaceOut, dependencies=SCHREIBEN["GERAET"])
 async def teams_events(request: Request, db=Depends(get_db)):
     raw_body = await request.body()
     signature = request.headers.get("X-Teams-Signature")

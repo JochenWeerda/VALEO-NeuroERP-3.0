@@ -33,6 +33,20 @@ function makeMockPlan(overrides: Partial<RenderPlan> = {}): RenderPlan {
 }
 
 describe('compileDataBindingPlan', () => {
+  it('routes projected entity reads through the shared mask source for form prefill', () => {
+    const plan = makeMockPlan({ screenId: 'fibu/anlage' })
+    const result = compileDataBindingPlan(
+      plan,
+      [{ key: 'entity', endpoint: '/api/v1/finance/asset-accounting/assets/{entity_id}' }],
+      undefined,
+      'asset-42',
+      'tenant-a',
+      { id: 'asset.id', asset_number: 'asset.asset_number' },
+    )
+    expect(result.entityBinding.entityEndpoint).toBe('/api/v1/finance/asset-accounting/assets/asset-42')
+    expect(result.entityBinding.sharedEntityEndpoint).toBe('/api/v1/masks/fibu%2Fanlage/data/entity?entity_id=asset-42')
+  })
+
   it('resolves entity binding from dataSources', () => {
     const plan = makeMockPlan()
     const result = compileDataBindingPlan(
@@ -43,6 +57,7 @@ describe('compileDataBindingPlan', () => {
     )
     expect(result.entityBinding.entityEndpoint).toBe('/api/v1/crm/customers/42')
     expect(result.entityBinding.entityId).toBe('42')
+    expect(result.entityBinding.sharedEntityEndpoint).toBeUndefined()
   })
 
   it('resolves table bindings from dataSourceKey', () => {

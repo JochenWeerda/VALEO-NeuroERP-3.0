@@ -264,9 +264,7 @@ const ROUTES: Array<{ path: string; label: string; group: string }> = [
   { path: '/controlling/dashboard-verwaltung',    label: 'Dashboard Verwaltung',                group: 'controlling' },
   { path: '/controlling/widget-verwaltung',       label: 'Widget Verwaltung',                   group: 'controlling' },
   { path: '/reports',                             label: 'Reports',                             group: 'controlling' },
-  { path: '/reports/umsatz',                      label: 'Report Umsatz',                       group: 'controlling' },
   { path: '/reports/deckungsbeitrag',             label: 'Report Deckungsbeitrag',              group: 'controlling' },
-  { path: '/reports/lagerbestand',                label: 'Report Lagerbestand',                 group: 'controlling' },
 
   // Compliance
   { path: '/compliance/bvl-umsatzmeldung',        label: 'BVL Umsatzmeldung',                   group: 'compliance' },
@@ -350,7 +348,6 @@ const ROUTES: Array<{ path: string; label: string; group: string }> = [
   { path: '/personal/organigramm',                label: 'Organigramm',                         group: 'personal' },
   { path: '/personal/hrm-operations-gates',       label: 'HRM Operations Gates',               group: 'personal' },
   { path: '/schichtplan',                         label: 'Schichtplan',                         group: 'personal' },
-  { path: '/termine/kalender',                    label: 'Kalender',                            group: 'personal' },
 
   // Artikel / Stammdaten
   { path: '/artikel',                             label: 'Artikel Liste',                       group: 'stammdaten' },
@@ -385,7 +382,6 @@ const ROUTES: Array<{ path: string; label: string; group: string }> = [
   { path: '/pos/promotionen',                     label: 'POS Promotionen',                     group: 'pos' },
   { path: '/pos/gift-cards',                      label: 'POS Geschenkkarten',                  group: 'pos' },
   { path: '/pos/suspended-sales',                 label: 'POS Suspended Sales',                 group: 'pos' },
-  { path: '/kasse/tagesabschluss',                label: 'Kasse Tagesabschluss',                group: 'pos' },
 
   // Waage
   { path: '/waage',                               label: 'Waage',                               group: 'waage' },
@@ -464,12 +460,10 @@ const ROUTES: Array<{ path: string; label: string; group: string }> = [
   { path: '/portal/zertifikate',                  label: 'Portal Zertifikate',                  group: 'portal' },
 
   // Sonstiges
-  { path: '/energie/verbrauch',                   label: 'Energie Verbrauch',                   group: 'sonstiges' },
   { path: '/dokumente/ablage',                    label: 'Dokumentenablage',                    group: 'sonstiges' },
   { path: '/zertifikate',                         label: 'Zertifikate',                         group: 'sonstiges' },
   { path: '/zertifikate/liste',                   label: 'Zertifikate Liste',                   group: 'sonstiges' },
   { path: '/wartung/anlagen',                     label: 'Wartung Anlagen',                     group: 'sonstiges' },
-  { path: '/statistik/bewegungen',                label: 'Statistik Bewegungen',                group: 'sonstiges' },
 ]
 
 // ---------------------------------------------------------------------------

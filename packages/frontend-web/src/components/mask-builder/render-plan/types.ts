@@ -1,4 +1,7 @@
 import type {
+  ScreenDefinition,
+  DocumentScreenVariantRef,
+  ListExperience,
   ScreenDomain,
   ScreenColumnNavigation,
   ScreenCalendarView,
@@ -6,6 +9,7 @@ import type {
   ScreenContextRailSection,
   ScreenDensity,
   ScreenFieldType,
+  ScreenFieldDefinition,
   ScreenFloorplan,
   ScreenLayoutMode,
   ScreenMode,
@@ -17,9 +21,11 @@ import type {
   ScreenTableProfile,
   ScreenTwinMetricKind,
   ScreenVoiceProvider,
+  ScreenSpecializedComponent,
 } from '../schema'
 
 export type RenderComponentKind =
+  | 'table'
   | 'text'
   | 'number'
   | 'date'
@@ -144,6 +150,7 @@ export interface RenderTabContentPlan {
 }
 
 export interface RenderFieldPlan {
+  currencyField?: string
   key: string
   label: string
   componentKind: RenderComponentKind
@@ -158,6 +165,8 @@ export interface RenderFieldPlan {
   options?: Array<{ value: string | number; label: string }>
   dataSourceKey?: string
   minSearchChars: number
+  rowFields?: ScreenFieldDefinition[]
+  tableEditing?: ScreenFieldDefinition['tableEditing']
   renderHint?: 'singleLine' | 'multiLine' | 'compact' | 'touch'
 }
 
@@ -180,6 +189,7 @@ export interface RenderTableColumnPlan {
   sortable?: boolean
   filterable?: boolean
   renderKind?: RenderColumnKind
+  currencyField?: string
   defaultSort?: 'asc' | 'desc'
   priority?: RenderColumnPriority
 }
@@ -213,6 +223,7 @@ export interface RenderTablePlan {
     enabledWhen?: ScreenCondition
     visibleWhen?: { field: string; values: Array<string | number | boolean> }
     disabledWhen?: { field: string; values: Array<string | number | boolean> }
+    localRowPatch?: { identityField: string; field: string; value: string | number | boolean }
   }>
   bulkActions?: Array<{
     key: string
@@ -269,6 +280,9 @@ export interface RenderPerformancePlan {
 }
 
 export interface RenderPlan {
+  flowSpineCatalog?: ScreenDefinition['flowSpineCatalog']
+  listExperience?: ListExperience
+  documentVariant?: DocumentScreenVariantRef
   cacheKey: string
   screenId: string
   schemaVersion: number
@@ -278,6 +292,7 @@ export interface RenderPlan {
   tiles: RenderTilePlan[]
   calendar?: RenderCalendarPlan
   sourceProposals?: { contextKey: string }
+  specialized?: ScreenSpecializedComponent
   twin?: RenderTwinPlan
   visibleTabs: RenderTabPlan[]
   tabContent: Record<string, RenderTabContentPlan>
@@ -297,7 +312,7 @@ export interface RenderPlan {
   overlayInvalidPaths?: string[]
 }
 
-export function fieldTypeToComponentKind(type: ScreenFieldType): RenderComponentKind {
-  if (type === 'table') return 'text'
+export function fieldTypeToComponentKind(type: ScreenFieldType, structuredTable = false): RenderComponentKind {
+  if (type === 'table' && !structuredTable) return 'text'
   return type
 }

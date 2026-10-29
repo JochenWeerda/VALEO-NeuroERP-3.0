@@ -43,3 +43,132 @@ gegen dieselben Identitäts-/Kapazitätsregeln. Eine Vorschau schreibt keine
 Kontingente und kein Verbrauchsereignis. Jede Vergabe besitzt einen Urheber.
 
 [Abnahmestand und offene Verbrauchs-/Provider-/Handbuchintegration](../../../quality-assurance/identity-administration-20261012.md).
+
+
+## Studio-Fachdialog (2026-10-15)
+
+`GET /studio/catalog` erweitert den vorhandenen Katalog um versionierte fachliche Eingabevertraege. `POST /studio/dialogue` klaert Anforderungen und erzeugt ausschliesslich einen serverseitig kataloggebundenen Vorschlag. Der optionale Modellmodus nutzt den konfigurierten LLMGateway und das bestehende eigene Tokenkontingent; fehlende Mittel oder ungeklärte Anbieterabschluesse eroeffnen keinen Bypass. `POST /studio/harvest-preview` berechnet manuelle Testeingaben ueber den Agrar-Domain-Service ohne Datenbank-, Buchungs-, Bestands- oder externe Wirkung. Beide POST-Wege verlangen die vorhandene Beleg-Bearbeitungsrolle; der Dialog verwendet den verifizierten Mandantenkontext.
+
+Entwurfsspeicherung bleibt ausschliesslich im bestehenden versionierten, idempotenten Studio-Speicher. Der Vorschauvertrag wird nicht als durch grain.v1 abgenommene produktive Prozessvariante veroeffentlicht. Neue MCP-/CLI-Schreibwerkzeuge werden daraus nicht freigeschaltet. [Architekturentscheidung](../../../adr/adr-studio-semantic-contracts.md), [QA](../../../quality-assurance/studio-semantic-20261015.md).
+
+
+## Getrennte Qualitaetsbewertung im Studio
+
+Der manuelle Vorschauvertrag ergaenzt quality_limit_pct unabhaengig von impurities_free_pct. Die Antwort kennzeichnet quality_limit_exceeded dreistufig (unbekannt/eingehalten/ueberschritten) und settlement_authorized immer false. Diese Angaben erteilen keine Vertragsfreigabe. [Fachlicher Kontrollvertrag](../../harvest-deduction-contract-standard.md).
+
+## Versionierte native Studio-Ausgangsfassungen (2026-10-16)
+
+GET /studio/native-sources liefert einen begrenzten, durchsuchbaren Katalog eigener verfuegbarer nativer Masken mit Quellhash. POST /studio/native-imports verlangt bestehende Beleg-Bearbeitungsrechte, angezeigten Quellhash und UUID-Idempotenzschluessel. Der Server sichert die Ausgangsfassung im bestehenden revisionsgebundenen Studio-Speicher; Mandant und Urheber stammen ausschliesslich aus der Anmeldung. Importierte Entwuerfe aktivieren keine Maske und erzeugen keinen Simulations- oder Freigabenachweis. [Schrittweise Migration](../../studio-native-migration.md).
+
+Snapshot-Lesewege unter /read-models/snapshots verwenden ebenfalls den geprueften Mandanten; ein Queryparameter waehlt keinen anderen Mandanten. Alle generischen technischen Snapshot-Lese- und Schreibwege verlangen die vorhandene admin-Rolle.
+
+
+## Personalakten: Identitaetsgrenze
+
+GET /api/v1/personal/employee-files/{employee_ref} verlangt PERSONAL_LESEN, PERSONAL_BEARBEITEN, PERSONAL_ADMIN oder admin. actorRole ist ausschliesslich ein Ansichtsfilter nach dieser Berechtigung, keine Rollenvergabe. POST desselben Weges mit /documents verlangt PERSONAL_BEARBEITEN, PERSONAL_ADMIN oder admin; sein Urheber wird aus dem geprueften Token uebernommen. Der alte POST-Queryparameter actorRole ist entfernt und uebermittelt keine Rechte.
+
+Die kanonische Metadatentabelle domain_hr.employee_file_documents wird durch hr_employee_files_20261019 angelegt. Fehlende oder fehlerhafte Persistenz antwortet generisch503, niemals mit einem erzeugten Demo-Dokument oder falschem201. Ungueltige Kalenderdaten und umgekehrte Gueltigkeitszeiträume werden vor SQL abgewiesen. Die Personalakten-Sichtbarkeitsklasse manager ist keine allgemeine Realm-Berechtigung. Selbstservice und zugelassene Vorgesetztenbeziehungen benoetigen eigene gepruefte Objektbeziehungen; dieser Vertrag erteilt sie nicht.
+
+
+## Studio-Migrationsplanung (20.10.2026)
+
+`POST /api/v1/studio/migration-plan` verwendet die vorhandene Beleg-Bearbeitungsrolle
+und den geprueften aktiven Mandanten. Eingabe: `definition` und optionale additive
+`schema_changes` mit `create_table` oder `add_columns`. Freie SQL-Ausdruecke,
+Aufruferidentitaet und Mandantenangaben sind kein Bestandteil des Eingabeschemas.
+Ausgabe: verdrahtete Definition, Bindungen, Blocker und gegebenenfalls versionierte
+Alembic-Quelle samt Hash. CLI: `python -m valeo_cli studio migrationsentwurf
+auftrag.json --ausgabe plan.json`. Die Planung schreibt weder Tabellen noch
+Fachdaten und aktiviert keine Commands. Sie ist im vorhandenen Studio-Katalog
+entdeckbar; Rechte werden durch die Ausgabe nicht erweitert.
+
+
+## Gemeinsame Maskendaten (20.10.2026)
+
+`GET /api/v1/masks/{mask_id}/data/{source_key}` liest ausschliesslich die genau
+benannte, deklarierte lokale GET-Quelle der mandantengenauen ScreenDefinition.
+Optional: entity_id, page (1..1000000), limit (1..100), q (max200 Zeichen).
+CLI: `python -m valeo_cli daten finance/ap-invoice entity --id BELEGKENNUNG`.
+MCP: `mask.data.read` mit demselben screen_id/source_key/entity_id-Vertrag und
+vorhandenem Transport-Scope masks:read.
+
+Beide Adapter verwenden denselben Quellenresolver und dieselbe sichere
+Antwortpruefung. Der REST-Adapter arbeitet asynchron; MCP delegiert synchron an
+denselben Fach-Endpunkt. Ausschliesslich der Bearer-Token des Aufrufers geht
+weiter, kein frei waehlbarer Mandantenheader und kein technischer Superuser.
+Der Fach-Endpunkt prueft Token, Rollen, Datensatz und Mandant erneut; sein
+Status401/403/404 bleibt erhalten. masks:read ist kein Fachleserecht.
+
+Nicht aufloesbare/mehrdeutige Quellen, freie URLs, Pfadnavigation, unbekannte
+Kontextvariablen, POST-Quellen, Redirects, Nicht-JSON, doppelte JSON-Felder,
+nichtendliche Zahlen, Stubantworten und Antworten ueber2MiB scheitern geschlossen.
+Feste Mehrfachfilter bleiben erhalten. Diese Schnittstelle liefert die
+Domain-Antwort; Browserprojektionen fuer lokale Tabellenfilter/-sortierung und
+API-spezifische Paging-Aliasse muessen im weiteren Dreikanalvertrag noch
+vereinheitlicht werden. Der neue Weg bescheinigt noch keine vollständige
+Abnahme aller Quellen oder Tabellenfunktionen.
+
+
+## Tabellenvertrag (21.10.2026)
+
+Der gemeinsame Datenleseweg akzeptiert table_key, sort, sort_dir und filter_plan.
+Explizite Quellen lokaler Tabellen verwenden denselben begrenzten Projektor in
+Human-Runtime, CLI und MCP; page/skip/offset werden am deklarierten Fachvertrag
+ausgerichtet. Unvollstaendige Quellen scheitern statt Teildaten zu filtern.
+Serverpagination erfordert passende deklarierte Such-/Sortier-/Filterparameter.
+Details und Grenzen: docs/quality-assurance/studio-table-query-20261021.md.
+
+
+## Gespeicherter Migrationsplan (21.10.2026)
+
+POST /api/v1/studio/drafts/{draft_id}/migration-plan nimmt ausschliesslich
+expected_revision, idempotency_key und optionale schema_changes entgegen.
+Derselbe beleg_write-/verifizierte Mandantenkontext wie bestehende Authoring-
+Commands gilt. Die Definition wird unter Draftsperre serverseitig gelesen.
+Antwort StudioSavedMigrationOut bindet Planhash, Kandidatenrevision/-hash,
+Urheber, Mandant und validierten Schemaauftrag. Speicherung als migration_plan
+in der bestehenden unveraenderbaren Studio-Historie, keine neue Tabelle.
+CLI: studio plan-speichern ENTWURF --revision REVISION [--schema DATEI]
+[--idempotenz UUID] [--ausgabe DATEI]. Wiederholung gibt den urspruenglichen
+Historienstand zurueck; sie ist keine neue Abnahme gegen heutige Kataloge.
+requires_definition_update kennzeichnet noch ungespeicherte Bindungsvorschlaege.
+Keine Statusaenderung, DDL oder Publikation; Erweiterung des vollstaendigen
+Dreikanal-Freigabegates bleibt offen. ADR084 Proposed und QA
+studio-plan-history-20261021.md dokumentieren Nachweis und Grenzen.
+
+
+## Generierte neue Stammdaten (21.10.2026)
+
+POST /api/v1/studio/entity-bundle nimmt EntitySpec und liefert EntityBundleOut.
+Bestehendes beleg_write, verifizierter Tenant/Actor, keine DDL im Request.
+CLI: studio entitaet-generieren DATEI --ausgabe PAKET. Der bestehende
+Studio-Katalog generated_entities verdrahtet spaeter gepruefte Quellen,
+Commands und Routen. Ausgabeschreibrechte und Agentenrollen bleiben aus.
+Details/Grenzen: docs/quality-assurance/studio-generated-entities-20261021.md
+und ADR-085; keine automatische universelle Publikationsfreigabe.
+
+
+## Studio-Freigabeprofile (21.10.2026)
+
+Bestehende simulate-/status-/history-APIs bleiben unveraendert.
+processSimulation kann fuer exakt registrierte generierte Stammdaten das
+Profil studio.entity.v1 mit entity und contractHash binden. Es prueft reale
+CRUD-/Versions-/Replay-/Tenant-/Rollen-/Audit-/Outbox-/Rollbackinvarianten.
+Die Freigabe verlangt dieselbe unveraenderliche Kandidatenrevision, aktuellen
+Artefaktfingerprint, gespeicherten Migrationsplan und unabhaengigen Publisher.
+Profilnachweise sind nicht austauschbar. Deaktivierte Registrierung oder
+geaenderter geladener Runtimevertrag sperrt. Keine neue direkte DDL-,
+Freischalt- oder Umgehungs-API.
+
+
+GET /api/v1/studio/entity-definitions/{name} liefert EntityRegisteredDefinitionOut
+mit exakter registrierter Definition, Vertragsfingerprint und bestehendem
+Freischaltstatus. Keine DDL oder Rechtevergabe. Bestehendes beleg_write und
+Tenant-/Akteurkontext. CLI studio entitaet-uebernehmen NAME speichert diese
+Definition ueber den bestehenden idempotenten Draftcommand. Anschliessend
+bestehender Review-/Plan-/Simulations-/Vier-Augen-Freigabeweg.
+
+
+## Verladung: explizite Mandantenbindung (2026-10-23)
+
+Die bestehenden `/api/v1/tours`-Wege verwenden den verifizierten Mandantenkontext fuer alle Tour- und Unterobjektrepositories. Loading-Start/-Ende und Dispatch verwenden den verifizierten Urheber; Status, Tourlog und Loading-Outbox werden gemeinsam bestaetigt. Schema-/Abnahmenachweis: [Verladung Mandant/Atomaritaet](../../../quality-assurance/loading-tenant-atomic-20261023.md). Keine neuen Endpoints oder Container.

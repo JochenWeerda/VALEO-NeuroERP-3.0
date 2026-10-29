@@ -1,6 +1,5 @@
-// React import removed - not needed with new JSX transform
-import { StockManagement } from '@/features/inventory/StockManagement';
+import { NativeListPage } from '@/components/mask-builder/NativeListPage'
 
-export default function StockManagementPage() {
-  return <StockManagement />;
+export default function Page(): JSX.Element {
+  return <NativeListPage screenId="stock-management" testId="screen-stock-management" />
 }

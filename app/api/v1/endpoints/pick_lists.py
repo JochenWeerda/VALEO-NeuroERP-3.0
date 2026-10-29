@@ -10,13 +10,31 @@ from pydantic import BaseModel
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from ....core.config import settings
 from ....core.database import get_db
+from app.core.tenant import get_tenant_id  # Mandant aus dem Token (bis 27.10.2026 ?tenant_id= / ohne Filter)
 from ....infrastructure.models import PickList
 from ..schemas.base import PaginatedResponse, BaseSchema
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter()
-DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
+
+
+def _own_pick_list(db: Session, pl_id: str, tenant_id: str) -> PickList:
+    """Pickliste des eigenen Mandanten; eine fremde gibt es hier nicht (bis 27.10.2026 jede per ID)."""
+    obj = db.query(PickList).filter(PickList.id == pl_id, PickList.tenant_id == tenant_id).first()
+    if not obj:
+        raise HTTPException(404, "Pick list not found")
+    return obj
+
+
+def _own_order(db: Session, order_id: str, tenant_id: str) -> None:
+    """Ein verknuepfter Auftrag muss dem eigenen Mandanten gehoeren."""
+    found = db.execute(
+        text("SELECT 1 FROM domain_crm.sales_orders WHERE id = :oid AND tenant_id = :tid"),
+        {"oid": order_id, "tid": tenant_id},
+    ).first()
+    if not found:
+        raise HTTPException(404, "Sales order not found")
 
 
 class PickListOut(BaseSchema):
@@ -41,13 +59,13 @@ class PickListBooking(BaseModel):
 
 @router.get("/", response_model=PaginatedResponse[PickListOut], summary="Pick lists auflisten")
 async def list_pick_lists(
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     skip: int = Query(0, ge=0),
     limit: int = Query(25, ge=1, le=200),
     db: Session = Depends(get_db),
 ):
     """GET Pickliste ermitteln"""
-    tid = tenant_id or DEFAULT_TENANT
+    tid = tenant_id
     q = db.query(PickList).filter(PickList.tenant_id == tid)
     total = q.count()
     items = q.offset(skip).limit(limit).all()
@@ -60,14 +78,12 @@ async def list_pick_lists(
     )
 
 
-@router.post("/{pl_id}/edit", response_model=PickListOut, summary="Pick list bearbeiten")
+@router.post("/{pl_id}/edit", response_model=PickListOut, summary="Pick list bearbeiten", dependencies=SCHREIBEN["LAGER"])
 async def edit_pick_list(
-    pl_id: str, payload: PickListEdit, db: Session = Depends(get_db),
+    pl_id: str, payload: PickListEdit, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ):
     """POST Pickliste bearbeiten"""
-    obj = db.query(PickList).filter(PickList.id == pl_id).first()
-    if not obj:
-        raise HTTPException(404, "Pick list not found")
+    obj = _own_pick_list(db, pl_id, tenant_id)
     for f, v in payload.model_dump(exclude_unset=True).items():
         setattr(obj, f, v)
     db.commit()
@@ -75,38 +91,34 @@ async def edit_pick_list(
     return PickListOut.model_validate(obj)
 
 
-@router.post("/{pl_id}/cancel", response_model=PickListOut, summary="Pick list stornieren")
-async def cancel_pick_list(pl_id: str, db: Session = Depends(get_db)):
+@router.post("/{pl_id}/cancel", response_model=PickListOut, summary="Pick list stornieren", dependencies=SCHREIBEN["LAGER"])
+async def cancel_pick_list(pl_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     """POST Pickliste bearbeiten abbrechen"""
-    obj = db.query(PickList).filter(PickList.id == pl_id).first()
-    if not obj:
-        raise HTTPException(404, "Pick list not found")
+    obj = _own_pick_list(db, pl_id, tenant_id)
     obj.status = "cancelled"
     db.commit()
     db.refresh(obj)
     return PickListOut.model_validate(obj)
 
 
-@router.post("/{pl_id}/cancel-delete", response_model=PickListOut, summary="Delete pick list stornieren")
-async def cancel_delete_pick_list(pl_id: str, db: Session = Depends(get_db)):
+@router.post("/{pl_id}/cancel-delete", response_model=PickListOut, summary="Delete pick list stornieren", dependencies=SCHREIBEN["LAGER"])
+async def cancel_delete_pick_list(pl_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     """POST Pickliste bearbeiten abbrechen (Buchungen löschen)"""
-    obj = db.query(PickList).filter(PickList.id == pl_id).first()
-    if not obj:
-        raise HTTPException(404, "Pick list not found")
+    obj = _own_pick_list(db, pl_id, tenant_id)
     obj.status = "cancelled_deleted"
     db.commit()
     db.refresh(obj)
     return PickListOut.model_validate(obj)
 
 
-@router.post("/{pl_id}/book-order", response_model=PickListOut, summary="Pick list order book")
+@router.post("/{pl_id}/book-order", response_model=PickListOut, summary="Pick list order book", dependencies=SCHREIBEN["LAGER"])
 async def book_pick_list_order(
-    pl_id: str, payload: PickListBooking, db: Session = Depends(get_db),
+    pl_id: str, payload: PickListBooking, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ):
     """POST Pickliste buchen Auftrag / Tour"""
-    obj = db.query(PickList).filter(PickList.id == pl_id).first()
-    if not obj:
-        raise HTTPException(404, "Pick list not found")
+    obj = _own_pick_list(db, pl_id, tenant_id)
+    if payload.order_id:
+        _own_order(db, payload.order_id, tenant_id)
     obj.status = "booked"
     if payload.tour_id:
         obj.tour_id = payload.tour_id
@@ -122,27 +134,28 @@ async def book_pick_list_order(
                 text("""
                     UPDATE domain_crm.sales_orders
                     SET status = 'in_delivery', updated_at = NOW()
-                    WHERE id = :oid
+                    WHERE id = :oid AND tenant_id = :tid
                       AND status NOT IN ('in_delivery', 'geliefert', 'completed', 'cancelled')
                 """),
-                {"oid": linked_order},
+                {"oid": linked_order, "tid": tenant_id},
             )
             db.commit()
-        except Exception:  # noqa: BLE001 — Auftragsupdate nicht kritisch für Picklisten-Buchung
-            pass
+        except Exception:  # noqa: BLE001 — Auftragsstatus ist Folgeinformation, die Picklisten-Buchung steht schon
+            # Ohne Rollback war die Transaktion danach tot und db.refresh scheiterte (bis 27.10.2026).
+            db.rollback()
 
     db.refresh(obj)
     return PickListOut.model_validate(obj)
 
 
-@router.post("/{pl_id}/park-order", response_model=PickListOut, summary="Pick list order park")
+@router.post("/{pl_id}/park-order", response_model=PickListOut, summary="Pick list order park", dependencies=SCHREIBEN["LAGER"])
 async def park_pick_list_order(
-    pl_id: str, payload: PickListBooking, db: Session = Depends(get_db),
+    pl_id: str, payload: PickListBooking, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ):
     """POST Pickliste parken Auftrag / Tour"""
-    obj = db.query(PickList).filter(PickList.id == pl_id).first()
-    if not obj:
-        raise HTTPException(404, "Pick list not found")
+    obj = _own_pick_list(db, pl_id, tenant_id)
+    if payload.order_id:
+        _own_order(db, payload.order_id, tenant_id)
     obj.status = "parked"
     if payload.tour_id:
         obj.tour_id = payload.tour_id
@@ -153,42 +166,36 @@ async def park_pick_list_order(
     return PickListOut.model_validate(obj)
 
 
-@router.post("/{pl_id}/book-internal", response_model=PickListOut, summary="Pick list internal book")
+@router.post("/{pl_id}/book-internal", response_model=PickListOut, summary="Pick list internal book", dependencies=SCHREIBEN["LAGER"])
 async def book_pick_list_internal(
-    pl_id: str, db: Session = Depends(get_db),
+    pl_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ):
     """POST Pickliste buchen Interner Auftrag"""
-    obj = db.query(PickList).filter(PickList.id == pl_id).first()
-    if not obj:
-        raise HTTPException(404, "Pick list not found")
+    obj = _own_pick_list(db, pl_id, tenant_id)
     obj.status = "booked_internal"
     db.commit()
     db.refresh(obj)
     return PickListOut.model_validate(obj)
 
 
-@router.post("/{pl_id}/park-internal", response_model=PickListOut, summary="Pick list internal park")
+@router.post("/{pl_id}/park-internal", response_model=PickListOut, summary="Pick list internal park", dependencies=SCHREIBEN["LAGER"])
 async def park_pick_list_internal(
-    pl_id: str, db: Session = Depends(get_db),
+    pl_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ):
     """POST Pickliste parken Interner Auftrag"""
-    obj = db.query(PickList).filter(PickList.id == pl_id).first()
-    if not obj:
-        raise HTTPException(404, "Pick list not found")
+    obj = _own_pick_list(db, pl_id, tenant_id)
     obj.status = "parked_internal"
     db.commit()
     db.refresh(obj)
     return PickListOut.model_validate(obj)
 
 
-@router.post("/{pl_id}/book-free", response_model=PickListOut, summary="Pick list free book")
+@router.post("/{pl_id}/book-free", response_model=PickListOut, summary="Pick list free book", dependencies=SCHREIBEN["LAGER"])
 async def book_pick_list_free(
-    pl_id: str, db: Session = Depends(get_db),
+    pl_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ):
     """POST 'Freie' Pickliste buchen"""
-    obj = db.query(PickList).filter(PickList.id == pl_id).first()
-    if not obj:
-        raise HTTPException(404, "Pick list not found")
+    obj = _own_pick_list(db, pl_id, tenant_id)
     obj.status = "booked_free"
     db.commit()
     db.refresh(obj)

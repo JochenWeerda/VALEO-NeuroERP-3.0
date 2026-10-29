@@ -37,8 +37,8 @@ WEGE = [
 ROLLEN = [None, "user", "LAGER_ADMIN", "PERSONAL_ADMIN", "SALES_BEARBEITEN",
           "FINANCE_LESEN", "FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin", "manager"]
 ERLAUBT = {
-    "read": {"FINANCE_LESEN", "FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin", "manager"},
-    "write": {"FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin", "manager"},
+    "read": {"FINANCE_LESEN", "FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin"},
+    "write": {"FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin"},
 }
 # Rumpf, der die Eingabepruefung besteht — damit 418 die Datenbank meint und nicht 422 den Rumpf.
 RUMPF = {

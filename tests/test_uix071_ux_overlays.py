@@ -60,7 +60,8 @@ class _OverlayDb:
 
 
 def _request(user_id: str = "user-a"):
-    return SimpleNamespace(headers={"X-User-ID": user_id})
+    """Die Person steht in den geprueften Claims; ein Kopf ``X-User-ID`` waehlt keine fremde Ansicht."""
+    return SimpleNamespace(headers={"X-User-ID": "fremde-person"}, state=SimpleNamespace(token_claims={"sub": user_id}))
 
 
 def test_put_sanitizes_and_persists_allowed_overlay() -> None:

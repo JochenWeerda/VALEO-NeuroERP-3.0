@@ -94,3 +94,17 @@ Die vier konkurrierenden INT-BANK-001-Routen unter /api/v1/bank entfallen;
 kein Redirect und keine implizite Uebernahme alter IBAN-/DTO-Vertraege.
 Externe Alt-Konsumenten benoetigen eine bewusste Vertragsumstellung.
 [ADR-073](../../../adr/adr-073-bank-model-retirement.md).
+
+
+## DocFlow-Maskenprovenienz
+
+POST /api/v1/docflow/ akzeptiert optional screen_context (screen_id, definition_hash). Aktive Definition ausschliesslich im verifizierten Mandanten, passender Belegtyp und Inhaltsbindung sind erforderlich. Serverseitige Versions-/Freigabereferenzen werden im bestehenden unveraenderlichen Erstellungsprotokoll gespeichert und im typisierten Header ausgegeben. Keine neue Route, Schema-Migration oder Freigabeumgehung. [Vertragsabnahme](../../../quality-assurance/docflow-screen-provenance-20261016.md).
+
+## AP-Freigabevertrag (2026-10-20)
+
+Entscheidungen ueber Workflow, direkten approve-Pfad und native Aktion brauchen
+approval_request_id; Antragsteller/Entscheider kommen ausschliesslich aus gepruefter
+Identitaet. Reale ApproveAPInvoice/RejectAPInvoice/PostAPInvoice-Kommandos nutzen
+denselben Service und FINANCE_ADMIN/admin. Keine zweite Rollendefinition.
+Der MCP-Altdirektadapter ist entfernt, menschliche Freigabe erfolgt am gebundenen Antrag.
+[Abnahme, Atomaritaet und Grenzen](../../../quality-assurance/ap-workflow-security-20261020.md).

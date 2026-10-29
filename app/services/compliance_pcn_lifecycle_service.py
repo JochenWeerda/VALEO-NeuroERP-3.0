@@ -26,10 +26,12 @@ class PCNError(Exception):
     """Raised when PCN lifecycle constraints are violated."""
 
 
-def _fetch_meldung(db: Session, meldung_id: str) -> Optional[Dict[str, Any]]:
+def _fetch_meldung(db: Session, meldung_id: str, tenant_id: str) -> Optional[Dict[str, Any]]:
+    # Eine Meldung eines anderen Mandanten gibt es fuer diesen Mandanten nicht (wie unter RLS):
+    # bis 27.10.2026 meldete der Dienst "gehoert nicht zu Tenant" und bestaetigte so die Kennung.
     row = db.execute(
-        text("SELECT * FROM domain_compliance.compliance_pcn_meldungen WHERE id = :id"),
-        {"id": meldung_id},
+        text("SELECT * FROM domain_compliance.compliance_pcn_meldungen WHERE id = :id AND tenant_id = :tenant_id"),
+        {"id": meldung_id, "tenant_id": tenant_id},
     ).mappings().first()
     return dict(row) if row else None
 
@@ -111,11 +113,9 @@ def transition_pcn_status(
     reason: Optional[str] = None,
 ) -> Dict[str, Any]:
     """Zustandsübergang für eine PCN-Meldung (fail-closed)."""
-    meldung = _fetch_meldung(db, meldung_id)
+    meldung = _fetch_meldung(db, meldung_id, tenant_id)
     if not meldung:
         raise PCNError(f"PCN-Meldung {meldung_id} nicht gefunden")
-    if meldung.get("tenant_id") != tenant_id:
-        raise PCNError(f"Meldung {meldung_id} gehört nicht zu Tenant {tenant_id}")
 
     current = (meldung.get("status") or "DRAFT").upper()
     target = new_status.upper()
@@ -133,14 +133,14 @@ def transition_pcn_status(
         extras["abgeschlossen_am"] = datetime.now(timezone.utc).isoformat()
 
     set_clauses = "status = :status"
-    params: Dict[str, Any] = {"status": target, "id": meldung_id}
+    params: Dict[str, Any] = {"status": target, "id": meldung_id, "tenant_id": tenant_id}
     if "eingereicht_am" in extras:
         set_clauses += ", eingereicht_am = NOW()"
     if "abgeschlossen_am" in extras:
         set_clauses += ", abgeschlossen_am = NOW()"
 
     db.execute(
-        text(f"UPDATE domain_compliance.compliance_pcn_meldungen SET {set_clauses} WHERE id = :id"),  # nosec B608  # set_clauses is assembled only from fixed code-controlled fragments; values are parameterized.
+        text(f"UPDATE domain_compliance.compliance_pcn_meldungen SET {set_clauses} WHERE id = :id AND tenant_id = :tenant_id"),  # nosec B608  # set_clauses is assembled only from fixed code-controlled fragments; values are parameterized.
         params,
     )
     _log_pcn_transition(db, meldung_id, current, target, tenant_id, operator, reason)
@@ -157,11 +157,9 @@ def withdraw_pcn_meldung(
     operator: str = "system",
 ) -> Dict[str, Any]:
     """Zieht eine PCN-Meldung zurück (aus DRAFT oder VALIDATED)."""
-    meldung = _fetch_meldung(db, meldung_id)
+    meldung = _fetch_meldung(db, meldung_id, tenant_id)
     if not meldung:
         raise PCNError(f"PCN-Meldung {meldung_id} nicht gefunden")
-    if meldung.get("tenant_id") != tenant_id:
-        raise PCNError(f"Meldung {meldung_id} gehört nicht zu Tenant {tenant_id}")
 
     current = (meldung.get("status") or "DRAFT").upper()
     if current == "WITHDRAWN":
@@ -170,8 +168,9 @@ def withdraw_pcn_meldung(
         raise PCNError(f"Rückzug nur aus DRAFT oder VALIDATED möglich (aktuell: {current})")
 
     db.execute(
-        text("UPDATE domain_compliance.compliance_pcn_meldungen SET status = 'WITHDRAWN' WHERE id = :id"),
-        {"id": meldung_id},
+        text("UPDATE domain_compliance.compliance_pcn_meldungen SET status = 'WITHDRAWN' "
+             "WHERE id = :id AND tenant_id = :tenant_id"),
+        {"id": meldung_id, "tenant_id": tenant_id},
     )
     _log_pcn_transition(db, meldung_id, current, "WITHDRAWN", tenant_id, operator, grund)
     db.commit()

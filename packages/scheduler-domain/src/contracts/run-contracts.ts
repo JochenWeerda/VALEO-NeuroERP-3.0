@@ -14,8 +14,8 @@ const RunQuerySchema = z.object({
   workerId: z.string().optional(),
   from: z.string().datetime().optional(),
   to: z.string().datetime().optional(),
-  page: z.string().transform(val => parseInt(val)).default('1'),
-  pageSize: z.string().transform(val => Math.min(parseInt(val), 100)).default('20'),
+  page: z.string().transform(val => parseInt(val)).prefault('1'),
+  pageSize: z.string().transform(val => Math.min(parseInt(val), 100)).prefault('20'),
 });
 
 // Response schemas

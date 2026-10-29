@@ -24,10 +24,26 @@ from app.models.knowledge import (
     KnowledgeObjectRecord,
     KnowledgeVersionRecord,
 )
+from app.core.exceptions import PermissionDeniedError
+from app.core.tenant_context import current_tenant_or_none
 
 
 def _utcnow() -> datetime:
     return datetime.now(timezone.utc)
+
+
+class SharedKnowledgeReadOnly(PermissionDeniedError):
+    """Ein Mandant aendert nur eigene Wissensobjekte; gemeinsames Produktwissen pflegt die zentrale Pflege.
+
+    PermissionDeniedError bildet der zentrale Fehlerhandler auf 403 ab (app/core/exceptions.py)."""
+
+
+def _ensure_writable(record: KnowledgeObjectRecord) -> None:
+    # Ohne Mandantenkontext arbeitet die zentrale Pflege (valeo_system); mit Kontext nur eigene Objekte.
+    # Bis 27.10.2026 konnte jeder Mandant gemeinsamem Produktwissen Versionen anhaengen.
+    tenant = current_tenant_or_none()
+    if tenant is not None and record.tenant_id != tenant:
+        raise SharedKnowledgeReadOnly(f"Wissensobjekt {record.knowledge_id!r} gehoert nicht dem eigenen Mandanten")
 
 
 class KnowledgeRepository:
@@ -60,7 +76,7 @@ class KnowledgeRepository:
         titel: str,
         typ: str,
         status: str,
-        tenant_id: str = "system",
+        tenant_id: str,
         beschreibung: str = "",
         tags: list[str] | None = None,
         zielrollen: list[str] | None = None,
@@ -85,6 +101,7 @@ class KnowledgeRepository:
                 inhalt=version_payload["inhalt"],
                 strukturierte_daten=dict(version_payload.get("strukturierte_daten", {})),
                 quelle=version_payload.get("quelle", "api"),
+                tenant_id=tenant_id,
             )
         )
         self.db.add(record)
@@ -96,6 +113,7 @@ class KnowledgeRepository:
         record = self.get_object(knowledge_id)
         if record is None:
             return None
+        _ensure_writable(record)
         requested_version = int(version_payload.get("version", 0))
         if requested_version and self.has_version(knowledge_id, requested_version):
             return record
@@ -107,6 +125,7 @@ class KnowledgeRepository:
                 inhalt=version_payload["inhalt"],
                 strukturierte_daten=dict(version_payload.get("strukturierte_daten", {})),
                 quelle=version_payload.get("quelle", "api"),
+                tenant_id=record.tenant_id,
             )
         )
         if "status" in version_payload and version_payload["status"]:

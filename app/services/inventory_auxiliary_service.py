@@ -31,6 +31,12 @@ class InventoryAuxiliaryService:
         self.db = db
         self.tenant_id = tenant_id
 
+    def count_exists(self, count_id: str) -> bool:
+        """Gibt es die Inventur im Mandanten? (Vorpruefung der Maskenaktionen, auch im Trockenlauf.)"""
+        return self.db.execute(text("""
+            SELECT 1 FROM domain_inventory.inventory_counts WHERE id=:id AND tenant_id=:tid
+        """), {"id": count_id, "tid": self.tenant_id}).first() is not None
+
     def create(self, *, count_id: str, batch_type: str, actor: str, reason: str,
                import_rows: list[dict[str, Any]] | None = None, declared_hash: str | None = None) -> dict[str, Any]:
         if batch_type not in BATCH_TYPES:

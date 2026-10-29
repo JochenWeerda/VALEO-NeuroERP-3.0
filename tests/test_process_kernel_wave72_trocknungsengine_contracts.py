@@ -10,12 +10,14 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from app.api.v1.endpoints import agrar_settlements
+from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
 
 
 @pytest.fixture
 def client() -> TestClient:
     app = FastAPI()
     app.include_router(agrar_settlements.router)
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)  # Schreibwege pruefen die Bereichsrolle (19.10.2026)
     return TestClient(app)
 
 

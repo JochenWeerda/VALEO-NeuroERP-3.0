@@ -15,6 +15,7 @@ from ....core.database import get_db
 from ....core.tenant import get_tenant_id
 
 from app.api.v1.schemas.base import BaseSchema, IDResponse
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter()
@@ -173,7 +174,7 @@ async def credit_status(
         raise HTTPException(status_code=503, detail="Datenbankfehler")
 
 
-@router.post("/customers/{customer_id}/credit-limit", response_model=CreditLimitOut, status_code=status.HTTP_200_OK, summary="Credit limit setzen")
+@router.post("/customers/{customer_id}/credit-limit", response_model=CreditLimitOut, status_code=status.HTTP_200_OK, summary="Credit limit setzen", dependencies=SCHREIBEN["VERKAUF"])
 async def set_credit_limit(
     customer_id: str,
     payload: CreditLimitSet,
@@ -243,8 +244,7 @@ async def set_credit_limit(
 
 
 @router.post("/customers/{customer_id}/credit-override", status_code=status.HTTP_201_CREATED, summary="Override credit",
-    response_model=IDResponse
-)
+    response_model=IDResponse, dependencies=SCHREIBEN["VERKAUF"])
 async def credit_override(
     customer_id: str,
     payload: CreditOverride,

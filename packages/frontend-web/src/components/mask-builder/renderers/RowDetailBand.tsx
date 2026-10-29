@@ -68,14 +68,17 @@ export function RowDetailBand({
         </div>
       </div>
       <dl className="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2 xl:grid-cols-3">
-        {fields.map((field) => (
+        {fields.map((field) => {
+          const currencyField = table.columns.find((column) => column.key === field.key)?.currencyField
+          return (
           <div key={field.key} className="grid grid-cols-[minmax(7rem,10rem)_1fr] gap-2">
             <dt className="text-muted-foreground">{field.label}</dt>
             <dd className="min-w-0 break-words font-medium" data-testid={`row-detail-${table.key}-${field.key}`}>
-              {formatCellValue(row[field.key] === '' ? null : row[field.key], field.renderKind)}
+              {formatCellValue(row[field.key] === '' ? null : row[field.key], field.renderKind, currencyField ? String(row[currencyField] ?? '') : 'EUR')}
             </dd>
           </div>
-        ))}
+          )
+        })}
       </dl>
     </section>
   )

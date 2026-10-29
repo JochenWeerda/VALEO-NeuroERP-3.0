@@ -57,7 +57,7 @@ BELEGKOMMANDOS: dict[str, Belegkommando] = {
     for k in (
         Belegkommando("beleg.lesen", "Beleg lesen", "GET", "/belege/{belegart}/{beleg_id}", "R0", "lesen", idempotent=True),
         Belegkommando("docflow.create", "Beleg anlegen", "POST", "/docflow/", "R1", "bearbeiten", idempotent=True),
-        Belegkommando("docflow.update", "Beleg bearbeiten", "PUT", "/docflow/{doc_id}", "R1", "bearbeiten"),
+        Belegkommando("docflow.update", "Beleg bearbeiten", "PUT", "/docflow/{doc_id}", "R1", "bearbeiten", idempotent=True),
         Belegkommando("docflow.delete_draft", "Entwurf löschen", "DELETE", "/docflow/{doc_id}", "R1", "bearbeiten"),
         Belegkommando("docflow.convert", "Folgebeleg erstellen", "POST", "/docflow/{doc_id}/convert", "R2", "bearbeiten", idempotent=True),
         Belegkommando("docflow.record_print", "Druck vermerken", "POST", "/docflow/{doc_id}/record-print", "R2", "bearbeiten"),

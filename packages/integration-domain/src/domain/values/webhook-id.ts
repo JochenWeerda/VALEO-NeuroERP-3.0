@@ -5,7 +5,7 @@
 import { z } from 'zod';
 import { generatePrefixedId, isValidId } from '@shared/utils/id-generator.js';
 
-const WebhookIdSchema = z.string().uuid();
+const WebhookIdSchema = z.string().guid();
 
 export class WebhookId {
   private readonly _value: string;

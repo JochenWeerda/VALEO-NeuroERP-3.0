@@ -32,6 +32,20 @@ export type ScreenSummaryPlacement = 'header' | 'footer'
 export type ScreenActionZone = 'header' | 'footer' | 'commit'
 export type ScreenVoiceProvider = 'webspeech' | 'server'
 export type ScreenAdapterType = 'native' | 'maskConfig' | 'crmMaskJson' | 'formSchema' | 'specialized'
+/** Nur explizit registrierte Spezialkomponenten. Weitere Typen brauchen eigenen Dateibesitz. */
+export type SpecializedComponentType = 'disposition_board'
+
+export interface ScreenSpecializedComponent {
+  type: SpecializedComponentType
+  /** Stabile Registry-ID, z. B. `lkw-disposition-board`. */
+  id: string
+  /** Domain- und UX-Events, die die Komponente emittieren darf. */
+  events?: string[]
+  permissions?: string[]
+  /** Live-Kanal (SSE/NATS-Projektion), z. B. `disposition.board`. */
+  liveChannel?: string
+}
+
 export type ScreenFieldType =
   | 'text'
   | 'number'
@@ -62,6 +76,7 @@ export interface ScreenDataSource {
 }
 
 export interface ScreenFieldDefinition {
+  currencyField?: string
   key: string
   label: string
   type: ScreenFieldType
@@ -72,6 +87,9 @@ export interface ScreenFieldDefinition {
   options?: Array<{ value: string | number; label: string }>
   dataSourceKey?: string
   minSearchChars?: number
+  /** Structured table input; adds no persistence or business command. */
+  rowFields?: ScreenFieldDefinition[]
+  tableEditing?: { allowAdd?: boolean; allowDelete?: boolean; maxRows?: number }
   renderHint?: 'singleLine' | 'multiLine' | 'compact' | 'touch'
 }
 
@@ -95,6 +113,7 @@ export interface ScreenTableColumn {
   sortable?: boolean
   filterable?: boolean
   renderKind?: ScreenColumnRenderKind
+  currencyField?: string
   defaultSort?: 'asc' | 'desc'
   priority?: ScreenColumnPriority
   render?: (_value: unknown, _row: Record<string, unknown>) => ReactNode
@@ -116,11 +135,28 @@ export interface ScreenTableDefinition {
     key: string
     label: string
     command?: string
+    /** Recht wie bei Kopfaktionen; ohne Recht blendet der Plan die Aktion aus. */
+    permission?: string
     dangerLevel?: ActionDangerLevel
     requiresConfirmation?: boolean
     enabledWhen?: ScreenCondition
     visibleWhen?: { field: string; values: Array<string | number | boolean> }
     disabledWhen?: { field: string; values: Array<string | number | boolean> }
+    /** Kommando-Weg der Zeile ({entity_id} = Zeilenkennung); dieselben Wege rufen CLI und MCP. */
+    commandEndpoint?: string
+    method?: 'POST' | 'PUT' | 'PATCH' | 'DELETE'
+    auditReasonRequired?: boolean
+    humanApprovalRequired?: boolean
+    forbiddenForAgents?: boolean
+    /** Formular der Seite mit Sendeweg; nie automatisch abgeschickt (wie bei Kopfaktionen). */
+    inputFlow?: { kind: 'humanForm'; submitEndpoint: string; method: 'POST' | 'PUT' | 'PATCH' | 'DELETE' }
+    localEffect?: ScreenActionDefinition['localEffect']
+    /** Fluechtige Projektion einer einzelnen Zeile; keine Serveraenderung. */
+    localRowPatch?: { identityField: string; field: string; value: string | number | boolean }
+    /** Deklarierte Eingaben vor dem Kommando (Dialog der Maske, nie automatisch abgeschickt). */
+    inputFields?: ScreenActionInputField[]
+    /** Reine Navigation; Platzhalter wie {id} kommen aus der Zeile. */
+    navigationRoute?: string
   }>
   /** Selection-based actions; payload contains selectedRows and selectedIds. */
   bulkActions?: Array<{
@@ -169,6 +205,9 @@ export interface ScreenActionInputField extends ScreenFieldDefinition {
 }
 
 export interface ScreenActionDefinition {
+  responseAdapter?: 'resource.v1'
+  resultNavigationRoute?: string
+  inputPrefill?: 'entity'
   key: string
   label: string
   kind?: 'primary' | 'secondary' | 'danger' | 'workflow'
@@ -183,8 +222,14 @@ export interface ScreenActionDefinition {
   /** Versioned transport only; domain authorization/approvals remain server-side. */
   commandBinding?: {
     adapter: 'docflow.v1'
-    command: 'release' | 'post' | 'reverse' | 'convert' | 'approval_request' | 'approval_decide'
+    command: 'update' | 'release' | 'post' | 'reverse' | 'convert' | 'approval_request' | 'approval_decide'
     preview: boolean
+    defaults?: Record<string, unknown>
+    stateAction?: string
+  } | {
+    adapter: 'harvest.control.v1'
+    command: 'create_rule' | 'approve_rule' | 'revoke_rule' | 'bind_rule' | 'attest' | 'calculate' | 'approve_calculation' | 'release'
+    preview: false
     defaults?: Record<string, unknown>
     stateAction?: string
   }
@@ -195,8 +240,14 @@ export interface ScreenActionDefinition {
   /** Opens an existing human input flow; submitEndpoint is documentation, never auto-dispatched. */
   inputFlow?: { kind: 'humanForm'; submitEndpoint: string; method: 'POST' | 'PUT' | 'PATCH' | 'DELETE' }
   stubReason?: string
-  /** Wirkt nur in der Maske (kein Fachbefehl): Eingabe leeren oder woandershin fuehren. */
-  localEffect?: 'form_reset' | 'navigation'
+  /**
+   * Wirkt nur in der Maske (kein Fachbefehl, keine Serveraenderung): Eingabe leeren, woandershin fuehren,
+   * drucken, herunterladen (lesend), in den Bearbeitungsmodus wechseln, neu laden oder eine Ansicht oeffnen.
+   * CLI und MCP lesen dieselben Daten ueber die Datenquellen der Maske.
+   */
+  localEffect?: 'form_reset' | 'navigation' | 'print' | 'download' | 'edit_mode' | 'refresh' | 'view'
+  /** Read-only server-produced file; never a domain write command. */
+  download?: { endpoint: string; contentField: string; filenameField: string; mediaType: 'text/csv;charset=utf-8' }
   method?: 'POST' | 'PUT' | 'PATCH' | 'DELETE'
   requiresConfirmation?: boolean
   dangerLevel?: ActionDangerLevel
@@ -419,14 +470,42 @@ export interface ScreenProcessChainCatalogEntry {
   steps: ScreenProcessChainStep[]
 }
 
+/** Immutable origin template. The full edited candidate has its own Studio revision. */
+export interface DocumentScreenVariantRef {
+  family: 'beleg'
+  baseVersion: string
+  baseHash: string
+  variantId: string
+  variantVersion: string
+  variantHash: string
+  materializedHash: string
+}
+
+export interface ListExperience {
+  searchFields: string[]
+  aggregates: { key: string; label: string; kind?: 'count' | 'sum'; field?: string; format?: 'currency'; currencyField?: string; conditions: { field: string; op: 'eq' | 'neq'; value: string }[] }[]
+  export: { filenamePrefix: string; delimiter: ';'; columns: { key: string; label: string }[] }
+  workflowResume?: { resumeNodeId: string; businessStatus: string; actionLabelPrefix: string; createScreen: string; detailScreen: string }
+  notice?: { aggregate: string; text: string }
+  insightLines?: { label: string; variants: { when?: { aggregate: string; op: 'gt'; value: number }; text: string }[] }[]
+}
+
 export interface ScreenDefinition {
+  flowSpineCatalog?: { enabled: true; warmWorkspaces: boolean }
+  listExperience?: ListExperience
+  documentVariant?: DocumentScreenVariantRef
   /** Declared native creation; new/neu are never fetched as entity IDs. */
   creation?: {
+    adapter?: 'docflow.create.v1'
+    fields?: ScreenFieldDefinition[]
+    dataSources?: ScreenDataSource[]
     endpoint: string
     permission: string
     detailRoute: string
+    cancelRoute?: string
     defaults?: Record<string, unknown>
   }
+  creationContext?: { screen_id: string; definition_hash: string }
   schemaVersion: 1
   id: string
   domain: ScreenDomain
@@ -448,12 +527,16 @@ export interface ScreenDefinition {
   summaryEndpoint?: string
   summary?: ScreenSummaryItem[]
   dataSources?: ScreenDataSource[]
+  /** Registered scalar fields selected from the secured entity GET response. */
+  entityProjection?: Record<string, string>
   fields?: ScreenFieldDefinition[]
   tabs?: ScreenTabDefinition[]
   tables?: ScreenTableDefinition[]
   tiles?: ScreenTileDefinition[]
   calendar?: ScreenCalendarDefinition
   sourceProposals?: ScreenSourceProposals
+  /** Registrierte Spezialkomponente; derzeit nur `disposition_board`. */
+  specialized?: ScreenSpecializedComponent
   twin?: ScreenTwinDefinition
   processChain?: ScreenProcessChainRef
   processChains?: Record<string, ScreenProcessChainCatalogEntry>
@@ -493,7 +576,8 @@ export interface ScreenDefinition {
     lookupMinChars?: number
     bundleGroup?: string
   }
-  agentContract?: AgentMaskContract
+  /** Authoring metadata; the separate generated agent-contract endpoint returns the full contract. */
+  agentContract?: Partial<AgentMaskContract>
 }
 
 export function validateScreenDefinition(screen: ScreenDefinition): string[] {
@@ -503,7 +587,46 @@ export function validateScreenDefinition(screen: ScreenDefinition): string[] {
   if (!screen.id) errors.push('id is required')
   if (!screen.domain) errors.push('domain is required')
   if (!screen.mode) errors.push('mode is required')
+  if (screen.documentVariant !== undefined) {
+    const binding = screen.documentVariant
+    const version = /^[1-9][0-9]*\.[0-9]+\.[0-9]+$/
+    const hash = /^[0-9a-f]{64}$/
+    if (!binding || binding.family !== 'beleg' || typeof binding.variantId !== 'string' || !binding.variantId.trim()
+      || !version.test(binding.baseVersion) || !version.test(binding.variantVersion)
+      || ![binding.baseHash, binding.variantHash, binding.materializedHash].every(value => hash.test(value))) {
+      errors.push('documentVariant requires an exact valid base and variant binding')
+    }
+  }
   if (!screen.title) errors.push('title is required')
+  if (screen.flowSpineCatalog !== undefined) {
+    const c = screen.flowSpineCatalog
+    if (!c || typeof c !== 'object' || c.enabled !== true || typeof c.warmWorkspaces !== 'boolean'
+      || Object.keys(c).some(key => !['enabled', 'warmWorkspaces'].includes(key))
+      || screen.id !== 'workflow/flow-spine-studio' || screen.mode !== 'cockpit') {
+      errors.push('flowSpineCatalog is invalid')
+    }
+  }
+  if (screen.listExperience !== undefined) {
+    const x = screen.listExperience
+    const str = (v: unknown): v is string => typeof v === 'string' && v.length > 0 && v.length <= 200
+    const arr = (v: unknown): v is unknown[] => Array.isArray(v) && v.length <= 100
+    const key = (v: unknown): v is string => str(v) && !['__proto__', 'prototype', 'constructor'].includes(v.toLowerCase())
+    const obj = (v: unknown): v is Record<string, unknown> => v !== null && typeof v === 'object' && !Array.isArray(v)
+    let valid = obj(x) && arr(x.searchFields) && x.searchFields.length > 0 && x.searchFields.every(key)
+      && arr(x.aggregates) && x.aggregates.every(a => obj(a) && key(a.key) && str(a.label) && (a.kind === undefined || ['count', 'sum'].includes(a.kind)) && (a.kind !== 'sum' || key(a.field)) && (a.field === undefined || a.kind === 'sum') && (a.currencyField === undefined || (a.kind === 'sum' && key(a.currencyField))) && (a.format === undefined || (a.kind === 'sum' && a.format === 'currency')) && arr(a.conditions) && a.conditions.every(c => obj(c) && key(c.field) && ['eq', 'neq'].includes(c.op) && typeof c.value === 'string' && c.value.length <= 200))
+      && obj(x.export) && str(x.export.filenamePrefix) && x.export.delimiter === ';' && arr(x.export.columns) && x.export.columns.length > 0 && x.export.columns.every(c => obj(c) && key(c.key) && str(c.label))
+      && (x.workflowResume === undefined || (obj(x.workflowResume) && [x.workflowResume.resumeNodeId, x.workflowResume.businessStatus, x.workflowResume.actionLabelPrefix, x.workflowResume.createScreen, x.workflowResume.detailScreen].every(str)))
+    if (valid) {
+      const keys = new Set(x.aggregates.map(a => a.key))
+      valid = keys.size === x.aggregates.length && new Set(x.searchFields).size === x.searchFields.length && new Set(x.export.columns.map(c => c.key)).size === x.export.columns.length && (!x.notice || (obj(x.notice) && keys.has(x.notice.aggregate) && str(x.notice.text)))
+        && (!x.insightLines || (arr(x.insightLines) && x.insightLines.every(line => obj(line) && str(line.label) && arr(line.variants) && line.variants.every(v => obj(v) && str(v.text) && (!v.when || (obj(v.when) && keys.has(v.when.aggregate) && v.when.op === 'gt' && typeof v.when.value === 'number' && Number.isFinite(v.when.value)))))))
+    }
+    const columns = new Set((screen.tables?.[0]?.columns ?? []).map(column => column.key))
+    if (valid) valid = screen.mode === 'list' && columns.size > 0
+      && [...x.searchFields, ...x.export.columns.map(column => column.key), ...x.aggregates.flatMap(a => [...a.conditions.map(c => c.field), ...(a.field ? [a.field] : []), ...(a.currencyField ? [a.currencyField] : [])])].every(field => columns.has(field))
+    if (!valid) errors.push('listExperience is invalid')
+  }
+
 
   if (screen.layout?.columnNavigation && screen.layout.columnNavigation !== 'single'
       && screen.layout.floorplan && FLOORPLAN_RULES[screen.layout.floorplan]?.allowsColumns === false) {
@@ -566,6 +689,14 @@ export function validateScreenDefinition(screen: ScreenDefinition): string[] {
   if (screen.twin && !screen.twin.endpoint) {
     errors.push('twin.endpoint is required')
   }
+  if (screen.specialized) {
+    if (screen.specialized.type !== 'disposition_board') {
+      errors.push(`specialized.type is invalid: ${String(screen.specialized.type)}`)
+    }
+    if (!screen.specialized.id?.trim()) {
+      errors.push('specialized.id is required')
+    }
+  }
   if (screen.processChain) {
     if (!screen.processChain.chainId?.trim()) errors.push('processChain.chainId is required')
     if (!screen.processChain.stepKey?.trim()) errors.push('processChain.stepKey is required')
@@ -610,6 +741,33 @@ export function validateScreenDefinition(screen: ScreenDefinition): string[] {
     ])
     if (!fieldKeys.has(screen.identityField)) {
       errors.push(`identityField ${screen.identityField} is not a declared field`)
+    }
+  }
+
+  if (screen.entityProjection !== undefined) {
+    const projection = screen.entityProjection
+    const entries = projection && typeof projection === 'object' && !Array.isArray(projection)
+      ? Object.entries(projection) : []
+    const safeSegment = /^[A-Za-z][A-Za-z0-9_]{0,63}$/
+    const forbidden = new Set(['__proto__', 'prototype', 'constructor', '__class__', '__dict__', '__globals__'])
+    const fields = new Set([
+      ...(screen.fields ?? []).map((field) => field.key),
+      ...(screen.tabs ?? []).flatMap((tab) => (tab.fields ?? []).map((field) => field.key)),
+    ])
+    if (!entries.length || entries.length > 64 || !Object.prototype.hasOwnProperty.call(projection, 'id')) {
+      errors.push('entityProjection requires a bounded id mapping')
+    }
+    const entitySources = (screen.dataSources ?? []).filter((source) => source.key === 'entity')
+    if (entitySources.length !== 1 || (entitySources[0]?.method ?? 'GET') !== 'GET') {
+      errors.push('entityProjection requires one declared entity GET source')
+    }
+    for (const [key, path] of entries) {
+      const segments = typeof path === 'string' ? path.split('.') : []
+      if (!safeSegment.test(key) || forbidden.has(key.toLowerCase()) || !fields.has(key)
+        || !segments.length || segments.length > 8
+        || segments.some((segment) => !safeSegment.test(segment) || forbidden.has(segment.toLowerCase()))) {
+        errors.push(`entityProjection has an invalid field or path: ${key}`)
+      }
     }
   }
 

@@ -16,7 +16,6 @@ from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.core.config import settings
 from app.core.data_quality_enforcement import build_dq_error_detail, evaluate_customer_datensatz
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
 from app.integrations.crm_core_client import (
@@ -163,9 +162,12 @@ def attach_mask_aliases(customer: dict[str, Any]) -> dict[str, Any]:
     return customer
 
 
-def _adapt_customer(core_customer: CRMCoreCustomer) -> dict[str, Any]:
-    """Map crm-core payload to the Customer schema dict."""
-    tenant_uuid = UUID(settings.DEFAULT_TENANT_ID)
+def _adapt_customer(core_customer: CRMCoreCustomer, tenant_id: str) -> dict[str, Any]:
+    """Map crm-core payload to the Customer schema dict.
+
+    Der Mandant ist der des Aufrufers (nur eigene Kunden werden abgebildet), nicht der Standardmandant.
+    """
+    tenant_uuid = _tenant_as_uuid(tenant_id)
     now = datetime.utcnow()
     customer_number = f"CRM-{core_customer.id[:8].upper()}"
     is_active = core_customer.status not in {"blacklisted", "former"}
@@ -517,6 +519,7 @@ class CustomerService:
                 ON CONFLICT (id) DO UPDATE SET
                     business_partner_id = EXCLUDED.business_partner_id,
                     updated_at = NOW()
+                WHERE domain_crm.customers.tenant_id = EXCLUDED.tenant_id
             """),
             {
                 "id": customer_id,
@@ -549,10 +552,15 @@ class CustomerService:
             tenant_id=self.tenant_id,
             customer_number=customer_data.customer_number.strip(),
             company_name=customer_data.company_name.strip(),
-            contact_person=None,
+            contact_person=customer_data.contact_person,
             email=str(customer_data.email) if customer_data.email else None,
             phone=customer_data.phone,
             address=customer_data.address,
+            # Bis 20.10.2026 verwarf die lokale Anlage Ort, PLZ, Land und Branche.
+            city=customer_data.city,
+            postal_code=customer_data.postal_code,
+            country=customer_data.country,
+            industry=customer_data.industry,
             credit_limit=customer_data.credit_limit,
             payment_terms=payment_terms,
             tax_id=customer_data.tax_id,
@@ -685,12 +693,13 @@ class CustomerService:
         limit: int = 50,
         search: Optional[str] = None,
     ) -> tuple[list[dict[str, Any]], int]:
-        effective_tenant = self.tenant_id or _DEFAULT_TENANT
+        effective_tenant = self.tenant_id
         try:
-            core_items, total = await _crm_list(skip=skip, limit=limit, search=search)
-            items = [_adapt_customer(c) for c in core_items]
+            core_items, _ = await _crm_list(skip=skip, limit=limit, search=search)
+            eigene = self._eigene_kunden({str(c.id) for c in core_items})
+            items = [_adapt_customer(c, self.tenant_id) for c in core_items if str(c.id) in eigene]
             items = self.merge_extensions_for_list(items)
-            return items, total
+            return items, self._anzahl_eigene_kunden()
         except Exception as exc:
             logger.warning("crm-core unavailable, DB fallback: %s: %s", type(exc).__name__, exc)
             return self._list_fallback_db(skip, limit, search, effective_tenant)
@@ -709,8 +718,8 @@ class CustomerService:
             except Exception as exc:
                 logger.warning("crm-core get_customer failed, DB fallback: %s: %s", type(exc).__name__, exc)
                 customer = None
-        if customer is not None:
-            return self.merge_extensions(_adapt_customer(customer))
+        if customer is not None and self._eigene_kunden({str(customer.id)}):
+            return self.merge_extensions(_adapt_customer(customer, self.tenant_id))
         row = self.get_from_db_any_key(customer_id)
         if row is None:
             raise EntityNotFoundError("Customer", customer_id)
@@ -914,19 +923,18 @@ class CustomerService:
         except httpx.RequestError as exc:
             logger.warning("crm-core unreachable, monolith fallback: %s", exc)
             return self._create_in_monolith_db(customer_data)
-        if getattr(customer_data, "business_partner_id", None):
-            bp_id = customer_data.business_partner_id
+        bp_id = getattr(customer_data, "business_partner_id", None) or None
+        if bp_id:
             self.ensure_bp_belongs_to_tenant(bp_id)
-            try:
-                self.upsert_monolith_stub(
-                    created.id,
-                    bp_id,
-                    (created.display_name or customer_data.company_name or "Kunde").strip() or "Kunde",
-                    f"CRM-{created.id[:8].upper()}",
-                )
-            except Exception:
-                logger.warning("Monolith stub upsert failed for customer %s", created.id)
-        d = _adapt_customer(created)
+        # Ohne lokalen Eintrag gehoerte der crm-core-Kunde keinem Mandanten (crm-core fuehrt keinen); bis 20.10.2026
+        # entstand er nur mit Geschaeftspartner, und ein Fehler wurde verschluckt.
+        self.upsert_monolith_stub(
+            created.id,
+            bp_id,
+            (created.display_name or customer_data.company_name or "Kunde").strip() or "Kunde",
+            customer_data.customer_number or f"CRM-{created.id[:8].upper()}",
+        )
+        d = _adapt_customer(created, self.tenant_id)
         return self.merge_extensions(d)
 
     async def update_customer(self, customer_id: str, customer_data: Any) -> dict[str, Any]:
@@ -941,31 +949,75 @@ class CustomerService:
             )
             if not dq_result.bestanden:
                 raise ValidationFailedError(build_dq_error_detail("Debitor", dq_result))
-        payload = _map_update_payload(customer_data)
-        if payload:
-            updated = await _crm_update(customer_id, payload)
-        else:
-            updated = await _crm_get(customer_id)
-        if updated is None:
+        if not self._eigene_kunden({str(customer_id)}):
             raise EntityNotFoundError("Customer", customer_id)
-        if "business_partner_id" in data:
-            bid = data["business_partner_id"]
-            if bid:
-                self.ensure_bp_belongs_to_tenant(bid)
-            try:
-                self.upsert_monolith_stub(
-                    customer_id,
-                    bid,
-                    (updated.display_name or "Kunde").strip() or "Kunde",
-                    f"CRM-{customer_id[:8].upper()}",
-                )
-            except Exception:
-                logger.warning("Monolith stub update failed for customer %s", customer_id)
-        d = _adapt_customer(updated)
+        if data.get("business_partner_id"):
+            self.ensure_bp_belongs_to_tenant(data["business_partner_id"])
+        # Der lokale Eintrag ist Mandantenanker und Fallback; er traegt die Aenderung immer (bis 20.10.2026 liess
+        # sich ein ohne crm-core angelegter Kunde nie aendern: crm-core kannte ihn nicht, es gab keinen Fallback).
+        self._update_in_monolith_db(customer_id, data)
+        payload = _map_update_payload(customer_data)
+        try:
+            updated = await _crm_update(customer_id, payload) if payload else await _crm_get(customer_id)
+        except httpx.RequestError as exc:
+            logger.warning("crm-core unreachable, monolith update only: %s", exc)
+            updated = None
+        except httpx.HTTPStatusError as exc:
+            if exc.response.status_code != 404:
+                raise
+            updated = None  # nur lokal gefuehrt (Anlage bei nicht erreichbarem crm-core)
+        if updated is None:
+            row = self.get_from_db_any_key(customer_id)
+            if row is None:
+                raise EntityNotFoundError("Customer", customer_id)
+            return self.merge_extensions(row)
+        d = _adapt_customer(updated, self.tenant_id)
         return self.merge_extensions(d)
 
     async def delete_customer(self, customer_id: str) -> None:
+        if not self._eigene_kunden({str(customer_id)}):
+            raise EntityNotFoundError("Customer", customer_id)
         await _crm_delete(customer_id)
+
+    _LOKALE_SPALTEN = ("customer_number", "company_name", "contact_person", "email", "phone", "address", "city",
+                       "postal_code", "country", "industry", "website", "is_active", "business_partner_id")
+
+    def _update_in_monolith_db(self, customer_id: str, data: dict[str, Any]) -> None:
+        werte = {k: (str(v) if k == "email" and v is not None else v)
+                 for k, v in data.items() if k in self._LOKALE_SPALTEN}
+        if not werte:
+            return
+        zuweisung = ", ".join(f"{k} = :{k}" for k in werte)  # Spaltennamen aus der festen Liste
+        try:
+            self.db.execute(
+                text(f"UPDATE domain_crm.customers SET {zuweisung}, updated_at = NOW() "  # nosec B608
+                     "WHERE id::text = :cid AND tenant_id = :tid"),
+                {**werte, "cid": str(customer_id), "tid": self.tenant_id},
+            )
+            self.db.commit()
+        except IntegrityError as exc:
+            self.db.rollback()
+            raise ConflictError("Kundennummer oder Datensatz existiert bereits.") from exc
+
+    def _eigene_kunden(self, kennungen: set[str]) -> set[str]:
+        """Die Kennungen, die im Mandanten als Kunde gefuehrt sind.
+
+        crm-core fuehrt an Kunden keinen Mandanten. Bis 20.10.2026 reichten Liste, Abruf, Aendern und Loeschen
+        deshalb Kunden *aller* Mandanten durch; jetzt gilt ein crm-core-Kunde nur ueber seinen Eintrag in
+        ``domain_crm.customers`` als eigener."""
+        if not kennungen:
+            return set()
+        zeilen = self.db.execute(
+            text("SELECT id::text FROM domain_crm.customers WHERE tenant_id = :tid AND id::text = ANY(:k)"),
+            {"tid": self.tenant_id, "k": sorted(kennungen)},
+        ).scalars().all()
+        return set(zeilen)
+
+    def _anzahl_eigene_kunden(self) -> int:
+        return int(self.db.execute(
+            text("SELECT count(*) FROM domain_crm.customers WHERE tenant_id = :tid AND deleted_at IS NULL"),
+            {"tid": self.tenant_id},
+        ).scalar() or 0)
 
     def quick_search(self, term: str, limit: int = 8) -> list[dict[str, Any]]:
         if not term.strip():

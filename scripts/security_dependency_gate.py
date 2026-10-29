@@ -12,7 +12,7 @@ import re
 
 ROOT = Path(__file__).resolve().parents[1]
 POLICY = ROOT / "config/security/dependency-decisions.json"
-EVIDENCE_GLOBS = ("services/ai/**/*.py", "services/ai/Dockerfile", "services/ai/requirements.txt", "docker-compose*.yml", "k8s/**/*.yaml", "k8s/**/*.yml")
+EVIDENCE_GLOBS = ("services/ai/**/*.py", "services/ai/Dockerfile", "services/ai/requirements.txt", "app/infrastructure/rag/vector_store.py", "docker-compose*.yml", "k8s/**/*.yaml", "k8s/**/*.yml")
 
 
 def fingerprint(root=ROOT):

@@ -14,6 +14,13 @@ _HEADERS = {
 _client = TestClient(app, raise_server_exceptions=False)
 
 
+@pytest.fixture(autouse=True)
+def isolated_snapshot_store(monkeypatch):
+    from app.api.v1.endpoints import read_model_snapshots as endpoint
+    from app.core.read_model_persistence import ReadModelSnapshotStore
+    monkeypatch.setitem(app.dependency_overrides, endpoint._get_store, lambda: ReadModelSnapshotStore())
+
+
 # ---------------------------------------------------------------------------
 # read_model_snapshots  /api/v1/read-models/*
 # ---------------------------------------------------------------------------
@@ -73,7 +80,7 @@ def test_snapshot_create_returns_201(monkeypatch: pytest.MonkeyPatch) -> None:
         def __init__(self, db_session): pass  # noqa: ANN001
         def save(self, snap): return snap  # noqa: ANN001
 
-    monkeypatch.setattr(ep_mod, "_get_store", lambda: _FakeStore(None))
+    monkeypatch.setitem(app.dependency_overrides, ep_mod._get_store, lambda: _FakeStore(None))
 
     # POST with query params (model_name, tenant_id) + body dict
     resp = _client.post(
@@ -82,8 +89,8 @@ def test_snapshot_create_returns_201(monkeypatch: pytest.MonkeyPatch) -> None:
         json={"order_id": "ORD-001", "status": "open"},
         headers=_HEADERS,
     )
-    # 201 with monkeypatched store, or 500 if store init hits DB
-    assert resp.status_code in (201, 422, 500)
+    assert resp.status_code == 201, resp.text
+    assert resp.json()["tenant_id"] == _HEADERS["X-Tenant-ID"]
 
 
 # ---------------------------------------------------------------------------

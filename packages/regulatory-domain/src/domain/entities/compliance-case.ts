@@ -44,7 +44,7 @@ export type ComplianceCaseStatus = z.infer<typeof ComplianceCaseStatusEnum>;
  * Compliance Case - Compliance-Vorfall
  */
 export const ComplianceCaseSchema = z.object({
-  id: z.string().uuid().optional(),
+  id: z.string().guid().optional(),
   tenantId: z.string().min(1, 'Tenant ID is required'),
   
   // Case-Identifikation
@@ -63,7 +63,7 @@ export const ComplianceCaseSchema = z.object({
   description: z.string().min(1, 'Description is required'),
   
   // Policy/Label-Bezug
-  policyId: z.string().uuid().optional(),
+  policyId: z.string().guid().optional(),
   labelCode: z.string().optional(), // Betroffenes Label
   ruleId: z.string().optional(), // Verletzte Regel
   
@@ -77,10 +77,10 @@ export const ComplianceCaseSchema = z.object({
   
   // Maßnahmen
   immediateAction: z.string().optional(),
-  capaId: z.string().uuid().optional(), // Verknüpfung zu quality-domain CAPA
+  capaId: z.string().guid().optional(), // Verknüpfung zu quality-domain CAPA
   
   // Auswirkungen
-  impactedBatches: z.array(z.string().uuid()).optional(),
+  impactedBatches: z.array(z.string().guid()).optional(),
   impactedLabels: z.array(z.string()).optional(), // Label-Codes die betroffen sind
   
   // Abschluss

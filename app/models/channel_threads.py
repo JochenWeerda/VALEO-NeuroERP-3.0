@@ -63,6 +63,7 @@ class ChannelThreadAuditItemRecord(Base):
         ForeignKey("domain_shared.channel_process_threads.thread_id", ondelete="CASCADE"),
         nullable=False,
     )
+    tenant_id: Mapped[str] = mapped_column(String, nullable=False)
     position: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     audit_type: Mapped[str] = mapped_column(String(80), nullable=False)
     payload: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)

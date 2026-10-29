@@ -11,6 +11,7 @@ from typing import Optional
 from uuid import uuid4
 
 from app.agents.neuroassist_contracts import PromptPack
+from app.core.tenant_context import get_current_tenant_id
 
 _IN_MEMORY_PROMPT_PACKS: dict[str, list[dict]] = {}
 
@@ -18,10 +19,11 @@ _IN_MEMORY_PROMPT_PACKS: dict[str, list[dict]] = {}
 def register_prompt_pack(
     prompt_pack: PromptPack,
     version: str = "1.0",
-    tenant_id: str = "system",
+    tenant_id: str | None = None,
     variant_key: str | None = None,
     traffic_weight: float | None = None,
 ) -> dict:
+    tenant_id = tenant_id or get_current_tenant_id()
     entry = {
         "id": str(uuid4()),
         "prompt_pack_key": prompt_pack.prompt_pack_key,
@@ -51,7 +53,8 @@ def register_prompt_pack(
     return entry
 
 
-def list_prompt_packs(tenant_id: str = "system") -> list[dict]:
+def list_prompt_packs(tenant_id: str | None = None) -> list[dict]:
+    tenant_id = tenant_id or get_current_tenant_id()
     result = []
     for versions in _IN_MEMORY_PROMPT_PACKS.values():
         for v in versions:
@@ -60,7 +63,8 @@ def list_prompt_packs(tenant_id: str = "system") -> list[dict]:
     return result
 
 
-def get_active_prompt_pack(prompt_pack_key: str, tenant_id: str = "system") -> Optional[dict]:
+def get_active_prompt_pack(prompt_pack_key: str, tenant_id: str | None = None) -> Optional[dict]:
+    tenant_id = tenant_id or get_current_tenant_id()
     versions = _IN_MEMORY_PROMPT_PACKS.get(prompt_pack_key, [])
     for v in reversed(versions):
         if v.get("active") and v.get("tenant_id") == tenant_id:
@@ -68,7 +72,8 @@ def get_active_prompt_pack(prompt_pack_key: str, tenant_id: str = "system") -> O
     return None
 
 
-def list_active_variants(prompt_pack_key: str, tenant_id: str = "system") -> list[dict]:
+def list_active_variants(prompt_pack_key: str, tenant_id: str | None = None) -> list[dict]:
+    tenant_id = tenant_id or get_current_tenant_id()
     versions = _IN_MEMORY_PROMPT_PACKS.get(prompt_pack_key, [])
     return [
         v for v in versions
@@ -78,9 +83,10 @@ def list_active_variants(prompt_pack_key: str, tenant_id: str = "system") -> lis
 
 def select_prompt_pack_variant(
     prompt_pack_key: str,
-    tenant_id: str = "system",
+    tenant_id: str | None = None,
     seed: str | None = None,
 ) -> Optional[dict]:
+    tenant_id = tenant_id or get_current_tenant_id()
     variants = list_active_variants(prompt_pack_key, tenant_id)
     if not variants:
         return None
@@ -100,9 +106,9 @@ def select_prompt_pack_variant(
         digest = hashlib.sha256(seed.encode()).hexdigest()
         roll = int(digest, 16) / float(2**256)
     else:
-        from random import random
+        import secrets
 
-        roll = random()
+        roll = secrets.randbelow(1_000_000) / 1_000_000
 
     threshold = roll * total
     running = 0.0
@@ -113,7 +119,8 @@ def select_prompt_pack_variant(
     return weighted[-1][0]
 
 
-def rollback_prompt_pack(prompt_pack_key: str, tenant_id: str = "system") -> Optional[dict]:
+def rollback_prompt_pack(prompt_pack_key: str, tenant_id: str | None = None) -> Optional[dict]:
+    tenant_id = tenant_id or get_current_tenant_id()
     versions = _IN_MEMORY_PROMPT_PACKS.get(prompt_pack_key, [])
     tenant_versions = [v for v in versions if v.get("tenant_id") == tenant_id]
     if len(tenant_versions) < 2:

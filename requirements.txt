@@ -28,7 +28,7 @@ bcrypt==4.1.2
 
 # HTTP client for external APIs
 httpx==0.28.1
-aiohttp==3.14.3
+aiohttp==3.14.4
 requests==2.33.0
 boto3>=1.34.0
 
@@ -40,18 +40,18 @@ prometheus-fastapi-instrumentator==8.0.0
 psutil==6.1.1
 
 # OpenTelemetry (optional, Gap 039 — nur bei ENABLE_TRACING / OTEL_EXPORTER_OTLP_ENDPOINT aktiv)
-opentelemetry-api==1.29.0
-opentelemetry-sdk==1.29.0
-opentelemetry-exporter-otlp-proto-http==1.29.0
-opentelemetry-instrumentation-fastapi==0.50b0
-opentelemetry-instrumentation-sqlalchemy==0.50b0
+opentelemetry-api==1.45.1
+opentelemetry-sdk==1.45.1
+opentelemetry-exporter-otlp-proto-http==1.45.1
+opentelemetry-instrumentation-fastapi==0.66b1
+opentelemetry-instrumentation-sqlalchemy==0.66b1
 
 # Development and testing
 pytest==9.0.3
 pytest-asyncio==1.3.0
 coverage==7.14.1
 pytest-cov==7.1.0
-black==26.3.1
+black==26.10.1
 isort==5.13.2
 flake8==7.3.0
 mypy==1.16.1
@@ -62,7 +62,7 @@ nats-py==2.6.0
 # Code quality and utilities
 click==8.3.3
 colorama==0.4.6
-GitPython==3.1.62
+GitPython==3.2.1
 
 # Data processing
 pandas==2.3.0

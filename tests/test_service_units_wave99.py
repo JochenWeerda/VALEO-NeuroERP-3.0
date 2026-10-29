@@ -38,7 +38,7 @@ def test_sha256_hex_returns_hex_string() -> None:
 @pytest.mark.unit
 def test_sha256_hex_deterministic() -> None:
     from app.services.docflow_artifact_service import sha256_hex
-    assert sha256_hex("test") == sha256_hex("test")
+    assert sha256_hex("test") == "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
 
 
 @pytest.mark.unit

@@ -366,6 +366,6 @@ def test_ein_beleg_wird_nicht_als_gebucht_oder_storniert_angelegt(haus, status):
 
 def test_gebucht_wird_nicht_durch_aendern_gesetzt(haus):
     auftrag = _auftrag(haus, doc_type="sales_invoice")
-    antwort = haus["client"].put(f"/docflow/{auftrag['id']}", params=haus["t"], json={"status": "posted"})
+    antwort = haus["client"].put(f"/docflow/{auftrag['id']}", params=haus["t"], json={"status": "posted", "expected_version": 1, "idempotency_key": "reject-posted-state"})
     assert antwort.status_code in (400, 409, 422) and "entsteht durch Buchen" in antwort.text, antwort.text
     assert _historie(haus, auftrag["id"]) == [(None, "open", "create", "5f0c2a9e")]

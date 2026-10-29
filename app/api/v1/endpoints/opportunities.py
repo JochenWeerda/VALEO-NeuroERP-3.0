@@ -27,6 +27,7 @@ from ..schemas.crm import Opportunity, OpportunityCreate, OpportunityUpdate
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.opportunities_schemas import OpportunitiesOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter()
@@ -38,7 +39,7 @@ router = APIRouter()
 OPPORTUNITY_STAGES = ["LEAD", "QUALIFIZIERT", "ANGEBOT", "VERHANDLUNG", "GEWONNEN", "VERLOREN"]
 
 
-@router.post("/", response_model=Opportunity, status_code=status.HTTP_201_CREATED, summary="Opportunity anlegen")
+@router.post("/", response_model=Opportunity, status_code=status.HTTP_201_CREATED, summary="Opportunity anlegen", dependencies=SCHREIBEN["CRM"])
 async def create_opportunity(opportunity_data: OpportunityCreate, tenant_id: str = Depends(get_tenant_id)):
     """Create a new sales opportunity via crm-sales.
 
@@ -194,32 +195,6 @@ def _local_opportunities(
     return [_opportunity_from_local(dict(row)) for row in rows], int(total or 0)
 
 
-def _ensure_opp_columns(db: Session) -> None:
-    """Add missing columns to opportunities table (idempotent)."""
-    cols_sql = text(
-        "SELECT column_name FROM information_schema.columns "
-        "WHERE table_name='opportunities' AND table_schema='public'"
-    )
-    try:
-        existing = {r[0] for r in db.execute(cols_sql)}
-    except Exception:
-        return
-    migrations = [
-        ("stage", "ALTER TABLE opportunities ADD COLUMN stage TEXT DEFAULT 'LEAD'"),
-        ("probability", "ALTER TABLE opportunities ADD COLUMN probability FLOAT DEFAULT 25"),
-        ("expected_close_date", "ALTER TABLE opportunities ADD COLUMN expected_close_date DATE"),
-        ("amount", "ALTER TABLE opportunities ADD COLUMN amount NUMERIC"),
-        ("stage_history", "ALTER TABLE opportunities ADD COLUMN stage_history JSONB DEFAULT '[]'::jsonb"),
-    ]
-    for col, ddl in migrations:
-        if col not in existing:
-            try:
-                db.execute(text(ddl))
-                db.commit()
-            except Exception:
-                db.rollback()
-
-
 @router.get("/stages", response_model=list[OpportunitiesOut], summary="Stages auflisten")
 async def list_stages():
     """Pipeline-Stages fuer Kanban-Board."""
@@ -236,7 +211,6 @@ async def get_pipeline(
     db: Session = Depends(get_db),
 ):
     """Kanban-View: Opportunities gruppiert nach Stage."""
-    _ensure_opp_columns(db)
 
     try:
         sql = text(
@@ -312,7 +286,6 @@ async def get_forecast(
     db: Session = Depends(get_db),
 ):
     """Umsatz-Prognose: probability * amount, gruppiert nach Monat."""
-    _ensure_opp_columns(db)
 
     # Try DB-based forecast first
     try:
@@ -396,7 +369,7 @@ async def get_forecast(
 # PATCH /{id}/stage — Stage-Wechsel mit History-Log
 # ---------------------------------------------------------------------------
 
-@router.patch("/{opportunity_id}/stage", response_model=OpportunitiesOut, tags=["crm", "opportunities"], summary="Opportunity stage aktualisieren")
+@router.patch("/{opportunity_id}/stage", response_model=OpportunitiesOut, tags=["crm", "opportunities"], summary="Opportunity stage aktualisieren", dependencies=SCHREIBEN["CRM"])
 async def patch_opportunity_stage(
     opportunity_id: str,
     new_stage: str = Query(..., description="Target stage (LEAD/QUALIFIZIERT/ANGEBOT/VERHANDLUNG/GEWONNEN/VERLOREN)"),
@@ -408,7 +381,6 @@ async def patch_opportunity_stage(
     if new_stage not in OPPORTUNITY_STAGES:
         raise HTTPException(status_code=422, detail=f"Ungueltige Stage. Erlaubt: {OPPORTUNITY_STAGES}")
 
-    _ensure_opp_columns(db)
 
     try:
         # Check exists
@@ -462,7 +434,7 @@ async def patch_opportunity_stage(
 # ---------------------------------------------------------------------------
 
 @router.post("/{opportunity_id}/activities", response_model=OpportunitiesOut, status_code=status.HTTP_201_CREATED,
-             tags=["crm", "opportunities"], summary="Opportunity activity hinzufügen")
+             tags=["crm", "opportunities"], summary="Opportunity activity hinzufügen", dependencies=SCHREIBEN["CRM"])
 async def add_opportunity_activity(
     opportunity_id: str,
     activity_type: str = Query("NOTE", description="Aktivitätstyp (NOTE/CALL/EMAIL/MEETING)"),
@@ -530,29 +502,60 @@ async def get_opportunity(
     return result.model_copy(update={"customer_name": kunde.name, "customer_number": number})
 
 
-@router.put("/{opportunity_id}", response_model=Opportunity, summary="Opportunity aktualisieren")
+@router.put("/{opportunity_id}", response_model=Opportunity, summary="Opportunity aktualisieren", dependencies=SCHREIBEN["CRM"])
 async def update_opportunity(
     opportunity_id: str,
     opportunity_data: OpportunityUpdate,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
-    """Update a sales opportunity via crm-sales — nur im eigenen Mandanten."""
+    """Update a sales opportunity via crm-sales — nur im eigenen Mandanten.
+
+    Wie beim Lesen gilt die lokale Pipeline-Tabelle, wenn crm-sales die Chance nicht kennt oder nicht erreichbar
+    ist (bis 19.10.2026 scheiterte jede Aenderung einer lokal gefuehrten Chance mit 500)."""
     await _opportunity_im_mandanten(db, opportunity_id, tenant_id)
+    daten = opportunity_data.model_dump(exclude_unset=True)
     try:
-        updated = await crm_update_opportunity(opportunity_id, opportunity_data.model_dump(exclude_unset=True))
+        updated = await crm_update_opportunity(opportunity_id, daten)
     except httpx.HTTPStatusError as exc:
+        if exc.response.status_code == 404 and _local_opportunity(db, opportunity_id, tenant_id):
+            return Opportunity.model_validate(_update_local_opportunity(db, opportunity_id, tenant_id, daten))
         if exc.response.status_code == 404:
             raise HTTPException(status_code=404, detail="Opportunity not found") from exc
         raise HTTPException(status_code=exc.response.status_code, detail=exc.response.text) from exc
+    except (httpx.RequestError, RuntimeError) as exc:
+        if not _local_opportunity(db, opportunity_id, tenant_id):
+            raise HTTPException(status_code=503, detail="crm-sales nicht erreichbar") from exc
+        return Opportunity.model_validate(_update_local_opportunity(db, opportunity_id, tenant_id, daten))
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Failed to update opportunity: {exc}") from exc
     return Opportunity.model_validate(updated)
 
 
+#: Felder des crm-sales-Vertrags -> Spalten der lokalen Pipeline-Tabelle (Umkehrung von ``_opportunity_from_local``).
+_LOKALE_SPALTEN = {"name": "title", "description": "description", "amount": "estimated_value",
+                   "probability": "probability", "expected_close_date": "expected_close_date", "status": "status",
+                   "stage": "stage", "lead_source": "source", "assigned_to": "assigned_to", "customer_id": "customer_id"}
+
+
+def _update_local_opportunity(db: Session, opportunity_id: str, tenant_id: str, daten: dict[str, Any]) -> dict:
+    fremd = sorted(set(daten) - set(_LOKALE_SPALTEN))
+    if fremd:
+        raise HTTPException(status_code=422, detail=f"Lokal gefuehrte Chance: nicht aenderbar {', '.join(fremd)}")
+    werte = {_LOKALE_SPALTEN[k]: (str(v) if k == "customer_id" and v is not None else v) for k, v in daten.items()}
+    if werte:
+        zuweisung = ", ".join(f"{spalte} = :{spalte}" for spalte in werte)
+        db.execute(
+            text(f"UPDATE domain_crm.crm_opportunities SET {zuweisung}, updated_at = now() "
+                 "WHERE id = :id AND tenant_id = :tid"),  # nosec B608  # Spalten aus fester Zuordnung, Werte gebunden
+            {**werte, "id": opportunity_id, "tid": tenant_id},
+        )
+        db.commit()
+    return _local_opportunity(db, opportunity_id, tenant_id)
+
+
 @router.delete("/{opportunity_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Opportunity löschen",
-    response_model=None
-)
+    response_model=None, dependencies=SCHREIBEN["CRM"])
 async def delete_opportunity(
     opportunity_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
 ):

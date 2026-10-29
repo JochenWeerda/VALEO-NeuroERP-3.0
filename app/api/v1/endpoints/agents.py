@@ -9,11 +9,14 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from ....core.logging import set_correlation_id
+from app.core.tenant import get_tenant_id
+from fastapi import Depends
 
 logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema, StatusResponse
 from pydantic import ConfigDict as _ConfigDict
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 class AgentOut(BaseSchema):
@@ -42,7 +45,6 @@ class CapabilityResponse(BaseModel):
 
 class NeuroAssistRunRequest(BaseModel):
     capability_key: str
-    tenant_id: str = "system"
     parameters: dict = Field(default_factory=dict)
 
 
@@ -73,7 +75,6 @@ class NeuroAssistGateActionResponse(BaseModel):
 
 
 class AgentBudgetUpdateRequest(BaseModel):
-    tenant_id: str = "system"
     monthly_budget_cents: int = Field(ge=0)
     changed_by: str = "admin-ui"
 
@@ -121,19 +122,16 @@ class AgentTicketResponse(BaseModel):
 
 
 class AgentInterventionRequest(BaseModel):
-    tenant_id: str = "system"
     action: str
     requested_by: str = "admin-ui"
     note: str | None = None
 
 
 class AgentTemplateImportRequest(BaseModel):
-    tenant_id: str = "system"
     template: dict
 
 
 class AgentHeartbeatUpdateRequest(BaseModel):
-    tenant_id: str = "system"
     cadence: str | None = None
     enabled: bool | None = None
     stale_after_hours: int | None = Field(default=None, ge=1)
@@ -141,7 +139,6 @@ class AgentHeartbeatUpdateRequest(BaseModel):
 
 
 class AgentProfileUpdateRequest(BaseModel):
-    tenant_id: str = "system"
     owner_role: str | None = None
     escalation_role: str | None = None
     review_sla_hours: int | None = Field(default=None, ge=1)
@@ -151,14 +148,12 @@ class AgentProfileUpdateRequest(BaseModel):
 
 
 class AgentSkillPackUpdateRequest(BaseModel):
-    tenant_id: str = "system"
     skills: list[str] | None = None
     prompt_contracts: list[str] | None = None
     changed_by: str = "admin-ui"
 
 
 class LowStockSimulateRequest(BaseModel):
-    tenant_id: str = "default"
     artikel_id: str
     artikel_name: str
     bestand: float = Field(ge=0)
@@ -181,7 +176,6 @@ class AgentPersistenceStatusResponse(BaseModel):
 
 
 class ControlCenterPlanItemRequest(BaseModel):
-    tenant_id: str = "system"
     plan_id: str
     title: str
     kind: str
@@ -192,7 +186,6 @@ class ControlCenterPlanItemRequest(BaseModel):
 
 
 class ControlCenterIncidentActionRequest(BaseModel):
-    tenant_id: str = "system"
     action: str
     requested_by: str = "admin-ui"
     note: str | None = None
@@ -298,18 +291,18 @@ async def list_neuroassist_runs(status: str | None = None, limit: int = 50):
         return []
 
 
-@router.post("/neuroassist/runs", response_model=NeuroAssistRunResponse, summary="Neuroassist capability ausführen")
-async def run_neuroassist_capability(request: NeuroAssistRunRequest):
+@router.post("/neuroassist/runs", response_model=NeuroAssistRunResponse, summary="Neuroassist capability ausführen", dependencies=SCHREIBEN["FACHLICH"])
+async def run_neuroassist_capability(request: NeuroAssistRunRequest, tenant_id: str = Depends(get_tenant_id)):
     logger.info(
         "Running NeuroASSIST capability '%s' (tenant: %s)",
         request.capability_key,
-        request.tenant_id,
+        tenant_id,
     )
 
     try:
         result = await neuroassist_service.run_capability(
             request.capability_key,
-            tenant_id=request.tenant_id,
+            tenant_id=tenant_id,
             parameters=request.parameters,
         )
         set_correlation_id(result["correlation_id"])
@@ -332,7 +325,7 @@ async def get_neuroassist_run_status(run_id: str):
         raise HTTPException(status_code=500, detail=f"NeuroASSIST status lookup failed: {str(exc)}")
 
 
-@router.post("/neuroassist/runs/{run_id}/gates", response_model=NeuroAssistGateActionResponse, summary="Neuroassist gate action apply")
+@router.post("/neuroassist/runs/{run_id}/gates", response_model=NeuroAssistGateActionResponse, summary="Neuroassist gate action apply", dependencies=SCHREIBEN["FACHLICH"])
 async def apply_neuroassist_gate_action(run_id: str, request: NeuroAssistGateActionRequest):
     try:
         return NeuroAssistGateActionResponse(
@@ -355,7 +348,7 @@ async def apply_neuroassist_gate_action(run_id: str, request: NeuroAssistGateAct
 
 
 @router.get("/neuroassist/ops/overview", response_model=AgentOpsOverviewResponse, summary="Neuroassist ops overview abrufen")
-async def get_neuroassist_ops_overview(tenant_id: str = "system"):
+async def get_neuroassist_ops_overview(tenant_id: str = Depends(get_tenant_id)):
     try:
         return AgentOpsOverviewResponse(**_get_agent_ops_service().build_overview(tenant_id).model_dump(mode="json"))
     except Exception as exc:
@@ -364,7 +357,7 @@ async def get_neuroassist_ops_overview(tenant_id: str = "system"):
 
 
 @router.get("/neuroassist/ops/tickets", response_model=list[AgentTicketResponse], summary="Neuroassist ops tickets auflisten")
-async def list_neuroassist_ops_tickets(tenant_id: str = "system", include_closed: bool = False):
+async def list_neuroassist_ops_tickets(tenant_id: str = Depends(get_tenant_id), include_closed: bool = False):
     try:
         tickets = _get_agent_ops_service().list_tickets(tenant_id, include_closed=include_closed)
         return [AgentTicketResponse(**ticket.model_dump(mode="json")) for ticket in tickets]
@@ -373,11 +366,11 @@ async def list_neuroassist_ops_tickets(tenant_id: str = "system", include_closed
         raise HTTPException(status_code=500, detail=f"NeuroASSIST ops tickets failed: {str(exc)}")
 
 
-@router.post("/neuroassist/ops/budgets/{capability_key}", response_model=AgentOut, summary="Neuroassist budget aktualisieren")
-async def update_neuroassist_budget(capability_key: str, request: AgentBudgetUpdateRequest):
+@router.post("/neuroassist/ops/budgets/{capability_key}", response_model=AgentOut, summary="Neuroassist budget aktualisieren", dependencies=SCHREIBEN["FACHLICH"])
+async def update_neuroassist_budget(capability_key: str, request: AgentBudgetUpdateRequest, tenant_id: str = Depends(get_tenant_id)):
     try:
         budget = _get_agent_ops_service().set_budget(
-            request.tenant_id,
+            tenant_id,
             capability_key,
             request.monthly_budget_cents,
             changed_by=request.changed_by,
@@ -391,7 +384,7 @@ async def update_neuroassist_budget(capability_key: str, request: AgentBudgetUpd
 
 
 @router.get("/neuroassist/ops/dashboard", response_model=AgentOut, summary="Neuroassist ops dashboard abrufen")
-async def get_neuroassist_ops_dashboard(tenant_id: str = "system"):
+async def get_neuroassist_ops_dashboard(tenant_id: str = Depends(get_tenant_id)):
     try:
         return _get_agent_ops_service().build_dashboard(tenant_id).model_dump(mode="json")
     except Exception as exc:
@@ -400,7 +393,7 @@ async def get_neuroassist_ops_dashboard(tenant_id: str = "system"):
 
 
 @router.get("/neuroassist/ops/control-center", response_model=AgentOut, summary="Neuroassist control center abrufen")
-async def get_neuroassist_control_center(tenant_id: str = "system"):
+async def get_neuroassist_control_center(tenant_id: str = Depends(get_tenant_id)):
     try:
         return _get_agent_ops_service().build_control_center(tenant_id).model_dump(mode="json")
     except Exception as exc:
@@ -409,7 +402,7 @@ async def get_neuroassist_control_center(tenant_id: str = "system"):
 
 
 @router.get("/neuroassist/ops/mobile-overview", response_model=AgentOut, summary="Neuroassist mobile ops overview abrufen")
-async def get_neuroassist_mobile_ops_overview(tenant_id: str = "system"):
+async def get_neuroassist_mobile_ops_overview(tenant_id: str = Depends(get_tenant_id)):
     try:
         return _get_agent_ops_service().build_mobile_overview(tenant_id).model_dump(mode="json")
     except Exception as exc:
@@ -418,7 +411,7 @@ async def get_neuroassist_mobile_ops_overview(tenant_id: str = "system"):
 
 
 @router.get("/neuroassist/ops/interventions", response_model=list[AgentOut], summary="Neuroassist interventions auflisten")
-async def list_neuroassist_interventions(tenant_id: str = "system"):
+async def list_neuroassist_interventions(tenant_id: str = Depends(get_tenant_id)):
     try:
         return [item.model_dump(mode="json") for item in _get_agent_ops_service().list_interventions(tenant_id)]
     except Exception as exc:
@@ -427,7 +420,7 @@ async def list_neuroassist_interventions(tenant_id: str = "system"):
 
 
 @router.get("/neuroassist/ops/config-revisions", response_model=list[AgentOut], summary="Neuroassist config revisions auflisten")
-async def list_neuroassist_config_revisions(tenant_id: str = "system"):
+async def list_neuroassist_config_revisions(tenant_id: str = Depends(get_tenant_id)):
     try:
         return [item.model_dump(mode="json") for item in _get_agent_ops_service().list_config_revisions(tenant_id)]
     except Exception as exc:
@@ -436,7 +429,7 @@ async def list_neuroassist_config_revisions(tenant_id: str = "system"):
 
 
 @router.get("/neuroassist/ops/persistence", response_model=AgentPersistenceStatusResponse, summary="Neuroassist persistence status abrufen")
-async def get_neuroassist_persistence_status(tenant_id: str = "system"):
+async def get_neuroassist_persistence_status(tenant_id: str = Depends(get_tenant_id)):
     try:
         return AgentPersistenceStatusResponse(**_get_agent_ops_service().build_persistence_status(tenant_id))
     except Exception as exc:
@@ -445,7 +438,7 @@ async def get_neuroassist_persistence_status(tenant_id: str = "system"):
 
 
 @router.get("/neuroassist/ops/planning", response_model=AgentOut, summary="Neuroassist control center planning abrufen")
-async def get_neuroassist_control_center_planning(tenant_id: str = "system"):
+async def get_neuroassist_control_center_planning(tenant_id: str = Depends(get_tenant_id)):
     try:
         return _get_control_center_helpers()["build_planning"](tenant_id)
     except Exception as exc:
@@ -453,11 +446,11 @@ async def get_neuroassist_control_center_planning(tenant_id: str = "system"):
         raise HTTPException(status_code=500, detail=f"NeuroASSIST control-center planning failed: {str(exc)}")
 
 
-@router.post("/neuroassist/ops/planning/items", response_model=AgentOut, summary="Neuroassist control center plan item upsert")
-async def upsert_neuroassist_control_center_plan_item(request: ControlCenterPlanItemRequest):
+@router.post("/neuroassist/ops/planning/items", response_model=AgentOut, summary="Neuroassist control center plan item upsert", dependencies=SCHREIBEN["FACHLICH"])
+async def upsert_neuroassist_control_center_plan_item(request: ControlCenterPlanItemRequest, tenant_id: str = Depends(get_tenant_id)):
     try:
         return _get_control_center_helpers()["upsert_plan_item"](
-            request.tenant_id,
+            tenant_id,
             plan_id=request.plan_id,
             title=request.title,
             kind=request.kind,
@@ -472,7 +465,7 @@ async def upsert_neuroassist_control_center_plan_item(request: ControlCenterPlan
 
 
 @router.get("/neuroassist/ops/incidents", response_model=AgentOut, summary="Neuroassist control center incidents abrufen")
-async def get_neuroassist_control_center_incidents(tenant_id: str = "system"):
+async def get_neuroassist_control_center_incidents(tenant_id: str = Depends(get_tenant_id)):
     try:
         return _get_control_center_helpers()["build_incidents"](tenant_id)
     except Exception as exc:
@@ -480,11 +473,11 @@ async def get_neuroassist_control_center_incidents(tenant_id: str = "system"):
         raise HTTPException(status_code=500, detail=f"NeuroASSIST control-center incidents failed: {str(exc)}")
 
 
-@router.post("/neuroassist/ops/incidents/{incident_id}/actions", response_model=AgentOut, summary="Neuroassist control center incident action apply")
-async def apply_neuroassist_control_center_incident_action(incident_id: str, request: ControlCenterIncidentActionRequest):
+@router.post("/neuroassist/ops/incidents/{incident_id}/actions", response_model=AgentOut, summary="Neuroassist control center incident action apply", dependencies=SCHREIBEN["FACHLICH"])
+async def apply_neuroassist_control_center_incident_action(incident_id: str, request: ControlCenterIncidentActionRequest, tenant_id: str = Depends(get_tenant_id)):
     try:
         return _get_control_center_helpers()["apply_incident_action"](
-            request.tenant_id,
+            tenant_id,
             incident_id,
             action=request.action,
             requested_by=request.requested_by,
@@ -499,11 +492,11 @@ async def apply_neuroassist_control_center_incident_action(incident_id: str, req
         raise HTTPException(status_code=500, detail=f"NeuroASSIST control-center incident action failed: {str(exc)}")
 
 
-@router.post("/neuroassist/ops/tickets/{ticket_id}/interventions", response_model=AgentOut, summary="Neuroassist intervention apply")
-async def apply_neuroassist_intervention(ticket_id: str, request: AgentInterventionRequest):
+@router.post("/neuroassist/ops/tickets/{ticket_id}/interventions", response_model=AgentOut, summary="Neuroassist intervention apply", dependencies=SCHREIBEN["FACHLICH"])
+async def apply_neuroassist_intervention(ticket_id: str, request: AgentInterventionRequest, tenant_id: str = Depends(get_tenant_id)):
     try:
         return _get_agent_ops_service().apply_intervention(
-            request.tenant_id,
+            tenant_id,
             ticket_id,
             action=request.action,
             requested_by=request.requested_by,
@@ -519,7 +512,7 @@ async def apply_neuroassist_intervention(ticket_id: str, request: AgentIntervent
 
 
 @router.get("/neuroassist/ops/templates/export", response_model=AgentOut, summary="Neuroassist template exportieren")
-async def export_neuroassist_template(tenant_id: str = "system", template_key: str = "default"):
+async def export_neuroassist_template(tenant_id: str = Depends(get_tenant_id), template_key: str = "default"):
     try:
         return _get_agent_ops_service().export_template(tenant_id, template_key=template_key).model_dump(mode="json")
     except Exception as exc:
@@ -527,21 +520,21 @@ async def export_neuroassist_template(tenant_id: str = "system", template_key: s
         raise HTTPException(status_code=500, detail=f"NeuroASSIST template export failed: {str(exc)}")
 
 
-@router.post("/neuroassist/ops/templates/import", response_model=AgentOut, summary="Neuroassist template importieren")
-async def import_neuroassist_template(request: AgentTemplateImportRequest):
+@router.post("/neuroassist/ops/templates/import", response_model=AgentOut, summary="Neuroassist template importieren", dependencies=SCHREIBEN["FACHLICH"])
+async def import_neuroassist_template(request: AgentTemplateImportRequest, tenant_id: str = Depends(get_tenant_id)):
     try:
         template = _get_agent_ops_template_model().model_validate(request.template)
-        return _get_agent_ops_service().import_template(request.tenant_id, template).model_dump(mode="json")
+        return _get_agent_ops_service().import_template(tenant_id, template).model_dump(mode="json")
     except Exception as exc:
         logger.error("NeuroASSIST template import failed: %s", exc, exc_info=True)
         raise HTTPException(status_code=500, detail=f"NeuroASSIST template import failed: {str(exc)}")
 
 
-@router.post("/neuroassist/ops/heartbeats/{capability_key}", response_model=AgentOut, summary="Neuroassist heartbeat aktualisieren")
-async def update_neuroassist_heartbeat(capability_key: str, request: AgentHeartbeatUpdateRequest):
+@router.post("/neuroassist/ops/heartbeats/{capability_key}", response_model=AgentOut, summary="Neuroassist heartbeat aktualisieren", dependencies=SCHREIBEN["GERAET"])
+async def update_neuroassist_heartbeat(capability_key: str, request: AgentHeartbeatUpdateRequest, tenant_id: str = Depends(get_tenant_id)):
     try:
         return _get_agent_ops_service().set_heartbeat(
-            request.tenant_id,
+            tenant_id,
             capability_key,
             cadence=request.cadence,
             enabled=request.enabled,
@@ -555,11 +548,11 @@ async def update_neuroassist_heartbeat(capability_key: str, request: AgentHeartb
         raise HTTPException(status_code=500, detail=f"NeuroASSIST heartbeat update failed: {str(exc)}")
 
 
-@router.post("/neuroassist/ops/profiles/{capability_key}", response_model=AgentOut, summary="Neuroassist profile aktualisieren")
-async def update_neuroassist_profile(capability_key: str, request: AgentProfileUpdateRequest):
+@router.post("/neuroassist/ops/profiles/{capability_key}", response_model=AgentOut, summary="Neuroassist profile aktualisieren", dependencies=SCHREIBEN["FACHLICH"])
+async def update_neuroassist_profile(capability_key: str, request: AgentProfileUpdateRequest, tenant_id: str = Depends(get_tenant_id)):
     try:
         return _get_agent_ops_service().set_profile(
-            request.tenant_id,
+            tenant_id,
             capability_key,
             owner_role=request.owner_role,
             escalation_role=request.escalation_role,
@@ -575,11 +568,11 @@ async def update_neuroassist_profile(capability_key: str, request: AgentProfileU
         raise HTTPException(status_code=500, detail=f"NeuroASSIST profile update failed: {str(exc)}")
 
 
-@router.post("/neuroassist/ops/skill-packs/{skill_pack_key}", response_model=AgentOut, summary="Neuroassist skill pack aktualisieren")
-async def update_neuroassist_skill_pack(skill_pack_key: str, request: AgentSkillPackUpdateRequest):
+@router.post("/neuroassist/ops/skill-packs/{skill_pack_key}", response_model=AgentOut, summary="Neuroassist skill pack aktualisieren", dependencies=SCHREIBEN["FACHLICH"])
+async def update_neuroassist_skill_pack(skill_pack_key: str, request: AgentSkillPackUpdateRequest, tenant_id: str = Depends(get_tenant_id)):
     try:
         return _get_agent_ops_service().update_skill_pack(
-            request.tenant_id,
+            tenant_id,
             skill_pack_key,
             skills=request.skills,
             prompt_contracts=request.prompt_contracts,
@@ -593,7 +586,7 @@ async def update_neuroassist_skill_pack(skill_pack_key: str, request: AgentSkill
 
 
 @router.get("/neuroassist/ops/skill-packs", response_model=list[AgentOut], summary="Neuroassist skill packs auflisten")
-async def list_neuroassist_skill_packs(tenant_id: str = "system"):
+async def list_neuroassist_skill_packs(tenant_id: str = Depends(get_tenant_id)):
     try:
         return [item.model_dump(mode="json") for item in _get_agent_ops_service().list_skill_packs(tenant_id)]
     except Exception as exc:
@@ -602,7 +595,7 @@ async def list_neuroassist_skill_packs(tenant_id: str = "system"):
 
 
 @router.get("/neuroassist/ops/plugin-boundary-review", response_model=AgentOut, summary="Neuroassist plugin boundary review abrufen")
-async def get_neuroassist_plugin_boundary_review(tenant_id: str = "system"):
+async def get_neuroassist_plugin_boundary_review(tenant_id: str = Depends(get_tenant_id)):
     try:
         return _get_agent_ops_service().build_plugin_boundary_review(tenant_id).model_dump(mode="json")
     except Exception as exc:
@@ -624,13 +617,13 @@ async def get_low_stock_agent_status():
     }
 
 
-@router.post("/low-stock/simulate", response_model=AgentOut, summary="Low-Stock-Event simulieren")
-async def simulate_low_stock_event(request: LowStockSimulateRequest):
+@router.post("/low-stock/simulate", response_model=AgentOut, summary="Low-Stock-Event simulieren", dependencies=SCHREIBEN["BERECHNEN"])
+async def simulate_low_stock_event(request: LowStockSimulateRequest, tenant_id: str = Depends(get_tenant_id)):
     from ....workers.low_stock_agent import LowStockEvent, handle_low_stock_event
 
     result = await handle_low_stock_event(
         LowStockEvent(
-            tenant_id=request.tenant_id,
+            tenant_id=tenant_id,
             artikel_id=request.artikel_id,
             artikel_name=request.artikel_name,
             bestand=request.bestand,

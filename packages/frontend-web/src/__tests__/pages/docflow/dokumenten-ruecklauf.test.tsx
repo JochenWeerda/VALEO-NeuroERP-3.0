@@ -21,7 +21,7 @@ describe('Dokumentenruecklauf', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.spyOn(window, 'prompt').mockReturnValue('Posteingang geprueft')
-    post.mockResolvedValue({ data: { id: 'case-1', return_status: 'received' } })
+    post.mockResolvedValue({ data: { success: true, summary: 'Ruecklauffall: return_status received.' } })
     invalidateQueries.mockResolvedValue(undefined)
   })
 
@@ -29,8 +29,9 @@ describe('Dokumentenruecklauf', () => {
     render(<DokumentenRuecklaufPage />)
     expect(screen.getByTestId('native-worklist')).toHaveAttribute('data-screen-id', 'docflow/dokumenten-ruecklauf')
     fireEvent.click(screen.getByRole('button', { name: 'Eingang' }))
-    await waitFor(() => expect(post).toHaveBeenCalledWith('/api/v1/docflow/returns/case-1/transition', {
-      kind: 'return', target: 'received', reason: 'Posteingang geprueft',
+    // Kommando-Weg der Maske (nicht unter /docflow), den auch CLI und MCP rufen.
+    await waitFor(() => expect(post).toHaveBeenCalledWith('/api/v1/document-returns/case-1/actions/mark_received', {
+      _auditReason: 'Posteingang geprueft', _idempotencyKey: expect.any(String),
     }))
     expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: ['docflow/dokumenten-ruecklauf'] })
   })

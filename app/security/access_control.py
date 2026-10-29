@@ -16,6 +16,7 @@ import secrets
 import jwt
 import re
 from app.core.uuid7 import uuid7
+from app.core.tenant_context import get_current_tenant_id
 
 logger = logging.getLogger(__name__)
 
@@ -746,9 +747,10 @@ class ISO27001AccessControl:
         logger.info(f"Password changed for user: {user.username}")
         return True
 
-    def get_access_control_status(self, tenant_id: str = "system") -> Dict[str, Any]:
+    def get_access_control_status(self, tenant_id: str | None = None) -> Dict[str, Any]:
         """Get comprehensive access control status"""
         # Filter data by tenant
+        tenant_id = tenant_id or get_current_tenant_id()
         tenant_users = [u for u in self.users.values() if u.id.startswith(tenant_id)]
         tenant_sessions = [s for s in self.active_sessions.values() if s.user_id.startswith(tenant_id)]
         recent_attempts = [a for a in self.access_attempts[-1000:] if a.user_id and a.user_id.startswith(tenant_id)]
@@ -911,8 +913,9 @@ class ISO27001AccessControl:
 
         return alerts
 
-    def check_access_control_compliance(self, tenant_id: str = "system") -> Dict[str, Any]:
+    def check_access_control_compliance(self, tenant_id: str | None = None) -> Dict[str, Any]:
         """Check ISO 27001 access control compliance"""
+        tenant_id = tenant_id or get_current_tenant_id()
         users = [u for u in self.users.values() if u.id.startswith(tenant_id)]
         attempts = [a for a in self.access_attempts[-1000:] if a.user_id and a.user_id.startswith(tenant_id)]
 

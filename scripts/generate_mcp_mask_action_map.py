@@ -17,6 +17,8 @@ from typing import Any
 import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+from app.core.screen_definitions_harvest_controls import COMMAND_PATHS as HARVEST_COMMANDS
 ACTIONS_PATH = ROOT / "services/ki-usability/app/data/screen_mask_actions.json"
 TOOLS_PATH = ROOT / "config/mcp_erp_tools.yaml"
 OUT_PATH = ROOT / "config/mcp_mask_action_map.yaml"
@@ -157,14 +159,7 @@ MAPPED_RULES: dict[str, dict[str, str]] = {
         "coverage": "adjacent",
         "notes": "Druck ≠ Rechnung; Invoice-Propose/Post sind MCP-Writes der Belegkette.",
     },
-    "mask:finance/ap-invoice:freigeben": {
-        "mcp_tool_id": "finance.ap_invoice.freigeben",
-        "coverage": "mapped",
-        "notes": (
-            "MCP-AP-FREIGABE-20261008; Freigabe nur nach approved Proposal "
-            "(finance.ap_invoice.propose); echter CommandEndpoint; kein Journal/FIN-CLOSE."
-        ),
-    },
+
     "mask:lager/inventur-nebenlaeufe:create_opening": {
         "mcp_tool_id": "lager.inventur.propose_opening",
         "coverage": "mapped_propose_only",
@@ -408,6 +403,10 @@ LOCAL_UI_RULES: dict[str, dict[str, str]] = {
 }
 
 BLOCKED_RULES: dict[str, dict[str, str]] = {
+    **{f"mask:agrar/harvest-controls:{key}": {
+        "coverage": "blocked_human_only",
+        "notes": "Native Erntekontrolle ist forbiddenForAgents; kein freigegebener MCP-Write. Domain-Commands bleiben menschlich autorisiert und nachweispflichtig.",
+    } for key in HARVEST_COMMANDS},
     "mask:finance/steuerschluessel:speichern": {
         "coverage": "open_high",
         "notes": (
@@ -459,7 +458,7 @@ MCP_NATIVE_WRITES = (
         "mcp_tool_id": "finance.ap_invoice.propose",
         "mask_action_id": None,
         "coverage": "mcp_native",
-        "notes": "AP-Freigabe-Vorschlag; Freigeben ist mask:finance/ap-invoice:freigeben.",
+        "notes": "AP-Pruefvorschlag ohne Belegfreigabe; die verbindliche Entscheidung bleibt der menschlichen AP-Maske vorbehalten.",
     },
 )
 
@@ -484,6 +483,42 @@ def _load_json(path: Path) -> Any:
 def _is_mutation(action: dict[str, Any]) -> bool:
     key = str(action.get("source", {}).get("actionKey") or "")
     return bool(MUT_KEY.search(key))
+
+
+def _generic_coverage(action: dict[str, Any]) -> dict[str, Any] | None:
+    """Kommando-Endpunkt im Maskenformat: ``mask.action.execute`` fuehrt ihn aus — oder die Maske sperrt Agenten.
+
+    Dieselbe Regel wie das Werkzeug selbst (``app.services.mcp_mask_actions.agent_block``), gelesen aus der
+    mandantenunabhaengigen ScreenDefinition. ``None``: kein Kommando-Endpunkt, alte Einstufung gilt.
+    """
+    from app.core.screen_definitions import get_screen_definition
+    from app.services.mcp_mask_actions import agent_block, iter_actions
+
+    screen_id = action.get("mask")
+    key = (action.get("source") or {}).get("actionKey")
+    definition = get_screen_definition(screen_id) if isinstance(screen_id, str) else None
+    sd_action = next((a for a in iter_actions(definition or {}) if a.get("key") == key), None)
+    if not sd_action:
+        return None
+    if not sd_action.get("commandEndpoint") and not sd_action.get("inputFlow") and (
+            sd_action.get("localEffect") or sd_action.get("navigationRoute")):
+        # Deklarierte Oberflaechenwirkung (Navigation, Anzeige) ohne Serverwirkung — kein MCP-Write noetig.
+        return {"coverage": "local_ui", "mcp_tool_id": None,
+                "notes": "Reine Oberflaechenwirkung (localEffect/navigationRoute) ohne Serverwirkung."}
+    if sd_action.get("inputFlow") and not sd_action.get("commandEndpoint"):
+        # Eingabefluss der Maske: Ein Mensch fuellt das Formular (auch per CLI); Agenten bleiben gesperrt.
+        return {"mcp_tool_id": None, "coverage": "blocked_human_only",
+                "notes": "Eingabefluss der Maske (humanForm); Menschen per Maske oder CLI, fuer Agenten gesperrt."}
+    if not sd_action.get("commandEndpoint"):
+        return None
+    block = agent_block(sd_action)
+    if block is None:
+        return {"mcp_tool_id": "mask.action.execute", "coverage": "mapped_generic",
+                "notes": "Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske."}
+    if block in {"fuer_agenten_gesperrt", "menschliche_genehmigung"}:
+        return {"mcp_tool_id": None, "coverage": "blocked_human_only",
+                "notes": f"Maske behaelt die Aktion Menschen vor ({block}); CLI und Maske nutzen denselben Endpunkt."}
+    return None
 
 
 def build_map() -> dict[str, Any]:
@@ -527,6 +562,8 @@ def build_map() -> dict[str, Any]:
         elif mid in BLOCKED_RULES:
             entry.update(BLOCKED_RULES[mid])
             entry["mcp_tool_id"] = None
+        elif (generic := _generic_coverage(action)) is not None:
+            entry.update(generic)
         elif domain in HIGH_DOMAINS:
             entry["mcp_tool_id"] = None
             entry["coverage"] = "open_high"
@@ -564,7 +601,8 @@ def build_map() -> dict[str, Any]:
         "classification_notes": (
             "FUHRPARK-TENANT-CE-20261009: Fuhrpark 5× mapped (tenant_id+CE+MCP Isolation); "
             f"blocked_missing_tenant {by_cov.get('blocked_missing_tenant', 0)}. "
-            f"Rest: open_high nur Zahlauf; blocked_no_endpoint {by_cov.get('blocked_no_endpoint', 0)}; "
+            f"Rest: open_high {by_cov.get('open_high', 0)}; open_medium {by_cov.get('open_medium', 0)}; "
+            f"blocked_human_only {by_cov.get('blocked_human_only', 0)}; blocked_no_endpoint {by_cov.get('blocked_no_endpoint', 0)}; "
             f"local_ui {by_cov.get('local_ui', 0)}; FIN-CLOSE blocked_adr_076."
         ),
     }

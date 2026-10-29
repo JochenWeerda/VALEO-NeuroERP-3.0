@@ -17,7 +17,8 @@ done
 
 # Führe Alembic-Migrationen aus
 echo "📦 Führe Datenbank-Migrationen aus..."
-if alembic upgrade head 2>&1; then
+# Migrationen mit der Migratorrolle (DB-Governance), die Anwendung laeuft als valeo_app
+if DATABASE_URL="${MIGRATION_DATABASE_URL:-$DATABASE_URL}" alembic upgrade head 2>&1; then
     echo "✅ Migrationen erfolgreich!"
 else
     echo "⚠️  Migration: Bereits aktuell oder Fehler"

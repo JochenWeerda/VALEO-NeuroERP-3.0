@@ -344,8 +344,26 @@ from app.documents.router import router as documents_router
 from app.reports.router import router as reports_router
 from app.verkauf.router import router as verkauf_router
 
+class _Sammelrouter(APIRouter):
+    """APIRouter, der Standard-Lifespans der Unterrouter nicht verkettet.
+
+    FastAPI verschachtelt je ``include_router`` den Lifespan um eine Ebene (``merged_lifespan``). Bei ueber 450
+    Unterroutern sprengte das am 20.10.2026 beim Start unter uvicorn den Python-Stack (RecursionError, E2E rot).
+    Ein Standard-Lifespan fuehrt nur on_startup/on_shutdown des Unterrouters aus, und die hat ``include_router``
+    bereits in diesen Router uebernommen; verkettet liefen sie doppelt. Eigene Lifespans werden weiter verkettet.
+    """
+
+    def include_router(self, router: APIRouter, *args, **kwargs) -> None:  # type: ignore[override]
+        from fastapi.routing import _DefaultLifespan
+
+        vorher = self.lifespan_context
+        super().include_router(router, *args, **kwargs)
+        if isinstance(router.lifespan_context, _DefaultLifespan):
+            self.lifespan_context = vorher
+
+
 # Create main API router — auth enforced globally; exempt paths handled in require_bearer_token
-api_router = APIRouter(dependencies=[Depends(require_bearer_token)])
+api_router = _Sammelrouter(dependencies=[Depends(require_bearer_token)])
 
 # WebSocket routes manage their own auth; excluded from the global auth dependency
 ws_router = APIRouter()
@@ -478,6 +496,9 @@ api_router.include_router(
     prefix="/sales/orders",
     tags=["sales", "orders"]
 )
+from app.api.v1.endpoints import sales_order_commands  # noqa: E402
+
+api_router.include_router(sales_order_commands.router, prefix="/sales/orders", tags=["sales", "orders"])
 
 api_router.include_router(
     sales_blanket_orders.router,
@@ -1075,6 +1096,7 @@ api_router.include_router(
 from app.api.v1.endpoints import docflow_return  # noqa: E402
 
 api_router.include_router(docflow_return.router)
+api_router.include_router(docflow_return.command_router)  # Maskenaktionen (MASK-COMMANDS-ROLLOUT)
 
 from app.api.v1.endpoints import document_control  # noqa: E402
 
@@ -1103,6 +1125,10 @@ api_router.include_router(query_center.router)
 from app.api.v1.endpoints import mail_workspace  # noqa: E402
 
 api_router.include_router(mail_workspace.router)
+
+from app.workspace.agrar_chain_router import router as workspace_agrar_chain_router  # noqa: E402
+
+api_router.include_router(workspace_agrar_chain_router)
 
 from app.api.v1.endpoints import tank_adapter  # noqa: E402
 
@@ -1938,12 +1964,33 @@ api_router.include_router(import_pipeline.router)
 api_router.include_router(iot_telemetry.router)
 api_router.include_router(mask_registry.router)
 api_router.include_router(mask_actions.router)
+from app.api.v1.endpoints import stammdaten_bearbeiten  # noqa: E402  # Bearbeiten der Objektmasken
+api_router.include_router(stammdaten_bearbeiten.router)
+from app.api.v1.endpoints import einkauf_ab_erfassung  # noqa: E402  # Erfassung eingehender ABs
+api_router.include_router(einkauf_ab_erfassung.router)
+from app.api.v1.endpoints import einkauf_anfrage_kommandos  # noqa: E402  # Zeilenaktionen der Anfragen-Liste
+api_router.include_router(einkauf_anfrage_kommandos.router)
+from app.api.v1.endpoints import einkauf_angebot_kommandos  # noqa: E402  # Zeilenaktionen der Angebots-Liste
+api_router.include_router(einkauf_angebot_kommandos.router)
+from app.api.v1.endpoints import einkauf_avis_kommandos  # noqa: E402  # Zeilenaktionen der Anlieferavis-Liste
+api_router.include_router(einkauf_avis_kommandos.router)
+from app.api.v1.endpoints import einkauf_bestellung_kommandos  # noqa: E402  # Zeilenaktionen der Bestell-Liste
+api_router.include_router(einkauf_bestellung_kommandos.router)
+from app.api.v1.endpoints import agrar_stammdaten_kommandos  # noqa: E402  # Zeilenaktionen der Agrar-Listen
+api_router.include_router(agrar_stammdaten_kommandos.router)
+from app.api.v1.endpoints import finance_stammdaten_kommandos  # noqa: E402  # Zeilenaktionen der Finance-Listen
+api_router.include_router(finance_stammdaten_kommandos.router)
+from app.api.v1.endpoints import crm_listen_kommandos  # noqa: E402  # Zeilenaktionen der CRM-Listen
+api_router.include_router(crm_listen_kommandos.router)
 api_router.include_router(mask_rollout_summaries.router)
 api_router.include_router(mask_screen_definition.router)
 api_router.include_router(studio_drafts.router)
 api_router.include_router(finance_stammdaten.router)
 api_router.include_router(crm_consents.router)
 api_router.include_router(mask_frontend_bridges.router)
+from app.api.v1.endpoints import preis_kalkulation_bridge  # noqa: E402
+
+api_router.include_router(preis_kalkulation_bridge.router)  # aus mask_frontend_bridges herausgeloest
 api_router.include_router(operational_governance.router)
 api_router.include_router(planung_kalender.router)
 api_router.include_router(pricing_governance.router)

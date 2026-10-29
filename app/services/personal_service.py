@@ -1835,10 +1835,7 @@ class PersonalService:
 
     @staticmethod
     def _add_years(date_text: str | None, years: int) -> str:
-        try:
-            base = date.fromisoformat(str(date_text)) if date_text else business_today()
-        except ValueError:
-            base = business_today()
+        base = date.fromisoformat(str(date_text)) if date_text else business_today()
         try:
             return base.replace(year=base.year + years).isoformat()
         except ValueError:
@@ -1876,39 +1873,21 @@ class PersonalService:
             auditRef=str(row.get("audit_ref") or f"hrm-akte:{doc_id}"),
         )
 
-    def _pilot_file_documents(self, employee_ref: str, actor_role: str) -> tuple[list[EmployeeFileDocumentOut], int]:
-        rows = [
-            {"id": f"akte-{employee_ref}-contract", "employee_ref": employee_ref, "document_type": "employment_contract", "title": "Arbeitsvertrag", "visibility": "hr", "issued_at": "2024-01-01", "dms_document_id": "dms-hr-contract-demo"},
-            {"id": f"akte-{employee_ref}-certificate", "employee_ref": employee_ref, "document_type": "certificate", "title": "Staplerschein / Qualifikationsnachweis", "visibility": "employee", "issued_at": "2025-04-01", "valid_until": "2028-04-01", "dms_document_id": "dms-hr-cert-demo"},
-            {"id": f"akte-{employee_ref}-payroll", "employee_ref": employee_ref, "document_type": "payroll_document", "title": "Payroll-Stammdatenblatt", "visibility": "payroll", "issued_at": "2025-01-01", "dms_document_id": "dms-hr-payroll-demo"},
-        ]
-        docs = [self._doc_from_row(r, actor_role) for r in rows]
-        visible = [d for d in docs if self.role_can_view(actor_role, d.visibility)]
-        return visible, len(docs) - len(visible)
-
     def get_employee_file(self, employee_ref: str, actor_role: str) -> EmployeeFileOut:
-        try:
-            rows = self.db.execute(
-                text("""
-                    SELECT id, employee_ref, document_type, title, status, visibility,
-                           issued_at, valid_until, retention_until, dms_document_id, audit_ref
-                    FROM domain_hr.employee_file_documents
-                    WHERE tenant_id = :tenant_id AND employee_ref = :employee_ref
-                    ORDER BY issued_at DESC NULLS LAST, created_at DESC NULLS LAST
-                """),
-                {"tenant_id": self.tenant_id, "employee_ref": employee_ref},
-            ).mappings().all()
-            if rows:
-                docs = [self._doc_from_row(dict(r), actor_role) for r in rows]
-                visible = [d for d in docs if self.role_can_view(actor_role, d.visibility)]
-                hidden = len(docs) - len(visible)
-                source = "database"
-            else:
-                visible, hidden = self._pilot_file_documents(employee_ref, actor_role)
-                source = "pilot"
-        except Exception:
-            visible, hidden = self._pilot_file_documents(employee_ref, actor_role)
-            source = "pilot"
+        rows = self.db.execute(
+            text("""
+                SELECT id, employee_ref, document_type, title, status, visibility,
+                       issued_at, valid_until, retention_until, dms_document_id, audit_ref
+                FROM domain_hr.employee_file_documents
+                WHERE tenant_id = :tenant_id AND employee_ref = :employee_ref
+                ORDER BY issued_at DESC NULLS LAST, created_at DESC NULLS LAST
+            """),
+            {"tenant_id": self.tenant_id, "employee_ref": employee_ref},
+        ).mappings().all()
+        docs = [self._doc_from_row(dict(r), actor_role) for r in rows]
+        visible = [d for d in docs if self.role_can_view(actor_role, d.visibility)]
+        hidden = len(docs) - len(visible)
+        source = "database"
         return EmployeeFileOut(
             employeeRef=employee_ref,
             source=source,
@@ -1959,7 +1938,7 @@ class PersonalService:
                 row,
             )
             self.db.commit()
-        except Exception:
-            # Table may not exist yet; contract remains usable as pilot/preview
-            pass
+        except SQLAlchemyError:
+            self.db.rollback()
+            raise
         return self._doc_from_row(row, actor_role)

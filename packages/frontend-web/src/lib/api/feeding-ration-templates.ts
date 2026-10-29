@@ -52,6 +52,6 @@ export async function applyRationTemplate(templateId: string, input: {
   expected_latest_version_no: number
   reason: string
 }): Promise<{ id: string; version_no: number }> {
-  const response = await apiClient.post<{ id: string; version_no: number }>(`${BASE}/ration-templates/${templateId}/apply`, input)
+  const response = await apiClient.post<{ id: string; version_no: number }>(`${BASE}/ration-templates/actions/apply_template`, { ...input, template_id: templateId })
   return response.data
 }

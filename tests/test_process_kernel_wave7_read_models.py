@@ -322,6 +322,9 @@ def client():
 def snapshot_client(sqlite_snapshot_db: Session):
     app = FastAPI()
     app.include_router(snapshot_endpoints.router, prefix="/api/v1")
+    from testgrenze import ersetze_mandant, ersetze_nutzer
+    ersetze_mandant(app, "tenant-db")
+    ersetze_nutzer(app, "admin")
 
     def _override_get_db():
         try:

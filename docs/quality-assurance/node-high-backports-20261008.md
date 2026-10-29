@@ -66,3 +66,8 @@ pruefen. Review nur mit dokumentierter Evidenz erneuern. Aenderungen an
 Manifest, Lockfile oder reparierten Dateien erzwingen diese erneute Abnahme.
 Die GitHub-Jobs Security Scan und Quality Gate bewahren beide Berichte als
 Artefakte. Andere Security-Gates und Versionsalerts bleiben eigenstaendig.
+
+
+## Wiedervorlage 15.10.2026
+
+Die vollstaendige erneute Original-, Runtime-, Frozen-, Hash- und Roh-Audit-Abnahme ist im [Nachweis vom 15.10.](node-high-review-20261015.md) dokumentiert. Nur die Reviewdaten wurden nach erfolgreicher Pruefung erneuert; naechste Wiedervorlage vor 22.10.2026. Zwei versionsbasierte High-Befunde bleiben im Sensor sichtbar.

@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "id": "workflow/flow-spine-studio",
+  "domain": "workflow",
+  "mode": "cockpit",
+  "title": "Flow Spine Studio",
+  "subtitle": "Prozessräume",
+  "adapter": {
+    "type": "native",
+    "sourceId": "workflow/flow-spine-studio",
+    "temporary": false
+  },
+  "layout": {
+    "floorplan": "cockpit",
+    "density": "expertDense",
+    "contextRail": "workflow"
+  },
+  "flowSpineCatalog": {
+    "enabled": true,
+    "warmWorkspaces": true
+  },
+  "agentContract": {
+    "businessPurpose": "Prozessräume aus dem Flow-Spine-Katalog öffnen.",
+    "examplePrompts": [
+      "Zeige die Prozessräume."
+    ],
+    "sensitiveFields": [],
+    "forbiddenAgentTasks": [],
+    "testSelectors": {
+      "screenRoot": "[data-testid='workflow-flow-spine-studio']"
+    }
+  },
+  "noWorkflowReason": "Der Katalog öffnet die jeweiligen Prozessräume."
+}

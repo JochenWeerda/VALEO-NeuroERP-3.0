@@ -4,15 +4,14 @@ Repository for persistent channel process threads.
 
 from __future__ import annotations
 
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy import desc, select
 from sqlalchemy.orm import Session
+from app.core.exceptions import EntityNotFoundError
 
 from app.core.channel_process_actions import (
     ChannelProcessThread,
     ChannelProcessThreadStore,
     ChannelThreadAuditItem,
-    get_channel_process_thread_store,
 )
 from app.models.channel_threads import (
     ChannelProcessThreadRecord,
@@ -34,6 +33,8 @@ class PersistentChannelProcessThreadStore(ChannelProcessThreadStore):
         record = self.db.get(ChannelProcessThreadRecord, thread.thread_id)
         if record is not None and record.process_definition_key == _RESERVED_NOTIFICATION_PROCESS:
             raise ValueError("Reserved notification record cannot be replaced")
+        if record is not None and record.tenant_id != thread.tenant_id:
+            raise EntityNotFoundError("Kanalvorgang", thread.thread_id)
         if record is None:
             record = ChannelProcessThreadRecord(thread_id=thread.thread_id)
             self.db.add(record)
@@ -62,6 +63,7 @@ class PersistentChannelProcessThreadStore(ChannelProcessThreadStore):
         for position, item in enumerate(thread.audit_trail):
             record.audit_items.append(
                 ChannelThreadAuditItemRecord(
+                    tenant_id=thread.tenant_id,
                     position=position,
                     audit_type=item.audit_type,
                     payload=dict(item.payload),
@@ -71,9 +73,9 @@ class PersistentChannelProcessThreadStore(ChannelProcessThreadStore):
 
         try:
             self.db.commit()
-        except IntegrityError:
+        except Exception:
             self.db.rollback()
-            return get_channel_process_thread_store().save(thread)
+            raise
         self.db.refresh(record)
         return self._to_domain(record)
 
@@ -85,8 +87,7 @@ class PersistentChannelProcessThreadStore(ChannelProcessThreadStore):
         )
         record = self.db.execute(stmt).unique().scalar_one_or_none()
         if record is None:
-            cached = get_channel_process_thread_store().get(thread_id)
-            return cached if cached is None or cached.process_definition_key != _RESERVED_NOTIFICATION_PROCESS else None
+            return None
         return self._to_domain(record)
 
     def list_threads(
@@ -113,16 +114,7 @@ class PersistentChannelProcessThreadStore(ChannelProcessThreadStore):
             )
         stmt = stmt.order_by(desc(ChannelProcessThreadRecord.updated_at)).limit(max(limit, 1))
         records = self.db.execute(stmt).unique().scalars().all()
-        if records:
-            return [self._to_domain(record) for record in records]
-        cached = get_channel_process_thread_store().list_threads(
-            kanal=kanal,
-            tenant_id=tenant_id,
-            status=status,
-            process_definition_key=process_definition_key,
-            limit=limit,
-        )
-        return [thread for thread in cached if thread.process_definition_key != _RESERVED_NOTIFICATION_PROCESS]
+        return [self._to_domain(record) for record in records]
 
     def get_audit_trail(self, thread_id: str) -> list[ChannelThreadAuditItem] | None:
         thread = self.get(thread_id)
@@ -131,10 +123,7 @@ class PersistentChannelProcessThreadStore(ChannelProcessThreadStore):
         return list(thread.audit_trail)
 
     def clear(self) -> None:
-        self.db.query(ChannelThreadAuditItemRecord).delete()
-        self.db.query(ChannelProcessThreadRecord).delete()
-        self.db.commit()
-        get_channel_process_thread_store().clear()
+        raise RuntimeError("Persistent channel audit cannot be globally cleared")
 
     @staticmethod
     def _to_domain(record: ChannelProcessThreadRecord) -> ChannelProcessThread:

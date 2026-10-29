@@ -3,17 +3,19 @@ import { actionIsEnabled } from '../governance/screen-context'
 import type { ActionRequest, ActionResult, ActionRuntimeOptions } from './ActionRuntime'
 
 const paths = {
+  update: '',
   release: '/release', post: '/post', reverse: '/reverse', convert: '/convert',
   approval_request: '/approvals', approval_decide: '/approvals/{approval_id}/decision',
 } as const
 const fields = {
+  update: ['currency', 'document_date', 'source_ref', 'items'],
   release: [], post: ['posting_date'], reverse: ['reason'], convert: ['quantities_by_source_item_id'],
   approval_request: ['reason'], approval_decide: ['note'],
 } as const
 
 /** Transport adaptation, never domain logic or a grant of permission. */
 export function prepareDocflowCommand(action: ScreenActionDefinition, req: ActionRequest,
-  opts: ActionRuntimeOptions, idempotencyKey: string): { url: string; body: Record<string, unknown> } {
+  opts: ActionRuntimeOptions, idempotencyKey: string): { url: string; method: 'POST' | 'PUT'; body: Record<string, unknown> } {
   const binding = action.commandBinding
   if (!binding || binding.adapter !== 'docflow.v1' || !Object.prototype.hasOwnProperty.call(paths, binding.command)) {
     throw new Error('DocFlow-Command-Adapter fehlt oder ist unbekannt.')
@@ -24,7 +26,8 @@ export function prepareDocflowCommand(action: ScreenActionDefinition, req: Actio
   const entityId = opts.entityId
   if (!entityId || req.entityId && req.entityId !== entityId) throw new Error('Belegbindung fehlt oder widerspricht dem Aufruf.')
   const expectedEndpoint = `/api/v1/docflow/{entity_id}${paths[command]}`
-  if (action.commandEndpoint !== expectedEndpoint || (action.method ?? 'POST') !== 'POST') {
+  const method = command === 'update' ? 'PUT' : 'POST'
+  if (action.commandEndpoint !== expectedEndpoint || (action.method ?? 'POST') !== method) {
     throw new Error('DocFlow-Endpoint widerspricht dem versionierten Kommando.')
   }
   const data = opts.entityData
@@ -74,7 +77,7 @@ export function prepareDocflowCommand(action: ScreenActionDefinition, req: Actio
       body.reason = reason.trim()
     }
   }
-  return { url, body }
+  return { url, method, body }
 }
 
 export function docflowCommandResult(action: ScreenActionDefinition, req: ActionRequest,
@@ -82,6 +85,14 @@ export function docflowCommandResult(action: ScreenActionDefinition, req: Action
   const data = response as Record<string, unknown> | null
   const command = action.commandBinding?.command
   const base = { actionKey: req.actionKey, mode: req.mode }
+  if (command === 'update') {
+    const version = req.expectedVersion ?? opts.entityData?.version
+    if (data?.id !== opts.entityId || data?.status !== 'draft' ||
+      !Number.isInteger(version) || data?.version !== Number(version) + 1 || !Array.isArray(data?.items)) {
+      return { ...base, success: false, error: 'Bearbeitungsantwort entspricht nicht dem Belegvertrag.' }
+    }
+    return { ...base, success: true, summary: 'Belegentwurf gespeichert.', affectedIds: [String(data.id)] }
+  }
   if (command === 'approval_request' || command === 'approval_decide') {
     const status = command === 'approval_request' ? ['requested', 'granted'] :
       [action.commandBinding?.defaults?.granted ? 'granted' : 'denied']

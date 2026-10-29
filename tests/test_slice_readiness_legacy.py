@@ -40,3 +40,24 @@ def test_reine_syntaxreparatur_abgeschlossener_legacy_hat_keinen_erfundenen_harn
 ])
 def test_inhalt_oder_statusaenderung_verlangt_vollen_harness(tmp_path, after):
     assert readiness(tmp_path, "slice_id: OLD\nstatus: done\ngoal: text\n", after) == 1
+
+
+def test_slice_id_als_alias_der_alten_kennung_ist_syntaxreparatur(tmp_path):
+    """Alte Slices fuehrten ``id``; ``slice_id`` mit demselben Wert repariert nur die Syntax (20.10.2026)."""
+    assert readiness(tmp_path,
+        "id: OLD\nstatus: abgeschlossen\ngoal: text\n",
+        "slice_id: OLD\nid: OLD\nstatus: abgeschlossen\ngoal: text\n",
+    ) == 0
+
+
+def test_abweichende_slice_id_ist_keine_reparatur(tmp_path):
+    assert readiness(tmp_path,
+        "id: OLD\nstatus: abgeschlossen\ngoal: text\n",
+        "slice_id: NEU\nid: OLD\nstatus: abgeschlossen\ngoal: text\n",
+    ) == 1
+
+
+def test_unvollstaendiger_aber_unveraenderter_abgeschlossener_vertrag_bleibt_unbewertet(tmp_path):
+    vorher = ("slice_id: OLD\ntitle: t\nowner: o\nstatus: done\ngoal: g\nfile_ownership:\n  - a\nacceptance:\n  - a\n"
+              "tests:\n  - a\nrisks:\n  - a\nai_harness:\n  fachlicher_vertrag: x\n---\n")
+    assert readiness(tmp_path, vorher, vorher.replace("---\n", "")) == 0

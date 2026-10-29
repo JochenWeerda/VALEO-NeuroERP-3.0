@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from fastapi import FastAPI
+from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
 from fastapi.testclient import TestClient
 
 from app.api.v1.endpoints import external_agent_integrations
@@ -8,6 +9,7 @@ from app.api.v1.endpoints import external_agent_integrations
 
 def _client() -> TestClient:
     app = FastAPI()
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(external_agent_integrations.router)
     return TestClient(app)
 

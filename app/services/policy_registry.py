@@ -13,6 +13,7 @@ from uuid import uuid4
 
 from sqlalchemy import text
 from sqlalchemy.orm import Session
+from app.core.tenant_context import get_current_tenant_id
 
 logger = logging.getLogger(__name__)
 
@@ -34,11 +35,12 @@ def register_policy(
     name: str,
     rules: dict[str, Any],
     version: str = "1.0",
-    tenant_id: str = "system",
+    tenant_id: str | None = None,
     variant_key: str | None = None,
     traffic_weight: float | None = None,
     db: Optional[Session] = None,
 ) -> dict:
+    tenant_id = tenant_id or get_current_tenant_id()
     if variant_key:
         rules = dict(rules)
         rules["_variant_key"] = variant_key
@@ -94,7 +96,8 @@ def register_policy(
     return entry
 
 
-def get_active_policy(policy_id: str, tenant_id: str = "system", db: Optional[Session] = None) -> Optional[dict]:
+def get_active_policy(policy_id: str, tenant_id: str | None = None, db: Optional[Session] = None) -> Optional[dict]:
+    tenant_id = tenant_id or get_current_tenant_id()
     if db:
         try:
             row = db.execute(text("""
@@ -124,7 +127,8 @@ def get_active_policy(policy_id: str, tenant_id: str = "system", db: Optional[Se
     return None
 
 
-def list_policies(tenant_id: str = "system", db: Optional[Session] = None) -> list[dict]:
+def list_policies(tenant_id: str | None = None, db: Optional[Session] = None) -> list[dict]:
+    tenant_id = tenant_id or get_current_tenant_id()
     if db:
         try:
             rows = db.execute(text("""
@@ -153,7 +157,8 @@ def list_policies(tenant_id: str = "system", db: Optional[Session] = None) -> li
     return result
 
 
-def list_active_variants(policy_id: str, tenant_id: str = "system", db: Optional[Session] = None) -> list[dict]:
+def list_active_variants(policy_id: str, tenant_id: str | None = None, db: Optional[Session] = None) -> list[dict]:
+    tenant_id = tenant_id or get_current_tenant_id()
     if db:
         try:
             rows = db.execute(text("""
@@ -190,10 +195,11 @@ def list_active_variants(policy_id: str, tenant_id: str = "system", db: Optional
 
 def select_policy_variant(
     policy_id: str,
-    tenant_id: str = "system",
+    tenant_id: str | None = None,
     seed: str | None = None,
     db: Optional[Session] = None,
 ) -> Optional[dict]:
+    tenant_id = tenant_id or get_current_tenant_id()
     variants = list_active_variants(policy_id, tenant_id, db)
     if not variants:
         return None
@@ -217,9 +223,9 @@ def select_policy_variant(
         digest = hashlib.sha256(seed.encode()).hexdigest()
         roll = int(digest, 16) / float(2**256)
     else:
-        from random import random
+        import secrets
 
-        roll = random()
+        roll = secrets.randbelow(1_000_000) / 1_000_000
 
     threshold = roll * total
     running = 0.0
@@ -230,7 +236,8 @@ def select_policy_variant(
     return weighted[-1][0]
 
 
-def rollback_policy(policy_id: str, tenant_id: str = "system", db: Optional[Session] = None) -> Optional[dict]:
+def rollback_policy(policy_id: str, tenant_id: str | None = None, db: Optional[Session] = None) -> Optional[dict]:
+    tenant_id = tenant_id or get_current_tenant_id()
     versions = _IN_MEMORY_POLICIES.get(policy_id, [])
     tenant_versions = [v for v in versions if v.get("tenant_id") == tenant_id]
     if len(tenant_versions) < 2:

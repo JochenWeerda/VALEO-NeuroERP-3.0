@@ -1,6 +1,5 @@
 """Shared-probe SQL evidence tests; each test rolls back its own outer transaction."""
 from uuid import uuid4
-import os
 import pytest
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -17,12 +16,10 @@ def _enable_dev_token():
 
 @pytest.fixture
 def sql_candidate(monkeypatch):
-    try:
-        engine=simulation._configured_probe()
-    except RuntimeError:
-        if os.environ.get("PYTEST_REQUIRE_DB_STRICT")=="1":
-            raise
-        pytest.skip("Explicit shared probe configuration required")
+    from app.core.database import engine
+    from testgrenze import pruefstand_erlaubt
+    assert pruefstand_erlaubt(engine.url), "Only the declared shared test database is allowed"
+    monkeypatch.setattr(simulation, "_configured_probe", lambda: engine)
     connection=engine.connect();outer=connection.begin()
     own=str(uuid4())
     connection.execute(text("INSERT INTO domain_shared.tenants(id,name,domain) VALUES (:id,'Studio SQL evidence',:domain)"),
@@ -55,6 +52,10 @@ def test_sql_real_evidence_is_durable_replayable_and_publishable(sql_candidate,m
     event=store.history_event(item["tenant_id"],item["id"],event_id=key)
     assert event["snapshot"]["simulation"]==result["simulation"]
     assert store.count_history(item["tenant_id"],item["id"])==3
+    from app.services.studio_migration_store import save_migration_plan
+    from app.api.v1.schemas.studio_migration import StudioSavedMigrationIn
+    save_migration_plan(item['tenant_id'],item['id'],'editor',StudioSavedMigrationIn(
+        expected_revision=item['revision'],idempotency_key=uuid4()))
     published=store.set_status(item["tenant_id"],item["id"],"reviewer","published_temp",expected_snapshot=item)
     assert published["status"]=="published_temp"
 

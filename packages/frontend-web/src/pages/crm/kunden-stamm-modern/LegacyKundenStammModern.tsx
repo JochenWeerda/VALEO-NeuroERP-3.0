@@ -257,7 +257,7 @@ function LegacyKundenStammModern(): JSX.Element {
       />
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Kunden-Stamm Modern</h1>
+          <h1 className="text-xl font-semibold tracking-tight">Kunden-Stamm Modern</h1>
           <p className="text-muted-foreground">Mask Builder, CRM-Assistenz und professionelle Folgewege in einem Arbeitsplatz.</p>
         </div>
         <div className="flex gap-2">

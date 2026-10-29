@@ -83,6 +83,9 @@ WEGE = {
         ("POST", "/billing-batches/{batch_id}/release", "admin"),
         ("POST", "/billing-batches/{batch_id}/execute", "admin"),
         ("POST", "/billing-batches/lines/{line_id}/retry", "write"),
+        # Maskenaktionen: Grundrolle am Weg, Freigeben/Ausfuehren verlangen im Weg die Finanzleitung.
+        ("POST", "/billing-batches/{entity_id}/actions/{action_key}", "write"),
+        ("POST", "/billing-batches/lines/{entity_id}/actions/retry", "write"),
     ],
     "fibu_connectors": [
         ("GET", "/connectors/profiles", "read"),
@@ -203,13 +206,13 @@ WEGE = {
 }
 FAELLE = [(modul, methode, weg, zugang) for modul, wege in WEGE.items() for methode, weg, zugang in wege]
 
-FINANZ_LESEN = {"FINANCE_LESEN", "FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin", "manager"}
+FINANZ_LESEN = {"FINANCE_LESEN", "FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin"}
 ROLLEN = [None, "user", "LAGER_ADMIN", "PERSONAL_ADMIN", "SALES_ADMIN", "CRM_ADMIN", "EINKAUF_ADMIN",
           "KONTENPLAN_PFLEGE", "FINANCE_LESEN", "FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin", "manager"]
 ERLAUBT = {
     "offen": set(ROLLEN),
     "read": FINANZ_LESEN,
-    "write": {"FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin", "manager"},
+    "write": {"FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin"},
     "admin": {"FINANCE_ADMIN", "admin"},
 }
 

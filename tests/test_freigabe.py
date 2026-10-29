@@ -364,7 +364,10 @@ def test_eine_aenderung_nach_der_freigabe_macht_sie_ungueltig(haus):
     _erste, zweite = _doppelte_eingangsrechnung(haus, status="draft")
     fid = _frage(haus, ANNA, zweite).json()["id"]
     assert _entscheide(haus, CARL, zweite, fid).status_code == 200
+    aktuelle_fassung = haus["als"](ANNA).get(f"/docflow/{zweite}")
+    assert aktuelle_fassung.status_code == 200
     geaendert = haus["als"](ANNA).put(f"/docflow/{zweite}", json={
+        "expected_version": aktuelle_fassung.json()["version"], "idempotency_key": "edit-invalidates-approval",
         "items": [{"article_number": "A-1", "quantity": 1, "unit_price": 950, "tax_code": "9"}]})
     assert geaendert.status_code == 200, geaendert.text
     antwort = _buche(haus, ANNA, zweite)

@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-14
+last_reviewed: 2026-10-29
 version: 3.0.0
 description: Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -40,6 +40,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `agrar_maschinen` | Agrar Maschinen — CRUD für Maschinenpark (Landhandel + Lohnunternehmer) |
 | `agrar_p0` | — |
 | `agrar_settlements` | Agrar self-billing settlements with deduction and posting workflow (AGRAR-SET-01). |
+| `agrar_stammdaten_kommandos` | Zeilenaktionen der Agrar- und Futtermittel-Stammdatenlisten als Fachaktion fuer Maske, CLI und MCP. |
 | `agrar_varieties` | Agrar Sorten/Varieties API fuer Ernte-Annahme. |
 | `agrar_wetter` | Agrar Wetter — Wetter-Proxy für BrightSky (DWD) + Open-Meteo (ICON-D2) |
 | `agri_lot_link_booking` | WM-AGRI-LOT-LINK-001 endpoint: Annahme/Waage-Lot in Silozelle buchen. |
@@ -133,6 +134,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `crm_kontakte` | Kunden-Kontakte (Kontakthistorie + Wiedervorlage) — Kunden-Cockpit. |
 | `crm_kunden_map` | CRM-Kundenkarte — alle Kunden als GeoJSON (Karte + Hover-Kennzahlen). |
 | `crm_lead_gen` | CRM Lead-Generierung — region-universale Lead-Kandidaten (GAP/LKV). |
+| `crm_listen_kommandos` | Zeilenaktionen der CRM-Listen als Fachaktion fuer Maske, CLI und MCP (MASK-STUDIO-ROLLOUT, Welle 1). |
 | `crm_mail_capture` | KIM E-Mail-Connector — ein-/ausgehende Mails als Kontakt erfassen. |
 | `crm_ownership` | Kunden-Ownership (DOM-CRM-004.3) — Zuordnung/Übergabe Außendienst/Innendienst. |
 | `crm_partner_suche` | Einheitliche Partner-Suche über Kunden, Lieferanten und Leads (Multi-Rolle). |
@@ -162,6 +164,11 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `e2e_chain` | — |
 | `ebilanz_elster` | eBilanz / ELSTER export and ERiC submission endpoint. |
 | `edi_api` | — |
+| `einkauf_ab_erfassung` | Erfassung eingehender Auftragsbestaetigungen (STAMMDATEN-BEARBEITEN-20261019, Folgepunkt). |
+| `einkauf_anfrage_kommandos` | Zeilenaktionen der Anfragen-Liste als Fachaktion fuer Maske, CLI und MCP (MASK-STUDIO-ROLLOUT, Welle 1). |
+| `einkauf_angebot_kommandos` | Zeilenaktionen der Angebots-Liste als Fachaktion fuer Maske, CLI und MCP (MASK-STUDIO-ROLLOUT, Welle 1). |
+| `einkauf_avis_kommandos` | Zeilenaktionen der Anlieferavis-Liste als Fachaktion fuer Maske, CLI und MCP (MASK-STUDIO-ROLLOUT, Welle 1). |
+| `einkauf_bestellung_kommandos` | Zeilenaktionen der Bestell-Liste als Fachaktion fuer Maske, CLI und MCP (MASK-STUDIO-ROLLOUT, Welle 1). |
 | `einkauf_bestellvorschlag` | Einkauf â€” Bestell-Vorschlag Endpoints |
 | `einkauf_kpis` | Einkauf — KPIs |
 | `einkauf_lieferschein` | Einkauf Lieferschein + Frachtauftrag CRUD endpoints. |
@@ -215,6 +222,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `finance_period` | Periodenabschluss & Storno-Konsistenz (DOM-FIN-004.4). |
 | `finance_read_models` | Finance Read-Models — Wave 2 AP2 |
 | `finance_stammdaten` | Finance-Stamm fuer Debitoren und Kreditoren — Maskengenerator und Listen. |
+| `finance_stammdaten_kommandos` | Zeilenaktionen der Finance-Stammdatenlisten als Fachaktion fuer Maske, CLI und MCP (MASK-STUDIO-ROLLOUT, Welle 1). |
 | `financial_reports` | Financial Reports API |
 | `flow_spines` | — |
 | `foerderung` | Foerderung API - DB-backed endpoints. |
@@ -239,6 +247,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `gs1_barcode` | GS1 Barcode Parse Service |
 | `gs1_parser` | GS1 barcode parser endpoint (l3c-gs1) |
 | `harvest_acceptance` | Harvest Acceptance (Ernte-Annahme) API endpoints. |
+| `harvest_rules` | Transport adapter for versioned harvest domain commands, never direct CRUD. |
 | `hausbankenstamm` | Hausbankenstamm — Eigene Bankverbindungen des Mandanten. |
 | `hofliste` | Hofliste — Fahrzeugvormeldungen und Status am Waagenterminal. |
 | `hrm_abwesenheit` | HRM-ABWESENHEIT-ANTRAG-001 — Abwesenheitsantrag API. |
@@ -349,6 +358,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `pos_tagesabschluss_actions` | DOM-POS-004 — POS Tagesabschluss: Z-Bon, TSE-Simulation, DSFinV-K. |
 | `position_overrides` | Commodity Position Override API (Freigabe anfordern / genehmigen / ablehnen). |
 | `position_rules` | Commodity Position Rules API (No-Speculation Guard Regeln). |
+| `preis_kalkulation_bridge` | Preiskalkulation der Maske ``preise/kalkulation`` (aus ``mask_frontend_bridges`` herausgeloest, 19.10.2026). |
 | `preis_rabattgruppen` | Rabattgruppen und Rabattklassen — Stammdaten für die Rabattpflege. |
 | `preparation_lists` | Preparation list endpoints (l3c-lager Rüstlisten) |
 | `price_calculation` | Preis-Kalkulations-Engine (dynamisch). |
@@ -403,6 +413,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `sales_invoices` | Die Ausgangsrechnung mit ihren Positionen. |
 | `sales_match` | Auftrag-↔-Lieferschein-Positions-Match (DOM-SALES-004.2) — read-only. |
 | `sales_offers` | Domain sales offers (Angebote) CRUD endpoints. |
+| `sales_order_commands` | Auftrag stornieren als Kommando-Weg (Studio-Katalog ``stornieren``, MASK-COMMANDS-ROLLOUT-20261019). |
 | `sales_orders` | Domain sales orders CRUD endpoints. |
 | `sales_reports` | Sales Reports and Dashboards endpoints. |
 | `sales_shipping_ext` | Sales shipping extension endpoints (l3c-verkaufslieferschein extras) |
@@ -418,10 +429,12 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `silo_operations_api` | — |
 | `silo_target_cell` | WM-SILO-RULE-ENGINE-001 — Zielzellen-Vorschlag API. |
 | `sla_escalation_api` | SLA-Eskalation API — Wave 12 |
+| `stammdaten_bearbeiten` | Bearbeiten nativer Objektmasken als Fachaktion fuer Maske, CLI und MCP (STAMMDATEN-BEARBEITEN-20261019). |
 | `stmd_duplikat` | STMD-DUP-001: Cross-Domain-Dublettenprüfung für Stammdaten. |
 | `strecke` | Strecke – Streckengeschaefte CRUD |
 | `strecke_speditionen` | Strecke – Speditionen / Frachttarife nach PLZ |
 | `studio_drafts` | ScreenDefinition Studio API — catalog, validate, propose, drafts. |
+| `studio_native_import` | Authenticated native-mask baselines; no activation or release shortcut. |
 | `stuecklisten` | Stücklisten / Rezepturen [ARTSTLI] — Artikelkomponenten-Stammdaten. |
 | `subsidiary_ledger_reconciliation` | Subsidiary Ledger Reconciliation API |
 | `supplier_portal` | — |

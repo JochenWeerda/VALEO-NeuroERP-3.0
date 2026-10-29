@@ -14,9 +14,9 @@ export type OpportunityStageType = typeof OpportunityStage[keyof typeof Opportun
 
 // Opportunity Entity Schema
 export const OpportunitySchema = z.object({
-  id: z.string().uuid(),
-  tenantId: z.string().uuid(),
-  customerId: z.string().uuid(),
+  id: z.string().guid(),
+  tenantId: z.string().guid(),
+  customerId: z.string().guid(),
   title: z.string().min(1),
   stage: z.enum([
     OpportunityStage.LEAD,
@@ -29,7 +29,7 @@ export const OpportunitySchema = z.object({
   amountNet: z.number().nonnegative().optional(),
   currency: z.string().length(3).optional(), // ISO 4217 currency code
   probability: z.number().min(0).max(1), // 0-1 (0% to 100%)
-  ownerUserId: z.string().uuid().optional(),
+  ownerUserId: z.string().guid().optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
   version: z.number().int().nonnegative()
@@ -61,7 +61,7 @@ export const UpdateOpportunityInputSchema = z.object({
   amountNet: z.number().nonnegative().nullish(),
   currency: z.string().length(3).nullish(),
   probability: z.number().min(0).max(1).optional(),
-  ownerUserId: z.string().uuid().nullish()
+  ownerUserId: z.string().guid().nullish()
 });
 
 export type UpdateOpportunityInput = z.infer<typeof UpdateOpportunityInputSchema>;

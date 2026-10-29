@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.pos_payments_promotions_schemas import PosPaymentsPromotionsOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/pos", tags=["pos", "payments", "promotions"])
@@ -88,8 +89,7 @@ async def list_payment_methods() -> dict:
 
 
 @router.post("/promotions/simulate", summary="Promotions simulate",
-    response_model=PosPaymentsPromotionsOut
-)
+    response_model=PosPaymentsPromotionsOut, dependencies=SCHREIBEN["VERKAUF"])
 async def simulate_promotions(payload: PosCheckoutPreviewIn) -> dict:
     discounts = []
     total_discount = 0.0
@@ -109,8 +109,7 @@ async def simulate_promotions(payload: PosCheckoutPreviewIn) -> dict:
 
 
 @router.post("/checkout/preview", summary="Checkout vorschauen",
-    response_model=PosPaymentsPromotionsOut
-)
+    response_model=PosPaymentsPromotionsOut, dependencies=SCHREIBEN["VERKAUF"])
 async def preview_checkout(payload: PosCheckoutPreviewIn) -> dict:
     subtotal = round(sum(_line_gross(line) for line in payload.lines), 2)
     promotion_result = await simulate_promotions(payload)

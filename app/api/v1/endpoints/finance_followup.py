@@ -15,6 +15,7 @@ import tempfile
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException
+from starlette.concurrency import run_in_threadpool
 from fastapi.responses import RedirectResponse, StreamingResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -42,6 +43,15 @@ class FinanceFollowupOut(BaseSchema):
 
 
 router = APIRouter(prefix="/finance/followup", tags=["finance", "followup"])
+
+
+def _csv_in_tempdatei(rows) -> str:  # noqa: ANN001
+    """Schreibt die Exportzeilen in eine temporaere CSV (synchron; aus async-Wegen ueber den Threadpool)."""
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", delete=False, encoding="utf-8", newline="") as tmp:
+        w = csv.writer(tmp, delimiter=";")
+        for r in rows:
+            w.writerow(r)
+        return tmp.name
 
 
 def build_finance_followup_superglue_rollout(tenant_id: str) -> dict[str, object]:
@@ -334,13 +344,7 @@ async def export_mahnwesen(
             from app.integrations.finance_export_upload import upload_finance_export_csv
 
             rows = _mahnwesen_csv_rows(db, tenant_id, export_params or None)
-            with tempfile.NamedTemporaryFile(
-                mode="w", suffix=".csv", delete=False, encoding="utf-8", newline=""
-            ) as tmp:
-                w = csv.writer(tmp, delimiter=";")
-                for r in rows:
-                    w.writerow(r)
-                tmp_path = tmp.name
+            tmp_path = await run_in_threadpool(_csv_in_tempdatei, rows)
             try:
                 up = upload_finance_export_csv(
                     tmp_path,
@@ -548,13 +552,7 @@ async def export_lastschriften(
             from app.integrations.finance_export_upload import upload_finance_export_csv
 
             rows = _lastschrift_csv_rows(db, tenant_id, run_id)
-            with tempfile.NamedTemporaryFile(
-                mode="w", suffix=".csv", delete=False, encoding="utf-8", newline=""
-            ) as tmp:
-                w = csv.writer(tmp, delimiter=";")
-                for r in rows:
-                    w.writerow(r)
-                tmp_path = tmp.name
+            tmp_path = await run_in_threadpool(_csv_in_tempdatei, rows)
             try:
                 up = upload_finance_export_csv(
                     tmp_path,
@@ -729,13 +727,7 @@ async def export_kassenfolge(
             from app.integrations.finance_export_upload import upload_finance_export_csv
 
             rows = _kasse_csv_rows(db, tenant_id)
-            with tempfile.NamedTemporaryFile(
-                mode="w", suffix=".csv", delete=False, encoding="utf-8", newline=""
-            ) as tmp:
-                w = csv.writer(tmp, delimiter=";")
-                for r in rows:
-                    w.writerow(r)
-                tmp_path = tmp.name
+            tmp_path = await run_in_threadpool(_csv_in_tempdatei, rows)
             try:
                 up = upload_finance_export_csv(
                     tmp_path,

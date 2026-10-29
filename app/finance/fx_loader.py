@@ -85,8 +85,8 @@ class EZBClient:
         root = ET.fromstring(xml_content)
         
         # Namespace
-        ns = {'gesmes': 'http://www.gesmes.org/xml/2002-08-01',
-              'ecb': 'http://www.ecb.int/vocabulary/2002-08-01/eurofxref'}
+        ns = {'gesmes': 'http://www.gesmes.org/xml/2002-08-01',  # NOSONAR - XML-Namensraum ist eine feste Kennung des Standards, kein Netzzugriff
+              'ecb': 'http://www.ecb.int/vocabulary/2002-08-01/eurofxref'}  # NOSONAR - XML-Namensraum ist eine feste Kennung des Standards, kein Netzzugriff
         
         # Datum finden
         cube = root.find('.//ecb:Cube[@time]', ns)
@@ -108,8 +108,8 @@ class EZBClient:
         records = []
         
         root = ET.fromstring(xml_content)
-        ns = {'gesmes': 'http://www.gesmes.org/xml/2002-08-01',
-              'ecb': 'http://www.ecb.int/vocabulary/2002-08-01/eurofxref'}
+        ns = {'gesmes': 'http://www.gesmes.org/xml/2002-08-01',  # NOSONAR - XML-Namensraum ist eine feste Kennung des Standards, kein Netzzugriff
+              'ecb': 'http://www.ecb.int/vocabulary/2002-08-01/eurofxref'}  # NOSONAR - XML-Namensraum ist eine feste Kennung des Standards, kein Netzzugriff
         
         # Alle Tages-Cubes
         for day_cube in root.findall('.//ecb:Cube[@time]/..', ns):

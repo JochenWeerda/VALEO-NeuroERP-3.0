@@ -38,6 +38,6 @@ def test_valid_transition_rueckwaerts_verboten():
 
 
 def test_sha256_deterministisch():
-    assert sha256_hex("PDF-Inhalt v1") == sha256_hex("PDF-Inhalt v1")
+    assert sha256_hex("PDF-Inhalt v1") == "c4f78a48f5451cf0f109bd442a9e9e964df5fd1133b7fc0380e5ef11467a4b48"
     assert sha256_hex("a") != sha256_hex("b")
     assert len(sha256_hex("x")) == 64

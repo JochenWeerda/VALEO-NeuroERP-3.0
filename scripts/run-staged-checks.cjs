@@ -69,9 +69,18 @@ const scriptLikeFiles = stagedFiles.filter(
 )
 const markdownFiles = stagedFiles.filter((file) => /\.md$/i.test(file))
 
+const ESLINT_BATCH = 40
+
+function runEslintInBatches(files, extraArgs = []) {
+  for (let i = 0; i < files.length; i += ESLINT_BATCH) {
+    const batch = files.slice(i, i + ESLINT_BATCH)
+    run(process.execPath, [eslintBin, ...extraArgs, ...batch])
+  }
+}
+
 if (scriptLikeFiles.length > 0) {
-  run(process.execPath, [eslintBin, '--fix', ...scriptLikeFiles])
-  run(process.execPath, [eslintBin, ...scriptLikeFiles])
+  runEslintInBatches(scriptLikeFiles, ['--fix'])
+  runEslintInBatches(scriptLikeFiles)
 }
 
 if (markdownFiles.length > 0) {

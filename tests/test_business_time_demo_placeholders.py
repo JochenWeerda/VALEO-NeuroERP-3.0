@@ -64,22 +64,6 @@ def test_atlas_exit_date_uses_business_day_and_keeps_event_timestamp_utc(
     assert result["erledigt_am"] == "2029-12-31T23:30:00Z"
 
 
-def test_compliance_demo_trend_ends_on_business_day(monkeypatch) -> None:
-    monkeypatch.setattr(
-        compliance_monitor,
-        "business_today",
-        lambda: date(2030, 1, 1),
-    )
+def test_compliance_trend_does_not_invent_evidence() -> None:
     monitor = compliance_monitor.ISO27001ComplianceMonitor(db_session=None)
-
-    trend = monitor._get_compliance_trend("tenant-1")
-
-    assert [point["date"] for point in trend] == [
-        date(2029, 12, 26),
-        date(2029, 12, 27),
-        date(2029, 12, 28),
-        date(2029, 12, 29),
-        date(2029, 12, 30),
-        date(2029, 12, 31),
-        date(2030, 1, 1),
-    ]
+    assert monitor._get_compliance_trend("tenant-1") == []

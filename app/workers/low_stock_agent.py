@@ -25,6 +25,9 @@ from dataclasses import dataclass
 from datetime import datetime, date
 from typing import Any, Dict, Optional
 
+from app.core.tenant_context import tenant_scope
+from app.core.tenant_registry import active_tenant_ids
+
 logger = logging.getLogger(__name__)
 
 NATS_URL = os.getenv("NATS_URL", "nats://localhost:4222")
@@ -176,8 +179,14 @@ async def run_nats_subscriber() -> None:
     async for msg in sub.messages:
         try:
             payload: Dict[str, Any] = json.loads(msg.data.decode())
+            tenant_id = str(payload.get("tenant_id") or "").strip()
+            if not tenant_id:
+                # Fail-closed (RLS plan P1): an event without tenant is never booked to a default.
+                logger.error("low_stock_event_ohne_mandant verworfen: %s", payload.get("artikel_id"))
+                await msg.ack()
+                continue
             event = LowStockEvent(
-                tenant_id=payload.get("tenant_id", "default"),
+                tenant_id=tenant_id,
                 artikel_id=payload.get("artikel_id", ""),
                 artikel_name=payload.get("artikel_name", ""),
                 bestand=float(payload.get("bestand", 0)),
@@ -186,19 +195,25 @@ async def run_nats_subscriber() -> None:
                 lieferant_id=payload.get("lieferant_id"),
                 durchschnittlicher_verbrauch_pro_tag=payload.get("verbrauch_pro_tag"),
             )
-            db = next(get_db())
-            try:
-                await handle_low_stock_event(event, db)
-            finally:
-                db.close()
+            with tenant_scope(event.tenant_id, "low-stock-event"):
+                db = next(get_db())
+                try:
+                    await handle_low_stock_event(event, db)
+                finally:
+                    db.close()
             await msg.ack()
         except Exception as exc:
             logger.exception("low_stock_event_fehler: %s", exc)
             await msg.nak()
 
 
-async def run_batch_scan(tenant_id: str = "default") -> list[BestellvorschlagResult]:
+async def run_batch_scan(tenant_id: str) -> list[BestellvorschlagResult]:
     """Batch-Scan: prüft alle Artikel eines Mandanten auf Unterdeckung."""
+    with tenant_scope(tenant_id, "low-stock-batch-scan"):
+        return await _run_batch_scan(tenant_id)
+
+
+async def _run_batch_scan(tenant_id: str) -> list[BestellvorschlagResult]:
     try:
         from app.core.database import get_db
         from sqlalchemy import text
@@ -244,10 +259,22 @@ async def run_batch_scan(tenant_id: str = "default") -> list[BestellvorschlagRes
     return results
 
 
+
+async def run_batch_scan_all_tenants() -> dict[str, list[BestellvorschlagResult]]:
+    from app.core.database import SessionLocal
+
+    registry = SessionLocal()
+    try:
+        tenants = active_tenant_ids(registry)
+    finally:
+        registry.close()
+    return {tenant_id: await run_batch_scan(tenant_id) for tenant_id in tenants}
+
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     if AGENT_ENABLED:
         asyncio.run(run_nats_subscriber())
     else:
-        logger.info("LOW_STOCK_AGENT_ENABLED nicht gesetzt — einmaliger Batch-Scan")
-        asyncio.run(run_batch_scan())
+        logger.info("LOW_STOCK_AGENT_ENABLED nicht gesetzt — einmaliger Batch-Scan je Mandant")
+        asyncio.run(run_batch_scan_all_tenants())

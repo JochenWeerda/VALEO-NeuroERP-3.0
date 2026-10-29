@@ -1,3 +1,11 @@
+import { screen } from '@testing-library/react'
+import { mountDomainPage } from '../multi-domain-uix-harness'
+import Kpi from '@/pages/controlling/kpi-verwaltung'
+import Measures from '@/pages/controlling/massnahmen'
+import Timeseries from '@/pages/controlling/timeseries-erfassung'
+import Benchmark from '@/pages/controlling/benchmark-cockpit'
+import Quarantine from '@/pages/admin/integrationen-quarantaene'
+import Compliance from '@/pages/admin/compliance-dashboard'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
@@ -5,25 +13,28 @@ import { describe, expect, it } from 'vitest'
 const read = (rel: string) => readFileSync(resolve(__dirname, rel), 'utf8')
 
 describe('Leitung Controlling Admin Compliance UIX', () => {
-  it('stellt Controlling-Stammaktionen beschriftet 44 px', () => {
-    const kpi = read('../../pages/controlling/kpi-verwaltung.tsx')
-    expect(kpi).toContain('min-h-touch')
-    expect(kpi).toContain('Bearbeiten')
-    expect(kpi).toContain('Löschen')
-    expect(kpi).not.toMatch(/size="sm"/)
-    expect(read('../../pages/controlling/massnahmen.tsx')).not.toMatch(/size="sm"/)
-    expect(read('../../pages/controlling/timeseries-erfassung.tsx')).toContain('Löschen')
-    expect(read('../../pages/controlling/benchmark-cockpit.tsx')).toContain('min-h-touch')
+  it('stellt Controlling-Stammaktionen beschriftet 44 px', async () => {
+    await mountDomainPage(Kpi, 'controlling/kpi-verwaltung', true)
+    expect.soft(screen.queryByRole('button', { name: 'Bearbeiten' })).toHaveClass('min-h-touch')
+    expect.soft(screen.queryByRole('button', { name: 'Löschen' })).toHaveClass('min-h-touch')
+    await mountDomainPage(Timeseries, 'controlling/timeseries-erfassung', true)
+    expect.soft(screen.queryByRole('button', { name: 'Löschen' })).toHaveClass('min-h-touch')
+    await mountDomainPage(Measures, 'controlling/massnahmen', true)
+    expect(screen.getByRole('button', { name: 'Aktualisieren' })).toHaveClass('min-h-touch')
+    await mountDomainPage(Benchmark, 'controlling/benchmark-cockpit', true)
+    expect(screen.getByRole('button', { name: 'Aktualisieren' })).toHaveClass('min-h-touch')
   })
 
-  it('stellt Leitungs-Admin und Vorfälle auf Deutsch 44 px', () => {
+  it('stellt Leitungs-Admin und Vorfälle auf Deutsch 44 px', async () => {
+    // The ControlCenter source contract remains explicitly static; quarantine is mounted below.
     const cc = read('../../pages/admin/control-center/index.tsx')
     expect(cc).toContain('PLANNING_FILTER_LABELS')
     expect(cc).toContain('Erledigen')
     expect(cc).toContain('Erneut versuchen')
-    expect(cc).not.toMatch(/size="sm"/)
-    expect(read('../../pages/admin/integrationen-quarantaene.tsx')).toContain('Erneut versuchen')
-    expect(read('../../pages/admin/compliance-dashboard.tsx')).toContain('min-h-touch')
+    await mountDomainPage(Quarantine, 'admin/integrationen-quarantaene', true)
+    expect.soft(screen.queryByRole('button', { name: 'Erneut versuchen' })).toHaveClass('min-h-touch')
+    await mountDomainPage(Compliance, 'admin/compliance-dashboard', true)
+    expect(screen.getByRole('button', { name: 'Aktualisieren' })).toHaveClass('min-h-touch')
     expect(read('../../pages/admin-suite/setup.tsx')).not.toMatch(/size="sm"/)
   })
 

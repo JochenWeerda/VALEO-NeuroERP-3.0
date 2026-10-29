@@ -14,13 +14,11 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from app.main import app
-from conftest import skip_if_db_unavailable
+from app.auth.deps import get_current_user
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 
-AUTH = {"Authorization": "Bearer dev-token", "X-Tenant-ID": "test-tenant"}
-BASE = "/api/v1/gdpr"
+AUTH = {}  # Unit identity is supplied explicitly by the miniature-app fixture.
 
 
 # ---------------------------------------------------------------------------
@@ -88,31 +86,30 @@ def _unit_app(db):
     unit.include_router(gdpr_router, prefix="/gdpr")
     unit.dependency_overrides[get_db] = lambda: db
     unit.dependency_overrides[get_tenant_id] = lambda: "test-tenant"
+    # This miniature app tests response/SQL-error handling; signed identities
+    # and actual SQL authorization are covered by test_gdpr_subject_boundary.
+    unit.dependency_overrides[get_current_user] = lambda: {"sub": "synthetic-privacy-admin", "roles": ["admin"]}
     return unit
 
 
 # ---------------------------------------------------------------------------
-# Integration tests
+# Missing subjects fail with an exact status; real integration is separate.
 # ---------------------------------------------------------------------------
 
-class TestGdprIntegration:
-    def setup_method(self):
-        self.client = TestClient(app, raise_server_exceptions=False)
+@pytest.mark.parametrize('operation,method', [('data-export','GET'),('export-portable','GET'),('delete-user','DELETE')])
+def test_missing_subject_is_404_not_a_server_error(operation, method):
+    client = TestClient(_unit_app(_FakeDb(user=None)), raise_server_exceptions=False)
+    assert client.request(method, f'/gdpr/{operation}/NONEXISTENT', headers=AUTH).status_code == 404
 
-    def test_data_export_nonexistent_user_integration(self):
-        r = self.client.get(f"{BASE}/data-export/NONEXISTENT-USER", headers=AUTH)
-        skip_if_db_unavailable(r)
-        assert r.status_code in (404, 500)
 
-    def test_delete_user_nonexistent_integration(self):
-        r = self.client.delete(f"{BASE}/delete-user/NONEXISTENT-USER", headers=AUTH)
-        skip_if_db_unavailable(r)
-        assert r.status_code in (404, 500)
-
-    def test_export_portable_nonexistent_integration(self):
-        r = self.client.get(f"{BASE}/export-portable/NONEXISTENT-USER", headers=AUTH)
-        skip_if_db_unavailable(r)
-        assert r.status_code in (404, 500)
+@pytest.mark.parametrize('operation,method', [('data-export','GET'),('export-portable','GET'),('delete-user','DELETE')])
+def test_storage_errors_do_not_disclose_personal_values(operation, method, caplog):
+    class BrokenDb(_FakeDb):
+        def query(self, _model):
+            raise RuntimeError('SYNTHETIC-PRIVATE-INPUT')
+    response = TestClient(_unit_app(BrokenDb()), raise_server_exceptions=False).request(method, f'/gdpr/{operation}/USER-1',headers=AUTH)
+    assert response.status_code == 500
+    assert 'SYNTHETIC-PRIVATE-INPUT' not in response.text + caplog.text
 
 
 # ---------------------------------------------------------------------------

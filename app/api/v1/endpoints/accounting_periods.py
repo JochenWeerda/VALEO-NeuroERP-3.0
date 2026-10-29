@@ -118,7 +118,7 @@ async def create_period(
                 "end_date": period_data.end_date
             }
         )
-        db.commit()
+        db.flush()
 
         # Fetch created period
         result = db.execute(
@@ -299,7 +299,7 @@ async def update_period(
 
         update_query += ",".join(updates) + " WHERE id = :id AND tenant_id = :tenant_id"
         db.execute(text(update_query), params)
-        db.commit()
+        db.flush()
         tenant_id = existing[1]
         log_fibu_audit(
             db, tenant_id, "update", "accounting_period", period_id,

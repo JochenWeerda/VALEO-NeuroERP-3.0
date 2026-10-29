@@ -51,7 +51,7 @@ export type PriceCaps = z.infer<typeof PriceCapsSchema>;
  * Dynamic Formula - Dynamische Preisformel
  */
 export const DynamicFormulaSchema = z.object({
-  id: z.string().uuid().optional(),
+  id: z.string().guid().optional(),
   tenantId: z.string().min(1, 'Tenant ID is required'),
   
   // Identifikation
@@ -121,7 +121,7 @@ export type UpdateDynamicFormula = z.infer<typeof UpdateDynamicFormulaSchema>;
  * Formula Evaluation Result
  */
 export const FormulaEvaluationResultSchema = z.object({
-  formulaId: z.string().uuid(),
+  formulaId: z.string().guid(),
   result: z.number(),
   inputs: z.record(z.string(), z.number()),
   expression: z.string(),

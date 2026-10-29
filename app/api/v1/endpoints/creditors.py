@@ -160,7 +160,7 @@ async def create_creditor(
             raise HTTPException(status_code=422, detail=build_dq_error_detail("Lieferant", dq_result))
         check = db.execute(
             text(
-                "SELECT id FROM domain_erp.creditors WHERE creditor_number = :cn AND (tenant_id = :tid OR (tenant_id IS NULL AND :tid = 'system'))"
+                "SELECT id FROM domain_erp.creditors WHERE creditor_number = :cn AND tenant_id = :tid"
             ),
             {"cn": payload.creditor_number, "tid": tenant_id},
         ).fetchone()
@@ -191,7 +191,7 @@ async def create_creditor(
         db.commit()
         row = db.execute(
             text(
-                "SELECT id, tenant_id, creditor_number, name, address, payment_terms, current_balance, is_active, created_at, updated_at FROM domain_erp.creditors WHERE id = :id AND (tenant_id = :tenant_id OR (tenant_id IS NULL AND :tenant_id = 'system'))"
+                "SELECT id, tenant_id, creditor_number, name, address, payment_terms, current_balance, is_active, created_at, updated_at FROM domain_erp.creditors WHERE id = :id AND tenant_id = :tenant_id"
             ),
             {"id": acc_id, "tenant_id": tenant_id},
         ).fetchone()
@@ -214,7 +214,7 @@ async def list_creditors(
 ):
     """List creditors with pagination and optional filters."""
     try:
-        where = ["(tenant_id = :tenant_id OR (tenant_id IS NULL AND :tenant_id = 'system'))"]
+        where = ["tenant_id = :tenant_id"]
         params = {"tenant_id": tenant_id}
         if is_active is not None:
             where.append("is_active = :is_active")
@@ -260,7 +260,7 @@ async def get_creditor(
     """Get creditor by ID."""
     row = db.execute(
         text(
-            "SELECT id, tenant_id, creditor_number, name, address, payment_terms, current_balance, is_active, created_at, updated_at FROM domain_erp.creditors WHERE id = :id AND (tenant_id = :tenant_id OR (tenant_id IS NULL AND :tenant_id = 'system'))"
+            "SELECT id, tenant_id, creditor_number, name, address, payment_terms, current_balance, is_active, created_at, updated_at FROM domain_erp.creditors WHERE id = :id AND tenant_id = :tenant_id"
         ),
         {"id": creditor_id, "tenant_id": tenant_id},
     ).fetchone()
@@ -282,7 +282,7 @@ async def update_creditor(
         _validate_iban(payload.iban)
         existing = db.execute(
             text(
-                "SELECT id, name, address FROM domain_erp.creditors WHERE id = :id AND (tenant_id = :tenant_id OR (tenant_id IS NULL AND :tenant_id = 'system'))"
+                "SELECT id, name, address FROM domain_erp.creditors WHERE id = :id AND tenant_id = :tenant_id"
             ),
             {"id": creditor_id, "tenant_id": tenant_id},
         ).fetchone()
@@ -298,7 +298,7 @@ async def update_creditor(
         }
         creditor_number_row = db.execute(
             text(
-                "SELECT creditor_number FROM domain_erp.creditors WHERE id = :id AND (tenant_id = :tenant_id OR (tenant_id IS NULL AND :tenant_id = 'system'))"
+                "SELECT creditor_number FROM domain_erp.creditors WHERE id = :id AND tenant_id = :tenant_id"
             ),
             {"id": creditor_id, "tenant_id": tenant_id},
         ).fetchone()
@@ -361,14 +361,14 @@ async def update_creditor(
             params_update["is_active"] = payload.is_active
         db.execute(
             text(
-                f"UPDATE domain_erp.creditors SET {', '.join(set_parts)} WHERE id = :id AND (tenant_id = :tenant_id OR (tenant_id IS NULL AND :tenant_id = 'system'))"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
+                f"UPDATE domain_erp.creditors SET {', '.join(set_parts)} WHERE id = :id AND tenant_id = :tenant_id"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             ),
             params_update,
         )
         db.commit()
         row = db.execute(
             text(
-                "SELECT id, tenant_id, creditor_number, name, address, payment_terms, current_balance, is_active, created_at, updated_at FROM domain_erp.creditors WHERE id = :id AND (tenant_id = :tenant_id OR (tenant_id IS NULL AND :tenant_id = 'system'))"
+                "SELECT id, tenant_id, creditor_number, name, address, payment_terms, current_balance, is_active, created_at, updated_at FROM domain_erp.creditors WHERE id = :id AND tenant_id = :tenant_id"
             ),
             {"id": creditor_id, "tenant_id": tenant_id},
         ).fetchone()
@@ -389,7 +389,7 @@ async def get_creditor_balance(
     """OP-Saldo eines Kreditors: offener Betrag, Anzahl OPs, ältester OP."""
     existing = db.execute(
         text(
-            "SELECT id FROM domain_erp.creditors WHERE id = :id AND (tenant_id = :tenant_id OR (tenant_id IS NULL AND :tenant_id = 'system'))"
+            "SELECT id FROM domain_erp.creditors WHERE id = :id AND tenant_id = :tenant_id"
         ),
         {"id": creditor_id, "tenant_id": tenant_id},
     ).fetchone()
@@ -426,7 +426,7 @@ async def delete_creditor(
     """Soft-delete creditor (set is_active = false)."""
     existing = db.execute(
         text(
-            "SELECT id FROM domain_erp.creditors WHERE id = :id AND (tenant_id = :tenant_id OR (tenant_id IS NULL AND :tenant_id = 'system'))"
+            "SELECT id FROM domain_erp.creditors WHERE id = :id AND tenant_id = :tenant_id"
         ),
         {"id": creditor_id, "tenant_id": tenant_id},
     ).fetchone()
@@ -434,7 +434,7 @@ async def delete_creditor(
         raise HTTPException(status_code=404, detail="Kreditor nicht gefunden")
     db.execute(
         text(
-            "UPDATE domain_erp.creditors SET is_active = false, updated_at = NOW() WHERE id = :id AND (tenant_id = :tenant_id OR (tenant_id IS NULL AND :tenant_id = 'system'))"
+            "UPDATE domain_erp.creditors SET is_active = false, updated_at = NOW() WHERE id = :id AND tenant_id = :tenant_id"
         ),
         {"id": creditor_id, "tenant_id": tenant_id},
     )

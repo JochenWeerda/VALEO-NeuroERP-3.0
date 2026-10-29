@@ -33,6 +33,19 @@ from sqlalchemy.orm import Session
 logger = logging.getLogger("llm.gateway")
 
 
+@dataclass(frozen=True)
+class MeteredCompletion:
+    text: str
+    input_tokens: int
+    output_tokens: int
+
+
+def _completion(text: str, input_tokens: Any, output_tokens: Any) -> MeteredCompletion:
+    if not isinstance(text, str) or any(type(value) is not int or value < 0 for value in (input_tokens, output_tokens)):
+        raise LLMUnavailable("Anbieter liefert keinen gueltigen Tokenverbrauch")
+    return MeteredCompletion(text, input_tokens, output_tokens)
+
+
 def _finite_json_float(value: str) -> float:
     number = float(value)
     if not math.isfinite(number):
@@ -190,6 +203,30 @@ class LLMGateway:
         except LLMUnavailable:
             return None
 
+    def complete_metered(self, prompt: str, system: Optional[str] = None,
+                         max_tokens: int = 512, timeout: float = 40.0) -> MeteredCompletion:
+        """Actual provider usage for reserved jobs; callers own quota settlement.
+
+        Missing usage is an unknown outcome, never guessed or refunded here.
+        Existing text-only consumers retain their previous contract.
+        """
+        if not self.available():
+            raise LLMUnavailable("Sprachmodell nicht verfuegbar")
+        handlers = {"anthropic": self._anthropic, "openai_compatible": self._openai_compatible, "ollama": self._ollama}
+        handler = handlers.get(self.config.provider)
+        if handler is None:
+            raise LLMUnavailable("Unbekannter Modellanbieter")
+        try:
+            result = handler(prompt, system, max_tokens, timeout, metered=True)
+            if not isinstance(result, MeteredCompletion):
+                raise LLMUnavailable("Anbieter-Verbrauch fehlt")
+            return result
+        except LLMUnavailable:
+            raise
+        except Exception as error:
+            # Do not propagate provider URLs, response bodies or credentials.
+            raise LLMUnavailable("Modellaufruf ohne gesicherten Abschluss") from error
+
     def test(self) -> dict:
         """Konfigurations-/Erreichbarkeitsprobe für die Admin-UI."""
         c = self.config
@@ -205,7 +242,7 @@ class LLMGateway:
                     "detail": f"Probe fehlgeschlagen: {exc}"}
 
     # ── Anbieter-Implementierungen ────────────────────────────────────────────
-    def _anthropic(self, prompt: str, system: Optional[str], max_tokens: int, timeout: float) -> str:
+    def _anthropic(self, prompt: str, system: Optional[str], max_tokens: int, timeout: float, *, metered: bool = False) -> str | MeteredCompletion:
         c = self.config
         body: dict = {"model": c.resolved_model(), "max_tokens": max_tokens,
                       "messages": [{"role": "user", "content": prompt}]}
@@ -218,9 +255,18 @@ class LLMGateway:
             json=body, timeout=timeout,
         )
         resp.raise_for_status()
-        return resp.json()["content"][0]["text"]
+        data = resp.json()
+        answer = data["content"][0]["text"]
+        usage = data.get("usage") or {}
+        if metered:
+            # Cached input is still consumed context and belongs in the ledger.
+            counts = [usage.get("input_tokens"), usage.get("cache_read_input_tokens", 0), usage.get("cache_creation_input_tokens", 0)]
+            if any(type(value) is not int or value < 0 for value in counts):
+                raise LLMUnavailable("Anbieter-Verbrauch fehlt")
+            return _completion(answer, sum(counts), usage.get("output_tokens"))
+        return answer
 
-    def _openai_compatible(self, prompt: str, system: Optional[str], max_tokens: int, timeout: float) -> str:
+    def _openai_compatible(self, prompt: str, system: Optional[str], max_tokens: int, timeout: float, *, metered: bool = False) -> str | MeteredCompletion:
         c = self.config
         messages = ([{"role": "system", "content": system}] if system else []) + \
                    [{"role": "user", "content": prompt}]
@@ -235,9 +281,12 @@ class LLMGateway:
             timeout=timeout,
         )
         resp.raise_for_status()
-        return resp.json()["choices"][0]["message"]["content"]
+        data = resp.json()
+        answer = data["choices"][0]["message"]["content"]
+        usage = data.get("usage") or {}
+        return _completion(answer, usage.get("prompt_tokens"), usage.get("completion_tokens")) if metered else answer
 
-    def _ollama(self, prompt: str, system: Optional[str], max_tokens: int, timeout: float) -> str:
+    def _ollama(self, prompt: str, system: Optional[str], max_tokens: int, timeout: float, *, metered: bool = False) -> str | MeteredCompletion:
         c = self.config
         messages = ([{"role": "system", "content": system}] if system else []) + \
                    [{"role": "user", "content": prompt}]
@@ -248,4 +297,6 @@ class LLMGateway:
             timeout=timeout,
         )
         resp.raise_for_status()
-        return resp.json()["message"]["content"]
+        data = resp.json()
+        answer = data["message"]["content"]
+        return _completion(answer, data.get("prompt_eval_count"), data.get("eval_count")) if metered else answer

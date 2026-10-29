@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema, IDResponse
 from app.api.v1.schemas.intrastat_schemas import IntrastatOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/intrastat", tags=["Intrastat", "Außenhandel"])
@@ -178,9 +179,31 @@ def list_meldungen(
         ) from exc
 
 
+@router.get("/meldungen/{meldung_id}", summary="Intrastat-Meldung abrufen",
+    response_model=IntrastatMeldungOut)
+def get_meldung(
+    meldung_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict:
+    """Eine gespeicherte Meldung im verifizierten Mandanten lesen."""
+    row = db.execute(
+        text(
+            "SELECT id, meldenummer, meldezeitraum, meldungsart, cn8_warennummer, "
+            "ursprungsland, bestimmungsland, statistischer_wert_eur, nettomasse_kg, "
+            "menge, mengeneinheit, geschaeftsvorgang_code, status "
+            "FROM domain_compliance.intrastat_meldungen "
+            "WHERE (id = :id OR meldenummer = :id) AND tenant_id = :tid LIMIT 1"
+        ),
+        {"id": meldung_id, "tid": tenant_id},
+    ).mappings().first()
+    if row is None:
+        raise HTTPException(status_code=404, detail="Intrastat-Meldung nicht gefunden")
+    return dict(row)
+
+
 @router.post("/meldungen", status_code=201, summary="Intrastat-Meldung erstellen",
-    response_model=IntrastatMeldungCreateOut
-)
+    response_model=IntrastatMeldungCreateOut, dependencies=SCHREIBEN["FINANZ"])
 def create_meldung(
     payload: IntrastatMeldungCreate,
     db: Session = Depends(get_db),
@@ -227,8 +250,7 @@ def create_meldung(
 
 
 @router.put("/meldungen/{meldung_id}", summary="Intrastat-Meldung aktualisieren",
-    response_model=IDResponse
-)
+    response_model=IDResponse, dependencies=SCHREIBEN["FINANZ"])
 def update_meldung(
     meldung_id: str,
     payload: IntrastatMeldungUpdate,
@@ -254,15 +276,21 @@ def update_meldung(
     params = {**updates, "id": meldung_id, "tenant_id": tenant_id}
 
     try:
-        db.execute(
+        updated = db.execute(
             text(
                 f"UPDATE domain_compliance.intrastat_meldungen "
                 f"SET {set_clauses} WHERE id = :id AND tenant_id = :tenant_id"  # nosec B608  # reviewed-safe: Bezeichner stammen aus einer Allowlist im Code, Werte sind gebunden
             ),
             params,
-        )
+        ).rowcount
+        if not updated:
+            # Fremde oder fehlende Meldung: bis 27.10.2026 meldete der Weg trotzdem "aktualisiert".
+            db.rollback()
+            raise HTTPException(status_code=404, detail="Meldung nicht gefunden")
         db.commit()
         return {"id": meldung_id, "status": "aktualisiert"}
+    except HTTPException:
+        raise
     except Exception as exc:
         db.rollback()
         raise HTTPException(
@@ -271,7 +299,7 @@ def update_meldung(
         )
 
 
-@router.delete("/meldungen/{meldung_id}", status_code=204, summary="Intrastat-Entwurf löschen", response_class=Response, response_model=None)
+@router.delete("/meldungen/{meldung_id}", status_code=204, summary="Intrastat-Entwurf löschen", response_class=Response, response_model=None, dependencies=SCHREIBEN["FINANZ"])
 def delete_meldung(
     meldung_id: str,
     db: Session = Depends(get_db),
@@ -354,8 +382,7 @@ def zusammenfassung(
 @router.post(
     "/meldungen/{meldezeitraum}/export-csv",
     response_model=IntrastatOut,
-    summary="Intrastat-Meldung als CSV exportieren (INTRASTAT-DE)",
-)
+    summary="Intrastat-Meldung als CSV exportieren (INTRASTAT-DE)", dependencies=SCHREIBEN["FINANZ"])
 def export_csv(
     meldezeitraum: str,
     db: Session = Depends(get_db),
@@ -411,3 +438,56 @@ def export_csv(
         media_type="text/csv; charset=utf-8",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
+
+
+#: Pflichtfelder einer Warenbewegung nach VO (EG) 638/2004 auf Positionsebene.
+_LAND = set("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+
+def _verstoesse(zeile: dict) -> list[dict[str, str]]:
+    verstoesse: list[dict[str, str]] = []
+
+    def melde(code: str, text_: str) -> None:
+        verstoesse.append({"code": code, "message": text_})
+
+    cn8 = str(zeile.get("cn8_warennummer") or "")
+    if len(cn8) != 8 or not cn8.isdigit():
+        melde("INVALID_CN8", "Warennummer muss aus 8 Ziffern bestehen (Kombinierte Nomenklatur).")
+    for feld, name in (("ursprungsland", "Ursprungsland"), ("bestimmungsland", "Bestimmungsland")):
+        land = str(zeile.get(feld) or "")
+        if len(land) != 2 or not set(land) <= _LAND:
+            melde(f"INVALID_{feld.upper()}", f"{name} braucht einen zweistelligen ISO-Code.")
+    if float(zeile.get("statistischer_wert_eur") or 0) <= 0:
+        melde("MISSING_WERT", "Statistischer Wert in EUR fehlt oder ist nicht positiv.")
+    if float(zeile.get("nettomasse_kg") or 0) < 0:
+        melde("INVALID_MASSE", "Nettomasse darf nicht negativ sein.")
+    if float(zeile.get("menge") or 0) <= 0:
+        melde("MISSING_MENGE", "Menge fehlt oder ist nicht positiv.")
+    if not 11 <= int(zeile.get("geschaeftsvorgang_code") or 0) <= 99:
+        melde("INVALID_GESCHAEFTSART", "Art des Geschaefts braucht einen zweistelligen Code (11-99).")
+    zeitraum = str(zeile.get("meldezeitraum") or "")
+    if len(zeitraum) != 7 or zeitraum[4] != "-":
+        melde("MISSING_MELDEZEITRAUM", "Meldezeitraum fehlt oder hat nicht das Format YYYY-MM.")
+    return verstoesse
+
+
+@router.get("/meldungen/{meldung_id}/validate", summary="Intrastat-Meldung vor der Abgabe pruefen")
+def validate_meldung(meldung_id: str, db: Session = Depends(get_db),
+                     tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
+    """Prueft die gespeicherte Meldung des Mandanten (Positionspflichtfelder).
+
+    Bis 20.10.2026 pruefte ``/compliance/intrastat/meldungen/{id}/validate`` eine erfundene Beispielmeldung und
+    meldete fuer jede Kennung "gueltig" — auch dem Agenten-Werkzeug ``valeo_compliance_intrastat_validate``.
+    Die Kopfangaben des Meldepflichtigen (USt-IdNr., Betriebsstaette) prueft die Abgabe beim Statistischen Amt.
+    """
+    zeile = db.execute(
+        text("SELECT id, meldenummer, meldezeitraum, meldungsart, cn8_warennummer, ursprungsland, bestimmungsland, "
+             "statistischer_wert_eur, nettomasse_kg, menge, mengeneinheit, geschaeftsvorgang_code, status "
+             "FROM domain_compliance.intrastat_meldungen "
+             "WHERE (id = :id OR meldenummer = :id) AND tenant_id = :tid LIMIT 1"),
+        {"id": meldung_id, "tid": tenant_id},
+    ).mappings().first()
+    if zeile is None:
+        raise HTTPException(status_code=404, detail="Intrastat-Meldung nicht gefunden")
+    verstoesse = _verstoesse(dict(zeile))
+    return {"meldung_id": zeile["id"], "valid": not verstoesse, "violations": verstoesse, "schema_version": 1}

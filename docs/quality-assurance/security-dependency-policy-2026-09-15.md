@@ -117,3 +117,23 @@ Kein Deployment wurde ausgefuehrt, bestehende Branch-Protection unveraendert.
 Die fruehere Regel dieses Service-Audits, dass jeder Versionsbefund ohne
 Bewertung blockiert, wird mit dem ausdruecklichen Nutzerauftrag vom 2026-09-15
 praezisiert. Bestehende Root-, Container- und SAST-Gates bleiben unveraendert.
+
+## Nachpruefung 20.10.2026 (Claude Code)
+
+- `aiohttp` 3.14.3 -> 3.14.4 in `requirements.txt` und `services/ai/requirements.txt`. Damit sind CVE-2026-111063,
+  CVE-2026-111064 und GHSA-2g87-pp6c-29x5 behoben (Fix-Version laut pip-audit). Das Root-Audit meldet danach keine
+  bekannte Schwachstelle mehr.
+- Die drei chromadb-Entscheidungen (CVE-2026-45830/-45831/-45833, ohne Fix-Version) sind neu geprueft. Von den
+  Belegdateien hat sich nur `services/ai/requirements.txt` geaendert, und zwar nur der aiohttp-Pin.
+- Die Schutzbedingung `chroma_embedded_only` ist weiter erfuellt (`embedded_chroma()` = wahr).
+- Neu gesetzt sind nur der Fingerabdruck dieser Datei und `reviewed_on`; Frist und Begruendung bleiben unveraendert.
+  Das Dienst-Audit `ai` laeuft mit Exit 0 durch.
+
+
+## Nachpruefung22.10.2026: einzelner Studio-Mount
+
+Run39732227258:22 Serviceaudits gruen, nur AI blockiert. Rohbericht nennt ausschliesslich die drei bestehenden Chroma-Befunde ohne Fixversion; Bewertungsgrund ist geaenderte Deployment-Evidenz. Alle98 betrachteten Dateien byte-/LF-normalisiert mit dem committed Stand abgeglichen. Genau docker-compose.yml weicht von der letzten Bewertung ab:431cd5f66 fuegt nur einen read-only Mount von docs/admin/table-catalog.json am ERP-Backend hinzu. Kein Chroma-Server, Remoteclient, SimpleRBAC-Provider oder trust_remote_code-Pfad entsteht. Beide bisherigen Consumer und der komplette uebrige Nachweisbestand sind unveraendert.
+
+Nachpruefung: eingebetteter Kontrolltyp wahr;12 Tests plus9 Subtests gruen, darunter geaenderte/fehlende Evidenz, Ablauf und erreichbarer Serverpfad als negative Kontrollen. Der echte heruntergeladene CI-Rohbericht ergibt nach dem gezielten Compose-Fingerprintnachzug drei not_affected,0 blocked. Reviewed_on22.10.; bisheriges Ablaufdatum23.10. unveraendert. Keine neue Ausnahme oder Fristverlaengerung. Bibliotheks-/Versionswarnungen bleiben sichtbar; dieser Befund ist keine allgemeine Herstellerreparatur.
+
+Node-Befunde ebenfalls erneut kontrolliert: vorhandene gepatchte Parser-/Forge-/Braces-Laufzeiten22/22 gruen. Unveraenderte Originalpakete zeigen neun Angriffsausfaelle und drei normale Faelle gruen. Erster Gesamtaufruf scheiterte an fehlender Detox-Aufloesung der selektiven Quellkopie; danach vorhandene mobile Installation nur lesend verknuepft und die getrennten vorhandenen Original-/Patchlaufzeiten verwendet. Kein gemeinsames node_modules veraendert. Acht GitHub-Versionsmeldungen bleiben als Rohbefunde offen; deren Bewertung/Fixverfuegbarkeit ist nicht mit einem gruenen Einzelscan gleichzusetzen.

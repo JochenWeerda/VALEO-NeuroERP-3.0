@@ -93,7 +93,7 @@ def test_precondition_gte_operator():
 def test_dispatcher_check_role_authorized():
     dispatcher = CommandDispatcher()
     cmd = _cmd("ApproveAPInvoice")
-    assert dispatcher.check_role(cmd, "finance_manager") is True
+    assert dispatcher.check_role(cmd, "FINANCE_ADMIN") is True
 
 
 def test_dispatcher_check_role_denied():
@@ -105,7 +105,7 @@ def test_dispatcher_check_role_denied():
 def test_dispatcher_check_role_unknown_command_returns_false():
     dispatcher = CommandDispatcher()
     cmd = _cmd("NonExistentCommand")
-    assert dispatcher.check_role(cmd, "finance_manager") is False
+    assert dispatcher.check_role(cmd, "FINANCE_ADMIN") is False
 
 
 def test_dispatcher_check_preconditions_ok():
@@ -132,7 +132,7 @@ def test_dispatcher_check_preconditions_fails_wrong_status():
 def test_dispatch_accepts_valid_command():
     dispatcher = CommandDispatcher()
     cmd = _cmd("ApproveAPInvoice")
-    result = dispatcher.dispatch(cmd, {"status": "ZUR_FREIGABE"}, issuer_role="ap_approver")
+    result = dispatcher.dispatch(cmd, {"status": "ZUR_FREIGABE"}, issuer_role="FINANCE_ADMIN")
     assert result.status == CommandStatus.ACCEPTED
     assert result.error is None
     assert result.schema_version == 1
@@ -158,7 +158,7 @@ def test_dispatch_rejects_failed_precondition():
     dispatcher = CommandDispatcher()
     cmd = _cmd("PostAPInvoice")
     state = {"status": "ZUR_FREIGABE"}   # needs FREIGEGEBEN
-    result = dispatcher.dispatch(cmd, state, issuer_role="accountant")
+    result = dispatcher.dispatch(cmd, state, issuer_role="FINANCE_ADMIN")
     assert result.status == CommandStatus.REJECTED
     assert result.error.code == "NOT_APPROVED"
 
@@ -166,7 +166,7 @@ def test_dispatch_rejects_failed_precondition():
 def test_dispatch_requires_human_confirmation():
     dispatcher = CommandDispatcher()
     cmd = _cmd("PostAPInvoice", requires_human=False)  # defn requires_human=True
-    result = dispatcher.dispatch(cmd, {"status": "FREIGEGEBEN"}, issuer_role="finance_manager")
+    result = dispatcher.dispatch(cmd, {"status": "FREIGEGEBEN"}, issuer_role="FINANCE_ADMIN")
     assert result.status == CommandStatus.PENDING_APPROVAL
     assert result.error.code == "HUMAN_CONFIRMATION_REQUIRED"
 
@@ -174,7 +174,7 @@ def test_dispatch_requires_human_confirmation():
 def test_dispatch_accepted_with_human_confirmation_set():
     dispatcher = CommandDispatcher()
     cmd = _cmd("PostAPInvoice", requires_human=True)
-    result = dispatcher.dispatch(cmd, {"status": "FREIGEGEBEN"}, issuer_role="finance_manager")
+    result = dispatcher.dispatch(cmd, {"status": "FREIGEGEBEN"}, issuer_role="FINANCE_ADMIN")
     assert result.status == CommandStatus.ACCEPTED
 
 
@@ -258,10 +258,10 @@ def test_agent_manifest_entries_count_matches_catalog():
 # AP6: Agent-sicheres Dispatch
 # ---------------------------------------------------------------------------
 
-def test_approve_ap_invoice_allows_audit_agent():
+def test_approve_ap_invoice_blocks_all_agents():
     catalog = build_core_command_catalog()
     defn = next(c for c in catalog if c.command_name == "ApproveAPInvoice")
-    assert "audit_agent" in defn.allowed_agent_types
+    assert defn.allowed_agent_types == []
 
 
 def test_reject_ap_invoice_blocks_all_agents():

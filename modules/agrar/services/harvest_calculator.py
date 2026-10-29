@@ -33,6 +33,16 @@ class DryingRuleRepository(Protocol):
     def list_factor_ranges(self, *, rule_set_id: str): ...
 
 
+class MissingHarvestContractRuleError(ValueError):
+    """A calculation must not invent a contractual impurity allowance."""
+
+    def __init__(self):
+        super().__init__(
+            "Abrechnungsgrundlage fehlt: Die Besatzfreigrenze muss aus einer "
+            "geprueften vertraglichen Regel stammen; ein Standardwert ist nicht zulaessig."
+        )
+
+
 @dataclass
 class HarvestCalculationInput:
     """Eingabedaten für Berechnung."""
@@ -52,8 +62,8 @@ class HarvestCalculationInput:
     freight_costs: Optional[Decimal] = None  # Pos. 78: Frachtkosten (EUR)
     weighing_fees: Optional[Decimal] = None  # Pos. 80: Wiegegebühren (EUR)
     
-    # Besatz "2% frei" Regel
-    impurities_free_pct: Decimal = Decimal("2.0")  # Standard: 2% frei
+    # Explicit contractual allowance; a quality limit does not supply this value.
+    impurities_free_pct: Optional[Decimal] = None
     
     # Preis (für Gutschriftsbetrag)
     unit_price_eur_per_ton: Optional[Decimal] = None
@@ -102,7 +112,7 @@ def calculate_harvest_settlement(inp: HarvestCalculationInput, vat_rate_percent:
     Berechnungsreihenfolge:
     1. Angelieferte Menge (Pos. 10) = delivered_quantity_kg
     2. Windabgang (Pos. 15) = delivered_quantity_kg × (windage_pct / 100)
-    3. Besatz 2% frei (Pos. 20) = max(0, impurities_pct - 2%) × delivered_quantity_kg / 100
+    3. Besatz (Pos. 20) = max(0, impurities_pct - explicit allowance) × delivered_quantity_kg / 100
     4. Gereinigte Menge (Pos. 30) = delivered_quantity_kg - Besatz_Abzug
     5. Feuchte/Tr.verlust (Pos. 40) = Gereinigte Menge × (moisture_pct / 100) [oder aus Drying Rule Engine]
     6. Zwischenmenge (Pos. 50) = Gereinigte Menge - Feuchte/Tr.verlust
@@ -115,6 +125,11 @@ def calculate_harvest_settlement(inp: HarvestCalculationInput, vat_rate_percent:
     13. Wiegegebühren (Pos. 80) = weighing_fees
     14. Gutschriftsbetrag (Pos. 110) = (Nettogewicht × Preis) - Abzüge + Zuschläge
     """
+    if inp.impurities_free_pct is None:
+        raise MissingHarvestContractRuleError()
+    allowance = Decimal(str(inp.impurities_free_pct))
+    if not allowance.is_finite() or not Decimal("0") <= allowance <= Decimal("100"):
+        raise ValueError("Besatzfreigrenze muss endlich und zwischen 0 und 100 Prozent sein.")
     warnings: list[str] = []
     positions: list[HarvestPositionResult] = []
     
@@ -142,21 +157,20 @@ def calculate_harvest_settlement(inp: HarvestCalculationInput, vat_rate_percent:
             calculation_formula=f"Angelieferte Menge × ({windage_pct}% / 100)"
         ))
     
-    # Pos. 20: Besatz 2% frei
+    # Pos. 20: only the explicitly supplied allowance is free.
     impurities_abzug_kg = Decimal("0")
     if inp.impurities_pct is not None:
         impurities_pct = round_pct(inp.impurities_pct)
-        # "2% frei" bedeutet: nur der Anteil über 2% wird abgezogen
-        impurities_abzug_pct = max(Decimal("0"), impurities_pct - inp.impurities_free_pct)
+        impurities_abzug_pct = max(Decimal("0"), impurities_pct - allowance)
         if impurities_abzug_pct > 0:
             impurities_abzug_kg = round_qty(delivered_qty * (impurities_abzug_pct / Decimal("100")))
         positions.append(HarvestPositionResult(
             position_number=20,
-            description="Besatz 2% frei",
+            description=f"Besatz {allowance.normalize():f}% frei",
             quantity_kg=impurities_abzug_kg,
             quantity_pct=impurities_pct,
             unit="kg / %",
-            calculation_formula=f"max(0, {impurities_pct}% - {inp.impurities_free_pct}%) × Angelieferte Menge / 100"
+            calculation_formula=f"max(0, {impurities_pct}% - {allowance}%) × Angelieferte Menge / 100"
         ))
     
     # Pos. 30: Gereinigte Menge

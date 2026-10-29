@@ -2,7 +2,7 @@
 Inventory-specific authentication and authorization.
 
 Seit 14.10.2026 (CI-GRUEN): Rollen kommen aus der geprueften Anmeldung — den Fachrollen des Hauses
-(``LAGER_LESEN``/``LAGER_BEARBEITEN``/``LAGER_ADMIN``, ``admin``, ``manager``) — und nur ergaenzend aus der lokalen
+(``LAGER_LESEN``/``LAGER_BEARBEITEN``/``LAGER_ADMIN``, ``admin``) — und nur ergaenzend aus der lokalen
 Benutzertabelle (Altbestand ``inventory_manager``/``inventory_user``). Bis dahin liess ein Token mit dem Claim
 ``token_type == "dev"`` jede Pruefung aus; Dev-Tokens gibt es seit 12.10.2026 nicht mehr, ein solcher Claim haette nur
 noch ueber einen fehlkonfigurierten Provider kommen koennen und dann alles geoeffnet. Wer weder eine Fachrolle traegt
@@ -20,7 +20,7 @@ from ....core.database import get_db
 from ....core.security import require_bearer_token
 from ....infrastructure.models import User as UserModel
 
-LESEN = frozenset({"admin", "manager", "LAGER_LESEN", "LAGER_BEARBEITEN", "LAGER_ADMIN",
+LESEN = frozenset({"admin", "LAGER_LESEN", "LAGER_BEARBEITEN", "LAGER_ADMIN",
                    "inventory_manager", "inventory_user"})
 VERWALTEN = frozenset({"admin", "LAGER_ADMIN", "inventory_manager"})
 

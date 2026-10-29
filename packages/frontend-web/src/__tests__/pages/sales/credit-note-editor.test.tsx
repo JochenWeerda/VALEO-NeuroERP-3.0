@@ -90,7 +90,9 @@ describe('Gutschrift', () => {
     // Verkaufsbeleg: kein reiner Vorsteuerschluessel in der Auswahl.
     expect(within(auswahl).queryByRole('option', { name: /Vorsteuer/ })).toBeNull()
     expect(auswahl).toHaveValue('')
-    expect(screen.queryByLabelText(/Steuersatz|MwSt|%$/)).toBeNull()
+    expect(screen.queryByLabelText(/Steuersatz/)).toBeNull()
+    expect(screen.queryByLabelText(/MwSt/)).toBeNull()
+    expect(screen.queryByLabelText(/%$/)).toBeNull()
   })
 
   it('laesst den Server rechnen und zeigt Netto, Umsatzsteuer und Brutto', async () => {

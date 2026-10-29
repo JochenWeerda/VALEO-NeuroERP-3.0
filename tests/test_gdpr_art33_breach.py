@@ -17,6 +17,7 @@ from unittest.mock import MagicMock
 
 import pytest
 from fastapi import FastAPI
+from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
 from fastapi.testclient import TestClient
 
 from app.api.v1.endpoints import gdpr_art33_breach
@@ -53,6 +54,7 @@ def clear_store():
 @pytest.fixture
 def client():
     app = FastAPI()
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     mock_db = MagicMock()
     mock_db.execute.side_effect = Exception("no db")
 

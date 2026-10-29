@@ -45,7 +45,7 @@ const ChartSkeleton: React.FC<{ title?: string }> = ({ title }) => (
 
 // Skeleton-Layout für das gesamte Dashboard
 const DashboardSkeleton: React.FC<{ config: OverviewConfig }> = ({ config }) => (
-  <div className="space-y-8 p-4 md:p-8">
+  <div className="space-y-4">
     {/* Header */}
     <div className="flex items-center justify-between rounded-(--radius) border border-border bg-card p-6 shadow-sm">
       <div>
@@ -131,7 +131,7 @@ const OverviewPage: React.FC<OverviewPageProps> = ({
   }
 
   return (
-    <div className="space-y-8 p-4 md:p-8">
+    <div className="space-y-4">
       {/* Header */}
       <div className="flex flex-col gap-4 rounded-(--radius) border border-border bg-card p-6 shadow-sm md:flex-row md:items-center md:justify-between">
         <div>

@@ -20,6 +20,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.api.v1.schemas.base import BaseSchema
 from app.services.gap_pipeline_service import GapPipelineService
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 class GapOut(BaseSchema):
@@ -65,7 +66,7 @@ class PipelineProgressResponse(BaseModel):
 # ── Pipeline-Ausführung ───────────────────────────────────────────────────────
 
 
-@router.post("/pipeline/run-year", response_model=GapPipelineResponse, summary="Gap pipeline year ausführen")
+@router.post("/pipeline/run-year", response_model=GapPipelineResponse, summary="Gap pipeline year ausführen", dependencies=SCHREIBEN["AGRAR"])
 async def run_gap_pipeline_year(
     request: GapPipelineRequest,
     plz_filter: Optional[str] = Query(None, description="PLZ-Filter (z.B. '26500-26999' oder '49,48')"),
@@ -80,7 +81,7 @@ async def run_gap_pipeline_year(
     return GapPipelineResponse(success=True, message=message, job_id=job_id)
 
 
-@router.post("/pipeline/import", response_model=GapPipelineResponse, summary="Gap import ausführen")
+@router.post("/pipeline/import", response_model=GapPipelineResponse, summary="Gap import ausführen", dependencies=SCHREIBEN["AGRAR"])
 async def run_gap_import(request: GapPipelineRequest, background_tasks: BackgroundTasks):
     """Führt nur den GAP-Import aus."""
     message = GapPipelineService().queue_import(
@@ -92,7 +93,7 @@ async def run_gap_import(request: GapPipelineRequest, background_tasks: Backgrou
     return GapPipelineResponse(success=True, message=message)
 
 
-@router.post("/pipeline/fetch-external", response_model=GapPipelineResponse, summary="Gap external abrufen")
+@router.post("/pipeline/fetch-external", response_model=GapPipelineResponse, summary="Gap external abrufen", dependencies=SCHREIBEN["AGRAR"])
 async def fetch_gap_external(
     background_tasks: BackgroundTasks,
     year: int = Query(..., description="Jahr (z.B. 2024)"),
@@ -102,7 +103,7 @@ async def fetch_gap_external(
     return GapPipelineResponse(success=True, message=message)
 
 
-@router.post("/pipeline/upload", response_model=GapOut, summary="Gap csv hochladen")
+@router.post("/pipeline/upload", response_model=GapOut, summary="Gap csv hochladen", dependencies=SCHREIBEN["AGRAR"])
 async def upload_gap_csv(
     file: UploadFile = File(..., description="GAP CSV-Datei"),
     year: Optional[int] = Query(None, description="Jahr (wird aus Dateiname extrahiert, falls nicht angegeben)"),
@@ -129,7 +130,7 @@ async def get_pipeline_progress(job_id: str):
     return PipelineProgressResponse(**progress_data)
 
 
-@router.post("/pipeline/{command}", response_model=GapPipelineResponse, summary="Gap command ausführen")
+@router.post("/pipeline/{command}", response_model=GapPipelineResponse, summary="Gap command ausführen", dependencies=SCHREIBEN["AGRAR"])
 async def run_gap_command(
     command: str,
     background_tasks: BackgroundTasks,
@@ -175,7 +176,7 @@ async def generate_leads_from_gap(
 # ── Daten-Reset ───────────────────────────────────────────────────────────────
 
 
-@router.delete("/reset-gap-data", response_model=GapOut, summary="Gap data zurücksetzen")
+@router.delete("/reset-gap-data", response_model=GapOut, summary="Gap data zurücksetzen", dependencies=SCHREIBEN["AGRAR"])
 async def reset_gap_data(
     year: int = Query(2024, description="Jahr für Daten-Reset"),
     confirm: bool = Query(False, description="Bestätigung erforderlich"),

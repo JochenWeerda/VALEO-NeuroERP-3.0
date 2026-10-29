@@ -211,7 +211,7 @@ def test_sieben_prozent_trifft_nicht_siebzehn(haus):
     with SessionLocal() as db:
         db.execute(text(
             "INSERT INTO domain_erp.chart_of_accounts (id, tenant_id, account_number, account_name, account_type, "
-            " category, is_active) VALUES (:id, :t, '1777', 'Umsatzsteuer 17 %', 'liability', 'tax', true)"),
+            " category, is_active) VALUES (:id, :t, '1777', 'Umsatzsteuer 17 %', 'liability', 'current_liabilities', true)"),
             {"id": f"{haus['mandant']}-1777", "t": haus["mandant"]})
         db.commit()
     nach_nr = {k["account_number"]: k["grund"] for k in _vorschlaege(haus, "7")["credit_account"]}

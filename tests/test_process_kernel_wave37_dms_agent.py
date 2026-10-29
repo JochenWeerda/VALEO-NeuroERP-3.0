@@ -23,6 +23,7 @@ from datetime import datetime
 
 import pytest
 from fastapi import FastAPI
+from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
 from fastapi.testclient import TestClient
 
 from app.api.v1.endpoints import process_kernel_api
@@ -83,6 +84,7 @@ def _make_ergebnis(felder: list[ExtrahiertesFelder]) -> OCRExtraktionsErgebnis:
 @pytest.fixture
 def client() -> TestClient:
     app = FastAPI()
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(process_kernel_api.router)
     return TestClient(app)
 

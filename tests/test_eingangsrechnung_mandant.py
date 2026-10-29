@@ -34,8 +34,9 @@ WORKFLOW = "/api/v1/finance/ap/approval-workflow"
 
 ROLES = [None, "user", "PERSONAL_ADMIN", "FINANCE_LESEN", "FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin", "manager"]
 ALLOWED = {
-    "read": {"FINANCE_LESEN", "FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin", "manager"},
-    "write": {"FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin", "manager"},
+    # ``manager`` bleibt Negativfall: abgeloest seit MANAGER-ROLE-ENFORCEMENT-20261019, gewaehrt nichts.
+    "read": {"FINANCE_LESEN", "FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin"},
+    "write": {"FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin"},
     "admin": {"FINANCE_ADMIN", "admin"},
 }
 CASES = [
@@ -118,7 +119,8 @@ def engine():
     if not DB_URL:
         pytest.skip("Explicit shared PostgreSQL test database required")
     database = make_url(DB_URL).database or ""
-    if database != "valeo_probe" and "test" not in database.lower():
+    from testgrenze import pruefstand_erlaubt
+    if not pruefstand_erlaubt(make_url(DB_URL)):
         pytest.fail("Never write finance test data into a development database")
     try:
         motor = create_engine(DB_URL)
@@ -183,7 +185,8 @@ class TestMandant:
         assert client.get(f"{PREFIX}/{nummer}", headers=kopf(HAUS_A)).status_code == 200
         assert client.get(f"{PREFIX}/{nummer}", headers=kopf(HAUS_B)).status_code == 404
         assert client.delete(f"{PREFIX}/{nummer}", headers=kopf(HAUS_B)).status_code == 404
-        assert client.post(f"{PREFIX}/{nummer}/approve", headers=kopf(HAUS_B)).status_code == 404
+        assert client.post(f"{PREFIX}/{nummer}/approve", headers=kopf(HAUS_B),
+                           json={"approval_request_id": "foreign-request"}).status_code == 404
         assert client.post(f"{PREFIX}/{nummer}/post?posted_by=x", headers=kopf(HAUS_B)).status_code == 404
         nummern_b = [r.get("number") for r in client.get(f"{PREFIX}/", headers=kopf(HAUS_B)).json()]
         assert nummer not in nummern_b
@@ -220,19 +223,26 @@ class TestMandant:
             antrag = client.post(f"{WORKFLOW}/request", headers=kopf(HAUS_A),
                                  json={"invoice_id": nummer, "requested_by": "einkauf"})
             assert antrag.status_code == 200, antrag.text
+            from app.main import app
+            # Antragsteller ist kasse aus dem Token, ungeachtet des Rumpfes.
+            selbst = client.post(f"{WORKFLOW}/approve", headers=kopf(HAUS_A), json={
+                "invoice_id": nummer, "approval_request_id": antrag.json()["approval_request_id"], "action": "approve"})
+            assert selbst.status_code == 403, selbst.text
+            app.dependency_overrides[get_current_user] = lambda: {"sub":"pruefer", "roles":["FINANCE_ADMIN"]}
             erste = client.post(f"{WORKFLOW}/approve", headers=kopf(HAUS_A), json={
-                "invoice_id": nummer, "approved_by": "Frau A", "action": "approve"})
+                "invoice_id": nummer, "approval_request_id": antrag.json()["approval_request_id"], "approved_by": "Frau A", "action": "approve"})
             assert erste.status_code == 200, erste.text
             # Derselbe angemeldete Nutzer, ein anderer Name im Rumpf: keine zweite Stufe.
             zweite = client.post(f"{WORKFLOW}/approve", headers=kopf(HAUS_A), json={
-                "invoice_id": nummer, "approved_by": "Herr B", "action": "approve"})
-            assert zweite.status_code == 400, zweite.text
+                "invoice_id": nummer, "approval_request_id": antrag.json()["approval_request_id"], "approved_by": "Herr B", "action": "approve"})
+            assert zweite.status_code == 200, zweite.text
             with engine.connect() as v:
                 freigeber = [z[0] for z in v.execute(text(
                     "SELECT a.approved_by FROM domain_erp.ap_approvals a "
                     "JOIN domain_erp.ap_approval_requests r ON r.id = a.request_id "
                     "WHERE r.invoice_id = :n AND r.tenant_id = :h"), {"n": nummer, "h": HAUS_A})]
-            assert freigeber == ["kasse"]
+            assert freigeber == ["pruefer"]
+            assert zweite.json()["status"] == "partially_approved"
         finally:
             with engine.begin() as v:
                 v.execute(text(

@@ -28,9 +28,11 @@ from app.core.tenant import get_tenant_id
 from app.infrastructure.models import Customer
 from app.infrastructure.models.agrar_models import FeldbuchSchlag
 from app.services.customer_reference import resolve_reference
+from app.services.pricing_condition_read import read_pricing_conditions
 from app.services.finance_datev_service import FinanceDatevService
 from app.services.finance_period_service import FinancePeriodService, PeriodError
 from app.services.vies_service import vies_service
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(tags=["mask-frontend-bridges"])
 
@@ -46,15 +48,6 @@ class SeedOrderIn(BaseModel):
 class AskIn(BaseModel):
     prompt: str = Field(..., min_length=1, max_length=4000)
     context: dict[str, Any] | None = None
-
-
-class PreisBerechnenIn(BaseModel):
-    model_config = ConfigDict(extra="allow")
-    artikel_id: str | None = None
-    menge_kg: float | None = None
-    kundengruppe: str | None = None
-    sorte_klasse: str | None = None
-    kontrakt_id: str | None = None
 
 
 class EpcisEventIn(BaseModel):
@@ -223,7 +216,7 @@ def get_agrar_kunde(
         return _kunde_payload(customer, 0, 0.0)
 
 
-@router.post("/agrar/seed-orders", response_model=BridgeOut, status_code=201, summary="Saatgutbestellung anlegen")
+@router.post("/agrar/seed-orders", response_model=BridgeOut, status_code=201, summary="Saatgutbestellung anlegen", dependencies=SCHREIBEN["AGRAR"])
 def create_seed_order(
     body: SeedOrderIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -330,7 +323,7 @@ def get_segment_performance(
     }
 
 
-@router.post("/crm/segments/{segment_id}/calculate", response_model=BridgeOut, summary="Segment neu berechnen")
+@router.post("/crm/segments/{segment_id}/calculate", response_model=BridgeOut, summary="Segment neu berechnen", dependencies=SCHREIBEN["CRM"])
 def calculate_segment(
     segment_id: str,
     body: SegmentCalculateIn,
@@ -352,7 +345,7 @@ def calculate_segment(
 # ---------------------------------------------------------------------------
 
 
-@router.post("/einkauf/anfragen/{anfrage_id}/send", response_model=BridgeOut, summary="Anfrage an Lieferanten senden")
+@router.post("/einkauf/anfragen/{anfrage_id}/send", response_model=BridgeOut, summary="Anfrage an Lieferanten senden", dependencies=SCHREIBEN["EINKAUF"])
 def send_anfrage(
     anfrage_id: str,
     body: AnfrageSendIn,
@@ -365,7 +358,7 @@ def send_anfrage(
     return versende_einkauf_anfrage(db, tenant_id, anfrage_id, body.supplierIds, body.method, nutzer)
 
 
-@router.post("/einkauf/lieferscheine/{ls_id}/print", response_model=BridgeOut, summary="Einkauf-Lieferschein drucken")
+@router.post("/einkauf/lieferscheine/{ls_id}/print", response_model=BridgeOut, summary="Einkauf-Lieferschein drucken", dependencies=SCHREIBEN["EINKAUF"])
 def print_einkauf_lieferschein(
     ls_id: str,
     template: Optional[str] = Query(default=None, max_length=60),
@@ -883,11 +876,7 @@ def list_pos_rabatte(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> list[dict[str, Any]]:
-    rows = _safe_rows(
-        db,
-        "SELECT * FROM domain_shared.zu_abschlag_konditionen ORDER BY id LIMIT 200",
-        {},
-    )
+    rows = read_pricing_conditions(db, tenant_id, limit=200)
     return [
         {
             "id": str(r.get("id")),
@@ -925,28 +914,6 @@ def list_tse_journal(
         }
         for r in rows
     ]
-
-
-@router.post("/preise/berechnen", response_model=BridgeOut, summary="Preis kalkulieren")
-def preise_berechnen(body: PreisBerechnenIn) -> dict[str, Any]:
-    menge = float(body.menge_kg or 1)
-    basis = 100.0
-    if body.kundengruppe and body.kundengruppe.upper() == "GROSSHANDEL":
-        rabatt = 8.0
-    else:
-        rabatt = 0.0
-    netto = round(basis * menge * (1 - rabatt / 100.0), 2)
-    mwst = round(netto * 0.19, 2)
-    return {
-        "netto_preis": netto,
-        "brutto_preis": round(netto + mwst, 2),
-        "mwst_betrag": mwst,
-        "kalkulationsweg": [
-            {"schritt": "Basispreis", "wert": round(basis * menge, 2), "delta": 0},
-            {"schritt": f"Kundengruppe {body.kundengruppe or '-'}", "wert": netto, "delta": -round(basis * menge * rabatt / 100.0, 2)},
-            {"schritt": "MwSt 19%", "wert": round(netto + mwst, 2), "delta": mwst},
-        ],
-    }
 
 
 @router.get("/preise/historie", response_model=BridgeOut, summary="Preishistorie")
@@ -991,11 +958,7 @@ def preise_konditionen(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict[str, Any]:
-    rows = _safe_rows(
-        db,
-        "SELECT * FROM domain_shared.zu_abschlag_konditionen ORDER BY id LIMIT 1",
-        {},
-    )
+    rows = read_pricing_conditions(db, tenant_id, limit=1)
     row = dict(rows[0]) if rows else {}
     today = date.today()
     return {
@@ -1016,47 +979,9 @@ def list_qualitaet_reklamationen(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> list[dict[str, Any]]:
-    rows = _safe_rows(
-        db,
-        "SELECT * FROM domain_ops.reklamationen WHERE tenant_id = :t ORDER BY erstellt_am DESC LIMIT 200",
-        {"t": tenant_id},
-    )
-    # Die Liste kennt vier Stufen; die Zustandsmaschine (ReklamationsStatus) sechs.
-    status_map = {
-        "offen": "neu",
-        "in_pruefung": "in-bearbeitung",
-        "teilweise_anerkannt": "in-bearbeitung",
-        "anerkannt": "in-bearbeitung",
-        "geschlossen": "geloest",
-        "abgelehnt": "abgelehnt",
-    }
-    lieferanten: dict[str, str] = {}
-    result = []
-    for r in rows:
-        lieferant_ref = str(r.get("lieferant_id") or "")
-        if lieferant_ref not in lieferanten:
-            lieferant = resolve_reference(db, tenant_id, "supplier", lieferant_ref)
-            lieferanten[lieferant_ref] = lieferant.name or lieferant.number or ""
-        positionen = r.get("positionen") or []
-        if isinstance(positionen, str):
-            try:
-                positionen = json.loads(positionen)
-            except json.JSONDecodeError:
-                positionen = []
-        first = positionen[0] if isinstance(positionen, list) and positionen else {}
-        result.append(
-            {
-                "id": r.get("reklamation_id") or r.get("id"),
-                "nummer": r.get("reklamation_nr") or "",
-                "kunde": lieferanten[lieferant_ref],
-                "artikel": first.get("artikel") or first.get("bezeichnung") or r.get("typ") or "",
-                "grund": r.get("typ") or "",
-                "datum": _iso(r.get("erstellt_am") or r.get("frist_datum")) or "",
-                "prioritaet": "normal",
-                "status": status_map.get(str(r.get("status") or "offen"), "neu"),
-            }
-        )
-    return result
+    from app.services.complaint_list_read import read_complaint_list
+
+    return read_complaint_list(db, tenant_id, iso=_iso)
 
 
 @router.get("/operations/exceptions", response_model=list[BridgeOut], summary="Betriebsausnahmen auflisten")
@@ -1127,7 +1052,7 @@ def list_waage_vorlagen(
     ]
 
 
-@router.post("/waage/vorlagen", response_model=BridgeOut, status_code=201, summary="Waagenvorlage anlegen")
+@router.post("/waage/vorlagen", response_model=BridgeOut, status_code=201, summary="Waagenvorlage anlegen", dependencies=SCHREIBEN["LAGER"])
 def create_waage_vorlage(
     body: WaageVorlageIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -1157,7 +1082,7 @@ def create_waage_vorlage(
 # ---------------------------------------------------------------------------
 
 
-@router.post("/personal/work-plan/assignments", response_model=BridgeOut, status_code=201, summary="Dienstplan-Zuweisung anlegen")
+@router.post("/personal/work-plan/assignments", response_model=BridgeOut, status_code=201, summary="Dienstplan-Zuweisung anlegen", dependencies=SCHREIBEN["PERSONAL"])
 def create_work_plan_assignment(
     body: WorkPlanAssignmentIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -1229,7 +1154,7 @@ def list_epcis_events(
     return {"items": items, "total": len(items)}
 
 
-@router.post("/inventory/epcis/events", response_model=BridgeOut, status_code=201, summary="EPCIS-Ereignis anlegen")
+@router.post("/inventory/epcis/events", response_model=BridgeOut, status_code=201, summary="EPCIS-Ereignis anlegen", dependencies=SCHREIBEN["GERAET"])
 def create_epcis_event(
     body: EpcisEventIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -1308,7 +1233,7 @@ def analytics_contract_positions(
     return {"data": data}
 
 
-@router.post("/ai/ask", response_model=BridgeOut, summary="Fachfrage beantworten")
+@router.post("/ai/ask", response_model=BridgeOut, summary="Fachfrage beantworten", dependencies=SCHREIBEN["BERECHNEN"])
 def ai_ask(body: AskIn) -> dict[str, Any]:
     prompt = body.prompt.strip()
     domain = ""
@@ -1443,25 +1368,4 @@ def audit_trail(
     return {"data": data}
 
 
-@router.post("/futter/{kategorie}/bulk-delete", response_model=BridgeOut, summary="Futtermittel sammeln löschen")
-def futter_bulk_delete(
-    kategorie: str,
-    body: dict[str, Any] = Body(default={}),
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-) -> dict[str, Any]:
-    ids = [str(x) for x in (body.get("ids") or []) if x]
-    if not ids:
-        return {"deleted": 0, "kategorie": kategorie, "ids": []}
-    table = {
-        "einzelfuttermittel": "domain_shared.einzelfuttermittel",
-        "mischfuttermittel": "domain_shared.mischfuttermittel",
-    }.get(kategorie, "domain_shared.einzelfuttermittel")
-    deleted = 0
-    for item_id in ids:
-        deleted += _safe_execute(
-            db,
-            f"DELETE FROM {table} WHERE id = :id AND tenant_id = :t",  # nosec B608
-            {"id": item_id, "t": tenant_id},
-        )
-    return {"deleted": deleted, "kategorie": kategorie, "ids": ids}
+# /futter/{kategorie}/bulk-delete entfernt (20.10.2026): loeschte hart aus Tabellen, die es nicht gibt.

@@ -36,3 +36,9 @@ export { checkGeneratorReadiness } from './runtime/generatorReadiness'
 export type { GeneratorReadinessReport, GateResult, ReadinessGate, GateSeverity } from './runtime/generatorReadiness'
 // UIX-042 — Generic native detail page
 export { UniversalNativeDetailPage } from './UniversalNativeDetailPage'
+export {
+  StammNativeDetailRoute,
+  createStammNativeDetailPage,
+  isStammCreationEntityId,
+} from './StammNativeDetailRoute'
+export { createLegacyMaskPage } from './LegacyMaskRoute'

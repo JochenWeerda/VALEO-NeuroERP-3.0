@@ -14,9 +14,11 @@ from __future__ import annotations
 
 from app.auth.deps import require_roles
 
-finance_read = require_roles("FINANCE_LESEN", "FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin", "manager")
-finance_write = require_roles("FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin", "manager")
-finance_admin = require_roles("FINANCE_ADMIN", "admin")
+finance_read = require_roles("FINANCE_LESEN", "FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin")
+FINANCE_WRITE_ROLES = ("FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin")
+FINANCE_APPROVAL_ROLES = ("FINANCE_ADMIN", "admin")
+finance_write = require_roles(*FINANCE_WRITE_ROLES)
+finance_admin = require_roles(*FINANCE_APPROVAL_ROLES)
 
 # Offene Posten lesen auch Verkauf, Vertrieb und Einkauf: Wer einen Auftrag annimmt oder eine
 # Bestellung ausloest, muss sehen, was der Kunde schuldet und was dem Lieferanten zusteht.
@@ -26,7 +28,7 @@ BELEG_READ_ROLES = (
     "SALES_LESEN", "SALES_BEARBEITEN", "SALES_ADMIN",
     "CRM_LESEN", "CRM_BEARBEITEN", "CRM_ADMIN",
     "EINKAUF_LESEN", "EINKAUF_BEARBEITEN", "EINKAUF_ADMIN",
-    "admin", "manager",
+    "admin",
 )
 open_items_read = require_roles(*BELEG_READ_ROLES)
 
@@ -35,7 +37,7 @@ open_items_read = require_roles(*BELEG_READ_ROLES)
 kontenplan_read = require_roles(
     "FINANCE_LESEN", "FINANCE_BEARBEITEN", "FINANCE_ADMIN", "KONTENPLAN_PFLEGE",
     "EINKAUF_LESEN", "EINKAUF_BEARBEITEN", "EINKAUF_ADMIN",
-    "admin", "manager",
+    "admin",
 )
 
 # Kontenplanpflege ist Stammdatenpflege, kein Tagesgeschaeft: Sehen duerfen die Konten viele, anlegen,
@@ -57,7 +59,7 @@ BELEG_WRITE_ROLES = (
     "FINANCE_BEARBEITEN", "FINANCE_ADMIN",
     "SALES_BEARBEITEN", "SALES_ADMIN",
     "EINKAUF_BEARBEITEN", "EINKAUF_ADMIN",
-    "admin", "manager",
+    "admin",
 )
 
 beleg_write = require_roles(*BELEG_WRITE_ROLES)

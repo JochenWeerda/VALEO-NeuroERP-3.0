@@ -89,6 +89,7 @@ import { isRecord, numberValue, stringValue } from '@/lib/record-utils'
 import { createRationDraft, ensureFeedingGroup, evaluateFeedReadiness, transitionRationVersion } from '@/lib/api/rations-lifecycle'
 import { WizardFeedSections, type SectionFeed } from '@/features/feed-advice/WizardFeedSections'
 
+import { tastenKlick } from '@/lib/tastenklick'
 // ---------------------------------------------------------------------------
 // Meridian-/Terra-Semantikbruecke fuer den spezialisierten Solver-Arbeitsplatz.
 // Keine Produktpalette: Der Portal-Einstieg selbst wird nativ aus der
@@ -1533,6 +1534,9 @@ function Dashboard({ onStart, onDemo }: { onStart: () => void; onDemo: () => voi
               { name: 'Frischmelker 08/2026', group: 'Frischmelker', milk: 32, ctPerEcm: 18.4, status: 'Freigegeben' },
             ].map((r) => (
               <div
+                role="button"
+                tabIndex={0}
+                onKeyDown={tastenKlick}
                 key={r.name}
                 onClick={onStart}
                 className="bg-white p-5 rounded-lg border shadow-sm cursor-pointer group transition-all hover:shadow-md"
@@ -1555,6 +1559,9 @@ function Dashboard({ onStart, onDemo }: { onStart: () => void; onDemo: () => voi
               </div>
             ))}
             <div
+              role="button"
+              tabIndex={0}
+              onKeyDown={tastenKlick}
               onClick={onStart}
               className="bg-slate-50 p-5 rounded-lg border-2 border-dashed flex flex-col items-center justify-center cursor-pointer min-h-[160px] transition-all hover:bg-white"
               style={{ borderColor: C.border }}
@@ -4056,6 +4063,9 @@ function Workbench({
             { name: 'Entwurf B', price: '–' },
           ].map((v) => (
             <div
+              role="button"
+              tabIndex={0}
+              onKeyDown={tastenKlick}
               key={v.name}
               onClick={() => setActiveVariant(v.name)}
               className="p-2 rounded text-[13px] mb-1 cursor-pointer flex justify-between border transition-all"
@@ -4927,6 +4937,8 @@ function Review({
   onApplySuggestionPatch,
   onReoptimize,
   isFinalizing,
+  canSubmit,
+  submissionError,
 }: {
   wizardData: WizardData | null
   result: OptimizationResult | null
@@ -4937,6 +4949,8 @@ function Review({
   onApplySuggestionPatch: (patch: RationAdjustmentApplyPatch) => void
   onReoptimize: () => void
   isFinalizing: boolean
+  canSubmit: boolean
+  submissionError: string | null
 }) {
   const comparison = result
     ? [
@@ -5174,6 +5188,8 @@ function Review({
       </div>
 
 
+      {submissionError && <p role="alert" className="text-destructive">{submissionError}</p>}
+      {!canSubmit && <p role="status">Demoergebnisse und nicht optimale Rationen können nicht eingereicht werden. Beginnen Sie eine eigene Beratung und berechnen Sie eine gültige Ration.</p>}
       {/* Footer */}
       <div className="flex items-center justify-between pt-8 border-t" style={{ borderColor: C.border }}>
         <button
@@ -5189,7 +5205,7 @@ function Review({
           </button>
           <button
             onClick={() => { void onFinalize() }}
-            disabled={isFinalizing}
+            disabled={isFinalizing || !canSubmit}
             className="px-10 py-3 font-bold rounded-xl text-white shadow-xl flex items-center gap-2 transition-opacity hover:opacity-90"
             style={{ background: C.accent }}
           >
@@ -5871,8 +5887,10 @@ export default function Rationsoptimierung() {
   const [error, setError] = useState<string | null>(null)
 
   const lifecycleMutation = useMutation({
+    onMutate: () => setError(null),
     mutationFn: async () => {
-      if (!result || !wizardData) throw new Error('Keine berechnete Ration vorhanden.')
+      if (demoMode) throw new Error('Demoergebnisse dürfen nicht eingereicht werden.')
+      if (!result || !wizardData || result.status !== 'optimal') throw new Error('Keine gültige berechnete Ration vorhanden.')
       const group = await ensureFeedingGroup({
         external_ref: wizardData.group.id,
         name: wizardData.group.name,
@@ -5884,11 +5902,14 @@ export default function Rationsoptimierung() {
         feeding_system: wizardData.feedingType,
         location: wizardData.group.location,
       })
+      if (!Number.isSafeInteger(group.animal_count) || group.animal_count <= 0) {
+        throw new Error('Die bestätigte Tiergruppe besitzt keine gültige Tieranzahl.')
+      }
       const protocolItems = result.mixing_protocol?.steps?.filter((item) => item.feed_id) ?? []
       const components = (protocolItems.length ? protocolItems : result.ration_items).map((item) => ({
         feed_id: item.feed_id as string,
         name: item.name,
-        soll_kg: Number(('kgfm' in item ? item.kgfm : 0) ?? 0) * wizardData.group.count,
+        soll_kg: Number(('kgfm' in item ? item.kgfm : 0) ?? 0) * group.animal_count,
       })).filter((item) => item.soll_kg > 0)
       const mobile = {
         version: 1,
@@ -5989,6 +6010,16 @@ export default function Rationsoptimierung() {
   })
 
   const openWizardFresh = useCallback(() => {
+    setDemoMode(false)
+    setDemoOverlay(false)
+    setTourStep(null)
+    setDemoChatSeed([])
+    setResult(null)
+    setWizardData(null)
+    setError(null)
+    setPreviewResult(null)
+    setPreviewIntent(null)
+    previewWizardRef.current = null
     setWizardBoot((b) => ({ key: b.key + 1, resumeFrom: null, initialStep: 1 }))
     setView('wizard')
   }, [])
@@ -6182,6 +6213,9 @@ export default function Rationsoptimierung() {
         style={{ background: C.dark }}
       >
         <div
+          role="button"
+          tabIndex={0}
+          onKeyDown={tastenKlick}
           className="flex items-center gap-1 cursor-pointer font-bold text-lg leading-none tracking-widest uppercase"
           onClick={() => setView('dashboard')}
         >
@@ -6209,7 +6243,8 @@ export default function Rationsoptimierung() {
               if (tab.id === 'diagnose' && !result) return
               if (tab.id === 'review' && !result) return
               if (tab.id === 'wizard') {
-                setWizardBoot((b) => ({ key: b.key + 1, resumeFrom: null, initialStep: 1 }))
+                openWizardFresh()
+                return
               }
               setView(tab.id)
             }}
@@ -6298,6 +6333,8 @@ export default function Rationsoptimierung() {
               lifecycleMutation.mutate()
             }}
             isFinalizing={lifecycleMutation.isPending}
+            canSubmit={!demoMode && result?.status === 'optimal'}
+            submissionError={error}
             isOptimizing={isOptimizing}
             onGoWizard={() => (wizardData ? openWizardReoptimize(wizardData) : openWizardFresh())}
             onApplySuggestionPatch={handleApplySuggestionPatch}

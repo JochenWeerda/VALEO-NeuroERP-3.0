@@ -10,9 +10,9 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
-from ....core.config import settings
 from ....core.data_quality_enforcement import build_dq_error_detail, evaluate_weighing_ticket_datensatz
 from ....core.database import get_db
+from app.core.tenant import get_tenant_id
 from ....domains.shared.events import IntegrationEvent, get_event_publisher
 from ....infrastructure.eventbus.outbox import OutboxPublisher
 from ....infrastructure.models import AgrarContract, AgrarContractAllocation, Article, WeighingTicket
@@ -24,9 +24,9 @@ from modules.agrar.services.weighing_domain import (
 from app.services.agrar_contract_service import _compute_status
 from ..schemas.base import PaginatedResponse, BaseSchema
 from app.core.uuid7 import uuid7
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter()
-DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 
 def _build_weighing_ticket_dq_datensatz(data: dict[str, Any]) -> dict[str, object]:
@@ -149,14 +149,13 @@ def _derive_billing_weight(
 
 @router.get("/", response_model=PaginatedResponse[WeighingTicketOut], summary="Weighing tickets auflisten")
 async def list_weighing_tickets(
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     skip: int = Query(0, ge=0),
     limit: int = Query(25, ge=1, le=200),
     db: Session = Depends(get_db),
 ):
     """GET Wiegescheine ermitteln"""
-    tid = tenant_id or DEFAULT_TENANT
-    q = db.query(WeighingTicket).filter(WeighingTicket.tenant_id == tid)
+    q = db.query(WeighingTicket).filter(WeighingTicket.tenant_id == tenant_id)
     total = q.count()
     items = q.offset(skip).limit(limit).all()
     page = (skip // limit) + 1
@@ -175,17 +174,16 @@ class ArticleGroupOut(BaseModel):
 
 @router.get("/article-groups", response_model=list[ArticleGroupOut], summary="Article groups auflisten")
 async def list_article_groups(
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Liefert die vorhandenen Artikelgruppen (DISTINCT warengruppe aus articles)."""
     from sqlalchemy import func as sqla_func
 
-    tid = tenant_id or DEFAULT_TENANT
     rows = (
         db.query(Article.warengruppe, sqla_func.count(Article.id).label("count"))
         .filter(
-            Article.tenant_id == tid,
+            Article.tenant_id == tenant_id,
             Article.is_active == True,  # noqa: E712
             Article.warengruppe.isnot(None),
             Article.warengruppe != "",
@@ -197,14 +195,13 @@ async def list_article_groups(
     return [ArticleGroupOut(warengruppe=r[0], count=r[1]) for r in rows]
 
 
-@router.post("/", response_model=WeighingTicketOut, status_code=201, summary="Weighing ticket anlegen")
+@router.post("/", response_model=WeighingTicketOut, status_code=201, summary="Weighing ticket anlegen", dependencies=SCHREIBEN["LAGER"])
 async def create_weighing_ticket(
     payload: WeighingTicketCreate,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """POST Wiegescheine anlegen"""
-    tid = tenant_id or DEFAULT_TENANT
     net_weight = _validate_and_compute_weights(payload.gross_weight, payload.tare_weight, payload.net_weight)
     dq_result = evaluate_weighing_ticket_datensatz(
         _build_weighing_ticket_dq_datensatz(
@@ -246,7 +243,7 @@ async def create_weighing_ticket(
         article_group=payload.article_group,
         article_id=payload.article_id,
         notes=payload.notes,
-        tenant_id=tid,
+        tenant_id=tenant_id,
     )
     db.add(ticket)
     db.commit()
@@ -254,14 +251,33 @@ async def create_weighing_ticket(
     return WeighingTicketOut.model_validate(ticket)
 
 
-@router.put("/{ticket_id}", response_model=WeighingTicketOut, summary="Weighing ticket aktualisieren")
+@router.get("/{ticket_id}", response_model=WeighingTicketOut, summary="Weighing ticket abrufen")
+async def get_weighing_ticket(
+    ticket_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    ticket = db.query(WeighingTicket).filter(
+        WeighingTicket.id == ticket_id,
+        WeighingTicket.tenant_id == tenant_id,
+    ).first()
+    if ticket is None:
+        raise HTTPException(status_code=404, detail="Wiegeschein nicht gefunden")
+    return WeighingTicketOut.model_validate(ticket)
+
+
+@router.put("/{ticket_id}", response_model=WeighingTicketOut, summary="Weighing ticket aktualisieren", dependencies=SCHREIBEN["LAGER"])
 async def update_weighing_ticket(
     ticket_id: str,
     payload: WeighingTicketUpdate,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """PUT Wiegescheine ändern"""
-    ticket = db.query(WeighingTicket).filter(WeighingTicket.id == ticket_id).first()
+    ticket = db.query(WeighingTicket).filter(
+        WeighingTicket.id == ticket_id,
+        WeighingTicket.tenant_id == tenant_id,
+    ).first()
     if not ticket:
         raise HTTPException(404, "Weighing ticket not found")
     data = payload.model_dump(exclude_unset=True)
@@ -297,20 +313,25 @@ async def update_weighing_ticket(
     return WeighingTicketOut.model_validate(ticket)
 
 
-@router.post("/{ticket_id}/allocate-contract", response_model=WeighingTicketContractAllocationOut, status_code=201, summary="Ticket to contract zuweisen")
+@router.post("/{ticket_id}/allocate-contract", response_model=WeighingTicketContractAllocationOut, status_code=201, summary="Ticket to contract zuweisen", dependencies=SCHREIBEN["LAGER"])
 async def allocate_ticket_to_contract(
     ticket_id: str,
     payload: WeighingTicketContractAllocationRequest,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    ticket = db.query(WeighingTicket).filter(WeighingTicket.id == ticket_id).first()
+    ticket = db.query(WeighingTicket).filter(
+        WeighingTicket.id == ticket_id,
+        WeighingTicket.tenant_id == tenant_id,
+    ).first()
     if not ticket:
         raise HTTPException(status_code=404, detail="Weighing ticket not found")
-    contract = db.query(AgrarContract).filter(AgrarContract.id == payload.contract_id).first()
+    contract = db.query(AgrarContract).filter(
+        AgrarContract.id == payload.contract_id,
+        AgrarContract.tenant_id == tenant_id,
+    ).first()
     if not contract:
         raise HTTPException(status_code=404, detail="Contract not found")
-    if ticket.tenant_id != contract.tenant_id:
-        raise HTTPException(status_code=400, detail="Ticket and contract tenant mismatch")
     if contract.status in {"cancelled", "fulfilled"}:
         raise HTTPException(status_code=400, detail=f"Contract cannot be allocated in status {contract.status}")
 

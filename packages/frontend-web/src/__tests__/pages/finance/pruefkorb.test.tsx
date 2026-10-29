@@ -49,7 +49,7 @@ describe('PruefkorbPage', () => {
   })
 
   it('zeigt die Arbeitsliste aus der ScreenDefinition und hält die Bewertung über den Kommandoweg fest', async () => {
-    post.mockResolvedValue({ data: { id: 'befund-1', status: 'geprueft' } })
+    post.mockResolvedValue({ data: { success: true, summary: 'Befund bewertet.' } })
     render(<PruefkorbPage />)
     expect(screen.getByTestId('native-worklist')).toHaveAttribute('data-screen-id', 'finance/pruefkorb')
 
@@ -61,8 +61,9 @@ describe('PruefkorbPage', () => {
     await userEvent.type(screen.getByLabelText('Bewertung'), 'Zweite Rechnung ist die Korrektur')
     await userEvent.click(speichern)
     await waitFor(() =>
-      expect(post).toHaveBeenCalledWith('/api/v1/kontrolle/befunde/befund-1/pruefung', {
+      expect(post).toHaveBeenCalledWith('/api/v1/kontrolle/befunde/befund-1/actions/pruefen', {
         note: 'Zweite Rechnung ist die Korrektur',
+        _idempotencyKey: expect.any(String),
       }),
     )
     expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: ['finance/pruefkorb'] })
@@ -70,7 +71,8 @@ describe('PruefkorbPage', () => {
   })
 
   it('zeigt den Grund des Servers, wenn die Bewertung abgelehnt wird, und lässt den Dialog offen', async () => {
-    post.mockRejectedValue({ response: { data: { detail: 'Wer gebucht hat, prüft den Befund nicht selbst.' } } })
+    // Fachliche Ablehnung des Kommando-Wegs: HTTP 200, success=false.
+    post.mockResolvedValue({ data: { success: false, error: 'Wer gebucht hat, prüft den Befund nicht selbst.' } })
     render(<PruefkorbPage />)
     await userEvent.click(screen.getByTestId('finanz-pruefkorb'))
     await userEvent.type(await screen.findByLabelText('Bewertung'), 'Geprüft')

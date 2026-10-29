@@ -60,6 +60,11 @@ class SSEHub:
         """Get active connection count for channel"""
         return len(self._channels.get((tenant_id, channel), set()))
 
+    async def ping(self) -> None:
+        """Probe the hub lock without accessing any tenant's subscriptions."""
+        async with self._lock:
+            pass
+
 
 # Global SSE-Hub
 sse_hub = SSEHub()

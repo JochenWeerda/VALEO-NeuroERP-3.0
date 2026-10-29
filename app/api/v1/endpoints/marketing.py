@@ -11,6 +11,7 @@ from app.domains.operations.models import MarketingKampagneEntry
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.marketing_schemas import MarketingOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/marketing", tags=["Marketing"])
@@ -135,7 +136,7 @@ class MarketingKampagneUpdate(BaseModel):
 from starlette.responses import Response
 
 
-@router.post("/kampagnen", response_model=MarketingOut, status_code=201, summary="Kampagne anlegen")
+@router.post("/kampagnen", response_model=MarketingOut, status_code=201, summary="Kampagne anlegen", dependencies=SCHREIBEN["CRM"])
 async def create_kampagne(
     body: MarketingKampagneCreate,
     db: Session = Depends(get_db),
@@ -165,7 +166,7 @@ async def create_kampagne(
     }
 
 
-@router.put("/kampagnen/{kampagne_id}", response_model=MarketingOut, summary="Kampagne aktualisieren")
+@router.put("/kampagnen/{kampagne_id}", response_model=MarketingOut, summary="Kampagne aktualisieren", dependencies=SCHREIBEN["CRM"])
 async def update_kampagne(
     kampagne_id: int,
     body: MarketingKampagneUpdate,
@@ -196,7 +197,7 @@ async def update_kampagne(
     }
 
 
-@router.delete("/kampagnen/{kampagne_id}", response_class=Response, status_code=204, response_model=None, summary="Kampagne löschen")
+@router.delete("/kampagnen/{kampagne_id}", response_class=Response, status_code=204, response_model=None, summary="Kampagne löschen", dependencies=SCHREIBEN["CRM"])
 async def delete_kampagne(
     kampagne_id: int,
     db: Session = Depends(get_db),

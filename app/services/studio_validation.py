@@ -23,10 +23,17 @@ from pathlib import Path
 from typing import Any
 
 import yaml
+import json
 
 _CONFIG_PATH = Path(__file__).resolve().parents[2] / "config" / "studio_data_sources.yaml"
 
 _DANGER_RANK = {"safe": 0, "moderate": 1, "high": 2, "critical": 3}
+_DOCUMENT_TRANSPORT_FIELDS = ("commandEndpoint", "method", "commandBinding", "kommando", "permission",
+                              "enabledWhen", "inputFields", "folgebelegart")
+_DOCUMENT_POLICY_FIELDS = (*_DOCUMENT_TRANSPORT_FIELDS, "dangerLevel", "forbiddenForAgents",
+                           "requiresConfirmation", "auditReasonRequired", "humanApprovalRequired",
+                           "requiresHumanApproval", "disabled")
+
 
 
 class StudioConfigError(RuntimeError):
@@ -38,6 +45,15 @@ def load_studio_catalog() -> dict[str, Any]:
     if not _CONFIG_PATH.exists():
         raise StudioConfigError(f"Studio-Katalog fehlt: {_CONFIG_PATH}")
     data = yaml.safe_load(_CONFIG_PATH.read_text(encoding="utf-8")) or {}
+    from app.services.studio_entity_contracts import registrations
+    from app.services.studio_entity_compiler import compile_entity
+    for entry in registrations(data):
+        generated = json.loads(compile_entity(entry.spec, catalog_only=True)['files']['catalog.json'])
+        data.setdefault('data_sources', []).extend(generated['data_sources'])
+        for action in generated['command_actions']:
+            action['disabled'] = not entry.writes_enabled
+            action['forbiddenForAgents'] = not bool(entry.agent_roles)
+            data.setdefault('command_actions', []).append(action)
     actions = {a["key"]: a for a in data.get("command_actions", []) if a.get("key")}
     data_sources = list(data.get("data_sources") or [])
     endpoints = {ds["endpoint"] for ds in data_sources if ds.get("endpoint")}
@@ -69,6 +85,38 @@ def _iter_actions(definition: dict[str, Any]):
                 yield from actions if isinstance(actions, list) else [None]
 
 
+def _bound_document_template(definition):
+    """A pinned origin never grants an unregistered or weakened current command."""
+    from app.core.document_screen_versions import document_definition
+    from app.core.screen_definitions_beleg import build_beleg_screen_definition
+    from app.core.screen_definitions import _with_meridian_action_contract
+    from app.core.studio_release import definition_hash
+    binding = definition["documentVariant"]
+    if not isinstance(binding, dict):
+        raise ValueError("document_binding_not_an_object")
+    original = _with_meridian_action_contract(document_definition(
+        binding["variantId"], binding["variantVersion"], expected=binding))
+    current = _with_meridian_action_contract(build_beleg_screen_definition(binding["variantId"]))
+    if (definition.get("domain") != original["domain"]
+            or definition_hash(definition.get("variant")) != definition_hash(original["variant"])
+            or definition_hash(original["variant"]) != definition_hash(current["variant"])):
+        raise ValueError("document_variant_changed")
+    old_actions = {action["key"]: action for action in _iter_actions(original)}
+    new_actions = {action["key"]: action for action in _iter_actions(current)}
+    if set(old_actions) != set(new_actions) or definition_hash(original["dataSources"]) != definition_hash(current["dataSources"]):
+        raise ValueError("document_policy_changed")
+    if definition_hash(original.get('creation')) != definition_hash(current.get('creation')):
+        raise ValueError('document_creation_policy_changed')
+    if definition_hash(definition.get('creation')) != definition_hash(original.get('creation')):
+        raise ValueError('document_creation_changed')
+    for key, action in old_actions.items():
+        previous = {field: action.get(field) for field in _DOCUMENT_POLICY_FIELDS}
+        registered = {field: new_actions[key].get(field) for field in _DOCUMENT_POLICY_FIELDS}
+        if definition_hash(previous) != definition_hash(registered):
+            raise ValueError("document_command_policy_changed")
+    return original
+
+
 def validate_studio_draft(
     definition: dict[str, Any],
     *,
@@ -82,7 +130,9 @@ def validate_studio_draft(
     """
     cat = catalog or load_studio_catalog()
     catalog_actions: dict[str, Any] = cat["actions"]
-    violations: list[str] = []
+    from app.services.studio_list_contracts import validate_list_experience
+    from app.services.studio_catalog_contracts import validate_flow_spine_catalog
+    violations: list[str] = validate_list_experience(definition) + validate_flow_spine_catalog(definition)
 
     # ── Struktur (Minimalkontrakt) ───────────────────────────────────────────
     for req in ("schemaVersion", "id", "domain", "mode", "title"):
@@ -95,6 +145,18 @@ def validate_studio_draft(
     if not isinstance(screen_id, str):
         violations.append("screen_id_muss_text_sein")
         screen_id = ""
+
+    document_template = None
+    binding = definition.get("documentVariant")
+    if binding is not None:
+        try:
+            document_template = _bound_document_template(definition)
+        except (ValueError, KeyError, TypeError, AttributeError):
+            violations.append("belegvariantenbindung_ungueltig")
+    if document_template is not None:
+        # Scoped projection of the existing immutable template and live registry,
+        # not a second global command/permission allowlist.
+        catalog_actions = {action["key"]: action for action in _iter_actions(document_template)}
 
     # ── Namensraum ───────────────────────────────────────────────────────────
     if screen_id and not screen_id.startswith("tenant/"):
@@ -113,7 +175,32 @@ def validate_studio_draft(
         violations.append("adapter_muss_native_und_an_screen_id_gebunden_sein")
 
     allowed_endpoints: set[str] = cat.get("data_source_endpoints") or set()
+    if document_template is not None:
+        allowed_endpoints = {source["endpoint"] for source in document_template["dataSources"]}
+        allowed_endpoints.update(source['endpoint'] for source in (document_template.get('creation') or {}).get('dataSources', []))
+
+    write_endpoints = {action.get("commandEndpoint") for action in catalog_actions.values()}
+    write_endpoints.update((action.get("inputFlow") or {}).get("submitEndpoint")
+                           for action in catalog_actions.values())
     for node in _nodes(definition):
+        for field in ("endpoint", "summaryEndpoint", "countEndpoint"):
+            endpoint = node.get(field)
+            bound_creation_endpoint = (document_template is not None and node is definition.get('creation')
+                                       and field == 'endpoint' and endpoint == document_template.get('creation', {}).get('endpoint'))
+            if endpoint is not None and not bound_creation_endpoint and (not isinstance(endpoint, str) or endpoint not in allowed_endpoints):
+                violations.append(f"datenquelle_nicht_im_katalog:{endpoint}")
+        for field in ("reprojectEndpoint", "icsTokenEndpoint", "submitEndpoint"):
+            endpoint = node.get(field)
+            if endpoint is not None and (not isinstance(endpoint, str) or endpoint not in write_endpoints):
+                violations.append("schreibender_transport_nicht_im_katalog")
+        if node.get("creation") not in (None, {}) and (document_template is None or node is not definition):
+            violations.append("erstellung_nicht_im_studio_katalog")
+        for field in ("rowRouteTemplate", "targetRoute", "activateRouteTemplate"):
+            route = node.get(field)
+            if route is not None and (not isinstance(route, str) or not route.startswith("/")
+                    or route.startswith("//") or "\\" in route
+                    or any(ord(char) < 32 or ord(char) == 127 for char in route)):
+                violations.append("navigation_muss_lokaler_maskenpfad_sein")
         sources = node.get("dataSources", [])
         if not isinstance(sources, list):
             violations.append("datenquellen_muss_liste_sein")
@@ -124,15 +211,14 @@ def validate_studio_draft(
             if not isinstance(source, dict):
                 violations.append("datenquelle_muss_objekt_sein")
                 continue
-            endpoint = source.get("endpoint")
-            if endpoint is not None and (not isinstance(endpoint, str) or endpoint not in allowed_endpoints):
-                violations.append(f"datenquelle_nicht_im_katalog:{endpoint}")
 
     # ── Actions ──────────────────────────────────────────────────────────────
     for action in _iter_actions(definition):
         if not isinstance(action, dict):
             violations.append("action_muss_objekt_sein")
             continue
+        if any(field in action for field in ("responseAdapter", "resultNavigationRoute", "inputPrefill")):
+            violations.append("nativer_ressourcenadapter_nicht_im_studio_katalog")
         key = action.get("key", "")
         if not isinstance(key, str):
             violations.append("action_key_muss_text_sein")
@@ -141,6 +227,15 @@ def validate_studio_draft(
         if base is None:
             violations.append(f"action_nicht_im_katalog:{key}")
             continue
+        if document_template is not None:
+            from app.core.studio_release import definition_hash
+            try:
+                given = {field: action.get(field) for field in _DOCUMENT_TRANSPORT_FIELDS}
+                required = {field: base.get(field) for field in _DOCUMENT_TRANSPORT_FIELDS}
+                if definition_hash(given) != definition_hash(required):
+                    violations.append(f"belegaktionsvertrag_geaendert:{key}")
+            except (ValueError, TypeError):
+                violations.append(f"belegaktionsvertrag_geaendert:{key}")
         # eigener/fremder commandEndpoint
         ep = action.get("commandEndpoint")
         if ep is not None and ep != base.get("commandEndpoint"):
@@ -152,7 +247,7 @@ def validate_studio_draft(
         elif _DANGER_RANK[draft_danger] < _DANGER_RANK[base["dangerLevel"]]:
             violations.append(f"action_dangerLevel_gesenkt:{key}")
         # Transport identifiers cannot select an alternative command or human form.
-        for field in ("command", "commandBinding", "inputFlow", "navigationRoute"):
+        for field in ("command", "commandBinding", "inputFlow", "navigationRoute", "download"):
             if field in action and action[field] != base.get(field):
                 violations.append(f"action_fremder_{field}:{key}")
         if action.get("method", "POST") != base.get("method", "POST"):
@@ -205,4 +300,6 @@ def validate_studio_draft(
                 if screen_action.get(ui_flag) is True and action.get(agent_flag) is not True:
                     violations.append(f"agent_action_{agent_flag}_aufgehoben:{key}")
 
+    from app.services.studio_semantic import semantic_violations
+    violations.extend(semantic_violations(definition))
     return violations

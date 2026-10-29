@@ -63,7 +63,7 @@ command_actions:
     label: Mahnen
     commandEndpoint: /api/v1/finance/open-items/{entity_id}/actions/mahnen
     dangerLevel: moderate
-    forbiddenForAgents: false
+    forbiddenForAgents: true  # Mahnen bleibt Menschen vorbehalten (MCP nur Status)
   - key: freigeben
     label: Freigeben
     commandEndpoint: /api/v1/finance/ap/invoices/{entity_id}/actions/freigeben

@@ -17,6 +17,7 @@ from ....core.tenant import get_tenant_id
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.sales_blanket_orders_schemas import SalesBlanketOrdersOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter()
@@ -161,7 +162,7 @@ async def list_blanket_orders(
     return [_row_to_blanket(dict(r)) for r in rows]
 
 
-@router.post("/", response_model=BlanketOrderOut, status_code=status.HTTP_201_CREATED, summary="Blanket order anlegen")
+@router.post("/", response_model=BlanketOrderOut, status_code=status.HTTP_201_CREATED, summary="Blanket order anlegen", dependencies=SCHREIBEN["VERKAUF"])
 async def create_blanket_order(
     payload: BlanketOrderCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -223,7 +224,7 @@ async def get_blanket_order(
     }
 
 
-@router.patch("/{order_id}", response_model=BlanketOrderOut, summary="Blanket order aktualisieren")
+@router.patch("/{order_id}", response_model=BlanketOrderOut, summary="Blanket order aktualisieren", dependencies=SCHREIBEN["VERKAUF"])
 async def update_blanket_order(
     order_id: str,
     payload: BlanketOrderUpdate,
@@ -251,7 +252,7 @@ async def update_blanket_order(
     return _row_to_blanket(_get_blanket_order(db, order_id, tenant_id))
 
 
-@router.post("/{order_id}/release", response_model=ReleaseOut, status_code=status.HTTP_201_CREATED, summary="Release anlegen")
+@router.post("/{order_id}/release", response_model=ReleaseOut, status_code=status.HTTP_201_CREATED, summary="Release anlegen", dependencies=SCHREIBEN["VERKAUF"])
 async def create_release(
     order_id: str,
     payload: ReleaseCreate,
@@ -340,7 +341,7 @@ async def get_remaining(
     )
 
 
-@router.post("/{order_id}/close", response_model=BlanketOrderOut, summary="Blanket order abschließen")
+@router.post("/{order_id}/close", response_model=BlanketOrderOut, summary="Blanket order abschließen", dependencies=SCHREIBEN["VERKAUF"])
 async def close_blanket_order(
     order_id: str,
     tenant_id: str = Depends(get_tenant_id),

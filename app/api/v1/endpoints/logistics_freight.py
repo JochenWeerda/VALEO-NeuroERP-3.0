@@ -31,6 +31,7 @@ from app.core.database import get_db
 
 from app.api.v1.schemas.base import IDResponse, TypedObjectOut
 from app.api.v1.schemas.logistics_freight_schemas import LogisticsFreightOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 logger = logging.getLogger(__name__)
@@ -175,8 +176,7 @@ def list_tariffs(
 
 
 @router.post("/freight-tariffs", status_code=201, summary="Tariff anlegen",
-    response_model=IDResponse
-)
+    response_model=IDResponse, dependencies=SCHREIBEN["LOGISTIK"])
 def create_tariff(
     body: FreightTariffIn,
     x_tenant_id: Optional[str] = Header(None),
@@ -208,8 +208,7 @@ def create_tariff(
 @router.post(
     "/freight-tariffs/{tariff_id}/cancel",
     response_model=LogisticsFreightOut,
-    summary="Fracht-Tarif stornieren (soft, Mandanten-Tarife)",
-)
+    summary="Fracht-Tarif stornieren (soft, Mandanten-Tarife)", dependencies=SCHREIBEN["LOGISTIK"])
 def cancel_tariff(
     tariff_id: str,
     body: FreightTariffCancelIn,
@@ -268,8 +267,7 @@ def cancel_tariff(
 
 
 @router.post("/freight-cost/calculate", summary="Freight berechnen",
-    response_model=LogisticsFreightOut
-)
+    response_model=LogisticsFreightOut, dependencies=SCHREIBEN["LOGISTIK"])
 def calculate_freight(
     body: FreightCalcIn,
     x_tenant_id: Optional[str] = Header(None),
@@ -346,8 +344,7 @@ class CarrierInvoiceIn(BaseModel):
 @router.post(
     "/freight-cost/carrier-invoice", response_model=TypedObjectOut,
     status_code=201,
-    summary="Spediteur-Eingangsrechnung erfassen + FiBu-Buchung (LOG-FRACHT-001)",
-)
+    summary="Spediteur-Eingangsrechnung erfassen + FiBu-Buchung (LOG-FRACHT-001)", dependencies=SCHREIBEN["LOGISTIK"])
 def create_carrier_invoice(
     body: CarrierInvoiceIn,
     x_tenant_id: Optional[str] = Header(None),

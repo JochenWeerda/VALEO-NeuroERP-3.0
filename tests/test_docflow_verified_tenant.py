@@ -13,7 +13,7 @@ from app.services.docflow_service import DocflowService
 
 ROUTES = [
     ('GET','/',None), ('POST','/',{'doc_type':'sales_offer','doc_number':'IT-rejected'}),
-    ('GET','/{id}',None), ('DELETE','/{id}',None), ('PUT','/{id}',{}),
+    ('GET','/{id}',None), ('DELETE','/{id}',None), ('PUT','/{id}',{'expected_version':1,'idempotency_key':'tenant-check-key'}),
     ('GET','/{id}/status-history',None), ('GET','/{id}/pos-compliance',None),
     ('POST','/{id}/release',{'idempotency_key':'IT-release'}),
     ('POST','/{id}/record-print',{}), ('POST','/{id}/record-export',{}),

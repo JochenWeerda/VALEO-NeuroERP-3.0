@@ -219,6 +219,9 @@ nav:
       - Einstieg: benutzerhandbuch/einstieg.md
       - Dashboard und Workflows: benutzerhandbuch/dashboard-workflows.md
       - Masken-Plattform: benutzerhandbuch/masken-plattform.md
+      - Masken im Fachgespraech: benutzerhandbuch/studio-fachdialog.md
+      - Studio-Freigabe: benutzerhandbuch/studio-freigabe.md
+      - Ernteabrechnung pruefen und genehmigen: benutzerhandbuch/ernte-abrechnung-freigabe.md
       - Wissensbasis und Kundenportal: benutzerhandbuch/wissensbasis-kundenportal.md
       - Ernteannahme: benutzerhandbuch/annahme.md
       - Agrar-Kontrakte: benutzerhandbuch/agrar-kontrakte.md
@@ -459,7 +462,11 @@ nav:
           - "ADR-081: Persistente WhatsApp-Benachrichtigungsvorbereitung": adr/adr-081-whatsapp-browser-notification-persistence.md
           - "ADR-082: Verifizierte Identitaet an den Transportgrenzen": adr/adr-082-verified-identity-transport.md
           - "ADR-083: Gemeinsame Sitzungs- und Agentengrenze": adr/adr-083-shared-session-and-agent-boundary.md
+          - "ADR-084: Migrationsplan in bestehender Studio-Historie": adr/adr-084-studio-migration-plan-history.md
+          - "ADR-085: Generierte Studio-Stammdatencommands": adr/adr-085-studio-generated-master-data.md
           - ADR-CRM-001 – CRM as Independent AI-First Bounded Context: adr/ADR-CRM-001.md
+          - Explizite Ernte-Abrechnungsregeln statt impliziter Freigrenze: adr/adr-harvest-deduction-resolver.md
+          - "ADR Studio: Fachvertraege und kontingentierte Modellinterpretation": adr/adr-studio-semantic-contracts.md
           - UIX-034 - CRM 360 Native Parity Matrix: adr/uix-034-crm360-native-parity-matrix.md
       # adr-nav:end
   - Schnittstellen:

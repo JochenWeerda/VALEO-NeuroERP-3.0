@@ -2,6 +2,7 @@ import { spawn } from "child_process";
 import { mkdirSync, writeFileSync } from "fs";
 import { fileURLToPath } from "url";
 import path from "path";
+import anmeldung from "./playwright.anmeldung.mjs";
 
 const rootDir = path.resolve(fileURLToPath(new URL("./", import.meta.url)));
 const processes = [];
@@ -114,6 +115,8 @@ export default async function globalSetup() {
     startProcess(nodeCmd, ["scripts/tmp_sse_server.js"]);
     await waitForHttp(sseUrl);
   }
+
+  await anmeldung();
 
   mkdirSync(path.dirname(pidFile), { recursive: true });
   writeFileSync(pidFile, JSON.stringify(processes.map((proc) => proc.pid).filter(Boolean)));

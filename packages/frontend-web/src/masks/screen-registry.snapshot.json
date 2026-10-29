@@ -97,6 +97,7 @@
      "key": "anmelden",
      "kind": "secondary",
      "label": "Beim Anbieter anmelden",
+     "localEffect": "navigation",
      "stubReason": "Fuehrt zur Anmeldung bei Google bzw. Microsoft fuer das geladene Postfach.",
      "zone": "header"
     },
@@ -378,11 +379,18 @@
        "command": "admin.postfachBearbeiten",
        "dangerLevel": "safe",
        "key": "bearbeiten",
-       "label": "Bearbeiten"
+       "label": "Bearbeiten",
+       "localEffect": "edit_mode"
       },
       {
        "command": "admin.postfachEntfernen",
        "dangerLevel": "high",
+       "forbiddenForAgents": true,
+       "inputFlow": {
+        "kind": "humanForm",
+        "method": "DELETE",
+        "submitEndpoint": "/api/v1/admin/postfaecher/{entity_id}"
+       },
        "key": "entfernen",
        "label": "Entfernen",
        "requiresConfirmation": true
@@ -702,7 +710,8 @@
        "command": "finance.steuerschluesselBearbeiten",
        "dangerLevel": "safe",
        "key": "bearbeiten",
-       "label": "Bearbeiten"
+       "label": "Bearbeiten",
+       "localEffect": "edit_mode"
       }
      ],
      "rowDetail": false,
@@ -861,6 +870,12 @@
          true
         ]
        },
+       "forbiddenForAgents": true,
+       "inputFlow": {
+        "kind": "humanForm",
+        "method": "DELETE",
+        "submitEndpoint": "/api/v1/fuhrpark/ausgehende-dokumente/{entity_id}"
+       },
        "key": "loeschen",
        "label": "Löschen"
       }
@@ -933,12 +948,19 @@
      "key": "liste",
      "kind": "secondary",
      "label": "Zur Liste",
+     "localEffect": "navigation",
      "stubReason": "Wechselt zur Fahrzeugliste.",
      "zone": "footer"
     },
     {
      "command": "fuhrpark.setupDrucker",
      "dangerLevel": "safe",
+     "forbiddenForAgents": true,
+     "inputFlow": {
+      "kind": "humanForm",
+      "method": "POST",
+      "submitEndpoint": "/api/v1/fuhrpark/fahrzeuge/{entity_id}/drucker-einrichten"
+     },
      "key": "drucker",
      "kind": "secondary",
      "label": "Drucker einrichten",
@@ -951,12 +973,19 @@
      "key": "drucken",
      "kind": "secondary",
      "label": "Drucken",
+     "localEffect": "print",
      "stubReason": "Druckt die Fahrzeugakte.",
      "zone": "footer"
     },
     {
      "command": "fuhrpark.reportUnfall",
      "dangerLevel": "moderate",
+     "forbiddenForAgents": true,
+     "inputFlow": {
+      "kind": "humanForm",
+      "method": "POST",
+      "submitEndpoint": "/api/v1/fuhrpark/fahrzeuge/{entity_id}/unfall-anzeige"
+     },
      "key": "unfall",
      "kind": "secondary",
      "label": "Unfall-Anzeige",
@@ -1646,6 +1675,12 @@
          true
         ]
        },
+       "forbiddenForAgents": true,
+       "inputFlow": {
+        "kind": "humanForm",
+        "method": "DELETE",
+        "submitEndpoint": "/api/v1/fuhrpark/rechnungen/{entity_id}"
+       },
        "key": "loeschen",
        "label": "Löschen"
       }
@@ -1782,6 +1817,12 @@
         "values": [
          true
         ]
+       },
+       "forbiddenForAgents": true,
+       "inputFlow": {
+        "kind": "humanForm",
+        "method": "DELETE",
+        "submitEndpoint": "/api/v1/fuhrpark/terminarten/{entity_id}"
        },
        "key": "loeschen",
        "label": "Löschen"
@@ -2020,6 +2061,7 @@
      "key": "position",
      "kind": "secondary",
      "label": "Position anlegen",
+     "localEffect": "edit_mode",
      "permission": "logistics:write",
      "zone": "footer"
     }
@@ -2158,8 +2200,15 @@
          true
         ]
        },
+       "forbiddenForAgents": true,
+       "inputFlow": {
+        "kind": "humanForm",
+        "method": "DELETE",
+        "submitEndpoint": "/api/v1/logistik/frachttabellen/{entity_id}"
+       },
        "key": "loeschen",
-       "label": "Löschen"
+       "label": "Löschen",
+       "requiresConfirmation": true
       }
      ],
      "rowDetail": false,
@@ -2240,6 +2289,7 @@
      "key": "probe",
      "kind": "primary",
      "label": "Probe berechnen",
+     "localEffect": "view",
      "permission": "logistics:read",
      "zone": "footer"
     }
@@ -2415,8 +2465,15 @@
      "rowActions": [
       {
        "dangerLevel": "moderate",
+       "forbiddenForAgents": true,
+       "inputFlow": {
+        "kind": "humanForm",
+        "method": "POST",
+        "submitEndpoint": "/api/v1/logistik/freight-tariffs/{entity_id}/cancel"
+       },
        "key": "storno",
        "label": "Stornieren",
+       "requiresConfirmation": true,
        "visibleWhen": {
         "field": "stornierbar",
         "values": [
@@ -2444,6 +2501,7 @@
      "key": "dispo",
      "kind": "secondary",
      "label": "Dispo-Arbeitsraum",
+     "localEffect": "navigation",
      "stubReason": "Oeffnet den bestehenden Dispo-Arbeitsraum.",
      "zone": "header"
     },
@@ -2453,6 +2511,7 @@
      "key": "aufloesen",
      "kind": "secondary",
      "label": "Auflösen",
+     "localEffect": "view",
      "stubReason": "Liest den Lieferschein und setzt das Ziel.",
      "zone": "footer"
     },
@@ -2656,17 +2715,25 @@
        "command": "tour.openLoading",
        "dangerLevel": "safe",
        "key": "beladung",
-       "label": "Beladung"
+       "label": "Beladung",
+       "localEffect": "navigation"
       },
       {
        "command": "tour.showHints",
        "dangerLevel": "safe",
        "key": "hinweise",
-       "label": "Hinweise"
+       "label": "Hinweise",
+       "localEffect": "view"
       },
       {
        "command": "tour.cancel",
        "dangerLevel": "moderate",
+       "forbiddenForAgents": true,
+       "inputFlow": {
+        "kind": "humanForm",
+        "method": "POST",
+        "submitEndpoint": "/api/v1/logistik/tours/{entity_id}/cancel"
+       },
        "key": "storno",
        "label": "Stornieren",
        "requiresConfirmation": true,
@@ -2820,6 +2887,12 @@
     {
      "command": "versand.saveProfile",
      "dangerLevel": "safe",
+     "forbiddenForAgents": true,
+     "inputFlow": {
+      "kind": "humanForm",
+      "method": "POST",
+      "submitEndpoint": "/api/v1/logistik/versand/profile"
+     },
      "key": "profil",
      "kind": "primary",
      "label": "Profil speichern",
@@ -2829,6 +2902,12 @@
     {
      "command": "versand.saveAvis",
      "dangerLevel": "safe",
+     "forbiddenForAgents": true,
+     "inputFlow": {
+      "kind": "humanForm",
+      "method": "POST",
+      "submitEndpoint": "/api/v1/logistik/versand/avise"
+     },
      "key": "avis",
      "kind": "secondary",
      "label": "Avis speichern",
@@ -2990,6 +3069,12 @@
            true
           ]
          },
+         "forbiddenForAgents": true,
+         "inputFlow": {
+          "kind": "humanForm",
+          "method": "DELETE",
+          "submitEndpoint": "/api/v1/logistik/versand/profile/{entity_id}"
+         },
          "key": "loeschen",
          "label": "Löschen"
         }
@@ -3102,6 +3187,12 @@
     {
      "command": "personal.erteileEinwilligung",
      "dangerLevel": "safe",
+     "forbiddenForAgents": true,
+     "inputFlow": {
+      "kind": "humanForm",
+      "method": "POST",
+      "submitEndpoint": "/api/v1/personal/applications/{entity_id}/einwilligung"
+     },
      "key": "erteilen",
      "kind": "primary",
      "label": "Einwilligung erteilen",
@@ -3111,6 +3202,12 @@
     {
      "command": "personal.widerrufeEinwilligung",
      "dangerLevel": "moderate",
+     "forbiddenForAgents": true,
+     "inputFlow": {
+      "kind": "humanForm",
+      "method": "DELETE",
+      "submitEndpoint": "/api/v1/personal/applications/{entity_id}/einwilligung"
+     },
      "key": "widerrufen",
      "kind": "secondary",
      "label": "Einwilligung widerrufen",
@@ -3124,6 +3221,7 @@
      "key": "zurueck",
      "kind": "secondary",
      "label": "Zu den Bewerbungen",
+     "localEffect": "navigation",
      "stubReason": "Wechselt zur Bewerbungsliste.",
      "zone": "footer"
     },
@@ -3133,6 +3231,7 @@
      "key": "erklaerungen",
      "kind": "secondary",
      "label": "Einwilligungserklärungen",
+     "localEffect": "navigation",
      "stubReason": "Oeffnet die Fassungen der Einwilligungserklaerung.",
      "zone": "footer"
     }
@@ -3386,6 +3485,7 @@
      "key": "erklaerungen",
      "kind": "secondary",
      "label": "Einwilligungserklärungen",
+     "localEffect": "navigation",
      "stubReason": "Oeffnet die Fassungen der Einwilligungserklaerung.",
      "zone": "footer"
     }
@@ -3497,7 +3597,8 @@
        "command": "personal.openEinwilligung",
        "dangerLevel": "safe",
        "key": "einwilligung",
-       "label": "Einwilligung"
+       "label": "Einwilligung",
+       "localEffect": "navigation"
       },
       {
        "command": "personal.deleteBewerbung",
@@ -3507,6 +3608,12 @@
         "values": [
          true
         ]
+       },
+       "forbiddenForAgents": true,
+       "inputFlow": {
+        "kind": "humanForm",
+        "method": "DELETE",
+        "submitEndpoint": "/api/v1/personal/applications/{entity_id}"
        },
        "key": "loeschen",
        "label": "Löschen"
@@ -3801,6 +3908,12 @@
          true
         ]
        },
+       "forbiddenForAgents": true,
+       "inputFlow": {
+        "kind": "humanForm",
+        "method": "DELETE",
+        "submitEndpoint": "/api/v1/training/onboarding/runs/{entity_id}"
+       },
        "key": "loeschen",
        "label": "Löschen"
       }
@@ -3976,6 +4089,12 @@
          true
         ]
        },
+       "forbiddenForAgents": true,
+       "inputFlow": {
+        "kind": "humanForm",
+        "method": "DELETE",
+        "submitEndpoint": "/api/v1/training/qualifications/{entity_id}"
+       },
        "key": "loeschen",
        "label": "Löschen"
       }
@@ -4131,6 +4250,12 @@
          true
         ]
        },
+       "forbiddenForAgents": true,
+       "inputFlow": {
+        "kind": "humanForm",
+        "method": "DELETE",
+        "submitEndpoint": "/api/v1/training/assignments/{entity_id}"
+       },
        "key": "loeschen",
        "label": "Löschen"
       }
@@ -4154,6 +4279,7 @@
      "key": "position",
      "kind": "secondary",
      "label": "Position übernehmen",
+     "localEffect": "edit_mode",
      "stubReason": "Stellt die Positionseingabe in die Positionsliste der Maske; gespeichert wird erst mit Speichern.",
      "zone": "header"
     },
@@ -4489,7 +4615,8 @@
        "command": "sales.gutschriftPositionEntfernen",
        "dangerLevel": "safe",
        "key": "entfernen",
-       "label": "Entfernen"
+       "label": "Entfernen",
+       "localEffect": "edit_mode"
       }
      ],
      "rowDetail": false,
@@ -4594,7 +4721,8 @@
        "command": "sales.gutschriftLaden",
        "dangerLevel": "safe",
        "key": "laden",
-       "label": "Öffnen"
+       "label": "Öffnen",
+       "localEffect": "view"
       }
      ],
      "rowDetail": false,
@@ -4654,7 +4782,8 @@
        "command": "sales.gutschriftVorschlagPruefen",
        "dangerLevel": "safe",
        "key": "pruefen",
-       "label": "Prüfen"
+       "label": "Prüfen",
+       "localEffect": "view"
       }
      ],
      "rowDetail": false,
@@ -4687,6 +4816,12 @@
    "actions": [
     {
      "dangerLevel": "safe",
+     "forbiddenForAgents": true,
+     "inputFlow": {
+      "kind": "humanForm",
+      "method": "POST",
+      "submitEndpoint": "/api/v1/tours"
+     },
      "key": "neu",
      "kind": "primary",
      "label": "Neue Strecke",
@@ -4770,8 +4905,15 @@
      "rowActions": [
       {
        "dangerLevel": "moderate",
+       "forbiddenForAgents": true,
+       "inputFlow": {
+        "kind": "humanForm",
+        "method": "DELETE",
+        "submitEndpoint": "/api/v1/tours/{entity_id}"
+       },
        "key": "loeschen",
-       "label": "Löschen"
+       "label": "Löschen",
+       "requiresConfirmation": true
       }
      ],
      "rowHeight": 36,
@@ -5305,6 +5447,7 @@
      "key": "verfuegbar",
      "kind": "secondary",
      "label": "Verfügbaren Fahrer öffnen",
+     "localEffect": "navigation",
      "stubReason": "Oeffnet den ersten verfuegbaren Fahrer.",
      "zone": "footer"
     },
@@ -5314,6 +5457,7 @@
      "key": "touren",
      "kind": "secondary",
      "label": "Tourenplanung",
+     "localEffect": "navigation",
      "stubReason": "Wechselt in die Tourenplanung.",
      "zone": "footer"
     },
@@ -5323,6 +5467,7 @@
      "key": "dokumente",
      "kind": "secondary",
      "label": "Dokumente",
+     "localEffect": "navigation",
      "stubReason": "Oeffnet die Dokumentenablage.",
      "zone": "footer"
     },
@@ -5332,6 +5477,7 @@
      "key": "export",
      "kind": "secondary",
      "label": "Export",
+     "localEffect": "download",
      "stubReason": "Exportiert die sichtbare Fahrerliste.",
      "zone": "footer"
     }

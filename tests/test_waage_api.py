@@ -21,6 +21,7 @@ from app.main import app
 from conftest import skip_if_db_unavailable
 from app.api.v1.endpoints.waage import _serialize_value, _to_list, router as waage_router
 from app.core.database import get_db
+from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
 
 _NOW = datetime(2026, 5, 5, 8, 0, tzinfo=timezone.utc)
 
@@ -131,6 +132,7 @@ def _client_ctx(waagen=None, wiegungen=None):
          _mock_patch("app.api.v1.endpoints.waage._to_dict", _mock_to_dict):
         _app = FastAPI()
         _app.include_router(waage_router)
+        ersetze_nutzer(_app, *ALLE_FACHROLLEN)  # Schreibwege pruefen die Bereichsrolle (19.10.2026)
         _app.dependency_overrides[get_db] = lambda: MagicMock()
         yield TestClient(_app), wgr
 
@@ -145,6 +147,7 @@ def _client(waagen=None, wiegungen=None):
     patcher_wg.start()
     _app = FastAPI()
     _app.include_router(waage_router)
+    ersetze_nutzer(_app, *ALLE_FACHROLLEN)  # Schreibwege pruefen die Bereichsrolle (19.10.2026)
     _app.dependency_overrides[get_db] = lambda: MagicMock()
     c = TestClient(_app)
     # Stop after client creation so patches stay active through requests made on c

@@ -21,37 +21,37 @@
     "realm": [
       {
         "name": "admin",
-        "description": "System Administrator - Full Access",
+        "description": "Technische Administration",
         "composite": false
       },
       {
         "name": "user",
-        "description": "Standard User - Basic Access",
+        "description": "Angemeldeter Standardnutzer",
         "composite": false
       },
       {
         "name": "auditor",
-        "description": "Auditor - Read-Only Access + Audit Logs",
+        "description": "Pruefender Zugang",
         "composite": false
       },
       {
         "name": "finance_manager",
-        "description": "Finance Manager - Finance Module Access",
+        "description": "Historische Finanzrolle",
         "composite": false
       },
       {
         "name": "inventory_manager",
-        "description": "Inventory Manager - Inventory Module Access",
+        "description": "Historische Lagerrolle",
         "composite": false
       },
       {
         "name": "crm_manager",
-        "description": "CRM Manager - CRM Module Access",
+        "description": "Historische CRM-Rolle",
         "composite": false
       },
       {
         "name": "AGRAR_ADMIN",
-        "description": "Agrar: leiten: freigeben, loeschen, abschliessen"
+        "description": "Agrar: fachliche Leitung; Freigaben und Abschluesse nur gemaess Aktionsvertrag, keine technische Administration"
       },
       {
         "name": "AGRAR_BEARBEITEN",
@@ -63,7 +63,7 @@
       },
       {
         "name": "CRM_ADMIN",
-        "description": "Vertrieb und Kundenpflege: leiten: freigeben, loeschen, abschliessen"
+        "description": "Vertrieb und Kundenpflege: fachliche Leitung; Freigaben und Abschluesse nur gemaess Aktionsvertrag, keine technische Administration"
       },
       {
         "name": "CRM_BEARBEITEN",
@@ -75,7 +75,7 @@
       },
       {
         "name": "EINKAUF_ADMIN",
-        "description": "Einkauf: leiten: freigeben, loeschen, abschliessen"
+        "description": "Einkauf: fachliche Leitung; Freigaben und Abschluesse nur gemaess Aktionsvertrag, keine technische Administration"
       },
       {
         "name": "EINKAUF_BEARBEITEN",
@@ -87,7 +87,7 @@
       },
       {
         "name": "FINANCE_ADMIN",
-        "description": "Finanzbuchhaltung: leiten: freigeben, loeschen, abschliessen"
+        "description": "Finanzbuchhaltung: fachliche Leitung; Freigaben und Abschluesse nur gemaess Aktionsvertrag, keine technische Administration"
       },
       {
         "name": "FINANCE_BEARBEITEN",
@@ -99,7 +99,7 @@
       },
       {
         "name": "FUTTERMITTEL_ADMIN",
-        "description": "Futtermittel: leiten: freigeben, loeschen, abschliessen"
+        "description": "Futtermittel: fachliche Leitung; Freigaben und Abschluesse nur gemaess Aktionsvertrag, keine technische Administration"
       },
       {
         "name": "FUTTERMITTEL_BEARBEITEN",
@@ -111,7 +111,7 @@
       },
       {
         "name": "HARVEST_ADMIN",
-        "description": "Ernteannahme: leiten: freigeben, loeschen, abschliessen"
+        "description": "Ernteannahme: fachliche Leitung; Freigaben und Abschluesse nur gemaess Aktionsvertrag, keine technische Administration"
       },
       {
         "name": "HARVEST_BEARBEITEN",
@@ -131,7 +131,7 @@
       },
       {
         "name": "KONTRAKT_ADMIN",
-        "description": "Kontrakte: leiten: freigeben, loeschen, abschliessen"
+        "description": "Kontrakte: fachliche Leitung; Freigaben und Abschluesse nur gemaess Aktionsvertrag, keine technische Administration"
       },
       {
         "name": "KONTRAKT_BEARBEITEN",
@@ -147,7 +147,11 @@
       },
       {
         "name": "LAGER_ADMIN",
-        "description": "Lager: leiten: freigeben, loeschen, abschliessen"
+        "description": "Lager: fachliche Leitung; Freigaben und Abschluesse nur gemaess Aktionsvertrag, keine technische Administration"
+      },
+      {
+        "name": "LAGER_BEARBEITEN",
+        "description": "Lager: anlegen und aendern"
       },
       {
         "name": "LAGER_LESEN",
@@ -155,7 +159,7 @@
       },
       {
         "name": "PERSONAL_ADMIN",
-        "description": "Personal: leiten: freigeben, loeschen, abschliessen"
+        "description": "Personal: fachliche Leitung; Freigaben und Abschluesse nur gemaess Aktionsvertrag, keine technische Administration"
       },
       {
         "name": "PERSONAL_BEARBEITEN",
@@ -171,7 +175,7 @@
       },
       {
         "name": "SALES_ADMIN",
-        "description": "Verkauf: leiten: freigeben, loeschen, abschliessen"
+        "description": "Verkauf: fachliche Leitung; Freigaben und Abschluesse nur gemaess Aktionsvertrag, keine technische Administration"
       },
       {
         "name": "SALES_BEARBEITEN",
@@ -187,7 +191,7 @@
       },
       {
         "name": "manager",
-        "description": "Explicit management role; never assigned by default"
+        "description": "Historische Managementrolle ohne eigene Rechte; nicht neu vergeben"
       }
     ]
   },
@@ -217,6 +221,70 @@
         "http://localhost:3001"
       ],
       "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
+      "defaultClientScopes": [
+        "email",
+        "profile",
+        "roles"
+      ],
+      "protocolMappers": [
+        {
+          "name": "erp-api-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "valeo-neuro-erp-backend",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        },
+        {
+          "name": "erp-identity-type",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "identity_type",
+            "claim.name": "identity_type",
+            "jsonType.label": "String",
+            "access.token.claim": "true",
+            "id.token.claim": "true"
+          }
+        },
+        {
+          "name": "erp-permissions",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "erp_scopes",
+            "claim.name": "erp_scopes",
+            "jsonType.label": "String",
+            "multivalued": "true",
+            "access.token.claim": "true",
+            "id.token.claim": "true"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "valeo-neuro-erp-cli",
+      "name": "VALEO NeuroERP CLI",
+      "description": "Kommandozeile fuer Maskenaktionen; nur Device-Anmeldung der Person, kein Dienstkonto",
+      "enabled": true,
+      "publicClient": true,
+      "protocol": "openid-connect",
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "authorizationServicesEnabled": false,
+      "redirectUris": [],
+      "webOrigins": [],
+      "attributes": {
+        "oauth2.device.authorization.grant.enabled": "true",
         "pkce.code.challenge.method": "S256"
       },
       "defaultClientScopes": [

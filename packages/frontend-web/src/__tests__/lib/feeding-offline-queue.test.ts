@@ -73,7 +73,7 @@ describe('FeedingOfflineQueue', () => {
 
     expect(summary.sent).toBe(0)
     expect(summary.remaining).toBe(2)
-    expect(sender).toHaveBeenCalledTimes(1), 'weiter offline: nicht jeden Eintrag anrennen'
+    expect(sender, 'weiter offline: nicht jeden Eintrag anrennen').toHaveBeenCalledTimes(1)
     expect(queue.pending().map((item) => item.status)).toEqual(['pending', 'pending'])
   })
 

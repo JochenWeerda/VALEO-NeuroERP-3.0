@@ -7,10 +7,11 @@
  * GMP+/VLOG-Anforderungen fuer Futtermittel; EU-VO 178/2002 Rueckverfolgbarkeit.
  */
 import { test, expect, request } from '@playwright/test'
+import { apiToken, E2E_MANDANT } from '../../helpers/anmeldung'
 
 const BASE = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:8000'
-const TENANT = 'e2e-qs-001'
-const AUTH = process.env.API_DEV_TOKEN ?? 'dev-token'
+const TENANT = E2E_MANDANT
+const AUTH = apiToken()
 const HEADERS = {
   'X-Tenant-ID': TENANT,
   'Content-Type': 'application/json',
@@ -279,11 +280,11 @@ test.describe.serial('QS/Reklamation — Labor bis CAPA Prozesskette @smoke @e2e
 // SEMANTIC-E2E-STRICT-001 — @critical Kern-Pfad QS
 test.describe('QS @critical Kern-Pfad', () => {
   const BASE_CRIT = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:8000'
-  const TENANT_CRIT = 'e2e-crit-qs'
+  const TENANT_CRIT = E2E_MANDANT
   const HEADERS_CRIT = {
     'X-Tenant-ID': TENANT_CRIT,
     'Content-Type': 'application/json',
-    'Authorization': `Bearer ${process.env.API_DEV_TOKEN ?? 'dev-token'}`,
+    'Authorization': `Bearer ${apiToken()}`,
   }
 
   test('QS @critical — QS-Worklist-Endpunkt antwortet (Health)', async () => {

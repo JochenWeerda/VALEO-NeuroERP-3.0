@@ -107,10 +107,21 @@ class TestApInvoiceEndpoints:
         assert resp.status_code == 404
 
     def test_delete_ap_invoice_404(self, client, auth_headers):
-        resp = client.delete(
-            "/api/v1/finance/ap/invoices/nonexistent-invoice",
-            headers=auth_headers,
-        )
+        # Loeschen verlangt seit 20.10.2026 eine gepruefte Person mit Freigaberolle; der Dev-Token traegt keine.
+        from app.auth.deps import get_current_user
+        from app.auth.finance_roles import FINANCE_APPROVAL_ROLES
+        from app.core.security import require_bearer_token
+        from testgrenze import ersetze_bearer
+
+        ersetze_bearer(client.app, *FINANCE_APPROVAL_ROLES)
+        try:
+            resp = client.delete(
+                "/api/v1/finance/ap/invoices/nonexistent-invoice",
+                headers=auth_headers,
+            )
+        finally:
+            client.app.dependency_overrides.pop(require_bearer_token, None)
+            client.app.dependency_overrides.pop(get_current_user, None)
         skip_if_db_unavailable(resp)
         assert resp.status_code == 404
 

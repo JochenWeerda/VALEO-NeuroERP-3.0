@@ -507,38 +507,11 @@ def test_nebenkosten_preview_rule_count(client):
     assert data["rule_count"] == 4  # Standard-Regelset hat 4 Regeln
 
 
-def test_intrastat_meldungen_list_empty(client):
-    resp = client.get(
-        "/api/v1/compliance/intrastat/meldungen",
-        headers={"X-Tenant-ID": "tenant-test"},
-    )
-    assert resp.status_code == 200
-    data = resp.json()
-    assert "meldungen" in data
-    assert data["schema_version"] == 1
-
-
-def test_intrastat_meldungen_create(client):
-    resp = client.post(
-        "/api/v1/compliance/intrastat/meldungen",
-        json={"meldung_id": "INTRA-API-001", "meldezeitraum": "2026-03", "richtung": "EINGANG"},
-        headers={"X-Tenant-ID": "tenant-test"},
-    )
-    assert resp.status_code == 201
-    data = resp.json()
-    assert "meldung" in data
-    assert "validation_result" in data
-    assert data["schema_version"] == 1
-    assert data["validation_result"]["valid"] is True
-
-
-def test_intrastat_validate_endpoint(client):
-    resp = client.get(
-        "/api/v1/compliance/intrastat/meldungen/INTRA-STUB/validate",
-        headers={"X-Tenant-ID": "tenant-test"},
-    )
-    assert resp.status_code == 200
-    data = resp.json()
-    assert data["valid"] is True
-    assert data["schema_version"] == INTRASTAT_SCHEMA_VERSION
-    assert "violations" in data
+def test_intrastat_platzhalterwege_sind_entfernt(client):
+    """Die Wege unter /compliance/intrastat legten erfundene Beispielmeldungen an und prueften jede Kennung als
+    gueltig (20.10.2026 entfernt; Intrastat liegt unter /intrastat mit Mandant und Tabelle)."""
+    for methode, pfad in (("get", "/api/v1/compliance/intrastat/meldungen"),
+                          ("post", "/api/v1/compliance/intrastat/meldungen"),
+                          ("get", "/api/v1/compliance/intrastat/meldungen/INTRA-STUB/validate")):
+        antwort = getattr(client, methode)(pfad, headers={"X-Tenant-ID": "tenant-test"})
+        assert antwort.status_code in (404, 405), (pfad, antwort.status_code)

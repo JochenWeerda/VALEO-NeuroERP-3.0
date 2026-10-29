@@ -17,7 +17,7 @@ def test_bound_acceptance_cannot_be_cancelled_or_released_again(status, invoice)
     db = MagicMock()
     svc = HarvestAcceptanceService(db,"own")
     obj = SimpleNamespace(release_status=status, invoice_id=invoice)
-    svc._get_or_raise = lambda _: obj
+    svc._get_or_raise = lambda _, **kwargs: obj
     with pytest.raises(ValidationFailedError):
         svc.cancel("acceptance", "unsafe correction")
     with pytest.raises(ValidationFailedError):

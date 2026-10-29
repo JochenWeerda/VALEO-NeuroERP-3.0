@@ -318,3 +318,116 @@ Die zentrale Tailwind-Kompilation scannt explizit `src/` und `index.html`.
 So bleiben Klassen der Renderer und Seiten vollstaendig erfasst, waehrend
 Workspace-Artefakte und der Startordner den CSS-Build nicht ausweiten.
 Die acht WCAG-Kernrouten bestehen nach dieser Begrenzung (2026-10-05).
+
+
+## Studio-Fachdialog und interaktive Vorschau (2026-10-15)
+
+Das Studio erzeugt seine manuelle Getreide-Kalkulationsprobe als normale ScreenDefinition. Fachsprachlicher Katalog und optional kontingentiertes Modell liefern Vorschlaege; der Server bestimmt allein die zulaessigen Vertragsfelder. Optionale Felder lassen sich ueber Fachbezeichnungen auswaehlen, Pflichtfelder bleiben verbindlich. Freie technische feld_N-Spalten wurden aus der Bedienung entfernt.
+
+Die Vorschau verwendet weiterhin schema-compiler, UniversalFormState und UniversalMaskRenderer. Der Host bindet ausschliesslich den bestehenden Agrar-Kalkulator an; keine zweite Masken-Engine oder nachgebaute Fachformel. Eingabeaenderungen entwerten alte Ergebnisse; verspaetete Antworten duerfen sie nicht wieder sichtbar machen. Beispieldaten enthalten nur sichtbare Felder.
+
+RenderPlan-Caching beruecksichtigt auch Fields, Tables, Tabs, Layout und Datenquellen, weil Studio-Aenderungen vor dem Speichern dieselbe ID/Version behalten. Die Referenz ist eine isolierte Kalkulationsprobe und noch keine freigegebene produktive Getreideannahme. [Abnahme und Grenzen](../quality-assurance/studio-semantic-20261015.md).
+
+## Studio-Themes und funktionale Kontraste (16.10.2026)
+
+Studio-Definitionen erben das aktive globale Theme ueber denselben UniversalMaskRenderer. Keine feste Maskenfarbe zur Reparatur eines zentralen Themefehlers einfuehren. Der regulaere Frontendvertrag studio-theme-contrast.test.ts prueft Textpaare mit mindestens 4,5:1 und aktive Eingabe-/Fokuskontraste mit mindestens 3:1, einschliesslich spezifischer Meridian-/Terra-Dunkelregeln. Dekorative Trenner bleiben davon getrennt. Browserabnahmen bleiben fuer konkrete Zustaende, Transparenz, Zoom und Layout erforderlich; Palettentests sind keine vollstaendige WCAG-Zertifizierung. Nachweis: docs/quality-assurance/studio-theme-contrast-20261016.md.
+
+## Versionsgebundene Belegvarianten (16.10.2026)
+
+Die Belegfamilie liefert Basis-/Variantenreferenzen einschliesslich Inhaltsbindung ueber ScreenDefinition, Compiler und RenderPlan bis zur zentralen Rendererwurzel. Ein Wechsel allein der Versionsbindung darf keinen alten Plan aus dem Cache liefern. Die Version beschreibt die Definition; das globale Theme bleibt zentral geerbt. Fachfremde Profilfelder und alte Arbeitsanforderungen bleiben beim Wechsel auf eine andere Maske ausgeblendet beziehungsweise werden verworfen. Nachweis und verbleibende Integrationsschritte: docs/quality-assurance/document-screen-version-binding-20261016.md.
+
+## Fachliche Beschriftung importierter Belegvarianten (16.10.2026)
+
+Der Studio-Darstellungseditor arbeitet ausschliesslich auf vorhandenen ScreenDefinition-Beschriftungen. Vorschau und Laufzeit bleiben in der zentralen Meridian-Kette; keine zweite Belegmaske. Technische Bindungen und Schutzvertraege sind nicht editierbar. 21 gezielte UI-Vertraege und Typpruefung gruen; reale SSO-/Speicher-/Wiederoeffnungspruefung und drei Desktopgroessen hell/dunkel dokumentiert. QA studio-variant-presentation-20261016.md.
+
+
+## Strukturierte Formular-Tabellen (17.10.2026)
+
+Deklarierte rowFields und tableEditing werden ueber denselben Compiler und RenderPlan bis zu FastFormRenderer/FieldRenderer gefuehrt. Der Tabellenbaustein spannt eine volle Formularzeile auf, verwendet semantische globale Themefarben und prueft zentrale Struktur-/Pflichtfeldgrenzen. Keine eigene Belegseite oder Fachberechnung. Reale isolierte StudioPreview-Referenz bei1366/1440/1920 und Hell/Dunkel abgenommen. [Nachweis und Integrationsgrenze](../quality-assurance/mask-table-input-20261017.md).
+
+## Gemeinsame Belegbearbeitung (17.10.2026)
+
+Die Belegfamilie verwendet eine gemeinsame deklarierte Tabellen-Eingabeaktion ueber ScreenDefinition, RenderPlan, nativen Dialog und zentralen Formularzustand. PUT, Vollabruf, Versionsbindung und Ergebniskontrolle sind Transportaufgaben; Rechte, Steuer, Ketten und Transaktion bleiben beim Domain-Command. Neun Varianten teilen dieses Geruest und behalten ihre Spaltenpolitik. Matrix und Abnahme: beleg-studio-variantenmatrix.md und ../quality-assurance/beleg-studio-edit-20261017.md. Keine parallele Beleg-UI oder fachliche Berechnung im Renderer.
+
+## Gemeinsame Belegneuanlage (19.10.2026)
+
+Deklarierte creation-Felder und Partnerquellen laufen durch denselben Compiler, RenderPlan, Formularzustand und Renderer. Auswahl nach Namen statt technischer Kennung, alte Auswahl beim Uebertippen invalidiert. Detailnavigation erst nach erfolgreichem Formularabschluss, damit der zentrale Ungespeichertschutz keine erfolgreiche Anlage festhaelt. Echte Buchungsabnahme hell/dunkel bei1440 dokumentiert: ../quality-assurance/beleg-studio-create-20261019.md.
+
+## AP-Freigabe 2026-10-20
+
+finance/ap-invoice.freigeben nutzt serverseitiges approval_can_decide und die gebundene
+approval_request_id aus dem Entity. Der bestehende ScreenDefinition-/RenderPlan-/Runtime-
+Pfad und zentrale Themebehandlung bleiben erhalten; keine lokale Layoutalternative.
+Menschliche Fachfreigabe und Agentensperre stehen explizit in der ScreenDefinition.
+
+
+## Studio-Migrationsplanung und Zugangsgleichheit (20.10.2026)
+
+Automatische Funktionsverdrahtung und additive Schemaartefakte werden im
+bestehenden Studio geplant. Die daraus entstehenden Masken bleiben an
+ScreenDefinition -> RenderPlan -> UniversalMaskRuntime -> UniversalMaskRenderer
+gebunden; ein generiertes Datenmodell rechtfertigt keine handgebaute Ersatzseite.
+Human-, CLI- und MCP-Bedienung mit identischen Fachrechten und Mandantengrenzen
+ist gemaess STUDIO-CHANNEL-001 Pflicht. Der neue Planer weist fehlende Nachweise
+als Blocker aus. Dieser Backend-/CLI-Meilenstein aendert keine Darstellung und
+behauptet keine neue visuelle oder allgemeine Dreikanal-Releaseabnahme.
+
+
+## Gemeinsamer Datenlesevertrag (20.10.2026)
+
+Native und Studio-Definitionen dienen nun auch dem generischen CLI-/MCP-
+Datenleseweg als fuehrende Quellenbindung. Das fuehrt kein zweites Layout oder
+handgebaute Ersatzmasken ein. Lokale Tabellenprojektionen bleiben in der
+Meridian-Laufzeit, bis deren zentrale Dreikanalgleichheit separat abgenommen ist.
+Ein bestandener Domain-Lesetest allein ist kein visueller Readinessnachweis.
+
+
+## Zentrale Tabellenprojektion (21.10.2026)
+
+Explizite GET-Quellen ohne Serverpagination laufen nun zentral ueber den
+gemeinsamen Maskendatenweg. RenderPlan und BindingPlan bleiben fuehrend; keine
+Seiten-Sonderimplementierung. Serverantworten werden nicht nochmals lokal
+gefiltert oder paginiert. Alte Tab-Endpunkte ohne Quellenbindung behalten
+ihren bisherigen Vertrag und sind damit noch nicht kanalgleich zertifiziert.
+Siehe studio-table-query-20261021.md fuer Abnahme und Begrenzungen.
+
+
+## Studio-generierte Stammdaten (2026-10-21)
+
+Entity-Vertraege erzeugen ScreenDefinitions und Aktions-Eingabefelder statt
+eigener React-Seiten. Darstellung und Theme laufen weiter zentral ueber
+RenderPlan, UniversalMaskRuntime und UniversalMaskRenderer. Fuer generierte
+Aenderungs-/Deaktivierungscommands uebermittelt die ActionRuntime die gelesene
+Version; ein fehlender Versionswert wird serverseitig abgelehnt. Deaktivierte
+Ausgaben und fehlende Fachkettenabnahme duerfen nicht als generator-ready
+Freigabe umgedeutet werden. Details: ADR-085 und Studio-Generierungs-QA.
+
+
+## Generierte Studio-Stammdaten und Rechte (21.10.2026)
+
+Entitymasken bleiben in ScreenDefinition -> RenderPlan -> UniversalMaskRuntime
+-> UniversalMaskRenderer. Aktionsrechte studio.entity.{domain}.write werden
+durch die bestehende Projektion aus dem Backend-Entityrouter gewonnen;
+Frontend und Server verwenden dieselben Bereichsrollen. Leser, andere
+Bereiche, abgelegte manager-Rolle oder ein blosser Scope erhalten kein
+Schreibrecht. Version und Erstellzeitpunkt liefern pruefbaren Listenkontext.
+Das echte Readiness-Gate und der signierte CLI-Lebenszyklus bleiben
+Freigabevoraussetzungen, keine Sonderfreigabe fuer Compiler-Ausgaben.
+Reale Theme-/Lesbarkeits-/Viewportabnahme bleibt ein eigener Nachweis vor
+einem umfassenden made-by-studio-Qualitaetsversprechen.
+
+## Deklarative Listen-Erlebnisse (28.10.2026)
+
+listExperience ist ein zentraler Vertrag der ScreenDefinition. Der Compiler
+uebernimmt die validierte Metadatenstruktur in den RenderPlan; die Runtime
+liefert gefilterte Daten vor der Seitenteilung. Gemeinsame Renderer erzeugen
+Kennzahlen und Fallhinweise. NativeListPage behandelt Export, Workflow-Resume,
+Tastatur und Zeilenaktionen; die fachliche Seite nennt nur ihre Definition.
+Damit werden weitere Listen ohne eine zweite Seitenarchitektur migrierbar.
+
+Suchfelder gelten gleichermassen in der gemeinsamen REST-/MCP-/CLI-Projektion.
+Server und Compiler pruefen Bounds und Referenzen. CSV und Kennzahlen duerfen
+keine unvollstaendige Seite als gesamten Bestand darstellen. Die aktuelle
+Reklamationsquelle benennt ihre fachliche Grenze von200 neuesten Faellen.
+Die Komponentenabnahme umfasst drei Desktop-Aufloesungen mit beiden Themes;
+Details stehen im [Abnahmenachweis](../quality-assurance/studio-functional-lists-20261028.md).

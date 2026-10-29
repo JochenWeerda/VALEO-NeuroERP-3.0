@@ -166,7 +166,7 @@ def test_create_ap_invoice_requires_supplier_before_repo_access():
     )
 
     with pytest.raises(HTTPException) as exc:
-        asyncio.run(create_ap_invoice(invoice, db=FailDB()))
+        asyncio.run(create_ap_invoice(invoice, db=FailDB(), nutzer={"sub":"verified-accountant", "roles":["FINANCE_BEARBEITEN"]}))
 
     assert exc.value.status_code == 422
     assert exc.value.detail["entity_typ"] == "APRechnung"

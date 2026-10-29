@@ -75,7 +75,7 @@ describe('versioned DocFlow transport', () => {
   })
   it('binds approvals to the server-provided ID and concrete decision', () => {
     const prepared = prepareDocflowCommand(action('approval_decide'), request('approval_decide'), opts('approval_decide'), key)
-    expect(prepared).toEqual({ url: '/api/v1/docflow/doc-1/approvals/approval-1/decision', body: { granted: true } })
+    expect(prepared).toEqual({ url: '/api/v1/docflow/doc-1/approvals/approval-1/decision', method: 'POST', body: { granted: true } })
     expect(() => prepareDocflowCommand(action('approval_decide'), { ...request('approval_decide'), approvalId: 'other' }, opts('approval_decide'), key)).toThrow('Freigabebindung')
     const response = { id: 'approval-1', action: 'post', subject_version: 7, status: 'granted' }
     expect(docflowCommandResult(action('approval_decide'), request('approval_decide'), opts('approval_decide'), response).success).toBe(true)

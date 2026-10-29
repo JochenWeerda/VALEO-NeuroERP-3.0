@@ -103,12 +103,12 @@ WEGE = {
 }
 FAELLE = [(modul, methode, weg, zugang) for modul, wege in WEGE.items() for methode, weg, zugang in wege]
 
-FINANZ_LESEN = {"FINANCE_LESEN", "FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin", "manager"}
+FINANZ_LESEN = {"FINANCE_LESEN", "FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin"}
 ERLAUBT = {
     "read": FINANZ_LESEN,
     "kontenplan": FINANZ_LESEN | {"EINKAUF_LESEN", "EINKAUF_BEARBEITEN", "EINKAUF_ADMIN", "KONTENPLAN_PFLEGE"},
     "pflege": {"KONTENPLAN_PFLEGE", "FINANCE_ADMIN", "admin"},
-    "write": {"FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin", "manager"},
+    "write": {"FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin"},
     "admin": {"FINANCE_ADMIN", "admin"},
 }
 ROLLEN = [None, "user", "LAGER_ADMIN", "PERSONAL_ADMIN", "SALES_ADMIN", "CRM_ADMIN",

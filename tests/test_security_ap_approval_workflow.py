@@ -15,6 +15,9 @@ class _FakeResult:
     def fetchone(self):
         return self._rows[0] if self._rows else None
 
+    def first(self):
+        return self.fetchone()
+
     def fetchall(self):
         return self._rows
 
@@ -30,6 +33,9 @@ class _CapturingDb:
         self.calls.append((str(statement), dict(params or {})))
         rows = self.rows.pop(0) if self.rows else []
         return _FakeResult(rows)
+
+    def add(self, entry):
+        self.audit = entry
 
     def commit(self):
         self.committed = True
@@ -49,7 +55,7 @@ async def test_list_approval_rules_uses_context_tenant():
                     None,
                     '[{"field":"amount","operator":"gt","value":1000}]',
                     2,
-                    '["manager"]',
+                    '["FINANCE_ADMIN"]',
                     10,
                     True,
                     datetime.utcnow(),
@@ -82,7 +88,7 @@ async def test_create_approval_rule_uses_context_tenant():
                     None,
                     '[{"field":"amount","operator":"gt","value":1000}]',
                     2,
-                    '["manager"]',
+                    '["FINANCE_ADMIN"]',
                     10,
                     True,
                     datetime.utcnow(),
@@ -96,13 +102,14 @@ async def test_create_approval_rule_uses_context_tenant():
         description=None,
         conditions=[ap_approval_workflow.ApprovalRuleCondition(field="amount", operator="gt", value=1000)],
         required_approvals=2,
-        approval_roles=["manager"],
+        approval_roles=["FINANCE_ADMIN"],
         priority=10,
         active=True,
     )
 
     result = await ap_approval_workflow.create_approval_rule(
         rule=payload,
+        user={"sub":"verified-admin", "roles":["FINANCE_ADMIN"]},
         tenant_id="tenant-a",
         db=db,
     )
@@ -131,10 +138,11 @@ async def test_request_approval_rejects_cross_tenant_invoice(monkeypatch):
     with pytest.raises(HTTPException) as exc_info:
         await ap_approval_workflow.request_approval(
             request=request,
+            user={"sub":"verified-requester", "roles":["FINANCE_BEARBEITEN"]},
             tenant_id="tenant-a",
             db=db,
         )
 
-    # Seit 07.10.2026: fremd ist wie nicht vorhanden (404) — die Existenz einer
+    # Seit 07.10.2026: fremd ist wie nicht vorhanden (404) â€” die Existenz einer
     # fremden Rechnung wird nicht verraten.
     assert exc_info.value.status_code == 404

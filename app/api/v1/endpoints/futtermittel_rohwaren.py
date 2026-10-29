@@ -34,56 +34,10 @@ logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.futtermittel_rohwaren_schemas import FuttermittelRohwarenOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/futtermittel/rohwaren", tags=["futtermittel", "rohwaren"])
-
-_DDL = """
-CREATE SCHEMA IF NOT EXISTS domain_futtermittel;
-
-CREATE TABLE IF NOT EXISTS domain_futtermittel.feed_raw_materials (
-    id               TEXT PRIMARY KEY,
-    material_code    TEXT NOT NULL,
-    name             TEXT NOT NULL,
-    kategorie        TEXT NOT NULL DEFAULT 'SONSTIGE',
-    dry_matter_percent NUMERIC(6,3),
-    energie_me_mj    NUMERIC(8,4),
-    rohprotein_g     NUMERIC(8,4),
-    rohfett_g        NUMERIC(8,4),
-    rohfaser_g       NUMERIC(8,4),
-    rohasche_g       NUMERIC(8,4),
-    lysin_g          NUMERIC(8,4),
-    methionin_g      NUMERIC(8,4),
-    calcium_g        NUMERIC(8,4),
-    phosphor_g       NUMERIC(8,4),
-    natrium_g        NUMERIC(8,4),
-    gueltig_ab       DATE,
-    gueltig_bis      DATE,
-    tenant_id        TEXT NOT NULL,
-    created_at       TIMESTAMPTZ DEFAULT NOW(),
-    updated_at       TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS domain_futtermittel.raw_material_analyses (
-    id              TEXT PRIMARY KEY,
-    material_id     TEXT NOT NULL,
-    analyse_datum   DATE,
-    labor_ref       TEXT,
-    analysiert_von  TEXT,
-    werte           JSONB DEFAULT '{}'::JSONB,
-    tenant_id       TEXT NOT NULL,
-    created_at      TIMESTAMPTZ DEFAULT NOW()
-);
-"""
-
-
-def _ensure_tables(db: Session) -> None:
-    """Create schema/tables if they don't exist yet."""
-    for stmt in _DDL.strip().split(";"):
-        stmt = stmt.strip()
-        if stmt:
-            db.execute(text(stmt))
-    db.commit()
 
 
 # ---------------------------------------------------------------------------
@@ -154,7 +108,6 @@ async def list_rohwaren(
 ):
     """Liste aller Rohwaren-Stammdaten."""
     try:
-        _ensure_tables(db)
         sql = text("""
             SELECT id, material_code, name, kategorie,
                    dry_matter_percent, energie_me_mj,
@@ -176,8 +129,7 @@ async def list_rohwaren(
 
 
 @router.post("", status_code=201, summary="Rohware anlegen",
-    response_model=FuttermittelRohwarenOut
-)
+    response_model=FuttermittelRohwarenOut, dependencies=SCHREIBEN["FUTTERMITTEL"])
 async def create_rohware(
     payload: RohwareIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -187,7 +139,6 @@ async def create_rohware(
     if payload.kategorie not in KATEGORIEN:
         raise HTTPException(status_code=422, detail=f"UngÃ¼ltige Kategorie. Erlaubt: {sorted(KATEGORIEN)}")
     try:
-        _ensure_tables(db)
         new_id = uuid7()
         sql = text("""
             INSERT INTO domain_futtermittel.feed_raw_materials
@@ -230,7 +181,6 @@ async def vergleich_rohwaren(
     if not id_list:
         raise HTTPException(status_code=422, detail="Parameter 'ids' darf nicht leer sein")
     try:
-        _ensure_tables(db)
         sql = text("""
             SELECT id, material_code, name, kategorie,
                    dry_matter_percent, energie_me_mj,
@@ -272,7 +222,6 @@ async def get_rohware(
 ):
     """Rohware-Detail inkl. NÃ¤hrstoffprofil."""
     try:
-        _ensure_tables(db)
         sql = text("""
             SELECT * FROM domain_futtermittel.feed_raw_materials
             WHERE id = :id AND tenant_id = :tenant_id
@@ -287,8 +236,7 @@ async def get_rohware(
 
 
 @router.patch("/{rohware_id}", summary="Rohware aktualisieren",
-    response_model=FuttermittelRohwarenOut
-)
+    response_model=FuttermittelRohwarenOut, dependencies=SCHREIBEN["FUTTERMITTEL"])
 async def update_rohware(
     rohware_id: str,
     payload: RohwarePatch,
@@ -300,7 +248,6 @@ async def update_rohware(
     if not updates:
         raise HTTPException(status_code=422, detail="Keine Felder zum Aktualisieren angegeben")
     try:
-        _ensure_tables(db)
         set_clauses = ", ".join(f"{k} = :{k}" for k in updates)
         sql = text(f"""
             UPDATE domain_futtermittel.feed_raw_materials
@@ -329,7 +276,6 @@ async def list_analysen(
 ):
     """Alle Laboranalysen fÃ¼r eine Rohware."""
     try:
-        _ensure_tables(db)
         sql = text("""
             SELECT id, material_id, analyse_datum, labor_ref, analysiert_von, werte, created_at
             FROM domain_futtermittel.raw_material_analyses
@@ -344,8 +290,7 @@ async def list_analysen(
 
 
 @router.post("/{rohware_id}/analysen", status_code=201, summary="Analyse anlegen",
-    response_model=FuttermittelRohwarenOut
-)
+    response_model=FuttermittelRohwarenOut, dependencies=SCHREIBEN["FUTTERMITTEL"])
 async def create_analyse(
     rohware_id: str,
     payload: AnalyseIn,
@@ -354,7 +299,6 @@ async def create_analyse(
 ):
     """Neue Laboranalyse fÃ¼r eine Rohware erfassen."""
     try:
-        _ensure_tables(db)
         # Verify material exists
         check = db.execute(text("""
             SELECT id FROM domain_futtermittel.feed_raw_materials

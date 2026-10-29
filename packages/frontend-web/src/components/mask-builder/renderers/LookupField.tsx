@@ -1,4 +1,4 @@
-import { memo, useState } from 'react'
+import { memo, useEffect, useRef, useState } from 'react'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { useLookupSearch } from '../hooks/useLookupSearch'
@@ -23,7 +23,14 @@ export const LookupField = memo(function LookupField({
   onSelect?: (_value: string, _item: { value: string; label: string }) => void
 }): JSX.Element {
   const [query, setQuery] = useState('')
-  const [pickedLabel, setPickedLabel] = useState<string | null>(null)
+  const [picked, setPicked] = useState<{ value: string; label: string; endpoint?: string } | null>(null)
+  const displayValue = value == null || value === '' ? '' : String(value)
+  const localClear = useRef<{ endpoint?: string } | null>(null)
+  useEffect(() => {
+    if (!(localClear.current && localClear.current.endpoint === lookupEndpoint && displayValue === '')) setQuery('')
+    localClear.current = null
+    setPicked(current => current?.value === displayValue && current.endpoint === lookupEndpoint ? current : null)
+  }, [displayValue, lookupEndpoint])
   const minChars = field.minSearchChars ?? performance?.lookupMinChars ?? 2
   const search = useLookupSearch({
     endpoint: lookupEndpoint,
@@ -35,12 +42,11 @@ export const LookupField = memo(function LookupField({
     enabled: !field.readOnly && Boolean(lookupEndpoint),
   })
 
-  const displayValue = value == null || value === '' ? '' : String(value)
   const inputValue = field.readOnly
     ? displayValue
     : query.length > 0
       ? query
-      : (pickedLabel ?? displayValue)
+      : (picked?.label ?? displayValue)
 
   return (
     <div className="space-y-2">
@@ -55,8 +61,12 @@ export const LookupField = memo(function LookupField({
         aria-controls={!field.readOnly ? `lookup-results-${field.key}` : undefined}
         onChange={(event) => {
           if (field.readOnly) return
-          setPickedLabel(null)
+          setPicked(null)
           setQuery(event.target.value)
+          if (displayValue && onSelect) {
+            localClear.current = { endpoint: lookupEndpoint }
+            onSelect('', { value: '', label: '' })
+          }
         }}
       />
       {!field.readOnly && query.length > 0 && query.length < minChars ? (
@@ -80,7 +90,7 @@ export const LookupField = memo(function LookupField({
                 className="flex min-h-touch w-full items-center px-3 py-2 text-left text-sm hover:bg-accent"
                 onClick={() => {
                   setQuery('')
-                  setPickedLabel(item.label)
+                  setPicked({ ...item, endpoint: lookupEndpoint })
                   onSelect?.(item.value, item)
                 }}
               >

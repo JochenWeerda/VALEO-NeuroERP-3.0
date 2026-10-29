@@ -5,14 +5,16 @@ from pydantic import BaseModel, ConfigDict
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.core.config import settings
+from app.core.tenant import get_tenant_id
 
 from app.api.v1.schemas.base import BaseSchema
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter()
 
-DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
+# Mandant aus der geprueften Anmeldung (get_tenant_id). Bis 27.10.2026 kam er aus ?tenant_id=
+# mit dem Standardmandanten als Rueckfall.
 
 
 # ── Pydantic Schemas ──────────────────────────────────────────────────────────
@@ -48,13 +50,13 @@ class DeleteFarmerRequest(BaseModel):
 @router.get("/farmers", response_model=FarmerListResponse, summary="Farmers auflisten")
 def list_farmers(
     db: Session = Depends(get_db),
-    tenant_id: Optional[str] = None,
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """List all farmers for the current tenant."""
     from app.infrastructure.models.agribusiness_models import Farmer
     from sqlalchemy import text
 
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
 
     rows = (
         db.query(Farmer)
@@ -84,19 +86,19 @@ def list_farmers(
     return FarmerListResponse(items=items, total=len(items))
 
 
-@router.delete("/farmers/{farmer_id}", status_code=204, response_class=Response, summary="Farmer löschen")
+@router.delete("/farmers/{farmer_id}", status_code=204, response_class=Response, summary="Farmer löschen", dependencies=SCHREIBEN["AGRAR"])
 def delete_farmer(
     farmer_id: str,
     body: DeleteFarmerRequest,
     db: Session = Depends(get_db),
-    tenant_id: Optional[str] = None,
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """Delete a farmer record. Requires a reason in the request body."""
     from app.infrastructure.models.agribusiness_models import Farmer
     import logging
 
     logger = logging.getLogger(__name__)
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
 
     farmer = (
         db.query(Farmer)

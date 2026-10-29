@@ -92,12 +92,21 @@ export default function PartyNativePage({
   testId?: string
   requestedSectionKey?: string
 }): JSX.Element {
-  const screenId = kind === 'lead' ? 'crm/lead' : 'crm/customer-360'
+  if (kind === 'lead') {
+    return (
+      <UniversalNativeDetailPage
+        screenId="crm/lead"
+        entityId={entityId}
+        testId={testId ?? 'crm-lead'}
+        requestedSectionKey={requestedSectionKey}
+      />
+    )
+  }
   return (
     <UniversalNativeDetailPage
-      screenId={screenId}
+      screenId="crm/customer-360"
       entityId={entityId}
-      testId={testId ?? (kind === 'lead' ? 'crm-lead' : 'crm-customer-360')}
+      testId={testId ?? 'crm-customer-360'}
       requestedSectionKey={requestedSectionKey}
     />
   )

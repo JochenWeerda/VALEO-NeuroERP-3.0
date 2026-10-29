@@ -7,10 +7,11 @@
  * Alle Tests laufen gegen Backend-API. Externe Gates (DATEV, Bank/SEPA) simuliert.
  */
 import { test, expect, request } from '@playwright/test'
+import { apiToken, E2E_MANDANT } from '../../helpers/anmeldung'
 
 const BASE = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:8000'
-const TENANT = 'e2e-p2p-001'
-const AUTH = process.env.API_DEV_TOKEN ?? 'dev-token'
+const TENANT = E2E_MANDANT
+const AUTH = apiToken()
 const HEADERS = {
   'X-Tenant-ID': TENANT,
   'Content-Type': 'application/json',
@@ -253,11 +254,11 @@ test.describe.serial('P2P — Procure-to-Pay Prozesskette @smoke @e2e-matrix', (
 // SEMANTIC-E2E-STRICT-001 — @critical Kern-Pfad P2P
 test.describe('P2P @critical Kern-Pfad', () => {
   const BASE_CRIT = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:8000'
-  const TENANT_CRIT = 'e2e-crit-p2p'
+  const TENANT_CRIT = E2E_MANDANT
   const HEADERS_CRIT = {
     'X-Tenant-ID': TENANT_CRIT,
     'Content-Type': 'application/json',
-    'Authorization': `Bearer ${process.env.API_DEV_TOKEN ?? 'dev-token'}`,
+    'Authorization': `Bearer ${apiToken()}`,
   }
 
   test('P2P @critical — Bestellungen-Endpunkt antwortet (Health)', async () => {

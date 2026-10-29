@@ -5,7 +5,8 @@ import logging
 from datetime import date, timedelta
 from typing import Any, Dict, List
 
-from ..core.config import settings
+from app.core.tenant_context import get_current_tenant_id, tenant_scope
+from app.core.tenant_registry import active_tenant_ids
 from app.infrastructure.models import ArticlePriceThreshold, DailyPrice
 
 from .base_worker import BaseWorker
@@ -14,11 +15,9 @@ logger = logging.getLogger(__name__)
 
 DAILY_PRICE_CHANGE_PERCENT_THRESHOLD = 5.0
 
-_DEFAULT_TENANT = "00000000-0000-0000-0000-000000000001"
-
-
 def _tenant() -> str:
-    return getattr(settings, "DEFAULT_TENANT_ID", None) or _DEFAULT_TENANT
+    # Fail-closed: the tenant comes from tenant_scope in run_price_monitoring (RLS plan P1).
+    return get_current_tenant_id()
 
 
 def _price_key(r) -> tuple:
@@ -191,15 +190,34 @@ class PriceMonitoringWorker(BaseWorker):
 
 
 async def run_price_monitoring() -> Dict[str, Any]:
-    worker = PriceMonitoringWorker()
+    from app.core.database import SessionLocal
+
+    registry = SessionLocal()
     try:
-        await worker.initialize()
-        return await worker.run()
-    except Exception as exc:
-        logger.error("Critical error in price monitoring worker: %s", exc)
-        return {"success": False, "error": str(exc)}
+        tenants = active_tenant_ids(registry)
     finally:
-        await worker.cleanup()
+        registry.close()
+
+    alerts: List[Dict[str, Any]] = []
+    checks = 0
+    failed: List[str] = []
+    for tenant_id in tenants:
+        with tenant_scope(tenant_id, "price-monitoring"):
+            worker = PriceMonitoringWorker()
+            try:
+                await worker.initialize()
+                outcome = await worker.run()
+                alerts.extend(outcome.get("alerts", []))
+                checks += int(outcome.get("checks", 0))
+                if outcome.get("success") is False:
+                    failed.append(tenant_id)
+            except Exception as exc:
+                logger.error("Critical error in price monitoring worker for %s: %s", tenant_id, exc)
+                failed.append(tenant_id)
+            finally:
+                await worker.cleanup()
+    return {"success": not failed, "alerts": alerts, "checks": checks,
+            "tenants": len(tenants), "failed_tenants": failed}
 
 
 def execute_price_monitoring() -> Dict[str, Any]:

@@ -1,0 +1,9 @@
+{
+  "scanner_advisories": 0,
+  "scanner_findings": 0,
+  "source_backported": 0,
+  "blocked": 0,
+  "release_allowed": true,
+  "findings": [],
+  "runtime_contracts": "passed"
+}

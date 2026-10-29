@@ -6,7 +6,7 @@ from datetime import date, datetime
 from decimal import Decimal
 from typing import Any, Optional
 from sqlalchemy import func as sqlfunc, text as sqltext
-from sqlalchemy.exc import DataError
+from sqlalchemy.exc import DataError, IntegrityError
 from sqlalchemy.orm import Session, selectinload
 
 from app.core.business_time import business_today
@@ -483,9 +483,21 @@ class ProcurementService:
         ]
 
     def create_lieferant(self, data: dict) -> dict:
+        # Keine Datenbankregel haelt die Nummer eindeutig (Stand 20.10.2026); doppelte Lieferanten-Nummern im
+        # Mandanten waren moeglich.
+        vorhanden = self.db.query(EinkaufLieferant.id).filter(
+            EinkaufLieferant.tenant_id == self.tenant_id,
+            EinkaufLieferant.lieferantennummer == data.get("lieferantennummer"),
+        ).first()
+        if vorhanden:
+            raise ConflictError("Lieferantennummer existiert bereits.")
         lf = EinkaufLieferant(id=uuid7(), tenant_id=self.tenant_id, **data)
         self.db.add(lf)
-        self.db.commit()
+        try:
+            self.db.commit()
+        except IntegrityError as exc:
+            self.db.rollback()
+            raise ConflictError("Lieferantennummer existiert bereits.") from exc
         self.db.refresh(lf)
         return {"id": str(lf.id), "lieferantennummer": lf.lieferantennummer, "firmenname": lf.firmenname}
 

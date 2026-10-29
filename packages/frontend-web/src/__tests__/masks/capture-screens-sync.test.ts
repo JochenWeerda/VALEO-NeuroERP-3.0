@@ -48,7 +48,7 @@ function geordnet(wert: unknown): unknown {
   if (Array.isArray(wert)) return wert.map(geordnet)
   if (wert && typeof wert === 'object') {
     return Object.fromEntries(
-      Object.keys(wert as Definition).sort().map((k) => [k, geordnet((wert as Definition)[k])]),
+      Object.keys(wert as Definition).sort((a, b) => a.localeCompare(b)).map((k) => [k, geordnet((wert as Definition)[k])]),
     )
   }
   return wert
@@ -59,7 +59,7 @@ function abweichendeTeile(kopie: Definition, quelle: Definition): string[] {
   teile.delete('agentContract') // gehoert dem Server und den Agenten
   return [...teile]
     .filter((teil) => JSON.stringify(geordnet(kopie[teil])) !== JSON.stringify(geordnet(quelle[teil])))
-    .sort()
+    .sort((a, b) => a.localeCompare(b))
 }
 
 const exporte = abbild.exports as Record<string, string>
@@ -69,7 +69,7 @@ const kopierte = Object.entries(kopien as Record<string, unknown>)
 
 describe('ScreenDefinitions: die Kopie im Frontend gegen die Registry', () => {
   it('kennt jede Kopie — eine neue Handkopie gibt es nicht', () => {
-    expect(kopierte.map(([name]) => name).sort()).toEqual(Object.keys(exporte).sort())
+    expect(kopierte.map(([name]) => name).sort((a, b) => a.localeCompare(b))).toEqual(Object.keys(exporte).sort((a, b) => a.localeCompare(b)))
   })
 
   it.each(kopierte)('%s weicht nur dort ab, wo es bekannt ist', (name, kopie) => {

@@ -26,6 +26,7 @@ from ....core.outbound_security import (
 from ....core.tenant import get_tenant_id
 from ....services import webhook_service as dienst
 from ..schemas.base import BaseSchema, PaginatedResponse
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 logger = logging.getLogger(__name__)
 
@@ -126,7 +127,7 @@ async def list_event_areas():
     return bereiche
 
 
-@router.post("/", response_model=WebhookOut, status_code=201, summary="Webhook registrieren")
+@router.post("/", response_model=WebhookOut, status_code=201, summary="Webhook registrieren", dependencies=SCHREIBEN["PLATTFORM"])
 async def register_webhook(
     payload: WebhookCreate,
     tenant_id: Optional[str] = Query(None),
@@ -160,7 +161,7 @@ async def register_webhook(
     )
 
 
-@router.delete("/{webhook_id}", status_code=204, response_class=Response, response_model=None, summary="Webhook entfernen")
+@router.delete("/{webhook_id}", status_code=204, response_class=Response, response_model=None, summary="Webhook entfernen", dependencies=SCHREIBEN["PLATTFORM"])
 async def remove_webhook(
     webhook_id: str,
     tenant_id: str = Depends(get_tenant_id),

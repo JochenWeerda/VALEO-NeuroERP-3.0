@@ -16,6 +16,7 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 
 from app.api.v1.schemas.base import BaseSchema
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter()
@@ -111,7 +112,7 @@ async def get_connector(
     )
 
 
-@router.put("/connectors", response_model=ConnectorOut, status_code=201, summary="Connector upsert")
+@router.put("/connectors", response_model=ConnectorOut, status_code=201, summary="Connector upsert", dependencies=SCHREIBEN["PLATTFORM"])
 async def upsert_connector(
     payload: ConnectorCreateIn,
     db: Session = Depends(get_db),
@@ -147,7 +148,7 @@ async def upsert_connector(
     return await get_connector(str(uid), db, tenant_id)
 
 
-@router.patch("/connectors/{connector_id}", response_model=ConnectorOut, summary="Connector aktualisieren")
+@router.patch("/connectors/{connector_id}", response_model=ConnectorOut, summary="Connector aktualisieren", dependencies=SCHREIBEN["PLATTFORM"])
 async def update_connector(
     connector_id: str,
     payload: ConnectorUpdateIn,
@@ -182,7 +183,7 @@ async def update_connector(
     return await get_connector(connector_id, db, tenant_id)
 
 
-@router.delete("/connectors/{connector_id}", status_code=204, response_class=Response, response_model=None, summary="Connector löschen")
+@router.delete("/connectors/{connector_id}", status_code=204, response_class=Response, response_model=None, summary="Connector löschen", dependencies=SCHREIBEN["PLATTFORM"])
 async def delete_connector(
     connector_id: str,
     db: Session = Depends(get_db),
@@ -260,7 +261,7 @@ async def list_reporting_units(
     ]
 
 
-@router.put("/reporting-units", response_model=ReportingUnitOut, status_code=201, summary="Reporting unit upsert")
+@router.put("/reporting-units", response_model=ReportingUnitOut, status_code=201, summary="Reporting unit upsert", dependencies=SCHREIBEN["PLATTFORM"])
 async def upsert_reporting_unit(
     payload: ReportingUnitCreateIn,
     db: Session = Depends(get_db),
@@ -312,7 +313,7 @@ async def upsert_reporting_unit(
     )
 
 
-@router.patch("/reporting-units/{unit_id}", response_model=ReportingUnitOut, summary="Reporting unit aktualisieren")
+@router.patch("/reporting-units/{unit_id}", response_model=ReportingUnitOut, summary="Reporting unit aktualisieren", dependencies=SCHREIBEN["PLATTFORM"])
 async def update_reporting_unit(
     unit_id: str,
     payload: ReportingUnitUpdateIn,
@@ -366,7 +367,7 @@ async def update_reporting_unit(
     )
 
 
-@router.delete("/reporting-units/{unit_id}", status_code=204, response_class=Response, response_model=None, summary="Reporting unit löschen")
+@router.delete("/reporting-units/{unit_id}", status_code=204, response_class=Response, response_model=None, summary="Reporting unit löschen", dependencies=SCHREIBEN["PLATTFORM"])
 async def delete_reporting_unit(
     unit_id: str,
     db: Session = Depends(get_db),
@@ -461,7 +462,7 @@ async def list_schedules(
     ]
 
 
-@router.put("/schedules", response_model=ScheduleOut, status_code=201, summary="Schedule upsert")
+@router.put("/schedules", response_model=ScheduleOut, status_code=201, summary="Schedule upsert", dependencies=SCHREIBEN["PLATTFORM"])
 async def upsert_schedule(
     payload: ScheduleCreateIn,
     db: Session = Depends(get_db),
@@ -524,7 +525,7 @@ async def upsert_schedule(
     )
 
 
-@router.patch("/schedules/{schedule_id}", response_model=ScheduleOut, summary="Schedule aktualisieren")
+@router.patch("/schedules/{schedule_id}", response_model=ScheduleOut, summary="Schedule aktualisieren", dependencies=SCHREIBEN["PLATTFORM"])
 async def update_schedule(
     schedule_id: str,
     payload: ScheduleUpdateIn,
@@ -591,7 +592,7 @@ async def update_schedule(
     )
 
 
-@router.delete("/schedules/{schedule_id}", status_code=204, response_class=Response, response_model=None, summary="Schedule löschen")
+@router.delete("/schedules/{schedule_id}", status_code=204, response_class=Response, response_model=None, summary="Schedule löschen", dependencies=SCHREIBEN["PLATTFORM"])
 async def delete_schedule(
     schedule_id: str,
     db: Session = Depends(get_db),

@@ -17,6 +17,7 @@ from app.domains.operations.repository import BankKontoRepository
 from app.api.v1.schemas.base import BaseSchema
 from pydantic import ConfigDict as _ConfigDict
 from app.api.v1.schemas.mask_entity_contracts import FinanceBankkontoOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 class BankenOut(BaseSchema):
@@ -103,7 +104,7 @@ async def get_bankkonto(konto_id: str, db: Session = Depends(get_db), tenant_id:
     return _to_dict(konto)
 
 
-@router.post("/konten", response_model=BankenOut, status_code=201, summary="Bankkonto anlegen")
+@router.post("/konten", response_model=BankenOut, status_code=201, summary="Bankkonto anlegen", dependencies=SCHREIBEN["FINANZ"])
 async def create_bankkonto(data: BankKontoCreate, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> dict:
     repo = BankKontoRepository(db, tenant_id)
     iban = data.iban.replace(" ", "").upper()
@@ -129,7 +130,7 @@ async def create_bankkonto(data: BankKontoCreate, db: Session = Depends(get_db),
     return _to_dict(konto)
 
 
-@router.patch("/konten/{konto_id}", response_model=BankenOut, summary="Bankkonto aktualisieren")
+@router.patch("/konten/{konto_id}", response_model=BankenOut, summary="Bankkonto aktualisieren", dependencies=SCHREIBEN["FINANZ"])
 async def update_bankkonto(
     konto_id: str, data: BankKontoUpdate, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
 ) -> dict:
@@ -143,7 +144,7 @@ async def update_bankkonto(
     return _to_dict(konto)
 
 
-@router.delete("/konten/{konto_id}", status_code=204, response_class=Response, response_model=None, summary="Bankkonto löschen")
+@router.delete("/konten/{konto_id}", status_code=204, response_class=Response, response_model=None, summary="Bankkonto löschen", dependencies=SCHREIBEN["FINANZ"])
 async def delete_bankkonto(konto_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
     repo = BankKontoRepository(db, tenant_id)
     if not repo.deactivate(konto_id):
@@ -237,8 +238,7 @@ async def fints_get_umsaetze(
 @router.post(
     "/fints/ueberweisung",
     response_model=BankenOut,
-    summary="SEPA-Überweisung via FinTS senden (HKCCM)",
-)
+    summary="SEPA-Überweisung via FinTS senden (HKCCM)", dependencies=SCHREIBEN["FINANZ"])
 async def fints_send_ueberweisung(
     body: UeberweisungRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -287,7 +287,7 @@ async def fints_tan_medien(tenant_id: str = Depends(get_tenant_id)) -> dict:
     return {"erfolg": result.erfolg, "fehler": result.fehler, "tan_medien": result.rohdaten}
 
 
-@router.post("/fints/ueberweisung/tan-initiieren", response_model=BankenOut, summary="Überweisung mit TAN einleiten (Schritt 1)")
+@router.post("/fints/ueberweisung/tan-initiieren", response_model=BankenOut, summary="Überweisung mit TAN einleiten (Schritt 1)", dependencies=SCHREIBEN["FINANZ"])
 async def fints_tan_initiieren(body: TanInitRequest, tenant_id: str = Depends(get_tenant_id)) -> dict:
     """Leitet SEPA-Überweisung ein und gibt TAN-Challenge zurück (ChipTAN/pushTAN Schritt 1)."""
     from decimal import Decimal as _Decimal
@@ -317,7 +317,7 @@ async def fints_tan_initiieren(body: TanInitRequest, tenant_id: str = Depends(ge
     }
 
 
-@router.post("/fints/ueberweisung/tan-bestaetigen", response_model=BankenOut, summary="TAN bestätigen und Überweisung abschließen (Schritt 2)")
+@router.post("/fints/ueberweisung/tan-bestaetigen", response_model=BankenOut, summary="TAN bestätigen und Überweisung abschließen (Schritt 2)", dependencies=SCHREIBEN["FINANZ"])
 async def fints_tan_bestaetigen(body: TanBestaetigenRequest, tenant_id: str = Depends(get_tenant_id)) -> dict:
     """Bestätigt TAN und schließt die Überweisung ab (ChipTAN/pushTAN Schritt 2)."""
     from app.services.fints_connector import bestaetige_tan

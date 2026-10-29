@@ -147,7 +147,7 @@ def test_dispatcher_accepts_valid_command():
     result = dispatcher.dispatch(
         cmd,
         aggregate_state={"status": "ZUR_FREIGABE"},
-        issuer_role="finance_manager",
+        issuer_role="FINANCE_ADMIN",
     )
     assert result.status == CommandStatus.ACCEPTED
     assert result.error is None
@@ -181,7 +181,7 @@ def test_dispatcher_rejects_precondition_failed():
     result = dispatcher.dispatch(
         cmd,
         aggregate_state={"status": "STORNIERT"},
-        issuer_role="finance_manager",
+        issuer_role="FINANCE_ADMIN",
     )
     assert result.status == CommandStatus.REJECTED
     assert result.error is not None

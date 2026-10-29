@@ -23,6 +23,7 @@ from app.domains.operations.repository import WaageRepository, WiegungRepository
 
 from app.api.v1.schemas.base import BaseSchema
 from pydantic import ConfigDict as _ConfigDict
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 class WaageOut(BaseSchema):
@@ -70,7 +71,7 @@ async def get_partiepflicht_config(db: Session = Depends(get_db)) -> dict:
     }
 
 
-@router.post("/waagen/partiepflicht-check", response_model=WaageOut, summary="Partiepflicht prÃ¼fen")
+@router.post("/waagen/partiepflicht-check", response_model=WaageOut, summary="Partiepflicht prÃ¼fen", dependencies=SCHREIBEN["LAGER"])
 async def check_partiepflicht(
     payload: PartiepflichtCheckRequest,
     db: Session = Depends(get_db),
@@ -147,7 +148,7 @@ async def get_waage(waage_id: str, db: Session = Depends(get_db)):
     return _to_dict(waage)
 
 
-@router.post("/waagen", response_model=WaageOut, status_code=201, summary="Waage anlegen")
+@router.post("/waagen", response_model=WaageOut, status_code=201, summary="Waage anlegen", dependencies=SCHREIBEN["LAGER"])
 async def create_waage(
     waage_data: dict,
     db: Session = Depends(get_db)
@@ -161,7 +162,7 @@ async def create_waage(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.patch("/waagen/{waage_id}", response_model=WaageOut, summary="Waage aktualisieren")
+@router.patch("/waagen/{waage_id}", response_model=WaageOut, summary="Waage aktualisieren", dependencies=SCHREIBEN["LAGER"])
 async def update_waage(
     waage_id: str,
     waage_data: dict,
@@ -175,7 +176,7 @@ async def update_waage(
     return _to_dict(waage)
 
 
-@router.delete("/waagen/{waage_id}", status_code=204, response_class=Response, response_model=None, summary="Waage lÃ¶schen")
+@router.delete("/waagen/{waage_id}", status_code=204, response_class=Response, response_model=None, summary="Waage lÃ¶schen", dependencies=SCHREIBEN["LAGER"])
 async def delete_waage(waage_id: str, db: Session = Depends(get_db)):
     """Delete a Waage"""
     repo = WaageRepository(db)
@@ -213,7 +214,7 @@ async def get_wiegung(wiegung_id: str, db: Session = Depends(get_db)):
     return _to_dict(wiegung)
 
 
-@router.post("/wiegungen", response_model=WaageOut, status_code=201, summary="Wiegung anlegen")
+@router.post("/wiegungen", response_model=WaageOut, status_code=201, summary="Wiegung anlegen", dependencies=SCHREIBEN["LAGER"])
 async def create_wiegung(
     wiegung_data: dict,
     db: Session = Depends(get_db)
@@ -246,7 +247,7 @@ async def create_wiegung(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.delete("/wiegungen/{wiegung_id}", status_code=204, response_class=Response, response_model=None, summary="Wiegung lÃ¶schen")
+@router.delete("/wiegungen/{wiegung_id}", status_code=204, response_class=Response, response_model=None, summary="Wiegung lÃ¶schen", dependencies=SCHREIBEN["LAGER"])
 async def delete_wiegung(wiegung_id: str, db: Session = Depends(get_db)):
     """Delete a Wiegung"""
     repo = WiegungRepository(db)
@@ -301,7 +302,7 @@ def _parse_q_line(parts: List[str]) -> Dict[str, Any]:
     }
 
 
-@router.post("/waagen/import/ascii", response_model=WaageOut, status_code=200, summary="Ascii importieren")
+@router.post("/waagen/import/ascii", response_model=WaageOut, status_code=200, summary="Ascii importieren", dependencies=SCHREIBEN["LAGER"])
 async def import_ascii(
     file: UploadFile,
     waage_id: str = Form(...),
@@ -443,7 +444,7 @@ async def list_fehlerqueue():
     return _fehlerqueue
 
 
-@router.post("/waagen/import/fehlerqueue/{entry_id}/retry", response_model=WaageOut, summary="Fehlerqueue entry wiederholen")
+@router.post("/waagen/import/fehlerqueue/{entry_id}/retry", response_model=WaageOut, summary="Fehlerqueue entry wiederholen", dependencies=SCHREIBEN["LAGER"])
 async def retry_fehlerqueue_entry(entry_id: str):
     """ErhÃ¶ht retry_count fÃ¼r einen Fehlerqueue-Eintrag (Simulation)."""
     for entry in _fehlerqueue:
@@ -453,7 +454,7 @@ async def retry_fehlerqueue_entry(entry_id: str):
     raise HTTPException(status_code=404, detail=f"Fehlerqueue-Eintrag {entry_id} nicht gefunden")
 
 
-@router.delete("/waagen/import/fehlerqueue/{entry_id}", status_code=204, response_class=Response, response_model=None, summary="Fehlerqueue entry lÃ¶schen")
+@router.delete("/waagen/import/fehlerqueue/{entry_id}", status_code=204, response_class=Response, response_model=None, summary="Fehlerqueue entry lÃ¶schen", dependencies=SCHREIBEN["LAGER"])
 async def delete_fehlerqueue_entry(entry_id: str):
     """LÃ¶scht einen Eintrag aus der Import-Fehlerqueue."""
     global _fehlerqueue
@@ -513,7 +514,7 @@ async def get_kalibrierung(waage_id: str, db: Session = Depends(get_db)):
     }
 
 
-@router.patch("/waagen/{waage_id}/kalibrierung", response_model=WaageOut, summary="Kalibrierung aktualisieren")
+@router.patch("/waagen/{waage_id}/kalibrierung", response_model=WaageOut, summary="Kalibrierung aktualisieren", dependencies=SCHREIBEN["LAGER"])
 async def update_kalibrierung(
     waage_id: str,
     payload: Dict[str, Any],
@@ -598,8 +599,7 @@ __all__ = ["WiegungErweitert", "WiegescheinMitDoppelwiegung"]
     "/wiegungen/dual",
     response_model=WiegungAngelegt,
     status_code=201,
-    summary="Doppelwiegung buchen (Brutto und Tara)",
-)
+    summary="Doppelwiegung buchen (Brutto und Tara)", dependencies=SCHREIBEN["LAGER"])
 async def create_dual_wiegung(
     payload: WiegescheinMitDoppelwiegung,
     tenant_id: str = Depends(get_tenant_id),

@@ -25,6 +25,7 @@ from typing import Optional
 from sqlalchemy import text
 
 from app.core.database import SessionLocal
+from app.core.schema_guard import require_tables
 from app.core.sql_identifiers import bezeichner, qualifizierter_bezeichner
 from app.services.gap_pipeline import normalize_name, tokenset as _tokenset
 
@@ -35,7 +36,8 @@ DEFAULT_CSV_GLOB = str(BASE_DIR / "Futtermittelbetriebe PLZ 26- Landwirte PLZ 26
 
 NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
 # Nominatim-Nutzungsregeln: aussagekräftiger User-Agent + max 1 Request/Sekunde.
-NOMINATIM_UA = "VALEO-NeuroERP-GeoSync/1.0 (jochen.weerda@gmail.com)"
+# Contact address only from the environment, never in code (Nominatim policy wants one).
+NOMINATIM_UA = os.getenv("NOMINATIM_USER_AGENT", "VALEO-NeuroERP-GeoSync/1.0")
 _PLZ_RE = re.compile(r"^\d{5}$")
 
 # Bounding-Box des PLZ-26-Gebiets (Ostfriesland/Oldenburger Land), env-überschreibbar.
@@ -48,31 +50,8 @@ GEO_LON_MAX = float(os.getenv("GAP_GEO_LON_MAX", "8.8"))
 
 
 def ensure_geo_schema(db) -> None:
-    db.execute(
-        text(
-            """
-            CREATE TABLE IF NOT EXISTS gap_map_points (
-                id             BIGSERIAL PRIMARY KEY,
-                name           TEXT             NOT NULL,
-                name_norm      TEXT             NOT NULL,
-                ortsteil       TEXT,
-                adresse        TEXT,
-                postal_code    TEXT,
-                ort            TEXT,
-                source_layer   TEXT,
-                lat            DOUBLE PRECISION,
-                lon            DOUBLE PRECISION,
-                geocode_status TEXT,
-                geocode_query  TEXT,
-                geocoded_at    TIMESTAMPTZ,
-                UNIQUE (name_norm, postal_code, adresse)
-            )
-            """
-        )
-    )
-    db.execute(text("CREATE INDEX IF NOT EXISTS idx_mappoints_name_plz ON gap_map_points (name_norm, postal_code)"))
-    db.execute(text("CREATE INDEX IF NOT EXISTS idx_mappoints_geo ON gap_map_points (lat, lon)"))
-    db.commit()
+    """Tabelle und Indizes kommen aus Migrationen; hier nur pruefen (Anwendung ohne DDL-Recht)."""
+    require_tables(db, ('gap_map_points',), "runtime_ddl_to_migrations_20261026")
 
 
 def _parse_row(row: list[str]) -> Optional[dict]:

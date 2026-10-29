@@ -21,6 +21,15 @@ jobs:
     timeout-minutes: 15
 
     services:
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
       postgres:
         image: postgres:15
         env:
@@ -37,7 +46,10 @@ jobs:
 
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/valeo_test
-      API_DEV_TOKEN: e2e-critical-token
+      # Echte Anmeldung (seit 12.10.2026 kein Dev-Token): Wegwerf-Keycloak aus scripts/ci/e2e_keycloak.sh,
+      # Sitzungen in Redis. Kennungen und Kennwoerter setzt dieser Schritt je Lauf ueber $GITHUB_ENV.
+      REDIS_URL: redis://localhost:6379/0
+      IDENTITY_SESSION_IDLE_SECONDS: "3600"
       PLAYWRIGHT_BASE_URL: http://127.0.0.1:8000
       EVENT_BUS_ENABLED: "false"
       OUTBOX_WORKER_ENABLED: "false"
@@ -66,6 +78,9 @@ jobs:
 
       - name: Install Playwright browsers
         run: pnpm exec playwright install chromium --with-deps
+
+      - name: Start Test-Keycloak und Testkennungen
+        run: bash scripts/ci/e2e_keycloak.sh
 
       - name: Migrate test database
         run: python scripts/init_db.py

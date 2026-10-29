@@ -1,4 +1,4 @@
-import { act, render } from '@testing-library/react'
+import { act, render, waitFor } from '@testing-library/react'
 import { expect, it, vi } from 'vitest'
 import BankKontenStammPage from '@/pages/finance/bankkonten-stamm'
 
@@ -8,12 +8,19 @@ const mocks = vi.hoisted(() => ({
 }))
 vi.mock('@/components/navigation/ModuleToolbar', () => ({ ModuleToolbar: () => null }))
 vi.mock('@/hooks/useUnsavedChanges', () => ({ useUnsavedChanges: () => ({ state: 'unblocked' }) }))
-vi.mock('@/app/routing/typed-router', () => ({ useNavigate: () => vi.fn() }))
+vi.mock('@/app/routing/typed-router', async (importOriginal) => ({
+  ...await importOriginal<typeof import('@/app/routing/typed-router')>(),
+  useNavigate: () => vi.fn(),
+  useParams: () => ({}),
+}))
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }))
 vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 vi.mock('@/features/crud/utils/i18n-helpers', () => ({ getEntityTypeLabel: () => 'Bankkonto' }))
 vi.mock('@/features/finance/useBankOptions', () => ({ useBankLedgerOptions: () => ({ data: [] }) }))
-vi.mock('@/components/mask-builder', () => ({ ObjectPage: () => <div>Bankkonto</div> }))
+vi.mock('@/components/mask-builder', async (importOriginal) => ({
+  ...await importOriginal<typeof import('@/components/mask-builder')>(),
+  ObjectPage: () => <div>Bankkonto</div>,
+}))
 vi.mock('@/components/mask-builder/hooks', () => ({
   useMaskData: () => ({ data: null, loading: false, saveData: mocks.saveData,
     updateData: mocks.saveData, setData: mocks.setData }),
@@ -26,8 +33,9 @@ vi.mock('@/hooks/useIbanLookup', () => ({
   },
 }))
 
-it('bank lookup fills a draft locally and never implicitly saves an account', () => {
+it('bank lookup fills a draft locally and never implicitly saves an account', async () => {
   render(<BankKontenStammPage />)
+  await waitFor(() => expect(mocks.onLookup).toBeTypeOf('function'))
   act(() => mocks.onLookup?.({ valid: true, bank_name: 'Bank', bic: 'COBADEFFXXX' }))
   expect(mocks.setData).toHaveBeenCalledWith(expect.objectContaining({ bank_name: 'Bank', bic: 'COBADEFFXXX' }))
   expect(mocks.saveData).not.toHaveBeenCalled()

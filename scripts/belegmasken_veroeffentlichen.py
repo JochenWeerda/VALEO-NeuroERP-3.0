@@ -1,23 +1,10 @@
 #!/usr/bin/env python3
-"""Veroeffentlicht die neun Varianten der Belegmaske fuer den Testmandanten der Sichtpruefung — wiederholbar.
+"""Check code-defined document masks for the approved visual-test tenant.
 
-    python scripts/belegmasken_veroeffentlichen.py            # zeigt, was veroeffentlicht wuerde
-    python scripts/belegmasken_veroeffentlichen.py --apply    # veroeffentlicht
-    python scripts/belegmasken_veroeffentlichen.py --adressen # Adressen der Belege in der Maske
-
-Entscheidung des Auftraggebers vom 13.10.2026: Die Belegdefinitionen duerfen registriert werden, zunaechst **nur
-fuer den autorisierten Testmandanten** der Sichtpruefung. Das ist keine Produktivfreigabe.
-
-Deshalb stehen sie nicht in der Registry aller Mandanten (``_SCREEN_DEFINITIONS``), sondern werden ueber den
-vorhandenen Weg fuer mandantenbezogene Masken veroeffentlicht (``studio_draft_store``, Stand ``published_temp``).
-Ein anderer Mandant bekommt fuer ``beleg/…`` weiterhin „nicht gefunden". Das Skript nimmt nur Mandanten aus
-``ERLAUBTE_MANDANTEN`` an.
-
-Der Weg verlangt zwei Kennungen (Bearbeiter und Veroeffentlicher). Das Skript benutzt zwei ausgewiesene Kennungen
-der Referenzdaten; beide stehen am Entwurf.
+Native definitions are deployed with the application. This command does not
+create Studio drafts, invent approvers or bypass Studio release evidence.
 """
 from __future__ import annotations
-
 import argparse
 import sys
 from pathlib import Path
@@ -25,42 +12,30 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from app.core.screen_definitions_beleg import alle_beleg_screen_definitions  # noqa: E402
-from app.core.screen_governance import governance_errors  # noqa: E402
-from app.services import studio_draft_store  # noqa: E402
+from app.core.screen_definitions import get_screen_definition
+from app.core.screen_definitions_beleg import NATIVE_BELEG_TENANTS, alle_beleg_screen_definitions
+from app.core.screen_governance import governance_errors
 
 TESTMANDANT = "00000000-0000-0000-0000-000000000051"
-ERLAUBTE_MANDANTEN: frozenset[str] = frozenset({TESTMANDANT})
-BEARBEITER = "belegmasken"
-VEROEFFENTLICHER = "belegmasken-zweitfreigabe"
 
 
-def veroeffentliche(tenant_id: str, *, erlaubte: frozenset[str] = ERLAUBTE_MANDANTEN) -> dict[str, str]:
-    """Bringt jede Variante auf ``published_temp`` — mit dem aktuellen Stand der Definition. Kennung -> was geschah."""
-    if tenant_id not in erlaubte:
-        raise PermissionError(f"Mandant {tenant_id} ist fuer die Belegmasken nicht freigegeben.")
-    bericht: dict[str, str] = {}
-    vorhanden = {str(e.get("screen_id")): e for e in studio_draft_store.list_drafts(tenant_id)}
-    for kennung, definition in alle_beleg_screen_definitions().items():
-        fehler = governance_errors(definition)
-        if fehler:
-            raise ValueError(f"{kennung}: {'; '.join(fehler)}")
-        alt = vorhanden.get(kennung)
-        if alt and alt.get("status") == "published_temp" and alt.get("definition") == definition:
-            bericht[kennung] = "aktuell"
-            continue
-        if alt and alt.get("status") == "published_temp":
-            # Eine veroeffentlichte Maske wird erst zurueckgenommen, dann neu vorgelegt.
-            alt = studio_draft_store.set_status(tenant_id, str(alt["id"]), VEROEFFENTLICHER, "retired", expected_snapshot=alt)
-        entwurf = studio_draft_store.save_draft(tenant_id, BEARBEITER, definition, draft_id=str(alt["id"]) if alt else None, expected_revision=alt["revision"] if alt else None)
-        entwurf = studio_draft_store.set_status(tenant_id, str(entwurf["id"]), BEARBEITER, "review", expected_snapshot=entwurf)
-        studio_draft_store.set_status(tenant_id, str(entwurf["id"]), VEROEFFENTLICHER, "published_temp", expected_snapshot=entwurf)
-        bericht[kennung] = "erneuert" if alt else "veroeffentlicht"
-    return bericht
+def pruefe_native_definitionen(tenant_id: str) -> dict[str, str]:
+    if tenant_id not in NATIVE_BELEG_TENANTS:
+        raise PermissionError("Mandant ist fuer die native Beleg-Sichtpruefung nicht freigegeben.")
+    result = {}
+    for screen_id in alle_beleg_screen_definitions():
+        definition = get_screen_definition(screen_id, tenant_id=tenant_id)
+        errors = governance_errors(definition) if definition else ["Definition fehlt"]
+        if errors:
+            raise ValueError(f"{screen_id}: {'; '.join(errors)}")
+        result[screen_id] = "native_definition_geprueft"
+    return result
 
 
 def adressen(tenant_id: str) -> list[str]:
     """Je Beleg des Mandanten die Adresse der Belegmaske — fuer die Sichtpruefung im Browser."""
+    if tenant_id not in NATIVE_BELEG_TENANTS:
+        raise PermissionError("Mandant ist fuer die Sichtpruefung nicht freigegeben.")
     from sqlalchemy import text
 
     from app.core.belegvertrag import BELEGARTEN
@@ -77,23 +52,17 @@ def adressen(tenant_id: str) -> list[str]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--tenant", default=TESTMANDANT)
-    parser.add_argument("--apply", action="store_true", help="veroeffentlichen (sonst nur zeigen)")
-    parser.add_argument("--adressen", action="store_true", help="die Adressen der Belege des Mandanten in der Maske zeigen")
+    parser.add_argument("--adressen", action="store_true", help="Nur Adressen der vorhandenen Referenzbelege anzeigen")
+    parser.add_argument("--apply", action="store_true", help=argparse.SUPPRESS)
     args = parser.parse_args()
-    if args.tenant not in ERLAUBTE_MANDANTEN:
-        print(f"Abgelehnt: Mandant {args.tenant} ist nicht freigegeben (nur {', '.join(sorted(ERLAUBTE_MANDANTEN))}).",
-              file=sys.stderr)
-        return 1
+    if args.apply:
+        parser.error("Native Belegmasken werden mit dem Code ausgeliefert. Keine Studio-Veroeffentlichung aus diesem Skript.")
     if args.adressen:
-        for zeile in adressen(args.tenant):
-            print(zeile)
+        for address in adressen(args.tenant):
+            print(address)
         return 0
-    if not args.apply:
-        for kennung in alle_beleg_screen_definitions():
-            print(f"wuerde veroeffentlichen: {kennung}  ->  {studio_draft_store.studio_run_route(kennung)}")
-        return 0
-    for kennung, was in veroeffentliche(args.tenant).items():
-        print(f"{was:16} {kennung}")
+    for screen_id, result in pruefe_native_definitionen(args.tenant).items():
+        print(f"{result}: {screen_id}")
     return 0
 
 

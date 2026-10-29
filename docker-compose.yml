@@ -234,7 +234,15 @@ services:
     container_name: valeo-neuro-erp-backend
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql://valeo_dev:valeo_dev_2024@postgres:5432/valeo_neuro_erp
+      # DB-Governance (docs/architecture/db-governance-20261026.md): Anwendung als valeo_app, Migrationen
+      # in init_db.py als valeo_migrator. Werte aus .env; ohne sie bleibt der Superuser wie bisher.
+      DATABASE_URL: ${VALEO_APP_CONTAINER_DATABASE_URL:-postgresql://valeo_dev:valeo_dev_2024@postgres:5432/valeo_neuro_erp}
+      MIGRATION_DATABASE_URL: ${VALEO_MIGRATOR_CONTAINER_DATABASE_URL:-postgresql://valeo_dev:valeo_dev_2024@postgres:5432/valeo_neuro_erp}
+      # RLS-Plan P6: valeo_system fuer mandantenuebergreifende Worker; leer = Anwendungsanmeldung (fail-closed)
+      SYSTEM_DATABASE_URL: ${VALEO_SYSTEM_CONTAINER_DATABASE_URL:-}
+      NOMINATIM_USER_AGENT: ${NOMINATIM_USER_AGENT:-VALEO-NeuroERP-GeoSync/1.0}
+      # Pruefstand fuer die Studio-Prozesssimulation (frische DB, nie die Entwicklungs-DB); siehe CLAUDE.md.
+      TEST_DATABASE_URL: postgresql://valeo_dev:valeo_dev_2024@postgres:5432/valeo_probe
       REDIS_URL: redis://redis:6379/0
       EVENT_BUS_ENABLED: "true"
       EVENT_BUS_PROVIDER: nats
@@ -288,7 +296,10 @@ services:
       - ./alembic:/app/alembic
       - ./alembic.ini:/app/alembic.ini
       - ./main.py:/app/main.py
-      - ./config/mcp_erp_tools.yaml:/app/config/mcp_erp_tools.yaml:ro
+      # Laufzeitkonfiguration (Belegvarianten, Studio-Katalog); ohne sie 500 auf beleg/* und Studio-Simulation.
+      - ./config:/app/config:ro
+      # Studio requires the same reviewed schema catalog in development and image runtime.
+      - ./docs/admin/table-catalog.json:/app/docs/admin/table-catalog.json:ro
     command: sh -c "python scripts/init_db.py && uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4 --timeout-keep-alive 5"
 
   inventory-service:
@@ -300,7 +311,8 @@ services:
     container_name: valeo-neuro-erp-inventory
     restart: unless-stopped
     environment:
-      INVENTORY_DATABASE_URL: postgresql+asyncpg://valeo_dev:valeo_dev_2024@postgres:5432/valeo_neuro_erp
+      INVENTORY_DATABASE_URL: ${VALEO_APP_CONTAINER_ASYNC_DATABASE_URL:-postgresql+asyncpg://valeo_dev:valeo_dev_2024@postgres:5432/valeo_neuro_erp}
+      MIGRATION_DATABASE_URL: ${VALEO_MIGRATOR_CONTAINER_ASYNC_DATABASE_URL:-postgresql+asyncpg://valeo_dev:valeo_dev_2024@postgres:5432/valeo_neuro_erp}
       INVENTORY_DEBUG: "true"
       INVENTORY_EVENT_BUS_ENABLED: "true"
       INVENTORY_EVENT_BUS_URL: nats://nats:4222
@@ -328,7 +340,8 @@ services:
     # no container_name to preserve DNS service alias
     restart: unless-stopped
     environment:
-      CRM_CORE_DATABASE_URL: postgresql+asyncpg://valeo_dev:valeo_dev_2024@postgres:5432/valeo_neuro_erp
+      CRM_CORE_DATABASE_URL: ${VALEO_APP_CONTAINER_ASYNC_DATABASE_URL:-postgresql+asyncpg://valeo_dev:valeo_dev_2024@postgres:5432/valeo_neuro_erp}
+      MIGRATION_DATABASE_URL: ${VALEO_MIGRATOR_CONTAINER_ASYNC_DATABASE_URL:-postgresql+asyncpg://valeo_dev:valeo_dev_2024@postgres:5432/valeo_neuro_erp}
       CRM_CORE_DEBUG: "true"
       CRM_CORE_DEFAULT_TENANT_ID: 00000000-0000-0000-0000-000000000001
       CRM_CORE_BACKEND_CORS_ORIGINS: '["http://localhost:3000","http://frontend-web:3000","http://bff-web:4001"]'
@@ -350,7 +363,8 @@ services:
     container_name: valeo-neuro-erp-crm-sales
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql+asyncpg://valeo_dev:${POSTGRES_PASSWORD:-valeo_dev_2024}@postgres:5432/valeo_neuro_erp
+      DATABASE_URL: ${VALEO_APP_CONTAINER_ASYNC_DATABASE_URL:-postgresql+asyncpg://valeo_dev:${POSTGRES_PASSWORD:-valeo_dev_2024}@postgres:5432/valeo_neuro_erp}
+      MIGRATION_DATABASE_URL: ${VALEO_MIGRATOR_CONTAINER_ASYNC_DATABASE_URL:-postgresql+asyncpg://valeo_dev:${POSTGRES_PASSWORD:-valeo_dev_2024}@postgres:5432/valeo_neuro_erp}
       SERVICE_NAME: crm-sales
       DEBUG: "true"
       DEFAULT_TENANT_ID: 00000000-0000-0000-0000-000000000001
@@ -370,7 +384,8 @@ services:
     container_name: valeo-neuro-erp-crm-service
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql+asyncpg://valeo_dev:${POSTGRES_PASSWORD:-valeo_dev_2024}@postgres:5432/valeo_neuro_erp
+      DATABASE_URL: ${VALEO_APP_CONTAINER_ASYNC_DATABASE_URL:-postgresql+asyncpg://valeo_dev:${POSTGRES_PASSWORD:-valeo_dev_2024}@postgres:5432/valeo_neuro_erp}
+      MIGRATION_DATABASE_URL: ${VALEO_MIGRATOR_CONTAINER_ASYNC_DATABASE_URL:-postgresql+asyncpg://valeo_dev:${POSTGRES_PASSWORD:-valeo_dev_2024}@postgres:5432/valeo_neuro_erp}
       SERVICE_NAME: crm-service
       DEBUG: "true"
       DEFAULT_TENANT_ID: 00000000-0000-0000-0000-000000000001
@@ -390,7 +405,8 @@ services:
     container_name: valeo-neuro-erp-crm-workflow
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql+asyncpg://valeo_dev:${POSTGRES_PASSWORD:-valeo_dev_2024}@postgres:5432/valeo_neuro_erp
+      DATABASE_URL: ${VALEO_APP_CONTAINER_ASYNC_DATABASE_URL:-postgresql+asyncpg://valeo_dev:${POSTGRES_PASSWORD:-valeo_dev_2024}@postgres:5432/valeo_neuro_erp}
+      MIGRATION_DATABASE_URL: ${VALEO_MIGRATOR_CONTAINER_ASYNC_DATABASE_URL:-postgresql+asyncpg://valeo_dev:${POSTGRES_PASSWORD:-valeo_dev_2024}@postgres:5432/valeo_neuro_erp}
       REDIS_URL: redis://redis:6379/2
       SERVICE_NAME: crm-workflow
       DEBUG: "true"
@@ -414,7 +430,8 @@ services:
     container_name: valeo-neuro-erp-crm-analytics
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql+asyncpg://valeo_dev:${POSTGRES_PASSWORD:-valeo_dev_2024}@postgres:5432/valeo_neuro_erp
+      DATABASE_URL: ${VALEO_APP_CONTAINER_ASYNC_DATABASE_URL:-postgresql+asyncpg://valeo_dev:${POSTGRES_PASSWORD:-valeo_dev_2024}@postgres:5432/valeo_neuro_erp}
+      MIGRATION_DATABASE_URL: ${VALEO_MIGRATOR_CONTAINER_ASYNC_DATABASE_URL:-postgresql+asyncpg://valeo_dev:${POSTGRES_PASSWORD:-valeo_dev_2024}@postgres:5432/valeo_neuro_erp}
       REDIS_URL: redis://redis:6379/4
       SERVICE_NAME: crm-analytics
       DEBUG: "true"
@@ -441,7 +458,8 @@ services:
     container_name: valeo-neuro-erp-crm-communication
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql+asyncpg://valeo_dev:${POSTGRES_PASSWORD:-valeo_dev_2024}@postgres:5432/valeo_neuro_erp
+      DATABASE_URL: ${VALEO_APP_CONTAINER_ASYNC_DATABASE_URL:-postgresql+asyncpg://valeo_dev:${POSTGRES_PASSWORD:-valeo_dev_2024}@postgres:5432/valeo_neuro_erp}
+      MIGRATION_DATABASE_URL: ${VALEO_MIGRATOR_CONTAINER_ASYNC_DATABASE_URL:-postgresql+asyncpg://valeo_dev:${POSTGRES_PASSWORD:-valeo_dev_2024}@postgres:5432/valeo_neuro_erp}
       REDIS_URL: redis://redis:6379/6
       SERVICE_NAME: crm-communication
       DEBUG: "true"
@@ -499,7 +517,8 @@ services:
     container_name: valeo-neuro-erp-crm-multichannel
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql+asyncpg://valeo_dev:${POSTGRES_PASSWORD:-valeo_dev_2024}@postgres:5432/valeo_neuro_erp
+      DATABASE_URL: ${VALEO_APP_CONTAINER_ASYNC_DATABASE_URL:-postgresql+asyncpg://valeo_dev:${POSTGRES_PASSWORD:-valeo_dev_2024}@postgres:5432/valeo_neuro_erp}
+      MIGRATION_DATABASE_URL: ${VALEO_MIGRATOR_CONTAINER_ASYNC_DATABASE_URL:-postgresql+asyncpg://valeo_dev:${POSTGRES_PASSWORD:-valeo_dev_2024}@postgres:5432/valeo_neuro_erp}
       REDIS_URL: redis://redis:6379/10
       SERVICE_NAME: crm-multichannel
       DEBUG: "true"
@@ -530,7 +549,8 @@ services:
     container_name: valeo-neuro-erp-crm-security
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql+asyncpg://valeo_dev:${POSTGRES_PASSWORD:-valeo_dev_2024}@postgres:5432/valeo_neuro_erp
+      DATABASE_URL: ${VALEO_APP_CONTAINER_ASYNC_DATABASE_URL:-postgresql+asyncpg://valeo_dev:${POSTGRES_PASSWORD:-valeo_dev_2024}@postgres:5432/valeo_neuro_erp}
+      MIGRATION_DATABASE_URL: ${VALEO_MIGRATOR_CONTAINER_ASYNC_DATABASE_URL:-postgresql+asyncpg://valeo_dev:${POSTGRES_PASSWORD:-valeo_dev_2024}@postgres:5432/valeo_neuro_erp}
       REDIS_URL: redis://redis:6379/12
       SERVICE_NAME: crm-security
       DEBUG: "true"
@@ -711,7 +731,8 @@ services:
       PAPERLESS_TOKEN: ${PAPERLESS_API_TOKEN:-}
       PAPERLESS_TIMEOUT: 30
       # Database (für Document References)
-      DATABASE_URL: postgresql+asyncpg://valeo_dev:valeo_dev_2024@postgres:5432/valeo_neuro_erp
+      DATABASE_URL: ${VALEO_APP_CONTAINER_ASYNC_DATABASE_URL:-postgresql+asyncpg://valeo_dev:valeo_dev_2024@postgres:5432/valeo_neuro_erp}
+      MIGRATION_DATABASE_URL: ${VALEO_MIGRATOR_CONTAINER_ASYNC_DATABASE_URL:-postgresql+asyncpg://valeo_dev:valeo_dev_2024@postgres:5432/valeo_neuro_erp}
       # Security
       JWT_SECRET: ${JWT_SECRET:-dev-jwt-secret-change-in-production}
       # Tag Configuration

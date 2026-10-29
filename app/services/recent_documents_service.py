@@ -21,7 +21,7 @@ ROLE_BY_SCREEN_PREFIX = {
     "futtermittel/": "FUTTERMITTEL_LESEN",
     "qualitaet/": "QUALITAET_LESEN",
 }
-PRIVILEGED_ROLES = frozenset({"admin", "manager"})
+PRIVILEGED_ROLES = frozenset({"admin"})
 
 
 class RecentDocumentError(ValueError):

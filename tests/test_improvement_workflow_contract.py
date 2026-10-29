@@ -18,7 +18,7 @@ def test_frontendtests_blockieren_und_erzeugen_nachweis():
     assert not tests[0].get("continue-on-error", False)
     assert "--coverage.reportsDirectory=coverage" in tests[0]["run"]
     package = json.loads((ROOT / "packages/frontend-web/package.json").read_text(encoding="utf-8"))
-    assert package["devDependencies"]["@vitest/coverage-v8"] == "4.1.11"
+    assert package["devDependencies"]["@vitest/coverage-v8"] == "4.1.12"
 
 
 def test_sonar_verbraucht_nachweise_statt_tests_zu_wiederholen():

@@ -1,7 +1,7 @@
 """Postgres persistence for Masken-Studio drafts (require_db)."""
 
 from __future__ import annotations
-from studio_review_helper import publish_reviewed
+from studio_review_helper import publish_reviewed, simulation_ready_definition
 
 import pytest
 from uuid import uuid4
@@ -19,7 +19,10 @@ from app.services.studio_draft_store import (
     reset_studio_drafts,
     use_sql_studio_drafts,
 )
-from app.services.studio_propose import propose_studio_draft
+from app.services.studio_propose import propose_studio_draft as original_proposal
+
+def propose_studio_draft(intent):
+    return simulation_ready_definition(original_proposal(intent))
 
 pytestmark = pytest.mark.integration
 
@@ -40,7 +43,8 @@ _USER: dict = {}
 
 @pytest.fixture
 def studio_db(require_db, monkeypatch):
-    assert engine.url.database == "valeo_probe" or "test" in (engine.url.database or "").lower()
+    from testgrenze import pruefstand_erlaubt
+    assert pruefstand_erlaubt(engine.url)
     _USER.clear()
     _USER.update(sub="anna", roles=["admin"], raw={"identity_type": "human"})
     previous_user = app.dependency_overrides.get(get_current_user)

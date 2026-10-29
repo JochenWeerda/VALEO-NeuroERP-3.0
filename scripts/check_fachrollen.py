@@ -62,6 +62,7 @@ def katalog_aus_code(bestehend: dict | None = None) -> dict:
         rollen.append({
             "name": name,
             "beschreibung": alt.get(name, {}).get("beschreibung") or beschreibung(name),
+            **({"vertrag": alt[name]["vertrag"]} if "vertrag" in alt.get(name, {}) else {}),
         })
     return {
         "hinweis": (
@@ -71,7 +72,37 @@ def katalog_aus_code(bestehend: dict | None = None) -> dict:
             "hier nicht."
         ),
         "rollen": rollen,
+        "grundrollen": (bestehend or {}).get("grundrollen", []),
     }
+
+
+VERTRAGSFELDER = ("zweck", "personenkreis", "geltungsbereich", "erlaubt", "ausgeschlossen", "freigaben", "vergabe")
+
+
+def vertragsfehler(katalog: dict, realm: dict | None = None) -> list[str]:
+    """Beschreibungen sind pruefbare Grenzen, keine zusaetzliche Rechtequelle."""
+    fehler = []
+    namen = set()
+    for rolle in [*katalog.get("rollen", []), *katalog.get("grundrollen", [])]:
+        name = rolle.get("name", "")
+        if not isinstance(name, str) or not name.strip() or name in namen:
+            fehler.append("Fehlender oder doppelter Rollenname")
+        namen.add(name)
+        if not isinstance(rolle.get("beschreibung"), str) or not rolle["beschreibung"].strip():
+            fehler.append(f"{name}: Beschreibung fehlt")
+        vertrag = rolle.get("vertrag")
+        if not isinstance(vertrag, dict):
+            fehler.append(f"{name}: Rollenvertrag fehlt")
+            continue
+        for feld in VERTRAGSFELDER:
+            wert = vertrag.get(feld)
+            if not isinstance(wert, str) or not wert.strip():
+                fehler.append(f"{name}: {feld} fehlt")
+    if realm is not None:
+        for rolle in realm.get("roles", {}).get("realm", []):
+            if rolle["name"] not in namen:
+                fehler.append(f"{rolle['name']}: Realm-Rolle ohne Beschreibungskontrakt")
+    return fehler
 
 
 def render(katalog: dict) -> str:
@@ -86,6 +117,11 @@ def main() -> int:
 
     bestehend = json.loads(KATALOG.read_text(encoding="utf-8")) if KATALOG.exists() else None
     soll = katalog_aus_code(bestehend)
+
+    fehler = vertragsfehler(soll, json.loads(REALM.read_text(encoding="utf-8")))
+    if fehler:
+        print("\n".join(fehler), file=sys.stderr)
+        return 1
 
     if args.realm:
         realm = {r["name"] for r in json.loads(REALM.read_text(encoding="utf-8")).get("roles", {}).get("realm", [])}

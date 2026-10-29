@@ -9,6 +9,7 @@ from fastapi import HTTPException, Request
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 from app.services.mask_action_runtime_service import MaskActionResult, parse_action_body
+from app.core.akteur import gepruefter_akteur_aus_request
 
 
 class TourStopIn(BaseModel):
@@ -187,7 +188,7 @@ def action_tour_anlegen(request: Request, body: dict[str, Any], db: Session, ten
             commit=False,
         )
         entity_id = str(row["id"])
-        actor = request.headers.get("X-User-ID") or "logistik-user"
+        actor = gepruefter_akteur_aus_request(request)
         audit_id = _write_audit(
             db,
             tenant_id=tenant_id,

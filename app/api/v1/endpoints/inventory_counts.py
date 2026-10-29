@@ -19,6 +19,7 @@ from ....core.tenant import get_tenant_id
 from ....infrastructure.models import InventoryCount, InventoryCountLine
 from ..schemas.base import PaginatedResponse, BaseSchema
 import logging
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 logger = logging.getLogger(__name__)
 
@@ -99,7 +100,7 @@ async def list_inventory_counts(
     )
 
 
-@router.post("/", response_model=InventoryCountOut, status_code=201, summary="Inventory count anlegen")
+@router.post("/", response_model=InventoryCountOut, status_code=201, summary="Inventory count anlegen", dependencies=SCHREIBEN["LAGER"])
 async def create_inventory_count(
     payload: InventoryCountCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -135,7 +136,7 @@ async def get_inventory_count(
     return InventoryCountOut.model_validate(obj)
 
 
-@router.delete("/{count_id}", status_code=204, response_class=Response, response_model=None, summary="Inventory count löschen")
+@router.delete("/{count_id}", status_code=204, response_class=Response, response_model=None, summary="Inventory count löschen", dependencies=SCHREIBEN["LAGER"])
 async def delete_inventory_count(
     count_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ):
@@ -161,7 +162,7 @@ async def get_count_lines(
     return [InventoryCountLineOut.model_validate(line_item) for line_item in lines]
 
 
-@router.post("/lines", response_model=InventoryCountLineOut, status_code=201, summary="Count line anlegen")
+@router.post("/lines", response_model=InventoryCountLineOut, status_code=201, summary="Count line anlegen", dependencies=SCHREIBEN["LAGER"])
 async def create_count_line(
     payload: InventoryCountLineCreate,
     count_id: str = Query(...),
@@ -191,7 +192,7 @@ async def create_count_line(
     return InventoryCountLineOut.model_validate(line)
 
 
-@router.patch("/lines/{line_id}", response_model=InventoryCountLineOut, summary="Count line aktualisieren")
+@router.patch("/lines/{line_id}", response_model=InventoryCountLineOut, summary="Count line aktualisieren", dependencies=SCHREIBEN["LAGER"])
 async def update_count_line(
     line_id: str,
     payload: InventoryCountLineUpdate,
@@ -214,7 +215,7 @@ async def update_count_line(
     return InventoryCountLineOut.model_validate(line)
 
 
-@router.delete("/lines/{line_id}", status_code=204, response_class=Response, response_model=None, summary="Count line löschen")
+@router.delete("/lines/{line_id}", status_code=204, response_class=Response, response_model=None, summary="Count line löschen", dependencies=SCHREIBEN["LAGER"])
 async def delete_count_line(
     line_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ):
@@ -238,7 +239,7 @@ class InventurPostResult(BaseModel):
     status: str
 
 
-@router.post("/{count_id}/post", response_model=InventurPostResult, tags=["inventory"], summary="Inventory count erstellen")
+@router.post("/{count_id}/post", response_model=InventurPostResult, tags=["inventory"], summary="Inventory count erstellen", dependencies=SCHREIBEN["LAGER"])
 async def post_inventory_count(
     count_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -397,7 +398,7 @@ class PeriodCloseResult(BaseModel):
     status: str
 
 
-@router.post("/period-close", response_model=PeriodCloseResult, tags=["inventory"], summary="Close period")
+@router.post("/period-close", response_model=PeriodCloseResult, tags=["inventory"], summary="Close period", dependencies=SCHREIBEN["LAGER"])
 async def period_close(
     period: str = Query(..., description="Periode z.B. 2026-Q1 oder 2026-12"),
     tenant_id: str = Depends(get_tenant_id),

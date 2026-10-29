@@ -60,7 +60,10 @@ def prepared_realm(source: dict) -> dict:
     known = {role['name'] for role in roles}
     desired = [{'name': role['name'], 'description': role['beschreibung']}
                for role in catalog['rollen']]
-    desired.append({'name': 'manager', 'description': 'Explicit management role; never assigned by default'})
+    descriptions = {r['name']: r['beschreibung'] for r in catalog['rollen'] + catalog.get('grundrollen', [])}
+    for role in roles:
+        if role['name'] in descriptions:
+            role['description'] = descriptions[role['name']]
     roles.extend(role for role in desired if role['name'] not in known)
     realm.update(accessTokenLifespan=300, ssoSessionIdleTimeout=900,
                  ssoSessionMaxLifespan=28800, revokeRefreshToken=True, refreshTokenMaxReuse=0)
@@ -131,6 +134,24 @@ def assign_declared_scopes(client: httpx.Client, headers: dict, realm: str, iden
             raise RuntimeError('OIDC client scope assignment not persisted')
 
 
+#: Clients, die nach einem bestehenden Realm-Import hinzukamen und deshalb angelegt werden duerfen.
+#: Jeder andere fehlende Client bleibt ein Fehler: Ein ERP-Client wird nicht stillschweigend neu erfunden.
+ADDITIVE_CLIENT_IDS = frozenset({'valeo-neuro-erp-cli'})
+
+
+def create_declared_client(client: httpx.Client, headers: dict, realm: str, desired: dict) -> None:
+    """Oeffentlicher CLI-Client nur mit Device-Grant; kein Geheimnis, kein Browser-, Passwort- oder Dienstfluss."""
+    attributes = desired.get('attributes', {})
+    if (not desired.get('publicClient') or desired.get('standardFlowEnabled') or desired.get('serviceAccountsEnabled')
+            or desired.get('directAccessGrantsEnabled') or desired.get('implicitFlowEnabled')
+            or attributes.get('oauth2.device.authorization.grant.enabled') != 'true' or desired.get('redirectUris')):
+        raise RuntimeError('Additive client must be a public device-grant-only client')
+    representation = {k: v for k, v in desired.items() if k not in ('secret', 'defaultClientScopes', 'optionalClientScopes')}
+    response = client.post(f'/admin/realms/{realm}/clients', headers=headers, json=representation)
+    if response.status_code != 201:
+        raise RuntimeError(f'Declared client creation failed ({response.status_code})')
+
+
 def reconcile_callback_origins(current: dict, desired: dict) -> None:
     """Only declared callback origins, with existing deployment addresses retained."""
     for field in ('redirectUris','webOrigins'):
@@ -160,6 +181,10 @@ def provision(client: httpx.Client, username: str, password: str, source: dict, 
     for desired in realm.get('clients',[]):
         found=client.get(f'/admin/realms/{name}/clients',headers=headers,params={'clientId':desired['clientId']})
         found.raise_for_status()
+        if not found.json() and desired['clientId'] in ADDITIVE_CLIENT_IDS:
+            create_declared_client(client, headers, name, desired)
+            found=client.get(f'/admin/realms/{name}/clients',headers=headers,params={'clientId':desired['clientId']})
+            found.raise_for_status()
         if len(found.json()) != 1:
             raise RuntimeError('Configured ERP client missing or ambiguous')
         client_id=found.json()[0]['id']
@@ -216,6 +241,20 @@ def reconcile_realm_roles(client: httpx.Client, headers: dict, realm: str, roles
     for role in roles:
         response = client.get(f"/admin/realms/{realm}/roles/{role['name']}", headers=headers)
         if response.status_code == 200:
+            current = response.json()
+            if current.get('name') != role['name']:
+                raise RuntimeError('Realm role identity mismatch')
+            if 'description' not in role or current.get('description') == role['description']:
+                continue
+            if not current.get('id'):
+                raise RuntimeError('Realm role identifier was not verified')
+            desired = {**current, 'description': role['description']}
+            updated = client.put(f"/admin/realms/{realm}/roles/{role['name']}", headers=headers, json=desired)
+            if updated.status_code != 204:
+                raise RuntimeError('Realm role description update failed')
+            checked = client.get(f"/admin/realms/{realm}/roles/{role['name']}", headers=headers)
+            if checked.status_code != 200 or checked.json() != desired:
+                raise RuntimeError('Realm role description or preserved metadata did not persist')
             continue
         if response.status_code != 404:
             raise RuntimeError(f'Realm role inventory failed ({response.status_code})')

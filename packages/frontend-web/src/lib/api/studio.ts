@@ -17,8 +17,50 @@ export interface StudioDraftRecord {
   definition: ScreenDefinition
 }
 
+export interface StudioDialogueTurn { role: 'user' | 'assistant'; content: string }
+export interface StudioDialogueResult {
+  mode: 'catalog_guided' | 'llm_assisted'
+  ready: boolean
+  message: string
+  contract: string
+  limitations: string[]
+  definition?: ScreenDefinition | null
+}
+
+export async function fetchStudioBudgets(): Promise<Array<{ id: string; available: number; kind: string }>> {
+  const response = await apiClient.get<Array<{ id: string; available: number; kind: string }>>('/api/v1/identity/budgets')
+  return response.data
+}
+
+export async function sendStudioDialogue(turns: StudioDialogueTurn[], weighing?: 'manual' | 'automatic', acceptPreviewLimits = false, model?: { budget: string }): Promise<StudioDialogueResult> {
+  const fingerprintBytes = model ? await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify({ turns, budget: model.budget }))) : undefined
+  const fingerprint = fingerprintBytes ? Array.from(new Uint8Array(fingerprintBytes), byte => byte.toString(16).padStart(2, '0')).join('') : ''
+  const response = await apiClient.post<StudioDialogueResult>('/api/v1/studio/dialogue', { turns, weighing, accept_preview_limits: acceptPreviewLimits,
+    ...(model ? { use_language_model: true, budget_id: model.budget, idempotency_key: statusKey('dialogue-model', model.budget, fingerprint) } : {}),
+  })
+  return response.data
+}
+
+export interface HarvestPreviewResult {
+  contract: string
+  business_effect: 'none'
+  external_effect: 'none'
+  positions: Array<Record<string, unknown>>
+  total_net_amount_eur: string
+  total_vat_amount_eur: string
+  total_gross_amount_eur: string
+  quality_limit_exceeded?: boolean | null
+  settlement_authorized?: false
+  warnings: string[]
+}
+
+export async function calculateStudioHarvest(values: Record<string, unknown>): Promise<HarvestPreviewResult> {
+  const response = await apiClient.post<HarvestPreviewResult>('/api/v1/studio/harvest-preview', values)
+  return response.data
+}
+
 export async function fetchStudioDrafts(): Promise<StudioDraftRecord[]> {
-  const response = await apiClient.get('/api/v1/studio/drafts')
+  const response = await apiClient.get<{ drafts?: StudioDraftRecord[] }>('/api/v1/studio/drafts')
   return response.data.drafts ?? []
 }
 
@@ -36,6 +78,7 @@ export async function fetchStudioCatalog() {
     columnNavigation: string[]
     dataSources: Array<{ key: string; label: string; endpoint: string }>
     actions: Array<{ key: string; label: string; dangerLevel: string }>
+    semantic?: { contract: string; fields: Array<{ key: string; label: string; unit: string; contract: string; required: boolean }>; limitations: string[] }
   }
 }
 
@@ -112,4 +155,25 @@ export async function simulateStudioDraft(draftId: string, expectedRevision: str
   statusKeys.delete(intent)
   try { sessionStorage.removeItem(intent) } catch { /* client-memory key was cleared */ }
   return response.data as StudioDraftRecord & { simulation: StudioSimulationResult }
+}
+
+
+export interface StudioSavedMigrationPlan {
+  event_id: string
+  draft_id: string
+  candidate_revision: string
+  candidate_definition_hash: string
+  binding_hash: string
+  requires_definition_update: boolean
+  schema_changes: Record<string, unknown>[]
+  plan: { bindings: string[]; blockers: string[]; can_activate: false; plan_hash: string }
+}
+
+export async function saveStudioMigrationPlan(draftId: string, expectedRevision: string): Promise<StudioSavedMigrationPlan> {
+  const response = await apiClient.post(`/api/v1/studio/drafts/${encodeURIComponent(draftId)}/migration-plan`, {
+    expected_revision: expectedRevision,
+    idempotency_key: statusKey('migration-plan', draftId, expectedRevision),
+    schema_changes: [],
+  })
+  return response.data as StudioSavedMigrationPlan
 }

@@ -6,6 +6,7 @@ vi.mock('@/components/mask-builder/UniversalNativeCockpitPage', () => ({
     <div data-testid={String(props.testId)} data-screen-id={String(props.screenId)} />
   ),
 }))
+vi.mock('@tanstack/react-query', () => ({ useQueryClient: () => ({ invalidateQueries: vi.fn() }) }))
 vi.mock('@/hooks/use-toast', () => ({ useToast: () => ({ toast: vi.fn() }) }))
 vi.mock('@/lib/api-client', () => ({ apiClient: { post: vi.fn() } }))
 

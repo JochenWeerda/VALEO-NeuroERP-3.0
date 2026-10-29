@@ -16,7 +16,7 @@ from __future__ import annotations
 import time
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -27,6 +27,8 @@ from app.services.crm_kontakt_service import CrmKontaktService
 from app.services.crm_notification_service import CrmNotificationService
 from app.services.llm_gateway import LLMGateway, parse_json_object
 from app.api.v1.schemas.base import TypedObjectOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
+from app.core.akteur import gepruefter_akteur_aus_request  # Bearbeiter aus dem Token
 
 router = APIRouter(prefix="/crm/kim", tags=["crm", "kim", "360"])
 
@@ -265,7 +267,7 @@ def get_customer(
     return _customer_from_row(dict(r)) if r else None
 
 
-@router.put("/customers/{kunden_nr}", response_model=StatusOut, summary="Kundenstamm bearbeiten (KIM)")
+@router.put("/customers/{kunden_nr}", response_model=StatusOut, summary="Kundenstamm bearbeiten (KIM)", dependencies=SCHREIBEN["CRM"])
 def update_customer(
     kunden_nr: str,
     body: CustomerUpdateIn,
@@ -347,7 +349,7 @@ def list_contacts(
     return out
 
 
-@router.post("/customers/{kunden_nr}/contacts", response_model=StatusOut, summary="Ansprechpartner anlegen")
+@router.post("/customers/{kunden_nr}/contacts", response_model=StatusOut, summary="Ansprechpartner anlegen", dependencies=SCHREIBEN["CRM"])
 def create_contact(
     kunden_nr: str,
     body: ContactPersonCreate,
@@ -422,10 +424,11 @@ class LogCreateIn(BaseModel):
     referenceNo: Optional[str] = None
 
 
-@router.post("/customers/{kunden_nr}/logs", response_model=StatusOut, summary="Kontakt protokollieren")
+@router.post("/customers/{kunden_nr}/logs", response_model=StatusOut, summary="Kontakt protokollieren", dependencies=SCHREIBEN["CRM"])
 def create_log(
     kunden_nr: str,
     body: LogCreateIn,
+    request: Request,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> StatusOut:
@@ -439,7 +442,7 @@ def create_log(
         "art": art,
         "kurzinfo": body.betreff or body.artKurzinfo,
         "notiz": body.kommentar,
-        "bediener": body.operator,
+        "bediener": gepruefter_akteur_aus_request(request),
         "wiedervorlage": body.reSubmissionDate or None,
         "weiterleitung_an": body.ccIntern,
         "verweis": body.referenceNo,
@@ -451,7 +454,7 @@ def create_log(
                 cc=body.ccIntern,
                 betreff=body.betreff or body.artKurzinfo,
                 kommentar=body.kommentar,
-                sender=body.operator,
+                sender=gepruefter_akteur_aus_request(request),
                 kunden_nr=kunden_nr,
                 kontakt_id=created.get("id"),
             )
@@ -460,7 +463,7 @@ def create_log(
     return StatusOut()
 
 
-@router.put("/contact-logs/{log_id}/completed", response_model=StatusOut, summary="Wiedervorlage erledigen")
+@router.put("/contact-logs/{log_id}/completed", response_model=StatusOut, summary="Wiedervorlage erledigen", dependencies=SCHREIBEN["CRM"])
 def complete_log(
     log_id: str,
     db: Session = Depends(get_db),
@@ -481,7 +484,7 @@ class NotificationIn(BaseModel):
     channel: Optional[str] = None        # 'internal' | 'email'; None -> Auto (@ => email)
 
 
-@router.post("/notifications", response_model=TypedObjectOut, summary="Benachrichtigung senden (intern/extern)")
+@router.post("/notifications", response_model=TypedObjectOut, summary="Benachrichtigung senden (intern/extern)", dependencies=SCHREIBEN["CRM"])
 def create_notification(
     body: NotificationIn,
     db: Session = Depends(get_db),
@@ -515,7 +518,7 @@ def list_notifications(
     return CrmNotificationService(db, tenant_id).inbox(recipient, only_unread=unread)
 
 
-@router.post("/notifications/{notification_id}/read", response_model=TypedObjectOut, summary="Benachrichtigung als gelesen markieren")
+@router.post("/notifications/{notification_id}/read", response_model=TypedObjectOut, summary="Benachrichtigung als gelesen markieren", dependencies=SCHREIBEN["CRM"])
 def read_notification(
     notification_id: str,
     db: Session = Depends(get_db),
@@ -761,7 +764,7 @@ def _fallback_summary(cust: Customer, outstanding: float, log_count: int, doc_co
                         risks=risks or ["Keine akuten Risiken erkennbar."], engine="fallback")
 
 
-@router.post("/neuro-summary", response_model=NeuroSummary, summary="NeuroAI-Kundendossier")
+@router.post("/neuro-summary", response_model=NeuroSummary, summary="NeuroAI-Kundendossier", dependencies=SCHREIBEN["CRM"])
 def neuro_summary(
     body: NeuroSummaryIn,
     db: Session = Depends(get_db),
@@ -810,7 +813,7 @@ _TONE_LABEL = {
 }
 
 
-@router.post("/draft-email", response_model=DraftEmailOut, summary="NeuroComms E-Mail-Entwurf")
+@router.post("/draft-email", response_model=DraftEmailOut, summary="NeuroComms E-Mail-Entwurf", dependencies=SCHREIBEN["CRM"])
 def draft_email(
     body: DraftEmailIn,
     db: Session = Depends(get_db),

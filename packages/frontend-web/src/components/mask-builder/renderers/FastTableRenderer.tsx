@@ -32,11 +32,11 @@ interface FastTableRendererProps {
   suppressHeading?: boolean
 }
 
-export function formatCellValue(value: unknown, renderKind: RenderColumnKind | undefined): ReactNode {
+export function formatCellValue(value: unknown, renderKind: RenderColumnKind | undefined, currency = 'EUR'): ReactNode {
   if (value == null) return '–'
   switch (renderKind) {
     case 'currency':
-      return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(Number(value))
+      return /^[A-Z]{3}$/.test(currency) ? new Intl.NumberFormat('de-DE', { style: 'currency', currency }).format(Number(value)) : 'Währung fehlt'
     case 'date':
     case 'datetime': {
       const raw = String(value).trim()
@@ -131,7 +131,8 @@ export const FastTableRenderer = memo(function FastTableRenderer({
   onRowSelect,
   suppressHeading = false,
 }: FastTableRendererProps): JSX.Element {
-  const isServerPaged = table.serverPagination && Boolean(onQueryChange)
+  // Blaettern am Server oder, ohne Serverblaetterung, in der Laufzeit (die dann `total` liefert und die Seite schneidet).
+  const isServerPaged = Boolean(onQueryChange) && (table.serverPagination || total !== undefined)
   const visibleRows = isServerPaged ? rows : rows.slice(0, table.pageSize)
   const totalPages = total !== undefined ? Math.ceil(total / table.pageSize) : undefined
   const activeFilterPlan = filterPlan && Object.keys(filterPlan).length > 0 ? filterPlan : undefined
@@ -173,7 +174,7 @@ export const FastTableRenderer = memo(function FastTableRenderer({
     numeric: isProfileNumeric(table, column),
     sortable: column.sortable,
     render: column.renderKind
-      ? (value: unknown) => formatCellValue(value, column.renderKind)
+      ? (value: unknown, row: Record<string, unknown>) => formatCellValue(value, column.renderKind, column.currencyField ? String(row[column.currencyField] ?? '') : 'EUR')
       : undefined,
   }))
   const selectableColumns = table.bulkActions?.length && onRowAction

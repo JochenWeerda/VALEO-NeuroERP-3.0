@@ -67,6 +67,12 @@ Sie ersetzt nicht die fachliche Dokumentation, sondern legt die verbindliche Sta
   Volumes loeschen; kein pauschales Docker-Prune.
 - CI nutzt die vom Job bereits bereitgestellte Datenbank. Tests erzeugen darin
   keine weiteren Datenbanken oder Dockerinstanzen.
+- Direkte Datenbanksitzungen von Agenten (psql, Skripte, Treiber) setzen
+  `PGAPPNAME=agent:<agentname>`, damit `governance.ddl_events` ihre
+  Schemaaenderungen zuordnen kann ([DB-Governance](docs/architecture/db-governance-20261026.md)).
+- Wo die Rollen aus `scripts/provision_db_roles.py` eingerichtet sind, verbinden sich
+  Agenten als `valeo_agent` (Daten, kein DDL); Schemaaenderungen nur ueber
+  `valeo_migrator` bzw. Alembic/`migrate:apply` im abgestimmten Wartungsfenster.
 
 Runbook: [Gemeinsamer Testpruefstand](docs/quality-assurance/test-database-resource-policy-20261001.md).
 
@@ -126,3 +132,25 @@ Fuer alle schreibenden MCP-Adapter gilt [MCP-WRITE-001 bis 015](docs/architectur
 Integrationsreihenfolge: Ausfuehrung absichern, bestehende Register vereinheitlichen,
 Kanalvertraege pruefen, Masken und MCP ableiten. Unabgenommene Writes bleiben deaktiviert;
 Freischaltung erfolgt ausdruecklich pro Capability und Agentenrolle.
+
+## Aufgabenangepasste Subagenten und Modellwahl (Nutzerfreigabe)
+
+- Parallele Subagenten und eine der Schwierigkeit angepasste Modellwahl sind fuer
+  die Projektarbeit ausdruecklich erlaubt. Innerhalb des freigegebenen Auftrags
+  autonom bis zur vollstaendigen, belegten Abnahme weiterarbeiten.
+- Fuer klar begrenzte Inventar-, Recherche-, Generator- und Routineaufgaben das
+  kleinste ausreichend leistungsfaehige verfuegbare Modell verwenden. Fuer
+  komplexe Fachketten, Mandanten-/Rechtegrenzen, Architektur und schwierige
+  Integration eine entsprechend hoehere Modell- und Denkleistung waehlen.
+- Nicht vorsorglich alle Aufgaben an das groesste Modell geben. Bei nachgewiesenen
+  Qualitaetsproblemen oder hoeherer Komplexitaet gezielt eskalieren; zuerst
+  Aufgabenbeschreibung, Eingaben und vorhandene Belege pruefen.
+- Delegation mit engem Kontext, eindeutigen Dateien/Themen und konkreten
+  Abnahmekriterien. Keine konkurrierenden Aenderungen an denselben Dateien,
+  keine doppelten Builds/Tests und keine neuen Testdatenbanken pro Agent.
+- Der Lead integriert und prueft Ergebnisse gegen Fachvertraege, Tests und
+  reale Bedienbarkeit. Tokenersparnis rechtfertigt weder reduzierte
+  Funktionsparitaet noch schwaechere Sicherheits- oder Qualitaetsgates.
+- Gepruefte groessere Zwischenstaende committen und auf den vorgesehenen
+  GitHub-Zweig pushen. Die jeweilige Claim-, Datenschutz- und Ressourcenregel
+  bleibt verbindlich; eine erneute allgemeine Genehmigung ist nicht erforderlich.

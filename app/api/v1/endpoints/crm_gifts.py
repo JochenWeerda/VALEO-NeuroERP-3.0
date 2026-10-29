@@ -18,6 +18,7 @@ from app.api.v1.schemas.crm_bundle_schemas import (
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.crm_gift_service import CrmGiftService
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/crm/kim", tags=["crm", "kim", "360"])
 
@@ -50,7 +51,7 @@ def list_gifts(
     return CrmGiftService(db, tenant_id).list(kunden_nr, year=year, contact_id=contactId)
 
 
-@router.post("/customers/{kunden_nr}/gifts", response_model=GiftOut, summary="Präsent anlegen")
+@router.post("/customers/{kunden_nr}/gifts", response_model=GiftOut, summary="Präsent anlegen", dependencies=SCHREIBEN["CRM"])
 def create_gift(
     kunden_nr: str,
     body: GiftIn,
@@ -60,7 +61,7 @@ def create_gift(
     return CrmGiftService(db, tenant_id).create(kunden_nr, body.model_dump())
 
 
-@router.put("/gifts/{gift_id}", response_model=GiftOut, summary="Präsent bearbeiten")
+@router.put("/gifts/{gift_id}", response_model=GiftOut, summary="Präsent bearbeiten", dependencies=SCHREIBEN["CRM"])
 def update_gift(
     gift_id: str,
     body: GiftIn,
@@ -70,7 +71,7 @@ def update_gift(
     return CrmGiftService(db, tenant_id).update(gift_id, body.model_dump())
 
 
-@router.delete("/gifts/{gift_id}", response_model=StatusOut, summary="Präsent löschen")
+@router.delete("/gifts/{gift_id}", response_model=StatusOut, summary="Präsent löschen", dependencies=SCHREIBEN["CRM"])
 def delete_gift(
     gift_id: str,
     db: Session = Depends(get_db),

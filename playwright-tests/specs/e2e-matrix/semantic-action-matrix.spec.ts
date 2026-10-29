@@ -5,11 +5,12 @@
  * Externe Gates: TSE, ELSTER, DATEV, DMS bleiben simuliert / skipped.
  */
 import { test, expect } from "@playwright/test";
+import { apiToken } from "../../helpers/anmeldung";
 
 const BASE = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3001";
 const HEADERS = {
-  "X-Tenant-ID": "test-tenant",
-  Authorization: "Bearer dev-token",
+  "X-Tenant-ID": "00000000-0000-0000-0000-000000000001",
+  Authorization: `Bearer ${apiToken()}`,
 };
 
 test.describe("O2C — Order-to-Cash Prozesskette @smoke", () => {

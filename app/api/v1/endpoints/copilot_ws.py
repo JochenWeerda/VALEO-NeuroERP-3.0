@@ -35,7 +35,7 @@ def _run_pipeline_sync(user_text: str, session_context: dict) -> dict:
         return run_pipeline(
             user_input=user_text,
             context=session_context,
-            tenant_id=session_context.get("tenant_id", "system"),
+            tenant_id=session_context["tenant_id"],  # verified_websocket_context liefert ihn immer
             db=None,
             dry_run=False,
         )

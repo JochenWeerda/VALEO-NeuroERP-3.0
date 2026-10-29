@@ -1621,6 +1621,11 @@
       "source": "alias"
     },
     {
+      "module": "@/pages/disposition/touren-disposition",
+      "path": "disposition/touren-disposition",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/docflow/artefakt-freigabe",
       "path": "docflow/artefakt-freigabe",
       "source": "alias"
@@ -1746,7 +1751,7 @@
       "source": "navigation"
     },
     {
-      "module": "@/pages/einkauf/anlieferavis",
+      "module": "@/pages/einkauf/anlieferavis-liste",
       "path": "einkauf/anlieferavis",
       "source": "auto"
     },
@@ -2531,7 +2536,7 @@
       "source": "alias"
     },
     {
-      "module": "@/pages/finance/kreditoren-stamm",
+      "module": "@/pages/finance/kreditoren-liste",
       "path": "finance/kreditoren",
       "source": "alias"
     },
@@ -4246,6 +4251,11 @@
       "source": "alias"
     },
     {
+      "module": "@/pages/studio/workspace-composition-preview",
+      "path": "studio/workspace-composition-preview",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/subventionen/dashboard",
       "path": "subventionen/dashboard",
       "source": "auto"
@@ -4707,13 +4717,10 @@
     }
   ],
   "searchKeys": [
-    "anfrage_id",
     "angebot",
     "articleId",
     "articleName",
-    "article_id",
     "auftrag",
-    "campaign",
     "campaignEnd",
     "campaignId",
     "campaignName",
@@ -4723,23 +4730,17 @@
     "code_challenge_method",
     "contact_id",
     "contractId",
-    "count",
     "customerId",
     "customerName",
     "customerNumber",
-    "customer_id",
-    "date",
     "entryMode",
     "error",
-    "flaeche",
-    "flik",
+    "filter_plan",
     "fromOffer",
     "id",
     "inbox",
     "initialName",
     "instanceId",
-    "invoiceId",
-    "kennzeichen",
     "kunde",
     "kundeName",
     "lieferschein",
@@ -4748,10 +4749,9 @@
     "nonce",
     "op",
     "opId",
+    "page",
     "partnerName",
     "pflege",
-    "process",
-    "productGroup",
     "qpResult",
     "qualityProtocolId",
     "queueEntryId",
@@ -4763,14 +4763,10 @@
     "rfqId",
     "search",
     "service_request_id",
-    "settlementId",
-    "source",
     "state",
     "subject",
-    "token",
     "vehiclePlate",
     "vorlage",
-    "warehouse_id",
     "workflowCase",
     "workflowInstanceId",
     "workflowLabel",

@@ -7,7 +7,6 @@ const ALLOWED_DOCUMENT_WRITE_FILES = new Set([
   'lib/export-utils.ts',
   'lib/nawaro-communication.ts',
   'lib/services/bon-druck.ts',
-  'pages/einkauf/bestellungen-liste.tsx',
 ])
 
 const DANGEROUS_PATTERNS: Array<{ name: string; regex: RegExp }> = [
@@ -51,9 +50,9 @@ describe('frontend html sink inventory', () => {
         return relative(SRC_ROOT, filePath).replace(/\\/g, '/')
       })
       .filter((value): value is string => Boolean(value))
-      .sort()
+      .sort((a, b) => a.localeCompare(b))
 
-    expect(hits).toEqual([...ALLOWED_DOCUMENT_WRITE_FILES].sort())
+    expect(hits).toEqual([...ALLOWED_DOCUMENT_WRITE_FILES].sort((a, b) => a.localeCompare(b)))
   })
 
   it('finds no new raw html sink patterns in frontend source', () => {

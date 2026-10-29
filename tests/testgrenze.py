@@ -29,8 +29,29 @@ def ersetze_mandant(app: FastAPI, mandant: str | None = None) -> None:
 
 
 def ersetze_nutzer(app: FastAPI, *rollen: str) -> None:
-    app.dependency_overrides[get_current_user] = lambda: {
-        "sub": "5f0c2a9e", "name": "t.de-vries", "roles": list(rollen)}
+    """Nutzer der Rollen-Abhaengigkeiten — und dieselbe Identitaet als gepruefte Claims im Request, wie die echte
+    Bearer-Pruefung sie ablegt (Urheber und FiBu-Audit lesen dort, ``app.core.akteur.akteur_aus_request``)."""
+    nutzer = {"sub": "5f0c2a9e", "name": "t.de-vries", "roles": list(rollen)}
+    app.dependency_overrides[get_current_user] = lambda: nutzer
+    _claims_fuer(app, nutzer)
+
+
+def _claims_fuer(app: FastAPI, nutzer: dict) -> None:
+    """Claims-Middleware einmal je App; der jeweils zuletzt gesetzte Nutzer gilt."""
+    app.state.testgrenze_nutzer = nutzer
+    if getattr(app.state, "testgrenze_claims", False):
+        return
+    try:
+        @app.middleware("http")
+        async def _claims(request: Request, call_next):  # noqa: ANN001, ANN202
+            aktuell = getattr(request.app.state, "testgrenze_nutzer", None)
+            if aktuell and not getattr(request.state, "token_claims", None):
+                request.state.token_claims = {"sub": aktuell["sub"], "preferred_username": aktuell.get("name"),
+                                              "roles": list(aktuell.get("roles") or [])}
+            return await call_next(request)
+    except RuntimeError:
+        return  # App laeuft schon; dann liefert nur die Abhaengigkeit den Nutzer
+    app.state.testgrenze_claims = True
 
 
 def ersetze_bearer(app: FastAPI, *rollen: str) -> None:
@@ -46,6 +67,8 @@ def ersetze_bearer(app: FastAPI, *rollen: str) -> None:
         return "testgrenze"
 
     app.dependency_overrides[require_bearer_token] = identitaet
+    # Rollen-Abhaengigkeiten (require_roles) lesen den Nutzer; er traegt dieselbe Identitaet und dieselben Rollen.
+    app.dependency_overrides[get_current_user] = lambda: {"sub": "5f0c2a9e", "name": "t.de-vries", "roles": list(rollen)}
 
 
 def _alle_fachrollen() -> tuple[str, ...]:
@@ -83,3 +106,13 @@ def pruefstand_erlaubt(url) -> bool:
         erklaert = os.environ.get("TEST_DATABASE_URL") or os.environ.get("DATABASE_URL")
         return bool(erklaert) and make_url(erklaert).database == ziel.database
     return False
+
+
+def setze_identitaet(app: FastAPI, sub: str = "5f0c2a9e", *rollen: str) -> None:
+    """Fuer Mini-Apps ohne Bearer-Pruefung: die geprueften Claims so in den Request legen, wie es
+    ``require_bearer_token`` taete. Ersetzt den frueheren Kopf ``X-User-ID`` (kein Weg liest ihn mehr)."""
+
+    @app.middleware("http")
+    async def _identitaet(request: Request, call_next):  # noqa: ANN001, ANN202
+        request.state.token_claims = {"sub": sub, "roles": list(rollen)}
+        return await call_next(request)

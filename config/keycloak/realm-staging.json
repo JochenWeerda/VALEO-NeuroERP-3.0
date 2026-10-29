@@ -347,13 +347,13 @@
     "realm": [
       {
         "name": "user",
-        "description": "Standard user role",
+        "description": "Angemeldeter Standardnutzer",
         "composite": false,
         "clientRole": false
       },
       {
         "name": "admin",
-        "description": "Administrator role with full access",
+        "description": "Technische Administration",
         "composite": false,
         "clientRole": false
       },
@@ -371,7 +371,7 @@
       },
       {
         "name": "AGRAR_ADMIN",
-        "description": "Agrar: leiten: freigeben, loeschen, abschliessen"
+        "description": "Agrar: fachliche Leitung; Freigaben und Abschluesse nur gemaess Aktionsvertrag, keine technische Administration"
       },
       {
         "name": "AGRAR_BEARBEITEN",
@@ -383,7 +383,7 @@
       },
       {
         "name": "CRM_ADMIN",
-        "description": "Vertrieb und Kundenpflege: leiten: freigeben, loeschen, abschliessen"
+        "description": "Vertrieb und Kundenpflege: fachliche Leitung; Freigaben und Abschluesse nur gemaess Aktionsvertrag, keine technische Administration"
       },
       {
         "name": "CRM_BEARBEITEN",
@@ -395,7 +395,7 @@
       },
       {
         "name": "EINKAUF_ADMIN",
-        "description": "Einkauf: leiten: freigeben, loeschen, abschliessen"
+        "description": "Einkauf: fachliche Leitung; Freigaben und Abschluesse nur gemaess Aktionsvertrag, keine technische Administration"
       },
       {
         "name": "EINKAUF_BEARBEITEN",
@@ -407,7 +407,7 @@
       },
       {
         "name": "FINANCE_ADMIN",
-        "description": "Finanzbuchhaltung: leiten: freigeben, loeschen, abschliessen"
+        "description": "Finanzbuchhaltung: fachliche Leitung; Freigaben und Abschluesse nur gemaess Aktionsvertrag, keine technische Administration"
       },
       {
         "name": "FINANCE_BEARBEITEN",
@@ -419,7 +419,7 @@
       },
       {
         "name": "FUTTERMITTEL_ADMIN",
-        "description": "Futtermittel: leiten: freigeben, loeschen, abschliessen"
+        "description": "Futtermittel: fachliche Leitung; Freigaben und Abschluesse nur gemaess Aktionsvertrag, keine technische Administration"
       },
       {
         "name": "FUTTERMITTEL_BEARBEITEN",
@@ -431,7 +431,7 @@
       },
       {
         "name": "HARVEST_ADMIN",
-        "description": "Ernteannahme: leiten: freigeben, loeschen, abschliessen"
+        "description": "Ernteannahme: fachliche Leitung; Freigaben und Abschluesse nur gemaess Aktionsvertrag, keine technische Administration"
       },
       {
         "name": "HARVEST_BEARBEITEN",
@@ -451,7 +451,7 @@
       },
       {
         "name": "KONTRAKT_ADMIN",
-        "description": "Kontrakte: leiten: freigeben, loeschen, abschliessen"
+        "description": "Kontrakte: fachliche Leitung; Freigaben und Abschluesse nur gemaess Aktionsvertrag, keine technische Administration"
       },
       {
         "name": "KONTRAKT_BEARBEITEN",
@@ -467,7 +467,7 @@
       },
       {
         "name": "LAGER_ADMIN",
-        "description": "Lager: leiten: freigeben, loeschen, abschliessen"
+        "description": "Lager: fachliche Leitung; Freigaben und Abschluesse nur gemaess Aktionsvertrag, keine technische Administration"
       },
       {
         "name": "LAGER_LESEN",
@@ -475,7 +475,7 @@
       },
       {
         "name": "PERSONAL_ADMIN",
-        "description": "Personal: leiten: freigeben, loeschen, abschliessen"
+        "description": "Personal: fachliche Leitung; Freigaben und Abschluesse nur gemaess Aktionsvertrag, keine technische Administration"
       },
       {
         "name": "PERSONAL_BEARBEITEN",
@@ -491,7 +491,7 @@
       },
       {
         "name": "SALES_ADMIN",
-        "description": "Verkauf: leiten: freigeben, loeschen, abschliessen"
+        "description": "Verkauf: fachliche Leitung; Freigaben und Abschluesse nur gemaess Aktionsvertrag, keine technische Administration"
       },
       {
         "name": "SALES_BEARBEITEN",
@@ -507,7 +507,7 @@
       },
       {
         "name": "manager",
-        "description": "Explicit management role; never assigned by default"
+        "description": "Historische Managementrolle ohne eigene Rechte; nicht neu vergeben"
       }
     ]
   },

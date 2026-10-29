@@ -66,6 +66,22 @@ describe('ActionInputDialog', () => {
     expect(onSubmit).toHaveBeenCalledWith({ lieferschein_nr: 'LS-4711', lager_id: 'l-2' })
   })
 
+  it('sendet deklarierte Zahlen typisiert, bewahrt Null und Textkennungen', () => {
+    const onSubmit = vi.fn()
+    const action: ScreenActionDefinition = { key: 'root', label: 'Budget', inputFields: [
+      { key: 'tokens', label: 'Tokens', type: 'number', required: true },
+      { key: 'max_children', label: 'Unterkontingente', type: 'number', required: true },
+      { key: 'optional', label: 'Optional', type: 'number' },
+      { key: 'reference', label: 'Kennung', type: 'text' },
+    ] }
+    render(mitAbfragen(<ActionInputDialog action={action} open onCancel={vi.fn()} onSubmit={onSubmit} />))
+    fireEvent.change(screen.getByRole('spinbutton', { name: 'Tokens' }), { target: { value: '10000' } })
+    fireEvent.change(screen.getByRole('spinbutton', { name: 'Unterkontingente' }), { target: { value: '0' } })
+    fireEvent.change(screen.getByLabelText('Kennung'), { target: { value: '000051' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Weiter' }))
+    expect(onSubmit).toHaveBeenCalledWith({ tokens: 10000, max_children: 0, reference: '000051' })
+  })
+
   it('Abbrechen gibt nichts weiter', () => {
     const onSubmit = vi.fn()
     const onCancel = vi.fn()

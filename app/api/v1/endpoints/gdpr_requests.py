@@ -12,7 +12,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Body, Depends, HTTPException, Request, status
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import Column, DateTime, String, Text, func
@@ -25,6 +25,8 @@ logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.gdpr_requests_schemas import GdprRequestsOut
+from app.core.akteur import akteur_aus_request
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/gdpr/requests", tags=["gdpr"])
@@ -150,14 +152,15 @@ def _record_history(
 
 
 def _current_user(request: Request) -> Optional[str]:
-    return request.headers.get("X-User-ID")
+    """Urheber aus dem geprueften Token (bis 19.10.2026 zuerst aus dem Client-Header ``X-User-ID``)."""
+    return akteur_aus_request(request)
 
 
 # ---------------------------------------------------------------------------
 # Endpoints
 # ---------------------------------------------------------------------------
 
-@router.post("", response_model=GdprRequestResponse, status_code=status.HTTP_201_CREATED, summary="Gdpr request anlegen")
+@router.post("", response_model=GdprRequestResponse, status_code=status.HTTP_201_CREATED, summary="Gdpr request anlegen", dependencies=SCHREIBEN["QUALITAET"])
 async def create_gdpr_request(
     payload: GdprRequestCreate,
     request: Request,
@@ -194,6 +197,21 @@ async def create_gdpr_request(
     return GdprRequestResponse.model_validate(obj)
 
 
+@router.get("", response_model=List[GdprRequestResponse], summary="Gdpr requests auflisten",
+            dependencies=SCHREIBEN["QUALITAET"])
+async def list_gdpr_requests(
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> List[GdprRequestResponse]:
+    """Anfragen des Mandanten, neueste zuerst. Bis 20.10.2026 fehlte der Weg; die Liste blieb immer leer.
+
+    Die Liste zeigt E-Mail-Adressen der Betroffenen; deshalb dieselbe Rolle wie die Bearbeitung.
+    """
+    rows = (db.query(GdprRequest).filter(GdprRequest.tenant_id == tenant_id)
+            .order_by(GdprRequest.created_at.desc()).limit(500).all())
+    return [GdprRequestResponse.model_validate(row) for row in rows]
+
+
 @router.get("/{request_id}", response_model=GdprRequestResponse, summary="Gdpr request abrufen")
 async def get_gdpr_request(
     request_id: str,
@@ -225,7 +243,7 @@ async def get_gdpr_request_history(
     return [GdprHistoryEntry.model_validate(e) for e in entries]
 
 
-@router.post("/{request_id}/verify", response_model=GdprRequestResponse, summary="Gdpr request verifizieren")
+@router.post("/{request_id}/verify", response_model=GdprRequestResponse, summary="Gdpr request verifizieren", dependencies=SCHREIBEN["QUALITAET"])
 async def verify_gdpr_request(
     request_id: str,
     request: Request,
@@ -254,7 +272,7 @@ async def verify_gdpr_request(
     return GdprRequestResponse.model_validate(obj)
 
 
-@router.post("/{request_id}/export", response_model=GdprRequestResponse, summary="Gdpr request exportieren")
+@router.post("/{request_id}/export", response_model=GdprRequestResponse, summary="Gdpr request exportieren", dependencies=SCHREIBEN["QUALITAET"])
 async def export_gdpr_request(
     request_id: str,
     request: Request,
@@ -315,7 +333,7 @@ async def export_gdpr_request(
     return GdprRequestResponse.model_validate(obj)
 
 
-@router.post("/{request_id}/delete", response_model=GdprRequestResponse, summary="Subject data löschen")
+@router.post("/{request_id}/delete", response_model=GdprRequestResponse, summary="Subject data löschen", dependencies=SCHREIBEN["QUALITAET"])
 async def delete_subject_data(
     request_id: str,
     request: Request,
@@ -373,15 +391,18 @@ async def delete_subject_data(
     return GdprRequestResponse.model_validate(obj)
 
 
-@router.post("/{request_id}/reject", response_model=GdprRequestResponse, summary="Gdpr request ablehnen")
+@router.post("/{request_id}/reject", response_model=GdprRequestResponse, summary="Gdpr request ablehnen", dependencies=SCHREIBEN["QUALITAET"])
 async def reject_gdpr_request(
     request_id: str,
     request: Request,
     reason: Optional[str] = None,
+    body: Optional[dict] = Body(None),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> GdprRequestResponse:
     """Reject a GDPR request (e.g. identity not verifiable, legal hold)."""
+    # Maske, CLI und MCP schicken die Begruendung im Body (``_auditReason``); vorher ging sie dort verloren.
+    reason = reason or (body or {}).get("reason") or (body or {}).get("_auditReason")
     obj = _get_request_or_404(request_id, tenant_id, db)
     if obj.status in ("COMPLETED", "REJECTED"):
         raise HTTPException(

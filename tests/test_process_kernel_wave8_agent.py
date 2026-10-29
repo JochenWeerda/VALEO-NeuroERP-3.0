@@ -5,6 +5,7 @@ import uuid
 from datetime import datetime, timedelta
 
 from fastapi import FastAPI
+from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
 from fastapi.testclient import TestClient
 
 from app.core.betriebskennzahlen import (
@@ -288,6 +289,7 @@ def test_api_agent_context_post():
     from app.api.v1.endpoints.agent_context_api import router as agent_context_router
 
     app = FastAPI()
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(agent_context_router, prefix="/api/v1")
     client = TestClient(app, raise_server_exceptions=True)
     resp = client.post(
@@ -310,6 +312,7 @@ def test_api_agent_context_dispatch_post():
     from app.api.v1.endpoints.agent_context_api import router as agent_context_router
 
     app = FastAPI()
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(agent_context_router, prefix="/api/v1")
     client = TestClient(app, raise_server_exceptions=True)
 
@@ -341,6 +344,7 @@ def test_api_benchmark_katalog_get():
     from app.api.v1.endpoints.benchmark_api import router as benchmark_router
 
     app = FastAPI()
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(benchmark_router, prefix="/api/v1")
     client = TestClient(app, raise_server_exceptions=True)
     resp = client.get("/api/v1/benchmark/katalog")

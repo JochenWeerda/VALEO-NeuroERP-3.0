@@ -4,12 +4,111 @@ type: reference
 audience: [agent, entwickler, architektur, qa]
 owner: Codex
 status: aktiv
-last_reviewed: 2026-09-17
-version: 2.5.0
-description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-021…050) — Lieferstand, Gates, Governance. ActionRuntime produktiv. Alle nativen commandEndpoints verdrahtet (SPEC-P1-04).
+last_reviewed: 2026-10-28
+version: 2.6.0
+description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-021…050) — Lieferstand, Gates, Governance. Historische Lieferstaende und aktuelle Abnahmegrenzen getrennt ausgewiesen.
 ---
 
 # Universal Mask Runtime — Plattformstatus
+
+**Aktueller Artefaktabgleich 2026-10-29:**851 registrierte Definitionen,
+Gate A/B/C jeweils851,E804(47 Runtime-Punkte);842 native
+Katalogeintraege und5 strukturell freigabefaehige Draft-Projektionen.
+Reklamationen nutzt nun die echte NativeListPage mit gemeinsamem Such-,
+Kennzahlen-, Export- und Workflow-Resume-Vertrag. Vier obsolete Identitaeten
+sind bereinigt.108 gezielte Tests sind gruen; sechs visuelle Komponentenansichten
+(Hell/Dunkel,drei Desktopaufloesungen) und der gefilterte Browserdownload
+sind geprueft. Angemeldete E2E-/Gesamtfreigabe bleibt ein eigener Nachweis.
+[Abnahme](../../quality-assurance/studio-functional-lists-20261028.md).
+Der Prozesskatalog ist zusaetzlich funktional ueber die Runtime migriert;
+63 gezielte Nachlauffaelle, Typpruefung, Build und sechs synthetische
+Browser-Komponentenansichten sind gruen. Die neun Prozessraeume sind davon
+nicht umfasst. [Katalogabnahme](../../quality-assurance/studio-process-catalog-20261028.md).
+Kontraktprotokoll und Kampagnenvorlage sind zusaetzlich funktional migriert;
+58 gezielte Faelle einschliesslich signierter SQL-Kanaele, Typpruefung, Build
+und12 synthetische Browser-Komponentenansichten sind geprueft.
+[Abnahme](../../quality-assurance/studio-audit-template-20261028.md).
+Diese Werte sind fuehrend; nachfolgende fruehere Zahlen sind historisch.
+
+**Verbindliches Ziel (Nutzer 2026-10-27):** Alle fachlichen Masken werden ueber
+Studio gebaut, versioniert und ueber die gemeinsame Runtime betrieben.
+Handgebaute Seiten und Legacy-Wrapper sind kein Endzustand. Abloesung erst mit
+nachgewiesener Fachparitaet, Rollen-/Mandantenpruefung und Human-/MCP-/CLI-Vertrag;
+Katalogeintrag allein erfuellt dieses Ziel nicht.
+
+> **Gepruefter Nachlauf 2026-10-27:** Der native Studio-Katalog ist mit **848**
+> Definitionen synchron. **79** gezielte Frontendtests in elf Dateien sowie die
+> vollstaendige Typpruefung sind gruen ([QA](../../quality-assurance/session-cache-boundary-20261027.md)).
+> Der gespeicherte [Gate-Bericht](made-by-studio-gate-report.md) vom 26.10. weist
+> C **856/857**, E **807/857** aus; Browser-Gate D ist nicht automatisiert abgenommen.
+> `portal/zertifikat` benoetigt weiterhin eine kundenbezogene Zuordnung.
+> Die folgenden aelteren Zahlen sind historische Messungen begrenzter Scopes;
+> sie belegen weder vollstaendige Fachparitaet noch eine produktive Freigabe.
+> Gesamt-CI und reale Browser-/Fachkettenabnahmen bleiben offen.
+
+> **Korrektur 2026-10-22 — MIGRATION-PARITY-REPAIR:** Die bisherigen Vollmigrations-/Release-ready-Zahlen waren durch generische Legacy-Wrapper, versteckte Runtime-Aufrufe und fehlende Fachparitaet ueberhoeht. Neue Parent-Builder bleiben erhalten; funktionierende bestehende Einstiege bleiben bis echter Paritaet fuehrend. Katalogbindung belegt ausschliesslich strukturelle Evidenz, keine Live-Freigabe. Massgeblich sind die neu erzeugten Inventare und [Reparaturnachweis](../../quality-assurance/migration-parity-repair-20261022.md).
+
+
+> **Nachtrag 2026-10-22 (`studio_screen_versions` Sync):** Append-only Katalog
+> `config/studio_screen_versions.json` (Release **1.0.0**, **847** native Screens,
+> **719** release-ready mit Gates A/B/C/E + sauberer Draft-Projektion). Generator:
+> `python scripts/generate_studio_screen_versions.py` (Default = Sync). Masken-Studio-
+> Inventar bindet Routen an Katalog + Belegfamilie (**505/671** `studio_versioniert`,
+> **0** `handgebaut`); verbleibende **166** Routen ohne Katalog-Match brauchen
+> Builder-Registrierung oder `screenId`-Kanonisierung. Report:
+> [`masken-studio-inventar-20261019.md`](../../quality-assurance/masken-studio-inventar-20261019.md).
+
+> **Nachtrag 2026-10-22 (Batches 11–15, abgeschlossen):** Maskenfamilien-Migration auf Universal-Mask-Runtime
+> fuer alle **941** Page-Routen (`runtime_wired` 941, `legacy_mask_pattern` 0, `hand_built` 0).
+> Registry: Batch-11-Listen, Batch-12-Kontrolle, Batch-13-Stamm, Batch-14-Cockpit, Batch-15-Domain.
+> Made-by-Studio **749/749** ScreenDefinitions (Gates A/B/C/E + Draft-clean). pytest Parent/Gates **701/701**.
+
+> **Nachtrag 2026-10-22 (Batch 6 — `legacy_mask_pattern` 0):** Massenmigration der
+> Produktiv-Routen auf `NativeListPage` / `UniversalNativeDetailPage` /
+> `createStammNativeDetailPage` / `createLegacyMaskPage` (Prozess-Legacy in `*-legacy.tsx`).
+> Inventar (`mask_route_migration_inventory.py`): **`legacy_mask_pattern` = 0** Routen,
+> **`runtime_wired` = 282** Routen / **183** Seiten (941 Routen gesamt). Made-by-Studio
+> Gates A/B/C/E + Studio-Draft clean: **168/168** ScreenDefinitions (inkl. Batch-6-SDs
+> `agrar/feldbuch-massnahmen`, `prospecting/lead-explorer`, `schaeden/meldung`).
+> Verifikation: `python scripts/verify_made_by_studio_gates.py --write-report`,
+> `python -m pytest tests/test_made_by_studio_gates.py -q -o addopts=`.
+
+> **Nachtrag 2026-10-22 (`UIX-STAMM-OBJECTPAGE-ALL`):** Alle 12 Stamm-ObjectPage-ScreenDefinitions (`agrar/duenger`, `agrar/saatgut`, `einkauf/supplier`, `finance/debitor`, `finance/kreditor`, `finance/bankkonto`, `lager/article-stock`, `crm/opportunity`, `crm/lead`, `futtermittel/einzelfuttermittel`, `futtermittel/mischfuttermittel`, `artikel/stamm`) nutzen nun `StammObjectPageParent` (`build_stamm_object_page`) mit `generatorReady=True` (Gate A–C). `banken/konten.tsx` oeffnet bei Zeilenklick `/finance/bankkonto/:id`; `NativeListPage` und `UniversalNativeCockpitPage` zaehlen im Inventar als `runtime_wired` (61 → 104 Routen, 52 → 89 Seiten). Create bleibt Legacy. QA: [`stamm-objectpage-parent-20261022.md`](../../quality-assurance/stamm-objectpage-parent-20261022.md).
+
+> **Nachtrag 2026-10-22 (`UIX-STAMM-OBJECTPAGE-PARENT`):** P1-Pilot
+> StammObjectPageParent — Factory `stamm_object_page_parent.py`; Children
+> Duenger/Saatgut/Supplier/Debitor/Kreditor teilen Meridian-Shell (objectPage,
+> anchors). Create Legacy. QA:
+> [`stamm-objectpage-parent-20261022.md`](../../quality-assurance/stamm-objectpage-parent-20261022.md).
+> Gate D / CLI-Siegel weiter Codex Entity-Release.
+
+> **Nachtrag 2026-10-22 (`STUDIO-MADE-BY-EVIDENCE`):** Qualitätsversprechen
+> „made by studio“ = Freigabe+CLI+Runtime+Browser, nicht Draft-Count. Katalog:
+> [`made-by-studio-qualitaetsversprechen.md`](made-by-studio-qualitaetsversprechen.md).
+> Sync: WIP-Studio-Löschungen restored; Codex Entity-Release/Live-Probe auf main;
+> nächster Siegel-Kandidat eine Stamm-Parent-Maske (nicht Massenmigration).
+
+> **Nachtrag 2026-10-22 (`UIX-MASKENFAMILIEN-TAXONOMIE`):** Systemweite
+> Parent/Child-Taxonomie (Beleg/Stamm/Liste/Worklist/Ausnahme) und priorisierte
+> Cluster-Roadmap P0–P3 — Plan only, keine Page-Migration. Artefakt:
+> [`maskenfamilien-taxonomie.md`](maskenfamilien-taxonomie.md); Beleg-Spezialfall
+> bleibt [`beleg-maskenfamilie-vererbung.md`](beleg-maskenfamilie-vererbung.md).
+> Slice `UIX-MASKENFAMILIEN-TAXONOMIE-20261022` offen (nicht reserviert).
+
+> **Nachtrag 2026-10-22 (`MASK-BESTELLUNG-NAV-NATIVE`):** Bestellungen-Liste und
+> Folgebeleg-Einstiege oeffnen bestehende Saetze auf `/einkauf/bestellung/:id`
+> (SD `einkauf/purchase-order`); Neuanlage bleibt `/einkauf/bestellungen/neu`.
+> Paritaetsluecken (CaseBand, Allokation, Freigabe/Storno-Detail, Komm-Senden)
+> dokumentiert; Legacy-Plural bleibt Rollback. QA:
+> [`mask-bestellung-nav-native-20261022.md`](../../quality-assurance/mask-bestellung-nav-native-20261022.md).
+
+> **Nachtrag 2026-10-22 (`MASK-PRIMARY-NAV-NATIVE`):** Routen-Inventur gegen
+> `route-inventory.gen.json`: 941 Routen — 61 runtime_wired, 122 Legacy-
+> ObjectPage/ListReport, 757 handgebaut. Studio-Entwuerfe ≠ Produktivablösung.
+> Listen Saatgut/Duenger/Lieferant oeffnen bestehende Saetze auf den nativen
+> UIX-057-Detailrouten; Neuanlage bleibt Legacy. Inventar:
+> [`mask-route-migration-inventory.md`](mask-route-migration-inventory.md),
+> QA [`mask-primary-nav-native-20261022.md`](../../quality-assurance/mask-primary-nav-native-20261022.md).
 
 > **Nachtrag 2026-09-17 (`MASK-L3-HABIT-DECLARE`):** L3-Gewohnheit Zeilenklick
 > ohne Pixelkopie: Registertabellen feuern `rowActions` ueber `FastTabRenderer`,

@@ -9,6 +9,7 @@ Schichtregeln:
 """
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
@@ -200,7 +201,7 @@ def match_capabilities(
     fehlende = [c for c in angefragte if c.lower() not in abgedeckt]
     score = len(abgedeckt) / len(angefragte) if angefragte else 0.0
 
-    if score == 1.0:
+    if math.isclose(score, 1.0):
         match_typ = CapabilityMatchResultTyp.VOLLSTAENDIGER_MATCH
     elif score > 0.0:
         match_typ = CapabilityMatchResultTyp.TEILWEISER_MATCH

@@ -14,6 +14,7 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Optional
 from uuid import uuid4
+from app.core.tenant_context import get_current_tenant_id
 
 logger = logging.getLogger(__name__)
 
@@ -145,9 +146,10 @@ def build_template_reply(to_number: str, template_name: str, language: str = "de
 
 async def process_incoming(
     incoming: WhatsAppIncoming,
-    tenant_id: str = "system",
+    tenant_id: str | None = None,
     db=None,
 ) -> dict:
+    tenant_id = tenant_id or get_current_tenant_id()
     if db:
         try:
             from app.services.consent_engine import check_consent

@@ -150,9 +150,21 @@ def test_actual_writes_and_finance_gaps_remain_visible():
     assert by_id["mask:einkauf/purchase-order:speichern"]["coverage"] == "mapped"
     assert data["stats"]["by_coverage"].get("blocked_no_endpoint", 0) == 0
     assert data["stats"]["by_coverage"].get("blocked_missing_tenant", 0) == 0
-    assert data["stats"]["by_coverage"]["local_ui"] == 15
+    # Studio-Listen oeffnen ihre Anlage per Navigation (MASK-STUDIO-ROLLOUT): 15 Bestandsaktionen + je Liste eine.
+    from app.core.screen_definitions_listen import LISTEN_SCREEN_BUILDERS
+
+    # Nur Anlage-*Navigationen* sind lokal; eine Anlage als Kommandoweg wird abgebildet (nie local_ui).
+    anlagen = {sid: next(a for a in bau()["actions"] if a["key"] == "neu")
+               for sid, bau in LISTEN_SCREEN_BUILDERS.items() if any(a["key"] == "neu" for a in bau()["actions"])}
+    listen_anlagen = [sid for sid, aktion in anlagen.items() if aktion.get("navigationRoute")]
+    for liste in listen_anlagen:
+        assert by_id[f"mask:{liste}:neu"]["coverage"] == "local_ui"
+    for liste in set(anlagen) - set(listen_anlagen):
+        assert by_id[f"mask:{liste}:neu"]["coverage"] not in ("local_ui", "open_high")
+    lokal = 15 + len(listen_anlagen)
+    assert data["stats"]["by_coverage"]["local_ui"] == lokal
     assert data["stats"]["mask_actions_considered"] == len(by_id)
-    assert data["stats"]["mask_mutations_considered"] == len(by_id) - 15
+    assert data["stats"]["mask_mutations_considered"] == len(by_id) - lokal
     assert "blocked_missing_tenant 0" in data["classification_notes"]
 
 

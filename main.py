@@ -52,6 +52,7 @@ from app.routers.translations_router import router as translations_router  # Üb
 from app.routers.vies_router import router as vies_router  # VIES USt-IdNr.-Prüfung (/api/vies)
 from app.routers.contracts_router import router as contracts_router  # Verträge (contracts-v2 Maske)
 from app.api.v1.endpoints import opportunities as opportunities_endpoints  # CRM-Sales (Frontend /api/crm-sales)
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 # Import domain-specific routers with error handling
 try:
@@ -124,6 +125,16 @@ async def lifespan(app: FastAPI):
                 "WARNING: API_DEV_TOKEN nicht gesetzt - Dev-Token 'dev-token' aktiv. "
                 "In Produktion APP_ENV=production setzen!"
             )
+
+    # RLS plan P7: refuse (production) or flag (development) a connection that bypasses RLS.
+    try:
+        from app.core.database import engine as _rls_engine
+        from app.core.rls_guard import enforce_rls_effective
+        enforce_rls_effective(_rls_engine, settings.APP_ENV)
+    except RuntimeError:
+        raise
+    except Exception as exc:  # database unreachable at startup: readiness reports it separately
+        logger.warning("RLS-Pruefung beim Start nicht moeglich: %s", exc)
 
     # Startup
     logger.info("Starting VALEO-NeuroERP API server...")
@@ -573,17 +584,18 @@ if purchase_workflow_router:
 # Inventory and Agrar are mounted once through api_router.
 
 # Lightweight stubs for missing MCP/stream endpoints to avoid frontend 404s during development
-@app.post("/api/mcp/analytics/kpis")
+from app.auth.bereich_roles import SCHREIBEN  # Lesende Stubs: Fach- oder Leserolle (WRITE-ROLES)
+@app.post("/api/mcp/analytics/kpis", dependencies=SCHREIBEN["BERECHNEN"])
 async def mcp_kpis_stub():
     return {"ok": True, "data": []}
 
 
-@app.post("/api/mcp/analytics/trends")
+@app.post("/api/mcp/analytics/trends", dependencies=SCHREIBEN["BERECHNEN"])
 async def mcp_trends_stub():
     return {"ok": True, "data": []}
 
 
-@app.post("/api/mcp/copilot/forecast")
+@app.post("/api/mcp/copilot/forecast", dependencies=SCHREIBEN["BERECHNEN"])
 async def mcp_copilot_forecast_stub():
     return {"ok": True, "data": {"forecast": None}}
 
@@ -618,8 +630,10 @@ app.include_router(websocket_router, prefix="/api/v1", tags=["WebSocket"])
 from app.api.v1.endpoints.copilot_ws import router as copilot_ws_router
 app.include_router(copilot_ws_router, prefix="/api/v1", tags=["WebSocket", "copilot"])
 
-# Include Authentication Router (⚠️ NUR FÜR ENTWICKLUNG!)
-app.include_router(auth_router)
+# Demo-Anmeldung stellt Tokens mit beliebigen Rollen aus (HS256, JWT_SECRET). Nur lokal eingehaengt: Seit 19.10.2026
+# nicht mehr in jeder Nicht-Produktionsumgebung (Staging), wo ein geteiltes JWT_SECRET Nebendienste oeffnen wuerde.
+if settings.APP_ENV == "development":
+    app.include_router(auth_router)
 
 # Include Policy Manager (direkt, ohne prefix - hat eigenen prefix)
 app.include_router(policy_router)

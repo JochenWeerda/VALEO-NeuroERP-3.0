@@ -19,6 +19,34 @@ const DEFAULT_RETRY_BASE_MS = 1_000
 const DEFAULT_MAX_RETRY_MS = 30_000
 const DEFAULT_TOKEN_PARAM = 'token'
 
+/**
+ * EventSource cannot send Authorization headers. Backend accepts `?token=` on
+ * `/api/events` and `/api/stream/*` (see app/core/security.py). Returns null
+ * when no token; authenticated consumers must not connect without auth.
+ */
+export function appendSseAuthToken(
+  url: string,
+  token: string | null | undefined,
+  param: string = DEFAULT_TOKEN_PARAM,
+): string | null {
+  if (token == null || token.length === 0) {
+    return null
+  }
+  try {
+    if (url.startsWith('/')) {
+      const relative = new URL(url, 'http://sse.local')
+      relative.searchParams.set(param, token)
+      return `${relative.pathname}${relative.search}${relative.hash}`
+    }
+    const absolute = new URL(url)
+    absolute.searchParams.set(param, token)
+    return absolute.toString()
+  } catch {
+    const separator = url.includes('?') ? '&' : '?'
+    return `${url}${separator}${param}=${encodeURIComponent(token)}`
+  }
+}
+
 function getWindow(): typeof window | undefined {
   if (typeof window === 'undefined') {
     return undefined
