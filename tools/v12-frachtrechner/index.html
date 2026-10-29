@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#216b36"><meta name="apple-mobile-web-app-capable" content="yes">
+<title>V12 Greenline Frachtrechner</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f3f6f1;color:#1d3325;font:16px system-ui,-apple-system,sans-serif}header{background:#205e35;color:white;padding:24px 18px}main,header section{max-width:600px;margin:auto}main{padding:16px}h1{font-size:25px;margin:5px 0}h2{font-size:19px;margin:0 0 12px}.card{background:white;border-radius:15px;padding:18px;margin-bottom:14px;box-shadow:0 2px 10px #0001}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}label{display:block;font-weight:600;font-size:13px;margin:10px 0 5px}input,select,textarea{font:inherit;border:1px solid #bfcfc0;border-radius:9px;padding:11px;width:100%;background:white}textarea{min-height:290px;font-size:14px}button{background:#216b36;color:white;border:0;border-radius:10px;padding:13px;width:100%;font:600 16px system-ui;margin-top:9px}.result{font-size:23px;font-weight:750;color:#216b36}.muted{font-size:12px;color:#607468}.note{font-size:12px;line-height:1.5}input[type=radio],input[type=checkbox]{width:auto}footer{font-size:12px;line-height:1.5;color:#67736a;padding-bottom:28px}
+</style></head><body>
+<header><section><small>HINRICH FOLKERTS LANDHANDEL</small><h1>V12 Greenline · Frachtrechner</h1><small>100 µm · Preise netto · WhatsApp-Angebot</small></section></header>
+<main>
+<div class="card"><h2>Rollendaten</h2><div class="grid">
+<div><label>Länge (m)</label><select id="len"><option>75</option><option>150</option><option selected>300</option></select></div>
+<div><label>Breite (m)</label><input id="wid" type="number" value="12" min="1" max="80"></div>
+<div><label>Anzahl Rollen</label><input id="count" type="number" min="1" value="1"></div>
+<div><label>Materialdichte (kg/m³)</label><input id="density" type="number" value="920"></div>
+</div><label>Folienpreis netto je m² (€)</label><input id="price" type="number" step=".01" value=".79">
+<p><label><input type="radio" name="discount" value="3" checked> 3 % Frühbestellung</label><label><input type="radio" name="discount" value="6"> 6 % Sofortzahlung</label><label><input type="radio" name="discount" value="0"> Ohne Rabatt</label></p>
+<label><input type="checkbox" id="pickup"> Abholung in Groothusen – frachtfrei</label></div>
+<div class="card"><h2>Kalkulation für PLZ 26</h2><div class="grid">
+<div><div class="muted">Fläche gesamt</div><div class="result" id="area">–</div></div>
+<div><div class="muted">Versandgewicht</div><div class="result" id="weight">–</div></div>
+<div><div class="muted">Folie nach Rabatt</div><div class="result" id="film">–</div></div>
+<div><div class="muted">Fracht</div><div class="result" id="freight">–</div></div>
+</div><hr><div class="muted">Gesamt netto inklusive Fracht</div><div class="result" id="total">–</div><p class="note" id="warning"></p></div>
+<div class="card"><h2>WhatsApp-Angebot</h2><textarea id="message" aria-label="Angebotstext"></textarea>
+<button id="copy">Text kopieren</button><button id="share">Über WhatsApp teilen</button></div>
+<footer>Richtwerte: Folie = Länge × Breite × 100 µm × 920 kg/m³; zzgl. 7 kg Kern je Rolle und 25 kg Palette je Sendung. Die Speditionspreise gelten nur für PLZ 26 und laut angegebener Gewichtsstaffel. Zusatzpaletten, Sperrgut und Überlängen können Mehrkosten verursachen. Greenline-Verfügbarkeit von Rollengrößen auf Anfrage. Alle Preise netto zzgl. gesetzlicher MwSt.</footer>
+</main>
+<script>
+const rates=[[100,41],[150,44],[200,49],[250,54],[300,59],[350,69],[400,74],[450,78],[500,79],[600,80],[700,86],[800,94],[900,108],[1000,115],[1250,129],[1500,147],[1750,164],[2000,178],[2250,192],[2500,206],[3300,200],[4400,232]];
+const el=id=>document.getElementById(id),fmt=(x,n=1)=>x.toLocaleString('de-DE',{maximumFractionDigits:n}),eur=x=>x.toLocaleString('de-DE',{style:'currency',currency:'EUR'});
+function calc(){
+const l=+el('len').value,w=+el('wid').value,n=+el('count').value,d=+el('density').value,p=+el('price').value,disc=+document.querySelector('[name=discount]:checked').value,pickup=el('pickup').checked;
+if(![l,w,n,d,p].every(Number.isFinite)||w<=0||n<1||d<=0||p<0){el('warning').textContent='Bitte gültige Werte eingeben.';return}
+const area=l*w*n,weight=area*.0001*d+7*n+25,r=rates.find(x=>weight<=x[0]),freight=pickup?0:r?.[1],film=area*p*(1-disc/100),total=freight===undefined?null:film+freight;
+el('area').textContent=fmt(area,0)+' m²';el('weight').textContent=fmt(weight)+' kg';el('film').textContent=eur(film);el('freight').textContent=freight===undefined?'Anfrage':eur(freight);el('total').textContent=total===null?'Auf Anfrage':eur(total);
+el('warning').textContent='Gewicht und Fracht sind Richtwerte; Paletten, Rollenüberlängen oder Sperrgut können Zuschläge auslösen. Lieferfähigkeit und Preise vorbehaltlich Bestätigung.';
+el('message').value='🌱 *V12 GREENLINE 100 µm*\n\n📏 '+n+' × '+l+' m × '+fmt(w)+' m = *'+fmt(area,0)+' m²*\n💰 Listenpreis: '+eur(p)+'/m² netto\n🎁 Rabatt: '+disc+' % ('+(disc===3?'Frühbestellung, Lieferung Frühjahr 2027':disc===6?'Sofortzahlung':'ohne')+')\n✅ *Folie nach Rabatt: '+eur(film)+' netto*\n🚛 '+(pickup?'Abholung in Groothusen: frachtfrei':'Fracht PLZ 26: '+(freight===undefined?'auf Anfrage':eur(freight)+' netto'))+'\n📦 Gewicht: ca. '+fmt(weight)+' kg\n\n*Gesamt netto: '+(total===null?'auf Anfrage':eur(total))+'*\nZzgl. gesetzlicher MwSt.\n\nHinweis: Fracht nach Aufmaß, Speditionszuschlägen und Lieferbestätigung.\n\nHinrich Folkerts Landhandel · Jochen Weerda';
+}
+document.querySelectorAll('input,select').forEach(x=>{x.addEventListener('input',calc);x.addEventListener('change',calc)});
+el('copy').onclick=async()=>{try{await navigator.clipboard.writeText(el('message').value);el('copy').textContent='✓ Kopiert'}catch(e){el('message').select();document.execCommand('copy')}};
+el('share').onclick=async()=>{const s=el('message').value;if(navigator.share){try{await navigator.share({text:s});return}catch(e){if(e.name==='AbortError')return}}location.href='https://wa.me/?text='+encodeURIComponent(s)};
+calc();
+</script></body></html>
