@@ -3107,6 +3107,23 @@ Liest eine deklarierte GET-Datenquelle derselben mandantengenauen Maske wie Huma
         "desc"
       ]
     },
+    "complete": {
+      "type": "boolean",
+      "default": false
+    },
+    "preset_filters": {
+      "type": "object",
+      "maxProperties": 8,
+      "propertyNames": {
+        "minLength": 1,
+        "maxLength": 200
+      },
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 200
+      }
+    },
     "filter_plan": {
       "type": "object",
       "maxProperties": 20,

@@ -17,5 +17,7 @@ export function toQueryParams(state: TableQueryState): Record<string, string> {
   if (state.filterPlan && Object.keys(state.filterPlan).length > 0) {
     params['filter_plan'] = JSON.stringify(state.filterPlan)
   }
+  if (state.presetFilters && Object.keys(state.presetFilters).length) params.preset_filters = JSON.stringify(state.presetFilters)
+  if (state.complete) params.complete = 'true'
   return params
 }

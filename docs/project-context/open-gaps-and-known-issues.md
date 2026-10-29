@@ -13,6 +13,13 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 ## UIX-RUNTIME: Migrationsnachweise und Fachparitaet (2026-10-22)
 
+**CRM-Aktivitaeten 2026-10-29:** Zentrale Listenpresets/Vollabruf vorbereitet und
+gezielt getestet. Noch keine Listen-Fachfreigabe: Collection ohne/mit Slash
+verwendet unterschiedliche Modelle; Detaildefinition und Anlagepayload passen
+nicht zum zuerst registrierten Proxyweg. Erst Quell-/Detail-/Anlageparitaet
+schliessen, dann Migration und reale Abnahme. [Nachweis](../quality-assurance/studio-list-presets-20261029.md).
+
+
 **Aktueller Gesamtartefaktstand 2026-10-29:** Gate A/B/C851/851,
 E804/851(47 Runtime-Punkte),842 native
 Katalogeintraege und5 strukturell freigabefaehige Draft-Projektionen.

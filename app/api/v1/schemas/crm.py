@@ -8,7 +8,7 @@ from decimal import Decimal
 from typing import Any, Optional
 from uuid import UUID
 
-from pydantic import ConfigDict, EmailStr, Field, ValidationInfo, field_validator, model_validator
+from pydantic import computed_field, ConfigDict, EmailStr, Field, ValidationInfo, field_validator, model_validator
 
 from .base import BaseSchema, TimestampMixin, SoftDeleteMixin
 
@@ -288,6 +288,14 @@ class ActivityUpdate(BaseSchema):
 class Activity(ActivityBase, TimestampMixin):
     """Full activity schema"""
     id: UUID = Field(..., description="Activity ID")
+    date: datetime | None = Field(default=None, description="Planned activity date; missing means unscheduled")
+
+    @computed_field
+    @property
+    def overdue(self) -> bool:
+        from app.services.list_presets import is_business_overdue
+        return is_business_overdue(self.date, self.status)
+
 
 
 # Farm Profile Schemas

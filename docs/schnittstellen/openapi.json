@@ -185131,10 +185131,17 @@
             "type": "string"
           },
           "date": {
-            "description": "Activity date",
-            "format": "date-time",
-            "title": "Date",
-            "type": "string"
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Planned activity date; missing means unscheduled",
+            "title": "Date"
           },
           "description": {
             "anyOf": [
@@ -185153,6 +185160,11 @@
             "format": "uuid",
             "title": "Id",
             "type": "string"
+          },
+          "overdue": {
+            "readOnly": true,
+            "title": "Overdue",
+            "type": "boolean"
           },
           "status": {
             "description": "Activity status (planned, completed, overdue)",
@@ -185192,10 +185204,10 @@
           "title",
           "customer",
           "contact_person",
-          "date",
           "status",
           "assigned_to",
-          "id"
+          "id",
+          "overdue"
         ],
         "title": "Activity",
         "type": "object"
@@ -346001,6 +346013,33 @@
                 }
               ],
               "title": "Filter Plan"
+            }
+          },
+          {
+            "in": "query",
+            "name": "preset_filters",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 5000,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Preset Filters"
+            }
+          },
+          {
+            "in": "query",
+            "name": "complete",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Complete",
+              "type": "boolean"
             }
           },
           {

@@ -297,6 +297,8 @@ def parser() -> argparse.ArgumentParser:
     d.add_argument("--limit", type=int, default=50)
     d.add_argument("--suche")
     d.add_argument("--tabelle")
+    d.add_argument("--vollstaendig", action="store_true", help="Vollstaendiger begrenzter Tabellenbestand")
+    d.add_argument("--preset", action="append", default=[], metavar="FILTER=WERT", help="Registrierten Listenfilter auswaehlen")
     d.add_argument("--sortieren")
     d.add_argument("--richtung", choices=["asc", "desc"], default="asc")
     d.add_argument("--filter", dest="tabellenfilter", metavar="DATEI|-", help="Filterplan als JSON-Objekt")
@@ -356,6 +358,17 @@ def main(argv: list[str] | None = None, *, http: httpx.Client | None = None, out
             if not 1 <= args.seite <= 1000000 or not 1 <= args.limit <= 100:
                 raise UsageError("Seite muss 1..1000000 und Limit 1..100 sein.")
             params = {"page": args.seite, "limit": args.limit}
+            if args.vollstaendig:
+                params["complete"] = "true"
+            if args.preset:
+                selections = {}
+                for option in args.preset:
+                    key, separator, value = option.partition("=")
+                    if not separator or not key or not value or key in selections or len(selections) >= 8:
+                        raise UsageError("Listenfilter als eindeutiges FILTER=WERT angeben.")
+                    selections[key] = value
+                params["preset_filters"] = json.dumps(selections, ensure_ascii=False)
+
             if args.id is not None:
                 params["entity_id"] = args.id
             if args.suche is not None:

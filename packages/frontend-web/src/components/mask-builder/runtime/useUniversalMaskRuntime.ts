@@ -272,14 +272,14 @@ export function useUniversalMaskRuntime({
   const tableResults = useQueries({
     queries: tableEntries.map(([tableKey, tb]) => ({
       queryKey: tb.clientQuery && (plan?.listExperience || completeClientTables)
-        ? [tenantId, screenId, entityId, 'table', tableKey, { endpoint: tb.endpoint, sourceKey: tb.sourceKey, searchFields: plan?.listExperience?.searchFields, completeClientTables }]
+        ? [tenantId, screenId, entityId, 'table', tableKey, { endpoint: tb.endpoint, sourceKey: tb.sourceKey, searchFields: plan?.listExperience?.searchFields, presets: resolvedTableQueryStates[tableKey]?.presetFilters, completeClientTables }]
         : tb.clientQuery && !tb.sourceKey
           ? [tenantId, screenId, entityId, 'table', tableKey]
           : [tenantId, screenId, entityId, 'table', tableKey, resolvedTableQueryStates[tableKey]],
       queryFn: async ({ signal }) => {
         if (tb.clientQuery && tb.sourceKey && (plan?.listExperience || completeClientTables)) {
           return readCompleteList(async (page) => {
-            const state = { ...defaultTableQueryState(100), page }
+            const state = { ...defaultTableQueryState(100), page, complete: page === 1, presetFilters: resolvedTableQueryStates[tableKey]?.presetFilters }
             const url = tableSourceRequest(screenId, entityId, tb, state)
             if (!url) throw new Error('Gemeinsame Listenquelle fehlt.')
             const result = await apiClient.get<{ data: { items: Record<string, unknown>[]; total: number } }>(url, { signal })

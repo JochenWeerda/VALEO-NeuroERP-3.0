@@ -67,7 +67,34 @@ class Insight(Contract):
     label: Text
     variants: list[Variant] = Field(max_length=100)
 
+class PresetOption(Contract):
+    value: Text
+    label: Text
+
+class ListPreset(Contract):
+    key: Key
+    label: Text
+    field: Key
+    kind: Literal["choice", "date", "actor"]
+    options: list[PresetOption] = Field(min_length=2, max_length=20)
+    completionField: Key | None = None
+    completionValue: Text = "completed"
+
+    @model_validator(mode="after")
+    def shape(self):
+        values = [option.value for option in self.options]
+        if len(set(values)) != len(values) or "all" not in values:
+            raise ValueError("invalid preset options")
+        if self.kind == "date" and not set(values) <= {"all", "today", "week", "overdue"}:
+            raise ValueError("invalid date preset")
+        if self.kind == "actor" and not set(values) <= {"all", "mine"}:
+            raise ValueError("invalid actor preset")
+        if self.kind != "date" and self.completionField is not None:
+            raise ValueError("completion field only allowed for date preset")
+        return self
+
 class ListExperience(Contract):
+    presets: list[ListPreset] = Field(default_factory=list, max_length=8)
     searchFields: list[Key] = Field(min_length=1, max_length=100)
     aggregates: list[Aggregate] = Field(max_length=100)
     export: Export
@@ -77,6 +104,9 @@ class ListExperience(Contract):
 
     @model_validator(mode="after")
     def references(self):
+        preset_keys = [entry.key for entry in self.presets]
+        if len(set(preset_keys)) != len(preset_keys):
+            raise ValueError("duplicate preset key")
         keys = [entry.key for entry in self.aggregates]
         exports = [entry.key for entry in self.export.columns]
         if len(set(keys)) != len(keys) or len(set(exports)) != len(exports) or len(set(self.searchFields)) != len(self.searchFields):
@@ -108,6 +138,9 @@ def validate_list_experience(definition: dict) -> list[str]:
             condition.field for aggregate in experience.aggregates for condition in aggregate.conditions} | {
             aggregate.field for aggregate in experience.aggregates if aggregate.field is not None} | {
             aggregate.currencyField for aggregate in experience.aggregates if aggregate.currencyField is not None}
+        used |= {preset.field for preset in experience.presets} | {preset.completionField for preset in experience.presets if preset.completionField}
+        if experience.presets and tables[0].get("serverPagination") is True:
+            return ["listenpresets_benoetigen_vollbestand"]
         if not used <= columns:
             return ["listenvertrag_feld_nicht_deklariert"]
         return []
