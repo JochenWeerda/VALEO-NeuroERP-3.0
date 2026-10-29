@@ -21,8 +21,9 @@ pytestmark = [pytest.mark.integration, pytest.mark.needs_live_db]
 
 @pytest.fixture
 def data(request):
-    raw = os.environ.get("TEST_DATABASE_URL")
-    assert raw and make_url(raw) == engine.url and engine.url.database not in {"valeo_neuro_erp", "postgres"}, "Explicit shared test database required"
+    ci = os.environ.get("CI", "").casefold() == "true"
+    raw = os.environ.get("TEST_DATABASE_URL") or (os.environ.get("DATABASE_URL") if ci else None)
+    assert raw and make_url(raw) == engine.url and (ci or engine.url.database not in {"valeo_neuro_erp", "postgres"}), "Explicit shared test database required"
     result = request.getfixturevalue("subject_data")
     connection = result[1].connection()
     connection.info["activity_test_heads"] = tuple(connection.execute(sa.text("SELECT version_num FROM alembic_version ORDER BY version_num")).scalars())

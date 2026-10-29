@@ -128,3 +128,11 @@ Artefaktvertrag ergaenzt: drei MCP-Schema-Gleichheitstests bestanden; Contract-/
 Acht Generatorchecks bestehen: OpenAPI (3256 Pfade), Aktionsrechteprojektion (151), CLI (255 Aktionen), Screen-Registry (31), MCP-Referenz (69 Tools), drei Codeinventare, Agentenhandbuch und Studio-Katalog (842 native Definitionen). Strukturinventar: A/B/C851, E805 von851;46 Runtimepunkte bleiben offen. Dies ersetzt keine fachliche Gesamt-/Browser-/RLS-Abnahme.
 
 CI-Ausgangszustand nachgeprueft: SQL-Vertraege17/17 und zusaetzliche installierter-Head-Gegenprobe1/1 bestanden. Die Migrationstesthilfe rekonstruiert nur innerhalb ihrer aeusseren Rollbacktransaktion die betroffene Vorgaengertabelle; sie stempelt keine Revision und setzt keine Datenbank zurueck. Der Anwendungstest verwendet ein bereits migriertes Schema direkt. Damit sind105verschiedeneBackendfaelle und65Frontendfaelle nachgewiesen. Auch ADR-Navigation, Maskenaktionskatalog, MCP-Maskenkarte und Aktionsmatrix sind synchronisiert; MCP-Registryvalidierung ohne Fehler.
+
+## CI-Nachlauf nach f84db0298
+
+Der erste GitHub-Nachlauf meldete im unabhaengigen Improvement-Gate eine veraltete Business-Time-Ratsche: Der direkte Kalenderzugriff in crm_360 ist entfernt, daher wurde der Bestand exakt um einen Befund auf190 abgesenkt. Die lokale Gegenpruefung besteht; keine neue Ausnahme und keine Schwellenerhoehung.
+
+Die Testgrenze akzeptiert in CI ausschliesslich die deklarierte Jobdatenbank bei exakt passender URL. Lokal bleiben Entwicklungsdatenbanken gesperrt. Vier Positiv-/Negativfaelle pruefen diese Grenze ohne Verbindung. Der FK-Test legt eine fehlende Standardrolle nur NOLOGIN im eigenen zurueckgerollten Savepoint an; keine Rolle oder Rechte bleiben erhalten. Insgesamt109verschiedeneBackendfaelle und65Frontendfaelle nachgewiesen.
+
+Der physische Aktivitaetseintrag im Tabellenkatalog wurde nach realer Upgrade-Transaktion geerntet und anschliessend vollstaendig zurueckgerollt. Andere physische Tabellen bleiben identisch zur veroeffentlichten Git-Basis. Verbraucher-Lineage wurde aus deren vollstaendigem App-Quellbaum nachgezogen; keine fremden physischen Schemastaende aus der partiellen Reparaturquelle uebernommen. Gesamt-CI ist nach dem Nachlauf erneut abzuwarten.

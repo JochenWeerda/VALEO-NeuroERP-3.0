@@ -20,8 +20,9 @@ pytestmark=[pytest.mark.integration,pytest.mark.needs_live_db]
 
 @pytest.fixture
 def require_db():
-    raw=os.environ.get("TEST_DATABASE_URL")
-    assert raw and make_url(raw)==engine.url and engine.url.database not in {"valeo_neuro_erp","postgres"}, "Explicit shared test database required"
+    ci=os.environ.get("CI","").casefold()=="true"
+    raw=os.environ.get("TEST_DATABASE_URL") or (os.environ.get("DATABASE_URL") if ci else None)
+    assert raw and make_url(raw)==engine.url and (ci or engine.url.database not in {"valeo_neuro_erp","postgres"}), "Explicit shared test database required"
 
 
 @pytest.fixture
@@ -223,6 +224,10 @@ def test_foreign_customer_is_blocked_by_command_and_database_fk(canonical):
     # FK checks bypass RLS: the composite key, not a SELECT filter, must block this write.
     with pytest.raises(IntegrityError) as error:
         with db.begin_nested():
+            # Fresh CI does not provision application logins. A missing standard role
+            # is created NOLOGIN inside this rolled-back savepoint, never persisted.
+            if not db.execute(text("SELECT 1 FROM pg_roles WHERE rolname='valeo_app'")).scalar():
+                db.execute(text("CREATE ROLE valeo_app NOLOGIN NOSUPERUSER NOBYPASSRLS"))
             db.execute(text("GRANT USAGE ON SCHEMA domain_crm TO valeo_app"))
             db.execute(text("GRANT INSERT ON domain_crm.activities TO valeo_app"))
             db.execute(text("SET LOCAL ROLE valeo_app"))
@@ -258,3 +263,24 @@ def test_opportunity_rest_mask_and_mcp_replay_one_canonical_command(canonical,mo
     assert db.execute(text("SELECT count(*) FROM public.outbox_events WHERE tenant_id=:t"),{"t":tenant}).scalar()==1
     denied=client.post("/api/v1/crm/opportunities/"+foreign_opportunity+"/activities",headers={**headers(canonical),"Idempotency-Key":str(uuid4())},params={"subject":"Foreign"})
     assert denied.status_code==404,denied.text
+
+
+@pytest.mark.parametrize("ci,database,declared,allowed", [
+    (False, "valeo_neuro_erp", "valeo_neuro_erp", False),
+    (True, "valeo_neuro_erp", None, True),
+    (True, "valeo_test", "another_database", False),
+    (False, "valeo_probe", "valeo_probe", True),
+])
+def test_database_policy_accepts_only_declared_ci_or_explicit_local_probe(monkeypatch,ci,database,declared,allowed):
+    from types import SimpleNamespace
+    import sys
+    url=make_url("postgresql://synthetic@localhost/"+database)
+    monkeypatch.setattr(sys.modules[__name__],"engine",SimpleNamespace(url=url))
+    monkeypatch.setenv("CI","true" if ci else "false")
+    monkeypatch.setenv("DATABASE_URL",str(url))
+    monkeypatch.delenv("TEST_DATABASE_URL",raising=False)
+    if declared:monkeypatch.setenv("TEST_DATABASE_URL","postgresql://synthetic@localhost/"+declared)
+    if allowed:require_db.__wrapped__()
+    else:
+        with pytest.raises(AssertionError,match="Explicit shared test database"):
+            require_db.__wrapped__()
