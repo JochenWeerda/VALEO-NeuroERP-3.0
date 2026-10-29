@@ -14,7 +14,7 @@
     {
       "key": "list",
       "endpoint": "/api/v1/kontrakte/{entity_id}/audit",
-      "pageSize": 500
+      "pageSize": 100
     }
   ],
   "actions": [],

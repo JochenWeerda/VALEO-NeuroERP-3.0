@@ -62,13 +62,17 @@ def build_stamm_list_screen(
     bundle: str,
     no_workflow: str,
     dangerous: list[dict[str, str]] | None = None,
-    fetch_limit: int = 500,
+    fetch_limit: int = 100,
     table_profile: str = "standard",
     table_page_size: int = 50,
     row_height: int = 40,
     server_pagination: bool = False,
 ) -> dict[str, Any]:
-    """Parent-Vertrag: worklist + virtuelle Tabelle; Child liefert Spalten und Zeilenroute."""
+    """Worklist; fetch_limit bounds one source page, never the complete result.
+
+    The shared read collector follows source pagination before client filtering,
+    totals and exports. A source page must respect the registered API bounds.
+    """
     if table_profile == "standard":
         if domain == "finance" or screen_id.startswith("fibu/"):
             table_profile = "financial"

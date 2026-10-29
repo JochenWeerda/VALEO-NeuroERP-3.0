@@ -12428,6 +12428,7 @@ export const generatedSearchKeys = [
   "nonce",
   "op",
   "opId",
+  "page",
   "partnerName",
   "pflege",
   "qpResult",

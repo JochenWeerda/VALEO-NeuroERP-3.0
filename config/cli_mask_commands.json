@@ -134,6 +134,8 @@
   "mask:beleg/sales-order:stornieren",
   "mask:beleg/sales-order:umwandeln:sales_delivery",
   "mask:beleg/sales-order:umwandeln:sales_invoice",
+  "mask:crm/campaign-template:duplicate",
+  "mask:crm/campaign-template:edit",
   "mask:crm/customer-360:bearbeiten",
   "mask:crm/customer-360:create_activity",
   "mask:crm/dsgvo-anfragen-liste:ablehnen",
@@ -156,6 +158,8 @@
   "mask:crm/segmente-liste:berechnen",
   "mask:crm/segmente-liste:loeschen",
   "mask:crm/wiedervorlagen:erledigen",
+  "mask:dms/inbox:create_beleg",
+  "mask:dms/inbox:discard",
   "mask:einkauf/anfrage:bearbeiten",
   "mask:einkauf/anfragen:in_bestellung",
   "mask:einkauf/anfragen:loeschen",
@@ -220,6 +224,8 @@
   "mask:futtermittel/einzelfuttermittel-liste:stilllegen",
   "mask:futtermittel/mischfuttermittel-liste:deaktivieren",
   "mask:futtermittel/mischfuttermittel:bearbeiten",
+  "mask:inbox:create_beleg",
+  "mask:inbox:discard",
   "mask:lager/inventur-nebenlaeufe:create_control",
   "mask:lager/inventur-nebenlaeufe:create_count_sheet",
   "mask:lager/inventur-nebenlaeufe:create_opening",
@@ -245,9 +251,11 @@
   "mask:sales/gutschrift:vorschlag_ablehnen",
   "mask:sales/gutschrift:vorschlag_freigeben",
   "mask:sales/sales-order:bearbeiten",
-  "mask:schnittstelle/mde-inbox:process_pending"
+  "mask:schnittstelle/mde-inbox:process_pending",
+  "mask:stammdaten/hausbank:edit",
+  "mask:stammdaten/mengeneinheit:edit"
  ],
  "nicht_unterstuetzt": {
-  "kein_endpunkt": 928
+  "kein_endpunkt": 916
  }
 }

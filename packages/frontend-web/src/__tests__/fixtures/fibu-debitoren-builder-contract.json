@@ -14,7 +14,7 @@
     {
       "key": "list",
       "endpoint": "/api/v1/finance/open-items?konto_typ=debitoren&only_open=true",
-      "pageSize": 500
+      "pageSize": 100
     }
   ],
   "actions": [
