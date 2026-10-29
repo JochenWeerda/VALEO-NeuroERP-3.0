@@ -131,6 +131,9 @@ jobs:
           pnpm --filter @valero-neuroerp/frontend-web preview -- --host 127.0.0.1 --port 4173 &
           timeout 60 bash -c 'until curl -fsS http://127.0.0.1:4173 >/dev/null; do sleep 2; done'
 
+      - name: Verify production frontend bootstrap
+        run: node packages/frontend-web/scripts/check-production-bootstrap.mjs
+
       - name: Run Smoke Tests - ${{ matrix.domain }}
         run: pnpm exec playwright test --grep "@smoke" --project=smoke specs/${{ matrix.domain }}/
         env:

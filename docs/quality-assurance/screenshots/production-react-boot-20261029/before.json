@@ -1,0 +1,9 @@
+{
+  "mode": "before",
+  "pathname": "/login",
+  "ready": false,
+  "pageErrors": [
+    "Cannot set properties of undefined (setting 'Children')"
+  ],
+  "rootTextLength": 0
+}
