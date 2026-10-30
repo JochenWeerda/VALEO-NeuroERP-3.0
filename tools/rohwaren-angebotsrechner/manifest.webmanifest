@@ -1,0 +1,18 @@
+{
+  "name": "Folkerts Landhandel – Rohwaren-Angebotsrechner",
+  "short_name": "Rohwaren",
+  "description": "Kalkulation und WhatsApp-Angebote für Agrarrohwaren",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f1f5ef",
+  "theme_color": "#176037",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
