@@ -305,12 +305,12 @@ class CrmWiedervorlagenProjector:
         rows = _safe_mappings(
             db,
             """
-            SELECT id, customer_id, customer_name, subject, due_date
+            SELECT id, customer_id, customer AS customer_name, title AS subject, date AS due_date
             FROM domain_crm.activities
             WHERE tenant_id = :tenant_id
-              AND due_date >= :from_ts
-              AND due_date < :to_ts
-              AND COALESCE(status, 'open') NOT IN ('done', 'closed')
+              AND date >= :from_ts
+              AND date < :to_ts
+              AND status = 'planned'
         """,
             {
                 "tenant_id": tenant_id,
@@ -328,8 +328,8 @@ class CrmWiedervorlagenProjector:
                 starts_at=_to_datetime(row.get("due_date"), base),
                 object_type="crm_activity",
                 object_id=str(row.get("id") or ""),
-                object_screen_id="crm/customer-360",
-                object_route=_route("/verkauf/kunden-liste", row.get("customer_id")),
+                object_screen_id="crm/aktivitaet",
+                object_route=_route("/crm/aktivitaet", row.get("id")),
                 payload={
                     "customerId": row.get("customer_id"),
                     "customer": row.get("customer_name"),

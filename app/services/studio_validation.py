@@ -256,7 +256,7 @@ def validate_studio_draft(
             violations.append(f"action_fremdes_recht:{key}")
         if base.get("permission") and action.get("permission") != base["permission"]:
             violations.append(f"action_recht_fehlt:{key}")
-        for flag in ("forbiddenForAgents", "humanApprovalRequired", "requiresHumanApproval", "auditReasonRequired", "requiresConfirmation", "disabled"):
+        for flag in ("forbiddenForAgents", "humanApprovalRequired", "requiresHumanApproval", "auditReasonRequired", "requiresConfirmation", "requiresExpectedVersion", "requiresIdempotencyKey", "disabled"):
             if base.get(flag) is True and action.get(flag) is not True:
                 violations.append(f"action_{flag}_aufgehoben:{key}")
             elif flag in action and type(action[flag]) is not bool:

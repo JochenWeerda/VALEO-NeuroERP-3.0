@@ -1,320 +1,129 @@
-"""
-CRM activity endpoints proxied via crm-core.
+"""Canonical tenant-bound CRM activity resources and versioned commands."""
+from __future__ import annotations
+from typing import Literal
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, Response
+from pydantic import AliasChoices, BaseModel, Field
+from sqlalchemy import func, or_, select
+from sqlalchemy.orm import Session
+
+from app.auth.bereich_roles import SCHREIBEN
+from app.core.database import get_db
+from app.core.tenant import get_tenant_id
+from app.domains.crm.activity_contracts import ActivityRead, ActivityCreateCommand, ActivityUpdateCommand, ActivityDeleteCommand
+from app.infrastructure.models import Activity
+from app.services.crm_activity_service import activity_or_404, execute_activity, read_activity, preview_activity
+from app.api.v1.schemas.base import PaginatedResponse
 
-crm-core fuehrt den Mandanten an der Aktivitaet, der Proxy wertete ihn bis 21.10.2026 nicht aus: Liste, Abruf,
-Aendern, Loeschen und die Unterlisten reichten Aktivitaeten *aller* Mandanten durch, die Anlage trug den
-Standardmandanten ein. Jetzt gilt der gepruefte Kontext (``get_tenant_id``) an jedem Weg.
-"""
+router=APIRouter()
 
-from contextvars import ContextVar
-from typing import Any
 
-import httpx
-from fastapi import APIRouter, Depends, HTTPException, Path, Query, status
-from pydantic import BaseModel, Field
+class ActivityCommandResult(BaseModel):
+    actionKey: str
+    mode: Literal["execute","dryRun","validate","propose"] = "execute"
+    success: bool
+    activity_id: str | None = None
+    activity: ActivityRead | None = None
+    auditEntryId: str | None = None
+    version: int | None = None
+    replayed: bool = False
+    proposedChanges: list[dict] | None = None
 
-from ....core.tenant import get_tenant_id
-from ....integrations import crm_core_client
-from ..schemas.base import PaginatedResponse
-from ..schemas.crm import Activity, ActivityCreate, ActivityUpdate
 
-from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.activities_schemas import ActivitiesOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
+class ActivityCreateAction(ActivityCreateCommand):
+    mode: Literal["execute","dryRun","validate","propose"] = Field(default="execute",validation_alias=AliasChoices("mode","_mode"))
 
 
-_MANDANT: ContextVar[str] = ContextVar("aktivitaeten_mandant")
-
-
-async def _mandant_merken(tenant_id: str = Depends(get_tenant_id)) -> None:
-    # async: der Wert muss im selben Kontext wie der Endpunkt gesetzt werden (sync liefe im Threadpool).
-    _MANDANT.set(tenant_id)
-
-
-router = APIRouter(dependencies=[Depends(_mandant_merken)])
-
-
-class _StringListItem(BaseModel):
-    value: str = Field(..., min_length=1, max_length=200)
-
-
-class _FollowUpActionItem(BaseModel):
-    value: dict[str, Any] | str
-
-
-def _adapt_activity(core_activity: crm_core_client.CRMCoreActivity) -> dict:
-    return {
-        "id": core_activity.id,
-        "type": core_activity.type,
-        "title": core_activity.title,
-        # Schema verlangt min_length=1 — fehlende Werte als "-" mappen
-        "customer": core_activity.customer_name or "-",
-        "contact_person": "-",
-        "date": core_activity.scheduled_at,
-        "status": core_activity.status,
-        "assigned_to": core_activity.assigned_to or "",
-        "description": core_activity.description,
-        "main_topics": core_activity.main_topics or [],
-        "orders_placed": core_activity.orders_placed or [],
-        "follow_up_actions": core_activity.follow_up_actions or [],
-        "tenant_id": core_activity.tenant_id,
-        "created_at": core_activity.created_at,
-        "updated_at": core_activity.updated_at,
-    }
-
-
-def _map_activity_payload(payload: ActivityCreate | ActivityUpdate) -> dict:
-    body = payload.model_dump(exclude_unset=True)
-    mapping = {
-        "title": body.get("title"),
-        "type": body.get("type"),
-        "status": body.get("status"),
-        "description": body.get("description"),
-        "assigned_to": body.get("assigned_to"),
-        "scheduled_at": body.get("date"),
-    }
-    return {k: v for k, v in mapping.items() if v is not None}
-
-
-def _raise_core_error(exc: Exception, not_found_detail: str, default_detail: str) -> None:
-    if isinstance(exc, httpx.HTTPStatusError):
-        if exc.response.status_code == 404:
-            raise HTTPException(status_code=404, detail=not_found_detail) from exc
-        raise HTTPException(status_code=exc.response.status_code, detail=exc.response.text) from exc
-    raise HTTPException(status_code=500, detail=default_detail) from exc
-
-
-async def _get_activity_or_404(activity_id: str) -> crm_core_client.CRMCoreActivity:
-    try:
-        activity = await crm_core_client.get_activity(activity_id)
-    except Exception as exc:
-        _raise_core_error(exc, "Activity not found", f"Failed to retrieve activity: {exc}")
-        raise HTTPException(status_code=500, detail="Failed to retrieve activity") from exc
-    if activity.tenant_id != _MANDANT.get():
-        raise HTTPException(status_code=404, detail="Activity not found")
-    return activity
-
-
-def _validate_item_index(items: list[Any], item_index: int, field_label: str) -> None:
-    if item_index < 0 or item_index >= len(items):
-        raise HTTPException(status_code=404, detail=f"{field_label} item not found")
-
+class ActivityUpdateAction(ActivityUpdateCommand):
+    mode: Literal["execute","dryRun","validate","propose"] = Field(default="execute",validation_alias=AliasChoices("mode","_mode"))
 
-async def _load_list_field(activity_id: str, field_name: str) -> list[Any]:
-    activity = await _get_activity_or_404(activity_id)
-    value = getattr(activity, field_name, None)
-    return list(value or [])
-
-
-async def _replace_list_field(activity_id: str, field_name: str, items: list[Any]) -> list[Any]:
-    try:
-        updated = await crm_core_client.update_activity(activity_id, {field_name: items})
-    except Exception as exc:
-        _raise_core_error(exc, "Activity not found", f"Failed to update {field_name}: {exc}")
-    value = getattr(updated, field_name, None)
-    return list(value or [])
-
-
-@router.get("/", response_model=PaginatedResponse[Activity], summary="Activities auflisten")
-async def list_activities(
-    type_filter: str | None = Query(None, alias="type"),
-    status_filter: str | None = Query(None, alias="status"),
-    skip: int = Query(0, ge=0),
-    limit: int = Query(100, ge=1, le=200),
-):
-    tenant_id = _MANDANT.get()
-    if not tenant_id:
-        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Activity list unavailable")
-    try:
-        activities, total = await crm_core_client.list_activities(
-            tenant_id=tenant_id,
-            activity_type=type_filter,
-            status=status_filter,
-            skip=skip,
-            limit=limit,
-        )
-    except Exception as exc:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Activity list unavailable",
-        ) from exc
-
-    if any(activity.tenant_id != tenant_id for activity in activities):
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail="Activity list unavailable",
-        )
-    items = [_adapt_activity(activity) for activity in activities]
-    return PaginatedResponse[Activity](
-        items=[Activity.model_validate(item) for item in items],
-        total=total,
-        page=(skip // limit) + 1,
-        size=limit,
-        pages=(total + limit - 1) // limit,
-        has_next=(skip + limit) < total,
-        has_prev=skip > 0,
-    )
-
-
-@router.get("/{activity_id}", response_model=Activity, summary="Activity abrufen")
-async def get_activity(activity_id: str):
-    return Activity.model_validate(_adapt_activity(await _get_activity_or_404(activity_id)))
-
-
-@router.post("/", response_model=Activity, status_code=status.HTTP_201_CREATED, summary="Activity anlegen", dependencies=SCHREIBEN["CRM"])
-async def create_activity(payload: ActivityCreate):
-    try:
-        body = {**_map_activity_payload(payload), "tenant_id": _MANDANT.get()}
-        created = await crm_core_client.create_activity(body)
-    except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"Failed to create activity: {exc}") from exc
-    return Activity.model_validate(_adapt_activity(created))
-
-
-@router.put("/{activity_id}", response_model=Activity, summary="Activity aktualisieren", dependencies=SCHREIBEN["CRM"])
-async def update_activity(activity_id: str, payload: ActivityUpdate):
-    await _get_activity_or_404(activity_id)
-    try:
-        body = _map_activity_payload(payload)
-        updated = await crm_core_client.update_activity(activity_id, body)
-    except httpx.HTTPStatusError as exc:
-        if exc.response.status_code == 404:
-            raise HTTPException(status_code=404, detail="Activity not found") from exc
-        raise HTTPException(status_code=exc.response.status_code, detail=exc.response.text) from exc
-    except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"Failed to update activity: {exc}") from exc
-    return Activity.model_validate(_adapt_activity(updated))
-
-
-@router.delete("/{activity_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Activity lÃ¶schen",
-    response_model=None, dependencies=SCHREIBEN["CRM"])
-async def delete_activity(activity_id: str):
-    await _get_activity_or_404(activity_id)
-    try:
-        await crm_core_client.delete_activity(activity_id)
-    except httpx.HTTPStatusError as exc:
-        if exc.response.status_code == 404:
-            raise HTTPException(status_code=404, detail="Activity not found") from exc
-        raise HTTPException(status_code=exc.response.status_code, detail=exc.response.text) from exc
-    except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"Failed to delete activity: {exc}") from exc
-
-
-@router.get("/{activity_id}/main-topics", response_model=list[str], summary="Activity main topics auflisten")
-async def list_activity_main_topics(activity_id: str):
-    items = await _load_list_field(activity_id, "main_topics")
-    return [str(item) for item in items]
-
-
-@router.post(
-    "/{activity_id}/main-topics",
-    response_model=str,
-    status_code=status.HTTP_201_CREATED,
-    summary="Activity main topic anlegen", dependencies=SCHREIBEN["CRM"])
-async def create_activity_main_topic(activity_id: str, payload: _StringListItem):
-    items = [str(item) for item in await _load_list_field(activity_id, "main_topics")]
-    items.append(payload.value)
-    updated = await _replace_list_field(activity_id, "main_topics", items)
-    return str(updated[-1])
-
-
-@router.put("/{activity_id}/main-topics/{item_index}", response_model=str, summary="Activity main topic replace", dependencies=SCHREIBEN["CRM"])
-async def replace_activity_main_topic(
-    activity_id: str,
-    payload: _StringListItem,
-    item_index: int = Path(..., ge=0),
-):
-    items = [str(item) for item in await _load_list_field(activity_id, "main_topics")]
-    _validate_item_index(items, item_index, "Main topic")
-    items[item_index] = payload.value
-    updated = await _replace_list_field(activity_id, "main_topics", items)
-    return str(updated[item_index])
-
-
-@router.delete("/{activity_id}/main-topics/{item_index}", status_code=status.HTTP_204_NO_CONTENT, summary="Activity main topic lÃ¶schen",
-    response_model=None, dependencies=SCHREIBEN["CRM"])
-async def delete_activity_main_topic(activity_id: str, item_index: int = Path(..., ge=0)):
-    items = [str(item) for item in await _load_list_field(activity_id, "main_topics")]
-    _validate_item_index(items, item_index, "Main topic")
-    del items[item_index]
-    await _replace_list_field(activity_id, "main_topics", items)
-
-
-@router.get("/{activity_id}/orders-placed", response_model=list[str], summary="Activity orders placed auflisten")
-async def list_activity_orders_placed(activity_id: str):
-    items = await _load_list_field(activity_id, "orders_placed")
-    return [str(item) for item in items]
-
-
-@router.post(
-    "/{activity_id}/orders-placed",
-    response_model=str,
-    status_code=status.HTTP_201_CREATED,
-    summary="Activity order placed anlegen", dependencies=SCHREIBEN["CRM"])
-async def create_activity_order_placed(activity_id: str, payload: _StringListItem):
-    items = [str(item) for item in await _load_list_field(activity_id, "orders_placed")]
-    items.append(payload.value)
-    updated = await _replace_list_field(activity_id, "orders_placed", items)
-    return str(updated[-1])
-
-
-@router.put("/{activity_id}/orders-placed/{item_index}", response_model=str, summary="Activity order placed replace", dependencies=SCHREIBEN["CRM"])
-async def replace_activity_order_placed(
-    activity_id: str,
-    payload: _StringListItem,
-    item_index: int = Path(..., ge=0),
-):
-    items = [str(item) for item in await _load_list_field(activity_id, "orders_placed")]
-    _validate_item_index(items, item_index, "Order")
-    items[item_index] = payload.value
-    updated = await _replace_list_field(activity_id, "orders_placed", items)
-    return str(updated[item_index])
-
-
-@router.delete("/{activity_id}/orders-placed/{item_index}", status_code=status.HTTP_204_NO_CONTENT, summary="Activity order placed lÃ¶schen",
-    response_model=None, dependencies=SCHREIBEN["CRM"])
-async def delete_activity_order_placed(activity_id: str, item_index: int = Path(..., ge=0)):
-    items = [str(item) for item in await _load_list_field(activity_id, "orders_placed")]
-    _validate_item_index(items, item_index, "Order")
-    del items[item_index]
-    await _replace_list_field(activity_id, "orders_placed", items)
-
-
-@router.get("/{activity_id}/follow-up-actions", response_model=list[ActivitiesOut], summary="Activity follow up actions auflisten")
-async def list_activity_follow_up_actions(activity_id: str):
-    return await _load_list_field(activity_id, "follow_up_actions")
-
-
-@router.post(
-    "/{activity_id}/follow-up-actions",
-    response_model=ActivitiesOut | str,
-    status_code=status.HTTP_201_CREATED,
-    summary="Activity follow up action anlegen", dependencies=SCHREIBEN["CRM"])
-async def create_activity_follow_up_action(activity_id: str, payload: _FollowUpActionItem):
-    items = await _load_list_field(activity_id, "follow_up_actions")
-    items.append(payload.value)
-    updated = await _replace_list_field(activity_id, "follow_up_actions", items)
-    return updated[-1]
-
-
-@router.put("/{activity_id}/follow-up-actions/{item_index}", response_model=ActivitiesOut | str, summary="Activity follow up action replace", dependencies=SCHREIBEN["CRM"])
-async def replace_activity_follow_up_action(
-    activity_id: str,
-    payload: _FollowUpActionItem,
-    item_index: int = Path(..., ge=0),
-):
-    items = await _load_list_field(activity_id, "follow_up_actions")
-    _validate_item_index(items, item_index, "Follow-up action")
-    items[item_index] = payload.value
-    updated = await _replace_list_field(activity_id, "follow_up_actions", items)
-    return updated[item_index]
-
-
-@router.delete("/{activity_id}/follow-up-actions/{item_index}", status_code=status.HTTP_204_NO_CONTENT, summary="Activity follow up action lÃ¶schen",
-    response_model=None, dependencies=SCHREIBEN["CRM"])
-async def delete_activity_follow_up_action(activity_id: str, item_index: int = Path(..., ge=0)):
-    items = await _load_list_field(activity_id, "follow_up_actions")
-    _validate_item_index(items, item_index, "Follow-up action")
-    del items[item_index]
-    await _replace_list_field(activity_id, "follow_up_actions", items)
 
+class ActivityDeleteAction(ActivityDeleteCommand):
+    mode: Literal["execute","dryRun","validate","propose"] = Field(default="execute",validation_alias=AliasChoices("mode","_mode"))
+
+
+def _action(db,tenant,action,envelope,entity=None):
+    cls={"create":ActivityCreateCommand,"update":ActivityUpdateCommand,"delete":ActivityDeleteCommand}[action]
+    command=cls.model_validate(envelope.model_dump(exclude={"mode"},exclude_unset=action=="update"))
+    if envelope.mode!="execute":
+        proposed=preview_activity(db,tenant,action,command,entity)
+        return {"actionKey":action,"mode":envelope.mode,"success":True,"proposedChanges":[proposed]}
+    return {**execute_activity(db,tenant,action,command,entity),"actionKey":action}
+
+
+@router.get("",response_model=PaginatedResponse[ActivityRead],summary="Aktivitaeten auflisten")
+def list_activities(type_filter:str|None=Query(None,alias="type"),status_filter:str|None=Query(None,alias="status"),
+                    search:str|None=Query(None,max_length=200),contact_id:str|None=Query(None,max_length=64),
+                    skip:int=Query(0,ge=0),limit:int=Query(100,ge=1,le=200),
+                    db:Session=Depends(get_db),tenant_id:str=Depends(get_tenant_id)) -> PaginatedResponse[ActivityRead]:
+    conditions=[Activity.tenant_id==tenant_id]
+    if type_filter is not None:conditions.append(Activity.type==type_filter)
+    if status_filter is not None:conditions.append(Activity.status==status_filter)
+    if contact_id is not None:conditions.append(Activity.contact_id==contact_id)
+    if search:
+        term="%"+search+"%"
+        conditions.append(or_(Activity.title.ilike(term),Activity.customer.ilike(term),Activity.contact_person.ilike(term),Activity.assigned_to.ilike(term)))
+    total=db.execute(select(func.count()).select_from(Activity).where(*conditions)).scalar_one()
+    rows=db.execute(select(Activity).where(*conditions).order_by(Activity.date.desc().nullslast(),Activity.id).offset(skip).limit(limit)).scalars()
+    return PaginatedResponse(items=[read_activity(row) for row in rows],total=total,page=skip//limit+1,size=limit,
+                             pages=(total+limit-1)//limit,has_next=skip+limit<total,has_prev=skip>0)
+
+
+@router.get("/{activity_id}",response_model=ActivityRead,summary="Aktivitaet abrufen")
+def get_activity(activity_id:str,response:Response,db:Session=Depends(get_db),tenant_id:str=Depends(get_tenant_id)) -> ActivityRead:
+    result=read_activity(activity_or_404(db,tenant_id,activity_id))
+    response.headers["ETag"]='"'+str(result.version)+'"'
+    return result
+
+
+@router.post("",response_model=ActivityRead,status_code=201,summary="Aktivitaet anlegen",dependencies=SCHREIBEN["CRM"])
+def create_activity(payload:ActivityCreateCommand,db:Session=Depends(get_db),tenant_id:str=Depends(get_tenant_id)) -> ActivityRead:
+    return ActivityRead.model_validate(execute_activity(db,tenant_id,"create",payload)["activity"])
+
+
+@router.put("/{activity_id}",response_model=ActivityRead,summary="Aktivitaet aendern",dependencies=SCHREIBEN["CRM"])
+def update_activity(activity_id:str,payload:ActivityUpdateCommand,db:Session=Depends(get_db),tenant_id:str=Depends(get_tenant_id)) -> ActivityRead:
+    return ActivityRead.model_validate(execute_activity(db,tenant_id,"update",payload,activity_id)["activity"])
+
+
+@router.delete("/{activity_id}",status_code=204,response_model=None,summary="Aktivitaet loeschen",dependencies=SCHREIBEN["CRM"])
+def delete_activity(activity_id:str,
+                    if_match:str|None=Header(None,alias="If-Match",pattern=r'^"[1-9][0-9]{0,9}"$'),
+                    idempotency_key:str=Header(...,alias="Idempotency-Key",min_length=1,max_length=200),
+                    db:Session=Depends(get_db),tenant_id:str=Depends(get_tenant_id)) -> None:
+    if if_match is None:raise HTTPException(428,"If-Match is required for activity deletion")
+    command=ActivityDeleteCommand(expected_version=int(if_match[1:-1]),idempotency_key=idempotency_key)
+    try:execute_activity(db,tenant_id,"delete",command,activity_id)
+    except HTTPException as error:
+        if error.status_code==409 and error.detail=="Activity version changed; reload before editing":
+            raise HTTPException(412,"Activity precondition failed; reload before deleting") from error
+        raise
+
+
+@router.post("/actions/create",response_model=ActivityCommandResult,summary="Aktivitaet erstellen v1",dependencies=SCHREIBEN["CRM"])
+def create_activity_action(payload:ActivityCreateAction,db:Session=Depends(get_db),tenant_id:str=Depends(get_tenant_id)) -> ActivityCommandResult:
+    return ActivityCommandResult.model_validate(_action(db,tenant_id,"create",payload))
+
+
+@router.post("/{activity_id}/actions/update",response_model=ActivityCommandResult,summary="Aktivitaet bearbeiten v1",dependencies=SCHREIBEN["CRM"])
+def update_activity_action(activity_id:str,payload:ActivityUpdateAction,db:Session=Depends(get_db),tenant_id:str=Depends(get_tenant_id)) -> ActivityCommandResult:
+    return ActivityCommandResult.model_validate(_action(db,tenant_id,"update",payload,activity_id))
+
+
+@router.post("/{activity_id}/actions/delete",response_model=ActivityCommandResult,summary="Aktivitaet entfernen v1",dependencies=SCHREIBEN["CRM"])
+def delete_activity_action(activity_id:str,payload:ActivityDeleteAction,db:Session=Depends(get_db),tenant_id:str=Depends(get_tenant_id)) -> ActivityCommandResult:
+    return ActivityCommandResult.model_validate(_action(db,tenant_id,"delete",payload,activity_id))
+
+
+# Child reads remain available; writes update the aggregate atomically with a version and idempotency key.
+_COLLECTIONS={"main-topics":"main_topics","orders-placed":"orders_placed","follow-up-actions":"follow_up_actions"}
+
+
+def _collection(collection):
+    if collection not in _COLLECTIONS:raise HTTPException(404,"Activity collection not found")
+    return _COLLECTIONS[collection]
+
+
+@router.get("/{activity_id}/{collection}",response_model=list[str],summary="Aktivitaeten-Unterliste lesen")
+def list_collection(activity_id:str,collection:Literal["main-topics","orders-placed","follow-up-actions"],
+                    db:Session=Depends(get_db),tenant_id:str=Depends(get_tenant_id)) -> list[str]:
+    return getattr(activity_or_404(db,tenant_id,activity_id),_collection(collection))

@@ -479,3 +479,7 @@ Kundenformat und Zieladapter technisch gesperrt.
 - [Benutzerhandbuch Masken-Plattform](../../benutzerhandbuch/masken-plattform.md)
 - [Entwickler Mask Runtime API](../../entwickler/mask-runtime-api.md)
 - [Agent-Runbook Mask Runtime Agent-Modus](../../agent-docs/runbooks/mask-runtime-agent-modus.md)
+
+## CRM-Aktivitaeten: kanonischer Funktionsvertrag (29.10.2026)
+
+Aktivitaetsliste, Detail und Neuanlage laufen ueber gemeinsame native Studio-Hosts; die handgeschriebene Aktivitaetsdetailseite ist entfernt. Der Domaincommand verbindet REST, MCP, CLI und Maskenaktionen mit Version, Idempotenz, geprueftem Mandanten/Urheber und atomarem Audit/Outbox. Agentenwrites bleiben gesperrt. Die notwendige additive Schemaaenderung ist ausschliesslich transaktional auf valeo_probe erprobt, noch nicht live ausgerollt. Kontakt-/Farm-Neuanlage verweigert die vorher falsche Aktivitaetsanlage; das ist keine abgeschlossene Kontakt-/Farmmigration. [Abnahmeumfang](../../quality-assurance/crm-activity-canonical-20261029.md).

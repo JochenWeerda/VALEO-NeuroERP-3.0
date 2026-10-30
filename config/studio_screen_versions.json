@@ -3153,7 +3153,7 @@
       "version": "1.0.0"
     },
     "crm/aktivitaet": {
-      "definition_hash": "d14a9a2959168018574bde30829a6913e1b5d141e098f86039574a945c67d4c5",
+      "definition_hash": "a7a8603a03c93879b270ae1372d9d44524fa37d261656d8a7414643a394ae4d7",
       "gates_passed": [
         "A",
         "B",
@@ -3164,11 +3164,12 @@
       "version": "1.0.0"
     },
     "crm/aktivitaeten-liste": {
-      "definition_hash": "00b7170a70ad41be91cc74606171a703bd50d5b7056bbcc863b24295a9a20aab",
+      "definition_hash": "7dd40dcf88182454c1dc25f2e3d66dde98ce587d8c7734adca95ccce1a4c11ad",
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
       "studio_draft_clean": false,
       "version": "1.0.0"
@@ -3359,7 +3360,7 @@
       "version": "1.0.0"
     },
     "crm/customer-360": {
-      "definition_hash": "d6b790a0364d368a3c3140715cf9cff52efdf4791ae267fc387f324abb67dc23",
+      "definition_hash": "8989a2b7983a5766bb8d6217ef915517194f6d0b42c80f075b61f5f94e96128b",
       "gates_passed": [
         "A",
         "B",
@@ -3665,7 +3666,7 @@
       "version": "1.0.0"
     },
     "crm/opportunity": {
-      "definition_hash": "75eefb9a8aba17ec1f1bcd92fda17302f9fd71313af53cd93ea2ec385f2dbec0",
+      "definition_hash": "599969272e3b5c60b1ebc7a9ba00e855da42e54bd67e571653e26af21f26edda",
       "gates_passed": [
         "A",
         "B",

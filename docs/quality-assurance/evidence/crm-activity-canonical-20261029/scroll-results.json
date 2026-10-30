@@ -1,0 +1,239 @@
+[
+  {
+    "width": 1366,
+    "height": 768,
+    "theme": "light",
+    "controls": [
+      {
+        "label": "Besprochene Themen",
+        "top": 391,
+        "bottom": 471,
+        "viewport": 768,
+        "footer": [
+          {
+            "top": 699,
+            "bottom": 768
+          }
+        ],
+        "focused": true,
+        "value": "first\nsecond"
+      },
+      {
+        "label": "Besprochene Bestellungen",
+        "top": 563,
+        "bottom": 643,
+        "viewport": 768,
+        "footer": [
+          {
+            "top": 699,
+            "bottom": 768
+          }
+        ],
+        "focused": true,
+        "value": "first\nsecond"
+      },
+      {
+        "label": "Naechste Schritte",
+        "top": 563,
+        "bottom": 643,
+        "viewport": 768,
+        "footer": [
+          {
+            "top": 699,
+            "bottom": 768
+          }
+        ],
+        "focused": true,
+        "value": "first\nsecond"
+      }
+    ]
+  },
+  {
+    "width": 1366,
+    "height": 768,
+    "theme": "dark",
+    "controls": [
+      {
+        "label": "Besprochene Themen",
+        "top": 391,
+        "bottom": 471,
+        "viewport": 768,
+        "footer": [
+          {
+            "top": 699,
+            "bottom": 768
+          }
+        ],
+        "focused": true,
+        "value": "first\nsecond"
+      },
+      {
+        "label": "Besprochene Bestellungen",
+        "top": 563,
+        "bottom": 643,
+        "viewport": 768,
+        "footer": [
+          {
+            "top": 699,
+            "bottom": 768
+          }
+        ],
+        "focused": true,
+        "value": "first\nsecond"
+      },
+      {
+        "label": "Naechste Schritte",
+        "top": 563,
+        "bottom": 643,
+        "viewport": 768,
+        "footer": [
+          {
+            "top": 699,
+            "bottom": 768
+          }
+        ],
+        "focused": true,
+        "value": "first\nsecond"
+      }
+    ]
+  },
+  {
+    "width": 1440,
+    "height": 900,
+    "theme": "light",
+    "controls": [
+      {
+        "label": "Besprochene Themen",
+        "top": 454,
+        "bottom": 534,
+        "viewport": 900,
+        "footer": [],
+        "focused": true,
+        "value": "first\nsecond"
+      },
+      {
+        "label": "Besprochene Bestellungen",
+        "top": 626,
+        "bottom": 706,
+        "viewport": 900,
+        "footer": [],
+        "focused": true,
+        "value": "first\nsecond"
+      },
+      {
+        "label": "Naechste Schritte",
+        "top": 626,
+        "bottom": 706,
+        "viewport": 900,
+        "footer": [],
+        "focused": true,
+        "value": "first\nsecond"
+      }
+    ]
+  },
+  {
+    "width": 1440,
+    "height": 900,
+    "theme": "dark",
+    "controls": [
+      {
+        "label": "Besprochene Themen",
+        "top": 454,
+        "bottom": 534,
+        "viewport": 900,
+        "footer": [],
+        "focused": true,
+        "value": "first\nsecond"
+      },
+      {
+        "label": "Besprochene Bestellungen",
+        "top": 626,
+        "bottom": 706,
+        "viewport": 900,
+        "footer": [],
+        "focused": true,
+        "value": "first\nsecond"
+      },
+      {
+        "label": "Naechste Schritte",
+        "top": 626,
+        "bottom": 706,
+        "viewport": 900,
+        "footer": [],
+        "focused": true,
+        "value": "first\nsecond"
+      }
+    ]
+  },
+  {
+    "width": 1920,
+    "height": 1080,
+    "theme": "light",
+    "controls": [
+      {
+        "label": "Besprochene Themen",
+        "top": 454,
+        "bottom": 534,
+        "viewport": 1080,
+        "footer": [],
+        "focused": true,
+        "value": "first\nsecond"
+      },
+      {
+        "label": "Besprochene Bestellungen",
+        "top": 626,
+        "bottom": 706,
+        "viewport": 1080,
+        "footer": [],
+        "focused": true,
+        "value": "first\nsecond"
+      },
+      {
+        "label": "Naechste Schritte",
+        "top": 626,
+        "bottom": 706,
+        "viewport": 1080,
+        "footer": [],
+        "focused": true,
+        "value": "first\nsecond"
+      }
+    ]
+  },
+  {
+    "width": 1920,
+    "height": 1080,
+    "theme": "dark",
+    "controls": [
+      {
+        "label": "Besprochene Themen",
+        "top": 454,
+        "bottom": 534,
+        "viewport": 1080,
+        "footer": [],
+        "focused": true,
+        "value": "first\nsecond"
+      },
+      {
+        "label": "Besprochene Bestellungen",
+        "top": 626,
+        "bottom": 706,
+        "viewport": 1080,
+        "footer": [],
+        "focused": true,
+        "value": "first\nsecond"
+      },
+      {
+        "label": "Naechste Schritte",
+        "top": 626,
+        "bottom": 706,
+        "viewport": 1080,
+        "footer": [],
+        "focused": true,
+        "value": "first\nsecond"
+      }
+    ]
+  },
+  {
+    "filterType": "call"
+  }
+]

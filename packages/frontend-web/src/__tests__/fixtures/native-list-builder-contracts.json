@@ -15,7 +15,7 @@
       {
         "key": "list",
         "endpoint": "/api/v1/einkauf/angebote",
-        "pageSize": 500
+        "pageSize": 100
       }
     ],
     "actions": [
@@ -243,7 +243,7 @@
       {
         "key": "list",
         "endpoint": "/api/v1/einkauf/lieferanten",
-        "pageSize": 500
+        "pageSize": 100
       }
     ],
     "actions": [

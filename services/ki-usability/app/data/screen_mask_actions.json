@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 540,
-    "screens_with_actions": 424,
+    "actions": 537,
+    "screens_with_actions": 419,
     "domains": 57
   },
   "actions": [
@@ -2026,6 +2026,26 @@
       }
     },
     {
+      "id": "mask:crm/aktivitaeten-liste:neu",
+      "label": "Neue Aktivitaet",
+      "description": "Neue Aktivitaet (crm/aktivitaeten-liste)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/aktivitaeten-liste",
+      "intent_phrases": [
+        "Neue Aktivitaet"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "crm/aktivitaeten-liste",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": "/crm/aktivitaet/neu",
+        "command": null,
+        "method": null
+      }
+    },
+    {
       "id": "mask:crm/betriebsprofile-liste:export",
       "label": "CSV-Export",
       "description": "CSV-Export (crm/betriebsprofile-liste)",
@@ -3978,22 +3998,22 @@
       }
     },
     {
-      "id": "mask:fibu/debitoren:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (fibu/debitoren)",
+      "id": "mask:fibu/debitoren-liste:zurueck-op-verwaltung",
+      "label": "Zurück zur OP-Verwaltung",
+      "description": "Zurück zur OP-Verwaltung (fibu/debitoren-liste)",
       "category": "mask-action",
-      "domain": "fibu",
-      "mask": "fibu/debitoren",
+      "domain": "finance",
+      "mask": "fibu/debitoren-liste",
       "intent_phrases": [
-        "CSV-Export"
+        "Zurück zur OP-Verwaltung"
       ],
       "required_data": [],
       "source": {
-        "screenId": "fibu/debitoren",
-        "actionKey": "export",
+        "screenId": "fibu/debitoren-liste",
+        "actionKey": "zurueck-op-verwaltung",
         "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
+        "navigationRoute": "/fibu/op-verwaltung",
+        "command": null,
         "method": null
       }
     },
@@ -4362,7 +4382,7 @@
       "label": "CSV-Export",
       "description": "CSV-Export (fibu/op-verwaltung)",
       "category": "mask-action",
-      "domain": "fibu",
+      "domain": "finance",
       "mask": "fibu/op-verwaltung",
       "intent_phrases": [
         "CSV-Export"
@@ -6760,26 +6780,6 @@
       }
     },
     {
-      "id": "mask:kontrakte/FrmKontraktProtokoll:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (kontrakte/FrmKontraktProtokoll)",
-      "category": "mask-action",
-      "domain": "kontrakte",
-      "mask": "kontrakte/FrmKontraktProtokoll",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "kontrakte/FrmKontraktProtokoll",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
       "id": "mask:kontrakte/kontraktklassen-liste:export",
       "label": "CSV-Export",
       "description": "CSV-Export (kontrakte/kontraktklassen-liste)",
@@ -8982,26 +8982,6 @@
       }
     },
     {
-      "id": "mask:qualitaet/reklamation-detail:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (qualitaet/reklamation-detail)",
-      "category": "mask-action",
-      "domain": "qualitaet",
-      "mask": "qualitaet/reklamation-detail",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "qualitaet/reklamation-detail",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
       "id": "mask:qualitaet/reklamation:abschliessen",
       "label": "Abschliessen",
       "description": "Abschliessen (qualitaet/reklamation)",
@@ -9082,26 +9062,6 @@
         "commandEndpoint": null,
         "navigationRoute": "/qualitaet/reklamation/neu",
         "command": null,
-        "method": null
-      }
-    },
-    {
-      "id": "mask:qualitaet/reklamationen:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (qualitaet/reklamationen)",
-      "category": "mask-action",
-      "domain": "qualitaet",
-      "mask": "qualitaet/reklamationen",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "qualitaet/reklamationen",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
         "method": null
       }
     },
@@ -10748,26 +10708,6 @@
       "required_data": [],
       "source": {
         "screenId": "workflow/flow-spine-service-to-customer",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:workflow/flow-spine-studio:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (workflow/flow-spine-studio)",
-      "category": "mask-action",
-      "domain": "workflow",
-      "mask": "workflow/flow-spine-studio",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "workflow/flow-spine-studio",
         "actionKey": "export",
         "commandEndpoint": null,
         "navigationRoute": null,

@@ -270,72 +270,8 @@ def seed_crm_data(db: Session, tenant_id: str):
         lead = models.Lead(**lead_data)
         db.add(lead)
     
-    # 10+ Activities
-    # (Aktivitäten für die ersten 3 Contacts)
     contact_ids = [c["id"] for c in contacts_data]
-    
-    activities_data = [
-        {
-            "id": uuid7(),
-            "contact_id": contact_ids[0],
-            "type": models.ActivityType.CALL,
-            "date": datetime.now() - timedelta(days=2),
-            "subject": "Erstkontakt Getreidehandel",
-            "notes": "Telefonat geführt, Interesse an Weizenverkauf, Termin vereinbart",
-            "status": models.ActivityStatus.COMPLETED,
-            "created_by": "user1",
-            "tenant_id": tenant_id
-        },
-        {
-            "id": uuid7(),
-            "contact_id": contact_ids[0],
-            "type": models.ActivityType.MEETING,
-            "date": datetime.now() + timedelta(days=5),
-            "subject": "Präsentation Produktportfolio",
-            "notes": "Termin: 10 Uhr, Besprechungsraum 2, Muster mitbringen",
-            "status": models.ActivityStatus.PLANNED,
-            "created_by": "user1",
-            "tenant_id": tenant_id
-        },
-        {
-            "id": uuid7(),
-            "contact_id": contact_ids[1],
-            "type": models.ActivityType.EMAIL,
-            "date": datetime.now() - timedelta(days=1),
-            "subject": "Angebot Bio-Saatgut versendet",
-            "notes": "Angebot ANG-2025-045 per E-Mail, Rückmeldung bis 20.10.",
-            "status": models.ActivityStatus.COMPLETED,
-            "created_by": "user2",
-            "tenant_id": tenant_id
-        },
-        {
-            "id": uuid7(),
-            "contact_id": contact_ids[2],
-            "type": models.ActivityType.VISIT,
-            "date": datetime.now() - timedelta(days=7),
-            "subject": "Hofbesichtigung & Bedarfsanalyse",
-            "notes": "Vor-Ort-Termin, Flächen begutachtet, PSM-Bedarf ermittelt",
-            "status": models.ActivityStatus.COMPLETED,
-            "created_by": "user1",
-            "tenant_id": tenant_id
-        },
-        {
-            "id": uuid7(),
-            "contact_id": contact_ids[2],
-            "type": models.ActivityType.CALL,
-            "date": datetime.now() + timedelta(days=3),
-            "subject": "Follow-up Angebot",
-            "notes": "Nachfassen zu Angebot, Preisverhandlung möglich",
-            "status": models.ActivityStatus.PLANNED,
-            "created_by": "user1",
-            "tenant_id": tenant_id
-        },
-    ]
-    
-    for activity_data in activities_data:
-        activity = models.Activity(**activity_data)
-        db.add(activity)
-    
+
     # 5+ Betriebsprofile
     betriebsprofile_data = [
         {

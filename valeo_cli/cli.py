@@ -193,14 +193,14 @@ def cmd_ausfuehren(args, http, token, out, ask: Callable[[str], str], stdin) -> 
             result["idempotenz"] = key
     else:
         generated = bool(re.fullmatch(r'/api/v1/studio/entities/studio_[a-z0-9_]+/(?:\{entity_id\}/)?actions/(?:create|update|delete)', action.get('commandEndpoint', '')))
-        if generated and action['commandEndpoint'].endswith(('/update', '/delete')):
+        if action.get('requiresExpectedVersion') or (generated and action['commandEndpoint'].endswith(('/update', '/delete'))):
             version = args.version if args.version is not None else payload.get('expected_version')
             if type(version) is not int or version < 1:
                 raise UsageError('Diese Aktion braucht die gelesene Version (--version).')
             if 'expected_version' in payload and payload['expected_version'] != version:
                 raise UsageError('Widerspruechliche Versionsangaben.')
             payload = {**payload, 'expected_version': version}
-        key = args.idempotenz or (str(uuid.uuid4()) if generated else None)
+        key = args.idempotenz or (str(uuid.uuid4()) if generated or action.get('requiresIdempotencyKey') else None)
         method, path, body = support.build_request(
             action, screen_id=args.maske, entity_id=args.id, payload=payload, mode=args.modus,
             audit_reason=args.grund, idempotency_key=key)
@@ -297,6 +297,8 @@ def parser() -> argparse.ArgumentParser:
     d.add_argument("--limit", type=int, default=50)
     d.add_argument("--suche")
     d.add_argument("--tabelle")
+    d.add_argument("--vollstaendig", action="store_true", help="Vollstaendiger begrenzter Tabellenbestand")
+    d.add_argument("--preset", action="append", default=[], metavar="FILTER=WERT", help="Registrierten Listenfilter auswaehlen")
     d.add_argument("--sortieren")
     d.add_argument("--richtung", choices=["asc", "desc"], default="asc")
     d.add_argument("--filter", dest="tabellenfilter", metavar="DATEI|-", help="Filterplan als JSON-Objekt")
@@ -356,6 +358,17 @@ def main(argv: list[str] | None = None, *, http: httpx.Client | None = None, out
             if not 1 <= args.seite <= 1000000 or not 1 <= args.limit <= 100:
                 raise UsageError("Seite muss 1..1000000 und Limit 1..100 sein.")
             params = {"page": args.seite, "limit": args.limit}
+            if args.vollstaendig:
+                params["complete"] = "true"
+            if args.preset:
+                selections = {}
+                for option in args.preset:
+                    key, separator, value = option.partition("=")
+                    if not separator or not key or not value or key in selections or len(selections) >= 8:
+                        raise UsageError("Listenfilter als eindeutiges FILTER=WERT angeben.")
+                    selections[key] = value
+                params["preset_filters"] = json.dumps(selections, ensure_ascii=False)
+
             if args.id is not None:
                 params["entity_id"] = args.id
             if args.suche is not None:

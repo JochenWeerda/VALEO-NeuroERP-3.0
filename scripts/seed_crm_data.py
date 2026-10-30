@@ -1,73 +1,18 @@
 #!/usr/bin/env python3
 """
 Seed CRM test data directly into database
-Creates sample contacts, leads, activities, and farm profiles
+Creates sample farm profiles
 """
 
 import sys
 import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from datetime import datetime, timedelta
+from datetime import datetime
 from app.core.uuid7 import uuid7
 
 from app.core.database import SessionLocal
-from app.infrastructure.models import Activity, FarmProfile
-
-def seed_activities(db):
-    """Seed test activities"""
-    print("🧪 Seeding Activities...")
-    
-    activities = [
-        {
-            "id": uuid7(),
-            "type": "meeting",
-            "title": "Jahresgespräch 2025",
-            "customer": "Musterfirma GmbH",
-            "contact_person": "Max Mustermann",
-            "date": datetime.now() + timedelta(days=30),
-            "status": "planned",
-            "assigned_to": "Hans Mueller",
-            "description": "Wichtiges Jahresgespräch mit Neukunden",
-            "tenant_id": "00000000-0000-0000-0000-000000000001",
-            "created_at": datetime.now(),
-            "updated_at": datetime.now(),
-        },
-        {
-            "id": uuid7(),
-            "type": "call",
-            "title": "Telefon-Follow-up Schmidt GmbH",
-            "customer": "Schmidt GmbH",
-            "contact_person": "Anna Schmidt",
-            "date": datetime.now() + timedelta(days=7),
-            "status": "planned",
-            "assigned_to": "Maria Weber",
-            "description": "Angebot besprechen",
-            "tenant_id": "00000000-0000-0000-0000-000000000001",
-            "created_at": datetime.now(),
-            "updated_at": datetime.now(),
-        },
-        {
-            "id": uuid7(),
-            "type": "email",
-            "title": "Angebot versenden",
-            "customer": "Bio-Hof Müller",
-            "contact_person": "Thomas Müller",
-            "date": datetime.now() - timedelta(days=2),
-            "status": "completed",
-            "assigned_to": "Hans Mueller",
-            "description": "Jahresangebot für Saatgut versendet",
-            "tenant_id": "00000000-0000-0000-0000-000000000001",
-            "created_at": datetime.now(),
-            "updated_at": datetime.now(),
-        },
-    ]
-    
-    for act_data in activities:
-        activity = Activity(**act_data)
-        db.add(activity)
-    
-    print(f"   ✅ Created {len(activities)} activities")
+from app.infrastructure.models import FarmProfile
 
 def seed_farm_profiles(db):
     """Seed test farm profiles"""
@@ -162,7 +107,6 @@ def main():
     
     try:
         # Seed data
-        seed_activities(db)
         seed_farm_profiles(db)
         
         # Commit
@@ -174,10 +118,8 @@ def main():
         print("📊 Summary")
         print("=" * 60)
         
-        activity_count = db.query(Activity).count()
         profile_count = db.query(FarmProfile).count()
         
-        print(f"   Activities in DB: {activity_count}")
         print(f"   Farm Profiles in DB: {profile_count}")
         
         print("\n🎉 Ready to test in browser!")

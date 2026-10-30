@@ -77,30 +77,6 @@ class CRMCoreLeadListResponse(BaseModel):
     total: int
 
 
-class CRMCoreActivity(BaseModel):
-    id: str
-    tenant_id: str
-    type: str
-    title: str
-    status: str
-    assigned_to: str | None = None
-    scheduled_at: str | None = None
-    description: str | None = None
-    customer_id: str | None = None
-    customer_name: str | None = None
-    contact_id: str | None = None
-    main_topics: list[str] | None = None
-    orders_placed: list[str] | None = None
-    follow_up_actions: list[dict[str, Any] | str] | None = None
-    created_at: str | None = None
-    updated_at: str | None = None
-
-
-class CRMCoreActivityListResponse(BaseModel):
-    items: list[CRMCoreActivity]
-    total: int
-
-
 class CRMCoreFarmProfile(BaseModel):
     id: str
     tenant_id: str
@@ -223,44 +199,6 @@ async def update_lead(lead_id: str, body: dict[str, Any]) -> CRMCoreLead:
 
 async def delete_lead(lead_id: str) -> None:
     await _request("DELETE", f"/api/v1/leads/{lead_id}")
-
-
-async def list_activities(
-    tenant_id: str,
-    activity_type: str | None = None,
-    status: str | None = None,
-    skip: int = 0,
-    limit: int = 50,
-) -> Tuple[list[CRMCoreActivity], int]:
-    if not tenant_id or not tenant_id.strip():
-        raise ValueError("tenant_id is required")
-    params: dict[str, Any] = {"tenant_id": tenant_id, "skip": skip, "limit": min(limit, 200)}
-    if activity_type:
-        params["type"] = activity_type
-    if status:
-        params["status"] = status
-    payload = await _request("GET", "/api/v1/activities", params=params)
-    response = CRMCoreActivityListResponse.model_validate(payload)
-    return response.items, response.total
-
-
-async def get_activity(activity_id: str) -> CRMCoreActivity:
-    payload = await _request("GET", f"/api/v1/activities/{activity_id}")
-    return CRMCoreActivity.model_validate(payload)
-
-
-async def create_activity(body: dict[str, Any]) -> CRMCoreActivity:
-    payload = await _request("POST", "/api/v1/activities", json=body)
-    return CRMCoreActivity.model_validate(payload)
-
-
-async def update_activity(activity_id: str, body: dict[str, Any]) -> CRMCoreActivity:
-    payload = await _request("PATCH", f"/api/v1/activities/{activity_id}", json=body)
-    return CRMCoreActivity.model_validate(payload)
-
-
-async def delete_activity(activity_id: str) -> None:
-    await _request("DELETE", f"/api/v1/activities/{activity_id}")
 
 
 async def list_farm_profiles(

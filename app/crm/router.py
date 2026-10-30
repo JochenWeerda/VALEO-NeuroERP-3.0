@@ -138,24 +138,16 @@ async def get_contact_timeline(
     tenant_id: str = Depends(get_tenant_id),
 ):
     """CRM-360-01: Customer Timeline — all activities for contact chronologically."""
-    query = db.query(models.Activity).filter(
-        models.Activity.contact_id == contact_id,
-        models.Activity.tenant_id == tenant_id,
-    )
+    from app.infrastructure.models import Activity
+    from app.domains.crm.activity_contracts import normalize_legacy_activity_type
+    query=db.query(Activity).filter(Activity.contact_id==contact_id,Activity.tenant_id==tenant_id)
     if activity_type:
-        query = query.filter(models.Activity.type == activity_type)
-    activities = query.order_by(models.Activity.date.desc()).limit(limit).all()
-    return [
-        {
-            "id": str(a.id),
-            "type": a.type.value if hasattr(a.type, "value") else str(a.type),
-            "date": a.date.isoformat() if a.date else None,
-            "subject": a.subject,
-            "notes": a.notes,
-            "status": a.status.value if hasattr(a.status, "value") else str(a.status),
-        }
-        for a in activities
-    ]
+        try:query=query.filter(Activity.type==normalize_legacy_activity_type(activity_type))
+        except ValueError as error:raise HTTPException(422,"Unknown activity type") from error
+    return [{"id":str(a.id),"type":a.type,"date":a.date.isoformat() if a.date else None,
+             "subject":a.title,"notes":a.description,"status":a.status}
+            for a in query.order_by(Activity.date.desc().nullslast(),Activity.id).limit(min(max(limit,1),200)).all()]
+
 
 
 # --- LEADS ---
@@ -209,111 +201,6 @@ async def assign_lead(
     db.commit()
     db.refresh(db_lead)
     return db_lead
-
-
-# --- ACTIVITIES ---
-
-@router.post("/activities", response_model=schemas.Activity, status_code=201, dependencies=SCHREIBEN["CRM"])
-async def create_activity(
-    activity: schemas.ActivityCreate,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id)
-):
-    """Create new activity"""
-    db_activity = models.Activity(
-        id=uuid7(),
-        **activity.model_dump(),
-        tenant_id=tenant_id
-    )
-    db.add(db_activity)
-    db.commit()
-    db.refresh(db_activity)
-    return db_activity
-
-
-@router.get("/activities", response_model=List[schemas.Activity])
-async def list_activities(
-    contact_id: Optional[str] = None,
-    type: Optional[schemas.ActivityType] = None,
-    status: Optional[schemas.ActivityStatus] = None,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id)
-):
-    """List all activities"""
-    query = db.query(models.Activity).filter(models.Activity.tenant_id == tenant_id)
-    
-    if contact_id:
-        query = query.filter(models.Activity.contact_id == contact_id)
-    
-    if type:
-        query = query.filter(models.Activity.type == type)
-    
-    if status:
-        query = query.filter(models.Activity.status == status)
-    
-    return query.order_by(models.Activity.date.desc()).all()
-
-
-@router.get("/activities/{activity_id}", response_model=schemas.Activity)
-async def get_activity(
-    activity_id: str,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id)
-):
-    """Get activity by ID"""
-    activity = db.query(models.Activity).filter(
-        models.Activity.id == activity_id,
-        models.Activity.tenant_id == tenant_id
-    ).first()
-    
-    if not activity:
-        raise HTTPException(status_code=404, detail="Activity not found")
-    
-    return activity
-
-
-@router.put("/activities/{activity_id}", response_model=schemas.Activity, dependencies=SCHREIBEN["CRM"])
-async def update_activity(
-    activity_id: str,
-    activity_update: schemas.ActivityUpdate,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id)
-):
-    """Update activity"""
-    db_activity = db.query(models.Activity).filter(
-        models.Activity.id == activity_id,
-        models.Activity.tenant_id == tenant_id
-    ).first()
-    
-    if not db_activity:
-        raise HTTPException(status_code=404, detail="Activity not found")
-    
-    for field, value in activity_update.model_dump(exclude_unset=True).items():
-        setattr(db_activity, field, value)
-    
-    db.commit()
-    db.refresh(db_activity)
-    return db_activity
-
-
-@router.delete("/activities/{activity_id}", status_code=204, dependencies=SCHREIBEN["CRM"])
-async def delete_activity(
-    activity_id: str,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id)
-):
-    """Delete activity"""
-    db_activity = db.query(models.Activity).filter(
-        models.Activity.id == activity_id,
-        models.Activity.tenant_id == tenant_id
-    ).first()
-    
-    if not db_activity:
-        raise HTTPException(status_code=404, detail="Activity not found")
-    
-    db.delete(db_activity)
-    db.commit()
-    return None
 
 
 # --- BETRIEBSPROFILE ---
@@ -755,7 +642,7 @@ async def gdpr_data_export(
     # Aktivitaeten und offene Posten fehlen in manchen Installationen; der Savepoint haelt die
     # Transaktion fuer die naechste Abfrage am Leben.
     for key, sql in (
-        ("activities", "SELECT * FROM domain_crm.crm_activities WHERE contact_id = :pid AND tenant_id = :tid"),
+        ("activities", "SELECT * FROM domain_crm.activities WHERE contact_id = :pid AND tenant_id = :tid"),
         ("open_items", "SELECT * FROM domain_erp.offene_posten WHERE kunde_id = :pid AND tenant_id = :tid"),
     ):
         try:

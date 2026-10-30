@@ -78,6 +78,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `controlling_budget_lifecycle_service` | DOM-CONTROLLING-004.2 — Budget Lifecycle Service (Statusmaschine). |
 | `controlling_kostenstellen_abschluss_service` | DOM-CONTROLLING-004.4 — Kostenstellen-Abschluss Service. |
 | `controlling_service` | Service layer for Controlling module (KPIs, Dashboards, Widgets, Timeseries, Actions). |
+| `crm_activity_service` | Canonical CRM activity commands v1; transports never own business writes. |
 | `crm_auto_capture_service` | Automatische Kontakt-Erfassung (KIM-AUTOCAPTURE). |
 | `crm_capture_inbox_service` | Klärfall-Inbox für nicht zuordenbare Auto-Captures (KIM). |
 | `crm_compat_service` | Service layer for compat CRM domain routes. |
@@ -90,6 +91,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `crm_lead_service` | The lead mask and qualification use the INTERESSENT-IST-LEAD register. |
 | `crm_merge_service` | Kunden-Zusammenführung (DOM-CRM-004.2). |
 | `crm_notification_service` | CRM-Benachrichtigungen — internes In-App-Postfach + externe Fachberater-Mail. |
+| `crm_opportunity_reference` | Shared tenant-checked opportunity reference resolution for every activity adapter. |
 | `crm_ownership_service` | Kunden-Ownership (DOM-CRM-004.3) — Zuordnung & Übergabe. |
 | `customer_reference` | Referenzen in Maskenkoepfen lesbar machen. |
 | `customer_sales_eligibility` | CRM-Kunde ↔ Business-Partner: Sperr- und Lieferfähigkeit für Verkaufsbelege. |
@@ -202,6 +204,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `legacy_interface_adapter_service` | Versioned, non-executing adapter framework for L3 Standard and Unimet. |
 | `lieferschein_pdf` | Lieferschein PDF Generator |
 | `list_experience_metrics` | Read-only list metrics shared across registered human/MCP/CLI projections. |
+| `list_presets` | Registered read-only list selectors, shared by REST, MCP and CLI. |
 | `lkv_pipeline` | LKV-Pipeline – Download der LKV-Weser-Ems-Jahresberichte (Milchleistungsprüfung). |
 | `llm_gateway` | Anbieterunabhängiges LLM-Gateway. |
 | `logistics_disposition_service` | DOM-LOG-004.2 — Tour-Dispositions-Service (Kapazität + Zeitfenster). |

@@ -34,6 +34,7 @@ export type RenderComponentKind =
   | 'select'
   | 'multiselect'
   | 'textarea'
+  | 'stringList'
   | 'file'
   | 'lookup'
   | 'currency'
@@ -239,6 +240,8 @@ export interface RenderTablePlan {
 }
 
 export interface RenderActionPlan {
+  requiresExpectedVersion?: boolean
+  requiresIdempotencyKey?: boolean
   key: string
   label: string
   kind: 'primary' | 'secondary' | 'danger' | 'workflow'

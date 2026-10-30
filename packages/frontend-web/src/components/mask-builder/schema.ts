@@ -55,6 +55,7 @@ export type ScreenFieldType =
   | 'select'
   | 'multiselect'
   | 'textarea'
+  | 'stringList'
   | 'file'
   | 'lookup'
   | 'table'
@@ -205,6 +206,8 @@ export interface ScreenActionInputField extends ScreenFieldDefinition {
 }
 
 export interface ScreenActionDefinition {
+  requiresExpectedVersion?: boolean
+  requiresIdempotencyKey?: boolean
   responseAdapter?: 'resource.v1'
   resultNavigationRoute?: string
   inputPrefill?: 'entity'
@@ -481,7 +484,19 @@ export interface DocumentScreenVariantRef {
   materializedHash: string
 }
 
+export interface ListPreset {
+  key: string
+  label: string
+  field: string
+  kind: 'choice' | 'date' | 'actor'
+  options: { value: string; label: string }[]
+  completionField?: string
+  completionValue?: string
+  completionValues?: string[]
+}
+
 export interface ListExperience {
+  presets?: ListPreset[]
   searchFields: string[]
   aggregates: { key: string; label: string; kind?: 'count' | 'sum'; field?: string; format?: 'currency'; currencyField?: string; conditions: { field: string; op: 'eq' | 'neq'; value: string }[] }[]
   export: { filenamePrefix: string; delimiter: ';'; columns: { key: string; label: string }[] }
@@ -497,6 +512,7 @@ export interface ScreenDefinition {
   /** Declared native creation; new/neu are never fetched as entity IDs. */
   creation?: {
     adapter?: 'docflow.create.v1'
+    requiresIdempotencyKey?: boolean
     fields?: ScreenFieldDefinition[]
     dataSources?: ScreenDataSource[]
     endpoint: string
@@ -621,9 +637,26 @@ export function validateScreenDefinition(screen: ScreenDefinition): string[] {
       valid = keys.size === x.aggregates.length && new Set(x.searchFields).size === x.searchFields.length && new Set(x.export.columns.map(c => c.key)).size === x.export.columns.length && (!x.notice || (obj(x.notice) && keys.has(x.notice.aggregate) && str(x.notice.text)))
         && (!x.insightLines || (arr(x.insightLines) && x.insightLines.every(line => obj(line) && str(line.label) && arr(line.variants) && line.variants.every(v => obj(v) && str(v.text) && (!v.when || (obj(v.when) && keys.has(v.when.aggregate) && v.when.op === 'gt' && typeof v.when.value === 'number' && Number.isFinite(v.when.value)))))))
     }
+    if (valid && x.presets !== undefined) {
+      valid = Array.isArray(x.presets) && x.presets.length <= 8
+        && x.presets.every(p => obj(p) && key(p.key) && str(p.label) && key(p.field)
+          && ['choice', 'date', 'actor'].includes(p.kind)
+          && Object.keys(p).every(k => ['key','label','field','kind','options','completionField','completionValue','completionValues'].includes(k))
+          && Array.isArray(p.options) && p.options.length >= 2 && p.options.length <= 20
+          && p.options.every(o => obj(o) && str(o.value) && str(o.label) && Object.keys(o).every(k => ['value','label'].includes(k)))
+          && new Set(p.options.map(o => o.value)).size === p.options.length
+          && p.options.some(o => o.value === 'all')
+          && (p.kind !== 'date' || p.options.every(o => ['all','today','week','overdue'].includes(o.value)))
+          && (p.kind !== 'actor' || p.options.every(o => ['all','mine'].includes(o.value)))
+          && (p.completionField === undefined || (p.kind === 'date' && key(p.completionField)))
+          && (p.completionValue === undefined || str(p.completionValue))
+          && (p.completionValues === undefined || (p.kind === 'date' && Array.isArray(p.completionValues) && p.completionValues.length > 0 && p.completionValues.length <= 20 && p.completionValues.every(str))))
+        && new Set(x.presets.map(p => p.key)).size === x.presets.length
+        && (!x.presets.length || screen.tables?.[0]?.serverPagination !== true)
+    }
     const columns = new Set((screen.tables?.[0]?.columns ?? []).map(column => column.key))
     if (valid) valid = screen.mode === 'list' && columns.size > 0
-      && [...x.searchFields, ...x.export.columns.map(column => column.key), ...x.aggregates.flatMap(a => [...a.conditions.map(c => c.field), ...(a.field ? [a.field] : []), ...(a.currencyField ? [a.currencyField] : [])])].every(field => columns.has(field))
+      && [...(x.presets ?? []).flatMap(p => [p.field, ...(p.completionField ? [p.completionField] : [])]), ...x.searchFields, ...x.export.columns.map(column => column.key), ...x.aggregates.flatMap(a => [...a.conditions.map(c => c.field), ...(a.field ? [a.field] : []), ...(a.currencyField ? [a.currencyField] : [])])].every(field => columns.has(field))
     if (!valid) errors.push('listExperience is invalid')
   }
 

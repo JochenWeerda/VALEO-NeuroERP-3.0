@@ -261,24 +261,42 @@ def build_agrar_psm_stamm() -> dict[str, Any]:
 
 
 def build_crm_aktivitaet_stamm() -> dict[str, Any]:
-    return _stamm(
-        screen_id="crm/aktivitaet",
-        domain="crm",
-        title="Aktivitaet",
-        subtitle="CRM-Aktivitaet",
-        endpoint="/api/v1/crm/activities/{entity_id}",
-        identity="subject",
-        felder=[
-        _feld("subject", "Betreff"),
-        _feld("activity_type", "Typ"),
-        _feld("status", "Status"),
-        _feld("due_date", "Faellig", "date"),
-        ],
-        edit_permission="crm.activity.update",
-        test_id="crm-aktivitaet-stamm",
-        purpose="Aktivitaetsdetail im CRM.",
-        prompts=['Wann ist Aktivitaet {entity_id} faellig?'],
-    )
+    fields=[
+        _feld("title","Betreff",required=True),
+        _feld("type","Typ","select",required=True,options=[{"value":value,"label":label} for value,label in
+            [("call","Anruf"),("meeting","Besprechung"),("visit","Besuch"),("email","E-Mail"),("task","Aufgabe"),("note","Notiz")]]),
+        _feld("status","Status","select",options=[{"value":value,"label":label} for value,label in
+            [("planned","Geplant"),("completed","Erledigt"),("cancelled","Abgesagt")]]),
+        _feld("date","Termin","datetime"),
+        _feld("customer","Kunde"),_feld("contact_person","Ansprechpartner"),
+        _feld("assigned_to","Zustaendig"),_feld("description","Beschreibung","textarea"),
+        _feld("main_topics","Besprochene Themen","stringList",helpText="Ein Thema pro Zeile."),
+        _feld("orders_placed","Besprochene Bestellungen","stringList",helpText="Ein Eintrag pro Zeile; erzeugt keine Bestellung."),
+        _feld("follow_up_actions","Naechste Schritte","stringList",helpText="Ein Schritt pro Zeile."),
+    ]
+    definition=_stamm(screen_id="crm/aktivitaet",domain="crm",title="Aktivitaet",subtitle="Termin und dokumentierte Kundeninteraktion",
+        endpoint="/api/v1/crm/activities/{entity_id}",identity="title",
+        felder=[{**field,"readOnly":True} for field in fields]+[_feld("version","Version","number",readOnly=True),
+            _feld("created_by","Erfasst durch",readOnly=True),_feld("updated_by","Geaendert durch",readOnly=True)],
+        edit_permission="crm.activity.update",test_id="crm-aktivitaet-stamm",
+        purpose="Aktivitaeten aus derselben kanonischen Quelle lesen und versioniert bearbeiten.",
+        prompts=["Wann ist Aktivitaet {entity_id} faellig?"],
+        edit_action_overrides={"key":"update","label":"Bearbeiten","command":"crm.activity.update.v1",
+            "commandEndpoint":"/api/v1/crm/activities/{entity_id}/actions/update","method":"POST",
+            "inputFields":fields,"inputPrefill":"entity","requiresExpectedVersion":True,
+            "requiresIdempotencyKey":True,"forbiddenForAgents":True},
+        extra_actions=[{"key":"delete","label":"Aktivitaet loeschen","kind":"danger","dangerLevel":"high",
+            "permission":"crm.activity.update","command":"crm.activity.delete.v1",
+            "commandEndpoint":"/api/v1/crm/activities/{entity_id}/actions/delete","method":"POST",
+            "requiresConfirmation":True,"requiresExpectedVersion":True,"requiresIdempotencyKey":True,
+            "forbiddenForAgents":True}])
+    definition["creation"]={"endpoint":"/api/v1/crm/activities","permission":"crm.activity.update",
+        "detailRoute":"/crm/aktivitaet/{entity_id}","cancelRoute":"/crm/aktivitaeten",
+        "requiresIdempotencyKey":True,"fields":fields,
+        "defaults":{"type":"call","title":"","status":"planned","customer":"","contact_person":"",
+                    "assigned_to":"","date":None,"description":None,"main_topics":[],"orders_placed":[],"follow_up_actions":[]}}
+    return definition
+
 
 
 

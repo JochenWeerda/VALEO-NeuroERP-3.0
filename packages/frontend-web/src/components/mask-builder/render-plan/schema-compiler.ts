@@ -133,6 +133,8 @@ function filterActionsByPermission(
       dangerLevel: action.dangerLevel,
       requiresConfirmation: action.requiresConfirmation,
       auditReasonRequired: action.auditReasonRequired,
+      requiresExpectedVersion: action.requiresExpectedVersion,
+      requiresIdempotencyKey: action.requiresIdempotencyKey,
       humanApprovalRequired: action.humanApprovalRequired,
       zone: action.zone ?? 'header',
       keyboardShortcut: action.keyboardShortcut,

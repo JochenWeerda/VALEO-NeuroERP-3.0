@@ -74,3 +74,11 @@ Weitere Tools sind dadurch nicht automatisch ausfuehrbar.
 Vertrag und Nachweise: [MCP-Ausfuehrung](../../../quality-assurance/mcp-execution-crm-20260921.md).
 
 Bearer Token + `X-Tenant-ID` — [ADR-032](../../../adr/adr-032-auth-enforcement-router-global-dependency.md)
+
+## Aktivitaeten: Vertragsabgleich 2026-10-29
+
+Sammlungsrouten mit und ohne abschliessenden Slash liefern unterschiedliche
+Modelle. Vor der Studio-Listenfreigabe muessen Collection, Detail und Anlage
+auf denselben vorhandenen Fachvertrag ausgerichtet werden; die zentrale
+Listenpreset-Erweiterung allein entscheidet diese Quellfrage nicht.
+[Nachweis und Integrationsgrenzen](../../../quality-assurance/studio-list-presets-20261029.md).

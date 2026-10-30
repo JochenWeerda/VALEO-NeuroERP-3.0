@@ -102,9 +102,35 @@ export function FieldRenderer({
     placeholder: field.placeholder,
     readOnly: isReadOnly,
     'aria-label': field.label,
-    onChange: onChange
+    onChange: onChange && !isReadOnly
       ? (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => onChange(e.target.value)
       : undefined,
+  }
+
+  if (field.type === 'stringList') {
+    const listValue = value === undefined ? [] : value
+    const valid = Array.isArray(listValue) && listValue.every((item) => typeof item === 'string')
+    const errorId = `${field.key}-invalid-list`
+    return (
+      <div className="space-y-2">
+        <Label htmlFor={field.key}>
+          {field.label}
+          {field.required && <span className="ml-1 text-destructive">*</span>}
+        </Label>
+        <Textarea
+          id={field.key}
+          aria-label={field.label}
+          aria-invalid={!valid}
+          aria-describedby={valid ? undefined : errorId}
+          value={valid ? listValue.join('\n') : ''}
+          placeholder={field.placeholder}
+          readOnly={isReadOnly || !valid}
+          onChange={valid && !isReadOnly && onChange ? (event) => onChange(event.target.value === '' ? [] : event.target.value.split('\n')) : undefined}
+        />
+        {!valid && <p id={errorId} role="alert" className="text-xs text-destructive">Ungültiger Listenwert: Eine Liste aus Texten wird erwartet.</p>}
+        {field.helpText && <p className="text-xs text-muted-foreground">{field.helpText}</p>}
+      </div>
+    )
   }
 
   if (field.type === 'multiselect' && field.options?.length) {
@@ -165,6 +191,9 @@ export function FieldRenderer({
       </Label>
       {field.type === 'textarea' ? (
         <Textarea {...commonProps} ref={textareaRef} />
+      ) : field.type === 'select' && isReadOnly ? (
+        <Input {...commonProps} ref={inputRef} type="text"
+          value={field.options?.find(option => String(option.value) === renderValue(value))?.label ?? renderValue(value)} />
       ) : field.type === 'select' ? (
         <NativeSelect
           id={field.key}

@@ -37,6 +37,7 @@ function ListKeyboardNavigation({ onNew, surface }: { onNew: () => void; surface
 
 type Aktion = Pick<ScreenActionDefinition, 'key' | 'label'> & {
   permission?: string
+  requiresExpectedVersion?: boolean
   commandEndpoint?: string
   method?: 'POST' | 'PUT' | 'PATCH' | 'DELETE'
   navigationRoute?: string
@@ -128,7 +129,7 @@ export function NativeListPage({ screenId, testId }: { screenId: string; testId?
     try {
       // Jeder Platzhalter aus der Zeile ({entity_id} = id, sonst gleichnamiges Feld), wie bei Navigationsrouten.
       const pfad = zielRoute(aktion.commandEndpoint, row)
-      const versioniert = /^\/api\/v1\/studio\/entities\/studio_[a-z0-9_]+\/[^/]+\/actions\/(update|delete)$/.test(pfad)
+      const versioniert = aktion.requiresExpectedVersion === true || /^\/api\/v1\/studio\/entities\/studio_[a-z0-9_]+\/[^/]+\/actions\/(update|delete)$/.test(pfad)
       if (versioniert && (!Number.isInteger(row.version) || Number(row.version) < 1)) {
         throw new Error('Die angezeigte Version fehlt. Bitte die Liste neu laden.')
       }

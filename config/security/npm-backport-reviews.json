@@ -9,9 +9,9 @@
       "patch_sha256": "803945b6b11ff5b6d9966ee59136eb23bf76953dbbcbc764740d0858c3eccb11",
       "original_integrity": "sha512-yQbXgO/OSZVD2IsiLlro+7Hf6Q18EJrKSEsdoMzKePKXct3gvD8oLcOQdIzGupr5Fj+EDe8gO/lxc1BzfMpxvA==",
       "license": "MIT",
-      "reviewed_on": "2026-10-28",
-      "review_by": "2026-10-30",
-      "owner": "Codex-01a0f3fc",
+      "reviewed_on": "2026-10-30",
+      "review_by": "2026-11-06",
+      "owner": "Codex-runtime-security",
       "source": "https://github.com/micromatch/braces/issues/70",
       "installed_sha256": {
         "lib/compile.js": "028d24a371f790c927a2b3a7b237b938ff6abd3e65113f127f04f065e7cb18ba",
@@ -19,8 +19,8 @@
         "lib/stringify.js": "1d059d40df3eea35ccecc8fafcd64fca67e02dcfb1edaf1e8e0c94fd88338fc9",
         "lib/parse.js": "540c920c9186405e6d059b468a2a440c247f5c9aa0fdbdae5cd3d0a021697549"
       },
-      "lock_sha256": "c665b78965e536144ebb5a341b22ac0b7955ad94660a63cde5b1144bb3d590e1",
-      "manifest_sha256": "7c78a6e0c2f32c51cf1c7574d10848f7c4586d31bda288e215bb1070967ab482"
+      "lock_sha256": "e266b17bb4b5b8886ef8278c75b7d0a2997288fa90231c9a0c7c1fda08e3a270",
+      "manifest_sha256": "db154b9d3f4321e4328225d84faf63872ce0333c95ddb2e38e2fee1f2f682278"
     },
     {
       "package": "deepmerge",
@@ -30,17 +30,17 @@
       "patch_sha256": "06b3fb34ab98180e3564b6526b1527ce4f7905dd93ed92a52a2756caf5c939e2",
       "original_integrity": "sha512-3sUqbMEc77XqpdNO7FRyRog+eW3ph+GYCbj+rK+uYyRMuwsVy0rMiVtPn+QJlKFvWP/1PYpapqYn0Me2knFn+A==",
       "license": "MIT",
-      "reviewed_on": "2026-10-28",
-      "review_by": "2026-10-30",
-      "owner": "Codex-01a0f3fc",
+      "reviewed_on": "2026-10-30",
+      "review_by": "2026-11-06",
+      "owner": "Codex-runtime-security",
       "source": "https://github.com/advisories/GHSA-gcqx-w48m-w2h4",
       "installed_sha256": {
         "index.js": "616af995c76262bfe7db13383074be44123d1a2f92f406f516bf8a1f016efa62",
         "dist/cjs.js": "f07353a2be736978e8b1c013ba362251a1e5af89dcfdae50e1fcb93f0ae66664",
         "dist/umd.js": "92a1d0f76b7974f7e759cf170c8968fb58dfae5fc28f48b677ce9dd796e3000d"
       },
-      "lock_sha256": "c665b78965e536144ebb5a341b22ac0b7955ad94660a63cde5b1144bb3d590e1",
-      "manifest_sha256": "7c78a6e0c2f32c51cf1c7574d10848f7c4586d31bda288e215bb1070967ab482"
+      "lock_sha256": "e266b17bb4b5b8886ef8278c75b7d0a2997288fa90231c9a0c7c1fda08e3a270",
+      "manifest_sha256": "db154b9d3f4321e4328225d84faf63872ce0333c95ddb2e38e2fee1f2f682278"
     }
   ]
 }

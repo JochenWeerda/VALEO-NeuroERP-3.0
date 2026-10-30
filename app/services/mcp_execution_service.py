@@ -89,14 +89,6 @@ class ContactLogInput(BaseModel):
     wiedervorlage_datum: date | None = None
 
 
-class ActivityCreateInput(BaseModel):
-    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
-    kunden_nr: str = Field(min_length=1, max_length=20)
-    betreff: str = Field(min_length=1, max_length=200)
-    typ: Literal["Anruf", "Besuch", "E-Mail", "Aufgabe", "Meeting", "Sonstiges"]
-    datum: date | None = None
-    notiz: str | None = Field(default=None, max_length=10000)
-    verantwortlich: str | None = Field(default=None, max_length=100)
 
 
 class LeadQualifyInput(BaseModel):
@@ -685,8 +677,8 @@ def execute_mcp_tool(db: Session, request: ToolExecutionRequest, user: dict, ten
         return _open_customer(db, request, actor, tenant)
     if request.tool_name == "crm.contact.log":
         return _log_contact(db, request, actor, tenant)
-    if request.tool_name == "crm.activity.create":
-        return _create_activity(db, request, actor, tenant)
+    if request.tool_name in {"crm.activity.create","crm.activity.update","crm.activity.delete"}:
+        return _activity_command(db, request, actor, tenant)
     if request.tool_name == "crm.lead.qualify":
         return _qualify_lead(db, request, actor, tenant)
     if request.tool_name == "sales.order.status":
@@ -3831,69 +3823,26 @@ def _propose_invoice(db: Session, request: ToolExecutionRequest, actor: str, ten
         raise HTTPException(503, "ERP tool transaction failed; no success confirmed") from exc
 
 
-def _create_activity(db: Session, request: ToolExecutionRequest, actor: str, tenant: str) -> dict:
+def _activity_command(db: Session, request: ToolExecutionRequest, actor: str, tenant: str) -> dict:
+    from app.domains.crm.activity_contracts import ActivityCreateCommand, ActivityUpdateCommand, ActivityDeleteCommand, ActivityRead
+    from app.services.crm_activity_service import execute_activity, preview_activity
+    action=request.tool_name.rsplit(".",1)[-1]
+    command_type={"create":ActivityCreateCommand,"update":ActivityUpdateCommand,"delete":ActivityDeleteCommand}[action]
+    values=dict(request.parameters)
+    if "idempotency_key" in values or "_idempotencyKey" in values:
+        raise HTTPException(422,"Use the MCP envelope idempotency key")
+    activity_id=values.pop("activity_id",None)
+    if (action=="create" and activity_id is not None) or (action!="create" and (not isinstance(activity_id,str) or not 1<=len(activity_id)<=64)):
+        raise HTTPException(422,"Invalid activity target")
     try:
-        activity = ActivityCreateInput.model_validate(request.parameters)
-    except ValidationError as exc:
-        raise HTTPException(422, "Invalid activity parameters") from exc
-    parameters = activity.model_dump(mode="json")
-    if request.mode == "execute" and not (request.idempotency_key or "").strip():
-        raise HTTPException(422, "execute requires an idempotency_key")
-    fingerprint = hashlib.sha256(json.dumps(parameters, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
-    try:
-        if request.mode == "execute":
-            _advisory_lock(db, tenant, request.tool_name, request.idempotency_key)  # type: ignore[arg-type]
-            replayed = _replay_or_none(
-                db, tenant, request.tool_name, request.idempotency_key, actor, fingerprint  # type: ignore[arg-type]
-            )
-            if replayed is not None:
-                return replayed
-        customer = _customer_in_tenant(db, kunden_nr=activity.kunden_nr, tenant=tenant)
-        if not customer:
-            raise HTTPException(404, "Customer not found in the authenticated tenant")
-        if request.mode != "execute":
-            return {"success": True, "mode": request.mode, "proposedChanges": parameters}
-        activity_id = str(uuid4())
-        now = datetime.now(timezone.utc)
-        verantwortlich = (activity.verantwortlich or actor)[:100]
-        db.execute(text("""
-            INSERT INTO domain_crm.activities
-              (id, type, title, customer, contact_person, date, status, assigned_to, description, tenant_id)
-            VALUES
-              (:aid, :typ, :titel, :kunde, :person, :datum, 'offen', :verantwortlich, :notiz, :tid)
-        """), {
-            "aid": activity_id,
-            "typ": activity.typ[:20],
-            "titel": activity.betreff[:200],
-            "kunde": str(customer["name"] or customer["kunden_nr"] or activity.kunden_nr)[:100],
-            "person": verantwortlich,
-            "datum": parameters["datum"] or now.date().isoformat(),
-            "verantwortlich": verantwortlich,
-            "notiz": activity.notiz,
-            "tid": tenant,
-        })
-        audit_id = _write_audit(
-            db, tenant_id=tenant, action_key=request.tool_name,
-            entity_type="crm_activity", entity_id=activity_id,
-            audit_reason="MCP activity create", idempotency_key=request.idempotency_key,
-            summary=f"Activity '{activity.betreff}' by {actor}",
-        )
-        result = {
-            "success": True, "mode": "execute", "replayed": False,
-            "activity_id": activity_id, "erfasst_am": now.isoformat(), "auditEntryId": audit_id,
-        }
-        _store_execution(
-            db, tenant=tenant, tool=request.tool_name, key=request.idempotency_key,  # type: ignore[arg-type]
-            actor=actor, fingerprint=fingerprint, result=result,
-        )
-        db.commit()
-        return result
-    except HTTPException:
-        db.rollback()
-        raise
-    except Exception as exc:
-        db.rollback()
-        raise HTTPException(503, "ERP tool transaction failed; no success confirmed") from exc
+        command=command_type.model_validate({**values,"idempotency_key":request.idempotency_key or ("preview" if request.mode!="execute" else "")})
+    except ValidationError as error:
+        raise HTTPException(422,"Invalid activity parameters") from error
+    if request.mode!="execute":
+        return {"success":True,"mode":request.mode,"proposedChanges":preview_activity(db,tenant,action,command,activity_id)}
+    result=execute_activity(db,tenant,action,command,activity_id)
+    result["activity"]=ActivityRead.model_validate(result["activity"]).model_dump(mode="json")
+    return {key:value for key,value in result.items() if key!="previous_activity"}
 
 
 def _resolve_customer_id(db: Session, *, tenant: str, customer_id: str | None, kunden_nr: str | None) -> str:

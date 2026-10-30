@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { NativeSelect } from '@/components/ui/native-select'
 import { AlertCircle } from 'lucide-react'
 import { useSearchParams } from '@/app/routing/typed-router'
 import { readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
@@ -50,7 +51,7 @@ export function UniversalNativeCockpitPage({
   const firstKey = plan ? Object.keys(plan.tablesByKey)[0] : undefined
   const firstRows = firstKey && plan?.listExperience ? runtime.filteredTableRows[firstKey] : undefined
   useEffect(() => {
-    if (plan && firstRows && onListData) onListData(firstRows, plan)
+    if (plan && onListData) onListData(firstRows ?? [], plan)
   }, [plan, firstRows, onListData])
   const experience = plan?.listExperience
   let result: ReturnType<typeof evaluateListExperience> | undefined
@@ -81,6 +82,16 @@ export function UniversalNativeCockpitPage({
   return (
     <div data-testid={testId ?? `native-cockpit-${screenId.replace('/', '-')}`} data-runtime="native-cockpit">
       {experience?.workflowResume && <ListWorkflowBand />}
+      {firstKey && Boolean(experience?.presets?.length) && <section aria-label="Listenfilter" className="grid gap-3 px-4 py-3 sm:grid-cols-2 xl:grid-cols-4">
+        {experience?.presets?.map(preset => <label key={preset.key} className="space-y-1 text-sm text-foreground">
+          <span>{preset.label}</span>
+          <NativeSelect ariaLabel={preset.label} options={preset.options}
+            value={runtime.tableQueryStates[firstKey]?.presetFilters?.[preset.key] ?? 'all'}
+            onValueChange={value => runtime.setTableQuery(firstKey, {page: 1, presetFilters: {
+              ...runtime.tableQueryStates[firstKey]?.presetFilters, [preset.key]: value,
+            }})} />
+        </label>)}
+      </section>}
       <UniversalMaskRenderer
         plan={plan}
         flowSpineCatalog={runtime.flowSpineCatalog}

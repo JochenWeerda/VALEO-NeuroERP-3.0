@@ -349,50 +349,30 @@ async def action_opportunity_create_activity(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> MaskActionResult:
-    """Legt die Aktivitaet ueber den mandantengebundenen Fachweg an.
-
-    Betreff und Typ fragt die Maske deklarativ (``inputFields`` der Aktion).
-    """
-
-    async def pruefen(db_: Session, payload: dict[str, Any], eid: str, tid: str) -> list[dict[str, Any]]:
-        from app.api.v1.endpoints.opportunities import _opportunity_im_mandanten
-
-        fehler: list[dict[str, Any]] = []
-        if not str(payload.get("subject") or "").strip():
-            fehler += _fehler("Betreff fehlt.", "subject")
-        if str(payload.get("activity_type") or "").upper() not in _AKTIVITAETSARTEN:
-            fehler += _fehler("Typ muss Anruf, E-Mail, Termin oder Notiz sein.", "activity_type")
-        try:
-            await _opportunity_im_mandanten(db_, eid, tid)
-        except HTTPException:
-            fehler += _fehler("Opportunity nicht gefunden.")
-        return fehler
-
-    async def anlegen(db_: Session, payload: dict[str, Any], eid: str, tid: str) -> str:
-        from app.api.v1.endpoints.opportunities import add_opportunity_activity
-
-        await add_opportunity_activity(
-            eid,
-            activity_type=str(payload["activity_type"]).upper(),
-            subject=str(payload["subject"]).strip(),
-            notes=payload.get("notes"),
-            assigned_to=None,
-            db=db_,
-            tenant_id=tid,
-        )
-        return f"Aktivitaet '{str(payload['subject']).strip()}' angelegt."
-
-    return await run_delegated_mask_action(
-        db,
-        action_key="create_activity",
-        entity_type="opportunity",
-        entity_id=entity_id,
-        tenant_id=tenant_id,
-        body=body,
-        check_fn=pruefen,
-        delegate_fn=anlegen,
-        outbox_event_type="crm.opportunity.activity_created",
-    )
+    """Transport the existing mask inputs to the one canonical command transaction."""
+    from pydantic import ValidationError
+    from starlette.concurrency import run_in_threadpool
+    from app.domains.crm.activity_contracts import ActivityCreateCommand, normalize_legacy_activity_type
+    from app.services.crm_activity_service import execute_activity, preview_activity
+    values=dict(body)
+    mode=values.pop("_mode","execute")
+    key=values.pop("_idempotencyKey",None)
+    reason=values.pop("_auditReason",None)
+    if mode not in {"execute","dryRun","validate","propose"} or set(values)-{"subject","activity_type","notes"}:
+        raise HTTPException(422,"Invalid activity mask envelope")
+    try:
+        command=ActivityCreateCommand(type=normalize_legacy_activity_type(values.get("activity_type")),
+            title=values.get("subject"),description=values.get("notes"),opportunity_id=entity_id,
+            idempotency_key=key or ("preview" if mode!="execute" else ""),audit_reason=reason)
+    except (ValidationError,ValueError) as error:
+        raise HTTPException(422,"Invalid activity parameters") from error
+    if mode!="execute":
+        proposed=await run_in_threadpool(preview_activity,db,tenant_id,"create",command)
+        return MaskActionResult(actionKey="create_activity",mode=mode,success=True,
+            summary="Validierte Aktivitaet ohne Geschaeftswirkung",proposedChanges=[proposed])
+    result=await run_in_threadpool(execute_activity,db,tenant_id,"create",command)
+    return MaskActionResult(actionKey="create_activity",mode=mode,success=True,
+        summary="Aktivitaet angelegt",auditEntryId=result["auditEntryId"])
 
 
 # ---------------------------------------------------------------------------
