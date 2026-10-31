@@ -20120,3 +20120,20 @@ Andere Familien Annahme/Waage, CRM, Finanzen, Futter, Admin/Auth und Materialflu
 **SECURITY-CI-URI-VITE Reviewfenster20261030:** Lead beauftragt runtime_security_patch die heuteabgelaufenenbraces/deepmerge-Reviews inhaltlicherneutzubewerten: aktuelleoffizielleAdvisories/Herstellerreleases,Originalgegenproben,reparierteLaufzeittests undexakteHashbindungen. Herstellerfixfallsverfuegbarvorziehen. Nur beiunveraenderterwirksamerReparatur/fehlendemgeeignetenHerstellerfixverifizierterfrischerReview2026-10-30 bisexklusiv2026-11-06(max7Tage,ADR080max90unveraendert),mitEigentuemer/Evidenz/Restgrenzen. KeineautomatischeFristverlaengerung,keinSeverityIgnore,keinunbekannterBefundzulassen. Besitzconfig/security/npm-backport-reviews.jsonplusQAbeleg;GatebleibtbisNachweisfailclosed.
 
 **SECURITY-CI-URI-VITE-20261030 abgenommen:** offizielleHerstellerpatchesdecode-uri-component0.5.1/Vite6.4.5,gegenAltversionRotzeitbegrenzt/GegenFixgruen;pnpm9.12FrozenInstall36WorkspacesmitunveraendertemLock,56Securitytestsgruen,Produktionsaudit0Advisories/0Findings,strictGate0blocked. BestehendeBackportsinhaltlichneuprueft(Originalbrace1/8vsPatch8/8,deepmerge9/21vs21/21),Quell-/Patchhashesidentisch;aktuellePrimaerquellenbracewithdrawn/deepmergekeinRelease,kurzertechnischerReviewbisexklusiv06.11.nachADR080. KeinePolicy-/SeverityLockerung,keinDatenbank-/Containerwechsel. QA/Handshake node-uri-vite-security-20261030.md. Runtime46ArbeitbleibtgetrenntinArbeit.
+
+## STUDIO-RUNTIME46-LIST-PRINT-20261031 — abgeschlossen, Codex Lead
+
+Fortsetzung des freigegebenen Runtime46-Auftrags im bestehenden Lead-Dateibesitz.
+Besitz: NativeListPage.tsx ausschliesslich deklarierter lokaler Druck, eigener
+Komponententest und QA/Handshake. Bestehendes localEffect=print und vorhandenen
+printTable-Helper wiederverwenden; ausschliesslich vollstaendige gefilterte
+listExperience-Daten und deklarierte Exportspalten drucken. Keine unfiltrierte
+Nachladung, kein Fachwrite, keine neue Schema-/DB-/Containeraenderung.
+Reservierte SALES-LISTS-/INTAKE-WEIGHING-Dateien anderer Owner bleiben unberuehrt.
+Abnahme: Filter-/Spaltenparitaet, leere/nicht deklarierte Liste, Rechte und
+Druckfehler; gezielte Frontendtests, Typpruefung soweit Umgebung verfuegbar.
+Annahme: Browserdruck ist eine lokale Listenaktion; Fachbelegdruck mit
+commandEndpoint behaelt seinen bestehenden Commandvertrag. Kein Runtimepunkt
+allein durch diese zentrale Voraussetzung geschlossen.
+
+**LIST-PRINT Abnahme20261031:** 29gezielteFrontendtests in5Dateien, vollstaendigeTyppruefung und Produktionsbuild gruen. LokalerDruck nutzt gefilterteGesamtmenge und deklarierteExportspalten, prueftAktionsrechte und laedtkeineErsatzdaten. Fachbelegdruck bleibtCommand. QA/Handshake studio-list-print-20261031.md. KeineDB/Container/Migration,keineGateLockerung,46Runtimepunkteweiteroffen. AusgangsCI separat rot (261echteRoutingDrifts/186Frontendtestfehler); keineGesamtfreigabe.

@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/hooks/use-toast'
 import { useScreenDefinition } from '@/lib/api/masks'
 import { apiClient, getAxiosErrorMessage } from '@/lib/api-client'
-import { exportToCSV } from '@/lib/export-utils'
+import { exportToCSV, printTable } from '@/lib/export-utils'
 import { UniversalNativeCockpitPage } from './UniversalNativeCockpitPage'
 import { ActionInputDialog } from './renderers/ActionInputDialog'
 import { useScreenPermissions } from './runtime/screen-permissions'
@@ -221,6 +221,25 @@ export function NativeListPage({ screenId, testId }: { screenId: string; testId?
     }
     if (aktion.localEffect === 'download' && !aktion.commandEndpoint) {
       void exportieren()
+      return
+    }
+    if (aktion.localEffect === 'print' && !aktion.commandEndpoint) {
+      // Use the same complete filtered result and declared columns as CSV.
+      // A missing list contract must never trigger an unfiltered fallback read.
+      if (!schema?.listExperience) {
+        toast({ title: 'Druck nicht verfügbar', description: 'Für diese Liste fehlt die Druckdatenfreigabe.', variant: 'destructive' })
+        return
+      }
+      const rows = listData.current
+      if (!rows?.length) {
+        toast({ title: 'Keine Daten', description: 'Es gibt nichts zu drucken.', variant: 'destructive' })
+        return
+      }
+      try {
+        printTable(rows, schema.title, schema.listExperience.export.columns)
+      } catch (error) {
+        toast({ title: 'Druck fehlgeschlagen', description: getAxiosErrorMessage(error), variant: 'destructive' })
+      }
       return
     }
     if (aktion.navigationRoute) {
