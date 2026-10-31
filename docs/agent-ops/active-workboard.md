@@ -20137,3 +20137,33 @@ commandEndpoint behaelt seinen bestehenden Commandvertrag. Kein Runtimepunkt
 allein durch diese zentrale Voraussetzung geschlossen.
 
 **LIST-PRINT Abnahme20261031:** 29gezielteFrontendtests in5Dateien, vollstaendigeTyppruefung und Produktionsbuild gruen. LokalerDruck nutzt gefilterteGesamtmenge und deklarierteExportspalten, prueftAktionsrechte und laedtkeineErsatzdaten. Fachbelegdruck bleibtCommand. QA/Handshake studio-list-print-20261031.md. KeineDB/Container/Migration,keineGateLockerung,46Runtimepunkteweiteroffen. AusgangsCI separat rot (261echteRoutingDrifts/186Frontendtestfehler); keineGesamtfreigabe.
+
+## STUDIO-RUNTIME46-FILE-CONTENT-20261031 — abgeschlossen, Codex Lead
+
+Fortsetzung des bereits zugewiesenen Lead-Vertrags fileContent. Besitz:
+schema.ts nur fileContent-Feldvertrag/Validierung, RenderPlan types/compiler/
+plan-to-screen, FastFormRenderer und UniversalMaskRenderer nur Durchreichung,
+FieldRenderer plus separate TextFileField/Runtime-Helper, useUniversalFormState
+nur Dateiwertvalidierung, eigene Tests und QA/Handshake. Backendbesitz:
+studio_validation.py nur Einbindung eines engen studio_file_content_contracts.py
+mit eigenen Tests; andere Studio-/Workflowzweige bleiben unberuehrt.
+Vertrag: type=file mit fileContent={encoding:utf-8,maxBytes,accept}; maxBytes
+positive Ganzzahl bis1MiB, accept explizit csv/txt-Endungen. Nur dekodierter
+Text als Feldwert, keine automatische Mutation. Auswahlwechsel leert Altwert;
+ungueltige, zu grosse oder nichtUTF8-Dateien werden abgewiesen. LetzteAuswahl
+gewinnt; Pflichtfelder bleiben bis zum erfolgreichen Lesen gesperrt.
+Abnahme: Compiler-/Roundtrip-/Cachevertrag, Backend-Draftvalidierung,
+Dateigrenzen/UTF8/Lesefehler/Race/ReadOnly und echter ActionInputDialog.
+Architektur: additive Metadaten im bestehenden Studio-Vertrag, keine neue
+Route/Servicegrenze/DB/Events; C4/Prefixinventar unveraendert. Security:
+Clientgrenzen sind keine serverseitige Importfreigabe; Fachcommand muss
+Payload/Kunde/Transaktion/Mandant selbst pruefen. Betrieb: keine DB/Container.
+Tests zentral koordiniert, Backendhelfer isoliert ohne DB; Dokumentation und
+Workboard nachziehen. Keine Uebernahme reservierter Verkaufs-/Waagen-Dateien.
+
+**FILE-CONTENT enger Integrationsnachtrag:** Lead besitzt ActionInputDialog.tsx
+nur zur Erhaltung des transienten null-Dateiwerts. Dadurch kann ein externer
+Formularreset einen noch laufenden Leseauftrag entwerten. Andere Feldtypen und
+Dialogaktionen bleiben unveraendert; eigener Reset-/Unmount-Nachweis erforderlich.
+
+**FILE-CONTENT Abnahme20261031:** 80Frontendtests in9Dateien und46reineBackendfaelle gruen. VollstaendigeTyppruefung/Produktionsbuild/Lint gruen. EchteFileReaderBytes,UTF8/Bytegrenzen,Altwertschutz,OptionalPending,Reset/Race/Unmount/ReadOnly undCompilerCachevertrag geprueft. BackendAufnahmetest isoliert fachfremdeSemanticPreview; keinAPI-/DB-/Importnachweis. QA/Handshake studio-file-content-20261031.md. KeineDB/Container/AgentenWritefreigabe/GateLockerung. 46Runtimepunkteweiteroffen; Architekturcheck1Route/7Services in unveraendertenInventarenrot, AusgangsCIweiterseparat.

@@ -74,3 +74,14 @@ requires_definition_update kennzeichnet noch ungespeicherte Bindungsvorschlaege.
 Keine Statusaenderung, DDL oder Publikation; Erweiterung des vollstaendigen
 Dreikanal-Freigabegates bleibt offen. ADR084 Proposed und QA
 studio-plan-history-20261021.md dokumentieren Nachweis und Grenzen.
+
+## Begrenzte Studio-Dateieingabe (31.10.2026)
+
+Der vorhandene ScreenDefinition-/Draftvertrag erhaelt optional fileContent fuer
+lokale UTF-8-Dateitexte. Exakte Schluessel, Endungsallowlist und maximal1MiB
+werden in Backend-Draftvalidierung und Frontend-Compiler geprueft; die Form
+sperrt ungueltige/pending Werte. Keine neue Route, Servicegrenze, Tabelle,
+Container- oder Eventbeziehung. C4/Prefixinventar bleiben unveraendert.
+Eine Deklaration erteilt weder Upload- noch Fachschreibrechte; Domain-Commands
+muessen Payload und Atomizitaet selbst pruefen.
+[Vertrag und begrenzte Abnahme](../../../quality-assurance/studio-file-content-20261031.md).

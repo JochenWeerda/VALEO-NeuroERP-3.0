@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { FLOORPLAN_RULES } from './floorplans'
+import { validTextFileDefinitions } from './runtime/text-file-contract'
 
 export { FLOORPLAN_IDS, FLOORPLAN_RULES, defaultColumnNavigation, resolveSectionNavigation } from './floorplans'
 
@@ -76,7 +77,14 @@ export interface ScreenDataSource {
   minSearchChars?: number
 }
 
+export interface TextFileContentContract {
+  encoding: 'utf-8'
+  maxBytes: number
+  accept: ('.csv' | '.txt')[]
+}
+
 export interface ScreenFieldDefinition {
+  fileContent?: TextFileContentContract
   currencyField?: string
   key: string
   label: string
@@ -598,6 +606,7 @@ export interface ScreenDefinition {
 
 export function validateScreenDefinition(screen: ScreenDefinition): string[] {
   const errors: string[] = []
+  if (!validTextFileDefinitions(screen)) errors.push('fileContent is invalid')
 
   if (screen.schemaVersion !== 1) errors.push('schemaVersion must be 1')
   if (!screen.id) errors.push('id is required')

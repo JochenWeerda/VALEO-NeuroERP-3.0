@@ -1,6 +1,7 @@
 import { type ChangeEvent, useMemo, useRef } from 'react'
 import { Checkbox } from '@/components/ui/checkbox'
 import { TableFieldRenderer } from './TableFieldRenderer'
+import { TextFileField } from './TextFileField'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -90,6 +91,9 @@ export function FieldRenderer({
     })
   }
 
+  if (Object.prototype.hasOwnProperty.call(field, 'fileContent')) {
+    return <TextFileField field={field} value={value} onChange={isReadOnly ? undefined : onChange} />
+  }
   if (field.type === 'table' && (field.rowFields !== undefined || field.tableEditing !== undefined)) {
     return <TableFieldRenderer field={field} value={value} onChange={isReadOnly ? undefined : onChange}
       renderCell={(column, cellValue, change) => <FieldRenderer field={column} value={cellValue}

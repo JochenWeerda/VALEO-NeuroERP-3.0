@@ -176,6 +176,7 @@ function renderLegacyFields(
             renderHint: field.renderHint,
             rowFields: field.rowFields,
             tableEditing: field.tableEditing,
+            ...(field.fileContent !== undefined ? { fileContent: field.fileContent } : {}),
           },
         ]),
       )}
