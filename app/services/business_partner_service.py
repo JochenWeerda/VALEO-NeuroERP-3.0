@@ -780,6 +780,25 @@ class BusinessPartnerService:
                 "AND column_default IS NULL ORDER BY column_name")).scalars().all())
         return _FLAGS_OHNE_DEFAULT[key]
 
+    def importkunden_anlegen(
+        self, customer_id: str, customer_number: str, firma: str, *, email: str, telefon: str, plz: str, ort: str,
+        land: Optional[str], ust_id: str, is_active: bool,
+    ) -> None:
+        """Kunde aus dem CSV-Import samt Geschaeftspartner anlegen; kein commit (der Import fuehrt die Transaktion)."""
+        partner = self.partner_fuer_rolle(
+            "kunde", name=firma, vat_id=ust_id or None, postal_code=plz or None, city=ort or None,
+            country=land, email=email or None, phone=telefon or None,
+        )
+        self.db.execute(
+            text("INSERT INTO domain_crm.customers (id, tenant_id, customer_number, company_name, email, phone, "
+                 "postal_code, city, country, tax_id, business_partner_id, is_active, created_at, updated_at) "
+                 "VALUES (:id, :tid, :cn, :cname, :email, :phone, :plz, :ort, :land, :tx, :bp, :is_active, "
+                 "NOW(), NOW())"),
+            {"id": customer_id, "tid": self.tenant_id, "cn": customer_number, "cname": firma[:255],
+             "email": email or None, "phone": telefon or None, "plz": plz or None, "ort": ort or None,
+             "land": land, "tx": ust_id or None, "bp": partner, "is_active": is_active},
+        )
+
     def ensure_partner_belongs_to_tenant(self, partner_id: str) -> None:
         """Validiert, dass der BusinessPartner im Mandanten existiert (sonst ValidationFailedError).
 
