@@ -346685,7 +346685,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Debitor: Offene Posten (leerer Stub)",
+        "summary": "Debitor: Offene Posten",
         "tags": [
           "ui",
           "masks",
@@ -346892,7 +346892,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Kreditor: Offene Posten (leerer Stub)",
+        "summary": "Kreditor: Offene Posten",
         "tags": [
           "ui",
           "masks",

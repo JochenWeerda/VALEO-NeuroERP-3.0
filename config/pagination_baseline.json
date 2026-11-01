@@ -97,7 +97,6 @@
     "app/api/v1/endpoints/finance_actions.py::list_collaterals": 1,
     "app/api/v1/endpoints/finance_actions.py::list_credit_limits": 1,
     "app/api/v1/endpoints/finance_actions.py::list_payment_suggestions": 1,
-    "app/api/v1/endpoints/finance_stammdaten.py::_op_by_name": 1,
     "app/api/v1/endpoints/finance_stammdaten.py::list_debitoren": 1,
     "app/api/v1/endpoints/flow_spines.py::_latest_events_by_node": 1,
     "app/api/v1/endpoints/flow_spines.py::find_instances_for_document": 2,

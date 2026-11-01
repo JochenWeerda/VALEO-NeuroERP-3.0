@@ -8,9 +8,11 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, Header, Query, Request
 
 from pydantic import ValidationError
+from sqlalchemy.orm import Session
 from app.auth.deps import get_current_user
 from app.api.v1.schemas.mask_data_contracts import MaskDataReadIn, MaskDataReadOut
 from app.services import mask_data_read
+from ....core.database import get_db
 from ....core.screen_definitions import get_screen_definition
 from ....core.tenant import get_tenant_id
 from app.api.v1.schemas.base import TypedObjectOut
@@ -502,28 +504,12 @@ _LEERE_BRUECKEN_TABS: tuple[tuple[str, type, str, str, str, str], ...] = (
         "get_finance_bankkonto_buchungen_tab",
     ),
     (
-        "/finance/debitoren/entity/{entity_id}/tabs/offene-posten",
-        FinanceOffenePostenTabOut,
-        "Debitor: Offene Posten (leerer Stub)",
-        "finance/debitor",
-        "offene_posten",
-        "get_finance_debitor_offene_posten_tab",
-    ),
-    (
         "/finance/debitoren/entity/{entity_id}/tabs/umsaetze",
         FinanceDebitorUmsatzTabOut,
         "Debitor: Umsaetze (leerer Stub)",
         "finance/debitor",
         "umsaetze",
         "get_finance_debitor_umsaetze_tab",
-    ),
-    (
-        "/finance/kreditoren/entity/{entity_id}/tabs/offene-posten",
-        FinanceOffenePostenTabOut,
-        "Kreditor: Offene Posten (leerer Stub)",
-        "finance/kreditor",
-        "offene_posten",
-        "get_finance_kreditor_offene_posten_tab",
     ),
     (
         "/finance/kreditoren/entity/{entity_id}/tabs/bestellungen",
@@ -651,6 +637,35 @@ def _register_leere_bruecken_tabs() -> None:
 
 
 _register_leere_bruecken_tabs()
+
+
+def _offene_posten_register(konto_typ: str):
+    async def get_offene_posten_tab(
+        entity_id: str,
+        page: int = 1,
+        page_size: int = 25,
+        db: Session = Depends(get_db),
+        tenant_id: str = Depends(get_tenant_id),
+    ) -> dict[str, Any]:
+        from app.api.v1.endpoints.finance_stammdaten import offene_posten_registerseite
+
+        return offene_posten_registerseite(db, tenant_id, konto_typ, entity_id, page=max(page, 1),
+                                           page_size=min(max(page_size, 1), 200))
+
+    return get_offene_posten_tab
+
+
+# Offene Posten je Debitor/Kreditor (Stufe 4 Geschaeftspartnerstamm); bis 01.11.2026 leere Stubs.
+for _pfad, _konto, _name, _text in (
+    ("/finance/debitoren/entity/{entity_id}/tabs/offene-posten", "debitoren", "get_finance_debitor_offene_posten_tab",
+     "Debitor: Offene Posten"),
+    ("/finance/kreditoren/entity/{entity_id}/tabs/offene-posten", "kreditoren", "get_finance_kreditor_offene_posten_tab",
+     "Kreditor: Offene Posten"),
+):
+    _handler = _offene_posten_register(_konto)
+    _handler.__name__ = _handler.__qualname__ = _name
+    router.add_api_route(_pfad, _handler, methods=["GET"], response_model=FinanceOffenePostenTabOut,
+                         summary=_text, name=_name)
 
 
 @router.get(
