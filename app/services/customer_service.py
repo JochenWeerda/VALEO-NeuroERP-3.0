@@ -965,6 +965,22 @@ class CustomerService:
         # Eine Nummer je Mandant: crm-core kennt keinen Mandanten und prueft sie deshalb nicht.
         if self._kundennummer_vergeben(customer_data.customer_number):
             raise ConflictError("Kundennummer ist im Mandanten bereits vergeben.")
+        # Partnerbruecke (Stufe 1): jeder neue Kunde haengt an einem Geschaeftspartner des Mandanten.
+        from app.services.business_partner_service import BusinessPartnerService
+
+        partner = BusinessPartnerService(self.db, self.tenant_id).partner_fuer_rolle(
+            "kunde",
+            name=customer_data.company_name,
+            vat_id=getattr(customer_data, "tax_id", None),
+            street=customer_data.address,
+            postal_code=customer_data.postal_code,
+            city=customer_data.city,
+            country=customer_data.country,
+            email=str(customer_data.email) if customer_data.email else None,
+            phone=customer_data.phone,
+            partner_id=getattr(customer_data, "business_partner_id", None) or None,
+        )
+        customer_data = customer_data.model_copy(update={"business_partner_id": partner})
         payload = _map_create_payload(customer_data)
         try:
             created = await _crm_create(payload)
