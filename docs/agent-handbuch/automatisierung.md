@@ -131,6 +131,8 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `crm.mail_workspace.attachment_transfer` | outbox | `app/api/v1/endpoints/mail_workspace.py` |
 | `crm.mail_workspace.queue` | outbox | `app/api/v1/endpoints/mail_workspace.py` |
 | `crm.opportunity.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
+| `crm.partner_klaerfall.neuer_partner` | outbox | `app/api/v1/endpoints/crm_partner_klaerfaelle.py` |
+| `crm.partner_klaerfall.zugeordnet` | outbox | `app/api/v1/endpoints/crm_partner_klaerfaelle.py` |
 | `crm_case.created` | outbox | `app/services/crm_compat_service.py` |
 
 ### Einkauf

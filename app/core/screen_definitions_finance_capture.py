@@ -7,8 +7,8 @@ from typing import Any
 from app.core.stamm_object_page_parent import build_stamm_object_page, stamm_entity_source, stamm_kopf_tab
 
 
-#: Nur Felder, die der fuehrende Kundenstamm (domain_crm.customers) haelt. Bankverbindung, Skonto und
-#: Notizen hielt nur die stillgelegte Tabelle domain_erp.debitors; die Bankverbindung gehoert zum SEPA-Mandat.
+#: Felder des fuehrenden Kundenstamms (domain_crm.customers); Bank, Skonto und Steuernummer legt die Anlage
+#: seit Stufe 3 am Geschaeftspartner ab (ADR Geschaeftspartnerstamm).
 DEBTOR_FIELDS: list[dict[str, Any]] = [
     {"key": "debtor_number", "label": "Debitorennummer", "type": "text", "required": True},
     {"key": "company_name", "label": "Firma", "type": "text", "required": True},
@@ -20,7 +20,14 @@ DEBTOR_FIELDS: list[dict[str, Any]] = [
     {"key": "phone", "label": "Telefon", "type": "text"},
     {"key": "email", "label": "E-Mail", "type": "text"},
     {"key": "vat_id", "label": "USt-IdNr.", "type": "text"},
+    {"key": "tax_number", "label": "Steuernummer", "type": "text"},
+    {"key": "iban", "label": "IBAN", "type": "text"},
+    {"key": "bic", "label": "BIC", "type": "text"},
+    {"key": "bank_name", "label": "Bank", "type": "text"},
+    {"key": "account_holder", "label": "Kontoinhaber", "type": "text"},
     {"key": "payment_terms_days", "label": "Zahlungsziel (Tage)", "type": "number"},
+    {"key": "discount_days", "label": "Skontofrist (Tage)", "type": "number"},
+    {"key": "discount_percent", "label": "Skonto (%)", "type": "number"},
     {"key": "credit_limit", "label": "Kreditlimit", "type": "currency"},
     {"key": "is_active", "label": "Aktiv", "type": "boolean"},
 ]
@@ -55,7 +62,7 @@ def build_debtor_capture() -> dict[str, Any]:
         no_workflow_reason="Debitorenstamm ist Referenzdaten ohne Beleglebenszyklus.",
         business_purpose="Debitoren beim verifizierten Mandanten im fuehrenden Kundenstamm anlegen.",
         example_prompts=["Lege einen Debitor an.", "Zeige Debitor {entity_id}."],
-        sensitive_fields=["credit_limit", "vat_id"],
+        sensitive_fields=["credit_limit", "vat_id", "tax_number", "iban", "bic"],
         test_id="finance-debitoren-new",
         density="expertDense",
         context_rail="audit",

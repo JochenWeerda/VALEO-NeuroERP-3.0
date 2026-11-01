@@ -482,7 +482,7 @@ class ProcurementService:
             for lf in q.order_by(EinkaufLieferant.firmenname).all()
         ]
 
-    def create_lieferant(self, data: dict) -> dict:
+    def create_lieferant(self, data: dict, rollenfelder: Optional[dict] = None) -> dict:
         # Keine Datenbankregel haelt die Nummer eindeutig (Stand 20.10.2026); doppelte Lieferanten-Nummern im
         # Mandanten waren moeglich.
         vorhanden = self.db.query(EinkaufLieferant.id).filter(
@@ -505,6 +505,7 @@ class ProcurementService:
             email=data.get("email"),
             phone=data.get("telefon"),
             partner_id=data.get("partner_id") or None,
+            rollenfelder=rollenfelder,
         )}
         lf = EinkaufLieferant(id=uuid7(), tenant_id=self.tenant_id, **data)
         self.db.add(lf)
