@@ -9791,6 +9791,41 @@
       ]
     },
     {
+      "mask_id": "crm/partner-klaerfaelle-liste",
+      "title": "Partner-Klaerfaelle",
+      "domain": "crm",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/crm__partner-klaerfaelle-liste/:entityId",
+      "agent_contract_url": "/api/v1/masks/crm/partner-klaerfaelle-liste/agent-contract",
+      "screen_definition_url": "/api/v1/masks/crm/partner-klaerfaelle-liste/screen-definition",
+      "readiness_url": "/api/v1/masks/crm/partner-klaerfaelle-liste/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "crm.customer.search",
+        "crm.customer.summary360",
+        "crm.customer.open",
+        "crm.contact.log",
+        "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
+        "crm.lead.qualify"
+      ]
+    },
+    {
       "mask_id": "crm/segment",
       "title": "Segment",
       "domain": "crm",

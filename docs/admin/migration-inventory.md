@@ -382,6 +382,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `ops_wave106_operations_crud_20260519` | Wave 106: Operations CRUD — Versicherungen, Wartung/Anlagen, Tankstelle/Zapfungen, |
 | `ops_wave107_remaining_stubs_20260520` | ops_wave107_remaining_stubs — DB tables for critical in-memory stores |
 | `optimize_procurement_indexes_20260213` | Optimize indexes for documents/procurement frequent query paths. |
+| `partner_rueckfuellung_20261101` | Stufe 2 Geschaeftspartnerstamm: bestehende Kunden und Lieferanten Partnern zuordnen. |
 | `pcn_meldungen_20260326` | PCN-Meldungen Persistenz-Tabelle (Wave 104 Gap-D) |
 | `perf_indexes_apply_20260602` | Catch-up: Performance-Indizes auf bereits migrierten DBs anlegen. |
 | `perf_indexes_multitenant_20260408` | perf: add missing database indexes for multi-tenant queries |
