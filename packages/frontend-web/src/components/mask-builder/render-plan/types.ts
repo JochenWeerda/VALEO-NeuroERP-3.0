@@ -151,7 +151,6 @@ export interface RenderTabContentPlan {
 }
 
 export interface RenderFieldPlan {
-  fileContent?: ScreenFieldDefinition['fileContent']
   currencyField?: string
   key: string
   label: string
@@ -169,6 +168,7 @@ export interface RenderFieldPlan {
   minSearchChars: number
   rowFields?: ScreenFieldDefinition[]
   tableEditing?: ScreenFieldDefinition['tableEditing']
+  fileContent?: ScreenFieldDefinition['fileContent']
   renderHint?: 'singleLine' | 'multiLine' | 'compact' | 'touch'
 }
 
@@ -241,6 +241,7 @@ export interface RenderTablePlan {
 }
 
 export interface RenderActionPlan {
+  surfaceOnly?: boolean
   requiresExpectedVersion?: boolean
   requiresIdempotencyKey?: boolean
   key: string
@@ -285,6 +286,7 @@ export interface RenderPerformancePlan {
 
 export interface RenderPlan {
   flowSpineCatalog?: ScreenDefinition['flowSpineCatalog']
+  flowSpineWorkspace?: ScreenDefinition['flowSpineWorkspace']
   listExperience?: ListExperience
   documentVariant?: DocumentScreenVariantRef
   cacheKey: string

@@ -10,6 +10,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from app.core.screen_definitions_intake_weighing import build_scale_list, build_weighing_tickets
+
 from app.core.stamm_list_parent import (
     build_stamm_list_screen,
     stamm_list_export_action,
@@ -465,21 +467,16 @@ def build_crm_kampagnen_liste() -> dict[str, Any]:
         endpoint="/api/v1/crm/campaigns", row_route="/crm/campaign/{id}", bundle="crm",
         columns=[
             {"key": "name", "label": "Kampagne", "sortable": True, "filterable": True, "priority": "primary"},
-            {"key": "type", "label": "Typ", "filterable": True, "priority": "primary"},
-            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
-            {"key": "sent_count", "label": "Versendet", "numeric": True, "sortable": True, "priority": "secondary"},
-            {"key": "open_count", "label": "Geoeffnet", "numeric": True, "sortable": True, "priority": "secondary"},
-            {"key": "click_count", "label": "Klicks", "numeric": True, "sortable": True, "priority": "secondary"},
+            {"key": "campaign_type", "label": "Typ", "filterable": True, "priority": "primary"},
+            {"key": "state", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "campaign_channel", "label": "Kanal", "filterable": True, "priority": "secondary"},
+            {"key": "start_date", "label": "Beginn", "renderKind": "date", "priority": "secondary"},
+            {"key": "end_date", "label": "Ende", "renderKind": "date", "priority": "secondary"},
             {"key": "created_at", "label": "Erstellt", "renderKind": "date", "sortable": True, "priority": "tertiary"},
         ],
         actions=[_neu("Neue Kampagne", "/crm/campaign/new"), _EXPORT],
-        row_actions=[
-            {"key": "loeschen", "label": "Loeschen", "dangerLevel": "high", "permission": "crm.kampagne.loeschen",
-             "commandEndpoint": "/api/v1/crm/campaigns/{entity_id}", "method": "DELETE",
-             "requiresConfirmation": True, "auditReasonRequired": True, "forbiddenForAgents": True},
-        ],
-        dangerous=[{"key": "loeschen", "reason": "Entfernt eine Kampagne; nur Mensch."}],
-        purpose="Kampagnen mit Versand-, Oeffnungs- und Klickzahlen finden und oeffnen.",
+        row_actions=[{"key": "bearbeiten", "label": "Details und Aktionen", "dangerLevel": "safe", "localEffect": "navigation", "navigationRoute": "/crm/campaign/{id}"}],
+        purpose="Kampagnen finden und fuer Kennzahlen und Aktionen oeffnen.",
         prompts=["Welche Kampagnen sind noch im Entwurf?", "Welche Kampagne hat die meisten Klicks?"],
         no_workflow="Der Status steht an der Kampagne; die Liste fuehrt keinen eigenen Ablauf.",
     )
@@ -494,27 +491,13 @@ def build_crm_kampagnenvorlagen_liste() -> dict[str, Any]:
         row_route="/crm/campaign-template/{id}", bundle="crm",
         columns=[
             {"key": "name", "label": "Vorlage", "sortable": True, "filterable": True, "priority": "primary"},
-            {"key": "type", "label": "Typ", "filterable": True, "priority": "primary"},
-            {"key": "subject", "label": "Betreff", "filterable": True, "priority": "secondary"},
+            {"key": "campaign_type", "label": "Typ", "filterable": True, "priority": "primary"},
+            {"key": "subject_line", "label": "Betreff", "filterable": True, "priority": "secondary"},
             {"key": "is_active", "label": "Aktiv", "renderKind": "boolean", "filterable": True, "priority": "primary"},
-            {"key": "usage_count", "label": "Verwendet", "numeric": True, "sortable": True, "priority": "tertiary"},
             {"key": "created_at", "label": "Erstellt", "renderKind": "date", "sortable": True, "priority": "tertiary"},
         ],
         actions=[_neu("Neue Vorlage", "/crm/campaign-template/new"), _EXPORT],
-        row_actions=[
-            {"key": "aktivieren", "label": "Aktivieren", "dangerLevel": "safe", "permission": "crm.vorlage.aktivieren",
-             "commandEndpoint": pfad + "/activate", "method": "POST", "requiresConfirmation": True,
-             "visibleWhen": {"field": "is_active", "values": [False]}},
-            {"key": "deaktivieren", "label": "Deaktivieren", "dangerLevel": "moderate",
-             "permission": "crm.vorlage.deaktivieren", "commandEndpoint": pfad + "/deactivate", "method": "POST",
-             "requiresConfirmation": True, "visibleWhen": {"field": "is_active", "values": [True]}},
-            {"key": "duplizieren", "label": "Duplizieren", "dangerLevel": "safe", "permission": "crm.vorlage.duplizieren",
-             "commandEndpoint": pfad + "/duplicate", "method": "POST", "requiresConfirmation": True},
-            {"key": "loeschen", "label": "Loeschen", "dangerLevel": "high", "permission": "crm.vorlage.loeschen",
-             "commandEndpoint": pfad, "method": "DELETE", "requiresConfirmation": True,
-             "auditReasonRequired": True, "forbiddenForAgents": True},
-        ],
-        dangerous=[{"key": "loeschen", "reason": "Entfernt eine Vorlage; nur Mensch."}],
+        row_actions=[{"key": "bearbeiten", "label": "Details und Aktionen", "dangerLevel": "safe", "localEffect": "navigation", "navigationRoute": "/crm/campaign-template/{id}"}],
         purpose="Kampagnenvorlagen pflegen: aktivieren, deaktivieren, duplizieren.",
         prompts=["Welche Vorlagen sind aktiv?", "Welche Vorlage wird am haeufigsten verwendet?"],
         no_workflow="Stammdatenliste ohne eigenen Ablauf.",
@@ -533,19 +516,10 @@ def build_crm_einwilligungen_liste() -> dict[str, Any]:
             {"key": "consent_type", "label": "Zweck", "filterable": True, "priority": "primary"},
             {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
             {"key": "granted_at", "label": "Erteilt", "renderKind": "date", "sortable": True, "priority": "secondary"},
-            {"key": "double_opt_in_confirmed_at", "label": "Double-Opt-in", "renderKind": "date",
-             "priority": "secondary"},
             {"key": "source", "label": "Quelle", "filterable": True, "priority": "tertiary"},
         ],
         actions=[_neu("Einwilligung erfassen", "/crm/consent/new"), _EXPORT],
-        row_actions=[
-            {"key": "widerrufen", "label": "Widerrufen", "dangerLevel": "high",
-             "permission": "crm.einwilligung.widerrufen",
-             "commandEndpoint": "/api/v1/crm/consents/{entity_id}/revoke", "method": "POST",
-             "requiresConfirmation": True, "auditReasonRequired": True, "forbiddenForAgents": True,
-             "visibleWhen": {"field": "status", "values": ["granted"]}},
-        ],
-        dangerous=[{"key": "widerrufen", "reason": "Widerruft eine Einwilligung; nur Mensch mit Begruendung."}],
+        row_actions=[{"key": "bearbeiten", "label": "Details und Aktionen", "dangerLevel": "safe", "localEffect": "navigation", "navigationRoute": "/crm/consent/{id}"}],
         purpose="Einwilligungen je Kontakt und Kanal nachweisen und auf Wunsch widerrufen.",
         prompts=["Welche Einwilligungen warten auf Double-Opt-in?", "Welche Einwilligungen wurden widerrufen?"],
         no_workflow="Der Status steht an der Einwilligung; die Liste fuehrt keinen eigenen Ablauf.",
@@ -574,21 +548,15 @@ def build_dsgvo_anfragen_liste() -> dict[str, Any]:
              "permission": "dsgvo.anfrage.pruefen", "commandEndpoint": pfad + "verify", "method": "POST",
              "requiresConfirmation": True, "forbiddenForAgents": True,
              "visibleWhen": {"field": "status", "values": ["PENDING"]}},
-            {"key": "exportieren", "label": "Auskunft erstellen", "dangerLevel": "moderate",
-             "permission": "dsgvo.anfrage.exportieren", "commandEndpoint": pfad + "export", "method": "POST",
-             "requiresConfirmation": True, "forbiddenForAgents": True,
+            {"key": "verarbeiten", "label": "Datenbereich pruefen und verarbeiten", "dangerLevel": "safe",
+             "localEffect": "navigation", "navigationRoute": "/crm/gdpr-request/{id}", "forbiddenForAgents": True,
              "visibleWhen": {"field": "status", "values": ["VERIFIED"]}},
-            {"key": "daten_loeschen", "label": "Daten loeschen (Art. 17)", "dangerLevel": "critical",
-             "permission": "dsgvo.anfrage.loeschen", "commandEndpoint": pfad + "delete", "method": "POST",
-             "requiresConfirmation": True, "auditReasonRequired": True, "humanApprovalRequired": True,
-             "forbiddenForAgents": True, "visibleWhen": {"field": "status", "values": ["VERIFIED"]}},
             {"key": "ablehnen", "label": "Ablehnen", "dangerLevel": "high", "permission": "dsgvo.anfrage.ablehnen",
              "commandEndpoint": pfad + "reject", "method": "POST", "requiresConfirmation": True,
              "auditReasonRequired": True, "forbiddenForAgents": True,
              "visibleWhen": {"field": "status", "values": ["PENDING", "VERIFIED", "PROCESSING"]}},
         ],
         dangerous=[
-            {"key": "daten_loeschen", "reason": "Loescht personenbezogene Daten unwiderruflich (Art. 17); nur Mensch."},
             {"key": "ablehnen", "reason": "Lehnt eine Betroffenenanfrage ab; nur Mensch mit Begruendung."},
         ],
         purpose="Betroffenenanfragen fristgerecht pruefen, beantworten, loeschen oder begruendet ablehnen.",
@@ -605,25 +573,16 @@ def build_crm_segmente_liste() -> dict[str, Any]:
         row_route="/crm/segment/{id}", bundle="crm", fetch_limit=200,
         columns=[
             {"key": "name", "label": "Segment", "sortable": True, "filterable": True, "priority": "primary"},
-            {"key": "type", "label": "Typ", "filterable": True, "priority": "primary"},
-            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "segment_type", "label": "Typ", "filterable": True, "priority": "primary"},
             {"key": "member_count", "label": "Mitglieder", "numeric": True, "sortable": True, "priority": "secondary"},
-            {"key": "last_calculated_at", "label": "Berechnet", "renderKind": "date", "sortable": True,
+            {"key": "updated_at", "label": "Geaendert", "renderKind": "date", "sortable": True,
              "priority": "secondary"},
             {"key": "created_at", "label": "Erstellt", "renderKind": "date", "sortable": True, "priority": "tertiary"},
         ],
         actions=[_neu("Neues Segment", "/crm/segment/new"), _EXPORT],
-        row_actions=[
-            {"key": "berechnen", "label": "Neu berechnen", "dangerLevel": "safe", "permission": "crm.segment.berechnen",
-             "commandEndpoint": "/api/v1/crm/segments/{entity_id}/calculate", "method": "POST",
-             "requiresConfirmation": True},
-            {"key": "loeschen", "label": "Loeschen", "dangerLevel": "high", "permission": "crm.segment.loeschen",
-             "commandEndpoint": "/api/v1/crm/segments/{entity_id}", "method": "DELETE",
-             "requiresConfirmation": True, "auditReasonRequired": True, "forbiddenForAgents": True},
-        ],
-        dangerous=[{"key": "loeschen", "reason": "Entfernt ein Segment; nur Mensch."}],
+        row_actions=[{"key": "bearbeiten", "label": "Details und Aktionen", "dangerLevel": "safe", "localEffect": "navigation", "navigationRoute": "/crm/segment/{id}"}],
         purpose="Kundensegmente finden, Mitglieder neu berechnen und nicht mehr genutzte entfernen.",
-        prompts=["Wie viele Mitglieder hat jedes Segment?", "Welche Segmente sind lange nicht berechnet?"],
+        prompts=["Wie viele Mitglieder hat jedes Segment?", "Welche Segmente wurden zuletzt geaendert?"],
         no_workflow="Stammdatenliste ohne eigenen Ablauf.",
     )
 
@@ -1342,25 +1301,49 @@ def build_crm_betriebsprofile_liste() -> dict[str, Any]:
 
 
 def build_sales_angebote_liste() -> dict[str, Any]:
-    return _liste(
-        screen_id="sales/angebote-liste", domain="sales", title="Verkaufsangebote",
-        subtitle="Angebote mit Kunde, Betrag und Gueltigkeit", endpoint="/api/v1/sales/offers/",
-        row_route="/sales/angebot/{id}", bundle="sales",
-        columns=[
-            {"key": "offer_number", "label": "Angebot-Nr.", "sortable": True, "filterable": True, "priority": "primary"},
-            {"key": "customer_name", "label": "Kunde", "filterable": True, "priority": "primary"},
-            {"key": "subject", "label": "Betreff", "filterable": True, "priority": "secondary"},
-            {"key": "total_amount", "label": "Betrag", "numeric": True, "renderKind": "currency", "sortable": True,
-             "priority": "primary"},
-            {"key": "valid_until", "label": "Gueltig bis", "renderKind": "date", "sortable": True, "priority": "secondary"},
-            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
-        ],
-        actions=[_neu("Neues Angebot", "/sales/angebot/neu"), _EXPORT],
-        row_actions=[],
-        purpose="Verkaufsangebote nach Kunde und Status verfolgen.",
+    columns = [
+        {"key": "offer_number", "label": "Angebot-Nr.", "sortable": True, "filterable": True, "priority": "primary"},
+        {"key": "created_at", "label": "Datum", "renderKind": "date", "sortable": True, "filterable": True, "priority": "secondary"},
+        {"key": "customer_name", "label": "Kunde", "filterable": True, "priority": "primary"},
+        {"key": "subject", "label": "Betreff", "filterable": True, "priority": "secondary"},
+        {"key": "total_amount", "label": "Betrag", "numeric": True, "renderKind": "currency", "currencyField": "currency", "sortable": True, "priority": "primary"},
+        {"key": "currency", "label": "Währung", "priority": "secondary"},
+        {"key": "valid_until", "label": "Gültig bis", "renderKind": "date", "sortable": True, "priority": "secondary"},
+        {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+    ]
+    definition = _liste(screen_id="sales/angebote-liste", domain="sales", title="Verkaufsangebote",
+        subtitle="Angebote mit Kunde, Betrag und Gültigkeit", endpoint="/api/v1/sales/offers/",
+        row_route="/sales/angebot/{id}", bundle="sales", columns=columns,
+        actions=[_neu("Neues Angebot", "/sales/angebot/neu"), _EXPORT,
+                 {"key": "print", "label": "Drucken", "dangerLevel": "safe", "zone": "header", "localEffect": "print"},
+                 {"key": "import_csv", "label": "CSV importieren", "permission": "sales.offer.import_csv", "dangerLevel": "moderate", "zone": "header",
+                  "commandEndpoint": "/api/v1/sales/offers/actions/import-csv", "method": "POST",
+                  "requiresConfirmation": True, "requiresIdempotencyKey": True, "forbiddenForAgents": True,
+                  "inputFields": [{"key": "csv_content", "label": "CSV-Datei", "type": "file", "required": True,
+                                   "helpText": "UTF-8, Semikolon; Pflichtkopf: offer_number;subject;customer_id;total_amount;currency. Optional: valid_until (ISO-Datum). Alle Zeilen werden gemeinsam importiert.",
+                                   "fileContent": {"encoding": "utf-8", "accept": [".csv"], "maxBytes": 1048576}}]}],
+        row_actions=[], purpose="Verkaufsangebote nach Kunde und Status verfolgen.",
         prompts=["Welche Angebote laufen diese Woche ab?", "Welche Angebote sind offen?"],
-        no_workflow="Der Status steht am Angebot; die Liste fuehrt keinen eigenen Ablauf.",
-    )
+        no_workflow="Der Status steht am Angebot; die Liste führt keinen eigenen Ablauf.")
+    definition["listExperience"] = {
+        "searchFields": ["offer_number", "customer_name"],
+        "presets": [{"key": "status", "label": "Status", "field": "status", "kind": "choice",
+                     "options": [{"value": "all", "label": "Alle Status"}, {"value": "offen", "label": "Offen"},
+                                 {"value": "angenommen", "label": "Angenommen"}, {"value": "abgelehnt", "label": "Abgelehnt"},
+                                 {"value": "abgelaufen", "label": "Abgelaufen"}]}],
+        "aggregates": [{"key": "total", "label": "Angebote", "conditions": []},
+                       {"key": "open", "label": "Offen", "conditions": [{"field": "status", "op": "eq", "value": "offen"}]}],
+        "export": {"filenamePrefix": "Angebote_", "delimiter": ";", "columns": [{"key": c["key"], "label": c["label"]} for c in columns]},
+        "insightLines": [{"key": "sales", "label": "Vertrieb", "variants": [{"text": "{open} offene Angebote in der aktuellen Sicht."}]},
+                         {"key": "management", "label": "Leitung", "variants": [{"text": "{total} Angebote in der aktuellen Sicht."}]}],
+        "roleFocus": {"defaultKey": "all", "options": [{"key": "all", "label": "Alle Rollen"},
+            {"key": "sales", "label": "Vertrieb", "insightLineKeys": ["sales"]},
+            {"key": "inside-sales", "label": "Innendienst", "insightLineKeys": ["sales"]},
+            {"key": "order-desk", "label": "Auftragsabwicklung", "insightLineKeys": ["sales"]},
+            {"key": "finance", "label": "Finance", "insightLineKeys": ["management"]},
+            {"key": "management", "label": "Leitung", "insightLineKeys": ["management"]}]},
+    }
+    return definition
 
 
 def build_sales_auftraege_liste() -> dict[str, Any]:
@@ -1387,24 +1370,50 @@ def build_sales_auftraege_liste() -> dict[str, Any]:
 
 
 def build_sales_lieferungen_liste() -> dict[str, Any]:
-    return _liste(
+    columns = [
+        {"key": "delivery_note_number", "label": "Lieferschein-Nr.", "sortable": True, "filterable": True, "priority": "primary"},
+        {"key": "delivery_date", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+        {"key": "customer_name", "label": "Kunde", "filterable": True, "priority": "primary"},
+        {"key": "customer_id", "label": "Kundenreferenz", "filterable": True, "priority": "secondary"},
+        {"key": "sales_order_number", "label": "Auftrag", "filterable": True, "priority": "primary"},
+        {"key": "sales_order_id", "label": "Auftragsreferenz", "filterable": True, "priority": "secondary"},
+        {"key": "quantity_summary", "label": "Mengen nach Einheit", "priority": "secondary"},
+        {"key": "status", "label": "Belegstatus", "renderKind": "status", "filterable": True, "priority": "primary"},
+        {"key": "is_delivered", "label": "Zugestellt", "renderKind": "boolean", "filterable": True, "priority": "secondary"},
+    ]
+    definition = _liste(
         screen_id="sales/lieferungen-liste", domain="sales", title="Lieferscheine",
-        subtitle="Ausgehende Lieferungen und Versandstatus", endpoint="/api/v1/sales/delivery-notes",
-        row_route="/sales/delivery-note/{id}", bundle="sales",
-        columns=[
-            {"key": "delivery_number", "label": "Lieferschein-Nr.", "sortable": True, "filterable": True,
-             "priority": "primary"},
-            {"key": "customer_name", "label": "Kunde", "filterable": True, "priority": "primary"},
-            {"key": "delivery_date", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
-            {"key": "shipping_method", "label": "Versandart", "filterable": True, "priority": "tertiary"},
-            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
-        ],
-        actions=[_neu("Lieferschein erfassen", "/sales/delivery-editor"), _EXPORT],
-        row_actions=[],
-        purpose="Lieferscheine und Versandstatus nachverfolgen.",
-        prompts=["Welche Lieferscheine sind heute offen?", "Welche Lieferungen sind unterwegs?"],
-        no_workflow="Der Status steht am Lieferschein; die Liste fuehrt keinen eigenen Ablauf.",
+        subtitle="Ausgehende Lieferungen und Belegstatus", endpoint="/api/v1/sales/delivery-notes?limit=100",
+        row_route="/sales/delivery-editor?id={id}", bundle="sales", columns=columns,
+        actions=[_neu("Lieferschein erfassen", "/sales/delivery-editor"), _EXPORT,
+                 {"key": "print", "label": "Drucken", "dangerLevel": "safe", "zone": "header", "localEffect": "print"}],
+        row_actions=[{"key": "auftrag_oeffnen", "label": "Auftrag öffnen", "dangerLevel": "low",
+                      "navigationRoute": "/sales/order-editor?id={sales_order_id}", "localEffect": "navigation",
+                      "visibleWhen": {"field": "has_sales_order", "values": [True]}}],
+        purpose="Lieferscheine und ihren dokumentierten Status nachverfolgen.",
+        prompts=["Welche Lieferscheine sind offen?", "Welche Lieferungen sind zugestellt?"],
+        no_workflow="Der Belegstatus ist kein Transportstatus.",
     )
+    definition["listExperience"] = {
+        "searchFields": ["delivery_note_number", "customer_name", "customer_id", "sales_order_number", "sales_order_id"],
+        "presets": [{"key": "status", "label": "Belegstatus", "field": "status", "kind": "choice",
+                     "options": [{"value": "all", "label": "Alle Status"}, {"value": "draft", "label": "Entwurf"},
+                                 {"value": "posted", "label": "Gebucht"}, {"value": "printed", "label": "Gedruckt"},
+                                 {"value": "delivered", "label": "Zugestellt"}, {"value": "cancelled", "label": "Storniert"}]}],
+        "aggregates": [{"key": "total", "label": "Lieferscheine", "conditions": []},
+                       {"key": "draft", "label": "Entwürfe", "conditions": [{"field": "status", "op": "eq", "value": "draft"}]},
+                       {"key": "delivered", "label": "Zugestellt", "conditions": [{"field": "is_delivered", "op": "eq", "value": "true"}]}],
+        "export": {"filenamePrefix": "Lieferungen_", "delimiter": ";", "columns": [{"key": c["key"], "label": c["label"]} for c in columns]},
+        "insightLines": [{"key": "status", "label": "Stand", "variants": [{"text": "{total} Lieferscheine in der aktuellen Sicht; {draft} Entwürfe und {delivered} als zugestellt markiert."}]},
+                         {"key": "shipping", "label": "Versand", "variants": [{"text": "Der Belegstatus belegt keinen Transportstatus."}]}],
+        "roleFocus": {"defaultKey": "all", "options": [{"key": "all", "label": "Alle Rollen"},
+            {"key": "shipping", "label": "Versand", "insightLineKeys": ["shipping", "status"]},
+            {"key": "sales", "label": "Vertrieb", "insightLineKeys": ["status"]},
+            {"key": "logistics", "label": "Logistik", "insightLineKeys": ["shipping"]},
+            {"key": "billing", "label": "Faktura", "insightLineKeys": ["status"]},
+            {"key": "management", "label": "Leitung", "insightLineKeys": ["status", "shipping"]}]},
+    }
+    return definition
 
 
 def build_einkauf_rechnungseingaenge_liste() -> dict[str, Any]:
@@ -1974,21 +1983,8 @@ def build_admin_audit_log_liste() -> dict[str, Any]:
     )
 
 def build_admin_webhooks_liste() -> dict[str, Any]:
-    return _liste(
-        screen_id="admin/webhooks-liste", domain="admin", title="Webhooks", subtitle="Webhook-Endpunkte und Bereiche",
-        endpoint="/api/v1/webhooks", row_route=None, bundle="admin",
-        columns=[
-            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
-            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
-            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
-            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
-        ],
-        actions=[_EXPORT],
-        row_actions=[],
-        purpose="Webhooks: Eintraege finden und Details oeffnen.",
-        prompts=["Welche offenen Webhooks?", "Zeige aktuelle Webhooks."],
-        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
-    )
+    from app.core.screen_definitions_admin_workbench import build_webhooks_workbench
+    return build_webhooks_workbench()
 
 def build_finance_audit_trail_liste() -> dict[str, Any]:
     return _liste(
@@ -2229,21 +2225,8 @@ def build_waage_hofliste_liste() -> dict[str, Any]:
     )
 
 def build_waage_waagen_liste() -> dict[str, Any]:
-    return _liste(
-        screen_id="waage/waagen-liste", domain="agrar", title="Waagen", subtitle="Waagenstamm und Eichung",
-        endpoint="/api/v1/waage/waagen", row_route="/waage/{id}", bundle="agrar",
-        columns=[
-            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
-            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
-            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
-            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
-        ],
-        actions=[_EXPORT],
-        row_actions=[],
-        purpose="Waagen: Eintraege finden und Details oeffnen.",
-        prompts=["Welche offenen Waagen?", "Zeige aktuelle Waagen."],
-        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
-    )
+    return build_scale_list("waage/waagen-liste")
+
 
 def build_fuhrpark_rechnungen_liste() -> dict[str, Any]:
     return _liste(
@@ -2280,21 +2263,8 @@ def build_fuhrpark_fahrzeuge_liste() -> dict[str, Any]:
     )
 
 def build_waage_wiegungen_liste() -> dict[str, Any]:
-    return _liste(
-        screen_id="waage/wiegungen-liste", domain="agrar", title="Wiegescheine", subtitle="Waagen-Wiegescheine",
-        endpoint="/api/v1/weighing-tickets/", row_route="/waage/wiegeschein/{id}", bundle="agrar",
-        columns=[
-            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
-            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
-            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
-            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
-        ],
-        actions=[_EXPORT],
-        row_actions=[],
-        purpose="Wiegescheine: Eintraege finden und Details oeffnen.",
-        prompts=["Welche offenen Wiegescheine?", "Zeige aktuelle Wiegescheine."],
-        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
-    )
+    return build_weighing_tickets("waage/wiegungen-liste")
+
 
 def build_marketing_kampagnen_liste() -> dict[str, Any]:
     return _liste(
@@ -2448,25 +2418,7 @@ def build_tankstelle_zapfungen_liste() -> dict[str, Any]:
 
 
 def build_waage_liste() -> dict[str, Any]:
-    return _liste(
-        screen_id="waage/liste", domain="logistik", title="Waagen",
-        subtitle="Standorte, Kapazitaet und Eichung", endpoint="/api/v1/waage/waagen", row_route=None, bundle="logistik",
-        columns=[
-            {"key": "standort", "label": "Standort", "sortable": True, "filterable": True, "priority": "primary"},
-            {"key": "typ", "label": "Typ", "filterable": True, "priority": "primary"},
-            {"key": "maxKapazitaet", "label": "Max. Kapazitaet", "numeric": True, "sortable": True, "priority": "secondary"},
-            {"key": "letzteEichung", "label": "Letzte Eichung", "renderKind": "date", "sortable": True,
-             "priority": "secondary"},
-            {"key": "naechsteEichung", "label": "Naechste Eichung", "renderKind": "date", "sortable": True,
-             "priority": "primary"},
-            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
-        ],
-        actions=[_EXPORT],
-        row_actions=[],
-        purpose="Waagenstandorte und Eichtermine im Blick behalten.",
-        prompts=["Welche Waage muss als naechstes geeicht werden?", "Welche Waagen sind in Wartung?"],
-        no_workflow="Geraeteliste ohne eigenen Ablauf.",
-    )
+    return build_scale_list()
 
 
 def build_compliance_cross_compliance_liste() -> dict[str, Any]:

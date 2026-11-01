@@ -2,6 +2,9 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import CreditNoteEditorPage from '@/pages/sales/credit-note-editor'
+import definition from '../../fixtures/sales-credit-notes-native.json'
+import { compileRenderPlanFromScreenDefinition } from '@/components/mask-builder/render-plan/schema-compiler'
+import type { ScreenDefinition } from '@/components/mask-builder/schema'
 
 const mocks = vi.hoisted(() => ({
   liste: vi.fn(),
@@ -37,6 +40,11 @@ vi.mock('@/lib/api-client', () => ({
   getAxiosErrorMessage: (e: unknown) => String((e as Error).message),
 }))
 vi.mock('@/hooks/useTouchDevice', () => ({ useTouchDevice: () => false }))
+vi.mock('@/lib/api/masks', () => ({ useScreenDefinition: () => ({ data: definition }) }))
+vi.mock('@/components/mask-builder/runtime/screen-permissions', () => ({ useScreenPermissions: () => ['sales.gutschrift.write', 'sales.gutschrift.post'] }))
+vi.mock('@/components/mask-builder/runtime/useUniversalMaskRuntime', () => ({
+  useUniversalMaskRuntime: ({ schema, permissions }: { schema: ScreenDefinition; permissions: string[] }) => ({ plan: compileRenderPlanFromScreenDefinition(schema, { permissions, roleHash: 'credit-test' }) }),
+}))
 
 const SCHLUESSEL = [
   { id: 'a', code: '2', bezeichnung: 'Umsatzsteuer 7 %', steuersatz: 7, credit_account: '1771', revenue_account: '8300' },

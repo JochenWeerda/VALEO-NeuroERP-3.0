@@ -273,71 +273,11 @@ def list_opportunity_quotes(
     ]
 
 
-@router.get("/crm/segments/{segment_id}/members", response_model=list[BridgeOut], summary="Segmentmitglieder auflisten")
-def list_segment_members(
-    segment_id: str,
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-) -> list[dict[str, Any]]:
-    stored = _safe_rows(
-        db,
-        "SELECT m.partner_id AS contact_id, m.added_at "
-        "FROM domain_crm.crm_segment_members m "
-        "JOIN domain_crm.crm_segments s ON s.id = m.segment_id "
-        "WHERE s.tenant_id = :t AND m.segment_id = :s "
-        "ORDER BY m.added_at DESC LIMIT 500",
-        {"t": tenant_id, "s": segment_id},
-    )
-    if stored:
-        return [{"contact_id": r["contact_id"], "added_at": _iso(r["added_at"]), "segment_id": segment_id} for r in stored]
-    customers = (
-        db.query(Customer)
-        .filter(Customer.tenant_id == tenant_id, Customer.deleted_at.is_(None), Customer.is_active.is_(True))
-        .order_by(Customer.company_name.asc())
-        .limit(50)
-        .all()
-    )
-    return [
-        {
-            "contact_id": c.id,
-            "added_at": _iso(c.created_at),
-            "name": c.company_name,
-            "segment_id": segment_id,
-        }
-        for c in customers
-    ]
-
-
-@router.get("/crm/segments/{segment_id}/performance", response_model=BridgeOut, summary="Segment-Performance")
-def get_segment_performance(
-    segment_id: str,
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-) -> dict[str, Any]:
-    members = list_segment_members(segment_id, tenant_id, db)
-    return {
-        "segment_id": segment_id,
-        "member_count": len(members),
-        "coverage": min(1.0, len(members) / 50) if members else 0.0,
-        "updated_at": _now().isoformat(),
-    }
-
-
-@router.post("/crm/segments/{segment_id}/calculate", response_model=BridgeOut, summary="Segment neu berechnen", dependencies=SCHREIBEN["CRM"])
-def calculate_segment(
-    segment_id: str,
-    body: SegmentCalculateIn,
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-) -> dict[str, Any]:
-    members = list_segment_members(segment_id, tenant_id, db)
-    return {
-        "segment_id": segment_id,
-        "calculated": True,
-        "force_full": body.force_full,
-        "member_count": len(members),
-        "calculated_at": _now().isoformat(),
-    }
+# Canonical segment members, evaluation and truthful counts are owned by crm_segments.
+from app.api.v1.endpoints.crm_segments import (  # noqa: E402,F401
+    segment_members as list_segment_members, segment_performance as get_segment_performance,
+    recalculate_segment as calculate_segment,
+)
 
 
 # ---------------------------------------------------------------------------

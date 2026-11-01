@@ -201,3 +201,14 @@ Calculate und finale Gutschrift verwenden den persistenten HarvestRuleStore. Ver
 ## Ernte-Regelversionen
 
 GET `/api/v1/agrar/harvest-acceptance/settlement-controls/rules` liefert die unveraenderliche `definition` und daraus abgeleitete schreibgeschuetzte Anzeigefelder (Regelbezeichnung/-fassung, Besatz-/Qualitaetsgrenze, Methode/-fassung, Geltung und Vertragsquelle). Diese Ausgabefelder sind keine schreibbaren Regelparameter. [Vertragsnachweis](../../../quality-assurance/harvest-read-projection-20261015.md).
+
+
+## Waagenstamm und ASCII-Import (2026-10-30)
+
+- `GET|POST /api/v1/waage/waagen`, `GET|PATCH|DELETE /api/v1/waage/waagen/{id}`: verifizierter Mandant; fremde/unzugeordnete IDs 404, Identitaetsfelder im Body 422, vorhandene Wiege-/Importnachweise verhindern Loeschen mit 409.
+- `GET|PATCH /api/v1/waage/waagen/{id}/kalibrierung`: kanonische Eichdaten (`letztes_eichdatum`, `naechste_eichfaelligkeit`, `eichamt`, `zertifikat_nr`); ungueltige Datumsreihenfolge 422, atomarer Audit-/Outboxnachweis.
+- `POST /api/v1/waage/waagen/import/ascii`: Multipart `file`, `waage_id`, `fehler_toleranz`; UTF-8 bis 1 MB, maximal 1000 W/Q-Gruppen. Antwort `imported`, `skipped`, `errors`, `wiegung_ids`, `replayed`. Strikt atomar; tolerant persistente Fehler. Ziel ausschliesslich `domain_inventory.weighing_tickets`.
+- `GET /api/v1/waage/waagen/import/fehlerqueue?limit=100`: aktive eigene Fehler, maximal 1000. `POST .../{entry_id}/retry` verarbeitet erneut; `DELETE .../{entry_id}` verwirft mit erhaltenem Wiederholungsnachweis. Fremde IDs 404.
+- Vorhandene Legacy-`/waage/wiegungen`-CRUD-Wege 410; `/waage/wiegungen/dual` bleibt kanonisch. Bekannte fremde registrierte `scale_id` wird in beiden kanonischen Anlagewegen verweigert; unbekannte externe Quellenbezeichnungen begruenden keine Stammdatenrechte.
+
+Entscheidung: [Waagen-/Importvertrag](../../../adr/adr-waage-tenant-import-20261030.md). Migration und Rollenbereitstellung benoetigen getrennte Betriebsabnahme; keine vermutete Altbestandszuordnung.

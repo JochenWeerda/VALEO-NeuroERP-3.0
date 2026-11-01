@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-29",
+  "generatedAt": "2026-11-01",
   "schemaVersion": 1,
   "sources": [
     "app/core/flow_spine_registry.py",
@@ -1109,15 +1109,60 @@
     },
     {
       "mask_id": "admin/control-center",
-      "title": "Control center",
+      "title": "Admin Kontrollzentrum",
       "domain": "admin",
       "process_keys": [],
       "rollout_route": "/mask-rollout/admin__control-center/:entityId",
       "agent_contract_url": "/api/v1/masks/admin/control-center/agent-contract",
       "screen_definition_url": "/api/v1/masks/admin/control-center/screen-definition",
       "readiness_url": "/api/v1/masks/admin/control-center/readiness",
-      "risk_summary": "low",
-      "actions": [],
+      "risk_summary": "medium",
+      "actions": [
+        {
+          "key": "plan",
+          "label": "Planungseintrag anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "studio.admin-control-center.plan",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "escalate",
+          "label": "Vorfall eskalieren",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "studio.admin-control-center.escalate",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "resolve",
+          "label": "Vorfall erledigen",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "studio.admin-control-center.resolve",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "retry",
+          "label": "Erneut versuchen",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "studio.admin-control-center.retry",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
       "sensitive_fields": [],
       "mcp_tool_ids": []
     },
@@ -1437,28 +1482,52 @@
     },
     {
       "mask_id": "admin/webhooks-liste",
-      "title": "Webhooks",
+      "title": "Webhook-Verwaltung",
       "domain": "admin",
       "process_keys": [],
       "rollout_route": "/mask-rollout/admin__webhooks-liste/:entityId",
       "agent_contract_url": "/api/v1/masks/admin/webhooks-liste/agent-contract",
       "screen_definition_url": "/api/v1/masks/admin/webhooks-liste/screen-definition",
       "readiness_url": "/api/v1/masks/admin/webhooks-liste/readiness",
-      "risk_summary": "low",
+      "risk_summary": "medium",
       "actions": [
         {
-          "key": "export",
-          "label": "CSV-Export",
+          "key": "register",
+          "label": "Neuer Webhook",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "studio.admin-webhooks.register",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "history",
+          "label": "Zustellversuche",
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": null,
           "commandEndpoint": null,
           "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+          "stubReason": null
+        },
+        {
+          "key": "unregister",
+          "label": "Abmelden",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "studio.admin-webhooks.unregister",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
         }
       ],
-      "sensitive_fields": [],
+      "sensitive_fields": [
+        "secret"
+      ],
       "mcp_tool_ids": []
     },
     {
@@ -4805,7 +4874,7 @@
     },
     {
       "mask_id": "annahme/lkw-registrierung",
-      "title": "Lkw registrierung",
+      "title": "LKW-Registrierung",
       "domain": "agrar",
       "process_keys": [],
       "rollout_route": "/mask-rollout/annahme__lkw-registrierung/:entityId",
@@ -4815,18 +4884,49 @@
       "risk_summary": "low",
       "actions": [
         {
-          "key": "bearbeiten",
-          "label": "Bearbeiten",
+          "key": "register",
+          "label": "LKW registrieren",
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
-          "permission": "annahme.lkw-registrierung.update",
+          "permission": "studio.register.intake-weighing",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "upload",
+          "label": "Bild hochladen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "studio.upload.intake-weighing",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "cancel",
+          "label": "Zur Warteschlange",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
           "commandEndpoint": null,
           "method": null,
           "stubReason": null
         }
       ],
-      "sensitive_fields": [],
+      "sensitive_fields": [
+        "kennzeichen",
+        "lieferant",
+        "lieferscheinNr",
+        "articleId",
+        "artikel",
+        "ankunftszeit",
+        "prioritaet",
+        "attachmentIds"
+      ],
       "mcp_tool_ids": [
         "agrar.contract.get",
         "agrar.weighing_ticket.list",
@@ -4873,7 +4973,7 @@
     },
     {
       "mask_id": "annahme/qualitaets-check",
-      "title": "Qualitaets-Check",
+      "title": "Qualitätsprüfung",
       "domain": "agrar",
       "process_keys": [],
       "rollout_route": "/mask-rollout/annahme__qualitaets-check/:entityId",
@@ -4881,8 +4981,64 @@
       "screen_definition_url": "/api/v1/masks/annahme/qualitaets-check/screen-definition",
       "readiness_url": "/api/v1/masks/annahme/qualitaets-check/readiness",
       "risk_summary": "low",
-      "actions": [],
-      "sensitive_fields": [],
+      "actions": [
+        {
+          "key": "save",
+          "label": "Qualitätsprüfung speichern",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "studio.save.intake-weighing",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "start",
+          "label": "Prüfung beginnen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "studio.start.intake-weighing",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "billing",
+          "label": "Zur Abrechnung",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "cancel",
+          "label": "Zur Warteschlange",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "lieferscheinNr",
+        "artikel",
+        "feuchtigkeit",
+        "protein",
+        "verunreinigung",
+        "fremdgeruch",
+        "schaedlinge",
+        "farbe",
+        "bemerkungen",
+        "ergebnis"
+      ],
       "mcp_tool_ids": [
         "agrar.contract.get",
         "agrar.weighing_ticket.list",
@@ -5107,8 +5263,94 @@
       "screen_definition_url": "/api/v1/masks/annahme/warteschlange/screen-definition",
       "readiness_url": "/api/v1/masks/annahme/warteschlange/readiness",
       "risk_summary": "low",
-      "actions": [],
-      "sensitive_fields": [],
+      "actions": [
+        {
+          "key": "new",
+          "label": "LKW anmelden",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "qr",
+          "label": "QR-Code (Handy)",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "refresh",
+          "label": "Aktualisieren",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "quality",
+          "label": "Qualitätsprüfung öffnen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "repair",
+          "label": "Artikel reparieren",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "studio.repair.intake-weighing",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "clarify",
+          "label": "Klärung starten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "harvest",
+          "label": "Ernte-Annahme öffnen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "kennzeichen",
+        "lieferant",
+        "artikel",
+        "status",
+        "ankunft",
+        "wartezeit",
+        "lieferschein_nr"
+      ],
       "mcp_tool_ids": [
         "agrar.contract.get",
         "agrar.weighing_ticket.list",
@@ -5569,6 +5811,173 @@
       ]
     },
     {
+      "mask_id": "waage/liste",
+      "title": "Waagen",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/waage__liste/:entityId",
+      "agent_contract_url": "/api/v1/masks/waage/liste/agent-contract",
+      "screen_definition_url": "/api/v1/masks/waage/liste/screen-definition",
+      "readiness_url": "/api/v1/masks/waage/liste/readiness",
+      "risk_summary": "medium",
+      "actions": [
+        {
+          "key": "new",
+          "label": "Neue Waage",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "yard",
+          "label": "Hofliste",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "export",
+          "label": "Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "refresh",
+          "label": "Aktualisieren",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "calibrate",
+          "label": "Eichdaten speichern",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "studio.calibrate.intake-weighing",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "import",
+          "label": "Datei importieren",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "studio.import.intake-weighing",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "retryImport",
+          "label": "Erneut prüfen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "studio.retryImport.intake-weighing",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "dismissImport",
+          "label": "Verwerfen",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": true,
+          "permission": "studio.dismissImport.intake-weighing",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "id",
+        "standort",
+        "typ",
+        "maxKapazitaet",
+        "letzteEichung",
+        "naechsteEichung",
+        "status",
+        "letztes_eichdatum",
+        "naechste_eichfaelligkeit",
+        "eichamt",
+        "zertifikat_nr",
+        "importScaleId",
+        "importFile",
+        "fehlerToleranz",
+        "importRaw",
+        "importError",
+        "importRetryCount"
+      ],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
+      "mask_id": "waage/neu",
+      "title": "Waage anlegen",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/waage__neu/:entityId",
+      "agent_contract_url": "/api/v1/masks/waage/neu/agent-contract",
+      "screen_definition_url": "/api/v1/masks/waage/neu/screen-definition",
+      "readiness_url": "/api/v1/masks/waage/neu/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "create",
+          "label": "Waage anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "studio.create.intake-weighing",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "standort",
+        "typ",
+        "max_kapazitaet"
+      ],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
       "mask_id": "waage/waagen-liste",
       "title": "Waagen",
       "domain": "agrar",
@@ -5577,21 +5986,193 @@
       "agent_contract_url": "/api/v1/masks/waage/waagen-liste/agent-contract",
       "screen_definition_url": "/api/v1/masks/waage/waagen-liste/screen-definition",
       "readiness_url": "/api/v1/masks/waage/waagen-liste/readiness",
-      "risk_summary": "low",
+      "risk_summary": "medium",
       "actions": [
         {
-          "key": "export",
-          "label": "CSV-Export",
+          "key": "new",
+          "label": "Neue Waage",
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": null,
           "commandEndpoint": null,
           "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+          "stubReason": null
+        },
+        {
+          "key": "yard",
+          "label": "Hofliste",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "export",
+          "label": "Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "refresh",
+          "label": "Aktualisieren",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "calibrate",
+          "label": "Eichdaten speichern",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "studio.calibrate.intake-weighing",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "import",
+          "label": "Datei importieren",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "studio.import.intake-weighing",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "retryImport",
+          "label": "Erneut prüfen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "studio.retryImport.intake-weighing",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "dismissImport",
+          "label": "Verwerfen",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": true,
+          "permission": "studio.dismissImport.intake-weighing",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
         }
       ],
-      "sensitive_fields": [],
+      "sensitive_fields": [
+        "id",
+        "standort",
+        "typ",
+        "maxKapazitaet",
+        "letzteEichung",
+        "naechsteEichung",
+        "status",
+        "letztes_eichdatum",
+        "naechste_eichfaelligkeit",
+        "eichamt",
+        "zertifikat_nr",
+        "importScaleId",
+        "importFile",
+        "fehlerToleranz",
+        "importRaw",
+        "importError",
+        "importRetryCount"
+      ],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
+      "mask_id": "waage/wiegungen",
+      "title": "Wiegungen",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/waage__wiegungen/:entityId",
+      "agent_contract_url": "/api/v1/masks/waage/wiegungen/agent-contract",
+      "screen_definition_url": "/api/v1/masks/waage/wiegungen/screen-definition",
+      "readiness_url": "/api/v1/masks/waage/wiegungen/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "create",
+          "label": "Wiegeschein anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "studio.create.intake-weighing",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "close",
+          "label": "Ticket schließen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "studio.close.intake-weighing",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "allocate",
+          "label": "Kontrakt zuordnen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "studio.allocate.intake-weighing",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "refresh",
+          "label": "Aktualisieren",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "ticketNumber",
+        "scaleId",
+        "vehiclePlate",
+        "grossWeight",
+        "tareWeight",
+        "moisturePct",
+        "impuritiesPct",
+        "selectedTicketId",
+        "selectedContractId"
+      ],
       "mcp_tool_ids": [
         "agrar.contract.get",
         "agrar.weighing_ticket.list",
@@ -5604,7 +6185,7 @@
     },
     {
       "mask_id": "waage/wiegungen-liste",
-      "title": "Wiegescheine",
+      "title": "Wiegungen",
       "domain": "agrar",
       "process_keys": [],
       "rollout_route": "/mask-rollout/waage__wiegungen-liste/:entityId",
@@ -5614,18 +6195,61 @@
       "risk_summary": "low",
       "actions": [
         {
-          "key": "export",
-          "label": "CSV-Export",
+          "key": "create",
+          "label": "Wiegeschein anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "studio.create.intake-weighing",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "close",
+          "label": "Ticket schließen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "studio.close.intake-weighing",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "allocate",
+          "label": "Kontrakt zuordnen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "studio.allocate.intake-weighing",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "refresh",
+          "label": "Aktualisieren",
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": null,
           "commandEndpoint": null,
           "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+          "stubReason": null
         }
       ],
-      "sensitive_fields": [],
+      "sensitive_fields": [
+        "ticketNumber",
+        "scaleId",
+        "vehiclePlate",
+        "grossWeight",
+        "tareWeight",
+        "moisturePct",
+        "impuritiesPct",
+        "selectedTicketId",
+        "selectedContractId"
+      ],
       "mcp_tool_ids": [
         "agrar.contract.get",
         "agrar.weighing_ticket.list",
@@ -7512,7 +8136,7 @@
       "agent_contract_url": "/api/v1/masks/crm/campaign/agent-contract",
       "screen_definition_url": "/api/v1/masks/crm/campaign/screen-definition",
       "readiness_url": "/api/v1/masks/crm/campaign/readiness",
-      "risk_summary": "low",
+      "risk_summary": "high",
       "actions": [
         {
           "key": "edit",
@@ -7521,6 +8145,83 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "crm.campaign.update",
+          "commandEndpoint": "/api/v1/crm/campaigns/{entity_id}",
+          "method": "PUT",
+          "stubReason": null
+        },
+        {
+          "key": "activate",
+          "label": "Starten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": true,
+          "permission": "crm.campaign.update",
+          "commandEndpoint": "/api/v1/crm/campaigns/{entity_id}/activate",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "pause",
+          "label": "Pausieren",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.campaign.update",
+          "commandEndpoint": "/api/v1/crm/campaigns/{entity_id}/pause",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "resume",
+          "label": "Fortsetzen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.campaign.update",
+          "commandEndpoint": "/api/v1/crm/campaigns/{entity_id}/resume",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "complete",
+          "label": "Abschließen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": true,
+          "permission": "crm.campaign.update",
+          "commandEndpoint": "/api/v1/crm/campaigns/{entity_id}/complete",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "archive",
+          "label": "Archivieren",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": true,
+          "permission": "crm.campaign.update",
+          "commandEndpoint": "/api/v1/crm/campaigns/{entity_id}/archive",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "delete",
+          "label": "Kampagne löschen",
+          "dangerLevel": "high",
+          "humanApprovalRequired": true,
+          "requiresConfirmation": true,
+          "permission": "crm.campaign.update",
+          "commandEndpoint": "/api/v1/crm/campaigns/{entity_id}",
+          "method": "DELETE",
+          "stubReason": null
+        },
+        {
+          "key": "back",
+          "label": "Zur Kampagnenliste",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
           "commandEndpoint": null,
           "method": null,
           "stubReason": null
@@ -7582,7 +8283,7 @@
       "agent_contract_url": "/api/v1/masks/crm/campaign-template/agent-contract",
       "screen_definition_url": "/api/v1/masks/crm/campaign-template/screen-definition",
       "readiness_url": "/api/v1/masks/crm/campaign-template/readiness",
-      "risk_summary": "low",
+      "risk_summary": "high",
       "actions": [
         {
           "key": "edit",
@@ -7604,6 +8305,17 @@
           "permission": "crm.campaign.update",
           "commandEndpoint": "/api/v1/crm/campaigns/templates/{entity_id}/duplicate",
           "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "delete",
+          "label": "Vorlage löschen",
+          "dangerLevel": "high",
+          "humanApprovalRequired": true,
+          "requiresConfirmation": true,
+          "permission": "crm.campaign.update",
+          "commandEndpoint": "/api/v1/crm/campaigns/templates/{entity_id}",
+          "method": "DELETE",
           "stubReason": null
         },
         {
@@ -7683,6 +8395,39 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "crm.consent.update",
+          "commandEndpoint": "/api/v1/crm/consents/{entity_id}",
+          "method": "PUT",
+          "stubReason": null
+        },
+        {
+          "key": "revoke",
+          "label": "Widerrufen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": true,
+          "permission": "crm.consent.update",
+          "commandEndpoint": "/api/v1/crm/consents/{entity_id}/revoke",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "resend-confirmation",
+          "label": "Bestätigungstoken neu ausstellen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.consent.update",
+          "commandEndpoint": "/api/v1/crm/consents/{entity_id}/resend-confirmation",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "back",
+          "label": "Zur Einwilligungsliste",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
           "commandEndpoint": null,
           "method": null,
           "stubReason": null
@@ -8066,15 +8811,59 @@
       "agent_contract_url": "/api/v1/masks/crm/gdpr-request/agent-contract",
       "screen_definition_url": "/api/v1/masks/crm/gdpr-request/screen-definition",
       "readiness_url": "/api/v1/masks/crm/gdpr-request/readiness",
-      "risk_summary": "low",
+      "risk_summary": "high",
       "actions": [
         {
-          "key": "edit",
-          "label": "Bearbeiten",
+          "key": "verify",
+          "label": "Identität verifizieren",
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "gdpr.request.update",
+          "commandEndpoint": "/api/v1/gdpr/requests/{entity_id}/verify",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "reject",
+          "label": "Ablehnen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": true,
+          "permission": "gdpr.request.update",
+          "commandEndpoint": "/api/v1/gdpr/requests/{entity_id}/reject",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "export",
+          "label": "CRM-Daten exportieren",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": true,
+          "permission": "gdpr.request.update",
+          "commandEndpoint": "/api/v1/gdpr/requests/{entity_id}/export",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "delete",
+          "label": "CRM-Personendaten anonymisieren",
+          "dangerLevel": "high",
+          "humanApprovalRequired": true,
+          "requiresConfirmation": true,
+          "permission": "gdpr.request.update",
+          "commandEndpoint": "/api/v1/gdpr/requests/{entity_id}/delete",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "back",
+          "label": "Zur Anfragenliste",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
           "commandEndpoint": null,
           "method": null,
           "stubReason": null
@@ -8570,7 +9359,7 @@
     },
     {
       "mask_id": "crm/kunden-cockpit",
-      "title": "Kunden-Cockpit",
+      "title": "Kundenakte",
       "domain": "crm",
       "process_keys": [],
       "rollout_route": "/mask-rollout/crm__kunden-cockpit/:entityId",
@@ -8580,18 +9369,46 @@
       "risk_summary": "low",
       "actions": [
         {
-          "key": "refresh",
-          "label": "Aktualisieren",
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
-          "permission": "crm.read",
+          "permission": "crm.customer.update",
+          "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/bearbeiten",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "edit",
+          "label": "Erweiterte Pflege",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.customer.update",
           "commandEndpoint": null,
           "method": null,
           "stubReason": null
+        },
+        {
+          "key": "create_activity",
+          "label": "Aktivitaet anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.activity.create",
+          "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/create_activity",
+          "method": "POST",
+          "stubReason": null
         }
       ],
-      "sensitive_fields": [],
+      "sensitive_fields": [
+        "iban",
+        "bic",
+        "kreditlimit",
+        "zahlungsbedingungen",
+        "notizen"
+      ],
       "mcp_tool_ids": [
         "crm.customer.search",
         "crm.customer.summary360",
@@ -8982,7 +9799,7 @@
       "agent_contract_url": "/api/v1/masks/crm/segment/agent-contract",
       "screen_definition_url": "/api/v1/masks/crm/segment/screen-definition",
       "readiness_url": "/api/v1/masks/crm/segment/readiness",
-      "risk_summary": "low",
+      "risk_summary": "high",
       "actions": [
         {
           "key": "edit",
@@ -8991,6 +9808,72 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "crm.segment.update",
+          "commandEndpoint": "/api/v1/crm/segments/{entity_id}",
+          "method": "PUT",
+          "stubReason": null
+        },
+        {
+          "key": "rules",
+          "label": "Regeln ersetzen",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": true,
+          "permission": "crm.segment.update",
+          "commandEndpoint": "/api/v1/crm/segments/{entity_id}",
+          "method": "PUT",
+          "stubReason": null
+        },
+        {
+          "key": "calculate",
+          "label": "Mitglieder berechnen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.segment.update",
+          "commandEndpoint": "/api/v1/crm/segments/{entity_id}/calculate",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "delete",
+          "label": "Segment löschen",
+          "dangerLevel": "high",
+          "humanApprovalRequired": true,
+          "requiresConfirmation": true,
+          "permission": "crm.segment.update",
+          "commandEndpoint": "/api/v1/crm/segments/{entity_id}",
+          "method": "DELETE",
+          "stubReason": null
+        },
+        {
+          "key": "add_member",
+          "label": "Mitglied hinzufuegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.segment.update",
+          "commandEndpoint": "/api/v1/crm/segments/{entity_id}/members",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "remove_member",
+          "label": "Mitglied entfernen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.segment.update",
+          "commandEndpoint": "/api/v1/crm/segments/{entity_id}/members/remove",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "back",
+          "label": "Zur Segmentliste",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
           "commandEndpoint": null,
           "method": null,
           "stubReason": null
@@ -11078,7 +11961,7 @@
     },
     {
       "mask_id": "einkauf/rechnungseingang/neu",
-      "title": "Vorgang",
+      "title": "Eingangsrechnung erfassen",
       "domain": "einkauf",
       "process_keys": [],
       "rollout_route": "/mask-rollout/einkauf__rechnungseingang__neu/:entityId",
@@ -11088,15 +11971,26 @@
       "risk_summary": "low",
       "actions": [
         {
-          "key": "export",
-          "label": "CSV-Export",
+          "key": "position",
+          "label": "Position übernehmen",
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
-          "permission": null,
+          "permission": "finance.ap.invoice.create",
           "commandEndpoint": null,
           "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+          "stubReason": null
+        },
+        {
+          "key": "save",
+          "label": "Als Entwurf speichern",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "finance.ap.invoice.create",
+          "commandEndpoint": "/api/v1/finance/ap/invoices/",
+          "method": "POST",
+          "stubReason": null
         }
       ],
       "sensitive_fields": [],
@@ -13585,7 +14479,7 @@
     },
     {
       "mask_id": "finance/bank-abgleich",
-      "title": "Objekt",
+      "title": "Bankabgleich",
       "domain": "finance",
       "process_keys": [],
       "rollout_route": "/mask-rollout/finance__bank-abgleich/:entityId",
@@ -13595,18 +14489,55 @@
       "risk_summary": "low",
       "actions": [
         {
+          "key": "import",
+          "label": "Kontoauszug importieren",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "studio.finance-workbench.import",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "validate",
+          "label": "Salden vergleichen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "studio.finance-workbench.validate",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
           "key": "export",
-          "label": "CSV-Export",
+          "label": "Umsatzzeilen exportieren",
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": null,
           "commandEndpoint": null,
           "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+          "stubReason": null
         }
       ],
-      "sensitive_fields": [],
+      "sensitive_fields": [
+        "kontoId",
+        "camtFile",
+        "statementId",
+        "startSaldo",
+        "endSaldo",
+        "gebuchteUmsaetze",
+        "zugeordnet",
+        "nichtZugeordnet",
+        "abgleichsDifferenz",
+        "accountingBalance",
+        "zuordnungData",
+        "importErrors",
+        "differences",
+        "comparisonState"
+      ],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
         "fibu.open_items.list",
@@ -13949,7 +14880,7 @@
     },
     {
       "mask_id": "finance/debitoren/new",
-      "title": "Debitoren stamm",
+      "title": "Debitor",
       "domain": "finance",
       "process_keys": [],
       "rollout_route": "/mask-rollout/finance__debitoren__new/:entityId",
@@ -13964,13 +14895,16 @@
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
-          "permission": "finance.write",
-          "commandEndpoint": null,
-          "method": null,
+          "permission": "finance.debitor.update",
+          "commandEndpoint": "/api/v1/finance/debtors/{entity_id}",
+          "method": "PUT",
           "stubReason": null
         }
       ],
-      "sensitive_fields": [],
+      "sensitive_fields": [
+        "iban",
+        "bic"
+      ],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
         "fibu.open_items.list",
@@ -14039,7 +14973,7 @@
     },
     {
       "mask_id": "finance/invoices/new",
-      "title": "Invoice form",
+      "title": "Ausgangsrechnung erfassen",
       "domain": "finance",
       "process_keys": [],
       "rollout_route": "/mask-rollout/finance__invoices__new/:entityId",
@@ -14049,15 +14983,26 @@
       "risk_summary": "low",
       "actions": [
         {
-          "key": "export",
-          "label": "CSV-Export",
+          "key": "position",
+          "label": "Position übernehmen",
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
-          "permission": null,
+          "permission": "finance.invoice.create",
           "commandEndpoint": null,
           "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+          "stubReason": null
+        },
+        {
+          "key": "save",
+          "label": "Als Entwurf speichern",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "finance.invoice.create",
+          "commandEndpoint": "/api/v1/finance/invoices",
+          "method": "POST",
+          "stubReason": null
         }
       ],
       "sensitive_fields": [],
@@ -14908,6 +15853,89 @@
       ]
     },
     {
+      "mask_id": "mahnwesen/mahnlauf",
+      "title": "Mahnlauf",
+      "domain": "finance",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/mahnwesen__mahnlauf/:entityId",
+      "agent_contract_url": "/api/v1/masks/mahnwesen/mahnlauf/agent-contract",
+      "screen_definition_url": "/api/v1/masks/mahnwesen/mahnlauf/screen-definition",
+      "readiness_url": "/api/v1/masks/mahnwesen/mahnlauf/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "refresh",
+          "label": "Aktualisieren",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "run",
+          "label": "Mahnlauf ausführen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "studio.finance-workbench.run",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "sendEmail",
+          "label": "Per E-Mail senden",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "studio.finance-workbench.sendEmail",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "sendPost",
+          "label": "Postversand festhalten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "studio.finance-workbench.sendPost",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "op_id",
+        "rechnungsnr",
+        "partner",
+        "tage_ueberfaellig",
+        "offen",
+        "aktuelle_stufe",
+        "naechste_stufe",
+        "dunning_fee",
+        "interest",
+        "total_amount",
+        "id",
+        "stufe",
+        "gesamt",
+        "frist",
+        "datum",
+        "status",
+        "versand_art",
+        "empfaenger",
+        "auswahl"
+      ],
+      "mcp_tool_ids": [
+        "finance.ap_invoice.propose",
+        "fibu.open_items.list",
+        "fibu.dunning.status"
+      ]
+    },
+    {
       "mask_id": "schaeden/liste",
       "title": "Schadenmeldungen",
       "domain": "finance",
@@ -15705,7 +16733,7 @@
     },
     {
       "mask_id": "futtermittel/einzelfuttermittel/stamm/new",
-      "title": "Einzelfuttermittel-Stammdaten",
+      "title": "Einzelfuttermittel anlegen",
       "domain": "futtermittel",
       "process_keys": [],
       "rollout_route": "/mask-rollout/futtermittel__einzelfuttermittel__stamm__new/:entityId",
@@ -15731,7 +16759,7 @@
     },
     {
       "mask_id": "futtermittel/fuetterungsdokumentation-mobil",
-      "title": "Fuetterungsdokumentation mobil",
+      "title": "Fütterungsdokumentation mobil",
       "domain": "futtermittel",
       "process_keys": [],
       "rollout_route": "/mask-rollout/futtermittel__fuetterungsdokumentation-mobil/:entityId",
@@ -15741,18 +16769,35 @@
       "risk_summary": "low",
       "actions": [
         {
-          "key": "export",
-          "label": "CSV-Export",
+          "key": "record_actual",
+          "label": "Fütterung erfassen",
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
-          "permission": null,
+          "permission": "futtermittel.rations.update",
           "commandEndpoint": null,
           "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+          "stubReason": null
+        },
+        {
+          "key": "replay_pending",
+          "label": "Ausstehende Meldungen senden",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "futtermittel.rations.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
         }
       ],
-      "sensitive_fields": [],
+      "sensitive_fields": [
+        "plan_version_id",
+        "group_id",
+        "actual_kg",
+        "rest_kg",
+        "tm_pct"
+      ],
       "mcp_tool_ids": []
     },
     {
@@ -15964,7 +17009,7 @@
     },
     {
       "mask_id": "futtermittel/mischfuttermittel/stamm/new",
-      "title": "Mischfuttermittel-Stammdaten",
+      "title": "Mischfuttermittel anlegen",
       "domain": "futtermittel",
       "process_keys": [],
       "rollout_route": "/mask-rollout/futtermittel__mischfuttermittel__stamm__new/:entityId",
@@ -16052,18 +17097,45 @@
       "risk_summary": "low",
       "actions": [
         {
-          "key": "export",
-          "label": "CSV-Export",
+          "key": "open_ration",
+          "label": "Ration öffnen",
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
-          "permission": null,
+          "permission": "futtermittel.rations.update",
           "commandEndpoint": null,
           "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+          "stubReason": null
+        },
+        {
+          "key": "evaluate",
+          "label": "Ration bewerten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "futtermittel.rations.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "save_ration",
+          "label": "Ration speichern",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "futtermittel.rations.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
         }
       ],
-      "sensitive_fields": [],
+      "sensitive_fields": [
+        "ration_id",
+        "group_id",
+        "version_no",
+        "status"
+      ],
       "mcp_tool_ids": []
     },
     {
@@ -16078,18 +17150,45 @@
       "risk_summary": "low",
       "actions": [
         {
-          "key": "refresh",
-          "label": "Aktualisieren",
+          "key": "optimize",
+          "label": "Ration optimieren",
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
-          "permission": "futtermittel.read",
+          "permission": "futtermittel.rations.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "review",
+          "label": "Ergebnis prüfen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "futtermittel.rations.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "submit",
+          "label": "Ration einreichen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "futtermittel.rations.update",
           "commandEndpoint": null,
           "method": null,
           "stubReason": null
         }
       ],
-      "sensitive_fields": [],
+      "sensitive_fields": [
+        "feed_id",
+        "cow_profile",
+        "optimization_result",
+        "review_status"
+      ],
       "mcp_tool_ids": []
     },
     {
@@ -16142,6 +17241,37 @@
         }
       ],
       "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "portal/rationsoptimierung",
+      "title": "Fütterungsberatung",
+      "domain": "futtermittel",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/portal__rationsoptimierung/:entityId",
+      "agent_contract_url": "/api/v1/masks/portal/rationsoptimierung/agent-contract",
+      "screen_definition_url": "/api/v1/masks/portal/rationsoptimierung/screen-definition",
+      "readiness_url": "/api/v1/masks/portal/rationsoptimierung/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "open_workspace",
+          "label": "Planungswerkzeug öffnen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "futtermittel.rations.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "view",
+        "ration_id",
+        "group_id",
+        "plan_status"
+      ],
       "mcp_tool_ids": []
     },
     {
@@ -16624,7 +17754,7 @@
     },
     {
       "mask_id": "auth/callback",
-      "title": "OIDC Callback",
+      "title": "Anmeldung",
       "domain": "identity",
       "process_keys": [],
       "rollout_route": "/mask-rollout/auth__callback/:entityId",
@@ -16634,12 +17764,12 @@
       "risk_summary": "low",
       "actions": [
         {
-          "key": "refresh",
-          "label": "Aktualisieren",
+          "key": "back",
+          "label": "Zurueck zur Anmeldung",
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
-          "permission": "identity.session.read",
+          "permission": null,
           "commandEndpoint": null,
           "method": null,
           "stubReason": null
@@ -16650,7 +17780,7 @@
     },
     {
       "mask_id": "auth/login",
-      "title": "Anmeldung",
+      "title": "VALEO NeuroERP",
       "domain": "identity",
       "process_keys": [],
       "rollout_route": "/mask-rollout/auth__login/:entityId",
@@ -16660,12 +17790,12 @@
       "risk_summary": "low",
       "actions": [
         {
-          "key": "refresh",
-          "label": "Aktualisieren",
+          "key": "login",
+          "label": "Mit SSO anmelden",
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
-          "permission": "identity.session.read",
+          "permission": null,
           "commandEndpoint": null,
           "method": null,
           "stubReason": null
@@ -20197,58 +21327,6 @@
       "mcp_tool_ids": []
     },
     {
-      "mask_id": "waage/liste",
-      "title": "Waagen",
-      "domain": "logistik",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/waage__liste/:entityId",
-      "agent_contract_url": "/api/v1/masks/waage/liste/agent-contract",
-      "screen_definition_url": "/api/v1/masks/waage/liste/screen-definition",
-      "readiness_url": "/api/v1/masks/waage/liste/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "mahnwesen/mahnlauf",
-      "title": "Mahnlauf",
-      "domain": "mahnwesen",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/mahnwesen__mahnlauf/:entityId",
-      "agent_contract_url": "/api/v1/masks/mahnwesen/mahnlauf/agent-contract",
-      "screen_definition_url": "/api/v1/masks/mahnwesen/mahnlauf/screen-definition",
-      "readiness_url": "/api/v1/masks/mahnwesen/mahnlauf/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
       "mask_id": "dashboards/geschaeftsfuehrung",
       "title": "Geschaeftsfuehrung",
       "domain": "management",
@@ -21578,32 +22656,6 @@
       "agent_contract_url": "/api/v1/masks/portal/preisspiegel/agent-contract",
       "screen_definition_url": "/api/v1/masks/portal/preisspiegel/screen-definition",
       "readiness_url": "/api/v1/masks/portal/preisspiegel/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "portal/rationsoptimierung",
-      "title": "Rationsoptimierung",
-      "domain": "portal",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/portal__rationsoptimierung/:entityId",
-      "agent_contract_url": "/api/v1/masks/portal/rationsoptimierung/agent-contract",
-      "screen_definition_url": "/api/v1/masks/portal/rationsoptimierung/screen-definition",
-      "readiness_url": "/api/v1/masks/portal/rationsoptimierung/readiness",
       "risk_summary": "low",
       "actions": [
         {
@@ -23289,7 +24341,7 @@
       "agent_contract_url": "/api/v1/masks/sales/angebote-liste/agent-contract",
       "screen_definition_url": "/api/v1/masks/sales/angebote-liste/screen-definition",
       "readiness_url": "/api/v1/masks/sales/angebote-liste/readiness",
-      "risk_summary": "low",
+      "risk_summary": "medium",
       "actions": [
         {
           "key": "neu",
@@ -23312,6 +24364,28 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        },
+        {
+          "key": "print",
+          "label": "Drucken",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "import_csv",
+          "label": "CSV importieren",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": true,
+          "permission": "sales.offer.import_csv",
+          "commandEndpoint": "/api/v1/sales/offers/actions/import-csv",
+          "method": "POST",
+          "stubReason": null
         }
       ],
       "sensitive_fields": [],
@@ -23469,25 +24543,80 @@
     },
     {
       "mask_id": "sales/credit-notes",
-      "title": "Credit note editor",
+      "title": "Gutschrift",
       "domain": "sales",
       "process_keys": [],
       "rollout_route": "/mask-rollout/sales__credit-notes/:entityId",
       "agent_contract_url": "/api/v1/masks/sales/credit-notes/agent-contract",
       "screen_definition_url": "/api/v1/masks/sales/credit-notes/screen-definition",
       "readiness_url": "/api/v1/masks/sales/credit-notes/readiness",
-      "risk_summary": "low",
+      "risk_summary": "medium",
       "actions": [
         {
-          "key": "export",
-          "label": "CSV-Export",
+          "key": "position",
+          "label": "Position übernehmen",
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": null,
           "commandEndpoint": null,
           "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+          "stubReason": "Stellt die Positionseingabe in die Positionsliste der Maske; gespeichert wird erst mit Speichern."
+        },
+        {
+          "key": "speichern",
+          "label": "Als Entwurf speichern",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "sales.gutschrift.write",
+          "commandEndpoint": "/api/v1/sales/credit-notes/actions/speichern",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "buchen",
+          "label": "Buchen",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": true,
+          "requiresConfirmation": true,
+          "permission": "sales.gutschrift.post",
+          "commandEndpoint": "/api/v1/sales/credit-notes/{entity_id}/actions/buchen",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "vorschlag_freigeben",
+          "label": "Vorschlag freigeben",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": true,
+          "requiresConfirmation": true,
+          "permission": "sales.gutschrift.post",
+          "commandEndpoint": "/api/v1/sales/credit-notes/buchungsvorschlaege/{entity_id}/actions/freigeben",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "vorschlag_ablehnen",
+          "label": "Vorschlag ablehnen",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": true,
+          "requiresConfirmation": false,
+          "permission": "sales.gutschrift.post",
+          "commandEndpoint": "/api/v1/sales/credit-notes/buchungsvorschlaege/{entity_id}/actions/ablehnen",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "neu",
+          "label": "Neue Gutschrift",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Leert die Eingabe fuer eine neue Gutschrift."
         }
       ],
       "sensitive_fields": [],
@@ -23862,6 +24991,17 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        },
+        {
+          "key": "print",
+          "label": "Drucken",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
         }
       ],
       "sensitive_fields": [],
@@ -24022,6 +25162,39 @@
       "readiness_url": "/api/v1/masks/verkauf/betriebsauftrag/readiness",
       "risk_summary": "low",
       "actions": [],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "sales.order.status",
+        "sales.gutschrift.speichern",
+        "sales.gutschrift.propose",
+        "sales.gutschrift.buchen",
+        "sales.invoice.propose",
+        "sales.invoice.post"
+      ]
+    },
+    {
+      "mask_id": "verkauf/rechnungen",
+      "title": "Ausgangsrechnungen",
+      "domain": "sales",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/verkauf__rechnungen/:entityId",
+      "agent_contract_url": "/api/v1/masks/verkauf/rechnungen/agent-contract",
+      "screen_definition_url": "/api/v1/masks/verkauf/rechnungen/screen-definition",
+      "readiness_url": "/api/v1/masks/verkauf/rechnungen/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "Liste exportieren",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "sales.rechnung.lesen",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "sales.order.status",
@@ -25013,32 +26186,6 @@
       "mcp_tool_ids": []
     },
     {
-      "mask_id": "verkauf/rechnungen",
-      "title": "Rechnungen worklist",
-      "domain": "verkauf",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/verkauf__rechnungen/:entityId",
-      "agent_contract_url": "/api/v1/masks/verkauf/rechnungen/agent-contract",
-      "screen_definition_url": "/api/v1/masks/verkauf/rechnungen/screen-definition",
-      "readiness_url": "/api/v1/masks/verkauf/rechnungen/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
       "mask_id": "verkauf/rechnungen/neu",
       "title": "Invoice editor",
       "domain": "verkauf",
@@ -25195,32 +26342,6 @@
       "mcp_tool_ids": []
     },
     {
-      "mask_id": "waage/neu",
-      "title": "Liste",
-      "domain": "waage",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/waage__neu/:entityId",
-      "agent_contract_url": "/api/v1/masks/waage/neu/agent-contract",
-      "screen_definition_url": "/api/v1/masks/waage/neu/screen-definition",
-      "readiness_url": "/api/v1/masks/waage/neu/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
       "mask_id": "waage/vorlagen",
       "title": "Vorlagen",
       "domain": "waage",
@@ -25299,34 +26420,8 @@
       "mcp_tool_ids": []
     },
     {
-      "mask_id": "waage/wiegungen",
-      "title": "Wiegungen",
-      "domain": "waage",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/waage__wiegungen/:entityId",
-      "agent_contract_url": "/api/v1/masks/waage/wiegungen/agent-contract",
-      "screen_definition_url": "/api/v1/masks/waage/wiegungen/screen-definition",
-      "readiness_url": "/api/v1/masks/waage/wiegungen/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
       "mask_id": "workflow/flow-spine-complaint-to-resolution",
-      "title": "Flow spine complaint to resolution",
+      "title": "complaint-to-resolution",
       "domain": "workflow",
       "process_keys": [],
       "rollout_route": "/mask-rollout/workflow__flow-spine-complaint-to-resolution/:entityId",
@@ -25334,25 +26429,13 @@
       "screen_definition_url": "/api/v1/masks/workflow/flow-spine-complaint-to-resolution/screen-definition",
       "readiness_url": "/api/v1/masks/workflow/flow-spine-complaint-to-resolution/readiness",
       "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
+      "actions": [],
       "sensitive_fields": [],
       "mcp_tool_ids": []
     },
     {
       "mask_id": "workflow/flow-spine-compliance-to-report",
-      "title": "Flow spine compliance to report",
+      "title": "compliance-to-report",
       "domain": "workflow",
       "process_keys": [],
       "rollout_route": "/mask-rollout/workflow__flow-spine-compliance-to-report/:entityId",
@@ -25360,25 +26443,13 @@
       "screen_definition_url": "/api/v1/masks/workflow/flow-spine-compliance-to-report/screen-definition",
       "readiness_url": "/api/v1/masks/workflow/flow-spine-compliance-to-report/readiness",
       "risk_summary": "low",
-      "actions": [
-        {
-          "key": "refresh",
-          "label": "Aktualisieren",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "workflow.read",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        }
-      ],
+      "actions": [],
       "sensitive_fields": [],
       "mcp_tool_ids": []
     },
     {
       "mask_id": "workflow/flow-spine-contract-to-settlement",
-      "title": "Flow spine contract to settlement",
+      "title": "contract-to-settlement",
       "domain": "workflow",
       "process_keys": [],
       "rollout_route": "/mask-rollout/workflow__flow-spine-contract-to-settlement/:entityId",
@@ -25386,25 +26457,13 @@
       "screen_definition_url": "/api/v1/masks/workflow/flow-spine-contract-to-settlement/screen-definition",
       "readiness_url": "/api/v1/masks/workflow/flow-spine-contract-to-settlement/readiness",
       "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
+      "actions": [],
       "sensitive_fields": [],
       "mcp_tool_ids": []
     },
     {
       "mask_id": "workflow/flow-spine-finance-to-close",
-      "title": "Flow spine finance to close",
+      "title": "finance-to-close",
       "domain": "workflow",
       "process_keys": [],
       "rollout_route": "/mask-rollout/workflow__flow-spine-finance-to-close/:entityId",
@@ -25412,25 +26471,13 @@
       "screen_definition_url": "/api/v1/masks/workflow/flow-spine-finance-to-close/screen-definition",
       "readiness_url": "/api/v1/masks/workflow/flow-spine-finance-to-close/readiness",
       "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
+      "actions": [],
       "sensitive_fields": [],
       "mcp_tool_ids": []
     },
     {
       "mask_id": "workflow/flow-spine-harvest-to-settlement",
-      "title": "Flow spine harvest to settlement",
+      "title": "harvest-to-settlement",
       "domain": "workflow",
       "process_keys": [],
       "rollout_route": "/mask-rollout/workflow__flow-spine-harvest-to-settlement/:entityId",
@@ -25438,25 +26485,13 @@
       "screen_definition_url": "/api/v1/masks/workflow/flow-spine-harvest-to-settlement/screen-definition",
       "readiness_url": "/api/v1/masks/workflow/flow-spine-harvest-to-settlement/readiness",
       "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
+      "actions": [],
       "sensitive_fields": [],
       "mcp_tool_ids": []
     },
     {
       "mask_id": "workflow/flow-spine-inventory-to-settlement",
-      "title": "Flow spine inventory to settlement",
+      "title": "inventory-to-settlement",
       "domain": "workflow",
       "process_keys": [],
       "rollout_route": "/mask-rollout/workflow__flow-spine-inventory-to-settlement/:entityId",
@@ -25464,25 +26499,13 @@
       "screen_definition_url": "/api/v1/masks/workflow/flow-spine-inventory-to-settlement/screen-definition",
       "readiness_url": "/api/v1/masks/workflow/flow-spine-inventory-to-settlement/readiness",
       "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
+      "actions": [],
       "sensitive_fields": [],
       "mcp_tool_ids": []
     },
     {
       "mask_id": "workflow/flow-spine-order-to-cash",
-      "title": "Flow spine order to cash",
+      "title": "order-to-cash",
       "domain": "workflow",
       "process_keys": [],
       "rollout_route": "/mask-rollout/workflow__flow-spine-order-to-cash/:entityId",
@@ -25490,25 +26513,13 @@
       "screen_definition_url": "/api/v1/masks/workflow/flow-spine-order-to-cash/screen-definition",
       "readiness_url": "/api/v1/masks/workflow/flow-spine-order-to-cash/readiness",
       "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
+      "actions": [],
       "sensitive_fields": [],
       "mcp_tool_ids": []
     },
     {
       "mask_id": "workflow/flow-spine-procure-to-pay",
-      "title": "Flow spine procure to pay",
+      "title": "procure-to-pay",
       "domain": "workflow",
       "process_keys": [],
       "rollout_route": "/mask-rollout/workflow__flow-spine-procure-to-pay/:entityId",
@@ -25516,25 +26527,13 @@
       "screen_definition_url": "/api/v1/masks/workflow/flow-spine-procure-to-pay/screen-definition",
       "readiness_url": "/api/v1/masks/workflow/flow-spine-procure-to-pay/readiness",
       "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
+      "actions": [],
       "sensitive_fields": [],
       "mcp_tool_ids": []
     },
     {
       "mask_id": "workflow/flow-spine-service-to-customer",
-      "title": "Flow spine service to customer",
+      "title": "service-to-customer",
       "domain": "workflow",
       "process_keys": [],
       "rollout_route": "/mask-rollout/workflow__flow-spine-service-to-customer/:entityId",
@@ -25542,19 +26541,7 @@
       "screen_definition_url": "/api/v1/masks/workflow/flow-spine-service-to-customer/screen-definition",
       "readiness_url": "/api/v1/masks/workflow/flow-spine-service-to-customer/readiness",
       "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
+      "actions": [],
       "sensitive_fields": [],
       "mcp_tool_ids": []
     },
@@ -26570,5 +27557,5 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     }
   ],
-  "event_count": 134
+  "event_count": 137
 }

@@ -479,7 +479,8 @@ describe('Service/Annahme/Feldservice UIX', () => {
   })
 
   it('stellt Mahnlauf mit 44-px-Start', () => {
-    const src = read('../../pages/finance/mahnlauf.tsx')
+    const src = read('../../components/mask-builder/specialized/finance/dunning-surface.tsx')
+    expect(read('../../pages/finance/mahnlauf.tsx')).toContain('mahnwesen/mahnlauf')
     expect(src).toContain('min-h-touch')
     expect(src).not.toContain('size="sm"')
   })
@@ -723,7 +724,9 @@ describe('Service/Annahme/Feldservice UIX', () => {
   })
 
   it('stellt Annahme-Warteschlange ohne size=sm', () => {
-    const src = read('../../pages/annahme/warteschlange.tsx')
+    // The page is a Studio shell; the queue surface is drawn by the intake renderer.
+    expect(read('../../pages/annahme/warteschlange.tsx')).toContain('IntakeWeighingPage')
+    const src = read('../../components/mask-builder/specialized/intake/queue-renderer.tsx')
     expect(src).toContain('min-h-touch')
     expect(src).toContain('{!isTouch ?')
     expect(src).not.toContain('size="sm"')

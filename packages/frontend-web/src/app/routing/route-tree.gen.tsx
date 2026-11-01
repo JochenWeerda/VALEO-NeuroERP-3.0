@@ -6266,8 +6266,8 @@ const appRoute0876 = createRoute({
 const appRoute0877 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "waage/neu",
-  component: () => renderPage("@/pages/waage/liste"),
-  staticData: {"breadcrumb":"Neu","module":"@/pages/waage/liste","legacyPath":"/waage/neu"},
+  component: () => renderPage("@/pages/waage/neu"),
+  staticData: {"breadcrumb":"Neu","module":"@/pages/waage/neu","legacyPath":"/waage/neu"},
 })
 
 const appRoute0878 = createRoute({
@@ -12185,7 +12185,7 @@ export const generatedRouteInventory = [
     "source": "auto"
   },
   {
-    "module": "@/pages/waage/liste",
+    "module": "@/pages/waage/neu",
     "path": "waage/neu",
     "source": "alias"
   },

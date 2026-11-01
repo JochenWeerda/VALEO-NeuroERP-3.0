@@ -34,7 +34,7 @@ def _patch_journal(tmp_path: Path):
 
 def test_monitoring_summary_empty(tmp_path):
     with _patch_journal(tmp_path):
-        summary = build_superglue_monitoring_summary()
+        summary = build_superglue_monitoring_summary(tenant_id="t1")
     assert isinstance(summary, dict)
     assert summary.get("run_count", 0) == 0
 
@@ -48,7 +48,7 @@ def test_monitoring_summary_counts_runs(tmp_path):
                 execution_mode="sync", target_kind="api", result_status=status,
                 started_at=_ts(0), finished_at=_ts(1),
             )
-        summary = build_superglue_monitoring_summary()
+        summary = build_superglue_monitoring_summary(tenant_id="t1")
     assert summary.get("run_count", 0) == 3
 
 

@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-29
+last_reviewed: 2026-11-01
 version: 3.0.0
 description: Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Beschreibungen sind aus den Datei-Docstrings extrahiert.
 ---
@@ -273,6 +273,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `fuhrpark_tenant_ce_20261009` | Fuhrpark: additive tenant_id fuer Masken-CRUD (CE+MCP Isolation). |
 | `fuhrpark_vertiefung_20260616` | Fuhrpark Vertiefung: Statushistorie, Schaeden, Bussgeld |
 | `futtermittel_sorten_produktion_20260410` | Futtermittel-Stammdaten, Rezepte, Produktionsaufträge und Sortenregister |
+| `gdpr_request_processing_20261031` | Explicit CRM subject type and processing receipts; no guessed legacy identity. |
 | `genossenschaft_mitgliederregister_20261005` | Das Mitgliederregister einer eingetragenen Genossenschaft. |
 | `gis_geojson_schlag_20260527` | GIS: geometry_geojson column on feldbuch_schlaege for polygon capture. |
 | `gobd_archiv_erechnung_20260301` | GoBD: Archiv (document_artifacts) + E-Rechnung XML-Speicher |
@@ -448,6 +449,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `sales_delivery_storno_20260611` | DOM-SALES-004.4 — Lieferungs-Storno (Grund am Lieferschein). |
 | `sales_invoice_lines_20260915` | Ausgangsrechnung und Rechnungsposition als eigene Objekte |
 | `sales_o2c_link_20260610` | sales O2C-Link — Auftrag→Lieferschein-Verknüpfung (DOM-SALES-004.1) |
+| `sales_offer_number_tenant_20261031` | Scope active offer numbers to their tenant without changing historical data. |
 | `sales_orders_items_shipping_20260215` | Add sales_order_items relation and shipping_method on sales_orders. |
 | `screen_definition_drafts_20260916` | Studio ScreenDefinition drafts for Masken-Studio persistency. |
 | `seed_anlage1_abzugstabelle_template_20260303` | seed Anlage 1 (Abzugstabelle Qualität) amendment template |
@@ -467,6 +469,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `vat_codes_entfernt_20261012` | vat_codes entfaellt: Steuerschluessel kommen allein aus domain_erp.tax_keys. |
 | `verkauf_fehlende_spalten_20260929` | Fuenf Spalten, die der Code schreibt und keine Migration anlegt. |
 | `versandwege_echt_20261008` | Versandwege: Anfragen mit Mandant, Mahnungen mit Versandweg. |
+| `waage_tenant_20261030` | Bind operations scales to verified tenant; leave unknown legacy ownership unassigned. |
 | `warehouse_schema_repair_20260626` | WAREHOUSE-REPAIR-001: domain_inventory.warehouses fehlende Spalten nachziehen. |
 | `warehouse_wms_structure_20260517` | WMS warehouse zones, bins, bin_stock, pick_lists and pick_list_lines |
 | `wave3_wf_trigger_log_20260618` | wave3: wf_trigger_log + bank_statements + bank_statement_lines + waagen_quittungen |

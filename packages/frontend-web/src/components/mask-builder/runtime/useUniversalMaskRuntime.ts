@@ -132,8 +132,11 @@ export function useUniversalMaskRuntime({
   completeClientTables = false,
 }: UseUniversalMaskRuntimeOptions): UseUniversalMaskRuntimeResult {
   const queryClient = useQueryClient()
-  const overlayQuery = useUserScreenOverlay(screenId, { enabled: enabled && Boolean(schema) })
-  const activeOverlay = overlayQuery.data?.overlay ?? {}
+  // These generated public schemas have no protected data. Authentication must
+  // never trigger an overlay request before its verified session exists.
+  const publicAuth = (screenId === 'auth/login' || screenId === 'auth/callback') && schema?.id === screenId
+  const overlayQuery = useUserScreenOverlay(screenId, { enabled: enabled && Boolean(schema) && !publicAuth })
+  const activeOverlay = useMemo(() => publicAuth ? {} : overlayQuery.data?.overlay ?? {}, [publicAuth, overlayQuery.data?.overlay])
 
   const summaryQuery = useQuery({
     queryKey: [screenId, entityId, 'screen-summary'],
@@ -143,7 +146,7 @@ export function useUniversalMaskRuntime({
       const res = await apiClient.get<Record<string, unknown>>(interpolateSummaryEndpoint(template, entityId))
       return res.data ?? {}
     },
-    enabled: enabled && Boolean(entityId) && Boolean(schema?.summaryEndpoint),
+    enabled: enabled && !publicAuth && Boolean(entityId) && Boolean(schema?.summaryEndpoint),
     staleTime: 30_000,
   })
 
@@ -201,19 +204,21 @@ export function useUniversalMaskRuntime({
   })
 
   async function updateUserOverlay(patch: ScreenOverlay): Promise<void> {
+    if (publicAuth) throw new Error('Anmeldeansichten besitzen keine gespeicherten Benutzeranpassungen.')
     await saveOverlayMutation.mutateAsync(mergeOverlay(activeOverlay, patch))
   }
 
   async function resetUserOverlay(): Promise<void> {
+    if (publicAuth) throw new Error('Anmeldeansichten besitzen keine gespeicherten Benutzeranpassungen.')
     await resetOverlayMutation.mutateAsync()
   }
 
-  const flowSpineCatalog = useFlowSpineCatalogRuntime(Boolean(enabled && plan?.flowSpineCatalog?.enabled), Boolean(plan?.flowSpineCatalog?.warmWorkspaces))
+  const flowSpineCatalog = useFlowSpineCatalogRuntime(Boolean(enabled && !publicAuth && plan?.flowSpineCatalog?.enabled), Boolean(plan?.flowSpineCatalog?.warmWorkspaces))
 
   const binding = useMemo<DataBindingPlan | undefined>(() => {
-    if (!plan) return undefined
+    if (!plan || publicAuth) return undefined
     return compileDataBindingPlan(plan, schema?.dataSources, tabEndpoints, entityId, tenantId, schema?.entityProjection)
-  }, [plan, schema?.dataSources, schema?.entityProjection, tabEndpoints, entityId, tenantId])
+  }, [plan, publicAuth, schema?.dataSources, schema?.entityProjection, tabEndpoints, entityId, tenantId])
 
   // Per-table query states
   const [tableQueryStates, setTableQueryStates] = useState<Record<string, TableQueryState>>({})
@@ -276,7 +281,7 @@ export function useUniversalMaskRuntime({
         : tb.clientQuery && !tb.sourceKey
           ? [tenantId, screenId, entityId, 'table', tableKey]
           : [tenantId, screenId, entityId, 'table', tableKey, resolvedTableQueryStates[tableKey]],
-      queryFn: async ({ signal }) => {
+      queryFn: async ({ signal }: { signal: AbortSignal }) => {
         if (tb.clientQuery && tb.sourceKey && (plan?.listExperience || completeClientTables)) {
           return readCompleteList(async (page) => {
             const state = { ...defaultTableQueryState(100), page, complete: page === 1, presetFilters: resolvedTableQueryStates[tableKey]?.presetFilters }

@@ -1,7 +1,7 @@
-import { NativeListPage } from '@/components/mask-builder/NativeListPage'
+import { useParams } from '@/app/routing/typed-router'
+import { UniversalNativeDetailPage } from '@/components/mask-builder/UniversalNativeDetailPage'
 
 export default function Page(): JSX.Element {
-  return (
-    <NativeListPage screenId="crm/gdpr-request/new" testId="screen-crm/gdpr-request/new" />
-  )
+  const { id } = useParams<{ id?: string }>()
+  return <UniversalNativeDetailPage screenId="crm/gdpr-request" entityId={id} testId="crm-gdpr-request-stamm" />
 }

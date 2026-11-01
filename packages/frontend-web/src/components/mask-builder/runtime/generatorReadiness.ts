@@ -138,7 +138,9 @@ export function checkGeneratorReadiness(screen: ScreenDefinition): GeneratorRead
   // 6. actions_classified — every action has dangerLevel + permission OR explicit stubReason
   const actions = screen.actions ?? []
   const unclassifiedActions = actions.filter(
-    (a) => !a.dangerLevel || (!a.permission && !('stubReason' in a)),
+    (a) => !a.dangerLevel || (!a.permission && !('stubReason' in a)
+      && !(a.dangerLevel === 'safe' && ['view', 'print', 'download', 'navigation'].includes(a.localEffect ?? '')
+        && !a.commandEndpoint && !a.inputFlow && !a.command && !a.commandBinding && !('kommando' in a && a.kommando) && !a.download)),
   )
   mand('actions_classified',
     actions.length === 0 || unclassifiedActions.length === 0,

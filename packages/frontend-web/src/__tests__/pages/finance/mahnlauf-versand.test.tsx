@@ -1,12 +1,22 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import MahnlaufPage from '@/pages/finance/mahnlauf'
+import DunningSurface from '@/components/mask-builder/specialized/finance/dunning-surface'
+import type { RenderPlan } from '@/components/mask-builder/render-plan/types'
 
-const mocks = vi.hoisted(() => ({ get: vi.fn(), put: vi.fn(), post: vi.fn(), toast: vi.fn() }))
+const mocks = vi.hoisted(() => ({ get: vi.fn(), put: vi.fn(), post: vi.fn(), toast: vi.fn(), handlers: {} as Record<string, () => void> }))
 
 vi.mock('@/lib/api-client', () => ({ apiClient: { get: mocks.get, put: mocks.put, post: mocks.post } }))
 vi.mock('@/hooks/use-toast', () => ({ toast: mocks.toast }))
+vi.mock('@/components/mask-builder/specialized/intake/domain-data', () => ({ useDomainIdentity: () => ({ tenantId: 'tenant-1', actor: 'actor-1' }) }))
+vi.mock('@/components/mask-builder/specialized/intake/domain-runtime', () => ({
+  canDomainAction: () => true, fieldsEditable: () => true,
+  useDomainDispatch: (_plan: unknown, handlers: Record<string, () => void>) => { mocks.handlers = handlers },
+}))
+function MahnlaufPage() {
+  return <><button onClick={() => mocks.handlers.run?.()}>Mahnlauf ausführen</button><DunningSurface plan={{} as RenderPlan} /></>
+}
+
 
 const OFFEN = {
   id: 'm-1', stufe: 1, datum: '2026-10-01', offen: 1250, gebuehr: 5, zinsen: 3.7, gesamt: 1258.7, frist: '2026-10-15',

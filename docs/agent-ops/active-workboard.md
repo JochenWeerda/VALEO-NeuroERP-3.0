@@ -20121,6 +20121,14 @@ Andere Familien Annahme/Waage, CRM, Finanzen, Futter, Admin/Auth und Materialflu
 
 **SECURITY-CI-URI-VITE-20261030 abgenommen:** offizielleHerstellerpatchesdecode-uri-component0.5.1/Vite6.4.5,gegenAltversionRotzeitbegrenzt/GegenFixgruen;pnpm9.12FrozenInstall36WorkspacesmitunveraendertemLock,56Securitytestsgruen,Produktionsaudit0Advisories/0Findings,strictGate0blocked. BestehendeBackportsinhaltlichneuprueft(Originalbrace1/8vsPatch8/8,deepmerge9/21vs21/21),Quell-/Patchhashesidentisch;aktuellePrimaerquellenbracewithdrawn/deepmergekeinRelease,kurzertechnischerReviewbisexklusiv06.11.nachADR080. KeinePolicy-/SeverityLockerung,keinDatenbank-/Containerwechsel. QA/Handshake node-uri-vite-security-20261030.md. Runtime46ArbeitbleibtgetrenntinArbeit.
 
+
+## STUDIO-RUNTIME46-RESUME-20261030 — reserviert, Codex Lead
+
+Fortsetzung des ausdruecklichen Nutzerauftrags aus PR90. Isolierter Checkout auf 662dfaed; gemischte Root-/Indexaenderungen bleiben unangetastet. Besitz: bereits begonnene Runtime46-Vertraege, Angebots-/Lieferlisten-Dateiimport/Druck/Arbeitsfokus, Annahme/Waage-Spezialrenderer und eng notwendige Mandanten-/Referenzschutzkorrekturen; Tests, Generatorprojektionen und Statusdoku. Bestehende Unterclaims werden im Nutzerauftrag fortgesetzt, keine doppelte Neuentwicklung. Teilung: Lead gemeinsame Integration/Backend/Sicherheit/Tests/Git; sales_integration NativeListPage/Listenbedienung samt eigenen UI-Tests; intake_integration spezialisierte Annahme-/Waagenoberflaechen, feste Definitionen und Seiten. Kein fremder aktiver Workspacebesitz, keine neue DB/Container/Reset. Altzeilen ohne belegten Mandanten bleiben NULL und gesperrt. Abschluss erst mit benannten Testbelegen; strukturelle Gates und Livefreigabe getrennt.
+
+
+**RUNTIME46 Fortsetzung 31.10.:** Lead-Besitz umfasst oeffentliche auth/Login+Callback samt generierter geschuetzter-datenfreier Definition, strenge native Quellbindung und vorhandene Kunden-/Faktura-Ablosungsnachweise; Materialfluss wird als naechstes in echte native Domainprimitiven zerlegt. Admin/Feed/Finance in klaren eigenen Unterfamilien; CRM abgeschlossen mit 4 signierten PG-Faellen (Plugin-Autoload aus, benoetigte Plugins explizit, vollstaendiger Rollback) und 10 Adapterfaellen. Waage104Unit+1SQL-Rollback, Angebotsimport/Nummernscope und native Policy33Faelle, Auth/Quellnavigation14Frontendfaelle. Keine gesamtheitliche Made-by-Studio-/Live-/CI-Freigabe; main/develop-Uebernahme ausdruecklich beauftragt und folgt der integrierten Abnahme. 261 vorher bestehende unroutbare Seiten separat inventarisiert, nicht versteckt oder blind geloescht.
+
 ## STUDIO-RUNTIME46-LIST-PRINT-20261031 — abgeschlossen, Codex Lead
 
 Fortsetzung des freigegebenen Runtime46-Auftrags im bestehenden Lead-Dateibesitz.
@@ -20167,3 +20175,16 @@ Formularreset einen noch laufenden Leseauftrag entwerten. Andere Feldtypen und
 Dialogaktionen bleiben unveraendert; eigener Reset-/Unmount-Nachweis erforderlich.
 
 **FILE-CONTENT Abnahme20261031:** 80Frontendtests in9Dateien und46reineBackendfaelle gruen. VollstaendigeTyppruefung/Produktionsbuild/Lint gruen. EchteFileReaderBytes,UTF8/Bytegrenzen,Altwertschutz,OptionalPending,Reset/Race/Unmount/ReadOnly undCompilerCachevertrag geprueft. BackendAufnahmetest isoliert fachfremdeSemanticPreview; keinAPI-/DB-/Importnachweis. QA/Handshake studio-file-content-20261031.md. KeineDB/Container/AgentenWritefreigabe/GateLockerung. 46Runtimepunkteweiteroffen; Architekturcheck1Route/7Services in unveraendertenInventarenrot, AusgangsCIweiterseparat.
+
+## STUDIO-RUNTIME46-INTEGRATION-20261101 — abgeschlossen, Claude
+
+Integration der uncommitteten Runtime46-Arbeit (Klon 30./31.10.) auf main, PR #92.
+Dateivertrag von main (accept als Liste) beibehalten; Debitoren- und
+Eingangsrechnungsdetail fuer bestehende IDs erhalten, nur die Anlage nutzt die
+neue Erfassung. CI-Nacharbeit: CRM-Segmente ohne zusammengesetztes SQL ausser
+zwei Whitelist-Stellen (nosec mit Begruendung), begrenzte Abfragen per
+fetchmany, back-Aktionen der CRM-Masken mit dangerLevel, Waagen-Migration
+vergibt valeo_app nur bei vorhandener Rolle, Waagen-ADR mit Pflichtabschnitten,
+Baselines Godfile/Business-Time gesenkt.
+Offen: zwei Debitoren-Aggregate (domain_erp.debitors vs. domain_crm.customers).
+

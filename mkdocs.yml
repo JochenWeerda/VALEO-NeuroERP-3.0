@@ -468,6 +468,7 @@ nav:
           - Kanonischer CRM-Aktivitaetsspeicher und gemeinsamer Command-Vertrag: adr/adr-crm-activity-canonical-20261029.md
           - Explizite Ernte-Abrechnungsregeln statt impliziter Freigrenze: adr/adr-harvest-deduction-resolver.md
           - "ADR Studio: Fachvertraege und kontingentierte Modellinterpretation": adr/adr-studio-semantic-contracts.md
+          - Waagenstamm und Wiegescheinimport: adr/adr-waage-tenant-import-20261030.md
           - UIX-034 - CRM 360 Native Parity Matrix: adr/uix-034-crm360-native-parity-matrix.md
       # adr-nav:end
   - Schnittstellen:

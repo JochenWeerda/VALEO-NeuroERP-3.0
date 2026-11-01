@@ -119,8 +119,9 @@ describe('CRM/FIBU/Logistik UIX', () => {
     expect(src).toContain('compileRenderPlanFromScreenDefinition')
     expect(src).toContain('<UniversalMaskRenderer')
     expect(src).toContain('schulungen: rows.map')
-    expect(definition).toContain("key: 'status'")
-    expect(definition).toContain("label: 'Stand'")
+    // capture-screens.ts is generated; match the field independent of quoting style.
+    expect(definition).toMatch(/["']?key["']?: ["']status["']/)
+    expect(definition).toMatch(/["']?label["']?: ["']Stand["']/)
     expect(src).not.toContain('bg-orange-50')
   })
 
@@ -228,11 +229,11 @@ describe('CRM/FIBU/Logistik UIX', () => {
     expect(screen.getByRole('combobox', { name: 'UStVA-Periode' })).toHaveClass('min-h-touch')
   })
 
-  it('stellt Bankabgleich Arbeit zuerst und Theater nur Desktop', () => {
-    const src = read('../../pages/finance/bank-abgleich.tsx')
-    expect(src).toContain('useTouchDevice')
-    expect(src.indexOf('<ObjectPage')).toBeLessThan(src.indexOf('<OperationalCaseHeader'))
-    expect(src).toContain('{!isTouch ? (')
+  it('führt Bankabgleich in den nativen Finanzarbeitsbereich', () => {
+    expect(read('../../pages/finance/bank-abgleich.tsx')).toContain('finance/bank-abgleich')
+    const src = read('../../components/mask-builder/specialized/finance/bank-surface.tsx')
+    expect(src).toContain('min-h-touch')
+    expect(src).toContain('auto_book=false')
   })
 
   it('stellt Fahrer 44 px ohne Hover-Blau', async () => {

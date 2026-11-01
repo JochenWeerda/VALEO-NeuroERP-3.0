@@ -3044,6 +3044,10 @@
             },
             {
               "column": "tenant_id",
+              "references": "domain_shared.futtermittel_einzelfutter.tenant_id"
+            },
+            {
+              "column": "tenant_id",
               "references": "domain_shared.tenants.id"
             }
           ],
@@ -3152,6 +3156,10 @@
             },
             {
               "column": "tenant_id",
+              "references": "domain_shared.futtermittel_einzelfutter.tenant_id"
+            },
+            {
+              "column": "tenant_id",
               "references": "domain_shared.tenants.id"
             }
           ],
@@ -3217,6 +3225,10 @@
             {
               "column": "feed_id",
               "references": "domain_shared.futtermittel_einzelfutter.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_shared.futtermittel_einzelfutter.tenant_id"
             },
             {
               "column": "tenant_id",
@@ -7599,7 +7611,7 @@
             },
             {
               "name": "tenant_id",
-              "nullable": true,
+              "nullable": false,
               "type": "character varying"
             },
             {
@@ -7608,7 +7620,16 @@
               "type": "timestamp with time zone"
             }
           ],
-          "foreign_keys": [],
+          "foreign_keys": [
+            {
+              "column": "meldung_id",
+              "references": "domain_compliance.compliance_pcn_meldungen.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_compliance.compliance_pcn_meldungen.tenant_id"
+            }
+          ],
           "owner_domain": "dms-compliance",
           "ownership_reason": "Custodian domain_compliance / Domain dms-compliance.",
           "placement": "native",
@@ -9642,11 +9663,9 @@
             "app/crm/router.py",
             "app/infrastructure/models/__init__.py",
             "app/services/calendar_projection_service.py",
+            "app/services/gdpr_request_processor.py",
             "app/services/mask_rollout_summary_service.py",
             "app/services/mcp_execution_service.py"
-          ],
-          "written_by": [
-            "app/api/v1/endpoints/compliance_dsgvo.py"
           ]
         },
         "business_partner_addresses": {
@@ -9795,12 +9814,21 @@
               "name": "updated_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [
             {
               "column": "partner_id",
               "references": "domain_crm.business_partners.partner_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_crm.business_partners.tenant_id"
             }
           ],
           "owner_domain": "crm",
@@ -9935,12 +9963,21 @@
               "name": "updated_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [
             {
               "column": "partner_id",
               "references": "domain_crm.business_partners.partner_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_crm.business_partners.tenant_id"
             }
           ],
           "owner_domain": "crm",
@@ -10024,6 +10061,11 @@
               "name": "updated_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [
@@ -10034,6 +10076,10 @@
             {
               "column": "partner_id",
               "references": "domain_crm.business_partners.partner_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_crm.business_partners.tenant_id"
             }
           ],
           "owner_domain": "crm",
@@ -10202,12 +10248,21 @@
               "name": "updated_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [
             {
               "column": "partner_id",
               "references": "domain_crm.business_partners.partner_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_crm.business_partners.tenant_id"
             }
           ],
           "owner_domain": "crm",
@@ -10287,12 +10342,21 @@
               "name": "updated_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [
             {
               "column": "partner_id",
               "references": "domain_crm.business_partners.partner_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_crm.business_partners.tenant_id"
             }
           ],
           "owner_domain": "crm",
@@ -10486,12 +10550,21 @@
               "name": "updated_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [
             {
               "column": "partner_id",
               "references": "domain_crm.business_partners.partner_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_crm.business_partners.tenant_id"
             }
           ],
           "owner_domain": "crm",
@@ -10571,12 +10644,21 @@
               "name": "updated_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [
             {
               "column": "partner_id",
               "references": "domain_crm.business_partners.partner_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_crm.business_partners.tenant_id"
             }
           ],
           "owner_domain": "crm",
@@ -10647,12 +10729,21 @@
               "name": "updated_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [
             {
               "column": "partner_id",
               "references": "domain_crm.business_partners.partner_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_crm.business_partners.tenant_id"
             }
           ],
           "owner_domain": "crm",
@@ -10706,12 +10797,21 @@
               "name": "updated_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [
             {
               "column": "partner_id",
               "references": "domain_crm.business_partners.partner_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_crm.business_partners.tenant_id"
             }
           ],
           "owner_domain": "crm",
@@ -10775,12 +10875,21 @@
               "name": "updated_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [
             {
               "column": "partner_id",
               "references": "domain_crm.business_partners.partner_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_crm.business_partners.tenant_id"
             }
           ],
           "owner_domain": "crm",
@@ -10855,12 +10964,21 @@
               "name": "updated_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [
             {
               "column": "partner_id",
               "references": "domain_crm.business_partners.partner_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_crm.business_partners.tenant_id"
             }
           ],
           "owner_domain": "crm",
@@ -10929,12 +11047,21 @@
               "name": "updated_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [
             {
               "column": "partner_id",
               "references": "domain_crm.business_partners.partner_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_crm.business_partners.tenant_id"
             }
           ],
           "owner_domain": "crm",
@@ -11043,12 +11170,21 @@
               "name": "updated_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [
             {
               "column": "partner_id",
               "references": "domain_crm.business_partners.partner_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_crm.business_partners.tenant_id"
             }
           ],
           "owner_domain": "crm",
@@ -11129,12 +11265,21 @@
               "name": "updated_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [
             {
               "column": "partner_id",
               "references": "domain_crm.business_partners.partner_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_crm.business_partners.tenant_id"
             }
           ],
           "owner_domain": "crm",
@@ -11233,12 +11378,21 @@
               "name": "updated_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [
             {
               "column": "partner_id",
               "references": "domain_crm.business_partners.partner_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_crm.business_partners.tenant_id"
             }
           ],
           "owner_domain": "crm",
@@ -12012,14 +12166,17 @@
             "partner_id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/ap_invoices.py",
             "app/api/v1/endpoints/crm_360.py",
             "app/api/v1/endpoints/crm_360_sql.py",
+            "app/api/v1/endpoints/crm_segments.py",
             "app/api/v1/endpoints/finance_invoices.py",
             "app/crm/router.py",
             "app/infrastructure/models/__init__.py",
             "app/infrastructure/models/einkauf_models.py",
             "app/infrastructure/models/l3c_models.py",
             "app/services/business_partner_service.py",
+            "app/services/crm_segment_service.py",
             "app/services/customer_reference.py",
             "app/services/customer_service.py",
             "app/services/docflow_belegadapter.py",
@@ -12028,6 +12185,11 @@
             "app/services/mcp_execution_service.py",
             "app/services/rfq_service.py",
             "app/services/whatsapp_intake_service.py"
+          ],
+          "screens": [
+            "crm/betreuungsgebiet",
+            "crm/segment",
+            "crm/zielgruppen"
           ]
         },
         "cancellation_reason": {
@@ -12039,7 +12201,7 @@
             },
             {
               "name": "tenant_id",
-              "nullable": true,
+              "nullable": false,
               "type": "character varying"
             },
             {
@@ -12804,12 +12966,21 @@
               "name": "user_agent",
               "nullable": true,
               "type": "text"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [
             {
               "column": "consent_id",
               "references": "domain_crm.crm_contact_consents.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_crm.crm_contact_consents.tenant_id"
             }
           ],
           "owner_domain": "crm",
@@ -13088,12 +13259,21 @@
               "name": "added_at",
               "nullable": true,
               "type": "timestamp without time zone"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [
             {
               "column": "segment_id",
               "references": "domain_crm.crm_segments.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_crm.crm_segments.tenant_id"
             }
           ],
           "owner_domain": "crm",
@@ -13103,11 +13283,17 @@
             "id"
           ],
           "read_by": [
-            "app/api/v1/endpoints/mask_frontend_bridges.py",
-            "app/crm/router.py"
+            "app/api/v1/endpoints/crm_segments.py",
+            "app/services/crm_segment_service.py"
+          ],
+          "screens": [
+            "crm/betreuungsgebiet",
+            "crm/segment",
+            "crm/zielgruppen"
           ],
           "written_by": [
-            "app/crm/router.py"
+            "app/api/v1/endpoints/crm_segments.py",
+            "app/services/crm_segment_service.py"
           ]
         },
         "crm_segments": {
@@ -13166,11 +13352,18 @@
             "id"
           ],
           "read_by": [
-            "app/api/v1/endpoints/mask_frontend_bridges.py",
-            "app/crm/router.py"
+            "app/api/v1/endpoints/crm_campaigns.py",
+            "app/api/v1/endpoints/crm_segments.py",
+            "app/services/crm_segment_service.py"
+          ],
+          "screens": [
+            "crm/betreuungsgebiet",
+            "crm/campaign",
+            "crm/segment",
+            "crm/zielgruppen"
           ],
           "written_by": [
-            "app/crm/router.py"
+            "app/api/v1/endpoints/crm_segments.py"
           ]
         },
         "customer_inquiries": {
@@ -13471,10 +13664,13 @@
             "app/api/v1/endpoints/contacts.py",
             "app/api/v1/endpoints/crm_360.py",
             "app/api/v1/endpoints/crm_360_sql.py",
+            "app/api/v1/endpoints/crm_consents.py",
             "app/api/v1/endpoints/customers.py",
+            "app/api/v1/endpoints/finance_invoices.py",
             "app/api/v1/endpoints/finance_stammdaten_kommandos.py",
             "app/api/v1/endpoints/mask_frontend_bridges.py",
             "app/api/v1/endpoints/portal_kundenzugaenge.py",
+            "app/api/v1/endpoints/sales_offers.py",
             "app/api/v1/endpoints/stammdaten_bearbeiten.py",
             "app/api/v1/schemas/crm.py",
             "app/auth/portal_kunde.py",
@@ -13491,6 +13687,7 @@
             "app/services/docflow_belegadapter.py",
             "app/services/docflow_creation_context.py",
             "app/services/finance_dunning_service.py",
+            "app/services/gdpr_request_processor.py",
             "app/services/kunden_merge.py",
             "app/services/mcp_execution_service.py",
             "app/services/portal_intelligence_service.py",
@@ -13499,6 +13696,9 @@
             "app/services/sales_posting_service.py",
             "app/services/webshop_integration_service.py",
             "app/services/whatsapp_agent_service.py"
+          ],
+          "screens": [
+            "crm/consent"
           ],
           "written_by": [
             "app/api/v1/endpoints/compat.py",
@@ -13674,9 +13874,6 @@
             "app/api/v1/endpoints/compliance_dsgvo.py",
             "app/infrastructure/models/__init__.py",
             "app/services/interessent_service.py"
-          ],
-          "written_by": [
-            "app/api/v1/endpoints/compliance_dsgvo.py"
           ]
         },
         "mail_workspace_attachments": {
@@ -13948,7 +14145,7 @@
             },
             {
               "name": "tenant_id",
-              "nullable": true,
+              "nullable": false,
               "type": "character varying"
             },
             {
@@ -13981,6 +14178,10 @@
             {
               "column": "cancel_reason_id",
               "references": "domain_crm.cancellation_reason.cancel_reason_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_crm.cancellation_reason.tenant_id"
             },
             {
               "column": "tenant_id",
@@ -14074,6 +14275,10 @@
             {
               "column": "offer_id",
               "references": "domain_crm.sales_offers.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_crm.sales_offers.tenant_id"
             }
           ],
           "owner_domain": "crm",
@@ -14319,6 +14524,10 @@
             {
               "column": "order_id",
               "references": "domain_crm.sales_orders.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_crm.sales_orders.tenant_id"
             },
             {
               "column": "tenant_id",
@@ -14596,6 +14805,10 @@
             {
               "column": "supplier_id",
               "references": "domain_crm.business_partners.partner_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_crm.business_partners.tenant_id"
             },
             {
               "column": "tenant_id",
@@ -15111,6 +15324,10 @@
             {
               "column": "header_id",
               "references": "domain_docflow.document_headers.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_docflow.document_headers.tenant_id"
             }
           ],
           "owner_domain": "dms-compliance",
@@ -15304,6 +15521,14 @@
             {
               "column": "from_header_id",
               "references": "domain_docflow.document_headers.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_docflow.document_headers.tenant_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_docflow.document_headers.tenant_id"
             },
             {
               "column": "to_header_id",
@@ -15608,6 +15833,10 @@
             {
               "column": "header_id",
               "references": "domain_docflow.document_headers.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_docflow.document_headers.tenant_id"
             }
           ],
           "owner_domain": "dms-compliance",
@@ -15684,6 +15913,22 @@
             {
               "column": "from_item_id",
               "references": "domain_docflow.document_items.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_docflow.document_headers.tenant_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_docflow.document_headers.tenant_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_docflow.document_items.tenant_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_docflow.document_items.tenant_id"
             },
             {
               "column": "to_header_id",
@@ -15773,6 +16018,10 @@
             {
               "column": "header_id",
               "references": "domain_docflow.document_headers.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_docflow.document_headers.tenant_id"
             }
           ],
           "owner_domain": "dms-compliance",
@@ -15953,6 +16202,14 @@
             {
               "column": "header_id",
               "references": "domain_docflow.document_headers.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_docflow.document_artifacts.tenant_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_docflow.document_headers.tenant_id"
             }
           ],
           "owner_domain": "dms-compliance",
@@ -16167,6 +16424,10 @@
             {
               "column": "header_id",
               "references": "domain_docflow.document_headers.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_docflow.document_headers.tenant_id"
             }
           ],
           "owner_domain": "dms-compliance",
@@ -16725,6 +16986,14 @@
             {
               "column": "original_header_id",
               "references": "domain_docflow.document_headers.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_docflow.document_headers.tenant_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_docflow.document_headers.tenant_id"
             }
           ],
           "owner_domain": "dms-compliance",
@@ -16806,6 +17075,10 @@
             }
           ],
           "foreign_keys": [
+            {
+              "column": "tenant_id",
+              "references": "domain_docflow.pos_tse_devices.tenant_id"
+            },
             {
               "column": "terminal_id",
               "references": "domain_docflow.pos_terminals.id"
@@ -16979,6 +17252,10 @@
             }
           ],
           "foreign_keys": [
+            {
+              "column": "tenant_id",
+              "references": "domain_docflow.pos_terminals.tenant_id"
+            },
             {
               "column": "terminal_id",
               "references": "domain_docflow.pos_terminals.id"
@@ -17275,6 +17552,10 @@
             {
               "column": "std_lieferant_id",
               "references": "domain_einkauf.lieferanten.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_einkauf.lieferanten.tenant_id"
             }
           ],
           "owner_domain": "procurement",
@@ -17521,6 +17802,11 @@
               "name": "maximalmenge",
               "nullable": true,
               "type": "numeric"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [
@@ -17531,6 +17817,14 @@
             {
               "column": "kontrakt_pos_id",
               "references": "domain_einkauf.kontrakt_positionen.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_einkauf.bestellungen.tenant_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_einkauf.kontrakt_positionen.tenant_id"
             }
           ],
           "owner_domain": "procurement",
@@ -17916,6 +18210,18 @@
               "references": "domain_einkauf.lieferanten.id"
             },
             {
+              "column": "tenant_id",
+              "references": "domain_einkauf.bestellvorschlaege.tenant_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_einkauf.kontrakte.tenant_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_einkauf.lieferanten.tenant_id"
+            },
+            {
               "column": "vorschlag_id",
               "references": "domain_einkauf.bestellvorschlaege.id"
             }
@@ -18140,6 +18446,11 @@
               "name": "status",
               "nullable": true,
               "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [
@@ -18150,6 +18461,18 @@
             {
               "column": "lieferant_id",
               "references": "domain_einkauf.lieferanten.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_einkauf.bestellvorschlaege.tenant_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_einkauf.kontrakte.tenant_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_einkauf.lieferanten.tenant_id"
             },
             {
               "column": "vorschlag_id",
@@ -18164,6 +18487,100 @@
           ],
           "read_by": [
             "app/infrastructure/models/einkauf_models.py"
+          ]
+        },
+        "ers_invoices": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "bigint"
+            },
+            {
+              "name": "gr_id",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "supplier_id",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "amount",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "status",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "auto_created_at",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "text"
+            }
+          ],
+          "foreign_keys": [],
+          "owner_domain": "procurement",
+          "ownership_reason": "Custodian domain_einkauf / Domain procurement.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/api/v1/endpoints/ers_settlement.py"
+          ],
+          "written_by": [
+            "app/api/v1/endpoints/ers_settlement.py"
+          ]
+        },
+        "ers_suppliers": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "bigint"
+            },
+            {
+              "name": "supplier_id",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "is_ers_qualified",
+              "nullable": false,
+              "type": "boolean"
+            },
+            {
+              "name": "ers_tolerance_percent",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "text"
+            }
+          ],
+          "foreign_keys": [],
+          "owner_domain": "procurement",
+          "ownership_reason": "Custodian domain_einkauf / Domain procurement.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/api/v1/endpoints/ers_settlement.py"
+          ],
+          "written_by": [
+            "app/api/v1/endpoints/ers_settlement.py"
           ]
         },
         "foreign_goods_audit": {
@@ -18470,7 +18887,7 @@
             },
             {
               "name": "tenant_id",
-              "nullable": true,
+              "nullable": false,
               "type": "text"
             },
             {
@@ -18580,12 +18997,21 @@
               "name": "notiz",
               "nullable": true,
               "type": "text"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [
             {
               "column": "kontrakt_id",
               "references": "domain_einkauf.kontrakte.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_einkauf.kontrakte.tenant_id"
             }
           ],
           "owner_domain": "procurement",
@@ -18701,6 +19127,10 @@
             {
               "column": "lieferant_id",
               "references": "domain_einkauf.lieferanten.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_einkauf.lieferanten.tenant_id"
             }
           ],
           "owner_domain": "procurement",
@@ -19392,6 +19822,10 @@
             {
               "column": "rfq_id",
               "references": "domain_einkauf.rfq_requests.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_einkauf.rfq_requests.tenant_id"
             }
           ],
           "owner_domain": "procurement",
@@ -25093,6 +25527,202 @@
             "app/services/feed_produktion_lifecycle_service.py"
           ]
         },
+        "feed_raw_materials": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "material_code",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "name",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "kategorie",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "dry_matter_percent",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "energie_me_mj",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "rohprotein_g",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "rohfett_g",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "rohfaser_g",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "rohasche_g",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "lysin_g",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "methionin_g",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "calcium_g",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "phosphor_g",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "natrium_g",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "gueltig_ab",
+              "nullable": true,
+              "type": "date"
+            },
+            {
+              "name": "gueltig_bis",
+              "nullable": true,
+              "type": "date"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "created_at",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "updated_at",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_futtermittel / Domain agrar.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/api/v1/endpoints/futtermittel_rezepte.py",
+            "app/api/v1/endpoints/futtermittel_rohwaren.py"
+          ],
+          "screens": [
+            "rezepte/rezept"
+          ],
+          "written_by": [
+            "app/api/v1/endpoints/futtermittel_rohwaren.py"
+          ]
+        },
+        "feed_recipes": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "recipe_code",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "name",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "tierart",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "produktionsphase",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "status",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "version",
+              "nullable": false,
+              "type": "integer"
+            },
+            {
+              "name": "erstellt_am",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "erstellt_von",
+              "nullable": true,
+              "type": "text"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "updated_at",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_futtermittel / Domain agrar.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/api/v1/endpoints/futtermittel_rezepte.py"
+          ],
+          "screens": [
+            "rezepte/rezept"
+          ],
+          "written_by": [
+            "app/api/v1/endpoints/futtermittel_rezepte.py"
+          ]
+        },
         "feed_rezeptur_positionen": {
           "columns": [
             {
@@ -25205,6 +25835,123 @@
           ],
           "written_by": [
             "app/services/feed_rezeptur_service.py"
+          ]
+        },
+        "raw_material_analyses": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "material_id",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "analyse_datum",
+              "nullable": true,
+              "type": "date"
+            },
+            {
+              "name": "labor_ref",
+              "nullable": true,
+              "type": "text"
+            },
+            {
+              "name": "analysiert_von",
+              "nullable": true,
+              "type": "text"
+            },
+            {
+              "name": "werte",
+              "nullable": true,
+              "type": "jsonb"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "created_at",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_futtermittel / Domain agrar.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/api/v1/endpoints/futtermittel_rohwaren.py"
+          ],
+          "written_by": [
+            "app/api/v1/endpoints/futtermittel_rohwaren.py"
+          ]
+        },
+        "recipe_ingredients": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "recipe_id",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "material_id",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "anteil_percent",
+              "nullable": false,
+              "type": "numeric"
+            },
+            {
+              "name": "min_anteil",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "max_anteil",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "sort_order",
+              "nullable": false,
+              "type": "integer"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "text"
+            }
+          ],
+          "foreign_keys": [],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_futtermittel / Domain agrar.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/api/v1/endpoints/futtermittel_rezepte.py"
+          ],
+          "screens": [
+            "rezepte/rezept"
+          ],
+          "written_by": [
+            "app/api/v1/endpoints/futtermittel_rezepte.py"
           ]
         }
       }
@@ -26237,7 +26984,7 @@
             },
             {
               "name": "tenant_id",
-              "nullable": true,
+              "nullable": false,
               "type": "character varying"
             },
             {
@@ -26270,6 +27017,10 @@
             {
               "column": "person_id",
               "references": "domain_hr.person.person_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_hr.person.tenant_id"
             },
             {
               "column": "tenant_id",
@@ -26797,6 +27548,10 @@
             {
               "column": "checklist_id",
               "references": "domain_hr.onboarding_checklists.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_hr.onboarding_checklists.tenant_id"
             }
           ],
           "owner_domain": "hr",
@@ -26967,7 +27722,7 @@
             },
             {
               "name": "tenant_id",
-              "nullable": true,
+              "nullable": false,
               "type": "character varying"
             },
             {
@@ -27396,6 +28151,10 @@
             {
               "column": "course_id",
               "references": "domain_hr.training_courses.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_hr.training_courses.tenant_id"
             }
           ],
           "owner_domain": "hr",
@@ -28660,6 +29419,14 @@
             },
             {
               "column": "tenant_id",
+              "references": "domain_inventory.articles.tenant_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_inventory.warehouses.tenant_id"
+            },
+            {
+              "column": "tenant_id",
               "references": "domain_shared.tenants.id"
             },
             {
@@ -28760,6 +29527,10 @@
             {
               "column": "article_id",
               "references": "domain_inventory.articles.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_inventory.articles.tenant_id"
             }
           ],
           "owner_domain": "inventory",
@@ -28838,6 +29609,10 @@
             {
               "column": "article_id",
               "references": "domain_inventory.articles.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_inventory.articles.tenant_id"
             },
             {
               "column": "tenant_id",
@@ -28953,6 +29728,10 @@
             },
             {
               "column": "tenant_id",
+              "references": "domain_inventory.articles.tenant_id"
+            },
+            {
+              "column": "tenant_id",
               "references": "domain_shared.tenants.id"
             }
           ],
@@ -29052,6 +29831,11 @@
               "name": "wiederbeschaffungs_tage",
               "nullable": true,
               "type": "integer"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [
@@ -29062,6 +29846,14 @@
             {
               "column": "partner_id",
               "references": "domain_crm.business_partners.partner_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_crm.business_partners.tenant_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_inventory.articles.tenant_id"
             }
           ],
           "owner_domain": "inventory",
@@ -29153,7 +29945,7 @@
             },
             {
               "name": "tenant_id",
-              "nullable": true,
+              "nullable": false,
               "type": "character varying"
             },
             {
@@ -29959,6 +30751,10 @@
           "foreign_keys": [
             {
               "column": "tenant_id",
+              "references": "domain_inventory.warehouses.tenant_id"
+            },
+            {
+              "column": "tenant_id",
               "references": "domain_shared.tenants.id"
             },
             {
@@ -30028,6 +30824,10 @@
             {
               "column": "bin_id",
               "references": "domain_inventory.warehouse_bins.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_inventory.warehouse_bins.tenant_id"
             }
           ],
           "owner_domain": "inventory",
@@ -30122,6 +30922,14 @@
             {
               "column": "target_movement_id",
               "references": "domain_inventory.inventory_stock_movements.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_inventory.inventory_stock_movements.tenant_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_inventory.inventory_stock_movements.tenant_id"
             }
           ],
           "owner_domain": "inventory",
@@ -30412,6 +31220,10 @@
             },
             {
               "column": "tenant_id",
+              "references": "domain_inventory.articles.tenant_id"
+            },
+            {
+              "column": "tenant_id",
               "references": "domain_shared.tenants.id"
             }
           ],
@@ -30456,12 +31268,21 @@
               "name": "created_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [
             {
               "column": "rule_set_id",
               "references": "domain_inventory.drying_rule_sets.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_inventory.drying_rule_sets.tenant_id"
             }
           ],
           "owner_domain": "inventory",
@@ -30515,12 +31336,21 @@
               "name": "created_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [
             {
               "column": "rule_set_id",
               "references": "domain_inventory.drying_rule_sets.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_inventory.drying_rule_sets.tenant_id"
             }
           ],
           "owner_domain": "inventory",
@@ -30803,12 +31633,21 @@
               "name": "updated_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [
             {
               "column": "harvest_acceptance_id",
               "references": "domain_inventory.harvest_acceptances.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_inventory.harvest_acceptances.tenant_id"
             }
           ],
           "owner_domain": "inventory",
@@ -30927,6 +31766,11 @@
               "name": "updated_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [
@@ -30937,6 +31781,14 @@
             {
               "column": "harvest_acceptance_id",
               "references": "domain_inventory.harvest_acceptances.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_inventory.articles.tenant_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_inventory.harvest_acceptances.tenant_id"
             }
           ],
           "owner_domain": "inventory",
@@ -31235,6 +32087,30 @@
             {
               "column": "stock_movement_id",
               "references": "domain_inventory.inventory_stock_movements.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_crm.business_partners.tenant_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_crm.business_partners.tenant_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_inventory.articles.tenant_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_inventory.inventory_stock_movements.tenant_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_inventory.warehouses.tenant_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_shared.branches.tenant_id"
             },
             {
               "column": "tenant_id",
@@ -31567,6 +32443,18 @@
             },
             {
               "column": "tenant_id",
+              "references": "domain_inventory.articles.tenant_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_inventory.inventory_counts.tenant_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_inventory.warehouses.tenant_id"
+            },
+            {
+              "column": "tenant_id",
               "references": "domain_shared.tenants.id"
             },
             {
@@ -31664,6 +32552,10 @@
             },
             {
               "column": "tenant_id",
+              "references": "domain_inventory.warehouses.tenant_id"
+            },
+            {
+              "column": "tenant_id",
               "references": "domain_shared.tenants.id"
             },
             {
@@ -31700,7 +32592,7 @@
             },
             {
               "name": "tenant_id",
-              "nullable": true,
+              "nullable": false,
               "type": "character varying"
             },
             {
@@ -32092,6 +32984,18 @@
             },
             {
               "column": "tenant_id",
+              "references": "domain_inventory.articles.tenant_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_inventory.warehouse_bins.tenant_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_inventory.warehouses.tenant_id"
+            },
+            {
+              "column": "tenant_id",
               "references": "domain_shared.tenants.id"
             },
             {
@@ -32226,6 +33130,10 @@
             {
               "column": "article_id",
               "references": "domain_inventory.articles.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_inventory.articles.tenant_id"
             },
             {
               "column": "tenant_id",
@@ -32843,7 +33751,7 @@
             },
             {
               "name": "tenant_id",
-              "nullable": true,
+              "nullable": false,
               "type": "character varying"
             },
             {
@@ -33149,6 +34057,10 @@
             },
             {
               "column": "tenant_id",
+              "references": "domain_inventory.articles.tenant_id"
+            },
+            {
+              "column": "tenant_id",
               "references": "domain_shared.tenants.id"
             }
           ],
@@ -33252,6 +34164,14 @@
             {
               "column": "pick_list_id",
               "references": "domain_inventory.pick_lists.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_inventory.articles.tenant_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_inventory.warehouse_bins.tenant_id"
             },
             {
               "column": "tenant_id",
@@ -33428,6 +34348,14 @@
             },
             {
               "column": "tenant_id",
+              "references": "domain_inventory.articles.tenant_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_inventory.preparation_lists.tenant_id"
+            },
+            {
+              "column": "tenant_id",
               "references": "domain_shared.tenants.id"
             }
           ],
@@ -33485,6 +34413,10 @@
             }
           ],
           "foreign_keys": [
+            {
+              "column": "tenant_id",
+              "references": "domain_inventory.warehouses.tenant_id"
+            },
             {
               "column": "tenant_id",
               "references": "domain_shared.tenants.id"
@@ -33581,6 +34513,10 @@
             {
               "column": "article_id",
               "references": "domain_inventory.articles.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_inventory.articles.tenant_id"
             },
             {
               "column": "tenant_id",
@@ -34405,6 +35341,10 @@
             },
             {
               "column": "tenant_id",
+              "references": "domain_inventory.articles.tenant_id"
+            },
+            {
+              "column": "tenant_id",
               "references": "domain_shared.tenants.id"
             }
           ],
@@ -34469,6 +35409,10 @@
           "foreign_keys": [
             {
               "column": "tenant_id",
+              "references": "domain_inventory.warehouses.tenant_id"
+            },
+            {
+              "column": "tenant_id",
               "references": "domain_shared.tenants.id"
             },
             {
@@ -34495,7 +35439,7 @@
             },
             {
               "name": "tenant_id",
-              "nullable": true,
+              "nullable": false,
               "type": "character varying"
             },
             {
@@ -34563,9 +35507,18 @@
               "name": "is_active",
               "nullable": true,
               "type": "boolean"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [
+            {
+              "column": "tenant_id",
+              "references": "domain_inventory.warehouses.tenant_id"
+            },
             {
               "column": "warehouse_id",
               "references": "domain_inventory.warehouses.id"
@@ -34587,7 +35540,7 @@
             },
             {
               "name": "tenant_id",
-              "nullable": true,
+              "nullable": false,
               "type": "character varying"
             },
             {
@@ -34628,7 +35581,7 @@
             },
             {
               "name": "tenant_id",
-              "nullable": true,
+              "nullable": false,
               "type": "character varying"
             },
             {
@@ -34694,6 +35647,18 @@
             {
               "column": "performed_by",
               "references": "domain_shared.users.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_inventory.articles.tenant_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_inventory.stock_locations.tenant_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_inventory.warehouses.tenant_id"
             },
             {
               "column": "tenant_id",
@@ -34921,6 +35886,14 @@
           ],
           "foreign_keys": [
             {
+              "column": "tenant_id",
+              "references": "domain_inventory.warehouse_zones.tenant_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_inventory.warehouses.tenant_id"
+            },
+            {
               "column": "warehouse_id",
               "references": "domain_inventory.warehouses.id"
             },
@@ -35012,6 +35985,18 @@
               "references": "domain_inventory.warehouse_aisles.id"
             },
             {
+              "column": "tenant_id",
+              "references": "domain_inventory.warehouse_aisles.tenant_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_inventory.warehouse_zones.tenant_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_inventory.warehouses.tenant_id"
+            },
+            {
               "column": "warehouse_id",
               "references": "domain_inventory.warehouses.id"
             },
@@ -35079,6 +36064,10 @@
             {
               "column": "article_id",
               "references": "domain_inventory.articles.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_inventory.articles.tenant_id"
             },
             {
               "column": "tenant_id",
@@ -35154,6 +36143,14 @@
             },
             {
               "column": "tenant_id",
+              "references": "domain_inventory.warehouses.tenant_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_inventory.warehouses.tenant_id"
+            },
+            {
+              "column": "tenant_id",
               "references": "domain_shared.tenants.id"
             },
             {
@@ -35221,6 +36218,10 @@
           ],
           "foreign_keys": [
             {
+              "column": "tenant_id",
+              "references": "domain_inventory.warehouses.tenant_id"
+            },
+            {
               "column": "warehouse_id",
               "references": "domain_inventory.warehouses.id"
             }
@@ -35250,7 +36251,7 @@
             },
             {
               "name": "tenant_id",
-              "nullable": true,
+              "nullable": false,
               "type": "character varying"
             },
             {
@@ -35470,6 +36471,10 @@
             {
               "column": "article_id",
               "references": "domain_inventory.articles.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_inventory.articles.tenant_id"
             },
             {
               "column": "tenant_id",
@@ -37081,7 +38086,16 @@
               "type": "timestamp with time zone"
             }
           ],
-          "foreign_keys": [],
+          "foreign_keys": [
+            {
+              "column": "dokument_id",
+              "references": "domain_nachweisraum.nachweisraum_dokumente.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_nachweisraum.nachweisraum_dokumente.tenant_id"
+            }
+          ],
           "owner_domain": "dms-compliance",
           "ownership_reason": "Custodian domain_nachweisraum / Domain dms-compliance.",
           "placement": "native",
@@ -41834,6 +42848,21 @@
               "name": "updated_by",
               "nullable": true,
               "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "eichamt",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "zertifikat_nr",
+              "nullable": true,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [],
@@ -43719,6 +44748,70 @@
             "app/services/tank_adapter_service.py"
           ]
         },
+        "waage_import_entries": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "waage_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "raw_text",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "status",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "error",
+              "nullable": true,
+              "type": "text"
+            },
+            {
+              "name": "ticket_id",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "retry_count",
+              "nullable": false,
+              "type": "integer"
+            },
+            {
+              "name": "created_by",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "created_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_ops / Domain inventory.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/services/waage_import_service.py"
+          ]
+        },
         "wf_trigger_log": {
           "columns": [
             {
@@ -45091,12 +46184,21 @@
               "name": "valid_until",
               "nullable": true,
               "type": "date"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [
             {
               "column": "price_list_id",
               "references": "domain_pricing.price_lists.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_pricing.price_lists.tenant_id"
             }
           ],
           "owner_domain": "finance",
@@ -45377,7 +46479,7 @@
             },
             {
               "name": "tenant_id",
-              "nullable": true,
+              "nullable": false,
               "type": "character varying"
             },
             {
@@ -46317,6 +47419,11 @@
               "name": "anerken",
               "nullable": true,
               "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [
@@ -46327,6 +47434,14 @@
             {
               "column": "delivery_note_id",
               "references": "domain_sales.delivery_notes.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_inventory.articles.tenant_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_sales.delivery_notes.tenant_id"
             }
           ],
           "owner_domain": "crm",
@@ -46506,6 +47621,10 @@
             },
             {
               "column": "tenant_id",
+              "references": "domain_shared.branches.tenant_id"
+            },
+            {
+              "column": "tenant_id",
               "references": "domain_shared.tenants.id"
             }
           ],
@@ -46658,12 +47777,21 @@
               "name": "tax_code",
               "nullable": true,
               "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [
             {
               "column": "credit_note_id",
               "references": "domain_sales.sales_credit_notes.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_sales.sales_credit_notes.tenant_id"
             }
           ],
           "owner_domain": "crm",
@@ -46789,7 +47917,7 @@
             },
             {
               "name": "tenant_id",
-              "nullable": true,
+              "nullable": false,
               "type": "character varying"
             },
             {
@@ -50166,9 +51294,18 @@
               "name": "created_at",
               "nullable": false,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [
+            {
+              "column": "tenant_id",
+              "references": "domain_shared.channel_process_threads.tenant_id"
+            },
             {
               "column": "thread_id",
               "references": "domain_shared.channel_process_threads.thread_id"
@@ -51228,6 +52365,10 @@
             {
               "column": "analysis_id",
               "references": "domain_shared.grundfutter_analysen.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_shared.grundfutter_analysen.tenant_id"
             }
           ],
           "owner_domain": "platform",
@@ -51290,6 +52431,10 @@
             {
               "column": "analysis_id",
               "references": "domain_shared.grundfutter_analysen.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_shared.grundfutter_analysen.tenant_id"
             }
           ],
           "owner_domain": "platform",
@@ -51397,6 +52542,10 @@
             {
               "column": "analysis_id",
               "references": "domain_shared.grundfutter_analysen.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_shared.grundfutter_analysen.tenant_id"
             }
           ],
           "owner_domain": "platform",
@@ -52344,6 +53493,10 @@
             {
               "column": "rezept_id",
               "references": "domain_shared.futtermittel_rezepte.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_shared.futtermittel_rezepte.tenant_id"
             }
           ],
           "owner_domain": "platform",
@@ -52484,6 +53637,11 @@
               "name": "sortierung",
               "nullable": true,
               "type": "integer"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [
@@ -52494,6 +53652,14 @@
             {
               "column": "rezept_id",
               "references": "domain_shared.futtermittel_rezepte.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_shared.futtermittel_einzelfutter.tenant_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_shared.futtermittel_rezepte.tenant_id"
             }
           ],
           "owner_domain": "platform",
@@ -52588,6 +53754,10 @@
             {
               "column": "mischfutter_id",
               "references": "domain_shared.futtermittel_mischfutter.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_shared.futtermittel_mischfutter.tenant_id"
             }
           ],
           "owner_domain": "platform",
@@ -53381,6 +54551,10 @@
             {
               "column": "feed_id",
               "references": "domain_shared.futtermittel_einzelfutter.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_shared.futtermittel_einzelfutter.tenant_id"
             }
           ],
           "owner_domain": "platform",
@@ -53993,12 +55167,21 @@
               "name": "created_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [
             {
               "column": "job_id",
               "references": "domain_shared.jobs.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_shared.jobs.tenant_id"
             }
           ],
           "owner_domain": "platform",
@@ -54355,12 +55538,21 @@
               "name": "erstellt_am",
               "nullable": false,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [
             {
               "column": "knowledge_id",
               "references": "domain_shared.knowledge_objects.knowledge_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_shared.knowledge_objects.tenant_id"
             }
           ],
           "owner_domain": "platform",
@@ -58921,12 +60113,21 @@
               "name": "created_at",
               "nullable": false,
               "type": "timestamp without time zone"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "text"
             }
           ],
           "foreign_keys": [
             {
               "column": "gruppe_id",
               "references": "domain_shared.vertreter_provisionsgruppen.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_shared.vertreter_provisionsgruppen.tenant_id"
             }
           ],
           "owner_domain": "platform",
@@ -58968,12 +60169,21 @@
               "name": "provisionssatz",
               "nullable": false,
               "type": "numeric"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "text"
             }
           ],
           "foreign_keys": [
             {
               "column": "staffel_id",
               "references": "domain_shared.vertreter_provisionsstaffeln.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_shared.vertreter_provisionsstaffeln.tenant_id"
             }
           ],
           "owner_domain": "platform",
@@ -59852,6 +61062,11 @@
               "name": "created_at",
               "nullable": false,
               "type": "timestamp without time zone"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "text"
             }
           ],
           "foreign_keys": [
@@ -59862,6 +61077,14 @@
             {
               "column": "klasse_id",
               "references": "domain_shared.zu_abschlagklassen.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_shared.zu_abschlaggruppen.tenant_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_shared.zu_abschlagklassen.tenant_id"
             }
           ],
           "owner_domain": "platform",

@@ -145,7 +145,6 @@ def _anonymize_subject(db: Session, subject_type: str, subject_id: str, tenant_i
     log: list[dict] = []
     anon_name = "ANONYM (DSGVO Art.17)"
     anon_email = "geloescht@dsgvo.invalid"
-    namen = _namen_des_betroffenen(db, subject_type, subject_id, tenant_id)
 
     def anweisungen(typ: str) -> list[tuple[str, str, dict]]:
         basis = {"anon_name": anon_name, "anon_email": anon_email,
@@ -168,7 +167,8 @@ def _anonymize_subject(db: Session, subject_type: str, subject_id: str, tenant_i
                 ("domain_crm.contacts",
                  # Kein tenant_id in der Tabelle — der Mandant haengt am Kunden,
                  # der oben bereits mandantenrein geprueft wurde.
-                 "DELETE FROM domain_crm.contacts WHERE customer_id::text = :sid", basis),
+                 "DELETE FROM domain_crm.contacts c USING domain_crm.customers p"
+                 " WHERE c.customer_id=p.id AND p.id::text=:sid AND p.tenant_id::text=:tid", basis),
             ]
         elif typ == "LEAD":
             # Bis zum 06.10.2026 stand hier ein UPDATE auf
@@ -198,13 +198,15 @@ def _anonymize_subject(db: Session, subject_type: str, subject_id: str, tenant_i
         else:
             return []
 
-        for name in namen:
+        if typ == "CUSTOMER":
+            # Only activities bound by the canonical customer reference are erased.
+            # Free-text name matches are not proof of identity; they stay for
+            # separate review and are reported as unlinked by the GDPR processor.
             schritte.append((
                 "domain_crm.activities",
                 "DELETE FROM domain_crm.activities"
-                " WHERE tenant_id::text = :tid AND"
-                " (customer_id::text = :customer_sid OR (customer_id IS NULL AND customer = :kunde))",
-                {**basis, "kunde": name, "customer_sid": subject_id if subject_type == "CUSTOMER" else None},
+                " WHERE tenant_id::text = :tid AND customer_id::text = :sid",
+                basis,
             ))
         return schritte
 

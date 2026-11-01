@@ -341,7 +341,7 @@ class DebtorBase(BaseModel):
 
 class DebtorCreate(DebtorBase):
     """Schema for creating debtors"""
-    tenant_id: str = Field(..., description="Tenant ID")
+    tenant_id: Optional[str] = Field(None, description="Deprecated: must match the verified tenant")
 
 
 class DebtorUpdate(BaseModel):

@@ -1,7 +1,7 @@
 """Das Abbild der ScreenDefinition-Registry fuer das Frontend ist aktuell.
 
 ``packages/frontend-web/src/masks/screen-registry.snapshot.json`` kommt aus der Python-Registry — der einen
-Quelle. Der Frontend-Test ``capture-screens-sync.test.ts`` vergleicht die von Hand kopierten Definitionen
+Quelle. Der Frontend-Test ``capture-screens-sync.test.ts`` vergleicht die generierten Fallback-Definitionen
 damit. Aendert jemand eine ScreenDefinition, ohne das Abbild neu zu erzeugen, wird es hier rot.
 """
 

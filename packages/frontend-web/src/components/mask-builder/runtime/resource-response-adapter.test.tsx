@@ -42,6 +42,20 @@ describe('explicit human resource adapter', () => {
   expect(() => resourceActionResult(duplicate, req, opts, { id: opts.entityId })).toThrow()
   expect(() => checkResourceAction({ ...action, commandEndpoint: '/api/v1/finance/post' }, req, opts)).toThrow()
  })
+ it('accepts only an empty 204 for an allowlisted delete', async () => {
+  const deletion = { ...action, key: 'delete', method: 'DELETE' as const }
+  checkResourceAction(deletion, { ...req, actionKey: 'delete' }, opts)
+  expect(resourceActionResult(deletion, req, opts, '', 204).resourceId).toBe('template-1')
+  for (const [body, status] of [[{ id: 'foreign' }, 204], ['', 200], [null, 500]] as const) {
+   expect(() => resourceActionResult(deletion, req, opts, body, status)).toThrow()
+  }
+  expect(() => checkResourceAction(deletion, req, { ...opts, entityId: '../foreign' })).toThrow()
+  expect(() => resourceActionResult(deletion, req, { ...opts, entityId: '../foreign' }, '', 204)).toThrow()
+  request.mockResolvedValue({ httpStatus: 204, data: '' })
+  const { result } = renderHook(() => useActionRuntime([deletion], opts)); let receipt
+  await act(async () => { receipt = await result.current.executeAction({ ...req, actionKey: 'delete' }) })
+  expect(receipt).toMatchObject({ success: true, resourceId: 'template-1' })
+ })
  it('keeps transport errors unsuccessful', async () => {
   request.mockRejectedValue(new Error('synthetic failure'))
   const { result } = renderHook(() => useActionRuntime([action], opts)); let receipt

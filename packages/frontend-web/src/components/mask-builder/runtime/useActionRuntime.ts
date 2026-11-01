@@ -139,7 +139,7 @@ export function useActionRuntime(
           data: body,
         })
 
-        const result: ActionResult = actionDef.responseAdapter ? resourceActionResult(actionDef, req, opts, response.data) : response.data
+        const result: ActionResult = actionDef.responseAdapter ? resourceActionResult(actionDef, req, opts, response.data, response.httpStatus) : response.data
         setLastResult(result)
         return result
       } catch (err) {

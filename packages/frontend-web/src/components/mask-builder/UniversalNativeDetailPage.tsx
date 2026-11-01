@@ -226,6 +226,13 @@ function NativeExistingDetailPage({
       void navigate({ to: action.resultNavigationRoute.replace('{result_id}', encodeURIComponent(result.resourceId)) as never })
       return
     }
+    if (action?.responseAdapter === 'resource.v1' && action.method === 'DELETE' &&
+        ((screenId === 'crm/campaign' && action.resultNavigationRoute === '/crm/campaigns') ||
+         (screenId === 'crm/campaign-template' && action.resultNavigationRoute === '/crm/campaign-templates') ||
+         (screenId === 'crm/segment' && action.resultNavigationRoute === '/crm/segments'))) {
+      void navigate({ to: action.resultNavigationRoute as never })
+      return
+    }
     await runtime.refetch()
   }
 
@@ -260,6 +267,7 @@ function NativeExistingDetailPage({
     }
     const hasDryRun = Boolean(
       actionDef?.commandEndpoint &&
+      actionDef.responseAdapter !== 'resource.v1' &&
       !actionDef?.stubReason &&
       (actionDef.commandBinding ? actionDef.commandBinding.preview : MODERATE_OR_ABOVE.has(actionDef?.dangerLevel ?? 'safe')),
     )

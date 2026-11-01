@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import PortalFeedAdvicePage from '@/pages/portal/rationsoptimierung'
+import PortalFeedAdvicePage from '@/components/mask-builder/specialized/feed/portal-feed-surface'
 
 const locationState = vi.hoisted(() => ({ search: '' }))
 
@@ -14,7 +14,7 @@ vi.mock('@/components/mask-builder/UniversalNativeCockpitPage', () => ({
   ),
 }))
 
-vi.mock('@/pages/futtermittel/rationsoptimierung', () => ({
+vi.mock('@/components/mask-builder/specialized/feed/ration-optimization-surface', () => ({
   default: () => <div data-testid="expert-ration-workspace">Expert</div>,
 }))
 

@@ -3,6 +3,13 @@ from __future__ import annotations
 
 from typing import Any
 
+from app.core.screen_definitions_finance_workbench import build_bank_workbench, build_dunning_workbench
+from app.core.screen_definitions_finance_capture import build_debtor_capture, build_invoice_capture
+from app.core.screen_definitions_feed_workbench import build_feed_workbench
+from app.core.screen_definitions_stamm import build_feed_einzel_create, build_feed_misch_create
+
+from app.core.screen_definitions_intake_weighing import build_scale_create, build_weighing_tickets
+
 from app.core.cockpit_overview_parent import (
     build_cockpit_overview_screen,
     cockpit_entity_source,
@@ -80,22 +87,7 @@ def build_einkauf_rechnung_eingang_erfassung_screen_definition() -> dict[str, An
 
 
 def build_einkauf_rechnungseingang_neu_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "stammdaten", "label": "Stammdaten", "sortable": True, "filterable": True, "width": 160}, {"key": "betrag", "label": "Betrag", "sortable": True, "filterable": True, "width": 160}, {"key": "zahlung", "label": "Zahlung", "sortable": True, "filterable": True, "width": 160}, {"key": "positionen", "label": "Positionen", "sortable": True, "filterable": True, "width": 160}, {"key": "artikelId", "label": "Artikelid", "sortable": True, "filterable": True, "width": 160}, {"key": "menge", "label": "Menge", "sortable": True, "filterable": True, "width": 160}, {"key": "preis", "label": "Preis", "sortable": True, "filterable": True, "width": 160}, {"key": "steuerSatz", "label": "Steuersatz", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="einkauf/rechnungseingang/neu",
-        domain="einkauf",
-        title="Vorgang",
-        subtitle="einkauf",
-        endpoint="/api/v1/finance/chart-of-accounts/",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Vorgang im einkauf-Bereich finden und auswerten.",
-        prompts=["Zeige Vorgang.", "Filtere die Liste."],
-        bundle="einkauf",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
+    return build_invoice_capture(purchase=True)
 
 
 def build_einkauf_reports_screen_definition() -> dict[str, Any]:
@@ -985,22 +977,7 @@ def build_finance_ap_invoices_new_screen_definition() -> dict[str, Any]:
 
 
 def build_finance_bank_abgleich_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "import", "label": "Import", "sortable": True, "filterable": True, "width": 160}, {"key": "salden", "label": "Salden", "sortable": True, "filterable": True, "width": 160}, {"key": "zuordnung", "label": "Zuordnung", "sortable": True, "filterable": True, "width": 160}, {"key": "zuordnung_custom", "label": "Zuordnung Custom", "sortable": True, "filterable": True, "width": 160}, {"key": "import_protokoll", "label": "Import Protokoll", "sortable": True, "filterable": True, "width": 160}, {"key": "abgleich", "label": "Abgleich", "sortable": True, "filterable": True, "width": 160}, {"key": "validate", "label": "Validate", "sortable": True, "filterable": True, "width": 160}, {"key": "export", "label": "Export", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="finance/bank-abgleich",
-        domain="finance",
-        title="Objekt",
-        subtitle="finance",
-        endpoint="/api/v1/finance/abstimmung/nebenbuch",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Objekt im finance-Bereich finden und auswerten.",
-        prompts=["Zeige Objekt.", "Filtere die Liste."],
-        bundle="finance",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
+    return build_bank_workbench()
 
 
 def build_finance_bank_stamm_screen_definition() -> dict[str, Any]:
@@ -1085,20 +1062,7 @@ def build_finance_datev_export_screen_definition() -> dict[str, Any]:
 
 
 def build_finance_debitoren_new_screen_definition() -> dict[str, Any]:
-    return build_stamm_object_page(
-        screen_id="finance/debitoren/new",
-        domain="finance",
-        title="Debitoren stamm",
-        subtitle="finance",
-        identity_field="stammdaten",
-        data_sources=[stamm_entity_source("/api/v1/finance/debtors/{entity_id}")],
-        tabs=[stamm_kopf_tab([{"key": "stammdaten", "label": "Stammdaten", "type": "text"}, {"key": "kontakt", "label": "Kontakt", "type": "text"}, {"key": "bankverbindung", "label": "Bankverbindung", "type": "text"}, {"key": "konditionen", "label": "Konditionen", "type": "text"}, {"key": "notizen", "label": "Notizen", "type": "text"}, {"key": "validate", "label": "Validate", "type": "text"}])],
-        edit_permission="finance.write",
-        no_workflow_reason="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-        business_purpose="Debitoren stamm als Stammblatt pflegen.",
-        example_prompts=["Oeffne Debitoren stamm.", "Bearbeite Stammdaten."],
-        test_id="finance-debitoren-new",
-    )
+    return build_debtor_capture()
 
 
 def build_finance_dunning_editor_screen_definition() -> dict[str, Any]:
@@ -1140,22 +1104,7 @@ def build_finance_invoices_list_screen_definition() -> dict[str, Any]:
 
 
 def build_finance_invoices_new_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="finance/invoices/new",
-        domain="finance",
-        title="Invoice form",
-        subtitle="finance",
-        endpoint="/api/v1/finance/invoices",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Invoice form im finance-Bereich finden und auswerten.",
-        prompts=["Zeige Invoice form.", "Filtere die Liste."],
-        bundle="finance",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
+    return build_invoice_capture(purchase=False)
 
 
 def build_finance_kasse_screen_definition() -> dict[str, Any]:
@@ -1786,39 +1735,11 @@ def build_futtermittel_einzelfuttermittel_liste_screen_definition() -> dict[str,
 
 
 def build_futtermittel_einzelfuttermittel_stamm_new_screen_definition() -> dict[str, Any]:
-    return build_stamm_object_page(
-        screen_id="futtermittel/einzelfuttermittel/stamm/new",
-        domain="futtermittel",
-        title="Einzelfuttermittel-Stammdaten",
-        subtitle="futtermittel",
-        identity_field="allgemein",
-        data_sources=[stamm_entity_source("/api/v1/futter/einzelfuttermittel/{entity_id}")],
-        tabs=[stamm_kopf_tab([{"key": "allgemein", "label": "Allgemein", "type": "text"}, {"key": "inhaltsstoffe", "label": "Inhaltsstoffe", "type": "text"}, {"key": "qualitaet", "label": "Qualitaet", "type": "text"}, {"key": "lager", "label": "Lager", "type": "text"}, {"key": "validate", "label": "Validate", "type": "text"}, {"key": "save", "label": "Save", "type": "text"}])],
-        edit_permission="futtermittel.write",
-        no_workflow_reason="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-        business_purpose="Einzelfuttermittel-Stammdaten als Stammblatt pflegen.",
-        example_prompts=["Oeffne Einzelfuttermittel-Stammdaten.", "Bearbeite Stammdaten."],
-        test_id="futtermittel-einzelfuttermittel-stamm-new",
-    )
+    return build_feed_einzel_create()
 
 
 def build_futtermittel_fuetterungsdokumentation_mobil_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="futtermittel/fuetterungsdokumentation-mobil",
-        domain="futtermittel",
-        title="Fuetterungsdokumentation mobil",
-        subtitle="futtermittel",
-        endpoint="/api/v1/futtermittel/qs/haccp-plaene",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Fuetterungsdokumentation mobil im futtermittel-Bereich finden und auswerten.",
-        prompts=["Zeige Fuetterungsdokumentation mobil.", "Filtere die Liste."],
-        bundle="futtermittel",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
+    return build_feed_workbench("futtermittel/fuetterungsdokumentation-mobil")
 
 
 def build_futtermittel_futtermittel_bestellung_screen_definition() -> dict[str, Any]:
@@ -1917,20 +1838,7 @@ def build_futtermittel_mischfuttermittel_liste_screen_definition() -> dict[str, 
 
 
 def build_futtermittel_mischfuttermittel_stamm_new_screen_definition() -> dict[str, Any]:
-    return build_stamm_object_page(
-        screen_id="futtermittel/mischfuttermittel/stamm/new",
-        domain="futtermittel",
-        title="Mischfuttermittel-Stammdaten",
-        subtitle="futtermittel",
-        identity_field="allgemein",
-        data_sources=[stamm_entity_source("/api/v1/futter/mischfuttermittel/{entity_id}")],
-        tabs=[stamm_kopf_tab([{"key": "allgemein", "label": "Allgemein", "type": "text"}, {"key": "zielgruppe", "label": "Zielgruppe", "type": "text"}, {"key": "rezeptur", "label": "Rezeptur", "type": "text"}, {"key": "naehrwerte", "label": "Naehrwerte", "type": "text"}, {"key": "qualitaet", "label": "Qualitaet", "type": "text"}, {"key": "lager", "label": "Lager", "type": "text"}])],
-        edit_permission="futtermittel.write",
-        no_workflow_reason="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-        business_purpose="Mischfuttermittel-Stammdaten als Stammblatt pflegen.",
-        example_prompts=["Oeffne Mischfuttermittel-Stammdaten.", "Bearbeite Stammdaten."],
-        test_id="futtermittel-mischfuttermittel-stamm-new",
-    )
+    return build_feed_misch_create()
 
 
 def build_futtermittel_rations_schnittstellen_import_screen_definition() -> dict[str, Any]:
@@ -1972,39 +1880,11 @@ def build_futtermittel_rations_zugang_screen_definition() -> dict[str, Any]:
 
 
 def build_futtermittel_rationseditor_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="futtermittel/rationseditor",
-        domain="futtermittel",
-        title="Rationseditor",
-        subtitle="futtermittel",
-        endpoint="/api/v1/futtermittel/qs/haccp-plaene",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Rationseditor im futtermittel-Bereich finden und auswerten.",
-        prompts=["Zeige Rationseditor.", "Filtere die Liste."],
-        bundle="futtermittel",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
+    return build_feed_workbench("futtermittel/rationseditor")
 
 
 def build_futtermittel_rationsoptimierung_screen_definition() -> dict[str, Any]:
-    cols = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_cockpit_overview_screen(
-        screen_id="futtermittel/rationsoptimierung",
-        domain="futtermittel",
-        title="Rationsoptimierung",
-        subtitle="futtermittel",
-        business_purpose="Rationsoptimierung mandantensicher als Cockpit bereitstellen.",
-        example_prompts=["Zeige Rationsoptimierung.", "Aktualisiere die Kennzahlen."],
-        test_id="futtermittel-rationsoptimierung",
-        data_sources=[cockpit_entity_source("/api/v1/futtermittel/qs/haccp-plaene")],
-        tables=[cockpit_summary_table(table_key="list", label="Rationsoptimierung", columns=cols)],
-        actions=[cockpit_refresh_action(permission="futtermittel.read")],
-        context_rail="combined",
-    )
+    return build_feed_workbench("futtermittel/rationsoptimierung")
 
 
 def build_futtermittel_rationsvergleich_screen_definition() -> dict[str, Any]:
@@ -2584,22 +2464,7 @@ def build_logistik_frachtbriefe_screen_definition() -> dict[str, Any]:
 
 
 def build_mahnwesen_mahnlauf_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="mahnwesen/mahnlauf",
-        domain="mahnwesen",
-        title="Mahnlauf",
-        subtitle="mahnwesen",
-        endpoint="/api/v1/finance/mahnlauf/candidates",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Mahnlauf im mahnwesen-Bereich finden und auswerten.",
-        prompts=["Zeige Mahnlauf.", "Filtere die Liste."],
-        bundle="mahnwesen",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
+    return build_dunning_workbench()
 
 
 def build_marketing_kampagnen_screen_definition() -> dict[str, Any]:
@@ -2939,22 +2804,7 @@ def build_portal_preisspiegel_screen_definition() -> dict[str, Any]:
 
 
 def build_portal_rationsoptimierung_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="portal/rationsoptimierung",
-        domain="portal",
-        title="Rationsoptimierung",
-        subtitle="portal",
-        endpoint="/api/v1/portal/anfragen",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Rationsoptimierung im portal-Bereich finden und auswerten.",
-        prompts=["Zeige Rationsoptimierung.", "Filtere die Liste."],
-        bundle="portal",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
+    return build_feed_workbench("portal/rationsoptimierung")
 
 
 def build_portal_rechnungen_screen_definition() -> dict[str, Any]:
@@ -3618,22 +3468,17 @@ def build_sales_auftragskette_screen_definition() -> dict[str, Any]:
 
 
 def build_sales_credit_notes_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="sales/credit-notes",
-        domain="sales",
-        title="Credit note editor",
-        subtitle="sales",
-        endpoint="/api/v1/sales/blanket-orders",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Credit note editor im sales-Bereich finden und auswerten.",
-        prompts=["Zeige Credit note editor.", "Filtere die Liste."],
-        bundle="sales",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
+    from app.core.screen_definitions_capture import build_sales_gutschrift_screen_definition
+    definition = build_sales_gutschrift_screen_definition()
+    definition["id"] = "sales/credit-notes"
+    definition["adapter"] = {"type": "native", "sourceId": "sales/credit-notes", "temporary": False}
+    # These row controls only select a fetched record or edit an unsaved position.
+    # Read and mutation authorization remains on the actual server endpoints.
+    for table in definition.get("tables", []):
+        for action in table.get("rowActions", []):
+            if action.get("key") in {"laden", "pruefen", "entfernen"}:
+                action.pop("permission", None)
+    return definition
 
 
 def build_sales_delivery_editor_screen_definition() -> dict[str, Any]:
@@ -4378,22 +4223,8 @@ def build_verkauf_lieferschein_erfassung_screen_definition() -> dict[str, Any]:
 
 
 def build_verkauf_rechnungen_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="verkauf/rechnungen",
-        domain="verkauf",
-        title="Rechnungen worklist",
-        subtitle="verkauf",
-        endpoint="/api/v1/verkauf/kunden",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Rechnungen worklist im verkauf-Bereich finden und auswerten.",
-        prompts=["Zeige Rechnungen worklist.", "Filtere die Liste."],
-        bundle="verkauf",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
+    from app.core.native_screen_aliases import build_native_alias
+    return build_native_alias("verkauf/rechnungen")
 
 
 def build_verkauf_rechnungen_neu_screen_definition() -> dict[str, Any]:
@@ -4512,22 +4343,7 @@ def build_vertrieb_kundenumsatz_screen_definition() -> dict[str, Any]:
 
 
 def build_waage_neu_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="waage/neu",
-        domain="waage",
-        title="Liste",
-        subtitle="waage",
-        endpoint="/api/v1/waage/hofliste",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Liste im waage-Bereich finden und auswerten.",
-        prompts=["Zeige Liste.", "Filtere die Liste."],
-        bundle="waage",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
+    return build_scale_create()
 
 
 def build_waage_vorlagen_screen_definition() -> dict[str, Any]:
@@ -4569,192 +4385,54 @@ def build_waage_wiegeschein_detail_screen_definition() -> dict[str, Any]:
 
 
 def build_waage_wiegungen_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="waage/wiegungen",
-        domain="waage",
-        title="Wiegungen",
-        subtitle="waage",
-        endpoint="/api/v1/waage/hofliste",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Wiegungen im waage-Bereich finden und auswerten.",
-        prompts=["Zeige Wiegungen.", "Filtere die Liste."],
-        bundle="waage",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
+    return build_weighing_tickets()
+
+
+def _build_flow_spine_workspace(process_key: str) -> dict[str, Any]:
+    screen_id = f"workflow/flow-spine-{process_key}"
+    return {
+        "schemaVersion": 1, "id": screen_id, "domain": "workflow", "mode": "cockpit",
+        "title": process_key, "adapter": {"type": "native", "sourceId": screen_id, "temporary": False},
+        "layout": {"floorplan": "cockpit", "density": "expertDense", "contextRail": "workflow"},
+        "flowSpineWorkspace": {"processKey": process_key},
+        "agentContract": {"businessPurpose": "Prozessraum und Vorgänge bedienen.", "examplePrompts": ["Zeige den Prozessraum."], "sensitiveFields": [], "forbiddenAgentTasks": [], "testSelectors": {"screenRoot": f"[data-testid=\"workflow-flow-spine-{process_key}\"]"}},
+    }
 
 
 def build_workflow_flow_spine_complaint_to_resolution_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="workflow/flow-spine-complaint-to-resolution",
-        domain="workflow",
-        title="Flow spine complaint to resolution",
-        subtitle="workflow",
-        endpoint="/api/v1/workflow/cockpit-db/dead-letter",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Flow spine complaint to resolution im workflow-Bereich finden und auswerten.",
-        prompts=["Zeige Flow spine complaint to resolution.", "Filtere die Liste."],
-        bundle="workflow",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
+    return _build_flow_spine_workspace("complaint-to-resolution")
 
 
 def build_workflow_flow_spine_compliance_to_report_screen_definition() -> dict[str, Any]:
-    cols = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_cockpit_overview_screen(
-        screen_id="workflow/flow-spine-compliance-to-report",
-        domain="workflow",
-        title="Flow spine compliance to report",
-        subtitle="workflow",
-        business_purpose="Flow spine compliance to report mandantensicher als Cockpit bereitstellen.",
-        example_prompts=["Zeige Flow spine compliance to report.", "Aktualisiere die Kennzahlen."],
-        test_id="workflow-flow-spine-compliance-to-report",
-        data_sources=[cockpit_entity_source("/api/v1/workflow/cockpit-db/dead-letter")],
-        tables=[cockpit_summary_table(table_key="list", label="Flow spine compliance to report", columns=cols)],
-        actions=[cockpit_refresh_action(permission="workflow.read")],
-        context_rail="combined",
-    )
+    return _build_flow_spine_workspace("compliance-to-report")
 
 
 def build_workflow_flow_spine_contract_to_settlement_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="workflow/flow-spine-contract-to-settlement",
-        domain="workflow",
-        title="Flow spine contract to settlement",
-        subtitle="workflow",
-        endpoint="/api/v1/workflow/cockpit-db/dead-letter",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Flow spine contract to settlement im workflow-Bereich finden und auswerten.",
-        prompts=["Zeige Flow spine contract to settlement.", "Filtere die Liste."],
-        bundle="workflow",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
+    return _build_flow_spine_workspace("contract-to-settlement")
 
 
 def build_workflow_flow_spine_finance_to_close_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="workflow/flow-spine-finance-to-close",
-        domain="workflow",
-        title="Flow spine finance to close",
-        subtitle="workflow",
-        endpoint="/api/v1/workflow/cockpit-db/dead-letter",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Flow spine finance to close im workflow-Bereich finden und auswerten.",
-        prompts=["Zeige Flow spine finance to close.", "Filtere die Liste."],
-        bundle="workflow",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
+    return _build_flow_spine_workspace("finance-to-close")
 
 
 def build_workflow_flow_spine_harvest_to_settlement_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="workflow/flow-spine-harvest-to-settlement",
-        domain="workflow",
-        title="Flow spine harvest to settlement",
-        subtitle="workflow",
-        endpoint="/api/v1/workflow/cockpit-db/dead-letter",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Flow spine harvest to settlement im workflow-Bereich finden und auswerten.",
-        prompts=["Zeige Flow spine harvest to settlement.", "Filtere die Liste."],
-        bundle="workflow",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
+    return _build_flow_spine_workspace("harvest-to-settlement")
 
 
 def build_workflow_flow_spine_inventory_to_settlement_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="workflow/flow-spine-inventory-to-settlement",
-        domain="workflow",
-        title="Flow spine inventory to settlement",
-        subtitle="workflow",
-        endpoint="/api/v1/workflow/cockpit-db/dead-letter",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Flow spine inventory to settlement im workflow-Bereich finden und auswerten.",
-        prompts=["Zeige Flow spine inventory to settlement.", "Filtere die Liste."],
-        bundle="workflow",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-        table_profile="inventory",
-    )
+    return _build_flow_spine_workspace("inventory-to-settlement")
 
 
 def build_workflow_flow_spine_order_to_cash_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="workflow/flow-spine-order-to-cash",
-        domain="workflow",
-        title="Flow spine order to cash",
-        subtitle="workflow",
-        endpoint="/api/v1/workflow/cockpit-db/dead-letter",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Flow spine order to cash im workflow-Bereich finden und auswerten.",
-        prompts=["Zeige Flow spine order to cash.", "Filtere die Liste."],
-        bundle="workflow",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
+    return _build_flow_spine_workspace("order-to-cash")
 
 
 def build_workflow_flow_spine_procure_to_pay_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="workflow/flow-spine-procure-to-pay",
-        domain="workflow",
-        title="Flow spine procure to pay",
-        subtitle="workflow",
-        endpoint="/api/v1/workflow/cockpit-db/dead-letter",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Flow spine procure to pay im workflow-Bereich finden und auswerten.",
-        prompts=["Zeige Flow spine procure to pay.", "Filtere die Liste."],
-        bundle="workflow",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
+    return _build_flow_spine_workspace("procure-to-pay")
 
 
 def build_workflow_flow_spine_service_to_customer_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="workflow/flow-spine-service-to-customer",
-        domain="workflow",
-        title="Flow spine service to customer",
-        subtitle="workflow",
-        endpoint="/api/v1/workflow/cockpit-db/dead-letter",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Flow spine service to customer im workflow-Bereich finden und auswerten.",
-        prompts=["Zeige Flow spine service to customer.", "Filtere die Liste."],
-        bundle="workflow",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
+    return _build_flow_spine_workspace("service-to-customer")
 
 
 def build_workflow_flow_spine_studio_screen_definition() -> dict[str, Any]:

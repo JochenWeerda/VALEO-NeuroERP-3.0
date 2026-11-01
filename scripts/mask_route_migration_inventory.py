@@ -17,7 +17,7 @@ OUT = ROOT / "docs" / "architecture" / "uix" / "mask-route-migration-inventory.m
 
 
 def classify_source(text: str, *, filename: str = "") -> str:
-    from app.core.mask_runtime_evidence import has_visible_runtime
+    from app.core.mask_runtime_evidence import has_visible_runtime, bound_domain_runtime_ids
     # A lazy wrapper still runs the previous page; its name proves no migration.
     if "createLegacyMaskPage" in text:
         return "legacy_wrapper"
@@ -27,7 +27,7 @@ def classify_source(text: str, *, filename: str = "") -> str:
         return "runtime_wired"
     if filename == "MaskRolloutRoute.tsx" and "UniversalMaskRolloutPilotPage" in text:
         return "runtime_wired"
-    if has_visible_runtime(text):
+    if has_visible_runtime(text) or bound_domain_runtime_ids(text, root=ROOT):
         return "runtime_wired"
     if re.search(r"\bObjectPage\b", text) or re.search(r"\bListReport\b", text):
         return "legacy_mask_pattern"

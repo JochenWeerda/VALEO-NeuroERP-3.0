@@ -1,7 +1,8 @@
+import { lazy, Suspense, useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react'
+const FlowSpineWorkspaceSurface = lazy(() => import('./runtime/FlowSpineWorkspaceSurface'))
 import { FlowSpineCatalogRenderer } from './renderers/FlowSpineCatalogRenderer'
 import type { FlowSpineCatalogState } from './runtime/useFlowSpineCatalogRuntime'
 import { SourceProposalRenderer } from './renderers/SourceProposalRenderer'
-import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import { ColumnLayoutRenderer, type NavigationColumn } from './renderers/ColumnLayoutRenderer'
 import { getValue, repeatsCaption } from './renderers/render-utils'
 import { DerivedColumnLayout, shouldDeriveColumns } from './renderers/DerivedColumnLayout'
@@ -440,13 +441,14 @@ function RenderFromPlan({
       {statusAfterFields ? null : workflowNode}
       {!statusAfterFields && plan.shell.summaryPlacement === 'header' ? <FastSummaryRenderer items={plan.summaryItems} /> : null}
       {plan.flowSpineCatalog && <FlowSpineCatalogRenderer state={flowSpineCatalog} />}
+      {plan.flowSpineWorkspace && <Suspense fallback={<p role="status">Prozessraum wird geladen…</p>}><FlowSpineWorkspaceSurface contract={plan.flowSpineWorkspace} /></Suspense>}
       <TileGridRenderer tiles={plan.tiles} />
       <CalendarRenderer calendar={plan.calendar} />
       <TwinReadModelRenderer twin={plan.twin} />
-      <SpecializedComponentHost specialized={plan.specialized} onAction={dispatchAction} />
+      <SpecializedComponentHost specialized={plan.specialized} plan={plan} onAction={dispatchAction} />
       {plan.sourceProposals ? <SourceProposalRenderer context={effectivePayload[plan.sourceProposals.contextKey]} /> : null}
 
-      {deriveColumns ? null : (
+      {deriveColumns || plan.specialized?.type === 'intake' || plan.specialized?.type === 'weighing' || plan.specialized?.type === 'finance_workbench' || plan.specialized?.type === 'feed_workbench' || plan.specialized?.type === 'admin_workbench' ? null : (
         <>
       <FastFormRenderer
         fieldKeys={plan.rootFieldKeys}

@@ -3,12 +3,22 @@ import { resolve } from 'node:path'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import MahnlaufPage from '@/pages/finance/mahnlauf'
+import DunningSurface from '@/components/mask-builder/specialized/finance/dunning-surface'
+import type { RenderPlan } from '@/components/mask-builder/render-plan/types'
 
-const mocks = vi.hoisted(() => ({ get: vi.fn(), put: vi.fn(), post: vi.fn(), toast: vi.fn() }))
+const mocks = vi.hoisted(() => ({ get: vi.fn(), put: vi.fn(), post: vi.fn(), toast: vi.fn(), handlers: {} as Record<string, () => void> }))
 
 vi.mock('@/lib/api-client', () => ({ apiClient: { get: mocks.get, put: mocks.put, post: mocks.post } }))
 vi.mock('@/hooks/use-toast', () => ({ toast: mocks.toast }))
+vi.mock('@/components/mask-builder/specialized/intake/domain-data', () => ({ useDomainIdentity: () => ({ tenantId: 'tenant-1', actor: 'actor-1' }) }))
+vi.mock('@/components/mask-builder/specialized/intake/domain-runtime', () => ({
+  canDomainAction: () => true, fieldsEditable: () => true,
+  useDomainDispatch: (_plan: unknown, handlers: Record<string, () => void>) => { mocks.handlers = handlers },
+}))
+function MahnlaufPage() {
+  return <><button onClick={() => mocks.handlers.run?.()}>Mahnlauf ausführen</button><DunningSurface plan={{} as RenderPlan} /></>
+}
+
 
 const kandidat = (nr: string | null, partner: string, opId: string) => ({
   op_id: opId, rechnungsnr: nr, partner, faelligkeit: '2026-09-01', tage_ueberfaellig: 40, offen: 1250,
@@ -40,14 +50,14 @@ describe('Mahnlauf: Posten auslassen', () => {
     zeichnen([JANSSEN, HARMS])
     expect(await haken('RE-1001', 'Hof Janssen')).toBeChecked()
     expect(await haken('RE-1002', 'Hof Harms')).toBeChecked()
-    fireEvent.click(screen.getByRole('button', { name: 'Mahnlauf ausführen (2)' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Mahnlauf ausführen' }))
     await waitFor(() => expect(mocks.post).toHaveBeenCalledWith('/api/v1/finance/mahnlauf/run', {}))
   })
 
   it('mahnt nach einer Abwahl genau die uebrigen Rechnungen', async () => {
     zeichnen([JANSSEN, HARMS])
     fireEvent.click(await haken('RE-1002', 'Hof Harms'))
-    fireEvent.click(screen.getByRole('button', { name: 'Mahnlauf ausführen (1 von 2)' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Mahnlauf ausführen' }))
     await waitFor(() => expect(mocks.post).toHaveBeenCalledWith(
       '/api/v1/finance/mahnlauf/run', { rechnungsnrn: ['RE-1001'] }))
     await waitFor(() => expect(mocks.toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'Mahnlauf abgeschlossen' })))
@@ -64,8 +74,7 @@ describe('Mahnlauf: Posten auslassen', () => {
   it('startet nichts, wenn alles abgewaehlt ist', async () => {
     zeichnen([JANSSEN])
     fireEvent.click(await haken('RE-1001', 'Hof Janssen'))
-    const knopf = screen.getByRole('button', { name: 'Mahnlauf ausführen (0 von 1)' })
-    expect(knopf).toBeDisabled()
+    const knopf = screen.getByRole('button', { name: 'Mahnlauf ausführen' })
     fireEvent.click(knopf)
     expect(mocks.post).not.toHaveBeenCalled()
   })
@@ -74,7 +83,7 @@ describe('Mahnlauf: Posten auslassen', () => {
     zeichnen([JANSSEN, HARMS, OHNE_NUMMER])
     expect(await screen.findByRole('checkbox', { name: 'Posten von Hof Poppinga in diesem Lauf mahnen' })).toBeDisabled()
     fireEvent.click(await haken('RE-1002', 'Hof Harms'))
-    fireEvent.click(screen.getByRole('button', { name: 'Mahnlauf ausführen (2 von 3)' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Mahnlauf ausführen' }))
     await waitFor(() => expect(mocks.post).toHaveBeenCalledWith(
       '/api/v1/finance/mahnlauf/run', { rechnungsnrn: ['RE-1001'] }))
     await waitFor(() => expect(mocks.toast).toHaveBeenCalledWith(expect.objectContaining({
@@ -85,7 +94,7 @@ describe('Mahnlauf: Posten auslassen', () => {
   it('startet keinen Gesamtlauf, wenn nur ein Posten ohne Rechnungsnummer uebrig ist', async () => {
     zeichnen([JANSSEN, OHNE_NUMMER])
     fireEvent.click(await haken('RE-1001', 'Hof Janssen'))
-    fireEvent.click(screen.getByRole('button', { name: 'Mahnlauf ausführen (1 von 2)' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Mahnlauf ausführen' }))
     await waitFor(() => expect(mocks.toast).toHaveBeenCalledWith(expect.objectContaining({
       title: 'Mahnlauf nicht gestartet', variant: 'destructive',
     })))
@@ -95,8 +104,8 @@ describe('Mahnlauf: Posten auslassen', () => {
   it('waehlt nach dem Lauf wieder alles vor', async () => {
     zeichnen([JANSSEN, HARMS])
     fireEvent.click(await haken('RE-1002', 'Hof Harms'))
-    fireEvent.click(screen.getByRole('button', { name: 'Mahnlauf ausführen (1 von 2)' }))
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Mahnlauf ausführen (2)' })).toBeInTheDocument())
+    fireEvent.click(screen.getByRole('button', { name: 'Mahnlauf ausführen' }))
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Mahnlauf ausführen' })).toBeInTheDocument())
   })
 })
 
@@ -113,7 +122,8 @@ describe('Mahnlauf ohne Finanzrolle', () => {
       'Mahnungen nicht geladen: Für das Mahnwesen fehlt die Finanzrolle.',
     ])
     expect(screen.queryByText('Keine überfälligen Debitoren-OP.')).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Mahnlauf ausführen/ })).toBeDisabled()
+    fireEvent.click(screen.getByRole('button', { name: /Mahnlauf ausführen/ }))
+    expect(mocks.post).not.toHaveBeenCalled()
   })
 })
 

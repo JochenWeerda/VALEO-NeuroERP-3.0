@@ -3,6 +3,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from app.core.screen_definitions_intake_weighing import build_intake_queue, build_intake_quality
+
 from app.core.kontroll_worklist_legacy_payloads import KONTROLL_WORKLIST_LEGACY_PAYLOADS
 from app.core.screen_definitions_kontrolle_batch12 import BATCH12_BUILDERS, BATCH12_KONTROLL_TEST_IDS
 from app.core.kontroll_worklist_parent import (
@@ -607,6 +609,8 @@ KONTROLLE_SCREEN_BUILDERS: dict[str, Any] = {
     **{sid: _lift_legacy_kontroll_worklist(sid) for sid in KONTROLL_WORKLIST_LEGACY_PAYLOADS},
     **BATCH8_KONTROLL_BUILDERS,
     **BATCH12_BUILDERS,
+    "annahme/warteschlange": build_intake_queue,
+    "annahme/qualitaets-check": build_intake_quality,
 }
 
 KONTROLL_WORKLIST_SCREEN_IDS: tuple[str, ...] = (
