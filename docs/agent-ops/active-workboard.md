@@ -20225,3 +20225,11 @@ Abweichung 409); Kreditor-Aenderung lehnt Bankfelder ab; Debitor-/Kreditor-Detai
 (Studio-SD, tableProfile financial). Klaerfaelle per Zeilenaktion zuordnen/neuer-partner mit Begruendung,
 Audit, Outbox (Recht STAMMDATEN). Aktionsrechte-Projektion neu erzeugt (war seit #92 veraltet).
 Offen: Stufe 3b Konten/SEPA am Partner (Fachentscheidung Kontennummern), Stufen 4-6.
+
+## BP-LESEWEGE-STUFE4-20261101 — abgeschlossen, Claude
+
+Stufe 4 des ADR Geschaeftspartnerstamm: Debitoren-/Kreditorenliste und -detail ordnen offene Posten ueber
+Kennung zu (debtor_id, kunde_id, creditor_id, lieferant_id, partner_id; ID, Nummer oder Partner-ID), Name nur
+ohne treffende Kennung und nur eindeutig (vorher Summe nach Namen). Register "Offene Posten" der Debitor- und
+Kreditormaske zeigt die eigenen Posten (vorher leerer Stub). Listen mit Geschaeftspartnernummer.
+Naechstes: Stufe 3b eigene Debitoren-/Kreditorennummer je Geschaeftspartner-ID (Nutzerentscheidung 01.11.).
