@@ -1,23 +1,23 @@
 {
  "_note": "Generiert von scripts/rls_inventory.py; nicht von Hand aendern. Plan: docs/architecture/rls-mandantenkernel-plan.md",
  "summary": {
-  "tables": 775,
+  "tables": 778,
   "by_class": {
-   "A": 675,
+   "A": 679,
    "B": 32,
-   "C": 14,
-   "D": 54
+   "C": 15,
+   "D": 52
   },
-  "rls_enabled": 635,
+  "rls_enabled": 639,
   "tenant_types": {
-   "character varying": 333,
+   "character varying": 335,
    "character varying(100)": 9,
    "character varying(120)": 39,
    "character varying(128)": 1,
    "character varying(255)": 1,
    "character varying(36)": 82,
    "character varying(50)": 1,
-   "character varying(64)": 103,
+   "character varying(64)": 105,
    "character varying(80)": 24,
    "text": 110,
    "uuid": 4
@@ -93,7 +93,6 @@
    "app/api/v1/endpoints/articles.py": 1,
    "app/api/v1/endpoints/chart_of_accounts.py": 1,
    "app/api/v1/endpoints/crm_reports.py": 1,
-   "app/api/v1/endpoints/customer_extensions.py": 1,
    "app/api/v1/endpoints/farm_profiles.py": 1,
    "app/api/v1/endpoints/nutrient_compositions.py": 1,
    "app/api/v1/endpoints/reklamation_api.py": 1,
@@ -1080,7 +1079,7 @@
   },
   {
    "table": "domain_crm.activities",
-   "class": "B",
+   "class": "A",
    "tenant_type": "character varying",
    "rls": false,
    "force_rls": false,
@@ -1384,6 +1383,22 @@
   },
   {
    "table": "domain_crm.opportunity",
+   "class": "A",
+   "tenant_type": "character varying",
+   "rls": true,
+   "force_rls": false,
+   "policies": 4
+  },
+  {
+   "table": "domain_crm.partner_klaerfaelle",
+   "class": "A",
+   "tenant_type": "character varying",
+   "rls": true,
+   "force_rls": false,
+   "policies": 4
+  },
+  {
+   "table": "domain_crm.partner_rueckfuellung_protokoll",
    "class": "A",
    "tenant_type": "character varying",
    "rls": true,
@@ -3883,11 +3898,11 @@
   },
   {
    "table": "domain_ops.ops_waagen",
-   "class": "D",
-   "tenant_type": null,
-   "rls": false,
+   "class": "B",
+   "tenant_type": "character varying(64)",
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_wartung_anlagen",
@@ -3907,11 +3922,14 @@
   },
   {
    "table": "domain_ops.ops_wiegungen",
-   "class": "D",
+   "class": "C",
    "tenant_type": null,
    "rls": false,
    "force_rls": false,
-   "policies": 0
+   "policies": 0,
+   "tenant_parents": [
+    "domain_ops.ops_waagen"
+   ]
   },
   {
    "table": "domain_ops.ops_zapfungen",
@@ -4072,6 +4090,14 @@
    "rls": true,
    "force_rls": false,
    "policies": 4
+  },
+  {
+   "table": "domain_ops.waage_import_entries",
+   "class": "A",
+   "tenant_type": "character varying(64)",
+   "rls": true,
+   "force_rls": false,
+   "policies": 1
   },
   {
    "table": "domain_ops.wf_trigger_log",
