@@ -1,4 +1,4 @@
-ARG PYTHON_IMAGE=python:3.13.16-slim-bookworm
+ARG PYTHON_IMAGE=python:3.13.18-slim-bookworm
 FROM ${PYTHON_IMAGE} AS builder
 
 WORKDIR /build
@@ -12,9 +12,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Pinned upstream security backports; keep the real interpreter version.
-COPY config/security/cpython-3.13.16/ /build/cpython-security/
+COPY config/security/cpython-3.13.18/ /build/cpython-security/
 COPY scripts/verify_cpython_security.py /build/verify_cpython_security.py
-RUN python -c "import sys; assert sys.version_info[:3] == (3, 13, 16)" \
+RUN python -c "import sys; assert sys.version_info[:3] == (3, 13, 18)" \
     && for fix in /build/cpython-security/*.patch; do \
          patch --batch --fuzz=0 -p1 -d /usr/local/lib/python3.13 < "$fix" || exit 1; \
        done \
