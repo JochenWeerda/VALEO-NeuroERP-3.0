@@ -124,6 +124,11 @@ def _land_iso2(land: Optional[str]) -> Optional[str]:
     return _LAENDER_ISO2.get(wert.lower())
 
 
+# Pflicht-Boolean-Spalten ohne Default je Datenbank. Frisch migriert haben alle einen Default; die gewachsene
+# Entwicklungsdatenbank hat 34 davon verloren, dort scheiterte jede Partneranlage ohne ausdrueckliche Werte.
+_FLAGS_OHNE_DEFAULT: dict[str, tuple[str, ...]] = {}
+
+
 def _ust_id_norm(vat_id: Optional[str]) -> str:
     return re.sub(r"[\s.-]", "", vat_id or "").upper()
 
@@ -749,11 +754,14 @@ class BusinessPartnerService:
             )
             return partner_id
         neu = str(uuid7())
+        flags = [f for f in self._flags_ohne_default() if f != flag]
+        spalten = "".join(f", {f}" for f in flags)  # Spaltennamen aus information_schema
+        werte = ", FALSE" * len(flags)
         self.db.execute(
             text(f"INSERT INTO domain_crm.business_partners (partner_id, tenant_id, partner_number, name_1, "  # nosec B608
-                 f"street, postal_code, city, country, vat_id, email, phone, status, {flag}, created_at, updated_at) "
-                 "VALUES (:pid, :tid, :nr, :name, :street, :plz, :ort, :land, :ust, :email, :tel, 'active', TRUE, "
-                 "NOW(), NOW())"),  # reviewed-safe: Spalte aus _ROLLEN_FLAG, Werte gebunden
+                 f"street, postal_code, city, country, vat_id, email, phone, status, {flag}, created_at, updated_at"
+                 f"{spalten}) VALUES (:pid, :tid, :nr, :name, :street, :plz, :ort, :land, :ust, :email, :tel, "
+                 f"'active', TRUE, NOW(), NOW(){werte})"),  # reviewed-safe: Spalten aus _ROLLEN_FLAG/Katalog
             {"pid": neu, "tid": self.tenant_id, "nr": "GP-" + neu.replace("-", "").upper()[:20],
              "name": (name or "").strip()[:255] or "Geschaeftspartner", "street": (street or None) and street[:120],
              "plz": (postal_code or None) and postal_code[:20], "ort": (city or None) and city[:120],
@@ -761,6 +769,16 @@ class BusinessPartnerService:
              "email": email or None, "tel": phone or None},
         )
         return neu
+
+    def _flags_ohne_default(self) -> tuple[str, ...]:
+        bind = self.db.get_bind()
+        key = str(getattr(bind, "engine", bind).url)
+        if key not in _FLAGS_OHNE_DEFAULT:
+            _FLAGS_OHNE_DEFAULT[key] = tuple(self.db.execute(text(
+                "SELECT column_name FROM information_schema.columns WHERE table_schema = 'domain_crm' "
+                "AND table_name = 'business_partners' AND data_type = 'boolean' AND is_nullable = 'NO' "
+                "AND column_default IS NULL ORDER BY column_name")).scalars().all())
+        return _FLAGS_OHNE_DEFAULT[key]
 
     def ensure_partner_belongs_to_tenant(self, partner_id: str) -> None:
         """Validiert, dass der BusinessPartner im Mandanten existiert (sonst ValidationFailedError).
