@@ -97,11 +97,93 @@ class CreditorWrite(BaseSchema):
     discount_percent: Optional[float] = Field(None, ge=0, le=100)
 
 
-def _op_by_name(db: Session, tenant_id: str, konto_typ: str) -> dict[str, dict[str, Any]]:
+#: Kennungen, mit denen offene Posten ihren Debitor bzw. Kreditor nennen (je nach Schreiber verschieden).
+_OP_ID_SPALTEN = ("debtor_id", "kunde_id", "creditor_id", "lieferant_id", "partner_id")
+_OP_SPALTEN_JE_DB: dict[str, tuple[str, ...]] = {}
+
+
+def _op_id_spalten(db: Session) -> tuple[str, ...]:
+    # Die gewachsene Entwicklungsdatenbank hat partner_id an offene_posten nicht; frisch migriert ist sie da.
+    bind = db.get_bind()
+    key = str(getattr(bind, "engine", bind).url)
+    if key not in _OP_SPALTEN_JE_DB:
+        vorhanden = set(db.execute(text(
+            "SELECT column_name FROM information_schema.columns WHERE table_schema = 'domain_erp' "
+            "AND table_name = 'offene_posten'")).scalars().all())
+        _OP_SPALTEN_JE_DB[key] = tuple(c for c in _OP_ID_SPALTEN if c in vorhanden)
+    return _OP_SPALTEN_JE_DB[key]
+
+
+def _op_zuordner(spalten: tuple[str, ...], saetze: list[tuple]) -> Any:
+    """Liefert zu einer OP-Zeile die ID des Satzes, dem sie eindeutig gehoert, sonst None (Regel: _op_zuordnung)."""
+    kennung: dict[str, set[str]] = {}
+    namen: dict[str, set[str]] = {}
+    for satz_id, nummer, partner_id, name in saetze:
+        for wert in (satz_id, nummer, partner_id):
+            if wert:
+                kennung.setdefault(str(wert), set()).add(str(satz_id))
+        namen.setdefault((name or "").strip().lower(), set()).add(str(satz_id))
+
+    def ziel_von(row: Any) -> Optional[str]:
+        ziele: set[str] = set()
+        for spalte in spalten:
+            if row[spalte]:
+                ziele |= kennung.get(str(row[spalte]), set())
+        if not ziele and row["name"]:
+            ziele = namen.get(str(row["name"]).strip().lower(), set())
+        return next(iter(ziele)) if len(ziele) == 1 else None
+
+    return ziel_von
+
+
+def offene_posten_registerseite(db: Session, tenant_id: str, konto_typ: str, satz_id: str, *,
+                                page: int, page_size: int) -> dict[str, Any]:
+    """Register "Offene Posten" der Debitor- bzw. Kreditor-Maske nach derselben Zuordnung wie die Liste.
+
+    Bis 01.11.2026 war das Register ein leerer Stub."""
+    saetze = (_debitor_saetze(db, tenant_id) if konto_typ == "debitoren"
+              else _kreditor_saetze(ProcurementService(db, tenant_id).list_lieferanten()))
+    spalten = _op_id_spalten(db)
+    auswahl = "".join(f"{c}, " for c in spalten)  # Spaltennamen aus _OP_ID_SPALTEN
+    try:
+        rows = db.execute(
+            text(f"SELECT id, {auswahl}COALESCE(kunde_name, lieferant_name, '') AS name, "  # nosec B608
+                 "rechnungsnr, COALESCE(rechnungsdatum, datum) AS datum, COALESCE(faelligkeit, due_date) AS faellig, "
+                 "COALESCE(offen, open_amount, betrag, 0) AS betrag, op_status FROM domain_erp.offene_posten "
+                 "WHERE tenant_id = :t AND konto_typ = :k AND COALESCE(op_status,'') <> 'storniert' "
+                 "ORDER BY COALESCE(faelligkeit, due_date) NULLS LAST, id"),  # reviewed-safe: feste Spalten
+            {"t": tenant_id, "k": konto_typ},
+        ).mappings().fetchmany(100_000)
+    except (ProgrammingError, OperationalError):
+        db.rollback()
+        rows = []
+    ziel_von = _op_zuordner(spalten, saetze)
+    eigene = [r for r in rows if ziel_von(r) == str(satz_id)]
+    start = max(page - 1, 0) * page_size
+    return {
+        "tab_key": "offene_posten", "table_key": "offene_posten", "page": page, "limit": page_size,
+        "total": len(eigene),
+        "items": [{"id": str(r["id"]), "beleg_nr": r["rechnungsnr"], "datum": r["datum"], "faellig": r["faellig"],
+                   "betrag": float(r["betrag"] or 0), "status": r["op_status"]}
+                  for r in eigene[start:start + page_size]],
+    }
+
+
+def _op_zuordnung(db: Session, tenant_id: str, konto_typ: str,
+                  saetze: list[tuple[str, Optional[str], Optional[str], Optional[str]]]) -> dict[str, dict[str, Any]]:
+    """Offene Posten je Debitor/Kreditor (Stufe 4 Geschaeftspartnerstamm).
+
+    ``saetze``: (ID, Nummer, Partner-ID, Name) aller Debitoren bzw. Kreditoren des Mandanten. Ein Posten gehoert
+    dem Satz, auf den seine Kennungen (ID, Nummer oder Partner-ID) eindeutig zeigen. Nur wenn keine Kennung auf
+    einen Satz zeigt, entscheidet der Name, und auch das nur, wenn genau ein Satz so heisst. Bis 01.11.2026
+    summierte die Liste nach Namen: zwei gleichnamige Kunden teilten sich ihre Forderungen.
+    """
+    spalten = _op_id_spalten(db)
+    auswahl = "".join(f"{c}, " for c in spalten)  # Spaltennamen aus _OP_ID_SPALTEN
     try:
         rows = db.execute(
             text(
-                "SELECT COALESCE(kunde_name, lieferant_name, '') AS name, "
+                f"SELECT {auswahl}COALESCE(kunde_name, lieferant_name, '') AS name, "  # nosec B608
                 "SUM(COALESCE(betrag, 0)) AS gesamt, "
                 "SUM(COALESCE(offen, open_amount, betrag, 0)) AS offen, "
                 "MIN(COALESCE(faelligkeit, due_date)) AS faellig, "
@@ -109,23 +191,45 @@ def _op_by_name(db: Session, tenant_id: str, konto_typ: str) -> dict[str, dict[s
                 "FROM domain_erp.offene_posten "
                 "WHERE tenant_id = :t AND konto_typ = :k "
                 "AND COALESCE(op_status,'') <> 'storniert' "
-                "GROUP BY COALESCE(kunde_name, lieferant_name, '')"
+                f"GROUP BY {auswahl}COALESCE(kunde_name, lieferant_name, '')"  # reviewed-safe: feste Spalten
             ),
             {"t": tenant_id, "k": konto_typ},
-        ).mappings().all()
+        ).mappings().fetchmany(100_000)
     except (ProgrammingError, OperationalError):
         # OP-Tabelle darf die Stammliste nicht blockieren — Debitor bleibt sichtbar.
         db.rollback()
         return {}
-    return {
-        str(row["name"] or ""): {
-            "gesamtForderung": float(row["gesamt"] or 0),
-            "offenerBetrag": float(row["offen"] or 0),
-            "faelligkeit": row["faellig"].isoformat()[:10] if row["faellig"] else None,
-            "mahnstufe": int(row["mahnstufe"] or 0),
-        }
-        for row in rows
-    }
+    ziel_von = _op_zuordner(spalten, saetze)
+    summe: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        satz = ziel_von(row)
+        if satz is None:
+            continue  # mehrdeutig oder unbekannt: lieber keine als eine falsche Zuordnung
+        ziel = summe.setdefault(satz, {"gesamtForderung": 0.0, "offenerBetrag": 0.0,
+                                                    "faelligkeit": None, "mahnstufe": 0})
+        ziel["gesamtForderung"] += float(row["gesamt"] or 0)
+        ziel["offenerBetrag"] += float(row["offen"] or 0)
+        faellig = row["faellig"].isoformat()[:10] if row["faellig"] else None
+        if faellig and (ziel["faelligkeit"] is None or faellig < ziel["faelligkeit"]):
+            ziel["faelligkeit"] = faellig
+        ziel["mahnstufe"] = max(ziel["mahnstufe"], int(row["mahnstufe"] or 0))
+    return summe
+
+
+def _debitor_saetze(db: Session, tenant_id: str) -> list[tuple]:
+    return [tuple(r) for r in db.execute(
+        text("SELECT id, customer_number, business_partner_id, company_name FROM domain_crm.customers "
+             "WHERE tenant_id = :t AND deleted_at IS NULL"), {"t": tenant_id}).fetchmany(100_000)]
+
+
+def _partnernummern(db: Session, tenant_id: str) -> dict[str, str]:
+    return {str(r[0]): r[1] for r in db.execute(
+        text("SELECT partner_id, partner_number FROM domain_crm.business_partners WHERE tenant_id = :t"),
+        {"t": tenant_id}).fetchmany(100_000)}
+
+
+def _kreditor_saetze(items: list[dict[str, Any]]) -> list[tuple]:
+    return [(str(i.get("id")), i.get("lieferantennummer"), i.get("partner_id"), i.get("firmenname")) for i in items]
 
 
 def _partner_felder(db: Session, tenant_id: str, partner_id: Optional[str]) -> dict[str, Any]:
@@ -209,14 +313,16 @@ async def list_debitoren(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> list[dict[str, Any]]:
-    op_map = _op_by_name(db, tenant_id, "debitoren")
+    op_map = _op_zuordnung(db, tenant_id, "debitoren", _debitor_saetze(db, tenant_id))
     rows = (
         db.query(Customer)
         .filter(Customer.tenant_id == tenant_id, Customer.deleted_at.is_(None))
         .order_by(Customer.company_name)
         .all()
     )
-    return [_debitor_dict(row, op_map.get(row.company_name or "")) for row in rows]
+    partner = _partnernummern(db, tenant_id)
+    return [{**_debitor_dict(row, op_map.get(str(row.id))),
+             "geschaeftspartner_nr": partner.get(str(row.business_partner_id or ""))} for row in rows]
 
 
 @router.get("/finance/debitoren/{debitor_id}", response_model=FinanceDebitorOut, summary="Debitor abrufen")
@@ -236,8 +342,8 @@ async def get_debitor(
     )
     if row is None:
         raise HTTPException(status_code=404, detail="Debitor nicht gefunden")
-    op_map = _op_by_name(db, tenant_id, "debitoren")
-    return {**_debitor_dict(row, op_map.get(row.company_name or "")),
+    op_map = _op_zuordnung(db, tenant_id, "debitoren", _debitor_saetze(db, tenant_id))
+    return {**_debitor_dict(row, op_map.get(str(row.id))),
             **_partner_felder(db, tenant_id, row.business_partner_id)}
 
 
@@ -324,9 +430,11 @@ async def list_kreditoren(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> list[dict[str, Any]]:
-    op_map = _op_by_name(db, tenant_id, "kreditoren")
     items = ProcurementService(db, tenant_id).list_lieferanten()
-    return [_creditor_from_lieferant(item, op_map.get(item.get("firmenname") or "")) for item in items]
+    op_map = _op_zuordnung(db, tenant_id, "kreditoren", _kreditor_saetze(items))
+    partner = _partnernummern(db, tenant_id)
+    return [{**_creditor_from_lieferant(item, op_map.get(str(item.get("id")))),
+             "geschaeftspartner_nr": partner.get(str(item.get("partner_id") or ""))} for item in items]
 
 
 @router.post("/finance/creditors", response_model=TypedObjectOut, status_code=201, summary="Kreditor anlegen", dependencies=[Depends(finance_write)])
@@ -379,8 +487,9 @@ async def get_kreditor(
         lf = ProcurementService(db, tenant_id).get_lieferant(kreditor_id)
     except EntityNotFoundError as exc:
         raise HTTPException(status_code=404, detail="Kreditor nicht gefunden") from exc
-    op_map = _op_by_name(db, tenant_id, "kreditoren")
-    return {**_creditor_from_lieferant(lf, op_map.get(lf.get("firmenname") or "")),
+    op_map = _op_zuordnung(db, tenant_id, "kreditoren",
+                           _kreditor_saetze(ProcurementService(db, tenant_id).list_lieferanten()))
+    return {**_creditor_from_lieferant(lf, op_map.get(str(lf.get("id")))),
             **_partner_felder(db, tenant_id, lf.get("partner_id"))}
 
 
