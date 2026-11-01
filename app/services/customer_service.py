@@ -956,7 +956,7 @@ class CustomerService:
             "updated_at": row.updated_at,
         }
 
-    async def create_customer(self, customer_data: Any) -> dict[str, Any]:
+    async def create_customer(self, customer_data: Any, rollenfelder: Optional[dict[str, Any]] = None) -> dict[str, Any]:
         dq_result = evaluate_customer_datensatz(
             _build_dq_datensatz(customer_data.model_dump(mode="python"))
         )
@@ -979,6 +979,7 @@ class CustomerService:
             email=str(customer_data.email) if customer_data.email else None,
             phone=customer_data.phone,
             partner_id=getattr(customer_data, "business_partner_id", None) or None,
+            rollenfelder=rollenfelder,
         )
         customer_data = customer_data.model_copy(update={"business_partner_id": partner})
         payload = _map_create_payload(customer_data)

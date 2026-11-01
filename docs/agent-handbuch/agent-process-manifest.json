@@ -14851,6 +14851,8 @@
         }
       ],
       "sensitive_fields": [
+        "iban",
+        "bic",
         "kreditlimit",
         "steuernummer",
         "ust_id"
@@ -14937,8 +14939,11 @@
         }
       ],
       "sensitive_fields": [
+        "iban",
+        "bic",
         "credit_limit",
-        "vat_id"
+        "vat_id",
+        "tax_number"
       ],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
@@ -15131,6 +15136,8 @@
         }
       ],
       "sensitive_fields": [
+        "iban",
+        "bic",
         "steuernummer",
         "ust_id"
       ],
@@ -27592,5 +27599,5 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     }
   ],
-  "event_count": 137
+  "event_count": 139
 }

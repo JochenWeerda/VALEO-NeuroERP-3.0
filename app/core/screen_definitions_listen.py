@@ -724,7 +724,8 @@ def build_personal_mitarbeiter_liste() -> dict[str, Any]:
 
 def build_crm_partner_klaerfaelle_liste() -> dict[str, Any]:
     """Klaerliste der Partnerzuordnung (ADR Geschaeftspartnerstamm, Stufe 2): Kunden und Lieferanten, die die
-    Rueckfuellung nicht eindeutig einem Geschaeftspartner zuordnen konnte."""
+    Rueckfuellung nicht eindeutig einem Geschaeftspartner zuordnen konnte; entschieden als Zeilenaktion (Stufe 3)."""
+    pfad = "/api/v1/crm/partner-klaerfaelle/{entity_id}/actions/"
     return _liste(
         screen_id="crm/partner-klaerfaelle-liste", domain="crm", title="Partner-Klaerfaelle",
         subtitle="Kunden und Lieferanten ohne eindeutigen Geschaeftspartner",
@@ -734,14 +735,26 @@ def build_crm_partner_klaerfaelle_liste() -> dict[str, Any]:
             {"key": "nummer", "label": "Nummer", "sortable": True, "filterable": True, "priority": "primary"},
             {"key": "name", "label": "Name", "sortable": True, "filterable": True, "priority": "primary"},
             {"key": "grund", "label": "Grund", "filterable": True, "priority": "primary"},
+            {"key": "kandidaten_text", "label": "Kandidaten", "priority": "secondary"},
             {"key": "erstellt_am", "label": "Erfasst", "renderKind": "datetime", "sortable": True,
              "priority": "secondary"},
         ],
         actions=[_EXPORT],
-        row_actions=[],
-        purpose="Zweifelsfaelle der Partnerzuordnung sichten, bevor sie fachlich entschieden werden.",
+        row_actions=[
+            {"key": "zuordnen", "label": "Partner zuordnen", "dangerLevel": "moderate",
+             "permission": "crm.partner.klaeren", "commandEndpoint": pfad + "zuordnen", "method": "POST",
+             "requiresConfirmation": True, "auditReasonRequired": True, "forbiddenForAgents": True,
+             "inputFields": [{"key": "partner_id", "label": "Geschaeftspartner-ID (aus den Kandidaten)",
+                              "type": "text", "required": True}]},
+            {"key": "neuer-partner", "label": "Neuer Partner", "dangerLevel": "moderate",
+             "permission": "crm.partner.klaeren", "commandEndpoint": pfad + "neuer-partner", "method": "POST",
+             "requiresConfirmation": True, "auditReasonRequired": True, "forbiddenForAgents": True},
+        ],
+        purpose="Zweifelsfaelle der Partnerzuordnung entscheiden: vorhandenem Partner zuordnen oder neuen anlegen.",
         prompts=["Welche Kunden haben noch keinen Geschaeftspartner?", "Welche Dubletten hat die Partnerzuordnung gefunden?"],
-        no_workflow="Klaerliste ohne eigenen Ablauf; die Entscheidung folgt mit Stufe 3 des Partnerstamms.",
+        dangerous=[{"key": "zuordnen", "reason": "Verknuepft Kunde oder Lieferant dauerhaft mit einem Partner."},
+                   {"key": "neuer-partner", "reason": "Legt einen weiteren Geschaeftspartner an."}],
+        no_workflow="Jeder Klaerfall wird einzeln entschieden und ist danach erledigt; kein Belegablauf.",
     )
 
 

@@ -153,6 +153,14 @@ class FinanceDebitorOut(_MaskEntityOut):
     steuernummer: Optional[str] = None
     ust_id: Optional[str] = None
     status: Optional[str] = None
+    # Rollenfelder am Geschaeftspartner (Stufe 3).
+    geschaeftspartner_nr: Optional[str] = None
+    iban: Optional[str] = None
+    bic: Optional[str] = None
+    bank: Optional[str] = None
+    kontoinhaber: Optional[str] = None
+    skonto_tage: Optional[int] = None
+    skonto_prozent: Optional[float] = None
 
 
 class FinanceKreditorOut(_MaskEntityOut):
@@ -163,6 +171,14 @@ class FinanceKreditorOut(_MaskEntityOut):
     steuernummer: Optional[str] = None
     ust_id: Optional[str] = None
     status: Optional[str] = None
+    # Rollenfelder am Geschaeftspartner (Stufe 3).
+    geschaeftspartner_nr: Optional[str] = None
+    iban: Optional[str] = None
+    bic: Optional[str] = None
+    bank: Optional[str] = None
+    kontoinhaber: Optional[str] = None
+    skonto_tage: Optional[int] = None
+    skonto_prozent: Optional[float] = None
 
 
 class FinanceBankkontoOut(_MaskEntityOut):
