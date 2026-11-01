@@ -20128,3 +20128,50 @@ Fortsetzung des ausdruecklichen Nutzerauftrags aus PR90. Isolierter Checkout auf
 
 
 **RUNTIME46 Fortsetzung 31.10.:** Lead-Besitz umfasst oeffentliche auth/Login+Callback samt generierter geschuetzter-datenfreier Definition, strenge native Quellbindung und vorhandene Kunden-/Faktura-Ablosungsnachweise; Materialfluss wird als naechstes in echte native Domainprimitiven zerlegt. Admin/Feed/Finance in klaren eigenen Unterfamilien; CRM abgeschlossen mit 4 signierten PG-Faellen (Plugin-Autoload aus, benoetigte Plugins explizit, vollstaendiger Rollback) und 10 Adapterfaellen. Waage104Unit+1SQL-Rollback, Angebotsimport/Nummernscope und native Policy33Faelle, Auth/Quellnavigation14Frontendfaelle. Keine gesamtheitliche Made-by-Studio-/Live-/CI-Freigabe; main/develop-Uebernahme ausdruecklich beauftragt und folgt der integrierten Abnahme. 261 vorher bestehende unroutbare Seiten separat inventarisiert, nicht versteckt oder blind geloescht.
+
+## STUDIO-RUNTIME46-LIST-PRINT-20261031 — abgeschlossen, Codex Lead
+
+Fortsetzung des freigegebenen Runtime46-Auftrags im bestehenden Lead-Dateibesitz.
+Besitz: NativeListPage.tsx ausschliesslich deklarierter lokaler Druck, eigener
+Komponententest und QA/Handshake. Bestehendes localEffect=print und vorhandenen
+printTable-Helper wiederverwenden; ausschliesslich vollstaendige gefilterte
+listExperience-Daten und deklarierte Exportspalten drucken. Keine unfiltrierte
+Nachladung, kein Fachwrite, keine neue Schema-/DB-/Containeraenderung.
+Reservierte SALES-LISTS-/INTAKE-WEIGHING-Dateien anderer Owner bleiben unberuehrt.
+Abnahme: Filter-/Spaltenparitaet, leere/nicht deklarierte Liste, Rechte und
+Druckfehler; gezielte Frontendtests, Typpruefung soweit Umgebung verfuegbar.
+Annahme: Browserdruck ist eine lokale Listenaktion; Fachbelegdruck mit
+commandEndpoint behaelt seinen bestehenden Commandvertrag. Kein Runtimepunkt
+allein durch diese zentrale Voraussetzung geschlossen.
+
+**LIST-PRINT Abnahme20261031:** 29gezielteFrontendtests in5Dateien, vollstaendigeTyppruefung und Produktionsbuild gruen. LokalerDruck nutzt gefilterteGesamtmenge und deklarierteExportspalten, prueftAktionsrechte und laedtkeineErsatzdaten. Fachbelegdruck bleibtCommand. QA/Handshake studio-list-print-20261031.md. KeineDB/Container/Migration,keineGateLockerung,46Runtimepunkteweiteroffen. AusgangsCI separat rot (261echteRoutingDrifts/186Frontendtestfehler); keineGesamtfreigabe.
+
+## STUDIO-RUNTIME46-FILE-CONTENT-20261031 — abgeschlossen, Codex Lead
+
+Fortsetzung des bereits zugewiesenen Lead-Vertrags fileContent. Besitz:
+schema.ts nur fileContent-Feldvertrag/Validierung, RenderPlan types/compiler/
+plan-to-screen, FastFormRenderer und UniversalMaskRenderer nur Durchreichung,
+FieldRenderer plus separate TextFileField/Runtime-Helper, useUniversalFormState
+nur Dateiwertvalidierung, eigene Tests und QA/Handshake. Backendbesitz:
+studio_validation.py nur Einbindung eines engen studio_file_content_contracts.py
+mit eigenen Tests; andere Studio-/Workflowzweige bleiben unberuehrt.
+Vertrag: type=file mit fileContent={encoding:utf-8,maxBytes,accept}; maxBytes
+positive Ganzzahl bis1MiB, accept explizit csv/txt-Endungen. Nur dekodierter
+Text als Feldwert, keine automatische Mutation. Auswahlwechsel leert Altwert;
+ungueltige, zu grosse oder nichtUTF8-Dateien werden abgewiesen. LetzteAuswahl
+gewinnt; Pflichtfelder bleiben bis zum erfolgreichen Lesen gesperrt.
+Abnahme: Compiler-/Roundtrip-/Cachevertrag, Backend-Draftvalidierung,
+Dateigrenzen/UTF8/Lesefehler/Race/ReadOnly und echter ActionInputDialog.
+Architektur: additive Metadaten im bestehenden Studio-Vertrag, keine neue
+Route/Servicegrenze/DB/Events; C4/Prefixinventar unveraendert. Security:
+Clientgrenzen sind keine serverseitige Importfreigabe; Fachcommand muss
+Payload/Kunde/Transaktion/Mandant selbst pruefen. Betrieb: keine DB/Container.
+Tests zentral koordiniert, Backendhelfer isoliert ohne DB; Dokumentation und
+Workboard nachziehen. Keine Uebernahme reservierter Verkaufs-/Waagen-Dateien.
+
+**FILE-CONTENT enger Integrationsnachtrag:** Lead besitzt ActionInputDialog.tsx
+nur zur Erhaltung des transienten null-Dateiwerts. Dadurch kann ein externer
+Formularreset einen noch laufenden Leseauftrag entwerten. Andere Feldtypen und
+Dialogaktionen bleiben unveraendert; eigener Reset-/Unmount-Nachweis erforderlich.
+
+**FILE-CONTENT Abnahme20261031:** 80Frontendtests in9Dateien und46reineBackendfaelle gruen. VollstaendigeTyppruefung/Produktionsbuild/Lint gruen. EchteFileReaderBytes,UTF8/Bytegrenzen,Altwertschutz,OptionalPending,Reset/Race/Unmount/ReadOnly undCompilerCachevertrag geprueft. BackendAufnahmetest isoliert fachfremdeSemanticPreview; keinAPI-/DB-/Importnachweis. QA/Handshake studio-file-content-20261031.md. KeineDB/Container/AgentenWritefreigabe/GateLockerung. 46Runtimepunkteweiteroffen; Architekturcheck1Route/7Services in unveraendertenInventarenrot, AusgangsCIweiterseparat.

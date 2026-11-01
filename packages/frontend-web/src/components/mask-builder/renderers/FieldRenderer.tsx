@@ -91,6 +91,9 @@ export function FieldRenderer({
     })
   }
 
+  if (Object.prototype.hasOwnProperty.call(field, 'fileContent')) {
+    return <TextFileField field={field} value={value} onChange={isReadOnly ? undefined : onChange} />
+  }
   if (field.type === 'table' && (field.rowFields !== undefined || field.tableEditing !== undefined)) {
     return <TableFieldRenderer field={field} value={value} onChange={isReadOnly ? undefined : onChange}
       renderCell={(column, cellValue, change) => <FieldRenderer field={column} value={cellValue}
@@ -108,7 +111,6 @@ export function FieldRenderer({
       : undefined,
   }
 
-  if (field.type === 'file' && field.fileContent) return <TextFileField field={field} value={value} readOnly={isReadOnly} onChange={onChange} />
 
   if (field.type === 'stringList') {
     const listValue = value === undefined ? [] : value

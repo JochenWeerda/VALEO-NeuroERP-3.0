@@ -233,6 +233,25 @@ export function NativeListPage({ screenId, testId }: { screenId: string; testId?
       void exportieren()
       return
     }
+    if (aktion.localEffect === 'print' && !aktion.commandEndpoint) {
+      // Use the same complete filtered result and declared columns as CSV.
+      // A missing list contract must never trigger an unfiltered fallback read.
+      if (!schema?.listExperience) {
+        toast({ title: 'Druck nicht verfügbar', description: 'Für diese Liste fehlt die Druckdatenfreigabe.', variant: 'destructive' })
+        return
+      }
+      const rows = listData.current
+      if (!rows?.length) {
+        toast({ title: 'Keine Daten', description: 'Es gibt nichts zu drucken.', variant: 'destructive' })
+        return
+      }
+      try {
+        printTable(rows, schema.title, schema.listExperience.export.columns)
+      } catch (error) {
+        toast({ title: 'Druck fehlgeschlagen', description: getAxiosErrorMessage(error), variant: 'destructive' })
+      }
+      return
+    }
     if (aktion.navigationRoute) {
       const path = zielRoute(aktion.navigationRoute, payload)
       if (schema?.listExperience?.workflowResume) void navigateList(path, payload.id == null)

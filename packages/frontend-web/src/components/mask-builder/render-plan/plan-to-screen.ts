@@ -19,6 +19,7 @@ export function renderPlanToScreenDefinition(plan: RenderPlan): ScreenDefinition
         dataSourceKey: field.dataSourceKey,
         minSearchChars: field.minSearchChars,
         renderHint: field.renderHint,
+        ...(field.fileContent !== undefined ? { fileContent: field.fileContent } : {}),
       }))
 
   const tabs: ScreenTabDefinition[] = plan.visibleTabs.map((tab) => ({

@@ -66,7 +66,9 @@
             "helpText": "UTF-8, Semikolon; Pflichtkopf: offer_number;subject;customer_id;total_amount;currency. Optional: valid_until (ISO-Datum). Alle Zeilen werden gemeinsam importiert.",
             "fileContent": {
               "encoding": "utf-8",
-              "accept": ".csv",
+              "accept": [
+                ".csv"
+              ],
               "maxBytes": 1048576
             }
           }

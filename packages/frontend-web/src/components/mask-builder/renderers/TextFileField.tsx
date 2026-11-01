@@ -1,48 +1,85 @@
 import { useEffect, useRef, useState } from 'react'
+import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import type { ScreenFieldDefinition } from '../schema'
+import { readTextFile, validTextFileContract, validTextFileValue } from '../runtime/text-file-contract'
 
-/** File contents, not a local path or an opaque File, enter the versioned command. */
-export function TextFileField({ field, value, readOnly, onChange }: {
+/** Reads a bounded local text file; the form submits only after successful decoding. */
+export function TextFileField({ field, value, onChange }: {
   field: ScreenFieldDefinition
   value: unknown
-  readOnly: boolean
   onChange?: (value: unknown) => void
 }): JSX.Element {
-  const sequence = useRef(0)
   const [error, setError] = useState('')
   const [reading, setReading] = useState(false)
-  useEffect(() => () => { sequence.current += 1 }, [])
-  const policy = field.fileContent
-  const valid = policy?.encoding === 'utf-8' && Number.isInteger(policy.maxBytes)
-    && policy.maxBytes > 0 && policy.maxBytes <= 1048576 && ['.csv', '.txt', '.json'].includes(policy.accept)
+  const sequence = useRef(0)
+  const pending = useRef(false)
+  const input = useRef<HTMLInputElement>(null)
+  const readOnly = Boolean(field.readOnly || !onChange)
+  const contract = field.fileContent
+  const signature = JSON.stringify(contract)
+  useEffect(() => {
+    sequence.current += 1
+    pending.current = false
+    setReading(false)
+    setError('')
+    return () => { sequence.current += 1 }
+  }, [signature, readOnly, field.key])
+  useEffect(() => {
+    // A reset replaces the transient null marker; its late read must not win.
+    if (pending.current && value !== null) {
+      sequence.current += 1
+      pending.current = false
+      setReading(false)
+      setError('')
+    }
+  }, [value])
+  if (!validTextFileContract(contract, field.type)) return <p role="alert">{field.label}: Die Dateivorgaben sind ungültig.</p>
+
+  function clear(): void {
+    sequence.current += 1
+    pending.current = false
+    setReading(false)
+    setError('')
+    if (input.current) input.current.value = ''
+    onChange?.('')
+  }
+
+  async function select(file: File | undefined): Promise<void> {
+    if (readOnly || !onChange) return
+    if (!validTextFileContract(contract, field.type)) return
+    if (!file) { clear(); return }
+    const current = ++sequence.current
+    pending.current = true
+    setError('')
+    setReading(true)
+    onChange(null)
+    try {
+      const text = await readTextFile(file, contract)
+      if (current === sequence.current) {
+        pending.current = false
+        onChange(text)
+      }
+    } catch (reason) {
+      if (current === sequence.current) setError(reason instanceof Error ? reason.message : 'Die Datei konnte nicht gelesen werden.')
+    } finally {
+      if (current === sequence.current) {
+        pending.current = false
+        setReading(false)
+      }
+    }
+  }
+
   return <div className="space-y-2">
     <Label htmlFor={field.key}>{field.label}{field.required ? ' *' : ''}</Label>
-    {!readOnly && <Input id={field.key} type="file" accept={policy?.accept} disabled={!valid}
-      aria-label={field.label} aria-invalid={Boolean(error)} aria-describedby={`${field.key}-file-help`}
-      onChange={async event => {
-        const request = ++sequence.current
-        const file = event.target.files?.[0]
-        onChange?.(undefined)
-        setError('')
-        if (!file || !valid || !policy) { setReading(false); return }
-        setReading(true)
-        try {
-          if (file.size === 0 || file.size > policy.maxBytes) throw new Error(`Datei muss zwischen 1 und ${policy.maxBytes} Bytes groß sein.`)
-          const content = new TextDecoder('utf-8', { fatal: true }).decode(await file.arrayBuffer())
-          if (content.includes('\0')) throw new Error('Die Datei enthält ungültige Nullzeichen.')
-          if (request === sequence.current) onChange?.(content)
-        } catch (failure) {
-          if (request === sequence.current) setError(failure instanceof Error ? failure.message : 'Datei konnte nicht gelesen werden.')
-        } finally {
-          if (request === sequence.current) setReading(false)
-        }
-      }} />}
-    <p id={`${field.key}-file-help`} className="text-xs text-muted-foreground">{field.helpText ?? 'UTF-8-Textdatei. Inhalt vor der Ausführung prüfen.'}</p>
-    {!valid && <p role="alert" className="text-sm text-destructive">Der Dateivertrag ist ungültig.</p>}
+    <Input ref={input} id={field.key} type="file" accept={contract.accept.join(',')} disabled={readOnly}
+      aria-label={field.label} aria-invalid={Boolean(error)} aria-describedby={`${field.key}-file-help${error ? ` ${field.key}-file-error` : ''}`}
+      onChange={event => { void select(event.target.files?.[0]) }} />
+    <p id={`${field.key}-file-help`} className="text-sm text-muted-foreground">UTF-8 · {contract.accept.join(', ')} · maximal {contract.maxBytes} Bytes{field.helpText ? ` · ${field.helpText}` : ''}</p>
     {reading && <p role="status">Datei wird gelesen…</p>}
-    {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
-    {typeof value === 'string' && <pre aria-label="Dateivorschau" className="max-h-48 overflow-auto whitespace-pre-wrap rounded border border-border bg-muted p-3 text-xs text-foreground">{value.slice(0, 4096)}{value.length > 4096 ? '\n… Vorschau gekürzt; der vollständige Inhalt wird geprüft.' : ''}</pre>}
+    {!reading && typeof value === 'string' && value.length > 0 && validTextFileValue(field, value) && <p role="status">Textdatei geladen.</p>}
+    {error && <p id={`${field.key}-file-error`} role="alert" className="text-sm text-status-error">{error}</p>}
+    {!readOnly && <Button type="button" variant="outline" onClick={clear}>Dateiauswahl leeren</Button>}
   </div>
 }

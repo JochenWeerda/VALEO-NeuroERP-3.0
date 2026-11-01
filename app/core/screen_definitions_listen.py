@@ -1321,7 +1321,7 @@ def build_sales_angebote_liste() -> dict[str, Any]:
                   "requiresConfirmation": True, "requiresIdempotencyKey": True, "forbiddenForAgents": True,
                   "inputFields": [{"key": "csv_content", "label": "CSV-Datei", "type": "file", "required": True,
                                    "helpText": "UTF-8, Semikolon; Pflichtkopf: offer_number;subject;customer_id;total_amount;currency. Optional: valid_until (ISO-Datum). Alle Zeilen werden gemeinsam importiert.",
-                                   "fileContent": {"encoding": "utf-8", "accept": ".csv", "maxBytes": 1048576}}]}],
+                                   "fileContent": {"encoding": "utf-8", "accept": [".csv"], "maxBytes": 1048576}}]}],
         row_actions=[], purpose="Verkaufsangebote nach Kunde und Status verfolgen.",
         prompts=["Welche Angebote laufen diese Woche ab?", "Welche Angebote sind offen?"],
         no_workflow="Der Status steht am Angebot; die Liste führt keinen eigenen Ablauf.")

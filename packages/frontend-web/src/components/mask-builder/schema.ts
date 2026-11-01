@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { FLOORPLAN_RULES } from './floorplans'
+import { validTextFileDefinitions } from './runtime/text-file-contract'
 
 export { FLOORPLAN_IDS, FLOORPLAN_RULES, defaultColumnNavigation, resolveSectionNavigation } from './floorplans'
 
@@ -33,7 +34,7 @@ export type ScreenActionZone = 'header' | 'footer' | 'commit'
 export type ScreenVoiceProvider = 'webspeech' | 'server'
 export type ScreenAdapterType = 'native' | 'maskConfig' | 'crmMaskJson' | 'formSchema' | 'specialized'
 /** Nur explizit registrierte Spezialkomponenten. Weitere Typen brauchen eigenen Dateibesitz. */
-export type SpecializedComponentType = 'disposition_board' | 'intake' | 'weighing' | 'finance_workbench' | 'feed_workbench' | 'admin_workbench'
+export type SpecializedComponentType = 'disposition_board'
 
 export interface ScreenSpecializedComponent {
   type: SpecializedComponentType
@@ -76,8 +77,14 @@ export interface ScreenDataSource {
   minSearchChars?: number
 }
 
+export interface TextFileContentContract {
+  encoding: 'utf-8'
+  maxBytes: number
+  accept: ('.csv' | '.txt')[]
+}
+
 export interface ScreenFieldDefinition {
-  fileContent?: { encoding: 'utf-8'; accept: '.csv' | '.txt' | '.json'; maxBytes: number }
+  fileContent?: TextFileContentContract
   currencyField?: string
   key: string
   label: string
@@ -137,8 +144,6 @@ export interface ScreenTableDefinition {
     key: string
     label: string
     command?: string
-    /** Authored explanation of a local action; no server execution permission. */
-    stubReason?: string
     /** Recht wie bei Kopfaktionen; ohne Recht blendet der Plan die Aktion aus. */
     permission?: string
     dangerLevel?: ActionDangerLevel
@@ -209,8 +214,6 @@ export interface ScreenActionInputField extends ScreenFieldDefinition {
 }
 
 export interface ScreenActionDefinition {
-  /** Domain control supplies row/form context; keep compiled guards, omit generic toolbar. */
-  surfaceOnly?: boolean
   requiresExpectedVersion?: boolean
   requiresIdempotencyKey?: boolean
   responseAdapter?: 'resource.v1'
@@ -253,7 +256,7 @@ export interface ScreenActionDefinition {
    * drucken, herunterladen (lesend), in den Bearbeitungsmodus wechseln, neu laden oder eine Ansicht oeffnen.
    * CLI und MCP lesen dieselben Daten ueber die Datenquellen der Maske.
    */
-  localEffect?: 'form_reset' | 'navigation' | 'print' | 'download' | 'edit_mode' | 'refresh' | 'view' | 'load_row'
+  localEffect?: 'form_reset' | 'navigation' | 'print' | 'download' | 'edit_mode' | 'refresh' | 'view'
   /** Read-only server-produced file; never a domain write command. */
   download?: { endpoint: string; contentField: string; filenameField: string; mediaType: 'text/csv;charset=utf-8' }
   method?: 'POST' | 'PUT' | 'PATCH' | 'DELETE'
@@ -501,20 +504,17 @@ export interface ListPreset {
 }
 
 export interface ListExperience {
-  /** View context only; never grants permissions or filters business records. */
-  roleFocus?: { options: { key: string; label: string; description?: string; insightLineKeys?: string[] }[]; defaultKey?: string }
   presets?: ListPreset[]
   searchFields: string[]
   aggregates: { key: string; label: string; kind?: 'count' | 'sum'; field?: string; format?: 'currency'; currencyField?: string; conditions: { field: string; op: 'eq' | 'neq'; value: string }[] }[]
   export: { filenamePrefix: string; delimiter: ';'; columns: { key: string; label: string }[] }
   workflowResume?: { resumeNodeId: string; businessStatus: string; actionLabelPrefix: string; createScreen: string; detailScreen: string }
   notice?: { aggregate: string; text: string }
-  insightLines?: { key?: string; label: string; variants: { when?: { aggregate: string; op: 'gt'; value: number }; text: string }[] }[]
+  insightLines?: { label: string; variants: { when?: { aggregate: string; op: 'gt'; value: number }; text: string }[] }[]
 }
 
 export interface ScreenDefinition {
   flowSpineCatalog?: { enabled: true; warmWorkspaces: boolean }
-  flowSpineWorkspace?: { processKey: string }
   listExperience?: ListExperience
   documentVariant?: DocumentScreenVariantRef
   /** Declared native creation; new/neu are never fetched as entity IDs. */
@@ -532,8 +532,6 @@ export interface ScreenDefinition {
   creationContext?: { screen_id: string; definition_hash: string }
   schemaVersion: 1
   id: string
-  /** Canonical native binding of a server-validated tenant Studio clone. */
-  baseScreenId?: string
   domain: ScreenDomain
   mode: ScreenMode
   title: string
@@ -578,7 +576,6 @@ export interface ScreenDefinition {
   }
   workflow?: ScreenWorkflowDefinition
   noWorkflowReason?: string
-  noProcessChainReason?: string
   layout?: {
     preferredMode?: ScreenLayoutMode
     mobileMode?: ScreenLayoutMode
@@ -609,6 +606,7 @@ export interface ScreenDefinition {
 
 export function validateScreenDefinition(screen: ScreenDefinition): string[] {
   const errors: string[] = []
+  if (!validTextFileDefinitions(screen)) errors.push('fileContent is invalid')
 
   if (screen.schemaVersion !== 1) errors.push('schemaVersion must be 1')
   if (!screen.id) errors.push('id is required')
@@ -625,33 +623,6 @@ export function validateScreenDefinition(screen: ScreenDefinition): string[] {
     }
   }
   if (!screen.title) errors.push('title is required')
-  const seenFileNodes = new WeakSet<object>()
-  const checkFileContracts = (node: unknown): void => {
-    if (!node || typeof node !== 'object' || seenFileNodes.has(node)) return
-    seenFileNodes.add(node)
-    if (!Array.isArray(node) && 'fileContent' in node) {
-      const field = node as Record<string, unknown>
-      const file = field.fileContent as Record<string, unknown> | null
-      if (field.type !== 'file' || !file || typeof file !== 'object' || Array.isArray(file)
-        || Object.keys(file).some(key => !['encoding','accept','maxBytes'].includes(key))
-        || file.encoding !== 'utf-8' || !['.csv','.txt','.json'].includes(String(file.accept))
-        || !Number.isInteger(file.maxBytes) || Number(file.maxBytes) < 1 || Number(file.maxBytes) > 1048576) errors.push('fileContent is invalid')
-    }
-    Object.values(node).forEach(checkFileContracts)
-  }
-  checkFileContracts(screen)
-
-  const surfaceScreenId = screen.id?.startsWith('tenant/') ? screen.baseScreenId : screen.id
-
-  for (const action of screen.actions ?? []) {
-    if (action.surfaceOnly !== undefined && (typeof action.surfaceOnly !== 'boolean'
-      || (action.surfaceOnly && (!['intake', 'weighing', 'finance_workbench', 'feed_workbench', 'admin_workbench'].includes(screen.specialized?.type ?? '') || (action.zone && action.zone !== 'header'))))) errors.push('surfaceOnly requires a registered domain action')
-  }
-  if (screen.flowSpineWorkspace !== undefined) {
-    const key = screen.flowSpineWorkspace.processKey
-    const keys = ['order-to-cash', 'procure-to-pay', 'inventory-to-settlement', 'harvest-to-settlement', 'contract-to-settlement', 'complaint-to-resolution', 'service-to-customer', 'finance-to-close', 'compliance-to-report']
-    if (!keys.includes(key) || surfaceScreenId !== `workflow/flow-spine-${key}` || screen.mode !== 'cockpit') errors.push('flowSpineWorkspace is invalid')
-  }
   if (screen.flowSpineCatalog !== undefined) {
     const c = screen.flowSpineCatalog
     if (!c || typeof c !== 'object' || c.enabled !== true || typeof c.warmWorkspaces !== 'boolean'
@@ -695,21 +666,6 @@ export function validateScreenDefinition(screen: ScreenDefinition): string[] {
     const columns = new Set((screen.tables?.[0]?.columns ?? []).map(column => column.key))
     if (valid) valid = screen.mode === 'list' && columns.size > 0
       && [...(x.presets ?? []).flatMap(p => [p.field, ...(p.completionField ? [p.completionField] : [])]), ...x.searchFields, ...x.export.columns.map(column => column.key), ...x.aggregates.flatMap(a => [...a.conditions.map(c => c.field), ...(a.field ? [a.field] : []), ...(a.currencyField ? [a.currencyField] : [])])].every(field => columns.has(field))
-    if (valid && x.roleFocus !== undefined) {
-      const focus = x.roleFocus
-      const insightKeys = (x.insightLines ?? []).map(line => line.key)
-      valid = obj(focus) && Object.keys(focus).every(k => ['options', 'defaultKey'].includes(k))
-        && Array.isArray(focus.options) && focus.options.length >= 1 && focus.options.length <= 8
-        && insightKeys.every(key) && new Set(insightKeys).size === insightKeys.length
-        && focus.options.every(option => obj(option) && key(option.key) && str(option.label)
-          && Object.keys(option).every(k => ['key','label','description','insightLineKeys'].includes(k))
-          && (option.description === undefined || str(option.description))
-          && (option.insightLineKeys === undefined || arr(option.insightLineKeys)
-            && option.insightLineKeys.every(k => key(k) && insightKeys.includes(k))
-            && new Set(option.insightLineKeys).size === option.insightLineKeys.length))
-        && new Set(focus.options.map(option => option.key)).size === focus.options.length
-        && focus.options.some(option => option.key === (focus.defaultKey ?? 'all'))
-    }
     if (!valid) errors.push('listExperience is invalid')
   }
 
@@ -776,18 +732,9 @@ export function validateScreenDefinition(screen: ScreenDefinition): string[] {
     errors.push('twin.endpoint is required')
   }
   if (screen.specialized) {
-    if (!['disposition_board', 'intake', 'weighing', 'finance_workbench', 'feed_workbench', 'admin_workbench'].includes(screen.specialized.type)) {
+    if (screen.specialized.type !== 'disposition_board') {
       errors.push(`specialized.type is invalid: ${String(screen.specialized.type)}`)
     }
-    const nativeBindings: Record<string, string[]> = {
-      intake: ['annahme/lkw-registrierung', 'annahme/qualitaets-check', 'annahme/warteschlange'],
-      finance_workbench: ['finance/bank-abgleich', 'mahnwesen/mahnlauf'],
-      admin_workbench: ['admin/webhooks-liste', 'admin/control-center'],
-      feed_workbench: ['futtermittel/rationseditor', 'futtermittel/rationsoptimierung', 'portal/rationsoptimierung', 'futtermittel/fuetterungsdokumentation-mobil'],
-      weighing: ['waage/liste', 'waage/neu', 'waage/waagen-liste', 'waage/wiegungen', 'waage/wiegungen-liste'],
-    }
-    const allowed = nativeBindings[screen.specialized.type]
-    if (allowed && (!surfaceScreenId || !allowed.includes(surfaceScreenId) || screen.specialized.id !== surfaceScreenId)) errors.push('specialized native binding is invalid')
     if (!screen.specialized.id?.trim()) {
       errors.push('specialized.id is required')
     }

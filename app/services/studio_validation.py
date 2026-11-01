@@ -154,9 +154,10 @@ def validate_studio_draft(
     catalog_actions: dict[str, Any] = cat["actions"]
     from app.services.studio_list_contracts import validate_list_experience
     from app.services.studio_catalog_contracts import validate_flow_spine_catalog
+    from app.services.studio_file_content_contracts import validate_file_content_contracts
     from app.services.studio_runtime_surface_contracts import validate_runtime_surface
     violations: list[str] = (validate_list_experience(definition) + validate_flow_spine_catalog(definition)
-                             + validate_runtime_surface(definition))
+                             + validate_file_content_contracts(definition) + validate_runtime_surface(definition))
 
     # ── Struktur (Minimalkontrakt) ───────────────────────────────────────────
     for req in ("schemaVersion", "id", "domain", "mode", "title"):
@@ -222,13 +223,6 @@ def validate_studio_draft(
     write_endpoints.update((action.get("inputFlow") or {}).get("submitEndpoint")
                            for action in catalog_actions.values())
     for node in _nodes(definition):
-        if "fileContent" in node:
-            file = node["fileContent"]
-            if (node.get("type") != "file" or not isinstance(file, dict)
-                    or set(file) != {"encoding", "accept", "maxBytes"}
-                    or file.get("encoding") != "utf-8" or file.get("accept") not in {".csv", ".txt", ".json"}
-                    or type(file.get("maxBytes")) is not int or not 1 <= file["maxBytes"] <= 1048576):
-                violations.append("datei_textvertrag_ungueltig")
         for field in ("endpoint", "summaryEndpoint", "countEndpoint"):
             endpoint = node.get(field)
             bound_template = document_template or native_template

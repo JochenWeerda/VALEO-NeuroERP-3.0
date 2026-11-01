@@ -24,7 +24,7 @@ function toScreenField(field: RenderFieldPlan): ScreenFieldDefinition {
     currencyField: field.currencyField,
     rowFields: field.rowFields,
     tableEditing: field.tableEditing,
-    fileContent: field.fileContent,
+    ...(field.fileContent !== undefined ? { fileContent: field.fileContent } : {}),
   }
 }
 
