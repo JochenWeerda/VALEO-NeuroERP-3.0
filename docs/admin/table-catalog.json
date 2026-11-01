@@ -13672,6 +13672,7 @@
             "app/api/v1/endpoints/crm_360.py",
             "app/api/v1/endpoints/crm_360_sql.py",
             "app/api/v1/endpoints/crm_consents.py",
+            "app/api/v1/endpoints/crm_partner_klaerfaelle.py",
             "app/api/v1/endpoints/customers.py",
             "app/api/v1/endpoints/debtors.py",
             "app/api/v1/endpoints/finance_invoices.py",
@@ -14209,6 +14210,102 @@
           ],
           "read_by": [
             "app/services/crm_opportunity_reference.py"
+          ]
+        },
+        "partner_klaerfaelle": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "quelle",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "satz_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "grund",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "kandidaten",
+              "nullable": false,
+              "type": "jsonb"
+            },
+            {
+              "name": "erstellt_am",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "erledigt_am",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/api/v1/endpoints/crm_partner_klaerfaelle.py"
+          ]
+        },
+        "partner_rueckfuellung_protokoll": {
+          "columns": [
+            {
+              "name": "quelle",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "satz_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "partner_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "partner_neu",
+              "nullable": false,
+              "type": "boolean"
+            },
+            {
+              "name": "zugeordnet_am",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
+          "primary_key": [
+            "quelle",
+            "satz_id"
           ]
         },
         "sales_offer_items": {
@@ -19425,6 +19522,7 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/compat.py",
+            "app/api/v1/endpoints/crm_partner_klaerfaelle.py",
             "app/api/v1/endpoints/crm_partner_suche.py",
             "app/api/v1/endpoints/stammdaten_bearbeiten.py",
             "app/infrastructure/models/einkauf_models.py",
