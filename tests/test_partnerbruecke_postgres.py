@@ -88,3 +88,19 @@ def test_fremder_mandant_teilt_keinen_partner(anlage):
     b = partner_von("domain_crm.customers", "business_partner_id", fremd)
     assert a != b
     assert (partner(a).tenant_id, partner(b).tenant_id) == (tenant, foreign)
+
+
+
+def test_csv_import_haengt_neuen_kunden_an_partner(require_db, subject_data):
+    from app.api.v1.endpoints.compat import _domain_crm_upsert_customer_norm
+
+    _, db, _, tenant, *_ = subject_data
+    nummer = "IMP-" + uuid4().hex[:10]
+    created, updated, fehler = _domain_crm_upsert_customer_norm(
+        db, tenant, firma="Importhof " + nummer, kundennummer=nummer, plz="12345", ort="Ort", land="DE",
+        email="", telefon="", is_active=True, ust_id="")
+    assert (created, updated, fehler) == (True, False, None)
+    pid = db.execute(text("SELECT business_partner_id FROM domain_crm.customers WHERE tenant_id = :t "
+                          "AND customer_number = :n"), {"t": tenant, "n": nummer}).scalar()
+    assert db.execute(text("SELECT tenant_id, is_customer FROM domain_crm.business_partners WHERE partner_id = :p"),
+                      {"p": pid}).one() == (tenant, True)
