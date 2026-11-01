@@ -1506,6 +1506,11 @@
       "source": "alias"
     },
     {
+      "module": "@/pages/crm/partner-klaerfaelle",
+      "path": "crm/partner-klaerfaelle",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/crm/potential-analyse",
       "path": "crm/potential-analyse",
       "source": "navigation"

@@ -722,6 +722,29 @@ def build_personal_mitarbeiter_liste() -> dict[str, Any]:
 #: verlinken deshalb nichts, bis es eine Objektmaske gibt (MASK-STUDIO-ROLLOUT, keine toten Links).
 
 
+def build_crm_partner_klaerfaelle_liste() -> dict[str, Any]:
+    """Klaerliste der Partnerzuordnung (ADR Geschaeftspartnerstamm, Stufe 2): Kunden und Lieferanten, die die
+    Rueckfuellung nicht eindeutig einem Geschaeftspartner zuordnen konnte."""
+    return _liste(
+        screen_id="crm/partner-klaerfaelle-liste", domain="crm", title="Partner-Klaerfaelle",
+        subtitle="Kunden und Lieferanten ohne eindeutigen Geschaeftspartner",
+        endpoint="/api/v1/crm/partner-klaerfaelle", row_route=None, bundle="crm", table_profile="audit",
+        columns=[
+            {"key": "quelle", "label": "Rolle", "filterable": True, "priority": "primary"},
+            {"key": "nummer", "label": "Nummer", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "name", "label": "Name", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "grund", "label": "Grund", "filterable": True, "priority": "primary"},
+            {"key": "erstellt_am", "label": "Erfasst", "renderKind": "datetime", "sortable": True,
+             "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Zweifelsfaelle der Partnerzuordnung sichten, bevor sie fachlich entschieden werden.",
+        prompts=["Welche Kunden haben noch keinen Geschaeftspartner?", "Welche Dubletten hat die Partnerzuordnung gefunden?"],
+        no_workflow="Klaerliste ohne eigenen Ablauf; die Entscheidung folgt mit Stufe 3 des Partnerstamms.",
+    )
+
+
 def build_versicherungen_liste() -> dict[str, Any]:
     """Versicherungsvertraege mit Praemie und Ablauf."""
     return _liste(
@@ -3251,6 +3274,7 @@ LISTEN_SCREEN_BUILDERS = {
     "crm/kampagnen-liste": build_crm_kampagnen_liste,
     "crm/kampagnenvorlagen-liste": build_crm_kampagnenvorlagen_liste,
     "crm/einwilligungen-liste": build_crm_einwilligungen_liste,
+    "crm/partner-klaerfaelle-liste": build_crm_partner_klaerfaelle_liste,
     "crm/dsgvo-anfragen-liste": build_dsgvo_anfragen_liste,
     "crm/segmente-liste": build_crm_segmente_liste,
     "crm/opportunities-liste": build_crm_opportunities_liste,
@@ -3357,6 +3381,7 @@ LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/
                 "crm/kampagnen-liste": "/crm/campaigns",
                 "crm/kampagnenvorlagen-liste": "/crm/campaign-templates",
                 "crm/einwilligungen-liste": "/crm/consents",
+                "crm/partner-klaerfaelle-liste": "/crm/partner-klaerfaelle",
                 "crm/dsgvo-anfragen-liste": "/crm/gdpr-requests",
                 "crm/segmente-liste": "/crm/segments",
                 "crm/opportunities-liste": "/crm/opportunities",
@@ -3481,6 +3506,7 @@ LISTEN_SYNONYME = {"einkauf/anfragen": ["anfragen", "bedarfsanforderungen", "ban
                    "crm/kampagnen-liste": ["kampagnen", "marketing", "campaigns"],
                    "crm/kampagnenvorlagen-liste": ["kampagnenvorlagen", "vorlagen", "templates"],
                    "crm/einwilligungen-liste": ["einwilligungen", "consent", "opt-in"],
+                   "crm/partner-klaerfaelle-liste": ["partner-klaerfaelle", "partnerzuordnung", "dubletten"],
                    "crm/dsgvo-anfragen-liste": ["dsgvo-anfragen", "betroffenenanfragen", "gdpr"],
                    "crm/segmente-liste": ["segmente", "kundensegmente", "zielgruppen"],
                    "crm/opportunities-liste": ["verkaufschancen", "opportunities", "pipeline"],

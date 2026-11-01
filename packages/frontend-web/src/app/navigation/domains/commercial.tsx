@@ -151,6 +151,15 @@ const CRM_CHILDREN: RawNavItem[] = [
     mcp: { businessDomain: 'crm', scope: 'compliance:read' },
   },
   {
+    id: 'partner-klaerfaelle',
+    label: 'Partner-Klärfälle',
+    icon: Users,
+    module: '@/pages/crm/partner-klaerfaelle',
+    preferredPath: 'crm/partner-klaerfaelle',
+    keywords: ['geschaeftspartner', 'partnerzuordnung', 'dubletten', 'klaerfall'],
+    mcp: { businessDomain: 'crm', scope: 'crm:read' },
+  },
+  {
     id: 'verarbeitungsverzeichnis',
     label: 'Verarbeitungsverzeichnis (Art. 30)',
     icon: ShieldCheck,

@@ -273,6 +273,10 @@
       "path": "crm/consents"
     },
     {
+      "module": "@/pages/crm/partner-klaerfaelle",
+      "path": "crm/partner-klaerfaelle"
+    },
+    {
       "module": "@/pages/crm/consent-detail",
       "path": "crm/consent/:id"
     },

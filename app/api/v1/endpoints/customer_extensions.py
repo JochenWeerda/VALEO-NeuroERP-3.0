@@ -6,12 +6,13 @@ Geo-radius search, lead-to-customer conversion, contact operator status.
 from typing import Optional
 import math
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from ....core.config import settings
 from ....core.database import get_db
+from ....core.tenant import get_tenant_id
 from ....infrastructure.models import Customer, Lead, Contact
 from ..schemas.base import BaseSchema
 
@@ -21,7 +22,6 @@ from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-R
 
 
 router = APIRouter()
-DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 
 class GeoSearchRequest(BaseModel):
@@ -58,11 +58,12 @@ def _haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
 @router.post("/geo-search", response_model=list[CustomerBrief], summary="Geo search customer", dependencies=SCHREIBEN["CRM"])
 async def customer_geo_search(
     payload: GeoSearchRequest,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    """POST Kunde Umkreissuche"""
-    tid = tenant_id or DEFAULT_TENANT
+    """POST Kunde Umkreissuche. Mandant aus dem geprueften Kontext; bis 01.11.2026 aus der Query mit
+    Rueckfall auf den Standardmandanten."""
+    tid = tenant_id
     # Note: Full GIS would use PostGIS; this is a simple in-memory filter
     customers = db.query(Customer).filter(
         Customer.tenant_id == tid,
@@ -75,16 +76,26 @@ async def customer_geo_search(
 @router.post("/convert-lead", response_model=CustomerBrief, summary="Lead to customer umwandeln", dependencies=SCHREIBEN["CRM"])
 async def convert_lead_to_customer(
     payload: ConvertLeadRequest,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    """POST Interessent zu Kunde"""
-    from app.core.uuid7 import uuid7
+    """POST Interessent zu Kunde.
+
+    Bis 01.11.2026 kam der Mandant aus der Query (ohne Angabe: Standardmandant), der Lead wurde ohne
+    Mandantenfilter gesucht und der Kunde ohne Geschaeftspartner angelegt."""
     from datetime import datetime, timezone
-    tid = tenant_id or DEFAULT_TENANT
-    lead = db.query(Lead).filter(Lead.id == payload.lead_id).first()
+
+    from app.core.uuid7 import uuid7
+    from app.services.business_partner_service import BusinessPartnerService
+
+    lead = db.query(Lead).filter(Lead.id == payload.lead_id, Lead.tenant_id == tenant_id).first()
     if not lead:
         raise HTTPException(404, "Lead not found")
+    if lead.converted_to_customer_id:
+        raise HTTPException(409, "Lead ist bereits in einen Kunden umgewandelt")
+    partner = BusinessPartnerService(db, tenant_id).partner_fuer_rolle(
+        "kunde", name=lead.company_name, email=lead.email, phone=lead.phone,
+    )
     customer = Customer(
         id=uuid7(),
         customer_number=f"K-{lead.id[:8].upper()}",
@@ -92,13 +103,18 @@ async def convert_lead_to_customer(
         contact_person=lead.contact_person,
         email=lead.email,
         phone=lead.phone,
-        tenant_id=tid,
+        business_partner_id=partner,
+        tenant_id=tenant_id,
     )
     db.add(customer)
     lead.status = "converted"
     lead.converted_at = datetime.now(timezone.utc)
     lead.converted_to_customer_id = customer.id
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(409, "Kundennummer ist im Mandanten bereits vergeben") from exc
     db.refresh(customer)
     return CustomerBrief.model_validate(customer)
 

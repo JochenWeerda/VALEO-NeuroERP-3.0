@@ -953,6 +953,10 @@ api_router.include_router(
     tags=["crm", "partner"]
 )
 
+from app.api.v1.endpoints import crm_partner_klaerfaelle  # noqa: E402  # Klaerliste der Partnerzuordnung
+
+api_router.include_router(crm_partner_klaerfaelle.router)
+
 from app.api.v1.endpoints import tapi  # noqa: E402
 
 api_router.include_router(

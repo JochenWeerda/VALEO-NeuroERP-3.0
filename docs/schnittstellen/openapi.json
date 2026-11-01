@@ -121533,6 +121533,86 @@
         "title": "PartnerActivationIn",
         "type": "object"
       },
+      "PartnerKlaerfallOut": {
+        "properties": {
+          "erledigt_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erledigt Am"
+          },
+          "erstellt_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erstellt Am"
+          },
+          "grund": {
+            "title": "Grund",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "kandidaten": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Kandidaten",
+            "type": "array"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "nummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nummer"
+          },
+          "quelle": {
+            "title": "Quelle",
+            "type": "string"
+          },
+          "satz_id": {
+            "title": "Satz Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "quelle",
+          "satz_id",
+          "grund"
+        ],
+        "title": "PartnerKlaerfallOut",
+        "type": "object"
+      },
       "PartyAddress": {
         "properties": {
           "city": {
@@ -259505,26 +259585,8 @@
     },
     "/api/v1/crm/customers/convert-lead": {
       "post": {
-        "description": "POST Interessent zu Kunde",
+        "description": "POST Interessent zu Kunde.\n\nBis 01.11.2026 kam der Mandant aus der Query (ohne Angabe: Standardmandant), der Lead wurde ohne\nMandantenfilter gesucht und der Kunde ohne Geschaeftspartner angelegt.",
         "operationId": "convert_lead_to_customer_api_v1_crm_customers_convert_lead_post",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -259571,26 +259633,8 @@
     },
     "/api/v1/crm/customers/geo-search": {
       "post": {
-        "description": "POST Kunde Umkreissuche",
+        "description": "POST Kunde Umkreissuche. Mandant aus dem geprueften Kontext; bis 01.11.2026 aus der Query mit\nRueckfall auf den Standardmandanten.",
         "operationId": "customer_geo_search_api_v1_crm_customers_geo_search_post",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -268972,6 +269016,73 @@
           "ownership",
           "crm",
           "ownership"
+        ]
+      }
+    },
+    "/api/v1/crm/partner-klaerfaelle": {
+      "get": {
+        "operationId": "list_partner_klaerfaelle_api_v1_crm_partner_klaerfaelle_get",
+        "parameters": [
+          {
+            "description": "Auch erledigte Klaerfaelle zeigen",
+            "in": "query",
+            "name": "erledigt",
+            "required": false,
+            "schema": {
+              "default": false,
+              "description": "Auch erledigte Klaerfaelle zeigen",
+              "title": "Erledigt",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PartnerKlaerfallOut"
+                  },
+                  "title": "Response List Partner Klaerfaelle Api V1 Crm Partner Klaerfaelle Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Klaerfaelle der Partnerzuordnung auflisten",
+        "tags": [
+          "crm",
+          "partner"
         ]
       }
     },

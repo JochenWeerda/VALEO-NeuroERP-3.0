@@ -20207,3 +20207,12 @@ Kunden- und Lieferantenrolle an einen Partner des Mandanten (CustomerService.cre
 create_customer_record, CSV-Kundenimport, ProcurementService.create_lieferant). Wiederverwendung nur
 bei eindeutiger USt-IdNr. und Name; Name allein ordnet nie zu. Keine Maskenaenderung.
 Offen: crm/convert-lead (customer_extensions.py) ohne Bruecke und mit Query-Mandant; Stufe 2 Rueckfuellung.
+
+## BP-RUECKFUELLUNG-STUFE2-20261101 — abgeschlossen, Claude
+
+Stufe 2 des ADR Geschaeftspartnerstamm: Migration partner_rueckfuellung_20261101 ordnet Kunden und
+Lieferanten ohne Partner nach der Regel der Partnerbruecke zu (IDs/Nummern/Belege unveraendert),
+Zweifelsfaelle in domain_crm.partner_klaerfaelle (RLS), Protokoll fuer das Downgrade. Studio-Liste
+crm/partner-klaerfaelle-liste (GET /api/v1/crm/partner-klaerfaelle, NativeListPage, CRM-Navigation).
+crm/convert-lead mandantengebunden und mit Bruecke. Probelauf gewachsene DB: 20 zugeordnet, 4 Klaerfaelle.
+Offen: Klaerfaelle entscheiden (Stufe 3), convert-lead stilllegen (Stufe 5).

@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (842 Masken).
+> Generiert aus `app/core/screen_definitions.py` (843 Masken).
 
 ## Übersicht
 
@@ -352,6 +352,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `crm/mail-arbeitsplatz` | Mail-Arbeitsplatz | crm | niedrig | — | `GET /api/v1/masks/crm/mail-arbeitsplatz/agent-contract` |
 | `crm/opportunities-liste` | Verkaufschancen | crm | niedrig | — | `GET /api/v1/masks/crm/opportunities-liste/agent-contract` |
 | `crm/opportunity` | Opportunity | crm | niedrig | `order-to-cash` | `GET /api/v1/masks/crm/opportunity/agent-contract` |
+| `crm/partner-klaerfaelle-liste` | Partner-Klaerfaelle | crm | niedrig | — | `GET /api/v1/masks/crm/partner-klaerfaelle-liste/agent-contract` |
 | `crm/segment` | Segment | crm | hoch | — | `GET /api/v1/masks/crm/segment/agent-contract` |
 | `crm/segmente-liste` | Segmente | crm | niedrig | — | `GET /api/v1/masks/crm/segmente-liste/agent-contract` |
 | `crm/vertreter` | Vertreter | crm | niedrig | — | `GET /api/v1/masks/crm/vertreter/agent-contract` |
@@ -10588,6 +10589,46 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 |---|---|---|---|---|
 | `bearbeiten` | Bearbeiten | safe | nein | `/api/v1/crm/opportunities/{entity_id}/actions/bearbeiten` |
 | `create_activity` | Aktivitaet anlegen | safe | nein | `/api/v1/crm/opportunities/{entity_id}/actions/create_activity` |
+
+---
+
+### `crm/partner-klaerfaelle-liste` — Partner-Klaerfaelle
+
+**Zweck:** Zweifelsfaelle der Partnerzuordnung sichten, bevor sie fachlich entschieden werden.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/crm/partner-klaerfaelle-liste/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/crm/partner-klaerfaelle-liste/agent-contract` |
+| Readiness | `GET /api/v1/masks/crm/partner-klaerfaelle-liste/readiness` |
+| Rollout-Route | `/mask-rollout/crm__partner-klaerfaelle-liste/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/crm/partner-klaerfaelle`
+
+**MCP-Tools (Domäne):**
+
+- `crm.customer.search` — scope `crm:read`, Risiko niedrig
+- `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
+- `crm.customer.open` — scope `crm:read`, Risiko niedrig
+- `crm.contact.log` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
+- `crm.lead.qualify` — scope `crm:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche Kunden haben noch keinen Geschaeftspartner?
+- Welche Dubletten hat die Partnerzuordnung gefunden?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
 
