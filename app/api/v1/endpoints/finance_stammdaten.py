@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 from app.api.v1.schemas.base import BaseSchema, TypedObjectOut
 from app.api.v1.schemas.mask_entity_contracts import FinanceDebitorOut, FinanceKreditorOut
 from app.core.database import get_db
+from app.api.v1.endpoints.creditors import _validate_iban
 from app.api.v1.endpoints.debtors import _validate_vat_id_format
 from app.api.v1.schemas.crm import CustomerCreate
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
@@ -48,20 +49,27 @@ class DebitorCreate(BaseSchema):
     credit_limit: Optional[float] = Field(None, ge=0)
     is_active: bool = True
     tenant_id: Optional[str] = None
-    # Altfelder aus domain_erp.debitors. Der Kundenstamm haelt sie nicht; gefuellt werden sie abgelehnt statt
-    # still verworfen (Bankverbindung gehoert zum SEPA-Mandat).
-    tax_number: Optional[str] = None
-    iban: Optional[str] = None
-    bic: Optional[str] = None
-    bank_name: Optional[str] = None
-    account_holder: Optional[str] = None
-    discount_days: Optional[int] = None
-    discount_percent: Optional[float] = None
+    # Rollenfelder (Stufe 3): Bank, Skonto und Steuernummer fuehrt der Geschaeftspartner.
+    tax_number: Optional[str] = Field(None, max_length=50)
+    iban: Optional[str] = Field(None, max_length=34)
+    bic: Optional[str] = Field(None, max_length=11)
+    bank_name: Optional[str] = Field(None, max_length=255)
+    account_holder: Optional[str] = Field(None, max_length=255)
+    discount_days: Optional[int] = Field(None, ge=0)
+    discount_percent: Optional[float] = Field(None, ge=0, le=100)
+    # Altfeld aus domain_erp.debitors ohne Ziel: gefuellt wird es abgelehnt statt still verworfen.
     notes: Optional[str] = None
 
 
-_NICHT_GEHALTENE_DEBITORFELDER = ("tax_number", "iban", "bic", "bank_name", "account_holder",
-                                  "discount_days", "discount_percent", "notes")
+_NICHT_GEHALTENE_DEBITORFELDER = ("notes",)
+
+
+def _partner_rollenfelder(payload: Any) -> dict[str, Any]:
+    """Bank, Skonto und Steuernummer einer Debitor- oder Kreditoranlage fuer den Geschaeftspartner."""
+    _validate_iban(payload.iban)
+    return {"iban": payload.iban, "bic": payload.bic, "bank_name": payload.bank_name,
+            "account_holder": payload.account_holder, "cash_discount_days": payload.discount_days,
+            "cash_discount_percent": payload.discount_percent, "tax_number": payload.tax_number}
 
 
 class CreditorWrite(BaseSchema):
@@ -80,6 +88,13 @@ class CreditorWrite(BaseSchema):
     is_active: Optional[bool] = None
     notes: Optional[str] = None
     tenant_id: Optional[str] = None
+    # Rollenfelder (Stufe 3) am Geschaeftspartner; nur bei der Anlage.
+    iban: Optional[str] = Field(None, max_length=34)
+    bic: Optional[str] = Field(None, max_length=11)
+    bank_name: Optional[str] = Field(None, max_length=255)
+    account_holder: Optional[str] = Field(None, max_length=255)
+    discount_days: Optional[int] = Field(None, ge=0)
+    discount_percent: Optional[float] = Field(None, ge=0, le=100)
 
 
 def _op_by_name(db: Session, tenant_id: str, konto_typ: str) -> dict[str, dict[str, Any]]:
@@ -111,6 +126,23 @@ def _op_by_name(db: Session, tenant_id: str, konto_typ: str) -> dict[str, dict[s
         }
         for row in rows
     }
+
+
+def _partner_felder(db: Session, tenant_id: str, partner_id: Optional[str]) -> dict[str, Any]:
+    """Bank, Skonto und Partnernummer vom Geschaeftspartner (Stufe 3); leer ohne Partner."""
+    if not partner_id:
+        return {}
+    row = db.execute(
+        text("SELECT partner_number, iban, bic, bank_name, account_holder, cash_discount_days, "
+             "cash_discount_percent FROM domain_crm.business_partners WHERE partner_id = :p AND tenant_id = :t"),
+        {"p": str(partner_id), "t": tenant_id},
+    ).mappings().first()
+    if row is None:
+        return {}
+    return {"geschaeftspartner_nr": row["partner_number"], "iban": row["iban"], "bic": row["bic"],
+            "bank": row["bank_name"], "kontoinhaber": row["account_holder"],
+            "skonto_tage": row["cash_discount_days"],
+            "skonto_prozent": float(row["cash_discount_percent"]) if row["cash_discount_percent"] is not None else None}
 
 
 def _debitor_dict(customer: Customer, op: Optional[dict[str, Any]] = None) -> dict[str, Any]:
@@ -205,7 +237,8 @@ async def get_debitor(
     if row is None:
         raise HTTPException(status_code=404, detail="Debitor nicht gefunden")
     op_map = _op_by_name(db, tenant_id, "debitoren")
-    return _debitor_dict(row, op_map.get(row.company_name or ""))
+    return {**_debitor_dict(row, op_map.get(row.company_name or "")),
+            **_partner_felder(db, tenant_id, row.business_partner_id)}
 
 
 @router.post("/finance/debitoren", response_model=TypedObjectOut, status_code=201, summary="Debitor anlegen", dependencies=[Depends(finance_write)])
@@ -226,8 +259,7 @@ async def create_debitor(
     if gefuellt:
         raise HTTPException(
             status_code=422,
-            detail=f"Der Kundenstamm fuehrt diese Felder nicht: {', '.join(gefuellt)}. "
-                   "Bankverbindung ueber das SEPA-Mandat erfassen.",
+            detail=f"Diese Felder haben kein Ziel im Stamm: {', '.join(gefuellt)}.",
         )
     kunde = CustomerCreate(
         customer_number=payload.debtor_number.strip(),
@@ -245,7 +277,7 @@ async def create_debitor(
         is_active=payload.is_active,
     )
     try:
-        created = await CustomerService(db, tenant_id).create_customer(kunde)
+        created = await CustomerService(db, tenant_id).create_customer(kunde, _partner_rollenfelder(payload))
     except ValidationFailedError as exc:
         raise HTTPException(status_code=422, detail=exc.detail) from exc
     except ConflictError as exc:
@@ -305,7 +337,17 @@ async def create_kreditor(
 ) -> dict[str, Any]:
     if not payload.creditor_number or not payload.company_name:
         raise HTTPException(status_code=422, detail="creditor_number und company_name sind Pflicht")
-    created = ProcurementService(db, tenant_id).create_lieferant(
+    try:
+        created = _lieferant_anlegen(db, tenant_id, payload)
+    except ConflictError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    return _creditor_from_lieferant(
+        ProcurementService(db, tenant_id).get_lieferant(str(created["id"]))
+    )
+
+
+def _lieferant_anlegen(db: Session, tenant_id: str, payload: CreditorWrite) -> dict[str, Any]:
+    return ProcurementService(db, tenant_id).create_lieferant(
         {
             "lieferantennummer": payload.creditor_number,
             "firmenname": payload.company_name,
@@ -321,10 +363,8 @@ async def create_kreditor(
             "zahlungsziel_tage": payload.payment_terms_days,
             "notiz": payload.notes,
             "aktiv": True if payload.is_active is None else payload.is_active,
-        }
-    )
-    return _creditor_from_lieferant(
-        ProcurementService(db, tenant_id).get_lieferant(str(created["id"]))
+        },
+        _partner_rollenfelder(payload),
     )
 
 
@@ -340,7 +380,8 @@ async def get_kreditor(
     except EntityNotFoundError as exc:
         raise HTTPException(status_code=404, detail="Kreditor nicht gefunden") from exc
     op_map = _op_by_name(db, tenant_id, "kreditoren")
-    return _creditor_from_lieferant(lf, op_map.get(lf.get("firmenname") or ""))
+    return {**_creditor_from_lieferant(lf, op_map.get(lf.get("firmenname") or "")),
+            **_partner_felder(db, tenant_id, lf.get("partner_id"))}
 
 
 @router.put("/finance/creditors/{kreditor_id}", response_model=TypedObjectOut, summary="Kreditor aktualisieren", dependencies=[Depends(finance_write)])
@@ -351,6 +392,12 @@ async def update_kreditor(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
+    am_partner = [k for k in ("iban", "bic", "bank_name", "account_holder", "discount_days", "discount_percent")
+                  if getattr(payload, k) not in (None, "")]
+    if am_partner:
+        # Bank und Skonto liegen am Geschaeftspartner; hier geaendert wuerden sie still verworfen.
+        raise HTTPException(status_code=422, detail=f"Diese Felder werden am Geschaeftspartner gepflegt: "
+                                                    f"{', '.join(am_partner)}.")
     mapping = {
         "lieferantennummer": payload.creditor_number,
         "firmenname": payload.company_name,

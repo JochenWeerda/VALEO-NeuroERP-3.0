@@ -10594,7 +10594,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ### `crm/partner-klaerfaelle-liste` — Partner-Klaerfaelle
 
-**Zweck:** Zweifelsfaelle der Partnerzuordnung sichten, bevor sie fachlich entschieden werden.
+**Zweck:** Zweifelsfaelle der Partnerzuordnung entscheiden: vorhandenem Partner zuordnen oder neuen anlegen.
 
 | | |
 |---|---|
@@ -16158,7 +16158,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - Was ist das Kreditlimit von Debitor {entity_id}?
 - Zeige alle offenen Posten von Debitor {entity_id}.
 
-**Sensible Felder:** `kreditlimit, steuernummer, ust_id`
+**Sensible Felder:** `iban, bic, kreditlimit, steuernummer, ust_id`
 
 **Actions:**
 
@@ -16232,7 +16232,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - Lege einen Debitor an.
 - Zeige Debitor {entity_id}.
 
-**Sensible Felder:** `credit_limit, vat_id`
+**Sensible Felder:** `iban, bic, credit_limit, vat_id, tax_number`
 
 **Actions:**
 
@@ -16448,7 +16448,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - Welche offenen Posten hat Kreditor {entity_id}?
 - Zeige alle Bestellungen bei Kreditor {entity_id}.
 
-**Sensible Felder:** `steuernummer, ust_id`
+**Sensible Felder:** `iban, bic, steuernummer, ust_id`
 
 **Actions:**
 

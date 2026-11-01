@@ -12172,8 +12172,10 @@
             "app/api/v1/endpoints/ap_invoices.py",
             "app/api/v1/endpoints/crm_360.py",
             "app/api/v1/endpoints/crm_360_sql.py",
+            "app/api/v1/endpoints/crm_partner_klaerfaelle.py",
             "app/api/v1/endpoints/crm_segments.py",
             "app/api/v1/endpoints/finance_invoices.py",
+            "app/api/v1/endpoints/finance_stammdaten.py",
             "app/crm/router.py",
             "app/infrastructure/models/__init__.py",
             "app/infrastructure/models/einkauf_models.py",
@@ -14263,6 +14265,9 @@
             "id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/crm_partner_klaerfaelle.py"
+          ],
+          "written_by": [
             "app/api/v1/endpoints/crm_partner_klaerfaelle.py"
           ]
         },
@@ -21445,8 +21450,7 @@
           "read_by": [
             "app/api/v1/endpoints/debtors.py",
             "app/api/v1/endpoints/export_service.py",
-            "app/api/v1/endpoints/finance_stammdaten.py",
-            "app/core/screen_definitions_finance_capture.py"
+            "app/api/v1/endpoints/finance_stammdaten.py"
           ],
           "written_by": [
             "app/api/v1/endpoints/debtors.py"

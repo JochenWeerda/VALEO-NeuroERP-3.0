@@ -44596,6 +44596,42 @@
       },
       "CreditorWrite": {
         "properties": {
+          "account_holder": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Account Holder"
+          },
+          "bank_name": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bank Name"
+          },
+          "bic": {
+            "anyOf": [
+              {
+                "maxLength": 11,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bic"
+          },
           "city": {
             "anyOf": [
               {
@@ -44655,6 +44691,31 @@
             ],
             "title": "Creditor Number"
           },
+          "discount_days": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Discount Days"
+          },
+          "discount_percent": {
+            "anyOf": [
+              {
+                "maximum": 100.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Discount Percent"
+          },
           "email": {
             "anyOf": [
               {
@@ -44665,6 +44726,18 @@
               }
             ],
             "title": "Email"
+          },
+          "iban": {
+            "anyOf": [
+              {
+                "maxLength": 34,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Iban"
           },
           "is_active": {
             "anyOf": [
@@ -48911,6 +48984,7 @@
           "account_holder": {
             "anyOf": [
               {
+                "maxLength": 255,
                 "type": "string"
               },
               {
@@ -48922,6 +48996,7 @@
           "bank_name": {
             "anyOf": [
               {
+                "maxLength": 255,
                 "type": "string"
               },
               {
@@ -48933,6 +49008,7 @@
           "bic": {
             "anyOf": [
               {
+                "maxLength": 11,
                 "type": "string"
               },
               {
@@ -49004,6 +49080,7 @@
           "discount_days": {
             "anyOf": [
               {
+                "minimum": 0.0,
                 "type": "integer"
               },
               {
@@ -49015,6 +49092,8 @@
           "discount_percent": {
             "anyOf": [
               {
+                "maximum": 100.0,
+                "minimum": 0.0,
                 "type": "number"
               },
               {
@@ -49038,6 +49117,7 @@
           "iban": {
             "anyOf": [
               {
+                "maxLength": 34,
                 "type": "string"
               },
               {
@@ -49113,6 +49193,7 @@
           "tax_number": {
             "anyOf": [
               {
+                "maxLength": 50,
                 "type": "string"
               },
               {
@@ -71257,6 +71338,28 @@
       "FinanceDebitorOut": {
         "additionalProperties": true,
         "properties": {
+          "bank": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bank"
+          },
+          "bic": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bic"
+          },
           "debitoren_nr": {
             "anyOf": [
               {
@@ -71268,6 +71371,28 @@
             ],
             "title": "Debitoren Nr"
           },
+          "geschaeftspartner_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Geschaeftspartner Nr"
+          },
+          "iban": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Iban"
+          },
           "id": {
             "anyOf": [
               {
@@ -71278,6 +71403,17 @@
               }
             ],
             "title": "Id"
+          },
+          "kontoinhaber": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kontoinhaber"
           },
           "kreditlimit": {
             "anyOf": [
@@ -71300,6 +71436,28 @@
               }
             ],
             "title": "Name"
+          },
+          "skonto_prozent": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Skonto Prozent"
+          },
+          "skonto_tage": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Skonto Tage"
           },
           "status": {
             "anyOf": [
@@ -71534,6 +71692,50 @@
       "FinanceKreditorOut": {
         "additionalProperties": true,
         "properties": {
+          "bank": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bank"
+          },
+          "bic": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bic"
+          },
+          "geschaeftspartner_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Geschaeftspartner Nr"
+          },
+          "iban": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Iban"
+          },
           "id": {
             "anyOf": [
               {
@@ -71544,6 +71746,17 @@
               }
             ],
             "title": "Id"
+          },
+          "kontoinhaber": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kontoinhaber"
           },
           "kreditoren_nr": {
             "anyOf": [
@@ -71566,6 +71779,28 @@
               }
             ],
             "title": "Name"
+          },
+          "skonto_prozent": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Skonto Prozent"
+          },
+          "skonto_tage": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Skonto Tage"
           },
           "status": {
             "anyOf": [
@@ -121572,6 +121807,17 @@
             },
             "title": "Kandidaten",
             "type": "array"
+          },
+          "kandidaten_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kandidaten Text"
           },
           "name": {
             "anyOf": [
@@ -269080,6 +269326,124 @@
           }
         ],
         "summary": "Klaerfaelle der Partnerzuordnung auflisten",
+        "tags": [
+          "crm",
+          "partner"
+        ]
+      }
+    },
+    "/api/v1/crm/partner-klaerfaelle/{entity_id}/actions/neuer-partner": {
+      "post": {
+        "operationId": "klaerfall_neuer_partner_api_v1_crm_partner_klaerfaelle__entity_id__actions_neuer_partner_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Klaerfall mit neuem Geschaeftspartner entscheiden",
+        "tags": [
+          "crm",
+          "partner"
+        ]
+      }
+    },
+    "/api/v1/crm/partner-klaerfaelle/{entity_id}/actions/zuordnen": {
+      "post": {
+        "operationId": "klaerfall_zuordnen_api_v1_crm_partner_klaerfaelle__entity_id__actions_zuordnen_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Klaerfall einem vorhandenen Geschaeftspartner zuordnen",
         "tags": [
           "crm",
           "partner"

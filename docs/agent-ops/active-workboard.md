@@ -20216,3 +20216,12 @@ Zweifelsfaelle in domain_crm.partner_klaerfaelle (RLS), Protokoll fuer das Downg
 crm/partner-klaerfaelle-liste (GET /api/v1/crm/partner-klaerfaelle, NativeListPage, CRM-Navigation).
 crm/convert-lead mandantengebunden und mit Bruecke. Probelauf gewachsene DB: 20 zugeordnet, 4 Klaerfaelle.
 Offen: Klaerfaelle entscheiden (Stufe 3), convert-lead stilllegen (Stufe 5).
+
+## BP-ROLLENFELDER-STUFE3-20261101 — abgeschlossen, Claude
+
+Stufe 3 des ADR Geschaeftspartnerstamm: Bank (IBAN Mod-97, BIC, Bank, Kontoinhaber), Skonto und
+Steuernummer der Debitoren- und Kreditorenanlage liegen am Geschaeftspartner (nur leere Felder fuellen,
+Abweichung 409); Kreditor-Aenderung lehnt Bankfelder ab; Debitor-/Kreditor-Detail zeigen sie schreibgeschuetzt
+(Studio-SD, tableProfile financial). Klaerfaelle per Zeilenaktion zuordnen/neuer-partner mit Begruendung,
+Audit, Outbox (Recht STAMMDATEN). Aktionsrechte-Projektion neu erzeugt (war seit #92 veraltet).
+Offen: Stufe 3b Konten/SEPA am Partner (Fachentscheidung Kontennummern), Stufen 4-6.

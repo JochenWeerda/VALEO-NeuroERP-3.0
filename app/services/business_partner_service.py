@@ -111,6 +111,9 @@ def resolve_customer_ref(entry: dict) -> Optional[str]:
 
 
 _ROLLEN_FLAG = {"kunde": "is_customer", "lieferant": "is_supplier"}
+#: Rollenfelder, die seit Stufe 3 am Geschaeftspartner liegen (Bank, Skonto, Steuernummer).
+PARTNER_ROLLENFELDER = ("iban", "bic", "bank_name", "account_holder", "cash_discount_days", "cash_discount_percent",
+                        "tax_number")
 _LAENDER_ISO2 = {"deutschland": "DE", "germany": "DE", "oesterreich": "AT", "österreich": "AT", "austria": "AT",
                  "niederlande": "NL", "netherlands": "NL", "schweiz": "CH", "frankreich": "FR", "polen": "PL",
                  "belgien": "BE", "daenemark": "DK", "dänemark": "DK", "luxemburg": "LU"}
@@ -127,6 +130,15 @@ def _land_iso2(land: Optional[str]) -> Optional[str]:
 # Pflicht-Boolean-Spalten ohne Default je Datenbank. Frisch migriert haben alle einen Default; die gewachsene
 # Entwicklungsdatenbank hat 34 davon verloren, dort scheiterte jede Partneranlage ohne ausdrueckliche Werte.
 _FLAGS_OHNE_DEFAULT: dict[str, tuple[str, ...]] = {}
+
+
+def _feldwert(feld: str, wert: Any) -> Any:
+    """Vergleichsform eines Rollenfelds: Zahlen als Decimal, IBAN/BIC ohne Leerzeichen und gross."""
+    if feld in ("cash_discount_days", "cash_discount_percent"):
+        return Decimal(str(wert))
+    if feld in ("iban", "bic"):
+        return re.sub(r"\s", "", str(wert)).upper()
+    return str(wert).strip()
 
 
 def _ust_id_norm(vat_id: Optional[str]) -> str:
@@ -723,19 +735,23 @@ class BusinessPartnerService:
         email: Optional[str] = None,
         phone: Optional[str] = None,
         partner_id: Optional[str] = None,
+        neu_erzwingen: bool = False,
+        rollenfelder: Optional[dict[str, Any]] = None,
     ) -> str:
         """Partnerbruecke (ADR Geschaeftspartnerstamm, Stufe 1): Partner-ID fuer eine neue Kunden- oder
         Lieferantenrolle.
 
         Mit ``partner_id`` muss der Partner im Mandanten liegen. Sonst wird ein vorhandener Partner nur
         wiederverwendet, wenn USt-IdNr. **und** Name im Mandanten eindeutig passen; ein Name allein ordnet
-        nie zu. Ohne Treffer entsteht ein neuer Partner. Die Rolle wird am Partner gesetzt. Kein commit:
-        der Partner gehoert zur Transaktion der Anlage, die ihn ausloest.
+        nie zu. Ohne Treffer (oder mit ``neu_erzwingen``, Entscheidung eines Klaerfalls) entsteht ein neuer
+        Partner. Die Rolle wird am Partner gesetzt. ``rollenfelder`` (Stufe 3, ``PARTNER_ROLLENFELDER``) fuellen
+        leere Felder des Partners; ein abweichender Wert in einem schon gefuellten Feld wird abgelehnt statt
+        ueberschrieben. Kein commit: der Partner gehoert zur Transaktion der Anlage, die ihn ausloest.
         """
         flag = _ROLLEN_FLAG[rolle]  # Schluessel aus der festen Rollenliste
         if partner_id:
             self.ensure_partner_belongs_to_tenant(partner_id)
-        else:
+        elif not neu_erzwingen:
             ust = _ust_id_norm(vat_id)
             if ust:
                 treffer = self.db.execute(
@@ -752,6 +768,7 @@ class BusinessPartnerService:
                      "WHERE partner_id = :pid AND tenant_id = :tid"),  # reviewed-safe: Spalte aus _ROLLEN_FLAG
                 {"pid": partner_id, "tid": self.tenant_id},
             )
+            self._rollenfelder_setzen(partner_id, rollenfelder)
             return partner_id
         neu = str(uuid7())
         flags = [f for f in self._flags_ohne_default() if f != flag]
@@ -768,7 +785,32 @@ class BusinessPartnerService:
              "land": _land_iso2(country), "ust": (vat_id or None) and vat_id.strip()[:50],
              "email": email or None, "tel": phone or None},
         )
+        self._rollenfelder_setzen(neu, rollenfelder)
         return neu
+
+    def _rollenfelder_setzen(self, partner_id: str, rollenfelder: Optional[dict[str, Any]]) -> None:
+        werte = {k: (_feldwert(k, v) if k in ("iban", "bic") else v) for k, v in (rollenfelder or {}).items()
+                 if k in PARTNER_ROLLENFELDER and v not in (None, "")}
+        if not werte:
+            return
+        spalten = ", ".join(werte)  # Spaltennamen aus PARTNER_ROLLENFELDER
+        bisher = self.db.execute(
+            text(f"SELECT {spalten} FROM domain_crm.business_partners "  # nosec B608
+                 "WHERE partner_id = :pid AND tenant_id = :tid"),  # reviewed-safe: Spalten aus fester Liste
+            {"pid": partner_id, "tid": self.tenant_id},
+        ).mappings().first() or {}
+        abweichend = [k for k, v in werte.items()
+                      if bisher.get(k) not in (None, "") and _feldwert(k, bisher[k]) != _feldwert(k, v)]
+        if abweichend:
+            raise ConflictError("Der Geschaeftspartner fuehrt fuer diese Felder schon andere Werte: "
+                                + ", ".join(abweichend) + ". Aenderung am Partner vornehmen.")
+        # Erreicht wird diese Stelle nur, wenn jedes Feld leer ist oder schon denselben Wert traegt.
+        zuweisung = ", ".join(f"{k} = :{k}" for k in werte)
+        self.db.execute(
+            text(f"UPDATE domain_crm.business_partners SET {zuweisung}, updated_at = NOW() "  # nosec B608
+                 "WHERE partner_id = :pid AND tenant_id = :tid"),  # reviewed-safe: Spalten aus fester Liste
+            {**werte, "pid": partner_id, "tid": self.tenant_id},
+        )
 
     def _flags_ohne_default(self) -> tuple[str, ...]:
         bind = self.db.get_bind()
