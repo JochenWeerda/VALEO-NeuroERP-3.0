@@ -109,7 +109,7 @@ def _op_id_spalten(db: Session) -> tuple[str, ...]:
     if key not in _OP_SPALTEN_JE_DB:
         vorhanden = set(db.execute(text(
             "SELECT column_name FROM information_schema.columns WHERE table_schema = 'domain_erp' "
-            "AND table_name = 'offene_posten'")).scalars().all())
+            "AND table_name = 'offene_posten'")).scalars().fetchmany(200))
         _OP_SPALTEN_JE_DB[key] = tuple(c for c in _OP_ID_SPALTEN if c in vorhanden)
     return _OP_SPALTEN_JE_DB[key]
 
