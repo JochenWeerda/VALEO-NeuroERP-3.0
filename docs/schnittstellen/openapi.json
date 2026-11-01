@@ -48905,6 +48905,253 @@
         "title": "DebitMemoResponse",
         "type": "object"
       },
+      "DebitorCreate": {
+        "description": "Debitor-Anlage; Felder ausser den Altfeldern unten haelt der fuehrende Kundenstamm.",
+        "properties": {
+          "account_holder": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Account Holder"
+          },
+          "bank_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bank Name"
+          },
+          "bic": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bic"
+          },
+          "city": {
+            "anyOf": [
+              {
+                "maxLength": 50,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "City"
+          },
+          "company_name": {
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Company Name",
+            "type": "string"
+          },
+          "contact_person": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Person"
+          },
+          "country": {
+            "anyOf": [
+              {
+                "maxLength": 50,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country"
+          },
+          "credit_limit": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Credit Limit"
+          },
+          "debtor_number": {
+            "maxLength": 50,
+            "minLength": 1,
+            "title": "Debtor Number",
+            "type": "string"
+          },
+          "discount_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Discount Days"
+          },
+          "discount_percent": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Discount Percent"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "format": "email",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "iban": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Iban"
+          },
+          "is_active": {
+            "default": true,
+            "title": "Is Active",
+            "type": "boolean"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "payment_terms_days": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Payment Terms Days"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "maxLength": 20,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "postal_code": {
+            "anyOf": [
+              {
+                "maxLength": 10,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Postal Code"
+          },
+          "street": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Street"
+          },
+          "tax_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tax Number"
+          },
+          "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenant Id"
+          },
+          "vat_id": {
+            "anyOf": [
+              {
+                "maxLength": 50,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vat Id"
+          }
+        },
+        "required": [
+          "debtor_number",
+          "company_name"
+        ],
+        "title": "DebitorCreate",
+        "type": "object"
+      },
       "DebitorPatch": {
         "properties": {
           "credit_limit": {
@@ -49183,253 +49430,6 @@
           "tenant_id"
         ],
         "title": "Debtor",
-        "type": "object"
-      },
-      "DebtorCreate": {
-        "description": "Schema for creating debtors",
-        "properties": {
-          "account_holder": {
-            "anyOf": [
-              {
-                "maxLength": 255,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Account holder",
-            "title": "Account Holder"
-          },
-          "bank_name": {
-            "anyOf": [
-              {
-                "maxLength": 255,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Bank name",
-            "title": "Bank Name"
-          },
-          "bic": {
-            "anyOf": [
-              {
-                "maxLength": 11,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "BIC/SWIFT code",
-            "title": "Bic"
-          },
-          "city": {
-            "description": "City",
-            "maxLength": 100,
-            "minLength": 1,
-            "title": "City",
-            "type": "string"
-          },
-          "company_name": {
-            "description": "Company name",
-            "maxLength": 255,
-            "minLength": 1,
-            "title": "Company Name",
-            "type": "string"
-          },
-          "contact_person": {
-            "anyOf": [
-              {
-                "maxLength": 255,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Contact person",
-            "title": "Contact Person"
-          },
-          "country": {
-            "default": "DE",
-            "description": "Country code",
-            "maxLength": 2,
-            "minLength": 2,
-            "title": "Country",
-            "type": "string"
-          },
-          "credit_limit": {
-            "anyOf": [
-              {
-                "minimum": 0.0,
-                "type": "number"
-              },
-              {
-                "type": "string"
-              }
-            ],
-            "default": "0.00",
-            "description": "Credit limit",
-            "title": "Credit Limit"
-          },
-          "debtor_number": {
-            "description": "Debtor number",
-            "maxLength": 50,
-            "minLength": 1,
-            "title": "Debtor Number",
-            "type": "string"
-          },
-          "discount_days": {
-            "default": 0,
-            "description": "Discount days",
-            "minimum": 0.0,
-            "title": "Discount Days",
-            "type": "integer"
-          },
-          "discount_percent": {
-            "anyOf": [
-              {
-                "maximum": 100.0,
-                "minimum": 0.0,
-                "type": "number"
-              },
-              {
-                "type": "string"
-              }
-            ],
-            "default": "0.00",
-            "description": "Discount percentage",
-            "title": "Discount Percent"
-          },
-          "email": {
-            "anyOf": [
-              {
-                "maxLength": 255,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Email address",
-            "title": "Email"
-          },
-          "iban": {
-            "anyOf": [
-              {
-                "maxLength": 34,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "IBAN",
-            "title": "Iban"
-          },
-          "is_active": {
-            "default": true,
-            "description": "Debtor status",
-            "title": "Is Active",
-            "type": "boolean"
-          },
-          "notes": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Internal notes",
-            "title": "Notes"
-          },
-          "payment_terms_days": {
-            "default": 30,
-            "description": "Payment terms in days",
-            "minimum": 0.0,
-            "title": "Payment Terms Days",
-            "type": "integer"
-          },
-          "phone": {
-            "anyOf": [
-              {
-                "maxLength": 50,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Phone number",
-            "title": "Phone"
-          },
-          "postal_code": {
-            "description": "Postal code",
-            "maxLength": 10,
-            "minLength": 1,
-            "title": "Postal Code",
-            "type": "string"
-          },
-          "street": {
-            "description": "Street address",
-            "maxLength": 255,
-            "minLength": 1,
-            "title": "Street",
-            "type": "string"
-          },
-          "tax_number": {
-            "anyOf": [
-              {
-                "maxLength": 50,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Tax number",
-            "title": "Tax Number"
-          },
-          "tenant_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Deprecated: must match the verified tenant",
-            "title": "Tenant Id"
-          },
-          "vat_id": {
-            "anyOf": [
-              {
-                "maxLength": 50,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "VAT ID",
-            "title": "Vat Id"
-          }
-        },
-        "required": [
-          "debtor_number",
-          "company_name",
-          "street",
-          "postal_code",
-          "city"
-        ],
-        "title": "DebtorCreate",
         "type": "object"
       },
       "DebtorUpdate": {
@@ -299937,6 +299937,52 @@
           "finance",
           "stammdaten"
         ]
+      },
+      "post": {
+        "description": "Legt den Debitor im fuehrenden Kundenstamm an - dieselbe Fachaktion wie die Kundenanlage im CRM.\n\nBis 01.11.2026 schrieb die Anlage in domain_erp.debitors, Liste und Detail lasen domain_crm.customers:\nein neuer Debitor erschien nie in der Liste, und die Detailmaske nach der Anlage meldete 404.",
+        "operationId": "create_debitor_api_v1_finance_debitoren_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DebitorCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TypedObjectOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Debitor anlegen",
+        "tags": [
+          "finance",
+          "stammdaten"
+        ]
       }
     },
     "/api/v1/finance/debitoren/{debitor_id}": {
@@ -300322,13 +300368,13 @@
         ]
       },
       "post": {
-        "description": "Create a new debtor.",
-        "operationId": "create_debtor_api_v1_finance_debtors__post",
+        "description": "Legt den Debitor im fuehrenden Kundenstamm an - dieselbe Fachaktion wie die Kundenanlage im CRM.\n\nBis 01.11.2026 schrieb die Anlage in domain_erp.debitors, Liste und Detail lasen domain_crm.customers:\nein neuer Debitor erschien nie in der Liste, und die Detailmaske nach der Anlage meldete 404.",
+        "operationId": "create_debitor_api_v1_finance_debtors__post",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/DebtorCreate"
+                "$ref": "#/components/schemas/DebitorCreate"
               }
             }
           },
@@ -300339,7 +300385,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Debtor"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -300361,12 +300407,10 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Debtor anlegen",
+        "summary": "Debitor anlegen",
         "tags": [
           "finance",
-          "debtors",
-          "finance",
-          "debtors"
+          "stammdaten"
         ]
       }
     },

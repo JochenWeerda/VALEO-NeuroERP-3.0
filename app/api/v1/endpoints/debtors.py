@@ -47,7 +47,7 @@ def _validate_vat_id_format(vat_id: Optional[str]) -> None:
             status_code=400,
             detail=f"USt-ID: ungültiges Format für {prefix} (z.B. DE123456789, ATU12345678).",
         )
-from ..schemas.finance import Debtor, DebtorCreate, DebtorUpdate
+from ..schemas.finance import Debtor, DebtorUpdate
 from ..schemas.base import PaginatedResponse
 
 from app.api.v1.schemas.base import BaseSchema
@@ -72,30 +72,6 @@ def _parse_address_jsonb(address_jsonb) -> dict:
     if isinstance(address_jsonb, str):
         return json.loads(address_jsonb)
     return address_jsonb
-
-
-def _build_address_jsonb(debtor_data) -> str:
-    """Build address JSONB from debtor data"""
-    address_data = {
-        "contact_person": debtor_data.contact_person,
-        "street": debtor_data.street,
-        "postal_code": debtor_data.postal_code,
-        "city": debtor_data.city,
-        "country": debtor_data.country or "DE",
-        "phone": debtor_data.phone,
-        "email": debtor_data.email,
-        "vat_id": debtor_data.vat_id,
-        "tax_number": debtor_data.tax_number,
-        "iban": debtor_data.iban,
-        "bic": debtor_data.bic,
-        "bank_name": debtor_data.bank_name,
-        "account_holder": debtor_data.account_holder,
-        "payment_terms_days": debtor_data.payment_terms_days or 30,
-        "discount_days": debtor_data.discount_days or 0,
-        "discount_percent": float(debtor_data.discount_percent) if debtor_data.discount_percent else 0.0,
-        "notes": debtor_data.notes
-    }
-    return json.dumps(address_data)
 
 
 def _row_to_debtor(row) -> Debtor:
@@ -131,74 +107,9 @@ def _row_to_debtor(row) -> Debtor:
     )
 
 
-@router.post("/", response_model=Debtor, status_code=201, summary="Debtor anlegen", dependencies=[Depends(finance_write)])
-async def create_debtor(
-    debtor_data: DebtorCreate,
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db)
-):
-    """
-    Create a new debtor.
-    """
-    try:
-        if debtor_data.tenant_id is not None and debtor_data.tenant_id != tenant_id:
-            raise HTTPException(status_code=403, detail="Tenant context mismatch")
-        _validate_vat_id_format(debtor_data.vat_id)
-        dq_result = evaluate_debtor_datensatz(_build_debtor_dq_datensatz(debtor_data.model_dump()))
-        if not dq_result.bestanden:
-            raise HTTPException(status_code=422, detail=build_dq_error_detail("Debitor", dq_result))
-        # Check if debtor number already exists
-        check_query = text("""
-            SELECT id FROM domain_erp.debitors 
-            WHERE debitor_number = :debtor_number AND tenant_id = :tenant_id
-        """)
-        existing = db.execute(
-            check_query,
-            {
-                "debtor_number": debtor_data.debtor_number,
-                "tenant_id": tenant_id
-            }
-        ).fetchone()
-        
-        if existing:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Debtor with number {debtor_data.debtor_number} already exists"
-            )
-
-        # Insert new debtor
-        address_json = _build_address_jsonb(debtor_data)
-        payment_terms = f"{debtor_data.payment_terms_days or 30}_days"
-        
-        insert_query = text("""
-            INSERT INTO domain_erp.debitors 
-            (tenant_id, debitor_number, name, address, payment_terms, credit_limit, is_active)
-            VALUES (:tenant_id, :debtor_number, :company_name, CAST(:address AS jsonb), :payment_terms, :credit_limit, :is_active)
-            RETURNING id, tenant_id, debitor_number, name, address, payment_terms, credit_limit, 
-                      is_active, created_at, updated_at
-        """)
-        
-        result = db.execute(
-            insert_query,
-            {
-                "tenant_id": tenant_id,
-                "debtor_number": debtor_data.debtor_number,
-                "company_name": debtor_data.company_name,
-                "address": address_json,
-                "payment_terms": payment_terms,
-                "credit_limit": debtor_data.credit_limit or Decimal("0.00"),
-                "is_active": debtor_data.is_active if debtor_data.is_active is not None else True
-            }
-        ).fetchone()
-        
-        db.commit()
-        
-        return _row_to_debtor(result)
-    except HTTPException:
-        raise
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=500, detail=f"Failed to create debtor: {str(e)}")
+# Anlage: POST /finance/debtors/ liegt in finance_stammdaten.create_debitor und legt im fuehrenden Kundenstamm
+# (domain_crm.customers) an. Bis 01.11.2026 schrieb dieser Weg in domain_erp.debitors, die Liste las aber
+# domain_crm.customers - neue Debitoren erschienen nie in der Liste. Lesen/Aendern des Altbestands bleibt hier.
 
 
 @router.get("/", response_model=PaginatedResponse[Debtor], summary="Debtors auflisten", dependencies=[Depends(finance_read)])

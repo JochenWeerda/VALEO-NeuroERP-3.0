@@ -7,7 +7,7 @@ import logging
 from datetime import datetime
 from math import ceil
 
-from app.core.address import parse_address
+from app.core.address import Address, parse_address
 from typing import Any, Optional, Union
 from uuid import UUID
 
@@ -206,6 +206,12 @@ def _build_dq_datensatz(data: dict[str, object]) -> dict[str, object]:
         "name": data.get("company_name"),
         "land": data.get("country") or "DE",
     }
+
+
+# Speicherform von domain_crm.customers.address je Datenbank. Die Migrationen legen JSONB an; die gewachsene
+# Entwicklungsdatenbank fuehrt VARCHAR mit Freitext. Bis 01.11.2026 schrieb die lokale Anlage immer Freitext und
+# scheiterte auf jeder frisch migrierten Datenbank, sobald eine Strasse angegeben war.
+_ADRESSE_JSONB: dict[str, bool] = {}
 
 
 # ── service class ─────────────────────────────────────────────────────────────
@@ -503,25 +509,40 @@ class CustomerService:
                     item["business_partner_id"] = row.business_partner_id
         return items
 
+    #: Spalten, die der lokale Eintrag bei der Anlage ueber crm-core mitfuehrt. Die Debitorenliste liest
+    #: domain_crm.customers; bis 01.11.2026 trug der Eintrag nur Nummer und Name, Kreditlimit, Zahlungsziel
+    #: und USt-IdNr. fehlten dort.
+    _STUB_SPALTEN = ("contact_person", "email", "phone", "address", "city", "postal_code", "country",
+                     "industry", "website", "credit_limit", "payment_terms", "tax_id", "is_active")
+
     def upsert_monolith_stub(
         self,
         customer_id: str,
         business_partner_id: Optional[str],
         company_name: str,
         customer_number: str,
+        lokale_werte: Optional[dict[str, Any]] = None,
     ) -> None:
+        werte = {k: (str(v) if k == "email" and v is not None else v)
+                 for k, v in (lokale_werte or {}).items() if k in self._STUB_SPALTEN and v is not None}
+        if "address" in werte:
+            werte["address"] = self._adresse_als_spaltenwert(werte["address"], werte.get("postal_code"),
+                                                             werte.get("city"), werte.get("country"))
+        spalten = "".join(f", {k}" for k in werte)  # Spaltennamen aus der festen Liste
+        platzhalter = "".join(f", :{k}" for k in werte)
         self.db.execute(
-            text("""
+            text(f"""
                 INSERT INTO domain_crm.customers
                     (id, tenant_id, customer_number, company_name, business_partner_id,
-                     is_active, created_at, updated_at)
-                VALUES (:id, :tid, :cn, :cname, :bid, true, NOW(), NOW())
+                     created_at, updated_at{spalten}{'' if 'is_active' in werte else ', is_active'})
+                VALUES (:id, :tid, :cn, :cname, :bid, NOW(), NOW(){platzhalter}{'' if 'is_active' in werte else ', true'})
                 ON CONFLICT (id) DO UPDATE SET
                     business_partner_id = EXCLUDED.business_partner_id,
                     updated_at = NOW()
                 WHERE domain_crm.customers.tenant_id = EXCLUDED.tenant_id
-            """),
+            """),  # nosec B608  # reviewed-safe: Spaltennamen nur aus _STUB_SPALTEN, Werte gebunden
             {
+                **werte,
                 "id": customer_id,
                 "tid": self.tenant_id,
                 "cn": customer_number[:50],
@@ -530,6 +551,29 @@ class CustomerService:
             },
         )
         self.db.commit()
+
+    def _adresse_als_spaltenwert(self, street: Optional[str], postal_code: Optional[str] = None,
+                                 city: Optional[str] = None, country: Optional[str] = None) -> Optional[str]:
+        if not street:
+            return street
+        bind = self.db.get_bind()
+        key = str(getattr(bind, "engine", bind).url)
+        if key not in _ADRESSE_JSONB:
+            _ADRESSE_JSONB[key] = self.db.execute(text(
+                "SELECT data_type FROM information_schema.columns WHERE table_schema = 'domain_crm' "
+                "AND table_name = 'customers' AND column_name = 'address'")).scalar() == "jsonb"
+        if not _ADRESSE_JSONB[key]:
+            return street
+        return json.dumps(Address(street=street, postal_code=postal_code, city=city, country=country).to_jsonb())
+
+    def _kundennummer_vergeben(self, customer_number: Optional[str]) -> bool:
+        if not customer_number or not customer_number.strip():
+            return False
+        return self.db.execute(
+            text("SELECT 1 FROM domain_crm.customers WHERE tenant_id = :tid AND customer_number = :cn "
+                 "AND deleted_at IS NULL LIMIT 1"),
+            {"tid": self.tenant_id, "cn": customer_number.strip()},
+        ).first() is not None
 
     def ensure_bp_belongs_to_tenant(self, partner_id: str) -> None:
         # BP-Tenant-Prüfung über die kanonische Schicht (Phase 2C: BP-Logik an einer Stelle).
@@ -555,7 +599,8 @@ class CustomerService:
             contact_person=customer_data.contact_person,
             email=str(customer_data.email) if customer_data.email else None,
             phone=customer_data.phone,
-            address=customer_data.address,
+            address=self._adresse_als_spaltenwert(customer_data.address, customer_data.postal_code,
+                                                  customer_data.city, customer_data.country),
             # Bis 20.10.2026 verwarf die lokale Anlage Ort, PLZ, Land und Branche.
             city=customer_data.city,
             postal_code=customer_data.postal_code,
@@ -917,6 +962,9 @@ class CustomerService:
         )
         if not dq_result.bestanden:
             raise ValidationFailedError(build_dq_error_detail("Debitor", dq_result))
+        # Eine Nummer je Mandant: crm-core kennt keinen Mandanten und prueft sie deshalb nicht.
+        if self._kundennummer_vergeben(customer_data.customer_number):
+            raise ConflictError("Kundennummer ist im Mandanten bereits vergeben.")
         payload = _map_create_payload(customer_data)
         try:
             created = await _crm_create(payload)
@@ -933,6 +981,7 @@ class CustomerService:
             bp_id,
             (created.display_name or customer_data.company_name or "Kunde").strip() or "Kunde",
             customer_data.customer_number or f"CRM-{created.id[:8].upper()}",
+            customer_data.model_dump(include=set(self._STUB_SPALTEN), mode="python"),
         )
         d = _adapt_customer(created, self.tenant_id)
         return self.merge_extensions(d)
@@ -987,6 +1036,9 @@ class CustomerService:
                  for k, v in data.items() if k in self._LOKALE_SPALTEN}
         if not werte:
             return
+        if werte.get("address"):
+            werte["address"] = self._adresse_als_spaltenwert(werte["address"], werte.get("postal_code"),
+                                                             werte.get("city"), werte.get("country"))
         zuweisung = ", ".join(f"{k} = :{k}" for k in werte)  # Spaltennamen aus der festen Liste
         try:
             self.db.execute(

@@ -9666,6 +9666,9 @@
             "app/services/gdpr_request_processor.py",
             "app/services/mask_rollout_summary_service.py",
             "app/services/mcp_execution_service.py"
+          ],
+          "written_by": [
+            "app/api/v1/endpoints/compliance_dsgvo.py"
           ]
         },
         "business_partner_addresses": {
@@ -12315,7 +12318,8 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/compliance_dsgvo.py",
-            "app/infrastructure/models/__init__.py"
+            "app/infrastructure/models/__init__.py",
+            "app/services/gdpr_request_processor.py"
           ],
           "written_by": [
             "app/api/v1/endpoints/compliance_dsgvo.py"
@@ -13666,7 +13670,9 @@
             "app/api/v1/endpoints/crm_360_sql.py",
             "app/api/v1/endpoints/crm_consents.py",
             "app/api/v1/endpoints/customers.py",
+            "app/api/v1/endpoints/debtors.py",
             "app/api/v1/endpoints/finance_invoices.py",
+            "app/api/v1/endpoints/finance_stammdaten.py",
             "app/api/v1/endpoints/finance_stammdaten_kommandos.py",
             "app/api/v1/endpoints/mask_frontend_bridges.py",
             "app/api/v1/endpoints/portal_kundenzugaenge.py",
@@ -13674,6 +13680,7 @@
             "app/api/v1/endpoints/stammdaten_bearbeiten.py",
             "app/api/v1/schemas/crm.py",
             "app/auth/portal_kunde.py",
+            "app/core/screen_definitions_finance_capture.py",
             "app/domains/logistik/strecke.py",
             "app/infrastructure/models/__init__.py",
             "app/infrastructure/models/agrar_models.py",
@@ -13874,6 +13881,9 @@
             "app/api/v1/endpoints/compliance_dsgvo.py",
             "app/infrastructure/models/__init__.py",
             "app/services/interessent_service.py"
+          ],
+          "written_by": [
+            "app/api/v1/endpoints/compliance_dsgvo.py"
           ]
         },
         "mail_workspace_attachments": {
@@ -21333,7 +21343,9 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/debtors.py",
-            "app/api/v1/endpoints/export_service.py"
+            "app/api/v1/endpoints/export_service.py",
+            "app/api/v1/endpoints/finance_stammdaten.py",
+            "app/core/screen_definitions_finance_capture.py"
           ],
           "written_by": [
             "app/api/v1/endpoints/debtors.py"

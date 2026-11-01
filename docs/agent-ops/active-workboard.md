@@ -20188,3 +20188,14 @@ vergibt valeo_app nur bei vorhandener Rolle, Waagen-ADR mit Pflichtabschnitten,
 Baselines Godfile/Business-Time gesenkt.
 Offen: zwei Debitoren-Aggregate (domain_erp.debitors vs. domain_crm.customers).
 
+
+## FIN-DEBITOR-KUNDENSTAMM-20261101 — abgeschlossen, Claude
+
+Debitorenanlage schreibt in den fuehrenden Kundenstamm (domain_crm.customers) ueber
+CustomerService.create_customer, PR #93; domain_erp.debitors erhaelt keine neuen Zeilen.
+Nicht gehaltene Felder (Bank, Skonto, Notizen, Steuernummer) werden mit 422 abgelehnt.
+Kundennummer je Mandant eindeutig (kundennummer_mandant_20261101). Adressspalte frisch
+JSONB, gewachsen VARCHAR: Dienst schreibt die Spaltenform. crm-core-Stub traegt
+Finanzfelder mit. Stufenplan zum Geschaeftspartnerstamm:
+docs/adr/adr-business-partner-debitoren-kreditoren-20261101.md.
+Offen: Stufen 1-6 des ADR (Partnerbruecke, Rueckfuellung, Rollenfelder, Lesewege, Altwege, public.kunden).

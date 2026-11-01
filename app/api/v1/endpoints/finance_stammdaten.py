@@ -5,8 +5,9 @@ from __future__ import annotations
 from app.auth.finance_roles import finance_admin, finance_write
 from typing import Any, Optional
 
+import httpx
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import Field
+from pydantic import EmailStr, Field
 from sqlalchemy import text
 from sqlalchemy.exc import OperationalError, ProgrammingError
 from sqlalchemy.orm import Session
@@ -14,9 +15,12 @@ from sqlalchemy.orm import Session
 from app.api.v1.schemas.base import BaseSchema, TypedObjectOut
 from app.api.v1.schemas.mask_entity_contracts import FinanceDebitorOut, FinanceKreditorOut
 from app.core.database import get_db
-from app.core.exceptions import EntityNotFoundError
+from app.api.v1.endpoints.debtors import _validate_vat_id_format
+from app.api.v1.schemas.crm import CustomerCreate
+from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
 from app.core.tenant import get_tenant_id
 from app.infrastructure.models import Customer
+from app.services.customer_service import CustomerService
 from app.services.procurement_service import ProcurementService
 
 router = APIRouter(tags=["finance", "stammdaten"])
@@ -25,6 +29,39 @@ router = APIRouter(tags=["finance", "stammdaten"])
 class DebitorPatch(BaseSchema):
     is_active: Optional[bool] = None
     credit_limit: Optional[float] = None
+
+
+class DebitorCreate(BaseSchema):
+    """Debitor-Anlage; Felder ausser den Altfeldern unten haelt der fuehrende Kundenstamm."""
+
+    debtor_number: str = Field(..., min_length=1, max_length=50)
+    company_name: str = Field(..., min_length=1, max_length=100)
+    contact_person: Optional[str] = Field(None, max_length=100)
+    street: Optional[str] = Field(None, max_length=200)
+    postal_code: Optional[str] = Field(None, max_length=10)
+    city: Optional[str] = Field(None, max_length=50)
+    country: Optional[str] = Field(None, max_length=50)
+    phone: Optional[str] = Field(None, max_length=20)
+    email: Optional[EmailStr] = None
+    vat_id: Optional[str] = Field(None, max_length=50)
+    payment_terms_days: Optional[int] = Field(None, ge=0)
+    credit_limit: Optional[float] = Field(None, ge=0)
+    is_active: bool = True
+    tenant_id: Optional[str] = None
+    # Altfelder aus domain_erp.debitors. Der Kundenstamm haelt sie nicht; gefuellt werden sie abgelehnt statt
+    # still verworfen (Bankverbindung gehoert zum SEPA-Mandat).
+    tax_number: Optional[str] = None
+    iban: Optional[str] = None
+    bic: Optional[str] = None
+    bank_name: Optional[str] = None
+    account_holder: Optional[str] = None
+    discount_days: Optional[int] = None
+    discount_percent: Optional[float] = None
+    notes: Optional[str] = None
+
+
+_NICHT_GEHALTENE_DEBITORFELDER = ("tax_number", "iban", "bic", "bank_name", "account_holder",
+                                  "discount_days", "discount_percent", "notes")
 
 
 class CreditorWrite(BaseSchema):
@@ -169,6 +206,60 @@ async def get_debitor(
         raise HTTPException(status_code=404, detail="Debitor nicht gefunden")
     op_map = _op_by_name(db, tenant_id, "debitoren")
     return _debitor_dict(row, op_map.get(row.company_name or ""))
+
+
+@router.post("/finance/debitoren", response_model=TypedObjectOut, status_code=201, summary="Debitor anlegen", dependencies=[Depends(finance_write)])
+@router.post("/finance/debtors/", response_model=TypedObjectOut, status_code=201, summary="Debitor anlegen", dependencies=[Depends(finance_write)])
+async def create_debitor(
+    payload: DebitorCreate,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
+    """Legt den Debitor im fuehrenden Kundenstamm an - dieselbe Fachaktion wie die Kundenanlage im CRM.
+
+    Bis 01.11.2026 schrieb die Anlage in domain_erp.debitors, Liste und Detail lasen domain_crm.customers:
+    ein neuer Debitor erschien nie in der Liste, und die Detailmaske nach der Anlage meldete 404."""
+    if payload.tenant_id is not None and payload.tenant_id != tenant_id:
+        raise HTTPException(status_code=403, detail="Tenant context mismatch")
+    _validate_vat_id_format(payload.vat_id)
+    gefuellt = [k for k in _NICHT_GEHALTENE_DEBITORFELDER if getattr(payload, k) not in (None, "", 0)]
+    if gefuellt:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Der Kundenstamm fuehrt diese Felder nicht: {', '.join(gefuellt)}. "
+                   "Bankverbindung ueber das SEPA-Mandat erfassen.",
+        )
+    kunde = CustomerCreate(
+        customer_number=payload.debtor_number.strip(),
+        company_name=payload.company_name.strip(),
+        contact_person=payload.contact_person,
+        email=payload.email,
+        phone=payload.phone,
+        address=payload.street,
+        city=payload.city,
+        postal_code=payload.postal_code,
+        country=payload.country,
+        tax_id=payload.vat_id,
+        payment_terms=payload.payment_terms_days,
+        credit_limit=payload.credit_limit,
+        is_active=payload.is_active,
+    )
+    try:
+        created = await CustomerService(db, tenant_id).create_customer(kunde)
+    except ValidationFailedError as exc:
+        raise HTTPException(status_code=422, detail=exc.detail) from exc
+    except ConflictError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    except httpx.HTTPStatusError as exc:
+        raise HTTPException(status_code=exc.response.status_code, detail="Kundenstamm hat die Anlage abgelehnt") from exc
+    row = (
+        db.query(Customer)
+        .filter(Customer.tenant_id == tenant_id, Customer.id == str(created["id"]))
+        .first()
+    )
+    if row is None:
+        raise HTTPException(status_code=500, detail="Debitor angelegt, aber im Kundenstamm nicht lesbar")
+    return _debitor_dict(row)
 
 
 @router.patch("/finance/debitoren/{debitor_id}", response_model=TypedObjectOut, summary="Debitor aktualisieren", dependencies=[Depends(finance_write)])

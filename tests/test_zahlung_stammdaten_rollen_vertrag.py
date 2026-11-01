@@ -123,6 +123,9 @@ WEGE = {
     "finance_stammdaten": [
         ("GET", "/finance/debitoren", "offen"),
         ("GET", "/finance/debitoren/{debitor_id}", "offen"),
+        # Anlage im fuehrenden Kundenstamm; /finance/debtors/ ist der alte Zugang derselben Fachaktion.
+        ("POST", "/finance/debitoren", "write"),
+        ("POST", "/finance/debtors/", "write"),
         ("PATCH", "/finance/debtors/{debitor_id}", "write"),
         ("PATCH", "/finance/debitoren/{debitor_id}", "write"),
         ("GET", "/finance/creditors", "offen"),
@@ -188,7 +191,6 @@ WEGE = {
         ("GET", "/fibu/erloeskennziffern/lookup", "offen"),
     ],
     "debtors": [
-        ("POST", "/debtors/", "write"),
         ("GET", "/debtors/", "offen"),
         ("GET", "/debtors/{debtor_id}", "offen"),
         ("PUT", "/debtors/{debtor_id}", "write"),
