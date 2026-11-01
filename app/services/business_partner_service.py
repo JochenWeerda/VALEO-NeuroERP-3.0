@@ -110,6 +110,24 @@ def resolve_customer_ref(entry: dict) -> Optional[str]:
     return entry.get("business_partner_id") or entry.get("partner_number") or entry.get("kunden_nr")
 
 
+_ROLLEN_FLAG = {"kunde": "is_customer", "lieferant": "is_supplier"}
+_LAENDER_ISO2 = {"deutschland": "DE", "germany": "DE", "oesterreich": "AT", "österreich": "AT", "austria": "AT",
+                 "niederlande": "NL", "netherlands": "NL", "schweiz": "CH", "frankreich": "FR", "polen": "PL",
+                 "belgien": "BE", "daenemark": "DK", "dänemark": "DK", "luxemburg": "LU"}
+
+
+def _land_iso2(land: Optional[str]) -> Optional[str]:
+    """business_partners.country ist ISO-2; Kunden und Lieferanten fuehren oft 'Deutschland'."""
+    wert = (land or "").strip()
+    if len(wert) == 2 and wert.isalpha():
+        return wert.upper()
+    return _LAENDER_ISO2.get(wert.lower())
+
+
+def _ust_id_norm(vat_id: Optional[str]) -> str:
+    return re.sub(r"[\s.-]", "", vat_id or "").upper()
+
+
 class BusinessPartnerService:
     """Facade over BusinessPartnerRepository with additional aggregate operations."""
 
@@ -670,20 +688,79 @@ class BusinessPartnerService:
         Behebt das frühere Fehl-Mapping (kunden_nr/name/telefon/erstellt_am existieren nicht).
         """
         try:
+            partner = self.partner_fuer_rolle("kunde", name=name, email=email, phone=phone)
             self.db.execute(
                 text(
                     "INSERT INTO domain_crm.customers "
-                    "(id, tenant_id, customer_number, company_name, email, phone, is_active, created_at, updated_at) "
-                    "VALUES (:id, :tid, :cnum, :name, :email, :phone, TRUE, NOW(), NOW())"
+                    "(id, tenant_id, customer_number, company_name, email, phone, business_partner_id, is_active, "
+                    "created_at, updated_at) "
+                    "VALUES (:id, :tid, :cnum, :name, :email, :phone, :bp, TRUE, NOW(), NOW())"
                 ),
                 {"id": customer_id, "tid": self.tenant_id, "cnum": customer_number,
-                 "name": name, "email": email, "phone": phone},
+                 "name": name, "email": email, "phone": phone, "bp": partner},
             )
             self.db.commit()
             return True
         except (OperationalError, ProgrammingError, IntegrityError):
             self.db.rollback()
             return False
+
+    def partner_fuer_rolle(
+        self,
+        rolle: str,
+        *,
+        name: str,
+        vat_id: Optional[str] = None,
+        street: Optional[str] = None,
+        postal_code: Optional[str] = None,
+        city: Optional[str] = None,
+        country: Optional[str] = None,
+        email: Optional[str] = None,
+        phone: Optional[str] = None,
+        partner_id: Optional[str] = None,
+    ) -> str:
+        """Partnerbruecke (ADR Geschaeftspartnerstamm, Stufe 1): Partner-ID fuer eine neue Kunden- oder
+        Lieferantenrolle.
+
+        Mit ``partner_id`` muss der Partner im Mandanten liegen. Sonst wird ein vorhandener Partner nur
+        wiederverwendet, wenn USt-IdNr. **und** Name im Mandanten eindeutig passen; ein Name allein ordnet
+        nie zu. Ohne Treffer entsteht ein neuer Partner. Die Rolle wird am Partner gesetzt. Kein commit:
+        der Partner gehoert zur Transaktion der Anlage, die ihn ausloest.
+        """
+        flag = _ROLLEN_FLAG[rolle]  # Schluessel aus der festen Rollenliste
+        if partner_id:
+            self.ensure_partner_belongs_to_tenant(partner_id)
+        else:
+            ust = _ust_id_norm(vat_id)
+            if ust:
+                treffer = self.db.execute(
+                    text("SELECT partner_id FROM domain_crm.business_partners WHERE tenant_id = :tid "
+                         "AND upper(regexp_replace(coalesce(vat_id, ''), '[[:space:].-]', '', 'g')) = :ust "
+                         "AND lower(trim(name_1)) = lower(trim(:name)) LIMIT 2"),
+                    {"tid": self.tenant_id, "ust": ust, "name": name},
+                ).fetchall()
+                if len(treffer) == 1:
+                    partner_id = str(treffer[0][0])
+        if partner_id:
+            self.db.execute(
+                text(f"UPDATE domain_crm.business_partners SET {flag} = TRUE, updated_at = NOW() "  # nosec B608
+                     "WHERE partner_id = :pid AND tenant_id = :tid"),  # reviewed-safe: Spalte aus _ROLLEN_FLAG
+                {"pid": partner_id, "tid": self.tenant_id},
+            )
+            return partner_id
+        neu = str(uuid7())
+        self.db.execute(
+            text(f"INSERT INTO domain_crm.business_partners (partner_id, tenant_id, partner_number, name_1, "  # nosec B608
+                 f"street, postal_code, city, country, vat_id, email, phone, status, {flag}, created_at, updated_at) "
+                 "VALUES (:pid, :tid, :nr, :name, :street, :plz, :ort, :land, :ust, :email, :tel, 'active', TRUE, "
+                 "NOW(), NOW())"),  # reviewed-safe: Spalte aus _ROLLEN_FLAG, Werte gebunden
+            {"pid": neu, "tid": self.tenant_id, "nr": "GP-" + neu.replace("-", "").upper()[:20],
+             "name": (name or "").strip()[:255] or "Geschaeftspartner", "street": (street or None) and street[:120],
+             "plz": (postal_code or None) and postal_code[:20], "ort": (city or None) and city[:120],
+             "land": _land_iso2(country), "ust": (vat_id or None) and vat_id.strip()[:50],
+             "email": email or None, "tel": phone or None},
+        )
+        return neu
 
     def ensure_partner_belongs_to_tenant(self, partner_id: str) -> None:
         """Validiert, dass der BusinessPartner im Mandanten existiert (sonst ValidationFailedError).

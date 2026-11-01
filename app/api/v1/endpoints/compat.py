@@ -1459,15 +1459,22 @@ def _domain_crm_upsert_customer_norm(
         else:
             cn = kundennummer if kundennummer else _allocate_import_customer_number(db)
             new_id = str(uuid_module.uuid4())
+            # Partnerbruecke (Stufe 1): auch importierte Kunden haengen an einem Geschaeftspartner.
+            from app.services.business_partner_service import BusinessPartnerService
+
+            partner = BusinessPartnerService(db, tenant_id).partner_fuer_rolle(
+                "kunde", name=firma, vat_id=ust_id or None, postal_code=plz or None, city=ort or None,
+                country=land, email=email or None, phone=telefon or None,
+            )
             db.execute(
                 text(
                     """
                     INSERT INTO domain_crm.customers (
                         id, tenant_id, customer_number, company_name, email, phone,
-                        postal_code, city, country, tax_id, is_active, created_at, updated_at
+                        postal_code, city, country, tax_id, business_partner_id, is_active, created_at, updated_at
                     ) VALUES (
                         :id, :tid, :cn, :cname, :email, :phone,
-                        :plz, :ort, :land, :tx, :is_active, NOW(), NOW()
+                        :plz, :ort, :land, :tx, :bp, :is_active, NOW(), NOW()
                     )
                     """
                 ),
@@ -1482,6 +1489,7 @@ def _domain_crm_upsert_customer_norm(
                     "ort": ort or None,
                     "land": land,
                     "tx": ust_id or None,
+                    "bp": partner,
                     "is_active": is_active,
                 },
             )

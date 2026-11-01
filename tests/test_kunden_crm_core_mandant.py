@@ -49,6 +49,8 @@ def sitzung():
     yield sessionmaker(bind=motor)
     with motor.begin() as v:
         v.execute(text("DELETE FROM domain_crm.customers WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
+        # Seit der Partnerbruecke (01.11.2026) legt jede Kundenanlage auch einen Geschaeftspartner an.
+        v.execute(text("DELETE FROM domain_crm.business_partners WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
         v.execute(text("DELETE FROM domain_shared.tenants WHERE id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
 
 
