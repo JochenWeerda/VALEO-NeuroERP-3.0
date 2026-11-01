@@ -34,9 +34,6 @@
     "app/api/v1/endpoints/compat.py": {
       "date.today": 3
     },
-    "app/api/v1/endpoints/crm_360.py": {
-      "datetime.now.date": 1
-    },
     "app/api/v1/endpoints/crm_kim.py": {
       "date.today": 1
     },

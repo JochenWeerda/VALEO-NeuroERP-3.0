@@ -257,37 +257,10 @@ class Contact(ContactBase, TimestampMixin, SoftDeleteMixin):
 
 
 # Activity Schemas
-class ActivityBase(BaseSchema):
-    """Base activity schema"""
-    type: str = Field(..., max_length=20, description="Activity type (meeting, call, email, note)")
-    title: str = Field(..., min_length=1, max_length=200, description="Activity title")
-    customer: str = Field(..., min_length=1, max_length=100, description="Customer name")
-    contact_person: str = Field(..., min_length=1, max_length=100, description="Contact person")
-    date: datetime = Field(..., description="Activity date")
-    status: str = Field(..., max_length=20, description="Activity status (planned, completed, overdue)")
-    assigned_to: str = Field(..., max_length=100, description="Assigned user")
-    description: Optional[str] = Field(None, description="Activity description")
-
-
-class ActivityCreate(ActivityBase):
-    """Schema for creating an activity"""
-
-
-class ActivityUpdate(BaseSchema):
-    """Schema for updating an activity"""
-    type: Optional[str] = Field(None, max_length=20, description="Activity type")
-    title: Optional[str] = Field(None, min_length=1, max_length=200, description="Activity title")
-    customer: Optional[str] = Field(None, min_length=1, max_length=100, description="Customer name")
-    contact_person: Optional[str] = Field(None, min_length=1, max_length=100, description="Contact person")
-    date: Optional[datetime] = Field(None, description="Activity date")
-    status: Optional[str] = Field(None, max_length=20, description="Activity status")
-    assigned_to: Optional[str] = Field(None, max_length=100, description="Assigned user")
-    description: Optional[str] = Field(None, description="Activity description")
-
-
-class Activity(ActivityBase, TimestampMixin):
-    """Full activity schema"""
-    id: UUID = Field(..., description="Activity ID")
+from app.domains.crm.activity_contracts import (
+    ActivityBase, ActivityCreateCommand as ActivityCreate,
+    ActivityUpdateCommand as ActivityUpdate, ActivityRead as Activity,
+)
 
 
 # Farm Profile Schemas

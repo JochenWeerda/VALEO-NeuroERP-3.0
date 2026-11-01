@@ -7,6 +7,7 @@ So kann das Register nicht mehr versprechen, als die CLI tatsaechlich tut.
 """
 from __future__ import annotations
 
+import json
 import re
 from dataclasses import dataclass
 from typing import Any
@@ -172,6 +173,14 @@ def coerce_fields(action: dict[str, Any], raw: dict[str, str]) -> dict[str, Any]
                 out[key] = int(value) if re.fullmatch(r"-?\d+", value) else float(value)
             except ValueError as exc:
                 raise ValueError(f"Feld {key}: Zahl erwartet, nicht {value!r}") from exc
+        elif kind == "stringList":
+            try:
+                values=json.loads(value)
+                if not isinstance(values,list) or len(values)>100 or any(not isinstance(item,str) or len(item)>200 for item in values):
+                    raise ValueError("bounded text list required")
+            except (ValueError,TypeError) as error:
+                raise ValueError(f"Feld {key}: JSON-Textliste mit maximal 100 Eintraegen erwartet") from error
+            out[key]=values
         elif kind in {"boolean", "checkbox"}:
             if value.lower() not in {"true", "false", "ja", "nein", "1", "0"}:
                 raise ValueError(f"Feld {key}: ja/nein erwartet, nicht {value!r}")

@@ -22,7 +22,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `accounting_periods` | Accounting Period Management API |
 | `accounts` | Finance Account management endpoints |
 | `accruals_provisions` | Accruals and Provisions API |
-| `activities` | CRM activity endpoints proxied via crm-core. |
+| `activities` | Canonical tenant-bound CRM activity resources and versioned commands. |
 | `admin_core` | Core admin endpoints used by the settings/admin frontend. |
 | `admin_devices` | Admin device mapping and output/form settings. |
 | `admin_dms` | Admin DMS Endpoints |

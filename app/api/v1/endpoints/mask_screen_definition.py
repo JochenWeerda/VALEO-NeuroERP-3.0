@@ -697,18 +697,23 @@ async def get_mask_source_data(request: Request, mask_id: str, source_key: str,
                                sort: str | None = None,
                                sort_dir: str = "asc",
                                filter_plan: str | None = Query(None, max_length=50000),
+                               preset_filters: str | None = Query(None, max_length=5000),
+                               complete: bool = False,
                                authorization: str | None = Header(None),
                                tenant_id: str = Depends(get_tenant_id),
                                user: dict = Depends(get_current_user)) -> MaskDataReadOut:
-    if set(request.query_params) - {"entity_id", "page", "limit", "q", "table_key", "sort", "sort_dir", "filter_plan"}:
+    if set(request.query_params) - {"entity_id", "page", "limit", "q", "table_key", "sort", "sort_dir", "filter_plan", "preset_filters", "complete"}:
         raise HTTPException(422, "Unbekannter Parameter im Maskendatenabruf")
     try:
         import json
         filters = json.loads(filter_plan, object_pairs_hook=mask_data_read._json_object,
                              parse_constant=mask_data_read._json_constant) if filter_plan is not None else {}
+        presets = json.loads(preset_filters, object_pairs_hook=mask_data_read._json_object,
+                             parse_constant=mask_data_read._json_constant) if preset_filters is not None else {}
         body = MaskDataReadIn(screen_id=_normalize_mask_id(mask_id), source_key=source_key,
                               entity_id=entity_id, page=page, limit=limit, q=q,
-                              table_key=table_key, sort=sort, sort_dir=sort_dir, filter_plan=filters)
+                              table_key=table_key, sort=sort, sort_dir=sort_dir, filter_plan=filters,
+                              preset_filters=presets, complete=complete)
     except (ValidationError, ValueError) as error:
         raise HTTPException(422, "Ungueltiger Maskendatenauftrag") from error
     return await mask_data_read.read_async(body, tenant_id, authorization)

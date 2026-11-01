@@ -238,6 +238,8 @@ def _sequence(body, tenant):
     aliases = _query_parameters(path)
     can_page = bool(aliases & {"page", "skip", "offset"})
     if table.get("serverPagination") is True:
+        if body.complete or body.preset_filters:
+            raise HTTPException(409, "Vollbestand oder Listenpresets benoetigen einen gemeinsamen Projektionsvertrag")
         if not can_page:raise HTTPException(409, "Serverblaetterung besitzt keinen passenden Fachvertrag")
         required = {"sort", "sort_dir"} if body.sort else set()
         if body.filter_plan:required.add("filter_plan")

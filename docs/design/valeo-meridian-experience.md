@@ -431,3 +431,9 @@ keine unvollstaendige Seite als gesamten Bestand darstellen. Die aktuelle
 Reklamationsquelle benennt ihre fachliche Grenze von200 neuesten Faellen.
 Die Komponentenabnahme umfasst drei Desktop-Aufloesungen mit beiden Themes;
 Details stehen im [Abnahmenachweis](../quality-assurance/studio-functional-lists-20261028.md).
+
+## Kanonische CRM-Aktivitaeten (29.10.2026)
+
+Liste, Details und Neuanlage verwenden dieselbe ScreenDefinition-/RenderPlan-Runtime. Bearbeiten und Entfernen binden Version und Wiederholungsschluessel; Themen, besprochene Bestellungen und naechste Schritte sind atomare Stringlisten. Eine besprochene Bestellung erzeugt keinen Auftrag. Zentrale readonly-Auswahlfelder behalten lesbaren Kontrast; die zentrale Ladegrenze verhindert einen leeren Bearbeitungsdialog vor Abschluss des Datensatzabrufs.
+
+24 synthetische Komponentenansichten dokumentieren Hell/Dunkel bei drei Desktopgroessen einschliesslich Erreichbarkeit der letzten Eingabefelder. Sie ersetzen keine angemeldete End-to-End-Abnahme. [Nachweis und Bilder](../quality-assurance/crm-activity-canonical-20261029.md).

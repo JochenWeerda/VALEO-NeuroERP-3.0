@@ -22,6 +22,8 @@ export interface FilterPlan {
 }
 
 export interface TableQueryState {
+  presetFilters?: Record<string, string>
+  complete?: boolean
   page: number
   pageSize: number
   sort?: string

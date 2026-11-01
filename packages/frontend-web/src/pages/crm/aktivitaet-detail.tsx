@@ -1,7 +1,7 @@
-import { createStammNativeDetailPage } from '@/components/mask-builder'
+import { useParams } from '@/app/routing/typed-router'
+import { UniversalNativeDetailPage } from '@/components/mask-builder/UniversalNativeDetailPage'
 
-export default createStammNativeDetailPage(
-  'crm/aktivitaet-detail',
-  'crm-aktivitaet-detail',
-  () => import('./aktivitaet-detail-legacy'),
-)
+export default function AktivitaetDetailPage(): JSX.Element {
+  const { id } = useParams<{ id?: string }>()
+  return <UniversalNativeDetailPage screenId="crm/aktivitaet" entityId={id || 'neu'} testId="crm-aktivitaet-detail" />
+}

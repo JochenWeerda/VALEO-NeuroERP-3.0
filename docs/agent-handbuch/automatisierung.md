@@ -43,7 +43,9 @@ Vollständige Referenz: [mcp-tools.md](../schnittstellen/mcp-tools.md)
 | `beleg.suchen` | belege | `belege:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
 | `compliance.gate.status` | compliance | `compliance:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
 | `compliance.sanctions.check` | compliance | `compliance:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
-| `crm.activity.create` | crm | `crm:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
+| `crm.activity.create` | crm | `crm:write` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
+| `crm.activity.delete` | crm | `crm:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
+| `crm.activity.update` | crm | `crm:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `crm.contact.log` | crm | `crm:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `crm.customer.open` | crm | `crm:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
 | `crm.customer.search` | crm | `crm:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
@@ -128,7 +130,6 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `crm.lead.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `crm.mail_workspace.attachment_transfer` | outbox | `app/api/v1/endpoints/mail_workspace.py` |
 | `crm.mail_workspace.queue` | outbox | `app/api/v1/endpoints/mail_workspace.py` |
-| `crm.opportunity.activity_created` | outbox | `app/api/v1/endpoints/mask_actions.py` |
 | `crm.opportunity.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `crm_case.created` | outbox | `app/services/crm_compat_service.py` |
 

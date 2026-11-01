@@ -561,122 +561,28 @@ async def create_activity_action(
     - propose: gibt vorausgefüllten Payload-Vorschlag zurück.
     - execute: legt Aktivität an, schreibt Audit-Log-Eintrag.
     """
-    mode: str = body.pop("_mode", "execute")
-    audit_reason: str | None = body.pop("_auditReason", None)
-    idempotency_key: str | None = body.pop("_idempotencyKey", None)
-
-    if mode == "propose":
-        return ActionResult(
-            actionKey="create_activity",
-            mode=mode,
-            success=True,
-            summary="Vorschlag für neue Aktivität",
-            proposedChanges=[{
-                "betreff": f"Aktivität für Kunde {customer_id[:8]}",
-                "typ": "Anruf",
-                "datum": datetime.now(timezone.utc).date().isoformat(),
-                "verantwortlich": None,
-                "notiz": None,
-            }],
-        )
-
-    validation_errors = _validate_create_activity(body)
-
-    if mode in ("validate", "dryRun"):
-        return ActionResult(
-            actionKey="create_activity",
-            mode=mode,
-            success=len(validation_errors) == 0,
-            summary="Validierung erfolgreich — keine Änderungen geschrieben." if not validation_errors else "Validierung fehlgeschlagen.",
-            proposedChanges=[body] if not validation_errors else None,
-            validationErrors=validation_errors or None,
-        )
-
-    # execute
-    if validation_errors:
-        return ActionResult(
-            actionKey="create_activity",
-            mode=mode,
-            success=False,
-            error="Validierung fehlgeschlagen — Aktivität wurde nicht angelegt.",
-            validationErrors=validation_errors,
-        )
-
-    activity_id = str(uuid.uuid4())
-    audit_id = str(uuid.uuid4())
-    now = datetime.now(timezone.utc)
-
-    kunde = _kunde_finden(db, customer_id, tenant_id)
-    if kunde is None:
-        return ActionResult(
-            actionKey="create_activity",
-            mode=mode,
-            success=False,
-            error="Kunde nicht gefunden.",
-        )
-    customer_id = str(kunde.get("id") or customer_id)
-
-    verantwortlich = (body.get("verantwortlich") or "Akte")[:100]
+    from app.domains.crm.activity_contracts import ActivityCreateCommand, normalize_legacy_activity_type
+    from app.services.crm_activity_service import execute_activity, preview_activity
+    from pydantic import ValidationError
+    body=dict(body)
+    mode=body.pop("_mode","execute")
+    reason=body.pop("_auditReason",None)
+    key=body.pop("_idempotencyKey",None)
+    if mode not in {"execute","dryRun","validate","propose"} or set(body)-{"betreff","typ","datum","verantwortlich","notiz"}:
+        raise HTTPException(422,"Invalid activity action envelope")
+    kunde=_kunde_finden(db,customer_id,tenant_id)
+    if kunde is None:raise HTTPException(404,"Customer not found")
     try:
-        db.execute(
-            text(
-                """
-                INSERT INTO domain_crm.activities
-                  (id, type, title, customer, contact_person, date, status, assigned_to, description, tenant_id)
-                VALUES
-                  (:aid, :typ, :titel, :kunde, :person, :datum, 'offen', :verantwortlich, :notiz, :tid)
-                """
-            ),
-            {
-                "aid": activity_id,
-                "typ": (body.get("typ") or "Sonstiges")[:20],
-                "titel": body.get("betreff", "")[:200],
-                "kunde": str(kunde.get("name") or "")[:100] or customer_id[:100],
-                "person": verantwortlich,
-                "datum": body.get("datum") or now.date().isoformat(),
-                "verantwortlich": verantwortlich,
-                "notiz": body.get("notiz"),
-                "tid": tenant_id,
-            },
-        )
-        db.commit()
-    except Exception as exc:
-        db.rollback()
-        raise HTTPException(status_code=500, detail=f"Aktivität konnte nicht gespeichert werden: {exc}") from exc
-
-    try:
-        db.execute(
-            text(
-                """
-                INSERT INTO domain_crm.crm_action_audit_log
-                  (id, tenant_id, action_key, entity_type, entity_id, idempotency_key, audit_reason,
-                   performed_at, result_summary)
-                VALUES
-                  (:id, :tid, 'create_activity', 'customer', :cid, :ikey, :areason, :now, :summary)
-                """
-            ),
-            {
-                "id": audit_id,
-                "tid": tenant_id,
-                "cid": customer_id,
-                "ikey": idempotency_key,
-                "areason": audit_reason,
-                "now": now,
-                "summary": f"Aktivität '{body.get('betreff')}' vom Typ '{body.get('typ')}' angelegt.",
-            },
-        )
-        db.commit()
-    except Exception:
-        # Die Aktivitaet ist bereits festgeschrieben. Ein fehlendes Audit
-        # darf sie nicht als Fehlschlag ausgeben.
-        db.rollback()
-        audit_id = None
-
-    return ActionResult(
-        actionKey="create_activity",
-        mode=mode,
-        success=True,
-        summary=f"Aktivität '{body.get('betreff')}' vom Typ '{body.get('typ')}' erfolgreich angelegt.",
-        affectedIds=[activity_id],
-        auditEntryId=audit_id,
-    )
+        command=ActivityCreateCommand(type=normalize_legacy_activity_type(body.get("typ")),
+            title=body.get("betreff"),customer_id=str(kunde["id"]),date=body.get("datum"),
+            assigned_to=body.get("verantwortlich") or "",description=body.get("notiz"),
+            idempotency_key=key or ("preview" if mode!="execute" else ""),audit_reason=reason)
+    except (ValidationError,ValueError) as error:
+        raise HTTPException(422,"Invalid activity parameters") from error
+    if mode!="execute":
+        values=preview_activity(db,tenant_id,"create",command)
+        return ActionResult(actionKey="create_activity",mode=mode,success=True,
+            summary="Validierter Vorschlag ohne Aenderung",proposedChanges=[values])
+    result=execute_activity(db,tenant_id,"create",command)
+    return ActionResult(actionKey="create_activity",mode=mode,success=True,
+        summary="Aktivitaet angelegt",affectedIds=[result["activity_id"]],auditEntryId=result["auditEntryId"])

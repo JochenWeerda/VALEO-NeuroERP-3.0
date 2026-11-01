@@ -1561,21 +1561,42 @@ def build_crm_leads_liste() -> dict[str, Any]:
     )
 
 def build_crm_aktivitaeten_liste() -> dict[str, Any]:
-    return _liste(
-        screen_id="crm/aktivitaeten-liste", domain="crm", title="Aktivitaeten", subtitle="Kontakte, Termine und Follow-ups",
-        endpoint="/api/v1/crm/activities", row_route="/crm/aktivitaeten/{id}", bundle="crm",
-        columns=[
-            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
-            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
-            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
-            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+    columns=[
+        {"key":"type","label":"Typ","filterable":True,"priority":"primary"},
+        {"key":"title","label":"Betreff","sortable":True,"filterable":True,"priority":"primary"},
+        {"key":"customer","label":"Kunde","sortable":True,"filterable":True,"priority":"primary"},
+        {"key":"contact_person","label":"Ansprechpartner","filterable":True,"priority":"secondary"},
+        {"key":"date","label":"Termin","renderKind":"date","sortable":True,"priority":"primary"},
+        {"key":"status","label":"Status","renderKind":"status","filterable":True,"priority":"primary"},
+        {"key":"assigned_to","label":"Zustaendig","filterable":True,"priority":"secondary"},
+        {"key":"overdue","label":"Ueberfaellig","renderKind":"boolean","priority":"secondary"},
+    ]
+    definition=_liste(screen_id="crm/aktivitaeten-liste",domain="crm",title="Aktivitaeten",
+        subtitle="Kontakte, Termine und naechste Schritte",endpoint="/api/v1/crm/activities",
+        row_route="/crm/aktivitaet/{id}",bundle="crm",columns=columns,
+        actions=[_neu("Neue Aktivitaet","/crm/aktivitaet/neu"),_EXPORT],row_actions=[],
+        purpose="Aktivitaeten vollstaendig suchen, filtern, auswerten und versioniert bearbeiten.",
+        prompts=["Welche offenen Aktivitaeten?","Zeige meine Termine dieser Woche."],
+        no_workflow="Aktivitaeten sind keine Buchungsbelege; Folgeaufgaben werden dokumentiert.")
+    def preset(key,label,field,kind,options,**extra):
+        return {"key":key,"label":label,"field":field,"kind":kind,
+                "options":[{"value":value,"label":text} for value,text in options],**extra}
+    definition["listExperience"]={"searchFields":["title","customer","contact_person","assigned_to"],
+        "presets":[
+            preset("type","Typ","type","choice",[("all","Alle Typen"),("call","Anruf"),("meeting","Besprechung"),("visit","Besuch"),("email","E-Mail"),("task","Aufgabe"),("note","Notiz")]),
+            preset("status","Status","status","choice",[("all","Alle Status"),("planned","Geplant"),("completed","Erledigt"),("cancelled","Abgesagt")]),
+            preset("owner","Zustaendigkeit","assigned_to","actor",[("all","Alle Aktivitaeten"),("mine","Meine Aktivitaeten")]),
+            preset("when","Zeitraum","date","date",[("all","Alle Termine"),("today","Heute"),("week","Diese Woche"),("overdue","Ueberfaellig")],
+                   completionField="status",completionValues=["completed","cancelled"]),
         ],
-        actions=[_EXPORT],
-        row_actions=[],
-        purpose="Aktivitaeten: Eintraege finden und Details oeffnen.",
-        prompts=["Welche offenen Aktivitaeten?", "Zeige aktuelle Aktivitaeten."],
-        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
-    )
+        "aggregates":[{"key":"total","label":"Aktivitaeten Gesamt","conditions":[]},
+            {"key":"planned","label":"Geplant","conditions":[{"field":"status","op":"eq","value":"planned"}]},
+            {"key":"completed","label":"Erledigt","conditions":[{"field":"status","op":"eq","value":"completed"}]},
+            {"key":"overdue","label":"Ueberfaellig","conditions":[{"field":"overdue","op":"eq","value":"true"}]}],
+        "export":{"filenamePrefix":"aktivitaeten-","delimiter":";","columns":[{"key":c["key"],"label":c["label"]} for c in columns]},
+    }
+    return definition
+
 
 def build_fibu_buchungsjournal_liste() -> dict[str, Any]:
     return _liste(

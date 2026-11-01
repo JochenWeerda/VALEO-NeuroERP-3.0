@@ -35,11 +35,17 @@ class MaskDataReadIn(BaseModel):
     table_key: str | None = Field(default=None, pattern=r"^[A-Za-z][A-Za-z0-9_-]{0,63}$")
     sort: str | None = Field(default=None, pattern=r"^[A-Za-z][A-Za-z0-9_.-]{0,100}$")
     sort_dir: Literal["asc", "desc"] = "asc"
+    complete: bool = False
+    preset_filters: dict[str, str] = Field(default_factory=dict, max_length=8)
     filter_plan: dict[str, MaskTableFilter] = Field(default_factory=dict, max_length=20)
 
     @model_validator(mode="after")
     def table_contract_required(self):
-        if not self.table_key and (self.sort or self.filter_plan):
+        if any(not key or len(key) > 200 or not value or len(value) > 200 for key, value in self.preset_filters.items()):
+            raise ValueError("invalid_preset_selection")
+        if self.complete and self.page != 1:
+            raise ValueError("complete_read_requires_first_page")
+        if not self.table_key and (self.sort or self.filter_plan or self.preset_filters or self.complete):
             raise ValueError("table_key_required_for_sort_and_filters")
         return self
 

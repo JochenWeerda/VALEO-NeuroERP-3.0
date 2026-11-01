@@ -2365,31 +2365,1218 @@
         "title": "ActiveRationOut",
         "type": "object"
       },
-      "ActivitiesOut": {
-        "additionalProperties": true,
-        "description": "Response schema for activities endpoints.",
-        "properties": {},
-        "title": "ActivitiesOut",
+      "ActivityCommandResult": {
+        "properties": {
+          "actionKey": {
+            "title": "Actionkey",
+            "type": "string"
+          },
+          "activity": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ActivityRead"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "activity_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Activity Id"
+          },
+          "auditEntryId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Auditentryid"
+          },
+          "mode": {
+            "default": "execute",
+            "enum": [
+              "execute",
+              "dryRun",
+              "validate",
+              "propose"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "proposedChanges": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Proposedchanges"
+          },
+          "replayed": {
+            "default": false,
+            "title": "Replayed",
+            "type": "boolean"
+          },
+          "success": {
+            "title": "Success",
+            "type": "boolean"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version"
+          }
+        },
+        "required": [
+          "actionKey",
+          "success"
+        ],
+        "title": "ActivityCommandResult",
         "type": "object"
       },
-      "ActivityStatus": {
-        "enum": [
-          "planned",
-          "completed",
-          "cancelled"
+      "ActivityCreateAction": {
+        "additionalProperties": false,
+        "properties": {
+          "assigned_to": {
+            "default": "",
+            "maxLength": 100,
+            "title": "Assigned To",
+            "type": "string"
+          },
+          "audit_reason": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Audit Reason"
+          },
+          "contact_id": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Id"
+          },
+          "contact_person": {
+            "default": "",
+            "maxLength": 100,
+            "title": "Contact Person",
+            "type": "string"
+          },
+          "correlation_id": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Correlation Id"
+          },
+          "customer": {
+            "default": "",
+            "maxLength": 100,
+            "title": "Customer",
+            "type": "string"
+          },
+          "customer_id": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Id"
+          },
+          "date": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "maxLength": 10000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "follow_up_actions": {
+            "items": {
+              "maxLength": 200,
+              "type": "string"
+            },
+            "maxItems": 100,
+            "title": "Follow Up Actions",
+            "type": "array"
+          },
+          "idempotency_key": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "main_topics": {
+            "items": {
+              "maxLength": 200,
+              "type": "string"
+            },
+            "maxItems": 100,
+            "title": "Main Topics",
+            "type": "array"
+          },
+          "mode": {
+            "default": "execute",
+            "enum": [
+              "execute",
+              "dryRun",
+              "validate",
+              "propose"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "opportunity_id": {
+            "anyOf": [
+              {
+                "maxLength": 36,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Opportunity Id"
+          },
+          "orders_placed": {
+            "items": {
+              "maxLength": 200,
+              "type": "string"
+            },
+            "maxItems": 100,
+            "title": "Orders Placed",
+            "type": "array"
+          },
+          "status": {
+            "default": "planned",
+            "enum": [
+              "planned",
+              "completed",
+              "cancelled"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "meeting",
+              "call",
+              "email",
+              "note",
+              "visit",
+              "task"
+            ],
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "idempotency_key"
         ],
-        "title": "ActivityStatus",
-        "type": "string"
+        "title": "ActivityCreateAction",
+        "type": "object"
       },
-      "ActivityType": {
-        "enum": [
-          "call",
-          "email",
-          "meeting",
-          "visit"
+      "ActivityCreateCommand": {
+        "additionalProperties": false,
+        "properties": {
+          "assigned_to": {
+            "default": "",
+            "maxLength": 100,
+            "title": "Assigned To",
+            "type": "string"
+          },
+          "audit_reason": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Audit Reason"
+          },
+          "contact_id": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Id"
+          },
+          "contact_person": {
+            "default": "",
+            "maxLength": 100,
+            "title": "Contact Person",
+            "type": "string"
+          },
+          "correlation_id": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Correlation Id"
+          },
+          "customer": {
+            "default": "",
+            "maxLength": 100,
+            "title": "Customer",
+            "type": "string"
+          },
+          "customer_id": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Id"
+          },
+          "date": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "maxLength": 10000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "follow_up_actions": {
+            "items": {
+              "maxLength": 200,
+              "type": "string"
+            },
+            "maxItems": 100,
+            "title": "Follow Up Actions",
+            "type": "array"
+          },
+          "idempotency_key": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "main_topics": {
+            "items": {
+              "maxLength": 200,
+              "type": "string"
+            },
+            "maxItems": 100,
+            "title": "Main Topics",
+            "type": "array"
+          },
+          "opportunity_id": {
+            "anyOf": [
+              {
+                "maxLength": 36,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Opportunity Id"
+          },
+          "orders_placed": {
+            "items": {
+              "maxLength": 200,
+              "type": "string"
+            },
+            "maxItems": 100,
+            "title": "Orders Placed",
+            "type": "array"
+          },
+          "status": {
+            "default": "planned",
+            "enum": [
+              "planned",
+              "completed",
+              "cancelled"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "meeting",
+              "call",
+              "email",
+              "note",
+              "visit",
+              "task"
+            ],
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "idempotency_key"
         ],
-        "title": "ActivityType",
-        "type": "string"
+        "title": "ActivityCreateCommand",
+        "type": "object"
+      },
+      "ActivityDeleteAction": {
+        "additionalProperties": false,
+        "properties": {
+          "audit_reason": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Audit Reason"
+          },
+          "correlation_id": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Correlation Id"
+          },
+          "expected_version": {
+            "minimum": 1.0,
+            "title": "Expected Version",
+            "type": "integer"
+          },
+          "idempotency_key": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "mode": {
+            "default": "execute",
+            "enum": [
+              "execute",
+              "dryRun",
+              "validate",
+              "propose"
+            ],
+            "title": "Mode",
+            "type": "string"
+          }
+        },
+        "required": [
+          "expected_version",
+          "idempotency_key"
+        ],
+        "title": "ActivityDeleteAction",
+        "type": "object"
+      },
+      "ActivityRead": {
+        "properties": {
+          "assigned_to": {
+            "default": "",
+            "maxLength": 100,
+            "title": "Assigned To",
+            "type": "string"
+          },
+          "contact_id": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Id"
+          },
+          "contact_person": {
+            "default": "",
+            "maxLength": 100,
+            "title": "Contact Person",
+            "type": "string"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "created_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created By"
+          },
+          "customer": {
+            "default": "",
+            "maxLength": 100,
+            "title": "Customer",
+            "type": "string"
+          },
+          "customer_id": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Id"
+          },
+          "date": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "maxLength": 10000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "follow_up_actions": {
+            "items": {
+              "maxLength": 200,
+              "type": "string"
+            },
+            "maxItems": 100,
+            "title": "Follow Up Actions",
+            "type": "array"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "main_topics": {
+            "items": {
+              "maxLength": 200,
+              "type": "string"
+            },
+            "maxItems": 100,
+            "title": "Main Topics",
+            "type": "array"
+          },
+          "opportunity_id": {
+            "anyOf": [
+              {
+                "maxLength": 36,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Opportunity Id"
+          },
+          "orders_placed": {
+            "items": {
+              "maxLength": 200,
+              "type": "string"
+            },
+            "maxItems": 100,
+            "title": "Orders Placed",
+            "type": "array"
+          },
+          "overdue": {
+            "readOnly": true,
+            "title": "Overdue",
+            "type": "boolean"
+          },
+          "status": {
+            "default": "planned",
+            "enum": [
+              "planned",
+              "completed",
+              "cancelled"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "meeting",
+              "call",
+              "email",
+              "note",
+              "visit",
+              "task"
+            ],
+            "title": "Type",
+            "type": "string"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "updated_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated By"
+          },
+          "version": {
+            "minimum": 1.0,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "id",
+          "version",
+          "overdue"
+        ],
+        "title": "ActivityRead",
+        "type": "object"
+      },
+      "ActivityUpdateAction": {
+        "additionalProperties": false,
+        "properties": {
+          "assigned_to": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assigned To"
+          },
+          "audit_reason": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Audit Reason"
+          },
+          "contact_id": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Id"
+          },
+          "contact_person": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Person"
+          },
+          "correlation_id": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Correlation Id"
+          },
+          "customer": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer"
+          },
+          "customer_id": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Id"
+          },
+          "date": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "maxLength": 10000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "expected_version": {
+            "minimum": 1.0,
+            "title": "Expected Version",
+            "type": "integer"
+          },
+          "follow_up_actions": {
+            "anyOf": [
+              {
+                "items": {
+                  "maxLength": 200,
+                  "type": "string"
+                },
+                "maxItems": 100,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Follow Up Actions"
+          },
+          "idempotency_key": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "main_topics": {
+            "anyOf": [
+              {
+                "items": {
+                  "maxLength": 200,
+                  "type": "string"
+                },
+                "maxItems": 100,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Main Topics"
+          },
+          "mode": {
+            "default": "execute",
+            "enum": [
+              "execute",
+              "dryRun",
+              "validate",
+              "propose"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "opportunity_id": {
+            "anyOf": [
+              {
+                "maxLength": 36,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Opportunity Id"
+          },
+          "orders_placed": {
+            "anyOf": [
+              {
+                "items": {
+                  "maxLength": 200,
+                  "type": "string"
+                },
+                "maxItems": 100,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Orders Placed"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "enum": [
+                  "planned",
+                  "completed",
+                  "cancelled"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "type": {
+            "anyOf": [
+              {
+                "enum": [
+                  "meeting",
+                  "call",
+                  "email",
+                  "note",
+                  "visit",
+                  "task"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Type"
+          }
+        },
+        "required": [
+          "expected_version",
+          "idempotency_key"
+        ],
+        "title": "ActivityUpdateAction",
+        "type": "object"
+      },
+      "ActivityUpdateCommand": {
+        "additionalProperties": false,
+        "properties": {
+          "assigned_to": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assigned To"
+          },
+          "audit_reason": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Audit Reason"
+          },
+          "contact_id": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Id"
+          },
+          "contact_person": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Person"
+          },
+          "correlation_id": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Correlation Id"
+          },
+          "customer": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer"
+          },
+          "customer_id": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Id"
+          },
+          "date": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "maxLength": 10000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "expected_version": {
+            "minimum": 1.0,
+            "title": "Expected Version",
+            "type": "integer"
+          },
+          "follow_up_actions": {
+            "anyOf": [
+              {
+                "items": {
+                  "maxLength": 200,
+                  "type": "string"
+                },
+                "maxItems": 100,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Follow Up Actions"
+          },
+          "idempotency_key": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "main_topics": {
+            "anyOf": [
+              {
+                "items": {
+                  "maxLength": 200,
+                  "type": "string"
+                },
+                "maxItems": 100,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Main Topics"
+          },
+          "opportunity_id": {
+            "anyOf": [
+              {
+                "maxLength": 36,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Opportunity Id"
+          },
+          "orders_placed": {
+            "anyOf": [
+              {
+                "items": {
+                  "maxLength": 200,
+                  "type": "string"
+                },
+                "maxItems": 100,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Orders Placed"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "enum": [
+                  "planned",
+                  "completed",
+                  "cancelled"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "type": {
+            "anyOf": [
+              {
+                "enum": [
+                  "meeting",
+                  "call",
+                  "email",
+                  "note",
+                  "visit",
+                  "task"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Type"
+          }
+        },
+        "required": [
+          "expected_version",
+          "idempotency_key"
+        ],
+        "title": "ActivityUpdateCommand",
+        "type": "object"
       },
       "ActualComponentIn": {
         "properties": {
@@ -117821,7 +119008,7 @@
         "title": "PaginatedResponse[Account]",
         "type": "object"
       },
-      "PaginatedResponse_Activity_": {
+      "PaginatedResponse_ActivityRead_": {
         "properties": {
           "has_next": {
             "description": "Whether there is a next page",
@@ -117836,7 +119023,7 @@
           "items": {
             "description": "List of items",
             "items": {
-              "$ref": "#/components/schemas/app__api__v1__schemas__crm__Activity"
+              "$ref": "#/components/schemas/ActivityRead"
             },
             "title": "Items",
             "type": "array"
@@ -117871,7 +119058,7 @@
           "has_next",
           "has_prev"
         ],
-        "title": "PaginatedResponse[Activity]",
+        "title": "PaginatedResponse[ActivityRead]",
         "type": "object"
       },
       "PaginatedResponse_AgrarContractOut_": {
@@ -179476,27 +180663,6 @@
         "title": "_FeedingControlIn",
         "type": "object"
       },
-      "_FollowUpActionItem": {
-        "properties": {
-          "value": {
-            "anyOf": [
-              {
-                "additionalProperties": true,
-                "type": "object"
-              },
-              {
-                "type": "string"
-              }
-            ],
-            "title": "Value"
-          }
-        },
-        "required": [
-          "value"
-        ],
-        "title": "_FollowUpActionItem",
-        "type": "object"
-      },
       "_JahreswechselBody": {
         "properties": {
           "dry_run": {
@@ -180259,21 +181425,6 @@
           "unten_pct"
         ],
         "title": "_ShakerBoxIn",
-        "type": "object"
-      },
-      "_StringListItem": {
-        "properties": {
-          "value": {
-            "maxLength": 200,
-            "minLength": 1,
-            "title": "Value",
-            "type": "string"
-          }
-        },
-        "required": [
-          "value"
-        ],
-        "title": "_StringListItem",
         "type": "object"
       },
       "app__api__v1__endpoints__admin_pos__DsfinvkExportOut": {
@@ -185094,298 +186245,6 @@
         "title": "BatchOut",
         "type": "object"
       },
-      "app__api__v1__schemas__crm__Activity": {
-        "description": "Full activity schema",
-        "properties": {
-          "assigned_to": {
-            "description": "Assigned user",
-            "maxLength": 100,
-            "title": "Assigned To",
-            "type": "string"
-          },
-          "contact_person": {
-            "description": "Contact person",
-            "maxLength": 100,
-            "minLength": 1,
-            "title": "Contact Person",
-            "type": "string"
-          },
-          "created_at": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Creation timestamp",
-            "title": "Created At"
-          },
-          "customer": {
-            "description": "Customer name",
-            "maxLength": 100,
-            "minLength": 1,
-            "title": "Customer",
-            "type": "string"
-          },
-          "date": {
-            "description": "Activity date",
-            "format": "date-time",
-            "title": "Date",
-            "type": "string"
-          },
-          "description": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Activity description",
-            "title": "Description"
-          },
-          "id": {
-            "description": "Activity ID",
-            "format": "uuid",
-            "title": "Id",
-            "type": "string"
-          },
-          "status": {
-            "description": "Activity status (planned, completed, overdue)",
-            "maxLength": 20,
-            "title": "Status",
-            "type": "string"
-          },
-          "title": {
-            "description": "Activity title",
-            "maxLength": 200,
-            "minLength": 1,
-            "title": "Title",
-            "type": "string"
-          },
-          "type": {
-            "description": "Activity type (meeting, call, email, note)",
-            "maxLength": 20,
-            "title": "Type",
-            "type": "string"
-          },
-          "updated_at": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Last update timestamp",
-            "title": "Updated At"
-          }
-        },
-        "required": [
-          "type",
-          "title",
-          "customer",
-          "contact_person",
-          "date",
-          "status",
-          "assigned_to",
-          "id"
-        ],
-        "title": "Activity",
-        "type": "object"
-      },
-      "app__api__v1__schemas__crm__ActivityCreate": {
-        "description": "Schema for creating an activity",
-        "properties": {
-          "assigned_to": {
-            "description": "Assigned user",
-            "maxLength": 100,
-            "title": "Assigned To",
-            "type": "string"
-          },
-          "contact_person": {
-            "description": "Contact person",
-            "maxLength": 100,
-            "minLength": 1,
-            "title": "Contact Person",
-            "type": "string"
-          },
-          "customer": {
-            "description": "Customer name",
-            "maxLength": 100,
-            "minLength": 1,
-            "title": "Customer",
-            "type": "string"
-          },
-          "date": {
-            "description": "Activity date",
-            "format": "date-time",
-            "title": "Date",
-            "type": "string"
-          },
-          "description": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Activity description",
-            "title": "Description"
-          },
-          "status": {
-            "description": "Activity status (planned, completed, overdue)",
-            "maxLength": 20,
-            "title": "Status",
-            "type": "string"
-          },
-          "title": {
-            "description": "Activity title",
-            "maxLength": 200,
-            "minLength": 1,
-            "title": "Title",
-            "type": "string"
-          },
-          "type": {
-            "description": "Activity type (meeting, call, email, note)",
-            "maxLength": 20,
-            "title": "Type",
-            "type": "string"
-          }
-        },
-        "required": [
-          "type",
-          "title",
-          "customer",
-          "contact_person",
-          "date",
-          "status",
-          "assigned_to"
-        ],
-        "title": "ActivityCreate",
-        "type": "object"
-      },
-      "app__api__v1__schemas__crm__ActivityUpdate": {
-        "description": "Schema for updating an activity",
-        "properties": {
-          "assigned_to": {
-            "anyOf": [
-              {
-                "maxLength": 100,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Assigned user",
-            "title": "Assigned To"
-          },
-          "contact_person": {
-            "anyOf": [
-              {
-                "maxLength": 100,
-                "minLength": 1,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Contact person",
-            "title": "Contact Person"
-          },
-          "customer": {
-            "anyOf": [
-              {
-                "maxLength": 100,
-                "minLength": 1,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Customer name",
-            "title": "Customer"
-          },
-          "date": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Activity date",
-            "title": "Date"
-          },
-          "description": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Activity description",
-            "title": "Description"
-          },
-          "status": {
-            "anyOf": [
-              {
-                "maxLength": 20,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Activity status",
-            "title": "Status"
-          },
-          "title": {
-            "anyOf": [
-              {
-                "maxLength": 200,
-                "minLength": 1,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Activity title",
-            "title": "Title"
-          },
-          "type": {
-            "anyOf": [
-              {
-                "maxLength": 20,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Activity type",
-            "title": "Type"
-          }
-        },
-        "title": "ActivityUpdate",
-        "type": "object"
-      },
       "app__api__v1__schemas__crm__ContactCreate": {
         "description": "Schema for creating a contact",
         "properties": {
@@ -187289,220 +188148,6 @@
           }
         },
         "title": "Buchung",
-        "type": "object"
-      },
-      "app__crm__schemas__Activity": {
-        "properties": {
-          "contact_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Contact Id"
-          },
-          "created_at": {
-            "format": "date-time",
-            "title": "Created At",
-            "type": "string"
-          },
-          "created_by": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Created By"
-          },
-          "date": {
-            "format": "date-time",
-            "title": "Date",
-            "type": "string"
-          },
-          "id": {
-            "title": "Id",
-            "type": "string"
-          },
-          "notes": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Notes"
-          },
-          "status": {
-            "$ref": "#/components/schemas/ActivityStatus",
-            "default": "planned"
-          },
-          "subject": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Subject"
-          },
-          "type": {
-            "$ref": "#/components/schemas/ActivityType"
-          }
-        },
-        "required": [
-          "type",
-          "date",
-          "id",
-          "created_at"
-        ],
-        "title": "Activity",
-        "type": "object"
-      },
-      "app__crm__schemas__ActivityCreate": {
-        "properties": {
-          "contact_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Contact Id"
-          },
-          "created_by": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Created By"
-          },
-          "date": {
-            "format": "date-time",
-            "title": "Date",
-            "type": "string"
-          },
-          "notes": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Notes"
-          },
-          "status": {
-            "$ref": "#/components/schemas/ActivityStatus",
-            "default": "planned"
-          },
-          "subject": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Subject"
-          },
-          "type": {
-            "$ref": "#/components/schemas/ActivityType"
-          }
-        },
-        "required": [
-          "type",
-          "date"
-        ],
-        "title": "ActivityCreate",
-        "type": "object"
-      },
-      "app__crm__schemas__ActivityUpdate": {
-        "properties": {
-          "contact_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Contact Id"
-          },
-          "date": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Date"
-          },
-          "notes": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Notes"
-          },
-          "status": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/ActivityStatus"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "subject": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Subject"
-          },
-          "type": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/ActivityType"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "title": "ActivityUpdate",
         "type": "object"
       },
       "app__crm__schemas__ConsentCreate": {
@@ -189827,7 +190472,6 @@
     },
     "/api/crm-sales/opportunities/{opportunity_id}/activities": {
       "post": {
-        "description": "Aktivität zur Opportunity hinzufügen.\n\nBis 07.10.2026 ohne Mandant und in eine Tabelle ``activities`` mit\n``opportunity_id``, die keine Migration anlegt. Jetzt: nur im eigenen Mandanten,\nin ``domain_crm.activities`` — dort liest der Reiter der Opportunity-Maske.",
         "operationId": "add_opportunity_activity_api_crm_sales_opportunities__opportunity_id__activities_post",
         "parameters": [
           {
@@ -189840,13 +190484,13 @@
             }
           },
           {
-            "description": "Aktivitätstyp (NOTE/CALL/EMAIL/MEETING)",
+            "description": "Aktivitaetstyp",
             "in": "query",
             "name": "activity_type",
             "required": false,
             "schema": {
               "default": "NOTE",
-              "description": "Aktivitätstyp (NOTE/CALL/EMAIL/MEETING)",
+              "description": "Aktivitaetstyp",
               "title": "Activity Type",
               "type": "string"
             }
@@ -189858,6 +190502,8 @@
             "required": true,
             "schema": {
               "description": "Betreff",
+              "maxLength": 200,
+              "minLength": 1,
               "title": "Subject",
               "type": "string"
             }
@@ -189869,6 +190515,7 @@
             "schema": {
               "anyOf": [
                 {
+                  "maxLength": 10000,
                   "type": "string"
                 },
                 {
@@ -189885,6 +190532,7 @@
             "schema": {
               "anyOf": [
                 {
+                  "maxLength": 100,
                   "type": "string"
                 },
                 {
@@ -189892,6 +190540,17 @@
                 }
               ],
               "title": "Assigned To"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "maxLength": 200,
+              "minLength": 1,
+              "title": "Idempotency-Key",
+              "type": "string"
             }
           }
         ],
@@ -249147,9 +249806,57 @@
     },
     "/api/v1/crm/activities": {
       "get": {
-        "description": "List all activities",
         "operationId": "list_activities_api_v1_crm_activities_get",
         "parameters": [
+          {
+            "in": "query",
+            "name": "type",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Type"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 200,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Search"
+            }
+          },
           {
             "in": "query",
             "name": "contact_id",
@@ -249157,6 +249864,7 @@
             "schema": {
               "anyOf": [
                 {
+                  "maxLength": 64,
                   "type": "string"
                 },
                 {
@@ -249164,159 +249872,6 @@
                 }
               ],
               "title": "Contact Id"
-            }
-          },
-          {
-            "in": "query",
-            "name": "type",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/ActivityType"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Type"
-            }
-          },
-          {
-            "in": "query",
-            "name": "status",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/ActivityStatus"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Status"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/app__crm__schemas__Activity"
-                  },
-                  "title": "Response List Activities Api V1 Crm Activities Get",
-                  "type": "array"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "List Activities",
-        "tags": [
-          "CRM",
-          "CRM"
-        ]
-      },
-      "post": {
-        "description": "Create new activity",
-        "operationId": "create_activity_api_v1_crm_activities_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/app__crm__schemas__ActivityCreate"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/app__crm__schemas__Activity"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Create Activity",
-        "tags": [
-          "CRM",
-          "CRM"
-        ]
-      }
-    },
-    "/api/v1/crm/activities/": {
-      "get": {
-        "operationId": "list_activities_api_v1_crm_activities__get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "type",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Type"
-            }
-          },
-          {
-            "in": "query",
-            "name": "status",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Status"
             }
           },
           {
@@ -249348,7 +249903,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PaginatedResponse_Activity_"
+                  "$ref": "#/components/schemas/PaginatedResponse_ActivityRead_"
                 }
               }
             },
@@ -249370,19 +249925,19 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Activities auflisten",
+        "summary": "Aktivitaeten auflisten",
         "tags": [
           "crm",
           "activities"
         ]
       },
       "post": {
-        "operationId": "create_activity_api_v1_crm_activities__post",
+        "operationId": "create_activity_api_v1_crm_activities_post",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/app__api__v1__schemas__crm__ActivityCreate"
+                "$ref": "#/components/schemas/ActivityCreateCommand"
               }
             }
           },
@@ -249393,7 +249948,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__api__v1__schemas__crm__Activity"
+                  "$ref": "#/components/schemas/ActivityRead"
                 }
               }
             },
@@ -249415,7 +249970,54 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Activity anlegen",
+        "summary": "Aktivitaet anlegen",
+        "tags": [
+          "crm",
+          "activities"
+        ]
+      }
+    },
+    "/api/v1/crm/activities/actions/create": {
+      "post": {
+        "operationId": "create_activity_action_api_v1_crm_activities_actions_create_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActivityCreateAction"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivityCommandResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Aktivitaet erstellen v1",
         "tags": [
           "crm",
           "activities"
@@ -249424,7 +250026,6 @@
     },
     "/api/v1/crm/activities/{activity_id}": {
       "delete": {
-        "description": "Delete activity",
         "operationId": "delete_activity_api_v1_crm_activities__activity_id__delete",
         "parameters": [
           {
@@ -249433,6 +250034,34 @@
             "required": true,
             "schema": {
               "title": "Activity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "If-Match",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "pattern": "^\"[1-9][0-9]{0,9}\"$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "If-Match"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "maxLength": 200,
+              "minLength": 1,
+              "title": "Idempotency-Key",
               "type": "string"
             }
           }
@@ -249457,14 +250086,13 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Delete Activity",
+        "summary": "Aktivitaet loeschen",
         "tags": [
-          "CRM",
-          "CRM"
+          "crm",
+          "activities"
         ]
       },
       "get": {
-        "description": "Get activity by ID",
         "operationId": "get_activity_api_v1_crm_activities__activity_id__get",
         "parameters": [
           {
@@ -249482,7 +250110,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__crm__schemas__Activity"
+                  "$ref": "#/components/schemas/ActivityRead"
                 }
               }
             },
@@ -249504,14 +250132,13 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Get Activity",
+        "summary": "Aktivitaet abrufen",
         "tags": [
-          "CRM",
-          "CRM"
+          "crm",
+          "activities"
         ]
       },
       "put": {
-        "description": "Update activity",
         "operationId": "update_activity_api_v1_crm_activities__activity_id__put",
         "parameters": [
           {
@@ -249528,7 +250155,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/app__crm__schemas__ActivityUpdate"
+                "$ref": "#/components/schemas/ActivityUpdateCommand"
               }
             }
           },
@@ -249539,7 +250166,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__crm__schemas__Activity"
+                  "$ref": "#/components/schemas/ActivityRead"
                 }
               }
             },
@@ -249561,66 +250188,16 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Update Activity",
-        "tags": [
-          "CRM",
-          "CRM"
-        ]
-      }
-    },
-    "/api/v1/crm/activities/{activity_id}/follow-up-actions": {
-      "get": {
-        "operationId": "list_activity_follow_up_actions_api_v1_crm_activities__activity_id__follow_up_actions_get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "activity_id",
-            "required": true,
-            "schema": {
-              "title": "Activity Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/ActivitiesOut"
-                  },
-                  "title": "Response List Activity Follow Up Actions Api V1 Crm Activities  Activity Id  Follow Up Actions Get",
-                  "type": "array"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Activity follow up actions auflisten",
+        "summary": "Aktivitaet aendern",
         "tags": [
           "crm",
           "activities"
         ]
-      },
+      }
+    },
+    "/api/v1/crm/activities/{activity_id}/actions/delete": {
       "post": {
-        "operationId": "create_activity_follow_up_action_api_v1_crm_activities__activity_id__follow_up_actions_post",
+        "operationId": "delete_activity_action_api_v1_crm_activities__activity_id__actions_delete_post",
         "parameters": [
           {
             "in": "path",
@@ -249636,132 +250213,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/_FollowUpActionItem"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "anyOf": [
-                    {
-                      "$ref": "#/components/schemas/ActivitiesOut"
-                    },
-                    {
-                      "type": "string"
-                    }
-                  ],
-                  "title": "Response Create Activity Follow Up Action Api V1 Crm Activities  Activity Id  Follow Up Actions Post"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Activity follow up action anlegen",
-        "tags": [
-          "crm",
-          "activities"
-        ]
-      }
-    },
-    "/api/v1/crm/activities/{activity_id}/follow-up-actions/{item_index}": {
-      "delete": {
-        "operationId": "delete_activity_follow_up_action_api_v1_crm_activities__activity_id__follow_up_actions__item_index__delete",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "activity_id",
-            "required": true,
-            "schema": {
-              "title": "Activity Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "item_index",
-            "required": true,
-            "schema": {
-              "minimum": 0,
-              "title": "Item Index",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Activity follow up action lÃ¶schen",
-        "tags": [
-          "crm",
-          "activities"
-        ]
-      },
-      "put": {
-        "operationId": "replace_activity_follow_up_action_api_v1_crm_activities__activity_id__follow_up_actions__item_index__put",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "activity_id",
-            "required": true,
-            "schema": {
-              "title": "Activity Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "item_index",
-            "required": true,
-            "schema": {
-              "minimum": 0,
-              "title": "Item Index",
-              "type": "integer"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/_FollowUpActionItem"
+                "$ref": "#/components/schemas/ActivityDeleteAction"
               }
             }
           },
@@ -249772,15 +250224,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "anyOf": [
-                    {
-                      "$ref": "#/components/schemas/ActivitiesOut"
-                    },
-                    {
-                      "type": "string"
-                    }
-                  ],
-                  "title": "Response Replace Activity Follow Up Action Api V1 Crm Activities  Activity Id  Follow Up Actions  Item Index  Put"
+                  "$ref": "#/components/schemas/ActivityCommandResult"
                 }
               }
             },
@@ -249802,16 +250246,16 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Activity follow up action replace",
+        "summary": "Aktivitaet entfernen v1",
         "tags": [
           "crm",
           "activities"
         ]
       }
     },
-    "/api/v1/crm/activities/{activity_id}/main-topics": {
-      "get": {
-        "operationId": "list_activity_main_topics_api_v1_crm_activities__activity_id__main_topics_get",
+    "/api/v1/crm/activities/{activity_id}/actions/update": {
+      "post": {
+        "operationId": "update_activity_action_api_v1_crm_activities__activity_id__actions_update_post",
         "parameters": [
           {
             "in": "path",
@@ -249819,6 +250263,78 @@
             "required": true,
             "schema": {
               "title": "Activity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActivityUpdateAction"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivityCommandResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Aktivitaet bearbeiten v1",
+        "tags": [
+          "crm",
+          "activities"
+        ]
+      }
+    },
+    "/api/v1/crm/activities/{activity_id}/{collection}": {
+      "get": {
+        "operationId": "list_collection_api_v1_crm_activities__activity_id___collection__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "activity_id",
+            "required": true,
+            "schema": {
+              "title": "Activity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "collection",
+            "required": true,
+            "schema": {
+              "enum": [
+                "main-topics",
+                "orders-placed",
+                "follow-up-actions"
+              ],
+              "title": "Collection",
               "type": "string"
             }
           }
@@ -249831,7 +250347,7 @@
                   "items": {
                     "type": "string"
                   },
-                  "title": "Response List Activity Main Topics Api V1 Crm Activities  Activity Id  Main Topics Get",
+                  "title": "Response List Collection Api V1 Crm Activities  Activity Id   Collection  Get",
                   "type": "array"
                 }
               }
@@ -249854,409 +250370,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Activity main topics auflisten",
-        "tags": [
-          "crm",
-          "activities"
-        ]
-      },
-      "post": {
-        "operationId": "create_activity_main_topic_api_v1_crm_activities__activity_id__main_topics_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "activity_id",
-            "required": true,
-            "schema": {
-              "title": "Activity Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/_StringListItem"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "title": "Response Create Activity Main Topic Api V1 Crm Activities  Activity Id  Main Topics Post",
-                  "type": "string"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Activity main topic anlegen",
-        "tags": [
-          "crm",
-          "activities"
-        ]
-      }
-    },
-    "/api/v1/crm/activities/{activity_id}/main-topics/{item_index}": {
-      "delete": {
-        "operationId": "delete_activity_main_topic_api_v1_crm_activities__activity_id__main_topics__item_index__delete",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "activity_id",
-            "required": true,
-            "schema": {
-              "title": "Activity Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "item_index",
-            "required": true,
-            "schema": {
-              "minimum": 0,
-              "title": "Item Index",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Activity main topic lÃ¶schen",
-        "tags": [
-          "crm",
-          "activities"
-        ]
-      },
-      "put": {
-        "operationId": "replace_activity_main_topic_api_v1_crm_activities__activity_id__main_topics__item_index__put",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "activity_id",
-            "required": true,
-            "schema": {
-              "title": "Activity Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "item_index",
-            "required": true,
-            "schema": {
-              "minimum": 0,
-              "title": "Item Index",
-              "type": "integer"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/_StringListItem"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "title": "Response Replace Activity Main Topic Api V1 Crm Activities  Activity Id  Main Topics  Item Index  Put",
-                  "type": "string"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Activity main topic replace",
-        "tags": [
-          "crm",
-          "activities"
-        ]
-      }
-    },
-    "/api/v1/crm/activities/{activity_id}/orders-placed": {
-      "get": {
-        "operationId": "list_activity_orders_placed_api_v1_crm_activities__activity_id__orders_placed_get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "activity_id",
-            "required": true,
-            "schema": {
-              "title": "Activity Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "type": "string"
-                  },
-                  "title": "Response List Activity Orders Placed Api V1 Crm Activities  Activity Id  Orders Placed Get",
-                  "type": "array"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Activity orders placed auflisten",
-        "tags": [
-          "crm",
-          "activities"
-        ]
-      },
-      "post": {
-        "operationId": "create_activity_order_placed_api_v1_crm_activities__activity_id__orders_placed_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "activity_id",
-            "required": true,
-            "schema": {
-              "title": "Activity Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/_StringListItem"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "title": "Response Create Activity Order Placed Api V1 Crm Activities  Activity Id  Orders Placed Post",
-                  "type": "string"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Activity order placed anlegen",
-        "tags": [
-          "crm",
-          "activities"
-        ]
-      }
-    },
-    "/api/v1/crm/activities/{activity_id}/orders-placed/{item_index}": {
-      "delete": {
-        "operationId": "delete_activity_order_placed_api_v1_crm_activities__activity_id__orders_placed__item_index__delete",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "activity_id",
-            "required": true,
-            "schema": {
-              "title": "Activity Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "item_index",
-            "required": true,
-            "schema": {
-              "minimum": 0,
-              "title": "Item Index",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Activity order placed lÃ¶schen",
-        "tags": [
-          "crm",
-          "activities"
-        ]
-      },
-      "put": {
-        "operationId": "replace_activity_order_placed_api_v1_crm_activities__activity_id__orders_placed__item_index__put",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "activity_id",
-            "required": true,
-            "schema": {
-              "title": "Activity Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "item_index",
-            "required": true,
-            "schema": {
-              "minimum": 0,
-              "title": "Item Index",
-              "type": "integer"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/_StringListItem"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "title": "Response Replace Activity Order Placed Api V1 Crm Activities  Activity Id  Orders Placed  Item Index  Put",
-                  "type": "string"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Activity order placed replace",
+        "summary": "Aktivitaeten-Unterliste lesen",
         "tags": [
           "crm",
           "activities"
@@ -267422,7 +267536,7 @@
     },
     "/api/v1/crm/opportunities/{entity_id}/actions/create_activity": {
       "post": {
-        "description": "Legt die Aktivitaet ueber den mandantengebundenen Fachweg an.\n\nBetreff und Typ fragt die Maske deklarativ (``inputFields`` der Aktion).",
+        "description": "Transport the existing mask inputs to the one canonical command transaction.",
         "operationId": "action_opportunity_create_activity_api_v1_crm_opportunities__entity_id__actions_create_activity_post",
         "parameters": [
           {
@@ -267999,7 +268113,6 @@
     },
     "/api/v1/crm/opportunities/{opportunity_id}/activities": {
       "post": {
-        "description": "Aktivität zur Opportunity hinzufügen.\n\nBis 07.10.2026 ohne Mandant und in eine Tabelle ``activities`` mit\n``opportunity_id``, die keine Migration anlegt. Jetzt: nur im eigenen Mandanten,\nin ``domain_crm.activities`` — dort liest der Reiter der Opportunity-Maske.",
         "operationId": "add_opportunity_activity_api_v1_crm_opportunities__opportunity_id__activities_post",
         "parameters": [
           {
@@ -268012,13 +268125,13 @@
             }
           },
           {
-            "description": "Aktivitätstyp (NOTE/CALL/EMAIL/MEETING)",
+            "description": "Aktivitaetstyp",
             "in": "query",
             "name": "activity_type",
             "required": false,
             "schema": {
               "default": "NOTE",
-              "description": "Aktivitätstyp (NOTE/CALL/EMAIL/MEETING)",
+              "description": "Aktivitaetstyp",
               "title": "Activity Type",
               "type": "string"
             }
@@ -268030,6 +268143,8 @@
             "required": true,
             "schema": {
               "description": "Betreff",
+              "maxLength": 200,
+              "minLength": 1,
               "title": "Subject",
               "type": "string"
             }
@@ -268041,6 +268156,7 @@
             "schema": {
               "anyOf": [
                 {
+                  "maxLength": 10000,
                   "type": "string"
                 },
                 {
@@ -268057,6 +268173,7 @@
             "schema": {
               "anyOf": [
                 {
+                  "maxLength": 100,
                   "type": "string"
                 },
                 {
@@ -268064,6 +268181,17 @@
                 }
               ],
               "title": "Assigned To"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "maxLength": 200,
+              "minLength": 1,
+              "title": "Idempotency-Key",
+              "type": "string"
             }
           }
         ],
@@ -346001,6 +346129,33 @@
                 }
               ],
               "title": "Filter Plan"
+            }
+          },
+          {
+            "in": "query",
+            "name": "preset_filters",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 5000,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Preset Filters"
+            }
+          },
+          {
+            "in": "query",
+            "name": "complete",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Complete",
+              "type": "boolean"
             }
           },
           {

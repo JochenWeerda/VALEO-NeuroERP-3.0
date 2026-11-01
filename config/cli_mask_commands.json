@@ -134,6 +134,8 @@
   "mask:beleg/sales-order:stornieren",
   "mask:beleg/sales-order:umwandeln:sales_delivery",
   "mask:beleg/sales-order:umwandeln:sales_invoice",
+  "mask:crm/aktivitaet:delete",
+  "mask:crm/aktivitaet:update",
   "mask:crm/campaign-template:duplicate",
   "mask:crm/campaign-template:edit",
   "mask:crm/customer-360:bearbeiten",
