@@ -44,7 +44,7 @@ def welt():
             db.execute(text("INSERT INTO domain_shared.tenants (id, name, domain, is_active) VALUES (:i, :i, :i, TRUE)"),
                        {"i": t})
         for t, k in ((a, k1), (a, k2), (b, k1)):
-            # Die Kundennummer ist systemweit eindeutig (customers_customer_number_key), daher je Mandant eine eigene.
+            # Kundennummern sind je Mandant eindeutig (uq_customers_mandant_nummer); hier trotzdem je Mandant eine eigene.
             db.execute(text("INSERT INTO domain_crm.customers (id, customer_number, company_name, tenant_id) "
                             "VALUES (:k || ':' || :t, :k || ':' || :t, :k, :t)"), {"k": k, "t": t})
         db.commit()

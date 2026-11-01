@@ -322,6 +322,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `kunden_lookup_view_20260602` | kunden_lookup View für schnelle Kundenauswahl (Phase 2D, Decomposition). |
 | `kunden_milchvieh_profil_20260602` | Milchvieh-Profil je Kunde (Herde/Leistung/Zellzahl) — Agrar-Anreicherung. |
 | `kunden_produktgruppen_bezug_20260603` | Ist-Bezug je Betrieb × Produktgruppe (rollierend 12 M) — Durchdringungs-CRM. |
+| `kundennummer_mandant_20261101` | Kundennummer (= Debitorennummer) je Mandant eindeutig statt systemweit. |
 | `l3_deep_mask_parity_20260822` | Tenant-safe L3 deep-mask parity foundations. |
 | `l3_legacy_interfaces_20260821` | Governed L3 Standard and Unimet adapter contracts. |
 | `l3_recent_documents_20260821` | Personal authorized recent-document projection. |

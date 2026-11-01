@@ -42,6 +42,9 @@ class _FakeResult:
     def fetchone(self):
         return self._fetchone_value
 
+    def first(self):
+        return self._fetchone_value
+
     def mappings(self):
         return _FakeMappings(self._mapping_value)
 
@@ -88,6 +91,8 @@ def _core_customer(customer_id: str = "12345678-1234-1234-1234-1234567890ab") ->
 async def test_create_customer_persists_business_partner_link_for_request_tenant(monkeypatch):
     db = _CapturingDb(
         results=[
+            # Erst die Nummernpruefung je Mandant (seit 01.11.2026): Nummer frei.
+            _FakeResult(),
             _FakeResult(scalar_value=1),
             _FakeResult(),
             _FakeResult(fetchone_value=SimpleNamespace(chefanweisung=None, business_partner_id="bp-1")),
@@ -105,9 +110,12 @@ async def test_create_customer_persists_business_partner_link_for_request_tenant
     # Mandant aus dem Kontext (seit 20.10.2026); der Body-Mandant muss ihm entsprechen.
     created = await customers_endpoint.create_customer(payload, db=db, tenant_id="11111111-1111-1111-1111-111111111111")
 
-    ensure_statement, ensure_params = db.calls[0]
-    insert_statement, insert_params = db.calls[1]
-    fetch_statement, fetch_params = db.calls[2]
+    number_statement, number_params = db.calls[0]
+    ensure_statement, ensure_params = db.calls[1]
+    insert_statement, insert_params = db.calls[2]
+    fetch_statement, fetch_params = db.calls[3]
+    assert "customer_number = :cn" in number_statement and "tenant_id = :tid" in number_statement
+    assert number_params == {"tid": "11111111-1111-1111-1111-111111111111", "cn": "DEB-100"}
     assert "FROM domain_crm.business_partners" in ensure_statement
     assert ensure_params == {"pid": "bp-1", "tid": "11111111-1111-1111-1111-111111111111"}
     assert "INSERT INTO domain_crm.customers" in insert_statement
