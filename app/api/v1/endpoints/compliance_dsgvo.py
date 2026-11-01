@@ -184,6 +184,11 @@ def _anonymize_subject(db: Session, subject_type: str, subject_id: str, tenant_i
                  " contact_person = :anon_name, email = :anon_email, phone = NULL,"
                  " notes = NULL, assigned_to = NULL"
                  " WHERE id::text = :sid AND tenant_id::text = :tid", basis),
+                # Die Verkaufschance fuehrt keine Namen, aber `notes` kann
+                # Personenbezug enthalten. Fehlt die Tabelle, sagt das Protokoll das.
+                ("domain_crm.leads",
+                 "UPDATE domain_crm.leads SET notes = NULL, assigned_to = NULL"
+                 " WHERE customer_id::text = :sid AND tenant_id::text = :tid", basis),
             ]
         elif typ == "EMPLOYEE":
             # Einen Personalstamm gibt es in dieser Datenbank nicht. Das als
@@ -193,8 +198,16 @@ def _anonymize_subject(db: Session, subject_type: str, subject_id: str, tenant_i
         else:
             return []
 
-        # Activities in the deployed schema have only a free-text customer
-        # name. They remain for separate review instead of guessing identity.
+        if typ == "CUSTOMER":
+            # Only activities bound by the canonical customer reference are erased.
+            # Free-text name matches are not proof of identity; they stay for
+            # separate review and are reported as unlinked by the GDPR processor.
+            schritte.append((
+                "domain_crm.activities",
+                "DELETE FROM domain_crm.activities"
+                " WHERE tenant_id::text = :tid AND customer_id::text = :sid",
+                basis,
+            ))
         return schritte
 
     schritte = anweisungen(subject_type)

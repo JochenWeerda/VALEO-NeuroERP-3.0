@@ -1,12 +1,9 @@
 """Signed HTTP import against the shared probe; every change rolls back."""
-import os
 from uuid import uuid4
 
 import pytest
 from sqlalchemy import text
-from sqlalchemy.engine import make_url
 
-from app.core.database import engine
 from app.api.v1.endpoints import sales_offers
 from test_gdpr_subject_boundary import subject_data, keys, probe  # noqa: F401
 
@@ -21,9 +18,8 @@ def _seed_contract_test_tenants():
 
 
 @pytest.fixture
-def imports(subject_data, monkeypatch):
-    raw = os.environ.get("TEST_DATABASE_URL")
-    assert raw and make_url(raw) == engine.url and engine.url.database == "valeo_probe"
+def imports(require_db, subject_data, monkeypatch):
+    # require_db rejects the development database and needs an explicit test database.
     client, db, provider, tenant, foreign, *_ = subject_data
     import importlib.util
     from pathlib import Path

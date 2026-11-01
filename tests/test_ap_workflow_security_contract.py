@@ -27,6 +27,10 @@ def case(require_db, subject_data, monkeypatch):
         DocumentRepository(db).save_document("ap_invoice", number,
             {"number": number, "tenantId": tid, "status": "ENTWURF", "totalGross": 119.0,
              "customerId": "synthetic-supplier", "createdBy": "creator", "items": []}, commit=False)
+    # AP invoice creation requires an active supplier of the own tenant.
+    for supplier in ("synthetic-supplier", "synthetic-kernel-supplier", "synthetic-post-supplier", "synthetic-tax-supplier"):
+        db.execute(text("INSERT INTO domain_crm.business_partners (partner_id, tenant_id, partner_number, name_1, is_supplier) "
+                        "VALUES (:id, :tenant, :id, 'Synthetic supplier', TRUE)"), {"id": supplier, "tenant": tenant})
     db.commit()  # Release fixture savepoint; the outer transaction always rolls back.
     app = FastAPI()
     app.add_middleware(BearerAuthMiddleware)
