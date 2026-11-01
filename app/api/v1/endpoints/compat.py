@@ -1458,33 +1458,12 @@ def _domain_crm_upsert_customer_norm(
             updated = True
         else:
             cn = kundennummer if kundennummer else _allocate_import_customer_number(db)
-            new_id = str(uuid_module.uuid4())
-            db.execute(
-                text(
-                    """
-                    INSERT INTO domain_crm.customers (
-                        id, tenant_id, customer_number, company_name, email, phone,
-                        postal_code, city, country, tax_id, is_active, created_at, updated_at
-                    ) VALUES (
-                        :id, :tid, :cn, :cname, :email, :phone,
-                        :plz, :ort, :land, :tx, :is_active, NOW(), NOW()
-                    )
-                    """
-                ),
-                {
-                    "id": new_id,
-                    "tid": tenant_id,
-                    "cn": cn,
-                    "cname": firma[:255],
-                    "email": email or None,
-                    "phone": telefon or None,
-                    "plz": plz or None,
-                    "ort": ort or None,
-                    "land": land,
-                    "tx": ust_id or None,
-                    "is_active": is_active,
-                },
-            )
+            from app.services.business_partner_service import BusinessPartnerService
+
+            # Anlage samt Partnerbruecke (Stufe 1) im Dienst; ein importierter Kunde haengt an einem Partner.
+            BusinessPartnerService(db, tenant_id).importkunden_anlegen(
+                str(uuid_module.uuid4()), cn, firma, email=email, telefon=telefon, plz=plz, ort=ort, land=land,
+                ust_id=ust_id, is_active=is_active)
             created = True
     except Exception as e:
         return False, False, str(e)[:120]

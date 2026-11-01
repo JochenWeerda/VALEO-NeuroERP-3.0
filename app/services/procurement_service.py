@@ -491,6 +491,21 @@ class ProcurementService:
         ).first()
         if vorhanden:
             raise ConflictError("Lieferantennummer existiert bereits.")
+        # Partnerbruecke (Stufe 1): jeder neue Lieferant haengt an einem Geschaeftspartner des Mandanten.
+        from app.services.business_partner_service import BusinessPartnerService
+
+        data = {**data, "partner_id": BusinessPartnerService(self.db, self.tenant_id).partner_fuer_rolle(
+            "lieferant",
+            name=data.get("firmenname") or "",
+            vat_id=data.get("ust_id"),
+            street=data.get("strasse"),
+            postal_code=data.get("plz"),
+            city=data.get("ort"),
+            country=data.get("land"),
+            email=data.get("email"),
+            phone=data.get("telefon"),
+            partner_id=data.get("partner_id") or None,
+        )}
         lf = EinkaufLieferant(id=uuid7(), tenant_id=self.tenant_id, **data)
         self.db.add(lf)
         try:

@@ -12193,6 +12193,9 @@
             "crm/betreuungsgebiet",
             "crm/segment",
             "crm/zielgruppen"
+          ],
+          "written_by": [
+            "app/services/business_partner_service.py"
           ]
         },
         "cancellation_reason": {

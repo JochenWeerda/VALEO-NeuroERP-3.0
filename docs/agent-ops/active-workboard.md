@@ -20199,3 +20199,11 @@ JSONB, gewachsen VARCHAR: Dienst schreibt die Spaltenform. crm-core-Stub traegt
 Finanzfelder mit. Stufenplan zum Geschaeftspartnerstamm:
 docs/adr/adr-business-partner-debitoren-kreditoren-20261101.md.
 Offen: Stufen 1-6 des ADR (Partnerbruecke, Rueckfuellung, Rollenfelder, Lesewege, Altwege, public.kunden).
+
+## BP-BRUECKE-STUFE1-20261101 — abgeschlossen, Claude
+
+Stufe 1 des ADR Geschaeftspartnerstamm: BusinessPartnerService.partner_fuer_rolle haengt jede neue
+Kunden- und Lieferantenrolle an einen Partner des Mandanten (CustomerService.create_customer,
+create_customer_record, CSV-Kundenimport, ProcurementService.create_lieferant). Wiederverwendung nur
+bei eindeutiger USt-IdNr. und Name; Name allein ordnet nie zu. Keine Maskenaenderung.
+Offen: crm/convert-lead (customer_extensions.py) ohne Bruecke und mit Query-Mandant; Stufe 2 Rueckfuellung.

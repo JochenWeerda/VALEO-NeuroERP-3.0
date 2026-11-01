@@ -54,6 +54,7 @@ def _stamm(
     extra_actions: list[dict[str, Any]] | None = None,
     edit_action_overrides: dict[str, Any] | None = None,
     entity_projection: dict[str, str] | None = None,
+    table_profile: str | None = None,
 ) -> dict[str, Any]:
     kopf = list(felder)
     if identity and not any(f["key"] == identity for f in kopf):
@@ -75,6 +76,7 @@ def _stamm(
         creation=creation,
         extra_actions=extra_actions,
         edit_action_overrides=edit_action_overrides,
+        table_profile=table_profile,
     )
     if entity_projection is not None:
         definition["entityProjection"] = entity_projection
@@ -354,7 +356,7 @@ def build_crm_campaign_stamm() -> dict[str, Any]:
         _feld("target_customer_type", "Zielkundentyp"), _feld("seasonal_context", "Saison"),
     ]
     base = "/api/v1/crm/campaigns"
-    definition = _stamm(screen_id="crm/campaign", domain="crm", title="Kampagne", subtitle="Marketingkampagne",
+    definition = _stamm(screen_id="crm/campaign", table_profile="standard", domain="crm", title="Kampagne", subtitle="Marketingkampagne",
         endpoint=base + "/{entity_id}", identity="name", felder=[*fields, _feld("state", "Status", readOnly=True),
         _feld("created_at", "Erstellt", "datetime", readOnly=True), _feld("updated_at", "Geändert", "datetime", readOnly=True)],
         edit_permission="crm.campaign.update", test_id="crm-campaign-stamm", purpose="Kampagne bearbeiten.",
@@ -449,7 +451,7 @@ def build_crm_consent_stamm() -> dict[str, Any]:
               _feld("expires_at", "Gültig bis", "datetime")]
     editable = [_feld("status", "Status", "select", options=[{"value": x, "label": x} for x in ("pending", "granted", "denied", "revoked")]), _feld("expires_at", "Gültig bis", "datetime"), _feld("reason", "Grund")]
     base = "/api/v1/crm/consents"
-    definition = _stamm(screen_id="crm/consent", domain="crm", title="Einwilligung", subtitle="DSGVO-Einwilligung",
+    definition = _stamm(screen_id="crm/consent", table_profile="audit", domain="crm", title="Einwilligung", subtitle="DSGVO-Einwilligung",
         endpoint=base + "/{entity_id}", identity="contact_id", felder=[*fields, _feld("status", "Status", readOnly=True),
         *[_feld(key, label, "datetime", readOnly=True) for key, label in [("granted_at", "Erteilt"), ("denied_at", "Abgelehnt"), ("revoked_at", "Widerrufen"), ("created_at", "Erstellt"), ("updated_at", "Geändert")]]],
         edit_permission="crm.consent.update", test_id="crm-consent-stamm", purpose="Einwilligungsnachweis.",
@@ -485,7 +487,7 @@ def build_crm_gdpr_request_stamm() -> dict[str, Any]:
               _feld("request_type", "Anfragetyp", "select", required=True, options=[{"value": x, "label": x} for x in
               ("ACCESS", "ERASURE", "PORTABILITY", "RECTIFICATION")]), _feld("notes", "Notizen", "textarea")]
     base = "/api/v1/gdpr/requests"
-    definition = _stamm(screen_id="crm/gdpr-request", domain="crm", title="DSGVO-Anfrage", subtitle="Betroffenenanfrage",
+    definition = _stamm(screen_id="crm/gdpr-request", table_profile="audit", domain="crm", title="DSGVO-Anfrage", subtitle="Betroffenenanfrage",
         endpoint=base + "/{entity_id}", identity="subject_id", felder=[*fields, _feld("status", "Status", readOnly=True),
         _feld("rejection_reason", "Ablehnungsgrund", readOnly=True), *[_feld(key, label, "datetime", readOnly=True)
         for key, label in [("created_at", "Eingegangen"), ("verified_at", "Verifiziert"), ("completed_at", "Abgeschlossen"), ("updated_at", "Geändert")]]],
@@ -538,7 +540,7 @@ def build_crm_segment_stamm() -> dict[str, Any]:
         tableEditing={"allowAdd": True, "allowDelete": True, "maxRows": 20})
     base = "/api/v1/crm/segments"
     common = {"permission": "crm.segment.update", "forbiddenForAgents": True, "responseAdapter": "resource.v1", "requiresExpectedVersion": True, "requiresIdempotencyKey": True}
-    definition = _stamm(screen_id="crm/segment", domain="crm", title="Segment", subtitle="Nachvollziehbare CRM-Auswahl",
+    definition = _stamm(screen_id="crm/segment", table_profile="standard", domain="crm", title="Segment", subtitle="Nachvollziehbare CRM-Auswahl",
         endpoint=base + "/{entity_id}", identity="name", felder=[*fields, _feld("member_count", "Mitglieder", "number", readOnly=True),
         _feld("criteria", "Gespeicherte Regeln", "textarea", readOnly=True), _feld("criteria_supported", "Regeln auswertbar", "boolean", readOnly=True),
         _feld("created_at", "Erstellt", "datetime", readOnly=True), _feld("updated_at", "Geaendert", "datetime", readOnly=True)],
