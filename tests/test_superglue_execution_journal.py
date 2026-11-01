@@ -43,7 +43,7 @@ def test_append_and_list(tmp_path):
             started_at=_ts(0),
             finished_at=_ts(1),
         )
-        entries = list_execution_journal_entries(limit=10)
+        entries = list_execution_journal_entries(limit=10, tenant_id="t1")
 
     assert isinstance(entry, dict)
     assert entry["tenant_id"] == "t1"
@@ -66,7 +66,7 @@ def test_append_multiple_entries(tmp_path):
                 started_at=_ts(i),
                 finished_at=_ts(i + 0.5),
             )
-        entries = list_execution_journal_entries(limit=10)
+        entries = list_execution_journal_entries(limit=10, tenant_id="t1")
 
     assert len(entries) == 5
 
@@ -79,7 +79,7 @@ def test_list_respects_limit(tmp_path):
                 tenant_id="t1", correlation_id=f"c{i}", tool_id="t", execution_mode="sync",
                 target_kind="api", result_status="success", started_at=_ts(i), finished_at=_ts(i + 0.1),
             )
-        entries = list_execution_journal_entries(limit=3)
+        entries = list_execution_journal_entries(limit=3, tenant_id="t1")
 
     assert len(entries) <= 3
 
@@ -122,7 +122,7 @@ def test_summary_error_count(tmp_path):
                 tenant_id="t1", correlation_id=f"c-{status}", tool_id="t", execution_mode="sync",
                 target_kind="api", result_status=status, started_at=_ts(0), finished_at=_ts(1),
             )
-        summary = build_execution_journal_summary(limit=10)
+        summary = build_execution_journal_summary(limit=10, tenant_id="t1")
 
     assert summary["entry_count"] == 3
     assert summary["error_count"] == 2
@@ -131,7 +131,7 @@ def test_summary_error_count(tmp_path):
 def test_summary_empty_journal(tmp_path):
     journal_path = tmp_path / "journal.jsonl"
     with patch("app.integrations.services.superglue_execution_journal._storage_path", return_value=journal_path):
-        summary = build_execution_journal_summary()
+        summary = build_execution_journal_summary(tenant_id="t1")
     assert summary["entry_count"] == 0
     assert summary["error_count"] == 0
 

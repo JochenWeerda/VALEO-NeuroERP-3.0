@@ -39,7 +39,23 @@ export function evaluateListExperience(experience: ListExperience, rows: Row[]) 
   const notice = experience.notice && (counts[experience.notice.aggregate] ?? 0) > 0 ? interpolate(experience.notice.text) : undefined
   const insights = (experience.insightLines ?? []).flatMap(line => {
     const variant = line.variants.find(v => !v.when || (counts[v.when.aggregate] ?? 0) > v.when.value)
-    return variant ? [{ label: line.label, text: interpolate(variant.text) }] : []
+    return variant ? [{ label: line.label, text: interpolate(variant.text), ...(line.key ? { key: line.key } : {}) }] : []
   })
   return { counts, notice, insights, ...(Object.keys(currencies).length ? { currencies } : {}) }
+}
+
+
+/** A focus changes only explanatory context, never the rows or authorization. */
+export function selectListRoleFocus(experience: ListExperience, selected?: string) {
+  const focus = experience.roleFocus
+  if (!focus) return undefined
+  const key = selected ?? focus.defaultKey ?? 'all'
+  const option = focus.options.find(item => item.key === key)
+  if (!option) throw new Error('Unbekannter Ansichtenfokus.')
+  return option
+}
+
+export function focusListInsights(experience: ListExperience, insights: ReturnType<typeof evaluateListExperience>['insights'], selected?: string) {
+  const option = selectListRoleFocus(experience, selected)
+  return option?.insightLineKeys ? insights.filter(line => line.key && option.insightLineKeys?.includes(line.key)) : insights
 }

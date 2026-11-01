@@ -197,6 +197,47 @@ def test_inventory_seed_follows_static_dynamic_relative_and_alias_imports(tmp_pa
     assert [item['module'] for item in issues] == ['@/pages/true-orphan']
 
 
+def test_generated_route_inventory_seeds_transitive_imports_but_not_globs(tmp_path, monkeypatch):
+    import scripts.doc_drift_report as mod
+
+    src = tmp_path / 'src'
+    pages = src / 'pages'
+    pages.mkdir(parents=True)
+    (pages / 'entry.tsx').write_text(
+        "const modules = import.meta.glob('./**/*.tsx')\n"
+        "export default () => import('./bridge')",
+        encoding='utf-8',
+    )
+    (pages / 'bridge.tsx').write_text(
+        "export { default } from '@/pages/detail'",
+        encoding='utf-8',
+    )
+    (pages / 'detail.tsx').write_text('export default function Detail() {}', encoding='utf-8')
+    (pages / 'glob-only.tsx').write_text('export default function GlobOnly() {}', encoding='utf-8')
+    (pages / 'orphan-legacy.tsx').write_text('export default function Legacy() {}', encoding='utf-8')
+    (pages / 'studio-unregistered.tsx').write_text(
+        "export default function StudioUnregistered() { return <NativeListPage screenId=\"x\" /> }",
+        encoding='utf-8',
+    )
+    inventory = tmp_path / 'routes.json'
+    inventory.write_text(
+        json.dumps({'routes': [{'module': '@/pages/entry', 'path': 'entry'}]}),
+        encoding='utf-8',
+    )
+    monkeypatch.setattr(mod, 'REPO_ROOT', tmp_path)
+    monkeypatch.setattr(mod, 'PAGES_DIR', pages)
+    monkeypatch.setattr(mod, 'ROUTE_INVENTORY', inventory)
+
+    route_modules, route_paths = mod._route_inventory()
+    issues = mod.check_pages_without_route_or_nav('', route_modules, route_paths)
+
+    assert {issue['module'] for issue in issues} == {
+        '@/pages/glob-only',
+        '@/pages/orphan-legacy',
+        '@/pages/studio-unregistered',
+    }
+
+
 def test_comments_strings_glob_and_unreachable_wrapper_are_not_route_edges(tmp_path, monkeypatch):
     import scripts.doc_drift_report as mod
 

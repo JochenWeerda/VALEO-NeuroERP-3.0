@@ -1,5 +1,5 @@
-import FlowSpineWorkspace from '@/components/workflow/FlowSpineWorkspace'
+import { UniversalNativeCockpitPage } from '@/components/mask-builder/UniversalNativeCockpitPage'
 
-export default function FlowSpineHarvestToSettlementPage(): JSX.Element {
-  return <FlowSpineWorkspace processKey="harvest-to-settlement" />
+export default function FlowSpinePage(): JSX.Element {
+  return <UniversalNativeCockpitPage screenId="workflow/flow-spine-harvest-to-settlement" />
 }

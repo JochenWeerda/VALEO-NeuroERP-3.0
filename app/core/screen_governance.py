@@ -11,6 +11,14 @@ from typing import Any
 
 SCREEN_SCHEMA_VERSION = 1
 
+
+def is_local_view_action(action: dict[str, Any]) -> bool:
+    """Classify an explicit browser effect, never a domain command in disguise."""
+    return (action.get("localEffect") in {"view", "print", "download", "navigation"}
+            and action.get("dangerLevel") == "safe"
+            and not any(action.get(key) for key in (
+                "commandEndpoint", "inputFlow", "command", "commandBinding", "kommando", "download")))
+
 FLOORPLANS = frozenset({
     "worklist",
     "objectPage",

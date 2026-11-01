@@ -112,7 +112,16 @@ function workspacePayload() {
 }
 
 function renderWorkspace() {
-  getMock.mockResolvedValue(workspacePayload())
+  getMock.mockImplementation(async (url: string) => {
+    if (url.includes('/screen-definition')) return { data: {
+      schemaVersion: 1, id: 'workflow/flow-spine-service-to-customer', domain: 'workflow', mode: 'cockpit',
+      title: 'Prozessraum', adapter: { type: 'native', sourceId: 'workflow/flow-spine-service-to-customer', temporary: false },
+      layout: { floorplan: 'cockpit', density: 'expertDense', contextRail: 'workflow' },
+      flowSpineWorkspace: { processKey: 'service-to-customer' },
+    } }
+    if (url.includes('/instances')) return { data: { instances: [] } }
+    return workspacePayload()
+  })
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
     <MemoryRouter>

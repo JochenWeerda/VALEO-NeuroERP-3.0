@@ -190,6 +190,8 @@ def schreiben(
     Beide Waegungszeitpunkte stehen auf jetzt: Der Weg nimmt sie in einem Zug
     entgegen. Ein erfundener Abstand waere eine Behauptung ueber den Ablauf.
     """
+    from app.services.waage_import_service import reference_allowed
+    reference_allowed(db, scale_id)
     db.execute(
         text(
             f"INSERT INTO {WIEGESCHEINE} "  # nosec B608  # reviewed-safe: Tabellenname ist ein Code-Literal

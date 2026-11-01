@@ -479,7 +479,8 @@ describe('Service/Annahme/Feldservice UIX', () => {
   })
 
   it('stellt Mahnlauf mit 44-px-Start', () => {
-    const src = read('../../pages/finance/mahnlauf.tsx')
+    const src = read('../../components/mask-builder/specialized/finance/dunning-surface.tsx')
+    expect(read('../../pages/finance/mahnlauf.tsx')).toContain('mahnwesen/mahnlauf')
     expect(src).toContain('min-h-touch')
     expect(src).not.toContain('size="sm"')
   })

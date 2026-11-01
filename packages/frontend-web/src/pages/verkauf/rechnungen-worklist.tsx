@@ -2,6 +2,7 @@ import { AlertCircle } from 'lucide-react'
 import { UniversalMaskRenderer, useUniversalMaskRuntime } from '@/components/mask-builder'
 import { useScreenDefinition } from '@/lib/api/masks'
 import { useListActions } from '@/hooks/useListActions'
+import { useScreenPermissions } from '@/components/mask-builder/runtime/screen-permissions'
 
 /**
  * Ausgangsrechnungen — die Faktura-Worklist aus der ScreenDefinition
@@ -22,10 +23,11 @@ function text(wert: unknown): string {
 
 export default function RechnungenWorklistPage(): JSX.Element {
   const schemaQuery = useScreenDefinition('sales/invoices')
+  const permissions = useScreenPermissions(schemaQuery.data)
   const runtime = useUniversalMaskRuntime({
     screenId: 'sales/invoices',
     schema: schemaQuery.data,
-    permissions: ['sales.rechnung.lesen'],
+    permissions,
     enabled: Boolean(schemaQuery.data),
   })
 

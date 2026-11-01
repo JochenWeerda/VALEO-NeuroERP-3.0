@@ -246,23 +246,8 @@ def build_crm_campaign_performance_screen_definition() -> dict[str, Any]:
 
 
 def build_crm_kunden_cockpit_screen_definition() -> dict[str, Any]:
-    return build_cockpit_overview_screen(
-        screen_id="crm/kunden-cockpit",
-        domain="crm",
-        title="Kunden-Cockpit",
-        subtitle="360-Grad-Einstieg und Worklists",
-        business_purpose="Vom Kunden-Cockpit in Akte, Offene Posten und Kontrakte springen.",
-        example_prompts=["Oeffne die Kundenakte.", "Zeige offene CRM-Aufgaben."],
-        test_id="crm-kunden-cockpit",
-        tiles=[
-            cockpit_nav_tile("akte", "Kundenakte", target_screen_id="crm/customer-360", target_route="/crm/kunden-stamm"),
-            cockpit_nav_tile("bedarf", "Bedarfsdeckung", target_route="/crm/bedarfsdeckung-cockpit"),
-            cockpit_nav_tile("dashboard", "CRM-Dashboard", target_route="/crm/crm-dashboard"),
-        ],
-        data_sources=[cockpit_entity_source("/api/v1/crm/dashboard")],
-        actions=[cockpit_refresh_action(permission=_CRM_READ)],
-        context_rail="copilot",
-    )
+    from app.core.native_screen_aliases import build_native_alias
+    return build_native_alias("crm/kunden-cockpit")
 
 
 def build_dashboard_einkauf_screen_definition() -> dict[str, Any]:

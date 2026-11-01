@@ -161,6 +161,8 @@ class DeliveryNote(DeliveryNoteBase):
     customer_number: Optional[str] = None
     sales_order_number: Optional[str] = None
     branch_name: Optional[str] = None
+    quantity_summary: Optional[str] = None
+    has_sales_order: bool = False
 
 
 def _generate_delivery_note_number(db: Session, tenant_id: str) -> str:
@@ -708,6 +710,16 @@ async def deliver_delivery_note(
     return DeliveryNote(**dict(row), positionen=[DeliveryNotePosition(**dict(p)) for p in positions])
 
 
+def _quantity_summary(positions: list[dict]) -> str:
+    """Summarise quantities only within the same unit; unknown units stay explicit."""
+    quantities: dict[str, Decimal] = {}
+    for position in positions:
+        unit = str(position.get("einheit") or "ohne Einheit").strip() or "ohne Einheit"
+        quantity = Decimal(str(position.get("menge") or 0))
+        quantities[unit] = quantities.get(unit, Decimal(0)) + quantity
+    return ", ".join(f"{value.normalize():f} {unit}" for unit, value in quantities.items())
+
+
 @router.get("", response_model=list[DeliveryNote], summary="Delivery notes auflisten")
 async def list_delivery_notes(
     customer_id: Optional[str] = Query(None),
@@ -741,10 +753,17 @@ async def list_delivery_notes(
     result = []
     for row in rows:
         positions = _list_positions(db, row["id"])
+        kunde = resolve_customer(db, tenant_id, row.get("customer_id"))
+        auftrag = resolve_reference(db, tenant_id, "sales_order", row.get("sales_order_id"))
         result.append(
             DeliveryNote(
                 **dict(row),
-                positionen=[DeliveryNotePosition(**dict(p)) for p in positions]
+                positionen=[DeliveryNotePosition(**dict(p)) for p in positions],
+                customer_name=kunde.name,
+                customer_number=kunde.number,
+                sales_order_number=auftrag.number,
+                quantity_summary=_quantity_summary(positions),
+                has_sales_order=bool(row.get("sales_order_id")),
             )
         )
     

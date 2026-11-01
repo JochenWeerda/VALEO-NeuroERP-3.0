@@ -2,45 +2,11 @@ import { describe, expect, it } from 'vitest'
 import * as kopien from '@/masks/capture-screens'
 import abbild from '@/masks/screen-registry.snapshot.json'
 
-/**
- * Die eine Quelle der ScreenDefinitions ist die Python-Registry. `capture-screens.ts` wiederholt 31 davon
- * von Hand. Das Abbild `screen-registry.snapshot.json` kommt aus der Registry
- * (`scripts/generate_screen_registry_snapshot.py`, im Backend-Lauf auf Aktualitaet geprueft).
- *
- * Am 13.10.2026 wichen 26 Kopien ab. Diese Liste friert den Stand ein:
- *  - eine neue Kopie oder eine neue Abweichung macht den Test rot;
- *  - eine behobene Abweichung muss hier ausgetragen werden.
- * Ziel ist die leere Liste. Umgestellt wird je Maske mit Sichtpruefung: Die Registry verlangt in elf Masken
- * ein Recht an der Aktion und nennt den Kommando-Weg; die Seiten zeichnen heute ohne Rechte.
+/** Both frontend projections must match the authored Python registry exactly.
+ * The backend generator checks reject stale checked-in copies; this frontend check
+ * also catches omitted exports and runtime value differences after TypeScript compilation.
  */
-const BEKANNTE_ABWEICHUNG: Record<string, string[]> = {
-  'admin/postfaecher': ['performance'],
-  'fuhrpark/ausgehende-dokumente': ['actions', 'performance'],
-  'fuhrpark/fahrzeug-stamm': ['actions', 'performance'],
-  'fuhrpark/fahrzeuge': ['performance'],
-  'fuhrpark/rechnungen': ['actions', 'performance'],
-  'fuhrpark/terminarten': ['actions', 'performance'],
-  'logistik/frachtbrief': ['performance'],
-  'logistik/frachttabellen': ['actions', 'performance'],
-  'logistik/tour-fracht-arbeitsraum': ['performance'],
-  'logistik/tourenplanung': ['actions', 'performance'],
-  'logistik/verladung': ['performance'],
-  'logistik/versandprofile': ['performance'],
-  'personal/bewerbung-einwilligung': ['noProcessChainReason', 'performance'],
-  'personal/bewerbungen': ['actions', 'performance'],
-  'personal/einwilligungserklaerungen': ['actions', 'performance'],
-  'personal/onboarding': ['actions', 'performance'],
-  'personal/qualifikationen': ['actions', 'performance'],
-  'personal/schulungen': ['actions', 'performance'],
-  'strecke/disposition': ['performance'],
-  'strecke/nawaro-lieferungen': ['performance'],
-  'strecke/qualitaets-abweichung': ['performance'],
-  'strecke/streckengeschaeft': ['performance'],
-  'strecke/vorlaeufig': ['performance'],
-  'transporte/fahrer': ['performance'],
-  'verkauf/betriebsauftrag': ['performance'],
-  'versand/versand-avis': ['performance'],
-}
+const BEKANNTE_ABWEICHUNG: Record<string, string[]> = {}
 
 type Definition = Record<string, unknown>
 

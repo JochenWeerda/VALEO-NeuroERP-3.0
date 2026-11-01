@@ -88,7 +88,7 @@ describe('QualitaetsCheckPage', () => {
     await screen.findByRole('heading', { name: 'Messungen' })
     fireEvent.click(screen.getByRole('button', { name: 'Weiter' }))
     await screen.findByRole('heading', { name: 'Ergebnis' })
-    fireEvent.click(screen.getByRole('button', { name: 'Abschliessen' }))
+    fireEvent.click(screen.getAllByRole('button', { name: 'Qualitätsprüfung speichern' }).at(-1)!)
 
     await waitFor(() => {
       expect(apiPostMock).toHaveBeenCalled()
@@ -101,4 +101,32 @@ describe('QualitaetsCheckPage', () => {
       })
     })
   })
+})
+
+
+// Test identities/read hooks remain explicit doubles; the real Studio compiler,
+// runtime and renderer execute the native ScreenDefinition fixture.
+vi.mock('@/lib/api/masks', async () => {
+  const fixtures = (await import('@/__tests__/fixtures/intake-weighing-screens.json')).default
+  return { useScreenDefinition: (id: string) => ({ data: (fixtures as Record<string, unknown>)[id], isLoading: false, error: null }) }
+})
+vi.mock('@/components/mask-builder/runtime/screen-permissions', () => ({
+  useScreenPermissions: (definition: { actions?: Array<{ permission?: string }> }) => definition?.actions?.flatMap(action => action.permission ? [action.permission] : []) ?? [],
+}))
+vi.mock('@/lib/api/ux-overlays', () => ({
+  useUserScreenOverlay: () => ({ data: undefined }), overlayKeys: { screen: (id: string) => ['test-overlay', id] },
+  saveUserOverlay: vi.fn(), deleteUserOverlay: vi.fn(),
+}))
+vi.mock('@/components/mask-builder/specialized/intake/domain-data', async () => {
+  const inventory = await import('@/lib/api/inventory')
+  const tickets = await import('@/lib/api/weighing-tickets')
+  const supply = await import('@/lib/api/supply-chain')
+  return {
+    useDomainIdentity: () => ({ tenantId: 'test-tenant', actor: 'test-operator' }),
+    useDomainQueue: () => inventory.useWarteschlange(),
+    useDomainQueueEntry: (id: string) => inventory.useWarteschlangeEintrag(id),
+    useDomainTickets: () => tickets.useWeighingTickets({ limit: 100 }),
+    useDomainContracts: () => tickets.useOpenContracts(),
+    useDomainSupplyChain: () => supply.useSupplyChainOverview(),
+  }
 })

@@ -1,10 +1,14 @@
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import Rationsoptimierung from '@/pages/futtermittel/rationsoptimierung'
+import Rationsoptimierung from '@/components/mask-builder/specialized/feed/ration-optimization-surface'
 import type { OptimizationResult } from '@/lib/api/rations-optimization'
 
 const api = vi.hoisted(() => ({ feeds: vi.fn(), demo: vi.fn(), optimize: vi.fn(), group: vi.fn(), readiness: vi.fn(), draft: vi.fn(), transition: vi.fn() }))
+vi.mock('@/components/mask-builder/specialized/intake/domain-data', () => ({
+  useDomainIdentity: () => ({ tenantId: 'test-tenant', actor: 'test-actor' }),
+}))
+
 vi.mock('@/lib/api/rations-optimization', async importOriginal => ({
   ...await importOriginal<typeof import('@/lib/api/rations-optimization')>(),
   fetchFeeds: api.feeds, optimizeDemo: api.demo, optimizeFromProfile: api.optimize,

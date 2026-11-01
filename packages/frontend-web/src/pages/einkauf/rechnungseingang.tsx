@@ -1,7 +1,5 @@
-import { createStammNativeDetailPage } from '@/components/mask-builder'
+import { InvoiceCapturePage } from '@/pages/finance/InvoiceCapturePage'
 
-export default createStammNativeDetailPage(
-  'finance/ap-invoice',
-  'einkauf-rechnungseingang',
-  () => import('./rechnungseingang-legacy'),
-)
+export default function RechnungseingangPage(): JSX.Element {
+  return <InvoiceCapturePage purchase />
+}

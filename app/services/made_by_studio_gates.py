@@ -57,8 +57,6 @@ _RUNTIME_LIST_WIRE_ALIASES: dict[str, str] = {
     "lager/lagerbewegungen-liste": "lager/stock-movement",
     "sales/invoices": "sales/invoice",
     "fibu/kostenstellenrechnung": "fibu/kostenstellen-liste",
-    "finance/bookings/new": "fibu/buchungsjournal-liste",
-    "transporte/fahrer/neu": "transporte/fahrer",
     "kontrakte/liste": "kontrakte/LstKontraktUebersicht",
     "agrar/feldbuch-massnahmen-liste": "agrar/feldbuch/massnahmen",
     "agrar/saatzucht-partien-liste": "agrar/saatzucht",
@@ -139,6 +137,20 @@ def _screen_ids_from_runtime_routes() -> set[str]:
 
 def _gate_e_runtime_candidates(screen_id: str) -> set[str]:
     candidates = _screen_id_path_variants(screen_id)
+    # Two already deployed replacements, bound to their actual routed source.
+    # A declaration alone never proves a runtime migration.
+    if screen_id in {"verkauf/rechnungen", "crm/kunden-cockpit"}:
+        from app.core.native_screen_aliases import NATIVE_SCREEN_ALIASES
+        relative = ("verkauf/rechnungen-worklist.tsx" if screen_id == "verkauf/rechnungen" else "crm/kunden-cockpit.tsx")
+        try:
+            source = (ROOT / "packages/frontend-web/src/pages" / relative).read_text(encoding="utf-8")
+        except OSError:
+            source = ""
+        direct = screen_id == "verkauf/rechnungen" and _source_has_runtime_marker(source) and "useScreenDefinition('sales/invoices')" in source
+        redirect = (screen_id == "crm/kunden-cockpit" and "`/crm/kunden/${encodeURIComponent(customerId)}${tabQuery}`" in source
+                    and "navigate(target, { replace: true })" in source and "'/verkauf/kunden-liste'" in source)
+        if direct or redirect:
+            candidates.add(NATIVE_SCREEN_ALIASES[screen_id])
     mapped = _RUNTIME_LIST_WIRE_ALIASES.get(screen_id)
     if mapped:
         candidates.add(mapped)
@@ -283,6 +295,7 @@ def check_gate_a(definition: dict[str, Any]) -> GateResult:
 
 def check_gate_b(definition: dict[str, Any]) -> GateResult:
     from app.services.studio_validation import _iter_actions
+    from app.core.screen_governance import is_local_view_action
 
     issues: list[str] = []
     mutating = 0
@@ -299,7 +312,7 @@ def check_gate_b(definition: dict[str, Any]) -> GateResult:
         a.get("key")
         for a in (definition.get("actions") or [])
         if isinstance(a, dict) and a.get("key")
-        and (not a.get("dangerLevel") or (not a.get("permission") and not a.get("stubReason")))
+        and (not a.get("dangerLevel") or (not a.get("permission") and not a.get("stubReason") and not is_local_view_action(a)))
     ]
     for key in unclassified:
         issues.append(f"header_aktion_unklassifiziert:{key}")
@@ -537,6 +550,8 @@ def runtime_wired_screen_ids() -> frozenset[str]:
     wired: set[str] = set()
     for src in _iter_runtime_source_files():
         text = src.read_text(encoding="utf-8", errors="replace")
+        from app.core.mask_runtime_evidence import bound_domain_runtime_ids
+        wired |= bound_domain_runtime_ids(text, root=ROOT)
         if not _source_has_runtime_marker(text):
             continue
         wired |= _screen_ids_from_source(text)
@@ -601,8 +616,12 @@ def load_registered_definitions() -> dict[str, dict[str, Any]]:
     ensure_stamm_screen_registry()
     ids = list(SCREEN_DEFINITION_BUILDERS)
     defs = {sid: get_screen_definition(sid) or {} for sid in ids}
+    from app.core.screen_definitions_beleg import NATIVE_BELEG_TENANTS
     for art in BELEGARTEN:
-        defs[beleg_screen_id(art)] = build_beleg_screen_definition(art)
+        # Measure the pinned definition actually returned by the restricted
+        # native release, not its unversioned parent-builder precursor.
+        defs[beleg_screen_id(art)] = get_screen_definition(
+            beleg_screen_id(art), tenant_id=sorted(NATIVE_BELEG_TENANTS)[0]) or {}
     return defs
 
 

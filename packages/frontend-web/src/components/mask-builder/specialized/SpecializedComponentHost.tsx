@@ -1,11 +1,14 @@
 import type { ScreenSpecializedComponent } from '../schema'
+import type { RenderPlan } from '../render-plan/types'
 import { resolveSpecializedComponent } from './registry'
 
 export function SpecializedComponentHost({
   specialized,
+  plan,
   onAction,
 }: {
   specialized?: ScreenSpecializedComponent
+  plan?: RenderPlan
   onAction?: (_actionKey: string, _payload: Record<string, unknown>) => void | Promise<void>
 }): JSX.Element | null {
   if (!specialized) return null
@@ -17,5 +20,5 @@ export function SpecializedComponentHost({
       </p>
     )
   }
-  return <Component contract={specialized} onAction={onAction} />
+  return <Component contract={specialized} plan={plan} onAction={onAction} />
 }

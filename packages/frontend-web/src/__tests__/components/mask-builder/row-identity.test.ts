@@ -17,4 +17,7 @@ describe('resolveRowRoute', () => {
     expect(resolveRowRoute('{source_route}', { source_route: '' })).toBeUndefined()
     expect(resolveRowRoute('{source_route}', {})).toBeUndefined()
   })
+  it.each(['/\\evil.example/x', '/path\nredirect', '/path\tredirect', '/path\u0000redirect', 'https://evil.example'])('rejects unsafe whole-row navigation: %s', source_route => {
+    expect(resolveRowRoute('{source_route}', {source_route})).toBeUndefined()
+  })
 })

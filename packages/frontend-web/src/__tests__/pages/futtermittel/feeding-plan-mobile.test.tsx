@@ -1,6 +1,10 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import MobileFuetterungsdokumentation from '@/pages/futtermittel/fuetterungsdokumentation-mobil'
+import MobileFuetterungsdokumentation from '@/components/mask-builder/specialized/feed/mobile-feeding-surface'
+
+vi.mock('@/components/mask-builder/specialized/intake/domain-data', () => ({
+  useDomainIdentity: () => ({ tenantId: 'test-tenant', actor: 'test-actor' }),
+}))
 
 const mocks = vi.hoisted(() => ({
   current: { data: [{
@@ -38,7 +42,7 @@ describe('mobile feeding plan', () => {
       cause_class: 'normal',
       components: [{ feed_id: 'mais', actual_kg: 525 }],
     }))
-    const cached = JSON.parse(localStorage.getItem('valeo.feeding-plan.mobile.v2') ?? '{}')
+    const cached = JSON.parse(localStorage.getItem('valeo.feeding-plan.mobile.v2:test-tenant%2Ftest-actor') ?? '{}')
     expect(cached.planVersionId).toBe('plan-version-2')
   })
 })

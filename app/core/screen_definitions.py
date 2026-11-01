@@ -6,6 +6,7 @@ import re
 from typing import Any
 
 from app.core.screen_definitions_studio_history import STUDIO_HISTORY_BUILDERS
+from app.core.screen_definitions_admin_workbench import build_webhooks_workbench, build_control_center_workbench
 from app.core.screen_definitions_harvest_controls import HARVEST_CONTROL_BUILDERS
 from app.core.screen_definitions_identity import IDENTITY_SCREEN_BUILDERS
 from app.core.screen_definitions_kontrolle import KONTROLLE_ROUTEN, KONTROLLE_SCREEN_BUILDERS, KONTROLLE_SYNONYME
@@ -5309,6 +5310,8 @@ _SCREEN_DEFINITIONS: dict[str, Any] = {
     "personal/bewerbung-einwilligung": build_personal_bewerbung_einwilligung_screen_definition,
     "personal/einwilligungserklaerungen": build_personal_einwilligungserklaerungen_screen_definition,
     "admin/postfaecher": build_admin_postfaecher_screen_definition,
+    "admin/webhooks-liste": build_webhooks_workbench,
+    "admin/control-center": build_control_center_workbench,
     "sales/gutschrift": build_sales_gutschrift_screen_definition,
     "finance/steuerschluessel": build_finance_steuerschluessel_screen_definition,
     "logistik/frachtbrief": build_logistik_frachtbrief_screen_definition,
@@ -6094,6 +6097,8 @@ _SCREEN_LIST_ROUTE: dict[str, str] = {
     "personal/bewerbung-einwilligung": "/personal/bewerbungen",
     "personal/einwilligungserklaerungen": "/personal/einwilligungserklaerungen",
     "admin/postfaecher": "/admin/postfaecher",
+    "admin/webhooks-liste": "/admin/webhooks",
+    "admin/control-center": "/admin/control-center",
     "sales/gutschrift": "/sales/credit-notes",
     "finance/steuerschluessel": "/finance/steuerschluessel",
     "logistik/frachtbrief": "/logistik/frachtbriefe",

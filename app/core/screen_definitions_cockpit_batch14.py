@@ -75,43 +75,13 @@ def build_auswertungen_warengruppen_analyse_screen_definition() -> dict[str, Any
 
 
 def build_auth_callback_screen_definition() -> dict[str, Any]:
-    return build_cockpit_overview_screen(
-        screen_id="auth/callback",
-        domain="identity",
-        title="OIDC Callback",
-        subtitle="Anmeldung abschliessen",
-        business_purpose="OIDC Callback als Read-Model-Cockpit.",
-        example_prompts=["Zeige OIDC Callback.", "Was ist der aktuelle Stand?"],
-        test_id="auth-callback",
-        summary=[
-            {"key": "total", "label": "Anzahl", "tone": "neutral"},
-            {"key": "open", "label": "Offen", "tone": "warning"},
-        ],
-        data_sources=[cockpit_entity_source("/api/v1/identity/session")],
-        tiles=[cockpit_nav_tile("overview", "Uebersicht", target_route="/auth/callback")],
-        actions=[cockpit_refresh_action(permission="identity.session.read")],
-        context_rail="combined",
-    )
+    from app.core.public_auth_screen_definitions import build_public_auth_screen
+    return build_public_auth_screen("auth/callback")
 
 
 def build_auth_login_screen_definition() -> dict[str, Any]:
-    return build_cockpit_overview_screen(
-        screen_id="auth/login",
-        domain="identity",
-        title="Anmeldung",
-        subtitle="SSO-Anmeldung",
-        business_purpose="Anmeldung als Read-Model-Cockpit.",
-        example_prompts=["Zeige Anmeldung.", "Was ist der aktuelle Stand?"],
-        test_id="auth-login",
-        summary=[
-            {"key": "total", "label": "Anzahl", "tone": "neutral"},
-            {"key": "open", "label": "Offen", "tone": "warning"},
-        ],
-        data_sources=[cockpit_entity_source("/api/v1/identity/session")],
-        tiles=[cockpit_nav_tile("overview", "Uebersicht", target_route="/auth/login")],
-        actions=[cockpit_refresh_action(permission="identity.session.read")],
-        context_rail="combined",
-    )
+    from app.core.public_auth_screen_definitions import build_public_auth_screen
+    return build_public_auth_screen("auth/login")
 
 
 def build_banken_konten_stamm_screen_definition() -> dict[str, Any]:

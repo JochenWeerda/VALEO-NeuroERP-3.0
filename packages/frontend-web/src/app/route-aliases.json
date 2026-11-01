@@ -2129,7 +2129,7 @@
       "path": "schaeden/liste"
     },
     {
-      "module": "@/pages/waage/liste",
+      "module": "@/pages/waage/neu",
       "path": "waage/neu"
     },
     {

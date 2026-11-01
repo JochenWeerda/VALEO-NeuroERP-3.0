@@ -14,14 +14,15 @@ import {
 } from '@/components/ui/alert-dialog'
 import { UniversalMaskRenderer } from '@/components/mask-builder/UniversalMaskRenderer'
 import { ActionInputDialog } from '@/components/mask-builder/renderers/ActionInputDialog'
-import { compileRenderPlanFromScreenDefinition } from '@/components/mask-builder/render-plan/schema-compiler'
+import { useUniversalMaskRuntime } from '@/components/mask-builder/runtime/useUniversalMaskRuntime'
+import { useScreenPermissions } from '@/components/mask-builder/runtime/screen-permissions'
+import { useScreenDefinition } from '@/lib/api/masks'
 import { useUniversalFormState } from '@/components/mask-builder/runtime/useUniversalFormState'
 import { createScreenContext } from '@/components/mask-builder/governance/screen-context'
 import type { ScreenActionDefinition, ScreenDefinition } from '@/components/mask-builder/schema'
 import type { WorkflowState } from '@/components/mask-builder/runtime/WorkflowRuntime'
 import { getAxiosErrorMessage } from '@/lib/api-client'
 import { useTouchDevice } from '@/hooks/useTouchDevice'
-import { salesGutschriftScreen } from '@/masks/capture-screens'
 import {
   bucheGutschrift,
   gibVorschlagFrei,
@@ -54,8 +55,6 @@ const leer: Record<string, unknown> = {
 const POSITION_LEER = { pos_description: '', pos_quantity: '', pos_unit_price: '', pos_tax_code: '' }
 const STATUS: Record<string, string> = { draft: 'Entwurf', posted: 'Gebucht' }
 const VORSCHLAG_STAND: Record<string, string> = { pending: 'Wartet auf Prüfung', approved: 'Freigegeben', rejected: 'Abgelehnt' }
-// Der Server prueft die Rolle; hier nur die Freigabe der Aktionen im Builder.
-const RECHTE = ['sales.gutschrift.write', 'sales.gutschrift.post']
 
 function text(wert: unknown): string {
   return String(wert ?? '').trim()
@@ -76,6 +75,14 @@ function schluesselText(code: string | null, schluessel: Steuerschluessel[]): st
 }
 
 export default function CreditNoteEditorPage(): JSX.Element {
+  const query = useScreenDefinition('sales/credit-notes')
+  if (query.isLoading) return <p role="status">Gutschrift wird geladen …</p>
+  if (query.error || !query.data) return <p role="alert">Gutschriftsvertrag konnte nicht geladen werden.</p>
+  return <CreditNoteWorkspace definition={query.data} />
+}
+
+function CreditNoteWorkspace({ definition }: { definition: ScreenDefinition }): JSX.Element {
+  const rechte = useScreenPermissions(definition)
   const isTouch = useTouchDevice()
   const queryClient = useQueryClient()
   const liste = useQuery({ queryKey: ['sales-gutschriften'], queryFn: listeGutschriften })
@@ -118,10 +125,10 @@ export default function CreditNoteEditorPage(): JSX.Element {
   const steuer = positionen.length > 0 ? vorschau.data : undefined
 
   const schema = useMemo<ScreenDefinition>(() => ({
-    ...salesGutschriftScreen,
-    subtitle: geladen ? `${STATUS[geladen.status] ?? geladen.status}: ${geladen.credit_note_number}` : salesGutschriftScreen.subtitle,
-    layout: { ...salesGutschriftScreen.layout, density: isTouch ? 'comfortable' : 'compact' },
-    summary: salesGutschriftScreen.summary.map((eintrag) => ({
+    ...definition,
+    subtitle: geladen ? `${STATUS[geladen.status] ?? geladen.status}: ${geladen.credit_note_number}` : definition.subtitle,
+    layout: { ...definition.layout, density: isTouch ? 'comfortable' : 'compact' },
+    summary: (definition.summary ?? []).map((eintrag) => ({
       ...eintrag,
       value: eintrag.key === 'netto'
         ? euro(steuer?.netto ?? 0)
@@ -129,9 +136,9 @@ export default function CreditNoteEditorPage(): JSX.Element {
           ? euro(eintrag.key === 'steuer' ? steuer.steuer : steuer.brutto)
           : 'offen',
     })),
-    fields: salesGutschriftScreen.fields.map((feld) => ({
+    fields: (definition.fields ?? []).map((feld) => ({
       ...feld,
-      readOnly: gespeichert,
+      readOnly: feld.readOnly || gespeichert,
       ...(feld.key === 'pos_tax_code'
         ? {
             // Verkaufsbeleg: reine Vorsteuerschluessel gehoeren nicht in die Auswahl.
@@ -142,16 +149,17 @@ export default function CreditNoteEditorPage(): JSX.Element {
           }
         : {}),
     })),
-    actions: salesGutschriftScreen.actions.map((aktion) => ({
+    actions: (definition.actions ?? []).map((aktion) => ({
       ...aktion,
       disabled: laeuft !== null
         || ((aktion.key === 'position' || aktion.key === 'speichern') && gespeichert)
         || (aktion.key === 'buchen' && (!gespeichert || gebucht))
         || ((aktion.key === 'vorschlag_freigeben' || aktion.key === 'vorschlag_ablehnen') && !vorschlagOffen),
     })),
-  }), [gebucht, geladen, gespeichert, isTouch, laeuft, schluessel, steuer, vorschlagOffen])
+  }), [definition, gebucht, geladen, gespeichert, isTouch, laeuft, schluessel, steuer, vorschlagOffen])
 
-  const plan = useMemo(() => compileRenderPlanFromScreenDefinition(schema, { permissions: RECHTE }), [schema])
+  const runtime = useUniversalMaskRuntime({ screenId: 'sales/credit-notes', schema, permissions: rechte })
+  const plan = runtime.plan
   const form = useUniversalFormState({ screen: schema, initialValues: leer })
   const { resetForm, setValue } = form
 
@@ -195,6 +203,7 @@ export default function CreditNoteEditorPage(): JSX.Element {
   }, [resetForm])
 
   const positionUebernehmen = useCallback(() => {
+    if (!plan?.actions.some(action => action.key === 'position' && !action.disabled) || ['pos_description', 'pos_quantity', 'pos_unit_price', 'pos_tax_code'].some(key => !plan.fieldsByKey[key]?.visible || plan.fieldsByKey[key]?.readOnly)) return
     const werte = form.values
     if (!text(werte.pos_description) || zahl(werte.pos_quantity) <= 0 || zahl(werte.pos_unit_price) <= 0) {
       toast.error('Position unvollständig', { description: 'Bezeichnung, Menge und Einzelpreis eintragen.' })
@@ -207,9 +216,10 @@ export default function CreditNoteEditorPage(): JSX.Element {
       tax_code: text(werte.pos_tax_code) || null,
     }])
     Object.entries(POSITION_LEER).forEach(([feld, wert]) => setValue(feld, wert))
-  }, [form.values, setValue])
+  }, [form.values, plan, setValue])
 
   const speichern = useCallback(() => mitSperre('speichern', async () => {
+    if (!plan?.actions.some(action => action.key === 'speichern' && !action.disabled) || ['credit_note_number', 'customer_id', 'reason'].some(key => !plan.fieldsByKey[key]?.visible || plan.fieldsByKey[key]?.readOnly)) return
     const werte = form.values
     if (!text(werte.credit_note_number) || !text(werte.customer_id) || !text(werte.reason) || positionen.length === 0) {
       form.revealErrors?.()
@@ -239,9 +249,10 @@ export default function CreditNoteEditorPage(): JSX.Element {
     } catch (fehler) {
       toast.error('Gutschrift nicht gespeichert', { description: getAxiosErrorMessage(fehler) })
     }
-  }), [form, mitSperre, neuLaden, positionen, zeige])
+  }), [form, mitSperre, neuLaden, plan, positionen, zeige])
 
   const buchen = useCallback(() => mitSperre('buchen', async () => {
+    if (!plan?.actions.some(action => action.key === 'buchen' && !action.disabled)) return
     if (!geladen) return
     try {
       const ergebnis = await bucheGutschrift(geladen.id, `gutschrift-buchen-${geladen.id}`)
@@ -259,7 +270,7 @@ export default function CreditNoteEditorPage(): JSX.Element {
     } finally {
       setBuchenFragen(false)
     }
-  }), [geladen, mitSperre, neuLaden, zeige])
+  }), [geladen, mitSperre, neuLaden, plan, zeige])
 
   const oeffnen = useCallback((id: unknown) => mitSperre('laden', async () => {
     try {
@@ -280,6 +291,7 @@ export default function CreditNoteEditorPage(): JSX.Element {
   }), [mitSperre, vorschlaege, zeige])
 
   const entscheiden = useCallback((art: 'freigeben' | 'ablehnen', grund = '') => mitSperre(art, async () => {
+    if (!plan?.actions.some(action => action.key === `vorschlag_${art}` && !action.disabled)) return
     if (!vorschlag || !geladen) return
     try {
       const ergebnis = art === 'freigeben'
@@ -301,11 +313,11 @@ export default function CreditNoteEditorPage(): JSX.Element {
       setFreigebenFragen(false)
       setAblehnenFragen(false)
     }
-  }), [geladen, mitSperre, neuLaden, vorschlag, zeige])
+  }), [geladen, mitSperre, neuLaden, plan, vorschlag, zeige])
 
   const screenContext = useMemo(() => createScreenContext({
     data: { gutschriften, positionen },
-    permissions: { granted: RECHTE },
+    permissions: { granted: rechte },
     state: { values: form.values, policies: {} },
     actions: {
       'sales.gutschriftPosition': () => positionUebernehmen(),
@@ -322,7 +334,7 @@ export default function CreditNoteEditorPage(): JSX.Element {
       },
     },
     navigation: { push: () => undefined },
-  }), [form.values, gespeichert, gutschriften, oeffnen, positionUebernehmen, positionen, pruefen, speichern, zeige])
+  }), [form.values, gespeichert, gutschriften, oeffnen, positionUebernehmen, positionen, pruefen, rechte, speichern, zeige])
 
   const workflow = useMemo<WorkflowState>(() => {
     const ohneSchluessel = positionen.some((p) => !p.tax_code)
@@ -360,9 +372,9 @@ export default function CreditNoteEditorPage(): JSX.Element {
     }
   }, [gebucht, gespeichert, positionen, pruefgrund, steuer, vorschlag, vorschlagOffen])
 
-  const ablehnenAktion = salesGutschriftScreen.actions.find((a) => a.key === 'vorschlag_ablehnen') as ScreenActionDefinition
+  const ablehnenAktion = (definition.actions ?? []).find((a) => a.key === 'vorschlag_ablehnen') as ScreenActionDefinition
 
-  if (liste.isLoading) {
+  if (liste.isLoading || !plan) {
     return (
       <div className="space-y-6 p-3 md:p-6">
         <Skeleton className="min-h-touch h-10 w-48" />

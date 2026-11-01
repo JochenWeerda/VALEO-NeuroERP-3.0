@@ -60,6 +60,8 @@ class Waage(Base):
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
     id = Column(String, primary_key=True, default=default_prefixed_id("W"))
+    # NULL marks pre-existing records with unknown ownership; never assigned by guess.
+    tenant_id = Column(String(64), nullable=True, index=True)
     
     # Stammdaten
     standort = Column(String(100), nullable=False)
@@ -70,6 +72,9 @@ class Waage(Base):
     letzte_eichung = Column(DateTime(timezone=True))
     naechste_eichung = Column(DateTime(timezone=True))
     
+    eichamt = Column(String(200))
+    zertifikat_nr = Column(String(200))
+
     # Status
     status = Column(String(20), default=WaageStatus.AKTIV.value)
     

@@ -4,14 +4,11 @@
     python scripts/generate_screen_registry_snapshot.py           # schreiben
     python scripts/generate_screen_registry_snapshot.py --check   # pruefen (CI)
 
-``app/core/screen_definitions*.py`` ist die kanonische Quelle der ScreenDefinitions. Daneben stehen 31 davon
-ein zweites Mal von Hand in ``packages/frontend-web/src/masks/capture-screens.ts``. Am 13.10.2026 wichen 26
-dieser Kopien von der Quelle ab — elf bei den Aktionen (die Kopie kennt weder Kommando-Weg noch Recht).
-
-Dieses Abbild macht die Abweichung pruefbar: Der Frontend-Test ``capture-screens-sync.test.ts`` vergleicht
-jede Kopie mit ihm und laesst nur die dort einzeln benannten Abweichungen zu. Eine neue Kopie oder eine neue
-Abweichung macht ihn rot; eine behobene muss aus der Liste. Neue Masken lesen die Definition aus der Registry
-(``useScreenDefinition``) oder aus diesem Abbild — nicht aus einer weiteren Handkopie.
+``app/core/screen_definitions*.py`` ist die kanonische Quelle der ScreenDefinitions.
+Das JSON-Abbild und ``generate_capture_screens.py`` projizieren dieselben 31 verfassten
+Definitionen fuer das Frontend. ``capture-screens-sync.test.ts`` vergleicht beide
+Ausgaben ohne zugelassene Abweichungen. Beide Generatoren besitzen einen --check-Modus;
+neue Masken lesen die Registry oder eine ihrer generierten Projektionen.
 
 Der Agentenvertrag (``agentContract``) gehoert nicht ins Abbild: Er ist fuer den Server und die Agenten.
 """

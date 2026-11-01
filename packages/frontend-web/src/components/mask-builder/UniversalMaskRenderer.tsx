@@ -1,3 +1,5 @@
+import { lazy, Suspense } from 'react'
+const FlowSpineWorkspaceSurface = lazy(() => import('./runtime/FlowSpineWorkspaceSurface'))
 import { FlowSpineCatalogRenderer } from './renderers/FlowSpineCatalogRenderer'
 import type { FlowSpineCatalogState } from './runtime/useFlowSpineCatalogRuntime'
 import { SourceProposalRenderer } from './renderers/SourceProposalRenderer'
@@ -439,13 +441,14 @@ function RenderFromPlan({
       {statusAfterFields ? null : workflowNode}
       {!statusAfterFields && plan.shell.summaryPlacement === 'header' ? <FastSummaryRenderer items={plan.summaryItems} /> : null}
       {plan.flowSpineCatalog && <FlowSpineCatalogRenderer state={flowSpineCatalog} />}
+      {plan.flowSpineWorkspace && <Suspense fallback={<p role="status">Prozessraum wird geladen…</p>}><FlowSpineWorkspaceSurface contract={plan.flowSpineWorkspace} /></Suspense>}
       <TileGridRenderer tiles={plan.tiles} />
       <CalendarRenderer calendar={plan.calendar} />
       <TwinReadModelRenderer twin={plan.twin} />
-      <SpecializedComponentHost specialized={plan.specialized} onAction={dispatchAction} />
+      <SpecializedComponentHost specialized={plan.specialized} plan={plan} onAction={dispatchAction} />
       {plan.sourceProposals ? <SourceProposalRenderer context={effectivePayload[plan.sourceProposals.contextKey]} /> : null}
 
-      {deriveColumns ? null : (
+      {deriveColumns || plan.specialized?.type === 'intake' || plan.specialized?.type === 'weighing' || plan.specialized?.type === 'finance_workbench' || plan.specialized?.type === 'feed_workbench' || plan.specialized?.type === 'admin_workbench' ? null : (
         <>
       <FastFormRenderer
         fieldKeys={plan.rootFieldKeys}

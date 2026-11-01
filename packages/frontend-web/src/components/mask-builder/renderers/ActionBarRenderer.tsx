@@ -42,10 +42,11 @@ export function ActionBarRenderer({
   /** One-line header while the page is scrolled; identity and actions stay reachable. */
   condensed?: boolean
 }): JSX.Element {
-  const primaryActions = actions.filter((action) => action.kind === 'primary').slice(0, 1)
+  const toolbarActions = actions.filter(action => !action.surfaceOnly)
+  const primaryActions = toolbarActions.filter((action) => action.kind === 'primary').slice(0, 1)
   const primaryKeys = new Set(primaryActions.map((action) => action.key))
-  const secondaryActions = actions.filter((action) => !primaryKeys.has(action.key) && !isDangerAction(action))
-  const dangerActions = actions.filter((action) => !primaryKeys.has(action.key) && isDangerAction(action))
+  const secondaryActions = toolbarActions.filter((action) => !primaryKeys.has(action.key) && !isDangerAction(action))
+  const dangerActions = toolbarActions.filter((action) => !primaryKeys.has(action.key) && isDangerAction(action))
 
   function renderAction(action: ScreenActionDefinition) {
     const danger = isDangerAction(action)

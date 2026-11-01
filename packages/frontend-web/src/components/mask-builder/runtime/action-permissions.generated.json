@@ -579,8 +579,30 @@
         ]
       ]
     },
+    "crm/campaign": {
+      "crm.campaign.update": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "crm/campaign-template": {
       "crm.campaign.update": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "crm/consent": {
+      "crm.consent.update": [
         [
           "CRM_ADMIN",
           "CRM_BEARBEITEN",
@@ -692,6 +714,23 @@
         ]
       ]
     },
+    "crm/gdpr-request": {
+      "gdpr.request.update": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "FUTTERMITTEL_ADMIN",
+          "FUTTERMITTEL_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "crm/kampagnen-liste": {
       "crm.kampagne.loeschen": [
         [
@@ -795,6 +834,17 @@
         ]
       ],
       "crm.activity.create": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "crm/segment": {
+      "crm.segment.update": [
         [
           "CRM_ADMIN",
           "CRM_BEARBEITEN",
@@ -1608,6 +1658,15 @@
           "FUTTERMITTEL_BEARBEITEN",
           "LAGER_ADMIN",
           "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "sales/angebote-liste": {
+      "sales.offer.import_csv": [
+        [
           "SALES_ADMIN",
           "SALES_BEARBEITEN",
           "admin"

@@ -1,6 +1,7 @@
 import { type ChangeEvent, useMemo, useRef } from 'react'
 import { Checkbox } from '@/components/ui/checkbox'
 import { TableFieldRenderer } from './TableFieldRenderer'
+import { TextFileField } from './TextFileField'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -106,6 +107,8 @@ export function FieldRenderer({
       ? (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => onChange(e.target.value)
       : undefined,
   }
+
+  if (field.type === 'file' && field.fileContent) return <TextFileField field={field} value={value} readOnly={isReadOnly} onChange={onChange} />
 
   if (field.type === 'stringList') {
     const listValue = value === undefined ? [] : value

@@ -1,4 +1,5 @@
-import { StrictMode } from 'react'
+import { StrictMode, type ReactNode } from 'react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { cleanup, render, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import CallbackPage from '@/pages/auth/Callback'
@@ -8,7 +9,9 @@ vi.mock('@/hooks/useAuth', () => ({
   // Intentionally unstable reference, as returned by the existing hook.
   useAuth: () => ({ handleCallback: (code: string, state: string) => fixture.callback(code, state) }),
 }))
-vi.mock('@/app/routing/typed-router', () => ({ useSearchParams: () => [fixture.params] }))
+vi.mock('@/app/routing/typed-router', () => ({ useSearchParams: () => [fixture.params], useNavigate: () => vi.fn() }))
+
+function Wrapper({children}: {children: ReactNode}): JSX.Element { return <QueryClientProvider client={new QueryClient({defaultOptions:{queries:{retry:false}}})}>{children}</QueryClientProvider> }
 
 beforeEach(() => {
   fixture.callback.mockReset().mockResolvedValue(undefined)
@@ -18,20 +21,20 @@ afterEach(cleanup)
 
 describe('real callback page lifecycle', () => {
   it('exchanges the callback once under React StrictMode', async () => {
-    render(<StrictMode><CallbackPage /></StrictMode>)
+    render(<StrictMode><CallbackPage /></StrictMode>, {wrapper: Wrapper})
     await waitFor(() => expect(fixture.callback).toHaveBeenCalledTimes(1))
     expect(fixture.callback).toHaveBeenCalledWith('synthetic-code', 'synthetic-state')
   })
 
   it('does not consume the callback again after a parent rerender', async () => {
-    const view = render(<CallbackPage />)
-    view.rerender(<CallbackPage />)
+    const view = render(<CallbackPage />, {wrapper: Wrapper})
+    view.rerender(<CallbackPage />, {wrapper: Wrapper})
     await waitFor(() => expect(fixture.callback).toHaveBeenCalledTimes(1))
   })
 
   it.each(['error=access_denied', 'state=synthetic-state'])('shows provider or incomplete response errors without exchange: %s', async query => {
     fixture.params = new URLSearchParams(query)
-    const view = render(<StrictMode><CallbackPage /></StrictMode>)
+    const view = render(<StrictMode><CallbackPage /></StrictMode>, {wrapper: Wrapper})
     await waitFor(() => expect(view.getByText('Anmeldung fehlgeschlagen')).toBeTruthy())
     expect(fixture.callback).not.toHaveBeenCalled()
   })

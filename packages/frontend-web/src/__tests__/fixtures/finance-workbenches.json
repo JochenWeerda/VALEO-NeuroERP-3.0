@@ -1,0 +1,731 @@
+[
+  {
+    "schemaVersion": 1,
+    "id": "finance/bank-abgleich",
+    "domain": "finance",
+    "mode": "cockpit",
+    "title": "Bankabgleich",
+    "subtitle": "Finanzbuchhaltung",
+    "adapter": {
+      "type": "native",
+      "sourceId": "finance/bank-abgleich",
+      "temporary": false
+    },
+    "layout": {
+      "floorplan": "cockpit",
+      "density": "expertDense",
+      "contextRail": "combined",
+      "tableProfile": "financial",
+      "preferredMode": "desktopDense",
+      "mobileMode": "mobileStack",
+      "touchTargetPx": 44,
+      "columnNavigation": "single"
+    },
+    "fields": [
+      {
+        "key": "kontoId",
+        "label": "Bankkonto",
+        "type": "text",
+        "readOnly": false
+      },
+      {
+        "key": "camtFile",
+        "label": "Kontoauszug",
+        "type": "file",
+        "readOnly": false
+      },
+      {
+        "key": "statementId",
+        "label": "Statement",
+        "type": "text",
+        "readOnly": true
+      },
+      {
+        "key": "startSaldo",
+        "label": "Startsaldo",
+        "type": "text",
+        "readOnly": true
+      },
+      {
+        "key": "endSaldo",
+        "label": "Endsaldo",
+        "type": "text",
+        "readOnly": true
+      },
+      {
+        "key": "gebuchteUmsaetze",
+        "label": "Umsätze",
+        "type": "text",
+        "readOnly": true
+      },
+      {
+        "key": "zugeordnet",
+        "label": "Zugeordnet",
+        "type": "text",
+        "readOnly": true
+      },
+      {
+        "key": "nichtZugeordnet",
+        "label": "Nicht zugeordnet",
+        "type": "text",
+        "readOnly": true
+      },
+      {
+        "key": "abgleichsDifferenz",
+        "label": "Differenz",
+        "type": "text",
+        "readOnly": true
+      },
+      {
+        "key": "accountingBalance",
+        "label": "Hauptbuchsaldo",
+        "type": "text",
+        "readOnly": true
+      },
+      {
+        "key": "zuordnungData",
+        "label": "Umsatzzeilen",
+        "type": "text",
+        "readOnly": true
+      },
+      {
+        "key": "importErrors",
+        "label": "Importprotokoll",
+        "type": "text",
+        "readOnly": true
+      },
+      {
+        "key": "differences",
+        "label": "Differenzen",
+        "type": "text",
+        "readOnly": true
+      },
+      {
+        "key": "comparisonState",
+        "label": "Nachweisstatus",
+        "type": "text",
+        "readOnly": true
+      }
+    ],
+    "actions": [
+      {
+        "key": "import",
+        "label": "Kontoauszug importieren",
+        "kind": "secondary",
+        "dangerLevel": "safe",
+        "forbiddenForAgents": true,
+        "permission": "studio.finance-workbench.import",
+        "inputFlow": {
+          "kind": "humanForm",
+          "submitEndpoint": "/api/v1/finance/bank-statements/import",
+          "method": "POST"
+        }
+      },
+      {
+        "key": "validate",
+        "label": "Salden vergleichen",
+        "kind": "primary",
+        "dangerLevel": "safe",
+        "forbiddenForAgents": true,
+        "permission": "studio.finance-workbench.validate",
+        "inputFlow": {
+          "kind": "humanForm",
+          "submitEndpoint": "/api/v1/finance/bank-reconciliation/{statement_id}/reconcile",
+          "method": "POST"
+        }
+      },
+      {
+        "key": "export",
+        "label": "Umsatzzeilen exportieren",
+        "kind": "secondary",
+        "dangerLevel": "safe",
+        "forbiddenForAgents": true,
+        "localEffect": "download"
+      }
+    ],
+    "dataSources": [],
+    "specialized": {
+      "type": "finance_workbench",
+      "id": "finance/bank-abgleich"
+    },
+    "workflow": {
+      "processKey": "finance-to-close",
+      "status": "operator-workspace",
+      "auditRequired": true
+    },
+    "performance": {
+      "initialPayloadBudgetKb": 100,
+      "requiresLazyTabs": true,
+      "requiresVirtualTables": true,
+      "lookupMinChars": 2,
+      "bundleGroup": "finance"
+    },
+    "agentContract": {
+      "businessPurpose": "Bankabgleich",
+      "examplePrompts": [
+        "Welche Eingaben und Aktionen sind verfügbar?"
+      ],
+      "sensitiveFields": [
+        "kontoId",
+        "camtFile",
+        "statementId",
+        "startSaldo",
+        "endSaldo",
+        "gebuchteUmsaetze",
+        "zugeordnet",
+        "nichtZugeordnet",
+        "abgleichsDifferenz",
+        "accountingBalance",
+        "zuordnungData",
+        "importErrors",
+        "differences",
+        "comparisonState"
+      ],
+      "forbiddenAgentTasks": [
+        "Fachaktionen ausführen"
+      ],
+      "testSelectors": {
+        "screenRoot": "[data-testid='native-cockpit-finance-bank-abgleich']"
+      },
+      "dangerousActions": [],
+      "synonyms": []
+    },
+    "processChains": {
+      "k1_ernte": {
+        "label": "Ernte",
+        "steps": [
+          {
+            "key": "kontrakt",
+            "label": "Kontrakt",
+            "screenId": "agrar/kontrakte",
+            "routePath": "/kontrakte"
+          },
+          {
+            "key": "avis",
+            "label": "Avis",
+            "screenId": "einkauf/anlieferavis",
+            "routePath": "/einkauf/anlieferavis"
+          },
+          {
+            "key": "qualitaet",
+            "label": "Qualitaet",
+            "screenId": "qualitaet/reklamation",
+            "routePath": "/qualitaet/reklamationen"
+          },
+          {
+            "key": "einlagerung",
+            "label": "Einlagerung",
+            "screenId": "lager/article-stock",
+            "routePath": "/lager/bestandsuebersicht"
+          },
+          {
+            "key": "abrechnung",
+            "label": "Abrechnung",
+            "screenId": "agrar/harvest-settlement",
+            "routePath": "/agrar/kontrakt-settlement"
+          }
+        ]
+      },
+      "k2_verkauf": {
+        "label": "Verkauf",
+        "steps": [
+          {
+            "key": "auftrag",
+            "label": "Auftrag",
+            "screenId": "sales/sales-order",
+            "routePath": "/verkauf/auftraege"
+          },
+          {
+            "key": "lieferschein",
+            "label": "Lieferschein",
+            "screenId": "sales/delivery-note",
+            "routePath": "/verkauf/lieferschein-erfassung"
+          },
+          {
+            "key": "rechnung",
+            "label": "Rechnung",
+            "screenId": "sales/invoice",
+            "routePath": "/verkauf/rechnungen"
+          },
+          {
+            "key": "offene_posten",
+            "label": "Offene Posten",
+            "screenId": "finance/ar-open-item",
+            "routePath": "/finance/op-debitoren"
+          },
+          {
+            "key": "zahlung",
+            "label": "Zahlung",
+            "screenId": "finance/payment-run",
+            "routePath": "/fibu/zahlungslaeufe"
+          }
+        ]
+      },
+      "k3_einkauf": {
+        "label": "Einkauf",
+        "steps": [
+          {
+            "key": "anfrage",
+            "label": "Anfrage",
+            "screenId": "einkauf/anfrage",
+            "routePath": "/einkauf/anfragen"
+          },
+          {
+            "key": "angebot",
+            "label": "Angebot",
+            "screenId": "einkauf/angebot",
+            "routePath": "/einkauf/angebote"
+          },
+          {
+            "key": "bestellung",
+            "label": "Bestellung",
+            "screenId": "einkauf/purchase-order",
+            "routePath": "/einkauf/bestellungen"
+          },
+          {
+            "key": "bestaetigung",
+            "label": "Auftragsbestaetigung",
+            "screenId": "einkauf/auftragsbestaetigung",
+            "routePath": "/einkauf/auftragsbestaetigungen"
+          },
+          {
+            "key": "avis",
+            "label": "Avis",
+            "screenId": "einkauf/anlieferavis",
+            "routePath": "/einkauf/anlieferavis"
+          },
+          {
+            "key": "rechnung",
+            "label": "Rechnung",
+            "screenId": "finance/ap-invoice",
+            "routePath": "/einkauf/rechnungseingang"
+          },
+          {
+            "key": "zahlung",
+            "label": "Zahlung",
+            "screenId": "finance/payment-run",
+            "routePath": "/fibu/zahlungslaeufe"
+          }
+        ]
+      },
+      "k4_crm": {
+        "label": "CRM",
+        "steps": [
+          {
+            "key": "lead",
+            "label": "Lead",
+            "screenId": "crm/lead",
+            "routePath": "/crm/leads"
+          },
+          {
+            "key": "opportunity",
+            "label": "Opportunity",
+            "screenId": "crm/opportunity",
+            "routePath": "/crm/opportunities"
+          },
+          {
+            "key": "kunde",
+            "label": "Kunde",
+            "screenId": "crm/customer-360",
+            "routePath": "/verkauf/kunden-liste"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": "mahnwesen/mahnlauf",
+    "domain": "finance",
+    "mode": "cockpit",
+    "title": "Mahnlauf",
+    "subtitle": "Finanzbuchhaltung",
+    "adapter": {
+      "type": "native",
+      "sourceId": "mahnwesen/mahnlauf",
+      "temporary": false
+    },
+    "layout": {
+      "floorplan": "cockpit",
+      "density": "expertDense",
+      "contextRail": "combined",
+      "tableProfile": "financial",
+      "preferredMode": "desktopDense",
+      "mobileMode": "mobileStack",
+      "touchTargetPx": 44,
+      "columnNavigation": "single"
+    },
+    "fields": [
+      {
+        "key": "op_id",
+        "label": "Posten",
+        "type": "text",
+        "readOnly": true
+      },
+      {
+        "key": "rechnungsnr",
+        "label": "Rechnung",
+        "type": "text",
+        "readOnly": true
+      },
+      {
+        "key": "partner",
+        "label": "Partner",
+        "type": "text",
+        "readOnly": true
+      },
+      {
+        "key": "tage_ueberfaellig",
+        "label": "Überfällig",
+        "type": "text",
+        "readOnly": true
+      },
+      {
+        "key": "offen",
+        "label": "Offen",
+        "type": "text",
+        "readOnly": true
+      },
+      {
+        "key": "aktuelle_stufe",
+        "label": "Aktuelle Stufe",
+        "type": "text",
+        "readOnly": true
+      },
+      {
+        "key": "naechste_stufe",
+        "label": "Nächste Stufe",
+        "type": "text",
+        "readOnly": true
+      },
+      {
+        "key": "dunning_fee",
+        "label": "Gebühr",
+        "type": "text",
+        "readOnly": true
+      },
+      {
+        "key": "interest",
+        "label": "Zinsen",
+        "type": "text",
+        "readOnly": true
+      },
+      {
+        "key": "total_amount",
+        "label": "Gesamt",
+        "type": "text",
+        "readOnly": true
+      },
+      {
+        "key": "id",
+        "label": "Mahnung",
+        "type": "text",
+        "readOnly": true
+      },
+      {
+        "key": "stufe",
+        "label": "Stufe",
+        "type": "text",
+        "readOnly": true
+      },
+      {
+        "key": "gesamt",
+        "label": "Gesamtbetrag",
+        "type": "text",
+        "readOnly": true
+      },
+      {
+        "key": "frist",
+        "label": "Frist",
+        "type": "text",
+        "readOnly": true
+      },
+      {
+        "key": "datum",
+        "label": "Datum",
+        "type": "text",
+        "readOnly": true
+      },
+      {
+        "key": "status",
+        "label": "Status",
+        "type": "text",
+        "readOnly": true
+      },
+      {
+        "key": "versand_art",
+        "label": "Versandart",
+        "type": "text",
+        "readOnly": true
+      },
+      {
+        "key": "empfaenger",
+        "label": "Empfänger",
+        "type": "text",
+        "readOnly": true
+      },
+      {
+        "key": "auswahl",
+        "label": "Auswahl",
+        "type": "boolean",
+        "readOnly": false
+      }
+    ],
+    "actions": [
+      {
+        "key": "refresh",
+        "label": "Aktualisieren",
+        "kind": "secondary",
+        "dangerLevel": "safe",
+        "forbiddenForAgents": true,
+        "localEffect": "view"
+      },
+      {
+        "key": "run",
+        "label": "Mahnlauf ausführen",
+        "kind": "primary",
+        "dangerLevel": "safe",
+        "forbiddenForAgents": true,
+        "permission": "studio.finance-workbench.run",
+        "inputFlow": {
+          "kind": "humanForm",
+          "submitEndpoint": "/api/v1/finance/mahnlauf/run",
+          "method": "POST"
+        }
+      },
+      {
+        "key": "sendEmail",
+        "label": "Per E-Mail senden",
+        "kind": "secondary",
+        "dangerLevel": "safe",
+        "forbiddenForAgents": true,
+        "permission": "studio.finance-workbench.sendEmail",
+        "inputFlow": {
+          "kind": "humanForm",
+          "submitEndpoint": "/api/v1/finance/dunning/{id}/send",
+          "method": "PUT"
+        },
+        "surfaceOnly": true
+      },
+      {
+        "key": "sendPost",
+        "label": "Postversand festhalten",
+        "kind": "secondary",
+        "dangerLevel": "safe",
+        "forbiddenForAgents": true,
+        "permission": "studio.finance-workbench.sendPost",
+        "inputFlow": {
+          "kind": "humanForm",
+          "submitEndpoint": "/api/v1/finance/dunning/{id}/send",
+          "method": "PUT"
+        },
+        "surfaceOnly": true
+      }
+    ],
+    "dataSources": [
+      {
+        "key": "candidates",
+        "endpoint": "/api/v1/finance/mahnlauf/candidates",
+        "staleTimeMs": 15000
+      },
+      {
+        "key": "notices",
+        "endpoint": "/api/v1/finance/mahnlauf/notices",
+        "staleTimeMs": 15000
+      }
+    ],
+    "specialized": {
+      "type": "finance_workbench",
+      "id": "mahnwesen/mahnlauf"
+    },
+    "workflow": {
+      "processKey": "finance-to-close",
+      "status": "operator-workspace",
+      "auditRequired": true
+    },
+    "performance": {
+      "initialPayloadBudgetKb": 100,
+      "requiresLazyTabs": true,
+      "requiresVirtualTables": true,
+      "lookupMinChars": 2,
+      "bundleGroup": "finance"
+    },
+    "agentContract": {
+      "businessPurpose": "Mahnlauf",
+      "examplePrompts": [
+        "Welche Eingaben und Aktionen sind verfügbar?"
+      ],
+      "sensitiveFields": [
+        "op_id",
+        "rechnungsnr",
+        "partner",
+        "tage_ueberfaellig",
+        "offen",
+        "aktuelle_stufe",
+        "naechste_stufe",
+        "dunning_fee",
+        "interest",
+        "total_amount",
+        "id",
+        "stufe",
+        "gesamt",
+        "frist",
+        "datum",
+        "status",
+        "versand_art",
+        "empfaenger",
+        "auswahl"
+      ],
+      "forbiddenAgentTasks": [
+        "Fachaktionen ausführen"
+      ],
+      "testSelectors": {
+        "screenRoot": "[data-testid='native-cockpit-mahnwesen-mahnlauf']"
+      },
+      "dangerousActions": [],
+      "synonyms": []
+    },
+    "processChains": {
+      "k1_ernte": {
+        "label": "Ernte",
+        "steps": [
+          {
+            "key": "kontrakt",
+            "label": "Kontrakt",
+            "screenId": "agrar/kontrakte",
+            "routePath": "/kontrakte"
+          },
+          {
+            "key": "avis",
+            "label": "Avis",
+            "screenId": "einkauf/anlieferavis",
+            "routePath": "/einkauf/anlieferavis"
+          },
+          {
+            "key": "qualitaet",
+            "label": "Qualitaet",
+            "screenId": "qualitaet/reklamation",
+            "routePath": "/qualitaet/reklamationen"
+          },
+          {
+            "key": "einlagerung",
+            "label": "Einlagerung",
+            "screenId": "lager/article-stock",
+            "routePath": "/lager/bestandsuebersicht"
+          },
+          {
+            "key": "abrechnung",
+            "label": "Abrechnung",
+            "screenId": "agrar/harvest-settlement",
+            "routePath": "/agrar/kontrakt-settlement"
+          }
+        ]
+      },
+      "k2_verkauf": {
+        "label": "Verkauf",
+        "steps": [
+          {
+            "key": "auftrag",
+            "label": "Auftrag",
+            "screenId": "sales/sales-order",
+            "routePath": "/verkauf/auftraege"
+          },
+          {
+            "key": "lieferschein",
+            "label": "Lieferschein",
+            "screenId": "sales/delivery-note",
+            "routePath": "/verkauf/lieferschein-erfassung"
+          },
+          {
+            "key": "rechnung",
+            "label": "Rechnung",
+            "screenId": "sales/invoice",
+            "routePath": "/verkauf/rechnungen"
+          },
+          {
+            "key": "offene_posten",
+            "label": "Offene Posten",
+            "screenId": "finance/ar-open-item",
+            "routePath": "/finance/op-debitoren"
+          },
+          {
+            "key": "zahlung",
+            "label": "Zahlung",
+            "screenId": "finance/payment-run",
+            "routePath": "/fibu/zahlungslaeufe"
+          }
+        ]
+      },
+      "k3_einkauf": {
+        "label": "Einkauf",
+        "steps": [
+          {
+            "key": "anfrage",
+            "label": "Anfrage",
+            "screenId": "einkauf/anfrage",
+            "routePath": "/einkauf/anfragen"
+          },
+          {
+            "key": "angebot",
+            "label": "Angebot",
+            "screenId": "einkauf/angebot",
+            "routePath": "/einkauf/angebote"
+          },
+          {
+            "key": "bestellung",
+            "label": "Bestellung",
+            "screenId": "einkauf/purchase-order",
+            "routePath": "/einkauf/bestellungen"
+          },
+          {
+            "key": "bestaetigung",
+            "label": "Auftragsbestaetigung",
+            "screenId": "einkauf/auftragsbestaetigung",
+            "routePath": "/einkauf/auftragsbestaetigungen"
+          },
+          {
+            "key": "avis",
+            "label": "Avis",
+            "screenId": "einkauf/anlieferavis",
+            "routePath": "/einkauf/anlieferavis"
+          },
+          {
+            "key": "rechnung",
+            "label": "Rechnung",
+            "screenId": "finance/ap-invoice",
+            "routePath": "/einkauf/rechnungseingang"
+          },
+          {
+            "key": "zahlung",
+            "label": "Zahlung",
+            "screenId": "finance/payment-run",
+            "routePath": "/fibu/zahlungslaeufe"
+          }
+        ]
+      },
+      "k4_crm": {
+        "label": "CRM",
+        "steps": [
+          {
+            "key": "lead",
+            "label": "Lead",
+            "screenId": "crm/lead",
+            "routePath": "/crm/leads"
+          },
+          {
+            "key": "opportunity",
+            "label": "Opportunity",
+            "screenId": "crm/opportunity",
+            "routePath": "/crm/opportunities"
+          },
+          {
+            "key": "kunde",
+            "label": "Kunde",
+            "screenId": "crm/customer-360",
+            "routePath": "/verkauf/kunden-liste"
+          }
+        ]
+      }
+    }
+  }
+]

@@ -193,6 +193,15 @@ def _row_to_campaign(row: Any) -> dict:
     }
 
 
+def _own_reference(db: Session, tenant_id: str, field: str, value: str | None) -> None:
+    if not value:
+        return
+    tables = {"template_id": "domain_crm.crm_campaign_templates", "segment_id": "domain_crm.crm_segments"}
+    table = tables[field]
+    if db.execute(text(f"SELECT id FROM {table} WHERE tenant_id=:tenant AND id=:id FOR SHARE"), {"tenant": tenant_id, "id": value}).scalar() is None:
+        raise HTTPException(status_code=404, detail="Kampagnenreferenz nicht gefunden")
+
+
 VALID_TRANSITIONS: dict[str, list[str]] = {
     "draft":     ["active", "archived"],
     "active":    ["paused", "completed", "archived"],
@@ -459,6 +468,7 @@ async def create_campaign(
         if not tmpl:
             raise HTTPException(status_code=404, detail="Vorlage nicht gefunden")
 
+    _own_reference(db, tenant_id, "segment_id", payload.segment_id)
     nid = uuid7()
     now = datetime.utcnow()
     db.execute(
@@ -482,7 +492,7 @@ async def create_campaign(
             "channel": payload.campaign_channel,
             "cust_type": payload.target_customer_type,
             "season": payload.seasonal_context,
-            "meta": str(payload.meta or {}), "now": now,
+            "meta": json.dumps(payload.meta or {}), "now": now,
         },
     )
     db.commit()
@@ -524,6 +534,8 @@ async def update_campaign(
     if row.state in ("completed", "archived"):
         raise HTTPException(status_code=422, detail=f"Kampagne im Status '{row.state}' kann nicht bearbeitet werden.")
 
+    _own_reference(db, tenant_id, "template_id", payload.template_id)
+    _own_reference(db, tenant_id, "segment_id", payload.segment_id)
     updates = {k: v for k, v in payload.model_dump(exclude_none=True).items()}
     if not updates:
         return _row_to_campaign(row)
@@ -551,7 +563,7 @@ async def delete_campaign(
     db: Session = Depends(get_db),
 ) -> Response:
     row = db.execute(
-        text("SELECT state FROM domain_crm.crm_campaigns WHERE id = :id AND tenant_id = :tid"),
+        text("SELECT state FROM domain_crm.crm_campaigns WHERE id = :id AND tenant_id = :tid FOR UPDATE"),
         {"id": campaign_id, "tid": tenant_id},
     ).fetchone()
     if not row:
@@ -694,7 +706,7 @@ async def add_recipient(
         {
             "id": nid, "tid": tenant_id, "cid": campaign_id,
             "rid": payload.recipient_id, "rtype": payload.recipient_type,
-            "meta": str(payload.meta or {}),
+            "meta": json.dumps(payload.meta or {}),
         },
     )
     db.commit()
@@ -810,3 +822,8 @@ async def get_analytics(
     ]
     return campaign
 
+
+
+@router.get("/{campaign_id}/timeline", response_model=list[CrmCampaignOut], summary="Kampagnenverlauf")
+async def campaign_timeline(campaign_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> list[dict]:
+    return (await get_analytics(campaign_id, tenant_id, db))["timeline"]
