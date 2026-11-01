@@ -133,7 +133,7 @@ export function ActionInputDialog({
             <div key={feld.key} className="space-y-1">
               <FieldRenderer
                 field={feld}
-                value={form.values[feld.key] ?? (feld.type === 'table' ? [] : '')}
+                value={feld.fileContent !== undefined ? form.values[feld.key] : form.values[feld.key] ?? (feld.type === 'table' ? [] : '')}
                 onChange={(wert) => form.setValue(feld.key, wert)}
                 voiceEnabled={false}
               />

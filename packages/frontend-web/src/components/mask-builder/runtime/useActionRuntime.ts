@@ -114,13 +114,23 @@ export function useActionRuntime(
           .replace('{entity_id}', actionDef.responseAdapter ? encodeURIComponent(opts.entityId ?? '') : opts.entityId ?? '')
           .replace('{screen_id}', opts.screenId)
 
+        const expectedVersion = req.expectedVersion ?? opts.entityData?.version
+        if (actionDef.requiresExpectedVersion && (!Number.isInteger(expectedVersion) || Number(expectedVersion) < 1)) {
+          throw new Error('Die aktuelle Version fehlt. Bitte den Vorgang erneut laden.')
+        }
+        let intentKey = req.idempotencyKey
+        if (actionDef.requiresIdempotencyKey) {
+          const signature = JSON.stringify([opts.screenId, opts.entityId, req.actionKey, expectedVersion, req.payload ?? {}, req.auditReason ?? ''])
+          if (intentRef.current?.signature !== signature) intentRef.current = {signature, key: crypto.randomUUID()}
+          intentKey = intentKey ?? intentRef.current.key
+        }
         const body: Record<string, unknown> = {
           ...(actionDef.responseAdapter ? resourceActionPayload(actionDef, req.payload ?? {}) : identityBudgetInput(endpoint, req.payload ?? {})),
-          ...(/^\/api\/v1\/studio\/entities\/studio_[a-z0-9_]+\/[^/]+\/actions\/(update|delete)$/.test(endpoint)
-            && typeof req.expectedVersion === 'number' ? { expected_version: req.expectedVersion } : {}),
+          ...((actionDef.requiresExpectedVersion || /^\/api\/v1\/studio\/entities\/studio_[a-z0-9_]+\/[^/]+\/actions\/(update|delete)$/.test(endpoint))
+            && typeof expectedVersion === 'number' ? { expected_version: expectedVersion } : {}),
           ...(req.mode !== 'execute' ? { _mode: req.mode } : {}),
           ...(req.auditReason ? { _auditReason: req.auditReason } : {}),
-          ...(req.idempotencyKey ? { _idempotencyKey: req.idempotencyKey } : {}),
+          ...(intentKey ? { _idempotencyKey: intentKey } : {}),
         }
 
         const response = await apiClient.request<ActionResult>({

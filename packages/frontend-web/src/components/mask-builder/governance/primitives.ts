@@ -4,6 +4,7 @@ import type { ScreenFieldType } from '../schema'
 export const PRIMITIVE_BY_FIELD_TYPE: Record<ScreenFieldType, string> = {
   text: 'TextField',
   textarea: 'TextField',
+  stringList: 'TextField',
   number: 'NumberField',
   currency: 'NumberField',
   percentage: 'NumberField',

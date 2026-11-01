@@ -48,6 +48,8 @@ def project_rows(rows, table, query):
     for key in query.filter_plan:
         if key not in columns or columns[key].get("filterable") is False:
             raise HTTPException(422, "Filterfeld ist in der Tabelle nicht freigegeben")
+    from app.services.list_presets import apply_list_presets
+    rows = apply_list_presets(rows, table.get("listExperience") or {}, getattr(query, "preset_filters", {}))
     search = _text(query.q).strip()
     selected = [row for row in rows if not search or any(search in _text(row.get(key)) for key in table.get("searchFields", columns))]
     for key, filter in query.filter_plan.items():
@@ -56,9 +58,12 @@ def project_rows(rows, table, query):
         direction = -1 if query.sort_dir == "desc" else 1
         selected = sorted(selected, key=cmp_to_key(lambda a,b: direction * _compare(a.get(query.sort), b.get(query.sort))))
     total = len(selected)
-    start = (query.page - 1) * query.limit
-    result = {"items": selected[start:start+query.limit], "total": total, "page": query.page, "size": query.limit,
-              "pages": math.ceil(total/query.limit) if total else 1, "has_next": start+query.limit < total,
+    if getattr(query, "complete", False) and total > 5000:
+        raise HTTPException(409, "Vollstaendiger Listenabruf ueberschreitet die Obergrenze")
+    page_limit = 5000 if getattr(query, "complete", False) else query.limit
+    start = 0 if getattr(query, "complete", False) else (query.page - 1) * page_limit
+    result = {"items": selected[start:start+page_limit], "total": total, "page": query.page, "size": page_limit,
+              "pages": math.ceil(total/page_limit) if total else 1, "has_next": start+page_limit < total,
               "has_prev": query.page > 1}
     if table.get("listExperience"):
         from app.services.list_experience_metrics import list_metrics, metric_currencies
@@ -89,6 +94,12 @@ def table_definition(definition, query):
         raise HTTPException(409, "Tabelle besitzt keine eindeutige Bindung an diese Quelle")
     table = found[0]
     experience = definition.get("listExperience")
+    if isinstance(experience, dict):
+        from app.services.list_presets import registered_presets
+        for preset in registered_presets(experience):
+            fields = {preset.field, preset.completionField} - {None}
+            if not fields <= {column.get("key") for column in table.get("columns", []) if isinstance(column, dict)}:
+                raise HTTPException(409, "Listenpreset verwendet ein nicht deklariertes Feld")
     if isinstance(experience, dict) and "searchFields" in experience:
         fields = experience["searchFields"]
         columns = {column.get("key") for column in table.get("columns", []) if isinstance(column, dict)}

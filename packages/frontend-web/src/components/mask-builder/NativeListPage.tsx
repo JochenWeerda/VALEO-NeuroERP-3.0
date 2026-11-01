@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/hooks/use-toast'
 import { useScreenDefinition } from '@/lib/api/masks'
 import { apiClient, getAxiosErrorMessage } from '@/lib/api-client'
-import { exportToCSV } from '@/lib/export-utils'
+import { exportToCSV, printTable } from '@/lib/export-utils'
 import { UniversalNativeCockpitPage } from './UniversalNativeCockpitPage'
 import { ActionInputDialog } from './renderers/ActionInputDialog'
 import { useScreenPermissions } from './runtime/screen-permissions'
@@ -37,6 +37,7 @@ function ListKeyboardNavigation({ onNew, surface }: { onNew: () => void; surface
 
 type Aktion = Pick<ScreenActionDefinition, 'key' | 'label'> & {
   permission?: string
+  requiresExpectedVersion?: boolean
   commandEndpoint?: string
   method?: 'POST' | 'PUT' | 'PATCH' | 'DELETE'
   navigationRoute?: string
@@ -128,7 +129,7 @@ export function NativeListPage({ screenId, testId }: { screenId: string; testId?
     try {
       // Jeder Platzhalter aus der Zeile ({entity_id} = id, sonst gleichnamiges Feld), wie bei Navigationsrouten.
       const pfad = zielRoute(aktion.commandEndpoint, row)
-      const versioniert = /^\/api\/v1\/studio\/entities\/studio_[a-z0-9_]+\/[^/]+\/actions\/(update|delete)$/.test(pfad)
+      const versioniert = aktion.requiresExpectedVersion === true || /^\/api\/v1\/studio\/entities\/studio_[a-z0-9_]+\/[^/]+\/actions\/(update|delete)$/.test(pfad)
       if (versioniert && (!Number.isInteger(row.version) || Number(row.version) < 1)) {
         throw new Error('Die angezeigte Version fehlt. Bitte die Liste neu laden.')
       }
@@ -220,6 +221,25 @@ export function NativeListPage({ screenId, testId }: { screenId: string; testId?
     }
     if (aktion.localEffect === 'download' && !aktion.commandEndpoint) {
       void exportieren()
+      return
+    }
+    if (aktion.localEffect === 'print' && !aktion.commandEndpoint) {
+      // Use the same complete filtered result and declared columns as CSV.
+      // A missing list contract must never trigger an unfiltered fallback read.
+      if (!schema?.listExperience) {
+        toast({ title: 'Druck nicht verfügbar', description: 'Für diese Liste fehlt die Druckdatenfreigabe.', variant: 'destructive' })
+        return
+      }
+      const rows = listData.current
+      if (!rows?.length) {
+        toast({ title: 'Keine Daten', description: 'Es gibt nichts zu drucken.', variant: 'destructive' })
+        return
+      }
+      try {
+        printTable(rows, schema.title, schema.listExperience.export.columns)
+      } catch (error) {
+        toast({ title: 'Druck fehlgeschlagen', description: getAxiosErrorMessage(error), variant: 'destructive' })
+      }
       return
     }
     if (aktion.navigationRoute) {

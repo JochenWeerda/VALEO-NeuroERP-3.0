@@ -14,6 +14,7 @@ import { defaultColumnNavigation, FLOORPLAN_RULES, resolveSectionNavigation, ROW
 import { compileProcessRibbon, type ProcessChain } from '../renderers/process-ribbon'
 import { buildRenderPlanCacheKey, type CompileContext } from './compile-context'
 import { globalRenderPlanCache } from './cache'
+import { validTextFileDefinitions } from '../runtime/text-file-contract'
 import { fieldTypeToComponentKind, type RenderActionPlan, type RenderCalendarPlan, type RenderFieldPlan, type RenderPlan, type RenderProcessRibbonPlan, type RenderTabContentPlan, type RenderTabPlan, type RenderTablePlan, type RenderTilePlan, type RenderTwinPlan } from './types'
 
 const DEFAULT_LOOKUP_MIN_CHARS = 2
@@ -48,6 +49,7 @@ function compileField(
     currencyField: field.currencyField,
     rowFields: field.rowFields,
     tableEditing: field.tableEditing,
+    ...(field.fileContent !== undefined ? { fileContent: field.fileContent } : {}),
   }
 }
 
@@ -133,6 +135,8 @@ function filterActionsByPermission(
       dangerLevel: action.dangerLevel,
       requiresConfirmation: action.requiresConfirmation,
       auditReasonRequired: action.auditReasonRequired,
+      requiresExpectedVersion: action.requiresExpectedVersion,
+      requiresIdempotencyKey: action.requiresIdempotencyKey,
       humanApprovalRequired: action.humanApprovalRequired,
       zone: action.zone ?? 'header',
       keyboardShortcut: action.keyboardShortcut,
@@ -240,6 +244,7 @@ export function compileRenderPlan(
   schema: ScreenDefinition,
   context: CompileContext,
 ): RenderPlan {
+  if (!validTextFileDefinitions(schema)) throw new Error('Invalid text file content contract')
   if (schema.listExperience !== undefined && validateScreenDefinition(schema).includes('listExperience is invalid')) {
     throw new Error('Invalid declarative list experience')
   }

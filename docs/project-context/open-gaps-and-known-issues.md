@@ -13,6 +13,13 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 ## UIX-RUNTIME: Migrationsnachweise und Fachparitaet (2026-10-22)
 
+**CRM-Aktivitaeten 2026-10-29:** Zentrale Listenpresets/Vollabruf vorbereitet und
+gezielt getestet. Noch keine Listen-Fachfreigabe: Collection ohne/mit Slash
+verwendet unterschiedliche Modelle; Detaildefinition und Anlagepayload passen
+nicht zum zuerst registrierten Proxyweg. Erst Quell-/Detail-/Anlageparitaet
+schliessen, dann Migration und reale Abnahme. [Nachweis](../quality-assurance/studio-list-presets-20261029.md).
+
+
 **Aktueller Gesamtartefaktstand 2026-10-29:** Gate A/B/C851/851,
 E804/851(47 Runtime-Punkte),842 native
 Katalogeintraege und5 strukturell freigabefaehige Draft-Projektionen.
@@ -2229,3 +2236,7 @@ Fachkatalog, kataloggefuehrter Dialog, optionale kontingentierte Modellinterpret
 Der implizite Zwei-Prozent-Standard ist entfernt. Persistenter append-only Versionsspeicher, getrennte menschliche Genehmigung, Messprovenienz, Berechnungsnachweis und finanzielle Freigabebindung sind im Produktionsrouter integriert. Fehlende, manipulierte, widerrufene oder veraltete Nachweise sperren; Altbetraege umgehen die Grenze nicht. Nichtfinanzielle Warenannahme bleibt getrennt. 31 Backend-, 47 Frontend- und vier reale SQL-Prozessfaelle bestanden; lokale additive Migration integriert.
 
 Offen bleiben finanzielle Browserabnahme, begrenzter Modellaufruf, Liefer-/CI-Nachlauf und vollstaendige operative Abnahme. Hash/Formeltext oder eine vom Aufrufer gelieferte Behauptung sind kein Genehmigungsnachweis. Slice HARVEST-RULE-STORE-20261015 bleibt in Arbeit. Nicht unterstuetzte alternative Abzugsmodelle bleiben bewusst deaktiviert. [Standard](../architecture/harvest-deduction-contract-standard.md), [aktueller QA-Stand](../quality-assurance/harvest-rule-store-20261015.md).
+
+## CRM-ACTIVITY-CANONICAL — Integration und Rollout (29.10.2026)
+
+Konkurrierende aktive Aktivitaets-CRUD-Wege sind durch den versionierten Domaincommand ersetzt; native Liste, Detail und Neuanlage nutzen denselben Vertrag. Die additive Migration ist auf dem gemeinsamen Pruefstand mit Rollback nachgewiesen, noch nicht auf dem laufenden Anwendungsschema angewendet. RLS bleibt eine explizite Service-Ausnahme. Dormantes Daily-Report-Modul, Kontakt-/Farm-Neuanlage und authentifizierte Browser-/Rolloutabnahme bleiben gesonderte Arbeiten. Der gesetzliche DSGVO-Erasureweg bleibt eine dokumentierte Ausnahme; sein Aktivitaetsfilter ist jetzt strikt mandantengebunden. [QA mit Grenzen](../quality-assurance/crm-activity-canonical-20261029.md).

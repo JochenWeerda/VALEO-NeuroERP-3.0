@@ -15,7 +15,7 @@
       {
         "key": "list",
         "endpoint": "/api/v1/labor/proben",
-        "pageSize": 500
+        "pageSize": 100
       }
     ],
     "actions": [
@@ -116,7 +116,7 @@
       {
         "key": "list",
         "endpoint": "/api/v1/agrar/ernte",
-        "pageSize": 500
+        "pageSize": 100
       }
     ],
     "actions": [

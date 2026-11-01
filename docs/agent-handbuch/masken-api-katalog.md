@@ -304,7 +304,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `controlling/widget-verwaltung` | Widget-Verwaltung | controlling | niedrig | — | `GET /api/v1/masks/controlling/widget-verwaltung/agent-contract` |
 | `crm/activities` | Aktivitaeten | crm | niedrig | — | `GET /api/v1/masks/crm/activities/agent-contract` |
 | `crm/activity-detail` | Aktivitaet | crm | niedrig | — | `GET /api/v1/masks/crm/activity-detail/agent-contract` |
-| `crm/aktivitaet` | Aktivitaet | crm | niedrig | — | `GET /api/v1/masks/crm/aktivitaet/agent-contract` |
+| `crm/aktivitaet` | Aktivitaet | crm | hoch | — | `GET /api/v1/masks/crm/aktivitaet/agent-contract` |
 | `crm/aktivitaeten-liste` | Aktivitaeten | crm | niedrig | — | `GET /api/v1/masks/crm/aktivitaeten-liste/agent-contract` |
 | `crm/angebot-erstellen` | Angebot erstellen | crm | niedrig | — | `GET /api/v1/masks/crm/angebot-erstellen/agent-contract` |
 | `crm/anruf-protokoll` | Anruf-Protokoll | crm | niedrig | — | `GET /api/v1/masks/crm/anruf-protokoll/agent-contract` |
@@ -8357,7 +8357,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -8395,7 +8397,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -8413,7 +8417,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ### `crm/aktivitaet` — Aktivitaet
 
-**Zweck:** Aktivitaetsdetail im CRM.
+**Zweck:** Aktivitaeten aus derselben kanonischen Quelle lesen und versioniert bearbeiten.
 
 | | |
 |---|---|
@@ -8433,7 +8437,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -8444,13 +8450,14 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `edit` | Bearbeiten | safe | nein | `—` |
+| `update` | Bearbeiten | safe | nein | `/api/v1/crm/activities/{entity_id}/actions/update` |
+| `delete` | Aktivitaet loeschen | high | ja | `/api/v1/crm/activities/{entity_id}/actions/delete` |
 
 ---
 
 ### `crm/aktivitaeten-liste` — Aktivitaeten
 
-**Zweck:** Aktivitaeten: Eintraege finden und Details oeffnen.
+**Zweck:** Aktivitaeten vollstaendig suchen, filtern, auswerten und versioniert bearbeiten.
 
 | | |
 |---|---|
@@ -8470,18 +8477,21 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
 - Welche offenen Aktivitaeten?
-- Zeige aktuelle Aktivitaeten.
+- Zeige meine Termine dieser Woche.
 
 **Actions:**
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
+| `neu` | Neue Aktivitaet | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
 | `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
@@ -8508,7 +8518,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -8546,7 +8558,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -8585,7 +8599,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -8623,7 +8639,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -8654,7 +8672,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -8692,7 +8712,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -8730,7 +8752,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -8767,7 +8791,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -8806,7 +8832,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -8844,7 +8872,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -8881,7 +8911,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -8919,7 +8951,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -8958,7 +8992,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -8996,7 +9032,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -9033,7 +9071,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -9070,7 +9110,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -9108,7 +9150,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -9162,7 +9206,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -9205,7 +9251,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -9243,7 +9291,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -9281,7 +9331,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -9319,7 +9371,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -9358,7 +9412,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -9396,7 +9452,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -9433,7 +9491,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -9471,7 +9531,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -9509,7 +9571,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -9547,7 +9611,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -9585,7 +9651,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -9623,7 +9691,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -9662,7 +9732,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -9701,7 +9773,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -9739,7 +9813,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -9770,7 +9846,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -9808,7 +9886,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -9845,7 +9925,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -9882,7 +9964,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -9921,7 +10005,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -9959,7 +10045,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -10000,7 +10088,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -10042,7 +10132,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -10081,7 +10173,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -10118,7 +10212,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -10158,7 +10254,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -10198,7 +10296,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -10242,7 +10342,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -10284,7 +10386,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -10321,7 +10425,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -10360,7 +10466,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -10397,7 +10505,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -10435,7 +10545,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
@@ -10473,7 +10585,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
 - `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**

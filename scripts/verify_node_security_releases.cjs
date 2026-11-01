@@ -137,3 +137,42 @@ test('translation query URLs reject language parameter injection before any requ
   assert.equal(await read('de'), null);
   assert.deepEqual(requests, ['/locales/resources.json?lng=de&ns=common']);
 });
+
+test('malformed percent runs are decoded within a bounded subprocess', () => {
+  const { spawnSync } = require('node:child_process');
+  const entry = patched.resolve('decode-uri-component');
+  const code = `import(${JSON.stringify(require('node:url').pathToFileURL(entry).href)}).then(({default: decode}) => {
+    let input = '';
+    for (let i = 0; i < 32000; i++) input += '%' + (i >> 8).toString(16).padStart(2, '0') + '%' + (i & 255).toString(16).padStart(2, '0') + 'x';
+    input += '%zz';
+    if (!decode(input).endsWith('%zz') || decode('hello%20world') !== 'hello world') process.exit(2);
+  });`;
+  const result = spawnSync(process.execPath, ['-e', code], { timeout: 5000, encoding: 'utf8' });
+  assert.equal(result.error, undefined, result.error?.message);
+  assert.equal(result.status, 0, result.stderr);
+});
+
+test('Vite denies sensitive files even with raw and inline query parameters', async () => {
+  const fs = require('node:fs');
+  const os = require('node:os');
+  const { pathToFileURL } = require('node:url');
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'valeo-vite-deny-'));
+  fs.writeFileSync(path.join(root, '.env'), 'VALEO_PRIVATE_MARKER=secret');
+  fs.writeFileSync(path.join(root, 'public.txt'), 'public marker');
+  let server;
+  try {
+    const { createServer } = await import(pathToFileURL(patched.resolve('vite')).href);
+    server = await createServer({ root, configFile: false, server: { host: '127.0.0.1', port: 0, fs: { allow: [root] } }, logLevel: 'silent' });
+    await server.listen(0);
+    const port = server.httpServer.address().port;
+    for (const query of ['?raw', '?import&raw', '?import&url&inline']) {
+      const response = await fetch(`http://127.0.0.1:${port}/.env${query}`);
+      assert.notEqual(response.status, 200, query);
+      assert.ok(!(await response.text()).includes('VALEO_PRIVATE_MARKER'));
+    }
+    assert.equal(await (await fetch(`http://127.0.0.1:${port}/public.txt`)).text(), 'public marker');
+  } finally {
+    if (server) await server.close();
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
