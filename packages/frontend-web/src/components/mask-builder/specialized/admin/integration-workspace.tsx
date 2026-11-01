@@ -694,7 +694,8 @@ export function AgentenIntegrationWorkspace({
   const agentMobileOverview = agentMobileOverviewQuery.data
   const agentPluginBoundary = agentPluginBoundaryQuery.data
   const agentControlCenter = agentControlCenterQuery.data
-  const sampleTenant = tenantId!
+  // Only shown once identityReady; the example never falls back to a fixed tenant.
+  const sampleTenant = tenantId ?? ''
 
   const commandSources: AgentUxSource[] = [
     {

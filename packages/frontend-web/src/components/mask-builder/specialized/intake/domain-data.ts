@@ -20,7 +20,7 @@ export function useDomainQueue() {
 export function useDomainQueueEntry(id: string | undefined) {
   const identity = useDomainIdentity()
   return useQuery({ queryKey: [...inventoryExtraKeys.warteschlange(), identity, id], enabled: Boolean(id && identity.tenantId && identity.actor),
-    queryFn: async () => (await apiClient.get<LKWEintrag>(`/api/v1/annahme/warteschlange/${encodeURIComponent(id!)}`)).data })
+    queryFn: async () => (await apiClient.get<LKWEintrag>(`/api/v1/annahme/warteschlange/${encodeURIComponent(id ?? '')}`)).data })
 }
 export function useDomainTickets() {
   const identity = useDomainIdentity()

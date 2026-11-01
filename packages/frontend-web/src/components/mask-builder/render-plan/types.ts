@@ -151,7 +151,6 @@ export interface RenderTabContentPlan {
 }
 
 export interface RenderFieldPlan {
-  fileContent?: ScreenFieldDefinition['fileContent']
   currencyField?: string
   key: string
   label: string

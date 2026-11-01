@@ -31,7 +31,7 @@ beforeEach(() => {
     actions: [
       { key: 'print', label: 'Drucken', localEffect: 'print' },
       { key: 'import_csv', label: 'CSV importieren', permission: 'sales.offer.import', commandEndpoint: '/api/v1/sales/offers/actions/import-csv', method: 'POST', requiresConfirmation: true,
-        inputFields: [{key:'csv_content',label:'CSV-Datei',type:'file',required:true,fileContent:{encoding:'utf-8',accept:'.csv',maxBytes:1048576}}] },
+        inputFields: [{key:'csv_content',label:'CSV-Datei',type:'file',required:true,fileContent:{encoding:'utf-8',accept:['.csv'],maxBytes:1048576}}] },
     ],
   } as ScreenDefinition
 })
@@ -58,7 +58,7 @@ it('reads CSV contents, requires confirmation and preserves the same retry key a
   const file = new File([csv], 'angebote.csv', {type:'text/csv'})
   Object.defineProperty(file, 'arrayBuffer', {value: async () => new TextEncoder().encode(csv).buffer})
   fireEvent.change(screen.getByLabelText('CSV-Datei'), {target:{files:[file]}})
-  await waitFor(() => expect(screen.getByLabelText('Dateivorschau')).toHaveTextContent('ANG-7'))
+  await waitFor(() => expect(screen.getByText('Textdatei geladen.')).toBeInTheDocument())
   fireEvent.click(screen.getByRole('button', {name:'Weiter'}))
   expect(state.request).not.toHaveBeenCalled()
   fireEvent.click(screen.getByRole('button', {name:'CSV importieren'}))

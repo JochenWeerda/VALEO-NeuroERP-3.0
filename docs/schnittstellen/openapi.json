@@ -94,6 +94,22 @@
         "title": "APInvoiceCockpitReadModel",
         "type": "object"
       },
+      "APInvoiceTaxPreviewIn": {
+        "properties": {
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/DocLine"
+            },
+            "title": "Lines",
+            "type": "array"
+          }
+        },
+        "required": [
+          "lines"
+        ],
+        "title": "APInvoiceTaxPreviewIn",
+        "type": "object"
+      },
       "AbgleichPayload": {
         "properties": {
           "bestellung_id": {
@@ -37617,6 +37633,7 @@
         "type": "object"
       },
       "ConsentUpdate": {
+        "additionalProperties": false,
         "properties": {
           "expires_at": {
             "anyOf": [
@@ -49380,9 +49397,16 @@
             "title": "Tax Number"
           },
           "tenant_id": {
-            "description": "Tenant ID",
-            "title": "Tenant Id",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Deprecated: must match the verified tenant",
+            "title": "Tenant Id"
           },
           "vat_id": {
             "anyOf": [
@@ -49403,8 +49427,7 @@
           "company_name",
           "street",
           "postal_code",
-          "city",
-          "tenant_id"
+          "city"
         ],
         "title": "DebtorCreate",
         "type": "object"
@@ -50242,6 +50265,11 @@
             ],
             "title": "Delivery Time"
           },
+          "has_sales_order": {
+            "default": false,
+            "title": "Has Sales Order",
+            "type": "boolean"
+          },
           "id": {
             "title": "Id",
             "type": "string"
@@ -50300,6 +50328,17 @@
             },
             "title": "Positionen",
             "type": "array"
+          },
+          "quantity_summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quantity Summary"
           },
           "reference_invoice_number": {
             "anyOf": [
@@ -77662,7 +77701,26 @@
         "type": "object"
       },
       "GdprRequestCreate": {
+        "additionalProperties": false,
         "properties": {
+          "data_scope": {
+            "const": "LOCAL_CRM_SUBJECT",
+            "title": "Data Scope",
+            "type": "string"
+          },
+          "idempotency_key": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Idempotency Key"
+          },
           "notes": {
             "anyOf": [
               {
@@ -77681,16 +77739,30 @@
           },
           "subject_email": {
             "description": "E-mail of the data subject",
+            "maxLength": 255,
+            "minLength": 3,
             "title": "Subject Email",
             "type": "string"
           },
           "subject_id": {
             "description": "ID of the data subject",
+            "maxLength": 36,
+            "minLength": 1,
             "title": "Subject Id",
+            "type": "string"
+          },
+          "subject_type": {
+            "enum": [
+              "CUSTOMER",
+              "LEAD"
+            ],
+            "title": "Subject Type",
             "type": "string"
           }
         },
         "required": [
+          "subject_type",
+          "data_scope",
           "subject_id",
           "subject_email",
           "request_type"
@@ -77728,6 +77800,17 @@
             ],
             "title": "Created By"
           },
+          "data_scope": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Scope"
+          },
           "id": {
             "title": "Id",
             "type": "string"
@@ -77742,6 +77825,18 @@
               }
             ],
             "title": "Notes"
+          },
+          "processing_result": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Processing Result"
           },
           "rejection_reason": {
             "anyOf": [
@@ -77770,6 +77865,17 @@
             "title": "Subject Id",
             "type": "string"
           },
+          "subject_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Type"
+          },
           "tenant_id": {
             "title": "Tenant Id",
             "type": "string"
@@ -77797,6 +77903,11 @@
               }
             ],
             "title": "Verified At"
+          },
+          "version": {
+            "default": 1,
+            "title": "Version",
+            "type": "integer"
           }
         },
         "required": [
@@ -89747,6 +89858,22 @@
           "total"
         ],
         "title": "InvoicePositionTabOut",
+        "type": "object"
+      },
+      "InvoiceTaxPreviewIn": {
+        "properties": {
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/DocLine"
+            },
+            "title": "Lines",
+            "type": "array"
+          }
+        },
+        "required": [
+          "lines"
+        ],
+        "title": "InvoiceTaxPreviewIn",
         "type": "object"
       },
       "InvoiceTaxRowOut": {
@@ -102918,6 +103045,55 @@
         "title": "LogCreateIn",
         "type": "object"
       },
+      "LoginBody": {
+        "description": "Login-Request Body",
+        "properties": {
+          "role": {
+            "default": "manager",
+            "title": "Role",
+            "type": "string"
+          },
+          "username": {
+            "title": "Username",
+            "type": "string"
+          }
+        },
+        "required": [
+          "username"
+        ],
+        "title": "LoginBody",
+        "type": "object"
+      },
+      "LoginResponse": {
+        "description": "Login-Response",
+        "properties": {
+          "access_token": {
+            "title": "Access Token",
+            "type": "string"
+          },
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "token_type": {
+            "title": "Token Type",
+            "type": "string"
+          },
+          "user": {
+            "additionalProperties": true,
+            "title": "User",
+            "type": "object"
+          }
+        },
+        "required": [
+          "ok",
+          "access_token",
+          "token_type",
+          "user"
+        ],
+        "title": "LoginResponse",
+        "type": "object"
+      },
       "Logistics": {
         "properties": {
           "default_route_id": {
@@ -108259,6 +108435,53 @@
         "title": "MeldungTransitionRequest",
         "type": "object"
       },
+      "MemberInput": {
+        "additionalProperties": false,
+        "properties": {
+          "audit_reason": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Audit Reason"
+          },
+          "expected_version": {
+            "anyOf": [
+              {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Version"
+          },
+          "idempotency_key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "partner_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Partner Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "idempotency_key",
+          "partner_id"
+        ],
+        "title": "MemberInput",
+        "type": "object"
+      },
       "MemoItem": {
         "description": "Memo Position",
         "properties": {
@@ -111418,6 +111641,46 @@
           }
         },
         "title": "MovementOut",
+        "type": "object"
+      },
+      "Mutation": {
+        "additionalProperties": false,
+        "properties": {
+          "audit_reason": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Audit Reason"
+          },
+          "expected_version": {
+            "anyOf": [
+              {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Version"
+          },
+          "idempotency_key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Idempotency Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "idempotency_key"
+        ],
+        "title": "Mutation",
         "type": "object"
       },
       "NVECreate": {
@@ -130974,6 +131237,62 @@
         "title": "ProcessObservationReadModel",
         "type": "object"
       },
+      "ProcessPayload": {
+        "additionalProperties": false,
+        "properties": {
+          "audit_reason": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Audit Reason"
+          },
+          "data_scope": {
+            "const": "LOCAL_CRM_SUBJECT",
+            "title": "Data Scope",
+            "type": "string"
+          },
+          "expected_version": {
+            "minimum": 1.0,
+            "title": "Expected Version",
+            "type": "integer"
+          },
+          "idempotency_key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 1000,
+            "minLength": 3,
+            "title": "Reason",
+            "type": "string"
+          },
+          "subject_type": {
+            "enum": [
+              "CUSTOMER",
+              "LEAD"
+            ],
+            "title": "Subject Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "subject_type",
+          "data_scope",
+          "reason",
+          "expected_version",
+          "idempotency_key"
+        ],
+        "title": "ProcessPayload",
+        "type": "object"
+      },
       "ProcessQueueIn": {
         "properties": {
           "reason": {
@@ -147727,6 +148046,51 @@
         "title": "SalesOfferCreate",
         "type": "object"
       },
+      "SalesOfferImportCommand": {
+        "additionalProperties": false,
+        "properties": {
+          "_auditReason": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Auditreason"
+          },
+          "_idempotencyKey": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Idempotencykey",
+            "type": "string"
+          },
+          "_mode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mode"
+          },
+          "csv_content": {
+            "minLength": 1,
+            "title": "Csv Content",
+            "type": "string"
+          }
+        },
+        "required": [
+          "csv_content",
+          "_idempotencyKey"
+        ],
+        "title": "SalesOfferImportCommand",
+        "type": "object"
+      },
       "SalesOfferItemInput": {
         "properties": {
           "article_number": {
@@ -151352,35 +151716,48 @@
         "title": "SeedOrderIn",
         "type": "object"
       },
-      "Segment": {
+      "SegmentInput": {
+        "additionalProperties": false,
         "properties": {
-          "created_at": {
+          "audit_reason": {
             "anyOf": [
               {
-                "format": "date-time",
+                "maxLength": 1000,
                 "type": "string"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Created At"
+            "title": "Audit Reason"
           },
           "criteria": {
+            "additionalProperties": true,
+            "title": "Criteria",
+            "type": "object"
+          },
+          "criteria_rules": {
             "anyOf": [
               {
-                "additionalProperties": true,
-                "type": "object"
+                "items": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                },
+                "maxItems": 20,
+                "type": "array"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Criteria"
+            "title": "Criteria Rules"
           },
           "description": {
             "anyOf": [
               {
+                "maxLength": 10000,
                 "type": "string"
               },
               {
@@ -151389,14 +151766,23 @@
             ],
             "title": "Description"
           },
-          "id": {
-            "title": "Id",
-            "type": "string"
+          "expected_version": {
+            "anyOf": [
+              {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Version"
           },
-          "member_count": {
-            "default": 0,
-            "title": "Member Count",
-            "type": "integer"
+          "idempotency_key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Idempotency Key",
+            "type": "string"
           },
           "name": {
             "maxLength": 200,
@@ -151406,143 +151792,36 @@
           },
           "segment_type": {
             "default": "static",
-            "title": "Segment Type",
-            "type": "string"
-          },
-          "tenant_id": {
-            "title": "Tenant Id",
-            "type": "string"
-          },
-          "updated_at": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
+            "enum": [
+              "static",
+              "dynamic"
             ],
-            "title": "Updated At"
-          }
-        },
-        "required": [
-          "name",
-          "id",
-          "tenant_id"
-        ],
-        "title": "Segment",
-        "type": "object"
-      },
-      "SegmentCalculateIn": {
-        "additionalProperties": true,
-        "properties": {
-          "force_full": {
-            "default": false,
-            "title": "Force Full",
-            "type": "boolean"
-          }
-        },
-        "title": "SegmentCalculateIn",
-        "type": "object"
-      },
-      "SegmentCreate": {
-        "properties": {
-          "criteria": {
-            "anyOf": [
-              {
-                "additionalProperties": true,
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Criteria"
-          },
-          "description": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Description"
-          },
-          "name": {
-            "maxLength": 200,
-            "minLength": 1,
-            "title": "Name",
-            "type": "string"
-          },
-          "segment_type": {
-            "default": "static",
             "title": "Segment Type",
             "type": "string"
           }
         },
         "required": [
+          "idempotency_key",
           "name"
         ],
-        "title": "SegmentCreate",
-        "type": "object"
-      },
-      "SegmentListOut": {
-        "properties": {
-          "items": {
-            "items": {
-              "$ref": "#/components/schemas/SegmentOut"
-            },
-            "title": "Items",
-            "type": "array"
-          },
-          "total": {
-            "title": "Total",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "items",
-          "total"
-        ],
-        "title": "SegmentListOut",
-        "type": "object"
-      },
-      "SegmentOut": {
-        "additionalProperties": true,
-        "description": "Kundensegment — freie Zusatzfelder erlaubt (Stub-Datenmodell).",
-        "properties": {
-          "id": {
-            "title": "Id",
-            "type": "string"
-          },
-          "name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Name"
-          },
-          "tenant_id": {
-            "title": "Tenant Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "tenant_id"
-        ],
-        "title": "SegmentOut",
+        "title": "SegmentInput",
         "type": "object"
       },
       "SegmentUpdate": {
+        "additionalProperties": false,
         "properties": {
+          "audit_reason": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Audit Reason"
+          },
           "criteria": {
             "anyOf": [
               {
@@ -151555,9 +151834,28 @@
             ],
             "title": "Criteria"
           },
+          "criteria_rules": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                },
+                "maxItems": 20,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Criteria Rules"
+          },
           "description": {
             "anyOf": [
               {
+                "maxLength": 10000,
                 "type": "string"
               },
               {
@@ -151566,9 +151864,29 @@
             ],
             "title": "Description"
           },
+          "expected_version": {
+            "anyOf": [
+              {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Version"
+          },
+          "idempotency_key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Idempotency Key",
+            "type": "string"
+          },
           "name": {
             "anyOf": [
               {
+                "maxLength": 200,
+                "minLength": 1,
                 "type": "string"
               },
               {
@@ -151580,6 +151898,10 @@
           "segment_type": {
             "anyOf": [
               {
+                "enum": [
+                  "static",
+                  "dynamic"
+                ],
                 "type": "string"
               },
               {
@@ -151589,6 +151911,9 @@
             "title": "Segment Type"
           }
         },
+        "required": [
+          "idempotency_key"
+        ],
         "title": "SegmentUpdate",
         "type": "object"
       },
@@ -172669,11 +172994,284 @@
         "title": "VorschlagSaveRequest",
         "type": "object"
       },
+      "WaageCalibrationUpdate": {
+        "additionalProperties": false,
+        "properties": {
+          "eichamt": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Eichamt"
+          },
+          "letztes_eichdatum": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Letztes Eichdatum"
+          },
+          "naechste_eichfaelligkeit": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Naechste Eichfaelligkeit"
+          },
+          "zertifikat_nr": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Zertifikat Nr"
+          }
+        },
+        "title": "WaageCalibrationUpdate",
+        "type": "object"
+      },
+      "WaageCreate": {
+        "additionalProperties": false,
+        "properties": {
+          "hersteller": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hersteller"
+          },
+          "installiert_am": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Installiert Am"
+          },
+          "letzte_eichung": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Letzte Eichung"
+          },
+          "max_kapazitaet": {
+            "exclusiveMinimum": 0.0,
+            "title": "Max Kapazitaet",
+            "type": "number"
+          },
+          "naechste_eichung": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Naechste Eichung"
+          },
+          "seriennummer": {
+            "anyOf": [
+              {
+                "maxLength": 50,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seriennummer"
+          },
+          "standort": {
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Standort",
+            "type": "string"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "maxLength": 20,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "typ": {
+            "maxLength": 50,
+            "minLength": 1,
+            "title": "Typ",
+            "type": "string"
+          }
+        },
+        "required": [
+          "standort",
+          "typ",
+          "max_kapazitaet"
+        ],
+        "title": "WaageCreate",
+        "type": "object"
+      },
       "WaageOut": {
         "additionalProperties": true,
         "description": "Typed response schema for WaageOut endpoints (extra fields forwarded).",
         "properties": {},
         "title": "WaageOut",
+        "type": "object"
+      },
+      "WaageUpdate": {
+        "additionalProperties": false,
+        "properties": {
+          "hersteller": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hersteller"
+          },
+          "installiert_am": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Installiert Am"
+          },
+          "letzte_eichung": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Letzte Eichung"
+          },
+          "max_kapazitaet": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Kapazitaet"
+          },
+          "naechste_eichung": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Naechste Eichung"
+          },
+          "seriennummer": {
+            "anyOf": [
+              {
+                "maxLength": 50,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seriennummer"
+          },
+          "standort": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Standort"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "maxLength": 20,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "typ": {
+            "anyOf": [
+              {
+                "maxLength": 50,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Typ"
+          }
+        },
+        "title": "WaageUpdate",
         "type": "object"
       },
       "WaageVorlageIn": {
@@ -182916,6 +183514,7 @@
         "type": "object"
       },
       "app__api__v1__endpoints__crm_consents__ConsentCreate": {
+        "additionalProperties": false,
         "properties": {
           "channel": {
             "minLength": 1,
@@ -203914,18 +204513,6 @@
     "/api/v1/agent/integrations/providers/superglue/admin-overview": {
       "get": {
         "operationId": "get_superglue_admin_overview_api_v1_agent_integrations_providers_superglue_admin_overview_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "default",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -203936,16 +204523,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -203994,18 +204571,6 @@
     "/api/v1/agent/integrations/providers/superglue/domain-rollouts": {
       "get": {
         "operationId": "get_superglue_domain_rollouts_api_v1_agent_integrations_providers_superglue_domain_rollouts_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "default",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -204016,16 +204581,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -204052,16 +204607,6 @@
             "required": true,
             "schema": {
               "title": "Domain Key",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "default",
-              "title": "Tenant Id",
               "type": "string"
             }
           }
@@ -204205,18 +204750,6 @@
     "/api/v1/agent/integrations/providers/superglue/live-readiness": {
       "get": {
         "operationId": "get_superglue_live_readiness_api_v1_agent_integrations_providers_superglue_live_readiness_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "default",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -204227,16 +204760,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -204256,24 +204779,6 @@
     "/api/v1/agent/integrations/providers/superglue/monitoring": {
       "get": {
         "operationId": "get_superglue_monitoring_api_v1_agent_integrations_providers_superglue_monitoring_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -204284,16 +204789,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -204313,18 +204808,6 @@
     "/api/v1/agent/integrations/providers/superglue/onboarding-pack": {
       "get": {
         "operationId": "get_superglue_onboarding_pack_api_v1_agent_integrations_providers_superglue_onboarding_pack_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "default",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -204335,16 +204818,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -257034,6 +257507,59 @@
         ]
       }
     },
+    "/api/v1/crm/campaigns/{campaign_id}/timeline": {
+      "get": {
+        "operationId": "campaign_timeline_api_v1_crm_campaigns__campaign_id__timeline_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "campaign_id",
+            "required": true,
+            "schema": {
+              "title": "Campaign Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CrmCampaignOut"
+                  },
+                  "title": "Response Campaign Timeline Api V1 Crm Campaigns  Campaign Id  Timeline Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Kampagnenverlauf",
+        "tags": [
+          "crm",
+          "campaigns",
+          "marketing"
+        ]
+      }
+    },
     "/api/v1/crm/cases/": {
       "get": {
         "description": "List support cases from crm-service with pagination.",
@@ -268761,22 +269287,71 @@
     },
     "/api/v1/crm/segments": {
       "get": {
-        "description": "List all segments for a tenant.",
         "operationId": "list_segments_api_v1_crm_segments_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "search",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 255,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Search"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/Segment"
-                  },
+                  "additionalProperties": true,
                   "title": "Response List Segments Api V1 Crm Segments Get",
-                  "type": "array"
+                  "type": "object"
                 }
               }
             },
             "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "security": [
@@ -268786,18 +269361,19 @@
         ],
         "summary": "List Segments",
         "tags": [
-          "CRM",
-          "CRM"
+          "crm",
+          "segments",
+          "crm",
+          "segments"
         ]
       },
       "post": {
-        "description": "Create a new marketing segment.",
         "operationId": "create_segment_api_v1_crm_segments_post",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/SegmentCreate"
+                "$ref": "#/components/schemas/SegmentInput"
               }
             }
           },
@@ -268808,7 +269384,9 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Segment"
+                  "additionalProperties": true,
+                  "title": "Response Create Segment Api V1 Crm Segments Post",
+                  "type": "object"
                 }
               }
             },
@@ -268832,28 +269410,48 @@
         ],
         "summary": "Create Segment",
         "tags": [
-          "CRM",
-          "CRM"
+          "crm",
+          "segments",
+          "crm",
+          "segments"
         ]
       }
     },
-    "/api/v1/crm/segments/{seg_id}": {
+    "/api/v1/crm/segments/{segment_id}": {
       "delete": {
-        "description": "Delete segment.",
-        "operationId": "delete_segment_api_v1_crm_segments__seg_id__delete",
+        "operationId": "delete_segment_api_v1_crm_segments__segment_id__delete",
         "parameters": [
           {
             "in": "path",
-            "name": "seg_id",
+            "name": "segment_id",
             "required": true,
             "schema": {
-              "title": "Seg Id",
+              "title": "Segment Id",
               "type": "string"
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Mutation"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
-          "204": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Delete Segment Api V1 Crm Segments  Segment Id  Delete",
+                  "type": "object"
+                }
+              }
+            },
             "description": "Successful Response"
           },
           "422": {
@@ -268873,316 +269471,6 @@
           }
         ],
         "summary": "Delete Segment",
-        "tags": [
-          "CRM",
-          "CRM"
-        ]
-      },
-      "get": {
-        "description": "Get segment by ID.",
-        "operationId": "get_segment_api_v1_crm_segments__seg_id__get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "seg_id",
-            "required": true,
-            "schema": {
-              "title": "Seg Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Segment"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Get Segment",
-        "tags": [
-          "CRM",
-          "CRM"
-        ]
-      },
-      "put": {
-        "description": "Update segment.",
-        "operationId": "update_segment_api_v1_crm_segments__seg_id__put",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "seg_id",
-            "required": true,
-            "schema": {
-              "title": "Seg Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SegmentUpdate"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Segment"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Update Segment",
-        "tags": [
-          "CRM",
-          "CRM"
-        ]
-      }
-    },
-    "/api/v1/crm/segments/{seg_id}/members": {
-      "get": {
-        "description": "List members of a segment.",
-        "operationId": "list_segment_members_api_v1_crm_segments__seg_id__members_get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "seg_id",
-            "required": true,
-            "schema": {
-              "title": "Seg Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "additionalProperties": true,
-                    "type": "object"
-                  },
-                  "title": "Response List Segment Members Api V1 Crm Segments  Seg Id  Members Get",
-                  "type": "array"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "List Segment Members",
-        "tags": [
-          "CRM",
-          "CRM"
-        ]
-      },
-      "post": {
-        "description": "Add a partner to a segment.",
-        "operationId": "add_segment_member_api_v1_crm_segments__seg_id__members_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "seg_id",
-            "required": true,
-            "schema": {
-              "title": "Seg Id",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Partner ID to add",
-            "in": "query",
-            "name": "partner_id",
-            "required": true,
-            "schema": {
-              "description": "Partner ID to add",
-              "title": "Partner Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Add Segment Member Api V1 Crm Segments  Seg Id  Members Post",
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Add Segment Member",
-        "tags": [
-          "CRM",
-          "CRM"
-        ]
-      }
-    },
-    "/api/v1/crm/segments/{seg_id}/recalculate": {
-      "post": {
-        "description": "MKT-SEG-02: Recalculate dynamic segment members from criteria.",
-        "operationId": "recalculate_segment_api_v1_crm_segments__seg_id__recalculate_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "seg_id",
-            "required": true,
-            "schema": {
-              "title": "Seg Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Recalculate Segment Api V1 Crm Segments  Seg Id  Recalculate Post",
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Recalculate Segment",
-        "tags": [
-          "CRM",
-          "CRM"
-        ]
-      }
-    },
-    "/api/v1/crm/segments/{segment_id}": {
-      "delete": {
-        "operationId": "delete_segment_api_v1_crm_segments__segment_id__delete",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "segment_id",
-            "required": true,
-            "schema": {
-              "title": "Segment Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Kundensegment löschen",
         "tags": [
           "crm",
           "segments",
@@ -269208,7 +269496,9 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/SegmentOut"
+                  "additionalProperties": true,
+                  "title": "Response Get Segment Api V1 Crm Segments  Segment Id  Get",
+                  "type": "object"
                 }
               }
             },
@@ -269230,7 +269520,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Kundensegment abrufen",
+        "summary": "Get Segment",
         "tags": [
           "crm",
           "segments",
@@ -269255,20 +269545,20 @@
           "content": {
             "application/json": {
               "schema": {
-                "additionalProperties": true,
-                "default": {},
-                "title": "Body",
-                "type": "object"
+                "$ref": "#/components/schemas/SegmentUpdate"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/SegmentOut"
+                  "additionalProperties": true,
+                  "title": "Response Update Segment Api V1 Crm Segments  Segment Id  Put",
+                  "type": "object"
                 }
               }
             },
@@ -269290,7 +269580,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Kundensegment aktualisieren",
+        "summary": "Update Segment",
         "tags": [
           "crm",
           "segments",
@@ -269301,7 +269591,7 @@
     },
     "/api/v1/crm/segments/{segment_id}/calculate": {
       "post": {
-        "operationId": "calculate_segment_api_v1_crm_segments__segment_id__calculate_post",
+        "operationId": "recalculate_segment_api_v1_crm_segments__segment_id__calculate_post",
         "parameters": [
           {
             "in": "path",
@@ -269317,7 +269607,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/SegmentCalculateIn"
+                "$ref": "#/components/schemas/Mutation"
               }
             }
           },
@@ -269328,7 +269618,9 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/BridgeOut"
+                  "additionalProperties": true,
+                  "title": "Response Recalculate Segment Api V1 Crm Segments  Segment Id  Calculate Post",
+                  "type": "object"
                 }
               }
             },
@@ -269350,15 +269642,18 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Segment neu berechnen",
+        "summary": "Recalculate Segment",
         "tags": [
-          "mask-frontend-bridges"
+          "crm",
+          "segments",
+          "crm",
+          "segments"
         ]
       }
     },
     "/api/v1/crm/segments/{segment_id}/members": {
       "get": {
-        "operationId": "list_segment_members_api_v1_crm_segments__segment_id__members_get",
+        "operationId": "segment_members_api_v1_crm_segments__segment_id__members_get",
         "parameters": [
           {
             "in": "path",
@@ -269368,6 +269663,29 @@
               "title": "Segment Id",
               "type": "string"
             }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "maximum": 5000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
           }
         ],
         "responses": {
@@ -269375,11 +269693,9 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/BridgeOut"
-                  },
-                  "title": "Response List Segment Members Api V1 Crm Segments  Segment Id  Members Get",
-                  "type": "array"
+                  "additionalProperties": true,
+                  "title": "Response Segment Members Api V1 Crm Segments  Segment Id  Members Get",
+                  "type": "object"
                 }
               }
             },
@@ -269401,15 +269717,140 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Segmentmitglieder auflisten",
+        "summary": "Segment Members",
         "tags": [
-          "mask-frontend-bridges"
+          "crm",
+          "segments",
+          "crm",
+          "segments"
+        ]
+      },
+      "post": {
+        "operationId": "add_segment_member_api_v1_crm_segments__segment_id__members_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "segment_id",
+            "required": true,
+            "schema": {
+              "title": "Segment Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Add Segment Member Api V1 Crm Segments  Segment Id  Members Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Add Segment Member",
+        "tags": [
+          "crm",
+          "segments",
+          "crm",
+          "segments"
+        ]
+      }
+    },
+    "/api/v1/crm/segments/{segment_id}/members/remove": {
+      "post": {
+        "operationId": "remove_segment_member_api_v1_crm_segments__segment_id__members_remove_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "segment_id",
+            "required": true,
+            "schema": {
+              "title": "Segment Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Remove Segment Member Api V1 Crm Segments  Segment Id  Members Remove Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Remove Segment Member",
+        "tags": [
+          "crm",
+          "segments",
+          "crm",
+          "segments"
         ]
       }
     },
     "/api/v1/crm/segments/{segment_id}/performance": {
       "get": {
-        "operationId": "get_segment_performance_api_v1_crm_segments__segment_id__performance_get",
+        "operationId": "segment_performance_api_v1_crm_segments__segment_id__performance_get",
         "parameters": [
           {
             "in": "path",
@@ -269426,7 +269867,9 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/BridgeOut"
+                  "additionalProperties": true,
+                  "title": "Response Segment Performance Api V1 Crm Segments  Segment Id  Performance Get",
+                  "type": "object"
                 }
               }
             },
@@ -269448,9 +269891,12 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Segment-Performance",
+        "summary": "Segment Performance",
         "tags": [
-          "mask-frontend-bridges"
+          "crm",
+          "segments",
+          "crm",
+          "segments"
         ]
       }
     },
@@ -292801,6 +293247,133 @@
         ]
       }
     },
+    "/api/v1/finance/ap/invoices/steuer-vorschau": {
+      "post": {
+        "description": "Preview against the same tax keys and account checks as posting.",
+        "operationId": "preview_ap_invoice_tax_api_v1_finance_ap_invoices_steuer_vorschau_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/APInvoiceTaxPreviewIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Preview Ap Invoice Tax Api V1 Finance Ap Invoices Steuer Vorschau Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Eingangsrechnung Vorsteuer vorschauen",
+        "tags": [
+          "finance",
+          "ap",
+          "invoices",
+          "finance",
+          "ap",
+          "invoices"
+        ]
+      }
+    },
+    "/api/v1/finance/ap/invoices/supplier-lookup": {
+      "get": {
+        "operationId": "invoice_supplier_lookup_api_v1_finance_ap_invoices_supplier_lookup_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "default": "",
+              "minLength": 2,
+              "title": "Q",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 25,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "type": "object"
+                  },
+                  "title": "Response Invoice Supplier Lookup Api V1 Finance Ap Invoices Supplier Lookup Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Rechnungslieferanten suchen",
+        "tags": [
+          "finance",
+          "ap",
+          "invoices",
+          "finance",
+          "ap",
+          "invoices"
+        ]
+      }
+    },
     "/api/v1/finance/ap/invoices/{entity_id}/actions/freigeben": {
       "post": {
         "description": "Delegiert an den Freigabeweg. Bis zum 07.10.2026 meldete diese Aktion Erfolg,\nohne die Rechnung anzufassen.",
@@ -303734,6 +304307,129 @@
           }
         ],
         "summary": "Invoice anlegen",
+        "tags": [
+          "finance",
+          "invoices",
+          "finance",
+          "invoices"
+        ]
+      }
+    },
+    "/api/v1/finance/invoices/customer-lookup": {
+      "get": {
+        "operationId": "invoice_customer_lookup_api_v1_finance_invoices_customer_lookup_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "default": "",
+              "minLength": 2,
+              "title": "Q",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 25,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "type": "object"
+                  },
+                  "title": "Response Invoice Customer Lookup Api V1 Finance Invoices Customer Lookup Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Rechnungskunden suchen",
+        "tags": [
+          "finance",
+          "invoices",
+          "finance",
+          "invoices"
+        ]
+      }
+    },
+    "/api/v1/finance/invoices/steuer-vorschau": {
+      "post": {
+        "description": "Use the exact calculation used by invoice posting; no client tax estimate.",
+        "operationId": "preview_invoice_tax_api_v1_finance_invoices_steuer_vorschau_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InvoiceTaxPreviewIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Preview Invoice Tax Api V1 Finance Invoices Steuer Vorschau Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Ausgangsrechnung Steuer vorschauen",
         "tags": [
           "finance",
           "invoices",
@@ -318155,7 +318851,6 @@
     },
     "/api/v1/gdpr/requests/{request_id}/delete": {
       "post": {
-        "description": "Execute erasure (Art. 17). Only for ERASURE requests in VERIFIED status.",
         "operationId": "delete_subject_data_api_v1_gdpr_requests__request_id__delete_post",
         "parameters": [
           {
@@ -318168,6 +318863,16 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProcessPayload"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "content": {
@@ -318195,7 +318900,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Subject data löschen",
+        "summary": "CRM-Personendaten anonymisieren",
         "tags": [
           "gdpr"
         ]
@@ -318251,7 +318956,6 @@
     },
     "/api/v1/gdpr/requests/{request_id}/export": {
       "post": {
-        "description": "Trigger data export (Art. 15/20). VERIFIED -> PROCESSING -> COMPLETED.",
         "operationId": "export_gdpr_request_api_v1_gdpr_requests__request_id__export_post",
         "parameters": [
           {
@@ -318264,6 +318968,16 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProcessPayload"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "content": {
@@ -318291,7 +319005,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Gdpr request exportieren",
+        "summary": "CRM-Betroffenendaten exportieren",
         "tags": [
           "gdpr"
         ]
@@ -395711,6 +396425,51 @@
         ]
       }
     },
+    "/api/v1/sales/offers/actions/import-csv": {
+      "post": {
+        "operationId": "import_sales_offers_api_v1_sales_offers_actions_import_csv_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SalesOfferImportCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Import Sales Offers",
+        "tags": [
+          "sales",
+          "offers"
+        ]
+      }
+    },
     "/api/v1/sales/offers/{offer_id}": {
       "delete": {
         "operationId": "delete_sales_offer_api_v1_sales_offers__offer_id__delete",
@@ -413736,7 +414495,6 @@
     },
     "/api/v1/waage/waagen": {
       "get": {
-        "description": "List all Waagen with optional filtering",
         "operationId": "list_waagen_api_v1_waage_waagen_get",
         "parameters": [
           {
@@ -413777,6 +414535,22 @@
               ],
               "title": "Status"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
           }
         ],
         "responses": {
@@ -413816,15 +414590,30 @@
         ]
       },
       "post": {
-        "description": "Create a new Waage",
         "operationId": "create_waage_api_v1_waage_waagen_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "additionalProperties": true,
-                "title": "Waage Data",
-                "type": "object"
+                "$ref": "#/components/schemas/WaageCreate"
               }
             }
           },
@@ -413865,8 +414654,25 @@
     },
     "/api/v1/waage/waagen/import/ascii": {
       "post": {
-        "description": "Importiert eine ASCII-Waagendatei im Agrar-Standardformat (Satzarten W und Q).",
         "operationId": "import_ascii_api_v1_waage_waagen_import_ascii_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "multipart/form-data": {
@@ -413881,9 +414687,7 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/WaageOut"
-                }
+                "schema": {}
               }
             },
             "description": "Successful Response"
@@ -413904,7 +414708,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Ascii importieren",
+        "summary": "ASCII-Wiegescheine importieren",
         "tags": [
           "Waage"
         ]
@@ -413912,22 +414716,55 @@
     },
     "/api/v1/waage/waagen/import/fehlerqueue": {
       "get": {
-        "description": "Gibt alle EintrÃ¤ge der Import-Fehlerqueue zurÃ¼ck.",
         "operationId": "list_fehlerqueue_api_v1_waage_waagen_import_fehlerqueue_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "maximum": 1000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
               "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/WaageOut"
-                  },
-                  "title": "Response List Fehlerqueue Api V1 Waage Waagen Import Fehlerqueue Get",
-                  "type": "array"
-                }
+                "schema": {}
               }
             },
             "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "security": [
@@ -413935,7 +414772,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Fehlerqueue auflisten",
+        "summary": "Importfehler auflisten",
         "tags": [
           "Waage"
         ]
@@ -413943,7 +414780,6 @@
     },
     "/api/v1/waage/waagen/import/fehlerqueue/{entry_id}": {
       "delete": {
-        "description": "LÃ¶scht einen Eintrag aus der Import-Fehlerqueue.",
         "operationId": "delete_fehlerqueue_entry_api_v1_waage_waagen_import_fehlerqueue__entry_id__delete",
         "parameters": [
           {
@@ -413954,10 +414790,31 @@
               "title": "Entry Id",
               "type": "string"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
           }
         ],
         "responses": {
-          "204": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "description": "Successful Response"
           },
           "422": {
@@ -413976,7 +414833,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Fehlerqueue entry lÃ¶schen",
+        "summary": "Importfehler verwerfen",
         "tags": [
           "Waage"
         ]
@@ -413984,7 +414841,6 @@
     },
     "/api/v1/waage/waagen/import/fehlerqueue/{entry_id}/retry": {
       "post": {
-        "description": "ErhÃ¶ht retry_count fÃ¼r einen Fehlerqueue-Eintrag (Simulation).",
         "operationId": "retry_fehlerqueue_entry_api_v1_waage_waagen_import_fehlerqueue__entry_id__retry_post",
         "parameters": [
           {
@@ -413995,15 +414851,29 @@
               "title": "Entry Id",
               "type": "string"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
           }
         ],
         "responses": {
           "200": {
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/WaageOut"
-                }
+                "schema": {}
               }
             },
             "description": "Successful Response"
@@ -414024,7 +414894,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Fehlerqueue entry wiederholen",
+        "summary": "Importfehler erneut pruefen",
         "tags": [
           "Waage"
         ]
@@ -414106,7 +414976,6 @@
     },
     "/api/v1/waage/waagen/{waage_id}": {
       "delete": {
-        "description": "Delete a Waage",
         "operationId": "delete_waage_api_v1_waage_waagen__waage_id__delete",
         "parameters": [
           {
@@ -414116,6 +414985,22 @@
             "schema": {
               "title": "Waage Id",
               "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -414139,13 +415024,12 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Waage lÃ¶schen",
+        "summary": "Waage loeschen",
         "tags": [
           "Waage"
         ]
       },
       "get": {
-        "description": "Get a single Waage by ID",
         "operationId": "get_waage_api_v1_waage_waagen__waage_id__get",
         "parameters": [
           {
@@ -414155,6 +415039,22 @@
             "schema": {
               "title": "Waage Id",
               "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -414191,7 +415091,6 @@
         ]
       },
       "patch": {
-        "description": "Update a Waage",
         "operationId": "update_waage_api_v1_waage_waagen__waage_id__patch",
         "parameters": [
           {
@@ -414202,15 +415101,29 @@
               "title": "Waage Id",
               "type": "string"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
           }
         ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "additionalProperties": true,
-                "title": "Waage Data",
-                "type": "object"
+                "$ref": "#/components/schemas/WaageUpdate"
               }
             }
           },
@@ -414251,7 +415164,6 @@
     },
     "/api/v1/waage/waagen/{waage_id}/kalibrierung": {
       "get": {
-        "description": "Gibt den Kalibrierungsstatus einer Waage zurÃ¼ck.",
         "operationId": "get_kalibrierung_api_v1_waage_waagen__waage_id__kalibrierung_get",
         "parameters": [
           {
@@ -414261,6 +415173,22 @@
             "schema": {
               "title": "Waage Id",
               "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -414297,7 +415225,6 @@
         ]
       },
       "patch": {
-        "description": "Aktualisiert Kalibrierungsdaten einer Waage (kalibrierung_meta JSONB).",
         "operationId": "update_kalibrierung_api_v1_waage_waagen__waage_id__kalibrierung_patch",
         "parameters": [
           {
@@ -414308,15 +415235,29 @@
               "title": "Waage Id",
               "type": "string"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
           }
         ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "additionalProperties": true,
-                "title": "Payload",
-                "type": "object"
+                "$ref": "#/components/schemas/WaageCalibrationUpdate"
               }
             }
           },
@@ -414357,89 +415298,15 @@
     },
     "/api/v1/waage/wiegungen": {
       "get": {
-        "description": "List all Wiegungen with optional filtering",
         "operationId": "list_wiegungen_api_v1_waage_wiegungen_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "skip",
-            "required": false,
-            "schema": {
-              "default": 0,
-              "minimum": 0,
-              "title": "Skip",
-              "type": "integer"
-            }
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "schema": {
-              "default": 100,
-              "maximum": 1000,
-              "minimum": 1,
-              "title": "Limit",
-              "type": "integer"
-            }
-          },
-          {
-            "in": "query",
-            "name": "waage_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Waage Id"
-            }
-          },
-          {
-            "in": "query",
-            "name": "kennzeichen",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Kennzeichen"
-            }
-          }
-        ],
         "responses": {
-          "200": {
+          "410": {
             "content": {
               "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/WaageOut"
-                  },
-                  "title": "Response List Wiegungen Api V1 Waage Wiegungen Get",
-                  "type": "array"
-                }
+                "schema": {}
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -414447,13 +415314,12 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Wiegungen auflisten",
+        "summary": "Legacy-Wiegungen abgeloest",
         "tags": [
           "Waage"
         ]
       },
       "post": {
-        "description": "Create a new Wiegung",
         "operationId": "create_wiegung_api_v1_waage_wiegungen_post",
         "requestBody": {
           "content": {
@@ -414468,12 +415334,10 @@
           "required": true
         },
         "responses": {
-          "201": {
+          "410": {
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/WaageOut"
-                }
+                "schema": {}
               }
             },
             "description": "Successful Response"
@@ -414494,7 +415358,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Wiegung anlegen",
+        "summary": "Legacy-Wiegung abgeloest",
         "tags": [
           "Waage"
         ]
@@ -414597,7 +415461,6 @@
     },
     "/api/v1/waage/wiegungen/{wiegung_id}": {
       "delete": {
-        "description": "Delete a Wiegung",
         "operationId": "delete_wiegung_api_v1_waage_wiegungen__wiegung_id__delete",
         "parameters": [
           {
@@ -414611,7 +415474,12 @@
           }
         ],
         "responses": {
-          "204": {
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "description": "Successful Response"
           },
           "422": {
@@ -414630,13 +415498,12 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Wiegung lÃ¶schen",
+        "summary": "Legacy-Wiegung abgeloest",
         "tags": [
           "Waage"
         ]
       },
       "get": {
-        "description": "Get a single Wiegung by ID",
         "operationId": "get_wiegung_api_v1_waage_wiegungen__wiegung_id__get",
         "parameters": [
           {
@@ -414650,12 +415517,10 @@
           }
         ],
         "responses": {
-          "200": {
+          "410": {
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/WaageOut"
-                }
+                "schema": {}
               }
             },
             "description": "Successful Response"
@@ -414676,7 +415541,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Wiegung abrufen",
+        "summary": "Legacy-Wiegung abgeloest",
         "tags": [
           "Waage"
         ]
@@ -422277,6 +423142,105 @@
         "summary": "Do Transition",
         "tags": [
           "workflow"
+        ]
+      }
+    },
+    "/auth/demo-login": {
+      "post": {
+        "description": "Demo-Login-Endpoint (NUR FÜR ENTWICKLUNG!)\n\n⚠️ WARNUNG: Dieser Endpoint gibt jedem User die gewünschte Rolle!\n⚠️ In Production durch echtes Login mit User-DB ersetzen!\n\nArgs:\n    body: LoginBody mit username und role\n\nReturns:\n    LoginResponse mit access_token",
+        "operationId": "demo_login_auth_demo_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Demo Login",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/demo-multi-role": {
+      "post": {
+        "description": "Demo-Login mit mehreren Rollen (NUR FÜR ENTWICKLUNG!)\n\nArgs:\n    username: Username\n    roles: Liste von Rollen\n\nReturns:\n    LoginResponse mit access_token",
+        "operationId": "demo_multi_role_login_auth_demo_multi_role_post",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "username",
+            "required": true,
+            "schema": {
+              "title": "Username",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "type": "string"
+                },
+                "title": "Roles",
+                "type": "array"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Demo Multi Role Login",
+        "tags": [
+          "auth"
         ]
       }
     },

@@ -51,7 +51,7 @@ export function resourceActionResult(action: ScreenActionDefinition, req: Action
 
     || action.commandEndpoint === '/api/v1/crm/campaigns/{entity_id}/recipients' && resource?.campaign_id !== opts.entityId) throw new Error('Die Serverantwort bestätigt die betroffene Ressource nicht.')
 
-  return { actionKey: req.actionKey, mode: req.mode, success: true, resourceId: id, affectedIds: createsChild ? [opts.entityId!, id] : [id] }
+  return { actionKey: req.actionKey, mode: req.mode, success: true, resourceId: id, affectedIds: createsChild && opts.entityId ? [opts.entityId, id] : [id] }
 
 }
 

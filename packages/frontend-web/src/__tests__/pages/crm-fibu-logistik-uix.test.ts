@@ -119,8 +119,9 @@ describe('CRM/FIBU/Logistik UIX', () => {
     expect(src).toContain('compileRenderPlanFromScreenDefinition')
     expect(src).toContain('<UniversalMaskRenderer')
     expect(src).toContain('schulungen: rows.map')
-    expect(definition).toContain("key: 'status'")
-    expect(definition).toContain("label: 'Stand'")
+    // capture-screens.ts is generated; match the field independent of quoting style.
+    expect(definition).toMatch(/["']?key["']?: ["']status["']/)
+    expect(definition).toMatch(/["']?label["']?: ["']Stand["']/)
     expect(src).not.toContain('bg-orange-50')
   })
 

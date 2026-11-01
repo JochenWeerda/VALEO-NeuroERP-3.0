@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, qa]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-29
+last_reviewed: 2026-11-01
 version: 3.0.0
 description: Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -93,6 +93,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `crm_notification_service` | CRM-Benachrichtigungen — internes In-App-Postfach + externe Fachberater-Mail. |
 | `crm_opportunity_reference` | Shared tenant-checked opportunity reference resolution for every activity adapter. |
 | `crm_ownership_service` | Kunden-Ownership (DOM-CRM-004.3) — Zuordnung & Übergabe. |
+| `crm_segment_service` | Canonical, tenant-scoped CRM segment data and bounded membership evaluation. |
 | `customer_reference` | Referenzen in Maskenkoepfen lesbar machen. |
 | `customer_sales_eligibility` | CRM-Kunde ↔ Business-Partner: Sperr- und Lieferfähigkeit für Verkaufsbelege. |
 | `customer_service` | Service layer for CRM Customer management (crm-core + monolith bridge). |
@@ -168,6 +169,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `gap_pipeline` | GAP (Gemeinsame Agrarpolitik) ETL-Engine. |
 | `gap_pipeline_service` | Service layer for the GAP (Gemeinsame Agrarpolitik) ETL pipeline endpoints. |
 | `gap_progress` | In-process job- and progress-tracking for the GAP ETL pipeline. |
+| `gdpr_request_processor` | Explicit CRM-subject processing; never substitutes a system-user lookup. |
 | `genossenschaft_service` | Mitgliederregister einer eG — eine Wahrheit uber den Anteilsbestand. |
 | `geo_pipeline` | Geo-Pipeline – Betriebsadressen → Koordinaten für den Außendienst-Viewer. |
 | `guardrails` | Guardrails Service — NC-C3 |
@@ -289,6 +291,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `sales_invoice_service` | Aus Lieferscheinpositionen wird eine Rechnung mit eigenen Positionen. |
 | `sales_lieferschein_close_service` | DOM-SALES-004.3 — Lieferschein-Closing-Flow Service. |
 | `sales_match_service` | Auftrag-↔-Lieferschein-Positions-Match (DOM-SALES-004.2). |
+| `sales_offer_import` | Atomic, idempotent import of explicitly specified sales offers. |
 | `sales_posting_service` | Service for creating FIBU journal entries along the Auftrag → Lieferschein → Rechnung chain. |
 | `sales_preisabweichung_service` | DOM-SALES-004.4 — Preisabweichungs-Prüfung + Eskalation/Freigabe Service. |
 | `sales_storno_service` | Lieferungs-Storno & Gutschrift-Übersicht (DOM-SALES-004.4) — durchgängig. |
@@ -312,6 +315,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `studio_entity_evolution` | Reviewable additive evolution from trusted registered Studio master-data contracts. |
 | `studio_entity_router` | One authenticated HTTP command adapter for generated master-data contracts. |
 | `studio_entity_simulation` | Real rollback-only CRUD simulation for an exact registered Studio entity definition. |
+| `studio_file_content_contracts` | Pure validation of bounded local UTF-8 file-content field declarations. |
 | `studio_history_view` | Read-only, type-preserving comparison of immutable Studio snapshots. |
 | `studio_list_contracts` | Bounded declarative list behavior; no commands or executable expressions. |
 | `studio_migration` | Studio migration compiler: catalog wiring and reviewable additive Alembic artifacts. |
@@ -319,6 +323,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `studio_native_import` | Version native masks through the existing Studio store, without activation. |
 | `studio_process_simulation` | Real domain-service simulation on the shared probe, always rolled back. |
 | `studio_propose` | Deterministic ScreenDefinition proposals for humans and agents. |
+| `studio_runtime_surface_contracts` | Fixed bindings for domain surfaces rendered inside the universal runtime. |
 | `studio_semantic` | Versioned business vocabulary and side-effect-free Studio reference contract. |
 | `studio_semantic_model` | Budgeted intent interpretation; model output can only select a known contract. |
 | `studio_validation` | SD-Studio Draft-Validierung (UIX-090) — harte Sicherheitsregeln. |
@@ -331,6 +336,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `tse_fiskaly_service` | Compatibility facade for the canonical fiscalization provider layer. |
 | `vies_service` | VIES Service |
 | `voice_adapter` | Voice Adapter Layer — NC-003 |
+| `waage_import_service` | Tenant-bound ASCII import into the canonical weighing-ticket aggregate. |
 | `warehouse_service` | — |
 | `wareneingang_avis_service` | Wareneingang aus dem Anlieferavis — Bestellung beliefert, Ware im Lager. |
 | `webfleet_connect` | Aktuelle Fahrzeugpositionen über WEBFLEET.connect. |

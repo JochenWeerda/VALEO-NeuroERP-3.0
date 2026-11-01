@@ -25,8 +25,11 @@ def crm(subject_data):
     migration = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(migration)
     db.execute(text("SET LOCAL lock_timeout='5s'"))
-    with Operations.context(MigrationContext.configure(db.connection())):
-        migration.upgrade()
+    # A fresh probe at head already carries the migration; only older databases need it applied here.
+    applied = db.execute(text("SELECT 1 FROM information_schema.columns WHERE table_name='gdpr_requests' AND column_name='data_scope'")).first()
+    if applied is None:
+        with Operations.context(MigrationContext.configure(db.connection())):
+            migration.upgrade()
     client.app.include_router(gdpr_requests.router, prefix='/api/v1')
     client.app.include_router(crm_segments.router, prefix='/api/v1')
     def headers(tid=tenant, roles=None):

@@ -4,7 +4,7 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-29
+last_reviewed: 2026-11-01
 version: 3.0.0
 description: MCP-Tools, Domain-Events und Automatisierungsregeln für Agenten.
 ---
@@ -241,7 +241,7 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `fuhrpark.fahrzeug.saved` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
 | `fuhrpark.rechnung.saved` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
 | `fuhrpark.terminart.saved` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
-| … | | 28 weitere |
+| … | | 31 weitere |
 
 ### System
 

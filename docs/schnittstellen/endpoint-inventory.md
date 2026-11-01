@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-29
+last_reviewed: 2026-11-01
 version: 3.0.0
 description: Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -139,7 +139,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `crm_ownership` | Kunden-Ownership (DOM-CRM-004.3) — Zuordnung/Übergabe Außendienst/Innendienst. |
 | `crm_partner_suche` | Einheitliche Partner-Suche über Kunden, Lieferanten und Leads (Multi-Rolle). |
 | `crm_reports` | CRM Reports and Analytics endpoints. |
-| `crm_segments` | CRM Kundensegmente — CRUD-Stub |
+| `crm_segments` | Canonical persistent CRM segments; all routes use the verified tenant. |
 | `customer_extensions` | Customer extension endpoints (l3c-kunde extras) |
 | `customers` | CRM Customer endpoints backed by the crm-core service. |
 | `daily_prices` | Daily Price API endpoints. |

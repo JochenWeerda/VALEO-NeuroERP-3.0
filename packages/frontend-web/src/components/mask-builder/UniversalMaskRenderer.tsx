@@ -1,9 +1,8 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react'
 const FlowSpineWorkspaceSurface = lazy(() => import('./runtime/FlowSpineWorkspaceSurface'))
 import { FlowSpineCatalogRenderer } from './renderers/FlowSpineCatalogRenderer'
 import type { FlowSpineCatalogState } from './runtime/useFlowSpineCatalogRuntime'
 import { SourceProposalRenderer } from './renderers/SourceProposalRenderer'
-import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import { ColumnLayoutRenderer, type NavigationColumn } from './renderers/ColumnLayoutRenderer'
 import { getValue, repeatsCaption } from './renderers/render-utils'
 import { DerivedColumnLayout, shouldDeriveColumns } from './renderers/DerivedColumnLayout'

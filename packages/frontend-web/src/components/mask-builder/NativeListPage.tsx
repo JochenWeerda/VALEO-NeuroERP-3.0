@@ -240,7 +240,7 @@ export function NativeListPage({ screenId, testId }: { screenId: string; testId?
         toast({ title: 'Druck nicht verfügbar', description: 'Für diese Liste fehlt die Druckdatenfreigabe.', variant: 'destructive' })
         return
       }
-      const rows = listData.current
+      const rows = listData.current?.screen === screenId ? listData.current.rows : undefined
       if (!rows?.length) {
         toast({ title: 'Keine Daten', description: 'Es gibt nichts zu drucken.', variant: 'destructive' })
         return
