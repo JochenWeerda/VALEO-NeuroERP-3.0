@@ -1,5 +1,5 @@
-import FlowSpineWorkspace from '@/components/workflow/FlowSpineWorkspace'
+import { UniversalNativeCockpitPage } from '@/components/mask-builder/UniversalNativeCockpitPage'
 
-export default function FlowSpineContractToSettlementPage(): JSX.Element {
-  return <FlowSpineWorkspace processKey="contract-to-settlement" />
+export default function FlowSpinePage(): JSX.Element {
+  return <UniversalNativeCockpitPage screenId="workflow/flow-spine-contract-to-settlement" />
 }

@@ -30,46 +30,61 @@ from app.domains.operations.models import (
 
 
 class WaageRepository:
-    """Repository for Waage operations"""
-    
+    """Waagen are visible only within the verified tenant."""
+
+    _FIELDS = {"standort", "typ", "max_kapazitaet", "letzte_eichung", "naechste_eichung", "status", "hersteller", "seriennummer", "installiert_am"}
+
     def __init__(self, db: Session):
         self.db = db
-    
-    def get_all(self, skip: int = 0, limit: int = 100) -> List[Waage]:
-        return self.db.query(Waage).offset(skip).limit(limit).all()
-    
-    def get_by_id(self, waage_id: str) -> Optional[Waage]:
-        return self.db.query(Waage).filter(Waage.id == waage_id).first()
-    
-    def get_by_status(self, status: str) -> List[Waage]:
-        return self.db.query(Waage).filter(Waage.status == status).all()
-    
-    def create(self, waage_data: dict) -> Waage:
-        waage = Waage(
-            id=f"W-{str(__import__('uuid').uuid4())[:8].upper()}",
-            **waage_data
-        )
+
+    @staticmethod
+    def _tenant(tenant_id: str) -> str:
+        if not isinstance(tenant_id, str) or not tenant_id.strip():
+            raise ValueError("Verified tenant required")
+        return tenant_id
+
+    def get_all(self, tenant_id: str, skip: int = 0, limit: int = 100) -> List[Waage]:
+        return self.db.query(Waage).filter(Waage.tenant_id == self._tenant(tenant_id)).offset(skip).limit(limit).all()
+
+    def get_by_id(self, tenant_id: str, waage_id: str) -> Optional[Waage]:
+        return self.db.query(Waage).filter(Waage.tenant_id == self._tenant(tenant_id), Waage.id == waage_id).first()
+
+    def get_by_status(self, tenant_id: str, status: str, skip: int = 0, limit: int = 100) -> List[Waage]:
+        return self.db.query(Waage).filter(Waage.tenant_id == self._tenant(tenant_id), Waage.status == status).offset(skip).limit(limit).all()
+
+    def create(self, tenant_id: str, waage_data: dict) -> Waage:
+        waage = Waage(id=prefixed_id("W"), tenant_id=self._tenant(tenant_id), **{k: v for k, v in waage_data.items() if k in self._FIELDS})
         self.db.add(waage)
         self.db.commit()
         self.db.refresh(waage)
         return waage
-    
-    def update(self, waage_id: str, waage_data: dict) -> Optional[Waage]:
-        waage = self.get_by_id(waage_id)
-        if waage:
+
+    def update(self, tenant_id: str, waage_id: str, waage_data: dict) -> Optional[Waage]:
+        waage = self.get_by_id(tenant_id, waage_id)
+        if waage is not None:
             for key, value in waage_data.items():
-                setattr(waage, key, value)
+                if key in self._FIELDS:
+                    setattr(waage, key, value)
             self.db.commit()
             self.db.refresh(waage)
         return waage
-    
-    def delete(self, waage_id: str) -> bool:
-        waage = self.get_by_id(waage_id)
-        if waage:
-            self.db.delete(waage)
-            self.db.commit()
-            return True
-        return False
+
+    def delete(self, tenant_id: str, waage_id: str) -> bool:
+        waage = self.db.query(Waage).filter(Waage.tenant_id == self._tenant(tenant_id), Waage.id == waage_id).with_for_update().first()
+        if waage is None:
+            return False
+        # Legacy weighings have no tenant boundary; never cascade-delete them.
+        if self.db.query(Wiegung.id).filter(Wiegung.waage_id == waage_id).first() is not None:
+            raise ValueError("Waage hat bestehende Wiegungen")
+        from app.infrastructure.models import WeighingTicket
+        if self.db.query(WeighingTicket.id).filter(WeighingTicket.tenant_id == tenant_id, WeighingTicket.scale_id == waage_id).first() is not None:
+            raise ValueError("Waage hat bestehende Wiegescheine")
+        from app.services.waage_import_service import WaageImportEntry
+        if self.db.query(WaageImportEntry.id).filter(WaageImportEntry.tenant_id == tenant_id, WaageImportEntry.waage_id == waage_id).first() is not None:
+            raise ValueError("Waage hat bestehende Importnachweise")
+        self.db.delete(waage)
+        self.db.commit()
+        return True
 
 
 class WiegungRepository:

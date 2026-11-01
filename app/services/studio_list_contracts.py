@@ -64,6 +64,7 @@ class Variant(Contract):
     text: Text
 
 class Insight(Contract):
+    key: Key | None = None
     label: Text
     variants: list[Variant] = Field(max_length=100)
 
@@ -94,7 +95,18 @@ class ListPreset(Contract):
             raise ValueError("completion field only allowed for date preset")
         return self
 
+class RoleFocusOption(Contract):
+    key: Key
+    label: Text
+    description: Text | None = None
+    insightLineKeys: list[Key] | None = Field(default=None, max_length=100)
+
+class RoleFocus(Contract):
+    options: list[RoleFocusOption] = Field(min_length=1, max_length=8)
+    defaultKey: Key = "all"
+
 class ListExperience(Contract):
+    roleFocus: RoleFocus | None = None
     presets: list[ListPreset] = Field(default_factory=list, max_length=8)
     searchFields: list[Key] = Field(min_length=1, max_length=100)
     aggregates: list[Aggregate] = Field(max_length=100)
@@ -105,6 +117,16 @@ class ListExperience(Contract):
 
     @model_validator(mode="after")
     def references(self):
+        if self.roleFocus:
+            focus_keys = [entry.key for entry in self.roleFocus.options]
+            insight_keys = [line.key for line in self.insightLines]
+            if len(set(focus_keys)) != len(focus_keys) or self.roleFocus.defaultKey not in focus_keys:
+                raise ValueError("invalid role focus options")
+            if any(key is None for key in insight_keys) or len(set(insight_keys)) != len(insight_keys):
+                raise ValueError("role focus needs unique insight keys")
+            for option in self.roleFocus.options:
+                if option.insightLineKeys is not None and (len(set(option.insightLineKeys)) != len(option.insightLineKeys) or not set(option.insightLineKeys) <= set(insight_keys)):
+                    raise ValueError("unknown role focus insight")
         preset_keys = [entry.key for entry in self.presets]
         if len(set(preset_keys)) != len(preset_keys):
             raise ValueError("duplicate preset key")

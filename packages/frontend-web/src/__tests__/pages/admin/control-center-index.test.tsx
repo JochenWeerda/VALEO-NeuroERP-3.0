@@ -1,12 +1,17 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it, vi, beforeEach } from 'vitest'
-import AdminControlCenterPage from '@/pages/admin/control-center/index'
+import ControlCenterSurface from '@/components/mask-builder/specialized/admin/control-center-surface'
+import type { RenderPlan } from '@/components/mask-builder/render-plan/types'
 
 const getMock = vi.hoisted(() => vi.fn())
 const postMock = vi.hoisted(() => vi.fn())
 
-vi.mock('@/pages/admin/agenten-integration', () => ({
+vi.mock('@/components/mask-builder/specialized/intake/domain-data', () => ({
+  useDomainIdentity: () => ({ tenantId: 'tenant-a', actor: 'actor-a' }),
+}))
+
+vi.mock('@/components/mask-builder/specialized/admin/integration-workspace', () => ({
   AgentenIntegrationWorkspace: ({ title }: { title?: string }) => <div>{title ?? 'workspace'}</div>,
 }))
 
@@ -18,6 +23,10 @@ vi.mock('@/lib/api-client', () => ({
 }))
 
 function renderPage(): void {
+  const plan = {
+    actions: ['plan', 'escalate', 'resolve', 'retry'].map(key => ({ key, disabled: false })),
+    fieldsByKey: { scheduled_for: { visible: true, readOnly: false } },
+  } as unknown as RenderPlan
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -28,7 +37,7 @@ function renderPage(): void {
 
   render(
     <QueryClientProvider client={queryClient}>
-      <AdminControlCenterPage />
+      <ControlCenterSurface plan={plan} />
     </QueryClientProvider>,
   )
 }
@@ -41,7 +50,7 @@ describe('AdminControlCenterPage', () => {
     getMock
       .mockResolvedValueOnce({
         data: {
-          tenant_id: 'default',
+          tenant_id: 'tenant-a',
           storage_path: 'runtime/agent-ops/planning.json',
           calendar_window: '14d',
           suggested_items: [
@@ -84,7 +93,7 @@ describe('AdminControlCenterPage', () => {
       })
       .mockResolvedValueOnce({
         data: {
-          tenant_id: 'default',
+          tenant_id: 'tenant-a',
           incident_count: 2,
           open_quarantine_count: 1,
           blocked_connector_count: 1,
@@ -121,6 +130,9 @@ describe('AdminControlCenterPage', () => {
     renderPage()
 
     expect(await screen.findByText('Admin Kontroll- und Ueberwachungszentrum')).toBeInTheDocument()
+    expect(getMock).toHaveBeenCalledWith('/api/v1/agents/neuroassist/ops/planning')
+    expect(getMock).toHaveBeenCalledWith('/api/v1/agents/neuroassist/ops/incidents')
+    expect(screen.getByLabelText('Naechster Leitstand-Slot')).toHaveValue('')
     expect(screen.getByText('Offene Vorfaelle')).toBeInTheDocument()
     expect(screen.getByText('Prioritaet und Quick Actions')).toBeInTheDocument()
     expect(screen.getByText('Scheduling und Planung')).toBeInTheDocument()

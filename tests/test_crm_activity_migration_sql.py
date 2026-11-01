@@ -147,9 +147,11 @@ def test_erasure_deletes_only_matching_tenant_activities(data, monkeypatch):
         monkeypatch.setattr(compliance_dsgvo, "_namen_des_betroffenen", lambda *args: [name])
         log = compliance_dsgvo._anonymize_subject(db, "CUSTOMER", subject_id, tenant)
         entry = next(item for item in log if item["table"] == "domain_crm.activities")
-        assert entry["rows_affected"] == 2 and "error" not in entry
+        # Only the canonically linked row is erased; a bare name match (ids[0]) is
+        # not proof of identity and stays for separate review.
+        assert entry["rows_affected"] == 1 and "error" not in entry
         remaining = set(connection.execute(sa.select(target.c.id).where(target.c.id.in_(ids))).scalars())
-        assert remaining == {ids[1], ids[2], ids[4]}
+        assert remaining == {ids[0], ids[1], ids[2], ids[4]}
     finally:
         savepoint.rollback()
 

@@ -33,6 +33,28 @@ _DOCUMENT_TRANSPORT_FIELDS = ("commandEndpoint", "method", "commandBinding", "ko
 _DOCUMENT_POLICY_FIELDS = (*_DOCUMENT_TRANSPORT_FIELDS, "dangerLevel", "forbiddenForAgents",
                            "requiresConfirmation", "auditReasonRequired", "humanApprovalRequired",
                            "requiresHumanApproval", "disabled")
+_NATIVE_TRANSPORT_FIELDS = (*_DOCUMENT_TRANSPORT_FIELDS, "command", "inputFlow", "navigationRoute", "download",
+                            "responseAdapter", "resultNavigationRoute", "inputPrefill", "localEffect", "visibleWhen", "surfaceOnly")
+
+
+def _bound_native_template(definition):
+    """A current pinned native source scopes policy; its hash grants no rights."""
+    from app.core.screen_definitions import SCREEN_DEFINITION_BUILDERS, get_screen_definition
+    from app.core.studio_release import definition_hash
+    binding = definition.get("nativeBaseline")
+    source_id = definition.get("baseScreenId")
+    if (not isinstance(binding, dict) or not isinstance(source_id, str)
+            or source_id not in SCREEN_DEFINITION_BUILDERS
+            or binding.get("sourceId", source_id) != source_id):
+        raise ValueError("native_baseline_binding_invalid")
+    canonical = get_screen_definition(source_id)
+    if not canonical or binding.get("sourceHash") != definition_hash(canonical):
+        raise ValueError("native_source_changed")
+    # Presentation can evolve; APIs, processors and aggregate creation cannot.
+    for key in ("domain", "mode", "dataSources", "creation", "specialized", "flowSpineWorkspace", "flowSpineCatalog", "entityProjection"):
+        if definition_hash(definition.get(key)) != definition_hash(canonical.get(key)):
+            raise ValueError("native_policy_changed:" + key)
+    return canonical
 
 
 
@@ -133,8 +155,9 @@ def validate_studio_draft(
     from app.services.studio_list_contracts import validate_list_experience
     from app.services.studio_catalog_contracts import validate_flow_spine_catalog
     from app.services.studio_file_content_contracts import validate_file_content_contracts
+    from app.services.studio_runtime_surface_contracts import validate_runtime_surface
     violations: list[str] = (validate_list_experience(definition) + validate_flow_spine_catalog(definition)
-                             + validate_file_content_contracts(definition))
+                             + validate_file_content_contracts(definition) + validate_runtime_surface(definition))
 
     # ── Struktur (Minimalkontrakt) ───────────────────────────────────────────
     for req in ("schemaVersion", "id", "domain", "mode", "title"):
@@ -159,6 +182,17 @@ def validate_studio_draft(
         # Scoped projection of the existing immutable template and live registry,
         # not a second global command/permission allowlist.
         catalog_actions = {action["key"]: action for action in _iter_actions(document_template)}
+    native_template = None
+    native_actions = {}
+    if "nativeBaseline" in definition and document_template is None:
+        try:
+            native_template = _bound_native_template(definition)
+            for action in _iter_actions(native_template):
+                if isinstance(action, dict) and isinstance(action.get("key"), str):
+                    native_actions.setdefault(action["key"], []).append(action)
+            catalog_actions = {key: values[0] for key, values in native_actions.items()}
+        except (ValueError, KeyError, TypeError, AttributeError):
+            violations.append("native_basisbindung_ungueltig")
 
     # ── Namensraum ───────────────────────────────────────────────────────────
     if screen_id and not screen_id.startswith("tenant/"):
@@ -180,6 +214,10 @@ def validate_studio_draft(
     if document_template is not None:
         allowed_endpoints = {source["endpoint"] for source in document_template["dataSources"]}
         allowed_endpoints.update(source['endpoint'] for source in (document_template.get('creation') or {}).get('dataSources', []))
+    if native_template is not None:
+        allowed_endpoints = {node[key] for node in _nodes(native_template)
+                             for key in ("endpoint", "summaryEndpoint", "countEndpoint")
+                             if isinstance(node.get(key), str)}
 
     write_endpoints = {action.get("commandEndpoint") for action in catalog_actions.values()}
     write_endpoints.update((action.get("inputFlow") or {}).get("submitEndpoint")
@@ -187,19 +225,22 @@ def validate_studio_draft(
     for node in _nodes(definition):
         for field in ("endpoint", "summaryEndpoint", "countEndpoint"):
             endpoint = node.get(field)
-            bound_creation_endpoint = (document_template is not None and node is definition.get('creation')
-                                       and field == 'endpoint' and endpoint == document_template.get('creation', {}).get('endpoint'))
+            bound_template = document_template or native_template
+            bound_creation_endpoint = (bound_template is not None and node is definition.get('creation')
+                                       and field == 'endpoint' and endpoint == bound_template.get('creation', {}).get('endpoint'))
             if endpoint is not None and not bound_creation_endpoint and (not isinstance(endpoint, str) or endpoint not in allowed_endpoints):
                 violations.append(f"datenquelle_nicht_im_katalog:{endpoint}")
         for field in ("reprojectEndpoint", "icsTokenEndpoint", "submitEndpoint"):
             endpoint = node.get(field)
             if endpoint is not None and (not isinstance(endpoint, str) or endpoint not in write_endpoints):
                 violations.append("schreibender_transport_nicht_im_katalog")
-        if node.get("creation") not in (None, {}) and (document_template is None or node is not definition):
+        if node.get("creation") not in (None, {}) and (document_template is None and native_template is None or node is not definition):
             violations.append("erstellung_nicht_im_studio_katalog")
         for field in ("rowRouteTemplate", "targetRoute", "activateRouteTemplate"):
             route = node.get(field)
-            if route is not None and (not isinstance(route, str) or not route.startswith("/")
+            bound_row_route = (field == "rowRouteTemplate" and route == "{source_route}" and native_template is not None
+                               and any(source.get("rowRouteTemplate") == route for source in _nodes(native_template)))
+            if route is not None and not bound_row_route and (not isinstance(route, str) or not route.startswith("/")
                     or route.startswith("//") or "\\" in route
                     or any(ord(char) < 32 or ord(char) == 127 for char in route)):
                 violations.append("navigation_muss_lokaler_maskenpfad_sein")
@@ -219,13 +260,19 @@ def validate_studio_draft(
         if not isinstance(action, dict):
             violations.append("action_muss_objekt_sein")
             continue
-        if any(field in action for field in ("responseAdapter", "resultNavigationRoute", "inputPrefill")):
+        if native_template is None and any(field in action for field in ("responseAdapter", "resultNavigationRoute", "inputPrefill")):
             violations.append("nativer_ressourcenadapter_nicht_im_studio_katalog")
         key = action.get("key", "")
         if not isinstance(key, str):
             violations.append("action_key_muss_text_sein")
             continue
         base = catalog_actions.get(key)
+        if key in native_actions:
+            from app.core.studio_release import definition_hash
+            signature = lambda candidate: definition_hash({field: candidate.get(field) for field in _NATIVE_TRANSPORT_FIELDS})
+            base = next((candidate for candidate in native_actions[key] if signature(candidate) == signature(action)), base)
+            if signature(base) != signature(action):
+                violations.append(f"native_aktionsvertrag_geaendert:{key}")
         if base is None:
             violations.append(f"action_nicht_im_katalog:{key}")
             continue
@@ -246,7 +293,7 @@ def validate_studio_draft(
         draft_danger = action.get("dangerLevel", "safe")
         if not isinstance(draft_danger, str) or draft_danger not in _DANGER_RANK:
             violations.append(f"action_ungueltiger_dangerLevel:{key}:{draft_danger}")
-        elif _DANGER_RANK[draft_danger] < _DANGER_RANK[base["dangerLevel"]]:
+        elif _DANGER_RANK[draft_danger] < _DANGER_RANK.get(base.get("dangerLevel", "safe"), 0):
             violations.append(f"action_dangerLevel_gesenkt:{key}")
         # Transport identifiers cannot select an alternative command or human form.
         for field in ("command", "commandBinding", "inputFlow", "navigationRoute", "download"):

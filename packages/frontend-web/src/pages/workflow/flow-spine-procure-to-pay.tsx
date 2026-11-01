@@ -1,5 +1,5 @@
-import FlowSpineWorkspace from '@/components/workflow/FlowSpineWorkspace'
+import { UniversalNativeCockpitPage } from '@/components/mask-builder/UniversalNativeCockpitPage'
 
-export default function FlowSpineProcureToPayPage(): JSX.Element {
-  return <FlowSpineWorkspace processKey="procure-to-pay" />
+export default function FlowSpinePage(): JSX.Element {
+  return <UniversalNativeCockpitPage screenId="workflow/flow-spine-procure-to-pay" />
 }

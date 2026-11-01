@@ -19,12 +19,12 @@ describe('Batch 5–6: Legacy-ObjectPage-Stamm → UniversalMaskRuntime', () => 
     expect(isStammCreationEntityId('DEB-001')).toBe(false)
   })
 
-  const migrated: Array<{ file: string; screenId: string; kind: 'factory' }> = [
+  const migrated: Array<{ file: string; screenId: string; kind: 'factory' | 'native-create' }> = [
     { file: 'finance/debitoren-stamm.tsx', screenId: 'finance/debitor', kind: 'factory' },
     { file: 'finance/kreditoren-stamm.tsx', screenId: 'finance/kreditor', kind: 'factory' },
     { file: 'finance/bankkonten-stamm.tsx', screenId: 'finance/bankkonto', kind: 'factory' },
-    { file: 'futtermittel/einzelfuttermittel-stamm.tsx', screenId: 'futtermittel/einzelfuttermittel', kind: 'factory' },
-    { file: 'futtermittel/mischfuttermittel-stamm.tsx', screenId: 'futtermittel/mischfuttermittel', kind: 'factory' },
+    { file: 'futtermittel/einzelfuttermittel-stamm.tsx', screenId: 'futtermittel/einzelfuttermittel', kind: 'native-create' },
+    { file: 'futtermittel/mischfuttermittel-stamm.tsx', screenId: 'futtermittel/mischfuttermittel', kind: 'native-create' },
     { file: 'crm/opportunity-detail.tsx', screenId: 'crm/opportunity', kind: 'factory' },
     { file: 'agrar/duenger/stamm.tsx', screenId: 'agrar/duenger', kind: 'factory' },
     { file: 'agrar/saatgut/stamm.tsx', screenId: 'agrar/saatgut', kind: 'factory' },
@@ -53,7 +53,8 @@ describe('Batch 5–6: Legacy-ObjectPage-Stamm → UniversalMaskRuntime', () => 
       expect(src).toContain(`'${screenId}'`)
       expect(src).toContain('-legacy')
     } else {
-      expect(src).toContain('<NativeListPage')
+      expect(src).toContain('<UniversalNativeCreatePage')
+      expect(src).toContain('<UniversalNativeDetailPage')
       expect(src).toContain(`screenId="${screenId}"`)
     }
   })

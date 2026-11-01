@@ -11,8 +11,8 @@ from app.integrations.services.superglue_quarantine import build_quarantine_summ
 
 def build_superglue_admin_overview(tenant_id: str) -> dict[str, Any]:
     bindings = list_superglue_connector_bindings(tenant_id)
-    journal = build_execution_journal_summary(limit=50)
-    quarantine = build_quarantine_summary()
+    journal = build_execution_journal_summary(limit=50, tenant_id=tenant_id)
+    quarantine = build_quarantine_summary(tenant_id=tenant_id)
     return {
         "provider_key": "superglue",
         "tenant_id": tenant_id,
@@ -39,10 +39,8 @@ def build_superglue_admin_overview(tenant_id: str) -> dict[str, Any]:
     }
 
 
-def build_superglue_monitoring_summary(tenant_id: str | None = None) -> dict[str, Any]:
-    journal_entries = list_execution_journal_entries(limit=1000)
-    if tenant_id:
-        journal_entries = [entry for entry in journal_entries if str(entry.get("tenant_id")) == tenant_id]
+def build_superglue_monitoring_summary(tenant_id: str) -> dict[str, Any]:
+    journal_entries = list_execution_journal_entries(limit=1000, tenant_id=tenant_id)
     total_latency = sum(int(entry.get("latency_ms") or 0) for entry in journal_entries)
     connector_metrics: dict[str, dict[str, Any]] = {}
     for entry in journal_entries:
@@ -71,7 +69,7 @@ def build_superglue_monitoring_summary(tenant_id: str | None = None) -> dict[str
             bucket["error_rate_pct"] = round((bucket["errors"] / bucket["runs"]) * 100, 1)
         else:
             bucket["error_rate_pct"] = 0.0
-    quarantine = build_quarantine_summary()
+    quarantine = build_quarantine_summary(tenant_id=tenant_id)
     return {
         "provider_key": "superglue",
         "tenant_id": tenant_id,

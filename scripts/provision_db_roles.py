@@ -206,11 +206,53 @@ def apply_plan(conn, plan: Plan) -> int:
     return changed
 
 
+
+def waage_only_grant_plan(conn) -> list[str]:
+    """Fail closed if schema USAGE would expose other unprotected tables."""
+    from sqlalchemy import text
+    role = conn.execute(text("SELECT rolsuper, rolbypassrls FROM pg_roles WHERE rolname='valeo_app'")).one_or_none()
+    if role is None or role.rolsuper or role.rolbypassrls:
+        raise RuntimeError("valeo_app fehlt oder umgeht RLS")
+    bypass = conn.execute(text("""SELECT EXISTS (SELECT 1 FROM pg_roles r WHERE (r.rolsuper OR r.rolbypassrls)
+        AND pg_has_role('valeo_app', r.oid, 'MEMBER'))""")).scalar_one()
+    if bypass:
+        raise RuntimeError("valeo_app kann eine Rolle mit RLS-Bypass annehmen")
+    target = conn.execute(text("""SELECT c.relrowsecurity, c.relforcerowsecurity,
+        pg_has_role('valeo_app', c.relowner, 'MEMBER') AS owner_member FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
+        WHERE n.nspname='domain_ops' AND c.relname='ops_waagen' AND c.relkind IN ('r','p')""")).one_or_none()
+    if target is None or not target.relrowsecurity or (target.owner_member and not target.relforcerowsecurity):
+        raise RuntimeError("Waagen-RLS fehlt oder wird vom Rolleneigentuemer umgangen")
+    queue = conn.execute(text("""SELECT c.relrowsecurity, c.relforcerowsecurity,
+        pg_has_role('valeo_app', c.relowner, 'MEMBER') AS owner_member FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
+        WHERE n.nspname='domain_ops' AND c.relname='waage_import_entries' AND c.relkind IN ('r','p')""")).one_or_none()
+    if queue is None or not queue.relrowsecurity or (queue.owner_member and not queue.relforcerowsecurity):
+        raise RuntimeError("Importqueue-RLS fehlt oder wird vom Rolleneigentuemer umgangen")
+    unsafe = conn.execute(text("""SELECT c.relname FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
+        WHERE n.nspname='domain_ops' AND c.relkind IN ('r','p','v','m','f') AND c.relname <> 'ops_waagen'
+        AND (has_table_privilege('valeo_app',c.oid,'SELECT') OR has_table_privilege('valeo_app',c.oid,'INSERT')
+          OR has_table_privilege('valeo_app',c.oid,'UPDATE') OR has_table_privilege('valeo_app',c.oid,'DELETE'))
+        AND (NOT c.relrowsecurity OR (pg_has_role('valeo_app', c.relowner, 'MEMBER') AND NOT c.relforcerowsecurity))
+        ORDER BY c.relname""")).scalars().all()
+    if unsafe:
+        raise RuntimeError("Schema-USAGE wuerde ungeschuetzte Objekte freigeben: " + ', '.join(unsafe))
+    callable_objects = conn.execute(text("""SELECT p.proname FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
+        WHERE n.nspname='domain_ops' AND has_function_privilege('valeo_app', p.oid, 'EXECUTE')""")).scalars().all()
+    sequences = conn.execute(text("""SELECT c.relname FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
+        WHERE n.nspname='domain_ops' AND c.relkind='S' AND (has_sequence_privilege('valeo_app',c.oid,'USAGE')
+        OR has_sequence_privilege('valeo_app',c.oid,'SELECT') OR has_sequence_privilege('valeo_app',c.oid,'UPDATE'))""")).scalars().all()
+    if callable_objects or sequences:
+        raise RuntimeError("Schema-USAGE wuerde Funktionen oder Sequenzen freigeben")
+    return ["GRANT USAGE ON SCHEMA domain_ops TO valeo_app",
+            "GRANT SELECT, INSERT, UPDATE, DELETE ON domain_ops.ops_waagen TO valeo_app",
+            "GRANT SELECT, INSERT, UPDATE ON domain_ops.waage_import_entries TO valeo_app",
+            "GRANT EXECUTE ON FUNCTION public.waage_reference_allowed(text) TO valeo_app"]
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--url", default=os.environ.get("DATABASE_URL"), help="Superuser-Verbindung zur Zieldatenbank")
     parser.add_argument("--anwenden", action="store_true", help="ausfuehren statt nur planen")
     parser.add_argument("--eigentum", action="store_true", help="Fachschemata und -objekte an valeo_owner uebertragen")
+    parser.add_argument("--waage-only", action="store_true", help="nur gepruefte Waagenrechte fuer valeo_app")
     parser.add_argument("--rollback", action="store_true", help="in einer Transaktion ausfuehren und zuruecknehmen")
     args = parser.parse_args()
     if not args.url:
@@ -225,6 +267,21 @@ def main() -> int:
             if not conn.execute(text("SELECT rolsuper FROM pg_roles WHERE rolname = current_user")).scalar():
                 trans.rollback()
                 raise SystemExit("Rollen und Eigentum lassen sich nur als Superuser einrichten.")
+            if args.waage_only:
+                if args.eigentum:
+                    raise SystemExit("--waage-only und --eigentum nicht kombinieren")
+                grants = waage_only_grant_plan(conn)
+                print(f"Gepruefte Waagenrechte: {len(grants)} Anweisungen")
+                if args.anwenden:
+                    for statement in grants:
+                        conn.execute(text(statement))
+                if args.anwenden and not args.rollback:
+                    trans.commit()
+                    print("Angewendet.")
+                else:
+                    trans.rollback()
+                    print("Nur Plan oder Probelauf, nichts geaendert.")
+                return 0
             plan = build_plan(conn, args.eigentum)
             print(f"Rollen: {len(plan.roles)} Anweisungen, Eigentum: {len(plan.ownership)} Objekte, "
                   f"Rechte: {len(plan.grants)} Anweisungen")

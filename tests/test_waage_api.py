@@ -17,10 +17,10 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from app.main import app
 from conftest import skip_if_db_unavailable
 from app.api.v1.endpoints.waage import _serialize_value, _to_list, router as waage_router
 from app.core.database import get_db
+from app.auth.tenant import get_verified_tenant_id
 from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
 
 _NOW = datetime(2026, 5, 5, 8, 0, tzinfo=timezone.utc)
@@ -58,24 +58,24 @@ class _WaageRepo:
     def __init__(self, items=None):
         self._items = list(items or [])
 
-    def get_all(self, skip=0, limit=100):
+    def get_all(self, tenant_id, skip=0, limit=100):
         return self._items[skip: skip + limit]
 
-    def get_by_status(self, status):
-        return [i for i in self._items if i.status == status]
+    def get_by_status(self, tenant_id, status, skip=0, limit=100):
+        return [i for i in self._items if i.status == status][skip:skip + limit]
 
-    def get_by_id(self, eid):
+    def get_by_id(self, tenant_id, eid):
         return next((i for i in self._items if i.id == eid), None)
 
-    def create(self, data):
+    def create(self, tenant_id, data):
         if data.get("_raise"):
             raise ValueError("boom")
         return _fw("W-new")
 
-    def update(self, eid, data):
+    def update(self, tenant_id, eid, data):
         return next((i for i in self._items if i.id == eid), None)
 
-    def delete(self, eid):
+    def delete(self, tenant_id, eid):
         return any(i.id == eid for i in self._items)
 
 
@@ -123,17 +123,18 @@ def _mock_to_dict(model):
 
 
 @contextlib.contextmanager
-def _client_ctx(waagen=None, wiegungen=None):
+def _client_ctx(waagen=None, wiegungen=None, prefix=""):
     """Context manager that keeps repo patches alive for the lifetime of the client."""
     wr = _WaageRepo(waagen)
     wgr = _WiegungRepo(wiegungen)
     with _mock_patch("app.api.v1.endpoints.waage.WaageRepository", lambda db: wr), \
-         _mock_patch("app.api.v1.endpoints.waage.WiegungRepository", lambda db: wgr), \
+         _mock_patch("app.api.v1.endpoints.waage.WiegungRepository", lambda db: wgr, create=True), \
          _mock_patch("app.api.v1.endpoints.waage._to_dict", _mock_to_dict):
         _app = FastAPI()
-        _app.include_router(waage_router)
+        _app.include_router(waage_router, prefix=prefix)
         ersetze_nutzer(_app, *ALLE_FACHROLLEN)  # Schreibwege pruefen die Bereichsrolle (19.10.2026)
         _app.dependency_overrides[get_db] = lambda: MagicMock()
+        _app.dependency_overrides[get_verified_tenant_id] = lambda: "test-tenant"
         yield TestClient(_app), wgr
 
 
@@ -142,13 +143,14 @@ def _client(waagen=None, wiegungen=None):
     wr = _WaageRepo(waagen)
     wgr = _WiegungRepo(wiegungen)
     patcher_w = _mock_patch("app.api.v1.endpoints.waage.WaageRepository", lambda db: wr)
-    patcher_wg = _mock_patch("app.api.v1.endpoints.waage.WiegungRepository", lambda db: wgr)
+    patcher_wg = _mock_patch("app.api.v1.endpoints.waage.WiegungRepository", lambda db: wgr, create=True)
     patcher_w.start()
     patcher_wg.start()
     _app = FastAPI()
     _app.include_router(waage_router)
     ersetze_nutzer(_app, *ALLE_FACHROLLEN)  # Schreibwege pruefen die Bereichsrolle (19.10.2026)
     _app.dependency_overrides[get_db] = lambda: MagicMock()
+    _app.dependency_overrides[get_verified_tenant_id] = lambda: "test-tenant"
     c = TestClient(_app)
     # Stop after client creation so patches stay active through requests made on c
     # (TestClient is synchronous — requests happen when .get/.post is called, not here)
@@ -158,7 +160,24 @@ def _client(waagen=None, wiegungen=None):
     c._stop_patches = lambda: (patcher_w.stop(), patcher_wg.stop())
     return c, wgr
 
-client = TestClient(app, raise_server_exceptions=False)
+client = None
+
+
+@pytest.fixture(autouse=True)
+def _explicit_prefixed_transport(request, monkeypatch):
+    """HTTP contracts use an explicit mini-app; persistence is tested with rollback.
+
+    These old dev-token tests previously wrote to whichever database app.main
+    selected. The dedicated PostgreSQL contract now owns real SQL verification.
+    """
+    classes = {'TestWaagenList', 'TestWaagenCRUD', 'TestWiegungenList', 'TestWiegungenCRUD'}
+    if request.cls and request.cls.__name__ in classes:
+        import sys
+        with _client_ctx(prefix='/api/v1') as (transport, _):
+            monkeypatch.setattr(sys.modules[__name__], 'client', transport)
+            yield
+    else:
+        yield
 AUTH = {"Authorization": "Bearer dev-token", "X-Tenant-ID": "test-tenant"}
 
 
@@ -204,8 +223,7 @@ class TestWaagenCRUD:
         }
         r = client.post("/api/v1/waage/waagen", headers=AUTH, json=payload)
         skip_if_db_unavailable(r)
-        if r.status_code not in (201, 400, 500):
-            pytest.fail(f"Unexpected status {r.status_code}: {r.text}")
+        assert r.status_code == 422  # identity and unknown body fields are rejected
 
     def test_patch_nonexistent_404(self):
         r = client.patch(
@@ -231,23 +249,23 @@ class TestWiegungenList:
     def test_list_returns_200(self):
         r = client.get("/api/v1/waage/wiegungen", headers=AUTH)
         skip_if_db_unavailable(r)
-        assert r.status_code == 200
-        assert isinstance(r.json(), list)
+        assert r.status_code == 410
+        assert "abgeloest" in r.json()["detail"]
 
     def test_list_with_pagination(self):
         r = client.get("/api/v1/waage/wiegungen?skip=0&limit=10", headers=AUTH)
         skip_if_db_unavailable(r)
-        assert r.status_code == 200
+        assert r.status_code == 410
 
     def test_list_filter_by_waage_id(self):
         r = client.get("/api/v1/waage/wiegungen?waage_id=WAAGE-001", headers=AUTH)
         skip_if_db_unavailable(r)
-        assert r.status_code == 200
+        assert r.status_code == 410
 
     def test_list_filter_by_kennzeichen(self):
         r = client.get("/api/v1/waage/wiegungen?kennzeichen=AB-CD-1234", headers=AUTH)
         skip_if_db_unavailable(r)
-        assert r.status_code == 200
+        assert r.status_code == 410
 
 
 class TestWiegungenCRUD:
@@ -256,7 +274,7 @@ class TestWiegungenCRUD:
     def test_get_nonexistent_404(self):
         r = client.get("/api/v1/waage/wiegungen/NONEXISTENT-WIEGUNG", headers=AUTH)
         skip_if_db_unavailable(r)
-        assert r.status_code == 404
+        assert r.status_code == 410
 
     def test_create_wiegung(self):
         payload = {
@@ -268,13 +286,12 @@ class TestWiegungenCRUD:
         }
         r = client.post("/api/v1/waage/wiegungen", headers=AUTH, json=payload)
         skip_if_db_unavailable(r)
-        if r.status_code not in (201, 400, 500):
-            pytest.fail(f"Unexpected status {r.status_code}: {r.text}")
+        assert r.status_code == 410
 
     def test_delete_nonexistent_404(self):
         r = client.delete("/api/v1/waage/wiegungen/NONEXISTENT-WIEGUNG", headers=AUTH)
         skip_if_db_unavailable(r)
-        assert r.status_code == 404
+        assert r.status_code == 410
 
 
 # ---------------------------------------------------------------------------
@@ -327,11 +344,11 @@ class TestWaagenUnit:
 
     def test_create_ok(self):
         with _client_ctx() as (c, _):
-            assert c.post("/waage/waagen", json={"standort": "A"}).status_code == 201
+            assert c.post("/waage/waagen", json={"standort": "A", "typ": "LKW", "max_kapazitaet": 10}).status_code == 201
 
-    def test_create_error_400(self):
+    def test_create_invalid_payload_422(self):
         with _client_ctx() as (c, _):
-            assert c.post("/waage/waagen", json={"_raise": True}).status_code == 400
+            assert c.post("/waage/waagen", json={"_raise": True}).status_code == 422
 
     def test_update_not_found(self):
         with _client_ctx() as (c, _):
@@ -351,42 +368,15 @@ class TestWaagenUnit:
 
 
 class TestWiegungenUnit:
-    def test_list_empty(self):
-        with _client_ctx() as (c, _):
-            assert c.get("/waage/wiegungen").status_code == 200
-
-    def test_get_not_found(self):
-        with _client_ctx() as (c, _):
-            assert c.get("/waage/wiegungen/WG-miss").status_code == 404
-
-    def test_get_found(self):
-        with _client_ctx(wiegungen=[_fwg("WG-1")]) as (c, _):
-            assert c.get("/waage/wiegungen/WG-1").status_code == 200
-
-    def test_create_netto_auto(self):
-        with _client_ctx() as (c, wgr):
-            r = c.post("/waage/wiegungen", json={
-                "kennzeichen": "HB-1", "artikel": "Mais", "brutto": 30.0, "tara": 10.0
-            })
-            assert r.status_code == 201
-            assert wgr.last_data.get("netto") == pytest.approx(20.0)
-
-    def test_create_explicit_netto_kept(self):
-        with _client_ctx() as (c, wgr):
-            r = c.post("/waage/wiegungen", json={
-                "kennzeichen": "HB-2", "artikel": "Mais",
-                "brutto": 30.0, "tara": 10.0, "netto": 25.0,
-            })
-            assert r.status_code == 201
-            assert wgr.last_data.get("netto") == pytest.approx(25.0)
-
-    def test_delete_not_found(self):
-        with _client_ctx() as (c, _):
-            assert c.delete("/waage/wiegungen/WG-miss").status_code == 404
-
-    def test_delete_found(self):
-        with _client_ctx(wiegungen=[_fwg("WG-1")]) as (c, _):
-            assert c.delete("/waage/wiegungen/WG-1").status_code == 204
+    @pytest.mark.parametrize('method,path,body', [
+        ('get', '/waage/wiegungen', None), ('get', '/waage/wiegungen/WG-1', None),
+        ('post', '/waage/wiegungen', {'kennzeichen': 'HB-1', 'brutto': 30, 'tara': 10}),
+        ('delete', '/waage/wiegungen/WG-1', None)])
+    def test_legacy_source_retired_without_mutation(self, method, path, body):
+        with _client_ctx() as (client, repository):
+            result = client.request(method, path, json=body)
+            assert result.status_code == 410
+            assert repository.last_data == {}
 
 
 class TestWaageLiveUnit:
@@ -418,59 +408,34 @@ class TestWaageLiveUnit:
         assert valid["valid"] is True
 
     def test_parse_ascii_lines_and_import_error_queue(self):
-        import asyncio
-        from app.api.v1.endpoints import waage
+        from app.services.waage_import_service import parse_record, split_records
+        raw = "W;WG1;2026-01-01;08:00;1000;400;600;HB1;L1;;S1;P1;SILO;14.5;78;1.2;X"
+        record = parse_record(split_records(raw + "\nQ;WG1;Protein;11.5;%")[0])
+        assert record['net_weight'] == 600
+        assert record['quality_data']['additional'][0]['parameter'] == 'Protein'
 
-        waage._fehlerqueue.clear()
-        w = waage._parse_w_line(
-            "W;WG1;2026-01-01;08:00;1000;400;600;HB1;L1;A1;S1;P1;SILO;14.5;78;1.2;X".split(";")
-        )
-        assert w["netto_kg"] == pytest.approx(600)
-        q = waage._parse_q_line("Q;WG1;Feuchte;14.5;%".split(";"))
-        assert q["parameter"] == "Feuchte"
-
-        db = MagicMock()
-        db.execute.side_effect = Exception("relation missing")
-        file = MagicMock()
-        file.read = AsyncMock(return_value=b"W;WG1;2026-01-01;08:00;1000;400;600;HB1;L1;A1;S1;P1;SILO;14.5;78;1.2;X\nBAD\n")
-        result = asyncio.run(waage.import_ascii(file=file, waage_id="WA-1", fehler_toleranz=True, db=db))
-        assert result["imported"] == 0
-        assert result["skipped"] == 2
-        assert len(waage._fehlerqueue) == 1
 
     def test_fehlerqueue_retry_delete_and_404(self):
-        import asyncio
+        from app.services import waage_import_service as service
         from fastapi import HTTPException
-        from app.api.v1.endpoints import waage
+        db = MagicMock()
+        db.query.return_value.filter.return_value.first.return_value = None
+        with pytest.raises(HTTPException) as denied:
+            service.queue_entry(db, 'tenant-a', 'foreign-entry')
+        assert denied.value.status_code == 404
+        db.commit.assert_not_called()
 
-        waage._fehlerqueue[:] = [{"id": "E1", "retry_count": 0}]
-        retry = asyncio.run(waage.retry_fehlerqueue_entry("E1"))
-        assert retry["entry"]["retry_count"] == 1
-        assert asyncio.run(waage.list_fehlerqueue())[0]["id"] == "E1"
-        asyncio.run(waage.delete_fehlerqueue_entry("E1"))
-        with pytest.raises(HTTPException):
-            asyncio.run(waage.retry_fehlerqueue_entry("missing"))
 
     def test_kalibrierung_status_get_update_paths(self):
-        import asyncio
-        from fastapi import HTTPException
+        from types import SimpleNamespace
         from app.api.v1.endpoints import waage
+        scale = SimpleNamespace(id='own', letzte_eichung=_NOW, naechste_eichung=_NOW, eichamt='Amt', zertifikat_nr='Z')
+        with _mock_patch.object(waage, 'WaageRepository') as repo:
+            repo.return_value.get_by_id.return_value = scale
+            result = asyncio.run(waage.get_kalibrierung('own', db=MagicMock(), tenant_id='t-1'))
+        assert result['letztes_eichdatum'] == '2026-05-05'
+        assert result['eichamt'] == 'Amt'
 
-        assert waage._kalibrierung_status(None) == "faellig"
-        assert waage._kalibrierung_status("bad") == "unbekannt"
-
-        row = ({"letztes_eichdatum": "2026-01-01", "naechste_eichfaelligkeit": "2999-01-01"},)
-        db = MagicMock()
-        db.execute.return_value.fetchone.return_value = row
-        got = asyncio.run(waage.get_kalibrierung("WA-1", db=db))
-        assert got["kalibrierungsstatus"] == "ok"
-        upd = asyncio.run(waage.update_kalibrierung("WA-1", {"eichamt": "Amt"}, db=db))
-        assert upd["eichamt"] == "Amt"
-
-        db_missing = MagicMock()
-        db_missing.execute.return_value.fetchone.return_value = None
-        with pytest.raises(HTTPException):
-            asyncio.run(waage.get_kalibrierung("missing", db=db_missing))
 
     def test_dual_wiegung_schreibt_den_kanonischen_schein(self):
         """Vorher prueffte dieser Test den JSONB-Rueckfall als Erfolgsfall.
@@ -513,24 +478,15 @@ class TestWaageLiveUnit:
         assert "domain_agrar.wiegungen" not in anweisungen
 
     def test_import_ascii_success_quality_and_strict_parse_error(self):
-        from app.api.v1.endpoints import waage
+        from fastapi import HTTPException
+        from app.services.waage_import_service import parse_record, split_records
+        good = "W;WG1;2026-01-01;08:00;1000;400;600;HB1;L1;;S1;P1;SILO;14.5;78;1.2;X"
+        assert parse_record(good)['net_weight'] == 600
+        with pytest.raises((ValueError, HTTPException)):
+            parse_record(good.replace(';600;', ';999;'))
+        with pytest.raises(HTTPException):
+            split_records(good + '\n' + good)
 
-        db = MagicMock()
-        file_ok = MagicMock()
-        file_ok.read = AsyncMock(return_value=(
-            b"W;WG1;2026-01-01;08:00;1000;400;600;HB1;L1;A1;S1;P1;SILO;14.5;78;1.2;X\n"
-            b"Q;WG1;Feuchte;14.5;%\n"
-            b"Q;OTHER;Feuchte;15;%\n"
-        ))
-        result = asyncio.run(waage.import_ascii(file=file_ok, waage_id="WA-1", fehler_toleranz=True, db=db))
-        assert result["imported"] == 1
-        assert result["skipped"] == 1
-        assert db.commit.call_count >= 2
-
-        file_bad = MagicMock()
-        file_bad.read = AsyncMock(return_value=b"W;too;short\n")
-        strict = asyncio.run(waage.import_ascii(file=file_bad, waage_id="WA-1", fehler_toleranz=False, db=MagicMock()))
-        assert strict["errors"]
 
     def test_kalibrierung_update_db_error_and_extended_errors(self):
         import asyncio
@@ -538,10 +494,11 @@ class TestWaageLiveUnit:
         from app.api.v1.endpoints import waage
 
         db_update_error = MagicMock()
-        db_update_error.execute.side_effect = [MagicMock(fetchone=MagicMock(return_value=({},))), Exception("boom")]
+        db_update_error.query.return_value.filter.return_value.with_for_update.return_value.first.return_value = None
         with pytest.raises(HTTPException) as exc:
-            asyncio.run(waage.update_kalibrierung("WA-1", {"eichamt": "Amt"}, db=db_update_error))
-        assert exc.value.status_code == 503
+            asyncio.run(waage.update_kalibrierung('foreign', waage.WaageCalibrationUpdate(eichamt='Amt'), db=db_update_error, tenant_id='t-1', user={'sub': 'user'}))
+        assert exc.value.status_code == 404
+        db_update_error.commit.assert_not_called()
 
         db_extended_missing = MagicMock()
         db_extended_missing.execute.return_value.mappings.return_value.first.return_value = None

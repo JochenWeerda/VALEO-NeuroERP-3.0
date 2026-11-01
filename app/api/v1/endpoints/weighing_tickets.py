@@ -216,6 +216,8 @@ async def create_weighing_ticket(
     )
     if not dq_result.bestanden:
         raise HTTPException(status_code=422, detail=build_dq_error_detail("Wiegeschein", dq_result))
+    from app.services.waage_import_service import reference_allowed
+    reference_allowed(db, payload.scale_id)
     ticket = WeighingTicket(
         id=uuid7(),
         ticket_number=payload.ticket_number,

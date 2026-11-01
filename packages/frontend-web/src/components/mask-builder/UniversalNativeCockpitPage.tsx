@@ -1,11 +1,11 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { NativeSelect } from '@/components/ui/native-select'
 import { AlertCircle } from 'lucide-react'
 import { useSearchParams } from '@/app/routing/typed-router'
 import { readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
 import { WorkflowProcessBand } from '@/components/workflow/WorkflowProcessBand'
 import type { RenderPlan } from './render-plan/types'
-import { evaluateListExperience, formatListAggregate } from './runtime/list-experience'
+import { evaluateListExperience, formatListAggregate, selectListRoleFocus, focusListInsights } from './runtime/list-experience'
 import { UniversalMaskRenderer, useUniversalMaskRuntime } from '@/components/mask-builder'
 import { useScreenDefinition } from '@/lib/api/masks'
 
@@ -54,9 +54,14 @@ export function UniversalNativeCockpitPage({
     if (plan && onListData) onListData(firstRows ?? [], plan)
   }, [plan, firstRows, onListData])
   const experience = plan?.listExperience
+  const [focusSelection, setFocusSelection] = useState<{ screen: string; key: string } | null>(null)
+  const selectedFocusKey = focusSelection?.screen === screenId ? focusSelection.key : undefined
   let result: ReturnType<typeof evaluateListExperience> | undefined
   let aggregateError = false
   try { result = experience && firstRows ? evaluateListExperience(experience, firstRows) : undefined } catch { aggregateError = true }
+
+  const focus = experience ? selectListRoleFocus(experience, selectedFocusKey) : undefined
+  const insights = experience && result ? focusListInsights(experience, result.insights, selectedFocusKey) : []
 
   if (schemaQuery.isLoading) {
     return (
@@ -92,6 +97,13 @@ export function UniversalNativeCockpitPage({
             }})} />
         </label>)}
       </section>}
+      {experience?.roleFocus && <section aria-label="Arbeitsfokus" className="space-y-2 px-4 py-3">
+        <label className="text-sm text-foreground">Arbeitsfokus
+          <NativeSelect ariaLabel="Arbeitsfokus" options={experience.roleFocus.options.map(option => ({ value: option.key, label: option.label }))}
+            value={focus?.key ?? 'all'} onValueChange={key => setFocusSelection({ screen: screenId, key })} />
+        </label>
+        {focus?.description && <p className="text-sm text-muted-foreground">{focus.description}</p>}
+      </section>}
       <UniversalMaskRenderer
         plan={plan}
         flowSpineCatalog={runtime.flowSpineCatalog}
@@ -112,7 +124,7 @@ export function UniversalNativeCockpitPage({
       {experience && result && <section aria-label="Listenübersicht" className="space-y-2 px-4 py-3">
         <dl className="grid grid-cols-2 gap-x-6 gap-y-2 md:grid-cols-3 xl:grid-cols-6">{experience.aggregates.map(a => <div key={a.key}><dt className="text-sm text-muted-foreground">{a.label}</dt><dd className="font-semibold">{formatListAggregate(a, result.counts[a.key], result.currencies?.[a.key])}</dd></div>)}</dl>
         {result.notice && <p role="status">{result.notice}</p>}
-        {result.insights.length > 0 && <dl className="grid gap-x-6 gap-y-2 md:grid-cols-2 xl:grid-cols-3">{result.insights.map(line => <div key={line.label}><dt className="font-medium">{line.label}</dt><dd>{line.text}</dd></div>)}</dl>}
+        {insights.length > 0 && <dl className="grid gap-x-6 gap-y-2 md:grid-cols-2 xl:grid-cols-3">{insights.map(line => <div key={line.key ?? line.label}><dt className="font-medium">{line.label}</dt><dd>{line.text}</dd></div>)}</dl>}
       </section>}
     </div>
   )

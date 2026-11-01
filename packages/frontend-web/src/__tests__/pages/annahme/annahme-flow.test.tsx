@@ -1,11 +1,14 @@
+import { renderStudio as render } from '@/__tests__/helpers/studio-intake-render'
 /**
  * Annahme-Kernflow Tests (Wave 91)
  * Gap 002, 021, 023, 024
  */
 
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { screen, fireEvent } from '@testing-library/react'
 import React from 'react'
+import LKWRegistrierungPage from '@/pages/annahme/lkw-registrierung'
+import QualitaetsCheckPage from '@/pages/annahme/qualitaets-check'
 
 // ============================================================
 // Gruppe 1: useTouchDevice() Hook — JSDOM-Sicherheit
@@ -186,13 +189,11 @@ vi.mock('@tanstack/react-query', async () => {
 
 describe('AnnahmeFlowSeiten', () => {
   it('lkw-registrierung exportiert default-Komponente', async () => {
-    const mod = await import('@/pages/annahme/lkw-registrierung')
-    expect(typeof mod.default).toBe('function')
+    expect(typeof LKWRegistrierungPage).toBe('function')
   })
 
   it('qualitaets-check exportiert default-Komponente', async () => {
-    const mod = await import('@/pages/annahme/qualitaets-check')
-    expect(typeof mod.default).toBe('function')
+    expect(typeof QualitaetsCheckPage).toBe('function')
   })
 
   it('abrechnung exportiert default-Komponente', async () => {
@@ -201,17 +202,43 @@ describe('AnnahmeFlowSeiten', () => {
   })
 
   it('LKWRegistrierungPage rendert ohne Fehler', async () => {
-    const { default: Page } = await import('@/pages/annahme/lkw-registrierung')
-    expect(() => render(React.createElement(Page))).not.toThrow()
+    expect(() => render(React.createElement(LKWRegistrierungPage))).not.toThrow()
   })
 
   it('QualitaetsCheckPage rendert ohne Fehler', async () => {
-    const { default: Page } = await import('@/pages/annahme/qualitaets-check')
-    expect(() => render(React.createElement(Page))).not.toThrow()
+    expect(() => render(React.createElement(QualitaetsCheckPage))).not.toThrow()
   })
 
   it('AnnahmeAbrechnungPage rendert ohne Fehler', async () => {
     const { default: Page } = await import('@/pages/annahme/abrechnung')
     expect(() => render(React.createElement(Page))).not.toThrow()
   })
+})
+
+
+// Test identities/read hooks remain explicit doubles; the real Studio compiler,
+// runtime and renderer execute the native ScreenDefinition fixture.
+vi.mock('@/lib/api/masks', async () => {
+  const fixtures = (await import('@/__tests__/fixtures/intake-weighing-screens.json')).default
+  return { useScreenDefinition: (id: string) => ({ data: (fixtures as Record<string, unknown>)[id], isLoading: false, error: null }) }
+})
+vi.mock('@/components/mask-builder/runtime/screen-permissions', () => ({
+  useScreenPermissions: (definition: { actions?: Array<{ permission?: string }> }) => definition?.actions?.flatMap(action => action.permission ? [action.permission] : []) ?? [],
+}))
+vi.mock('@/lib/api/ux-overlays', () => ({
+  useUserScreenOverlay: () => ({ data: undefined }), overlayKeys: { screen: (id: string) => ['test-overlay', id] },
+  saveUserOverlay: vi.fn(), deleteUserOverlay: vi.fn(),
+}))
+vi.mock('@/components/mask-builder/specialized/intake/domain-data', async () => {
+  const inventory = await import('@/lib/api/inventory')
+  const tickets = await import('@/lib/api/weighing-tickets')
+  const supply = await import('@/lib/api/supply-chain')
+  return {
+    useDomainIdentity: () => ({ tenantId: 'test-tenant', actor: 'test-operator' }),
+    useDomainQueue: () => inventory.useWarteschlange(),
+    useDomainQueueEntry: (id: string) => inventory.useWarteschlangeEintrag(id),
+    useDomainTickets: () => tickets.useWeighingTickets({ limit: 100 }),
+    useDomainContracts: () => tickets.useOpenContracts(),
+    useDomainSupplyChain: () => supply.useSupplyChainOverview(),
+  }
 })

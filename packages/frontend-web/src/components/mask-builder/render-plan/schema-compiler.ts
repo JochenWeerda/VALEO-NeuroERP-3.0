@@ -132,6 +132,7 @@ function filterActionsByPermission(
       label: action.label,
       kind: action.kind ?? 'secondary',
       disabled: action.disabled ?? false,
+      surfaceOnly: action.surfaceOnly,
       dangerLevel: action.dangerLevel,
       requiresConfirmation: action.requiresConfirmation,
       auditReasonRequired: action.auditReasonRequired,
@@ -227,13 +228,13 @@ export function compileTwin(schema: ScreenDefinition): RenderTwinPlan | undefine
 function schemaVolatility(schema: ScreenDefinition): string {
   // Studio edits retain the same screen ID/version until they are saved. All
   // editable field/table/tab/layout contracts must participate in this cache.
-  const structure = JSON.stringify({ flowSpineCatalog: schema.flowSpineCatalog, listExperience: schema.listExperience, actions: schema.actions, documentVariant: schema.documentVariant, fields: schema.fields, tables: schema.tables, tabs: schema.tabs, layout: schema.layout, dataSources: schema.dataSources, specialized: schema.specialized })
+  const structure = JSON.stringify({ title: schema.title, subtitle: schema.subtitle, flowSpineCatalog: schema.flowSpineCatalog, flowSpineWorkspace: schema.flowSpineWorkspace, listExperience: schema.listExperience, actions: schema.actions, documentVariant: schema.documentVariant, fields: schema.fields, tables: schema.tables, tabs: schema.tabs, layout: schema.layout, dataSources: schema.dataSources, specialized: schema.specialized })
   const summary = (schema.summary ?? []).map((item) => `${item.key}:${String(item.value)}`).join(',')
   const options = (schema.fields ?? []).map((field) => (
     // Auch die Beschriftung: Eine Auswahl kann bei gleichen Werten neu beschriftet werden (Vorschlagshinweis).
     field.options ? `${field.key}=${field.options.map((option) => `${String(option.value)}~${option.label}`).join('|')}` : ''
   )).join(';')
-  const actions = (schema.actions ?? []).map((action) => `${action.key}${action.disabled ? '!' : ''}`).join(',')
+  const actions = (schema.actions ?? []).map((action) => `${action.key}${action.disabled ? '!' : ''}${action.surfaceOnly ? ':surface' : ''}`).join(',')
   // Schreibschutz und Untertitel aendern sich zur Laufzeit (ein geladener Datensatz sperrt sein
   // Schluesselfeld). Ohne sie im Schluessel lieferte der Cache den Plan des vorigen Zustands.
   const readOnly = (schema.fields ?? []).filter((field) => field.readOnly).map((field) => field.key).join(',')
@@ -248,6 +249,9 @@ export function compileRenderPlan(
   if (schema.listExperience !== undefined && validateScreenDefinition(schema).includes('listExperience is invalid')) {
     throw new Error('Invalid declarative list experience')
   }
+  if (validateScreenDefinition(schema).includes('fileContent is invalid')) throw new Error('Invalid text file contract')
+  if (schema.specialized && validateScreenDefinition(schema).some(error => error.startsWith('specialized'))) throw new Error('Invalid native specialized contract')
+  if (schema.flowSpineWorkspace !== undefined && validateScreenDefinition(schema).includes('flowSpineWorkspace is invalid')) throw new Error('Invalid process workspace contract')
   if (schema.flowSpineCatalog !== undefined && validateScreenDefinition(schema).includes('flowSpineCatalog is invalid')) throw new Error('Invalid process catalog contract')
   const cacheKey = `${buildRenderPlanCacheKey(context)}::${schemaVolatility(schema)}`
   const cached = globalRenderPlanCache.get(cacheKey)
@@ -342,6 +346,7 @@ export function compileRenderPlan(
 
   const plan: RenderPlan = {
     flowSpineCatalog: schema.flowSpineCatalog,
+    flowSpineWorkspace: schema.flowSpineWorkspace,
     listExperience: schema.listExperience,
     documentVariant: schema.documentVariant ? { ...schema.documentVariant } : undefined,
     cacheKey,

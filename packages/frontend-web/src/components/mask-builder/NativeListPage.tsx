@@ -86,9 +86,9 @@ export function NativeListPage({ screenId, testId }: { screenId: string; testId?
   const schema = useScreenDefinition(screenId).data
   const permissions = useScreenPermissions(schema)
   const surface = useRef<HTMLDivElement | null>(null)
-  const listData = useRef<Row[] | null>(null)
+  const listData = useRef<{ screen: string; rows: Row[] } | null>(null)
   const workflowQuery = useRef(new URLSearchParams())
-  const captureRows = useCallback((rows: Row[]) => { listData.current = rows }, [])
+  const captureRows = useCallback((rows: Row[]) => { listData.current = { screen: screenId, rows } }, [screenId])
   const captureQuery = useCallback((query: URLSearchParams) => { workflowQuery.current = query }, [])
   const laufend = useRef(new Set<string>())
   const absicht = useRef<{ inhalt: string; id: string } | null>(null)
@@ -177,7 +177,7 @@ export function NativeListPage({ screenId, testId }: { screenId: string; testId?
 
   async function exportieren(): Promise<void> {
     if (schema?.listExperience) {
-      const rows = listData.current
+      const rows = listData.current?.screen === screenId ? listData.current.rows : undefined
       if (!rows?.length) {
         toast({ title: 'Keine Daten', description: 'Es gibt nichts zu exportieren.', variant: 'destructive' })
         return
@@ -219,6 +219,16 @@ export function NativeListPage({ screenId, testId }: { screenId: string; testId?
       setStufe('eingabe')
       return
     }
+    if (aktion.localEffect === 'print' && !aktion.commandEndpoint) {
+      const rows = listData.current?.screen === screenId ? listData.current.rows : undefined
+      const columns = schema?.listExperience?.export.columns
+      if (!rows?.length || !columns?.length) {
+        toast({ title: 'Keine vollstaendige Drucksicht', description: 'Bitte die Liste laden und den Filter pruefen.', variant: 'destructive' })
+        return
+      }
+      printTable(rows, schema?.title ?? screenId, columns)
+      return
+    }
     if (aktion.localEffect === 'download' && !aktion.commandEndpoint) {
       void exportieren()
       return
@@ -230,7 +240,7 @@ export function NativeListPage({ screenId, testId }: { screenId: string; testId?
         toast({ title: 'Druck nicht verfügbar', description: 'Für diese Liste fehlt die Druckdatenfreigabe.', variant: 'destructive' })
         return
       }
-      const rows = listData.current
+      const rows = listData.current?.screen === screenId ? listData.current.rows : undefined
       if (!rows?.length) {
         toast({ title: 'Keine Daten', description: 'Es gibt nichts zu drucken.', variant: 'destructive' })
         return

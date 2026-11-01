@@ -266,7 +266,8 @@ def _check_readiness(definition: dict[str, Any]) -> dict[str, Any]:
 
     # 6. actions_classified — every action has dangerLevel + permission (or stubReason)
     actions = definition.get("actions") or []
-    unclassified = [a_["key"] for a_ in actions if not a_.get("dangerLevel") or (not a_.get("permission") and not a_.get("stubReason"))]
+    from app.core.screen_governance import is_local_view_action
+    unclassified = [a_["key"] for a_ in actions if not a_.get("dangerLevel") or (not a_.get("permission") and not a_.get("stubReason") and not is_local_view_action(a_))]
     m("actions_classified",
       not actions or not unclassified,
       f"actions missing dangerLevel or permission: {', '.join(unclassified)}" if unclassified else

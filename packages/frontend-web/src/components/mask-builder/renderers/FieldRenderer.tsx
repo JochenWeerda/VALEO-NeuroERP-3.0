@@ -111,6 +111,7 @@ export function FieldRenderer({
       : undefined,
   }
 
+
   if (field.type === 'stringList') {
     const listValue = value === undefined ? [] : value
     const valid = Array.isArray(listValue) && listValue.every((item) => typeof item === 'string')

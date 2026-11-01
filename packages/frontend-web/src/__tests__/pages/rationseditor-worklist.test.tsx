@@ -5,10 +5,14 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import RationsEditorPage from '@/pages/futtermittel/rationseditor'
+import RationsEditorPage from '@/components/mask-builder/specialized/feed/ration-editor-surface'
 
 const listRationsMock = vi.hoisted(() => vi.fn())
 const locationState = vi.hoisted(() => ({ search: '' }))
+
+vi.mock('@/components/mask-builder/specialized/intake/domain-data', () => ({
+  useDomainIdentity: () => ({ tenantId: 'test-tenant', actor: 'test-actor' }),
+}))
 
 vi.mock('@/lib/api/rations-lifecycle', () => ({
   listRations: listRationsMock,

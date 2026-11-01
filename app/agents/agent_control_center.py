@@ -164,7 +164,7 @@ def build_control_center_incidents(tenant_id: str | None = None) -> dict[str, An
     ops = get_agent_ops_service()
     control_center = ops.build_control_center(tenant_id)
     readiness = build_superglue_live_readiness(tenant_id)
-    quarantine = build_quarantine_summary()
+    quarantine = build_quarantine_summary(tenant_id=tenant_id)
     admin_overview = build_superglue_admin_overview(tenant_id)
 
     incidents: list[dict[str, Any]] = []
@@ -252,11 +252,11 @@ def apply_control_center_incident_action(
     if incident_id.startswith("superglue:quarantine:"):
         entry_id = incident_id.rsplit(":", 1)[1]
         if action == "resolve":
-            result = resolve_quarantine_entry(entry_id=entry_id, resolved_by=requested_by, note=note)
+            result = resolve_quarantine_entry(tenant_id=tenant_id, entry_id=entry_id, resolved_by=requested_by, note=note)
         elif action == "retry":
-            result = retry_quarantine_entry(entry_id=entry_id, retried_by=requested_by, note=note, dead_letter=False)
+            result = retry_quarantine_entry(tenant_id=tenant_id, entry_id=entry_id, retried_by=requested_by, note=note, dead_letter=False)
         elif action == "dead_letter":
-            result = retry_quarantine_entry(entry_id=entry_id, retried_by=requested_by, note=note, dead_letter=True)
+            result = retry_quarantine_entry(tenant_id=tenant_id, entry_id=entry_id, retried_by=requested_by, note=note, dead_letter=True)
         else:
             raise ValueError(f"Unsupported quarantine incident action '{action}'")
         return {"incident_id": incident_id, "result": result, "schema_version": 1}

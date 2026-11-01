@@ -3,7 +3,8 @@ Accounts Payable (AP) Invoices API
 FIBU-AP-02: Eingangsrechnungen
 """
 
-from fastapi import APIRouter, HTTPException, Depends, Body
+from fastapi import APIRouter, HTTPException, Depends, Body, Query
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from typing import List, Optional, Any
@@ -19,7 +20,9 @@ from app.core.data_quality_enforcement import (
 )
 from app.core import endpoint_gateways
 from app.core.ap_approval_status import APPROVAL_STATUS_TO_DOCUMENT_STATUS
-from app.documents.models import SalesInvoice  # Reusing model structure for now
+from app.documents.models import SalesInvoice, DocLine  # Reusing model structure for now
+from pydantic import BaseModel
+from decimal import Decimal
 from app.documents.router_helpers import get_repository, save_to_store, get_from_store, list_from_store, delete_from_store
 from app.documents.repository import DocumentAlreadyExists, DocumentOwnershipError
 from app.finance.steuerschluessel import Steuerklaerung, vorsteuergruppen
@@ -35,6 +38,43 @@ from app.services.ap_invoice_approval_service import APApprovalWorkflowService
 
 
 router = APIRouter(prefix="/ap/invoices", tags=["finance", "ap", "invoices"])
+
+
+@router.get("/supplier-lookup", summary="Rechnungslieferanten suchen", dependencies=[Depends(finance_read)])
+def invoice_supplier_lookup(
+    q: str = Query("", min_length=2),
+    limit: int = Query(25, ge=1, le=25),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> list[dict[str, str]]:
+    rows = db.execute(text("""
+        SELECT partner_id, name_1, partner_number FROM domain_crm.business_partners
+        WHERE tenant_id = :tid AND is_supplier AND status = 'active'
+          AND (name_1 ILIKE :query OR partner_number ILIKE :query)
+        ORDER BY partner_number LIMIT :limit
+    """), {"tid": tenant_id, "query": f"%{q.strip()}%", "limit": limit}).fetchall()
+    return [{"value": str(row[0]), "label": f"{row[1]} ({row[2]})"} for row in rows]
+
+
+class APInvoiceTaxPreviewIn(BaseModel):
+    lines: list[DocLine]
+
+
+@router.post("/steuer-vorschau", summary="Eingangsrechnung Vorsteuer vorschauen", dependencies=[Depends(finance_read)])
+def preview_ap_invoice_tax(
+    body: APInvoiceTaxPreviewIn,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Preview against the same tax keys and account checks as posting."""
+    try:
+        groups = vorsteuergruppen(db, tenant_id, positionen({"lines": [line.model_dump() for line in body.lines]}))
+    except Steuerklaerung as error:
+        return {"geklaert": False, "pruefgrund": str(error), "netto": None, "steuer": None, "brutto": None,
+                "gruppen": []}
+    netto, steuer, brutto = summen(groups)
+    return {"geklaert": True, "pruefgrund": None, "netto": netto, "steuer": steuer, "brutto": brutto,
+            "gruppen": [group.model_dump(mode="json") for group in groups]}
 
 
 def _build_ap_invoice_dq_datensatz(invoice: SalesInvoice) -> dict[str, Any]:
@@ -148,8 +188,14 @@ async def create_ap_invoice(
     actor = gepruefter_akteur(nutzer)
     logger.info(f"Creating AP invoice: {doc.number}")
     try:
-        doc.date = datetime.now().isoformat()[:10]  # Set current date
-        doc.dueDate = (datetime.now() + timedelta(days=30)).isoformat()[:10]  # Default 30 days due
+        supplier_exists = db.execute(text("""
+            SELECT 1 FROM domain_crm.business_partners
+            WHERE partner_id = :id AND tenant_id = :tid AND is_supplier AND status = 'active'
+        """), {"id": doc.customerId, "tid": tenant_id}).scalar()
+        if not supplier_exists:
+            raise HTTPException(status_code=404, detail="Lieferant nicht gefunden")
+        # The captured supplier invoice date and due date are business evidence.
+        # Do not replace them with today's dates after the user has checked them.
         doc.status = "ENTWURF"  # Initial status
 
         doc = calculate_invoice_totals(doc, db, tenant_id)

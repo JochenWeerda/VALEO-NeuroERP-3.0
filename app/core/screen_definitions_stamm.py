@@ -345,24 +345,46 @@ def build_crm_betriebsprofil_stamm() -> dict[str, Any]:
 
 
 def build_crm_campaign_stamm() -> dict[str, Any]:
-    return _stamm(
-        screen_id="crm/campaign",
-        domain="crm",
-        title="Kampagne",
-        subtitle="Marketingkampagne",
-        endpoint="/api/v1/crm/campaigns/{entity_id}",
-        identity="name",
-        felder=[
-        _feld("name", "Name"),
-        _feld("status", "Status"),
-        _feld("channel", "Kanal"),
-        _feld("start_date", "Start", "date"),
-        ],
-        edit_permission="crm.campaign.update",
-        test_id="crm-campaign-stamm",
-        purpose="Kampagnendetail.",
-        prompts=['Welchen Status hat Kampagne {entity_id}?'],
-    )
+    fields = [
+        _feld("name", "Name", required=True), _feld("description", "Beschreibung", "textarea"),
+        _feld("campaign_type", "Kampagnentyp", "select", required=True, options=[{"value": value, "label": value} for value in ("email", "sms", "post", "event", "webinar", "push")]), _feld("template_id", "Vorlage"),
+        _feld("segment_id", "Segment"), _feld("start_date", "Start", "date"),
+        _feld("end_date", "Ende", "date"), _feld("budget", "Budget", "number"),
+        _feld("owner_id", "Verantwortlich"), _feld("campaign_channel", "Kanal"),
+        _feld("target_customer_type", "Zielkundentyp"), _feld("seasonal_context", "Saison"),
+    ]
+    base = "/api/v1/crm/campaigns"
+    definition = _stamm(screen_id="crm/campaign", domain="crm", title="Kampagne", subtitle="Marketingkampagne",
+        endpoint=base + "/{entity_id}", identity="name", felder=[*fields, _feld("state", "Status", readOnly=True),
+        _feld("created_at", "Erstellt", "datetime", readOnly=True), _feld("updated_at", "Geändert", "datetime", readOnly=True)],
+        edit_permission="crm.campaign.update", test_id="crm-campaign-stamm", purpose="Kampagne bearbeiten.",
+        prompts=["Welchen Status hat Kampagne {entity_id}?"],
+        creation={"endpoint": base, "permission": "crm.campaign.update", "detailRoute": "/crm/campaign/{entity_id}",
+                  "cancelRoute": "/crm/campaigns", "defaults": {"campaign_type": "email"}, "fields": fields},
+        edit_action_overrides={"commandEndpoint": base + "/{entity_id}", "method": "PUT", "forbiddenForAgents": True,
+                               "responseAdapter": "resource.v1", "inputPrefill": "entity", "inputFields": fields},
+        extra_actions=[{"key": key, "label": label, "kind": "secondary", "dangerLevel": "safe",
+                        "permission": "crm.campaign.update", "forbiddenForAgents": True,
+                        "commandEndpoint": base + "/{entity_id}/" + key, "method": "POST", "responseAdapter": "resource.v1"}
+                       for key, label in [("activate", "Starten"), ("pause", "Pausieren"), ("resume", "Fortsetzen"), ("complete", "Abschließen"), ("archive", "Archivieren")]])
+    definition["dataSources"].append(stamm_tab_source("recipients", base + "/{entity_id}/recipients"))
+    definition["tabs"].append(_register("recipients", "Empfänger", "recipients", [
+        {"key": "recipient_id", "label": "Empfänger"}, {"key": "recipient_type", "label": "Typ"},
+        {"key": "status", "label": "Status"}, {"key": "sent_at", "label": "Gesendet"}]))
+    transitions = {"activate": ["draft"], "pause": ["active"], "resume": ["paused"], "complete": ["active"], "archive": ["draft", "active", "paused", "completed"]}
+    for action in definition["actions"]:
+        if action["key"] in transitions:
+            action["enabledWhen"] = {"any": [{"path": "state", "equals": state} for state in transitions[action["key"]]]}
+            action["requiresConfirmation"] = action["key"] in {"activate", "complete", "archive"}
+    definition["actions"].append({"key": "delete", "label": "Kampagne löschen", "kind": "danger", "dangerLevel": "high", "permission": "crm.campaign.update", "forbiddenForAgents": True, "requiresConfirmation": True, "commandEndpoint": base + "/{entity_id}", "method": "DELETE", "responseAdapter": "resource.v1", "resultNavigationRoute": "/crm/campaigns", "enabledWhen": {"any": [{"path": "state", "equals": state} for state in ("draft", "archived")]}})
+    definition["actions"].append({"key": "back", "label": "Zur Kampagnenliste", "kind": "secondary", "dangerLevel": "safe", "localEffect": "navigation", "navigationRoute": "/crm/campaigns"})
+    definition["tabs"].append(stamm_entity_tab(key="analytics", label="Kennzahlen", fields=[
+        _feld("kpis." + key, label, "number", readOnly=True) for key, label in
+        [("total_sent", "Gesendet"), ("total_delivered", "Zugestellt"), ("total_bounced", "Unzustellbar"), ("total_opens", "Geoeffnet"), ("total_clicks", "Klicks"), ("total_conversions", "Konversionen"), ("revenue_generated", "Umsatz"), ("open_rate", "Oeffnungsrate (%)"), ("click_rate", "Klickrate (%)"), ("conversion_rate", "Konversionsrate (%)")]]))
+    definition["dataSources"].append(stamm_tab_source("timeline", base + "/{entity_id}/timeline"))
+    definition["tabs"].append(_register("timeline", "Zeitverlauf", "timeline", [{"key": key, "label": label} for key, label in [("day", "Tag"), ("sent", "Gesendet"), ("opens", "Geoeffnet"), ("clicks", "Klicks"), ("conversions", "Konversionen")]]))
+    definition["summary"] = []
+    return definition
 
 
 
@@ -411,6 +433,7 @@ def build_crm_campaign_template_stamm() -> dict[str, Any]:
              "commandEndpoint": "/api/v1/crm/campaigns/templates/{entity_id}/duplicate",
              "method": "POST", "responseAdapter": "resource.v1",
              "resultNavigationRoute": "/crm/campaign-template/{result_id}"},
+            {"key": "delete", "label": "Vorlage löschen", "kind": "danger", "dangerLevel": "high", "permission": "crm.campaign.update", "forbiddenForAgents": True, "requiresConfirmation": True, "commandEndpoint": "/api/v1/crm/campaigns/templates/{entity_id}", "method": "DELETE", "responseAdapter": "resource.v1", "resultNavigationRoute": "/crm/campaign-templates"},
             {"key": "back", "label": "Zurück", "kind": "secondary", "dangerLevel": "safe",
              "localEffect": "navigation", "stubReason": "Oeffnet die Liste; keine Serverwirkung.",
              "navigationRoute": "/crm/campaign-templates"},
@@ -421,65 +444,121 @@ def build_crm_campaign_template_stamm() -> dict[str, Any]:
 
 
 def build_crm_consent_stamm() -> dict[str, Any]:
-    return _stamm(
-        screen_id="crm/consent",
-        domain="crm",
-        title="Einwilligung",
-        subtitle="DSGVO-Einwilligung",
-        endpoint="/api/v1/crm/consents/{entity_id}",
-        identity="purpose",
-        felder=[
-        _feld("purpose", "Zweck"),
-        _feld("status", "Status"),
-        _feld("granted_at", "Erteilt am", "date"),
-        ],
-        edit_permission="crm.consent.update",
-        test_id="crm-consent-stamm",
-        purpose="Einwilligungsnachweis.",
-        prompts=['Ist Einwilligung {entity_id} aktiv?'],
-    )
+    fields = [_feld("contact_id", "Kontakt", required=True), _feld("channel", "Kanal", "select", required=True, options=[{"value": x, "label": x} for x in ("email", "sms", "phone", "postal")]),
+              _feld("consent_type", "Einwilligungstyp", "select", required=True, options=[{"value": x, "label": x} for x in ("marketing", "service", "required")]), _feld("source", "Quelle", "select", options=[{"value": x, "label": x} for x in ("web_form", "api", "import", "manual")]),
+              _feld("expires_at", "Gültig bis", "datetime")]
+    editable = [_feld("status", "Status", "select", options=[{"value": x, "label": x} for x in ("pending", "granted", "denied", "revoked")]), _feld("expires_at", "Gültig bis", "datetime"), _feld("reason", "Grund")]
+    base = "/api/v1/crm/consents"
+    definition = _stamm(screen_id="crm/consent", domain="crm", title="Einwilligung", subtitle="DSGVO-Einwilligung",
+        endpoint=base + "/{entity_id}", identity="contact_id", felder=[*fields, _feld("status", "Status", readOnly=True),
+        *[_feld(key, label, "datetime", readOnly=True) for key, label in [("granted_at", "Erteilt"), ("denied_at", "Abgelehnt"), ("revoked_at", "Widerrufen"), ("created_at", "Erstellt"), ("updated_at", "Geändert")]]],
+        edit_permission="crm.consent.update", test_id="crm-consent-stamm", purpose="Einwilligungsnachweis.",
+        prompts=["Ist Einwilligung {entity_id} aktiv?"],
+        creation={"endpoint": base, "permission": "crm.consent.update", "detailRoute": "/crm/consent/{entity_id}",
+                  "cancelRoute": "/crm/consents", "defaults": {"source": "manual"}, "fields": fields},
+        edit_action_overrides={"commandEndpoint": base + "/{entity_id}", "method": "PUT", "forbiddenForAgents": True,
+                               "responseAdapter": "resource.v1", "inputPrefill": "entity", "inputFields": editable},
+        extra_actions=[{"key": "revoke", "label": "Widerrufen", "kind": "secondary", "dangerLevel": "safe",
+                        "permission": "crm.consent.update", "forbiddenForAgents": True,
+                        "commandEndpoint": base + "/{entity_id}/revoke", "method": "POST", "responseAdapter": "resource.v1",
+                        "inputFields": [_feld("reason", "Grund")]},
+                       {"key": "resend-confirmation", "label": "Bestätigungstoken neu ausstellen", "kind": "secondary", "dangerLevel": "safe",
+                        "permission": "crm.consent.update", "forbiddenForAgents": True,
+                        "commandEndpoint": base + "/{entity_id}/resend-confirmation", "method": "POST", "responseAdapter": "resource.v1"}])
+    definition["dataSources"].append(stamm_tab_source("history", base + "/{entity_id}/history"))
+    definition["tabs"].append(_register("history", "Verlauf", "history", [{"key": key, "label": label} for key, label in
+        [("changed_at", "Zeit"), ("action", "Aktion"), ("old_status", "Alt"), ("new_status", "Neu"), ("reason", "Grund"), ("changed_by", "Von")]]))
+    for action in definition["actions"]:
+        if action["key"] == "revoke":
+            action["requiresConfirmation"] = True
+            action["enabledWhen"] = {"path": "status", "equals": "granted"}
+        if action["key"] == "resend-confirmation":
+            action["enabledWhen"] = {"any": [{"path": "status", "equals": state} for state in ("pending", "denied")]}
+    definition["actions"].append({"key": "back", "label": "Zur Einwilligungsliste", "kind": "secondary", "dangerLevel": "safe", "localEffect": "navigation", "navigationRoute": "/crm/consents"})
+    definition["summary"] = []
+    return definition
 
 
 
 def build_crm_gdpr_request_stamm() -> dict[str, Any]:
-    return _stamm(
-        screen_id="crm/gdpr-request",
-        domain="crm",
-        title="DSGVO-Anfrage",
-        subtitle="Betroffenenanfrage",
-        endpoint="/api/v1/gdpr/requests/{entity_id}",
-        identity="request_type",
-        felder=[
-        _feld("request_type", "Typ"),
-        _feld("status", "Status"),
-        _feld("submitted_at", "Eingegangen", "date"),
-        ],
-        edit_permission="gdpr.request.update",
-        test_id="crm-gdpr-request-stamm",
-        purpose="DSGVO-Anfrage bearbeiten.",
-        prompts=['Welchen Status hat Anfrage {entity_id}?'],
-    )
+    fields = [_feld("subject_type", "Personenart", "select", required=True, options=[{"value": "CUSTOMER", "label": "Kunde"}, {"value": "LEAD", "label": "Interessent"}]), _feld("data_scope", "Datenbereich", "select", required=True, options=[{"value": "LOCAL_CRM_SUBJECT", "label": "Lokale CRM-Personendaten"}]), _feld("subject_id", "Betroffene Person", required=True), _feld("subject_email", "E-Mail", required=True),
+              _feld("request_type", "Anfragetyp", "select", required=True, options=[{"value": x, "label": x} for x in
+              ("ACCESS", "ERASURE", "PORTABILITY", "RECTIFICATION")]), _feld("notes", "Notizen", "textarea")]
+    base = "/api/v1/gdpr/requests"
+    definition = _stamm(screen_id="crm/gdpr-request", domain="crm", title="DSGVO-Anfrage", subtitle="Betroffenenanfrage",
+        endpoint=base + "/{entity_id}", identity="subject_id", felder=[*fields, _feld("status", "Status", readOnly=True),
+        _feld("rejection_reason", "Ablehnungsgrund", readOnly=True), *[_feld(key, label, "datetime", readOnly=True)
+        for key, label in [("created_at", "Eingegangen"), ("verified_at", "Verifiziert"), ("completed_at", "Abgeschlossen"), ("updated_at", "Geändert")]]],
+        edit_permission="gdpr.request.update", test_id="crm-gdpr-request-stamm", purpose="Betroffenenanfrage nachverfolgen.",
+        prompts=["Welchen Status hat Anfrage {entity_id}?"], creation={"endpoint": base, "permission": "gdpr.request.update", "requiresIdempotencyKey": True,
+        "detailRoute": "/crm/gdpr-request/{entity_id}", "cancelRoute": "/crm/gdpr-requests", "fields": fields},
+        extra_actions=[{"key": "verify", "label": "Identität verifizieren", "kind": "secondary", "dangerLevel": "safe",
+        "permission": "gdpr.request.update", "forbiddenForAgents": True, "commandEndpoint": base + "/{entity_id}/verify",
+        "method": "POST", "responseAdapter": "resource.v1"},
+        {"key": "reject", "label": "Ablehnen", "kind": "secondary", "dangerLevel": "safe", "permission": "gdpr.request.update",
+        "forbiddenForAgents": True, "commandEndpoint": base + "/{entity_id}/reject", "method": "POST", "responseAdapter": "resource.v1",
+        "inputFields": [_feld("reason", "Grund", required=True)]}])
+    definition["actions"] = [action for action in definition["actions"] if action["key"] != "edit"]
+    definition["actions"].extend([
+        {"key": "export", "label": "CRM-Daten exportieren", "kind": "secondary", "dangerLevel": "safe",
+         "permission": "gdpr.request.update", "forbiddenForAgents": True,
+         "commandEndpoint": base + "/{entity_id}/export", "method": "POST", "responseAdapter": "resource.v1"},
+        {"key": "delete", "label": "CRM-Personendaten anonymisieren", "kind": "danger", "dangerLevel": "high",
+         "permission": "gdpr.request.update", "forbiddenForAgents": True, "requiresConfirmation": True,
+         "commandEndpoint": base + "/{entity_id}/delete", "method": "POST", "responseAdapter": "resource.v1"},
+    ])
+    definition["dataSources"].append(stamm_tab_source("history", base + "/{entity_id}/history"))
+    definition["tabs"].append(_register("history", "Verlauf", "history", [{"key": key, "label": label} for key, label in
+        [("changed_at", "Zeit"), ("old_status", "Alt"), ("new_status", "Neu"), ("changed_by", "Von"), ("note", "Notiz")]]))
+    processing_fields = [_feld("subject_type", "Personenart", "select", required=True, options=[{"value": "CUSTOMER", "label": "Kunde"}, {"value": "LEAD", "label": "Interessent"}]), _feld("data_scope", "Datenbereich", "select", required=True, options=[{"value": "LOCAL_CRM_SUBJECT", "label": "Lokale CRM-Personendaten"}]), _feld("reason", "Begruendung", "textarea", required=True)]
+    for action in definition["actions"]:
+        if action["key"] in {"export", "delete"}:
+            action.update({"inputFields": processing_fields, "inputPrefill": "entity", "requiresExpectedVersion": True, "requiresIdempotencyKey": True, "requiresConfirmation": True})
+            action["enabledWhen"] = {"all": [{"path": "status", "equals": "VERIFIED"}, {"path": "request_type", "equals": "ERASURE"}]} if action["key"] == "delete" else {"all": [{"path": "status", "equals": "VERIFIED"}, {"any": [{"path": "request_type", "equals": value} for value in ("ACCESS", "PORTABILITY")]}]}
+        elif action["key"] == "verify":
+            action["enabledWhen"] = {"path": "status", "equals": "PENDING"}
+        elif action["key"] == "reject":
+            action["requiresConfirmation"] = True
+            action["enabledWhen"] = {"any": [{"path": "status", "equals": value} for value in ("PENDING", "VERIFIED")]}
+    definition["tabs"].append(stamm_entity_tab(key="result", label="CRM-Verarbeitungsnachweis", fields=[_feld("data_scope", "Datenbereich", readOnly=True), _feld("processing_result", "Ergebnis und aufbewahrte Nachweise", "textarea", readOnly=True)]))
+    definition["actions"].append({"key": "back", "label": "Zur Anfragenliste", "kind": "secondary", "dangerLevel": "safe", "localEffect": "navigation", "navigationRoute": "/crm/gdpr-requests"})
+    definition["summary"] = []
+    return definition
 
 
 
 def build_crm_segment_stamm() -> dict[str, Any]:
-    return _stamm(
-        screen_id="crm/segment",
-        domain="crm",
-        title="Segment",
-        subtitle="Marketingsegment",
-        endpoint="/api/v1/crm/segments/{entity_id}",
-        identity="name",
-        felder=[
-        _feld("name", "Name"),
-        _feld("description", "Beschreibung", "textarea"),
-        _feld("member_count", "Mitglieder", "number", readOnly=True),
-        ],
-        edit_permission="crm.segment.update",
-        test_id="crm-segment-stamm",
-        purpose="Segmentdefinition.",
-        prompts=['Wie viele Mitglieder hat Segment {entity_id}?'],
+    from app.services.crm_segment_service import TEXT_FIELDS, BOOL_FIELDS
+    kinds = [{"value": "static", "label": "Statisch"}, {"value": "dynamic", "label": "Dynamisch"}]
+    fields = [_feld("name", "Name", required=True), _feld("description", "Beschreibung", "textarea"), _feld("segment_type", "Segmenttyp", "select", required=True, options=kinds)]
+    rules = _feld("criteria_rules", "Auswahlregeln (alle muessen zutreffen)", "table", rowFields=[
+        _feld("field", "Merkmal", "select", required=True, options=[{"value": key, "label": key} for key in sorted(TEXT_FIELDS | BOOL_FIELDS)]),
+        _feld("op", "Vergleich", "select", required=True, options=[{"value": key, "label": label} for key, label in [("eq", "Gleich"), ("contains", "Enthaelt"), ("prefix", "Beginnt mit")]]),
+        _feld("value", "Wert", required=True, helpText="Boolesche Merkmale: true oder false; sonst wortgetreuer Text.")],
+        tableEditing={"allowAdd": True, "allowDelete": True, "maxRows": 20})
+    base = "/api/v1/crm/segments"
+    common = {"permission": "crm.segment.update", "forbiddenForAgents": True, "responseAdapter": "resource.v1", "requiresExpectedVersion": True, "requiresIdempotencyKey": True}
+    definition = _stamm(screen_id="crm/segment", domain="crm", title="Segment", subtitle="Nachvollziehbare CRM-Auswahl",
+        endpoint=base + "/{entity_id}", identity="name", felder=[*fields, _feld("member_count", "Mitglieder", "number", readOnly=True),
+        _feld("criteria", "Gespeicherte Regeln", "textarea", readOnly=True), _feld("criteria_supported", "Regeln auswertbar", "boolean", readOnly=True),
+        _feld("created_at", "Erstellt", "datetime", readOnly=True), _feld("updated_at", "Geaendert", "datetime", readOnly=True)],
+        edit_permission="crm.segment.update", test_id="crm-segment-stamm", purpose="Segmentdefinition und mandantengebundene Mitglieder.", prompts=["Welche Mitglieder hat Segment {entity_id}?"],
+        creation={"endpoint": base, "permission": "crm.segment.update", "detailRoute": "/crm/segment/{entity_id}", "cancelRoute": "/crm/segments", "requiresIdempotencyKey": True,
+                  "defaults": {"segment_type": "static", "criteria_rules": []}, "fields": [*fields, rules]},
+        edit_action_overrides={**common, "commandEndpoint": base + "/{entity_id}", "method": "PUT", "inputPrefill": "entity", "inputFields": fields},
+        extra_actions=[
+            {**common, "key": "rules", "label": "Regeln ersetzen", "kind": "secondary", "dangerLevel": "moderate", "requiresConfirmation": True, "auditReasonRequired": True,
+             "commandEndpoint": base + "/{entity_id}", "method": "PUT", "inputPrefill": "entity", "inputFields": [rules]},
+            {**common, "key": "calculate", "label": "Mitglieder berechnen", "kind": "secondary", "dangerLevel": "safe", "commandEndpoint": base + "/{entity_id}/calculate", "method": "POST"},
+            {**common, "key": "delete", "label": "Segment löschen", "kind": "danger", "dangerLevel": "high", "requiresConfirmation": True, "auditReasonRequired": True, "commandEndpoint": base + "/{entity_id}", "method": "DELETE", "resultNavigationRoute": "/crm/segments"},
+            *[{**common, "key": key, "label": label, "kind": "secondary", "dangerLevel": "safe", "commandEndpoint": base + "/{entity_id}/" + path, "method": "POST", "inputFields": [_feld("partner_id", "Partner-ID", required=True)], "enabledWhen": {"path": "segment_type", "equals": "static"}}
+              for key, label, path in [("add_member", "Mitglied hinzufuegen", "members"), ("remove_member", "Mitglied entfernen", "members/remove")]]],
     )
+    definition["dataSources"].append(stamm_tab_source("members", base + "/{entity_id}/members?limit=5000"))
+    definition["tabs"].append(_register("members", "Mitglieder", "members", [{"key": key, "label": label} for key, label in [("partner_id", "Partner"), ("name", "Name"), ("added_at", "Hinzugefuegt")]]))
+    definition["actions"].append({"key": "back", "label": "Zur Segmentliste", "kind": "secondary", "dangerLevel": "safe", "localEffect": "navigation", "navigationRoute": "/crm/segments"})
+    definition["summary"] = []
+    return definition
 
 
 
@@ -902,6 +981,59 @@ def build_futter_einzel_stamm() -> dict[str, Any]:
         test_id="futter-einzel-stamm",
         purpose="Einzelfuttermittel (Futter-Pfad).",
         prompts=['Welches Protein hat Einzelfutter {entity_id}?'],
+    )
+
+
+def build_feed_einzel_create() -> dict[str, Any]:
+    """Native creation with the exact EinzelfuttermittelIn payload contract."""
+    fields = [
+        _feld("artikel_nummer", "Artikelnummer", required=True),
+        _feld("name", "Bezeichnung", required=True),
+        _feld("art", "Futterart", required=True),
+        _feld("herkunft", "Herkunft"), _feld("lieferant", "Lieferant"),
+        *[_feld(key, label, "number") for key, label in (
+            ("protein", "Protein"), ("energie", "Energie"), ("faser", "Faser"),
+            ("fett", "Fett"), ("asche", "Asche"), ("trockensubstanz", "Trockenmasse"),
+            ("verfuegbar_t", "Verfügbar (t)"), ("min_bestand_t", "Mindestbestand (t)"),
+            ("preis_pro_t", "Preis je t"))],
+        _feld("gvo_status", "GVO-Status"),
+        _feld("qs_milch", "QS Milch", "boolean"),
+        _feld("gmp_plus", "GMP+", "boolean"),
+        _feld("bio_zertifiziert", "Bio", "boolean"),
+        _feld("einheit", "Einheit"),
+    ]
+    return _stamm(
+        screen_id="futtermittel/einzelfuttermittel/stamm/new", domain="futtermittel",
+        title="Einzelfuttermittel anlegen", subtitle="Futterstamm", endpoint="/api/v1/futter/einzelfuttermittel/{entity_id}",
+        identity="artikel_nummer", felder=fields, edit_permission="futtermittel.write",
+        test_id="feed-einzel-create", purpose="Einzelfuttermittel mit vollständigen Stammdaten anlegen.",
+        prompts=["Lege ein Einzelfuttermittel an."],
+        creation={"endpoint": "/api/v1/futter/einzelfuttermittel", "permission": "futtermittel.write",
+                  "detailRoute": "/futtermittel/einzelfuttermittel/{entity_id}",
+                  "cancelRoute": "/futtermittel/einzelfuttermittel-liste", "fields": fields},
+    )
+
+
+def build_feed_misch_create() -> dict[str, Any]:
+    """Native creation with the exact MischfuttermittelIn payload contract."""
+    fields = [
+        _feld("produkt_code", "Produktcode", required=True),
+        _feld("name", "Bezeichnung", required=True),
+        _feld("tierart", "Tierart", required=True),
+        _feld("leistungsstufe", "Leistungsstufe"),
+        _feld("protein", "Protein", "number"),
+        _feld("energie", "Energie", "number"),
+        _feld("beschreibung", "Beschreibung", "textarea"),
+    ]
+    return _stamm(
+        screen_id="futtermittel/mischfuttermittel/stamm/new", domain="futtermittel",
+        title="Mischfuttermittel anlegen", subtitle="Futterstamm", endpoint="/api/v1/futter/mischfuttermittel/{entity_id}",
+        identity="produkt_code", felder=fields, edit_permission="futtermittel.write",
+        test_id="feed-misch-create", purpose="Mischfuttermittel mit vollständigen Stammdaten anlegen.",
+        prompts=["Lege ein Mischfuttermittel an."],
+        creation={"endpoint": "/api/v1/futter/mischfuttermittel", "permission": "futtermittel.write",
+                  "detailRoute": "/futtermittel/mischfuttermittel/{entity_id}",
+                  "cancelRoute": "/futtermittel/mischfuttermittel-liste", "fields": fields},
     )
 
 

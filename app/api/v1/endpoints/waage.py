@@ -4,22 +4,26 @@ Waage API Endpoints - SQLAlchemy Version
 
 import logging
 import uuid
-from datetime import date, datetime
+from datetime import date, datetime, time
 from decimal import Decimal
 from typing import Any, Dict, List, Optional
 
 from fastapi import Response, APIRouter, Depends, Form, HTTPException, Query, UploadFile
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, ConfigDict
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 from sqlalchemy.inspection import inspect as sa_inspect
 
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
+from app.auth.tenant import get_verified_tenant_id
+from app.auth.deps_oidc import get_current_user
+from app.services import waage_import_service as scale_import
+from app.core.business_time import business_today, business_timezone
 from app.core.uuid7 import uuid7
 from app.services.frachtbrief_service import finalize_menge_from_outbound_weighing
 
-from app.domains.operations.repository import WaageRepository, WiegungRepository
+from app.domains.operations.repository import WaageRepository
 
 from app.api.v1.schemas.base import BaseSchema
 from pydantic import ConfigDict as _ConfigDict
@@ -30,6 +34,40 @@ class WaageOut(BaseSchema):
     """Typed response schema for WaageOut endpoints (extra fields forwarded)."""
     model_config = _ConfigDict(extra="allow")
 
+
+
+class WaageCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True, allow_inf_nan=False)
+    standort: str = Field(min_length=1, max_length=100)
+    typ: str = Field(min_length=1, max_length=50)
+    max_kapazitaet: float = Field(gt=0)
+    letzte_eichung: Optional[datetime] = None
+    naechste_eichung: Optional[datetime] = None
+    status: Optional[str] = Field(default=None, max_length=20)
+    hersteller: Optional[str] = Field(default=None, max_length=100)
+    seriennummer: Optional[str] = Field(default=None, max_length=50)
+    installiert_am: Optional[datetime] = None
+
+
+class WaageUpdate(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True, allow_inf_nan=False)
+    standort: Optional[str] = Field(default=None, min_length=1, max_length=100)
+    typ: Optional[str] = Field(default=None, min_length=1, max_length=50)
+    max_kapazitaet: Optional[float] = Field(default=None, gt=0)
+    letzte_eichung: Optional[datetime] = None
+    naechste_eichung: Optional[datetime] = None
+    status: Optional[str] = Field(default=None, max_length=20)
+    hersteller: Optional[str] = Field(default=None, max_length=100)
+    seriennummer: Optional[str] = Field(default=None, max_length=50)
+    installiert_am: Optional[datetime] = None
+
+
+class WaageCalibrationUpdate(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    letztes_eichdatum: Optional[date] = None
+    naechste_eichfaelligkeit: Optional[date] = None
+    eichamt: Optional[str] = Field(default=None, max_length=200)
+    zertifikat_nr: Optional[str] = Field(default=None, max_length=200)
 
 logger = logging.getLogger(__name__)
 
@@ -125,143 +163,70 @@ def _to_list(models: List[Any]) -> List[dict]:
 # === WAAGE ENDPOINTS ===
 
 @router.get("/waagen", response_model=list[WaageOut], summary="Waagen auflisten")
-async def list_waagen(
-    skip: int = Query(0, ge=0),
-    limit: int = Query(100, ge=1, le=1000),
-    status: Optional[str] = None,
-    db: Session = Depends(get_db)
-):
-    """List all Waagen with optional filtering"""
+async def list_waagen(skip: int = Query(0, ge=0), limit: int = Query(100, ge=1, le=1000), status: Optional[str] = None, db: Session = Depends(get_db), tenant_id: str = Depends(get_verified_tenant_id)):
     repo = WaageRepository(db)
-    if status:
-        return _to_list(repo.get_by_status(status))
-    return _to_list(repo.get_all(skip=skip, limit=limit))
+    return _to_list(repo.get_by_status(tenant_id, status, skip=skip, limit=limit) if status else repo.get_all(tenant_id, skip=skip, limit=limit))
 
 
 @router.get("/waagen/{waage_id}", response_model=WaageOut, summary="Waage abrufen")
-async def get_waage(waage_id: str, db: Session = Depends(get_db)):
-    """Get a single Waage by ID"""
-    repo = WaageRepository(db)
-    waage = repo.get_by_id(waage_id)
-    if not waage:
-        raise HTTPException(status_code=404, detail=f"Waage {waage_id} not found")
+async def get_waage(waage_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_verified_tenant_id)):
+    waage = WaageRepository(db).get_by_id(tenant_id, waage_id)
+    if waage is None:
+        raise HTTPException(status_code=404, detail="Waage nicht gefunden")
     return _to_dict(waage)
 
 
 @router.post("/waagen", response_model=WaageOut, status_code=201, summary="Waage anlegen", dependencies=SCHREIBEN["LAGER"])
-async def create_waage(
-    waage_data: dict,
-    db: Session = Depends(get_db)
-):
-    """Create a new Waage"""
-    repo = WaageRepository(db)
-    try:
-        waage = repo.create(waage_data)
-        return _to_dict(waage)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+async def create_waage(waage_data: WaageCreate, db: Session = Depends(get_db), tenant_id: str = Depends(get_verified_tenant_id)):
+    return _to_dict(WaageRepository(db).create(tenant_id, waage_data.model_dump(exclude_none=True)))
 
 
 @router.patch("/waagen/{waage_id}", response_model=WaageOut, summary="Waage aktualisieren", dependencies=SCHREIBEN["LAGER"])
-async def update_waage(
-    waage_id: str,
-    waage_data: dict,
-    db: Session = Depends(get_db)
-):
-    """Update a Waage"""
-    repo = WaageRepository(db)
-    waage = repo.update(waage_id, waage_data)
-    if not waage:
-        raise HTTPException(status_code=404, detail=f"Waage {waage_id} not found")
+async def update_waage(waage_id: str, waage_data: WaageUpdate, db: Session = Depends(get_db), tenant_id: str = Depends(get_verified_tenant_id)):
+    payload = waage_data.model_dump(exclude_unset=True)
+    if any(k in payload and payload[k] is None for k in ("standort", "typ", "max_kapazitaet")):
+        raise HTTPException(status_code=422, detail="Pflichtfelder duerfen nicht leer sein")
+    waage = WaageRepository(db).update(tenant_id, waage_id, payload)
+    if waage is None:
+        raise HTTPException(status_code=404, detail="Waage nicht gefunden")
     return _to_dict(waage)
 
 
-@router.delete("/waagen/{waage_id}", status_code=204, response_class=Response, response_model=None, summary="Waage lÃ¶schen", dependencies=SCHREIBEN["LAGER"])
-async def delete_waage(waage_id: str, db: Session = Depends(get_db)):
-    """Delete a Waage"""
-    repo = WaageRepository(db)
-    if not repo.delete(waage_id):
-        raise HTTPException(status_code=404, detail=f"Waage {waage_id} not found")
-
-
-# === WIEGUNG ENDPOINTS ===
-
-@router.get("/wiegungen", response_model=list[WaageOut], summary="Wiegungen auflisten")
-async def list_wiegungen(
-    skip: int = Query(0, ge=0),
-    limit: int = Query(100, ge=1, le=1000),
-    waage_id: Optional[str] = None,
-    kennzeichen: Optional[str] = None,
-    db: Session = Depends(get_db)
-):
-    """List all Wiegungen with optional filtering"""
-    repo = WiegungRepository(db)
-    
-    if waage_id:
-        return _to_list(repo.get_by_waage(waage_id))
-    if kennzeichen:
-        return _to_list(repo.get_by_kennzeichen(kennzeichen))
-    return _to_list(repo.get_all(skip=skip, limit=limit))
-
-
-@router.get("/wiegungen/{wiegung_id}", response_model=WaageOut, summary="Wiegung abrufen")
-async def get_wiegung(wiegung_id: str, db: Session = Depends(get_db)):
-    """Get a single Wiegung by ID"""
-    repo = WiegungRepository(db)
-    wiegung = repo.get_by_id(wiegung_id)
-    if not wiegung:
-        raise HTTPException(status_code=404, detail=f"Wiegung {wiegung_id} not found")
-    return _to_dict(wiegung)
-
-
-@router.post("/wiegungen", response_model=WaageOut, status_code=201, summary="Wiegung anlegen", dependencies=SCHREIBEN["LAGER"])
-async def create_wiegung(
-    wiegung_data: dict,
-    db: Session = Depends(get_db)
-):
-    """Create a new Wiegung"""
-    repo = WiegungRepository(db)
-
-    # PARTIE-PFLICHT-001: Partiepflicht-Validierung
-    wiegetyp = wiegung_data.get("wiegetyp") or wiegung_data.get("typ")
-    if wiegetyp and wiegetyp.upper() in _PARTIEPFLICHTIGE_WIEGETYPEN:
-        partie = (
-            wiegung_data.get("partie_id")
-            or wiegung_data.get("charge_id")
-            or wiegung_data.get("lot_id")
-        )
-        if not partie:
-            raise HTTPException(
-                status_code=422,
-                detail=f"Partie/Charge Pflichtfeld fÃ¼r Wiegetyp {wiegetyp}",
-            )
-
-    # Auto-calculate netto if not provided
-    if "brutto" in wiegung_data and "tara" in wiegung_data and "netto" not in wiegung_data:
-        wiegung_data["netto"] = wiegung_data["brutto"] - wiegung_data["tara"]
-
+@router.delete("/waagen/{waage_id}", status_code=204, response_class=Response, response_model=None, summary="Waage loeschen", dependencies=SCHREIBEN["LAGER"])
+async def delete_waage(waage_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_verified_tenant_id)):
     try:
-        wiegung = repo.create(wiegung_data)
-        return _to_dict(wiegung)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        deleted = WaageRepository(db).delete(tenant_id, waage_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail="Waage hat bestehende Wiegungen") from exc
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Waage nicht gefunden")
 
 
-@router.delete("/wiegungen/{wiegung_id}", status_code=204, response_class=Response, response_model=None, summary="Wiegung lÃ¶schen", dependencies=SCHREIBEN["LAGER"])
-async def delete_wiegung(wiegung_id: str, db: Session = Depends(get_db)):
-    """Delete a Wiegung"""
-    repo = WiegungRepository(db)
-    if not repo.delete(wiegung_id):
-        raise HTTPException(status_code=404, detail=f"Wiegung {wiegung_id} not found")
+# Legacy ops_wiegungen has no tenant ownership. The active UI uses the canonical
+# /weighing-tickets API; never expose or mutate the unscoped legacy aggregate.
+@router.get("/wiegungen", response_model=None, status_code=410, summary="Legacy-Wiegungen abgeloest")
+async def list_wiegungen():
+    raise HTTPException(status_code=410, detail="Legacy-Wiegungen abgeloest; Wiegescheine verwenden")
+
+
+@router.get("/wiegungen/{wiegung_id}", response_model=None, status_code=410, summary="Legacy-Wiegung abgeloest")
+async def get_wiegung(wiegung_id: str):
+    raise HTTPException(status_code=410, detail="Legacy-Wiegungen abgeloest; Wiegescheine verwenden")
+
+
+@router.post("/wiegungen", response_model=None, status_code=410, summary="Legacy-Wiegung abgeloest", dependencies=SCHREIBEN["LAGER"])
+async def create_wiegung(wiegung_data: dict):
+    raise HTTPException(status_code=410, detail="Legacy-Wiegungen abgeloest; Wiegescheine verwenden")
+
+
+@router.delete("/wiegungen/{wiegung_id}", response_model=None, status_code=410, summary="Legacy-Wiegung abgeloest", dependencies=SCHREIBEN["LAGER"])
+async def delete_wiegung(wiegung_id: str):
+    raise HTTPException(status_code=410, detail="Legacy-Wiegungen abgeloest; Wiegescheine verwenden")
 
 
 # ===========================================================================
 # WAAGE-LIVE-001 â€” ASCII-Import, Fehlerqueue, Kalibrierung
 # ===========================================================================
-
-# Module-level in-memory Fehlerqueue
-_fehlerqueue: List[Dict[str, Any]] = []
-
 
 # ---------------------------------------------------------------------------
 # 1a. ASCII-Dateiimport
@@ -302,166 +267,60 @@ def _parse_q_line(parts: List[str]) -> Dict[str, Any]:
     }
 
 
-@router.post("/waagen/import/ascii", response_model=WaageOut, status_code=200, summary="Ascii importieren", dependencies=SCHREIBEN["LAGER"])
-async def import_ascii(
-    file: UploadFile,
-    waage_id: str = Form(...),
-    fehler_toleranz: bool = Form(True),
-    db: Session = Depends(get_db),
-):
-    """Importiert eine ASCII-Waagendatei im Agrar-Standardformat (Satzarten W und Q)."""
-    content = (await file.read()).decode("utf-8", errors="replace")
-    lines = content.splitlines()
-
-    imported: int = 0
-    skipped: int = 0
-    errors: List[str] = []
-    wiegung_ids: List[str] = []
-    last_wiegung_id: Optional[str] = None
-    last_wiegung_nr: Optional[str] = None
-
-    for lineno, raw in enumerate(lines, start=1):
-        line = raw.strip()
-        if not line or line.startswith("#"):
-            continue
-        parts = line.split(";")
-        satzart = parts[0].upper()
-
-        try:
-            if satzart == "W":
-                data = _parse_w_line(parts)
-                new_id = str(uuid.uuid4())
-                try:
-                    db.execute(
-                        text(
-                            """
-                            INSERT INTO agrar_wiegungen (
-                                id, waage_id, wiegung_nr, datum, uhrzeit,
-                                brutto_kg, tara_kg, netto_kg, kfz_kennzeichen,
-                                lieferant_id, artikel_id, sorte, partie_id, silo_id,
-                                qualitaet_feuchtigkeit, qualitaet_hl, qualitaet_bruch,
-                                created_at
-                            ) VALUES (
-                                :id, :waage_id, :wiegung_nr, :datum, :uhrzeit,
-                                :brutto_kg, :tara_kg, :netto_kg, :kfz_kennzeichen,
-                                :lieferant_id, :artikel_id, :sorte, :partie_id, :silo_id,
-                                :qualitaet_feuchtigkeit, :qualitaet_hl, :qualitaet_bruch,
-                                now()
-                            )
-                            """
-                        ),
-                        {**data, "id": new_id, "waage_id": waage_id},
-                    )
-                    db.commit()
-                    last_wiegung_id = new_id
-                    last_wiegung_nr = data["wiegung_nr"]
-                    wiegung_ids.append(new_id)
-                    imported += 1
-                except Exception as db_err:
-                    db.rollback()
-                    # Tabelle nicht vorhanden oder anderer DB-Fehler â†’ queue entry
-                    entry_id = str(uuid.uuid4())
-                    _fehlerqueue.append(
-                        {
-                            "id": entry_id,
-                            "timestamp": datetime.utcnow().isoformat(),
-                            "waage_id": waage_id,
-                            "rohdaten": line,
-                            "fehler_beschreibung": str(db_err),
-                            "retry_count": 0,
-                        }
-                    )
-                    err_msg = f"Zeile {lineno} DB-Fehler: {db_err}"
-                    if not fehler_toleranz:
-                        return {
-                            "imported": imported,
-                            "skipped": skipped,
-                            "errors": [err_msg],
-                            "wiegung_ids": wiegung_ids,
-                        }
-                    errors.append(err_msg)
-                    skipped += 1
-
-            elif satzart == "Q":
-                q_data = _parse_q_line(parts)
-                if last_wiegung_id and q_data["wiegung_nr"] == last_wiegung_nr:
-                    try:
-                        db.execute(
-                            text(
-                                """
-                                INSERT INTO agrar_wiegung_qualitaet (
-                                    id, wiegung_id, parameter, wert, einheit, created_at
-                                ) VALUES (
-                                    :id, :wiegung_id, :parameter, :wert, :einheit, now()
-                                )
-                                """
-                            ),
-                            {
-                                "id": str(uuid.uuid4()),
-                                "wiegung_id": last_wiegung_id,
-                                "parameter": q_data["parameter"],
-                                "wert": q_data["wert"],
-                                "einheit": q_data["einheit"],
-                            },
-                        )
-                        db.commit()
-                    except Exception:
-                        db.rollback()
-                        # QualitÃ¤tstabelle fehlt â†’ ignorieren (non-critical)
-                        pass
-                else:
-                    skipped += 1
-            else:
-                skipped += 1
-
-        except ValueError as parse_err:
-            err_msg = f"Zeile {lineno} Parse-Fehler: {parse_err}"
-            if not fehler_toleranz:
-                return {
-                    "imported": imported,
-                    "skipped": skipped,
-                    "errors": [err_msg],
-                    "wiegung_ids": wiegung_ids,
-                }
-            errors.append(err_msg)
-            skipped += 1
-
-    return {
-        "imported": imported,
-        "skipped": skipped,
-        "errors": errors,
-        "wiegung_ids": wiegung_ids,
-    }
+@router.post("/waagen/import/ascii", response_model=None, summary="ASCII-Wiegescheine importieren", dependencies=SCHREIBEN["LAGER"])
+async def import_ascii(file: UploadFile, waage_id: str = Form(...), fehler_toleranz: bool = Form(True),
+                       db: Session = Depends(get_db), tenant_id: str = Depends(get_verified_tenant_id), user: dict = Depends(get_current_user)):
+    if WaageRepository(db).get_by_id(tenant_id, waage_id) is None:
+        raise HTTPException(status_code=404, detail="Waage nicht gefunden")
+    data = await file.read(1048577)
+    if len(data) > 1048576:
+        raise HTTPException(413, "Datei ist groesser als 1 MB")
+    try:
+        content = data.decode('utf-8-sig', errors='strict')
+    except UnicodeDecodeError as exc:
+        raise HTTPException(422, "Datei muss UTF-8 sein") from exc
+    try:
+        result = scale_import.import_records(db, tenant_id, waage_id, content, fehler_toleranz, user['sub'])
+        db.commit()
+        return result
+    except Exception:
+        db.rollback()
+        raise
 
 
-# ---------------------------------------------------------------------------
-# 1b. Fehlerqueue
-# ---------------------------------------------------------------------------
-
-@router.get("/waagen/import/fehlerqueue", response_model=list[WaageOut], summary="Fehlerqueue auflisten")
-async def list_fehlerqueue():
-    """Gibt alle EintrÃ¤ge der Import-Fehlerqueue zurÃ¼ck."""
-    return _fehlerqueue
-
-
-@router.post("/waagen/import/fehlerqueue/{entry_id}/retry", response_model=WaageOut, summary="Fehlerqueue entry wiederholen", dependencies=SCHREIBEN["LAGER"])
-async def retry_fehlerqueue_entry(entry_id: str):
-    """ErhÃ¶ht retry_count fÃ¼r einen Fehlerqueue-Eintrag (Simulation)."""
-    for entry in _fehlerqueue:
-        if entry["id"] == entry_id:
-            entry["retry_count"] += 1
-            return {"status": "retry_scheduled", "entry": entry}
-    raise HTTPException(status_code=404, detail=f"Fehlerqueue-Eintrag {entry_id} nicht gefunden")
+@router.get("/waagen/import/fehlerqueue", response_model=None, summary="Importfehler auflisten")
+async def list_fehlerqueue(db: Session = Depends(get_db), tenant_id: str = Depends(get_verified_tenant_id),
+                          limit: int = Query(100, ge=1, le=1000)):
+    entries = db.query(scale_import.WaageImportEntry).filter(
+        scale_import.WaageImportEntry.tenant_id == tenant_id,
+        scale_import.WaageImportEntry.status == 'error').order_by(scale_import.WaageImportEntry.created_at).limit(limit).all()
+    return [scale_import.serialize_entry(item) for item in entries]
 
 
-@router.delete("/waagen/import/fehlerqueue/{entry_id}", status_code=204, response_class=Response, response_model=None, summary="Fehlerqueue entry lÃ¶schen", dependencies=SCHREIBEN["LAGER"])
-async def delete_fehlerqueue_entry(entry_id: str):
-    """LÃ¶scht einen Eintrag aus der Import-Fehlerqueue."""
-    global _fehlerqueue
-    before = len(_fehlerqueue)
-    _fehlerqueue = [e for e in _fehlerqueue if e["id"] != entry_id]
-    if len(_fehlerqueue) == before:
-        raise HTTPException(status_code=404, detail=f"Fehlerqueue-Eintrag {entry_id} nicht gefunden")
+@router.post("/waagen/import/fehlerqueue/{entry_id}/retry", response_model=None, summary="Importfehler erneut pruefen", dependencies=SCHREIBEN["LAGER"])
+async def retry_fehlerqueue_entry(entry_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_verified_tenant_id), user: dict = Depends(get_current_user)):
+    try:
+        result = scale_import.retry_entry(db, tenant_id, entry_id, user['sub'])
+        db.commit()
+        return result
+    except Exception:
+        db.rollback()
+        raise
+
+
+@router.delete("/waagen/import/fehlerqueue/{entry_id}", response_model=None, summary="Importfehler verwerfen", dependencies=SCHREIBEN["LAGER"])
+async def delete_fehlerqueue_entry(entry_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_verified_tenant_id), user: dict = Depends(get_current_user)):
+    try:
+        item = scale_import.queue_entry(db, tenant_id, entry_id)
+        if item.status != 'error':
+            raise HTTPException(409, 'Eintrag wurde bereits verarbeitet')
+        item.status = 'dismissed'
+        scale_import._event(db, tenant_id, user['sub'], item, 'dismissed')
+        db.commit()
+        return {'deleted': True, 'id': entry_id}
+    except Exception:
+        db.rollback()
+        raise
 
 
 # ---------------------------------------------------------------------------
@@ -473,7 +332,7 @@ def _kalibrierung_status(naechste_eichfaelligkeit: Optional[str]) -> str:
         return "faellig"
     try:
         faellig = date.fromisoformat(str(naechste_eichfaelligkeit)[:10])
-        today = date.today()
+        today = business_today()
         if faellig < today:
             delta = (today - faellig).days
             return "ueberfaellig" if delta > 30 else "faellig"
@@ -482,80 +341,51 @@ def _kalibrierung_status(naechste_eichfaelligkeit: Optional[str]) -> str:
         return "unbekannt"
 
 
+def _calibration_response(scale):
+    def day(value):
+        return value.date().isoformat() if isinstance(value, datetime) else value.isoformat() if value else None
+    return {'waage_id': scale.id, 'letztes_eichdatum': day(scale.letzte_eichung),
+            'naechste_eichfaelligkeit': day(scale.naechste_eichung), 'eichamt': scale.eichamt,
+            'zertifikat_nr': scale.zertifikat_nr, 'kalibrierungsstatus': _kalibrierung_status(day(scale.naechste_eichung))}
+
+
 @router.get("/waagen/{waage_id}/kalibrierung", response_model=WaageOut, summary="Kalibrierung abrufen")
-async def get_kalibrierung(waage_id: str, db: Session = Depends(get_db)):
-    """Gibt den Kalibrierungsstatus einer Waage zurÃ¼ck."""
-    # Versuche kalibrierung_meta aus agrar_waagen zu lesen
-    meta: Dict[str, Any] = {}
-    try:
-        row = db.execute(
-            text("SELECT kalibrierung_meta FROM agrar_waagen WHERE id = :id"),
-            {"id": waage_id},
-        ).fetchone()
-        if row is None:
-            raise HTTPException(status_code=404, detail=f"Waage {waage_id} nicht gefunden")
-        meta = row[0] or {}
-    except HTTPException:
-        raise
-    except Exception:
-        # Tabelle/Spalte fehlt noch â†’ leere Meta
-        meta = {}
-
-    letztes_eichdatum = meta.get("letztes_eichdatum")
-    naechste = meta.get("naechste_eichfaelligkeit")
-
-    return {
-        "waage_id": waage_id,
-        "letztes_eichdatum": letztes_eichdatum,
-        "naechste_eichfaelligkeit": naechste,
-        "kalibrierungsstatus": _kalibrierung_status(naechste),
-        "eichamt": meta.get("eichamt"),
-        "zertifikat_nr": meta.get("zertifikat_nr"),
-    }
+async def get_kalibrierung(waage_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_verified_tenant_id)):
+    scale = WaageRepository(db).get_by_id(tenant_id, waage_id)
+    if scale is None:
+        raise HTTPException(status_code=404, detail="Waage nicht gefunden")
+    return _calibration_response(scale)
 
 
 @router.patch("/waagen/{waage_id}/kalibrierung", response_model=WaageOut, summary="Kalibrierung aktualisieren", dependencies=SCHREIBEN["LAGER"])
-async def update_kalibrierung(
-    waage_id: str,
-    payload: Dict[str, Any],
-    db: Session = Depends(get_db),
-):
-    """Aktualisiert Kalibrierungsdaten einer Waage (kalibrierung_meta JSONB)."""
-    allowed_keys = {"letztes_eichdatum", "naechste_eichfaelligkeit", "eichamt", "zertifikat_nr"}
-    update_data = {k: v for k, v in payload.items() if k in allowed_keys}
-
+async def update_kalibrierung(waage_id: str, payload: WaageCalibrationUpdate, db: Session = Depends(get_db), tenant_id: str = Depends(get_verified_tenant_id), user: dict = Depends(get_current_user)):
+    scale = scale_import.locked_scale(db, tenant_id, waage_id)
+    values = payload.model_dump(exclude_unset=True)
+    previous = _calibration_response(scale)
+    last = values.get('letztes_eichdatum', scale.letzte_eichung.date() if scale.letzte_eichung else None)
+    next_ = values.get('naechste_eichfaelligkeit', scale.naechste_eichung.date() if scale.naechste_eichung else None)
+    if last and next_ and next_ < last:
+        raise HTTPException(422, 'Naechste Eichung liegt vor der letzten Eichung')
+    mapping = {'letztes_eichdatum': 'letzte_eichung', 'naechste_eichfaelligkeit': 'naechste_eichung', 'eichamt': 'eichamt', 'zertifikat_nr': 'zertifikat_nr'}
     try:
-        # Lese bisherige Meta, merge, schreibe zurÃ¼ck
-        row = db.execute(
-            text("SELECT kalibrierung_meta FROM agrar_waagen WHERE id = :id"),
-            {"id": waage_id},
-        ).fetchone()
-        if row is None:
-            raise HTTPException(status_code=404, detail=f"Waage {waage_id} nicht gefunden")
-        current: Dict[str, Any] = row[0] or {}
-        current.update(update_data)
+        for key, value in values.items():
+            setattr(scale, mapping[key], datetime.combine(value, time(), business_timezone()) if isinstance(value, date) else value)
+        scale.updated_by = user['sub']
+        result = _calibration_response(scale)
         import json
-        db.execute(
-            text(
-                "UPDATE agrar_waagen SET kalibrierung_meta = CAST(:meta AS jsonb) WHERE id = :id"
-            ),
-            {"meta": json.dumps(current), "id": waage_id},
-        )
+        from app.infrastructure.eventbus.outbox import OutboxEvent
+        from app.core.business_time import business_now
+        from app.services.mask_action_runtime_service import _write_audit
+        _write_audit(db, tenant_id=tenant_id, action_key='waage.calibration.update', entity_type='waage',
+            entity_id=scale.id, audit_reason=None, idempotency_key=None, summary=json.dumps({'before':previous, 'after':result}), performed_by=user['sub'])
+        db.add(OutboxEvent(id=str(uuid7()), event_type='waage.calibration.updated', aggregate_id=scale.id,
+            tenant_id=tenant_id, timestamp=business_now().replace(tzinfo=None), payload=json.dumps({'tenant_id': tenant_id,
+                'actor': user['sub'], 'before': previous, 'after': result})))
         db.commit()
-        naechste = current.get("naechste_eichfaelligkeit")
-        return {
-            "waage_id": waage_id,
-            "letztes_eichdatum": current.get("letztes_eichdatum"),
-            "naechste_eichfaelligkeit": naechste,
-            "kalibrierungsstatus": _kalibrierung_status(naechste),
-            "eichamt": current.get("eichamt"),
-            "zertifikat_nr": current.get("zertifikat_nr"),
-        }
-    except HTTPException:
-        raise
-    except Exception as e:
+        return result
+    except Exception:
         db.rollback()
-        raise HTTPException(status_code=503, detail=f"DB-Fehler: {e}")
+        raise
 
 
 # ===========================================================================

@@ -22,7 +22,8 @@ from app.core.fibu_audit import log_fibu_audit
 from app.core.gobd_artifact import register_artifact, sha256_hex
 from app.core.tenant import get_tenant_id
 from app.finance.steuerschluessel import Steuergruppe, Steuerklaerung, steuergruppen
-from app.documents.models import SalesInvoice
+from app.documents.models import SalesInvoice, DocLine
+from pydantic import BaseModel
 from app.documents.router_helpers import (
     delete_from_store,
     eigener_beleg,
@@ -39,6 +40,47 @@ from app.api.v1.schemas.finance_invoices_schemas import FinanceInvoicesOut
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/finance/invoices", tags=["finance", "invoices"])
+
+
+@router.get("/customer-lookup", summary="Rechnungskunden suchen", dependencies=[Depends(beleg_read)])
+def invoice_customer_lookup(
+    q: str = Query("", min_length=2),
+    limit: int = Query(25, ge=1, le=25),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> list[dict[str, str]]:
+    rows = db.execute(text("""
+        SELECT id, company_name, customer_number FROM domain_crm.customers
+        WHERE tenant_id = :tid AND deleted_at IS NULL
+          AND (company_name ILIKE :query OR customer_number ILIKE :query)
+        ORDER BY customer_number LIMIT :limit
+    """), {"tid": tenant_id, "query": f"%{q.strip()}%", "limit": limit}).fetchall()
+    return [{"value": str(row[0]), "label": f"{row[1]} ({row[2]})"} for row in rows]
+
+
+class InvoiceTaxPreviewIn(BaseModel):
+    lines: list[DocLine]
+
+
+@router.post("/steuer-vorschau", summary="Ausgangsrechnung Steuer vorschauen", dependencies=[Depends(beleg_read)])
+def preview_invoice_tax(
+    body: InvoiceTaxPreviewIn,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Use the exact calculation used by invoice posting; no client tax estimate."""
+    try:
+        groups = steuergruppen(db, tenant_id, [
+            (index, line.taxCode, line.vatRate, Decimal(str(line.qty)) * Decimal(str(line.price or 0)))
+            for index, line in enumerate(body.lines, 1)
+        ])
+    except Steuerklaerung as error:
+        return {"geklaert": False, "pruefgrund": str(error), "netto": None, "steuer": None, "brutto": None,
+                "gruppen": []}
+    netto = sum((group.netto for group in groups), Decimal("0"))
+    steuer = sum((group.steuer for group in groups), Decimal("0"))
+    return {"geklaert": True, "pruefgrund": None, "netto": netto, "steuer": steuer,
+            "brutto": netto + steuer, "gruppen": [group.model_dump(mode="json") for group in groups]}
 
 
 def _resolve_open_items_table(db: Session) -> str:
@@ -177,6 +219,12 @@ async def create_invoice(
     """Erstellt eine neue Rechnung im Finance-Modul."""
     try:
         if invoice.customerId:
+            customer_exists = db.execute(text("""
+                SELECT 1 FROM domain_crm.customers
+                WHERE id = :id AND tenant_id = :tid AND deleted_at IS NULL
+            """), {"id": invoice.customerId, "tid": tenant_id}).scalar()
+            if not customer_exists:
+                raise HTTPException(status_code=404, detail="Kunde nicht gefunden")
             assert_customer_allowed_for_invoice(db, tenant_id, str(invoice.customerId))
         repo = get_repository(db)
 

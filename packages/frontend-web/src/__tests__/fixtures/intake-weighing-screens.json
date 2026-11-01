@@ -1,0 +1,1127 @@
+{
+  "annahme/lkw-registrierung": {
+    "schemaVersion": 1,
+    "id": "annahme/lkw-registrierung",
+    "domain": "agrar",
+    "mode": "wizard",
+    "title": "LKW-Registrierung",
+    "subtitle": "Annahme, Qualität und Wiegen",
+    "adapter": {
+      "type": "native",
+      "sourceId": "annahme/lkw-registrierung",
+      "temporary": false
+    },
+    "layout": {
+      "floorplan": "wizard",
+      "density": "expertDense",
+      "contextRail": "combined",
+      "tableProfile": "inventory"
+    },
+    "fields": [
+      {
+        "key": "kennzeichen",
+        "label": "Kennzeichen",
+        "type": "text",
+        "required": true,
+        "readOnly": false
+      },
+      {
+        "key": "lieferant",
+        "label": "Lieferant",
+        "type": "text",
+        "required": true,
+        "readOnly": false
+      },
+      {
+        "key": "lieferscheinNr",
+        "label": "Lieferschein-Nr.",
+        "type": "text",
+        "required": false,
+        "readOnly": false
+      },
+      {
+        "key": "articleId",
+        "label": "Artikel",
+        "type": "text",
+        "required": true,
+        "readOnly": false
+      },
+      {
+        "key": "artikel",
+        "label": "Artikelbezeichnung",
+        "type": "text",
+        "required": false,
+        "readOnly": false
+      },
+      {
+        "key": "ankunftszeit",
+        "label": "Ankunftszeit",
+        "type": "datetime",
+        "required": false,
+        "readOnly": false
+      },
+      {
+        "key": "prioritaet",
+        "label": "Priorität",
+        "type": "text",
+        "required": false,
+        "readOnly": false
+      },
+      {
+        "key": "attachmentIds",
+        "label": "Bildanhänge",
+        "type": "stringList",
+        "required": false,
+        "readOnly": false
+      }
+    ],
+    "actions": [
+      {
+        "key": "register",
+        "label": "LKW registrieren",
+        "kind": "primary",
+        "dangerLevel": "safe",
+        "forbiddenForAgents": true,
+        "permission": "studio.register.intake-weighing",
+        "inputFlow": {
+          "kind": "humanForm",
+          "submitEndpoint": "/api/v1/annahme/lkw-registrierung",
+          "method": "POST"
+        }
+      },
+      {
+        "key": "upload",
+        "label": "Bild hochladen",
+        "kind": "secondary",
+        "dangerLevel": "safe",
+        "forbiddenForAgents": true,
+        "permission": "studio.upload.intake-weighing",
+        "inputFlow": {
+          "kind": "humanForm",
+          "submitEndpoint": "/api/v1/annahme/upload",
+          "method": "POST"
+        },
+        "surfaceOnly": true
+      },
+      {
+        "key": "cancel",
+        "label": "Zur Warteschlange",
+        "kind": "secondary",
+        "dangerLevel": "safe",
+        "forbiddenForAgents": true,
+        "localEffect": "view"
+      }
+    ],
+    "dataSources": [
+      {
+        "key": "articles",
+        "endpoint": "/api/v1/articles?limit=100",
+        "staleTimeMs": 15000
+      }
+    ],
+    "specialized": {
+      "type": "intake",
+      "id": "annahme/lkw-registrierung"
+    },
+    "workflow": {
+      "processKey": "harvest-to-settlement",
+      "status": "operator-workspace",
+      "auditRequired": true
+    },
+    "performance": {
+      "initialPayloadBudgetKb": 100,
+      "requiresLazyTabs": true,
+      "requiresVirtualTables": true,
+      "lookupMinChars": 2,
+      "bundleGroup": "agrar"
+    },
+    "agentContract": {
+      "businessPurpose": "LKW-Registrierung über die vorhandenen Fachverträge bearbeiten.",
+      "examplePrompts": [
+        "Welche Eingaben und Aktionen sind verfügbar?"
+      ],
+      "sensitiveFields": [
+        "kennzeichen",
+        "lieferant",
+        "lieferscheinNr",
+        "articleId",
+        "artikel",
+        "ankunftszeit",
+        "prioritaet",
+        "attachmentIds"
+      ],
+      "forbiddenAgentTasks": [
+        "Fachaktionen dieser Bedienoberfläche ausführen"
+      ],
+      "testSelectors": {
+        "screenRoot": "[data-testid='native-cockpit-annahme-lkw-registrierung']"
+      }
+    }
+  },
+  "annahme/qualitaets-check": {
+    "schemaVersion": 1,
+    "id": "annahme/qualitaets-check",
+    "domain": "agrar",
+    "mode": "wizard",
+    "title": "Qualitätsprüfung",
+    "subtitle": "Annahme, Qualität und Wiegen",
+    "adapter": {
+      "type": "native",
+      "sourceId": "annahme/qualitaets-check",
+      "temporary": false
+    },
+    "layout": {
+      "floorplan": "wizard",
+      "density": "expertDense",
+      "contextRail": "combined",
+      "tableProfile": "inventory"
+    },
+    "fields": [
+      {
+        "key": "lieferscheinNr",
+        "label": "Lieferschein-Nr.",
+        "type": "text",
+        "required": false,
+        "readOnly": true
+      },
+      {
+        "key": "artikel",
+        "label": "Artikel",
+        "type": "text",
+        "required": false,
+        "readOnly": true
+      },
+      {
+        "key": "feuchtigkeit",
+        "label": "Feuchtigkeit %",
+        "type": "number",
+        "required": false,
+        "readOnly": false
+      },
+      {
+        "key": "protein",
+        "label": "Protein %",
+        "type": "number",
+        "required": false,
+        "readOnly": false
+      },
+      {
+        "key": "verunreinigung",
+        "label": "Verunreinigung %",
+        "type": "number",
+        "required": false,
+        "readOnly": false
+      },
+      {
+        "key": "fremdgeruch",
+        "label": "Fremdgeruch",
+        "type": "text",
+        "required": false,
+        "readOnly": false
+      },
+      {
+        "key": "schaedlinge",
+        "label": "Schädlinge / Schimmel",
+        "type": "text",
+        "required": false,
+        "readOnly": false
+      },
+      {
+        "key": "farbe",
+        "label": "Farbe",
+        "type": "text",
+        "required": false,
+        "readOnly": false
+      },
+      {
+        "key": "bemerkungen",
+        "label": "Bemerkungen",
+        "type": "textarea",
+        "required": false,
+        "readOnly": false
+      },
+      {
+        "key": "ergebnis",
+        "label": "Ergebnis",
+        "type": "text",
+        "required": false,
+        "readOnly": true
+      }
+    ],
+    "actions": [
+      {
+        "key": "save",
+        "label": "Qualitätsprüfung speichern",
+        "kind": "primary",
+        "dangerLevel": "safe",
+        "forbiddenForAgents": true,
+        "permission": "studio.save.intake-weighing",
+        "inputFlow": {
+          "kind": "humanForm",
+          "submitEndpoint": "/api/v1/agrar/quality-protocols",
+          "method": "POST"
+        }
+      },
+      {
+        "key": "start",
+        "label": "Prüfung beginnen",
+        "kind": "secondary",
+        "dangerLevel": "safe",
+        "forbiddenForAgents": true,
+        "permission": "studio.start.intake-weighing",
+        "inputFlow": {
+          "kind": "humanForm",
+          "submitEndpoint": "/api/v1/annahme/warteschlange/{entity_id}",
+          "method": "PATCH"
+        },
+        "surfaceOnly": true
+      },
+      {
+        "key": "billing",
+        "label": "Zur Abrechnung",
+        "kind": "secondary",
+        "dangerLevel": "safe",
+        "forbiddenForAgents": true,
+        "localEffect": "view"
+      },
+      {
+        "key": "cancel",
+        "label": "Zur Warteschlange",
+        "kind": "secondary",
+        "dangerLevel": "safe",
+        "forbiddenForAgents": true,
+        "localEffect": "view"
+      }
+    ],
+    "dataSources": [
+      {
+        "key": "queue",
+        "endpoint": "/api/v1/annahme/warteschlange",
+        "staleTimeMs": 15000
+      }
+    ],
+    "specialized": {
+      "type": "intake",
+      "id": "annahme/qualitaets-check"
+    },
+    "workflow": {
+      "processKey": "harvest-to-settlement",
+      "status": "operator-workspace",
+      "auditRequired": true
+    },
+    "performance": {
+      "initialPayloadBudgetKb": 100,
+      "requiresLazyTabs": true,
+      "requiresVirtualTables": true,
+      "lookupMinChars": 2,
+      "bundleGroup": "agrar"
+    },
+    "agentContract": {
+      "businessPurpose": "Qualitätsprüfung über die vorhandenen Fachverträge bearbeiten.",
+      "examplePrompts": [
+        "Welche Eingaben und Aktionen sind verfügbar?"
+      ],
+      "sensitiveFields": [
+        "lieferscheinNr",
+        "artikel",
+        "feuchtigkeit",
+        "protein",
+        "verunreinigung",
+        "fremdgeruch",
+        "schaedlinge",
+        "farbe",
+        "bemerkungen",
+        "ergebnis"
+      ],
+      "forbiddenAgentTasks": [
+        "Fachaktionen dieser Bedienoberfläche ausführen"
+      ],
+      "testSelectors": {
+        "screenRoot": "[data-testid='native-cockpit-annahme-qualitaets-check']"
+      }
+    }
+  },
+  "annahme/warteschlange": {
+    "schemaVersion": 1,
+    "id": "annahme/warteschlange",
+    "domain": "agrar",
+    "mode": "cockpit",
+    "title": "Annahme-Warteschlange",
+    "subtitle": "Annahme, Qualität und Wiegen",
+    "adapter": {
+      "type": "native",
+      "sourceId": "annahme/warteschlange",
+      "temporary": false
+    },
+    "layout": {
+      "floorplan": "cockpit",
+      "density": "expertDense",
+      "contextRail": "combined",
+      "tableProfile": "inventory"
+    },
+    "fields": [
+      {
+        "key": "kennzeichen",
+        "label": "Kennzeichen",
+        "type": "text",
+        "required": false,
+        "readOnly": true
+      },
+      {
+        "key": "lieferant",
+        "label": "Lieferant",
+        "type": "text",
+        "required": false,
+        "readOnly": true
+      },
+      {
+        "key": "artikel",
+        "label": "Artikel",
+        "type": "text",
+        "required": false,
+        "readOnly": true
+      },
+      {
+        "key": "status",
+        "label": "Status",
+        "type": "text",
+        "required": false,
+        "readOnly": true
+      },
+      {
+        "key": "ankunft",
+        "label": "Ankunft",
+        "type": "text",
+        "required": false,
+        "readOnly": true
+      },
+      {
+        "key": "wartezeit",
+        "label": "Wartezeit",
+        "type": "text",
+        "required": false,
+        "readOnly": true
+      },
+      {
+        "key": "lieferschein_nr",
+        "label": "Lieferschein-Nr.",
+        "type": "text",
+        "required": false,
+        "readOnly": true
+      }
+    ],
+    "actions": [
+      {
+        "key": "new",
+        "label": "LKW anmelden",
+        "kind": "primary",
+        "dangerLevel": "safe",
+        "forbiddenForAgents": true,
+        "localEffect": "view"
+      },
+      {
+        "key": "qr",
+        "label": "QR-Code (Handy)",
+        "kind": "secondary",
+        "dangerLevel": "safe",
+        "forbiddenForAgents": true,
+        "localEffect": "view"
+      },
+      {
+        "key": "refresh",
+        "label": "Aktualisieren",
+        "kind": "secondary",
+        "dangerLevel": "safe",
+        "forbiddenForAgents": true,
+        "localEffect": "view"
+      },
+      {
+        "key": "quality",
+        "label": "Qualitätsprüfung öffnen",
+        "kind": "secondary",
+        "dangerLevel": "safe",
+        "forbiddenForAgents": true,
+        "localEffect": "view",
+        "surfaceOnly": true
+      },
+      {
+        "key": "repair",
+        "label": "Artikel reparieren",
+        "kind": "secondary",
+        "dangerLevel": "safe",
+        "forbiddenForAgents": true,
+        "permission": "studio.repair.intake-weighing",
+        "inputFlow": {
+          "kind": "humanForm",
+          "submitEndpoint": "/api/v1/annahme/warteschlange/{entity_id}/repair-article",
+          "method": "POST"
+        },
+        "surfaceOnly": true
+      },
+      {
+        "key": "clarify",
+        "label": "Klärung starten",
+        "kind": "secondary",
+        "dangerLevel": "safe",
+        "forbiddenForAgents": true,
+        "localEffect": "view",
+        "surfaceOnly": true
+      },
+      {
+        "key": "harvest",
+        "label": "Ernte-Annahme öffnen",
+        "kind": "secondary",
+        "dangerLevel": "safe",
+        "forbiddenForAgents": true,
+        "localEffect": "view",
+        "surfaceOnly": true
+      }
+    ],
+    "dataSources": [
+      {
+        "key": "queue",
+        "endpoint": "/api/v1/annahme/warteschlange",
+        "staleTimeMs": 15000
+      },
+      {
+        "key": "charges",
+        "endpoint": "/api/v1/chargen",
+        "staleTimeMs": 15000
+      },
+      {
+        "key": "freight",
+        "endpoint": "/api/v1/logistik/frachtbriefe",
+        "staleTimeMs": 15000
+      }
+    ],
+    "specialized": {
+      "type": "intake",
+      "id": "annahme/warteschlange"
+    },
+    "workflow": {
+      "processKey": "harvest-to-settlement",
+      "status": "operator-workspace",
+      "auditRequired": true
+    },
+    "performance": {
+      "initialPayloadBudgetKb": 100,
+      "requiresLazyTabs": true,
+      "requiresVirtualTables": true,
+      "lookupMinChars": 2,
+      "bundleGroup": "agrar"
+    },
+    "agentContract": {
+      "businessPurpose": "Annahme-Warteschlange über die vorhandenen Fachverträge bearbeiten.",
+      "examplePrompts": [
+        "Welche Eingaben und Aktionen sind verfügbar?"
+      ],
+      "sensitiveFields": [
+        "kennzeichen",
+        "lieferant",
+        "artikel",
+        "status",
+        "ankunft",
+        "wartezeit",
+        "lieferschein_nr"
+      ],
+      "forbiddenAgentTasks": [
+        "Fachaktionen dieser Bedienoberfläche ausführen"
+      ],
+      "testSelectors": {
+        "screenRoot": "[data-testid='native-cockpit-annahme-warteschlange']"
+      }
+    }
+  },
+  "waage/liste": {
+    "schemaVersion": 1,
+    "id": "waage/liste",
+    "domain": "agrar",
+    "mode": "cockpit",
+    "title": "Waagen",
+    "subtitle": "Waagen und Wiegescheine",
+    "adapter": {
+      "type": "native",
+      "sourceId": "waage/liste",
+      "temporary": false
+    },
+    "layout": {
+      "floorplan": "cockpit",
+      "density": "expertDense",
+      "contextRail": "combined",
+      "tableProfile": "inventory"
+    },
+    "fields": [
+      {
+        "key": "id",
+        "label": "ID",
+        "type": "text",
+        "required": false,
+        "readOnly": true
+      },
+      {
+        "key": "standort",
+        "label": "Standort",
+        "type": "text",
+        "required": false,
+        "readOnly": true
+      },
+      {
+        "key": "typ",
+        "label": "Typ",
+        "type": "text",
+        "required": false,
+        "readOnly": true
+      },
+      {
+        "key": "maxKapazitaet",
+        "label": "Max. Kapazität (t)",
+        "type": "text",
+        "required": false,
+        "readOnly": true
+      },
+      {
+        "key": "letzteEichung",
+        "label": "Letzte Eichung",
+        "type": "text",
+        "required": false,
+        "readOnly": true
+      },
+      {
+        "key": "naechsteEichung",
+        "label": "Nächste Eichung",
+        "type": "text",
+        "required": false,
+        "readOnly": true
+      },
+      {
+        "key": "status",
+        "label": "Status",
+        "type": "text",
+        "required": false,
+        "readOnly": true
+      },
+      {
+        "key": "letztes_eichdatum",
+        "label": "Letztes Eichdatum",
+        "type": "date",
+        "required": false,
+        "readOnly": false
+      },
+      {
+        "key": "naechste_eichfaelligkeit",
+        "label": "Nächste Eichfälligkeit",
+        "type": "date",
+        "required": false,
+        "readOnly": false
+      },
+      {
+        "key": "eichamt",
+        "label": "Eichamt",
+        "type": "text",
+        "required": false,
+        "readOnly": false
+      },
+      {
+        "key": "zertifikat_nr",
+        "label": "Zertifikat-Nr.",
+        "type": "text",
+        "required": false,
+        "readOnly": false
+      },
+      {
+        "key": "importScaleId",
+        "label": "Importwaage",
+        "type": "text",
+        "required": true,
+        "readOnly": false
+      },
+      {
+        "key": "importFile",
+        "label": "ASCII-Datei",
+        "type": "file",
+        "required": true,
+        "readOnly": false
+      },
+      {
+        "key": "fehlerToleranz",
+        "label": "Gültige Zeilen übernehmen und Fehler protokollieren",
+        "type": "boolean",
+        "required": false,
+        "readOnly": false
+      },
+      {
+        "key": "importRaw",
+        "label": "Rohdaten",
+        "type": "text",
+        "required": false,
+        "readOnly": true
+      },
+      {
+        "key": "importError",
+        "label": "Importfehler",
+        "type": "text",
+        "required": false,
+        "readOnly": true
+      },
+      {
+        "key": "importRetryCount",
+        "label": "Versuche",
+        "type": "text",
+        "required": false,
+        "readOnly": true
+      }
+    ],
+    "actions": [
+      {
+        "key": "new",
+        "label": "Neue Waage",
+        "kind": "primary",
+        "dangerLevel": "safe",
+        "forbiddenForAgents": true,
+        "localEffect": "view"
+      },
+      {
+        "key": "yard",
+        "label": "Hofliste",
+        "kind": "secondary",
+        "dangerLevel": "safe",
+        "forbiddenForAgents": true,
+        "localEffect": "view"
+      },
+      {
+        "key": "export",
+        "label": "Export",
+        "kind": "secondary",
+        "dangerLevel": "safe",
+        "forbiddenForAgents": true,
+        "localEffect": "view"
+      },
+      {
+        "key": "refresh",
+        "label": "Aktualisieren",
+        "kind": "secondary",
+        "dangerLevel": "safe",
+        "forbiddenForAgents": true,
+        "localEffect": "view"
+      },
+      {
+        "key": "calibrate",
+        "label": "Eichdaten speichern",
+        "kind": "secondary",
+        "dangerLevel": "safe",
+        "forbiddenForAgents": true,
+        "permission": "studio.calibrate.intake-weighing",
+        "inputFlow": {
+          "kind": "humanForm",
+          "submitEndpoint": "/api/v1/waage/waagen/{entity_id}/kalibrierung",
+          "method": "PATCH"
+        },
+        "surfaceOnly": true
+      },
+      {
+        "key": "import",
+        "label": "Datei importieren",
+        "kind": "secondary",
+        "dangerLevel": "safe",
+        "forbiddenForAgents": true,
+        "permission": "studio.import.intake-weighing",
+        "inputFlow": {
+          "kind": "humanForm",
+          "submitEndpoint": "/api/v1/waage/waagen/import/ascii",
+          "method": "POST"
+        },
+        "surfaceOnly": true
+      },
+      {
+        "key": "retryImport",
+        "label": "Erneut prüfen",
+        "kind": "secondary",
+        "dangerLevel": "safe",
+        "forbiddenForAgents": true,
+        "permission": "studio.retryImport.intake-weighing",
+        "inputFlow": {
+          "kind": "humanForm",
+          "submitEndpoint": "/api/v1/waage/waagen/import/fehlerqueue/{entity_id}/retry",
+          "method": "POST"
+        },
+        "surfaceOnly": true
+      },
+      {
+        "key": "dismissImport",
+        "label": "Verwerfen",
+        "kind": "secondary",
+        "dangerLevel": "moderate",
+        "forbiddenForAgents": true,
+        "permission": "studio.dismissImport.intake-weighing",
+        "inputFlow": {
+          "kind": "humanForm",
+          "submitEndpoint": "/api/v1/waage/waagen/import/fehlerqueue/{entity_id}",
+          "method": "DELETE"
+        },
+        "requiresConfirmation": true,
+        "surfaceOnly": true
+      }
+    ],
+    "dataSources": [
+      {
+        "key": "scales",
+        "endpoint": "/api/v1/waage/waagen?limit=1000",
+        "staleTimeMs": 15000
+      },
+      {
+        "key": "importQueue",
+        "endpoint": "/api/v1/waage/waagen/import/fehlerqueue?limit=100",
+        "staleTimeMs": 15000
+      },
+      {
+        "key": "charges",
+        "endpoint": "/api/v1/chargen",
+        "staleTimeMs": 15000
+      },
+      {
+        "key": "freight",
+        "endpoint": "/api/v1/logistik/frachtbriefe",
+        "staleTimeMs": 15000
+      }
+    ],
+    "specialized": {
+      "type": "weighing",
+      "id": "waage/liste"
+    },
+    "workflow": {
+      "processKey": "harvest-to-settlement",
+      "status": "operator-workspace",
+      "auditRequired": true
+    },
+    "performance": {
+      "initialPayloadBudgetKb": 100,
+      "requiresLazyTabs": true,
+      "requiresVirtualTables": true,
+      "lookupMinChars": 2,
+      "bundleGroup": "agrar"
+    },
+    "agentContract": {
+      "businessPurpose": "Waagen über die vorhandenen Fachverträge bearbeiten.",
+      "examplePrompts": [
+        "Welche Eingaben und Aktionen sind verfügbar?"
+      ],
+      "sensitiveFields": [
+        "id",
+        "standort",
+        "typ",
+        "maxKapazitaet",
+        "letzteEichung",
+        "naechsteEichung",
+        "status",
+        "letztes_eichdatum",
+        "naechste_eichfaelligkeit",
+        "eichamt",
+        "zertifikat_nr",
+        "importScaleId",
+        "importFile",
+        "fehlerToleranz",
+        "importRaw",
+        "importError",
+        "importRetryCount"
+      ],
+      "forbiddenAgentTasks": [
+        "Fachaktionen dieser Bedienoberfläche ausführen"
+      ],
+      "testSelectors": {
+        "screenRoot": "[data-testid='native-cockpit-waage-liste']"
+      }
+    }
+  },
+  "waage/neu": {
+    "schemaVersion": 1,
+    "id": "waage/neu",
+    "domain": "agrar",
+    "mode": "wizard",
+    "title": "Waage anlegen",
+    "subtitle": "Waagen und Wiegescheine",
+    "adapter": {
+      "type": "native",
+      "sourceId": "waage/neu",
+      "temporary": false
+    },
+    "layout": {
+      "floorplan": "wizard",
+      "density": "expertDense",
+      "contextRail": "combined",
+      "tableProfile": "inventory"
+    },
+    "fields": [
+      {
+        "key": "standort",
+        "label": "Standort",
+        "type": "text",
+        "required": true,
+        "readOnly": false
+      },
+      {
+        "key": "typ",
+        "label": "Waagentyp",
+        "type": "text",
+        "required": true,
+        "readOnly": false
+      },
+      {
+        "key": "max_kapazitaet",
+        "label": "Kapazität in Tonnen",
+        "type": "number",
+        "required": true,
+        "readOnly": false
+      }
+    ],
+    "actions": [
+      {
+        "key": "create",
+        "label": "Waage anlegen",
+        "kind": "primary",
+        "dangerLevel": "safe",
+        "forbiddenForAgents": true,
+        "permission": "studio.create.intake-weighing",
+        "inputFlow": {
+          "kind": "humanForm",
+          "submitEndpoint": "/api/v1/waage/waagen",
+          "method": "POST"
+        }
+      }
+    ],
+    "dataSources": [
+      {
+        "key": "scales",
+        "endpoint": "/api/v1/waage/waagen",
+        "staleTimeMs": 15000
+      }
+    ],
+    "specialized": {
+      "type": "weighing",
+      "id": "waage/neu"
+    },
+    "workflow": {
+      "processKey": "harvest-to-settlement",
+      "status": "operator-workspace",
+      "auditRequired": true
+    },
+    "performance": {
+      "initialPayloadBudgetKb": 100,
+      "requiresLazyTabs": true,
+      "requiresVirtualTables": true,
+      "lookupMinChars": 2,
+      "bundleGroup": "agrar"
+    },
+    "agentContract": {
+      "businessPurpose": "Waage anlegen über die vorhandenen Fachverträge bearbeiten.",
+      "examplePrompts": [
+        "Welche Eingaben und Aktionen sind verfügbar?"
+      ],
+      "sensitiveFields": [
+        "standort",
+        "typ",
+        "max_kapazitaet"
+      ],
+      "forbiddenAgentTasks": [
+        "Fachaktionen dieser Bedienoberfläche ausführen"
+      ],
+      "testSelectors": {
+        "screenRoot": "[data-testid='native-cockpit-waage-neu']"
+      }
+    }
+  },
+  "waage/wiegungen": {
+    "schemaVersion": 1,
+    "id": "waage/wiegungen",
+    "domain": "agrar",
+    "mode": "cockpit",
+    "title": "Wiegungen",
+    "subtitle": "Waagen und Wiegescheine",
+    "adapter": {
+      "type": "native",
+      "sourceId": "waage/wiegungen",
+      "temporary": false
+    },
+    "layout": {
+      "floorplan": "cockpit",
+      "density": "expertDense",
+      "contextRail": "combined",
+      "tableProfile": "inventory"
+    },
+    "fields": [
+      {
+        "key": "ticketNumber",
+        "label": "Ticketnummer",
+        "type": "text",
+        "required": true,
+        "readOnly": false
+      },
+      {
+        "key": "scaleId",
+        "label": "Waage",
+        "type": "text",
+        "required": false,
+        "readOnly": false
+      },
+      {
+        "key": "vehiclePlate",
+        "label": "Kennzeichen",
+        "type": "text",
+        "required": false,
+        "readOnly": false
+      },
+      {
+        "key": "grossWeight",
+        "label": "Brutto",
+        "type": "number",
+        "required": false,
+        "readOnly": false
+      },
+      {
+        "key": "tareWeight",
+        "label": "Tara",
+        "type": "number",
+        "required": false,
+        "readOnly": false
+      },
+      {
+        "key": "moisturePct",
+        "label": "Feuchte %",
+        "type": "number",
+        "required": false,
+        "readOnly": false
+      },
+      {
+        "key": "impuritiesPct",
+        "label": "Besatz %",
+        "type": "number",
+        "required": false,
+        "readOnly": false
+      },
+      {
+        "key": "selectedTicketId",
+        "label": "Ticket",
+        "type": "text",
+        "required": false,
+        "readOnly": false
+      },
+      {
+        "key": "selectedContractId",
+        "label": "Offener Kontrakt",
+        "type": "text",
+        "required": false,
+        "readOnly": false
+      }
+    ],
+    "actions": [
+      {
+        "key": "create",
+        "label": "Wiegeschein anlegen",
+        "kind": "primary",
+        "dangerLevel": "safe",
+        "forbiddenForAgents": true,
+        "permission": "studio.create.intake-weighing",
+        "inputFlow": {
+          "kind": "humanForm",
+          "submitEndpoint": "/api/v1/weighing-tickets",
+          "method": "POST"
+        }
+      },
+      {
+        "key": "close",
+        "label": "Ticket schließen",
+        "kind": "secondary",
+        "dangerLevel": "safe",
+        "forbiddenForAgents": true,
+        "permission": "studio.close.intake-weighing",
+        "inputFlow": {
+          "kind": "humanForm",
+          "submitEndpoint": "/api/v1/weighing-tickets/{entity_id}",
+          "method": "PUT"
+        },
+        "surfaceOnly": true
+      },
+      {
+        "key": "allocate",
+        "label": "Kontrakt zuordnen",
+        "kind": "secondary",
+        "dangerLevel": "safe",
+        "forbiddenForAgents": true,
+        "permission": "studio.allocate.intake-weighing",
+        "inputFlow": {
+          "kind": "humanForm",
+          "submitEndpoint": "/api/v1/weighing-tickets/{entity_id}/allocate-contract",
+          "method": "POST"
+        }
+      },
+      {
+        "key": "refresh",
+        "label": "Aktualisieren",
+        "kind": "secondary",
+        "dangerLevel": "safe",
+        "forbiddenForAgents": true,
+        "localEffect": "view"
+      }
+    ],
+    "dataSources": [
+      {
+        "key": "tickets",
+        "endpoint": "/api/v1/weighing-tickets?limit=100",
+        "staleTimeMs": 15000
+      },
+      {
+        "key": "contracts",
+        "endpoint": "/api/v1/agrar/contracts?status=open&limit=100",
+        "staleTimeMs": 15000
+      },
+      {
+        "key": "charges",
+        "endpoint": "/api/v1/chargen",
+        "staleTimeMs": 15000
+      },
+      {
+        "key": "freight",
+        "endpoint": "/api/v1/logistik/frachtbriefe",
+        "staleTimeMs": 15000
+      }
+    ],
+    "specialized": {
+      "type": "weighing",
+      "id": "waage/wiegungen"
+    },
+    "workflow": {
+      "processKey": "harvest-to-settlement",
+      "status": "operator-workspace",
+      "auditRequired": true
+    },
+    "performance": {
+      "initialPayloadBudgetKb": 100,
+      "requiresLazyTabs": true,
+      "requiresVirtualTables": true,
+      "lookupMinChars": 2,
+      "bundleGroup": "agrar"
+    },
+    "agentContract": {
+      "businessPurpose": "Wiegungen über die vorhandenen Fachverträge bearbeiten.",
+      "examplePrompts": [
+        "Welche Eingaben und Aktionen sind verfügbar?"
+      ],
+      "sensitiveFields": [
+        "ticketNumber",
+        "scaleId",
+        "vehiclePlate",
+        "grossWeight",
+        "tareWeight",
+        "moisturePct",
+        "impuritiesPct",
+        "selectedTicketId",
+        "selectedContractId"
+      ],
+      "forbiddenAgentTasks": [
+        "Fachaktionen dieser Bedienoberfläche ausführen"
+      ],
+      "testSelectors": {
+        "screenRoot": "[data-testid='native-cockpit-waage-wiegungen']"
+      }
+    }
+  }
+}

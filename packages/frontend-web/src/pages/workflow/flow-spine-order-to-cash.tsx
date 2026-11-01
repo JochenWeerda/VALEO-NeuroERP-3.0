@@ -1,5 +1,5 @@
-import FlowSpineWorkspace from '@/components/workflow/FlowSpineWorkspace'
+import { UniversalNativeCockpitPage } from '@/components/mask-builder/UniversalNativeCockpitPage'
 
-export default function FlowSpineOrderToCashPage(): JSX.Element {
-  return <FlowSpineWorkspace processKey="order-to-cash" />
+export default function FlowSpinePage(): JSX.Element {
+  return <UniversalNativeCockpitPage screenId="workflow/flow-spine-order-to-cash" />
 }

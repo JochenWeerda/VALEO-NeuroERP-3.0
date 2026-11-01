@@ -3,6 +3,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from app.core.screen_definitions_intake_weighing import build_intake_quality, build_intake_registration
+
 from app.core.stamm_object_page_parent import (
     build_stamm_object_page,
     stamm_entity_source,
@@ -271,9 +273,8 @@ def build_annahme_labor() -> dict[str, Any]:
         edit_permission="annahme.labor.update", bearbeiten_endpoint=None)
 
 def build_annahme_lkw_registrierung() -> dict[str, Any]:
-    return _batch13_stamm("annahme/lkw-registrierung", domain="agrar", title="Lkw registrierung",
-        entity_endpoint="/api/v1/annahme/warteschlange/{entity_id}", identity_field="bezeichnung",
-        edit_permission="annahme.lkw-registrierung.update", bearbeiten_endpoint=None)
+    return build_intake_registration()
+
 
 def build_annahme_muster() -> dict[str, Any]:
     return _batch13_stamm("annahme/muster", domain="agrar", title="Muster",
@@ -281,9 +282,8 @@ def build_annahme_muster() -> dict[str, Any]:
         edit_permission="annahme.muster.update", bearbeiten_endpoint=None)
 
 def build_annahme_qualitaets_check() -> dict[str, Any]:
-    return _batch13_stamm("annahme/qualitaets-check", domain="agrar", title="Qualitaets check",
-        entity_endpoint="/api/v1/annahme/warteschlange/{entity_id}", identity_field="bezeichnung",
-        edit_permission="annahme.qualitaets-check.update", bearbeiten_endpoint=None)
+    return build_intake_quality()
+
 
 def build_annahme_rohwaren_annahme() -> dict[str, Any]:
     return _batch13_stamm("annahme/rohwaren-annahme", domain="agrar", title="Rohwaren annahme",

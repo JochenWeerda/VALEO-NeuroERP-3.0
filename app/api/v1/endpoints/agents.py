@@ -5,11 +5,12 @@ Endpoints for triggering and managing agent workflows
 
 import logging
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field
 
 from ....core.logging import set_correlation_id
 from app.core.tenant import get_tenant_id
+from app.core.akteur import gepruefter_akteur_aus_request
 from fastapi import Depends
 
 logger = logging.getLogger(__name__)
@@ -474,13 +475,13 @@ async def get_neuroassist_control_center_incidents(tenant_id: str = Depends(get_
 
 
 @router.post("/neuroassist/ops/incidents/{incident_id}/actions", response_model=AgentOut, summary="Neuroassist control center incident action apply", dependencies=SCHREIBEN["FACHLICH"])
-async def apply_neuroassist_control_center_incident_action(incident_id: str, request: ControlCenterIncidentActionRequest, tenant_id: str = Depends(get_tenant_id)):
+async def apply_neuroassist_control_center_incident_action(incident_id: str, request: ControlCenterIncidentActionRequest, http_request: Request, tenant_id: str = Depends(get_tenant_id)):
     try:
         return _get_control_center_helpers()["apply_incident_action"](
             tenant_id,
             incident_id,
             action=request.action,
-            requested_by=request.requested_by,
+            requested_by=gepruefter_akteur_aus_request(http_request),
             note=request.note,
         )
     except ValueError as exc:
