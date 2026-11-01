@@ -1,0 +1,18 @@
+
+ RUN  v4.1.11 C:/Users/Jochen/VALEO-NeuroERP-3.0/artifacts/security-integrated-source/packages/frontend-web
+
+
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/__tests__/features/screen-studio/ScreenStudioPage.test.tsx [ src/__tests__/features/screen-studio/ScreenStudioPage.test.tsx ]
+ FAIL  src/__tests__/features/screen-studio/studio-api.test.ts [ src/__tests__/features/screen-studio/studio-api.test.ts ]
+Error: EPERM: operation not permitted, rename 'C:\Users\Jochen\AppData\Local\Packages\sandbox.{e9be743e-ffa1-4d6e-ace8-0884f4372e93}\AC\Temp\IPEeRhbAtUbslvLWkiRu-\client\.tmp-1792564760910-kztbbib1hur' -> 'C:\Users\Jochen\AppData\Local\Packages\sandbox.{e9be743e-ffa1-4d6e-ace8-0884f4372e93}\AC\Temp\IPEeRhbAtUbslvLWkiRu-\client\7eb247a7dbb71c5b74436f50d41685f27d8b8a0d'
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  no tests
+   Start at  08:39:05
+   Duration  15.04s (transform 0ms, setup 0ms, import 0ms, tests 0ms, environment 27.52s)
+

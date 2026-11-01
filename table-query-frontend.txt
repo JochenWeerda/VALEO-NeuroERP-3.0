@@ -1,0 +1,13 @@
+
+ RUN  v4.1.11 C:/Users/Jochen/VALEO-NeuroERP-3.0/artifacts/security-integrated-source/packages/frontend-web
+
+stderr | src/__tests__/components/mask-builder/runtime/compile-data-binding-plan.test.ts > compileDataBindingPlan > marks table as non-server-queried when no endpoint found
+[mask-runtime] No endpoint for table "orphan" in screen "crm/customer-360"
+
+·······
+
+ Test Files  2 passed (2)
+      Tests  7 passed (7)
+   Start at  05:53:21
+   Duration  2.25s (transform 102ms, setup 649ms, import 138ms, tests 10ms, environment 2.82s)
+
