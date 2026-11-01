@@ -14896,14 +14896,14 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "finance.debitor.update",
-          "commandEndpoint": "/api/v1/finance/debtors/{entity_id}",
-          "method": "PUT",
+          "commandEndpoint": "/api/v1/finance/debitoren/{entity_id}/actions/bearbeiten",
+          "method": "POST",
           "stubReason": null
         }
       ],
       "sensitive_fields": [
-        "iban",
-        "bic"
+        "credit_limit",
+        "vat_id"
       ],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",

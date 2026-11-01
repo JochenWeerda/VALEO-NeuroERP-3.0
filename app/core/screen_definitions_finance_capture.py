@@ -1,4 +1,4 @@
-"""Native finance creation screens backed by the actual debtor aggregate."""
+"""Native finance creation screens; debtors are created in the leading customer master (domain_crm.customers)."""
 
 from __future__ import annotations
 
@@ -7,6 +7,8 @@ from typing import Any
 from app.core.stamm_object_page_parent import build_stamm_object_page, stamm_entity_source, stamm_kopf_tab
 
 
+#: Nur Felder, die der fuehrende Kundenstamm (domain_crm.customers) haelt. Bankverbindung, Skonto und
+#: Notizen hielt nur die stillgelegte Tabelle domain_erp.debitors; die Bankverbindung gehoert zum SEPA-Mandat.
 DEBTOR_FIELDS: list[dict[str, Any]] = [
     {"key": "debtor_number", "label": "Debitorennummer", "type": "text", "required": True},
     {"key": "company_name", "label": "Firma", "type": "text", "required": True},
@@ -18,17 +20,9 @@ DEBTOR_FIELDS: list[dict[str, Any]] = [
     {"key": "phone", "label": "Telefon", "type": "text"},
     {"key": "email", "label": "E-Mail", "type": "text"},
     {"key": "vat_id", "label": "USt-IdNr.", "type": "text"},
-    {"key": "tax_number", "label": "Steuernummer", "type": "text"},
-    {"key": "iban", "label": "IBAN", "type": "text"},
-    {"key": "bic", "label": "BIC", "type": "text"},
-    {"key": "bank_name", "label": "Bank", "type": "text"},
-    {"key": "account_holder", "label": "Kontoinhaber", "type": "text"},
     {"key": "payment_terms_days", "label": "Zahlungsziel (Tage)", "type": "number"},
-    {"key": "discount_days", "label": "Skontofrist (Tage)", "type": "number"},
-    {"key": "discount_percent", "label": "Skonto (%)", "type": "number"},
     {"key": "credit_limit", "label": "Kreditlimit", "type": "currency"},
     {"key": "is_active", "label": "Aktiv", "type": "boolean"},
-    {"key": "notes", "label": "Notizen", "type": "textarea"},
 ]
 
 
@@ -39,30 +33,29 @@ def build_debtor_capture() -> dict[str, Any]:
         title="Debitor",
         subtitle="Debitorenstamm",
         identity_field="debtor_number",
-        data_sources=[stamm_entity_source("/api/v1/finance/debtors/{entity_id}")],
+        data_sources=[stamm_entity_source("/api/v1/finance/debitoren/{entity_id}")],
         tabs=[stamm_kopf_tab(DEBTOR_FIELDS)],
         edit_permission="finance.debitor.update",
         edit_action_overrides={
-            "commandEndpoint": "/api/v1/finance/debtors/{entity_id}",
-            "method": "PUT",
-            "responseAdapter": "resource.v1",
-            "inputPrefill": "entity",
-            "inputFields": [f for f in DEBTOR_FIELDS if f["key"] != "debtor_number"],
+            "commandEndpoint": "/api/v1/finance/debitoren/{entity_id}/actions/bearbeiten",
+            "method": "POST",
+            "inputFields": [{"key": "credit_limit", "label": "Kreditlimit", "type": "number"},
+                            {"key": "is_active", "label": "Aktiv (nicht gesperrt)", "type": "boolean"}],
             "auditReasonRequired": True,
             "forbiddenForAgents": True,
         },
         creation={
-            "endpoint": "/api/v1/finance/debtors/",
+            "endpoint": "/api/v1/finance/debitoren",
             "permission": "finance.debitor.update",
             "detailRoute": "/finance/debitoren/{entity_id}",
             "cancelRoute": "/finance/debitoren-liste",
-            "defaults": {"country": "DE", "payment_terms_days": 30, "discount_days": 0,
-                         "discount_percent": 0, "credit_limit": 0, "is_active": True},
+            "defaults": {"country": "DE", "payment_terms_days": 30, "credit_limit": 0, "is_active": True},
             "fields": DEBTOR_FIELDS,
         },
         no_workflow_reason="Debitorenstamm ist Referenzdaten ohne Beleglebenszyklus.",
-        business_purpose="Debitoren beim verifizierten Mandanten anlegen und pflegen.",
+        business_purpose="Debitoren beim verifizierten Mandanten im fuehrenden Kundenstamm anlegen.",
         example_prompts=["Lege einen Debitor an.", "Zeige Debitor {entity_id}."],
+        sensitive_fields=["credit_limit", "vat_id"],
         test_id="finance-debitoren-new",
         density="expertDense",
         context_rail="audit",

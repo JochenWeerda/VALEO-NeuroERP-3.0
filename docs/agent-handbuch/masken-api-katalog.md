@@ -16166,7 +16166,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ### `finance/debitoren/new` — Debitor
 
-**Zweck:** Debitoren beim verifizierten Mandanten anlegen und pflegen.
+**Zweck:** Debitoren beim verifizierten Mandanten im fuehrenden Kundenstamm anlegen.
 
 | | |
 |---|---|
@@ -16178,7 +16178,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/finance/debtors/{entity_id}`
+- `entity` → `/api/v1/finance/debitoren/{entity_id}`
 
 **MCP-Tools (Domäne):**
 
@@ -16191,13 +16191,13 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - Lege einen Debitor an.
 - Zeige Debitor {entity_id}.
 
-**Sensible Felder:** `iban, bic`
+**Sensible Felder:** `credit_limit, vat_id`
 
 **Actions:**
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `edit` | Bearbeiten | safe | nein | `/api/v1/finance/debtors/{entity_id}` |
+| `edit` | Bearbeiten | safe | nein | `/api/v1/finance/debitoren/{entity_id}/actions/bearbeiten` |
 
 ---
 

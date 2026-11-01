@@ -11,7 +11,8 @@ from app.api.v1.endpoints.ap_invoices import create_ap_invoice
 from app.api.v1.endpoints.agrar_contracts import AgrarContractCreate, create_agrar_contract
 from app.api.v1.endpoints.agrar_settlements import SettlementCreate, create_settlement
 from app.api.v1.endpoints.creditors import CreditorCreate, create_creditor
-from app.api.v1.endpoints.debtors import DebtorCreate, DebtorUpdate, create_debtor, update_debtor
+from app.api.v1.endpoints.debtors import DebtorUpdate, update_debtor
+from app.api.v1.endpoints.finance_stammdaten import DebitorCreate, create_debitor
 from app.api.v1.endpoints.weighing_tickets import (
     WeighingTicketCreate,
     WeighingTicketUpdate,
@@ -188,7 +189,7 @@ def test_create_settlement_requires_supplier_before_db_access():
 
 
 def test_create_debtor_rejects_invalid_country_before_db_access():
-    payload = DebtorCreate(
+    payload = DebitorCreate(
         tenant_id="tenant-1",
         debtor_number="DB-001",
         company_name="Kunde AG",
@@ -199,7 +200,7 @@ def test_create_debtor_rejects_invalid_country_before_db_access():
     )
 
     with pytest.raises(HTTPException) as exc:
-        asyncio.run(create_debtor(payload, db=FailDB()))
+        asyncio.run(create_debitor(payload, db=FailDB(), tenant_id="tenant-1"))
 
     assert exc.value.status_code == 422
     assert exc.value.detail["entity_typ"] == "Debitor"
