@@ -44,6 +44,11 @@ class SegmentInput(Mutation):
         return self
 
 
+# Updatable columns and their fixed SET fragments; values are always bound.
+_UPDATABLE = {"name": "name=:name", "description": "description=:description",
+              "segment_type": "segment_type=:segment_type", "criteria": "criteria=CAST(:criteria AS jsonb)"}
+
+
 class SegmentUpdate(Mutation):
     name: str | None = Field(default=None, min_length=1, max_length=200)
     description: str | None = Field(default=None, max_length=10000)
@@ -88,9 +93,8 @@ def _touch(db, tenant: str, segment_id: str, count: int | None = None) -> dict:
 @router.get("/", include_in_schema=False)
 async def list_segments(search: str | None = Query(default=None, max_length=255), limit: int = Query(50, ge=1, le=200), offset: int = Query(0, ge=0), tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
     params = {"tenant": tenant_id,"search": f"%{search}%" if search else None,"limit": limit,"offset": offset}
-    where = "tenant_id=:tenant AND (CAST(:search AS text) IS NULL OR name ILIKE :search)"
-    total = db.execute(text(f"SELECT count(*) FROM domain_crm.crm_segments WHERE {where}"), params).scalar_one()
-    ids = db.execute(text(f"SELECT id FROM domain_crm.crm_segments WHERE {where} ORDER BY name,id LIMIT :limit OFFSET :offset"), params).scalars().all()
+    total = db.execute(text("SELECT count(*) FROM domain_crm.crm_segments WHERE tenant_id=:tenant AND (CAST(:search AS text) IS NULL OR name ILIKE :search)"), params).scalar_one()
+    ids = db.execute(text("SELECT id FROM domain_crm.crm_segments WHERE tenant_id=:tenant AND (CAST(:search AS text) IS NULL OR name ILIKE :search) ORDER BY name,id LIMIT :limit OFFSET :offset"), params).scalars().fetchmany(limit)
     return {"items": [service.find(db, tenant_id, sid) for sid in ids], "total": total}
 
 
@@ -121,10 +125,12 @@ async def update_segment(segment_id: str, body: SegmentUpdate, tenant_id: str = 
         if "criteria" in updates and updates["criteria"] is None:
             raise HTTPException(422, "Criteria must not be null")
         if updates:
-            keys = [key + ("=CAST(:criteria AS jsonb)" if key == "criteria" else "=:" + key) for key in updates]
+            if not set(updates) <= _UPDATABLE:
+                raise HTTPException(422, "Unsupported segment field")
+            keys = [_UPDATABLE[key] for key in updates]
             if "criteria" in updates:
                 updates["criteria"] = json.dumps(updates["criteria"])
-            db.execute(text("UPDATE domain_crm.crm_segments SET " + ",".join(keys) + " WHERE tenant_id=:tenant AND id=:id"), {**updates,"tenant": tenant_id,"id": segment_id})
+            db.execute(text("UPDATE domain_crm.crm_segments SET " + ",".join(keys) + " WHERE tenant_id=:tenant AND id=:id"), {**updates,"tenant": tenant_id,"id": segment_id})  # nosec B608  # SET-Teile nur aus der festen _UPDATABLE-Zuordnung, Werte gebunden
         return _touch(db, tenant_id, segment_id)
     return service.command(db, tenant_id, "update", body.idempotency_key, {"id": segment_id,**body.model_dump()}, mutate)
 
@@ -133,9 +139,8 @@ async def update_segment(segment_id: str, body: SegmentUpdate, tenant_id: str = 
 async def segment_members(segment_id: str, limit: int = Query(100, ge=1, le=5000), offset: int = Query(0, ge=0), tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
     service.find(db, tenant_id, segment_id)
     params={"tenant": tenant_id,"id": segment_id,"limit": limit,"offset": offset}
-    where="m.tenant_id=:tenant AND m.segment_id=:id AND p.tenant_id=:tenant"
-    total=db.execute(text("SELECT count(*) FROM domain_crm.crm_segment_members m JOIN domain_crm.business_partners p ON p.partner_id=m.partner_id WHERE "+where),params).scalar_one()
-    rows=db.execute(text("SELECT m.id,m.partner_id,m.partner_id AS contact_id,m.added_at,p.name_1 AS name FROM domain_crm.crm_segment_members m JOIN domain_crm.business_partners p ON p.partner_id=m.partner_id WHERE "+where+" ORDER BY m.added_at,m.id LIMIT :limit OFFSET :offset"),params).mappings().all()
+    total=db.execute(text("SELECT count(*) FROM domain_crm.crm_segment_members m JOIN domain_crm.business_partners p ON p.partner_id=m.partner_id WHERE m.tenant_id=:tenant AND m.segment_id=:id AND p.tenant_id=:tenant"),params).scalar_one()
+    rows=db.execute(text("SELECT m.id,m.partner_id,m.partner_id AS contact_id,m.added_at,p.name_1 AS name FROM domain_crm.crm_segment_members m JOIN domain_crm.business_partners p ON p.partner_id=m.partner_id WHERE m.tenant_id=:tenant AND m.segment_id=:id AND p.tenant_id=:tenant ORDER BY m.added_at,m.id LIMIT :limit OFFSET :offset"),params).mappings().fetchmany(limit)
     return {"items":[dict(row) for row in rows],"total":total}
 
 

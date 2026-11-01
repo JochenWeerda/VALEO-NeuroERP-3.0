@@ -70,7 +70,9 @@ def version_of(row: dict) -> int:
 def find(db, tenant: str, segment_id: str, *, lock: bool = False) -> dict:
     if not tenant or not tenant.strip():
         raise HTTPException(403, "Verified tenant required")
-    row = db.execute(text("SELECT * FROM domain_crm.crm_segments WHERE tenant_id=:tenant AND id=:id" + (" FOR UPDATE" if lock else "")), {"tenant": tenant, "id": segment_id}).mappings().first()
+    query = ("SELECT * FROM domain_crm.crm_segments WHERE tenant_id=:tenant AND id=:id FOR UPDATE" if lock
+             else "SELECT * FROM domain_crm.crm_segments WHERE tenant_id=:tenant AND id=:id")
+    row = db.execute(text(query), {"tenant": tenant, "id": segment_id}).mappings().first()
     if row is None:
         raise HTTPException(404, "Segment not found")
     result = dict(row)
@@ -118,7 +120,7 @@ def evaluate(db, tenant: str, row: dict) -> int:
             # Literal substring/prefix; no wildcard interpretation, no client SQL.
             clauses.append(f"strpos(lower(COALESCE({field}, '')), lower(:{key})) " + ("> 0" if op == "contains" else "= 1"))
             params[key] = value
-    members = db.execute(text("SELECT partner_id FROM domain_crm.business_partners WHERE " + " AND ".join(clauses) + " ORDER BY partner_id LIMIT 5001 FOR SHARE"), params).scalars().all()
+    members = db.execute(text("SELECT partner_id FROM domain_crm.business_partners WHERE " + " AND ".join(clauses) + " ORDER BY partner_id LIMIT 5001 FOR SHARE"), params).scalars().fetchmany(5001)  # nosec B608  # Spalten nur aus TEXT_FIELDS/BOOL_FIELDS (criteria_rules), Werte gebunden
     if len(members) > 5000:
         raise HTTPException(413, "Segment exceeds the 5000-member evaluation limit")
     db.execute(text("DELETE FROM domain_crm.crm_segment_members WHERE tenant_id=:tenant AND segment_id=:id"), params)

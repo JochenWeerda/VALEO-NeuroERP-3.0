@@ -54,7 +54,13 @@ def upgrade():
         END
         $$""")
     op.execute('REVOKE ALL ON FUNCTION public.waage_reference_allowed(text) FROM PUBLIC')
-    op.execute('GRANT EXECUTE ON FUNCTION public.waage_reference_allowed(text) TO valeo_app')
+    # valeo_app is provisioned outside Alembic (scripts/provision_db_roles.py); a fresh
+    # CI database without separated roles keeps the function owner-only.
+    op.execute("""DO $$ BEGIN
+        IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'valeo_app') THEN
+            GRANT EXECUTE ON FUNCTION public.waage_reference_allowed(text) TO valeo_app;
+        END IF;
+    END $$""")
 
 
 def downgrade():

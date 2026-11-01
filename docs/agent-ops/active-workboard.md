@@ -20175,3 +20175,16 @@ Formularreset einen noch laufenden Leseauftrag entwerten. Andere Feldtypen und
 Dialogaktionen bleiben unveraendert; eigener Reset-/Unmount-Nachweis erforderlich.
 
 **FILE-CONTENT Abnahme20261031:** 80Frontendtests in9Dateien und46reineBackendfaelle gruen. VollstaendigeTyppruefung/Produktionsbuild/Lint gruen. EchteFileReaderBytes,UTF8/Bytegrenzen,Altwertschutz,OptionalPending,Reset/Race/Unmount/ReadOnly undCompilerCachevertrag geprueft. BackendAufnahmetest isoliert fachfremdeSemanticPreview; keinAPI-/DB-/Importnachweis. QA/Handshake studio-file-content-20261031.md. KeineDB/Container/AgentenWritefreigabe/GateLockerung. 46Runtimepunkteweiteroffen; Architekturcheck1Route/7Services in unveraendertenInventarenrot, AusgangsCIweiterseparat.
+
+## STUDIO-RUNTIME46-INTEGRATION-20261101 — abgeschlossen, Claude
+
+Integration der uncommitteten Runtime46-Arbeit (Klon 30./31.10.) auf main, PR #92.
+Dateivertrag von main (accept als Liste) beibehalten; Debitoren- und
+Eingangsrechnungsdetail fuer bestehende IDs erhalten, nur die Anlage nutzt die
+neue Erfassung. CI-Nacharbeit: CRM-Segmente ohne zusammengesetztes SQL ausser
+zwei Whitelist-Stellen (nosec mit Begruendung), begrenzte Abfragen per
+fetchmany, back-Aktionen der CRM-Masken mit dangerLevel, Waagen-Migration
+vergibt valeo_app nur bei vorhandener Rolle, Waagen-ADR mit Pflichtabschnitten,
+Baselines Godfile/Business-Time gesenkt.
+Offen: zwei Debitoren-Aggregate (domain_erp.debitors vs. domain_crm.customers).
+

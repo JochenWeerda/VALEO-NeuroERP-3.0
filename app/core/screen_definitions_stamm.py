@@ -377,7 +377,7 @@ def build_crm_campaign_stamm() -> dict[str, Any]:
             action["enabledWhen"] = {"any": [{"path": "state", "equals": state} for state in transitions[action["key"]]]}
             action["requiresConfirmation"] = action["key"] in {"activate", "complete", "archive"}
     definition["actions"].append({"key": "delete", "label": "Kampagne löschen", "kind": "danger", "dangerLevel": "high", "permission": "crm.campaign.update", "forbiddenForAgents": True, "requiresConfirmation": True, "commandEndpoint": base + "/{entity_id}", "method": "DELETE", "responseAdapter": "resource.v1", "resultNavigationRoute": "/crm/campaigns", "enabledWhen": {"any": [{"path": "state", "equals": state} for state in ("draft", "archived")]}})
-    definition["actions"].append({"key": "back", "label": "Zur Kampagnenliste", "kind": "secondary", "localEffect": "navigation", "navigationRoute": "/crm/campaigns"})
+    definition["actions"].append({"key": "back", "label": "Zur Kampagnenliste", "kind": "secondary", "dangerLevel": "safe", "localEffect": "navigation", "navigationRoute": "/crm/campaigns"})
     definition["tabs"].append(stamm_entity_tab(key="analytics", label="Kennzahlen", fields=[
         _feld("kpis." + key, label, "number", readOnly=True) for key, label in
         [("total_sent", "Gesendet"), ("total_delivered", "Zugestellt"), ("total_bounced", "Unzustellbar"), ("total_opens", "Geoeffnet"), ("total_clicks", "Klicks"), ("total_conversions", "Konversionen"), ("revenue_generated", "Umsatz"), ("open_rate", "Oeffnungsrate (%)"), ("click_rate", "Klickrate (%)"), ("conversion_rate", "Konversionsrate (%)")]]))
@@ -474,7 +474,7 @@ def build_crm_consent_stamm() -> dict[str, Any]:
             action["enabledWhen"] = {"path": "status", "equals": "granted"}
         if action["key"] == "resend-confirmation":
             action["enabledWhen"] = {"any": [{"path": "status", "equals": state} for state in ("pending", "denied")]}
-    definition["actions"].append({"key": "back", "label": "Zur Einwilligungsliste", "kind": "secondary", "localEffect": "navigation", "navigationRoute": "/crm/consents"})
+    definition["actions"].append({"key": "back", "label": "Zur Einwilligungsliste", "kind": "secondary", "dangerLevel": "safe", "localEffect": "navigation", "navigationRoute": "/crm/consents"})
     definition["summary"] = []
     return definition
 
@@ -521,7 +521,7 @@ def build_crm_gdpr_request_stamm() -> dict[str, Any]:
             action["requiresConfirmation"] = True
             action["enabledWhen"] = {"any": [{"path": "status", "equals": value} for value in ("PENDING", "VERIFIED")]}
     definition["tabs"].append(stamm_entity_tab(key="result", label="CRM-Verarbeitungsnachweis", fields=[_feld("data_scope", "Datenbereich", readOnly=True), _feld("processing_result", "Ergebnis und aufbewahrte Nachweise", "textarea", readOnly=True)]))
-    definition["actions"].append({"key": "back", "label": "Zur Anfragenliste", "kind": "secondary", "localEffect": "navigation", "navigationRoute": "/crm/gdpr-requests"})
+    definition["actions"].append({"key": "back", "label": "Zur Anfragenliste", "kind": "secondary", "dangerLevel": "safe", "localEffect": "navigation", "navigationRoute": "/crm/gdpr-requests"})
     definition["summary"] = []
     return definition
 
@@ -556,7 +556,7 @@ def build_crm_segment_stamm() -> dict[str, Any]:
     )
     definition["dataSources"].append(stamm_tab_source("members", base + "/{entity_id}/members?limit=5000"))
     definition["tabs"].append(_register("members", "Mitglieder", "members", [{"key": key, "label": label} for key, label in [("partner_id", "Partner"), ("name", "Name"), ("added_at", "Hinzugefuegt")]]))
-    definition["actions"].append({"key": "back", "label": "Zur Segmentliste", "kind": "secondary", "localEffect": "navigation", "navigationRoute": "/crm/segments"})
+    definition["actions"].append({"key": "back", "label": "Zur Segmentliste", "kind": "secondary", "dangerLevel": "safe", "localEffect": "navigation", "navigationRoute": "/crm/segments"})
     definition["summary"] = []
     return definition
 

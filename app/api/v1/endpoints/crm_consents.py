@@ -185,7 +185,7 @@ async def create_consent(
     # Consent contact_id follows the same crm-core/customer ownership contract as /crm/contacts.
     from app.api.v1.endpoints.contacts import _eigener_kontakt
     contact = await _eigener_kontakt(db, tenant_id, payload.contact_id)
-    parent = db.execute(text("SELECT id FROM domain_crm.customers WHERE tenant_id=:tenant AND (id::text=:customer OR business_partner_id::text=:customer) FOR SHARE"), {"tenant": tenant_id, "customer": str(contact.customer_id)}).scalars().all()
+    parent = db.execute(text("SELECT id FROM domain_crm.customers WHERE tenant_id=:tenant AND (id::text=:customer OR business_partner_id::text=:customer) FOR SHARE"), {"tenant": tenant_id, "customer": str(contact.customer_id)}).scalars().fetchmany(2)
     if len(parent) != 1:
         raise HTTPException(status_code=404, detail="Kontaktkunde nicht eindeutig zugeordnet")
     now = datetime.now(timezone.utc)
