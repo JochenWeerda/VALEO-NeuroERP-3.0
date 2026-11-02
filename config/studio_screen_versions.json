@@ -7067,7 +7067,7 @@
       "version": "1.0.0"
     },
     "personal/bewerbungen": {
-      "definition_hash": "39fd30c54026accc936b0e2616dcedb05d257e2aaf1e2a712cdfb56f59119821",
+      "definition_hash": "f912edcd93c03a6bf510daba5d4a9a9bdd76f2626370f3e1be9013758646a6c9",
       "gates_passed": [
         "A",
         "B",

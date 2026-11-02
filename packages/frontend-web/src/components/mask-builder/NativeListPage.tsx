@@ -219,16 +219,6 @@ export function NativeListPage({ screenId, testId }: { screenId: string; testId?
       setStufe('eingabe')
       return
     }
-    if (aktion.localEffect === 'print' && !aktion.commandEndpoint) {
-      const rows = listData.current?.screen === screenId ? listData.current.rows : undefined
-      const columns = schema?.listExperience?.export.columns
-      if (!rows?.length || !columns?.length) {
-        toast({ title: 'Keine vollstaendige Drucksicht', description: 'Bitte die Liste laden und den Filter pruefen.', variant: 'destructive' })
-        return
-      }
-      printTable(rows, schema?.title ?? screenId, columns)
-      return
-    }
     if (aktion.localEffect === 'download' && !aktion.commandEndpoint) {
       void exportieren()
       return

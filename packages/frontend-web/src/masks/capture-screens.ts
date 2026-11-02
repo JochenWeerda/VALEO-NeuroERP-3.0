@@ -4047,7 +4047,7 @@ export const personalBewerbungenScreen = {
           "label": "Einwilligung",
           "command": "personal.openEinwilligung",
           "dangerLevel": "safe",
-          "permission": "personal.bewerbung.consent",
+          "permission": "personal.bewerbung.write",
           "navigationRoute": "/personal/bewerbungen/{entity_id}/einwilligung"
         },
         {

@@ -20289,4 +20289,11 @@ crm/leads-liste). Nutzerentscheidung 02.11.2026 Weg 1: 14 Seiten auf ihre vorhan
 (Kampagnen, Kampagnenvorlagen, Einwilligungen, DSGVO-Anfragen, Leads, Segmente, Dubletten, Freigaben,
 Kulturpflanzen, fuenf Compliance-Listen); 113 als Altlast in config/frontend_seiten_ohne_maske.json,
 Waechter tests/test_frontend_seiten_haben_ihre_maske.py. Echte Studio-Masken dafuer: Weg 3 im Studio-Umbau.
+Vitest (02.11.2026, Nutzerentscheidung Weg 2): 187 Faelle in 51 Testdateien pruefen Quelltext oder Bedienung der
+frueheren handgebauten Seiten (useTouchDevice, min-h-touch, variant="register", Flow-Spine-Inhalte, alte
+Rechnungserfassung). Sie laufen als it.fails mit der Marke "Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46)";
+Ratsche tests/test_vitest_runtime46_altlast.py (hoechstens 187, nur senken). Echte Fehler aus derselben Welle
+sind behoben: doppelte Dateivertragspruefung (accept-Liste) und doppelter Druckzweig ohne Fehlermeldung durch
+die Konfliktaufloesung c0bc8e99b/ca50c46f7; neun handgebaute Capture-Seiten blendeten alle rechtegebundenen
+Aktionen aus (Rechte jetzt aus useScreenPermissions), Postfaecher/Steuerschluessel mit fehlenden Rechten.
 

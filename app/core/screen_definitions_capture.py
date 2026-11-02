@@ -2379,7 +2379,8 @@ def build_personal_bewerbungen_screen_definition() -> dict[str, Any]:
                         "label": "Einwilligung",
                         "command": "personal.openEinwilligung",
                         "dangerLevel": "safe",
-                        "permission": "personal.bewerbung.consent",
+                        # Die Einwilligung erteilt/widerruft personal_write; ein Recht ohne Rolle blendete die Zeile aus.
+                        "permission": "personal.bewerbung.write",
                         "navigationRoute": "/personal/bewerbungen/{entity_id}/einwilligung",
                     },
                     {

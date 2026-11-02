@@ -634,21 +634,6 @@ export function validateScreenDefinition(screen: ScreenDefinition): string[] {
     }
   }
   if (!screen.title) errors.push('title is required')
-  const seenFileNodes = new WeakSet<object>()
-  const checkFileContracts = (node: unknown): void => {
-    if (!node || typeof node !== 'object' || seenFileNodes.has(node)) return
-    seenFileNodes.add(node)
-    if (!Array.isArray(node) && 'fileContent' in node) {
-      const field = node as Record<string, unknown>
-      const file = field.fileContent as Record<string, unknown> | null
-      if (field.type !== 'file' || !file || typeof file !== 'object' || Array.isArray(file)
-        || Object.keys(file).some(key => !['encoding','accept','maxBytes'].includes(key))
-        || file.encoding !== 'utf-8' || !['.csv','.txt','.json'].includes(String(file.accept))
-        || !Number.isInteger(file.maxBytes) || Number(file.maxBytes) < 1 || Number(file.maxBytes) > 1048576) errors.push('fileContent is invalid')
-    }
-    Object.values(node).forEach(checkFileContracts)
-  }
-  checkFileContracts(screen)
 
   const surfaceScreenId = screen.id?.startsWith('tenant/') ? screen.baseScreenId : screen.id
 

@@ -115,13 +115,19 @@ describe('Batch 12 route inventory (source-level evidence only)', () => {
     expect(BATCH12).toHaveLength(83)
   })
 
+  // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
+  it.fails('admin/control-center/index.tsx behaelt Planung, Filter und Vorfallsaktionen', () => {
+    const src = read('admin/control-center/index.tsx')
+    expect(src).toContain('ControlCenterPlanning')
+    expect(src).toContain('ControlCenterIncidents')
+    expect(src).toContain('actOnIncident')
+  })
+
   it.each(BATCH12)('%s → %s', (file, screenId, component) => {
     const src = read(file)
     if (file === 'admin/control-center/index.tsx') {
-      // The routed control center still owns its planning, filtering and incident actions.
-      expect(src).toContain('ControlCenterPlanning')
-      expect(src).toContain('ControlCenterIncidents')
-      expect(src).toContain('actOnIncident')
+      // Seit Runtime46 die Admin-Werkbank im Domain-Runtime-Host (Altlast oben).
+      expect(src).toContain(`screenId="${screenId}"`)
       return
     }
     expect(src).toContain(component)
