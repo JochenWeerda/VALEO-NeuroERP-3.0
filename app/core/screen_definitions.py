@@ -2262,7 +2262,9 @@ def build_finance_debitor_screen_definition() -> dict[str, Any]:
         ],
         tabs=[
             stamm_kopf_tab([
+                # Stufe 3b: Konto am Geschaeftspartner, vergeben bei der ersten Kundenrolle.
                 {"key": "debitoren_nr", "label": "Debitoren-Nr.", "type": "text", "readOnly": True},
+                {"key": "kundennummer", "label": "Kunden-Nr.", "type": "text", "readOnly": True},
                 {"key": "name", "label": "Name", "type": "text", "required": True},
                 {"key": "kreditlimit", "label": "Kreditlimit", "type": "currency"},
                 {"key": "zahlungsbedingungen", "label": "Zahlungsbedingungen", "type": "text"},
@@ -2357,7 +2359,9 @@ def build_finance_kreditor_screen_definition() -> dict[str, Any]:
         ],
         tabs=[
             stamm_kopf_tab([
+                # Stufe 3b: Konto am Geschaeftspartner, vergeben bei der ersten Lieferantenrolle.
                 {"key": "kreditoren_nr", "label": "Kreditoren-Nr.", "type": "text", "readOnly": True},
+                {"key": "lieferantennummer", "label": "Lieferanten-Nr.", "type": "text", "readOnly": True},
                 {"key": "name", "label": "Name", "type": "text", "required": True},
                 {"key": "zahlungsbedingungen", "label": "Zahlungsbedingungen", "type": "text"},
                 {"key": "steuernummer", "label": "Steuernummer", "type": "text"},

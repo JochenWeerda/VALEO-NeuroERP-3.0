@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-01
+last_reviewed: 2026-11-02
 version: 3.0.0
 description: Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Beschreibungen sind aus den Datei-Docstrings extrahiert.
 ---
@@ -382,6 +382,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `ops_wave106_operations_crud_20260519` | Wave 106: Operations CRUD — Versicherungen, Wartung/Anlagen, Tankstelle/Zapfungen, |
 | `ops_wave107_remaining_stubs_20260520` | ops_wave107_remaining_stubs — DB tables for critical in-memory stores |
 | `optimize_procurement_indexes_20260213` | Optimize indexes for documents/procurement frequent query paths. |
+| `partner_kontonummern_20261102` | Stufe 3b Geschaeftspartnerstamm: eigene Debitoren- und Kreditorennummer je Partner. |
 | `partner_rueckfuellung_20261101` | Stufe 2 Geschaeftspartnerstamm: bestehende Kunden und Lieferanten Partnern zuordnen. |
 | `pcn_meldungen_20260326` | PCN-Meldungen Persistenz-Tabelle (Wave 104 Gap-D) |
 | `perf_indexes_apply_20260602` | Catch-up: Performance-Indizes auf bereits migrierten DBs anlegen. |

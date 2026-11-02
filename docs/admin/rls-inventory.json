@@ -1,16 +1,16 @@
 {
  "_note": "Generiert von scripts/rls_inventory.py; nicht von Hand aendern. Plan: docs/architecture/rls-mandantenkernel-plan.md",
  "summary": {
-  "tables": 778,
+  "tables": 779,
   "by_class": {
-   "A": 679,
+   "A": 680,
    "B": 32,
    "C": 15,
    "D": 52
   },
-  "rls_enabled": 639,
+  "rls_enabled": 640,
   "tenant_types": {
-   "character varying": 335,
+   "character varying": 336,
    "character varying(100)": 9,
    "character varying(120)": 39,
    "character varying(128)": 1,
@@ -1391,6 +1391,14 @@
   },
   {
    "table": "domain_crm.partner_klaerfaelle",
+   "class": "A",
+   "tenant_type": "character varying",
+   "rls": true,
+   "force_rls": false,
+   "policies": 4
+  },
+  {
+   "table": "domain_crm.partner_konto_protokoll",
    "class": "A",
    "tenant_type": "character varying",
    "rls": true,

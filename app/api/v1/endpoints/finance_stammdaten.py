@@ -222,28 +222,41 @@ def _debitor_saetze(db: Session, tenant_id: str) -> list[tuple]:
              "WHERE tenant_id = :t AND deleted_at IS NULL"), {"t": tenant_id}).fetchmany(100_000)]
 
 
-def _partnernummern(db: Session, tenant_id: str) -> dict[str, str]:
-    return {str(r[0]): r[1] for r in db.execute(
-        text("SELECT partner_id, partner_number FROM domain_crm.business_partners WHERE tenant_id = :t"),
-        {"t": tenant_id}).fetchmany(100_000)}
+def _partnerkonten(db: Session, tenant_id: str) -> dict[str, dict[str, Any]]:
+    """Partnernummer und Konten (Stufe 3b) je Partner-ID des Mandanten."""
+    return {str(r["partner_id"]): dict(r) for r in db.execute(
+        text("SELECT partner_id, partner_number, debtor_account, creditor_account "
+             "FROM domain_crm.business_partners WHERE tenant_id = :t"),
+        {"t": tenant_id}).mappings().fetchmany(100_000)}
+
+
+def _listen_partnerfelder(partner: Optional[dict[str, Any]], konto: str) -> dict[str, Any]:
+    partner = partner or {}
+    return {"geschaeftspartner_nr": partner.get("partner_number"), konto: partner.get(_KONTO_SPALTE[konto])}
 
 
 def _kreditor_saetze(items: list[dict[str, Any]]) -> list[tuple]:
     return [(str(i.get("id")), i.get("lieferantennummer"), i.get("partner_id"), i.get("firmenname")) for i in items]
 
 
-def _partner_felder(db: Session, tenant_id: str, partner_id: Optional[str]) -> dict[str, Any]:
-    """Bank, Skonto und Partnernummer vom Geschaeftspartner (Stufe 3); leer ohne Partner."""
+#: Kontonummer der Rolle am Geschaeftspartner (Stufe 3b): Debitoren- bzw. Kreditorennummer.
+_KONTO_SPALTE = {"debitoren_nr": "debtor_account", "kreditoren_nr": "creditor_account"}
+
+
+def _partner_felder(db: Session, tenant_id: str, partner_id: Optional[str], konto: str) -> dict[str, Any]:
+    """Konto der Rolle, Bank, Skonto und Partnernummer vom Geschaeftspartner (Stufe 3/3b); leer ohne Partner."""
     if not partner_id:
         return {}
     row = db.execute(
-        text("SELECT partner_number, iban, bic, bank_name, account_holder, cash_discount_days, "
-             "cash_discount_percent FROM domain_crm.business_partners WHERE partner_id = :p AND tenant_id = :t"),
+        text("SELECT partner_number, debtor_account, creditor_account, iban, bic, bank_name, account_holder, "
+             "cash_discount_days, cash_discount_percent FROM domain_crm.business_partners "
+             "WHERE partner_id = :p AND tenant_id = :t"),
         {"p": str(partner_id), "t": tenant_id},
     ).mappings().first()
     if row is None:
         return {}
-    return {"geschaeftspartner_nr": row["partner_number"], "iban": row["iban"], "bic": row["bic"],
+    return {"geschaeftspartner_nr": row["partner_number"], konto: row[_KONTO_SPALTE[konto]],
+            "iban": row["iban"], "bic": row["bic"],
             "bank": row["bank_name"], "kontoinhaber": row["account_holder"],
             "skonto_tage": row["cash_discount_days"],
             "skonto_prozent": float(row["cash_discount_percent"]) if row["cash_discount_percent"] is not None else None}
@@ -257,7 +270,8 @@ def _debitor_dict(customer: Customer, op: Optional[dict[str, Any]] = None) -> di
         "id": customer.id,
         "kunde": customer.company_name,
         "kundennummer": customer.customer_number,
-        "debitoren_nr": customer.customer_number,
+        # Stufe 3b: Debitorennummer = Konto am Geschaeftspartner (_partner_felder), nicht die Kundennummer.
+        "debitoren_nr": None,
         "name": customer.company_name,
         "kreditlimit": float(customer.credit_limit or 0),
         "zahlungsbedingungen": f"{payment} Tage" if payment is not None else None,
@@ -281,7 +295,8 @@ def _creditor_from_lieferant(lf: dict[str, Any], op: Optional[dict[str, Any]] = 
     name = lf.get("firmenname") or ""
     return {
         "id": str(lf.get("id")),
-        "kreditoren_nr": lf.get("lieferantennummer"),
+        "kreditoren_nr": None,  # Konto am Geschaeftspartner (Stufe 3b), nicht die Lieferantennummer
+        "lieferantennummer": lf.get("lieferantennummer"),
         "name": name,
         "zahlungsbedingungen": lf.get("zahlungsbedingungen"),
         "steuernummer": lf.get("steuernummer"),
@@ -320,9 +335,10 @@ async def list_debitoren(
         .order_by(Customer.company_name)
         .all()
     )
-    partner = _partnernummern(db, tenant_id)
+    partner = _partnerkonten(db, tenant_id)
     return [{**_debitor_dict(row, op_map.get(str(row.id))),
-             "geschaeftspartner_nr": partner.get(str(row.business_partner_id or ""))} for row in rows]
+             **_listen_partnerfelder(partner.get(str(row.business_partner_id or "")), "debitoren_nr")}
+            for row in rows]
 
 
 @router.get("/finance/debitoren/{debitor_id}", response_model=FinanceDebitorOut, summary="Debitor abrufen")
@@ -344,7 +360,7 @@ async def get_debitor(
         raise HTTPException(status_code=404, detail="Debitor nicht gefunden")
     op_map = _op_zuordnung(db, tenant_id, "debitoren", _debitor_saetze(db, tenant_id))
     return {**_debitor_dict(row, op_map.get(str(row.id))),
-            **_partner_felder(db, tenant_id, row.business_partner_id)}
+            **_partner_felder(db, tenant_id, row.business_partner_id, "debitoren_nr")}
 
 
 @router.post("/finance/debitoren", response_model=TypedObjectOut, status_code=201, summary="Debitor anlegen", dependencies=[Depends(finance_write)])
@@ -397,7 +413,7 @@ async def create_debitor(
     )
     if row is None:
         raise HTTPException(status_code=500, detail="Debitor angelegt, aber im Kundenstamm nicht lesbar")
-    return _debitor_dict(row)
+    return {**_debitor_dict(row), **_partner_felder(db, tenant_id, row.business_partner_id, "debitoren_nr")}
 
 
 @router.patch("/finance/debitoren/{debitor_id}", response_model=TypedObjectOut, summary="Debitor aktualisieren", dependencies=[Depends(finance_write)])
@@ -421,7 +437,7 @@ async def patch_debitor(
         row.credit_limit = payload.credit_limit
     db.commit()
     db.refresh(row)
-    return _debitor_dict(row)
+    return {**_debitor_dict(row), **_partner_felder(db, tenant_id, row.business_partner_id, "debitoren_nr")}
 
 
 @router.get("/finance/kreditoren", response_model=list[TypedObjectOut], summary="Kreditoren auflisten")
@@ -432,9 +448,10 @@ async def list_kreditoren(
 ) -> list[dict[str, Any]]:
     items = ProcurementService(db, tenant_id).list_lieferanten()
     op_map = _op_zuordnung(db, tenant_id, "kreditoren", _kreditor_saetze(items))
-    partner = _partnernummern(db, tenant_id)
+    partner = _partnerkonten(db, tenant_id)
     return [{**_creditor_from_lieferant(item, op_map.get(str(item.get("id")))),
-             "geschaeftspartner_nr": partner.get(str(item.get("partner_id") or ""))} for item in items]
+             **_listen_partnerfelder(partner.get(str(item.get("partner_id") or "")), "kreditoren_nr")}
+            for item in items]
 
 
 @router.post("/finance/creditors", response_model=TypedObjectOut, status_code=201, summary="Kreditor anlegen", dependencies=[Depends(finance_write)])
@@ -449,9 +466,8 @@ async def create_kreditor(
         created = _lieferant_anlegen(db, tenant_id, payload)
     except ConflictError as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
-    return _creditor_from_lieferant(
-        ProcurementService(db, tenant_id).get_lieferant(str(created["id"]))
-    )
+    lf = ProcurementService(db, tenant_id).get_lieferant(str(created["id"]))
+    return {**_creditor_from_lieferant(lf), **_partner_felder(db, tenant_id, lf.get("partner_id"), "kreditoren_nr")}
 
 
 def _lieferant_anlegen(db: Session, tenant_id: str, payload: CreditorWrite) -> dict[str, Any]:
@@ -490,7 +506,7 @@ async def get_kreditor(
     op_map = _op_zuordnung(db, tenant_id, "kreditoren",
                            _kreditor_saetze(ProcurementService(db, tenant_id).list_lieferanten()))
     return {**_creditor_from_lieferant(lf, op_map.get(str(lf.get("id")))),
-            **_partner_felder(db, tenant_id, lf.get("partner_id"))}
+            **_partner_felder(db, tenant_id, lf.get("partner_id"), "kreditoren_nr")}
 
 
 @router.put("/finance/creditors/{kreditor_id}", response_model=TypedObjectOut, summary="Kreditor aktualisieren", dependencies=[Depends(finance_write)])
@@ -529,7 +545,7 @@ async def update_kreditor(
         lf = ProcurementService(db, tenant_id).get_lieferant(kreditor_id)
     except EntityNotFoundError as exc:
         raise HTTPException(status_code=404, detail="Kreditor nicht gefunden") from exc
-    return _creditor_from_lieferant(lf)
+    return {**_creditor_from_lieferant(lf), **_partner_felder(db, tenant_id, lf.get("partner_id"), "kreditoren_nr")}
 
 
 @router.delete("/finance/creditors/{kreditor_id}", status_code=204, summary="Kreditor loeschen", dependencies=[Depends(finance_admin)])

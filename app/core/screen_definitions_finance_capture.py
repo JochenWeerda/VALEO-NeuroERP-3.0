@@ -10,7 +10,8 @@ from app.core.stamm_object_page_parent import build_stamm_object_page, stamm_ent
 #: Felder des fuehrenden Kundenstamms (domain_crm.customers); Bank, Skonto und Steuernummer legt die Anlage
 #: seit Stufe 3 am Geschaeftspartner ab (ADR Geschaeftspartnerstamm).
 DEBTOR_FIELDS: list[dict[str, Any]] = [
-    {"key": "debtor_number", "label": "Debitorennummer", "type": "text", "required": True},
+    # Kundennummer des Kundenstamms; die Debitorennummer vergibt der Nummernkreis am Partner (Stufe 3b).
+    {"key": "debtor_number", "label": "Kunden-Nr.", "type": "text", "required": True},
     {"key": "company_name", "label": "Firma", "type": "text", "required": True},
     {"key": "contact_person", "label": "Kontaktperson", "type": "text"},
     {"key": "street", "label": "Straße", "type": "text", "required": True},

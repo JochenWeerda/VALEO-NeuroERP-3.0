@@ -111,6 +111,9 @@ def resolve_customer_ref(entry: dict) -> Optional[str]:
 
 
 _ROLLEN_FLAG = {"kunde": "is_customer", "lieferant": "is_supplier"}
+#: Stufe 3b: je Rolle ein Konto am Partner. Ohne eingerichteten Kreis gilt der DATEV-Standard je Mandant
+#: (Debitoren 10000-69999, Kreditoren 70000-99999); ``range_type`` in ``domain_shared.number_ranges``.
+KONTOKREISE = {"is_customer": ("debtor_account", 10000, 69999), "is_supplier": ("creditor_account", 70000, 99999)}
 #: Rollenfelder, die seit Stufe 3 am Geschaeftspartner liegen (Bank, Skonto, Steuernummer).
 PARTNER_ROLLENFELDER = ("iban", "bic", "bank_name", "account_holder", "cash_discount_days", "cash_discount_percent",
                         "tax_number")
@@ -769,6 +772,7 @@ class BusinessPartnerService:
                 {"pid": partner_id, "tid": self.tenant_id},
             )
             self._rollenfelder_setzen(partner_id, rollenfelder)
+            self._konto_vergeben(partner_id, flag)
             return partner_id
         neu = str(uuid7())
         flags = [f for f in self._flags_ohne_default() if f != flag]
@@ -786,7 +790,65 @@ class BusinessPartnerService:
              "email": email or None, "tel": phone or None},
         )
         self._rollenfelder_setzen(neu, rollenfelder)
+        self._konto_vergeben(neu, flag)
         return neu
+
+    def naechste_kontonummer(self, flag: str) -> str:
+        """Naechste freie Debitoren- oder Kreditorennummer des Mandanten (Stufe 3b); kein commit.
+
+        Der Kreis wird beim ersten Bedarf mit dem DATEV-Standard angelegt. Eine schon (etwa von Hand)
+        vergebene Nummer wird uebersprungen; ist der Standardkreis voll, wird abgelehnt statt in den
+        anderen Kreis zu laufen.
+        """
+        spalte, start, ende = KONTOKREISE[flag]  # Schluessel aus der festen Rollenliste
+        self.db.execute(
+            text("INSERT INTO domain_shared.number_ranges (id, tenant_id, range_type, prefix, start_number, "
+                 "current_value, digit_count, reserved_prefix_digits, is_active) "
+                 "VALUES (:id, :tid, :typ, '', :start, :start, 5, 1, TRUE) "
+                 "ON CONFLICT (tenant_id, range_type) DO NOTHING"),
+            {"id": str(uuid7()), "tid": self.tenant_id, "typ": spalte, "start": start},
+        )
+        kreis = self.db.execute(
+            text("SELECT prefix, start_number, current_value, digit_count, is_active FROM domain_shared.number_ranges "
+                 "WHERE tenant_id = :tid AND range_type = :typ FOR UPDATE"),
+            {"tid": self.tenant_id, "typ": spalte},
+        ).one()
+        if not kreis.is_active:
+            raise ConflictError(f"Der Nummernkreis {spalte} ist gesperrt.")
+        # Die Obergrenze gilt nur fuer den Standardkreis; ein eingerichteter Kreis traegt seine eigene Logik.
+        bis = ende if kreis.start_number == start and not kreis.prefix else kreis.current_value + 100000
+        frei = self.db.execute(
+            text(f"SELECT n FROM generate_series(CAST(:von AS bigint), CAST(:bis AS bigint)) AS n "  # nosec B608
+                 "WHERE NOT EXISTS (SELECT 1 FROM domain_crm.business_partners WHERE tenant_id = :tid "
+                 f"AND {spalte} = :prefix || lpad(n::text, :stellen, '0')) "  # reviewed-safe: Spalte aus KONTOKREISE
+                 "ORDER BY n LIMIT 1"),
+            {"von": kreis.current_value, "bis": bis, "tid": self.tenant_id, "prefix": kreis.prefix,
+             "stellen": kreis.digit_count},
+        ).scalar()
+        if frei is None:
+            raise ConflictError(f"Der Nummernkreis {spalte} ist ausgeschoepft ({start}-{ende}).")
+        self.db.execute(
+            text("UPDATE domain_shared.number_ranges SET current_value = :n, updated_at = NOW() "
+                 "WHERE tenant_id = :tid AND range_type = :typ"),
+            {"n": frei + 1, "tid": self.tenant_id, "typ": spalte},
+        )
+        return f"{kreis.prefix}{frei:0{kreis.digit_count}d}"
+
+    def _konto_vergeben(self, partner_id: str, flag: str) -> None:
+        """Konto der Rolle vergeben, wenn der Partner noch keins hat; ein vorhandenes bleibt unveraendert."""
+        spalte = KONTOKREISE[flag][0]
+        vorhanden = self.db.execute(
+            text(f"SELECT {spalte} FROM domain_crm.business_partners "  # nosec B608
+                 "WHERE partner_id = :pid AND tenant_id = :tid FOR UPDATE"),  # reviewed-safe: Spalte aus KONTOKREISE
+            {"pid": partner_id, "tid": self.tenant_id},
+        ).scalar()
+        if vorhanden:
+            return
+        self.db.execute(
+            text(f"UPDATE domain_crm.business_partners SET {spalte} = :nr, updated_at = NOW() "  # nosec B608
+                 "WHERE partner_id = :pid AND tenant_id = :tid"),  # reviewed-safe: Spalte aus KONTOKREISE
+            {"nr": self.naechste_kontonummer(flag), "pid": partner_id, "tid": self.tenant_id},
+        )
 
     def _rollenfelder_setzen(self, partner_id: str, rollenfelder: Optional[dict[str, Any]]) -> None:
         werte = {k: (_feldwert(k, v) if k in ("iban", "bic") else v) for k, v in (rollenfelder or {}).items()
@@ -1485,20 +1547,18 @@ class BusinessPartnerService:
 
     # ── envelope create / update (with number-range assignment) ─────────────
 
-    def assign_account_numbers(self, row: BusinessPartner) -> None:
-        """Assign debtor/creditor account from number range if not set."""
-        from app.services.number_range_service import NumberRangeService
-        nrs = NumberRangeService(self.db)
-        if row.is_customer and not row.debtor_account:
-            try:
-                row.debtor_account = nrs.next_number("debtor_account", self.tenant_id)
-            except ValueError:
-                pass
-        if row.is_supplier and not row.creditor_account:
-            try:
-                row.creditor_account = nrs.next_number("creditor_account", self.tenant_id)
-            except ValueError:
-                pass
+    def assign_account_numbers(self, row: BusinessPartner, bisher: Optional[dict[str, Any]] = None) -> None:
+        """Konten je Rolle (Stufe 3b): fehlende aus dem Kreis vergeben, vergebene nie aendern.
+
+        ``bisher`` sind die Kontonummern vor einer Aenderung; eine abweichende oder geleerte Nummer wird
+        abgelehnt, weil Buchungen und offene Posten sie fuehren.
+        """
+        for flag, (spalte, _start, _ende) in KONTOKREISE.items():
+            alt = (bisher or {}).get(spalte)
+            if alt and getattr(row, spalte) != alt:
+                raise ConflictError(f"Die Kontonummer {alt} ({spalte}) ist vergeben und bleibt unveraendert.")
+            if getattr(row, flag) and not getattr(row, spalte):
+                setattr(row, spalte, self.naechste_kontonummer(flag))
 
     def persist_new_partner(self, row: BusinessPartner) -> BusinessPartner:
         """Add, commit, and refresh a newly constructed BusinessPartner row."""
@@ -1513,7 +1573,11 @@ class BusinessPartnerService:
 
     def persist_updated_partner(self, row: BusinessPartner) -> BusinessPartner:
         """Commit and refresh an existing BusinessPartner row after field mutations."""
-        self.db.commit()
+        try:
+            self.db.commit()
+        except IntegrityError as exc:
+            self.db.rollback()
+            raise ConflictError("Business partner number or account already exists") from exc
         self.db.refresh(row)
         return row
 

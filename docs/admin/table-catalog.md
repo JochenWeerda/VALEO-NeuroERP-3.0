@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, architect, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-01
+last_reviewed: 2026-11-02
 version: 1.0.0
 description: Generierter Katalog der domain_*-Tabellen aus information_schema.
 ---
@@ -17,7 +17,7 @@ Quelle: `information_schema` nach `alembic upgrade head`. Verbraucher: SQL/ORM u
 Logisches Modell: [ERD Canonical Domain](../architecture/views/erd-canonical-domain.md).
 Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell-tenancy.md).
 
-**31 Schemas, 697 Tabellen, 9227 Spalten.**
+**31 Schemas, 698 Tabellen, 9235 Spalten.**
 
 ## Schemas
 
@@ -28,7 +28,7 @@ Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell
 | `domain_compliance` | `dms-compliance` | 15 | 188 |
 | `domain_contracts` | `agrar` | 3 | 30 |
 | `domain_controlling` | `finance` | 9 | 88 |
-| `domain_crm` | `crm` | 47 | 841 |
+| `domain_crm` | `crm` | 48 | 848 |
 | `domain_dev_mock` | `platform` | 1 | 7 |
 | `domain_docflow` | `dms-compliance` | 27 | 348 |
 | `domain_docs` | `platform` | 2 | 25 |
@@ -52,7 +52,7 @@ Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell
 | `domain_procurement` | `procurement` | 5 | 50 |
 | `domain_reporting` | `finance` | 6 | 80 |
 | `domain_sales` | `crm` | 11 | 158 |
-| `domain_shared` | `platform` | 159 | 1910 |
+| `domain_shared` | `platform` | 159 | 1911 |
 | `domain_workflow` | `platform` | 3 | 37 |
 
 ## Geschwister-Modelle
@@ -691,7 +691,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_shared.neuroassist_state_edges` | `app/infrastructure/models/neuro_state_models.py` | — | — |
 | `domain_shared.neuroassist_state_nodes` | `app/infrastructure/models/neuro_state_models.py` | — | — |
 | `domain_shared.neuroassist_state_transitions` | `app/infrastructure/models/neuro_state_models.py` | — | — |
-| `domain_shared.number_ranges` | `app/infrastructure/models/__init__.py` | — | — |
+| `domain_shared.number_ranges` | `app/infrastructure/models/__init__.py`, `app/services/business_partner_service.py` | `app/services/business_partner_service.py` | — |
 | `domain_shared.oberwarengruppen` | `app/api/v1/endpoints/warengruppen.py` | `app/api/v1/endpoints/warengruppen.py` | `artikel/kategorien` |
 | `domain_shared.op_auszifferungen` | `app/api/v1/endpoints/op_skonto_auszifferung.py`, `app/services/finance_clearing_service.py` | `app/api/v1/endpoints/op_skonto_auszifferung.py`, `app/services/finance_clearing_service.py` | `fibu/op-skonto-auszifferung` |
 | `domain_shared.open_items` | `app/agents/workflows/skonto_optimizer.py`, `app/api/v1/endpoints/crm_kim.py`, `app/api/v1/endpoints/finance_actions.py`, `app/api/v1/endpoints/finance_followup.py`, `app/api/v1/endpoints/liquidity.py` | — | — |
@@ -930,6 +930,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `mail_workspace_messages` | `crm` | native | `id` | id, tenant_id, role_key, message_id, direction, status, from_address, to_addresses, subject, body_text, contact_id, document_type, document_ref, document_route, assigned_to, provider_ref, error_message, received_at, sent_at, created_at, updated_at |
 | `opportunity` | `crm` | native | `id` | id, tenant_id, stage, status, cancel_reason_id, created_at, updated_at |
 | `partner_klaerfaelle` | `crm` | native | `id` | id, tenant_id, quelle, satz_id, grund, kandidaten, erstellt_am, erledigt_am |
+| `partner_konto_protokoll` | `crm` | native | `id` | id, tenant_id, art, spalte, partner_id, nummer, vergeben_am |
 | `partner_rueckfuellung_protokoll` | `crm` | native | `quelle`, `satz_id` | quelle, satz_id, tenant_id, partner_id, partner_neu, zugeordnet_am |
 | `sales_offer_items` | `crm` | legacy | `id` | id, tenant_id, offer_id, line_number, article_number, description, quantity, unit, unit_price, ek_price, discount_percent, line_total, created_at, updated_at |
 | `sales_offers` | `crm` | legacy | `id` | id, tenant_id, customer_inquiry_id, customer_id, offer_number, subject, description, total_amount, currency, valid_until, status, contact_person, delivery_date, payment_terms, notes, created_at, updated_at, deleted_at, version, printed_at, print_count, posted_at, customer_name, is_pauschale |
@@ -1567,7 +1568,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `schedules` | `platform` | native | `id` | id, tenant_id, schedule_key, display_name, reporting_unit_id, cron_expr, lead_days, use_workday_rule, output_format, is_active, created_at, updated_at, config_json |
 | `screen_definition_drafts` | `platform` | native | `id` | id, tenant_id, screen_id, base_screen_id, definition, status, readiness, created_by, updated_by, updated_at |
 | `screen_definition_history` | `platform` | native | `id` | id, tenant_id, draft_id, actor, action, previous_revision, revision, snapshot, recorded_at |
-| `sepa_mandates` | `platform` | native | `id` | id, tenant_id, debitor_id, mandate_reference, mandate_valid, mandate_expired_at, created_at, updated_at |
+| `sepa_mandates` | `platform` | native | `id` | id, tenant_id, debitor_id, mandate_reference, mandate_valid, mandate_expired_at, created_at, updated_at, partner_id |
 | `stuecklisten` | `platform` | native | `id` | id, tenant_id, stueckliste_nr, artikel_nr, bezeichnung, menge_basis, einheit, variable_komp, aktiv, created_at |
 | `stuecklisten_positionen` | `platform` | native | `id` | id, tenant_id, stueckliste_id, pos_nr, komponente_nr, komponente_bez, menge, einheit, anteil_prozent, optional, created_at |
 | `system_properties` | `platform` | native | `id` | id, tenant_id, property_key, property_value, property_type, category, description |

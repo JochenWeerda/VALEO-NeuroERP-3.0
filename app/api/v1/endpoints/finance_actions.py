@@ -218,7 +218,8 @@ async def run_direct_debit(
                     NOW()
                 FROM domain_shared.open_items oi
                 JOIN domain_shared.sepa_mandates sm
-                    ON sm.debitor_id = oi.partner_id AND sm.tenant_id = oi.tenant_id
+                    ON (sm.partner_id = oi.partner_id OR sm.debitor_id = oi.partner_id)
+                    AND sm.tenant_id = oi.tenant_id
                     AND sm.mandate_valid = true
                     AND (sm.mandate_expired_at IS NULL OR sm.mandate_expired_at > NOW())
                 WHERE oi.tenant_id = :tid
