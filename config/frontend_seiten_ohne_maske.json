@@ -78,7 +78,6 @@
     "einkauf/lieferschein-frachtauftrag.tsx": "einkauf/lieferschein-frachtauftrag",
     "einstellungen/system.tsx": "einstellungen/system",
     "energie/verbrauch.tsx": "energie/verbrauch",
-    "errors/NotFound.tsx": "errors/NotFound",
     "finance/index.tsx": "finance",
     "fuhrpark/fahrzeug-vertiefung.tsx": "fuhrpark/fahrzeug-vertiefung",
     "futtermittel/einzelfuttermittel-native.tsx": "futtermittel/einzelfuttermittel/:id",

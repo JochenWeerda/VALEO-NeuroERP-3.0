@@ -549,7 +549,7 @@
       "path": "sales/angebot/neu"
     },
     {
-      "module": "@/pages/sales/angebot-erstellen",
+      "module": "@/pages/sales/angebote-liste",
       "path": "sales/angebote"
     },
     {
