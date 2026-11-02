@@ -26,6 +26,7 @@ from app.core.exceptions import register_domain_exception_handlers
 from app.finance.steuerschluessel import richte_skr03_ein
 from app.services import docflow_service
 from app.services.finance_freigabe import SUBJEKTE, engine_fuer
+from stammsaetze import lege_kunden_an, lege_lieferanten_an
 from testgrenze import ersetze_mandant
 
 ANNA = {"sub": "anna", "name": "a.petersen", "roles": ["FINANCE_ADMIN", "SALES_BEARBEITEN", "EINKAUF_BEARBEITEN"]}
@@ -56,6 +57,8 @@ AUFRAEUMEN = (
     "DELETE FROM domain_erp.tax_keys WHERE tenant_id = :t",
     "DELETE FROM domain_erp.chart_of_accounts WHERE tenant_id = :t",
     "DELETE FROM domain_shared.system_properties WHERE tenant_id = :t",
+    "DELETE FROM domain_crm.customers WHERE tenant_id = :t",
+    "DELETE FROM domain_crm.business_partners WHERE tenant_id = :t",
     "DELETE FROM domain_shared.tenants WHERE id = :t",
 )
 
@@ -65,6 +68,9 @@ def haus(monkeypatch):
     mandant = f"zw-{uuid.uuid4().hex[:8]}"
     with SessionLocal() as db:
         db.execute(text("INSERT INTO domain_shared.tenants (id, name, is_active) VALUES (:id, :id, true)"), {"id": mandant})
+        # Rechnungswege pruefen Kunde bzw. Lieferanten im Mandanten (tests/stammsaetze.py).
+        lege_kunden_an(db, mandant, "kunde-1")
+        lege_lieferanten_an(db, mandant, "lieferant-1")
         richte_skr03_ein(db, mandant)
         db.execute(text(
             "INSERT INTO domain_erp.chart_of_accounts (id, tenant_id, account_number, account_name, account_type, is_active) "
@@ -238,8 +244,8 @@ def _gutschrift(haus, netto: float, rechnung: str | None = "RE-1") -> str:
             {"id": gs, "t": haus["mandant"], "nr": gs.upper(), "re": rechnung, "total": brutto})
         db.execute(text(
             "INSERT INTO domain_sales.sales_credit_note_lines "
-            "(id, credit_note_id, line_number, description, quantity, unit_price, tax_code, tax_rate, line_total) "
-            "VALUES (:id, :gs, 1, 'Position', 1, :netto, '3', 19, :netto)"), {"id": f"{gs}-1", "gs": gs, "netto": netto})
+            "(id, credit_note_id, line_number, description, quantity, unit_price, tax_code, tax_rate, line_total, tenant_id) "
+            "VALUES (:id, :gs, 1, 'Position', 1, :netto, '3', 19, :netto, (SELECT tenant_id FROM domain_sales.sales_credit_notes WHERE id = :gs))"), {"id": f"{gs}-1", "gs": gs, "netto": netto})
         db.commit()
     return gs
 

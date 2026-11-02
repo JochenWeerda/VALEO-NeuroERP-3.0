@@ -26,6 +26,7 @@ from app.core.exceptions import register_domain_exception_handlers
 from app.finance.steuerschluessel import Steuerklaerung, richte_skr03_ein, vorsteuergruppen
 from app.services.finance_freigabe import EingangsrechnungFreigabe
 from freigabehilfe import sichere_freigabe_fuer
+from stammsaetze import lege_lieferanten_an
 from testgrenze import ersetze_mandant, ersetze_nutzer
 
 WEG = "/ap/invoices"
@@ -38,6 +39,7 @@ def haus(monkeypatch):
     with SessionLocal() as db:
         db.execute(text(
             "INSERT INTO domain_shared.tenants (id, name, is_active) VALUES (:id, :id, true)"), {"id": mandant})
+        lege_lieferanten_an(db, mandant, "lieferant-1")  # Eingangsrechnung verlangt den Lieferanten
         # SKR03: Vorsteuerschluessel 8 (7 %, 1571, Wareneingang 3300) und 9 (19 %, 1576, Wareneingang 3400).
         richte_skr03_ein(db, mandant)
         # Der Buchungsdienst bucht nur auf Konten, die dem Mandanten gehoeren.
@@ -85,6 +87,9 @@ def haus(monkeypatch):
                 "DELETE FROM domain_erp.tax_keys WHERE tenant_id = :t",
                 "DELETE FROM domain_erp.chart_of_accounts WHERE tenant_id = :t",
                 "DELETE FROM domain_shared.system_properties WHERE tenant_id = :t",
+                # Stammsaetze des Testmandanten (tests/stammsaetze.py); der Mandant gehoert nur diesem Lauf.
+                "DELETE FROM domain_crm.customers WHERE tenant_id = :t",
+                "DELETE FROM domain_crm.business_partners WHERE tenant_id = :t",
                 "DELETE FROM domain_shared.tenants WHERE id = :t",
             ):
                 db.execute(text(sql), {"t": mandant, "nr": f"ER-{lauf}-%"})

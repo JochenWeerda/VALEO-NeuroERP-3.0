@@ -159,8 +159,8 @@ def proben(engine):
                 text(
                     "INSERT INTO domain_einkauf.bestellung_positionen "
                     "(id, bestellung_id, pos_nr, article_id, artikel_nr, "
-                    " artikel_bezeichnung, menge, einheit) "
-                    "VALUES (:id, :b, 1, :a, :nr, :bez, 100, 't')"
+                    " artikel_bezeichnung, menge, einheit, tenant_id) "
+                    "VALUES (:id, :b, 1, :a, :nr, :bez, 100, 't', (SELECT tenant_id FROM domain_einkauf.bestellungen WHERE id = :b))"
                 ),
                 {
                     "id": str(uuid.uuid4()), "b": bestell_id, "a": artikel_id,

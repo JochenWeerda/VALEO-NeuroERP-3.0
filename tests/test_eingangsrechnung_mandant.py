@@ -25,6 +25,7 @@ if DB_URL:
 from app.api.v1.endpoints import ap_approval_workflow as workflow  # noqa: E402
 from app.api.v1.endpoints import ap_invoices as endpoint  # noqa: E402
 from app.auth.deps import get_current_user  # noqa: E402
+from stammsaetze import entferne_stammsaetze, lege_lieferanten_an
 from testgrenze import ersetze_mandant
 from app.core.tenant import get_tenant_id
 from app.core.database import get_db  # noqa: E402
@@ -141,6 +142,8 @@ def client(engine):
         for haus in (HAUS_A, HAUS_B):
             v.execute(text("INSERT INTO domain_shared.tenants (id, name) VALUES (:i, :n) ON CONFLICT (id) DO NOTHING"),
                       {"i": haus, "n": f"Pruefbetrieb {haus}"})
+            # Eingangsrechnungen pruefen den Lieferanten im Mandanten (tests/stammsaetze.py).
+            lege_lieferanten_an(v, haus, f"supplier-{haus}")
     ersetze_mandant(app)
     nutzer = {"sub": "kasse", "roles": ["FINANCE_ADMIN"]}
     app.dependency_overrides[get_current_user] = lambda: nutzer
@@ -149,6 +152,8 @@ def client(engine):
     app.dependency_overrides.pop(get_tenant_id, None)
     with engine.begin() as v:
         v.execute(text("DELETE FROM documents WHERE doc_type = 'ap_invoice' AND doc_number = ANY(:n)"), {"n": NUMMERN})
+        for haus in (HAUS_A, HAUS_B):
+            entferne_stammsaetze(v, haus, f"supplier-{haus}")
 
 
 def kopf(haus: str) -> dict[str, str]:
@@ -159,7 +164,7 @@ def anlegen(client, haus: str, nummer: str | None = None):
     nummer = nummer or f"RE-{uuid.uuid4().hex[:8]}"
     NUMMERN.append(nummer)
     return nummer, client.post(f"{PREFIX}/", headers=kopf(haus), json={
-        "number": nummer, "date": "2026-10-07", "customerId": "supplier-1", "dueDate": "2026-11-06",
+        "number": nummer, "date": "2026-10-07", "customerId": f"supplier-{haus}", "dueDate": "2026-11-06",
         "lines": [{"article": "Weizen", "qty": 1, "price": 100.0, "vatRate": 19.0}],
     })
 

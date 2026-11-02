@@ -153,7 +153,7 @@ def anfrage(engine, status: str, haus: str = HAUS_A) -> str:
                        "'normal', :s, 'Weizen', 25, 't', now(), now(), :h)"),
                   {"id": kennung, "nr": f"BANF-{kennung[:8]}", "s": status, "h": haus})
         v.execute(text("INSERT INTO einkauf_anfragen_positionen (id, anfrage_id, artikel, quantity, unit, created_at, "
-                       "updated_at) VALUES (:p, :id, 'Weizen', 25, 't', now(), now())"),
+                       "updated_at, tenant_id) VALUES (:p, :id, 'Weizen', 25, 't', now(), now(), (SELECT tenant_id FROM public.einkauf_anfragen WHERE id = :id))"),
                   {"p": str(uuid.uuid4()), "id": kennung})
     return kennung
 

@@ -374,9 +374,9 @@ def test_partnerfelder_kontakte_und_kontrakte_liegen_in_der_akte(client, kunde) 
             text(
                 "INSERT INTO domain_crm.business_partner_contacts "
                 "(id, partner_id, priority, first_name, last_name, email, position, contact_type, "
-                "invoice_email_recipient, reminder_email_recipient, is_data_protection_officer) "
+                "invoice_email_recipient, reminder_email_recipient, is_data_protection_officer, tenant_id) "
                 "VALUES (:id, :pid, 0, 'Ada', 'Meyer', 'ada@sonnenacker.test', 'Geschaeftsfuehrung', "
-                "'other', false, false, false)"
+                "'other', false, false, false, (SELECT tenant_id FROM domain_crm.business_partners WHERE partner_id = :pid))"
             ),
             {"id": kontakt, "pid": kunde["partner_id"]},
         )
@@ -464,8 +464,8 @@ def test_pflege_register_liegen_in_der_akte(client, kunde) -> None:
         verbindung.execute(
             text(
                 "INSERT INTO domain_crm.business_partner_instructions "
-                "(id, partner_id, instruction_text, instruction_priority) "
-                "VALUES (:id, :pid, 'Nur nach Absprache liefern', 'high')"
+                "(id, partner_id, instruction_text, instruction_priority, tenant_id) "
+                "VALUES (:id, :pid, 'Nur nach Absprache liefern', 'high', (SELECT tenant_id FROM domain_crm.business_partners WHERE partner_id = :pid))"
             ),
             {"id": anweisung, "pid": kunde["partner_id"]},
         )
@@ -570,16 +570,16 @@ def test_rabatte_preise_und_sepa_liegen_in_der_akte(client, kunde) -> None:
         verbindung.execute(
             text(
                 "INSERT INTO domain_crm.business_partner_discount_items "
-                "(id, partner_id, article_number, description, discount_percent) "
-                "VALUES (:id, :pid, 'SAAT-1', 'Winterweizen', 12.5)"
+                "(id, partner_id, article_number, description, discount_percent, tenant_id) "
+                "VALUES (:id, :pid, 'SAAT-1', 'Winterweizen', 12.5, (SELECT tenant_id FROM domain_crm.business_partners WHERE partner_id = :pid))"
             ),
             {"id": rabatt, "pid": kunde["partner_id"]},
         )
         verbindung.execute(
             text(
                 "INSERT INTO domain_crm.business_partner_price_agreements "
-                "(id, partner_id, article_number, description, price_net, price_unit, discount_allowed) "
-                "VALUES (:id, :pid, 'SAAT-1', 'Winterweizen', 18.40, 'kg', true)"
+                "(id, partner_id, article_number, description, price_net, price_unit, discount_allowed, tenant_id) "
+                "VALUES (:id, :pid, 'SAAT-1', 'Winterweizen', 18.40, 'kg', true, (SELECT tenant_id FROM domain_crm.business_partners WHERE partner_id = :pid))"
             ),
             {"id": preis, "pid": kunde["partner_id"]},
         )
@@ -587,8 +587,8 @@ def test_rabatte_preise_und_sepa_liegen_in_der_akte(client, kunde) -> None:
             text(
                 "INSERT INTO domain_crm.business_partner_contacts "
                 "(id, partner_id, priority, last_name, email, contact_type, "
-                "invoice_email_recipient, reminder_email_recipient, is_data_protection_officer) "
-                "VALUES (:id, :pid, 0, 'Berger', 'berger@sonnenacker.test', 'other', false, false, false)"
+                "invoice_email_recipient, reminder_email_recipient, is_data_protection_officer, tenant_id) "
+                "VALUES (:id, :pid, 0, 'Berger', 'berger@sonnenacker.test', 'other', false, false, false, (SELECT tenant_id FROM domain_crm.business_partners WHERE partner_id = :pid))"
             ),
             {"id": kontakt, "pid": kunde["partner_id"]},
         )

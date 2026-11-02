@@ -489,8 +489,8 @@ def test_ordrsp_legt_ab_an_und_gleicht_positionen_ab(client, engine):
                id=bestellung, h=HAUS_A, nr=nummer, l=lieferant)
     for pos, artikel, menge, preis in ((1, "WEIZEN", 100, 24.5), (2, "RAPS", 50, 51.0)):
         ausfuehren(engine, "INSERT INTO domain_einkauf.bestellung_positionen (id, bestellung_id, pos_nr, "
-                           "artikel_nr, artikel_bezeichnung, menge, einheit, einzelpreis) "
-                           "VALUES (:id, :b, :p, :a, :a, :m, 'dt', :e)",
+                           "artikel_nr, artikel_bezeichnung, menge, einheit, einzelpreis, tenant_id) "
+                           "VALUES (:id, :b, :p, :a, :a, :m, 'dt', :e, (SELECT tenant_id FROM domain_einkauf.bestellungen WHERE id = :b))",
                    id=str(uuid.uuid4()), b=bestellung, p=pos, a=artikel, m=menge, e=preis)
     nachricht = (f"UNH+1+ORDRSP:D:96A:UN'BGM+231+AB-EDI-1+4'DTM+137:20261020:102'RFF+ON:{nummer}'"
                  "LIN+1+5+WEIZEN:BP'QTY+21:100'PRI+AAA:24.50'LIN+2+3+RAPS:BP'QTY+21:40'PRI+AAA:51.00'UNT+11+1'")
