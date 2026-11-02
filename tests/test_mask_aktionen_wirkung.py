@@ -488,7 +488,10 @@ class TestStatisch:
         quelle = Path("app/api/v1/endpoints/mask_actions.py").read_text(encoding="utf-8")
         # Der alte Baustein baute nur ein Ergebnis-Dict.
         assert "_status_mutation" not in quelle
-        assert quelle.count("delegate_fn=") == quelle.count("@router.post(")
+        # Jeder Weg ruft einen Fachaufruf: ueber run_delegated_mask_action oder - die Opportunity-Aktivitaet seit
+        # Runtime46 - direkt den kanonischen Aktivitaetsdienst (eigene Transaktion mit Audit und Outbox).
+        fachaufrufe = quelle.count("delegate_fn=") + quelle.count("run_in_threadpool(execute_activity,")
+        assert fachaufrufe == quelle.count("@router.post(")
 
     def test_eingaben_brauchen_einen_befehl_und_gueltige_felder(self):
         from app.core.screen_governance import governance_errors
