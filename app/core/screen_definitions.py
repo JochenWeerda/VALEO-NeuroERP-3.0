@@ -19,6 +19,7 @@ from app.core.screen_definitions_listen import (
 )
 from app.core.screen_definitions_cockpit import COCKPIT_SCREEN_BUILDERS
 from app.core.screen_definitions_domain_batch15 import BATCH15_SCREEN_BUILDERS
+from app.core.screen_definitions_cluster_fibu import CLUSTER_FIBU_SCREEN_BUILDERS
 from app.core.mask_rollout_catalog import ROLLOUT_WAVES_42_51
 from app.core.kontroll_worklist_parent import (
     build_document_control_variant,
@@ -39,6 +40,7 @@ from app.core.screen_definitions_capture import (
     build_strecke_vorlaeufig_screen_definition,
     build_fuhrpark_fahrzeuge_screen_definition,
     build_fuhrpark_uebersicht_screen_definition,
+    build_errors_not_found_screen_definition,
     build_logistik_frachtbrief_screen_definition,
     build_logistik_verladung_screen_definition,
     build_logistik_tourenplanung_screen_definition,
@@ -4988,6 +4990,7 @@ _SCREEN_DEFINITIONS: dict[str, Any] = {
     **LISTEN_SCREEN_BUILDERS,
     **COCKPIT_SCREEN_BUILDERS,
     **BATCH15_SCREEN_BUILDERS,
+    **CLUSTER_FIBU_SCREEN_BUILDERS,
 
     **IDENTITY_SCREEN_BUILDERS,
     **STUDIO_HISTORY_BUILDERS,
@@ -5320,6 +5323,7 @@ _SCREEN_DEFINITIONS: dict[str, Any] = {
     "strecke/nawaro-lieferungen": build_strecke_nawaro_lieferungen_screen_definition,
     "strecke/qualitaets-abweichung": build_strecke_qualitaets_abweichung_screen_definition,
     "fuhrpark/uebersicht": build_fuhrpark_uebersicht_screen_definition,
+    "errors/NotFound": build_errors_not_found_screen_definition,
     "strecke/dokumente-drucken": build_strecke_dokumente_drucken_screen_definition,
     "strecke/nawaro-ernterklaerung-drucken": build_nawaro_ernterklaerung_drucken_screen_definition,
     "fuhrpark/fahrzeuge": build_fuhrpark_fahrzeuge_screen_definition,
@@ -5367,6 +5371,7 @@ _SCREEN_DEFINITIONS: dict[str, Any] = {
     "futtermittel/mischfuttermittel": build_futtermittel_mischfuttermittel_screen_definition,
     "crm/lead": build_crm_lead_screen_definition,
     **BATCH15_SCREEN_BUILDERS,
+    **CLUSTER_FIBU_SCREEN_BUILDERS,
 }
 
 

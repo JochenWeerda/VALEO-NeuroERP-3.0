@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (843 Masken).
+> Generiert aus `app/core/screen_definitions.py` (816 Masken).
 
 ## Übersicht
 
@@ -442,6 +442,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `einkauf/wareneingangsabgleich` | Wareneingangsabgleich | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/wareneingangsabgleich/agent-contract` |
 | `einkauf/warengruppen` | Warengruppen | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/warengruppen/agent-contract` |
 | `einkauf/zahlungsbedingungen` | Zahlungsbedingungen | finance | niedrig | — | `GET /api/v1/masks/einkauf/zahlungsbedingungen/agent-contract` |
+| `errors/NotFound` | Seite nicht gefunden | platform | niedrig | — | `GET /api/v1/masks/errors/NotFound/agent-contract` |
 | `etiketten/druck-liste` | Etikettendruck | lager | niedrig | — | `GET /api/v1/masks/etiketten/druck-liste/agent-contract` |
 | `etiketten/drucken` | Drucken | etiketten | niedrig | — | `GET /api/v1/masks/etiketten/drucken/agent-contract` |
 | `export/intrastat-meldung-liste` | Intrastat-Meldung | compliance | niedrig | — | `GET /api/v1/masks/export/intrastat-meldung-liste/agent-contract` |
@@ -453,57 +454,39 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `fibu/anlage` | Anlage | finance | niedrig | — | `GET /api/v1/masks/fibu/anlage/agent-contract` |
 | `fibu/anlagen` | Anlagen Gesamt | fibu | niedrig | — | `GET /api/v1/masks/fibu/anlagen/agent-contract` |
 | `fibu/anlagen-liste` | Anlagen | finance | niedrig | — | `GET /api/v1/masks/fibu/anlagen-liste/agent-contract` |
-| `fibu/anlagen-suite` | Anlagen suite | fibu | niedrig | — | `GET /api/v1/masks/fibu/anlagen-suite/agent-contract` |
 | `fibu/atlas` | Atlas | fibu | niedrig | — | `GET /api/v1/masks/fibu/atlas/agent-contract` |
 | `fibu/bilanz` | Bilanz | fibu | niedrig | — | `GET /api/v1/masks/fibu/bilanz/agent-contract` |
-| `fibu/buchhaltungsuebersicht` | Buchhaltungsuebersicht | fibu | niedrig | — | `GET /api/v1/masks/fibu/buchhaltungsuebersicht/agent-contract` |
 | `fibu/buchungsjournal-liste` | Buchungsjournal | finance | niedrig | — | `GET /api/v1/masks/fibu/buchungsjournal-liste/agent-contract` |
-| `fibu/buchungsuebernahme-connectors` | Buchungsuebernahme connectors | fibu | niedrig | — | `GET /api/v1/masks/fibu/buchungsuebernahme-connectors/agent-contract` |
-| `fibu/bwa` | Bwa | fibu | niedrig | — | `GET /api/v1/masks/fibu/bwa/agent-contract` |
-| `fibu/debitoren-api` | Debitoren api | fibu | niedrig | — | `GET /api/v1/masks/fibu/debitoren-api/agent-contract` |
 | `fibu/debitoren-liste` | Debitoren OP | finance | niedrig | — | `GET /api/v1/masks/fibu/debitoren-liste/agent-contract` |
-| `fibu/elster-online` | Elster online | fibu | niedrig | — | `GET /api/v1/masks/fibu/elster-online/agent-contract` |
-| `fibu/erloeskennziffern` | Erloeskennziffern | fibu | niedrig | — | `GET /api/v1/masks/fibu/erloeskennziffern/agent-contract` |
-| `fibu/erloeskontenzuordnung` | Erloeskontenzuordnung | fibu | niedrig | — | `GET /api/v1/masks/fibu/erloeskontenzuordnung/agent-contract` |
+| `fibu/erloeskennziffern` | Erlöskennziffern | fibu | niedrig | — | `GET /api/v1/masks/fibu/erloeskennziffern/agent-contract` |
+| `fibu/erloeskontenzuordnung` | Erlöskontenzuordnung | fibu | niedrig | — | `GET /api/v1/masks/fibu/erloeskontenzuordnung/agent-contract` |
 | `fibu/forderungsgruppen` | Forderungsgruppen | fibu | niedrig | — | `GET /api/v1/masks/fibu/forderungsgruppen/agent-contract` |
 | `fibu/geschaeftsjahre` | Neues Geschäftsjahr [JAHR] | fibu | niedrig | — | `GET /api/v1/masks/fibu/geschaeftsjahre/agent-contract` |
 | `fibu/guv` | Guv | fibu | niedrig | — | `GET /api/v1/masks/fibu/guv/agent-contract` |
-| `fibu/hauptbuch` | Hauptbuch | fibu | niedrig | — | `GET /api/v1/masks/fibu/hauptbuch/agent-contract` |
 | `fibu/hauptbuch-liste` | Hauptbuch | finance | niedrig | — | `GET /api/v1/masks/fibu/hauptbuch-liste/agent-contract` |
 | `fibu/kassenbuch-liste` | Kassenbuch | finance | niedrig | — | `GET /api/v1/masks/fibu/kassenbuch-liste/agent-contract` |
-| `fibu/kontenplan` | Kontenplan | fibu | niedrig | — | `GET /api/v1/masks/fibu/kontenplan/agent-contract` |
 | `fibu/kontenplan-liste` | Kontenplan | finance | niedrig | — | `GET /api/v1/masks/fibu/kontenplan-liste/agent-contract` |
 | `fibu/kostenstellen-liste` | Kostenstellen | finance | niedrig | — | `GET /api/v1/masks/fibu/kostenstellen-liste/agent-contract` |
-| `fibu/kostenstellenrechnung` | Kostenstellenrechnung | fibu | niedrig | — | `GET /api/v1/masks/fibu/kostenstellenrechnung/agent-contract` |
 | `fibu/kreditlinien` | Kreditlinien | fibu | niedrig | — | `GET /api/v1/masks/fibu/kreditlinien/agent-contract` |
-| `fibu/kreditoren` | Kreditoren | fibu | niedrig | — | `GET /api/v1/masks/fibu/kreditoren/agent-contract` |
 | `fibu/kreditoren-liste` | Kreditoren OP | finance | niedrig | — | `GET /api/v1/masks/fibu/kreditoren-liste/agent-contract` |
-| `fibu/lohn-connector` | Lohn connector | fibu | niedrig | — | `GET /api/v1/masks/fibu/lohn-connector/agent-contract` |
+| `fibu/lohn-connector` | Lohn-Übernahme | fibu | niedrig | — | `GET /api/v1/masks/fibu/lohn-connector/agent-contract` |
 | `fibu/monatswerte` | Monatswerte | fibu | niedrig | — | `GET /api/v1/masks/fibu/monatswerte/agent-contract` |
 | `fibu/offene-posten-liste` | Offene Posten | finance | niedrig | — | `GET /api/v1/masks/fibu/offene-posten-liste/agent-contract` |
 | `fibu/op-skonto-auszifferung` | Auszifferungen | fibu | niedrig | — | `GET /api/v1/masks/fibu/op-skonto-auszifferung/agent-contract` |
 | `fibu/op-verwaltung` | OP-Verwaltung | finance | niedrig | — | `GET /api/v1/masks/fibu/op-verwaltung/agent-contract` |
-| `fibu/periodische-buchungen` | Periodische buchungen | fibu | niedrig | — | `GET /api/v1/masks/fibu/periodische-buchungen/agent-contract` |
-| `fibu/quadriga-connector` | Quadriga connector | fibu | niedrig | — | `GET /api/v1/masks/fibu/quadriga-connector/agent-contract` |
+| `fibu/periodische-buchungen` | Periodische Buchungen | fibu | niedrig | — | `GET /api/v1/masks/fibu/periodische-buchungen/agent-contract` |
+| `fibu/quadriga-connector` | Quadriga-Anbindung | fibu | niedrig | — | `GET /api/v1/masks/fibu/quadriga-connector/agent-contract` |
 | `fibu/sachkonto` | Sachkonto | fibu | niedrig | — | `GET /api/v1/masks/fibu/sachkonto/agent-contract` |
-| `fibu/schnittstelle-fibu` | Schnittstelle fibu | fibu | niedrig | — | `GET /api/v1/masks/fibu/schnittstelle-fibu/agent-contract` |
 | `fibu/schnittstelle-fibu-liste` | FIBU-Schnittstelle | finance | niedrig | — | `GET /api/v1/masks/fibu/schnittstelle-fibu-liste/agent-contract` |
-| `fibu/schnittstellen-center` | Schnittstellen center | fibu | niedrig | — | `GET /api/v1/masks/fibu/schnittstellen-center/agent-contract` |
 | `fibu/sicherheiten` | Sicherheiten | fibu | niedrig | — | `GET /api/v1/masks/fibu/sicherheiten/agent-contract` |
 | `fibu/stammdaten` | Neues Zahlungsformular [FIZAF] | fibu | niedrig | — | `GET /api/v1/masks/fibu/stammdaten/agent-contract` |
-| `fibu/verbindlichkeiten` | Verbindlichkeiten | fibu | niedrig | — | `GET /api/v1/masks/fibu/verbindlichkeiten/agent-contract` |
 | `fibu/verbindlichkeiten-liste` | Verbindlichkeiten | finance | niedrig | — | `GET /api/v1/masks/fibu/verbindlichkeiten-liste/agent-contract` |
-| `fibu/zahlungseingaenge` | Zahlungseingaenge | fibu | niedrig | — | `GET /api/v1/masks/fibu/zahlungseingaenge/agent-contract` |
 | `fibu/zahlungseingaenge-liste` | Zahlungseingaenge | finance | niedrig | — | `GET /api/v1/masks/fibu/zahlungseingaenge-liste/agent-contract` |
-| `fibu/zahlungslaeufe` | Zahlungslaeufe | fibu | niedrig | — | `GET /api/v1/masks/fibu/zahlungslaeufe/agent-contract` |
 | `fibu/zahlungslaeufe-liste` | Zahlungslaeufe | finance | niedrig | — | `GET /api/v1/masks/fibu/zahlungslaeufe-liste/agent-contract` |
 | `fibu/zahlungsmeldungen` | Neue Zahlungsmeldung [KASSZAME] | fibu | niedrig | — | `GET /api/v1/masks/fibu/zahlungsmeldungen/agent-contract` |
-| `fibu/zahlungsvorschlaege` | Zahlungsvorschlaege | fibu | niedrig | — | `GET /api/v1/masks/fibu/zahlungsvorschlaege/agent-contract` |
 | `finance/abschluss` | Monats-/Jahresabschluss | finance | niedrig | — | `GET /api/v1/masks/finance/abschluss/agent-contract` |
 | `finance/ap-invoice` | Eingangsrechnung | finance | mittel | `procure-to-pay` | `GET /api/v1/masks/finance/ap-invoice/agent-contract` |
 | `finance/ap-invoices-liste` | AP-Rechnungen | finance | niedrig | — | `GET /api/v1/masks/finance/ap-invoices-liste/agent-contract` |
-| `finance/ap/invoices` | Ap invoices list | finance | niedrig | — | `GET /api/v1/masks/finance/ap/invoices/agent-contract` |
-| `finance/ap/invoices/new` | Ap invoice form | finance | niedrig | — | `GET /api/v1/masks/finance/ap/invoices/new/agent-contract` |
 | `finance/ar-open-item` | Offener Posten | finance | mittel | `order-to-cash` | `GET /api/v1/masks/finance/ar-open-item/agent-contract` |
 | `finance/audit-trail` | Finanz-Audit-Trail | finance | niedrig | — | `GET /api/v1/masks/finance/audit-trail/agent-contract` |
 | `finance/audit-trail-liste` | Audit-Trail | finance | niedrig | — | `GET /api/v1/masks/finance/audit-trail-liste/agent-contract` |
@@ -511,7 +494,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `finance/bank-account` | Bankkonto | finance | niedrig | — | `GET /api/v1/masks/finance/bank-account/agent-contract` |
 | `finance/bank-stamm` | Bank stamm | finance | niedrig | — | `GET /api/v1/masks/finance/bank-stamm/agent-contract` |
 | `finance/bankkonto` | Bankkonto | finance | mittel | — | `GET /api/v1/masks/finance/bankkonto/agent-contract` |
-| `finance/bookings/new` | Buchungsjournal | finance | niedrig | — | `GET /api/v1/masks/finance/bookings/new/agent-contract` |
 | `finance/buchungserfassung` | Vorgang | finance | niedrig | — | `GET /api/v1/masks/finance/buchungserfassung/agent-contract` |
 | `finance/buchungsimport` | Buchungsimport | finance | niedrig | — | `GET /api/v1/masks/finance/buchungsimport/agent-contract` |
 | `finance/buchungsvorlagen` | Buchungsvorlagen | finance | niedrig | — | `GET /api/v1/masks/finance/buchungsvorlagen/agent-contract` |
@@ -523,31 +505,22 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `finance/invoices-list` | Invoices list | finance | niedrig | — | `GET /api/v1/masks/finance/invoices-list/agent-contract` |
 | `finance/invoices/new` | Ausgangsrechnung erfassen | finance | niedrig | — | `GET /api/v1/masks/finance/invoices/new/agent-contract` |
 | `finance/kasse` | Kasse | finance | niedrig | — | `GET /api/v1/masks/finance/kasse/agent-contract` |
-| `finance/kontenplan` | Chart of accounts | finance | niedrig | — | `GET /api/v1/masks/finance/kontenplan/agent-contract` |
 | `finance/kreditor` | Kreditor | finance | mittel | — | `GET /api/v1/masks/finance/kreditor/agent-contract` |
-| `finance/kreditoren` | Kreditoren liste | finance | niedrig | — | `GET /api/v1/masks/finance/kreditoren/agent-contract` |
 | `finance/kreditoren-liste` | Kreditoren | finance | niedrig | — | `GET /api/v1/masks/finance/kreditoren-liste/agent-contract` |
 | `finance/lastschriften-debitoren` | Debitorenlauf | finance | niedrig | — | `GET /api/v1/masks/finance/lastschriften-debitoren/agent-contract` |
-| `finance/nebenbuch-abstimmung` | Nebenbuch abstimmung | finance | niedrig | — | `GET /api/v1/masks/finance/nebenbuch-abstimmung/agent-contract` |
-| `finance/offene-posten` | Offene posten | finance | niedrig | — | `GET /api/v1/masks/finance/offene-posten/agent-contract` |
+| `finance/nebenbuch-abstimmung` | Nebenbuch-Abstimmung | finance | niedrig | — | `GET /api/v1/masks/finance/nebenbuch-abstimmung/agent-contract` |
 | `finance/offene-posten-cockpit` | Offene-Posten-Cockpit | finance | niedrig | — | `GET /api/v1/masks/finance/offene-posten-cockpit/agent-contract` |
 | `finance/op-debitoren` | OP-Lage | finance | niedrig | — | `GET /api/v1/masks/finance/op-debitoren/agent-contract` |
-| `finance/op-kreditoren` | Op kreditoren | finance | niedrig | — | `GET /api/v1/masks/finance/op-kreditoren/agent-contract` |
 | `finance/payment-matching-liste` | Zahlungsabgleich | finance | niedrig | — | `GET /api/v1/masks/finance/payment-matching-liste/agent-contract` |
 | `finance/payment-run` | Zahlungslauf | finance | niedrig | `procure-to-pay`, `order-to-cash`, `finance-to-close` | `GET /api/v1/masks/finance/payment-run/agent-contract` |
-| `finance/payments` | Payment matching | finance | niedrig | — | `GET /api/v1/masks/finance/payments/agent-contract` |
-| `finance/periodenabschluss` | Periodenabschluss | finance | niedrig | — | `GET /api/v1/masks/finance/periodenabschluss/agent-contract` |
-| `finance/periods` | Periods | finance | niedrig | — | `GET /api/v1/masks/finance/periods/agent-contract` |
 | `finance/periods-liste` | Buchungsperioden | finance | niedrig | — | `GET /api/v1/masks/finance/periods-liste/agent-contract` |
 | `finance/pruefkorb` | Prüfkorb | finance | niedrig | — | `GET /api/v1/masks/finance/pruefkorb/agent-contract` |
 | `finance/rechnungstapel` | Rechnungstapel | finance | niedrig | — | `GET /api/v1/masks/finance/rechnungstapel/agent-contract` |
-| `finance/skonto-optimizer` | Skonto optimizer | finance | niedrig | — | `GET /api/v1/masks/finance/skonto-optimizer/agent-contract` |
 | `finance/skonto-optimizer-liste` | Skonto-Optimierung | finance | niedrig | — | `GET /api/v1/masks/finance/skonto-optimizer-liste/agent-contract` |
 | `finance/steuerschluessel` | Steuerschlüssel | finance | mittel | — | `GET /api/v1/masks/finance/steuerschluessel/agent-contract` |
 | `finance/umsatz` | Reports | finance | niedrig | — | `GET /api/v1/masks/finance/umsatz/agent-contract` |
 | `finance/ustva` | Meldekontext | finance | niedrig | — | `GET /api/v1/masks/finance/ustva/agent-contract` |
 | `finance/wechselkurse` | Wechselkurse | finance | niedrig | — | `GET /api/v1/masks/finance/wechselkurse/agent-contract` |
-| `finance/zahlungseingang` | Zahlungseingang | finance | niedrig | — | `GET /api/v1/masks/finance/zahlungseingang/agent-contract` |
 | `finance/zahlungslauf-kreditoren` | Zahlungslage | finance | niedrig | — | `GET /api/v1/masks/finance/zahlungslauf-kreditoren/agent-contract` |
 | `finanzplanung/liquiditaet` | Liquiditaet | finanzplanung | niedrig | — | `GET /api/v1/masks/finanzplanung/liquiditaet/agent-contract` |
 | `foerderung/antrag` | Antrag | foerderung | niedrig | — | `GET /api/v1/masks/foerderung/antrag/agent-contract` |
@@ -13529,35 +13502,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `fibu/anlagen-suite` — Anlagen suite
-
-**Zweck:** Anlagen suite im fibu-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/fibu/anlagen-suite/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/fibu/anlagen-suite/agent-contract` |
-| Readiness | `GET /api/v1/masks/fibu/anlagen-suite/readiness` |
-| Rollout-Route | `/mask-rollout/fibu__anlagen-suite/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/finance/asset-ledger-connector/config`
-
-**Beispiel-Prompts:**
-
-- Zeige Anlagen suite.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
 ### `fibu/atlas` — Atlas
 
 **Zweck:** Atlas im fibu-Bereich finden und auswerten.
@@ -13616,154 +13560,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `fibu/buchhaltungsuebersicht` — Buchhaltungsuebersicht
+### `fibu/erloeskennziffern` — Erlöskennziffern
 
-**Zweck:** Buchhaltungsuebersicht mandantensicher als Cockpit bereitstellen.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/fibu/buchhaltungsuebersicht/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/fibu/buchhaltungsuebersicht/agent-contract` |
-| Readiness | `GET /api/v1/masks/fibu/buchhaltungsuebersicht/readiness` |
-| Rollout-Route | `/mask-rollout/fibu__buchhaltungsuebersicht/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `entity` → `/api/v1/fibu/anlagen`
-
-**Beispiel-Prompts:**
-
-- Zeige Buchhaltungsuebersicht.
-- Aktualisiere die Kennzahlen.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `refresh` | Aktualisieren | safe | nein | `—` |
-
----
-
-### `fibu/buchungsuebernahme-connectors` — Buchungsuebernahme connectors
-
-**Zweck:** Buchungsuebernahme connectors im fibu-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/fibu/buchungsuebernahme-connectors/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/fibu/buchungsuebernahme-connectors/agent-contract` |
-| Readiness | `GET /api/v1/masks/fibu/buchungsuebernahme-connectors/readiness` |
-| Rollout-Route | `/mask-rollout/fibu__buchungsuebernahme-connectors/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/fibu/anlagen`
-
-**Beispiel-Prompts:**
-
-- Zeige Buchungsuebernahme connectors.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
-### `fibu/bwa` — Bwa
-
-**Zweck:** Bwa im fibu-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/fibu/bwa/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/fibu/bwa/agent-contract` |
-| Readiness | `GET /api/v1/masks/fibu/bwa/readiness` |
-| Rollout-Route | `/mask-rollout/fibu__bwa/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/fibu/anlagen`
-
-**Beispiel-Prompts:**
-
-- Zeige Bwa.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
-### `fibu/debitoren-api` — Debitoren api
-
-**Zweck:** Debitoren api im fibu-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/fibu/debitoren-api/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/fibu/debitoren-api/agent-contract` |
-| Readiness | `GET /api/v1/masks/fibu/debitoren-api/readiness` |
-| Rollout-Route | `/mask-rollout/fibu__debitoren-api/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/fibu/anlagen`
-
-**Beispiel-Prompts:**
-
-- Zeige Debitoren api.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
-### `fibu/elster-online` — Elster online
-
-**Zweck:** Elster online im fibu-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/fibu/elster-online/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/fibu/elster-online/agent-contract` |
-| Readiness | `GET /api/v1/masks/fibu/elster-online/readiness` |
-| Rollout-Route | `/mask-rollout/fibu__elster-online/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/fibu/anlagen`
-
-**Beispiel-Prompts:**
-
-- Zeige Elster online.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
-### `fibu/erloeskennziffern` — Erloeskennziffern
-
-**Zweck:** Erloeskennziffern im fibu-Bereich finden und auswerten.
+**Zweck:** Erloeskennziffern finden und pruefen, welche aktiv sind.
 
 | | |
 |---|---|
@@ -13775,12 +13574,12 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `list` → `/api/v1/fibu/anlagen`
+- `list` → `/api/v1/fibu/erloeskennziffern`
 
 **Beispiel-Prompts:**
 
-- Zeige Erloeskennziffern.
-- Filtere die Liste.
+- Welche Erloeskennziffern sind inaktiv?
+- Zeige die Kennziffer 100.
 
 **Actions:**
 
@@ -13790,9 +13589,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `fibu/erloeskontenzuordnung` — Erloeskontenzuordnung
+### `fibu/erloeskontenzuordnung` — Erlöskontenzuordnung
 
-**Zweck:** Erloeskontenzuordnung im fibu-Bereich finden und auswerten.
+**Zweck:** Pruefen, auf welche Konten eine Erloeskennziffer je Steuerschluessel bucht.
 
 | | |
 |---|---|
@@ -13804,12 +13603,12 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `list` → `/api/v1/fibu/anlagen`
+- `list` → `/api/v1/fibu/erloeskennziffern/zuordnungen`
 
 **Beispiel-Prompts:**
 
-- Zeige Erloeskontenzuordnung.
-- Filtere die Liste.
+- Welche Zuordnungen gelten fuer Steuerschluessel 3?
+- Welches Erloeskonto gilt ab 1.1.?
 
 **Actions:**
 
@@ -13821,7 +13620,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ### `fibu/forderungsgruppen` — Forderungsgruppen
 
-**Zweck:** Forderungsgruppen im fibu-Bereich finden und auswerten.
+**Zweck:** Forderungsgruppen und ihre Sammelkonten pruefen.
 
 | | |
 |---|---|
@@ -13833,12 +13632,12 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `list` → `/api/v1/fibu/anlagen`
+- `list` → `/api/v1/fibu/forderungsgruppen`
 
 **Beispiel-Prompts:**
 
-- Zeige Forderungsgruppen.
-- Filtere die Liste.
+- Welche Forderungsgruppe bucht auf 1400?
+- Zeige inaktive Forderungsgruppen.
 
 **Actions:**
 
@@ -13906,96 +13705,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `fibu/hauptbuch` — Hauptbuch
-
-**Zweck:** Hauptbuch im fibu-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/fibu/hauptbuch/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/fibu/hauptbuch/agent-contract` |
-| Readiness | `GET /api/v1/masks/fibu/hauptbuch/readiness` |
-| Rollout-Route | `/mask-rollout/fibu__hauptbuch/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/fibu/anlagen`
-
-**Beispiel-Prompts:**
-
-- Zeige Hauptbuch.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
-### `fibu/kontenplan` — Kontenplan
-
-**Zweck:** Kontenplan im fibu-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/fibu/kontenplan/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/fibu/kontenplan/agent-contract` |
-| Readiness | `GET /api/v1/masks/fibu/kontenplan/readiness` |
-| Rollout-Route | `/mask-rollout/fibu__kontenplan/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/finance/chart-of-accounts/`
-
-**Beispiel-Prompts:**
-
-- Zeige Kontenplan.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
-### `fibu/kostenstellenrechnung` — Kostenstellenrechnung
-
-**Zweck:** Kostenstellenrechnung im fibu-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/fibu/kostenstellenrechnung/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/fibu/kostenstellenrechnung/agent-contract` |
-| Readiness | `GET /api/v1/masks/fibu/kostenstellenrechnung/readiness` |
-| Rollout-Route | `/mask-rollout/fibu__kostenstellenrechnung/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/fibu/anlagen`
-
-**Beispiel-Prompts:**
-
-- Zeige Kostenstellenrechnung.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
 ### `fibu/kreditlinien` — Kreditlinien
 
-**Zweck:** Kreditlinien im fibu-Bereich finden und auswerten.
+**Zweck:** Kreditlinien und ihre Auslastung je Partner pruefen.
 
 | | |
 |---|---|
@@ -14007,12 +13719,12 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `list` → `/api/v1/fibu/anlagen`
+- `list` → `/api/v1/finance/credit-limits`
 
 **Beispiel-Prompts:**
 
-- Zeige Kreditlinien.
-- Filtere die Liste.
+- Welche Partner sind ueber 90 % ausgelastet?
+- Wie hoch ist das gesamte Kreditlimit?
 
 **Actions:**
 
@@ -14022,38 +13734,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `fibu/kreditoren` — Kreditoren
+### `fibu/lohn-connector` — Lohn-Übernahme
 
-**Zweck:** Kreditoren im fibu-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/fibu/kreditoren/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/fibu/kreditoren/agent-contract` |
-| Readiness | `GET /api/v1/masks/fibu/kreditoren/readiness` |
-| Rollout-Route | `/mask-rollout/fibu__kreditoren/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/fibu/anlagen`
-
-**Beispiel-Prompts:**
-
-- Zeige Kreditoren.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
-### `fibu/lohn-connector` — Lohn connector
-
-**Zweck:** Lohn connector im fibu-Bereich finden und auswerten.
+**Zweck:** Pruefen, ob die Lohnbuchungen einer Periode vollstaendig und ausgeglichen uebernommen wurden.
 
 | | |
 |---|---|
@@ -14069,8 +13752,8 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Beispiel-Prompts:**
 
-- Zeige Lohn connector.
-- Filtere die Liste.
+- Ist die Lohnuebernahme fuer Oktober gelaufen?
+- Welche Laeufe sind fehlgeschlagen?
 
 **Actions:**
 
@@ -14138,9 +13821,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `fibu/periodische-buchungen` — Periodische buchungen
+### `fibu/periodische-buchungen` — Periodische Buchungen
 
-**Zweck:** Periodische buchungen im fibu-Bereich finden und auswerten.
+**Zweck:** Wiederkehrende Buchungen pruefen: Konten, Betrag, Turnus und Sperren.
 
 | | |
 |---|---|
@@ -14152,12 +13835,12 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `list` → `/api/v1/fibu/anlagen`
+- `list` → `/api/v1/fibu/periodische-buchungen`
 
 **Beispiel-Prompts:**
 
-- Zeige Periodische buchungen.
-- Filtere die Liste.
+- Welche periodischen Buchungen sind gesperrt?
+- Wie hoch ist die monatliche Summe?
 
 **Actions:**
 
@@ -14167,9 +13850,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `fibu/quadriga-connector` — Quadriga connector
+### `fibu/quadriga-connector` — Quadriga-Anbindung
 
-**Zweck:** Quadriga connector im fibu-Bereich finden und auswerten.
+**Zweck:** Pruefen, welche Quadriga-Konfiguration aktiv ist.
 
 | | |
 |---|---|
@@ -14185,8 +13868,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Beispiel-Prompts:**
 
-- Zeige Quadriga connector.
-- Filtere die Liste.
+- Ist die Quadriga-Anbindung aktiv?
 
 **Actions:**
 
@@ -14215,64 +13897,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **Beispiel-Prompts:**
 
 - Zeige Sachkonto.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
-### `fibu/schnittstelle-fibu` — Schnittstelle fibu
-
-**Zweck:** Schnittstelle fibu im fibu-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/fibu/schnittstelle-fibu/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/fibu/schnittstelle-fibu/agent-contract` |
-| Readiness | `GET /api/v1/masks/fibu/schnittstelle-fibu/readiness` |
-| Rollout-Route | `/mask-rollout/fibu__schnittstelle-fibu/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/fibu/anlagen`
-
-**Beispiel-Prompts:**
-
-- Zeige Schnittstelle fibu.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
-### `fibu/schnittstellen-center` — Schnittstellen center
-
-**Zweck:** Schnittstellen center im fibu-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/fibu/schnittstellen-center/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/fibu/schnittstellen-center/agent-contract` |
-| Readiness | `GET /api/v1/masks/fibu/schnittstellen-center/readiness` |
-| Rollout-Route | `/mask-rollout/fibu__schnittstellen-center/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/fibu/anlagen`
-
-**Beispiel-Prompts:**
-
-- Zeige Schnittstellen center.
 - Filtere die Liste.
 
 **Actions:**
@@ -14343,93 +13967,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `fibu/verbindlichkeiten` — Verbindlichkeiten
-
-**Zweck:** Verbindlichkeiten im fibu-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/fibu/verbindlichkeiten/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/fibu/verbindlichkeiten/agent-contract` |
-| Readiness | `GET /api/v1/masks/fibu/verbindlichkeiten/readiness` |
-| Rollout-Route | `/mask-rollout/fibu__verbindlichkeiten/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/fibu/anlagen`
-
-**Beispiel-Prompts:**
-
-- Zeige Verbindlichkeiten.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
-### `fibu/zahlungseingaenge` — Zahlungseingaenge
-
-**Zweck:** Zahlungseingaenge im fibu-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/fibu/zahlungseingaenge/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/fibu/zahlungseingaenge/agent-contract` |
-| Readiness | `GET /api/v1/masks/fibu/zahlungseingaenge/readiness` |
-| Rollout-Route | `/mask-rollout/fibu__zahlungseingaenge/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/finance/bank-accounts`
-
-**Beispiel-Prompts:**
-
-- Zeige Zahlungseingaenge.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
-### `fibu/zahlungslaeufe` — Zahlungslaeufe
-
-**Zweck:** Zahlungslaeufe im fibu-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/fibu/zahlungslaeufe/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/fibu/zahlungslaeufe/agent-contract` |
-| Readiness | `GET /api/v1/masks/fibu/zahlungslaeufe/readiness` |
-| Rollout-Route | `/mask-rollout/fibu__zahlungslaeufe/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/fibu/anlagen`
-
-**Beispiel-Prompts:**
-
-- Zeige Zahlungslaeufe.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
 ### `fibu/zahlungsmeldungen` — Neue Zahlungsmeldung [KASSZAME]
 
 **Zweck:** Neue Zahlungsmeldung [KASSZAME] als Stammblatt pflegen.
@@ -14456,35 +13993,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `edit` | Bearbeiten | safe | nein | `—` |
-
----
-
-### `fibu/zahlungsvorschlaege` — Zahlungsvorschlaege
-
-**Zweck:** Zahlungsvorschlaege im fibu-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/fibu/zahlungsvorschlaege/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/fibu/zahlungsvorschlaege/agent-contract` |
-| Readiness | `GET /api/v1/masks/fibu/zahlungsvorschlaege/readiness` |
-| Rollout-Route | `/mask-rollout/fibu__zahlungsvorschlaege/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/fibu/anlagen`
-
-**Beispiel-Prompts:**
-
-- Zeige Zahlungsvorschlaege.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
 
@@ -15634,76 +15142,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `finance/ap/invoices` — Ap invoices list
-
-**Zweck:** Ap invoices list im finance-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/finance/ap/invoices/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/finance/ap/invoices/agent-contract` |
-| Readiness | `GET /api/v1/masks/finance/ap/invoices/readiness` |
-| Rollout-Route | `/mask-rollout/finance__ap__invoices/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/finance/abstimmung/nebenbuch`
-
-**MCP-Tools (Domäne):**
-
-- `finance.ap_invoice.propose` — scope `finance:write`, Risiko hoch
-- `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
-- `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
-
-**Beispiel-Prompts:**
-
-- Zeige Ap invoices list.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
-### `finance/ap/invoices/new` — Ap invoice form
-
-**Zweck:** Ap invoice form im finance-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/finance/ap/invoices/new/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/finance/ap/invoices/new/agent-contract` |
-| Readiness | `GET /api/v1/masks/finance/ap/invoices/new/readiness` |
-| Rollout-Route | `/mask-rollout/finance__ap__invoices__new/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/finance/abstimmung/nebenbuch`
-
-**MCP-Tools (Domäne):**
-
-- `finance.ap_invoice.propose` — scope `finance:write`, Risiko hoch
-- `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
-- `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
-
-**Beispiel-Prompts:**
-
-- Zeige Ap invoice form.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
 ### `finance/ar-open-item` — Offener Posten
 
 **Zweck:** Offener Posten: Forderungs-Cockpit fuer Debitorenbuchhaltung mit Faelligkeiten, Skonto und Ausgleichshistorie.
@@ -15948,41 +15386,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `bearbeiten` | Bearbeiten | moderate | nein | `/api/v1/banken/konten/{entity_id}/actions/bearbeiten` |
-
----
-
-### `finance/bookings/new` — Buchungsjournal
-
-**Zweck:** Buchungsjournal im finance-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/finance/bookings/new/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/finance/bookings/new/agent-contract` |
-| Readiness | `GET /api/v1/masks/finance/bookings/new/readiness` |
-| Rollout-Route | `/mask-rollout/finance__bookings__new/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/finance/abstimmung/nebenbuch`
-
-**MCP-Tools (Domäne):**
-
-- `finance.ap_invoice.propose` — scope `finance:write`, Risiko hoch
-- `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
-- `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
-
-**Beispiel-Prompts:**
-
-- Zeige Buchungsjournal.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
 
@@ -16384,41 +15787,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `finance/kontenplan` — Chart of accounts
-
-**Zweck:** Chart of accounts im finance-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/finance/kontenplan/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/finance/kontenplan/agent-contract` |
-| Readiness | `GET /api/v1/masks/finance/kontenplan/readiness` |
-| Rollout-Route | `/mask-rollout/finance__kontenplan/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/finance/abstimmung/nebenbuch`
-
-**MCP-Tools (Domäne):**
-
-- `finance.ap_invoice.propose` — scope `finance:write`, Risiko hoch
-- `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
-- `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
-
-**Beispiel-Prompts:**
-
-- Zeige Chart of accounts.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
 ### `finance/kreditor` — Kreditor
 
 **Zweck:** Kreditoren-Stammdaten: Zahlungsbedingungen, offene Posten und Bestellhistorie fuer Kreditorenbuchhaltung.
@@ -16455,41 +15823,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `bearbeiten` | Bearbeiten | moderate | nein | `/api/v1/finance/kreditoren/{entity_id}/actions/bearbeiten` |
-
----
-
-### `finance/kreditoren` — Kreditoren liste
-
-**Zweck:** Kreditoren liste im finance-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/finance/kreditoren/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/finance/kreditoren/agent-contract` |
-| Readiness | `GET /api/v1/masks/finance/kreditoren/readiness` |
-| Rollout-Route | `/mask-rollout/finance__kreditoren/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/finance/abstimmung/nebenbuch`
-
-**MCP-Tools (Domäne):**
-
-- `finance.ap_invoice.propose` — scope `finance:write`, Risiko hoch
-- `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
-- `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
-
-**Beispiel-Prompts:**
-
-- Zeige Kreditoren liste.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
 
@@ -16564,9 +15897,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `finance/nebenbuch-abstimmung` — Nebenbuch abstimmung
+### `finance/nebenbuch-abstimmung` — Nebenbuch-Abstimmung
 
-**Zweck:** Nebenbuch abstimmung im finance-Bereich finden und auswerten.
+**Zweck:** Differenzen zwischen Neben- und Hauptbuch je Periode finden.
 
 | | |
 |---|---|
@@ -16588,43 +15921,8 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Beispiel-Prompts:**
 
-- Zeige Nebenbuch abstimmung.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
-### `finance/offene-posten` — Offene posten
-
-**Zweck:** Offene posten im finance-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/finance/offene-posten/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/finance/offene-posten/agent-contract` |
-| Readiness | `GET /api/v1/masks/finance/offene-posten/readiness` |
-| Rollout-Route | `/mask-rollout/finance__offene-posten/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/finance/open-items`
-
-**MCP-Tools (Domäne):**
-
-- `finance.ap_invoice.propose` — scope `finance:write`, Risiko hoch
-- `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
-- `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
-
-**Beispiel-Prompts:**
-
-- Zeige Offene posten.
-- Filtere die Liste.
+- Welche Perioden haben eine Differenz?
+- Wer hat die Abstimmung fuer Oktober gemacht?
 
 **Actions:**
 
@@ -16695,41 +15993,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **Beispiel-Prompts:**
 
 - Zeige OP-Lage.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
-### `finance/op-kreditoren` — Op kreditoren
-
-**Zweck:** Op kreditoren im finance-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/finance/op-kreditoren/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/finance/op-kreditoren/agent-contract` |
-| Readiness | `GET /api/v1/masks/finance/op-kreditoren/readiness` |
-| Rollout-Route | `/mask-rollout/finance__op-kreditoren/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/finance/open-items`
-
-**MCP-Tools (Domäne):**
-
-- `finance.ap_invoice.propose` — scope `finance:write`, Risiko hoch
-- `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
-- `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
-
-**Beispiel-Prompts:**
-
-- Zeige Op kreditoren.
 - Filtere die Liste.
 
 **Actions:**
@@ -16812,111 +16075,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `freigeben` | Zahlungslauf freigeben | critical | ja | `/api/v1/finance/payment-runs/{entity_id}/actions/freigeben` |
-
----
-
-### `finance/payments` — Payment matching
-
-**Zweck:** Payment matching im finance-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/finance/payments/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/finance/payments/agent-contract` |
-| Readiness | `GET /api/v1/masks/finance/payments/readiness` |
-| Rollout-Route | `/mask-rollout/finance__payments/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/finance/payments/unmatched`
-
-**MCP-Tools (Domäne):**
-
-- `finance.ap_invoice.propose` — scope `finance:write`, Risiko hoch
-- `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
-- `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
-
-**Beispiel-Prompts:**
-
-- Zeige Payment matching.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
-### `finance/periodenabschluss` — Periodenabschluss
-
-**Zweck:** Periodenabschluss im finance-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/finance/periodenabschluss/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/finance/periodenabschluss/agent-contract` |
-| Readiness | `GET /api/v1/masks/finance/periodenabschluss/readiness` |
-| Rollout-Route | `/mask-rollout/finance__periodenabschluss/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/finance/abstimmung/nebenbuch`
-
-**MCP-Tools (Domäne):**
-
-- `finance.ap_invoice.propose` — scope `finance:write`, Risiko hoch
-- `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
-- `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
-
-**Beispiel-Prompts:**
-
-- Zeige Periodenabschluss.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
-### `finance/periods` — Periods
-
-**Zweck:** Periods im finance-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/finance/periods/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/finance/periods/agent-contract` |
-| Readiness | `GET /api/v1/masks/finance/periods/readiness` |
-| Rollout-Route | `/mask-rollout/finance__periods/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/finance/abstimmung/nebenbuch`
-
-**MCP-Tools (Domäne):**
-
-- `finance.ap_invoice.propose` — scope `finance:write`, Risiko hoch
-- `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
-- `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
-
-**Beispiel-Prompts:**
-
-- Zeige Periods.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
 
@@ -17018,41 +16176,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - Welche Selbstabrechner warten auf Freigabe?
 
 **Sensible Felder:** `validation_error, source_ref, maker, checker`
-
----
-
-### `finance/skonto-optimizer` — Skonto optimizer
-
-**Zweck:** Skonto optimizer im finance-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/finance/skonto-optimizer/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/finance/skonto-optimizer/agent-contract` |
-| Readiness | `GET /api/v1/masks/finance/skonto-optimizer/readiness` |
-| Rollout-Route | `/mask-rollout/finance__skonto-optimizer/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/finance/open-items`
-
-**MCP-Tools (Domäne):**
-
-- `finance.ap_invoice.propose` — scope `finance:write`, Risiko hoch
-- `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
-- `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
-
-**Beispiel-Prompts:**
-
-- Zeige Skonto optimizer.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
 
@@ -17230,41 +16353,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `neu` | Kurs erfassen | safe | nein | `/api/v1/finance/exchange-rates` |
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
-### `finance/zahlungseingang` — Zahlungseingang
-
-**Zweck:** Zahlungseingang im finance-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/finance/zahlungseingang/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/finance/zahlungseingang/agent-contract` |
-| Readiness | `GET /api/v1/masks/finance/zahlungseingang/readiness` |
-| Rollout-Route | `/mask-rollout/finance__zahlungseingang/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/finance/abstimmung/nebenbuch`
-
-**MCP-Tools (Domäne):**
-
-- `finance.ap_invoice.propose` — scope `finance:write`, Risiko hoch
-- `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
-- `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
-
-**Beispiel-Prompts:**
-
-- Zeige Zahlungseingang.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
 | `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
@@ -23963,6 +23051,28 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `refresh` | Aktualisieren | safe | nein | `—` |
+
+---
+
+### `errors/NotFound` — Seite nicht gefunden
+
+**Zweck:** Von einer unbekannten Adresse zur Startseite oder in die Kundenliste zurueckfinden.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/errors/NotFound/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/errors/NotFound/agent-contract` |
+| Readiness | `GET /api/v1/masks/errors/NotFound/readiness` |
+| Rollout-Route | `/mask-rollout/errors__NotFound/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**MCP-Tools (Domäne):**
+
+- `admin.postfach.speichern` — scope `admin:write`, Risiko hoch
+
+**Beispiel-Prompts:**
+
+- Oeffne Seite nicht gefunden.
 
 ---
 

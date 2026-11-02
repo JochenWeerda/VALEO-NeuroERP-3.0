@@ -2105,110 +2105,89 @@
       }
     }
   },
-  "fibu/zahlungsvorschlaege": {
+  "banken/zahlungsvorschlaege": {
     "schemaVersion": 1,
-    "id": "fibu/zahlungsvorschlaege",
-    "domain": "fibu",
-    "mode": "list",
+    "id": "banken/zahlungsvorschlaege",
+    "domain": "finance",
+    "mode": "cockpit",
     "title": "Zahlungsvorschlaege",
-    "subtitle": "fibu",
+    "subtitle": "Vorschlaege aus offenen Posten",
     "adapter": {
       "type": "native",
-      "sourceId": "fibu/zahlungsvorschlaege",
+      "sourceId": "banken/zahlungsvorschlaege",
       "temporary": false
     },
-    "dataSources": [
-      {
-        "key": "list",
-        "endpoint": "/api/v1/fibu/anlagen",
-        "pageSize": 100
-      }
-    ],
-    "actions": [
-      {
-        "key": "export",
-        "label": "CSV-Export",
-        "kind": "secondary",
-        "dangerLevel": "safe",
-        "zone": "header",
-        "command": "list.exportCsv",
-        "localEffect": "download",
-        "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-      }
-    ],
-    "tables": [
-      {
-        "key": "list",
-        "label": "Zahlungsvorschlaege",
-        "dataSourceKey": "list",
-        "serverPagination": false,
-        "pageSize": 50,
-        "virtualized": true,
-        "rowHeight": 40,
-        "columns": [
-          {
-            "key": "id",
-            "label": "Id",
-            "sortable": true,
-            "filterable": true,
-            "width": 160
-          },
-          {
-            "key": "name",
-            "label": "Name",
-            "sortable": true,
-            "filterable": true,
-            "width": 160
-          },
-          {
-            "key": "status",
-            "label": "Status",
-            "sortable": true,
-            "filterable": true,
-            "width": 160
-          },
-          {
-            "key": "updated_at",
-            "label": "Updated At",
-            "sortable": true,
-            "filterable": true,
-            "width": 160
-          }
-        ],
-        "rowActions": []
-      }
-    ],
-    "noWorkflowReason": "Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    "agentContract": {
-      "businessPurpose": "Zahlungsvorschlaege im fibu-Bereich finden und auswerten.",
-      "examplePrompts": [
-        "Zeige Zahlungsvorschlaege.",
-        "Filtere die Liste."
-      ],
-      "sensitiveFields": [],
-      "testSelectors": {
-        "screenRoot": "[data-testid='screen-fibu/zahlungsvorschlaege']"
-      },
-      "dangerousActions": [],
-      "synonyms": []
-    },
     "layout": {
-      "floorplan": "worklist",
-      "density": "compact",
-      "contextRail": "none",
+      "floorplan": "cockpit",
+      "density": "expertDense",
+      "contextRail": "combined",
       "preferredMode": "desktopDense",
       "mobileMode": "mobileStack",
       "touchTargetPx": 44,
       "tableProfile": "financial",
-      "columnNavigation": "listDetail"
+      "columnNavigation": "single"
     },
     "performance": {
-      "initialPayloadBudgetKb": 60,
+      "initialPayloadBudgetKb": 32,
       "requiresLazyTabs": false,
-      "requiresVirtualTables": true,
+      "requiresVirtualTables": false,
       "lookupMinChars": 2,
-      "bundleGroup": "fibu"
+      "bundleGroup": "finance"
     },
+    "agentContract": {
+      "businessPurpose": "Zahlungsvorschlaege als Read-Model-Cockpit.",
+      "examplePrompts": [
+        "Zeige Zahlungsvorschlaege.",
+        "Was ist der aktuelle Stand?"
+      ],
+      "sensitiveFields": [],
+      "forbiddenAgentTasks": [],
+      "testSelectors": {
+        "screenRoot": "[data-testid='banken-zahlungsvorschlaege']"
+      },
+      "dangerousActions": [],
+      "synonyms": []
+    },
+    "summary": [
+      {
+        "key": "total",
+        "label": "Anzahl",
+        "tone": "neutral"
+      },
+      {
+        "key": "open",
+        "label": "Offen",
+        "tone": "warning"
+      }
+    ],
+    "tiles": [
+      {
+        "key": "overview",
+        "label": "Uebersicht",
+        "tone": "neutral",
+        "targetRoute": "/banken/zahlungsvorschlaege"
+      }
+    ],
+    "dataSources": [
+      {
+        "key": "entity",
+        "endpoint": "/api/v1/finance/payment-suggestions",
+        "staleTimeMs": 15000
+      }
+    ],
+    "actions": [
+      {
+        "key": "refresh",
+        "label": "Aktualisieren",
+        "kind": "secondary",
+        "zone": "header",
+        "dangerLevel": "safe",
+        "permission": "finance.read",
+        "localEffect": "refetch"
+      }
+    ],
+    "noWorkflowReason": "Cockpit ist ein Read-Model- oder Navigations-Workspace ohne eigenen Objekt-Lebenszyklus; Statuswechsel erfolgen in den verlinkten Prozessmasken.",
+    "noProcessChainReason": "Aggregations-Cockpit ohne ERP-Belegkette; KPIs und Spruenge sind orientierend.",
     "processChains": {
       "k1_ernte": {
         "label": "Ernte",
@@ -4511,110 +4490,125 @@
       }
     }
   },
-  "fibu/bwa": {
+  "controlling/bwa": {
     "schemaVersion": 1,
-    "id": "fibu/bwa",
-    "domain": "fibu",
+    "id": "controlling/bwa",
+    "domain": "controlling",
     "mode": "list",
     "title": "Bwa",
-    "subtitle": "fibu",
+    "subtitle": "Kontroll-Worklist Bwa",
     "adapter": {
       "type": "native",
-      "sourceId": "fibu/bwa",
+      "sourceId": "controlling/bwa",
       "temporary": false
     },
     "dataSources": [
       {
-        "key": "list",
-        "endpoint": "/api/v1/fibu/anlagen",
-        "pageSize": 100
-      }
-    ],
-    "actions": [
+        "key": "entity",
+        "endpoint": "/api/v1/finance/financial-reports/bwa",
+        "staleTimeMs": 10000
+      },
       {
-        "key": "export",
-        "label": "CSV-Export",
-        "kind": "secondary",
-        "dangerLevel": "safe",
-        "zone": "header",
-        "command": "list.exportCsv",
-        "localEffect": "download",
-        "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        "key": "items",
+        "endpoint": "/api/v1/finance/financial-reports/bwa",
+        "pageSize": 50,
+        "staleTimeMs": 10000
       }
     ],
     "tables": [
       {
-        "key": "list",
+        "key": "items",
         "label": "Bwa",
-        "dataSourceKey": "list",
-        "serverPagination": false,
+        "dataSourceKey": "items",
+        "serverPagination": true,
         "pageSize": 50,
         "virtualized": true,
-        "rowHeight": 40,
+        "rowHeight": 44,
         "columns": [
           {
             "key": "id",
-            "label": "Id",
+            "label": "ID",
             "sortable": true,
             "filterable": true,
-            "width": 160
+            "width": 120
           },
           {
             "key": "name",
-            "label": "Name",
+            "label": "Bezeichnung",
             "sortable": true,
             "filterable": true,
-            "width": 160
+            "width": 220
           },
           {
             "key": "status",
             "label": "Status",
+            "renderKind": "status",
             "sortable": true,
             "filterable": true,
-            "width": 160
+            "width": 120
           },
           {
-            "key": "updated_at",
-            "label": "Updated At",
+            "key": "datum",
+            "label": "Datum",
+            "renderKind": "date",
             "sortable": true,
-            "filterable": true,
-            "width": 160
+            "width": 130
           }
         ],
-        "rowActions": []
+        "rowActions": [
+          {
+            "key": "open",
+            "label": "Oeffnen"
+          }
+        ],
+        "rowRouteTemplate": "{source_route}"
       }
     ],
-    "noWorkflowReason": "Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
+    "layout": {
+      "floorplan": "worklist",
+      "density": "expertDense",
+      "contextRail": "audit",
+      "tableProfile": "financial",
+      "preferredMode": "desktopDense",
+      "mobileMode": "mobileStack",
+      "touchTargetPx": 44,
+      "columnNavigation": "listDetail"
+    },
+    "performance": {
+      "initialPayloadBudgetKb": 48,
+      "requiresLazyTabs": false,
+      "requiresVirtualTables": true,
+      "lookupMinChars": 2,
+      "bundleGroup": "controlling"
+    },
     "agentContract": {
-      "businessPurpose": "Bwa im fibu-Bereich finden und auswerten.",
+      "businessPurpose": "Bwa mandantensicher als Kontroll-Worklist abarbeiten.",
       "examplePrompts": [
-        "Zeige Bwa.",
-        "Filtere die Liste."
+        "Zeige offene Bwa.",
+        "Was ist in Bwa faellig?"
       ],
       "sensitiveFields": [],
+      "forbiddenAgentTasks": [],
       "testSelectors": {
-        "screenRoot": "[data-testid='screen-fibu/bwa']"
+        "screenRoot": "[data-testid='controlling-bwa']",
+        "summaryArea": "[data-testid='mask-summary']"
       },
       "dangerousActions": [],
       "synonyms": []
     },
-    "layout": {
-      "floorplan": "worklist",
-      "density": "compact",
-      "contextRail": "none",
-      "preferredMode": "desktopDense",
-      "mobileMode": "mobileStack",
-      "touchTargetPx": 44,
-      "tableProfile": "financial",
-      "columnNavigation": "listDetail"
-    },
-    "performance": {
-      "initialPayloadBudgetKb": 60,
-      "requiresLazyTabs": false,
-      "requiresVirtualTables": true,
-      "lookupMinChars": 2,
-      "bundleGroup": "fibu"
-    },
+    "summary": [
+      {
+        "key": "total",
+        "label": "Eintraege",
+        "tone": "neutral"
+      },
+      {
+        "key": "offen",
+        "label": "Offen",
+        "tone": "warning"
+      }
+    ],
+    "noWorkflowReason": "Status und Freigaben stehen am Datensatz; die Liste priorisiert nur.",
     "processChains": {
       "k1_ernte": {
         "label": "Ernte",
@@ -5527,22 +5521,22 @@
       }
     }
   },
-  "fibu/elster-online": {
+  "finance/ustva": {
     "schemaVersion": 1,
-    "id": "fibu/elster-online",
-    "domain": "fibu",
+    "id": "finance/ustva",
+    "domain": "finance",
     "mode": "list",
-    "title": "Elster online",
-    "subtitle": "fibu",
+    "title": "Meldekontext",
+    "subtitle": "finance",
     "adapter": {
       "type": "native",
-      "sourceId": "fibu/elster-online",
+      "sourceId": "finance/ustva",
       "temporary": false
     },
     "dataSources": [
       {
         "key": "list",
-        "endpoint": "/api/v1/fibu/anlagen",
+        "endpoint": "/api/v1/finance/vat-return",
         "pageSize": 100
       }
     ],
@@ -5561,7 +5555,7 @@
     "tables": [
       {
         "key": "list",
-        "label": "Elster online",
+        "label": "Meldekontext",
         "dataSourceKey": "list",
         "serverPagination": false,
         "pageSize": 50,
@@ -5569,29 +5563,57 @@
         "rowHeight": 40,
         "columns": [
           {
-            "key": "id",
-            "label": "Id",
+            "key": "grunddaten",
+            "label": "Grunddaten",
             "sortable": true,
             "filterable": true,
             "width": 160
           },
           {
-            "key": "name",
-            "label": "Name",
+            "key": "umsatz",
+            "label": "Umsatz",
             "sortable": true,
             "filterable": true,
             "width": 160
           },
           {
-            "key": "status",
-            "label": "Status",
+            "key": "vorsteuer",
+            "label": "Vorsteuer",
             "sortable": true,
             "filterable": true,
             "width": 160
           },
           {
-            "key": "updated_at",
-            "label": "Updated At",
+            "key": "berechnung",
+            "label": "Berechnung",
+            "sortable": true,
+            "filterable": true,
+            "width": 160
+          },
+          {
+            "key": "abweichungen",
+            "label": "Abweichungen",
+            "sortable": true,
+            "filterable": true,
+            "width": 160
+          },
+          {
+            "key": "abweichungen_custom",
+            "label": "Abweichungen Custom",
+            "sortable": true,
+            "filterable": true,
+            "width": 160
+          },
+          {
+            "key": "freigabe",
+            "label": "Freigabe",
+            "sortable": true,
+            "filterable": true,
+            "width": 160
+          },
+          {
+            "key": "notizen",
+            "label": "Notizen",
             "sortable": true,
             "filterable": true,
             "width": 160
@@ -5602,14 +5624,14 @@
     ],
     "noWorkflowReason": "Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     "agentContract": {
-      "businessPurpose": "Elster online im fibu-Bereich finden und auswerten.",
+      "businessPurpose": "Meldekontext im finance-Bereich finden und auswerten.",
       "examplePrompts": [
-        "Zeige Elster online.",
+        "Zeige Meldekontext.",
         "Filtere die Liste."
       ],
       "sensitiveFields": [],
       "testSelectors": {
-        "screenRoot": "[data-testid='screen-fibu/elster-online']"
+        "screenRoot": "[data-testid='screen-finance/ustva']"
       },
       "dangerousActions": [],
       "synonyms": []
@@ -5629,7 +5651,7 @@
       "requiresLazyTabs": false,
       "requiresVirtualTables": true,
       "lookupMinChars": 2,
-      "bundleGroup": "fibu"
+      "bundleGroup": "finance"
     },
     "processChains": {
       "k1_ernte": {
@@ -5779,8 +5801,8 @@
     "id": "fibu/periodische-buchungen",
     "domain": "fibu",
     "mode": "list",
-    "title": "Periodische buchungen",
-    "subtitle": "fibu",
+    "title": "Periodische Buchungen",
+    "subtitle": "Wiederkehrende Buchungen mit Turnus und Gueltigkeit",
     "adapter": {
       "type": "native",
       "sourceId": "fibu/periodische-buchungen",
@@ -5789,7 +5811,7 @@
     "dataSources": [
       {
         "key": "list",
-        "endpoint": "/api/v1/fibu/anlagen",
+        "endpoint": "/api/v1/fibu/periodische-buchungen",
         "pageSize": 100
       }
     ],
@@ -5808,7 +5830,7 @@
     "tables": [
       {
         "key": "list",
-        "label": "Periodische buchungen",
+        "label": "Periodische Buchungen",
         "dataSourceKey": "list",
         "serverPagination": false,
         "pageSize": 50,
@@ -5816,43 +5838,87 @@
         "rowHeight": 40,
         "columns": [
           {
-            "key": "id",
-            "label": "Id",
+            "key": "bezeichnung",
+            "label": "Bezeichnung",
             "sortable": true,
             "filterable": true,
-            "width": 160
+            "priority": "primary"
           },
           {
-            "key": "name",
-            "label": "Name",
+            "key": "konto",
+            "label": "Konto",
             "sortable": true,
             "filterable": true,
-            "width": 160
+            "priority": "primary"
           },
           {
-            "key": "status",
-            "label": "Status",
+            "key": "gegenkonto",
+            "label": "Gegenkonto",
             "sortable": true,
             "filterable": true,
-            "width": 160
+            "priority": "primary"
           },
           {
-            "key": "updated_at",
-            "label": "Updated At",
+            "key": "betrag",
+            "label": "Betrag",
+            "renderKind": "currency",
+            "numeric": true,
+            "sortable": true,
+            "priority": "primary",
+            "aggregate": "sum"
+          },
+          {
+            "key": "turnus",
+            "label": "Turnus",
             "sortable": true,
             "filterable": true,
-            "width": 160
+            "priority": "secondary"
+          },
+          {
+            "key": "gueltig_ab",
+            "label": "Gültig ab",
+            "renderKind": "date",
+            "sortable": true,
+            "priority": "secondary"
+          },
+          {
+            "key": "gueltig_bis",
+            "label": "Gültig bis",
+            "renderKind": "date",
+            "sortable": true,
+            "priority": "secondary"
+          },
+          {
+            "key": "kostenstelle",
+            "label": "Kostenstelle",
+            "sortable": true,
+            "filterable": true,
+            "priority": "tertiary"
+          },
+          {
+            "key": "gesperrt",
+            "label": "Gesperrt",
+            "renderKind": "boolean",
+            "filterable": true,
+            "priority": "secondary"
+          },
+          {
+            "key": "aktiv",
+            "label": "Aktiv",
+            "renderKind": "boolean",
+            "filterable": true,
+            "priority": "secondary"
           }
         ],
         "rowActions": []
       }
     ],
-    "noWorkflowReason": "Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
+    "noWorkflowReason": "Stammdaten- bzw. Auswertungsliste ohne eigenen Ablauf; Aenderungen in der jeweiligen Fachmaske.",
     "agentContract": {
-      "businessPurpose": "Periodische buchungen im fibu-Bereich finden und auswerten.",
+      "businessPurpose": "Wiederkehrende Buchungen pruefen: Konten, Betrag, Turnus und Sperren.",
       "examplePrompts": [
-        "Zeige Periodische buchungen.",
-        "Filtere die Liste."
+        "Welche periodischen Buchungen sind gesperrt?",
+        "Wie hoch ist die monatliche Summe?"
       ],
       "sensitiveFields": [],
       "testSelectors": {
@@ -5876,7 +5942,7 @@
       "requiresLazyTabs": false,
       "requiresVirtualTables": true,
       "lookupMinChars": 2,
-      "bundleGroup": "fibu"
+      "bundleGroup": "finance"
     },
     "processChains": {
       "k1_ernte": {
@@ -6026,8 +6092,8 @@
     "id": "fibu/erloeskennziffern",
     "domain": "fibu",
     "mode": "list",
-    "title": "Erloeskennziffern",
-    "subtitle": "fibu",
+    "title": "Erlöskennziffern",
+    "subtitle": "Kennziffern, ueber die Artikel ihre Erloes- und Aufwandskonten finden",
     "adapter": {
       "type": "native",
       "sourceId": "fibu/erloeskennziffern",
@@ -6036,7 +6102,7 @@
     "dataSources": [
       {
         "key": "list",
-        "endpoint": "/api/v1/fibu/anlagen",
+        "endpoint": "/api/v1/fibu/erloeskennziffern",
         "pageSize": 100
       }
     ],
@@ -6055,7 +6121,7 @@
     "tables": [
       {
         "key": "list",
-        "label": "Erloeskennziffern",
+        "label": "Erlöskennziffern",
         "dataSourceKey": "list",
         "serverPagination": false,
         "pageSize": 50,
@@ -6063,43 +6129,43 @@
         "rowHeight": 40,
         "columns": [
           {
-            "key": "id",
-            "label": "Id",
+            "key": "ekz_nr",
+            "label": "EKZ-Nr.",
             "sortable": true,
             "filterable": true,
-            "width": 160
+            "priority": "primary"
           },
           {
-            "key": "name",
-            "label": "Name",
+            "key": "bezeichnung",
+            "label": "Bezeichnung",
             "sortable": true,
             "filterable": true,
-            "width": 160
+            "priority": "primary"
           },
           {
-            "key": "status",
-            "label": "Status",
-            "sortable": true,
+            "key": "aktiv",
+            "label": "Aktiv",
+            "renderKind": "boolean",
             "filterable": true,
-            "width": 160
+            "priority": "secondary"
           },
           {
-            "key": "updated_at",
-            "label": "Updated At",
+            "key": "created_at",
+            "label": "Angelegt",
+            "renderKind": "date",
             "sortable": true,
-            "filterable": true,
-            "width": 160
+            "priority": "tertiary"
           }
         ],
         "rowActions": []
       }
     ],
-    "noWorkflowReason": "Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
+    "noWorkflowReason": "Stammdaten- bzw. Auswertungsliste ohne eigenen Ablauf; Aenderungen in der jeweiligen Fachmaske.",
     "agentContract": {
-      "businessPurpose": "Erloeskennziffern im fibu-Bereich finden und auswerten.",
+      "businessPurpose": "Erloeskennziffern finden und pruefen, welche aktiv sind.",
       "examplePrompts": [
-        "Zeige Erloeskennziffern.",
-        "Filtere die Liste."
+        "Welche Erloeskennziffern sind inaktiv?",
+        "Zeige die Kennziffer 100."
       ],
       "sensitiveFields": [],
       "testSelectors": {
@@ -6123,7 +6189,7 @@
       "requiresLazyTabs": false,
       "requiresVirtualTables": true,
       "lookupMinChars": 2,
-      "bundleGroup": "fibu"
+      "bundleGroup": "finance"
     },
     "processChains": {
       "k1_ernte": {
@@ -6273,8 +6339,8 @@
     "id": "fibu/erloeskontenzuordnung",
     "domain": "fibu",
     "mode": "list",
-    "title": "Erloeskontenzuordnung",
-    "subtitle": "fibu",
+    "title": "Erlöskontenzuordnung",
+    "subtitle": "Konten je Erloeskennziffer, Steuerschluessel und Gueltigkeit",
     "adapter": {
       "type": "native",
       "sourceId": "fibu/erloeskontenzuordnung",
@@ -6283,7 +6349,7 @@
     "dataSources": [
       {
         "key": "list",
-        "endpoint": "/api/v1/fibu/anlagen",
+        "endpoint": "/api/v1/fibu/erloeskennziffern/zuordnungen",
         "pageSize": 100
       }
     ],
@@ -6302,7 +6368,7 @@
     "tables": [
       {
         "key": "list",
-        "label": "Erloeskontenzuordnung",
+        "label": "Erlöskontenzuordnung",
         "dataSourceKey": "list",
         "serverPagination": false,
         "pageSize": 50,
@@ -6310,43 +6376,71 @@
         "rowHeight": 40,
         "columns": [
           {
-            "key": "id",
-            "label": "Id",
+            "key": "gueltig_ab",
+            "label": "Gültig ab",
+            "renderKind": "date",
             "sortable": true,
-            "filterable": true,
-            "width": 160
+            "priority": "primary"
           },
           {
-            "key": "name",
-            "label": "Name",
+            "key": "steuerschluessel",
+            "label": "Steuerschlüssel",
             "sortable": true,
             "filterable": true,
-            "width": 160
+            "priority": "primary"
           },
           {
-            "key": "status",
-            "label": "Status",
+            "key": "steuergruppe",
+            "label": "Steuergruppe",
             "sortable": true,
             "filterable": true,
-            "width": 160
+            "priority": "secondary"
           },
           {
-            "key": "updated_at",
-            "label": "Updated At",
+            "key": "buchungsklasse",
+            "label": "Buchungsklasse",
             "sortable": true,
             "filterable": true,
-            "width": 160
+            "priority": "secondary"
+          },
+          {
+            "key": "konto_erloese",
+            "label": "Erlöskonto",
+            "sortable": true,
+            "filterable": true,
+            "priority": "primary"
+          },
+          {
+            "key": "konto_aufwand",
+            "label": "Aufwandskonto",
+            "sortable": true,
+            "filterable": true,
+            "priority": "secondary"
+          },
+          {
+            "key": "konto_umsatzsteuer",
+            "label": "USt-Konto",
+            "sortable": true,
+            "filterable": true,
+            "priority": "tertiary"
+          },
+          {
+            "key": "konto_vorsteuer",
+            "label": "VSt-Konto",
+            "sortable": true,
+            "filterable": true,
+            "priority": "tertiary"
           }
         ],
         "rowActions": []
       }
     ],
-    "noWorkflowReason": "Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
+    "noWorkflowReason": "Stammdaten- bzw. Auswertungsliste ohne eigenen Ablauf; Aenderungen in der jeweiligen Fachmaske.",
     "agentContract": {
-      "businessPurpose": "Erloeskontenzuordnung im fibu-Bereich finden und auswerten.",
+      "businessPurpose": "Pruefen, auf welche Konten eine Erloeskennziffer je Steuerschluessel bucht.",
       "examplePrompts": [
-        "Zeige Erloeskontenzuordnung.",
-        "Filtere die Liste."
+        "Welche Zuordnungen gelten fuer Steuerschluessel 3?",
+        "Welches Erloeskonto gilt ab 1.1.?"
       ],
       "sensitiveFields": [],
       "testSelectors": {
@@ -6370,7 +6464,7 @@
       "requiresLazyTabs": false,
       "requiresVirtualTables": true,
       "lookupMinChars": 2,
-      "bundleGroup": "fibu"
+      "bundleGroup": "finance"
     },
     "processChains": {
       "k1_ernte": {
@@ -6521,7 +6615,7 @@
     "domain": "fibu",
     "mode": "list",
     "title": "Forderungsgruppen",
-    "subtitle": "fibu",
+    "subtitle": "Sammelkonten fuer Forderungen und Verbindlichkeiten",
     "adapter": {
       "type": "native",
       "sourceId": "fibu/forderungsgruppen",
@@ -6530,7 +6624,7 @@
     "dataSources": [
       {
         "key": "list",
-        "endpoint": "/api/v1/fibu/anlagen",
+        "endpoint": "/api/v1/fibu/forderungsgruppen",
         "pageSize": 100
       }
     ],
@@ -6557,43 +6651,57 @@
         "rowHeight": 40,
         "columns": [
           {
-            "key": "id",
-            "label": "Id",
+            "key": "gruppe_nr",
+            "label": "Gruppe",
             "sortable": true,
             "filterable": true,
-            "width": 160
+            "priority": "primary"
           },
           {
-            "key": "name",
-            "label": "Name",
+            "key": "bezeichnung",
+            "label": "Bezeichnung",
             "sortable": true,
             "filterable": true,
-            "width": 160
+            "priority": "primary"
           },
           {
-            "key": "status",
-            "label": "Status",
+            "key": "konto_forderungen",
+            "label": "Konto Forderungen",
             "sortable": true,
             "filterable": true,
-            "width": 160
+            "priority": "secondary"
           },
           {
-            "key": "updated_at",
-            "label": "Updated At",
+            "key": "konto_verbindlichkeiten",
+            "label": "Konto Verbindlichkeiten",
             "sortable": true,
             "filterable": true,
-            "width": 160
+            "priority": "secondary"
+          },
+          {
+            "key": "konto_sammel_1",
+            "label": "Sammelkonto 1",
+            "sortable": true,
+            "filterable": true,
+            "priority": "tertiary"
+          },
+          {
+            "key": "aktiv",
+            "label": "Aktiv",
+            "renderKind": "boolean",
+            "filterable": true,
+            "priority": "secondary"
           }
         ],
         "rowActions": []
       }
     ],
-    "noWorkflowReason": "Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
+    "noWorkflowReason": "Stammdaten- bzw. Auswertungsliste ohne eigenen Ablauf; Aenderungen in der jeweiligen Fachmaske.",
     "agentContract": {
-      "businessPurpose": "Forderungsgruppen im fibu-Bereich finden und auswerten.",
+      "businessPurpose": "Forderungsgruppen und ihre Sammelkonten pruefen.",
       "examplePrompts": [
-        "Zeige Forderungsgruppen.",
-        "Filtere die Liste."
+        "Welche Forderungsgruppe bucht auf 1400?",
+        "Zeige inaktive Forderungsgruppen."
       ],
       "sensitiveFields": [],
       "testSelectors": {
@@ -6617,7 +6725,7 @@
       "requiresLazyTabs": false,
       "requiresVirtualTables": true,
       "lookupMinChars": 2,
-      "bundleGroup": "fibu"
+      "bundleGroup": "finance"
     },
     "processChains": {
       "k1_ernte": {
@@ -6767,8 +6875,8 @@
     "id": "fibu/lohn-connector",
     "domain": "fibu",
     "mode": "list",
-    "title": "Lohn connector",
-    "subtitle": "fibu",
+    "title": "Lohn-Übernahme",
+    "subtitle": "Importlaeufe aus der Lohnbuchhaltung je Periode",
     "adapter": {
       "type": "native",
       "sourceId": "fibu/lohn-connector",
@@ -6796,7 +6904,7 @@
     "tables": [
       {
         "key": "list",
-        "label": "Lohn connector",
+        "label": "Lohn-Übernahme",
         "dataSourceKey": "list",
         "serverPagination": false,
         "pageSize": 50,
@@ -6804,43 +6912,76 @@
         "rowHeight": 40,
         "columns": [
           {
-            "key": "id",
-            "label": "Id",
+            "key": "period",
+            "label": "Periode",
             "sortable": true,
             "filterable": true,
-            "width": 160
+            "priority": "primary"
           },
           {
-            "key": "name",
-            "label": "Name",
+            "key": "source",
+            "label": "Quelle",
             "sortable": true,
             "filterable": true,
-            "width": 160
+            "priority": "secondary"
           },
           {
             "key": "status",
             "label": "Status",
             "sortable": true,
             "filterable": true,
-            "width": 160
+            "priority": "primary",
+            "renderKind": "status"
           },
           {
-            "key": "updated_at",
-            "label": "Updated At",
+            "key": "journal_entry_count",
+            "label": "Buchungen",
+            "renderKind": "number",
+            "numeric": true,
+            "priority": "secondary"
+          },
+          {
+            "key": "total_debit",
+            "label": "Soll",
+            "renderKind": "currency",
+            "numeric": true,
+            "sortable": true,
+            "priority": "primary",
+            "aggregate": "sum"
+          },
+          {
+            "key": "total_credit",
+            "label": "Haben",
+            "renderKind": "currency",
+            "numeric": true,
+            "sortable": true,
+            "priority": "primary",
+            "aggregate": "sum"
+          },
+          {
+            "key": "message",
+            "label": "Meldung",
             "sortable": true,
             "filterable": true,
-            "width": 160
+            "priority": "tertiary"
+          },
+          {
+            "key": "created_at",
+            "label": "Gelaufen am",
+            "renderKind": "date",
+            "sortable": true,
+            "priority": "secondary"
           }
         ],
         "rowActions": []
       }
     ],
-    "noWorkflowReason": "Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
+    "noWorkflowReason": "Stammdaten- bzw. Auswertungsliste ohne eigenen Ablauf; Aenderungen in der jeweiligen Fachmaske.",
     "agentContract": {
-      "businessPurpose": "Lohn connector im fibu-Bereich finden und auswerten.",
+      "businessPurpose": "Pruefen, ob die Lohnbuchungen einer Periode vollstaendig und ausgeglichen uebernommen wurden.",
       "examplePrompts": [
-        "Zeige Lohn connector.",
-        "Filtere die Liste."
+        "Ist die Lohnuebernahme fuer Oktober gelaufen?",
+        "Welche Laeufe sind fehlgeschlagen?"
       ],
       "sensitiveFields": [],
       "testSelectors": {
@@ -6864,7 +7005,7 @@
       "requiresLazyTabs": false,
       "requiresVirtualTables": true,
       "lookupMinChars": 2,
-      "bundleGroup": "fibu"
+      "bundleGroup": "finance"
     },
     "processChains": {
       "k1_ernte": {

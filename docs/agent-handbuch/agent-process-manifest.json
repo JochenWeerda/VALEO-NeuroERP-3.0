@@ -12522,32 +12522,6 @@
       "mcp_tool_ids": []
     },
     {
-      "mask_id": "fibu/anlagen-suite",
-      "title": "Anlagen suite",
-      "domain": "fibu",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/fibu__anlagen-suite/:entityId",
-      "agent_contract_url": "/api/v1/masks/fibu/anlagen-suite/agent-contract",
-      "screen_definition_url": "/api/v1/masks/fibu/anlagen-suite/screen-definition",
-      "readiness_url": "/api/v1/masks/fibu/anlagen-suite/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
       "mask_id": "fibu/atlas",
       "title": "Atlas",
       "domain": "fibu",
@@ -12600,138 +12574,8 @@
       "mcp_tool_ids": []
     },
     {
-      "mask_id": "fibu/buchhaltungsuebersicht",
-      "title": "Buchhaltungsuebersicht",
-      "domain": "fibu",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/fibu__buchhaltungsuebersicht/:entityId",
-      "agent_contract_url": "/api/v1/masks/fibu/buchhaltungsuebersicht/agent-contract",
-      "screen_definition_url": "/api/v1/masks/fibu/buchhaltungsuebersicht/screen-definition",
-      "readiness_url": "/api/v1/masks/fibu/buchhaltungsuebersicht/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "refresh",
-          "label": "Aktualisieren",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "fibu.read",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "fibu/buchungsuebernahme-connectors",
-      "title": "Buchungsuebernahme connectors",
-      "domain": "fibu",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/fibu__buchungsuebernahme-connectors/:entityId",
-      "agent_contract_url": "/api/v1/masks/fibu/buchungsuebernahme-connectors/agent-contract",
-      "screen_definition_url": "/api/v1/masks/fibu/buchungsuebernahme-connectors/screen-definition",
-      "readiness_url": "/api/v1/masks/fibu/buchungsuebernahme-connectors/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "fibu/bwa",
-      "title": "Bwa",
-      "domain": "fibu",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/fibu__bwa/:entityId",
-      "agent_contract_url": "/api/v1/masks/fibu/bwa/agent-contract",
-      "screen_definition_url": "/api/v1/masks/fibu/bwa/screen-definition",
-      "readiness_url": "/api/v1/masks/fibu/bwa/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "fibu/debitoren-api",
-      "title": "Debitoren api",
-      "domain": "fibu",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/fibu__debitoren-api/:entityId",
-      "agent_contract_url": "/api/v1/masks/fibu/debitoren-api/agent-contract",
-      "screen_definition_url": "/api/v1/masks/fibu/debitoren-api/screen-definition",
-      "readiness_url": "/api/v1/masks/fibu/debitoren-api/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "fibu/elster-online",
-      "title": "Elster online",
-      "domain": "fibu",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/fibu__elster-online/:entityId",
-      "agent_contract_url": "/api/v1/masks/fibu/elster-online/agent-contract",
-      "screen_definition_url": "/api/v1/masks/fibu/elster-online/screen-definition",
-      "readiness_url": "/api/v1/masks/fibu/elster-online/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
       "mask_id": "fibu/erloeskennziffern",
-      "title": "Erloeskennziffern",
+      "title": "Erlöskennziffern",
       "domain": "fibu",
       "process_keys": [],
       "rollout_route": "/mask-rollout/fibu__erloeskennziffern/:entityId",
@@ -12757,7 +12601,7 @@
     },
     {
       "mask_id": "fibu/erloeskontenzuordnung",
-      "title": "Erloeskontenzuordnung",
+      "title": "Erlöskontenzuordnung",
       "domain": "fibu",
       "process_keys": [],
       "rollout_route": "/mask-rollout/fibu__erloeskontenzuordnung/:entityId",
@@ -12860,84 +12704,6 @@
       "mcp_tool_ids": []
     },
     {
-      "mask_id": "fibu/hauptbuch",
-      "title": "Hauptbuch",
-      "domain": "fibu",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/fibu__hauptbuch/:entityId",
-      "agent_contract_url": "/api/v1/masks/fibu/hauptbuch/agent-contract",
-      "screen_definition_url": "/api/v1/masks/fibu/hauptbuch/screen-definition",
-      "readiness_url": "/api/v1/masks/fibu/hauptbuch/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "fibu/kontenplan",
-      "title": "Kontenplan",
-      "domain": "fibu",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/fibu__kontenplan/:entityId",
-      "agent_contract_url": "/api/v1/masks/fibu/kontenplan/agent-contract",
-      "screen_definition_url": "/api/v1/masks/fibu/kontenplan/screen-definition",
-      "readiness_url": "/api/v1/masks/fibu/kontenplan/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "fibu/kostenstellenrechnung",
-      "title": "Kostenstellenrechnung",
-      "domain": "fibu",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/fibu__kostenstellenrechnung/:entityId",
-      "agent_contract_url": "/api/v1/masks/fibu/kostenstellenrechnung/agent-contract",
-      "screen_definition_url": "/api/v1/masks/fibu/kostenstellenrechnung/screen-definition",
-      "readiness_url": "/api/v1/masks/fibu/kostenstellenrechnung/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
       "mask_id": "fibu/kreditlinien",
       "title": "Kreditlinien",
       "domain": "fibu",
@@ -12964,34 +12730,8 @@
       "mcp_tool_ids": []
     },
     {
-      "mask_id": "fibu/kreditoren",
-      "title": "Kreditoren",
-      "domain": "fibu",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/fibu__kreditoren/:entityId",
-      "agent_contract_url": "/api/v1/masks/fibu/kreditoren/agent-contract",
-      "screen_definition_url": "/api/v1/masks/fibu/kreditoren/screen-definition",
-      "readiness_url": "/api/v1/masks/fibu/kreditoren/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
       "mask_id": "fibu/lohn-connector",
-      "title": "Lohn connector",
+      "title": "Lohn-Übernahme",
       "domain": "fibu",
       "process_keys": [],
       "rollout_route": "/mask-rollout/fibu__lohn-connector/:entityId",
@@ -13069,7 +12809,7 @@
     },
     {
       "mask_id": "fibu/periodische-buchungen",
-      "title": "Periodische buchungen",
+      "title": "Periodische Buchungen",
       "domain": "fibu",
       "process_keys": [],
       "rollout_route": "/mask-rollout/fibu__periodische-buchungen/:entityId",
@@ -13095,7 +12835,7 @@
     },
     {
       "mask_id": "fibu/quadriga-connector",
-      "title": "Quadriga connector",
+      "title": "Quadriga-Anbindung",
       "domain": "fibu",
       "process_keys": [],
       "rollout_route": "/mask-rollout/fibu__quadriga-connector/:entityId",
@@ -13128,58 +12868,6 @@
       "agent_contract_url": "/api/v1/masks/fibu/sachkonto/agent-contract",
       "screen_definition_url": "/api/v1/masks/fibu/sachkonto/screen-definition",
       "readiness_url": "/api/v1/masks/fibu/sachkonto/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "fibu/schnittstelle-fibu",
-      "title": "Schnittstelle fibu",
-      "domain": "fibu",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/fibu__schnittstelle-fibu/:entityId",
-      "agent_contract_url": "/api/v1/masks/fibu/schnittstelle-fibu/agent-contract",
-      "screen_definition_url": "/api/v1/masks/fibu/schnittstelle-fibu/screen-definition",
-      "readiness_url": "/api/v1/masks/fibu/schnittstelle-fibu/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "fibu/schnittstellen-center",
-      "title": "Schnittstellen center",
-      "domain": "fibu",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/fibu__schnittstellen-center/:entityId",
-      "agent_contract_url": "/api/v1/masks/fibu/schnittstellen-center/agent-contract",
-      "screen_definition_url": "/api/v1/masks/fibu/schnittstellen-center/screen-definition",
-      "readiness_url": "/api/v1/masks/fibu/schnittstellen-center/readiness",
       "risk_summary": "low",
       "actions": [
         {
@@ -13252,84 +12940,6 @@
       "mcp_tool_ids": []
     },
     {
-      "mask_id": "fibu/verbindlichkeiten",
-      "title": "Verbindlichkeiten",
-      "domain": "fibu",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/fibu__verbindlichkeiten/:entityId",
-      "agent_contract_url": "/api/v1/masks/fibu/verbindlichkeiten/agent-contract",
-      "screen_definition_url": "/api/v1/masks/fibu/verbindlichkeiten/screen-definition",
-      "readiness_url": "/api/v1/masks/fibu/verbindlichkeiten/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "fibu/zahlungseingaenge",
-      "title": "Zahlungseingaenge",
-      "domain": "fibu",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/fibu__zahlungseingaenge/:entityId",
-      "agent_contract_url": "/api/v1/masks/fibu/zahlungseingaenge/agent-contract",
-      "screen_definition_url": "/api/v1/masks/fibu/zahlungseingaenge/screen-definition",
-      "readiness_url": "/api/v1/masks/fibu/zahlungseingaenge/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "fibu/zahlungslaeufe",
-      "title": "Zahlungslaeufe",
-      "domain": "fibu",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/fibu__zahlungslaeufe/:entityId",
-      "agent_contract_url": "/api/v1/masks/fibu/zahlungslaeufe/agent-contract",
-      "screen_definition_url": "/api/v1/masks/fibu/zahlungslaeufe/screen-definition",
-      "readiness_url": "/api/v1/masks/fibu/zahlungslaeufe/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
       "mask_id": "fibu/zahlungsmeldungen",
       "title": "Neue Zahlungsmeldung [KASSZAME]",
       "domain": "fibu",
@@ -13350,32 +12960,6 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": null
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "fibu/zahlungsvorschlaege",
-      "title": "Zahlungsvorschlaege",
-      "domain": "fibu",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/fibu__zahlungsvorschlaege/:entityId",
-      "agent_contract_url": "/api/v1/masks/fibu/zahlungsvorschlaege/agent-contract",
-      "screen_definition_url": "/api/v1/masks/fibu/zahlungsvorschlaege/screen-definition",
-      "readiness_url": "/api/v1/masks/fibu/zahlungsvorschlaege/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
         }
       ],
       "sensitive_fields": [],
@@ -14368,66 +13952,6 @@
       ]
     },
     {
-      "mask_id": "finance/ap/invoices",
-      "title": "Ap invoices list",
-      "domain": "finance",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/finance__ap__invoices/:entityId",
-      "agent_contract_url": "/api/v1/masks/finance/ap/invoices/agent-contract",
-      "screen_definition_url": "/api/v1/masks/finance/ap/invoices/screen-definition",
-      "readiness_url": "/api/v1/masks/finance/ap/invoices/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "finance.ap_invoice.propose",
-        "fibu.open_items.list",
-        "fibu.dunning.status"
-      ]
-    },
-    {
-      "mask_id": "finance/ap/invoices/new",
-      "title": "Ap invoice form",
-      "domain": "finance",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/finance__ap__invoices__new/:entityId",
-      "agent_contract_url": "/api/v1/masks/finance/ap/invoices/new/agent-contract",
-      "screen_definition_url": "/api/v1/masks/finance/ap/invoices/new/screen-definition",
-      "readiness_url": "/api/v1/masks/finance/ap/invoices/new/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "finance.ap_invoice.propose",
-        "fibu.open_items.list",
-        "fibu.dunning.status"
-      ]
-    },
-    {
       "mask_id": "finance/ar-open-item",
       "title": "Offener Posten",
       "domain": "finance",
@@ -14669,36 +14193,6 @@
         "bic",
         "saldo"
       ],
-      "mcp_tool_ids": [
-        "finance.ap_invoice.propose",
-        "fibu.open_items.list",
-        "fibu.dunning.status"
-      ]
-    },
-    {
-      "mask_id": "finance/bookings/new",
-      "title": "Buchungsjournal",
-      "domain": "finance",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/finance__bookings__new/:entityId",
-      "agent_contract_url": "/api/v1/masks/finance/bookings/new/agent-contract",
-      "screen_definition_url": "/api/v1/masks/finance/bookings/new/screen-definition",
-      "readiness_url": "/api/v1/masks/finance/bookings/new/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
         "fibu.open_items.list",
@@ -15083,36 +14577,6 @@
       ]
     },
     {
-      "mask_id": "finance/kontenplan",
-      "title": "Chart of accounts",
-      "domain": "finance",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/finance__kontenplan/:entityId",
-      "agent_contract_url": "/api/v1/masks/finance/kontenplan/agent-contract",
-      "screen_definition_url": "/api/v1/masks/finance/kontenplan/screen-definition",
-      "readiness_url": "/api/v1/masks/finance/kontenplan/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "finance.ap_invoice.propose",
-        "fibu.open_items.list",
-        "fibu.dunning.status"
-      ]
-    },
-    {
       "mask_id": "finance/kreditor",
       "title": "Kreditor",
       "domain": "finance",
@@ -15141,36 +14605,6 @@
         "steuernummer",
         "ust_id"
       ],
-      "mcp_tool_ids": [
-        "finance.ap_invoice.propose",
-        "fibu.open_items.list",
-        "fibu.dunning.status"
-      ]
-    },
-    {
-      "mask_id": "finance/kreditoren",
-      "title": "Kreditoren liste",
-      "domain": "finance",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/finance__kreditoren/:entityId",
-      "agent_contract_url": "/api/v1/masks/finance/kreditoren/agent-contract",
-      "screen_definition_url": "/api/v1/masks/finance/kreditoren/screen-definition",
-      "readiness_url": "/api/v1/masks/finance/kreditoren/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
         "fibu.open_items.list",
@@ -15250,43 +14684,13 @@
     },
     {
       "mask_id": "finance/nebenbuch-abstimmung",
-      "title": "Nebenbuch abstimmung",
+      "title": "Nebenbuch-Abstimmung",
       "domain": "finance",
       "process_keys": [],
       "rollout_route": "/mask-rollout/finance__nebenbuch-abstimmung/:entityId",
       "agent_contract_url": "/api/v1/masks/finance/nebenbuch-abstimmung/agent-contract",
       "screen_definition_url": "/api/v1/masks/finance/nebenbuch-abstimmung/screen-definition",
       "readiness_url": "/api/v1/masks/finance/nebenbuch-abstimmung/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "finance.ap_invoice.propose",
-        "fibu.open_items.list",
-        "fibu.dunning.status"
-      ]
-    },
-    {
-      "mask_id": "finance/offene-posten",
-      "title": "Offene posten",
-      "domain": "finance",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/finance__offene-posten/:entityId",
-      "agent_contract_url": "/api/v1/masks/finance/offene-posten/agent-contract",
-      "screen_definition_url": "/api/v1/masks/finance/offene-posten/screen-definition",
-      "readiness_url": "/api/v1/masks/finance/offene-posten/readiness",
       "risk_summary": "low",
       "actions": [
         {
@@ -15347,36 +14751,6 @@
       "agent_contract_url": "/api/v1/masks/finance/op-debitoren/agent-contract",
       "screen_definition_url": "/api/v1/masks/finance/op-debitoren/screen-definition",
       "readiness_url": "/api/v1/masks/finance/op-debitoren/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "finance.ap_invoice.propose",
-        "fibu.open_items.list",
-        "fibu.dunning.status"
-      ]
-    },
-    {
-      "mask_id": "finance/op-kreditoren",
-      "title": "Op kreditoren",
-      "domain": "finance",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/finance__op-kreditoren/:entityId",
-      "agent_contract_url": "/api/v1/masks/finance/op-kreditoren/agent-contract",
-      "screen_definition_url": "/api/v1/masks/finance/op-kreditoren/screen-definition",
-      "readiness_url": "/api/v1/masks/finance/op-kreditoren/readiness",
       "risk_summary": "low",
       "actions": [
         {
@@ -15467,96 +14841,6 @@
       ]
     },
     {
-      "mask_id": "finance/payments",
-      "title": "Payment matching",
-      "domain": "finance",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/finance__payments/:entityId",
-      "agent_contract_url": "/api/v1/masks/finance/payments/agent-contract",
-      "screen_definition_url": "/api/v1/masks/finance/payments/screen-definition",
-      "readiness_url": "/api/v1/masks/finance/payments/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "finance.ap_invoice.propose",
-        "fibu.open_items.list",
-        "fibu.dunning.status"
-      ]
-    },
-    {
-      "mask_id": "finance/periodenabschluss",
-      "title": "Periodenabschluss",
-      "domain": "finance",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/finance__periodenabschluss/:entityId",
-      "agent_contract_url": "/api/v1/masks/finance/periodenabschluss/agent-contract",
-      "screen_definition_url": "/api/v1/masks/finance/periodenabschluss/screen-definition",
-      "readiness_url": "/api/v1/masks/finance/periodenabschluss/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "finance.ap_invoice.propose",
-        "fibu.open_items.list",
-        "fibu.dunning.status"
-      ]
-    },
-    {
-      "mask_id": "finance/periods",
-      "title": "Periods",
-      "domain": "finance",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/finance__periods/:entityId",
-      "agent_contract_url": "/api/v1/masks/finance/periods/agent-contract",
-      "screen_definition_url": "/api/v1/masks/finance/periods/screen-definition",
-      "readiness_url": "/api/v1/masks/finance/periods/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "finance.ap_invoice.propose",
-        "fibu.open_items.list",
-        "fibu.dunning.status"
-      ]
-    },
-    {
       "mask_id": "finance/periods-liste",
       "title": "Buchungsperioden",
       "domain": "finance",
@@ -15626,36 +14910,6 @@
         "maker",
         "checker"
       ],
-      "mcp_tool_ids": [
-        "finance.ap_invoice.propose",
-        "fibu.open_items.list",
-        "fibu.dunning.status"
-      ]
-    },
-    {
-      "mask_id": "finance/skonto-optimizer",
-      "title": "Skonto optimizer",
-      "domain": "finance",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/finance__skonto-optimizer/:entityId",
-      "agent_contract_url": "/api/v1/masks/finance/skonto-optimizer/agent-contract",
-      "screen_definition_url": "/api/v1/masks/finance/skonto-optimizer/screen-definition",
-      "readiness_url": "/api/v1/masks/finance/skonto-optimizer/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
         "fibu.open_items.list",
@@ -15815,36 +15069,6 @@
           "method": "POST",
           "stubReason": null
         },
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "finance.ap_invoice.propose",
-        "fibu.open_items.list",
-        "fibu.dunning.status"
-      ]
-    },
-    {
-      "mask_id": "finance/zahlungseingang",
-      "title": "Zahlungseingang",
-      "domain": "finance",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/finance__zahlungseingang/:entityId",
-      "agent_contract_url": "/api/v1/masks/finance/zahlungseingang/agent-contract",
-      "screen_definition_url": "/api/v1/masks/finance/zahlungseingang/screen-definition",
-      "readiness_url": "/api/v1/masks/finance/zahlungseingang/readiness",
-      "risk_summary": "low",
-      "actions": [
         {
           "key": "export",
           "label": "CSV-Export",
@@ -22295,6 +21519,22 @@
           "stubReason": null
         }
       ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "admin.postfach.speichern"
+      ]
+    },
+    {
+      "mask_id": "errors/NotFound",
+      "title": "Seite nicht gefunden",
+      "domain": "platform",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/errors__NotFound/:entityId",
+      "agent_contract_url": "/api/v1/masks/errors/NotFound/agent-contract",
+      "screen_definition_url": "/api/v1/masks/errors/NotFound/screen-definition",
+      "readiness_url": "/api/v1/masks/errors/NotFound/readiness",
+      "risk_summary": "low",
+      "actions": [],
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "admin.postfach.speichern"

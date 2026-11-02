@@ -2,6 +2,6 @@ import { NativeListPage } from '@/components/mask-builder/NativeListPage'
 
 export default function Page(): JSX.Element {
   return (
-    <NativeListPage screenId="fibu/kontenplan" testId="screen-fibu/kontenplan" />
+    <NativeListPage screenId="fibu/kontenplan-liste" testId="screen-fibu/kontenplan" />
   )
 }

@@ -16,11 +16,6 @@ from app.core.cockpit_overview_parent import (
     cockpit_refresh_action,
     cockpit_summary_table,
 )
-from app.core.kontroll_worklist_parent import (
-    build_kontroll_worklist_screen,
-    kontroll_entity_and_queue_sources,
-    kontroll_queue_table,
-)
 from app.core.stamm_list_parent import build_stamm_list_screen, stamm_list_export_action
 from app.core.stamm_object_page_parent import (
     build_stamm_object_page,
@@ -276,25 +271,6 @@ def build_fibu_anlagen_screen_definition() -> dict[str, Any]:
     )
 
 
-def build_fibu_anlagen_suite_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="fibu/anlagen-suite",
-        domain="fibu",
-        title="Anlagen suite",
-        subtitle="fibu",
-        endpoint="/api/v1/finance/asset-ledger-connector/config",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Anlagen suite im fibu-Bereich finden und auswerten.",
-        prompts=["Zeige Anlagen suite.", "Filtere die Liste."],
-        bundle="fibu",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
 def build_fibu_atlas_screen_definition() -> dict[str, Any]:
     columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
     return build_stamm_list_screen(
@@ -333,156 +309,6 @@ def build_fibu_bilanz_screen_definition() -> dict[str, Any]:
     )
 
 
-def build_fibu_buchhaltungsuebersicht_screen_definition() -> dict[str, Any]:
-    cols = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_cockpit_overview_screen(
-        screen_id="fibu/buchhaltungsuebersicht",
-        domain="fibu",
-        title="Buchhaltungsuebersicht",
-        subtitle="fibu",
-        business_purpose="Buchhaltungsuebersicht mandantensicher als Cockpit bereitstellen.",
-        example_prompts=["Zeige Buchhaltungsuebersicht.", "Aktualisiere die Kennzahlen."],
-        test_id="fibu-buchhaltungsuebersicht",
-        data_sources=[cockpit_entity_source("/api/v1/fibu/anlagen")],
-        tables=[cockpit_summary_table(table_key="list", label="Buchhaltungsuebersicht", columns=cols)],
-        actions=[cockpit_refresh_action(permission="fibu.read")],
-        context_rail="combined",
-    )
-
-
-def build_fibu_buchungsuebernahme_connectors_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="fibu/buchungsuebernahme-connectors",
-        domain="fibu",
-        title="Buchungsuebernahme connectors",
-        subtitle="fibu",
-        endpoint="/api/v1/fibu/anlagen",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Buchungsuebernahme connectors im fibu-Bereich finden und auswerten.",
-        prompts=["Zeige Buchungsuebernahme connectors.", "Filtere die Liste."],
-        bundle="fibu",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_fibu_bwa_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="fibu/bwa",
-        domain="fibu",
-        title="Bwa",
-        subtitle="fibu",
-        endpoint="/api/v1/fibu/anlagen",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Bwa im fibu-Bereich finden und auswerten.",
-        prompts=["Zeige Bwa.", "Filtere die Liste."],
-        bundle="fibu",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_fibu_debitoren_api_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="fibu/debitoren-api",
-        domain="fibu",
-        title="Debitoren api",
-        subtitle="fibu",
-        endpoint="/api/v1/fibu/anlagen",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Debitoren api im fibu-Bereich finden und auswerten.",
-        prompts=["Zeige Debitoren api.", "Filtere die Liste."],
-        bundle="fibu",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_fibu_elster_online_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="fibu/elster-online",
-        domain="fibu",
-        title="Elster online",
-        subtitle="fibu",
-        endpoint="/api/v1/fibu/anlagen",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Elster online im fibu-Bereich finden und auswerten.",
-        prompts=["Zeige Elster online.", "Filtere die Liste."],
-        bundle="fibu",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_fibu_erloeskennziffern_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="fibu/erloeskennziffern",
-        domain="fibu",
-        title="Erloeskennziffern",
-        subtitle="fibu",
-        endpoint="/api/v1/fibu/anlagen",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Erloeskennziffern im fibu-Bereich finden und auswerten.",
-        prompts=["Zeige Erloeskennziffern.", "Filtere die Liste."],
-        bundle="fibu",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_fibu_erloeskontenzuordnung_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="fibu/erloeskontenzuordnung",
-        domain="fibu",
-        title="Erloeskontenzuordnung",
-        subtitle="fibu",
-        endpoint="/api/v1/fibu/anlagen",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Erloeskontenzuordnung im fibu-Bereich finden und auswerten.",
-        prompts=["Zeige Erloeskontenzuordnung.", "Filtere die Liste."],
-        bundle="fibu",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_fibu_forderungsgruppen_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="fibu/forderungsgruppen",
-        domain="fibu",
-        title="Forderungsgruppen",
-        subtitle="fibu",
-        endpoint="/api/v1/fibu/anlagen",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Forderungsgruppen im fibu-Bereich finden und auswerten.",
-        prompts=["Zeige Forderungsgruppen.", "Filtere die Liste."],
-        bundle="fibu",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
 def build_fibu_geschaeftsjahre_screen_definition() -> dict[str, Any]:
     return build_stamm_object_page(
         screen_id="fibu/geschaeftsjahre",
@@ -514,120 +340,6 @@ def build_fibu_guv_screen_definition() -> dict[str, Any]:
         row_actions=[],
         purpose="Guv im fibu-Bereich finden und auswerten.",
         prompts=["Zeige Guv.", "Filtere die Liste."],
-        bundle="fibu",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_fibu_hauptbuch_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="fibu/hauptbuch",
-        domain="fibu",
-        title="Hauptbuch",
-        subtitle="fibu",
-        endpoint="/api/v1/fibu/anlagen",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Hauptbuch im fibu-Bereich finden und auswerten.",
-        prompts=["Zeige Hauptbuch.", "Filtere die Liste."],
-        bundle="fibu",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_fibu_kontenplan_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="fibu/kontenplan",
-        domain="fibu",
-        title="Kontenplan",
-        subtitle="fibu",
-        endpoint="/api/v1/finance/chart-of-accounts/",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Kontenplan im fibu-Bereich finden und auswerten.",
-        prompts=["Zeige Kontenplan.", "Filtere die Liste."],
-        bundle="fibu",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_fibu_kostenstellenrechnung_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="fibu/kostenstellenrechnung",
-        domain="fibu",
-        title="Kostenstellenrechnung",
-        subtitle="fibu",
-        endpoint="/api/v1/fibu/anlagen",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Kostenstellenrechnung im fibu-Bereich finden und auswerten.",
-        prompts=["Zeige Kostenstellenrechnung.", "Filtere die Liste."],
-        bundle="fibu",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_fibu_kreditlinien_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="fibu/kreditlinien",
-        domain="fibu",
-        title="Kreditlinien",
-        subtitle="fibu",
-        endpoint="/api/v1/fibu/anlagen",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Kreditlinien im fibu-Bereich finden und auswerten.",
-        prompts=["Zeige Kreditlinien.", "Filtere die Liste."],
-        bundle="fibu",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_fibu_kreditoren_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="fibu/kreditoren",
-        domain="fibu",
-        title="Kreditoren",
-        subtitle="fibu",
-        endpoint="/api/v1/fibu/anlagen",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Kreditoren im fibu-Bereich finden und auswerten.",
-        prompts=["Zeige Kreditoren.", "Filtere die Liste."],
-        bundle="fibu",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_fibu_lohn_connector_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="fibu/lohn-connector",
-        domain="fibu",
-        title="Lohn connector",
-        subtitle="fibu",
-        endpoint="/api/v1/finance/lohn-connector/runs",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Lohn connector im fibu-Bereich finden und auswerten.",
-        prompts=["Zeige Lohn connector.", "Filtere die Liste."],
         bundle="fibu",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -695,44 +407,6 @@ def build_fibu_op_verwaltung_screen_definition() -> dict[str, Any]:
     }
     return definition
 
-def build_fibu_periodische_buchungen_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="fibu/periodische-buchungen",
-        domain="fibu",
-        title="Periodische buchungen",
-        subtitle="fibu",
-        endpoint="/api/v1/fibu/anlagen",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Periodische buchungen im fibu-Bereich finden und auswerten.",
-        prompts=["Zeige Periodische buchungen.", "Filtere die Liste."],
-        bundle="fibu",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_fibu_quadriga_connector_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="fibu/quadriga-connector",
-        domain="fibu",
-        title="Quadriga connector",
-        subtitle="fibu",
-        endpoint="/api/v1/finance/quadriga-connector/config",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Quadriga connector im fibu-Bereich finden und auswerten.",
-        prompts=["Zeige Quadriga connector.", "Filtere die Liste."],
-        bundle="fibu",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
 def build_fibu_sachkonto_screen_definition() -> dict[str, Any]:
     columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
     return build_stamm_list_screen(
@@ -747,44 +421,6 @@ def build_fibu_sachkonto_screen_definition() -> dict[str, Any]:
         row_actions=[],
         purpose="Sachkonto im fibu-Bereich finden und auswerten.",
         prompts=["Zeige Sachkonto.", "Filtere die Liste."],
-        bundle="fibu",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_fibu_schnittstelle_fibu_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="fibu/schnittstelle-fibu",
-        domain="fibu",
-        title="Schnittstelle fibu",
-        subtitle="fibu",
-        endpoint="/api/v1/fibu/anlagen",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Schnittstelle fibu im fibu-Bereich finden und auswerten.",
-        prompts=["Zeige Schnittstelle fibu.", "Filtere die Liste."],
-        bundle="fibu",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_fibu_schnittstellen_center_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="fibu/schnittstellen-center",
-        domain="fibu",
-        title="Schnittstellen center",
-        subtitle="fibu",
-        endpoint="/api/v1/fibu/anlagen",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Schnittstellen center im fibu-Bereich finden und auswerten.",
-        prompts=["Zeige Schnittstellen center.", "Filtere die Liste."],
         bundle="fibu",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -826,63 +462,6 @@ def build_fibu_stammdaten_screen_definition() -> dict[str, Any]:
     )
 
 
-def build_fibu_verbindlichkeiten_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="fibu/verbindlichkeiten",
-        domain="fibu",
-        title="Verbindlichkeiten",
-        subtitle="fibu",
-        endpoint="/api/v1/fibu/anlagen",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Verbindlichkeiten im fibu-Bereich finden und auswerten.",
-        prompts=["Zeige Verbindlichkeiten.", "Filtere die Liste."],
-        bundle="fibu",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_fibu_zahlungseingaenge_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="fibu/zahlungseingaenge",
-        domain="fibu",
-        title="Zahlungseingaenge",
-        subtitle="fibu",
-        endpoint="/api/v1/finance/bank-accounts",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Zahlungseingaenge im fibu-Bereich finden und auswerten.",
-        prompts=["Zeige Zahlungseingaenge.", "Filtere die Liste."],
-        bundle="fibu",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_fibu_zahlungslaeufe_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="fibu/zahlungslaeufe",
-        domain="fibu",
-        title="Zahlungslaeufe",
-        subtitle="fibu",
-        endpoint="/api/v1/fibu/anlagen",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Zahlungslaeufe im fibu-Bereich finden und auswerten.",
-        prompts=["Zeige Zahlungslaeufe.", "Filtere die Liste."],
-        bundle="fibu",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
 def build_fibu_zahlungsmeldungen_screen_definition() -> dict[str, Any]:
     return build_stamm_object_page(
         screen_id="fibu/zahlungsmeldungen",
@@ -900,25 +479,6 @@ def build_fibu_zahlungsmeldungen_screen_definition() -> dict[str, Any]:
     )
 
 
-def build_fibu_zahlungsvorschlaege_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="fibu/zahlungsvorschlaege",
-        domain="fibu",
-        title="Zahlungsvorschlaege",
-        subtitle="fibu",
-        endpoint="/api/v1/fibu/anlagen",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Zahlungsvorschlaege im fibu-Bereich finden und auswerten.",
-        prompts=["Zeige Zahlungsvorschlaege.", "Filtere die Liste."],
-        bundle="fibu",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
 def build_finance_abschluss_screen_definition() -> dict[str, Any]:
     columns = [{"key": "grunddaten", "label": "Grunddaten", "sortable": True, "filterable": True, "width": 160}, {"key": "bilanz", "label": "Bilanz", "sortable": True, "filterable": True, "width": 160}, {"key": "guv", "label": "Guv", "sortable": True, "filterable": True, "width": 160}, {"key": "abgrenzungen", "label": "Abgrenzungen", "sortable": True, "filterable": True, "width": 160}, {"key": "abgrenzungen_custom", "label": "Abgrenzungen Custom", "sortable": True, "filterable": True, "width": 160}, {"key": "rueckstellungen", "label": "Rueckstellungen", "sortable": True, "filterable": True, "width": 160}, {"key": "rueckstellungen_custom", "label": "Rueckstellungen Custom", "sortable": True, "filterable": True, "width": 160}, {"key": "pruefungen", "label": "Pruefungen", "sortable": True, "filterable": True, "width": 160}]
     return build_stamm_list_screen(
@@ -933,44 +493,6 @@ def build_finance_abschluss_screen_definition() -> dict[str, Any]:
         row_actions=[],
         purpose="Monats-/Jahresabschluss im finance-Bereich finden und auswerten.",
         prompts=["Zeige Monats-/Jahresabschluss.", "Filtere die Liste."],
-        bundle="finance",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_finance_ap_invoices_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="finance/ap/invoices",
-        domain="finance",
-        title="Ap invoices list",
-        subtitle="finance",
-        endpoint="/api/v1/finance/abstimmung/nebenbuch",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Ap invoices list im finance-Bereich finden und auswerten.",
-        prompts=["Zeige Ap invoices list.", "Filtere die Liste."],
-        bundle="finance",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_finance_ap_invoices_new_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="finance/ap/invoices/new",
-        domain="finance",
-        title="Ap invoice form",
-        subtitle="finance",
-        endpoint="/api/v1/finance/abstimmung/nebenbuch",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Ap invoice form im finance-Bereich finden und auswerten.",
-        prompts=["Zeige Ap invoice form.", "Filtere die Liste."],
         bundle="finance",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -994,27 +516,6 @@ def build_finance_bank_stamm_screen_definition() -> dict[str, Any]:
         business_purpose="Bank stamm als Stammblatt pflegen.",
         example_prompts=["Oeffne Bank stamm.", "Bearbeite Stammdaten."],
         test_id="finance-bank-stamm",
-    )
-
-
-
-
-def build_finance_bookings_new_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="finance/bookings/new",
-        domain="finance",
-        title="Buchungsjournal",
-        subtitle="finance",
-        endpoint="/api/v1/finance/abstimmung/nebenbuch",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Buchungsjournal im finance-Bereich finden und auswerten.",
-        prompts=["Zeige Buchungsjournal.", "Filtere die Liste."],
-        bundle="finance",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
 
 
@@ -1126,46 +627,6 @@ def build_finance_kasse_screen_definition() -> dict[str, Any]:
     )
 
 
-def build_finance_kontenplan_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="finance/kontenplan",
-        domain="finance",
-        title="Chart of accounts",
-        subtitle="finance",
-        endpoint="/api/v1/finance/abstimmung/nebenbuch",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Chart of accounts im finance-Bereich finden und auswerten.",
-        prompts=["Zeige Chart of accounts.", "Filtere die Liste."],
-        bundle="finance",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_finance_kreditoren_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="finance/kreditoren",
-        domain="finance",
-        title="Kreditoren liste",
-        subtitle="finance",
-        endpoint="/api/v1/finance/abstimmung/nebenbuch",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Kreditoren liste im finance-Bereich finden und auswerten.",
-        prompts=["Zeige Kreditoren liste.", "Filtere die Liste."],
-        bundle="finance",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-
-
 def build_finance_lastschriften_debitoren_screen_definition() -> dict[str, Any]:
     columns = [{"key": "grunddaten", "label": "Grunddaten", "sortable": True, "filterable": True, "width": 160}, {"key": "creditor", "label": "Creditor", "sortable": True, "filterable": True, "width": 160}, {"key": "lastschriften", "label": "Lastschriften", "sortable": True, "filterable": True, "width": 160}, {"key": "lastschriften_custom", "label": "Lastschriften Custom", "sortable": True, "filterable": True, "width": 160}, {"key": "freigabe", "label": "Freigabe", "sortable": True, "filterable": True, "width": 160}, {"key": "notizen", "label": "Notizen", "sortable": True, "filterable": True, "width": 160}, {"key": "preview", "label": "Preview", "sortable": True, "filterable": True, "width": 160}, {"key": "approve", "label": "Approve", "sortable": True, "filterable": True, "width": 160}]
     return build_stamm_list_screen(
@@ -1185,44 +646,6 @@ def build_finance_lastschriften_debitoren_screen_definition() -> dict[str, Any]:
     )
 
 
-def build_finance_nebenbuch_abstimmung_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="finance/nebenbuch-abstimmung",
-        domain="finance",
-        title="Nebenbuch abstimmung",
-        subtitle="finance",
-        endpoint="/api/v1/finance/abstimmung/nebenbuch",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Nebenbuch abstimmung im finance-Bereich finden und auswerten.",
-        prompts=["Zeige Nebenbuch abstimmung.", "Filtere die Liste."],
-        bundle="finance",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_finance_offene_posten_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="finance/offene-posten",
-        domain="finance",
-        title="Offene posten",
-        subtitle="finance",
-        endpoint="/api/v1/finance/open-items",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Offene posten im finance-Bereich finden und auswerten.",
-        prompts=["Zeige Offene posten.", "Filtere die Liste."],
-        bundle="finance",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
 def build_finance_op_debitoren_screen_definition() -> dict[str, Any]:
     columns = [{"key": "grunddaten", "label": "Grunddaten", "sortable": True, "filterable": True, "width": 160}, {"key": "betrag", "label": "Betrag", "sortable": True, "filterable": True, "width": 160}, {"key": "zahlungen", "label": "Zahlungen", "sortable": True, "filterable": True, "width": 160}, {"key": "zahlungen_custom", "label": "Zahlungen Custom", "sortable": True, "filterable": True, "width": 160}, {"key": "mahnwesen", "label": "Mahnwesen", "sortable": True, "filterable": True, "width": 160}, {"key": "ausgleichshistorie", "label": "Ausgleichshistorie", "sortable": True, "filterable": True, "width": 160}, {"key": "notizen", "label": "Notizen", "sortable": True, "filterable": True, "width": 160}, {"key": "zahlung", "label": "Zahlung", "sortable": True, "filterable": True, "width": 160}]
     return build_stamm_list_screen(
@@ -1237,101 +660,6 @@ def build_finance_op_debitoren_screen_definition() -> dict[str, Any]:
         row_actions=[],
         purpose="OP-Lage im finance-Bereich finden und auswerten.",
         prompts=["Zeige OP-Lage.", "Filtere die Liste."],
-        bundle="finance",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_finance_op_kreditoren_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="finance/op-kreditoren",
-        domain="finance",
-        title="Op kreditoren",
-        subtitle="finance",
-        endpoint="/api/v1/finance/open-items",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Op kreditoren im finance-Bereich finden und auswerten.",
-        prompts=["Zeige Op kreditoren.", "Filtere die Liste."],
-        bundle="finance",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_finance_payments_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="finance/payments",
-        domain="finance",
-        title="Payment matching",
-        subtitle="finance",
-        endpoint="/api/v1/finance/payments/unmatched",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Payment matching im finance-Bereich finden und auswerten.",
-        prompts=["Zeige Payment matching.", "Filtere die Liste."],
-        bundle="finance",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_finance_periodenabschluss_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="finance/periodenabschluss",
-        domain="finance",
-        title="Periodenabschluss",
-        subtitle="finance",
-        endpoint="/api/v1/finance/abstimmung/nebenbuch",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Periodenabschluss im finance-Bereich finden und auswerten.",
-        prompts=["Zeige Periodenabschluss.", "Filtere die Liste."],
-        bundle="finance",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_finance_periods_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="finance/periods",
-        domain="finance",
-        title="Periods",
-        subtitle="finance",
-        endpoint="/api/v1/finance/abstimmung/nebenbuch",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Periods im finance-Bereich finden und auswerten.",
-        prompts=["Zeige Periods.", "Filtere die Liste."],
-        bundle="finance",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_finance_skonto_optimizer_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="finance/skonto-optimizer",
-        domain="finance",
-        title="Skonto optimizer",
-        subtitle="finance",
-        endpoint="/api/v1/finance/open-items",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Skonto optimizer im finance-Bereich finden und auswerten.",
-        prompts=["Zeige Skonto optimizer.", "Filtere die Liste."],
         bundle="finance",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -1368,25 +696,6 @@ def build_finance_ustva_screen_definition() -> dict[str, Any]:
         row_actions=[],
         purpose="Meldekontext im finance-Bereich finden und auswerten.",
         prompts=["Zeige Meldekontext.", "Filtere die Liste."],
-        bundle="finance",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_finance_zahlungseingang_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="finance/zahlungseingang",
-        domain="finance",
-        title="Zahlungseingang",
-        subtitle="finance",
-        endpoint="/api/v1/finance/abstimmung/nebenbuch",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Zahlungseingang im finance-Bereich finden und auswerten.",
-        prompts=["Zeige Zahlungseingang.", "Filtere die Liste."],
         bundle="finance",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -3298,8 +2607,6 @@ def build_qualitaet_labor_detail_screen_definition() -> dict[str, Any]:
     )
 
 
-
-
 def build_reports_screen_definition() -> dict[str, Any]:
     cols = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
     return build_cockpit_overview_screen(
@@ -4584,46 +3891,20 @@ BATCH15_SCREEN_BUILDERS: dict[str, Any] = {
     "export/ustva": build_export_ustva_screen_definition,
     "fibu/abschluss-checklist-detail": build_fibu_abschluss_checklist_detail_screen_definition,
     "fibu/anlagen": build_fibu_anlagen_screen_definition,
-    "fibu/anlagen-suite": build_fibu_anlagen_suite_screen_definition,
     "fibu/atlas": build_fibu_atlas_screen_definition,
     "fibu/bilanz": build_fibu_bilanz_screen_definition,
-    "fibu/buchhaltungsuebersicht": build_fibu_buchhaltungsuebersicht_screen_definition,
-    "fibu/buchungsuebernahme-connectors": build_fibu_buchungsuebernahme_connectors_screen_definition,
-    "fibu/bwa": build_fibu_bwa_screen_definition,
-    "fibu/debitoren-api": build_fibu_debitoren_api_screen_definition,
-    "fibu/elster-online": build_fibu_elster_online_screen_definition,
-    "fibu/erloeskennziffern": build_fibu_erloeskennziffern_screen_definition,
-    "fibu/erloeskontenzuordnung": build_fibu_erloeskontenzuordnung_screen_definition,
-    "fibu/forderungsgruppen": build_fibu_forderungsgruppen_screen_definition,
     "fibu/geschaeftsjahre": build_fibu_geschaeftsjahre_screen_definition,
     "fibu/guv": build_fibu_guv_screen_definition,
-    "fibu/hauptbuch": build_fibu_hauptbuch_screen_definition,
-    "fibu/kontenplan": build_fibu_kontenplan_screen_definition,
-    "fibu/kostenstellenrechnung": build_fibu_kostenstellenrechnung_screen_definition,
-    "fibu/kreditlinien": build_fibu_kreditlinien_screen_definition,
-    "fibu/kreditoren": build_fibu_kreditoren_screen_definition,
-    "fibu/lohn-connector": build_fibu_lohn_connector_screen_definition,
     "fibu/monatswerte": build_fibu_monatswerte_screen_definition,
     "fibu/op-skonto-auszifferung": build_fibu_op_skonto_auszifferung_screen_definition,
     "fibu/op-verwaltung": build_fibu_op_verwaltung_screen_definition,
-    "fibu/periodische-buchungen": build_fibu_periodische_buchungen_screen_definition,
-    "fibu/quadriga-connector": build_fibu_quadriga_connector_screen_definition,
     "fibu/sachkonto": build_fibu_sachkonto_screen_definition,
-    "fibu/schnittstelle-fibu": build_fibu_schnittstelle_fibu_screen_definition,
-    "fibu/schnittstellen-center": build_fibu_schnittstellen_center_screen_definition,
     "fibu/sicherheiten": build_fibu_sicherheiten_screen_definition,
     "fibu/stammdaten": build_fibu_stammdaten_screen_definition,
-    "fibu/verbindlichkeiten": build_fibu_verbindlichkeiten_screen_definition,
-    "fibu/zahlungseingaenge": build_fibu_zahlungseingaenge_screen_definition,
-    "fibu/zahlungslaeufe": build_fibu_zahlungslaeufe_screen_definition,
     "fibu/zahlungsmeldungen": build_fibu_zahlungsmeldungen_screen_definition,
-    "fibu/zahlungsvorschlaege": build_fibu_zahlungsvorschlaege_screen_definition,
     "finance/abschluss": build_finance_abschluss_screen_definition,
-    "finance/ap/invoices": build_finance_ap_invoices_screen_definition,
-    "finance/ap/invoices/new": build_finance_ap_invoices_new_screen_definition,
     "finance/bank-abgleich": build_finance_bank_abgleich_screen_definition,
     "finance/bank-stamm": build_finance_bank_stamm_screen_definition,
-    "finance/bookings/new": build_finance_bookings_new_screen_definition,
     "finance/buchungserfassung": build_finance_buchungserfassung_screen_definition,
     "finance/buchungsimport": build_finance_buchungsimport_screen_definition,
     "finance/datev-export": build_finance_datev_export_screen_definition,
@@ -4632,20 +3913,10 @@ BATCH15_SCREEN_BUILDERS: dict[str, Any] = {
     "finance/invoices-list": build_finance_invoices_list_screen_definition,
     "finance/invoices/new": build_finance_invoices_new_screen_definition,
     "finance/kasse": build_finance_kasse_screen_definition,
-    "finance/kontenplan": build_finance_kontenplan_screen_definition,
-    "finance/kreditoren": build_finance_kreditoren_screen_definition,
     "finance/lastschriften-debitoren": build_finance_lastschriften_debitoren_screen_definition,
-    "finance/nebenbuch-abstimmung": build_finance_nebenbuch_abstimmung_screen_definition,
-    "finance/offene-posten": build_finance_offene_posten_screen_definition,
     "finance/op-debitoren": build_finance_op_debitoren_screen_definition,
-    "finance/op-kreditoren": build_finance_op_kreditoren_screen_definition,
-    "finance/payments": build_finance_payments_screen_definition,
-    "finance/periodenabschluss": build_finance_periodenabschluss_screen_definition,
-    "finance/periods": build_finance_periods_screen_definition,
-    "finance/skonto-optimizer": build_finance_skonto_optimizer_screen_definition,
     "finance/umsatz": build_finance_umsatz_screen_definition,
     "finance/ustva": build_finance_ustva_screen_definition,
-    "finance/zahlungseingang": build_finance_zahlungseingang_screen_definition,
     "finance/zahlungslauf-kreditoren": build_finance_zahlungslauf_kreditoren_screen_definition,
     "finanzplanung/liquiditaet": build_finanzplanung_liquiditaet_screen_definition,
     "foerderung/antrag": build_foerderung_antrag_screen_definition,

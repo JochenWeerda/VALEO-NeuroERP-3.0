@@ -20296,4 +20296,11 @@ Ratsche tests/test_vitest_runtime46_altlast.py (hoechstens 187, nur senken). Ech
 sind behoben: doppelte Dateivertragspruefung (accept-Liste) und doppelter Druckzweig ohne Fehlermeldung durch
 die Konfliktaufloesung c0bc8e99b/ca50c46f7; neun handgebaute Capture-Seiten blendeten alle rechtegebundenen
 Aktionen aus (Rechte jetzt aus useScreenPermissions), Postfaecher/Steuerschluessel mit fehlenden Rechten.
+Masken-Cluster (Branch feat/studio-masken-cluster-20261102): Batch 0/0b Feldklassen (rechnende Felder, Menge,
+Summenzeile, Formate, Periode, Wertetypen aus config/wertetypen.json, Geschaeftstag), MCP-Studio-Authoring
+(studio.catalog.read/definition.validate/draft.save/draft.submit_review, kein Agenten-Publish).
+Batch 1 FiBu/Finance (von 188 Platzhaltern): 11 tote Doppelungen entfernt, 17 Seiten auf ihre echte Maske
+umgehaengt, 8 Listen aus typisierten Wegen neu (app/core/screen_definitions_cluster_fibu.py), 404-Seite als
+Studio-Einstieg (errors/NotFound). Offen in fibu/finance: atlas, bilanz, guv, monatswerte, sachkonto,
+sicherheiten, buchungsimport, invoices-list, umsatz (kein passender typisierter Weg bzw. verschachtelter Bericht).
 

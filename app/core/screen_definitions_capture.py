@@ -513,6 +513,22 @@ def build_fuhrpark_uebersicht_screen_definition() -> dict[str, Any]:
     )
 
 
+def build_errors_not_found_screen_definition() -> dict[str, Any]:
+    """404-Seite als Studio-Einstieg: keine Daten, nur Wege zurueck (vorher eine Maske, die es nicht gab)."""
+    return _capture_cockpit(
+        screen_id="errors/NotFound",
+        domain="platform",
+        title="Seite nicht gefunden",
+        subtitle="Die angeforderte Seite existiert nicht oder wurde verschoben.",
+        purpose="Von einer unbekannten Adresse zur Startseite oder in die Kundenliste zurueckfinden.",
+        reason="Die Seite hat keinen Vorgang. Jede Kachel oeffnet eine bestehende Maske.",
+        tiles=[
+            _nav_tile("start", "Zur Startseite", "/"),
+            _nav_tile("kunden", "Zu Kunden", "/verkauf/kunden-liste"),
+        ],
+    )
+
+
 def build_strecke_dokumente_drucken_screen_definition() -> dict[str, Any]:
     return _capture_cockpit(
         screen_id="strecke/dokumente-drucken",
