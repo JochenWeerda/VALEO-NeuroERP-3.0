@@ -20243,3 +20243,16 @@ Nummer unveraenderlich, je Mandant eindeutig. Migration partner_kontonummern_202
 Protokoll und bezieht sepa_mandates ueber partner_id auf den Partner. Debitor-/Kreditormaske und -liste zeigen
 das Konto, Kunden-/Lieferantennummer daneben.
 Offen: OP-Zuordnung ueber Kontonummer, sobald Buchungen sie schreiben; Stufen 5-6.
+
+## CI-DAUERROT-20261102 — in Arbeit, Claude
+
+Dauerrote Pruefungen auf main beheben (PR #99, Nutzerauftrag "auch fremde Fehler beheben").
+Welle 1: letzte untypisierte Route (sales_offers import-csv), pnpm-Override brace-expansion nur <5
+(ESLint-Glob brach mit minimatch@11 ab), Docs-Abhaengigkeiten fuer generate_agent_handbuch.
+Welle 2: TEST_DATABASE_URL im Job Test & Lint; Mandantenkontext auch ohne main:app-Middleware
+(require_bearer_token, MCP /tools/call, Testgrenze) - Positionen holen tenant_id per
+rls_current_tenant(); Fixtures schreiben tenant_id vom Elternbeleg; Stammsaetze fuer
+Rechnungswege (tests/stammsaetze.py). Vertraege an Runtime46 angeglichen (Rollen, Worklist-
+Familie, Meridian-Lookup, Belegmasken-Release 1.3.0, Studio-Katalog).
+Offen: Rest von Test & Lint, Smoke-Tests.
+
