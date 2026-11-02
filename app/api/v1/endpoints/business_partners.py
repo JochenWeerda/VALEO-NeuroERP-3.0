@@ -1234,12 +1234,8 @@ async def create_business_partner(
     partner_id = payload.business_partner.core_identity.partner_id or uuid7()
     row = BusinessPartner(partner_id=partner_id, tenant_id=tenant_id)
     _apply_payload(row, payload.business_partner)
-    svc.assign_account_numbers(row)
-    try:
-        row = svc.persist_new_partner(row)
-    except ConflictError as exc:
-        raise HTTPException(status_code=409, detail=exc.detail)
-    return _to_out(row)
+    svc.assign_account_numbers(row)  # ConflictError -> 409 ueber den zentralen Domain-Handler
+    return _to_out(svc.persist_new_partner(row))
 
 
 @router.get("/", response_model=list[BusinessPartnerEnvelope], summary="Business partners auflisten")
@@ -1288,9 +1284,10 @@ async def update_business_partner(
             )
         except ConflictError as exc:
             raise HTTPException(status_code=409, detail=exc.detail)
+    bisher = {"debtor_account": row.debtor_account, "creditor_account": row.creditor_account}
     _apply_payload(row, payload.business_partner)
-    row = svc.persist_updated_partner(row)
-    return _to_out(row)
+    svc.assign_account_numbers(row, bisher)  # vergebene Kontonummer bleibt, sonst 409 (zentraler Handler)
+    return _to_out(svc.persist_updated_partner(row))
 
 
 def _svc(db: Session, tenant_id: str) -> BusinessPartnerService:

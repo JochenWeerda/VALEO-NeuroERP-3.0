@@ -146,7 +146,9 @@ class EinkaufBestellungOut(_MaskEntityOut):
 
 class FinanceDebitorOut(_MaskEntityOut):
     id: Optional[str] = None
+    #: Konto am Geschaeftspartner (Stufe 3b); die Kundennummer steht in ``kundennummer``.
     debitoren_nr: Optional[str] = None
+    kundennummer: Optional[str] = None
     name: Optional[str] = None
     kreditlimit: Optional[float] = None
     zahlungsbedingungen: Optional[str] = None
@@ -165,7 +167,9 @@ class FinanceDebitorOut(_MaskEntityOut):
 
 class FinanceKreditorOut(_MaskEntityOut):
     id: Optional[str] = None
+    #: Konto am Geschaeftspartner (Stufe 3b); die Lieferantennummer steht in ``lieferantennummer``.
     kreditoren_nr: Optional[str] = None
+    lieferantennummer: Optional[str] = None
     name: Optional[str] = None
     zahlungsbedingungen: Optional[str] = None
     steuernummer: Optional[str] = None

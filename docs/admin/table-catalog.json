@@ -14271,6 +14271,52 @@
             "app/api/v1/endpoints/crm_partner_klaerfaelle.py"
           ]
         },
+        "partner_konto_protokoll": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "art",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "spalte",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "partner_id",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "nummer",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "vergeben_am",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ]
+        },
         "partner_rueckfuellung_protokoll": {
           "columns": [
             {
@@ -57125,7 +57171,11 @@
             "id"
           ],
           "read_by": [
-            "app/infrastructure/models/__init__.py"
+            "app/infrastructure/models/__init__.py",
+            "app/services/business_partner_service.py"
+          ],
+          "written_by": [
+            "app/services/business_partner_service.py"
           ]
         },
         "nuts2_postal_codes": {
@@ -59575,6 +59625,11 @@
               "name": "updated_at",
               "nullable": false,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "partner_id",
+              "nullable": true,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [],

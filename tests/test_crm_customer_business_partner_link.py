@@ -93,6 +93,12 @@ async def test_create_customer_persists_business_partner_link_for_request_tenant
         results=[
             # Erst die Nummernpruefung je Mandant (seit 01.11.2026): Nummer frei.
             _FakeResult(),
+            # Partnerbruecke (Stufe 1): Partner im Mandanten, Kundenrolle setzen; das Konto (Stufe 3b)
+            # ist schon vergeben und bleibt.
+            _FakeResult(scalar_value=1),
+            _FakeResult(),
+            _FakeResult(scalar_value="10000"),
+            # Nach crm-core: Partner erneut im Mandanten, lokaler Eintrag, Rueckgabe.
             _FakeResult(scalar_value=1),
             _FakeResult(),
             _FakeResult(fetchone_value=SimpleNamespace(chefanweisung=None, business_partner_id="bp-1")),
@@ -112,8 +118,13 @@ async def test_create_customer_persists_business_partner_link_for_request_tenant
 
     number_statement, number_params = db.calls[0]
     ensure_statement, ensure_params = db.calls[1]
-    insert_statement, insert_params = db.calls[2]
-    fetch_statement, fetch_params = db.calls[3]
+    rolle_statement, _ = db.calls[2]
+    konto_statement, _ = db.calls[3]
+    insert_statement, insert_params = db.calls[5]
+    fetch_statement, fetch_params = db.calls[6]
+    assert "SET is_customer = TRUE" in rolle_statement
+    assert "debtor_account" in konto_statement and "FOR UPDATE" in konto_statement
+    assert not any("number_ranges" in sql for sql, _ in db.calls)  # vorhandenes Konto: keine neue Nummer
     assert "customer_number = :cn" in number_statement and "tenant_id = :tid" in number_statement
     assert number_params == {"tid": "11111111-1111-1111-1111-111111111111", "cn": "DEB-100"}
     assert "FROM domain_crm.business_partners" in ensure_statement
