@@ -6238,6 +6238,13 @@ def get_screen_definition(
     tenant_id: str | None = None,
 ) -> dict[str, Any] | None:
     builder = _SCREEN_DEFINITIONS.get(mask_id)
+    if builder is None:
+        # Stamm-Masken (artikel/stamm, ...) registrieren sich erst beim ersten Bedarf; im laufenden Server rief das
+        # niemand, die Masken antworteten 404 und die Seiten zeigten "Workspace konnte nicht geladen werden".
+        from app.core.stamm_object_page_parent import ensure_stamm_screen_registry
+
+        ensure_stamm_screen_registry()
+        builder = _SCREEN_DEFINITIONS.get(mask_id)
     if builder is not None:
         return _hydrate_screen_definition(builder(), mask_id, today)
     if not tenant_id:

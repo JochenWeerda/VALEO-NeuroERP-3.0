@@ -20281,4 +20281,9 @@ config/mask_endpoint_altlast.json (42 Quellen ohne Backend-Route, u.a. 38 FiBu-P
 Kostenstellen /kostenrechnung/kostenstellen), config/meridian_beleg_altlast.json (143 Platzhalter-
 Identitaeten, 9 Bezugsfelder fuer rohe IDs in crm/campaign, crm/consent, crm/gdpr-request,
 fibu/op-skonto-auszifferung, lager/charge, lager/permanente-inventur, silo/silo - brauchen Lookups).
+Befund 02.11.2026 (Smoke-Tests): 127 Frontend-Seiten rendern seit deeb707b4 eine Native-Seite mit einer
+screenId, die das Backend nicht kennt (u.a. crm/campaigns, crm/segments, crm/leads, crm/dubletten,
+crm/kunden-zuordnung, lager/bestandsuebersicht, finance, hilfe, portal, errors/NotFound) und zeigen nur
+"Workspace konnte nicht geladen werden". Teilweise gibt es Gegenstuecke (crm/dubletten-pruefung,
+crm/leads-liste). Entscheidung zum Vorgehen beim Nutzer offen.
 
