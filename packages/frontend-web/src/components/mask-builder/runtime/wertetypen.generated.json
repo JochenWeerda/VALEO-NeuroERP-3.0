@@ -1,0 +1,132 @@
+{
+  "_hinweis": "Erzeugt von scripts/generate_wertetypen_frontend.py aus config/wertetypen.json; nicht von Hand pflegen.",
+  "ustIdMuster": {
+    "DE": "^DE\\d{9}$",
+    "AT": "^ATU\\d{8}$",
+    "NL": "^NL\\d{9}B\\d{2}$",
+    "FR": "^FR[A-HJ-NP-Z0-9]{2}\\d{9}$",
+    "BE": "^BE0?\\d{9}$",
+    "CH": "^CHE\\d{9}$",
+    "IT": "^IT\\d{11}$",
+    "ES": "^ES[A-Z0-9]\\d{7}[A-Z0-9]$",
+    "PL": "^PL\\d{10}$"
+  },
+  "beispiele": {
+    "email": {
+      "gueltig": [
+        "dispo@haus.example"
+      ],
+      "ungueltig": [
+        "dispo@haus",
+        "dispo haus@x.de"
+      ]
+    },
+    "phone": {
+      "gueltig": [
+        "+49 4941 123-45",
+        "04941 12345"
+      ],
+      "ungueltig": [
+        "abc",
+        "12"
+      ]
+    },
+    "iban": {
+      "gueltig": [
+        "DE89 3704 0044 0532 0130 00",
+        "AT611904300234573201"
+      ],
+      "ungueltig": [
+        "DE89 3704 0044 0532 0130 01",
+        "DE89"
+      ]
+    },
+    "vatId": {
+      "gueltig": [
+        "DE123456789",
+        "ATU12345678",
+        "de 123 456 789",
+        "NL123456789B01"
+      ],
+      "ungueltig": [
+        "DE12345678",
+        "XX123456789",
+        "ATU1234567"
+      ]
+    },
+    "gln": {
+      "gueltig": [
+        "4012345678901"
+      ],
+      "ungueltig": [
+        "4012345678902",
+        "401234567890",
+        "40123456789O1"
+      ]
+    },
+    "gtin": {
+      "gueltig": [
+        "4006381333931",
+        "96385074",
+        "04006381333931"
+      ],
+      "ungueltig": [
+        "4006381333932",
+        "123"
+      ]
+    },
+    "sscc": {
+      "gueltig": [
+        "000123456000123452"
+      ],
+      "ungueltig": [
+        "000123456000123453",
+        "00012345600012345"
+      ]
+    },
+    "hsCode": {
+      "gueltig": [
+        "10019900"
+      ],
+      "ungueltig": [
+        "1001990",
+        "1001990A",
+        "100199001"
+      ]
+    },
+    "currencyCode": {
+      "gueltig": [
+        "EUR",
+        "CHF"
+      ],
+      "ungueltig": [
+        "eur",
+        "EURO",
+        "E1R"
+      ]
+    },
+    "monthDay": {
+      "gueltig": [
+        "07-01",
+        "02-29",
+        "12-31"
+      ],
+      "ungueltig": [
+        "13-01",
+        "02-30",
+        "7-1"
+      ]
+    },
+    "period": {
+      "gueltig": [
+        "2026-11",
+        "2026-01"
+      ],
+      "ungueltig": [
+        "2026-13",
+        "2026-1",
+        "11/2026"
+      ]
+    }
+  }
+}

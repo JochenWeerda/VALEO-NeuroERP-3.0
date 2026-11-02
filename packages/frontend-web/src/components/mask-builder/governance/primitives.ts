@@ -9,6 +9,7 @@ export const PRIMITIVE_BY_FIELD_TYPE: Record<ScreenFieldType, string> = {
   currency: 'NumberField',
   percentage: 'NumberField',
   quantity: 'NumberField',
+  period: 'DateField',
   password: 'TextField',
   date: 'DateField',
   datetime: 'DateTimeField',

@@ -9,6 +9,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from app.core.wertetypen import TEXT_FORMATE
+
 SCREEN_SCHEMA_VERSION = 1
 
 
@@ -43,6 +45,7 @@ FIELD_TYPES = frozenset({
     "currency",
     "percentage",
     "quantity",
+    "period",
     "stringList",
     "password",
 })
@@ -54,6 +57,7 @@ PRIMITIVE_BY_FIELD_TYPE = {
     "currency": "NumberField",
     "percentage": "NumberField",
     "quantity": "NumberField",
+    "period": "DateField",
     "stringList": "TextField",
     "date": "DateField",
     "datetime": "DateTimeField",
@@ -73,7 +77,7 @@ COMPUTATION_OPS = frozenset({"sum", "product", "difference", "ratio", "percentOf
 _ZWEI_OPERANDEN = frozenset({"difference", "ratio", "percentOf"})
 NUMERIC_FIELD_TYPES = frozenset({"number", "currency", "percentage", "quantity"})
 NUMERIC_RENDER_KINDS = frozenset({"number", "currency", "quantity", "percentage"})
-TEXT_FORMATS = frozenset({"email", "phone", "iban"})
+TEXT_FORMATS = TEXT_FORMATE  # eine Quelle mit dem Frontend: config/wertetypen.json
 
 
 def computation_valid(value: Any) -> bool:

@@ -40,6 +40,7 @@ export type RenderComponentKind =
   | 'currency'
   | 'percentage'
   | 'quantity'
+  | 'period'
   | 'password'
 
 export interface RenderShellPlan {

@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { NativeSelect } from '@/components/ui/native-select'
 import type { ScreenFieldDefinition } from '../schema'
 import { renderValue } from './render-utils'
-import { formatTextValue } from '../runtime/text-format'
+import { formatPeriod, formatTextValue } from '../runtime/text-format'
 import { formatBusinessDateTime } from '@/lib/business-time'
 import { statusLabel } from './status-labels'
 import { VoiceBar } from './VoiceBar'
@@ -37,6 +37,8 @@ export function formatReadOnlyValue(
       return Number.isFinite(number) ? `${new Intl.NumberFormat('de-DE').format(number)}${unit ? ` ${unit}` : ''}` : raw
     case 'text':
       return formatTextValue(format, raw)
+    case 'period':
+      return formatPeriod(raw)
     case 'currency':
       return Number.isFinite(number)
         ? /^[A-Z]{3}$/.test(currency) ? new Intl.NumberFormat('de-DE', { style: 'currency', currency }).format(number) : `${raw} (Währung fehlt)`
@@ -249,7 +251,7 @@ export function FieldRenderer({
           <Input
             {...commonProps}
             ref={inputRef}
-            type={field.type === 'number' ? 'number' : field.type === 'date' ? 'date'
+            type={field.type === 'number' ? 'number' : field.type === 'date' ? 'date' : field.type === 'period' ? 'month'
               : field.format === 'email' ? 'email' : field.format === 'phone' ? 'tel' : 'text'}
             inputMode={field.type === 'quantity' || field.type === 'currency' || field.type === 'percentage' ? 'decimal' : undefined}
             autoComplete={field.format === 'email' ? 'email' : field.format === 'phone' ? 'tel' : undefined}

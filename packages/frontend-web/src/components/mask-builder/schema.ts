@@ -66,6 +66,8 @@ export type ScreenFieldType =
   | 'percentage'
   /** Menge mit Einheit (`unit` fest oder `unitField` aus den Daten). */
   | 'quantity'
+  /** Buchungs- oder Meldeperiode JJJJ-MM (Monatsauswahl). */
+  | 'period'
   /** Geheimnis (Passwort, Token): wird verdeckt eingegeben und nie angezeigt. */
   | 'password'
 
@@ -82,7 +84,8 @@ export interface ScreenComputation {
 }
 
 /** Pruef- und Anzeigeformat eines Textfelds. */
-export type ScreenTextFormat = 'email' | 'phone' | 'iban'
+export type ScreenTextFormat =
+  | 'email' | 'phone' | 'iban' | 'vatId' | 'gln' | 'gtin' | 'sscc' | 'hsCode' | 'currencyCode' | 'monthDay'
 
 export interface ScreenDataSource {
   key: string

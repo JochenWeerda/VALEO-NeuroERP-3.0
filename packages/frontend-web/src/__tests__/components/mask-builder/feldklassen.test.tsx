@@ -76,3 +76,22 @@ describe('Geschaeftstag', () => {
     expect(formatCellValue('2026-03-29', 'date')).toBe('29.03.2026')
   })
 })
+
+describe('Wertetypen wie im Backend (config/wertetypen.json)', async () => {
+  const { default: wertetypen } = await import('@/components/mask-builder/runtime/wertetypen.generated.json')
+  const { validPeriod } = await import('@/components/mask-builder/runtime/text-format')
+  for (const [format, faelle] of Object.entries(wertetypen.beispiele)) {
+    it(`${format}: dieselben Beispiele wie app/core/wertetypen.py`, () => {
+      const pruefe = (wert: string) => format === 'period' ? validPeriod(wert)
+        : validTextFormat(format as Parameters<typeof validTextFormat>[0], wert)
+      for (const wert of faelle.gueltig) expect(pruefe(wert), wert).toBe(true)
+      for (const wert of faelle.ungueltig) expect(pruefe(wert), wert).toBe(false)
+    })
+  }
+  it('zeigt Periode und Kennungen lesbar', async () => {
+    const { formatPeriod } = await import('@/components/mask-builder/runtime/text-format')
+    expect(formatPeriod('2026-11')).toBe('11/2026')
+    expect(formatReadOnlyValue('period', '2026-11')).toBe('11/2026')
+    expect(formatReadOnlyValue('text', 'de 123-456-789', 'EUR', undefined, 'vatId')).toBe('DE123456789')
+  })
+})

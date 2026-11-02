@@ -1,6 +1,6 @@
 import { validTableInputValues } from './table-input-contract'
 import { validTextFileValue } from './text-file-contract'
-import { FORMAT_MESSAGE, validTextFormat } from './text-format'
+import { FORMAT_MESSAGE, validPeriod, validTextFormat } from './text-format'
 import { useCallback, useMemo, useRef, useState } from 'react'
 import type { ScreenDefinition, ScreenFieldDefinition } from '../schema'
 import type { DirtyState, FieldError, SubmitState, UniversalFormState, ValidationPlan, ValidationRule } from './FormState'
@@ -20,6 +20,10 @@ function buildValidationRules(fields: ScreenFieldDefinition[]): ValidationRule[]
       const format = field.format
       rules.push({ fieldKey: field.key, message: `${field.label}: ${FORMAT_MESSAGE[format]}`,
         severity: 'blocking', validate: value => !validTextFormat(format, value) })
+    }
+    if (field.type === 'period') {
+      rules.push({ fieldKey: field.key, message: `${field.label}: bitte eine Periode als JJJJ-MM wählen.`,
+        severity: 'blocking', validate: value => !validPeriod(value) })
     }
     if (field.required && !field.computed) {
       rules.push({
