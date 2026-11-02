@@ -20274,4 +20274,11 @@ Positionsaktionen der Rechnungserfassungen).
 Dazu (Feldvertrag, tests/test_mask_field_contracts.py PLATZHALTER_ALTLAST/UNGETYPT_ALTLAST): 17 generierte
 batch15-Platzhaltermasken mit id/name/status/updated_at (sieben Stammdatenmasken lesen faelschlich
 /stammdaten/betriebsstaetten, u.a. Hausbanken, Mengeneinheiten) und 8 ungetypte Kopfquellen.
+Weitere nur schrumpfende Altlast-Dateien derselben Ursache (02.11.2026, PR #99):
+config/screen_list_routes.generated.json "ohne_route" (223 Masken, die keine Seite rendert),
+config/mask_endpoint_altlast.json (42 Quellen ohne Backend-Route, u.a. 38 FiBu-Platzhalter auf
+/fibu/anlagen bzw. /finance/abstimmung/nebenbuch; Betriebsprofile heissen /crm/farm-profiles,
+Kostenstellen /kostenrechnung/kostenstellen), config/meridian_beleg_altlast.json (143 Platzhalter-
+Identitaeten, 9 Bezugsfelder fuer rohe IDs in crm/campaign, crm/consent, crm/gdpr-request,
+fibu/op-skonto-auszifferung, lager/charge, lager/permanente-inventur, silo/silo - brauchen Lookups).
 
