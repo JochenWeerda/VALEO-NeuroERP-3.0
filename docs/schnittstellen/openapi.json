@@ -71426,6 +71426,17 @@
             ],
             "title": "Kreditlimit"
           },
+          "kundennummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kundennummer"
+          },
           "name": {
             "anyOf": [
               {
@@ -71768,6 +71779,17 @@
               }
             ],
             "title": "Kreditoren Nr"
+          },
+          "lieferantennummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lieferantennummer"
           },
           "name": {
             "anyOf": [

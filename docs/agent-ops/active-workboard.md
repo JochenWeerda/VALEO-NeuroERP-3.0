@@ -20233,3 +20233,13 @@ Kennung zu (debtor_id, kunde_id, creditor_id, lieferant_id, partner_id; ID, Numm
 ohne treffende Kennung und nur eindeutig (vorher Summe nach Namen). Register "Offene Posten" der Debitor- und
 Kreditormaske zeigt die eigenen Posten (vorher leerer Stub). Listen mit Geschaeftspartnernummer.
 Naechstes: Stufe 3b eigene Debitoren-/Kreditorennummer je Geschaeftspartner-ID (Nutzerentscheidung 01.11.).
+
+## BP-KONTONUMMERN-STUFE3B-20261102 — abgeschlossen, Claude
+
+Stufe 3b des ADR Geschaeftspartnerstamm (Nutzerentscheidung 01.11.): eigene Debitoren- und Kreditorennummer
+je Geschaeftspartner (debtor_account/creditor_account), vergeben bei der ersten Rolle ueber die Partnerbruecke
+und die Partneranlage; Kreis je Mandant (number_ranges), Standard DATEV 10000-69999 / 70000-99999; vergebene
+Nummer unveraenderlich, je Mandant eindeutig. Migration partner_kontonummern_20261102 fuellt den Bestand mit
+Protokoll und bezieht sepa_mandates ueber partner_id auf den Partner. Debitor-/Kreditormaske und -liste zeigen
+das Konto, Kunden-/Lieferantennummer daneben.
+Offen: OP-Zuordnung ueber Kontonummer, sobald Buchungen sie schreiben; Stufen 5-6.

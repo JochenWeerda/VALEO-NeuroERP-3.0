@@ -53,14 +53,16 @@ def test_created_debtor_is_listed_and_opens_in_detail(debitoren):
     listed = send("GET", "/api/v1/finance/debitoren")
     assert listed.status_code == 200, listed.text
     row = next(item for item in listed.json() if item["id"] == debitor_id)
-    assert row["debitoren_nr"] == number
+    assert row["kundennummer"] == number
+    assert row["debitoren_nr"] and row["debitoren_nr"] != number  # Konto am Partner (Stufe 3b)
     assert row["kreditlimit"] == 5000
     assert row["zahlungsbedingungen"] == "14 Tage"
     assert row["ust_id"] == "DE123456789"
 
     detail = send("GET", f"/api/v1/finance/debitoren/{debitor_id}")
     assert detail.status_code == 200, detail.text
-    assert detail.json()["debitoren_nr"] == number
+    assert detail.json()["kundennummer"] == number
+    assert detail.json()["debitoren_nr"] == row["debitoren_nr"]
 
     # Kein zweiter Stammsatz in der stillgelegten Tabelle.
     assert db.execute(text("SELECT count(*) FROM domain_erp.debitors WHERE debitor_number = :n"),
