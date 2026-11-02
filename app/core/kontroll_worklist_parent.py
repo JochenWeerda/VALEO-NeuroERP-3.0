@@ -36,18 +36,23 @@ DOCUMENT_CONTROL_EXCEPTION_COLUMNS: list[dict[str, Any]] = [
     {"key": "created_at", "label": "Erfasst", "renderKind": "datetime", "sortable": True, "width": 150},
 ]
 
+_DC_WEG = "/api/v1/document-control/exceptions/{entity_id}/actions/"
+_DC_OFFEN = {"field": "status", "values": ["open", "assigned", "in_progress"]}
+
+
+def _dc_kommando(key: str, label: str, **extra: Any) -> dict[str, Any]:
+    """Kommando-Weg (MASK-COMMANDS-ROLLOUT, be1e34df7): Maske, CLI und MCP rufen denselben Fachweg."""
+    return {"key": key, "label": label, "visibleWhen": extra.pop("visibleWhen", _DC_OFFEN),
+            "commandEndpoint": _DC_WEG + key, "method": "POST", "auditReasonRequired": True,
+            "permission": "document_control.write", **extra}
+
+
 DOCUMENT_CONTROL_ROW_ACTIONS: list[dict[str, Any]] = [
-    {"key": "assign_me", "label": "Zuweisen", "visibleWhen": {"field": "status", "values": ["open", "assigned", "in_progress"]}},
-    {"key": "start_work", "label": "In Arbeit", "visibleWhen": {"field": "status", "values": ["open", "assigned"]}},
-    {"key": "resolve", "label": "Erledigt", "visibleWhen": {"field": "status", "values": ["open", "assigned", "in_progress"]}},
-    {
-        "key": "waive",
-        "label": "Verwerfen",
-        "dangerLevel": "moderate",
-        "permission": "document_control.write",
-        "visibleWhen": {"field": "status", "values": ["open", "assigned", "in_progress"]},
-    },
-    {"key": "open_source", "label": "Zum Beleg"},
+    _dc_kommando("assign_me", "Zuweisen"),
+    _dc_kommando("start_work", "In Arbeit", visibleWhen={"field": "status", "values": ["open", "assigned"]}),
+    _dc_kommando("resolve", "Erledigt"),
+    _dc_kommando("waive", "Verwerfen", dangerLevel="moderate", requiresConfirmation=True, humanApprovalRequired=True),
+    {"key": "open_source", "label": "Zum Beleg", "localEffect": "navigation"},
 ]
 
 DOCUMENT_CONTROL_NO_WORKFLOW_REASON = (

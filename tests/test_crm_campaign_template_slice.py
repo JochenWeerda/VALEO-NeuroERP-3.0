@@ -45,7 +45,10 @@ def test_definition_uses_real_contract_and_human_only_writes():
     assert {field["key"] for field in fields} == {
         "name", "description", "campaign_type", "subject_line", "message_body", "is_active"
     }
-    edit, duplicate, back = definition["actions"]
+    edit, duplicate, delete, back = definition["actions"]
+    # Loeschen (seit Runtime46): nur Menschen, mit Bestaetigung, ueber den Ressourcenweg.
+    assert (delete["method"], delete["forbiddenForAgents"], delete["requiresConfirmation"]) == ("DELETE", True, True)
+    assert delete["commandEndpoint"].endswith("/templates/{entity_id}")
     assert edit["method"] == "PUT" and edit["inputFields"] == fields
     assert edit["inputPrefill"] == "entity"
     assert edit["forbiddenForAgents"] and duplicate["forbiddenForAgents"]
