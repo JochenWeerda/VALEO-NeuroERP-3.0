@@ -27572,6 +27572,42 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     },
     {
+      "tool_id": "studio.catalog.read",
+      "domain": "studio",
+      "scope": "masks:read",
+      "idempotent": true,
+      "risk_class": "low",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "studio.definition.validate",
+      "domain": "studio",
+      "scope": "masks:read",
+      "idempotent": true,
+      "risk_class": "low",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "studio.draft.save",
+      "domain": "studio",
+      "scope": "belege:write",
+      "idempotent": true,
+      "risk_class": "low",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "studio.draft.submit_review",
+      "domain": "studio",
+      "scope": "belege:write",
+      "idempotent": true,
+      "risk_class": "low",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
       "tool_id": "studio.migration.plan",
       "domain": "studio",
       "scope": "belege:write",
