@@ -95,7 +95,11 @@ def test_keine_migration_schreibt_gebuchte_werte_um() -> None:
         text = datei.read_text(encoding="utf-8", errors="ignore")
         for treffer in anweisung.finditer(text):
             art = treffer.group("art").upper()
-            rest = treffer.group("rest")
+            # Mehrzeilige Anweisungen (aneinandergereihte String-Stuecke) bis zum Ende des Aufrufs lesen:
+            # die IS-NULL-Bedingung steht oft erst in der naechsten Zeile.
+            enden = (text.find("\n    )", treffer.end()), text.find("\n\n", treffer.end()))
+            ende = min((i for i in enden if i >= 0), default=len(text))
+            rest = text[treffer.start("rest"):ende]
             if art.startswith("DELETE"):
                 verstoesse.append(f"{datei.name}: DELETE auf gebuchten Saetzen")
             elif "IS NULL" not in rest.upper():
