@@ -147,6 +147,9 @@ async def create_period(
             {"period": period_data.period, "status": period_data.status},
             request=request,
         )
+        # Periode und Audit-Eintrag in einer Transaktion festschreiben; get_db committet nicht (bis 02.11.2026
+        # meldete der Weg Erfolg, und die Periode war nach dem Request verloren).
+        db.commit()
         return period_out
 
     except HTTPException:
@@ -306,6 +309,9 @@ async def update_period(
             {"status": period_update.status, "closed_by": period_update.closed_by},
             request=request,
         )
+        # Ohne commit blieb ein Periodenabschluss ungespeichert: Buchungen in die "geschlossene" Periode gingen
+        # weiter durch (GoBD). Aenderung und Audit-Eintrag zusammen festschreiben.
+        db.commit()
 
         # Fetch updated period
         result = db.execute(

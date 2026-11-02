@@ -276,6 +276,17 @@ class VersandNichtMoeglich(DomainError):
             self.http_status = 502
 
 
+def _im_mandanten(tenant_id: str):
+    """Mandantenkontext fuer Schreibvorgaenge; ein schon gesetzter Kontext desselben Mandanten bleibt."""
+    from contextlib import nullcontext
+
+    from app.core.tenant_context import current_tenant_or_none, tenant_scope
+
+    if current_tenant_or_none() == tenant_id:
+        return nullcontext()
+    return tenant_scope(tenant_id, "ProcurementService schreibt Positionen")
+
+
 class ProcurementService:
     def __init__(self, db: Session, tenant_id: str) -> None:
         self.db = db
@@ -967,7 +978,10 @@ class ProcurementService:
                 }},
             )
             self.db.add(pos)
-        self.db.flush()
+        # Positionen holen tenant_id per Vorgabe aus rls_current_tenant(); auch ausserhalb eines Requests
+        # (Dienstaufruf, Auftrag -> Bestellung) gilt der Mandant dieses Dienstes.
+        with _im_mandanten(self.tenant_id):
+            self.db.flush()
         _summen_rechnen(bestellung)
         if commit:
             self.db.commit()
