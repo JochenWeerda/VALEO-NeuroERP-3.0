@@ -8,6 +8,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { NativeSelect } from '@/components/ui/native-select'
 import type { ScreenFieldDefinition } from '../schema'
 import { renderValue } from './render-utils'
+import { formatTextValue } from '../runtime/text-format'
+import { formatBusinessDateTime } from '@/lib/business-time'
 import { statusLabel } from './status-labels'
 import { VoiceBar } from './VoiceBar'
 import { createDefaultSttProvider, type SttProvider } from '@/lib/voice/stt-provider'
@@ -24,11 +26,17 @@ function alsListe(value: unknown): string[] {
  * Anzeige eines Nur-Lese-Werts im deutschen Format. Ohne Formatregel oder bei
  * unlesbarem Wert bleibt der Rohwert stehen, damit nichts verschluckt wird.
  */
-export function formatReadOnlyValue(type: ScreenFieldDefinition['type'], value: unknown, currency = 'EUR'): string {
+export function formatReadOnlyValue(
+  type: ScreenFieldDefinition['type'], value: unknown, currency = 'EUR', unit?: string, format?: ScreenFieldDefinition['format'],
+): string {
   const raw = renderValue(value)
   if (raw === '') return ''
   const number = Number(raw)
   switch (type) {
+    case 'quantity':
+      return Number.isFinite(number) ? `${new Intl.NumberFormat('de-DE').format(number)}${unit ? ` ${unit}` : ''}` : raw
+    case 'text':
+      return formatTextValue(format, raw)
     case 'currency':
       return Number.isFinite(number)
         ? /^[A-Z]{3}$/.test(currency) ? new Intl.NumberFormat('de-DE', { style: 'currency', currency }).format(number) : `${raw} (Währung fehlt)`
@@ -42,10 +50,8 @@ export function formatReadOnlyValue(type: ScreenFieldDefinition['type'], value: 
       const match = ISO_DATE.exec(raw)
       return match ? `${match[3]}.${match[2]}.${match[1]}` : raw
     }
-    case 'datetime': {
-      const date = new Date(raw)
-      return Number.isNaN(date.getTime()) ? raw : date.toLocaleString('de-DE')
-    }
+    case 'datetime':
+      return formatBusinessDateTime(raw) ?? raw
     case 'boolean':
       if (raw === 'true') return 'Ja'
       if (raw === 'false') return 'Nein'
@@ -62,10 +68,13 @@ export function FieldRenderer({
   voiceEnabled = true,
   voiceProvider,
   currency = 'EUR',
+  unit,
 }: {
   field: ScreenFieldDefinition
   value: unknown
   currency?: string
+  /** Aufgeloeste Einheit einer Menge (fest oder aus dem Datensatz). */
+  unit?: string
   onChange?: (_value: unknown) => void
   voiceEnabled?: boolean
   voiceProvider?: SttProvider | null
@@ -226,7 +235,7 @@ export function FieldRenderer({
           {...commonProps}
           ref={inputRef}
           type="text"
-          value={field.key === 'status' ? statusLabel(renderValue(value)) : formatReadOnlyValue(field.type, value, currency)}
+          value={field.key === 'status' ? statusLabel(renderValue(value)) : formatReadOnlyValue(field.type, value, currency, unit ?? field.unit, field.format)}
         />
       ) : field.type === 'boolean' ? (
         <Checkbox
@@ -236,11 +245,20 @@ export function FieldRenderer({
           onCheckedChange={(checked) => onChange?.(checked === true)}
         />
       ) : (
-        <Input
-          {...commonProps}
-          ref={inputRef}
-          type={field.type === 'number' ? 'number' : field.type === 'date' ? 'date' : 'text'}
-        />
+        <div className={field.type === 'quantity' ? 'flex items-center gap-2' : undefined}>
+          <Input
+            {...commonProps}
+            ref={inputRef}
+            type={field.type === 'number' ? 'number' : field.type === 'date' ? 'date'
+              : field.format === 'email' ? 'email' : field.format === 'phone' ? 'tel' : 'text'}
+            inputMode={field.type === 'quantity' || field.type === 'currency' || field.type === 'percentage' ? 'decimal' : undefined}
+            autoComplete={field.format === 'email' ? 'email' : field.format === 'phone' ? 'tel' : undefined}
+            spellCheck={field.format === 'iban' ? false : undefined}
+          />
+          {field.type === 'quantity' && (unit ?? field.unit) ? (
+            <span className="text-sm text-muted-foreground" data-field-unit={field.key}>{unit ?? field.unit}</span>
+          ) : null}
+        </div>
       )}
       {canDictate ? (
         <VoiceBar

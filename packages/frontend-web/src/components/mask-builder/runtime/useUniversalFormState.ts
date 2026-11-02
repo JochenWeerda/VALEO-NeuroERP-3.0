@@ -1,5 +1,6 @@
 import { validTableInputValues } from './table-input-contract'
 import { validTextFileValue } from './text-file-contract'
+import { FORMAT_MESSAGE, validTextFormat } from './text-format'
 import { useCallback, useMemo, useRef, useState } from 'react'
 import type { ScreenDefinition, ScreenFieldDefinition } from '../schema'
 import type { DirtyState, FieldError, SubmitState, UniversalFormState, ValidationPlan, ValidationRule } from './FormState'
@@ -15,7 +16,12 @@ function buildValidationRules(fields: ScreenFieldDefinition[]): ValidationRule[]
       rules.push({ fieldKey: field.key, message: `${field.label}: Bitte Tabellenstruktur, Pflichtfelder und Zahlen prüfen.`,
         severity: 'blocking', validate: value => !validTableInputValues(field, value) })
     }
-    if (field.required) {
+    if (field.format) {
+      const format = field.format
+      rules.push({ fieldKey: field.key, message: `${field.label}: ${FORMAT_MESSAGE[format]}`,
+        severity: 'blocking', validate: value => !validTextFormat(format, value) })
+    }
+    if (field.required && !field.computed) {
       rules.push({
         fieldKey: field.key,
         message: `${field.label} ist ein Pflichtfeld.`,

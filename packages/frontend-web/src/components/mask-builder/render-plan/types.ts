@@ -39,6 +39,7 @@ export type RenderComponentKind =
   | 'lookup'
   | 'currency'
   | 'percentage'
+  | 'quantity'
   | 'password'
 
 export interface RenderShellPlan {
@@ -152,6 +153,10 @@ export interface RenderTabContentPlan {
 
 export interface RenderFieldPlan {
   currencyField?: string
+  unit?: string
+  unitField?: string
+  format?: ScreenFieldDefinition['format']
+  computed?: ScreenFieldDefinition['computed']
   key: string
   label: string
   componentKind: RenderComponentKind
@@ -180,6 +185,8 @@ export type RenderColumnKind =
   | 'datetime'
   | 'status'
   | 'boolean'
+  | 'quantity'
+  | 'percentage'
 
 export type RenderColumnPriority = 'primary' | 'secondary' | 'tertiary'
 
@@ -192,6 +199,10 @@ export interface RenderTableColumnPlan {
   filterable?: boolean
   renderKind?: RenderColumnKind
   currencyField?: string
+  unit?: string
+  unitField?: string
+  computed?: ScreenFieldDefinition['computed']
+  aggregate?: 'sum'
   defaultSort?: 'asc' | 'desc'
   priority?: RenderColumnPriority
 }

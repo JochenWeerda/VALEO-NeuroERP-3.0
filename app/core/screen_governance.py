@@ -42,6 +42,8 @@ FIELD_TYPES = frozenset({
     "table",
     "currency",
     "percentage",
+    "quantity",
+    "stringList",
     "password",
 })
 
@@ -51,6 +53,8 @@ PRIMITIVE_BY_FIELD_TYPE = {
     "number": "NumberField",
     "currency": "NumberField",
     "percentage": "NumberField",
+    "quantity": "NumberField",
+    "stringList": "TextField",
     "date": "DateField",
     "datetime": "DateTimeField",
     "select": "Select",
@@ -63,6 +67,44 @@ PRIMITIVE_BY_FIELD_TYPE = {
 }
 
 REJECTED_KEYS = ("screenType", "listReport", "form")
+
+# Rechnende Felder/Spalten: feste Operationen, kein auswertbarer Ausdruck (wie runtime/computed-fields.ts).
+COMPUTATION_OPS = frozenset({"sum", "product", "difference", "ratio", "percentOf"})
+_ZWEI_OPERANDEN = frozenset({"difference", "ratio", "percentOf"})
+NUMERIC_FIELD_TYPES = frozenset({"number", "currency", "percentage", "quantity"})
+NUMERIC_RENDER_KINDS = frozenset({"number", "currency", "quantity", "percentage"})
+TEXT_FORMATS = frozenset({"email", "phone", "iban"})
+
+
+def computation_valid(value: Any) -> bool:
+    if not isinstance(value, dict) or set(value) - {"op", "of", "round"}:
+        return False
+    of = value.get("of")
+    if value.get("op") not in COMPUTATION_OPS or not isinstance(of, list) or not of:
+        return False
+    if any(not isinstance(k, str) or not k for k in of) or len(set(of)) != len(of):
+        return False
+    if (len(of) != 2) if value["op"] in _ZWEI_OPERANDEN else (len(of) < 2):
+        return False
+    rnd = value.get("round")
+    return rnd is None or (isinstance(rnd, int) and not isinstance(rnd, bool) and 0 <= rnd <= 6)
+
+
+def _computed_field_errors(fields: list[dict[str, Any]]) -> list[str]:
+    """Operanden muessen Felder derselben Ebene sein; Zeilenfelder einer Tabelle rechnen untereinander."""
+    errors: list[str] = []
+    keys = {str(f.get("key")) for f in fields if isinstance(f, dict)}
+    for field in fields:
+        if not isinstance(field, dict):
+            continue
+        comp = field.get("computed")
+        if comp is not None and not (
+                computation_valid(comp) and field.get("type") in NUMERIC_FIELD_TYPES
+                and all(k != field.get("key") and k in keys for k in comp["of"])):
+            errors.append(f"field {field.get('key')} has invalid computed")
+        if isinstance(field.get("rowFields"), list):
+            errors.extend(_computed_field_errors(field["rowFields"]))
+    return errors
 
 REFERENCE_COMMANDS: dict[str, frozenset[str]] = {
     "logistik/tourenplanung": frozenset({
@@ -177,6 +219,10 @@ def validate_screen_definition(definition: dict[str, Any]) -> list[str]:
         field_type = field.get("type")
         if field_type not in FIELD_TYPES:
             errors.append(f"field {key} has unknown component: {field_type}")
+        if field.get("format") is not None and (field_type != "text" or field.get("format") not in TEXT_FORMATS):
+            errors.append(f"field {key} has invalid format")
+
+    errors.extend(_computed_field_errors(_fields(definition)))
 
     data_sources = {
         source.get("key")
@@ -199,6 +245,14 @@ def validate_screen_definition(definition: dict[str, Any]) -> list[str]:
             if column_key in column_keys:
                 errors.append(f"table {table.get('key')} column is duplicated: {column_key}")
             column_keys.add(column_key)
+            if column.get("computed") is not None and (
+                    not computation_valid(column.get("computed")) or column_key in column["computed"]["of"]):
+                errors.append(f"table {table.get('key')} column {column_key} has invalid computed")
+            if column.get("aggregate") is not None and not (
+                    column.get("aggregate") == "sum"
+                    and (column.get("numeric") is True or column.get("computed") is not None
+                         or column.get("renderKind") in NUMERIC_RENDER_KINDS)):
+                errors.append(f"table {table.get('key')} column {column_key} has invalid aggregate")
 
     action_keys: set[str] = set()
     commands: list[str] = []

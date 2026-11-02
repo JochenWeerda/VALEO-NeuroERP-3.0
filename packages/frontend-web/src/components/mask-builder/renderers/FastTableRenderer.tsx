@@ -10,6 +10,8 @@ import { navigateRowRoute, rowIdentity } from './row-identity'
 import { columnsForWidth } from './column-priority'
 import { evaluateCondition, matchesValueList } from '../governance/condition-engine'
 import { statusLabel } from './status-labels'
+import { formatBusinessDate, formatBusinessDateTime } from '@/lib/business-time'
+import { computeValue, sumColumn } from '../runtime/computed-fields'
 
 interface FastTableRendererProps {
   table: RenderTablePlan
@@ -32,18 +34,29 @@ interface FastTableRendererProps {
   suppressHeading?: boolean
 }
 
-export function formatCellValue(value: unknown, renderKind: RenderColumnKind | undefined, currency = 'EUR'): ReactNode {
+export function formatCellValue(value: unknown, renderKind: RenderColumnKind | undefined, currency = 'EUR', unit?: string): ReactNode {
   if (value == null) return '–'
   switch (renderKind) {
+    case 'quantity': {
+      const menge = Number(value)
+      return Number.isFinite(menge) ? `${new Intl.NumberFormat('de-DE').format(menge)}${unit ? ` ${unit}` : ''}` : String(value)
+    }
+    case 'percentage': {
+      const anteil = Number(value)
+      return Number.isFinite(anteil) ? `${new Intl.NumberFormat('de-DE', { maximumFractionDigits: 2 }).format(anteil)} %` : String(value)
+    }
+    case 'number': {
+      const zahl = Number(value)
+      return Number.isFinite(zahl) ? new Intl.NumberFormat('de-DE').format(zahl) : String(value)
+    }
     case 'currency':
       return /^[A-Z]{3}$/.test(currency) ? new Intl.NumberFormat('de-DE', { style: 'currency', currency }).format(Number(value)) : 'Währung fehlt'
     case 'date':
     case 'datetime': {
+      // Geschaeftstag: ein Kalendertag wird nie als UTC-Zeitpunkt gelesen, Zeitpunkte in der Betriebszeitzone.
       const raw = String(value).trim()
       if (!raw) return '–'
-      const date = new Date(raw)
-      if (Number.isNaN(date.getTime())) return '–'
-      return renderKind === 'date' ? date.toLocaleDateString('de-DE') : date.toLocaleString('de-DE')
+      return (renderKind === 'date' ? formatBusinessDate(raw) : formatBusinessDateTime(raw)) ?? '–'
     }
     case 'boolean':
       return value ? 'Ja' : 'Nein'
@@ -58,8 +71,23 @@ export function formatCellValue(value: unknown, renderKind: RenderColumnKind | u
   }
 }
 
+/** Wert einer Zelle; eine rechnende Spalte rechnet aus derselben Zeile (Vorschau, der Server bleibt massgeblich). */
+function cellValue(column: RenderTablePlan['columns'][number], row: Record<string, unknown>, value: unknown): unknown {
+  return column.computed ? computeValue(column.computed, (key) => row[key]) : value
+}
+
+function columnUnit(column: RenderTablePlan['columns'][number], row: Record<string, unknown>): string | undefined {
+  return column.unitField ? String(row[column.unitField] ?? '') || column.unit : column.unit
+}
+
+/** Einheit/Waehrung der Summenzeile nur, wenn alle Zeilen dieselbe tragen; sonst keine (gemischte Summe). */
+function einheitlich(rows: Record<string, unknown>[], key: string): string | undefined {
+  const werte = new Set(rows.map((row) => String(row[key] ?? '')))
+  return werte.size === 1 ? [...werte][0] || undefined : undefined
+}
+
 function isProfileNumeric(table: RenderTablePlan, column: RenderTablePlan['columns'][number]): boolean {
-  if (column.numeric || column.renderKind === 'currency' || column.renderKind === 'number') return true
+  if (column.numeric || column.computed || ['currency', 'number', 'quantity', 'percentage'].includes(column.renderKind ?? '')) return true
   if (table.tableProfile === 'financial') return /betrag|saldo|soll|haben|steuer|skonto|summe|differenz|amount|debit|credit/i.test(column.key)
   if (table.tableProfile === 'inventory') return /menge|bestand|reserv|verfueg|block|quantity|qty|stock|unit/i.test(column.key)
   return false
@@ -173,10 +201,13 @@ export const FastTableRenderer = memo(function FastTableRenderer({
     width: column.width,
     numeric: isProfileNumeric(table, column),
     sortable: column.sortable,
-    render: column.renderKind
-      ? (value: unknown, row: Record<string, unknown>) => formatCellValue(value, column.renderKind, column.currencyField ? String(row[column.currencyField] ?? '') : 'EUR')
+    render: column.renderKind || column.computed
+      ? (value: unknown, row: Record<string, unknown>) => formatCellValue(
+        cellValue(column, row, value), column.renderKind ?? 'number',
+        column.currencyField ? String(row[column.currencyField] ?? '') : 'EUR', columnUnit(column, row))
       : undefined,
   }))
+  const summen = priorityColumns.filter((column) => column.aggregate === 'sum')
   const selectableColumns = table.bulkActions?.length && onRowAction
     ? [{
         key: '__selected',
@@ -448,6 +479,20 @@ export const FastTableRenderer = memo(function FastTableRenderer({
             columns={renderedColumns}
           />
         )}
+        {summen.length > 0 && visibleRows.length > 0 ? (
+          <dl className="flex flex-wrap justify-end gap-x-6 gap-y-1 border-t pt-2 text-sm" data-table-totals={table.key}>
+            {summen.map((column) => (
+              <div key={column.key} className="flex gap-2">
+                <dt className="text-muted-foreground">Summe {column.label}</dt>
+                <dd className="font-medium tabular-nums">
+                  {column.currencyField && !einheitlich(visibleRows, column.currencyField) ? 'Währungen gemischt' : formatCellValue(sumColumn(visibleRows, (row) => cellValue(column, row, row[column.key])),
+                    column.renderKind ?? 'number', column.currencyField ? einheitlich(visibleRows, column.currencyField) : 'EUR',
+                    column.unitField ? einheitlich(visibleRows, column.unitField) : column.unit)}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        ) : null}
         {isServerPaged && totalPages !== undefined && totalPages > 1 ? (
           <div className="flex items-center justify-end gap-2 pt-2">
             <Button

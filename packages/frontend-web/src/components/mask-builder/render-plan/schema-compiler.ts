@@ -15,6 +15,7 @@ import { compileProcessRibbon, type ProcessChain } from '../renderers/process-ri
 import { buildRenderPlanCacheKey, type CompileContext } from './compile-context'
 import { globalRenderPlanCache } from './cache'
 import { validTextFileDefinitions } from '../runtime/text-file-contract'
+import { columnExtras, fieldExtras } from './field-extras'
 import { fieldTypeToComponentKind, type RenderActionPlan, type RenderCalendarPlan, type RenderFieldPlan, type RenderPlan, type RenderProcessRibbonPlan, type RenderTabContentPlan, type RenderTabPlan, type RenderTablePlan, type RenderTilePlan, type RenderTwinPlan } from './types'
 
 const DEFAULT_LOOKUP_MIN_CHARS = 2
@@ -38,7 +39,8 @@ function compileField(
     tabKey,
     order,
     required: field.required ?? false,
-    readOnly: field.readOnly ?? false,
+    // Ein rechnendes Feld ist nie eingebbar.
+    readOnly: (field.readOnly ?? false) || field.computed !== undefined,
     visible: true,
     placeholder: field.placeholder,
     helpText: field.helpText,
@@ -47,6 +49,7 @@ function compileField(
     minSearchChars: field.minSearchChars ?? performanceLookupMinChars,
     renderHint: field.renderHint,
     currencyField: field.currencyField,
+    ...fieldExtras(field),
     rowFields: field.rowFields,
     tableEditing: field.tableEditing,
     ...(field.fileContent !== undefined ? { fileContent: field.fileContent } : {}),
@@ -95,6 +98,7 @@ function compileTable(
       filterable: column.filterable,
       renderKind: column.renderKind,
       currencyField: column.currencyField,
+      ...columnExtras(column),
       defaultSort: column.defaultSort,
       priority: column.priority,
     })),

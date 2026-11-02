@@ -8,6 +8,7 @@ export const PRIMITIVE_BY_FIELD_TYPE: Record<ScreenFieldType, string> = {
   number: 'NumberField',
   currency: 'NumberField',
   percentage: 'NumberField',
+  quantity: 'NumberField',
   password: 'TextField',
   date: 'DateField',
   datetime: 'DateTimeField',
@@ -27,6 +28,8 @@ export const PRIMITIVE_BY_RENDER_KIND = {
   datetime: 'DateTimeField',
   status: 'StatusBadge',
   boolean: 'Checkbox',
+  quantity: 'NumberField',
+  percentage: 'NumberField',
 } as const
 
 export function primitiveForFieldType(type: string): string | null {
