@@ -43,17 +43,17 @@ def _user_from_request(request: Optional[Request]) -> Optional[str]:
 
 @router.get("/profiles", response_model=List[ConnectorProfile], summary="Profiles auflisten", dependencies=[Depends(finance_read)])
 async def list_profiles(
-    type: str = Query(..., pattern="^(PAYROLL|ASSET_LEDGER)$"),
+    type: Optional[str] = Query(None, pattern="^(PAYROLL|ASSET_LEDGER)$"),
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    """Profile pro Mandant und Connector-Typ."""
+    """Profile pro Mandant, wahlweise je Connector-Typ (die Liste fibu/schnittstelle-fibu-liste zeigt alle)."""
     rows = db.execute(
         text("""
             SELECT id, tenant_id, connector_type, name, is_default, settings, mapping, version, created_at, updated_at, created_by, updated_by
             FROM domain_erp.fibu_connector_profiles
-            WHERE tenant_id = :tid AND connector_type = :ct
-            ORDER BY is_default DESC, name
+            WHERE tenant_id = :tid AND (CAST(:ct AS text) IS NULL OR connector_type = :ct)
+            ORDER BY connector_type, is_default DESC, name
         """),
         {"tid": tenant_id, "ct": type},
     ).fetchall()
