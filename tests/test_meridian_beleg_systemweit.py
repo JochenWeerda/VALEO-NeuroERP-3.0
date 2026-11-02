@@ -44,6 +44,9 @@ _READABLE_SUFFIXES = ("_name", "_nummer", "_number", "_nr")
 _RAW_KEY_ALLOWLIST = {
     # USt-IdNr. ist eine Steuernummer, kein Fremdschluessel.
     "ust_id",
+    "vat_id",
+    # Glaeubiger-Identifikationsnummer der Bundesbank (SEPA), eine fachliche Kennung.
+    "sepa_glaeubiger_id",
     # Futterplan: Herkunftsnachweis, ausdruecklich als technische ID beschriftet.
     "plan_id",
     "source_ration_version_id",
@@ -79,6 +82,11 @@ def _visible(fields: list[dict]) -> list[dict]:
     return [f for f in fields if f.get("key") and not f.get("hidden")]
 
 
+def _lesbare_auswahl(field: dict) -> bool:
+    """Ein Lookup aus einer Datenquelle zeigt den Namen des Gegenuebers, nicht seinen Schluessel."""
+    return field.get("type") == "lookup" and bool(field.get("dataSourceKey"))
+
+
 # ---------------------------------------------------------------------------
 # Kopf-Gate
 # ---------------------------------------------------------------------------
@@ -89,17 +97,19 @@ def test_kopf_zeigt_keinen_technischen_schluessel(mask_id: str, definition: dict
     roh = [
         f["key"]
         for f in _visible(_head_fields(definition))
-        if _RAW_KEY.search(f["key"]) and f["key"] not in _RAW_KEY_ALLOWLIST
+        if _RAW_KEY.search(f["key"]) and f["key"] not in _RAW_KEY_ALLOWLIST and not _lesbare_auswahl(f)
     ]
     assert roh == [], f"{mask_id}: Kopf zeigt technische Schluessel {roh}"
 
 
 @pytest.mark.parametrize(("mask_id", "definition"), _beleg_definitions(), ids=lambda v: v if isinstance(v, str) else "")
 def test_aenderbarer_bezug_hat_lesbares_gegenstueck(mask_id: str, definition: dict) -> None:
-    keys = {f["key"] for f in _visible(_all_fields(definition))}
+    sichtbar = _visible(_all_fields(definition))
+    keys = {f["key"] for f in sichtbar}
+    auswahl = {f["key"] for f in sichtbar if _lesbare_auswahl(f)}
     ohne_gegenstueck = []
     for key in sorted(keys):
-        if not _RAW_KEY.search(key) or key in _RAW_KEY_ALLOWLIST:
+        if not _RAW_KEY.search(key) or key in _RAW_KEY_ALLOWLIST or key in auswahl:
             continue
         stamm = _RAW_KEY.sub("", key)
         if not any(stamm + suffix in keys for suffix in _READABLE_SUFFIXES):
