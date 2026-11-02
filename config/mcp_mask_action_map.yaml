@@ -1,13 +1,13 @@
 schema_version: '1.0'
 slice_id: MCP-MASK-WRITE-PARITY-20261008
-generated_on: '2026-10-29'
+generated_on: '2026-11-02'
 sources:
   screen_mask_actions: services/ki-usability/app/data/screen_mask_actions.json
   mcp_erp_tools: config/mcp_erp_tools.yaml
   action_stats:
-    actions: 537
-    screens_with_actions: 419
-    domains: 57
+    actions: 610
+    screens_with_actions: 439
+    domains: 56
 mcp_write_tools:
 - crm.contact.log
 - crm.activity.create
@@ -84,17 +84,18 @@ fin_close:
   notes: FIN-CLOSE absichtlich nicht als MCP-Tool. Kein Adapter, kein Scheinabschluss. Bleibt offener
     Fachvertrag ausserhalb Mask-Write-Parität.
 stats:
-  mask_actions_considered: 127
-  mask_mutations_considered: 69
+  mask_actions_considered: 156
+  mask_mutations_considered: 97
   by_coverage:
     adjacent: 1
-    blocked_human_only: 13
-    local_ui: 58
+    blocked_human_only: 29
+    local_ui: 59
     mapped: 42
-    mapped_generic: 6
+    mapped_generic: 9
     mapped_propose_only: 1
     mapped_read: 2
     open_high: 4
+    open_medium: 9
 mappings:
 - mask_action_id: mask:admin/postfaecher:neu
   mask: admin/postfaecher
@@ -367,6 +368,16 @@ mappings:
   coverage: local_ui
   mcp_tool_id: null
   notes: Reine Oberflaechenwirkung (localEffect/navigationRoute) ohne Serverwirkung.
+- mask_action_id: mask:annahme/qualitaets-check:save
+  mask: annahme/qualitaets-check
+  domain: agrar
+  action_key: save
+  label: Qualitätsprüfung speichern
+  command_endpoint: null
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Eingabefluss der Maske (humanForm); Menschen per Maske oder CLI, fuer Agenten gesperrt.
 - mask_action_id: mask:artikel/liste:neu
   mask: artikel/liste
   domain: lager
@@ -449,6 +460,16 @@ mappings:
   coverage: local_ui
   mcp_tool_id: null
   notes: Reine Oberflaechenwirkung (localEffect/navigationRoute) ohne Serverwirkung.
+- mask_action_id: mask:crm/aktivitaet:delete
+  mask: crm/aktivitaet
+  domain: crm
+  action_key: delete
+  label: Aktivitaet loeschen
+  command_endpoint: /api/v1/crm/activities/{entity_id}/actions/delete
+  command: crm.activity.delete.v1
+  mcp_tool_id: null
+  coverage: open_medium
+  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
 - mask_action_id: mask:crm/aktivitaeten-liste:neu
   mask: crm/aktivitaeten-liste
   domain: crm
@@ -469,6 +490,46 @@ mappings:
   coverage: local_ui
   mcp_tool_id: null
   notes: Reine Oberflaechenwirkung (localEffect/navigationRoute) ohne Serverwirkung.
+- mask_action_id: mask:crm/campaign-template:delete
+  mask: crm/campaign-template
+  domain: crm
+  action_key: delete
+  label: Vorlage löschen
+  command_endpoint: /api/v1/crm/campaigns/templates/{entity_id}
+  command: null
+  mcp_tool_id: null
+  coverage: open_medium
+  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
+- mask_action_id: mask:crm/campaign:activate
+  mask: crm/campaign
+  domain: crm
+  action_key: activate
+  label: Starten
+  command_endpoint: /api/v1/crm/campaigns/{entity_id}/activate
+  command: null
+  mcp_tool_id: null
+  coverage: open_medium
+  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
+- mask_action_id: mask:crm/campaign:archive
+  mask: crm/campaign
+  domain: crm
+  action_key: archive
+  label: Archivieren
+  command_endpoint: /api/v1/crm/campaigns/{entity_id}/archive
+  command: null
+  mcp_tool_id: null
+  coverage: open_medium
+  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
+- mask_action_id: mask:crm/campaign:delete
+  mask: crm/campaign
+  domain: crm
+  action_key: delete
+  label: Kampagne löschen
+  command_endpoint: /api/v1/crm/campaigns/{entity_id}
+  command: null
+  mcp_tool_id: null
+  coverage: open_medium
+  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
 - mask_action_id: mask:crm/customer-360:create_activity
   mask: crm/customer-360
   domain: crm
@@ -509,6 +570,26 @@ mappings:
   coverage: local_ui
   mcp_tool_id: null
   notes: Reine Oberflaechenwirkung (localEffect/navigationRoute) ohne Serverwirkung.
+- mask_action_id: mask:crm/gdpr-request:delete
+  mask: crm/gdpr-request
+  domain: crm
+  action_key: delete
+  label: CRM-Personendaten anonymisieren
+  command_endpoint: /api/v1/gdpr/requests/{entity_id}/delete
+  command: null
+  mcp_tool_id: null
+  coverage: open_medium
+  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
+- mask_action_id: mask:crm/gdpr-request:reject
+  mask: crm/gdpr-request
+  domain: crm
+  action_key: reject
+  label: Ablehnen
+  command_endpoint: /api/v1/gdpr/requests/{entity_id}/reject
+  command: null
+  mcp_tool_id: null
+  coverage: open_medium
+  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
 - mask_action_id: mask:crm/kampagnen-liste:neu
   mask: crm/kampagnen-liste
   domain: crm
@@ -539,6 +620,17 @@ mappings:
   coverage: local_ui
   mcp_tool_id: null
   notes: Reine Oberflaechenwirkung (localEffect/navigationRoute) ohne Serverwirkung.
+- mask_action_id: mask:crm/kunden-cockpit:create_activity
+  mask: crm/kunden-cockpit
+  domain: crm
+  action_key: create_activity
+  label: Aktivitaet anlegen
+  command_endpoint: /api/v1/crm/customers/{entity_id}/actions/create_activity
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
 - mask_action_id: mask:crm/kunden-liste:neu
   mask: crm/kunden-liste
   domain: crm
@@ -599,6 +691,26 @@ mappings:
   mcp_tool_id: crm.activity.create
   coverage: mapped
   notes: Gleicher Activity-Adapter; Opportunity-Kontext via kunden_nr/entity.
+- mask_action_id: mask:crm/segment:calculate
+  mask: crm/segment
+  domain: crm
+  action_key: calculate
+  label: Mitglieder berechnen
+  command_endpoint: /api/v1/crm/segments/{entity_id}/calculate
+  command: null
+  mcp_tool_id: null
+  coverage: open_medium
+  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
+- mask_action_id: mask:crm/segment:delete
+  mask: crm/segment
+  domain: crm
+  action_key: delete
+  label: Segment löschen
+  command_endpoint: /api/v1/crm/segments/{entity_id}
+  command: null
+  mcp_tool_id: null
+  coverage: open_medium
+  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
 - mask_action_id: mask:crm/segmente-liste:neu
   mask: crm/segmente-liste
   domain: crm
@@ -720,6 +832,16 @@ mappings:
   coverage: local_ui
   mcp_tool_id: null
   notes: Reine Oberflaechenwirkung (localEffect/navigationRoute) ohne Serverwirkung.
+- mask_action_id: mask:einkauf/rechnungseingang/neu:save
+  mask: einkauf/rechnungseingang/neu
+  domain: einkauf
+  action_key: save
+  label: Als Entwurf speichern
+  command_endpoint: /api/v1/finance/ap/invoices/
+  command: finance.invoiceSpeichern
+  mcp_tool_id: mask.action.execute
+  coverage: mapped_generic
+  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
 - mask_action_id: mask:einkauf/supplier:neue_bestellung
   mask: einkauf/supplier
   domain: einkauf
@@ -772,6 +894,16 @@ mappings:
   mcp_tool_id: fibu.dunning.status
   coverage: mapped_read
   notes: Mahnlauf-Write bewusst nicht; Status-Read vorhanden.
+- mask_action_id: mask:finance/bank-abgleich:import
+  mask: finance/bank-abgleich
+  domain: finance
+  action_key: import
+  label: Kontoauszug importieren
+  command_endpoint: null
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Eingabefluss der Maske (humanForm); Menschen per Maske oder CLI, fuer Agenten gesperrt.
 - mask_action_id: mask:finance/debitoren-liste:neu
   mask: finance/debitoren-liste
   domain: finance
@@ -782,6 +914,16 @@ mappings:
   coverage: local_ui
   mcp_tool_id: null
   notes: Reine Oberflaechenwirkung (localEffect/navigationRoute) ohne Serverwirkung.
+- mask_action_id: mask:finance/invoices/new:save
+  mask: finance/invoices/new
+  domain: finance
+  action_key: save
+  label: Als Entwurf speichern
+  command_endpoint: /api/v1/finance/invoices
+  command: finance.invoiceSpeichern
+  mcp_tool_id: mask.action.execute
+  coverage: mapped_generic
+  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
 - mask_action_id: mask:finance/kreditoren-liste:neu
   mask: finance/kreditoren-liste
   domain: finance
@@ -1085,6 +1227,16 @@ mappings:
   local_effect: navigation
   notes: SD navigationRoute /verladung/lkw-beladung; legt keine Beladung an. MCP-MASK-CE-SANCTIONS-FRACHT-20261009.
   mcp_tool_id: null
+- mask_action_id: mask:mahnwesen/mahnlauf:sendPost
+  mask: mahnwesen/mahnlauf
+  domain: finance
+  action_key: sendPost
+  label: Postversand festhalten
+  command_endpoint: null
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Eingabefluss der Maske (humanForm); Menschen per Maske oder CLI, fuer Agenten gesperrt.
 - mask_action_id: mask:marketing/kampagnen-liste:neu
   mask: marketing/kampagnen-liste
   domain: marketing
@@ -1278,6 +1430,17 @@ mappings:
   coverage: local_ui
   mcp_tool_id: null
   notes: Reine Oberflaechenwirkung (localEffect/navigationRoute) ohne Serverwirkung.
+- mask_action_id: mask:sales/angebote-liste:import_csv
+  mask: sales/angebote-liste
+  domain: sales
+  action_key: import_csv
+  label: CSV importieren
+  command_endpoint: /api/v1/sales/offers/actions/import-csv
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
 - mask_action_id: mask:sales/angebote-liste:neu
   mask: sales/angebote-liste
   domain: sales
@@ -1298,6 +1461,48 @@ mappings:
   coverage: local_ui
   mcp_tool_id: null
   notes: Reine Oberflaechenwirkung (localEffect/navigationRoute) ohne Serverwirkung.
+- mask_action_id: mask:sales/credit-notes:buchen
+  mask: sales/credit-notes
+  domain: sales
+  action_key: buchen
+  label: Buchen
+  command_endpoint: /api/v1/sales/credit-notes/{entity_id}/actions/buchen
+  command: sales.gutschriftBuchen
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
+- mask_action_id: mask:sales/credit-notes:neu
+  mask: sales/credit-notes
+  domain: sales
+  action_key: neu
+  label: Neue Gutschrift
+  command_endpoint: null
+  command: sales.gutschriftNeu
+  coverage: local_ui
+  mcp_tool_id: null
+  notes: Reine Oberflaechenwirkung (localEffect/navigationRoute) ohne Serverwirkung.
+- mask_action_id: mask:sales/credit-notes:speichern
+  mask: sales/credit-notes
+  domain: sales
+  action_key: speichern
+  label: Als Entwurf speichern
+  command_endpoint: /api/v1/sales/credit-notes/actions/speichern
+  command: sales.gutschriftSpeichern
+  mcp_tool_id: mask.action.execute
+  coverage: mapped_generic
+  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+- mask_action_id: mask:sales/credit-notes:vorschlag_freigeben
+  mask: sales/credit-notes
+  domain: sales
+  action_key: vorschlag_freigeben
+  label: Vorschlag freigeben
+  command_endpoint: /api/v1/sales/credit-notes/buchungsvorschlaege/{entity_id}/actions/freigeben
+  command: sales.gutschriftVorschlagFreigeben
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
 - mask_action_id: mask:sales/delivery-note:drucken
   mask: sales/delivery-note
   domain: sales
@@ -1413,8 +1618,98 @@ mappings:
   notes: Oeffnet /transporte/fahrer/neu; legt keinen Fahrer an. Der separate Speichervorgang braucht seinen
     Fachvertrag.
   mcp_tool_id: null
+- mask_action_id: mask:waage/liste:dismissImport
+  mask: waage/liste
+  domain: agrar
+  action_key: dismissImport
+  label: Verwerfen
+  command_endpoint: null
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Eingabefluss der Maske (humanForm); Menschen per Maske oder CLI, fuer Agenten gesperrt.
+- mask_action_id: mask:waage/liste:import
+  mask: waage/liste
+  domain: agrar
+  action_key: import
+  label: Datei importieren
+  command_endpoint: null
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Eingabefluss der Maske (humanForm); Menschen per Maske oder CLI, fuer Agenten gesperrt.
+- mask_action_id: mask:waage/liste:retryImport
+  mask: waage/liste
+  domain: agrar
+  action_key: retryImport
+  label: Erneut prüfen
+  command_endpoint: null
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Eingabefluss der Maske (humanForm); Menschen per Maske oder CLI, fuer Agenten gesperrt.
+- mask_action_id: mask:waage/neu:create
+  mask: waage/neu
+  domain: agrar
+  action_key: create
+  label: Waage anlegen
+  command_endpoint: null
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Eingabefluss der Maske (humanForm); Menschen per Maske oder CLI, fuer Agenten gesperrt.
+- mask_action_id: mask:waage/waagen-liste:dismissImport
+  mask: waage/waagen-liste
+  domain: agrar
+  action_key: dismissImport
+  label: Verwerfen
+  command_endpoint: null
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Eingabefluss der Maske (humanForm); Menschen per Maske oder CLI, fuer Agenten gesperrt.
+- mask_action_id: mask:waage/waagen-liste:import
+  mask: waage/waagen-liste
+  domain: agrar
+  action_key: import
+  label: Datei importieren
+  command_endpoint: null
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Eingabefluss der Maske (humanForm); Menschen per Maske oder CLI, fuer Agenten gesperrt.
+- mask_action_id: mask:waage/waagen-liste:retryImport
+  mask: waage/waagen-liste
+  domain: agrar
+  action_key: retryImport
+  label: Erneut prüfen
+  command_endpoint: null
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Eingabefluss der Maske (humanForm); Menschen per Maske oder CLI, fuer Agenten gesperrt.
+- mask_action_id: mask:waage/wiegungen-liste:create
+  mask: waage/wiegungen-liste
+  domain: agrar
+  action_key: create
+  label: Wiegeschein anlegen
+  command_endpoint: null
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Eingabefluss der Maske (humanForm); Menschen per Maske oder CLI, fuer Agenten gesperrt.
+- mask_action_id: mask:waage/wiegungen:create
+  mask: waage/wiegungen
+  domain: agrar
+  action_key: create
+  label: Wiegeschein anlegen
+  command_endpoint: null
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Eingabefluss der Maske (humanForm); Menschen per Maske oder CLI, fuer Agenten gesperrt.
 next_medium_candidates: []
 classification_complete: true
 classification_notes: 'FUHRPARK-TENANT-CE-20261009: Fuhrpark 5× mapped (tenant_id+CE+MCP Isolation); blocked_missing_tenant
-  0. Rest: open_high 4; open_medium 0; blocked_human_only 13; blocked_no_endpoint 0; local_ui 58; FIN-CLOSE
+  0. Rest: open_high 4; open_medium 9; blocked_human_only 29; blocked_no_endpoint 0; local_ui 59; FIN-CLOSE
   blocked_adr_076.'

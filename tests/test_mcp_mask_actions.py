@@ -185,7 +185,8 @@ def test_mcp_weiche_gibt_den_token_weiter(monkeypatch):
     ("agrar.ration.transition", {}, "mask:agrar/ration:activate"),
     ("lager.stock_movement.stornieren", {}, "mask:lager/stock-movement:stornieren"),
     ("logistik.fahrzeug.loeschen", {}, "mask:fuhrpark/fahrzeug-stamm:loeschen"),
-    ("crm.activity.create", {}, None),
+    # Seit Runtime46 schreibt der kanonische Aktivitaetsdienst nur fuer Menschen; die Maske haelt die Grenze.
+    ("crm.activity.create", {}, "mask:crm/customer-360:create_activity"),
 ])
 def test_spezialwerkzeug_erbt_die_agentengrenze_der_maske(tool, parameters, locked):
     assert mm.human_only_tool_call(tool, parameters) == locked
