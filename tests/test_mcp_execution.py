@@ -2084,20 +2084,13 @@ def test_mobile_sync_process_pending_dry_run_and_execute(client):
     db.commit.assert_called()
 
 
-def test_activity_dry_run_is_tenant_scoped_and_non_mutating(client):
+def test_activity_legacy_parameters_are_rejected_before_any_lookup(client):
+    """Seit Runtime46 nimmt crm.activity.create die Felder des kanonischen Aktivitaetsdienstes (type, title,
+    customer_id); Vorschau, fremder Kunde und Wiederholung prueft tests/test_crm_activity_canonical_sql.py."""
     http, _, db = client
-    db.execute.return_value.mappings.return_value.first.return_value = {
-        "id": "c1", "name": "Test GmbH", "kunden_nr": "TEST",
-    }
-    response = http.post("/mcp/tools/call", json={
-        "tool_name": "crm.activity.create",
-        "parameters": ACTIVITY,
-    })
-    assert response.status_code == 200
-    assert response.json()["mode"] == "dryRun"
-    sql = str(db.execute.call_args[0][0])
-    assert "domain_crm.customers" in sql
-    assert "tenant_id" in sql
+    response = http.post("/mcp/tools/call", json={"tool_name": "crm.activity.create", "parameters": ACTIVITY})
+    assert response.status_code == 422
+    db.execute.assert_not_called()
     db.commit.assert_not_called()
 
 
@@ -2109,17 +2102,6 @@ def test_activity_rejects_foreign_mandant_parameter(client):
     })
     assert response.status_code == 422
     db.execute.assert_not_called()
-
-
-def test_activity_cross_tenant_customer_is_not_found(client):
-    http, _, db = client
-    db.execute.return_value.mappings.return_value.first.return_value = None
-    response = http.post("/mcp/tools/call", json={
-        "tool_name": "crm.activity.create",
-        "parameters": ACTIVITY,
-    })
-    assert response.status_code == 404
-    db.commit.assert_not_called()
 
 
 def test_invoice_post_requires_approved_proposal(client):
