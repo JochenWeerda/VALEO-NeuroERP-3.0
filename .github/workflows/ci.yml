@@ -16,6 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DATABASE_URL: postgresql://valeo_dev:REDACTED_PASSWORD@localhost:5432/valeo_neuro_erp
+      # Der Job-Pruefstand ist frisch migriert; RLS- und Nebenlaeufigkeitstests verlangen ihn ausdruecklich.
+      TEST_DATABASE_URL: postgresql://valeo_dev:REDACTED_PASSWORD@localhost:5432/valeo_neuro_erp
       API_DEV_TOKEN: dev-token
       PYTEST_REQUIRE_DB_STRICT: "1"
     services:

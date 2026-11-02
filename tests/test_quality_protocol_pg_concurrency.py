@@ -119,12 +119,17 @@ def test_create_rejects_foreign_acceptance_before_insert():
     engine = create_engine(url, pool_pre_ping=True)
     acceptance_id = f"aw02_{uuid4().hex}"
     protocol_id = f"qp_aw02_{uuid4().hex}"
+    # Eigener Kunde im kanonischen Testmandanten: ein frischer Pruefstand hat keinen Bestand.
+    own_tenant, customer_id = "00000000-0000-0000-0000-000000000001", str(uuid4())
     with Session(engine) as db:
-        own_tenant, customer_id = db.execute(text("""
-            SELECT c.tenant_id, c.id FROM domain_crm.customers c
-            JOIN domain_shared.tenants t ON t.id = c.tenant_id
-            ORDER BY c.id LIMIT 1
-        """)).one()
+        db.execute(text("""
+            INSERT INTO domain_shared.tenants (id, name) VALUES (:tenant, 'Dev/Test Tenant A (kanonisch)')
+            ON CONFLICT (id) DO NOTHING
+        """), {"tenant": own_tenant})
+        db.execute(text("""
+            INSERT INTO domain_crm.customers (id, tenant_id, customer_number, company_name)
+            VALUES (:id, :tenant, :number, 'AW02 Probe')
+        """), {"id": customer_id, "tenant": own_tenant, "number": f"AW02-{uuid4().hex[:12]}"})
         db.execute(text("""
             INSERT INTO domain_inventory.harvest_acceptances
                 (id, acceptance_number, tenant_id, delivery_date, operator_id, customer_id,
@@ -156,6 +161,8 @@ def test_create_rejects_foreign_acceptance_before_insert():
                 DELETE FROM domain_inventory.harvest_acceptances
                 WHERE id=:id AND tenant_id=:tenant
             """), {"id": acceptance_id, "tenant": own_tenant})
+            db.execute(text("DELETE FROM domain_crm.customers WHERE id=:id AND tenant_id=:tenant"),
+                       {"id": customer_id, "tenant": own_tenant})
             db.commit()
         engine.dispose()
 
