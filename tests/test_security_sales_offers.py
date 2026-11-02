@@ -69,6 +69,10 @@ class _CapturingDb:
     def commit(self):
         self.committed = True
 
+    def rollback(self):
+        # create_sales_offer nimmt die Transaktion bei jedem Fehler zurueck (seit Runtime46).
+        self.rolled_back = True
+
 
 @pytest.mark.asyncio
 async def test_create_sales_offer_rejects_payload_tenant_mismatch():
