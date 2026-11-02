@@ -4850,13 +4850,6 @@ export const adminPostfaecherScreen = {
     "touchTargetPx": 44,
     "summaryPlacement": "footer",
     "statusPlacement": "afterFields"
-  },
-  "performance": {
-    "initialPayloadBudgetKb": 24,
-    "requiresLazyTabs": false,
-    "requiresVirtualTables": false,
-    "lookupMinChars": 2,
-    "bundleGroup": "platform"
   }
 } satisfies ScreenDefinition
 
