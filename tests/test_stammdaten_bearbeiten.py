@@ -34,7 +34,9 @@ BEARBEITER = f"bearb-{uuid.uuid4().hex[:8]}"
 TABELLEN = ("domain_crm.crm_action_audit_log", "public.outbox_events", "domain_ops.ops_bankkonten",
             "domain_shared.futtermittel_mischfutter", "public.crm_leads", "public.einkauf_auftragsbestaetigungen",
             "domain_ops.reklamationen", "domain_einkauf.bestellungen",
-            "domain_einkauf.lieferanten", "domain_inventory.articles", "domain_crm.customers")
+            "domain_einkauf.lieferanten", "domain_inventory.articles", "domain_crm.customers",
+            # Seit der Partnerbruecke (Stufe 1) haengt jede Kunden-/Lieferantenanlage an einem Geschaeftspartner.
+            "domain_crm.business_partners")
 
 
 @pytest.fixture(scope="module")
@@ -294,6 +296,9 @@ ERWARTET = {
 @pytest.mark.parametrize("maske,endpunkt", sorted(ERWARTET.items()))
 def test_jede_maske_deklariert_ihren_bearbeitungsweg(maske, endpunkt):
     from app.core.screen_definitions import get_screen_definition
+    from app.core.stamm_object_page_parent import ensure_stamm_screen_registry
+
+    ensure_stamm_screen_registry()  # artikel/stamm registriert sich mit den Stamm-Masken
 
     aktionen = {a.get("commandEndpoint"): a for a in get_screen_definition(maske)["actions"]}
     assert endpunkt in aktionen
