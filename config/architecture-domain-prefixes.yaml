@@ -417,6 +417,7 @@ domains:
   platform:
     route_segments:
       - schnittstelle
+      - studio
       - admin
       - admin-suite
       - auth
@@ -659,6 +660,18 @@ exact_service_stems:
   mail_versand: platform
   mailkonto_service: platform
   kaeufergruppe: crm
+  # Runtime46 (ca50c46f7)
+  complaint_list_read: agrar
+  gdpr_request_processor: crm
+  list_experience_metrics: platform
+  list_presets: platform
+  open_item_read_source: finance
+  pricing_condition_read: finance
+  studio_catalog_contracts: platform
+  studio_file_content_contracts: platform
+  studio_list_contracts: platform
+  studio_runtime_surface_contracts: platform
+  waage_import_service: agrar
 
 exact_endpoint_stems:
   identity_management: platform

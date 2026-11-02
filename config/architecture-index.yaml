@@ -1,7 +1,7 @@
-# Architecture Index — generiert 2026-10-26
+# Architecture Index — generiert 2026-11-02
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-10-26T06:46:23Z'
+generated_at: '2026-11-02T12:24:48Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -298,6 +298,7 @@ domains:
     - agri_silo_material_flow_service
     - agribusiness_service
     - annahme_service
+    - complaint_list_read
     - contract_engagement_service
     - contract_fixing_service
     - contract_fulfillment_service
@@ -349,6 +350,7 @@ domains:
     - supply_chain_lot_service
     - supply_chain_trace_service
     - tank_adapter_service
+    - waage_import_service
     - webshop_integration_service
     backend_endpoints:
     - agrar_contracts
@@ -488,6 +490,7 @@ domains:
     - docs/adr/adr-078-canonical-lead-postgresql-pdf.md
     - docs/adr/adr-079-ebilanz-xbrl-drafts.md
     - docs/adr/adr-085-studio-generated-master-data.md
+    - docs/adr/adr-business-partner-debitoren-kreditoren-20261101.md
     - docs/adr/adr-harvest-deduction-resolver.md
     - docs/adr/adr-studio-semantic-contracts.md
     status: active
@@ -605,6 +608,7 @@ domains:
     - /crm/opportunity-detail
     - /crm/opportunity/:id
     - /crm/opportunity/new
+    - /crm/partner-klaerfaelle
     - /crm/potential-analyse
     - /crm/segment-detail
     - /crm/segment/:id
@@ -712,6 +716,7 @@ domains:
     - case_management
     - competitor_monitor
     - consent_engine
+    - crm_activity_service
     - crm_auto_capture_service
     - crm_capture_inbox_service
     - crm_compat_service
@@ -724,13 +729,16 @@ domains:
     - crm_lead_service
     - crm_merge_service
     - crm_notification_service
+    - crm_opportunity_reference
     - crm_ownership_service
+    - crm_segment_service
     - customer_reference
     - customer_sales_eligibility
     - customer_service
     - gap_analytics
     - gap_pipeline
     - gap_progress
+    - gdpr_request_processor
     - interessent_service
     - kaeufer_klassifikator
     - kaeufer_signal_service
@@ -754,6 +762,7 @@ domains:
     - sales_invoice_service
     - sales_lieferschein_close_service
     - sales_match_service
+    - sales_offer_import
     - sales_posting_service
     - sales_preisabweichung_service
     - sales_storno_service
@@ -791,6 +800,7 @@ domains:
     - crm_listen_kommandos
     - crm_mail_capture
     - crm_ownership
+    - crm_partner_klaerfaelle
     - crm_partner_suche
     - crm_reports
     - crm_segments
@@ -853,6 +863,8 @@ domains:
     - docs/adr/adr-078-canonical-lead-postgresql-pdf.md
     - docs/adr/adr-081-whatsapp-browser-notification-persistence.md
     - docs/adr/adr-085-studio-generated-master-data.md
+    - docs/adr/adr-business-partner-debitoren-kreditoren-20261101.md
+    - docs/adr/adr-crm-activity-canonical-20261029.md
     status: pilot
   dms-compliance:
     owner: domain/dms-compliance
@@ -1246,12 +1258,14 @@ domains:
     - ist_aggregation_service
     - l3_report_catalog_service
     - meldewesen_lifecycle_service
+    - open_item_read_source
     - payment_run_freigabe
     - pos_accounting_service
     - pos_compat_service
     - pos_fiscal_document_service
     - pos_tagesabschluss_service
     - preisfindung_service
+    - pricing_condition_read
     - query_center_service
     - sepa_xml_generator
     - tse_fiskaly_service
@@ -1360,6 +1374,7 @@ domains:
     - docs/adr/adr-076-cash-close-retirement.md
     - docs/adr/adr-078-canonical-lead-postgresql-pdf.md
     - docs/adr/adr-079-ebilanz-xbrl-drafts.md
+    - docs/adr/adr-business-partner-debitoren-kreditoren-20261101.md
     status: active
   hr:
     owner: domain/hr
@@ -1418,6 +1433,7 @@ domains:
     - personal_lohnabrechnung
     decisions:
     - docs/adr/adr-068-personal-authorized-recent-documents.md
+    - docs/adr/adr-business-partner-debitoren-kreditoren-20261101.md
   inventory:
     owner: domain/inventory
     frontend_route_prefixes:
@@ -1453,6 +1469,7 @@ domains:
     - /disposition/liste
     - /disposition/position-matrix
     - /disposition/regeln
+    - /disposition/touren-disposition
     - /etiketten/drucken
     - /inventory
     - /inventory-dashboard
@@ -1578,6 +1595,7 @@ domains:
     - docs/adr/adr-077-leading-weighing-ticket.md
     - docs/adr/adr-078-canonical-lead-postgresql-pdf.md
     - docs/adr/adr-085-studio-generated-master-data.md
+    - docs/adr/adr-waage-tenant-import-20261030.md
     status: active
   logistics:
     owner: domain/logistics
@@ -1668,6 +1686,7 @@ domains:
     - docs/adr/adr-081-whatsapp-browser-notification-persistence.md
     - docs/adr/adr-082-verified-identity-transport.md
     - docs/adr/adr-084-studio-migration-plan-history.md
+    - docs/adr/adr-crm-activity-canonical-20261029.md
   platform:
     owner: platform
     frontend_route_prefixes:
@@ -1779,6 +1798,7 @@ domains:
     - /setup/firma
     - /start-dashboard
     - /studio/run/:screenId
+    - /studio/workspace-composition-preview
     - /system/live-monitor
     - /verify/:domain/:number
     - /verify/:domain/:number/:hash
@@ -1837,6 +1857,8 @@ domains:
     - interaction_state_manager
     - knowledge_store
     - legacy_interface_adapter_service
+    - list_experience_metrics
+    - list_presets
     - llm_gateway
     - made_by_studio_gates
     - mail_ingest_service
@@ -1871,6 +1893,7 @@ domains:
     - secrets_vault
     - security_observability
     - stt_client
+    - studio_catalog_contracts
     - studio_draft_store
     - studio_entity_commands
     - studio_entity_compiler
@@ -1878,12 +1901,15 @@ domains:
     - studio_entity_evolution
     - studio_entity_router
     - studio_entity_simulation
+    - studio_file_content_contracts
     - studio_history_view
+    - studio_list_contracts
     - studio_migration
     - studio_migration_store
     - studio_native_import
     - studio_process_simulation
     - studio_propose
+    - studio_runtime_surface_contracts
     - studio_semantic
     - studio_semantic_model
     - studio_validation
@@ -2140,13 +2166,14 @@ domains:
     - docs/adr/adr-051-feeding-supply-and-procurement-handoff.md
     - docs/adr/adr-054-schemafeste-feeding-events.md
     - docs/adr/adr-062-foreign-goods-operator-projection.md
+    - docs/adr/adr-business-partner-debitoren-kreditoren-20261101.md
 mapping_stats:
-  frontend_routes_total: 941
-  frontend_routes_mapped: 941
-  backend_services_total: 318
-  backend_services_mapped: 318
-  backend_endpoints_total: 473
-  backend_endpoints_mapped: 473
+  frontend_routes_total: 944
+  frontend_routes_mapped: 944
+  backend_services_total: 333
+  backend_services_mapped: 333
+  backend_endpoints_total: 474
+  backend_endpoints_mapped: 474
 unmapped:
   frontend_routes: []
   backend_services: []
