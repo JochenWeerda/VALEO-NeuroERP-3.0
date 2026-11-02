@@ -25,6 +25,8 @@ def test_domain_actions_and_creation_survive_parent_shell(case):
         for field in TRANSPORT_FIELDS:
             if field in {'forbiddenForAgents', 'auditReasonRequired', 'humanApprovalRequired', 'requiresConfirmation'} and old.get(field) is not True:
                 continue  # Current central governance may require stronger safeguards.
+            if field == 'inputFields' and old.get(field) is None:
+                continue  # Eine Aktion darf ihre Eingaben neu deklarieren (z.B. Aktivitaet der Kundenakte, Runtime46).
             assert actual[old['key']].get(field) == old.get(field), (case['screen_id'], old['key'], field)
     if case['creation_changed']:
         assert definition.get('creation') == case['creation']

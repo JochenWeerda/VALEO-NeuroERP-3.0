@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from functools import lru_cache
+
 import re
 from typing import Any
 
@@ -6146,9 +6148,22 @@ _SCREEN_LIST_ROUTE: dict[str, str] = {
 }
 
 
+@lru_cache(maxsize=1)
+def _erzeugte_listen_routen() -> dict[str, str]:
+    """Route der Seite, die die Maske rendert (scripts/generate_screen_list_routes.py); kuratiert geht vor."""
+    import json
+    from pathlib import Path
+
+    datei = Path(__file__).resolve().parents[2] / "config/screen_list_routes.generated.json"
+    try:
+        return json.loads(datei.read_text(encoding="utf-8"))["routen"]
+    except (OSError, ValueError, KeyError):
+        return {}  # ohne Datei bleibt es bei den kuratierten Routen; das Omnibox-Gate meldet die Luecke
+
+
 def get_screen_list_route(mask_id: str) -> str | None:
     """Kuratierte Listen-Route einer Maske fuer die Omnibox-Navigation (UIX-060)."""
-    route = _SCREEN_LIST_ROUTE.get(mask_id)
+    route = _SCREEN_LIST_ROUTE.get(mask_id) or _erzeugte_listen_routen().get(mask_id)
     if route:
         return route
     if mask_id.startswith("tenant/"):
