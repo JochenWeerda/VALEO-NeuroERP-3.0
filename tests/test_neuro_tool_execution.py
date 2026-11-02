@@ -295,8 +295,11 @@ def test_pipeline_credentials_never_enter_classifier_or_planner(monkeypatch):
     classify, planner = Mock(wraps=original_classify), Mock(wraps=original_plan)
     monkeypatch.setattr(neuro_pipeline,"classify",classify)
     monkeypatch.setattr(neuro_pipeline,"generate_plan",planner)
-    result = neuro_pipeline.run_pipeline("Lagerbestand abfragen",
-        context={"auth_token":"untrusted-body-token"}, auth_token="transport-only-token", dry_run=True)
+    from app.core.tenant_context import tenant_scope
+    # Die Pipeline arbeitet nur im Mandantenkontext (wie im Request ueber main:app).
+    with tenant_scope("00000000-0000-0000-0000-000000000001", "Test der Neuro-Pipeline"):
+        result = neuro_pipeline.run_pipeline("Lagerbestand abfragen",
+            context={"auth_token":"untrusted-body-token"}, auth_token="transport-only-token", dry_run=True)
     assert result["status"] == "dry_run"
     assert "auth_token" not in classify.call_args.args[1]
     assert "auth_token" not in planner.call_args.args[1]
