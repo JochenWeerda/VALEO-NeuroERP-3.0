@@ -188,12 +188,6 @@ async def create_ap_invoice(
     actor = gepruefter_akteur(nutzer)
     logger.info(f"Creating AP invoice: {doc.number}")
     try:
-        supplier_exists = db.execute(text("""
-            SELECT 1 FROM domain_crm.business_partners
-            WHERE partner_id = :id AND tenant_id = :tid AND is_supplier AND status = 'active'
-        """), {"id": doc.customerId, "tid": tenant_id}).scalar()
-        if not supplier_exists:
-            raise HTTPException(status_code=404, detail="Lieferant nicht gefunden")
         # The captured supplier invoice date and due date are business evidence.
         # Do not replace them with today's dates after the user has checked them.
         doc.status = "ENTWURF"  # Initial status
@@ -202,6 +196,13 @@ async def create_ap_invoice(
         dq_result = evaluate_ap_invoice_datensatz(_build_ap_invoice_dq_datensatz(doc))
         if not dq_result.bestanden:
             raise HTTPException(status_code=422, detail=build_dq_error_detail("APRechnung", dq_result))
+        # Erst nach der Datenqualitaet: ein unvollstaendiger Datensatz fragt die Datenbank nicht ab.
+        supplier_exists = db.execute(text("""
+            SELECT 1 FROM domain_crm.business_partners
+            WHERE partner_id = :id AND tenant_id = :tid AND is_supplier AND status = 'active'
+        """), {"id": doc.customerId, "tid": tenant_id}).scalar()
+        if not supplier_exists:
+            raise HTTPException(status_code=404, detail="Lieferant nicht gefunden")
 
         repo = get_repository(db)
         # Der Speicher ist global nach Nummer eindeutig: Anlegen darf eine fremde

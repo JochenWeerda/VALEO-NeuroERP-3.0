@@ -122,7 +122,22 @@ def test_get_nonexistent_ap_invoice_returns_404():
     assert resp.status_code == 404
 
 
-def test_create_ap_invoice_minimal():
+@pytest.fixture
+def lieferant(require_db):
+    """Die Eingangsrechnung verlangt einen aktiven Lieferanten des Mandanten (tests/stammsaetze.py)."""
+    from app.core.database import SessionLocal
+    from stammsaetze import entferne_stammsaetze, lege_lieferanten_an
+
+    with SessionLocal() as db:
+        lege_lieferanten_an(db, _TENANT, "supplier-1")
+        db.commit()
+    yield "supplier-1"
+    with SessionLocal() as db:
+        entferne_stammsaetze(db, _TENANT, "supplier-1")
+        db.commit()
+
+
+def test_create_ap_invoice_minimal(lieferant):
     payload = {
         # Eindeutig je Lauf: Seit 07.10.2026 ueberschreibt Anlegen keine vorhandene
         # Rechnung mehr (409); die feste Nummer liess den zweiten Lauf scheitern.
