@@ -247,7 +247,7 @@ def test_angebote_historie_und_aufgaben_liefern_echte_zeilen(client, kunde) -> N
             text(
                 "INSERT INTO domain_crm.activities "
                 "(id, type, title, customer, contact_person, date, status, assigned_to, tenant_id) "
-                "VALUES (:id, 'task', 'Rueckruf', 'Testhof Sonnenacker', 'Meyer', NOW(), 'offen', 'vertrieb', :tid)"
+                "VALUES (:id, 'task', 'Rueckruf', 'Testhof Sonnenacker', 'Meyer', NOW(), 'planned', 'vertrieb', :tid)"
             ),
             {"id": aktivitaet, "tid": kunde["mandant"]},
         )
@@ -280,42 +280,8 @@ def test_angebote_historie_und_aufgaben_liefern_echte_zeilen(client, kunde) -> N
             )
 
 
-def test_angelegte_aktivitaet_erscheint_in_der_historie(client, kunde) -> None:
-    """create_activity schreibt in domain_crm.activities, nicht in eine Tabelle ohne Migration."""
-    from sqlalchemy import create_engine, text
-
-    antwort = client.post(
-        f"/api/v1/crm/customers/{kunde['kunden_nr']}/actions/create_activity",
-        headers=kopf(kunde["mandant"]),
-        json={"betreff": "Hofbesuch", "typ": "Besuch", "_mode": "execute", "_auditReason": "Termin"},
-    )
-    assert antwort.status_code == 200, antwort.text
-    koerper = antwort.json()
-    assert koerper["success"] is True
-    aktivitaet = koerper["affectedIds"][0]
-    engine = create_engine(DB_URL, connect_args={"connect_timeout": 5})
-    try:
-        historie = client.get(
-            f"/api/v1/crm/customers/{kunde['id']}/tabs/historie", headers=kopf(kunde["mandant"])
-        )
-        assert historie.status_code == 200, historie.text
-        assert any(zeile.get("subject") == "Hofbesuch" for zeile in historie.json()["items"])
-        aufgaben = client.get(
-            f"/api/v1/crm/customers/{kunde['id']}/tabs/aufgaben", headers=kopf(kunde["mandant"])
-        )
-        assert aufgaben.status_code == 200, aufgaben.text
-        assert all(zeile.get("titel") != "Hofbesuch" for zeile in aufgaben.json()["items"])
-    finally:
-        with engine.begin() as verbindung:
-            verbindung.execute(text("DELETE FROM domain_crm.activities WHERE id = :id"), {"id": aktivitaet})
-            verbindung.execute(
-                text(
-                    "DELETE FROM domain_crm.crm_action_audit_log "
-                    "WHERE entity_id = :cid AND action_key = 'create_activity'"
-                ),
-                {"cid": kunde["id"]},
-            )
-
+# Die Aktivitaet aus der Kundenmaske laeuft seit Runtime46 ueber den kanonischen Aktivitaetsdienst
+# (signierte menschliche Identitaet); geprueft in tests/test_crm_activity_canonical_sql.py.
 
 def test_offene_posten_erscheinen_in_dokumenten_und_im_kopf(client, kunde) -> None:
     """domain_erp.offene_posten fuehrt den Kunden als kunde_id, nicht als kunden_id."""
@@ -472,8 +438,8 @@ def test_pflege_register_liegen_in_der_akte(client, kunde) -> None:
         verbindung.execute(
             text(
                 "INSERT INTO domain_crm.business_partner_addresses "
-                "(id, partner_id, address_type, name_1, city, is_default) "
-                "VALUES (:id, :pid, 'shipping', 'Lagerhof', 'Kiel', false)"
+                "(id, partner_id, address_type, name_1, city, is_default, tenant_id) "
+                "VALUES (:id, :pid, 'shipping', 'Lagerhof', 'Kiel', false, (SELECT tenant_id FROM domain_crm.business_partners WHERE partner_id = :pid))"
             ),
             {"id": anschrift, "pid": kunde["partner_id"]},
         )
@@ -483,17 +449,17 @@ def test_pflege_register_liegen_in_der_akte(client, kunde) -> None:
                 "(id, partner_id, customer_group, account_balance, "
                 "account_statement_print, account_statement_separate, account_statement_reprint, "
                 "print_ad_text, shipping_expenses_enabled, bonus_eligible, "
-                "self_billing_sales, self_billing_purchase, remarkable_claim, vat_optimizer) "
+                "self_billing_sales, self_billing_purchase, remarkable_claim, vat_optimizer, tenant_id) "
                 "VALUES (:id, :pid, 'LAND', 1250.50, true, false, false, false, false, true, "
-                "false, false, false, false)"
+                "false, false, false, false, (SELECT tenant_id FROM domain_crm.business_partners WHERE partner_id = :pid))"
             ),
             {"id": abrechnung, "pid": kunde["partner_id"]},
         )
         verbindung.execute(
             text(
                 "INSERT INTO domain_crm.business_partner_cpd_accounts "
-                "(id, partner_id, cpd_customer_number, name_1, debtor_account, collective_invoice) "
-                "VALUES (:id, :pid, :nr, 'CPD Hof', '1400', false)"
+                "(id, partner_id, cpd_customer_number, name_1, debtor_account, collective_invoice, tenant_id) "
+                "VALUES (:id, :pid, :nr, 'CPD Hof', '1400', false, (SELECT tenant_id FROM domain_crm.business_partners WHERE partner_id = :pid))"
             ),
             {"id": cpd, "pid": kunde["partner_id"], "nr": cpd_nr},
         )

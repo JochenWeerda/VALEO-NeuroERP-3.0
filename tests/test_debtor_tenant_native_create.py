@@ -42,8 +42,9 @@ def test_body_tenant_cannot_override_verified_tenant():
     assert db.calls == []
 
 
-@pytest.mark.parametrize('field,value', [('iban', 'DE89370400440532013000'), ('discount_percent', 2.0),
-                                         ('notes', 'Hinweis'), ('tax_number', '12/345/67890')])
+# Bank, Skonto und Steuernummer liegen seit Stufe 3 am Geschaeftspartner (tests/test_partner_rollenfelder_postgres.py);
+# Notizen haben kein Ziel und werden weiter abgelehnt.
+@pytest.mark.parametrize('field,value', [('notes', 'Hinweis')])
 def test_fields_the_customer_master_does_not_hold_are_rejected_not_dropped(field, value):
     db = CaptureDB()
     with pytest.raises(HTTPException) as exc:

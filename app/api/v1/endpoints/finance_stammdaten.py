@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+
 from app.auth.finance_roles import finance_admin, finance_write
 from typing import Any, Optional
 
@@ -249,7 +251,7 @@ def _partner_felder(db: Session, tenant_id: str, partner_id: Optional[str], kont
         return {}
     row = db.execute(
         text("SELECT partner_number, debtor_account, creditor_account, iban, bic, bank_name, account_holder, "
-             "cash_discount_days, cash_discount_percent FROM domain_crm.business_partners "
+             "cash_discount_days, cash_discount_percent, tax_number FROM domain_crm.business_partners "
              "WHERE partner_id = :p AND tenant_id = :t"),
         {"p": str(partner_id), "t": tenant_id},
     ).mappings().first()
@@ -259,7 +261,11 @@ def _partner_felder(db: Session, tenant_id: str, partner_id: Optional[str], kont
             "iban": row["iban"], "bic": row["bic"],
             "bank": row["bank_name"], "kontoinhaber": row["account_holder"],
             "skonto_tage": row["cash_discount_days"],
-            "skonto_prozent": float(row["cash_discount_percent"]) if row["cash_discount_percent"] is not None else None}
+            "skonto_prozent": float(row["cash_discount_percent"]) if row["cash_discount_percent"] is not None else None,
+            # Dieselben Werte unter den Schluesseln der Erfassungsmasken.
+            "bank_name": row["bank_name"], "account_holder": row["account_holder"],
+            "discount_days": row["cash_discount_days"], "tax_number": row["tax_number"],
+            "discount_percent": float(row["cash_discount_percent"]) if row["cash_discount_percent"] is not None else None}
 
 
 def _debitor_dict(customer: Customer, op: Optional[dict[str, Any]] = None) -> dict[str, Any]:
@@ -286,7 +292,28 @@ def _debitor_dict(customer: Customer, op: Optional[dict[str, Any]] = None) -> di
         "offenerBetrag": op.get("offenerBetrag", 0.0),
         "faelligkeit": op.get("faelligkeit"),
         "mahnstufe": op.get("mahnstufe", 0),
+        # Schluessel der Erfassung finance/debitoren/new (deren Bearbeitungsmodus liest dieses Detail).
+        "debtor_number": customer.customer_number,
+        "contact_person": customer.contact_person,
+        "street": _strasse(customer.address),
+        "postal_code": customer.postal_code,
+        "city": customer.city,
+        "country": customer.country,
+        "phone": customer.phone,
+        "email": customer.email,
+        "vat_id": customer.tax_id,
+        "payment_terms_days": payment,
     }
+
+
+def _strasse(adresse: Optional[str]) -> Optional[str]:
+    """``address`` ist frisch migriert JSON (mit ``street``), in der gewachsenen DB Freitext."""
+    if not adresse or not str(adresse).lstrip().startswith("{"):
+        return adresse
+    try:
+        return (json.loads(adresse) or {}).get("street")
+    except ValueError:
+        return adresse
 
 
 def _creditor_from_lieferant(lf: dict[str, Any], op: Optional[dict[str, Any]] = None) -> dict[str, Any]:

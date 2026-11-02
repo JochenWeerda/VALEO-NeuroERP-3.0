@@ -20271,4 +20271,7 @@ annahme/rohware, einkauf/bestellungen/neu.
 Nicht deklarierte Maskenaktionen: siehe Diff von config/mask_studio_ratchet.json in PR #99
 (u.a. admin/control-center, admin/webhooks-liste, artikel/zoll-intrastat, finance/bank-abgleich,
 Positionsaktionen der Rechnungserfassungen).
+Dazu (Feldvertrag, tests/test_mask_field_contracts.py PLATZHALTER_ALTLAST/UNGETYPT_ALTLAST): 17 generierte
+batch15-Platzhaltermasken mit id/name/status/updated_at (sieben Stammdatenmasken lesen faelschlich
+/stammdaten/betriebsstaetten, u.a. Hausbanken, Mengeneinheiten) und 8 ungetypte Kopfquellen.
 
