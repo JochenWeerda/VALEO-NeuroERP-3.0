@@ -27,8 +27,9 @@ test.describe('CRM - Kundenstamm-Tiefe @smoke', () => {
   test.slow();
 
   test('Kunden-Dubletten lädt', async ({ adminPage }) => {
-    await open(adminPage, '/crm/dubletten', 'Kunden-Dubletten');
-    await expect(adminPage.getByRole('button', { name: 'Neu prüfen' })).toBeVisible({ timeout: 30000 });
+    // Seit 02.11.2026 zeigt /crm/dubletten das Studio-Cockpit crm/dubletten-pruefung.
+    await open(adminPage, '/crm/dubletten', 'Dubletten-Pruefung');
+    await expect(adminPage.getByRole('button', { name: 'Aktualisieren' })).toBeVisible({ timeout: 30000 });
   });
 
   test('Kunden-Zuordnung lädt', async ({ adminPage }) => {

@@ -1,7 +1,7 @@
-import { NativeListPage } from '@/components/mask-builder/NativeListPage'
+import { UniversalNativeCockpitPage } from '@/components/mask-builder/UniversalNativeCockpitPage'
 
 export default function Page(): JSX.Element {
   return (
-    <NativeListPage screenId="crm/dubletten" testId="screen-crm/dubletten" />
+    <UniversalNativeCockpitPage screenId="crm/dubletten-pruefung" testId="screen-crm/dubletten-pruefung" />
   )
 }

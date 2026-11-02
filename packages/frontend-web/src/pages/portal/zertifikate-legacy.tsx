@@ -1,0 +1,272 @@
+/**
+ * Kundenportal - Zertifikate
+ * 
+ * GMP+, VLOG, QS und andere Zertifikate zum Download
+ */
+
+import { useState } from 'react'
+import { usePortalZertifikate } from '@/lib/api/portal'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge, type BadgeVariant } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { ErrorState } from '@/components/ErrorState'
+import {
+  Search,
+  Download,
+  Award,
+  CheckCircle2,
+  AlertCircle,
+  Calendar,
+  Clock,
+} from 'lucide-react'
+
+interface Zertifikat {
+  id: string
+  name: string
+  typ: string
+  aussteller: string
+  gueltigVon: string
+  gueltigBis: string
+  status: 'gueltig' | 'auslaufend' | 'abgelaufen'
+  beschreibung: string
+  dokument: string
+  logo?: string
+}
+
+
+const statusConfig: Record<string, { label: string; variant: BadgeVariant; icon: React.ReactNode; bgColor: string }> = {
+  'gueltig': { 
+    label: 'Gültig', 
+    variant: 'success',
+    icon: <CheckCircle2 className="h-4 w-4" />,
+    bgColor: 'border-l-status-success',
+  },
+  'auslaufend': { 
+    label: 'Läuft bald aus', 
+    variant: 'warning',
+    icon: <AlertCircle className="h-4 w-4" />,
+    bgColor: 'border-l-status-warning',
+  },
+  'abgelaufen': { 
+    label: 'Abgelaufen', 
+    variant: 'error',
+    icon: <Clock className="h-4 w-4" />,
+    bgColor: 'border-l-status-error',
+  },
+}
+
+const typColors: Record<string, string> = {
+  'GMP+': 'bg-chart-1/15 text-chart-1',
+  'VLOG': 'bg-chart-3/15 text-chart-3',
+  'QS': 'bg-chart-2/15 text-chart-2',
+  'Bio': 'bg-chart-3/20 text-chart-3',
+  'ISO': 'bg-chart-4/15 text-chart-4',
+  'AMA': 'bg-chart-5/15 text-chart-5',
+  'GLOBALG.A.P.': 'bg-chart-6/15 text-chart-6',
+}
+
+export default function PortalZertifikate() {
+  const [searchTerm, setSearchTerm] = useState('')
+
+  const { data: portalZertifikate = [], isLoading, isError, error, refetch } = usePortalZertifikate()
+  const zertifikate: Zertifikat[] = portalZertifikate.map((z) => ({
+    id: z.id,
+    name: z.art,
+    typ: z.art,
+    aussteller: 'VALEO',
+    gueltigVon: '',
+    gueltigBis: z.gueltigBis,
+    status: z.status === 'ablaufend' ? 'auslaufend' : z.status,
+    beschreibung: `Zertifikat ${z.nummer}`,
+    dokument: `${z.nummer}.pdf`,
+  }))
+
+  const filteredZertifikate = zertifikate.filter((z) =>
+    z.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    z.typ.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    z.aussteller.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+
+  const gueltigeZertifikate = zertifikate.filter(z => z.status === 'gueltig').length
+  const auslaufendeZertifikate = zertifikate.filter(z => z.status === 'auslaufend').length
+
+  if (isLoading) {
+    return <ZertifikateSkeleton />
+  }
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div>
+        <h1 className="text-xl font-semibold tracking-tight">Zertifikate</h1>
+        <p className="text-muted-foreground">Alle Zertifikate und Qualitätsnachweise zum Download</p>
+      </div>
+
+      {/* Warnung bei auslaufenden Zertifikaten */}
+      {auslaufendeZertifikate > 0 && (
+        <Alert variant="warning">
+          <AlertCircle className="h-4 w-4 text-status-warning" />
+          <AlertTitle className="text-status-warning">Zertifikate laufen bald aus</AlertTitle>
+          <AlertDescription className="text-status-warning">
+            {auslaufendeZertifikate} Zertifikat(e) laufen in den nächsten Wochen aus.
+            Bitte kontaktieren Sie uns für eine Verlängerung.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* KPIs */}
+      <div className="grid gap-4 sm:grid-cols-3">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg bg-[hsl(var(--color-semantic-success-500-hsl)/0.18)] p-2 text-status-success">
+                <CheckCircle2 className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{gueltigeZertifikate}</p>
+                <p className="text-sm text-muted-foreground">Gültige Zertifikate</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg bg-[hsl(var(--color-semantic-warning-500-hsl)/0.18)] p-2 text-status-warning">
+                <AlertCircle className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{auslaufendeZertifikate}</p>
+                <p className="text-sm text-muted-foreground">Laufen bald aus</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg bg-primary/10 p-2 text-primary">
+                <Award className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{zertifikate.length}</p>
+                <p className="text-sm text-muted-foreground">Gesamt</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Search */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          placeholder="Zertifikat suchen..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="pl-9"
+        />
+      </div>
+
+      {/* Zertifikate Grid */}
+      <div className="grid gap-4 md:grid-cols-2">
+        {filteredZertifikate.map((zertifikat) => {
+          const status = statusConfig[zertifikat.status]
+          return (
+            <Card 
+              key={zertifikat.id} 
+              className={`border-l-4 transition-all hover:shadow-md ${status.bgColor}`}
+            >
+              <CardHeader className="pb-2">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-muted">
+                      <Award className="h-6 w-6 text-muted-foreground" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-base">{zertifikat.name}</CardTitle>
+                      <CardDescription>{zertifikat.aussteller}</CardDescription>
+                    </div>
+                  </div>
+                  <Badge className={typColors[zertifikat.typ] || 'bg-muted text-muted-foreground'}>
+                    {zertifikat.typ}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <p className="text-sm text-muted-foreground">{zertifikat.beschreibung}</p>
+                
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-muted-foreground">
+                      {zertifikat.gueltigVon} - {zertifikat.gueltigBis}
+                    </span>
+                  </div>
+                  <Badge variant={status.variant} className="gap-1">
+                    {status.icon}
+                    {status.label}
+                  </Badge>
+                </div>
+
+                <Button className="w-full gap-2">
+                  <Download className="h-4 w-4" />
+                  Zertifikat herunterladen
+                </Button>
+              </CardContent>
+            </Card>
+          )
+        })}
+      </div>
+
+      {filteredZertifikate.length === 0 && (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <Award className="h-12 w-12 text-muted-foreground mb-4" />
+            <p className="text-muted-foreground">Keine Zertifikate gefunden</p>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  )
+}
+
+function ZertifikateSkeleton() {
+  return (
+    <div className="space-y-6">
+      <Skeleton className="h-10 w-48" />
+      <div className="grid gap-4 sm:grid-cols-3">
+        {[...Array(3)].map((_, i) => (
+          <Card key={i}>
+            <CardContent className="p-4">
+              <Skeleton className="h-12 w-full" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+      <Skeleton className="h-10 w-full" />
+      <div className="grid gap-4 md:grid-cols-2">
+        {[...Array(4)].map((_, i) => (
+          <Card key={i}>
+            <CardHeader>
+              <Skeleton className="h-12 w-full" />
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  )
+}
+

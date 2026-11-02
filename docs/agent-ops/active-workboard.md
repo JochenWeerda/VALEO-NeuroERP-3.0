@@ -20285,5 +20285,8 @@ Befund 02.11.2026 (Smoke-Tests): 127 Frontend-Seiten rendern seit deeb707b4 eine
 screenId, die das Backend nicht kennt (u.a. crm/campaigns, crm/segments, crm/leads, crm/dubletten,
 crm/kunden-zuordnung, lager/bestandsuebersicht, finance, hilfe, portal, errors/NotFound) und zeigen nur
 "Workspace konnte nicht geladen werden". Teilweise gibt es Gegenstuecke (crm/dubletten-pruefung,
-crm/leads-liste). Entscheidung zum Vorgehen beim Nutzer offen.
+crm/leads-liste). Nutzerentscheidung 02.11.2026 Weg 1: 14 Seiten auf ihre vorhandene Maske umgehaengt
+(Kampagnen, Kampagnenvorlagen, Einwilligungen, DSGVO-Anfragen, Leads, Segmente, Dubletten, Freigaben,
+Kulturpflanzen, fuenf Compliance-Listen); 113 als Altlast in config/frontend_seiten_ohne_maske.json,
+Waechter tests/test_frontend_seiten_haben_ihre_maske.py. Echte Studio-Masken dafuer: Weg 3 im Studio-Umbau.
 
