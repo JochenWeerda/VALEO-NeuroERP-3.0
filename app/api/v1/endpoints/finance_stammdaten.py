@@ -306,8 +306,10 @@ def _debitor_dict(customer: Customer, op: Optional[dict[str, Any]] = None) -> di
     }
 
 
-def _strasse(adresse: Optional[str]) -> Optional[str]:
-    """``address`` ist frisch migriert JSON (mit ``street``), in der gewachsenen DB Freitext."""
+def _strasse(adresse: Any) -> Optional[str]:
+    """``address`` ist frisch migriert JSONB (kommt als dict), in der gewachsenen DB Freitext."""
+    if isinstance(adresse, dict):
+        return adresse.get("street")
     if not adresse or not str(adresse).lstrip().startswith("{"):
         return adresse
     try:

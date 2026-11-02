@@ -82,9 +82,14 @@ def collect(db, subject_type, subject_id, tenant_id, email):
     if contacts:
         db.execute(text('SELECT c.id FROM domain_crm.contacts c JOIN domain_crm.customers p ON p.id=c.customer_id WHERE p.id::text=:sid AND p.tenant_id::text=:tid FOR UPDATE OF c'), params).all()
     contact_logs = _rows(db, 'public.kunden_kontakte', 'SELECT * FROM public.kunden_kontakte WHERE tenant_id::text=:tid AND kunden_nr=ANY(:numbers)', params, evidence) if numbers else []
-    # Activity customer is free text on deployed schemas; it is not a verified person link.
+    # Art. 15/17 DSGVO: Aktivitaeten am Kunden (customer_id) und solche, die den Klarnamen im Freitext nennen.
+    # Die Loeschung entfernt den Klarnamen (compliance_dsgvo._klarnamen_anonymisieren); die Auskunft nennt beide.
     activities = []
-    evidence.append({'source': 'domain_crm.activities', 'state': 'unlinked_retained', 'rows': None})
+    if subject_type == 'CUSTOMER':
+        params['namen'] = sorted({str(row[k]) for row in profiles for k in ('company_name', 'contact_person') if row.get(k)})
+        activities = _rows(db, 'domain_crm.activities', 'SELECT * FROM domain_crm.activities WHERE tenant_id::text=:tid '
+                           'AND (customer_id::text=:sid OR customer=ANY(:namen) OR contact_person=ANY(:namen))',
+                           params, evidence)
     # Consent contact IDs refer to the external CRM-core registry. Local
     # contact IDs are not evidence of identity across the two registries.
     consents, consent_history = [], []
@@ -97,7 +102,7 @@ def retained_manifest():
     return [
         {'source': 'commercial_documents_and_tax_identifiers', 'reason': 'Nicht Teil der operativen CRM-Personendatenanonymisierung; gesonderte Aufbewahrungspruefung erforderlich'},
         {'source': 'audit_and_consent_history', 'reason': 'Bestehende unveraenderliche Nachweise bleiben erhalten; keine Umschreibung der Herkunft'},
-        {'source': 'unlinked_activities_external_crm_consents_and_other_external_systems', 'reason': 'Ohne belegte Personenverknuepfung keine automatische Zuordnung oder Loeschung'},
+        {'source': 'external_crm_consents_and_other_external_systems', 'reason': 'Ohne belegte Personenverknuepfung keine automatische Zuordnung oder Loeschung'},
     ]
 
 

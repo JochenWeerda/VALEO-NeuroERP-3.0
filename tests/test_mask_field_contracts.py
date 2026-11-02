@@ -26,6 +26,9 @@ ungetypte Maskenquelle ist eine Stelle, an der dieses Gate blind wird.
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 import pytest
 
 from scripts.check_field_contracts import pruefe
@@ -40,32 +43,22 @@ NICHT_PRUEFBAR_MAX = 0
 #: Darf sinken, nicht steigen. Auftrag/Rechnung bleiben Claude. R5 nicht hier.
 ZEILEN_NICHT_PRUEFBAR_MAX = 0
 
-#: Altlast Runtime46/batch15 (Workboard STUDIO-UMBAU-RUNTIME46): generierte Platzhaltermasken mit den
-#: Feldern id/name/status/updated_at, teils auf fremdem Endpunkt (sieben Stammdatenmasken lesen
-#: /stammdaten/betriebsstaetten). Sie werden mit dem Studio-Umbau richtig gebaut. Darf nur schrumpfen.
-PLATZHALTER_ALTLAST = frozenset({
-    "preise/individualpreise", "preise/rabattgruppen", "preise/zu-abschlaggruppen", "produktion/rezepturgruppen",
-    "stammdaten/artikel-stoffstrom", "stammdaten/artikelbestandteile", "stammdaten/artikelverpackung",
-    "stammdaten/betriebsstaetten", "stammdaten/hausbanken", "stammdaten/individuelle-artikelnummern",
-    "stammdaten/mengeneinheiten", "verkauf/auftraege/neu", "verkauf/dauerauftraege", "verkauf/kunde-neu",
-    "verkauf/kunden-stamm", "verkauf/kunden-stamm-enhanced", "verkauf/rechnungen/neu",
-})
-
-#: Altlast Runtime46: Kopfquellen ohne deklarierte Antwort (ebenfalls STUDIO-UMBAU-RUNTIME46). Darf nur schrumpfen.
-UNGETYPT_ALTLAST = frozenset({
-    "finance/bank-stamm/kopf -> /api/v1/finance/abstimmung/nebenbuch/{entity_id}",
-    "kontrakte/mengenzeitraeume/kopf -> /api/v1/kontrakte/{entity_id}",
-    "personal/schulung-neu/kopf -> /api/v1/training/courses/{entity_id}",
-    "qualitaet/labor-detail/kopf -> /api/v1/qualitaet/labor-auftraege/{entity_id}",
-    "sales/delivery-editor-new/kopf -> /api/v1/sales/blanket-orders/{entity_id}",
-    "sales/delivery-editor/kopf -> /api/v1/sales/blanket-orders/{entity_id}",
-    "service/anfrage-detail/kopf -> /api/v1/service/anfragen/{entity_id}",
-    "service/anfrage/neu/kopf -> /api/v1/service/anfragen/{entity_id}",
-})
+#: Altlast Runtime46/batch15 (Workboard STUDIO-UMBAU-RUNTIME46): Masken und Quellen, die heute nicht passen.
+#: Darf nur schrumpfen; eine reparierte Maske muss aus der Datei (sonst verdeckt sie Neues).
+ALTLAST = json.loads((Path(__file__).resolve().parents[1] / "config/mask_field_contract_altlast.json")
+                     .read_text(encoding="utf-8"))
+PLATZHALTER_ALTLAST = frozenset(ALTLAST["abweichungen_masken"])
+UNGETYPT_ALTLAST = frozenset(ALTLAST["nicht_pruefbar"])
+ZEILEN_ALTLAST = frozenset(ALTLAST["zeilen_nicht_pruefbar"])
 
 
 @pytest.fixture(scope="module")
 def ergebnis() -> dict:
+    # Immer derselbe Umfang wie im Gesamtlauf: volle App und registrierte Stamm-Masken.
+    import app.main  # noqa: F401
+    from app.core.stamm_object_page_parent import ensure_stamm_screen_registry
+
+    ensure_stamm_screen_registry()
     return pruefe()
 
 
@@ -84,6 +77,8 @@ def test_altlasten_schrumpfen_nur(ergebnis: dict) -> None:
     noch_platzhalter = {a["screen"] for a in ergebnis["abweichungen"]}
     assert PLATZHALTER_ALTLAST <= noch_platzhalter, sorted(PLATZHALTER_ALTLAST - noch_platzhalter)
     assert UNGETYPT_ALTLAST <= set(ergebnis["nicht_pruefbar"]), sorted(UNGETYPT_ALTLAST - set(ergebnis["nicht_pruefbar"]))
+    zeilen = set(ergebnis["zeilen_nicht_pruefbar"])
+    assert ZEILEN_ALTLAST <= zeilen, sorted(ZEILEN_ALTLAST - zeilen)
 
 
 def test_es_wird_ueberhaupt_etwas_geprueft(ergebnis: dict) -> None:
@@ -102,7 +97,7 @@ def test_tabellenquellen_ohne_zeilenform_nehmen_nicht_zu(ergebnis: dict) -> None
     wie im Kopf, nur oefter. Wo die Zeilenform nicht deklariert ist, kann das
     Gate nichts sagen; diese Zahl haelt den Rest fest und darf nur sinken.
     """
-    offen = ergebnis["zeilen_nicht_pruefbar"]
+    offen = [quelle for quelle in ergebnis["zeilen_nicht_pruefbar"] if quelle not in ZEILEN_ALTLAST]
     assert len(offen) <= ZEILEN_NICHT_PRUEFBAR_MAX, (
         "Neue Tabellenquellen ohne deklarierte Zeilenform: " + ", ".join(offen)
     )

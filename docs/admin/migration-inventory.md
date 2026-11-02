@@ -374,6 +374,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `neuro_step_audit_einkauf_tenant_20260405` | neuro_step_audit_trace + einkauf_bestellungen.tenant_id |
 | `neuroassist_state_graph_confidence_ledger_20260329` | Neuro State Graph + Confidence Ledger tables |
 | `normalize_finance_hr_contracts_20260610` | Normalize finance account values and restore HR shift schema. |
+| `nummernkreis_mandant_cascade_20261102` | Nummernkreise gehoeren dem Mandanten: Fremdschluessel mit ON DELETE CASCADE. |
 | `offene_posten_fields_crud_20260214` | Extend offene_posten with L3 fields for full CRUD. |
 | `offenes_schliessen_20261008` | Bestellkommunikation mit Inhalt; Bankkonten im Mandanten. |
 | `ops_chargen_add_mhd_20260215` | add mhd to ops_chargen |
