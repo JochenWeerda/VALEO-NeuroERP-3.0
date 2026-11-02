@@ -3,7 +3,7 @@
   "schemaVersion": 1,
   "screens": {
     "abrechnung/eb-lieferschein-kontrolle": {
-      "definition_hash": "c3b0ff912bbba50588bb039c8ee3e7e780111e4ee38d69e8372dd74790525239",
+      "definition_hash": "a1941b4a2040fb3a563714db4608fa3df65ab136800cf92d09d96623eb3612ec",
       "gates_passed": [
         "A",
         "B",
@@ -1871,7 +1871,7 @@
       "version": "1.0.0"
     },
     "artikel/stamm": {
-      "definition_hash": "ae47dee45823c6da4ab36e0e41527728c3231f4f7504a3bee77001ada202dfc5",
+      "definition_hash": "4b0927da6d182672cee9803cdd654a3b06a43b74bfb5f418dcb317376c945fb0",
       "gates_passed": [
         "A",
         "B",
@@ -1981,7 +1981,7 @@
       "version": "1.0.0"
     },
     "auswertungen/auftrags-kontrolle": {
-      "definition_hash": "923c3eba6e2e50509ce447394f55d82fe8b67c3e7c04f3e20abc9885e8718863",
+      "definition_hash": "b51b0d9e4b5e48ea8efc97f2498838e8ec1a6014680fc94d800b02eae3a571fb",
       "gates_passed": [
         "A",
         "B",
@@ -1992,7 +1992,7 @@
       "version": "1.0.0"
     },
     "auswertungen/beleg-kontrolle": {
-      "definition_hash": "fd895b8807173357fb387b0cd9b981787a9dc8a8bd540cc1d8294deb8c537f48",
+      "definition_hash": "e75faac9ea21ce38b9b7510397fc9723f06b3d60e7869b3c9d38b976898b5886",
       "gates_passed": [
         "A",
         "B",
@@ -2102,7 +2102,7 @@
       "version": "1.0.0"
     },
     "auswertungen/lieferschein-kontrolle": {
-      "definition_hash": "dbeaa24ef651f2101e0f8111b60f5a643bd085de36d3ee80b9eb35bae3bccc7a",
+      "definition_hash": "8bbcf335b155a77cead38636a0e4be5b8b91632f196b7aeafbcac6b1fb65cddc",
       "gates_passed": [
         "A",
         "B",

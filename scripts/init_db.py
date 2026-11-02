@@ -72,6 +72,11 @@ def main() -> None:
 
     print("Database schema migrated to head.")
 
+    # --nur-migrationen: der frisch migrierte Stand, gegen den die Schemavertraege (RLS-Inventar) pruefen;
+    # create_all legt danach Tabellen an, die keine Migration kennt.
+    if "--nur-migrationen" in sys.argv[1:]:
+        return
+
     # ORM-Vertrag sicherstellen: Modelle, die (noch) keine eigene Migration
     # haben, additiv anlegen (create_all ist idempotent). Ohne diesen Schritt
     # fehlen auf frischen Installationen ORM-definierte Tabellen — Befund

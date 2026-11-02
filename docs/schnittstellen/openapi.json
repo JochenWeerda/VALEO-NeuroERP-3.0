@@ -71338,6 +71338,17 @@
       "FinanceDebitorOut": {
         "additionalProperties": true,
         "properties": {
+          "account_holder": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Account Holder"
+          },
           "bank": {
             "anyOf": [
               {
@@ -71348,6 +71359,17 @@
               }
             ],
             "title": "Bank"
+          },
+          "bank_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bank Name"
           },
           "bic": {
             "anyOf": [
@@ -71360,6 +71382,61 @@
             ],
             "title": "Bic"
           },
+          "city": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "City"
+          },
+          "company_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Company Name"
+          },
+          "contact_person": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Person"
+          },
+          "country": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country"
+          },
+          "credit_limit": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Credit Limit"
+          },
           "debitoren_nr": {
             "anyOf": [
               {
@@ -71370,6 +71447,50 @@
               }
             ],
             "title": "Debitoren Nr"
+          },
+          "debtor_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Debtor Number"
+          },
+          "discount_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Discount Days"
+          },
+          "discount_percent": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Discount Percent"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
           },
           "geschaeftspartner_nr": {
             "anyOf": [
@@ -71403,6 +71524,17 @@
               }
             ],
             "title": "Id"
+          },
+          "is_active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Active"
           },
           "kontoinhaber": {
             "anyOf": [
@@ -71448,6 +71580,39 @@
             ],
             "title": "Name"
           },
+          "payment_terms_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Payment Terms Days"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "postal_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Postal Code"
+          },
           "skonto_prozent": {
             "anyOf": [
               {
@@ -71492,6 +71657,28 @@
             ],
             "title": "Steuernummer"
           },
+          "street": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Street"
+          },
+          "tax_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tax Number"
+          },
           "ust_id": {
             "anyOf": [
               {
@@ -71502,6 +71689,17 @@
               }
             ],
             "title": "Ust Id"
+          },
+          "vat_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vat Id"
           },
           "zahlungsbedingungen": {
             "anyOf": [
@@ -148437,6 +148635,49 @@
           "_idempotencyKey"
         ],
         "title": "SalesOfferImportCommand",
+        "type": "object"
+      },
+      "SalesOfferImportOut": {
+        "description": "Ergebnis von ``sales_offer_import.import_offers``; ``replayed`` bei wiederholtem Idempotenzschluessel.",
+        "properties": {
+          "auditEntryId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Auditentryid"
+          },
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "offer_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Offer Ids",
+            "type": "array"
+          },
+          "replayed": {
+            "default": false,
+            "title": "Replayed",
+            "type": "boolean"
+          },
+          "success": {
+            "title": "Success",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "success",
+          "count",
+          "offer_ids"
+        ],
+        "title": "SalesOfferImportOut",
         "type": "object"
       },
       "SalesOfferItemInput": {
@@ -269856,7 +270097,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "List Segments",
+        "summary": "Segmente auflisten",
         "tags": [
           "crm",
           "segments",
@@ -269905,7 +270146,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Create Segment",
+        "summary": "Segment anlegen",
         "tags": [
           "crm",
           "segments",
@@ -269967,7 +270208,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Delete Segment",
+        "summary": "Segment loeschen",
         "tags": [
           "crm",
           "segments",
@@ -270017,7 +270258,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Get Segment",
+        "summary": "Segment lesen",
         "tags": [
           "crm",
           "segments",
@@ -270077,7 +270318,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Update Segment",
+        "summary": "Segment aendern",
         "tags": [
           "crm",
           "segments",
@@ -270139,7 +270380,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Recalculate Segment",
+        "summary": "Segment neu berechnen",
         "tags": [
           "crm",
           "segments",
@@ -270214,7 +270455,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Segment Members",
+        "summary": "Segmentmitglieder auflisten",
         "tags": [
           "crm",
           "segments",
@@ -270274,7 +270515,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Add Segment Member",
+        "summary": "Mitglied ins Segment aufnehmen",
         "tags": [
           "crm",
           "segments",
@@ -270336,7 +270577,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Remove Segment Member",
+        "summary": "Mitglied aus dem Segment entfernen",
         "tags": [
           "crm",
           "segments",
@@ -270388,7 +270629,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Segment Performance",
+        "summary": "Segment-Kennzahlen lesen",
         "tags": [
           "crm",
           "segments",
@@ -299279,17 +299520,24 @@
     },
     "/api/v1/finance/connectors/profiles": {
       "get": {
-        "description": "Profile pro Mandant und Connector-Typ.",
+        "description": "Profile pro Mandant, wahlweise je Connector-Typ (die Liste fibu/schnittstelle-fibu-liste zeigt alle).",
         "operationId": "list_profiles_api_v1_finance_connectors_profiles_get",
         "parameters": [
           {
             "in": "query",
             "name": "type",
-            "required": true,
+            "required": false,
             "schema": {
-              "pattern": "^(PAYROLL|ASSET_LEDGER)$",
-              "title": "Type",
-              "type": "string"
+              "anyOf": [
+                {
+                  "pattern": "^(PAYROLL|ASSET_LEDGER)$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Type"
             }
           }
         ],
@@ -396983,7 +397231,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/SalesOfferImportOut"
+                }
               }
             },
             "description": "Successful Response"
@@ -397004,7 +397254,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Import Sales Offers",
+        "summary": "Sales offers aus CSV importieren",
         "tags": [
           "sales",
           "offers"

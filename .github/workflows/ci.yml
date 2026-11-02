@@ -69,6 +69,9 @@ jobs:
 
       - name: Initialize database schema & seed data
         run: |
+          # Schemavertrag gegen den rein migrierten Stand, bevor create_all ORM-Tabellen ohne Migration ergaenzt.
+          python scripts/init_db.py --nur-migrationen
+          pytest -q -p no:cacheprovider --no-cov tests/test_rls_inventory_contract.py::test_tabellen_entsprechen_dem_frischen_schema
           python scripts/init_db.py
           python -m app.seeds.inventory_seed
           # Getrennte Rollen (valeo_app, valeo_system, ...) wie im Betrieb; RLS-Tests pruefen unter valeo_app.
@@ -77,7 +80,8 @@ jobs:
       # Vollsuite deckt u.a. Compliance/PCN (test_flow_spines_api), Kernel-Actions (wave17), Broker ab.
       - name: Run tests
         run: |
-          pytest --cov=app --cov-report=xml --cov-report=term
+          pytest --cov=app --cov-report=xml --cov-report=term \
+            --deselect tests/test_rls_inventory_contract.py::test_tabellen_entsprechen_dem_frischen_schema
       
       - name: Upload coverage
         uses: codecov/codecov-action@v3

@@ -88,14 +88,13 @@ stats:
   mask_mutations_considered: 97
   by_coverage:
     adjacent: 1
-    blocked_human_only: 29
+    blocked_human_only: 38
     local_ui: 59
     mapped: 42
     mapped_generic: 9
     mapped_propose_only: 1
     mapped_read: 2
     open_high: 4
-    open_medium: 9
 mappings:
 - mask_action_id: mask:admin/postfaecher:neu
   mask: admin/postfaecher
@@ -468,8 +467,9 @@ mappings:
   command_endpoint: /api/v1/crm/activities/{entity_id}/actions/delete
   command: crm.activity.delete.v1
   mcp_tool_id: null
-  coverage: open_medium
-  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
 - mask_action_id: mask:crm/aktivitaeten-liste:neu
   mask: crm/aktivitaeten-liste
   domain: crm
@@ -498,8 +498,9 @@ mappings:
   command_endpoint: /api/v1/crm/campaigns/templates/{entity_id}
   command: null
   mcp_tool_id: null
-  coverage: open_medium
-  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
 - mask_action_id: mask:crm/campaign:activate
   mask: crm/campaign
   domain: crm
@@ -508,8 +509,9 @@ mappings:
   command_endpoint: /api/v1/crm/campaigns/{entity_id}/activate
   command: null
   mcp_tool_id: null
-  coverage: open_medium
-  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
 - mask_action_id: mask:crm/campaign:archive
   mask: crm/campaign
   domain: crm
@@ -518,8 +520,9 @@ mappings:
   command_endpoint: /api/v1/crm/campaigns/{entity_id}/archive
   command: null
   mcp_tool_id: null
-  coverage: open_medium
-  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
 - mask_action_id: mask:crm/campaign:delete
   mask: crm/campaign
   domain: crm
@@ -528,8 +531,9 @@ mappings:
   command_endpoint: /api/v1/crm/campaigns/{entity_id}
   command: null
   mcp_tool_id: null
-  coverage: open_medium
-  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
 - mask_action_id: mask:crm/customer-360:create_activity
   mask: crm/customer-360
   domain: crm
@@ -578,8 +582,9 @@ mappings:
   command_endpoint: /api/v1/gdpr/requests/{entity_id}/delete
   command: null
   mcp_tool_id: null
-  coverage: open_medium
-  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
 - mask_action_id: mask:crm/gdpr-request:reject
   mask: crm/gdpr-request
   domain: crm
@@ -588,8 +593,9 @@ mappings:
   command_endpoint: /api/v1/gdpr/requests/{entity_id}/reject
   command: null
   mcp_tool_id: null
-  coverage: open_medium
-  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
 - mask_action_id: mask:crm/kampagnen-liste:neu
   mask: crm/kampagnen-liste
   domain: crm
@@ -699,8 +705,9 @@ mappings:
   command_endpoint: /api/v1/crm/segments/{entity_id}/calculate
   command: null
   mcp_tool_id: null
-  coverage: open_medium
-  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
 - mask_action_id: mask:crm/segment:delete
   mask: crm/segment
   domain: crm
@@ -709,8 +716,9 @@ mappings:
   command_endpoint: /api/v1/crm/segments/{entity_id}
   command: null
   mcp_tool_id: null
-  coverage: open_medium
-  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
 - mask_action_id: mask:crm/segmente-liste:neu
   mask: crm/segmente-liste
   domain: crm
@@ -1711,5 +1719,5 @@ mappings:
 next_medium_candidates: []
 classification_complete: true
 classification_notes: 'FUHRPARK-TENANT-CE-20261009: Fuhrpark 5× mapped (tenant_id+CE+MCP Isolation); blocked_missing_tenant
-  0. Rest: open_high 4; open_medium 9; blocked_human_only 29; blocked_no_endpoint 0; local_ui 59; FIN-CLOSE
+  0. Rest: open_high 4; open_medium 0; blocked_human_only 38; blocked_no_endpoint 0; local_ui 59; FIN-CLOSE
   blocked_adr_076.'

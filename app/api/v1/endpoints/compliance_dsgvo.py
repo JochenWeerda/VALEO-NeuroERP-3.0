@@ -269,6 +269,7 @@ def _klarnamen_anonymisieren(db: Session, namen: list[str], subject_id: str, ten
     exakt gleichem Namen. Ueber die Kunden-ID gebundene Aktivitaeten loescht der Lauf vorher ganz.
     """
     try:
+        # RETURNING liefert genau die geaenderten Zeilen; eine Loeschung nach Art. 17 wird nicht seitenweise begrenzt.
         with db.begin_nested():
             kennungen = [str(k) for k in db.execute(text(
                 "UPDATE domain_crm.activities SET "
@@ -276,7 +277,7 @@ def _klarnamen_anonymisieren(db: Session, namen: list[str], subject_id: str, ten
                 "contact_person = CASE WHEN contact_person = ANY(:namen) THEN :anon ELSE contact_person END "
                 "WHERE tenant_id::text = :tid AND (customer_id IS NULL OR customer_id::text <> :sid) "
                 "AND (customer = ANY(:namen) OR contact_person = ANY(:namen)) RETURNING id"),
-                {"tid": tenant_id, "sid": subject_id, "namen": namen, "anon": anon_name}).scalars().all()]
+                {"tid": tenant_id, "sid": subject_id, "namen": namen, "anon": anon_name}).scalars()]
     except Exception as exc:  # noqa: BLE001 - jeder Fehlschlag muss sichtbar bleiben und den Antrag offen halten
         return {"table": "domain_crm.activities (Klarname)", "rows_affected": 0, "error": str(exc)}
     return {"table": "domain_crm.activities (Klarname)", "rows_affected": len(kennungen),
