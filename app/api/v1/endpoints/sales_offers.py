@@ -385,7 +385,17 @@ class SalesOfferImportCommand(BaseModel):
     mode: Optional[str] = Field(default=None, alias="_mode")
 
 
-@router.post("/actions/import-csv", dependencies=SCHREIBEN["VERKAUF"])
+class SalesOfferImportOut(BaseModel):
+    """Ergebnis von ``sales_offer_import.import_offers``; ``replayed`` bei wiederholtem Idempotenzschluessel."""
+    success: bool
+    count: int
+    offer_ids: list[str]
+    auditEntryId: Optional[str] = None
+    replayed: bool = False
+
+
+@router.post("/actions/import-csv", response_model=SalesOfferImportOut, summary="Sales offers aus CSV importieren",
+             dependencies=SCHREIBEN["VERKAUF"])
 async def import_sales_offers(payload: SalesOfferImportCommand, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     from app.services.sales_offer_import import import_offers
     if payload.mode not in (None, "execute"):
