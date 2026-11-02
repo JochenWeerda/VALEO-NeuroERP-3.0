@@ -231,6 +231,9 @@ def test_foreign_customer_is_blocked_by_command_and_database_fk(canonical):
             db.execute(text("GRANT USAGE ON SCHEMA domain_crm TO valeo_app"))
             db.execute(text("GRANT INSERT ON domain_crm.activities TO valeo_app"))
             db.execute(text("SET LOCAL ROLE valeo_app"))
+            # Eigener Mandant im Kontext: RLS (seit rahmenauftrag_afa_tabellen_20261102) laesst die Zeile zu,
+            # gesperrt werden muss sie vom Fremdschluessel.
+            db.execute(text("SELECT set_config('app.tenant_id', :tenant, true)"), {"tenant": tenant})
             db.execute(text("INSERT INTO domain_crm.activities(id,tenant_id,customer_id,type,title,customer,contact_person,status,assigned_to) VALUES (:id,:tenant,:customer,'call','Synthetic cross reference','','','planned','')"),
                 {"id":str(uuid4()),"tenant":tenant,"customer":customer})
     assert getattr(error.value.orig,"pgcode",None)=="23503"

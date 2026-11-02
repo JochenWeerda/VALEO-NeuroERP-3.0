@@ -191,8 +191,12 @@ def _erreichbare_dateien() -> set[str]:
         if ".endpoints." in modul:
             modul_routen[modul.split(".")[-1] + ".py"].add(getattr(route, "path", ""))
 
+    from app.core.stamm_object_page_parent import ensure_stamm_screen_registry
+
+    # Stamm-Masken registrieren sich beim ersten Abruf nach; vorher laden, sonst aendert sich das Register beim Lauf.
+    ensure_stamm_screen_registry()
     gerufen: set[str] = set()
-    for screen_id in SCREEN_DEFINITION_BUILDERS:
+    for screen_id in list(SCREEN_DEFINITION_BUILDERS):
         screen = get_screen_definition(screen_id) or {}
         for quelle in screen.get("dataSources") or []:
             if quelle.get("endpoint"):

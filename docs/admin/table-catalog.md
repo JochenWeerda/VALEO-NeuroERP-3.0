@@ -17,7 +17,7 @@ Quelle: `information_schema` nach `alembic upgrade head`. Verbraucher: SQL/ORM u
 Logisches Modell: [ERD Canonical Domain](../architecture/views/erd-canonical-domain.md).
 Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell-tenancy.md).
 
-**31 Schemas, 698 Tabellen, 9235 Spalten.**
+**31 Schemas, 701 Tabellen, 9260 Spalten.**
 
 ## Schemas
 
@@ -34,7 +34,7 @@ Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell
 | `domain_docs` | `platform` | 2 | 25 |
 | `domain_einkauf` | `procurement` | 21 | 393 |
 | `domain_erp` | `finance` | 46 | 594 |
-| `domain_finance` | `finance` | 20 | 229 |
+| `domain_finance` | `finance` | 21 | 237 |
 | `domain_futtermittel` | `agrar` | 8 | 83 |
 | `domain_hr` | `hr` | 30 | 361 |
 | `domain_hrm` | `hr` | 3 | 32 |
@@ -51,7 +51,7 @@ Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell
 | `domain_pricing` | `finance` | 5 | 49 |
 | `domain_procurement` | `procurement` | 5 | 50 |
 | `domain_reporting` | `finance` | 6 | 80 |
-| `domain_sales` | `crm` | 11 | 158 |
+| `domain_sales` | `crm` | 13 | 175 |
 | `domain_shared` | `platform` | 159 | 1911 |
 | `domain_workflow` | `platform` | 3 | 37 |
 
@@ -323,6 +323,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_erp.tax_keys` | `app/api/v1/endpoints/preis_kalkulation_bridge.py`, `app/api/v1/endpoints/tax_keys.py`, `app/api/v1/endpoints/vat_return_export.py`, `app/core/screen_definitions_capture.py`, `app/finance/steuerschluessel.py`, `app/finance/tax_resolver.py`, `app/services/docflow_service.py`, `app/services/finance_freigabe.py` | `app/api/v1/endpoints/tax_keys.py`, `app/finance/steuerschluessel.py` | — |
 | `domain_erp.vat_returns` | `app/api/v1/endpoints/vat_return_export.py`, `app/services/closing_checklist_validation.py` | `app/api/v1/endpoints/vat_return_export.py` | — |
 | `domain_erp.versicherungen` | `app/services/schaden_service.py` | — | — |
+| `domain_finance.asset_depreciation_runs` | `app/api/v1/endpoints/asset_accounting.py` | — | — |
 | `domain_finance.aufbewahrungsfristen` | `app/finance/gobd.py`, `app/finance/models.py` | `app/finance/gobd.py` | — |
 | `domain_finance.billing_batch_audit` | — | `app/services/billing_batch_service.py` | — |
 | `domain_finance.billing_batch_lines` | `app/api/v1/endpoints/billing_batch.py`, `app/services/billing_batch_service.py` | `app/services/billing_batch_service.py` | — |
@@ -579,6 +580,8 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_reporting.l3_report_facts` | `app/services/l3_report_catalog_service.py` | `app/services/l3_report_catalog_service.py` | — |
 | `domain_reporting.query_center_audit` | — | `app/services/query_center_service.py` | — |
 | `domain_reporting.query_definitions` | `app/services/query_center_service.py` | `app/services/query_center_service.py` | — |
+| `domain_sales.blanket_order_releases` | `app/api/v1/endpoints/sales_blanket_orders.py` | `app/api/v1/endpoints/sales_blanket_orders.py` | — |
+| `domain_sales.blanket_orders` | `app/api/v1/endpoints/sales_blanket_orders.py` | `app/api/v1/endpoints/sales_blanket_orders.py` | — |
 | `domain_sales.delivery_note_positions` | `app/api/v1/endpoints/articles.py`, `app/api/v1/endpoints/sales_delivery_notes.py`, `app/api/v1/endpoints/sales_invoices.py`, `app/api/v1/endpoints/sustainability.py`, `app/services/docflow_service.py`, `app/services/mask_rollout_summary_service.py`, `app/services/mcp_execution_service.py`, `app/services/sales_match_service.py`, `app/services/warehouse_service.py` | `app/api/v1/endpoints/sales_delivery_notes.py`, `app/api/v1/endpoints/sales_orders.py` | `sales/delivery-note` |
 | `domain_sales.delivery_notes` | `app/api/v1/endpoints/articles.py`, `app/api/v1/endpoints/branches.py`, `app/api/v1/endpoints/collective_documents.py`, `app/api/v1/endpoints/logistics_tours.py`, `app/api/v1/endpoints/mask_actions.py`, `app/api/v1/endpoints/sales_delivery_notes.py`, `app/api/v1/endpoints/sales_invoices.py`, `app/api/v1/endpoints/sales_orders.py`, `app/api/v1/endpoints/sales_reports.py`, `app/api/v1/endpoints/sustainability.py`, `app/services/docflow_service.py`, `app/services/document_control_projection.py`, `app/services/logistics_disposition_service.py`, `app/services/mask_rollout_summary_service.py`, `app/services/mcp_execution_service.py`, `app/services/o2c_chain_service.py`, `app/services/sales_credit_service.py`, `app/services/sales_match_service.py`, `app/services/sales_storno_service.py`, `app/services/warehouse_service.py` | `app/api/v1/endpoints/collective_documents.py`, `app/api/v1/endpoints/finance_invoices.py`, `app/api/v1/endpoints/logistics_tours.py`, `app/api/v1/endpoints/sales_credit_notes.py`, `app/api/v1/endpoints/sales_delivery_notes.py`, `app/api/v1/endpoints/sales_orders.py`, `app/services/mcp_execution_service.py`, `app/services/sales_storno_service.py`, `app/services/warehouse_service.py` | `admin/branches`, `sales/delivery-note` |
 | `domain_sales.sales_ab_status_log` | — | `app/services/sales_ab_lifecycle_service.py` | — |
@@ -1064,6 +1067,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 
 | Tabelle | Domain | Lage | PK | Spalten |
 |---|---|---|---|---|
+| `asset_depreciation_runs` | `finance` | native | `id` | id, tenant_id, asset_id, period_year, period_month, depreciation_amount, book_value_after, created_at |
 | `aufbewahrungsfristen` | `finance` | native | `id` | id, tenant_id, dokument_typ, gesetzliche_grundlage, aufbewahrungs_jahre, aeltestes_dokument_datum, anzahl_dokumente, ablauf_datum, status, created_at, updated_at |
 | `billing_batch_audit` | `finance` | native | `id` | id, tenant_id, batch_id, line_id, action, old_value, new_value, actor, reason, created_at |
 | `billing_batch_lines` | `finance` | native | `id` | id, tenant_id, batch_id, source_type, source_ref, source_number, source_route, evidence_route, amount, status, validation_error, retry_count, idempotency_key, processed_at, created_at |
@@ -1418,6 +1422,8 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 
 | Tabelle | Domain | Lage | PK | Spalten |
 |---|---|---|---|---|
+| `blanket_order_releases` | `crm` | native | `id` | id, tenant_id, blanket_order_id, release_quantity, release_date, sales_order_ref, status |
+| `blanket_orders` | `crm` | native | `id` | id, tenant_id, customer_id, article_id, total_quantity, unit_price, valid_from, valid_to, status, created_at |
 | `delivery_note_positions` | `crm` | native | `id` | id, delivery_note_id, pos_nr, artikel_id, artikel_nr, bezeichnung, bezeichnung2, menge, einheit, listenpreis, rabatt, art, netto_preis, netto_betrag, niederlassung, lagerhalle, lagerfach, charge, serien_nr, erloskonto, mwst_prozent, kontrakt_nr, skontierf, fremdware, created_at, updated_at, gef_punkt, na_bio, muster_nr, strecke, zus_beleg, anerken, tenant_id |
 | `delivery_notes` | `crm` | native | `id` | id, tenant_id, delivery_note_number, customer_id, branch_id, sales_rep_id, operator_id, delivery_date, delivery_time, cost_center_id, truck_number, is_credit_note, is_self_pickup, is_early_payment, reference_invoice_number, status, is_printed, is_delivered, invoice_number, totals, created_at, updated_at, created_by, updated_by, sales_order_id, storno_grund |
 | `sales_ab_status_log` | `crm` | prefix | `id` | id, auftrag_id, tenant_id, old_status, new_status, operator, reason, created_at |
