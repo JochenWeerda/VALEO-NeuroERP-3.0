@@ -20256,3 +20256,19 @@ Rechnungswege (tests/stammsaetze.py). Vertraege an Runtime46 angeglichen (Rollen
 Familie, Meridian-Lookup, Belegmasken-Release 1.3.0, Studio-Katalog).
 Offen: Rest von Test & Lint, Smoke-Tests.
 
+## STUDIO-UMBAU-RUNTIME46 — offen (Nutzerentscheidung 02.11.2026: Weg 2)
+
+Der Codex-Stand ca50c46f7 ("runtime46") brachte Seiten an der Studio-Regel vorbei. Sie stehen seit
+CI-DAUERROT-20261102 als dokumentierte Altlast in config/mask_studio_ratchet.json und werden in einem
+eigenen Auftrag zu Studio-Masken umgebaut (danach Ratsche wieder senken).
+Handgebaute Routen (20): admin/control-center, admin/webhooks, annahme/abrechnung, annahme/lkw-registrierung,
+annahme/qualitaets-check, annahme/warteschlange, einkauf/lieferschein-erfassung, finance/bank-abgleich,
+finance/dunning, finance/mahnlauf, finance/mahnwesen, lager/materialfluss, mahnwesen/mahnlauf,
+studio/workspace-composition-preview, verkauf/kunde/:id, verkauf/kunde/neu, verkauf/kunden-stamm/:id,
+waage, waage/neu, waage/wiegungen.
+Altmuster-Routen (5): admin/control-center/agent-ops, admin/control-center/superglue, admin/screen-studio,
+annahme/rohware, einkauf/bestellungen/neu.
+Nicht deklarierte Maskenaktionen: siehe Diff von config/mask_studio_ratchet.json in PR #99
+(u.a. admin/control-center, admin/webhooks-liste, artikel/zoll-intrastat, finance/bank-abgleich,
+Positionsaktionen der Rechnungserfassungen).
+
