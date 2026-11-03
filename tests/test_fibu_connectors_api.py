@@ -92,26 +92,28 @@ class FakeDb:
         sql = " ".join(str(statement).split())
         params = params or {}
 
-        if "FROM domain_erp.fibu_connector_profiles WHERE tenant_id = :tid AND connector_type = :ct" in sql:
+        if ("FROM domain_erp.fibu_connector_profiles WHERE tenant_id = :tid "
+                "AND (CAST(:ct AS text) IS NULL OR connector_type = :ct)") in sql:
             rows = []
-            for profile in self.profiles.values():
-                if profile["tenant_id"] == params["tid"] and profile["connector_type"] == params["ct"]:
-                    rows.append(
-                        (
-                            profile["id"],
-                            profile["tenant_id"],
-                            profile["connector_type"],
-                            profile["name"],
-                            profile["is_default"],
-                            profile["settings"],
-                            profile["mapping"],
-                            profile["version"],
-                            profile["created_at"],
-                            profile["updated_at"],
-                            profile["created_by"],
-                            profile["updated_by"],
-                        )
+            treffer = [p for p in self.profiles.values()
+                       if p["tenant_id"] == params["tid"] and params["ct"] in (None, p["connector_type"])]
+            for profile in sorted(treffer, key=lambda p: (p["connector_type"], not p["is_default"], p["name"])):
+                rows.append(
+                    (
+                        profile["id"],
+                        profile["tenant_id"],
+                        profile["connector_type"],
+                        profile["name"],
+                        profile["is_default"],
+                        profile["settings"],
+                        profile["mapping"],
+                        profile["version"],
+                        profile["created_at"],
+                        profile["updated_at"],
+                        profile["created_by"],
+                        profile["updated_by"],
                     )
+                )
             return _FakeResult(fetchall=rows)
 
         if "INSERT INTO domain_erp.fibu_connector_profiles" in sql:

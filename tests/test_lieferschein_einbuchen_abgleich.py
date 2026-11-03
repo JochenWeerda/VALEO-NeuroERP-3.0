@@ -137,8 +137,8 @@ def lieferschein(engine, stamm, positionen: list[tuple[str | None, float]], haus
                        " lieferant_id) VALUES (:i, :h, :n, CURRENT_DATE, :l)"),
                   {"i": kennung, "h": haus, "n": f"LS-{kennung[:8]}", "l": LIEFERANT})
         for nr, (artikel_nr, menge) in enumerate(positionen, start=1):
-            v.execute(text("INSERT INTO einkauf_lieferschein_positionen (id, lieferschein_id, pos_nr, artikel_nr, menge) "
-                           "VALUES (:i, :l, :p, :a, :m)"),
+            v.execute(text("INSERT INTO einkauf_lieferschein_positionen (id, lieferschein_id, pos_nr, artikel_nr, menge, tenant_id) "
+                           "VALUES (:i, :l, :p, :a, :m, (SELECT tenant_id FROM public.einkauf_lieferscheine WHERE id = :l))"),
                       {"i": str(uuid.uuid4()), "l": kennung, "p": nr, "a": artikel_nr, "m": menge})
     return kennung
 
@@ -152,8 +152,8 @@ def bestellung(engine, stamm, menge: float = 40) -> str:
                        " bestelldatum, status) VALUES (:i, :h, :n, :l, CURRENT_DATE, 'versendet')"),
                   {"i": kennung, "h": HAUS_A, "n": f"EK-{kennung[:8]}", "l": LIEFERANT})
         v.execute(text("INSERT INTO domain_einkauf.bestellung_positionen (id, bestellung_id, pos_nr, article_id, "
-                       " artikel_nr, artikel_bezeichnung, menge, menge_geliefert, menge_offen, einheit, status) "
-                       "VALUES (:i, :b, 1, :a, :nr, 'Saatweizen', :m, 0, :m, 'kg', 'offen')"),
+                       " artikel_nr, artikel_bezeichnung, menge, menge_geliefert, menge_offen, einheit, status, tenant_id) "
+                       "VALUES (:i, :b, 1, :a, :nr, 'Saatweizen', :m, 0, :m, 'kg', 'offen', (SELECT tenant_id FROM domain_einkauf.bestellungen WHERE id = :b))"),
                   {"i": str(uuid.uuid4()), "b": kennung, "a": stamm["artikel"], "nr": stamm["nummer"], "m": menge})
     return kennung
 

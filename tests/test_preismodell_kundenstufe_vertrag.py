@@ -184,8 +184,8 @@ def vereinbarung(engine, partner: str, artikelnr: str, **felder) -> str:
         v.execute(
             text(
                 f"INSERT INTO {VEREINBARUNGEN} (id, partner_id, article_number, "
-                " price_net, discount_allowed, valid_from, valid_to) "
-                "VALUES (:id, :pid, :nr, :preis, :rabatt_erlaubt, :von, :bis)"
+                " price_net, discount_allowed, valid_from, valid_to, tenant_id) "
+                "VALUES (:id, :pid, :nr, :preis, :rabatt_erlaubt, :von, :bis, (SELECT tenant_id FROM domain_crm.business_partners WHERE partner_id = :pid))"
             ),
             {
                 "id": vid,
@@ -208,8 +208,8 @@ def rabattposten(engine, partner: str, artikelnr: str, prozent, **felder) -> str
         v.execute(
             text(
                 f"INSERT INTO {RABATTPOSTEN} (id, partner_id, article_number, "
-                " discount_percent, valid_from, valid_to) "
-                "VALUES (:id, :pid, :nr, :proz, :von, :bis)"
+                " discount_percent, valid_from, valid_to, tenant_id) "
+                "VALUES (:id, :pid, :nr, :proz, :von, :bis, (SELECT tenant_id FROM domain_crm.business_partners WHERE partner_id = :pid))"
             ),
             {
                 "id": rid,

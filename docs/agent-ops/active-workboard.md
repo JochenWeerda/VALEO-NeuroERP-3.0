@@ -20243,3 +20243,57 @@ Nummer unveraenderlich, je Mandant eindeutig. Migration partner_kontonummern_202
 Protokoll und bezieht sepa_mandates ueber partner_id auf den Partner. Debitor-/Kreditormaske und -liste zeigen
 das Konto, Kunden-/Lieferantennummer daneben.
 Offen: OP-Zuordnung ueber Kontonummer, sobald Buchungen sie schreiben; Stufen 5-6.
+
+## CI-DAUERROT-20261102 — in Arbeit, Claude
+
+Dauerrote Pruefungen auf main beheben (PR #99, Nutzerauftrag "auch fremde Fehler beheben").
+Welle 1: letzte untypisierte Route (sales_offers import-csv), pnpm-Override brace-expansion nur <5
+(ESLint-Glob brach mit minimatch@11 ab), Docs-Abhaengigkeiten fuer generate_agent_handbuch.
+Welle 2: TEST_DATABASE_URL im Job Test & Lint; Mandantenkontext auch ohne main:app-Middleware
+(require_bearer_token, MCP /tools/call, Testgrenze) - Positionen holen tenant_id per
+rls_current_tenant(); Fixtures schreiben tenant_id vom Elternbeleg; Stammsaetze fuer
+Rechnungswege (tests/stammsaetze.py). Vertraege an Runtime46 angeglichen (Rollen, Worklist-
+Familie, Meridian-Lookup, Belegmasken-Release 1.3.0, Studio-Katalog).
+Offen: Rest von Test & Lint, Smoke-Tests.
+
+## STUDIO-UMBAU-RUNTIME46 — offen (Nutzerentscheidung 02.11.2026: Weg 2)
+
+Der Codex-Stand ca50c46f7 ("runtime46") brachte Seiten an der Studio-Regel vorbei. Sie stehen seit
+CI-DAUERROT-20261102 als dokumentierte Altlast in config/mask_studio_ratchet.json und werden in einem
+eigenen Auftrag zu Studio-Masken umgebaut (danach Ratsche wieder senken).
+Handgebaute Routen (20): admin/control-center, admin/webhooks, annahme/abrechnung, annahme/lkw-registrierung,
+annahme/qualitaets-check, annahme/warteschlange, einkauf/lieferschein-erfassung, finance/bank-abgleich,
+finance/dunning, finance/mahnlauf, finance/mahnwesen, lager/materialfluss, mahnwesen/mahnlauf,
+studio/workspace-composition-preview, verkauf/kunde/:id, verkauf/kunde/neu, verkauf/kunden-stamm/:id,
+waage, waage/neu, waage/wiegungen.
+Altmuster-Routen (5): admin/control-center/agent-ops, admin/control-center/superglue, admin/screen-studio,
+annahme/rohware, einkauf/bestellungen/neu.
+Nicht deklarierte Maskenaktionen: siehe Diff von config/mask_studio_ratchet.json in PR #99
+(u.a. admin/control-center, admin/webhooks-liste, artikel/zoll-intrastat, finance/bank-abgleich,
+Positionsaktionen der Rechnungserfassungen).
+Dazu (Feldvertrag, tests/test_mask_field_contracts.py PLATZHALTER_ALTLAST/UNGETYPT_ALTLAST): 17 generierte
+batch15-Platzhaltermasken mit id/name/status/updated_at (sieben Stammdatenmasken lesen faelschlich
+/stammdaten/betriebsstaetten, u.a. Hausbanken, Mengeneinheiten) und 8 ungetypte Kopfquellen.
+Weitere nur schrumpfende Altlast-Dateien derselben Ursache (02.11.2026, PR #99):
+config/screen_list_routes.generated.json "ohne_route" (223 Masken, die keine Seite rendert),
+config/mask_endpoint_altlast.json (42 Quellen ohne Backend-Route, u.a. 38 FiBu-Platzhalter auf
+/fibu/anlagen bzw. /finance/abstimmung/nebenbuch; Betriebsprofile heissen /crm/farm-profiles,
+Kostenstellen /kostenrechnung/kostenstellen), config/meridian_beleg_altlast.json (143 Platzhalter-
+Identitaeten, 9 Bezugsfelder fuer rohe IDs in crm/campaign, crm/consent, crm/gdpr-request,
+fibu/op-skonto-auszifferung, lager/charge, lager/permanente-inventur, silo/silo - brauchen Lookups).
+Befund 02.11.2026 (Smoke-Tests): 127 Frontend-Seiten rendern seit deeb707b4 eine Native-Seite mit einer
+screenId, die das Backend nicht kennt (u.a. crm/campaigns, crm/segments, crm/leads, crm/dubletten,
+crm/kunden-zuordnung, lager/bestandsuebersicht, finance, hilfe, portal, errors/NotFound) und zeigen nur
+"Workspace konnte nicht geladen werden". Teilweise gibt es Gegenstuecke (crm/dubletten-pruefung,
+crm/leads-liste). Nutzerentscheidung 02.11.2026 Weg 1: 14 Seiten auf ihre vorhandene Maske umgehaengt
+(Kampagnen, Kampagnenvorlagen, Einwilligungen, DSGVO-Anfragen, Leads, Segmente, Dubletten, Freigaben,
+Kulturpflanzen, fuenf Compliance-Listen); 113 als Altlast in config/frontend_seiten_ohne_maske.json,
+Waechter tests/test_frontend_seiten_haben_ihre_maske.py. Echte Studio-Masken dafuer: Weg 3 im Studio-Umbau.
+Vitest (02.11.2026, Nutzerentscheidung Weg 2): 187 Faelle in 51 Testdateien pruefen Quelltext oder Bedienung der
+frueheren handgebauten Seiten (useTouchDevice, min-h-touch, variant="register", Flow-Spine-Inhalte, alte
+Rechnungserfassung). Sie laufen als it.fails mit der Marke "Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46)";
+Ratsche tests/test_vitest_runtime46_altlast.py (hoechstens 187, nur senken). Echte Fehler aus derselben Welle
+sind behoben: doppelte Dateivertragspruefung (accept-Liste) und doppelter Druckzweig ohne Fehlermeldung durch
+die Konfliktaufloesung c0bc8e99b/ca50c46f7; neun handgebaute Capture-Seiten blendeten alle rechtegebundenen
+Aktionen aus (Rechte jetzt aus useScreenPermissions), Postfaecher/Steuerschluessel mit fehlenden Rechten.
+

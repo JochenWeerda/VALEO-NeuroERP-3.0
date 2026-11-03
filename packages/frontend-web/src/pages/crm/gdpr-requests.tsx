@@ -2,6 +2,6 @@ import { NativeListPage } from '@/components/mask-builder/NativeListPage'
 
 export default function Page(): JSX.Element {
   return (
-    <NativeListPage screenId="crm/gdpr-requests" testId="screen-crm/gdpr-requests" />
+    <NativeListPage screenId="crm/dsgvo-anfragen-liste" testId="screen-crm/dsgvo-anfragen-liste" />
   )
 }

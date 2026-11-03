@@ -106,8 +106,8 @@ def _gutschrift(haus, positionen, *, total, art="rechnungskorrektur") -> str:
         for nr, (code, satz, netto) in enumerate(positionen, 1):
             db.execute(text(
                 "INSERT INTO domain_sales.sales_credit_note_lines "
-                "(id, credit_note_id, line_number, description, quantity, unit_price, tax_code, tax_rate, line_total) "
-                "VALUES (:id, :gs, :nr, 'Position', 1, :netto, :code, :satz, :netto)"),
+                "(id, credit_note_id, line_number, description, quantity, unit_price, tax_code, tax_rate, line_total, tenant_id) "
+                "VALUES (:id, :gs, :nr, 'Position', 1, :netto, :code, :satz, :netto, (SELECT tenant_id FROM domain_sales.sales_credit_notes WHERE id = :gs))"),
                 {"id": f"{gs}-{nr}", "gs": gs, "nr": nr, "code": code, "satz": satz, "netto": netto})
         db.commit()
     # Jede Gutschrift braucht die Freigabe einer zweiten Person (APPROVAL-001).

@@ -374,6 +374,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `neuro_step_audit_einkauf_tenant_20260405` | neuro_step_audit_trace + einkauf_bestellungen.tenant_id |
 | `neuroassist_state_graph_confidence_ledger_20260329` | Neuro State Graph + Confidence Ledger tables |
 | `normalize_finance_hr_contracts_20260610` | Normalize finance account values and restore HR shift schema. |
+| `nummernkreis_mandant_cascade_20261102` | Nummernkreise gehoeren dem Mandanten: Fremdschluessel mit ON DELETE CASCADE. |
 | `offene_posten_fields_crud_20260214` | Extend offene_posten with L3 fields for full CRUD. |
 | `offenes_schliessen_20261008` | Bestellkommunikation mit Inhalt; Bankkonten im Mandanten. |
 | `ops_chargen_add_mhd_20260215` | add mhd to ops_chargen |
@@ -412,6 +413,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `projektion_cursor_20260930` | Die Projektionsbuchhaltung bekommt eine Migration. |
 | `query_center_20260821` | Safe query-center definitions and audit. |
 | `quittung_ohne_vorgang_20261006` | Vier Tabellen fuer drei Wege, die bisher nur quittiert haben. |
+| `rahmenauftrag_afa_tabellen_20261102` | Tabellen, die Rahmenauftraege und AfA-Laeufe schon benutzen, auf frischen Installationen anlegen. |
 | `rations_feeding_control_20260711` | Persisted feeding-control logs (DLG 01/2025 F1). |
 | `rations_integrations_20260712` | Rations integration import journal. |
 | `rations_zugang_dsgvo_20260420` | rations_zugang DSGVO access control table |

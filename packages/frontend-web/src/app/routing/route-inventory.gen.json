@@ -3886,7 +3886,7 @@
       "source": "alias"
     },
     {
-      "module": "@/pages/sales/angebot-erstellen",
+      "module": "@/pages/sales/angebote-liste",
       "path": "sales/angebote",
       "source": "alias"
     },

@@ -2,12 +2,12 @@
  "_note": "Generiert von scripts/rls_rollout.py aus docs/admin/rls-inventory.json; nicht von Hand aendern.",
  "summary": {
   "ready": 0,
-  "pending": 43,
+  "pending": 42,
   "reasons": {
-   "dienst": 10,
+   "dienst": 9,
    "mandant_ermitteln": 1,
-   "standardmandant": 25,
-   "mandant_null": 20,
+   "standardmandant": 24,
+   "mandant_null": 18,
    "uebergreifend": 0,
    "identitaet": 4
   }
@@ -131,17 +131,11 @@
    "standardmandant"
   ],
   "domain_shared.audit_logs": [
-   "mandant_null",
    "standardmandant"
   ],
   "domain_shared.calendar_ics_tokens": [
    "identitaet",
    "mandant_ermitteln",
-   "standardmandant"
-  ],
-  "public.crm_activities": [
-   "dienst",
-   "mandant_null",
    "standardmandant"
   ],
   "public.crm_leads": [

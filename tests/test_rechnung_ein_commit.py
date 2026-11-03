@@ -50,6 +50,25 @@ def client(engine):
     return TestClient(app, raise_server_exceptions=False)
 
 
+KUNDE = f"kunde-{HAUS}"
+
+
+@pytest.fixture(scope="module", autouse=True)
+def kunde_im_haus(engine):
+    """Die Rechnung prueft den Kunden im Mandanten (tests/stammsaetze.py)."""
+    from sqlalchemy import text
+
+    from stammsaetze import entferne_stammsaetze, lege_kunden_an
+
+    with engine.begin() as v:
+        v.execute(text("INSERT INTO domain_shared.tenants (id, name) VALUES (:t, :t) ON CONFLICT (id) DO NOTHING"),
+                  {"t": HAUS})
+        lege_kunden_an(v, HAUS, KUNDE)
+    yield
+    with engine.begin() as v:
+        entferne_stammsaetze(v, HAUS, KUNDE)
+
+
 @pytest.fixture(autouse=True)
 def ohne_kundenpruefung(monkeypatch):
     from app.api.v1.endpoints import finance_invoices as modul
@@ -75,7 +94,7 @@ def gespeichert(engine, nr: str) -> int:
 
 
 def rechnung(nr: str, status: str = "VERSENDET") -> dict:
-    return {"number": nr, "date": "2026-10-08", "customerId": str(uuid.uuid4()), "dueDate": "2026-11-07",
+    return {"number": nr, "date": "2026-10-08", "customerId": KUNDE, "dueDate": "2026-11-07",
             "status": status, "subtotalNet": 100.0, "totalTax": 19.0, "totalGross": 119.0}
 
 

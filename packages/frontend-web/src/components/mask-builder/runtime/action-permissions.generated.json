@@ -2,6 +2,19 @@
   "schemaVersion": 1,
   "source": "require_roles der Kommandowege (scripts/generate_action_permission_projection.py)",
   "screens": {
+    "abrechnung/eb-lieferschein-kontrolle": {
+      "document_control.write": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "admin/identity-budgets": {
       "identity:quota:allocate": [
         [
@@ -507,6 +520,32 @@
         ]
       ]
     },
+    "auswertungen/auftrags-kontrolle": {
+      "document_control.write": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "auswertungen/beleg-kontrolle": {
+      "document_control.write": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "auswertungen/bonus-berechnung": {
       "reporting.bonus.write": [
         [
@@ -528,6 +567,19 @@
           "LAGER_BEARBEITEN",
           "PERSONAL_ADMIN",
           "PERSONAL_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "auswertungen/lieferschein-kontrolle": {
+      "document_control.write": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
           "SALES_ADMIN",
           "SALES_BEARBEITEN",
           "admin"

@@ -57,12 +57,13 @@ def client():
 
 @pytest.fixture()
 def kunde_mit_spuren():
-    """Ein Kunde, eine Aktivitaet unter seinem Namen, ein eigener Mandant."""
+    """Ein Kunde, eine Aktivitaet mit seiner Kunden-ID, eine nur unter seinem Namen, ein eigener Mandant."""
     from sqlalchemy import create_engine, text
 
     mandant = f"test-{uuid.uuid4().hex[:8]}"
     kunden_id = str(uuid.uuid4())
     aktivitaet_id = str(uuid.uuid4())
+    nur_name_id = str(uuid.uuid4())
     name = f"Hof Testmann {uuid.uuid4().hex[:5]}"
 
     engine = create_engine(DB_URL)
@@ -96,7 +97,18 @@ def kunde_mit_spuren():
                 "VALUES (:id, 'call', 'Telefonat', :kunde, :kunde, NOW(), "
                 "        'completed', 'tester', :tid)"
             ),
-            {"id": aktivitaet_id, "kunde": name, "tid": mandant},
+            {"id": nur_name_id, "kunde": name, "tid": mandant},
+        )
+        # Ueber die Kunden-ID gebunden: die einzige Zuordnung, die die Loeschung gelten laesst.
+        verbindung.execute(
+            text(
+                "INSERT INTO domain_crm.activities "
+                "(id, type, title, customer, contact_person, date, status, "
+                " assigned_to, tenant_id, customer_id) "
+                "VALUES (:id, 'call', 'Telefonat', :kunde, :kunde, NOW(), "
+                "        'completed', 'tester', :tid, :kid)"
+            ),
+            {"id": aktivitaet_id, "kunde": name, "tid": mandant, "kid": kunden_id},
         )
     try:
         yield {
@@ -104,11 +116,12 @@ def kunde_mit_spuren():
             "mandant": mandant,
             "name": name,
             "aktivitaet": aktivitaet_id,
+            "nur_name": nur_name_id,
         }
     finally:
         with engine.begin() as verbindung:
             for sql, params in (
-                ("DELETE FROM domain_crm.activities WHERE id = :id", {"id": aktivitaet_id}),
+                ("DELETE FROM domain_crm.activities WHERE id = ANY(:ids)", {"ids": [aktivitaet_id, nur_name_id]}),
                 ("DELETE FROM domain_crm.customers WHERE id = :id", {"id": kunden_id}),
                 (
                     "DELETE FROM domain_compliance.data_erasure_requests "
@@ -169,22 +182,29 @@ def test_der_kunde_ist_danach_anonym(client, kunde_mit_spuren) -> None:
     assert zeile[2] is None and zeile[3] is None
 
 
-def test_die_aktivitaet_unter_seinem_namen_ist_weg(client, kunde_mit_spuren) -> None:
-    """Die Aktivitaet kennt den Kunden nur beim Namen — deshalb blieb sie liegen."""
+def test_kunden_id_loescht_die_aktivitaet_klarname_wird_anonymisiert(client, kunde_mit_spuren) -> None:
+    """Art. 17 DSGVO: ueber die Kunden-ID gebunden wird geloescht; nennt eine Aktivitaet den Betroffenen nur im
+    Freitext, wird der Klarname entfernt und der Vorgang bleibt ohne Personenbezug stehen."""
     from sqlalchemy import create_engine, text
 
     antrag = antrag_stellen(client, kunde_mit_spuren)
-    client.post(
+    antwort = client.post(
         f"/api/v1/compliance/dsgvo/erasure-requests/{antrag}/process",
         headers=kopf(kunde_mit_spuren["mandant"]),
         json={},
     )
+    klarname = [e for e in antwort.json()["deletion_log"] if e.get("action") == "name_anonymized"]
+    assert klarname and klarname[0]["ids"] == [kunde_mit_spuren["nur_name"]], antwort.json()["deletion_log"]
     with create_engine(DB_URL).connect() as verbindung:
-        uebrig = verbindung.execute(
-            text("SELECT count(*) FROM domain_crm.activities WHERE id::text = :id"),
-            {"id": kunde_mit_spuren["aktivitaet"]},
-        ).scalar()
-    assert uebrig == 0, "Die Aktivitaet mit dem Klarnamen liegt noch in der Datenbank"
+        def da(kennung):
+            return verbindung.execute(
+                text("SELECT count(*) FROM domain_crm.activities WHERE id::text = :id"), {"id": kennung}).scalar()
+
+        assert da(kunde_mit_spuren["aktivitaet"]) == 0, "Die ueber die Kunden-ID gebundene Aktivitaet liegt noch da"
+        assert da(kunde_mit_spuren["nur_name"]) == 1, "Der Vorgang selbst ist kein personenbezogenes Datum"
+        rest = verbindung.execute(text("SELECT customer, contact_person FROM domain_crm.activities WHERE id::text = :id"),
+                                  {"id": kunde_mit_spuren["nur_name"]}).one()
+        assert kunde_mit_spuren["name"] not in (rest[0] or "") + (rest[1] or ""), "Der Klarname steht noch da"
 
 
 def test_das_protokoll_weist_die_angefassten_zeilen_aus(client, kunde_mit_spuren) -> None:

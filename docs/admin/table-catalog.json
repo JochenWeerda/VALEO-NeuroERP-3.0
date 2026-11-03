@@ -24037,6 +24037,65 @@
     },
     "domain_finance": {
       "tables": {
+        "asset_depreciation_runs": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "asset_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "period_year",
+              "nullable": false,
+              "type": "integer"
+            },
+            {
+              "name": "period_month",
+              "nullable": false,
+              "type": "integer"
+            },
+            {
+              "name": "depreciation_amount",
+              "nullable": false,
+              "type": "numeric"
+            },
+            {
+              "name": "book_value_after",
+              "nullable": false,
+              "type": "numeric"
+            },
+            {
+              "name": "created_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [
+            {
+              "column": "asset_id",
+              "references": "domain_finance.fixed_assets.id"
+            }
+          ],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_finance / Domain finance.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/api/v1/endpoints/asset_accounting.py"
+          ]
+        },
         "aufbewahrungsfristen": {
           "columns": [
             {
@@ -47421,6 +47480,130 @@
     },
     "domain_sales": {
       "tables": {
+        "blanket_order_releases": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "blanket_order_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "release_quantity",
+              "nullable": false,
+              "type": "numeric"
+            },
+            {
+              "name": "release_date",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "sales_order_ref",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "status",
+              "nullable": false,
+              "type": "character varying"
+            }
+          ],
+          "foreign_keys": [
+            {
+              "column": "blanket_order_id",
+              "references": "domain_sales.blanket_orders.id"
+            }
+          ],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_sales / Domain crm.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/api/v1/endpoints/sales_blanket_orders.py"
+          ],
+          "written_by": [
+            "app/api/v1/endpoints/sales_blanket_orders.py"
+          ]
+        },
+        "blanket_orders": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "customer_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "article_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "total_quantity",
+              "nullable": false,
+              "type": "numeric"
+            },
+            {
+              "name": "unit_price",
+              "nullable": false,
+              "type": "numeric"
+            },
+            {
+              "name": "valid_from",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "valid_to",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "status",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "created_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_sales / Domain crm.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/api/v1/endpoints/sales_blanket_orders.py"
+          ],
+          "written_by": [
+            "app/api/v1/endpoints/sales_blanket_orders.py"
+          ]
+        },
         "delivery_note_positions": {
           "columns": [
             {

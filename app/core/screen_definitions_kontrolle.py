@@ -613,7 +613,21 @@ KONTROLLE_SCREEN_BUILDERS: dict[str, Any] = {
     "annahme/qualitaets-check": build_intake_quality,
 }
 
-KONTROLL_WORKLIST_SCREEN_IDS: tuple[str, ...] = (
+#: Masken, die frueher die Kontroll-Worklist trugen und heute einer eigenen nativen Fachmaske gehoeren
+#: (``_SCREEN_DEFINITIONS`` in screen_definitions.py, Annahme/Waage, Admin-Werkbank). Sie gehoeren nicht mehr
+#: zur Worklist-Familie; ihre Kontroll-Fassung oben wird nicht ausgeliefert.
+KONTROLL_WORKLIST_EIGENE_MASKE: frozenset[str] = frozenset({
+    "auswertungen/abfrage-center", "auswertungen/aenderungshistorie", "auswertungen/bonus-berechnung",
+    "auswertungen/dms-volltext", "auswertungen/duengemittelmengen", "auswertungen/l3-berichtskatalog",
+    "crm/mail-arbeitsplatz", "docflow/dokumenten-ruecklauf", "finance/rechnungstapel", "lager/fremdware",
+    "lager/inventur-nebenlaeufe", "produktion/chargen-bearbeiten", "produktion/produktionsleitstand",
+    "schnittstelle/legacy-adapter-monitor", "schnittstelle/mde-inbox", "tankstelle/adapter-inbox",
+    "workspace/letzte-dokumente",
+    # Runtime46: Annahme als Cockpit bzw. Wizard, Control-Center als Admin-Werkbank.
+    "annahme/qualitaets-check", "annahme/warteschlange", "admin/control-center",
+})
+
+KONTROLL_WORKLIST_SCREEN_IDS: tuple[str, ...] = tuple(sid for sid in (
     "auswertungen/beleg-kontrolle",
     "auswertungen/auftrags-kontrolle",
     "auswertungen/lieferschein-kontrolle",
@@ -624,7 +638,7 @@ KONTROLL_WORKLIST_SCREEN_IDS: tuple[str, ...] = (
     *tuple(sorted(KONTROLL_WORKLIST_LEGACY_PAYLOADS)),
     *BATCH8_KONTROLL_SCREEN_IDS,
     *BATCH12_KONTROLL_TEST_IDS,
-)
+) if sid not in KONTROLL_WORKLIST_EIGENE_MASKE)
 
 KONTROLLE_SYNONYME = {
     SCREEN_ID: [

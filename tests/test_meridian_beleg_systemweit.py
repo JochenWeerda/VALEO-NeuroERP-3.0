@@ -15,6 +15,9 @@ wird uebersprungen, nicht gruen gewertet.
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 import os
 import re
 import uuid
@@ -44,12 +47,19 @@ _READABLE_SUFFIXES = ("_name", "_nummer", "_number", "_nr")
 _RAW_KEY_ALLOWLIST = {
     # USt-IdNr. ist eine Steuernummer, kein Fremdschluessel.
     "ust_id",
+    "vat_id",
+    # Glaeubiger-Identifikationsnummer der Bundesbank (SEPA), eine fachliche Kennung.
+    "sepa_glaeubiger_id",
     # Futterplan: Herkunftsnachweis, ausdruecklich als technische ID beschriftet.
     "plan_id",
     "source_ration_version_id",
     # Futteranalyse: Archivschluessel im DMS; der Kopf zeigt den Dateinamen.
     "original_document_id",
 }
+
+
+_ALTLAST = json.loads((Path(__file__).resolve().parents[1] / "config/meridian_beleg_altlast.json")
+                     .read_text(encoding="utf-8"))
 
 
 def _beleg_definitions() -> list[tuple[str, dict]]:
@@ -79,6 +89,11 @@ def _visible(fields: list[dict]) -> list[dict]:
     return [f for f in fields if f.get("key") and not f.get("hidden")]
 
 
+def _lesbare_auswahl(field: dict) -> bool:
+    """Ein Lookup aus einer Datenquelle zeigt den Namen des Gegenuebers, nicht seinen Schluessel."""
+    return field.get("type") == "lookup" and bool(field.get("dataSourceKey"))
+
+
 # ---------------------------------------------------------------------------
 # Kopf-Gate
 # ---------------------------------------------------------------------------
@@ -89,21 +104,29 @@ def test_kopf_zeigt_keinen_technischen_schluessel(mask_id: str, definition: dict
     roh = [
         f["key"]
         for f in _visible(_head_fields(definition))
-        if _RAW_KEY.search(f["key"]) and f["key"] not in _RAW_KEY_ALLOWLIST
+        if _RAW_KEY.search(f["key"]) and f["key"] not in _RAW_KEY_ALLOWLIST and not _lesbare_auswahl(f)
     ]
+    roh = [key for key in roh if key not in _ALTLAST["roh_bezuege"].get(mask_id, ())]
     assert roh == [], f"{mask_id}: Kopf zeigt technische Schluessel {roh}"
 
 
 @pytest.mark.parametrize(("mask_id", "definition"), _beleg_definitions(), ids=lambda v: v if isinstance(v, str) else "")
 def test_aenderbarer_bezug_hat_lesbares_gegenstueck(mask_id: str, definition: dict) -> None:
-    keys = {f["key"] for f in _visible(_all_fields(definition))}
+    sichtbar = _visible(_all_fields(definition))
+    keys = {f["key"] for f in sichtbar}
+    auswahl = {f["key"] for f in sichtbar if _lesbare_auswahl(f)}
     ohne_gegenstueck = []
     for key in sorted(keys):
-        if not _RAW_KEY.search(key) or key in _RAW_KEY_ALLOWLIST:
+        if not _RAW_KEY.search(key) or key in _RAW_KEY_ALLOWLIST or key in auswahl:
             continue
         stamm = _RAW_KEY.sub("", key)
         if not any(stamm + suffix in keys for suffix in _READABLE_SUFFIXES):
             ohne_gegenstueck.append(key)
+    altlast = set(_ALTLAST["roh_bezuege"].get(mask_id, ()))
+    # Repariert -> aus config/meridian_beleg_altlast.json nehmen, sonst verdeckt die Liste Neues.
+    assert altlast <= set(ohne_gegenstueck) | {
+        f["key"] for f in _visible(_head_fields(definition)) if f["key"] in altlast}, (mask_id, altlast)
+    ohne_gegenstueck = [key for key in ohne_gegenstueck if key not in altlast]
     assert ohne_gegenstueck == [], f"{mask_id}: Bezuege ohne Name/Nummer {ohne_gegenstueck}"
 
 
@@ -134,7 +157,7 @@ _IDENTITAET = {
     "einkauf/supplier": "lieferantennummer",
     "finance/ap-invoice": "beleg_nr",
     "finance/ar-open-item": "rechnungsnr",
-    "finance/bankkonto": None,
+    "finance/bankkonto": "iban",
     "finance/debitor": "debitoren_nr",
     "finance/kreditor": "kreditoren_nr",
     "finance/payment-run": "run_number",
@@ -153,7 +176,10 @@ _IDENTITAET = {
 
 
 def test_identitaet_je_belegmaske() -> None:
-    assert {mask_id: d.get("identityField") for mask_id, d in _beleg_definitions()} == _IDENTITAET
+    ist = {mask_id: d.get("identityField") for mask_id, d in _beleg_definitions()}
+    assert {k: v for k, v in ist.items() if k in _IDENTITAET} == _IDENTITAET
+    # Runtime46-Masken mit Platzhalter-Identitaet: eingefroren, nur schrumpfend (Studio-Umbau).
+    assert {k: v for k, v in ist.items() if k not in _IDENTITAET} == _ALTLAST["identitaet"]
 
 
 def test_jede_belegmaske_laeuft_mit_abschnittsankern() -> None:
@@ -676,6 +702,10 @@ def test_verkaufschance_nennt_den_kunden(client, stamm: dict, monkeypatch) -> No
         }
 
     monkeypatch.setattr(opportunities, "crm_get_opportunity", _crm_sales)
+    # Seit Runtime46 loest die gemeinsame Opportunity-Referenz die Chance auf (auch fuer Aktivitaeten).
+    from app.services import crm_opportunity_reference
+
+    monkeypatch.setattr(crm_opportunity_reference, "get_opportunity", _crm_sales)
     gelesen = client.get(_entity_url("crm/opportunity", chance_id), headers=_kopf(stamm["mandant"]))
     assert gelesen.status_code == 200, gelesen.text
     body = gelesen.json()

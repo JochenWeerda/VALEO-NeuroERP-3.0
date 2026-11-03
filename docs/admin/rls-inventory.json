@@ -1,16 +1,16 @@
 {
  "_note": "Generiert von scripts/rls_inventory.py; nicht von Hand aendern. Plan: docs/architecture/rls-mandantenkernel-plan.md",
  "summary": {
-  "tables": 779,
+  "tables": 782,
   "by_class": {
-   "A": 680,
+   "A": 683,
    "B": 32,
    "C": 15,
    "D": 52
   },
-  "rls_enabled": 640,
+  "rls_enabled": 645,
   "tenant_types": {
-   "character varying": 336,
+   "character varying": 339,
    "character varying(100)": 9,
    "character varying(120)": 39,
    "character varying(128)": 1,
@@ -1081,9 +1081,9 @@
    "table": "domain_crm.activities",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_crm.business_partner_addresses",
@@ -2228,6 +2228,14 @@
    "table": "domain_erp.versicherungen",
    "class": "A",
    "tenant_type": "character varying(36)",
+   "rls": true,
+   "force_rls": false,
+   "policies": 4
+  },
+  {
+   "table": "domain_finance.asset_depreciation_runs",
+   "class": "A",
+   "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
    "policies": 4
@@ -4105,7 +4113,7 @@
    "tenant_type": "character varying(64)",
    "rls": true,
    "force_rls": false,
-   "policies": 1
+   "policies": 4
   },
   {
    "table": "domain_ops.wf_trigger_log",
@@ -4346,6 +4354,22 @@
    "table": "domain_reporting.query_definitions",
    "class": "A",
    "tenant_type": "text",
+   "rls": true,
+   "force_rls": false,
+   "policies": 4
+  },
+  {
+   "table": "domain_sales.blanket_order_releases",
+   "class": "A",
+   "tenant_type": "character varying",
+   "rls": true,
+   "force_rls": false,
+   "policies": 4
+  },
+  {
+   "table": "domain_sales.blanket_orders",
+   "class": "A",
+   "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
    "policies": 4
@@ -5813,9 +5837,9 @@
    "table": "public.crm_activities",
    "class": "A",
    "tenant_type": "character varying(36)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "public.crm_betriebsprofile",

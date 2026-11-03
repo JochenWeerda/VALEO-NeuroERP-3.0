@@ -188,7 +188,9 @@ class AiEngineeringMetricsService:
         slices = _load_slices()
         dist: dict[str, int] = {}
         for s in slices:
-            dist[s.owner] = dist.get(s.owner, 0) + 1
+            # Slices ohne owner zaehlen sichtbar mit; ein None-Schluessel liess das Dashboard scheitern.
+            owner = s.owner or "ohne Owner"
+            dist[owner] = dist.get(owner, 0) + 1
         return dist
 
     def full_dashboard(self) -> dict[str, Any]:

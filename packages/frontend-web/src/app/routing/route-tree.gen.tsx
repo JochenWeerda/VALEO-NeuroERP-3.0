@@ -5400,8 +5400,8 @@ const appRoute0754 = createRoute({
 const appRoute0755 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "sales/angebote",
-  component: () => renderPage("@/pages/sales/angebot-erstellen"),
-  staticData: {"breadcrumb":"Angebote","module":"@/pages/sales/angebot-erstellen","legacyPath":"/sales/angebote"},
+  component: () => renderPage("@/pages/sales/angebote-liste"),
+  staticData: {"breadcrumb":"Angebote","module":"@/pages/sales/angebote-liste","legacyPath":"/sales/angebote"},
 })
 
 const appRoute0756 = createRoute({
@@ -11573,7 +11573,7 @@ export const generatedRouteInventory = [
     "source": "alias"
   },
   {
-    "module": "@/pages/sales/angebot-erstellen",
+    "module": "@/pages/sales/angebote-liste",
     "path": "sales/angebote",
     "source": "alias"
   },

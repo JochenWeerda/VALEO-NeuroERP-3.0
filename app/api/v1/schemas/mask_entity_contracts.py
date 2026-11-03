@@ -163,6 +163,25 @@ class FinanceDebitorOut(_MaskEntityOut):
     kontoinhaber: Optional[str] = None
     skonto_tage: Optional[int] = None
     skonto_prozent: Optional[float] = None
+    # Schluessel der Erfassung finance/debitoren/new (Bearbeitungsmodus liest dieses Detail).
+    debtor_number: Optional[str] = None
+    company_name: Optional[str] = None
+    contact_person: Optional[str] = None
+    street: Optional[str] = None
+    postal_code: Optional[str] = None
+    city: Optional[str] = None
+    country: Optional[str] = None
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    vat_id: Optional[str] = None
+    tax_number: Optional[str] = None
+    bank_name: Optional[str] = None
+    account_holder: Optional[str] = None
+    payment_terms_days: Optional[int] = None
+    discount_days: Optional[int] = None
+    discount_percent: Optional[float] = None
+    credit_limit: Optional[float] = None
+    is_active: Optional[bool] = None
 
 
 class FinanceKreditorOut(_MaskEntityOut):

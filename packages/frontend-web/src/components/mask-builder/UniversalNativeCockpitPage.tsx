@@ -8,8 +8,7 @@ import type { RenderPlan } from './render-plan/types'
 import { evaluateListExperience, formatListAggregate, selectListRoleFocus, focusListInsights } from './runtime/list-experience'
 import { UniversalMaskRenderer, useUniversalMaskRuntime } from '@/components/mask-builder'
 import { useScreenDefinition } from '@/lib/api/masks'
-
-const EMPTY_PERMISSIONS: string[] = []
+import { useScreenPermissions } from './runtime/screen-permissions'
 
 function ListWorkflowBand(): JSX.Element | null {
   const [searchParams] = useSearchParams()
@@ -31,7 +30,7 @@ export function UniversalNativeCockpitPage({
   onAction,
   onRowSelect,
   onListData,
-  permissions = EMPTY_PERMISSIONS,
+  permissions,
 }: {
   screenId: string
   testId?: string
@@ -41,11 +40,13 @@ export function UniversalNativeCockpitPage({
   permissions?: string[]
 }): JSX.Element {
   const schemaQuery = useScreenDefinition(screenId)
+  // Ohne ausdrueckliche Rechte gelten die des Benutzers; eine leere Liste blendete jede rechtegebundene Aktion aus.
+  const benutzerRechte = useScreenPermissions(schemaQuery.data)
   const runtime = useUniversalMaskRuntime({
     screenId,
     schema: schemaQuery.data,
     enabled: Boolean(schemaQuery.data),
-    permissions,
+    permissions: permissions ?? benutzerRechte,
   })
   const plan = runtime.plan
   const firstKey = plan ? Object.keys(plan.tablesByKey)[0] : undefined

@@ -92,6 +92,7 @@ WEGE = {
     ],
     "fibu_geschaeftsjahre": [
         ("GET", "/fibu/geschaeftsjahre", "read"),
+        ("GET", "/fibu/geschaeftsjahre/detail/{jahr_id}", "read"),
         ("POST", "/fibu/geschaeftsjahre", "admin"),
         ("GET", "/fibu/geschaeftsjahre/{jahr_nr}/perioden", "read"),
         ("PATCH", "/fibu/geschaeftsjahre/{jahr_nr}/perioden/{periode_nr}/sperren", "admin"),

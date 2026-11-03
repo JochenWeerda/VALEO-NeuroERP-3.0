@@ -27,6 +27,21 @@ SD_NAV_ONLY = {
 }
 
 
+def _studio_seite(source: str) -> str | None:
+    """Rendert die Seite inzwischen eine Studio-Maske (Runtime46), steht der Nachweis in deren Definition."""
+    if "NativeListPage" not in source and "NativeObjectPage" not in source:
+        return None
+    treffer = re.search(r'screenId="([^"]+)"', source)
+    return treffer.group(1) if treffer else None
+
+
+def _studio_neu_ohne_fachaktion(screen_id: str) -> None:
+    from app.core.screen_definitions import get_screen_definition
+
+    actions = (get_screen_definition(screen_id) or {}).get("actions") or []
+    assert not [a for a in actions if a["key"] == "neu" and (a.get("commandEndpoint") or a.get("endpoint"))], screen_id
+
+
 def generator():
     spec = importlib.util.spec_from_file_location("tested_mask_map", ROOT / "scripts/generate_mcp_mask_action_map.py")
     module = importlib.util.module_from_spec(spec)
@@ -88,6 +103,9 @@ def test_postfaecher_neu_is_form_reset_local_ui():
 @pytest.mark.parametrize("screen,page", list(RESET_PAGES.items()))
 def test_local_reset_evidence_has_no_business_operation(screen, page):
     source = (ROOT / "packages/frontend-web/src/pages" / page).read_text(encoding="utf-8")
+    if studio := _studio_seite(source):
+        _studio_neu_ohne_fachaktion(studio)
+        return
     branch = re.search(r"if \(key === 'neu'\) \{(.*?)\}", source, re.S)
     assert branch, screen
     assert re.sub(r"\s+", "", branch.group(1)) == "leeren()return", screen
@@ -97,6 +115,9 @@ def test_local_reset_evidence_has_no_business_operation(screen, page):
 def test_local_navigation_evidence_opens_the_create_form(screen, evidence):
     page, route = evidence
     source = (ROOT / "packages/frontend-web/src/pages" / page).read_text(encoding="utf-8")
+    if studio := _studio_seite(source):
+        _studio_neu_ohne_fachaktion(studio)
+        return
     if screen == "fuhrpark/fahrzeuge":
         assert f"'vehicle.create': () => navigate('{route}')" in source
     else:
@@ -161,7 +182,8 @@ def test_actual_writes_and_finance_gaps_remain_visible():
         assert by_id[f"mask:{liste}:neu"]["coverage"] == "local_ui"
     for liste in set(anlagen) - set(listen_anlagen):
         assert by_id[f"mask:{liste}:neu"]["coverage"] not in ("local_ui", "open_high")
-    lokal = 15 + len(listen_anlagen)
+    # 16: dazu sales/credit-notes:neu (localEffect form_reset), seit der Katalog alle Masken vollstaendig sieht.
+    lokal = 16 + len(listen_anlagen)
     assert data["stats"]["by_coverage"]["local_ui"] == lokal
     assert data["stats"]["mask_actions_considered"] == len(by_id)
     assert data["stats"]["mask_mutations_considered"] == len(by_id) - lokal

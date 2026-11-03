@@ -20,6 +20,7 @@ from app.api.v1.endpoints import credit_debit_memos, finance_invoices
 from app.auth.deps import get_current_user
 from app.core.database import SessionLocal
 from app.core.exceptions import register_domain_exception_handlers
+from stammsaetze import lege_kunden_an
 from testgrenze import ersetze_mandant
 
 ANNA = {"sub": "anna", "name": "a.petersen", "roles": ["FINANCE_ADMIN", "EINKAUF_ADMIN", "SALES_ADMIN"]}
@@ -33,6 +34,9 @@ def haus(monkeypatch):
     with SessionLocal() as db:
         for m in (mandant, anderer):
             db.execute(text("INSERT INTO domain_shared.tenants (id, name, is_active) VALUES (:id, :id, true)"), {"id": m})
+        # Ausgangsrechnungen pruefen den Kunden im Mandanten; Kennungen sind systemweit eindeutig.
+        lege_kunden_an(db, mandant, "kunde-1", "kunde-2", "kunde-des-angreifers")
+        lege_kunden_an(db, anderer, f"kunde-{anderer}")
         db.commit()
     monkeypatch.setattr(finance_invoices, "assert_customer_allowed_for_invoice", lambda *_a, **_k: None)
     app = FastAPI()
@@ -52,6 +56,7 @@ def haus(monkeypatch):
     with SessionLocal() as db:
         for m in (mandant, anderer):
             db.execute(text("DELETE FROM documents WHERE CAST(data AS jsonb)->>'tenantId' = :t"), {"t": m})
+            db.execute(text("DELETE FROM domain_crm.customers WHERE tenant_id = :t"), {"t": m})
             db.execute(text("DELETE FROM domain_shared.tenants WHERE id = :t"), {"t": m})
         for nummer in herrenlos:
             db.execute(text("DELETE FROM documents WHERE doc_number = :n"), {"n": nummer})
@@ -162,6 +167,8 @@ def _rechnung(nummer: str, kunde: str = "kunde-1", **mehr) -> dict:
 
 def _lege_an(haus, wer: dict, wo: str, **mehr) -> str:
     nummer = f"LM-{uuid.uuid4().hex[:10]}"
+    if wo != haus["mandant"]:
+        mehr.setdefault("kunde", f"kunde-{wo}")
     antwort = haus["als"](wer, wo).post("/finance/invoices", json=_rechnung(nummer, **mehr))
     assert antwort.status_code == 200, antwort.text
     return nummer

@@ -23,9 +23,24 @@ def mandant_aus_kopf(request: Request) -> str:
     return (request.headers.get("X-Tenant-ID") or "").strip() or settings.DEFAULT_TENANT_ID
 
 
+def _im_kontext(tenant: str) -> str:
+    """Wie die echte Bearer-Pruefung: der Mandant gilt auch fuer ``rls_current_tenant()`` (Vorgaben, Policies)."""
+    from app.core.tenant_context import current_tenant_or_none, set_current_tenant_id
+    if tenant and current_tenant_or_none() != tenant:
+        set_current_tenant_id(tenant)
+    return tenant
+
+
 def ersetze_mandant(app: FastAPI, mandant: str | None = None) -> None:
     """Fester Mandant, oder ohne Angabe der aus dem Kopf der Testanfrage."""
-    app.dependency_overrides[get_tenant_id] = (lambda: mandant) if mandant else mandant_aus_kopf
+    # async: nur so bleibt der gesetzte Kontext fuer den Endpunkt erhalten (sync liefe im Threadpool).
+    async def fest() -> str:
+        return _im_kontext(mandant)
+
+    async def aus_kopf(request: Request) -> str:
+        return _im_kontext(mandant_aus_kopf(request))
+
+    app.dependency_overrides[get_tenant_id] = fest if mandant else aus_kopf
 
 
 def ersetze_nutzer(app: FastAPI, *rollen: str) -> None:

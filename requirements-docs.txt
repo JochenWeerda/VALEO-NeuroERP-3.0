@@ -14,3 +14,7 @@ httpx==0.28.1
 SQLAlchemy==2.0.41
 cryptography==50.0.1
 fastapi==0.136.3
+# generate_agent_handbuch.py --check liest die Masken ueber app.core (Konfiguration, Token, Treiber).
+PyJWT[crypto]==2.15.0
+pydantic-settings==2.10.1
+psycopg2-binary==2.9.10

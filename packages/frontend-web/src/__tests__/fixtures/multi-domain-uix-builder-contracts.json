@@ -15,7 +15,7 @@
       {
         "key": "list",
         "endpoint": "/api/v1/fuhrpark/fahrzeuge",
-        "pageSize": 500
+        "pageSize": 100
       }
     ],
     "actions": [
@@ -262,7 +262,7 @@
       {
         "key": "list",
         "endpoint": "/api/v1/stammdaten/warengruppen",
-        "pageSize": 500
+        "pageSize": 100
       }
     ],
     "actions": [
@@ -581,7 +581,7 @@
       {
         "key": "list",
         "endpoint": "/api/v1/benachrichtigungen",
-        "pageSize": 500
+        "pageSize": 100
       }
     ],
     "actions": [
@@ -856,7 +856,7 @@
       {
         "key": "list",
         "endpoint": "/api/v1/banken/konten",
-        "pageSize": 500
+        "pageSize": 100
       }
     ],
     "actions": [
@@ -1114,7 +1114,7 @@
       {
         "key": "list",
         "endpoint": "/api/v1/crm/customers/lookup?q=&limit=1000",
-        "pageSize": 500
+        "pageSize": 100
       }
     ],
     "actions": [
@@ -1392,7 +1392,7 @@
       {
         "key": "list",
         "endpoint": "/api/v1/marketing/kampagnen",
-        "pageSize": 500
+        "pageSize": 100
       }
     ],
     "actions": [
@@ -1639,7 +1639,7 @@
       {
         "key": "list",
         "endpoint": "/api/v1/finance/open-items?typ=kreditor",
-        "pageSize": 500
+        "pageSize": 100
       }
     ],
     "actions": [
@@ -1880,7 +1880,7 @@
       {
         "key": "list",
         "endpoint": "/api/v1/finance/open-items?typ=kreditor",
-        "pageSize": 500
+        "pageSize": 100
       }
     ],
     "actions": [
@@ -2121,7 +2121,7 @@
       {
         "key": "list",
         "endpoint": "/api/v1/fibu/anlagen",
-        "pageSize": 500
+        "pageSize": 100
       }
     ],
     "actions": [
@@ -2368,7 +2368,7 @@
       {
         "key": "list",
         "endpoint": "/api/v1/einkauf/anlieferavis",
-        "pageSize": 500
+        "pageSize": 100
       }
     ],
     "actions": [
@@ -2734,7 +2734,7 @@
       {
         "key": "list",
         "endpoint": "/api/v1/finance/payment-runs",
-        "pageSize": 500
+        "pageSize": 100
       }
     ],
     "actions": [
@@ -2971,10 +2971,10 @@
   "fibu/op-verwaltung": {
     "schemaVersion": 1,
     "id": "fibu/op-verwaltung",
-    "domain": "fibu",
+    "domain": "finance",
     "mode": "list",
-    "title": "Op verwaltung",
-    "subtitle": "fibu",
+    "title": "OP-Verwaltung",
+    "subtitle": "Offene Forderungen und Verbindlichkeiten",
     "adapter": {
       "type": "native",
       "sourceId": "fibu/op-verwaltung",
@@ -2983,8 +2983,8 @@
     "dataSources": [
       {
         "key": "list",
-        "endpoint": "/api/v1/fibu/anlagen",
-        "pageSize": 500
+        "endpoint": "/api/v1/finance/open-items?only_open=true",
+        "pageSize": 100
       }
     ],
     "actions": [
@@ -3002,7 +3002,7 @@
     "tables": [
       {
         "key": "list",
-        "label": "Op verwaltung",
+        "label": "OP-Verwaltung",
         "dataSourceKey": "list",
         "serverPagination": false,
         "pageSize": 50,
@@ -3010,43 +3010,61 @@
         "rowHeight": 40,
         "columns": [
           {
-            "key": "id",
-            "label": "Id",
-            "sortable": true,
+            "key": "rechnungsnr",
+            "label": "Beleg",
             "filterable": true,
-            "width": 160
+            "priority": "primary"
           },
           {
-            "key": "name",
-            "label": "Name",
-            "sortable": true,
+            "key": "konto_typ",
+            "label": "Kontotyp",
             "filterable": true,
-            "width": 160
+            "priority": "primary"
           },
           {
-            "key": "status",
-            "label": "Status",
-            "sortable": true,
-            "filterable": true,
-            "width": 160
+            "key": "kunde_name",
+            "label": "Debitor",
+            "filterable": true
           },
           {
-            "key": "updated_at",
-            "label": "Updated At",
-            "sortable": true,
-            "filterable": true,
-            "width": 160
+            "key": "lieferant_name",
+            "label": "Kreditor",
+            "filterable": true
+          },
+          {
+            "key": "faelligkeit",
+            "label": "Faelligkeit",
+            "renderKind": "date",
+            "sortable": true
+          },
+          {
+            "key": "offen",
+            "label": "Offen",
+            "renderKind": "currency",
+            "currencyField": "waehrung",
+            "numeric": true,
+            "priority": "primary"
+          },
+          {
+            "key": "waehrung",
+            "label": "Waehrung",
+            "filterable": true
+          },
+          {
+            "key": "ueberfaellig",
+            "label": "Ueberfaellig",
+            "renderKind": "boolean"
           }
         ],
-        "rowActions": []
+        "rowActions": [],
+        "rowRouteTemplate": "/finance/ar-open-item/{id}"
       }
     ],
-    "noWorkflowReason": "Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
+    "noWorkflowReason": "Ausgleich und Mahnung erfolgen am eigenen offenen Posten.",
     "agentContract": {
-      "businessPurpose": "Op verwaltung im fibu-Bereich finden und auswerten.",
+      "businessPurpose": "Offene Posten mandantensicher pruefen und oeffnen.",
       "examplePrompts": [
-        "Zeige Op verwaltung.",
-        "Filtere die Liste."
+        "Zeige offene Posten."
       ],
       "sensitiveFields": [],
       "testSelectors": {
@@ -3070,7 +3088,60 @@
       "requiresLazyTabs": false,
       "requiresVirtualTables": true,
       "lookupMinChars": 2,
-      "bundleGroup": "fibu"
+      "bundleGroup": "finance"
+    },
+    "listExperience": {
+      "searchFields": [
+        "rechnungsnr",
+        "kunde_name",
+        "lieferant_name",
+        "konto_typ"
+      ],
+      "aggregates": [
+        {
+          "key": "all",
+          "label": "Offene Posten",
+          "conditions": []
+        }
+      ],
+      "export": {
+        "filenamePrefix": "Offene-Posten-",
+        "delimiter": ";",
+        "columns": [
+          {
+            "key": "rechnungsnr",
+            "label": "Beleg"
+          },
+          {
+            "key": "konto_typ",
+            "label": "Kontotyp"
+          },
+          {
+            "key": "kunde_name",
+            "label": "Debitor"
+          },
+          {
+            "key": "lieferant_name",
+            "label": "Kreditor"
+          },
+          {
+            "key": "faelligkeit",
+            "label": "Faelligkeit"
+          },
+          {
+            "key": "offen",
+            "label": "Offen"
+          },
+          {
+            "key": "waehrung",
+            "label": "Waehrung"
+          },
+          {
+            "key": "ueberfaellig",
+            "label": "Ueberfaellig"
+          }
+        ]
+      }
     },
     "processChains": {
       "k1_ernte": {
@@ -3231,7 +3302,7 @@
       {
         "key": "list",
         "endpoint": "/api/v1/finance/open-items",
-        "pageSize": 500
+        "pageSize": 100
       }
     ],
     "actions": [
@@ -3480,7 +3551,7 @@
       {
         "key": "list",
         "endpoint": "/api/v1/journal-entries/",
-        "pageSize": 500
+        "pageSize": 100
       }
     ],
     "actions": [
@@ -3730,7 +3801,7 @@
       {
         "key": "list",
         "endpoint": "/api/v1/journal-entries/",
-        "pageSize": 500
+        "pageSize": 100
       }
     ],
     "actions": [
@@ -3975,7 +4046,7 @@
       {
         "key": "list",
         "endpoint": "/api/v1/finance/connectors/profiles",
-        "pageSize": 500
+        "pageSize": 100
       }
     ],
     "actions": [
@@ -4209,7 +4280,7 @@
       {
         "key": "list",
         "endpoint": "/api/v1/finance/abstimmung/nebenbuch",
-        "pageSize": 500
+        "pageSize": 100
       }
     ],
     "actions": [
@@ -4456,7 +4527,7 @@
       {
         "key": "list",
         "endpoint": "/api/v1/fibu/anlagen",
-        "pageSize": 500
+        "pageSize": 100
       }
     ],
     "actions": [
@@ -4703,7 +4774,7 @@
       {
         "key": "list",
         "endpoint": "/api/v1/fibu/anlagen",
-        "pageSize": 500
+        "pageSize": 100
       }
     ],
     "actions": [
@@ -4950,7 +5021,7 @@
       {
         "key": "list",
         "endpoint": "/api/v1/fibu/anlagen",
-        "pageSize": 500
+        "pageSize": 100
       }
     ],
     "actions": [
@@ -5197,7 +5268,7 @@
       {
         "key": "list",
         "endpoint": "/api/v1/finance/direct-debits",
-        "pageSize": 500
+        "pageSize": 100
       }
     ],
     "actions": [
@@ -5472,7 +5543,7 @@
       {
         "key": "list",
         "endpoint": "/api/v1/fibu/anlagen",
-        "pageSize": 500
+        "pageSize": 100
       }
     ],
     "actions": [
@@ -5719,7 +5790,7 @@
       {
         "key": "list",
         "endpoint": "/api/v1/fibu/anlagen",
-        "pageSize": 500
+        "pageSize": 100
       }
     ],
     "actions": [
@@ -5966,7 +6037,7 @@
       {
         "key": "list",
         "endpoint": "/api/v1/fibu/anlagen",
-        "pageSize": 500
+        "pageSize": 100
       }
     ],
     "actions": [
@@ -6213,7 +6284,7 @@
       {
         "key": "list",
         "endpoint": "/api/v1/fibu/anlagen",
-        "pageSize": 500
+        "pageSize": 100
       }
     ],
     "actions": [
@@ -6460,7 +6531,7 @@
       {
         "key": "list",
         "endpoint": "/api/v1/fibu/anlagen",
-        "pageSize": 500
+        "pageSize": 100
       }
     ],
     "actions": [
@@ -6707,7 +6778,7 @@
       {
         "key": "list",
         "endpoint": "/api/v1/finance/lohn-connector/runs",
-        "pageSize": 500
+        "pageSize": 100
       }
     ],
     "actions": [
@@ -6954,7 +7025,7 @@
       {
         "key": "list",
         "endpoint": "/api/v1/fibu/anlagen",
-        "pageSize": 500
+        "pageSize": 100
       }
     ],
     "actions": [
@@ -7201,7 +7272,7 @@
       {
         "key": "list",
         "endpoint": "/api/v1/portal/anfragen",
-        "pageSize": 500
+        "pageSize": 100
       }
     ],
     "actions": [
@@ -7448,7 +7519,7 @@
       {
         "key": "list",
         "endpoint": "/api/v1/portal/anfragen",
-        "pageSize": 500
+        "pageSize": 100
       }
     ],
     "actions": [
@@ -7695,7 +7766,7 @@
       {
         "key": "list",
         "endpoint": "/api/v1/portal/anfragen",
-        "pageSize": 500
+        "pageSize": 100
       }
     ],
     "actions": [
@@ -7942,7 +8013,7 @@
       {
         "key": "list",
         "endpoint": "/api/v1/portal/anfragen",
-        "pageSize": 500
+        "pageSize": 100
       }
     ],
     "actions": [
@@ -8189,7 +8260,7 @@
       {
         "key": "list",
         "endpoint": "/api/v1/portal/anfragen",
-        "pageSize": 500
+        "pageSize": 100
       }
     ],
     "actions": [
@@ -8436,7 +8507,7 @@
       {
         "key": "list",
         "endpoint": "/api/v1/portal/empfehlungen",
-        "pageSize": 500
+        "pageSize": 100
       }
     ],
     "actions": [
@@ -8683,7 +8754,7 @@
       {
         "key": "list",
         "endpoint": "/api/v1/fibu/zahlungsbedingungen",
-        "pageSize": 500
+        "pageSize": 100
       }
     ],
     "actions": [
@@ -9120,7 +9191,7 @@
       {
         "key": "list",
         "endpoint": "/api/v1/crm/customers/",
-        "pageSize": 500
+        "pageSize": 100
       }
     ],
     "actions": [
@@ -9614,7 +9685,7 @@
       {
         "key": "list",
         "endpoint": "/api/v1/lager/bestaende",
-        "pageSize": 500
+        "pageSize": 100
       }
     ],
     "actions": [
@@ -11353,7 +11424,7 @@
       {
         "key": "list",
         "endpoint": "/api/v1/workflow/cockpit-db/dead-letter",
-        "pageSize": 500
+        "pageSize": 100
       }
     ],
     "actions": [
@@ -11600,7 +11671,7 @@
       {
         "key": "list",
         "endpoint": "/api/v1/einkauf/auftragsbestaetigungen",
-        "pageSize": 500
+        "pageSize": 100
       }
     ],
     "actions": [
@@ -11904,7 +11975,7 @@
       {
         "key": "list",
         "endpoint": "/api/v1/einkauf/anfragen",
-        "pageSize": 500
+        "pageSize": 100
       }
     ],
     "actions": [
