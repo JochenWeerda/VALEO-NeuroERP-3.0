@@ -7403,7 +7403,7 @@
     "domain": "portal",
     "mode": "list",
     "title": "Bestellungen",
-    "subtitle": "portal",
+    "subtitle": "Auftraege des Kundenkontos",
     "adapter": {
       "type": "native",
       "sourceId": "portal/bestellungen",
@@ -7412,7 +7412,7 @@
     "dataSources": [
       {
         "key": "list",
-        "endpoint": "/api/v1/portal/anfragen",
+        "endpoint": "/api/v1/portal/bestellungen",
         "pageSize": 100
       }
     ],
@@ -7439,43 +7439,61 @@
         "rowHeight": 40,
         "columns": [
           {
-            "key": "id",
-            "label": "Id",
+            "key": "nummer",
+            "label": "Bestellung",
             "sortable": true,
             "filterable": true,
-            "width": 160
+            "priority": "primary"
           },
           {
-            "key": "name",
-            "label": "Name",
+            "key": "datum",
+            "label": "Datum",
+            "renderKind": "date",
+            "sortable": true,
+            "priority": "primary"
+          },
+          {
+            "key": "artikel",
+            "label": "Erster Artikel",
             "sortable": true,
             "filterable": true,
-            "width": 160
+            "priority": "secondary"
+          },
+          {
+            "key": "menge",
+            "label": "Menge",
+            "renderKind": "quantity",
+            "numeric": true,
+            "sortable": true,
+            "priority": "secondary"
+          },
+          {
+            "key": "betrag",
+            "label": "Betrag (brutto)",
+            "renderKind": "currency",
+            "numeric": true,
+            "sortable": true,
+            "priority": "primary",
+            "aggregate": "sum"
           },
           {
             "key": "status",
             "label": "Status",
             "sortable": true,
             "filterable": true,
-            "width": 160
-          },
-          {
-            "key": "updated_at",
-            "label": "Updated At",
-            "sortable": true,
-            "filterable": true,
-            "width": 160
+            "priority": "primary",
+            "renderKind": "status"
           }
         ],
         "rowActions": []
       }
     ],
-    "noWorkflowReason": "Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
+    "noWorkflowReason": "Portalliste; Bestellen im Shop, Bearbeitung im Verkauf.",
     "agentContract": {
-      "businessPurpose": "Bestellungen im portal-Bereich finden und auswerten.",
+      "businessPurpose": "Eigene Bestellungen, ihren Stand und die Summe sehen.",
       "examplePrompts": [
-        "Zeige Bestellungen.",
-        "Filtere die Liste."
+        "Welche Bestellungen sind noch nicht geliefert?",
+        "Wie viel habe ich dieses Jahr bestellt?"
       ],
       "sensitiveFields": [],
       "testSelectors": {
@@ -7650,7 +7668,7 @@
     "domain": "portal",
     "mode": "list",
     "title": "Rechnungen",
-    "subtitle": "portal",
+    "subtitle": "Rechnungen des Kundenkontos",
     "adapter": {
       "type": "native",
       "sourceId": "portal/rechnungen",
@@ -7659,7 +7677,7 @@
     "dataSources": [
       {
         "key": "list",
-        "endpoint": "/api/v1/portal/anfragen",
+        "endpoint": "/api/v1/portal/rechnungen",
         "pageSize": 100
       }
     ],
@@ -7686,43 +7704,46 @@
         "rowHeight": 40,
         "columns": [
           {
-            "key": "id",
-            "label": "Id",
+            "key": "nummer",
+            "label": "Rechnung",
             "sortable": true,
             "filterable": true,
-            "width": 160
+            "priority": "primary"
           },
           {
-            "key": "name",
-            "label": "Name",
+            "key": "datum",
+            "label": "Datum",
+            "renderKind": "date",
             "sortable": true,
-            "filterable": true,
-            "width": 160
+            "priority": "primary"
+          },
+          {
+            "key": "betrag",
+            "label": "Betrag (brutto)",
+            "renderKind": "currency",
+            "numeric": true,
+            "sortable": true,
+            "priority": "primary",
+            "aggregate": "sum"
           },
           {
             "key": "status",
             "label": "Status",
             "sortable": true,
             "filterable": true,
-            "width": 160
-          },
-          {
-            "key": "updated_at",
-            "label": "Updated At",
-            "sortable": true,
-            "filterable": true,
-            "width": 160
+            "priority": "primary",
+            "renderKind": "status"
           }
         ],
         "rowActions": []
       }
     ],
-    "noWorkflowReason": "Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
+    "noWorkflowReason": "Portalliste; Zahlung und Mahnung laufen in der Buchhaltung.",
     "agentContract": {
-      "businessPurpose": "Rechnungen im portal-Bereich finden und auswerten.",
+      "businessPurpose": "Eigene Rechnungen und offene Betraege sehen.",
       "examplePrompts": [
-        "Zeige Rechnungen.",
-        "Filtere die Liste."
+        "Welche Rechnungen sind offen?",
+        "Wie hoch ist die Summe der offenen Rechnungen?"
       ],
       "sensitiveFields": [],
       "testSelectors": {
@@ -7896,8 +7917,8 @@
     "id": "portal/vertraege",
     "domain": "portal",
     "mode": "list",
-    "title": "Vertraege",
-    "subtitle": "portal",
+    "title": "Verträge",
+    "subtitle": "Dem Kundenkonto zugeordnete Vertraege",
     "adapter": {
       "type": "native",
       "sourceId": "portal/vertraege",
@@ -7906,7 +7927,7 @@
     "dataSources": [
       {
         "key": "list",
-        "endpoint": "/api/v1/portal/anfragen",
+        "endpoint": "/api/v1/portal/vertraege",
         "pageSize": 100
       }
     ],
@@ -7925,7 +7946,7 @@
     "tables": [
       {
         "key": "list",
-        "label": "Vertraege",
+        "label": "Verträge",
         "dataSourceKey": "list",
         "serverPagination": false,
         "pageSize": 50,
@@ -7933,43 +7954,50 @@
         "rowHeight": 40,
         "columns": [
           {
-            "key": "id",
-            "label": "Id",
+            "key": "nummer",
+            "label": "Vertrag",
             "sortable": true,
             "filterable": true,
-            "width": 160
+            "priority": "primary"
           },
           {
-            "key": "name",
-            "label": "Name",
+            "key": "typ",
+            "label": "Typ",
             "sortable": true,
             "filterable": true,
-            "width": 160
+            "priority": "primary"
+          },
+          {
+            "key": "partner",
+            "label": "Partner",
+            "sortable": true,
+            "filterable": true,
+            "priority": "secondary"
+          },
+          {
+            "key": "laufzeitBis",
+            "label": "Laufzeit bis",
+            "renderKind": "date",
+            "sortable": true,
+            "priority": "primary"
           },
           {
             "key": "status",
             "label": "Status",
             "sortable": true,
             "filterable": true,
-            "width": 160
-          },
-          {
-            "key": "updated_at",
-            "label": "Updated At",
-            "sortable": true,
-            "filterable": true,
-            "width": 160
+            "priority": "primary",
+            "renderKind": "status"
           }
         ],
         "rowActions": []
       }
     ],
-    "noWorkflowReason": "Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
+    "noWorkflowReason": "Portalliste; nur gesichert zugeordnete Vertraege (TENANT-DOC-001), sonst leer.",
     "agentContract": {
-      "businessPurpose": "Vertraege im portal-Bereich finden und auswerten.",
+      "businessPurpose": "Eigene Vertraege und ihre Laufzeit sehen.",
       "examplePrompts": [
-        "Zeige Vertraege.",
-        "Filtere die Liste."
+        "Welche Vertraege laufen dieses Jahr aus?"
       ],
       "sensitiveFields": [],
       "testSelectors": {
@@ -8144,7 +8172,7 @@
     "domain": "portal",
     "mode": "list",
     "title": "Anfragen",
-    "subtitle": "portal",
+    "subtitle": "Anfragen des Kundenkontos",
     "adapter": {
       "type": "native",
       "sourceId": "portal/anfragen",
@@ -8180,43 +8208,43 @@
         "rowHeight": 40,
         "columns": [
           {
-            "key": "id",
-            "label": "Id",
+            "key": "nummer",
+            "label": "Anfrage",
             "sortable": true,
             "filterable": true,
-            "width": 160
+            "priority": "primary"
           },
           {
-            "key": "name",
-            "label": "Name",
+            "key": "betreff",
+            "label": "Betreff",
             "sortable": true,
             "filterable": true,
-            "width": 160
+            "priority": "primary"
+          },
+          {
+            "key": "datum",
+            "label": "Datum",
+            "renderKind": "date",
+            "sortable": true,
+            "priority": "primary"
           },
           {
             "key": "status",
             "label": "Status",
             "sortable": true,
             "filterable": true,
-            "width": 160
-          },
-          {
-            "key": "updated_at",
-            "label": "Updated At",
-            "sortable": true,
-            "filterable": true,
-            "width": 160
+            "priority": "primary",
+            "renderKind": "status"
           }
         ],
         "rowActions": []
       }
     ],
-    "noWorkflowReason": "Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
+    "noWorkflowReason": "Portalliste; die Anfrage bearbeitet der Innendienst.",
     "agentContract": {
-      "businessPurpose": "Anfragen im portal-Bereich finden und auswerten.",
+      "businessPurpose": "Eigene Anfragen und ihren Bearbeitungsstand sehen.",
       "examplePrompts": [
-        "Zeige Anfragen.",
-        "Filtere die Liste."
+        "Welche meiner Anfragen sind noch offen?"
       ],
       "sensitiveFields": [],
       "testSelectors": {
@@ -8391,7 +8419,7 @@
     "domain": "portal",
     "mode": "list",
     "title": "Shop",
-    "subtitle": "portal",
+    "subtitle": "Artikel mit Preis, Einheit und Verfuegbarkeit",
     "adapter": {
       "type": "native",
       "sourceId": "portal/shop",
@@ -8400,7 +8428,7 @@
     "dataSources": [
       {
         "key": "list",
-        "endpoint": "/api/v1/portal/anfragen",
+        "endpoint": "/api/v1/portal/shop",
         "pageSize": 100
       }
     ],
@@ -8427,43 +8455,50 @@
         "rowHeight": 40,
         "columns": [
           {
-            "key": "id",
-            "label": "Id",
-            "sortable": true,
-            "filterable": true,
-            "width": 160
-          },
-          {
             "key": "name",
-            "label": "Name",
+            "label": "Artikel",
             "sortable": true,
             "filterable": true,
-            "width": 160
+            "priority": "primary"
           },
           {
-            "key": "status",
-            "label": "Status",
+            "key": "kategorie",
+            "label": "Kategorie",
             "sortable": true,
             "filterable": true,
-            "width": 160
+            "priority": "primary"
           },
           {
-            "key": "updated_at",
-            "label": "Updated At",
+            "key": "preis",
+            "label": "Preis",
+            "renderKind": "currency",
+            "numeric": true,
+            "sortable": true,
+            "priority": "primary"
+          },
+          {
+            "key": "einheit",
+            "label": "Einheit",
             "sortable": true,
             "filterable": true,
-            "width": 160
+            "priority": "secondary"
+          },
+          {
+            "key": "verfuegbar",
+            "label": "Verfügbar",
+            "renderKind": "boolean",
+            "filterable": true,
+            "priority": "primary"
           }
         ],
         "rowActions": []
       }
     ],
-    "noWorkflowReason": "Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
+    "noWorkflowReason": "Katalogliste; Bestellen ueber den Shop-Warenkorb.",
     "agentContract": {
-      "businessPurpose": "Shop im portal-Bereich finden und auswerten.",
+      "businessPurpose": "Artikel finden und pruefen, ob sie verfuegbar sind.",
       "examplePrompts": [
-        "Zeige Shop.",
-        "Filtere die Liste."
+        "Welche Duenger sind verfuegbar?"
       ],
       "sensitiveFields": [],
       "testSelectors": {
@@ -8638,7 +8673,7 @@
     "domain": "portal",
     "mode": "list",
     "title": "Empfehlungen",
-    "subtitle": "portal",
+    "subtitle": "Vorschlaege fuer das Kundenkonto",
     "adapter": {
       "type": "native",
       "sourceId": "portal/empfehlungen",
@@ -8674,43 +8709,71 @@
         "rowHeight": 40,
         "columns": [
           {
-            "key": "id",
-            "label": "Id",
+            "key": "titel",
+            "label": "Empfehlung",
             "sortable": true,
             "filterable": true,
-            "width": 160
+            "priority": "primary"
           },
           {
-            "key": "name",
-            "label": "Name",
+            "key": "typ",
+            "label": "Typ",
             "sortable": true,
             "filterable": true,
-            "width": 160
+            "priority": "primary"
           },
           {
-            "key": "status",
-            "label": "Status",
+            "key": "prioritaet",
+            "label": "Priorität",
             "sortable": true,
             "filterable": true,
-            "width": 160
+            "priority": "secondary"
           },
           {
-            "key": "updated_at",
-            "label": "Updated At",
+            "key": "betrag_indikativ",
+            "label": "Richtbetrag",
+            "renderKind": "currency",
+            "numeric": true,
+            "sortable": true,
+            "priority": "secondary"
+          },
+          {
+            "key": "gueltig_bis",
+            "label": "Gültig bis",
+            "renderKind": "date",
+            "sortable": true,
+            "priority": "secondary"
+          },
+          {
+            "key": "gesehen",
+            "label": "Gesehen",
+            "renderKind": "boolean",
+            "filterable": true,
+            "priority": "secondary"
+          },
+          {
+            "key": "herkunft",
+            "label": "Herkunft",
             "sortable": true,
             "filterable": true,
-            "width": 160
+            "priority": "tertiary"
+          },
+          {
+            "key": "beschreibung",
+            "label": "Beschreibung",
+            "sortable": true,
+            "filterable": true,
+            "priority": "tertiary"
           }
         ],
         "rowActions": []
       }
     ],
-    "noWorkflowReason": "Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
+    "noWorkflowReason": "Vorschlagsliste; Bestellen nur ueber den Shop.",
     "agentContract": {
-      "businessPurpose": "Empfehlungen im portal-Bereich finden und auswerten.",
+      "businessPurpose": "Vorschlaege sehen; eine Empfehlung ist ein Vorschlag, kein Auftrag.",
       "examplePrompts": [
-        "Zeige Empfehlungen.",
-        "Filtere die Liste."
+        "Welche neuen Empfehlungen habe ich?"
       ],
       "sensitiveFields": [],
       "testSelectors": {

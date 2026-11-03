@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 548,
-    "screens_with_actions": 376,
+    "actions": 549,
+    "screens_with_actions": 377,
     "domains": 51
   },
   "actions": [
@@ -8764,6 +8764,26 @@
       "required_data": [],
       "source": {
         "screenId": "portal/lohndienste/neu",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:portal/naehrstoffbilanzen:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (portal/naehrstoffbilanzen)",
+      "category": "mask-action",
+      "domain": "portal",
+      "mask": "portal/naehrstoffbilanzen",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "portal/naehrstoffbilanzen",
         "actionKey": "export",
         "commandEndpoint": null,
         "navigationRoute": null,
