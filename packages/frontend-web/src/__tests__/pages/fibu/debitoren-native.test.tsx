@@ -69,7 +69,8 @@ describe('Studio Debitoren OP list', () => {
     await waitFor(() => expect(testState.get.mock.calls.length).toBeGreaterThan(1))
     expect(await screen.findByText('Seite 1 / 3')).toBeTruthy()
     expect(screen.getByText('24,94', { exact: false })).toBeTruthy()
-    fireEvent.click(screen.getByRole('button', { name: 'Weiter' }))
+    // Auf den Knopf warten: die Liste kann zwischen Seitenanzeige und Abfrage noch einmal rendern.
+    fireEvent.click(await screen.findByRole('button', { name: 'Weiter' }))
     expect(await screen.findByText('Seite 2 / 3')).toBeTruthy()
 
     fireEvent.change(screen.getByTestId('search-list'), { target: { value: 'CUSTOMER-127' } })
