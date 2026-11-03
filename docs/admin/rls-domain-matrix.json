@@ -2,18 +2,18 @@
  "_note": "Generiert von scripts/rls_domain_matrix.py; nicht von Hand aendern.",
  "datenstand": "2026-10-28",
  "summary": {
-  "tabellen": 85,
+  "tabellen": 63,
   "nach_klasse": {
-   "A": 42,
-   "B": 28,
-   "C": 15
+   "A": 35,
+   "B": 19,
+   "C": 9
   },
   "nach_ursache": {
    "dienst": 16,
-   "position": 13,
-   "referenzdaten": 16,
-   "mandant_nullbar": 22,
-   "standardmandant": 16,
+   "position": 7,
+   "referenzdaten": 15,
+   "mandant_nullbar": 12,
+   "standardmandant": 11,
    "identitaet": 2
   },
   "nach_domain": {
@@ -22,7 +22,7 @@
     "mandant_nullbar": 6,
     "position": 1,
     "referenzdaten": 6,
-    "standardmandant": 8
+    "standardmandant": 7
    },
    "crm": {
     "dienst": 5
@@ -32,10 +32,8 @@
    },
    "erp": {
     "dienst": 1,
-    "mandant_nullbar": 4,
-    "position": 1,
-    "referenzdaten": 2,
-    "standardmandant": 2
+    "mandant_nullbar": 1,
+    "referenzdaten": 1
    },
    "finance": {
     "dienst": 1
@@ -51,17 +49,14 @@
     "dienst": 1,
     "position": 3
    },
-   "logistics": {
-    "mandant_nullbar": 7
-   },
    "mfg": {
     "mandant_nullbar": 3
    },
    "ops": {
     "dienst": 1,
-    "position": 6,
+    "position": 1,
     "referenzdaten": 1,
-    "standardmandant": 3
+    "standardmandant": 1
    },
    "portal": {
     "position": 1
@@ -860,36 +855,6 @@
    "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
   },
   {
-   "table": "domain_agrar.nutrient_compositions",
-   "domain": "agrar",
-   "class": "A",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [
-    "standardmandant"
-   ],
-   "modell": [
-    "app/infrastructure/models/__init__.py"
-   ],
-   "leser": [
-    "app/infrastructure/models/__init__.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/nutrient_compositions.py"
-   ],
-   "worker": [],
-   "identitaet": {},
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": null,
-   "bereinigung": [
-    "Datenbefund fehlt (Tabelle nicht in der gewachsenen Datenbank)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
    "table": "domain_agrar.seed_orders",
    "domain": "agrar",
    "class": "A",
@@ -1542,39 +1507,6 @@
    "policy": "keine Mandanten-Policy: Nachschlagen vor der Mandantenbindung, Zugriff ueber valeo_system"
   },
   {
-   "table": "domain_erp.bank_accounts",
-   "domain": "erp",
-   "class": "B",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "mandant_nullbar",
-   "gruende": [
-    "mandant_nullbar"
-   ],
-   "modell": [],
-   "leser": [
-    "app/api/v1/endpoints/bank_reconciliation.py",
-    "app/api/v1/endpoints/bank_statement_import.py",
-    "app/api/v1/endpoints/liquidity_planning.py",
-    "app/api/v1/endpoints/subsidiary_ledger_reconciliation.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/bank_accounts.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "token": 2
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": null,
-   "bereinigung": [
-    "Datenbefund fehlt (Tabelle nicht in der gewachsenen Datenbank)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
    "table": "domain_erp.chart_of_accounts",
    "domain": "erp",
    "class": "B",
@@ -1678,171 +1610,6 @@
    "policy": "keine, bis der Dienst tokengebundene Identitaet hat (rls-dienste-identitaet-vorschlag.md)"
   },
   {
-   "table": "domain_erp.creditors",
-   "domain": "erp",
-   "class": "B",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "mandant_nullbar",
-   "gruende": [
-    "mandant_nullbar"
-   ],
-   "modell": [],
-   "leser": [
-    "app/api/v1/endpoints/export_service.py",
-    "app/api/v1/schemas/finance.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/creditors.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "nutzlast": 1,
-    "token": 1
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": null,
-   "bereinigung": [
-    "Datenbefund fehlt (Tabelle nicht in der gewachsenen Datenbank)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_erp.debitors",
-   "domain": "erp",
-   "class": "B",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "mandant_nullbar",
-   "gruende": [
-    "mandant_nullbar"
-   ],
-   "modell": [],
-   "leser": [
-    "app/api/v1/endpoints/export_service.py",
-    "app/api/v1/endpoints/finance_stammdaten.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/debtors.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "nutzlast": 1,
-    "token": 3
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": null,
-   "bereinigung": [
-    "Datenbefund fehlt (Tabelle nicht in der gewachsenen Datenbank)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_erp.dunning_notices",
-   "domain": "erp",
-   "class": "A",
-   "tenant_type": "character varying(64)",
-   "eltern": [],
-   "ursache": "referenzdaten",
-   "gruende": [
-    "referenzdaten",
-    "mandant_nullbar"
-   ],
-   "modell": [],
-   "leser": [
-    "app/api/v1/endpoints/export_service.py",
-    "app/services/mcp_execution_service.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/dunning.py",
-    "app/services/finance_dunning_service.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "token": 1
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [
-    "app/services/mcp_execution_service.py:3151"
-   ],
-   "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3151"
-   ],
-   "daten": null,
-   "bereinigung": [
-    "Datenbefund fehlt (Tabelle nicht in der gewachsenen Datenbank)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_erp.fibu_connector_run_items",
-   "domain": "erp",
-   "class": "C",
-   "tenant_type": null,
-   "eltern": [
-    "domain_erp.fibu_connector_runs"
-   ],
-   "ursache": "position",
-   "gruende": [
-    "position"
-   ],
-   "modell": [],
-   "leser": [
-    "app/api/v1/endpoints/fibu_connectors.py"
-   ],
-   "schreiber": [
-    "app/core/connectors/workflow.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "token": 1
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": null,
-   "bereinigung": [
-    "tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_erp.fibu_connector_runs"
-  },
-  {
-   "table": "domain_erp.gift_cards",
-   "domain": "erp",
-   "class": "A",
-   "tenant_type": "character varying(64)",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [
-    "standardmandant"
-   ],
-   "modell": [],
-   "leser": [
-    "app/api/v1/endpoints/admin_pos.py",
-    "app/api/v1/endpoints/mask_frontend_bridges.py"
-   ],
-   "schreiber": [],
-   "worker": [],
-   "identitaet": {
-    "standardmandant": 1,
-    "token": 2
-   },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py:905"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": null,
-   "bereinigung": [
-    "Datenbefund fehlt (Tabelle nicht in der gewachsenen Datenbank)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
    "table": "domain_erp.offene_posten",
    "domain": "erp",
    "class": "A",
@@ -1936,38 +1703,6 @@
    },
    "bereinigung": [],
    "policy": "getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_erp.open_items",
-   "domain": "erp",
-   "class": "A",
-   "tenant_type": "character varying(64)",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [
-    "standardmandant"
-   ],
-   "modell": [],
-   "leser": [
-    "app/api/v1/endpoints/crm_360.py",
-    "app/api/v1/endpoints/finance_actions.py",
-    "app/services/calendar_projection_service.py"
-   ],
-   "schreiber": [],
-   "worker": [],
-   "identitaet": {
-    "standardmandant": 1
-   },
-   "standardmandant_stellen": [
-    "app/services/calendar_projection_service.py:911"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": null,
-   "bereinigung": [
-    "Datenbefund fehlt (Tabelle nicht in der gewachsenen Datenbank)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
   },
   {
    "table": "domain_erp.policy_rules",
@@ -2919,213 +2654,6 @@
    "policy": "keine, bis der Dienst tokengebundene Identitaet hat (rls-dienste-identitaet-vorschlag.md)"
   },
   {
-   "table": "domain_logistics.carrier_invoices",
-   "domain": "logistics",
-   "class": "A",
-   "tenant_type": "character varying(36)",
-   "eltern": [],
-   "ursache": "mandant_nullbar",
-   "gruende": [
-    "mandant_nullbar"
-   ],
-   "modell": [],
-   "leser": [],
-   "schreiber": [
-    "app/api/v1/endpoints/logistics_freight.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "token": 1
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [
-    "app/api/v1/endpoints/logistics_freight.py:7"
-   ],
-   "gemeinsam_stellen": [],
-   "daten": null,
-   "bereinigung": [
-    "Datenbefund fehlt (Tabelle nicht in der gewachsenen Datenbank)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_logistics.epod_settlements",
-   "domain": "logistics",
-   "class": "B",
-   "tenant_type": "character varying(36)",
-   "eltern": [],
-   "ursache": "mandant_nullbar",
-   "gruende": [
-    "mandant_nullbar"
-   ],
-   "modell": [],
-   "leser": [],
-   "schreiber": [
-    "app/services/logistics_epod_service.py"
-   ],
-   "worker": [],
-   "identitaet": {},
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": null,
-   "bereinigung": [
-    "Datenbefund fehlt (Tabelle nicht in der gewachsenen Datenbank)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_logistics.freight_tariffs",
-   "domain": "logistics",
-   "class": "B",
-   "tenant_type": "text",
-   "eltern": [],
-   "ursache": "mandant_nullbar",
-   "gruende": [
-    "mandant_nullbar"
-   ],
-   "modell": [],
-   "leser": [],
-   "schreiber": [
-    "app/api/v1/endpoints/logistics_freight.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "token": 1
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [
-    "app/api/v1/endpoints/logistics_freight.py:7"
-   ],
-   "gemeinsam_stellen": [],
-   "daten": null,
-   "bereinigung": [
-    "Datenbefund fehlt (Tabelle nicht in der gewachsenen Datenbank)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_logistics.tour_disposition_checks",
-   "domain": "logistics",
-   "class": "B",
-   "tenant_type": "character varying(36)",
-   "eltern": [],
-   "ursache": "mandant_nullbar",
-   "gruende": [
-    "mandant_nullbar"
-   ],
-   "modell": [],
-   "leser": [],
-   "schreiber": [
-    "app/services/logistics_disposition_service.py"
-   ],
-   "worker": [],
-   "identitaet": {},
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": null,
-   "bereinigung": [
-    "Datenbefund fehlt (Tabelle nicht in der gewachsenen Datenbank)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_logistics.tour_events",
-   "domain": "logistics",
-   "class": "B",
-   "tenant_type": "text",
-   "eltern": [],
-   "ursache": "mandant_nullbar",
-   "gruende": [
-    "mandant_nullbar"
-   ],
-   "modell": [],
-   "leser": [],
-   "schreiber": [
-    "app/api/v1/endpoints/logistics_tours.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "token": 1
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": null,
-   "bereinigung": [
-    "Datenbefund fehlt (Tabelle nicht in der gewachsenen Datenbank)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_logistics.tour_stops",
-   "domain": "logistics",
-   "class": "B",
-   "tenant_type": "text",
-   "eltern": [],
-   "ursache": "mandant_nullbar",
-   "gruende": [
-    "mandant_nullbar"
-   ],
-   "modell": [],
-   "leser": [
-    "app/services/logistics_disposition_service.py"
-   ],
-   "schreiber": [
-    "app/api/v1/command_handlers/logistics.py",
-    "app/api/v1/endpoints/logistics_tours.py",
-    "app/services/logistics_epod_service.py",
-    "app/services/mobile_sync_service.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "token": 1
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": null,
-   "bereinigung": [
-    "Datenbefund fehlt (Tabelle nicht in der gewachsenen Datenbank)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_logistics.tours",
-   "domain": "logistics",
-   "class": "B",
-   "tenant_type": "text",
-   "eltern": [],
-   "ursache": "mandant_nullbar",
-   "gruende": [
-    "mandant_nullbar"
-   ],
-   "modell": [],
-   "leser": [
-    "app/api/v1/endpoints/logistics_freight.py",
-    "app/services/logistics_disposition_service.py"
-   ],
-   "schreiber": [
-    "app/api/v1/command_handlers/logistics.py",
-    "app/api/v1/endpoints/logistics_tours.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "token": 2
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [
-    "app/api/v1/endpoints/logistics_freight.py:7"
-   ],
-   "gemeinsam_stellen": [],
-   "daten": null,
-   "bereinigung": [
-    "Datenbefund fehlt (Tabelle nicht in der gewachsenen Datenbank)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
    "table": "domain_mfg.bill_of_material",
    "domain": "mfg",
    "class": "B",
@@ -3189,60 +2717,6 @@
    "worker": [],
    "identitaet": {},
    "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": null,
-   "bereinigung": [
-    "Datenbefund fehlt (Tabelle nicht in der gewachsenen Datenbank)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_ops.kon_contract",
-   "domain": "ops",
-   "class": "A",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [
-    "standardmandant"
-   ],
-   "modell": [
-    "app/domains/operations/models.py"
-   ],
-   "leser": [
-    "app/api/v1/endpoints/crm_360_reads.py",
-    "app/documents/inbox_service.py",
-    "app/domains/operations/models.py",
-    "app/services/calendar_projection_service.py",
-    "app/services/contract_engagement_service.py",
-    "app/services/contract_fixing_service.py",
-    "app/services/contract_fulfillment_service.py",
-    "app/services/contract_settlement_service.py",
-    "app/services/docflow_source_proposals.py",
-    "app/services/kontrakt_disposition_service.py",
-    "app/services/position_service.py",
-    "app/services/preisfindung_service.py",
-    "app/workspace/agrar_chain.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/kontrakte.py",
-    "app/api/v1/endpoints/stammdaten_bearbeiten.py",
-    "app/domains/operations/repository.py",
-    "app/routers/contracts_router.py",
-    "app/services/kontrakt_movement_sync.py",
-    "app/services/kontrakt_position_service.py",
-    "app/services/kontrakte_service.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "nutzlast": 2,
-    "standardmandant": 1,
-    "token": 3
-   },
-   "standardmandant_stellen": [
-    "app/services/calendar_projection_service.py:911"
-   ],
    "null_stellen": [],
    "gemeinsam_stellen": [],
    "daten": null,
@@ -3414,131 +2888,6 @@
    "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_ops.ops_fahrzeuge"
   },
   {
-   "table": "domain_ops.ops_fahrzeug_bussgeld",
-   "domain": "ops",
-   "class": "C",
-   "tenant_type": null,
-   "eltern": [
-    "domain_ops.ops_fahrzeuge"
-   ],
-   "ursache": "position",
-   "gruende": [
-    "position"
-   ],
-   "modell": [],
-   "leser": [],
-   "schreiber": [
-    "app/api/v1/endpoints/fuhrpark.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "token": 1
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": null,
-   "bereinigung": [
-    "tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_ops.ops_fahrzeuge"
-  },
-  {
-   "table": "domain_ops.ops_fahrzeug_schaeden",
-   "domain": "ops",
-   "class": "C",
-   "tenant_type": null,
-   "eltern": [
-    "domain_ops.ops_fahrzeuge"
-   ],
-   "ursache": "position",
-   "gruende": [
-    "position"
-   ],
-   "modell": [],
-   "leser": [],
-   "schreiber": [
-    "app/api/v1/endpoints/fuhrpark.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "token": 1
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": null,
-   "bereinigung": [
-    "tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_ops.ops_fahrzeuge"
-  },
-  {
-   "table": "domain_ops.ops_fahrzeug_status_historie",
-   "domain": "ops",
-   "class": "C",
-   "tenant_type": null,
-   "eltern": [
-    "domain_ops.ops_fahrzeuge"
-   ],
-   "ursache": "position",
-   "gruende": [
-    "position"
-   ],
-   "modell": [],
-   "leser": [],
-   "schreiber": [
-    "app/api/v1/endpoints/fuhrpark.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "token": 1
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": null,
-   "bereinigung": [
-    "tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_ops.ops_fahrzeuge"
-  },
-  {
-   "table": "domain_ops.ops_fahrzeug_touren",
-   "domain": "ops",
-   "class": "C",
-   "tenant_type": null,
-   "eltern": [
-    "domain_ops.ops_fahrzeuge"
-   ],
-   "ursache": "position",
-   "gruende": [
-    "position"
-   ],
-   "modell": [
-    "app/domains/operations/models.py"
-   ],
-   "leser": [
-    "app/core/database.py",
-    "app/domains/operations/models.py"
-   ],
-   "schreiber": [
-    "app/domains/operations/repository.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "nutzlast": 1
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": null,
-   "bereinigung": [
-    "tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_ops.ops_fahrzeuge"
-  },
-  {
    "table": "domain_ops.ops_fahrzeuge",
    "domain": "ops",
    "class": "A",
@@ -3600,87 +2949,6 @@
    },
    "bereinigung": [],
    "policy": "getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_ops.ops_pcn_meldungen",
-   "domain": "ops",
-   "class": "A",
-   "tenant_type": "character varying(120)",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [
-    "standardmandant"
-   ],
-   "modell": [
-    "app/domains/operations/models.py"
-   ],
-   "leser": [
-    "app/domains/operations/models.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/compliance.py",
-    "app/services/compliance_service.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "standardmandant": 1,
-    "token": 1
-   },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/compliance.py:838"
-   ],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": null,
-   "bereinigung": [
-    "Datenbefund fehlt (Tabelle nicht in der gewachsenen Datenbank)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_ops.ops_wiegungen",
-   "domain": "ops",
-   "class": "C",
-   "tenant_type": null,
-   "eltern": [
-    "domain_ops.ops_waagen"
-   ],
-   "ursache": "position",
-   "gruende": [
-    "position"
-   ],
-   "modell": [
-    "app/domains/operations/models.py"
-   ],
-   "leser": [
-    "app/api/v1/endpoints/supply_chain.py",
-    "app/api/v1/endpoints/vermehrungsvertrag.py",
-    "app/api/v1/schemas/supply_chain_schemas.py",
-    "app/core/database.py",
-    "app/core/screen_definitions_finisher.py",
-    "app/domains/operations/models.py",
-    "app/services/supply_chain_trace_service.py",
-    "app/services/wiegung_service.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/artikel_stamm_ext.py",
-    "app/api/v1/endpoints/waage.py",
-    "app/domains/operations/repository.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "kopfzeile": 2,
-    "nutzlast": 1,
-    "token": 2
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": null,
-   "bereinigung": [
-    "tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_ops.ops_waagen"
   },
   {
    "table": "domain_ops.reklamationen",

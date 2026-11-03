@@ -33,7 +33,9 @@ def test_repository_queries_include_verified_tenant_and_bound_limit():
     db = MagicMock()
     repo = WaageRepository(db, 'tenant-a')
     repo.get_by_id('foreign')
-    expressions = db.query.return_value.filter.call_args.args
+    # Mandant im Konstruktor: erst der Mandantenfilter, dann der Schluessel.
+    expressions = (db.query.return_value.filter.call_args.args
+                   + db.query.return_value.filter.return_value.filter.call_args.args)
     compiled = [str(x.compile(dialect=postgresql.dialect(), compile_kwargs={'literal_binds': True})) for x in expressions]
     assert any("tenant_id = 'tenant-a'" in x for x in compiled)
     assert any("id = 'foreign'" in x for x in compiled)

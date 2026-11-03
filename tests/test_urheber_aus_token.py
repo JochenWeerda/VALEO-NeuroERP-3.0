@@ -88,7 +88,7 @@ class _PartnerDienst:
     def check_partner_number_unique(self, *a, **k):
         pass
 
-    def assign_account_numbers(self, row):
+    def assign_account_numbers(self, row, bisher=None):
         pass
 
     def persist_new_partner(self, row):
