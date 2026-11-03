@@ -20327,4 +20327,9 @@ fuhrpark/uebersicht, Fahrzeug-Stamm Neuanlage+Detail, Stundenzettel, Zeiterfassu
 Streckengeschaefte, Reports Umsatz/Lagerbestand), 2 Einstiegs-Cockpits (Strecken-Menue, NaWaRo-Uebersicht),
 16 Platzhalter entfernt. Offen: organigramm, hrm-operations-gates, service abschluss/rueckmeldung,
 speditionen-fracht-preise, reports/ReportsDashboardCharts, nawaro-uebersicht-drucken; nawaro/* Seiten ohne Maske.
+Doku-Drift (03.11.2026, Nutzerauftrag): 266 Seiten ohne Route/Navigation. 198 Seiten mit echter Studio-Maske
+haben eine Route bekommen (route-aliases.json; Masken ohne Route 204 -> 65). 65 handgebaute Altfassungen
+(61 x *-legacy, crm/detail, Home, ...) stehen in config/doc_drift_page_altlast.json (nur schrumpfen) und werden
+per Paritaetspruefung gegen ihre Studio-Maske abgebaut (Nutzerentscheidung: Altlast + Paritaetspruefung);
+nicht loeschen ohne Pruefung (Audit doc-drift-page-orphan-audit-20261031).
 
