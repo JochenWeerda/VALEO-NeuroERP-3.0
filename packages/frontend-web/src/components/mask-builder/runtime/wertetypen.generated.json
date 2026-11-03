@@ -142,6 +142,7 @@
     },
     "aliase": {
       "bag": "sack",
+      "bb": "big_bag",
       "big_bag": "big_bag",
       "bigbag": "big_bag",
       "bottle": "flasche",
@@ -157,6 +158,7 @@
       "eh": "einheit",
       "kilogramm": "kg",
       "liter": "l",
+      "ltr": "l",
       "pallet": "palette",
       "pcs": "st",
       "piece": "st",
@@ -166,11 +168,13 @@
       "to": "t",
       "tonne": "t",
       "tonnen": "t",
+      "umkarton": "karton",
       "unit": "einheit"
     },
     "zaehleinheiten": [
       "big_bag",
       "container",
+      "dose",
       "einheit",
       "flasche",
       "kanister",
