@@ -1,4 +1,5 @@
 import type { ScreenComputation } from '../schema'
+import { isConvertibleUnit } from './units'
 
 /**
  * Rechnende Felder und Spalten: eine feste Liste von Operationen, kein auswertbarer Ausdruck.
@@ -54,7 +55,7 @@ export function sumColumn(rows: Record<string, unknown>[], read: (_row: Record<s
 }
 
 type Feld = { key?: unknown; type?: unknown; computed?: unknown; rowFields?: unknown }
-type Spalte = { key?: unknown; computed?: unknown; aggregate?: unknown; renderKind?: unknown; numeric?: unknown }
+type Spalte = { key?: unknown; computed?: unknown; aggregate?: unknown; renderKind?: unknown; numeric?: unknown; displayUnit?: unknown }
 const ZAHLENFELDER = new Set(['number', 'currency', 'percentage', 'quantity'])
 const ZAHLENSPALTEN = new Set(['number', 'currency', 'quantity', 'percentage'])
 
@@ -82,6 +83,9 @@ export function computedDefinitionErrors(screen: {
   for (const spalte of tabellen.flatMap(tabelle => tabelle.columns ?? [])) {
     if (spalte.computed !== undefined && !(validComputation(spalte.computed) && !spalte.computed.of.includes(String(spalte.key)))) {
       fehler.add('computed is invalid')
+    }
+    if (spalte.displayUnit !== undefined && !(spalte.renderKind === 'quantity' && isConvertibleUnit(String(spalte.displayUnit)))) {
+      fehler.add('displayUnit is invalid')
     }
     if (spalte.aggregate !== undefined && !(spalte.aggregate === 'sum'
       && (spalte.numeric === true || spalte.computed !== undefined || ZAHLENSPALTEN.has(String(spalte.renderKind))))) {

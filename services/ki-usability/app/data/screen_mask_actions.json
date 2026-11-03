@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 583,
-    "screens_with_actions": 412,
-    "domains": 56
+    "actions": 578,
+    "screens_with_actions": 407,
+    "domains": 55
   },
   "actions": [
     {
@@ -7770,6 +7770,26 @@
       }
     },
     {
+      "id": "mask:lager/bestandsuebersicht:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (lager/bestandsuebersicht)",
+      "category": "mask-action",
+      "domain": "lager",
+      "mask": "lager/bestandsuebersicht",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "lager/bestandsuebersicht",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null
+      }
+    },
+    {
       "id": "mask:lager/einlagerung:export",
       "label": "CSV-Export",
       "description": "CSV-Export (lager/einlagerung)",
@@ -7910,26 +7930,6 @@
       }
     },
     {
-      "id": "mask:lager/inventur:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (lager/inventur)",
-      "category": "mask-action",
-      "domain": "lager",
-      "mask": "lager/inventur",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "lager/inventur",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
       "id": "mask:lager/kommissionierung:export",
       "label": "CSV-Export",
       "description": "CSV-Export (lager/kommissionierung)",
@@ -8010,26 +8010,6 @@
       }
     },
     {
-      "id": "mask:lager/materialfluss:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (lager/materialfluss)",
-      "category": "mask-action",
-      "domain": "lager",
-      "mask": "lager/materialfluss",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "lager/materialfluss",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
       "id": "mask:lager/partiestamm-liste:export",
       "label": "CSV-Export",
       "description": "CSV-Export (lager/partiestamm-liste)",
@@ -8050,26 +8030,6 @@
       }
     },
     {
-      "id": "mask:lager/partiestamm:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (lager/partiestamm)",
-      "category": "mask-action",
-      "domain": "lager",
-      "mask": "lager/partiestamm",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "lager/partiestamm",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
       "id": "mask:lager/rueckverfolgbarkeit:export",
       "label": "CSV-Export",
       "description": "CSV-Export (lager/rueckverfolgbarkeit)",
@@ -8082,26 +8042,6 @@
       "required_data": [],
       "source": {
         "screenId": "lager/rueckverfolgbarkeit",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:lager/silo-mobil:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (lager/silo-mobil)",
-      "category": "mask-action",
-      "domain": "lager",
-      "mask": "lager/silo-mobil",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "lager/silo-mobil",
         "actionKey": "export",
         "commandEndpoint": null,
         "navigationRoute": null,
@@ -8164,26 +8104,6 @@
       "required_data": [],
       "source": {
         "screenId": "lager/terminal",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:lager/umlagerung:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (lager/umlagerung)",
-      "category": "mask-action",
-      "domain": "lager",
-      "mask": "lager/umlagerung",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "lager/umlagerung",
         "actionKey": "export",
         "commandEndpoint": null,
         "navigationRoute": null,
@@ -10764,26 +10684,6 @@
       "required_data": [],
       "source": {
         "screenId": "setup/firma",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:silo/kapazitaeten:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (silo/kapazitaeten)",
-      "category": "mask-action",
-      "domain": "silo",
-      "mask": "silo/kapazitaeten",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "silo/kapazitaeten",
         "actionKey": "export",
         "commandEndpoint": null,
         "navigationRoute": null,

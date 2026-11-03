@@ -15,7 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 MARKE = "// Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46)"
 HOECHSTENS = 187  # Stand 02.11.2026; nur senken
 # E2E-Smoke: Faelle ohne echte Maske (fehlende Maske oder batch15-Platzhalter) laufen als test.fixme.
-HOECHSTENS_SMOKE = 10  # Stand 02.11.2026; nur senken
+HOECHSTENS_SMOKE = 9  # Stand 03.11.2026 (Lagerbestand repariert); nur senken
 
 
 def _marken(wurzel: str = "packages/frontend-web/src/__tests__") -> list[tuple[str, int, str]]:

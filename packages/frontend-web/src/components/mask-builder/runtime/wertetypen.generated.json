@@ -1,5 +1,5 @@
 {
-  "_hinweis": "Erzeugt von scripts/generate_wertetypen_frontend.py aus config/wertetypen.json; nicht von Hand pflegen.",
+  "_hinweis": "Erzeugt von scripts/generate_wertetypen_frontend.py aus config/wertetypen.json und app/core/agrar_units.py; nicht von Hand pflegen.",
   "ustIdMuster": {
     "DE": "^DE\\d{9}$",
     "AT": "^ATU\\d{8}$",
@@ -128,5 +128,60 @@
         "11/2026"
       ]
     }
+  },
+  "einheiten": {
+    "masseInKg": {
+      "kg": 1.0,
+      "dt": 100.0,
+      "t": 1000.0
+    },
+    "volumenInL": {
+      "ml": 0.001,
+      "l": 1.0,
+      "hl": 100.0
+    },
+    "aliase": {
+      "bag": "sack",
+      "big_bag": "big_bag",
+      "bigbag": "big_bag",
+      "bottle": "flasche",
+      "box": "karton",
+      "can": "kanister",
+      "canister": "kanister",
+      "carton": "karton",
+      "crate": "kiste",
+      "dezitonne": "dt",
+      "doppelzentner": "dt",
+      "dz": "dt",
+      "e": "einheit",
+      "eh": "einheit",
+      "kilogramm": "kg",
+      "liter": "l",
+      "pallet": "palette",
+      "pcs": "st",
+      "piece": "st",
+      "stk": "st",
+      "stueck": "st",
+      "stück": "st",
+      "to": "t",
+      "tonne": "t",
+      "tonnen": "t",
+      "unit": "einheit"
+    },
+    "zaehleinheiten": [
+      "big_bag",
+      "container",
+      "einheit",
+      "flasche",
+      "kanister",
+      "karton",
+      "kiste",
+      "pack",
+      "palette",
+      "sack",
+      "st"
+    ],
+    "anzeigeMasse": "dt",
+    "anzeigeVolumen": "l"
   }
 }

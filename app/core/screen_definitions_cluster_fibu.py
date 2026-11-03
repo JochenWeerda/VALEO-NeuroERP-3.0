@@ -8,27 +8,11 @@ from __future__ import annotations
 
 from typing import Any
 
+from app.core.cluster_spalten import betrag as _betrag, datum as _datum, janein as _janein, text as _text
 from app.core.stamm_list_parent import build_stamm_list_screen, stamm_list_export_action
 
 _EXPORT = stamm_list_export_action()
 _KEIN_ABLAUF = "Stammdaten- bzw. Auswertungsliste ohne eigenen Ablauf; Aenderungen in der jeweiligen Fachmaske."
-
-
-def _text(key: str, label: str, prioritaet: str = "secondary", **zusatz: Any) -> dict[str, Any]:
-    return {"key": key, "label": label, "sortable": True, "filterable": True, "priority": prioritaet, **zusatz}
-
-
-def _betrag(key: str, label: str, summe: bool = True, prioritaet: str = "primary") -> dict[str, Any]:
-    spalte = {"key": key, "label": label, "renderKind": "currency", "numeric": True, "sortable": True, "priority": prioritaet}
-    return {**spalte, "aggregate": "sum"} if summe else spalte
-
-
-def _datum(key: str, label: str, prioritaet: str = "secondary") -> dict[str, Any]:
-    return {"key": key, "label": label, "renderKind": "date", "sortable": True, "priority": prioritaet}
-
-
-def _janein(key: str, label: str) -> dict[str, Any]:
-    return {"key": key, "label": label, "renderKind": "boolean", "filterable": True, "priority": "secondary"}
 
 
 def _liste(**kwargs: Any) -> dict[str, Any]:

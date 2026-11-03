@@ -4,14 +4,14 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-02
+last_reviewed: 2026-11-03
 version: 3.0.0
 description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions.
 ---
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (816 Masken).
+> Generiert aus `app/core/screen_definitions.py` (810 Masken).
 
 ## Übersicht
 
@@ -592,13 +592,13 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `lager/auslagerung` | Auslagerung | lager | niedrig | — | `GET /api/v1/masks/lager/auslagerung/agent-contract` |
 | `lager/bestandsbewertung` | Bestandsbewertung | lager | niedrig | — | `GET /api/v1/masks/lager/bestandsbewertung/agent-contract` |
 | `lager/bestandskorrektur` | Bestandskorrektur | lager | niedrig | — | `GET /api/v1/masks/lager/bestandskorrektur/agent-contract` |
+| `lager/bestandsuebersicht` | Bestandsübersicht | lager | niedrig | — | `GET /api/v1/masks/lager/bestandsuebersicht/agent-contract` |
 | `lager/charge` | Charge | lager | niedrig | — | `GET /api/v1/masks/lager/charge/agent-contract` |
 | `lager/einlagerung` | Einlagerung | lager | niedrig | — | `GET /api/v1/masks/lager/einlagerung/agent-contract` |
 | `lager/foreign-goods-queue` | Fremdware-Queue | inventory | niedrig | — | `GET /api/v1/masks/lager/foreign-goods-queue/agent-contract` |
 | `lager/fremdware` | Fremdware und Fremdbestand | inventory | niedrig | — | `GET /api/v1/masks/lager/fremdware/agent-contract` |
 | `lager/gs1-scanner` | Gs1 scanner | lager | niedrig | — | `GET /api/v1/masks/lager/gs1-scanner/agent-contract` |
 | `lager/inventory-dashboard` | Lager-Dashboard | lager | niedrig | — | `GET /api/v1/masks/lager/inventory-dashboard/agent-contract` |
-| `lager/inventur` | Inventur | lager | niedrig | — | `GET /api/v1/masks/lager/inventur/agent-contract` |
 | `lager/inventur-liste` | Inventur | lager | niedrig | — | `GET /api/v1/masks/lager/inventur-liste/agent-contract` |
 | `lager/inventur-nebenlaeufe` | Inventur-Nebenlaeufe | inventory | hoch | — | `GET /api/v1/masks/lager/inventur-nebenlaeufe/agent-contract` |
 | `lager/kommissionierung` | Kommissionierung | lager | niedrig | — | `GET /api/v1/masks/lager/kommissionierung/agent-contract` |
@@ -606,19 +606,14 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `lager/lagerplaetze` | Lagerplaetze | lager | niedrig | — | `GET /api/v1/masks/lager/lagerplaetze/agent-contract` |
 | `lager/leitstand` | Lager-Leitstand | lager | niedrig | — | `GET /api/v1/masks/lager/leitstand/agent-contract` |
 | `lager/massebilanz` | Neue Massebilanz anlegen | lager | niedrig | — | `GET /api/v1/masks/lager/massebilanz/agent-contract` |
-| `lager/materialfluss` | Materialfluss | lager | niedrig | — | `GET /api/v1/masks/lager/materialfluss/agent-contract` |
 | `lager/materialfluss-visualisierung` | Materialfluss visualisierung | lager | niedrig | — | `GET /api/v1/masks/lager/materialfluss-visualisierung/agent-contract` |
-| `lager/partiestamm` | Partiestamm | lager | niedrig | — | `GET /api/v1/masks/lager/partiestamm/agent-contract` |
 | `lager/partiestamm-liste` | Partiestamm | lager | niedrig | — | `GET /api/v1/masks/lager/partiestamm-liste/agent-contract` |
 | `lager/permanente-inventur` | Abschlüsse | lager | niedrig | — | `GET /api/v1/masks/lager/permanente-inventur/agent-contract` |
 | `lager/qs-leitstand` | QS-Leitstand | qualitaet | niedrig | — | `GET /api/v1/masks/lager/qs-leitstand/agent-contract` |
-| `lager/rueckverfolgbarkeit` | Rueckverfolgbarkeit | lager | niedrig | — | `GET /api/v1/masks/lager/rueckverfolgbarkeit/agent-contract` |
-| `lager/silo-mobil` | Silo mobil | lager | niedrig | — | `GET /api/v1/masks/lager/silo-mobil/agent-contract` |
-| `lager/silo-uebersicht` | Silo uebersicht | lager | niedrig | — | `GET /api/v1/masks/lager/silo-uebersicht/agent-contract` |
+| `lager/rueckverfolgbarkeit` | Rückverfolgbarkeit | lager | niedrig | — | `GET /api/v1/masks/lager/rueckverfolgbarkeit/agent-contract` |
 | `lager/silo-uebersicht-liste` | Silo-Uebersicht | lager | niedrig | — | `GET /api/v1/masks/lager/silo-uebersicht-liste/agent-contract` |
 | `lager/stock-movement` | Lagerbewegung | lager | hoch | `inventory-to-settlement` | `GET /api/v1/masks/lager/stock-movement/agent-contract` |
 | `lager/terminal` | Terminal | lager | niedrig | — | `GET /api/v1/masks/lager/terminal/agent-contract` |
-| `lager/umlagerung` | Lagerbewegungen | lager | niedrig | — | `GET /api/v1/masks/lager/umlagerung/agent-contract` |
 | `logistik/frachtbrief` | Frachtbriefe | logistics | niedrig | — | `GET /api/v1/masks/logistik/frachtbrief/agent-contract` |
 | `logistik/frachtbriefe` | Frachtbriefe | logistik | niedrig | — | `GET /api/v1/masks/logistik/frachtbriefe/agent-contract` |
 | `logistik/frachttabellen` | Frachttabellen | logistics | niedrig | — | `GET /api/v1/masks/logistik/frachttabellen/agent-contract` |
@@ -739,7 +734,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `service/anfragen-liste` | Serviceanfragen | service | niedrig | — | `GET /api/v1/masks/service/anfragen-liste/agent-contract` |
 | `service/rueckmeldung` | Rueckmeldung | service | niedrig | — | `GET /api/v1/masks/service/rueckmeldung/agent-contract` |
 | `setup/firma` | Firma | setup | niedrig | — | `GET /api/v1/masks/setup/firma/agent-contract` |
-| `silo/kapazitaeten` | Silos Gesamt | silo | niedrig | — | `GET /api/v1/masks/silo/kapazitaeten/agent-contract` |
 | `silo/silo` | Silo | lager | niedrig | — | `GET /api/v1/masks/silo/silo/agent-contract` |
 | `stammdaten/artikel-stoffstrom` | Stoffstrom-Datensätze | stammdaten | niedrig | — | `GET /api/v1/masks/stammdaten/artikel-stoffstrom/agent-contract` |
 | `stammdaten/artikelbestandteile` | Neuen Bestandteil anlegen | stammdaten | niedrig | — | `GET /api/v1/masks/stammdaten/artikelbestandteile/agent-contract` |
@@ -19774,7 +19768,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ### `lager/bestandsbewertung` — Bestandsbewertung
 
-**Zweck:** Bestandsbewertung im lager-Bereich finden und auswerten.
+**Zweck:** Den Bestandswert je Lager und Artikel pruefen, etwa zum Monatsabschluss.
 
 | | |
 |---|---|
@@ -19797,8 +19791,8 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Beispiel-Prompts:**
 
-- Zeige Bestandsbewertung.
-- Filtere die Liste.
+- Wie hoch ist der Bestandswert im Lager Sued?
+- Welche Artikel binden das meiste Kapital?
 
 **Actions:**
 
@@ -19835,6 +19829,42 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - Zeige Bestandskorrektur.
 - Filtere die Liste.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+
+---
+
+### `lager/bestandsuebersicht` — Bestandsübersicht
+
+**Zweck:** Den aktuellen Bestand eines Artikels in allen Lagern finden.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/lager/bestandsuebersicht/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/lager/bestandsuebersicht/agent-contract` |
+| Readiness | `GET /api/v1/masks/lager/bestandsuebersicht/readiness` |
+| Rollout-Route | `/mask-rollout/lager__bestandsuebersicht/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/lager/bestaende`
+
+**MCP-Tools (Domäne):**
+
+- `lager.bestand.get` — scope `lager:read`, Risiko niedrig
+- `lager.inventur.status` — scope `lager:read`, Risiko niedrig
+- `lager.inventur.propose_opening` — scope `lager:write`, Risiko hoch
+- `lager.stock_movement.stornieren` — scope `lager:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Wie viel Weizen liegt im Lager Nord?
+- Welche Chargen hat Artikel 4711?
 
 **Actions:**
 
@@ -19984,42 +20014,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `refresh` | Aktualisieren | safe | nein | `—` |
-
----
-
-### `lager/inventur` — Inventur
-
-**Zweck:** Inventur im lager-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/lager/inventur/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/lager/inventur/agent-contract` |
-| Readiness | `GET /api/v1/masks/lager/inventur/readiness` |
-| Rollout-Route | `/mask-rollout/lager__inventur/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/lager/bestaende`
-
-**MCP-Tools (Domäne):**
-
-- `lager.bestand.get` — scope `lager:read`, Risiko niedrig
-- `lager.inventur.status` — scope `lager:read`, Risiko niedrig
-- `lager.inventur.propose_opening` — scope `lager:write`, Risiko hoch
-- `lager.stock_movement.stornieren` — scope `lager:write`, Risiko mittel
-
-**Beispiel-Prompts:**
-
-- Zeige Inventur.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
 
@@ -20236,42 +20230,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `lager/materialfluss` — Materialfluss
-
-**Zweck:** Materialfluss im lager-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/lager/materialfluss/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/lager/materialfluss/agent-contract` |
-| Readiness | `GET /api/v1/masks/lager/materialfluss/readiness` |
-| Rollout-Route | `/mask-rollout/lager__materialfluss/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/lager/bestaende`
-
-**MCP-Tools (Domäne):**
-
-- `lager.bestand.get` — scope `lager:read`, Risiko niedrig
-- `lager.inventur.status` — scope `lager:read`, Risiko niedrig
-- `lager.inventur.propose_opening` — scope `lager:write`, Risiko hoch
-- `lager.stock_movement.stornieren` — scope `lager:write`, Risiko mittel
-
-**Beispiel-Prompts:**
-
-- Zeige Materialfluss.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
 ### `lager/materialfluss-visualisierung` — Materialfluss visualisierung
 
 **Zweck:** Materialfluss visualisierung im lager-Bereich finden und auswerten.
@@ -20298,42 +20256,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **Beispiel-Prompts:**
 
 - Zeige Materialfluss visualisierung.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
-### `lager/partiestamm` — Partiestamm
-
-**Zweck:** Partiestamm im lager-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/lager/partiestamm/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/lager/partiestamm/agent-contract` |
-| Readiness | `GET /api/v1/masks/lager/partiestamm/readiness` |
-| Rollout-Route | `/mask-rollout/lager__partiestamm/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/lager/bestaende`
-
-**MCP-Tools (Domäne):**
-
-- `lager.bestand.get` — scope `lager:read`, Risiko niedrig
-- `lager.inventur.status` — scope `lager:read`, Risiko niedrig
-- `lager.inventur.propose_opening` — scope `lager:write`, Risiko hoch
-- `lager.stock_movement.stornieren` — scope `lager:write`, Risiko mittel
-
-**Beispiel-Prompts:**
-
-- Zeige Partiestamm.
 - Filtere die Liste.
 
 **Actions:**
@@ -20416,9 +20338,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `lager/rueckverfolgbarkeit` — Rueckverfolgbarkeit
+### `lager/rueckverfolgbarkeit` — Rückverfolgbarkeit
 
-**Zweck:** Rueckverfolgbarkeit im lager-Bereich finden und auswerten.
+**Zweck:** Wiegescheine finden, deren Kette von der Annahme bis zur Abrechnung noch Luecken hat.
 
 | | |
 |---|---|
@@ -20430,7 +20352,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `list` → `/api/v1/lager/bestaende`
+- `list` → `/api/v1/supply-chain/traceability/tickets`
 
 **MCP-Tools (Domäne):**
 
@@ -20441,86 +20363,14 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Beispiel-Prompts:**
 
-- Zeige Rueckverfolgbarkeit.
-- Filtere die Liste.
+- Welche Wiegescheine haben keine Abrechnung?
+- Ist die Kette von WG-2026-00001 vollstaendig?
 
 **Actions:**
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
-### `lager/silo-mobil` — Silo mobil
-
-**Zweck:** Silo mobil im lager-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/lager/silo-mobil/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/lager/silo-mobil/agent-contract` |
-| Readiness | `GET /api/v1/masks/lager/silo-mobil/readiness` |
-| Rollout-Route | `/mask-rollout/lager__silo-mobil/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/lager/bestaende`
-
-**MCP-Tools (Domäne):**
-
-- `lager.bestand.get` — scope `lager:read`, Risiko niedrig
-- `lager.inventur.status` — scope `lager:read`, Risiko niedrig
-- `lager.inventur.propose_opening` — scope `lager:write`, Risiko hoch
-- `lager.stock_movement.stornieren` — scope `lager:write`, Risiko mittel
-
-**Beispiel-Prompts:**
-
-- Zeige Silo mobil.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
-### `lager/silo-uebersicht` — Silo uebersicht
-
-**Zweck:** Silo uebersicht mandantensicher als Cockpit bereitstellen.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/lager/silo-uebersicht/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/lager/silo-uebersicht/agent-contract` |
-| Readiness | `GET /api/v1/masks/lager/silo-uebersicht/readiness` |
-| Rollout-Route | `/mask-rollout/lager__silo-uebersicht/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `entity` → `/api/v1/lager/bestaende`
-
-**MCP-Tools (Domäne):**
-
-- `lager.bestand.get` — scope `lager:read`, Risiko niedrig
-- `lager.inventur.status` — scope `lager:read`, Risiko niedrig
-- `lager.inventur.propose_opening` — scope `lager:write`, Risiko hoch
-- `lager.stock_movement.stornieren` — scope `lager:write`, Risiko mittel
-
-**Beispiel-Prompts:**
-
-- Zeige Silo uebersicht.
-- Aktualisiere die Kennzahlen.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `refresh` | Aktualisieren | safe | nein | `—` |
 
 ---
 
@@ -20625,42 +20475,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **Beispiel-Prompts:**
 
 - Zeige Terminal.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
-### `lager/umlagerung` — Lagerbewegungen
-
-**Zweck:** Lagerbewegungen im lager-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/lager/umlagerung/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/lager/umlagerung/agent-contract` |
-| Readiness | `GET /api/v1/masks/lager/umlagerung/readiness` |
-| Rollout-Route | `/mask-rollout/lager__umlagerung/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/lager/bestaende`
-
-**MCP-Tools (Domäne):**
-
-- `lager.bestand.get` — scope `lager:read`, Risiko niedrig
-- `lager.inventur.status` — scope `lager:read`, Risiko niedrig
-- `lager.inventur.propose_opening` — scope `lager:write`, Risiko hoch
-- `lager.stock_movement.stornieren` — scope `lager:write`, Risiko mittel
-
-**Beispiel-Prompts:**
-
-- Zeige Lagerbewegungen.
 - Filtere die Liste.
 
 **Actions:**
@@ -26603,37 +26417,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **Beispiel-Prompts:**
 
 - Zeige Firma.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
-## Domäne: silo
-
-### `silo/kapazitaeten` — Silos Gesamt
-
-**Zweck:** Silos Gesamt im silo-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/silo/kapazitaeten/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/silo/kapazitaeten/agent-contract` |
-| Readiness | `GET /api/v1/masks/silo/kapazitaeten/readiness` |
-| Rollout-Route | `/mask-rollout/silo__kapazitaeten/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/silo/kapazitaeten`
-
-**Beispiel-Prompts:**
-
-- Zeige Silos Gesamt.
 - Filtere die Liste.
 
 **Actions:**

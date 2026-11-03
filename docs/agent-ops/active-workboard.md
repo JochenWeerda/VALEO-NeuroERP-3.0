@@ -20303,4 +20303,12 @@ Batch 1 FiBu/Finance (von 188 Platzhaltern): 11 tote Doppelungen entfernt, 17 Se
 umgehaengt, 8 Listen aus typisierten Wegen neu (app/core/screen_definitions_cluster_fibu.py), 404-Seite als
 Studio-Einstieg (errors/NotFound). Offen in fibu/finance: atlas, bilanz, guv, monatswerte, sachkonto,
 sicherheiten, buchungsimport, invoices-list, umsatz (kein passender typisierter Weg bzw. verschachtelter Bericht).
+Batch 2 Lager (03.11.2026): 6 Seiten umgehaengt (Lagerbewegungen, Inventur, Partiestamm, Silo-Uebersicht,
+Silo mobil, Silo-Kapazitaeten), 1 Doppelung entfernt, 3 Listen neu (Bestandsuebersicht - Seite hatte keine Maske -,
+Bestandsbewertung, Rueckverfolgbarkeit der Wiegescheine; screen_definitions_cluster_lager.py). Mengen nach
+app/core/agrar_units.py: Anzeige in dt (displayUnit), Summen rechnen Masse/Volumen um, Zaehleinheiten nie.
+Befund: /lager/ruestliste liest domain_inventory.ruestlisten, die weder Migration noch Modell anlegt -
+Kommissionierung bleibt Platzhalter bis zu einer eigenen Migration (mit RLS). Offen in lager: einlagerung,
+auslagerung, bestandskorrektur, lagerplaetze, gs1-scanner, terminal, epcis, inventory-reports,
+materialfluss-visualisierung.
 

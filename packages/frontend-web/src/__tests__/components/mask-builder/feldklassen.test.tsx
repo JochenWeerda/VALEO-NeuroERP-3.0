@@ -51,8 +51,8 @@ describe('rechnende Felder', () => {
 describe('Spezialfelder', () => {
   it('zeigt Mengen mit Einheit und Prozent', () => {
     expect(formatReadOnlyValue('quantity', 1250.5, 'EUR', 'kg')).toBe('1.250,5 kg')
-    render(<span>{formatCellValue(25000, 'quantity', 'EUR', 't')}|{formatCellValue(12.5, 'percentage')}</span>)
-    expect(screen.getByText('25.000 t|12,5 %')).toBeInTheDocument()
+    render(<span>{formatCellValue(250, 'quantity', 'EUR', 'dt')}|{formatCellValue(12.5, 'percentage')}</span>)
+    expect(screen.getByText('250 dt|12,5 %')).toBeInTheDocument()
   })
   it('prueft IBAN, E-Mail und Telefon', () => {
     expect(validIban('DE89 3704 0044 0532 0130 00')).toBe(true)
@@ -93,5 +93,31 @@ describe('Wertetypen wie im Backend (config/wertetypen.json)', async () => {
     expect(formatPeriod('2026-11')).toBe('11/2026')
     expect(formatReadOnlyValue('period', '2026-11')).toBe('11/2026')
     expect(formatReadOnlyValue('text', 'de 123-456-789', 'EUR', undefined, 'vatId')).toBe('DE123456789')
+  })
+})
+
+describe('Einheiten wie agrar_units (Landhandel: Masse in dt)', async () => {
+  const { convertQuantity, normalizeUnit, sumQuantities, unitKind } = await import('@/components/mask-builder/runtime/units')
+  it('rechnet Masse und Volumen exakt, Zaehleinheiten nie', () => {
+    expect(convertQuantity(25000, 'kg', 'dt')).toBe(250)
+    expect(convertQuantity(3, 'to', 'dt')).toBe(30)
+    expect(convertQuantity(2, 'Doppelzentner', 'kg')).toBe(200)
+    expect(convertQuantity(5, 'hl', 'l')).toBe(500)
+    expect(convertQuantity(4, 'Sack', 'kg')).toBeNull()
+    expect(convertQuantity(1, 'kg', 'l')).toBeNull()
+    expect(normalizeUnit('BigBag:500')).toBe('big_bag:500')
+    expect(unitKind('Big Bag')).toBe('andere')
+  })
+  it('summiert gemischte Masse in dt und verweigert Sack plus kg', () => {
+    expect(sumQuantities([{ wert: 2500, einheit: 'kg' }, { wert: 3, einheit: 't' }, { wert: 10, einheit: 'dt' }])).toEqual({ wert: 65, einheit: 'dt' })
+    expect(sumQuantities([{ wert: 2, einheit: 'kg' }, { wert: 3, einheit: 'kg' }])).toEqual({ wert: 5, einheit: 'kg' })
+    expect(sumQuantities([{ wert: 2, einheit: 'kg' }, { wert: 3, einheit: 'Sack' }])).toBeNull()
+    expect(sumQuantities([{ wert: 25000, einheit: 'kg' }], 'dt')).toEqual({ wert: 250, einheit: 'dt' })
+  })
+  it('laesst eine Anzeigeeinheit nur an Mengenspalten mit Masse/Volumen zu', () => {
+    const tabelle = (spalte: object) => ({ ...basis, mode: 'list' as const, tables: [{ key: 't', label: 'T', columns: [spalte] }] }) as ScreenDefinition
+    expect(validateScreenDefinition(tabelle({ key: 'm', label: 'Menge', renderKind: 'quantity', unit: 'kg', displayUnit: 'dt' }))).not.toContain('displayUnit is invalid')
+    expect(validateScreenDefinition(tabelle({ key: 'm', label: 'Menge', renderKind: 'quantity', displayUnit: 'Sack' }))).toContain('displayUnit is invalid')
+    expect(validateScreenDefinition(tabelle({ key: 'm', label: 'Menge', renderKind: 'number', displayUnit: 'dt' }))).toContain('displayUnit is invalid')
   })
 })

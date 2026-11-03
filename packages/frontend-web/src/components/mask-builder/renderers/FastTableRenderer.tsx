@@ -12,6 +12,7 @@ import { evaluateCondition, matchesValueList } from '../governance/condition-eng
 import { statusLabel } from './status-labels'
 import { formatBusinessDate, formatBusinessDateTime } from '@/lib/business-time'
 import { computeValue, sumColumn } from '../runtime/computed-fields'
+import { convertQuantity, sumQuantities } from '../runtime/units'
 
 interface FastTableRendererProps {
   table: RenderTablePlan
@@ -78,6 +79,24 @@ function cellValue(column: RenderTablePlan['columns'][number], row: Record<strin
 
 function columnUnit(column: RenderTablePlan['columns'][number], row: Record<string, unknown>): string | undefined {
   return column.unitField ? String(row[column.unitField] ?? '') || column.unit : column.unit
+}
+
+/** Menge in der Anzeigeeinheit; nicht umrechenbar (Zaehleinheit) bleibt sie in ihrer eigenen Einheit stehen. */
+function displayQuantity(column: RenderTablePlan['columns'][number], row: Record<string, unknown>, value: unknown): [unknown, string | undefined] {
+  const einheit = columnUnit(column, row)
+  if (column.renderKind !== 'quantity' || !column.displayUnit || value == null || value === '') return [value, einheit]
+  const umgerechnet = convertQuantity(Number(value), einheit, column.displayUnit)
+  return umgerechnet === null ? [value, einheit] : [umgerechnet, column.displayUnit]
+}
+
+/** Summenzeile einer Mengenspalte: gemischte Masse/Volumen umgerechnet (Masse in dt), sonst keine Summe. */
+function quantityTotal(column: RenderTablePlan['columns'][number], rows: Record<string, unknown>[]): ReactNode {
+  const summe = sumQuantities(rows.map((row) => {
+    const roh = cellValue(column, row, row[column.key])
+    const zahl = roh == null || roh === '' ? null : Number(roh)
+    return { wert: zahl !== null && Number.isFinite(zahl) ? zahl : null, einheit: columnUnit(column, row) }
+  }), column.displayUnit)
+  return summe ? formatCellValue(summe.wert, 'quantity', 'EUR', summe.einheit || undefined) : 'Einheiten nicht umrechenbar'
 }
 
 /** Einheit/Waehrung der Summenzeile nur, wenn alle Zeilen dieselbe tragen; sonst keine (gemischte Summe). */
@@ -202,9 +221,11 @@ export const FastTableRenderer = memo(function FastTableRenderer({
     numeric: isProfileNumeric(table, column),
     sortable: column.sortable,
     render: column.renderKind || column.computed
-      ? (value: unknown, row: Record<string, unknown>) => formatCellValue(
-        cellValue(column, row, value), column.renderKind ?? 'number',
-        column.currencyField ? String(row[column.currencyField] ?? '') : 'EUR', columnUnit(column, row))
+      ? (value: unknown, row: Record<string, unknown>) => {
+        const [wert, einheit] = displayQuantity(column, row, cellValue(column, row, value))
+        return formatCellValue(wert, column.renderKind ?? 'number',
+          column.currencyField ? String(row[column.currencyField] ?? '') : 'EUR', einheit)
+      }
       : undefined,
   }))
   const summen = priorityColumns.filter((column) => column.aggregate === 'sum')
@@ -485,7 +506,8 @@ export const FastTableRenderer = memo(function FastTableRenderer({
               <div key={column.key} className="flex gap-2">
                 <dt className="text-muted-foreground">Summe {column.label}</dt>
                 <dd className="font-medium tabular-nums">
-                  {column.currencyField && !einheitlich(visibleRows, column.currencyField) ? 'Währungen gemischt' : formatCellValue(sumColumn(visibleRows, (row) => cellValue(column, row, row[column.key])),
+                  {column.currencyField && !einheitlich(visibleRows, column.currencyField) ? 'Währungen gemischt'
+                    : column.renderKind === 'quantity' ? quantityTotal(column, visibleRows) : formatCellValue(sumColumn(visibleRows, (row) => cellValue(column, row, row[column.key])),
                     column.renderKind ?? 'number', column.currencyField ? einheitlich(visibleRows, column.currencyField) : 'EUR',
                     column.unitField ? einheitlich(visibleRows, column.unitField) : column.unit)}
                 </dd>

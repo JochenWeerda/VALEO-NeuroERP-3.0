@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-02",
+  "generatedAt": "2026-11-03",
   "schemaVersion": 1,
   "sources": [
     "app/core/flow_spine_registry.py",
@@ -18466,6 +18466,37 @@
       ]
     },
     {
+      "mask_id": "lager/bestandsuebersicht",
+      "title": "Bestandsübersicht",
+      "domain": "lager",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/lager__bestandsuebersicht/:entityId",
+      "agent_contract_url": "/api/v1/masks/lager/bestandsuebersicht/agent-contract",
+      "screen_definition_url": "/api/v1/masks/lager/bestandsuebersicht/screen-definition",
+      "readiness_url": "/api/v1/masks/lager/bestandsuebersicht/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "lager.bestand.get",
+        "lager.inventur.status",
+        "lager.inventur.propose_opening",
+        "lager.stock_movement.stornieren"
+      ]
+    },
+    {
       "mask_id": "lager/charge",
       "title": "Charge",
       "domain": "lager",
@@ -18579,37 +18610,6 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": null
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "lager.bestand.get",
-        "lager.inventur.status",
-        "lager.inventur.propose_opening",
-        "lager.stock_movement.stornieren"
-      ]
-    },
-    {
-      "mask_id": "lager/inventur",
-      "title": "Inventur",
-      "domain": "lager",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/lager__inventur/:entityId",
-      "agent_contract_url": "/api/v1/masks/lager/inventur/agent-contract",
-      "screen_definition_url": "/api/v1/masks/lager/inventur/screen-definition",
-      "readiness_url": "/api/v1/masks/lager/inventur/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
         }
       ],
       "sensitive_fields": [],
@@ -18807,37 +18807,6 @@
       ]
     },
     {
-      "mask_id": "lager/materialfluss",
-      "title": "Materialfluss",
-      "domain": "lager",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/lager__materialfluss/:entityId",
-      "agent_contract_url": "/api/v1/masks/lager/materialfluss/agent-contract",
-      "screen_definition_url": "/api/v1/masks/lager/materialfluss/screen-definition",
-      "readiness_url": "/api/v1/masks/lager/materialfluss/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "lager.bestand.get",
-        "lager.inventur.status",
-        "lager.inventur.propose_opening",
-        "lager.stock_movement.stornieren"
-      ]
-    },
-    {
       "mask_id": "lager/materialfluss-visualisierung",
       "title": "Materialfluss visualisierung",
       "domain": "lager",
@@ -18846,37 +18815,6 @@
       "agent_contract_url": "/api/v1/masks/lager/materialfluss-visualisierung/agent-contract",
       "screen_definition_url": "/api/v1/masks/lager/materialfluss-visualisierung/screen-definition",
       "readiness_url": "/api/v1/masks/lager/materialfluss-visualisierung/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "lager.bestand.get",
-        "lager.inventur.status",
-        "lager.inventur.propose_opening",
-        "lager.stock_movement.stornieren"
-      ]
-    },
-    {
-      "mask_id": "lager/partiestamm",
-      "title": "Partiestamm",
-      "domain": "lager",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/lager__partiestamm/:entityId",
-      "agent_contract_url": "/api/v1/masks/lager/partiestamm/agent-contract",
-      "screen_definition_url": "/api/v1/masks/lager/partiestamm/screen-definition",
-      "readiness_url": "/api/v1/masks/lager/partiestamm/readiness",
       "risk_summary": "low",
       "actions": [
         {
@@ -18963,7 +18901,7 @@
     },
     {
       "mask_id": "lager/rueckverfolgbarkeit",
-      "title": "Rueckverfolgbarkeit",
+      "title": "Rückverfolgbarkeit",
       "domain": "lager",
       "process_keys": [],
       "rollout_route": "/mask-rollout/lager__rueckverfolgbarkeit/:entityId",
@@ -18982,68 +18920,6 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "lager.bestand.get",
-        "lager.inventur.status",
-        "lager.inventur.propose_opening",
-        "lager.stock_movement.stornieren"
-      ]
-    },
-    {
-      "mask_id": "lager/silo-mobil",
-      "title": "Silo mobil",
-      "domain": "lager",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/lager__silo-mobil/:entityId",
-      "agent_contract_url": "/api/v1/masks/lager/silo-mobil/agent-contract",
-      "screen_definition_url": "/api/v1/masks/lager/silo-mobil/screen-definition",
-      "readiness_url": "/api/v1/masks/lager/silo-mobil/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "lager.bestand.get",
-        "lager.inventur.status",
-        "lager.inventur.propose_opening",
-        "lager.stock_movement.stornieren"
-      ]
-    },
-    {
-      "mask_id": "lager/silo-uebersicht",
-      "title": "Silo uebersicht",
-      "domain": "lager",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/lager__silo-uebersicht/:entityId",
-      "agent_contract_url": "/api/v1/masks/lager/silo-uebersicht/agent-contract",
-      "screen_definition_url": "/api/v1/masks/lager/silo-uebersicht/screen-definition",
-      "readiness_url": "/api/v1/masks/lager/silo-uebersicht/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "refresh",
-          "label": "Aktualisieren",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "lager.read",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
         }
       ],
       "sensitive_fields": [],
@@ -19127,37 +19003,6 @@
       "agent_contract_url": "/api/v1/masks/lager/terminal/agent-contract",
       "screen_definition_url": "/api/v1/masks/lager/terminal/screen-definition",
       "readiness_url": "/api/v1/masks/lager/terminal/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "lager.bestand.get",
-        "lager.inventur.status",
-        "lager.inventur.propose_opening",
-        "lager.stock_movement.stornieren"
-      ]
-    },
-    {
-      "mask_id": "lager/umlagerung",
-      "title": "Lagerbewegungen",
-      "domain": "lager",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/lager__umlagerung/:entityId",
-      "agent_contract_url": "/api/v1/masks/lager/umlagerung/agent-contract",
-      "screen_definition_url": "/api/v1/masks/lager/umlagerung/screen-definition",
-      "readiness_url": "/api/v1/masks/lager/umlagerung/readiness",
       "risk_summary": "low",
       "actions": [
         {
@@ -24748,32 +24593,6 @@
       "agent_contract_url": "/api/v1/masks/setup/firma/agent-contract",
       "screen_definition_url": "/api/v1/masks/setup/firma/screen-definition",
       "readiness_url": "/api/v1/masks/setup/firma/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "silo/kapazitaeten",
-      "title": "Silos Gesamt",
-      "domain": "silo",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/silo__kapazitaeten/:entityId",
-      "agent_contract_url": "/api/v1/masks/silo/kapazitaeten/agent-contract",
-      "screen_definition_url": "/api/v1/masks/silo/kapazitaeten/screen-definition",
-      "readiness_url": "/api/v1/masks/silo/kapazitaeten/readiness",
       "risk_summary": "low",
       "actions": [
         {

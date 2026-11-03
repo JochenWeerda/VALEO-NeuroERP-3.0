@@ -63,3 +63,32 @@ def test_aeltere_pruefer_urteilen_wie_die_wertetypen(format_name, pruefer):
     faelle = wertetypen.beispiele()[format_name]
     assert all(funktion(w).is_valid for w in faelle["gueltig"]), faelle["gueltig"]
     assert not any(funktion(w).is_valid for w in faelle["ungueltig"]), faelle["ungueltig"]
+
+
+@pytest.mark.parametrize("spalte,gueltig", [
+    ({"key": "m", "label": "Menge", "renderKind": "quantity", "unit": "kg", "displayUnit": "dt"}, True),
+    ({"key": "m", "label": "Menge", "renderKind": "quantity", "displayUnit": "Doppelzentner"}, True),
+    ({"key": "m", "label": "Menge", "renderKind": "quantity", "displayUnit": "Sack"}, False),
+    ({"key": "m", "label": "Menge", "renderKind": "number", "displayUnit": "dt"}, False),
+])
+def test_anzeigeeinheit_nur_fuer_umrechenbare_mengen(spalte, gueltig):
+    """Landhandel zeigt Masse in dt (agrar_units); Zaehleinheiten wie Sack sind nie global umrechenbar."""
+    from app.core.screen_governance import validate_screen_definition
+
+    definition = {"schemaVersion": 1, "id": "probe/menge", "title": "Menge", "mode": "list", "domain": "lager",
+                  "layout": {"floorplan": "worklist", "density": "compact", "tableProfile": "inventory"},
+                  "tables": [{"key": "t", "label": "T", "columns": [spalte]}]}
+    fehler = [f for f in validate_screen_definition(definition) if "displayUnit" in f]
+    assert (not fehler) is gueltig, fehler
+
+
+def test_frontend_kennt_dieselben_einheiten_wie_agrar_units():
+    import json
+
+    from app.core import agrar_units
+
+    kopie = json.loads((ROOT / "packages/frontend-web/src/components/mask-builder/runtime/wertetypen.generated.json")
+                       .read_text(encoding="utf-8"))["einheiten"]
+    assert kopie["masseInKg"] == {e: float(f) for e, f in agrar_units.MASSE_IN_KG.items()}
+    assert kopie["anzeigeMasse"] == "dt"
+    assert set(kopie["zaehleinheiten"]) == set(agrar_units.ZAEHLEINHEITEN)

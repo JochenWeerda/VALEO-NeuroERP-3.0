@@ -6298,7 +6298,7 @@
       "version": "1.0.0"
     },
     "lager/bestandsbewertung": {
-      "definition_hash": "3c3131a92d9b5785648b6cb5f917c27bb9b7fbc0eb7d65ecdf2de271874c6ea5",
+      "definition_hash": "839f861c20879d58374a2580f39f72fa0da9c5628ae731407b04e4c8c9491067",
       "gates_passed": [
         "A",
         "B",
@@ -6310,6 +6310,17 @@
     },
     "lager/bestandskorrektur": {
       "definition_hash": "8548ac8f497509e7c4e58996b3e7c3692a30f89fd2a9be1fc86d6555efcd5689",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
+    "lager/bestandsuebersicht": {
+      "definition_hash": "769f60cd2c5f0954bf3248e5d22c37da6508c9ebd197c603f3dbbef12c15d387",
       "gates_passed": [
         "A",
         "B",
@@ -6376,17 +6387,6 @@
     },
     "lager/inventory-dashboard": {
       "definition_hash": "ef4da92b5b09f742959e42a00379bddbb7cb10aae9eca7593f476275861d2f46",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "lager/inventur": {
-      "definition_hash": "10ef6e1d360ef82cb1f9327b2983fe2dc3bd5da47666387e639b8475dc37703f",
       "gates_passed": [
         "A",
         "B",
@@ -6473,29 +6473,8 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "lager/materialfluss": {
-      "definition_hash": "41ac3c2559c632539b8490fc66752eee2a54e817a27e1f78e9a93ba832f48b25",
-      "gates_passed": [
-        "A",
-        "B",
-        "C"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "lager/materialfluss-visualisierung": {
       "definition_hash": "dd37f89334e2cbaf4279cc05d595ea861612d7bb5c17e726d4047413df467c1f",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "lager/partiestamm": {
-      "definition_hash": "fa52bd0c14fb05bdf35faa6099c251d5f77be63e0f24c5e278c3a86079fa36e7",
       "gates_passed": [
         "A",
         "B",
@@ -6539,29 +6518,7 @@
       "version": "1.0.0"
     },
     "lager/rueckverfolgbarkeit": {
-      "definition_hash": "bd40b4e2479eb294af73ea78f34f9df09cce340cf2dfcbb8562924e320863912",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "lager/silo-mobil": {
-      "definition_hash": "d8291b432f73b287300bf0a4022f6503ca76374183947a5a8f310b3611633222",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "lager/silo-uebersicht": {
-      "definition_hash": "3cf123fe9363de4469d747d44612f770093df51ad4443ac8242ba671b849e1bb",
+      "definition_hash": "561421a8f261f4da30ac8c0ae6f8b89f87114d6f6bf2f1d5258e1b3d420190c8",
       "gates_passed": [
         "A",
         "B",
@@ -6595,17 +6552,6 @@
     },
     "lager/terminal": {
       "definition_hash": "7b0b3cea6f5d72aeb27bd69c26f8881a0b5648319e290d8436fc06431f356180",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "lager/umlagerung": {
-      "definition_hash": "72692665f1a843c8104ccf287636f28a40f84447d77691b2fe7271c1dfa38886",
       "gates_passed": [
         "A",
         "B",
@@ -7925,17 +7871,6 @@
     },
     "setup/firma": {
       "definition_hash": "8a8d3f7820da8b970ffc17541b14d4c6b67536a18252b80dc95e4327363373aa",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "silo/kapazitaeten": {
-      "definition_hash": "4edbdf9e24d9e3593d8be8a7ab039c52b81d947c9df688ca0f1fd9b6f427d080",
       "gates_passed": [
         "A",
         "B",

@@ -1436,25 +1436,6 @@ def build_lager_auslagerung_screen_definition() -> dict[str, Any]:
     )
 
 
-def build_lager_bestandsbewertung_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="lager/bestandsbewertung",
-        domain="lager",
-        title="Bestandsbewertung",
-        subtitle="lager",
-        endpoint="/api/v1/lager/bestaende",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Bestandsbewertung im lager-Bereich finden und auswerten.",
-        prompts=["Zeige Bestandsbewertung.", "Filtere die Liste."],
-        bundle="lager",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
 def build_lager_bestandskorrektur_screen_definition() -> dict[str, Any]:
     columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
     return build_stamm_list_screen(
@@ -1512,44 +1493,6 @@ def build_lager_gs1_scanner_screen_definition() -> dict[str, Any]:
     )
 
 
-def build_lager_inventur_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="lager/inventur",
-        domain="lager",
-        title="Inventur",
-        subtitle="lager",
-        endpoint="/api/v1/lager/bestaende",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Inventur im lager-Bereich finden und auswerten.",
-        prompts=["Zeige Inventur.", "Filtere die Liste."],
-        bundle="lager",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_lager_kommissionierung_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="lager/kommissionierung",
-        domain="lager",
-        title="Kommissionierung",
-        subtitle="lager",
-        endpoint="/api/v1/sales/delivery-notes",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Kommissionierung im lager-Bereich finden und auswerten.",
-        prompts=["Zeige Kommissionierung.", "Filtere die Liste."],
-        bundle="lager",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
 def build_lager_lagerplaetze_screen_definition() -> dict[str, Any]:
     columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
     return build_stamm_list_screen(
@@ -1586,25 +1529,6 @@ def build_lager_massebilanz_screen_definition() -> dict[str, Any]:
     )
 
 
-def build_lager_materialfluss_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="lager/materialfluss",
-        domain="lager",
-        title="Materialfluss",
-        subtitle="lager",
-        endpoint="/api/v1/lager/bestaende",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Materialfluss im lager-Bereich finden und auswerten.",
-        prompts=["Zeige Materialfluss.", "Filtere die Liste."],
-        bundle="lager",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
 def build_lager_materialfluss_visualisierung_screen_definition() -> dict[str, Any]:
     columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
     return build_stamm_list_screen(
@@ -1619,25 +1543,6 @@ def build_lager_materialfluss_visualisierung_screen_definition() -> dict[str, An
         row_actions=[],
         purpose="Materialfluss visualisierung im lager-Bereich finden und auswerten.",
         prompts=["Zeige Materialfluss visualisierung.", "Filtere die Liste."],
-        bundle="lager",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_lager_partiestamm_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="lager/partiestamm",
-        domain="lager",
-        title="Partiestamm",
-        subtitle="lager",
-        endpoint="/api/v1/lager/bestaende",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Partiestamm im lager-Bereich finden und auswerten.",
-        prompts=["Zeige Partiestamm.", "Filtere die Liste."],
         bundle="lager",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -1660,61 +1565,6 @@ def build_lager_permanente_inventur_screen_definition() -> dict[str, Any]:
     )
 
 
-def build_lager_rueckverfolgbarkeit_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="lager/rueckverfolgbarkeit",
-        domain="lager",
-        title="Rueckverfolgbarkeit",
-        subtitle="lager",
-        endpoint="/api/v1/lager/bestaende",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Rueckverfolgbarkeit im lager-Bereich finden und auswerten.",
-        prompts=["Zeige Rueckverfolgbarkeit.", "Filtere die Liste."],
-        bundle="lager",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_lager_silo_mobil_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="lager/silo-mobil",
-        domain="lager",
-        title="Silo mobil",
-        subtitle="lager",
-        endpoint="/api/v1/lager/bestaende",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Silo mobil im lager-Bereich finden und auswerten.",
-        prompts=["Zeige Silo mobil.", "Filtere die Liste."],
-        bundle="lager",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_lager_silo_uebersicht_screen_definition() -> dict[str, Any]:
-    cols = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_cockpit_overview_screen(
-        screen_id="lager/silo-uebersicht",
-        domain="lager",
-        title="Silo uebersicht",
-        subtitle="lager",
-        business_purpose="Silo uebersicht mandantensicher als Cockpit bereitstellen.",
-        example_prompts=["Zeige Silo uebersicht.", "Aktualisiere die Kennzahlen."],
-        test_id="lager-silo-uebersicht",
-        data_sources=[cockpit_entity_source("/api/v1/lager/bestaende")],
-        tables=[cockpit_summary_table(table_key="list", label="Silo uebersicht", columns=cols)],
-        actions=[cockpit_refresh_action(permission="lager.read")],
-        context_rail="combined",
-    )
-
-
 def build_lager_terminal_screen_definition() -> dict[str, Any]:
     columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
     return build_stamm_list_screen(
@@ -1729,25 +1579,6 @@ def build_lager_terminal_screen_definition() -> dict[str, Any]:
         row_actions=[],
         purpose="Terminal im lager-Bereich finden und auswerten.",
         prompts=["Zeige Terminal.", "Filtere die Liste."],
-        bundle="lager",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_lager_umlagerung_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="lager/umlagerung",
-        domain="lager",
-        title="Lagerbewegungen",
-        subtitle="lager",
-        endpoint="/api/v1/lager/bestaende",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Lagerbewegungen im lager-Bereich finden und auswerten.",
-        prompts=["Zeige Lagerbewegungen.", "Filtere die Liste."],
         bundle="lager",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -3046,25 +2877,6 @@ def build_setup_firma_screen_definition() -> dict[str, Any]:
     )
 
 
-def build_silo_kapazitaeten_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="silo/kapazitaeten",
-        domain="silo",
-        title="Silos Gesamt",
-        subtitle="silo",
-        endpoint="/api/v1/silo/kapazitaeten",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Silos Gesamt im silo-Bereich finden und auswerten.",
-        prompts=["Zeige Silos Gesamt.", "Filtere die Liste."],
-        bundle="silo",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
 def build_stammdaten_artikel_stoffstrom_screen_definition() -> dict[str, Any]:
     return build_stamm_object_page(
         screen_id="stammdaten/artikel-stoffstrom",
@@ -3876,6 +3688,26 @@ def build_zertifikate_neu_screen_definition() -> dict[str, Any]:
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
 
+
+def build_lager_kommissionierung_screen_definition() -> dict[str, Any]:
+    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
+    return build_stamm_list_screen(
+        screen_id="lager/kommissionierung",
+        domain="lager",
+        title="Kommissionierung",
+        subtitle="lager",
+        endpoint="/api/v1/sales/delivery-notes",
+        row_route=None,
+        columns=columns,
+        actions=[stamm_list_export_action()],
+        row_actions=[],
+        purpose="Kommissionierung im lager-Bereich finden und auswerten.",
+        prompts=["Zeige Kommissionierung.", "Filtere die Liste."],
+        bundle="lager",
+        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
+    )
+
+
 BATCH15_SCREEN_BUILDERS: dict[str, Any] = {
     "contracts-v2": build_contracts_v2_screen_definition,
     "einkauf/rechnung-abgleich": build_einkauf_rechnung_abgleich_screen_definition,
@@ -3960,23 +3792,15 @@ BATCH15_SCREEN_BUILDERS: dict[str, Any] = {
     "kontrakte/mengenzeitraeume": build_kontrakte_mengenzeitraeume_screen_definition,
     "kontrakte/positionen": build_kontrakte_positionen_screen_definition,
     "lager/auslagerung": build_lager_auslagerung_screen_definition,
-    "lager/bestandsbewertung": build_lager_bestandsbewertung_screen_definition,
     "lager/bestandskorrektur": build_lager_bestandskorrektur_screen_definition,
     "lager/einlagerung": build_lager_einlagerung_screen_definition,
     "lager/gs1-scanner": build_lager_gs1_scanner_screen_definition,
-    "lager/inventur": build_lager_inventur_screen_definition,
     "lager/kommissionierung": build_lager_kommissionierung_screen_definition,
     "lager/lagerplaetze": build_lager_lagerplaetze_screen_definition,
     "lager/massebilanz": build_lager_massebilanz_screen_definition,
-    "lager/materialfluss": build_lager_materialfluss_screen_definition,
     "lager/materialfluss-visualisierung": build_lager_materialfluss_visualisierung_screen_definition,
-    "lager/partiestamm": build_lager_partiestamm_screen_definition,
     "lager/permanente-inventur": build_lager_permanente_inventur_screen_definition,
-    "lager/rueckverfolgbarkeit": build_lager_rueckverfolgbarkeit_screen_definition,
-    "lager/silo-mobil": build_lager_silo_mobil_screen_definition,
-    "lager/silo-uebersicht": build_lager_silo_uebersicht_screen_definition,
     "lager/terminal": build_lager_terminal_screen_definition,
-    "lager/umlagerung": build_lager_umlagerung_screen_definition,
     "logistik/frachtbriefe": build_logistik_frachtbriefe_screen_definition,
     "mahnwesen/mahnlauf": build_mahnwesen_mahnlauf_screen_definition,
     "marketing/kampagnen": build_marketing_kampagnen_screen_definition,
@@ -4048,7 +3872,6 @@ BATCH15_SCREEN_BUILDERS: dict[str, Any] = {
     "service/anfragen": build_service_anfragen_screen_definition,
     "service/rueckmeldung": build_service_rueckmeldung_screen_definition,
     "setup/firma": build_setup_firma_screen_definition,
-    "silo/kapazitaeten": build_silo_kapazitaeten_screen_definition,
     "stammdaten/artikel-stoffstrom": build_stammdaten_artikel_stoffstrom_screen_definition,
     "stammdaten/artikelbestandteile": build_stammdaten_artikelbestandteile_screen_definition,
     "stammdaten/artikelverpackung": build_stammdaten_artikelverpackung_screen_definition,

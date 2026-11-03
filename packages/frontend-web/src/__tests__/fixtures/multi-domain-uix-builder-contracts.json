@@ -9810,22 +9810,22 @@
       }
     }
   },
-  "lager/partiestamm": {
+  "lager/partiestamm-liste": {
     "schemaVersion": 1,
-    "id": "lager/partiestamm",
+    "id": "lager/partiestamm-liste",
     "domain": "lager",
     "mode": "list",
     "title": "Partiestamm",
-    "subtitle": "lager",
+    "subtitle": "Partien und Chargenstamm",
     "adapter": {
       "type": "native",
-      "sourceId": "lager/partiestamm",
+      "sourceId": "lager/partiestamm-liste",
       "temporary": false
     },
     "dataSources": [
       {
         "key": "list",
-        "endpoint": "/api/v1/lager/bestaende",
+        "endpoint": "/api/v1/lager/partien",
         "pageSize": 100
       }
     ],
@@ -9853,46 +9853,46 @@
         "columns": [
           {
             "key": "id",
-            "label": "Id",
-            "sortable": true,
+            "label": "ID",
             "filterable": true,
-            "width": 160
+            "priority": "secondary"
           },
           {
             "key": "name",
-            "label": "Name",
+            "label": "Bezeichnung",
             "sortable": true,
             "filterable": true,
-            "width": 160
+            "priority": "primary"
           },
           {
             "key": "status",
             "label": "Status",
-            "sortable": true,
+            "renderKind": "status",
             "filterable": true,
-            "width": 160
+            "priority": "primary"
           },
           {
-            "key": "updated_at",
-            "label": "Updated At",
+            "key": "datum",
+            "label": "Datum",
+            "renderKind": "date",
             "sortable": true,
-            "filterable": true,
-            "width": 160
+            "priority": "secondary"
           }
         ],
-        "rowActions": []
+        "rowActions": [],
+        "rowRouteTemplate": "/lager/partiestamm/{id}"
       }
     ],
-    "noWorkflowReason": "Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
+    "noWorkflowReason": "Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
     "agentContract": {
-      "businessPurpose": "Partiestamm im lager-Bereich finden und auswerten.",
+      "businessPurpose": "Partiestamm: Eintraege finden und Details oeffnen.",
       "examplePrompts": [
-        "Zeige Partiestamm.",
-        "Filtere die Liste."
+        "Welche offenen Partiestamm?",
+        "Zeige aktuelle Partiestamm."
       ],
       "sensitiveFields": [],
       "testSelectors": {
-        "screenRoot": "[data-testid='screen-lager/partiestamm']"
+        "screenRoot": "[data-testid='screen-lager/partiestamm-liste']"
       },
       "dangerousActions": [],
       "synonyms": []

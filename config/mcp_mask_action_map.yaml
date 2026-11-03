@@ -1,13 +1,13 @@
 schema_version: '1.0'
 slice_id: MCP-MASK-WRITE-PARITY-20261008
-generated_on: '2026-11-02'
+generated_on: '2026-11-03'
 sources:
   screen_mask_actions: services/ki-usability/app/data/screen_mask_actions.json
   mcp_erp_tools: config/mcp_erp_tools.yaml
   action_stats:
-    actions: 583
-    screens_with_actions: 412
-    domains: 56
+    actions: 578
+    screens_with_actions: 407
+    domains: 55
 mcp_write_tools:
 - crm.contact.log
 - crm.activity.create
