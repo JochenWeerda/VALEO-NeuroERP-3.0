@@ -1,7 +1,7 @@
 """Studio-Listen Lager aus vorhandenen Lesewegen (Masken-Cluster Batch 2, 03.11.2026).
 
 Vorher batch15-Platzhalter auf ``/lager/bestaende`` mit id/name/status/updated_at bzw. eine Seite ohne Maske
-(``lager/bestandsuebersicht``). Inventarprofil, Export und Lesegrenzen kommen aus ``build_stamm_list_screen``.
+(``lager/bestandsuebersicht``). Die Kommissionierung liest die Ruestlisten (Tabelle seit ruestlisten_tabelle_20261103). Inventarprofil, Export und Lesegrenzen kommen aus ``build_stamm_list_screen``.
 """
 from __future__ import annotations
 
@@ -41,6 +41,18 @@ def build_lager_bestandsbewertung() -> dict[str, Any]:
                     prompts=["Wie hoch ist der Bestandswert im Lager Sued?", "Welche Artikel binden das meiste Kapital?"])
 
 
+def build_lager_kommissionierung() -> dict[str, Any]:
+    return _liste(
+        screen_id="lager/kommissionierung", title="Kommissionierung", subtitle="Rüstlisten je Auftrag mit Status und Priorität",
+        endpoint="/api/v1/lager/ruestliste", row_route=None,
+        columns=[text("ruestlisten_nr", "Rüstliste", "primary"), text("auftrag_nr", "Auftrag", "primary"), status(),
+                 text("prioritaet", "Priorität"), text("erstellt_fuer", "Erstellt für"),
+                 datum("erstellt_am", "Erstellt am"), datum("verarbeitet_am", "Verarbeitet am", "tertiary")],
+        purpose="Offene Ruestlisten nach Prioritaet abarbeiten und erledigte nachvollziehen.",
+        prompts=["Welche Ruestlisten sind noch offen?", "Welche Auftraege sind eilig?"],
+    )
+
+
 def build_lager_rueckverfolgbarkeit() -> dict[str, Any]:
     return _liste(
         screen_id="lager/rueckverfolgbarkeit", title="Rückverfolgbarkeit",
@@ -58,5 +70,6 @@ def build_lager_rueckverfolgbarkeit() -> dict[str, Any]:
 CLUSTER_LAGER_SCREEN_BUILDERS: dict[str, Any] = {
     "lager/bestandsuebersicht": build_lager_bestandsuebersicht,
     "lager/bestandsbewertung": build_lager_bestandsbewertung,
+    "lager/kommissionierung": build_lager_kommissionierung,
     "lager/rueckverfolgbarkeit": build_lager_rueckverfolgbarkeit,
 }

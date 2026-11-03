@@ -20055,7 +20055,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ### `lager/kommissionierung` — Kommissionierung
 
-**Zweck:** Kommissionierung im lager-Bereich finden und auswerten.
+**Zweck:** Offene Ruestlisten nach Prioritaet abarbeiten und erledigte nachvollziehen.
 
 | | |
 |---|---|
@@ -20067,7 +20067,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `list` → `/api/v1/sales/delivery-notes`
+- `list` → `/api/v1/lager/ruestliste`
 
 **MCP-Tools (Domäne):**
 
@@ -20078,8 +20078,8 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Beispiel-Prompts:**
 
-- Zeige Kommissionierung.
-- Filtere die Liste.
+- Welche Ruestlisten sind noch offen?
+- Welche Auftraege sind eilig?
 
 **Actions:**
 

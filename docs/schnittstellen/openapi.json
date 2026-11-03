@@ -145592,6 +145592,30 @@
         "title": "RuestlisteBearbeiten",
         "type": "object"
       },
+      "RuestlisteBemerkungOut": {
+        "properties": {
+          "bemerkung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bemerkung"
+          },
+          "ruestlisten_nr": {
+            "title": "Ruestlisten Nr",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ruestlisten_nr"
+        ],
+        "title": "RuestlisteBemerkungOut",
+        "type": "object"
+      },
       "RuestlisteCreate": {
         "properties": {
           "auftrag_nr": {
@@ -145611,6 +145635,11 @@
           },
           "prioritaet": {
             "default": "NORMAL",
+            "enum": [
+              "NORMAL",
+              "HOCH",
+              "EILIG"
+            ],
             "title": "Prioritaet",
             "type": "string"
           }
@@ -145719,6 +145748,24 @@
           "menge"
         ],
         "title": "RuestlistePosition",
+        "type": "object"
+      },
+      "RuestlisteStatusOut": {
+        "properties": {
+          "ruestlisten_nr": {
+            "title": "Ruestlisten Nr",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ruestlisten_nr",
+          "status"
+        ],
+        "title": "RuestlisteStatusOut",
         "type": "object"
       },
       "Rule": {
@@ -335840,20 +335887,26 @@
         "operationId": "list_ruestlisten_api_v1_lager_ruestliste_get",
         "parameters": [
           {
-            "description": "Filter by status (OFFEN/IN_BEARBEITUNG/VERARBEITET/ABGEBROCHEN)",
+            "description": "Status-Filter",
             "in": "query",
             "name": "status",
             "required": false,
             "schema": {
               "anyOf": [
                 {
+                  "enum": [
+                    "OFFEN",
+                    "IN_BEARBEITUNG",
+                    "VERARBEITET",
+                    "ABGEBROCHEN"
+                  ],
                   "type": "string"
                 },
                 {
                   "type": "null"
                 }
               ],
-              "description": "Filter by status (OFFEN/IN_BEARBEITUNG/VERARBEITET/ABGEBROCHEN)",
+              "description": "Status-Filter",
               "title": "Status"
             }
           }
@@ -336017,7 +336070,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RuestlisteOut"
+                  "$ref": "#/components/schemas/RuestlisteStatusOut"
                 }
               }
             },
@@ -336068,7 +336121,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RuestlisteOut"
+                  "$ref": "#/components/schemas/RuestlisteStatusOut"
                 }
               }
             },
@@ -336119,7 +336172,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RuestlisteOut"
+                  "$ref": "#/components/schemas/RuestlisteStatusOut"
                 }
               }
             },
@@ -336180,7 +336233,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RuestlisteOut"
+                  "$ref": "#/components/schemas/RuestlisteBemerkungOut"
                 }
               }
             },

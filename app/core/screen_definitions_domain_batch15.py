@@ -3689,25 +3689,6 @@ def build_zertifikate_neu_screen_definition() -> dict[str, Any]:
     )
 
 
-def build_lager_kommissionierung_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="lager/kommissionierung",
-        domain="lager",
-        title="Kommissionierung",
-        subtitle="lager",
-        endpoint="/api/v1/sales/delivery-notes",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Kommissionierung im lager-Bereich finden und auswerten.",
-        prompts=["Zeige Kommissionierung.", "Filtere die Liste."],
-        bundle="lager",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
 BATCH15_SCREEN_BUILDERS: dict[str, Any] = {
     "contracts-v2": build_contracts_v2_screen_definition,
     "einkauf/rechnung-abgleich": build_einkauf_rechnung_abgleich_screen_definition,
@@ -3795,7 +3776,6 @@ BATCH15_SCREEN_BUILDERS: dict[str, Any] = {
     "lager/bestandskorrektur": build_lager_bestandskorrektur_screen_definition,
     "lager/einlagerung": build_lager_einlagerung_screen_definition,
     "lager/gs1-scanner": build_lager_gs1_scanner_screen_definition,
-    "lager/kommissionierung": build_lager_kommissionierung_screen_definition,
     "lager/lagerplaetze": build_lager_lagerplaetze_screen_definition,
     "lager/massebilanz": build_lager_massebilanz_screen_definition,
     "lager/materialfluss-visualisierung": build_lager_materialfluss_visualisierung_screen_definition,
