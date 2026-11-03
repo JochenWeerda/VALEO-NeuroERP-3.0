@@ -67,7 +67,7 @@ PRIMITIVE_BY_FIELD_TYPE = {
     "boolean": "Checkbox",
     "file": "FileField",
     "table": "DataTable",
-    "password": "TextField",
+    "password": "TextField",  # NOSONAR - Feldtypname (verdeckte Eingabe), kein Kennwort
 }
 
 REJECTED_KEYS = ("screenType", "listReport", "form")
