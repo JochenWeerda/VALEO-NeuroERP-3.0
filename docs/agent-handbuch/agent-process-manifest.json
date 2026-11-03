@@ -21275,7 +21275,7 @@
     },
     {
       "mask_id": "portal/naehrstoffbilanzen",
-      "title": "Naehrstoffbilanzen",
+      "title": "Nährstoffzufuhr",
       "domain": "portal",
       "process_keys": [],
       "rollout_route": "/mask-rollout/portal__naehrstoffbilanzen/:entityId",
@@ -21285,15 +21285,15 @@
       "risk_summary": "low",
       "actions": [
         {
-          "key": "refresh",
-          "label": "Aktualisieren",
+          "key": "export",
+          "label": "CSV-Export",
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
-          "permission": "portal.read",
+          "permission": null,
           "commandEndpoint": null,
           "method": null,
-          "stubReason": null
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
         }
       ],
       "sensitive_fields": [],
@@ -21405,7 +21405,7 @@
     },
     {
       "mask_id": "portal/vertraege",
-      "title": "Vertraege",
+      "title": "Verträge",
       "domain": "portal",
       "process_keys": [],
       "rollout_route": "/mask-rollout/portal__vertraege/:entityId",

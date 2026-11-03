@@ -1280,99 +1280,14 @@ def build_personal_schulung_neu_screen_definition() -> dict[str, Any]:
     )
 
 
-def build_portal_anfragen_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="portal/anfragen",
-        domain="portal",
-        title="Anfragen",
-        subtitle="portal",
-        endpoint="/api/v1/portal/anfragen",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Anfragen im portal-Bereich finden und auswerten.",
-        prompts=["Zeige Anfragen.", "Filtere die Liste."],
-        bundle="portal",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
 
 
-def build_portal_bestellungen_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="portal/bestellungen",
-        domain="portal",
-        title="Bestellungen",
-        subtitle="portal",
-        endpoint="/api/v1/portal/anfragen",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Bestellungen im portal-Bereich finden und auswerten.",
-        prompts=["Zeige Bestellungen.", "Filtere die Liste."],
-        bundle="portal",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
 
 
-def build_portal_dokumente_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="portal/dokumente",
-        domain="portal",
-        title="Dokumente",
-        subtitle="portal",
-        endpoint="/api/v1/portal/anfragen",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Dokumente im portal-Bereich finden und auswerten.",
-        prompts=["Zeige Dokumente.", "Filtere die Liste."],
-        bundle="portal",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
 
 
-def build_portal_empfehlungen_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="portal/empfehlungen",
-        domain="portal",
-        title="Empfehlungen",
-        subtitle="portal",
-        endpoint="/api/v1/portal/empfehlungen",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Empfehlungen im portal-Bereich finden und auswerten.",
-        prompts=["Zeige Empfehlungen.", "Filtere die Liste."],
-        bundle="portal",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
 
 
-def build_portal_feldbuch_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="portal/feldbuch",
-        domain="portal",
-        title="Feldbuch",
-        subtitle="portal",
-        endpoint="/api/v1/portal/anfragen",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Feldbuch im portal-Bereich finden und auswerten.",
-        prompts=["Zeige Feldbuch.", "Filtere die Liste."],
-        bundle="portal",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
 
 
 def build_portal_lohndienste_neu_screen_definition() -> dict[str, Any]:
@@ -1394,21 +1309,6 @@ def build_portal_lohndienste_neu_screen_definition() -> dict[str, Any]:
     )
 
 
-def build_portal_naehrstoffbilanzen_screen_definition() -> dict[str, Any]:
-    cols = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_cockpit_overview_screen(
-        screen_id="portal/naehrstoffbilanzen",
-        domain="portal",
-        title="Naehrstoffbilanzen",
-        subtitle="portal",
-        business_purpose="Naehrstoffbilanzen mandantensicher als Cockpit bereitstellen.",
-        example_prompts=["Zeige Naehrstoffbilanzen.", "Aktualisiere die Kennzahlen."],
-        test_id="portal-naehrstoffbilanzen",
-        data_sources=[cockpit_entity_source("/api/v1/portal/anfragen")],
-        tables=[cockpit_summary_table(table_key="list", label="Naehrstoffbilanzen", columns=cols)],
-        actions=[cockpit_refresh_action(permission="portal.read")],
-        context_rail="combined",
-    )
 
 
 def build_portal_onboarding_screen_definition() -> dict[str, Any]:
@@ -1453,61 +1353,10 @@ def build_portal_rationsoptimierung_screen_definition() -> dict[str, Any]:
     return build_feed_workbench("portal/rationsoptimierung")
 
 
-def build_portal_rechnungen_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="portal/rechnungen",
-        domain="portal",
-        title="Rechnungen",
-        subtitle="portal",
-        endpoint="/api/v1/portal/anfragen",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Rechnungen im portal-Bereich finden und auswerten.",
-        prompts=["Zeige Rechnungen.", "Filtere die Liste."],
-        bundle="portal",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
 
 
-def build_portal_shop_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="portal/shop",
-        domain="portal",
-        title="Shop",
-        subtitle="portal",
-        endpoint="/api/v1/portal/anfragen",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Shop im portal-Bereich finden und auswerten.",
-        prompts=["Zeige Shop.", "Filtere die Liste."],
-        bundle="portal",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
 
 
-def build_portal_vertraege_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="portal/vertraege",
-        domain="portal",
-        title="Vertraege",
-        subtitle="portal",
-        endpoint="/api/v1/portal/anfragen",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Vertraege im portal-Bereich finden und auswerten.",
-        prompts=["Zeige Vertraege.", "Filtere die Liste."],
-        bundle="portal",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
 
 
 def build_portal_whatsapp_simulator_screen_definition() -> dict[str, Any]:
@@ -3008,19 +2857,10 @@ BATCH15_SCREEN_BUILDERS: dict[str, Any] = {
     "personal/mitarbeiter/neu": build_personal_mitarbeiter_neu_screen_definition,
     "personal/organigramm": build_personal_organigramm_screen_definition,
     "personal/schulung-neu": build_personal_schulung_neu_screen_definition,
-    "portal/anfragen": build_portal_anfragen_screen_definition,
-    "portal/bestellungen": build_portal_bestellungen_screen_definition,
-    "portal/dokumente": build_portal_dokumente_screen_definition,
-    "portal/empfehlungen": build_portal_empfehlungen_screen_definition,
-    "portal/feldbuch": build_portal_feldbuch_screen_definition,
     "portal/lohndienste/neu": build_portal_lohndienste_neu_screen_definition,
-    "portal/naehrstoffbilanzen": build_portal_naehrstoffbilanzen_screen_definition,
     "portal/onboarding": build_portal_onboarding_screen_definition,
     "portal/preisspiegel": build_portal_preisspiegel_screen_definition,
     "portal/rationsoptimierung": build_portal_rationsoptimierung_screen_definition,
-    "portal/rechnungen": build_portal_rechnungen_screen_definition,
-    "portal/shop": build_portal_shop_screen_definition,
-    "portal/vertraege": build_portal_vertraege_screen_definition,
     "portal/whatsapp-simulator": build_portal_whatsapp_simulator_screen_definition,
     "portal/zertifikate": build_portal_zertifikate_screen_definition,
     "pos/customer-display": build_pos_customer_display_screen_definition,

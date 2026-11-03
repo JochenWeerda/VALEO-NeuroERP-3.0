@@ -20333,3 +20333,17 @@ haben eine Route bekommen (route-aliases.json; Masken ohne Route 204 -> 65). 65 
 per Paritaetspruefung gegen ihre Studio-Maske abgebaut (Nutzerentscheidung: Altlast + Paritaetspruefung);
 nicht loeschen ohne Pruefung (Audit doc-drift-page-orphan-audit-20261031).
 
+Batch 6 Listen auf ihrem eigenen Leseweg (03.11.2026, Commit 3c8eaf841): sechs batch15-Platzhalter, die schon
+den richtigen Weg lasen, zeigen die Felder ihres Response-Models statt id/name/status/updated_at - Etikettendruck,
+Genossenschaftsmitglieder (ohne IBAN, datensparsam), Kontraktklassen, Frachtbriefe, Schadensmeldungen (mit
+Meldefrist), Agentenlaeufe (app/core/screen_definitions_cluster_eigene_wege.py). Gates A/B/C/E gruen.
+Batch 7 Portal (03.11.2026): neun Portal-Platzhalter lasen fast alle /portal/anfragen (Bestellungen, Rechnungen,
+Feldbuch, Shop zeigten Anfragen). Jede Liste liest jetzt ihren Weg aus portal_kundenwege.py
+(app/core/screen_definitions_cluster_portal.py); die Wege antworten typisiert statt CompatBridgeOut
+(app/api/v1/schemas/portal_listen_schemas.py), damit der Feldvertrag sie prueft. Naehrstoffliste ohne die Spalte
+"bewertung" (170 kg N je Lieferung statt je ha und Betrieb - falsche DueV-Aussage), Titel Naehrstoffzufuhr.
+Befunde fuer eigene Auftraege (nicht in Batch 7): /foerderung/antraege, /marketing/kampagnen und
+/qualitaet/labor-auftraege legen bei jedem GET per _seed(db) Demodaten an und filtern keinen Mandanten;
+/preise/historie errechnet einen Preisverlauf (aktuell*(1-i*0,01)), /preise/konditionen fuellt "Standardkunde"/
+Basispreis 100 auf; /strecke/speditionen/frachttarife, /vertrag/rahmenvertraege und /tankstelle/bestand ohne
+Mandantenbezug. Darauf keine Studio-Listen, bis die Wege echt sind.

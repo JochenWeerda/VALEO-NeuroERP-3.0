@@ -1,10 +1,7 @@
-import { UniversalNativeCockpitPage } from '@/components/mask-builder/UniversalNativeCockpitPage'
+import { NativeListPage } from '@/components/mask-builder/NativeListPage'
 
 export default function Page(): JSX.Element {
   return (
-    <UniversalNativeCockpitPage
-      screenId="portal/naehrstoffbilanzen"
-      testId="portal-naehrstoffbilanzen"
-    />
+    <NativeListPage screenId="portal/naehrstoffbilanzen" testId="screen-portal/naehrstoffbilanzen" />
   )
 }

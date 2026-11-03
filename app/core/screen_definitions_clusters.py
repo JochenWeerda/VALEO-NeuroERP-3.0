@@ -11,10 +11,12 @@ from app.core.screen_definitions_cluster_eigene_wege import CLUSTER_EIGENE_WEGE_
 from app.core.screen_definitions_cluster_fibu import CLUSTER_FIBU_SCREEN_BUILDERS
 from app.core.screen_definitions_cluster_futter import CLUSTER_FUTTER_SCREEN_BUILDERS
 from app.core.screen_definitions_cluster_lager import CLUSTER_LAGER_SCREEN_BUILDERS
+from app.core.screen_definitions_cluster_portal import CLUSTER_PORTAL_SCREEN_BUILDERS
 
 CLUSTER_SCREEN_BUILDERS: dict[str, Any] = {
     **CLUSTER_FIBU_SCREEN_BUILDERS,
     **CLUSTER_LAGER_SCREEN_BUILDERS,
     **CLUSTER_FUTTER_SCREEN_BUILDERS,
     **CLUSTER_EIGENE_WEGE_SCREEN_BUILDERS,
+    **CLUSTER_PORTAL_SCREEN_BUILDERS,
 }

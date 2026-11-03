@@ -633,13 +633,13 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `portal/feldbuch` | Feldbuch | portal | niedrig | — | `GET /api/v1/masks/portal/feldbuch/agent-contract` |
 | `portal/feldbuch-auswertungen` | Feldbuch-Auswertungen | agrar | niedrig | — | `GET /api/v1/masks/portal/feldbuch-auswertungen/agent-contract` |
 | `portal/lohndienste/neu` | Lohndienste | portal | niedrig | — | `GET /api/v1/masks/portal/lohndienste/neu/agent-contract` |
-| `portal/naehrstoffbilanzen` | Naehrstoffbilanzen | portal | niedrig | — | `GET /api/v1/masks/portal/naehrstoffbilanzen/agent-contract` |
+| `portal/naehrstoffbilanzen` | Nährstoffzufuhr | portal | niedrig | — | `GET /api/v1/masks/portal/naehrstoffbilanzen/agent-contract` |
 | `portal/onboarding` | Onboarding | portal | niedrig | — | `GET /api/v1/masks/portal/onboarding/agent-contract` |
 | `portal/preisspiegel` | Preisspiegel | portal | niedrig | — | `GET /api/v1/masks/portal/preisspiegel/agent-contract` |
 | `portal/rationsoptimierung` | Fütterungsberatung | futtermittel | niedrig | — | `GET /api/v1/masks/portal/rationsoptimierung/agent-contract` |
 | `portal/rechnungen` | Rechnungen | portal | niedrig | — | `GET /api/v1/masks/portal/rechnungen/agent-contract` |
 | `portal/shop` | Shop | portal | niedrig | — | `GET /api/v1/masks/portal/shop/agent-contract` |
-| `portal/vertraege` | Vertraege | portal | niedrig | — | `GET /api/v1/masks/portal/vertraege/agent-contract` |
+| `portal/vertraege` | Verträge | portal | niedrig | — | `GET /api/v1/masks/portal/vertraege/agent-contract` |
 | `portal/whatsapp-simulator` | Whatsapp simulator | portal | niedrig | — | `GET /api/v1/masks/portal/whatsapp-simulator/agent-contract` |
 | `portal/zertifikate` | Zertifikate | portal | niedrig | — | `GET /api/v1/masks/portal/zertifikate/agent-contract` |
 | `pos/customer-display` | Customer display | pos | niedrig | — | `GET /api/v1/masks/pos/customer-display/agent-contract` |
@@ -22583,7 +22583,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ### `portal/anfragen` — Anfragen
 
-**Zweck:** Anfragen im portal-Bereich finden und auswerten.
+**Zweck:** Eigene Anfragen und ihren Bearbeitungsstand sehen.
 
 | | |
 |---|---|
@@ -22599,8 +22599,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Beispiel-Prompts:**
 
-- Zeige Anfragen.
-- Filtere die Liste.
+- Welche meiner Anfragen sind noch offen?
 
 **Actions:**
 
@@ -22612,7 +22611,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ### `portal/bestellungen` — Bestellungen
 
-**Zweck:** Bestellungen im portal-Bereich finden und auswerten.
+**Zweck:** Eigene Bestellungen, ihren Stand und die Summe sehen.
 
 | | |
 |---|---|
@@ -22624,12 +22623,12 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `list` → `/api/v1/portal/anfragen`
+- `list` → `/api/v1/portal/bestellungen`
 
 **Beispiel-Prompts:**
 
-- Zeige Bestellungen.
-- Filtere die Liste.
+- Welche Bestellungen sind noch nicht geliefert?
+- Wie viel habe ich dieses Jahr bestellt?
 
 **Actions:**
 
@@ -22641,7 +22640,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ### `portal/dokumente` — Dokumente
 
-**Zweck:** Dokumente im portal-Bereich finden und auswerten.
+**Zweck:** Unterlagen finden, die dem eigenen Kundenkonto zugeordnet sind.
 
 | | |
 |---|---|
@@ -22653,12 +22652,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `list` → `/api/v1/portal/anfragen`
+- `list` → `/api/v1/portal/dokumente`
 
 **Beispiel-Prompts:**
 
-- Zeige Dokumente.
-- Filtere die Liste.
+- Welche Dokumente sind neu?
 
 **Actions:**
 
@@ -22670,7 +22668,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ### `portal/empfehlungen` — Empfehlungen
 
-**Zweck:** Empfehlungen im portal-Bereich finden und auswerten.
+**Zweck:** Vorschlaege sehen; eine Empfehlung ist ein Vorschlag, kein Auftrag.
 
 | | |
 |---|---|
@@ -22686,8 +22684,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Beispiel-Prompts:**
 
-- Zeige Empfehlungen.
-- Filtere die Liste.
+- Welche neuen Empfehlungen habe ich?
 
 **Actions:**
 
@@ -22699,7 +22696,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ### `portal/feldbuch` — Feldbuch
 
-**Zweck:** Feldbuch im portal-Bereich finden und auswerten.
+**Zweck:** Schlaege, Kulturen und die bewirtschaftete Flaeche sehen.
 
 | | |
 |---|---|
@@ -22711,12 +22708,12 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `list` → `/api/v1/portal/anfragen`
+- `list` → `/api/v1/portal/feldbuch`
 
 **Beispiel-Prompts:**
 
-- Zeige Feldbuch.
-- Filtere die Liste.
+- Wie viel Hektar Weizen habe ich?
+- Welche Schlaege haben keine Kultur?
 
 **Actions:**
 
@@ -22755,9 +22752,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `portal/naehrstoffbilanzen` — Naehrstoffbilanzen
+### `portal/naehrstoffbilanzen` — Nährstoffzufuhr
 
-**Zweck:** Naehrstoffbilanzen mandantensicher als Cockpit bereitstellen.
+**Zweck:** Sehen, wie viel Stickstoff, Phosphat und Kali mit den Lieferungen auf den Betrieb kamen.
 
 | | |
 |---|---|
@@ -22769,18 +22766,17 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/portal/anfragen`
+- `list` → `/api/v1/portal/naehrstoffbilanzen`
 
 **Beispiel-Prompts:**
 
-- Zeige Naehrstoffbilanzen.
-- Aktualisiere die Kennzahlen.
+- Wie viel Stickstoff wurde dieses Jahr geliefert?
 
 **Actions:**
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `refresh` | Aktualisieren | safe | nein | `—` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
 
@@ -22844,7 +22840,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ### `portal/rechnungen` — Rechnungen
 
-**Zweck:** Rechnungen im portal-Bereich finden und auswerten.
+**Zweck:** Eigene Rechnungen und offene Betraege sehen.
 
 | | |
 |---|---|
@@ -22856,12 +22852,12 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `list` → `/api/v1/portal/anfragen`
+- `list` → `/api/v1/portal/rechnungen`
 
 **Beispiel-Prompts:**
 
-- Zeige Rechnungen.
-- Filtere die Liste.
+- Welche Rechnungen sind offen?
+- Wie hoch ist die Summe der offenen Rechnungen?
 
 **Actions:**
 
@@ -22873,7 +22869,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ### `portal/shop` — Shop
 
-**Zweck:** Shop im portal-Bereich finden und auswerten.
+**Zweck:** Artikel finden und pruefen, ob sie verfuegbar sind.
 
 | | |
 |---|---|
@@ -22885,12 +22881,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `list` → `/api/v1/portal/anfragen`
+- `list` → `/api/v1/portal/shop`
 
 **Beispiel-Prompts:**
 
-- Zeige Shop.
-- Filtere die Liste.
+- Welche Duenger sind verfuegbar?
 
 **Actions:**
 
@@ -22900,9 +22895,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `portal/vertraege` — Vertraege
+### `portal/vertraege` — Verträge
 
-**Zweck:** Vertraege im portal-Bereich finden und auswerten.
+**Zweck:** Eigene Vertraege und ihre Laufzeit sehen.
 
 | | |
 |---|---|
@@ -22914,12 +22909,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `list` → `/api/v1/portal/anfragen`
+- `list` → `/api/v1/portal/vertraege`
 
 **Beispiel-Prompts:**
 
-- Zeige Vertraege.
-- Filtere die Liste.
+- Welche Vertraege laufen dieses Jahr aus?
 
 **Actions:**
 

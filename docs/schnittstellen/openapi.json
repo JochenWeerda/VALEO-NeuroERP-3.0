@@ -125026,6 +125026,222 @@
         "title": "PolicyUpsertResponse",
         "type": "object"
       },
+      "PortalAnfrageZeile": {
+        "properties": {
+          "betreff": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Betreff"
+          },
+          "datum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datum"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "nummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nummer"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "title": "PortalAnfrageZeile",
+        "type": "object"
+      },
+      "PortalBestellungZeile": {
+        "properties": {
+          "artikel": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artikel"
+          },
+          "betrag": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Betrag"
+          },
+          "datum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datum"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "menge": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Menge"
+          },
+          "nummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nummer"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "title": "PortalBestellungZeile",
+        "type": "object"
+      },
+      "PortalDokumentZeile": {
+        "properties": {
+          "datum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datum"
+          },
+          "groesse": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Groesse"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "kategorie": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kategorie"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "typ": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Typ"
+          }
+        },
+        "title": "PortalDokumentZeile",
+        "type": "object"
+      },
       "PortalEmpfehlungAckOut": {
         "properties": {
           "ok": {
@@ -125379,6 +125595,78 @@
         "description": "Typed response schema for PortalFeldbuchOut endpoints (extra fields forwarded).",
         "properties": {},
         "title": "PortalFeldbuchOut",
+        "type": "object"
+      },
+      "PortalFeldbuchZeile": {
+        "properties": {
+          "flaeche": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Flaeche"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "kultur": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kultur"
+          },
+          "letzteMassnahme": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Letztemassnahme"
+          },
+          "naechsteMassnahme": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Naechstemassnahme"
+          },
+          "schlag": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Schlag"
+          }
+        },
+        "title": "PortalFeldbuchZeile",
         "type": "object"
       },
       "PortalInteressentListOut": {
@@ -126903,6 +127191,89 @@
         "title": "PortalMassnahmeUpdate",
         "type": "object"
       },
+      "PortalNaehrstoffZeile": {
+        "properties": {
+          "bewertung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bewertung"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "k_saldo": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "K Saldo"
+          },
+          "kultur": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kultur"
+          },
+          "n_saldo": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "N Saldo"
+          },
+          "p_saldo": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "P Saldo"
+          },
+          "schlag": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Schlag"
+          }
+        },
+        "title": "PortalNaehrstoffZeile",
+        "type": "object"
+      },
       "PortalOut": {
         "additionalProperties": true,
         "properties": {},
@@ -127112,6 +127483,67 @@
           "total"
         ],
         "title": "PortalProductList",
+        "type": "object"
+      },
+      "PortalRechnungZeile": {
+        "properties": {
+          "betrag": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Betrag"
+          },
+          "datum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datum"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "nummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nummer"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "title": "PortalRechnungZeile",
         "type": "object"
       },
       "PortalSchlagCreate": {
@@ -127579,6 +128011,211 @@
         "description": "Response schema for portal shop endpoints.",
         "properties": {},
         "title": "PortalShopOut",
+        "type": "object"
+      },
+      "PortalShopZeile": {
+        "properties": {
+          "einheit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Einheit"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "kategorie": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kategorie"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "preis": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preis"
+          },
+          "verfuegbar": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verfuegbar"
+          }
+        },
+        "title": "PortalShopZeile",
+        "type": "object"
+      },
+      "PortalVertragZeile": {
+        "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "laufzeitBis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Laufzeitbis"
+          },
+          "nummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nummer"
+          },
+          "partner": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Partner"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "typ": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Typ"
+          }
+        },
+        "title": "PortalVertragZeile",
+        "type": "object"
+      },
+      "PortalZertifikatZeile": {
+        "properties": {
+          "art": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Art"
+          },
+          "gueltigBis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gueltigbis"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "nummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nummer"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "title": "PortalZertifikatZeile",
         "type": "object"
       },
       "PosCartLine": {
@@ -361072,7 +361709,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/CompatBridgeOut"
+                    "$ref": "#/components/schemas/PortalAnfrageZeile"
                   },
                   "title": "Response Portal Anfragen Api V1 Portal Anfragen Get",
                   "type": "array"
@@ -361130,7 +361767,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/CompatBridgeOut"
+                    "$ref": "#/components/schemas/PortalBestellungZeile"
                   },
                   "title": "Response Portal Bestellungen Api V1 Portal Bestellungen Get",
                   "type": "array"
@@ -361303,7 +361940,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/CompatBridgeOut"
+                    "$ref": "#/components/schemas/PortalDokumentZeile"
                   },
                   "title": "Response Portal Dokumente Api V1 Portal Dokumente Get",
                   "type": "array"
@@ -361743,7 +362380,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/CompatBridgeOut"
+                    "$ref": "#/components/schemas/PortalFeldbuchZeile"
                   },
                   "title": "Response Portal Feldbuch Api V1 Portal Feldbuch Get",
                   "type": "array"
@@ -365069,7 +365706,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/CompatBridgeOut"
+                    "$ref": "#/components/schemas/PortalNaehrstoffZeile"
                   },
                   "title": "Response Portal Naehrstoffbilanzen Api V1 Portal Naehrstoffbilanzen Get",
                   "type": "array"
@@ -365889,7 +366526,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/CompatBridgeOut"
+                    "$ref": "#/components/schemas/PortalRechnungZeile"
                   },
                   "title": "Response Portal Rechnungen Api V1 Portal Rechnungen Get",
                   "type": "array"
@@ -365947,7 +366584,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/CompatBridgeOut"
+                    "$ref": "#/components/schemas/PortalShopZeile"
                   },
                   "title": "Response Portal Shop Api V1 Portal Shop Get",
                   "type": "array"
@@ -366005,7 +366642,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/CompatBridgeOut"
+                    "$ref": "#/components/schemas/PortalVertragZeile"
                   },
                   "title": "Response Portal Vertraege Api V1 Portal Vertraege Get",
                   "type": "array"
@@ -366063,7 +366700,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/CompatBridgeOut"
+                    "$ref": "#/components/schemas/PortalZertifikatZeile"
                   },
                   "title": "Response Portal Zertifikate Api V1 Portal Zertifikate Get",
                   "type": "array"

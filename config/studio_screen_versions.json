@@ -6694,7 +6694,7 @@
       "version": "1.0.0"
     },
     "portal/anfragen": {
-      "definition_hash": "d12faf668136a438351f9c02e727bff796c4b40a3765a0828f3c08c4bddb0a0c",
+      "definition_hash": "5c07d502c3f38debeb6f3536792709f0dfb7f85d455ea7404989cf784b846317",
       "gates_passed": [
         "A",
         "B",
@@ -6705,7 +6705,7 @@
       "version": "1.0.0"
     },
     "portal/bestellungen": {
-      "definition_hash": "4666c7933ce2411855bc725ca3046d7fc3acf00cf1493adca4cefa7856696329",
+      "definition_hash": "6a527a74822f20de01a426aaaf3e2b141c295227278612988251a55b053eeb54",
       "gates_passed": [
         "A",
         "B",
@@ -6716,7 +6716,7 @@
       "version": "1.0.0"
     },
     "portal/dokumente": {
-      "definition_hash": "6841bbc1396b75b00c72f8caa4aaa4e6628a1f94e32a0b20e8fd1c655e0269c5",
+      "definition_hash": "ff2419636b04b542d9f7ce9be6ffb5e5137e0da4da6f95b387f3a4370d68d312",
       "gates_passed": [
         "A",
         "B",
@@ -6727,7 +6727,7 @@
       "version": "1.0.0"
     },
     "portal/empfehlungen": {
-      "definition_hash": "40a0bbe278179f1ba7d55eaea031460c18452ed349b4847f44eb45bad02ac974",
+      "definition_hash": "e29ce24479db19de4709382b6bdac43fe530ac5ee04deef5a863170b2516963a",
       "gates_passed": [
         "A",
         "B",
@@ -6738,7 +6738,7 @@
       "version": "1.0.0"
     },
     "portal/feldbuch": {
-      "definition_hash": "398d799f4bc25a8b1249e01b05c8fc20dbd94430d70f3f2239b718bdd543de5b",
+      "definition_hash": "75208d1268876a51d5c82dd70d39068821f43155a7492a6c9848087315c4dd2a",
       "gates_passed": [
         "A",
         "B",
@@ -6771,7 +6771,7 @@
       "version": "1.0.0"
     },
     "portal/naehrstoffbilanzen": {
-      "definition_hash": "0064fba62742e3a28bbd90ef09ccf7d77d61bb1c2eafc4cdc4c291ce6237a4a3",
+      "definition_hash": "3466c1b6995d1ca9ae5d594abcaa48b00572f6ff4b9b54a097738c61e2be397a",
       "gates_passed": [
         "A",
         "B",
@@ -6815,7 +6815,7 @@
       "version": "1.0.0"
     },
     "portal/rechnungen": {
-      "definition_hash": "83e135cf2257c5eea57ef235a868861a2e175833abe48aec1d2f4b6605ce7768",
+      "definition_hash": "f3812a06e3bdd5f005eea88dd354feb16029c881b209efe3086f5dbcf9c3150d",
       "gates_passed": [
         "A",
         "B",
@@ -6826,7 +6826,7 @@
       "version": "1.0.0"
     },
     "portal/shop": {
-      "definition_hash": "34256a4de50436b1b793915cb485024ca9163a59f41a8f8adfb42b09aaa7e83e",
+      "definition_hash": "b67436f0d50acd913bc369deacc971e6540801fc41cffb8154b21fe03ebd6325",
       "gates_passed": [
         "A",
         "B",
@@ -6837,7 +6837,7 @@
       "version": "1.0.0"
     },
     "portal/vertraege": {
-      "definition_hash": "acf0a14c5be9a1ccc26261382821cf5df409380f3a918d0677c7454db5693302",
+      "definition_hash": "3a9cafd32c178892f05945c42e8a0f808654316f48fa7c0db08a08b6560148f9",
       "gates_passed": [
         "A",
         "B",
