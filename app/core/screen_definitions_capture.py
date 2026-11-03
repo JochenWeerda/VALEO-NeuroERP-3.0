@@ -529,6 +529,41 @@ def build_errors_not_found_screen_definition() -> dict[str, Any]:
     )
 
 
+def build_strecke_menu_screen_definition() -> dict[str, Any]:
+    return _capture_cockpit(
+        screen_id="strecke/menu",
+        domain="logistics",
+        title="Streckengeschäft",
+        subtitle="Einstieg",
+        purpose="Vom Streckengeschaeft in Disposition, Geschaefte, NaWaRo, Qualitaet und Belegdruck springen.",
+        reason="Der Einstieg hat keinen eigenen Vorgang. Jede Kachel oeffnet die bestehende Maske.",
+        tiles=[
+            _nav_tile("disposition", "Strecken-Disposition", "/strecke/disposition"),
+            _nav_tile("geschaeft", "Streckengeschäft", "/strecke/streckengeschaeft"),
+            _nav_tile("vorlaeufig", "Vorläufige Streckengeschäfte", "/strecke/vorlaeufige-streckengeschaefte"),
+            _nav_tile("nawaro", "NaWaRo", "/strecke/nawaro-uebersicht"),
+            _nav_tile("qualitaet", "Qualitätsabweichung", "/strecke/qualitaets-abweichung"),
+            _nav_tile("drucken", "Strecken-Dokumente drucken", "/strecke/dokumente-drucken"),
+        ],
+    )
+
+
+def build_strecke_nawaro_uebersicht_screen_definition() -> dict[str, Any]:
+    return _capture_cockpit(
+        screen_id="strecke/nawaro-uebersicht",
+        domain="agrar",
+        title="NaWaRo",
+        subtitle="Nachwachsende Rohstoffe: Lieferungen, Vertraege, Ernteerklaerung",
+        purpose="Von NaWaRo in Lieferungen, Vertragspruefung und Ernteerklaerung springen.",
+        reason="Der Einstieg hat keinen eigenen Vorgang. Jede Kachel oeffnet die bestehende Maske.",
+        tiles=[
+            _nav_tile("lieferungen", "NaWaRo-Lieferungen", "/strecke/nawaro-lieferungen"),
+            _nav_tile("vertraege", "NaWaRo-Verträge prüfen", "/strecke/nawaro-vertraege-pruefen"),
+            _nav_tile("ernteerklaerung", "Ernteerklärung drucken", "/strecke/nawaro-ernterklaerung-drucken"),
+        ],
+    )
+
+
 def build_strecke_dokumente_drucken_screen_definition() -> dict[str, Any]:
     return _capture_cockpit(
         screen_id="strecke/dokumente-drucken",

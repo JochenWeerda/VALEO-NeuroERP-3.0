@@ -5527,17 +5527,6 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "fuhrpark/ausgehende-belege-dokumente": {
-      "definition_hash": "4a467143c212b86d6463ed85dce145ee0398b87c54fd9b7cf32ffa7d2b31b452",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "fuhrpark/ausgehende-dokumente": {
       "definition_hash": "6d793e5f74bfd4e1c33c9984de896841222196d70871eb7f2cdfd9ec647d0259",
       "gates_passed": [
@@ -5582,17 +5571,6 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "fuhrpark/fahrzeug/neu": {
-      "definition_hash": "3fd9636c46bef6fbffe63f1485e3d55e18972e567843203b5183fd0cacac9a03",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "fuhrpark/fahrzeuge": {
       "definition_hash": "8921aa0985231d79d7f9f14fc3ac4728d45c9969228de3d6bba8ac2864eee8dc",
       "gates_passed": [
@@ -5606,72 +5584,6 @@
     },
     "fuhrpark/fahrzeuge-liste": {
       "definition_hash": "9078f76e8e54657ac6445d29513d3749d48d514bd72b6a8d78ebb53364523213",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "fuhrpark/fuhrpark-auswertung-kosten-pro-fahrzeug": {
-      "definition_hash": "0c628d094a56a377767eec65e42b6ada7a6fb64227989c4ce3dfdbb310c57f50",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "fuhrpark/fuhrpark-auswertungen-menu": {
-      "definition_hash": "1f1271f04fdd684fdf3f648c30713249a0dd8c4376fbefea5763bdca345e026f",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "fuhrpark/fuhrpark-klassisch": {
-      "definition_hash": "25a83239e993fbd76e80e914d910526b11071f1e5d22eb4773c25da7eee71324",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "fuhrpark/fuhrpark-menue": {
-      "definition_hash": "e824d87859a5fe229e7eaee3d22ba1de4bd159f01cf980a43ec09bf4af609654",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "fuhrpark/fuhrpark-rechnungen": {
-      "definition_hash": "d7e2afec98b45af6c0f10e51dcaef7568c7d07451a8fe2d67e685cb3138aa529",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "fuhrpark/fuhrpark-stammdaten": {
-      "definition_hash": "acc85119e7b0b424be6f563322e9985889e6c16fe4b663abd922dfb712c6ab2d",
       "gates_passed": [
         "A",
         "B",
@@ -6715,30 +6627,8 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "personal/stundenzettel": {
-      "definition_hash": "5c832304db126b822aa83859f678b3fbab2f6ff62b482d066f634fd5056b5097",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "personal/stundenzettel-liste": {
       "definition_hash": "e7d1e41f6aadfafe142d127e4900b9361b24cca7c378b73cbb0246f5531b3d4b",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "personal/zeiterfassung": {
-      "definition_hash": "a47a243abea7ac7f62df744ec6ead75c39cbc6f6d60e60eb6252640662218491",
       "gates_passed": [
         "A",
         "B",
@@ -7364,28 +7254,6 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "reports/lagerbestand": {
-      "definition_hash": "741f3baa5999afd4eb6d7a7c827b2011ff58a29ff83179e02488af66714e15ec",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "reports/umsatz": {
-      "definition_hash": "bccf76015d1d83e551d2f326744398bde7ce6a9be7e1d3e531b52ac4d5398200",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "rezepte/editor": {
       "definition_hash": "3715f61b3c7a7d35b3db339aa1951f6cc9067c4e76bfd7b5ba0181bd10e62b3f",
       "gates_passed": [
@@ -7683,17 +7551,6 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "service/anfragen": {
-      "definition_hash": "5c1faa0186ecc5da12100d894390eac9c0b9cc5f0ddb22e5189c6b725d7363c8",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "service/anfragen-liste": {
       "definition_hash": "8772836dcf28ad1db38784e8bc739dae82542c8b9d04d1de7c8305befa2bffa2",
       "gates_passed": [
@@ -7882,7 +7739,7 @@
       "version": "1.0.0"
     },
     "strecke/menu": {
-      "definition_hash": "5f8d8edf23a2fb5774b05f6008602790cb26c3b87db8d512b90ddc761db0870e",
+      "definition_hash": "2b89b65b752a8e50decb266cadbc9ec2142f3c167f19f080525f3b64c1adcf99",
       "gates_passed": [
         "A",
         "B",
@@ -7915,7 +7772,7 @@
       "version": "1.0.0"
     },
     "strecke/nawaro-uebersicht": {
-      "definition_hash": "efcba6733709d11d0fed3ad1f61f309d58c5f0c563f70f62c8ecfb95a6fdd0e5",
+      "definition_hash": "2eec378e356377d30f50e4c0a800a831a58d137dd41dcfcf19ee37f5d93723c7",
       "gates_passed": [
         "A",
         "B",
@@ -7982,17 +7839,6 @@
     },
     "strecke/vorlaeufig": {
       "definition_hash": "acb3976b656e8ab79d5fe33104f8e7ba9fe7b99dc9c1d7995e035d6b98f13de3",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "strecke/vorlaeufige-streckengeschaefte": {
-      "definition_hash": "ed4fc9c1c72484e7a6fd073a983866ec36924362271a7685d2ab2863e2c424f3",
       "gates_passed": [
         "A",
         "B",

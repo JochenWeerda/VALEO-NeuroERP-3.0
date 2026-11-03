@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 563,
-    "screens_with_actions": 391,
-    "domains": 54
+    "actions": 548,
+    "screens_with_actions": 376,
+    "domains": 53
   },
   "actions": [
     {
@@ -6440,26 +6440,6 @@
       }
     },
     {
-      "id": "mask:fuhrpark/ausgehende-belege-dokumente:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (fuhrpark/ausgehende-belege-dokumente)",
-      "category": "mask-action",
-      "domain": "fuhrpark",
-      "mask": "fuhrpark/ausgehende-belege-dokumente",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "fuhrpark/ausgehende-belege-dokumente",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
       "id": "mask:fuhrpark/ausgehende-dokumente:neu",
       "label": "Neu",
       "description": "Neu (fuhrpark/ausgehende-dokumente)",
@@ -6622,26 +6602,6 @@
       }
     },
     {
-      "id": "mask:fuhrpark/fahrzeug/neu:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (fuhrpark/fahrzeug/neu)",
-      "category": "mask-action",
-      "domain": "fuhrpark",
-      "mask": "fuhrpark/fahrzeug/neu",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "fuhrpark/fahrzeug/neu",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
       "id": "mask:fuhrpark/fahrzeuge-liste:export",
       "label": "CSV-Export",
       "description": "CSV-Export (fuhrpark/fahrzeuge-liste)",
@@ -6678,126 +6638,6 @@
         "commandEndpoint": null,
         "navigationRoute": null,
         "command": "vehicle.create",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:fuhrpark/fuhrpark-auswertung-kosten-pro-fahrzeug:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (fuhrpark/fuhrpark-auswertung-kosten-pro-fahrzeug)",
-      "category": "mask-action",
-      "domain": "fuhrpark",
-      "mask": "fuhrpark/fuhrpark-auswertung-kosten-pro-fahrzeug",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "fuhrpark/fuhrpark-auswertung-kosten-pro-fahrzeug",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:fuhrpark/fuhrpark-auswertungen-menu:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (fuhrpark/fuhrpark-auswertungen-menu)",
-      "category": "mask-action",
-      "domain": "fuhrpark",
-      "mask": "fuhrpark/fuhrpark-auswertungen-menu",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "fuhrpark/fuhrpark-auswertungen-menu",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:fuhrpark/fuhrpark-klassisch:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (fuhrpark/fuhrpark-klassisch)",
-      "category": "mask-action",
-      "domain": "fuhrpark",
-      "mask": "fuhrpark/fuhrpark-klassisch",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "fuhrpark/fuhrpark-klassisch",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:fuhrpark/fuhrpark-menue:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (fuhrpark/fuhrpark-menue)",
-      "category": "mask-action",
-      "domain": "fuhrpark",
-      "mask": "fuhrpark/fuhrpark-menue",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "fuhrpark/fuhrpark-menue",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:fuhrpark/fuhrpark-rechnungen:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (fuhrpark/fuhrpark-rechnungen)",
-      "category": "mask-action",
-      "domain": "fuhrpark",
-      "mask": "fuhrpark/fuhrpark-rechnungen",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "fuhrpark/fuhrpark-rechnungen",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:fuhrpark/fuhrpark-stammdaten:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (fuhrpark/fuhrpark-stammdaten)",
-      "category": "mask-action",
-      "domain": "fuhrpark",
-      "mask": "fuhrpark/fuhrpark-stammdaten",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "fuhrpark/fuhrpark-stammdaten",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
         "method": null
       }
     },
@@ -8772,26 +8612,6 @@
       }
     },
     {
-      "id": "mask:personal/stundenzettel:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (personal/stundenzettel)",
-      "category": "mask-action",
-      "domain": "personal",
-      "mask": "personal/stundenzettel",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "personal/stundenzettel",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
       "id": "mask:personal/zeiterfassung-liste:export",
       "label": "CSV-Export",
       "description": "CSV-Export (personal/zeiterfassung-liste)",
@@ -8804,26 +8624,6 @@
       "required_data": [],
       "source": {
         "screenId": "personal/zeiterfassung-liste",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:personal/zeiterfassung:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (personal/zeiterfassung)",
-      "category": "mask-action",
-      "domain": "personal",
-      "mask": "personal/zeiterfassung",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "personal/zeiterfassung",
         "actionKey": "export",
         "commandEndpoint": null,
         "navigationRoute": null,
@@ -9636,46 +9436,6 @@
       }
     },
     {
-      "id": "mask:reports/lagerbestand:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (reports/lagerbestand)",
-      "category": "mask-action",
-      "domain": "reports",
-      "mask": "reports/lagerbestand",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "reports/lagerbestand",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:reports/umsatz:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (reports/umsatz)",
-      "category": "mask-action",
-      "domain": "reports",
-      "mask": "reports/umsatz",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "reports/umsatz",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
       "id": "mask:rezepte/editor:export",
       "label": "CSV-Export",
       "description": "CSV-Export (rezepte/editor)",
@@ -10372,26 +10132,6 @@
       }
     },
     {
-      "id": "mask:service/anfragen:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (service/anfragen)",
-      "category": "mask-action",
-      "domain": "service",
-      "mask": "service/anfragen",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "service/anfragen",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
       "id": "mask:service/rueckmeldung:export",
       "label": "CSV-Export",
       "description": "CSV-Export (service/rueckmeldung)",
@@ -10476,26 +10216,6 @@
       }
     },
     {
-      "id": "mask:strecke/menu:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (strecke/menu)",
-      "category": "mask-action",
-      "domain": "strecke",
-      "mask": "strecke/menu",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "strecke/menu",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
       "id": "mask:strecke/speditionen-fracht-preise:export",
       "label": "CSV-Export",
       "description": "CSV-Export (strecke/speditionen-fracht-preise)",
@@ -10508,26 +10228,6 @@
       "required_data": [],
       "source": {
         "screenId": "strecke/speditionen-fracht-preise",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:strecke/vorlaeufige-streckengeschaefte:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (strecke/vorlaeufige-streckengeschaefte)",
-      "category": "mask-action",
-      "domain": "strecke",
-      "mask": "strecke/vorlaeufige-streckengeschaefte",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "strecke/vorlaeufige-streckengeschaefte",
         "actionKey": "export",
         "commandEndpoint": null,
         "navigationRoute": null,

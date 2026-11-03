@@ -20322,4 +20322,9 @@ Ausgangsrechnungen, Wareneingang -> Einkaufs-Lieferscheinerfassung, RFQ-Gebote -
 Eingangsrechnungs-Erfassung -> InvoiceCapturePage), 3 Doppelungen entfernt. Belegerfassungen (Angebot,
 Lieferschein, Kalkulation) warten auf den Rollout der Belegfamilie (beleg/* nur im Sichtpruefungsmandanten).
 Vorbestehend rot auf main (reihenfolgeabhaengig): einkauf/angebote-liste-uix.test.tsx, lieferanten-liste-uix.test.tsx.
+Batch 5 Fuhrpark/Personal/Service/Strecke/Reports (03.11.2026): 14 Seiten umgehaengt (u.a. Fuhrpark-Menue ->
+fuhrpark/uebersicht, Fahrzeug-Stamm Neuanlage+Detail, Stundenzettel, Zeiterfassung, Service-Anfragen, vorlaeufige
+Streckengeschaefte, Reports Umsatz/Lagerbestand), 2 Einstiegs-Cockpits (Strecken-Menue, NaWaRo-Uebersicht),
+16 Platzhalter entfernt. Offen: organigramm, hrm-operations-gates, service abschluss/rueckmeldung,
+speditionen-fracht-preise, reports/ReportsDashboardCharts, nawaro-uebersicht-drucken; nawaro/* Seiten ohne Maske.
 

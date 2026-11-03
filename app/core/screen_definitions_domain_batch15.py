@@ -663,158 +663,6 @@ def build_foerderung_antrag_screen_definition() -> dict[str, Any]:
     )
 
 
-def build_fuhrpark_ausgehende_belege_dokumente_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="fuhrpark/ausgehende-belege-dokumente",
-        domain="fuhrpark",
-        title="Ausgehende belege dokumente",
-        subtitle="fuhrpark",
-        endpoint="/api/v1/fuhrpark/ausgehende-dokumente",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Ausgehende belege dokumente im fuhrpark-Bereich finden und auswerten.",
-        prompts=["Zeige Ausgehende belege dokumente.", "Filtere die Liste."],
-        bundle="fuhrpark",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_fuhrpark_fahrzeug_neu_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="fuhrpark/fahrzeug/neu",
-        domain="fuhrpark",
-        title="Fahrzeug stamm",
-        subtitle="fuhrpark",
-        endpoint="/api/v1/fuhrpark/ausgehende-dokumente",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Fahrzeug stamm im fuhrpark-Bereich finden und auswerten.",
-        prompts=["Zeige Fahrzeug stamm.", "Filtere die Liste."],
-        bundle="fuhrpark",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_fuhrpark_fuhrpark_auswertung_kosten_pro_fahrzeug_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="fuhrpark/fuhrpark-auswertung-kosten-pro-fahrzeug",
-        domain="fuhrpark",
-        title="Fuhrpark auswertung kosten pro fahrzeug",
-        subtitle="fuhrpark",
-        endpoint="/api/v1/fuhrpark/ausgehende-dokumente",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Fuhrpark auswertung kosten pro fahrzeug im fuhrpark-Bereich finden und auswerten.",
-        prompts=["Zeige Fuhrpark auswertung kosten pro fahrzeug.", "Filtere die Liste."],
-        bundle="fuhrpark",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_fuhrpark_fuhrpark_auswertungen_menu_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="fuhrpark/fuhrpark-auswertungen-menu",
-        domain="fuhrpark",
-        title="Fuhrpark auswertungen menu",
-        subtitle="fuhrpark",
-        endpoint="/api/v1/fuhrpark/ausgehende-dokumente",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Fuhrpark auswertungen menu im fuhrpark-Bereich finden und auswerten.",
-        prompts=["Zeige Fuhrpark auswertungen menu.", "Filtere die Liste."],
-        bundle="fuhrpark",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_fuhrpark_fuhrpark_klassisch_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="fuhrpark/fuhrpark-klassisch",
-        domain="fuhrpark",
-        title="Fuhrpark klassisch",
-        subtitle="fuhrpark",
-        endpoint="/api/v1/fuhrpark/ausgehende-dokumente",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Fuhrpark klassisch im fuhrpark-Bereich finden und auswerten.",
-        prompts=["Zeige Fuhrpark klassisch.", "Filtere die Liste."],
-        bundle="fuhrpark",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_fuhrpark_fuhrpark_menue_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="fuhrpark/fuhrpark-menue",
-        domain="fuhrpark",
-        title="Fuhrpark menue",
-        subtitle="fuhrpark",
-        endpoint="/api/v1/fuhrpark/ausgehende-dokumente",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Fuhrpark menue im fuhrpark-Bereich finden und auswerten.",
-        prompts=["Zeige Fuhrpark menue.", "Filtere die Liste."],
-        bundle="fuhrpark",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_fuhrpark_fuhrpark_rechnungen_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="fuhrpark/fuhrpark-rechnungen",
-        domain="fuhrpark",
-        title="Fuhrpark rechnungen",
-        subtitle="fuhrpark",
-        endpoint="/api/v1/fuhrpark/ausgehende-dokumente",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Fuhrpark rechnungen im fuhrpark-Bereich finden und auswerten.",
-        prompts=["Zeige Fuhrpark rechnungen.", "Filtere die Liste."],
-        bundle="fuhrpark",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_fuhrpark_fuhrpark_stammdaten_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="fuhrpark/fuhrpark-stammdaten",
-        domain="fuhrpark",
-        title="Fuhrpark stammdaten",
-        subtitle="fuhrpark",
-        endpoint="/api/v1/fuhrpark/ausgehende-dokumente",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Fuhrpark stammdaten im fuhrpark-Bereich finden und auswerten.",
-        prompts=["Zeige Fuhrpark stammdaten.", "Filtere die Liste."],
-        bundle="fuhrpark",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
 def build_futtermittel_beratung_screen_definition() -> dict[str, Any]:
     columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
     return build_stamm_list_screen(
@@ -1505,44 +1353,6 @@ def build_personal_schulung_neu_screen_definition() -> dict[str, Any]:
         business_purpose="Schulung neu als Stammblatt pflegen.",
         example_prompts=["Oeffne Schulung neu.", "Bearbeite Stammdaten."],
         test_id="personal-schulung-neu",
-    )
-
-
-def build_personal_stundenzettel_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="personal/stundenzettel",
-        domain="personal",
-        title="Stundenzettel",
-        subtitle="personal",
-        endpoint="/api/v1/personal/absences",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Stundenzettel im personal-Bereich finden und auswerten.",
-        prompts=["Zeige Stundenzettel.", "Filtere die Liste."],
-        bundle="personal",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_personal_zeiterfassung_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="personal/zeiterfassung",
-        domain="personal",
-        title="Zeiterfassung",
-        subtitle="personal",
-        endpoint="/api/v1/personal/absences",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Zeiterfassung im personal-Bereich finden und auswerten.",
-        prompts=["Zeige Zeiterfassung.", "Filtere die Liste."],
-        bundle="personal",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
 
 
@@ -2244,44 +2054,6 @@ def build_reports_deckungsbeitrag_screen_definition() -> dict[str, Any]:
     )
 
 
-def build_reports_lagerbestand_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="reports/lagerbestand",
-        domain="reports",
-        title="Lagerbestand",
-        subtitle="reports",
-        endpoint="/api/v1/reports/customer-analytics",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Lagerbestand im reports-Bereich finden und auswerten.",
-        prompts=["Zeige Lagerbestand.", "Filtere die Liste."],
-        bundle="reports",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_reports_umsatz_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="reports/umsatz",
-        domain="reports",
-        title="Umsatz",
-        subtitle="reports",
-        endpoint="/api/v1/reports/customer-analytics",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Umsatz im reports-Bereich finden und auswerten.",
-        prompts=["Zeige Umsatz.", "Filtere die Liste."],
-        bundle="reports",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
 def build_rezepte_editor_screen_definition() -> dict[str, Any]:
     columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
     return build_stamm_list_screen(
@@ -2516,25 +2288,6 @@ def build_service_anfrage_neu_screen_definition() -> dict[str, Any]:
     )
 
 
-def build_service_anfragen_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="service/anfragen",
-        domain="service",
-        title="Anfragen",
-        subtitle="service",
-        endpoint="/api/v1/service/anfragen",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Anfragen im service-Bereich finden und auswerten.",
-        prompts=["Zeige Anfragen.", "Filtere die Liste."],
-        bundle="service",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
 def build_service_rueckmeldung_screen_definition() -> dict[str, Any]:
     columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
     return build_stamm_list_screen(
@@ -2709,42 +2462,6 @@ def build_start_dashboard_screen_definition() -> dict[str, Any]:
     )
 
 
-def build_strecke_menu_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="strecke/menu",
-        domain="strecke",
-        title="Menu",
-        subtitle="strecke",
-        endpoint="/api/v1/strecke/speditionen/frachttarife",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Menu im strecke-Bereich finden und auswerten.",
-        prompts=["Zeige Menu.", "Filtere die Liste."],
-        bundle="strecke",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_strecke_nawaro_uebersicht_screen_definition() -> dict[str, Any]:
-    cols = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_cockpit_overview_screen(
-        screen_id="strecke/nawaro-uebersicht",
-        domain="strecke",
-        title="Nawaro uebersicht",
-        subtitle="strecke",
-        business_purpose="Nawaro uebersicht mandantensicher als Cockpit bereitstellen.",
-        example_prompts=["Zeige Nawaro uebersicht.", "Aktualisiere die Kennzahlen."],
-        test_id="strecke-nawaro-uebersicht",
-        data_sources=[cockpit_entity_source("/api/v1/strecke/speditionen/frachttarife")],
-        tables=[cockpit_summary_table(table_key="list", label="Nawaro uebersicht", columns=cols)],
-        actions=[cockpit_refresh_action(permission="strecke.read")],
-        context_rail="combined",
-    )
-
-
 def build_strecke_nawaro_uebersicht_drucken_screen_definition() -> dict[str, Any]:
     cols = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
     return build_cockpit_overview_screen(
@@ -2776,25 +2493,6 @@ def build_strecke_speditionen_fracht_preise_screen_definition() -> dict[str, Any
         row_actions=[],
         purpose="Speditionen fracht preise im strecke-Bereich finden und auswerten.",
         prompts=["Zeige Speditionen fracht preise.", "Filtere die Liste."],
-        bundle="strecke",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_strecke_vorlaeufige_streckengeschaefte_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="strecke/vorlaeufige-streckengeschaefte",
-        domain="strecke",
-        title="Vorlaeufige streckengeschaefte",
-        subtitle="strecke",
-        endpoint="/api/v1/strecke/speditionen/frachttarife",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Vorlaeufige streckengeschaefte im strecke-Bereich finden und auswerten.",
-        prompts=["Zeige Vorlaeufige streckengeschaefte.", "Filtere die Liste."],
         bundle="strecke",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -3386,14 +3084,6 @@ BATCH15_SCREEN_BUILDERS: dict[str, Any] = {
     "finance/zahlungslauf-kreditoren": build_finance_zahlungslauf_kreditoren_screen_definition,
     "finanzplanung/liquiditaet": build_finanzplanung_liquiditaet_screen_definition,
     "foerderung/antrag": build_foerderung_antrag_screen_definition,
-    "fuhrpark/ausgehende-belege-dokumente": build_fuhrpark_ausgehende_belege_dokumente_screen_definition,
-    "fuhrpark/fahrzeug/neu": build_fuhrpark_fahrzeug_neu_screen_definition,
-    "fuhrpark/fuhrpark-auswertung-kosten-pro-fahrzeug": build_fuhrpark_fuhrpark_auswertung_kosten_pro_fahrzeug_screen_definition,
-    "fuhrpark/fuhrpark-auswertungen-menu": build_fuhrpark_fuhrpark_auswertungen_menu_screen_definition,
-    "fuhrpark/fuhrpark-klassisch": build_fuhrpark_fuhrpark_klassisch_screen_definition,
-    "fuhrpark/fuhrpark-menue": build_fuhrpark_fuhrpark_menue_screen_definition,
-    "fuhrpark/fuhrpark-rechnungen": build_fuhrpark_fuhrpark_rechnungen_screen_definition,
-    "fuhrpark/fuhrpark-stammdaten": build_fuhrpark_fuhrpark_stammdaten_screen_definition,
     "futtermittel/beratung": build_futtermittel_beratung_screen_definition,
     "futtermittel/chargen/neu": build_futtermittel_chargen_neu_screen_definition,
     "futtermittel/einzelfuttermittel/stamm/new": build_futtermittel_einzelfuttermittel_stamm_new_screen_definition,
@@ -3436,8 +3126,6 @@ BATCH15_SCREEN_BUILDERS: dict[str, Any] = {
     "personal/mitarbeiter/neu": build_personal_mitarbeiter_neu_screen_definition,
     "personal/organigramm": build_personal_organigramm_screen_definition,
     "personal/schulung-neu": build_personal_schulung_neu_screen_definition,
-    "personal/stundenzettel": build_personal_stundenzettel_screen_definition,
-    "personal/zeiterfassung": build_personal_zeiterfassung_screen_definition,
     "portal/anfragen": build_portal_anfragen_screen_definition,
     "portal/bestellungen": build_portal_bestellungen_screen_definition,
     "portal/dokumente": build_portal_dokumente_screen_definition,
@@ -3476,8 +3164,6 @@ BATCH15_SCREEN_BUILDERS: dict[str, Any] = {
     "reports": build_reports_screen_definition,
     "reports/ReportsDashboardCharts": build_reports_reportsdashboardcharts_screen_definition,
     "reports/deckungsbeitrag": build_reports_deckungsbeitrag_screen_definition,
-    "reports/lagerbestand": build_reports_lagerbestand_screen_definition,
-    "reports/umsatz": build_reports_umsatz_screen_definition,
     "rezepte/editor": build_rezepte_editor_screen_definition,
     "sales/angebote/neu": build_sales_angebote_neu_screen_definition,
     "sales/auftrag-lieferschein-abgleich": build_sales_auftrag_lieferschein_abgleich_screen_definition,
@@ -3491,7 +3177,6 @@ BATCH15_SCREEN_BUILDERS: dict[str, Any] = {
     "service/abschluss": build_service_abschluss_screen_definition,
     "service/anfrage-detail": build_service_anfrage_detail_screen_definition,
     "service/anfrage/neu": build_service_anfrage_neu_screen_definition,
-    "service/anfragen": build_service_anfragen_screen_definition,
     "service/rueckmeldung": build_service_rueckmeldung_screen_definition,
     "setup/firma": build_setup_firma_screen_definition,
     "stammdaten/artikel-stoffstrom": build_stammdaten_artikel_stoffstrom_screen_definition,
@@ -3502,11 +3187,8 @@ BATCH15_SCREEN_BUILDERS: dict[str, Any] = {
     "stammdaten/individuelle-artikelnummern": build_stammdaten_individuelle_artikelnummern_screen_definition,
     "stammdaten/mengeneinheiten": build_stammdaten_mengeneinheiten_screen_definition,
     "start-dashboard": build_start_dashboard_screen_definition,
-    "strecke/menu": build_strecke_menu_screen_definition,
-    "strecke/nawaro-uebersicht": build_strecke_nawaro_uebersicht_screen_definition,
     "strecke/nawaro-uebersicht-drucken": build_strecke_nawaro_uebersicht_drucken_screen_definition,
     "strecke/speditionen-fracht-preise": build_strecke_speditionen_fracht_preise_screen_definition,
-    "strecke/vorlaeufige-streckengeschaefte": build_strecke_vorlaeufige_streckengeschaefte_screen_definition,
     "system/live-monitor": build_system_live_monitor_screen_definition,
     "tankstelle/zapfungen": build_tankstelle_zapfungen_screen_definition,
     "transporte/fahrer/neu": build_transporte_fahrer_neu_screen_definition,

@@ -14,7 +14,7 @@ describe('Listenfamilien: aktuelles Routeninventar (Quellnachweis)', () => {
       ['agrar/biostimulanzien-liste.tsx', 'agrar/biostimulanzien-liste'],
       ['agrar/ernte/liste.tsx', 'agrar/ernte-liste'],
       ['sales/auftraege-liste.tsx', 'sales/auftraege-liste'],
-      ['service/anfragen.tsx', 'service/anfragen'],
+      ['service/anfragen.tsx', 'service/anfragen-liste'],
     ]
     for (const [file, screenId] of batch3) {
       const src = read(file)
