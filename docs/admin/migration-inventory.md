@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-02
+last_reviewed: 2026-11-03
 version: 3.0.0
 description: Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Beschreibungen sind aus den Datei-Docstrings extrahiert.
 ---
@@ -438,6 +438,8 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `rls_domain_ki_20261027` | Row-level security for the AI domain: agent proposals, tool executions, knowledge versions. |
 | `rls_domain_logistics_20261028` | Row-level security for domain_logistics (tours, stops, events, disposition checks, ePOD settlements, freight |
 | `rls_domain_nachweisraum_20261027` | Row-level security for the evidence room (RLS domain slice nachweisraum). |
+| `rls_domain_ops_20261028` | Row-level security for domain_ops, part 1 (schema only, no data change). |
+| `rls_domain_ops_teil2_20261028` | Row-level security for domain_ops part 2: the eight tables without a tenant column that are empty live. |
 | `rls_domain_pricing_20261027` | Row-level security for domain_pricing (RLS domain slice, first after P0-P7). |
 | `rls_domain_sales_20261027` | Row-level security for the sales documents (RLS domain slice sales). |
 | `rls_domain_shared_20261027` | Row-level security for tenant tables in domain_shared (RLS domain slice shared). |
@@ -481,6 +483,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `verkauf_fehlende_spalten_20260929` | Fuenf Spalten, die der Code schreibt und keine Migration anlegt. |
 | `versandwege_echt_20261008` | Versandwege: Anfragen mit Mandant, Mahnungen mit Versandweg. |
 | `waage_tenant_20261030` | Bind operations scales to verified tenant; leave unknown legacy ownership unassigned. |
+| `waagen_wiegungen_mandant_20261103` | Waagen und Alt-Wiegungen im selben Mandantenmuster wie die uebrigen domain_ops-Tabellen. |
 | `warehouse_schema_repair_20260626` | WAREHOUSE-REPAIR-001: domain_inventory.warehouses fehlende Spalten nachziehen. |
 | `warehouse_wms_structure_20260517` | WMS warehouse zones, bins, bin_stock, pick_lists and pick_list_lines |
 | `wave3_wf_trigger_log_20260618` | wave3: wf_trigger_log + bank_statements + bank_statement_lines + waagen_quittungen |

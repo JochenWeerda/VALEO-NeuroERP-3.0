@@ -50,7 +50,6 @@ from app.api.v1.schemas.base import BaseSchema
 from pydantic import ConfigDict as _ConfigDict
 from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 from app.core.akteur import gepruefter_akteur_aus_request  # Bearbeiter aus dem Token
-from app.core.tenant import get_tenant_id
 
 
 class AgentIntegrationOut(BaseSchema):

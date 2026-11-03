@@ -9,14 +9,14 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any, List, Optional
 from uuid import uuid4
-from fastapi import APIRouter, Body, Depends, File, HTTPException, Query, UploadFile
+from fastapi import APIRouter, Body, Depends, File, HTTPException, Query, Request, UploadFile
 from fastapi.responses import Response
 from starlette.concurrency import run_in_threadpool
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from app.core.akteur import gepruefter_akteur
+from app.core.akteur import gepruefter_akteur, gepruefter_akteur_aus_request
 from app.core.cache import cache_delete_prefix, cache_get_json, cache_set_json
 from app.core.config import settings
 from app.core.data_quality_enforcement import (
