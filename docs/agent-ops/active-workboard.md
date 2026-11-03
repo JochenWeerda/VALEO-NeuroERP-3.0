@@ -20311,4 +20311,10 @@ Befund: /lager/ruestliste liest domain_inventory.ruestlisten, die weder Migratio
 Kommissionierung bleibt Platzhalter bis zu einer eigenen Migration (mit RLS). Offen in lager: einlagerung,
 auslagerung, bestandskorrektur, lagerplaetze, gs1-scanner, terminal, epcis, inventory-reports,
 materialfluss-visualisierung.
+Ruestlisten-Tabelle per Migration ruestlisten_tabelle_20261103 (RLS), Weg repariert; Kommissionierung Studio-Liste.
+Batch 3 Futtermittel (03.11.2026): 7 Seiten umgehaengt (Misch-/Einzelfuttermittel-Listen, Stamm-Seiten auf
+Anlage- bzw. Objektmaske, Grundfutteranalysen), 2 Listen neu (Einzelfuttermittel, Mischfutter-Produktion;
+Inventarprofil, Mengen in dt, Preis je dt statt je t - Feldklasse pricePer/displayPricePer). Alle Cluster in
+app/core/screen_definitions_clusters.py. Offen: beratung, bestellung, statistik, integrationsmonitor,
+rations-import/-zugang, rationsvergleich, wareneingang, produktionsdokumente, rezepte/editor.
 

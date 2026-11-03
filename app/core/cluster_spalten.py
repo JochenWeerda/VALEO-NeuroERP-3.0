@@ -12,7 +12,11 @@ def text(key: str, label: str, prioritaet: str = "secondary", **zusatz: Any) -> 
     return {"key": key, "label": label, "sortable": True, "filterable": True, "priority": prioritaet, **zusatz}
 
 
-def betrag(key: str, label: str, summe: bool = True, prioritaet: str = "primary", **zusatz: Any) -> dict[str, Any]:
+def betrag(key: str, label: str, summe: bool = True, prioritaet: str = "primary", *, je: str | None = None,
+           anzeige_je: str | None = None, **zusatz: Any) -> dict[str, Any]:
+    """Betrag; ``je``/``anzeige_je`` rechnen einen Preis je Einheit um (Landhandel: je dt / 100 kg statt je t)."""
+    if je and anzeige_je:
+        zusatz = {**zusatz, "pricePer": je, "displayPricePer": anzeige_je}
     spalte = {"key": key, "label": label, "renderKind": "currency", "numeric": True, "sortable": True,
               "priority": prioritaet, **zusatz}
     return {**spalte, "aggregate": "sum"} if summe else spalte

@@ -5792,18 +5792,7 @@
       "version": "1.0.0"
     },
     "futter/einzel/liste": {
-      "definition_hash": "b278029eebe3746af4c6a44651e1ab5122bece2771d78d0f817da5b053863463",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "futter/einzel/stamm/neu": {
-      "definition_hash": "7be9b5e0c7db51bfd0dc76c34e943e48245437e0f9eedaa61923a17e6c508a34",
+      "definition_hash": "e4a5a55568947fbf6b801ffa6e959e7c47e4d1f899acfc93ce286edcfbdcc1ce",
       "gates_passed": [
         "A",
         "B",
@@ -5815,28 +5804,6 @@
     },
     "futter/misch": {
       "definition_hash": "672cd06254fc6bc940f1d30aeeb86e6468ea2e659eec9eec212f8d9dca1d5489",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "futter/misch/liste": {
-      "definition_hash": "5fdb1f50b5d567d4717e46cafda47a3603bbfe2c37f324675ed579e34c0ccb1c",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "futter/misch/stamm/neu": {
-      "definition_hash": "66a224f74d0e13ba35192085d32220bf27a735c6203fd9c2ffedf571860b3897",
       "gates_passed": [
         "A",
         "B",
@@ -5912,17 +5879,6 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "futtermittel/einzelfuttermittel/liste": {
-      "definition_hash": "176b4abf3baab3aaabb9349f9ba3fff8c7820893247ceb3cb589c839bf4ca400",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "futtermittel/einzelfuttermittel/stamm/new": {
       "definition_hash": "079b24caee7a6b4027b5bda8e094d0583af5239c679106fe91edf16685fe498a",
       "gates_passed": [
@@ -5978,17 +5934,6 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "futtermittel/grundfutteranalysen": {
-      "definition_hash": "db03673676bc80539c25459aa7986be91732febdef5440684a6e988ee19413d0",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "futtermittel/integrationsmonitor": {
       "definition_hash": "6c5b3b5993815554c682db78657c6aeff6d58d631b59b71d9c2576e6adfafc8d",
       "gates_passed": [
@@ -6013,17 +5958,6 @@
     },
     "futtermittel/mischfuttermittel-liste": {
       "definition_hash": "5b346e9c96b2af8c1b3b74ac4afa1848626b010e98c81c4b4183811dbdb15402",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "futtermittel/mischfuttermittel/liste": {
-      "definition_hash": "4b4eb26b8a6f9fdc0b496a74754a5c20484852741766a8ea8b806774f3fcdd1a",
       "gates_passed": [
         "A",
         "B",
@@ -7299,7 +7233,7 @@
       "version": "1.0.0"
     },
     "produktion/mischfutter-produktion": {
-      "definition_hash": "b450a53cc4981652bf567eea28e85010c81f814bc9d28ac08fd7876840dc9f1e",
+      "definition_hash": "ff4dadb535f8250e5d42d3e8e9671619a792badb34deb35ffa377141168ee1f8",
       "gates_passed": [
         "A",
         "B",

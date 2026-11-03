@@ -15622,110 +15622,6 @@
       "mcp_tool_ids": []
     },
     {
-      "mask_id": "futter/einzel/liste",
-      "title": "Liste",
-      "domain": "futter",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/futter__einzel__liste/:entityId",
-      "agent_contract_url": "/api/v1/masks/futter/einzel/liste/agent-contract",
-      "screen_definition_url": "/api/v1/masks/futter/einzel/liste/screen-definition",
-      "readiness_url": "/api/v1/masks/futter/einzel/liste/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "futter/einzel/stamm/neu",
-      "title": "Stamm",
-      "domain": "futter",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/futter__einzel__stamm__neu/:entityId",
-      "agent_contract_url": "/api/v1/masks/futter/einzel/stamm/neu/agent-contract",
-      "screen_definition_url": "/api/v1/masks/futter/einzel/stamm/neu/screen-definition",
-      "readiness_url": "/api/v1/masks/futter/einzel/stamm/neu/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "futter/misch/liste",
-      "title": "Liste",
-      "domain": "futter",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/futter__misch__liste/:entityId",
-      "agent_contract_url": "/api/v1/masks/futter/misch/liste/agent-contract",
-      "screen_definition_url": "/api/v1/masks/futter/misch/liste/screen-definition",
-      "readiness_url": "/api/v1/masks/futter/misch/liste/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "futter/misch/stamm/neu",
-      "title": "Rezeptur-Komponenten",
-      "domain": "futter",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/futter__misch__stamm__neu/:entityId",
-      "agent_contract_url": "/api/v1/masks/futter/misch/stamm/neu/agent-contract",
-      "screen_definition_url": "/api/v1/masks/futter/misch/stamm/neu/screen-definition",
-      "readiness_url": "/api/v1/masks/futter/misch/stamm/neu/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
       "mask_id": "futter/einzel",
       "title": "Einzelfuttermittel",
       "domain": "futtermittel",
@@ -15746,6 +15642,43 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "futter/einzel/liste",
+      "title": "Einzelfuttermittel",
+      "domain": "futtermittel",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/futter__einzel__liste/:entityId",
+      "agent_contract_url": "/api/v1/masks/futter/einzel/liste/agent-contract",
+      "screen_definition_url": "/api/v1/masks/futter/einzel/liste/screen-definition",
+      "readiness_url": "/api/v1/masks/futter/einzel/liste/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Neues Einzelfuttermittel",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
         }
       ],
       "sensitive_fields": [],
@@ -15972,32 +15905,6 @@
       "mcp_tool_ids": []
     },
     {
-      "mask_id": "futtermittel/einzelfuttermittel/liste",
-      "title": "Einzelfuttermittel liste",
-      "domain": "futtermittel",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/futtermittel__einzelfuttermittel__liste/:entityId",
-      "agent_contract_url": "/api/v1/masks/futtermittel/einzelfuttermittel/liste/agent-contract",
-      "screen_definition_url": "/api/v1/masks/futtermittel/einzelfuttermittel/liste/screen-definition",
-      "readiness_url": "/api/v1/masks/futtermittel/einzelfuttermittel/liste/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
       "mask_id": "futtermittel/einzelfuttermittel/stamm/new",
       "title": "Einzelfuttermittel anlegen",
       "domain": "futtermittel",
@@ -16133,32 +16040,6 @@
       "mcp_tool_ids": []
     },
     {
-      "mask_id": "futtermittel/grundfutteranalysen",
-      "title": "Grundfutteranalysen native",
-      "domain": "futtermittel",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/futtermittel__grundfutteranalysen/:entityId",
-      "agent_contract_url": "/api/v1/masks/futtermittel/grundfutteranalysen/agent-contract",
-      "screen_definition_url": "/api/v1/masks/futtermittel/grundfutteranalysen/screen-definition",
-      "readiness_url": "/api/v1/masks/futtermittel/grundfutteranalysen/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
       "mask_id": "futtermittel/integrationsmonitor",
       "title": "Integrationsmonitor",
       "domain": "futtermittel",
@@ -16232,32 +16113,6 @@
           "method": null,
           "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
         },
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "futtermittel/mischfuttermittel/liste",
-      "title": "Mischfuttermittel liste",
-      "domain": "futtermittel",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/futtermittel__mischfuttermittel__liste/:entityId",
-      "agent_contract_url": "/api/v1/masks/futtermittel/mischfuttermittel/liste/agent-contract",
-      "screen_definition_url": "/api/v1/masks/futtermittel/mischfuttermittel/liste/screen-definition",
-      "readiness_url": "/api/v1/masks/futtermittel/mischfuttermittel/liste/readiness",
-      "risk_summary": "low",
-      "actions": [
         {
           "key": "export",
           "label": "CSV-Export",
@@ -16538,6 +16393,32 @@
         "group_id",
         "plan_status"
       ],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "produktion/mischfutter-produktion",
+      "title": "Mischfutter-Produktion",
+      "domain": "futtermittel",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/produktion__mischfutter-produktion/:entityId",
+      "agent_contract_url": "/api/v1/masks/produktion/mischfutter-produktion/agent-contract",
+      "screen_definition_url": "/api/v1/masks/produktion/mischfutter-produktion/screen-definition",
+      "readiness_url": "/api/v1/masks/produktion/mischfutter-produktion/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
       "mcp_tool_ids": []
     },
     {
@@ -22319,34 +22200,6 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "produktion/mischfutter-produktion",
-      "title": "Mischfutter produktion",
-      "domain": "produktion",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/produktion__mischfutter-produktion/:entityId",
-      "agent_contract_url": "/api/v1/masks/produktion/mischfutter-produktion/agent-contract",
-      "screen_definition_url": "/api/v1/masks/produktion/mischfutter-produktion/screen-definition",
-      "readiness_url": "/api/v1/masks/produktion/mischfutter-produktion/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "produktion.control.sync"
-      ]
     },
     {
       "mask_id": "produktion/produktions-dokumente-drucken",

@@ -19,8 +19,7 @@ from app.core.screen_definitions_listen import (
 )
 from app.core.screen_definitions_cockpit import COCKPIT_SCREEN_BUILDERS
 from app.core.screen_definitions_domain_batch15 import BATCH15_SCREEN_BUILDERS
-from app.core.screen_definitions_cluster_fibu import CLUSTER_FIBU_SCREEN_BUILDERS
-from app.core.screen_definitions_cluster_lager import CLUSTER_LAGER_SCREEN_BUILDERS
+from app.core.screen_definitions_clusters import CLUSTER_SCREEN_BUILDERS
 from app.core.mask_rollout_catalog import ROLLOUT_WAVES_42_51
 from app.core.kontroll_worklist_parent import (
     build_document_control_variant,
@@ -4991,8 +4990,7 @@ _SCREEN_DEFINITIONS: dict[str, Any] = {
     **LISTEN_SCREEN_BUILDERS,
     **COCKPIT_SCREEN_BUILDERS,
     **BATCH15_SCREEN_BUILDERS,
-    **CLUSTER_FIBU_SCREEN_BUILDERS,
-    **CLUSTER_LAGER_SCREEN_BUILDERS,
+    **CLUSTER_SCREEN_BUILDERS,
 
     **IDENTITY_SCREEN_BUILDERS,
     **STUDIO_HISTORY_BUILDERS,
@@ -5373,8 +5371,7 @@ _SCREEN_DEFINITIONS: dict[str, Any] = {
     "futtermittel/mischfuttermittel": build_futtermittel_mischfuttermittel_screen_definition,
     "crm/lead": build_crm_lead_screen_definition,
     **BATCH15_SCREEN_BUILDERS,
-    **CLUSTER_FIBU_SCREEN_BUILDERS,
-    **CLUSTER_LAGER_SCREEN_BUILDERS,
+    **CLUSTER_SCREEN_BUILDERS,
 }
 
 

@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 578,
-    "screens_with_actions": 407,
-    "domains": 55
+    "actions": 573,
+    "screens_with_actions": 401,
+    "domains": 54
   },
   "actions": [
     {
@@ -7006,7 +7006,7 @@
       "label": "CSV-Export",
       "description": "CSV-Export (futter/einzel/liste)",
       "category": "mask-action",
-      "domain": "futter",
+      "domain": "futtermittel",
       "mask": "futter/einzel/liste",
       "intent_phrases": [
         "CSV-Export"
@@ -7022,62 +7022,22 @@
       }
     },
     {
-      "id": "mask:futter/einzel/stamm/neu:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (futter/einzel/stamm/neu)",
+      "id": "mask:futter/einzel/liste:neu",
+      "label": "Neues Einzelfuttermittel",
+      "description": "Neues Einzelfuttermittel (futter/einzel/liste)",
       "category": "mask-action",
-      "domain": "futter",
-      "mask": "futter/einzel/stamm/neu",
+      "domain": "futtermittel",
+      "mask": "futter/einzel/liste",
       "intent_phrases": [
-        "CSV-Export"
+        "Neues Einzelfuttermittel"
       ],
       "required_data": [],
       "source": {
-        "screenId": "futter/einzel/stamm/neu",
-        "actionKey": "export",
+        "screenId": "futter/einzel/liste",
+        "actionKey": "neu",
         "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:futter/misch/liste:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (futter/misch/liste)",
-      "category": "mask-action",
-      "domain": "futter",
-      "mask": "futter/misch/liste",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "futter/misch/liste",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:futter/misch/stamm/neu:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (futter/misch/stamm/neu)",
-      "category": "mask-action",
-      "domain": "futter",
-      "mask": "futter/misch/stamm/neu",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "futter/misch/stamm/neu",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
+        "navigationRoute": "/futter/einzel/neu",
+        "command": null,
         "method": null
       }
     },
@@ -7248,26 +7208,6 @@
       }
     },
     {
-      "id": "mask:futtermittel/einzelfuttermittel/liste:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (futtermittel/einzelfuttermittel/liste)",
-      "category": "mask-action",
-      "domain": "futtermittel",
-      "mask": "futtermittel/einzelfuttermittel/liste",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "futtermittel/einzelfuttermittel/liste",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
       "id": "mask:futtermittel/futtermittel-bestellung:export",
       "label": "CSV-Export",
       "description": "CSV-Export (futtermittel/futtermittel-bestellung)",
@@ -7300,26 +7240,6 @@
       "required_data": [],
       "source": {
         "screenId": "futtermittel/futtermittel-statistik",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:futtermittel/grundfutteranalysen:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (futtermittel/grundfutteranalysen)",
-      "category": "mask-action",
-      "domain": "futtermittel",
-      "mask": "futtermittel/grundfutteranalysen",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "futtermittel/grundfutteranalysen",
         "actionKey": "export",
         "commandEndpoint": null,
         "navigationRoute": null,
@@ -7384,26 +7304,6 @@
         "commandEndpoint": null,
         "navigationRoute": "/futtermittel/mischfuttermittel/stamm/new",
         "command": null,
-        "method": null
-      }
-    },
-    {
-      "id": "mask:futtermittel/mischfuttermittel/liste:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (futtermittel/mischfuttermittel/liste)",
-      "category": "mask-action",
-      "domain": "futtermittel",
-      "mask": "futtermittel/mischfuttermittel/liste",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "futtermittel/mischfuttermittel/liste",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
         "method": null
       }
     },
@@ -9556,7 +9456,7 @@
       "label": "CSV-Export",
       "description": "CSV-Export (produktion/mischfutter-produktion)",
       "category": "mask-action",
-      "domain": "produktion",
+      "domain": "futtermittel",
       "mask": "produktion/mischfutter-produktion",
       "intent_phrases": [
         "CSV-Export"

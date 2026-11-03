@@ -92,3 +92,21 @@ def test_frontend_kennt_dieselben_einheiten_wie_agrar_units():
     assert kopie["masseInKg"] == {e: float(f) for e, f in agrar_units.MASSE_IN_KG.items()}
     assert kopie["anzeigeMasse"] == "dt"
     assert set(kopie["zaehleinheiten"]) == set(agrar_units.ZAEHLEINHEITEN)
+
+
+@pytest.mark.parametrize("spalte,gueltig", [
+    ({"key": "p", "label": "Preis je dt", "renderKind": "currency", "pricePer": "t", "displayPricePer": "dt"}, True),
+    ({"key": "p", "label": "Preis je l", "renderKind": "currency", "pricePer": "hl", "displayPricePer": "l"}, True),
+    ({"key": "p", "label": "Preis", "renderKind": "currency", "pricePer": "t", "displayPricePer": "l"}, False),
+    ({"key": "p", "label": "Preis", "renderKind": "currency", "pricePer": "sack", "displayPricePer": "kg"}, False),
+    ({"key": "p", "label": "Preis", "renderKind": "number", "pricePer": "t", "displayPricePer": "dt"}, False),
+])
+def test_preis_je_einheit_nur_exakt_umrechenbar(spalte, gueltig):
+    """Landhandel zeigt Preise je dt (100 kg); Sack und andere Zaehleinheiten haben keinen globalen Faktor."""
+    from app.core.screen_governance import validate_screen_definition
+
+    definition = {"schemaVersion": 1, "id": "probe/preis", "title": "Preis", "mode": "list", "domain": "futtermittel",
+                  "layout": {"floorplan": "worklist", "density": "compact", "tableProfile": "inventory"},
+                  "tables": [{"key": "t", "label": "T", "columns": [spalte]}]}
+    fehler = [f for f in validate_screen_definition(definition) if "pricePer" in f]
+    assert (not fehler) is gueltig, fehler

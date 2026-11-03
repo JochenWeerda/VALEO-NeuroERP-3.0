@@ -12,7 +12,7 @@ import { evaluateCondition, matchesValueList } from '../governance/condition-eng
 import { statusLabel } from './status-labels'
 import { formatBusinessDate, formatBusinessDateTime } from '@/lib/business-time'
 import { computeValue, sumColumn } from '../runtime/computed-fields'
-import { convertQuantity, sumQuantities } from '../runtime/units'
+import { convertQuantity, convertUnitPrice, sumQuantities } from '../runtime/units'
 
 interface FastTableRendererProps {
   table: RenderTablePlan
@@ -84,6 +84,10 @@ function columnUnit(column: RenderTablePlan['columns'][number], row: Record<stri
 /** Menge in der Anzeigeeinheit; nicht umrechenbar (Zaehleinheit) bleibt sie in ihrer eigenen Einheit stehen. */
 function displayQuantity(column: RenderTablePlan['columns'][number], row: Record<string, unknown>, value: unknown): [unknown, string | undefined] {
   const einheit = columnUnit(column, row)
+  if (column.renderKind === 'currency' && column.pricePer && column.displayPricePer && value != null && value !== '') {
+    const preis = convertUnitPrice(Number(value), column.pricePer, column.displayPricePer)
+    return [preis === null ? value : Math.round((preis + Number.EPSILON) * 100) / 100, einheit]
+  }
   if (column.renderKind !== 'quantity' || !column.displayUnit || value == null || value === '') return [value, einheit]
   const umgerechnet = convertQuantity(Number(value), einheit, column.displayUnit)
   return umgerechnet === null ? [value, einheit] : [umgerechnet, column.displayUnit]

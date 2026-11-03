@@ -203,6 +203,8 @@ export interface RenderTableColumnPlan {
   unit?: string
   unitField?: string
   displayUnit?: string
+  pricePer?: string
+  displayPricePer?: string
   computed?: ScreenFieldDefinition['computed']
   aggregate?: 'sum'
   defaultSort?: 'asc' | 'desc'

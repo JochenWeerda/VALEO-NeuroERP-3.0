@@ -121,3 +121,19 @@ describe('Einheiten wie agrar_units (Landhandel: Masse in dt)', async () => {
     expect(validateScreenDefinition(tabelle({ key: 'm', label: 'Menge', renderKind: 'number', displayUnit: 'dt' }))).toContain('displayUnit is invalid')
   })
 })
+
+describe('Preis je Einheit (Landhandel: je dt / 100 kg)', async () => {
+  const { convertUnitPrice } = await import('@/components/mask-builder/runtime/units')
+  it('rechnet Preise exakt und umgekehrt zur Menge', () => {
+    expect(convertUnitPrice(500, 't', 'dt')).toBe(50)
+    expect(convertUnitPrice(25, 'dt', 'kg')).toBe(0.25)
+    expect(convertUnitPrice(8, 'l', 'hl')).toBe(800)
+    expect(convertUnitPrice(12, 'sack', 'kg')).toBeNull()
+  })
+  it('laesst die Preisbezugseinheit nur an Betragsspalten mit Masse/Volumen zu', () => {
+    const tabelle = (spalte: object) => ({ ...basis, mode: 'list' as const, tables: [{ key: 't', label: 'T', columns: [spalte] }] }) as ScreenDefinition
+    expect(validateScreenDefinition(tabelle({ key: 'p', label: 'Preis je dt', renderKind: 'currency', pricePer: 't', displayPricePer: 'dt' }))).not.toContain('pricePer is invalid')
+    expect(validateScreenDefinition(tabelle({ key: 'p', label: 'Preis', renderKind: 'currency', pricePer: 'sack', displayPricePer: 'kg' }))).toContain('pricePer is invalid')
+    expect(validateScreenDefinition(tabelle({ key: 'p', label: 'Preis', renderKind: 'currency', pricePer: 't', displayPricePer: 'l' }))).toContain('pricePer is invalid')
+  })
+})

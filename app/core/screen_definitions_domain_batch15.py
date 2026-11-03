@@ -910,82 +910,6 @@ def build_fuhrpark_fuhrpark_stammdaten_screen_definition() -> dict[str, Any]:
     )
 
 
-def build_futter_einzel_liste_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="futter/einzel/liste",
-        domain="futter",
-        title="Liste",
-        subtitle="futter",
-        endpoint="/api/v1/futter/chargen",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Liste im futter-Bereich finden und auswerten.",
-        prompts=["Zeige Liste.", "Filtere die Liste."],
-        bundle="futter",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_futter_einzel_stamm_neu_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="futter/einzel/stamm/neu",
-        domain="futter",
-        title="Stamm",
-        subtitle="futter",
-        endpoint="/api/v1/futter/chargen",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Stamm im futter-Bereich finden und auswerten.",
-        prompts=["Zeige Stamm.", "Filtere die Liste."],
-        bundle="futter",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_futter_misch_liste_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="futter/misch/liste",
-        domain="futter",
-        title="Liste",
-        subtitle="futter",
-        endpoint="/api/v1/futter/chargen",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Liste im futter-Bereich finden und auswerten.",
-        prompts=["Zeige Liste.", "Filtere die Liste."],
-        bundle="futter",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_futter_misch_stamm_neu_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="futter/misch/stamm/neu",
-        domain="futter",
-        title="Rezeptur-Komponenten",
-        subtitle="futter",
-        endpoint="/api/v1/futter/chargen",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Rezeptur-Komponenten im futter-Bereich finden und auswerten.",
-        prompts=["Zeige Rezeptur-Komponenten.", "Filtere die Liste."],
-        bundle="futter",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
 def build_futtermittel_beratung_screen_definition() -> dict[str, Any]:
     columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
     return build_stamm_list_screen(
@@ -1019,25 +943,6 @@ def build_futtermittel_chargen_neu_screen_definition() -> dict[str, Any]:
         row_actions=[],
         purpose="Charge-Verfolgung im futtermittel-Bereich finden und auswerten.",
         prompts=["Zeige Charge-Verfolgung.", "Filtere die Liste."],
-        bundle="futtermittel",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_futtermittel_einzelfuttermittel_liste_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="futtermittel/einzelfuttermittel/liste",
-        domain="futtermittel",
-        title="Einzelfuttermittel liste",
-        subtitle="futtermittel",
-        endpoint="/api/v1/futtermittel/qs/haccp-plaene",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Einzelfuttermittel liste im futtermittel-Bereich finden und auswerten.",
-        prompts=["Zeige Einzelfuttermittel liste.", "Filtere die Liste."],
         bundle="futtermittel",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -1089,25 +994,6 @@ def build_futtermittel_futtermittel_statistik_screen_definition() -> dict[str, A
     )
 
 
-def build_futtermittel_grundfutteranalysen_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="futtermittel/grundfutteranalysen",
-        domain="futtermittel",
-        title="Grundfutteranalysen native",
-        subtitle="futtermittel",
-        endpoint="/api/v1/futtermittel/qs/haccp-plaene",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Grundfutteranalysen native im futtermittel-Bereich finden und auswerten.",
-        prompts=["Zeige Grundfutteranalysen native.", "Filtere die Liste."],
-        bundle="futtermittel",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
 def build_futtermittel_integrationsmonitor_screen_definition() -> dict[str, Any]:
     columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
     return build_stamm_list_screen(
@@ -1122,25 +1008,6 @@ def build_futtermittel_integrationsmonitor_screen_definition() -> dict[str, Any]
         row_actions=[],
         purpose="Integrationsmonitor im futtermittel-Bereich finden und auswerten.",
         prompts=["Zeige Integrationsmonitor.", "Filtere die Liste."],
-        bundle="futtermittel",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_futtermittel_mischfuttermittel_liste_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="futtermittel/mischfuttermittel/liste",
-        domain="futtermittel",
-        title="Mischfuttermittel liste",
-        subtitle="futtermittel",
-        endpoint="/api/v1/futtermittel/qs/haccp-plaene",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Mischfuttermittel liste im futtermittel-Bereich finden und auswerten.",
-        prompts=["Zeige Mischfuttermittel liste.", "Filtere die Liste."],
         bundle="futtermittel",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -2325,25 +2192,6 @@ def build_preise_zu_abschlaggruppen_screen_definition() -> dict[str, Any]:
         business_purpose="Neue Zu-/Abschlaggruppe [ZAGR] als Stammblatt pflegen.",
         example_prompts=["Oeffne Neue Zu-/Abschlaggruppe [ZAGR].", "Bearbeite Stammdaten."],
         test_id="preise-zu-abschlaggruppen",
-    )
-
-
-def build_produktion_mischfutter_produktion_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="produktion/mischfutter-produktion",
-        domain="produktion",
-        title="Mischfutter produktion",
-        subtitle="produktion",
-        endpoint="/api/v1/produktion/mischfutter/auftraege",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Mischfutter produktion im produktion-Bereich finden und auswerten.",
-        prompts=["Zeige Mischfutter produktion.", "Filtere die Liste."],
-        bundle="produktion",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
 
 
@@ -3741,20 +3589,13 @@ BATCH15_SCREEN_BUILDERS: dict[str, Any] = {
     "fuhrpark/fuhrpark-menue": build_fuhrpark_fuhrpark_menue_screen_definition,
     "fuhrpark/fuhrpark-rechnungen": build_fuhrpark_fuhrpark_rechnungen_screen_definition,
     "fuhrpark/fuhrpark-stammdaten": build_fuhrpark_fuhrpark_stammdaten_screen_definition,
-    "futter/einzel/liste": build_futter_einzel_liste_screen_definition,
-    "futter/einzel/stamm/neu": build_futter_einzel_stamm_neu_screen_definition,
-    "futter/misch/liste": build_futter_misch_liste_screen_definition,
-    "futter/misch/stamm/neu": build_futter_misch_stamm_neu_screen_definition,
     "futtermittel/beratung": build_futtermittel_beratung_screen_definition,
     "futtermittel/chargen/neu": build_futtermittel_chargen_neu_screen_definition,
-    "futtermittel/einzelfuttermittel/liste": build_futtermittel_einzelfuttermittel_liste_screen_definition,
     "futtermittel/einzelfuttermittel/stamm/new": build_futtermittel_einzelfuttermittel_stamm_new_screen_definition,
     "futtermittel/fuetterungsdokumentation-mobil": build_futtermittel_fuetterungsdokumentation_mobil_screen_definition,
     "futtermittel/futtermittel-bestellung": build_futtermittel_futtermittel_bestellung_screen_definition,
     "futtermittel/futtermittel-statistik": build_futtermittel_futtermittel_statistik_screen_definition,
-    "futtermittel/grundfutteranalysen": build_futtermittel_grundfutteranalysen_screen_definition,
     "futtermittel/integrationsmonitor": build_futtermittel_integrationsmonitor_screen_definition,
-    "futtermittel/mischfuttermittel/liste": build_futtermittel_mischfuttermittel_liste_screen_definition,
     "futtermittel/mischfuttermittel/stamm/new": build_futtermittel_mischfuttermittel_stamm_new_screen_definition,
     "futtermittel/rations-schnittstellen-import": build_futtermittel_rations_schnittstellen_import_screen_definition,
     "futtermittel/rations-zugang": build_futtermittel_rations_zugang_screen_definition,
@@ -3822,7 +3663,6 @@ BATCH15_SCREEN_BUILDERS: dict[str, Any] = {
     "preise/konditionen": build_preise_konditionen_screen_definition,
     "preise/rabattgruppen": build_preise_rabattgruppen_screen_definition,
     "preise/zu-abschlaggruppen": build_preise_zu_abschlaggruppen_screen_definition,
-    "produktion/mischfutter-produktion": build_produktion_mischfutter_produktion_screen_definition,
     "produktion/produktions-dokumente-drucken": build_produktion_produktions_dokumente_drucken_screen_definition,
     "produktion/rezepturgruppen": build_produktion_rezepturgruppen_screen_definition,
     "prospecting/leads": build_prospecting_leads_screen_definition,

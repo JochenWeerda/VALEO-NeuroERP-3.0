@@ -158,6 +158,10 @@ export interface ScreenTableColumn {
   unitField?: string
   /** Anzeige einer Menge in dieser Einheit (Landhandel: Masse in dt); nur Masse/Volumen, exakt umgerechnet. */
   displayUnit?: string
+  /** Bezugseinheit eines Preises aus den Daten (z. B. `t` bei preis_pro_t); nur mit `displayPricePer`. */
+  pricePer?: string
+  /** Anzeige des Preises je dieser Einheit (Landhandel: je dt / 100 kg); exakt umgerechnet, nur Masse/Volumen. */
+  displayPricePer?: string
   /** Rechnende Spalte aus anderen Werten derselben Zeile. */
   computed?: ScreenComputation
   /** Summenzeile unter der Tabelle (ueber die angezeigten Zeilen). */

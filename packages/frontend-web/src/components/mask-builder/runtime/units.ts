@@ -43,6 +43,15 @@ export function convertQuantity(wert: number, von: string | null | undefined, na
 }
 
 /**
+ * Preis je `von` als Preis je `nach` (z. B. 500 EUR je t -> 50 EUR je dt). null, wenn nicht exakt umrechenbar.
+ * Ein Preis verhaelt sich umgekehrt zur Menge: je groesser die Bezugseinheit, desto hoeher der Preis.
+ */
+export function convertUnitPrice(preis: number, von: string | null | undefined, nach: string | null | undefined): number | null {
+  const anteil = convertQuantity(1, nach, von)
+  return anteil === null ? null : preis * anteil
+}
+
+/**
  * Summe ueber Zeilen mit eigener Einheit. Einheitlich: in dieser Einheit. Gemischt, aber alle Masse bzw. Volumen:
  * umgerechnet in die Zieleinheit (Vorgabe dt bzw. l). Sonst null - eine Summe ueber Sack und kg gibt es nicht.
  */

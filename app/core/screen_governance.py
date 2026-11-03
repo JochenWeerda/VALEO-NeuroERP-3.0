@@ -88,6 +88,15 @@ def _umrechenbar(einheit: Any) -> bool:
     return norm in agrar_units.MASSE_IN_KG or norm in agrar_units.VOLUMEN_IN_L
 
 
+def _gleiche_art(a: Any, b: Any) -> bool:
+    """Preis je a als Preis je b: beide Masse oder beide Volumen (agrar_units), sonst nicht exakt umrechenbar."""
+    from app.core import agrar_units
+
+    na, nb = (agrar_units.normalisiere(str(x or "")) for x in (a, b))
+    return ((na in agrar_units.MASSE_IN_KG and nb in agrar_units.MASSE_IN_KG)
+            or (na in agrar_units.VOLUMEN_IN_L and nb in agrar_units.VOLUMEN_IN_L))
+
+
 def computation_valid(value: Any) -> bool:
     if not isinstance(value, dict) or set(value) - {"op", "of", "round"}:
         return False
@@ -263,6 +272,10 @@ def validate_screen_definition(definition: dict[str, Any]) -> list[str]:
             if column.get("displayUnit") is not None and not (
                     column.get("renderKind") == "quantity" and _umrechenbar(column.get("displayUnit"))):
                 errors.append(f"table {table.get('key')} column {column_key} has invalid displayUnit")
+            if (column.get("pricePer") is not None or column.get("displayPricePer") is not None) and not (
+                    column.get("renderKind") == "currency"
+                    and _gleiche_art(column.get("pricePer"), column.get("displayPricePer"))):
+                errors.append(f"table {table.get('key')} column {column_key} has invalid pricePer")
             if column.get("aggregate") is not None and not (
                     column.get("aggregate") == "sum"
                     and (column.get("numeric") is True or column.get("computed") is not None

@@ -29,7 +29,7 @@ describe('Listenfamilien: aktuelles Routeninventar (Quellnachweis)', () => {
   it('Debitoren-, Mischfuttermittel-, Auftragsbestaetigungen- und Artikel-Listen nutzen NativeListPage', () => {
     expect(read('finance/debitoren-liste.tsx')).toContain('NativeListPage')
     expect(read('finance/debitoren-liste.tsx')).toContain('screenId="finance/debitoren-liste"')
-    expect(read('futtermittel/mischfuttermittel-liste.tsx')).toContain('screenId="futtermittel/mischfuttermittel/liste"')
+    expect(read('futtermittel/mischfuttermittel-liste.tsx')).toContain('screenId="futtermittel/mischfuttermittel-liste"')
     expect(read('einkauf/auftragsbestaetigungen-liste.tsx')).toContain('screenId="einkauf/auftragsbestaetigungen"')
     expect(read('artikel/liste.tsx')).toContain('screenId="artikel/liste"')
   })

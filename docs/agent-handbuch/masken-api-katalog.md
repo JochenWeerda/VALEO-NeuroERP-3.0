@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (810 Masken).
+> Generiert aus `app/core/screen_definitions.py` (804 Masken).
 
 ## Übersicht
 
@@ -544,28 +544,22 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `fuhrpark/terminarten` | Terminarten | logistics | niedrig | — | `GET /api/v1/masks/fuhrpark/terminarten/agent-contract` |
 | `fuhrpark/uebersicht` | Fuhrpark | logistics | niedrig | — | `GET /api/v1/masks/fuhrpark/uebersicht/agent-contract` |
 | `futter/einzel` | Einzelfuttermittel | futtermittel | niedrig | — | `GET /api/v1/masks/futter/einzel/agent-contract` |
-| `futter/einzel/liste` | Liste | futter | niedrig | — | `GET /api/v1/masks/futter/einzel/liste/agent-contract` |
-| `futter/einzel/stamm/neu` | Stamm | futter | niedrig | — | `GET /api/v1/masks/futter/einzel/stamm/neu/agent-contract` |
+| `futter/einzel/liste` | Einzelfuttermittel | futtermittel | niedrig | — | `GET /api/v1/masks/futter/einzel/liste/agent-contract` |
 | `futter/misch` | Mischfuttermittel | futtermittel | niedrig | — | `GET /api/v1/masks/futter/misch/agent-contract` |
-| `futter/misch/liste` | Liste | futter | niedrig | — | `GET /api/v1/masks/futter/misch/liste/agent-contract` |
-| `futter/misch/stamm/neu` | Rezeptur-Komponenten | futter | niedrig | — | `GET /api/v1/masks/futter/misch/stamm/neu/agent-contract` |
 | `futtermittel/analyse` | Futteranalyse | futtermittel | hoch | — | `GET /api/v1/masks/futtermittel/analyse/agent-contract` |
 | `futtermittel/analysen` | Futteranalysen | futtermittel | niedrig | — | `GET /api/v1/masks/futtermittel/analysen/agent-contract` |
 | `futtermittel/beratung` | Beratung | futtermittel | niedrig | — | `GET /api/v1/masks/futtermittel/beratung/agent-contract` |
 | `futtermittel/chargen/neu` | Charge-Verfolgung | futtermittel | niedrig | — | `GET /api/v1/masks/futtermittel/chargen/neu/agent-contract` |
 | `futtermittel/einzelfuttermittel` | Einzelfuttermittel | futtermittel | niedrig | — | `GET /api/v1/masks/futtermittel/einzelfuttermittel/agent-contract` |
 | `futtermittel/einzelfuttermittel-liste` | Einzelfuttermittel | futtermittel | niedrig | — | `GET /api/v1/masks/futtermittel/einzelfuttermittel-liste/agent-contract` |
-| `futtermittel/einzelfuttermittel/liste` | Einzelfuttermittel liste | futtermittel | niedrig | — | `GET /api/v1/masks/futtermittel/einzelfuttermittel/liste/agent-contract` |
 | `futtermittel/einzelfuttermittel/stamm/new` | Einzelfuttermittel anlegen | futtermittel | niedrig | — | `GET /api/v1/masks/futtermittel/einzelfuttermittel/stamm/new/agent-contract` |
 | `futtermittel/fuetterungsdokumentation-mobil` | Fütterungsdokumentation mobil | futtermittel | niedrig | — | `GET /api/v1/masks/futtermittel/fuetterungsdokumentation-mobil/agent-contract` |
 | `futtermittel/futtermittel-bestellung` | Futtermittel bestellung | futtermittel | niedrig | — | `GET /api/v1/masks/futtermittel/futtermittel-bestellung/agent-contract` |
 | `futtermittel/futtermittel-qualitaetskontrolle` | Futtermittel-Qualitaetskontrolle | futtermittel | niedrig | — | `GET /api/v1/masks/futtermittel/futtermittel-qualitaetskontrolle/agent-contract` |
 | `futtermittel/futtermittel-statistik` | Futtermittel statistik | futtermittel | niedrig | — | `GET /api/v1/masks/futtermittel/futtermittel-statistik/agent-contract` |
-| `futtermittel/grundfutteranalysen` | Grundfutteranalysen native | futtermittel | niedrig | — | `GET /api/v1/masks/futtermittel/grundfutteranalysen/agent-contract` |
 | `futtermittel/integrationsmonitor` | Integrationsmonitor | futtermittel | niedrig | — | `GET /api/v1/masks/futtermittel/integrationsmonitor/agent-contract` |
 | `futtermittel/mischfuttermittel` | Mischfuttermittel | futtermittel | niedrig | — | `GET /api/v1/masks/futtermittel/mischfuttermittel/agent-contract` |
 | `futtermittel/mischfuttermittel-liste` | Mischfuttermittel | futtermittel | niedrig | — | `GET /api/v1/masks/futtermittel/mischfuttermittel-liste/agent-contract` |
-| `futtermittel/mischfuttermittel/liste` | Mischfuttermittel liste | futtermittel | niedrig | — | `GET /api/v1/masks/futtermittel/mischfuttermittel/liste/agent-contract` |
 | `futtermittel/mischfuttermittel/stamm/new` | Mischfuttermittel anlegen | futtermittel | niedrig | — | `GET /api/v1/masks/futtermittel/mischfuttermittel/stamm/new/agent-contract` |
 | `futtermittel/rations-schnittstellen-import` | Rations schnittstellen import | futtermittel | niedrig | — | `GET /api/v1/masks/futtermittel/rations-schnittstellen-import/agent-contract` |
 | `futtermittel/rations-zugang` | Rations zugang | futtermittel | niedrig | — | `GET /api/v1/masks/futtermittel/rations-zugang/agent-contract` |
@@ -681,7 +675,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `process/approval-density` | Freigabe-Dichte | platform | niedrig | — | `GET /api/v1/masks/process/approval-density/agent-contract` |
 | `process/background-jobs` | Hintergrund-Jobs | platform | niedrig | — | `GET /api/v1/masks/process/background-jobs/agent-contract` |
 | `produktion/chargen-bearbeiten` | Chargen-Nummern bearbeiten | inventory | niedrig | — | `GET /api/v1/masks/produktion/chargen-bearbeiten/agent-contract` |
-| `produktion/mischfutter-produktion` | Mischfutter produktion | produktion | niedrig | — | `GET /api/v1/masks/produktion/mischfutter-produktion/agent-contract` |
+| `produktion/mischfutter-produktion` | Mischfutter-Produktion | futtermittel | niedrig | — | `GET /api/v1/masks/produktion/mischfutter-produktion/agent-contract` |
 | `produktion/produktions-dokumente-drucken` | Produktions dokumente drucken | produktion | niedrig | — | `GET /api/v1/masks/produktion/produktions-dokumente-drucken/agent-contract` |
 | `produktion/produktionsleitstand` | Produktionsleitstand | agrar | mittel | — | `GET /api/v1/masks/produktion/produktionsleitstand/agent-contract` |
 | `produktion/rezepturgruppe` | Rezepturgruppe | produktion | niedrig | — | `GET /api/v1/masks/produktion/rezepturgruppe/agent-contract` |
@@ -16893,124 +16887,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-## Domäne: futter
-
-### `futter/einzel/liste` — Liste
-
-**Zweck:** Liste im futter-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/futter/einzel/liste/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/futter/einzel/liste/agent-contract` |
-| Readiness | `GET /api/v1/masks/futter/einzel/liste/readiness` |
-| Rollout-Route | `/mask-rollout/futter__einzel__liste/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/futter/chargen`
-
-**Beispiel-Prompts:**
-
-- Zeige Liste.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
-### `futter/einzel/stamm/neu` — Stamm
-
-**Zweck:** Stamm im futter-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/futter/einzel/stamm/neu/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/futter/einzel/stamm/neu/agent-contract` |
-| Readiness | `GET /api/v1/masks/futter/einzel/stamm/neu/readiness` |
-| Rollout-Route | `/mask-rollout/futter__einzel__stamm__neu/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/futter/chargen`
-
-**Beispiel-Prompts:**
-
-- Zeige Stamm.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
-### `futter/misch/liste` — Liste
-
-**Zweck:** Liste im futter-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/futter/misch/liste/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/futter/misch/liste/agent-contract` |
-| Readiness | `GET /api/v1/masks/futter/misch/liste/readiness` |
-| Rollout-Route | `/mask-rollout/futter__misch__liste/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/futter/chargen`
-
-**Beispiel-Prompts:**
-
-- Zeige Liste.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
-### `futter/misch/stamm/neu` — Rezeptur-Komponenten
-
-**Zweck:** Rezeptur-Komponenten im futter-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/futter/misch/stamm/neu/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/futter/misch/stamm/neu/agent-contract` |
-| Readiness | `GET /api/v1/masks/futter/misch/stamm/neu/readiness` |
-| Rollout-Route | `/mask-rollout/futter__misch__stamm__neu/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/futter/chargen`
-
-**Beispiel-Prompts:**
-
-- Zeige Rezeptur-Komponenten.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
 ## Domäne: futtermittel
 
 ### `futter/einzel` — Einzelfuttermittel
@@ -17038,6 +16914,36 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `edit` | Bearbeiten | safe | nein | `—` |
+
+---
+
+### `futter/einzel/liste` — Einzelfuttermittel
+
+**Zweck:** Einzelfuttermittel nach Naehrstoff, Zertifikat und verfuegbarer Menge finden.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/futter/einzel/liste/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/futter/einzel/liste/agent-contract` |
+| Readiness | `GET /api/v1/masks/futter/einzel/liste/readiness` |
+| Rollout-Route | `/mask-rollout/futter__einzel__liste/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/futter/einzelfuttermittel`
+
+**Beispiel-Prompts:**
+
+- Welche Einzelfuttermittel sind GMP+-zertifiziert?
+- Wie viel Sojaschrot ist verfuegbar?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `neu` | Neues Einzelfuttermittel | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
 
@@ -17256,35 +17162,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `futtermittel/einzelfuttermittel/liste` — Einzelfuttermittel liste
-
-**Zweck:** Einzelfuttermittel liste im futtermittel-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/futtermittel/einzelfuttermittel/liste/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/futtermittel/einzelfuttermittel/liste/agent-contract` |
-| Readiness | `GET /api/v1/masks/futtermittel/einzelfuttermittel/liste/readiness` |
-| Rollout-Route | `/mask-rollout/futtermittel__einzelfuttermittel__liste/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/futtermittel/qs/haccp-plaene`
-
-**Beispiel-Prompts:**
-
-- Zeige Einzelfuttermittel liste.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
 ### `futtermittel/einzelfuttermittel/stamm/new` — Einzelfuttermittel anlegen
 
 **Zweck:** Einzelfuttermittel mit vollständigen Stammdaten anlegen.
@@ -17420,35 +17297,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `futtermittel/grundfutteranalysen` — Grundfutteranalysen native
-
-**Zweck:** Grundfutteranalysen native im futtermittel-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/futtermittel/grundfutteranalysen/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/futtermittel/grundfutteranalysen/agent-contract` |
-| Readiness | `GET /api/v1/masks/futtermittel/grundfutteranalysen/readiness` |
-| Rollout-Route | `/mask-rollout/futtermittel__grundfutteranalysen/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/futtermittel/qs/haccp-plaene`
-
-**Beispiel-Prompts:**
-
-- Zeige Grundfutteranalysen native.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
 ### `futtermittel/integrationsmonitor` — Integrationsmonitor
 
 **Zweck:** Integrationsmonitor im futtermittel-Bereich finden und auswerten.
@@ -17535,35 +17383,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `neu` | Neues Mischfuttermittel | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
-### `futtermittel/mischfuttermittel/liste` — Mischfuttermittel liste
-
-**Zweck:** Mischfuttermittel liste im futtermittel-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/futtermittel/mischfuttermittel/liste/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/futtermittel/mischfuttermittel/liste/agent-contract` |
-| Readiness | `GET /api/v1/masks/futtermittel/mischfuttermittel/liste/readiness` |
-| Rollout-Route | `/mask-rollout/futtermittel__mischfuttermittel__liste/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/futtermittel/qs/haccp-plaene`
-
-**Beispiel-Prompts:**
-
-- Zeige Mischfuttermittel liste.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
 | `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
@@ -17791,6 +17610,35 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `open_workspace` | Planungswerkzeug öffnen | safe | nein | `—` |
+
+---
+
+### `produktion/mischfutter-produktion` — Mischfutter-Produktion
+
+**Zweck:** Produktionsauftraege verfolgen: Was ist produziert, abgebucht und gebucht?
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/produktion/mischfutter-produktion/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/produktion/mischfutter-produktion/agent-contract` |
+| Readiness | `GET /api/v1/masks/produktion/mischfutter-produktion/readiness` |
+| Rollout-Route | `/mask-rollout/produktion__mischfutter-produktion/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/produktion/mischfutter/auftraege`
+
+**Beispiel-Prompts:**
+
+- Welche Auftraege sind noch nicht vom Bestand abgebucht?
+- Wie viel Milchviehfutter lief diese Woche?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
 
@@ -23969,39 +23817,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 ---
 
 ## Domäne: produktion
-
-### `produktion/mischfutter-produktion` — Mischfutter produktion
-
-**Zweck:** Mischfutter produktion im produktion-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/produktion/mischfutter-produktion/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/produktion/mischfutter-produktion/agent-contract` |
-| Readiness | `GET /api/v1/masks/produktion/mischfutter-produktion/readiness` |
-| Rollout-Route | `/mask-rollout/produktion__mischfutter-produktion/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/produktion/mischfutter/auftraege`
-
-**MCP-Tools (Domäne):**
-
-- `produktion.control.sync` — scope `ops:write`, Risiko mittel
-
-**Beispiel-Prompts:**
-
-- Zeige Mischfutter produktion.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
 
 ### `produktion/produktions-dokumente-drucken` — Produktions dokumente drucken
 
