@@ -13,7 +13,7 @@ describe('Listenfamilien: aktuelles Routeninventar (Quellnachweis)', () => {
     const batch3: Array<[string, string]> = [
       ['agrar/biostimulanzien-liste.tsx', 'agrar/biostimulanzien-liste'],
       ['agrar/ernte/liste.tsx', 'agrar/ernte-liste'],
-      ['sales/auftraege-liste.tsx', 'verkauf/auftraege'],
+      ['sales/auftraege-liste.tsx', 'sales/auftraege-liste'],
       ['service/anfragen.tsx', 'service/anfragen'],
     ]
     for (const [file, screenId] of batch3) {
@@ -55,12 +55,12 @@ describe('Listenfamilien: aktuelles Routeninventar (Quellnachweis)', () => {
   })
 
   it('Verkauf-Kunden-Liste bindet ihre eigene aktuelle ScreenDefinition', () => {
-    expect(read('verkauf/kunden-liste.tsx')).toContain('screenId="verkauf/kunden-liste"')
+    expect(read('verkauf/kunden-liste.tsx')).toContain('screenId="crm/kunden-liste"')
   })
 
   // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
   it.fails('Sales-Auftraege- und Lieferungen-Listen nutzen NativeListPage', () => {
-    expect(read('sales/auftraege-liste.tsx')).toContain('screenId="verkauf/auftraege"')
+    expect(read('sales/auftraege-liste.tsx')).toContain('screenId="sales/auftraege-liste"')
     const lieferungen = read('sales/lieferungen-liste.tsx')
     expect(lieferungen).toContain('useLieferungen')
     expect(lieferungen).toContain('RoleFocusBar')

@@ -20317,4 +20317,9 @@ Anlage- bzw. Objektmaske, Grundfutteranalysen), 2 Listen neu (Einzelfuttermittel
 Inventarprofil, Mengen in dt, Preis je dt statt je t - Feldklasse pricePer/displayPricePer). Alle Cluster in
 app/core/screen_definitions_clusters.py. Offen: beratung, bestellung, statistik, integrationsmonitor,
 rations-import/-zugang, rationsvergleich, wareneingang, produktionsdokumente, rezepte/editor.
+Batch 4 Verkauf/Einkauf (03.11.2026): 7 Seiten umgehaengt (Kundenliste -> crm/kunden-liste, Auftraege x2,
+Ausgangsrechnungen, Wareneingang -> Einkaufs-Lieferscheinerfassung, RFQ-Gebote -> Angebotsvergleich,
+Eingangsrechnungs-Erfassung -> InvoiceCapturePage), 3 Doppelungen entfernt. Belegerfassungen (Angebot,
+Lieferschein, Kalkulation) warten auf den Rollout der Belegfamilie (beleg/* nur im Sichtpruefungsmandanten).
+Vorbestehend rot auf main (reihenfolgeabhaengig): einkauf/angebote-liste-uix.test.tsx, lieferanten-liste-uix.test.tsx.
 

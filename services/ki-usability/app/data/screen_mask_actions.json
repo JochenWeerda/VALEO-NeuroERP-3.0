@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 573,
-    "screens_with_actions": 401,
+    "actions": 563,
+    "screens_with_actions": 391,
     "domains": 54
   },
   "actions": [
@@ -4620,46 +4620,6 @@
       }
     },
     {
-      "id": "mask:einkauf/rechnung-abgleich:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (einkauf/rechnung-abgleich)",
-      "category": "mask-action",
-      "domain": "einkauf",
-      "mask": "einkauf/rechnung-abgleich",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "einkauf/rechnung-abgleich",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:einkauf/rechnung-eingang-erfassung:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (einkauf/rechnung-eingang-erfassung)",
-      "category": "mask-action",
-      "domain": "einkauf",
-      "mask": "einkauf/rechnung-eingang-erfassung",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "einkauf/rechnung-eingang-erfassung",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
       "id": "mask:einkauf/rechnungseingaenge-liste:export",
       "label": "CSV-Export",
       "description": "CSV-Export (einkauf/rechnungseingaenge-liste)",
@@ -4752,46 +4712,6 @@
       "required_data": [],
       "source": {
         "screenId": "einkauf/retouren-liste",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:einkauf/retouren:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (einkauf/retouren)",
-      "category": "mask-action",
-      "domain": "einkauf",
-      "mask": "einkauf/retouren",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "einkauf/retouren",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:einkauf/rfq-bids:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (einkauf/rfq-bids)",
-      "category": "mask-action",
-      "domain": "einkauf",
-      "mask": "einkauf/rfq-bids",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "einkauf/rfq-bids",
         "actionKey": "export",
         "commandEndpoint": null,
         "navigationRoute": null,
@@ -4903,26 +4823,6 @@
         "navigationRoute": null,
         "command": null,
         "method": "POST"
-      }
-    },
-    {
-      "id": "mask:einkauf/wareneingang:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (einkauf/wareneingang)",
-      "category": "mask-action",
-      "domain": "einkauf",
-      "mask": "einkauf/wareneingang",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "einkauf/wareneingang",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
       }
     },
     {
@@ -10310,66 +10210,6 @@
       }
     },
     {
-      "id": "mask:sales/lieferungen/neu:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (sales/lieferungen/neu)",
-      "category": "mask-action",
-      "domain": "sales",
-      "mask": "sales/lieferungen/neu",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "sales/lieferungen/neu",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:sales/orders-modern:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (sales/orders-modern)",
-      "category": "mask-action",
-      "domain": "sales",
-      "mask": "sales/orders-modern",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "sales/orders-modern",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:sales/rechnungen-liste:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (sales/rechnungen-liste)",
-      "category": "mask-action",
-      "domain": "sales",
-      "mask": "sales/rechnungen-liste",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "sales/rechnungen-liste",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
       "id": "mask:sales/sales-order:bearbeiten",
       "label": "Bearbeiten",
       "description": "Bearbeiten (sales/sales-order)",
@@ -10896,26 +10736,6 @@
       }
     },
     {
-      "id": "mask:verkauf/auftraege:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (verkauf/auftraege)",
-      "category": "mask-action",
-      "domain": "verkauf",
-      "mask": "verkauf/auftraege",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "verkauf/auftraege",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
       "id": "mask:verkauf/betriebs-auftraege:export",
       "label": "CSV-Export",
       "description": "CSV-Export (verkauf/betriebs-auftraege)",
@@ -10948,26 +10768,6 @@
       "required_data": [],
       "source": {
         "screenId": "verkauf/kommissions-auftraege",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:verkauf/kunden-liste:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (verkauf/kunden-liste)",
-      "category": "mask-action",
-      "domain": "verkauf",
-      "mask": "verkauf/kunden-liste",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "verkauf/kunden-liste",
         "actionKey": "export",
         "commandEndpoint": null,
         "navigationRoute": null,

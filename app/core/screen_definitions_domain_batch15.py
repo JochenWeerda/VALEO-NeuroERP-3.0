@@ -43,44 +43,6 @@ def build_contracts_v2_screen_definition() -> dict[str, Any]:
     )
 
 
-def build_einkauf_rechnung_abgleich_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="einkauf/rechnung-abgleich",
-        domain="einkauf",
-        title="Rechnung abgleich",
-        subtitle="einkauf",
-        endpoint="/api/v1/einkauf/rechnungseingaenge",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Rechnung abgleich im einkauf-Bereich finden und auswerten.",
-        prompts=["Zeige Rechnung abgleich.", "Filtere die Liste."],
-        bundle="einkauf",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_einkauf_rechnung_eingang_erfassung_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="einkauf/rechnung-eingang-erfassung",
-        domain="einkauf",
-        title="Rechnung eingang erfassung",
-        subtitle="einkauf",
-        endpoint="/api/v1/crm/customers/",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Rechnung eingang erfassung im einkauf-Bereich finden und auswerten.",
-        prompts=["Zeige Rechnung eingang erfassung.", "Filtere die Liste."],
-        bundle="einkauf",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
 def build_einkauf_rechnungseingang_neu_screen_definition() -> dict[str, Any]:
     return build_invoice_capture(purchase=True)
 
@@ -102,44 +64,6 @@ def build_einkauf_reports_screen_definition() -> dict[str, Any]:
     )
 
 
-def build_einkauf_retouren_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="einkauf/retouren",
-        domain="einkauf",
-        title="Retouren",
-        subtitle="einkauf",
-        endpoint="/api/v1/einkauf/retouren",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Retouren im einkauf-Bereich finden und auswerten.",
-        prompts=["Zeige Retouren.", "Filtere die Liste."],
-        bundle="einkauf",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_einkauf_rfq_bids_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="einkauf/rfq-bids",
-        domain="einkauf",
-        title="Rfq bids",
-        subtitle="einkauf",
-        endpoint="/api/v1/einkauf/anfragen",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Rfq bids im einkauf-Bereich finden und auswerten.",
-        prompts=["Zeige Rfq bids.", "Filtere die Liste."],
-        bundle="einkauf",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
 def build_einkauf_service_entry_sheets_screen_definition() -> dict[str, Any]:
     columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
     return build_stamm_list_screen(
@@ -154,25 +78,6 @@ def build_einkauf_service_entry_sheets_screen_definition() -> dict[str, Any]:
         row_actions=[],
         purpose="Service entry sheets im einkauf-Bereich finden und auswerten.",
         prompts=["Zeige Service entry sheets.", "Filtere die Liste."],
-        bundle="einkauf",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_einkauf_wareneingang_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="einkauf/wareneingang",
-        domain="einkauf",
-        title="Wareneingang",
-        subtitle="einkauf",
-        endpoint="/api/v1/purchase-orders",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Wareneingang im einkauf-Bereich finden und auswerten.",
-        prompts=["Zeige Wareneingang.", "Filtere die Liste."],
         bundle="einkauf",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -2539,63 +2444,6 @@ def build_sales_lieferung_storno_screen_definition() -> dict[str, Any]:
     )
 
 
-def build_sales_lieferungen_neu_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="sales/lieferungen/neu",
-        domain="sales",
-        title="Lieferungen liste",
-        subtitle="sales",
-        endpoint="/api/v1/sales/blanket-orders",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Lieferungen liste im sales-Bereich finden und auswerten.",
-        prompts=["Zeige Lieferungen liste.", "Filtere die Liste."],
-        bundle="sales",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_sales_orders_modern_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="sales/orders-modern",
-        domain="sales",
-        title="Orders modern",
-        subtitle="sales",
-        endpoint="/api/v1/sales/blanket-orders",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Orders modern im sales-Bereich finden und auswerten.",
-        prompts=["Zeige Orders modern.", "Filtere die Liste."],
-        bundle="sales",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_sales_rechnungen_liste_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="sales/rechnungen-liste",
-        domain="sales",
-        title="Rechnungen liste",
-        subtitle="sales",
-        endpoint="/api/v1/sales/blanket-orders",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Rechnungen liste im sales-Bereich finden und auswerten.",
-        prompts=["Zeige Rechnungen liste.", "Filtere die Liste."],
-        bundle="sales",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
 def build_schaeden_meldung_screen_definition() -> dict[str, Any]:
     columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
     return build_stamm_list_screen(
@@ -3009,25 +2857,6 @@ def build_transporte_fahrer_neu_screen_definition() -> dict[str, Any]:
     )
 
 
-def build_verkauf_auftraege_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="verkauf/auftraege",
-        domain="verkauf",
-        title="Auftraege liste",
-        subtitle="verkauf",
-        endpoint="/api/v1/verkauf/kunden",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Auftraege liste im verkauf-Bereich finden und auswerten.",
-        prompts=["Zeige Auftraege liste.", "Filtere die Liste."],
-        bundle="verkauf",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
 def build_verkauf_auftraege_neu_screen_definition() -> dict[str, Any]:
     return build_stamm_object_page(
         screen_id="verkauf/auftraege/neu",
@@ -3114,25 +2943,6 @@ def build_verkauf_kunde_neu_screen_definition() -> dict[str, Any]:
         business_purpose="Kunde neu als Stammblatt pflegen.",
         example_prompts=["Oeffne Kunde neu.", "Bearbeite Stammdaten."],
         test_id="verkauf-kunde-neu",
-    )
-
-
-def build_verkauf_kunden_liste_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="verkauf/kunden-liste",
-        domain="verkauf",
-        title="Kunden liste",
-        subtitle="verkauf",
-        endpoint="/api/v1/crm/customers/lookup",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Kunden liste im verkauf-Bereich finden und auswerten.",
-        prompts=["Zeige Kunden liste.", "Filtere die Liste."],
-        bundle="verkauf",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
 
 
@@ -3539,14 +3349,9 @@ def build_zertifikate_neu_screen_definition() -> dict[str, Any]:
 
 BATCH15_SCREEN_BUILDERS: dict[str, Any] = {
     "contracts-v2": build_contracts_v2_screen_definition,
-    "einkauf/rechnung-abgleich": build_einkauf_rechnung_abgleich_screen_definition,
-    "einkauf/rechnung-eingang-erfassung": build_einkauf_rechnung_eingang_erfassung_screen_definition,
     "einkauf/rechnungseingang/neu": build_einkauf_rechnungseingang_neu_screen_definition,
     "einkauf/reports": build_einkauf_reports_screen_definition,
-    "einkauf/retouren": build_einkauf_retouren_screen_definition,
-    "einkauf/rfq-bids": build_einkauf_rfq_bids_screen_definition,
     "einkauf/service-entry-sheets": build_einkauf_service_entry_sheets_screen_definition,
-    "einkauf/wareneingang": build_einkauf_wareneingang_screen_definition,
     "einkauf/wareneingangsabgleich": build_einkauf_wareneingangsabgleich_screen_definition,
     "etiketten/drucken": build_etiketten_drucken_screen_definition,
     "export/ustva": build_export_ustva_screen_definition,
@@ -3682,9 +3487,6 @@ BATCH15_SCREEN_BUILDERS: dict[str, Any] = {
     "sales/delivery-editor-new": build_sales_delivery_editor_new_screen_definition,
     "sales/kalkulationen/neu": build_sales_kalkulationen_neu_screen_definition,
     "sales/lieferung-storno": build_sales_lieferung_storno_screen_definition,
-    "sales/lieferungen/neu": build_sales_lieferungen_neu_screen_definition,
-    "sales/orders-modern": build_sales_orders_modern_screen_definition,
-    "sales/rechnungen-liste": build_sales_rechnungen_liste_screen_definition,
     "schaeden/meldung": build_schaeden_meldung_screen_definition,
     "service/abschluss": build_service_abschluss_screen_definition,
     "service/anfrage-detail": build_service_anfrage_detail_screen_definition,
@@ -3708,13 +3510,11 @@ BATCH15_SCREEN_BUILDERS: dict[str, Any] = {
     "system/live-monitor": build_system_live_monitor_screen_definition,
     "tankstelle/zapfungen": build_tankstelle_zapfungen_screen_definition,
     "transporte/fahrer/neu": build_transporte_fahrer_neu_screen_definition,
-    "verkauf/auftraege": build_verkauf_auftraege_screen_definition,
     "verkauf/auftraege/neu": build_verkauf_auftraege_neu_screen_definition,
     "verkauf/betriebs-auftraege": build_verkauf_betriebs_auftraege_screen_definition,
     "verkauf/dauerauftraege": build_verkauf_dauerauftraege_screen_definition,
     "verkauf/kommissions-auftraege": build_verkauf_kommissions_auftraege_screen_definition,
     "verkauf/kunde-neu": build_verkauf_kunde_neu_screen_definition,
-    "verkauf/kunden-liste": build_verkauf_kunden_liste_screen_definition,
     "verkauf/kunden-stamm": build_verkauf_kunden_stamm_screen_definition,
     "verkauf/kunden-stamm-enhanced": build_verkauf_kunden_stamm_enhanced_screen_definition,
     "verkauf/lieferschein-erfassung": build_verkauf_lieferschein_erfassung_screen_definition,

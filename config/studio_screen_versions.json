@@ -4510,30 +4510,8 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "einkauf/rechnung-abgleich": {
-      "definition_hash": "388afce269846d6673b1af8df2abf91c3d935e493b8f5b6873afa2969adc8b62",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "einkauf/rechnung-abgleich-liste": {
       "definition_hash": "7fb934bd318ca89e002584ab4251b4ea077c604a14738b9180af8fd13c76bdb2",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "einkauf/rechnung-eingang-erfassung": {
-      "definition_hash": "e14e406798e68ee71f432659a64bd9a45e95642f916d6fd07a78da345e3dec33",
       "gates_passed": [
         "A",
         "B",
@@ -4573,30 +4551,8 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "einkauf/retouren": {
-      "definition_hash": "b1d52d7479451230fa61a64fdb7a39cc0bae862d5ecb4b9d8d7243924401d785",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "einkauf/retouren-liste": {
       "definition_hash": "4cfc322ae25189d8d84284e98ed61f21307420e0d7fab1adb89f6873950c144d",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "einkauf/rfq-bids": {
-      "definition_hash": "ed58e10d7dde13630dfca4e8453bbedaef887398014d933f6c54eda1fa3c5fc6",
       "gates_passed": [
         "A",
         "B",
@@ -4619,17 +4575,6 @@
     },
     "einkauf/supplier": {
       "definition_hash": "90e59c56d83455ecfedb9422ed46846dab989726e734ae6fe6a3f14f50115263",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "einkauf/wareneingang": {
-      "definition_hash": "f30426b20c2d833d76b15054ce6059ac8386cf9bffee9cda7dc7fbb1b07f811e",
       "gates_passed": [
         "A",
         "B",
@@ -7639,38 +7584,6 @@
       "studio_draft_clean": false,
       "version": "1.0.0"
     },
-    "sales/lieferungen/neu": {
-      "definition_hash": "de4dd69e8bc852d9ae1fba9e5a33363e1c71b3965a73f9dff77a349f86f61cb1",
-      "gates_passed": [
-        "A",
-        "B",
-        "C"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "sales/orders-modern": {
-      "definition_hash": "f9161ba8639f104c02713ef273d089cfe2ca17933272d6ba84e73e7622a579e2",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "sales/rechnungen-liste": {
-      "definition_hash": "14321b6c468f8b49abbaf097595806d30eedf1cc46ce2e2aef6fd90da5caf7a1",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "sales/sales-order": {
       "definition_hash": "9942f1affcdf32944d334f1bdd345b7927a89400739ae07591744fc035d4a0da",
       "gates_passed": [
@@ -8177,17 +8090,6 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "verkauf/auftraege": {
-      "definition_hash": "019e55de8b46d1fd2507a13b787680b1599e3e24534b3706bb20475296af2379",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "verkauf/auftraege/neu": {
       "definition_hash": "7c00e079fff46848f1981d96a720a64b9c8f93e60c2f9d1876d9847aa8c1a392",
       "gates_passed": [
@@ -8254,17 +8156,6 @@
     },
     "verkauf/kunde-neu": {
       "definition_hash": "e0004120911cc7d1269acb8fb7186f4edb379042dbb17fb2e93bcb6dfce9d5c0",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "verkauf/kunden-liste": {
-      "definition_hash": "9922ab10dc9ba9dbac7dbe05e65c8210406006a2b641cb5fc4ac2db3b56633d6",
       "gates_passed": [
         "A",
         "B",
