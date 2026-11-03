@@ -4,7 +4,7 @@
   "stats": {
     "actions": 548,
     "screens_with_actions": 376,
-    "domains": 53
+    "domains": 51
   },
   "actions": [
     {
@@ -4950,7 +4950,7 @@
       "label": "CSV-Export",
       "description": "CSV-Export (etiketten/drucken)",
       "category": "mask-action",
-      "domain": "etiketten",
+      "domain": "lager",
       "mask": "etiketten/drucken",
       "intent_phrases": [
         "CSV-Export"
@@ -7174,7 +7174,7 @@
       "label": "CSV-Export",
       "description": "CSV-Export (genossenschaft/mitglieder)",
       "category": "mask-action",
-      "domain": "genossenschaft",
+      "domain": "platform",
       "mask": "genossenschaft/mitglieder",
       "intent_phrases": [
         "CSV-Export"
@@ -7254,7 +7254,7 @@
       "label": "CSV-Export",
       "description": "CSV-Export (kontrakte/kontraktklassen)",
       "category": "mask-action",
-      "domain": "kontrakte",
+      "domain": "agrar",
       "mask": "kontrakte/kontraktklassen",
       "intent_phrases": [
         "CSV-Export"
@@ -7776,7 +7776,7 @@
       "label": "CSV-Export",
       "description": "CSV-Export (logistik/frachtbriefe)",
       "category": "mask-action",
-      "domain": "logistik",
+      "domain": "logistics",
       "mask": "logistik/frachtbriefe",
       "intent_phrases": [
         "CSV-Export"
@@ -10036,7 +10036,7 @@
       "label": "CSV-Export",
       "description": "CSV-Export (schaeden/meldung)",
       "category": "mask-action",
-      "domain": "schaeden",
+      "domain": "qualitaet",
       "mask": "schaeden/meldung",
       "intent_phrases": [
         "CSV-Export"
@@ -11100,7 +11100,7 @@
       "label": "CSV-Export",
       "description": "CSV-Export (workflows/supervisor)",
       "category": "mask-action",
-      "domain": "workflows",
+      "domain": "platform",
       "mask": "workflows/supervisor",
       "intent_phrases": [
         "CSV-Export"

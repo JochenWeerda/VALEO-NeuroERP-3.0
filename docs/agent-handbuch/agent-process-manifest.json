@@ -5501,6 +5501,40 @@
       ]
     },
     {
+      "mask_id": "kontrakte/kontraktklassen",
+      "title": "Kontraktklassen",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/kontrakte__kontraktklassen/:entityId",
+      "agent_contract_url": "/api/v1/masks/kontrakte/kontraktklassen/agent-contract",
+      "screen_definition_url": "/api/v1/masks/kontrakte/kontraktklassen/screen-definition",
+      "readiness_url": "/api/v1/masks/kontrakte/kontraktklassen/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
       "mask_id": "kontrakte/kontraktklassen-liste",
       "title": "Kontraktklassen",
       "domain": "agrar",
@@ -12275,32 +12309,6 @@
       ]
     },
     {
-      "mask_id": "etiketten/drucken",
-      "title": "Drucken",
-      "domain": "etiketten",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/etiketten__drucken/:entityId",
-      "agent_contract_url": "/api/v1/masks/etiketten/drucken/agent-contract",
-      "screen_definition_url": "/api/v1/masks/etiketten/drucken/screen-definition",
-      "readiness_url": "/api/v1/masks/etiketten/drucken/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
       "mask_id": "export/ustva",
       "title": "Umsatzsteuervoranmeldung",
       "domain": "export",
@@ -16201,32 +16209,6 @@
       "mcp_tool_ids": []
     },
     {
-      "mask_id": "genossenschaft/mitglieder",
-      "title": "Mitglieder",
-      "domain": "genossenschaft",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/genossenschaft__mitglieder/:entityId",
-      "agent_contract_url": "/api/v1/masks/genossenschaft/mitglieder/agent-contract",
-      "screen_definition_url": "/api/v1/masks/genossenschaft/mitglieder/screen-definition",
-      "readiness_url": "/api/v1/masks/genossenschaft/mitglieder/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
       "mask_id": "genossenschaft/mitglieder-liste",
       "title": "Mitglieder",
       "domain": "genossenschaft",
@@ -17041,32 +17023,6 @@
       "mcp_tool_ids": []
     },
     {
-      "mask_id": "kontrakte/kontraktklassen",
-      "title": "Kontraktklassen",
-      "domain": "kontrakte",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/kontrakte__kontraktklassen/:entityId",
-      "agent_contract_url": "/api/v1/masks/kontrakte/kontraktklassen/agent-contract",
-      "screen_definition_url": "/api/v1/masks/kontrakte/kontraktklassen/screen-definition",
-      "readiness_url": "/api/v1/masks/kontrakte/kontraktklassen/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
       "mask_id": "kontrakte/mengenzeitraeume",
       "title": "Kontrakt wählen",
       "domain": "kontrakte",
@@ -17844,6 +17800,37 @@
       "agent_contract_url": "/api/v1/masks/etiketten/druck-liste/agent-contract",
       "screen_definition_url": "/api/v1/masks/etiketten/druck-liste/screen-definition",
       "readiness_url": "/api/v1/masks/etiketten/druck-liste/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "lager.bestand.get",
+        "lager.inventur.status",
+        "lager.inventur.propose_opening",
+        "lager.stock_movement.stornieren"
+      ]
+    },
+    {
+      "mask_id": "etiketten/drucken",
+      "title": "Etikettendruck",
+      "domain": "lager",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/etiketten__drucken/:entityId",
+      "agent_contract_url": "/api/v1/masks/etiketten/drucken/agent-contract",
+      "screen_definition_url": "/api/v1/masks/etiketten/drucken/screen-definition",
+      "readiness_url": "/api/v1/masks/etiketten/drucken/readiness",
       "risk_summary": "low",
       "actions": [
         {
@@ -19365,6 +19352,40 @@
       ]
     },
     {
+      "mask_id": "logistik/frachtbriefe",
+      "title": "Frachtbriefe",
+      "domain": "logistics",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/logistik__frachtbriefe/:entityId",
+      "agent_contract_url": "/api/v1/masks/logistik/frachtbriefe/agent-contract",
+      "screen_definition_url": "/api/v1/masks/logistik/frachtbriefe/screen-definition",
+      "readiness_url": "/api/v1/masks/logistik/frachtbriefe/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "logistik.frachttabelle.anlegen",
+        "logistik.tour.anlegen",
+        "logistik.fahrzeug.speichern",
+        "logistik.fahrzeug.loeschen",
+        "logistik.terminart.speichern",
+        "logistik.rechnung.speichern",
+        "logistik.ausgehendes_dokument.speichern"
+      ]
+    },
+    {
       "mask_id": "logistik/frachttabellen",
       "title": "Frachttabellen",
       "domain": "logistics",
@@ -19868,32 +19889,6 @@
       "agent_contract_url": "/api/v1/masks/fuhrpark/rechnungen-liste/agent-contract",
       "screen_definition_url": "/api/v1/masks/fuhrpark/rechnungen-liste/screen-definition",
       "readiness_url": "/api/v1/masks/fuhrpark/rechnungen-liste/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "logistik/frachtbriefe",
-      "title": "Frachtbriefe",
-      "domain": "logistik",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/logistik__frachtbriefe/:entityId",
-      "agent_contract_url": "/api/v1/masks/logistik/frachtbriefe/agent-contract",
-      "screen_definition_url": "/api/v1/masks/logistik/frachtbriefe/screen-definition",
-      "readiness_url": "/api/v1/masks/logistik/frachtbriefe/readiness",
       "risk_summary": "low",
       "actions": [
         {
@@ -20886,6 +20881,34 @@
       ]
     },
     {
+      "mask_id": "genossenschaft/mitglieder",
+      "title": "Mitglieder",
+      "domain": "platform",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/genossenschaft__mitglieder/:entityId",
+      "agent_contract_url": "/api/v1/masks/genossenschaft/mitglieder/agent-contract",
+      "screen_definition_url": "/api/v1/masks/genossenschaft/mitglieder/screen-definition",
+      "readiness_url": "/api/v1/masks/genossenschaft/mitglieder/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "admin.postfach.speichern"
+      ]
+    },
+    {
       "mask_id": "planung/kalender",
       "title": "Planungskalender",
       "domain": "platform",
@@ -21061,6 +21084,34 @@
       "readiness_url": "/api/v1/masks/workflow/workflow-monitoring/readiness",
       "risk_summary": "low",
       "actions": [],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "admin.postfach.speichern"
+      ]
+    },
+    {
+      "mask_id": "workflows/supervisor",
+      "title": "Agentenlaeufe",
+      "domain": "platform",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/workflows__supervisor/:entityId",
+      "agent_contract_url": "/api/v1/masks/workflows/supervisor/agent-contract",
+      "screen_definition_url": "/api/v1/masks/workflows/supervisor/screen-definition",
+      "readiness_url": "/api/v1/masks/workflows/supervisor/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "admin.postfach.speichern"
@@ -22228,6 +22279,34 @@
           "method": null,
           "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
         },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "qualitaet.reklamation.abschliessen"
+      ]
+    },
+    {
+      "mask_id": "schaeden/meldung",
+      "title": "Schadensmeldungen",
+      "domain": "qualitaet",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/schaeden__meldung/:entityId",
+      "agent_contract_url": "/api/v1/masks/schaeden/meldung/agent-contract",
+      "screen_definition_url": "/api/v1/masks/schaeden/meldung/screen-definition",
+      "readiness_url": "/api/v1/masks/schaeden/meldung/readiness",
+      "risk_summary": "low",
+      "actions": [
         {
           "key": "export",
           "label": "CSV-Export",
@@ -23687,32 +23766,6 @@
       ]
     },
     {
-      "mask_id": "schaeden/meldung",
-      "title": "Meldung",
-      "domain": "schaeden",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/schaeden__meldung/:entityId",
-      "agent_contract_url": "/api/v1/masks/schaeden/meldung/agent-contract",
-      "screen_definition_url": "/api/v1/masks/schaeden/meldung/screen-definition",
-      "readiness_url": "/api/v1/masks/schaeden/meldung/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
       "mask_id": "service/abschluss",
       "title": "Abschluss",
       "domain": "service",
@@ -24964,32 +25017,6 @@
       "agent_contract_url": "/api/v1/masks/workflows/history/agent-contract",
       "screen_definition_url": "/api/v1/masks/workflows/history/screen-definition",
       "readiness_url": "/api/v1/masks/workflows/history/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "workflows/supervisor",
-      "title": "Supervisor",
-      "domain": "workflows",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/workflows__supervisor/:entityId",
-      "agent_contract_url": "/api/v1/masks/workflows/supervisor/agent-contract",
-      "screen_definition_url": "/api/v1/masks/workflows/supervisor/screen-definition",
-      "readiness_url": "/api/v1/masks/workflows/supervisor/readiness",
       "risk_summary": "low",
       "actions": [
         {

@@ -4640,7 +4640,7 @@
       "version": "1.0.0"
     },
     "etiketten/drucken": {
-      "definition_hash": "04a932adf3402c3e6ea116ca674c1b803e9447f2306cea46ee3037a625d0eb05",
+      "definition_hash": "ee727b3f54167c9a2e1c2e9164d786cce8fac4e50d2e77584691321b82a7c8ef",
       "gates_passed": [
         "A",
         "B",
@@ -5902,7 +5902,7 @@
       "version": "1.0.0"
     },
     "genossenschaft/mitglieder": {
-      "definition_hash": "970af399a3f37e407375b710e10195c698fdb4e7c65069b64fe880c2c9391f8d",
+      "definition_hash": "a64ac9e3ae08d4e219c01aebd56cbfbe1995f8a87a8e7bb32b0291e634915965",
       "gates_passed": [
         "A",
         "B",
@@ -6001,7 +6001,7 @@
       "version": "1.0.0"
     },
     "kontrakte/kontraktklassen": {
-      "definition_hash": "34bd12f803d546d1d426205db05e1b255e6a4a05a0586c5fc2f96480f5bb2b14",
+      "definition_hash": "8837912a9ee72aa2e9c3e8588a41ba1cd713e8bbf01cd5b32410ebfdd6177843",
       "gates_passed": [
         "A",
         "B",
@@ -6364,7 +6364,7 @@
       "version": "1.0.0"
     },
     "logistik/frachtbriefe": {
-      "definition_hash": "9c072653d58996c97dac5dde603af19ac4ebf337bca98db759712e44392fd81d",
+      "definition_hash": "33ebf77eaf9d005f92debcc7202b0e0fc5a6a7e672dce9a35322a3927379efb9",
       "gates_passed": [
         "A",
         "B",
@@ -7475,7 +7475,7 @@
       "version": "1.0.0"
     },
     "schaeden/meldung": {
-      "definition_hash": "ea90170a40b189b32d05094475b124ef336e3d47b84d8681eab7db9a128f6de8",
+      "definition_hash": "3b3d1938685f196ad1f822457cf599285619478890e46d46b39a26c7e50d76eb",
       "gates_passed": [
         "A",
         "B",
@@ -8462,7 +8462,7 @@
       "version": "1.0.0"
     },
     "workflows/supervisor": {
-      "definition_hash": "da9a3de5173b8358cf9125fc3e793c4c76eb52f8463fda6f8ee79c3ba3c2968a",
+      "definition_hash": "52a6433569f57a664649cb4d1cecebe6197a177fcf8e2dc452702daf17f8ce12",
       "gates_passed": [
         "A",
         "B",

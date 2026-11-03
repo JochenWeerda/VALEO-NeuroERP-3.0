@@ -102,25 +102,6 @@ def build_einkauf_wareneingangsabgleich_screen_definition() -> dict[str, Any]:
     )
 
 
-def build_etiketten_drucken_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="etiketten/drucken",
-        domain="etiketten",
-        title="Drucken",
-        subtitle="etiketten",
-        endpoint="/api/v1/etiketten/druckauftrag",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Drucken im etiketten-Bereich finden und auswerten.",
-        prompts=["Zeige Drucken.", "Filtere die Liste."],
-        bundle="etiketten",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
 def build_export_ustva_screen_definition() -> dict[str, Any]:
     columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
     return build_stamm_list_screen(
@@ -854,25 +835,6 @@ def build_futtermittel_wareneingang_screen_definition() -> dict[str, Any]:
     )
 
 
-def build_genossenschaft_mitglieder_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="genossenschaft/mitglieder",
-        domain="genossenschaft",
-        title="Mitglieder",
-        subtitle="genossenschaft",
-        endpoint="/api/v1/genossenschaft/mitglieder",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Mitglieder im genossenschaft-Bereich finden und auswerten.",
-        prompts=["Zeige Mitglieder.", "Filtere die Liste."],
-        bundle="genossenschaft",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
 def build_inventory_reports_screen_definition() -> dict[str, Any]:
     cols = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
     return build_cockpit_overview_screen(
@@ -979,25 +941,6 @@ def build_kontrakte_lstkontraktuebersicht_screen_definition() -> dict[str, Any]:
         tables=[cockpit_summary_table(table_key="list", label="LstKontraktUebersicht", columns=cols)],
         actions=[cockpit_refresh_action(permission="kontrakte.read")],
         context_rail="combined",
-    )
-
-
-def build_kontrakte_kontraktklassen_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="kontrakte/kontraktklassen",
-        domain="kontrakte",
-        title="Kontraktklassen",
-        subtitle="kontrakte",
-        endpoint="/api/v1/kontrakt-klassen",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Kontraktklassen im kontrakte-Bereich finden und auswerten.",
-        prompts=["Zeige Kontraktklassen.", "Filtere die Liste."],
-        bundle="kontrakte",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
 
 
@@ -1200,25 +1143,6 @@ def build_lager_terminal_screen_definition() -> dict[str, Any]:
         purpose="Terminal im lager-Bereich finden und auswerten.",
         prompts=["Zeige Terminal.", "Filtere die Liste."],
         bundle="lager",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_logistik_frachtbriefe_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="logistik/frachtbriefe",
-        domain="logistik",
-        title="Frachtbriefe",
-        subtitle="logistik",
-        endpoint="/api/v1/logistik/frachtbriefe",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Frachtbriefe im logistik-Bereich finden und auswerten.",
-        prompts=["Zeige Frachtbriefe.", "Filtere die Liste."],
-        bundle="logistik",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
 
@@ -2216,25 +2140,6 @@ def build_sales_lieferung_storno_screen_definition() -> dict[str, Any]:
     )
 
 
-def build_schaeden_meldung_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="schaeden/meldung",
-        domain="schaeden",
-        title="Meldung",
-        subtitle="schaeden",
-        endpoint="/api/v1/schaeden/meldungen",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Meldung im schaeden-Bereich finden und auswerten.",
-        prompts=["Zeige Meldung.", "Filtere die Liste."],
-        bundle="schaeden",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
 def build_service_abschluss_screen_definition() -> dict[str, Any]:
     columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
     return build_stamm_list_screen(
@@ -3007,25 +2912,6 @@ def build_workflows_history_screen_definition() -> dict[str, Any]:
     )
 
 
-def build_workflows_supervisor_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="workflows/supervisor",
-        domain="workflows",
-        title="Supervisor",
-        subtitle="workflows",
-        endpoint="/api/v1/agents/neuroassist/runs",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Supervisor im workflows-Bereich finden und auswerten.",
-        prompts=["Zeige Supervisor.", "Filtere die Liste."],
-        bundle="workflows",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
 def build_zertifikate_neu_screen_definition() -> dict[str, Any]:
     columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
     return build_stamm_list_screen(
@@ -3051,7 +2937,6 @@ BATCH15_SCREEN_BUILDERS: dict[str, Any] = {
     "einkauf/reports": build_einkauf_reports_screen_definition,
     "einkauf/service-entry-sheets": build_einkauf_service_entry_sheets_screen_definition,
     "einkauf/wareneingangsabgleich": build_einkauf_wareneingangsabgleich_screen_definition,
-    "etiketten/drucken": build_etiketten_drucken_screen_definition,
     "export/ustva": build_export_ustva_screen_definition,
     "fibu/abschluss-checklist-detail": build_fibu_abschluss_checklist_detail_screen_definition,
     "fibu/anlagen": build_fibu_anlagen_screen_definition,
@@ -3098,14 +2983,12 @@ BATCH15_SCREEN_BUILDERS: dict[str, Any] = {
     "futtermittel/rationsoptimierung": build_futtermittel_rationsoptimierung_screen_definition,
     "futtermittel/rationsvergleich": build_futtermittel_rationsvergleich_screen_definition,
     "futtermittel/wareneingang": build_futtermittel_wareneingang_screen_definition,
-    "genossenschaft/mitglieder": build_genossenschaft_mitglieder_screen_definition,
     "inventory-reports": build_inventory_reports_screen_definition,
     "inventory/epcis": build_inventory_epcis_screen_definition,
     "kasse/tagesabschluss": build_kasse_tagesabschluss_screen_definition,
     "kontrakte/FrmKontraktProtokoll": build_kontrakte_frmkontraktprotokoll_screen_definition,
     "kontrakte/KontraktAlarmDashboard": build_kontrakte_kontraktalarmdashboard_screen_definition,
     "kontrakte/LstKontraktUebersicht": build_kontrakte_lstkontraktuebersicht_screen_definition,
-    "kontrakte/kontraktklassen": build_kontrakte_kontraktklassen_screen_definition,
     "kontrakte/mengenzeitraeume": build_kontrakte_mengenzeitraeume_screen_definition,
     "kontrakte/positionen": build_kontrakte_positionen_screen_definition,
     "lager/auslagerung": build_lager_auslagerung_screen_definition,
@@ -3117,7 +3000,6 @@ BATCH15_SCREEN_BUILDERS: dict[str, Any] = {
     "lager/materialfluss-visualisierung": build_lager_materialfluss_visualisierung_screen_definition,
     "lager/permanente-inventur": build_lager_permanente_inventur_screen_definition,
     "lager/terminal": build_lager_terminal_screen_definition,
-    "logistik/frachtbriefe": build_logistik_frachtbriefe_screen_definition,
     "mahnwesen/mahnlauf": build_mahnwesen_mahnlauf_screen_definition,
     "marketing/kampagnen": build_marketing_kampagnen_screen_definition,
     "mobile/scanner": build_mobile_scanner_screen_definition,
@@ -3173,7 +3055,6 @@ BATCH15_SCREEN_BUILDERS: dict[str, Any] = {
     "sales/delivery-editor-new": build_sales_delivery_editor_new_screen_definition,
     "sales/kalkulationen/neu": build_sales_kalkulationen_neu_screen_definition,
     "sales/lieferung-storno": build_sales_lieferung_storno_screen_definition,
-    "schaeden/meldung": build_schaeden_meldung_screen_definition,
     "service/abschluss": build_service_abschluss_screen_definition,
     "service/anfrage-detail": build_service_anfrage_detail_screen_definition,
     "service/anfrage/neu": build_service_anfrage_neu_screen_definition,
@@ -3225,7 +3106,6 @@ BATCH15_SCREEN_BUILDERS: dict[str, Any] = {
     "workflow/workflow-regeln": build_workflow_workflow_regeln_screen_definition,
     "workflow/workflow-sandbox": build_workflow_workflow_sandbox_screen_definition,
     "workflows/history": build_workflows_history_screen_definition,
-    "workflows/supervisor": build_workflows_supervisor_screen_definition,
     "zertifikate/neu": build_zertifikate_neu_screen_definition,
 }
 
