@@ -3,16 +3,16 @@
  "summary": {
   "tables": 784,
   "by_class": {
-   "A": 705,
+   "A": 709,
    "B": 22,
    "C": 9,
-   "D": 48
+   "D": 44
   },
-  "rls_enabled": 673,
+  "rls_enabled": 677,
   "tenant_types": {
    "character varying": 339,
    "character varying(100)": 9,
-   "character varying(120)": 51,
+   "character varying(120)": 55,
    "character varying(128)": 1,
    "character varying(255)": 1,
    "character varying(36)": 83,
@@ -3744,11 +3744,11 @@
   },
   {
    "table": "domain_ops.ops_foerderantraege",
-   "class": "D",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying(120)",
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_fuhrpark_ausgehende_dokumente",
@@ -3776,27 +3776,27 @@
   },
   {
    "table": "domain_ops.ops_labor_auftraege",
-   "class": "D",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying(120)",
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_labor_proben",
-   "class": "D",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying(120)",
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_marketing_kampagnen",
-   "class": "D",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying(120)",
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_pcn_meldungen",

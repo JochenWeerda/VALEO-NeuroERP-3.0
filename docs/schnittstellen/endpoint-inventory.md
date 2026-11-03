@@ -226,7 +226,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `finance_stammdaten_kommandos` | Zeilenaktionen der Finance-Stammdatenlisten als Fachaktion fuer Maske, CLI und MCP (MASK-STUDIO-ROLLOUT, Welle 1). |
 | `financial_reports` | Financial Reports API |
 | `flow_spines` | — |
-| `foerderung` | Foerderung API - DB-backed endpoints. |
+| `foerderung` | Foerderantraege (Agrarfoerderung) im Mandanten. |
 | `forderungsgruppen` | Forderungsgruppen [FORG] — Kundensegmentierung für Bestandskontenzuordnung. |
 | `foreign_goods_worklist` | Foreign-goods operator worklist API. |
 | `fuhrpark` | Fuhrpark API Endpoints - zvoove style master data mask. |
@@ -279,7 +279,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `kostenrechnung` | Kostenrechnung: Kostenstellen, Kostenarten, Kostenstellen-Buchungen. |
 | `kundenbanken` | Kundenbanken — IBAN/BIC-Bankverbindungen pro Kunde. |
 | `l3_report_catalog` | Prioritized fixed L3 report catalog API. |
-| `labor` | Labor API - DB-backed endpoints. |
+| `labor` | Laborproben, Laborauftraege und Befunde im Mandanten. |
 | `leads` | Tenant-bound lead CRUD and qualification on public.crm_leads. |
 | `legacy_interface_adapters` | Governed L3 Standard and Unimet adapter API. |
 | `liquidity` | Liquidity Planning API -- Liquiditaetsplanung |
@@ -291,7 +291,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `lohn_connector` | Lohn-Connector API – Lohn-Import-Läufe (LEXWARE / externe Lohnbuchhaltung). |
 | `mail_workspace` | Role-scoped ERP mail workspace API. |
 | `mailkonto` | Postfaecher des Mandanten — Einrichtung, Freigaben, Testmail, Anmeldung bei Google/Microsoft. |
-| `marketing` | Marketing API - DB-backed endpoints. |
+| `marketing` | Marketingkampagnen (Betriebsplanung) im Mandanten. |
 | `mask_actions` | SPEC-P1-04 / UIX-053+: Mask Action CommandEndpoints mit ActionRuntime. |
 | `mask_frontend_bridges` | Frontend-Pfade, die der Maskengenerator und die Fachmasken schon rufen. |
 | `mask_registry` | Mask Registry API — Wave 3 AP1 |

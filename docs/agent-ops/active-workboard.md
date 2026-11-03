@@ -20309,3 +20309,18 @@ Konstruktor, ops_waagen NOT NULL, ops_wiegungen mit Mandant aus der Waage und Ve
 (waagen_wiegungen_mandant_20261103); Alt-Wiegungswege bleiben 410. Alembic: vat_return_bearbeiter_20261027 auf
 rahmenauftrag_afa_tabellen_20261102 umgehaengt, ein Kopf. Pruefung auf frischer DB ueber CI (keine eigene lokale DB,
 ungemergte Migrationen nicht auf valeo_probe). Nach dem Merge: alte PRs #82/#84/#85/#88 schliessen.
+
+## BATCH8-SCHEINWEGE-20261103 — in Arbeit, Claude
+
+Nutzerauftrag 03.11.2026 (nach Batch 7): Foerderung, Marketing und Labor legten bei jedem Lesezugriff per _seed
+Demodaten an und kannten keinen Mandanten. Jetzt: kein Seed, Mandant aus der Anmeldung in allen Wegen, RLS je Befehl
+(scheinwege_mandant_20261103 auf waagen_wiegungen_mandant_20261103, Branch claude/batch8-scheinwege-20261103 auf
+PR #101). Altbestand an den Default-Mandanten (Nutzerentscheidung 28.10.), geloescht wird nichts.
+Mitbehoben: Aendern/Loeschen nahmen Text-Kennungen als Zahl an (immer 422); Antragsnummer je Mandant eindeutig (409);
+Kampagnen-KPIs melden unbekanntes Ist als None statt 0; Laborauftrag nur zu einer Charge des Mandanten (404); der
+Befund speichert Analysewerte, Grenzwerte und Bemerkung (vorher nur zurueckgegeben); Antworten typisiert, dadurch
+Feldvertrag fuer annahme/labor und qualitaet/labor-detail (fragten nie gelieferte Felder) - beide Masken repariert.
+Offen (Fachfrage): Kampagnen gibt es doppelt (ops_marketing_kampagnen und CRM /crm/campaigns).
+Offen (Folgeauftrag): die uebrigen neun mandantenlosen domain_ops-Tabellen mit Live-Zeilen (Compliance-Register mit
+demselben Seed-Muster in compliance.py, ops_disposition, ops_zertifikate); preise/historie errechnet Verlaeufe,
+preise/konditionen fuellt Standardwerte auf.

@@ -1585,7 +1585,7 @@
       "version": "1.0.0"
     },
     "annahme/labor": {
-      "definition_hash": "9af3ed5380de405f45edf5ab5afabab04e218a397eb444426734fa87db50ae49",
+      "definition_hash": "ab9c0b5cd029115a2307048686ff649cdbce4f311055d8920ade6df89b56613e",
       "gates_passed": [
         "A",
         "B",
@@ -7749,7 +7749,7 @@
       "version": "1.0.0"
     },
     "qualitaet/labor-auftrag": {
-      "definition_hash": "76b5552b3aaa67ba6dba5cdc630630bc88a10f042edc9cf63ccecf792baabe1b",
+      "definition_hash": "727fefa50823869a6141fa35ad9afc497aa31b96139272249e2570a5c2302765",
       "gates_passed": [
         "A",
         "B",
@@ -7760,7 +7760,7 @@
       "version": "1.0.0"
     },
     "qualitaet/labor-detail": {
-      "definition_hash": "a3a2f70230f4326f0b78df9f42fa081554a6aeb341167bf444ce0e1b657c1a9a",
+      "definition_hash": "d275c798f2900a99c91b380749db8dd7e8cdf805d673c6e1a6e044ec3cb671c5",
       "gates_passed": [
         "A",
         "B",

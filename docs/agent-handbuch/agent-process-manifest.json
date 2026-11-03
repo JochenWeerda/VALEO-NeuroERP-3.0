@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-02",
+  "generatedAt": "2026-11-03",
   "schemaVersion": 1,
   "sources": [
     "app/core/flow_spine_registry.py",
@@ -4840,7 +4840,7 @@
     },
     {
       "mask_id": "annahme/labor",
-      "title": "Labor",
+      "title": "Laborauftrag",
       "domain": "agrar",
       "process_keys": [],
       "rollout_route": "/mask-rollout/annahme__labor/:entityId",
@@ -23515,7 +23515,7 @@
     },
     {
       "mask_id": "qualitaet/labor-auftrag",
-      "title": "Labor auftrag",
+      "title": "Laborauftraege",
       "domain": "qualitaet",
       "process_keys": [],
       "rollout_route": "/mask-rollout/qualitaet__labor-auftrag/:entityId",
@@ -23543,7 +23543,7 @@
     },
     {
       "mask_id": "qualitaet/labor-detail",
-      "title": "Labor detail",
+      "title": "Laborauftrag",
       "domain": "qualitaet",
       "process_keys": [],
       "rollout_route": "/mask-rollout/qualitaet__labor-detail/:entityId",

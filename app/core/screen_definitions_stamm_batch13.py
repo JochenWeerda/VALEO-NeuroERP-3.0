@@ -268,9 +268,25 @@ def build_annahme_erfassung() -> dict[str, Any]:
         edit_permission="annahme.erfassung.update", bearbeiten_endpoint=None)
 
 def build_annahme_labor() -> dict[str, Any]:
-    return _batch13_stamm("annahme/labor", domain="agrar", title="Labor",
-        entity_endpoint="/api/v1/labor/labor-auftraege/{entity_id}", identity_field="bezeichnung",
-        edit_permission="annahme.labor.update", bearbeiten_endpoint=None)
+    # Laborauftrag aus der Annahme: Felder aus LaborAuftragOut (Batch 8, 03.11.2026); "bezeichnung" lieferte der
+    # Weg nie, der Kopf blieb leer. Befunde erfasst die Laborauftragsmaske, hier nur lesen.
+    return build_stamm_object_page(
+        screen_id="annahme/labor", domain="agrar", title="Laborauftrag", subtitle="Laborauftrag zur Charge der Annahme",
+        identity_field="chargen_id",
+        data_sources=[stamm_entity_source("/api/v1/labor/labor-auftraege/{entity_id}")],
+        tabs=[stamm_kopf_tab([
+            {"key": "chargen_id", "label": "Charge", "type": "text", "readOnly": True},
+            {"key": "labor", "label": "Labor", "type": "text", "readOnly": True},
+            {"key": "auftragsdatum", "label": "Auftragsdatum", "type": "date", "readOnly": True},
+            {"key": "status", "label": "Status", "type": "text", "readOnly": True},
+            {"key": "qs_entscheidung", "label": "QS-Entscheidung", "type": "text", "readOnly": True},
+        ])],
+        edit_permission="annahme.labor.update", edit_action_key="bearbeiten", edit_action_overrides=None,
+        no_workflow_reason="Lesesicht; Befund und QS-Entscheidung in der Laborauftragsmaske.",
+        business_purpose="Laborauftrag und QS-Entscheidung einer Annahmecharge pruefen.",
+        example_prompts=["Ist die Charge {entity_id} freigegeben?"],
+        test_id="annahme-labor", density="compact", context_rail="combined", table_profile="standard",
+    )
 
 def build_annahme_lkw_registrierung() -> dict[str, Any]:
     return build_intake_registration()

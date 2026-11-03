@@ -4,7 +4,7 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-02
+last_reviewed: 2026-11-03
 version: 3.0.0
 description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions.
 ---
@@ -161,7 +161,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `aktien/zeichnungen` | Zeichnungen | genossenschaft | niedrig | — | `GET /api/v1/masks/aktien/zeichnungen/agent-contract` |
 | `analysis/what-if-simulator` | What if simulator | reporting | niedrig | — | `GET /api/v1/masks/analysis/what-if-simulator/agent-contract` |
 | `annahme/erfassung` | Erfassung | agrar | niedrig | — | `GET /api/v1/masks/annahme/erfassung/agent-contract` |
-| `annahme/labor` | Labor | agrar | niedrig | — | `GET /api/v1/masks/annahme/labor/agent-contract` |
+| `annahme/labor` | Laborauftrag | agrar | niedrig | — | `GET /api/v1/masks/annahme/labor/agent-contract` |
 | `annahme/lkw-registrierung` | LKW-Registrierung | agrar | niedrig | — | `GET /api/v1/masks/annahme/lkw-registrierung/agent-contract` |
 | `annahme/muster` | Muster | agrar | niedrig | — | `GET /api/v1/masks/annahme/muster/agent-contract` |
 | `annahme/qualitaets-check` | Qualitätsprüfung | agrar | niedrig | — | `GET /api/v1/masks/annahme/qualitaets-check/agent-contract` |
@@ -722,8 +722,8 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `prospecting/leads` | LeadExplorer | prospecting | niedrig | — | `GET /api/v1/masks/prospecting/leads/agent-contract` |
 | `qualitaet/ausnahmen` | Betriebs-Ausnahmen | operations | niedrig | — | `GET /api/v1/masks/qualitaet/ausnahmen/agent-contract` |
 | `qualitaet/ausnahmen-liste` | Betriebsausnahmen | qualitaet | niedrig | — | `GET /api/v1/masks/qualitaet/ausnahmen-liste/agent-contract` |
-| `qualitaet/labor-auftrag` | Labor auftrag | qualitaet | niedrig | — | `GET /api/v1/masks/qualitaet/labor-auftrag/agent-contract` |
-| `qualitaet/labor-detail` | Labor detail | qualitaet | niedrig | — | `GET /api/v1/masks/qualitaet/labor-detail/agent-contract` |
+| `qualitaet/labor-auftrag` | Laborauftraege | qualitaet | niedrig | — | `GET /api/v1/masks/qualitaet/labor-auftrag/agent-contract` |
+| `qualitaet/labor-detail` | Laborauftrag | qualitaet | niedrig | — | `GET /api/v1/masks/qualitaet/labor-detail/agent-contract` |
 | `qualitaet/labor-liste` | Laborauftraege | qualitaet | niedrig | — | `GET /api/v1/masks/qualitaet/labor-liste/agent-contract` |
 | `qualitaet/reklamation` | Reklamation | qualitaet | mittel | `complaint-to-resolution` | `GET /api/v1/masks/qualitaet/reklamation/agent-contract` |
 | `qualitaet/reklamationen-liste` | Reklamationen | qualitaet | niedrig | — | `GET /api/v1/masks/qualitaet/reklamationen-liste/agent-contract` |
@@ -5440,9 +5440,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `annahme/labor` — Labor
+### `annahme/labor` — Laborauftrag
 
-**Zweck:** Stamm- und Fachmaske fuer Labor (annahme/labor).
+**Zweck:** Laborauftrag und QS-Entscheidung einer Annahmecharge pruefen.
 
 | | |
 |---|---|
@@ -5468,7 +5468,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Beispiel-Prompts:**
 
-- Zeige Stammdaten fuer Labor {entity_id}.
+- Ist die Charge {entity_id} freigegeben?
 
 **Actions:**
 
@@ -25374,9 +25374,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `qualitaet/labor-auftrag` — Labor auftrag
+### `qualitaet/labor-auftrag` — Laborauftraege
 
-**Zweck:** Labor auftrag im qualitaet-Bereich finden und auswerten.
+**Zweck:** Offene Laborauftraege und QS-Entscheidungen je Charge finden.
 
 | | |
 |---|---|
@@ -25396,8 +25396,8 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Beispiel-Prompts:**
 
-- Zeige Labor auftrag.
-- Filtere die Liste.
+- Welche Laborauftraege sind noch offen?
+- Welche Chargen wurden gesperrt?
 
 **Actions:**
 
@@ -25407,7 +25407,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `qualitaet/labor-detail` — Labor detail
+### `qualitaet/labor-detail` — Laborauftrag
 
 **Zweck:** Labor detail als Stammblatt pflegen.
 

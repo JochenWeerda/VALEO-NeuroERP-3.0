@@ -73757,6 +73757,7 @@
         "type": "object"
       },
       "FoerderAntragCreate": {
+        "additionalProperties": false,
         "properties": {
           "antragsdatum": {
             "format": "date",
@@ -73765,19 +73766,25 @@
           },
           "betrag": {
             "default": 0,
+            "minimum": 0.0,
             "title": "Betrag",
             "type": "number"
           },
           "flaeche": {
             "default": 0,
+            "minimum": 0.0,
             "title": "Flaeche",
             "type": "number"
           },
           "nummer": {
+            "maxLength": 80,
+            "minLength": 1,
             "title": "Nummer",
             "type": "string"
           },
           "programm": {
+            "maxLength": 120,
+            "minLength": 1,
             "title": "Programm",
             "type": "string"
           },
@@ -73795,7 +73802,89 @@
         "title": "FoerderAntragCreate",
         "type": "object"
       },
+      "FoerderAntragListOut": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FoerderAntragOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "sum_betrag": {
+            "title": "Sum Betrag",
+            "type": "number"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "sum_betrag"
+        ],
+        "title": "FoerderAntragListOut",
+        "type": "object"
+      },
+      "FoerderAntragOut": {
+        "properties": {
+          "antragsdatum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Antragsdatum"
+          },
+          "betrag": {
+            "default": 0,
+            "title": "Betrag",
+            "type": "number"
+          },
+          "flaeche": {
+            "default": 0,
+            "title": "Flaeche",
+            "type": "number"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "nummer": {
+            "title": "Nummer",
+            "type": "string"
+          },
+          "programm": {
+            "title": "Programm",
+            "type": "string"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "required": [
+          "id",
+          "nummer",
+          "programm"
+        ],
+        "title": "FoerderAntragOut",
+        "type": "object"
+      },
       "FoerderAntragUpdate": {
+        "additionalProperties": false,
         "properties": {
           "antragsdatum": {
             "anyOf": [
@@ -73812,6 +73901,7 @@
           "betrag": {
             "anyOf": [
               {
+                "minimum": 0.0,
                 "type": "number"
               },
               {
@@ -73823,6 +73913,7 @@
           "flaeche": {
             "anyOf": [
               {
+                "minimum": 0.0,
                 "type": "number"
               },
               {
@@ -73834,6 +73925,8 @@
           "programm": {
             "anyOf": [
               {
+                "maxLength": 120,
+                "minLength": 1,
                 "type": "string"
               },
               {
@@ -73857,11 +73950,32 @@
         "title": "FoerderAntragUpdate",
         "type": "object"
       },
-      "FoerderungOut": {
-        "additionalProperties": true,
-        "description": "Response schema for foerderung endpoints.",
-        "properties": {},
-        "title": "FoerderungOut",
+      "FoerderungStatsOut": {
+        "properties": {
+          "betrag_bewilligt": {
+            "title": "Betrag Bewilligt",
+            "type": "number"
+          },
+          "bewilligt": {
+            "title": "Bewilligt",
+            "type": "integer"
+          },
+          "eingereicht": {
+            "title": "Eingereicht",
+            "type": "integer"
+          },
+          "entwurf": {
+            "title": "Entwurf",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "bewilligt",
+          "eingereicht",
+          "entwurf",
+          "betrag_bewilligt"
+        ],
+        "title": "FoerderungStatsOut",
         "type": "object"
       },
       "FolgeartikelCreate": {
@@ -98163,6 +98277,123 @@
         "title": "LaborAuftragCreate",
         "type": "object"
       },
+      "LaborAuftragListOut": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/LaborAuftragOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "LaborAuftragListOut",
+        "type": "object"
+      },
+      "LaborAuftragOut": {
+        "properties": {
+          "analysen": {
+            "title": "Analysen",
+            "type": "integer"
+          },
+          "analysewerte": {
+            "additionalProperties": true,
+            "title": "Analysewerte",
+            "type": "object"
+          },
+          "auftragsdatum": {
+            "title": "Auftragsdatum",
+            "type": "string"
+          },
+          "befund": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LaborBefundKurzOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "bemerkung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bemerkung"
+          },
+          "chargenId": {
+            "title": "Chargenid",
+            "type": "string"
+          },
+          "chargen_id": {
+            "title": "Chargen Id",
+            "type": "string"
+          },
+          "folgeaktion": {
+            "title": "Folgeaktion",
+            "type": "string"
+          },
+          "grenzwerte": {
+            "additionalProperties": true,
+            "title": "Grenzwerte",
+            "type": "object"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "labor": {
+            "title": "Labor",
+            "type": "string"
+          },
+          "qs_entscheidung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Qs Entscheidung"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "required": [
+          "id",
+          "chargenId",
+          "chargen_id",
+          "labor",
+          "analysen",
+          "auftragsdatum",
+          "folgeaktion"
+        ],
+        "title": "LaborAuftragOut",
+        "type": "object"
+      },
       "LaborBefundCreate": {
         "properties": {
           "analysewerte": {
@@ -98197,11 +98428,148 @@
         "title": "LaborBefundCreate",
         "type": "object"
       },
-      "LaborOut": {
-        "additionalProperties": true,
-        "description": "Response schema for labor endpoints.",
-        "properties": {},
-        "title": "LaborOut",
+      "LaborBefundKurzOut": {
+        "properties": {
+          "datum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datum"
+          },
+          "entscheidung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entscheidung"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "labor": {
+            "title": "Labor",
+            "type": "string"
+          },
+          "probennummer": {
+            "title": "Probennummer",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "probennummer",
+          "labor"
+        ],
+        "title": "LaborBefundKurzOut",
+        "type": "object"
+      },
+      "LaborProbeListOut": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/LaborProbeOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "LaborProbeListOut",
+        "type": "object"
+      },
+      "LaborProbeOut": {
+        "properties": {
+          "artikel": {
+            "title": "Artikel",
+            "type": "string"
+          },
+          "datum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datum"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "labor": {
+            "title": "Labor",
+            "type": "string"
+          },
+          "probennummer": {
+            "title": "Probennummer",
+            "type": "string"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "typ": {
+            "title": "Typ",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "probennummer",
+          "typ",
+          "artikel",
+          "labor"
+        ],
+        "title": "LaborProbeOut",
+        "type": "object"
+      },
+      "LaborStatsOut": {
+        "properties": {
+          "abgeschlossen": {
+            "title": "Abgeschlossen",
+            "type": "integer"
+          },
+          "ausstehend": {
+            "title": "Ausstehend",
+            "type": "integer"
+          },
+          "in-bearbeitung": {
+            "title": "In-Bearbeitung",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "abgeschlossen",
+          "in-bearbeitung",
+          "ausstehend"
+        ],
+        "title": "LaborStatsOut",
         "type": "object"
       },
       "LagerKontenzuordnungCreate": {
@@ -105458,9 +105826,11 @@
         "type": "object"
       },
       "MarketingKampagneCreate": {
+        "additionalProperties": false,
         "properties": {
           "budget": {
             "default": 0,
+            "minimum": 0.0,
             "title": "Budget",
             "type": "number"
           },
@@ -105477,6 +105847,8 @@
             "title": "Enddatum"
           },
           "name": {
+            "maxLength": 255,
+            "minLength": 1,
             "title": "Name",
             "type": "string"
           },
@@ -105491,10 +105863,14 @@
             "type": "string"
           },
           "typ": {
+            "maxLength": 80,
+            "minLength": 1,
             "title": "Typ",
             "type": "string"
           },
           "zielgruppe": {
+            "default": "",
+            "maxLength": 120,
             "title": "Zielgruppe",
             "type": "string"
           }
@@ -105502,17 +105878,111 @@
         "required": [
           "name",
           "typ",
-          "zielgruppe",
           "startdatum"
         ],
         "title": "MarketingKampagneCreate",
         "type": "object"
       },
+      "MarketingKampagneListOut": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/MarketingKampagneOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "MarketingKampagneListOut",
+        "type": "object"
+      },
+      "MarketingKampagneOut": {
+        "properties": {
+          "budget": {
+            "default": 0,
+            "title": "Budget",
+            "type": "number"
+          },
+          "enddatum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enddatum"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "startdatum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Startdatum"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "typ": {
+            "title": "Typ",
+            "type": "string"
+          },
+          "zielgruppe": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Zielgruppe"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "typ"
+        ],
+        "title": "MarketingKampagneOut",
+        "type": "object"
+      },
       "MarketingKampagneUpdate": {
+        "additionalProperties": false,
         "properties": {
           "budget": {
             "anyOf": [
               {
+                "minimum": 0.0,
                 "type": "number"
               },
               {
@@ -105536,6 +106006,8 @@
           "name": {
             "anyOf": [
               {
+                "maxLength": 255,
+                "minLength": 1,
                 "type": "string"
               },
               {
@@ -105570,6 +106042,8 @@
           "typ": {
             "anyOf": [
               {
+                "maxLength": 80,
+                "minLength": 1,
                 "type": "string"
               },
               {
@@ -105581,6 +106055,7 @@
           "zielgruppe": {
             "anyOf": [
               {
+                "maxLength": 120,
                 "type": "string"
               },
               {
@@ -105593,11 +106068,94 @@
         "title": "MarketingKampagneUpdate",
         "type": "object"
       },
-      "MarketingOut": {
-        "additionalProperties": true,
-        "description": "Response schema for marketing endpoints.",
-        "properties": {},
-        "title": "MarketingOut",
+      "MarketingKpiOut": {
+        "description": "Plan aus der Kampagne; Ist-Werte gibt es erst mit einer Kostenquelle (bis dahin None, nicht 0).",
+        "properties": {
+          "budget_ist": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Budget Ist"
+          },
+          "budget_plan": {
+            "title": "Budget Plan",
+            "type": "number"
+          },
+          "click_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Click Rate"
+          },
+          "conversion_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conversion Rate"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "open_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Open Rate"
+          },
+          "roi": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Roi"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "budget_plan"
+        ],
+        "title": "MarketingKpiOut",
         "type": "object"
       },
       "MarketingPrefIn": {
@@ -105773,6 +106331,34 @@
           }
         },
         "title": "MarketingPrefSetOut",
+        "type": "object"
+      },
+      "MarketingStatsOut": {
+        "properties": {
+          "aktiv": {
+            "title": "Aktiv",
+            "type": "integer"
+          },
+          "beendet": {
+            "title": "Beendet",
+            "type": "integer"
+          },
+          "budget_aktiv": {
+            "title": "Budget Aktiv",
+            "type": "number"
+          },
+          "geplant": {
+            "title": "Geplant",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "aktiv",
+          "geplant",
+          "beendet",
+          "budget_aktiv"
+        ],
+        "title": "MarketingStatsOut",
         "type": "object"
       },
       "MaschineCreate": {
@@ -311031,6 +311617,18 @@
               "description": "Filter by status",
               "title": "Status"
             }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 500,
+              "maximum": 2000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
           }
         ],
         "responses": {
@@ -311038,7 +311636,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FoerderungOut"
+                  "$ref": "#/components/schemas/FoerderAntragListOut"
                 }
               }
             },
@@ -311066,7 +311664,6 @@
         ]
       },
       "post": {
-        "description": "Create a new Foerderantrag.",
         "operationId": "create_antrag_api_v1_foerderung_antraege_post",
         "requestBody": {
           "content": {
@@ -311083,7 +311680,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FoerderungOut"
+                  "$ref": "#/components/schemas/FoerderAntragOut"
                 }
               }
             },
@@ -311113,7 +311710,7 @@
     },
     "/api/v1/foerderung/antraege/{antrag_id}": {
       "delete": {
-        "description": "Förderantrag löschen (nur im Entwurfsstatus).",
+        "description": "Nur Entwuerfe; ein eingereichter Antrag ist ein Vorgang gegenueber der Behoerde.",
         "operationId": "delete_antrag_api_v1_foerderung_antraege__antrag_id__delete",
         "parameters": [
           {
@@ -311152,7 +311749,6 @@
         ]
       },
       "get": {
-        "description": "Einzelnen Förderantrag abrufen.",
         "operationId": "get_antrag_api_v1_foerderung_antraege__antrag_id__get",
         "parameters": [
           {
@@ -311170,7 +311766,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FoerderungOut"
+                  "$ref": "#/components/schemas/FoerderAntragOut"
                 }
               }
             },
@@ -311198,7 +311794,6 @@
         ]
       },
       "put": {
-        "description": "Update an existing Foerderantrag.",
         "operationId": "update_antrag_api_v1_foerderung_antraege__antrag_id__put",
         "parameters": [
           {
@@ -311207,7 +311802,7 @@
             "required": true,
             "schema": {
               "title": "Antrag Id",
-              "type": "integer"
+              "type": "string"
             }
           }
         ],
@@ -311226,7 +311821,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FoerderungOut"
+                  "$ref": "#/components/schemas/FoerderAntragOut"
                 }
               }
             },
@@ -311262,7 +311857,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FoerderungOut"
+                  "$ref": "#/components/schemas/FoerderungStatsOut"
                 }
               }
             },
@@ -333372,16 +333967,40 @@
     "/api/v1/labor/labor-auftraege": {
       "get": {
         "operationId": "list_labor_auftraege_api_v1_labor_labor_auftraege_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 500,
+              "maximum": 2000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LaborOut"
+                  "$ref": "#/components/schemas/LaborAuftragListOut"
                 }
               }
             },
             "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "security": [
@@ -333396,7 +334015,7 @@
         ]
       },
       "post": {
-        "description": "Neuen Labor-Auftrag anlegen (Wizard `labor-auftrag.tsx`).",
+        "description": "Neuen Labor-Auftrag anlegen (Wizard `labor-auftrag.tsx`); die Charge muss im Mandanten existieren.",
         "operationId": "create_labor_auftrag_api_v1_labor_labor_auftraege_post",
         "requestBody": {
           "content": {
@@ -333413,7 +334032,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LaborOut"
+                  "$ref": "#/components/schemas/LaborAuftragOut"
                 }
               }
             },
@@ -333462,7 +334081,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LaborOut"
+                  "$ref": "#/components/schemas/LaborAuftragOut"
                 }
               }
             },
@@ -333520,7 +334139,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LaborOut"
+                  "$ref": "#/components/schemas/LaborAuftragOut"
                 }
               }
             },
@@ -333570,6 +334189,18 @@
               "description": "Filter by status",
               "title": "Status"
             }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 500,
+              "maximum": 2000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
           }
         ],
         "responses": {
@@ -333577,7 +334208,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LaborOut"
+                  "$ref": "#/components/schemas/LaborProbeListOut"
                 }
               }
             },
@@ -333614,7 +334245,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LaborOut"
+                  "$ref": "#/components/schemas/LaborStatsOut"
                 }
               }
             },
@@ -342243,6 +342874,18 @@
               "description": "Filter by status",
               "title": "Status"
             }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 500,
+              "maximum": 2000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
           }
         ],
         "responses": {
@@ -342250,7 +342893,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/MarketingOut"
+                  "$ref": "#/components/schemas/MarketingKampagneListOut"
                 }
               }
             },
@@ -342278,7 +342921,6 @@
         ]
       },
       "post": {
-        "description": "Create a new marketing campaign.",
         "operationId": "create_kampagne_api_v1_marketing_kampagnen_post",
         "requestBody": {
           "content": {
@@ -342295,7 +342937,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/MarketingOut"
+                  "$ref": "#/components/schemas/MarketingKampagneOut"
                 }
               }
             },
@@ -342325,7 +342967,7 @@
     },
     "/api/v1/marketing/kampagnen/{kampagne_id}": {
       "delete": {
-        "description": "Delete a marketing campaign.",
+        "description": "Nur geplante Kampagnen; eine laufende oder beendete ist ein Vorgang mit Wirkung beim Kunden.",
         "operationId": "delete_kampagne_api_v1_marketing_kampagnen__kampagne_id__delete",
         "parameters": [
           {
@@ -342334,7 +342976,7 @@
             "required": true,
             "schema": {
               "title": "Kampagne Id",
-              "type": "integer"
+              "type": "string"
             }
           }
         ],
@@ -342364,7 +343006,6 @@
         ]
       },
       "put": {
-        "description": "Update an existing marketing campaign.",
         "operationId": "update_kampagne_api_v1_marketing_kampagnen__kampagne_id__put",
         "parameters": [
           {
@@ -342373,7 +343014,7 @@
             "required": true,
             "schema": {
               "title": "Kampagne Id",
-              "type": "integer"
+              "type": "string"
             }
           }
         ],
@@ -342392,7 +343033,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/MarketingOut"
+                  "$ref": "#/components/schemas/MarketingKampagneOut"
                 }
               }
             },
@@ -342422,7 +343063,7 @@
     },
     "/api/v1/marketing/kampagnen/{kampagne_id}/kpis": {
       "get": {
-        "description": "MKT-CAM-01: Kampagnen-KPIs (Budget Plan vs. Ist, Open-Rate, ROI-Stub).",
+        "description": "Plan aus der Kampagne. Ist, Oeffnungs-, Klick- und Abschlussrate sowie ROI brauchen eine Kosten- und\nVersandquelle, die es nicht gibt - deshalb ``None`` (unbekannt), nicht 0 (gemessen und leer).",
         "operationId": "get_kampagne_kpis_api_v1_marketing_kampagnen__kampagne_id__kpis_get",
         "parameters": [
           {
@@ -342431,7 +343072,7 @@
             "required": true,
             "schema": {
               "title": "Kampagne Id",
-              "type": "integer"
+              "type": "string"
             }
           }
         ],
@@ -342440,7 +343081,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/MarketingOut"
+                  "$ref": "#/components/schemas/MarketingKpiOut"
                 }
               }
             },
@@ -342476,7 +343117,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/MarketingOut"
+                  "$ref": "#/components/schemas/MarketingStatsOut"
                 }
               }
             },
@@ -387171,16 +387812,40 @@
     "/api/v1/qualitaet/labor-auftraege": {
       "get": {
         "operationId": "list_labor_auftraege_api_v1_qualitaet_labor_auftraege_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 500,
+              "maximum": 2000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LaborOut"
+                  "$ref": "#/components/schemas/LaborAuftragListOut"
                 }
               }
             },
             "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "security": [
@@ -387196,7 +387861,7 @@
         ]
       },
       "post": {
-        "description": "Neuen Labor-Auftrag anlegen (Wizard `labor-auftrag.tsx`).",
+        "description": "Neuen Labor-Auftrag anlegen (Wizard `labor-auftrag.tsx`); die Charge muss im Mandanten existieren.",
         "operationId": "create_labor_auftrag_api_v1_qualitaet_labor_auftraege_post",
         "requestBody": {
           "content": {
@@ -387213,7 +387878,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LaborOut"
+                  "$ref": "#/components/schemas/LaborAuftragOut"
                 }
               }
             },
@@ -387263,7 +387928,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LaborOut"
+                  "$ref": "#/components/schemas/LaborAuftragOut"
                 }
               }
             },
@@ -387322,7 +387987,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LaborOut"
+                  "$ref": "#/components/schemas/LaborAuftragOut"
                 }
               }
             },
@@ -387373,6 +388038,18 @@
               "description": "Filter by status",
               "title": "Status"
             }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 500,
+              "maximum": 2000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
           }
         ],
         "responses": {
@@ -387380,7 +388057,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LaborOut"
+                  "$ref": "#/components/schemas/LaborProbeListOut"
                 }
               }
             },
@@ -387448,7 +388125,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LaborOut"
+                  "$ref": "#/components/schemas/LaborStatsOut"
                 }
               }
             },
