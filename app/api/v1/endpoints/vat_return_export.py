@@ -389,18 +389,20 @@ async def validate_vat_return(
 @router.get("", response_model=List[VATReturnResponse], summary="Vat returns auflisten", dependencies=[Depends(finance_read)])
 async def list_vat_returns(
     period: Optional[str] = Query(None, description="Filter by period (YYYY-MM)"),
+    limit: int = Query(120, ge=1, le=500, description="Hoechstens so viele Anmeldungen (neueste zuerst)"),
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
-    """Anmeldungen des Mandanten. Ein Lesefehler ist 503, keine leere Liste."""
+    """Anmeldungen des Mandanten, neueste zuerst (Vorgabe 120 = zehn Jahre Monatsmeldungen). Lesefehler: 503."""
     sql = f"SELECT {_SPALTEN} FROM domain_erp.vat_returns WHERE tenant_id = :tenant_id"  # nosec B608  # reviewed-safe: Spaltenliste ist ein Code-Literal, Werte sind gebunden
     params: dict[str, Any] = {"tenant_id": tenant_id}
     if period:
         sql += " AND period = :period"
         params["period"] = period
-    sql += " ORDER BY period DESC, created_at DESC"
+    sql += " ORDER BY period DESC, created_at DESC LIMIT :limit"
+    params["limit"] = limit
     try:
-        rows = db.execute(text(sql), params).mappings().all()
+        rows = db.execute(text(sql), params).mappings().fetchmany(limit)
     except SQLAlchemyError as exc:
         raise _nicht_verfuegbar(db, exc) from exc
     return [_build_vat_return_response(row) for row in rows]

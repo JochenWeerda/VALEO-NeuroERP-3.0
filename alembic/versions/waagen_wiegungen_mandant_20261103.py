@@ -76,6 +76,11 @@ def upgrade() -> None:
         f"SELECT count(*) FROM {WAAGEN} WHERE tenant_id IS NULL OR btrim(tenant_id) = ''")).scalar()  # nosec B608
     if offen:
         raise RuntimeError(f"{WAAGEN}: {offen} Waagen ohne Mandanten; Herkunft klaeren, nicht pauschal zuordnen")
+    # Postgres aendert keinen Spaltentyp, den eine Policy liest: die Policies aus waage_tenant_20261030 erst
+    # entfernen, _enable() legt sie unten in derselben Form neu an (Transaktion und Tabellensperre halten).
+    for name in bind.execute(sa.text(
+            "SELECT policyname FROM pg_policies WHERE schemaname = 'domain_ops' AND tablename = 'ops_waagen'")).scalars():
+        op.execute(f'DROP POLICY "{name}" ON {WAAGEN}')
     op.execute(f"ALTER TABLE {WAAGEN} ALTER COLUMN tenant_id TYPE character varying(120)")
     op.execute(f"ALTER TABLE {WAAGEN} ALTER COLUMN tenant_id SET DEFAULT public.rls_current_tenant()")
     op.execute(f"ALTER TABLE {WAAGEN} ALTER COLUMN tenant_id SET NOT NULL")

@@ -71,7 +71,7 @@ def _json(row: Any) -> dict:
 
 def _lies(db: Session, anfrage_id: str, tenant_id: str, *, sperren: bool = False) -> dict:
     sql = f"SELECT {_SPALTEN} FROM domain_ops.service_anfragen WHERE id = :id AND tenant_id = :tid"  # nosec B608  # reviewed-safe: Spaltenliste ist ein Code-Literal, Werte sind gebunden
-    row = db.execute(text(sql + (" FOR UPDATE" if sperren else "")), {"id": anfrage_id, "tid": tenant_id}).mappings().first()
+    row = db.execute(text(sql + (" FOR UPDATE" if sperren else "")), {"id": anfrage_id, "tid": tenant_id}).mappings().first()  # nosec B608  # reviewed-safe: SQL aus Code-Literalen, Werte gebunden
     if not row:
         raise HTTPException(status_code=404, detail="Service-Anfrage nicht gefunden")
     return dict(row)
@@ -117,7 +117,7 @@ async def list_anfragen(
         text(f"SELECT {_SPALTEN} FROM domain_ops.service_anfragen WHERE {bedingung} "  # nosec B608  # reviewed-safe: wie oben
              "ORDER BY created_at DESC, nummer DESC OFFSET :skip LIMIT :limit"),
         params,
-    ).mappings().all()
+    ).mappings().fetchmany(limit)
     return {"items": [_json(r) for r in rows], "total": int(total or 0), "skip": skip, "limit": limit}
 
 
