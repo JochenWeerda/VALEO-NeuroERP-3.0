@@ -310036,7 +310036,7 @@
     },
     "/api/v1/finance/vat-return": {
       "get": {
-        "description": "Anmeldungen des Mandanten. Ein Lesefehler ist 503, keine leere Liste.",
+        "description": "Anmeldungen des Mandanten, neueste zuerst (Vorgabe 120 = zehn Jahre Monatsmeldungen). Lesefehler: 503.",
         "operationId": "list_vat_returns_api_v1_finance_vat_return_get",
         "parameters": [
           {
@@ -310055,6 +310055,20 @@
               ],
               "description": "Filter by period (YYYY-MM)",
               "title": "Period"
+            }
+          },
+          {
+            "description": "Hoechstens so viele Anmeldungen (neueste zuerst)",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 120,
+              "description": "Hoechstens so viele Anmeldungen (neueste zuerst)",
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
             }
           }
         ],
