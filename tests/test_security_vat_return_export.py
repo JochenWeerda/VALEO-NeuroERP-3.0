@@ -20,6 +20,9 @@ class _FakeResult:
     def fetchall(self):
         return self._rows
 
+    def fetchmany(self, size):
+        return self._rows[:size]
+
     def mappings(self):
         return self
 
@@ -101,6 +104,7 @@ async def test_list_vat_returns_uses_context_tenant():
 
     result = await vat_return_export.list_vat_returns(
         period="2026-03",
+        limit=120,
         tenant_id="tenant-a",
         db=db,
     )
@@ -109,4 +113,5 @@ async def test_list_vat_returns_uses_context_tenant():
     assert "WHERE tenant_id = :tenant_id" in statement
     assert params["tenant_id"] == "tenant-a"
     assert params["period"] == "2026-03"
+    assert "LIMIT :limit" in statement and params["limit"] == 120
     assert result[0].id == "vat-1"

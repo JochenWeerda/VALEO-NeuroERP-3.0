@@ -27,7 +27,7 @@ from app.api.v1.endpoints import creditors as kreditoren
 from app.api.v1.endpoints import debtors as debitoren
 from app.api.v1.endpoints import export_service as export
 from app.api.v1.endpoints import fibu_connectors as connectors
-from app.api.v1.schemas.finance import DebtorCreate, DebtorUpdate
+from app.api.v1.schemas.finance import DebtorUpdate
 from app.core.connectors import workflow
 from app.core.tenant import get_tenant_id
 from app.core.tenant_context import tenant_scope
@@ -137,15 +137,20 @@ def _status(aufruf) -> int:
     return info.value.status_code
 
 
+def _altdebitor(db, tenant: str, nummer: str, name: str) -> str:
+    """Altbestand in domain_erp.debitors: neue Debitoren legt seit 01.11.2026 der Kundenstamm an (PR #93)."""
+    did = str(uuid4())
+    db.execute(sa.text(
+        "INSERT INTO domain_erp.debitors (id, tenant_id, debitor_number, name, address, payment_terms, credit_limit, is_active) "
+        "VALUES (:id, :t, :nr, :n, CAST('{}' AS jsonb), '30_days', 0, TRUE)"), {"id": did, "t": tenant, "nr": nummer, "n": name})
+    return did
+
+
 def test_debitoren_nur_im_eigenen_mandanten(fach):
     db, _ = fach
     nummer = f"D-{uuid4().hex[:6]}"
-    roh = dict(debtor_number=nummer, company_name="Hof Janssen", street="Dorfstr. 1", postal_code="26789",
-               city="Leer", country="DE", email="hof@example.org")
-    assert _status(debitoren.create_debtor(DebtorCreate(tenant_id=B, **roh), tenant_id=A, db=db)) == 403
-    angelegt = asyncio.run(debitoren.create_debtor(DebtorCreate(tenant_id=A, **roh), tenant_id=A, db=db))
-    assert angelegt.tenant_id == A
-    did = angelegt.id
+    did = _altdebitor(db, A, nummer, "Hof Janssen")
+    assert not hasattr(debitoren, "create_debtor")  # Anlage nur ueber den Kundenstamm
     assert asyncio.run(debitoren.get_debtor(did, tenant_id=A, db=db)).id == did
     assert _status(debitoren.get_debtor(did, tenant_id=B, db=db)) == 404
     assert _status(debitoren.update_debtor(did, DebtorUpdate(company_name="Fremd"), tenant_id=B, db=db)) == 404
@@ -153,8 +158,7 @@ def test_debitoren_nur_im_eigenen_mandanten(fach):
     assert _status(debitoren.delete_debtor(did, tenant_id=B, db=db)) == 404
     assert db.execute(sa.text("SELECT name, is_active FROM domain_erp.debitors WHERE id = :i"), {"i": did}).one() == ("Hof Janssen", True)
     # dieselbe Nummer im anderen Mandanten ist erlaubt
-    assert asyncio.run(debitoren.create_debtor(DebtorCreate(tenant_id=B, **roh), tenant_id=B, db=db)).tenant_id == B
-
+    _altdebitor(db, B, nummer, "Hof Janssen")
 
 def _op(db, tenant, konto_typ, offen, **verweis):
     db.execute(sa.text(
@@ -167,13 +171,12 @@ def test_op_saldo_liest_die_offenen_posten(fach):
     db, rows = fach
     kunde = rows[CUSTOMERS, A]
     nummer = f"D-{uuid4().hex[:6]}"
-    deb = asyncio.run(debitoren.create_debtor(DebtorCreate(tenant_id=A, debtor_number=nummer, company_name="Hof Saldo", street="Weg 2", postal_code="26789", city="Leer",
-                                                           country="DE"), tenant_id=A, db=db))
-    db.execute(sa.text("UPDATE domain_erp.debitors SET customer_id = :k WHERE id = :i"), {"k": kunde, "i": deb.id})
+    deb_id = _altdebitor(db, A, nummer, "Hof Saldo")
+    db.execute(sa.text("UPDATE domain_erp.debitors SET customer_id = :k WHERE id = :i"), {"k": kunde, "i": deb_id})
     _op(db, A, "debitoren", 120, kunde_id=kunde)
-    _op(db, A, "debitoren", 30, debtor_id=deb.id)
+    _op(db, A, "debitoren", 30, debtor_id=deb_id)
     _op(db, B, "debitoren", 999, kunde_id=kunde)  # fremder Mandant zaehlt nicht
-    saldo = asyncio.run(debitoren.get_debtor_balance(deb.id, tenant_id=A, db=db))
+    saldo = asyncio.run(debitoren.get_debtor_balance(deb_id, tenant_id=A, db=db))
     assert (saldo["open_balance"], saldo["open_item_count"], saldo["oldest_due_date"]) == (150.0, 2, "2026-11-30")
 
     kred = rows[f"{ERP}.creditors", A]

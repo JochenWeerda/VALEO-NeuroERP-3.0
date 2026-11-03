@@ -45,9 +45,12 @@ def test_jeder_weg_nimmt_den_mandanten_aus_dem_token():
 
 
 def _dienste_mit_mandant():
-    import app.services as paket
+    from pathlib import Path
 
-    for info in pkgutil.iter_modules(paket.__path__):
+    # Nur das Backend-Verzeichnis: ``app.services.__path__`` umfasst in CI auch ``rationsoptimierung/app/services``
+    # (zweites ``app``-Paket im Pfad), dessen Solver ``pulp`` braucht und keine Backend-Dienste enthaelt.
+    verzeichnis = Path(__file__).resolve().parents[1] / "app" / "services"
+    for info in pkgutil.iter_modules([str(verzeichnis)]):
         modul = importlib.import_module(f"app.services.{info.name}")
         try:
             quelle = inspect.getsource(modul)
