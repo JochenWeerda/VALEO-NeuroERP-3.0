@@ -1,10 +1,10 @@
-"""RLS-Domain ops Teil 2: die acht domain_ops-Tabellen ohne Mandantenspalte, die live leer sind.
+"""RLS-Domain ops Teil 2: die zehn domain_ops-Tabellen ohne (verbindliche) Mandantenspalte, die live leer sind.
 
-Dokumente und Versionen, Fahrzeug-Bussgelder/-Schaeden/-Statushistorie/-Touren, Rahmenvertraege und
+Dokumente und Versionen, Fahrzeug-Bussgelder/-Schaeden/-Statushistorie/-Touren, Rahmenvertraege, Waagen, Wiegungen und
 Strecken-Frachttarife hatten bis 28.10.2026 **keinen** Mandanten; ihre Wege lasen und schrieben mandantenuebergreifend,
 Urheber kamen aus dem Rumpf (``hochgeladenVon``, ``erstellt_von``, ``benutzer``), Rahmenvertragsnummern waren
-systemweit eindeutig. Waagen und Wiegungen stehen seit 30.10.2026 unter dem Waagen-Sicherheitsvertrag
-(``waage_tenant_20261030``, Nachweis in ``tests/test_waage_api.py``) und sind hier nicht mehr enthalten.
+systemweit eindeutig. Waagen hatten seit ``waage_tenant_20261030`` einen nullable Mandanten, Alt-Wiegungen keinen;
+``waagen_wiegungen_mandant_20261103`` bringt beide in dasselbe Muster (NOT NULL, Verbundschluessel, Policy je Befehl).
 
 Pruefhilfe und Rahmen: tests/rls_domain_support.py (valeo_probe, zurueckgerollt). Die Fachketten laufen als
 Tabelleneigentuemer (ohne RLS): Sie pruefen den Code, nicht die Policies.
@@ -24,18 +24,18 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 import rls_domain_support as support
-from app.api.v1.endpoints import compat, dokumente, fuhrpark, strecke_speditionen, vertraege
+from app.api.v1.endpoints import compat, dokumente, fuhrpark, strecke_speditionen, vertraege, waage
 from app.api.v1.schemas.fuhrpark import SchadenPayload
 from app.core.tenant_context import tenant_scope
-from app.domains.operations.repository import DokumentRepository
+from app.domains.operations.repository import DokumentRepository, WaageRepository
 from rls_domain_support import A, B, SYSTEM
 
 OPS = "domain_ops"
-DOKUMENTE, FAHRZEUGE = f"{OPS}.ops_dokumente", f"{OPS}.ops_fahrzeuge"
+DOKUMENTE, WAAGEN, FAHRZEUGE = f"{OPS}.ops_dokumente", f"{OPS}.ops_waagen", f"{OPS}.ops_fahrzeuge"
 ISOLATED = (
     DOKUMENTE, f"{OPS}.ops_dokument_versionen", f"{OPS}.ops_fahrzeug_bussgeld", f"{OPS}.ops_fahrzeug_schaeden",
-    f"{OPS}.ops_fahrzeug_status_historie", f"{OPS}.ops_fahrzeug_touren", f"{OPS}.ops_rahmenvertraege",
-    f"{OPS}.strecke_speditionen_frachttarife",
+    f"{OPS}.ops_fahrzeug_status_historie", f"{OPS}.ops_fahrzeug_touren", f"{OPS}.ops_rahmenvertraege", WAAGEN,
+    f"{OPS}.ops_wiegungen", f"{OPS}.strecke_speditionen_frachttarife",
 )
 LINKS = (
     (f"{OPS}.ops_dokument_versionen", "dokument_id", DOKUMENTE),
@@ -43,8 +43,9 @@ LINKS = (
     (f"{OPS}.ops_fahrzeug_schaeden", "fahrzeug_id", FAHRZEUGE),
     (f"{OPS}.ops_fahrzeug_status_historie", "fahrzeug_id", FAHRZEUGE),
     (f"{OPS}.ops_fahrzeug_touren", "fahrzeug_id", FAHRZEUGE),
+    (f"{OPS}.ops_wiegungen", "waage_id", WAAGEN),
 )
-PARENTS = (DOKUMENTE, FAHRZEUGE)
+PARENTS = (DOKUMENTE, WAAGEN, FAHRZEUGE)
 
 
 @pytest.fixture(scope="module")
@@ -181,6 +182,21 @@ def test_lieferanten_dokumente_im_eigenen_mandanten(fach):
 
 
 
+def test_waage_nur_im_eigenen_mandanten(fach):
+    db, rows = fach
+    neu = waage.WaageCreate(standort="Hof", typ="LKW-Waage", max_kapazitaet=60)
+    w = asyncio.run(waage.create_waage(neu, db=db, tenant_id=A))
+    assert w["tenant_id"] == A
+    assert _status(waage.get_waage(w["id"], db=db, tenant_id=B)) == 404
+    assert _status(waage.delete_waage(w["id"], db=db, tenant_id=B)) == 404
+    assert WaageRepository(db, A).get_by_id(w["id"]) is not None
+    assert WaageRepository(db, B).get_by_id(rows[WAAGEN, A]) is None
+    # Die Alt-Wiegungen bleiben abgeloest (Wiegescheine), auch mit Mandant.
+    with pytest.raises(HTTPException) as abgeloest:
+        asyncio.run(waage.list_wiegungen())
+    assert abgeloest.value.status_code == 410
+
+
 def test_fahrzeug_schaden_im_eigenen_mandanten_urheber_aus_token(fach):
     db, rows = fach
     fahrzeug = rows[FAHRZEUGE, A]
@@ -214,7 +230,7 @@ def test_jeder_weg_hat_den_mandanten_aus_dem_token():
     from app.auth.tenant import get_verified_tenant_id
 
     funde = []
-    for modul in (dokumente, strecke_speditionen, vertraege, fuhrpark):
+    for modul in (dokumente, waage, strecke_speditionen, vertraege, fuhrpark):
         for route in modul.router.routes:
             parameter = inspect.signature(route.endpoint).parameters
             if "db" not in parameter:

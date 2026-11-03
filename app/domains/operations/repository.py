@@ -35,37 +35,37 @@ def _ohne_mandant(daten: dict) -> dict:
 
 
 class WaageRepository:
-    """Waagen are visible only within the verified tenant."""
+    """Waagen nur im geprueften Mandanten (Mandant im Konstruktor wie die uebrigen ops-Repositories)."""
 
     _FIELDS = {"standort", "typ", "max_kapazitaet", "letzte_eichung", "naechste_eichung", "status", "hersteller", "seriennummer", "installiert_am"}
 
-    def __init__(self, db: Session):
-        self.db = db
-
-    @staticmethod
-    def _tenant(tenant_id: str) -> str:
+    def __init__(self, db: Session, tenant_id: str):
         if not isinstance(tenant_id, str) or not tenant_id.strip():
             raise ValueError("Verified tenant required")
-        return tenant_id
+        self.db = db
+        self.tenant_id = tenant_id
 
-    def get_all(self, tenant_id: str, skip: int = 0, limit: int = 100) -> List[Waage]:
-        return self.db.query(Waage).filter(Waage.tenant_id == self._tenant(tenant_id)).offset(skip).limit(limit).all()
+    def _q(self):
+        return self.db.query(Waage).filter(Waage.tenant_id == self.tenant_id)
 
-    def get_by_id(self, tenant_id: str, waage_id: str) -> Optional[Waage]:
-        return self.db.query(Waage).filter(Waage.tenant_id == self._tenant(tenant_id), Waage.id == waage_id).first()
+    def get_all(self, skip: int = 0, limit: int = 100) -> List[Waage]:
+        return self._q().offset(skip).limit(limit).all()
 
-    def get_by_status(self, tenant_id: str, status: str, skip: int = 0, limit: int = 100) -> List[Waage]:
-        return self.db.query(Waage).filter(Waage.tenant_id == self._tenant(tenant_id), Waage.status == status).offset(skip).limit(limit).all()
+    def get_by_id(self, waage_id: str) -> Optional[Waage]:
+        return self._q().filter(Waage.id == waage_id).first()
 
-    def create(self, tenant_id: str, waage_data: dict) -> Waage:
-        waage = Waage(id=prefixed_id("W"), tenant_id=self._tenant(tenant_id), **{k: v for k, v in waage_data.items() if k in self._FIELDS})
+    def get_by_status(self, status: str, skip: int = 0, limit: int = 100) -> List[Waage]:
+        return self._q().filter(Waage.status == status).offset(skip).limit(limit).all()
+
+    def create(self, waage_data: dict) -> Waage:
+        waage = Waage(id=prefixed_id("W"), tenant_id=self.tenant_id, **{k: v for k, v in waage_data.items() if k in self._FIELDS})
         self.db.add(waage)
         self.db.commit()
         self.db.refresh(waage)
         return waage
 
-    def update(self, tenant_id: str, waage_id: str, waage_data: dict) -> Optional[Waage]:
-        waage = self.get_by_id(tenant_id, waage_id)
+    def update(self, waage_id: str, waage_data: dict) -> Optional[Waage]:
+        waage = self.get_by_id(waage_id)
         if waage is not None:
             for key, value in waage_data.items():
                 if key in self._FIELDS:
@@ -74,47 +74,49 @@ class WaageRepository:
             self.db.refresh(waage)
         return waage
 
-    def delete(self, tenant_id: str, waage_id: str) -> bool:
-        waage = self.db.query(Waage).filter(Waage.tenant_id == self._tenant(tenant_id), Waage.id == waage_id).with_for_update().first()
+    def delete(self, waage_id: str) -> bool:
+        waage = self._q().filter(Waage.id == waage_id).with_for_update().first()
         if waage is None:
             return False
-        # Legacy weighings have no tenant boundary; never cascade-delete them.
-        if self.db.query(Wiegung.id).filter(Wiegung.waage_id == waage_id).first() is not None:
+        # Alt-Wiegungen sind Belege: nie mitloeschen (der Verbundschluessel setzt sonst nur waage_id auf NULL).
+        if self.db.query(Wiegung.id).filter(Wiegung.tenant_id == self.tenant_id, Wiegung.waage_id == waage_id).first() is not None:
             raise ValueError("Waage hat bestehende Wiegungen")
         from app.infrastructure.models import WeighingTicket
-        if self.db.query(WeighingTicket.id).filter(WeighingTicket.tenant_id == tenant_id, WeighingTicket.scale_id == waage_id).first() is not None:
+        if self.db.query(WeighingTicket.id).filter(WeighingTicket.tenant_id == self.tenant_id, WeighingTicket.scale_id == waage_id).first() is not None:
             raise ValueError("Waage hat bestehende Wiegescheine")
         from app.services.waage_import_service import WaageImportEntry
-        if self.db.query(WaageImportEntry.id).filter(WaageImportEntry.tenant_id == tenant_id, WaageImportEntry.waage_id == waage_id).first() is not None:
+        if self.db.query(WaageImportEntry.id).filter(WaageImportEntry.tenant_id == self.tenant_id, WaageImportEntry.waage_id == waage_id).first() is not None:
             raise ValueError("Waage hat bestehende Importnachweise")
         self.db.delete(waage)
         self.db.commit()
         return True
 
-
 class WiegungRepository:
     """Repository for Wiegung operations"""
     
-    def __init__(self, db: Session):
+    def __init__(self, db: Session, tenant_id: str):
+        if not tenant_id:
+            raise ValueError("Mandant fehlt")
         self.db = db
+        self.tenant_id = tenant_id
+
+    def _q(self):
+        return self.db.query(Wiegung).filter(Wiegung.tenant_id == self.tenant_id)
     
     def get_all(self, skip: int = 0, limit: int = 100) -> List[Wiegung]:
-        return self.db.query(Wiegung).order_by(desc(Wiegung.zeitstempel)).offset(skip).limit(limit).all()
+        return self._q().order_by(desc(Wiegung.zeitstempel)).offset(skip).limit(limit).all()
     
     def get_by_id(self, wiegung_id: str) -> Optional[Wiegung]:
-        return self.db.query(Wiegung).filter(Wiegung.id == wiegung_id).first()
+        return self._q().filter(Wiegung.id == wiegung_id).first()
     
     def get_by_waage(self, waage_id: str) -> List[Wiegung]:
-        return self.db.query(Wiegung).filter(Wiegung.waage_id == waage_id).all()
+        return self._q().filter(Wiegung.waage_id == waage_id).all()
     
     def get_by_kennzeichen(self, kennzeichen: str) -> List[Wiegung]:
-        return self.db.query(Wiegung).filter(Wiegung.kennzeichen == kennzeichen).all()
+        return self._q().filter(Wiegung.kennzeichen == kennzeichen).all()
     
     def create(self, wiegung_data: dict) -> Wiegung:
-        wiegung = Wiegung(
-            id=f"WG-{str(__import__('uuid').uuid4())[:8].upper()}",
-            **wiegung_data
-        )
+        wiegung = Wiegung(id=f"WG-{str(__import__('uuid').uuid4())[:8].upper()}", tenant_id=self.tenant_id, **_ohne_mandant(wiegung_data))
         self.db.add(wiegung)
         self.db.commit()
         self.db.refresh(wiegung)

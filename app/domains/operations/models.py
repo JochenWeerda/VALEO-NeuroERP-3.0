@@ -60,8 +60,7 @@ class Waage(Base):
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
     id = Column(String, primary_key=True, default=default_prefixed_id("W"))
-    # NULL marks pre-existing records with unknown ownership; never assigned by guess.
-    tenant_id = Column(String(64), nullable=True, index=True)
+    tenant_id = Column(String(120), nullable=False, index=True)  # Mandant setzt der Weg aus dem Token
     
     # Stammdaten
     standort = Column(String(100), nullable=False)
@@ -101,6 +100,8 @@ class Wiegung(Base):
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
     id = Column(String, primary_key=True, default=default_prefixed_id("WG"))
+    
+    tenant_id = Column(String(120), nullable=False, index=True)  # aus der Waage (Verbundschluessel)
     
     # Fahrzeugdaten
     kennzeichen = Column(String(20), nullable=False)
