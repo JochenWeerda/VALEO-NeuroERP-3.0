@@ -26,7 +26,8 @@ test.describe('Finance - OP-Lebenszyklus @smoke', () => {
   test('Periodenabschluss lädt', async ({ adminPage }) => {
     await adminPage.goto('/finance/periodenabschluss');
     await waitForAppReady(adminPage);
-    await expect(adminPage.getByRole('heading', { name: 'Periodenabschluss' })).toBeVisible({ timeout: 15000 });
+    // Seit Batch 1 (02.11.2026) zeigt /finance/periodenabschluss das Abschluss-Cockpit (fibu/abschluss-cockpit).
+    await expect(adminPage.getByRole('heading', { name: 'Abschluss-Cockpit' })).toBeVisible({ timeout: 15000 });
   });
 
   test('DATEV-Export lädt', async ({ adminPage }) => {

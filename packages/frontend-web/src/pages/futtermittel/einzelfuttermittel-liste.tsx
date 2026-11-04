@@ -2,6 +2,6 @@ import { NativeListPage } from '@/components/mask-builder/NativeListPage'
 
 export default function Page(): JSX.Element {
   return (
-    <NativeListPage screenId="futtermittel/einzelfuttermittel/liste" testId="screen-futtermittel/einzelfuttermittel/liste" />
+    <NativeListPage screenId="futtermittel/einzelfuttermittel-liste" testId="screen-futtermittel/einzelfuttermittel/liste" />
   )
 }

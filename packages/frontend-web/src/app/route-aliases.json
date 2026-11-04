@@ -2695,6 +2695,798 @@
     {
       "module": "@/pages/studio/workspace-composition-preview",
       "path": "studio/workspace-composition-preview"
+    },
+    {
+      "module": "@/pages/admin/api-keys",
+      "path": "admin/api-keys"
+    },
+    {
+      "module": "@/pages/admin/backup-restore",
+      "path": "admin/backup-restore"
+    },
+    {
+      "module": "@/pages/admin/BelegfolgekonfigPage",
+      "path": "admin/belegfolgekonfig"
+    },
+    {
+      "module": "@/pages/admin/berechtigungen-matrix",
+      "path": "admin/berechtigungen-matrix"
+    },
+    {
+      "module": "@/pages/admin/branches",
+      "path": "admin/branches"
+    },
+    {
+      "module": "@/pages/admin/control-center/incident-response",
+      "path": "admin/control-center/incident-response"
+    },
+    {
+      "module": "@/pages/admin/control-center/security",
+      "path": "admin/control-center/security"
+    },
+    {
+      "module": "@/pages/admin/core/audit-governance",
+      "path": "admin/core/audit-governance"
+    },
+    {
+      "module": "@/pages/admin/dms-integration",
+      "path": "admin/dms-integration"
+    },
+    {
+      "module": "@/pages/admin/erntepeak-stabilitaet",
+      "path": "admin/erntepeak-stabilitaet"
+    },
+    {
+      "module": "@/pages/admin/monitoring/alerting",
+      "path": "admin/monitoring/alerting"
+    },
+    {
+      "module": "@/pages/admin/omnichannel-handelskonflikt",
+      "path": "admin/omnichannel-handelskonflikt"
+    },
+    {
+      "module": "@/pages/admin/tankstelle-evb",
+      "path": "admin/tankstelle-evb"
+    },
+    {
+      "module": "@/pages/admin/tenants",
+      "path": "admin/tenants"
+    },
+    {
+      "module": "@/pages/admin/users",
+      "path": "admin/users"
+    },
+    {
+      "module": "@/pages/admin/workflow-editor",
+      "path": "admin/workflow-editor"
+    },
+    {
+      "module": "@/pages/admin/zeitachsen-editor",
+      "path": "admin/zeitachsen-editor"
+    },
+    {
+      "module": "@/pages/agrar/daily-prices",
+      "path": "agrar/daily-prices"
+    },
+    {
+      "module": "@/pages/agrar/duenger-rechner",
+      "path": "agrar/duenger-rechner"
+    },
+    {
+      "module": "@/pages/agrar/ernte/kampagnenabschluss",
+      "path": "agrar/ernte/kampagnenabschluss"
+    },
+    {
+      "module": "@/pages/agrar/ernte-annahme-abrechnung",
+      "path": "agrar/ernte-annahme-abrechnung"
+    },
+    {
+      "module": "@/pages/agrar/ernte-annahme-energiemais",
+      "path": "agrar/ernte-annahme-energiemais"
+    },
+    {
+      "module": "@/pages/agrar/ernte-kampagne-erfassung",
+      "path": "agrar/ernte-kampagne-erfassung"
+    },
+    {
+      "module": "@/pages/agrar/ernte-qualitaetsfreigabe",
+      "path": "agrar/ernte-qualitaetsfreigabe"
+    },
+    {
+      "module": "@/pages/agrar/feldbuch/ackerschlagkartei",
+      "path": "agrar/feldbuch/ackerschlagkartei"
+    },
+    {
+      "module": "@/pages/agrar/feldbuch/flurstueck-kataster",
+      "path": "agrar/feldbuch/flurstueck-kataster"
+    },
+    {
+      "module": "@/pages/agrar/futter/mischfutter-optimierung",
+      "path": "agrar/futter/mischfutter-optimierung"
+    },
+    {
+      "module": "@/pages/agrar/kultur-stamm",
+      "path": "agrar/kultur-stamm"
+    },
+    {
+      "module": "@/pages/agrar/LieferscheinErstellen",
+      "path": "agrar/lieferschein-erstellen"
+    },
+    {
+      "module": "@/pages/agrar/maschinen-auslastung",
+      "path": "agrar/maschinen-auslastung"
+    },
+    {
+      "module": "@/pages/agrar/nachhaltigkeit-eudr",
+      "path": "agrar/nachhaltigkeit-eudr"
+    },
+    {
+      "module": "@/pages/agrar/nawaro-erntemeldung",
+      "path": "agrar/nawaro-erntemeldung"
+    },
+    {
+      "module": "@/pages/agrar/nawaro-kaskade",
+      "path": "agrar/nawaro-kaskade"
+    },
+    {
+      "module": "@/pages/agrar/partie-historie",
+      "path": "agrar/partie-historie"
+    },
+    {
+      "module": "@/pages/agrar/pflanzenschutz-applikationen",
+      "path": "agrar/pflanzenschutz-applikationen"
+    },
+    {
+      "module": "@/pages/agrar/pflanzenschutz-liste",
+      "path": "agrar/pflanzenschutz-liste"
+    },
+    {
+      "module": "@/pages/agrar/pflanzenschutz-rechner",
+      "path": "agrar/pflanzenschutz-rechner"
+    },
+    {
+      "module": "@/pages/agrar/planung/duengeplanung",
+      "path": "agrar/planung/duengeplanung"
+    },
+    {
+      "module": "@/pages/agrar/planung/fruchtfolge",
+      "path": "agrar/planung/fruchtfolge"
+    },
+    {
+      "module": "@/pages/agrar/probenehmer-stamm",
+      "path": "agrar/probenehmer-stamm"
+    },
+    {
+      "module": "@/pages/agrar/psm/anwendungsprotokoll",
+      "path": "agrar/psm/anwendungsprotokoll"
+    },
+    {
+      "module": "@/pages/agrar/psm/tankmischung",
+      "path": "agrar/psm/tankmischung"
+    },
+    {
+      "module": "@/pages/agrar/qualitaet/laborwerte",
+      "path": "agrar/qualitaet/laborwerte"
+    },
+    {
+      "module": "@/pages/agrar/qualitaet/mykotoxine",
+      "path": "agrar/qualitaet/mykotoxine"
+    },
+    {
+      "module": "@/pages/agrar/rechnungen-erstellen",
+      "path": "agrar/rechnungen-erstellen"
+    },
+    {
+      "module": "@/pages/agrar/saatgut/royalties",
+      "path": "agrar/saatgut/royalties"
+    },
+    {
+      "module": "@/pages/agrar/schlaege/kulturhistorie",
+      "path": "agrar/schlaege/kulturhistorie"
+    },
+    {
+      "module": "@/pages/agrar/sektion-auswahl",
+      "path": "agrar/sektion-auswahl"
+    },
+    {
+      "module": "@/pages/agrar/self-billing",
+      "path": "agrar/self-billing"
+    },
+    {
+      "module": "@/pages/agrar/silo-belegung",
+      "path": "agrar/silo-belegung"
+    },
+    {
+      "module": "@/pages/agrar/silo-qualitaet",
+      "path": "agrar/silo-qualitaet"
+    },
+    {
+      "module": "@/pages/agrar/silo-trocknung",
+      "path": "agrar/silo-trocknung"
+    },
+    {
+      "module": "@/pages/agrar/soil-samples",
+      "path": "agrar/soil-samples"
+    },
+    {
+      "module": "@/pages/agrar/sorten-vermehrung",
+      "path": "agrar/sorten-vermehrung"
+    },
+    {
+      "module": "@/pages/agrar/trocknungsregeln",
+      "path": "agrar/trocknungsregeln"
+    },
+    {
+      "module": "@/pages/agrar/umwelt/nitrat",
+      "path": "agrar/umwelt/nitrat"
+    },
+    {
+      "module": "@/pages/agrar/vertrag-kontingente",
+      "path": "agrar/vertrag-kontingente"
+    },
+    {
+      "module": "@/pages/agrar/wiegeschein-detail",
+      "path": "agrar/wiegeschein-detail"
+    },
+    {
+      "module": "@/pages/aktien/dividenden",
+      "path": "aktien/dividenden"
+    },
+    {
+      "module": "@/pages/aktien/hauptversammlung",
+      "path": "aktien/hauptversammlung"
+    },
+    {
+      "module": "@/pages/aktien/stimmrechte",
+      "path": "aktien/stimmrechte"
+    },
+    {
+      "module": "@/pages/aktien/zeichnungen",
+      "path": "aktien/zeichnungen"
+    },
+    {
+      "module": "@/pages/analysis/WhatIfSimulator",
+      "path": "analysis/what-if-simulator"
+    },
+    {
+      "module": "@/pages/annahme/muster",
+      "path": "annahme/muster"
+    },
+    {
+      "module": "@/pages/annahme/rohwaren-annahme",
+      "path": "annahme/rohwaren-annahme"
+    },
+    {
+      "module": "@/pages/annahme/silo-zuweisung",
+      "path": "annahme/silo-zuweisung"
+    },
+    {
+      "module": "@/pages/annahme/waage-1",
+      "path": "annahme/waage-1"
+    },
+    {
+      "module": "@/pages/annahme/waage-2",
+      "path": "annahme/waage-2"
+    },
+    {
+      "module": "@/pages/annahme/wartezeit",
+      "path": "annahme/wartezeit"
+    },
+    {
+      "module": "@/pages/artikel/chargen-pflicht",
+      "path": "artikel/chargen-pflicht"
+    },
+    {
+      "module": "@/pages/artikel/ersatzteile",
+      "path": "artikel/ersatzteile"
+    },
+    {
+      "module": "@/pages/artikel/gebinde",
+      "path": "artikel/gebinde"
+    },
+    {
+      "module": "@/pages/artikel/gefahrgut",
+      "path": "artikel/gefahrgut"
+    },
+    {
+      "module": "@/pages/artikel/herkunft",
+      "path": "artikel/herkunft"
+    },
+    {
+      "module": "@/pages/artikel/kategorien",
+      "path": "artikel/kategorien"
+    },
+    {
+      "module": "@/pages/artikel/lieferanten-artikel",
+      "path": "artikel/lieferanten-artikel"
+    },
+    {
+      "module": "@/pages/artikel/preisstaffeln",
+      "path": "artikel/preisstaffeln"
+    },
+    {
+      "module": "@/pages/artikel/qualitaetsmerkmale",
+      "path": "artikel/qualitaetsmerkmale"
+    },
+    {
+      "module": "@/pages/artikel/stuecklisten",
+      "path": "artikel/stuecklisten"
+    },
+    {
+      "module": "@/pages/artikel/texte-medien",
+      "path": "artikel/texte-medien"
+    },
+    {
+      "module": "@/pages/artikel/umrechnungen",
+      "path": "artikel/umrechnungen"
+    },
+    {
+      "module": "@/pages/artikel/verpackungen",
+      "path": "artikel/verpackungen"
+    },
+    {
+      "module": "@/pages/artikel/zoll-intrastat",
+      "path": "artikel/zoll-intrastat"
+    },
+    {
+      "module": "@/pages/auswertungen/abfrage-generator",
+      "path": "auswertungen/abfrage-generator"
+    },
+    {
+      "module": "@/pages/auswertungen/agrarmarkt-bericht",
+      "path": "auswertungen/agrarmarkt-bericht"
+    },
+    {
+      "module": "@/pages/auswertungen/deckungsbeitraege",
+      "path": "auswertungen/deckungsbeitraege"
+    },
+    {
+      "module": "@/pages/auswertungen/erntebilanz",
+      "path": "auswertungen/erntebilanz"
+    },
+    {
+      "module": "@/pages/auswertungen/kundenumsatz",
+      "path": "auswertungen/kundenumsatz"
+    },
+    {
+      "module": "@/pages/auswertungen/lagerumschlag",
+      "path": "auswertungen/lagerumschlag"
+    },
+    {
+      "module": "@/pages/auswertungen/rohertrag",
+      "path": "auswertungen/rohertrag"
+    },
+    {
+      "module": "@/pages/auswertungen/umsatzstatistik",
+      "path": "auswertungen/umsatzstatistik"
+    },
+    {
+      "module": "@/pages/auswertungen/vertriebstrichter",
+      "path": "auswertungen/vertriebstrichter"
+    },
+    {
+      "module": "@/pages/auswertungen/warengruppen-analyse",
+      "path": "auswertungen/warengruppen-analyse"
+    },
+    {
+      "module": "@/pages/banken/konten-stamm",
+      "path": "banken/konten-stamm"
+    },
+    {
+      "module": "@/pages/banken/lastschriften",
+      "path": "banken/lastschriften"
+    },
+    {
+      "module": "@/pages/banken/sepa-export",
+      "path": "banken/sepa-export"
+    },
+    {
+      "module": "@/pages/banken/ueberweisungen",
+      "path": "banken/ueberweisungen"
+    },
+    {
+      "module": "@/pages/banken/zahlungsavise",
+      "path": "banken/zahlungsavise"
+    },
+    {
+      "module": "@/pages/belege/BelegfolgePage",
+      "path": "belege/belegfolge"
+    },
+    {
+      "module": "@/pages/betrieb/gefahrstoff-betriebsanweisung",
+      "path": "betrieb/gefahrstoff-betriebsanweisung"
+    },
+    {
+      "module": "@/pages/betrieb/gefahrstoff-kataster",
+      "path": "betrieb/gefahrstoff-kataster"
+    },
+    {
+      "module": "@/pages/betrieb/maschinen-stamm",
+      "path": "betrieb/maschinen-stamm"
+    },
+    {
+      "module": "@/pages/betrieb/prueffristen",
+      "path": "betrieb/prueffristen"
+    },
+    {
+      "module": "@/pages/betrieb/schadensmeldung",
+      "path": "betrieb/schadensmeldung"
+    },
+    {
+      "module": "@/pages/betrieb/standorte",
+      "path": "betrieb/standorte"
+    },
+    {
+      "module": "@/pages/betrieb/unterweisungen",
+      "path": "betrieb/unterweisungen"
+    },
+    {
+      "module": "@/pages/betrieb/wartungsplan",
+      "path": "betrieb/wartungsplan"
+    },
+    {
+      "module": "@/pages/charge/chargen-verfolgung",
+      "path": "charge/chargen-verfolgung"
+    },
+    {
+      "module": "@/pages/charge/etiketten",
+      "path": "charge/etiketten"
+    },
+    {
+      "module": "@/pages/charge/probenahme",
+      "path": "charge/probenahme"
+    },
+    {
+      "module": "@/pages/charge/qualitaets-freigabe",
+      "path": "charge/qualitaets-freigabe"
+    },
+    {
+      "module": "@/pages/charge/rueckruf",
+      "path": "charge/rueckruf"
+    },
+    {
+      "module": "@/pages/charge/sperrlager",
+      "path": "charge/sperrlager"
+    },
+    {
+      "module": "@/pages/charge/zusammenfuehrung",
+      "path": "charge/zusammenfuehrung"
+    },
+    {
+      "module": "@/pages/compliance/CrossCompliancePage",
+      "path": "compliance/cross-compliance-liste"
+    },
+    {
+      "module": "@/pages/compliance/duenge-bilanz",
+      "path": "compliance/duenge-bilanz"
+    },
+    {
+      "module": "@/pages/compliance/eudr-meldungen",
+      "path": "compliance/eudr-meldungen"
+    },
+    {
+      "module": "@/pages/compliance/export-pruefung",
+      "path": "compliance/export-pruefung"
+    },
+    {
+      "module": "@/pages/compliance/gefahrstoff-doku",
+      "path": "compliance/gefahrstoff-doku"
+    },
+    {
+      "module": "@/pages/compliance/gefahrstoff-verzeichnis",
+      "path": "compliance/gefahrstoff-verzeichnis"
+    },
+    {
+      "module": "@/pages/compliance/lksg-lieferkette",
+      "path": "compliance/lksg-lieferkette"
+    },
+    {
+      "module": "@/pages/compliance/pflanzenschutz-nachweis",
+      "path": "compliance/pflanzenschutz-nachweis"
+    },
+    {
+      "module": "@/pages/compliance/qs-audits",
+      "path": "compliance/qs-audits"
+    },
+    {
+      "module": "@/pages/compliance/schadstoff-monitoring",
+      "path": "compliance/schadstoff-monitoring"
+    },
+    {
+      "module": "@/pages/compliance/stichtagsmeldung-bestaende",
+      "path": "compliance/stichtagsmeldung-bestaende"
+    },
+    {
+      "module": "@/pages/compliance/tierwohl-dokumentation",
+      "path": "compliance/tierwohl-dokumentation"
+    },
+    {
+      "module": "@/pages/compliance/usp-konformitaet",
+      "path": "compliance/usp-konformitaet"
+    },
+    {
+      "module": "@/pages/compliance/wasserschutz-auflagen",
+      "path": "compliance/wasserschutz-auflagen"
+    },
+    {
+      "module": "@/pages/contracts/ContractPage",
+      "path": "contracts/contract"
+    },
+    {
+      "module": "@/pages/controlling/abweichungsanalyse",
+      "path": "controlling/abweichungsanalyse"
+    },
+    {
+      "module": "@/pages/controlling/agrarkalkulation",
+      "path": "controlling/agrarkalkulation"
+    },
+    {
+      "module": "@/pages/controlling/berichtswesen",
+      "path": "controlling/berichtswesen"
+    },
+    {
+      "module": "@/pages/controlling/cashflow-prognose",
+      "path": "controlling/cashflow-prognose"
+    },
+    {
+      "module": "@/pages/controlling/deckungsbeitragsrechnung",
+      "path": "controlling/deckungsbeitragsrechnung"
+    },
+    {
+      "module": "@/pages/controlling/investitionsrechnung",
+      "path": "controlling/investitionsrechnung"
+    },
+    {
+      "module": "@/pages/controlling/kampagnen-controlling",
+      "path": "controlling/kampagnen-controlling"
+    },
+    {
+      "module": "@/pages/controlling/kennzahlen",
+      "path": "controlling/kennzahlen"
+    },
+    {
+      "module": "@/pages/controlling/kostentraegerrechnung",
+      "path": "controlling/kostentraegerrechnung"
+    },
+    {
+      "module": "@/pages/controlling/liquiditaetsplanung",
+      "path": "controlling/liquiditaetsplanung"
+    },
+    {
+      "module": "@/pages/controlling/standort-vergleich",
+      "path": "controlling/standort-vergleich"
+    },
+    {
+      "module": "@/pages/controlling/unternehmensplanung",
+      "path": "controlling/unternehmensplanung"
+    },
+    {
+      "module": "@/pages/crm/activities",
+      "path": "crm/activities"
+    },
+    {
+      "module": "@/pages/crm/activity-detail",
+      "path": "crm/activity-detail"
+    },
+    {
+      "module": "@/pages/crm/anruf-protokoll",
+      "path": "crm/anruf-protokoll"
+    },
+    {
+      "module": "@/pages/crm/besuchsberichte",
+      "path": "crm/besuchsberichte"
+    },
+    {
+      "module": "@/pages/crm/betreuungsgebiet",
+      "path": "crm/betreuungsgebiet"
+    },
+    {
+      "module": "@/pages/crm/bonus-vereinbarungen",
+      "path": "crm/bonus-vereinbarungen"
+    },
+    {
+      "module": "@/pages/crm/churn-risiko",
+      "path": "crm/churn-risiko"
+    },
+    {
+      "module": "@/pages/crm/contact-detail",
+      "path": "crm/contact-detail"
+    },
+    {
+      "module": "@/pages/crm/cross-selling",
+      "path": "crm/cross-selling"
+    },
+    {
+      "module": "@/pages/crm/dokumente-kunden",
+      "path": "crm/dokumente-kunden"
+    },
+    {
+      "module": "@/pages/crm/dubletten-pruefung",
+      "path": "crm/dubletten-pruefung"
+    },
+    {
+      "module": "@/pages/crm/events-messen",
+      "path": "crm/events-messen"
+    },
+    {
+      "module": "@/pages/crm/gebietsschutz",
+      "path": "crm/gebietsschutz"
+    },
+    {
+      "module": "@/pages/crm/geschenke-liste",
+      "path": "crm/geschenke-liste"
+    },
+    {
+      "module": "@/pages/crm/interaktions-historie",
+      "path": "crm/interaktions-historie"
+    },
+    {
+      "module": "@/pages/crm/kampagne-detail",
+      "path": "crm/kampagne-detail"
+    },
+    {
+      "module": "@/pages/crm/kampagne-erstellen",
+      "path": "crm/kampagne-erstellen"
+    },
+    {
+      "module": "@/pages/crm/kaufverhalten",
+      "path": "crm/kaufverhalten"
+    },
+    {
+      "module": "@/pages/crm/kommunikation-center",
+      "path": "crm/kommunikation-center"
+    },
+    {
+      "module": "@/pages/crm/wettbewerber",
+      "path": "crm/wettbewerber"
+    },
+    {
+      "module": "@/pages/dashboard/customizable-dashboard",
+      "path": "dashboard/customizable-dashboard"
+    },
+    {
+      "module": "@/pages/disposition/bestell-vorschlag",
+      "path": "disposition/bestell-vorschlag"
+    },
+    {
+      "module": "@/pages/disposition/engpass-monitor",
+      "path": "disposition/engpass-monitor"
+    },
+    {
+      "module": "@/pages/disposition/kontrakt-abruf",
+      "path": "disposition/kontrakt-abruf"
+    },
+    {
+      "module": "@/pages/disposition/lager-reichweite",
+      "path": "disposition/lager-reichweite"
+    },
+    {
+      "module": "@/pages/disposition/saison-planung",
+      "path": "disposition/saison-planung"
+    },
+    {
+      "module": "@/pages/disposition/strecken-disposition",
+      "path": "disposition/strecken-disposition"
+    },
+    {
+      "module": "@/pages/disposition/umlagerungs-vorschlag",
+      "path": "disposition/umlagerungs-vorschlag"
+    },
+    {
+      "module": "@/pages/dms/archiv-suche",
+      "path": "dms/archiv-suche"
+    },
+    {
+      "module": "@/pages/dms/beleg-erkennung",
+      "path": "dms/beleg-erkennung"
+    },
+    {
+      "module": "@/pages/dms/dokument-detail",
+      "path": "dms/dokument-detail"
+    },
+    {
+      "module": "@/pages/dms/dokument-upload",
+      "path": "dms/dokument-upload"
+    },
+    {
+      "module": "@/pages/dms/freigabe-workflow",
+      "path": "dms/freigabe-workflow"
+    },
+    {
+      "module": "@/pages/dms/verschlagwortung",
+      "path": "dms/verschlagwortung"
+    },
+    {
+      "module": "@/pages/dms/vorlagen-verwaltung",
+      "path": "dms/vorlagen-verwaltung"
+    },
+    {
+      "module": "@/pages/einkauf/anfrage-erstellen",
+      "path": "einkauf/anfrage-erstellen"
+    },
+    {
+      "module": "@/pages/einkauf/anfragen-create",
+      "path": "einkauf/anfragen-create"
+    },
+    {
+      "module": "@/pages/einkauf/angebot-erfassen",
+      "path": "einkauf/angebot-erfassen"
+    },
+    {
+      "module": "@/pages/einkauf/angebote-vergleich",
+      "path": "einkauf/angebote-vergleich"
+    },
+    {
+      "module": "@/pages/einkauf/anlieferavis-erfassen",
+      "path": "einkauf/anlieferavis-erfassen"
+    },
+    {
+      "module": "@/pages/einkauf/auftragsbestaetigung-erfassen",
+      "path": "einkauf/auftragsbestaetigung-erfassen"
+    },
+    {
+      "module": "@/pages/einkauf/bestellung-freigabe",
+      "path": "einkauf/bestellung-freigabe"
+    },
+    {
+      "module": "@/pages/einkauf/bestellvorschlag-kontrakt",
+      "path": "einkauf/bestellvorschlag-kontrakt"
+    },
+    {
+      "module": "@/pages/einkauf/bestellvorschlag-verbrauch",
+      "path": "einkauf/bestellvorschlag-verbrauch"
+    },
+    {
+      "module": "@/pages/einkauf/dienstleistungen-haltung",
+      "path": "einkauf/dienstleistungen-haltung"
+    },
+    {
+      "module": "@/pages/einkauf/EinkaufVorgangPage",
+      "path": "einkauf/einkauf-vorgang-liste"
+    },
+    {
+      "module": "@/pages/einkauf/gutschrift-belastung",
+      "path": "einkauf/gutschrift-belastung"
+    },
+    {
+      "module": "@/pages/einkauf/kontrakt-anlage",
+      "path": "einkauf/kontrakt-anlage"
+    },
+    {
+      "module": "@/pages/einkauf/kontrakte-service",
+      "path": "einkauf/kontrakte-service"
+    },
+    {
+      "module": "@/pages/einkauf/lieferanten-angebote",
+      "path": "einkauf/lieferanten-angebote"
+    },
+    {
+      "module": "@/pages/einkauf/lieferanten-konditionen",
+      "path": "einkauf/lieferanten-konditionen"
+    },
+    {
+      "module": "@/pages/einkauf/lieferanten-reklamationen",
+      "path": "einkauf/lieferanten-reklamationen"
+    },
+    {
+      "module": "@/pages/einkauf/lieferschein-erfassen",
+      "path": "einkauf/lieferschein-erfassen"
+    },
+    {
+      "module": "@/pages/einkauf/mahnwesen-lieferanten",
+      "path": "einkauf/mahnwesen-lieferanten"
+    },
+    {
+      "module": "@/pages/export/intrastat-meldung",
+      "path": "export/intrastat-meldung"
+    },
+    {
+      "module": "@/pages/export/umsatzsteuer-voranmeldung",
+      "path": "export/umsatzsteuer-voranmeldung"
+    },
+    {
+      "module": "@/pages/fibu/kassenbuch",
+      "path": "fibu/kassenbuch"
     }
   ]
 }

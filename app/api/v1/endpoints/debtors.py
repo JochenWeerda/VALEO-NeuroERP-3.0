@@ -6,7 +6,6 @@ Adapted to existing database schema (debitor_number, name, address JSONB)
 
 from app.auth.finance_roles import finance_admin, finance_read, finance_write
 from typing import Optional
-import re
 from app.core.tenant import get_tenant_id
 from fastapi import Response, APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
@@ -15,21 +14,12 @@ from decimal import Decimal
 import json
 
 from ....core.data_quality_enforcement import build_dq_error_detail, evaluate_debtor_datensatz
+from ....core.wertetypen import ust_id_muster
 from ....core.database import get_db
 from ....finance.op_saldo import OP_SALDO_SQL
 
 # EU/EWR USt-ID Format-Muster (optional; leeres Feld erlaubt)
-_VAT_PATTERNS = {
-    "DE": re.compile(r"^DE\d{9}$"),
-    "AT": re.compile(r"^ATU\d{8}$"),
-    "NL": re.compile(r"^NL\d{9}B\d{2}$"),
-    "FR": re.compile(r"^FR[A-HJ-NP-Z0-9]{2}\d{9}$"),
-    "BE": re.compile(r"^BE0?\d{9}$"),
-    "CH": re.compile(r"^CHE\d{9}$"),
-    "IT": re.compile(r"^IT\d{11}$"),
-    "ES": re.compile(r"^ES[A-Z0-9]\d{7}[A-Z0-9]$", re.IGNORECASE),
-    "PL": re.compile(r"^PL\d{10}$"),
-}
+# Muster je Land: eine Quelle mit der Maske (config/wertetypen.json).
 
 
 def _validate_vat_id_format(vat_id: Optional[str]) -> None:
@@ -37,7 +27,7 @@ def _validate_vat_id_format(vat_id: Optional[str]) -> None:
     if not vat_id or not (raw := vat_id.replace(" ", "").replace("-", "").strip().upper()):
         return
     prefix = raw[:2]
-    pattern = _VAT_PATTERNS.get(prefix)
+    pattern = ust_id_muster().get(prefix)
     if not pattern:
         raise HTTPException(
             status_code=400,

@@ -37,6 +37,7 @@ import {
 import { UnsavedChangesGuard } from './renderers/UnsavedChangesGuard'
 import { SpecializedComponentHost } from './specialized/SpecializedComponentHost'
 import { conditionRoot, dispatchScreenAction, type ScreenContext } from './governance/screen-context'
+import { fieldExtras } from './render-plan/field-extras'
 
 const PROCESS_FLOW_SECTION_KEY = 'belegfluss'
 
@@ -167,7 +168,7 @@ function renderLegacyFields(
             dataPath: field.key,
             order: index,
             required: field.required ?? false,
-            readOnly: field.readOnly ?? false,
+            readOnly: (field.readOnly ?? false) || field.computed !== undefined,
             visible: true,
             placeholder: field.placeholder,
             helpText: field.helpText,
@@ -177,6 +178,8 @@ function renderLegacyFields(
             renderHint: field.renderHint,
             rowFields: field.rowFields,
             tableEditing: field.tableEditing,
+            currencyField: field.currencyField,
+            ...fieldExtras(field),
             ...(field.fileContent !== undefined ? { fileContent: field.fileContent } : {}),
           },
         ]),

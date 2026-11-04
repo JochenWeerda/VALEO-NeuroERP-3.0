@@ -20296,7 +20296,57 @@ Ratsche tests/test_vitest_runtime46_altlast.py (hoechstens 187, nur senken). Ech
 sind behoben: doppelte Dateivertragspruefung (accept-Liste) und doppelter Druckzweig ohne Fehlermeldung durch
 die Konfliktaufloesung c0bc8e99b/ca50c46f7; neun handgebaute Capture-Seiten blendeten alle rechtegebundenen
 Aktionen aus (Rechte jetzt aus useScreenPermissions), Postfaecher/Steuerschluessel mit fehlenden Rechten.
+Masken-Cluster (Branch feat/studio-masken-cluster-20261102): Batch 0/0b Feldklassen (rechnende Felder, Menge,
+Summenzeile, Formate, Periode, Wertetypen aus config/wertetypen.json, Geschaeftstag), MCP-Studio-Authoring
+(studio.catalog.read/definition.validate/draft.save/draft.submit_review, kein Agenten-Publish).
+Batch 1 FiBu/Finance (von 188 Platzhaltern): 11 tote Doppelungen entfernt, 17 Seiten auf ihre echte Maske
+umgehaengt, 8 Listen aus typisierten Wegen neu (app/core/screen_definitions_cluster_fibu.py), 404-Seite als
+Studio-Einstieg (errors/NotFound). Offen in fibu/finance: atlas, bilanz, guv, monatswerte, sachkonto,
+sicherheiten, buchungsimport, invoices-list, umsatz (kein passender typisierter Weg bzw. verschachtelter Bericht).
+Batch 2 Lager (03.11.2026): 6 Seiten umgehaengt (Lagerbewegungen, Inventur, Partiestamm, Silo-Uebersicht,
+Silo mobil, Silo-Kapazitaeten), 1 Doppelung entfernt, 3 Listen neu (Bestandsuebersicht - Seite hatte keine Maske -,
+Bestandsbewertung, Rueckverfolgbarkeit der Wiegescheine; screen_definitions_cluster_lager.py). Mengen nach
+app/core/agrar_units.py: Anzeige in dt (displayUnit), Summen rechnen Masse/Volumen um, Zaehleinheiten nie.
+Befund: /lager/ruestliste liest domain_inventory.ruestlisten, die weder Migration noch Modell anlegt -
+Kommissionierung bleibt Platzhalter bis zu einer eigenen Migration (mit RLS). Offen in lager: einlagerung,
+auslagerung, bestandskorrektur, lagerplaetze, gs1-scanner, terminal, epcis, inventory-reports,
+materialfluss-visualisierung.
+Ruestlisten-Tabelle per Migration ruestlisten_tabelle_20261103 (RLS), Weg repariert; Kommissionierung Studio-Liste.
+Batch 3 Futtermittel (03.11.2026): 7 Seiten umgehaengt (Misch-/Einzelfuttermittel-Listen, Stamm-Seiten auf
+Anlage- bzw. Objektmaske, Grundfutteranalysen), 2 Listen neu (Einzelfuttermittel, Mischfutter-Produktion;
+Inventarprofil, Mengen in dt, Preis je dt statt je t - Feldklasse pricePer/displayPricePer). Alle Cluster in
+app/core/screen_definitions_clusters.py. Offen: beratung, bestellung, statistik, integrationsmonitor,
+rations-import/-zugang, rationsvergleich, wareneingang, produktionsdokumente, rezepte/editor.
+Batch 4 Verkauf/Einkauf (03.11.2026): 7 Seiten umgehaengt (Kundenliste -> crm/kunden-liste, Auftraege x2,
+Ausgangsrechnungen, Wareneingang -> Einkaufs-Lieferscheinerfassung, RFQ-Gebote -> Angebotsvergleich,
+Eingangsrechnungs-Erfassung -> InvoiceCapturePage), 3 Doppelungen entfernt. Belegerfassungen (Angebot,
+Lieferschein, Kalkulation) warten auf den Rollout der Belegfamilie (beleg/* nur im Sichtpruefungsmandanten).
+Vorbestehend rot auf main (reihenfolgeabhaengig): einkauf/angebote-liste-uix.test.tsx, lieferanten-liste-uix.test.tsx.
+Batch 5 Fuhrpark/Personal/Service/Strecke/Reports (03.11.2026): 14 Seiten umgehaengt (u.a. Fuhrpark-Menue ->
+fuhrpark/uebersicht, Fahrzeug-Stamm Neuanlage+Detail, Stundenzettel, Zeiterfassung, Service-Anfragen, vorlaeufige
+Streckengeschaefte, Reports Umsatz/Lagerbestand), 2 Einstiegs-Cockpits (Strecken-Menue, NaWaRo-Uebersicht),
+16 Platzhalter entfernt. Offen: organigramm, hrm-operations-gates, service abschluss/rueckmeldung,
+speditionen-fracht-preise, reports/ReportsDashboardCharts, nawaro-uebersicht-drucken; nawaro/* Seiten ohne Maske.
+Doku-Drift (03.11.2026, Nutzerauftrag): 266 Seiten ohne Route/Navigation. 198 Seiten mit echter Studio-Maske
+haben eine Route bekommen (route-aliases.json; Masken ohne Route 204 -> 65). 65 handgebaute Altfassungen
+(61 x *-legacy, crm/detail, Home, ...) stehen in config/doc_drift_page_altlast.json (nur schrumpfen) und werden
+per Paritaetspruefung gegen ihre Studio-Maske abgebaut (Nutzerentscheidung: Altlast + Paritaetspruefung);
+nicht loeschen ohne Pruefung (Audit doc-drift-page-orphan-audit-20261031).
 
+Batch 6 Listen auf ihrem eigenen Leseweg (03.11.2026, Commit 3c8eaf841): sechs batch15-Platzhalter, die schon
+den richtigen Weg lasen, zeigen die Felder ihres Response-Models statt id/name/status/updated_at - Etikettendruck,
+Genossenschaftsmitglieder (ohne IBAN, datensparsam), Kontraktklassen, Frachtbriefe, Schadensmeldungen (mit
+Meldefrist), Agentenlaeufe (app/core/screen_definitions_cluster_eigene_wege.py). Gates A/B/C/E gruen.
+Batch 7 Portal (03.11.2026): neun Portal-Platzhalter lasen fast alle /portal/anfragen (Bestellungen, Rechnungen,
+Feldbuch, Shop zeigten Anfragen). Jede Liste liest jetzt ihren Weg aus portal_kundenwege.py
+(app/core/screen_definitions_cluster_portal.py); die Wege antworten typisiert statt CompatBridgeOut
+(app/api/v1/schemas/portal_listen_schemas.py), damit der Feldvertrag sie prueft. Naehrstoffliste ohne die Spalte
+"bewertung" (170 kg N je Lieferung statt je ha und Betrieb - falsche DueV-Aussage), Titel Naehrstoffzufuhr.
+Befunde fuer eigene Auftraege (nicht in Batch 7): /foerderung/antraege, /marketing/kampagnen und
+/qualitaet/labor-auftraege legen bei jedem GET per _seed(db) Demodaten an und filtern keinen Mandanten;
+/preise/historie errechnet einen Preisverlauf (aktuell*(1-i*0,01)), /preise/konditionen fuellt "Standardkunde"/
+Basispreis 100 auf; /strecke/speditionen/frachttarife, /vertrag/rahmenvertraege und /tankstelle/bestand ohne
+Mandantenbezug. Darauf keine Studio-Listen, bis die Wege echt sind.
 ## RLS-REST-AUF-MAIN-20261103 — in Arbeit, Claude
 
 Nutzerauftrag 03.11.2026: der nicht gemergte RLS-Rest vom 27./28.10. (PR #82, #84, #85, #88 und Vorgaenger, 17 Commits,

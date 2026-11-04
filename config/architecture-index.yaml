@@ -1,7 +1,7 @@
-# Architecture Index — generiert 2026-11-02
+# Architecture Index — generiert 2026-11-04
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-11-02T12:24:48Z'
+generated_at: '2026-11-04T05:57:56Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -80,8 +80,10 @@ domains:
     - /agrar/bodenprobe/neu
     - /agrar/bodenproben
     - /agrar/bodenproben/liste
+    - /agrar/daily-prices
     - /agrar/duenger
     - /agrar/duenger-liste
+    - /agrar/duenger-rechner
     - /agrar/duenger-stamm
     - /agrar/duenger-stamm/:id
     - /agrar/duenger/:id
@@ -93,18 +95,26 @@ domains:
     - /agrar/duenger/stamm/:id/edit
     - /agrar/duengung/planung
     - /agrar/ernte
+    - /agrar/ernte-annahme-abrechnung
+    - /agrar/ernte-annahme-energiemais
     - /agrar/ernte-annahme-erfassung
     - /agrar/ernte-annahme-erfassung/:id
+    - /agrar/ernte-kampagne-erfassung
+    - /agrar/ernte-qualitaetsfreigabe
     - /agrar/ernte/:id
+    - /agrar/ernte/kampagnenabschluss
     - /agrar/ernte/liste
     - /agrar/ernte/neu
     - /agrar/erntefenster-konfig
+    - /agrar/feldbuch/ackerschlagkartei
+    - /agrar/feldbuch/flurstueck-kataster
     - /agrar/feldbuch/massnahme/:id
     - /agrar/feldbuch/massnahme/neu
     - /agrar/feldbuch/massnahmen
     - /agrar/feldbuch/schlag/:id
     - /agrar/feldbuch/schlag/neu
     - /agrar/feldbuch/schlagkartei
+    - /agrar/futter/mischfutter-optimierung
     - /agrar/harvest-settlement/:id
     - /agrar/kontrakt-engagement
     - /agrar/kontrakt-erfuellung
@@ -112,18 +122,32 @@ domains:
     - /agrar/kontrakt-settlement
     - /agrar/kontrakt/:id
     - /agrar/kontrakte/:id
+    - /agrar/kultur-stamm
     - /agrar/kulturpflanzen
     - /agrar/kulturpflanzen/:id
     - /agrar/kulturpflanzen/liste
     - /agrar/kulturpflanzen/neu
     - /agrar/kunden-schlagkartei
     - /agrar/kunden-schlagkartei/:kunden_nr
+    - /agrar/lieferschein-erstellen
+    - /agrar/maschinen-auslastung
     - /agrar/maschinenauslastung
     - /agrar/milchvieh-crosssell
     - /agrar/milchvieh-karte
+    - /agrar/nachhaltigkeit-eudr
+    - /agrar/nawaro-erntemeldung
+    - /agrar/nawaro-kaskade
+    - /agrar/partie-historie
+    - /agrar/pflanzenschutz-applikationen
+    - /agrar/pflanzenschutz-liste
+    - /agrar/pflanzenschutz-rechner
     - /agrar/pflanzenschutz/applikation
+    - /agrar/planung/duengeplanung
+    - /agrar/planung/fruchtfolge
+    - /agrar/probenehmer-stamm
     - /agrar/psm
     - /agrar/psm/abgabedokumentation
+    - /agrar/psm/anwendungsprotokoll
     - /agrar/psm/auflagen-manager
     - /agrar/psm/auflagen/:id/bearbeiten
     - /agrar/psm/beratung
@@ -134,7 +158,11 @@ domains:
     - /agrar/psm/sachkunde/neu
     - /agrar/psm/stamm
     - /agrar/psm/stamm/:id
+    - /agrar/psm/tankmischung
     - /agrar/psm/wasserschutz
+    - /agrar/qualitaet/laborwerte
+    - /agrar/qualitaet/mykotoxine
+    - /agrar/rechnungen-erstellen
     - /agrar/rohwarengruppen
     - /agrar/saatgut
     - /agrar/saatgut-liste
@@ -143,6 +171,7 @@ domains:
     - /agrar/saatgut/:id
     - /agrar/saatgut/bestellung
     - /agrar/saatgut/liste
+    - /agrar/saatgut/royalties
     - /agrar/saatgut/sorte/:id
     - /agrar/saatgut/sorte/neu
     - /agrar/saatgut/sortenregister
@@ -151,9 +180,21 @@ domains:
     - /agrar/saatzucht
     - /agrar/sammelabrechnung
     - /agrar/schlaege/karte
+    - /agrar/schlaege/kulturhistorie
+    - /agrar/sektion-auswahl
+    - /agrar/self-billing
+    - /agrar/silo-belegung
+    - /agrar/silo-qualitaet
+    - /agrar/silo-trocknung
+    - /agrar/soil-samples
+    - /agrar/sorten-vermehrung
+    - /agrar/trocknungsregeln
+    - /agrar/umwelt/nitrat
     - /agrar/vermehrungsvertraege
+    - /agrar/vertrag-kontingente
     - /agrar/wetter/prognose
     - /agrar/wetterwarnung
+    - /agrar/wiegeschein-detail
     - /agrar/zinsabrechnung
     - /agribusiness/farmers
     - /agribusiness/field-service-task-edit
@@ -165,18 +206,32 @@ domains:
     - /annahme/annahme-qr
     - /annahme/klaerung-gesperrt
     - /annahme/lkw-registrierung
+    - /annahme/muster
     - /annahme/qr
     - /annahme/qr-scanner
     - /annahme/qualitaets-check
     - /annahme/rohware
+    - /annahme/rohwaren-annahme
+    - /annahme/silo-zuweisung
+    - /annahme/waage-1
+    - /annahme/waage-2
     - /annahme/warteschlange
+    - /annahme/wartezeit
+    - /charge/chargen-verfolgung
+    - /charge/etiketten
     - /charge/liste
+    - /charge/probenahme
+    - /charge/qualitaets-freigabe
+    - /charge/rueckruf
     - /charge/rueckverfolgung
+    - /charge/sperrlager
     - /charge/stamm
     - /charge/stamm/:id
     - /charge/wareneingang
+    - /charge/zusammenfuehrung
     - /contracts
     - /contracts-v2
+    - /contracts/contract
     - /energie
     - /energie/verbrauch
     - /foerderung
@@ -527,18 +582,24 @@ domains:
     - /benachrichtigungen
     - /benachrichtigungen/liste
     - /crm
+    - /crm/activities
     - /crm/activities/neu
+    - /crm/activity-detail
     - /crm/aktivitaet-detail
     - /crm/aktivitaet/:id
     - /crm/aktivitaeten
+    - /crm/anruf-protokoll
     - /crm/audits/neu
     - /crm/bedarfsdeckung-cockpit
     - /crm/bestell-inbox
+    - /crm/besuchsberichte
+    - /crm/betreuungsgebiet
     - /crm/betrieb/:id
     - /crm/betriebsprofil-detail
     - /crm/betriebsprofil/:id
     - /crm/betriebsprofile
     - /crm/betriebsprofile-liste
+    - /crm/bonus-vereinbarungen
     - /crm/campaign-builder
     - /crm/campaign-detail
     - /crm/campaign-performance
@@ -551,6 +612,7 @@ domains:
     - /crm/campaign/new
     - /crm/campaigns
     - /crm/campaigns/new
+    - /crm/churn-risiko
     - /crm/consent-confirm
     - /crm/consent-detail
     - /crm/consent-management
@@ -558,20 +620,32 @@ domains:
     - /crm/consent/confirm
     - /crm/consent/new
     - /crm/consents
+    - /crm/contact-detail
     - /crm/crm-dashboard
+    - /crm/cross-selling
     - /crm/customer-360/:id
     - /crm/customers
     - /crm/customers/:id
     - /crm/customers/:id/articles
+    - /crm/dokumente-kunden
     - /crm/dubletten
+    - /crm/dubletten-pruefung
     - /crm/durchdringungs-pipeline
+    - /crm/events-messen
     - /crm/gdpr-request-detail
     - /crm/gdpr-request-public
     - /crm/gdpr-request/:id
     - /crm/gdpr-request/new
     - /crm/gdpr-requests
+    - /crm/gebietsschutz
+    - /crm/geschenke-liste
+    - /crm/interaktions-historie
+    - /crm/kampagne-detail
+    - /crm/kampagne-erstellen
+    - /crm/kaufverhalten
     - /crm/kim
     - /crm/klaerfall-inbox
+    - /crm/kommunikation-center
     - /crm/kontakt-detail
     - /crm/kontakt-management
     - /crm/kontakt/:id
@@ -616,6 +690,7 @@ domains:
     - /crm/segments
     - /crm/vertreterprovisionen
     - /crm/vertreterstamm
+    - /crm/wettbewerber
     - /crm/wiedervorlagen
     - /inbox
     - /mahnwesen/mahnlauf
@@ -892,28 +967,58 @@ domains:
     - domain_shared
     frontend_routes:
     - /belege/:belegart/:id
+    - /belege/belegfolge
+    - /betrieb/gefahrstoff-betriebsanweisung
+    - /betrieb/gefahrstoff-kataster
+    - /betrieb/maschinen-stamm
+    - /betrieb/prueffristen
+    - /betrieb/schadensmeldung
+    - /betrieb/standorte
+    - /betrieb/unterweisungen
+    - /betrieb/wartungsplan
     - /compliance/bvl-meldungen
     - /compliance/bvl-umsatzmeldung
     - /compliance/cross-compliance
+    - /compliance/cross-compliance-liste
     - /compliance/datenpannen
+    - /compliance/duenge-bilanz
     - /compliance/enni-meldungen
     - /compliance/enni-neu
+    - /compliance/eudr-meldungen
     - /compliance/export-pruefprotokoll
+    - /compliance/export-pruefung
+    - /compliance/gefahrstoff-doku
+    - /compliance/gefahrstoff-verzeichnis
     - /compliance/gelangensbestaetigung
     - /compliance/intrastat
     - /compliance/lksg
+    - /compliance/lksg-lieferkette
     - /compliance/meldewesen-konsole
     - /compliance/pcn-liste
     - /compliance/pcn-ufi
+    - /compliance/pflanzenschutz-nachweis
+    - /compliance/qs-audits
     - /compliance/qs-checkliste
     - /compliance/saatgut-nachbau
     - /compliance/saatgut-nachbau-neu
     - /compliance/sachkunde-neu
     - /compliance/sachkunde-register
     - /compliance/sanktionspruefung
+    - /compliance/schadstoff-monitoring
+    - /compliance/stichtagsmeldung-bestaende
+    - /compliance/tierwohl-dokumentation
+    - /compliance/usp-konformitaet
     - /compliance/verarbeitungsverzeichnis
     - /compliance/vvvo-register
+    - /compliance/wasserschutz-auflagen
     - /compliance/zulassungen-register
+    - /dms/archiv-suche
+    - /dms/beleg-erkennung
+    - /dms/dokument-detail
+    - /dms/dokument-upload
+    - /dms/freigabe-workflow
+    - /dms/verschlagwortung
+    - /dms/vorlagen-verwaltung
     - /docflow/artefakt-freigabe
     - /docflow/dokumenten-ruecklauf
     - /docflow/gobd-export
@@ -1057,26 +1162,55 @@ domains:
     frontend_routes:
     - /abrechnung/eb-lieferschein-kontrolle
     - /auswertungen/abfrage-center
+    - /auswertungen/abfrage-generator
     - /auswertungen/aenderungshistorie
+    - /auswertungen/agrarmarkt-bericht
     - /auswertungen/auftrags-kontrolle
     - /auswertungen/beleg-kontrolle
     - /auswertungen/bonus-berechnung
+    - /auswertungen/deckungsbeitraege
     - /auswertungen/dms-volltext
     - /auswertungen/duengemittelmengen
+    - /auswertungen/erntebilanz
+    - /auswertungen/kundenumsatz
     - /auswertungen/l3-berichtskatalog
+    - /auswertungen/lagerumschlag
     - /auswertungen/lieferschein-kontrolle
+    - /auswertungen/rohertrag
     - /auswertungen/sanktionspruefung-kunden
     - /auswertungen/sanktionspruefung-personal
+    - /auswertungen/umsatzstatistik
+    - /auswertungen/vertriebstrichter
+    - /auswertungen/warengruppen-analyse
     - /banken/konten
+    - /banken/konten-stamm
     - /banken/konto/:id
     - /banken/konto/neu
+    - /banken/lastschriften
+    - /banken/sepa-export
+    - /banken/ueberweisungen
+    - /banken/zahlungsavise
+    - /controlling/abweichungsanalyse
+    - /controlling/agrarkalkulation
     - /controlling/benchmark-cockpit
+    - /controlling/berichtswesen
+    - /controlling/cashflow-prognose
     - /controlling/dashboard-verwaltung
+    - /controlling/deckungsbeitragsrechnung
+    - /controlling/investitionsrechnung
+    - /controlling/kampagnen-controlling
+    - /controlling/kennzahlen
+    - /controlling/kostentraegerrechnung
     - /controlling/kpi-verwaltung
+    - /controlling/liquiditaetsplanung
     - /controlling/massnahmen
     - /controlling/plan-ist
+    - /controlling/standort-vergleich
     - /controlling/timeseries-erfassung
+    - /controlling/unternehmensplanung
     - /controlling/widget-verwaltung
+    - /export/intrastat-meldung
+    - /export/umsatzsteuer-voranmeldung
     - /export/umsatzsteuervoranmeldung
     - /export/ustva
     - /fibu
@@ -1103,6 +1237,7 @@ domains:
     - /fibu/geschaeftsjahre
     - /fibu/guv
     - /fibu/hauptbuch
+    - /fibu/kassenbuch
     - /fibu/kontenplan
     - /fibu/kostenstellenrechnung
     - /fibu/kreditlinie-neu
@@ -1458,18 +1593,39 @@ domains:
     frontend_routes:
     - /artikel
     - /artikel/:id
+    - /artikel/chargen-pflicht
+    - /artikel/ersatzteile
+    - /artikel/gebinde
+    - /artikel/gefahrgut
+    - /artikel/herkunft
+    - /artikel/kategorien
+    - /artikel/lieferanten-artikel
     - /artikel/liste
     - /artikel/neu
+    - /artikel/preisstaffeln
+    - /artikel/qualitaetsmerkmale
     - /artikel/stamm
+    - /artikel/stuecklisten
+    - /artikel/texte-medien
+    - /artikel/umrechnungen
+    - /artikel/verpackungen
+    - /artikel/zoll-intrastat
     - /disposition
     - /disposition/FrmCoverageMonitor
     - /disposition/FrmPositionRules
     - /disposition/LstCommodityPositionMatrix
+    - /disposition/bestell-vorschlag
     - /disposition/coverage-monitor
+    - /disposition/engpass-monitor
+    - /disposition/kontrakt-abruf
+    - /disposition/lager-reichweite
     - /disposition/liste
     - /disposition/position-matrix
     - /disposition/regeln
+    - /disposition/saison-planung
+    - /disposition/strecken-disposition
     - /disposition/touren-disposition
+    - /disposition/umlagerungs-vorschlag
     - /etiketten/drucken
     - /inventory
     - /inventory-dashboard
@@ -1729,25 +1885,37 @@ domains:
     - /admin/GapPipelineConsole
     - /admin/agenten-integration
     - /admin/ai-approvals
+    - /admin/api-keys
     - /admin/audit-log
+    - /admin/backup-restore
+    - /admin/belegfolgekonfig
     - /admin/benutzer
     - /admin/benutzer-liste
     - /admin/benutzer/:id
     - /admin/benutzer/neu
+    - /admin/berechtigungen-matrix
+    - /admin/branches
     - /admin/command-monitor
     - /admin/compliance
     - /admin/compliance-dashboard
     - /admin/control-center
     - /admin/control-center/agent-ops
+    - /admin/control-center/incident-response
+    - /admin/control-center/security
     - /admin/control-center/superglue
+    - /admin/core/audit-governance
     - /admin/data-quality
+    - /admin/dms-integration
+    - /admin/erntepeak-stabilitaet
     - /admin/externe-gates
     - /admin/gap-pipeline
     - /admin/identity-budgets
     - /admin/integrationen-quarantaene
+    - /admin/monitoring/alerting
     - /admin/monitoring/alerts
     - /admin/monitoring/regeln
     - /admin/nummernkreise
+    - /admin/omnichannel-handelskonflikt
     - /admin/postfaecher
     - /admin/postfaecher/anmeldung-rueckruf
     - /admin/qualitaets-cockpit
@@ -1758,18 +1926,29 @@ domains:
     - /admin/screen-studio
     - /admin/setup
     - /admin/setup/dms-integration
+    - /admin/tankstelle-evb
+    - /admin/tenants
     - /admin/terminologie
     - /admin/token-consumption
+    - /admin/users
     - /admin/voice-channel
     - /admin/vordruck-editor
     - /admin/webhooks
     - /admin/webshop
+    - /admin/workflow-editor
+    - /admin/zeitachsen-editor
+    - /aktien/dividenden
+    - /aktien/hauptversammlung
+    - /aktien/stimmrechte
+    - /aktien/zeichnungen
     - /alerts
+    - /analysis/what-if-simulator
     - /analytics
     - /auth/callback
     - /auth/login
     - /copilot
     - /dashboard/customizable
+    - /dashboard/customizable-dashboard
     - /dashboard/einkauf
     - /dashboard/einkauf-dashboard
     - /dashboard/sales
@@ -1872,6 +2051,7 @@ domains:
     - mcp_beleg_tools
     - mcp_execution_service
     - mcp_mask_actions
+    - mcp_studio_authoring
     - mcp_studio_plans
     - mcp_tool_registry_service
     - mobile_sync_service
@@ -2062,31 +2242,38 @@ domains:
     - /einkauf
     - /einkauf/anfrage
     - /einkauf/anfrage-erfassung
+    - /einkauf/anfrage-erstellen
     - /einkauf/anfrage-stamm
     - /einkauf/anfrage/:id
     - /einkauf/anfrage/neu
     - /einkauf/anfragen
+    - /einkauf/anfragen-create
     - /einkauf/anfragen-liste
     - /einkauf/anfragen/:id
     - /einkauf/angebot
+    - /einkauf/angebot-erfassen
     - /einkauf/angebot-stamm
     - /einkauf/angebot/:id
     - /einkauf/angebot/neu
     - /einkauf/angebote
     - /einkauf/angebote-liste
+    - /einkauf/angebote-vergleich
     - /einkauf/angebote/:id
     - /einkauf/anlieferavis
+    - /einkauf/anlieferavis-erfassen
     - /einkauf/anlieferavis-liste
     - /einkauf/anlieferavis/:id
     - /einkauf/anlieferavis/neu
     - /einkauf/audit-drilldown
     - /einkauf/auftragsbestaetigung
+    - /einkauf/auftragsbestaetigung-erfassen
     - /einkauf/auftragsbestaetigung/:id
     - /einkauf/auftragsbestaetigung/neu
     - /einkauf/auftragsbestaetigungen
     - /einkauf/auftragsbestaetigungen-liste
     - /einkauf/auftragsbestaetigungen/:id
     - /einkauf/bestellung-anlegen
+    - /einkauf/bestellung-freigabe
     - /einkauf/bestellung-stamm
     - /einkauf/bestellung/:id
     - /einkauf/bestellungen
@@ -2094,24 +2281,36 @@ domains:
     - /einkauf/bestellungen/:id
     - /einkauf/bestellungen/neu
     - /einkauf/bestellvorschlaege
+    - /einkauf/bestellvorschlag-kontrakt
     - /einkauf/bestellvorschlag-lager
     - /einkauf/bestellvorschlag-rohware
+    - /einkauf/bestellvorschlag-verbrauch
     - /einkauf/bestellvorschlag-verkauf
+    - /einkauf/dienstleistungen-haltung
     - /einkauf/edi-portal
+    - /einkauf/einkauf-vorgang-liste
     - /einkauf/frachtauftraege-eingang
     - /einkauf/frachtauftrag/:id
+    - /einkauf/gutschrift-belastung
     - /einkauf/gutschriften-belastungen
     - /einkauf/gutschriften-belastungen/:type
+    - /einkauf/kontrakt-anlage
+    - /einkauf/kontrakte-service
     - /einkauf/lieferant/:id
     - /einkauf/lieferant/neu
     - /einkauf/lieferanten
+    - /einkauf/lieferanten-angebote
     - /einkauf/lieferanten-dokumente
+    - /einkauf/lieferanten-konditionen
     - /einkauf/lieferanten-liste
+    - /einkauf/lieferanten-reklamationen
     - /einkauf/lieferanten-stamm
     - /einkauf/lieferanten/:id
     - /einkauf/lieferantenbewertung
+    - /einkauf/lieferschein-erfassen
     - /einkauf/lieferschein-erfassung
     - /einkauf/lieferschein-frachtauftrag
+    - /einkauf/mahnwesen-lieferanten
     - /einkauf/rechnung-abgleich
     - /einkauf/rechnung-abgleich/:invoiceId
     - /einkauf/rechnung-eingang-erfassung
@@ -2168,10 +2367,10 @@ domains:
     - docs/adr/adr-062-foreign-goods-operator-projection.md
     - docs/adr/adr-business-partner-debitoren-kreditoren-20261101.md
 mapping_stats:
-  frontend_routes_total: 944
-  frontend_routes_mapped: 944
-  backend_services_total: 333
-  backend_services_mapped: 333
+  frontend_routes_total: 1142
+  frontend_routes_mapped: 1142
+  backend_services_total: 334
+  backend_services_mapped: 334
   backend_endpoints_total: 474
   backend_endpoints_mapped: 474
 unmapped:

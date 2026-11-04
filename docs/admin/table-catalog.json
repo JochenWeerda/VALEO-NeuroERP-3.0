@@ -34888,6 +34888,78 @@
             "app/infrastructure/models/l3c_models.py"
           ]
         },
+        "ruestlisten": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "ruestlisten_nr",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "auftrag_nr",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "status",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "positionen",
+              "nullable": false,
+              "type": "jsonb"
+            },
+            {
+              "name": "erstellt_fuer",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "prioritaet",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "bemerkung",
+              "nullable": true,
+              "type": "text"
+            },
+            {
+              "name": "erstellt_am",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "verarbeitet_am",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/api/v1/endpoints/ruestliste.py"
+          ],
+          "written_by": [
+            "app/api/v1/endpoints/ruestliste.py"
+          ]
+        },
         "shipping_units": {
           "columns": [
             {
