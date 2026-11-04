@@ -1,3 +1,14 @@
+---
+title: Batch 8 - Schutz vor Verlust von Altbestand
+type: reference
+audience: [entwickler, agent, qa]
+owner: Codex
+status: aktiv
+last_reviewed: 2026-11-04
+version: 1.0.0
+description: Seed-Signaturen, konservative Datenbereinigung und PostgreSQL-Abnahme fuer Batch 8.
+---
+
 # Batch 8: Schutz vor Verlust von Altbestand
 
 Die Seed-Signaturen stammen aus den `_seed`-Funktionen im Git-Vorgaenger von `f8bbdac5c`. Marketing prueft alle reproduzierbaren Geschaeftswerte, NULL und doppelte Namen blockieren die Entfernung. Generierte Kennungen und technische Zeitstempel sind nicht reproduzierbar. Foerder- und Labor-Seeds werden nur bei vollstaendiger Geschaeftssignatur entfernt; doppelte Foerdernummern, bereits vorhandene Mandanten oder vorhandene Befundspalten verhindern die entsprechende Bereinigung.
