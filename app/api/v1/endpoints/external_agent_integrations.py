@@ -3,6 +3,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 
+from app.core.tenant import get_tenant_id
 from app.core.external_agent_catalog import (
     build_external_agent_install_pack,
     build_external_agent_integration_catalog,
@@ -49,7 +50,6 @@ from app.api.v1.schemas.base import BaseSchema
 from pydantic import ConfigDict as _ConfigDict
 from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 from app.core.akteur import gepruefter_akteur_aus_request  # Bearbeiter aus dem Token
-from app.core.tenant import get_tenant_id
 
 
 class AgentIntegrationOut(BaseSchema):

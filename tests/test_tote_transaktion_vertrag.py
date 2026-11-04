@@ -239,8 +239,9 @@ def test_die_loeschung_ist_auditiert(client, kopf, mandant) -> None:
     assert eintrag["changes"]["deletion_log"], "Das Loeschprotokoll fehlt in der Spur"
 
 
-def test_die_aktivitaet_unter_seinem_namen_verschwindet(client, kopf, mandant) -> None:
-    """``domain_crm.activities`` kennt den Kunden nur als Text — sie muss mit."""
+def test_die_aktivitaet_des_kunden_verschwindet(client, kopf, mandant) -> None:
+    """Die Aktivitaet des Kunden muss mit - zugeordnet ueber die Kunden-ID, nie ueber den Namen
+    (Nutzerentscheidung 01.11.2026; Name allein: tests/test_dsgvo_loeschung_loescht_wirklich.py)."""
     from sqlalchemy import create_engine, text
 
     name = f"Hof Namensfund {uuid.uuid4().hex[:5]}"
@@ -254,11 +255,11 @@ def test_die_aktivitaet_unter_seinem_namen_verschwindet(client, kopf, mandant) -
                 # nachzuraten kostet einen Durchlauf je Spalte.
                 "INSERT INTO domain_crm.activities "
                 "(id, tenant_id, type, title, date, customer, contact_person, "
-                " status, assigned_to) "
+                " status, assigned_to, customer_id) "
                 "VALUES (:id, :t, 'call', 'Rueckfrage', CURRENT_DATE, :kunde, :kunde, "
-                "        'offen', 'pruefer-artikel-17')"
+                "        'planned', 'pruefer-artikel-17', :kid)"
             ),
-            {"id": str(uuid.uuid4()), "t": mandant, "kunde": name},
+            {"id": str(uuid.uuid4()), "t": mandant, "kunde": name, "kid": kunden_id},
         )
 
     antrag_id = _antrag(client, kopf, kunden_id)
@@ -271,10 +272,10 @@ def test_die_aktivitaet_unter_seinem_namen_verschwindet(client, kopf, mandant) -
 
     with create_engine(DB_URL).connect() as c:
         uebrig = c.execute(
-            text("SELECT count(*) FROM domain_crm.activities WHERE customer = :kunde"),
-            {"kunde": name},
+            text("SELECT count(*) FROM domain_crm.activities WHERE customer_id::text = :kid"),
+            {"kid": kunden_id},
         ).scalar()
-    assert uebrig == 0, "Die Aktivitaet mit dem Klarnamen liegt noch in der Datenbank"
+    assert uebrig == 0, "Die Aktivitaet des Kunden liegt noch in der Datenbank"
 
 
 # ── Die tote Transaktion: eine echte Bedingungsverletzung ──────────────

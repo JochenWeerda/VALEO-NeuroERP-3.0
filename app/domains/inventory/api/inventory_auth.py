@@ -15,7 +15,6 @@ from fastapi import Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
 from ....auth.oidc import extract_roles
-from ....core.config import settings
 from ....core.database import get_db
 from ....core.security import require_bearer_token
 from ....infrastructure.models import User as UserModel
@@ -82,7 +81,10 @@ def get_current_tenant_id(
         getattr(request.state, "tenant_id", None)
         or request.headers.get("X-Tenant-ID")
         or ""
-    ).strip() or settings.DEFAULT_TENANT_ID
+    ).strip()
+    if not tenant_id:
+        # Bis 28.10.2026 fiel ein fehlender Mandant still auf den Standardmandanten.
+        raise HTTPException(status_code=403, detail="Gepruefter Mandant fehlt")
 
     claims = getattr(request.state, 'token_claims', {}) or {}
     token_tenant = claims.get('tenant_id')

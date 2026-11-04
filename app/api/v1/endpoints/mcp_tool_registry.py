@@ -8,7 +8,8 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 from app.auth.deps_oidc import get_current_user
 from app.core.database import get_db
-from app.services.mcp_execution_service import ToolExecutionRequest, execute_mcp_tool
+from app.core.tenant_context import tenant_scope
+from app.services.mcp_execution_service import ToolExecutionRequest, _tenant_from_claims, execute_mcp_tool
 
 from app.services.mcp_tool_registry_service import mcp_tool_registry_service
 from app.api.v1.schemas.base import TypedObjectOut
@@ -25,7 +26,14 @@ def call_tool(
     db: Session = Depends(get_db),
 ) -> dict[str, Any]:
     # Generische Maskenwerkzeuge rufen den Ziel-Endpunkt mit dem Token des Aufrufers (nie mit einem eigenen).
-    return execute_mcp_tool(db, body, user, tenant_header, authorization=request.headers.get("Authorization"))
+    authorization = request.headers.get("Authorization")
+    tenant = _tenant_from_claims(user.get("raw"))
+    if not isinstance(tenant, str) or not tenant.strip():
+        return execute_mcp_tool(db, body, user, tenant_header, authorization=authorization)  # lehnt mit 403 ab
+    # Der Mandant der geprueften Identitaet gilt auch fuer rls_current_tenant() (Vorgaben, Policies), wie im
+    # Request ueber main:app; ohne Kontext blieben tenant_id-Vorgaben der Positionen leer.
+    with tenant_scope(tenant.strip(), "MCP-Werkzeug der geprueften Identitaet"):
+        return execute_mcp_tool(db, body, user, tenant_header, authorization=authorization)
 
 
 @router.get(

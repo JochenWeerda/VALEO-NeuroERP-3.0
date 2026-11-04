@@ -99,6 +99,11 @@ def kopf(haus: str) -> dict[str, str]:
     return {"X-Tenant-ID": haus, "Authorization": "Bearer dev-token"}
 
 
+def neu(haus: str) -> dict[str, str]:
+    """Anlegen einer Aktivitaet verlangt seit Runtime46 einen Idempotenzschluessel."""
+    return {**kopf(haus), "Idempotency-Key": str(uuid.uuid4())}
+
+
 def opportunity(engine, haus: str) -> str:
     from sqlalchemy import text
 
@@ -150,70 +155,6 @@ class TestSchreiben:
         assert crm_sales_nicht_erreichbar["anlegen"]["tenant_id"] == HAUS_A
 
 
-class TestAktivitaet:
-    def test_die_aktivitaet_landet_beim_mandanten_und_im_reiter(self, engine, client):
-        kennung = opportunity(engine, HAUS_A)
-        antwort = client.post(
-            f"{WEG}/{kennung}/activities?activity_type=CALL&subject=Preis%20besprochen", headers=kopf(HAUS_A)
-        )
-        assert antwort.status_code == 201, antwort.text
-        assert aktivitaeten(engine, kennung) == [(HAUS_A, "Preis besprochen", "CALL")]
-        reiter = client.get(REITER.format(kennung), headers=kopf(HAUS_A))
-        assert reiter.status_code == 200, reiter.text
-        assert "Preis besprochen" in reiter.text
-
-    def test_ein_fremder_mandant_legt_keine_aktivitaet_an(self, engine, client):
-        kennung = opportunity(engine, HAUS_A)
-        antwort = client.post(f"{WEG}/{kennung}/activities?subject=Fremd", headers=kopf(HAUS_B))
-        assert antwort.status_code == 404
-        assert aktivitaeten(engine, kennung) == []
-
-    def test_der_reiter_zeigt_keine_fremden_aktivitaeten(self, engine, client):
-        kennung = opportunity(engine, HAUS_A)
-        client.post(f"{WEG}/{kennung}/activities?subject=Intern", headers=kopf(HAUS_A))
-        reiter = client.get(REITER.format(kennung), headers=kopf(HAUS_B))
-        assert "Intern" not in reiter.text
-
-
-AKTION = "/api/v1/crm/opportunities/{}/actions/create_activity"
-
-
-class TestMaskenaktion:
-    def test_die_maske_legt_die_aktivitaet_mit_den_eingaben_an(self, engine, client):
-        kennung = opportunity(engine, HAUS_A)
-        antwort = client.post(AKTION.format(kennung), headers=kopf(HAUS_A), json={
-            "_mode": "execute", "subject": "Muster vereinbart", "activity_type": "meeting", "notes": "Hof 3"}).json()
-        assert antwort["success"] is True, antwort
-        assert aktivitaeten(engine, kennung) == [(HAUS_A, "Muster vereinbart", "MEETING")]
-
-    def test_ohne_betreff_keine_aktivitaet(self, engine, client):
-        kennung = opportunity(engine, HAUS_A)
-        antwort = client.post(AKTION.format(kennung), headers=kopf(HAUS_A), json={
-            "_mode": "execute", "activity_type": "CALL"}).json()
-        assert antwort["success"] is False
-        assert aktivitaeten(engine, kennung) == []
-
-    def test_fremder_mandant_legt_nichts_an(self, engine, client):
-        kennung = opportunity(engine, HAUS_A)
-        antwort = client.post(AKTION.format(kennung), headers=kopf(HAUS_B), json={
-            "_mode": "execute", "subject": "x", "activity_type": "CALL"}).json()
-        assert antwort["success"] is False
-        assert aktivitaeten(engine, kennung) == []
-
-    def test_die_maske_deklariert_die_eingaben(self):
-        from app.core.screen_definitions import get_screen_definition
-
-        aktion = next(a for a in get_screen_definition("crm/opportunity")["actions"] if a["key"] == "create_activity")
-        assert aktion["commandEndpoint"] == "/api/v1/crm/opportunities/{entity_id}/actions/create_activity"
-        assert [f["key"] for f in aktion["inputFields"]] == ["subject", "activity_type", "notes"]
-        assert "stubReason" not in aktion
-
-
-def test_kein_weg_nimmt_den_mandanten_aus_dem_query():
-    from pathlib import Path
-
-    quelle = Path("app/api/v1/endpoints/opportunities.py").read_text(encoding="utf-8")
-    assert "tenant_id: Optional[str] = Query(" not in quelle
-    # Jede Abfrage nach einer Opportunity-Kennung traegt den Mandanten mit.
-    assert 'WHERE id = :oid"' not in quelle
-    assert "WHERE id = :oid\n" not in quelle
+# Aktivitaeten an Opportunities laufen seit Runtime46 ueber den kanonischen Aktivitaetsdienst (menschliche,
+# signierte Identitaet, CRM-Rolle, Idempotenzschluessel). Geprueft in tests/test_crm_activity_canonical_sql.py:
+# Anlage, Wiederholung, Maske und MCP, fremder Mandant, Reiter und fehlender Betreff.

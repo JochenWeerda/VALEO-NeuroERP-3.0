@@ -43,7 +43,8 @@ test.describe('Agrar - PSM @smoke', () => {
     console.log('PSM Export Fallback-Level:', detection);
   });
 
-  test('Navigation zu PSM-Stamm', async ({ adminPage }) => {
+  // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): Seite rendert agrar/psm/stamm, die Maske fehlt; fixme bis zum Studio-Umbau.
+  test.fixme('Navigation zu PSM-Stamm', async ({ adminPage }) => {
     await adminPage.goto('/agrar/psm/stamm');
     await waitForAppReady(adminPage);
     

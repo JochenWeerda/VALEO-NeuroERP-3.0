@@ -63,6 +63,7 @@ ALIASE: dict[str, str] = {
     "dezitonne": "dt",
     "kilogramm": "kg",
     "liter": "l",
+    "ltr": "l",
     "stk": "st",
     "stueck": "st",
     "stück": "st",
@@ -73,11 +74,13 @@ ALIASE: dict[str, str] = {
     # gemeldet, statt auf etwas Aehnliches gebogen zu werden.
     "bag": "sack",
     "bigbag": "big_bag",
+    "bb": "big_bag",
     "big_bag": "big_bag",
     "canister": "kanister",
     "can": "kanister",
     "bottle": "flasche",
     "box": "karton",
+    "umkarton": "karton",
     "carton": "karton",
     "pallet": "palette",
     "crate": "kiste",
@@ -94,6 +97,7 @@ ZAEHLEINHEITEN: frozenset[str] = frozenset(
         "sack",
         "kanister",
         "flasche",
+        "dose",
         "karton",
         "kiste",
         "big_bag",
@@ -394,6 +398,38 @@ class Pack:
     #: Recht, das die Aufloesung erlaubt. ``None`` = niemand darf.
     aufloesung_permission: str | None = None
     bezeichnung: str = ""
+    #: Verpackungsleiter des Packs, z. B. ``Gebinde("karton", 2, je_einheit="pack")`` - ein Umkarton enthaelt
+    #: zwei Verkaufsgebinde - und ``Gebinde("palette", 40, je_einheit="karton")``. Verkaufseinheit (Pack) und
+    #: Verpackungseinheit (Umkarton) fallen im Pflanzenschutz oft auseinander (Nutzerhinweis 03.11.2026).
+    verpackung: tuple[Gebinde, ...] = ()
+
+    def packs_je(self, einheit: str, gesehen: frozenset[str] = frozenset()) -> Decimal | None:
+        """Wie viele Packs stecken in einer Verpackungsstufe? ``None``, wenn die Stufe nicht belegt ist.
+
+        Die Leiter wird stufenweise gepflegt (Palette -> Umkarton -> Pack) und hier heruntergerechnet; ein
+        Ringbezug liefert ``None`` statt einer erfundenen Zahl.
+        """
+        norm = normalisiere(einheit)
+        if norm == "pack":
+            return Decimal(1)
+        if norm in gesehen:
+            return None
+        stufe = next((g for g in self.verpackung if normalisiere(g.einheit) == norm), None)
+        if stufe is None or stufe.je_einheit is None:
+            return None
+        darunter = self.packs_je(stufe.je_einheit, gesehen | {norm})
+        return None if darunter is None else stufe.faktor * darunter
+
+    def inhalt_fuer(self, menge: Decimal, einheit: str) -> tuple[PackPosition, ...] | None:
+        """Artikelmengen in ``menge`` x ``einheit`` (z. B. 1 Umkarton -> 2 x 5 l PSM, 2 x 250 ml FHS).
+
+        Eine Mengenauskunft fuer Bestand, Kommissionierung und Lieferung - kein Recht, die Artikel einzeln zu
+        verkaufen; das regelt allein ``aufloesen``. ``None``, wenn die Verpackungsstufe nicht belegt ist.
+        """
+        packs = self.packs_je(einheit)
+        if packs is None:
+            return None
+        return tuple(PackPosition(p.artikel_id, p.menge * menge * packs, p.einheit) for p in self.positionen)
 
     def darf_aufloesen(self, permissions: frozenset[str] | set[str] | None) -> bool:
         """Darf dieser Aufrufer den Pack zerlegen?

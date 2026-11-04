@@ -21,7 +21,6 @@ from typing import Any, Mapping, Optional
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-_DEFAULT_TENANT = "00000000-0000-0000-0000-000000000001"
 # Mengen-Toleranz (%) bevor Über-/Unterlieferung als Abweichung gilt.
 _MENGE_TOLERANZ_PCT = Decimal("1.0")
 # Wert-Toleranz (%) für Rechnungsabgleich gegen gelieferten Wert.
@@ -168,7 +167,9 @@ def calculate_ers_credit(
 class ProcurementMatchService:
     def __init__(self, db: Session, tenant_id: Optional[str] = None) -> None:
         self.db = db
-        self.tenant_id = tenant_id or _DEFAULT_TENANT
+        if not tenant_id:  # kein Rueckfall auf den Standardmandanten (bis 28.10.2026)
+            raise ValueError("Mandant fehlt")
+        self.tenant_id = tenant_id
 
     # ── Geliefert-Mengen je PO-Position aus Wareneingängen ─────────────────────
     def _delivered_by_line(self, po_id: Optional[str], po_number: Optional[str]) -> dict[str, Decimal]:

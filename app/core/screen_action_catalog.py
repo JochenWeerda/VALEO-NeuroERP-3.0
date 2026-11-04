@@ -82,6 +82,11 @@ def build_screen_action_catalog(
     screen_ids: list[str] | None = None,
 ) -> list[dict[str, Any]]:
     """Return catalog entries for all (or selected) screen definitions."""
+    if screen_ids is None:
+        # Stamm-Masken registrieren sich erst beim ersten Bedarf; ohne das haengt der Umfang an der Aufrufreihenfolge.
+        from app.core.stamm_object_page_parent import ensure_stamm_screen_registry
+
+        ensure_stamm_screen_registry()
     ids = screen_ids if screen_ids is not None else sorted(SCREEN_DEFINITION_BUILDERS.keys())
     catalog: list[dict[str, Any]] = []
     seen_ids: set[str] = set()

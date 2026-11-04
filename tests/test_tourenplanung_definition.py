@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 from app.core.screen_definitions import get_screen_definition
@@ -24,7 +25,15 @@ from app.core.screen_definitions_capture import (
 from app.core.screen_governance import derived_screen_type, governance_errors
 
 ROOT = Path(__file__).resolve().parents[1]
-FALLBACK = (ROOT / "packages/frontend-web/src/masks/capture-screens.ts").read_text(encoding="utf-8")
+
+
+def _ts_schreibweise(quelle: str) -> str:
+    """Der Fallback wird im JSON-Stil erzeugt (``"key": "x"``); die Pruefungen lesen ``key: 'x'``."""
+    quelle = re.sub(r'"([A-Za-z_]\w*)":', r"\1:", quelle)
+    return re.sub(r'"([^"\\]*)"', r"'\1'", quelle)
+
+
+FALLBACK = _ts_schreibweise((ROOT / "packages/frontend-web/src/masks/capture-screens.ts").read_text(encoding="utf-8"))
 
 TOUR_FIELDS = ["datum", "tour_id", "tour_status", "ziel", "lieferschein", "fahrzeug_id", "fahrer_id"]
 TOUR_ENDPOINTS = ["/api/v1/logistik/tours", "/api/v1/fuhrpark/fahrzeuge", "/api/v1/transporte/fahrer"]
@@ -260,7 +269,8 @@ def test_fahrzeug_stamm_folgt_kennzeichen_und_typ() -> None:
     assert definition["layout"]["statusPlacement"] == "afterFields"
     assert derived_screen_type(definition) == "DETAIL"
     assert "statusPlacement: 'afterFields'" in block
-    assert definition["dataSources"][0]["endpoint"] == "/api/v1/fuhrpark/fahrzeuge"
+    # Detailmaske: der Satz kommt einzeln aus dem Fahrzeugstamm.
+    assert definition["dataSources"][0]["endpoint"] == "/api/v1/fuhrpark/fahrzeuge/{entity_id}"
     assert "/api/v1/fuhrpark/fahrzeuge" in block
     assert [action["key"] for action in definition["actions"] if action["kind"] == "primary"] == ["speichern"]
     loeschen = next(action for action in definition["actions"] if action["key"] == "loeschen")

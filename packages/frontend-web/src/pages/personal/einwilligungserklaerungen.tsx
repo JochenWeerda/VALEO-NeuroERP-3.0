@@ -14,6 +14,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { UniversalMaskRenderer } from '@/components/mask-builder/UniversalMaskRenderer'
+import { useScreenPermissions } from '@/components/mask-builder/runtime/screen-permissions'
 import { compileRenderPlanFromScreenDefinition } from '@/components/mask-builder/render-plan/schema-compiler'
 import { useUniversalFormState } from '@/components/mask-builder/runtime/useUniversalFormState'
 import { createScreenContext } from '@/components/mask-builder/governance/screen-context'
@@ -60,7 +61,8 @@ export default function PersonalEinwilligungserklaerungenPage(): JSX.Element {
     })),
   }), [fassungen.length, isTouch, neueste, saving])
 
-  const plan = useMemo(() => compileRenderPlanFromScreenDefinition(schema), [schema])
+  const rechte = useScreenPermissions(schema)
+  const plan = useMemo(() => compileRenderPlanFromScreenDefinition(schema, { permissions: rechte }), [schema, rechte])
   const form = useUniversalFormState({ screen: schema, initialValues: leer })
   const { resetForm } = form
 
@@ -132,14 +134,14 @@ export default function PersonalEinwilligungserklaerungenPage(): JSX.Element {
 
   const screenContext = useMemo(() => createScreenContext({
     data: { fassungen },
-    permissions: { granted: [] },
+    permissions: { granted: rechte },
     state: { values: form.values, policies: {} },
     actions: {
       'personal.saveErklaerung': () => handleAction('anlegen'),
       'personal.newErklaerung': () => handleAction('neu'),
     },
     navigation: { push: () => undefined },
-  }), [fassungen, form.values, handleAction])
+  }), [rechte, fassungen, form.values, handleAction])
 
   if (erklaerungen.isLoading) {
     return (

@@ -28,6 +28,10 @@ ENDPOINTS_DIR = REPO_ROOT / "app" / "api" / "v1" / "endpoints"
 SERVICES_DIR = REPO_ROOT / "app" / "services"
 PAGES_DIR = REPO_ROOT / "packages" / "frontend-web" / "src" / "pages"
 NAV_DOMAINS_DIR = REPO_ROOT / "packages" / "frontend-web" / "src" / "app" / "navigation" / "domains"
+#: Handgebaute Altfassungen ohne Route, die erst nach Paritaetspruefung entfallen (nur schrumpfen).
+PAGE_ALTLAST = REPO_ROOT / "config" / "doc_drift_page_altlast.json"
+#: Die Altlastliste beschreibt die Seiten dieses Repos; ein anderes Seitenverzeichnis (Tests) hat keine.
+_REPO_PAGES_DIR = REPO_ROOT / "packages" / "frontend-web" / "src" / "pages"
 ROUTE_INVENTORY = (
     REPO_ROOT / "packages" / "frontend-web" / "src" / "app" / "routing" / "route-inventory.gen.json"
 )
@@ -264,6 +268,10 @@ def check_pages_without_route_or_nav(
     if not PAGES_DIR.exists():
         return issues
     route_modules = reachable_page_modules(route_modules)
+    altlast: set[str] = set()
+    if PAGES_DIR == _REPO_PAGES_DIR and PAGE_ALTLAST.exists():
+        altlast = set(json.loads(PAGE_ALTLAST.read_text(encoding="utf-8"))["seiten"])
+    gesehen: set[str] = set()
     for f in sorted(PAGES_DIR.rglob("*.tsx")):
         name = f.stem
         if name.startswith("_") or name in SKIP_PAGE_NAMES or name in SKIP_PAGE_NAMES_INDIRECT:
@@ -283,6 +291,10 @@ def check_pages_without_route_or_nav(
         path_hint = rel.replace("/index", "") if rel.endswith("/index") else rel
         if path_hint in route_paths or path_hint in nav_text or name in nav_text:
             continue
+        datei = str(f.relative_to(PAGES_DIR)).replace("\\", "/")
+        if datei in altlast:
+            gesehen.add(datei)
+            continue
         issues.append(
             {
                 "type": "page_no_route_or_nav",
@@ -291,6 +303,10 @@ def check_pages_without_route_or_nav(
                 "module": module,
             }
         )
+    # Nur schrumpfen: ein Eintrag, der geroutet oder entfernt ist, muss aus der Altlastliste.
+    for datei in sorted(altlast - gesehen):
+        issues.append({"type": "page_altlast_behoben", "file": f"packages/frontend-web/src/pages/{datei}",
+                       "hint": "aus config/doc_drift_page_altlast.json nehmen"})
     return issues
 
 

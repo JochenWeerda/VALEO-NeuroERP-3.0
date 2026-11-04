@@ -5,7 +5,6 @@ FIBU-AP-01: CRUD + Dublettencheck (creditor_number pro Tenant).
 
 from app.auth.finance_roles import finance_admin, finance_write
 from typing import Optional
-import re
 import json
 from decimal import Decimal
 
@@ -13,8 +12,10 @@ from fastapi import Response, APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 
+from ....core.wertetypen import ust_id_muster
 from ....core.database import get_db
 from ....core.tenant import get_tenant_id
+from ....finance.op_saldo import OP_SALDO_SQL
 from ....core.data_quality_enforcement import (
     build_dq_error_detail,
     evaluate_creditor_datensatz,
@@ -29,24 +30,14 @@ from app.api.v1.schemas.creditors_schemas import CreditorsOut
 
 router = APIRouter(prefix="/creditors", tags=["finance", "creditors"])
 
-_VAT_PATTERNS = {
-    "DE": re.compile(r"^DE\d{9}$"),
-    "AT": re.compile(r"^ATU\d{8}$"),
-    "NL": re.compile(r"^NL\d{9}B\d{2}$"),
-    "FR": re.compile(r"^FR[A-HJ-NP-Z0-9]{2}\d{9}$"),
-    "BE": re.compile(r"^BE0?\d{9}$"),
-    "CH": re.compile(r"^CHE\d{9}$"),
-    "IT": re.compile(r"^IT\d{11}$"),
-    "ES": re.compile(r"^ES[A-Z0-9]\d{7}[A-Z0-9]$", re.IGNORECASE),
-    "PL": re.compile(r"^PL\d{10}$"),
-}
+# Muster je Land: eine Quelle mit der Maske (config/wertetypen.json).
 
 
 def _validate_vat_id_format(vat_id: Optional[str]) -> None:
     if not vat_id or not (raw := vat_id.replace(" ", "").replace("-", "").strip().upper()):
         return
     prefix = raw[:2]
-    pattern = _VAT_PATTERNS.get(prefix)
+    pattern = ust_id_muster().get(prefix)
     if not pattern:
         raise HTTPException(status_code=400, detail=f"USt-ID: unbekanntes Format für '{prefix}'.")
     if not pattern.match(raw):
@@ -386,7 +377,11 @@ async def get_creditor_balance(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    """OP-Saldo eines Kreditors: offener Betrag, Anzahl OPs, ältester OP."""
+    """OP-Saldo eines Kreditors: offener Betrag, Anzahl OPs, ältester OP.
+
+    Bis 28.10.2026 las die Abfrage ``amount``, ``paid_amount`` und ``status`` — Spalten, die
+    ``offene_posten`` nicht hat; jeder Aufruf endete mit 500.
+    """
     existing = db.execute(
         text(
             "SELECT id FROM domain_erp.creditors WHERE id = :id AND tenant_id = :tenant_id"
@@ -397,15 +392,8 @@ async def get_creditor_balance(
         raise HTTPException(status_code=404, detail="Kreditor nicht gefunden")
     try:
         row = db.execute(
-            text("""
-                SELECT
-                    COALESCE(SUM(amount - COALESCE(paid_amount, 0)), 0) AS open_balance,
-                    COUNT(*) AS open_item_count,
-                    MIN(due_date) AS oldest_due_date
-                FROM domain_erp.offene_posten
-                WHERE creditor_id = :creditor_id AND status = 'open'
-            """),
-            {"creditor_id": creditor_id},
+            text(OP_SALDO_SQL.format(verweis="creditor_id = :creditor_id")),
+            {"creditor_id": creditor_id, "tenant_id": tenant_id, "konto_typ": "kreditoren"},
         ).fetchone()
         return {
             "creditor_id": creditor_id,

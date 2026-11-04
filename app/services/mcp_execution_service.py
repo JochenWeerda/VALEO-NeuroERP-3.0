@@ -20,7 +20,7 @@ from app.agrar.rations.lifecycle import RationStatus, TransitionError, validate_
 from app.api.v1.endpoints.reklamation_api import _query_reklamation, wechsle_status
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
 from app.core.reklamation import ReklamationsStatus, ReklamationZustandsmaschine
-from app.services import crm_lead_service, mcp_beleg_tools, mcp_mask_actions
+from app.services import crm_lead_service, mcp_beleg_tools, mcp_mask_actions, mcp_studio_authoring
 from app.services.crm_kontakt_service import CrmKontaktService
 from app.services.document_allocation_service import LineToRegister
 from app.services.einkauf_compat_service import EinkaufCompatService, _NICHT_BESTELLBAR
@@ -667,6 +667,8 @@ def execute_mcp_tool(db: Session, request: ToolExecutionRequest, user: dict, ten
         locked = mcp_mask_actions.human_only_tool_call(request.tool_name, request.parameters)
         if locked and (user.get("raw") or {}).get("identity_type") != "human":
             raise HTTPException(403, f"Nur menschliche Bedienung: {locked}")
+    if request.tool_name in mcp_studio_authoring.TOOLS:
+        return mcp_studio_authoring.dispatch(request, authorization)
     if request.tool_name in mcp_mask_actions.TOOLS:
         return mcp_mask_actions.dispatch(request, tenant, authorization)
     if request.tool_name == "crm.customer.search":

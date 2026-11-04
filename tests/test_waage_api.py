@@ -58,24 +58,24 @@ class _WaageRepo:
     def __init__(self, items=None):
         self._items = list(items or [])
 
-    def get_all(self, tenant_id, skip=0, limit=100):
+    def get_all(self, skip=0, limit=100):
         return self._items[skip: skip + limit]
 
-    def get_by_status(self, tenant_id, status, skip=0, limit=100):
+    def get_by_status(self, status, skip=0, limit=100):
         return [i for i in self._items if i.status == status][skip:skip + limit]
 
-    def get_by_id(self, tenant_id, eid):
+    def get_by_id(self, eid):
         return next((i for i in self._items if i.id == eid), None)
 
-    def create(self, tenant_id, data):
+    def create(self, data):
         if data.get("_raise"):
             raise ValueError("boom")
         return _fw("W-new")
 
-    def update(self, tenant_id, eid, data):
+    def update(self, eid, data):
         return next((i for i in self._items if i.id == eid), None)
 
-    def delete(self, tenant_id, eid):
+    def delete(self, eid):
         return any(i.id == eid for i in self._items)
 
 
@@ -127,7 +127,7 @@ def _client_ctx(waagen=None, wiegungen=None, prefix=""):
     """Context manager that keeps repo patches alive for the lifetime of the client."""
     wr = _WaageRepo(waagen)
     wgr = _WiegungRepo(wiegungen)
-    with _mock_patch("app.api.v1.endpoints.waage.WaageRepository", lambda db: wr), \
+    with _mock_patch("app.api.v1.endpoints.waage.WaageRepository", lambda db, tenant_id: wr), \
          _mock_patch("app.api.v1.endpoints.waage.WiegungRepository", lambda db: wgr, create=True), \
          _mock_patch("app.api.v1.endpoints.waage._to_dict", _mock_to_dict):
         _app = FastAPI()
@@ -142,7 +142,7 @@ def _client(waagen=None, wiegungen=None):
     """Returns (client, wgr) with patches already entered (used inside `with` blocks in tests)."""
     wr = _WaageRepo(waagen)
     wgr = _WiegungRepo(wiegungen)
-    patcher_w = _mock_patch("app.api.v1.endpoints.waage.WaageRepository", lambda db: wr)
+    patcher_w = _mock_patch("app.api.v1.endpoints.waage.WaageRepository", lambda db, tenant_id: wr)
     patcher_wg = _mock_patch("app.api.v1.endpoints.waage.WiegungRepository", lambda db: wgr, create=True)
     patcher_w.start()
     patcher_wg.start()

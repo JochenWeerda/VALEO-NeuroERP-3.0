@@ -41,6 +41,7 @@ import {
 import { tourenplanungScreen } from '@/masks/capture-screens'
 import { createScreenContext } from '@/components/mask-builder/governance/screen-context'
 import { UniversalMaskRenderer } from '@/components/mask-builder/UniversalMaskRenderer'
+import { useScreenPermissions } from '@/components/mask-builder/runtime/screen-permissions'
 import { compileRenderPlanFromScreenDefinition } from '@/components/mask-builder/render-plan/schema-compiler'
 import { useUniversalFormState } from '@/components/mask-builder/runtime/useUniversalFormState'
 import type { ScreenDefinition } from '@/components/mask-builder/schema'
@@ -176,7 +177,8 @@ export default function TourenplanungPage(): JSX.Element {
     })),
   }), [fahrer, fahrzeuge, isTouch, lsBusy, lsResult, tourBusy, touren])
 
-  const plan = useMemo(() => compileRenderPlanFromScreenDefinition(schema), [schema])
+  const rechte = useScreenPermissions(schema)
+  const plan = useMemo(() => compileRenderPlanFromScreenDefinition(schema, { permissions: rechte }), [schema, rechte])
   const form = useUniversalFormState({
     screen: schema,
     initialValues: {
@@ -360,7 +362,7 @@ export default function TourenplanungPage(): JSX.Element {
 
   const screenContext = useMemo(() => createScreenContext({
     data: { tours: rows },
-    permissions: { granted: [] },
+    permissions: { granted: rechte },
     state: {
       values: form.values,
       policies: {
@@ -376,7 +378,7 @@ export default function TourenplanungPage(): JSX.Element {
       'tour.cancel': (payload) => handleAction('storno', payload),
     },
     navigation: { push: (route) => navigate(route) },
-  }), [form.values, handleAction, lsBusy, lsResult, navigate, rows, tourBusy])
+  }), [rechte, form.values, handleAction, lsBusy, lsResult, navigate, rows, tourBusy])
 
   const selectRow = useCallback((row: Record<string, unknown>) => {
     form.setValue('datum', String(row.datum ?? ''))

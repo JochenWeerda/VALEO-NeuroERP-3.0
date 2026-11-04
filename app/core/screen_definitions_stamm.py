@@ -88,23 +88,63 @@ def _stamm(
 _ARTIKEL_STAMM = [
     _feld("article_number", "Artikel-Nr.", required=True),
     _feld("name", "Bezeichnung", required=True),
-    _feld("unit", "Einheit", required=True, width=80),
+    _feld("short_description", "Kurzbezeichnung"),
+    _feld("description", "Beschreibung", "textarea"),
+    _feld("suchbegriff", "Suchbegriff"),
+    _feld("warengruppe", "Warengruppe"),
     _feld("category", "Kategorie", required=True),
+    _feld("subcategory", "Unterkategorie"),
+    _feld("unit", "Einheit", required=True, width=80),
+    _feld("hersteller", "Hersteller"),
+    _feld("herkunftsland", "Herkunftsland (ISO)", width=80),
+    _feld("ean_code", "EAN", readOnly=True),
+    _feld("lieferantennummer", "Hauptlieferant"),
 ]
-_ARTIKEL_PREISE = [_feld("sales_price", "Verkaufspreis", "currency", required=True)]
-_ARTIKEL_LAGER = [_feld("lagerartikel", "Lagerartikel", "boolean")]
-_ARTIKEL_QUALITAET = [_feld("qs_pruefung_erforderlich", "QS-Pruefung", "boolean")]
+_ARTIKEL_PREISE = [
+    _feld("sales_price", "Verkaufspreis", "currency", required=True),
+    _feld("purchase_price", "Einkaufspreis", "currency"),
+    _feld("currency", "Waehrung", width=70),
+    _feld("einheit_preiseinheit", "Preiseinheit"),
+    _feld("steuerschluessel_verkauf", "Steuerschluessel Verkauf"),
+    _feld("steuerschluessel_einkauf", "Steuerschluessel Einkauf"),
+    _feld("rabattfaehig", "Rabattfaehig", "boolean", readOnly=True),
+    _feld("skontofaehig", "Skontofaehig", "boolean", readOnly=True),
+    _feld("bonus_faehig", "Bonusfaehig", "boolean", readOnly=True),
+]
+_ARTIKEL_LAGER = [
+    _feld("lagerartikel", "Lagerartikel", "boolean"),
+    _feld("min_stock", "Mindestbestand", "number"),
+    _feld("max_stock", "Hoechstbestand", "number"),
+    _feld("chargenpflicht", "Chargenpflicht", "boolean"),
+    _feld("mhd_erforderlich", "MHD erforderlich", "boolean"),
+    _feld("lager_silo", "Silolagerung", "boolean"),
+    _feld("gebinde_groesse", "Gebindegroesse", "number"),
+    _feld("gebinde_einheit", "Gebindeeinheit"),
+    _feld("weight", "Gewicht je Einheit", "number"),
+]
+_ARTIKEL_QUALITAET = [
+    _feld("qs_pruefung_erforderlich", "QS-Pruefung erforderlich", "boolean"),
+    _feld("gmp_plus_relevanz", "GMP+-relevant", "boolean"),
+    _feld("bio_kennzeichnung", "Bio", "boolean"),
+    _feld("analyse_protein", "Protein %", "number"),
+    _feld("analyse_feuchtigkeit", "Feuchte %", "number"),
+    _feld("analyse_fremdstoffe", "Fremdstoffe %", "number"),
+    _feld("gefahrgutklasse", "Gefahrgutklasse"),
+    _feld("gefahrgut_un_nummer", "UN-Nummer"),
+    _feld("zolltarifnummer", "Zolltarifnummer"),
+]
+#: Felder, die die Aktion "Bearbeiten" aendern darf (auch der Kommandoweg nimmt nur diese an). Schreibgeschuetzt
+#: sind die, die ArticleUpdate nicht kennt (EAN, Rabatt-/Skonto-/Bonusfaehigkeit).
+ARTIKEL_BEARBEITEN_FELDER = tuple(
+    f["key"] for f in (*_ARTIKEL_STAMM, *_ARTIKEL_PREISE, *_ARTIKEL_LAGER, *_ARTIKEL_QUALITAET) if not f.get("readOnly")
+)
+
 
 def _register(key: str, label: str, quelle: str, spalten: list[dict[str, Any]]) -> dict[str, Any]:
     from app.core.stamm_object_page_parent import stamm_lazy_table_tab  # noqa: PLC0415
     return stamm_lazy_table_tab(
         key=key, label=label, data_source_key=quelle, columns=spalten, server_pagination=False,
     )
-
-
-ARTIKEL_BEARBEITEN_FELDER = tuple(
-    f["key"] for f in (*_ARTIKEL_STAMM, *_ARTIKEL_PREISE, *_ARTIKEL_LAGER, *_ARTIKEL_QUALITAET)
-)
 
 
 def build_artikel_stamm() -> dict[str, Any]:

@@ -104,7 +104,8 @@ def kunde(mandant: str) -> str:
                 # ein Name steht erst da, wenn ihn jemand pflegt. Genau das
                 # prueft test_kopf_nennt_den_kunden_statt_der_referenz.
                 "VALUES ('K-100', :tid, 'K-100', NULL) "
-                "ON CONFLICT (id) DO NOTHING"
+                # Feste Kennung, systemweit Primaerschluessel: ein Rest aus einem anderen Lauf wird uebernommen.
+                "ON CONFLICT (id) DO UPDATE SET tenant_id = EXCLUDED.tenant_id, company_name = NULL"
             ),
             {"tid": mandant},
         )
@@ -112,7 +113,7 @@ def kunde(mandant: str) -> str:
             text(
                 "INSERT INTO domain_inventory.articles (id, tenant_id, article_number, name) "
                 "VALUES ('ART-WEIZEN', :tid, '10001', 'Weizen A') "
-                "ON CONFLICT (id) DO NOTHING"
+                "ON CONFLICT (id) DO UPDATE SET tenant_id = EXCLUDED.tenant_id"
             ),
             {"tid": mandant},
         )
@@ -128,17 +129,18 @@ def kopf(mandant: str, kunde: str) -> dict[str, str]:
     }
 
 
-def lieferschein(client, kopf, menge: str = "100", preis: str = "25.00", mwst: str = "7") -> str:
+def lieferschein(client, kopf, menge: str = "100", preis: str = "25.00", mwst: str = "7",
+                 kunde: str = "K-100", artikel: str = "ART-WEIZEN") -> str:
     antwort = client.post(
         "/api/v1/sales/delivery-notes",
         headers=kopf,
         json={
-            "customer_id": "K-100",
+            "customer_id": kunde,
             "delivery_date": "2026-09-15",
             "positionen": [
                 {
                     "pos_nr": 1,
-                    "artikel_id": "ART-WEIZEN",
+                    "artikel_id": artikel,
                     "artikel_nr": "10001",
                     "bezeichnung": "Weizen A",
                     "menge": menge,
@@ -318,13 +320,18 @@ def test_liste_zeigt_nur_die_rechnungen_des_eigenen_mandanten(client, kunde) -> 
             ),
             {"id": fremd, "domain": f"{fremd}.test"},
         )
+        # Kunde und Artikel sind systemweite Primaerschluessel; der fremde Mandant braucht eigene.
+        verbindung.execute(text("INSERT INTO domain_crm.customers (id, tenant_id, customer_number, company_name) "
+                                "VALUES (:k, :t, :k, 'Fremdhof')"), {"k": f"K-{fremd}", "t": fremd})
+        verbindung.execute(text("INSERT INTO domain_inventory.articles (id, tenant_id, article_number, name) "
+                                "VALUES (:a, :t, '10001', 'Weizen A')"), {"a": f"ART-{fremd}", "t": fremd})
     fremd_kopf = {
         "Authorization": "Bearer dev-token",
         "X-Tenant-ID": fremd,
         "X-Tenant-Id": fremd,
     }
     try:
-        ls_id = lieferschein(client, fremd_kopf)
+        ls_id = lieferschein(client, fremd_kopf, kunde=f"K-{fremd}", artikel=f"ART-{fremd}")
         fremde = rechnung(client, fremd_kopf, ls_id).json()
 
         eigener = f"test-{_uuid.uuid4().hex[:8]}"
@@ -353,6 +360,8 @@ def test_liste_zeigt_nur_die_rechnungen_des_eigenen_mandanten(client, kunde) -> 
                 ("domain_sales.sales_invoices", "tenant_id"),
                 ("domain_docs.doc_allocation_sources", "tenant_id"),
                 ("domain_sales.delivery_notes", "tenant_id"),
+                ("domain_crm.customers", "tenant_id"),
+                ("domain_inventory.articles", "tenant_id"),
                 ("domain_shared.tenants", "id"),
             ):
                 verbindung.execute(

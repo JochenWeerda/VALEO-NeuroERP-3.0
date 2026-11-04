@@ -1,7 +1,7 @@
-# Architecture Index — generiert 2026-10-26
+# Architecture Index — generiert 2026-11-04
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-10-26T06:46:23Z'
+generated_at: '2026-11-04T06:06:41Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -80,8 +80,10 @@ domains:
     - /agrar/bodenprobe/neu
     - /agrar/bodenproben
     - /agrar/bodenproben/liste
+    - /agrar/daily-prices
     - /agrar/duenger
     - /agrar/duenger-liste
+    - /agrar/duenger-rechner
     - /agrar/duenger-stamm
     - /agrar/duenger-stamm/:id
     - /agrar/duenger/:id
@@ -93,18 +95,26 @@ domains:
     - /agrar/duenger/stamm/:id/edit
     - /agrar/duengung/planung
     - /agrar/ernte
+    - /agrar/ernte-annahme-abrechnung
+    - /agrar/ernte-annahme-energiemais
     - /agrar/ernte-annahme-erfassung
     - /agrar/ernte-annahme-erfassung/:id
+    - /agrar/ernte-kampagne-erfassung
+    - /agrar/ernte-qualitaetsfreigabe
     - /agrar/ernte/:id
+    - /agrar/ernte/kampagnenabschluss
     - /agrar/ernte/liste
     - /agrar/ernte/neu
     - /agrar/erntefenster-konfig
+    - /agrar/feldbuch/ackerschlagkartei
+    - /agrar/feldbuch/flurstueck-kataster
     - /agrar/feldbuch/massnahme/:id
     - /agrar/feldbuch/massnahme/neu
     - /agrar/feldbuch/massnahmen
     - /agrar/feldbuch/schlag/:id
     - /agrar/feldbuch/schlag/neu
     - /agrar/feldbuch/schlagkartei
+    - /agrar/futter/mischfutter-optimierung
     - /agrar/harvest-settlement/:id
     - /agrar/kontrakt-engagement
     - /agrar/kontrakt-erfuellung
@@ -112,18 +122,32 @@ domains:
     - /agrar/kontrakt-settlement
     - /agrar/kontrakt/:id
     - /agrar/kontrakte/:id
+    - /agrar/kultur-stamm
     - /agrar/kulturpflanzen
     - /agrar/kulturpflanzen/:id
     - /agrar/kulturpflanzen/liste
     - /agrar/kulturpflanzen/neu
     - /agrar/kunden-schlagkartei
     - /agrar/kunden-schlagkartei/:kunden_nr
+    - /agrar/lieferschein-erstellen
+    - /agrar/maschinen-auslastung
     - /agrar/maschinenauslastung
     - /agrar/milchvieh-crosssell
     - /agrar/milchvieh-karte
+    - /agrar/nachhaltigkeit-eudr
+    - /agrar/nawaro-erntemeldung
+    - /agrar/nawaro-kaskade
+    - /agrar/partie-historie
+    - /agrar/pflanzenschutz-applikationen
+    - /agrar/pflanzenschutz-liste
+    - /agrar/pflanzenschutz-rechner
     - /agrar/pflanzenschutz/applikation
+    - /agrar/planung/duengeplanung
+    - /agrar/planung/fruchtfolge
+    - /agrar/probenehmer-stamm
     - /agrar/psm
     - /agrar/psm/abgabedokumentation
+    - /agrar/psm/anwendungsprotokoll
     - /agrar/psm/auflagen-manager
     - /agrar/psm/auflagen/:id/bearbeiten
     - /agrar/psm/beratung
@@ -134,7 +158,11 @@ domains:
     - /agrar/psm/sachkunde/neu
     - /agrar/psm/stamm
     - /agrar/psm/stamm/:id
+    - /agrar/psm/tankmischung
     - /agrar/psm/wasserschutz
+    - /agrar/qualitaet/laborwerte
+    - /agrar/qualitaet/mykotoxine
+    - /agrar/rechnungen-erstellen
     - /agrar/rohwarengruppen
     - /agrar/saatgut
     - /agrar/saatgut-liste
@@ -143,6 +171,7 @@ domains:
     - /agrar/saatgut/:id
     - /agrar/saatgut/bestellung
     - /agrar/saatgut/liste
+    - /agrar/saatgut/royalties
     - /agrar/saatgut/sorte/:id
     - /agrar/saatgut/sorte/neu
     - /agrar/saatgut/sortenregister
@@ -151,9 +180,21 @@ domains:
     - /agrar/saatzucht
     - /agrar/sammelabrechnung
     - /agrar/schlaege/karte
+    - /agrar/schlaege/kulturhistorie
+    - /agrar/sektion-auswahl
+    - /agrar/self-billing
+    - /agrar/silo-belegung
+    - /agrar/silo-qualitaet
+    - /agrar/silo-trocknung
+    - /agrar/soil-samples
+    - /agrar/sorten-vermehrung
+    - /agrar/trocknungsregeln
+    - /agrar/umwelt/nitrat
     - /agrar/vermehrungsvertraege
+    - /agrar/vertrag-kontingente
     - /agrar/wetter/prognose
     - /agrar/wetterwarnung
+    - /agrar/wiegeschein-detail
     - /agrar/zinsabrechnung
     - /agribusiness/farmers
     - /agribusiness/field-service-task-edit
@@ -165,18 +206,32 @@ domains:
     - /annahme/annahme-qr
     - /annahme/klaerung-gesperrt
     - /annahme/lkw-registrierung
+    - /annahme/muster
     - /annahme/qr
     - /annahme/qr-scanner
     - /annahme/qualitaets-check
     - /annahme/rohware
+    - /annahme/rohwaren-annahme
+    - /annahme/silo-zuweisung
+    - /annahme/waage-1
+    - /annahme/waage-2
     - /annahme/warteschlange
+    - /annahme/wartezeit
+    - /charge/chargen-verfolgung
+    - /charge/etiketten
     - /charge/liste
+    - /charge/probenahme
+    - /charge/qualitaets-freigabe
+    - /charge/rueckruf
     - /charge/rueckverfolgung
+    - /charge/sperrlager
     - /charge/stamm
     - /charge/stamm/:id
     - /charge/wareneingang
+    - /charge/zusammenfuehrung
     - /contracts
     - /contracts-v2
+    - /contracts/contract
     - /energie
     - /energie/verbrauch
     - /foerderung
@@ -298,6 +353,7 @@ domains:
     - agri_silo_material_flow_service
     - agribusiness_service
     - annahme_service
+    - complaint_list_read
     - contract_engagement_service
     - contract_fixing_service
     - contract_fulfillment_service
@@ -349,6 +405,7 @@ domains:
     - supply_chain_lot_service
     - supply_chain_trace_service
     - tank_adapter_service
+    - waage_import_service
     - webshop_integration_service
     backend_endpoints:
     - agrar_contracts
@@ -488,6 +545,7 @@ domains:
     - docs/adr/adr-078-canonical-lead-postgresql-pdf.md
     - docs/adr/adr-079-ebilanz-xbrl-drafts.md
     - docs/adr/adr-085-studio-generated-master-data.md
+    - docs/adr/adr-business-partner-debitoren-kreditoren-20261101.md
     - docs/adr/adr-harvest-deduction-resolver.md
     - docs/adr/adr-studio-semantic-contracts.md
     status: active
@@ -524,18 +582,24 @@ domains:
     - /benachrichtigungen
     - /benachrichtigungen/liste
     - /crm
+    - /crm/activities
     - /crm/activities/neu
+    - /crm/activity-detail
     - /crm/aktivitaet-detail
     - /crm/aktivitaet/:id
     - /crm/aktivitaeten
+    - /crm/anruf-protokoll
     - /crm/audits/neu
     - /crm/bedarfsdeckung-cockpit
     - /crm/bestell-inbox
+    - /crm/besuchsberichte
+    - /crm/betreuungsgebiet
     - /crm/betrieb/:id
     - /crm/betriebsprofil-detail
     - /crm/betriebsprofil/:id
     - /crm/betriebsprofile
     - /crm/betriebsprofile-liste
+    - /crm/bonus-vereinbarungen
     - /crm/campaign-builder
     - /crm/campaign-detail
     - /crm/campaign-performance
@@ -548,6 +612,7 @@ domains:
     - /crm/campaign/new
     - /crm/campaigns
     - /crm/campaigns/new
+    - /crm/churn-risiko
     - /crm/consent-confirm
     - /crm/consent-detail
     - /crm/consent-management
@@ -555,20 +620,29 @@ domains:
     - /crm/consent/confirm
     - /crm/consent/new
     - /crm/consents
+    - /crm/contact-detail
     - /crm/crm-dashboard
+    - /crm/cross-selling
     - /crm/customer-360/:id
     - /crm/customers
     - /crm/customers/:id
     - /crm/customers/:id/articles
+    - /crm/dokumente-kunden
     - /crm/dubletten
+    - /crm/dubletten-pruefung
     - /crm/durchdringungs-pipeline
     - /crm/gdpr-request-detail
     - /crm/gdpr-request-public
     - /crm/gdpr-request/:id
     - /crm/gdpr-request/new
     - /crm/gdpr-requests
+    - /crm/gebietsschutz
+    - /crm/geschenke-liste
+    - /crm/interaktions-historie
+    - /crm/kaufverhalten
     - /crm/kim
     - /crm/klaerfall-inbox
+    - /crm/kommunikation-center
     - /crm/kontakt-detail
     - /crm/kontakt-management
     - /crm/kontakt/:id
@@ -605,6 +679,7 @@ domains:
     - /crm/opportunity-detail
     - /crm/opportunity/:id
     - /crm/opportunity/new
+    - /crm/partner-klaerfaelle
     - /crm/potential-analyse
     - /crm/segment-detail
     - /crm/segment/:id
@@ -612,6 +687,7 @@ domains:
     - /crm/segments
     - /crm/vertreterprovisionen
     - /crm/vertreterstamm
+    - /crm/wettbewerber
     - /crm/wiedervorlagen
     - /inbox
     - /mahnwesen/mahnlauf
@@ -712,6 +788,7 @@ domains:
     - case_management
     - competitor_monitor
     - consent_engine
+    - crm_activity_service
     - crm_auto_capture_service
     - crm_capture_inbox_service
     - crm_compat_service
@@ -724,13 +801,16 @@ domains:
     - crm_lead_service
     - crm_merge_service
     - crm_notification_service
+    - crm_opportunity_reference
     - crm_ownership_service
+    - crm_segment_service
     - customer_reference
     - customer_sales_eligibility
     - customer_service
     - gap_analytics
     - gap_pipeline
     - gap_progress
+    - gdpr_request_processor
     - interessent_service
     - kaeufer_klassifikator
     - kaeufer_signal_service
@@ -754,6 +834,7 @@ domains:
     - sales_invoice_service
     - sales_lieferschein_close_service
     - sales_match_service
+    - sales_offer_import
     - sales_posting_service
     - sales_preisabweichung_service
     - sales_storno_service
@@ -791,6 +872,7 @@ domains:
     - crm_listen_kommandos
     - crm_mail_capture
     - crm_ownership
+    - crm_partner_klaerfaelle
     - crm_partner_suche
     - crm_reports
     - crm_segments
@@ -801,7 +883,6 @@ domains:
     - kaeufergruppe
     - leads
     - mail_workspace
-    - marketing
     - messages
     - milchvieh_crosssell
     - o2c_chain
@@ -853,6 +934,8 @@ domains:
     - docs/adr/adr-078-canonical-lead-postgresql-pdf.md
     - docs/adr/adr-081-whatsapp-browser-notification-persistence.md
     - docs/adr/adr-085-studio-generated-master-data.md
+    - docs/adr/adr-business-partner-debitoren-kreditoren-20261101.md
+    - docs/adr/adr-crm-activity-canonical-20261029.md
     status: pilot
   dms-compliance:
     owner: domain/dms-compliance
@@ -880,28 +963,58 @@ domains:
     - domain_shared
     frontend_routes:
     - /belege/:belegart/:id
+    - /belege/belegfolge
+    - /betrieb/gefahrstoff-betriebsanweisung
+    - /betrieb/gefahrstoff-kataster
+    - /betrieb/maschinen-stamm
+    - /betrieb/prueffristen
+    - /betrieb/schadensmeldung
+    - /betrieb/standorte
+    - /betrieb/unterweisungen
+    - /betrieb/wartungsplan
     - /compliance/bvl-meldungen
     - /compliance/bvl-umsatzmeldung
     - /compliance/cross-compliance
+    - /compliance/cross-compliance-liste
     - /compliance/datenpannen
+    - /compliance/duenge-bilanz
     - /compliance/enni-meldungen
     - /compliance/enni-neu
+    - /compliance/eudr-meldungen
     - /compliance/export-pruefprotokoll
+    - /compliance/export-pruefung
+    - /compliance/gefahrstoff-doku
+    - /compliance/gefahrstoff-verzeichnis
     - /compliance/gelangensbestaetigung
     - /compliance/intrastat
     - /compliance/lksg
+    - /compliance/lksg-lieferkette
     - /compliance/meldewesen-konsole
     - /compliance/pcn-liste
     - /compliance/pcn-ufi
+    - /compliance/pflanzenschutz-nachweis
+    - /compliance/qs-audits
     - /compliance/qs-checkliste
     - /compliance/saatgut-nachbau
     - /compliance/saatgut-nachbau-neu
     - /compliance/sachkunde-neu
     - /compliance/sachkunde-register
     - /compliance/sanktionspruefung
+    - /compliance/schadstoff-monitoring
+    - /compliance/stichtagsmeldung-bestaende
+    - /compliance/tierwohl-dokumentation
+    - /compliance/usp-konformitaet
     - /compliance/verarbeitungsverzeichnis
     - /compliance/vvvo-register
+    - /compliance/wasserschutz-auflagen
     - /compliance/zulassungen-register
+    - /dms/archiv-suche
+    - /dms/beleg-erkennung
+    - /dms/dokument-detail
+    - /dms/dokument-upload
+    - /dms/freigabe-workflow
+    - /dms/verschlagwortung
+    - /dms/vorlagen-verwaltung
     - /docflow/artefakt-freigabe
     - /docflow/dokumenten-ruecklauf
     - /docflow/gobd-export
@@ -1045,26 +1158,55 @@ domains:
     frontend_routes:
     - /abrechnung/eb-lieferschein-kontrolle
     - /auswertungen/abfrage-center
+    - /auswertungen/abfrage-generator
     - /auswertungen/aenderungshistorie
+    - /auswertungen/agrarmarkt-bericht
     - /auswertungen/auftrags-kontrolle
     - /auswertungen/beleg-kontrolle
     - /auswertungen/bonus-berechnung
+    - /auswertungen/deckungsbeitraege
     - /auswertungen/dms-volltext
     - /auswertungen/duengemittelmengen
+    - /auswertungen/erntebilanz
+    - /auswertungen/kundenumsatz
     - /auswertungen/l3-berichtskatalog
+    - /auswertungen/lagerumschlag
     - /auswertungen/lieferschein-kontrolle
+    - /auswertungen/rohertrag
     - /auswertungen/sanktionspruefung-kunden
     - /auswertungen/sanktionspruefung-personal
+    - /auswertungen/umsatzstatistik
+    - /auswertungen/vertriebstrichter
+    - /auswertungen/warengruppen-analyse
     - /banken/konten
+    - /banken/konten-stamm
     - /banken/konto/:id
     - /banken/konto/neu
+    - /banken/lastschriften
+    - /banken/sepa-export
+    - /banken/ueberweisungen
+    - /banken/zahlungsavise
+    - /controlling/abweichungsanalyse
+    - /controlling/agrarkalkulation
     - /controlling/benchmark-cockpit
+    - /controlling/berichtswesen
+    - /controlling/cashflow-prognose
     - /controlling/dashboard-verwaltung
+    - /controlling/deckungsbeitragsrechnung
+    - /controlling/investitionsrechnung
+    - /controlling/kampagnen-controlling
+    - /controlling/kennzahlen
+    - /controlling/kostentraegerrechnung
     - /controlling/kpi-verwaltung
+    - /controlling/liquiditaetsplanung
     - /controlling/massnahmen
     - /controlling/plan-ist
+    - /controlling/standort-vergleich
     - /controlling/timeseries-erfassung
+    - /controlling/unternehmensplanung
     - /controlling/widget-verwaltung
+    - /export/intrastat-meldung
+    - /export/umsatzsteuer-voranmeldung
     - /export/umsatzsteuervoranmeldung
     - /export/ustva
     - /fibu
@@ -1091,6 +1233,7 @@ domains:
     - /fibu/geschaeftsjahre
     - /fibu/guv
     - /fibu/hauptbuch
+    - /fibu/kassenbuch
     - /fibu/kontenplan
     - /fibu/kostenstellenrechnung
     - /fibu/kreditlinie-neu
@@ -1246,12 +1389,14 @@ domains:
     - ist_aggregation_service
     - l3_report_catalog_service
     - meldewesen_lifecycle_service
+    - open_item_read_source
     - payment_run_freigabe
     - pos_accounting_service
     - pos_compat_service
     - pos_fiscal_document_service
     - pos_tagesabschluss_service
     - preisfindung_service
+    - pricing_condition_read
     - query_center_service
     - sepa_xml_generator
     - tse_fiskaly_service
@@ -1360,6 +1505,7 @@ domains:
     - docs/adr/adr-076-cash-close-retirement.md
     - docs/adr/adr-078-canonical-lead-postgresql-pdf.md
     - docs/adr/adr-079-ebilanz-xbrl-drafts.md
+    - docs/adr/adr-business-partner-debitoren-kreditoren-20261101.md
     status: active
   hr:
     owner: domain/hr
@@ -1418,6 +1564,7 @@ domains:
     - personal_lohnabrechnung
     decisions:
     - docs/adr/adr-068-personal-authorized-recent-documents.md
+    - docs/adr/adr-business-partner-debitoren-kreditoren-20261101.md
   inventory:
     owner: domain/inventory
     frontend_route_prefixes:
@@ -1442,17 +1589,39 @@ domains:
     frontend_routes:
     - /artikel
     - /artikel/:id
+    - /artikel/chargen-pflicht
+    - /artikel/ersatzteile
+    - /artikel/gebinde
+    - /artikel/gefahrgut
+    - /artikel/herkunft
+    - /artikel/kategorien
+    - /artikel/lieferanten-artikel
     - /artikel/liste
     - /artikel/neu
+    - /artikel/preisstaffeln
+    - /artikel/qualitaetsmerkmale
     - /artikel/stamm
+    - /artikel/stuecklisten
+    - /artikel/texte-medien
+    - /artikel/umrechnungen
+    - /artikel/verpackungen
+    - /artikel/zoll-intrastat
     - /disposition
     - /disposition/FrmCoverageMonitor
     - /disposition/FrmPositionRules
     - /disposition/LstCommodityPositionMatrix
+    - /disposition/bestell-vorschlag
     - /disposition/coverage-monitor
+    - /disposition/engpass-monitor
+    - /disposition/kontrakt-abruf
+    - /disposition/lager-reichweite
     - /disposition/liste
     - /disposition/position-matrix
     - /disposition/regeln
+    - /disposition/saison-planung
+    - /disposition/strecken-disposition
+    - /disposition/touren-disposition
+    - /disposition/umlagerungs-vorschlag
     - /etiketten/drucken
     - /inventory
     - /inventory-dashboard
@@ -1578,6 +1747,7 @@ domains:
     - docs/adr/adr-077-leading-weighing-ticket.md
     - docs/adr/adr-078-canonical-lead-postgresql-pdf.md
     - docs/adr/adr-085-studio-generated-master-data.md
+    - docs/adr/adr-waage-tenant-import-20261030.md
     status: active
   logistics:
     owner: domain/logistics
@@ -1668,6 +1838,7 @@ domains:
     - docs/adr/adr-081-whatsapp-browser-notification-persistence.md
     - docs/adr/adr-082-verified-identity-transport.md
     - docs/adr/adr-084-studio-migration-plan-history.md
+    - docs/adr/adr-crm-activity-canonical-20261029.md
   platform:
     owner: platform
     frontend_route_prefixes:
@@ -1710,25 +1881,37 @@ domains:
     - /admin/GapPipelineConsole
     - /admin/agenten-integration
     - /admin/ai-approvals
+    - /admin/api-keys
     - /admin/audit-log
+    - /admin/backup-restore
+    - /admin/belegfolgekonfig
     - /admin/benutzer
     - /admin/benutzer-liste
     - /admin/benutzer/:id
     - /admin/benutzer/neu
+    - /admin/berechtigungen-matrix
+    - /admin/branches
     - /admin/command-monitor
     - /admin/compliance
     - /admin/compliance-dashboard
     - /admin/control-center
     - /admin/control-center/agent-ops
+    - /admin/control-center/incident-response
+    - /admin/control-center/security
     - /admin/control-center/superglue
+    - /admin/core/audit-governance
     - /admin/data-quality
+    - /admin/dms-integration
+    - /admin/erntepeak-stabilitaet
     - /admin/externe-gates
     - /admin/gap-pipeline
     - /admin/identity-budgets
     - /admin/integrationen-quarantaene
+    - /admin/monitoring/alerting
     - /admin/monitoring/alerts
     - /admin/monitoring/regeln
     - /admin/nummernkreise
+    - /admin/omnichannel-handelskonflikt
     - /admin/postfaecher
     - /admin/postfaecher/anmeldung-rueckruf
     - /admin/qualitaets-cockpit
@@ -1739,18 +1922,29 @@ domains:
     - /admin/screen-studio
     - /admin/setup
     - /admin/setup/dms-integration
+    - /admin/tankstelle-evb
+    - /admin/tenants
     - /admin/terminologie
     - /admin/token-consumption
+    - /admin/users
     - /admin/voice-channel
     - /admin/vordruck-editor
     - /admin/webhooks
     - /admin/webshop
+    - /admin/workflow-editor
+    - /admin/zeitachsen-editor
+    - /aktien/dividenden
+    - /aktien/hauptversammlung
+    - /aktien/stimmrechte
+    - /aktien/zeichnungen
     - /alerts
+    - /analysis/what-if-simulator
     - /analytics
     - /auth/callback
     - /auth/login
     - /copilot
     - /dashboard/customizable
+    - /dashboard/customizable-dashboard
     - /dashboard/einkauf
     - /dashboard/einkauf-dashboard
     - /dashboard/sales
@@ -1779,6 +1973,7 @@ domains:
     - /setup/firma
     - /start-dashboard
     - /studio/run/:screenId
+    - /studio/workspace-composition-preview
     - /system/live-monitor
     - /verify/:domain/:number
     - /verify/:domain/:number/:hash
@@ -1837,6 +2032,8 @@ domains:
     - interaction_state_manager
     - knowledge_store
     - legacy_interface_adapter_service
+    - list_experience_metrics
+    - list_presets
     - llm_gateway
     - made_by_studio_gates
     - mail_ingest_service
@@ -1850,6 +2047,7 @@ domains:
     - mcp_beleg_tools
     - mcp_execution_service
     - mcp_mask_actions
+    - mcp_studio_authoring
     - mcp_studio_plans
     - mcp_tool_registry_service
     - mobile_sync_service
@@ -1871,6 +2069,7 @@ domains:
     - secrets_vault
     - security_observability
     - stt_client
+    - studio_catalog_contracts
     - studio_draft_store
     - studio_entity_commands
     - studio_entity_compiler
@@ -1878,12 +2077,15 @@ domains:
     - studio_entity_evolution
     - studio_entity_router
     - studio_entity_simulation
+    - studio_file_content_contracts
     - studio_history_view
+    - studio_list_contracts
     - studio_migration
     - studio_migration_store
     - studio_native_import
     - studio_process_simulation
     - studio_propose
+    - studio_runtime_surface_contracts
     - studio_semantic
     - studio_semantic_model
     - studio_validation
@@ -2036,31 +2238,38 @@ domains:
     - /einkauf
     - /einkauf/anfrage
     - /einkauf/anfrage-erfassung
+    - /einkauf/anfrage-erstellen
     - /einkauf/anfrage-stamm
     - /einkauf/anfrage/:id
     - /einkauf/anfrage/neu
     - /einkauf/anfragen
+    - /einkauf/anfragen-create
     - /einkauf/anfragen-liste
     - /einkauf/anfragen/:id
     - /einkauf/angebot
+    - /einkauf/angebot-erfassen
     - /einkauf/angebot-stamm
     - /einkauf/angebot/:id
     - /einkauf/angebot/neu
     - /einkauf/angebote
     - /einkauf/angebote-liste
+    - /einkauf/angebote-vergleich
     - /einkauf/angebote/:id
     - /einkauf/anlieferavis
+    - /einkauf/anlieferavis-erfassen
     - /einkauf/anlieferavis-liste
     - /einkauf/anlieferavis/:id
     - /einkauf/anlieferavis/neu
     - /einkauf/audit-drilldown
     - /einkauf/auftragsbestaetigung
+    - /einkauf/auftragsbestaetigung-erfassen
     - /einkauf/auftragsbestaetigung/:id
     - /einkauf/auftragsbestaetigung/neu
     - /einkauf/auftragsbestaetigungen
     - /einkauf/auftragsbestaetigungen-liste
     - /einkauf/auftragsbestaetigungen/:id
     - /einkauf/bestellung-anlegen
+    - /einkauf/bestellung-freigabe
     - /einkauf/bestellung-stamm
     - /einkauf/bestellung/:id
     - /einkauf/bestellungen
@@ -2068,24 +2277,36 @@ domains:
     - /einkauf/bestellungen/:id
     - /einkauf/bestellungen/neu
     - /einkauf/bestellvorschlaege
+    - /einkauf/bestellvorschlag-kontrakt
     - /einkauf/bestellvorschlag-lager
     - /einkauf/bestellvorschlag-rohware
+    - /einkauf/bestellvorschlag-verbrauch
     - /einkauf/bestellvorschlag-verkauf
+    - /einkauf/dienstleistungen-haltung
     - /einkauf/edi-portal
+    - /einkauf/einkauf-vorgang-liste
     - /einkauf/frachtauftraege-eingang
     - /einkauf/frachtauftrag/:id
+    - /einkauf/gutschrift-belastung
     - /einkauf/gutschriften-belastungen
     - /einkauf/gutschriften-belastungen/:type
+    - /einkauf/kontrakt-anlage
+    - /einkauf/kontrakte-service
     - /einkauf/lieferant/:id
     - /einkauf/lieferant/neu
     - /einkauf/lieferanten
+    - /einkauf/lieferanten-angebote
     - /einkauf/lieferanten-dokumente
+    - /einkauf/lieferanten-konditionen
     - /einkauf/lieferanten-liste
+    - /einkauf/lieferanten-reklamationen
     - /einkauf/lieferanten-stamm
     - /einkauf/lieferanten/:id
     - /einkauf/lieferantenbewertung
+    - /einkauf/lieferschein-erfassen
     - /einkauf/lieferschein-erfassung
     - /einkauf/lieferschein-frachtauftrag
+    - /einkauf/mahnwesen-lieferanten
     - /einkauf/rechnung-abgleich
     - /einkauf/rechnung-abgleich/:invoiceId
     - /einkauf/rechnung-eingang-erfassung
@@ -2140,11 +2361,12 @@ domains:
     - docs/adr/adr-051-feeding-supply-and-procurement-handoff.md
     - docs/adr/adr-054-schemafeste-feeding-events.md
     - docs/adr/adr-062-foreign-goods-operator-projection.md
+    - docs/adr/adr-business-partner-debitoren-kreditoren-20261101.md
 mapping_stats:
-  frontend_routes_total: 941
-  frontend_routes_mapped: 941
-  backend_services_total: 318
-  backend_services_mapped: 318
+  frontend_routes_total: 1139
+  frontend_routes_mapped: 1139
+  backend_services_total: 334
+  backend_services_mapped: 334
   backend_endpoints_total: 473
   backend_endpoints_mapped: 473
 unmapped:

@@ -153,7 +153,7 @@ def anfrage(engine, status: str, haus: str = HAUS_A) -> str:
                        "'normal', :s, 'Weizen', 25, 't', now(), now(), :h)"),
                   {"id": kennung, "nr": f"BANF-{kennung[:8]}", "s": status, "h": haus})
         v.execute(text("INSERT INTO einkauf_anfragen_positionen (id, anfrage_id, artikel, quantity, unit, created_at, "
-                       "updated_at) VALUES (:p, :id, 'Weizen', 25, 't', now(), now())"),
+                       "updated_at, tenant_id) VALUES (:p, :id, 'Weizen', 25, 't', now(), now(), (SELECT tenant_id FROM public.einkauf_anfragen WHERE id = :id))"),
                   {"p": str(uuid.uuid4()), "id": kennung})
     return kennung
 
@@ -663,11 +663,25 @@ def test_kreditorenliste_ist_eine_liste_und_oeffnet_die_objektmaske():
     assert next(a for a in liste["actions"] if a["key"] == "neu")["navigationRoute"] == "/finance/kreditoren-stamm"
 
 
-def test_dsgvo_anfragen_liste_mandantengenau_und_ablehnung_mit_grund_aus_dem_body(client):
+def _kunde(engine, haus: str, **felder) -> str:
+    """Betroffener bzw. Kontaktinhaber: ein Kunde des Mandanten (DSGVO und Einwilligung pruefen ihn)."""
+    from sqlalchemy import text
+
+    kennung = str(uuid.uuid4())
+    with engine.begin() as v:
+        v.execute(text("INSERT INTO domain_crm.customers (id, tenant_id, customer_number, company_name, email) "
+                       "VALUES (:i, :h, :n, 'Hof Betroffen', :m)"),
+                  {"i": kennung, "h": haus, "n": f"K-{kennung[:8]}", "m": felder.get("email")})
+    return kennung
+
+
+def test_dsgvo_anfragen_liste_mandantengenau_und_ablehnung_mit_grund_aus_dem_body(engine, client):
     """Die Liste fehlte (Seite immer leer); der Ablehnungsgrund kam nur als Query-Parameter an."""
+    # Seit Runtime46 nur fuer einen Betroffenen des Mandanten mit passender Adresse und ausdruecklicher Art.
+    betroffen = _kunde(engine, HAUS_A, email="betroffen@example.invalid")
     neu = client.post("/api/v1/gdpr/requests", headers={"X-Tenant-ID": HAUS_A},
-                      json={"subject_id": str(uuid.uuid4()), "subject_email": "betroffen@example.invalid",
-                            "request_type": "ACCESS"})
+                      json={"subject_id": betroffen, "subject_type": "CUSTOMER", "data_scope": "LOCAL_CRM_SUBJECT",
+                            "subject_email": "betroffen@example.invalid", "request_type": "ACCESS"})
     assert neu.status_code == 201, neu.text
     kennung = neu.json()["id"]
     assert [a["id"] for a in client.get("/api/v1/gdpr/requests", headers={"X-Tenant-ID": HAUS_A}).json()] == [kennung]
@@ -678,8 +692,17 @@ def test_dsgvo_anfragen_liste_mandantengenau_und_ablehnung_mit_grund_aus_dem_bod
     assert abgelehnt.json()["rejection_reason"] == "Identitaet nicht nachweisbar"
 
 
-def test_einwilligung_widerruf_nimmt_den_grund_aus_dem_body(engine, client):
+def test_einwilligung_widerruf_nimmt_den_grund_aus_dem_body(engine, client, monkeypatch):
+    from app.integrations import crm_core_client
+
     kopf = {"X-Tenant-ID": HAUS_A}
+    # Der Kontakt gehoert seit Runtime46 einem Kunden des Mandanten (wie /crm/contacts).
+    kunde = _kunde(engine, HAUS_A)
+
+    async def holen(kennung):  # noqa: ANN001
+        return crm_core_client.CRMCoreContact(id=kennung, customer_id=kunde, first_name="Max", last_name="Muster")
+
+    monkeypatch.setattr(crm_core_client, "get_contact", holen)
     neu = client.post("/api/v1/crm/consents", headers=kopf,
                       json={"contact_id": "K-1", "channel": "email", "consent_type": "marketing"})
     assert neu.status_code == 201, neu.text
@@ -771,9 +794,16 @@ def test_kontakte_aus_crm_core_nur_ueber_den_kunden_des_mandanten(engine, monkey
     ("agrar/psm-liste", "/agrar/psm/stamm/{id}"), ("artikel/liste", "/artikel/{id}"),
     ("charge/liste", "/charge/stamm/{id}"), ("personal/mitarbeiter-liste", "/personal/mitarbeiter/{id}"),
 ])
-def test_leselisten_antworten_und_verlinken_ihre_objekte(client, liste, objekt_route):
+def test_leselisten_antworten_und_verlinken_ihre_objekte(client, liste, objekt_route, monkeypatch):
     """Die Datenquelle jeder Leseliste antwortet (mit Ladegrenze), die Zeile oeffnet die bisherige Objektseite."""
     from app.core.screen_definitions import get_screen_definition
+    from app.integrations.bvl_psm_client import BVLPSMClient
+
+    async def ohne_netz(self, *, search, skip, limit):  # noqa: ANN001, ANN202
+        return {"items": [], "total": 0}
+
+    # Die PSM-Liste liest das BVL-Register; im Test nie ueber das Netz.
+    monkeypatch.setattr(BVLPSMClient, "list_mittel", ohne_netz)
 
     definition = get_screen_definition(liste)
     quelle = definition["dataSources"][0]
@@ -794,7 +824,13 @@ def test_jede_studio_liste_akzeptiert_ihre_ladegrenze(client, liste):
     """Die Laufzeit laedt Tabellen ohne Serverblaetterung einmal mit limit=pageSize; ein 422 hiesse leere Liste."""
     from app.core.screen_definitions import get_screen_definition
 
-    quelle = get_screen_definition(liste)["dataSources"][0]
-    trenner = "&" if "?" in quelle["endpoint"] else "?"
-    antwort = client.get(f"{quelle['endpoint']}{trenner}limit={quelle['pageSize']}", headers={"X-Tenant-ID": HAUS_A})
+    definition = get_screen_definition(liste)
+    if not definition.get("dataSources"):
+        pytest.skip(f"{liste} ist keine Liste mehr ({definition['mode']}, eigene Fachmaske)")
+    quelle = definition["dataSources"][0]
+    ziel = quelle["endpoint"]
+    if quelle.get("pageSize"):
+        ziel += ("&" if "?" in ziel else "?") + f"limit={quelle['pageSize']}"
+    # Sonst traegt der Endpunkt seine Ladegrenze selbst (z.B. ?limit=1000).
+    antwort = client.get(ziel, headers={"X-Tenant-ID": HAUS_A})
     assert antwort.status_code != 422, antwort.text

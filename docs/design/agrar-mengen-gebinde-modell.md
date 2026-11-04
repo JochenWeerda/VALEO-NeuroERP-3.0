@@ -64,10 +64,10 @@ Belegte Groessen aus dem Handel:
 
 | Warengruppe | Uebliche Gebinde |
 |-------------|------------------|
-| Duenger | lose Ware; Sack 25 kg; **Big Bag 500 / 600 / 750 / 1000 kg** (Umstellung von 600 auf 750 kg im Gange) |
+| Duenger, Futter, Saatgut | lose Ware; **Sack 20 / 25 / 30 kg**; **Big Bag (BB) 500 / 600 / 650 / 750 / 1000 / 1050 kg** (haeufige Beispiele, Nutzerhinweis 03.11.2026; Umstellung von 600 auf 750 kg im Gange) |
 | Saatgetreide | Sack zu **750.000 keimfaehigen Koernern** (= 0,75 Einheiten), Dinkel 500.000 (= 0,5 E) |
 | Mais-/Ruebensaatgut | **Einheit zu 50.000 Koernern** (auch 100.000), Sack ca. 15 kg |
-| PSM | Kanister und Flaschen in Litern; Gebinde bis 5 l/5 kg mit erleichterten Transportvorschriften |
+| PSM | Kanister, Dose und Flasche in Litern; Gebinde bis 5 l/5 kg mit erleichterten Transportvorschriften; oft als Sammelgebinde (Pack, siehe 5a) |
 
 **Die Leiter ist artikelbezogen:** Basiseinheit (kg, l, Stueck) → Gebinde
 (Sack/Kanister/Big Bag mit Faktor) → Lagereinheit (Palette). Jeder Faktor gehoert
@@ -139,6 +139,23 @@ werden, ein Artikel darin aber nie unter sein Gebinde geteilt.** „Halber
 Kanister" ist keine zulaessige Teilmenge — nicht weil das Modell es nicht
 koennte, sondern weil der Handel es nicht darf. Die Teilbarkeit ist damit eine
 **Eigenschaft des Artikels**, nicht eine Freiheit der Belegposition.
+
+### 5a. Verkaufsgebinde und Verpackungseinheit eines Packs
+
+**Nutzerhinweis 2026-11-03:** PSM werden haeufig nicht als einzelnes Gebinde, sondern als **Sammelgebinde**
+verkauft - etwa ein 5-l-Kanister PSM und ein 250-ml-Gebinde Formulierungshilfsstoff (FHS). Die
+**Verpackungseinheit** (Umkarton) enthaelt dann auch mal **zwei Verkaufsgebinde**: Im Umkarton stehen 2 x 5 l
+PSM und 2 x 250 ml FHS.
+
+Verkaufseinheit und Verpackungseinheit fallen also beim Pack auseinander. Der Pack bekommt deshalb eine eigene
+Verpackungsleiter, die sich auf den Pack bezieht (``Gebinde("karton", 2, je_einheit="pack")``, weiter
+``Gebinde("palette", 40, je_einheit="karton")``). ``Pack.inhalt_fuer(1, "karton")`` rechnet sie bis auf die
+Artikel herunter (10 l PSM, 0,5 l FHS). Das ist eine **Mengenauskunft** fuer Bestand, Kommissionierung und
+Lieferung, kein Recht zum Einzelverkauf - das regelt weiter allein ``aufloesen`` mit Sperre und Rollenrecht.
+Wie ueberall gilt: eine nicht gepflegte Stufe liefert "nicht bestimmbar", ein Ringbezug ebenso.
+
+Schreibweisen des Handels, die das Modell kennt: BB (Big Bag), EH (Einheit), Umkarton (Karton), ltr (Liter),
+Dose (Zaehleinheit).
 
 ## 6. Was daraus fuer K5 folgt
 

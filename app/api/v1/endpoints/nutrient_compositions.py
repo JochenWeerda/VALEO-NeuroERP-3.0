@@ -6,8 +6,8 @@ from uuid import uuid4
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
-from ....core.config import settings
 from ....core.database import get_db
+from ....core.tenant import get_tenant_id
 from ....infrastructure.models import NutrientComposition
 from ..schemas.base import PaginatedResponse
 
@@ -18,7 +18,6 @@ from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-R
 
 router = APIRouter()
 
-DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 
 def _to_schema(row: NutrientComposition) -> dict:
@@ -51,14 +50,14 @@ def _to_schema(row: NutrientComposition) -> dict:
 
 @router.get("/", response_model=PaginatedResponse[dict], summary="Nutrient compositions auflisten")
 async def list_nutrient_compositions(
-    tenant_id: Optional[str] = Query(None, description="Filter by tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     search: Optional[str] = Query(None, description="Search in name/number"),
     skip: int = Query(0, ge=0),
     limit: int = Query(25, ge=1, le=200),
     db: Session = Depends(get_db),
 ):
     """Return a paginated list of nutrient compositions."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
 
     query = db.query(NutrientComposition).filter(
         NutrientComposition.tenant_id == effective_tenant,
@@ -93,11 +92,11 @@ async def list_nutrient_compositions(
 async def search_nutrient_compositions(
     q: str = Query(..., min_length=1, description="Search term"),
     limit: int = Query(10, ge=1, le=50),
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Lightweight search for autocomplete."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
     like = f"%{q}%"
 
     items = db.query(NutrientComposition).filter(
@@ -113,11 +112,11 @@ async def search_nutrient_compositions(
 @router.get("/{composition_id}", response_model=NutrientCompositionsOut, summary="Nutrient composition abrufen")
 async def get_nutrient_composition(
     composition_id: str,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Get a single nutrient composition by ID."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
 
     item = db.query(NutrientComposition).filter(
         NutrientComposition.id == composition_id,
@@ -134,11 +133,11 @@ async def get_nutrient_composition(
 @router.post("/", response_model=NutrientCompositionsOut, status_code=status.HTTP_201_CREATED, summary="Nutrient composition anlegen", dependencies=SCHREIBEN["AGRAR"])
 async def create_nutrient_composition(
     data: dict,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Create a new nutrient composition."""
-    tenant_id = data.get("tenant_id", DEFAULT_TENANT)
-
+    
     # Check for duplicate lfd_nr
     if data.get("lfd_nr"):
         existing = db.query(NutrientComposition).filter(
@@ -184,11 +183,11 @@ async def create_nutrient_composition(
 async def update_nutrient_composition(
     composition_id: str,
     data: dict,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Update a nutrient composition."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
 
     item = db.query(NutrientComposition).filter(
         NutrientComposition.id == composition_id,
@@ -248,11 +247,11 @@ async def update_nutrient_composition(
     response_model=None, dependencies=SCHREIBEN["AGRAR"])
 async def delete_nutrient_composition(
     composition_id: str,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Soft-delete a nutrient composition."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
 
     item = db.query(NutrientComposition).filter(
         NutrientComposition.id == composition_id,

@@ -18,13 +18,19 @@ class DispositionError(Exception):
     """Raised when a disposition check fails (overloaded or invalid time windows)."""
 
 
-def _fetch_tour_stops(db: Session, tour_id: str) -> List[Dict[str, Any]]:
+def _fetch_tour_stops(db: Session, tour_id: str, tenant_id: str) -> List[Dict[str, Any]]:
+    """Stopps der Tour im Mandanten; die Tour selbst muss dem Mandanten gehoeren."""
+    if not db.execute(
+        text("SELECT 1 FROM domain_logistics.tours WHERE id = :tid AND tenant_id = :tenant"),
+        {"tid": tour_id, "tenant": tenant_id},
+    ).first():
+        raise DispositionError(f"Tour {tour_id} nicht gefunden")
     rows = db.execute(
         text(
             "SELECT * FROM domain_logistics.tour_stops "
-            "WHERE tour_id = :tid ORDER BY stop_order"
+            "WHERE tour_id = :tid AND tenant_id = :tenant ORDER BY stop_order"
         ),
-        {"tid": tour_id},
+        {"tid": tour_id, "tenant": tenant_id},
     ).mappings().all()
     return [dict(r) for r in rows]
 
@@ -32,14 +38,16 @@ def _fetch_tour_stops(db: Session, tour_id: str) -> List[Dict[str, Any]]:
 def _fetch_delivery_weight(db: Session, delivery_note_ref: str, tenant_id: str) -> Optional[float]:
     """Try to read total_weight_kg from domain_sales.delivery_notes by ref."""
     try:
-        row = db.execute(
-            text(
-                "SELECT total_weight_kg FROM domain_sales.delivery_notes "
-                "WHERE (id = :ref OR delivery_note_number = :ref) AND tenant_id = :tid "
-                "LIMIT 1"
-            ),
-            {"ref": delivery_note_ref, "tid": tenant_id},
-        ).mappings().first()
+        # Eigener Savepoint: ein Lesefehler darf die Transaktion des Checks nicht abbrechen.
+        with db.begin_nested():
+            row = db.execute(
+                text(
+                    "SELECT total_weight_kg FROM domain_sales.delivery_notes "
+                    "WHERE (id = :ref OR delivery_note_number = :ref) AND tenant_id = :tid "
+                    "LIMIT 1"
+                ),
+                {"ref": delivery_note_ref, "tid": tenant_id},
+            ).mappings().first()
         if row and row.get("total_weight_kg") is not None:
             return float(row["total_weight_kg"])
     except Exception as exc:
@@ -59,7 +67,7 @@ def check_tour_disposition(
     windows are invalid.  Always persists a check record.
     """
     effective_capacity = capacity_kg if capacity_kg is not None else DEFAULT_VEHICLE_CAPACITY_KG
-    stops = _fetch_tour_stops(db, tour_id)
+    stops = _fetch_tour_stops(db, tour_id, tenant_id)
 
     # --- time window validation ---
     arrivals: List[datetime] = []

@@ -31,15 +31,17 @@ def test_payload_forbids_identity_and_invalid_values():
 
 def test_repository_queries_include_verified_tenant_and_bound_limit():
     db = MagicMock()
-    repo = WaageRepository(db)
-    repo.get_by_id('tenant-a', 'foreign')
-    expressions = db.query.return_value.filter.call_args.args
+    repo = WaageRepository(db, 'tenant-a')
+    repo.get_by_id('foreign')
+    # Mandant im Konstruktor: erst der Mandantenfilter, dann der Schluessel.
+    expressions = (db.query.return_value.filter.call_args.args
+                   + db.query.return_value.filter.return_value.filter.call_args.args)
     compiled = [str(x.compile(dialect=postgresql.dialect(), compile_kwargs={'literal_binds': True})) for x in expressions]
     assert any("tenant_id = 'tenant-a'" in x for x in compiled)
     assert any("id = 'foreign'" in x for x in compiled)
-    repo.get_by_status('tenant-a', 'aktiv', skip=2, limit=3)
-    db.query.return_value.filter.return_value.offset.assert_called_with(2)
-    db.query.return_value.filter.return_value.offset.return_value.limit.assert_called_with(3)
+    repo.get_by_status('aktiv', skip=2, limit=3)
+    db.query.return_value.filter.return_value.filter.return_value.offset.assert_called_with(2)
+    db.query.return_value.filter.return_value.filter.return_value.offset.return_value.limit.assert_called_with(3)
 
 
 def test_foreign_scale_and_calibration_are_denied(monkeypatch):
@@ -47,7 +49,8 @@ def test_foreign_scale_and_calibration_are_denied(monkeypatch):
     repo.get_by_id.return_value = None
     repo.update.return_value = None
     repo.delete.return_value = False
-    monkeypatch.setattr(waage, 'WaageRepository', lambda db: repo)
+    mandanten = []
+    monkeypatch.setattr(waage, 'WaageRepository', lambda db, tenant_id: mandanten.append(tenant_id) or repo)
     monkeypatch.setattr(waage.scale_import, 'locked_scale', lambda *args: (_ for _ in ()).throw(HTTPException(404, 'Waage nicht gefunden')))
     for operation in (
         waage.get_waage('foreign', db=object(), tenant_id='tenant-a'),
@@ -59,9 +62,10 @@ def test_foreign_scale_and_calibration_are_denied(monkeypatch):
         with pytest.raises(HTTPException) as exc:
             finish(operation)
         assert exc.value.status_code == 404
-    repo.get_by_id.assert_any_call('tenant-a', 'foreign')
-    repo.update.assert_called_once_with('tenant-a', 'foreign', {'typ': 'neu'})
-    repo.delete.assert_called_once_with('tenant-a', 'foreign')
+    assert mandanten and set(mandanten) == {'tenant-a'}
+    repo.get_by_id.assert_any_call('foreign')
+    repo.update.assert_called_once_with('foreign', {'typ': 'neu'})
+    repo.delete.assert_called_once_with('foreign')
 
 
 def test_calibration_reads_canonical_scale(monkeypatch):
@@ -69,14 +73,14 @@ def test_calibration_reads_canonical_scale(monkeypatch):
     scale = SimpleNamespace(id='own', letzte_eichung=None, naechste_eichung=None, eichamt=None, zertifikat_nr=None)
     repo = MagicMock()
     repo.get_by_id.return_value = scale
-    monkeypatch.setattr(waage, 'WaageRepository', lambda db: repo)
+    monkeypatch.setattr(waage, 'WaageRepository', lambda db, tenant_id: repo)
     assert finish(waage.get_kalibrierung('own', db=object(), tenant_id='tenant-a'))['waage_id'] == 'own'
 
 
 def test_missing_tenant_cannot_query_unassigned():
-    repo = WaageRepository(MagicMock())
-    with pytest.raises(ValueError):
-        repo.get_by_id('', 'unassigned')
+    for leer in ('', '  ', None):
+        with pytest.raises(ValueError):
+            WaageRepository(MagicMock(), leer)
 
 
 def test_legacy_child_prevents_scale_deletion():
@@ -84,7 +88,7 @@ def test_legacy_child_prevents_scale_deletion():
     db.query.return_value.filter.return_value.with_for_update.return_value.first.return_value = object()
     db.query.return_value.filter.return_value.first.return_value = object()
     with pytest.raises(ValueError):
-        WaageRepository(db).delete('tenant-a', 'own')
+        WaageRepository(db, 'tenant-a').delete('own')
     db.delete.assert_not_called()
 
 
@@ -137,7 +141,7 @@ def test_verified_claim_boundary_rejects_blank_and_conflicting_header():
 def test_legacy_ascii_rejects_foreign_scale_before_read(monkeypatch):
     repo = MagicMock()
     repo.get_by_id.return_value = None
-    monkeypatch.setattr(waage, 'WaageRepository', lambda db: repo)
+    monkeypatch.setattr(waage, 'WaageRepository', lambda db, tenant_id: repo)
     upload = MagicMock()
     with pytest.raises(HTTPException) as exc:
         finish(waage.import_ascii(upload, waage_id='foreign', db=object(), tenant_id='tenant-a'))

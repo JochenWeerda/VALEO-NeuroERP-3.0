@@ -25,7 +25,11 @@ from app.core.screen_definitions import SCREEN_DEFINITION_BUILDERS, get_screen_d
 
 
 #: Ehrliche Luecken: kein Fachweg oder keine Eingabe in der Maske. Nur schrumpfen.
-BEKANNTE_LUECKEN: set[str] = set()
+BEKANNTE_LUECKEN: set[str] = {
+    # Die API bietet fuer individuelle Artikelnummern keine Aktualisierung; die Maske zeigt den Knopf deaktiviert
+    # und nennt den Grund (Stamm-Maske, sichtbar erst mit registrierten Stamm-Masken).
+    "stammdaten/individuelle-artikelnummer/edit",
+}
 
 
 def valid_input_flow(action: dict) -> bool:

@@ -30,7 +30,7 @@ router = APIRouter(prefix="/studio", tags=["ui", "studio", "screen-definition"])
 
 _FIELD_TYPES = [
     "text", "number", "date", "datetime", "boolean", "select", "multiselect",
-    "textarea", "file", "lookup", "table", "currency", "percentage",
+    "textarea", "file", "lookup", "table", "currency", "percentage", "quantity", "period", "stringList",
 ]
 _FLOORPLANS = ["worklist", "objectPage", "transaction", "cockpit", "wizard", "analyticalList"]
 

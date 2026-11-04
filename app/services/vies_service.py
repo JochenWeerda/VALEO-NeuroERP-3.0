@@ -42,6 +42,8 @@ class ViesService:
         Returns:
             ViesResult with validation details
         """
+        # Die vollstaendige Nummer (mit Laenderkennung) steht in jedem Ergebnis - auch wenn VIES nicht erreichbar ist.
+        eingabe = vat_number
         try:
             # Extract country code from VAT number if not provided
             if not country_code:
@@ -94,9 +96,10 @@ class ViesService:
 
         except Exception as e:
             logger.error(f"VIES validation failed: {e}")
+            nummer = "".join(c for c in eingabe if c.isalnum()).upper()
             return ViesResult(
                 valid=False,
-                vat_number=vat_number,
+                vat_number=nummer if nummer[:2].isalpha() else f"{country_code or ''}{nummer}",
                 country_code=country_code or "",
                 error=f"Validation failed: {str(e)}"
             )

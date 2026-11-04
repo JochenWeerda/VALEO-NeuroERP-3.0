@@ -44,16 +44,43 @@ def test_checkout_never_claims_a_booking():
     assert 'nicht angebunden' in error.value.detail
     assert not db.calls
 
-def test_ustva_readiness_is_not_transmission():
-    db = Database()
+class _Anmeldung:
+    """Antwort der Anmeldungsabfrage: keine Anmeldung im Zeitraum."""
+    def __init__(self, calls): self.calls = calls
+    def execute(self, statement, params):
+        self.calls.append(params)
+        return SimpleNamespace(mappings=lambda: SimpleNamespace(first=lambda: None))
+    def rollback(self): pass
+
+
+def _stand(**werte):
+    # Hauptbuchstand (app.finance.ustva.berechne): seit 03.11.2026 die einzige Rechenquelle des Status.
+    vorgabe = dict(gebuchte_buchungen=3, offene_entwuerfe=0, klaerungen=[], umsatz_netto=100, umsatzsteuer=19,
+                   vorsteuer=4, zahllast=15)
+    return SimpleNamespace(**{**vorgabe, **werte})
+
+
+def test_ustva_readiness_is_not_transmission(monkeypatch):
+    import app.finance.ustva as ustva
+    aufrufe = []
+    monkeypatch.setattr(ustva, 'berechne', lambda db, tenant, periode: aufrufe.append(tenant) or _stand())
+    db = _Anmeldung([])
     body = asyncio.run(compliance.get_ustva_status(periode='2026-04', db=db, tenant_id='tenant-a'))
     assert body['readiness_pct'] == 100
-    assert body['elster_uebermittlung'] == 'AUSSTEHEND'
+    assert body['status'] == 'BEREIT'  # bereit, aber nicht uebermittelt
+    assert body['elster_uebermittlung'] == 'NICHT_UEBERMITTELT'
+    assert body['elster_transferticket'] is None
     assert body['zahllast'] == 15
-    assert all(call['tid'] == 'tenant-a' for call in db.calls)
+    assert aufrufe == ['tenant-a'] and all(call['tid'] == 'tenant-a' for call in db.calls)
 
-def test_ustva_database_failure_is_not_zero_report():
+def test_ustva_database_failure_is_not_zero_report(monkeypatch):
+    import app.finance.ustva as ustva
+    from sqlalchemy.exc import OperationalError
+
+    def kaputt(db, tenant, periode):
+        raise OperationalError('SELECT', {}, Exception('database unavailable'))
+    monkeypatch.setattr(ustva, 'berechne', kaputt)
     with pytest.raises(HTTPException) as error:
-        asyncio.run(compliance.get_ustva_status(periode='2026-04', db=Database(fail=True), tenant_id='tenant-a'))
+        asyncio.run(compliance.get_ustva_status(periode='2026-04', db=_Anmeldung([]), tenant_id='tenant-a'))
     assert error.value.status_code == 503
-    assert 'konnte nicht ermittelt' in error.value.detail
+    assert 'nicht verfügbar' in error.value.detail

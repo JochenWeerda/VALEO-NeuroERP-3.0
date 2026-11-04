@@ -28,7 +28,6 @@ from app.services.sales_invoice_service import (
     SalesInvoiceService,
     SourceLine,
 )
-from app.core.config import settings
 from app.core.tenant import get_tenant_id
 from app.services.customer_reference import resolve_customer, resolve_reference
 from app.services.customer_sales_eligibility import assert_customer_allowed_for_delivery
@@ -51,7 +50,6 @@ def _get_user_id_from_request(request: Request | None) -> str | None:
     return akteur_aus_request(request)
 
 
-DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 
 class DeliveryNotePositionBase(BaseModel):

@@ -3,7 +3,7 @@ import { UniversalNativeCockpitPage } from '@/components/mask-builder/UniversalN
 export default function Page(): JSX.Element {
   return (
     <UniversalNativeCockpitPage
-      screenId="fibu/buchhaltungsuebersicht"
+      screenId="workspace/fibu"
       testId="fibu-buchhaltungsuebersicht"
     />
   )

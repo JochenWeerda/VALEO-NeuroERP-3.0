@@ -319,7 +319,7 @@
       {
         "key": "list",
         "endpoint": "/api/v1/einkauf/lieferanten",
-        "pageSize": 500
+        "pageSize": 100
       }
     ],
     "actions": [
@@ -455,7 +455,7 @@
       {
         "key": "list",
         "endpoint": "/api/v1/banken/konten",
-        "pageSize": 500
+        "pageSize": 100
       }
     ],
     "actions": [

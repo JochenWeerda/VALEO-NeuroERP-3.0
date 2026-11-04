@@ -31,6 +31,8 @@ vi.mock('@/app/routing/typed-router', () => ({
 }))
 vi.mock('sonner', () => ({ toast: { success: mocks.toastSuccess, error: mocks.toastError } }))
 vi.mock('@/hooks/useTouchDevice', () => ({ useTouchDevice: () => false }))
+// Die Seiten blenden Aktionen nach den Rechten des Benutzers aus (useScreenPermissions); hier: Personalleitung.
+vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ user: { sub: 'hr', roles: ['PERSONAL_ADMIN'], scopes: [] } }) }))
 vi.mock('@/lib/api-client', () => ({
   apiClient: { get: mocks.apiGet, post: vi.fn(), delete: vi.fn() },
   getAxiosErrorMessage: (error: unknown) => (error instanceof Error ? error.message : String(error)),

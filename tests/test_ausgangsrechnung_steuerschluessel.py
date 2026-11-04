@@ -21,6 +21,7 @@ from app.api.v1.endpoints import finance_invoices
 from app.core.database import SessionLocal
 from app.core.exceptions import register_domain_exception_handlers
 from app.finance.steuerschluessel import richte_skr03_ein
+from stammsaetze import lege_kunden_an
 from testgrenze import ersetze_mandant, ersetze_nutzer
 
 WEG = "/finance/invoices"
@@ -33,6 +34,7 @@ def haus(monkeypatch):
     with SessionLocal() as db:
         db.execute(text(
             "INSERT INTO domain_shared.tenants (id, name, is_active) VALUES (:id, :id, true)"), {"id": mandant})
+        lege_kunden_an(db, mandant, "kunde-1")  # Ausgangsrechnung verlangt den Kunden
         richte_skr03_ein(db, mandant)
         # Der Buchungsdienst bucht nur auf Konten, die dem Mandanten gehoeren.
         for nr, name, art in (("1400", "Forderungen aus Lieferungen und Leistungen", "asset"),
@@ -64,6 +66,9 @@ def haus(monkeypatch):
                 "DELETE FROM domain_erp.tax_keys WHERE tenant_id = :t",
                 "DELETE FROM domain_erp.chart_of_accounts WHERE tenant_id = :t",
                 "DELETE FROM domain_shared.system_properties WHERE tenant_id = :t",
+                # Stammsaetze des Testmandanten (tests/stammsaetze.py); der Mandant gehoert nur diesem Lauf.
+                "DELETE FROM domain_crm.customers WHERE tenant_id = :t",
+                "DELETE FROM domain_crm.business_partners WHERE tenant_id = :t",
                 "DELETE FROM domain_shared.tenants WHERE id = :t",
             ):
                 db.execute(text(sql), {"t": mandant, "nr": f"RE-{lauf}-%"})

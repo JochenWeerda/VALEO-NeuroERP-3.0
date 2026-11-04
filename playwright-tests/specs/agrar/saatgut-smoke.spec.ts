@@ -30,7 +30,8 @@ test.describe('Agrar - Saatgut @smoke', () => {
     await waitForAppReady(adminPage);
     
     await expect(adminPage.getByRole('heading', { name: 'Sortenregister', exact: true })).toBeVisible({ timeout: 15000 });
-    await expect(adminPage.getByLabel('Suche Sorten')).toBeVisible();
+    // Studio-Liste: Wurzel aus der ScreenDefinition statt des frueheren Suchfelds "Suche Sorten".
+    await expect(adminPage.locator('[data-screen-definition="agrar/saatgut-sortenregister-liste"]')).toBeVisible({ timeout: 15000 });
   });
 });
 

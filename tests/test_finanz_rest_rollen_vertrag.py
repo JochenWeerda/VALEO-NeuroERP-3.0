@@ -57,6 +57,9 @@ WEGE = {
         ("GET", "/finance/invoices", "beleg_read"),
         ("DELETE", "/finance/invoices/{invoice_number}", "admin"),
         ("POST", "/finance/invoices/{invoice_number}/storno", "beleg_write"),
+        # Kundensuche und Steuervorschau der Erfassung lesen nur (Runtime46).
+        ("GET", "/finance/invoices/customer-lookup", "beleg_read"),
+        ("POST", "/finance/invoices/steuer-vorschau", "beleg_read"),
     ],
     "document_control": [
         ("POST", "/document-control/exceptions", "beleg_write"),

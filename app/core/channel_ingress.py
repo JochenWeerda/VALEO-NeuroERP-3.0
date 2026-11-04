@@ -15,13 +15,9 @@ from typing import Any
 import httpx
 from sqlalchemy.orm import Session
 
-from app.core.channel_process_actions import (
-    decide_channel_process_action,
-    execute_channel_process_action,
-)
+from app.core.channel_process_actions import execute_channel_process_action
 from app.core.channel_work_surfaces import build_channel_knowledge_response
 from app.core.config import settings
-from app.core.human_approval_gate import ApprovalDecision
 from app.core.knowledge_core_contracts import KnowledgeChannel
 
 
@@ -160,7 +156,9 @@ async def maybe_post_slack_response(payload: dict[str, Any], dispatch_result: di
         return data
 
 
-def normalize_slack_event(payload: dict[str, Any]) -> ChannelIngressEnvelope:
+def normalize_slack_event(payload: dict[str, Any], *, tenant_id: str) -> ChannelIngressEnvelope:
+    """``tenant_id`` ist der gepruefte Mandant der Anfrage; bis 28.10.2026 kam er aus den Nachrichten-Metadaten,
+    sonst der Standardmandant."""
     event = payload.get("event") or {}
     metadata = event.get("metadata") or payload.get("metadata") or {}
     event_type = str(event.get("type") or "").strip().lower()
@@ -170,7 +168,7 @@ def normalize_slack_event(payload: dict[str, Any]) -> ChannelIngressEnvelope:
     return ChannelIngressEnvelope(
         kanal=KnowledgeChannel.SLACK,
         intent=str(metadata.get("intent") or "knowledge_query"),
-        tenant_id=str(metadata.get("tenant_id") or settings.DEFAULT_TENANT_ID),
+        tenant_id=tenant_id,
         rolle=str(metadata.get("rolle") or "support"),
         query=text,
         capability_key=metadata.get("capability_key"),
@@ -180,7 +178,8 @@ def normalize_slack_event(payload: dict[str, Any]) -> ChannelIngressEnvelope:
     )
 
 
-def normalize_teams_event(payload: dict[str, Any]) -> ChannelIngressEnvelope:
+def normalize_teams_event(payload: dict[str, Any], *, tenant_id: str) -> ChannelIngressEnvelope:
+    """Wie ``normalize_slack_event``: der Mandant kommt aus der Anmeldung, nicht aus der Nachricht."""
     channel_data = payload.get("channelData") or {}
     metadata = channel_data.get("metadata") or {}
     text = str(payload.get("text") or metadata.get("query") or "").strip()
@@ -188,7 +187,7 @@ def normalize_teams_event(payload: dict[str, Any]) -> ChannelIngressEnvelope:
     return ChannelIngressEnvelope(
         kanal=KnowledgeChannel.TEAMS,
         intent=str(metadata.get("intent") or "knowledge_query"),
-        tenant_id=str(metadata.get("tenant_id") or settings.DEFAULT_TENANT_ID),
+        tenant_id=tenant_id,
         rolle=str(metadata.get("rolle") or "support"),
         query=text,
         capability_key=metadata.get("capability_key"),
@@ -232,14 +231,9 @@ def dispatch_channel_ingress(db: Session, envelope: ChannelIngressEnvelope) -> d
         return {"intent": envelope.intent, "result": thread.as_dict()}
 
     if envelope.intent == "approval_decision":
-        decision = ApprovalDecision(str(payload["decision"]).strip().upper())
-        thread = decide_channel_process_action(
-            thread_id=str(payload["thread_id"]),
-            decision=decision,
-            entschieden_von=str(payload.get("entschieden_von") or envelope.channel_user_id or envelope.rolle),
-            approver_role=str(payload["approver_role"]),
-            begruendung=str(payload.get("begruendung") or envelope.query or "Channel approval decision"),
-        )
-        return {"intent": envelope.intent, "result": thread.as_dict()}
+        # Bis 28.10.2026 entschied hier, wer in den Nachrichten-Metadaten als Entscheider und Freigaberolle stand.
+        # Ein Kanal-Nutzer ist keinem VALEO-Nutzer mit geprueften Rollen zugeordnet: Freigaben laufen ueber
+        # POST /channels/{kanal}/process-actions/{thread_id}/decision mit Anmeldung, bis diese Zuordnung existiert.
+        raise PermissionError("Freigaben ueber Kanaele brauchen eine gepruefte Nutzerzuordnung.")
 
     raise ValueError(f"Unbekannter channel intent: {envelope.intent}")

@@ -48,6 +48,7 @@ WEGE = {
         ("GET", "/fibu/op-auszifferung", "read"),
         ("POST", "/fibu/op-auszifferung", "write"),
         ("POST", "/fibu/op-auszifferung/{auszifferung_id}/stornieren", "write"),
+        ("GET", "/fibu/op-auszifferung/{auszifferung_id}", "read"),
     ],
     "fibu_zahlungsmeldungen": [
         ("GET", "/fibu/zahlungsmeldungen", "read"),
@@ -55,6 +56,7 @@ WEGE = {
         ("POST", "/fibu/zahlungsmeldungen/{meldung_id}/verarbeiten", "write"),
         ("POST", "/fibu/zahlungsmeldungen/{meldung_id}/abweisen", "write"),
         ("GET", "/fibu/zahlungsmeldungen/offen/zusammenfassung", "read"),
+        ("GET", "/fibu/zahlungsmeldungen/{meldung_id}", "read"),
     ],
     "finance_clearing": [
         ("GET", "/finance/zahlungseingang/clearings", "read"),
@@ -139,6 +141,7 @@ WEGE = {
     ],
     "fibu_stammdaten": [
         ("GET", "/fibu/stammdaten/zahlungsformulare", "offen"),
+        ("GET", "/fibu/stammdaten/zahlungsformulare/{formular_id}", "offen"),
         ("POST", "/fibu/stammdaten/zahlungsformulare", "write"),
         ("DELETE", "/fibu/stammdaten/zahlungsformulare/{formular_nr}", "admin"),
         ("GET", "/fibu/stammdaten/zinsgruppen", "offen"),
@@ -191,10 +194,11 @@ WEGE = {
         ("GET", "/fibu/erloeskennziffern/lookup", "offen"),
     ],
     "debtors": [
-        ("GET", "/debtors/", "offen"),
-        ("GET", "/debtors/{debtor_id}", "offen"),
+        # Seit Runtime46 (ca50c46f7) nur mit Finanzrolle: Debitoren und Salden sind Finanzdaten.
+        ("GET", "/debtors/", "read"),
+        ("GET", "/debtors/{debtor_id}", "read"),
         ("PUT", "/debtors/{debtor_id}", "write"),
-        ("GET", "/debtors/{debtor_id}/balance", "offen"),
+        ("GET", "/debtors/{debtor_id}/balance", "read"),
         ("DELETE", "/debtors/{debtor_id}", "admin"),
     ],
     "creditors": [

@@ -170,7 +170,9 @@ def test_bruecken_lesen_echte_tabellennamen() -> None:
 
     source = Path("app/api/v1/endpoints/mask_frontend_bridges.py").read_text(encoding="utf-8")
     assert "FROM domain_erp.journal_entries" in source
-    assert "FROM domain_crm.crm_segment_members" in source
+    # Segmentmitglieder liest seit Runtime46 der kanonische Weg crm_segments; die Bruecke delegiert dorthin.
+    assert "from app.api.v1.endpoints.crm_segments import" in source
+    assert "FROM domain_crm.crm_segment_members" in Path("app/api/v1/endpoints/crm_segments.py").read_text(encoding="utf-8")
     assert "FROM domain_inventory.agrar_contracts" in source
     assert "domain_finance.journal_entries" not in source
     assert "domain_crm.segment_members" not in source

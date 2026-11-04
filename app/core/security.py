@@ -53,6 +53,7 @@ async def require_bearer_token(
             if any(value.strip() != token for value in request.query_params.getlist("token")):
                 raise HTTPException(401, "Ambiguous bearer credentials")
             await run_in_threadpool(verified_identity, request, token)
+            _bind_tenant_context(request)
             return token
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -65,7 +66,22 @@ async def require_bearer_token(
         if any(value.strip() != token for value in query_tokens):
             raise HTTPException(401, "Ambiguous bearer credentials")
     await run_in_threadpool(verified_identity, request, token)
+    _bind_tenant_context(request)
     return token
+
+
+def _bind_tenant_context(request: Request) -> None:
+    """Geprueften Mandanten in den Kontext des Requests uebernehmen (RLS ``app.tenant_id``).
+
+    ``main:app`` bindet ihn schon in der Middleware. Auf Wegen ohne diese Bindung (``app.main``,
+    eigenstaendige Router) lief der Request sonst ohne Kontext, und ``tenant_id``-Vorgaben aus
+    ``rls_current_tenant()`` blieben leer. ``verified_identity`` laeuft im Threadpool; dort gesetzt
+    kaeme der Kontext nicht zurueck, deshalb hier in der async-Abhaengigkeit.
+    """
+    from app.core.tenant_context import current_tenant_or_none, set_current_tenant_id
+    tenant = getattr(request.state, "tenant_id", None)
+    if tenant and current_tenant_or_none() != tenant:
+        set_current_tenant_id(tenant)
 
 
 def verified_identity(connection, token: str) -> dict:
