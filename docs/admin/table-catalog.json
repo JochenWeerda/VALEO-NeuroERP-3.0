@@ -17094,6 +17094,7 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/pos_payments.py",
+            "app/api/v1/endpoints/pos_retoure.py",
             "app/services/fiscalization/service.py"
           ],
           "written_by": [
@@ -23886,6 +23887,7 @@
             "id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/pos_retoure.py",
             "app/api/v1/endpoints/preis_kalkulation_bridge.py",
             "app/api/v1/endpoints/tax_keys.py",
             "app/core/screen_definitions_capture.py",
@@ -33340,6 +33342,7 @@
             "app/api/v1/endpoints/inventory_counts.py",
             "app/api/v1/endpoints/inventory_operations.py",
             "app/api/v1/endpoints/mask_actions.py",
+            "app/api/v1/endpoints/pos_retoure.py",
             "app/domains/inventory/api/storage_fees.py",
             "app/infrastructure/models/__init__.py",
             "app/infrastructure/models/l3c_models.py",

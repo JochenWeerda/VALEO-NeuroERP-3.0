@@ -20400,3 +20400,19 @@ VVVO (ops vs domain_compliance) und Sachkunde (Kunden/Mitarbeitende/Feldbuch) fa
 Ziel: Batch-9-Migration schuetzt abweichende und NULL-haltige Daten vor Seed-Loeschung und Tabellen-Drop. Dateibesitz: alembic/versions/compliance_register_mandant_20261104.py, eigene fokussierte Tests, QA-Nachweis und dieser Workboard-Anhang im separaten Branch. Abnahme: Original-Seeds vollstaendig anhand belegbarer Geschaeftsfelder, unbekannte Reste erhalten; DROP bei unbekannten Zeilen abgebrochen; PostgreSQL-Test in zurueckgerollter Transaktion mit temporaeren Tabellen nach Freigabe des Prueffensters, kein Reset oder Migrationsstempel. Risiko: Original-Seedwerte mit zeitabhaengigen Feldern lassen sich nicht sicher rekonstruieren und muessen erhalten bleiben.
 
 **Abschluss BATCH9-SEED-SCHUTZ-20261104:** Volle deterministische Seed-Geschaeftsfelder, keine Seed-Loeschung bei vorhandener Mandantenspalte, NULL-sicherer Drop-Schutz und Abbruch bei doppelten Dispositionssignaturen. Unbekannte Testreste erhalten. PostgreSQL TEMP-Test 1 passed, Revision unveraendert; Grenzen und Datenrisiko siehe docs/quality-assurance/batch9-seed-schutz-20261104.md.
+
+## POS-CHECKOUT-AUF-MAIN-20261104 — abgeschlossen, Claude
+
+POS-CHECKOUT-WAHRHEIT-20261027 (Zweig claude/pos-checkout-wahrheit-20261027, nie gemergt) auf main uebernommen.
+Branch claude/pos-checkout-auf-main-20261104. Main hatte inzwischen nur einen Teil: Mandant aus dem Token, kein
+Fail-soft der Retoure, `/pos/checkout` antwortete 501. Jetzt gilt die vollstaendige Fassung: `/pos/checkout`
+signiert offline kassierte Bons ueber den `FiscalizationService` (Offline-ID = Transaktionskennung, idempotent,
+anderer Betrag 409, ohne Kasse des Mandanten 503); `/pos/retoure` signiert negativ, bucht Bestand genau einmal je
+`vorgang_id`; Steuersatz nur aus dem Artikelstamm (`domain_erp.tax_keys`), sonst 422; fiskaly signiert unbekannte
+Saetze nicht als Normalsatz. Die handgebauten Seiten pos/terminal und pos/retoure sind auf main Studio-Platzhalter;
+deren Aenderungen entfallen, die Offline-Warteschlange uebergibt Rabatt/Steuersatz.
+Angepasst: tests/test_domain_honest_outcomes_20261027.py (Checkout ohne Kasse 503 statt 501),
+tests/test_rls_domain_inventory.py (Retoure mit vorgang_id, Steuerschluessel und Simulationskasse; Fehler kommt
+durch). Nachweis valeo_probe: test_pos_checkout_wahrheit 18/18, POS-Faelle aus RLS/Honest-Outcomes 9/9;
+OpenAPI und Code-Inventare nachgezogen, Doc-Generatoren gruen.
+Offen: Die POS-Studio-Masken lesen fast alle /pos/dsfinvk/export (Scheinweg) - eigener Batch.
