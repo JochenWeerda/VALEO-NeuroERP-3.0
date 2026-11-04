@@ -7,13 +7,13 @@ Nutzerentscheidung 04.11.2026: Seed-Tabellen ohne Studio-Maske oder mit Ersatz w
 Altbestand ohne Nutzer darf geloescht werden.
 
 - ``ops_disposition``: handgepflegter Bestand/Mindestbestand/Empfehlung, ersetzt durch den Bestellvorschlag
-  (rechnet aus echtem Bestand und Meldebestand) -> entfernt. Enthaelt sie anderes als Seed (ART-001..003) und
-  Testreste (ART-TEST-001), bricht die Migration ab.
+  (rechnet aus echtem Bestand und Meldebestand) -> entfernt. Enthaelt sie andere, doppelte oder nicht sicher
+  zuordenbare Zeilen, bricht die Migration ab.
 - ``ops_zertifikate_api``: zweiter Zertifikatsweg, dessen POST vom ersten ueberdeckt war und dessen Lesewege den
   Mandanten aus dem Pfad nahmen bzw. alle Mandanten lasen -> entfernt (leer; Zeilen braechen ab).
 - Cross-Compliance, ENNI, QS-Checkliste, Zulassungen, Kunden-Sachkunde, Saatgut-Nachbau, VVVO und Zertifikate
-  (Studio-Masken vorhanden): Seed-Zeilen (exakte Signaturen aus ``seed_compliance_data`` bzw. ``_seed``) und die
-  Testreste von ``test_process_kernel_wave9_integration`` werden geloescht, dann Mandantenspalte mit RLS (Policy je
+  (Studio-Masken vorhanden): exakte Signaturen aus ``seed_compliance_data`` bzw. ``_seed``:
+  eindeutig nachweisbare Seed-Zeilen werden geloescht, dann Mandantenspalte mit RLS (Policy je
   Befehl). Uebrige Zeilen ohne Mandant: Default-Mandant (Nutzerentscheidung 28.10.2026); fehlt er -> Abbruch.
 
 Gewachsene Datenbank 04.11.2026: alle Zeilen der zehn Tabellen sind Seed oder Testrest.
@@ -35,24 +35,39 @@ OPS = "domain_ops"
 DISPOSITION = f"{OPS}.ops_disposition"
 ZERT_API = f"{OPS}.ops_zertifikate_api"
 
-#: Tabelle -> Bedingung, die genau die frueheren Seed-Zeilen (und bekannten Testreste) trifft.
+#: Nur vollstaendige, deterministische Geschaeftsfelder der urspruenglichen Seeds.
+#: Zufalls-IDs und Erzeugungszeitpunkte sind nicht reproduzierbar; Testreste unbekannter
+#: Herkunft bleiben erhalten. Zeitwerte entsprechen den naiven datetime()-Seedwerten.
 SEEDS = {
-    f"{OPS}.ops_compliance_items": "(bereich, anforderung) IN (('Gewaesserschutz', 'Gewaesserrandstreifen 5m'), "
-                                   "('Duengeverordnung', 'Naehrstoffbilanz erstellt'), "
-                                   "('PSM-Dokumentation', 'Anwendungsprotokolle vollstaendig'))",
-    f"{OPS}.ops_enni_meldungen": "(typ, betrieb, vvvo) IN (('DBE', 'Landwirtschaft Mueller', '03-276-1234'), "
-                                 "('WDE', 'Agrar Schmidt', '03-276-5678'))",
-    f"{OPS}.ops_qs_checks": "(bereich, pruefpunkt) IN (('Wareneingangskontrolle', 'Lieferschein-Pruefung'), "
-                            "('Temperaturkontrolle', 'Lagerungstemperatur dokumentiert'))",
-    f"{OPS}.ops_zulassungen_register": "(produkt, nummer) IN (('Roundup PowerFlex', '024567-00'), ('Fungizid X', '024568-00'))",
-    f"{OPS}.ops_sachkunde_register": "(kundennr, nachweis_nr) = ('K-10023', 'SK-NDS-2022-4567')",
-    f"{OPS}.ops_saatgut_nachbau": "(betrieb, sorte, erntejahr) = ('Landwirtschaft Mueller', 'Weichweizen Eltan', 2024)",
-    f"{OPS}.ops_vvvo_register": "(betriebsname, vvvo) = ('Landwirtschaft Mueller', '03-276-123456')",
-    f"{OPS}.ops_zertifikate": "nummer IN ('BIO-2025-1234', 'QS-2025-5678', 'GGN-12345678') "
-                              "OR (art = 'qs_gap' AND standard = 'QS' AND nummer = 'QS-2025-9999')",
+    f"{OPS}.ops_compliance_items": "(bereich, anforderung, erfuellt, nachweis, frist) IN ("
+        "('Gewaesserschutz', 'Gewaesserrandstreifen 5m', TRUE, 'Feldprotokoll', '2026-12-31 00:00:00'), "
+        "('Duengeverordnung', 'Naehrstoffbilanz erstellt', TRUE, 'Bilanz 2025/26', '2026-03-31 00:00:00'), "
+        "('PSM-Dokumentation', 'Anwendungsprotokolle vollstaendig', FALSE, '', '2026-03-15 00:00:00'))",
+    f"{OPS}.ops_enni_meldungen": "(typ, betrieb, vvvo, datum, status, naehrstoff_n, naehrstoff_p, naehrstoff_k) IN ("
+        "('DBE', 'Landwirtschaft Mueller', '03-276-1234', '2026-01-15 00:00:00', 'bestaetigt', 180, 60, 120), "
+        "('WDE', 'Agrar Schmidt', '03-276-5678', '2026-02-01 00:00:00', 'gesendet', 150, 45, 90))",
+    f"{OPS}.ops_qs_checks": "(bereich, pruefpunkt, erfuellt, bemerkung, geprueft_am) IN ("
+        "('Wareneingangskontrolle', 'Lieferschein-Pruefung', TRUE, 'Vollstaendig', '2026-02-10 00:00:00'), "
+        "('Temperaturkontrolle', 'Lagerungstemperatur dokumentiert', TRUE, 'Im Normbereich', '2026-02-10 00:00:00'))",
+    f"{OPS}.ops_zulassungen_register": "(produkt, typ, nummer, behoerde, gueltig_bis, status) IN ("
+        "('Roundup PowerFlex', 'PSM', '024567-00', 'BVL', '2026-12-31 00:00:00', 'aktiv'), "
+        "('Fungizid X', 'PSM', '024568-00', 'BVL', '2025-06-30 00:00:00', 'auslaufend'))",
+    f"{OPS}.ops_sachkunde_register": "(kunde, kundennr, nachweis_nr, ausstellungsdatum, gueltig_bis, ausstellende_stelle, status) = "
+        "('Landwirtschaft Mueller', 'K-10023', 'SK-NDS-2022-4567', '2022-03-15 00:00:00', '2025-03-15 00:00:00', 'LWK Niedersachsen', 'ablaufend')",
+    f"{OPS}.ops_saatgut_nachbau": "(betrieb, sorte, kultur, flaeche, erntejahr, gebuehr, status) = "
+        "('Landwirtschaft Mueller', 'Weichweizen Eltan', 'Weichweizen', 45.5, 2024, 682.50, 'bezahlt')",
+    f"{OPS}.ops_vvvo_register": "(betriebsname, vvvo, bundesland, tierart, status, letzte_aktualisierung) = "
+        "('Landwirtschaft Mueller', '03-276-123456', 'Niedersachsen', 'Rind (Milch)', 'aktiv', '2026-01-15 00:00:00')",
+    f"{OPS}.ops_zertifikate": "(art, standard, nummer, gueltig_bis, audit, status) IN ("
+        "('Bio-Zertifikat', 'EU-Bio-Verordnung', 'BIO-2025-1234', '2026-12-31 00:00:00', '2026-02-15 00:00:00', 'gueltig'), "
+        "('QS-Zertifikat', 'QS-GAP', 'QS-2025-5678', '2026-06-30 00:00:00', '2025-12-01 00:00:00', 'gueltig'), "
+        "('GlobalG.A.P.', 'GGN', 'GGN-12345678', '2025-09-30 00:00:00', '2025-08-15 00:00:00', 'ablaufend'))",
 }
 TABELLEN = tuple(SEEDS)
-DISPOSITION_ALT = "artikel_id IN ('ART-001', 'ART-002', 'ART-003', 'ART-TEST-001')"
+DISPOSITION_ALT = "(artikel, artikel_id, bestand, mindestbestand, bedarf, empfehlung, prioritaet) IN (" \
+    "('Weizen Premium', 'ART-001', 120, 200, 80, 'Nachbestellen: 100 t', 'hoch'), " \
+    "('Raps', 'ART-002', 85, 100, 15, 'Nachbestellen: 50 t', 'mittel'), " \
+    "('NPK 15-15-15', 'ART-003', 250, 150, 0, 'Ausreichend', 'niedrig'))"
 OWN = "tenant_id = public.rls_current_tenant()"
 POLICIES = tuple(f"tenant_isolation_{kind}" for kind in ("select", "insert", "update", "delete"))
 
@@ -80,11 +95,25 @@ def _enable(table: str) -> None:
 def _entfernen(bind, table: str, nur_diese: str | None) -> None:
     if not _exists(bind, table):
         return
-    bedingung = f"NOT ({nur_diese})" if nur_diese else "TRUE"
+    bedingung = f"({nur_diese}) IS NOT TRUE" if nur_diese else "TRUE"
     fremd = bind.execute(sa.text(f"SELECT count(*) FROM {table} WHERE {bedingung}")).scalar()  # nosec B608
     if fremd:
         raise RuntimeError(f"{table}: {fremd} Zeilen ausser Seed/Testrest; erst uebernehmen, dann entfernen")
+    if nur_diese:
+        doppelt = bind.execute(sa.text(
+            f"SELECT count(*) FROM (SELECT 1 FROM {table} GROUP BY "
+            "artikel, artikel_id, bestand, mindestbestand, bedarf, empfehlung, prioritaet "
+            "HAVING count(*) > 1) AS doppelungen"  # nosec B608
+        )).scalar()
+        if doppelt:
+            raise RuntimeError(f"{table}: {doppelt} doppelte Seed-Signaturen; Herkunft unklar")
     op.execute(f"DROP TABLE {table}")
+
+
+def _seed_loeschen(bind, table: str) -> None:
+    # Bereits mandantengebundene Zeilen koennen echte Geschaeftsdaten sein.
+    if not _has_column(bind, table, "tenant_id"):
+        op.execute(f"DELETE FROM {table} WHERE {SEEDS[table]}")  # nosec B608
 
 
 def upgrade() -> None:
@@ -97,7 +126,7 @@ def upgrade() -> None:
     _entfernen(bind, ZERT_API, None)
 
     for table in present:
-        op.execute(f"DELETE FROM {table} WHERE {SEEDS[table]}")  # nosec B608
+        _seed_loeschen(bind, table)
         if not _has_column(bind, table, "tenant_id"):
             op.execute(f"ALTER TABLE {table} ADD COLUMN tenant_id character varying(120)")
         offen = bind.execute(sa.text(f"SELECT count(*) FROM {table} WHERE tenant_id IS NULL")).scalar()  # nosec B608
