@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (775 Masken).
+> Generiert aus `app/core/screen_definitions.py` (772 Masken).
 
 ## Übersicht
 
@@ -363,14 +363,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `dashboard/verkauf` | Verkaufs-Dashboard | sales | niedrig | — | `GET /api/v1/masks/dashboard/verkauf/agent-contract` |
 | `dashboards/geschaeftsfuehrung` | Geschaeftsfuehrung | management | niedrig | — | `GET /api/v1/masks/dashboards/geschaeftsfuehrung/agent-contract` |
 | `disposition/bestell-vorschlag` | Bestellvorschlag | logistics | niedrig | — | `GET /api/v1/masks/disposition/bestell-vorschlag/agent-contract` |
-| `disposition/engpass-monitor` | Engpass-Monitor | logistics | niedrig | — | `GET /api/v1/masks/disposition/engpass-monitor/agent-contract` |
 | `disposition/kontrakt-abruf` | Kontrakt-Abruf | logistics | niedrig | — | `GET /api/v1/masks/disposition/kontrakt-abruf/agent-contract` |
 | `disposition/lager-reichweite` | Lager-Reichweite | logistics | niedrig | — | `GET /api/v1/masks/disposition/lager-reichweite/agent-contract` |
-| `disposition/liste` | Disposition | lager | niedrig | — | `GET /api/v1/masks/disposition/liste/agent-contract` |
 | `disposition/saison-planung` | Saison-Planung | logistics | niedrig | — | `GET /api/v1/masks/disposition/saison-planung/agent-contract` |
 | `disposition/strecken-disposition` | Strecken-Disposition | logistics | niedrig | — | `GET /api/v1/masks/disposition/strecken-disposition/agent-contract` |
 | `disposition/touren-disposition` | Touren-Disposition | logistics | niedrig | — | `GET /api/v1/masks/disposition/touren-disposition/agent-contract` |
-| `disposition/umlagerungs-vorschlag` | Umlagerungs-Vorschlag | logistics | niedrig | — | `GET /api/v1/masks/disposition/umlagerungs-vorschlag/agent-contract` |
 | `dms/archiv-suche` | Archiv-Suche | documents | niedrig | — | `GET /api/v1/masks/dms/archiv-suche/agent-contract` |
 | `dms/beleg-erkennung` | Beleg-Erkennung | documents | niedrig | — | `GET /api/v1/masks/dms/beleg-erkennung/agent-contract` |
 | `dms/dokument-detail` | Dokument | documents | niedrig | — | `GET /api/v1/masks/dms/dokument-detail/agent-contract` |
@@ -18867,43 +18864,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `disposition/liste` — Disposition
-
-**Zweck:** Unterdeckte Artikel finden und Bestellvorschlaege ausloesen.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/disposition/liste/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/disposition/liste/agent-contract` |
-| Readiness | `GET /api/v1/masks/disposition/liste/readiness` |
-| Rollout-Route | `/mask-rollout/disposition__liste/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/disposition`
-
-**MCP-Tools (Domäne):**
-
-- `lager.bestand.get` — scope `lager:read`, Risiko niedrig
-- `lager.inventur.status` — scope `lager:read`, Risiko niedrig
-- `lager.inventur.propose_opening` — scope `lager:write`, Risiko hoch
-- `lager.stock_movement.stornieren` — scope `lager:write`, Risiko mittel
-
-**Beispiel-Prompts:**
-
-- Welche Artikel liegen unter Mindestbestand?
-- Wo ist Bedarf hoch?
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `neu` | Bestellvorschlaege | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
 ### `etiketten/druck-liste` — Etikettendruck
 
 **Zweck:** Etikettendruck-Auftraege finden.
@@ -19991,45 +19951,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `disposition/engpass-monitor` — Engpass-Monitor
-
-**Zweck:** Engpass-Monitor als Read-Model-Cockpit.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/disposition/engpass-monitor/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/disposition/engpass-monitor/agent-contract` |
-| Readiness | `GET /api/v1/masks/disposition/engpass-monitor/readiness` |
-| Rollout-Route | `/mask-rollout/disposition__engpass-monitor/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `entity` → `/api/v1/disposition/stats`
-
-**MCP-Tools (Domäne):**
-
-- `logistik.frachttabelle.anlegen` — scope `logistics:write`, Risiko mittel
-- `logistik.tour.anlegen` — scope `logistics:write`, Risiko mittel
-- `logistik.fahrzeug.speichern` — scope `logistics:write`, Risiko mittel
-- `logistik.fahrzeug.loeschen` — scope `logistics:write`, Risiko hoch
-- `logistik.terminart.speichern` — scope `logistics:write`, Risiko mittel
-- `logistik.rechnung.speichern` — scope `logistics:write`, Risiko mittel
-- `logistik.ausgehendes_dokument.speichern` — scope `logistics:write`, Risiko mittel
-
-**Beispiel-Prompts:**
-
-- Zeige Engpass-Monitor.
-- Was ist der aktuelle Stand?
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `refresh` | Aktualisieren | safe | nein | `—` |
-
----
-
 ### `disposition/kontrakt-abruf` — Kontrakt-Abruf
 
 **Zweck:** Kontrakt-Abruf als Read-Model-Cockpit.
@@ -20215,45 +20136,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **Beispiel-Prompts:**
 
 - Zeige Touren-Disposition.
-- Was ist der aktuelle Stand?
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `refresh` | Aktualisieren | safe | nein | `—` |
-
----
-
-### `disposition/umlagerungs-vorschlag` — Umlagerungs-Vorschlag
-
-**Zweck:** Umlagerungs-Vorschlag als Read-Model-Cockpit.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/disposition/umlagerungs-vorschlag/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/disposition/umlagerungs-vorschlag/agent-contract` |
-| Readiness | `GET /api/v1/masks/disposition/umlagerungs-vorschlag/readiness` |
-| Rollout-Route | `/mask-rollout/disposition__umlagerungs-vorschlag/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `entity` → `/api/v1/disposition`
-
-**MCP-Tools (Domäne):**
-
-- `logistik.frachttabelle.anlegen` — scope `logistics:write`, Risiko mittel
-- `logistik.tour.anlegen` — scope `logistics:write`, Risiko mittel
-- `logistik.fahrzeug.speichern` — scope `logistics:write`, Risiko mittel
-- `logistik.fahrzeug.loeschen` — scope `logistics:write`, Risiko hoch
-- `logistik.terminart.speichern` — scope `logistics:write`, Risiko mittel
-- `logistik.rechnung.speichern` — scope `logistics:write`, Risiko mittel
-- `logistik.ausgehendes_dokument.speichern` — scope `logistics:write`, Risiko mittel
-
-**Beispiel-Prompts:**
-
-- Zeige Umlagerungs-Vorschlag.
 - Was ist der aktuelle Stand?
 
 **Actions:**

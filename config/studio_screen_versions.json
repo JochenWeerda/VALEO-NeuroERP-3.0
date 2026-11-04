@@ -3806,17 +3806,6 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "disposition/engpass-monitor": {
-      "definition_hash": "97f56d8606236960b024b2b81748c6a1d6e67da6864f12c1d5c89cb07daef47c",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "disposition/kontrakt-abruf": {
       "definition_hash": "f9421d55782c17c0d134775b4e7dd42f4bbf309ca7c3dc3fa5c6b95b3cadec5c",
       "gates_passed": [
@@ -3830,17 +3819,6 @@
     },
     "disposition/lager-reichweite": {
       "definition_hash": "211b3e95ea86072915710aada7eccea13134ffb427e53b106a7afabc030b8e3d",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "disposition/liste": {
-      "definition_hash": "e5446843f726c3ab31ff3d11426000813e91441d125b1edab2c978cd35f35e56",
       "gates_passed": [
         "A",
         "B",
@@ -3874,17 +3852,6 @@
     },
     "disposition/touren-disposition": {
       "definition_hash": "16337928638917c2a8ed17a22ce870a58fbac07dbe52b04f139b0b9393bea4dd",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "disposition/umlagerungs-vorschlag": {
-      "definition_hash": "94c06de2fa91b48bf4867944f85d25e259546755692f1917ca94fd83b8ed6b95",
       "gates_passed": [
         "A",
         "B",
