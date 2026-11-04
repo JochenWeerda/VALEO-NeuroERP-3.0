@@ -1,15 +1,36 @@
-"""Auto-generated domain schemas for foerderung.
-
-These are named open schemas (extra="allow") that provide semantic names
-in the OpenAPI documentation while maintaining backwards compatibility.
-Replace with fully typed schemas as the domain stabilizes.
-"""
+"""Antwortschemas der Foerderantraege (Batch 8, 03.11.2026: typisiert statt extra="allow")."""
 from __future__ import annotations
 
-from app.api.v1.schemas.base import BaseSchema
+from typing import Optional
+
 from pydantic import ConfigDict
+
+from app.api.v1.schemas.base import BaseSchema
+
+
+class FoerderAntragOut(BaseSchema):
+    id: str
+    nummer: str
+    programm: str
+    antragsdatum: Optional[str] = None
+    flaeche: float = 0
+    betrag: float = 0
+    status: Optional[str] = None
+
+
+class FoerderAntragListOut(BaseSchema):
+    items: list[FoerderAntragOut]
+    total: int
+    sum_betrag: float
+
+
+class FoerderungStatsOut(BaseSchema):
+    bewilligt: int
+    eingereicht: int
+    entwurf: int
+    betrag_bewilligt: float
 
 
 class FoerderungOut(BaseSchema):
-    """Response schema for foerderung endpoints."""
+    """Altname, nur noch fuer Aufrufer ausserhalb dieser Wege."""
     model_config = ConfigDict(extra="allow")

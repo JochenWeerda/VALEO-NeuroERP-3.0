@@ -463,6 +463,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `sales_o2c_link_20260610` | sales O2C-Link — Auftrag→Lieferschein-Verknüpfung (DOM-SALES-004.1) |
 | `sales_offer_number_tenant_20261031` | Scope active offer numbers to their tenant without changing historical data. |
 | `sales_orders_items_shipping_20260215` | Add sales_order_items relation and shipping_method on sales_orders. |
+| `scheinwege_mandant_20261103` | Batch 8 Scheinwege: Seeds und Testreste weg, Foerderung und Labor im Mandanten, Marketingtabelle entfernt. |
 | `screen_definition_drafts_20260916` | Studio ScreenDefinition drafts for Masken-Studio persistency. |
 | `seed_anlage1_abzugstabelle_template_20260303` | seed Anlage 1 (Abzugstabelle Qualität) amendment template |
 | `seed_default_tenant_20260214` | seed default tenant for foreign-key constrained domain tables |

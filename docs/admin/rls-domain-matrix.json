@@ -97,7 +97,6 @@
     "app/api/v1/endpoints/agrar_feldbuch.py",
     "app/api/v1/endpoints/agrar_stammdaten_kommandos.py",
     "app/api/v1/endpoints/compat.py",
-    "app/api/v1/endpoints/marketing.py",
     "app/api/v1/endpoints/mask_screen_definition.py",
     "app/api/v1/endpoints/portal_feldbuch.py",
     "app/core/screen_definitions.py",
@@ -2763,6 +2762,7 @@
     "app/core/screen_definitions_cluster_futter.py",
     "app/core/screen_definitions_cluster_lager.py",
     "app/core/screen_definitions_domain_batch15.py",
+    "app/core/screen_definitions_stamm_batch13.py",
     "app/core/settlement_e2e_reference.py",
     "app/domains/inventory/api/charge_lineage.py",
     "app/domains/logistik/sendung.py",
@@ -2785,6 +2785,7 @@
     "app/api/v1/endpoints/charges.py",
     "app/api/v1/endpoints/compat.py",
     "app/api/v1/endpoints/compliance.py",
+    "app/api/v1/endpoints/labor.py",
     "app/api/v1/endpoints/partiestamm.py",
     "app/api/v1/endpoints/produktion_mischfutter.py",
     "app/api/v1/endpoints/quality_lot_binding.py",
@@ -2810,7 +2811,7 @@
     "kopfzeile": 1,
     "nutzlast": 1,
     "standardmandant": 3,
-    "token": 13
+    "token": 14
    },
    "standardmandant_stellen": [
     "app/api/v1/endpoints/compliance.py:838",

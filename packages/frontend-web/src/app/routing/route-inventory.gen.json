@@ -2051,11 +2051,6 @@
       "source": "auto"
     },
     {
-      "module": "@/pages/crm/events-messen",
-      "path": "crm/events-messen",
-      "source": "alias"
-    },
-    {
       "module": "@/pages/crm/gdpr-request-detail",
       "path": "crm/gdpr-request-detail",
       "source": "auto"
@@ -2093,16 +2088,6 @@
     {
       "module": "@/pages/crm/interaktions-historie",
       "path": "crm/interaktions-historie",
-      "source": "alias"
-    },
-    {
-      "module": "@/pages/crm/kampagne-detail",
-      "path": "crm/kampagne-detail",
-      "source": "alias"
-    },
-    {
-      "module": "@/pages/crm/kampagne-erstellen",
-      "path": "crm/kampagne-erstellen",
       "source": "alias"
     },
     {
@@ -4311,12 +4296,12 @@
       "source": "auto"
     },
     {
-      "module": "@/pages/marketing/kampagnen",
+      "module": "@/pages/crm/campaign-detail",
       "path": "marketing/kampagne/:id",
       "source": "navigation"
     },
     {
-      "module": "@/pages/marketing/kampagnen",
+      "module": "@/pages/crm/campaign-detail",
       "path": "marketing/kampagne/neu",
       "source": "navigation"
     },

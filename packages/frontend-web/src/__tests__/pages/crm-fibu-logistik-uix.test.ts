@@ -106,7 +106,7 @@ describe('CRM/FIBU/Logistik UIX', () => {
   })
 
   it('stellt Kampagnen 44 px mit Export', async () => {
-    await mountDomainPage(Campaigns, 'marketing/kampagnen', true)
+    await mountDomainPage(Campaigns, 'crm/kampagnen-liste', true)  // Marketingseite zeigt die CRM-Liste (04.11.2026)
     await expectSearchWorkArea('Kampagnen')
     await expectCsvDownload()
   })

@@ -934,6 +934,7 @@ class FoerderAntrag(Base):
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
     id = Column(String, primary_key=True, default=default_prefixed_id("FA"))
+    tenant_id = Column(String(120), nullable=False, index=True)  # Mandant setzt der Weg aus dem Token
     nummer = Column(String(80), nullable=False)
     programm = Column(String(120), nullable=False)
     antragsdatum = Column(DateTime(timezone=True), nullable=True)
@@ -949,12 +950,17 @@ class LaborProbe(Base):
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
     id = Column(String, primary_key=True, default=default_prefixed_id("LB"))
+    tenant_id = Column(String(120), nullable=False, index=True)  # Mandant setzt der Weg aus dem Token
     probennummer = Column(String(80), nullable=False)
     typ = Column(String(80), nullable=False)
     artikel = Column(String(255), nullable=False)
     datum = Column(DateTime(timezone=True), nullable=True)
     labor = Column(String(255), nullable=False)
     status = Column(String(30), default="ausstehend")
+    # Befund: was der Weg meldet, wird gespeichert (bis 03.11.2026 nur zurueckgegeben)
+    analysewerte = Column(JSONB, nullable=True)
+    grenzwerte = Column(JSONB, nullable=True)
+    bemerkung = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
@@ -964,27 +970,12 @@ class LaborAuftragEntry(Base):
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
     id = Column(String, primary_key=True, default=default_prefixed_id("LA"))
+    tenant_id = Column(String(120), nullable=False, index=True)  # Mandant setzt der Weg aus dem Token
     chargen_id = Column(String(80), nullable=False)
     labor = Column(String(255), nullable=False)
     analysen = Column(Integer, default=0)
     auftragsdatum = Column(DateTime(timezone=True), nullable=True)
     status = Column(String(30), default="offen")
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
-
-
-class MarketingKampagneEntry(Base):
-    __tablename__ = "ops_marketing_kampagnen"
-    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
-
-    id = Column(String, primary_key=True, default=default_prefixed_id("MK"))
-    name = Column(String(255), nullable=False)
-    typ = Column(String(80), nullable=False)
-    zielgruppe = Column(String(120), nullable=True)
-    startdatum = Column(DateTime(timezone=True), nullable=True)
-    enddatum = Column(DateTime(timezone=True), nullable=True)
-    budget = Column(DECIMAL(14, 2), default=0)
-    status = Column(String(30), default="geplant")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 

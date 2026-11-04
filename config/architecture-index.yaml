@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-11-04
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-11-04T05:57:56Z'
+generated_at: '2026-11-04T06:06:41Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -631,7 +631,6 @@ domains:
     - /crm/dubletten
     - /crm/dubletten-pruefung
     - /crm/durchdringungs-pipeline
-    - /crm/events-messen
     - /crm/gdpr-request-detail
     - /crm/gdpr-request-public
     - /crm/gdpr-request/:id
@@ -640,8 +639,6 @@ domains:
     - /crm/gebietsschutz
     - /crm/geschenke-liste
     - /crm/interaktions-historie
-    - /crm/kampagne-detail
-    - /crm/kampagne-erstellen
     - /crm/kaufverhalten
     - /crm/kim
     - /crm/klaerfall-inbox
@@ -886,7 +883,6 @@ domains:
     - kaeufergruppe
     - leads
     - mail_workspace
-    - marketing
     - messages
     - milchvieh_crosssell
     - o2c_chain
@@ -2367,12 +2363,12 @@ domains:
     - docs/adr/adr-062-foreign-goods-operator-projection.md
     - docs/adr/adr-business-partner-debitoren-kreditoren-20261101.md
 mapping_stats:
-  frontend_routes_total: 1142
-  frontend_routes_mapped: 1142
+  frontend_routes_total: 1139
+  frontend_routes_mapped: 1139
   backend_services_total: 334
   backend_services_mapped: 334
-  backend_endpoints_total: 474
-  backend_endpoints_mapped: 474
+  backend_endpoints_total: 473
+  backend_endpoints_mapped: 473
 unmapped:
   frontend_routes: []
   backend_services: []

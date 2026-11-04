@@ -1151,25 +1151,6 @@ def build_mahnwesen_mahnlauf_screen_definition() -> dict[str, Any]:
     return build_dunning_workbench()
 
 
-def build_marketing_kampagnen_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="marketing/kampagnen",
-        domain="marketing",
-        title="Kampagnen",
-        subtitle="marketing",
-        endpoint="/api/v1/marketing/kampagnen",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Kampagnen im marketing-Bereich finden und auswerten.",
-        prompts=["Zeige Kampagnen.", "Filtere die Liste."],
-        bundle="marketing",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
 def build_mobile_scanner_screen_definition() -> dict[str, Any]:
     columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
     return build_stamm_list_screen(
@@ -1739,19 +1720,25 @@ def build_prospecting_leads_screen_definition() -> dict[str, Any]:
 
 
 def build_qualitaet_labor_auftrag_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
+    # Spalten aus LaborAuftragOut (Batch 8, 03.11.2026); vorher Platzhalter id/name/status/updated_at.
+    columns = [{"key": "charge", "label": "Charge", "sortable": True, "filterable": True, "priority": "primary"},
+               {"key": "labor", "label": "Labor", "sortable": True, "filterable": True, "priority": "primary"},
+               {"key": "auftragsdatum", "label": "Auftragsdatum", "sortable": True, "renderKind": "date", "priority": "primary"},
+               {"key": "analysen", "label": "Analysen", "numeric": True, "renderKind": "number", "sortable": True, "priority": "secondary"},
+               {"key": "status", "label": "Status", "sortable": True, "filterable": True, "renderKind": "status", "priority": "primary"},
+               {"key": "qs_entscheidung", "label": "QS-Entscheidung", "sortable": True, "filterable": True, "priority": "secondary"}]
     return build_stamm_list_screen(
         screen_id="qualitaet/labor-auftrag",
         domain="qualitaet",
-        title="Labor auftrag",
-        subtitle="qualitaet",
+        title="Laborauftraege",
+        subtitle="Auftraege je Charge mit Labor, Analysen und QS-Entscheidung",
         endpoint="/api/v1/qualitaet/labor-auftraege",
         row_route=None,
         columns=columns,
         actions=[stamm_list_export_action()],
         row_actions=[],
-        purpose="Labor auftrag im qualitaet-Bereich finden und auswerten.",
-        prompts=["Zeige Labor auftrag.", "Filtere die Liste."],
+        purpose="Offene Laborauftraege und QS-Entscheidungen je Charge finden.",
+        prompts=["Welche Laborauftraege sind noch offen?", "Welche Chargen wurden gesperrt?"],
         bundle="qualitaet",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -1761,11 +1748,15 @@ def build_qualitaet_labor_detail_screen_definition() -> dict[str, Any]:
     return build_stamm_object_page(
         screen_id="qualitaet/labor-detail",
         domain="qualitaet",
-        title="Labor detail",
-        subtitle="qualitaet",
-        identity_field="id",
+        title="Laborauftrag",
+        subtitle="Auftrag, Labor und Befund zur Charge",
+        identity_field="charge",
         data_sources=[stamm_entity_source("/api/v1/qualitaet/labor-auftraege/{entity_id}")],
-        tabs=[stamm_kopf_tab([{"key": "id", "label": "Id", "type": "text"}, {"key": "name", "label": "Name", "type": "text"}, {"key": "status", "label": "Status", "type": "text"}, {"key": "updated_at", "label": "Updated At", "type": "text"}])],
+        # Felder aus LaborAuftragOut (Batch 8, 03.11.2026); vorher Platzhalter id/name/status/updated_at.
+        tabs=[stamm_kopf_tab([{"key": "charge", "label": "Charge", "type": "text"}, {"key": "labor", "label": "Labor", "type": "text"},
+                              {"key": "auftragsdatum", "label": "Auftragsdatum", "type": "date"}, {"key": "analysen", "label": "Analysen", "type": "number"},
+                              {"key": "status", "label": "Status", "type": "text"}, {"key": "qs_entscheidung", "label": "QS-Entscheidung", "type": "text"},
+                              {"key": "bemerkung", "label": "Bemerkung", "type": "text"}])],
         edit_permission="qualitaet.write",
         no_workflow_reason="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
         business_purpose="Labor detail als Stammblatt pflegen.",
@@ -2850,7 +2841,6 @@ BATCH15_SCREEN_BUILDERS: dict[str, Any] = {
     "lager/permanente-inventur": build_lager_permanente_inventur_screen_definition,
     "lager/terminal": build_lager_terminal_screen_definition,
     "mahnwesen/mahnlauf": build_mahnwesen_mahnlauf_screen_definition,
-    "marketing/kampagnen": build_marketing_kampagnen_screen_definition,
     "mobile/scanner": build_mobile_scanner_screen_definition,
     "nachhaltigkeit/eudr-compliance": build_nachhaltigkeit_eudr_compliance_screen_definition,
     "personal/hrm-operations-gates": build_personal_hrm_operations_gates_screen_definition,

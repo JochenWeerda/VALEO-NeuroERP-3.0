@@ -20359,3 +20359,23 @@ Konstruktor, ops_waagen NOT NULL, ops_wiegungen mit Mandant aus der Waage und Ve
 (waagen_wiegungen_mandant_20261103); Alt-Wiegungswege bleiben 410. Alembic: vat_return_bearbeiter_20261027 auf
 rahmenauftrag_afa_tabellen_20261102 umgehaengt, ein Kopf. Pruefung auf frischer DB ueber CI (keine eigene lokale DB,
 ungemergte Migrationen nicht auf valeo_probe). Nach dem Merge: alte PRs #82/#84/#85/#88 schliessen.
+
+## BATCH8-SCHEINWEGE-20261103 — in Arbeit, Claude
+
+Nutzerauftrag 03.11.2026 (nach Batch 7) und Nutzerentscheidung 04.11.2026 ("alte Tabellen mit Seeds gehoeren der
+Vergangenheit"; Seed-Tabellen ohne Studio-Maske oder mit Ersatz entfernen, ersetzter Altbestand ohne Nutzer loeschbar;
+Kampagnen fuehrt domain_crm.crm_campaigns). Branch claude/batch8-scheinwege-20261103 auf PR #101, PR #102.
+- Marketing: /marketing/* entfernt (Weg, Schema, Modell), ops_marketing_kampagnen per Migration geloescht (nur Seed;
+  andere Zeilen braechen ab). /marketing/kampagnen zeigt die CRM-Studio-Liste crm/kampagnen-liste; Masken
+  marketing/kampagnen, marketing/kampagnen-liste und die unerreichbaren Cockpits crm/events-messen,
+  crm/kampagne-detail, crm/kampagne-erstellen (Doppel zu crm/campaign) samt Seiten entfernt; Navigation
+  marketing/kampagne/neu und /:id auf die CRM-Kampagnenmaske.
+- Foerderung und Labor (Studio-Masken vorhanden): kein _seed, Mandant aus der Anmeldung, RLS je Befehl
+  (scheinwege_mandant_20261103). Seed-Zeilen und Testreste (TEST-CHARGE-* bei Test-Labor samt Befunden) per exakter
+  Signatur geloescht; uebrige Altzeilen an den Default-Mandanten (28.10.). Aendern/Loeschen nahmen Text-Kennungen als
+  Zahl (immer 422); Antragsnummer je Mandant eindeutig; Laborauftrag nur zu eigener Charge; Befund speichert
+  Analysewerte, Grenzwerte, Bemerkung; Antworten typisiert, annahme/labor und qualitaet/labor-detail repariert.
+Offen (Folgeauftrag): die uebrigen neun mandantenlosen domain_ops-Tabellen mit Live-Zeilen nach derselben Regel
+pruefen (Compliance-Register mit Seed in compliance.py, ops_disposition, ops_zertifikate); preise/historie errechnet
+Verlaeufe, preise/konditionen fuellt Standardwerte auf; Marketing-/Communication-Dienste (services/crm-*) sollen
+CRM-Kampagnen konsumieren statt eigene zu fuehren.

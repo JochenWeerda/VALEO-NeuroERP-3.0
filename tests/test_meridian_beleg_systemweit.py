@@ -136,6 +136,8 @@ def test_aenderbarer_bezug_hat_lesbares_gegenstueck(mask_id: str, definition: di
 
 
 _IDENTITAET = {
+    "annahme/labor": "charge",  # Batch 8 (03.11.2026), vorher Platzhalter
+    "qualitaet/labor-detail": "charge",
     "fuhrpark/fahrzeug-stamm": "kennzeichen",
     "agrar/duenger": "artikelnummer",
     "artikel/stamm": "article_number",

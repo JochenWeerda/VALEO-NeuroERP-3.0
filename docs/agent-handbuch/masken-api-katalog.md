@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (780 Masken).
+> Generiert aus `app/core/screen_definitions.py` (775 Masken).
 
 ## Übersicht
 
@@ -161,7 +161,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `aktien/zeichnungen` | Zeichnungen | genossenschaft | niedrig | — | `GET /api/v1/masks/aktien/zeichnungen/agent-contract` |
 | `analysis/what-if-simulator` | What if simulator | reporting | niedrig | — | `GET /api/v1/masks/analysis/what-if-simulator/agent-contract` |
 | `annahme/erfassung` | Erfassung | agrar | niedrig | — | `GET /api/v1/masks/annahme/erfassung/agent-contract` |
-| `annahme/labor` | Labor | agrar | niedrig | — | `GET /api/v1/masks/annahme/labor/agent-contract` |
+| `annahme/labor` | Laborauftrag | agrar | niedrig | — | `GET /api/v1/masks/annahme/labor/agent-contract` |
 | `annahme/lkw-registrierung` | LKW-Registrierung | agrar | niedrig | — | `GET /api/v1/masks/annahme/lkw-registrierung/agent-contract` |
 | `annahme/muster` | Muster | agrar | niedrig | — | `GET /api/v1/masks/annahme/muster/agent-contract` |
 | `annahme/qualitaets-check` | Qualitätsprüfung | agrar | niedrig | — | `GET /api/v1/masks/annahme/qualitaets-check/agent-contract` |
@@ -328,13 +328,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `crm/dsgvo-anfragen-liste` | DSGVO-Anfragen | crm | niedrig | — | `GET /api/v1/masks/crm/dsgvo-anfragen-liste/agent-contract` |
 | `crm/dubletten-pruefung` | Dubletten-Pruefung | crm | niedrig | — | `GET /api/v1/masks/crm/dubletten-pruefung/agent-contract` |
 | `crm/einwilligungen-liste` | Einwilligungen | crm | niedrig | — | `GET /api/v1/masks/crm/einwilligungen-liste/agent-contract` |
-| `crm/events-messen` | Events und Messen | crm | niedrig | — | `GET /api/v1/masks/crm/events-messen/agent-contract` |
 | `crm/gdpr-request` | DSGVO-Anfrage | crm | hoch | — | `GET /api/v1/masks/crm/gdpr-request/agent-contract` |
 | `crm/gebietsschutz` | Gebietsschutz | crm | niedrig | — | `GET /api/v1/masks/crm/gebietsschutz/agent-contract` |
 | `crm/geschenke-liste` | Geschenke | crm | niedrig | — | `GET /api/v1/masks/crm/geschenke-liste/agent-contract` |
 | `crm/interaktions-historie` | Interaktions-Historie | crm | niedrig | — | `GET /api/v1/masks/crm/interaktions-historie/agent-contract` |
-| `crm/kampagne-detail` | Kampagne | crm | niedrig | — | `GET /api/v1/masks/crm/kampagne-detail/agent-contract` |
-| `crm/kampagne-erstellen` | Kampagne erstellen | crm | niedrig | — | `GET /api/v1/masks/crm/kampagne-erstellen/agent-contract` |
 | `crm/kampagnen-liste` | Kampagnen | crm | niedrig | — | `GET /api/v1/masks/crm/kampagnen-liste/agent-contract` |
 | `crm/kampagnenvorlagen-liste` | Kampagnenvorlagen | crm | niedrig | — | `GET /api/v1/masks/crm/kampagnenvorlagen-liste/agent-contract` |
 | `crm/kaufverhalten` | Kaufverhalten | crm | niedrig | — | `GET /api/v1/masks/crm/kaufverhalten/agent-contract` |
@@ -604,8 +601,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `logistik/versandprofile` | Versandprofile | logistics | niedrig | — | `GET /api/v1/masks/logistik/versandprofile/agent-contract` |
 | `mahnwesen/mahnlauf` | Mahnlauf | finance | niedrig | — | `GET /api/v1/masks/mahnwesen/mahnlauf/agent-contract` |
 | `management/executive-dashboard` | Executive Dashboard | management | niedrig | — | `GET /api/v1/masks/management/executive-dashboard/agent-contract` |
-| `marketing/kampagnen` | Kampagnen | marketing | niedrig | — | `GET /api/v1/masks/marketing/kampagnen/agent-contract` |
-| `marketing/kampagnen-liste` | Marketingkampagnen | marketing | niedrig | — | `GET /api/v1/masks/marketing/kampagnen-liste/agent-contract` |
 | `mobile/scanner` | Scanner | mobile | niedrig | — | `GET /api/v1/masks/mobile/scanner/agent-contract` |
 | `nachhaltigkeit/eudr-compliance` | Eudr compliance | nachhaltigkeit | niedrig | — | `GET /api/v1/masks/nachhaltigkeit/eudr-compliance/agent-contract` |
 | `personal/bewerbung-einwilligung` | Einwilligung zur Aufbewahrung | hr | mittel | — | `GET /api/v1/masks/personal/bewerbung-einwilligung/agent-contract` |
@@ -669,8 +664,8 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `prospecting/leads` | LeadExplorer | prospecting | niedrig | — | `GET /api/v1/masks/prospecting/leads/agent-contract` |
 | `qualitaet/ausnahmen` | Betriebs-Ausnahmen | operations | niedrig | — | `GET /api/v1/masks/qualitaet/ausnahmen/agent-contract` |
 | `qualitaet/ausnahmen-liste` | Betriebsausnahmen | qualitaet | niedrig | — | `GET /api/v1/masks/qualitaet/ausnahmen-liste/agent-contract` |
-| `qualitaet/labor-auftrag` | Labor auftrag | qualitaet | niedrig | — | `GET /api/v1/masks/qualitaet/labor-auftrag/agent-contract` |
-| `qualitaet/labor-detail` | Labor detail | qualitaet | niedrig | — | `GET /api/v1/masks/qualitaet/labor-detail/agent-contract` |
+| `qualitaet/labor-auftrag` | Laborauftraege | qualitaet | niedrig | — | `GET /api/v1/masks/qualitaet/labor-auftrag/agent-contract` |
+| `qualitaet/labor-detail` | Laborauftrag | qualitaet | niedrig | — | `GET /api/v1/masks/qualitaet/labor-detail/agent-contract` |
 | `qualitaet/labor-liste` | Laborauftraege | qualitaet | niedrig | — | `GET /api/v1/masks/qualitaet/labor-liste/agent-contract` |
 | `qualitaet/reklamation` | Reklamation | qualitaet | mittel | `complaint-to-resolution` | `GET /api/v1/masks/qualitaet/reklamation/agent-contract` |
 | `qualitaet/reklamationen-liste` | Reklamationen | qualitaet | niedrig | — | `GET /api/v1/masks/qualitaet/reklamationen-liste/agent-contract` |
@@ -5377,9 +5372,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `annahme/labor` — Labor
+### `annahme/labor` — Laborauftrag
 
-**Zweck:** Stamm- und Fachmaske fuer Labor (annahme/labor).
+**Zweck:** Laborauftrag und QS-Entscheidung einer Annahmecharge pruefen.
 
 | | |
 |---|---|
@@ -5405,7 +5400,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Beispiel-Prompts:**
 
-- Zeige Stammdaten fuer Labor {entity_id}.
+- Ist die Charge {entity_id} freigegeben?
 
 **Actions:**
 
@@ -9595,46 +9590,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `crm/events-messen` — Events und Messen
-
-**Zweck:** Events und Messen als Read-Model-Cockpit.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/crm/events-messen/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/crm/events-messen/agent-contract` |
-| Readiness | `GET /api/v1/masks/crm/events-messen/readiness` |
-| Rollout-Route | `/mask-rollout/crm__events-messen/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `entity` → `/api/v1/marketing/kampagnen`
-
-**MCP-Tools (Domäne):**
-
-- `crm.customer.search` — scope `crm:read`, Risiko niedrig
-- `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
-- `crm.customer.open` — scope `crm:read`, Risiko niedrig
-- `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko niedrig
-- `crm.activity.update` — scope `crm:write`, Risiko mittel
-- `crm.activity.delete` — scope `crm:write`, Risiko mittel
-- `crm.lead.qualify` — scope `crm:write`, Risiko mittel
-
-**Beispiel-Prompts:**
-
-- Zeige Events und Messen.
-- Was ist der aktuelle Stand?
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `refresh` | Aktualisieren | safe | nein | `—` |
-
----
-
 ### `crm/gdpr-request` — DSGVO-Anfrage
 
 **Zweck:** Betroffenenanfrage nachverfolgen.
@@ -9789,86 +9744,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **Beispiel-Prompts:**
 
 - Zeige Interaktions-Historie.
-- Was ist der aktuelle Stand?
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `refresh` | Aktualisieren | safe | nein | `—` |
-
----
-
-### `crm/kampagne-detail` — Kampagne
-
-**Zweck:** Kampagne als Read-Model-Cockpit.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/crm/kampagne-detail/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/crm/kampagne-detail/agent-contract` |
-| Readiness | `GET /api/v1/masks/crm/kampagne-detail/readiness` |
-| Rollout-Route | `/mask-rollout/crm__kampagne-detail/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `entity` → `/api/v1/marketing/kampagnen`
-
-**MCP-Tools (Domäne):**
-
-- `crm.customer.search` — scope `crm:read`, Risiko niedrig
-- `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
-- `crm.customer.open` — scope `crm:read`, Risiko niedrig
-- `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko niedrig
-- `crm.activity.update` — scope `crm:write`, Risiko mittel
-- `crm.activity.delete` — scope `crm:write`, Risiko mittel
-- `crm.lead.qualify` — scope `crm:write`, Risiko mittel
-
-**Beispiel-Prompts:**
-
-- Zeige Kampagne.
-- Was ist der aktuelle Stand?
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `refresh` | Aktualisieren | safe | nein | `—` |
-
----
-
-### `crm/kampagne-erstellen` — Kampagne erstellen
-
-**Zweck:** Kampagne erstellen als Read-Model-Cockpit.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/crm/kampagne-erstellen/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/crm/kampagne-erstellen/agent-contract` |
-| Readiness | `GET /api/v1/masks/crm/kampagne-erstellen/readiness` |
-| Rollout-Route | `/mask-rollout/crm__kampagne-erstellen/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `entity` → `/api/v1/marketing/kampagnen`
-
-**MCP-Tools (Domäne):**
-
-- `crm.customer.search` — scope `crm:read`, Risiko niedrig
-- `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
-- `crm.customer.open` — scope `crm:read`, Risiko niedrig
-- `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko niedrig
-- `crm.activity.update` — scope `crm:write`, Risiko mittel
-- `crm.activity.delete` — scope `crm:write`, Risiko mittel
-- `crm.lead.qualify` — scope `crm:write`, Risiko mittel
-
-**Beispiel-Prompts:**
-
-- Zeige Kampagne erstellen.
 - Was ist der aktuelle Stand?
 
 **Actions:**
@@ -21440,67 +21315,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-## Domäne: marketing
-
-### `marketing/kampagnen` — Kampagnen
-
-**Zweck:** Kampagnen im marketing-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/marketing/kampagnen/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/marketing/kampagnen/agent-contract` |
-| Readiness | `GET /api/v1/masks/marketing/kampagnen/readiness` |
-| Rollout-Route | `/mask-rollout/marketing__kampagnen/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/marketing/kampagnen`
-
-**Beispiel-Prompts:**
-
-- Zeige Kampagnen.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
-### `marketing/kampagnen-liste` — Marketingkampagnen
-
-**Zweck:** Marketingkampagnen und Budgets verfolgen.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/marketing/kampagnen-liste/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/marketing/kampagnen-liste/agent-contract` |
-| Readiness | `GET /api/v1/masks/marketing/kampagnen-liste/readiness` |
-| Rollout-Route | `/mask-rollout/marketing__kampagnen-liste/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/marketing/kampagnen`
-
-**Beispiel-Prompts:**
-
-- Welche Kampagnen laufen gerade?
-- Welches Budget ist fuer Q2 geplant?
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `neu` | Neue Kampagne | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
 ## Domäne: mobile
 
 ### `mobile/scanner` — Scanner
@@ -23717,9 +23531,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `qualitaet/labor-auftrag` — Labor auftrag
+### `qualitaet/labor-auftrag` — Laborauftraege
 
-**Zweck:** Labor auftrag im qualitaet-Bereich finden und auswerten.
+**Zweck:** Offene Laborauftraege und QS-Entscheidungen je Charge finden.
 
 | | |
 |---|---|
@@ -23739,8 +23553,8 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Beispiel-Prompts:**
 
-- Zeige Labor auftrag.
-- Filtere die Liste.
+- Welche Laborauftraege sind noch offen?
+- Welche Chargen wurden gesperrt?
 
 **Actions:**
 
@@ -23750,7 +23564,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `qualitaet/labor-detail` — Labor detail
+### `qualitaet/labor-detail` — Laborauftrag
 
 **Zweck:** Labor detail als Stammblatt pflegen.
 

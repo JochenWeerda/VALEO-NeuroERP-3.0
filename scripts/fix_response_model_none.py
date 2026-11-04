@@ -87,7 +87,6 @@ FIXES = {
     ],
     "service_anfragen.py": [(134, "ServiceAnfragenOut", "service_anfragen_schemas")],
     "tankstelle.py": [(114, "list[TankstelleOut]", "tankstelle_schemas")],
-    "marketing.py": [(168, "MarketingOut", "marketing_schemas")],
     "disposition.py": [(172, "DispositionOut", "disposition_schemas")],
     "zertifikate.py": [(148, "ZertifikateOut", "zertifikate_schemas")],
     # --- Special cases with inline schemas ---
