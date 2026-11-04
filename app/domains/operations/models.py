@@ -854,22 +854,6 @@ class QSCheckEintrag(Base):
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
 
-class ZulassungRegister(Base):
-    __tablename__ = "ops_zulassungen_register"
-    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
-
-    id = Column(String, primary_key=True, default=default_prefixed_id("ZUL"))
-    tenant_id = Column(String(120), nullable=False, index=True)  # Mandant setzt der Weg aus dem Token
-    produkt = Column(String(255), nullable=False)
-    typ = Column(String(50), nullable=False)
-    nummer = Column(String(80), nullable=False)
-    behoerde = Column(String(120), nullable=False)
-    gueltig_bis = Column(DateTime(timezone=True), nullable=True)
-    status = Column(String(30), default="aktiv")
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
-
-
 class SachkundeEintrag(Base):
     __tablename__ = "ops_sachkunde_register"
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}

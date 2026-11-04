@@ -20,7 +20,6 @@ from app.domains.operations.models import (
     Charge,
     PCNMeldung,
     QSCheckEintrag,
-    ZulassungRegister,
     SachkundeEintrag,
     SaatgutNachbauEintrag,
     VVVOEintrag,
@@ -112,36 +111,6 @@ async def list_qs_checkliste(tenant_id: str = Depends(get_tenant_id), db: Sessio
         "total": len(payload),
         "erfuellt": sum(1 for i in payload if i["erfuellt"]),
         "offen": sum(1 for i in payload if not i["erfuellt"]),
-    }
-
-
-@router.get("/zulassungen-register", response_model=ComplianceOut, summary="Zulassungen auflisten")
-async def list_zulassungen(
-    typ: Optional[str] = Query(None),
-    status: Optional[str] = Query(None),
-    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
-) -> dict:
-    q = db.query(ZulassungRegister).filter(ZulassungRegister.tenant_id == tenant_id)
-    if typ:
-        q = q.filter(ZulassungRegister.typ == typ)
-    if status:
-        q = q.filter(ZulassungRegister.status == status)
-    items = q.all()
-    return {
-        "items": [
-            {
-                "id": i.id,
-                "produkt": i.produkt,
-                "typ": i.typ,
-                "nummer": i.nummer,
-                "behoerde": i.behoerde,
-                "gueltig_bis": _dt(i.gueltig_bis),
-                "gueltigBis": _dt(i.gueltig_bis),
-                "status": i.status,
-            }
-            for i in items
-        ],
-        "total": len(items),
     }
 
 

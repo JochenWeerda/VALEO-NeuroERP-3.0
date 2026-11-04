@@ -72,7 +72,6 @@
     "app/api/v1/endpoints/compliance.py::list_saatgut_nachbau": 1,
     "app/api/v1/endpoints/compliance.py::list_sachkunde": 1,
     "app/api/v1/endpoints/compliance.py::list_vvvo": 1,
-    "app/api/v1/endpoints/compliance.py::list_zulassungen": 1,
     "app/api/v1/endpoints/compliance_whistleblower_lksg.py::list_lksg_supplier_risk_assessments": 1,
     "app/api/v1/endpoints/compliance_whistleblower_lksg.py::list_whistleblower_reports": 1,
     "app/api/v1/endpoints/compliance_whistleblower_lksg.py::lksg_annual_report_preview": 1,

@@ -30,9 +30,9 @@ from rls_domain_support import A, B, SYSTEM
 ROOT = Path(__file__).resolve().parents[1]
 OPS = "domain_ops"
 TABELLEN = tuple(f"{OPS}.{t}" for t in (
-    "ops_compliance_items", "ops_enni_meldungen", "ops_qs_checks", "ops_zulassungen_register", "ops_sachkunde_register",
+    "ops_compliance_items", "ops_enni_meldungen", "ops_qs_checks", "ops_sachkunde_register",
     "ops_saatgut_nachbau", "ops_vvvo_register", "ops_zertifikate"))
-REGISTERWEGE = ("list_cross_compliance", "list_enni_meldungen", "list_qs_checkliste", "list_zulassungen",
+REGISTERWEGE = ("list_cross_compliance", "list_enni_meldungen", "list_qs_checkliste",
                 "list_sachkunde", "list_saatgut_nachbau", "list_vvvo", "get_compliance_stats", "get_compliance_report_pdf",
                 "export_gefahrstoffdoku", "export_gefahrstoffdoku_csv", "export_naehrstoffstrom", "export_chargen_trace_report")
 
@@ -107,7 +107,7 @@ def test_mandantengrenze_je_tabelle(db, table):
 
 def test_entfernte_tabellen(db):
     conn, _ = db
-    for table in ("ops_disposition", "ops_zertifikate_api"):
+    for table in ("ops_disposition", "ops_zertifikate_api", "ops_zulassungen_register"):
         assert conn.execute(sa.text(f"SELECT to_regclass('{OPS}.{table}')")).scalar() is None, table
 
 
@@ -146,3 +146,20 @@ def test_zertifikat_im_eigenen_mandanten(fach):
     assert fremd.value.status_code == 404
     geaendert = asyncio.run(zertifikate.update_zertifikat(z["id"], zertifikate.ZertifikatUpdate(status="ablaufend"), tenant_id=A, db=db))
     assert geaendert["status"] == "ablaufend"
+
+
+def test_psm_zulassungen_lesen_nur_den_eigenen_mandanten(fach):
+    from uuid import uuid4
+    from app.domains.agrar.api.psm import list_psm_zulassungen
+    from app.infrastructure.models import PSM
+
+    db, _ = fach
+    marker = uuid4().hex
+    for tenant, suffix, datum in ((A, "a", datetime(2020, 1, 1)), (B, "b", datetime(2099, 1, 1))):
+        db.add(PSM(tenant_id=tenant, artikelnummer=f"{marker}-{suffix}", name=f"PSM {marker}",
+                   wirkstoff="W", mittel_typ="Fungizid", bvl_nummer=f"BVL-{suffix}", zulassung_ablauf=datum))
+    db.flush()
+    a = list_psm_zulassungen(tenant_id=A, search=marker, skip=0, limit=1, db=db)
+    b = list_psm_zulassungen(tenant_id=B, search=marker, skip=0, limit=1, db=db)
+    assert a.total == 1 and a.abgelaufen == 1 and a.items[0].artikelnummer == f"{marker}-a"
+    assert b.total == 1 and b.abgelaufen == 0 and b.items[0].artikelnummer == f"{marker}-b"

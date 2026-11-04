@@ -20395,10 +20395,14 @@ Offen (Folge): Die Register haben keinen Erfassungsweg (nur der Seed schrieb) - 
 Zulassungen auf den PSM-Stamm (agrar_psm: bvl_nummer, zulassung_ablauf) umstellen (neue Studio-Maske);
 VVVO (ops vs domain_compliance) und Sachkunde (Kunden/Mitarbeitende/Feldbuch) fachlich zusammenfuehren.
 
-## PSM-ZULASSUNGEN-20261104 — reserviert, Codex
+## PSM-ZULASSUNGEN-20261104 — in Arbeit, Codex
 
 Ziel: PSM-Zulassungen ueber mandantengebundenen echten PSM-Leseweg und native Studio-Liste; ersetztes Register nur nach sicherer Datenpruefung entfernen.
 Dateibesitz: PSM-Projektion und Schema, betroffene Studio-Definitionen und UI-Verbraucher, zugehoerige Migration, gezielte Tests sowie QA/Meridian-Doku. Integration nach Batch 8/9 durch Lead.
 Abnahme: typisierter Feldvertrag, Mandant aus Anmeldung, keine erfundenen Werte, native Maske, NULL-sichere Abbruchpruefung, gezielte Tests und Generatoren im koordinierten Fenster.
 Risiken: historische Fremdzeilen blockieren Tabellenentfernung; ungemergte Migration ausschliesslich transaktional pruefen; keine neue Testdatenbank.
 
+
+PSM-ZULASSUNGEN Zwischenstand: lokale PSM-Projektion und native Liste vorbereitet. Der Ablaufzaehler betrachtet alle Seiten in der Betriebszeitzone. Das Altregister wird nur entfernt, wenn es leer ist; jeder Bestand blockiert. Gezielte Tests und transaktionale Migrationspruefung sowie Generatoren stehen unter Lead-Koordination noch aus.
+
+Pruefnachweis: 5 reine PSM-Vertragstests mit deaktiviertem Plugin-Autoload bestanden (Exitcode 0; beim Interpreterende abgefangener pyreadline3-Destructorfehler); auf valeo_probe bei null fremden aktiven Clients zwei eigene PSM-Testmandanten, Suchergebnis und Ablaufzahlen transaktional geprueft und zurueckgerollt. Kein Schema geaendert oder gestempelt. Offen: migrationsbezogene PG-Pruefung nach Batch-8/9-Schutz, Generatoren und Gates durch Lead.

@@ -1,6 +1,6 @@
 import { NativeListPage } from '@/components/mask-builder/NativeListPage'
 
-/** Kontroll-Worklist `compliance/usp-konformitaet` (Batch 12). */
+/** PSM-Zulassungen aus dem lokalen PSM-Stamm. */
 export default function ComplianceUspKonformitaet(): JSX.Element {
-  return <NativeListPage screenId="compliance/usp-konformitaet" testId="screen-compliance/usp-konformitaet" />
+  return <NativeListPage screenId="compliance/zulassungen-liste" testId="screen-compliance/zulassungen-liste" />
 }

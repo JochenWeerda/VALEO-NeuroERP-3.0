@@ -2438,22 +2438,22 @@ def build_compliance_cross_compliance_liste() -> dict[str, Any]:
 
 def build_compliance_zulassungen_liste() -> dict[str, Any]:
     return _liste(
-        screen_id="compliance/zulassungen-liste", domain="compliance", title="Zulassungsregister",
-        subtitle="Produktzulassungen mit Behoerde und Gueltigkeit",
-        endpoint="/api/v1/compliance/zulassungen-register", row_route=None, bundle="compliance",
+        screen_id="compliance/zulassungen-liste", domain="compliance", title="PSM-Zulassungen",
+        subtitle="Zulassungsnummer und Ablauf aus dem PSM-Stamm",
+        endpoint="/api/v1/agrar/psm/zulassungen", row_route=None, bundle="compliance",
         columns=[
-            {"key": "produkt", "label": "Produkt", "sortable": True, "filterable": True, "priority": "primary"},
-            {"key": "typ", "label": "Typ", "filterable": True, "priority": "secondary"},
-            {"key": "nummer", "label": "Nummer", "filterable": True, "priority": "primary"},
-            {"key": "behoerde", "label": "Behoerde", "filterable": True, "priority": "secondary"},
-            {"key": "gueltigBis", "label": "Gueltig bis", "renderKind": "date", "sortable": True, "priority": "primary"},
-            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "artikelnummer", "label": "Artikelnummer", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "name", "label": "Mittel", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "wirkstoff", "label": "Wirkstoff", "filterable": True, "priority": "secondary"},
+            {"key": "mittel_typ", "label": "Mitteltyp", "filterable": True, "priority": "secondary"},
+            {"key": "bvl_nummer", "label": "BVL-Nummer", "filterable": True, "priority": "primary"},
+            {"key": "zulassung_ablauf", "label": "Zulassung bis", "renderKind": "date", "sortable": True, "priority": "primary"},
+            {"key": "ist_aktiv", "label": "Im Stamm aktiv", "renderKind": "boolean", "filterable": True, "priority": "secondary"},
         ],
-        actions=[_EXPORT],
-        row_actions=[],
-        purpose="Produktzulassungen und Ablaufdaten im Blick behalten.",
-        prompts=["Welche Zulassungen laufen ab?", "Welche Produkte sind widerrufen?"],
-        no_workflow="Registerliste ohne eigenen Ablauf.",
+        actions=[_EXPORT], row_actions=[],
+        purpose="PSM-Zulassungsnummern und Ablaufdaten im eigenen Stamm pruefen.",
+        prompts=["Welche PSM-Zulassungen laufen ab?"],
+        no_workflow="Stammdatenliste ohne eigenen Ablauf.",
     )
 
 

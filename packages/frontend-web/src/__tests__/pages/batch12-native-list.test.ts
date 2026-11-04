@@ -83,7 +83,7 @@ const BATCH12: Array<[string, string, string]> = [
   ['compliance/schadstoff-monitoring.tsx', 'compliance/schadstoff-monitoring', 'NativeListPage'],
   ['compliance/stichtagsmeldung-bestaende.tsx', 'compliance/stichtagsmeldung-bestaende', 'NativeListPage'],
   ['compliance/tierwohl-dokumentation.tsx', 'compliance/tierwohl-dokumentation', 'NativeListPage'],
-  ['compliance/usp-konformitaet.tsx', 'compliance/usp-konformitaet', 'NativeListPage'],
+  ['compliance/usp-konformitaet.tsx', 'compliance/zulassungen-liste', 'NativeListPage'],
   ['compliance/wasserschutz-auflagen.tsx', 'compliance/wasserschutz-auflagen', 'NativeListPage'],
   ['compliance/zertifikate.tsx', 'compliance/zertifikate', 'NativeListPage'],
   ['contracts/ContractPage.tsx', 'contracts/contract', 'NativeListPage'],
