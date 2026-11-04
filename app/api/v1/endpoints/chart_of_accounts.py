@@ -11,7 +11,6 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 from pydantic import BaseModel, Field
 
-from ....core.config import settings
 from ....core.database import get_db
 from ....core.fibu_audit import log_fibu_audit
 from ....core.tenant import get_tenant_id
@@ -33,7 +32,6 @@ from app.auth.finance_roles import (
 
 router = APIRouter(prefix="/chart-of-accounts")
 
-DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 VALID_ACCOUNT_TYPES = {"asset", "liability", "equity", "revenue", "expense"}
 

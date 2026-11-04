@@ -1,23 +1,23 @@
 {
  "_note": "Generiert von scripts/rls_inventory.py; nicht von Hand aendern. Plan: docs/architecture/rls-mandantenkernel-plan.md",
  "summary": {
-  "tables": 783,
+  "tables": 785,
   "by_class": {
-   "A": 684,
-   "B": 32,
-   "C": 15,
-   "D": 52
+   "A": 706,
+   "B": 22,
+   "C": 9,
+   "D": 48
   },
-  "rls_enabled": 646,
+  "rls_enabled": 674,
   "tenant_types": {
    "character varying": 340,
    "character varying(100)": 9,
-   "character varying(120)": 39,
+   "character varying(120)": 51,
    "character varying(128)": 1,
    "character varying(255)": 1,
-   "character varying(36)": 82,
+   "character varying(36)": 83,
    "character varying(50)": 1,
-   "character varying(64)": 105,
+   "character varying(64)": 104,
    "character varying(80)": 24,
    "text": 110,
    "uuid": 4
@@ -90,23 +90,12 @@
   },
   "driver_connect": {},
   "default_tenant": {
-   "app/api/v1/endpoints/articles.py": 1,
-   "app/api/v1/endpoints/chart_of_accounts.py": 1,
-   "app/api/v1/endpoints/crm_reports.py": 1,
    "app/api/v1/endpoints/farm_profiles.py": 1,
-   "app/api/v1/endpoints/nutrient_compositions.py": 1,
    "app/api/v1/endpoints/reklamation_api.py": 1,
-   "app/api/v1/endpoints/sales_delivery_notes.py": 1,
-   "app/api/v1/endpoints/webhooks.py": 3,
-   "app/core/channel_ingress.py": 2,
+   "app/api/v1/endpoints/webhooks.py": 2,
    "app/core/config.py": 1,
    "app/core/inventory_permissions.py": 1,
    "app/core/tenant_context.py": 1,
-   "app/domains/agrar/api/duenger.py": 1,
-   "app/domains/agrar/api/saatgut.py": 1,
-   "app/domains/crm/api/customers.py": 1,
-   "app/domains/crm/api/leads.py": 1,
-   "app/domains/inventory/api/inventory_auth.py": 1,
    "app/middleware/tenant_enforcement.py": 1,
    "app/seeds/inventory_seed.py": 1,
    "services/crm-ai/app/config/settings.py": 1,
@@ -710,9 +699,9 @@
    "table": "domain_agrar.nutrient_compositions",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_agrar.optimization_runs",
@@ -1895,11 +1884,11 @@
   },
   {
    "table": "domain_erp.bank_accounts",
-   "class": "B",
+   "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_erp.bank_matches",
@@ -1991,19 +1980,19 @@
   },
   {
    "table": "domain_erp.creditors",
-   "class": "B",
+   "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_erp.debitors",
-   "class": "B",
+   "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_erp.debtors",
@@ -2041,9 +2030,9 @@
    "table": "domain_erp.dunning_notices",
    "class": "A",
    "tenant_type": "character varying(64)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_erp.dunning_rules",
@@ -2071,14 +2060,11 @@
   },
   {
    "table": "domain_erp.fibu_connector_run_items",
-   "class": "C",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying(36)",
+   "rls": true,
    "force_rls": false,
-   "policies": 0,
-   "tenant_parents": [
-    "domain_erp.fibu_connector_runs"
-   ]
+   "policies": 4
   },
   {
    "table": "domain_erp.fibu_connector_runs",
@@ -2092,9 +2078,9 @@
    "table": "domain_erp.gift_cards",
    "class": "A",
    "tenant_type": "character varying(64)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_erp.journal_entries",
@@ -2140,9 +2126,9 @@
    "table": "domain_erp.open_items",
    "class": "A",
    "tenant_type": "character varying(64)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_erp.payment_returns",
@@ -3373,17 +3359,17 @@
    "table": "domain_logistics.carrier_invoices",
    "class": "A",
    "tenant_type": "character varying(36)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_logistics.epod_settlements",
-   "class": "B",
+   "class": "A",
    "tenant_type": "character varying(36)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_logistics.frachtbriefe",
@@ -3395,43 +3381,43 @@
   },
   {
    "table": "domain_logistics.freight_tariffs",
-   "class": "B",
+   "class": "A",
    "tenant_type": "text",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_logistics.tour_disposition_checks",
-   "class": "B",
+   "class": "A",
    "tenant_type": "character varying(36)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_logistics.tour_events",
-   "class": "B",
+   "class": "A",
    "tenant_type": "text",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_logistics.tour_stops",
-   "class": "B",
+   "class": "A",
    "tenant_type": "text",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_logistics.tours",
-   "class": "B",
+   "class": "A",
    "tenant_type": "text",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_meldewesen.meldung_log",
@@ -3557,9 +3543,9 @@
    "table": "domain_ops.kon_contract",
    "class": "A",
    "tenant_type": "character varying",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_ops.kon_contract_fixing",
@@ -3667,19 +3653,19 @@
   },
   {
    "table": "domain_ops.ops_dokument_versionen",
-   "class": "D",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying(120)",
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_dokumente",
-   "class": "D",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying(120)",
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_enni_meldungen",
@@ -3702,47 +3688,35 @@
   },
   {
    "table": "domain_ops.ops_fahrzeug_bussgeld",
-   "class": "C",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying(120)",
+   "rls": true,
    "force_rls": false,
-   "policies": 0,
-   "tenant_parents": [
-    "domain_ops.ops_fahrzeuge"
-   ]
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_fahrzeug_schaeden",
-   "class": "C",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying(120)",
+   "rls": true,
    "force_rls": false,
-   "policies": 0,
-   "tenant_parents": [
-    "domain_ops.ops_fahrzeuge"
-   ]
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_fahrzeug_status_historie",
-   "class": "C",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying(120)",
+   "rls": true,
    "force_rls": false,
-   "policies": 0,
-   "tenant_parents": [
-    "domain_ops.ops_fahrzeuge"
-   ]
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_fahrzeug_touren",
-   "class": "C",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying(120)",
+   "rls": true,
    "force_rls": false,
-   "policies": 0,
-   "tenant_parents": [
-    "domain_ops.ops_fahrzeuge"
-   ]
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_fahrzeuge",
@@ -3836,9 +3810,9 @@
    "table": "domain_ops.ops_pcn_meldungen",
    "class": "A",
    "tenant_type": "character varying(120)",
-   "rls": false,
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_projekt_aufgaben",
@@ -3866,11 +3840,11 @@
   },
   {
    "table": "domain_ops.ops_rahmenvertraege",
-   "class": "D",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying(120)",
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_saatgut_nachbau",
@@ -3922,8 +3896,8 @@
   },
   {
    "table": "domain_ops.ops_waagen",
-   "class": "B",
-   "tenant_type": "character varying(64)",
+   "class": "A",
+   "tenant_type": "character varying(120)",
    "rls": true,
    "force_rls": false,
    "policies": 4
@@ -3946,14 +3920,11 @@
   },
   {
    "table": "domain_ops.ops_wiegungen",
-   "class": "C",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying(120)",
+   "rls": true,
    "force_rls": false,
-   "policies": 0,
-   "tenant_parents": [
-    "domain_ops.ops_waagen"
-   ]
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_zapfungen",
@@ -4084,12 +4055,28 @@
    "policies": 0
   },
   {
-   "table": "domain_ops.strecke_speditionen_frachttarife",
-   "class": "D",
-   "tenant_type": null,
-   "rls": false,
+   "table": "domain_ops.service_anfrage_rueckmeldungen",
+   "class": "A",
+   "tenant_type": "character varying(120)",
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
+  },
+  {
+   "table": "domain_ops.service_anfragen",
+   "class": "A",
+   "tenant_type": "character varying(120)",
+   "rls": true,
+   "force_rls": false,
+   "policies": 4
+  },
+  {
+   "table": "domain_ops.strecke_speditionen_frachttarife",
+   "class": "A",
+   "tenant_type": "character varying(120)",
+   "rls": true,
+   "force_rls": false,
+   "policies": 4
   },
   {
    "table": "domain_ops.tank_adapter_audit",

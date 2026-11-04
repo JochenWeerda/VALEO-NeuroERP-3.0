@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-03
+last_reviewed: 2026-11-04
 version: 3.0.0
 description: Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Beschreibungen sind aus den Datei-Docstrings extrahiert.
 ---
@@ -155,6 +155,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `crm_gifts_kim_s3_20260609` | crm_gifts — Kunden-Präsente (KIM-S3) |
 | `crm_kim_perf_indexes_20260612` | CRM/KIM Cockpit-Performance — fehlende Indizes. |
 | `crm_kreditlimite_20260917` | Kreditlimite und Freigaben je Kunde. |
+| `crm_leads_spalten_20261028` | Zehn Spalten von domain_crm.leads, die das Modell liest und keine Migration anlegt. |
 | `crm_merge_20260610` | crm_merge — Kunden-Zusammenführung (DOM-CRM-004.2) |
 | `crm_notifications_kim_l3_backend_20260609` | crm_notifications — internes Benachrichtigungs-/Postfach-System fuer KIM (KIM-L3-BACKEND-001) |
 | `crm_ownership_log_20260610` | crm_ownership_log — Übergabe-/Zuordnungs-Audit (DOM-CRM-004.3) |
@@ -431,14 +432,19 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `rls_domain_crm_20261027` | Row-level security for the CRM master data (RLS domain slice crm). |
 | `rls_domain_docflow_20261027` | Row-level security for the document backbone (RLS domain slice docflow). |
 | `rls_domain_einkauf_20261027` | Row-level security for purchasing (RLS domain slice einkauf). |
+| `rls_domain_erp_20261028` | Row-level security for domain_erp part 1 (bank accounts, creditors, debitors, dunning notices, gift cards, |
 | `rls_domain_hr_20261027` | Row-level security for domain_hr master data (RLS domain slice hr). |
 | `rls_domain_inventory_20261027` | Row-level security for the inventory master data and stock documents (RLS domain slice inventory). |
 | `rls_domain_ki_20261027` | Row-level security for the AI domain: agent proposals, tool executions, knowledge versions. |
+| `rls_domain_logistics_20261028` | Row-level security for domain_logistics (tours, stops, events, disposition checks, ePOD settlements, freight |
 | `rls_domain_nachweisraum_20261027` | Row-level security for the evidence room (RLS domain slice nachweisraum). |
+| `rls_domain_ops_20261028` | Row-level security for domain_ops, part 1 (schema only, no data change). |
+| `rls_domain_ops_teil2_20261028` | Row-level security for domain_ops part 2: the eight tables without a tenant column that are empty live. |
 | `rls_domain_pricing_20261027` | Row-level security for domain_pricing (RLS domain slice, first after P0-P7). |
 | `rls_domain_sales_20261027` | Row-level security for the sales documents (RLS domain slice sales). |
 | `rls_domain_shared_20261027` | Row-level security for tenant tables in domain_shared (RLS domain slice shared). |
 | `rls_knowledge_objects_shared_20261027` | Row-level security for knowledge objects: own objects plus shared product knowledge. |
+| `rls_nutrient_compositions_20261028` | Row-level security for domain_agrar.nutrient_compositions (Naehrstoffgehalte der Duengemittel). |
 | `rls_pilot_finance_20261026` | Row-level security pilot: domain_finance and the posting journal (RLS plan P3). |
 | `rls_rollout_20261026` | Roll row-level security out to the class-A tables cleared by the analysis (RLS plan P5). |
 | `rls_system_read_justified_20261027` | Shared 'system' rows readable only where justified (RLS, system-wide). |
@@ -460,6 +466,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `screen_definition_drafts_20260916` | Studio ScreenDefinition drafts for Masken-Studio persistency. |
 | `seed_anlage1_abzugstabelle_template_20260303` | seed Anlage 1 (Abzugstabelle Qualität) amendment template |
 | `seed_default_tenant_20260214` | seed default tenant for foreign-key constrained domain tables |
+| `service_anfragen_20261027` | Service-Anfragen und ihre Rueckmeldungen liegen in der Datenbank. |
 | `steuernachweis_mandant_20261001` | Steuerliche Nachweise bekommen eine Migration — und einen Mandanten. |
 | `steuerschluessel_aufwandskonto_20261013` | Steuerschluessel tragen ein Aufwandskonto fuer Eingangsbelege. |
 | `steuerschluessel_einheit_20261012` | Steuerschluessel: eine Quelle. Erloeskonto und Paragraf-24-Kennzeichen an ``tax_keys``. |
@@ -473,9 +480,11 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `user_screen_overlays_uix071` | UIX-071 user screen overlays. |
 | `ustva_voranmeldungen_20260527` | UStVA Voranmeldungen Tabelle (§ 18 UStG ELSTER-Übertragung). |
 | `vat_codes_entfernt_20261012` | vat_codes entfaellt: Steuerschluessel kommen allein aus domain_erp.tax_keys. |
+| `vat_return_bearbeiter_20261027` | UStVA-Anmeldungen speichern, wer berechnet, geprueft, freigegeben und uebermittelt hat. |
 | `verkauf_fehlende_spalten_20260929` | Fuenf Spalten, die der Code schreibt und keine Migration anlegt. |
 | `versandwege_echt_20261008` | Versandwege: Anfragen mit Mandant, Mahnungen mit Versandweg. |
 | `waage_tenant_20261030` | Bind operations scales to verified tenant; leave unknown legacy ownership unassigned. |
+| `waagen_wiegungen_mandant_20261103` | Waagen und Alt-Wiegungen im selben Mandantenmuster wie die uebrigen domain_ops-Tabellen. |
 | `warehouse_schema_repair_20260626` | WAREHOUSE-REPAIR-001: domain_inventory.warehouses fehlende Spalten nachziehen. |
 | `warehouse_wms_structure_20260517` | WMS warehouse zones, bins, bin_stock, pick_lists and pick_list_lines |
 | `wave3_wf_trigger_log_20260618` | wave3: wf_trigger_log + bank_statements + bank_statement_lines + waagen_quittungen |

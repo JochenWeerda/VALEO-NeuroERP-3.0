@@ -171,7 +171,8 @@ class TestPodSetsStopDelivered:
             notes="Alles ok",
         )
 
-        result = save_pod(tour_id=tour_id, stop_id=stop_id, body=pod_body, x_tenant_id="T1", db=db)
+        db.execute.return_value.rowcount = 1  # der Stopp gehoert zu Tour und Mandant
+        result = save_pod(tour_id=tour_id, stop_id=stop_id, body=pod_body, tenant_id="T1", db=db)
 
         # DB should have been called (UPDATE + SELECT)
         assert db.execute.called
@@ -214,7 +215,8 @@ class TestLiveStatus:
         db = MagicMock()
         db.commit.return_value = None
 
-        results_queue = [gps_event, next_stop_row]
+        # Zuerst prueft der Weg, dass die Tour dem Mandanten gehoert.
+        results_queue = [{"id": tour_id, "tenant_id": "T1"}, gps_event, next_stop_row]
         call_count = {"n": 0}
 
         def side_effect(*args, **kwargs):
@@ -229,7 +231,7 @@ class TestLiveStatus:
 
         db.execute.side_effect = side_effect
 
-        result = logistics_tours.live_status(tour_id=tour_id, db=db)
+        result = logistics_tours.live_status(tour_id=tour_id, tenant_id="T1", db=db)
 
         assert result["tour_id"] == tour_id
         assert result["last_gps_event"] is not None

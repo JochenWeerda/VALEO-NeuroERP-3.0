@@ -12126,11 +12126,6 @@
             "title": "Status",
             "type": "string"
           },
-          "tenant_id": {
-            "default": "default",
-            "title": "Tenant Id",
-            "type": "string"
-          },
           "typ": {
             "minLength": 2,
             "title": "Typ",
@@ -18611,11 +18606,6 @@
           "status": {
             "default": "offen",
             "title": "Status",
-            "type": "string"
-          },
-          "tenant_id": {
-            "default": "default",
-            "title": "Tenant Id",
             "type": "string"
           },
           "titel": {
@@ -33464,6 +33454,7 @@
         "type": "object"
       },
       "ChannelApprovalDecisionRequest": {
+        "description": "Entscheider ist der Angemeldete; ``approver_role`` muss eine seiner geprueften Rollen sein.",
         "properties": {
           "approver_role": {
             "title": "Approver Role",
@@ -33476,15 +33467,10 @@
           "decision": {
             "title": "Decision",
             "type": "string"
-          },
-          "entschieden_von": {
-            "title": "Entschieden Von",
-            "type": "string"
           }
         },
         "required": [
           "decision",
-          "entschieden_von",
           "approver_role",
           "begruendung"
         ],
@@ -33516,17 +33502,6 @@
           "rolle": {
             "title": "Rolle",
             "type": "string"
-          },
-          "tenant_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Tenant Id"
           }
         },
         "required": [
@@ -33611,14 +33586,9 @@
           "process_definition_key": {
             "title": "Process Definition Key",
             "type": "string"
-          },
-          "tenant_id": {
-            "title": "Tenant Id",
-            "type": "string"
           }
         },
         "required": [
-          "tenant_id",
           "process_definition_key",
           "command_name",
           "aggregate_type",
@@ -60459,11 +60429,6 @@
             "title": "Payload Raw",
             "type": "string"
           },
-          "tenant_id": {
-            "default": "default",
-            "title": "Tenant Id",
-            "type": "string"
-          },
           "typ": {
             "title": "Typ",
             "type": "string"
@@ -60495,16 +60460,11 @@
           "name": {
             "title": "Name",
             "type": "string"
-          },
-          "tenant_id": {
-            "title": "Tenant Id",
-            "type": "string"
           }
         },
         "required": [
           "gln",
           "name",
-          "tenant_id",
           "aktive_nachrichtentypen"
         ],
         "title": "EdiPartnerCreateRequest",
@@ -65365,11 +65325,6 @@
             "default": "geplant",
             "title": "Status",
             "type": "string"
-          },
-          "tenant_id": {
-            "default": "default",
-            "title": "Tenant Id",
-            "type": "string"
           }
         },
         "required": [
@@ -66697,7 +66652,7 @@
         "type": "object"
       },
       "ExportListFilter": {
-        "description": "Optional filter for export (e.g. date_from, tenant_id).",
+        "description": "Optional filter for export (e.g. date_from).\n\n``tenant_id`` darf nur den eigenen Mandanten nennen; bis 28.10.2026 waehlte er den Mandanten\ndes Exports (Debitoren, Kreditoren, Nutzer, Prueflog eines fremden Mandanten).",
         "properties": {
           "action": {
             "anyOf": [
@@ -91876,17 +91831,6 @@
           "target_id": {
             "title": "Target Id",
             "type": "string"
-          },
-          "tenant_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Tenant Id"
           }
         },
         "required": [
@@ -114179,11 +114123,6 @@
             "title": "Domain",
             "type": "string"
           },
-          "tenant_id": {
-            "default": "default",
-            "title": "Tenant Id",
-            "type": "string"
-          },
           "year": {
             "anyOf": [
               {
@@ -114569,11 +114508,6 @@
           },
           "prefix": {
             "title": "Prefix",
-            "type": "string"
-          },
-          "tenant_id": {
-            "default": "default",
-            "title": "Tenant Id",
             "type": "string"
           },
           "width": {
@@ -123181,18 +123115,6 @@
       },
       "PayrollExportCreateIn": {
         "properties": {
-          "createdBy": {
-            "anyOf": [
-              {
-                "maxLength": 120,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Createdby"
-          },
           "periodFrom": {
             "title": "Periodfrom",
             "type": "string"
@@ -134652,11 +134574,6 @@
             "default": "geplant",
             "title": "Status",
             "type": "string"
-          },
-          "tenant_id": {
-            "default": "default",
-            "title": "Tenant Id",
-            "type": "string"
           }
         },
         "required": [
@@ -135134,11 +135051,6 @@
               }
             ],
             "title": "Techniker"
-          },
-          "tenant_id": {
-            "default": "default",
-            "title": "Tenant Id",
-            "type": "string"
           }
         },
         "required": [
@@ -146181,6 +146093,7 @@
           "bewertet_von": {
             "anyOf": [
               {
+                "maxLength": 255,
                 "type": "string"
               },
               {
@@ -146192,6 +146105,8 @@
           "bewertung": {
             "anyOf": [
               {
+                "maximum": 5.0,
+                "minimum": 1.0,
                 "type": "integer"
               },
               {
@@ -146201,6 +146116,7 @@
             "title": "Bewertung"
           },
           "text": {
+            "minLength": 1,
             "title": "Text",
             "type": "string"
           }
@@ -153747,12 +153663,15 @@
             "title": "Beschreibung"
           },
           "betreff": {
+            "maxLength": 255,
+            "minLength": 1,
             "title": "Betreff",
             "type": "string"
           },
           "kategorie": {
             "anyOf": [
               {
+                "maxLength": 120,
                 "type": "string"
               },
               {
@@ -153762,12 +153681,15 @@
             "title": "Kategorie"
           },
           "kunde": {
+            "maxLength": 255,
+            "minLength": 1,
             "title": "Kunde",
             "type": "string"
           },
           "nummer": {
             "anyOf": [
               {
+                "maxLength": 40,
                 "type": "string"
               },
               {
@@ -153778,6 +153700,11 @@
           },
           "prioritaet": {
             "default": "normal",
+            "enum": [
+              "hoch",
+              "normal",
+              "niedrig"
+            ],
             "title": "Prioritaet",
             "type": "string"
           }
@@ -153805,6 +153732,8 @@
           "betreff": {
             "anyOf": [
               {
+                "maxLength": 255,
+                "minLength": 1,
                 "type": "string"
               },
               {
@@ -153816,6 +153745,7 @@
           "kategorie": {
             "anyOf": [
               {
+                "maxLength": 120,
                 "type": "string"
               },
               {
@@ -153827,6 +153757,8 @@
           "kunde": {
             "anyOf": [
               {
+                "maxLength": 255,
+                "minLength": 1,
                 "type": "string"
               },
               {
@@ -153838,6 +153770,11 @@
           "prioritaet": {
             "anyOf": [
               {
+                "enum": [
+                  "hoch",
+                  "normal",
+                  "niedrig"
+                ],
                 "type": "string"
               },
               {
@@ -153849,6 +153786,10 @@
           "status": {
             "anyOf": [
               {
+                "enum": [
+                  "neu",
+                  "in-bearbeitung"
+                ],
                 "type": "string"
               },
               {
@@ -170280,25 +170221,11 @@
         "title": "UsersOut",
         "type": "object"
       },
-      "VATReturnApprovalRequest": {
-        "properties": {
-          "approved_by": {
-            "minLength": 1,
-            "title": "Approved By",
-            "type": "string"
-          }
-        },
-        "required": [
-          "approved_by"
-        ],
-        "title": "VATReturnApprovalRequest",
-        "type": "object"
-      },
       "VATReturnCalculationRequest": {
         "description": "Request to calculate VAT return from journal entries",
         "properties": {
           "period": {
-            "description": "Period in YYYY-MM format",
+            "description": "Zeitraum YYYY-MM oder YYYY-Q1 bis YYYY-Q4",
             "title": "Period",
             "type": "string"
           },
@@ -170394,6 +170321,17 @@
             ],
             "title": "Calculated At"
           },
+          "calculated_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Calculated By"
+          },
           "created_at": {
             "format": "date-time",
             "title": "Created At",
@@ -170457,6 +170395,17 @@
             ],
             "title": "Submitted At"
           },
+          "submitted_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Submitted By"
+          },
           "tax_id": {
             "anyOf": [
               {
@@ -170469,8 +170418,15 @@
             "title": "Tax Id"
           },
           "taxpayer_name": {
-            "title": "Taxpayer Name",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Taxpayer Name"
           },
           "total_input_tax": {
             "title": "Total Input Tax",
@@ -170500,6 +170456,17 @@
               }
             ],
             "title": "Validated At"
+          },
+          "validated_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Validated By"
           },
           "vat_id": {
             "anyOf": [
@@ -170541,23 +170508,41 @@
         "type": "object"
       },
       "VATReturnSubmitRequest": {
+        "description": "Festhalten einer im ELSTER-Portal erfolgten Uebermittlung.",
         "properties": {
-          "submitted_by": {
-            "minLength": 1,
-            "title": "Submitted By",
+          "transferticket": {
+            "description": "Transferticket aus ELSTER",
+            "maxLength": 50,
+            "minLength": 5,
+            "title": "Transferticket",
             "type": "string"
           }
         },
         "required": [
-          "submitted_by"
+          "transferticket"
         ],
         "title": "VATReturnSubmitRequest",
         "type": "object"
       },
       "VATReturnVorberechnung": {
-        "description": "Pre-calculation result (not persisted)",
+        "description": "Vorberechnung (nicht gespeichert).",
         "properties": {
+          "klaerungen": {
+            "description": "Was sich nicht eindeutig zuordnen laesst",
+            "items": {
+              "type": "string"
+            },
+            "title": "Klaerungen",
+            "type": "array"
+          },
+          "offene_entwuerfe": {
+            "default": 0,
+            "description": "Ungebuchte Buchungsentwuerfe im Zeitraum",
+            "title": "Offene Entwuerfe",
+            "type": "integer"
+          },
           "positionen": {
+            "description": "Kennzahlen",
             "items": {
               "additionalProperties": true,
               "type": "object"
@@ -170567,25 +170552,25 @@
           },
           "umsatz_netto": {
             "default": 0,
-            "description": "Netto-Umsatz",
+            "description": "Summe der Bemessungsgrundlagen",
             "title": "Umsatz Netto",
             "type": "number"
           },
           "umsatzsteuer": {
             "default": 0,
-            "description": "Umsatzsteuer (19%)",
+            "description": "Umsatzsteuer laut Hauptbuch",
             "title": "Umsatzsteuer",
             "type": "number"
           },
           "vorsteuer": {
             "default": 0,
-            "description": "Abziehbare Vorsteuer",
+            "description": "Abziehbare Vorsteuer laut Hauptbuch",
             "title": "Vorsteuer",
             "type": "number"
           },
           "zahllast": {
             "default": 0,
-            "description": "Verbleibende USt-Zahllast",
+            "description": "Kennzahl 83: positiv Zahlung, negativ Erstattung",
             "title": "Zahllast",
             "type": "number"
           },
@@ -171697,11 +171682,6 @@
             "title": "Status",
             "type": "string"
           },
-          "tenant_id": {
-            "default": "default",
-            "title": "Tenant Id",
-            "type": "string"
-          },
           "zielort": {
             "anyOf": [
               {
@@ -172714,11 +172694,6 @@
               }
             ],
             "title": "Telefon"
-          },
-          "tenant_id": {
-            "default": "default",
-            "title": "Tenant Id",
-            "type": "string"
           },
           "versicherer": {
             "minLength": 2,
@@ -180400,11 +180375,6 @@
               }
             ],
             "title": "Preis Liter"
-          },
-          "tenant_id": {
-            "default": "default",
-            "title": "Tenant Id",
-            "type": "string"
           },
           "zapfsaeule": {
             "anyOf": [
@@ -189049,7 +189019,6 @@
           },
           "tenant_id": {
             "description": "Tenant ID",
-            "format": "uuid",
             "title": "Tenant Id",
             "type": "string"
           },
@@ -191217,32 +191186,10 @@
             ],
             "title": "Contractid"
           },
-          "createdBy": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Createdby"
-          },
           "reason": {
             "minLength": 10,
             "title": "Reason",
             "type": "string"
-          },
-          "tenantId": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Tenantid"
           },
           "type": {
             "default": "amendment",
@@ -191832,7 +191779,7 @@
         ]
       },
       "post": {
-        "description": "Amendment anlegen und zurückgeben (camelCase).",
+        "description": "Amendment anlegen und zurückgeben (camelCase).\n\nMandant und Urheber aus der Anmeldung; bis 28.10.2026 kamen sie aus dem Rumpf (``tenantId``, ``createdBy``), und\nder Vertrag wurde nicht darauf geprueft, ob er dem Mandanten gehoert.",
         "operationId": "create_amendment_api_contracts__contract_id__amendments_post",
         "parameters": [
           {
@@ -196170,18 +196117,6 @@
       "get": {
         "description": "Listet alle Nummernkreise eines Mandanten auf.",
         "operationId": "list_number_series_api_numbering_series_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "default",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -196196,16 +196131,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -196275,16 +196200,6 @@
             "required": true,
             "schema": {
               "title": "Domain",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "default",
-              "title": "Tenant Id",
               "type": "string"
             }
           },
@@ -210632,24 +210547,6 @@
         "operationId": "list_duenger_api_v1_agrar_duenger__get",
         "parameters": [
           {
-            "description": "Filter by tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter by tenant ID",
-              "title": "Tenant Id"
-            }
-          },
-          {
             "description": "Search in name, article number, manufacturer",
             "in": "query",
             "name": "search",
@@ -210803,24 +210700,6 @@
       "post": {
         "description": "Create a new Dünger.",
         "operationId": "create_duenger_api_v1_agrar_duenger__post",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -210895,22 +210774,6 @@
               "title": "Limit",
               "type": "integer"
             }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
           }
         ],
         "responses": {
@@ -210955,24 +210818,6 @@
       "get": {
         "description": "Get Dünger statistics overview.",
         "operationId": "get_duenger_stats_api_v1_agrar_duenger_stats_overview_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -210981,16 +210826,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -211017,22 +210852,6 @@
             "schema": {
               "title": "Duenger Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
             }
           }
         ],
@@ -211073,22 +210892,6 @@
             "schema": {
               "title": "Duenger Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
             }
           }
         ],
@@ -211136,22 +210939,6 @@
             "schema": {
               "title": "Duenger Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
             }
           }
         ],
@@ -211209,22 +210996,6 @@
             "schema": {
               "title": "Duenger Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
             }
           }
         ],
@@ -228913,24 +228684,6 @@
         "operationId": "list_saatgut_api_v1_agrar_saatgut__get",
         "parameters": [
           {
-            "description": "Filter by tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter by tenant ID",
-              "title": "Tenant Id"
-            }
-          },
-          {
             "description": "Search in name, article number, variety",
             "in": "query",
             "name": "search",
@@ -229102,24 +228855,6 @@
       "post": {
         "description": "Create a new Saatgut.",
         "operationId": "create_saatgut_api_v1_agrar_saatgut__post",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -229194,22 +228929,6 @@
               "title": "Limit",
               "type": "integer"
             }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
           }
         ],
         "responses": {
@@ -229254,24 +228973,6 @@
       "get": {
         "description": "Get Saatgut statistics overview.",
         "operationId": "get_saatgut_stats_api_v1_agrar_saatgut_stats_overview_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -229280,16 +228981,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -229316,22 +229007,6 @@
             "schema": {
               "title": "Saatgut Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
             }
           }
         ],
@@ -229372,22 +229047,6 @@
             "schema": {
               "title": "Saatgut Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
             }
           }
         ],
@@ -229435,22 +229094,6 @@
             "schema": {
               "title": "Saatgut Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
             }
           }
         ],
@@ -229508,22 +229151,6 @@
             "schema": {
               "title": "Saatgut Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
             }
           }
         ],
@@ -244083,24 +243710,6 @@
     "/api/v1/channels/knowledge-graph": {
       "get": {
         "operationId": "get_knowledge_graph_api_v1_channels_knowledge_graph_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -244111,16 +243720,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -244146,22 +243745,6 @@
             "schema": {
               "title": "Node Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
             }
           }
         ],
@@ -244718,22 +244301,6 @@
           },
           {
             "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          },
-          {
-            "in": "query",
             "name": "status",
             "required": false,
             "schema": {
@@ -244983,6 +244550,7 @@
     },
     "/api/v1/channels/{channel}/process-actions/{thread_id}/decision": {
       "post": {
+        "description": "Freigabe oder Ablehnung. Bis 28.10.2026 kamen Entscheider und Freigaberolle aus dem Rumpf: jeder konnte sich\njede Rolle zuschreiben und unter fremdem Namen entscheiden, auch ueber Threads anderer Mandanten.",
         "operationId": "channel_process_decision_api_v1_channels__channel__process_actions__thread_id__decision_post",
         "parameters": [
           {
@@ -248101,11 +247669,11 @@
     },
     "/api/v1/compliance/ustva": {
       "get": {
-        "description": "UStVA-Bereitschaftsstatus — aggregiert aus gebuchten Journal-Einträgen der Periode.",
+        "description": "UStVA-Stand des Zeitraums: Zahlen aus dem Hauptbuch (``app.finance.ustva``), Uebermittlung aus der Anmeldung.\n\nBis 27.10.2026 stand hier ``EINGEREICHT``, sobald der Zeitraum keine Buchungsentwuerfe hatte — ohne dass\nirgendetwas uebermittelt war; der Mandant kam aus ``?tenant_id=`` mit ``default`` als Rueckfall, und ein\nLesefehler wurde zu Nullen. Uebermittelt ist jetzt nur, was mit ELSTER-Transferticket festgehalten ist.",
         "operationId": "get_ustva_status_api_v1_compliance_ustva_get",
         "parameters": [
           {
-            "description": "Meldezeitraum z.B. 2026-03",
+            "description": "Meldezeitraum z.B. 2026-03 oder 2026-Q1",
             "in": "query",
             "name": "periode",
             "required": false,
@@ -248118,7 +247686,7 @@
                   "type": "null"
                 }
               ],
-              "description": "Meldezeitraum z.B. 2026-03",
+              "description": "Meldezeitraum z.B. 2026-03 oder 2026-Q1",
               "title": "Periode"
             }
           }
@@ -250019,22 +249587,6 @@
               "title": "Periode",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "responses": {
@@ -250082,22 +249634,6 @@
             "schema": {
               "title": "Periode",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -250351,24 +249887,6 @@
     "/api/v1/controlling/budgets": {
       "post": {
         "operationId": "create_budget_api_v1_controlling_budgets_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -250424,22 +249942,6 @@
             "schema": {
               "title": "Budget Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -250783,24 +250285,6 @@
     "/api/v1/controlling/ist-werte": {
       "post": {
         "operationId": "buche_ist_wert_api_v1_controlling_ist_werte_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -250856,22 +250340,6 @@
             "schema": {
               "title": "Kostenstelle Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -260583,24 +260051,6 @@
       "get": {
         "operationId": "list_customers_api_v1_crm_customers__get",
         "parameters": [
-          {
-            "description": "Filter by tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter by tenant ID",
-              "title": "Tenant Id"
-            }
-          },
           {
             "description": "Number of items to skip",
             "in": "query",
@@ -270470,18 +269920,6 @@
       "get": {
         "description": "Lead source analysis with conversion rates.",
         "operationId": "get_lead_sources_report_api_v1_crm_reports_lead_sources_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "00000000-0000-0000-0000-000000000001",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -270496,16 +269934,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -270526,18 +269954,6 @@
       "get": {
         "description": "Pipeline funnel with stage distribution and conversion rates.",
         "operationId": "get_pipeline_funnel_report_api_v1_crm_reports_pipeline_funnel_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "00000000-0000-0000-0000-000000000001",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -270548,16 +269964,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -270611,16 +270017,6 @@
                 }
               ],
               "title": "Period To"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "00000000-0000-0000-0000-000000000001",
-              "title": "Tenant Id",
-              "type": "string"
             }
           }
         ],
@@ -278249,17 +277645,6 @@
     "/api/v1/edi/partner": {
       "get": {
         "operationId": "list_partner_api_v1_edi_partner_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": true,
-            "schema": {
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -278274,16 +277659,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -300962,7 +300337,7 @@
     },
     "/api/v1/finance/creditors/{creditor_id}/balance": {
       "get": {
-        "description": "OP-Saldo eines Kreditors: offener Betrag, Anzahl OPs, ältester OP.",
+        "description": "OP-Saldo eines Kreditors: offener Betrag, Anzahl OPs, ältester OP.\n\nBis 28.10.2026 las die Abfrage ``amount``, ``paid_amount`` und ``status`` — Spalten, die\n``offene_posten`` nicht hat; jeder Aufruf endete mit 500.",
         "operationId": "get_creditor_balance_api_v1_finance_creditors__creditor_id__balance_get",
         "parameters": [
           {
@@ -302055,7 +301430,7 @@
     },
     "/api/v1/finance/debtors/{debtor_id}/balance": {
       "get": {
-        "description": "OP-Saldo eines Debitors: offener Betrag, Anzahl OPs, ältester OP.",
+        "description": "OP-Saldo eines Debitors: offener Betrag, Anzahl OPs, ältester OP.\n\nBis 28.10.2026 las die Abfrage ``amount``, ``paid_amount`` und ``status`` — Spalten, die\n``offene_posten`` nicht hat; jeder Aufruf endete mit 500. Die OP-Schreiber setzen den\nKunden (``kunde_id``), nicht den Debitor; beide Verweise zaehlen.",
         "operationId": "get_debtor_balance_api_v1_finance_debtors__debtor_id__balance_get",
         "parameters": [
           {
@@ -307263,22 +306638,6 @@
               "title": "Rechnungsnr",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "requestBody": {
@@ -307338,22 +306697,6 @@
             "schema": {
               "title": "Rechnungsnr",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -309918,24 +309261,6 @@
     "/api/v1/finance/ratenzahlung/plaene": {
       "post": {
         "operationId": "create_ratenzahlungsplan_endpoint_api_v1_finance_ratenzahlung_plaene_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -309993,22 +309318,6 @@
             "schema": {
               "title": "Rate Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -310385,24 +309694,6 @@
     "/api/v1/finance/sepa/batches": {
       "post": {
         "operationId": "create_sepa_batch_endpoint_api_v1_finance_sepa_batches_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -310452,24 +309743,6 @@
     "/api/v1/finance/sepa/mandate": {
       "post": {
         "operationId": "create_sepa_mandat_endpoint_api_v1_finance_sepa_mandate_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -310527,22 +309800,6 @@
             "schema": {
               "title": "Mandat Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -311463,7 +310720,7 @@
     },
     "/api/v1/finance/vat-return": {
       "get": {
-        "description": "List all VAT returns.",
+        "description": "Anmeldungen des Mandanten, neueste zuerst (Vorgabe 120 = zehn Jahre Monatsmeldungen). Lesefehler: 503.",
         "operationId": "list_vat_returns_api_v1_finance_vat_return_get",
         "parameters": [
           {
@@ -311482,6 +310739,20 @@
               ],
               "description": "Filter by period (YYYY-MM)",
               "title": "Period"
+            }
+          },
+          {
+            "description": "Hoechstens so viele Anmeldungen (neueste zuerst)",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 120,
+              "description": "Hoechstens so viele Anmeldungen (neueste zuerst)",
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
             }
           }
         ],
@@ -311529,7 +310800,7 @@
     },
     "/api/v1/finance/vat-return/calculate": {
       "post": {
-        "description": "Calculate VAT return from journal entries for a period.",
+        "description": "Anmeldung aus dem Hauptbuch anlegen. Mit offenen Klaerungen wird nichts angelegt (422).",
         "operationId": "calculate_vat_return_api_v1_finance_vat_return_calculate_post",
         "requestBody": {
           "content": {
@@ -311581,7 +310852,7 @@
     },
     "/api/v1/finance/vat-return/export/{return_id}": {
       "get": {
-        "description": "Download VAT return export (ELSTER XML). Alias for /{return_id}/elster-xml.",
+        "description": "Alias fuer /{return_id}/elster-xml.",
         "operationId": "export_vat_return_download_api_v1_finance_vat_return_export__return_id__get",
         "parameters": [
           {
@@ -311634,7 +310905,7 @@
     },
     "/api/v1/finance/vat-return/vorberechnung": {
       "get": {
-        "description": "Vorberechnung der UStVA aus gebuchten Journaleinträgen.\nGibt aggregierte Beträge zurück, ohne einen VAT-Return anzulegen.",
+        "description": "Vorberechnung der UStVA aus dem Hauptbuch, ohne eine Anmeldung anzulegen. Ein Lesefehler ist 503, keine Null.",
         "operationId": "vorberechnung_ustva_api_v1_finance_vat_return_vorberechnung_get",
         "parameters": [
           {
@@ -311689,7 +310960,6 @@
     },
     "/api/v1/finance/vat-return/{return_id}": {
       "get": {
-        "description": "Get a VAT return by ID.",
         "operationId": "get_vat_return_api_v1_finance_vat_return__return_id__get",
         "parameters": [
           {
@@ -311742,6 +311012,7 @@
     },
     "/api/v1/finance/vat-return/{return_id}/approve": {
       "post": {
+        "description": "Freigabe einer geprueften Anmeldung. Hat sich das Hauptbuch seit der Pruefung geaendert: 409.",
         "operationId": "approve_vat_return_api_v1_finance_vat_return__return_id__approve_post",
         "parameters": [
           {
@@ -311754,16 +311025,6 @@
             }
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/VATReturnApprovalRequest"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "content": {
@@ -311804,7 +311065,7 @@
     },
     "/api/v1/finance/vat-return/{return_id}/elster-xml": {
       "get": {
-        "description": "Export VAT return as ELSTER XML (Anmeldungssteuern, UStVA).\nFormat nach offiziellem ERiC-Schema, Encoding ISO-8859-15.\nReferenz: https://www.elster.de, JuryOberst/Elster (GitHub).",
+        "description": "Kennzahlen der Anmeldung als XML (Datenaustausch, z. B. Steuerberatung) — keine signierte ERiC-Uebermittlung.",
         "operationId": "export_elster_xml_api_v1_finance_vat_return__return_id__elster_xml_get",
         "parameters": [
           {
@@ -311857,6 +311118,7 @@
     },
     "/api/v1/finance/vat-return/{return_id}/submit": {
       "post": {
+        "description": "Haelt die im ELSTER-Portal erfolgte Uebermittlung mit ihrem Transferticket fest. Uebermittelt selbst nichts.",
         "operationId": "submit_vat_return_api_v1_finance_vat_return__return_id__submit_post",
         "parameters": [
           {
@@ -311919,7 +311181,7 @@
     },
     "/api/v1/finance/vat-return/{return_id}/validate": {
       "post": {
-        "description": "Validate VAT return against GL totals.",
+        "description": "Anmeldung gegen das aktuelle Hauptbuch pruefen. Gueltig nur ohne Abweichung, Klaerung und offene Entwuerfe.",
         "operationId": "validate_vat_return_api_v1_finance_vat_return__return_id__validate_post",
         "parameters": [
           {
@@ -341152,24 +340414,6 @@
       "post": {
         "description": "Frachtkosten berechnen (mit Buchung / Logging).",
         "operationId": "calculate_freight_api_v1_logistik_freight_cost_calculate_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -341218,26 +340462,8 @@
     },
     "/api/v1/logistik/freight-cost/carrier-invoice": {
       "post": {
-        "description": "Erfasst Spediteur-Eingangsrechnung, verknüpft sie mit der Tour und bucht ins Hauptbuch.",
+        "description": "Erfasst Spediteur-Eingangsrechnung, verknüpft sie mit der Tour und bucht ins Hauptbuch.\n\nBis 28.10.2026: Eine doppelte Rechnungsnummer wurde still verworfen (``ON CONFLICT DO NOTHING``), gebucht wurde\ntrotzdem, und die Antwort meldete eine Rechnung, die es nicht gab; die Tour wurde nicht auf den Mandanten\ngeprueft; ein Buchungsfehler liess die Transaktion abgebrochen zurueck. Jetzt: 404 fuer eine fremde Tour, 409 fuer\neine vorhandene Nummer, der Buchungsentwurf in einem eigenen Savepoint (scheitert er, bleibt die Rechnung ``offen``).\nGemeldet wurde ``gebucht``, angelegt war nur ein Buchungsentwurf; der Status heisst jetzt ``entwurf``.",
         "operationId": "create_carrier_invoice_api_v1_logistik_freight_cost_carrier_invoice_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -341332,22 +340558,6 @@
               "title": "Limit",
               "type": "integer"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "responses": {
@@ -341435,22 +340645,6 @@
               "title": "Postal Code To",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "responses": {
@@ -341491,7 +340685,7 @@
     },
     "/api/v1/logistik/freight-tariffs": {
       "get": {
-        "description": "Tarif-Liste, optional nach Spediteur gefiltert.\n\nOhne ``X-Tenant-ID``: nur globale Tarife (``tenant_id IS NULL``).\nMit Header: eigener Mandant plus globale Tarife.",
+        "description": "Tarif-Liste des Mandanten, optional nach Spediteur gefiltert.",
         "operationId": "list_tariffs_api_v1_logistik_freight_tariffs_get",
         "parameters": [
           {
@@ -341508,22 +340702,6 @@
                 }
               ],
               "title": "Carrier Id"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -341569,24 +340747,6 @@
       "post": {
         "description": "Neuen Frachttarif anlegen.",
         "operationId": "create_tariff_api_v1_logistik_freight_tariffs_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -341635,7 +340795,7 @@
     },
     "/api/v1/logistik/freight-tariffs/{tariff_id}/cancel": {
       "post": {
-        "description": "Tarifzeile auf STORNIERT setzen; globale Tarife (``tenant_id IS NULL``) sind geschuetzt.",
+        "description": "Tarifzeile des Mandanten auf STORNIERT setzen.",
         "operationId": "cancel_tariff_api_v1_logistik_freight_tariffs__tariff_id__cancel_post",
         "parameters": [
           {
@@ -341645,22 +340805,6 @@
             "schema": {
               "title": "Tariff Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -341725,22 +340869,6 @@
               "minLength": 1,
               "title": "Ref",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -341832,22 +340960,6 @@
               ],
               "title": "Vehicle Id"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "responses": {
@@ -341938,22 +341050,6 @@
               ],
               "title": "Status"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "responses": {
@@ -341998,24 +341094,6 @@
       "post": {
         "description": "Tour anlegen inkl. Stopps.",
         "operationId": "create_tour_api_v1_logistik_tours_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -342066,17 +341144,6 @@
       "post": {
         "description": "CE fuer logistik/tourenplanung:anlegen — dryRun ohne INSERT; Token-Mandant.",
         "operationId": "action_tour_anlegen_api_v1_logistik_tours_actions_anlegen_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -342139,31 +341206,15 @@
             }
           },
           {
-            "description": "Wenn true und X-Tenant-ID: pro Stopp ``delivery_note_hint`` aus domain_sales",
+            "description": "Wenn true: pro Stopp ``delivery_note_hint`` aus domain_sales",
             "in": "query",
             "name": "include_delivery_hints",
             "required": false,
             "schema": {
               "default": false,
-              "description": "Wenn true und X-Tenant-ID: pro Stopp ``delivery_note_hint`` aus domain_sales",
+              "description": "Wenn true: pro Stopp ``delivery_note_hint`` aus domain_sales",
               "title": "Include Delivery Hints",
               "type": "boolean"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -342215,22 +341266,6 @@
             "schema": {
               "title": "Tour Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -342293,22 +341328,6 @@
               "title": "Tour Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "requestBody": {
@@ -342369,22 +341388,6 @@
             "schema": {
               "title": "Tour Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -342569,22 +341572,6 @@
               "title": "Tour Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "requestBody": {
@@ -342655,22 +341642,6 @@
               "title": "Stop Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "requestBody": {
@@ -342740,22 +341711,6 @@
             "schema": {
               "title": "Stop Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -342885,22 +341840,6 @@
               "title": "Stop Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "requestBody": {
@@ -342971,22 +341910,6 @@
               "title": "Stop Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "requestBody": {
@@ -343037,7 +341960,7 @@
     },
     "/api/v1/logistik/tracking/{tour_id}": {
       "get": {
-        "description": "Öffentlicher Tracking-Link – letzte GPS-Position, aktueller Stopp, ETA.",
+        "description": "Tracking – letzte GPS-Position, aktueller Stopp, ETA.\n\nNur im eigenen Mandanten. ``share_token`` wurde angenommen, aber nie geprueft: Jeder angemeldete Nutzer konnte\njede Tour verfolgen. Ein oeffentlicher Link mit geprueftem Token ist nicht gebaut.",
         "operationId": "public_tracking_api_v1_logistik_tracking__tour_id__get",
         "parameters": [
           {
@@ -343047,22 +341970,6 @@
             "schema": {
               "title": "Tour Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "share_token",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Share Token"
             }
           }
         ],
@@ -355606,24 +354513,6 @@
         "operationId": "list_nutrient_compositions_api_v1_nutrient_compositions__get",
         "parameters": [
           {
-            "description": "Filter by tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter by tenant ID",
-              "title": "Tenant Id"
-            }
-          },
-          {
             "description": "Search in name/number",
             "in": "query",
             "name": "search",
@@ -355777,22 +354666,6 @@
               "title": "Limit",
               "type": "integer"
             }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
           }
         ],
         "responses": {
@@ -355847,22 +354720,6 @@
               "title": "Composition Id",
               "type": "string"
             }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
           }
         ],
         "responses": {
@@ -355903,22 +354760,6 @@
             "schema": {
               "title": "Composition Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
             }
           }
         ],
@@ -355967,22 +354808,6 @@
             "schema": {
               "title": "Composition Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
             }
           }
         ],
@@ -401001,18 +399826,6 @@
       "post": {
         "description": "Service-Fall abschließen.",
         "operationId": "close_service_case_api_v1_service_abschluss_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": false,
-            "schema": {
-              "default": "default",
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -401116,16 +399929,6 @@
               "title": "Limit",
               "type": "integer"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": false,
-            "schema": {
-              "default": "default",
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -401164,18 +399967,6 @@
       "post": {
         "description": "Neue Service-Anfrage anlegen.",
         "operationId": "create_anfrage_api_v1_service_anfragen_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": false,
-            "schema": {
-              "default": "default",
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -401222,7 +400013,7 @@
     },
     "/api/v1/service/anfragen/{anfrage_id}": {
       "delete": {
-        "description": "Service-Anfrage löschen.",
+        "description": "Service-Anfrage loeschen (mit ihren Rueckmeldungen).",
         "operationId": "delete_anfrage_api_v1_service_anfragen__anfrage_id__delete",
         "parameters": [
           {
@@ -401231,16 +400022,6 @@
             "required": true,
             "schema": {
               "title": "Anfrage Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": false,
-            "schema": {
-              "default": "default",
-              "title": "X-Tenant-Id",
               "type": "string"
             }
           }
@@ -401272,7 +400053,7 @@
         ]
       },
       "get": {
-        "description": "Detail einer Service-Anfrage.",
+        "description": "Detail einer Service-Anfrage mit ihren Rueckmeldungen.",
         "operationId": "get_anfrage_api_v1_service_anfragen__anfrage_id__get",
         "parameters": [
           {
@@ -401281,16 +400062,6 @@
             "required": true,
             "schema": {
               "title": "Anfrage Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": false,
-            "schema": {
-              "default": "default",
-              "title": "X-Tenant-Id",
               "type": "string"
             }
           }
@@ -401329,7 +400100,7 @@
         ]
       },
       "put": {
-        "description": "Service-Anfrage aktualisieren.",
+        "description": "Service-Anfrage aktualisieren. Eine erledigte Anfrage bleibt, wie sie abgeschlossen wurde.",
         "operationId": "update_anfrage_api_v1_service_anfragen__anfrage_id__put",
         "parameters": [
           {
@@ -401338,16 +400109,6 @@
             "required": true,
             "schema": {
               "title": "Anfrage Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": false,
-            "schema": {
-              "default": "default",
-              "title": "X-Tenant-Id",
               "type": "string"
             }
           }
@@ -401400,18 +400161,6 @@
       "post": {
         "description": "Rückmeldung zu einer Service-Anfrage erfassen.",
         "operationId": "create_rueckmeldung_api_v1_service_rueckmeldungen_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": false,
-            "schema": {
-              "default": "default",
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {

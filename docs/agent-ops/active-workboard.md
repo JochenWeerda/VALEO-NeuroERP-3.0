@@ -20347,3 +20347,15 @@ Befunde fuer eigene Auftraege (nicht in Batch 7): /foerderung/antraege, /marketi
 /preise/historie errechnet einen Preisverlauf (aktuell*(1-i*0,01)), /preise/konditionen fuellt "Standardkunde"/
 Basispreis 100 auf; /strecke/speditionen/frachttarife, /vertrag/rahmenvertraege und /tankstelle/bestand ohne
 Mandantenbezug. Darauf keine Studio-Listen, bis die Wege echt sind.
+## RLS-REST-AUF-MAIN-20261103 — in Arbeit, Claude
+
+Nutzerauftrag 03.11.2026: der nicht gemergte RLS-Rest vom 27./28.10. (PR #82, #84, #85, #88 und Vorgaenger, 17 Commits,
+177 Commits hinter main) auf den aktuellen main; Waage-Code und -Tests dabei homogen uebernehmen. Branch
+claude/rls-rest-auf-main-20261103 (Worktree), zehn inhaltliche Commits per Cherry-pick, Claim-Commits entfallen.
+Konflikte: UStVA (vollstaendige Ledger-Berechnung statt Zwischenstand), Kontonummern am Partner (Stufe 3b) plus Urheber
+aus dem Token, Debitor-Anlage bleibt im Kundenstamm (PR #93), OP-Saldo ueber OP_SALDO_SQL, convert-lead in main-Fassung.
+Waage: waage_tenant_20261030 (Codex) hatte ops_waagen nullable gebunden; jetzt WaageRepository mit Mandant im
+Konstruktor, ops_waagen NOT NULL, ops_wiegungen mit Mandant aus der Waage und Verbundschluessel, Policies je Befehl
+(waagen_wiegungen_mandant_20261103); Alt-Wiegungswege bleiben 410. Alembic: vat_return_bearbeiter_20261027 auf
+rahmenauftrag_afa_tabellen_20261102 umgehaengt, ein Kopf. Pruefung auf frischer DB ueber CI (keine eigene lokale DB,
+ungemergte Migrationen nicht auf valeo_probe). Nach dem Merge: alte PRs #82/#84/#85/#88 schliessen.

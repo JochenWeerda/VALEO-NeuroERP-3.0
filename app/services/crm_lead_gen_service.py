@@ -105,13 +105,14 @@ def lkv_candidates(db: Session, plz_min: Optional[str], plz_max: Optional[str],
     return [{**dict(r), "quelle": "lkv", "score_label": "Milch kg/Kuh"} for r in rows]
 
 
-_DEFAULT_TENANT = "00000000-0000-0000-0000-000000000001"
 
 
 class CrmLeadGenService:
     def __init__(self, db: Session, tenant_id: Optional[str] = None) -> None:
         self.db = db
-        self.tenant_id = tenant_id or _DEFAULT_TENANT
+        if not tenant_id:  # kein Rueckfall auf den Standardmandanten (bis 28.10.2026)
+            raise ValueError("Mandant fehlt")
+        self.tenant_id = tenant_id
 
     def preview(self, *, quelle: str = "gap", plz_min: Optional[str] = None,
                 plz_max: Optional[str] = None, top_pct: float = 0.10,

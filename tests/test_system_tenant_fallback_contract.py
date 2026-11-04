@@ -28,23 +28,9 @@ CODE_ROOTS = ("app", "modules")
 NAMES = {"tenant_id", "x_tenant_id", "x_tenant", "mandant_id", "mandanten_id", "tenant"}
 LITERALS = ("system", "default")
 
-# Stand 27.10.2026; nur verkleinern. Neue Eintraege sind ein Rueckfall, kein Ausnahmefall.
-DEFAULT_BASELINE = {
-    "app/api/v1/endpoints/controlling_actions.py": 6,
-    "app/api/v1/endpoints/edi_api.py": 1,
-    "app/api/v1/endpoints/ernte_planung.py": 1,
-    "app/api/v1/endpoints/finance_actions.py": 7,
-    "app/api/v1/endpoints/service_anfragen.py": 7,
-    "app/api/v1/endpoints/projekte.py": 2,
-    "app/api/v1/endpoints/tankstelle.py": 1,
-    "app/api/v1/endpoints/verladung.py": 1,
-    "app/api/v1/endpoints/versicherungen.py": 1,
-    "app/api/v1/endpoints/wartung.py": 2,
-    "app/api/v1/schemas/agents_schemas.py": 1,
-    "app/routers/numbering_router.py": 4,
-    "app/services/atlas_customs_service.py": 1,
-    "app/services/numbering_service_pg.py": 3,
-}
+# Stand 27.10.2026: alle 43 eingefrorenen Rueckfaelle abgebaut (TENANT-FALLBACK-ABBAU-20261027). Die Liste bleibt
+# leer; ein neuer Eintrag ist ein Rueckfall, kein Ausnahmefall.
+DEFAULT_BASELINE: dict[str, int] = {}
 
 
 def _literal(node) -> str | None:
@@ -136,3 +122,53 @@ def test_gemeinsamer_mandant_ist_benannt():
 
     assert SHARED_TENANT_ID == "system"
     assert {o.tenant_id for o in _default_knowledge_objects()} == {SHARED_TENANT_ID}
+
+
+# --- Zweite und dritte Form: Standardmandant aus der Konfiguration oder als feste UUID ---------------------------
+# Bis 28.10.2026 fielen ueber 60 Stellen nicht ueber das Literal "default", sondern ueber settings.DEFAULT_TENANT_ID
+# (``tenant_id or DEFAULT_TENANT``, ``Query(DEFAULT_TENANT)``) oder eine fest eingetragene UUID
+# (``tenant_id or _DEFAULT_TENANT``) auf den Standardmandanten zurueck — fuer das Muster oben unsichtbar.
+STANDARD_UUID = "00000000-0000-0000-0000-000000000001"
+STANDARD_ERLAUBT = {
+    "app/core/config.py": "Definition der Einstellung",
+    "app/core/fibu_audit.py": "Systemnutzer als Urheber von Hintergrundlaeufen, kein Mandant",
+    "app/middleware/tenant_enforcement.py": "nur im Dev-Modus (API_DEV_TOKEN)",
+    "app/core/inventory_permissions.py": "nur fuer das Dev-Token",
+    "app/seeds/inventory_seed.py": "Seed fuer die Entwicklungsdatenbank",
+    "app/api/v1/endpoints/reklamation_api.py": "Vergleich, kein Rueckfall (Codex-Claim Reklamation)",
+    # Nicht eingebunden (kein Import in app/): toter Code, Aufraeumen ist ein eigener Slice.
+    "app/security/audit_service.py": "nicht eingebunden",
+    "app/security/compliance_monitor.py": "nicht eingebunden",
+    "app/security/encryption_service.py": "nicht eingebunden",
+    "app/security/incident_response.py": "nicht eingebunden",
+    "app/quality/quality_assurance.py": "nicht eingebunden",
+}
+
+
+def _standard_stellen(source: str) -> list[int]:
+    lines = []
+    tree = ast.parse(source)
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Attribute) and node.attr == "DEFAULT_TENANT_ID":
+            lines.append(node.lineno)
+        elif isinstance(node, ast.Constant) and node.value == STANDARD_UUID:
+            lines.append(node.lineno)
+    return sorted(set(lines))
+
+
+def test_kein_standardmandant_aus_konfiguration_oder_uuid():
+    funde = {}
+    for root in CODE_ROOTS:
+        for path in sorted((ROOT / root).rglob("*.py")):
+            rel = path.relative_to(ROOT).as_posix()
+            if "/tests/" in rel or "__pycache__" in rel or rel in STANDARD_ERLAUBT:
+                continue
+            stellen = _standard_stellen(path.read_text(encoding="utf-8-sig", errors="replace"))
+            if stellen:
+                funde[rel] = stellen
+    assert not funde, f"Standardmandant als Rueckfall: {funde}"
+
+
+def test_standard_muster_selbsttest():
+    quelle = 'x = tenant_id or settings.DEFAULT_TENANT_ID\n_D = "00000000-0000-0000-0000-000000000001"\n"""Doku: DEFAULT_TENANT_ID"""\n'
+    assert _standard_stellen(quelle) == [1, 2]

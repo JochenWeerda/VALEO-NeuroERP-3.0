@@ -2,12 +2,12 @@
  "_note": "Generiert von scripts/rls_rollout.py aus docs/admin/rls-inventory.json; nicht von Hand aendern.",
  "summary": {
   "ready": 0,
-  "pending": 42,
+  "pending": 35,
   "reasons": {
    "dienst": 9,
    "mandant_ermitteln": 1,
-   "standardmandant": 24,
-   "mandant_null": 18,
+   "standardmandant": 19,
+   "mandant_null": 16,
    "uebergreifend": 0,
    "identitaet": 4
   }
@@ -45,9 +45,6 @@
   "domain_agrar.feldbuch_schlaege": [
    "standardmandant"
   ],
-  "domain_agrar.nutrient_compositions": [
-   "standardmandant"
-  ],
   "domain_agrar.seed_orders": [
    "standardmandant"
   ],
@@ -61,17 +58,8 @@
   "domain_dev_mock.mock_sessions": [
    "identitaet"
   ],
-  "domain_erp.dunning_notices": [
-   "mandant_null"
-  ],
-  "domain_erp.gift_cards": [
-   "standardmandant"
-  ],
   "domain_erp.offene_posten": [
    "mandant_null",
-   "standardmandant"
-  ],
-  "domain_erp.open_items": [
    "standardmandant"
   ],
   "domain_inventory.agrar_contracts": [
@@ -104,21 +92,12 @@
    "dienst",
    "mandant_null"
   ],
-  "domain_logistics.carrier_invoices": [
-   "mandant_null"
-  ],
-  "domain_ops.kon_contract": [
-   "standardmandant"
-  ],
   "domain_ops.ops_chargen": [
    "dienst",
    "standardmandant"
   ],
   "domain_ops.ops_fahrzeuge": [
    "mandant_null"
-  ],
-  "domain_ops.ops_pcn_meldungen": [
-   "standardmandant"
   ],
   "domain_ops.reklamationen": [
    "standardmandant"

@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.tenant import get_tenant_id
 from app.core.edi_integration import (
     EdiNachrichtenTyp,
     EdiVerarbeitungsStatus,
@@ -29,19 +30,17 @@ class EdiNachrichtEmpfangRequest(BaseModel):
     empfaenger_gln: str
     interchange_control_ref: str
     payload_raw: str
-    tenant_id: str = "default"
 
 
 class EdiPartnerCreateRequest(BaseModel):
     gln: str
     name: str
-    tenant_id: str
     aktive_nachrichtentypen: list[str]
 
 
 @router.post("/nachrichten", status_code=201, summary="Nachricht empfange",
     response_model=EdiApiOut, dependencies=SCHREIBEN["EINKAUF"])
-def empfange_nachricht(req: EdiNachrichtEmpfangRequest, db: Session = Depends(get_db)):
+def empfange_nachricht(req: EdiNachrichtEmpfangRequest, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     typ = EdiNachrichtenTyp(req.typ)
     ergebnis = parse_edi_nachricht(req.payload_raw, typ)
     row = EdiNachrichtDB(
@@ -55,7 +54,7 @@ def empfange_nachricht(req: EdiNachrichtEmpfangRequest, db: Session = Depends(ge
         status=EdiVerarbeitungsStatus.VERARBEITET.value if ergebnis.success else EdiVerarbeitungsStatus.FEHLER.value,
         fehler_beschreibung=ergebnis.fehler_beschreibung,
         dokument_id=ergebnis.dokument_id,
-        tenant_id=req.tenant_id,
+        tenant_id=tenant_id,
     )
     db.add(row)
     db.commit()
@@ -65,8 +64,8 @@ def empfange_nachricht(req: EdiNachrichtEmpfangRequest, db: Session = Depends(ge
 @router.get("/nachrichten/offene", summary="Offene nachrichten abrufen",
     response_model=list[EdiApiOut]
 )
-def get_offene_nachrichten(empfaenger_gln: str, db: Session = Depends(get_db)):
-    rows = db.query(EdiNachrichtDB).filter(
+def get_offene_nachrichten(empfaenger_gln: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    rows = db.query(EdiNachrichtDB).filter(EdiNachrichtDB.tenant_id == tenant_id).filter(
         EdiNachrichtDB.empfaenger_gln == empfaenger_gln,
         EdiNachrichtDB.status == EdiVerarbeitungsStatus.ERHALTEN.value,
     ).all()
@@ -84,13 +83,13 @@ def get_offene_nachrichten(empfaenger_gln: str, db: Session = Depends(get_db)):
 
 @router.post("/partner", status_code=201, summary="Partner anlegen",
     response_model=EdiApiOut, dependencies=SCHREIBEN["EINKAUF"])
-def create_partner(req: EdiPartnerCreateRequest, db: Session = Depends(get_db)):
+def create_partner(req: EdiPartnerCreateRequest, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     pid = str(uuid.uuid4())
     row = EdiPartnerDB(
         partner_id=pid,
         gln=req.gln,
         name=req.name,
-        tenant_id=req.tenant_id,
+        tenant_id=tenant_id,
         aktive_nachrichtentypen=req.aktive_nachrichtentypen,
     )
     db.add(row)
@@ -102,6 +101,6 @@ def create_partner(req: EdiPartnerCreateRequest, db: Session = Depends(get_db)):
 @router.get("/partner", summary="Partner auflisten",
     response_model=list[EdiApiOut]
 )
-def list_partner(tenant_id: str, db: Session = Depends(get_db)):
+def list_partner(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     rows = db.query(EdiPartnerDB).filter(EdiPartnerDB.tenant_id == tenant_id).all()
     return [{"partner_id": r.partner_id, "gln": r.gln, "name": r.name, "aktive_nachrichtentypen": r.aktive_nachrichtentypen} for r in rows]

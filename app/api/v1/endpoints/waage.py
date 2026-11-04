@@ -164,13 +164,13 @@ def _to_list(models: List[Any]) -> List[dict]:
 
 @router.get("/waagen", response_model=list[WaageOut], summary="Waagen auflisten")
 async def list_waagen(skip: int = Query(0, ge=0), limit: int = Query(100, ge=1, le=1000), status: Optional[str] = None, db: Session = Depends(get_db), tenant_id: str = Depends(get_verified_tenant_id)):
-    repo = WaageRepository(db)
-    return _to_list(repo.get_by_status(tenant_id, status, skip=skip, limit=limit) if status else repo.get_all(tenant_id, skip=skip, limit=limit))
+    repo = WaageRepository(db, tenant_id)
+    return _to_list(repo.get_by_status(status, skip=skip, limit=limit) if status else repo.get_all(skip=skip, limit=limit))
 
 
 @router.get("/waagen/{waage_id}", response_model=WaageOut, summary="Waage abrufen")
 async def get_waage(waage_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_verified_tenant_id)):
-    waage = WaageRepository(db).get_by_id(tenant_id, waage_id)
+    waage = WaageRepository(db, tenant_id).get_by_id(waage_id)
     if waage is None:
         raise HTTPException(status_code=404, detail="Waage nicht gefunden")
     return _to_dict(waage)
@@ -178,7 +178,7 @@ async def get_waage(waage_id: str, db: Session = Depends(get_db), tenant_id: str
 
 @router.post("/waagen", response_model=WaageOut, status_code=201, summary="Waage anlegen", dependencies=SCHREIBEN["LAGER"])
 async def create_waage(waage_data: WaageCreate, db: Session = Depends(get_db), tenant_id: str = Depends(get_verified_tenant_id)):
-    return _to_dict(WaageRepository(db).create(tenant_id, waage_data.model_dump(exclude_none=True)))
+    return _to_dict(WaageRepository(db, tenant_id).create(waage_data.model_dump(exclude_none=True)))
 
 
 @router.patch("/waagen/{waage_id}", response_model=WaageOut, summary="Waage aktualisieren", dependencies=SCHREIBEN["LAGER"])
@@ -186,7 +186,7 @@ async def update_waage(waage_id: str, waage_data: WaageUpdate, db: Session = Dep
     payload = waage_data.model_dump(exclude_unset=True)
     if any(k in payload and payload[k] is None for k in ("standort", "typ", "max_kapazitaet")):
         raise HTTPException(status_code=422, detail="Pflichtfelder duerfen nicht leer sein")
-    waage = WaageRepository(db).update(tenant_id, waage_id, payload)
+    waage = WaageRepository(db, tenant_id).update(waage_id, payload)
     if waage is None:
         raise HTTPException(status_code=404, detail="Waage nicht gefunden")
     return _to_dict(waage)
@@ -195,7 +195,7 @@ async def update_waage(waage_id: str, waage_data: WaageUpdate, db: Session = Dep
 @router.delete("/waagen/{waage_id}", status_code=204, response_class=Response, response_model=None, summary="Waage loeschen", dependencies=SCHREIBEN["LAGER"])
 async def delete_waage(waage_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_verified_tenant_id)):
     try:
-        deleted = WaageRepository(db).delete(tenant_id, waage_id)
+        deleted = WaageRepository(db, tenant_id).delete(waage_id)
     except ValueError as exc:
         raise HTTPException(status_code=409, detail="Waage hat bestehende Wiegungen") from exc
     if not deleted:
@@ -270,7 +270,7 @@ def _parse_q_line(parts: List[str]) -> Dict[str, Any]:
 @router.post("/waagen/import/ascii", response_model=None, summary="ASCII-Wiegescheine importieren", dependencies=SCHREIBEN["LAGER"])
 async def import_ascii(file: UploadFile, waage_id: str = Form(...), fehler_toleranz: bool = Form(True),
                        db: Session = Depends(get_db), tenant_id: str = Depends(get_verified_tenant_id), user: dict = Depends(get_current_user)):
-    if WaageRepository(db).get_by_id(tenant_id, waage_id) is None:
+    if WaageRepository(db, tenant_id).get_by_id(waage_id) is None:
         raise HTTPException(status_code=404, detail="Waage nicht gefunden")
     data = await file.read(1048577)
     if len(data) > 1048576:
@@ -351,7 +351,7 @@ def _calibration_response(scale):
 
 @router.get("/waagen/{waage_id}/kalibrierung", response_model=WaageOut, summary="Kalibrierung abrufen")
 async def get_kalibrierung(waage_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_verified_tenant_id)):
-    scale = WaageRepository(db).get_by_id(tenant_id, waage_id)
+    scale = WaageRepository(db, tenant_id).get_by_id(waage_id)
     if scale is None:
         raise HTTPException(status_code=404, detail="Waage nicht gefunden")
     return _calibration_response(scale)

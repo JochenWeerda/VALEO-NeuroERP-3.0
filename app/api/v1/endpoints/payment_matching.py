@@ -433,7 +433,13 @@ def _apply_bank_line_match(db: Session, tenant_id: str, line: dict, op_id: str,
     # Identity comes from verified claims attached by the security dependency,
     # never from an unverified X-User-ID header.
     claims = getattr(request.state, 'token_claims', {}) if request is not None else {}
-    actor = claims.get('sub') or '00000000-0000-0000-0000-000000000001'
+    if request is None:  # Hintergrundabgleich ohne Anmeldung: der benannte Systemnutzer
+        from app.core.fibu_audit import SYSTEM_USER_ID
+        actor = SYSTEM_USER_ID
+    else:  # bis 28.10.2026 wurde ohne geprueften Bearbeiter still die Standard-UUID eingetragen
+        actor = claims.get('sub')
+        if not actor:
+            raise HTTPException(status_code=403, detail='Gepruefter Bearbeiter fehlt')
     db.execute(text("""
         INSERT INTO domain_shared.audit_logs
         (id,user_id,user_email,tenant_id,action,entity_type,entity_id,changes)

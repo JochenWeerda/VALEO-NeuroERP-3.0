@@ -76,7 +76,6 @@ class InteressentOut(BaseModel):
 
 
 
-DEFAULT_TENANT = "00000000-0000-0000-0000-000000000001"
 
 
 def _svc(db: Session, tenant_id: str) -> CustomerService:
@@ -122,13 +121,13 @@ async def create_customer(
 
 @router.get("/", response_model=PaginatedResponse[Customer], summary="Customers auflisten")
 async def list_customers(
-    tenant_id: Optional[str] = Query(None, description="Filter by tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     skip: int = Query(0, ge=0, description="Number of items to skip"),
     limit: int = Query(50, ge=1, le=200, description="Maximum number of items to return"),
     search: Optional[str] = Query(None, description="Search in display name"),
     db: Session = Depends(get_db),
 ) -> PaginatedResponse[Customer]:
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
     items_raw, total = await _svc(db, effective_tenant).list_customers(skip=skip, limit=limit, search=search)
     items = [Customer.model_validate(d) for d in items_raw]
     pages = ceil(total / limit) if total else 1
@@ -158,7 +157,7 @@ def quick_search_customers(
     danach Trigram-Ähnlichkeit. Nutzt pg_trgm GIN-Indizes
     (siehe Migration crm_customers_search_index_20260414).
     """
-    return _svc(db, tenant_id or DEFAULT_TENANT).quick_search(q or "", limit=limit)
+    return _svc(db, tenant_id).quick_search(q or "", limit=limit)
 
 
 @router.get("/recent", summary="Customers recent",
@@ -170,7 +169,7 @@ def recent_customers(
     tenant_id: str = Depends(get_tenant_id),
 ) -> list[dict[str, Any]]:
     """Zuletzt aktualisierte Kunden des Mandanten — MVP-Prefetch fuer die Combobox."""
-    return _svc(db, tenant_id or DEFAULT_TENANT).recent(limit=limit)
+    return _svc(db, tenant_id).recent(limit=limit)
 
 
 class KundenLookupItem(BaseSchema):
@@ -200,7 +199,7 @@ def customer_lookup(
     """Schmale Such-/Listen-Auswahl aus der kunden_lookup-View; Detaildaten on-demand."""
     from ....services.business_partner_service import BusinessPartnerService
 
-    return BusinessPartnerService(db, tenant_id or DEFAULT_TENANT).search_lookup(q, limit)
+    return BusinessPartnerService(db, tenant_id).search_lookup(q, limit)
 
 
 class KundenDetail(BaseSchema):
@@ -230,7 +229,7 @@ def customer_lookup_detail(
     """
     from ....services.business_partner_service import BusinessPartnerService
 
-    return BusinessPartnerService(db, tenant_id or DEFAULT_TENANT).get_customer_detail(kunden_nr)
+    return BusinessPartnerService(db, tenant_id).get_customer_detail(kunden_nr)
 
 
 class KundenIdentitaet(BaseSchema):
@@ -263,7 +262,7 @@ def customer_identity_resolve(
         raise HTTPException(status_code=400, detail="Mindestens ein Schlüssel erforderlich.")
     from ....services.business_partner_service import BusinessPartnerService
 
-    return BusinessPartnerService(db, tenant_id or DEFAULT_TENANT).resolve_customer_identity(
+    return BusinessPartnerService(db, tenant_id).resolve_customer_identity(
         kunden_nr=kunden_nr,
         business_partner_id=business_partner_id,
         crm_customer_id=crm_customer_id,
@@ -288,7 +287,7 @@ def customer_detail_by_partner(
     """
     from ....services.business_partner_service import BusinessPartnerService
 
-    svc = BusinessPartnerService(db, tenant_id or DEFAULT_TENANT)
+    svc = BusinessPartnerService(db, tenant_id)
     kunden_nr = svc.kunden_nr_for_partner(business_partner_id)
     if not kunden_nr:
         raise HTTPException(

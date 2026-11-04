@@ -6,13 +6,11 @@ Aendern, Loeschen und Unterlisten reichten Betriebsprofile *aller* Mandanten dur
 
 from contextvars import ContextVar
 from typing import Any
-from uuid import UUID
 
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, Path, Query, status
 from pydantic import BaseModel, Field
 
-from ....core.config import settings
 from ....core.tenant import get_tenant_id
 from ....integrations import crm_core_client
 from ..schemas.base import PaginatedResponse
@@ -39,10 +37,10 @@ class _CertificationItem(BaseModel):
 
 
 def _adapt_farm_profile(core_profile: crm_core_client.CRMCoreFarmProfile) -> dict:
-    tenant_uuid = UUID(settings.DEFAULT_TENANT_ID)
     return {
         "id": core_profile.id,
-        "tenant_id": tenant_uuid,
+        # Der Mandant des Profils, nicht der Standardmandant (bis 28.10.2026 stand hier immer DEFAULT_TENANT_ID).
+        "tenant_id": core_profile.tenant_id,
         "farm_name": core_profile.farm_name,
         "owner": core_profile.owner,
         "total_area": core_profile.total_area,

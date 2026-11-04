@@ -8,20 +8,19 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 
-from ....core.config import settings
 from ....core.database import get_db
+from ....core.tenant import get_tenant_id
 from ....infrastructure.models import Customer as CustomerModel
 from ....api.v1.schemas.base import PaginatedResponse
 from ....api.v1.schemas.crm import Customer, CustomerCreate, CustomerUpdate
 
 router = APIRouter()
 
-DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 
 @router.get("/", response_model=PaginatedResponse[Customer])
 async def list_customers(
-    tenant_id: Optional[str] = Query(None, description="Filter by tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     search: Optional[str] = Query(None, description="Search in name, email, phone"),
     is_active: Optional[bool] = Query(None, description="Filter by active status"),
     skip: int = Query(0, ge=0, description="Number of records to skip"),
@@ -29,7 +28,7 @@ async def list_customers(
     db: Session = Depends(get_db),
 ):
     """Return a paginated list of customers."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
 
     query = db.query(CustomerModel).filter(CustomerModel.tenant_id == effective_tenant)
     
@@ -65,11 +64,11 @@ async def list_customers(
 @router.get("/{customer_id}", response_model=Customer)
 async def get_customer(
     customer_id: str,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Get a single customer by ID."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
     
     customer = (
         db.query(CustomerModel)
@@ -89,11 +88,11 @@ async def get_customer(
 @router.post("/", response_model=Customer, status_code=201)
 async def create_customer(
     customer_data: CustomerCreate,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Create a new customer."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
     
     # Check if customer_number already exists
     existing = (
@@ -127,11 +126,11 @@ async def create_customer(
 async def update_customer(
     customer_id: str,
     customer_data: CustomerUpdate,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Update an existing customer."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
     
     customer = (
         db.query(CustomerModel)
@@ -158,11 +157,11 @@ async def update_customer(
 @router.delete("/{customer_id}", status_code=204)
 async def delete_customer(
     customer_id: str,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Delete a customer (soft delete - set is_active=False)."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
     
     customer = (
         db.query(CustomerModel)
