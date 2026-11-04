@@ -642,6 +642,6 @@ class TestMaske:
         quelle = Path("packages/frontend-web/src/masks/capture-screens.ts").read_text(encoding="utf-8")
         treffer = re.search(r"export const adminPostfaecherScreen = (\{.*?\n\}) satisfies ScreenDefinition", quelle, re.S)
         sd = build_admin_postfaecher_screen_definition()
-        for schluessel in ("agentContract", "performance"):
-            sd.pop(schluessel)
+        # Der Generator spiegelt den Performance-Block mit (generate_capture_screens.py); nur der Agentenvertrag fehlt.
+        sd.pop("agentContract")
         assert json.loads(treffer.group(1)) == sd

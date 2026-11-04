@@ -100,7 +100,12 @@ export function VirtualDataTable<T extends Record<string, unknown>>({
 
   if (data.length === 0) {
     return (
-      <div className="flex items-center justify-center rounded-md border border-border p-8 text-sm text-muted-foreground" style={{ height: emptyHeight }}>
+      <div
+        role="status"
+        data-testid="empty-state"
+        className="flex items-center justify-center rounded-md border border-border p-8 text-sm text-muted-foreground"
+        style={{ height: emptyHeight }}
+      >
         {emptyMessage}
       </div>
     )

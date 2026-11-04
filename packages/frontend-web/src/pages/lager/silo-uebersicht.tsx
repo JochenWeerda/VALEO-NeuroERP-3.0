@@ -3,7 +3,7 @@ import { UniversalNativeCockpitPage } from '@/components/mask-builder/UniversalN
 export default function Page(): JSX.Element {
   return (
     <UniversalNativeCockpitPage
-      screenId="lager/silo-uebersicht"
+      screenId="lager/silo-uebersicht-liste"
       testId="lager-silo-uebersicht"
     />
   )

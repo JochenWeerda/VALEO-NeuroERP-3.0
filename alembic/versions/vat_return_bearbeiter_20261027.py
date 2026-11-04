@@ -1,7 +1,7 @@
 """UStVA-Anmeldungen speichern, wer berechnet, geprueft, freigegeben und uebermittelt hat.
 
 Revision ID: vat_return_bearbeiter_20261027
-Revises: rahmenauftrag_afa_tabellen_20261102 (urspruenglich rls_domain_shared_20261027; 03.11.2026 auf main umgehaengt)
+Revises: ruestlisten_tabelle_20261103 (urspruenglich rls_domain_shared_20261027; 03.11.2026 auf main umgehaengt)
 
 ``domain_erp.vat_returns`` kannte nur den Status. Freigebender, Freigabezeitpunkt und ELSTER-Referenz standen bis
 27.10.2026 nur in der Antwort: der Freigebende kam aus dem Rumpf, die Referenz wurde erfunden, gespeichert wurde
@@ -17,7 +17,7 @@ from __future__ import annotations
 from alembic import op
 
 revision = "vat_return_bearbeiter_20261027"
-down_revision = "rahmenauftrag_afa_tabellen_20261102"
+down_revision = "ruestlisten_tabelle_20261103"
 branch_labels = None
 depends_on = None
 

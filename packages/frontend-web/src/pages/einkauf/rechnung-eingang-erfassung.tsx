@@ -1,7 +1,6 @@
-import { NativeListPage } from '@/components/mask-builder/NativeListPage'
+import { InvoiceCapturePage } from '@/pages/finance/InvoiceCapturePage'
 
-export default function Page(): JSX.Element {
-  return (
-    <NativeListPage screenId="einkauf/rechnung-eingang-erfassung" testId="screen-einkauf/rechnung-eingang-erfassung" />
-  )
+/** Eingangsrechnung erfassen: dieselbe Studio-Erfassung wie /finance/ap/invoices/new (einkauf/rechnungseingang/neu). */
+export default function EinkaufRechnungEingangErfassungPage(): JSX.Element {
+  return <InvoiceCapturePage purchase />
 }

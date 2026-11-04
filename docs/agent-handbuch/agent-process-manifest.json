@@ -5501,6 +5501,40 @@
       ]
     },
     {
+      "mask_id": "kontrakte/kontraktklassen",
+      "title": "Kontraktklassen",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/kontrakte__kontraktklassen/:entityId",
+      "agent_contract_url": "/api/v1/masks/kontrakte/kontraktklassen/agent-contract",
+      "screen_definition_url": "/api/v1/masks/kontrakte/kontraktklassen/screen-definition",
+      "readiness_url": "/api/v1/masks/kontrakte/kontraktklassen/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
       "mask_id": "kontrakte/kontraktklassen-liste",
       "title": "Kontraktklassen",
       "domain": "agrar",
@@ -5681,6 +5715,28 @@
       "agent_contract_url": "/api/v1/masks/strecke/nawaro-lieferungen/agent-contract",
       "screen_definition_url": "/api/v1/masks/strecke/nawaro-lieferungen/screen-definition",
       "readiness_url": "/api/v1/masks/strecke/nawaro-lieferungen/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
+      "mask_id": "strecke/nawaro-uebersicht",
+      "title": "NaWaRo",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/strecke__nawaro-uebersicht/:entityId",
+      "agent_contract_url": "/api/v1/masks/strecke/nawaro-uebersicht/agent-contract",
+      "screen_definition_url": "/api/v1/masks/strecke/nawaro-uebersicht/screen-definition",
+      "readiness_url": "/api/v1/masks/strecke/nawaro-uebersicht/readiness",
       "risk_summary": "low",
       "actions": [],
       "sensitive_fields": [],
@@ -11747,39 +11803,6 @@
       ]
     },
     {
-      "mask_id": "einkauf/rechnung-abgleich",
-      "title": "Rechnung abgleich",
-      "domain": "einkauf",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/einkauf__rechnung-abgleich/:entityId",
-      "agent_contract_url": "/api/v1/masks/einkauf/rechnung-abgleich/agent-contract",
-      "screen_definition_url": "/api/v1/masks/einkauf/rechnung-abgleich/screen-definition",
-      "readiness_url": "/api/v1/masks/einkauf/rechnung-abgleich/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
-        "einkauf.bestellung.list",
-        "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
-        "einkauf.angebot.bestellen",
-        "einkauf.anlieferavis.wareneingang"
-      ]
-    },
-    {
       "mask_id": "einkauf/rechnung-abgleich-liste",
       "title": "Rechnungsabgleich",
       "domain": "einkauf",
@@ -11788,39 +11811,6 @@
       "agent_contract_url": "/api/v1/masks/einkauf/rechnung-abgleich-liste/agent-contract",
       "screen_definition_url": "/api/v1/masks/einkauf/rechnung-abgleich-liste/screen-definition",
       "readiness_url": "/api/v1/masks/einkauf/rechnung-abgleich-liste/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
-        "einkauf.bestellung.list",
-        "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
-        "einkauf.angebot.bestellen",
-        "einkauf.anlieferavis.wareneingang"
-      ]
-    },
-    {
-      "mask_id": "einkauf/rechnung-eingang-erfassung",
-      "title": "Rechnung eingang erfassung",
-      "domain": "einkauf",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/einkauf__rechnung-eingang-erfassung/:entityId",
-      "agent_contract_url": "/api/v1/masks/einkauf/rechnung-eingang-erfassung/agent-contract",
-      "screen_definition_url": "/api/v1/masks/einkauf/rechnung-eingang-erfassung/screen-definition",
-      "readiness_url": "/api/v1/masks/einkauf/rechnung-eingang-erfassung/readiness",
       "risk_summary": "low",
       "actions": [
         {
@@ -11967,39 +11957,6 @@
       ]
     },
     {
-      "mask_id": "einkauf/retouren",
-      "title": "Retouren",
-      "domain": "einkauf",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/einkauf__retouren/:entityId",
-      "agent_contract_url": "/api/v1/masks/einkauf/retouren/agent-contract",
-      "screen_definition_url": "/api/v1/masks/einkauf/retouren/screen-definition",
-      "readiness_url": "/api/v1/masks/einkauf/retouren/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
-        "einkauf.bestellung.list",
-        "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
-        "einkauf.angebot.bestellen",
-        "einkauf.anlieferavis.wareneingang"
-      ]
-    },
-    {
       "mask_id": "einkauf/retouren-liste",
       "title": "Retouren",
       "domain": "einkauf",
@@ -12008,39 +11965,6 @@
       "agent_contract_url": "/api/v1/masks/einkauf/retouren-liste/agent-contract",
       "screen_definition_url": "/api/v1/masks/einkauf/retouren-liste/screen-definition",
       "readiness_url": "/api/v1/masks/einkauf/retouren-liste/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
-        "einkauf.bestellung.list",
-        "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
-        "einkauf.angebot.bestellen",
-        "einkauf.anlieferavis.wareneingang"
-      ]
-    },
-    {
-      "mask_id": "einkauf/rfq-bids",
-      "title": "Rfq bids",
-      "domain": "einkauf",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/einkauf__rfq-bids/:entityId",
-      "agent_contract_url": "/api/v1/masks/einkauf/rfq-bids/agent-contract",
-      "screen_definition_url": "/api/v1/masks/einkauf/rfq-bids/screen-definition",
-      "readiness_url": "/api/v1/masks/einkauf/rfq-bids/readiness",
       "risk_summary": "low",
       "actions": [
         {
@@ -12170,39 +12094,6 @@
       ]
     },
     {
-      "mask_id": "einkauf/wareneingang",
-      "title": "Wareneingang",
-      "domain": "einkauf",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/einkauf__wareneingang/:entityId",
-      "agent_contract_url": "/api/v1/masks/einkauf/wareneingang/agent-contract",
-      "screen_definition_url": "/api/v1/masks/einkauf/wareneingang/screen-definition",
-      "readiness_url": "/api/v1/masks/einkauf/wareneingang/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
-        "einkauf.bestellung.list",
-        "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
-        "einkauf.angebot.bestellen",
-        "einkauf.anlieferavis.wareneingang"
-      ]
-    },
-    {
       "mask_id": "einkauf/wareneingangsabgleich",
       "title": "Wareneingangsabgleich",
       "domain": "einkauf",
@@ -12313,32 +12204,6 @@
       ]
     },
     {
-      "mask_id": "etiketten/drucken",
-      "title": "Drucken",
-      "domain": "etiketten",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/etiketten__drucken/:entityId",
-      "agent_contract_url": "/api/v1/masks/etiketten/drucken/agent-contract",
-      "screen_definition_url": "/api/v1/masks/etiketten/drucken/screen-definition",
-      "readiness_url": "/api/v1/masks/etiketten/drucken/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
       "mask_id": "export/ustva",
       "title": "Umsatzsteuervoranmeldung",
       "domain": "export",
@@ -12417,32 +12282,6 @@
       "mcp_tool_ids": []
     },
     {
-      "mask_id": "fibu/anlagen-suite",
-      "title": "Anlagen suite",
-      "domain": "fibu",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/fibu__anlagen-suite/:entityId",
-      "agent_contract_url": "/api/v1/masks/fibu/anlagen-suite/agent-contract",
-      "screen_definition_url": "/api/v1/masks/fibu/anlagen-suite/screen-definition",
-      "readiness_url": "/api/v1/masks/fibu/anlagen-suite/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
       "mask_id": "fibu/atlas",
       "title": "Atlas",
       "domain": "fibu",
@@ -12495,138 +12334,8 @@
       "mcp_tool_ids": []
     },
     {
-      "mask_id": "fibu/buchhaltungsuebersicht",
-      "title": "Buchhaltungsuebersicht",
-      "domain": "fibu",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/fibu__buchhaltungsuebersicht/:entityId",
-      "agent_contract_url": "/api/v1/masks/fibu/buchhaltungsuebersicht/agent-contract",
-      "screen_definition_url": "/api/v1/masks/fibu/buchhaltungsuebersicht/screen-definition",
-      "readiness_url": "/api/v1/masks/fibu/buchhaltungsuebersicht/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "refresh",
-          "label": "Aktualisieren",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "fibu.read",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "fibu/buchungsuebernahme-connectors",
-      "title": "Buchungsuebernahme connectors",
-      "domain": "fibu",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/fibu__buchungsuebernahme-connectors/:entityId",
-      "agent_contract_url": "/api/v1/masks/fibu/buchungsuebernahme-connectors/agent-contract",
-      "screen_definition_url": "/api/v1/masks/fibu/buchungsuebernahme-connectors/screen-definition",
-      "readiness_url": "/api/v1/masks/fibu/buchungsuebernahme-connectors/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "fibu/bwa",
-      "title": "Bwa",
-      "domain": "fibu",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/fibu__bwa/:entityId",
-      "agent_contract_url": "/api/v1/masks/fibu/bwa/agent-contract",
-      "screen_definition_url": "/api/v1/masks/fibu/bwa/screen-definition",
-      "readiness_url": "/api/v1/masks/fibu/bwa/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "fibu/debitoren-api",
-      "title": "Debitoren api",
-      "domain": "fibu",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/fibu__debitoren-api/:entityId",
-      "agent_contract_url": "/api/v1/masks/fibu/debitoren-api/agent-contract",
-      "screen_definition_url": "/api/v1/masks/fibu/debitoren-api/screen-definition",
-      "readiness_url": "/api/v1/masks/fibu/debitoren-api/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "fibu/elster-online",
-      "title": "Elster online",
-      "domain": "fibu",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/fibu__elster-online/:entityId",
-      "agent_contract_url": "/api/v1/masks/fibu/elster-online/agent-contract",
-      "screen_definition_url": "/api/v1/masks/fibu/elster-online/screen-definition",
-      "readiness_url": "/api/v1/masks/fibu/elster-online/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
       "mask_id": "fibu/erloeskennziffern",
-      "title": "Erloeskennziffern",
+      "title": "Erlöskennziffern",
       "domain": "fibu",
       "process_keys": [],
       "rollout_route": "/mask-rollout/fibu__erloeskennziffern/:entityId",
@@ -12652,7 +12361,7 @@
     },
     {
       "mask_id": "fibu/erloeskontenzuordnung",
-      "title": "Erloeskontenzuordnung",
+      "title": "Erlöskontenzuordnung",
       "domain": "fibu",
       "process_keys": [],
       "rollout_route": "/mask-rollout/fibu__erloeskontenzuordnung/:entityId",
@@ -12755,84 +12464,6 @@
       "mcp_tool_ids": []
     },
     {
-      "mask_id": "fibu/hauptbuch",
-      "title": "Hauptbuch",
-      "domain": "fibu",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/fibu__hauptbuch/:entityId",
-      "agent_contract_url": "/api/v1/masks/fibu/hauptbuch/agent-contract",
-      "screen_definition_url": "/api/v1/masks/fibu/hauptbuch/screen-definition",
-      "readiness_url": "/api/v1/masks/fibu/hauptbuch/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "fibu/kontenplan",
-      "title": "Kontenplan",
-      "domain": "fibu",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/fibu__kontenplan/:entityId",
-      "agent_contract_url": "/api/v1/masks/fibu/kontenplan/agent-contract",
-      "screen_definition_url": "/api/v1/masks/fibu/kontenplan/screen-definition",
-      "readiness_url": "/api/v1/masks/fibu/kontenplan/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "fibu/kostenstellenrechnung",
-      "title": "Kostenstellenrechnung",
-      "domain": "fibu",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/fibu__kostenstellenrechnung/:entityId",
-      "agent_contract_url": "/api/v1/masks/fibu/kostenstellenrechnung/agent-contract",
-      "screen_definition_url": "/api/v1/masks/fibu/kostenstellenrechnung/screen-definition",
-      "readiness_url": "/api/v1/masks/fibu/kostenstellenrechnung/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
       "mask_id": "fibu/kreditlinien",
       "title": "Kreditlinien",
       "domain": "fibu",
@@ -12859,34 +12490,8 @@
       "mcp_tool_ids": []
     },
     {
-      "mask_id": "fibu/kreditoren",
-      "title": "Kreditoren",
-      "domain": "fibu",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/fibu__kreditoren/:entityId",
-      "agent_contract_url": "/api/v1/masks/fibu/kreditoren/agent-contract",
-      "screen_definition_url": "/api/v1/masks/fibu/kreditoren/screen-definition",
-      "readiness_url": "/api/v1/masks/fibu/kreditoren/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
       "mask_id": "fibu/lohn-connector",
-      "title": "Lohn connector",
+      "title": "Lohn-Übernahme",
       "domain": "fibu",
       "process_keys": [],
       "rollout_route": "/mask-rollout/fibu__lohn-connector/:entityId",
@@ -12964,7 +12569,7 @@
     },
     {
       "mask_id": "fibu/periodische-buchungen",
-      "title": "Periodische buchungen",
+      "title": "Periodische Buchungen",
       "domain": "fibu",
       "process_keys": [],
       "rollout_route": "/mask-rollout/fibu__periodische-buchungen/:entityId",
@@ -12990,7 +12595,7 @@
     },
     {
       "mask_id": "fibu/quadriga-connector",
-      "title": "Quadriga connector",
+      "title": "Quadriga-Anbindung",
       "domain": "fibu",
       "process_keys": [],
       "rollout_route": "/mask-rollout/fibu__quadriga-connector/:entityId",
@@ -13023,58 +12628,6 @@
       "agent_contract_url": "/api/v1/masks/fibu/sachkonto/agent-contract",
       "screen_definition_url": "/api/v1/masks/fibu/sachkonto/screen-definition",
       "readiness_url": "/api/v1/masks/fibu/sachkonto/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "fibu/schnittstelle-fibu",
-      "title": "Schnittstelle fibu",
-      "domain": "fibu",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/fibu__schnittstelle-fibu/:entityId",
-      "agent_contract_url": "/api/v1/masks/fibu/schnittstelle-fibu/agent-contract",
-      "screen_definition_url": "/api/v1/masks/fibu/schnittstelle-fibu/screen-definition",
-      "readiness_url": "/api/v1/masks/fibu/schnittstelle-fibu/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "fibu/schnittstellen-center",
-      "title": "Schnittstellen center",
-      "domain": "fibu",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/fibu__schnittstellen-center/:entityId",
-      "agent_contract_url": "/api/v1/masks/fibu/schnittstellen-center/agent-contract",
-      "screen_definition_url": "/api/v1/masks/fibu/schnittstellen-center/screen-definition",
-      "readiness_url": "/api/v1/masks/fibu/schnittstellen-center/readiness",
       "risk_summary": "low",
       "actions": [
         {
@@ -13147,84 +12700,6 @@
       "mcp_tool_ids": []
     },
     {
-      "mask_id": "fibu/verbindlichkeiten",
-      "title": "Verbindlichkeiten",
-      "domain": "fibu",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/fibu__verbindlichkeiten/:entityId",
-      "agent_contract_url": "/api/v1/masks/fibu/verbindlichkeiten/agent-contract",
-      "screen_definition_url": "/api/v1/masks/fibu/verbindlichkeiten/screen-definition",
-      "readiness_url": "/api/v1/masks/fibu/verbindlichkeiten/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "fibu/zahlungseingaenge",
-      "title": "Zahlungseingaenge",
-      "domain": "fibu",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/fibu__zahlungseingaenge/:entityId",
-      "agent_contract_url": "/api/v1/masks/fibu/zahlungseingaenge/agent-contract",
-      "screen_definition_url": "/api/v1/masks/fibu/zahlungseingaenge/screen-definition",
-      "readiness_url": "/api/v1/masks/fibu/zahlungseingaenge/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "fibu/zahlungslaeufe",
-      "title": "Zahlungslaeufe",
-      "domain": "fibu",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/fibu__zahlungslaeufe/:entityId",
-      "agent_contract_url": "/api/v1/masks/fibu/zahlungslaeufe/agent-contract",
-      "screen_definition_url": "/api/v1/masks/fibu/zahlungslaeufe/screen-definition",
-      "readiness_url": "/api/v1/masks/fibu/zahlungslaeufe/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
       "mask_id": "fibu/zahlungsmeldungen",
       "title": "Neue Zahlungsmeldung [KASSZAME]",
       "domain": "fibu",
@@ -13245,32 +12720,6 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": null
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "fibu/zahlungsvorschlaege",
-      "title": "Zahlungsvorschlaege",
-      "domain": "fibu",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/fibu__zahlungsvorschlaege/:entityId",
-      "agent_contract_url": "/api/v1/masks/fibu/zahlungsvorschlaege/agent-contract",
-      "screen_definition_url": "/api/v1/masks/fibu/zahlungsvorschlaege/screen-definition",
-      "readiness_url": "/api/v1/masks/fibu/zahlungsvorschlaege/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
         }
       ],
       "sensitive_fields": [],
@@ -14263,66 +13712,6 @@
       ]
     },
     {
-      "mask_id": "finance/ap/invoices",
-      "title": "Ap invoices list",
-      "domain": "finance",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/finance__ap__invoices/:entityId",
-      "agent_contract_url": "/api/v1/masks/finance/ap/invoices/agent-contract",
-      "screen_definition_url": "/api/v1/masks/finance/ap/invoices/screen-definition",
-      "readiness_url": "/api/v1/masks/finance/ap/invoices/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "finance.ap_invoice.propose",
-        "fibu.open_items.list",
-        "fibu.dunning.status"
-      ]
-    },
-    {
-      "mask_id": "finance/ap/invoices/new",
-      "title": "Ap invoice form",
-      "domain": "finance",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/finance__ap__invoices__new/:entityId",
-      "agent_contract_url": "/api/v1/masks/finance/ap/invoices/new/agent-contract",
-      "screen_definition_url": "/api/v1/masks/finance/ap/invoices/new/screen-definition",
-      "readiness_url": "/api/v1/masks/finance/ap/invoices/new/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "finance.ap_invoice.propose",
-        "fibu.open_items.list",
-        "fibu.dunning.status"
-      ]
-    },
-    {
       "mask_id": "finance/ar-open-item",
       "title": "Offener Posten",
       "domain": "finance",
@@ -14564,36 +13953,6 @@
         "bic",
         "saldo"
       ],
-      "mcp_tool_ids": [
-        "finance.ap_invoice.propose",
-        "fibu.open_items.list",
-        "fibu.dunning.status"
-      ]
-    },
-    {
-      "mask_id": "finance/bookings/new",
-      "title": "Buchungsjournal",
-      "domain": "finance",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/finance__bookings__new/:entityId",
-      "agent_contract_url": "/api/v1/masks/finance/bookings/new/agent-contract",
-      "screen_definition_url": "/api/v1/masks/finance/bookings/new/screen-definition",
-      "readiness_url": "/api/v1/masks/finance/bookings/new/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
         "fibu.open_items.list",
@@ -14978,36 +14337,6 @@
       ]
     },
     {
-      "mask_id": "finance/kontenplan",
-      "title": "Chart of accounts",
-      "domain": "finance",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/finance__kontenplan/:entityId",
-      "agent_contract_url": "/api/v1/masks/finance/kontenplan/agent-contract",
-      "screen_definition_url": "/api/v1/masks/finance/kontenplan/screen-definition",
-      "readiness_url": "/api/v1/masks/finance/kontenplan/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "finance.ap_invoice.propose",
-        "fibu.open_items.list",
-        "fibu.dunning.status"
-      ]
-    },
-    {
       "mask_id": "finance/kreditor",
       "title": "Kreditor",
       "domain": "finance",
@@ -15036,36 +14365,6 @@
         "steuernummer",
         "ust_id"
       ],
-      "mcp_tool_ids": [
-        "finance.ap_invoice.propose",
-        "fibu.open_items.list",
-        "fibu.dunning.status"
-      ]
-    },
-    {
-      "mask_id": "finance/kreditoren",
-      "title": "Kreditoren liste",
-      "domain": "finance",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/finance__kreditoren/:entityId",
-      "agent_contract_url": "/api/v1/masks/finance/kreditoren/agent-contract",
-      "screen_definition_url": "/api/v1/masks/finance/kreditoren/screen-definition",
-      "readiness_url": "/api/v1/masks/finance/kreditoren/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
         "fibu.open_items.list",
@@ -15145,43 +14444,13 @@
     },
     {
       "mask_id": "finance/nebenbuch-abstimmung",
-      "title": "Nebenbuch abstimmung",
+      "title": "Nebenbuch-Abstimmung",
       "domain": "finance",
       "process_keys": [],
       "rollout_route": "/mask-rollout/finance__nebenbuch-abstimmung/:entityId",
       "agent_contract_url": "/api/v1/masks/finance/nebenbuch-abstimmung/agent-contract",
       "screen_definition_url": "/api/v1/masks/finance/nebenbuch-abstimmung/screen-definition",
       "readiness_url": "/api/v1/masks/finance/nebenbuch-abstimmung/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "finance.ap_invoice.propose",
-        "fibu.open_items.list",
-        "fibu.dunning.status"
-      ]
-    },
-    {
-      "mask_id": "finance/offene-posten",
-      "title": "Offene posten",
-      "domain": "finance",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/finance__offene-posten/:entityId",
-      "agent_contract_url": "/api/v1/masks/finance/offene-posten/agent-contract",
-      "screen_definition_url": "/api/v1/masks/finance/offene-posten/screen-definition",
-      "readiness_url": "/api/v1/masks/finance/offene-posten/readiness",
       "risk_summary": "low",
       "actions": [
         {
@@ -15242,36 +14511,6 @@
       "agent_contract_url": "/api/v1/masks/finance/op-debitoren/agent-contract",
       "screen_definition_url": "/api/v1/masks/finance/op-debitoren/screen-definition",
       "readiness_url": "/api/v1/masks/finance/op-debitoren/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "finance.ap_invoice.propose",
-        "fibu.open_items.list",
-        "fibu.dunning.status"
-      ]
-    },
-    {
-      "mask_id": "finance/op-kreditoren",
-      "title": "Op kreditoren",
-      "domain": "finance",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/finance__op-kreditoren/:entityId",
-      "agent_contract_url": "/api/v1/masks/finance/op-kreditoren/agent-contract",
-      "screen_definition_url": "/api/v1/masks/finance/op-kreditoren/screen-definition",
-      "readiness_url": "/api/v1/masks/finance/op-kreditoren/readiness",
       "risk_summary": "low",
       "actions": [
         {
@@ -15362,96 +14601,6 @@
       ]
     },
     {
-      "mask_id": "finance/payments",
-      "title": "Payment matching",
-      "domain": "finance",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/finance__payments/:entityId",
-      "agent_contract_url": "/api/v1/masks/finance/payments/agent-contract",
-      "screen_definition_url": "/api/v1/masks/finance/payments/screen-definition",
-      "readiness_url": "/api/v1/masks/finance/payments/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "finance.ap_invoice.propose",
-        "fibu.open_items.list",
-        "fibu.dunning.status"
-      ]
-    },
-    {
-      "mask_id": "finance/periodenabschluss",
-      "title": "Periodenabschluss",
-      "domain": "finance",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/finance__periodenabschluss/:entityId",
-      "agent_contract_url": "/api/v1/masks/finance/periodenabschluss/agent-contract",
-      "screen_definition_url": "/api/v1/masks/finance/periodenabschluss/screen-definition",
-      "readiness_url": "/api/v1/masks/finance/periodenabschluss/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "finance.ap_invoice.propose",
-        "fibu.open_items.list",
-        "fibu.dunning.status"
-      ]
-    },
-    {
-      "mask_id": "finance/periods",
-      "title": "Periods",
-      "domain": "finance",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/finance__periods/:entityId",
-      "agent_contract_url": "/api/v1/masks/finance/periods/agent-contract",
-      "screen_definition_url": "/api/v1/masks/finance/periods/screen-definition",
-      "readiness_url": "/api/v1/masks/finance/periods/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "finance.ap_invoice.propose",
-        "fibu.open_items.list",
-        "fibu.dunning.status"
-      ]
-    },
-    {
       "mask_id": "finance/periods-liste",
       "title": "Buchungsperioden",
       "domain": "finance",
@@ -15521,36 +14670,6 @@
         "maker",
         "checker"
       ],
-      "mcp_tool_ids": [
-        "finance.ap_invoice.propose",
-        "fibu.open_items.list",
-        "fibu.dunning.status"
-      ]
-    },
-    {
-      "mask_id": "finance/skonto-optimizer",
-      "title": "Skonto optimizer",
-      "domain": "finance",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/finance__skonto-optimizer/:entityId",
-      "agent_contract_url": "/api/v1/masks/finance/skonto-optimizer/agent-contract",
-      "screen_definition_url": "/api/v1/masks/finance/skonto-optimizer/screen-definition",
-      "readiness_url": "/api/v1/masks/finance/skonto-optimizer/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
         "fibu.open_items.list",
@@ -15710,36 +14829,6 @@
           "method": "POST",
           "stubReason": null
         },
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "finance.ap_invoice.propose",
-        "fibu.open_items.list",
-        "fibu.dunning.status"
-      ]
-    },
-    {
-      "mask_id": "finance/zahlungseingang",
-      "title": "Zahlungseingang",
-      "domain": "finance",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/finance__zahlungseingang/:entityId",
-      "agent_contract_url": "/api/v1/masks/finance/zahlungseingang/agent-contract",
-      "screen_definition_url": "/api/v1/masks/finance/zahlungseingang/screen-definition",
-      "readiness_url": "/api/v1/masks/finance/zahlungseingang/readiness",
-      "risk_summary": "low",
-      "actions": [
         {
           "key": "export",
           "label": "CSV-Export",
@@ -16085,318 +15174,6 @@
       "mcp_tool_ids": []
     },
     {
-      "mask_id": "fuhrpark/ausgehende-belege-dokumente",
-      "title": "Ausgehende belege dokumente",
-      "domain": "fuhrpark",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/fuhrpark__ausgehende-belege-dokumente/:entityId",
-      "agent_contract_url": "/api/v1/masks/fuhrpark/ausgehende-belege-dokumente/agent-contract",
-      "screen_definition_url": "/api/v1/masks/fuhrpark/ausgehende-belege-dokumente/screen-definition",
-      "readiness_url": "/api/v1/masks/fuhrpark/ausgehende-belege-dokumente/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "fuhrpark/fahrzeug/neu",
-      "title": "Fahrzeug stamm",
-      "domain": "fuhrpark",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/fuhrpark__fahrzeug__neu/:entityId",
-      "agent_contract_url": "/api/v1/masks/fuhrpark/fahrzeug/neu/agent-contract",
-      "screen_definition_url": "/api/v1/masks/fuhrpark/fahrzeug/neu/screen-definition",
-      "readiness_url": "/api/v1/masks/fuhrpark/fahrzeug/neu/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "fuhrpark/fuhrpark-auswertung-kosten-pro-fahrzeug",
-      "title": "Fuhrpark auswertung kosten pro fahrzeug",
-      "domain": "fuhrpark",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/fuhrpark__fuhrpark-auswertung-kosten-pro-fahrzeug/:entityId",
-      "agent_contract_url": "/api/v1/masks/fuhrpark/fuhrpark-auswertung-kosten-pro-fahrzeug/agent-contract",
-      "screen_definition_url": "/api/v1/masks/fuhrpark/fuhrpark-auswertung-kosten-pro-fahrzeug/screen-definition",
-      "readiness_url": "/api/v1/masks/fuhrpark/fuhrpark-auswertung-kosten-pro-fahrzeug/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "fuhrpark/fuhrpark-auswertungen-menu",
-      "title": "Fuhrpark auswertungen menu",
-      "domain": "fuhrpark",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/fuhrpark__fuhrpark-auswertungen-menu/:entityId",
-      "agent_contract_url": "/api/v1/masks/fuhrpark/fuhrpark-auswertungen-menu/agent-contract",
-      "screen_definition_url": "/api/v1/masks/fuhrpark/fuhrpark-auswertungen-menu/screen-definition",
-      "readiness_url": "/api/v1/masks/fuhrpark/fuhrpark-auswertungen-menu/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "fuhrpark/fuhrpark-klassisch",
-      "title": "Fuhrpark klassisch",
-      "domain": "fuhrpark",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/fuhrpark__fuhrpark-klassisch/:entityId",
-      "agent_contract_url": "/api/v1/masks/fuhrpark/fuhrpark-klassisch/agent-contract",
-      "screen_definition_url": "/api/v1/masks/fuhrpark/fuhrpark-klassisch/screen-definition",
-      "readiness_url": "/api/v1/masks/fuhrpark/fuhrpark-klassisch/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "fuhrpark/fuhrpark-menue",
-      "title": "Fuhrpark menue",
-      "domain": "fuhrpark",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/fuhrpark__fuhrpark-menue/:entityId",
-      "agent_contract_url": "/api/v1/masks/fuhrpark/fuhrpark-menue/agent-contract",
-      "screen_definition_url": "/api/v1/masks/fuhrpark/fuhrpark-menue/screen-definition",
-      "readiness_url": "/api/v1/masks/fuhrpark/fuhrpark-menue/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "fuhrpark/fuhrpark-rechnungen",
-      "title": "Fuhrpark rechnungen",
-      "domain": "fuhrpark",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/fuhrpark__fuhrpark-rechnungen/:entityId",
-      "agent_contract_url": "/api/v1/masks/fuhrpark/fuhrpark-rechnungen/agent-contract",
-      "screen_definition_url": "/api/v1/masks/fuhrpark/fuhrpark-rechnungen/screen-definition",
-      "readiness_url": "/api/v1/masks/fuhrpark/fuhrpark-rechnungen/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "fuhrpark/fuhrpark-stammdaten",
-      "title": "Fuhrpark stammdaten",
-      "domain": "fuhrpark",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/fuhrpark__fuhrpark-stammdaten/:entityId",
-      "agent_contract_url": "/api/v1/masks/fuhrpark/fuhrpark-stammdaten/agent-contract",
-      "screen_definition_url": "/api/v1/masks/fuhrpark/fuhrpark-stammdaten/screen-definition",
-      "readiness_url": "/api/v1/masks/fuhrpark/fuhrpark-stammdaten/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "futter/einzel/liste",
-      "title": "Liste",
-      "domain": "futter",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/futter__einzel__liste/:entityId",
-      "agent_contract_url": "/api/v1/masks/futter/einzel/liste/agent-contract",
-      "screen_definition_url": "/api/v1/masks/futter/einzel/liste/screen-definition",
-      "readiness_url": "/api/v1/masks/futter/einzel/liste/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "futter/einzel/stamm/neu",
-      "title": "Stamm",
-      "domain": "futter",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/futter__einzel__stamm__neu/:entityId",
-      "agent_contract_url": "/api/v1/masks/futter/einzel/stamm/neu/agent-contract",
-      "screen_definition_url": "/api/v1/masks/futter/einzel/stamm/neu/screen-definition",
-      "readiness_url": "/api/v1/masks/futter/einzel/stamm/neu/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "futter/misch/liste",
-      "title": "Liste",
-      "domain": "futter",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/futter__misch__liste/:entityId",
-      "agent_contract_url": "/api/v1/masks/futter/misch/liste/agent-contract",
-      "screen_definition_url": "/api/v1/masks/futter/misch/liste/screen-definition",
-      "readiness_url": "/api/v1/masks/futter/misch/liste/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "futter/misch/stamm/neu",
-      "title": "Rezeptur-Komponenten",
-      "domain": "futter",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/futter__misch__stamm__neu/:entityId",
-      "agent_contract_url": "/api/v1/masks/futter/misch/stamm/neu/agent-contract",
-      "screen_definition_url": "/api/v1/masks/futter/misch/stamm/neu/screen-definition",
-      "readiness_url": "/api/v1/masks/futter/misch/stamm/neu/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
       "mask_id": "futter/einzel",
       "title": "Einzelfuttermittel",
       "domain": "futtermittel",
@@ -16417,6 +15194,43 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "futter/einzel/liste",
+      "title": "Einzelfuttermittel",
+      "domain": "futtermittel",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/futter__einzel__liste/:entityId",
+      "agent_contract_url": "/api/v1/masks/futter/einzel/liste/agent-contract",
+      "screen_definition_url": "/api/v1/masks/futter/einzel/liste/screen-definition",
+      "readiness_url": "/api/v1/masks/futter/einzel/liste/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Neues Einzelfuttermittel",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
         }
       ],
       "sensitive_fields": [],
@@ -16643,32 +15457,6 @@
       "mcp_tool_ids": []
     },
     {
-      "mask_id": "futtermittel/einzelfuttermittel/liste",
-      "title": "Einzelfuttermittel liste",
-      "domain": "futtermittel",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/futtermittel__einzelfuttermittel__liste/:entityId",
-      "agent_contract_url": "/api/v1/masks/futtermittel/einzelfuttermittel/liste/agent-contract",
-      "screen_definition_url": "/api/v1/masks/futtermittel/einzelfuttermittel/liste/screen-definition",
-      "readiness_url": "/api/v1/masks/futtermittel/einzelfuttermittel/liste/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
       "mask_id": "futtermittel/einzelfuttermittel/stamm/new",
       "title": "Einzelfuttermittel anlegen",
       "domain": "futtermittel",
@@ -16804,32 +15592,6 @@
       "mcp_tool_ids": []
     },
     {
-      "mask_id": "futtermittel/grundfutteranalysen",
-      "title": "Grundfutteranalysen native",
-      "domain": "futtermittel",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/futtermittel__grundfutteranalysen/:entityId",
-      "agent_contract_url": "/api/v1/masks/futtermittel/grundfutteranalysen/agent-contract",
-      "screen_definition_url": "/api/v1/masks/futtermittel/grundfutteranalysen/screen-definition",
-      "readiness_url": "/api/v1/masks/futtermittel/grundfutteranalysen/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
       "mask_id": "futtermittel/integrationsmonitor",
       "title": "Integrationsmonitor",
       "domain": "futtermittel",
@@ -16903,32 +15665,6 @@
           "method": null,
           "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
         },
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "futtermittel/mischfuttermittel/liste",
-      "title": "Mischfuttermittel liste",
-      "domain": "futtermittel",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/futtermittel__mischfuttermittel__liste/:entityId",
-      "agent_contract_url": "/api/v1/masks/futtermittel/mischfuttermittel/liste/agent-contract",
-      "screen_definition_url": "/api/v1/masks/futtermittel/mischfuttermittel/liste/screen-definition",
-      "readiness_url": "/api/v1/masks/futtermittel/mischfuttermittel/liste/readiness",
-      "risk_summary": "low",
-      "actions": [
         {
           "key": "export",
           "label": "CSV-Export",
@@ -17212,6 +15948,32 @@
       "mcp_tool_ids": []
     },
     {
+      "mask_id": "produktion/mischfutter-produktion",
+      "title": "Mischfutter-Produktion",
+      "domain": "futtermittel",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/produktion__mischfutter-produktion/:entityId",
+      "agent_contract_url": "/api/v1/masks/produktion/mischfutter-produktion/agent-contract",
+      "screen_definition_url": "/api/v1/masks/produktion/mischfutter-produktion/screen-definition",
+      "readiness_url": "/api/v1/masks/produktion/mischfutter-produktion/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
       "mask_id": "aktien/dividenden",
       "title": "Dividenden",
       "domain": "genossenschaft",
@@ -17336,32 +16098,6 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": null
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "genossenschaft/mitglieder",
-      "title": "Mitglieder",
-      "domain": "genossenschaft",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/genossenschaft__mitglieder/:entityId",
-      "agent_contract_url": "/api/v1/masks/genossenschaft/mitglieder/agent-contract",
-      "screen_definition_url": "/api/v1/masks/genossenschaft/mitglieder/screen-definition",
-      "readiness_url": "/api/v1/masks/genossenschaft/mitglieder/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
         }
       ],
       "sensitive_fields": [],
@@ -18182,32 +16918,6 @@
       "mcp_tool_ids": []
     },
     {
-      "mask_id": "kontrakte/kontraktklassen",
-      "title": "Kontraktklassen",
-      "domain": "kontrakte",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/kontrakte__kontraktklassen/:entityId",
-      "agent_contract_url": "/api/v1/masks/kontrakte/kontraktklassen/agent-contract",
-      "screen_definition_url": "/api/v1/masks/kontrakte/kontraktklassen/screen-definition",
-      "readiness_url": "/api/v1/masks/kontrakte/kontraktklassen/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
       "mask_id": "kontrakte/mengenzeitraeume",
       "title": "Kontrakt wählen",
       "domain": "kontrakte",
@@ -19008,6 +17718,37 @@
       ]
     },
     {
+      "mask_id": "etiketten/drucken",
+      "title": "Etikettendruck",
+      "domain": "lager",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/etiketten__drucken/:entityId",
+      "agent_contract_url": "/api/v1/masks/etiketten/drucken/agent-contract",
+      "screen_definition_url": "/api/v1/masks/etiketten/drucken/screen-definition",
+      "readiness_url": "/api/v1/masks/etiketten/drucken/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "lager.bestand.get",
+        "lager.inventur.status",
+        "lager.inventur.propose_opening",
+        "lager.stock_movement.stornieren"
+      ]
+    },
+    {
       "mask_id": "lager/article-stock",
       "title": "Artikelbestand",
       "domain": "lager",
@@ -19114,6 +17855,37 @@
       "agent_contract_url": "/api/v1/masks/lager/bestandskorrektur/agent-contract",
       "screen_definition_url": "/api/v1/masks/lager/bestandskorrektur/screen-definition",
       "readiness_url": "/api/v1/masks/lager/bestandskorrektur/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "lager.bestand.get",
+        "lager.inventur.status",
+        "lager.inventur.propose_opening",
+        "lager.stock_movement.stornieren"
+      ]
+    },
+    {
+      "mask_id": "lager/bestandsuebersicht",
+      "title": "Bestandsübersicht",
+      "domain": "lager",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/lager__bestandsuebersicht/:entityId",
+      "agent_contract_url": "/api/v1/masks/lager/bestandsuebersicht/agent-contract",
+      "screen_definition_url": "/api/v1/masks/lager/bestandsuebersicht/screen-definition",
+      "readiness_url": "/api/v1/masks/lager/bestandsuebersicht/readiness",
       "risk_summary": "low",
       "actions": [
         {
@@ -19250,37 +18022,6 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": null
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "lager.bestand.get",
-        "lager.inventur.status",
-        "lager.inventur.propose_opening",
-        "lager.stock_movement.stornieren"
-      ]
-    },
-    {
-      "mask_id": "lager/inventur",
-      "title": "Inventur",
-      "domain": "lager",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/lager__inventur/:entityId",
-      "agent_contract_url": "/api/v1/masks/lager/inventur/agent-contract",
-      "screen_definition_url": "/api/v1/masks/lager/inventur/screen-definition",
-      "readiness_url": "/api/v1/masks/lager/inventur/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
         }
       ],
       "sensitive_fields": [],
@@ -19478,37 +18219,6 @@
       ]
     },
     {
-      "mask_id": "lager/materialfluss",
-      "title": "Materialfluss",
-      "domain": "lager",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/lager__materialfluss/:entityId",
-      "agent_contract_url": "/api/v1/masks/lager/materialfluss/agent-contract",
-      "screen_definition_url": "/api/v1/masks/lager/materialfluss/screen-definition",
-      "readiness_url": "/api/v1/masks/lager/materialfluss/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "lager.bestand.get",
-        "lager.inventur.status",
-        "lager.inventur.propose_opening",
-        "lager.stock_movement.stornieren"
-      ]
-    },
-    {
       "mask_id": "lager/materialfluss-visualisierung",
       "title": "Materialfluss visualisierung",
       "domain": "lager",
@@ -19517,37 +18227,6 @@
       "agent_contract_url": "/api/v1/masks/lager/materialfluss-visualisierung/agent-contract",
       "screen_definition_url": "/api/v1/masks/lager/materialfluss-visualisierung/screen-definition",
       "readiness_url": "/api/v1/masks/lager/materialfluss-visualisierung/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "lager.bestand.get",
-        "lager.inventur.status",
-        "lager.inventur.propose_opening",
-        "lager.stock_movement.stornieren"
-      ]
-    },
-    {
-      "mask_id": "lager/partiestamm",
-      "title": "Partiestamm",
-      "domain": "lager",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/lager__partiestamm/:entityId",
-      "agent_contract_url": "/api/v1/masks/lager/partiestamm/agent-contract",
-      "screen_definition_url": "/api/v1/masks/lager/partiestamm/screen-definition",
-      "readiness_url": "/api/v1/masks/lager/partiestamm/readiness",
       "risk_summary": "low",
       "actions": [
         {
@@ -19634,7 +18313,7 @@
     },
     {
       "mask_id": "lager/rueckverfolgbarkeit",
-      "title": "Rueckverfolgbarkeit",
+      "title": "Rückverfolgbarkeit",
       "domain": "lager",
       "process_keys": [],
       "rollout_route": "/mask-rollout/lager__rueckverfolgbarkeit/:entityId",
@@ -19653,68 +18332,6 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "lager.bestand.get",
-        "lager.inventur.status",
-        "lager.inventur.propose_opening",
-        "lager.stock_movement.stornieren"
-      ]
-    },
-    {
-      "mask_id": "lager/silo-mobil",
-      "title": "Silo mobil",
-      "domain": "lager",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/lager__silo-mobil/:entityId",
-      "agent_contract_url": "/api/v1/masks/lager/silo-mobil/agent-contract",
-      "screen_definition_url": "/api/v1/masks/lager/silo-mobil/screen-definition",
-      "readiness_url": "/api/v1/masks/lager/silo-mobil/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "lager.bestand.get",
-        "lager.inventur.status",
-        "lager.inventur.propose_opening",
-        "lager.stock_movement.stornieren"
-      ]
-    },
-    {
-      "mask_id": "lager/silo-uebersicht",
-      "title": "Silo uebersicht",
-      "domain": "lager",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/lager__silo-uebersicht/:entityId",
-      "agent_contract_url": "/api/v1/masks/lager/silo-uebersicht/agent-contract",
-      "screen_definition_url": "/api/v1/masks/lager/silo-uebersicht/screen-definition",
-      "readiness_url": "/api/v1/masks/lager/silo-uebersicht/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "refresh",
-          "label": "Aktualisieren",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "lager.read",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
         }
       ],
       "sensitive_fields": [],
@@ -19798,37 +18415,6 @@
       "agent_contract_url": "/api/v1/masks/lager/terminal/agent-contract",
       "screen_definition_url": "/api/v1/masks/lager/terminal/screen-definition",
       "readiness_url": "/api/v1/masks/lager/terminal/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "lager.bestand.get",
-        "lager.inventur.status",
-        "lager.inventur.propose_opening",
-        "lager.stock_movement.stornieren"
-      ]
-    },
-    {
-      "mask_id": "lager/umlagerung",
-      "title": "Lagerbewegungen",
-      "domain": "lager",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/lager__umlagerung/:entityId",
-      "agent_contract_url": "/api/v1/masks/lager/umlagerung/agent-contract",
-      "screen_definition_url": "/api/v1/masks/lager/umlagerung/screen-definition",
-      "readiness_url": "/api/v1/masks/lager/umlagerung/readiness",
       "risk_summary": "low",
       "actions": [
         {
@@ -20661,6 +19247,40 @@
       ]
     },
     {
+      "mask_id": "logistik/frachtbriefe",
+      "title": "Frachtbriefe",
+      "domain": "logistics",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/logistik__frachtbriefe/:entityId",
+      "agent_contract_url": "/api/v1/masks/logistik/frachtbriefe/agent-contract",
+      "screen_definition_url": "/api/v1/masks/logistik/frachtbriefe/screen-definition",
+      "readiness_url": "/api/v1/masks/logistik/frachtbriefe/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "logistik.frachttabelle.anlegen",
+        "logistik.tour.anlegen",
+        "logistik.fahrzeug.speichern",
+        "logistik.fahrzeug.loeschen",
+        "logistik.terminart.speichern",
+        "logistik.rechnung.speichern",
+        "logistik.ausgehendes_dokument.speichern"
+      ]
+    },
+    {
       "mask_id": "logistik/frachttabellen",
       "title": "Frachttabellen",
       "domain": "logistics",
@@ -20964,6 +19584,28 @@
       ]
     },
     {
+      "mask_id": "strecke/menu",
+      "title": "Streckengeschäft",
+      "domain": "logistics",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/strecke__menu/:entityId",
+      "agent_contract_url": "/api/v1/masks/strecke/menu/agent-contract",
+      "screen_definition_url": "/api/v1/masks/strecke/menu/screen-definition",
+      "readiness_url": "/api/v1/masks/strecke/menu/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "logistik.frachttabelle.anlegen",
+        "logistik.tour.anlegen",
+        "logistik.fahrzeug.speichern",
+        "logistik.fahrzeug.loeschen",
+        "logistik.terminart.speichern",
+        "logistik.rechnung.speichern",
+        "logistik.ausgehendes_dokument.speichern"
+      ]
+    },
+    {
       "mask_id": "strecke/streckengeschaeft",
       "title": "Streckengeschäft",
       "domain": "logistics",
@@ -21142,32 +19784,6 @@
       "agent_contract_url": "/api/v1/masks/fuhrpark/rechnungen-liste/agent-contract",
       "screen_definition_url": "/api/v1/masks/fuhrpark/rechnungen-liste/screen-definition",
       "readiness_url": "/api/v1/masks/fuhrpark/rechnungen-liste/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "logistik/frachtbriefe",
-      "title": "Frachtbriefe",
-      "domain": "logistik",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/logistik__frachtbriefe/:entityId",
-      "agent_contract_url": "/api/v1/masks/logistik/frachtbriefe/agent-contract",
-      "screen_definition_url": "/api/v1/masks/logistik/frachtbriefe/screen-definition",
-      "readiness_url": "/api/v1/masks/logistik/frachtbriefe/readiness",
       "risk_summary": "low",
       "actions": [
         {
@@ -21785,32 +20401,6 @@
       "mcp_tool_ids": []
     },
     {
-      "mask_id": "personal/stundenzettel",
-      "title": "Stundenzettel",
-      "domain": "personal",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/personal__stundenzettel/:entityId",
-      "agent_contract_url": "/api/v1/masks/personal/stundenzettel/agent-contract",
-      "screen_definition_url": "/api/v1/masks/personal/stundenzettel/screen-definition",
-      "readiness_url": "/api/v1/masks/personal/stundenzettel/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
       "mask_id": "personal/stundenzettel-liste",
       "title": "Stundenzettel",
       "domain": "personal",
@@ -21832,32 +20422,6 @@
           "method": null,
           "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
         },
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "personal/zeiterfassung",
-      "title": "Zeiterfassung",
-      "domain": "personal",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/personal__zeiterfassung/:entityId",
-      "agent_contract_url": "/api/v1/masks/personal/zeiterfassung/agent-contract",
-      "screen_definition_url": "/api/v1/masks/personal/zeiterfassung/screen-definition",
-      "readiness_url": "/api/v1/masks/personal/zeiterfassung/readiness",
-      "risk_summary": "low",
-      "actions": [
         {
           "key": "export",
           "label": "CSV-Export",
@@ -22133,6 +20697,50 @@
       ]
     },
     {
+      "mask_id": "errors/NotFound",
+      "title": "Seite nicht gefunden",
+      "domain": "platform",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/errors__NotFound/:entityId",
+      "agent_contract_url": "/api/v1/masks/errors/NotFound/agent-contract",
+      "screen_definition_url": "/api/v1/masks/errors/NotFound/screen-definition",
+      "readiness_url": "/api/v1/masks/errors/NotFound/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "admin.postfach.speichern"
+      ]
+    },
+    {
+      "mask_id": "genossenschaft/mitglieder",
+      "title": "Mitglieder",
+      "domain": "platform",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/genossenschaft__mitglieder/:entityId",
+      "agent_contract_url": "/api/v1/masks/genossenschaft/mitglieder/agent-contract",
+      "screen_definition_url": "/api/v1/masks/genossenschaft/mitglieder/screen-definition",
+      "readiness_url": "/api/v1/masks/genossenschaft/mitglieder/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "admin.postfach.speichern"
+      ]
+    },
+    {
       "mask_id": "planung/kalender",
       "title": "Planungskalender",
       "domain": "platform",
@@ -22314,6 +20922,34 @@
       ]
     },
     {
+      "mask_id": "workflows/supervisor",
+      "title": "Agentenlaeufe",
+      "domain": "platform",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/workflows__supervisor/:entityId",
+      "agent_contract_url": "/api/v1/masks/workflows/supervisor/agent-contract",
+      "screen_definition_url": "/api/v1/masks/workflows/supervisor/screen-definition",
+      "readiness_url": "/api/v1/masks/workflows/supervisor/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "admin.postfach.speichern"
+      ]
+    },
+    {
       "mask_id": "portal/anfragen",
       "title": "Anfragen",
       "domain": "portal",
@@ -22471,7 +21107,7 @@
     },
     {
       "mask_id": "portal/naehrstoffbilanzen",
-      "title": "Naehrstoffbilanzen",
+      "title": "Nährstoffzufuhr",
       "domain": "portal",
       "process_keys": [],
       "rollout_route": "/mask-rollout/portal__naehrstoffbilanzen/:entityId",
@@ -22481,15 +21117,15 @@
       "risk_summary": "low",
       "actions": [
         {
-          "key": "refresh",
-          "label": "Aktualisieren",
+          "key": "export",
+          "label": "CSV-Export",
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
-          "permission": "portal.read",
+          "permission": null,
           "commandEndpoint": null,
           "method": null,
-          "stubReason": null
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
         }
       ],
       "sensitive_fields": [],
@@ -22601,7 +21237,7 @@
     },
     {
       "mask_id": "portal/vertraege",
-      "title": "Vertraege",
+      "title": "Verträge",
       "domain": "portal",
       "process_keys": [],
       "rollout_route": "/mask-rollout/portal__vertraege/:entityId",
@@ -23068,34 +21704,6 @@
       "mcp_tool_ids": []
     },
     {
-      "mask_id": "produktion/mischfutter-produktion",
-      "title": "Mischfutter produktion",
-      "domain": "produktion",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/produktion__mischfutter-produktion/:entityId",
-      "agent_contract_url": "/api/v1/masks/produktion/mischfutter-produktion/agent-contract",
-      "screen_definition_url": "/api/v1/masks/produktion/mischfutter-produktion/screen-definition",
-      "readiness_url": "/api/v1/masks/produktion/mischfutter-produktion/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "produktion.control.sync"
-      ]
-    },
-    {
       "mask_id": "produktion/produktions-dokumente-drucken",
       "title": "Produktions dokumente drucken",
       "domain": "produktion",
@@ -23503,6 +22111,34 @@
           "method": null,
           "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
         },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "qualitaet.reklamation.abschliessen"
+      ]
+    },
+    {
+      "mask_id": "schaeden/meldung",
+      "title": "Schadensmeldungen",
+      "domain": "qualitaet",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/schaeden__meldung/:entityId",
+      "agent_contract_url": "/api/v1/masks/schaeden/meldung/agent-contract",
+      "screen_definition_url": "/api/v1/masks/schaeden/meldung/screen-definition",
+      "readiness_url": "/api/v1/masks/schaeden/meldung/readiness",
+      "risk_summary": "low",
+      "actions": [
         {
           "key": "export",
           "label": "CSV-Export",
@@ -24045,58 +22681,6 @@
       "agent_contract_url": "/api/v1/masks/reports/deckungsbeitrag/agent-contract",
       "screen_definition_url": "/api/v1/masks/reports/deckungsbeitrag/screen-definition",
       "readiness_url": "/api/v1/masks/reports/deckungsbeitrag/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "reports/lagerbestand",
-      "title": "Lagerbestand",
-      "domain": "reports",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/reports__lagerbestand/:entityId",
-      "agent_contract_url": "/api/v1/masks/reports/lagerbestand/agent-contract",
-      "screen_definition_url": "/api/v1/masks/reports/lagerbestand/screen-definition",
-      "readiness_url": "/api/v1/masks/reports/lagerbestand/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "reports/umsatz",
-      "title": "Umsatz",
-      "domain": "reports",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/reports__umsatz/:entityId",
-      "agent_contract_url": "/api/v1/masks/reports/umsatz/agent-contract",
-      "screen_definition_url": "/api/v1/masks/reports/umsatz/screen-definition",
-      "readiness_url": "/api/v1/masks/reports/umsatz/readiness",
       "risk_summary": "low",
       "actions": [
         {
@@ -24889,105 +23473,6 @@
       ]
     },
     {
-      "mask_id": "sales/lieferungen/neu",
-      "title": "Lieferungen liste",
-      "domain": "sales",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/sales__lieferungen__neu/:entityId",
-      "agent_contract_url": "/api/v1/masks/sales/lieferungen/neu/agent-contract",
-      "screen_definition_url": "/api/v1/masks/sales/lieferungen/neu/screen-definition",
-      "readiness_url": "/api/v1/masks/sales/lieferungen/neu/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "sales.order.status",
-        "sales.gutschrift.speichern",
-        "sales.gutschrift.propose",
-        "sales.gutschrift.buchen",
-        "sales.invoice.propose",
-        "sales.invoice.post"
-      ]
-    },
-    {
-      "mask_id": "sales/orders-modern",
-      "title": "Orders modern",
-      "domain": "sales",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/sales__orders-modern/:entityId",
-      "agent_contract_url": "/api/v1/masks/sales/orders-modern/agent-contract",
-      "screen_definition_url": "/api/v1/masks/sales/orders-modern/screen-definition",
-      "readiness_url": "/api/v1/masks/sales/orders-modern/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "sales.order.status",
-        "sales.gutschrift.speichern",
-        "sales.gutschrift.propose",
-        "sales.gutschrift.buchen",
-        "sales.invoice.propose",
-        "sales.invoice.post"
-      ]
-    },
-    {
-      "mask_id": "sales/rechnungen-liste",
-      "title": "Rechnungen liste",
-      "domain": "sales",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/sales__rechnungen-liste/:entityId",
-      "agent_contract_url": "/api/v1/masks/sales/rechnungen-liste/agent-contract",
-      "screen_definition_url": "/api/v1/masks/sales/rechnungen-liste/screen-definition",
-      "readiness_url": "/api/v1/masks/sales/rechnungen-liste/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "sales.order.status",
-        "sales.gutschrift.speichern",
-        "sales.gutschrift.propose",
-        "sales.gutschrift.buchen",
-        "sales.invoice.propose",
-        "sales.invoice.post"
-      ]
-    },
-    {
       "mask_id": "sales/sales-order",
       "title": "Verkaufsauftrag",
       "domain": "sales",
@@ -25113,32 +23598,6 @@
       ]
     },
     {
-      "mask_id": "schaeden/meldung",
-      "title": "Meldung",
-      "domain": "schaeden",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/schaeden__meldung/:entityId",
-      "agent_contract_url": "/api/v1/masks/schaeden/meldung/agent-contract",
-      "screen_definition_url": "/api/v1/masks/schaeden/meldung/screen-definition",
-      "readiness_url": "/api/v1/masks/schaeden/meldung/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
       "mask_id": "service/abschluss",
       "title": "Abschluss",
       "domain": "service",
@@ -25243,32 +23702,6 @@
       "mcp_tool_ids": []
     },
     {
-      "mask_id": "service/anfragen",
-      "title": "Anfragen",
-      "domain": "service",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/service__anfragen/:entityId",
-      "agent_contract_url": "/api/v1/masks/service/anfragen/agent-contract",
-      "screen_definition_url": "/api/v1/masks/service/anfragen/screen-definition",
-      "readiness_url": "/api/v1/masks/service/anfragen/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
       "mask_id": "service/anfragen-liste",
       "title": "Serviceanfragen",
       "domain": "service",
@@ -25340,32 +23773,6 @@
       "agent_contract_url": "/api/v1/masks/setup/firma/agent-contract",
       "screen_definition_url": "/api/v1/masks/setup/firma/screen-definition",
       "readiness_url": "/api/v1/masks/setup/firma/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "silo/kapazitaeten",
-      "title": "Silos Gesamt",
-      "domain": "silo",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/silo__kapazitaeten/:entityId",
-      "agent_contract_url": "/api/v1/masks/silo/kapazitaeten/agent-contract",
-      "screen_definition_url": "/api/v1/masks/silo/kapazitaeten/screen-definition",
-      "readiness_url": "/api/v1/masks/silo/kapazitaeten/readiness",
       "risk_summary": "low",
       "actions": [
         {
@@ -25566,58 +23973,6 @@
       "mcp_tool_ids": []
     },
     {
-      "mask_id": "strecke/menu",
-      "title": "Menu",
-      "domain": "strecke",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/strecke__menu/:entityId",
-      "agent_contract_url": "/api/v1/masks/strecke/menu/agent-contract",
-      "screen_definition_url": "/api/v1/masks/strecke/menu/screen-definition",
-      "readiness_url": "/api/v1/masks/strecke/menu/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "strecke/nawaro-uebersicht",
-      "title": "Nawaro uebersicht",
-      "domain": "strecke",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/strecke__nawaro-uebersicht/:entityId",
-      "agent_contract_url": "/api/v1/masks/strecke/nawaro-uebersicht/agent-contract",
-      "screen_definition_url": "/api/v1/masks/strecke/nawaro-uebersicht/screen-definition",
-      "readiness_url": "/api/v1/masks/strecke/nawaro-uebersicht/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "refresh",
-          "label": "Aktualisieren",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "strecke.read",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
       "mask_id": "strecke/nawaro-uebersicht-drucken",
       "title": "Nawaro uebersicht drucken",
       "domain": "strecke",
@@ -25652,32 +24007,6 @@
       "agent_contract_url": "/api/v1/masks/strecke/speditionen-fracht-preise/agent-contract",
       "screen_definition_url": "/api/v1/masks/strecke/speditionen-fracht-preise/screen-definition",
       "readiness_url": "/api/v1/masks/strecke/speditionen-fracht-preise/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "strecke/vorlaeufige-streckengeschaefte",
-      "title": "Vorlaeufige streckengeschaefte",
-      "domain": "strecke",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/strecke__vorlaeufige-streckengeschaefte/:entityId",
-      "agent_contract_url": "/api/v1/masks/strecke/vorlaeufige-streckengeschaefte/agent-contract",
-      "screen_definition_url": "/api/v1/masks/strecke/vorlaeufige-streckengeschaefte/screen-definition",
-      "readiness_url": "/api/v1/masks/strecke/vorlaeufige-streckengeschaefte/readiness",
       "risk_summary": "low",
       "actions": [
         {
@@ -25756,32 +24085,6 @@
       "agent_contract_url": "/api/v1/masks/transporte/fahrer/neu/agent-contract",
       "screen_definition_url": "/api/v1/masks/transporte/fahrer/neu/screen-definition",
       "readiness_url": "/api/v1/masks/transporte/fahrer/neu/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "verkauf/auftraege",
-      "title": "Auftraege liste",
-      "domain": "verkauf",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/verkauf__auftraege/:entityId",
-      "agent_contract_url": "/api/v1/masks/verkauf/auftraege/agent-contract",
-      "screen_definition_url": "/api/v1/masks/verkauf/auftraege/screen-definition",
-      "readiness_url": "/api/v1/masks/verkauf/auftraege/readiness",
       "risk_summary": "low",
       "actions": [
         {
@@ -25950,32 +24253,6 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": null
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "verkauf/kunden-liste",
-      "title": "Kunden liste",
-      "domain": "verkauf",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/verkauf__kunden-liste/:entityId",
-      "agent_contract_url": "/api/v1/masks/verkauf/kunden-liste/agent-contract",
-      "screen_definition_url": "/api/v1/masks/verkauf/kunden-liste/screen-definition",
-      "readiness_url": "/api/v1/masks/verkauf/kunden-liste/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
         }
       ],
       "sensitive_fields": [],
@@ -26572,32 +24849,6 @@
       "agent_contract_url": "/api/v1/masks/workflows/history/agent-contract",
       "screen_definition_url": "/api/v1/masks/workflows/history/screen-definition",
       "readiness_url": "/api/v1/masks/workflows/history/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "workflows/supervisor",
-      "title": "Supervisor",
-      "domain": "workflows",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/workflows__supervisor/:entityId",
-      "agent_contract_url": "/api/v1/masks/workflows/supervisor/agent-contract",
-      "screen_definition_url": "/api/v1/masks/workflows/supervisor/screen-definition",
-      "readiness_url": "/api/v1/masks/workflows/supervisor/readiness",
       "risk_summary": "low",
       "actions": [
         {
@@ -27400,6 +25651,42 @@
       "scope": "masks:write",
       "idempotent": true,
       "risk_class": "medium",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "studio.catalog.read",
+      "domain": "studio",
+      "scope": "masks:read",
+      "idempotent": true,
+      "risk_class": "low",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "studio.definition.validate",
+      "domain": "studio",
+      "scope": "masks:read",
+      "idempotent": true,
+      "risk_class": "low",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "studio.draft.save",
+      "domain": "studio",
+      "scope": "belege:write",
+      "idempotent": true,
+      "risk_class": "low",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "studio.draft.submit_review",
+      "domain": "studio",
+      "scope": "belege:write",
+      "idempotent": true,
+      "risk_class": "low",
       "human_approval_required": false,
       "endpoint": "POST /api/v1/mcp/tools/call"
     },

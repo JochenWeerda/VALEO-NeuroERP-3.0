@@ -19,6 +19,7 @@ import { listNavigationTarget, listCSV } from './runtime/list-navigation'
 import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
 import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { useTouchDevice } from '@/hooks/useTouchDevice'
+import { businessToday } from '@/lib/business-time'
 
 type Row = Record<string, unknown>
 
@@ -187,7 +188,7 @@ export function NativeListPage({ screenId, testId }: { screenId: string; testId?
       const url = URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
-      link.download = `${declaration.filenamePrefix}${new Date().toISOString().slice(0, 10)}.csv`
+      link.download = `${declaration.filenamePrefix}${businessToday()}.csv`
       link.click()
       URL.revokeObjectURL(url)
       return
@@ -204,7 +205,7 @@ export function NativeListPage({ screenId, testId }: { screenId: string; testId?
         toast({ title: 'Keine Daten', description: 'Es gibt nichts zu exportieren.', variant: 'destructive' })
         return
       }
-      exportToCSV(zeilen, `${screenId.replaceAll('/', '-')}-${new Date().toISOString().slice(0, 10)}.csv`,
+      exportToCSV(zeilen, `${screenId.replaceAll('/', '-')}-${businessToday()}.csv`,
         tabelle.columns.map(spalte => ({ key: spalte.key, label: spalte.label })))
     } catch (error) {
       toast({ title: 'Export fehlgeschlagen', description: getAxiosErrorMessage(error), variant: 'destructive' })

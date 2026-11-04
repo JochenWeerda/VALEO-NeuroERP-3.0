@@ -14,6 +14,10 @@ from sqlalchemy.orm import Session
 
 from app.api.v1.endpoints.compat import PortalOut
 from app.api.v1.schemas.base import CompatBridgeOut
+from app.api.v1.schemas.portal_listen_schemas import (
+    PortalAnfrageZeile, PortalBestellungZeile, PortalDokumentZeile, PortalFeldbuchZeile, PortalNaehrstoffZeile,
+    PortalRechnungZeile, PortalShopZeile, PortalVertragZeile, PortalZertifikatZeile,
+)
 from app.auth.portal_kunde import (
     AUSWERTUNGEN, FELDBUCH_LESEN, FINANZEN, KONTRAKTE, UEBERSICHT, VERKAUF, PortalKunde, portal_recht,
 )
@@ -40,63 +44,63 @@ async def portal_dashboard(
     return _portal(db, kunde).get_portal_dashboard_full(kunde.rechte)
 
 
-@router.get("/portal/anfragen", response_model=list[CompatBridgeOut], summary="Anfragen portal")
+@router.get("/portal/anfragen", response_model=list[PortalAnfrageZeile], summary="Anfragen portal")
 async def portal_anfragen(
     kunde: PortalKunde = Depends(portal_recht(VERKAUF)), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
     return _portal(db, kunde).list_portal_anfragen()
 
 
-@router.get("/portal/bestellungen", response_model=list[CompatBridgeOut], summary="Bestellungen portal")
+@router.get("/portal/bestellungen", response_model=list[PortalBestellungZeile], summary="Bestellungen portal")
 async def portal_bestellungen(
     kunde: PortalKunde = Depends(portal_recht(VERKAUF)), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
     return _portal(db, kunde).list_portal_bestellungen()
 
 
-@router.get("/portal/dokumente", response_model=list[CompatBridgeOut], summary="Dokumente portal")
+@router.get("/portal/dokumente", response_model=list[PortalDokumentZeile], summary="Dokumente portal")
 async def portal_dokumente(
     kunde: PortalKunde = Depends(portal_recht(FINANZEN)), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
     return _portal(db, kunde).list_portal_dokumente()
 
 
-@router.get("/portal/feldbuch", response_model=list[CompatBridgeOut], summary="Feldbuch portal")
+@router.get("/portal/feldbuch", response_model=list[PortalFeldbuchZeile], summary="Feldbuch portal")
 async def portal_feldbuch(
     kunde: PortalKunde = Depends(portal_recht(FELDBUCH_LESEN)), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
     return _portal(db, kunde).list_portal_feldbuch(kunde.schlag_ids)
 
 
-@router.get("/portal/naehrstoffbilanzen", response_model=list[CompatBridgeOut], summary="Naehrstoffbilanzen portal")
+@router.get("/portal/naehrstoffbilanzen", response_model=list[PortalNaehrstoffZeile], summary="Naehrstoffbilanzen portal")
 async def portal_naehrstoffbilanzen(
     kunde: PortalKunde = Depends(portal_recht(AUSWERTUNGEN)), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
     return _portal(db, kunde).list_portal_naehrstoffbilanzen()
 
 
-@router.get("/portal/rechnungen", response_model=list[CompatBridgeOut], summary="Rechnungen portal")
+@router.get("/portal/rechnungen", response_model=list[PortalRechnungZeile], summary="Rechnungen portal")
 async def portal_rechnungen(
     kunde: PortalKunde = Depends(portal_recht(FINANZEN)), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
     return _portal(db, kunde).list_portal_rechnungen()
 
 
-@router.get("/portal/shop", response_model=list[CompatBridgeOut], summary="Shop portal")
+@router.get("/portal/shop", response_model=list[PortalShopZeile], summary="Shop portal")
 async def portal_shop(
     kunde: PortalKunde = Depends(portal_recht(VERKAUF)), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
     return _portal(db, kunde).list_portal_shop()
 
 
-@router.get("/portal/vertraege", response_model=list[CompatBridgeOut], summary="Vertraege portal")
+@router.get("/portal/vertraege", response_model=list[PortalVertragZeile], summary="Vertraege portal")
 async def portal_vertraege(
     kunde: PortalKunde = Depends(portal_recht(KONTRAKTE)), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
     return _portal(db, kunde).list_portal_vertraege()
 
 
-@router.get("/portal/zertifikate", response_model=list[CompatBridgeOut], summary="Zertifikate portal")
+@router.get("/portal/zertifikate", response_model=list[PortalZertifikatZeile], summary="Zertifikate portal")
 async def portal_zertifikate(
     kunde: PortalKunde = Depends(portal_recht(AUSWERTUNGEN)), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:

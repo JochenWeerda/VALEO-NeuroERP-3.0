@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { FLOORPLAN_RULES } from './floorplans'
 import { validTextFileDefinitions } from './runtime/text-file-contract'
+import { computedDefinitionErrors } from './runtime/computed-fields'
 
 export { FLOORPLAN_IDS, FLOORPLAN_RULES, defaultColumnNavigation, resolveSectionNavigation } from './floorplans'
 
@@ -63,8 +64,28 @@ export type ScreenFieldType =
   | 'table'
   | 'currency'
   | 'percentage'
+  /** Menge mit Einheit (`unit` fest oder `unitField` aus den Daten). */
+  | 'quantity'
+  /** Buchungs- oder Meldeperiode JJJJ-MM (Monatsauswahl). */
+  | 'period'
   /** Geheimnis (Passwort, Token): wird verdeckt eingegeben und nie angezeigt. */
   | 'password'
+
+/**
+ * Rechnendes Feld oder rechnende Spalte: feste Operation ueber andere Felder (Schluessel in `of`).
+ * Nur Vorschau in der Maske; verbindlich rechnet der Server. `difference`, `ratio` und `percentOf`
+ * nehmen genau zwei Operanden (a - b, a / b, a / b * 100), `sum` und `product` mindestens zwei.
+ */
+export interface ScreenComputation {
+  op: 'sum' | 'product' | 'difference' | 'ratio' | 'percentOf'
+  of: string[]
+  /** Nachkommastellen (0-6), Vorgabe 2. */
+  round?: number
+}
+
+/** Pruef- und Anzeigeformat eines Textfelds. */
+export type ScreenTextFormat =
+  | 'email' | 'phone' | 'iban' | 'vatId' | 'gln' | 'gtin' | 'sscc' | 'hsCode' | 'currencyCode' | 'monthDay'
 
 export interface ScreenDataSource {
   key: string
@@ -87,6 +108,13 @@ export interface TextFileContentContract {
 export interface ScreenFieldDefinition {
   fileContent?: TextFileContentContract
   currencyField?: string
+  /** Feste Einheit einer Menge (`kg`, `t`, `Stk`). */
+  unit?: string
+  /** Feld mit der Einheit je Datensatz; geht vor `unit`. */
+  unitField?: string
+  format?: ScreenTextFormat
+  /** Rechnendes Feld; immer nur lesend. */
+  computed?: ScreenComputation
   key: string
   label: string
   type: ScreenFieldType
@@ -111,6 +139,8 @@ export type ScreenColumnRenderKind =
   | 'datetime'
   | 'status'
   | 'boolean'
+  | 'quantity'
+  | 'percentage'
 
 /** Schmälere Fenster blenden von hinten aus: tertiary zuerst, primary bleibt. */
 export type ScreenColumnPriority = 'primary' | 'secondary' | 'tertiary'
@@ -124,6 +154,18 @@ export interface ScreenTableColumn {
   filterable?: boolean
   renderKind?: ScreenColumnRenderKind
   currencyField?: string
+  unit?: string
+  unitField?: string
+  /** Anzeige einer Menge in dieser Einheit (Landhandel: Masse in dt); nur Masse/Volumen, exakt umgerechnet. */
+  displayUnit?: string
+  /** Bezugseinheit eines Preises aus den Daten (z. B. `t` bei preis_pro_t); nur mit `displayPricePer`. */
+  pricePer?: string
+  /** Anzeige des Preises je dieser Einheit (Landhandel: je dt / 100 kg); exakt umgerechnet, nur Masse/Volumen. */
+  displayPricePer?: string
+  /** Rechnende Spalte aus anderen Werten derselben Zeile. */
+  computed?: ScreenComputation
+  /** Summenzeile unter der Tabelle (ueber die angezeigten Zeilen). */
+  aggregate?: 'sum'
   defaultSort?: 'asc' | 'desc'
   priority?: ScreenColumnPriority
   render?: (_value: unknown, _row: Record<string, unknown>) => ReactNode
@@ -634,6 +676,7 @@ export function validateScreenDefinition(screen: ScreenDefinition): string[] {
     }
   }
   if (!screen.title) errors.push('title is required')
+  errors.push(...computedDefinitionErrors(screen))
 
   const surfaceScreenId = screen.id?.startsWith('tenant/') ? screen.baseScreenId : screen.id
 

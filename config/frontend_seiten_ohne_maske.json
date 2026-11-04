@@ -86,7 +86,6 @@
     "futtermittel/grundfutteranalyse-native.tsx": "futtermittel/grundfutteranalysen/:id",
     "hilfe.tsx": "hilfe",
     "inventory.tsx": "inventory/adjust",
-    "lager/bestandsuebersicht.tsx": "lager/bestandsuebersicht",
     "nachhaltigkeit/biodiversitaet.tsx": "nachhaltigkeit/biodiversitaet",
     "nachhaltigkeit/co2-bilanz.tsx": "nachhaltigkeit/co2-bilanz",
     "nachhaltigkeit/esg-report.tsx": "nachhaltigkeit/esg-report",

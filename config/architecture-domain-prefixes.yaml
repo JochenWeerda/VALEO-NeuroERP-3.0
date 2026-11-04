@@ -354,6 +354,7 @@ domains:
 
   dms-compliance:
     route_segments:
+      - betrieb
       - compliance
       - dms
       - belege
@@ -416,6 +417,8 @@ domains:
 
   platform:
     route_segments:
+      - aktien
+      - analysis
       - schnittstelle
       - studio
       - admin

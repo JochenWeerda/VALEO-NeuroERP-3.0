@@ -5,6 +5,8 @@ import { useLookupBindingContext } from '../runtime/LookupBindingContext'
 import { useFormStateContext } from '../runtime/FormStateContext'
 import { FieldRenderer } from './FieldRenderer'
 import { getValue } from './render-utils'
+import { fieldExtras } from '../render-plan/field-extras'
+import { computeValue } from '../runtime/computed-fields'
 import type { ScreenFieldDefinition } from '../schema'
 import type { SttProvider } from '@/lib/voice/stt-provider'
 
@@ -22,6 +24,7 @@ function toScreenField(field: RenderFieldPlan): ScreenFieldDefinition {
     minSearchChars: field.minSearchChars,
     renderHint: field.renderHint,
     currencyField: field.currencyField,
+    ...fieldExtras(field),
     rowFields: field.rowFields,
     tableEditing: field.tableEditing,
     ...(field.fileContent !== undefined ? { fileContent: field.fileContent } : {}),
@@ -45,7 +48,9 @@ const FastFieldItem = memo(function FastFieldItem({
   const formState = useFormStateContext()
   if (!field.visible) return null
 
-  const value = getValue(payload, field.dataPath)
+  // Rechnendes Feld: Vorschau aus den Operanden; der Server rechnet verbindlich.
+  const value = field.computed ? computeValue(field.computed, (key) => getValue(payload, key)) : getValue(payload, field.dataPath)
+  const unit = field.unitField ? String(getValue(payload, field.unitField) ?? '') || field.unit : field.unit
   const fieldErrors = (formState?.visibleFieldErrors ?? formState?.fieldErrors)?.[field.key] ?? []
   const hasBlockingError = fieldErrors.some((e) => e.severity === 'blocking')
   const isEditable = formState !== undefined && !field.readOnly
@@ -85,6 +90,7 @@ const FastFieldItem = memo(function FastFieldItem({
         field={toScreenField(field)}
         value={value}
         currency={field.currencyField ? String(getValue(payload, field.currencyField) ?? '') : 'EUR'}
+        unit={unit}
         onChange={isEditable ? handleChange : undefined}
         voiceEnabled={voiceEnabled}
         voiceProvider={voiceProvider}

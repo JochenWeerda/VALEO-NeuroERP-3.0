@@ -172,11 +172,13 @@ def test_actual_writes_and_finance_gaps_remain_visible():
     assert data["stats"]["by_coverage"].get("blocked_no_endpoint", 0) == 0
     assert data["stats"]["by_coverage"].get("blocked_missing_tenant", 0) == 0
     # Studio-Listen oeffnen ihre Anlage per Navigation (MASK-STUDIO-ROLLOUT): 15 Bestandsaktionen + je Liste eine.
+    from app.core.screen_definitions_clusters import CLUSTER_SCREEN_BUILDERS
     from app.core.screen_definitions_listen import LISTEN_SCREEN_BUILDERS
 
     # Nur Anlage-*Navigationen* sind lokal; eine Anlage als Kommandoweg wird abgebildet (nie local_ui).
     anlagen = {sid: next(a for a in bau()["actions"] if a["key"] == "neu")
-               for sid, bau in LISTEN_SCREEN_BUILDERS.items() if any(a["key"] == "neu" for a in bau()["actions"])}
+               for sid, bau in {**LISTEN_SCREEN_BUILDERS, **CLUSTER_SCREEN_BUILDERS}.items()
+               if any(a["key"] == "neu" for a in bau()["actions"])}
     listen_anlagen = [sid for sid, aktion in anlagen.items() if aktion.get("navigationRoute")]
     for liste in listen_anlagen:
         assert by_id[f"mask:{liste}:neu"]["coverage"] == "local_ui"
