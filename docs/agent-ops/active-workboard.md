@@ -20379,3 +20379,19 @@ Offen (Folgeauftrag): die uebrigen neun mandantenlosen domain_ops-Tabellen mit L
 pruefen (Compliance-Register mit Seed in compliance.py, ops_disposition, ops_zertifikate); preise/historie errechnet
 Verlaeufe, preise/konditionen fuellt Standardwerte auf; Marketing-/Communication-Dienste (services/crm-*) sollen
 CRM-Kampagnen konsumieren statt eigene zu fuehren.
+
+## POS-CHECKOUT-AUF-MAIN-20261104 — abgeschlossen, Claude
+
+POS-CHECKOUT-WAHRHEIT-20261027 (Zweig claude/pos-checkout-wahrheit-20261027, nie gemergt) auf main uebernommen.
+Branch claude/pos-checkout-auf-main-20261104. Main hatte inzwischen nur einen Teil: Mandant aus dem Token, kein
+Fail-soft der Retoure, `/pos/checkout` antwortete 501. Jetzt gilt die vollstaendige Fassung: `/pos/checkout`
+signiert offline kassierte Bons ueber den `FiscalizationService` (Offline-ID = Transaktionskennung, idempotent,
+anderer Betrag 409, ohne Kasse des Mandanten 503); `/pos/retoure` signiert negativ, bucht Bestand genau einmal je
+`vorgang_id`; Steuersatz nur aus dem Artikelstamm (`domain_erp.tax_keys`), sonst 422; fiskaly signiert unbekannte
+Saetze nicht als Normalsatz. Die handgebauten Seiten pos/terminal und pos/retoure sind auf main Studio-Platzhalter;
+deren Aenderungen entfallen, die Offline-Warteschlange uebergibt Rabatt/Steuersatz.
+Angepasst: tests/test_domain_honest_outcomes_20261027.py (Checkout ohne Kasse 503 statt 501),
+tests/test_rls_domain_inventory.py (Retoure mit vorgang_id, Steuerschluessel und Simulationskasse; Fehler kommt
+durch). Nachweis valeo_probe: test_pos_checkout_wahrheit 18/18, POS-Faelle aus RLS/Honest-Outcomes 9/9;
+OpenAPI und Code-Inventare nachgezogen, Doc-Generatoren gruen.
+Offen: Die POS-Studio-Masken lesen fast alle /pos/dsfinvk/export (Scheinweg) - eigener Batch.
