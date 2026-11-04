@@ -98334,6 +98334,10 @@
             ],
             "title": "Bemerkung"
           },
+          "charge": {
+            "title": "Charge",
+            "type": "string"
+          },
           "chargenId": {
             "title": "Chargenid",
             "type": "string"
@@ -98386,6 +98390,7 @@
           "id",
           "chargenId",
           "chargen_id",
+          "charge",
           "labor",
           "analysen",
           "auftragsdatum",

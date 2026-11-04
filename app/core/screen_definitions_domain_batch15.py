@@ -1721,7 +1721,7 @@ def build_prospecting_leads_screen_definition() -> dict[str, Any]:
 
 def build_qualitaet_labor_auftrag_screen_definition() -> dict[str, Any]:
     # Spalten aus LaborAuftragOut (Batch 8, 03.11.2026); vorher Platzhalter id/name/status/updated_at.
-    columns = [{"key": "chargen_id", "label": "Charge", "sortable": True, "filterable": True, "priority": "primary"},
+    columns = [{"key": "charge", "label": "Charge", "sortable": True, "filterable": True, "priority": "primary"},
                {"key": "labor", "label": "Labor", "sortable": True, "filterable": True, "priority": "primary"},
                {"key": "auftragsdatum", "label": "Auftragsdatum", "sortable": True, "renderKind": "date", "priority": "primary"},
                {"key": "analysen", "label": "Analysen", "numeric": True, "renderKind": "number", "sortable": True, "priority": "secondary"},
@@ -1750,10 +1750,10 @@ def build_qualitaet_labor_detail_screen_definition() -> dict[str, Any]:
         domain="qualitaet",
         title="Laborauftrag",
         subtitle="Auftrag, Labor und Befund zur Charge",
-        identity_field="chargen_id",
+        identity_field="charge",
         data_sources=[stamm_entity_source("/api/v1/qualitaet/labor-auftraege/{entity_id}")],
         # Felder aus LaborAuftragOut (Batch 8, 03.11.2026); vorher Platzhalter id/name/status/updated_at.
-        tabs=[stamm_kopf_tab([{"key": "chargen_id", "label": "Charge", "type": "text"}, {"key": "labor", "label": "Labor", "type": "text"},
+        tabs=[stamm_kopf_tab([{"key": "charge", "label": "Charge", "type": "text"}, {"key": "labor", "label": "Labor", "type": "text"},
                               {"key": "auftragsdatum", "label": "Auftragsdatum", "type": "date"}, {"key": "analysen", "label": "Analysen", "type": "number"},
                               {"key": "status", "label": "Status", "type": "text"}, {"key": "qs_entscheidung", "label": "QS-Entscheidung", "type": "text"},
                               {"key": "bemerkung", "label": "Bemerkung", "type": "text"}])],
