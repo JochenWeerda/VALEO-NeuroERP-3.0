@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 610,
-    "screens_with_actions": 439,
-    "domains": 56
+    "actions": 607,
+    "screens_with_actions": 437,
+    "domains": 55
   },
   "actions": [
     {
@@ -9068,66 +9068,6 @@
         "commandEndpoint": null,
         "navigationRoute": null,
         "command": null,
-        "method": null
-      }
-    },
-    {
-      "id": "mask:marketing/kampagnen-liste:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (marketing/kampagnen-liste)",
-      "category": "mask-action",
-      "domain": "marketing",
-      "mask": "marketing/kampagnen-liste",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "marketing/kampagnen-liste",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:marketing/kampagnen-liste:neu",
-      "label": "Neue Kampagne",
-      "description": "Neue Kampagne (marketing/kampagnen-liste)",
-      "category": "mask-action",
-      "domain": "marketing",
-      "mask": "marketing/kampagnen-liste",
-      "intent_phrases": [
-        "Neue Kampagne"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "marketing/kampagnen-liste",
-        "actionKey": "neu",
-        "commandEndpoint": null,
-        "navigationRoute": "/marketing/kampagne/neu",
-        "command": null,
-        "method": null
-      }
-    },
-    {
-      "id": "mask:marketing/kampagnen:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (marketing/kampagnen)",
-      "category": "mask-action",
-      "domain": "marketing",
-      "mask": "marketing/kampagnen",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "marketing/kampagnen",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
         "method": null
       }
     },

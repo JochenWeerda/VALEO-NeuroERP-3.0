@@ -2467,25 +2467,6 @@ def build_mahnwesen_mahnlauf_screen_definition() -> dict[str, Any]:
     return build_dunning_workbench()
 
 
-def build_marketing_kampagnen_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="marketing/kampagnen",
-        domain="marketing",
-        title="Kampagnen",
-        subtitle="marketing",
-        endpoint="/api/v1/marketing/kampagnen",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Kampagnen im marketing-Bereich finden und auswerten.",
-        prompts=["Zeige Kampagnen.", "Filtere die Liste."],
-        bundle="marketing",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
 def build_mobile_scanner_screen_definition() -> dict[str, Any]:
     columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
     return build_stamm_list_screen(
@@ -4718,7 +4699,6 @@ BATCH15_SCREEN_BUILDERS: dict[str, Any] = {
     "lager/umlagerung": build_lager_umlagerung_screen_definition,
     "logistik/frachtbriefe": build_logistik_frachtbriefe_screen_definition,
     "mahnwesen/mahnlauf": build_mahnwesen_mahnlauf_screen_definition,
-    "marketing/kampagnen": build_marketing_kampagnen_screen_definition,
     "mobile/scanner": build_mobile_scanner_screen_definition,
     "nachhaltigkeit/eudr-compliance": build_nachhaltigkeit_eudr_compliance_screen_definition,
     "personal/hrm-operations-gates": build_personal_hrm_operations_gates_screen_definition,

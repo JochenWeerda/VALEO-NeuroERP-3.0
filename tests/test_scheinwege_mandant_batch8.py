@@ -1,7 +1,8 @@
-"""Batch 8 Scheinwege: Foerderantraege, Marketingkampagnen, Laborproben/-auftraege im Mandanten.
+"""Batch 8 Scheinwege: Foerderantraege und Laborproben/-auftraege im Mandanten, Marketingkampagnen ins CRM.
 
 Bis 03.11.2026 legten die drei Wege bei jedem Lesezugriff Demodaten an, kannten keinen Mandanten, nahmen
 Text-Kennungen als Zahl an (Aendern/Loeschen immer 422) und gaben Befundangaben zurueck, ohne sie zu speichern.
+Kampagnen fuehrt seit 04.11.2026 domain_crm.crm_campaigns (Nutzerentscheidung); der Marketingweg ist entfernt.
 
 Teil 1 prueft den Code ohne Datenbank, Teil 2 Policies und Fachwege auf dem frischen Pruefstand
 (tests/rls_domain_support.py: Migrationen in einer zurueckgerollten Transaktion).
@@ -20,14 +21,13 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 import rls_domain_support as support
-from app.api.v1.endpoints import foerderung, labor, marketing
+from app.api.v1.endpoints import foerderung, labor
 from app.core.tenant import get_tenant_id
 from rls_domain_support import A, B, SYSTEM
 
 OPS = "domain_ops"
-TABELLEN = (f"{OPS}.ops_foerderantraege", f"{OPS}.ops_marketing_kampagnen", f"{OPS}.ops_labor_proben",
-            f"{OPS}.ops_labor_auftraege")
-MODULE = (foerderung, marketing, labor)
+TABELLEN = (f"{OPS}.ops_foerderantraege", f"{OPS}.ops_labor_proben", f"{OPS}.ops_labor_auftraege")
+MODULE = (foerderung, labor)
 
 
 # --- Teil 1: Code ohne Datenbank -------------------------------------------------------------------------------
@@ -50,9 +50,15 @@ def test_jeder_weg_mit_mandant_aus_dem_token_und_text_kennung(modul):
                 assert p.annotation in (str, "str"), f"{route.path}: {name} ist {p.annotation}"
 
 
-def test_kpis_melden_unbekanntes_ist_nicht_als_null():
-    quelle = inspect.getsource(marketing.get_kampagne_kpis)
-    assert "* 0.0" not in quelle and '"budget_ist": None' in quelle
+def test_kampagnen_nur_noch_im_crm():
+    """Ein Kampagnenbestand: kein /marketing-Weg, die Marketingseite zeigt die CRM-Liste."""
+    from pathlib import Path
+
+    from app.main import app
+
+    assert not [r.path for r in app.routes if getattr(r, "path", "").startswith("/api/v1/marketing")]
+    seite = (Path(__file__).resolve().parents[1] / "packages/frontend-web/src/pages/marketing/kampagnen.tsx").read_text(encoding="utf-8")
+    assert 'screenId="crm/kampagnen-liste"' in seite
 
 
 # --- Teil 2: Pruefstand ----------------------------------------------------------------------------------------
@@ -131,17 +137,6 @@ def test_foerderantrag_im_eigenen_mandanten(fach):
     assert antrag["id"] not in {i["id"] for i in liste["items"]}
 
 
-def test_kampagne_im_eigenen_mandanten(fach):
-    db, _ = fach
-    neu = marketing.MarketingKampagneCreate(name="Herbstduengung", typ="Mailing", startdatum=date(2026, 9, 1))
-    k = asyncio.run(marketing.create_kampagne(neu, tenant_id=A, db=db))
-    assert _status(marketing.get_kampagne_kpis(k["id"], tenant_id=B, db=db)) == 404
-    kpi = asyncio.run(marketing.get_kampagne_kpis(k["id"], tenant_id=A, db=db))
-    assert kpi["budget_ist"] is None
-    assert _status(marketing.update_kampagne(k["id"], marketing.MarketingKampagneUpdate(enddatum=date(2026, 8, 1)),
-                                             tenant_id=A, db=db)) == 422  # Ende vor Start
-    assert _status(marketing.delete_kampagne(k["id"], tenant_id=B, db=db)) == 404
-    asyncio.run(marketing.delete_kampagne(k["id"], tenant_id=A, db=db))
 
 
 def test_laborauftrag_braucht_eigene_charge_und_befund_speichert(fach):
@@ -161,3 +156,8 @@ def test_laborauftrag_braucht_eigene_charge_und_befund_speichert(fach):
     assert (gelesen["status"], gelesen["qs_entscheidung"]) == ("abgeschlossen", "freigeben")
     assert (gelesen["analysewerte"], gelesen["grenzwerte"], gelesen["bemerkung"]) == ({"Feuchte": 14.2}, {"Feuchte": 15.0}, "ok")
     assert neu["id"] not in {i["id"] for i in asyncio.run(labor.list_labor_auftraege(limit=500, tenant_id=B, db=db))["items"]}
+
+
+def test_marketingtabelle_ist_entfernt(db):
+    conn, _ = db
+    assert conn.execute(sa.text("SELECT to_regclass('domain_ops.ops_marketing_kampagnen')")).scalar() is None

@@ -27,7 +27,6 @@ export type Dokument = { id: string; name: string; typ: string; kategorie: strin
 export type Fahrzeug = { id: string; kennzeichen: string; typ: string; kilometerstand: number; naechsteInspektion: string; status: 'verfuegbar' | 'unterwegs' | 'werkstatt' }
 export type Antrag = { id: string; nummer: string; programm: string; antragsdatum: string; flaeche: number; betrag: number; status: 'entwurf' | 'eingereicht' | 'bewilligt' | 'abgelehnt' }
 export type Probe = { id: string; probennummer: string; typ: string; artikel: string; datum: string; labor: string; status: 'ausstehend' | 'in-bearbeitung' | 'abgeschlossen' }
-export type Kampagne = { id: string; name: string; typ: string; zielgruppe: string; startdatum: string; enddatum: string; budget: number; status: 'geplant' | 'aktiv' | 'beendet' }
 export type Projekt = { id: string; name: string; kunde: string; startdatum: string; enddatum: string; fortschritt: number; budget: number; status: 'aktiv' | 'pausiert' | 'abgeschlossen' }
 export type LaborAuftrag = {
   id: string
@@ -132,7 +131,6 @@ export const useDokumenteAblage = makeHook<Dokument[]>(['dokumente'], '/api/v1/d
 export const useFahrzeuge = makeHook<Fahrzeug[]>(['fuhrpark', 'fahrzeuge'], '/api/v1/fuhrpark/fahrzeuge', [])
 export const useFoerderAntraege = makeHook<Antrag[]>(['foerderung'], '/api/v1/foerderung/antraege', [])
 export const useLaborProben = makeHook<Probe[]>(['labor', 'proben'], '/api/v1/labor/proben', [])
-export const useMarketingKampagnen = makeHook<Kampagne[]>(['marketing', 'kampagnen'], '/api/v1/marketing/kampagnen', [])
 export const useProjekte = makeHook<Projekt[]>(['projekte'], '/api/v1/projekte', [])
 export const useLaborAuftraege = makeHook<LaborAuftrag[]>(['qualitaet', 'labor'], '/api/v1/qualitaet/labor-auftraege', [])
 export const useServiceAnfragen = makeHook<ServiceAnfrage[]>(['service', 'anfragen'], '/api/v1/service/anfragen', [])

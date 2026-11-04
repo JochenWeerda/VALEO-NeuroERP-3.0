@@ -1,18 +1,23 @@
-"""Foerderantraege, Marketingkampagnen, Laborproben und -auftraege im Mandanten (Batch 8 Scheinwege).
+"""Batch 8 Scheinwege: Seeds und Testreste weg, Foerderung und Labor im Mandanten, Marketingtabelle entfernt.
 
 Revision ID: scheinwege_mandant_20261103
 Revises: waagen_wiegungen_mandant_20261103
 
-Die vier Tabellen hatten keine Mandantenspalte; ihre Wege legten bei jedem Lesezugriff Demodaten an und lasen und
-schrieben mandantenuebergreifend. Die Wege setzen den Mandanten jetzt aus der Anmeldung; hier kommt die Spalte mit
-RLS (getrennte Policy je Befehl), dazu fuer Antragsnummern Eindeutigkeit je Mandant und fuer Befunde die Spalten, die
-der Befundweg bisher nur zurueckgab.
+Die Wege ``/foerderung``, ``/marketing`` und ``/labor`` legten bei jedem Lesezugriff Demodaten an und lasen und
+schrieben ohne Mandanten. Nutzerentscheidung 04.11.2026: Seed-Tabellen ohne Studio-Maske oder mit Ersatz werden
+entfernt, ersetzter Altbestand ohne Nutzer darf geloescht werden; Kampagnen fuehrt ``domain_crm.crm_campaigns``.
 
-Altbestand: Nutzerentscheidung 28.10.2026 - mandantenlose Live-Altbestaende gehoeren dem Default-Mandanten
-``00000000-0000-0000-0000-000000000001`` (Rollout als Migration, kein Code-Rueckfall). Gilt nur fuer Zeilen, die
-beim Upgrade schon ohne Mandant da sind; existiert der Mandant nicht, bricht die Migration ab, statt zu raten.
-Gewachsene Datenbank 03.11.2026: 2 Antraege und 2 Kampagnen (beide aus dem frueheren Seed), 7 Proben (2 Seed,
-5 Befunde), 74 Laborauftraege. Geloescht wird nichts; der Seed ist im Code entfernt.
+- ``ops_marketing_kampagnen``: ersetzt durch die CRM-Kampagnen, kein Weg liest sie mehr -> entfernt. Enthaelt sie
+  andere Zeilen als die zwei frueheren Seed-Kampagnen, bricht die Migration ab (nichts Echtes wird verworfen).
+- ``ops_foerderantraege``, ``ops_labor_proben``, ``ops_labor_auftraege`` (Studio-Masken vorhanden): Seed-Zeilen und
+  die Testreste von ``tests/test_labor_api.py`` (Chargen ``TEST-CHARGE-%`` bei ``Test-Labor`` samt Befunden) werden
+  geloescht - an ihrer exakten Signatur, nicht an Mustern allein. Danach Mandantenspalte mit RLS (Policy je Befehl),
+  Antragsnummer je Mandant eindeutig, Befundspalten, die der Befundweg bisher nur zurueckgab.
+- Uebrige Zeilen ohne Mandant (andere Installationen): Nutzerentscheidung 28.10.2026, Default-Mandant
+  ``00000000-0000-0000-0000-000000000001``; fehlt er, bricht die Migration ab.
+
+Gewachsene Datenbank 03.11.2026: alle Zeilen der vier Tabellen sind Seed oder Testrest (2 Antraege, 2 Kampagnen,
+7 Proben, 74 Auftraege).
 """
 from __future__ import annotations
 
@@ -25,14 +30,23 @@ down_revision = "waagen_wiegungen_mandant_20261103"
 branch_labels = None
 depends_on = None
 
-#: Nutzerentscheidung 28.10.2026 (Altbestand -> Default Tenant), nur fuer diese einmalige Zuordnung.
+#: Nutzerentscheidung 28.10.2026 (Altbestand -> Default Tenant), nur fuer verbleibende echte Zeilen.
 ALTBESTAND_MANDANT = "00000000-0000-0000-0000-000000000001"
 OPS = "domain_ops"
 FOERDER = f"{OPS}.ops_foerderantraege"
 PROBEN = f"{OPS}.ops_labor_proben"
-TABELLEN = (FOERDER, f"{OPS}.ops_marketing_kampagnen", PROBEN, f"{OPS}.ops_labor_auftraege")
+AUFTRAEGE = f"{OPS}.ops_labor_auftraege"
+MARKETING = f"{OPS}.ops_marketing_kampagnen"
+TABELLEN = (FOERDER, PROBEN, AUFTRAEGE)
 OWN = "tenant_id = public.rls_current_tenant()"
 POLICIES = tuple(f"tenant_isolation_{kind}" for kind in ("select", "insert", "update", "delete"))
+
+# Exakte Signaturen der frueheren _seed-Funktionen und der Testreste.
+SEED_KAMPAGNEN = ("Herbst-Aktion Weizen", "Fruehjahrs-Duenger-Kampagne")
+SEED_ANTRAEGE = "(nummer, programm, flaeche, betrag) IN (('FA-2026-001', 'Greening', 250, 21250), ('FA-2026-002', 'Junglandwirte', 120, 15000))"
+SEED_PROBEN = "id IN ('LB-SEED-2026-001', 'LB-SEED-2026-002')"
+SEED_AUFTRAEGE = "id IN ('LA-SEED-WEI-001', 'LA-SEED-RAP-002')"
+TEST_AUFTRAEGE = "chargen_id IN ('TEST-CHARGE-001', 'TEST-CHARGE-SPERRE-001') AND labor = 'Test-Labor'"
 
 
 def _exists(bind, table: str) -> bool:
@@ -55,12 +69,36 @@ def _enable(table: str) -> None:
     op.execute(f"CREATE POLICY tenant_isolation_delete ON {table} FOR DELETE USING ({OWN})")
 
 
+def _marketing_entfernen(bind) -> None:
+    if not _exists(bind, MARKETING):
+        return
+    fremd = bind.execute(sa.text(f"SELECT count(*) FROM {MARKETING} WHERE name NOT IN :n").bindparams(  # nosec B608
+        sa.bindparam("n", expanding=True)), {"n": list(SEED_KAMPAGNEN)}).scalar()
+    if fremd:
+        raise RuntimeError(f"{MARKETING}: {fremd} Kampagnen ausser dem Seed; erst in domain_crm.crm_campaigns uebernehmen")
+    op.execute(f"DROP TABLE {MARKETING}")
+
+
+def _seed_und_testreste_loeschen(bind) -> None:
+    if _exists(bind, FOERDER):
+        op.execute(f"DELETE FROM {FOERDER} WHERE {SEED_ANTRAEGE}")  # nosec B608
+    if _exists(bind, PROBEN) and _exists(bind, AUFTRAEGE):
+        op.execute(f"DELETE FROM {PROBEN} WHERE probennummer IN (SELECT 'BEF-' || id FROM {AUFTRAEGE} "  # nosec B608
+                   f"WHERE {TEST_AUFTRAEGE} OR {SEED_AUFTRAEGE})")
+    if _exists(bind, PROBEN):
+        op.execute(f"DELETE FROM {PROBEN} WHERE {SEED_PROBEN}")  # nosec B608
+    if _exists(bind, AUFTRAEGE):
+        op.execute(f"DELETE FROM {AUFTRAEGE} WHERE {TEST_AUFTRAEGE} OR {SEED_AUFTRAEGE}")  # nosec B608
+
+
 def upgrade() -> None:
     bind = op.get_bind()
     present = [t for t in TABELLEN if _exists(bind, t)]
-    if not present:
-        return
-    op.execute(f"LOCK TABLE {', '.join(present)} IN ACCESS EXCLUSIVE MODE")
+    gesperrt = present + ([MARKETING] if _exists(bind, MARKETING) else [])
+    if gesperrt:
+        op.execute(f"LOCK TABLE {', '.join(gesperrt)} IN ACCESS EXCLUSIVE MODE")
+    _marketing_entfernen(bind)
+    _seed_und_testreste_loeschen(bind)
 
     for table in present:
         if not _has_column(bind, table, "tenant_id"):
@@ -94,6 +132,7 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
+    """Struktur zurueck; geloeschte Seeds und Testreste kommen nicht wieder (es waren Scheindaten)."""
     bind = op.get_bind()
     for table in TABELLEN:
         if not _exists(bind, table):
@@ -104,7 +143,6 @@ def downgrade() -> None:
     if _exists(bind, FOERDER):
         op.execute(f"ALTER TABLE {FOERDER} DROP CONSTRAINT IF EXISTS uq_ops_foerderantraege_tenant_nummer")
     if _exists(bind, PROBEN):
-        # Befundangaben sind Belege: Spalten nur entfernen, wenn sie leer sind.
         belegt = bind.execute(sa.text(
             f"SELECT count(*) FROM {PROBEN} WHERE analysewerte IS NOT NULL OR grenzwerte IS NOT NULL OR bemerkung IS NOT NULL")).scalar()  # nosec B608
         if belegt:
@@ -115,3 +153,7 @@ def downgrade() -> None:
         if _exists(bind, table):
             op.execute(f"DROP INDEX IF EXISTS {OPS}.ix_{table.split('.')[1]}_tenant_id")
             op.execute(f"ALTER TABLE {table} DROP COLUMN IF EXISTS tenant_id")
+    op.execute(f"""CREATE TABLE IF NOT EXISTS {MARKETING} (
+        id varchar PRIMARY KEY, name varchar(255) NOT NULL, typ varchar(80) NOT NULL, zielgruppe varchar(120),
+        startdatum timestamptz, enddatum timestamptz, budget numeric(14, 2) DEFAULT 0, status varchar(30) DEFAULT 'geplant',
+        created_at timestamptz DEFAULT now(), updated_at timestamptz DEFAULT now())""")

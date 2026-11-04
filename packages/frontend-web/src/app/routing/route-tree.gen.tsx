@@ -4736,15 +4736,15 @@ const appRoute0660 = createRoute({
 const appRoute0661 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "marketing/kampagne/$id",
-  component: () => renderPage("@/pages/marketing/kampagnen"),
-  staticData: {"breadcrumb":"Detail","module":"@/pages/marketing/kampagnen","legacyPath":"/marketing/kampagne/:id"},
+  component: () => renderPage("@/pages/crm/campaign-detail"),
+  staticData: {"breadcrumb":"Detail","module":"@/pages/crm/campaign-detail","legacyPath":"/marketing/kampagne/:id"},
 })
 
 const appRoute0662 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "marketing/kampagne/neu",
-  component: () => renderPage("@/pages/marketing/kampagnen"),
-  staticData: {"breadcrumb":"Neu","module":"@/pages/marketing/kampagnen","legacyPath":"/marketing/kampagne/neu"},
+  component: () => renderPage("@/pages/crm/campaign-detail"),
+  staticData: {"breadcrumb":"Neu","module":"@/pages/crm/campaign-detail","legacyPath":"/marketing/kampagne/neu"},
 })
 
 const appRoute0663 = createRoute({
@@ -11008,12 +11008,12 @@ export const generatedRouteInventory = [
     "source": "auto"
   },
   {
-    "module": "@/pages/marketing/kampagnen",
+    "module": "@/pages/crm/campaign-detail",
     "path": "marketing/kampagne/:id",
     "source": "navigation"
   },
   {
-    "module": "@/pages/marketing/kampagnen",
+    "module": "@/pages/crm/campaign-detail",
     "path": "marketing/kampagne/neu",
     "source": "navigation"
   },

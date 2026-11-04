@@ -980,23 +980,6 @@ class LaborAuftragEntry(Base):
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
 
-class MarketingKampagneEntry(Base):
-    __tablename__ = "ops_marketing_kampagnen"
-    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
-
-    id = Column(String, primary_key=True, default=default_prefixed_id("MK"))
-    tenant_id = Column(String(120), nullable=False, index=True)  # Mandant setzt der Weg aus dem Token
-    name = Column(String(255), nullable=False)
-    typ = Column(String(80), nullable=False)
-    zielgruppe = Column(String(120), nullable=True)
-    startdatum = Column(DateTime(timezone=True), nullable=True)
-    enddatum = Column(DateTime(timezone=True), nullable=True)
-    budget = Column(DECIMAL(14, 2), default=0)
-    status = Column(String(30), default="geplant")
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
-
-
 class ZertifikatEintrag(Base):
     __tablename__ = "ops_zertifikate"
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}

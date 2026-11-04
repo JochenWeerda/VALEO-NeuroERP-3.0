@@ -25,7 +25,7 @@
   { "path": "futtermittel/chargen/neu", "module": "@/pages/futtermittel/charge-verfolgung" },
   { "path": "labor/probe/neu", "module": "@/pages/labor/proben-liste" },
   { "path": "logistik/frachtbrief/neu", "module": "@/pages/logistik/frachtbriefe" },
-  { "path": "marketing/kampagne/neu", "module": "@/pages/marketing/kampagnen" },
+  { "path": "marketing/kampagne/neu", "module": "@/pages/crm/campaign-detail" },
   { "path": "pos/gift-card-neu", "module": "@/pages/pos/gift-cards" },
   { "path": "pos/rabatt-neu", "module": "@/pages/pos/rabatte" },
   { "path": "crm/leads/new", "module": "@/pages/crm/lead-detail" },
@@ -81,7 +81,7 @@
   ,{ "path": "labor/probe/:id", "module": "@/pages/labor/proben-liste" }
   ,{ "path": "lager/umlagerung", "module": "@/pages/lager/lagerbewegungen" }
   ,{ "path": "logistik/frachtbrief/:id", "module": "@/pages/logistik/frachtbriefe" }
-  ,{ "path": "marketing/kampagne/:id", "module": "@/pages/marketing/kampagnen" }
+  ,{ "path": "marketing/kampagne/:id", "module": "@/pages/crm/campaign-detail" }
   ,{ "path": "pos/gift-card/:id", "module": "@/pages/pos/gift-cards" }
   ,{ "path": "pos/rabatt/:id", "module": "@/pages/pos/rabatte" }
   ,{ "path": "projekte/:id", "module": "@/pages/projekte/liste" }

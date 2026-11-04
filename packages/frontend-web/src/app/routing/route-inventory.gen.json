@@ -3321,12 +3321,12 @@
       "source": "auto"
     },
     {
-      "module": "@/pages/marketing/kampagnen",
+      "module": "@/pages/crm/campaign-detail",
       "path": "marketing/kampagne/:id",
       "source": "navigation"
     },
     {
-      "module": "@/pages/marketing/kampagnen",
+      "module": "@/pages/crm/campaign-detail",
       "path": "marketing/kampagne/neu",
       "source": "navigation"
     },

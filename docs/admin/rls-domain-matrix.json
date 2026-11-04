@@ -2757,6 +2757,7 @@
     "app/core/quality_lot_binding.py",
     "app/core/screen_definitions_capture.py",
     "app/core/screen_definitions_domain_batch15.py",
+    "app/core/screen_definitions_stamm_batch13.py",
     "app/core/settlement_e2e_reference.py",
     "app/domains/inventory/api/charge_lineage.py",
     "app/domains/logistik/sendung.py",

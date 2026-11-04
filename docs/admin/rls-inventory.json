@@ -1,18 +1,18 @@
 {
  "_note": "Generiert von scripts/rls_inventory.py; nicht von Hand aendern. Plan: docs/architecture/rls-mandantenkernel-plan.md",
  "summary": {
-  "tables": 784,
+  "tables": 783,
   "by_class": {
-   "A": 709,
+   "A": 708,
    "B": 22,
    "C": 9,
    "D": 44
   },
-  "rls_enabled": 677,
+  "rls_enabled": 676,
   "tenant_types": {
    "character varying": 339,
    "character varying(100)": 9,
-   "character varying(120)": 55,
+   "character varying(120)": 54,
    "character varying(128)": 1,
    "character varying(255)": 1,
    "character varying(36)": 83,
@@ -3784,14 +3784,6 @@
   },
   {
    "table": "domain_ops.ops_labor_proben",
-   "class": "A",
-   "tenant_type": "character varying(120)",
-   "rls": true,
-   "force_rls": false,
-   "policies": 4
-  },
-  {
-   "table": "domain_ops.ops_marketing_kampagnen",
    "class": "A",
    "tenant_type": "character varying(120)",
    "rls": true,

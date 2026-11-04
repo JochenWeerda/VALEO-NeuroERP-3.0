@@ -1376,26 +1376,36 @@
       }
     }
   },
-  "marketing/kampagnen": {
+  "crm/kampagnen-liste": {
     "schemaVersion": 1,
-    "id": "marketing/kampagnen",
-    "domain": "marketing",
+    "id": "crm/kampagnen-liste",
+    "domain": "crm",
     "mode": "list",
     "title": "Kampagnen",
-    "subtitle": "marketing",
+    "subtitle": "Marketing-Kampagnen und Reichweite",
     "adapter": {
       "type": "native",
-      "sourceId": "marketing/kampagnen",
+      "sourceId": "crm/kampagnen-liste",
       "temporary": false
     },
     "dataSources": [
       {
         "key": "list",
-        "endpoint": "/api/v1/marketing/kampagnen",
+        "endpoint": "/api/v1/crm/campaigns",
         "pageSize": 100
       }
     ],
     "actions": [
+      {
+        "key": "neu",
+        "label": "Neue Kampagne",
+        "kind": "primary",
+        "dangerLevel": "safe",
+        "zone": "header",
+        "navigationRoute": "/crm/campaign/new",
+        "localEffect": "navigation",
+        "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
+      },
       {
         "key": "export",
         "label": "CSV-Export",
@@ -1418,50 +1428,82 @@
         "rowHeight": 40,
         "columns": [
           {
-            "key": "id",
-            "label": "Id",
-            "sortable": true,
-            "filterable": true,
-            "width": 160
-          },
-          {
             "key": "name",
-            "label": "Name",
+            "label": "Kampagne",
             "sortable": true,
             "filterable": true,
-            "width": 160
+            "priority": "primary"
           },
           {
-            "key": "status",
+            "key": "campaign_type",
+            "label": "Typ",
+            "filterable": true,
+            "priority": "primary"
+          },
+          {
+            "key": "state",
             "label": "Status",
-            "sortable": true,
+            "renderKind": "status",
             "filterable": true,
-            "width": 160
+            "priority": "primary"
           },
           {
-            "key": "updated_at",
-            "label": "Updated At",
-            "sortable": true,
+            "key": "campaign_channel",
+            "label": "Kanal",
             "filterable": true,
-            "width": 160
+            "priority": "secondary"
+          },
+          {
+            "key": "start_date",
+            "label": "Beginn",
+            "renderKind": "date",
+            "priority": "secondary"
+          },
+          {
+            "key": "end_date",
+            "label": "Ende",
+            "renderKind": "date",
+            "priority": "secondary"
+          },
+          {
+            "key": "created_at",
+            "label": "Erstellt",
+            "renderKind": "date",
+            "sortable": true,
+            "priority": "tertiary"
           }
         ],
-        "rowActions": []
+        "rowActions": [
+          {
+            "key": "bearbeiten",
+            "label": "Details und Aktionen",
+            "dangerLevel": "safe",
+            "localEffect": "navigation",
+            "navigationRoute": "/crm/campaign/{id}"
+          }
+        ],
+        "rowRouteTemplate": "/crm/campaign/{id}"
       }
     ],
-    "noWorkflowReason": "Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
+    "noWorkflowReason": "Der Status steht an der Kampagne; die Liste fuehrt keinen eigenen Ablauf.",
     "agentContract": {
-      "businessPurpose": "Kampagnen im marketing-Bereich finden und auswerten.",
+      "businessPurpose": "Kampagnen finden und fuer Kennzahlen und Aktionen oeffnen.",
       "examplePrompts": [
-        "Zeige Kampagnen.",
-        "Filtere die Liste."
+        "Welche Kampagnen sind noch im Entwurf?",
+        "Welche Kampagne hat die meisten Klicks?"
       ],
       "sensitiveFields": [],
       "testSelectors": {
-        "screenRoot": "[data-testid='screen-marketing/kampagnen']"
+        "screenRoot": "[data-testid='screen-crm/kampagnen-liste']"
       },
       "dangerousActions": [],
-      "synonyms": []
+      "synonyms": [
+        "kampagnen",
+        "marketing",
+        "campaigns",
+        "marketing kampagnen",
+        "werbekampagnen"
+      ]
     },
     "layout": {
       "floorplan": "worklist",
@@ -1478,7 +1520,7 @@
       "requiresLazyTabs": false,
       "requiresVirtualTables": true,
       "lookupMinChars": 2,
-      "bundleGroup": "marketing"
+      "bundleGroup": "crm"
     },
     "processChains": {
       "k1_ernte": {
