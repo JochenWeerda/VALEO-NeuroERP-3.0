@@ -20383,3 +20383,12 @@ Offen (Folgeauftrag): die uebrigen neun mandantenlosen domain_ops-Tabellen mit L
 pruefen (Compliance-Register mit Seed in compliance.py, ops_disposition, ops_zertifikate); preise/historie errechnet
 Verlaeufe, preise/konditionen fuellt Standardwerte auf; Marketing-/Communication-Dienste (services/crm-*) sollen
 CRM-Kampagnen konsumieren statt eigene zu fuehren.
+
+## BATCH8-ALTTABELLE-TESTDATEN-20261104 — reserviert, Codex
+
+Neue Nutzerentscheidung 04.11.2026: "vorhandene zeilen sin nur testdaten. tabelle kann entfernt werden, wenn nicht mehr passend".
+Die ersetzte ops_marketing_kampagnen darf nach dem bereits belegten Verbraucherabbau auch mit Testzeilen
+entfernt werden. Dies ersetzt fuer diese ausgemusterte Tabelle die vorherige Seed-/Leerheitspruefung.
+Dateibesitz: scheinwege_mandant_20261103.py, gezielter Batch8-Test, QA und dieser Nachtrag.
+Abnahme: DROP ohne CASCADE nach vorhandener Tabellensperre; PostgreSQL-Nachweis ausschliesslich temporaer
+und zurueckgerollt. Weiter verwendete Foerder-/Labortabellen und deren Mandanten-/RLS-Vertraege bleiben erhalten.
