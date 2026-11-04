@@ -48,6 +48,7 @@ def _auftrag_to_dict(i: LaborAuftragEntry, befund: Optional[LaborProbe] = None) 
         "id": i.id,
         "chargenId": i.chargen_id,
         "chargen_id": i.chargen_id,
+        "charge": i.chargen_id,
         "labor": i.labor,
         "analysen": int(i.analysen or 0),
         "auftragsdatum": _dt(i.auftragsdatum) or "",
