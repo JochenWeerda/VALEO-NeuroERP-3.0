@@ -20394,3 +20394,7 @@ Branch claude/batch9-compliance-register-20261104 auf Batch 8. Gewachsene DB: al
 Offen (Folge): Die Register haben keinen Erfassungsweg (nur der Seed schrieb) - sie zeigen jetzt ehrlich leer.
 Zulassungen auf den PSM-Stamm (agrar_psm: bvl_nummer, zulassung_ablauf) umstellen (neue Studio-Maske);
 VVVO (ops vs domain_compliance) und Sachkunde (Kunden/Mitarbeitende/Feldbuch) fachlich zusammenfuehren.
+
+## BATCH9-SEED-SCHUTZ-20261104 — reserviert, Codex
+
+Ziel: Batch-9-Migration schuetzt abweichende und NULL-haltige Daten vor Seed-Loeschung und Tabellen-Drop. Dateibesitz: alembic/versions/compliance_register_mandant_20261104.py, eigene fokussierte Tests, QA-Nachweis und dieser Workboard-Anhang im separaten Branch. Abnahme: Original-Seeds vollstaendig anhand belegbarer Geschaeftsfelder, unbekannte Reste erhalten; DROP bei unbekannten Zeilen abgebrochen; PostgreSQL-Test in zurueckgerollter Transaktion mit temporaeren Tabellen nach Freigabe des Prueffensters, kein Reset oder Migrationsstempel. Risiko: Original-Seedwerte mit zeitabhaengigen Feldern lassen sich nicht sicher rekonstruieren und muessen erhalten bleiben.
