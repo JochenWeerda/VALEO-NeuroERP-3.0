@@ -142,7 +142,9 @@ def _altdebitor(db, tenant: str, nummer: str, name: str) -> str:
     did = str(uuid4())
     db.execute(sa.text(
         "INSERT INTO domain_erp.debitors (id, tenant_id, debitor_number, name, address, payment_terms, credit_limit, is_active) "
-        "VALUES (:id, :t, :nr, :n, CAST('{}' AS jsonb), '30_days', 0, TRUE)"), {"id": did, "t": tenant, "nr": nummer, "n": name})
+        "VALUES (:id, :t, :nr, :n, CAST(:a AS jsonb), '30_days', 0, TRUE)"),
+        {"id": did, "t": tenant, "nr": nummer, "n": name,
+         "a": '{"street": "Dorfstr. 1", "postal_code": "26789", "city": "Leer", "country": "DE"}'})
     return did
 
 
