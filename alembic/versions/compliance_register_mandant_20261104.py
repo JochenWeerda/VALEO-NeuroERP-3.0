@@ -6,11 +6,8 @@ Revises: scheinwege_mandant_20261103
 Nutzerentscheidung 04.11.2026: Seed-Tabellen ohne Studio-Maske oder mit Ersatz werden entfernt, ersetzter
 Altbestand ohne Nutzer darf geloescht werden.
 
-- ``ops_disposition``: handgepflegter Bestand/Mindestbestand/Empfehlung, ersetzt durch den Bestellvorschlag
-  (rechnet aus echtem Bestand und Meldebestand) -> entfernt. Enthaelt sie andere, doppelte oder nicht sicher
-  zuordenbare Zeilen, bricht die Migration ab.
-- ``ops_zertifikate_api``: zweiter Zertifikatsweg, dessen POST vom ersten ueberdeckt war und dessen Lesewege den
-  Mandanten aus dem Pfad nahmen bzw. alle Mandanten lasen -> entfernt (leer; Zeilen braechen ab).
+- ``ops_disposition`` und ``ops_zertifikate_api`` sind ausgemustert; ihre vorhandenen Zeilen sind
+  laut Nutzerentscheidung 04.11.2026 Testdaten. Nach Verbraucherabbau werden beide Tabellen ohne CASCADE entfernt.
 - Cross-Compliance, ENNI, QS-Checkliste, Zulassungen, Kunden-Sachkunde, Saatgut-Nachbau, VVVO und Zertifikate
   (Studio-Masken vorhanden): exakte Signaturen aus ``seed_compliance_data`` bzw. ``_seed``:
   eindeutig nachweisbare Seed-Zeilen werden geloescht, dann Mandantenspalte mit RLS (Policy je
@@ -64,10 +61,6 @@ SEEDS = {
         "('GlobalG.A.P.', 'GGN', 'GGN-12345678', '2025-09-30 00:00:00', '2025-08-15 00:00:00', 'ablaufend'))",
 }
 TABELLEN = tuple(SEEDS)
-DISPOSITION_ALT = "(artikel, artikel_id, bestand, mindestbestand, bedarf, empfehlung, prioritaet) IN (" \
-    "('Weizen Premium', 'ART-001', 120, 200, 80, 'Nachbestellen: 100 t', 'hoch'), " \
-    "('Raps', 'ART-002', 85, 100, 15, 'Nachbestellen: 50 t', 'mittel'), " \
-    "('NPK 15-15-15', 'ART-003', 250, 150, 0, 'Ausreichend', 'niedrig'))"
 OWN = "tenant_id = public.rls_current_tenant()"
 POLICIES = tuple(f"tenant_isolation_{kind}" for kind in ("select", "insert", "update", "delete"))
 
@@ -92,22 +85,10 @@ def _enable(table: str) -> None:
     op.execute(f"CREATE POLICY tenant_isolation_delete ON {table} FOR DELETE USING ({OWN})")
 
 
-def _entfernen(bind, table: str, nur_diese: str | None) -> None:
-    if not _exists(bind, table):
-        return
-    bedingung = f"({nur_diese}) IS NOT TRUE" if nur_diese else "TRUE"
-    fremd = bind.execute(sa.text(f"SELECT count(*) FROM {table} WHERE {bedingung}")).scalar()  # nosec B608
-    if fremd:
-        raise RuntimeError(f"{table}: {fremd} Zeilen ausser Seed/Testrest; erst uebernehmen, dann entfernen")
-    if nur_diese:
-        doppelt = bind.execute(sa.text(
-            f"SELECT count(*) FROM (SELECT 1 FROM {table} GROUP BY "
-            "artikel, artikel_id, bestand, mindestbestand, bedarf, empfehlung, prioritaet "
-            "HAVING count(*) > 1) AS doppelungen"  # nosec B608
-        )).scalar()
-        if doppelt:
-            raise RuntimeError(f"{table}: {doppelt} doppelte Seed-Signaturen; Herkunft unklar")
-    op.execute(f"DROP TABLE {table}")
+def _entfernen(bind, table: str) -> None:
+    # Die beiden ausgemusterten Tabellen enthalten laut Nutzerentscheidung nur Testdaten.
+    if _exists(bind, table):
+        op.execute(f"DROP TABLE {table}")
 
 
 def _seed_loeschen(bind, table: str) -> None:
@@ -122,8 +103,8 @@ def upgrade() -> None:
     gesperrt = present + [t for t in (DISPOSITION, ZERT_API) if _exists(bind, t)]
     if gesperrt:
         op.execute(f"LOCK TABLE {', '.join(gesperrt)} IN ACCESS EXCLUSIVE MODE")
-    _entfernen(bind, DISPOSITION, DISPOSITION_ALT)
-    _entfernen(bind, ZERT_API, None)
+    _entfernen(bind, DISPOSITION)
+    _entfernen(bind, ZERT_API)
 
     for table in present:
         _seed_loeschen(bind, table)
