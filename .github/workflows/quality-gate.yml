@@ -216,22 +216,25 @@ jobs:
     runs-on: ubuntu-latest
     needs: [secret-scan]
     env:
-      POSTGRES_DB: valeo_test
+      # Pruefstand wie in ci.yml (Test & Lint): frisch migriert, Name als Pruefstand erkennbar; RLS-, DMS- und
+      # Rollen-Vertraege brauchen TEST_DATABASE_URL und pruefen unter den getrennten Rollen (valeo_app ...).
+      POSTGRES_DB: valeo_probe
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_HOST: localhost
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/valeo_test
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/valeo_probe
+      TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/valeo_probe
     services:
       postgres:
         image: postgres:15
         env:
-          POSTGRES_DB: valeo_test
+          POSTGRES_DB: valeo_probe
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U postgres -d valeo_test"
+          --health-cmd "pg_isready -U postgres -d valeo_probe"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 10
@@ -312,7 +315,13 @@ jobs:
         run: python scripts/check_no_core_contamination.py
 
       - name: Migrate DB schema (Alembic)
-        run: python scripts/init_db.py
+        run: |
+          # Schemavertrag gegen den rein migrierten Stand, bevor create_all ORM-Tabellen ohne Migration ergaenzt.
+          python scripts/init_db.py --nur-migrationen
+          pytest -q -p no:cacheprovider --no-cov tests/test_rls_inventory_contract.py::test_tabellen_entsprechen_dem_frischen_schema
+          python scripts/init_db.py
+          # Getrennte Rollen (valeo_app, valeo_system, ...) wie im Betrieb.
+          python scripts/provision_db_roles.py --url "$DATABASE_URL" --anwenden
 
       - name: DDL provenance (DB-GOVERNANCE-20261026)
         run: python scripts/check_ddl_provenance.py --erlaubt alembic orm-create-all
@@ -346,7 +355,7 @@ jobs:
           retention-days: 14
 
       - name: Run tests
-        run: pytest -q
+        run: pytest -q --deselect tests/test_rls_inventory_contract.py::test_tabellen_entsprechen_dem_frischen_schema
 
       - name: Run isolated KI service contracts and merge real coverage
         run: python scripts/run_ki_service_coverage.py

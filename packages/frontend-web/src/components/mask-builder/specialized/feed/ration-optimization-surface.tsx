@@ -91,6 +91,7 @@ import { WizardFeedSections, type SectionFeed } from '@/features/feed-advice/Wiz
 
 import { tastenKlick } from '@/lib/tastenklick'
 import { useDomainIdentity } from '../intake/domain-data'
+import { businessToday } from '@/lib/business-time'
 // ---------------------------------------------------------------------------
 // Meridian-/Terra-Semantikbruecke fuer den spezialisierten Solver-Arbeitsplatz.
 // Keine Produktpalette: Der Portal-Einstieg selbst wird nativ aus der
@@ -1148,7 +1149,7 @@ function FeedingControlPanel({ protocol, wizardData, result }: { protocol: Mixin
   })
   const latest = save.data?.control_result ?? history.data?.[0]?.control_result as FeedingControlResult | undefined
   const submit = () => save.mutate({
-    group_id: groupId, feeding_date: new Date().toISOString().slice(0, 10), ration_ref: 'active-optimization',
+    group_id: groupId, feeding_date: businessToday(), ration_ref: 'active-optimization',
     komponenten: components, restfutter_kg: restKg, tierzahl: wizardData.group.count, tm_pct: tmPct,
     milch_kg_kuh: wizardData.milkYield, milchpreis_eur_kg: wizardData.milkPriceEur ?? 0.44,
     futterkosten_eur_kuh: result.total_cost_eur_day ?? null, futtertisch_temp_c: feedTemp, umgebung_temp_c: ambientTemp,

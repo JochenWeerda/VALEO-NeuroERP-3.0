@@ -61,8 +61,9 @@ describe('DebitorenPage native OP list', () => {
 
     expect(await screen.findByRole('heading', { name: 'Debitoren OP' })).toBeTruthy()
     expect(screen.getByText('Offene Posten Debitoren')).toBeTruthy()
-    expect(await screen.findByText('RE-2025-0123')).toBeTruthy()
-    const table = screen.getByTestId('table-list')
+    // In der Tabelle suchen: das Detailband darunter wiederholt die Felder der gewaehlten Zeile.
+    const table = await screen.findByTestId('table-list')
+    expect(await within(table).findByText('RE-2025-0123')).toBeTruthy()
     expect(within(table).getByText('Agrar Schmidt GmbH')).toBeTruthy()
     expect(within(table).getByText('10001')).toBeTruthy()
     expect(within(table).getByText('Ja')).toBeTruthy()

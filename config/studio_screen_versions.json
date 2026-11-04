@@ -4510,30 +4510,8 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "einkauf/rechnung-abgleich": {
-      "definition_hash": "388afce269846d6673b1af8df2abf91c3d935e493b8f5b6873afa2969adc8b62",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "einkauf/rechnung-abgleich-liste": {
       "definition_hash": "7fb934bd318ca89e002584ab4251b4ea077c604a14738b9180af8fd13c76bdb2",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "einkauf/rechnung-eingang-erfassung": {
-      "definition_hash": "e14e406798e68ee71f432659a64bd9a45e95642f916d6fd07a78da345e3dec33",
       "gates_passed": [
         "A",
         "B",
@@ -4573,30 +4551,8 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "einkauf/retouren": {
-      "definition_hash": "b1d52d7479451230fa61a64fdb7a39cc0bae862d5ecb4b9d8d7243924401d785",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "einkauf/retouren-liste": {
       "definition_hash": "4cfc322ae25189d8d84284e98ed61f21307420e0d7fab1adb89f6873950c144d",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "einkauf/rfq-bids": {
-      "definition_hash": "ed58e10d7dde13630dfca4e8453bbedaef887398014d933f6c54eda1fa3c5fc6",
       "gates_passed": [
         "A",
         "B",
@@ -4619,17 +4575,6 @@
     },
     "einkauf/supplier": {
       "definition_hash": "90e59c56d83455ecfedb9422ed46846dab989726e734ae6fe6a3f14f50115263",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "einkauf/wareneingang": {
-      "definition_hash": "f30426b20c2d833d76b15054ce6059ac8386cf9bffee9cda7dc7fbb1b07f811e",
       "gates_passed": [
         "A",
         "B",
@@ -4672,6 +4617,17 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
+    "errors/NotFound": {
+      "definition_hash": "0765ddcefb6d0419a1a152640f25b195521b06f0ffe4608756e1667d8deed527",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
     "etiketten/druck-liste": {
       "definition_hash": "08d740657eacbdfc6ffa47e9a95dcbcf1236f53c78858a32e77ff63306c89557",
       "gates_passed": [
@@ -4684,7 +4640,7 @@
       "version": "1.0.0"
     },
     "etiketten/drucken": {
-      "definition_hash": "04a932adf3402c3e6ea116ca674c1b803e9447f2306cea46ee3037a625d0eb05",
+      "definition_hash": "ee727b3f54167c9a2e1c2e9164d786cce8fac4e50d2e77584691321b82a7c8ef",
       "gates_passed": [
         "A",
         "B",
@@ -4793,17 +4749,6 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "fibu/anlagen-suite": {
-      "definition_hash": "b9a364f7aebc3f5df77e351aa1d968c7db04d3ddeb9c030cb5e1c2770f3ea7ec",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "fibu/atlas": {
       "definition_hash": "42bd67179b817522da163cec85080c53b65d045a1e9a303a6936904778603108",
       "gates_passed": [
@@ -4826,52 +4771,8 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "fibu/buchhaltungsuebersicht": {
-      "definition_hash": "6e634d890734bd9d6e54e08a56321cdace9f1994db7e1f1a72fdd9ba25b702a8",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "fibu/buchungsjournal-liste": {
       "definition_hash": "25f5b5ea705e4f0e7da8c4335450c56e58f7a759ab29a206cf568fb605bc71d9",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "fibu/buchungsuebernahme-connectors": {
-      "definition_hash": "9b79c0e9991c57612c64a26b34b59be32203faf54725c99170504d5004de7c8e",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "fibu/bwa": {
-      "definition_hash": "d8f82fc2cab26a24f9f3123323dee0c596e37cfeb7c5c43d8e655858d22b0d2a",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "fibu/debitoren-api": {
-      "definition_hash": "f17aee6e8011437695fc541cca1edb5aa41be3f989ae2e25f293825df59efb63",
       "gates_passed": [
         "A",
         "B",
@@ -4892,19 +4793,8 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "fibu/elster-online": {
-      "definition_hash": "980a600e2f00376be62ddaf7c5e241c0c72adeeb6e0ffdad6e5f6456f756de02",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "fibu/erloeskennziffern": {
-      "definition_hash": "829521c570238b2601232a29bfa964a561131b6ad0a416f4518d35f8a40a1eac",
+      "definition_hash": "9e2c4eaddd274296049838bbbff73757ff6527f830c01e032ae447ddb15483cb",
       "gates_passed": [
         "A",
         "B",
@@ -4915,7 +4805,7 @@
       "version": "1.0.0"
     },
     "fibu/erloeskontenzuordnung": {
-      "definition_hash": "7a8cfbe31221cb51b9f12f245fa12e71b713fe05fb2ed624916d9c13a14ed9a3",
+      "definition_hash": "7a4675f0613e6649b3e8e51e76248a3e0396d7fea7a17c0970bc9b2590a907e7",
       "gates_passed": [
         "A",
         "B",
@@ -4926,7 +4816,7 @@
       "version": "1.0.0"
     },
     "fibu/forderungsgruppen": {
-      "definition_hash": "e507ba52caa2d940d2236854a65e48e029d6865b158c7db7987009c5518a1618",
+      "definition_hash": "952e9b8526b713e74b8955e69e55ebfaefb9a780efe70a8cd0ab66a44b07330b",
       "gates_passed": [
         "A",
         "B",
@@ -4958,17 +4848,6 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "fibu/hauptbuch": {
-      "definition_hash": "dfad9c2b82bfc5ec446e94e5ac43d0324dd9695cc5a588e4a94f9d0ffff1da49",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "fibu/hauptbuch-liste": {
       "definition_hash": "6a2357e0e9bbf865dbdd4f5cf82942daf70d485ca180a19f7dc3d4577fa57ebc",
       "gates_passed": [
@@ -4982,17 +4861,6 @@
     },
     "fibu/kassenbuch-liste": {
       "definition_hash": "9a25617c98ea48b4961d7bebbca144ce2cc5d2fa0af93535d7b5a2a1415b707e",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "fibu/kontenplan": {
-      "definition_hash": "c46c390d94988117dd8dbd88acdeae488341e2c9e1bed6577ec620a9bc78c031",
       "gates_passed": [
         "A",
         "B",
@@ -5024,30 +4892,8 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "fibu/kostenstellenrechnung": {
-      "definition_hash": "4e565d42279b363f3e99504ddcfaf579f68fc33cdc6c6daba76d63712c08993a",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "fibu/kreditlinien": {
-      "definition_hash": "f232b621aec7ca58a1d336116d2ee4f7acfa810a93c375907a8d65518cb3644b",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "fibu/kreditoren": {
-      "definition_hash": "d745fe75fc3a10f6641d588f1be81cda8fde2fd0e40c23341c95511d67c1805f",
+      "definition_hash": "500b3e4507ddab524585c8f76a741ebbfcabb891eee007b26abfe8b6b1a6e596",
       "gates_passed": [
         "A",
         "B",
@@ -5069,7 +4915,7 @@
       "version": "1.0.0"
     },
     "fibu/lohn-connector": {
-      "definition_hash": "08d01d0e1d3c87483b1b43db0d2bd9b43b42545a395c4907f0bbe8695f53308c",
+      "definition_hash": "157f8da2c732e02ebb084362144e5da31510346c51a89aaf3a37d66fce9707c7",
       "gates_passed": [
         "A",
         "B",
@@ -5124,7 +4970,7 @@
       "version": "1.0.0"
     },
     "fibu/periodische-buchungen": {
-      "definition_hash": "6ad76137d83c285a9cc1b8f7b0ad5db9f67bc32aa45ff01cadc64f3bbcc16c09",
+      "definition_hash": "1c79ff7cef86922f981d35d3003e7f1b219c5952c599ec659d8fb223720116ae",
       "gates_passed": [
         "A",
         "B",
@@ -5135,7 +4981,7 @@
       "version": "1.0.0"
     },
     "fibu/quadriga-connector": {
-      "definition_hash": "467954d2bcc2ccc6e822a724412a869233ccd9acc017e3d29ca51b3d0cbe9215",
+      "definition_hash": "104a6dac5eddefc48bbc4a49f4e869b2a114db19210aec2ec410e6cc4d89f510",
       "gates_passed": [
         "A",
         "B",
@@ -5156,30 +5002,8 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "fibu/schnittstelle-fibu": {
-      "definition_hash": "28f638cc6db769b83560d013331bac1097e801394cfab990f57b551664399bb1",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "fibu/schnittstelle-fibu-liste": {
       "definition_hash": "3cc11da6eab125cf0013400d69c30ebffb8f2365636c73240939fcef9d7df12f",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "fibu/schnittstellen-center": {
-      "definition_hash": "7cfdb137079cb71bb826f3eb3f84e612cf24bb72e79cb64ec70fc0db3e6f63a1",
       "gates_passed": [
         "A",
         "B",
@@ -5211,17 +5035,6 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "fibu/verbindlichkeiten": {
-      "definition_hash": "c668d2b922ee1f1727008488ca3e7daae7c55fdabbcc340faf96acddfa364ec4",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "fibu/verbindlichkeiten-liste": {
       "definition_hash": "89e1eede55fdf6a1153693ffc6beac312b1cfce503f356b23b5eb15d9f8c269b",
       "gates_passed": [
@@ -5233,30 +5046,8 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "fibu/zahlungseingaenge": {
-      "definition_hash": "85f51e9e5c8c1de9bd3f1a342f0274466f84516733256f48b22c23a254fc008f",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "fibu/zahlungseingaenge-liste": {
       "definition_hash": "c59c169fdad4f283c48d9c26a6d844a65a6892f0f2649f71921a8cbd05702026",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "fibu/zahlungslaeufe": {
-      "definition_hash": "5c7264318cca73ccded1235ca52c25fbe9b66aa82987e0fa14e7f39868d068bb",
       "gates_passed": [
         "A",
         "B",
@@ -5279,17 +5070,6 @@
     },
     "fibu/zahlungsmeldungen": {
       "definition_hash": "c32899a68056849a688609fb460fdabf77758e232a80adb3a4c857b53ca26f49",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "fibu/zahlungsvorschlaege": {
-      "definition_hash": "b280f4b57485b8e9026ea81473150a23eebbc6225b112b9e03c14f1658af0c88",
       "gates_passed": [
         "A",
         "B",
@@ -5323,28 +5103,6 @@
     },
     "finance/ap-invoices-liste": {
       "definition_hash": "aaeae073685d906e8fd468bc57d3ffd0d667d43d1d25171d671a5a1843b58c08",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "finance/ap/invoices": {
-      "definition_hash": "889282a26800500717f5ecc2910dc4a4f4c36a38bd5a5463c6029b2cd33381d8",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "finance/ap/invoices/new": {
-      "definition_hash": "601eb7f202774de82902e2383258d68ef00a9fe34470e9fb7ae4970fbbb06829",
       "gates_passed": [
         "A",
         "B",
@@ -5422,17 +5180,6 @@
     },
     "finance/bankkonto": {
       "definition_hash": "c004e57df269e70f90796a2a56f093a8e7443bf86867a80aab1ef2860bde889d",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "finance/bookings/new": {
-      "definition_hash": "4a3d1100bd95c127759e215c322945bbff65a34d4309d7d4063383095289b92b",
       "gates_passed": [
         "A",
         "B",
@@ -5560,30 +5307,8 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "finance/kontenplan": {
-      "definition_hash": "a55e5cde217bd15b6f747220a87a09584464f83843053d6edcebde533781a91d",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "finance/kreditor": {
       "definition_hash": "04c47b008cc28cdd11c4768637e86a4f677203451e0e3cc7a36b2cd8ffabeded",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "finance/kreditoren": {
-      "definition_hash": "5e94f6104bc0a5d308154087b7f545332ec50b8313f3d939f8383330a5a850db",
       "gates_passed": [
         "A",
         "B",
@@ -5616,18 +5341,7 @@
       "version": "1.0.0"
     },
     "finance/nebenbuch-abstimmung": {
-      "definition_hash": "eb5d39d850b0c39bf71763bc38b6e515b0f7927efbf2118da1fe709dbcc8f7ad",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "finance/offene-posten": {
-      "definition_hash": "48ceb257e45694d7bfe96f25f3c85bfbe4b07d40eb8ba65287e72fe362ae617a",
+      "definition_hash": "fbb24805a436c880497d2c13590d93005feeeff07008da1f7de7eee5fe87c1be",
       "gates_passed": [
         "A",
         "B",
@@ -5659,17 +5373,6 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "finance/op-kreditoren": {
-      "definition_hash": "e95cae1028c9d2df514d6beea8d3090db965de56d0d7a67f23d7feebc8ade19f",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "finance/payment-matching-liste": {
       "definition_hash": "a5ce89a511fecf3d134063cfde1f2efdfdb0cad4d7e931cdf440b956a50fc2ff",
       "gates_passed": [
@@ -5683,39 +5386,6 @@
     },
     "finance/payment-run": {
       "definition_hash": "5ba8406d72f8d560853abc7c843c56499f9f74e65281eb85f9d15ed47aacb1bd",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "finance/payments": {
-      "definition_hash": "dec9580f6615451f1acbae5c8eadb41dd45e07d1045f1df6cdb592ce2e1aaa0d",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "finance/periodenabschluss": {
-      "definition_hash": "8e6ab7fca703d2bcc4c691cd09fab98a04aee7ed644157912991ee11aa04a7e2",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "finance/periods": {
-      "definition_hash": "59a451154d77884b48b0cda5ed65cae9c7725da5c5205bbac11b266844eb0a1d",
       "gates_passed": [
         "A",
         "B",
@@ -5749,17 +5419,6 @@
     },
     "finance/rechnungstapel": {
       "definition_hash": "48ee31a5adccb4af380ef158d0e1747d47ed2c86eebc005eee5a383f8b343f2e",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "finance/skonto-optimizer": {
-      "definition_hash": "3a15dbedf7b175e06fd472f8a442a7eda51d7bf37fe47067d1017ca34cdd19af",
       "gates_passed": [
         "A",
         "B",
@@ -5824,17 +5483,6 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "finance/zahlungseingang": {
-      "definition_hash": "1e22447a84125c6122d758234bad66b96acc15669006388dc3b4273b687597b4",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "finance/zahlungslauf-kreditoren": {
       "definition_hash": "c17ac6cabeffada18181f22d2311e6f6cc2b55e6072036b3bc08982581d2dad2",
       "gates_passed": [
@@ -5870,17 +5518,6 @@
     },
     "foerderung/liste": {
       "definition_hash": "31b3067f1381bacf5f4c0643ebd6b9562fcd83b7f87569ad162a73f40e09fc80",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "fuhrpark/ausgehende-belege-dokumente": {
-      "definition_hash": "4a467143c212b86d6463ed85dce145ee0398b87c54fd9b7cf32ffa7d2b31b452",
       "gates_passed": [
         "A",
         "B",
@@ -5934,17 +5571,6 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "fuhrpark/fahrzeug/neu": {
-      "definition_hash": "3fd9636c46bef6fbffe63f1485e3d55e18972e567843203b5183fd0cacac9a03",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "fuhrpark/fahrzeuge": {
       "definition_hash": "8921aa0985231d79d7f9f14fc3ac4728d45c9969228de3d6bba8ac2864eee8dc",
       "gates_passed": [
@@ -5958,72 +5584,6 @@
     },
     "fuhrpark/fahrzeuge-liste": {
       "definition_hash": "9078f76e8e54657ac6445d29513d3749d48d514bd72b6a8d78ebb53364523213",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "fuhrpark/fuhrpark-auswertung-kosten-pro-fahrzeug": {
-      "definition_hash": "0c628d094a56a377767eec65e42b6ada7a6fb64227989c4ce3dfdbb310c57f50",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "fuhrpark/fuhrpark-auswertungen-menu": {
-      "definition_hash": "1f1271f04fdd684fdf3f648c30713249a0dd8c4376fbefea5763bdca345e026f",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "fuhrpark/fuhrpark-klassisch": {
-      "definition_hash": "25a83239e993fbd76e80e914d910526b11071f1e5d22eb4773c25da7eee71324",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "fuhrpark/fuhrpark-menue": {
-      "definition_hash": "e824d87859a5fe229e7eaee3d22ba1de4bd159f01cf980a43ec09bf4af609654",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "fuhrpark/fuhrpark-rechnungen": {
-      "definition_hash": "d7e2afec98b45af6c0f10e51dcaef7568c7d07451a8fe2d67e685cb3138aa529",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "fuhrpark/fuhrpark-stammdaten": {
-      "definition_hash": "acc85119e7b0b424be6f563322e9985889e6c16fe4b663abd922dfb712c6ab2d",
       "gates_passed": [
         "A",
         "B",
@@ -6089,18 +5649,7 @@
       "version": "1.0.0"
     },
     "futter/einzel/liste": {
-      "definition_hash": "b278029eebe3746af4c6a44651e1ab5122bece2771d78d0f817da5b053863463",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "futter/einzel/stamm/neu": {
-      "definition_hash": "7be9b5e0c7db51bfd0dc76c34e943e48245437e0f9eedaa61923a17e6c508a34",
+      "definition_hash": "e4a5a55568947fbf6b801ffa6e959e7c47e4d1f899acfc93ce286edcfbdcc1ce",
       "gates_passed": [
         "A",
         "B",
@@ -6112,28 +5661,6 @@
     },
     "futter/misch": {
       "definition_hash": "672cd06254fc6bc940f1d30aeeb86e6468ea2e659eec9eec212f8d9dca1d5489",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "futter/misch/liste": {
-      "definition_hash": "5fdb1f50b5d567d4717e46cafda47a3603bbfe2c37f324675ed579e34c0ccb1c",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "futter/misch/stamm/neu": {
-      "definition_hash": "66a224f74d0e13ba35192085d32220bf27a735c6203fd9c2ffedf571860b3897",
       "gates_passed": [
         "A",
         "B",
@@ -6209,17 +5736,6 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "futtermittel/einzelfuttermittel/liste": {
-      "definition_hash": "176b4abf3baab3aaabb9349f9ba3fff8c7820893247ceb3cb589c839bf4ca400",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "futtermittel/einzelfuttermittel/stamm/new": {
       "definition_hash": "079b24caee7a6b4027b5bda8e094d0583af5239c679106fe91edf16685fe498a",
       "gates_passed": [
@@ -6275,17 +5791,6 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "futtermittel/grundfutteranalysen": {
-      "definition_hash": "db03673676bc80539c25459aa7986be91732febdef5440684a6e988ee19413d0",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "futtermittel/integrationsmonitor": {
       "definition_hash": "6c5b3b5993815554c682db78657c6aeff6d58d631b59b71d9c2576e6adfafc8d",
       "gates_passed": [
@@ -6310,17 +5815,6 @@
     },
     "futtermittel/mischfuttermittel-liste": {
       "definition_hash": "5b346e9c96b2af8c1b3b74ac4afa1848626b010e98c81c4b4183811dbdb15402",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "futtermittel/mischfuttermittel/liste": {
-      "definition_hash": "4b4eb26b8a6f9fdc0b496a74754a5c20484852741766a8ea8b806774f3fcdd1a",
       "gates_passed": [
         "A",
         "B",
@@ -6408,7 +5902,7 @@
       "version": "1.0.0"
     },
     "genossenschaft/mitglieder": {
-      "definition_hash": "970af399a3f37e407375b710e10195c698fdb4e7c65069b64fe880c2c9391f8d",
+      "definition_hash": "a64ac9e3ae08d4e219c01aebd56cbfbe1995f8a87a8e7bb32b0291e634915965",
       "gates_passed": [
         "A",
         "B",
@@ -6507,7 +6001,7 @@
       "version": "1.0.0"
     },
     "kontrakte/kontraktklassen": {
-      "definition_hash": "34bd12f803d546d1d426205db05e1b255e6a4a05a0586c5fc2f96480f5bb2b14",
+      "definition_hash": "8837912a9ee72aa2e9c3e8588a41ba1cd713e8bbf01cd5b32410ebfdd6177843",
       "gates_passed": [
         "A",
         "B",
@@ -6595,7 +6089,7 @@
       "version": "1.0.0"
     },
     "lager/bestandsbewertung": {
-      "definition_hash": "3c3131a92d9b5785648b6cb5f917c27bb9b7fbc0eb7d65ecdf2de271874c6ea5",
+      "definition_hash": "839f861c20879d58374a2580f39f72fa0da9c5628ae731407b04e4c8c9491067",
       "gates_passed": [
         "A",
         "B",
@@ -6607,6 +6101,17 @@
     },
     "lager/bestandskorrektur": {
       "definition_hash": "8548ac8f497509e7c4e58996b3e7c3692a30f89fd2a9be1fc86d6555efcd5689",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
+    "lager/bestandsuebersicht": {
+      "definition_hash": "769f60cd2c5f0954bf3248e5d22c37da6508c9ebd197c603f3dbbef12c15d387",
       "gates_passed": [
         "A",
         "B",
@@ -6682,17 +6187,6 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "lager/inventur": {
-      "definition_hash": "10ef6e1d360ef82cb1f9327b2983fe2dc3bd5da47666387e639b8475dc37703f",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "lager/inventur-liste": {
       "definition_hash": "3c383888ca6906a5660b2eaf39b3f162bd27816a756aa1508ff1f69d96ffa4c2",
       "gates_passed": [
@@ -6716,7 +6210,7 @@
       "version": "1.0.0"
     },
     "lager/kommissionierung": {
-      "definition_hash": "db5f774758f5528c41dcbe326ae0012d780f52df310b2e6f78be3e00b1eac822",
+      "definition_hash": "3ab682abe29a74af0b4a0765f3621bda76e40ae6f347847fbe2f6956dc84c480",
       "gates_passed": [
         "A",
         "B",
@@ -6770,29 +6264,8 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "lager/materialfluss": {
-      "definition_hash": "41ac3c2559c632539b8490fc66752eee2a54e817a27e1f78e9a93ba832f48b25",
-      "gates_passed": [
-        "A",
-        "B",
-        "C"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "lager/materialfluss-visualisierung": {
       "definition_hash": "dd37f89334e2cbaf4279cc05d595ea861612d7bb5c17e726d4047413df467c1f",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "lager/partiestamm": {
-      "definition_hash": "fa52bd0c14fb05bdf35faa6099c251d5f77be63e0f24c5e278c3a86079fa36e7",
       "gates_passed": [
         "A",
         "B",
@@ -6836,29 +6309,7 @@
       "version": "1.0.0"
     },
     "lager/rueckverfolgbarkeit": {
-      "definition_hash": "bd40b4e2479eb294af73ea78f34f9df09cce340cf2dfcbb8562924e320863912",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "lager/silo-mobil": {
-      "definition_hash": "d8291b432f73b287300bf0a4022f6503ca76374183947a5a8f310b3611633222",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "lager/silo-uebersicht": {
-      "definition_hash": "3cf123fe9363de4469d747d44612f770093df51ad4443ac8242ba671b849e1bb",
+      "definition_hash": "561421a8f261f4da30ac8c0ae6f8b89f87114d6f6bf2f1d5258e1b3d420190c8",
       "gates_passed": [
         "A",
         "B",
@@ -6901,17 +6352,6 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "lager/umlagerung": {
-      "definition_hash": "72692665f1a843c8104ccf287636f28a40f84447d77691b2fe7271c1dfa38886",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "logistik/frachtbrief": {
       "definition_hash": "ae22df4b43fb1f9e12466f6470705627ad29c4b057010b7e8fb6131c0d70718e",
       "gates_passed": [
@@ -6924,7 +6364,7 @@
       "version": "1.0.0"
     },
     "logistik/frachtbriefe": {
-      "definition_hash": "9c072653d58996c97dac5dde603af19ac4ebf337bca98db759712e44392fd81d",
+      "definition_hash": "33ebf77eaf9d005f92debcc7202b0e0fc5a6a7e672dce9a35322a3927379efb9",
       "gates_passed": [
         "A",
         "B",
@@ -7187,30 +6627,8 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "personal/stundenzettel": {
-      "definition_hash": "5c832304db126b822aa83859f678b3fbab2f6ff62b482d066f634fd5056b5097",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "personal/stundenzettel-liste": {
       "definition_hash": "e7d1e41f6aadfafe142d127e4900b9361b24cca7c378b73cbb0246f5531b3d4b",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "personal/zeiterfassung": {
-      "definition_hash": "a47a243abea7ac7f62df744ec6ead75c39cbc6f6d60e60eb6252640662218491",
       "gates_passed": [
         "A",
         "B",
@@ -7276,7 +6694,7 @@
       "version": "1.0.0"
     },
     "portal/anfragen": {
-      "definition_hash": "d12faf668136a438351f9c02e727bff796c4b40a3765a0828f3c08c4bddb0a0c",
+      "definition_hash": "5c07d502c3f38debeb6f3536792709f0dfb7f85d455ea7404989cf784b846317",
       "gates_passed": [
         "A",
         "B",
@@ -7287,7 +6705,7 @@
       "version": "1.0.0"
     },
     "portal/bestellungen": {
-      "definition_hash": "4666c7933ce2411855bc725ca3046d7fc3acf00cf1493adca4cefa7856696329",
+      "definition_hash": "6a527a74822f20de01a426aaaf3e2b141c295227278612988251a55b053eeb54",
       "gates_passed": [
         "A",
         "B",
@@ -7298,7 +6716,7 @@
       "version": "1.0.0"
     },
     "portal/dokumente": {
-      "definition_hash": "6841bbc1396b75b00c72f8caa4aaa4e6628a1f94e32a0b20e8fd1c655e0269c5",
+      "definition_hash": "ff2419636b04b542d9f7ce9be6ffb5e5137e0da4da6f95b387f3a4370d68d312",
       "gates_passed": [
         "A",
         "B",
@@ -7309,7 +6727,7 @@
       "version": "1.0.0"
     },
     "portal/empfehlungen": {
-      "definition_hash": "40a0bbe278179f1ba7d55eaea031460c18452ed349b4847f44eb45bad02ac974",
+      "definition_hash": "e29ce24479db19de4709382b6bdac43fe530ac5ee04deef5a863170b2516963a",
       "gates_passed": [
         "A",
         "B",
@@ -7320,7 +6738,7 @@
       "version": "1.0.0"
     },
     "portal/feldbuch": {
-      "definition_hash": "398d799f4bc25a8b1249e01b05c8fc20dbd94430d70f3f2239b718bdd543de5b",
+      "definition_hash": "75208d1268876a51d5c82dd70d39068821f43155a7492a6c9848087315c4dd2a",
       "gates_passed": [
         "A",
         "B",
@@ -7353,7 +6771,7 @@
       "version": "1.0.0"
     },
     "portal/naehrstoffbilanzen": {
-      "definition_hash": "0064fba62742e3a28bbd90ef09ccf7d77d61bb1c2eafc4cdc4c291ce6237a4a3",
+      "definition_hash": "3466c1b6995d1ca9ae5d594abcaa48b00572f6ff4b9b54a097738c61e2be397a",
       "gates_passed": [
         "A",
         "B",
@@ -7397,7 +6815,7 @@
       "version": "1.0.0"
     },
     "portal/rechnungen": {
-      "definition_hash": "83e135cf2257c5eea57ef235a868861a2e175833abe48aec1d2f4b6605ce7768",
+      "definition_hash": "f3812a06e3bdd5f005eea88dd354feb16029c881b209efe3086f5dbcf9c3150d",
       "gates_passed": [
         "A",
         "B",
@@ -7408,7 +6826,7 @@
       "version": "1.0.0"
     },
     "portal/shop": {
-      "definition_hash": "34256a4de50436b1b793915cb485024ca9163a59f41a8f8adfb42b09aaa7e83e",
+      "definition_hash": "b67436f0d50acd913bc369deacc971e6540801fc41cffb8154b21fe03ebd6325",
       "gates_passed": [
         "A",
         "B",
@@ -7419,7 +6837,7 @@
       "version": "1.0.0"
     },
     "portal/vertraege": {
-      "definition_hash": "acf0a14c5be9a1ccc26261382821cf5df409380f3a918d0677c7454db5693302",
+      "definition_hash": "3a9cafd32c178892f05945c42e8a0f808654316f48fa7c0db08a08b6560148f9",
       "gates_passed": [
         "A",
         "B",
@@ -7650,7 +7068,7 @@
       "version": "1.0.0"
     },
     "produktion/mischfutter-produktion": {
-      "definition_hash": "b450a53cc4981652bf567eea28e85010c81f814bc9d28ac08fd7876840dc9f1e",
+      "definition_hash": "ff4dadb535f8250e5d42d3e8e9671619a792badb34deb35ffa377141168ee1f8",
       "gates_passed": [
         "A",
         "B",
@@ -7827,28 +7245,6 @@
     },
     "reports/deckungsbeitrag": {
       "definition_hash": "66d33c7fc7dd1b0c0b114794cf5c4283ddfe850d5b94d9659b66f664a75084ab",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "reports/lagerbestand": {
-      "definition_hash": "741f3baa5999afd4eb6d7a7c827b2011ff58a29ff83179e02488af66714e15ec",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "reports/umsatz": {
-      "definition_hash": "bccf76015d1d83e551d2f326744398bde7ce6a9be7e1d3e531b52ac4d5398200",
       "gates_passed": [
         "A",
         "B",
@@ -8056,38 +7452,6 @@
       "studio_draft_clean": false,
       "version": "1.0.0"
     },
-    "sales/lieferungen/neu": {
-      "definition_hash": "de4dd69e8bc852d9ae1fba9e5a33363e1c71b3965a73f9dff77a349f86f61cb1",
-      "gates_passed": [
-        "A",
-        "B",
-        "C"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "sales/orders-modern": {
-      "definition_hash": "f9161ba8639f104c02713ef273d089cfe2ca17933272d6ba84e73e7622a579e2",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "sales/rechnungen-liste": {
-      "definition_hash": "14321b6c468f8b49abbaf097595806d30eedf1cc46ce2e2aef6fd90da5caf7a1",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "sales/sales-order": {
       "definition_hash": "9942f1affcdf32944d334f1bdd345b7927a89400739ae07591744fc035d4a0da",
       "gates_passed": [
@@ -8111,7 +7475,7 @@
       "version": "1.0.0"
     },
     "schaeden/meldung": {
-      "definition_hash": "ea90170a40b189b32d05094475b124ef336e3d47b84d8681eab7db9a128f6de8",
+      "definition_hash": "3b3d1938685f196ad1f822457cf599285619478890e46d46b39a26c7e50d76eb",
       "gates_passed": [
         "A",
         "B",
@@ -8187,17 +7551,6 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "service/anfragen": {
-      "definition_hash": "5c1faa0186ecc5da12100d894390eac9c0b9cc5f0ddb22e5189c6b725d7363c8",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "service/anfragen-liste": {
       "definition_hash": "8772836dcf28ad1db38784e8bc739dae82542c8b9d04d1de7c8305befa2bffa2",
       "gates_passed": [
@@ -8222,17 +7575,6 @@
     },
     "setup/firma": {
       "definition_hash": "8a8d3f7820da8b970ffc17541b14d4c6b67536a18252b80dc95e4327363373aa",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "silo/kapazitaeten": {
-      "definition_hash": "4edbdf9e24d9e3593d8be8a7ab039c52b81d947c9df688ca0f1fd9b6f427d080",
       "gates_passed": [
         "A",
         "B",
@@ -8397,7 +7739,7 @@
       "version": "1.0.0"
     },
     "strecke/menu": {
-      "definition_hash": "5f8d8edf23a2fb5774b05f6008602790cb26c3b87db8d512b90ddc761db0870e",
+      "definition_hash": "2b89b65b752a8e50decb266cadbc9ec2142f3c167f19f080525f3b64c1adcf99",
       "gates_passed": [
         "A",
         "B",
@@ -8430,7 +7772,7 @@
       "version": "1.0.0"
     },
     "strecke/nawaro-uebersicht": {
-      "definition_hash": "efcba6733709d11d0fed3ad1f61f309d58c5f0c563f70f62c8ecfb95a6fdd0e5",
+      "definition_hash": "2eec378e356377d30f50e4c0a800a831a58d137dd41dcfcf19ee37f5d93723c7",
       "gates_passed": [
         "A",
         "B",
@@ -8497,17 +7839,6 @@
     },
     "strecke/vorlaeufig": {
       "definition_hash": "acb3976b656e8ab79d5fe33104f8e7ba9fe7b99dc9c1d7995e035d6b98f13de3",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "strecke/vorlaeufige-streckengeschaefte": {
-      "definition_hash": "ed4fc9c1c72484e7a6fd073a983866ec36924362271a7685d2ab2863e2c424f3",
       "gates_passed": [
         "A",
         "B",
@@ -8605,17 +7936,6 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "verkauf/auftraege": {
-      "definition_hash": "019e55de8b46d1fd2507a13b787680b1599e3e24534b3706bb20475296af2379",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "verkauf/auftraege/neu": {
       "definition_hash": "7c00e079fff46848f1981d96a720a64b9c8f93e60c2f9d1876d9847aa8c1a392",
       "gates_passed": [
@@ -8682,17 +8002,6 @@
     },
     "verkauf/kunde-neu": {
       "definition_hash": "e0004120911cc7d1269acb8fb7186f4edb379042dbb17fb2e93bcb6dfce9d5c0",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "verkauf/kunden-liste": {
-      "definition_hash": "9922ab10dc9ba9dbac7dbe05e65c8210406006a2b641cb5fc4ac2db3b56633d6",
       "gates_passed": [
         "A",
         "B",
@@ -9153,7 +8462,7 @@
       "version": "1.0.0"
     },
     "workflows/supervisor": {
-      "definition_hash": "da9a3de5173b8358cf9125fc3e793c4c76eb52f8463fda6f8ee79c3ba3c2968a",
+      "definition_hash": "52a6433569f57a664649cb4d1cecebe6197a177fcf8e2dc452702daf17f8ce12",
       "gates_passed": [
         "A",
         "B",

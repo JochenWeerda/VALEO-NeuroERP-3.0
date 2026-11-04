@@ -30,13 +30,13 @@ async function openTrace(page: Page): Promise<void> {
 test.describe('Inventory - Rückverfolgbarkeit @smoke', () => {
   test.slow(); // Vite-Erstkompilierung der Route kann den Default-Timeout sprengen.
 
-  // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): lager/rueckverfolgbarkeit ist eine batch15-Platzhaltermaske ohne Kette; fixme bis zum Studio-Umbau.
+  // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): lager/rueckverfolgbarkeit ist seit Batch 2 eine Studio-Liste der Wiegescheine; Picker und Kettenansicht fehlen noch.
   test.fixme('Seite lädt mit Picker', async ({ adminPage }) => {
     await openTrace(adminPage);
     await expect(adminPage.getByRole('heading', { name: 'Rückverfolgbarkeit' })).toBeVisible();
   });
 
-  // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): lager/rueckverfolgbarkeit ist eine batch15-Platzhaltermaske ohne Kette; fixme bis zum Studio-Umbau.
+  // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): lager/rueckverfolgbarkeit ist seit Batch 2 eine Studio-Liste der Wiegescheine; Picker und Kettenansicht fehlen noch.
   test.fixme('Kette eines Seed-Wiegescheins wird angezeigt', async ({ adminPage }) => {
     await adminPage.route('**/api/v1/supply-chain/traceability?**', async (route) => {
       await route.fulfill({

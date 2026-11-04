@@ -86,7 +86,9 @@ def test_mcp_mask_action_map_covers_top_writes_and_blocks_fin_close():
     from app.core.screen_definitions_listen import LISTEN_SCREEN_BUILDERS
 
     # Nur Anlage-*Navigationen* sind lokal; eine Anlage als Kommandoweg (Wechselkurse, Warengruppen) wird abgebildet.
+    from app.core.screen_definitions_clusters import CLUSTER_SCREEN_BUILDERS
+
     listen_anlagen = sum(any(a["key"] == "neu" and a.get("navigationRoute") for a in bau()["actions"])
-                         for bau in LISTEN_SCREEN_BUILDERS.values())
+                         for bau in {**LISTEN_SCREEN_BUILDERS, **CLUSTER_SCREEN_BUILDERS}.values())
     # 16 = 15 + "Neue Gutschrift" (sales/credit-notes, form_reset); + Anlage-Navigation je Studio-Liste
     assert data["stats"]["by_coverage"].get("local_ui", 0) == 16 + listen_anlagen

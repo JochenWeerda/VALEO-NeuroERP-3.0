@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, architect, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-02
+last_reviewed: 2026-11-03
 version: 1.0.0
 description: Generierter Katalog der domain_*-Tabellen aus information_schema.
 ---
@@ -17,7 +17,7 @@ Quelle: `information_schema` nach `alembic upgrade head`. Verbraucher: SQL/ORM u
 Logisches Modell: [ERD Canonical Domain](../architecture/views/erd-canonical-domain.md).
 Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell-tenancy.md).
 
-**31 Schemas, 701 Tabellen, 9260 Spalten.**
+**31 Schemas, 702 Tabellen, 9271 Spalten.**
 
 ## Schemas
 
@@ -39,7 +39,7 @@ Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell
 | `domain_hr` | `hr` | 30 | 361 |
 | `domain_hrm` | `hr` | 3 | 32 |
 | `domain_integration` | `platform` | 4 | 46 |
-| `domain_inventory` | `inventory` | 78 | 1125 |
+| `domain_inventory` | `inventory` | 79 | 1136 |
 | `domain_log` | `platform` | 4 | 60 |
 | `domain_logistics` | `logistics` | 8 | 92 |
 | `domain_meldewesen` | `finance` | 2 | 21 |
@@ -438,6 +438,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_inventory.preparation_lists` | `app/infrastructure/models/l3c_models.py` | — | — |
 | `domain_inventory.price_adjustment_rules` | `app/infrastructure/models/l3c_models.py` | — | — |
 | `domain_inventory.quality_protocols` | `app/infrastructure/models/l3c_models.py` | — | — |
+| `domain_inventory.ruestlisten` | `app/api/v1/endpoints/ruestliste.py` | `app/api/v1/endpoints/ruestliste.py` | — |
 | `domain_inventory.shipping_units` | `app/infrastructure/models/l3c_models.py` | — | — |
 | `domain_inventory.silo_cells` | `app/api/v1/endpoints/agri_plc_stub.py`, `app/api/v1/endpoints/silo_cells_readmodel.py`, `app/api/v1/schemas/silo_material_flow_schemas.py`, `app/infrastructure/models/wms_models.py`, `app/services/agri_flush_booking.py`, `app/services/agri_lot_link_booking_service.py`, `app/services/agri_qs_workflow_service.py`, `app/services/agri_silo_lot_link_service.py`, `app/services/agri_silo_material_flow_service.py`, `app/services/mcp_execution_service.py`, `app/services/silo_rule_engine_service.py` | `app/api/v1/endpoints/agri_plc_stub.py`, `app/services/agri_flush_booking.py`, `app/services/agri_lot_link_booking_service.py`, `app/services/agri_qs_workflow_service.py`, `app/services/agri_silo_lot_link_service.py`, `app/services/agri_silo_material_flow_service.py` | — |
 | `domain_inventory.silo_lot_movements` | `app/core/database.py`, `app/infrastructure/models/l3c_models.py`, `app/services/mcp_execution_service.py`, `app/services/supply_chain_trace_service.py` | `app/services/agri_qs_workflow_service.py`, `app/services/agri_silo_lot_link_service.py`, `app/services/supply_chain_lot_service.py` | — |
@@ -1212,6 +1213,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `preparation_lists` | `inventory` | native | `id` | id, list_number, status, notes, warehouse_id, tenant_id, created_at, updated_at |
 | `price_adjustment_rules` | `inventory` | native | `id` | id, article_id, warengruppe, adjustment_type, parameter_name, method, steps, effective_from, effective_to, tenant_id, created_at, created_by, updated_at, updated_by |
 | `quality_protocols` | `inventory` | native | `id` | id, tenant_id, harvest_acceptance_id, protocol_number, version, moisture_pct, impurities_pct, hl_weight_kg_per_hl, protein_pct, mycotoxin_ppb, other_values, source_type, source_device_id, source_file_name, source_file_content, is_final, approved_by, approved_at, created_at, created_by, updated_at, updated_by |
+| `ruestlisten` | `inventory` | native | `id` | id, tenant_id, ruestlisten_nr, auftrag_nr, status, positionen, erstellt_fuer, prioritaet, bemerkung, erstellt_am, verarbeitet_am |
 | `shipping_units` | `inventory` | native | `id` | id, sscc, status, order_id, delivery_note_id, weight, contents, tenant_id, created_at, updated_at |
 | `silo_cells` | `inventory` | native | `id` | id, silo_system_id, warehouse_id, zone_id, aisle_id, bin_id, cell_code, name, capacity_kg, current_material_id, current_lot_id, qs_status, contamination_risk_class, tenant_id, is_active, created_at, current_stock_kg, layout_x, layout_y, updated_at, legacy_silo_id |
 | `silo_lot_movements` | `inventory` | native | `id` | id, silo_lot_id, movement_type, quantity_tons, note, tenant_id, created_at |
