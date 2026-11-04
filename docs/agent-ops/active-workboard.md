@@ -20373,6 +20373,8 @@ keine ungemergte Migration auf dem Pruefstand gestempelt. Fachslices werden vor 
 separat mit Dateien und Abnahme reserviert. Stand: #102 Security/Frontend/Smoke gruen,
 Backend und Test & Lint laufen; #103 basiert noch auf #102. A/B/C/E/F im Code bestaetigt offen.
 
-## OMNIBOX-REGISTRY-F-20261104 — reserviert, Codex (Slice F)
+## OMNIBOX-REGISTRY-F-20261104 — abgeschlossen, Codex (Slice F)
 
 Ziel: Omnibox-Katalog beim ersten Aufruf vollstaendig und wiederholt stabil, veroeffentlichte Masken mandantenisoliert. Dateibesitz: app/api/v1/endpoints/mask_registry.py, tests/test_omnibox_catalog_lazy_registry.py, docs/quality-assurance/omnibox-registry-f-20261104.md und dieser Workboard-Anhang; Integrations-Worktree gemeinsam mit Lead, keine anderen Dateien. Abnahme: reiner Regressionstest fuer initiale Registry, Wiederholung und veroeffentlichte Mandantenmasken, bestehende Tests nicht abschwaechen. Keine Datenbank oder parallelen Tests; Testlauf vorher mit Lead abstimmen. Risiko: Lazy-Registrierung kann waehrend Katalogaufbau weitere IDs erzeugen.
+
+**Abschluss OMNIBOX-REGISTRY-F-20261104:** Stammregistrierung vor dem Kopieren der nativen Katalog-IDs; erster und wiederholter Aufruf vollstaendig, Mandantenpublikationen getrennt. Reiner Regressionstest 1 passed, keine Datenbank; HTTP-/Gesamtsuite bleibt CI-Nachweis. Details: docs/quality-assurance/omnibox-registry-f-20261104.md.
