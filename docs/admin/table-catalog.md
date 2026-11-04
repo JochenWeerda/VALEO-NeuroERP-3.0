@@ -17,7 +17,7 @@ Quelle: `information_schema` nach `alembic upgrade head`. Verbraucher: SQL/ORM u
 Logisches Modell: [ERD Canonical Domain](../architecture/views/erd-canonical-domain.md).
 Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell-tenancy.md).
 
-**31 Schemas, 704 Tabellen, 9321 Spalten.**
+**31 Schemas, 703 Tabellen, 9317 Spalten.**
 
 ## Schemas
 
@@ -45,7 +45,7 @@ Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell
 | `domain_meldewesen` | `finance` | 2 | 21 |
 | `domain_mfg` | `inventory` | 3 | 15 |
 | `domain_nachweisraum` | `dms-compliance` | 3 | 31 |
-| `domain_ops` | `inventory` | 79 | 1108 |
+| `domain_ops` | `inventory` | 78 | 1104 |
 | `domain_portal` | `crm` | 9 | 150 |
 | `domain_pos` | `finance` | 4 | 41 |
 | `domain_pricing` | `finance` | 5 | 49 |
@@ -508,13 +508,12 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_ops.ops_flow_spine_instance_documents` | `app/domains/operations/models.py` | — | — |
 | `domain_ops.ops_flow_spine_instance_events` | `app/domains/operations/models.py` | — | — |
 | `domain_ops.ops_flow_spine_instances` | `app/domains/operations/models.py` | — | — |
-| `domain_ops.ops_foerderantraege` | `app/domains/operations/models.py` | — | — |
+| `domain_ops.ops_foerderantraege` | `app/api/v1/endpoints/foerderung.py`, `app/domains/operations/models.py` | — | — |
 | `domain_ops.ops_fuhrpark_ausgehende_dokumente` | `app/domains/operations/models.py` | — | — |
 | `domain_ops.ops_fuhrpark_rechnungen` | `app/domains/operations/models.py` | — | — |
 | `domain_ops.ops_fuhrpark_terminarten` | `app/api/v1/endpoints/fuhrpark.py`, `app/domains/operations/models.py` | — | — |
 | `domain_ops.ops_labor_auftraege` | `app/domains/operations/models.py` | — | — |
 | `domain_ops.ops_labor_proben` | `app/domains/operations/models.py` | — | — |
-| `domain_ops.ops_marketing_kampagnen` | `app/domains/operations/models.py` | — | — |
 | `domain_ops.ops_pcn_meldungen` | `app/domains/operations/models.py` | — | — |
 | `domain_ops.ops_projekt_aufgaben` | `app/domains/operations/models.py` | — | — |
 | `domain_ops.ops_projekte` | `app/domains/operations/models.py` | — | — |
@@ -1323,13 +1322,12 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `ops_flow_spine_instance_documents` | `inventory` | prefix | `id` | id, instance_id, tenant_id, process_key, document_type, document_id, relation, linked_by, created_at |
 | `ops_flow_spine_instance_events` | `inventory` | prefix | `id` | id, instance_id, process_key, tenant_id, event_type, from_lifecycle_status, to_lifecycle_status, from_business_status, to_business_status, node_id, actor_id, reason_category, reason_code, reason_note, payload, created_at |
 | `ops_flow_spine_instances` | `inventory` | prefix | `id` | id, case_number, process_key, label, customer_id, customer_name, subject, entry_mode, linked_document_id, linked_document_type, node_statuses, active_node_id, last_actor, last_action_label, tenant_id, created_at, updated_at, lifecycle_status, business_status, resume_node_id, resume_route, resume_payload, assigned_owner, last_activity_at, blocked_until, completion_reason_code, cancellation_reason_category, cancellation_reason_code, failure_reason_category, failure_reason_code, reason_note, closed_at, closed_by, cancelled_at, cancelled_by, failed_at, failed_by, version_no |
-| `ops_foerderantraege` | `inventory` | prefix | `id` | id, nummer, programm, antragsdatum, flaeche, betrag, status, created_at, updated_at |
+| `ops_foerderantraege` | `inventory` | prefix | `id` | id, nummer, programm, antragsdatum, flaeche, betrag, status, created_at, updated_at, tenant_id |
 | `ops_fuhrpark_ausgehende_dokumente` | `inventory` | prefix | `id` | id, beleg_typ, formular, ziel_modul, beschreibung, aktiv, letzter_druck, created_at, updated_at, tenant_id |
 | `ops_fuhrpark_rechnungen` | `inventory` | prefix | `id` | id, rechnungs_nr, datum, fahrzeug_id, fahrzeug_kennzeichen, sachkonto, kostenart, betrag_eur, notiz, created_at, updated_at, tenant_id |
 | `ops_fuhrpark_terminarten` | `inventory` | prefix | `id` | id, terminart, intervall_monate, intervall_km, created_at, updated_at, tenant_id |
-| `ops_labor_auftraege` | `inventory` | prefix | `id` | id, chargen_id, labor, analysen, auftragsdatum, status, created_at, updated_at |
-| `ops_labor_proben` | `inventory` | prefix | `id` | id, probennummer, typ, artikel, datum, labor, status, created_at, updated_at |
-| `ops_marketing_kampagnen` | `inventory` | prefix | `id` | id, name, typ, zielgruppe, startdatum, enddatum, budget, status, created_at, updated_at |
+| `ops_labor_auftraege` | `inventory` | prefix | `id` | id, chargen_id, labor, analysen, auftragsdatum, status, created_at, updated_at, tenant_id |
+| `ops_labor_proben` | `inventory` | prefix | `id` | id, probennummer, typ, artikel, datum, labor, status, created_at, updated_at, tenant_id, analysewerte, grenzwerte, bemerkung |
 | `ops_pcn_meldungen` | `inventory` | prefix | `id` | id, produktname, ufi, cas_nummern, gefahrenklassen, verwendungskategorie, pcn_status, tenant_id, created_at, updated_at |
 | `ops_projekt_aufgaben` | `inventory` | prefix | `id` | id, projekt_id, titel, beschreibung, verantwortlicher, faellig_am, erledigt_am, status, tenant_id, created_at, updated_at |
 | `ops_projekte` | `inventory` | prefix | `id` | id, name, beschreibung, projektleiter, kunde, kunde_id, startdatum, enddatum, fortschritt, budget, ausgaben, kostenstelle, status, prioritaet, notiz, tenant_id, created_at, updated_at, created_by, updated_by |
