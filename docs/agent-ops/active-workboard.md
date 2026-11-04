@@ -20388,6 +20388,7 @@ pruefen (Compliance-Register mit Seed in compliance.py, ops_disposition, ops_zer
 Verlaeufe, preise/konditionen fuellt Standardwerte auf; Marketing-/Communication-Dienste (services/crm-*) sollen
 CRM-Kampagnen konsumieren statt eigene zu fuehren.
 
+<<<<<<< HEAD
 ## BATCH9-COMPLIANCE-REGISTER-20261104 — in Arbeit, Claude
 
 Nutzerentscheidung 04.11.2026 (Seeds/Altbestand wegraeumen) auf die uebrigen mandantenlosen domain_ops-Tabellen.
@@ -20602,3 +20603,20 @@ Besitz docs/admin/table-catalog.json und .md, eigene QA. CI-Artefakt13589076577 
 ## CI-PR115-UEBERNAHME-20261108 — abgeschlossen, Claude Code (uebernimmt Codex Lead)
 Codex hat das Nutzungslimit erreicht; Claude Code bringt PR #115 (`codex/sonar-contracts-20261106`) nach main. Quality-Gate-Lauf 42464912905 rot: (1) drei Postgres-Testdateien verlangten lokales `PGAPPNAME` — Verbindungsname jetzt per `application_name` in der Verbindung (DDL-Protokoll bleibt). (2) Masken-Ratsche: Standard-Sperre `capability_nicht_freigegeben` (ef1c1219c) zaehlt als gesperrt statt unklassifiziert; Baseline nur geschrumpft. (3) Aktionsrechte, Studio-Katalog und RLS-Matrix neu erzeugt. SBOM-Fehler war GitHub-HTTP-504, laeuft mit dem neuen Push erneut. Dateibesitz: nur die genannten Projektionen/Tests, `scripts/mask_studio_inventory.py`, Workboard.
 Nachtrag: `better-sqlite3` (+ Typen) aus der Wurzel-`package.json` entfernt — kein Code nutzt es, das einzige Skript `scripts/seed-policies.ts` importierte ein nicht existierendes `store-sqlite` (Policies liegen in PostgreSQL `domain_shared.policy_rules`); der Frontend-Docker-Build kompilierte es trotzdem nativ. `expo-sqlite` (Mobile-Offline) bleibt. Zeilen-Loeschen der Personal- und Versandprofilmasken als `hooks/useGuardedRowDelete.tsx` zusammengefuehrt; generiertes `capture-screens.ts` aus der Sonar-Duplikatpruefung genommen (Quelle bleibt gemessen).
+=======
+## POS-CHECKOUT-AUF-MAIN-20261104 — abgeschlossen, Claude
+
+POS-CHECKOUT-WAHRHEIT-20261027 (Zweig claude/pos-checkout-wahrheit-20261027, nie gemergt) auf main uebernommen.
+Branch claude/pos-checkout-auf-main-20261104. Main hatte inzwischen nur einen Teil: Mandant aus dem Token, kein
+Fail-soft der Retoure, `/pos/checkout` antwortete 501. Jetzt gilt die vollstaendige Fassung: `/pos/checkout`
+signiert offline kassierte Bons ueber den `FiscalizationService` (Offline-ID = Transaktionskennung, idempotent,
+anderer Betrag 409, ohne Kasse des Mandanten 503); `/pos/retoure` signiert negativ, bucht Bestand genau einmal je
+`vorgang_id`; Steuersatz nur aus dem Artikelstamm (`domain_erp.tax_keys`), sonst 422; fiskaly signiert unbekannte
+Saetze nicht als Normalsatz. Die handgebauten Seiten pos/terminal und pos/retoure sind auf main Studio-Platzhalter;
+deren Aenderungen entfallen, die Offline-Warteschlange uebergibt Rabatt/Steuersatz.
+Angepasst: tests/test_domain_honest_outcomes_20261027.py (Checkout ohne Kasse 503 statt 501),
+tests/test_rls_domain_inventory.py (Retoure mit vorgang_id, Steuerschluessel und Simulationskasse; Fehler kommt
+durch). Nachweis valeo_probe: test_pos_checkout_wahrheit 18/18, POS-Faelle aus RLS/Honest-Outcomes 9/9;
+OpenAPI und Code-Inventare nachgezogen, Doc-Generatoren gruen.
+Offen: Die POS-Studio-Masken lesen fast alle /pos/dsfinvk/export (Scheinweg) - eigener Batch.
+>>>>>>> 0e4c8a644 (fix(pos): Checkout/Retoure-Wahrheit auf main - Tests an signierten Kassenweg angepasst)
