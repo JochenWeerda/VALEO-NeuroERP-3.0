@@ -35,6 +35,7 @@ class LaborAuftragOut(BaseSchema):
     id: str
     chargenId: str  # noqa: N815 - Schluessel des Wizards
     chargen_id: str
+    charge: str  # Chargennummer fuer die Anzeige (chargen_id ist der Verweis)
     labor: str
     analysen: int
     auftragsdatum: str

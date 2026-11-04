@@ -272,10 +272,10 @@ def build_annahme_labor() -> dict[str, Any]:
     # Weg nie, der Kopf blieb leer. Befunde erfasst die Laborauftragsmaske, hier nur lesen.
     return build_stamm_object_page(
         screen_id="annahme/labor", domain="agrar", title="Laborauftrag", subtitle="Laborauftrag zur Charge der Annahme",
-        identity_field="chargen_id",
+        identity_field="charge",
         data_sources=[stamm_entity_source("/api/v1/labor/labor-auftraege/{entity_id}")],
         tabs=[stamm_kopf_tab([
-            {"key": "chargen_id", "label": "Charge", "type": "text", "readOnly": True},
+            {"key": "charge", "label": "Charge", "type": "text", "readOnly": True},
             {"key": "labor", "label": "Labor", "type": "text", "readOnly": True},
             {"key": "auftragsdatum", "label": "Auftragsdatum", "type": "date", "readOnly": True},
             {"key": "status", "label": "Status", "type": "text", "readOnly": True},
