@@ -21,3 +21,11 @@ Integrations-Worktree: **1 passed**. Der Test setzt die echte Stammregistrierung
 auf ihren Ausgangszustand zurueck und prueft Erstaufruf, Wiederholung, eindeutige
 IDs und unterschiedliche Mandantenpublikationen ohne Datenbank. Die bestehende
 HTTP-/Gesamtsuite wurde hier nicht ausgefuehrt; deren CI-Nachweis bleibt offen.
+
+Gegenprobe 2026-11-04: Derselbe Test wurde mit der frueheren Funktionsfassung
+wiederholt, indem nur im Python-Prozess der Aufruf von
+`ensure_stamm_screen_registry()` vor der ID-Kopie entfernt wurde. Ergebnis:
+**1 failed** an der Vollstaendigkeitsassertion; nachtraeglich registrierte
+Stamm-IDs fehlten im ersten Ergebnis. Die Projektdateien wurden fuer diese
+Gegenprobe nicht veraendert. Damit unterscheidet der Test den Fehlerzustand vom
+oben dokumentierten gruenen Fixlauf.
