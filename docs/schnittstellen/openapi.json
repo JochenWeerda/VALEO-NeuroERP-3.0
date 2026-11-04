@@ -53628,27 +53628,9 @@
         "title": "DispositionGeliefert",
         "type": "object"
       },
-      "DispositionPositionCreate": {
+      "DispositionOut": {
         "properties": {
-          "artikel": {
-            "title": "Artikel",
-            "type": "string"
-          },
-          "artikel_id": {
-            "title": "Artikel Id",
-            "type": "string"
-          },
-          "bedarf": {
-            "default": 0,
-            "title": "Bedarf",
-            "type": "number"
-          },
-          "bestand": {
-            "default": 0,
-            "title": "Bestand",
-            "type": "number"
-          },
-          "empfehlung": {
+          "bemerkung": {
             "anyOf": [
               {
                 "type": "string"
@@ -53657,107 +53639,123 @@
                 "type": "null"
               }
             ],
-            "title": "Empfehlung"
+            "title": "Bemerkung"
           },
-          "mindestbestand": {
-            "default": 0,
-            "title": "Mindestbestand",
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "disposition_nr": {
+            "title": "Disposition Nr",
+            "type": "integer"
+          },
+          "erfasst_durch": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erfasst Durch"
+          },
+          "freigabe": {
+            "title": "Freigabe",
+            "type": "boolean"
+          },
+          "geplantes_lieferdatum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Geplantes Lieferdatum"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "kontrakt_id": {
+            "title": "Kontrakt Id",
+            "type": "string"
+          },
+          "kontrakt_nr": {
+            "title": "Kontrakt Nr",
+            "type": "string"
+          },
+          "kontrakt_pos_nr": {
+            "title": "Kontrakt Pos Nr",
+            "type": "integer"
+          },
+          "lieferdatum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lieferdatum"
+          },
+          "menge": {
+            "title": "Menge",
             "type": "number"
           },
-          "prioritaet": {
-            "default": "mittel",
-            "title": "Prioritaet",
+          "status": {
+            "title": "Status",
             "type": "string"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "wiegeschein_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wiegeschein Id"
           }
         },
         "required": [
-          "artikel",
-          "artikel_id"
+          "id",
+          "tenant_id",
+          "kontrakt_id",
+          "kontrakt_nr",
+          "kontrakt_pos_nr",
+          "disposition_nr",
+          "menge",
+          "status",
+          "freigabe"
         ],
-        "title": "DispositionPositionCreate",
-        "type": "object"
-      },
-      "DispositionPositionUpdate": {
-        "properties": {
-          "artikel": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Artikel"
-          },
-          "artikel_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Artikel Id"
-          },
-          "bedarf": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Bedarf"
-          },
-          "bestand": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Bestand"
-          },
-          "empfehlung": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Empfehlung"
-          },
-          "mindestbestand": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Mindestbestand"
-          },
-          "prioritaet": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Prioritaet"
-          }
-        },
-        "title": "DispositionPositionUpdate",
+        "title": "DispositionOut",
         "type": "object"
       },
       "DisputeCreateIn": {
@@ -181045,50 +181043,6 @@
         "title": "ZertifikatCreate",
         "type": "object"
       },
-      "ZertifikatCreateRequest": {
-        "properties": {
-          "gueltig_bis": {
-            "title": "Gueltig Bis",
-            "type": "string"
-          },
-          "gueltig_von": {
-            "title": "Gueltig Von",
-            "type": "string"
-          },
-          "tenant_id": {
-            "title": "Tenant Id",
-            "type": "string"
-          },
-          "typ": {
-            "title": "Typ",
-            "type": "string"
-          },
-          "zertifikatsnummer": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Zertifikatsnummer"
-          },
-          "zertifizierungsstelle": {
-            "title": "Zertifizierungsstelle",
-            "type": "string"
-          }
-        },
-        "required": [
-          "tenant_id",
-          "typ",
-          "zertifizierungsstelle",
-          "gueltig_von",
-          "gueltig_bis"
-        ],
-        "title": "ZertifikatCreateRequest",
-        "type": "object"
-      },
       "ZertifikatUpdate": {
         "properties": {
           "art": {
@@ -181161,13 +181115,6 @@
           }
         },
         "title": "ZertifikatUpdate",
-        "type": "object"
-      },
-      "ZertifikateApiOut": {
-        "additionalProperties": true,
-        "description": "Response schema for zertifikate api endpoints.",
-        "properties": {},
-        "title": "ZertifikateApiOut",
         "type": "object"
       },
       "ZertifikateOut": {
@@ -190125,13 +190072,6 @@
         "title": "OpportunityUpdate",
         "type": "object"
       },
-      "app__api__v1__schemas__disposition_schemas__DispositionOut": {
-        "additionalProperties": true,
-        "description": "Response schema for disposition endpoints.",
-        "properties": {},
-        "title": "DispositionOut",
-        "type": "object"
-      },
       "app__api__v1__schemas__external_mock_harness_schemas__DsfinvkExportOut": {
         "description": "``POST /dev/external-mocks/dsfinvk/export``",
         "properties": {
@@ -190292,136 +190232,6 @@
           }
         },
         "title": "CreditLimitOut",
-        "type": "object"
-      },
-      "app__api__v1__schemas__kontrakt_disposition_schemas__DispositionOut": {
-        "properties": {
-          "bemerkung": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Bemerkung"
-          },
-          "created_at": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Created At"
-          },
-          "disposition_nr": {
-            "title": "Disposition Nr",
-            "type": "integer"
-          },
-          "erfasst_durch": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Erfasst Durch"
-          },
-          "freigabe": {
-            "title": "Freigabe",
-            "type": "boolean"
-          },
-          "geplantes_lieferdatum": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Geplantes Lieferdatum"
-          },
-          "id": {
-            "title": "Id",
-            "type": "string"
-          },
-          "kontrakt_id": {
-            "title": "Kontrakt Id",
-            "type": "string"
-          },
-          "kontrakt_nr": {
-            "title": "Kontrakt Nr",
-            "type": "string"
-          },
-          "kontrakt_pos_nr": {
-            "title": "Kontrakt Pos Nr",
-            "type": "integer"
-          },
-          "lieferdatum": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Lieferdatum"
-          },
-          "menge": {
-            "title": "Menge",
-            "type": "number"
-          },
-          "status": {
-            "title": "Status",
-            "type": "string"
-          },
-          "tenant_id": {
-            "title": "Tenant Id",
-            "type": "string"
-          },
-          "updated_at": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Updated At"
-          },
-          "wiegeschein_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Wiegeschein Id"
-          }
-        },
-        "required": [
-          "id",
-          "tenant_id",
-          "kontrakt_id",
-          "kontrakt_nr",
-          "kontrakt_pos_nr",
-          "disposition_nr",
-          "menge",
-          "status",
-          "freigabe"
-        ],
-        "title": "DispositionOut",
         "type": "object"
       },
       "app__api__v1__schemas__kontrakte_schemas__AmendmentCreate": {
@@ -273353,242 +273163,6 @@
         ]
       }
     },
-    "/api/v1/disposition": {
-      "get": {
-        "operationId": "list_disposition_api_v1_disposition_get",
-        "parameters": [
-          {
-            "description": "Filter by priority",
-            "in": "query",
-            "name": "prioritaet",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter by priority",
-              "title": "Prioritaet"
-            }
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "schema": {
-              "default": 100,
-              "maximum": 1000,
-              "minimum": 1,
-              "title": "Limit",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/app__api__v1__schemas__disposition_schemas__DispositionOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Disposition auflisten",
-        "tags": [
-          "Disposition"
-        ]
-      },
-      "post": {
-        "description": "Create a new disposition position.",
-        "operationId": "create_disposition_position_api_v1_disposition_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DispositionPositionCreate"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/app__api__v1__schemas__disposition_schemas__DispositionOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Disposition position anlegen",
-        "tags": [
-          "Disposition"
-        ]
-      }
-    },
-    "/api/v1/disposition/stats": {
-      "get": {
-        "operationId": "get_disposition_stats_api_v1_disposition_stats_get",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/app__api__v1__schemas__disposition_schemas__DispositionOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Disposition stats abrufen",
-        "tags": [
-          "Disposition"
-        ]
-      }
-    },
-    "/api/v1/disposition/{position_id}": {
-      "delete": {
-        "description": "Delete a disposition position.",
-        "operationId": "delete_disposition_position_api_v1_disposition__position_id__delete",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "position_id",
-            "required": true,
-            "schema": {
-              "title": "Position Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Disposition position löschen",
-        "tags": [
-          "Disposition"
-        ]
-      },
-      "put": {
-        "description": "Update an existing disposition position.",
-        "operationId": "update_disposition_position_api_v1_disposition__position_id__put",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "position_id",
-            "required": true,
-            "schema": {
-              "title": "Position Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DispositionPositionUpdate"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/app__api__v1__schemas__disposition_schemas__DispositionOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Disposition position aktualisieren",
-        "tags": [
-          "Disposition"
-        ]
-      }
-    },
     "/api/v1/dms/documents": {
       "get": {
         "description": "List canonical metadata without hiding database contract errors.",
@@ -331720,7 +331294,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/app__api__v1__schemas__kontrakt_disposition_schemas__DispositionOut"
+                    "$ref": "#/components/schemas/DispositionOut"
                   },
                   "title": "Response List Dispositionen Api V1 Kontrakte  Kontrakt Id  Dispositionen Get",
                   "type": "array"
@@ -331780,7 +331354,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__api__v1__schemas__kontrakt_disposition_schemas__DispositionOut"
+                  "$ref": "#/components/schemas/DispositionOut"
                 }
               }
             },
@@ -331838,7 +331412,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__api__v1__schemas__kontrakt_disposition_schemas__DispositionOut"
+                  "$ref": "#/components/schemas/DispositionOut"
                 }
               }
             },
@@ -331896,7 +331470,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__api__v1__schemas__kontrakt_disposition_schemas__DispositionOut"
+                  "$ref": "#/components/schemas/DispositionOut"
                 }
               }
             },
@@ -331963,7 +331537,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__api__v1__schemas__kontrakt_disposition_schemas__DispositionOut"
+                  "$ref": "#/components/schemas/DispositionOut"
                 }
               }
             },
@@ -422131,12 +421705,13 @@
         ]
       },
       "post": {
+        "description": "Create a new Zertifikat entry.",
         "operationId": "create_zertifikat_api_v1_zertifikate_post",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ZertifikatCreateRequest"
+                "$ref": "#/components/schemas/ZertifikatCreate"
               }
             }
           },
@@ -422147,7 +421722,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ZertifikateApiOut"
+                  "$ref": "#/components/schemas/ZertifikateOut"
                 }
               }
             },
@@ -422171,59 +421746,7 @@
         ],
         "summary": "Zertifikat anlegen",
         "tags": [
-          "zertifikate"
-        ]
-      }
-    },
-    "/api/v1/zertifikate/ablaufend": {
-      "get": {
-        "operationId": "get_ablaufend_api_v1_zertifikate_ablaufend_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tage_vorwarnung",
-            "required": false,
-            "schema": {
-              "default": 30,
-              "title": "Tage Vorwarnung",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/ZertifikateApiOut"
-                  },
-                  "title": "Response Get Ablaufend Api V1 Zertifikate Ablaufend Get",
-                  "type": "array"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Ablaufend abrufen",
-        "tags": [
-          "zertifikate"
+          "Zertifikate"
         ]
       }
     },
@@ -422253,57 +421776,6 @@
         ]
       }
     },
-    "/api/v1/zertifikate/tenant/{tenant_id}": {
-      "get": {
-        "operationId": "get_by_tenant_api_v1_zertifikate_tenant__tenant_id__get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "tenant_id",
-            "required": true,
-            "schema": {
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/ZertifikateApiOut"
-                  },
-                  "title": "Response Get By Tenant Api V1 Zertifikate Tenant  Tenant Id  Get",
-                  "type": "array"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "By tenant abrufen",
-        "tags": [
-          "zertifikate"
-        ]
-      }
-    },
     "/api/v1/zertifikate/{zertifikat_id}": {
       "delete": {
         "description": "Soft-delete: set status to 'abgelaufen'.",
@@ -422315,7 +421787,7 @@
             "required": true,
             "schema": {
               "title": "Zertifikat Id",
-              "type": "integer"
+              "type": "string"
             }
           }
         ],
@@ -422354,7 +421826,7 @@
             "required": true,
             "schema": {
               "title": "Zertifikat Id",
-              "type": "integer"
+              "type": "string"
             }
           }
         ],

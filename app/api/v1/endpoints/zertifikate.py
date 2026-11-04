@@ -1,4 +1,8 @@
-"""Zertifikate API - DB-backed endpoints."""
+"""Zertifikate (Bio, QS, GlobalG.A.P. ...) im Mandanten.
+
+Bis 04.11.2026 (Batch 9) legte jeder Lesezugriff drei erfundene Zertifikate an (Seed), kein Weg kannte einen
+Mandanten, und Aendern/Loeschen nahmen die Text-Kennung als Zahl an (immer 422).
+"""
 
 from datetime import datetime
 from typing import Optional
@@ -7,6 +11,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.tenant import get_tenant_id
 from app.domains.operations.models import ZertifikatEintrag
 
 from app.api.v1.schemas.base import BaseSchema
@@ -21,47 +26,14 @@ def _dt(v: Optional[datetime]) -> Optional[str]:
     return v.date().isoformat() if v else None
 
 
-def _seed(db: Session) -> None:
-    if db.query(ZertifikatEintrag).count() > 0:
-        return
-    db.add_all(
-        [
-            ZertifikatEintrag(
-                art="Bio-Zertifikat",
-                standard="EU-Bio-Verordnung",
-                nummer="BIO-2025-1234",
-                gueltig_bis=datetime(2026, 12, 31),
-                audit=datetime(2026, 2, 15),
-                status="gueltig",
-            ),
-            ZertifikatEintrag(
-                art="QS-Zertifikat",
-                standard="QS-GAP",
-                nummer="QS-2025-5678",
-                gueltig_bis=datetime(2026, 6, 30),
-                audit=datetime(2025, 12, 1),
-                status="gueltig",
-            ),
-            ZertifikatEintrag(
-                art="GlobalG.A.P.",
-                standard="GGN",
-                nummer="GGN-12345678",
-                gueltig_bis=datetime(2025, 9, 30),
-                audit=datetime(2025, 8, 15),
-                status="ablaufend",
-            ),
-        ]
-    )
-    db.commit()
 
 
 @router.get("", response_model=ZertifikateOut, summary="Zertifikate auflisten")
-async def list_zertifikate(status: Optional[str] = Query(None, description="Filter by status"), db: Session = Depends(get_db)) -> dict:
-    _seed(db)
-    query = db.query(ZertifikatEintrag)
+async def list_zertifikate(status: Optional[str] = Query(None, description="Filter by status"), tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
+    query = db.query(ZertifikatEintrag).filter(ZertifikatEintrag.tenant_id == tenant_id)
     if status:
         query = query.filter(ZertifikatEintrag.status == status)
-    items = query.order_by(ZertifikatEintrag.gueltig_bis.asc()).all()
+    items = query.order_by(ZertifikatEintrag.gueltig_bis.asc()).limit(2000).all()
     return {
         "items": [
             {
@@ -80,9 +52,8 @@ async def list_zertifikate(status: Optional[str] = Query(None, description="Filt
 
 
 @router.get("/stats", response_model=ZertifikateOut, summary="Zertifikate stats abrufen")
-async def get_zertifikate_stats(db: Session = Depends(get_db)) -> dict:
-    _seed(db)
-    items = db.query(ZertifikatEintrag).all()
+async def get_zertifikate_stats(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
+    items = db.query(ZertifikatEintrag).filter(ZertifikatEintrag.tenant_id == tenant_id).limit(10000).all()
     return {
         "gueltig": sum(1 for z in items if z.status == "gueltig"),
         "ablaufend": sum(1 for z in items if z.status == "ablaufend"),
@@ -121,10 +92,11 @@ from starlette.responses import Response
 @router.post("", response_model=ZertifikateOut, status_code=201, summary="Zertifikat anlegen", dependencies=SCHREIBEN["QUALITAET"])
 async def create_zertifikat(
     body: ZertifikatCreate,
-    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ) -> dict:
     """Create a new Zertifikat entry."""
     z = ZertifikatEintrag(
+        tenant_id=tenant_id,
         art=body.art,
         standard=body.standard,
         nummer=body.nummer,
@@ -148,12 +120,12 @@ async def create_zertifikat(
 
 @router.put("/{zertifikat_id}", response_model=ZertifikateOut, summary="Zertifikat aktualisieren", dependencies=SCHREIBEN["QUALITAET"])
 async def update_zertifikat(
-    zertifikat_id: int,
+    zertifikat_id: str,
     body: ZertifikatUpdate,
-    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ) -> dict:
     """Update an existing Zertifikat."""
-    z = db.query(ZertifikatEintrag).filter(ZertifikatEintrag.id == zertifikat_id).first()
+    z = db.query(ZertifikatEintrag).filter(ZertifikatEintrag.tenant_id == tenant_id).filter(ZertifikatEintrag.id == zertifikat_id).first()
     if not z:
         raise HTTPException(status_code=404, detail="Zertifikat nicht gefunden")
     update_data = body.model_dump(exclude_unset=True)
@@ -178,11 +150,11 @@ async def update_zertifikat(
 
 @router.delete("/{zertifikat_id}", response_class=Response, status_code=204, response_model=None, summary="Zertifikat löschen", dependencies=SCHREIBEN["QUALITAET"])
 async def delete_zertifikat(
-    zertifikat_id: int,
-    db: Session = Depends(get_db),
+    zertifikat_id: str,
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ) -> Response:
     """Soft-delete: set status to 'abgelaufen'."""
-    z = db.query(ZertifikatEintrag).filter(ZertifikatEintrag.id == zertifikat_id).first()
+    z = db.query(ZertifikatEintrag).filter(ZertifikatEintrag.tenant_id == tenant_id).filter(ZertifikatEintrag.id == zertifikat_id).first()
     if not z:
         raise HTTPException(status_code=404, detail="Zertifikat nicht gefunden")
     z.status = "abgelaufen"
