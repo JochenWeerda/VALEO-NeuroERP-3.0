@@ -11,6 +11,11 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## BATCH8-SEED-SCHUTZ-20261104 — reserviert, Codex
+
+**Owner:** Codex. **Ziel:** Irreversible Batch-8-Seedbereinigung gegen Datenverlust absichern. **Dateibesitz:** Migration scheinwege_mandant_20261103, zugehoerige Tests und eigene QA; Workboard-Integration mit Lead. **Abnahme:** unveraenderte Seeds eindeutig nachweisbar, fremde/geaenderte/NULL-Daten bleiben erhalten oder blockieren. **Risiko:** nicht eindeutig identifizierbare historische Seedzeilen erfordern konservativen Abbruch.
+
+
 ## ADAPTIVE-WORKSPACE-20261022 — reserviert, Cursor Grok (Phase-1 Lead)
 
 **Owner:** Cursor Grok. **Stand:** reserviert 2026-10-22. **Ziel:** Adaptive Workspace Framework INNERHALB von VALEO, Phase 1 — zentrale Registry fuer Module/Views/typisierte Fachaktionen/User-Context; Command Center (Strg+K) auf berechtigte Fachaktionen; deterministische Priorisierung (KI nur leerer Hook); Pin/Fixieren der Startseite. **Dateibesitz (exklusiv):** `packages/frontend-web/src/workspace/**`, `packages/frontend-web/src/app/navigation/**`, Command-Palette-Mapping (`command-palette-model.ts` / `CommandPalette.tsx`), `docs/architecture/adaptive-workspace-framework.md`, Slice-YAML, Workboard, eigene Tests. **Nicht anfassen:** Inbox/Documents/CaptureScreenHost; Touren/Dispo/Fuhrpark-Godfiles; `mcp_execution_service.py` / `mask_action_runtime_service.py` / NATS-Core; Geschwister-Docs `adaptive-workspace-inbox.md`, `-disposition.md`, `-events-mcp.md`, `-erpclow-lessons.md`; Codex STUDIO-*, Touren, Training, Bestellvorschlag. **Abnahme Phase 1:** Registry + Priorisierung + Command-Mapping testbar; Overlay-Pin; keine Fake-100% fuer Phase 2–5. **Slice:** `docs/agent-ops/slices/ADAPTIVE-WORKSPACE-20261022.yaml`.
