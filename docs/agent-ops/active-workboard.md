@@ -20359,3 +20359,16 @@ Konstruktor, ops_waagen NOT NULL, ops_wiegungen mit Mandant aus der Waage und Ve
 (waagen_wiegungen_mandant_20261103); Alt-Wiegungswege bleiben 410. Alembic: vat_return_bearbeiter_20261027 auf
 rahmenauftrag_afa_tabellen_20261102 umgehaengt, ein Kopf. Pruefung auf frischer DB ueber CI (keine eigene lokale DB,
 ungemergte Migrationen nicht auf valeo_probe). Nach dem Merge: alte PRs #82/#84/#85/#88 schliessen.
+
+## CODEX-ROLLOUT-INTEGRATION-20261104 — reserviert, Codex
+
+Ziel: Nutzerauftrag aus codex-uebergabe-20261104 umsetzen. Zuerst PR #102 mit gruenen
+Pruefungen integrieren, main nach develop; danach #103 auf main nachziehen, Generatoren
+und CI pruefen, integrieren und main erneut nach develop. Anschliessend A bis F der
+Uebergabe fachlich schliessen, ohne bestehende Nachweise erneut zu implementieren.
+Dateibesitz dieses Integrationsclaims: eigener Worktree artifacts/rollout-integration-20261104,
+Integrationsnachweise und dieser Workboard-Anhang; kein fremder Hauptbaum-Dateibesitz.
+Abnahme: Commit-genaue CI-Nachweise, keine abgeschwaechten Tests, keine neue Testdatenbank,
+keine ungemergte Migration auf dem Pruefstand gestempelt. Fachslices werden vor Umsetzung
+separat mit Dateien und Abnahme reserviert. Stand: #102 Security/Frontend/Smoke gruen,
+Backend und Test & Lint laufen; #103 basiert noch auf #102. A/B/C/E/F im Code bestaetigt offen.
