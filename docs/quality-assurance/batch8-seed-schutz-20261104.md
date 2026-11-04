@@ -1,0 +1,18 @@
+---
+title: Batch 8 - Schutz vor Verlust von Altbestand
+type: reference
+audience: [entwickler, agent, qa]
+owner: Codex
+status: aktiv
+last_reviewed: 2026-11-04
+version: 1.0.0
+description: Seed-Signaturen, konservative Datenbereinigung und PostgreSQL-Abnahme fuer Batch 8.
+---
+
+# Batch 8: Schutz vor Verlust von Altbestand
+
+Die Seed-Signaturen stammen aus den `_seed`-Funktionen im Git-Vorgaenger von `f8bbdac5c`. Marketing prueft alle reproduzierbaren Geschaeftswerte, NULL und doppelte Namen blockieren die Entfernung. Generierte Kennungen und technische Zeitstempel sind nicht reproduzierbar. Foerder- und Labor-Seeds werden nur bei vollstaendiger Geschaeftssignatur entfernt; doppelte Foerdernummern, bereits vorhandene Mandanten oder vorhandene Befundspalten verhindern die entsprechende Bereinigung.
+
+Test-Chargenkennung, Laborname und Befundnummer beweisen keine Herkunft: Testauftraege und Befunde bleiben erhalten und werden wie sonstiger Altbestand dem Default-Mandanten zugeordnet. Abweichende Marketingzeilen blockieren die Migration und muessen fachlich geklaert werden. Identische Geschaeftswerte koennen ohne Herkunftsnachweis nicht von einem nachgebildeten echten Datensatz unterschieden werden; die historische Seed-Signatur ist die Grundlage der Nutzerentscheidung.
+
+Die gezielten Migrationstests verwenden ausschliesslich temporaere PostgreSQL-Tabellen innerhalb einer zurueckgerollten Transaktion im konfigurierten gemeinsamen Pruefstand. Abnahme 04.11.2026: `pytest tests/test_batch8_seed_schutz.py --noconftest -o addopts= -q` mit `valeo_agent`: 2 bestanden. `pruefstand_db.py --status` davor und danach: Revision `ruestlisten_tabelle_20261103`. Temporäre Tabellen liegen in einer Transaktion, die auch bei Fehlern zurückgerollt wird. Der erste Lauf mit den globalen Fixtures wurde nach längerem Warten abgebrochen.

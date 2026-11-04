@@ -11,6 +11,11 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## BATCH8-SEED-SCHUTZ-20261104 — abgeschlossen, Codex
+
+**Owner:** Codex. **Ziel:** Irreversible Batch-8-Seedbereinigung gegen Datenverlust absichern. **Dateibesitz:** Migration scheinwege_mandant_20261103, zugehoerige Tests und eigene QA; Workboard-Integration mit Lead. **Abnahme:** unveraenderte Seeds eindeutig nachweisbar, fremde/geaenderte/NULL-Daten bleiben erhalten oder blockieren. **Ergebnis:** vollständige Seed-Geschäftswerte geprüft, abweichende Marketingdaten blockieren, ungesicherte Testreste und Befunde bleiben erhalten. PostgreSQL-Gegenproben 2/2; QA `docs/quality-assurance/batch8-seed-schutz-20261104.md`. **Risiko:** identische Geschäftsdatensätze ohne Herkunftsnachweis sind nicht unterscheidbar; abweichender Marketingbestand erfordert Klärung.
+
+
 ## ADAPTIVE-WORKSPACE-20261022 — reserviert, Cursor Grok (Phase-1 Lead)
 
 **Owner:** Cursor Grok. **Stand:** reserviert 2026-10-22. **Ziel:** Adaptive Workspace Framework INNERHALB von VALEO, Phase 1 — zentrale Registry fuer Module/Views/typisierte Fachaktionen/User-Context; Command Center (Strg+K) auf berechtigte Fachaktionen; deterministische Priorisierung (KI nur leerer Hook); Pin/Fixieren der Startseite. **Dateibesitz (exklusiv):** `packages/frontend-web/src/workspace/**`, `packages/frontend-web/src/app/navigation/**`, Command-Palette-Mapping (`command-palette-model.ts` / `CommandPalette.tsx`), `docs/architecture/adaptive-workspace-framework.md`, Slice-YAML, Workboard, eigene Tests. **Nicht anfassen:** Inbox/Documents/CaptureScreenHost; Touren/Dispo/Fuhrpark-Godfiles; `mcp_execution_service.py` / `mask_action_runtime_service.py` / NATS-Core; Geschwister-Docs `adaptive-workspace-inbox.md`, `-disposition.md`, `-events-mcp.md`, `-erpclow-lessons.md`; Codex STUDIO-*, Touren, Training, Bestellvorschlag. **Abnahme Phase 1:** Registry + Priorisierung + Command-Mapping testbar; Overlay-Pin; keine Fake-100% fuer Phase 2–5. **Slice:** `docs/agent-ops/slices/ADAPTIVE-WORKSPACE-20261022.yaml`.
@@ -20371,8 +20376,7 @@ Kampagnen fuehrt domain_crm.crm_campaigns). Branch claude/batch8-scheinwege-2026
   crm/kampagne-detail, crm/kampagne-erstellen (Doppel zu crm/campaign) samt Seiten entfernt; Navigation
   marketing/kampagne/neu und /:id auf die CRM-Kampagnenmaske.
 - Foerderung und Labor (Studio-Masken vorhanden): kein _seed, Mandant aus der Anmeldung, RLS je Befehl
-  (scheinwege_mandant_20261103). Seed-Zeilen und Testreste (TEST-CHARGE-* bei Test-Labor samt Befunden) per exakter
-  Signatur geloescht; uebrige Altzeilen an den Default-Mandanten (28.10.). Aendern/Loeschen nahmen Text-Kennungen als
+  (scheinwege_mandant_20261103). Vollstaendige historische Seed-Signaturen geloescht; Testreste und Befunde bleiben mangels sicherem Herkunftsnachweis erhalten; uebrige Altzeilen an den Default-Mandanten (28.10.). Aendern/Loeschen nahmen Text-Kennungen als
   Zahl (immer 422); Antragsnummer je Mandant eindeutig; Laborauftrag nur zu eigener Charge; Befund speichert
   Analysewerte, Grenzwerte, Bemerkung; Antworten typisiert, annahme/labor und qualitaet/labor-detail repariert.
 Offen (Folgeauftrag): die uebrigen neun mandantenlosen domain_ops-Tabellen mit Live-Zeilen nach derselben Regel
