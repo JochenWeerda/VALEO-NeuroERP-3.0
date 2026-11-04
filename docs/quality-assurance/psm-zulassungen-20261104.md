@@ -1,3 +1,13 @@
+---
+title: PSM-Zulassungen - Pruefstand und Grenzen
+type: reference
+audience: [agent, entwickler, qa]
+owner: Codex
+status: aktiv
+last_reviewed: 2026-11-04
+version: 1.0.0
+---
+
 # PSM-Zulassungen: Pruefstand und Grenzen (04.11.2026)
 
 Die native Liste verwendet ausschliesslich den lokalen PSM-Stamm des angemeldeten Mandanten. Artikelnummer, Name, Wirkstoff, Mitteltyp, BVL-Nummer und Ablaufdatum kommen unveraendert aus dem Stamm. Der nullable Aktivwert bleibt bei unbekanntem Wert leer. Ablauf bedeutet nicht Widerruf oder Sperre. Die Ablaufzahl vergleicht den Kalendertag in der Betriebszeitzone und umfasst alle Seiten der gefilterten Ergebnismenge.
