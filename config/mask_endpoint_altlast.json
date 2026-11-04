@@ -1,0 +1,21 @@
+{
+  "_hinweis": "Altlast Runtime46/batch15 (Workboard STUDIO-UMBAU-RUNTIME46): Maskenquellen ohne Backend-Route; FiBu/Finance-Platzhalter seit Batch 1 (02.11.2026) abgebaut. /finance/abstimmung/nebenbuch haengt nur in main:app (app/finance/router.py), nicht in app.main; Betriebsprofile heissen im Backend /crm/farm-profiles, Kostenstellen /kostenrechnung/kostenstellen. Darf nur schrumpfen: tests/test_mask_endpoint_inventory.py.",
+  "quellen_ohne_route": [
+    "crm/betriebsprofil dataSource:entity -> /api/v1/crm/betriebsprofile/{entity_id}",
+    "crm/betriebsprofile-liste dataSource:list -> /api/v1/crm/betriebsprofile",
+    "fibu/anlagen dataSource:list -> /api/v1/fibu/anlagen",
+    "fibu/atlas dataSource:list -> /api/v1/fibu/anlagen",
+    "fibu/bilanz dataSource:list -> /api/v1/fibu/anlagen",
+    "fibu/guv dataSource:list -> /api/v1/fibu/anlagen",
+    "fibu/kostenstellen-liste dataSource:list -> /api/v1/finance/kostenstellen",
+    "fibu/monatswerte dataSource:list -> /api/v1/fibu/anlagen",
+    "fibu/sachkonto dataSource:list -> /api/v1/fibu/anlagen",
+    "fibu/sicherheiten dataSource:list -> /api/v1/fibu/anlagen",
+    "finance/bank-stamm dataSource:entity -> /api/v1/finance/abstimmung/nebenbuch/{entity_id}",
+    "finance/buchungsimport dataSource:list -> /api/v1/finance/abstimmung/nebenbuch",
+    "finance/invoices-list dataSource:list -> /api/v1/finance/abstimmung/nebenbuch",
+    "finance/kasse dataSource:list -> /api/v1/finance/abstimmung/nebenbuch",
+    "finance/nebenbuch-abstimmung dataSource:list -> /api/v1/finance/abstimmung/nebenbuch",
+    "rezepte/editor dataSource:list -> /api/v1/fibu/kreditoren"
+  ]
+}

@@ -50,7 +50,7 @@ const leer: Record<string, unknown> = {
 }
 const PFLICHT = ['code', 'bezeichnung', 'steuersatz', 'gueltig_von']
 // Der Server prueft die Rolle; hier nur die Freigabe der Aktion im Builder.
-const RECHTE = ['finance.steuerschluessel.write']
+const RECHTE = ['finance.steuerschluessel.write', 'finance.tax_key.update']
 const LISTE = ['finance', 'tax-keys']
 const BUCHT_NICHT = 'Bucht nicht automatisch'
 const KONTENFELDER = ['credit_account', 'revenue_account', 'debit_account', 'expense_account'] as const

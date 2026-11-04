@@ -17,7 +17,7 @@ BATCH10_COCKPIT_SCREEN_IDS: tuple[str, ...] = (
     "crm/crm-dashboard",
     "crm/bedarfsdeckung-cockpit",
     "crm/campaign-performance",
-    "crm/kunden-cockpit",
+    # crm/kunden-cockpit ist seit Runtime46 ein Alias auf die Kundenakte (test_kunden_cockpit_ist_die_kundenakte).
     "dashboard/einkauf",
     "dashboard/verkauf",
     "dashboard/customizable",
@@ -90,3 +90,10 @@ def test_build_cockpit_overview_screen_validates_floorplan() -> None:
             business_purpose="P",
             example_prompts=["?"],
         )
+
+
+def test_kunden_cockpit_ist_die_kundenakte() -> None:
+    """Eine Maske statt zwei: das Kunden-Cockpit zeigt die kanonische Kundenakte crm/customer-360."""
+    screen = get_screen_definition("crm/kunden-cockpit")
+    assert screen["nativeAlias"] == {"screenId": "crm/customer-360"}
+    assert screen["id"] == "crm/kunden-cockpit"

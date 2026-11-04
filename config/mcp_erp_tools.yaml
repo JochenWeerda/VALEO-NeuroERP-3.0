@@ -2520,6 +2520,102 @@ tools:
     endpoint: "POST /api/v1/mcp/tools/call"
     human_approval_required: false
 
+  - tool_id: studio.catalog.read
+    domain: studio
+    name: Studio-Katalog lesen
+    description: 'Floorplans, Feldtypen, Formate, Datenquellen und Aktionen, aus denen eine Studio-Maske bestehen
+      darf. Grundlage, bevor ein Agent eine ScreenDefinition entwirft. Nur Lesen.'
+    scope: masks:read
+    idempotent: true
+    risk_class: low
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      additionalProperties: false
+      properties: {}
+    output_schema:
+      type: object
+    audit: read
+    endpoint: POST /api/v1/mcp/tools/call
+    human_approval_required: false
+
+  - tool_id: studio.definition.validate
+    domain: studio
+    name: Studio-Maske pruefen
+    description: 'Prueft eine ScreenDefinition gegen Katalog und Studio-Gates (Feldvertrag, Meridian-Layout,
+      Rechte, rechnende Felder, Formate) und liefert Verletzungen und Reifegrad. Speichert nichts.'
+    scope: masks:read
+    idempotent: true
+    risk_class: low
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      additionalProperties: false
+      properties:
+        definition: { type: object }
+      required: [definition]
+    output_schema:
+      type: object
+      properties:
+        violations: { type: array }
+        readiness: { type: object }
+    audit: read
+    endpoint: POST /api/v1/mcp/tools/call
+    human_approval_required: false
+
+  - tool_id: studio.draft.save
+    domain: studio
+    name: Studio-Entwurf speichern
+    description: 'Legt einen Studio-Entwurf an oder schreibt ihn mit draft_id und expected_revision fort. Nur
+      Entwurf: dieselben Gates wie im Studio, keine Freigabe. Ohne mode=execute wird nur geprueft.'
+    scope: belege:write
+    idempotent: true
+    risk_class: low
+    data_classification: LOCAL_ONLY
+    audit: write
+    endpoint: POST /api/v1/mcp/tools/call
+    human_approval_required: false
+    agent_write_enabled: true
+    domain_command: studio.draft.save
+    command_version: 1
+    role_policy: beleg_write
+    input_schema:
+      type: object
+      additionalProperties: false
+      properties:
+        definition: { type: object }
+        draft_id: { type: string, format: uuid }
+        expected_revision: { type: string, pattern: '^[0-9a-f]{64}$' }
+      required: [definition]
+    output_schema:
+      type: object
+
+  - tool_id: studio.draft.submit_review
+    domain: studio
+    name: Studio-Entwurf zur Pruefung geben
+    description: 'Gibt einen Entwurf in die Vier-Augen-Pruefung. Freigeben und Zurueckziehen bleiben Menschen
+      vorbehalten; dafuer gibt es kein Agentenwerkzeug.'
+    scope: belege:write
+    idempotent: true
+    risk_class: low
+    data_classification: LOCAL_ONLY
+    audit: write
+    endpoint: POST /api/v1/mcp/tools/call
+    human_approval_required: false
+    agent_write_enabled: true
+    domain_command: studio.draft.submit_review
+    command_version: 1
+    role_policy: beleg_write
+    input_schema:
+      type: object
+      additionalProperties: false
+      properties:
+        draft_id: { type: string, format: uuid }
+        expected_revision: { type: string, pattern: '^[0-9a-f]{64}$' }
+      required: [draft_id, expected_revision]
+    output_schema:
+      type: object
+
   - tool_id: studio.migration.plan
     domain: studio
     name: Studio-Aenderungsplan festhalten

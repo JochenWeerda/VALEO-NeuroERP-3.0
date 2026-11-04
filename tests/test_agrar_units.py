@@ -314,3 +314,65 @@ def test_null_und_negative_mengen_sind_nie_zulaessig() -> None:
     for profil in (duenger(), psm_artikel()):
         assert ist_zulaessige_menge(profil, Decimal(0), "kg") is False
         assert ist_zulaessige_menge(profil, Decimal(-1), "kg") is False
+
+
+# --- Verpackungsleiter eines Packs (Nutzerhinweis 03.11.2026) -------------------------------------------------
+# PSM werden oft als Sammelgebinde verkauft: 5 l Mittel plus 250 ml Formulierungshilfsstoff (FHS) sind ein
+# Verkaufsgebinde (Pack). Ein Umkarton (Verpackungseinheit) enthaelt dann z. B. zwei solche Packs.
+
+def _psm_set(**kwargs):
+    from app.core.agrar_units import Gebinde, Pack, PackPosition
+
+    return Pack(
+        pack_id="psm-set",
+        positionen=(PackPosition("psm-5l", Decimal(5), "l"), PackPosition("fhs-250", Decimal("0.25"), "l")),
+        verpackung=(Gebinde("karton", Decimal(2), je_einheit="pack", bezeichnung="Umkarton"),
+                    Gebinde("palette", Decimal(40), je_einheit="karton")),
+        **kwargs,
+    )
+
+
+def test_umkarton_enthaelt_zwei_verkaufsgebinde():
+    pack = _psm_set()
+    assert pack.packs_je("karton") == Decimal(2)
+    assert pack.packs_je("Umkarton") == Decimal(2)  # Handelsname des Kartons
+    assert pack.packs_je("palette") == Decimal(80)
+    assert pack.packs_je("pack") == Decimal(1)
+
+
+def test_inhalt_eines_umkartons_bis_auf_die_artikel():
+    inhalt = _psm_set().inhalt_fuer(Decimal(1), "karton")
+    assert [(p.artikel_id, p.menge, p.einheit) for p in inhalt] == [
+        ("psm-5l", Decimal(10), "l"), ("fhs-250", Decimal("0.50"), "l")]
+
+
+def test_inhalt_ohne_belegte_stufe_ist_nicht_bestimmbar():
+    assert _psm_set().inhalt_fuer(Decimal(1), "kiste") is None
+
+
+def test_inhalt_gilt_auch_fuer_gesperrte_packs_ohne_aufloesungsrecht():
+    """Der Inhalt ist eine Mengenauskunft (Bestand, Lieferung), kein Recht, die Artikel einzeln zu verkaufen."""
+    from app.core.agrar_units import PackGesperrtError
+
+    pack = _psm_set()
+    assert pack.inhalt_fuer(Decimal(3), "pack")[0].menge == Decimal(15)
+    with pytest.raises(PackGesperrtError):
+        pack.aufloesen({"irgendein.recht"})
+
+
+def test_ringbezug_in_der_packleiter_ist_nicht_bestimmbar():
+    from app.core.agrar_units import Gebinde, Pack, PackPosition
+
+    pack = Pack(pack_id="ring", positionen=(PackPosition("a", Decimal(1), "l"),),
+                verpackung=(Gebinde("karton", Decimal(2), je_einheit="palette"),
+                            Gebinde("palette", Decimal(3), je_einheit="karton")))
+    assert pack.packs_je("karton") is None
+
+
+@pytest.mark.parametrize("roh,norm", [("BB", "big_bag"), ("Umkarton", "karton"), ("ltr", "l"), ("EH", "einheit"),
+                                      ("Dose", "dose")])
+def test_schreibweisen_des_handels(roh, norm):
+    from app.core.agrar_units import art, normalisiere
+
+    assert normalisiere(roh) == norm
+    assert art(norm) is not None

@@ -1,199 +1,95 @@
 """
-UIX-035 / UIX-036 — ActionRuntime Backend-Test für CRM create_activity.
+UIX-035 / UIX-036 — ActionRuntime-Umschlag fuer CRM create_activity am Kunden.
 
-Testet alle vier Execution-Modes (validate, dryRun, propose, execute)
-sowie den Agent-Pfad (dryRun mit isAgentCaller-Logik).
-
-Kein Live-DB nötig für validate, dryRun und propose. Execute gegen einen
-unbekannten Kunden schreibt nichts und meldet den Fehlschlag.
+Seit dem Migrationsstand 6ff9d93f4 sucht der Weg den Kunden in jedem Modus, lehnt einen unbekannten Kunden mit
+404 und ungueltige Eingaben mit 422 ab und baut die Aktivitaet ueber den kanonischen Aktivitaetsdienst. Hier geht
+es nur um den Umschlag: welcher Modus was ausloest. Kundensuche und Aktivitaetsdienst sind ersetzt; das echte
+Schreiben pruefen ``tests/test_crm_activity_canonical_sql.py`` und ``tests/test_crm360_kunde_wird_gefunden.py``.
 """
 
 import pytest
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from app.main import app
+from app.api.v1.endpoints import crm_360
+from app.core.exceptions import register_domain_exception_handlers
+from app.services import crm_activity_service
+from testgrenze import ersetze_mandant, ersetze_nutzer
 
-CLIENT = TestClient(app)
-HEADERS = {"Authorization": "Bearer dev-token", "X-Tenant-Id": "00000000-0000-0000-0000-000000000001"}
-BASE = "/api/v1/crm/customers/cust-001/actions/create_activity"
-
-
-# ── UIX-035: validate mode ───────────────────────────────────────────────────
-
-def test_validate_mode_ok():
-    resp = CLIENT.post(BASE, json={"betreff": "Test-Anruf", "typ": "Anruf", "_mode": "validate"}, headers=HEADERS)
-    assert resp.status_code == 200
-    data = resp.json()
-    assert data["mode"] == "validate"
-    assert data["success"] is True
-    assert data.get("validationErrors") is None
+MANDANT = "00000000-0000-0000-0000-000000000001"
+BASE = "/crm/customers/cust-001/actions/create_activity"
 
 
-def test_validate_mode_missing_betreff():
-    resp = CLIENT.post(BASE, json={"betreff": "", "typ": "Anruf", "_mode": "validate"}, headers=HEADERS)
-    assert resp.status_code == 200
-    data = resp.json()
-    assert data["success"] is False
-    errors = data.get("validationErrors") or []
-    assert any(e["field"] == "betreff" for e in errors)
+@pytest.fixture
+def lauf(monkeypatch):
+    aufrufe: list[tuple[str, str]] = []
+    bekannt = {"cust-001": {"id": "cust-001"}}
+    monkeypatch.setattr(crm_360, "_kunde_finden", lambda _db, kunde, mandant: bekannt.get(kunde))
+
+    def vorschau(_db, mandant, aktion, command, activity_id=None):
+        aufrufe.append(("preview", mandant))
+        return {"title": command.title, "type": command.type, "customer_id": command.customer_id}
+
+    def ausfuehren(_db, mandant, aktion, command, activity_id=None):
+        aufrufe.append(("execute", mandant))
+        return {"activity_id": "act-1", "auditEntryId": "audit-1"}
+
+    monkeypatch.setattr(crm_activity_service, "preview_activity", vorschau)
+    monkeypatch.setattr(crm_activity_service, "execute_activity", ausfuehren)
+    app = FastAPI()
+    register_domain_exception_handlers(app)
+    app.include_router(crm_360.router, prefix="/crm/customers")
+    app.dependency_overrides[crm_360.get_db] = lambda: None
+    ersetze_mandant(app, MANDANT)
+    ersetze_nutzer(app, "CRM_BEARBEITEN")
+    with TestClient(app, raise_server_exceptions=False) as client:
+        yield client, aufrufe
 
 
-def test_validate_mode_invalid_type():
-    resp = CLIENT.post(BASE, json={"betreff": "OK", "typ": "NichtExistent", "_mode": "validate"}, headers=HEADERS)
-    assert resp.status_code == 200
-    data = resp.json()
-    assert data["success"] is False
-    errors = data.get("validationErrors") or []
-    assert any(e["field"] == "typ" for e in errors)
+@pytest.mark.parametrize("mode", ["validate", "dryRun", "propose"])
+def test_vorschau_modi_schreiben_nicht(lauf, mode):
+    client, aufrufe = lauf
+    antwort = client.post(BASE, json={"betreff": "Test-Anruf", "typ": "Anruf", "_mode": mode})
+    assert antwort.status_code == 200, antwort.text
+    daten = antwort.json()
+    assert (daten["mode"], daten["success"]) == (mode, True)
+    assert daten["proposedChanges"] == [{"title": "Test-Anruf", "type": "call", "customer_id": "cust-001"}]
+    assert aufrufe == [("preview", MANDANT)]
 
 
-# ── UIX-035: dryRun mode ─────────────────────────────────────────────────────
-
-def test_dry_run_mode_returns_proposed_changes():
-    resp = CLIENT.post(BASE, json={"betreff": "Besuch geplant", "typ": "Besuch", "_mode": "dryRun"}, headers=HEADERS)
-    assert resp.status_code == 200
-    data = resp.json()
-    assert data["mode"] == "dryRun"
-    assert data["success"] is True
-    assert data.get("proposedChanges") is not None
-    assert len(data["proposedChanges"]) > 0
+def test_execute_legt_ueber_den_aktivitaetsdienst_an(lauf):
+    client, aufrufe = lauf
+    antwort = client.post(BASE, json={"betreff": "Jahresgespraech", "typ": "Meeting", "_mode": "execute",
+                                      "_auditReason": "Kundentermin Q4", "_idempotencyKey": "ikey-abc-123"})
+    assert antwort.status_code == 200, antwort.text
+    daten = antwort.json()
+    assert (daten["success"], daten["affectedIds"], daten["auditEntryId"]) == (True, ["act-1"], "audit-1")
+    assert aufrufe == [("execute", MANDANT)]
 
 
-def test_dry_run_no_side_effects(monkeypatch):
-    """dryRun darf niemals in die DB schreiben — wird durch mode-Guard sichergestellt."""
-    writes: list[str] = []
-
-    original_post = CLIENT.post
-
-    def patched_post(url, **kwargs):
-        if "execute" not in str(kwargs.get("json", {})):
-            return original_post(url, **kwargs)
-        writes.append(url)
-        return original_post(url, **kwargs)
-
-    resp = CLIENT.post(BASE, json={"betreff": "Test", "typ": "E-Mail", "_mode": "dryRun"}, headers=HEADERS)
-    assert resp.status_code == 200
-    assert writes == [], "dryRun darf keine execute-Pfade auslösen"
+def test_unbekannter_kunde_wird_abgelehnt_und_nichts_simuliert(lauf):
+    client, aufrufe = lauf
+    for mode in ("validate", "execute"):
+        antwort = client.post("/crm/customers/unbekannt/actions/create_activity",
+                              json={"betreff": "X", "typ": "Anruf", "_mode": mode})
+        assert antwort.status_code == 404, antwort.text
+    assert aufrufe == []
 
 
-# ── UIX-035: propose mode ────────────────────────────────────────────────────
-
-def test_propose_mode_returns_suggestion():
-    resp = CLIENT.post(BASE, json={"_mode": "propose"}, headers=HEADERS)
-    assert resp.status_code == 200
-    data = resp.json()
-    assert data["mode"] == "propose"
-    assert data["success"] is True
-    changes = data.get("proposedChanges") or []
-    assert len(changes) > 0
-    suggestion = changes[0]
-    assert "betreff" in suggestion
-    assert "typ" in suggestion
-    assert suggestion["typ"] == "Anruf"
+@pytest.mark.parametrize("rumpf", [
+    {"betreff": "OK", "typ": "NichtExistent", "_mode": "validate"},
+    {"betreff": "OK", "typ": "Anruf", "_mode": "unbekannt"},
+    {"betreff": "OK", "typ": "Anruf", "_mode": "validate", "fremdfeld": 1},
+])
+def test_ungueltige_eingaben_werden_abgelehnt(lauf, rumpf):
+    client, aufrufe = lauf
+    assert client.post(BASE, json=rumpf).status_code == 422
+    assert aufrufe == []
 
 
-# ── UIX-035: execute mode ────────────────────────────────────────────────────
-
-def test_execute_mode_validation_blocks_on_empty_betreff():
-    resp = CLIENT.post(BASE, json={"betreff": "", "typ": "Anruf", "_mode": "execute"}, headers=HEADERS)
-    assert resp.status_code == 200
-    data = resp.json()
-    assert data["success"] is False
-    assert data.get("validationErrors") is not None
-
-
-def test_execute_mode_rejects_unknown_customer():
-    """Ohne Stammkunden wird nichts simuliert."""
-    resp = CLIENT.post(
-        BASE,
-        json={"betreff": "Jahresgespräch", "typ": "Meeting", "_mode": "execute", "_auditReason": "Kundentermin Q4"},
-        headers=HEADERS,
-    )
-    assert resp.status_code == 200
-    data = resp.json()
-    assert data["mode"] == "execute"
-    assert data["success"] is False
-    assert data["error"] == "Kunde nicht gefunden."
-
-
-def test_execute_with_idempotency_key_still_needs_a_customer():
-    payload = {"betreff": "Idempotenz-Test", "typ": "Aufgabe", "_mode": "execute", "_idempotencyKey": "ikey-abc-123"}
-    resp = CLIENT.post(BASE, json=payload, headers=HEADERS)
-    assert resp.status_code == 200
-    assert resp.json()["success"] is False
-
-
-# ── UIX-036: Agent-Modus ─────────────────────────────────────────────────────
-
-def test_agent_dry_run_propose_chain():
-    """Agent-Pfad: propose → dryRun → validate — kein execute."""
-
-    propose_resp = CLIENT.post(BASE, json={"_mode": "propose"}, headers=HEADERS)
-    assert propose_resp.status_code == 200
-    suggestion = (propose_resp.json().get("proposedChanges") or [{}])[0]
-
-    dry_resp = CLIENT.post(BASE, json={**suggestion, "_mode": "dryRun"}, headers=HEADERS)
-    assert dry_resp.status_code == 200
-    assert dry_resp.json()["success"] is True
-
-    val_resp = CLIENT.post(BASE, json={**suggestion, "_mode": "validate"}, headers=HEADERS)
-    assert val_resp.status_code == 200
-    assert val_resp.json()["success"] is True
-
-
-def test_agent_contract_gate_on_action_definition():
-    """AgentMaskContract enthält create_activity mit forbiddenForAgents=False."""
-    from app.api.v1.endpoints.mask_screen_definition import _generate_agent_contract
-    from app.core.screen_definitions import build_crm_customer_360_screen_definition
-
-    sd = build_crm_customer_360_screen_definition()
-    contract = _generate_agent_contract(sd)
-
-    action_keys = [a["key"] for a in (contract.get("availableActions") or [])]
-    assert "create_activity" in action_keys, "create_activity muss im AgentContract sichtbar sein"
-
-    ca = next(a for a in contract["availableActions"] if a["key"] == "create_activity")
-    assert ca.get("dangerLevel") == "safe"
-    assert ca.get("requiresHumanApproval") is False
-
-
-def test_readiness_gates_all_mandatory_green():
-    """Nach UIX-034b/c müssen alle 6 mandatory Gates für crm/customer-360 grün sein.
-
-    Geprüft wird die ausgelieferte ScreenDefinition (get_screen_definition inkl.
-    Meridian-Layout-Dekoration) — der rohe Builder ist ein internes Vorprodukt.
-    """
-    from app.api.v1.endpoints.mask_screen_definition import _check_readiness
-    from app.core.screen_definitions import get_screen_definition
-
-    sd = get_screen_definition("crm/customer-360")
-    assert sd is not None
-    result = _check_readiness(sd)
-
-    assert result["generatorReady"] is True, f"Mandatory gates failed: {result['errors']}"
-    assert result["errors"] == []
-
-
-def test_readiness_advisory_score_improved():
-    """advisoryScore soll nach UIX-034c deutlich über 0.17 liegen."""
-    from app.api.v1.endpoints.mask_screen_definition import _check_readiness
-    from app.core.screen_definitions import build_crm_customer_360_screen_definition
-
-    sd = build_crm_customer_360_screen_definition()
-    result = _check_readiness(sd)
-
-    assert result["advisoryScore"] >= 0.5, f"Advisory score zu niedrig: {result['advisoryScore']} — Warnings: {result['warnings']}"
-
-
-def test_command_endpoint_wired_in_screen_definition():
-    """create_activity muss commandEndpoint in der ScreenDefinition haben."""
-    from app.core.screen_definitions import build_crm_customer_360_screen_definition
-
-    sd = build_crm_customer_360_screen_definition()
-    actions = {a["key"]: a for a in sd.get("actions", [])}
-
-    assert "create_activity" in actions
-    assert actions["create_activity"].get("commandEndpoint"), "commandEndpoint muss gesetzt sein"
-    assert "{entity_id}" in actions["create_activity"]["commandEndpoint"]
-    assert actions["edit"]["navigationRoute"] == "/verkauf/kunden-stamm/{business_partner_id}?pflege=1"
-    assert "commandEndpoint" not in actions["edit"]
+def test_agent_kette_propose_dryrun_validate_fuehrt_nie_aus(lauf):
+    """UIX-036: Der Agent geht propose -> dryRun -> validate, ohne execute."""
+    client, aufrufe = lauf
+    for mode in ("propose", "dryRun", "validate"):
+        assert client.post(BASE, json={"betreff": "Besuch geplant", "typ": "Besuch", "_mode": mode}).json()["success"]
+    assert [art for art, _ in aufrufe] == ["preview", "preview", "preview"]

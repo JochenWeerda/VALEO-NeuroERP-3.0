@@ -15,14 +15,17 @@ jobs:
     name: Test & Lint
     runs-on: ubuntu-latest
     env:
-      DATABASE_URL: postgresql://valeo_dev:REDACTED_PASSWORD@localhost:5432/valeo_neuro_erp
+      DATABASE_URL: postgresql://valeo_dev:REDACTED_PASSWORD@localhost:5432/valeo_probe
+      # Der Job-Pruefstand ist frisch migriert und heisst wie der lokale (valeo_probe): RLS-, Bank- und
+      # Nebenlaeufigkeitstests verlangen ihn ausdruecklich und pruefen den Namen.
+      TEST_DATABASE_URL: postgresql://valeo_dev:REDACTED_PASSWORD@localhost:5432/valeo_probe
       API_DEV_TOKEN: dev-token
       PYTEST_REQUIRE_DB_STRICT: "1"
     services:
       postgres:
         image: postgres:15
         env:
-          POSTGRES_DB: valeo_neuro_erp
+          POSTGRES_DB: valeo_probe
           POSTGRES_USER: valeo_dev
           POSTGRES_PASSWORD: REDACTED_PASSWORD
         ports:
@@ -66,13 +69,19 @@ jobs:
 
       - name: Initialize database schema & seed data
         run: |
+          # Schemavertrag gegen den rein migrierten Stand, bevor create_all ORM-Tabellen ohne Migration ergaenzt.
+          python scripts/init_db.py --nur-migrationen
+          pytest -q -p no:cacheprovider --no-cov tests/test_rls_inventory_contract.py::test_tabellen_entsprechen_dem_frischen_schema
           python scripts/init_db.py
           python -m app.seeds.inventory_seed
+          # Getrennte Rollen (valeo_app, valeo_system, ...) wie im Betrieb; RLS-Tests pruefen unter valeo_app.
+          python scripts/provision_db_roles.py --url "$DATABASE_URL" --anwenden
       
       # Vollsuite deckt u.a. Compliance/PCN (test_flow_spines_api), Kernel-Actions (wave17), Broker ab.
       - name: Run tests
         run: |
-          pytest --cov=app --cov-report=xml --cov-report=term
+          pytest --cov=app --cov-report=xml --cov-report=term \
+            --deselect tests/test_rls_inventory_contract.py::test_tabellen_entsprechen_dem_frischen_schema
       
       - name: Upload coverage
         uses: codecov/codecov-action@v3

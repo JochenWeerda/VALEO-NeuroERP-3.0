@@ -3,6 +3,7 @@ import { MadeByStudioDetailRuntimeWire } from '@/components/mask-builder/made-by
 import { useNavigate, useParams } from '@/app/routing/typed-router'
 import { Skeleton } from '@/components/ui/skeleton'
 import { UniversalMaskRenderer } from '@/components/mask-builder/UniversalMaskRenderer'
+import { useScreenPermissions } from '@/components/mask-builder/runtime/screen-permissions'
 import { compileRenderPlanFromScreenDefinition } from '@/components/mask-builder/render-plan/schema-compiler'
 import { useUniversalFormState } from '@/components/mask-builder/runtime/useUniversalFormState'
 import { createScreenContext } from '@/components/mask-builder/governance/screen-context'
@@ -191,7 +192,8 @@ export default function FuhrparkFahrzeugStammPage(): JSX.Element {
     }
   }, [form.values.kilometerstand, form.values.naechster_tuev_termin, isNew, isTouch, pending])
 
-  const plan = useMemo(() => compileRenderPlanFromScreenDefinition(schema), [schema])
+  const rechte = useScreenPermissions(schema)
+  const plan = useMemo(() => compileRenderPlanFromScreenDefinition(schema, { permissions: rechte }), [schema, rechte])
 
   const workflow = useMemo<WorkflowState>(() => {
     const kennzeichen = text(form.values.kennzeichen)
@@ -359,7 +361,7 @@ export default function FuhrparkFahrzeugStammPage(): JSX.Element {
 
   const screenContext = useMemo(() => createScreenContext({
     data: { fahrzeug: geladen.current },
-    permissions: { granted: [] },
+    permissions: { granted: rechte },
     state: { values: form.values, policies: {} },
     actions: {
       'fuhrpark.saveFahrzeug': () => handleAction('speichern'),
@@ -370,7 +372,7 @@ export default function FuhrparkFahrzeugStammPage(): JSX.Element {
       'fuhrpark.deleteFahrzeug': () => handleAction('loeschen'),
     },
     navigation: { push: () => undefined },
-  }), [form.values, handleAction, navigate])
+  }), [rechte, form.values, handleAction, navigate])
 
   if (!isNew && fahrzeugQuery.isLoading) {
     return (

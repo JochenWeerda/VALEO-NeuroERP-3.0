@@ -7,11 +7,12 @@ Liefert das von der Maske erwartete Format { items: [...] } in camelCase.
 from datetime import datetime
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.akteur import gepruefter_akteur_aus_request
 from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
 from app.infrastructure.models import AgrarContract, ContractAmendment, AmendmentTemplate
@@ -24,11 +25,9 @@ router = APIRouter(prefix="/api/contracts", tags=["contracts"])
 
 class AmendmentCreate(BaseModel):
     contractId: Optional[str] = Field(None, alias="contractId")
-    tenantId: Optional[str] = Field(None, alias="tenantId")
     type: str = Field("amendment")
     reason: str = Field(..., min_length=10)
     changes: dict[str, Any] = Field(default_factory=dict)
-    createdBy: Optional[str] = Field(None, alias="createdBy")
 
     model_config = {"populate_by_name": True}
 
@@ -191,7 +190,7 @@ async def list_contracts(
         items.append(_kon_to_item(k))
 
     # Rahmenverträge (domain_ops) – begrenzt hinzufügen, damit Gesamtlimit ungefähr eingehalten wird
-    repo = RahmenvertragRepository(db)
+    repo = RahmenvertragRepository(db, tenant_id)
     rahmen = repo.get_all(limit=limit, status=status)
     for v in rahmen:
         items.append(_rahmen_to_item(v))
@@ -212,7 +211,7 @@ async def get_contract(
 ) -> dict[str, Any]:
     """Einzelvertrag nach ID (Agrar oder Rahmenvertrag)."""
     if contract_id.startswith("RV-"):
-        repo = RahmenvertragRepository(db)
+        repo = RahmenvertragRepository(db, tenant_id)
         vertrag = repo.get_by_id(contract_id)
         if not vertrag:
             raise HTTPException(status_code=404, detail="Contract not found")
@@ -244,7 +243,7 @@ async def delete_contract(
 ):
     """Vertrag löschen (Rahmenvertrag) oder 404 (Agrar-Storno über cancel)."""
     if contract_id.startswith("RV-"):
-        repo = RahmenvertragRepository(db)
+        repo = RahmenvertragRepository(db, tenant_id)
         if not repo.delete(contract_id):
             raise HTTPException(status_code=404, detail="Contract not found")
         return {"ok": True}
@@ -269,7 +268,7 @@ async def cancel_contract(
 ) -> dict[str, Any]:
     """Vertrag stornieren (Status auf cancelled bzw. storniert)."""
     if contract_id.startswith("RV-"):
-        repo = RahmenvertragRepository(db)
+        repo = RahmenvertragRepository(db, tenant_id)
         vertrag = repo.get_by_id(contract_id)
         if not vertrag:
             raise HTTPException(status_code=404, detail="Contract not found")
@@ -314,11 +313,17 @@ async def list_amendments(
 async def create_amendment(
     contract_id: str,
     body: AmendmentCreate,
+    request: Request,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
-    """Amendment anlegen und zurückgeben (camelCase)."""
-    tid = body.tenantId or tenant_id
+    """Amendment anlegen und zurückgeben (camelCase).
+
+    Mandant und Urheber aus der Anmeldung; bis 28.10.2026 kamen sie aus dem Rumpf (``tenantId``, ``createdBy``), und
+    der Vertrag wurde nicht darauf geprueft, ob er dem Mandanten gehoert.
+    """
+    akteur = gepruefter_akteur_aus_request(request)
+    await get_contract(contract_id, db=db, tenant_id=tenant_id)  # 404, wenn der Vertrag nicht im Mandanten liegt
     if len(body.reason.strip()) < 10:
         raise HTTPException(status_code=400, detail="reason must be at least 10 characters")
     amendment = ContractAmendment(
@@ -328,8 +333,8 @@ async def create_amendment(
         reason=body.reason.strip(),
         status="pending",
         changes=body.changes or {},
-        tenant_id=tid,
-        created_by=body.createdBy,
+        tenant_id=tenant_id,
+        created_by=akteur,
     )
     db.add(amendment)
     db.commit()

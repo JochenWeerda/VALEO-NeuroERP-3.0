@@ -111,7 +111,6 @@ from app.api.v1.endpoints import (
     waage,
     zertifikate,
     foerderung,
-    marketing,
     crm_campaigns,
     labor,
     fuhrpark,
@@ -1663,11 +1662,6 @@ api_router.include_router(
 # Förderung API
 api_router.include_router(
     foerderung.router
-)
-
-# Marketing API
-api_router.include_router(
-    marketing.router
 )
 
 # CRM Campaigns API — router prefix is already /crm/campaigns, no extra prefix needed

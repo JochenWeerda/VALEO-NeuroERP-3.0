@@ -2306,29 +2306,6 @@ def build_waage_wiegungen_liste() -> dict[str, Any]:
     return build_weighing_tickets("waage/wiegungen-liste")
 
 
-def build_marketing_kampagnen_liste() -> dict[str, Any]:
-    return _liste(
-        screen_id="marketing/kampagnen-liste", domain="marketing", title="Marketingkampagnen",
-        subtitle="Kampagnen mit Zielgruppe, Budget und Laufzeit",         endpoint="/api/v1/marketing/kampagnen",
-        row_route="/marketing/kampagne/{id}", bundle="marketing",
-        columns=[
-            {"key": "name", "label": "Kampagne", "sortable": True, "filterable": True, "priority": "primary"},
-            {"key": "typ", "label": "Typ", "filterable": True, "priority": "primary"},
-            {"key": "zielgruppe", "label": "Zielgruppe", "filterable": True, "priority": "secondary"},
-            {"key": "startdatum", "label": "Start", "renderKind": "date", "sortable": True, "priority": "secondary"},
-            {"key": "enddatum", "label": "Ende", "renderKind": "date", "sortable": True, "priority": "tertiary"},
-            {"key": "budget", "label": "Budget", "numeric": True, "renderKind": "currency", "sortable": True,
-             "priority": "primary"},
-            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
-        ],
-        actions=[_neu("Neue Kampagne", "/marketing/kampagne/neu"), _EXPORT],
-        row_actions=[],
-        purpose="Marketingkampagnen und Budgets verfolgen.",
-        prompts=["Welche Kampagnen laufen gerade?", "Welches Budget ist fuer Q2 geplant?"],
-        no_workflow="Kampagnenliste ohne eigenen Ablauf.",
-    )
-
-
 def build_crm_kunden_liste() -> dict[str, Any]:
     return _liste(
         screen_id="crm/kunden-liste", domain="crm", title="Kunden",
@@ -3329,7 +3306,6 @@ LISTEN_SCREEN_BUILDERS = {
     "service/anfragen-liste": build_service_anfragen_liste,
     "compliance/enni-meldungen-liste": build_compliance_enni_meldungen_liste,
     "qualitaet/reklamationen-liste": build_qualitaet_reklamationen_liste,
-    "marketing/kampagnen-liste": build_marketing_kampagnen_liste,
     "crm/kunden-liste": build_crm_kunden_liste,
     "crm/lieferanten-liste": build_crm_lieferanten_liste,
     "banken/konten-liste": build_banken_konten_liste,
@@ -3436,7 +3412,6 @@ LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/
                 "service/anfragen-liste": "/service/anfragen",
                 "compliance/enni-meldungen-liste": "/compliance/enni-meldungen",
                 "qualitaet/reklamationen-liste": "/qualitaet/reklamationen",
-                "marketing/kampagnen-liste": "/marketing/kampagnen",
                 "crm/kunden-liste": "/crm/kunden-liste",
                 "crm/lieferanten-liste": "/crm/lieferanten-liste",
                 "banken/konten-liste": "/banken/konten",
@@ -3520,7 +3495,7 @@ LISTEN_SYNONYME = {"einkauf/anfragen": ["anfragen", "bedarfsanforderungen", "ban
                    "futtermittel/mischfuttermittel-liste": ["mischfuttermittel", "mischfutter", "kraftfutter"],
                    "finance/debitoren-liste": ["debitoren", "debitorenliste", "forderungen"],
                    "finance/kreditoren-liste": ["kreditoren", "kreditorenliste", "verbindlichkeiten stamm"],
-                   "crm/kampagnen-liste": ["kampagnen", "marketing", "campaigns"],
+                   "crm/kampagnen-liste": ["kampagnen", "marketing", "campaigns", "marketing kampagnen", "werbekampagnen"],
                    "crm/kampagnenvorlagen-liste": ["kampagnenvorlagen", "vorlagen", "templates"],
                    "crm/einwilligungen-liste": ["einwilligungen", "consent", "opt-in"],
                    "crm/partner-klaerfaelle-liste": ["partner-klaerfaelle", "partnerzuordnung", "dubletten"],
@@ -3556,7 +3531,6 @@ LISTEN_SYNONYME = {"einkauf/anfragen": ["anfragen", "bedarfsanforderungen", "ban
                    "service/anfragen-liste": ["service", "tickets", "serviceanfragen"],
                    "compliance/enni-meldungen-liste": ["enni", "duengemeldung", "naehrstoffmeldung"],
                    "qualitaet/reklamationen-liste": ["reklamationen", "beanstandungen", "maengel"],
-                   "marketing/kampagnen-liste": ["marketing kampagnen", "werbekampagnen", "kampagne marketing"],
                    "crm/kunden-liste": ["kundenliste", "kundenstamm", "kunden"],
                    "crm/lieferanten-liste": ["lieferantenliste", "lieferanten crm", "einkaufspartner"],
                    "banken/konten-liste": ["bankkonten", "hausbank", "konten"],

@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 537,
-    "screens_with_actions": 419,
-    "domains": 57
+    "actions": 546,
+    "screens_with_actions": 375,
+    "domains": 50
   },
   "actions": [
     {
@@ -44,6 +44,86 @@
         "commandEndpoint": null,
         "navigationRoute": null,
         "command": "list.exportCsv",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:admin/control-center:escalate",
+      "label": "Vorfall eskalieren",
+      "description": "Vorfall eskalieren (admin/control-center)",
+      "category": "mask-action",
+      "domain": "admin",
+      "mask": "admin/control-center",
+      "intent_phrases": [
+        "Vorfall eskalieren"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/control-center",
+        "actionKey": "escalate",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:admin/control-center:plan",
+      "label": "Planungseintrag anlegen",
+      "description": "Planungseintrag anlegen (admin/control-center)",
+      "category": "mask-action",
+      "domain": "admin",
+      "mask": "admin/control-center",
+      "intent_phrases": [
+        "Planungseintrag anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/control-center",
+        "actionKey": "plan",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:admin/control-center:resolve",
+      "label": "Vorfall erledigen",
+      "description": "Vorfall erledigen (admin/control-center)",
+      "category": "mask-action",
+      "domain": "admin",
+      "mask": "admin/control-center",
+      "intent_phrases": [
+        "Vorfall erledigen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/control-center",
+        "actionKey": "resolve",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:admin/control-center:retry",
+      "label": "Erneut versuchen",
+      "description": "Erneut versuchen (admin/control-center)",
+      "category": "mask-action",
+      "domain": "admin",
+      "mask": "admin/control-center",
+      "intent_phrases": [
+        "Erneut versuchen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/control-center",
+        "actionKey": "retry",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": null,
         "method": null
       }
     },
@@ -210,22 +290,42 @@
       }
     },
     {
-      "id": "mask:admin/webhooks-liste:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (admin/webhooks-liste)",
+      "id": "mask:admin/webhooks-liste:register",
+      "label": "Neuer Webhook",
+      "description": "Neuer Webhook (admin/webhooks-liste)",
       "category": "mask-action",
       "domain": "admin",
       "mask": "admin/webhooks-liste",
       "intent_phrases": [
-        "CSV-Export"
+        "Neuer Webhook"
       ],
       "required_data": [],
       "source": {
         "screenId": "admin/webhooks-liste",
-        "actionKey": "export",
+        "actionKey": "register",
         "commandEndpoint": null,
         "navigationRoute": null,
-        "command": "list.exportCsv",
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:admin/webhooks-liste:unregister",
+      "label": "Abmelden",
+      "description": "Abmelden (admin/webhooks-liste)",
+      "category": "mask-action",
+      "domain": "admin",
+      "mask": "admin/webhooks-liste",
+      "intent_phrases": [
+        "Abmelden"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/webhooks-liste",
+        "actionKey": "unregister",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": null,
         "method": null
       }
     },
@@ -792,6 +892,28 @@
       }
     },
     {
+      "id": "mask:agrar/kontrakte/formular:bearbeiten",
+      "label": "Bearbeiten",
+      "description": "Bearbeiten (agrar/kontrakte/formular)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/kontrakte/formular",
+      "intent_phrases": [
+        "Bearbeiten"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "agrar/kontrakte/formular",
+        "actionKey": "bearbeiten",
+        "commandEndpoint": "/api/v1/kontrakte/{entity_id}/actions/bearbeiten",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
       "id": "mask:agrar/kontrakte:bearbeiten",
       "label": "Bearbeiten",
       "description": "Bearbeiten (agrar/kontrakte)",
@@ -911,6 +1033,28 @@
         "navigationRoute": null,
         "command": "list.exportCsv",
         "method": null
+      }
+    },
+    {
+      "id": "mask:agrar/probenehmer-stamm:bearbeiten",
+      "label": "Bearbeiten",
+      "description": "Bearbeiten (agrar/probenehmer-stamm)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/probenehmer-stamm",
+      "intent_phrases": [
+        "Bearbeiten"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "agrar/probenehmer-stamm",
+        "actionKey": "bearbeiten",
+        "commandEndpoint": "/api/v1/articles/{entity_id}/actions/bearbeiten",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
       }
     },
     {
@@ -1386,6 +1530,28 @@
       }
     },
     {
+      "id": "mask:agrar/vertraege/formular:bearbeiten",
+      "label": "Bearbeiten",
+      "description": "Bearbeiten (agrar/vertraege/formular)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/vertraege/formular",
+      "intent_phrases": [
+        "Bearbeiten"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "agrar/vertraege/formular",
+        "actionKey": "bearbeiten",
+        "commandEndpoint": "/api/v1/kontrakte/{entity_id}/actions/bearbeiten",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
       "id": "mask:agrar/vertrag-kontingente-liste:export",
       "label": "CSV-Export",
       "description": "CSV-Export (agrar/vertrag-kontingente-liste)",
@@ -1403,6 +1569,304 @@
         "navigationRoute": null,
         "command": "list.exportCsv",
         "method": null
+      }
+    },
+    {
+      "id": "mask:annahme/lkw-registrierung:register",
+      "label": "LKW registrieren",
+      "description": "LKW registrieren (annahme/lkw-registrierung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "annahme/lkw-registrierung",
+      "intent_phrases": [
+        "LKW registrieren"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "annahme/lkw-registrierung",
+        "actionKey": "register",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:annahme/lkw-registrierung:upload",
+      "label": "Bild hochladen",
+      "description": "Bild hochladen (annahme/lkw-registrierung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "annahme/lkw-registrierung",
+      "intent_phrases": [
+        "Bild hochladen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "annahme/lkw-registrierung",
+        "actionKey": "upload",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:annahme/qualitaets-check:save",
+      "label": "Qualitätsprüfung speichern",
+      "description": "Qualitätsprüfung speichern (annahme/qualitaets-check)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "annahme/qualitaets-check",
+      "intent_phrases": [
+        "Qualitätsprüfung speichern"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "annahme/qualitaets-check",
+        "actionKey": "save",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:annahme/qualitaets-check:start",
+      "label": "Prüfung beginnen",
+      "description": "Prüfung beginnen (annahme/qualitaets-check)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "annahme/qualitaets-check",
+      "intent_phrases": [
+        "Prüfung beginnen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "annahme/qualitaets-check",
+        "actionKey": "start",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:annahme/warteschlange:repair",
+      "label": "Artikel reparieren",
+      "description": "Artikel reparieren (annahme/warteschlange)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "annahme/warteschlange",
+      "intent_phrases": [
+        "Artikel reparieren"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "annahme/warteschlange",
+        "actionKey": "repair",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:artikel/bestandsuebersicht:bearbeiten",
+      "label": "Bearbeiten",
+      "description": "Bearbeiten (artikel/bestandsuebersicht)",
+      "category": "mask-action",
+      "domain": "lager",
+      "mask": "artikel/bestandsuebersicht",
+      "intent_phrases": [
+        "Bearbeiten"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "artikel/bestandsuebersicht",
+        "actionKey": "bearbeiten",
+        "commandEndpoint": "/api/v1/articles/{entity_id}/actions/bearbeiten",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:artikel/chargen-pflicht:bearbeiten",
+      "label": "Bearbeiten",
+      "description": "Bearbeiten (artikel/chargen-pflicht)",
+      "category": "mask-action",
+      "domain": "lager",
+      "mask": "artikel/chargen-pflicht",
+      "intent_phrases": [
+        "Bearbeiten"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "artikel/chargen-pflicht",
+        "actionKey": "bearbeiten",
+        "commandEndpoint": "/api/v1/articles/{entity_id}/actions/bearbeiten",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:artikel/ersatzteile:bearbeiten",
+      "label": "Bearbeiten",
+      "description": "Bearbeiten (artikel/ersatzteile)",
+      "category": "mask-action",
+      "domain": "lager",
+      "mask": "artikel/ersatzteile",
+      "intent_phrases": [
+        "Bearbeiten"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "artikel/ersatzteile",
+        "actionKey": "bearbeiten",
+        "commandEndpoint": "/api/v1/articles/{entity_id}/actions/bearbeiten",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:artikel/gebinde:bearbeiten",
+      "label": "Bearbeiten",
+      "description": "Bearbeiten (artikel/gebinde)",
+      "category": "mask-action",
+      "domain": "lager",
+      "mask": "artikel/gebinde",
+      "intent_phrases": [
+        "Bearbeiten"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "artikel/gebinde",
+        "actionKey": "bearbeiten",
+        "commandEndpoint": "/api/v1/articles/{entity_id}/actions/bearbeiten",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:artikel/gefahrgut:bearbeiten",
+      "label": "Bearbeiten",
+      "description": "Bearbeiten (artikel/gefahrgut)",
+      "category": "mask-action",
+      "domain": "lager",
+      "mask": "artikel/gefahrgut",
+      "intent_phrases": [
+        "Bearbeiten"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "artikel/gefahrgut",
+        "actionKey": "bearbeiten",
+        "commandEndpoint": "/api/v1/articles/{entity_id}/actions/bearbeiten",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:artikel/herkunft:bearbeiten",
+      "label": "Bearbeiten",
+      "description": "Bearbeiten (artikel/herkunft)",
+      "category": "mask-action",
+      "domain": "lager",
+      "mask": "artikel/herkunft",
+      "intent_phrases": [
+        "Bearbeiten"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "artikel/herkunft",
+        "actionKey": "bearbeiten",
+        "commandEndpoint": "/api/v1/articles/{entity_id}/actions/bearbeiten",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:artikel/kategorien:bearbeiten",
+      "label": "Bearbeiten",
+      "description": "Bearbeiten (artikel/kategorien)",
+      "category": "mask-action",
+      "domain": "lager",
+      "mask": "artikel/kategorien",
+      "intent_phrases": [
+        "Bearbeiten"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "artikel/kategorien",
+        "actionKey": "bearbeiten",
+        "commandEndpoint": "/api/v1/stammdaten/warengruppen/{entity_id}/actions/bearbeiten",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:artikel/konditionen:bearbeiten",
+      "label": "Bearbeiten",
+      "description": "Bearbeiten (artikel/konditionen)",
+      "category": "mask-action",
+      "domain": "lager",
+      "mask": "artikel/konditionen",
+      "intent_phrases": [
+        "Bearbeiten"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "artikel/konditionen",
+        "actionKey": "bearbeiten",
+        "commandEndpoint": "/api/v1/articles/{entity_id}/actions/bearbeiten",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:artikel/lieferanten-artikel:bearbeiten",
+      "label": "Bearbeiten",
+      "description": "Bearbeiten (artikel/lieferanten-artikel)",
+      "category": "mask-action",
+      "domain": "lager",
+      "mask": "artikel/lieferanten-artikel",
+      "intent_phrases": [
+        "Bearbeiten"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "artikel/lieferanten-artikel",
+        "actionKey": "bearbeiten",
+        "commandEndpoint": "/api/v1/articles/{entity_id}/actions/bearbeiten",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
       }
     },
     {
@@ -1443,6 +1907,116 @@
         "navigationRoute": "/artikel/neu",
         "command": null,
         "method": null
+      }
+    },
+    {
+      "id": "mask:artikel/preisstaffeln:bearbeiten",
+      "label": "Bearbeiten",
+      "description": "Bearbeiten (artikel/preisstaffeln)",
+      "category": "mask-action",
+      "domain": "lager",
+      "mask": "artikel/preisstaffeln",
+      "intent_phrases": [
+        "Bearbeiten"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "artikel/preisstaffeln",
+        "actionKey": "bearbeiten",
+        "commandEndpoint": "/api/v1/articles/{entity_id}/actions/bearbeiten",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:artikel/qualitaetsmerkmale:bearbeiten",
+      "label": "Bearbeiten",
+      "description": "Bearbeiten (artikel/qualitaetsmerkmale)",
+      "category": "mask-action",
+      "domain": "lager",
+      "mask": "artikel/qualitaetsmerkmale",
+      "intent_phrases": [
+        "Bearbeiten"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "artikel/qualitaetsmerkmale",
+        "actionKey": "bearbeiten",
+        "commandEndpoint": "/api/v1/articles/{entity_id}/actions/bearbeiten",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:artikel/rabattgruppen:bearbeiten",
+      "label": "Bearbeiten",
+      "description": "Bearbeiten (artikel/rabattgruppen)",
+      "category": "mask-action",
+      "domain": "lager",
+      "mask": "artikel/rabattgruppen",
+      "intent_phrases": [
+        "Bearbeiten"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "artikel/rabattgruppen",
+        "actionKey": "bearbeiten",
+        "commandEndpoint": "/api/v1/articles/{entity_id}/actions/bearbeiten",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:artikel/stamm:bearbeiten",
+      "label": "Bearbeiten",
+      "description": "Bearbeiten (artikel/stamm)",
+      "category": "mask-action",
+      "domain": "lager",
+      "mask": "artikel/stamm",
+      "intent_phrases": [
+        "Bearbeiten"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "artikel/stamm",
+        "actionKey": "bearbeiten",
+        "commandEndpoint": "/api/v1/articles/{entity_id}/actions/bearbeiten",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:artikel/texte-medien:bearbeiten",
+      "label": "Bearbeiten",
+      "description": "Bearbeiten (artikel/texte-medien)",
+      "category": "mask-action",
+      "domain": "lager",
+      "mask": "artikel/texte-medien",
+      "intent_phrases": [
+        "Bearbeiten"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "artikel/texte-medien",
+        "actionKey": "bearbeiten",
+        "commandEndpoint": "/api/v1/articles/{entity_id}/actions/bearbeiten",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
       }
     },
     {
@@ -2006,6 +2580,50 @@
       }
     },
     {
+      "id": "mask:crm/aktivitaet:delete",
+      "label": "Aktivitaet loeschen",
+      "description": "Aktivitaet loeschen (crm/aktivitaet)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/aktivitaet",
+      "intent_phrases": [
+        "Aktivitaet loeschen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/aktivitaet",
+        "actionKey": "delete",
+        "commandEndpoint": "/api/v1/crm/activities/{entity_id}/actions/delete",
+        "navigationRoute": null,
+        "command": "crm.activity.delete.v1",
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:crm/aktivitaet:update",
+      "label": "Bearbeiten",
+      "description": "Bearbeiten (crm/aktivitaet)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/aktivitaet",
+      "intent_phrases": [
+        "Bearbeiten"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/aktivitaet",
+        "actionKey": "update",
+        "commandEndpoint": "/api/v1/crm/activities/{entity_id}/actions/update",
+        "navigationRoute": null,
+        "command": "crm.activity.update.v1",
+        "method": "POST"
+      }
+    },
+    {
       "id": "mask:crm/aktivitaeten-liste:export",
       "label": "CSV-Export",
       "description": "CSV-Export (crm/aktivitaeten-liste)",
@@ -2083,6 +2701,352 @@
         "navigationRoute": "/crm/betriebsprofile/neu",
         "command": null,
         "method": null
+      }
+    },
+    {
+      "id": "mask:crm/campaign-template:back",
+      "label": "Zurück",
+      "description": "Zurück (crm/campaign-template)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/campaign-template",
+      "intent_phrases": [
+        "Zurück"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "crm/campaign-template",
+        "actionKey": "back",
+        "commandEndpoint": null,
+        "navigationRoute": "/crm/campaign-templates",
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:crm/campaign-template:delete",
+      "label": "Vorlage löschen",
+      "description": "Vorlage löschen (crm/campaign-template)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/campaign-template",
+      "intent_phrases": [
+        "Vorlage löschen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/campaign-template",
+        "actionKey": "delete",
+        "commandEndpoint": "/api/v1/crm/campaigns/templates/{entity_id}",
+        "navigationRoute": null,
+        "command": null,
+        "method": "DELETE"
+      }
+    },
+    {
+      "id": "mask:crm/campaign-template:duplicate",
+      "label": "Duplizieren",
+      "description": "Duplizieren (crm/campaign-template)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/campaign-template",
+      "intent_phrases": [
+        "Duplizieren"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/campaign-template",
+        "actionKey": "duplicate",
+        "commandEndpoint": "/api/v1/crm/campaigns/templates/{entity_id}/duplicate",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:crm/campaign-template:edit",
+      "label": "Bearbeiten",
+      "description": "Bearbeiten (crm/campaign-template)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/campaign-template",
+      "intent_phrases": [
+        "Bearbeiten"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/campaign-template",
+        "actionKey": "edit",
+        "commandEndpoint": "/api/v1/crm/campaigns/templates/{entity_id}",
+        "navigationRoute": null,
+        "command": null,
+        "method": "PUT"
+      }
+    },
+    {
+      "id": "mask:crm/campaign:activate",
+      "label": "Starten",
+      "description": "Starten (crm/campaign)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/campaign",
+      "intent_phrases": [
+        "Starten"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/campaign",
+        "actionKey": "activate",
+        "commandEndpoint": "/api/v1/crm/campaigns/{entity_id}/activate",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:crm/campaign:archive",
+      "label": "Archivieren",
+      "description": "Archivieren (crm/campaign)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/campaign",
+      "intent_phrases": [
+        "Archivieren"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/campaign",
+        "actionKey": "archive",
+        "commandEndpoint": "/api/v1/crm/campaigns/{entity_id}/archive",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:crm/campaign:back",
+      "label": "Zur Kampagnenliste",
+      "description": "Zur Kampagnenliste (crm/campaign)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/campaign",
+      "intent_phrases": [
+        "Zur Kampagnenliste"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "crm/campaign",
+        "actionKey": "back",
+        "commandEndpoint": null,
+        "navigationRoute": "/crm/campaigns",
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:crm/campaign:complete",
+      "label": "Abschließen",
+      "description": "Abschließen (crm/campaign)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/campaign",
+      "intent_phrases": [
+        "Abschließen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/campaign",
+        "actionKey": "complete",
+        "commandEndpoint": "/api/v1/crm/campaigns/{entity_id}/complete",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:crm/campaign:delete",
+      "label": "Kampagne löschen",
+      "description": "Kampagne löschen (crm/campaign)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/campaign",
+      "intent_phrases": [
+        "Kampagne löschen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/campaign",
+        "actionKey": "delete",
+        "commandEndpoint": "/api/v1/crm/campaigns/{entity_id}",
+        "navigationRoute": null,
+        "command": null,
+        "method": "DELETE"
+      }
+    },
+    {
+      "id": "mask:crm/campaign:edit",
+      "label": "Bearbeiten",
+      "description": "Bearbeiten (crm/campaign)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/campaign",
+      "intent_phrases": [
+        "Bearbeiten"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/campaign",
+        "actionKey": "edit",
+        "commandEndpoint": "/api/v1/crm/campaigns/{entity_id}",
+        "navigationRoute": null,
+        "command": null,
+        "method": "PUT"
+      }
+    },
+    {
+      "id": "mask:crm/campaign:pause",
+      "label": "Pausieren",
+      "description": "Pausieren (crm/campaign)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/campaign",
+      "intent_phrases": [
+        "Pausieren"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/campaign",
+        "actionKey": "pause",
+        "commandEndpoint": "/api/v1/crm/campaigns/{entity_id}/pause",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:crm/campaign:resume",
+      "label": "Fortsetzen",
+      "description": "Fortsetzen (crm/campaign)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/campaign",
+      "intent_phrases": [
+        "Fortsetzen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/campaign",
+        "actionKey": "resume",
+        "commandEndpoint": "/api/v1/crm/campaigns/{entity_id}/resume",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:crm/consent:back",
+      "label": "Zur Einwilligungsliste",
+      "description": "Zur Einwilligungsliste (crm/consent)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/consent",
+      "intent_phrases": [
+        "Zur Einwilligungsliste"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "crm/consent",
+        "actionKey": "back",
+        "commandEndpoint": null,
+        "navigationRoute": "/crm/consents",
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:crm/consent:edit",
+      "label": "Bearbeiten",
+      "description": "Bearbeiten (crm/consent)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/consent",
+      "intent_phrases": [
+        "Bearbeiten"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/consent",
+        "actionKey": "edit",
+        "commandEndpoint": "/api/v1/crm/consents/{entity_id}",
+        "navigationRoute": null,
+        "command": null,
+        "method": "PUT"
+      }
+    },
+    {
+      "id": "mask:crm/consent:resend-confirmation",
+      "label": "Bestätigungstoken neu ausstellen",
+      "description": "Bestätigungstoken neu ausstellen (crm/consent)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/consent",
+      "intent_phrases": [
+        "Bestätigungstoken neu ausstellen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/consent",
+        "actionKey": "resend-confirmation",
+        "commandEndpoint": "/api/v1/crm/consents/{entity_id}/resend-confirmation",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:crm/consent:revoke",
+      "label": "Widerrufen",
+      "description": "Widerrufen (crm/consent)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/consent",
+      "intent_phrases": [
+        "Widerrufen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/consent",
+        "actionKey": "revoke",
+        "commandEndpoint": "/api/v1/crm/consents/{entity_id}/revoke",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
       }
     },
     {
@@ -2230,6 +3194,114 @@
       }
     },
     {
+      "id": "mask:crm/gdpr-request:back",
+      "label": "Zur Anfragenliste",
+      "description": "Zur Anfragenliste (crm/gdpr-request)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/gdpr-request",
+      "intent_phrases": [
+        "Zur Anfragenliste"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "crm/gdpr-request",
+        "actionKey": "back",
+        "commandEndpoint": null,
+        "navigationRoute": "/crm/gdpr-requests",
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:crm/gdpr-request:delete",
+      "label": "CRM-Personendaten anonymisieren",
+      "description": "CRM-Personendaten anonymisieren (crm/gdpr-request)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/gdpr-request",
+      "intent_phrases": [
+        "CRM-Personendaten anonymisieren"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/gdpr-request",
+        "actionKey": "delete",
+        "commandEndpoint": "/api/v1/gdpr/requests/{entity_id}/delete",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:crm/gdpr-request:export",
+      "label": "CRM-Daten exportieren",
+      "description": "CRM-Daten exportieren (crm/gdpr-request)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/gdpr-request",
+      "intent_phrases": [
+        "CRM-Daten exportieren"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/gdpr-request",
+        "actionKey": "export",
+        "commandEndpoint": "/api/v1/gdpr/requests/{entity_id}/export",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:crm/gdpr-request:reject",
+      "label": "Ablehnen",
+      "description": "Ablehnen (crm/gdpr-request)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/gdpr-request",
+      "intent_phrases": [
+        "Ablehnen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/gdpr-request",
+        "actionKey": "reject",
+        "commandEndpoint": "/api/v1/gdpr/requests/{entity_id}/reject",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:crm/gdpr-request:verify",
+      "label": "Identität verifizieren",
+      "description": "Identität verifizieren (crm/gdpr-request)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/gdpr-request",
+      "intent_phrases": [
+        "Identität verifizieren"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/gdpr-request",
+        "actionKey": "verify",
+        "commandEndpoint": "/api/v1/gdpr/requests/{entity_id}/verify",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
       "id": "mask:crm/kampagnen-liste:export",
       "label": "CSV-Export",
       "description": "CSV-Export (crm/kampagnen-liste)",
@@ -2365,6 +3437,70 @@
         "actionKey": "neu",
         "commandEndpoint": null,
         "navigationRoute": "/crm/kontakt/neu",
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:crm/kunden-cockpit:bearbeiten",
+      "label": "Bearbeiten",
+      "description": "Bearbeiten (crm/kunden-cockpit)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/kunden-cockpit",
+      "intent_phrases": [
+        "Bearbeiten"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/kunden-cockpit",
+        "actionKey": "bearbeiten",
+        "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/bearbeiten",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:crm/kunden-cockpit:create_activity",
+      "label": "Aktivitaet anlegen",
+      "description": "Aktivitaet anlegen (crm/kunden-cockpit)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/kunden-cockpit",
+      "intent_phrases": [
+        "Aktivitaet anlegen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/kunden-cockpit",
+        "actionKey": "create_activity",
+        "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/create_activity",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:crm/kunden-cockpit:edit",
+      "label": "Erweiterte Pflege",
+      "description": "Erweiterte Pflege (crm/kunden-cockpit)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/kunden-cockpit",
+      "intent_phrases": [
+        "Erweiterte Pflege"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "crm/kunden-cockpit",
+        "actionKey": "edit",
+        "commandEndpoint": null,
+        "navigationRoute": "/verkauf/kunden-stamm/{business_partner_id}?pflege=1",
         "command": null,
         "method": null
       }
@@ -2655,6 +3791,178 @@
         "navigationRoute": null,
         "command": null,
         "method": "POST"
+      }
+    },
+    {
+      "id": "mask:crm/partner-klaerfaelle-liste:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (crm/partner-klaerfaelle-liste)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/partner-klaerfaelle-liste",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "crm/partner-klaerfaelle-liste",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:crm/segment:add_member",
+      "label": "Mitglied hinzufuegen",
+      "description": "Mitglied hinzufuegen (crm/segment)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/segment",
+      "intent_phrases": [
+        "Mitglied hinzufuegen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/segment",
+        "actionKey": "add_member",
+        "commandEndpoint": "/api/v1/crm/segments/{entity_id}/members",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:crm/segment:back",
+      "label": "Zur Segmentliste",
+      "description": "Zur Segmentliste (crm/segment)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/segment",
+      "intent_phrases": [
+        "Zur Segmentliste"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "crm/segment",
+        "actionKey": "back",
+        "commandEndpoint": null,
+        "navigationRoute": "/crm/segments",
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:crm/segment:calculate",
+      "label": "Mitglieder berechnen",
+      "description": "Mitglieder berechnen (crm/segment)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/segment",
+      "intent_phrases": [
+        "Mitglieder berechnen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/segment",
+        "actionKey": "calculate",
+        "commandEndpoint": "/api/v1/crm/segments/{entity_id}/calculate",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:crm/segment:delete",
+      "label": "Segment löschen",
+      "description": "Segment löschen (crm/segment)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/segment",
+      "intent_phrases": [
+        "Segment löschen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/segment",
+        "actionKey": "delete",
+        "commandEndpoint": "/api/v1/crm/segments/{entity_id}",
+        "navigationRoute": null,
+        "command": null,
+        "method": "DELETE"
+      }
+    },
+    {
+      "id": "mask:crm/segment:edit",
+      "label": "Bearbeiten",
+      "description": "Bearbeiten (crm/segment)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/segment",
+      "intent_phrases": [
+        "Bearbeiten"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/segment",
+        "actionKey": "edit",
+        "commandEndpoint": "/api/v1/crm/segments/{entity_id}",
+        "navigationRoute": null,
+        "command": null,
+        "method": "PUT"
+      }
+    },
+    {
+      "id": "mask:crm/segment:remove_member",
+      "label": "Mitglied entfernen",
+      "description": "Mitglied entfernen (crm/segment)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/segment",
+      "intent_phrases": [
+        "Mitglied entfernen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/segment",
+        "actionKey": "remove_member",
+        "commandEndpoint": "/api/v1/crm/segments/{entity_id}/members/remove",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:crm/segment:rules",
+      "label": "Regeln ersetzen",
+      "description": "Regeln ersetzen (crm/segment)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/segment",
+      "intent_phrases": [
+        "Regeln ersetzen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/segment",
+        "actionKey": "rules",
+        "commandEndpoint": "/api/v1/crm/segments/{entity_id}",
+        "navigationRoute": null,
+        "command": null,
+        "method": "PUT"
       }
     },
     {
@@ -3312,46 +4620,6 @@
       }
     },
     {
-      "id": "mask:einkauf/rechnung-abgleich:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (einkauf/rechnung-abgleich)",
-      "category": "mask-action",
-      "domain": "einkauf",
-      "mask": "einkauf/rechnung-abgleich",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "einkauf/rechnung-abgleich",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:einkauf/rechnung-eingang-erfassung:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (einkauf/rechnung-eingang-erfassung)",
-      "category": "mask-action",
-      "domain": "einkauf",
-      "mask": "einkauf/rechnung-eingang-erfassung",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "einkauf/rechnung-eingang-erfassung",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
       "id": "mask:einkauf/rechnungseingaenge-liste:export",
       "label": "CSV-Export",
       "description": "CSV-Export (einkauf/rechnungseingaenge-liste)",
@@ -3392,23 +4660,43 @@
       }
     },
     {
-      "id": "mask:einkauf/rechnungseingang/neu:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (einkauf/rechnungseingang/neu)",
+      "id": "mask:einkauf/rechnungseingang/neu:position",
+      "label": "Position übernehmen",
+      "description": "Position übernehmen (einkauf/rechnungseingang/neu)",
       "category": "mask-action",
       "domain": "einkauf",
       "mask": "einkauf/rechnungseingang/neu",
       "intent_phrases": [
-        "CSV-Export"
+        "Position übernehmen"
       ],
       "required_data": [],
       "source": {
         "screenId": "einkauf/rechnungseingang/neu",
-        "actionKey": "export",
+        "actionKey": "position",
         "commandEndpoint": null,
         "navigationRoute": null,
-        "command": "list.exportCsv",
+        "command": "finance.invoicePosition",
         "method": null
+      }
+    },
+    {
+      "id": "mask:einkauf/rechnungseingang/neu:save",
+      "label": "Als Entwurf speichern",
+      "description": "Als Entwurf speichern (einkauf/rechnungseingang/neu)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "einkauf/rechnungseingang/neu",
+      "intent_phrases": [
+        "Als Entwurf speichern"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "einkauf/rechnungseingang/neu",
+        "actionKey": "save",
+        "commandEndpoint": "/api/v1/finance/ap/invoices/",
+        "navigationRoute": null,
+        "command": "finance.invoiceSpeichern",
+        "method": "POST"
       }
     },
     {
@@ -3424,46 +4712,6 @@
       "required_data": [],
       "source": {
         "screenId": "einkauf/retouren-liste",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:einkauf/retouren:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (einkauf/retouren)",
-      "category": "mask-action",
-      "domain": "einkauf",
-      "mask": "einkauf/retouren",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "einkauf/retouren",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:einkauf/rfq-bids:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (einkauf/rfq-bids)",
-      "category": "mask-action",
-      "domain": "einkauf",
-      "mask": "einkauf/rfq-bids",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "einkauf/rfq-bids",
         "actionKey": "export",
         "commandEndpoint": null,
         "navigationRoute": null,
@@ -3575,26 +4823,6 @@
         "navigationRoute": null,
         "command": null,
         "method": "POST"
-      }
-    },
-    {
-      "id": "mask:einkauf/wareneingang:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (einkauf/wareneingang)",
-      "category": "mask-action",
-      "domain": "einkauf",
-      "mask": "einkauf/wareneingang",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "einkauf/wareneingang",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
       }
     },
     {
@@ -3722,7 +4950,7 @@
       "label": "CSV-Export",
       "description": "CSV-Export (etiketten/drucken)",
       "category": "mask-action",
-      "domain": "etiketten",
+      "domain": "lager",
       "mask": "etiketten/drucken",
       "intent_phrases": [
         "CSV-Export"
@@ -3818,26 +5046,6 @@
       }
     },
     {
-      "id": "mask:fibu/anlagen-suite:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (fibu/anlagen-suite)",
-      "category": "mask-action",
-      "domain": "fibu",
-      "mask": "fibu/anlagen-suite",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "fibu/anlagen-suite",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
       "id": "mask:fibu/anlagen:export",
       "label": "CSV-Export",
       "description": "CSV-Export (fibu/anlagen)",
@@ -3918,66 +5126,6 @@
       }
     },
     {
-      "id": "mask:fibu/buchungsuebernahme-connectors:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (fibu/buchungsuebernahme-connectors)",
-      "category": "mask-action",
-      "domain": "fibu",
-      "mask": "fibu/buchungsuebernahme-connectors",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "fibu/buchungsuebernahme-connectors",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:fibu/bwa:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (fibu/bwa)",
-      "category": "mask-action",
-      "domain": "fibu",
-      "mask": "fibu/bwa",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "fibu/bwa",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:fibu/debitoren-api:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (fibu/debitoren-api)",
-      "category": "mask-action",
-      "domain": "fibu",
-      "mask": "fibu/debitoren-api",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "fibu/debitoren-api",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
       "id": "mask:fibu/debitoren-liste:export",
       "label": "CSV-Export",
       "description": "CSV-Export (fibu/debitoren-liste)",
@@ -4014,26 +5162,6 @@
         "commandEndpoint": null,
         "navigationRoute": "/fibu/op-verwaltung",
         "command": null,
-        "method": null
-      }
-    },
-    {
-      "id": "mask:fibu/elster-online:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (fibu/elster-online)",
-      "category": "mask-action",
-      "domain": "fibu",
-      "mask": "fibu/elster-online",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "fibu/elster-online",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
         "method": null
       }
     },
@@ -4138,26 +5266,6 @@
       }
     },
     {
-      "id": "mask:fibu/hauptbuch:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (fibu/hauptbuch)",
-      "category": "mask-action",
-      "domain": "fibu",
-      "mask": "fibu/hauptbuch",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "fibu/hauptbuch",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
       "id": "mask:fibu/kassenbuch-liste:export",
       "label": "CSV-Export",
       "description": "CSV-Export (fibu/kassenbuch-liste)",
@@ -4198,26 +5306,6 @@
       }
     },
     {
-      "id": "mask:fibu/kontenplan:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (fibu/kontenplan)",
-      "category": "mask-action",
-      "domain": "fibu",
-      "mask": "fibu/kontenplan",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "fibu/kontenplan",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
       "id": "mask:fibu/kostenstellen-liste:export",
       "label": "CSV-Export",
       "description": "CSV-Export (fibu/kostenstellen-liste)",
@@ -4230,26 +5318,6 @@
       "required_data": [],
       "source": {
         "screenId": "fibu/kostenstellen-liste",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:fibu/kostenstellenrechnung:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (fibu/kostenstellenrechnung)",
-      "category": "mask-action",
-      "domain": "fibu",
-      "mask": "fibu/kostenstellenrechnung",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "fibu/kostenstellenrechnung",
         "actionKey": "export",
         "commandEndpoint": null,
         "navigationRoute": null,
@@ -4290,26 +5358,6 @@
       "required_data": [],
       "source": {
         "screenId": "fibu/kreditoren-liste",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:fibu/kreditoren:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (fibu/kreditoren)",
-      "category": "mask-action",
-      "domain": "fibu",
-      "mask": "fibu/kreditoren",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "fibu/kreditoren",
         "actionKey": "export",
         "commandEndpoint": null,
         "navigationRoute": null,
@@ -4478,46 +5526,6 @@
       }
     },
     {
-      "id": "mask:fibu/schnittstelle-fibu:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (fibu/schnittstelle-fibu)",
-      "category": "mask-action",
-      "domain": "fibu",
-      "mask": "fibu/schnittstelle-fibu",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "fibu/schnittstelle-fibu",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:fibu/schnittstellen-center:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (fibu/schnittstellen-center)",
-      "category": "mask-action",
-      "domain": "fibu",
-      "mask": "fibu/schnittstellen-center",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "fibu/schnittstellen-center",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
       "id": "mask:fibu/sicherheiten:export",
       "label": "CSV-Export",
       "description": "CSV-Export (fibu/sicherheiten)",
@@ -4558,26 +5566,6 @@
       }
     },
     {
-      "id": "mask:fibu/verbindlichkeiten:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (fibu/verbindlichkeiten)",
-      "category": "mask-action",
-      "domain": "fibu",
-      "mask": "fibu/verbindlichkeiten",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "fibu/verbindlichkeiten",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
       "id": "mask:fibu/zahlungseingaenge-liste:export",
       "label": "CSV-Export",
       "description": "CSV-Export (fibu/zahlungseingaenge-liste)",
@@ -4598,26 +5586,6 @@
       }
     },
     {
-      "id": "mask:fibu/zahlungseingaenge:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (fibu/zahlungseingaenge)",
-      "category": "mask-action",
-      "domain": "fibu",
-      "mask": "fibu/zahlungseingaenge",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "fibu/zahlungseingaenge",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
       "id": "mask:fibu/zahlungslaeufe-liste:export",
       "label": "CSV-Export",
       "description": "CSV-Export (fibu/zahlungslaeufe-liste)",
@@ -4630,46 +5598,6 @@
       "required_data": [],
       "source": {
         "screenId": "fibu/zahlungslaeufe-liste",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:fibu/zahlungslaeufe:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (fibu/zahlungslaeufe)",
-      "category": "mask-action",
-      "domain": "fibu",
-      "mask": "fibu/zahlungslaeufe",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "fibu/zahlungslaeufe",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:fibu/zahlungsvorschlaege:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (fibu/zahlungsvorschlaege)",
-      "category": "mask-action",
-      "domain": "fibu",
-      "mask": "fibu/zahlungsvorschlaege",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "fibu/zahlungsvorschlaege",
         "actionKey": "export",
         "commandEndpoint": null,
         "navigationRoute": null,
@@ -4740,46 +5668,6 @@
       }
     },
     {
-      "id": "mask:finance/ap/invoices/new:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (finance/ap/invoices/new)",
-      "category": "mask-action",
-      "domain": "finance",
-      "mask": "finance/ap/invoices/new",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "finance/ap/invoices/new",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:finance/ap/invoices:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (finance/ap/invoices)",
-      "category": "mask-action",
-      "domain": "finance",
-      "mask": "finance/ap/invoices",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "finance/ap/invoices",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
       "id": "mask:finance/ar-open-item:mahnen",
       "label": "Mahnung erstellen",
       "description": "Mahnung erstellen (finance/ar-open-item)",
@@ -4822,22 +5710,42 @@
       }
     },
     {
-      "id": "mask:finance/bank-abgleich:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (finance/bank-abgleich)",
+      "id": "mask:finance/bank-abgleich:import",
+      "label": "Kontoauszug importieren",
+      "description": "Kontoauszug importieren (finance/bank-abgleich)",
       "category": "mask-action",
       "domain": "finance",
       "mask": "finance/bank-abgleich",
       "intent_phrases": [
-        "CSV-Export"
+        "Kontoauszug importieren"
       ],
       "required_data": [],
       "source": {
         "screenId": "finance/bank-abgleich",
-        "actionKey": "export",
+        "actionKey": "import",
         "commandEndpoint": null,
         "navigationRoute": null,
-        "command": "list.exportCsv",
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:finance/bank-abgleich:validate",
+      "label": "Salden vergleichen",
+      "description": "Salden vergleichen (finance/bank-abgleich)",
+      "category": "mask-action",
+      "domain": "finance",
+      "mask": "finance/bank-abgleich",
+      "intent_phrases": [
+        "Salden vergleichen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "finance/bank-abgleich",
+        "actionKey": "validate",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": null,
         "method": null
       }
     },
@@ -4861,26 +5769,6 @@
         "navigationRoute": null,
         "command": null,
         "method": "POST"
-      }
-    },
-    {
-      "id": "mask:finance/bookings/new:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (finance/bookings/new)",
-      "category": "mask-action",
-      "domain": "finance",
-      "mask": "finance/bookings/new",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "finance/bookings/new",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
       }
     },
     {
@@ -5026,6 +5914,28 @@
       }
     },
     {
+      "id": "mask:finance/debitoren/new:edit",
+      "label": "Bearbeiten",
+      "description": "Bearbeiten (finance/debitoren/new)",
+      "category": "mask-action",
+      "domain": "finance",
+      "mask": "finance/debitoren/new",
+      "intent_phrases": [
+        "Bearbeiten"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "finance/debitoren/new",
+        "actionKey": "edit",
+        "commandEndpoint": "/api/v1/finance/debitoren/{entity_id}/actions/bearbeiten",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
       "id": "mask:finance/dunning-editor:export",
       "label": "CSV-Export",
       "description": "CSV-Export (finance/dunning-editor)",
@@ -5066,23 +5976,43 @@
       }
     },
     {
-      "id": "mask:finance/invoices/new:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (finance/invoices/new)",
+      "id": "mask:finance/invoices/new:position",
+      "label": "Position übernehmen",
+      "description": "Position übernehmen (finance/invoices/new)",
       "category": "mask-action",
       "domain": "finance",
       "mask": "finance/invoices/new",
       "intent_phrases": [
-        "CSV-Export"
+        "Position übernehmen"
       ],
       "required_data": [],
       "source": {
         "screenId": "finance/invoices/new",
-        "actionKey": "export",
+        "actionKey": "position",
         "commandEndpoint": null,
         "navigationRoute": null,
-        "command": "list.exportCsv",
+        "command": "finance.invoicePosition",
         "method": null
+      }
+    },
+    {
+      "id": "mask:finance/invoices/new:save",
+      "label": "Als Entwurf speichern",
+      "description": "Als Entwurf speichern (finance/invoices/new)",
+      "category": "mask-action",
+      "domain": "finance",
+      "mask": "finance/invoices/new",
+      "intent_phrases": [
+        "Als Entwurf speichern"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "finance/invoices/new",
+        "actionKey": "save",
+        "commandEndpoint": "/api/v1/finance/invoices",
+        "navigationRoute": null,
+        "command": "finance.invoiceSpeichern",
+        "method": "POST"
       }
     },
     {
@@ -5098,26 +6028,6 @@
       "required_data": [],
       "source": {
         "screenId": "finance/kasse",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:finance/kontenplan:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (finance/kontenplan)",
-      "category": "mask-action",
-      "domain": "finance",
-      "mask": "finance/kontenplan",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "finance/kontenplan",
         "actionKey": "export",
         "commandEndpoint": null,
         "navigationRoute": null,
@@ -5188,26 +6098,6 @@
       }
     },
     {
-      "id": "mask:finance/kreditoren:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (finance/kreditoren)",
-      "category": "mask-action",
-      "domain": "finance",
-      "mask": "finance/kreditoren",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "finance/kreditoren",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
       "id": "mask:finance/lastschriften-debitoren:export",
       "label": "CSV-Export",
       "description": "CSV-Export (finance/lastschriften-debitoren)",
@@ -5248,26 +6138,6 @@
       }
     },
     {
-      "id": "mask:finance/offene-posten:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (finance/offene-posten)",
-      "category": "mask-action",
-      "domain": "finance",
-      "mask": "finance/offene-posten",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "finance/offene-posten",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
       "id": "mask:finance/op-debitoren:export",
       "label": "CSV-Export",
       "description": "CSV-Export (finance/op-debitoren)",
@@ -5280,26 +6150,6 @@
       "required_data": [],
       "source": {
         "screenId": "finance/op-debitoren",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:finance/op-kreditoren:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (finance/op-kreditoren)",
-      "category": "mask-action",
-      "domain": "finance",
-      "mask": "finance/op-kreditoren",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "finance/op-kreditoren",
         "actionKey": "export",
         "commandEndpoint": null,
         "navigationRoute": null,
@@ -5350,46 +6200,6 @@
       }
     },
     {
-      "id": "mask:finance/payments:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (finance/payments)",
-      "category": "mask-action",
-      "domain": "finance",
-      "mask": "finance/payments",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "finance/payments",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:finance/periodenabschluss:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (finance/periodenabschluss)",
-      "category": "mask-action",
-      "domain": "finance",
-      "mask": "finance/periodenabschluss",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "finance/periodenabschluss",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
       "id": "mask:finance/periods-liste:export",
       "label": "CSV-Export",
       "description": "CSV-Export (finance/periods-liste)",
@@ -5410,26 +6220,6 @@
       }
     },
     {
-      "id": "mask:finance/periods:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (finance/periods)",
-      "category": "mask-action",
-      "domain": "finance",
-      "mask": "finance/periods",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "finance/periods",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
       "id": "mask:finance/skonto-optimizer-liste:export",
       "label": "CSV-Export",
       "description": "CSV-Export (finance/skonto-optimizer-liste)",
@@ -5442,26 +6232,6 @@
       "required_data": [],
       "source": {
         "screenId": "finance/skonto-optimizer-liste",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:finance/skonto-optimizer:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (finance/skonto-optimizer)",
-      "category": "mask-action",
-      "domain": "finance",
-      "mask": "finance/skonto-optimizer",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "finance/skonto-optimizer",
         "actionKey": "export",
         "commandEndpoint": null,
         "navigationRoute": null,
@@ -5570,26 +6340,6 @@
       }
     },
     {
-      "id": "mask:finance/zahlungseingang:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (finance/zahlungseingang)",
-      "category": "mask-action",
-      "domain": "finance",
-      "mask": "finance/zahlungseingang",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "finance/zahlungseingang",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
       "id": "mask:finance/zahlungslauf-kreditoren:export",
       "label": "CSV-Export",
       "description": "CSV-Export (finance/zahlungslauf-kreditoren)",
@@ -5686,26 +6436,6 @@
         "commandEndpoint": null,
         "navigationRoute": "/foerderung/antrag",
         "command": null,
-        "method": null
-      }
-    },
-    {
-      "id": "mask:fuhrpark/ausgehende-belege-dokumente:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (fuhrpark/ausgehende-belege-dokumente)",
-      "category": "mask-action",
-      "domain": "fuhrpark",
-      "mask": "fuhrpark/ausgehende-belege-dokumente",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "fuhrpark/ausgehende-belege-dokumente",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
         "method": null
       }
     },
@@ -5872,26 +6602,6 @@
       }
     },
     {
-      "id": "mask:fuhrpark/fahrzeug/neu:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (fuhrpark/fahrzeug/neu)",
-      "category": "mask-action",
-      "domain": "fuhrpark",
-      "mask": "fuhrpark/fahrzeug/neu",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "fuhrpark/fahrzeug/neu",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
       "id": "mask:fuhrpark/fahrzeuge-liste:export",
       "label": "CSV-Export",
       "description": "CSV-Export (fuhrpark/fahrzeuge-liste)",
@@ -5928,126 +6638,6 @@
         "commandEndpoint": null,
         "navigationRoute": null,
         "command": "vehicle.create",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:fuhrpark/fuhrpark-auswertung-kosten-pro-fahrzeug:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (fuhrpark/fuhrpark-auswertung-kosten-pro-fahrzeug)",
-      "category": "mask-action",
-      "domain": "fuhrpark",
-      "mask": "fuhrpark/fuhrpark-auswertung-kosten-pro-fahrzeug",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "fuhrpark/fuhrpark-auswertung-kosten-pro-fahrzeug",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:fuhrpark/fuhrpark-auswertungen-menu:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (fuhrpark/fuhrpark-auswertungen-menu)",
-      "category": "mask-action",
-      "domain": "fuhrpark",
-      "mask": "fuhrpark/fuhrpark-auswertungen-menu",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "fuhrpark/fuhrpark-auswertungen-menu",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:fuhrpark/fuhrpark-klassisch:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (fuhrpark/fuhrpark-klassisch)",
-      "category": "mask-action",
-      "domain": "fuhrpark",
-      "mask": "fuhrpark/fuhrpark-klassisch",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "fuhrpark/fuhrpark-klassisch",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:fuhrpark/fuhrpark-menue:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (fuhrpark/fuhrpark-menue)",
-      "category": "mask-action",
-      "domain": "fuhrpark",
-      "mask": "fuhrpark/fuhrpark-menue",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "fuhrpark/fuhrpark-menue",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:fuhrpark/fuhrpark-rechnungen:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (fuhrpark/fuhrpark-rechnungen)",
-      "category": "mask-action",
-      "domain": "fuhrpark",
-      "mask": "fuhrpark/fuhrpark-rechnungen",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "fuhrpark/fuhrpark-rechnungen",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:fuhrpark/fuhrpark-stammdaten:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (fuhrpark/fuhrpark-stammdaten)",
-      "category": "mask-action",
-      "domain": "fuhrpark",
-      "mask": "fuhrpark/fuhrpark-stammdaten",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "fuhrpark/fuhrpark-stammdaten",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
         "method": null
       }
     },
@@ -6156,7 +6746,7 @@
       "label": "CSV-Export",
       "description": "CSV-Export (futter/einzel/liste)",
       "category": "mask-action",
-      "domain": "futter",
+      "domain": "futtermittel",
       "mask": "futter/einzel/liste",
       "intent_phrases": [
         "CSV-Export"
@@ -6172,62 +6762,22 @@
       }
     },
     {
-      "id": "mask:futter/einzel/stamm/neu:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (futter/einzel/stamm/neu)",
+      "id": "mask:futter/einzel/liste:neu",
+      "label": "Neues Einzelfuttermittel",
+      "description": "Neues Einzelfuttermittel (futter/einzel/liste)",
       "category": "mask-action",
-      "domain": "futter",
-      "mask": "futter/einzel/stamm/neu",
+      "domain": "futtermittel",
+      "mask": "futter/einzel/liste",
       "intent_phrases": [
-        "CSV-Export"
+        "Neues Einzelfuttermittel"
       ],
       "required_data": [],
       "source": {
-        "screenId": "futter/einzel/stamm/neu",
-        "actionKey": "export",
+        "screenId": "futter/einzel/liste",
+        "actionKey": "neu",
         "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:futter/misch/liste:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (futter/misch/liste)",
-      "category": "mask-action",
-      "domain": "futter",
-      "mask": "futter/misch/liste",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "futter/misch/liste",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:futter/misch/stamm/neu:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (futter/misch/stamm/neu)",
-      "category": "mask-action",
-      "domain": "futter",
-      "mask": "futter/misch/stamm/neu",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "futter/misch/stamm/neu",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
+        "navigationRoute": "/futter/einzel/neu",
+        "command": null,
         "method": null
       }
     },
@@ -6398,46 +6948,6 @@
       }
     },
     {
-      "id": "mask:futtermittel/einzelfuttermittel/liste:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (futtermittel/einzelfuttermittel/liste)",
-      "category": "mask-action",
-      "domain": "futtermittel",
-      "mask": "futtermittel/einzelfuttermittel/liste",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "futtermittel/einzelfuttermittel/liste",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:futtermittel/fuetterungsdokumentation-mobil:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (futtermittel/fuetterungsdokumentation-mobil)",
-      "category": "mask-action",
-      "domain": "futtermittel",
-      "mask": "futtermittel/fuetterungsdokumentation-mobil",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "futtermittel/fuetterungsdokumentation-mobil",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
       "id": "mask:futtermittel/futtermittel-bestellung:export",
       "label": "CSV-Export",
       "description": "CSV-Export (futtermittel/futtermittel-bestellung)",
@@ -6470,26 +6980,6 @@
       "required_data": [],
       "source": {
         "screenId": "futtermittel/futtermittel-statistik",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:futtermittel/grundfutteranalysen:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (futtermittel/grundfutteranalysen)",
-      "category": "mask-action",
-      "domain": "futtermittel",
-      "mask": "futtermittel/grundfutteranalysen",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "futtermittel/grundfutteranalysen",
         "actionKey": "export",
         "commandEndpoint": null,
         "navigationRoute": null,
@@ -6558,26 +7048,6 @@
       }
     },
     {
-      "id": "mask:futtermittel/mischfuttermittel/liste:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (futtermittel/mischfuttermittel/liste)",
-      "category": "mask-action",
-      "domain": "futtermittel",
-      "mask": "futtermittel/mischfuttermittel/liste",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "futtermittel/mischfuttermittel/liste",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
       "id": "mask:futtermittel/mischfuttermittel:bearbeiten",
       "label": "Bearbeiten",
       "description": "Bearbeiten (futtermittel/mischfuttermittel)",
@@ -6632,26 +7102,6 @@
       "required_data": [],
       "source": {
         "screenId": "futtermittel/rations-zugang",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:futtermittel/rationseditor:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (futtermittel/rationseditor)",
-      "category": "mask-action",
-      "domain": "futtermittel",
-      "mask": "futtermittel/rationseditor",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "futtermittel/rationseditor",
         "actionKey": "export",
         "commandEndpoint": null,
         "navigationRoute": null,
@@ -6724,7 +7174,7 @@
       "label": "CSV-Export",
       "description": "CSV-Export (genossenschaft/mitglieder)",
       "category": "mask-action",
-      "domain": "genossenschaft",
+      "domain": "platform",
       "mask": "genossenschaft/mitglieder",
       "intent_phrases": [
         "CSV-Export"
@@ -6804,7 +7254,7 @@
       "label": "CSV-Export",
       "description": "CSV-Export (kontrakte/kontraktklassen)",
       "category": "mask-action",
-      "domain": "kontrakte",
+      "domain": "agrar",
       "mask": "kontrakte/kontraktklassen",
       "intent_phrases": [
         "CSV-Export"
@@ -6960,6 +7410,26 @@
       }
     },
     {
+      "id": "mask:lager/bestandsuebersicht:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (lager/bestandsuebersicht)",
+      "category": "mask-action",
+      "domain": "lager",
+      "mask": "lager/bestandsuebersicht",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "lager/bestandsuebersicht",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null
+      }
+    },
+    {
       "id": "mask:lager/einlagerung:export",
       "label": "CSV-Export",
       "description": "CSV-Export (lager/einlagerung)",
@@ -7100,26 +7570,6 @@
       }
     },
     {
-      "id": "mask:lager/inventur:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (lager/inventur)",
-      "category": "mask-action",
-      "domain": "lager",
-      "mask": "lager/inventur",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "lager/inventur",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
       "id": "mask:lager/kommissionierung:export",
       "label": "CSV-Export",
       "description": "CSV-Export (lager/kommissionierung)",
@@ -7200,26 +7650,6 @@
       }
     },
     {
-      "id": "mask:lager/materialfluss:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (lager/materialfluss)",
-      "category": "mask-action",
-      "domain": "lager",
-      "mask": "lager/materialfluss",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "lager/materialfluss",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
       "id": "mask:lager/partiestamm-liste:export",
       "label": "CSV-Export",
       "description": "CSV-Export (lager/partiestamm-liste)",
@@ -7240,26 +7670,6 @@
       }
     },
     {
-      "id": "mask:lager/partiestamm:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (lager/partiestamm)",
-      "category": "mask-action",
-      "domain": "lager",
-      "mask": "lager/partiestamm",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "lager/partiestamm",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
       "id": "mask:lager/rueckverfolgbarkeit:export",
       "label": "CSV-Export",
       "description": "CSV-Export (lager/rueckverfolgbarkeit)",
@@ -7272,26 +7682,6 @@
       "required_data": [],
       "source": {
         "screenId": "lager/rueckverfolgbarkeit",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:lager/silo-mobil:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (lager/silo-mobil)",
-      "category": "mask-action",
-      "domain": "lager",
-      "mask": "lager/silo-mobil",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "lager/silo-mobil",
         "actionKey": "export",
         "commandEndpoint": null,
         "navigationRoute": null,
@@ -7362,26 +7752,6 @@
       }
     },
     {
-      "id": "mask:lager/umlagerung:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (lager/umlagerung)",
-      "category": "mask-action",
-      "domain": "lager",
-      "mask": "lager/umlagerung",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "lager/umlagerung",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
       "id": "mask:logistik/frachtbrief:verladung",
       "label": "Zur Verladung",
       "description": "Zur Verladung (logistik/frachtbrief)",
@@ -7406,7 +7776,7 @@
       "label": "CSV-Export",
       "description": "CSV-Export (logistik/frachtbriefe)",
       "category": "mask-action",
-      "domain": "logistik",
+      "domain": "logistics",
       "mask": "logistik/frachtbriefe",
       "intent_phrases": [
         "CSV-Export"
@@ -7662,82 +8032,62 @@
       }
     },
     {
-      "id": "mask:mahnwesen/mahnlauf:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (mahnwesen/mahnlauf)",
+      "id": "mask:mahnwesen/mahnlauf:run",
+      "label": "Mahnlauf ausführen",
+      "description": "Mahnlauf ausführen (mahnwesen/mahnlauf)",
       "category": "mask-action",
-      "domain": "mahnwesen",
+      "domain": "finance",
       "mask": "mahnwesen/mahnlauf",
       "intent_phrases": [
-        "CSV-Export"
+        "Mahnlauf ausführen"
       ],
       "required_data": [],
       "source": {
         "screenId": "mahnwesen/mahnlauf",
-        "actionKey": "export",
+        "actionKey": "run",
         "commandEndpoint": null,
         "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:marketing/kampagnen-liste:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (marketing/kampagnen-liste)",
-      "category": "mask-action",
-      "domain": "marketing",
-      "mask": "marketing/kampagnen-liste",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "marketing/kampagnen-liste",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:marketing/kampagnen-liste:neu",
-      "label": "Neue Kampagne",
-      "description": "Neue Kampagne (marketing/kampagnen-liste)",
-      "category": "mask-action",
-      "domain": "marketing",
-      "mask": "marketing/kampagnen-liste",
-      "intent_phrases": [
-        "Neue Kampagne"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "marketing/kampagnen-liste",
-        "actionKey": "neu",
-        "commandEndpoint": null,
-        "navigationRoute": "/marketing/kampagne/neu",
         "command": null,
         "method": null
       }
     },
     {
-      "id": "mask:marketing/kampagnen:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (marketing/kampagnen)",
+      "id": "mask:mahnwesen/mahnlauf:sendEmail",
+      "label": "Per E-Mail senden",
+      "description": "Per E-Mail senden (mahnwesen/mahnlauf)",
       "category": "mask-action",
-      "domain": "marketing",
-      "mask": "marketing/kampagnen",
+      "domain": "finance",
+      "mask": "mahnwesen/mahnlauf",
       "intent_phrases": [
-        "CSV-Export"
+        "Per E-Mail senden"
       ],
       "required_data": [],
       "source": {
-        "screenId": "marketing/kampagnen",
-        "actionKey": "export",
+        "screenId": "mahnwesen/mahnlauf",
+        "actionKey": "sendEmail",
         "commandEndpoint": null,
         "navigationRoute": null,
-        "command": "list.exportCsv",
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:mahnwesen/mahnlauf:sendPost",
+      "label": "Postversand festhalten",
+      "description": "Postversand festhalten (mahnwesen/mahnlauf)",
+      "category": "mask-action",
+      "domain": "finance",
+      "mask": "mahnwesen/mahnlauf",
+      "intent_phrases": [
+        "Postversand festhalten"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "mahnwesen/mahnlauf",
+        "actionKey": "sendPost",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": null,
         "method": null
       }
     },
@@ -8202,26 +8552,6 @@
       }
     },
     {
-      "id": "mask:personal/stundenzettel:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (personal/stundenzettel)",
-      "category": "mask-action",
-      "domain": "personal",
-      "mask": "personal/stundenzettel",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "personal/stundenzettel",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
       "id": "mask:personal/zeiterfassung-liste:export",
       "label": "CSV-Export",
       "description": "CSV-Export (personal/zeiterfassung-liste)",
@@ -8234,26 +8564,6 @@
       "required_data": [],
       "source": {
         "screenId": "personal/zeiterfassung-liste",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:personal/zeiterfassung:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (personal/zeiterfassung)",
-      "category": "mask-action",
-      "domain": "personal",
-      "mask": "personal/zeiterfassung",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "personal/zeiterfassung",
         "actionKey": "export",
         "commandEndpoint": null,
         "navigationRoute": null,
@@ -8402,6 +8712,26 @@
       }
     },
     {
+      "id": "mask:portal/naehrstoffbilanzen:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (portal/naehrstoffbilanzen)",
+      "category": "mask-action",
+      "domain": "portal",
+      "mask": "portal/naehrstoffbilanzen",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "portal/naehrstoffbilanzen",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null
+      }
+    },
+    {
       "id": "mask:portal/onboarding:export",
       "label": "CSV-Export",
       "description": "CSV-Export (portal/onboarding)",
@@ -8434,26 +8764,6 @@
       "required_data": [],
       "source": {
         "screenId": "portal/preisspiegel",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:portal/rationsoptimierung:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (portal/rationsoptimierung)",
-      "category": "mask-action",
-      "domain": "portal",
-      "mask": "portal/rationsoptimierung",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "portal/rationsoptimierung",
         "actionKey": "export",
         "commandEndpoint": null,
         "navigationRoute": null,
@@ -8806,7 +9116,7 @@
       "label": "CSV-Export",
       "description": "CSV-Export (produktion/mischfutter-produktion)",
       "category": "mask-action",
-      "domain": "produktion",
+      "domain": "futtermittel",
       "mask": "produktion/mischfutter-produktion",
       "intent_phrases": [
         "CSV-Export"
@@ -9086,46 +9396,6 @@
       }
     },
     {
-      "id": "mask:reports/lagerbestand:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (reports/lagerbestand)",
-      "category": "mask-action",
-      "domain": "reports",
-      "mask": "reports/lagerbestand",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "reports/lagerbestand",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:reports/umsatz:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (reports/umsatz)",
-      "category": "mask-action",
-      "domain": "reports",
-      "mask": "reports/umsatz",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "reports/umsatz",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
       "id": "mask:rezepte/editor:export",
       "label": "CSV-Export",
       "description": "CSV-Export (rezepte/editor)",
@@ -9163,6 +9433,26 @@
         "navigationRoute": null,
         "command": "list.exportCsv",
         "method": null
+      }
+    },
+    {
+      "id": "mask:sales/angebote-liste:import_csv",
+      "label": "CSV importieren",
+      "description": "CSV importieren (sales/angebote-liste)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "sales/angebote-liste",
+      "intent_phrases": [
+        "CSV importieren"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "sales/angebote-liste",
+        "actionKey": "import_csv",
+        "commandEndpoint": "/api/v1/sales/offers/actions/import-csv",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
       }
     },
     {
@@ -9286,23 +9576,129 @@
       }
     },
     {
-      "id": "mask:sales/credit-notes:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (sales/credit-notes)",
+      "id": "mask:sales/credit-notes:buchen",
+      "label": "Buchen",
+      "description": "Buchen (sales/credit-notes)",
       "category": "mask-action",
       "domain": "sales",
       "mask": "sales/credit-notes",
       "intent_phrases": [
-        "CSV-Export"
+        "Buchen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "sales/credit-notes",
+        "actionKey": "buchen",
+        "commandEndpoint": "/api/v1/sales/credit-notes/{entity_id}/actions/buchen",
+        "navigationRoute": null,
+        "command": "sales.gutschriftBuchen",
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:sales/credit-notes:neu",
+      "label": "Neue Gutschrift",
+      "description": "Neue Gutschrift (sales/credit-notes)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "sales/credit-notes",
+      "intent_phrases": [
+        "Neue Gutschrift"
       ],
       "required_data": [],
       "source": {
         "screenId": "sales/credit-notes",
-        "actionKey": "export",
+        "actionKey": "neu",
         "commandEndpoint": null,
         "navigationRoute": null,
-        "command": "list.exportCsv",
+        "command": "sales.gutschriftNeu",
         "method": null
+      }
+    },
+    {
+      "id": "mask:sales/credit-notes:position",
+      "label": "Position übernehmen",
+      "description": "Position übernehmen (sales/credit-notes)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "sales/credit-notes",
+      "intent_phrases": [
+        "Position übernehmen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "sales/credit-notes",
+        "actionKey": "position",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "sales.gutschriftPosition",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:sales/credit-notes:speichern",
+      "label": "Als Entwurf speichern",
+      "description": "Als Entwurf speichern (sales/credit-notes)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "sales/credit-notes",
+      "intent_phrases": [
+        "Als Entwurf speichern"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "sales/credit-notes",
+        "actionKey": "speichern",
+        "commandEndpoint": "/api/v1/sales/credit-notes/actions/speichern",
+        "navigationRoute": null,
+        "command": "sales.gutschriftSpeichern",
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:sales/credit-notes:vorschlag_ablehnen",
+      "label": "Vorschlag ablehnen",
+      "description": "Vorschlag ablehnen (sales/credit-notes)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "sales/credit-notes",
+      "intent_phrases": [
+        "Vorschlag ablehnen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "sales/credit-notes",
+        "actionKey": "vorschlag_ablehnen",
+        "commandEndpoint": "/api/v1/sales/credit-notes/buchungsvorschlaege/{entity_id}/actions/ablehnen",
+        "navigationRoute": null,
+        "command": "sales.gutschriftVorschlagAblehnen",
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:sales/credit-notes:vorschlag_freigeben",
+      "label": "Vorschlag freigeben",
+      "description": "Vorschlag freigeben (sales/credit-notes)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "sales/credit-notes",
+      "intent_phrases": [
+        "Vorschlag freigeben"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "sales/credit-notes",
+        "actionKey": "vorschlag_freigeben",
+        "commandEndpoint": "/api/v1/sales/credit-notes/buchungsvorschlaege/{entity_id}/actions/freigeben",
+        "navigationRoute": null,
+        "command": "sales.gutschriftVorschlagFreigeben",
+        "method": "POST"
       }
     },
     {
@@ -9534,66 +9930,6 @@
       }
     },
     {
-      "id": "mask:sales/lieferungen/neu:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (sales/lieferungen/neu)",
-      "category": "mask-action",
-      "domain": "sales",
-      "mask": "sales/lieferungen/neu",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "sales/lieferungen/neu",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:sales/orders-modern:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (sales/orders-modern)",
-      "category": "mask-action",
-      "domain": "sales",
-      "mask": "sales/orders-modern",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "sales/orders-modern",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:sales/rechnungen-liste:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (sales/rechnungen-liste)",
-      "category": "mask-action",
-      "domain": "sales",
-      "mask": "sales/rechnungen-liste",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "sales/rechnungen-liste",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
       "id": "mask:sales/sales-order:bearbeiten",
       "label": "Bearbeiten",
       "description": "Bearbeiten (sales/sales-order)",
@@ -9660,7 +9996,7 @@
       "label": "CSV-Export",
       "description": "CSV-Export (schaeden/meldung)",
       "category": "mask-action",
-      "domain": "schaeden",
+      "domain": "qualitaet",
       "mask": "schaeden/meldung",
       "intent_phrases": [
         "CSV-Export"
@@ -9756,26 +10092,6 @@
       }
     },
     {
-      "id": "mask:service/anfragen:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (service/anfragen)",
-      "category": "mask-action",
-      "domain": "service",
-      "mask": "service/anfragen",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "service/anfragen",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
       "id": "mask:service/rueckmeldung:export",
       "label": "CSV-Export",
       "description": "CSV-Export (service/rueckmeldung)",
@@ -9816,43 +10132,47 @@
       }
     },
     {
-      "id": "mask:silo/kapazitaeten:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (silo/kapazitaeten)",
+      "id": "mask:stammdaten/hausbank:edit",
+      "label": "Bearbeiten",
+      "description": "Bearbeiten (stammdaten/hausbank)",
       "category": "mask-action",
-      "domain": "silo",
-      "mask": "silo/kapazitaeten",
+      "domain": "finance",
+      "mask": "stammdaten/hausbank",
       "intent_phrases": [
-        "CSV-Export"
+        "Bearbeiten"
       ],
-      "required_data": [],
+      "required_data": [
+        "entity_id"
+      ],
       "source": {
-        "screenId": "silo/kapazitaeten",
-        "actionKey": "export",
-        "commandEndpoint": null,
+        "screenId": "stammdaten/hausbank",
+        "actionKey": "edit",
+        "commandEndpoint": "/api/v1/stammdaten/hausbanken/{entity_id}",
         "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
+        "command": null,
+        "method": "PUT"
       }
     },
     {
-      "id": "mask:strecke/menu:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (strecke/menu)",
+      "id": "mask:stammdaten/mengeneinheit:edit",
+      "label": "Bearbeiten",
+      "description": "Bearbeiten (stammdaten/mengeneinheit)",
       "category": "mask-action",
-      "domain": "strecke",
-      "mask": "strecke/menu",
+      "domain": "lager",
+      "mask": "stammdaten/mengeneinheit",
       "intent_phrases": [
-        "CSV-Export"
+        "Bearbeiten"
       ],
-      "required_data": [],
+      "required_data": [
+        "entity_id"
+      ],
       "source": {
-        "screenId": "strecke/menu",
-        "actionKey": "export",
-        "commandEndpoint": null,
+        "screenId": "stammdaten/mengeneinheit",
+        "actionKey": "edit",
+        "commandEndpoint": "/api/v1/artikel/mengeneinheiten/stamm/{entity_id}",
         "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
+        "command": null,
+        "method": "PUT"
       }
     },
     {
@@ -9868,26 +10188,6 @@
       "required_data": [],
       "source": {
         "screenId": "strecke/speditionen-fracht-preise",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:strecke/vorlaeufige-streckengeschaefte:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (strecke/vorlaeufige-streckengeschaefte)",
-      "category": "mask-action",
-      "domain": "strecke",
-      "mask": "strecke/vorlaeufige-streckengeschaefte",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "strecke/vorlaeufige-streckengeschaefte",
         "actionKey": "export",
         "commandEndpoint": null,
         "navigationRoute": null,
@@ -10096,26 +10396,6 @@
       }
     },
     {
-      "id": "mask:verkauf/auftraege:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (verkauf/auftraege)",
-      "category": "mask-action",
-      "domain": "verkauf",
-      "mask": "verkauf/auftraege",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "verkauf/auftraege",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
       "id": "mask:verkauf/betriebs-auftraege:export",
       "label": "CSV-Export",
       "description": "CSV-Export (verkauf/betriebs-auftraege)",
@@ -10156,26 +10436,6 @@
       }
     },
     {
-      "id": "mask:verkauf/kunden-liste:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (verkauf/kunden-liste)",
-      "category": "mask-action",
-      "domain": "verkauf",
-      "mask": "verkauf/kunden-liste",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "verkauf/kunden-liste",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
       "id": "mask:verkauf/lieferschein-erfassung:export",
       "label": "CSV-Export",
       "description": "CSV-Export (verkauf/lieferschein-erfassung)",
@@ -10188,26 +10448,6 @@
       "required_data": [],
       "source": {
         "screenId": "verkauf/lieferschein-erfassung",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:verkauf/rechnungen:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (verkauf/rechnungen)",
-      "category": "mask-action",
-      "domain": "verkauf",
-      "mask": "verkauf/rechnungen",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "verkauf/rechnungen",
         "actionKey": "export",
         "commandEndpoint": null,
         "navigationRoute": null,
@@ -10396,42 +10636,102 @@
       }
     },
     {
-      "id": "mask:waage/liste:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (waage/liste)",
+      "id": "mask:waage/liste:calibrate",
+      "label": "Eichdaten speichern",
+      "description": "Eichdaten speichern (waage/liste)",
       "category": "mask-action",
-      "domain": "logistik",
+      "domain": "agrar",
       "mask": "waage/liste",
       "intent_phrases": [
-        "CSV-Export"
+        "Eichdaten speichern"
       ],
       "required_data": [],
       "source": {
         "screenId": "waage/liste",
-        "actionKey": "export",
+        "actionKey": "calibrate",
         "commandEndpoint": null,
         "navigationRoute": null,
-        "command": "list.exportCsv",
+        "command": null,
         "method": null
       }
     },
     {
-      "id": "mask:waage/neu:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (waage/neu)",
+      "id": "mask:waage/liste:dismissImport",
+      "label": "Verwerfen",
+      "description": "Verwerfen (waage/liste)",
       "category": "mask-action",
-      "domain": "waage",
+      "domain": "agrar",
+      "mask": "waage/liste",
+      "intent_phrases": [
+        "Verwerfen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "waage/liste",
+        "actionKey": "dismissImport",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:waage/liste:import",
+      "label": "Datei importieren",
+      "description": "Datei importieren (waage/liste)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "waage/liste",
+      "intent_phrases": [
+        "Datei importieren"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "waage/liste",
+        "actionKey": "import",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:waage/liste:retryImport",
+      "label": "Erneut prüfen",
+      "description": "Erneut prüfen (waage/liste)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "waage/liste",
+      "intent_phrases": [
+        "Erneut prüfen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "waage/liste",
+        "actionKey": "retryImport",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:waage/neu:create",
+      "label": "Waage anlegen",
+      "description": "Waage anlegen (waage/neu)",
+      "category": "mask-action",
+      "domain": "agrar",
       "mask": "waage/neu",
       "intent_phrases": [
-        "CSV-Export"
+        "Waage anlegen"
       ],
       "required_data": [],
       "source": {
         "screenId": "waage/neu",
-        "actionKey": "export",
+        "actionKey": "create",
         "commandEndpoint": null,
         "navigationRoute": null,
-        "command": "list.exportCsv",
+        "command": null,
         "method": null
       }
     },
@@ -10456,22 +10756,82 @@
       }
     },
     {
-      "id": "mask:waage/waagen-liste:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (waage/waagen-liste)",
+      "id": "mask:waage/waagen-liste:calibrate",
+      "label": "Eichdaten speichern",
+      "description": "Eichdaten speichern (waage/waagen-liste)",
       "category": "mask-action",
       "domain": "agrar",
       "mask": "waage/waagen-liste",
       "intent_phrases": [
-        "CSV-Export"
+        "Eichdaten speichern"
       ],
       "required_data": [],
       "source": {
         "screenId": "waage/waagen-liste",
-        "actionKey": "export",
+        "actionKey": "calibrate",
         "commandEndpoint": null,
         "navigationRoute": null,
-        "command": "list.exportCsv",
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:waage/waagen-liste:dismissImport",
+      "label": "Verwerfen",
+      "description": "Verwerfen (waage/waagen-liste)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "waage/waagen-liste",
+      "intent_phrases": [
+        "Verwerfen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "waage/waagen-liste",
+        "actionKey": "dismissImport",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:waage/waagen-liste:import",
+      "label": "Datei importieren",
+      "description": "Datei importieren (waage/waagen-liste)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "waage/waagen-liste",
+      "intent_phrases": [
+        "Datei importieren"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "waage/waagen-liste",
+        "actionKey": "import",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:waage/waagen-liste:retryImport",
+      "label": "Erneut prüfen",
+      "description": "Erneut prüfen (waage/waagen-liste)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "waage/waagen-liste",
+      "intent_phrases": [
+        "Erneut prüfen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "waage/waagen-liste",
+        "actionKey": "retryImport",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": null,
         "method": null
       }
     },
@@ -10496,42 +10856,122 @@
       }
     },
     {
-      "id": "mask:waage/wiegungen-liste:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (waage/wiegungen-liste)",
+      "id": "mask:waage/wiegungen-liste:allocate",
+      "label": "Kontrakt zuordnen",
+      "description": "Kontrakt zuordnen (waage/wiegungen-liste)",
       "category": "mask-action",
       "domain": "agrar",
       "mask": "waage/wiegungen-liste",
       "intent_phrases": [
-        "CSV-Export"
+        "Kontrakt zuordnen"
       ],
       "required_data": [],
       "source": {
         "screenId": "waage/wiegungen-liste",
-        "actionKey": "export",
+        "actionKey": "allocate",
         "commandEndpoint": null,
         "navigationRoute": null,
-        "command": "list.exportCsv",
+        "command": null,
         "method": null
       }
     },
     {
-      "id": "mask:waage/wiegungen:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (waage/wiegungen)",
+      "id": "mask:waage/wiegungen-liste:close",
+      "label": "Ticket schließen",
+      "description": "Ticket schließen (waage/wiegungen-liste)",
       "category": "mask-action",
-      "domain": "waage",
+      "domain": "agrar",
+      "mask": "waage/wiegungen-liste",
+      "intent_phrases": [
+        "Ticket schließen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "waage/wiegungen-liste",
+        "actionKey": "close",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:waage/wiegungen-liste:create",
+      "label": "Wiegeschein anlegen",
+      "description": "Wiegeschein anlegen (waage/wiegungen-liste)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "waage/wiegungen-liste",
+      "intent_phrases": [
+        "Wiegeschein anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "waage/wiegungen-liste",
+        "actionKey": "create",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:waage/wiegungen:allocate",
+      "label": "Kontrakt zuordnen",
+      "description": "Kontrakt zuordnen (waage/wiegungen)",
+      "category": "mask-action",
+      "domain": "agrar",
       "mask": "waage/wiegungen",
       "intent_phrases": [
-        "CSV-Export"
+        "Kontrakt zuordnen"
       ],
       "required_data": [],
       "source": {
         "screenId": "waage/wiegungen",
-        "actionKey": "export",
+        "actionKey": "allocate",
         "commandEndpoint": null,
         "navigationRoute": null,
-        "command": "list.exportCsv",
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:waage/wiegungen:close",
+      "label": "Ticket schließen",
+      "description": "Ticket schließen (waage/wiegungen)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "waage/wiegungen",
+      "intent_phrases": [
+        "Ticket schließen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "waage/wiegungen",
+        "actionKey": "close",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:waage/wiegungen:create",
+      "label": "Wiegeschein anlegen",
+      "description": "Wiegeschein anlegen (waage/wiegungen)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "waage/wiegungen",
+      "intent_phrases": [
+        "Wiegeschein anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "waage/wiegungen",
+        "actionKey": "create",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": null,
         "method": null
       }
     },
@@ -10548,166 +10988,6 @@
       "required_data": [],
       "source": {
         "screenId": "wartung/anlagen-liste",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:workflow/flow-spine-complaint-to-resolution:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (workflow/flow-spine-complaint-to-resolution)",
-      "category": "mask-action",
-      "domain": "workflow",
-      "mask": "workflow/flow-spine-complaint-to-resolution",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "workflow/flow-spine-complaint-to-resolution",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:workflow/flow-spine-contract-to-settlement:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (workflow/flow-spine-contract-to-settlement)",
-      "category": "mask-action",
-      "domain": "workflow",
-      "mask": "workflow/flow-spine-contract-to-settlement",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "workflow/flow-spine-contract-to-settlement",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:workflow/flow-spine-finance-to-close:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (workflow/flow-spine-finance-to-close)",
-      "category": "mask-action",
-      "domain": "workflow",
-      "mask": "workflow/flow-spine-finance-to-close",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "workflow/flow-spine-finance-to-close",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:workflow/flow-spine-harvest-to-settlement:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (workflow/flow-spine-harvest-to-settlement)",
-      "category": "mask-action",
-      "domain": "workflow",
-      "mask": "workflow/flow-spine-harvest-to-settlement",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "workflow/flow-spine-harvest-to-settlement",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:workflow/flow-spine-inventory-to-settlement:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (workflow/flow-spine-inventory-to-settlement)",
-      "category": "mask-action",
-      "domain": "workflow",
-      "mask": "workflow/flow-spine-inventory-to-settlement",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "workflow/flow-spine-inventory-to-settlement",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:workflow/flow-spine-order-to-cash:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (workflow/flow-spine-order-to-cash)",
-      "category": "mask-action",
-      "domain": "workflow",
-      "mask": "workflow/flow-spine-order-to-cash",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "workflow/flow-spine-order-to-cash",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:workflow/flow-spine-procure-to-pay:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (workflow/flow-spine-procure-to-pay)",
-      "category": "mask-action",
-      "domain": "workflow",
-      "mask": "workflow/flow-spine-procure-to-pay",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "workflow/flow-spine-procure-to-pay",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:workflow/flow-spine-service-to-customer:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (workflow/flow-spine-service-to-customer)",
-      "category": "mask-action",
-      "domain": "workflow",
-      "mask": "workflow/flow-spine-service-to-customer",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "workflow/flow-spine-service-to-customer",
         "actionKey": "export",
         "commandEndpoint": null,
         "navigationRoute": null,
@@ -10780,7 +11060,7 @@
       "label": "CSV-Export",
       "description": "CSV-Export (workflows/supervisor)",
       "category": "mask-action",
-      "domain": "workflows",
+      "domain": "platform",
       "mask": "workflows/supervisor",
       "intent_phrases": [
         "CSV-Export"

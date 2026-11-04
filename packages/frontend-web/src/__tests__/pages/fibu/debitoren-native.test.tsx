@@ -69,7 +69,10 @@ describe('Studio Debitoren OP list', () => {
     await waitFor(() => expect(testState.get.mock.calls.length).toBeGreaterThan(1))
     expect(await screen.findByText('Seite 1 / 3')).toBeTruthy()
     expect(screen.getByText('24,94', { exact: false })).toBeTruthy()
-    fireEvent.click(screen.getByRole('button', { name: 'Weiter' }))
+    // Textabfrage statt Rollenabfrage: getByRole berechnet den ganzen Barrierebaum und laeuft im vollen CI-Lauf
+    // (zwei Worker, Coverage) ueber die Wartezeit. Der Text sitzt direkt im Knopf der Seitenleiste.
+    const weiter = await screen.findByText('Weiter', { selector: 'button' })
+    fireEvent.click(weiter)
     expect(await screen.findByText('Seite 2 / 3')).toBeTruthy()
 
     fireEvent.change(screen.getByTestId('search-list'), { target: { value: 'CUSTOMER-127' } })

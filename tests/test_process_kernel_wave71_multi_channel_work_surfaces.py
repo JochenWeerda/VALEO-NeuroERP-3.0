@@ -9,6 +9,7 @@ from fastapi.testclient import TestClient
 import pytest
 
 from app.api.v1.endpoints import channel_work_surfaces
+from app.core.tenant import get_tenant_id
 
 
 @pytest.fixture
@@ -16,6 +17,8 @@ def client(require_db) -> TestClient:
     app = FastAPI()
     ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(channel_work_surfaces.router)
+    # Der Mandant kommt aus der Anmeldung (bis 28.10.2026 aus Rumpf/Query bzw. Nachrichten-Metadaten).
+    app.dependency_overrides[get_tenant_id] = lambda: "tenant-a"
     return TestClient(app)
 
 

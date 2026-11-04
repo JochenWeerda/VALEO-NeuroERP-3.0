@@ -174,8 +174,10 @@ describe('disposition_board specialized component', () => {
     vi.unstubAllGlobals()
   })
 
-  it('registriert nur den Typ disposition_board', () => {
-    expect(registeredSpecializedTypes()).toEqual(['disposition_board'])
+  it('registriert disposition_board neben den Runtime46-Werkbaenken', () => {
+    expect(registeredSpecializedTypes()).toEqual([
+      'disposition_board', 'intake', 'weighing', 'finance_workbench', 'admin_workbench', 'feed_workbench',
+    ])
     expect(validateScreenDefinition(dispositionBoardScreen)).toEqual([])
     expect(dispositionBoardScreen.specialized?.type).toBe('disposition_board')
     expect(dispositionBoardScreen.specialized?.id).toBe('lkw-disposition-board')

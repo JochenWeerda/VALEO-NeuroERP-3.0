@@ -736,26 +736,6 @@ def build_crm_dubletten_pruefung_screen_definition() -> dict[str, Any]:
     )
 
 
-def build_crm_events_messen_screen_definition() -> dict[str, Any]:
-    return build_cockpit_overview_screen(
-        screen_id="crm/events-messen",
-        domain="crm",
-        title="Events und Messen",
-        subtitle="Marketing-Events",
-        business_purpose="Events und Messen als Read-Model-Cockpit.",
-        example_prompts=["Zeige Events und Messen.", "Was ist der aktuelle Stand?"],
-        test_id="crm-events-messen",
-        summary=[
-            {"key": "total", "label": "Anzahl", "tone": "neutral"},
-            {"key": "open", "label": "Offen", "tone": "warning"},
-        ],
-        data_sources=[cockpit_entity_source("/api/v1/marketing/kampagnen")],
-        tiles=[cockpit_nav_tile("overview", "Uebersicht", target_route="/crm/events-messen")],
-        actions=[cockpit_refresh_action(permission="crm.read")],
-        context_rail="combined",
-    )
-
-
 def build_crm_gebietsschutz_screen_definition() -> dict[str, Any]:
     return build_cockpit_overview_screen(
         screen_id="crm/gebietsschutz",
@@ -812,46 +792,6 @@ def build_crm_interaktions_historie_screen_definition() -> dict[str, Any]:
         data_sources=[cockpit_entity_source("/api/v1/crm/customers/{customer_id}/tabs/historie")],
         tiles=[cockpit_nav_tile("overview", "Uebersicht", target_route="/crm/interaktions-historie")],
         actions=[cockpit_refresh_action(permission="crm.read")],
-        context_rail="combined",
-    )
-
-
-def build_crm_kampagne_detail_screen_definition() -> dict[str, Any]:
-    return build_cockpit_overview_screen(
-        screen_id="crm/kampagne-detail",
-        domain="crm",
-        title="Kampagne",
-        subtitle="Kampagnendetail",
-        business_purpose="Kampagne als Read-Model-Cockpit.",
-        example_prompts=["Zeige Kampagne.", "Was ist der aktuelle Stand?"],
-        test_id="crm-kampagne-detail",
-        summary=[
-            {"key": "total", "label": "Anzahl", "tone": "neutral"},
-            {"key": "open", "label": "Offen", "tone": "warning"},
-        ],
-        data_sources=[cockpit_entity_source("/api/v1/marketing/kampagnen")],
-        tiles=[cockpit_nav_tile("overview", "Uebersicht", target_route="/crm/kampagne-detail")],
-        actions=[cockpit_refresh_action(permission="crm.read")],
-        context_rail="combined",
-    )
-
-
-def build_crm_kampagne_erstellen_screen_definition() -> dict[str, Any]:
-    return build_cockpit_overview_screen(
-        screen_id="crm/kampagne-erstellen",
-        domain="crm",
-        title="Kampagne erstellen",
-        subtitle="Neue Marketing-Kampagne",
-        business_purpose="Kampagne erstellen als Read-Model-Cockpit.",
-        example_prompts=["Zeige Kampagne erstellen.", "Was ist der aktuelle Stand?"],
-        test_id="crm-kampagne-erstellen",
-        summary=[
-            {"key": "total", "label": "Anzahl", "tone": "neutral"},
-            {"key": "open", "label": "Offen", "tone": "warning"},
-        ],
-        data_sources=[cockpit_entity_source("/api/v1/marketing/kampagnen")],
-        tiles=[cockpit_nav_tile("overview", "Uebersicht", target_route="/crm/kampagne-erstellen")],
-        actions=[cockpit_refresh_action(permission="crm.write")],
         context_rail="combined",
     )
 
@@ -1773,12 +1713,9 @@ BATCH14_BUILDERS: dict[str, Any] = {
     "crm/cross-selling": build_crm_cross_selling_screen_definition,
     "crm/dokumente-kunden": build_crm_dokumente_kunden_screen_definition,
     "crm/dubletten-pruefung": build_crm_dubletten_pruefung_screen_definition,
-    "crm/events-messen": build_crm_events_messen_screen_definition,
     "crm/gebietsschutz": build_crm_gebietsschutz_screen_definition,
     "crm/geschenke-liste": build_crm_geschenke_liste_screen_definition,
     "crm/interaktions-historie": build_crm_interaktions_historie_screen_definition,
-    "crm/kampagne-detail": build_crm_kampagne_detail_screen_definition,
-    "crm/kampagne-erstellen": build_crm_kampagne_erstellen_screen_definition,
     "crm/kaufverhalten": build_crm_kaufverhalten_screen_definition,
     "crm/kommunikation-center": build_crm_kommunikation_center_screen_definition,
     "crm/wettbewerber": build_crm_wettbewerber_screen_definition,

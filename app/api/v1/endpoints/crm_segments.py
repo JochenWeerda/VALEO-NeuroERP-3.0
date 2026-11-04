@@ -89,8 +89,8 @@ def _touch(db, tenant: str, segment_id: str, count: int | None = None) -> dict:
     return service.find(db, tenant, segment_id)
 
 
-@router.get("")
-@router.get("/", include_in_schema=False)
+@router.get("", summary="Segmente auflisten")
+@router.get("/", summary="Segmente auflisten", include_in_schema=False)
 async def list_segments(search: str | None = Query(default=None, max_length=255), limit: int = Query(50, ge=1, le=200), offset: int = Query(0, ge=0), tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
     params = {"tenant": tenant_id,"search": f"%{search}%" if search else None,"limit": limit,"offset": offset}
     total = db.execute(text("SELECT count(*) FROM domain_crm.crm_segments WHERE tenant_id=:tenant AND (CAST(:search AS text) IS NULL OR name ILIKE :search)"), params).scalar_one()
@@ -98,8 +98,8 @@ async def list_segments(search: str | None = Query(default=None, max_length=255)
     return {"items": [service.find(db, tenant_id, sid) for sid in ids], "total": total}
 
 
-@router.post("", status_code=201, dependencies=SCHREIBEN["CRM"])
-@router.post("/", status_code=201, include_in_schema=False, dependencies=SCHREIBEN["CRM"])
+@router.post("", summary="Segment anlegen", status_code=201, dependencies=SCHREIBEN["CRM"])
+@router.post("/", summary="Segment anlegen", status_code=201, include_in_schema=False, dependencies=SCHREIBEN["CRM"])
 async def create_segment(body: SegmentInput, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
     def mutate():
         sid = str(uuid7())
@@ -108,12 +108,12 @@ async def create_segment(body: SegmentInput, tenant_id: str = Depends(get_tenant
     return service.command(db, tenant_id, "create", body.idempotency_key, body.model_dump(), mutate)
 
 
-@router.get("/{segment_id}")
+@router.get("/{segment_id}", summary="Segment lesen")
 async def get_segment(segment_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
     return service.find(db, tenant_id, segment_id)
 
 
-@router.put("/{segment_id}", dependencies=SCHREIBEN["CRM"])
+@router.put("/{segment_id}", summary="Segment aendern", dependencies=SCHREIBEN["CRM"])
 async def update_segment(segment_id: str, body: SegmentUpdate, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
     def mutate():
         row = _versioned(db, tenant_id, segment_id, body)
@@ -135,7 +135,7 @@ async def update_segment(segment_id: str, body: SegmentUpdate, tenant_id: str = 
     return service.command(db, tenant_id, "update", body.idempotency_key, {"id": segment_id,**body.model_dump()}, mutate)
 
 
-@router.get("/{segment_id}/members")
+@router.get("/{segment_id}/members", summary="Segmentmitglieder auflisten")
 async def segment_members(segment_id: str, limit: int = Query(100, ge=1, le=5000), offset: int = Query(0, ge=0), tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
     service.find(db, tenant_id, segment_id)
     params={"tenant": tenant_id,"id": segment_id,"limit": limit,"offset": offset}
@@ -144,7 +144,7 @@ async def segment_members(segment_id: str, limit: int = Query(100, ge=1, le=5000
     return {"items":[dict(row) for row in rows],"total":total}
 
 
-@router.post("/{segment_id}/members", dependencies=SCHREIBEN["CRM"])
+@router.post("/{segment_id}/members", summary="Mitglied ins Segment aufnehmen", dependencies=SCHREIBEN["CRM"])
 async def add_segment_member(segment_id: str, body: MemberInput, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
     def mutate():
         row=_versioned(db,tenant_id,segment_id,body)
@@ -158,7 +158,7 @@ async def add_segment_member(segment_id: str, body: MemberInput, tenant_id: str 
     return service.command(db,tenant_id,"member.add",body.idempotency_key,{"id":segment_id,**body.model_dump()},mutate)
 
 
-@router.post("/{segment_id}/members/remove", dependencies=SCHREIBEN["CRM"])
+@router.post("/{segment_id}/members/remove", summary="Mitglied aus dem Segment entfernen", dependencies=SCHREIBEN["CRM"])
 async def remove_segment_member(segment_id: str, body: MemberInput, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
     def mutate():
         row=_versioned(db,tenant_id,segment_id,body)
@@ -169,8 +169,8 @@ async def remove_segment_member(segment_id: str, body: MemberInput, tenant_id: s
     return service.command(db,tenant_id,"member.remove",body.idempotency_key,{"id":segment_id,**body.model_dump()},mutate)
 
 
-@router.post("/{segment_id}/calculate", dependencies=SCHREIBEN["CRM"])
-@router.post("/{segment_id}/recalculate", include_in_schema=False, dependencies=SCHREIBEN["CRM"])
+@router.post("/{segment_id}/calculate", summary="Segment neu berechnen", dependencies=SCHREIBEN["CRM"])
+@router.post("/{segment_id}/recalculate", summary="Segment neu berechnen", include_in_schema=False, dependencies=SCHREIBEN["CRM"])
 async def recalculate_segment(segment_id: str, body: Mutation, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
     def mutate():
         row=_versioned(db,tenant_id,segment_id,body)
@@ -178,13 +178,13 @@ async def recalculate_segment(segment_id: str, body: Mutation, tenant_id: str = 
     return service.command(db,tenant_id,"calculate",body.idempotency_key,{"id":segment_id,**body.model_dump()},mutate)
 
 
-@router.get("/{segment_id}/performance")
+@router.get("/{segment_id}/performance", summary="Segment-Kennzahlen lesen")
 async def segment_performance(segment_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
     row=service.find(db,tenant_id,segment_id)
     return {"segment_id":segment_id,"member_count":row["member_count"],"updated_at":row["updated_at"],"criteria_supported":row["criteria_supported"]}
 
 
-@router.delete("/{segment_id}", dependencies=SCHREIBEN["CRM"])
+@router.delete("/{segment_id}", summary="Segment loeschen", dependencies=SCHREIBEN["CRM"])
 async def delete_segment(segment_id: str, body: Mutation, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
     def mutate():
         row=_versioned(db,tenant_id,segment_id,body)

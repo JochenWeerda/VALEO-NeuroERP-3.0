@@ -5,12 +5,26 @@ Schemas for customers, leads, and CRM-related entities
 
 from datetime import datetime
 from decimal import Decimal
-from typing import Any, Optional
+from typing import Annotated, Any, Optional
 from uuid import UUID
 
-from pydantic import ConfigDict, EmailStr, Field, ValidationInfo, field_validator, model_validator
+from pydantic import AfterValidator, ConfigDict, EmailStr, Field, ValidationInfo, field_validator, model_validator
 
 from .base import BaseSchema, TimestampMixin, SoftDeleteMixin
+
+
+def _echter_mandant(value: str) -> str:
+    """Eine Mandantenkennung, wie sie gespeichert ist (UUID oder Kennung wie ``valeo``) - nie leer, nie Platzhalter.
+
+    Bis 28.10.2026 verlangte das Modell eine UUID; der Dienst gab Kennungen wie ``valeo`` deshalb als Standardmandant
+    aus. Ein Platzhalter ist ein Mandantenproblem und soll auffallen.
+    """
+    if not value.strip() or value.strip() in {"default", "system", "legacy-unassigned"}:
+        raise ValueError(f"kein gueltiger Mandant: {value!r}")
+    return value
+
+
+Mandant = Annotated[str, AfterValidator(_echter_mandant)]
 
 
 # Customer Schemas
@@ -124,7 +138,7 @@ class Customer(CustomerBase, TimestampMixin, SoftDeleteMixin):
         max_length=36,
         description="Verknüpfter Business-Partner (Stammdaten), falls in DB gepflegt",
     )
-    tenant_id: UUID = Field(..., description="Tenant ID")
+    tenant_id: Mandant = Field(..., description="Tenant ID")
     credit_limit: Optional[Decimal] = Field(None, ge=0, description="Credit limit")
     payment_terms: Optional[int] = Field(None, ge=0, description="Payment terms in days")
     tax_id: Optional[str] = Field(None, max_length=50, description="Tax identification number")
@@ -198,7 +212,7 @@ class LeadBase(BaseSchema):
 
 class LeadCreate(LeadBase):
     """Schema for creating a lead"""
-    tenant_id: UUID = Field(..., description="Tenant ID")
+    tenant_id: Mandant = Field(..., description="Tenant ID")
     assigned_to: Optional[str] = Field(None, description="Assigned user ID")
 
 
@@ -218,7 +232,7 @@ class LeadUpdate(BaseSchema):
 class Lead(LeadBase, TimestampMixin, SoftDeleteMixin):
     """Full lead schema"""
     id: UUID = Field(..., description="Lead ID")
-    tenant_id: UUID = Field(..., description="Tenant ID")
+    tenant_id: Mandant = Field(..., description="Tenant ID")
     assigned_to: Optional[str] = Field(None, description="Assigned user ID")
     converted_at: Optional[datetime] = Field(None, description="Conversion timestamp")
     converted_to_customer_id: Optional[UUID] = Field(None, description="Converted customer ID")

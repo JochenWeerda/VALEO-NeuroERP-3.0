@@ -3538,7 +3538,7 @@
        "key": "einwilligung",
        "label": "Einwilligung",
        "navigationRoute": "/personal/bewerbungen/{entity_id}/einwilligung",
-       "permission": "personal.bewerbung.consent"
+       "permission": "personal.bewerbung.write"
       },
       {
        "command": "personal.deleteBewerbung",

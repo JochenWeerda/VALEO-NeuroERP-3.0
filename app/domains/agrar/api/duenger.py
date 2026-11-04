@@ -8,9 +8,9 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, desc, func, case
 
-from ....core.config import settings
 from ....core.business_time import business_today
 from ....core.database import get_db
+from ....core.tenant import get_tenant_id
 from ....infrastructure.models import Duenger as DuengerModel
 from ....api.v1.schemas.base import PaginatedResponse
 from ....api.v1.schemas.agrar import Duenger, DuengerCreate, DuengerUpdate
@@ -18,12 +18,11 @@ from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-R
 
 router = APIRouter()
 
-DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 
 @router.get("/", response_model=PaginatedResponse[Duenger], summary="Duenger auflisten")
 async def list_duenger(
-    tenant_id: Optional[str] = Query(None, description="Filter by tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     search: Optional[str] = Query(None, description="Search in name, article number, manufacturer"),
     typ: Optional[str] = Query(None, description="Filter by type"),
     hersteller: Optional[str] = Query(None, description="Filter by manufacturer"),
@@ -34,7 +33,7 @@ async def list_duenger(
     db: Session = Depends(get_db),
 ):
     """Return a paginated list of Dünger."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
 
     query = db.query(DuengerModel).filter(DuengerModel.tenant_id == effective_tenant)
 
@@ -81,11 +80,11 @@ async def list_duenger(
 async def search_duenger(
     q: str = Query(..., min_length=2, description="Search term"),
     limit: int = Query(10, ge=1, le=50, description="Maximum number of results"),
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Lightweight search endpoint for Dünger."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
     like = f"%{q}%"
 
     query = (
@@ -108,11 +107,11 @@ async def search_duenger(
 
 @router.get("/stats/overview", summary="Duenger-Kennzahlen")
 async def get_duenger_stats(
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Get Dünger statistics overview."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
 
     type_stats = {}
     types = db.query(DuengerModel.typ, func.count(DuengerModel.id)).filter(
@@ -163,11 +162,11 @@ async def get_duenger_stats(
 @router.get("/{duenger_id}", response_model=Duenger, summary="Duenger abrufen")
 async def get_duenger(
     duenger_id: str,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Get a single Dünger by ID."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
 
     duenger = (
         db.query(DuengerModel)
@@ -187,11 +186,11 @@ async def get_duenger(
 @router.post("/", response_model=Duenger, status_code=201, summary="Duenger anlegen", dependencies=SCHREIBEN["AGRAR"])
 async def create_duenger(
     duenger_data: DuengerCreate,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Create a new Dünger."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
 
     # Check if artikelnummer already exists
     existing = (
@@ -246,11 +245,11 @@ async def create_duenger(
 async def update_duenger(
     duenger_id: str,
     duenger_data: DuengerUpdate,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Update an existing Dünger."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
 
     duenger = (
         db.query(DuengerModel)
@@ -312,11 +311,11 @@ async def update_duenger(
 @router.delete("/{duenger_id}", status_code=204, summary="Duenger deaktivieren", dependencies=SCHREIBEN["AGRAR"])
 async def delete_duenger(
     duenger_id: str,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Delete a Dünger (soft delete)."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
 
     duenger = (
         db.query(DuengerModel)

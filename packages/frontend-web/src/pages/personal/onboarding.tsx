@@ -3,6 +3,7 @@ import { MadeByStudioListRuntimeWire } from '@/components/mask-builder/made-by-s
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Skeleton } from '@/components/ui/skeleton'
 import { UniversalMaskRenderer } from '@/components/mask-builder/UniversalMaskRenderer'
+import { useScreenPermissions } from '@/components/mask-builder/runtime/screen-permissions'
 import { compileRenderPlanFromScreenDefinition } from '@/components/mask-builder/render-plan/schema-compiler'
 import { useUniversalFormState } from '@/components/mask-builder/runtime/useUniversalFormState'
 import { createScreenContext } from '@/components/mask-builder/governance/screen-context'
@@ -118,7 +119,8 @@ export default function PersonalOnboardingPage(): JSX.Element {
     })),
   }), [checklisten.data, isTouch, offen, rows.length, saving])
 
-  const plan = useMemo(() => compileRenderPlanFromScreenDefinition(schema), [schema])
+  const rechte = useScreenPermissions(schema)
+  const plan = useMemo(() => compileRenderPlanFromScreenDefinition(schema, { permissions: rechte }), [schema, rechte])
   const form = useUniversalFormState({ screen: schema, initialValues: leer })
 
   const workflow = useMemo<WorkflowState>(() => {
@@ -211,7 +213,7 @@ export default function PersonalOnboardingPage(): JSX.Element {
 
   const screenContext = useMemo(() => createScreenContext({
     data: { laeufe: rows },
-    permissions: { granted: [] },
+    permissions: { granted: rechte },
     state: { values: form.values, policies: {} },
     actions: {
       'personal.saveOnboarding': () => handleAction('speichern', {}),
@@ -219,7 +221,7 @@ export default function PersonalOnboardingPage(): JSX.Element {
       'personal.deleteOnboarding': (payload) => handleAction('loeschen', payload),
     },
     navigation: { push: () => undefined },
-  }), [form.values, handleAction, rows])
+  }), [rechte, form.values, handleAction, rows])
 
   if (laeufe.isLoading || checklisten.isLoading) {
     return (

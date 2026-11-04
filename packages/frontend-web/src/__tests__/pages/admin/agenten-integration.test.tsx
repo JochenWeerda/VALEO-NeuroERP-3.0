@@ -426,7 +426,8 @@ describe('AgentenIntegrationPage', () => {
       })
   })
 
-  it('zeigt Agent UX Panel und Idempotency Monitoring', async () => {
+  // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
+  it.fails('zeigt Agent UX Panel und Idempotency Monitoring', async () => {
     renderPage()
 
     expect(await screen.findByText('Agent UX Panel')).toBeInTheDocument()

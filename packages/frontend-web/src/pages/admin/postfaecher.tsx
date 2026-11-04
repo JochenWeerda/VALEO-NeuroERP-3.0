@@ -72,7 +72,7 @@ function alsFormular(postfach: Postfach): Record<string, unknown> {
 
 // Die Seite ist nur fuer die Administration erreichbar; der Server prueft die Rolle.
 // Ohne diese Rechte blendet der Mask Builder die Aktionen der Screen Definition aus.
-const POSTFACH_RECHTE = ['admin.postfach.write', 'admin.postfach.testen']
+const POSTFACH_RECHTE = ['admin.postfach.write', 'admin.postfach.testen', 'admin.postfach.update', 'admin.postfach.delete']
 
 export default function AdminPostfaecherPage(): JSX.Element {
   const isTouch = useTouchDevice()

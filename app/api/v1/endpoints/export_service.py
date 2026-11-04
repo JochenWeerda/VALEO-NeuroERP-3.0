@@ -45,7 +45,11 @@ SUPPORTED_ENTITIES = [
 
 
 class ExportListFilter(BaseModel):
-    """Optional filter for export (e.g. date_from, tenant_id)."""
+    """Optional filter for export (e.g. date_from).
+
+    ``tenant_id`` darf nur den eigenen Mandanten nennen; bis 28.10.2026 waehlte er den Mandanten
+    des Exports (Debitoren, Kreditoren, Nutzer, Prueflog eines fremden Mandanten).
+    """
     date_from: Optional[str] = None
     date_to: Optional[str] = None
     tenant_id: Optional[str] = None
@@ -77,7 +81,6 @@ def _safe_str(v: Any) -> str:
 # ---------- Entity export functions (tenant-scoped) ----------
 
 def _export_debtors(db: Session, tenant_id: str, filt: Optional[ExportListFilter]) -> list[dict]:
-    effective_tenant = (filt.tenant_id if filt else None) or tenant_id
     q = text("""
         SELECT id, tenant_id, debitor_number, name, address, payment_terms, credit_limit,
                is_active, created_at, updated_at
@@ -85,7 +88,7 @@ def _export_debtors(db: Session, tenant_id: str, filt: Optional[ExportListFilter
         WHERE tenant_id = :tenant_id
         ORDER BY debitor_number
     """)
-    rows = db.execute(q, {"tenant_id": effective_tenant}).fetchall()
+    rows = db.execute(q, {"tenant_id": tenant_id}).fetchall()
     _cols = ["id", "tenant_id", "debtor_number", "company_name", "address", "payment_terms", "credit_limit", "is_active", "created_at", "updated_at"]  # noqa: F841
     out = []
     for row in rows:
@@ -111,29 +114,26 @@ def _export_debtors(db: Session, tenant_id: str, filt: Optional[ExportListFilter
 
 
 def _export_creditors(db: Session, tenant_id: str, filt: Optional[ExportListFilter]) -> list[dict]:
-    # Export creditor open items from domain_erp.offene_posten (konto_typ = kreditoren)
-    effective_tenant = (filt.tenant_id if filt else None) or tenant_id
+    """Kreditoren-Stamm wie bei den Debitoren.
+
+    Bis 28.10.2026 las der Export Kreditoren-OP mit Spalten, die ``offene_posten`` nicht hat
+    (``konto_nr``, ``op_betrag``, ``saldo``, ``mahn_stufe`` ...); der Fehler wurde gefangen und
+    die Datei kam leer.
+    """
     q = text("""
-        SELECT id, tenant_id, konto_nr, konto_name, konto_typ, op_status, rechnungsnr, rechnungsdatum, faelligkeit,
-               op_betrag, saldo, offen, op_text, waehrung, lieferant_id, lieferant_name, skonto_prozent, skonto_bis,
-               mahn_stufe, zahlbar, created_at, updated_at
-        FROM domain_erp.offene_posten
-        WHERE tenant_id = :tenant_id AND konto_typ = 'kreditoren'
-        ORDER BY lieferant_name, faelligkeit
+        SELECT id, tenant_id, creditor_number, name, address, payment_terms, current_balance,
+               is_active, created_at, updated_at
+        FROM domain_erp.creditors
+        WHERE tenant_id = :tenant_id
+        ORDER BY creditor_number
     """)
-    try:
-        rows = db.execute(q, {"tenant_id": effective_tenant}).fetchall()
-    except Exception:
-        # Fallback if schema/table differs: return empty list
-        return []
-    cols = ["id", "tenant_id", "konto_nr", "konto_name", "konto_typ", "op_status", "rechnungsnr", "rechnungsdatum",
-            "faelligkeit", "op_betrag", "saldo", "offen", "op_text", "waehrung", "lieferant_id", "lieferant_name",
-            "skonto_prozent", "skonto_bis", "mahn_stufe", "zahlbar", "created_at", "updated_at"]
+    rows = db.execute(q, {"tenant_id": tenant_id}).fetchall()
+    cols = ["id", "tenant_id", "creditor_number", "company_name", "address", "payment_terms", "current_balance",
+            "is_active", "created_at", "updated_at"]
     return [dict(zip(cols, [_safe_str(c) for c in row])) for row in rows]
 
 
 def _export_chart_of_accounts(db: Session, tenant_id: str, filt: Optional[ExportListFilter]) -> list[dict]:
-    effective_tenant = (filt.tenant_id if filt else None) or tenant_id
     q = text("""
         SELECT id, tenant_id, account_number, account_name, account_type, category, subcategory,
                description, is_summary, balance, last_transaction_date, is_active, created_at, updated_at
@@ -141,14 +141,13 @@ def _export_chart_of_accounts(db: Session, tenant_id: str, filt: Optional[Export
         WHERE tenant_id = :tenant_id AND (is_active IS NULL OR is_active = true)
         ORDER BY account_number
     """)
-    rows = db.execute(q, {"tenant_id": effective_tenant}).fetchall()
+    rows = db.execute(q, {"tenant_id": tenant_id}).fetchall()
     cols = ["id", "tenant_id", "account_number", "account_name", "account_type", "category", "subcategory",
             "description", "is_summary", "balance", "last_transaction_date", "is_active", "created_at", "updated_at"]
     return [dict(zip(cols, [_safe_str(c) for c in row])) for row in rows]
 
 
 def _export_dunning_runs(db: Session, tenant_id: str, filt: Optional[ExportListFilter]) -> list[dict]:
-    effective_tenant = (filt.tenant_id if filt else None) or tenant_id
     q = text("""
         SELECT id, op_id, debtor_id, dunning_level, dunning_date, due_date, open_amount, dunning_fee,
                interest, total_amount, payment_deadline, status, sent_date, payment_date, notes, created_at, updated_at
@@ -156,7 +155,7 @@ def _export_dunning_runs(db: Session, tenant_id: str, filt: Optional[ExportListF
         WHERE tenant_id = :tenant_id
         ORDER BY dunning_date DESC, dunning_level DESC
     """)
-    rows = db.execute(q, {"tenant_id": effective_tenant}).fetchall()
+    rows = db.execute(q, {"tenant_id": tenant_id}).fetchall()
     cols = ["id", "op_id", "debtor_id", "dunning_level", "dunning_date", "due_date", "open_amount", "dunning_fee",
             "interest", "total_amount", "payment_deadline", "status", "sent_date", "payment_date", "notes", "created_at", "updated_at"]
     return [dict(zip(cols, [_safe_str(c) for c in row])) for row in rows]
@@ -165,8 +164,7 @@ def _export_dunning_runs(db: Session, tenant_id: str, filt: Optional[ExportListF
 def _export_audit_log(db: Session, tenant_id: str, filt: Optional[ExportListFilter]) -> list[dict]:
     from app.infrastructure.models import AuditLog
 
-    effective_tenant = (filt.tenant_id if filt else None) or tenant_id
-    query = db.query(AuditLog).filter(AuditLog.tenant_id == effective_tenant)
+    query = db.query(AuditLog).filter(AuditLog.tenant_id == tenant_id)
     if filt:
         if filt.entity_type:
             query = query.filter(AuditLog.entity_type == filt.entity_type)
@@ -196,14 +194,13 @@ def _export_audit_log(db: Session, tenant_id: str, filt: Optional[ExportListFilt
 
 
 def _export_users(db: Session, tenant_id: str, filt: Optional[ExportListFilter]) -> list[dict]:
-    effective_tenant = (filt.tenant_id if filt else None) or tenant_id
     q = text("""
         SELECT id, keycloak_id, username, email, first_name, last_name, roles, tenant_id, is_active, last_login, created_at, updated_at
         FROM domain_shared.users
         WHERE tenant_id = :tenant_id AND (deleted_at IS NULL)
         ORDER BY username
     """)
-    rows = db.execute(q, {"tenant_id": effective_tenant}).fetchall()
+    rows = db.execute(q, {"tenant_id": tenant_id}).fetchall()
     cols = ["id", "keycloak_id", "username", "email", "first_name", "last_name", "roles", "tenant_id", "is_active", "last_login", "created_at", "updated_at"]
     return [dict(zip(cols, [_safe_str(c) for c in row])) for row in rows]
 
@@ -216,13 +213,10 @@ def _export_futtermittel_einzel(db: Session, tenant_id: str, filt: Optional[Expo
                analyse_protein, analyse_feuchtigkeit, naehrwertangaben,
                chargenpflicht, gmp_plus_relevanz, created_at
         FROM domain_inventory.articles
-        WHERE is_active = true
+        WHERE tenant_id = :tenant_id AND is_active = true
         ORDER BY name
     """)
-    try:
-        rows = db.execute(q).fetchall()
-    except Exception:
-        return []
+    rows = db.execute(q, {"tenant_id": tenant_id}).fetchall()
     out = []
     for row in rows:
         out.append({
@@ -252,13 +246,10 @@ def _export_futtermittel_misch(db: Session, tenant_id: str, filt: Optional[Expor
                custom_properties, naehrwertangaben,
                chargenpflicht, gmp_plus_relevanz, created_at
         FROM domain_inventory.articles
-        WHERE is_active = true
+        WHERE tenant_id = :tenant_id AND is_active = true
         ORDER BY name
     """)
-    try:
-        rows = db.execute(q).fetchall()
-    except Exception:
-        return []
+    rows = db.execute(q, {"tenant_id": tenant_id}).fetchall()
     out = []
     for row in rows:
         props = row[8]
@@ -297,12 +288,10 @@ def _export_futtermittel_chargen(db: Session, tenant_id: str, filt: Optional[Exp
         SELECT id, chargen_id, artikel, menge, lagerort, status,
                qualitaetsstatus, eingang, mhd, herkunft, bemerkungen
         FROM domain_ops.ops_chargen
+        WHERE tenant_id = :tenant_id
         ORDER BY eingang DESC
     """)
-    try:
-        rows = db.execute(q).fetchall()
-    except Exception:
-        return []
+    rows = db.execute(q, {"tenant_id": tenant_id}).fetchall()
     cols = ["id", "chargen_id", "artikel", "menge_kg", "lagerort", "status",
             "qualitaetsstatus", "eingang", "mhd", "herkunft", "bemerkungen"]
     return [dict(zip(cols, [_safe_str(c) for c in row])) for row in rows]
@@ -311,7 +300,7 @@ def _export_futtermittel_chargen(db: Session, tenant_id: str, filt: Optional[Exp
 def _export_superglue_domain_rollouts(db: Session, tenant_id: str, filt: Optional[ExportListFilter]) -> list[dict]:
     from app.integrations.services.superglue_domain_rollouts import build_superglue_domain_rollout_summary
 
-    summary = build_superglue_domain_rollout_summary((filt.tenant_id if filt else None) or tenant_id)
+    summary = build_superglue_domain_rollout_summary(tenant_id)
     rows: list[dict] = []
     for domain in summary["domains"]:
         for connector in domain["connectors"]:
@@ -349,21 +338,18 @@ def _get_entity_data(entity: str, db: Session, tenant_id: str, filt: Optional[Ex
 
 
 def _data_to_csv(data: list[dict]) -> io.BytesIO:
-    if not data:
-        buffer = io.BytesIO()
-        w = csv.writer(io.TextIOWrapper(buffer, encoding="utf-8-sig", newline=""))
-        w.writerow([])
-        return buffer
-    keys = list(data[0].keys())
-    buffer = io.BytesIO()
-    text_buffer = io.TextIOWrapper(buffer, encoding="utf-8-sig", newline="")
-    writer = csv.DictWriter(text_buffer, fieldnames=keys)
-    writer.writeheader()
-    for row in data:
-        writer.writerow(row)
-    text_buffer.flush()
-    buffer.seek(0)
-    return buffer
+    """CSV mit BOM (Excel).
+
+    Bis 28.10.2026 schrieb ein ``TextIOWrapper`` in den Puffer; beim Verlassen der Funktion schloss er ihn,
+    ``getvalue()`` scheiterte und jeder CSV-Export endete mit 500.
+    """
+    text_buffer = io.StringIO(newline="")
+    if data:
+        writer = csv.DictWriter(text_buffer, fieldnames=list(data[0].keys()))
+        writer.writeheader()
+        for row in data:
+            writer.writerow(row)
+    return io.BytesIO(text_buffer.getvalue().encode("utf-8-sig"))
 
 
 def _data_to_xlsx(data: list[dict]) -> io.BytesIO:
@@ -418,12 +404,10 @@ async def export_list(
     if fmt not in ("csv", "xlsx"):
         fmt = "csv"
 
-    # Resolve tenant: filter can override for admin use; otherwise use request tenant
-    effective_tenant = tenant_id
-    if body.filter and body.filter.tenant_id:
-        effective_tenant = body.filter.tenant_id
+    if body.filter and body.filter.tenant_id and body.filter.tenant_id != tenant_id:
+        raise HTTPException(status_code=403, detail="Export nur im eigenen Mandanten")
 
-    data = _get_entity_data(entity, db, effective_tenant, body.filter)
+    data = _get_entity_data(entity, db, tenant_id, body.filter)
 
     if fmt == "xlsx":
         buffer = _data_to_xlsx(data)

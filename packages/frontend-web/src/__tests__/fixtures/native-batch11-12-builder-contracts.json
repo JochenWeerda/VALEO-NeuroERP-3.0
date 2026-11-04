@@ -15,7 +15,7 @@
       {
         "key": "list",
         "endpoint": "/api/v1/crm/customers/lookup?q=&limit=1000",
-        "pageSize": 500
+        "pageSize": 100
       }
     ],
     "actions": [

@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 from fastapi import FastAPI
-from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
+from testgrenze import ALLE_FACHROLLEN, ersetze_mandant, ersetze_nutzer
 from fastapi.testclient import TestClient
+from app.core.tenant import get_tenant_id
 
 from app.api.v1.endpoints import external_agent_integrations
 
@@ -10,7 +11,10 @@ from app.api.v1.endpoints import external_agent_integrations
 def _client() -> TestClient:
     app = FastAPI()
     ersetze_nutzer(app, *ALLE_FACHROLLEN)
+    ersetze_mandant(app, "tenant-a")  # Superglue-Wege nehmen den Mandanten aus der Anmeldung (Runtime46)
     app.include_router(external_agent_integrations.router)
+    # Der Mandant kommt aus dem Token; hier steht der gepruefte Mandant fuer die Anmeldung.
+    app.dependency_overrides[get_tenant_id] = lambda: "tenant-a"
     return TestClient(app)
 
 
@@ -198,7 +202,7 @@ def test_superglue_provider_routes_surface_sync_and_health():
         "preview_count": 1,
         "previews": [],
     }
-    external_agent_integrations.retry_quarantine_entry = lambda entry_id, retried_by, note=None, dead_letter=False: {
+    external_agent_integrations.retry_quarantine_entry = lambda entry_id, retried_by, note=None, dead_letter=False, tenant_id=None: {
         "entry_id": entry_id,
         "status": "open" if not dead_letter else "dead_letter",
         "retry_count": 1,

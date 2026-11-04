@@ -1,3 +1,4 @@
+import { formatBusinessDateTime } from '@/lib/business-time'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -29,7 +30,8 @@ describe('Kontraktprotokoll: Python definition and real renderer', () => {
     await screen.findByText('Bernd')
     expect(screen.getByText('Menge')).toBeTruthy()
     for (const label of ['Wann', 'Benutzer', 'Feld', 'Alt', 'Neu', 'Aktion']) expect(screen.getByText(label)).toBeTruthy()
-    expect(screen.getByText(new Date(rows[0].changed_at).toLocaleString('de-DE'))).toBeTruthy()
+    // Zeitpunkte zeigt die Maske in der Betriebszeitzone (lib/business-time), nicht in der Zeitzone der Maschine.
+    expect(screen.getByText(formatBusinessDateTime(rows[0].changed_at) ?? '')).toBeTruthy()
     expect(screen.getAllByText('–').length).toBeGreaterThan(0)
     expect(fixture.get).toHaveBeenCalledTimes(2)
     expect(fixture.get.mock.calls[0][0]).toContain('entity_id=contract+one')

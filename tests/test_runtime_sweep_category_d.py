@@ -5,7 +5,7 @@ import httpx
 import pytest
 from sqlalchemy.exc import SQLAlchemyError
 
-from app.api.v1.endpoints import activities, cases, einkauf_bestellvorschlag, journal_entries, opportunities
+from app.api.v1.endpoints import cases, einkauf_bestellvorschlag, journal_entries, opportunities
 from app.domains.inventory.application.services.replenishment_service import ReplenishmentService
 from app.finance.gobd import BelegnummernLuecke, _count_missing_belegnummern
 from app.infrastructure.models import NawaroPrintNotification
@@ -79,17 +79,8 @@ def test_nawaro_print_notification_model_matches_router_contract():
         assert hasattr(NawaroPrintNotification, column_name)
 
 
-@pytest.mark.asyncio
-async def test_crm_activity_list_degrades_when_downstream_unreachable(monkeypatch):
-    async def _raise_downstream(**_kwargs):
-        raise httpx.ConnectError("crm-core unavailable")
-
-    monkeypatch.setattr(activities.crm_core_client, "list_activities", _raise_downstream)
-
-    response = await activities.list_activities(skip=0, limit=50)
-
-    assert response.total == 0
-    assert response.items == []
+# Die Aktivitaetsliste liest seit Runtime46 lokal (domain_crm.activities) statt aus crm-core; ein
+# Ausfall von crm-core betrifft sie nicht mehr (tests/test_crm_activity_canonical_sql.py, Liste und Detail).
 
 
 @pytest.mark.parametrize("tenant", ["outage-house-a", "outage-house-b"])

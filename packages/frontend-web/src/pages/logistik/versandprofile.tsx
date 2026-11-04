@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { MadeByStudioListRuntimeWire } from '@/components/mask-builder/made-by-studio-runtime-wire'
 import { Skeleton } from '@/components/ui/skeleton'
 import { UniversalMaskRenderer } from '@/components/mask-builder/UniversalMaskRenderer'
+import { useScreenPermissions } from '@/components/mask-builder/runtime/screen-permissions'
 import { compileRenderPlanFromScreenDefinition } from '@/components/mask-builder/render-plan/schema-compiler'
 import { useUniversalFormState } from '@/components/mask-builder/runtime/useUniversalFormState'
 import { createScreenContext } from '@/components/mask-builder/governance/screen-context'
@@ -76,7 +77,8 @@ export default function VersandprofilePage(): JSX.Element {
     })),
   }), [avise.length, isTouch, profile.length, savingAvis, savingProfil])
 
-  const plan = useMemo(() => compileRenderPlanFromScreenDefinition(schema), [schema])
+  const rechte = useScreenPermissions(schema)
+  const plan = useMemo(() => compileRenderPlanFromScreenDefinition(schema, { permissions: rechte }), [schema, rechte])
   const form = useUniversalFormState({
     screen: schema,
     initialValues: {
@@ -218,7 +220,7 @@ export default function VersandprofilePage(): JSX.Element {
 
   const screenContext = useMemo(() => createScreenContext({
     data: { profile, avise },
-    permissions: { granted: [] },
+    permissions: { granted: rechte },
     state: { values: form.values, policies: {} },
     actions: {
       'versand.saveProfile': () => handleAction('profil', {}),
@@ -226,7 +228,7 @@ export default function VersandprofilePage(): JSX.Element {
       'versand.deleteProfile': (payload) => handleAction('loeschen', payload),
     },
     navigation: { push: () => undefined },
-  }), [avise, form.values, handleAction, profile])
+  }), [rechte, avise, form.values, handleAction, profile])
 
   if (profileQuery.isLoading || avisQuery.isLoading) {
     return (

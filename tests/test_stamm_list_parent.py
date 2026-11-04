@@ -84,10 +84,17 @@ def test_build_stamm_list_screen_validates_row_route_template() -> None:
         )
 
 
+#: Seit Runtime46 Cockpits statt Listen (handgebaute Altlast, Workboard STUDIO-UMBAU-RUNTIME46).
+COCKPIT_STATT_LISTE = frozenset({"admin/webhooks-liste", "waage/liste", "waage/waagen-liste", "waage/wiegungen-liste"})
+
+
 def test_all_listen_builders_use_parent_factory() -> None:
     for screen_id, builder in LISTEN_SCREEN_BUILDERS.items():
         screen = builder()
         assert screen["id"] == screen_id
+        if screen_id in COCKPIT_STATT_LISTE:
+            assert screen["layout"]["floorplan"] == "cockpit", screen_id  # schrumpft mit dem Umbau
+            continue
         assert screen["layout"]["floorplan"] == "worklist"
         assert screen["tables"][0]["virtualized"] is True
 

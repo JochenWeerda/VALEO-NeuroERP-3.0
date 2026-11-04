@@ -13861,12 +13861,66 @@
               "name": "updated_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "source",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "priority",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "company_name",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "contact_person",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "email",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "phone",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "converted_at",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "converted_to_customer_id",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "is_active",
+              "nullable": true,
+              "type": "boolean"
+            },
+            {
+              "name": "deleted_at",
+              "nullable": true,
+              "type": "timestamp with time zone"
             }
           ],
           "foreign_keys": [
             {
               "column": "assigned_to",
               "references": "domain_shared.users.id"
+            },
+            {
+              "column": "converted_to_customer_id",
+              "references": "domain_crm.customers.id"
             },
             {
               "column": "customer_id",
@@ -20333,7 +20387,7 @@
             },
             {
               "name": "tenant_id",
-              "nullable": true,
+              "nullable": false,
               "type": "character varying"
             },
             {
@@ -21029,7 +21083,6 @@
             "app/api/v1/endpoints/bulk_journal_import.py",
             "app/api/v1/endpoints/chart_of_accounts.py",
             "app/api/v1/endpoints/compat.py",
-            "app/api/v1/endpoints/compliance.py",
             "app/api/v1/endpoints/export_service.py",
             "app/api/v1/endpoints/finance_actions.py",
             "app/api/v1/endpoints/financial_reports.py",
@@ -21041,6 +21094,7 @@
             "app/core/screen_definitions_capture.py",
             "app/domains/inventory/api/storage_fees.py",
             "app/finance/steuerschluessel.py",
+            "app/finance/ustva.py",
             "app/infrastructure/models/__init__.py",
             "app/infrastructure/models/journal.py",
             "app/services/finance_closing_service.py",
@@ -21350,7 +21404,7 @@
             },
             {
               "name": "tenant_id",
-              "nullable": true,
+              "nullable": false,
               "type": "character varying"
             },
             {
@@ -21408,6 +21462,7 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/creditors.py",
+            "app/api/v1/endpoints/export_service.py",
             "app/api/v1/schemas/finance.py"
           ],
           "written_by": [
@@ -21423,7 +21478,7 @@
             },
             {
               "name": "tenant_id",
-              "nullable": true,
+              "nullable": false,
               "type": "character varying"
             },
             {
@@ -21481,6 +21536,10 @@
             {
               "column": "customer_id",
               "references": "domain_crm.customers.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_crm.customers.tenant_id"
             },
             {
               "column": "tenant_id",
@@ -22174,12 +22233,21 @@
               "name": "status",
               "nullable": false,
               "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [
             {
               "column": "run_id",
               "references": "domain_erp.fibu_connector_runs.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_erp.fibu_connector_runs.tenant_id"
             }
           ],
           "owner_domain": "finance",
@@ -22486,7 +22554,6 @@
             "app/api/v1/endpoints/bank_reconciliation.py",
             "app/api/v1/endpoints/budget_planning.py",
             "app/api/v1/endpoints/chart_of_accounts.py",
-            "app/api/v1/endpoints/compliance.py",
             "app/api/v1/endpoints/finance_actions.py",
             "app/api/v1/endpoints/finance_invoices.py",
             "app/api/v1/endpoints/financial_reports.py",
@@ -22495,11 +22562,11 @@
             "app/api/v1/endpoints/mask_frontend_bridges.py",
             "app/api/v1/endpoints/open_items.py",
             "app/api/v1/endpoints/subsidiary_ledger_reconciliation.py",
-            "app/api/v1/endpoints/vat_return_export.py",
             "app/api/v1/schemas/finance.py",
             "app/core/connectors/workflow.py",
             "app/finance/gobd.py",
             "app/finance/router.py",
+            "app/finance/ustva.py",
             "app/infrastructure/models/journal.py",
             "app/services/ap_invoice_approval_service.py",
             "app/services/closing_checklist_validation.py",
@@ -22640,12 +22707,11 @@
             "app/api/v1/endpoints/bank_reconciliation.py",
             "app/api/v1/endpoints/budget_planning.py",
             "app/api/v1/endpoints/chart_of_accounts.py",
-            "app/api/v1/endpoints/compliance.py",
             "app/api/v1/endpoints/finance_actions.py",
             "app/api/v1/endpoints/financial_reports.py",
             "app/api/v1/endpoints/subsidiary_ledger_reconciliation.py",
-            "app/api/v1/endpoints/vat_return_export.py",
             "app/core/connectors/workflow.py",
+            "app/finance/ustva.py",
             "app/infrastructure/models/journal.py",
             "app/services/finance_closing_service.py",
             "app/services/finance_datev_service.py",
@@ -23010,12 +23076,9 @@
             "app/api/v1/endpoints/auto_matching.py",
             "app/api/v1/endpoints/bank_reconciliation.py",
             "app/api/v1/endpoints/compat.py",
-            "app/api/v1/endpoints/creditors.py",
             "app/api/v1/endpoints/crm_360.py",
             "app/api/v1/endpoints/crm_360_reads.py",
-            "app/api/v1/endpoints/debtors.py",
             "app/api/v1/endpoints/dunning.py",
-            "app/api/v1/endpoints/export_service.py",
             "app/api/v1/endpoints/finance_invoices.py",
             "app/api/v1/endpoints/finance_stammdaten.py",
             "app/api/v1/endpoints/liquidity.py",
@@ -23026,6 +23089,7 @@
             "app/api/v1/endpoints/rohware_sammelabrechnung.py",
             "app/api/v1/endpoints/subsidiary_ledger_reconciliation.py",
             "app/crm/router.py",
+            "app/finance/op_saldo.py",
             "app/services/closing_checklist_validation.py",
             "app/services/finance_clearing_service.py",
             "app/services/finance_datev_service.py",
@@ -23824,10 +23888,10 @@
           "read_by": [
             "app/api/v1/endpoints/preis_kalkulation_bridge.py",
             "app/api/v1/endpoints/tax_keys.py",
-            "app/api/v1/endpoints/vat_return_export.py",
             "app/core/screen_definitions_capture.py",
             "app/finance/steuerschluessel.py",
             "app/finance/tax_resolver.py",
+            "app/finance/ustva.py",
             "app/services/docflow_service.py",
             "app/services/finance_freigabe.py"
           ],
@@ -23932,6 +23996,36 @@
               "name": "updated_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "calculated_by",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "validated_by",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "approved_by",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "approved_at",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "submitted_by",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "elster_transferticket",
+              "nullable": true,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [],
@@ -23942,6 +24036,7 @@
             "id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/compliance.py",
             "app/api/v1/endpoints/vat_return_export.py",
             "app/services/closing_checklist_validation.py"
           ],
@@ -24037,6 +24132,65 @@
     },
     "domain_finance": {
       "tables": {
+        "asset_depreciation_runs": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "asset_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "period_year",
+              "nullable": false,
+              "type": "integer"
+            },
+            {
+              "name": "period_month",
+              "nullable": false,
+              "type": "integer"
+            },
+            {
+              "name": "depreciation_amount",
+              "nullable": false,
+              "type": "numeric"
+            },
+            {
+              "name": "book_value_after",
+              "nullable": false,
+              "type": "numeric"
+            },
+            {
+              "name": "created_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [
+            {
+              "column": "asset_id",
+              "references": "domain_finance.fixed_assets.id"
+            }
+          ],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_finance / Domain finance.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/api/v1/endpoints/asset_accounting.py"
+          ]
+        },
         "aufbewahrungsfristen": {
           "columns": [
             {
@@ -30809,6 +30963,10 @@
             },
             {
               "column": "tenant_id",
+              "references": "domain_agrar.nutrient_compositions.tenant_id"
+            },
+            {
+              "column": "tenant_id",
               "references": "domain_shared.tenants.id"
             }
           ],
@@ -34829,6 +34987,78 @@
             "app/infrastructure/models/l3c_models.py"
           ]
         },
+        "ruestlisten": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "ruestlisten_nr",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "auftrag_nr",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "status",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "positionen",
+              "nullable": false,
+              "type": "jsonb"
+            },
+            {
+              "name": "erstellt_fuer",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "prioritaet",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "bemerkung",
+              "nullable": true,
+              "type": "text"
+            },
+            {
+              "name": "erstellt_am",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "verarbeitet_am",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/api/v1/endpoints/ruestliste.py"
+          ],
+          "written_by": [
+            "app/api/v1/endpoints/ruestliste.py"
+          ]
+        },
         "shipping_units": {
           "columns": [
             {
@@ -37338,7 +37568,16 @@
               "type": "timestamp with time zone"
             }
           ],
-          "foreign_keys": [],
+          "foreign_keys": [
+            {
+              "column": "tenant_id",
+              "references": "domain_logistics.tours.tenant_id"
+            },
+            {
+              "column": "tour_id",
+              "references": "domain_logistics.tours.id"
+            }
+          ],
           "owner_domain": "logistics",
           "ownership_reason": "Custodian domain_logistics / Domain logistics.",
           "placement": "native",
@@ -37391,11 +37630,28 @@
             },
             {
               "name": "tenant_id",
-              "nullable": true,
+              "nullable": false,
               "type": "character varying"
             }
           ],
-          "foreign_keys": [],
+          "foreign_keys": [
+            {
+              "column": "stop_id",
+              "references": "domain_logistics.tour_stops.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_logistics.tour_stops.tenant_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_logistics.tours.tenant_id"
+            },
+            {
+              "column": "tour_id",
+              "references": "domain_logistics.tours.id"
+            }
+          ],
           "owner_domain": "logistics",
           "ownership_reason": "Custodian domain_logistics / Domain logistics.",
           "placement": "native",
@@ -37542,7 +37798,7 @@
             },
             {
               "name": "tenant_id",
-              "nullable": true,
+              "nullable": false,
               "type": "text"
             },
             {
@@ -37624,11 +37880,20 @@
             },
             {
               "name": "tenant_id",
-              "nullable": true,
+              "nullable": false,
               "type": "character varying"
             }
           ],
-          "foreign_keys": [],
+          "foreign_keys": [
+            {
+              "column": "tenant_id",
+              "references": "domain_logistics.tours.tenant_id"
+            },
+            {
+              "column": "tour_id",
+              "references": "domain_logistics.tours.id"
+            }
+          ],
           "owner_domain": "logistics",
           "ownership_reason": "Custodian domain_logistics / Domain logistics.",
           "placement": "native",
@@ -37683,11 +37948,20 @@
             },
             {
               "name": "tenant_id",
-              "nullable": true,
+              "nullable": false,
               "type": "text"
             }
           ],
-          "foreign_keys": [],
+          "foreign_keys": [
+            {
+              "column": "tenant_id",
+              "references": "domain_logistics.tours.tenant_id"
+            },
+            {
+              "column": "tour_id",
+              "references": "domain_logistics.tours.id"
+            }
+          ],
           "owner_domain": "logistics",
           "ownership_reason": "Custodian domain_logistics / Domain logistics.",
           "placement": "native",
@@ -37765,7 +38039,7 @@
             },
             {
               "name": "tenant_id",
-              "nullable": true,
+              "nullable": false,
               "type": "text"
             },
             {
@@ -37789,7 +38063,16 @@
               "type": "character varying"
             }
           ],
-          "foreign_keys": [],
+          "foreign_keys": [
+            {
+              "column": "tenant_id",
+              "references": "domain_logistics.tours.tenant_id"
+            },
+            {
+              "column": "tour_id",
+              "references": "domain_logistics.tours.id"
+            }
+          ],
           "owner_domain": "logistics",
           "ownership_reason": "Custodian domain_logistics / Domain logistics.",
           "placement": "native",
@@ -37842,7 +38125,7 @@
             },
             {
               "name": "tenant_id",
-              "nullable": true,
+              "nullable": false,
               "type": "text"
             },
             {
@@ -37859,7 +38142,9 @@
             "id"
           ],
           "read_by": [
-            "app/api/v1/endpoints/logistics_tours.py"
+            "app/api/v1/endpoints/logistics_freight.py",
+            "app/api/v1/endpoints/logistics_tours.py",
+            "app/services/logistics_disposition_service.py"
           ],
           "written_by": [
             "app/api/v1/command_handlers/logistics.py",
@@ -39207,6 +39492,10 @@
             {
               "column": "contract_id",
               "references": "domain_ops.kon_contract.contract_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_ops.kon_contract.tenant_id"
             }
           ],
           "owner_domain": "inventory",
@@ -39326,6 +39615,14 @@
             {
               "column": "line_id",
               "references": "domain_ops.kon_contract_line.line_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_ops.kon_contract.tenant_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_ops.kon_contract_line.tenant_id"
             }
           ],
           "owner_domain": "inventory",
@@ -40177,12 +40474,21 @@
               "name": "erstellt_von",
               "nullable": true,
               "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [
             {
               "column": "dokument_id",
               "references": "domain_ops.ops_dokumente.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_ops.ops_dokumente.tenant_id"
             }
           ],
           "owner_domain": "inventory",
@@ -40301,6 +40607,11 @@
             {
               "name": "updated_by",
               "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
               "type": "character varying"
             }
           ],
@@ -40581,12 +40892,21 @@
               "name": "updated_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [
             {
               "column": "fahrzeug_id",
               "references": "domain_ops.ops_fahrzeuge.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_ops.ops_fahrzeuge.tenant_id"
             }
           ],
           "owner_domain": "inventory",
@@ -40678,12 +40998,21 @@
               "name": "updated_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [
             {
               "column": "fahrzeug_id",
               "references": "domain_ops.ops_fahrzeuge.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_ops.ops_fahrzeuge.tenant_id"
             }
           ],
           "owner_domain": "inventory",
@@ -40740,12 +41069,21 @@
               "name": "timestamp",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [
             {
               "column": "fahrzeug_id",
               "references": "domain_ops.ops_fahrzeuge.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_ops.ops_fahrzeuge.tenant_id"
             }
           ],
           "owner_domain": "inventory",
@@ -40832,6 +41170,11 @@
               "name": "created_by",
               "nullable": true,
               "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [
@@ -40842,6 +41185,10 @@
             {
               "column": "fahrzeug_id",
               "references": "domain_ops.ops_fahrzeuge.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_ops.ops_fahrzeuge.tenant_id"
             }
           ],
           "owner_domain": "inventory",
@@ -41296,6 +41643,10 @@
             {
               "column": "instance_id",
               "references": "domain_ops.ops_flow_spine_instances.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_ops.ops_flow_spine_instances.tenant_id"
             }
           ],
           "owner_domain": "inventory",
@@ -41395,6 +41746,10 @@
             {
               "column": "instance_id",
               "references": "domain_ops.ops_flow_spine_instances.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_ops.ops_flow_spine_instances.tenant_id"
             }
           ],
           "owner_domain": "inventory",
@@ -41657,6 +42012,11 @@
               "name": "updated_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [],
@@ -41667,6 +42027,7 @@
             "id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/foerderung.py",
             "app/domains/operations/models.py"
           ]
         },
@@ -41801,6 +42162,10 @@
             {
               "column": "fahrzeug_id",
               "references": "domain_ops.ops_fahrzeuge.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_ops.ops_fahrzeuge.tenant_id"
             }
           ],
           "owner_domain": "inventory",
@@ -41904,6 +42269,11 @@
               "name": "updated_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [],
@@ -41963,70 +42333,26 @@
               "name": "updated_at",
               "nullable": true,
               "type": "timestamp with time zone"
-            }
-          ],
-          "foreign_keys": [],
-          "owner_domain": "inventory",
-          "ownership_reason": "Praefix 'ops_' → domain_ops.",
-          "placement": "prefix",
-          "primary_key": [
-            "id"
-          ],
-          "read_by": [
-            "app/domains/operations/models.py"
-          ]
-        },
-        "ops_marketing_kampagnen": {
-          "columns": [
+            },
             {
-              "name": "id",
+              "name": "tenant_id",
               "nullable": false,
               "type": "character varying"
             },
             {
-              "name": "name",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "typ",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "zielgruppe",
+              "name": "analysewerte",
               "nullable": true,
-              "type": "character varying"
+              "type": "jsonb"
             },
             {
-              "name": "startdatum",
+              "name": "grenzwerte",
               "nullable": true,
-              "type": "timestamp with time zone"
+              "type": "jsonb"
             },
             {
-              "name": "enddatum",
+              "name": "bemerkung",
               "nullable": true,
-              "type": "timestamp with time zone"
-            },
-            {
-              "name": "budget",
-              "nullable": true,
-              "type": "numeric"
-            },
-            {
-              "name": "status",
-              "nullable": true,
-              "type": "character varying"
-            },
-            {
-              "name": "created_at",
-              "nullable": true,
-              "type": "timestamp with time zone"
-            },
-            {
-              "name": "updated_at",
-              "nullable": true,
-              "type": "timestamp with time zone"
+              "type": "text"
             }
           ],
           "foreign_keys": [],
@@ -42166,6 +42492,10 @@
             {
               "column": "projekt_id",
               "references": "domain_ops.ops_projekte.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_ops.ops_projekte.tenant_id"
             }
           ],
           "owner_domain": "inventory",
@@ -42426,6 +42756,11 @@
             {
               "name": "updated_by",
               "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
               "type": "character varying"
             }
           ],
@@ -43014,7 +43349,7 @@
             },
             {
               "name": "tenant_id",
-              "nullable": true,
+              "nullable": false,
               "type": "character varying"
             },
             {
@@ -43205,6 +43540,10 @@
             {
               "column": "anlage_id",
               "references": "domain_ops.ops_wartung_anlagen.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_ops.ops_wartung_anlagen.tenant_id"
             }
           ],
           "owner_domain": "inventory",
@@ -43288,9 +43627,18 @@
               "name": "created_by",
               "nullable": true,
               "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [
+            {
+              "column": "tenant_id",
+              "references": "domain_ops.ops_waagen.tenant_id"
+            },
             {
               "column": "waage_id",
               "references": "domain_ops.ops_waagen.id"
@@ -44630,6 +44978,169 @@
             "qualitaet/reklamation"
           ]
         },
+        "service_anfrage_rueckmeldungen": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "anfrage_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "text",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "bewertet_von",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "bewertung",
+              "nullable": true,
+              "type": "smallint"
+            },
+            {
+              "name": "erstellt_von",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "created_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [
+            {
+              "column": "anfrage_id",
+              "references": "domain_ops.service_anfragen.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_ops.service_anfragen.tenant_id"
+            }
+          ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_ops / Domain inventory.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/api/v1/endpoints/service_anfragen.py"
+          ],
+          "written_by": [
+            "app/api/v1/endpoints/service_anfragen.py"
+          ]
+        },
+        "service_anfragen": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "nummer",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "kunde",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "betreff",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "beschreibung",
+              "nullable": true,
+              "type": "text"
+            },
+            {
+              "name": "prioritaet",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "kategorie",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "status",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "datum",
+              "nullable": false,
+              "type": "date"
+            },
+            {
+              "name": "abschluss_grund",
+              "nullable": true,
+              "type": "text"
+            },
+            {
+              "name": "abschluss_notiz",
+              "nullable": true,
+              "type": "text"
+            },
+            {
+              "name": "abgeschlossen_am",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "erstellt_von",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "created_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "updated_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_ops / Domain inventory.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/api/v1/endpoints/service_anfragen.py"
+          ],
+          "written_by": [
+            "app/api/v1/endpoints/service_anfragen.py"
+          ]
+        },
         "strecke_speditionen_frachttarife": {
           "columns": [
             {
@@ -44685,6 +45196,11 @@
             {
               "name": "updated_by",
               "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
               "type": "character varying"
             }
           ],
@@ -47421,6 +47937,130 @@
     },
     "domain_sales": {
       "tables": {
+        "blanket_order_releases": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "blanket_order_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "release_quantity",
+              "nullable": false,
+              "type": "numeric"
+            },
+            {
+              "name": "release_date",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "sales_order_ref",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "status",
+              "nullable": false,
+              "type": "character varying"
+            }
+          ],
+          "foreign_keys": [
+            {
+              "column": "blanket_order_id",
+              "references": "domain_sales.blanket_orders.id"
+            }
+          ],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_sales / Domain crm.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/api/v1/endpoints/sales_blanket_orders.py"
+          ],
+          "written_by": [
+            "app/api/v1/endpoints/sales_blanket_orders.py"
+          ]
+        },
+        "blanket_orders": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "customer_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "article_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "total_quantity",
+              "nullable": false,
+              "type": "numeric"
+            },
+            {
+              "name": "unit_price",
+              "nullable": false,
+              "type": "numeric"
+            },
+            {
+              "name": "valid_from",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "valid_to",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "status",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "created_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_sales / Domain crm.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/api/v1/endpoints/sales_blanket_orders.py"
+          ],
+          "written_by": [
+            "app/api/v1/endpoints/sales_blanket_orders.py"
+          ]
+        },
         "delivery_note_positions": {
           "columns": [
             {
@@ -59908,6 +60548,7 @@
             "app/api/v1/endpoints/admin_suite.py",
             "app/api/v1/endpoints/health.py",
             "app/api/v1/endpoints/sales_invoice_einvoice.py",
+            "app/api/v1/endpoints/vat_return_export.py",
             "app/core/geheimnis.py",
             "app/core/policy_overrides.py",
             "app/core/process_config.py",

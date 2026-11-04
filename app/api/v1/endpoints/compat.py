@@ -9,14 +9,14 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any, List, Optional
 from uuid import uuid4
-from fastapi import APIRouter, Body, Depends, File, HTTPException, Query, UploadFile
+from fastapi import APIRouter, Body, Depends, File, HTTPException, Query, Request, UploadFile
 from fastapi.responses import Response
 from starlette.concurrency import run_in_threadpool
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from app.core.akteur import gepruefter_akteur
+from app.core.akteur import gepruefter_akteur, gepruefter_akteur_aus_request
 from app.core.cache import cache_delete_prefix, cache_get_json, cache_set_json
 from app.core.config import settings
 from app.core.data_quality_enforcement import (
@@ -2063,10 +2063,10 @@ async def upsert_supplier_rating(
 
 
 @router.get("/einkauf/suppliers/{supplier_id}/documents", response_model=list[CompatBridgeOut], summary="Documents supplier")
-async def supplier_documents(supplier_id: str, db: Session = Depends(get_db)) -> list[dict[str, Any]]:
+async def supplier_documents(supplier_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> list[dict[str, Any]]:
     docs = (
         db.query(Dokument)
-        .filter(Dokument.referenz_typ == "supplier", Dokument.referenz_id == supplier_id)
+        .filter(Dokument.tenant_id == tenant_id, Dokument.referenz_typ == "supplier", Dokument.referenz_id == supplier_id)
         .order_by(Dokument.hochgeladen_am.desc())
         .all()
     )
@@ -2085,17 +2085,17 @@ async def supplier_documents(supplier_id: str, db: Session = Depends(get_db)) ->
 
 
 @router.post("/einkauf/suppliers/{supplier_id}/documents", response_model=EinkaufDocOut, status_code=201, summary="Supplier document anlegen", dependencies=SCHREIBEN["EINKAUF"])
-async def create_supplier_document(supplier_id: str, payload: dict[str, Any], db: Session = Depends(get_db)) -> dict:
+async def create_supplier_document(supplier_id: str, payload: dict[str, Any], request: Request, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
+    akteur = gepruefter_akteur_aus_request(request)  # Urheber aus dem Token; bis 28.10.2026 ``hochgeladenVon`` aus dem Rumpf
     doc = Dokument(
-        name=str(payload.get("name") or f"Lieferanten-Dokument {supplier_id}"),
+        tenant_id=tenant_id, name=str(payload.get("name") or f"Lieferanten-Dokument {supplier_id}"),
         typ=str(payload.get("typ") or "PDF"),
         kategorie=str(payload.get("kategorie") or "Lieferanten"),
         groesse=int(payload.get("groesse") or 0),
         beschreibung=payload.get("beschreibung"),
         speicherpfad=payload.get("speicherpfad"),
-        referenz_typ="supplier",
-        referenz_id=supplier_id,
-        hochgeladen_von=str(payload.get("hochgeladenVon") or "system"),
+        referenz_typ="supplier", referenz_id=supplier_id,
+        hochgeladen_von=akteur, created_by=akteur,
     )
     db.add(doc)
     db.commit()
@@ -2103,10 +2103,10 @@ async def create_supplier_document(supplier_id: str, payload: dict[str, Any], db
 
 
 @router.delete("/einkauf/suppliers/{supplier_id}/documents/{doc_id}", response_model=EinkaufDocOut, summary="Supplier document lÃ¶schen", dependencies=SCHREIBEN["EINKAUF"])
-async def delete_supplier_document(supplier_id: str, doc_id: str, db: Session = Depends(get_db)) -> dict:
+async def delete_supplier_document(supplier_id: str, doc_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
     doc = (
         db.query(Dokument)
-        .filter(Dokument.id == doc_id, Dokument.referenz_typ == "supplier", Dokument.referenz_id == supplier_id)
+        .filter(Dokument.tenant_id == tenant_id, Dokument.id == doc_id, Dokument.referenz_typ == "supplier", Dokument.referenz_id == supplier_id)
         .first()
     )
     if not doc:

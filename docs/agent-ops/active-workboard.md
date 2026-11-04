@@ -20243,3 +20243,139 @@ Nummer unveraenderlich, je Mandant eindeutig. Migration partner_kontonummern_202
 Protokoll und bezieht sepa_mandates ueber partner_id auf den Partner. Debitor-/Kreditormaske und -liste zeigen
 das Konto, Kunden-/Lieferantennummer daneben.
 Offen: OP-Zuordnung ueber Kontonummer, sobald Buchungen sie schreiben; Stufen 5-6.
+
+## CI-DAUERROT-20261102 — in Arbeit, Claude
+
+Dauerrote Pruefungen auf main beheben (PR #99, Nutzerauftrag "auch fremde Fehler beheben").
+Welle 1: letzte untypisierte Route (sales_offers import-csv), pnpm-Override brace-expansion nur <5
+(ESLint-Glob brach mit minimatch@11 ab), Docs-Abhaengigkeiten fuer generate_agent_handbuch.
+Welle 2: TEST_DATABASE_URL im Job Test & Lint; Mandantenkontext auch ohne main:app-Middleware
+(require_bearer_token, MCP /tools/call, Testgrenze) - Positionen holen tenant_id per
+rls_current_tenant(); Fixtures schreiben tenant_id vom Elternbeleg; Stammsaetze fuer
+Rechnungswege (tests/stammsaetze.py). Vertraege an Runtime46 angeglichen (Rollen, Worklist-
+Familie, Meridian-Lookup, Belegmasken-Release 1.3.0, Studio-Katalog).
+Offen: Rest von Test & Lint, Smoke-Tests.
+
+## STUDIO-UMBAU-RUNTIME46 — offen (Nutzerentscheidung 02.11.2026: Weg 2)
+
+Der Codex-Stand ca50c46f7 ("runtime46") brachte Seiten an der Studio-Regel vorbei. Sie stehen seit
+CI-DAUERROT-20261102 als dokumentierte Altlast in config/mask_studio_ratchet.json und werden in einem
+eigenen Auftrag zu Studio-Masken umgebaut (danach Ratsche wieder senken).
+Handgebaute Routen (20): admin/control-center, admin/webhooks, annahme/abrechnung, annahme/lkw-registrierung,
+annahme/qualitaets-check, annahme/warteschlange, einkauf/lieferschein-erfassung, finance/bank-abgleich,
+finance/dunning, finance/mahnlauf, finance/mahnwesen, lager/materialfluss, mahnwesen/mahnlauf,
+studio/workspace-composition-preview, verkauf/kunde/:id, verkauf/kunde/neu, verkauf/kunden-stamm/:id,
+waage, waage/neu, waage/wiegungen.
+Altmuster-Routen (5): admin/control-center/agent-ops, admin/control-center/superglue, admin/screen-studio,
+annahme/rohware, einkauf/bestellungen/neu.
+Nicht deklarierte Maskenaktionen: siehe Diff von config/mask_studio_ratchet.json in PR #99
+(u.a. admin/control-center, admin/webhooks-liste, artikel/zoll-intrastat, finance/bank-abgleich,
+Positionsaktionen der Rechnungserfassungen).
+Dazu (Feldvertrag, tests/test_mask_field_contracts.py PLATZHALTER_ALTLAST/UNGETYPT_ALTLAST): 17 generierte
+batch15-Platzhaltermasken mit id/name/status/updated_at (sieben Stammdatenmasken lesen faelschlich
+/stammdaten/betriebsstaetten, u.a. Hausbanken, Mengeneinheiten) und 8 ungetypte Kopfquellen.
+Weitere nur schrumpfende Altlast-Dateien derselben Ursache (02.11.2026, PR #99):
+config/screen_list_routes.generated.json "ohne_route" (223 Masken, die keine Seite rendert),
+config/mask_endpoint_altlast.json (42 Quellen ohne Backend-Route, u.a. 38 FiBu-Platzhalter auf
+/fibu/anlagen bzw. /finance/abstimmung/nebenbuch; Betriebsprofile heissen /crm/farm-profiles,
+Kostenstellen /kostenrechnung/kostenstellen), config/meridian_beleg_altlast.json (143 Platzhalter-
+Identitaeten, 9 Bezugsfelder fuer rohe IDs in crm/campaign, crm/consent, crm/gdpr-request,
+fibu/op-skonto-auszifferung, lager/charge, lager/permanente-inventur, silo/silo - brauchen Lookups).
+Befund 02.11.2026 (Smoke-Tests): 127 Frontend-Seiten rendern seit deeb707b4 eine Native-Seite mit einer
+screenId, die das Backend nicht kennt (u.a. crm/campaigns, crm/segments, crm/leads, crm/dubletten,
+crm/kunden-zuordnung, lager/bestandsuebersicht, finance, hilfe, portal, errors/NotFound) und zeigen nur
+"Workspace konnte nicht geladen werden". Teilweise gibt es Gegenstuecke (crm/dubletten-pruefung,
+crm/leads-liste). Nutzerentscheidung 02.11.2026 Weg 1: 14 Seiten auf ihre vorhandene Maske umgehaengt
+(Kampagnen, Kampagnenvorlagen, Einwilligungen, DSGVO-Anfragen, Leads, Segmente, Dubletten, Freigaben,
+Kulturpflanzen, fuenf Compliance-Listen); 113 als Altlast in config/frontend_seiten_ohne_maske.json,
+Waechter tests/test_frontend_seiten_haben_ihre_maske.py. Echte Studio-Masken dafuer: Weg 3 im Studio-Umbau.
+Vitest (02.11.2026, Nutzerentscheidung Weg 2): 187 Faelle in 51 Testdateien pruefen Quelltext oder Bedienung der
+frueheren handgebauten Seiten (useTouchDevice, min-h-touch, variant="register", Flow-Spine-Inhalte, alte
+Rechnungserfassung). Sie laufen als it.fails mit der Marke "Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46)";
+Ratsche tests/test_vitest_runtime46_altlast.py (hoechstens 187, nur senken). Echte Fehler aus derselben Welle
+sind behoben: doppelte Dateivertragspruefung (accept-Liste) und doppelter Druckzweig ohne Fehlermeldung durch
+die Konfliktaufloesung c0bc8e99b/ca50c46f7; neun handgebaute Capture-Seiten blendeten alle rechtegebundenen
+Aktionen aus (Rechte jetzt aus useScreenPermissions), Postfaecher/Steuerschluessel mit fehlenden Rechten.
+Masken-Cluster (Branch feat/studio-masken-cluster-20261102): Batch 0/0b Feldklassen (rechnende Felder, Menge,
+Summenzeile, Formate, Periode, Wertetypen aus config/wertetypen.json, Geschaeftstag), MCP-Studio-Authoring
+(studio.catalog.read/definition.validate/draft.save/draft.submit_review, kein Agenten-Publish).
+Batch 1 FiBu/Finance (von 188 Platzhaltern): 11 tote Doppelungen entfernt, 17 Seiten auf ihre echte Maske
+umgehaengt, 8 Listen aus typisierten Wegen neu (app/core/screen_definitions_cluster_fibu.py), 404-Seite als
+Studio-Einstieg (errors/NotFound). Offen in fibu/finance: atlas, bilanz, guv, monatswerte, sachkonto,
+sicherheiten, buchungsimport, invoices-list, umsatz (kein passender typisierter Weg bzw. verschachtelter Bericht).
+Batch 2 Lager (03.11.2026): 6 Seiten umgehaengt (Lagerbewegungen, Inventur, Partiestamm, Silo-Uebersicht,
+Silo mobil, Silo-Kapazitaeten), 1 Doppelung entfernt, 3 Listen neu (Bestandsuebersicht - Seite hatte keine Maske -,
+Bestandsbewertung, Rueckverfolgbarkeit der Wiegescheine; screen_definitions_cluster_lager.py). Mengen nach
+app/core/agrar_units.py: Anzeige in dt (displayUnit), Summen rechnen Masse/Volumen um, Zaehleinheiten nie.
+Befund: /lager/ruestliste liest domain_inventory.ruestlisten, die weder Migration noch Modell anlegt -
+Kommissionierung bleibt Platzhalter bis zu einer eigenen Migration (mit RLS). Offen in lager: einlagerung,
+auslagerung, bestandskorrektur, lagerplaetze, gs1-scanner, terminal, epcis, inventory-reports,
+materialfluss-visualisierung.
+Ruestlisten-Tabelle per Migration ruestlisten_tabelle_20261103 (RLS), Weg repariert; Kommissionierung Studio-Liste.
+Batch 3 Futtermittel (03.11.2026): 7 Seiten umgehaengt (Misch-/Einzelfuttermittel-Listen, Stamm-Seiten auf
+Anlage- bzw. Objektmaske, Grundfutteranalysen), 2 Listen neu (Einzelfuttermittel, Mischfutter-Produktion;
+Inventarprofil, Mengen in dt, Preis je dt statt je t - Feldklasse pricePer/displayPricePer). Alle Cluster in
+app/core/screen_definitions_clusters.py. Offen: beratung, bestellung, statistik, integrationsmonitor,
+rations-import/-zugang, rationsvergleich, wareneingang, produktionsdokumente, rezepte/editor.
+Batch 4 Verkauf/Einkauf (03.11.2026): 7 Seiten umgehaengt (Kundenliste -> crm/kunden-liste, Auftraege x2,
+Ausgangsrechnungen, Wareneingang -> Einkaufs-Lieferscheinerfassung, RFQ-Gebote -> Angebotsvergleich,
+Eingangsrechnungs-Erfassung -> InvoiceCapturePage), 3 Doppelungen entfernt. Belegerfassungen (Angebot,
+Lieferschein, Kalkulation) warten auf den Rollout der Belegfamilie (beleg/* nur im Sichtpruefungsmandanten).
+Vorbestehend rot auf main (reihenfolgeabhaengig): einkauf/angebote-liste-uix.test.tsx, lieferanten-liste-uix.test.tsx.
+Batch 5 Fuhrpark/Personal/Service/Strecke/Reports (03.11.2026): 14 Seiten umgehaengt (u.a. Fuhrpark-Menue ->
+fuhrpark/uebersicht, Fahrzeug-Stamm Neuanlage+Detail, Stundenzettel, Zeiterfassung, Service-Anfragen, vorlaeufige
+Streckengeschaefte, Reports Umsatz/Lagerbestand), 2 Einstiegs-Cockpits (Strecken-Menue, NaWaRo-Uebersicht),
+16 Platzhalter entfernt. Offen: organigramm, hrm-operations-gates, service abschluss/rueckmeldung,
+speditionen-fracht-preise, reports/ReportsDashboardCharts, nawaro-uebersicht-drucken; nawaro/* Seiten ohne Maske.
+Doku-Drift (03.11.2026, Nutzerauftrag): 266 Seiten ohne Route/Navigation. 198 Seiten mit echter Studio-Maske
+haben eine Route bekommen (route-aliases.json; Masken ohne Route 204 -> 65). 65 handgebaute Altfassungen
+(61 x *-legacy, crm/detail, Home, ...) stehen in config/doc_drift_page_altlast.json (nur schrumpfen) und werden
+per Paritaetspruefung gegen ihre Studio-Maske abgebaut (Nutzerentscheidung: Altlast + Paritaetspruefung);
+nicht loeschen ohne Pruefung (Audit doc-drift-page-orphan-audit-20261031).
+
+Batch 6 Listen auf ihrem eigenen Leseweg (03.11.2026, Commit 3c8eaf841): sechs batch15-Platzhalter, die schon
+den richtigen Weg lasen, zeigen die Felder ihres Response-Models statt id/name/status/updated_at - Etikettendruck,
+Genossenschaftsmitglieder (ohne IBAN, datensparsam), Kontraktklassen, Frachtbriefe, Schadensmeldungen (mit
+Meldefrist), Agentenlaeufe (app/core/screen_definitions_cluster_eigene_wege.py). Gates A/B/C/E gruen.
+Batch 7 Portal (03.11.2026): neun Portal-Platzhalter lasen fast alle /portal/anfragen (Bestellungen, Rechnungen,
+Feldbuch, Shop zeigten Anfragen). Jede Liste liest jetzt ihren Weg aus portal_kundenwege.py
+(app/core/screen_definitions_cluster_portal.py); die Wege antworten typisiert statt CompatBridgeOut
+(app/api/v1/schemas/portal_listen_schemas.py), damit der Feldvertrag sie prueft. Naehrstoffliste ohne die Spalte
+"bewertung" (170 kg N je Lieferung statt je ha und Betrieb - falsche DueV-Aussage), Titel Naehrstoffzufuhr.
+Befunde fuer eigene Auftraege (nicht in Batch 7): /foerderung/antraege, /marketing/kampagnen und
+/qualitaet/labor-auftraege legen bei jedem GET per _seed(db) Demodaten an und filtern keinen Mandanten;
+/preise/historie errechnet einen Preisverlauf (aktuell*(1-i*0,01)), /preise/konditionen fuellt "Standardkunde"/
+Basispreis 100 auf; /strecke/speditionen/frachttarife, /vertrag/rahmenvertraege und /tankstelle/bestand ohne
+Mandantenbezug. Darauf keine Studio-Listen, bis die Wege echt sind.
+## RLS-REST-AUF-MAIN-20261103 — in Arbeit, Claude
+
+Nutzerauftrag 03.11.2026: der nicht gemergte RLS-Rest vom 27./28.10. (PR #82, #84, #85, #88 und Vorgaenger, 17 Commits,
+177 Commits hinter main) auf den aktuellen main; Waage-Code und -Tests dabei homogen uebernehmen. Branch
+claude/rls-rest-auf-main-20261103 (Worktree), zehn inhaltliche Commits per Cherry-pick, Claim-Commits entfallen.
+Konflikte: UStVA (vollstaendige Ledger-Berechnung statt Zwischenstand), Kontonummern am Partner (Stufe 3b) plus Urheber
+aus dem Token, Debitor-Anlage bleibt im Kundenstamm (PR #93), OP-Saldo ueber OP_SALDO_SQL, convert-lead in main-Fassung.
+Waage: waage_tenant_20261030 (Codex) hatte ops_waagen nullable gebunden; jetzt WaageRepository mit Mandant im
+Konstruktor, ops_waagen NOT NULL, ops_wiegungen mit Mandant aus der Waage und Verbundschluessel, Policies je Befehl
+(waagen_wiegungen_mandant_20261103); Alt-Wiegungswege bleiben 410. Alembic: vat_return_bearbeiter_20261027 auf
+rahmenauftrag_afa_tabellen_20261102 umgehaengt, ein Kopf. Pruefung auf frischer DB ueber CI (keine eigene lokale DB,
+ungemergte Migrationen nicht auf valeo_probe). Nach dem Merge: alte PRs #82/#84/#85/#88 schliessen.
+
+## BATCH8-SCHEINWEGE-20261103 — in Arbeit, Claude
+
+Nutzerauftrag 03.11.2026 (nach Batch 7) und Nutzerentscheidung 04.11.2026 ("alte Tabellen mit Seeds gehoeren der
+Vergangenheit"; Seed-Tabellen ohne Studio-Maske oder mit Ersatz entfernen, ersetzter Altbestand ohne Nutzer loeschbar;
+Kampagnen fuehrt domain_crm.crm_campaigns). Branch claude/batch8-scheinwege-20261103 auf PR #101, PR #102.
+- Marketing: /marketing/* entfernt (Weg, Schema, Modell), ops_marketing_kampagnen per Migration geloescht (nur Seed;
+  andere Zeilen braechen ab). /marketing/kampagnen zeigt die CRM-Studio-Liste crm/kampagnen-liste; Masken
+  marketing/kampagnen, marketing/kampagnen-liste und die unerreichbaren Cockpits crm/events-messen,
+  crm/kampagne-detail, crm/kampagne-erstellen (Doppel zu crm/campaign) samt Seiten entfernt; Navigation
+  marketing/kampagne/neu und /:id auf die CRM-Kampagnenmaske.
+- Foerderung und Labor (Studio-Masken vorhanden): kein _seed, Mandant aus der Anmeldung, RLS je Befehl
+  (scheinwege_mandant_20261103). Seed-Zeilen und Testreste (TEST-CHARGE-* bei Test-Labor samt Befunden) per exakter
+  Signatur geloescht; uebrige Altzeilen an den Default-Mandanten (28.10.). Aendern/Loeschen nahmen Text-Kennungen als
+  Zahl (immer 422); Antragsnummer je Mandant eindeutig; Laborauftrag nur zu eigener Charge; Befund speichert
+  Analysewerte, Grenzwerte, Bemerkung; Antworten typisiert, annahme/labor und qualitaet/labor-detail repariert.
+Offen (Folgeauftrag): die uebrigen neun mandantenlosen domain_ops-Tabellen mit Live-Zeilen nach derselben Regel
+pruefen (Compliance-Register mit Seed in compliance.py, ops_disposition, ops_zertifikate); preise/historie errechnet
+Verlaeufe, preise/konditionen fuellt Standardwerte auf; Marketing-/Communication-Dienste (services/crm-*) sollen
+CRM-Kampagnen konsumieren statt eigene zu fuehren.

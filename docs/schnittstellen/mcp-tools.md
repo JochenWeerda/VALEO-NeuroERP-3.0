@@ -12,7 +12,7 @@ version: 3.0.0
 
 > Automatisch generiert aus `config/mcp_erp_tools.yaml` via `python scripts/generate_mcp_tool_reference.py`. **Nicht manuell bearbeiten.**
 
-Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 69 Tools in 22 Domaenen.
+Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 73 Tools in 22 Domaenen.
 
 ## Uebersicht
 
@@ -82,6 +82,10 @@ Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 69 Tools in 22 Domaenen.
 | `sales.invoice.post` | sales | `sales:write` | ja | hoch | ja |
 | `sales.invoice.propose` | sales | `sales:write` | nein | hoch | ja |
 | `sales.order.status` | sales | `sales:read` | ja | niedrig | nein |
+| `studio.catalog.read` | studio | `masks:read` | ja | niedrig | nein |
+| `studio.definition.validate` | studio | `masks:read` | ja | niedrig | nein |
+| `studio.draft.save` | studio | `belege:write` | ja | niedrig | nein |
+| `studio.draft.submit_review` | studio | `belege:write` | ja | niedrig | nein |
 | `studio.migration.plan` | studio | `belege:write` | ja | niedrig | nein |
 | `wms.cell.status` | inventory | `inventory:read` | ja | niedrig | nein |
 | `wms.lot.trace` | inventory | `inventory:read` | ja | niedrig | nein |
@@ -5297,6 +5301,165 @@ Gibt Lifecycle-Status, offene Positionen, naechsten Schritt und kanonische Maske
 ```
 
 ## Domaene: studio
+
+### `studio.catalog.read` — Studio-Katalog lesen
+
+Floorplans, Feldtypen, Formate, Datenquellen und Aktionen, aus denen eine Studio-Maske bestehen darf. Grundlage, bevor ein Agent eine ScreenDefinition entwirft. Nur Lesen.
+
+- **Scope:** `masks:read`
+- **Idempotent:** ja
+- **Risikoklasse:** niedrig
+- **Audit:** read
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {}
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object"
+}
+```
+
+### `studio.definition.validate` — Studio-Maske pruefen
+
+Prueft eine ScreenDefinition gegen Katalog und Studio-Gates (Feldvertrag, Meridian-Layout, Rechte, rechnende Felder, Formate) und liefert Verletzungen und Reifegrad. Speichert nichts.
+
+- **Scope:** `masks:read`
+- **Idempotent:** ja
+- **Risikoklasse:** niedrig
+- **Audit:** read
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "definition": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "definition"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "violations": {
+      "type": "array"
+    },
+    "readiness": {
+      "type": "object"
+    }
+  }
+}
+```
+
+### `studio.draft.save` — Studio-Entwurf speichern
+
+Legt einen Studio-Entwurf an oder schreibt ihn mit draft_id und expected_revision fort. Nur Entwurf: dieselben Gates wie im Studio, keine Freigabe. Ohne mode=execute wird nur geprueft.
+
+- **Scope:** `belege:write`
+- **Idempotent:** ja
+- **Risikoklasse:** niedrig
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "definition": {
+      "type": "object"
+    },
+    "draft_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "expected_revision": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  },
+  "required": [
+    "definition"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object"
+}
+```
+
+### `studio.draft.submit_review` — Studio-Entwurf zur Pruefung geben
+
+Gibt einen Entwurf in die Vier-Augen-Pruefung. Freigeben und Zurueckziehen bleiben Menschen vorbehalten; dafuer gibt es kein Agentenwerkzeug.
+
+- **Scope:** `belege:write`
+- **Idempotent:** ja
+- **Risikoklasse:** niedrig
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "draft_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "expected_revision": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  },
+  "required": [
+    "draft_id",
+    "expected_revision"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object"
+}
+```
 
 ### `studio.migration.plan` — Studio-Aenderungsplan festhalten
 

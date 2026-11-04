@@ -231,6 +231,9 @@ def test_foreign_customer_is_blocked_by_command_and_database_fk(canonical):
             db.execute(text("GRANT USAGE ON SCHEMA domain_crm TO valeo_app"))
             db.execute(text("GRANT INSERT ON domain_crm.activities TO valeo_app"))
             db.execute(text("SET LOCAL ROLE valeo_app"))
+            # Eigener Mandant im Kontext: RLS (seit rahmenauftrag_afa_tabellen_20261102) laesst die Zeile zu,
+            # gesperrt werden muss sie vom Fremdschluessel.
+            db.execute(text("SELECT set_config('app.tenant_id', :tenant, true)"), {"tenant": tenant})
             db.execute(text("INSERT INTO domain_crm.activities(id,tenant_id,customer_id,type,title,customer,contact_person,status,assigned_to) VALUES (:id,:tenant,:customer,'call','Synthetic cross reference','','','planned','')"),
                 {"id":str(uuid4()),"tenant":tenant,"customer":customer})
     assert getattr(error.value.orig,"pgcode",None)=="23503"
@@ -263,6 +266,48 @@ def test_opportunity_rest_mask_and_mcp_replay_one_canonical_command(canonical,mo
     assert db.execute(text("SELECT count(*) FROM public.outbox_events WHERE tenant_id=:t"),{"t":tenant}).scalar()==1
     denied=client.post("/api/v1/crm/opportunities/"+foreign_opportunity+"/activities",headers={**headers(canonical),"Idempotency-Key":str(uuid4())},params={"subject":"Foreign"})
     assert denied.status_code==404,denied.text
+
+def test_customer_mask_action_lands_in_history_not_in_tasks(canonical):
+    """Aus test_crm360_kunde_wird_gefunden uebernommen (Runtime46): die Kundenmaske schreibt kanonisch."""
+    from app.infrastructure.models import Customer
+    from app.api.v1.endpoints import crm_360
+    client,db,_,tenant,_=canonical
+    client.app.include_router(crm_360.router,prefix="/api/v1/crm/customers")
+    customer=str(uuid4())
+    db.add(Customer(id=customer,tenant_id=tenant,customer_number="SYNTH-"+uuid4().hex[:12],company_name="Synthetic own customer",is_active=True))
+    db.flush();db.commit()
+    made=client.post("/api/v1/crm/customers/"+customer+"/actions/create_activity",headers=headers(canonical),
+        json={"betreff":"SYNTH Hofbesuch","typ":"Besuch","_mode":"execute","_auditReason":"Termin","_idempotencyKey":str(uuid4())})
+    assert made.status_code==200 and made.json()["success"] is True,made.text
+    history=client.get("/api/v1/crm/customers/"+customer+"/tabs/historie",headers=headers(canonical))
+    assert history.status_code==200,history.text
+    assert any(row.get("subject")=="SYNTH Hofbesuch" for row in history.json()["items"])
+    tasks=client.get("/api/v1/crm/customers/"+customer+"/tabs/aufgaben",headers=headers(canonical))
+    assert tasks.status_code==200 and all(row.get("titel")!="SYNTH Hofbesuch" for row in tasks.json()["items"])
+
+
+def test_opportunity_tab_shows_own_activities_and_subject_is_required(canonical,monkeypatch):
+    """Aus test_opportunity_mandant uebernommen (Runtime46): Reiter mandantengenau, ohne Betreff nichts."""
+    from app.services import crm_opportunity_reference
+    from app.api.v1.endpoints import mask_rollout_summaries
+    client,db,_,tenant,foreign=canonical
+    client.app.include_router(mask_rollout_summaries.router,prefix="/api/v1")
+    own=str(uuid4())
+    async def source(oid):
+        return {"id":oid,"tenant_id":tenant,"customer_name":"Synthetic linked customer"}
+    monkeypatch.setattr(crm_opportunity_reference,"get_opportunity",source)
+    made=client.post("/api/v1/crm/opportunities/"+own+"/activities",headers={**headers(canonical),"Idempotency-Key":str(uuid4())},
+        params={"subject":"SYNTH Preis besprochen","activity_type":"CALL"})
+    assert made.status_code==201,made.text
+    empty=client.post("/api/v1/crm/opportunities/"+own+"/actions/create_activity",headers=headers(canonical),
+        json={"_mode":"execute","activity_type":"call","_idempotencyKey":str(uuid4())})
+    assert empty.status_code==422 or empty.json().get("success") is False,empty.text
+    tab="/api/v1/mask-rollouts/crm/opportunity/"+own+"/tabs/aktivitaeten"
+    mine=client.get(tab,headers=headers(canonical))
+    assert mine.status_code==200 and "SYNTH Preis besprochen" in mine.text,mine.text
+    assert "SYNTH Preis besprochen" not in client.get(tab,headers=headers(canonical,tenant=foreign)).text
+    assert db.execute(text("SELECT count(*) FROM domain_crm.activities WHERE tenant_id=:t AND opportunity_id=:o"),
+        {"t":tenant,"o":own}).scalar()==1
 
 
 @pytest.mark.parametrize("ci,database,declared,allowed", [

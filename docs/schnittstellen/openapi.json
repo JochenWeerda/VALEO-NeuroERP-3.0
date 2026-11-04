@@ -12126,11 +12126,6 @@
             "title": "Status",
             "type": "string"
           },
-          "tenant_id": {
-            "default": "default",
-            "title": "Tenant Id",
-            "type": "string"
-          },
           "typ": {
             "minLength": 2,
             "title": "Typ",
@@ -18611,11 +18606,6 @@
           "status": {
             "default": "offen",
             "title": "Status",
-            "type": "string"
-          },
-          "tenant_id": {
-            "default": "default",
-            "title": "Tenant Id",
             "type": "string"
           },
           "titel": {
@@ -33464,6 +33454,7 @@
         "type": "object"
       },
       "ChannelApprovalDecisionRequest": {
+        "description": "Entscheider ist der Angemeldete; ``approver_role`` muss eine seiner geprueften Rollen sein.",
         "properties": {
           "approver_role": {
             "title": "Approver Role",
@@ -33476,15 +33467,10 @@
           "decision": {
             "title": "Decision",
             "type": "string"
-          },
-          "entschieden_von": {
-            "title": "Entschieden Von",
-            "type": "string"
           }
         },
         "required": [
           "decision",
-          "entschieden_von",
           "approver_role",
           "begruendung"
         ],
@@ -33516,17 +33502,6 @@
           "rolle": {
             "title": "Rolle",
             "type": "string"
-          },
-          "tenant_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Tenant Id"
           }
         },
         "required": [
@@ -33611,14 +33586,9 @@
           "process_definition_key": {
             "title": "Process Definition Key",
             "type": "string"
-          },
-          "tenant_id": {
-            "title": "Tenant Id",
-            "type": "string"
           }
         },
         "required": [
-          "tenant_id",
           "process_definition_key",
           "command_name",
           "aggregate_type",
@@ -60459,11 +60429,6 @@
             "title": "Payload Raw",
             "type": "string"
           },
-          "tenant_id": {
-            "default": "default",
-            "title": "Tenant Id",
-            "type": "string"
-          },
           "typ": {
             "title": "Typ",
             "type": "string"
@@ -60495,16 +60460,11 @@
           "name": {
             "title": "Name",
             "type": "string"
-          },
-          "tenant_id": {
-            "title": "Tenant Id",
-            "type": "string"
           }
         },
         "required": [
           "gln",
           "name",
-          "tenant_id",
           "aktive_nachrichtentypen"
         ],
         "title": "EdiPartnerCreateRequest",
@@ -65365,11 +65325,6 @@
             "default": "geplant",
             "title": "Status",
             "type": "string"
-          },
-          "tenant_id": {
-            "default": "default",
-            "title": "Tenant Id",
-            "type": "string"
           }
         },
         "required": [
@@ -66697,7 +66652,7 @@
         "type": "object"
       },
       "ExportListFilter": {
-        "description": "Optional filter for export (e.g. date_from, tenant_id).",
+        "description": "Optional filter for export (e.g. date_from).\n\n``tenant_id`` darf nur den eigenen Mandanten nennen; bis 28.10.2026 waehlte er den Mandanten\ndes Exports (Debitoren, Kreditoren, Nutzer, Prueflog eines fremden Mandanten).",
         "properties": {
           "action": {
             "anyOf": [
@@ -71338,6 +71293,17 @@
       "FinanceDebitorOut": {
         "additionalProperties": true,
         "properties": {
+          "account_holder": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Account Holder"
+          },
           "bank": {
             "anyOf": [
               {
@@ -71348,6 +71314,17 @@
               }
             ],
             "title": "Bank"
+          },
+          "bank_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bank Name"
           },
           "bic": {
             "anyOf": [
@@ -71360,6 +71337,61 @@
             ],
             "title": "Bic"
           },
+          "city": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "City"
+          },
+          "company_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Company Name"
+          },
+          "contact_person": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Person"
+          },
+          "country": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country"
+          },
+          "credit_limit": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Credit Limit"
+          },
           "debitoren_nr": {
             "anyOf": [
               {
@@ -71370,6 +71402,50 @@
               }
             ],
             "title": "Debitoren Nr"
+          },
+          "debtor_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Debtor Number"
+          },
+          "discount_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Discount Days"
+          },
+          "discount_percent": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Discount Percent"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
           },
           "geschaeftspartner_nr": {
             "anyOf": [
@@ -71403,6 +71479,17 @@
               }
             ],
             "title": "Id"
+          },
+          "is_active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Active"
           },
           "kontoinhaber": {
             "anyOf": [
@@ -71448,6 +71535,39 @@
             ],
             "title": "Name"
           },
+          "payment_terms_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Payment Terms Days"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "postal_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Postal Code"
+          },
           "skonto_prozent": {
             "anyOf": [
               {
@@ -71492,6 +71612,28 @@
             ],
             "title": "Steuernummer"
           },
+          "street": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Street"
+          },
+          "tax_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tax Number"
+          },
           "ust_id": {
             "anyOf": [
               {
@@ -71502,6 +71644,17 @@
               }
             ],
             "title": "Ust Id"
+          },
+          "vat_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vat Id"
           },
           "zahlungsbedingungen": {
             "anyOf": [
@@ -73604,6 +73757,7 @@
         "type": "object"
       },
       "FoerderAntragCreate": {
+        "additionalProperties": false,
         "properties": {
           "antragsdatum": {
             "format": "date",
@@ -73612,19 +73766,25 @@
           },
           "betrag": {
             "default": 0,
+            "minimum": 0.0,
             "title": "Betrag",
             "type": "number"
           },
           "flaeche": {
             "default": 0,
+            "minimum": 0.0,
             "title": "Flaeche",
             "type": "number"
           },
           "nummer": {
+            "maxLength": 80,
+            "minLength": 1,
             "title": "Nummer",
             "type": "string"
           },
           "programm": {
+            "maxLength": 120,
+            "minLength": 1,
             "title": "Programm",
             "type": "string"
           },
@@ -73642,7 +73802,89 @@
         "title": "FoerderAntragCreate",
         "type": "object"
       },
+      "FoerderAntragListOut": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FoerderAntragOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "sum_betrag": {
+            "title": "Sum Betrag",
+            "type": "number"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "sum_betrag"
+        ],
+        "title": "FoerderAntragListOut",
+        "type": "object"
+      },
+      "FoerderAntragOut": {
+        "properties": {
+          "antragsdatum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Antragsdatum"
+          },
+          "betrag": {
+            "default": 0,
+            "title": "Betrag",
+            "type": "number"
+          },
+          "flaeche": {
+            "default": 0,
+            "title": "Flaeche",
+            "type": "number"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "nummer": {
+            "title": "Nummer",
+            "type": "string"
+          },
+          "programm": {
+            "title": "Programm",
+            "type": "string"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "required": [
+          "id",
+          "nummer",
+          "programm"
+        ],
+        "title": "FoerderAntragOut",
+        "type": "object"
+      },
       "FoerderAntragUpdate": {
+        "additionalProperties": false,
         "properties": {
           "antragsdatum": {
             "anyOf": [
@@ -73659,6 +73901,7 @@
           "betrag": {
             "anyOf": [
               {
+                "minimum": 0.0,
                 "type": "number"
               },
               {
@@ -73670,6 +73913,7 @@
           "flaeche": {
             "anyOf": [
               {
+                "minimum": 0.0,
                 "type": "number"
               },
               {
@@ -73681,6 +73925,8 @@
           "programm": {
             "anyOf": [
               {
+                "maxLength": 120,
+                "minLength": 1,
                 "type": "string"
               },
               {
@@ -73704,11 +73950,32 @@
         "title": "FoerderAntragUpdate",
         "type": "object"
       },
-      "FoerderungOut": {
-        "additionalProperties": true,
-        "description": "Response schema for foerderung endpoints.",
-        "properties": {},
-        "title": "FoerderungOut",
+      "FoerderungStatsOut": {
+        "properties": {
+          "betrag_bewilligt": {
+            "title": "Betrag Bewilligt",
+            "type": "number"
+          },
+          "bewilligt": {
+            "title": "Bewilligt",
+            "type": "integer"
+          },
+          "eingereicht": {
+            "title": "Eingereicht",
+            "type": "integer"
+          },
+          "entwurf": {
+            "title": "Entwurf",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "bewilligt",
+          "eingereicht",
+          "entwurf",
+          "betrag_bewilligt"
+        ],
+        "title": "FoerderungStatsOut",
         "type": "object"
       },
       "FolgeartikelCreate": {
@@ -91678,17 +91945,6 @@
           "target_id": {
             "title": "Target Id",
             "type": "string"
-          },
-          "tenant_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Tenant Id"
           }
         },
         "required": [
@@ -98021,6 +98277,128 @@
         "title": "LaborAuftragCreate",
         "type": "object"
       },
+      "LaborAuftragListOut": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/LaborAuftragOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "LaborAuftragListOut",
+        "type": "object"
+      },
+      "LaborAuftragOut": {
+        "properties": {
+          "analysen": {
+            "title": "Analysen",
+            "type": "integer"
+          },
+          "analysewerte": {
+            "additionalProperties": true,
+            "title": "Analysewerte",
+            "type": "object"
+          },
+          "auftragsdatum": {
+            "title": "Auftragsdatum",
+            "type": "string"
+          },
+          "befund": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LaborBefundKurzOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "bemerkung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bemerkung"
+          },
+          "charge": {
+            "title": "Charge",
+            "type": "string"
+          },
+          "chargenId": {
+            "title": "Chargenid",
+            "type": "string"
+          },
+          "chargen_id": {
+            "title": "Chargen Id",
+            "type": "string"
+          },
+          "folgeaktion": {
+            "title": "Folgeaktion",
+            "type": "string"
+          },
+          "grenzwerte": {
+            "additionalProperties": true,
+            "title": "Grenzwerte",
+            "type": "object"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "labor": {
+            "title": "Labor",
+            "type": "string"
+          },
+          "qs_entscheidung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Qs Entscheidung"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "required": [
+          "id",
+          "chargenId",
+          "chargen_id",
+          "charge",
+          "labor",
+          "analysen",
+          "auftragsdatum",
+          "folgeaktion"
+        ],
+        "title": "LaborAuftragOut",
+        "type": "object"
+      },
       "LaborBefundCreate": {
         "properties": {
           "analysewerte": {
@@ -98055,11 +98433,148 @@
         "title": "LaborBefundCreate",
         "type": "object"
       },
-      "LaborOut": {
-        "additionalProperties": true,
-        "description": "Response schema for labor endpoints.",
-        "properties": {},
-        "title": "LaborOut",
+      "LaborBefundKurzOut": {
+        "properties": {
+          "datum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datum"
+          },
+          "entscheidung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entscheidung"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "labor": {
+            "title": "Labor",
+            "type": "string"
+          },
+          "probennummer": {
+            "title": "Probennummer",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "probennummer",
+          "labor"
+        ],
+        "title": "LaborBefundKurzOut",
+        "type": "object"
+      },
+      "LaborProbeListOut": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/LaborProbeOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "LaborProbeListOut",
+        "type": "object"
+      },
+      "LaborProbeOut": {
+        "properties": {
+          "artikel": {
+            "title": "Artikel",
+            "type": "string"
+          },
+          "datum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datum"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "labor": {
+            "title": "Labor",
+            "type": "string"
+          },
+          "probennummer": {
+            "title": "Probennummer",
+            "type": "string"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "typ": {
+            "title": "Typ",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "probennummer",
+          "typ",
+          "artikel",
+          "labor"
+        ],
+        "title": "LaborProbeOut",
+        "type": "object"
+      },
+      "LaborStatsOut": {
+        "properties": {
+          "abgeschlossen": {
+            "title": "Abgeschlossen",
+            "type": "integer"
+          },
+          "ausstehend": {
+            "title": "Ausstehend",
+            "type": "integer"
+          },
+          "in-bearbeitung": {
+            "title": "In-Bearbeitung",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "abgeschlossen",
+          "in-bearbeitung",
+          "ausstehend"
+        ],
+        "title": "LaborStatsOut",
         "type": "object"
       },
       "LagerKontenzuordnungCreate": {
@@ -105313,149 +105828,6 @@
           }
         },
         "title": "MarketingConsent",
-        "type": "object"
-      },
-      "MarketingKampagneCreate": {
-        "properties": {
-          "budget": {
-            "default": 0,
-            "title": "Budget",
-            "type": "number"
-          },
-          "enddatum": {
-            "anyOf": [
-              {
-                "format": "date",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Enddatum"
-          },
-          "name": {
-            "title": "Name",
-            "type": "string"
-          },
-          "startdatum": {
-            "format": "date",
-            "title": "Startdatum",
-            "type": "string"
-          },
-          "status": {
-            "default": "geplant",
-            "title": "Status",
-            "type": "string"
-          },
-          "typ": {
-            "title": "Typ",
-            "type": "string"
-          },
-          "zielgruppe": {
-            "title": "Zielgruppe",
-            "type": "string"
-          }
-        },
-        "required": [
-          "name",
-          "typ",
-          "zielgruppe",
-          "startdatum"
-        ],
-        "title": "MarketingKampagneCreate",
-        "type": "object"
-      },
-      "MarketingKampagneUpdate": {
-        "properties": {
-          "budget": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Budget"
-          },
-          "enddatum": {
-            "anyOf": [
-              {
-                "format": "date",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Enddatum"
-          },
-          "name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Name"
-          },
-          "startdatum": {
-            "anyOf": [
-              {
-                "format": "date",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Startdatum"
-          },
-          "status": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Status"
-          },
-          "typ": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Typ"
-          },
-          "zielgruppe": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Zielgruppe"
-          }
-        },
-        "title": "MarketingKampagneUpdate",
-        "type": "object"
-      },
-      "MarketingOut": {
-        "additionalProperties": true,
-        "description": "Response schema for marketing endpoints.",
-        "properties": {},
-        "title": "MarketingOut",
         "type": "object"
       },
       "MarketingPrefIn": {
@@ -113981,11 +114353,6 @@
             "title": "Domain",
             "type": "string"
           },
-          "tenant_id": {
-            "default": "default",
-            "title": "Tenant Id",
-            "type": "string"
-          },
           "year": {
             "anyOf": [
               {
@@ -114371,11 +114738,6 @@
           },
           "prefix": {
             "title": "Prefix",
-            "type": "string"
-          },
-          "tenant_id": {
-            "default": "default",
-            "title": "Tenant Id",
             "type": "string"
           },
           "width": {
@@ -122983,18 +123345,6 @@
       },
       "PayrollExportCreateIn": {
         "properties": {
-          "createdBy": {
-            "anyOf": [
-              {
-                "maxLength": 120,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Createdby"
-          },
           "periodFrom": {
             "title": "Periodfrom",
             "type": "string"
@@ -124828,6 +125178,222 @@
         "title": "PolicyUpsertResponse",
         "type": "object"
       },
+      "PortalAnfrageZeile": {
+        "properties": {
+          "betreff": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Betreff"
+          },
+          "datum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datum"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "nummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nummer"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "title": "PortalAnfrageZeile",
+        "type": "object"
+      },
+      "PortalBestellungZeile": {
+        "properties": {
+          "artikel": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artikel"
+          },
+          "betrag": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Betrag"
+          },
+          "datum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datum"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "menge": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Menge"
+          },
+          "nummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nummer"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "title": "PortalBestellungZeile",
+        "type": "object"
+      },
+      "PortalDokumentZeile": {
+        "properties": {
+          "datum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datum"
+          },
+          "groesse": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Groesse"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "kategorie": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kategorie"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "typ": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Typ"
+          }
+        },
+        "title": "PortalDokumentZeile",
+        "type": "object"
+      },
       "PortalEmpfehlungAckOut": {
         "properties": {
           "ok": {
@@ -125181,6 +125747,78 @@
         "description": "Typed response schema for PortalFeldbuchOut endpoints (extra fields forwarded).",
         "properties": {},
         "title": "PortalFeldbuchOut",
+        "type": "object"
+      },
+      "PortalFeldbuchZeile": {
+        "properties": {
+          "flaeche": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Flaeche"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "kultur": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kultur"
+          },
+          "letzteMassnahme": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Letztemassnahme"
+          },
+          "naechsteMassnahme": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Naechstemassnahme"
+          },
+          "schlag": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Schlag"
+          }
+        },
+        "title": "PortalFeldbuchZeile",
         "type": "object"
       },
       "PortalInteressentListOut": {
@@ -126705,6 +127343,89 @@
         "title": "PortalMassnahmeUpdate",
         "type": "object"
       },
+      "PortalNaehrstoffZeile": {
+        "properties": {
+          "bewertung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bewertung"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "k_saldo": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "K Saldo"
+          },
+          "kultur": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kultur"
+          },
+          "n_saldo": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "N Saldo"
+          },
+          "p_saldo": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "P Saldo"
+          },
+          "schlag": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Schlag"
+          }
+        },
+        "title": "PortalNaehrstoffZeile",
+        "type": "object"
+      },
       "PortalOut": {
         "additionalProperties": true,
         "properties": {},
@@ -126914,6 +127635,67 @@
           "total"
         ],
         "title": "PortalProductList",
+        "type": "object"
+      },
+      "PortalRechnungZeile": {
+        "properties": {
+          "betrag": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Betrag"
+          },
+          "datum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datum"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "nummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nummer"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "title": "PortalRechnungZeile",
         "type": "object"
       },
       "PortalSchlagCreate": {
@@ -127381,6 +128163,211 @@
         "description": "Response schema for portal shop endpoints.",
         "properties": {},
         "title": "PortalShopOut",
+        "type": "object"
+      },
+      "PortalShopZeile": {
+        "properties": {
+          "einheit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Einheit"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "kategorie": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kategorie"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "preis": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preis"
+          },
+          "verfuegbar": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verfuegbar"
+          }
+        },
+        "title": "PortalShopZeile",
+        "type": "object"
+      },
+      "PortalVertragZeile": {
+        "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "laufzeitBis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Laufzeitbis"
+          },
+          "nummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nummer"
+          },
+          "partner": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Partner"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "typ": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Typ"
+          }
+        },
+        "title": "PortalVertragZeile",
+        "type": "object"
+      },
+      "PortalZertifikatZeile": {
+        "properties": {
+          "art": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Art"
+          },
+          "gueltigBis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gueltigbis"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "nummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nummer"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "title": "PortalZertifikatZeile",
         "type": "object"
       },
       "PosCartLine": {
@@ -133817,11 +134804,6 @@
             "default": "geplant",
             "title": "Status",
             "type": "string"
-          },
-          "tenant_id": {
-            "default": "default",
-            "title": "Tenant Id",
-            "type": "string"
           }
         },
         "required": [
@@ -134299,11 +135281,6 @@
               }
             ],
             "title": "Techniker"
-          },
-          "tenant_id": {
-            "default": "default",
-            "title": "Tenant Id",
-            "type": "string"
           }
         },
         "required": [
@@ -145346,6 +146323,7 @@
           "bewertet_von": {
             "anyOf": [
               {
+                "maxLength": 255,
                 "type": "string"
               },
               {
@@ -145357,6 +146335,8 @@
           "bewertung": {
             "anyOf": [
               {
+                "maximum": 5.0,
+                "minimum": 1.0,
                 "type": "integer"
               },
               {
@@ -145366,6 +146346,7 @@
             "title": "Bewertung"
           },
           "text": {
+            "minLength": 1,
             "title": "Text",
             "type": "string"
           }
@@ -145394,6 +146375,30 @@
         "title": "RuestlisteBearbeiten",
         "type": "object"
       },
+      "RuestlisteBemerkungOut": {
+        "properties": {
+          "bemerkung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bemerkung"
+          },
+          "ruestlisten_nr": {
+            "title": "Ruestlisten Nr",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ruestlisten_nr"
+        ],
+        "title": "RuestlisteBemerkungOut",
+        "type": "object"
+      },
       "RuestlisteCreate": {
         "properties": {
           "auftrag_nr": {
@@ -145413,6 +146418,11 @@
           },
           "prioritaet": {
             "default": "NORMAL",
+            "enum": [
+              "NORMAL",
+              "HOCH",
+              "EILIG"
+            ],
             "title": "Prioritaet",
             "type": "string"
           }
@@ -145521,6 +146531,24 @@
           "menge"
         ],
         "title": "RuestlistePosition",
+        "type": "object"
+      },
+      "RuestlisteStatusOut": {
+        "properties": {
+          "ruestlisten_nr": {
+            "title": "Ruestlisten Nr",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ruestlisten_nr",
+          "status"
+        ],
+        "title": "RuestlisteStatusOut",
         "type": "object"
       },
       "Rule": {
@@ -148437,6 +149465,49 @@
           "_idempotencyKey"
         ],
         "title": "SalesOfferImportCommand",
+        "type": "object"
+      },
+      "SalesOfferImportOut": {
+        "description": "Ergebnis von ``sales_offer_import.import_offers``; ``replayed`` bei wiederholtem Idempotenzschluessel.",
+        "properties": {
+          "auditEntryId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Auditentryid"
+          },
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "offer_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Offer Ids",
+            "type": "array"
+          },
+          "replayed": {
+            "default": false,
+            "title": "Replayed",
+            "type": "boolean"
+          },
+          "success": {
+            "title": "Success",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "success",
+          "count",
+          "offer_ids"
+        ],
+        "title": "SalesOfferImportOut",
         "type": "object"
       },
       "SalesOfferItemInput": {
@@ -152822,12 +153893,15 @@
             "title": "Beschreibung"
           },
           "betreff": {
+            "maxLength": 255,
+            "minLength": 1,
             "title": "Betreff",
             "type": "string"
           },
           "kategorie": {
             "anyOf": [
               {
+                "maxLength": 120,
                 "type": "string"
               },
               {
@@ -152837,12 +153911,15 @@
             "title": "Kategorie"
           },
           "kunde": {
+            "maxLength": 255,
+            "minLength": 1,
             "title": "Kunde",
             "type": "string"
           },
           "nummer": {
             "anyOf": [
               {
+                "maxLength": 40,
                 "type": "string"
               },
               {
@@ -152853,6 +153930,11 @@
           },
           "prioritaet": {
             "default": "normal",
+            "enum": [
+              "hoch",
+              "normal",
+              "niedrig"
+            ],
             "title": "Prioritaet",
             "type": "string"
           }
@@ -152880,6 +153962,8 @@
           "betreff": {
             "anyOf": [
               {
+                "maxLength": 255,
+                "minLength": 1,
                 "type": "string"
               },
               {
@@ -152891,6 +153975,7 @@
           "kategorie": {
             "anyOf": [
               {
+                "maxLength": 120,
                 "type": "string"
               },
               {
@@ -152902,6 +153987,8 @@
           "kunde": {
             "anyOf": [
               {
+                "maxLength": 255,
+                "minLength": 1,
                 "type": "string"
               },
               {
@@ -152913,6 +154000,11 @@
           "prioritaet": {
             "anyOf": [
               {
+                "enum": [
+                  "hoch",
+                  "normal",
+                  "niedrig"
+                ],
                 "type": "string"
               },
               {
@@ -152924,6 +154016,10 @@
           "status": {
             "anyOf": [
               {
+                "enum": [
+                  "neu",
+                  "in-bearbeitung"
+                ],
                 "type": "string"
               },
               {
@@ -169355,25 +170451,11 @@
         "title": "UsersOut",
         "type": "object"
       },
-      "VATReturnApprovalRequest": {
-        "properties": {
-          "approved_by": {
-            "minLength": 1,
-            "title": "Approved By",
-            "type": "string"
-          }
-        },
-        "required": [
-          "approved_by"
-        ],
-        "title": "VATReturnApprovalRequest",
-        "type": "object"
-      },
       "VATReturnCalculationRequest": {
         "description": "Request to calculate VAT return from journal entries",
         "properties": {
           "period": {
-            "description": "Period in YYYY-MM format",
+            "description": "Zeitraum YYYY-MM oder YYYY-Q1 bis YYYY-Q4",
             "title": "Period",
             "type": "string"
           },
@@ -169469,6 +170551,17 @@
             ],
             "title": "Calculated At"
           },
+          "calculated_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Calculated By"
+          },
           "created_at": {
             "format": "date-time",
             "title": "Created At",
@@ -169532,6 +170625,17 @@
             ],
             "title": "Submitted At"
           },
+          "submitted_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Submitted By"
+          },
           "tax_id": {
             "anyOf": [
               {
@@ -169544,8 +170648,15 @@
             "title": "Tax Id"
           },
           "taxpayer_name": {
-            "title": "Taxpayer Name",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Taxpayer Name"
           },
           "total_input_tax": {
             "title": "Total Input Tax",
@@ -169575,6 +170686,17 @@
               }
             ],
             "title": "Validated At"
+          },
+          "validated_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Validated By"
           },
           "vat_id": {
             "anyOf": [
@@ -169616,23 +170738,41 @@
         "type": "object"
       },
       "VATReturnSubmitRequest": {
+        "description": "Festhalten einer im ELSTER-Portal erfolgten Uebermittlung.",
         "properties": {
-          "submitted_by": {
-            "minLength": 1,
-            "title": "Submitted By",
+          "transferticket": {
+            "description": "Transferticket aus ELSTER",
+            "maxLength": 50,
+            "minLength": 5,
+            "title": "Transferticket",
             "type": "string"
           }
         },
         "required": [
-          "submitted_by"
+          "transferticket"
         ],
         "title": "VATReturnSubmitRequest",
         "type": "object"
       },
       "VATReturnVorberechnung": {
-        "description": "Pre-calculation result (not persisted)",
+        "description": "Vorberechnung (nicht gespeichert).",
         "properties": {
+          "klaerungen": {
+            "description": "Was sich nicht eindeutig zuordnen laesst",
+            "items": {
+              "type": "string"
+            },
+            "title": "Klaerungen",
+            "type": "array"
+          },
+          "offene_entwuerfe": {
+            "default": 0,
+            "description": "Ungebuchte Buchungsentwuerfe im Zeitraum",
+            "title": "Offene Entwuerfe",
+            "type": "integer"
+          },
           "positionen": {
+            "description": "Kennzahlen",
             "items": {
               "additionalProperties": true,
               "type": "object"
@@ -169642,25 +170782,25 @@
           },
           "umsatz_netto": {
             "default": 0,
-            "description": "Netto-Umsatz",
+            "description": "Summe der Bemessungsgrundlagen",
             "title": "Umsatz Netto",
             "type": "number"
           },
           "umsatzsteuer": {
             "default": 0,
-            "description": "Umsatzsteuer (19%)",
+            "description": "Umsatzsteuer laut Hauptbuch",
             "title": "Umsatzsteuer",
             "type": "number"
           },
           "vorsteuer": {
             "default": 0,
-            "description": "Abziehbare Vorsteuer",
+            "description": "Abziehbare Vorsteuer laut Hauptbuch",
             "title": "Vorsteuer",
             "type": "number"
           },
           "zahllast": {
             "default": 0,
-            "description": "Verbleibende USt-Zahllast",
+            "description": "Kennzahl 83: positiv Zahlung, negativ Erstattung",
             "title": "Zahllast",
             "type": "number"
           },
@@ -170772,11 +171912,6 @@
             "title": "Status",
             "type": "string"
           },
-          "tenant_id": {
-            "default": "default",
-            "title": "Tenant Id",
-            "type": "string"
-          },
           "zielort": {
             "anyOf": [
               {
@@ -171789,11 +172924,6 @@
               }
             ],
             "title": "Telefon"
-          },
-          "tenant_id": {
-            "default": "default",
-            "title": "Tenant Id",
-            "type": "string"
           },
           "versicherer": {
             "minLength": 2,
@@ -179475,11 +180605,6 @@
               }
             ],
             "title": "Preis Liter"
-          },
-          "tenant_id": {
-            "default": "default",
-            "title": "Tenant Id",
-            "type": "string"
           },
           "zapfsaeule": {
             "anyOf": [
@@ -188124,7 +189249,6 @@
           },
           "tenant_id": {
             "description": "Tenant ID",
-            "format": "uuid",
             "title": "Tenant Id",
             "type": "string"
           },
@@ -190292,32 +191416,10 @@
             ],
             "title": "Contractid"
           },
-          "createdBy": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Createdby"
-          },
           "reason": {
             "minLength": 10,
             "title": "Reason",
             "type": "string"
-          },
-          "tenantId": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Tenantid"
           },
           "type": {
             "default": "amendment",
@@ -190907,7 +192009,7 @@
         ]
       },
       "post": {
-        "description": "Amendment anlegen und zurückgeben (camelCase).",
+        "description": "Amendment anlegen und zurückgeben (camelCase).\n\nMandant und Urheber aus der Anmeldung; bis 28.10.2026 kamen sie aus dem Rumpf (``tenantId``, ``createdBy``), und\nder Vertrag wurde nicht darauf geprueft, ob er dem Mandanten gehoert.",
         "operationId": "create_amendment_api_contracts__contract_id__amendments_post",
         "parameters": [
           {
@@ -195245,18 +196347,6 @@
       "get": {
         "description": "Listet alle Nummernkreise eines Mandanten auf.",
         "operationId": "list_number_series_api_numbering_series_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "default",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -195271,16 +196361,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -195350,16 +196430,6 @@
             "required": true,
             "schema": {
               "title": "Domain",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "default",
-              "title": "Tenant Id",
               "type": "string"
             }
           },
@@ -209707,24 +210777,6 @@
         "operationId": "list_duenger_api_v1_agrar_duenger__get",
         "parameters": [
           {
-            "description": "Filter by tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter by tenant ID",
-              "title": "Tenant Id"
-            }
-          },
-          {
             "description": "Search in name, article number, manufacturer",
             "in": "query",
             "name": "search",
@@ -209878,24 +210930,6 @@
       "post": {
         "description": "Create a new Dünger.",
         "operationId": "create_duenger_api_v1_agrar_duenger__post",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -209970,22 +211004,6 @@
               "title": "Limit",
               "type": "integer"
             }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
           }
         ],
         "responses": {
@@ -210030,24 +211048,6 @@
       "get": {
         "description": "Get Dünger statistics overview.",
         "operationId": "get_duenger_stats_api_v1_agrar_duenger_stats_overview_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -210056,16 +211056,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -210092,22 +211082,6 @@
             "schema": {
               "title": "Duenger Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
             }
           }
         ],
@@ -210148,22 +211122,6 @@
             "schema": {
               "title": "Duenger Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
             }
           }
         ],
@@ -210211,22 +211169,6 @@
             "schema": {
               "title": "Duenger Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
             }
           }
         ],
@@ -210284,22 +211226,6 @@
             "schema": {
               "title": "Duenger Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
             }
           }
         ],
@@ -227988,24 +228914,6 @@
         "operationId": "list_saatgut_api_v1_agrar_saatgut__get",
         "parameters": [
           {
-            "description": "Filter by tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter by tenant ID",
-              "title": "Tenant Id"
-            }
-          },
-          {
             "description": "Search in name, article number, variety",
             "in": "query",
             "name": "search",
@@ -228177,24 +229085,6 @@
       "post": {
         "description": "Create a new Saatgut.",
         "operationId": "create_saatgut_api_v1_agrar_saatgut__post",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -228269,22 +229159,6 @@
               "title": "Limit",
               "type": "integer"
             }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
           }
         ],
         "responses": {
@@ -228329,24 +229203,6 @@
       "get": {
         "description": "Get Saatgut statistics overview.",
         "operationId": "get_saatgut_stats_api_v1_agrar_saatgut_stats_overview_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -228355,16 +229211,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -228391,22 +229237,6 @@
             "schema": {
               "title": "Saatgut Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
             }
           }
         ],
@@ -228447,22 +229277,6 @@
             "schema": {
               "title": "Saatgut Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
             }
           }
         ],
@@ -228510,22 +229324,6 @@
             "schema": {
               "title": "Saatgut Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
             }
           }
         ],
@@ -228583,22 +229381,6 @@
             "schema": {
               "title": "Saatgut Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
             }
           }
         ],
@@ -243158,24 +243940,6 @@
     "/api/v1/channels/knowledge-graph": {
       "get": {
         "operationId": "get_knowledge_graph_api_v1_channels_knowledge_graph_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -243186,16 +243950,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -243221,22 +243975,6 @@
             "schema": {
               "title": "Node Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
             }
           }
         ],
@@ -243793,22 +244531,6 @@
           },
           {
             "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          },
-          {
-            "in": "query",
             "name": "status",
             "required": false,
             "schema": {
@@ -244058,6 +244780,7 @@
     },
     "/api/v1/channels/{channel}/process-actions/{thread_id}/decision": {
       "post": {
+        "description": "Freigabe oder Ablehnung. Bis 28.10.2026 kamen Entscheider und Freigaberolle aus dem Rumpf: jeder konnte sich\njede Rolle zuschreiben und unter fremdem Namen entscheiden, auch ueber Threads anderer Mandanten.",
         "operationId": "channel_process_decision_api_v1_channels__channel__process_actions__thread_id__decision_post",
         "parameters": [
           {
@@ -247176,11 +247899,11 @@
     },
     "/api/v1/compliance/ustva": {
       "get": {
-        "description": "UStVA-Bereitschaftsstatus — aggregiert aus gebuchten Journal-Einträgen der Periode.",
+        "description": "UStVA-Stand des Zeitraums: Zahlen aus dem Hauptbuch (``app.finance.ustva``), Uebermittlung aus der Anmeldung.\n\nBis 27.10.2026 stand hier ``EINGEREICHT``, sobald der Zeitraum keine Buchungsentwuerfe hatte — ohne dass\nirgendetwas uebermittelt war; der Mandant kam aus ``?tenant_id=`` mit ``default`` als Rueckfall, und ein\nLesefehler wurde zu Nullen. Uebermittelt ist jetzt nur, was mit ELSTER-Transferticket festgehalten ist.",
         "operationId": "get_ustva_status_api_v1_compliance_ustva_get",
         "parameters": [
           {
-            "description": "Meldezeitraum z.B. 2026-03",
+            "description": "Meldezeitraum z.B. 2026-03 oder 2026-Q1",
             "in": "query",
             "name": "periode",
             "required": false,
@@ -247193,7 +247916,7 @@
                   "type": "null"
                 }
               ],
-              "description": "Meldezeitraum z.B. 2026-03",
+              "description": "Meldezeitraum z.B. 2026-03 oder 2026-Q1",
               "title": "Periode"
             }
           }
@@ -249094,22 +249817,6 @@
               "title": "Periode",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "responses": {
@@ -249157,22 +249864,6 @@
             "schema": {
               "title": "Periode",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -249426,24 +250117,6 @@
     "/api/v1/controlling/budgets": {
       "post": {
         "operationId": "create_budget_api_v1_controlling_budgets_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -249499,22 +250172,6 @@
             "schema": {
               "title": "Budget Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -249858,24 +250515,6 @@
     "/api/v1/controlling/ist-werte": {
       "post": {
         "operationId": "buche_ist_wert_api_v1_controlling_ist_werte_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -249931,22 +250570,6 @@
             "schema": {
               "title": "Kostenstelle Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -259658,24 +260281,6 @@
       "get": {
         "operationId": "list_customers_api_v1_crm_customers__get",
         "parameters": [
-          {
-            "description": "Filter by tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter by tenant ID",
-              "title": "Tenant Id"
-            }
-          },
           {
             "description": "Number of items to skip",
             "in": "query",
@@ -269545,18 +270150,6 @@
       "get": {
         "description": "Lead source analysis with conversion rates.",
         "operationId": "get_lead_sources_report_api_v1_crm_reports_lead_sources_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "00000000-0000-0000-0000-000000000001",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -269571,16 +270164,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -269601,18 +270184,6 @@
       "get": {
         "description": "Pipeline funnel with stage distribution and conversion rates.",
         "operationId": "get_pipeline_funnel_report_api_v1_crm_reports_pipeline_funnel_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "00000000-0000-0000-0000-000000000001",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -269623,16 +270194,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -269686,16 +270247,6 @@
                 }
               ],
               "title": "Period To"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "00000000-0000-0000-0000-000000000001",
-              "title": "Tenant Id",
-              "type": "string"
             }
           }
         ],
@@ -269856,7 +270407,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "List Segments",
+        "summary": "Segmente auflisten",
         "tags": [
           "crm",
           "segments",
@@ -269905,7 +270456,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Create Segment",
+        "summary": "Segment anlegen",
         "tags": [
           "crm",
           "segments",
@@ -269967,7 +270518,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Delete Segment",
+        "summary": "Segment loeschen",
         "tags": [
           "crm",
           "segments",
@@ -270017,7 +270568,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Get Segment",
+        "summary": "Segment lesen",
         "tags": [
           "crm",
           "segments",
@@ -270077,7 +270628,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Update Segment",
+        "summary": "Segment aendern",
         "tags": [
           "crm",
           "segments",
@@ -270139,7 +270690,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Recalculate Segment",
+        "summary": "Segment neu berechnen",
         "tags": [
           "crm",
           "segments",
@@ -270214,7 +270765,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Segment Members",
+        "summary": "Segmentmitglieder auflisten",
         "tags": [
           "crm",
           "segments",
@@ -270274,7 +270825,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Add Segment Member",
+        "summary": "Mitglied ins Segment aufnehmen",
         "tags": [
           "crm",
           "segments",
@@ -270336,7 +270887,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Remove Segment Member",
+        "summary": "Mitglied aus dem Segment entfernen",
         "tags": [
           "crm",
           "segments",
@@ -270388,7 +270939,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Segment Performance",
+        "summary": "Segment-Kennzahlen lesen",
         "tags": [
           "crm",
           "segments",
@@ -277324,17 +277875,6 @@
     "/api/v1/edi/partner": {
       "get": {
         "operationId": "list_partner_api_v1_edi_partner_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": true,
-            "schema": {
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -277349,16 +277889,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -299279,17 +299809,24 @@
     },
     "/api/v1/finance/connectors/profiles": {
       "get": {
-        "description": "Profile pro Mandant und Connector-Typ.",
+        "description": "Profile pro Mandant, wahlweise je Connector-Typ (die Liste fibu/schnittstelle-fibu-liste zeigt alle).",
         "operationId": "list_profiles_api_v1_finance_connectors_profiles_get",
         "parameters": [
           {
             "in": "query",
             "name": "type",
-            "required": true,
+            "required": false,
             "schema": {
-              "pattern": "^(PAYROLL|ASSET_LEDGER)$",
-              "title": "Type",
-              "type": "string"
+              "anyOf": [
+                {
+                  "pattern": "^(PAYROLL|ASSET_LEDGER)$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Type"
             }
           }
         ],
@@ -300030,7 +300567,7 @@
     },
     "/api/v1/finance/creditors/{creditor_id}/balance": {
       "get": {
-        "description": "OP-Saldo eines Kreditors: offener Betrag, Anzahl OPs, ältester OP.",
+        "description": "OP-Saldo eines Kreditors: offener Betrag, Anzahl OPs, ältester OP.\n\nBis 28.10.2026 las die Abfrage ``amount``, ``paid_amount`` und ``status`` — Spalten, die\n``offene_posten`` nicht hat; jeder Aufruf endete mit 500.",
         "operationId": "get_creditor_balance_api_v1_finance_creditors__creditor_id__balance_get",
         "parameters": [
           {
@@ -301123,7 +301660,7 @@
     },
     "/api/v1/finance/debtors/{debtor_id}/balance": {
       "get": {
-        "description": "OP-Saldo eines Debitors: offener Betrag, Anzahl OPs, ältester OP.",
+        "description": "OP-Saldo eines Debitors: offener Betrag, Anzahl OPs, ältester OP.\n\nBis 28.10.2026 las die Abfrage ``amount``, ``paid_amount`` und ``status`` — Spalten, die\n``offene_posten`` nicht hat; jeder Aufruf endete mit 500. Die OP-Schreiber setzen den\nKunden (``kunde_id``), nicht den Debitor; beide Verweise zaehlen.",
         "operationId": "get_debtor_balance_api_v1_finance_debtors__debtor_id__balance_get",
         "parameters": [
           {
@@ -306331,22 +306868,6 @@
               "title": "Rechnungsnr",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "requestBody": {
@@ -306406,22 +306927,6 @@
             "schema": {
               "title": "Rechnungsnr",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -308986,24 +309491,6 @@
     "/api/v1/finance/ratenzahlung/plaene": {
       "post": {
         "operationId": "create_ratenzahlungsplan_endpoint_api_v1_finance_ratenzahlung_plaene_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -309061,22 +309548,6 @@
             "schema": {
               "title": "Rate Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -309453,24 +309924,6 @@
     "/api/v1/finance/sepa/batches": {
       "post": {
         "operationId": "create_sepa_batch_endpoint_api_v1_finance_sepa_batches_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -309520,24 +309973,6 @@
     "/api/v1/finance/sepa/mandate": {
       "post": {
         "operationId": "create_sepa_mandat_endpoint_api_v1_finance_sepa_mandate_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -309595,22 +310030,6 @@
             "schema": {
               "title": "Mandat Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -310531,7 +310950,7 @@
     },
     "/api/v1/finance/vat-return": {
       "get": {
-        "description": "List all VAT returns.",
+        "description": "Anmeldungen des Mandanten, neueste zuerst (Vorgabe 120 = zehn Jahre Monatsmeldungen). Lesefehler: 503.",
         "operationId": "list_vat_returns_api_v1_finance_vat_return_get",
         "parameters": [
           {
@@ -310550,6 +310969,20 @@
               ],
               "description": "Filter by period (YYYY-MM)",
               "title": "Period"
+            }
+          },
+          {
+            "description": "Hoechstens so viele Anmeldungen (neueste zuerst)",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 120,
+              "description": "Hoechstens so viele Anmeldungen (neueste zuerst)",
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
             }
           }
         ],
@@ -310597,7 +311030,7 @@
     },
     "/api/v1/finance/vat-return/calculate": {
       "post": {
-        "description": "Calculate VAT return from journal entries for a period.",
+        "description": "Anmeldung aus dem Hauptbuch anlegen. Mit offenen Klaerungen wird nichts angelegt (422).",
         "operationId": "calculate_vat_return_api_v1_finance_vat_return_calculate_post",
         "requestBody": {
           "content": {
@@ -310649,7 +311082,7 @@
     },
     "/api/v1/finance/vat-return/export/{return_id}": {
       "get": {
-        "description": "Download VAT return export (ELSTER XML). Alias for /{return_id}/elster-xml.",
+        "description": "Alias fuer /{return_id}/elster-xml.",
         "operationId": "export_vat_return_download_api_v1_finance_vat_return_export__return_id__get",
         "parameters": [
           {
@@ -310702,7 +311135,7 @@
     },
     "/api/v1/finance/vat-return/vorberechnung": {
       "get": {
-        "description": "Vorberechnung der UStVA aus gebuchten Journaleinträgen.\nGibt aggregierte Beträge zurück, ohne einen VAT-Return anzulegen.",
+        "description": "Vorberechnung der UStVA aus dem Hauptbuch, ohne eine Anmeldung anzulegen. Ein Lesefehler ist 503, keine Null.",
         "operationId": "vorberechnung_ustva_api_v1_finance_vat_return_vorberechnung_get",
         "parameters": [
           {
@@ -310757,7 +311190,6 @@
     },
     "/api/v1/finance/vat-return/{return_id}": {
       "get": {
-        "description": "Get a VAT return by ID.",
         "operationId": "get_vat_return_api_v1_finance_vat_return__return_id__get",
         "parameters": [
           {
@@ -310810,6 +311242,7 @@
     },
     "/api/v1/finance/vat-return/{return_id}/approve": {
       "post": {
+        "description": "Freigabe einer geprueften Anmeldung. Hat sich das Hauptbuch seit der Pruefung geaendert: 409.",
         "operationId": "approve_vat_return_api_v1_finance_vat_return__return_id__approve_post",
         "parameters": [
           {
@@ -310822,16 +311255,6 @@
             }
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/VATReturnApprovalRequest"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "content": {
@@ -310872,7 +311295,7 @@
     },
     "/api/v1/finance/vat-return/{return_id}/elster-xml": {
       "get": {
-        "description": "Export VAT return as ELSTER XML (Anmeldungssteuern, UStVA).\nFormat nach offiziellem ERiC-Schema, Encoding ISO-8859-15.\nReferenz: https://www.elster.de, JuryOberst/Elster (GitHub).",
+        "description": "Kennzahlen der Anmeldung als XML (Datenaustausch, z. B. Steuerberatung) — keine signierte ERiC-Uebermittlung.",
         "operationId": "export_elster_xml_api_v1_finance_vat_return__return_id__elster_xml_get",
         "parameters": [
           {
@@ -310925,6 +311348,7 @@
     },
     "/api/v1/finance/vat-return/{return_id}/submit": {
       "post": {
+        "description": "Haelt die im ELSTER-Portal erfolgte Uebermittlung mit ihrem Transferticket fest. Uebermittelt selbst nichts.",
         "operationId": "submit_vat_return_api_v1_finance_vat_return__return_id__submit_post",
         "parameters": [
           {
@@ -310987,7 +311411,7 @@
     },
     "/api/v1/finance/vat-return/{return_id}/validate": {
       "post": {
-        "description": "Validate VAT return against GL totals.",
+        "description": "Anmeldung gegen das aktuelle Hauptbuch pruefen. Gueltig nur ohne Abweichung, Klaerung und offene Entwuerfe.",
         "operationId": "validate_vat_return_api_v1_finance_vat_return__return_id__validate_post",
         "parameters": [
           {
@@ -311521,6 +311945,18 @@
               "description": "Filter by status",
               "title": "Status"
             }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 500,
+              "maximum": 2000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
           }
         ],
         "responses": {
@@ -311528,7 +311964,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FoerderungOut"
+                  "$ref": "#/components/schemas/FoerderAntragListOut"
                 }
               }
             },
@@ -311556,7 +311992,6 @@
         ]
       },
       "post": {
-        "description": "Create a new Foerderantrag.",
         "operationId": "create_antrag_api_v1_foerderung_antraege_post",
         "requestBody": {
           "content": {
@@ -311573,7 +312008,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FoerderungOut"
+                  "$ref": "#/components/schemas/FoerderAntragOut"
                 }
               }
             },
@@ -311603,7 +312038,7 @@
     },
     "/api/v1/foerderung/antraege/{antrag_id}": {
       "delete": {
-        "description": "Förderantrag löschen (nur im Entwurfsstatus).",
+        "description": "Nur Entwuerfe; ein eingereichter Antrag ist ein Vorgang gegenueber der Behoerde.",
         "operationId": "delete_antrag_api_v1_foerderung_antraege__antrag_id__delete",
         "parameters": [
           {
@@ -311642,7 +312077,6 @@
         ]
       },
       "get": {
-        "description": "Einzelnen Förderantrag abrufen.",
         "operationId": "get_antrag_api_v1_foerderung_antraege__antrag_id__get",
         "parameters": [
           {
@@ -311660,7 +312094,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FoerderungOut"
+                  "$ref": "#/components/schemas/FoerderAntragOut"
                 }
               }
             },
@@ -311688,7 +312122,6 @@
         ]
       },
       "put": {
-        "description": "Update an existing Foerderantrag.",
         "operationId": "update_antrag_api_v1_foerderung_antraege__antrag_id__put",
         "parameters": [
           {
@@ -311697,7 +312130,7 @@
             "required": true,
             "schema": {
               "title": "Antrag Id",
-              "type": "integer"
+              "type": "string"
             }
           }
         ],
@@ -311716,7 +312149,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FoerderungOut"
+                  "$ref": "#/components/schemas/FoerderAntragOut"
                 }
               }
             },
@@ -311752,7 +312185,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FoerderungOut"
+                  "$ref": "#/components/schemas/FoerderungStatsOut"
                 }
               }
             },
@@ -333862,16 +334295,40 @@
     "/api/v1/labor/labor-auftraege": {
       "get": {
         "operationId": "list_labor_auftraege_api_v1_labor_labor_auftraege_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 500,
+              "maximum": 2000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LaborOut"
+                  "$ref": "#/components/schemas/LaborAuftragListOut"
                 }
               }
             },
             "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "security": [
@@ -333886,7 +334343,7 @@
         ]
       },
       "post": {
-        "description": "Neuen Labor-Auftrag anlegen (Wizard `labor-auftrag.tsx`).",
+        "description": "Neuen Labor-Auftrag anlegen (Wizard `labor-auftrag.tsx`); die Charge muss im Mandanten existieren.",
         "operationId": "create_labor_auftrag_api_v1_labor_labor_auftraege_post",
         "requestBody": {
           "content": {
@@ -333903,7 +334360,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LaborOut"
+                  "$ref": "#/components/schemas/LaborAuftragOut"
                 }
               }
             },
@@ -333952,7 +334409,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LaborOut"
+                  "$ref": "#/components/schemas/LaborAuftragOut"
                 }
               }
             },
@@ -334010,7 +334467,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LaborOut"
+                  "$ref": "#/components/schemas/LaborAuftragOut"
                 }
               }
             },
@@ -334060,6 +334517,18 @@
               "description": "Filter by status",
               "title": "Status"
             }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 500,
+              "maximum": 2000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
           }
         ],
         "responses": {
@@ -334067,7 +334536,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LaborOut"
+                  "$ref": "#/components/schemas/LaborProbeListOut"
                 }
               }
             },
@@ -334104,7 +334573,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LaborOut"
+                  "$ref": "#/components/schemas/LaborStatsOut"
                 }
               }
             },
@@ -335592,20 +336061,26 @@
         "operationId": "list_ruestlisten_api_v1_lager_ruestliste_get",
         "parameters": [
           {
-            "description": "Filter by status (OFFEN/IN_BEARBEITUNG/VERARBEITET/ABGEBROCHEN)",
+            "description": "Status-Filter",
             "in": "query",
             "name": "status",
             "required": false,
             "schema": {
               "anyOf": [
                 {
+                  "enum": [
+                    "OFFEN",
+                    "IN_BEARBEITUNG",
+                    "VERARBEITET",
+                    "ABGEBROCHEN"
+                  ],
                   "type": "string"
                 },
                 {
                   "type": "null"
                 }
               ],
-              "description": "Filter by status (OFFEN/IN_BEARBEITUNG/VERARBEITET/ABGEBROCHEN)",
+              "description": "Status-Filter",
               "title": "Status"
             }
           }
@@ -335769,7 +336244,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RuestlisteOut"
+                  "$ref": "#/components/schemas/RuestlisteStatusOut"
                 }
               }
             },
@@ -335820,7 +336295,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RuestlisteOut"
+                  "$ref": "#/components/schemas/RuestlisteStatusOut"
                 }
               }
             },
@@ -335871,7 +336346,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RuestlisteOut"
+                  "$ref": "#/components/schemas/RuestlisteStatusOut"
                 }
               }
             },
@@ -335932,7 +336407,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RuestlisteOut"
+                  "$ref": "#/components/schemas/RuestlisteBemerkungOut"
                 }
               }
             },
@@ -340214,24 +340689,6 @@
       "post": {
         "description": "Frachtkosten berechnen (mit Buchung / Logging).",
         "operationId": "calculate_freight_api_v1_logistik_freight_cost_calculate_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -340280,26 +340737,8 @@
     },
     "/api/v1/logistik/freight-cost/carrier-invoice": {
       "post": {
-        "description": "Erfasst Spediteur-Eingangsrechnung, verknüpft sie mit der Tour und bucht ins Hauptbuch.",
+        "description": "Erfasst Spediteur-Eingangsrechnung, verknüpft sie mit der Tour und bucht ins Hauptbuch.\n\nBis 28.10.2026: Eine doppelte Rechnungsnummer wurde still verworfen (``ON CONFLICT DO NOTHING``), gebucht wurde\ntrotzdem, und die Antwort meldete eine Rechnung, die es nicht gab; die Tour wurde nicht auf den Mandanten\ngeprueft; ein Buchungsfehler liess die Transaktion abgebrochen zurueck. Jetzt: 404 fuer eine fremde Tour, 409 fuer\neine vorhandene Nummer, der Buchungsentwurf in einem eigenen Savepoint (scheitert er, bleibt die Rechnung ``offen``).\nGemeldet wurde ``gebucht``, angelegt war nur ein Buchungsentwurf; der Status heisst jetzt ``entwurf``.",
         "operationId": "create_carrier_invoice_api_v1_logistik_freight_cost_carrier_invoice_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -340394,22 +340833,6 @@
               "title": "Limit",
               "type": "integer"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "responses": {
@@ -340497,22 +340920,6 @@
               "title": "Postal Code To",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "responses": {
@@ -340553,7 +340960,7 @@
     },
     "/api/v1/logistik/freight-tariffs": {
       "get": {
-        "description": "Tarif-Liste, optional nach Spediteur gefiltert.\n\nOhne ``X-Tenant-ID``: nur globale Tarife (``tenant_id IS NULL``).\nMit Header: eigener Mandant plus globale Tarife.",
+        "description": "Tarif-Liste des Mandanten, optional nach Spediteur gefiltert.",
         "operationId": "list_tariffs_api_v1_logistik_freight_tariffs_get",
         "parameters": [
           {
@@ -340570,22 +340977,6 @@
                 }
               ],
               "title": "Carrier Id"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -340631,24 +341022,6 @@
       "post": {
         "description": "Neuen Frachttarif anlegen.",
         "operationId": "create_tariff_api_v1_logistik_freight_tariffs_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -340697,7 +341070,7 @@
     },
     "/api/v1/logistik/freight-tariffs/{tariff_id}/cancel": {
       "post": {
-        "description": "Tarifzeile auf STORNIERT setzen; globale Tarife (``tenant_id IS NULL``) sind geschuetzt.",
+        "description": "Tarifzeile des Mandanten auf STORNIERT setzen.",
         "operationId": "cancel_tariff_api_v1_logistik_freight_tariffs__tariff_id__cancel_post",
         "parameters": [
           {
@@ -340707,22 +341080,6 @@
             "schema": {
               "title": "Tariff Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -340787,22 +341144,6 @@
               "minLength": 1,
               "title": "Ref",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -340894,22 +341235,6 @@
               ],
               "title": "Vehicle Id"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "responses": {
@@ -341000,22 +341325,6 @@
               ],
               "title": "Status"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "responses": {
@@ -341060,24 +341369,6 @@
       "post": {
         "description": "Tour anlegen inkl. Stopps.",
         "operationId": "create_tour_api_v1_logistik_tours_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -341128,17 +341419,6 @@
       "post": {
         "description": "CE fuer logistik/tourenplanung:anlegen — dryRun ohne INSERT; Token-Mandant.",
         "operationId": "action_tour_anlegen_api_v1_logistik_tours_actions_anlegen_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -341201,31 +341481,15 @@
             }
           },
           {
-            "description": "Wenn true und X-Tenant-ID: pro Stopp ``delivery_note_hint`` aus domain_sales",
+            "description": "Wenn true: pro Stopp ``delivery_note_hint`` aus domain_sales",
             "in": "query",
             "name": "include_delivery_hints",
             "required": false,
             "schema": {
               "default": false,
-              "description": "Wenn true und X-Tenant-ID: pro Stopp ``delivery_note_hint`` aus domain_sales",
+              "description": "Wenn true: pro Stopp ``delivery_note_hint`` aus domain_sales",
               "title": "Include Delivery Hints",
               "type": "boolean"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -341277,22 +341541,6 @@
             "schema": {
               "title": "Tour Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -341355,22 +341603,6 @@
               "title": "Tour Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "requestBody": {
@@ -341431,22 +341663,6 @@
             "schema": {
               "title": "Tour Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -341631,22 +341847,6 @@
               "title": "Tour Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "requestBody": {
@@ -341717,22 +341917,6 @@
               "title": "Stop Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "requestBody": {
@@ -341802,22 +341986,6 @@
             "schema": {
               "title": "Stop Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -341947,22 +342115,6 @@
               "title": "Stop Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "requestBody": {
@@ -342033,22 +342185,6 @@
               "title": "Stop Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "requestBody": {
@@ -342099,7 +342235,7 @@
     },
     "/api/v1/logistik/tracking/{tour_id}": {
       "get": {
-        "description": "Öffentlicher Tracking-Link – letzte GPS-Position, aktueller Stopp, ETA.",
+        "description": "Tracking – letzte GPS-Position, aktueller Stopp, ETA.\n\nNur im eigenen Mandanten. ``share_token`` wurde angenommen, aber nie geprueft: Jeder angemeldete Nutzer konnte\njede Tour verfolgen. Ein oeffentlicher Link mit geprueftem Token ist nicht gebaut.",
         "operationId": "public_tracking_api_v1_logistik_tracking__tour_id__get",
         "parameters": [
           {
@@ -342109,22 +342245,6 @@
             "schema": {
               "title": "Tour Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "share_token",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Share Token"
             }
           }
         ],
@@ -343064,278 +343184,6 @@
         "summary": "Dashboard management",
         "tags": [
           "compat"
-        ]
-      }
-    },
-    "/api/v1/marketing/kampagnen": {
-      "get": {
-        "operationId": "list_kampagnen_api_v1_marketing_kampagnen_get",
-        "parameters": [
-          {
-            "description": "Filter by status",
-            "in": "query",
-            "name": "status",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter by status",
-              "title": "Status"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MarketingOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Kampagnen auflisten",
-        "tags": [
-          "Marketing"
-        ]
-      },
-      "post": {
-        "description": "Create a new marketing campaign.",
-        "operationId": "create_kampagne_api_v1_marketing_kampagnen_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/MarketingKampagneCreate"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MarketingOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Kampagne anlegen",
-        "tags": [
-          "Marketing"
-        ]
-      }
-    },
-    "/api/v1/marketing/kampagnen/{kampagne_id}": {
-      "delete": {
-        "description": "Delete a marketing campaign.",
-        "operationId": "delete_kampagne_api_v1_marketing_kampagnen__kampagne_id__delete",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "kampagne_id",
-            "required": true,
-            "schema": {
-              "title": "Kampagne Id",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Kampagne löschen",
-        "tags": [
-          "Marketing"
-        ]
-      },
-      "put": {
-        "description": "Update an existing marketing campaign.",
-        "operationId": "update_kampagne_api_v1_marketing_kampagnen__kampagne_id__put",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "kampagne_id",
-            "required": true,
-            "schema": {
-              "title": "Kampagne Id",
-              "type": "integer"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/MarketingKampagneUpdate"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MarketingOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Kampagne aktualisieren",
-        "tags": [
-          "Marketing"
-        ]
-      }
-    },
-    "/api/v1/marketing/kampagnen/{kampagne_id}/kpis": {
-      "get": {
-        "description": "MKT-CAM-01: Kampagnen-KPIs (Budget Plan vs. Ist, Open-Rate, ROI-Stub).",
-        "operationId": "get_kampagne_kpis_api_v1_marketing_kampagnen__kampagne_id__kpis_get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "kampagne_id",
-            "required": true,
-            "schema": {
-              "title": "Kampagne Id",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MarketingOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Kampagne kpis abrufen",
-        "tags": [
-          "Marketing"
-        ]
-      }
-    },
-    "/api/v1/marketing/stats": {
-      "get": {
-        "operationId": "get_marketing_stats_api_v1_marketing_stats_get",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MarketingOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Marketing stats abrufen",
-        "tags": [
-          "Marketing"
         ]
       }
     },
@@ -354668,24 +354516,6 @@
         "operationId": "list_nutrient_compositions_api_v1_nutrient_compositions__get",
         "parameters": [
           {
-            "description": "Filter by tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter by tenant ID",
-              "title": "Tenant Id"
-            }
-          },
-          {
             "description": "Search in name/number",
             "in": "query",
             "name": "search",
@@ -354839,22 +354669,6 @@
               "title": "Limit",
               "type": "integer"
             }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
           }
         ],
         "responses": {
@@ -354909,22 +354723,6 @@
               "title": "Composition Id",
               "type": "string"
             }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
           }
         ],
         "responses": {
@@ -354965,22 +354763,6 @@
             "schema": {
               "title": "Composition Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
             }
           }
         ],
@@ -355029,22 +354811,6 @@
             "schema": {
               "title": "Composition Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
             }
           }
         ],
@@ -360771,7 +360537,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/CompatBridgeOut"
+                    "$ref": "#/components/schemas/PortalAnfrageZeile"
                   },
                   "title": "Response Portal Anfragen Api V1 Portal Anfragen Get",
                   "type": "array"
@@ -360829,7 +360595,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/CompatBridgeOut"
+                    "$ref": "#/components/schemas/PortalBestellungZeile"
                   },
                   "title": "Response Portal Bestellungen Api V1 Portal Bestellungen Get",
                   "type": "array"
@@ -361002,7 +360768,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/CompatBridgeOut"
+                    "$ref": "#/components/schemas/PortalDokumentZeile"
                   },
                   "title": "Response Portal Dokumente Api V1 Portal Dokumente Get",
                   "type": "array"
@@ -361442,7 +361208,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/CompatBridgeOut"
+                    "$ref": "#/components/schemas/PortalFeldbuchZeile"
                   },
                   "title": "Response Portal Feldbuch Api V1 Portal Feldbuch Get",
                   "type": "array"
@@ -364768,7 +364534,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/CompatBridgeOut"
+                    "$ref": "#/components/schemas/PortalNaehrstoffZeile"
                   },
                   "title": "Response Portal Naehrstoffbilanzen Api V1 Portal Naehrstoffbilanzen Get",
                   "type": "array"
@@ -365588,7 +365354,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/CompatBridgeOut"
+                    "$ref": "#/components/schemas/PortalRechnungZeile"
                   },
                   "title": "Response Portal Rechnungen Api V1 Portal Rechnungen Get",
                   "type": "array"
@@ -365646,7 +365412,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/CompatBridgeOut"
+                    "$ref": "#/components/schemas/PortalShopZeile"
                   },
                   "title": "Response Portal Shop Api V1 Portal Shop Get",
                   "type": "array"
@@ -365704,7 +365470,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/CompatBridgeOut"
+                    "$ref": "#/components/schemas/PortalVertragZeile"
                   },
                   "title": "Response Portal Vertraege Api V1 Portal Vertraege Get",
                   "type": "array"
@@ -365762,7 +365528,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/CompatBridgeOut"
+                    "$ref": "#/components/schemas/PortalZertifikatZeile"
                   },
                   "title": "Response Portal Zertifikate Api V1 Portal Zertifikate Get",
                   "type": "array"
@@ -388098,16 +387864,40 @@
     "/api/v1/qualitaet/labor-auftraege": {
       "get": {
         "operationId": "list_labor_auftraege_api_v1_qualitaet_labor_auftraege_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 500,
+              "maximum": 2000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LaborOut"
+                  "$ref": "#/components/schemas/LaborAuftragListOut"
                 }
               }
             },
             "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "security": [
@@ -388123,7 +387913,7 @@
         ]
       },
       "post": {
-        "description": "Neuen Labor-Auftrag anlegen (Wizard `labor-auftrag.tsx`).",
+        "description": "Neuen Labor-Auftrag anlegen (Wizard `labor-auftrag.tsx`); die Charge muss im Mandanten existieren.",
         "operationId": "create_labor_auftrag_api_v1_qualitaet_labor_auftraege_post",
         "requestBody": {
           "content": {
@@ -388140,7 +387930,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LaborOut"
+                  "$ref": "#/components/schemas/LaborAuftragOut"
                 }
               }
             },
@@ -388190,7 +387980,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LaborOut"
+                  "$ref": "#/components/schemas/LaborAuftragOut"
                 }
               }
             },
@@ -388249,7 +388039,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LaborOut"
+                  "$ref": "#/components/schemas/LaborAuftragOut"
                 }
               }
             },
@@ -388300,6 +388090,18 @@
               "description": "Filter by status",
               "title": "Status"
             }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 500,
+              "maximum": 2000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
           }
         ],
         "responses": {
@@ -388307,7 +388109,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LaborOut"
+                  "$ref": "#/components/schemas/LaborProbeListOut"
                 }
               }
             },
@@ -388375,7 +388177,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LaborOut"
+                  "$ref": "#/components/schemas/LaborStatsOut"
                 }
               }
             },
@@ -396983,7 +396785,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/SalesOfferImportOut"
+                }
               }
             },
             "description": "Successful Response"
@@ -397004,7 +396808,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Import Sales Offers",
+        "summary": "Sales offers aus CSV importieren",
         "tags": [
           "sales",
           "offers"
@@ -400061,18 +399865,6 @@
       "post": {
         "description": "Service-Fall abschließen.",
         "operationId": "close_service_case_api_v1_service_abschluss_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": false,
-            "schema": {
-              "default": "default",
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -400176,16 +399968,6 @@
               "title": "Limit",
               "type": "integer"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": false,
-            "schema": {
-              "default": "default",
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -400224,18 +400006,6 @@
       "post": {
         "description": "Neue Service-Anfrage anlegen.",
         "operationId": "create_anfrage_api_v1_service_anfragen_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": false,
-            "schema": {
-              "default": "default",
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -400282,7 +400052,7 @@
     },
     "/api/v1/service/anfragen/{anfrage_id}": {
       "delete": {
-        "description": "Service-Anfrage löschen.",
+        "description": "Service-Anfrage loeschen (mit ihren Rueckmeldungen).",
         "operationId": "delete_anfrage_api_v1_service_anfragen__anfrage_id__delete",
         "parameters": [
           {
@@ -400291,16 +400061,6 @@
             "required": true,
             "schema": {
               "title": "Anfrage Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": false,
-            "schema": {
-              "default": "default",
-              "title": "X-Tenant-Id",
               "type": "string"
             }
           }
@@ -400332,7 +400092,7 @@
         ]
       },
       "get": {
-        "description": "Detail einer Service-Anfrage.",
+        "description": "Detail einer Service-Anfrage mit ihren Rueckmeldungen.",
         "operationId": "get_anfrage_api_v1_service_anfragen__anfrage_id__get",
         "parameters": [
           {
@@ -400341,16 +400101,6 @@
             "required": true,
             "schema": {
               "title": "Anfrage Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": false,
-            "schema": {
-              "default": "default",
-              "title": "X-Tenant-Id",
               "type": "string"
             }
           }
@@ -400389,7 +400139,7 @@
         ]
       },
       "put": {
-        "description": "Service-Anfrage aktualisieren.",
+        "description": "Service-Anfrage aktualisieren. Eine erledigte Anfrage bleibt, wie sie abgeschlossen wurde.",
         "operationId": "update_anfrage_api_v1_service_anfragen__anfrage_id__put",
         "parameters": [
           {
@@ -400398,16 +400148,6 @@
             "required": true,
             "schema": {
               "title": "Anfrage Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": false,
-            "schema": {
-              "default": "default",
-              "title": "X-Tenant-Id",
               "type": "string"
             }
           }
@@ -400460,18 +400200,6 @@
       "post": {
         "description": "Rückmeldung zu einer Service-Anfrage erfassen.",
         "operationId": "create_rueckmeldung_api_v1_service_rueckmeldungen_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": false,
-            "schema": {
-              "default": "default",
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {

@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { UniversalMaskRenderer } from '@/components/mask-builder/UniversalMaskRenderer'
 import { formatReadOnlyValue } from '@/components/mask-builder/renderers/FieldRenderer'
+import { useScreenPermissions } from '@/components/mask-builder/runtime/screen-permissions'
 import { compileRenderPlanFromScreenDefinition } from '@/components/mask-builder/render-plan/schema-compiler'
 import { useUniversalFormState } from '@/components/mask-builder/runtime/useUniversalFormState'
 import { createScreenContext } from '@/components/mask-builder/governance/screen-context'
@@ -127,7 +128,8 @@ export default function PersonalBewerbungEinwilligungPage(): JSX.Element {
     })),
   }), [fassungen, hatEinwilligung, isTouch, laeuft, pending, stand.data?.gueltig_bis])
 
-  const plan = useMemo(() => compileRenderPlanFromScreenDefinition(schema), [schema])
+  const rechte = useScreenPermissions(schema)
+  const plan = useMemo(() => compileRenderPlanFromScreenDefinition(schema, { permissions: rechte }), [schema, rechte])
   const form = useUniversalFormState({ screen: schema, initialValues: leer })
   const { setValue } = form
 
@@ -252,7 +254,7 @@ export default function PersonalBewerbungEinwilligungPage(): JSX.Element {
 
   const screenContext = useMemo(() => createScreenContext({
     data: { bewerbung: kopf.data ?? null, vorgaenge },
-    permissions: { granted: [] },
+    permissions: { granted: rechte },
     state: { values: form.values, policies: {} },
     actions: {
       'personal.erteileEinwilligung': () => handleAction('erteilen'),
@@ -261,7 +263,7 @@ export default function PersonalBewerbungEinwilligungPage(): JSX.Element {
       'personal.openErklaerungen': () => handleAction('erklaerungen'),
     },
     navigation: { push: () => undefined },
-  }), [form.values, handleAction, kopf.data, vorgaenge])
+  }), [rechte, form.values, handleAction, kopf.data, vorgaenge])
 
   if (!id) {
     return (

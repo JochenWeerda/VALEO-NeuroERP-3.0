@@ -148,12 +148,13 @@ class TestLogisticsIntegration:
         tour_id = created.json()["id"]
         stop_id = created.json()["stops"][0]["id"]
         try:
-            no_tenant = client.post(
+            # Mandant aus der Anmeldung: fuer einen anderen Mandanten gibt es die Tour nicht.
+            fremd = client.post(
                 f"/api/v1/logistik/tours/{tour_id}/cancel",
                 json={"grund": "x"},
-                headers={"Authorization": "Bearer dev-token"},
+                headers={"Authorization": "Bearer dev-token", "X-Tenant-ID": "11111111-1111-1111-1111-111111111111"},
             )
-            assert no_tenant.status_code == 422
+            assert fremd.status_code == 404
 
             sc = client.post(
                 f"/api/v1/logistik/tours/{tour_id}/stops/{stop_id}/cancel",
@@ -225,7 +226,8 @@ class TestLogisticsIntegration:
         finally:
             _purge_tariff(tariff_id)
 
-    def test_freight_simulate_requires_tenant(self, logistics_db):
+    def test_freight_simulate_unknown_carrier_404(self, logistics_db):
+        """Der Mandant kommt aus der Anmeldung; ohne passenden eigenen Tarif ist das Ergebnis 404."""
         r = client.get(
             "/api/v1/logistik/freight-cost/simulate",
             params={
@@ -237,7 +239,7 @@ class TestLogisticsIntegration:
             },
             headers={"Authorization": "Bearer dev-token"},
         )
-        assert r.status_code == 422
+        assert r.status_code == 404
 
     def test_freight_simulate_not_visible_for_other_tenant(self, logistics_db):
         carrier = f"IT-TENANT-WALL-{uuid.uuid4().hex[:8]}"
@@ -273,7 +275,8 @@ class TestLogisticsIntegration:
         finally:
             _purge_tariff(tariff_id)
 
-    def test_freight_create_tariff_requires_tenant(self, logistics_db):
+    def test_freight_create_tariff_in_token_tenant(self, logistics_db):
+        """Ohne X-Tenant-ID gilt der Mandant der Anmeldung (bis 28.10.2026: 422 ohne Kopf)."""
         r = client.post(
             "/api/v1/logistik/freight-tariffs",
             json={
@@ -287,9 +290,10 @@ class TestLogisticsIntegration:
             },
             headers={"Authorization": "Bearer dev-token"},
         )
-        assert r.status_code == 422
+        assert r.status_code == 201, r.text
+        _purge_tariff(r.json()["id"])
 
-    def test_freight_list_without_tenant_header_only_global(self, logistics_db):
+    def test_freight_list_other_tenant_sees_nothing(self, logistics_db):
         carrier = f"IT-LIST-WALL-{uuid.uuid4().hex[:8]}"
         created = client.post(
             "/api/v1/logistik/freight-tariffs",
@@ -310,14 +314,14 @@ class TestLogisticsIntegration:
             listed = client.get(
                 "/api/v1/logistik/freight-tariffs",
                 params={"carrier_id": carrier},
-                headers={"Authorization": "Bearer dev-token"},
+                headers={"Authorization": "Bearer dev-token", "X-Tenant-ID": "11111111-1111-1111-1111-111111111111"},
             )
             assert listed.status_code == 200
             assert listed.json() == []
         finally:
             _purge_tariff(tariff_id)
 
-    def test_freight_calculate_requires_tenant(self, logistics_db):
+    def test_freight_calculate_unknown_carrier_404(self, logistics_db):
         r = client.post(
             "/api/v1/logistik/freight-cost/calculate",
             json={
@@ -329,7 +333,7 @@ class TestLogisticsIntegration:
             },
             headers={"Authorization": "Bearer dev-token"},
         )
-        assert r.status_code == 422
+        assert r.status_code == 404
 
     def test_freight_list_with_tenant_returns_own_tariff(self, logistics_db):
         carrier = f"IT-LIST-OWN-{uuid.uuid4().hex[:8]}"
@@ -458,7 +462,8 @@ class TestLogisticsIntegration:
         finally:
             _purge_tariff(tariff_id)
 
-    def test_freight_tariff_cancel_wrong_tenant_403(self, logistics_db):
+    def test_freight_tariff_cancel_wrong_tenant_404(self, logistics_db):
+        """Ein Tarif eines anderen Mandanten existiert fuer die Anfrage nicht (vorher 403, das verriet ihn)."""
         carrier = f"IT-FR-403-{uuid.uuid4().hex[:8]}"
         created = client.post(
             "/api/v1/logistik/freight-tariffs",
@@ -485,40 +490,45 @@ class TestLogisticsIntegration:
                 json={"grund": "fremd"},
                 headers=other_headers,
             )
-            assert bad.status_code == 403
+            assert bad.status_code == 404
         finally:
             _purge_tariff(tariff_id)
 
-    def test_freight_tariff_cancel_requires_tenant(self, logistics_db):
+    def test_freight_tariff_cancel_unknown_404(self, logistics_db):
         r = client.post(
             "/api/v1/logistik/freight-tariffs/00000000-0000-0000-0000-000000000099/cancel",
             json={"grund": "x"},
             headers={"Authorization": "Bearer dev-token"},
         )
-        assert r.status_code == 422
+        assert r.status_code == 404
 
-    def test_freight_tariff_cancel_global_forbidden_403(self, logistics_db):
+    def test_freight_tariff_ohne_mandant_ist_unsichtbar(self, logistics_db):
+        """'Globale' Tarife (tenant_id NULL) gelten nicht mehr; nach rls_domain_logistics_20261028 gibt es sie nicht."""
         gid = str(uuid.uuid4())
         db = SessionLocal()
         try:
-            db.execute(
-                text(
-                    """
-                    INSERT INTO domain_logistics.freight_tariffs
-                        (id, carrier_id, zone_from, zone_to, weight_from_kg, weight_to_kg,
-                         price_per_100kg, min_charge, tenant_id)
-                    VALUES (:id, :carrier, '10', '20', 0, 999999, 9.0, 1.0, NULL)
-                    """
-                ),
-                {"id": gid, "carrier": f"IT-GLOBAL-{uuid.uuid4().hex[:6]}"},
-            )
-            db.commit()
+            nullbar = db.execute(text(
+                "SELECT NOT attnotnull FROM pg_attribute WHERE attrelid = 'domain_logistics.freight_tariffs'::regclass "
+                "AND attname = 'tenant_id'")).scalar()
+            if nullbar:
+                db.execute(
+                    text(
+                        """
+                        INSERT INTO domain_logistics.freight_tariffs
+                            (id, carrier_id, zone_from, zone_to, weight_from_kg, weight_to_kg,
+                             price_per_100kg, min_charge, tenant_id)
+                        VALUES (:id, :carrier, '10', '20', 0, 999999, 9.0, 1.0, NULL)
+                        """
+                    ),
+                    {"id": gid, "carrier": f"IT-GLOBAL-{uuid.uuid4().hex[:6]}"},
+                )
+                db.commit()
             r = client.post(
                 f"/api/v1/logistik/freight-tariffs/{gid}/cancel",
                 json={"grund": "x"},
                 headers=HEADERS,
             )
-            assert r.status_code == 403
+            assert r.status_code == 404
         finally:
             db.execute(text("DELETE FROM domain_logistics.freight_tariffs WHERE id = :id"), {"id": gid})
             db.commit()

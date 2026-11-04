@@ -1,7 +1,5 @@
-import { NativeListPage } from '@/components/mask-builder/NativeListPage'
+import { InvoiceCapturePage } from './InvoiceCapturePage'
 
-export default function Page(): JSX.Element {
-  return (
-    <NativeListPage screenId="finance/ap/invoices/new" testId="screen-finance/ap/invoices/new" />
-  )
+export default function FinanceApInvoiceFormPage(): JSX.Element {
+  return <InvoiceCapturePage purchase />
 }

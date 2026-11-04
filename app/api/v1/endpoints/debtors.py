@@ -6,7 +6,6 @@ Adapted to existing database schema (debitor_number, name, address JSONB)
 
 from app.auth.finance_roles import finance_admin, finance_read, finance_write
 from typing import Optional
-import re
 from app.core.tenant import get_tenant_id
 from fastapi import Response, APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
@@ -15,20 +14,12 @@ from decimal import Decimal
 import json
 
 from ....core.data_quality_enforcement import build_dq_error_detail, evaluate_debtor_datensatz
+from ....core.wertetypen import ust_id_muster
 from ....core.database import get_db
+from ....finance.op_saldo import OP_SALDO_SQL
 
 # EU/EWR USt-ID Format-Muster (optional; leeres Feld erlaubt)
-_VAT_PATTERNS = {
-    "DE": re.compile(r"^DE\d{9}$"),
-    "AT": re.compile(r"^ATU\d{8}$"),
-    "NL": re.compile(r"^NL\d{9}B\d{2}$"),
-    "FR": re.compile(r"^FR[A-HJ-NP-Z0-9]{2}\d{9}$"),
-    "BE": re.compile(r"^BE0?\d{9}$"),
-    "CH": re.compile(r"^CHE\d{9}$"),
-    "IT": re.compile(r"^IT\d{11}$"),
-    "ES": re.compile(r"^ES[A-Z0-9]\d{7}[A-Z0-9]$", re.IGNORECASE),
-    "PL": re.compile(r"^PL\d{10}$"),
-}
+# Muster je Land: eine Quelle mit der Maske (config/wertetypen.json).
 
 
 def _validate_vat_id_format(vat_id: Optional[str]) -> None:
@@ -36,7 +27,7 @@ def _validate_vat_id_format(vat_id: Optional[str]) -> None:
     if not vat_id or not (raw := vat_id.replace(" ", "").replace("-", "").strip().upper()):
         return
     prefix = raw[:2]
-    pattern = _VAT_PATTERNS.get(prefix)
+    pattern = ust_id_muster().get(prefix)
     if not pattern:
         raise HTTPException(
             status_code=400,
@@ -191,7 +182,7 @@ async def get_debtor(
             FROM domain_erp.debitors
             WHERE id = :debtor_id AND tenant_id = :tenant_id
         """)
-        
+
         row = db.execute(query, {"debtor_id": debtor_id, "tenant_id": tenant_id}).fetchone()
         
         if not row:
@@ -329,24 +320,25 @@ async def get_debtor_balance(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
-    """OP-Saldo eines Debitors: offener Betrag, Anzahl OPs, ältester OP."""
+    """OP-Saldo eines Debitors: offener Betrag, Anzahl OPs, ältester OP.
+
+    Bis 28.10.2026 las die Abfrage ``amount``, ``paid_amount`` und ``status`` — Spalten, die
+    ``offene_posten`` nicht hat; jeder Aufruf endete mit 500. Die OP-Schreiber setzen den
+    Kunden (``kunde_id``), nicht den Debitor; beide Verweise zaehlen.
+    """
     try:
         existing = db.execute(
-            text("SELECT id FROM domain_erp.debitors WHERE id = :debtor_id AND tenant_id = :tenant_id"),
+            text("SELECT id, customer_id FROM domain_erp.debitors WHERE id = :debtor_id AND tenant_id = :tenant_id"),
             {"debtor_id": debtor_id, "tenant_id": tenant_id}
         ).fetchone()
         if not existing:
             raise HTTPException(status_code=404, detail="Debtor not found")
 
-        balance_query = text("""
-            SELECT
-                COALESCE(SUM(amount - COALESCE(paid_amount, 0)), 0) AS open_balance,
-                COUNT(*) AS open_item_count,
-                MIN(due_date) AS oldest_due_date
-            FROM domain_erp.offene_posten
-            WHERE debtor_id = :debtor_id AND tenant_id = :tenant_id AND status = 'open'
-        """)
-        row = db.execute(balance_query, {"debtor_id": debtor_id, "tenant_id": tenant_id}).fetchone()
+        row = db.execute(
+            text(OP_SALDO_SQL.format(verweis="(debtor_id = :debtor_id OR (CAST(:customer_id AS text) IS NOT NULL AND kunde_id = CAST(:customer_id AS text)))")),
+            {"debtor_id": debtor_id, "customer_id": str(existing[1]) if existing[1] else None,
+             "tenant_id": tenant_id, "konto_typ": "debitoren"},
+        ).fetchone()
         return {
             "debtor_id": debtor_id,
             "open_balance": float(row[0]) if row else 0.0,
@@ -374,7 +366,7 @@ async def delete_debtor(
             text("SELECT id FROM domain_erp.debitors WHERE id = :debtor_id AND tenant_id = :tenant_id"),
             {"debtor_id": debtor_id, "tenant_id": tenant_id}
         ).fetchone()
-        
+
         if not existing:
             raise HTTPException(status_code=404, detail="Debtor not found")
         
@@ -384,7 +376,7 @@ async def delete_debtor(
             SET is_active = false, updated_at = NOW()
             WHERE id = :debtor_id AND tenant_id = :tenant_id
         """)
-        
+
         db.execute(update_query, {"debtor_id": debtor_id, "tenant_id": tenant_id})
         db.commit()
     except HTTPException:

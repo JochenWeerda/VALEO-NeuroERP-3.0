@@ -147,7 +147,6 @@ class AgentSkillPackUpdateRequest(BaseModel):
 
 
 class LowStockSimulateRequest(BaseModel):
-    tenant_id: str = "default"
     artikel_id: str
     artikel_name: str
     bestand: float = Field(ge=0)
