@@ -20394,3 +20394,11 @@ Branch claude/batch9-compliance-register-20261104 auf Batch 8. Gewachsene DB: al
 Offen (Folge): Die Register haben keinen Erfassungsweg (nur der Seed schrieb) - sie zeigen jetzt ehrlich leer.
 Zulassungen auf den PSM-Stamm (agrar_psm: bvl_nummer, zulassung_ablauf) umstellen (neue Studio-Maske);
 VVVO (ops vs domain_compliance) und Sachkunde (Kunden/Mitarbeitende/Feldbuch) fachlich zusammenfuehren.
+
+## PSM-ZULASSUNGEN-20261104 — reserviert, Codex
+
+Ziel: PSM-Zulassungen ueber mandantengebundenen echten PSM-Leseweg und native Studio-Liste; ersetztes Register nur nach sicherer Datenpruefung entfernen.
+Dateibesitz: PSM-Projektion und Schema, betroffene Studio-Definitionen und UI-Verbraucher, zugehoerige Migration, gezielte Tests sowie QA/Meridian-Doku. Integration nach Batch 8/9 durch Lead.
+Abnahme: typisierter Feldvertrag, Mandant aus Anmeldung, keine erfundenen Werte, native Maske, NULL-sichere Abbruchpruefung, gezielte Tests und Generatoren im koordinierten Fenster.
+Risiken: historische Fremdzeilen blockieren Tabellenentfernung; ungemergte Migration ausschliesslich transaktional pruefen; keine neue Testdatenbank.
+
