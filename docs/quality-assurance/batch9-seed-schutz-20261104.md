@@ -45,8 +45,13 @@ Abbruchregel fuer den Tabellen-Drop. Sie ist kein Nachweis fuer die aktuelle
 Entfernungsregel. Auch die frueheren Signaturen der drei Dispositions-Seeds
 werden fuer die Entfernung der ausgemusterten Tabelle nicht mehr verwendet.
 
-Der aktualisierte TEMP-Test prueft Drop mit Zeilen, fehlende Tabelle,
-Abhaengigkeit ohne CASCADE und Rollback; **dieser aktualisierte Test steht noch
-aus**, bis das Prueffenster frei ist. Er prueft je weiter genutztem Register
-einen urspruenglichen Seed, nicht alle einzelnen Varianten oder eine
-vollstaendige Migration. Keine Migration wurde hier gestempelt.
+Der aktualisierte TEMP-Test wurde am 05.11.2026 zusammen mit dem Batch-8-Test
+sequentiell ausgefuehrt: **3 passed in 10,44 s**, davon ein Batch-9- und zwei
+Batch-8-Testfaelle. Geprueft wurden Drop mit Zeilen, fehlende Tabelle,
+Abhaengigkeit ohne CASCADE und Rollback sowie je weiter genutztem Register ein
+urspruenglicher Seed und abweichende Werte. Der Lauf verwendete `valeo_agent`
+und TEMP-Tabellen; alle eigenen TEMP-/DDL-Aenderungen wurden zurueckgerollt.
+Die Pruefstandsrevision `ruestlisten_tabelle_20261103` blieb unveraendert;
+fremde Clients: vorher und nachher jeweils null. Es wurde keine Migration
+gestempelt. Der Test prueft nicht alle Seedvarianten oder eine vollstaendige
+Migration; der Gesamt-CI-Nachweis bleibt offen.
