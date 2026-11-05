@@ -133,7 +133,10 @@ describe('Batch 12 route inventory (source-level evidence only)', () => {
     expect(src).toContain(component)
     expect(src).toContain(`screenId="${screenId}"`)
     expect(src).toContain(`testId="screen-${screenId}"`)
-    if (component === 'NativeListPage' && !KONTROLLE_DEF_EXCLUDE.has(screenId)) {
+    if (screenId === 'compliance/zulassungen-liste') {
+      const listen = readFileSync(resolve(__dirname, '../../../../../app/core/screen_definitions_listen.py'), 'utf8')
+      expect(listen).toContain(`"${screenId}"`)
+    } else if (component === 'NativeListPage' && !KONTROLLE_DEF_EXCLUDE.has(screenId)) {
       expect(kontrolleBatch12).toContain(`"${screenId}"`)
     }
   })

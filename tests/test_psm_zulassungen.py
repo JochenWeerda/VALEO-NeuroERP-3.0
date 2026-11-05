@@ -76,3 +76,38 @@ def test_migration_entfernt_ersetzte_tabelle_ohne_cascade(monkeypatch):
     migration.upgrade()
     assert executed == ["LOCK TABLE domain_ops.ops_zulassungen_register IN ACCESS EXCLUSIVE MODE",
                         "DROP TABLE domain_ops.ops_zulassungen_register"]
+
+
+def test_vollstaendiger_psm_lesevertrag_wahrt_null_und_aktivstatus():
+    from app.api.v1.schemas.agrar import PSM, PSMCreate
+    from app.integrations.bvl_psm_client import map_bvl_mittel_to_psm_payload
+
+    row = SimpleNamespace(id="1", tenant_id="a", artikelnummer="A", name="M", wirkstoff="W", mittel_typ="P",
+                          bvl_nummer="B", zulassung_ablauf=datetime(2026, 1, 1, tzinfo=timezone.utc),
+                          eu_zulassung=None, kulturen=None, indikationen=None, bienenschutz=None,
+                          wasserschutz_gebiet=None, auflagen=None, ausgangsstoff_explosivstoffe=None,
+                          erklaerung_landwirt_erforderlich=None, waehrung=None, lagerbestand=None, ist_aktiv=False)
+    result = PSM.model_validate(row)
+    assert result.kulturen is None and result.auflagen is None and result.lagerbestand is None
+    assert result.eu_zulassung is None and result.waehrung is None
+    assert result.ist_aktiv is False and result.is_active is False
+    row.ist_aktiv = None
+    assert PSM.model_validate(row).is_active is None
+    bvl = map_bvl_mittel_to_psm_payload({"kennr": "B", "mittelname": "M", "versuchsbez": "W", "is_active": False}, "a")
+    mapped = PSM.model_validate(bvl)
+    assert mapped.is_active is False and mapped.ist_aktiv is False
+    assert mapped.kulturen is None and mapped.lagerbestand is None and mapped.zulassung_ablauf is None
+    bvl["zulassung_ablauf"] = None
+    assert PSM.model_validate(bvl).zulassung_ablauf is None
+    from app.integrations.bvl_psm_client import parse_bvl_datetime
+    assert parse_bvl_datetime("ungueltig") is None
+    assert parse_bvl_datetime(42) is None and parse_bvl_datetime({"datum": "2035"}) is None
+    assert parse_bvl_datetime("2035-01-29T23:00:00Z").year == 2035
+    assert PSMCreate.model_fields["kulturen"].is_required() is False
+
+
+def test_zulassung_guard_verweigert_unbekannt_und_abgelaufen():
+    from app.services.workflow_guards import guard_psm_approval_valid
+    for value in (None, "ungueltig", 42, {"datum": "2035"}, "2020-01-01T12:00:00Z"):
+        assert guard_psm_approval_valid({"psm": {"zulassung_ablauf": value}})[0] is False
+    assert guard_psm_approval_valid({"psm": {"zulassung_ablauf": "2099-01-01T12:00:00Z"}})[0] is True

@@ -67,7 +67,7 @@ def test_guard_price_not_below_cost_ok() -> None:
 @pytest.mark.unit
 def test_guard_psm_approval_valid_true() -> None:
     from app.services.workflow_guards import guard_psm_approval_valid
-    ok, _ = guard_psm_approval_valid({"psm_approved": True})
+    ok, _ = guard_psm_approval_valid({"psm": {"zulassung_ablauf": "2099-01-01T12:00:00Z"}})
     assert ok is True
 
 

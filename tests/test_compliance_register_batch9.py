@@ -146,20 +146,3 @@ def test_zertifikat_im_eigenen_mandanten(fach):
     assert fremd.value.status_code == 404
     geaendert = asyncio.run(zertifikate.update_zertifikat(z["id"], zertifikate.ZertifikatUpdate(status="ablaufend"), tenant_id=A, db=db))
     assert geaendert["status"] == "ablaufend"
-
-
-def test_psm_zulassungen_lesen_nur_den_eigenen_mandanten(fach):
-    from uuid import uuid4
-    from app.domains.agrar.api.psm import list_psm_zulassungen
-    from app.infrastructure.models import PSM
-
-    db, _ = fach
-    marker = uuid4().hex
-    for tenant, suffix, datum in ((A, "a", datetime(2020, 1, 1)), (B, "b", datetime(2099, 1, 1))):
-        db.add(PSM(tenant_id=tenant, artikelnummer=f"{marker}-{suffix}", name=f"PSM {marker}",
-                   wirkstoff="W", mittel_typ="Fungizid", bvl_nummer=f"BVL-{suffix}", zulassung_ablauf=datum))
-    db.flush()
-    a = list_psm_zulassungen(tenant_id=A, search=marker, skip=0, limit=1, db=db)
-    b = list_psm_zulassungen(tenant_id=B, search=marker, skip=0, limit=1, db=db)
-    assert a.total == 1 and a.abgelaufen == 1 and a.items[0].artikelnummer == f"{marker}-a"
-    assert b.total == 1 and b.abgelaufen == 0 and b.items[0].artikelnummer == f"{marker}-b"

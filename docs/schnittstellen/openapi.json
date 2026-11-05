@@ -118903,7 +118903,7 @@
         "type": "object"
       },
       "PSM": {
-        "description": "Full PSM schema",
+        "description": "Read contract: nullable ORM values stay unknown; write validation is unchanged.",
         "properties": {
           "abstand_gewaesser": {
             "anyOf": [
@@ -118939,24 +118939,40 @@
             "type": "string"
           },
           "auflagen": {
-            "description": "Restrictions",
-            "items": {
-              "type": "string"
-            },
-            "title": "Auflagen",
-            "type": "array"
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Auflagen"
           },
           "ausgangsstoff_explosivstoffe": {
-            "default": false,
-            "description": "Contains explosive precursors",
-            "title": "Ausgangsstoff Explosivstoffe",
-            "type": "boolean"
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ausgangsstoff Explosivstoffe"
           },
           "bienenschutz": {
-            "default": false,
-            "description": "Bee protection",
-            "title": "Bienenschutz",
-            "type": "boolean"
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bienenschutz"
           },
           "bvl_nummer": {
             "description": "BVL number",
@@ -119028,10 +119044,15 @@
             "title": "Ek Preis"
           },
           "erklaerung_landwirt_erforderlich": {
-            "default": false,
-            "description": "Farmer's declaration required",
-            "title": "Erklaerung Landwirt Erforderlich",
-            "type": "boolean"
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erklaerung Landwirt Erforderlich"
           },
           "erklaerung_landwirt_status": {
             "anyOf": [
@@ -119047,10 +119068,15 @@
             "title": "Erklaerung Landwirt Status"
           },
           "eu_zulassung": {
-            "default": false,
-            "description": "EU approval",
-            "title": "Eu Zulassung",
-            "type": "boolean"
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Eu Zulassung"
           },
           "id": {
             "description": "PSM ID",
@@ -119058,32 +119084,65 @@
             "type": "string"
           },
           "indikationen": {
-            "description": "Indications",
-            "items": {
-              "type": "string"
-            },
-            "title": "Indikationen",
-            "type": "array"
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Indikationen"
           },
           "is_active": {
-            "default": true,
-            "description": "Whether the record is active",
-            "title": "Is Active",
-            "type": "boolean"
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Active"
+          },
+          "ist_aktiv": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ist Aktiv"
           },
           "kulturen": {
-            "description": "Applicable crops",
-            "items": {
-              "type": "string"
-            },
-            "title": "Kulturen",
-            "type": "array"
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kulturen"
           },
           "lagerbestand": {
-            "default": 0,
-            "description": "Stock quantity",
-            "title": "Lagerbestand",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lagerbestand"
           },
           "mittel_typ": {
             "description": "Product type",
@@ -119142,11 +119201,15 @@
             "title": "Vk Preis"
           },
           "waehrung": {
-            "default": "EUR",
-            "description": "Currency",
-            "maxLength": 3,
-            "title": "Waehrung",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Waehrung"
           },
           "wartezeit": {
             "anyOf": [
@@ -119162,10 +119225,15 @@
             "title": "Wartezeit"
           },
           "wasserschutz_gebiet": {
-            "default": false,
-            "description": "Water protection area",
-            "title": "Wasserschutz Gebiet",
-            "type": "boolean"
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wasserschutz Gebiet"
           },
           "wirkstoff": {
             "description": "Active ingredient",
@@ -119188,10 +119256,16 @@
             "title": "Wirkstoff Gruppe"
           },
           "zulassung_ablauf": {
-            "description": "Approval expiry",
-            "format": "date-time",
-            "title": "Zulassung Ablauf",
-            "type": "string"
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Zulassung Ablauf"
           }
         },
         "required": [
@@ -119200,7 +119274,6 @@
           "wirkstoff",
           "mittel_typ",
           "bvl_nummer",
-          "zulassung_ablauf",
           "id",
           "tenant_id"
         ],

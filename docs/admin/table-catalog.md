@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, architect, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-04
+last_reviewed: 2026-11-05
 version: 1.0.0
 description: Generierter Katalog der domain_*-Tabellen aus information_schema.
 ---
@@ -17,7 +17,7 @@ Quelle: `information_schema` nach `alembic upgrade head`. Verbraucher: SQL/ORM u
 Logisches Modell: [ERD Canonical Domain](../architecture/views/erd-canonical-domain.md).
 Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell-tenancy.md).
 
-**31 Schemas, 701 Tabellen, 9304 Spalten.**
+**31 Schemas, 700 Tabellen, 9294 Spalten.**
 
 ## Schemas
 
@@ -45,7 +45,7 @@ Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell
 | `domain_meldewesen` | `finance` | 2 | 21 |
 | `domain_mfg` | `inventory` | 3 | 15 |
 | `domain_nachweisraum` | `dms-compliance` | 3 | 31 |
-| `domain_ops` | `inventory` | 76 | 1091 |
+| `domain_ops` | `inventory` | 75 | 1081 |
 | `domain_portal` | `crm` | 9 | 150 |
 | `domain_pos` | `finance` | 4 | 41 |
 | `domain_pricing` | `finance` | 5 | 49 |
@@ -530,7 +530,6 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_ops.ops_wiegungen` | `app/domains/operations/models.py` | — | — |
 | `domain_ops.ops_zapfungen` | `app/domains/operations/models.py` | `app/services/tank_adapter_service.py` | — |
 | `domain_ops.ops_zertifikate` | `app/core/database.py`, `app/domains/operations/models.py` | — | — |
-| `domain_ops.ops_zulassungen_register` | `app/domains/operations/models.py` | — | — |
 | `domain_ops.pos_position_override` | `app/domains/operations/models.py` | — | — |
 | `domain_ops.pos_position_rule` | `app/domains/operations/models.py` | — | — |
 | `domain_ops.pos_position_snapshot` | `app/domains/operations/models.py` | — | — |
@@ -1342,7 +1341,6 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `ops_wiegungen` | `inventory` | prefix | `id` | id, kennzeichen, fahrer_name, artikel, brutto, tara, netto, chargennummer, lieferant, kunde, zeitstempel, waage_id, created_at, created_by, tenant_id |
 | `ops_zapfungen` | `inventory` | prefix | `id` | id, kennzeichen, fahrzeug_id, fahrer, fahrer_id, artikel, menge, kilometer_stand, zapfsaeule, preis_liter, gesamtpreis, zeitstempel, notiz, tenant_id, created_at, created_by |
 | `ops_zertifikate` | `inventory` | prefix | `id` | id, art, standard, nummer, gueltig_bis, audit, status, created_at, updated_at, tenant_id |
-| `ops_zulassungen_register` | `inventory` | prefix | `id` | id, produkt, typ, nummer, behoerde, gueltig_bis, status, created_at, updated_at, tenant_id |
 | `pos_position_override` | `inventory` | native | `override_id` | override_id, branch_id, article_id, period_key, requested_by, requested_at, reason, status, approved_by, approved_at, valid_until, comment, related_doc_type, related_doc_id, tenant_id, created_at, updated_at |
 | `pos_position_rule` | `inventory` | native | `rule_id` | rule_id, scope_type, scope_id, neg_tolerance_qty, max_short_days, yellow_threshold, red_threshold, approval_required, approval_role, active_from, active_to, tenant_id, created_at, created_by, updated_at, updated_by |
 | `pos_position_snapshot` | `inventory` | native | `snapshot_id` | snapshot_id, branch_id, as_of_date, period_mode, article_id, period_key, qty_buy_open, qty_sell_open, qty_net, qty_tolerance, severity, tenant_id, created_at |
