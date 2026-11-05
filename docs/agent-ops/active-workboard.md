@@ -20452,3 +20452,7 @@ keine unkontrollierte Seitenueberbreite, lesbare Texte/Konturen und keine extern
 Keine Anmeldung, Buchung, Datenbank oder Produktivfreigabe durch diesen Komponenten-Nachweis.
 Die direkte Browser-Use-Verbindung scheitert vor Start am fehlenden Kernel-Assetpfad (ein Reset erfolglos);
 der Repository-Browsertest ist davon getrennt und umgeht keine Anmeldung oder Sicherheitsfreigabe.
+
+## PSM-SORTSYMBOLE-20261105 — reserviert, Codex Lead
+
+Enger Folgeclaim aus der visuellen Pruefung: gemeinsame VirtualDataTable-Sortierzeichen (30 Prozent Deckkraft, nicht automatisch bewertbare Sonderzeichen) durch klare SVG-Symbole mit Vordergrundfarbe ersetzen. Dateibesitz nur VirtualDataTable.tsx; keine parallele Maske. Abnahme: bestehende Tabellentests und sechs PSM-Rendereransichten mit Kontrastpruefung.
