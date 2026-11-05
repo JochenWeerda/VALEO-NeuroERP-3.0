@@ -204,7 +204,6 @@
     "app/crm/seed.py",
     "app/domains/agrar/api/psm.py",
     "app/domains/agrar/api/psm_proplanta.py",
-    "app/services/compliance_service.py",
     "app/services/pdf_service.py",
     "modules/agrar/services/feldbuch_service.py"
    ],
@@ -214,7 +213,7 @@
     "token": 5
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/compliance.py:838",
+    "app/api/v1/endpoints/compliance.py:828",
     "app/seeds/inventory_seed.py:20"
    ],
    "null_stellen": [],
@@ -288,7 +287,7 @@
     "token": 7
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/compliance.py:838",
+    "app/api/v1/endpoints/compliance.py:828",
     "app/seeds/inventory_seed.py:20"
    ],
    "null_stellen": [
@@ -344,7 +343,7 @@
     "token": 2
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/compliance.py:838",
+    "app/api/v1/endpoints/compliance.py:828",
     "app/services/calendar_projection_service.py:911"
    ],
    "null_stellen": [],
@@ -2772,6 +2771,7 @@
     "app/infrastructure/models/__init__.py",
     "app/infrastructure/models/futtermittel_models.py",
     "app/infrastructure/models/l3c_models.py",
+    "app/services/compliance_service.py",
     "app/services/esg_footprint_service.py",
     "app/services/eudr_register_service.py",
     "app/services/feed_produktion_lifecycle_service.py",
@@ -2797,7 +2797,6 @@
     "app/core/screen_definitions_listen.py",
     "app/core/screen_definitions_stamm.py",
     "app/domains/operations/repository.py",
-    "app/services/compliance_service.py",
     "app/services/feed_production_chain_service.py",
     "app/services/harvest_acceptance_service.py",
     "app/services/inventory_compat_service.py",
@@ -2814,7 +2813,7 @@
     "token": 14
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/compliance.py:838",
+    "app/api/v1/endpoints/compliance.py:828",
     "app/api/v1/endpoints/reklamation_api.py:121",
     "app/infrastructure/models/futtermittel_models.py:92"
    ],

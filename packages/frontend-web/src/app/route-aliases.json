@@ -3357,10 +3357,6 @@
       "path": "disposition/strecken-disposition"
     },
     {
-      "module": "@/pages/disposition/umlagerungs-vorschlag",
-      "path": "disposition/umlagerungs-vorschlag"
-    },
-    {
       "module": "@/pages/dms/archiv-suche",
       "path": "dms/archiv-suche"
     },
