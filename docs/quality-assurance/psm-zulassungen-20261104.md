@@ -30,4 +30,6 @@ Die kanonische PSM-ScreenDefinition wurde unveraendert durch NativeListPage, Ren
 
 Die Pruefung fand stark abgeschwaechte Unicode-Sortierpfeile in der gemeinsamen Tabelle. Sie sind zentral durch SVG-Symbole mit Vordergrundfarbe ersetzt. Bestehende VirtualDataTable-Suite: **4 passed**, Exit 0. Der Test wurde nicht um Kontrast-Ausnahmen abgeschwaecht.
 
-Nachweise: `evidence/psm-zulassungen-20261105/report.json` (Schema-Hash und sechs Ergebnisse), daneben sechs PNGs. Wiederholung: im Frontend `node tests/visual/psm-runtime-visual.mjs`. Die direkte Browser-Use-Verbindung scheiterte vor dem Start am Kernel-Assetpfad; der Komponentenlauf ersetzt keine Anmeldung, Rollen- oder RLS-Endabnahme. CI auf dem neuen Commit steht aus.
+Nachweise: `evidence/psm-zulassungen-20261105/psm-rendernachweis.json` (Schema-Hash und sechs Ergebnisse), daneben sechs PNGs. Wiederholung: im Frontend `node tests/visual/psm-runtime-visual.mjs`. Die direkte Browser-Use-Verbindung scheiterte vor dem Start am Kernel-Assetpfad; der Komponentenlauf ersetzt keine Anmeldung, Rollen- oder RLS-Endabnahme. CI auf dem neuen Commit steht aus.
+
+CI-Pfadpruefung: Der generische Dateiname `report.json` ist im Projekt gesperrt. Der ausschliesslich synthetische Renderer-Nachweis traegt jetzt den eindeutigen Namen `psm-rendernachweis.json`; keine Guard-Regel geaendert.

@@ -78,7 +78,7 @@ try {
       } finally { await context.close() }
     }
   }
-  await fs.writeFile(path.join(output, 'report.json'), JSON.stringify(report, null, 2) + '\n')
+  await fs.writeFile(path.join(output, 'psm-rendernachweis.json'), JSON.stringify(report, null, 2) + '\n')
 } finally {
   if (browser) await browser.close()
   await server.close()
