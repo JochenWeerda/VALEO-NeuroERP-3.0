@@ -20441,7 +20441,7 @@ PSM-READ-NULL Nachlauf: lokales/BVL-Readschema behaelt nullable Werte, beide Akt
 
 PSM-ZULASSUNGEN / PSM-READ-NULL Abnahme 05.11.: Backendfokus 9 bestanden, Feldvertrag 5 bestanden, PostgreSQL 2 bestanden (DROP/Rollback und SQL-Mandantenpraedikat, kein JWT-/valeo_app-RLS-Nachweis), native UI-Vertraege 147 bestanden plus ein erwarteter Altlastfall, Hook-Test bestanden, vollstaendige Frontend-Typpruefung bestanden. Ein Alembic-Kopf; vollstaendige Pending-Kette transaktional geprueft und zurueckgerollt, Katalog/RLS daraus aktualisiert, Revision unveraendert. Generatorgesamtcheck und Ratschen gruen, Doku-Drift 0. Browser-/visuelle und CI-Integration bleiben offen; Details QA psm-zulassungen-20261104.md.
 
-## PSM-VISUAL-20261105 — reserviert, Codex Lead
+## PSM-VISUAL-20261105 — Komponentenabnahme bestanden, Codex Lead
 
 Ziel: die echte kanonische PSM-ScreenDefinition ueber NativeListPage, RenderPlan und UniversalMaskRuntime
 in einem isolierten automatisierten Browser mit ausschliesslich synthetischen Daten pruefen.
@@ -20453,6 +20453,8 @@ Keine Anmeldung, Buchung, Datenbank oder Produktivfreigabe durch diesen Komponen
 Die direkte Browser-Use-Verbindung scheitert vor Start am fehlenden Kernel-Assetpfad (ein Reset erfolglos);
 der Repository-Browsertest ist davon getrennt und umgeht keine Anmeldung oder Sicherheitsfreigabe.
 
-## PSM-SORTSYMBOLE-20261105 — reserviert, Codex Lead
+## PSM-SORTSYMBOLE-20261105 — abgeschlossen, Codex Lead
 
 Enger Folgeclaim aus der visuellen Pruefung: gemeinsame VirtualDataTable-Sortierzeichen (30 Prozent Deckkraft, nicht automatisch bewertbare Sonderzeichen) durch klare SVG-Symbole mit Vordergrundfarbe ersetzen. Dateibesitz nur VirtualDataTable.tsx; keine parallele Maske. Abnahme: bestehende Tabellentests und sechs PSM-Rendereransichten mit Kontrastpruefung.
+
+Abnahme 05.11.2026: sechs Rendereransichten Hell/Dunkel bestanden, Kontrast ohne Verstoesse oder unbewertete Befunde; vier bestehende Tabellentests gruen. Sechs Screenshots gesichtet. Authentifizierte Gesamtansicht und neuer CI-Nachlauf bleiben offen; QA psm-zulassungen-20261104.md.

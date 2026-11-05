@@ -1,4 +1,5 @@
 import { useMemo, useRef, type ReactNode } from 'react'
+import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { cn } from '@/lib/utils'
 import { useTouchDevice } from '@/hooks/useTouchDevice'
@@ -204,11 +205,13 @@ export function VirtualDataTable<T extends Record<string, unknown>>({
                   }
                 >
                   {column.label}
-                  {canSort && isActive ? (
-                    <span className="ml-1">{sortDir === 'asc' ? '↑' : '↓'}</span>
-                  ) : canSort ? (
-                    <span className="ml-1 opacity-30">⇅</span>
-                  ) : null}
+                  {canSort && (
+                    isActive
+                      ? sortDir === 'asc'
+                        ? <ArrowUp aria-hidden="true" className="ml-1 inline-block size-3 text-foreground" />
+                        : <ArrowDown aria-hidden="true" className="ml-1 inline-block size-3 text-foreground" />
+                      : <ArrowUpDown aria-hidden="true" className="ml-1 inline-block size-3 text-foreground" />
+                  )}
                 </div>
               )
             })}
