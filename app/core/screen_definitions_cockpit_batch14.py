@@ -938,27 +938,6 @@ def build_disposition_bestell_vorschlag_screen_definition() -> dict[str, Any]:
     )
 
 
-def build_disposition_engpass_monitor_screen_definition() -> dict[str, Any]:
-    return build_cockpit_overview_screen(
-        screen_id="disposition/engpass-monitor",
-        domain="logistics",
-        title="Engpass-Monitor",
-        subtitle="Engpaesse in der Disposition",
-        business_purpose="Engpass-Monitor als Read-Model-Cockpit.",
-        example_prompts=["Zeige Engpass-Monitor.", "Was ist der aktuelle Stand?"],
-        test_id="disposition-engpass-monitor",
-        summary=[
-            {"key": "total", "label": "Anzahl", "tone": "neutral"},
-            {"key": "open", "label": "Offen", "tone": "warning"},
-        ],
-        data_sources=[cockpit_entity_source("/api/v1/disposition/stats")],
-        tiles=[cockpit_nav_tile("overview", "Uebersicht", target_route="/disposition/engpass-monitor")],
-        table_profile="inventory",
-        actions=[cockpit_refresh_action(permission="logistics.read")],
-        context_rail="combined",
-    )
-
-
 def build_disposition_kontrakt_abruf_screen_definition() -> dict[str, Any]:
     return build_cockpit_overview_screen(
         screen_id="disposition/kontrakt-abruf",
@@ -1076,27 +1055,6 @@ def build_disposition_touren_disposition_screen_definition() -> dict[str, Any]:
         "liveChannel": "disposition.board",
     }
     return screen
-
-
-def build_disposition_umlagerungs_vorschlag_screen_definition() -> dict[str, Any]:
-    return build_cockpit_overview_screen(
-        screen_id="disposition/umlagerungs-vorschlag",
-        domain="logistics",
-        title="Umlagerungs-Vorschlag",
-        subtitle="Umlagerungsvorschlaege",
-        business_purpose="Umlagerungs-Vorschlag als Read-Model-Cockpit.",
-        example_prompts=["Zeige Umlagerungs-Vorschlag.", "Was ist der aktuelle Stand?"],
-        test_id="disposition-umlagerungs-vorschlag",
-        summary=[
-            {"key": "total", "label": "Anzahl", "tone": "neutral"},
-            {"key": "open", "label": "Offen", "tone": "warning"},
-        ],
-        data_sources=[cockpit_entity_source("/api/v1/disposition")],
-        tiles=[cockpit_nav_tile("overview", "Uebersicht", target_route="/disposition/umlagerungs-vorschlag")],
-        table_profile="inventory",
-        actions=[cockpit_refresh_action(permission="logistics.read")],
-        context_rail="combined",
-    )
 
 
 def build_dms_archiv_suche_screen_definition() -> dict[str, Any]:
@@ -1723,13 +1681,11 @@ BATCH14_BUILDERS: dict[str, Any] = {
     "dashboard/customizable-dashboard": build_dashboard_customizable_dashboard_screen_definition,
     "dashboard/sales-dashboard": build_dashboard_sales_dashboard_screen_definition,
     "disposition/bestell-vorschlag": build_disposition_bestell_vorschlag_screen_definition,
-    "disposition/engpass-monitor": build_disposition_engpass_monitor_screen_definition,
     "disposition/kontrakt-abruf": build_disposition_kontrakt_abruf_screen_definition,
     "disposition/lager-reichweite": build_disposition_lager_reichweite_screen_definition,
     "disposition/saison-planung": build_disposition_saison_planung_screen_definition,
     "disposition/strecken-disposition": build_disposition_strecken_disposition_screen_definition,
     "disposition/touren-disposition": build_disposition_touren_disposition_screen_definition,
-    "disposition/umlagerungs-vorschlag": build_disposition_umlagerungs_vorschlag_screen_definition,
     "dms/archiv-suche": build_dms_archiv_suche_screen_definition,
     "dms/beleg-erkennung": build_dms_beleg_erkennung_screen_definition,
     "dms/dokument-detail": build_dms_dokument_detail_screen_definition,
