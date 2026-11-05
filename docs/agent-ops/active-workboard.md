@@ -20417,3 +20417,15 @@ Ziel: Batch-9-Migration schuetzt abweichende und NULL-haltige Daten vor Seed-Loe
 **Abschluss BATCH9-SEED-SCHUTZ-20261104:** Volle deterministische Seed-Geschaeftsfelder, keine Seed-Loeschung bei vorhandener Mandantenspalte, NULL-sicherer Drop-Schutz und Abbruch bei doppelten Dispositionssignaturen. Unbekannte Testreste erhalten. PostgreSQL TEMP-Test 1 passed, Revision unveraendert; Grenzen und Datenrisiko siehe docs/quality-assurance/batch9-seed-schutz-20261104.md.
 
 PSM-ZULASSUNGEN Nachtrag: Neuer Migrationsvertrag und Rollback-Test vorbereitet; Ausfuehrung wartet auf das koordinierte Prueffenster und aktualisierte B8/B9-Guards. Folgeauftrag B separat: VVVO-Liste liest ops_vvvo_register, der Pruefweg schreibt domain_compliance.compliance_vvvo_register; Service-UPDATE/Detail ohne Tenant-WHERE und ohne Audit, Faelligkeitsabfrage schliesst Ueberfaellige und NULL aus. Weitere Erfassungswege brauchen eigene Claims und Fachkommandos.
+## BATCH8-ALTTABELLE-TESTDATEN-20261104 — abgeschlossen, Codex
+
+Neue Nutzerentscheidung 04.11.2026: "vorhandene zeilen sin nur testdaten. tabelle kann entfernt werden, wenn nicht mehr passend".
+Die ersetzte ops_marketing_kampagnen darf nach dem bereits belegten Verbraucherabbau auch mit Testzeilen
+entfernt werden. Dies ersetzt fuer diese ausgemusterte Tabelle die vorherige Seed-/Leerheitspruefung.
+Dateibesitz: scheinwege_mandant_20261103.py, gezielter Batch8-Test, QA und dieser Nachtrag.
+Abnahme: DROP ohne CASCADE nach vorhandener Tabellensperre; PostgreSQL-Nachweis ausschliesslich temporaer
+und zurueckgerollt. Weiter verwendete Foerder-/Labortabellen und deren Mandanten-/RLS-Vertraege bleiben erhalten.
+
+Abnahme 05.11.2026: zwei Batch-8- und ein Batch-9-PostgreSQL-Test gemeinsam sequentiell bestanden (3 passed, Exit 0).
+Belegte Alttabelle entfernt und via Savepoint-Rollback wiederhergestellt. Rolle valeo_agent, Revision vorher/nachher
+ruestlisten_tabelle_20261103, fremde Clients jeweils 0. Keine persistente Schemaaenderung, kein Reset oder Stamp.

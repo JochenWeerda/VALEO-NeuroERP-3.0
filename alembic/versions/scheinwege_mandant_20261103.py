@@ -7,15 +7,15 @@ Die Wege ``/foerderung``, ``/marketing`` und ``/labor`` legten bei jedem Lesezug
 schrieben ohne Mandanten. Nutzerentscheidung 04.11.2026: Seed-Tabellen ohne Studio-Maske oder mit Ersatz werden
 entfernt, ersetzter Altbestand ohne Nutzer darf geloescht werden; Kampagnen fuehrt ``domain_crm.crm_campaigns``.
 
-- ``ops_marketing_kampagnen``: nur die vollstaendige Geschaeftssignatur der beiden Seeds ist erlaubt;
-  andere oder mehrfache Zeilen blockieren die Entfernung.
+- ``ops_marketing_kampagnen``: ersetzt durch CRM; die vorhandenen Zeilen sind laut
+  Nutzerentscheidung vom 04.11.2026 Testdaten und duerfen mit der Alttabelle entfallen.
 - ``ops_foerderantraege``, ``ops_labor_proben``, ``ops_labor_auftraege``: nur vollstaendige Seed-Signaturen werden geloescht.
   Testauftraege und Befunde bleiben erhalten, da Teilkennungen ihre Herkunft nicht beweisen.
   Mandantenspalte und RLS werden eingerichtet; Befundspalten werden ergaenzt.
 - Uebrige Zeilen ohne Mandant (andere Installationen): Nutzerentscheidung 28.10.2026, Default-Mandant
   ``00000000-0000-0000-0000-000000000001``; fehlt er, bricht die Migration ab.
 
-Abweichende Marketingzeilen muessen vorab fachlich geklaert werden.
+Die Tabellenentfernung verwendet kein CASCADE; verbliebene Datenbankabhaengigkeiten blockieren sie.
 """
 from __future__ import annotations
 
@@ -40,9 +40,6 @@ OWN = "tenant_id = public.rls_current_tenant()"
 POLICIES = tuple(f"tenant_isolation_{kind}" for kind in ("select", "insert", "update", "delete"))
 
 # Geschaeftswerte aus f8bbdac5c^; generierte IDs/Zeitstempel sind nicht reproduzierbar.
-SEED_KAMPAGNEN = """(name, typ, zielgruppe, startdatum, enddatum, budget, status) IN (
- ('Herbst-Aktion Weizen', 'E-Mail', 'Landwirte', '2025-10-01 00:00:00', '2025-10-31 00:00:00', 2500, 'beendet'),
- ('Fruehjahrs-Duenger-Kampagne', 'Newsletter', 'Ackerbau', '2026-02-15 00:00:00', '2026-03-31 00:00:00', 3000, 'aktiv'))"""
 SEED_ANTRAEGE = """(nummer, programm, antragsdatum, flaeche, betrag, status) IN (
  ('FA-2026-001', 'Greening', '2026-03-15 00:00:00', 250, 21250, 'bewilligt'),
  ('FA-2026-002', 'Junglandwirte', '2026-04-01 00:00:00', 120, 15000, 'eingereicht'))"""
@@ -77,14 +74,7 @@ def _enable(table: str) -> None:
 def _marketing_entfernen(bind) -> None:
     if not _exists(bind, MARKETING):
         return
-    if _has_column(bind, MARKETING, "tenant_id"):
-        bestand = bind.execute(sa.text(f"SELECT count(*) FROM {MARKETING}")).scalar()  # nosec B608
-        if bestand:
-            raise RuntimeError(f"{MARKETING}: bereits mandantengebundener Bestand; vor Entfernung fachlich klaeren")
-    bestand = bind.execute(sa.text(f"SELECT count(*) FROM {MARKETING} WHERE ({SEED_KAMPAGNEN}) IS NOT TRUE")).scalar()  # nosec B608
-    mehrfach = bind.execute(sa.text(f"SELECT count(*) FROM (SELECT name FROM {MARKETING} GROUP BY name HAVING count(*) > 1) d")).scalar()  # nosec B608
-    if bestand or mehrfach:
-        raise RuntimeError(f"{MARKETING}: {bestand} abweichende Kampagnen und {mehrfach} doppelte Namen; Bestand fachlich klaeren")
+    # Verbraucher sind auf domain_crm.crm_campaigns umgestellt; Testbestand ist freigegeben.
     op.execute(f"DROP TABLE {MARKETING}")
 
 
