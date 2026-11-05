@@ -7,17 +7,15 @@ Die Wege ``/foerderung``, ``/marketing`` und ``/labor`` legten bei jedem Lesezug
 schrieben ohne Mandanten. Nutzerentscheidung 04.11.2026: Seed-Tabellen ohne Studio-Maske oder mit Ersatz werden
 entfernt, ersetzter Altbestand ohne Nutzer darf geloescht werden; Kampagnen fuehrt ``domain_crm.crm_campaigns``.
 
-- ``ops_marketing_kampagnen``: ersetzt durch die CRM-Kampagnen, kein Weg liest sie mehr -> entfernt. Enthaelt sie
-  andere Zeilen als die zwei frueheren Seed-Kampagnen, bricht die Migration ab (nichts Echtes wird verworfen).
-- ``ops_foerderantraege``, ``ops_labor_proben``, ``ops_labor_auftraege`` (Studio-Masken vorhanden): Seed-Zeilen und
-  die Testreste von ``tests/test_labor_api.py`` (Chargen ``TEST-CHARGE-%`` bei ``Test-Labor`` samt Befunden) werden
-  geloescht - an ihrer exakten Signatur, nicht an Mustern allein. Danach Mandantenspalte mit RLS (Policy je Befehl),
-  Antragsnummer je Mandant eindeutig, Befundspalten, die der Befundweg bisher nur zurueckgab.
+- ``ops_marketing_kampagnen``: ersetzt durch CRM; die vorhandenen Zeilen sind laut
+  Nutzerentscheidung vom 04.11.2026 Testdaten und duerfen mit der Alttabelle entfallen.
+- ``ops_foerderantraege``, ``ops_labor_proben``, ``ops_labor_auftraege``: nur vollstaendige Seed-Signaturen werden geloescht.
+  Testauftraege und Befunde bleiben erhalten, da Teilkennungen ihre Herkunft nicht beweisen.
+  Mandantenspalte und RLS werden eingerichtet; Befundspalten werden ergaenzt.
 - Uebrige Zeilen ohne Mandant (andere Installationen): Nutzerentscheidung 28.10.2026, Default-Mandant
   ``00000000-0000-0000-0000-000000000001``; fehlt er, bricht die Migration ab.
 
-Gewachsene Datenbank 03.11.2026: alle Zeilen der vier Tabellen sind Seed oder Testrest (2 Antraege, 2 Kampagnen,
-7 Proben, 74 Auftraege).
+Die Tabellenentfernung verwendet kein CASCADE; verbliebene Datenbankabhaengigkeiten blockieren sie.
 """
 from __future__ import annotations
 
@@ -41,12 +39,16 @@ TABELLEN = (FOERDER, PROBEN, AUFTRAEGE)
 OWN = "tenant_id = public.rls_current_tenant()"
 POLICIES = tuple(f"tenant_isolation_{kind}" for kind in ("select", "insert", "update", "delete"))
 
-# Exakte Signaturen der frueheren _seed-Funktionen und der Testreste.
-SEED_KAMPAGNEN = ("Herbst-Aktion Weizen", "Fruehjahrs-Duenger-Kampagne")
-SEED_ANTRAEGE = "(nummer, programm, flaeche, betrag) IN (('FA-2026-001', 'Greening', 250, 21250), ('FA-2026-002', 'Junglandwirte', 120, 15000))"
-SEED_PROBEN = "id IN ('LB-SEED-2026-001', 'LB-SEED-2026-002')"
-SEED_AUFTRAEGE = "id IN ('LA-SEED-WEI-001', 'LA-SEED-RAP-002')"
-TEST_AUFTRAEGE = "chargen_id IN ('TEST-CHARGE-001', 'TEST-CHARGE-SPERRE-001') AND labor = 'Test-Labor'"
+# Geschaeftswerte aus f8bbdac5c^; generierte IDs/Zeitstempel sind nicht reproduzierbar.
+SEED_ANTRAEGE = """(nummer, programm, antragsdatum, flaeche, betrag, status) IN (
+ ('FA-2026-001', 'Greening', '2026-03-15 00:00:00', 250, 21250, 'bewilligt'),
+ ('FA-2026-002', 'Junglandwirte', '2026-04-01 00:00:00', 120, 15000, 'eingereicht'))"""
+SEED_PROBEN = """(id, probennummer, typ, artikel, datum, labor, status) IN (
+ ('LB-SEED-2026-001', 'LB-2026-001', 'Qualitaetspruefung', 'Weizen Premium', '2026-02-10 00:00:00', 'Lufa Nord-West', 'abgeschlossen'),
+ ('LB-SEED-2026-002', 'LB-2026-002', 'Rueckstandsanalyse', 'Raps', '2026-02-11 00:00:00', 'SGS', 'in-bearbeitung'))"""
+SEED_AUFTRAEGE = """(id, chargen_id, labor, analysen, auftragsdatum, status) IN (
+ ('LA-SEED-WEI-001', '251011-WEI-001', 'Lufa Nord-West', 4, '2026-02-10 00:00:00', 'in-bearbeitung'),
+ ('LA-SEED-RAP-002', '251010-RAP-002', 'SGS', 6, '2026-02-09 00:00:00', 'abgeschlossen'))"""
 
 
 def _exists(bind, table: str) -> bool:
@@ -72,23 +74,22 @@ def _enable(table: str) -> None:
 def _marketing_entfernen(bind) -> None:
     if not _exists(bind, MARKETING):
         return
-    fremd = bind.execute(sa.text(f"SELECT count(*) FROM {MARKETING} WHERE name NOT IN :n").bindparams(  # nosec B608
-        sa.bindparam("n", expanding=True)), {"n": list(SEED_KAMPAGNEN)}).scalar()
-    if fremd:
-        raise RuntimeError(f"{MARKETING}: {fremd} Kampagnen ausser dem Seed; erst in domain_crm.crm_campaigns uebernehmen")
+    # Verbraucher sind auf domain_crm.crm_campaigns umgestellt; Testbestand ist freigegeben.
     op.execute(f"DROP TABLE {MARKETING}")
 
 
-def _seed_und_testreste_loeschen(bind) -> None:
-    if _exists(bind, FOERDER):
-        op.execute(f"DELETE FROM {FOERDER} WHERE {SEED_ANTRAEGE}")  # nosec B608
-    if _exists(bind, PROBEN) and _exists(bind, AUFTRAEGE):
-        op.execute(f"DELETE FROM {PROBEN} WHERE probennummer IN (SELECT 'BEF-' || id FROM {AUFTRAEGE} "  # nosec B608
-                   f"WHERE {TEST_AUFTRAEGE} OR {SEED_AUFTRAEGE})")
-    if _exists(bind, PROBEN):
-        op.execute(f"DELETE FROM {PROBEN} WHERE {SEED_PROBEN}")  # nosec B608
-    if _exists(bind, AUFTRAEGE):
-        op.execute(f"DELETE FROM {AUFTRAEGE} WHERE {TEST_AUFTRAEGE} OR {SEED_AUFTRAEGE}")  # nosec B608
+def _seed_loeschen(bind) -> None:
+    for table, predicate in ((FOERDER, SEED_ANTRAEGE), (PROBEN, SEED_PROBEN), (AUFTRAEGE, SEED_AUFTRAEGE)):
+        if not _exists(bind, table):
+            continue
+        # Bereits zugeordnete oder erweiterte Zeilen koennen echte Nutzdaten tragen.
+        if _has_column(bind, table, "tenant_id") or (table == PROBEN and any(
+            _has_column(bind, table, column) for column in ("analysewerte", "grenzwerte", "bemerkung")
+        )):
+            continue
+        if table == FOERDER:
+            predicate += f" AND nummer IN (SELECT nummer FROM {FOERDER} GROUP BY nummer HAVING count(*) = 1)"
+        op.execute(f"DELETE FROM {table} WHERE {predicate}")  # nosec B608
 
 
 def upgrade() -> None:
@@ -98,7 +99,7 @@ def upgrade() -> None:
     if gesperrt:
         op.execute(f"LOCK TABLE {', '.join(gesperrt)} IN ACCESS EXCLUSIVE MODE")
     _marketing_entfernen(bind)
-    _seed_und_testreste_loeschen(bind)
+    _seed_loeschen(bind)
 
     for table in present:
         if not _has_column(bind, table, "tenant_id"):
@@ -132,7 +133,7 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    """Struktur zurueck; geloeschte Seeds und Testreste kommen nicht wieder (es waren Scheindaten)."""
+    """Struktur zurueck; vorhandene Fach- und Altzeilen bleiben erhalten."""
     bind = op.get_bind()
     for table in TABELLEN:
         if not _exists(bind, table):
