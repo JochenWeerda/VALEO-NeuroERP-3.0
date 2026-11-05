@@ -213,7 +213,7 @@
     "token": 5
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/compliance.py:828",
+    "app/api/v1/endpoints/compliance.py:797",
     "app/seeds/inventory_seed.py:20"
    ],
    "null_stellen": [],
@@ -287,7 +287,7 @@
     "token": 7
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/compliance.py:828",
+    "app/api/v1/endpoints/compliance.py:797",
     "app/seeds/inventory_seed.py:20"
    ],
    "null_stellen": [
@@ -343,7 +343,7 @@
     "token": 2
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/compliance.py:828",
+    "app/api/v1/endpoints/compliance.py:797",
     "app/services/calendar_projection_service.py:911"
    ],
    "null_stellen": [],
@@ -2813,7 +2813,7 @@
     "token": 14
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/compliance.py:828",
+    "app/api/v1/endpoints/compliance.py:797",
     "app/api/v1/endpoints/reklamation_api.py:121",
     "app/infrastructure/models/futtermittel_models.py:92"
    ],

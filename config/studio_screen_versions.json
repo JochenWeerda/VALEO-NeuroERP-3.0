@@ -2827,17 +2827,6 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "compliance/usp-konformitaet": {
-      "definition_hash": "0dc1d83f3d00a41c2e823cba1e533f41aac6a21072e67f60efb3ae2e1759fb2e",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "compliance/vvvo-liste": {
       "definition_hash": "91b10953df68b864849f7790a204da539c12d4c06046e43a446a58f4877e297c",
       "gates_passed": [
@@ -2872,7 +2861,7 @@
       "version": "1.0.0"
     },
     "compliance/zulassungen-liste": {
-      "definition_hash": "82b18d17823dcb35586688d7948ba97109e543be1660350b36c76e1780521133",
+      "definition_hash": "cbaa007cd8cc398eb55d2f248d0234db04998d9e593823a7094827a747496c9e",
       "gates_passed": [
         "A",
         "B",

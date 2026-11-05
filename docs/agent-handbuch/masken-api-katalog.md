@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (772 Masken).
+> Generiert aus `app/core/screen_definitions.py` (771 Masken).
 
 ## Übersicht
 
@@ -274,11 +274,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `compliance/schadstoff-monitoring` | Schadstoff monitoring | compliance | niedrig | — | `GET /api/v1/masks/compliance/schadstoff-monitoring/agent-contract` |
 | `compliance/stichtagsmeldung-bestaende` | Stichtagsmeldung bestaende | compliance | niedrig | — | `GET /api/v1/masks/compliance/stichtagsmeldung-bestaende/agent-contract` |
 | `compliance/tierwohl-dokumentation` | Tierwohl dokumentation | compliance | niedrig | — | `GET /api/v1/masks/compliance/tierwohl-dokumentation/agent-contract` |
-| `compliance/usp-konformitaet` | Usp konformitaet | compliance | niedrig | — | `GET /api/v1/masks/compliance/usp-konformitaet/agent-contract` |
 | `compliance/vvvo-liste` | VVVO-Register | compliance | niedrig | — | `GET /api/v1/masks/compliance/vvvo-liste/agent-contract` |
 | `compliance/wasserschutz-auflagen` | Wasserschutz auflagen | compliance | niedrig | — | `GET /api/v1/masks/compliance/wasserschutz-auflagen/agent-contract` |
 | `compliance/zertifikate` | Zertifikate | compliance | niedrig | — | `GET /api/v1/masks/compliance/zertifikate/agent-contract` |
-| `compliance/zulassungen-liste` | Zulassungsregister | compliance | niedrig | — | `GET /api/v1/masks/compliance/zulassungen-liste/agent-contract` |
+| `compliance/zulassungen-liste` | PSM-Zulassungen | compliance | niedrig | — | `GET /api/v1/masks/compliance/zulassungen-liste/agent-contract` |
 | `contracts-v2` | Contracts v2 | workspace | niedrig | — | `GET /api/v1/masks/contracts-v2/agent-contract` |
 | `contracts/contract` | Contract | contracts | niedrig | — | `GET /api/v1/masks/contracts/contract/agent-contract` |
 | `controlling/abweichungsanalyse` | Abweichungsanalyse | controlling | niedrig | — | `GET /api/v1/masks/controlling/abweichungsanalyse/agent-contract` |
@@ -7723,35 +7722,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `compliance/usp-konformitaet` — Usp konformitaet
-
-**Zweck:** Usp konformitaet mandantensicher als Kontroll-Worklist abarbeiten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/compliance/usp-konformitaet/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/compliance/usp-konformitaet/agent-contract` |
-| Readiness | `GET /api/v1/masks/compliance/usp-konformitaet/readiness` |
-| Rollout-Route | `/mask-rollout/compliance__usp-konformitaet/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `entity` → `/api/v1/compliance/zulassungen-register`
-- `items` → `/api/v1/compliance/zulassungen-register`
-
-**MCP-Tools (Domäne):**
-
-- `compliance.gate.status` — scope `compliance:read`, Risiko niedrig
-- `compliance.sanctions.check` — scope `compliance:write`, Risiko mittel
-
-**Beispiel-Prompts:**
-
-- Zeige offene Usp konformitaet.
-- Was ist in Usp konformitaet faellig?
-
----
-
 ### `compliance/vvvo-liste` — VVVO-Register
 
 **Zweck:** VVVO-registrierte Betriebe finden und pruefen.
@@ -7844,9 +7814,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `compliance/zulassungen-liste` — Zulassungsregister
+### `compliance/zulassungen-liste` — PSM-Zulassungen
 
-**Zweck:** Produktzulassungen und Ablaufdaten im Blick behalten.
+**Zweck:** PSM-Zulassungsnummern und Ablaufdaten im eigenen Stamm pruefen.
 
 | | |
 |---|---|
@@ -7858,7 +7828,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `list` → `/api/v1/compliance/zulassungen-register`
+- `list` → `/api/v1/agrar/psm/zulassungen`
 
 **MCP-Tools (Domäne):**
 
@@ -7867,8 +7837,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Beispiel-Prompts:**
 
-- Welche Zulassungen laufen ab?
-- Welche Produkte sind widerrufen?
+- Welche PSM-Zulassungen laufen ab?
 
 **Actions:**
 

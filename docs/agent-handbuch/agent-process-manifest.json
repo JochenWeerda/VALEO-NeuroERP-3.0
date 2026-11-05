@@ -7140,23 +7140,6 @@
       ]
     },
     {
-      "mask_id": "compliance/usp-konformitaet",
-      "title": "Usp konformitaet",
-      "domain": "compliance",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/compliance__usp-konformitaet/:entityId",
-      "agent_contract_url": "/api/v1/masks/compliance/usp-konformitaet/agent-contract",
-      "screen_definition_url": "/api/v1/masks/compliance/usp-konformitaet/screen-definition",
-      "readiness_url": "/api/v1/masks/compliance/usp-konformitaet/readiness",
-      "risk_summary": "low",
-      "actions": [],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "compliance.gate.status",
-        "compliance.sanctions.check"
-      ]
-    },
-    {
       "mask_id": "compliance/vvvo-liste",
       "title": "VVVO-Register",
       "domain": "compliance",
@@ -7221,7 +7204,7 @@
     },
     {
       "mask_id": "compliance/zulassungen-liste",
-      "title": "Zulassungsregister",
+      "title": "PSM-Zulassungen",
       "domain": "compliance",
       "process_keys": [],
       "rollout_route": "/mask-rollout/compliance__zulassungen-liste/:entityId",

@@ -1,4 +1,4 @@
-"""Entfernt das ersetzte Zulassungsregister nur bei leerem Bestand.
+"""Entfernt das ersetzte Zulassungsregister einschliesslich Testdaten.
 
 Revision ID: psm_register_entfernt_20261104
 Revises: compliance_register_mandant_20261104
@@ -17,8 +17,6 @@ def upgrade() -> None:
     if not bind.execute(sa.text("SELECT to_regclass('domain_ops.ops_zulassungen_register')")).scalar():
         return
     op.execute("LOCK TABLE domain_ops.ops_zulassungen_register IN ACCESS EXCLUSIVE MODE")
-    if bind.execute(sa.text("SELECT count(*) FROM domain_ops.ops_zulassungen_register")).scalar():
-        raise RuntimeError("ops_zulassungen_register enthaelt Zeilen; vor Entfernung einzeln pruefen")
     op.execute("DROP TABLE domain_ops.ops_zulassungen_register")
 
 

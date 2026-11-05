@@ -57,10 +57,9 @@ def test_listenvertrag_und_mandantenfilter(monkeypatch):
     assert "/api/v1/agrar/psm/zulassungen" in str(build_compliance_zulassungen_liste())
 
 
-def test_migration_bricht_bei_jeder_zeile_ab(monkeypatch):
+def test_migration_entfernt_ersetzte_tabelle_ohne_cascade(monkeypatch):
     import importlib.util
     from pathlib import Path
-    import pytest
     path = Path(__file__).resolve().parents[1] / "alembic/versions/psm_zulassungen_register_entfernen_20261104.py"
     spec = importlib.util.spec_from_file_location("psm_register_migration", path)
     migration = importlib.util.module_from_spec(spec)
@@ -74,7 +73,6 @@ def test_migration_bricht_bei_jeder_zeile_ab(monkeypatch):
             return Result("domain_ops.ops_zulassungen_register" if "to_regclass" in str(statement) else 1)
     monkeypatch.setattr(migration.op, "get_bind", lambda: Bind())
     monkeypatch.setattr(migration.op, "execute", executed.append)
-    with pytest.raises(RuntimeError, match="enthaelt Zeilen"):
-        migration.upgrade()
-    assert any("LOCK TABLE" in command for command in executed)
-    assert not any("DROP TABLE" in command for command in executed)
+    migration.upgrade()
+    assert executed == ["LOCK TABLE domain_ops.ops_zulassungen_register IN ACCESS EXCLUSIVE MODE",
+                        "DROP TABLE domain_ops.ops_zulassungen_register"]

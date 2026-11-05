@@ -35,6 +35,8 @@ geloescht.
 
 ## 2. Verbindliche Nutzerentscheidungen
 
+**Vorrangiger Nachtrag 04.11.2026:** „vorhandene zeilen sin nur testdaten. tabelle kann entfernt werden, wenn nicht mehr passend“. Fuer nach Verbraucherpruefung belegbar ersetzte Tabellen (Marketing, Disposition, doppeltes Zertifikatsregister, altes Zulassungsregister) entfaellt die nachstehende Nicht-Seed-Abbruchpflicht. Entfernung ohne CASCADE; kein pauschaler Pruefstandsreset. Weiter genutzte Tabellen bleiben erhalten; ihre Daten werden nicht pauschal geloescht.
+
 - **Masken:** nur Studio-generierte Masken (ScreenDefinitions), keine handgebauten Seiten.
 - **Seed-Tabellen (04.11.2026):**
   - Seed-Tabellen ohne Studio-Maske oder mit Ersatztabelle werden entfernt.
