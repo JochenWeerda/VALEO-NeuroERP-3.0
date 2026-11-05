@@ -2456,11 +2456,6 @@
       "source": "alias"
     },
     {
-      "module": "@/pages/disposition/umlagerungs-vorschlag",
-      "path": "disposition/umlagerungs-vorschlag",
-      "source": "alias"
-    },
-    {
       "module": "@/pages/dms/archiv-suche",
       "path": "dms/archiv-suche",
       "source": "alias"

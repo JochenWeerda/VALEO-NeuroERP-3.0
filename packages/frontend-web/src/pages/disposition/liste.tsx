@@ -1,6 +1,7 @@
 import { NativeListPage } from '@/components/mask-builder/NativeListPage'
 
-/** Disposition aus der ScreenDefinition `disposition/liste`. */
-export default function DispositionListePage(): JSX.Element {
-  return <NativeListPage screenId="disposition/liste" testId="screen-disposition/liste" />
+/** Disposition: der Bestellvorschlag rechnet aus echtem Bestand und Meldebestand (ops_disposition war eine
+ * handgepflegte Scheinliste, Nutzerentscheidung 04.11.2026). */
+export default function Page(): JSX.Element {
+  return <NativeListPage screenId="einkauf/bestellvorschlaege-liste" testId="screen-disposition/liste" />
 }

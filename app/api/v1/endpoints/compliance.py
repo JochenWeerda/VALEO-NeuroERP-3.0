@@ -32,7 +32,6 @@ from app.services.compliance_service import (
     extract_hazard_export_rows as _extract_hazard_export_rows,
     compute_nutrient_stream as _compute_nutrient_stream,
     build_lot_trace_report as _build_lot_trace_report,
-    seed_compliance_data as _seed,
     build_compliance_pdf_bytes as _build_compliance_pdf_bytes,
 )
 
@@ -52,9 +51,8 @@ router = APIRouter(prefix="/compliance", tags=["Compliance"])
 
 
 @router.get("/cross-compliance", response_model=ComplianceOut, summary="Cross compliance auflisten")
-async def list_cross_compliance(db: Session = Depends(get_db)) -> dict:
-    _seed(db)
-    items = db.query(ComplianceEintrag).all()
+async def list_cross_compliance(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
+    items = db.query(ComplianceEintrag).filter(ComplianceEintrag.tenant_id == tenant_id).all()
     payload = [
         {
             "id": i.id,
@@ -75,9 +73,8 @@ async def list_cross_compliance(db: Session = Depends(get_db)) -> dict:
 
 
 @router.get("/enni-meldungen", response_model=ComplianceOut, summary="Enni meldungen auflisten")
-async def list_enni_meldungen(db: Session = Depends(get_db)) -> dict:
-    _seed(db)
-    items = db.query(ENNIMeldung).all()
+async def list_enni_meldungen(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
+    items = db.query(ENNIMeldung).filter(ENNIMeldung.tenant_id == tenant_id).all()
     return {
         "items": [
             {
@@ -96,9 +93,8 @@ async def list_enni_meldungen(db: Session = Depends(get_db)) -> dict:
 
 
 @router.get("/qs-checkliste", response_model=ComplianceOut, summary="Qs checkliste auflisten")
-async def list_qs_checkliste(db: Session = Depends(get_db)) -> dict:
-    _seed(db)
-    items = db.query(QSCheckEintrag).all()
+async def list_qs_checkliste(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
+    items = db.query(QSCheckEintrag).filter(QSCheckEintrag.tenant_id == tenant_id).all()
     payload = [
         {
             "id": i.id,
@@ -123,10 +119,9 @@ async def list_qs_checkliste(db: Session = Depends(get_db)) -> dict:
 async def list_zulassungen(
     typ: Optional[str] = Query(None),
     status: Optional[str] = Query(None),
-    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ) -> dict:
-    _seed(db)
-    q = db.query(ZulassungRegister)
+    q = db.query(ZulassungRegister).filter(ZulassungRegister.tenant_id == tenant_id)
     if typ:
         q = q.filter(ZulassungRegister.typ == typ)
     if status:
@@ -151,9 +146,8 @@ async def list_zulassungen(
 
 
 @router.get("/sachkunde-register", response_model=ComplianceOut, summary="Sachkunde auflisten")
-async def list_sachkunde(status: Optional[str] = Query(None), db: Session = Depends(get_db)) -> dict:
-    _seed(db)
-    q = db.query(SachkundeEintrag)
+async def list_sachkunde(status: Optional[str] = Query(None), tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
+    q = db.query(SachkundeEintrag).filter(SachkundeEintrag.tenant_id == tenant_id)
     if status:
         q = q.filter(SachkundeEintrag.status == status)
     items = q.all()
@@ -179,9 +173,8 @@ async def list_sachkunde(status: Optional[str] = Query(None), db: Session = Depe
 
 
 @router.get("/saatgut-nachbau", response_model=ComplianceOut, summary="Saatgut nachbau auflisten")
-async def list_saatgut_nachbau(db: Session = Depends(get_db)) -> dict:
-    _seed(db)
-    items = db.query(SaatgutNachbauEintrag).all()
+async def list_saatgut_nachbau(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
+    items = db.query(SaatgutNachbauEintrag).filter(SaatgutNachbauEintrag.tenant_id == tenant_id).all()
     return {
         "items": [
             {
@@ -201,9 +194,8 @@ async def list_saatgut_nachbau(db: Session = Depends(get_db)) -> dict:
 
 
 @router.get("/vvvo-register", response_model=ComplianceOut, summary="Vvvo auflisten")
-async def list_vvvo(db: Session = Depends(get_db)) -> dict:
-    _seed(db)
-    items = db.query(VVVOEintrag).all()
+async def list_vvvo(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
+    items = db.query(VVVOEintrag).filter(VVVOEintrag.tenant_id == tenant_id).all()
     return {
         "items": [
             {
@@ -227,12 +219,11 @@ async def list_vvvo(db: Session = Depends(get_db)) -> dict:
 )
 async def get_compliance_report_pdf(
     inline: bool = Query(False, description="Vorschau im Browser (inline) statt Download"),
-    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ) -> Response:
     """Liefert Compliance-Report als mehrseitiges PDF mit Zwischensummen und automatischen Seitenumbrüchen."""
-    _seed(db)
-    stats = await get_compliance_stats(db=db)
-    cross_payload = await list_cross_compliance(db=db)
+    stats = await get_compliance_stats(tenant_id=tenant_id, db=db)
+    cross_payload = await list_cross_compliance(tenant_id=tenant_id, db=db)
     cross_items = cross_payload.get("items", [])
     pdf_bytes = _build_compliance_pdf_bytes(stats, cross_items)
     disposition = "inline" if inline else "attachment"
@@ -244,13 +235,12 @@ async def get_compliance_report_pdf(
 
 
 @router.get("/stats", response_model=ComplianceOut, summary="Compliance stats abrufen")
-async def get_compliance_stats(db: Session = Depends(get_db)) -> dict:
-    _seed(db)
-    total_checks = db.query(ComplianceEintrag).count()
-    fulfilled = db.query(ComplianceEintrag).filter(ComplianceEintrag.erfuellt == True).count()  # noqa: E712
-    enni_total = db.query(ENNIMeldung).count()
-    enni_confirmed = db.query(ENNIMeldung).filter(ENNIMeldung.status == "bestaetigt").count()
-    avg_n = db.query(ENNIMeldung).with_entities(ENNIMeldung.naehrstoff_n).all()
+async def get_compliance_stats(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
+    total_checks = db.query(ComplianceEintrag).filter(ComplianceEintrag.tenant_id == tenant_id).count()
+    fulfilled = db.query(ComplianceEintrag).filter(ComplianceEintrag.tenant_id == tenant_id).filter(ComplianceEintrag.erfuellt == True).count()  # noqa: E712
+    enni_total = db.query(ENNIMeldung).filter(ENNIMeldung.tenant_id == tenant_id).count()
+    enni_confirmed = db.query(ENNIMeldung).filter(ENNIMeldung.tenant_id == tenant_id).filter(ENNIMeldung.status == "bestaetigt").count()
+    avg_n = db.query(ENNIMeldung).filter(ENNIMeldung.tenant_id == tenant_id).with_entities(ENNIMeldung.naehrstoff_n).all()
     avg_n_val = sum(float(x[0] or 0) for x in avg_n) / len(avg_n) if avg_n else 0
 
     return {
@@ -273,9 +263,9 @@ async def get_compliance_stats(db: Session = Depends(get_db)) -> dict:
 @router.get("/exports/gefahrstoffdoku", response_model=ComplianceOut, summary="Gefahrstoffdoku exportieren")
 async def export_gefahrstoffdoku(
     year: Optional[int] = Query(None, ge=2000, le=2100),
-    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ) -> dict:
-    deliveries = _list_sales_deliveries(db)
+    deliveries = _list_sales_deliveries(db, tenant_id)
     rows = _extract_hazard_export_rows(deliveries, year=year)
     return {
         "year": year,
@@ -290,9 +280,9 @@ async def export_gefahrstoffdoku(
 )
 async def export_gefahrstoffdoku_csv(
     year: Optional[int] = Query(None, ge=2000, le=2100),
-    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ):
-    payload = await export_gefahrstoffdoku(year=year, db=db)
+    payload = await export_gefahrstoffdoku(year=year, tenant_id=tenant_id, db=db)
     buffer = io.StringIO()
     writer = csv.writer(buffer, delimiter=";")
     writer.writerow(
@@ -339,9 +329,9 @@ async def export_gefahrstoffdoku_csv(
 @router.get("/exports/naehrstoffstrom", response_model=ComplianceOut, summary="Naehrstoffstrom exportieren")
 async def export_naehrstoffstrom(
     year: int = Query(..., ge=2000, le=2100),
-    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ) -> dict:
-    deliveries = _list_sales_deliveries(db)
+    deliveries = _list_sales_deliveries(db, tenant_id)
     data = _compute_nutrient_stream(deliveries, year=year)
     data["generated_at"] = datetime.utcnow().isoformat()
     return data
@@ -385,7 +375,7 @@ async def export_chargen_trace_report(
     ).first()
     if not lot:
         return {"error": "lot not found", "lot_id": lot_id}
-    deliveries = _list_sales_deliveries(db)
+    deliveries = _list_sales_deliveries(db, tenant_id)
     report = _build_lot_trace_report(lot, deliveries)
     report["generated_at"] = datetime.utcnow().isoformat()
     return report

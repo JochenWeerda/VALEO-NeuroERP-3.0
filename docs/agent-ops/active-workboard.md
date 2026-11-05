@@ -20384,3 +20384,24 @@ Offen (Folgeauftrag): die uebrigen neun mandantenlosen domain_ops-Tabellen mit L
 pruefen (Compliance-Register mit Seed in compliance.py, ops_disposition, ops_zertifikate); preise/historie errechnet
 Verlaeufe, preise/konditionen fuellt Standardwerte auf; Marketing-/Communication-Dienste (services/crm-*) sollen
 CRM-Kampagnen konsumieren statt eigene zu fuehren.
+
+## BATCH9-COMPLIANCE-REGISTER-20261104 — in Arbeit, Claude
+
+Nutzerentscheidung 04.11.2026 (Seeds/Altbestand wegraeumen) auf die uebrigen mandantenlosen domain_ops-Tabellen.
+Branch claude/batch9-compliance-register-20261104 auf Batch 8. Gewachsene DB: alle Zeilen Seed oder Testrest.
+- Entfernt (Ersatz vorhanden): ops_disposition (handgepflegte Bestandsliste; /disposition und der Engpass-Monitor
+  zeigen den Bestellvorschlag einkauf/bestellvorschlaege-liste; Umlagerungs-Vorschlag ohne Quelle samt Seite/Route
+  entfernt); zertifikate_api.py + ops_zertifikate_api (POST ueberdeckt, Mandant aus dem Pfad bzw. alle Mandanten).
+- Im Mandanten (Studio-Masken vorhanden): Cross-Compliance, ENNI, QS-Checkliste, Zulassungen, Kunden-Sachkunde,
+  Saatgut-Nachbau, VVVO, Zertifikate - kein Seed, Mandant aus der Anmeldung, RLS je Befehl
+  (compliance_register_mandant_20261104); Seed/Testreste per Signatur geloescht; Zertifikate: Text-Kennung statt int.
+- Mitbehoben: Gefahrstoffdoku, Naehrstoffstrom und Chargenbericht lasen Lieferscheine aller Mandanten.
+Offen (Folge): Die Register haben keinen Erfassungsweg (nur der Seed schrieb) - sie zeigen jetzt ehrlich leer.
+Zulassungen auf den PSM-Stamm (agrar_psm: bvl_nummer, zulassung_ablauf) umstellen (neue Studio-Maske);
+VVVO (ops vs domain_compliance) und Sachkunde (Kunden/Mitarbeitende/Feldbuch) fachlich zusammenfuehren.
+
+## BATCH9-SEED-SCHUTZ-20261104 — abgeschlossen, Codex
+
+Ziel: Batch-9-Migration schuetzt abweichende und NULL-haltige Daten vor Seed-Loeschung und Tabellen-Drop. Dateibesitz: alembic/versions/compliance_register_mandant_20261104.py, eigene fokussierte Tests, QA-Nachweis und dieser Workboard-Anhang im separaten Branch. Abnahme: Original-Seeds vollstaendig anhand belegbarer Geschaeftsfelder, unbekannte Reste erhalten; DROP bei unbekannten Zeilen abgebrochen; PostgreSQL-Test in zurueckgerollter Transaktion mit temporaeren Tabellen nach Freigabe des Prueffensters, kein Reset oder Migrationsstempel. Risiko: Original-Seedwerte mit zeitabhaengigen Feldern lassen sich nicht sicher rekonstruieren und muessen erhalten bleiben.
+
+**Abschluss BATCH9-SEED-SCHUTZ-20261104:** Volle deterministische Seed-Geschaeftsfelder, keine Seed-Loeschung bei vorhandener Mandantenspalte, NULL-sicherer Drop-Schutz und Abbruch bei doppelten Dispositionssignaturen. Unbekannte Testreste erhalten. PostgreSQL TEMP-Test 1 passed, Revision unveraendert; Grenzen und Datenrisiko siehe docs/quality-assurance/batch9-seed-schutz-20261104.md.
