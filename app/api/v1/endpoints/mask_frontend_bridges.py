@@ -15,7 +15,7 @@ from datetime import date, datetime, timezone
 from typing import Any, NoReturn, Optional
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Path, Query
-from fastapi.responses import Response
+from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import text
 from sqlalchemy.exc import OperationalError, ProgrammingError
@@ -857,13 +857,23 @@ def list_tse_journal(
 
 
 class PreisansichtNichtVerfuegbar(BaseModel):
+    type: str
+    title: str
+    status: int
     detail: str
+    instance: str
+    error: str
+
+
+class PreisProblemResponse(JSONResponse):
+    media_type = "application/problem+json"
 
 
 @router.get(
     "/preise/historie",
     status_code=404,
     response_model=PreisansichtNichtVerfuegbar,
+    response_class=PreisProblemResponse,
     summary="Preishistorie derzeit nicht verfuegbar",
     description="Der parameterlose Maskenvertrag ist nicht an eine passende Preishistorie angebunden.",
     responses={404: {"model": PreisansichtNichtVerfuegbar, "description": "Keine passende Preishistorie angebunden"}},
@@ -879,6 +889,7 @@ def preise_historie(
     "/preise/konditionen",
     status_code=404,
     response_model=PreisansichtNichtVerfuegbar,
+    response_class=PreisProblemResponse,
     summary="Kundenpreiskondition derzeit nicht verfuegbar",
     description="Der parameterlose Maskenvertrag ist nicht an eine passende Kundenpreiskondition angebunden.",
     responses={404: {"model": PreisansichtNichtVerfuegbar, "description": "Keine passende Kundenpreiskondition angebunden"}},
