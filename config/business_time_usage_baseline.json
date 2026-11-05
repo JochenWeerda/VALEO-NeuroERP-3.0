@@ -99,7 +99,7 @@
       "date.today": 1
     },
     "app/api/v1/endpoints/mask_frontend_bridges.py": {
-      "date.today": 7
+      "date.today": 4
     },
     "app/api/v1/endpoints/periodische_buchungen.py": {
       "date.today": 1
