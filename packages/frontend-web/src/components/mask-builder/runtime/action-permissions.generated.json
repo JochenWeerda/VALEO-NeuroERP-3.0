@@ -51,6 +51,18 @@
         ]
       ]
     },
+    "admin/webhooks-liste": {
+      "studio.admin-webhooks.register": [
+        [
+          "admin"
+        ]
+      ],
+      "studio.admin-webhooks.unregister": [
+        [
+          "admin"
+        ]
+      ]
+    },
     "agrar/duenger-liste": {
       "agrar.duenger.deactivate": [
         [

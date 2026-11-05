@@ -85,7 +85,7 @@ def test_build_stamm_list_screen_validates_row_route_template() -> None:
 
 
 #: Seit Runtime46 Cockpits statt Listen (handgebaute Altlast, Workboard STUDIO-UMBAU-RUNTIME46).
-COCKPIT_STATT_LISTE = frozenset({"admin/webhooks-liste", "waage/liste", "waage/waagen-liste", "waage/wiegungen-liste"})
+COCKPIT_STATT_LISTE = frozenset({"waage/liste", "waage/waagen-liste", "waage/wiegungen-liste"})
 
 
 def test_all_listen_builders_use_parent_factory() -> None:

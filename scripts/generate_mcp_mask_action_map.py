@@ -500,6 +500,11 @@ def _generic_coverage(action: dict[str, Any]) -> dict[str, Any] | None:
     sd_action = next((a for a in iter_actions(definition or {}) if a.get("key") == key), None)
     if not sd_action:
         return None
+    if sd_action.get("readView"):
+        block = agent_block(sd_action)
+        return {"coverage": "mapped_generic" if block is None else "blocked_human_only",
+                "mcp_tool_id": "mask.action.execute" if block is None else None,
+                "notes": "Deklarierte Leseansicht: ausschliesslich GET, gleiche Zielautorisierung wie UI/CLI."}
     if not sd_action.get("commandEndpoint") and not sd_action.get("inputFlow") and (
             sd_action.get("localEffect") or sd_action.get("navigationRoute")):
         # Deklarierte Oberflaechenwirkung (Navigation, Anzeige) ohne Serverwirkung — kein MCP-Write noetig.

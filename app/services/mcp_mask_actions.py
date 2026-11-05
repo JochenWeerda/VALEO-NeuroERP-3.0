@@ -7,7 +7,7 @@ Rechte, Mandant, Audit und Wiederholungsschutz prueft der Ziel-Endpunkt; dieses 
 
 Was die Maske Agenten nicht erlaubt, erlaubt auch dieses Werkzeug nicht: ``forbiddenForAgents``,
 ``humanApprovalRequired``, versionierte Command-Adapter (Belege, Ernte-Steuerung), Eingabefluesse nur in der
-Maske und Aktionen ohne Kommando-Endpunkt. Die Regel ist dieselbe wie ``valeo_cli.support`` (Paritaetstest).
+Maske und Aktionen ohne registrierten Ausfuehrungsweg. Deklarierte readView-Aktionen lesen ausschliesslich per GET. Die Regel ist dieselbe wie ``valeo_cli.support`` (Paritaetstest).
 """
 from __future__ import annotations
 
@@ -35,6 +35,15 @@ _IDENTITY_KEYS = {"tenant_id", "mandanten_id", "bediener", "approval_granted", "
 
 def agent_block(action: dict[str, Any]) -> str | None:
     """Warum ein Agent diese Aktion nicht ausfuehren darf — oder ``None``."""
+    if "readView" in action:
+        from app.services.studio_read_view_contracts import validate_read_view
+        if validate_read_view(action):
+            return "leseansicht_ungueltig"
+        if action.get("forbiddenForAgents"):
+            return "fuer_agenten_gesperrt"
+        if action.get("humanApprovalRequired"):
+            return "menschliche_genehmigung"
+        return None
     if action.get("inputFlow"):
         return "eingabe_in_maske"
     endpoint = action.get("commandEndpoint")
@@ -94,7 +103,7 @@ def list_actions(parameters: dict[str, Any], tenant: str) -> dict[str, Any]:
                      "grund": block, "danger_level": action.get("dangerLevel", "safe"),
                      "requires_confirmation": bool(action.get("requiresConfirmation")),
                      "audit_reason_required": bool(action.get("auditReasonRequired")),
-                     "needs_entity_id": "{entity_id}" in (action.get("commandEndpoint") or ""),
+                     "needs_entity_id": "{entity_id}" in (action.get("commandEndpoint") or "") or bool(_PLACEHOLDER.search((action.get("readView") or {}).get("endpoint", ""))),
                      "input_fields": [{k: f.get(k) for k in ("key", "label", "type", "required", "options") if k in f}
                                       for f in action.get("inputFields") or [] if isinstance(f, dict)]})
     return {"success": True, "screen_id": definition.get("id"), "title": definition.get("title"), "actions": rows}
@@ -196,6 +205,22 @@ def execute(request: Any, tenant: str, authorization: str | None, *, transport: 
     block = agent_block(action)
     if block:
         raise HTTPException(403, f"Aktion fuer MCP-Agenten nicht freigegeben: {block}")
+    if "readView" in action:
+        if request.mode != "execute" or payload or audit_reason:
+            raise HTTPException(422, "Leseansichten akzeptieren keine Eingaben oder Ausfuehrungsmodi")
+        endpoint = action["readView"]["endpoint"]
+        placeholders = _PLACEHOLDER.findall(endpoint)
+        if len(placeholders) > 1:
+            raise HTTPException(422, "Leseansicht braucht einen eindeutigen Objektbezug")
+        if placeholders and (not isinstance(entity_id, str) or not entity_id.strip() or entity_id in {".", ".."}):
+            raise HTTPException(422, "Leseansicht braucht eine gueltige entity_id")
+        path = endpoint.replace(placeholders[0], quote(entity_id, safe="")) if placeholders else endpoint
+        with httpx.Client(base_url=_base_url(), timeout=60.0, transport=transport) as client:
+            response = client.get(path, headers={"Authorization": authorization})
+        if response.status_code >= 400:
+            raise HTTPException(response.status_code, "Leseansicht abgelehnt")
+        return {"success": True, "screen_id": definition["id"], "action": action["key"],
+                "mode": "execute", "result": response.json()}
     if request.mode == "execute" and not (request.idempotency_key or "").strip():
         raise HTTPException(422, "execute requires an idempotency_key")
     if request.mode == "execute" and action.get("auditReasonRequired") and not (audit_reason or "").strip():

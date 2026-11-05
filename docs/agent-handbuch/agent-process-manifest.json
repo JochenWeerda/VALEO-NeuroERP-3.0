@@ -1494,34 +1494,12 @@
         {
           "key": "register",
           "label": "Neuer Webhook",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "studio.admin-webhooks.register",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        },
-        {
-          "key": "history",
-          "label": "Zustellversuche",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        },
-        {
-          "key": "unregister",
-          "label": "Abmelden",
           "dangerLevel": "moderate",
           "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "studio.admin-webhooks.unregister",
-          "commandEndpoint": null,
-          "method": null,
+          "requiresConfirmation": true,
+          "permission": "studio.admin-webhooks.register",
+          "commandEndpoint": "/api/v1/webhooks/",
+          "method": "POST",
           "stubReason": null
         }
       ],

@@ -34,7 +34,7 @@ _DOCUMENT_POLICY_FIELDS = (*_DOCUMENT_TRANSPORT_FIELDS, "dangerLevel", "forbidde
                            "requiresConfirmation", "auditReasonRequired", "humanApprovalRequired",
                            "requiresHumanApproval", "disabled")
 _NATIVE_TRANSPORT_FIELDS = (*_DOCUMENT_TRANSPORT_FIELDS, "command", "inputFlow", "navigationRoute", "download",
-                            "responseAdapter", "resultNavigationRoute", "inputPrefill", "localEffect", "visibleWhen", "surfaceOnly")
+                            "responseAdapter", "resultNavigationRoute", "inputPrefill", "localEffect", "visibleWhen", "surfaceOnly", "readView")
 
 
 def _bound_native_template(definition):
@@ -262,6 +262,8 @@ def validate_studio_draft(
             continue
         if native_template is None and any(field in action for field in ("responseAdapter", "resultNavigationRoute", "inputPrefill")):
             violations.append("nativer_ressourcenadapter_nicht_im_studio_katalog")
+        from app.services.studio_read_view_contracts import validate_read_view
+        violations.extend(validate_read_view(action))
         key = action.get("key", "")
         if not isinstance(key, str):
             violations.append("action_key_muss_text_sein")
@@ -285,6 +287,8 @@ def validate_studio_draft(
                     violations.append(f"belegaktionsvertrag_geaendert:{key}")
             except (ValueError, TypeError):
                 violations.append(f"belegaktionsvertrag_geaendert:{key}")
+        if action.get("readView") != base.get("readView"):
+            violations.append(f"action_fremder_readView:{key}")
         # eigener/fremder commandEndpoint
         ep = action.get("commandEndpoint")
         if ep is not None and ep != base.get("commandEndpoint"):

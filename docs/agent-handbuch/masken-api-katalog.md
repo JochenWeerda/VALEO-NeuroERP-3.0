@@ -1590,7 +1590,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ### `admin/webhooks-liste` — Webhook-Verwaltung
 
-**Zweck:** Webhook-Registrierungen und Zustellversuche verwalten
+**Zweck:** Webhook-Registrierungen und echte Zustellversuche im angemeldeten Mandanten verwalten.
 
 | | |
 |---|---|
@@ -1600,9 +1600,14 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/admin__webhooks-liste/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
+**Data Sources:**
+
+- `list` → `/api/v1/webhooks`
+
 **Beispiel-Prompts:**
 
 - Welche Webhooks sind registriert?
+- Zeige die Zustellversuche dieser Registrierung.
 
 **Sensible Felder:** `secret`
 
@@ -1610,9 +1615,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `register` | Neuer Webhook | safe | nein | `—` |
-| `history` | Zustellversuche | safe | nein | `—` |
-| `unregister` | Abmelden | moderate | nein | `—` |
+| `register` | Neuer Webhook | moderate | nein | `/api/v1/webhooks/` |
 
 ---
 

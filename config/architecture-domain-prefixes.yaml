@@ -674,6 +674,7 @@ exact_service_stems:
   studio_file_content_contracts: platform
   studio_list_contracts: platform
   studio_runtime_surface_contracts: platform
+  studio_read_view_contracts: platform
   waage_import_service: agrar
 
 exact_endpoint_stems:

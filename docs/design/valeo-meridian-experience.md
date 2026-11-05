@@ -442,3 +442,8 @@ Liste, Details und Neuanlage verwenden dieselbe ScreenDefinition-/RenderPlan-Run
 ### PSM-Zulassungen (04.11.2026)
 
 Die native Studio-Liste `compliance/zulassungen-liste` nutzt den typisierten, mandantengebundenen lokalen PSM-Leseweg. Sie zeigt BVL-Nummer und Ablaufdatum als Stammdaten; ein Ablaufdatum belegt weder einen behoerdlichen Widerruf noch einen Sperrstatus. Die Darstellung bleibt Teil der zentralen ScreenDefinition- und RenderPlan-Kette.
+
+
+### Deklarative Zustellhistorie (05.11.2026)
+
+ScreenActionDefinition.readView beschreibt eine rein lesende, objektbezogene Tabellenansicht. Der gemeinsame Dialog verwendet ScreenDefinition, RenderPlan, UniversalMaskRuntime und UniversalMaskRenderer mit zentralen Theme-Tokens. Benutzer-/Mandantenwechsel und entzogene Aktionsrechte blenden Ergebnisse aus; Abfrageschluessel trennen Identitaeten. Ziel-GET und Rollenmodell bleiben verbindlich. Komponentenpruefungen ersetzen keine authentifizierte Browser- und Kontrastabnahme.

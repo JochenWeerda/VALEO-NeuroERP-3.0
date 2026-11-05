@@ -85,3 +85,8 @@ Container- oder Eventbeziehung. C4/Prefixinventar bleiben unveraendert.
 Eine Deklaration erteilt weder Upload- noch Fachschreibrechte; Domain-Commands
 muessen Payload und Atomizitaet selbst pruefen.
 [Vertrag und begrenzte Abnahme](../../../quality-assurance/studio-file-content-20261031.md).
+
+
+## Deklarative Leseansichten (05.11.2026)
+
+Minor-Erweiterung des bestehenden Studio-Vertrags: readView beschreibt objektbezogene Tabellenlesungen in derselben Renderer-Kette. Keine neue Route, kein Container, kein Domain-Command oder direkter Datenbankzugriff. Das interne Vertragsmodul studio_read_view_contracts gehoert zur Platform-Domaene. Versionierte Definition und Baseline binden Endpoint und Spalten; der registrierte GET behaelt seine Rollen-/Mandantenpruefung. UI, CLI und MCP verwenden denselben Weg. Agentenwrites werden dadurch nicht freigeschaltet. Nachweise und verbleibende Browserabnahme: [Studio-Webhooks](../../../quality-assurance/studio-webhooks-native-20261105.md).

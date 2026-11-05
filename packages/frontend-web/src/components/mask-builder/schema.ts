@@ -205,6 +205,7 @@ export interface ScreenTableDefinition {
     /** Formular der Seite mit Sendeweg; nie automatisch abgeschickt (wie bei Kopfaktionen). */
     inputFlow?: { kind: 'humanForm'; submitEndpoint: string; method: 'POST' | 'PUT' | 'PATCH' | 'DELETE' }
     localEffect?: ScreenActionDefinition['localEffect']
+    readView?: ScreenActionDefinition['readView']
     /** Fluechtige Projektion einer einzelnen Zeile; keine Serveraenderung. */
     localRowPatch?: { identityField: string; field: string; value: string | number | boolean }
     /** Deklarierte Eingaben vor dem Kommando (Dialog der Maske, nie automatisch abgeschickt). */
@@ -259,6 +260,8 @@ export interface ScreenActionInputField extends ScreenFieldDefinition {
 }
 
 export interface ScreenActionDefinition {
+  /** Read-only related rows, rendered by the shared Studio runtime. */
+  readView?: { endpoint: string; columns: Array<Pick<ScreenTableColumn, 'key' | 'label' | 'renderKind'>> }
   /** Domain control supplies row/form context; keep compiled guards, omit generic toolbar. */
   surfaceOnly?: boolean
   requiresExpectedVersion?: boolean

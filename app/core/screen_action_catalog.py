@@ -16,6 +16,9 @@ from app.core.screen_definitions import SCREEN_DEFINITION_BUILDERS, get_screen_d
 def action_has_execution_path(action: dict[str, Any]) -> bool:
     if not isinstance(action, dict):
         return False
+    if "readView" in action:
+        from app.services.studio_read_view_contracts import validate_read_view
+        return not validate_read_view(action)
     if action.get("commandEndpoint") or action.get("navigationRoute") or action.get("command"):
         return True
     flow = action.get("inputFlow")
@@ -56,6 +59,7 @@ def screen_action_to_catalog_entry(
             seen.add(cleaned.casefold())
             intent_phrases.append(cleaned)
 
+    read_view = action.get("readView") or {}
     entry: dict[str, Any] = {
         "id": mask_action_id(screen_id, key),
         "label": label,
@@ -64,14 +68,15 @@ def screen_action_to_catalog_entry(
         "domain": domain,
         "mask": screen_id,
         "intent_phrases": intent_phrases,
-        "required_data": ["entity_id"] if "{entity_id}" in str(action.get("commandEndpoint") or "") else [],
+        "required_data": ["entity_id"] if "{entity_id}" in str(action.get("commandEndpoint") or "") or "{" in read_view.get("endpoint", "") else [],
         "source": {
             "screenId": screen_id,
             "actionKey": key,
             "commandEndpoint": action.get("commandEndpoint"),
             "navigationRoute": action.get("navigationRoute"),
             "command": action.get("command"),
-            "method": action.get("method"),
+            "method": "GET" if read_view else action.get("method"),
+            **({"readView": read_view} if read_view else {}),
         },
     }
     return entry
