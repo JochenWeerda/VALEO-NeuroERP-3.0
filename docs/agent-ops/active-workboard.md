@@ -20462,3 +20462,26 @@ Abnahme 05.11.2026: sechs Rendereransichten Hell/Dunkel bestanden, Kontrast ohne
 ## GESAMTINTEGRATION-20261105 — reserviert, Codex Lead
 
 Ziel: die vollstaendig gruenen PR-Staende 104/106/108/110/111/112 in einem eigenen pruefbaren Integrationszweig zusammenfuehren. Basis PSM 2a43fd5dc einschliesslich der Tabellenstilllegungen; zusaetzlich Omnibox 29c5e8ea0, Preis 059c7e744 und VVVO d991345d7. Besitz: Konfliktaufloesung dieser eigenen Slices, generierte Projektionen, gemeinsame gezielte Pruefung und eigener QA/Handshake. Keine fremden Hauptbaumdateien uebernehmen, keine Live-Migration oder Rechtevergabe. Abnahme: gemeinsame Verträge, Artefaktabgleich und Gesamt-CI; Branch-Schutz bleibt aktiv, reguläre Review erforderlich.
+
+## CODEX-ROLLOUT-INTEGRATION-20261104 — reserviert, Codex
+
+Ziel: Nutzerauftrag aus codex-uebergabe-20261104 umsetzen. Zuerst PR #102 mit gruenen
+Pruefungen integrieren, main nach develop; danach #103 auf main nachziehen, Generatoren
+und CI pruefen, integrieren und main erneut nach develop. Anschliessend A bis F der
+Uebergabe fachlich schliessen, ohne bestehende Nachweise erneut zu implementieren.
+Dateibesitz dieses Integrationsclaims: eigener Worktree artifacts/rollout-integration-20261104,
+Integrationsnachweise und dieser Workboard-Anhang; kein fremder Hauptbaum-Dateibesitz.
+Abnahme: Commit-genaue CI-Nachweise, keine abgeschwaechten Tests, keine neue Testdatenbank,
+keine ungemergte Migration auf dem Pruefstand gestempelt. Fachslices werden vor Umsetzung
+separat mit Dateien und Abnahme reserviert. Stand: #102 Security/Frontend/Smoke gruen,
+Backend und Test & Lint laufen; #103 basiert noch auf #102. A/B/C/E/F im Code bestaetigt offen.
+
+## OMNIBOX-REGISTRY-F-20261104 — abgeschlossen, Codex (Slice F)
+
+Ziel: Omnibox-Katalog beim ersten Aufruf vollstaendig und wiederholt stabil, veroeffentlichte Masken mandantenisoliert. Dateibesitz: app/api/v1/endpoints/mask_registry.py, tests/test_omnibox_catalog_lazy_registry.py, docs/quality-assurance/omnibox-registry-f-20261104.md und dieser Workboard-Anhang; Integrations-Worktree gemeinsam mit Lead, keine anderen Dateien. Abnahme: reiner Regressionstest fuer initiale Registry, Wiederholung und veroeffentlichte Mandantenmasken, bestehende Tests nicht abschwaechen. Keine Datenbank oder parallelen Tests; Testlauf vorher mit Lead abstimmen. Risiko: Lazy-Registrierung kann waehrend Katalogaufbau weitere IDs erzeugen.
+
+**Abschluss OMNIBOX-REGISTRY-F-20261104:** Stammregistrierung vor dem Kopieren der nativen Katalog-IDs; erster und wiederholter Aufruf vollstaendig, Mandantenpublikationen getrennt. Reiner Regressionstest 1 passed, keine Datenbank; HTTP-/Gesamtsuite bleibt CI-Nachweis. Details: docs/quality-assurance/omnibox-registry-f-20261104.md.
+
+Gegenprobe F: alte Funktionsfassung nur im Prozessspeicher, derselbe Regressionstest scheitert erwartungsgemaess an fehlenden Stamm-IDs; Fixlauf gruen. QA-Nachweis ergaenzt.
+
+Integrationsabgleich 05.11.2026: #102 und #103 sind auf main; #105 hat den damaligen main nach develop uebernommen. Omnibox-Commit 50c264e4b hatte 76 abgeschlossene Checks ohne fehlerhaften, abgebrochenen oder ausstehenden Status. Der neue Merge bewahrt die Batch-8/9- und Codex-Anhaenge gemeinsam und benoetigt einen frischen CI-Nachlauf. Ein Admin-Merge wurde vom automatischen Sicherheitsreview abgelehnt und nicht ausgefuehrt; der regulaere PR-Weg bleibt massgeblich. Die spaetere Nutzerfreigabe erlaubt die Entfernung ersetzter Tabellen samt Testzeilen; Umsetzung/Nachweise in #106 und #108.
