@@ -20440,3 +20440,15 @@ PSM-READ-NULL-20261105 — reserviert, Codex: Erweiterung des PSM-Slices fuer de
 PSM-READ-NULL Nachlauf: lokales/BVL-Readschema behaelt nullable Werte, beide Aktivfelder spiegeln den echten Status; ungueltige oder fehlende BVL-Ablaufdaten bleiben unbekannt. Der Zulassungsguard lehnt unbekannten/abgelaufenen Ablauf ab. Neun fokussierte Backendtests bestanden; getrennte Create-/Updatevalidierung unveraendert. Feldvertrag und OpenAPI-Schlusspruefung folgen.
 
 PSM-ZULASSUNGEN / PSM-READ-NULL Abnahme 05.11.: Backendfokus 9 bestanden, Feldvertrag 5 bestanden, PostgreSQL 2 bestanden (DROP/Rollback und SQL-Mandantenpraedikat, kein JWT-/valeo_app-RLS-Nachweis), native UI-Vertraege 147 bestanden plus ein erwarteter Altlastfall, Hook-Test bestanden, vollstaendige Frontend-Typpruefung bestanden. Ein Alembic-Kopf; vollstaendige Pending-Kette transaktional geprueft und zurueckgerollt, Katalog/RLS daraus aktualisiert, Revision unveraendert. Generatorgesamtcheck und Ratschen gruen, Doku-Drift 0. Browser-/visuelle und CI-Integration bleiben offen; Details QA psm-zulassungen-20261104.md.
+
+## PSM-VISUAL-20261105 — reserviert, Codex Lead
+
+Ziel: die echte kanonische PSM-ScreenDefinition ueber NativeListPage, RenderPlan und UniversalMaskRuntime
+in einem isolierten automatisierten Browser mit ausschliesslich synthetischen Daten pruefen.
+Dateibesitz: packages/frontend-web/tests/visual/psm-*, zugehoerige PNG-/JSON-Nachweise unter
+docs/quality-assurance/evidence/psm-zulassungen-20261105, QA und dieser Anhang.
+Abnahme: 1366x768, 1440x900 und 1920x1080 in Hell/Dunkel; echte Spalten/Datums-/NULL-Werte,
+keine unkontrollierte Seitenueberbreite, lesbare Texte/Konturen und keine externen oder schreibenden Aufrufe.
+Keine Anmeldung, Buchung, Datenbank oder Produktivfreigabe durch diesen Komponenten-Nachweis.
+Die direkte Browser-Use-Verbindung scheitert vor Start am fehlenden Kernel-Assetpfad (ein Reset erfolglos);
+der Repository-Browsertest ist davon getrennt und umgeht keine Anmeldung oder Sicherheitsfreigabe.
