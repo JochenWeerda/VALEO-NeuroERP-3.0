@@ -3,9 +3,9 @@ title: Preisansichten ohne Scheinwerte
 type: qa
 audience: [agent, entwickler, qa]
 owner: Codex
-status: in arbeit
-last_reviewed: 2026-11-04
-version: 1.0.0
+status: abgeschlossen
+last_reviewed: 2026-11-05
+version: 1.1.0
 description: Vertrag und Pruefung der Preisansichten ohne erfundene Kunden oder Preise.
 ---
 
@@ -17,10 +17,10 @@ Die existierende Tagespreishistorie (`daily_prices.py`, `/{article_id}/history`)
 
 Offen: Produkt- und Fachvertrag fuer Artikelauswahl, Historienaggregation und Kunden-/Artikelpreis samt Feldsemantik; danach Anbindung und echte Datenfalltests. Die existierenden Masken und das Cockpit konsumieren die Wege weiterhin und erhalten bis dahin 404. Keine Schema- oder Datenmigration.
 
-Vertragstest: beide Endpunkte ueber eine isolierte FastAPI-App mit ersetztem Mandanten und einem Datenbank-Sentinel, der jeden Zugriff verweigert; HTTP-Antwort, OpenAPI-Fehlerschema und Abhaengigkeiten geprueft. Keine Authentifizierungsabnahme. Generierte Projektionen stehen aus.
+## Abnahme vom 05.11.2026
 
-Testfenster 2026-11-05: erster pytest-Start (Plugin-Autoload aus, `--noconftest`) endete vor Testausfuehrung mit Exit 1, da die globale Konfiguration Coverage-Optionen vorgibt. Zweiter Start mit `-o addopts=""` gab ueber zwei Minuten kein Ergebnis aus; die wartende Sitzung wurde abgebrochen (Exit 1). Kein Test bestanden oder fachliche Abnahme belegt. Keine Datenbank oder Generatoren verwendet.
+Der fokussierte HTTP-/OpenAPI-Vertragstest registriert den produktiven Domain-Exception-Handler: **1 passed in 2.95s**, Exit 0. Beide Antworten verwenden `application/problem+json` und die sechs dokumentierten Problemfelder. Ein Datenbank-Sentinel verhindert jeden Datenzugriff; Mandantenabhaengigkeiten bleiben registriert. Dies ist keine Authentifizierungsabnahme.
 
-Nachweis 2026-11-05: `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest --noconftest -p no:cacheprovider -o addopts= -q --tb=short tests/test_preise_ohne_scheinwerte.py` im freigegebenen lokalen Prozess: **1 passed in 6.50s, Exit 0**, ohne DB. Die vorherigen eingeschraenkten Prozessaufrufe waren kein Produktfehler. Offen: OpenAPI-Regeneration und Handoff-Metacheck auf aktuellem main im koordinierten Generatorfenster.
+Alle Doc-Generator-Checks sind gruen. Pagination-, Godfile- und SQL-Fstring-Gates bestehen; Doc-Drift: **0**. Feldvertraege: **5 passed**, vier Warnungen, Exit 0. OpenAPI, Architektur-/MCP-Projektionen, Inventare und Agent-Handbuch sind synchronisiert. Die Aenderung der generierten RLS-Analyse folgt entfernten Standardwerten; es wurden keine Policies live ausgerollt.
 
-Nachtrag Produktionsvertrag: Der vorherige gruene Test verwendete den FastAPI-Standardhandler. Der nun vorbereitete Test registriert den produktiven Domain-Exception-Handler und prueft `application/problem+json` sowie alle sechs Problemfelder; OpenAPI beschreibt denselben Vertrag. Nachweis: 1 passed in 2.95s, Exit 0, ohne DB; OpenAPI-Regeneration und Integrationspruefungen stehen aus.
+Damit ist der Sicherheits-Slice gegen erfundene Preisangaben lokal abgenommen. Der oben beschriebene fachliche Auswahl- und Aggregationsvertrag bleibt ein eigener Integrationsauftrag. Gesamt-CI wird auf dem PR geprueft.

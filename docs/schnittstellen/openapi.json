@@ -130157,6 +130157,44 @@
         "title": "PreisabweichungIn",
         "type": "object"
       },
+      "PreisansichtNichtVerfuegbar": {
+        "properties": {
+          "detail": {
+            "title": "Detail",
+            "type": "string"
+          },
+          "error": {
+            "title": "Error",
+            "type": "string"
+          },
+          "instance": {
+            "title": "Instance",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "integer"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "type": {
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "detail",
+          "instance",
+          "error"
+        ],
+        "title": "PreisansichtNichtVerfuegbar",
+        "type": "object"
+      },
       "PrepListLineOut": {
         "properties": {
           "article_id": {
@@ -367861,17 +367899,18 @@
     },
     "/api/v1/preise/historie": {
       "get": {
+        "description": "Der parameterlose Maskenvertrag ist nicht an eine passende Preishistorie angebunden.",
         "operationId": "preise_historie_api_v1_preise_historie_get",
         "responses": {
-          "200": {
+          "404": {
             "content": {
-              "application/json": {
+              "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/BridgeOut"
+                  "$ref": "#/components/schemas/PreisansichtNichtVerfuegbar"
                 }
               }
             },
-            "description": "Successful Response"
+            "description": "Keine passende Preishistorie angebunden"
           }
         },
         "security": [
@@ -367879,7 +367918,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Preishistorie",
+        "summary": "Preishistorie derzeit nicht verfuegbar",
         "tags": [
           "mask-frontend-bridges"
         ]
@@ -368237,17 +368276,18 @@
     },
     "/api/v1/preise/konditionen": {
       "get": {
+        "description": "Der parameterlose Maskenvertrag ist nicht an eine passende Kundenpreiskondition angebunden.",
         "operationId": "preise_konditionen_api_v1_preise_konditionen_get",
         "responses": {
-          "200": {
+          "404": {
             "content": {
-              "application/json": {
+              "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/BridgeOut"
+                  "$ref": "#/components/schemas/PreisansichtNichtVerfuegbar"
                 }
               }
             },
-            "description": "Successful Response"
+            "description": "Keine passende Kundenpreiskondition angebunden"
           }
         },
         "security": [
@@ -368255,7 +368295,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Preiskondition",
+        "summary": "Kundenpreiskondition derzeit nicht verfuegbar",
         "tags": [
           "mask-frontend-bridges"
         ]

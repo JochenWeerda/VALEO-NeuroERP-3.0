@@ -796,12 +796,9 @@
    ],
    "worker": [],
    "identitaet": {
-    "standardmandant": 1,
     "token": 5
    },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py:905"
-   ],
+   "standardmandant_stellen": [],
    "null_stellen": [],
    "gemeinsam_stellen": [],
    "daten": {
@@ -871,12 +868,9 @@
    ],
    "worker": [],
    "identitaet": {
-    "standardmandant": 1,
     "token": 1
    },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py:905"
-   ],
+   "standardmandant_stellen": [],
    "null_stellen": [],
    "gemeinsam_stellen": [],
    "daten": {
@@ -946,12 +940,9 @@
    ],
    "worker": [],
    "identitaet": {
-    "standardmandant": 1,
     "token": 2
    },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py:905"
-   ],
+   "standardmandant_stellen": [],
    "null_stellen": [],
    "gemeinsam_stellen": [],
    "daten": {
@@ -1008,12 +999,9 @@
    "identitaet": {
     "dienst": 3,
     "nutzlast": 1,
-    "standardmandant": 1,
     "token": 6
    },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py:905"
-   ],
+   "standardmandant_stellen": [],
    "null_stellen": [],
    "gemeinsam_stellen": [],
    "daten": {
@@ -1161,11 +1149,10 @@
    "identitaet": {
     "dienst": 14,
     "nutzlast": 9,
-    "standardmandant": 7,
+    "standardmandant": 6,
     "token": 24
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py:905",
     "app/integrations/adapters/superglue/tool_sync.py:427",
     "services/crm-core/app/api/v1/endpoints/activities.py:20",
     "services/crm-core/app/api/v1/endpoints/contacts.py:20",
@@ -1675,12 +1662,9 @@
    "identitaet": {
     "kopfzeile": 2,
     "nutzlast": 2,
-    "standardmandant": 1,
     "token": 22
    },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py:905"
-   ],
+   "standardmandant_stellen": [],
    "null_stellen": [
     "app/api/v1/endpoints/compat.py:1829",
     "app/api/v1/endpoints/compat.py:1836",
@@ -1851,12 +1835,9 @@
    ],
    "worker": [],
    "identitaet": {
-    "standardmandant": 1,
     "token": 6
    },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py:905"
-   ],
+   "standardmandant_stellen": [],
    "null_stellen": [
     "app/services/mcp_execution_service.py:3153"
    ],
@@ -3140,12 +3121,9 @@
     "app/workers/cleanup_worker.py"
    ],
    "identitaet": {
-    "standardmandant": 1,
     "token": 10
    },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py:905"
-   ],
+   "standardmandant_stellen": [],
    "null_stellen": [
     "app/api/v1/endpoints/compat.py:1829",
     "app/api/v1/endpoints/compat.py:1836",
