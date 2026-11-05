@@ -20401,6 +20401,8 @@ Ziel: Batch-9-Migration schuetzt abweichende und NULL-haltige Daten vor Seed-Loe
 
 **Abschluss BATCH9-SEED-SCHUTZ-20261104:** Volle deterministische Seed-Geschaeftsfelder, keine Seed-Loeschung bei vorhandener Mandantenspalte, NULL-sicherer Drop-Schutz und Abbruch bei doppelten Dispositionssignaturen. Unbekannte Testreste erhalten. PostgreSQL TEMP-Test 1 passed, Revision unveraendert; Grenzen und Datenrisiko siehe docs/quality-assurance/batch9-seed-schutz-20261104.md.
 
-## VVVO-MANDANTENFILTER-20261105 — reserviert, Codex Lead
+## VVVO-MANDANTENFILTER-20261105 — lokal abgenommen, Codex Lead
 
 Ziel: VVVO-Pruefung und Sachkunde-Status nur per ID und Mandant lesen; das VVVO-Update eigenstaendig mandantenfiltern und Erfolg nur bei tatsaechlich aktualisierter Zeile melden. Fremde und unbekannte IDs antworten gleich. Dateibesitz: app/services/compliance_vvvo_sachkunde_service.py, eigener PostgreSQL-TEMP-Verhaltenstest, QA/Handshake und dieser Anhang im Branch codex/vvvo-mandantenfilter-20261105. Abnahme: eigene Aenderung, fremde/fehlende ID, unveraenderte Fremddaten und simuliertes Umhaengen zwischen Lesen/Schreiben; bestehende Service-Tests. Keine Registerzusammenfuehrung, Rollenfreigabe, produktive Migration oder neue DB. Pruefstand valeo_probe nach Statuspruefung, nur eigene TEMP-Daten mit Rollback; dies beweist SQL-Praedikate, keine JWT-/RLS-Gesamtfreigabe.
+
+Abnahme VVVO-MANDANTENFILTER: 21 Tests bestanden, Gegenprobe alter Service 3 gezielt rot/1 gruen. Eigene TEMP-Daten zurueckgerollt, Revision unveraendert und fremde Clients 0. Generatorgesamtcheck und neun Verbesserungsscanner gruen, Doku-Drift 0. QA docs/quality-assurance/vvvo-mandantenfilter-20261105.md; Gesamt-CI folgt im PR.
