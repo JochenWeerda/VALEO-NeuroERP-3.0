@@ -20458,3 +20458,7 @@ der Repository-Browsertest ist davon getrennt und umgeht keine Anmeldung oder Si
 Enger Folgeclaim aus der visuellen Pruefung: gemeinsame VirtualDataTable-Sortierzeichen (30 Prozent Deckkraft, nicht automatisch bewertbare Sonderzeichen) durch klare SVG-Symbole mit Vordergrundfarbe ersetzen. Dateibesitz nur VirtualDataTable.tsx; keine parallele Maske. Abnahme: bestehende Tabellentests und sechs PSM-Rendereransichten mit Kontrastpruefung.
 
 Abnahme 05.11.2026: sechs Rendereransichten Hell/Dunkel bestanden, Kontrast ohne Verstoesse oder unbewertete Befunde; vier bestehende Tabellentests gruen. Sechs Screenshots gesichtet. Authentifizierte Gesamtansicht und neuer CI-Nachlauf bleiben offen; QA psm-zulassungen-20261104.md.
+
+## GESAMTINTEGRATION-20261105 — reserviert, Codex Lead
+
+Ziel: die vollstaendig gruenen PR-Staende 104/106/108/110/111/112 in einem eigenen pruefbaren Integrationszweig zusammenfuehren. Basis PSM 2a43fd5dc einschliesslich der Tabellenstilllegungen; zusaetzlich Omnibox 29c5e8ea0, Preis 059c7e744 und VVVO d991345d7. Besitz: Konfliktaufloesung dieser eigenen Slices, generierte Projektionen, gemeinsame gezielte Pruefung und eigener QA/Handshake. Keine fremden Hauptbaumdateien uebernehmen, keine Live-Migration oder Rechtevergabe. Abnahme: gemeinsame Verträge, Artefaktabgleich und Gesamt-CI; Branch-Schutz bleibt aktiv, reguläre Review erforderlich.
