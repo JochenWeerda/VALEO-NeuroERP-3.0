@@ -1,11 +1,12 @@
 """Echte PostgreSQL-Praedikate auf TEMP-Daten; kein JWT-/RLS-Nachweis."""
 import os
-from datetime import date
+from datetime import date, timedelta
 
 import pytest
 import sqlalchemy as sa
 from sqlalchemy.orm import Session
 
+from app.services import compliance_vvvo_sachkunde_service as service
 from app.services.compliance_vvvo_sachkunde_service import (
     VVVOError, berechne_naechste_vvvo_pruefung, get_sachkunde_status,
 )
@@ -102,3 +103,27 @@ def test_mandantenwechsel_zwischen_lesen_und_schreiben_meldet_keinen_erfolg(date
         berechne_naechste_vvvo_pruefung(db, "eigen", "a", "2026-01-15")
     row = session.execute(sa.text("SELECT tenant_id, letzte_pruefung_am, naechste_pruefung_am FROM pg_temp.vvvo_guard WHERE id = 'eigen'")).one()
     assert row == ("b", None, None)
+
+
+@pytest.mark.parametrize("days", [0, 30])
+def test_faelligkeit_zeigt_rueckstand_und_fehlende_termine_nur_im_eigenen_mandanten(daten, monkeypatch, days):
+    db, session = daten
+    # Absichtlich unabhaengig von Serverdatum und Tageswechsel.
+    today = date(2030, 1, 1)
+    monkeypatch.setattr(service, "business_today", lambda: today, raising=False)
+    session.execute(sa.text("DELETE FROM pg_temp.vvvo_guard"))
+    cases = [("alt", -100), ("heute", 0), ("morgen", 1), ("grenze", 30), ("spaeter", 31), ("ohne", None)]
+    for tenant in ("a", "b"):
+        for label, offset in cases:
+            session.execute(sa.text("""INSERT INTO pg_temp.vvvo_guard
+                (id, tenant_id, betrieb_name, vvvo_nummer, naechste_pruefung_am)
+                VALUES (:id, :tenant, :name, :nummer, :datum)"""), {
+                    "id": f"{tenant}-{label}", "tenant": tenant, "name": "Synthetischer Pruefhof",
+                    "nummer": label, "datum": None if offset is None else today + timedelta(days=offset),
+                })
+    rows = service.list_faellige_vvvo_pruefungen(db, "a", days)
+    expected = ["a-ohne", "a-alt", "a-heute"]
+    if days == 30:
+        expected += ["a-morgen", "a-grenze"]
+    assert [row["id"] for row in rows] == expected
+    assert all(row["tenant_id"] == "a" for row in rows)

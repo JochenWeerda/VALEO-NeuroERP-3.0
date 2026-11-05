@@ -5,7 +5,7 @@ audience: [agent, entwickler, qa]
 owner: Codex Lead
 status: lokal abgenommen
 last_reviewed: 2026-11-05
-version: 1.0.0
+version: 1.1.0
 ---
 
 # Mandantenfilter im VVVO-/Sachkundeservice
@@ -20,7 +20,7 @@ Der neue Verhaltenstest wertet die SQL-Anweisungen auf echten PostgreSQL-TEMP-Ta
 
 Sessions verwenden Savepoints innerhalb einer aeusseren Transaktion. Selbst der vorhandene Service-Commit persistiert dadurch keine Pruefdaten. Kein neues Schema, keine neue Datenbank, kein Container und keine Migration. Dies prueft Service-SQL und Persistenzwirkung, keine JWT-, Rollen-, reale Tabellen-FK- oder systemweite RLS-Abnahme.
 
-Die Liste in domain_ops und der Pruefservice in domain_compliance sind weiterhin unterschiedliche fachliche Register. Deren Zusammenfuehrung, Erfassungswege, Audit-/Commandanbindung sowie ueberfaellige/fehlende Faelligkeitsdaten bleiben eigene Folgeaufgaben. Der ungenutzte operator wird durch diesen Slice nicht als Auditnachweis ausgegeben.
+Die Liste in domain_ops und der Pruefservice in domain_compliance sind weiterhin unterschiedliche fachliche Register. Deren Zusammenfuehrung, Erfassungswege, Audit-/Commandanbindung bleiben eigene Folgeaufgaben. Die Faelligkeitskorrektur ist im folgenden Nachlauf belegt. Der ungenutzte operator wird durch diesen Slice nicht als Auditnachweis ausgegeben.
 
 ## Nachweise
 
@@ -29,3 +29,11 @@ Die Liste in domain_ops und der Pruefservice in domain_compliance sind weiterhin
 - Vor/nach jedem DB-Lauf: Revision `ruestlisten_tabelle_20261103`, fremde Clients 0. Rolle `valeo_agent`, nur eigene TEMP-Tabellen, vollstaendiger Rollback.
 - Vollstaendiger Doc-Generator-Abgleich: Exit 0. Alle neun Verbesserungsscanner bestanden, Snapshot stabil. Doku-Code-Drift 0.
 - Keine API-, Masken- oder Schemaaenderung; generierte Artefakte bleiben aktuell. Gesamt-CI auf dem PR steht aus.
+
+## Nachlauf: Faelligkeit und Fachrecherche
+
+Die Liste schliesst ueberfaellige und fehlende eigene Termine nicht mehr aus. Grenzfaelle heute und am inklusiven 30-Tage-Stichtag bleiben sichtbar; spaetere und fremde Eintraege bleiben ausgeschlossen. Stichtag aus business_today; zwei direkte Kalenderquellen entfernt, Dateibaseline 5 auf 3 abgesenkt. NULL steht fuer offenen internen Klaerungsbedarf.
+
+Neuer Gesamtfokus: **23 passed in 4.40s**, keine Ueberspruenge. Gegenprobe am unmittelbar vorherigen Service: beide neuen Faelligkeitsfaelle rot, vier vorhandene Schutzfaelle gruen. Revision `ruestlisten_tabelle_20261103` unveraendert, fremde Clients vor/nach den Laeufen 0. Alle neun Verbesserungsscanner und Dokumentations-Governance gruen.
+
+Die recherchierten Primärquellen belegen keine pauschale jaehrliche Erneuerung der VVVO-Nummer. Die bestehende 365-Tage-Wiedervorlage ist im Code ausdruecklich als interne Frist gekennzeichnet, ihr Wert wurde nicht als gesetzliche Vorgabe legitimiert. Keine automatische Liefersperre. [Fachgrundlagen, Quellen und Umsetzungsrahmen](vvvo-nummer-fachgrundlagen-20261105.md).

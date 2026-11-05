@@ -8,9 +8,12 @@ from typing import Any, Dict, List, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 
+from app.core.business_time import business_today
+
 logger = logging.getLogger(__name__)
 
 DEFAULT_ALARM_DAYS = 30
+# Bestehende interne Wiedervorlage; keine gesetzliche Laufzeit der VVVO-Nummer.
 VVVO_PRUEF_INTERVAL_DAYS = 365
 
 
@@ -23,20 +26,18 @@ def list_faellige_vvvo_pruefungen(
     tenant_id: str,
     within_days: int = DEFAULT_ALARM_DAYS,
 ) -> List[Dict[str, Any]]:
-    """Listet VVVO-Betriebe, deren jährliche Prüfung innerhalb von `within_days` Tagen fällig ist."""
-    cutoff = (date.today() + timedelta(days=within_days)).isoformat()
-    today = date.today().isoformat()
+    """Eigene ueberfaellige/faellige Pruefungen und offene Eintraege ohne Termin."""
+    cutoff = (business_today() + timedelta(days=within_days)).isoformat()
     rows = db.execute(
         text("""
             SELECT id, tenant_id, betrieb_name, vvvo_nummer,
                    letzte_pruefung_am, naechste_pruefung_am
             FROM domain_compliance.compliance_vvvo_register
             WHERE tenant_id = :tenant_id
-              AND naechste_pruefung_am <= :cutoff
-              AND (naechste_pruefung_am >= :today OR naechste_pruefung_am IS NULL)
-            ORDER BY naechste_pruefung_am ASC NULLS FIRST
+              AND (naechste_pruefung_am <= :cutoff OR naechste_pruefung_am IS NULL)
+            ORDER BY naechste_pruefung_am ASC NULLS FIRST, id ASC
         """),
-        {"tenant_id": tenant_id, "cutoff": cutoff, "today": today},
+        {"tenant_id": tenant_id, "cutoff": cutoff},
     ).mappings().all()
     return [dict(r) for r in rows]
 

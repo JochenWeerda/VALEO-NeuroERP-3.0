@@ -20407,6 +20407,10 @@ Ziel: VVVO-Pruefung und Sachkunde-Status nur per ID und Mandant lesen; das VVVO-
 
 Abnahme VVVO-MANDANTENFILTER: 21 Tests bestanden, Gegenprobe alter Service 3 gezielt rot/1 gruen. Eigene TEMP-Daten zurueckgerollt, Revision unveraendert und fremde Clients 0. Generatorgesamtcheck und neun Verbesserungsscanner gruen, Doku-Drift 0. QA docs/quality-assurance/vvvo-mandantenfilter-20261105.md; Gesamt-CI folgt im PR.
 
-## VVVO-FAELLIGKEIT-20261105 — reserviert, Codex Lead
+## VVVO-FAELLIGKEIT-20261105 — lokal abgenommen, Codex Lead
 
 Folgeslice im eigenen VVVO-Zweig: Faelligkeitsliste muss ueberfaellige und heute/bis Stichtag faellige eigene Eintraege sowie offene Eintraege ohne Prueftermin zeigen. NULL bedeutet Klaerungsbedarf, keine behauptete erfolgte Pruefung. Mandantenfilter bleibt fuer die gesamte ODER-Gruppe verbindlich; Stichtag aus business_today statt Serverdatum. Dateibesitz: list_faellige_vvvo_pruefungen im vorhandenen Service, zugehoeriger PostgreSQL-TEMP-Test, abgesenkte Business-Time-Baseline und eigene QA/Handshake. Abnahme: Grenzen 0/30 Tage, NULL, Ueberfaelligkeit, Fremdmandant und Gegenprobe; keine neue API/Maske/Migration.
+
+VVVO-FAELLIGKEIT Recherche-Nachtrag: Nutzer fragt nach Einsatzpflicht der VVVO-Nummer. Besitz zusaetzlich eigene Fachnotiz docs/quality-assurance/vvvo-nummer-fachgrundlagen-20261105.md. Primaerquellen ViehVerkV §26, QS Futtermittelwirtschaft 2026 §4.20.1, Niedersaechsische Tierseuchenkasse und LAVES. Bestehende 365-Tage-Wiedervorlage ist keine belegte gesetzliche Nummern-Laufzeit; keine neue Liefersperre oder generelle Kundennummernpflicht ableiten.
+
+Abnahme VVVO-FAELLIGKEIT: 23 Tests bestanden, alter Stand faellt in beiden neuen Faelligkeitsfaellen durch (4 Schutzfaelle weiterhin gruen). Geschaeftstag statt Serverdatum; Baseline nur um zwei entfernte Quellen gesenkt. TEMP-Daten zurueckgerollt, Revision unveraendert, fremde Clients 0. Neun Scanner und Doku-Governance gruen. Recherche in vvvo-nummer-fachgrundlagen-20261105.md: Standortzuordnung und QS-Lieferpflicht von interner Wiedervorlage trennen; keine jaehrliche gesetzliche Nummernerneuerung behauptet.
