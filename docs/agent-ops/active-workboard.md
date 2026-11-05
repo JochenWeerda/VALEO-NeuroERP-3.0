@@ -20463,7 +20463,7 @@ Enger Folgeclaim aus der visuellen Pruefung: gemeinsame VirtualDataTable-Sortier
 
 Abnahme 05.11.2026: sechs Rendereransichten Hell/Dunkel bestanden, Kontrast ohne Verstoesse oder unbewertete Befunde; vier bestehende Tabellentests gruen. Sechs Screenshots gesichtet. Authentifizierte Gesamtansicht und neuer CI-Nachlauf bleiben offen; QA psm-zulassungen-20261104.md.
 
-## GESAMTINTEGRATION-20261105 — reserviert, Codex Lead
+## GESAMTINTEGRATION-20261105 — lokal abgenommen, Codex Lead
 
 Ziel: die vollstaendig gruenen PR-Staende 104/106/108/110/111/112 in einem eigenen pruefbaren Integrationszweig zusammenfuehren. Basis PSM 2a43fd5dc einschliesslich der Tabellenstilllegungen; zusaetzlich Omnibox 29c5e8ea0, Preis 059c7e744 und VVVO d991345d7. Besitz: Konfliktaufloesung dieser eigenen Slices, generierte Projektionen, gemeinsame gezielte Pruefung und eigener QA/Handshake. Keine fremden Hauptbaumdateien uebernehmen, keine Live-Migration oder Rechtevergabe. Abnahme: gemeinsame Verträge, Artefaktabgleich und Gesamt-CI; Branch-Schutz bleibt aktiv, reguläre Review erforderlich.
 
@@ -20510,6 +20510,8 @@ VVVO-FAELLIGKEIT Recherche-Nachtrag: Nutzer fragt nach Einsatzpflicht der VVVO-N
 
 Abnahme VVVO-FAELLIGKEIT: 23 Tests bestanden, alter Stand faellt in beiden neuen Faelligkeitsfaellen durch (4 Schutzfaelle weiterhin gruen). Geschaeftstag statt Serverdatum; Baseline nur um zwei entfernte Quellen gesenkt. TEMP-Daten zurueckgerollt, Revision unveraendert, fremde Clients 0. Neun Scanner und Doku-Governance gruen. Recherche in vvvo-nummer-fachgrundlagen-20261105.md: Standortzuordnung und QS-Lieferpflicht von interner Wiedervorlage trennen; keine jaehrliche gesetzliche Nummernerneuerung behauptet.
 
-## LISTENROUTEN-DETERMINISMUS-20261105 — reserviert, Codex Lead
+## LISTENROUTEN-DETERMINISMUS-20261105 — abgeschlossen, Codex Lead
 
 Befund bei gemeinsamer Integration: generate_screen_list_routes.erzeugen behandelt nach vorheriger Stamm-Initialisierung 107 zusaetzliche Routen als kuratiert und laesst sie aus der Datei weg. Ziel: explizite, unveraenderliche Menge urspruenglich kuratierter IDs am kanonischen Registry-Ort; Generator muss vor/nach Lazy-Initialisierung denselben Inhalt liefern. Besitz: Kennzeichnung in app/core/screen_definitions.py, scripts/generate_screen_list_routes.py, eigener Regressionstest und bestehende Integrations-QA. Keine zweite Maskenregistry, keine fachliche Route entfernen. Abnahme: kalter/warmer/wiederholter Lauf identisch; vorhandene Stammrouten erhalten; Generator-/Gesamt-CI.
+
+GESAMTINTEGRATION / LISTENROUTEN Abnahme: Alle vier Quellstaende mit enthaltenen B8/B9-Stilllegungen zusammengefuehrt. 46 gemeinsame Vertrags-/Feldtests bestanden; zusaetzlicher Generator-/Omnibox-Fokus 2 bestanden. Gegenprobe alter Listenrouten-Generator gezielt rot. 447 Zuordnungen reproduzierbar; 65 weiterhin offen. Zwoelf Generatoren, neun Integritaetsscanner und vollstaendiger unabhaengiger Doc-Generator-Check gruen. Kein DB-/Container-/Rollen-/Live-Migrationszugriff. Neue gemeinsame Gesamt-CI noch erforderlich, main weiterhin regulaer reviewpflichtig. QA/Handshake gesamtintegration-20261105.md.
