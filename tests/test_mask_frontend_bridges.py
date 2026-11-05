@@ -78,14 +78,6 @@ def test_preise_berechnen_nennt_ohne_gueltigen_schluessel_keine_steuer():
     assert ergebnis["steuerhinweis"]
 
 
-def test_preise_konditionen_ist_ein_objekt(monkeypatch, require_db):
-    response = client.get("/api/v1/preise/konditionen", headers=_headers(monkeypatch))
-    assert response.status_code == 200
-    payload = response.json()
-    assert "basispreis" in payload
-    assert payload["status"] in {"aktiv", "abgelaufen"}
-
-
 def test_operations_exceptions_ist_liste(monkeypatch, require_db):
     response = client.get("/api/v1/operations/exceptions", headers=_headers(monkeypatch))
     assert response.status_code == 200

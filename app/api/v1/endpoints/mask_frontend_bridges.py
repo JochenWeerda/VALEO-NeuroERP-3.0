@@ -12,7 +12,7 @@ from app.auth.finance_roles import beleg_read, beleg_write, finance_admin, finan
 import json
 import uuid
 from datetime import date, datetime, timezone
-from typing import Any, Optional
+from typing import Any, NoReturn, Optional
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Path, Query
 from fastapi.responses import Response
@@ -856,62 +856,38 @@ def list_tse_journal(
     ]
 
 
-@router.get("/preise/historie", response_model=BridgeOut, summary="Preishistorie")
+class PreisansichtNichtVerfuegbar(BaseModel):
+    detail: str
+
+
+@router.get(
+    "/preise/historie",
+    status_code=404,
+    response_model=PreisansichtNichtVerfuegbar,
+    summary="Preishistorie derzeit nicht verfuegbar",
+    description="Der parameterlose Maskenvertrag ist nicht an eine passende Preishistorie angebunden.",
+    responses={404: {"model": PreisansichtNichtVerfuegbar, "description": "Keine passende Preishistorie angebunden"}},
+)
 def preise_historie(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
-) -> dict[str, Any]:
-    rows = _safe_rows(
-        db,
-        """
-        SELECT name, sales_price, updated_at
-        FROM domain_inventory.articles
-        WHERE tenant_id = :t AND is_active = TRUE
-        ORDER BY updated_at DESC NULLS LAST
-        LIMIT 1
-        """,
-        {"t": tenant_id},
-    )
-    aktuell = _dec(rows[0]["sales_price"]) if rows else 0.0
-    name = rows[0]["name"] if rows else "Kein Artikel"
-    verlauf = [
-        {"datum": (date.today().replace(day=max(1, date.today().day - i))).isoformat(), "preis": round(aktuell * (1 - i * 0.01), 2)}
-        for i in range(7, -1, -1)
-    ]
-    vorwoche = verlauf[0]["preis"] if verlauf else aktuell
-    vormonat = round(aktuell * 0.97, 2)
-    return {
-        "artikel": name,
-        "aktuell": aktuell,
-        "vorwoche": vorwoche,
-        "vormonat": vormonat,
-        "veraenderung": {
-            "woche": round(((aktuell - vorwoche) / vorwoche * 100) if vorwoche else 0, 2),
-            "monat": round(((aktuell - vormonat) / vormonat * 100) if vormonat else 0, 2),
-        },
-        "verlauf": verlauf,
-    }
+) -> NoReturn:
+    raise HTTPException(status_code=404, detail="Fuer diese Ansicht ist keine passende Preishistorie angebunden.")
 
 
-@router.get("/preise/konditionen", response_model=BridgeOut, summary="Preiskondition")
+@router.get(
+    "/preise/konditionen",
+    status_code=404,
+    response_model=PreisansichtNichtVerfuegbar,
+    summary="Kundenpreiskondition derzeit nicht verfuegbar",
+    description="Der parameterlose Maskenvertrag ist nicht an eine passende Kundenpreiskondition angebunden.",
+    responses={404: {"model": PreisansichtNichtVerfuegbar, "description": "Keine passende Kundenpreiskondition angebunden"}},
+)
 def preise_konditionen(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
-) -> dict[str, Any]:
-    rows = read_pricing_conditions(db, tenant_id, limit=1)
-    row = dict(rows[0]) if rows else {}
-    today = date.today()
-    return {
-        "id": str(row.get("id") or "default"),
-        "kunde": row.get("kunde") or "Standardkunde",
-        "artikel": row.get("artikel") or "Standardartikel",
-        "basispreis": _dec(row.get("basispreis") or row.get("betrag") or 100),
-        "rabatt": _dec(row.get("prozent") or row.get("rabatt") or 0),
-        "skonto": _dec(row.get("skonto") or 0),
-        "gueltigAb": _iso(row.get("gueltig_von")) or today.replace(month=1, day=1).isoformat(),
-        "gueltigBis": _iso(row.get("gueltig_bis")) or today.replace(month=12, day=31).isoformat(),
-        "status": "aktiv",
-    }
+) -> NoReturn:
+    raise HTTPException(status_code=404, detail="Fuer diese Ansicht ist keine passende Kundenpreiskondition angebunden.")
 
 
 @router.get("/qualitaet/reklamationen", response_model=list[BridgeOut], summary="Reklamationen auflisten")
