@@ -17,6 +17,8 @@ def bind(monkeypatch):
     url = os.environ.get("TEST_DATABASE_URL")
     if not url:
         pytest.skip("TEST_DATABASE_URL fuer gemeinsamen Pruefstand fehlt")
+    target = sa.engine.make_url(url)
+    assert target.get_backend_name() == "postgresql" and target.database == "valeo_probe"
     engine = sa.create_engine(url, connect_args={"application_name": "agent:batch8-seed-schutz"})
     with engine.connect() as conn:
         tx = conn.begin()
@@ -34,26 +36,14 @@ def bind(monkeypatch):
     engine.dispose()
 
 
-def test_marketing_seed_vollstaendig_und_fremde_zeilen_blockieren(bind):
-    bind.exec_driver_sql("CREATE TEMP TABLE batch8_marketing (name text, typ text, zielgruppe text, startdatum timestamptz, enddatum timestamptz, budget numeric, status text)")
-    seed = ("Herbst-Aktion Weizen", "E-Mail", "Landwirte", "2025-10-01 00:00:00", "2025-10-31 00:00:00", 2500, "beendet")
-    insert = "INSERT INTO batch8_marketing VALUES (%s, %s, %s, %s, %s, %s, %s)"
-    for changed in (seed[:5] + (2501, seed[6]), (None,) + seed[1:], seed[:2] + (None,) + seed[3:]):
-        bind.exec_driver_sql(insert, changed)
-        with pytest.raises(RuntimeError):
-            migration._marketing_entfernen(bind)
-        assert bind.exec_driver_sql("SELECT count(*) FROM batch8_marketing").scalar() == 1
-        bind.exec_driver_sql("DELETE FROM batch8_marketing")
-    bind.exec_driver_sql(insert, seed)
-    bind.exec_driver_sql(insert, seed)
-    with pytest.raises(RuntimeError):
-        migration._marketing_entfernen(bind)
-    assert bind.exec_driver_sql("SELECT count(*) FROM batch8_marketing").scalar() == 2
-    bind.exec_driver_sql("DELETE FROM batch8_marketing")
-    bind.exec_driver_sql(insert, seed)
-    bind.exec_driver_sql(insert, ("Fruehjahrs-Duenger-Kampagne", "Newsletter", "Ackerbau", "2026-02-15 00:00:00", "2026-03-31 00:00:00", 3000, "aktiv"))
+def test_ersetzte_marketingtabelle_mit_testzeilen_entfernen_und_zurueckrollen(bind):
+    bind.exec_driver_sql("CREATE TEMP TABLE batch8_marketing (id text, name text, tenant_id text)")
+    bind.exec_driver_sql("INSERT INTO batch8_marketing VALUES ('test-a', NULL, 'test-mandant'), ('test-b', 'Abweichende Testkampagne', NULL)")
+    savepoint = bind.begin_nested()
     migration._marketing_entfernen(bind)
     assert bind.exec_driver_sql("SELECT to_regclass('pg_temp.batch8_marketing')").scalar() is None
+    savepoint.rollback()
+    assert bind.exec_driver_sql("SELECT count(*) FROM batch8_marketing").scalar() == 2
 
 
 def test_nur_vollstaendige_foerder_und_labor_seeds_werden_entfernt(bind):

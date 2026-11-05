@@ -20384,7 +20384,7 @@ pruefen (Compliance-Register mit Seed in compliance.py, ops_disposition, ops_zer
 Verlaeufe, preise/konditionen fuellt Standardwerte auf; Marketing-/Communication-Dienste (services/crm-*) sollen
 CRM-Kampagnen konsumieren statt eigene zu fuehren.
 
-## BATCH8-ALTTABELLE-TESTDATEN-20261104 — reserviert, Codex
+## BATCH8-ALTTABELLE-TESTDATEN-20261104 — abgeschlossen, Codex
 
 Neue Nutzerentscheidung 04.11.2026: "vorhandene zeilen sin nur testdaten. tabelle kann entfernt werden, wenn nicht mehr passend".
 Die ersetzte ops_marketing_kampagnen darf nach dem bereits belegten Verbraucherabbau auch mit Testzeilen
@@ -20392,3 +20392,7 @@ entfernt werden. Dies ersetzt fuer diese ausgemusterte Tabelle die vorherige See
 Dateibesitz: scheinwege_mandant_20261103.py, gezielter Batch8-Test, QA und dieser Nachtrag.
 Abnahme: DROP ohne CASCADE nach vorhandener Tabellensperre; PostgreSQL-Nachweis ausschliesslich temporaer
 und zurueckgerollt. Weiter verwendete Foerder-/Labortabellen und deren Mandanten-/RLS-Vertraege bleiben erhalten.
+
+Abnahme 05.11.2026: zwei Batch-8- und ein Batch-9-PostgreSQL-Test gemeinsam sequentiell bestanden (3 passed, Exit 0).
+Belegte Alttabelle entfernt und via Savepoint-Rollback wiederhergestellt. Rolle valeo_agent, Revision vorher/nachher
+ruestlisten_tabelle_20261103, fremde Clients jeweils 0. Keine persistente Schemaaenderung, kein Reset oder Stamp.
