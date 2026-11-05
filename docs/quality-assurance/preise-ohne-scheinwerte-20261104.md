@@ -24,3 +24,5 @@ Der fokussierte HTTP-/OpenAPI-Vertragstest registriert den produktiven Domain-Ex
 Alle Doc-Generator-Checks sind gruen. Pagination-, Godfile- und SQL-Fstring-Gates bestehen; Doc-Drift: **0**. Feldvertraege: **5 passed**, vier Warnungen, Exit 0. OpenAPI, Architektur-/MCP-Projektionen, Inventare und Agent-Handbuch sind synchronisiert. Die Aenderung der generierten RLS-Analyse folgt entfernten Standardwerten; es wurden keine Policies live ausgerollt.
 
 Damit ist der Sicherheits-Slice gegen erfundene Preisangaben lokal abgenommen. Der oben beschriebene fachliche Auswahl- und Aggregationsvertrag bleibt ein eigener Integrationsauftrag. Gesamt-CI wird auf dem PR geprueft.
+
+CI-Nachlauf: Das Integritaets-Gate erkannte drei mit den Scheinwerten entfernte `date.today`-Zugriffe. Die Business-Time-Ratsche wurde ausschliesslich fuer diese Datei von 7 auf 4 abgesenkt. Der vollstaendige lokale Verbesserungsprueflauf besteht danach mit allen neun Scannern und stabilem Repository-Snapshot (Exit 0). Neuer CI-Lauf nach Push erforderlich.
