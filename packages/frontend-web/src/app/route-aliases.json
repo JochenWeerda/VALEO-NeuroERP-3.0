@@ -3305,10 +3305,6 @@
       "path": "crm/dubletten-pruefung"
     },
     {
-      "module": "@/pages/crm/events-messen",
-      "path": "crm/events-messen"
-    },
-    {
       "module": "@/pages/crm/gebietsschutz",
       "path": "crm/gebietsschutz"
     },
@@ -3319,14 +3315,6 @@
     {
       "module": "@/pages/crm/interaktions-historie",
       "path": "crm/interaktions-historie"
-    },
-    {
-      "module": "@/pages/crm/kampagne-detail",
-      "path": "crm/kampagne-detail"
-    },
-    {
-      "module": "@/pages/crm/kampagne-erstellen",
-      "path": "crm/kampagne-erstellen"
     },
     {
       "module": "@/pages/crm/kaufverhalten",
@@ -3367,10 +3355,6 @@
     {
       "module": "@/pages/disposition/strecken-disposition",
       "path": "disposition/strecken-disposition"
-    },
-    {
-      "module": "@/pages/disposition/umlagerungs-vorschlag",
-      "path": "disposition/umlagerungs-vorschlag"
     },
     {
       "module": "@/pages/dms/archiv-suche",

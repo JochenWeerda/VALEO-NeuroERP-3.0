@@ -1,18 +1,18 @@
 {
  "_note": "Generiert von scripts/rls_inventory.py; nicht von Hand aendern. Plan: docs/architecture/rls-mandantenkernel-plan.md",
  "summary": {
-  "tables": 785,
+  "tables": 782,
   "by_class": {
-   "A": 706,
+   "A": 716,
    "B": 22,
    "C": 9,
-   "D": 48
+   "D": 35
   },
-  "rls_enabled": 674,
+  "rls_enabled": 684,
   "tenant_types": {
    "character varying": 340,
    "character varying(100)": 9,
-   "character varying(120)": 51,
+   "character varying(120)": 61,
    "character varying(128)": 1,
    "character varying(255)": 1,
    "character varying(36)": 83,
@@ -3637,19 +3637,11 @@
   },
   {
    "table": "domain_ops.ops_compliance_items",
-   "class": "D",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying(120)",
+   "rls": true,
    "force_rls": false,
-   "policies": 0
-  },
-  {
-   "table": "domain_ops.ops_disposition",
-   "class": "D",
-   "tenant_type": null,
-   "rls": false,
-   "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_dokument_versionen",
@@ -3669,11 +3661,11 @@
   },
   {
    "table": "domain_ops.ops_enni_meldungen",
-   "class": "D",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying(120)",
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_fahrer",
@@ -3752,11 +3744,11 @@
   },
   {
    "table": "domain_ops.ops_foerderantraege",
-   "class": "D",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying(120)",
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_fuhrpark_ausgehende_dokumente",
@@ -3784,27 +3776,19 @@
   },
   {
    "table": "domain_ops.ops_labor_auftraege",
-   "class": "D",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying(120)",
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_labor_proben",
-   "class": "D",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying(120)",
+   "rls": true,
    "force_rls": false,
-   "policies": 0
-  },
-  {
-   "table": "domain_ops.ops_marketing_kampagnen",
-   "class": "D",
-   "tenant_type": null,
-   "rls": false,
-   "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_pcn_meldungen",
@@ -3832,11 +3816,11 @@
   },
   {
    "table": "domain_ops.ops_qs_checks",
-   "class": "D",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying(120)",
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_rahmenvertraege",
@@ -3848,19 +3832,19 @@
   },
   {
    "table": "domain_ops.ops_saatgut_nachbau",
-   "class": "D",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying(120)",
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_sachkunde_register",
-   "class": "D",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying(120)",
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_tank_bestand",
@@ -3888,11 +3872,11 @@
   },
   {
    "table": "domain_ops.ops_vvvo_register",
-   "class": "D",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying(120)",
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_waagen",
@@ -3936,14 +3920,6 @@
   },
   {
    "table": "domain_ops.ops_zertifikate",
-   "class": "D",
-   "tenant_type": null,
-   "rls": false,
-   "force_rls": false,
-   "policies": 0
-  },
-  {
-   "table": "domain_ops.ops_zertifikate_api",
    "class": "A",
    "tenant_type": "character varying(120)",
    "rls": true,
@@ -3952,11 +3928,11 @@
   },
   {
    "table": "domain_ops.ops_zulassungen_register",
-   "class": "D",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying(120)",
+   "rls": true,
    "force_rls": false,
-   "policies": 0
+   "policies": 4
   },
   {
    "table": "domain_ops.pos_position_override",

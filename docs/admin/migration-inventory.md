@@ -134,6 +134,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `calendar_items_uix063` | UIX-063: Planungskalender Read-Model und ICS-Token. |
 | `comp_artikel_sperren_20260618` | COMP-SPERR-001: Artikel-Sperr-Engine (artikel_sperren) |
 | `compliance_pcn_audit_20260623` | DOM-COMPLIANCE-004: compliance_pcn_meldungen, pcn_status_log, vvvo/sachkunde registers, artikel_sperre_audit |
+| `compliance_register_mandant_20261104` | Batch 9: Compliance-Register und Zertifikate im Mandanten, Disposition und zertifikate_api entfernt. |
 | `con_fixing_matif_20260611` | DOM-CON-004.2 — Fixierungs-Arbeitsraum + MATIF-Marktnotierung. |
 | `con_reminder_20260611` | DOM-CON-004.3 — Kontraktmahnung (append-only Mahnungs-Log). |
 | `con_settlement_storno_20260611` | DOM-CON-004.4 — Settlement-Übergabe + Storno (Bewegungs-Felder). |
@@ -463,6 +464,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `sales_o2c_link_20260610` | sales O2C-Link — Auftrag→Lieferschein-Verknüpfung (DOM-SALES-004.1) |
 | `sales_offer_number_tenant_20261031` | Scope active offer numbers to their tenant without changing historical data. |
 | `sales_orders_items_shipping_20260215` | Add sales_order_items relation and shipping_method on sales_orders. |
+| `scheinwege_mandant_20261103` | Batch 8 Scheinwege: Seeds und Testreste weg, Foerderung und Labor im Mandanten, Marketingtabelle entfernt. |
 | `screen_definition_drafts_20260916` | Studio ScreenDefinition drafts for Masken-Studio persistency. |
 | `seed_anlage1_abzugstabelle_template_20260303` | seed Anlage 1 (Abzugstabelle Qualität) amendment template |
 | `seed_default_tenant_20260214` | seed default tenant for foreign-key constrained domain tables |

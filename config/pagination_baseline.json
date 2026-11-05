@@ -79,7 +79,6 @@
     "app/api/v1/endpoints/crm_kim.py::_safe": 1,
     "app/api/v1/endpoints/crm_partner_suche.py::_safe": 1,
     "app/api/v1/endpoints/customer_extensions.py::customer_geo_search": 1,
-    "app/api/v1/endpoints/disposition.py::get_disposition_stats": 1,
     "app/api/v1/endpoints/dms_images.py::list_dms_documents": 1,
     "app/api/v1/endpoints/dms_images.py::list_dms_images": 1,
     "app/api/v1/endpoints/dms_images.py::search_dms_documents": 1,
@@ -102,8 +101,6 @@
     "app/api/v1/endpoints/flow_spines.py::find_instances_for_document": 2,
     "app/api/v1/endpoints/flow_spines.py::get_instance_timeline": 1,
     "app/api/v1/endpoints/flow_spines.py::list_instance_documents": 1,
-    "app/api/v1/endpoints/foerderung.py::get_foerderung_stats": 1,
-    "app/api/v1/endpoints/foerderung.py::list_antraege": 1,
     "app/api/v1/endpoints/futter_stamm.py::list_einzelfuttermittel": 1,
     "app/api/v1/endpoints/futter_stamm.py::list_mischfuttermittel": 1,
     "app/api/v1/endpoints/futter_stamm.py::list_rezepte": 1,
@@ -141,9 +138,6 @@
     "app/api/v1/endpoints/kostenrechnung.py::list_kostenarten": 1,
     "app/api/v1/endpoints/kostenrechnung.py::list_kostenstellen": 1,
     "app/api/v1/endpoints/labor.py::_befund_map": 1,
-    "app/api/v1/endpoints/labor.py::get_labor_stats": 1,
-    "app/api/v1/endpoints/labor.py::list_labor_auftraege": 1,
-    "app/api/v1/endpoints/labor.py::list_proben": 1,
     "app/api/v1/endpoints/logistics_freight.py::list_carrier_invoices": 1,
     "app/api/v1/endpoints/logistics_freight.py::list_tariffs": 1,
     "app/api/v1/endpoints/logistics_tours.py::get_statistics": 1,
@@ -151,8 +145,6 @@
     "app/api/v1/endpoints/logistics_tours.py::list_tours": 2,
     "app/api/v1/endpoints/logistics_tours.py::optimize_stops": 1,
     "app/api/v1/endpoints/logistik_frachtbriefe.py::list_frachtbriefe": 1,
-    "app/api/v1/endpoints/marketing.py::get_marketing_stats": 1,
-    "app/api/v1/endpoints/marketing.py::list_kampagnen": 1,
     "app/api/v1/endpoints/mask_frontend_bridges.py::_safe_rows": 1,
     "app/api/v1/endpoints/mask_frontend_bridges.py::get_agrar_kunde": 1,
     "app/api/v1/endpoints/master_data.py::list_branches": 1,
@@ -245,10 +237,6 @@
     "app/api/v1/endpoints/warehouse_transfers.py::list_bin_locations": 1,
     "app/api/v1/endpoints/warehouse_transfers.py::post_transfer": 1,
     "app/api/v1/endpoints/wartung.py::list_protokolle": 1,
-    "app/api/v1/endpoints/weighing_tickets.py::list_article_groups": 1,
-    "app/api/v1/endpoints/zertifikate.py::get_zertifikate_stats": 1,
-    "app/api/v1/endpoints/zertifikate.py::list_zertifikate": 1,
-    "app/api/v1/endpoints/zertifikate_api.py::get_ablaufend": 1,
-    "app/api/v1/endpoints/zertifikate_api.py::get_by_tenant": 1
+    "app/api/v1/endpoints/weighing_tickets.py::list_article_groups": 1
   }
 }

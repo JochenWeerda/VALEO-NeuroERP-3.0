@@ -1279,28 +1279,6 @@ def build_qualitaet_labor_liste() -> dict[str, Any]:
     )
 
 
-def build_disposition_liste() -> dict[str, Any]:
-    return _liste(
-        screen_id="disposition/liste", domain="lager", title="Disposition",
-        subtitle="Bestand, Mindestbestand und Beschaffungsempfehlung", endpoint="/api/v1/disposition",
-        row_route=None, bundle="lager",
-        columns=[
-            {"key": "artikel", "label": "Artikel", "sortable": True, "filterable": True, "priority": "primary"},
-            {"key": "bestand", "label": "Bestand", "numeric": True, "sortable": True, "priority": "primary"},
-            {"key": "mindestbestand", "label": "Mindest", "numeric": True, "priority": "secondary"},
-            {"key": "bedarf", "label": "Bedarf", "numeric": True, "priority": "secondary"},
-            {"key": "empfehlung", "label": "Empfehlung", "filterable": True, "priority": "primary"},
-            {"key": "prioritaet", "label": "Prioritaet", "renderKind": "status", "filterable": True,
-             "priority": "primary"},
-        ],
-        actions=[_neu("Bestellvorschlaege", "/einkauf/bestellvorschlaege"), _EXPORT],
-        row_actions=[],
-        purpose="Unterdeckte Artikel finden und Bestellvorschlaege ausloesen.",
-        prompts=["Welche Artikel liegen unter Mindestbestand?", "Wo ist Bedarf hoch?"],
-        no_workflow="Empfehlungsliste ohne eigenen Ablauf.",
-    )
-
-
 def build_crm_kontakte_liste() -> dict[str, Any]:
     return _liste(
         screen_id="crm/kontakte-liste", domain="crm", title="Kontakte",
@@ -2306,29 +2284,6 @@ def build_waage_wiegungen_liste() -> dict[str, Any]:
     return build_weighing_tickets("waage/wiegungen-liste")
 
 
-def build_marketing_kampagnen_liste() -> dict[str, Any]:
-    return _liste(
-        screen_id="marketing/kampagnen-liste", domain="marketing", title="Marketingkampagnen",
-        subtitle="Kampagnen mit Zielgruppe, Budget und Laufzeit",         endpoint="/api/v1/marketing/kampagnen",
-        row_route="/marketing/kampagne/{id}", bundle="marketing",
-        columns=[
-            {"key": "name", "label": "Kampagne", "sortable": True, "filterable": True, "priority": "primary"},
-            {"key": "typ", "label": "Typ", "filterable": True, "priority": "primary"},
-            {"key": "zielgruppe", "label": "Zielgruppe", "filterable": True, "priority": "secondary"},
-            {"key": "startdatum", "label": "Start", "renderKind": "date", "sortable": True, "priority": "secondary"},
-            {"key": "enddatum", "label": "Ende", "renderKind": "date", "sortable": True, "priority": "tertiary"},
-            {"key": "budget", "label": "Budget", "numeric": True, "renderKind": "currency", "sortable": True,
-             "priority": "primary"},
-            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
-        ],
-        actions=[_neu("Neue Kampagne", "/marketing/kampagne/neu"), _EXPORT],
-        row_actions=[],
-        purpose="Marketingkampagnen und Budgets verfolgen.",
-        prompts=["Welche Kampagnen laufen gerade?", "Welches Budget ist fuer Q2 geplant?"],
-        no_workflow="Kampagnenliste ohne eigenen Ablauf.",
-    )
-
-
 def build_crm_kunden_liste() -> dict[str, Any]:
     return _liste(
         screen_id="crm/kunden-liste", domain="crm", title="Kunden",
@@ -3319,7 +3274,6 @@ LISTEN_SCREEN_BUILDERS = {
     "zertifikate/liste": build_zertifikate_liste,
     "benachrichtigungen/liste": build_benachrichtigungen_liste,
     "qualitaet/labor-liste": build_qualitaet_labor_liste,
-    "disposition/liste": build_disposition_liste,
     "crm/kontakte-liste": build_crm_kontakte_liste,
     "crm/betriebsprofile-liste": build_crm_betriebsprofile_liste,
     "sales/angebote-liste": build_sales_angebote_liste,
@@ -3329,7 +3283,6 @@ LISTEN_SCREEN_BUILDERS = {
     "service/anfragen-liste": build_service_anfragen_liste,
     "compliance/enni-meldungen-liste": build_compliance_enni_meldungen_liste,
     "qualitaet/reklamationen-liste": build_qualitaet_reklamationen_liste,
-    "marketing/kampagnen-liste": build_marketing_kampagnen_liste,
     "crm/kunden-liste": build_crm_kunden_liste,
     "crm/lieferanten-liste": build_crm_lieferanten_liste,
     "banken/konten-liste": build_banken_konten_liste,
@@ -3426,7 +3379,6 @@ LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/
                 "zertifikate/liste": "/zertifikate",
                 "benachrichtigungen/liste": "/benachrichtigungen",
                 "qualitaet/labor-liste": "/qualitaet/labor-liste",
-                "disposition/liste": "/disposition",
                 "crm/kontakte-liste": "/crm/kontakte-liste",
                 "crm/betriebsprofile-liste": "/crm/betriebsprofile",
                 "sales/angebote-liste": "/sales/angebote-liste",
@@ -3436,7 +3388,6 @@ LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/
                 "service/anfragen-liste": "/service/anfragen",
                 "compliance/enni-meldungen-liste": "/compliance/enni-meldungen",
                 "qualitaet/reklamationen-liste": "/qualitaet/reklamationen",
-                "marketing/kampagnen-liste": "/marketing/kampagnen",
                 "crm/kunden-liste": "/crm/kunden-liste",
                 "crm/lieferanten-liste": "/crm/lieferanten-liste",
                 "banken/konten-liste": "/banken/konten",
@@ -3520,7 +3471,7 @@ LISTEN_SYNONYME = {"einkauf/anfragen": ["anfragen", "bedarfsanforderungen", "ban
                    "futtermittel/mischfuttermittel-liste": ["mischfuttermittel", "mischfutter", "kraftfutter"],
                    "finance/debitoren-liste": ["debitoren", "debitorenliste", "forderungen"],
                    "finance/kreditoren-liste": ["kreditoren", "kreditorenliste", "verbindlichkeiten stamm"],
-                   "crm/kampagnen-liste": ["kampagnen", "marketing", "campaigns"],
+                   "crm/kampagnen-liste": ["kampagnen", "marketing", "campaigns", "marketing kampagnen", "werbekampagnen"],
                    "crm/kampagnenvorlagen-liste": ["kampagnenvorlagen", "vorlagen", "templates"],
                    "crm/einwilligungen-liste": ["einwilligungen", "consent", "opt-in"],
                    "crm/partner-klaerfaelle-liste": ["partner-klaerfaelle", "partnerzuordnung", "dubletten"],
@@ -3546,7 +3497,6 @@ LISTEN_SYNONYME = {"einkauf/anfragen": ["anfragen", "bedarfsanforderungen", "ban
                    "zertifikate/liste": ["zertifikate", "zertifizierung", "qs nachweis"],
                    "benachrichtigungen/liste": ["benachrichtigungen", "hinweise", "warnungen inbox"],
                    "qualitaet/labor-liste": ["laborauftraege", "labor liste", "analysenauftrag"],
-                   "disposition/liste": ["disposition", "bestellvorschlag", "mindestbestand"],
                    "crm/kontakte-liste": ["kontakte", "ansprechpartner", "kontaktliste"],
                    "crm/betriebsprofile-liste": ["betriebsprofile", "landwirt", "farm profile"],
                    "sales/angebote-liste": ["verkaufsangebote", "kundenangebote", "sales offers"],
@@ -3556,7 +3506,6 @@ LISTEN_SYNONYME = {"einkauf/anfragen": ["anfragen", "bedarfsanforderungen", "ban
                    "service/anfragen-liste": ["service", "tickets", "serviceanfragen"],
                    "compliance/enni-meldungen-liste": ["enni", "duengemeldung", "naehrstoffmeldung"],
                    "qualitaet/reklamationen-liste": ["reklamationen", "beanstandungen", "maengel"],
-                   "marketing/kampagnen-liste": ["marketing kampagnen", "werbekampagnen", "kampagne marketing"],
                    "crm/kunden-liste": ["kundenliste", "kundenstamm", "kunden"],
                    "crm/lieferanten-liste": ["lieferantenliste", "lieferanten crm", "einkaufspartner"],
                    "banken/konten-liste": ["bankkonten", "hausbank", "konten"],

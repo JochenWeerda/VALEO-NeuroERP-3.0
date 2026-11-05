@@ -40351,70 +40351,11 @@
               "name": "updated_at",
               "nullable": true,
               "type": "timestamp with time zone"
-            }
-          ],
-          "foreign_keys": [],
-          "owner_domain": "inventory",
-          "ownership_reason": "Praefix 'ops_' → domain_ops.",
-          "placement": "prefix",
-          "primary_key": [
-            "id"
-          ],
-          "read_by": [
-            "app/domains/operations/models.py"
-          ]
-        },
-        "ops_disposition": {
-          "columns": [
+            },
             {
-              "name": "id",
+              "name": "tenant_id",
               "nullable": false,
               "type": "character varying"
-            },
-            {
-              "name": "artikel",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "artikel_id",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "bestand",
-              "nullable": true,
-              "type": "double precision"
-            },
-            {
-              "name": "mindestbestand",
-              "nullable": true,
-              "type": "double precision"
-            },
-            {
-              "name": "bedarf",
-              "nullable": true,
-              "type": "double precision"
-            },
-            {
-              "name": "empfehlung",
-              "nullable": true,
-              "type": "character varying"
-            },
-            {
-              "name": "prioritaet",
-              "nullable": true,
-              "type": "character varying"
-            },
-            {
-              "name": "created_at",
-              "nullable": true,
-              "type": "timestamp with time zone"
-            },
-            {
-              "name": "updated_at",
-              "nullable": true,
-              "type": "timestamp with time zone"
             }
           ],
           "foreign_keys": [],
@@ -40683,6 +40624,11 @@
               "name": "updated_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [],
@@ -42012,6 +41958,11 @@
               "name": "updated_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [],
@@ -42022,6 +41973,7 @@
             "id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/foerderung.py",
             "app/domains/operations/models.py"
           ]
         },
@@ -42263,6 +42215,11 @@
               "name": "updated_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [],
@@ -42322,70 +42279,26 @@
               "name": "updated_at",
               "nullable": true,
               "type": "timestamp with time zone"
-            }
-          ],
-          "foreign_keys": [],
-          "owner_domain": "inventory",
-          "ownership_reason": "Praefix 'ops_' → domain_ops.",
-          "placement": "prefix",
-          "primary_key": [
-            "id"
-          ],
-          "read_by": [
-            "app/domains/operations/models.py"
-          ]
-        },
-        "ops_marketing_kampagnen": {
-          "columns": [
+            },
             {
-              "name": "id",
+              "name": "tenant_id",
               "nullable": false,
               "type": "character varying"
             },
             {
-              "name": "name",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "typ",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "zielgruppe",
+              "name": "analysewerte",
               "nullable": true,
-              "type": "character varying"
+              "type": "jsonb"
             },
             {
-              "name": "startdatum",
+              "name": "grenzwerte",
               "nullable": true,
-              "type": "timestamp with time zone"
+              "type": "jsonb"
             },
             {
-              "name": "enddatum",
+              "name": "bemerkung",
               "nullable": true,
-              "type": "timestamp with time zone"
-            },
-            {
-              "name": "budget",
-              "nullable": true,
-              "type": "numeric"
-            },
-            {
-              "name": "status",
-              "nullable": true,
-              "type": "character varying"
-            },
-            {
-              "name": "created_at",
-              "nullable": true,
-              "type": "timestamp with time zone"
-            },
-            {
-              "name": "updated_at",
-              "nullable": true,
-              "type": "timestamp with time zone"
+              "type": "text"
             }
           ],
           "foreign_keys": [],
@@ -42696,6 +42609,11 @@
               "name": "updated_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [],
@@ -42860,6 +42778,11 @@
               "name": "updated_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [],
@@ -42924,6 +42847,11 @@
               "name": "updated_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [],
@@ -43295,6 +43223,11 @@
               "name": "updated_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [],
@@ -43830,6 +43763,11 @@
               "name": "updated_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [],
@@ -43841,75 +43779,6 @@
           ],
           "read_by": [
             "app/core/database.py",
-            "app/domains/operations/models.py"
-          ]
-        },
-        "ops_zertifikate_api": {
-          "columns": [
-            {
-              "name": "id",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "zertifikat_id",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "tenant_id",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "typ",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "zertifizierungsstelle",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "gueltig_von",
-              "nullable": false,
-              "type": "timestamp with time zone"
-            },
-            {
-              "name": "gueltig_bis",
-              "nullable": false,
-              "type": "timestamp with time zone"
-            },
-            {
-              "name": "zertifikatsnummer",
-              "nullable": true,
-              "type": "character varying"
-            },
-            {
-              "name": "status",
-              "nullable": true,
-              "type": "character varying"
-            },
-            {
-              "name": "created_at",
-              "nullable": true,
-              "type": "timestamp with time zone"
-            },
-            {
-              "name": "updated_at",
-              "nullable": true,
-              "type": "timestamp with time zone"
-            }
-          ],
-          "foreign_keys": [],
-          "owner_domain": "inventory",
-          "ownership_reason": "Praefix 'ops_' → domain_ops.",
-          "placement": "prefix",
-          "primary_key": [
-            "id"
-          ],
-          "read_by": [
             "app/domains/operations/models.py"
           ]
         },
@@ -43959,6 +43828,11 @@
               "name": "updated_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [],

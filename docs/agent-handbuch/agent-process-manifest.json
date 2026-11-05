@@ -4840,7 +4840,7 @@
     },
     {
       "mask_id": "annahme/labor",
-      "title": "Labor",
+      "title": "Laborauftrag",
       "domain": "agrar",
       "process_keys": [],
       "rollout_route": "/mask-rollout/annahme__labor/:entityId",
@@ -8824,41 +8824,6 @@
       ]
     },
     {
-      "mask_id": "crm/events-messen",
-      "title": "Events und Messen",
-      "domain": "crm",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/crm__events-messen/:entityId",
-      "agent_contract_url": "/api/v1/masks/crm/events-messen/agent-contract",
-      "screen_definition_url": "/api/v1/masks/crm/events-messen/screen-definition",
-      "readiness_url": "/api/v1/masks/crm/events-messen/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "refresh",
-          "label": "Aktualisieren",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "crm.read",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "crm.customer.search",
-        "crm.customer.summary360",
-        "crm.customer.open",
-        "crm.contact.log",
-        "crm.activity.create",
-        "crm.activity.update",
-        "crm.activity.delete",
-        "crm.lead.qualify"
-      ]
-    },
-    {
       "mask_id": "crm/gdpr-request",
       "title": "DSGVO-Anfrage",
       "domain": "crm",
@@ -9025,76 +8990,6 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "crm.read",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "crm.customer.search",
-        "crm.customer.summary360",
-        "crm.customer.open",
-        "crm.contact.log",
-        "crm.activity.create",
-        "crm.activity.update",
-        "crm.activity.delete",
-        "crm.lead.qualify"
-      ]
-    },
-    {
-      "mask_id": "crm/kampagne-detail",
-      "title": "Kampagne",
-      "domain": "crm",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/crm__kampagne-detail/:entityId",
-      "agent_contract_url": "/api/v1/masks/crm/kampagne-detail/agent-contract",
-      "screen_definition_url": "/api/v1/masks/crm/kampagne-detail/screen-definition",
-      "readiness_url": "/api/v1/masks/crm/kampagne-detail/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "refresh",
-          "label": "Aktualisieren",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "crm.read",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "crm.customer.search",
-        "crm.customer.summary360",
-        "crm.customer.open",
-        "crm.contact.log",
-        "crm.activity.create",
-        "crm.activity.update",
-        "crm.activity.delete",
-        "crm.lead.qualify"
-      ]
-    },
-    {
-      "mask_id": "crm/kampagne-erstellen",
-      "title": "Kampagne erstellen",
-      "domain": "crm",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/crm__kampagne-erstellen/:entityId",
-      "agent_contract_url": "/api/v1/masks/crm/kampagne-erstellen/agent-contract",
-      "screen_definition_url": "/api/v1/masks/crm/kampagne-erstellen/screen-definition",
-      "readiness_url": "/api/v1/masks/crm/kampagne-erstellen/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "refresh",
-          "label": "Aktualisieren",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "crm.write",
           "commandEndpoint": null,
           "method": null,
           "stubReason": null
@@ -17750,48 +17645,6 @@
       ]
     },
     {
-      "mask_id": "disposition/liste",
-      "title": "Disposition",
-      "domain": "lager",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/disposition__liste/:entityId",
-      "agent_contract_url": "/api/v1/masks/disposition/liste/agent-contract",
-      "screen_definition_url": "/api/v1/masks/disposition/liste/screen-definition",
-      "readiness_url": "/api/v1/masks/disposition/liste/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "neu",
-          "label": "Bestellvorschlaege",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
-        },
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "lager.bestand.get",
-        "lager.inventur.status",
-        "lager.inventur.propose_opening",
-        "lager.stock_movement.stornieren"
-      ]
-    },
-    {
       "mask_id": "etiketten/druck-liste",
       "title": "Etikettendruck",
       "domain": "lager",
@@ -18732,40 +18585,6 @@
       ]
     },
     {
-      "mask_id": "disposition/engpass-monitor",
-      "title": "Engpass-Monitor",
-      "domain": "logistics",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/disposition__engpass-monitor/:entityId",
-      "agent_contract_url": "/api/v1/masks/disposition/engpass-monitor/agent-contract",
-      "screen_definition_url": "/api/v1/masks/disposition/engpass-monitor/screen-definition",
-      "readiness_url": "/api/v1/masks/disposition/engpass-monitor/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "refresh",
-          "label": "Aktualisieren",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "logistics.read",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "logistik.frachttabelle.anlegen",
-        "logistik.tour.anlegen",
-        "logistik.fahrzeug.speichern",
-        "logistik.fahrzeug.loeschen",
-        "logistik.terminart.speichern",
-        "logistik.rechnung.speichern",
-        "logistik.ausgehendes_dokument.speichern"
-      ]
-    },
-    {
       "mask_id": "disposition/kontrakt-abruf",
       "title": "Kontrakt-Abruf",
       "domain": "logistics",
@@ -18910,40 +18729,6 @@
       "agent_contract_url": "/api/v1/masks/disposition/touren-disposition/agent-contract",
       "screen_definition_url": "/api/v1/masks/disposition/touren-disposition/screen-definition",
       "readiness_url": "/api/v1/masks/disposition/touren-disposition/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "refresh",
-          "label": "Aktualisieren",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "logistics.read",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "logistik.frachttabelle.anlegen",
-        "logistik.tour.anlegen",
-        "logistik.fahrzeug.speichern",
-        "logistik.fahrzeug.loeschen",
-        "logistik.terminart.speichern",
-        "logistik.rechnung.speichern",
-        "logistik.ausgehendes_dokument.speichern"
-      ]
-    },
-    {
-      "mask_id": "disposition/umlagerungs-vorschlag",
-      "title": "Umlagerungs-Vorschlag",
-      "domain": "logistics",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/disposition__umlagerungs-vorschlag/:entityId",
-      "agent_contract_url": "/api/v1/masks/disposition/umlagerungs-vorschlag/agent-contract",
-      "screen_definition_url": "/api/v1/masks/disposition/umlagerungs-vorschlag/screen-definition",
-      "readiness_url": "/api/v1/masks/disposition/umlagerungs-vorschlag/readiness",
       "risk_summary": "low",
       "actions": [
         {
@@ -20057,69 +19842,6 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": null
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "marketing/kampagnen",
-      "title": "Kampagnen",
-      "domain": "marketing",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/marketing__kampagnen/:entityId",
-      "agent_contract_url": "/api/v1/masks/marketing/kampagnen/agent-contract",
-      "screen_definition_url": "/api/v1/masks/marketing/kampagnen/screen-definition",
-      "readiness_url": "/api/v1/masks/marketing/kampagnen/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "marketing/kampagnen-liste",
-      "title": "Marketingkampagnen",
-      "domain": "marketing",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/marketing__kampagnen-liste/:entityId",
-      "agent_contract_url": "/api/v1/masks/marketing/kampagnen-liste/agent-contract",
-      "screen_definition_url": "/api/v1/masks/marketing/kampagnen-liste/screen-definition",
-      "readiness_url": "/api/v1/masks/marketing/kampagnen-liste/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "neu",
-          "label": "Neue Kampagne",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
-        },
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
         }
       ],
       "sensitive_fields": [],
@@ -22123,7 +21845,7 @@
     },
     {
       "mask_id": "qualitaet/labor-auftrag",
-      "title": "Labor auftrag",
+      "title": "Laborauftraege",
       "domain": "qualitaet",
       "process_keys": [],
       "rollout_route": "/mask-rollout/qualitaet__labor-auftrag/:entityId",
@@ -22151,7 +21873,7 @@
     },
     {
       "mask_id": "qualitaet/labor-detail",
-      "title": "Labor detail",
+      "title": "Laborauftrag",
       "domain": "qualitaet",
       "process_keys": [],
       "rollout_route": "/mask-rollout/qualitaet__labor-detail/:entityId",

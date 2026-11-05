@@ -105,13 +105,11 @@ from app.api.v1.endpoints import (
     banken,
     compliance,
     gobd_archiv,
-    disposition,
     dokumente,
     vertraege,
     waage,
     zertifikate,
     foerderung,
-    marketing,
     crm_campaigns,
     labor,
     fuhrpark,
@@ -221,7 +219,6 @@ from app.api.v1.endpoints import (
     silo_operations_api,
     read_model_snapshots,
     edi_api,
-    zertifikate_api,
     ernte_kampagne_api,
     ernte_planung,
 )
@@ -1635,11 +1632,6 @@ api_router.include_router(
 
 api_router.include_router(pos_fiscalization.router)
 
-# Disposition API
-api_router.include_router(
-    disposition.router
-)
-
 # Dokumente API
 api_router.include_router(
     dokumente.router
@@ -1663,11 +1655,6 @@ api_router.include_router(
 # Förderung API
 api_router.include_router(
     foerderung.router
-)
-
-# Marketing API
-api_router.include_router(
-    marketing.router
 )
 
 # CRM Campaigns API — router prefix is already /crm/campaigns, no extra prefix needed
@@ -1871,7 +1858,6 @@ api_router.include_router(read_model_snapshots.router)
 
 # Wave 9 — EDI, Zertifikate, Ernte-Kampagne
 api_router.include_router(edi_api.router)
-api_router.include_router(zertifikate_api.router)
 api_router.include_router(ernte_kampagne_api.router)
 api_router.include_router(ernte_planung.router)
 

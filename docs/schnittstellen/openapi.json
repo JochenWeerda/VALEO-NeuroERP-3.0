@@ -53516,27 +53516,9 @@
         "title": "DispositionGeliefert",
         "type": "object"
       },
-      "DispositionPositionCreate": {
+      "DispositionOut": {
         "properties": {
-          "artikel": {
-            "title": "Artikel",
-            "type": "string"
-          },
-          "artikel_id": {
-            "title": "Artikel Id",
-            "type": "string"
-          },
-          "bedarf": {
-            "default": 0,
-            "title": "Bedarf",
-            "type": "number"
-          },
-          "bestand": {
-            "default": 0,
-            "title": "Bestand",
-            "type": "number"
-          },
-          "empfehlung": {
+          "bemerkung": {
             "anyOf": [
               {
                 "type": "string"
@@ -53545,107 +53527,123 @@
                 "type": "null"
               }
             ],
-            "title": "Empfehlung"
+            "title": "Bemerkung"
           },
-          "mindestbestand": {
-            "default": 0,
-            "title": "Mindestbestand",
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "disposition_nr": {
+            "title": "Disposition Nr",
+            "type": "integer"
+          },
+          "erfasst_durch": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erfasst Durch"
+          },
+          "freigabe": {
+            "title": "Freigabe",
+            "type": "boolean"
+          },
+          "geplantes_lieferdatum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Geplantes Lieferdatum"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "kontrakt_id": {
+            "title": "Kontrakt Id",
+            "type": "string"
+          },
+          "kontrakt_nr": {
+            "title": "Kontrakt Nr",
+            "type": "string"
+          },
+          "kontrakt_pos_nr": {
+            "title": "Kontrakt Pos Nr",
+            "type": "integer"
+          },
+          "lieferdatum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lieferdatum"
+          },
+          "menge": {
+            "title": "Menge",
             "type": "number"
           },
-          "prioritaet": {
-            "default": "mittel",
-            "title": "Prioritaet",
+          "status": {
+            "title": "Status",
             "type": "string"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "wiegeschein_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wiegeschein Id"
           }
         },
         "required": [
-          "artikel",
-          "artikel_id"
+          "id",
+          "tenant_id",
+          "kontrakt_id",
+          "kontrakt_nr",
+          "kontrakt_pos_nr",
+          "disposition_nr",
+          "menge",
+          "status",
+          "freigabe"
         ],
-        "title": "DispositionPositionCreate",
-        "type": "object"
-      },
-      "DispositionPositionUpdate": {
-        "properties": {
-          "artikel": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Artikel"
-          },
-          "artikel_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Artikel Id"
-          },
-          "bedarf": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Bedarf"
-          },
-          "bestand": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Bestand"
-          },
-          "empfehlung": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Empfehlung"
-          },
-          "mindestbestand": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Mindestbestand"
-          },
-          "prioritaet": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Prioritaet"
-          }
-        },
-        "title": "DispositionPositionUpdate",
+        "title": "DispositionOut",
         "type": "object"
       },
       "DisputeCreateIn": {
@@ -73757,6 +73755,7 @@
         "type": "object"
       },
       "FoerderAntragCreate": {
+        "additionalProperties": false,
         "properties": {
           "antragsdatum": {
             "format": "date",
@@ -73765,19 +73764,25 @@
           },
           "betrag": {
             "default": 0,
+            "minimum": 0.0,
             "title": "Betrag",
             "type": "number"
           },
           "flaeche": {
             "default": 0,
+            "minimum": 0.0,
             "title": "Flaeche",
             "type": "number"
           },
           "nummer": {
+            "maxLength": 80,
+            "minLength": 1,
             "title": "Nummer",
             "type": "string"
           },
           "programm": {
+            "maxLength": 120,
+            "minLength": 1,
             "title": "Programm",
             "type": "string"
           },
@@ -73795,7 +73800,89 @@
         "title": "FoerderAntragCreate",
         "type": "object"
       },
+      "FoerderAntragListOut": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FoerderAntragOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "sum_betrag": {
+            "title": "Sum Betrag",
+            "type": "number"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "sum_betrag"
+        ],
+        "title": "FoerderAntragListOut",
+        "type": "object"
+      },
+      "FoerderAntragOut": {
+        "properties": {
+          "antragsdatum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Antragsdatum"
+          },
+          "betrag": {
+            "default": 0,
+            "title": "Betrag",
+            "type": "number"
+          },
+          "flaeche": {
+            "default": 0,
+            "title": "Flaeche",
+            "type": "number"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "nummer": {
+            "title": "Nummer",
+            "type": "string"
+          },
+          "programm": {
+            "title": "Programm",
+            "type": "string"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "required": [
+          "id",
+          "nummer",
+          "programm"
+        ],
+        "title": "FoerderAntragOut",
+        "type": "object"
+      },
       "FoerderAntragUpdate": {
+        "additionalProperties": false,
         "properties": {
           "antragsdatum": {
             "anyOf": [
@@ -73812,6 +73899,7 @@
           "betrag": {
             "anyOf": [
               {
+                "minimum": 0.0,
                 "type": "number"
               },
               {
@@ -73823,6 +73911,7 @@
           "flaeche": {
             "anyOf": [
               {
+                "minimum": 0.0,
                 "type": "number"
               },
               {
@@ -73834,6 +73923,8 @@
           "programm": {
             "anyOf": [
               {
+                "maxLength": 120,
+                "minLength": 1,
                 "type": "string"
               },
               {
@@ -73857,11 +73948,32 @@
         "title": "FoerderAntragUpdate",
         "type": "object"
       },
-      "FoerderungOut": {
-        "additionalProperties": true,
-        "description": "Response schema for foerderung endpoints.",
-        "properties": {},
-        "title": "FoerderungOut",
+      "FoerderungStatsOut": {
+        "properties": {
+          "betrag_bewilligt": {
+            "title": "Betrag Bewilligt",
+            "type": "number"
+          },
+          "bewilligt": {
+            "title": "Bewilligt",
+            "type": "integer"
+          },
+          "eingereicht": {
+            "title": "Eingereicht",
+            "type": "integer"
+          },
+          "entwurf": {
+            "title": "Entwurf",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "bewilligt",
+          "eingereicht",
+          "entwurf",
+          "betrag_bewilligt"
+        ],
+        "title": "FoerderungStatsOut",
         "type": "object"
       },
       "FolgeartikelCreate": {
@@ -98163,6 +98275,128 @@
         "title": "LaborAuftragCreate",
         "type": "object"
       },
+      "LaborAuftragListOut": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/LaborAuftragOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "LaborAuftragListOut",
+        "type": "object"
+      },
+      "LaborAuftragOut": {
+        "properties": {
+          "analysen": {
+            "title": "Analysen",
+            "type": "integer"
+          },
+          "analysewerte": {
+            "additionalProperties": true,
+            "title": "Analysewerte",
+            "type": "object"
+          },
+          "auftragsdatum": {
+            "title": "Auftragsdatum",
+            "type": "string"
+          },
+          "befund": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LaborBefundKurzOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "bemerkung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bemerkung"
+          },
+          "charge": {
+            "title": "Charge",
+            "type": "string"
+          },
+          "chargenId": {
+            "title": "Chargenid",
+            "type": "string"
+          },
+          "chargen_id": {
+            "title": "Chargen Id",
+            "type": "string"
+          },
+          "folgeaktion": {
+            "title": "Folgeaktion",
+            "type": "string"
+          },
+          "grenzwerte": {
+            "additionalProperties": true,
+            "title": "Grenzwerte",
+            "type": "object"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "labor": {
+            "title": "Labor",
+            "type": "string"
+          },
+          "qs_entscheidung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Qs Entscheidung"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "required": [
+          "id",
+          "chargenId",
+          "chargen_id",
+          "charge",
+          "labor",
+          "analysen",
+          "auftragsdatum",
+          "folgeaktion"
+        ],
+        "title": "LaborAuftragOut",
+        "type": "object"
+      },
       "LaborBefundCreate": {
         "properties": {
           "analysewerte": {
@@ -98197,11 +98431,148 @@
         "title": "LaborBefundCreate",
         "type": "object"
       },
-      "LaborOut": {
-        "additionalProperties": true,
-        "description": "Response schema for labor endpoints.",
-        "properties": {},
-        "title": "LaborOut",
+      "LaborBefundKurzOut": {
+        "properties": {
+          "datum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datum"
+          },
+          "entscheidung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entscheidung"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "labor": {
+            "title": "Labor",
+            "type": "string"
+          },
+          "probennummer": {
+            "title": "Probennummer",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "probennummer",
+          "labor"
+        ],
+        "title": "LaborBefundKurzOut",
+        "type": "object"
+      },
+      "LaborProbeListOut": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/LaborProbeOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "LaborProbeListOut",
+        "type": "object"
+      },
+      "LaborProbeOut": {
+        "properties": {
+          "artikel": {
+            "title": "Artikel",
+            "type": "string"
+          },
+          "datum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datum"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "labor": {
+            "title": "Labor",
+            "type": "string"
+          },
+          "probennummer": {
+            "title": "Probennummer",
+            "type": "string"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "typ": {
+            "title": "Typ",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "probennummer",
+          "typ",
+          "artikel",
+          "labor"
+        ],
+        "title": "LaborProbeOut",
+        "type": "object"
+      },
+      "LaborStatsOut": {
+        "properties": {
+          "abgeschlossen": {
+            "title": "Abgeschlossen",
+            "type": "integer"
+          },
+          "ausstehend": {
+            "title": "Ausstehend",
+            "type": "integer"
+          },
+          "in-bearbeitung": {
+            "title": "In-Bearbeitung",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "abgeschlossen",
+          "in-bearbeitung",
+          "ausstehend"
+        ],
+        "title": "LaborStatsOut",
         "type": "object"
       },
       "LagerKontenzuordnungCreate": {
@@ -105455,149 +105826,6 @@
           }
         },
         "title": "MarketingConsent",
-        "type": "object"
-      },
-      "MarketingKampagneCreate": {
-        "properties": {
-          "budget": {
-            "default": 0,
-            "title": "Budget",
-            "type": "number"
-          },
-          "enddatum": {
-            "anyOf": [
-              {
-                "format": "date",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Enddatum"
-          },
-          "name": {
-            "title": "Name",
-            "type": "string"
-          },
-          "startdatum": {
-            "format": "date",
-            "title": "Startdatum",
-            "type": "string"
-          },
-          "status": {
-            "default": "geplant",
-            "title": "Status",
-            "type": "string"
-          },
-          "typ": {
-            "title": "Typ",
-            "type": "string"
-          },
-          "zielgruppe": {
-            "title": "Zielgruppe",
-            "type": "string"
-          }
-        },
-        "required": [
-          "name",
-          "typ",
-          "zielgruppe",
-          "startdatum"
-        ],
-        "title": "MarketingKampagneCreate",
-        "type": "object"
-      },
-      "MarketingKampagneUpdate": {
-        "properties": {
-          "budget": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Budget"
-          },
-          "enddatum": {
-            "anyOf": [
-              {
-                "format": "date",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Enddatum"
-          },
-          "name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Name"
-          },
-          "startdatum": {
-            "anyOf": [
-              {
-                "format": "date",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Startdatum"
-          },
-          "status": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Status"
-          },
-          "typ": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Typ"
-          },
-          "zielgruppe": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Zielgruppe"
-          }
-        },
-        "title": "MarketingKampagneUpdate",
-        "type": "object"
-      },
-      "MarketingOut": {
-        "additionalProperties": true,
-        "description": "Response schema for marketing endpoints.",
-        "properties": {},
-        "title": "MarketingOut",
         "type": "object"
       },
       "MarketingPrefIn": {
@@ -180547,50 +180775,6 @@
         "title": "ZertifikatCreate",
         "type": "object"
       },
-      "ZertifikatCreateRequest": {
-        "properties": {
-          "gueltig_bis": {
-            "title": "Gueltig Bis",
-            "type": "string"
-          },
-          "gueltig_von": {
-            "title": "Gueltig Von",
-            "type": "string"
-          },
-          "tenant_id": {
-            "title": "Tenant Id",
-            "type": "string"
-          },
-          "typ": {
-            "title": "Typ",
-            "type": "string"
-          },
-          "zertifikatsnummer": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Zertifikatsnummer"
-          },
-          "zertifizierungsstelle": {
-            "title": "Zertifizierungsstelle",
-            "type": "string"
-          }
-        },
-        "required": [
-          "tenant_id",
-          "typ",
-          "zertifizierungsstelle",
-          "gueltig_von",
-          "gueltig_bis"
-        ],
-        "title": "ZertifikatCreateRequest",
-        "type": "object"
-      },
       "ZertifikatUpdate": {
         "properties": {
           "art": {
@@ -180663,13 +180847,6 @@
           }
         },
         "title": "ZertifikatUpdate",
-        "type": "object"
-      },
-      "ZertifikateApiOut": {
-        "additionalProperties": true,
-        "description": "Response schema for zertifikate api endpoints.",
-        "properties": {},
-        "title": "ZertifikateApiOut",
         "type": "object"
       },
       "ZertifikateOut": {
@@ -189627,13 +189804,6 @@
         "title": "OpportunityUpdate",
         "type": "object"
       },
-      "app__api__v1__schemas__disposition_schemas__DispositionOut": {
-        "additionalProperties": true,
-        "description": "Response schema for disposition endpoints.",
-        "properties": {},
-        "title": "DispositionOut",
-        "type": "object"
-      },
       "app__api__v1__schemas__external_mock_harness_schemas__DsfinvkExportOut": {
         "description": "``POST /dev/external-mocks/dsfinvk/export``",
         "properties": {
@@ -189794,136 +189964,6 @@
           }
         },
         "title": "CreditLimitOut",
-        "type": "object"
-      },
-      "app__api__v1__schemas__kontrakt_disposition_schemas__DispositionOut": {
-        "properties": {
-          "bemerkung": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Bemerkung"
-          },
-          "created_at": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Created At"
-          },
-          "disposition_nr": {
-            "title": "Disposition Nr",
-            "type": "integer"
-          },
-          "erfasst_durch": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Erfasst Durch"
-          },
-          "freigabe": {
-            "title": "Freigabe",
-            "type": "boolean"
-          },
-          "geplantes_lieferdatum": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Geplantes Lieferdatum"
-          },
-          "id": {
-            "title": "Id",
-            "type": "string"
-          },
-          "kontrakt_id": {
-            "title": "Kontrakt Id",
-            "type": "string"
-          },
-          "kontrakt_nr": {
-            "title": "Kontrakt Nr",
-            "type": "string"
-          },
-          "kontrakt_pos_nr": {
-            "title": "Kontrakt Pos Nr",
-            "type": "integer"
-          },
-          "lieferdatum": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Lieferdatum"
-          },
-          "menge": {
-            "title": "Menge",
-            "type": "number"
-          },
-          "status": {
-            "title": "Status",
-            "type": "string"
-          },
-          "tenant_id": {
-            "title": "Tenant Id",
-            "type": "string"
-          },
-          "updated_at": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Updated At"
-          },
-          "wiegeschein_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Wiegeschein Id"
-          }
-        },
-        "required": [
-          "id",
-          "tenant_id",
-          "kontrakt_id",
-          "kontrakt_nr",
-          "kontrakt_pos_nr",
-          "disposition_nr",
-          "menge",
-          "status",
-          "freigabe"
-        ],
-        "title": "DispositionOut",
         "type": "object"
       },
       "app__api__v1__schemas__kontrakte_schemas__AmendmentCreate": {
@@ -272855,242 +272895,6 @@
         ]
       }
     },
-    "/api/v1/disposition": {
-      "get": {
-        "operationId": "list_disposition_api_v1_disposition_get",
-        "parameters": [
-          {
-            "description": "Filter by priority",
-            "in": "query",
-            "name": "prioritaet",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter by priority",
-              "title": "Prioritaet"
-            }
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "schema": {
-              "default": 100,
-              "maximum": 1000,
-              "minimum": 1,
-              "title": "Limit",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/app__api__v1__schemas__disposition_schemas__DispositionOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Disposition auflisten",
-        "tags": [
-          "Disposition"
-        ]
-      },
-      "post": {
-        "description": "Create a new disposition position.",
-        "operationId": "create_disposition_position_api_v1_disposition_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DispositionPositionCreate"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/app__api__v1__schemas__disposition_schemas__DispositionOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Disposition position anlegen",
-        "tags": [
-          "Disposition"
-        ]
-      }
-    },
-    "/api/v1/disposition/stats": {
-      "get": {
-        "operationId": "get_disposition_stats_api_v1_disposition_stats_get",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/app__api__v1__schemas__disposition_schemas__DispositionOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Disposition stats abrufen",
-        "tags": [
-          "Disposition"
-        ]
-      }
-    },
-    "/api/v1/disposition/{position_id}": {
-      "delete": {
-        "description": "Delete a disposition position.",
-        "operationId": "delete_disposition_position_api_v1_disposition__position_id__delete",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "position_id",
-            "required": true,
-            "schema": {
-              "title": "Position Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Disposition position löschen",
-        "tags": [
-          "Disposition"
-        ]
-      },
-      "put": {
-        "description": "Update an existing disposition position.",
-        "operationId": "update_disposition_position_api_v1_disposition__position_id__put",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "position_id",
-            "required": true,
-            "schema": {
-              "title": "Position Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DispositionPositionUpdate"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/app__api__v1__schemas__disposition_schemas__DispositionOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Disposition position aktualisieren",
-        "tags": [
-          "Disposition"
-        ]
-      }
-    },
     "/api/v1/dms/documents": {
       "get": {
         "description": "List canonical metadata without hiding database contract errors.",
@@ -311715,6 +311519,18 @@
               "description": "Filter by status",
               "title": "Status"
             }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 500,
+              "maximum": 2000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
           }
         ],
         "responses": {
@@ -311722,7 +311538,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FoerderungOut"
+                  "$ref": "#/components/schemas/FoerderAntragListOut"
                 }
               }
             },
@@ -311750,7 +311566,6 @@
         ]
       },
       "post": {
-        "description": "Create a new Foerderantrag.",
         "operationId": "create_antrag_api_v1_foerderung_antraege_post",
         "requestBody": {
           "content": {
@@ -311767,7 +311582,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FoerderungOut"
+                  "$ref": "#/components/schemas/FoerderAntragOut"
                 }
               }
             },
@@ -311797,7 +311612,7 @@
     },
     "/api/v1/foerderung/antraege/{antrag_id}": {
       "delete": {
-        "description": "Förderantrag löschen (nur im Entwurfsstatus).",
+        "description": "Nur Entwuerfe; ein eingereichter Antrag ist ein Vorgang gegenueber der Behoerde.",
         "operationId": "delete_antrag_api_v1_foerderung_antraege__antrag_id__delete",
         "parameters": [
           {
@@ -311836,7 +311651,6 @@
         ]
       },
       "get": {
-        "description": "Einzelnen Förderantrag abrufen.",
         "operationId": "get_antrag_api_v1_foerderung_antraege__antrag_id__get",
         "parameters": [
           {
@@ -311854,7 +311668,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FoerderungOut"
+                  "$ref": "#/components/schemas/FoerderAntragOut"
                 }
               }
             },
@@ -311882,7 +311696,6 @@
         ]
       },
       "put": {
-        "description": "Update an existing Foerderantrag.",
         "operationId": "update_antrag_api_v1_foerderung_antraege__antrag_id__put",
         "parameters": [
           {
@@ -311891,7 +311704,7 @@
             "required": true,
             "schema": {
               "title": "Antrag Id",
-              "type": "integer"
+              "type": "string"
             }
           }
         ],
@@ -311910,7 +311723,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FoerderungOut"
+                  "$ref": "#/components/schemas/FoerderAntragOut"
                 }
               }
             },
@@ -311946,7 +311759,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FoerderungOut"
+                  "$ref": "#/components/schemas/FoerderungStatsOut"
                 }
               }
             },
@@ -331213,7 +331026,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/app__api__v1__schemas__kontrakt_disposition_schemas__DispositionOut"
+                    "$ref": "#/components/schemas/DispositionOut"
                   },
                   "title": "Response List Dispositionen Api V1 Kontrakte  Kontrakt Id  Dispositionen Get",
                   "type": "array"
@@ -331273,7 +331086,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__api__v1__schemas__kontrakt_disposition_schemas__DispositionOut"
+                  "$ref": "#/components/schemas/DispositionOut"
                 }
               }
             },
@@ -331331,7 +331144,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__api__v1__schemas__kontrakt_disposition_schemas__DispositionOut"
+                  "$ref": "#/components/schemas/DispositionOut"
                 }
               }
             },
@@ -331389,7 +331202,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__api__v1__schemas__kontrakt_disposition_schemas__DispositionOut"
+                  "$ref": "#/components/schemas/DispositionOut"
                 }
               }
             },
@@ -331456,7 +331269,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__api__v1__schemas__kontrakt_disposition_schemas__DispositionOut"
+                  "$ref": "#/components/schemas/DispositionOut"
                 }
               }
             },
@@ -334056,16 +333869,40 @@
     "/api/v1/labor/labor-auftraege": {
       "get": {
         "operationId": "list_labor_auftraege_api_v1_labor_labor_auftraege_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 500,
+              "maximum": 2000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LaborOut"
+                  "$ref": "#/components/schemas/LaborAuftragListOut"
                 }
               }
             },
             "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "security": [
@@ -334080,7 +333917,7 @@
         ]
       },
       "post": {
-        "description": "Neuen Labor-Auftrag anlegen (Wizard `labor-auftrag.tsx`).",
+        "description": "Neuen Labor-Auftrag anlegen (Wizard `labor-auftrag.tsx`); die Charge muss im Mandanten existieren.",
         "operationId": "create_labor_auftrag_api_v1_labor_labor_auftraege_post",
         "requestBody": {
           "content": {
@@ -334097,7 +333934,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LaborOut"
+                  "$ref": "#/components/schemas/LaborAuftragOut"
                 }
               }
             },
@@ -334146,7 +333983,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LaborOut"
+                  "$ref": "#/components/schemas/LaborAuftragOut"
                 }
               }
             },
@@ -334204,7 +334041,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LaborOut"
+                  "$ref": "#/components/schemas/LaborAuftragOut"
                 }
               }
             },
@@ -334254,6 +334091,18 @@
               "description": "Filter by status",
               "title": "Status"
             }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 500,
+              "maximum": 2000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
           }
         ],
         "responses": {
@@ -334261,7 +334110,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LaborOut"
+                  "$ref": "#/components/schemas/LaborProbeListOut"
                 }
               }
             },
@@ -334298,7 +334147,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LaborOut"
+                  "$ref": "#/components/schemas/LaborStatsOut"
                 }
               }
             },
@@ -342909,278 +342758,6 @@
         "summary": "Dashboard management",
         "tags": [
           "compat"
-        ]
-      }
-    },
-    "/api/v1/marketing/kampagnen": {
-      "get": {
-        "operationId": "list_kampagnen_api_v1_marketing_kampagnen_get",
-        "parameters": [
-          {
-            "description": "Filter by status",
-            "in": "query",
-            "name": "status",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter by status",
-              "title": "Status"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MarketingOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Kampagnen auflisten",
-        "tags": [
-          "Marketing"
-        ]
-      },
-      "post": {
-        "description": "Create a new marketing campaign.",
-        "operationId": "create_kampagne_api_v1_marketing_kampagnen_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/MarketingKampagneCreate"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MarketingOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Kampagne anlegen",
-        "tags": [
-          "Marketing"
-        ]
-      }
-    },
-    "/api/v1/marketing/kampagnen/{kampagne_id}": {
-      "delete": {
-        "description": "Delete a marketing campaign.",
-        "operationId": "delete_kampagne_api_v1_marketing_kampagnen__kampagne_id__delete",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "kampagne_id",
-            "required": true,
-            "schema": {
-              "title": "Kampagne Id",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Kampagne löschen",
-        "tags": [
-          "Marketing"
-        ]
-      },
-      "put": {
-        "description": "Update an existing marketing campaign.",
-        "operationId": "update_kampagne_api_v1_marketing_kampagnen__kampagne_id__put",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "kampagne_id",
-            "required": true,
-            "schema": {
-              "title": "Kampagne Id",
-              "type": "integer"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/MarketingKampagneUpdate"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MarketingOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Kampagne aktualisieren",
-        "tags": [
-          "Marketing"
-        ]
-      }
-    },
-    "/api/v1/marketing/kampagnen/{kampagne_id}/kpis": {
-      "get": {
-        "description": "MKT-CAM-01: Kampagnen-KPIs (Budget Plan vs. Ist, Open-Rate, ROI-Stub).",
-        "operationId": "get_kampagne_kpis_api_v1_marketing_kampagnen__kampagne_id__kpis_get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "kampagne_id",
-            "required": true,
-            "schema": {
-              "title": "Kampagne Id",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MarketingOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Kampagne kpis abrufen",
-        "tags": [
-          "Marketing"
-        ]
-      }
-    },
-    "/api/v1/marketing/stats": {
-      "get": {
-        "operationId": "get_marketing_stats_api_v1_marketing_stats_get",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MarketingOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Marketing stats abrufen",
-        "tags": [
-          "Marketing"
         ]
       }
     },
@@ -387861,16 +387438,40 @@
     "/api/v1/qualitaet/labor-auftraege": {
       "get": {
         "operationId": "list_labor_auftraege_api_v1_qualitaet_labor_auftraege_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 500,
+              "maximum": 2000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LaborOut"
+                  "$ref": "#/components/schemas/LaborAuftragListOut"
                 }
               }
             },
             "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "security": [
@@ -387886,7 +387487,7 @@
         ]
       },
       "post": {
-        "description": "Neuen Labor-Auftrag anlegen (Wizard `labor-auftrag.tsx`).",
+        "description": "Neuen Labor-Auftrag anlegen (Wizard `labor-auftrag.tsx`); die Charge muss im Mandanten existieren.",
         "operationId": "create_labor_auftrag_api_v1_qualitaet_labor_auftraege_post",
         "requestBody": {
           "content": {
@@ -387903,7 +387504,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LaborOut"
+                  "$ref": "#/components/schemas/LaborAuftragOut"
                 }
               }
             },
@@ -387953,7 +387554,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LaborOut"
+                  "$ref": "#/components/schemas/LaborAuftragOut"
                 }
               }
             },
@@ -388012,7 +387613,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LaborOut"
+                  "$ref": "#/components/schemas/LaborAuftragOut"
                 }
               }
             },
@@ -388063,6 +387664,18 @@
               "description": "Filter by status",
               "title": "Status"
             }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 500,
+              "maximum": 2000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
           }
         ],
         "responses": {
@@ -388070,7 +387683,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LaborOut"
+                  "$ref": "#/components/schemas/LaborProbeListOut"
                 }
               }
             },
@@ -388138,7 +387751,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LaborOut"
+                  "$ref": "#/components/schemas/LaborStatsOut"
                 }
               }
             },
@@ -421826,12 +421439,13 @@
         ]
       },
       "post": {
+        "description": "Create a new Zertifikat entry.",
         "operationId": "create_zertifikat_api_v1_zertifikate_post",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ZertifikatCreateRequest"
+                "$ref": "#/components/schemas/ZertifikatCreate"
               }
             }
           },
@@ -421842,7 +421456,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ZertifikateApiOut"
+                  "$ref": "#/components/schemas/ZertifikateOut"
                 }
               }
             },
@@ -421866,59 +421480,7 @@
         ],
         "summary": "Zertifikat anlegen",
         "tags": [
-          "zertifikate"
-        ]
-      }
-    },
-    "/api/v1/zertifikate/ablaufend": {
-      "get": {
-        "operationId": "get_ablaufend_api_v1_zertifikate_ablaufend_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tage_vorwarnung",
-            "required": false,
-            "schema": {
-              "default": 30,
-              "title": "Tage Vorwarnung",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/ZertifikateApiOut"
-                  },
-                  "title": "Response Get Ablaufend Api V1 Zertifikate Ablaufend Get",
-                  "type": "array"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Ablaufend abrufen",
-        "tags": [
-          "zertifikate"
+          "Zertifikate"
         ]
       }
     },
@@ -421948,57 +421510,6 @@
         ]
       }
     },
-    "/api/v1/zertifikate/tenant/{tenant_id}": {
-      "get": {
-        "operationId": "get_by_tenant_api_v1_zertifikate_tenant__tenant_id__get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "tenant_id",
-            "required": true,
-            "schema": {
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/ZertifikateApiOut"
-                  },
-                  "title": "Response Get By Tenant Api V1 Zertifikate Tenant  Tenant Id  Get",
-                  "type": "array"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "By tenant abrufen",
-        "tags": [
-          "zertifikate"
-        ]
-      }
-    },
     "/api/v1/zertifikate/{zertifikat_id}": {
       "delete": {
         "description": "Soft-delete: set status to 'abgelaufen'.",
@@ -422010,7 +421521,7 @@
             "required": true,
             "schema": {
               "title": "Zertifikat Id",
-              "type": "integer"
+              "type": "string"
             }
           }
         ],
@@ -422049,7 +421560,7 @@
             "required": true,
             "schema": {
               "title": "Zertifikat Id",
-              "type": "integer"
+              "type": "string"
             }
           }
         ],

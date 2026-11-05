@@ -811,6 +811,7 @@ class ComplianceEintrag(Base):
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
     id = Column(String, primary_key=True, default=default_prefixed_id("CMP"))
+    tenant_id = Column(String(120), nullable=False, index=True)  # Mandant setzt der Weg aus dem Token
     bereich = Column(String(120), nullable=False)
     anforderung = Column(String(255), nullable=False)
     erfuellt = Column(Boolean, default=False)
@@ -825,6 +826,7 @@ class ENNIMeldung(Base):
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
     id = Column(String, primary_key=True, default=default_prefixed_id("ENNI"))
+    tenant_id = Column(String(120), nullable=False, index=True)  # Mandant setzt der Weg aus dem Token
     typ = Column(String(20), nullable=False)
     betrieb = Column(String(255), nullable=False)
     vvvo = Column(String(50), nullable=False)
@@ -842,6 +844,7 @@ class QSCheckEintrag(Base):
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
     id = Column(String, primary_key=True, default=default_prefixed_id("QS"))
+    tenant_id = Column(String(120), nullable=False, index=True)  # Mandant setzt der Weg aus dem Token
     bereich = Column(String(120), nullable=False)
     pruefpunkt = Column(String(255), nullable=False)
     erfuellt = Column(Boolean, default=False)
@@ -856,6 +859,7 @@ class ZulassungRegister(Base):
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
     id = Column(String, primary_key=True, default=default_prefixed_id("ZUL"))
+    tenant_id = Column(String(120), nullable=False, index=True)  # Mandant setzt der Weg aus dem Token
     produkt = Column(String(255), nullable=False)
     typ = Column(String(50), nullable=False)
     nummer = Column(String(80), nullable=False)
@@ -871,6 +875,7 @@ class SachkundeEintrag(Base):
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
     id = Column(String, primary_key=True, default=default_prefixed_id("SACH"))
+    tenant_id = Column(String(120), nullable=False, index=True)  # Mandant setzt der Weg aus dem Token
     kunde = Column(String(255), nullable=False)
     kundennr = Column(String(80), nullable=False)
     nachweis_nr = Column(String(120), nullable=False)
@@ -887,6 +892,7 @@ class SaatgutNachbauEintrag(Base):
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
     id = Column(String, primary_key=True, default=default_prefixed_id("NACH"))
+    tenant_id = Column(String(120), nullable=False, index=True)  # Mandant setzt der Weg aus dem Token
     betrieb = Column(String(255), nullable=False)
     sorte = Column(String(120), nullable=False)
     kultur = Column(String(120), nullable=False)
@@ -903,6 +909,7 @@ class VVVOEintrag(Base):
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
     id = Column(String, primary_key=True, default=default_prefixed_id("VVVO"))
+    tenant_id = Column(String(120), nullable=False, index=True)  # Mandant setzt der Weg aus dem Token
     betriebsname = Column(String(255), nullable=False)
     vvvo = Column(String(50), nullable=False)
     bundesland = Column(String(80), nullable=True)
@@ -913,27 +920,12 @@ class VVVOEintrag(Base):
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
 
-class DispositionPosition(Base):
-    __tablename__ = "ops_disposition"
-    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
-
-    id = Column(String, primary_key=True, default=default_prefixed_id("DIS"))
-    artikel = Column(String(255), nullable=False)
-    artikel_id = Column(String(100), nullable=False)
-    bestand = Column(Float, default=0)
-    mindestbestand = Column(Float, default=0)
-    bedarf = Column(Float, default=0)
-    empfehlung = Column(String(255), default="")
-    prioritaet = Column(String(20), default="niedrig")
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
-
-
 class FoerderAntrag(Base):
     __tablename__ = "ops_foerderantraege"
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
     id = Column(String, primary_key=True, default=default_prefixed_id("FA"))
+    tenant_id = Column(String(120), nullable=False, index=True)  # Mandant setzt der Weg aus dem Token
     nummer = Column(String(80), nullable=False)
     programm = Column(String(120), nullable=False)
     antragsdatum = Column(DateTime(timezone=True), nullable=True)
@@ -949,12 +941,17 @@ class LaborProbe(Base):
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
     id = Column(String, primary_key=True, default=default_prefixed_id("LB"))
+    tenant_id = Column(String(120), nullable=False, index=True)  # Mandant setzt der Weg aus dem Token
     probennummer = Column(String(80), nullable=False)
     typ = Column(String(80), nullable=False)
     artikel = Column(String(255), nullable=False)
     datum = Column(DateTime(timezone=True), nullable=True)
     labor = Column(String(255), nullable=False)
     status = Column(String(30), default="ausstehend")
+    # Befund: was der Weg meldet, wird gespeichert (bis 03.11.2026 nur zurueckgegeben)
+    analysewerte = Column(JSONB, nullable=True)
+    grenzwerte = Column(JSONB, nullable=True)
+    bemerkung = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
@@ -964,6 +961,7 @@ class LaborAuftragEntry(Base):
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
     id = Column(String, primary_key=True, default=default_prefixed_id("LA"))
+    tenant_id = Column(String(120), nullable=False, index=True)  # Mandant setzt der Weg aus dem Token
     chargen_id = Column(String(80), nullable=False)
     labor = Column(String(255), nullable=False)
     analysen = Column(Integer, default=0)
@@ -973,27 +971,12 @@ class LaborAuftragEntry(Base):
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
 
-class MarketingKampagneEntry(Base):
-    __tablename__ = "ops_marketing_kampagnen"
-    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
-
-    id = Column(String, primary_key=True, default=default_prefixed_id("MK"))
-    name = Column(String(255), nullable=False)
-    typ = Column(String(80), nullable=False)
-    zielgruppe = Column(String(120), nullable=True)
-    startdatum = Column(DateTime(timezone=True), nullable=True)
-    enddatum = Column(DateTime(timezone=True), nullable=True)
-    budget = Column(DECIMAL(14, 2), default=0)
-    status = Column(String(30), default="geplant")
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
-
-
 class ZertifikatEintrag(Base):
     __tablename__ = "ops_zertifikate"
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
     id = Column(String, primary_key=True, default=default_prefixed_id("ZERT"))
+    tenant_id = Column(String(120), nullable=False, index=True)  # Mandant setzt der Weg aus dem Token
     art = Column(String(120), nullable=False)
     standard = Column(String(120), nullable=False)
     nummer = Column(String(120), nullable=False)
@@ -1482,26 +1465,6 @@ class HedgeReferenceDB(Base):
 
 
 # ── ZERTIFIKATE (Wave-9 API) ──────────────────────────────────────────────────
-
-class ZertifikatAPIEntry(Base):
-    """Zertifikate aus zertifikate_api.py — DB-Ersatz für ZertifikatStore"""
-    __tablename__ = "ops_zertifikate_api"
-    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
-
-    id = Column(String, primary_key=True, default=default_prefixed_id("ZAPI"))
-    zertifikat_id = Column(String(120), nullable=False, unique=True, index=True)
-    tenant_id = Column(String(120), nullable=False, index=True)
-    typ = Column(String(80), nullable=False)
-    zertifizierungsstelle = Column(String(255), nullable=False)
-    gueltig_von = Column(DateTime(timezone=True), nullable=False)
-    gueltig_bis = Column(DateTime(timezone=True), nullable=False)
-    zertifikatsnummer = Column(String(120), nullable=True)
-    status = Column(String(30), default="gueltig")  # gueltig|ablaufend|abgelaufen
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
-
-
-# ── WAVE 107: KRITISCHE IN-MEMORY STORES → DB ────────────────────────────────
 
 class AgentContextDB(Base):
     """Agent-Kontext (temporäre Delegations-Token) — ersetzt AgentContextStore"""

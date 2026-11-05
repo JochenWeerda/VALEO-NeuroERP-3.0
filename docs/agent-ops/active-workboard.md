@@ -20360,6 +20360,47 @@ Konstruktor, ops_waagen NOT NULL, ops_wiegungen mit Mandant aus der Waage und Ve
 rahmenauftrag_afa_tabellen_20261102 umgehaengt, ein Kopf. Pruefung auf frischer DB ueber CI (keine eigene lokale DB,
 ungemergte Migrationen nicht auf valeo_probe). Nach dem Merge: alte PRs #82/#84/#85/#88 schliessen.
 
+## BATCH8-SCHEINWEGE-20261103 — in Arbeit, Claude
+
+Nutzerauftrag 03.11.2026 (nach Batch 7) und Nutzerentscheidung 04.11.2026 ("alte Tabellen mit Seeds gehoeren der
+Vergangenheit"; Seed-Tabellen ohne Studio-Maske oder mit Ersatz entfernen, ersetzter Altbestand ohne Nutzer loeschbar;
+Kampagnen fuehrt domain_crm.crm_campaigns). Branch claude/batch8-scheinwege-20261103 auf PR #101, PR #102.
+- Marketing: /marketing/* entfernt (Weg, Schema, Modell), ops_marketing_kampagnen per Migration geloescht (nur Seed;
+  andere Zeilen braechen ab). /marketing/kampagnen zeigt die CRM-Studio-Liste crm/kampagnen-liste; Masken
+  marketing/kampagnen, marketing/kampagnen-liste und die unerreichbaren Cockpits crm/events-messen,
+  crm/kampagne-detail, crm/kampagne-erstellen (Doppel zu crm/campaign) samt Seiten entfernt; Navigation
+  marketing/kampagne/neu und /:id auf die CRM-Kampagnenmaske.
+- Foerderung und Labor (Studio-Masken vorhanden): kein _seed, Mandant aus der Anmeldung, RLS je Befehl
+  (scheinwege_mandant_20261103). Seed-Zeilen und Testreste (TEST-CHARGE-* bei Test-Labor samt Befunden) per exakter
+  Signatur geloescht; uebrige Altzeilen an den Default-Mandanten (28.10.). Aendern/Loeschen nahmen Text-Kennungen als
+  Zahl (immer 422); Antragsnummer je Mandant eindeutig; Laborauftrag nur zu eigener Charge; Befund speichert
+  Analysewerte, Grenzwerte, Bemerkung; Antworten typisiert, annahme/labor und qualitaet/labor-detail repariert.
+Offen (Folgeauftrag): die uebrigen neun mandantenlosen domain_ops-Tabellen mit Live-Zeilen nach derselben Regel
+pruefen (Compliance-Register mit Seed in compliance.py, ops_disposition, ops_zertifikate); preise/historie errechnet
+Verlaeufe, preise/konditionen fuellt Standardwerte auf; Marketing-/Communication-Dienste (services/crm-*) sollen
+CRM-Kampagnen konsumieren statt eigene zu fuehren.
+
+## BATCH9-COMPLIANCE-REGISTER-20261104 — in Arbeit, Claude
+
+Nutzerentscheidung 04.11.2026 (Seeds/Altbestand wegraeumen) auf die uebrigen mandantenlosen domain_ops-Tabellen.
+Branch claude/batch9-compliance-register-20261104 auf Batch 8. Gewachsene DB: alle Zeilen Seed oder Testrest.
+- Entfernt (Ersatz vorhanden): ops_disposition (handgepflegte Bestandsliste; /disposition und der Engpass-Monitor
+  zeigen den Bestellvorschlag einkauf/bestellvorschlaege-liste; Umlagerungs-Vorschlag ohne Quelle samt Seite/Route
+  entfernt); zertifikate_api.py + ops_zertifikate_api (POST ueberdeckt, Mandant aus dem Pfad bzw. alle Mandanten).
+- Im Mandanten (Studio-Masken vorhanden): Cross-Compliance, ENNI, QS-Checkliste, Zulassungen, Kunden-Sachkunde,
+  Saatgut-Nachbau, VVVO, Zertifikate - kein Seed, Mandant aus der Anmeldung, RLS je Befehl
+  (compliance_register_mandant_20261104); Seed/Testreste per Signatur geloescht; Zertifikate: Text-Kennung statt int.
+- Mitbehoben: Gefahrstoffdoku, Naehrstoffstrom und Chargenbericht lasen Lieferscheine aller Mandanten.
+Offen (Folge): Die Register haben keinen Erfassungsweg (nur der Seed schrieb) - sie zeigen jetzt ehrlich leer.
+Zulassungen auf den PSM-Stamm (agrar_psm: bvl_nummer, zulassung_ablauf) umstellen (neue Studio-Maske);
+VVVO (ops vs domain_compliance) und Sachkunde (Kunden/Mitarbeitende/Feldbuch) fachlich zusammenfuehren.
+
+## BATCH9-SEED-SCHUTZ-20261104 — abgeschlossen, Codex
+
+Ziel: Batch-9-Migration schuetzt abweichende und NULL-haltige Daten vor Seed-Loeschung und Tabellen-Drop. Dateibesitz: alembic/versions/compliance_register_mandant_20261104.py, eigene fokussierte Tests, QA-Nachweis und dieser Workboard-Anhang im separaten Branch. Abnahme: Original-Seeds vollstaendig anhand belegbarer Geschaeftsfelder, unbekannte Reste erhalten; DROP bei unbekannten Zeilen abgebrochen; PostgreSQL-Test in zurueckgerollter Transaktion mit temporaeren Tabellen nach Freigabe des Prueffensters, kein Reset oder Migrationsstempel. Risiko: Original-Seedwerte mit zeitabhaengigen Feldern lassen sich nicht sicher rekonstruieren und muessen erhalten bleiben.
+
+**Abschluss BATCH9-SEED-SCHUTZ-20261104:** Volle deterministische Seed-Geschaeftsfelder, keine Seed-Loeschung bei vorhandener Mandantenspalte, NULL-sicherer Drop-Schutz und Abbruch bei doppelten Dispositionssignaturen. Unbekannte Testreste erhalten. PostgreSQL TEMP-Test 1 passed, Revision unveraendert; Grenzen und Datenrisiko siehe docs/quality-assurance/batch9-seed-schutz-20261104.md.
+
 ## CODEX-ROLLOUT-INTEGRATION-20261104 — reserviert, Codex
 
 Ziel: Nutzerauftrag aus codex-uebergabe-20261104 umsetzen. Zuerst PR #102 mit gruenen
@@ -20380,3 +20421,5 @@ Ziel: Omnibox-Katalog beim ersten Aufruf vollstaendig und wiederholt stabil, ver
 **Abschluss OMNIBOX-REGISTRY-F-20261104:** Stammregistrierung vor dem Kopieren der nativen Katalog-IDs; erster und wiederholter Aufruf vollstaendig, Mandantenpublikationen getrennt. Reiner Regressionstest 1 passed, keine Datenbank; HTTP-/Gesamtsuite bleibt CI-Nachweis. Details: docs/quality-assurance/omnibox-registry-f-20261104.md.
 
 Gegenprobe F: alte Funktionsfassung nur im Prozessspeicher, derselbe Regressionstest scheitert erwartungsgemaess an fehlenden Stamm-IDs; Fixlauf gruen. QA-Nachweis ergaenzt.
+
+Integrationsabgleich 05.11.2026: #102 und #103 sind auf main; #105 hat den damaligen main nach develop uebernommen. Omnibox-Commit 50c264e4b hatte 76 abgeschlossene Checks ohne fehlerhaften, abgebrochenen oder ausstehenden Status. Der neue Merge bewahrt die Batch-8/9- und Codex-Anhaenge gemeinsam und benoetigt einen frischen CI-Nachlauf. Ein Admin-Merge wurde vom automatischen Sicherheitsreview abgelehnt und nicht ausgefuehrt; der regulaere PR-Weg bleibt massgeblich. Die spaetere Nutzerfreigabe erlaubt die Entfernung ersetzter Tabellen samt Testzeilen; Umsetzung/Nachweise in #106 und #108.

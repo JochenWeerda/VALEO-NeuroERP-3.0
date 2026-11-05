@@ -1585,7 +1585,7 @@
       "version": "1.0.0"
     },
     "annahme/labor": {
-      "definition_hash": "9af3ed5380de405f45edf5ab5afabab04e218a397eb444426734fa87db50ae49",
+      "definition_hash": "a79cc69922114a28933c0b0ec98da7e89b02b7735c69f2de27dfeddeff0634d4",
       "gates_passed": [
         "A",
         "B",
@@ -3421,17 +3421,6 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "crm/events-messen": {
-      "definition_hash": "6871fd0f6d7c1fa288124f6ecfb77d6a0baf2f748fb38f31e9f41ec24b4736fa",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "crm/gdpr-request": {
       "definition_hash": "6da0a60c08bcba52bbfa4cde3f395a7751a1c00ea45f7744aa8e94d5d560faaf",
       "gates_passed": [
@@ -3476,30 +3465,8 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "crm/kampagne-detail": {
-      "definition_hash": "ae2eaef0f2f9e445566392892ed5fcbb0f0a95820a37247af1759ae728ec877f",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "crm/kampagne-erstellen": {
-      "definition_hash": "0de86c7719258be9b31ffa96c1c70e1672fadff724058a767fced5a74a21259e",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "crm/kampagnen-liste": {
-      "definition_hash": "3249456e72040a5c9d18d3deccf1f0130fd2399f1f7efe612c29e8ff8e5533a2",
+      "definition_hash": "ab10dcf3f722557dee3adffcdabe19f38b4db0cf664698bbdfbebf3cf1a7e241",
       "gates_passed": [
         "A",
         "B",
@@ -3839,17 +3806,6 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "disposition/engpass-monitor": {
-      "definition_hash": "97f56d8606236960b024b2b81748c6a1d6e67da6864f12c1d5c89cb07daef47c",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "disposition/kontrakt-abruf": {
       "definition_hash": "f9421d55782c17c0d134775b4e7dd42f4bbf309ca7c3dc3fa5c6b95b3cadec5c",
       "gates_passed": [
@@ -3863,17 +3819,6 @@
     },
     "disposition/lager-reichweite": {
       "definition_hash": "211b3e95ea86072915710aada7eccea13134ffb427e53b106a7afabc030b8e3d",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "disposition/liste": {
-      "definition_hash": "e5446843f726c3ab31ff3d11426000813e91441d125b1edab2c978cd35f35e56",
       "gates_passed": [
         "A",
         "B",
@@ -3907,17 +3852,6 @@
     },
     "disposition/touren-disposition": {
       "definition_hash": "16337928638917c2a8ed17a22ce870a58fbac07dbe52b04f139b0b9393bea4dd",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "disposition/umlagerungs-vorschlag": {
-      "definition_hash": "94c06de2fa91b48bf4867944f85d25e259546755692f1917ca94fd83b8ed6b95",
       "gates_passed": [
         "A",
         "B",
@@ -6451,28 +6385,6 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "marketing/kampagnen": {
-      "definition_hash": "8ccefff4b836d7c55fd9b73fdb169f903b2b6f0d680a9b321d4c42c9be763305",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "marketing/kampagnen-liste": {
-      "definition_hash": "cba101d26c784bab2add1b10a337901ecc0788538d91bd047d38d038e3155462",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "mobile/scanner": {
       "definition_hash": "de686eb3f250b40c4ad19e55892787dacf2c89674060969ae2e7659693d166db",
       "gates_passed": [
@@ -7167,7 +7079,7 @@
       "version": "1.0.0"
     },
     "qualitaet/labor-auftrag": {
-      "definition_hash": "76b5552b3aaa67ba6dba5cdc630630bc88a10f042edc9cf63ccecf792baabe1b",
+      "definition_hash": "fa4016ec72a647c0bbae24eedd2d74c9a6e911cc79b4eef0d9bdad9d2d9fccbf",
       "gates_passed": [
         "A",
         "B",
@@ -7178,7 +7090,7 @@
       "version": "1.0.0"
     },
     "qualitaet/labor-detail": {
-      "definition_hash": "a3a2f70230f4326f0b78df9f42fa081554a6aeb341167bf444ce0e1b657c1a9a",
+      "definition_hash": "b7c46eaf1a9adca004f9368856da50848384f7c8c6b9a8f62421e05c0908bebc",
       "gates_passed": [
         "A",
         "B",
