@@ -20406,6 +20406,8 @@ Ziel: Batch-9-Migration schuetzt abweichende und NULL-haltige Daten vor Seed-Loe
 
 **Abschluss BATCH9-SEED-SCHUTZ-20261104:** Volle deterministische Seed-Geschaeftsfelder, keine Seed-Loeschung bei vorhandener Mandantenspalte, NULL-sicherer Drop-Schutz und Abbruch bei doppelten Dispositionssignaturen. Unbekannte Testreste erhalten. PostgreSQL TEMP-Test 1 passed, Revision unveraendert; Grenzen und Datenrisiko siehe docs/quality-assurance/batch9-seed-schutz-20261104.md.
 
-## PREISE-CI-NACHLAUF-20261105 — reserviert, Codex Lead
+## PREISE-CI-NACHLAUF-20261105 — lokal geprueft, Codex Lead
 
 Eigener Folgeslice zu PR111: Vollsuite meldet alten Testvertrag der entfernten Preisersatzwerte sowie RLS-Matrix-Drift und vier durch Heuristik als bereit markierte, noch nicht RLS-abgenommene Tabellen. Besitz: gezielte Preisassertion in tests/test_rls_domain_shared.py, erforderliche RLS-Generator-/Projektionskorrektur nach Ursachenanalyse und gezielte Regressionstests, eigene QA/Handshake/Workboard. Keine Policy ohne Abnahme aktivieren, keine Gates abschwaechen oder Ausnahme ohne konkreten Grund erfinden. Abnahme: fehlende Preisquelle bleibt ehrlicher 404, POS-Mandantentest bleibt bestehen; Projektionen reproduzierbar, kein automatisches Freigeben von Tabellen durch entfernte sachfremde Defaultwerte.
+
+PREISE-CI-NACHLAUF Abnahme: alter Preisersatzwert-Test auf 404, POS-Mandantentest auf beide Mandanten erweitert. Vier bestehende RLS-Ausnahmen mit konkreter Domain-Abnahmebegruendung statt zufaelligem Preis-Defaulttreffer; keine neue Ausnahme/Policy. Generatorfolge Rollout vor Matrix. 15 gezielte Tests im ersten Lauf, nach zusaetzlichem Freigabevorrang 9 im Nachlauf bestanden. Neun Verbesserungsscanner gruen, Snapshot stabil; grosse Shared-RLS-Fixture-Pruefung folgt in CI. QA und Handshake preise-ci-nachlauf-20261105.md bzw. preise-ohne-scheinwerte-20261104.md.

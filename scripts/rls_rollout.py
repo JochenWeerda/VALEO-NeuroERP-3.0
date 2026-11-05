@@ -16,6 +16,7 @@ laesst eine Tabelle warten, ein uebersehener liesse Daten still verschwinden.
     mandant_null      Datei mit Zugriff fragt tenant_id IS NULL ab
     uebergreifend     mandantenuebergreifende Arbeit ohne Systemverbindung (system_session, P6)
     identitaet        Schluessel/Token/Sitzung: Nachschlagen vor der Mandantenbindung
+    abnahme_ausstehend explizite bestehende Rueckstellung; begruendet in rls-exceptions.json
 
     python scripts/rls_rollout.py            # schreiben
     python scripts/rls_rollout.py --check    # Abweichung -> Exit 1
@@ -31,6 +32,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 INVENTORY = REPO_ROOT / "docs" / "admin" / "rls-inventory.json"
 OUTPUT = REPO_ROOT / "docs" / "admin" / "rls-rollout.json"
+EXCEPTIONS = REPO_ROOT / "docs" / "admin" / "rls-exceptions.json"
 CODE_ROOTS = ("app", "modules", "services")
 SKIP_PARTS = {"tests", "test", "node_modules", "__pycache__", "alembic"}
 
@@ -82,6 +84,17 @@ def _model_classes(files) -> dict[str, set[str]]:
     return classes
 
 
+def rollout_holds() -> dict[str, str]:
+    """Bewusste Rueckstellungen bleiben bis zur Domain-Abnahme bestehen, nicht durch Heuristik frei."""
+    decisions = json.loads(EXCEPTIONS.read_text(encoding="utf-8"))
+    holds = decisions.get("rollout_abnahme", {})
+    if not isinstance(holds, dict) or not set(holds) <= set(decisions["zurueckgestellt"]):
+        raise ValueError("Rollout-Abnahme darf keine neue ungeschuetzte Tabelle ausnehmen")
+    if any(not isinstance(reason, str) or not reason.strip() for reason in holds.values()):
+        raise ValueError("Rollout-Rueckstellung braucht eine konkrete Begruendung")
+    return holds
+
+
 def analyse(inventory: dict) -> dict:
     tables = [t["table"] for t in inventory["tables"] if t["class"] == "A" and not t["rls"]]
     files = list(_code_files())
@@ -112,10 +125,11 @@ def analyse(inventory: dict) -> dict:
             if t in models or t in via_class or patterns[t].search(text):
                 refs[t].append((rel, text))
 
+    holds = rollout_holds()
     ready, pending = [], {}
     for t in tables:
         schema, name = t.split(".")
-        reasons = set()
+        reasons = {"abnahme_ausstehend"} if t in holds else set()
         if schema == "public" and name in service_tables:
             reasons.add("dienst")
         if IDENTITY_NAME.search(name):
@@ -137,10 +151,10 @@ def analyse(inventory: dict) -> dict:
         else:
             ready.append(t)
     return {
-        "_note": "Generiert von scripts/rls_rollout.py aus docs/admin/rls-inventory.json; nicht von Hand aendern.",
+        "_note": "Generiert von scripts/rls_rollout.py aus docs/admin/rls-inventory.json und rls-exceptions.json; nicht von Hand aendern.",
         "summary": {"ready": len(ready), "pending": len(pending),
                     "reasons": {r: sum(r in v for v in pending.values()) for r in
-                                ("dienst", "mandant_ermitteln", "standardmandant", "mandant_null", "uebergreifend", "identitaet")}},
+                                ("dienst", "mandant_ermitteln", "standardmandant", "mandant_null", "uebergreifend", "identitaet", "abnahme_ausstehend")}},
         "ready": sorted(ready),
         "pending": dict(sorted(pending.items())),
     }

@@ -26,3 +26,17 @@ Alle Doc-Generator-Checks sind gruen. Pagination-, Godfile- und SQL-Fstring-Gate
 Damit ist der Sicherheits-Slice gegen erfundene Preisangaben lokal abgenommen. Der oben beschriebene fachliche Auswahl- und Aggregationsvertrag bleibt ein eigener Integrationsauftrag. Gesamt-CI wird auf dem PR geprueft.
 
 CI-Nachlauf: Das Integritaets-Gate erkannte drei mit den Scheinwerten entfernte `date.today`-Zugriffe. Die Business-Time-Ratsche wurde ausschliesslich fuer diese Datei von 7 auf 4 abgesenkt. Der vollstaendige lokale Verbesserungsprueflauf besteht danach mit allen neun Scannern und stabilem Repository-Snapshot (Exit 0). Neuer CI-Lauf nach Push erforderlich.
+
+## Vollsuite-Nachlauf und RLS-Projektion
+
+Die beiden vollstaendigen CI-Suiten auf 61d8e1c4a meldeten dieselben drei Fehler bei ueber 28.000 bestandenen Tests: ein alter Kundenpreis-Ersatzwertvertrag, veraltete Matrix und vier als ready ausgegebene ungeschuetzte Tabellen. Der Preis-Test wird auf den ehrlichen 404-Vertrag umgestellt; POS-Zu-/Abschlaege werden weiterhin fuer beide Mandanten getrennt geprueft.
+
+Die entfernte Preis-Default-Fundstelle hatte dateiweit fremde Tabellen heuristisch zurueckgehalten. Ihr Wegfall ist keine RLS-Abnahme. Vier schon bestehende Ausnahmen werden deshalb als abnahme_ausstehend konkret begruendet: Feldbuch-Altbestand mit datiertem default-Befund, fehlende Domain-Migration/Verhaltenstestabnahme fuer Saatgutbestellungen und Waagenvorlagen sowie zu klaerende Audit-Herkunft. Historische Datenbefunde sind keine neue Live-Abfrage. Keine neuen Tabellen ausgenommen, keine Obergrenze erhoeht, keine Policy oder gemeinsame Audit-Lesbarkeit freigeschaltet.
+
+Der Generator liest diese bewussten Rueckstellungen aus dem bestehenden Entscheidungsregister. Neue ungeschuetzte Tabellen bleiben als ready sichtbar und lassen das unveraenderte Gate scheitern. Zukuenftig abgesicherte Tabellen muessen den dann veralteten Vermerk entfernen. Erzeugungsreihenfolge: Inventar, Rollout, Domain-Matrix. Die fruehere Matrix war vor ihrer Vorstufe erzeugt worden.
+
+Gezielter erster Lauf: 15 Tests bestanden (Preisproblemvertrag, RLS-Matrix, bestehende P5-Gates und neue Rueckstellungsvertraege). Nach der zusaetzlichen Absicherung des Aktivierungsverbots gegen weitere Heuristikgruende: 9 Tests bestanden, einschliesslich reproduzierbarer Matrix-/Rollout-Projektion. Alle neun Verbesserungsscanner danach gruen mit stabilem Snapshot, Exit 0.
+
+Die Ausnahmemenge bleibt unveraendert. Eine neue ungeschuetzte Tabelle wird weiterhin als ready gemeldet; ein Vermerk ohne konkrete Begruendung oder ausserhalb der vorhandenen Ausnahmen wird abgewiesen. Bereits abgesicherte Tabellen duerfen keinen veralteten Vermerk behalten. Selbst ein spaeterer gemeinsamer-Daten-Treffer erzeugt bei aktiver Rueckstellung keinen Policy-Vorschlag.
+
+Der geaenderte grosse Shared-Domain-Fachkettentest wurde lokal nicht mit seinem vollstaendigen RLS-/Migrationsfixture ausgefuehrt; seine API-Vertragsaenderung ist durch den separaten produktiven HTTP-/OpenAPI-Test geprueft, die vollstaendige CI wird nach Push erneut ausgefuehrt. Keine lokale Datenbanksitzung oder Migration in diesem CI-Slice.
