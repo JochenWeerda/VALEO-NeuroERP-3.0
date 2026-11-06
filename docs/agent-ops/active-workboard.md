@@ -20547,3 +20547,6 @@ Ziel: explizite locale-unabhaengige Zeichenkettenordnung statt implizitem sort i
 
 ## SONAR-RESTVERTRAEGE-20261106 — reserviert, Codex Lead
 Besitz Regex-Alternativen mask_screen_definition.py/made_by_studio_gates.py; redundante Zweige in agrar/duenger-stamm-legacy.tsx, saatgut-stamm-legacy.tsx, kontrakte/FrmKontraktDetail-legacy.tsx, adapters/l3-mask-adapter.ts; Tastaturbedienung sales/OrderEditorLegacyPage-legacy.tsx und URL-Platzhalter admin-suite/connectoren-legacy.tsx. Semantik anhand Verbraucher erhalten, keine Gateabsenkung.
+
+## SONAR-ASYNC-20261106 — reserviert, Codex Subagent
+Besitz gemeldete Promise-Behandlung in pages/crm/*-legacy.tsx, pages/einkauf/*-legacy.tsx, pages/fibu/zahlungsmeldungen-legacy.tsx, pages/finance/{debitoren-stamm,zahlungslauf-kreditoren}-legacy.tsx, mask-builder/Wizard.tsx und hooks/useMaskData.ts samt gezielter Tests. Keine pauschalen void-Unterdrueckungen: Fehlerpfad und Ablauf erhalten. Keine DB.
