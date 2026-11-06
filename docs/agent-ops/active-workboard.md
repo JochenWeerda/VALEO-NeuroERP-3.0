@@ -20522,16 +20522,22 @@ Nutzerauftrag: restliche Masken auf Studio-made, fehlende Funktionen zentral im 
 
 STUDIO-WEBHOOKS-NATIVE Zwischenstand: NativeListPage plus zentrale readView-Leseansicht, CLI-/MCP-GET-Vertrag und menschliche Anlage-/Abmeldedialoge implementiert. 108 Backend-/Vertragsfaelle, 54 Frontendfaelle, Typpruefung und neun Scanner gruen. Generierte Register aktualisiert. Sicht-/Kontrast- und authentifizierte Browserabnahme sowie Rueckbau der alten Spezialoberflaeche offen; Kopfaktions-only-Sprachkatalog bleibt ein expliziter Folgebefund. QA/Handshake studio-webhooks-native-20261105.md.
 
-## CI-DEDUP-20261106 — reserviert, Codex Lead
+## CI-DEDUP-20261106 — abgeschlossen, Codex Lead
 Ziel: doppelte OpenAPI-Driftpruefung im selben Backendjob entfernen. Besitz: .github/workflows/quality-gate.yml und eigener QA-Nachweis. Der Meta-Check muss dieselbe Pruefung verbindlich genau einmal ausfuehren. Keine Testauswahl oder Coverage-Grenze abschwaechen. Speicherursachen gesondert anhand Laufprotokollen untersuchen.
 
-## SONAR-CONTRACTS-20261106 — reserviert, Codex Lead
+## SONAR-CONTRACTS-20261106 — abgeschlossen, Codex Lead
 Besitz: list-navigation.ts, sse-client.ts (nur synthetische URL-Basis), workspace-composition-parser.ts und QA. Reine URL-Aufloesung auf HTTPS-Basis und redundante Typkonvertierung bereinigen. Bestehende Tests, keine DB, keine Ausnahmen am Sonar-Gate.
 
 SONAR-CONTRACTS-20261106: Drei gezielte Korrekturen lokal geprueft, 16 bestehende Tests gruen. QA sonar-contracts-20261106.md. Sonar-Gesamtbefunde und SSE-Herkunftsvertrag bleiben offen.
 
-## SSE-TOKEN-ZIEL-20261106 — reserviert, Codex Lead
+## SSE-TOKEN-ZIEL-20261106 — abgeschlossen, Codex Lead
 Besitz sse-client.ts und gezielter Regressionstest. Token nur an eigene Origin oder explizite Buildkonfiguration VITE_MCP_EVENTS_URL; ungueltige Ziele fail closed. SSEClient nutzt denselben Vertrag. Lokale explizite HTTP-Konfiguration beruecksichtigen. Keine DB.
 
-## STUDIO-ZEILENKATALOG-20261106 — reserviert, Codex Subagent read_view_cli_tests
+## STUDIO-ZEILENKATALOG-20261106 — abgeschlossen, Codex Subagent read_view_cli_tests
 Ziel Zeilenaktionen im Sprach-/Aktionskatalog vollstaendig aus bestehender Definition ableiten. Besitz app/core/screen_action_catalog.py, tests/test_screen_action_catalog.py, eigene QA. Kein zweites Register, keine neuen Rechte, keine Tests parallel zum Lead. Generierte Artefakte und Integration beim Lead.
+
+STUDIO-ZEILENKATALOG Abnahme: 6 Tests, Katalog- und Handbuch-Driftcheck gruen; 638 Aktionen/381 Masken. Metadaten verleihen keine Ausfuehrungsrechte. QA studio-zeilenkatalog-20261106.md.
+
+Integrationsnachlauf 06.11.: #113/#114 in main, main konfliktfrei nach develop uebernommen (fc93d03fa). Develop-Gesamtlauf 42185134615 erfolgreich. Main-Lauf 42184961273 ausschliesslich Sonar rot; keine Gesamtfreigabe behauptet.
+
+SSE-TOKEN-ZIEL Abnahme: 15 Tests und vollstaendige Typpruefung gruen. Herkunft, Downgrade, spaeterer Token, stop und relative Pfade geprueft. Handshake sonar-studio-katalog-20261106.md.
