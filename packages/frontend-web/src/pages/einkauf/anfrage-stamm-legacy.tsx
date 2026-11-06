@@ -203,7 +203,7 @@ export default function AnfrageStammPage(): JSX.Element {
       }
     }
     if (sendRfqDialogOpen) {
-      loadSuppliers()
+      void loadSuppliers()
     }
   }, [sendRfqDialogOpen])
 
@@ -275,7 +275,7 @@ export default function AnfrageStammPage(): JSX.Element {
       })
 
       setApproveDialogOpen(false)
-      loadData()
+      await loadData()
     } catch (_rawErr: unknown) {
         const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({
@@ -317,7 +317,7 @@ export default function AnfrageStammPage(): JSX.Element {
 
       setRejectDialogOpen(false)
       setRejectReason('')
-      loadData()
+      await loadData()
     } catch (_rawErr: unknown) {
         const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({
@@ -393,7 +393,7 @@ export default function AnfrageStammPage(): JSX.Element {
 
       setSendRfqDialogOpen(false)
       setSelectedSuppliers([])
-      loadData()
+      await loadData()
     } catch (_rawErr: unknown) {
         const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({

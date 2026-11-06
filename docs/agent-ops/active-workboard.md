@@ -20545,10 +20545,12 @@ SSE-TOKEN-ZIEL Abnahme: 15 Tests und vollstaendige Typpruefung gruen. Herkunft, 
 ## SONAR-STUDIO-SORT-20261106 — abgeschlossen, Codex Subagent
 Ziel: explizite locale-unabhaengige Zeichenkettenordnung statt implizitem sort in compile-context.ts, overlay.ts und twin-geometry.ts. Bestehende Semantik erhalten, keine numerische Sortierung von IDs, keine neue Registry. Besitz diese drei Dateien und zugehoerige bestehende Tests, eigene QA. Keine DB.
 
-## SONAR-RESTVERTRAEGE-20261106 — reserviert, Codex Lead
+## SONAR-RESTVERTRAEGE-20261106 — abgeschlossen, Codex Lead
 Besitz Regex-Alternativen mask_screen_definition.py/made_by_studio_gates.py; redundante Zweige in agrar/duenger-stamm-legacy.tsx, saatgut-stamm-legacy.tsx, kontrakte/FrmKontraktDetail-legacy.tsx, adapters/l3-mask-adapter.ts; Tastaturbedienung sales/OrderEditorLegacyPage-legacy.tsx und URL-Platzhalter admin-suite/connectoren-legacy.tsx. Semantik anhand Verbraucher erhalten, keine Gateabsenkung.
 
-## SONAR-ASYNC-20261106 — reserviert, Codex Subagent
+## SONAR-ASYNC-20261106 — abgeschlossen, Codex Subagent
 Besitz gemeldete Promise-Behandlung in pages/crm/*-legacy.tsx, pages/einkauf/*-legacy.tsx, pages/fibu/zahlungsmeldungen-legacy.tsx, pages/finance/{debitoren-stamm,zahlungslauf-kreditoren}-legacy.tsx, mask-builder/Wizard.tsx und hooks/useMaskData.ts samt gezielter Tests. Keine pauschalen void-Unterdrueckungen: Fehlerpfad und Ablauf erhalten. Keine DB.
 
 SONAR-STUDIO-SORT Abnahme: 45 Tests in drei Suiten gruen, UTF-16-Reihenfolge und unveraenderte Cache-Semantik geprueft. SONAR-RESTVERTRAEGE: 31 Backend-Vertragsfaelle gruen; gemeinsame Typpruefung nach Async-Slice.
+
+SONAR-ASYNC: vorhandene Loader-Fehlerbehandlung explizit, Nachladungen abgewartet. Nebenbefund IBAN: keine automatische Anlage/Speicherung mehr, stale Antworten ignoriert, Snapshot schuetzt manuelle Bankdaten; Zahlungslauf-Neuanlage ohne /new-Pseudodatensatz. Sieben gezielte IBAN-Tests plus Bankkonto-Vertrag gruen. Finale vollstaendige Typpruefung gruen; Gesamt-Sonar-Coverage bleibt offener eigenstaendiger Befund.

@@ -26,3 +26,9 @@ Fuenfzehn gezielte Regressionen bestanden, einschliesslich Encoding, fremder Ori
 Unabhaengiges Review: fehlender Token wird mit begrenztem Backoff erneut geprueft, stop entfernt den Timer; keine parallelen Retry-Timer. Same-Origin bleibt bei fehlerhafter Fremdzielkonfiguration nutzbar, relative Pfade beziehen sich auf location.href.
 
 Browser: aktuellen Vite-Stand auf 3001 gestartet, Anmeldung sichtbar und SSO ueber localhost erfolgreich bis zum Keycloak-Anmeldeformular verfolgt. 127.0.0.1 ist kein freigegebener Callback-Host und wurde durch den konfigurierten localhost ersetzt; keine Authentifizierung aufgeweicht. Keine authentifizierte Webhook-/Kontrastabnahme behauptet.
+
+## Umfang der verbleibenden Gesamt-Coverage
+
+Sonar-Messwerte fuer main am 06.11.: 148.199 New-Code-Zeilen, davon 46.173 unbedeckt, sowie 20.290 Bedingungen, davon 8.571 unbedeckt. Gemessene Coverage 67,5089 Prozent; Grenze bleibt 80 Prozent. Dieser Zeitraum seit April ist nicht mit dem aktuellen Korrekturdiff gleichzusetzen. Kein Reset des New-Code-Zeitraums und keine Coverage-Ausnahmen zur Gruenfaerbung vorgenommen.
+
+Risikoorientierte Folgeprioritaet aus dateischarfen Sonar-Messwerten: mcp_execution_service.py (831 unbedeckte neue Zeilen), business_partner_service.py (542) plus business_partners.py (481), danach die Rationsoptimierungsoberflaeche (761) und Materialfluss (405). Der generierte Routenbaum ist mit 1.176 unbedeckten Zeilen zahlenmaessig groesser, ersetzt aber nicht die risikoreicheren Berechtigungs-, Mandanten- und Schreibpfade als Testschwerpunkt. Keine neue Testausnahme daraus abgeleitet.

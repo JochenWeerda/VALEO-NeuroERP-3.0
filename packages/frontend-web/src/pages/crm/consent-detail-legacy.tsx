@@ -206,7 +206,7 @@ function ConsentHistoryTab({ consentId }: { consentId: string }) {
       }
     }
     if (consentId) {
-      loadHistory()
+      void loadHistory()
     }
   }, [consentId])
 

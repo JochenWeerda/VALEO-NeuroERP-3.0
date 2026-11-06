@@ -307,7 +307,7 @@ function OpportunityHistoryTab({ opportunityId }: { opportunityId: string }) {
       }
     }
     if (opportunityId) {
-      loadHistory()
+      void loadHistory()
     }
   }, [opportunityId])
 

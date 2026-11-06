@@ -6,4 +6,4 @@ Vier redundante UI-/Adapterzweige sind vereinfacht, ohne Werte oder Berechtigung
 
 Die Niederlassungsauswahl ist ein nativer Button mit voller Zeilenbreite und sichtbarem Tastaturfokus. Enter/Leertaste erhalten dieselbe Auswahlwirkung wie der Mausklick, ohne Formularsubmit.
 
-Abnahme: 31 bestehende Studio-Gate-/L3-Vertraege bestanden. Gemeinsame Frontend-Typpruefung folgt nach dem parallelen Async-Slice. Keine neuen Testdatenbanken oder Container; keine Sonar-Ausnahme und keine abgesenkte Schwelle.
+Abnahme: 31 bestehende Studio-Gate-/L3-Vertraege bestanden. Gemeinsame Frontend-Typpruefung bestanden; weitere gezielte IBAN-Regressionen im Async-Nachweis. Keine neuen Testdatenbanken oder Container; keine Sonar-Ausnahme und keine abgesenkte Schwelle.
