@@ -1,15 +1,16 @@
 {
- "_note": "Generiert von scripts/rls_rollout.py aus docs/admin/rls-inventory.json; nicht von Hand aendern.",
+ "_note": "Generiert von scripts/rls_rollout.py aus docs/admin/rls-inventory.json und rls-exceptions.json; nicht von Hand aendern.",
  "summary": {
   "ready": 0,
   "pending": 35,
   "reasons": {
    "dienst": 9,
    "mandant_ermitteln": 1,
-   "standardmandant": 19,
+   "standardmandant": 12,
    "mandant_null": 16,
    "uebergreifend": 0,
-   "identitaet": 4
+   "identitaet": 4,
+   "abnahme_ausstehend": 4
   }
  },
  "ready": [],
@@ -43,28 +44,25 @@
    "standardmandant"
   ],
   "domain_agrar.feldbuch_schlaege": [
-   "standardmandant"
+   "abnahme_ausstehend"
   ],
   "domain_agrar.seed_orders": [
-   "standardmandant"
+   "abnahme_ausstehend"
   ],
   "domain_agrar.waagen_vorlagen": [
-   "standardmandant"
+   "abnahme_ausstehend"
   ],
   "domain_crm.crm_opportunities": [
-   "dienst",
-   "standardmandant"
+   "dienst"
   ],
   "domain_dev_mock.mock_sessions": [
    "identitaet"
   ],
   "domain_erp.offene_posten": [
-   "mandant_null",
-   "standardmandant"
+   "mandant_null"
   ],
   "domain_inventory.agrar_contracts": [
-   "mandant_null",
-   "standardmandant"
+   "mandant_null"
   ],
   "domain_inventory.material_flow_edges": [
    "mandant_null"
@@ -110,7 +108,7 @@
    "standardmandant"
   ],
   "domain_shared.audit_logs": [
-   "standardmandant"
+   "abnahme_ausstehend"
   ],
   "domain_shared.calendar_ics_tokens": [
    "identitaet",

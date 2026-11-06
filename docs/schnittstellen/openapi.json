@@ -118903,7 +118903,7 @@
         "type": "object"
       },
       "PSM": {
-        "description": "Full PSM schema",
+        "description": "Read contract: nullable ORM values stay unknown; write validation is unchanged.",
         "properties": {
           "abstand_gewaesser": {
             "anyOf": [
@@ -118939,24 +118939,40 @@
             "type": "string"
           },
           "auflagen": {
-            "description": "Restrictions",
-            "items": {
-              "type": "string"
-            },
-            "title": "Auflagen",
-            "type": "array"
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Auflagen"
           },
           "ausgangsstoff_explosivstoffe": {
-            "default": false,
-            "description": "Contains explosive precursors",
-            "title": "Ausgangsstoff Explosivstoffe",
-            "type": "boolean"
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ausgangsstoff Explosivstoffe"
           },
           "bienenschutz": {
-            "default": false,
-            "description": "Bee protection",
-            "title": "Bienenschutz",
-            "type": "boolean"
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bienenschutz"
           },
           "bvl_nummer": {
             "description": "BVL number",
@@ -119028,10 +119044,15 @@
             "title": "Ek Preis"
           },
           "erklaerung_landwirt_erforderlich": {
-            "default": false,
-            "description": "Farmer's declaration required",
-            "title": "Erklaerung Landwirt Erforderlich",
-            "type": "boolean"
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erklaerung Landwirt Erforderlich"
           },
           "erklaerung_landwirt_status": {
             "anyOf": [
@@ -119047,10 +119068,15 @@
             "title": "Erklaerung Landwirt Status"
           },
           "eu_zulassung": {
-            "default": false,
-            "description": "EU approval",
-            "title": "Eu Zulassung",
-            "type": "boolean"
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Eu Zulassung"
           },
           "id": {
             "description": "PSM ID",
@@ -119058,32 +119084,65 @@
             "type": "string"
           },
           "indikationen": {
-            "description": "Indications",
-            "items": {
-              "type": "string"
-            },
-            "title": "Indikationen",
-            "type": "array"
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Indikationen"
           },
           "is_active": {
-            "default": true,
-            "description": "Whether the record is active",
-            "title": "Is Active",
-            "type": "boolean"
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Active"
+          },
+          "ist_aktiv": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ist Aktiv"
           },
           "kulturen": {
-            "description": "Applicable crops",
-            "items": {
-              "type": "string"
-            },
-            "title": "Kulturen",
-            "type": "array"
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kulturen"
           },
           "lagerbestand": {
-            "default": 0,
-            "description": "Stock quantity",
-            "title": "Lagerbestand",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lagerbestand"
           },
           "mittel_typ": {
             "description": "Product type",
@@ -119142,11 +119201,15 @@
             "title": "Vk Preis"
           },
           "waehrung": {
-            "default": "EUR",
-            "description": "Currency",
-            "maxLength": 3,
-            "title": "Waehrung",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Waehrung"
           },
           "wartezeit": {
             "anyOf": [
@@ -119162,10 +119225,15 @@
             "title": "Wartezeit"
           },
           "wasserschutz_gebiet": {
-            "default": false,
-            "description": "Water protection area",
-            "title": "Wasserschutz Gebiet",
-            "type": "boolean"
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wasserschutz Gebiet"
           },
           "wirkstoff": {
             "description": "Active ingredient",
@@ -119188,10 +119256,16 @@
             "title": "Wirkstoff Gruppe"
           },
           "zulassung_ablauf": {
-            "description": "Approval expiry",
-            "format": "date-time",
-            "title": "Zulassung Ablauf",
-            "type": "string"
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Zulassung Ablauf"
           }
         },
         "required": [
@@ -119200,7 +119274,6 @@
           "wirkstoff",
           "mittel_typ",
           "bvl_nummer",
-          "zulassung_ablauf",
           "id",
           "tenant_id"
         ],
@@ -119833,6 +119906,121 @@
           }
         },
         "title": "PSMUpdate",
+        "type": "object"
+      },
+      "PSMZulassung": {
+        "description": "Zulassungsdaten aus dem mandanteneigenen PSM-Stamm.",
+        "properties": {
+          "artikelnummer": {
+            "title": "Artikelnummer",
+            "type": "string"
+          },
+          "bvl_nummer": {
+            "title": "Bvl Nummer",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "ist_aktiv": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ist Aktiv"
+          },
+          "mittel_typ": {
+            "title": "Mittel Typ",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "wirkstoff": {
+            "title": "Wirkstoff",
+            "type": "string"
+          },
+          "zulassung_ablauf": {
+            "format": "date-time",
+            "title": "Zulassung Ablauf",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "artikelnummer",
+          "name",
+          "wirkstoff",
+          "mittel_typ",
+          "bvl_nummer",
+          "zulassung_ablauf",
+          "ist_aktiv"
+        ],
+        "title": "PSMZulassung",
+        "type": "object"
+      },
+      "PSMZulassungen": {
+        "properties": {
+          "abgelaufen": {
+            "title": "Abgelaufen",
+            "type": "integer"
+          },
+          "has_next": {
+            "description": "Whether there is a next page",
+            "title": "Has Next",
+            "type": "boolean"
+          },
+          "has_prev": {
+            "description": "Whether there is a previous page",
+            "title": "Has Prev",
+            "type": "boolean"
+          },
+          "items": {
+            "description": "List of items",
+            "items": {
+              "$ref": "#/components/schemas/PSMZulassung"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "page": {
+            "description": "Current page",
+            "title": "Page",
+            "type": "integer"
+          },
+          "pages": {
+            "description": "Total number of pages",
+            "title": "Pages",
+            "type": "integer"
+          },
+          "size": {
+            "description": "Items per page",
+            "title": "Size",
+            "type": "integer"
+          },
+          "total": {
+            "description": "Total number of items",
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "page",
+          "size",
+          "pages",
+          "has_next",
+          "has_prev",
+          "abgelaufen"
+        ],
+        "title": "PSMZulassungen",
         "type": "object"
       },
       "PaginatedResponse_Account_": {
@@ -130155,6 +130343,44 @@
           "rechnungs_preis"
         ],
         "title": "PreisabweichungIn",
+        "type": "object"
+      },
+      "PreisansichtNichtVerfuegbar": {
+        "properties": {
+          "detail": {
+            "title": "Detail",
+            "type": "string"
+          },
+          "error": {
+            "title": "Error",
+            "type": "string"
+          },
+          "instance": {
+            "title": "Instance",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "integer"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "type": {
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "detail",
+          "instance",
+          "error"
+        ],
+        "title": "PreisansichtNichtVerfuegbar",
         "type": "object"
       },
       "PrepListLineOut": {
@@ -218520,6 +218746,85 @@
         ]
       }
     },
+    "/api/v1/agrar/psm/zulassungen": {
+      "get": {
+        "description": "Lokaler PSM-Stamm; Ablaufzaehler bezieht sich auf alle Mandantenzeilen.",
+        "operationId": "list_psm_zulassungen_api_v1_agrar_psm_zulassungen_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "search",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Search"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skip",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Skip",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PSMZulassungen"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "PSM-Zulassungen auflisten",
+        "tags": [
+          "agrar",
+          "psm"
+        ]
+      }
+    },
     "/api/v1/agrar/psm/{psm_id}": {
       "delete": {
         "description": "Delete a PSM (soft delete).",
@@ -248063,76 +248368,6 @@
           "compliance",
           "whistleblower",
           "lksg"
-        ]
-      }
-    },
-    "/api/v1/compliance/zulassungen-register": {
-      "get": {
-        "operationId": "list_zulassungen_api_v1_compliance_zulassungen_register_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "typ",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Typ"
-            }
-          },
-          {
-            "in": "query",
-            "name": "status",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Status"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ComplianceOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Zulassungen auflisten",
-        "tags": [
-          "Compliance"
         ]
       }
     },
@@ -367861,17 +368096,18 @@
     },
     "/api/v1/preise/historie": {
       "get": {
+        "description": "Der parameterlose Maskenvertrag ist nicht an eine passende Preishistorie angebunden.",
         "operationId": "preise_historie_api_v1_preise_historie_get",
         "responses": {
-          "200": {
+          "404": {
             "content": {
-              "application/json": {
+              "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/BridgeOut"
+                  "$ref": "#/components/schemas/PreisansichtNichtVerfuegbar"
                 }
               }
             },
-            "description": "Successful Response"
+            "description": "Keine passende Preishistorie angebunden"
           }
         },
         "security": [
@@ -367879,7 +368115,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Preishistorie",
+        "summary": "Preishistorie derzeit nicht verfuegbar",
         "tags": [
           "mask-frontend-bridges"
         ]
@@ -368237,17 +368473,18 @@
     },
     "/api/v1/preise/konditionen": {
       "get": {
+        "description": "Der parameterlose Maskenvertrag ist nicht an eine passende Kundenpreiskondition angebunden.",
         "operationId": "preise_konditionen_api_v1_preise_konditionen_get",
         "responses": {
-          "200": {
+          "404": {
             "content": {
-              "application/json": {
+              "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/BridgeOut"
+                  "$ref": "#/components/schemas/PreisansichtNichtVerfuegbar"
                 }
               }
             },
-            "description": "Successful Response"
+            "description": "Keine passende Kundenpreiskondition angebunden"
           }
         },
         "security": [
@@ -368255,7 +368492,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Preiskondition",
+        "summary": "Kundenpreiskondition derzeit nicht verfuegbar",
         "tags": [
           "mask-frontend-bridges"
         ]

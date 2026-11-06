@@ -22,12 +22,11 @@ ZIEL = ROOT / "config/screen_list_routes.generated.json"
 
 
 def erzeugen() -> dict:
-    from app.core.screen_definitions import SCREEN_DEFINITION_BUILDERS, _SCREEN_LIST_ROUTE
+    from app.core.screen_definitions import SCREEN_DEFINITION_BUILDERS, _SCREEN_LIST_ROUTE, _CURATED_SCREEN_LIST_ROUTE_IDS
     from app.core.stamm_object_page_parent import ensure_stamm_screen_registry
 
-    # Kuratiert ist nur, was ohne Nachregistrierung bekannt ist (vor dem Inventar, das die Stamm-Masken laedt);
-    # die Stamm-Routen (STAMM_ROUTEN) kommen erst mit ensure_stamm_screen_registry und stehen deshalb in der Datei.
-    kuratiert = dict(_SCREEN_LIST_ROUTE)
+    # Explizite Ursprungsmenge statt vom Aufrufzeitpunkt abhaengiger Registry-Snapshot.
+    kuratiert = _CURATED_SCREEN_LIST_ROUTE_IDS
     spec = importlib.util.spec_from_file_location("mask_studio_inventory", ROOT / "scripts/mask_studio_inventory.py")
     inventar_modul = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(inventar_modul)

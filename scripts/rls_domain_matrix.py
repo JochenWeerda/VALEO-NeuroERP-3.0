@@ -70,7 +70,7 @@ IDENTITY = {
     "nutzlast": re.compile(r"(?:payload|body|data|request_data|item)(?:\.|\[\s*['\"]|\.get\(\s*['\"])tenant_id"),
     "standardmandant": re.compile(r"\bDEFAULT_TENANT_ID\b|[\"']default[\"']\s*\)|tenant_id[^\n]{0,20}[\"']default[\"']"),
 }
-URSACHEN = ("dienst", "position", "referenzdaten", "mandant_nullbar", "standardmandant", "identitaet")
+URSACHEN = ("dienst", "position", "referenzdaten", "mandant_nullbar", "standardmandant", "identitaet", "abnahme_ausstehend")
 
 
 def domain_of(table: str) -> str:
@@ -180,7 +180,7 @@ def analyse(inventory: dict, rollout: dict, data: dict, files=None) -> dict:
             "gemeinsam_stellen": shared_hits,
             "daten": befund,
             "bereinigung": bereinigung(entry, befund),
-            "policy": policy(ursache, entry, befund),
+            "policy": policy("abnahme_ausstehend" if "abnahme_ausstehend" in gruende else ursache, entry, befund),
         })
     rows.sort(key=lambda r: (r["domain"], r["table"]))
     by_domain: dict[str, Counter] = defaultdict(Counter)
@@ -217,6 +217,8 @@ def bereinigung(entry: dict, befund: dict | None) -> list[str]:
 
 
 def policy(ursache: str, entry: dict, befund: dict | None) -> str:
+    if ursache == "abnahme_ausstehend":
+        return "keine Aktivierung vor begruendeter Domain-Migration und Verhaltenstestabnahme (rls-exceptions.json: rollout_abnahme)"
     if ursache == "dienst":
         return "keine, bis der Dienst tokengebundene Identitaet hat (rls-dienste-identitaet-vorschlag.md)"
     if ursache == "identitaet":

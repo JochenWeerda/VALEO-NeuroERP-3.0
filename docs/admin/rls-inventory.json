@@ -1,18 +1,18 @@
 {
  "_note": "Generiert von scripts/rls_inventory.py; nicht von Hand aendern. Plan: docs/architecture/rls-mandantenkernel-plan.md",
  "summary": {
-  "tables": 782,
+  "tables": 781,
   "by_class": {
-   "A": 716,
+   "A": 715,
    "B": 22,
    "C": 9,
    "D": 35
   },
-  "rls_enabled": 684,
+  "rls_enabled": 683,
   "tenant_types": {
    "character varying": 340,
    "character varying(100)": 9,
-   "character varying(120)": 61,
+   "character varying(120)": 60,
    "character varying(128)": 1,
    "character varying(255)": 1,
    "character varying(36)": 83,
@@ -3920,14 +3920,6 @@
   },
   {
    "table": "domain_ops.ops_zertifikate",
-   "class": "A",
-   "tenant_type": "character varying(120)",
-   "rls": true,
-   "force_rls": false,
-   "policies": 4
-  },
-  {
-   "table": "domain_ops.ops_zulassungen_register",
    "class": "A",
    "tenant_type": "character varying(120)",
    "rls": true,

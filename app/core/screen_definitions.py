@@ -6029,13 +6029,8 @@ _AGENT_SYNONYMS: dict[str, list[str]] = {
 
 
 # ── Omnibox-Listen-Routen (UIX-060) ──────────────────────────────────────────
-# Kuratiertes screen_id → Frontend-Listen-Route Mapping. Die nativen SD-Routen
-# sind Detail-Ansichten (screen_id/:id); fuer die Omnibox-Landung ("offene
-# posten folkerts") braucht der Compiler eine *filterbare Liste*. Diese Map ist
-# die eine Wartungsstelle, die jede Maske an ihre real existierende Listen-Seite
-# bindet — der Katalog (/ui/mask-registry/omnibox-catalog) emittiert die Route
-# direkt, sodass das Frontend keinen fragilen ID-Join gegen die MaskRegistry
-# (deren mask_ids fuer 19 von 26 SDs divergieren) mehr braucht.
+# Kanonische kuratierte Listenrouten fuer die Omnibox statt Detail-IDs.
+# Lazy-Stammrouten werden spaeter ergaenzt; die urspruenglichen IDs bleiben explizit.
 _SCREEN_LIST_ROUTE: dict[str, str] = {
     **LISTEN_ROUTEN,
     "platform/studio-history": "/admin/screen-studio",
@@ -6155,6 +6150,7 @@ _SCREEN_LIST_ROUTE: dict[str, str] = {
     "auswertungen/lieferschein-kontrolle": "/auswertungen/lieferschein-kontrolle",
     "abrechnung/eb-lieferschein-kontrolle": "/abrechnung/eb-lieferschein-kontrolle",
 }
+_CURATED_SCREEN_LIST_ROUTE_IDS = frozenset(_SCREEN_LIST_ROUTE)
 
 
 @lru_cache(maxsize=1)

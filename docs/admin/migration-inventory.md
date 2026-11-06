@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-04
+last_reviewed: 2026-11-05
 version: 3.0.0
 description: Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Beschreibungen sind aus den Datei-Docstrings extrahiert.
 ---
@@ -413,6 +413,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `production_control_20260821` | Production control worklist and audit. |
 | `produktgruppen_kaeufer_20260604` | Käuferlogik je Produktgruppe + echte Signal-Herkunft. |
 | `projektion_cursor_20260930` | Die Projektionsbuchhaltung bekommt eine Migration. |
+| `psm_zulassungen_register_entfernen_20261104` | Entfernt das ersetzte Zulassungsregister einschliesslich Testdaten. |
 | `query_center_20260821` | Safe query-center definitions and audit. |
 | `quittung_ohne_vorgang_20261006` | Vier Tabellen fuer drei Wege, die bisher nur quittiert haben. |
 | `rahmenauftrag_afa_tabellen_20261102` | Tabellen, die Rahmenauftraege und AfA-Laeufe schon benutzen, auf frischen Installationen anlegen. |

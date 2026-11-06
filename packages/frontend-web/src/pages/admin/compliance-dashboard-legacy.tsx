@@ -43,8 +43,9 @@ type QsCheckliste = {
 }
 
 type ZulassungenRegister = {
-  items: Array<{ id: string; produkt: string; typ: string; status: string; gueltig_bis?: string }>
+  items: Array<{ id: string; name: string; bvl_nummer: string; zulassung_ablauf: string }>
   total: number
+  abgelaufen: number
 }
 
 type CrossComplianceList = {
@@ -75,6 +76,7 @@ const EMPTY_QS_CHECKLISTE: QsCheckliste = {
 const EMPTY_ZULASSUNGEN_REGISTER: ZulassungenRegister = {
   items: [],
   total: 0,
+  abgelaufen: 0,
 }
 
 const EMPTY_CROSS_COMPLIANCE_LIST: CrossComplianceList = {
@@ -151,7 +153,7 @@ export default function ComplianceDashboardPage(): JSX.Element {
 
   const { data: zulassungen, isLoading: loadZulassungen } = useQuery({
     queryKey: ['compliance', 'zulassungen'],
-    queryFn: async () => (await apiClient.get<ZulassungenRegister>('/api/v1/compliance/zulassungen-register')).data,
+    queryFn: async () => (await apiClient.get<ZulassungenRegister>('/api/v1/agrar/psm/zulassungen')).data,
     initialData: EMPTY_ZULASSUNGEN_REGISTER,
     // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
     // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
@@ -213,7 +215,7 @@ export default function ComplianceDashboardPage(): JSX.Element {
 
   const qsScore = (qs && qs.total > 0) ? Math.round((qs.erfuellt / qs.total) * 100) : 0
 
-  const zulAbgelaufen = zulassungen?.items.filter(z => z.status === 'abgelaufen' || z.status === 'gesperrt').length ?? 0
+  const zulAbgelaufen = zulassungen?.abgelaufen ?? 0
   const zulTotal = zulassungen?.total ?? 0
   const zulScore = zulTotal > 0 ? Math.round(((zulTotal - zulAbgelaufen) / zulTotal) * 100) : 0
 
@@ -334,7 +336,7 @@ export default function ComplianceDashboardPage(): JSX.Element {
           items={[
             { label: 'Scores pruefen', done: overallScore >= 90, hint: `Gesamtstand liegt bei ${overallScore}%.` },
             { label: 'QS-Offenpunkte klaeren', done: (qs?.offen ?? 0) === 0, hint: `${qs?.offen ?? 0} QS-Punkt(e) offen.` },
-            { label: 'Zulassungen pruefen', done: zulAbgelaufen === 0, hint: zulAbgelaufen > 0 ? `${zulAbgelaufen} Zulassung(en) abgelaufen oder gesperrt.` : 'Keine abgelaufenen oder gesperrten Zulassungen.' },
+            { label: 'Zulassungen pruefen', done: zulAbgelaufen === 0, hint: zulAbgelaufen > 0 ? `${zulAbgelaufen} Zulassung(en) abgelaufen.` : 'Keine abgelaufenen Zulassungen.' },
             { label: 'Report nachweisen', done: complianceReady, hint: 'Report erst exportieren, wenn offene Punkte bewertet sind.' },
           ]}
         />
@@ -472,7 +474,7 @@ export default function ComplianceDashboardPage(): JSX.Element {
             <div className="flex items-center gap-2 text-[hsl(var(--color-semantic-warning-700-hsl))]">
               <AlertTriangle className="h-5 w-5 shrink-0" />
               <span className="font-medium">
-                {zulAbgelaufen} Zulassung{zulAbgelaufen > 1 ? 'en' : ''} abgelaufen oder gesperrt — Erneuerung erforderlich.
+                {zulAbgelaufen} Zulassung{zulAbgelaufen > 1 ? 'en' : ''} abgelaufen — Erneuerung erforderlich.
               </span>
             </div>
           </CardContent>

@@ -83,29 +83,27 @@ def test_seed_deletions_and_drop_guard_on_postgresql(monkeypatch):
             monkeypatch.setitem(m.SEEDS, 'pg_temp.seed_guard_tenant', m.SEEDS['domain_ops.ops_compliance_items'])
             m._seed_loeschen(conn, 'pg_temp.seed_guard_tenant')
             assert conn.execute(sa.text("SELECT count(*) FROM seed_guard_tenant")).scalar_one() == 1
-            name = "seed_guard_disposition"
-            _create(conn, name, DISPO)
-            _insert(conn, name, "seed", DISPO)
-            altered = dict(DISPO, bestand=121)
-            _insert(conn, name, "changed", altered)
-            _insert(conn, name, "null", dict(DISPO, artikel_id=None))
-            _insert(conn, name, "testrest", dict(DISPO, artikel_id="ART-TEST-001"))
-            with pytest.raises(RuntimeError, match="3 Zeilen"):
-                m._entfernen(conn, "pg_temp." + name, m.DISPOSITION_ALT)
-            assert conn.execute(sa.text(f"SELECT count(*) FROM {name}")).scalar_one() == 4
-            conn.exec_driver_sql(f"DELETE FROM {name} WHERE marker <> 'seed'")
-            _insert(conn, name, "duplicate", DISPO)
-            with pytest.raises(RuntimeError, match="doppelte Seed-Signaturen"):
-                m._entfernen(conn, "pg_temp." + name, m.DISPOSITION_ALT)
-            assert conn.execute(sa.text(f"SELECT count(*) FROM {name}")).scalar_one() == 2
-            conn.exec_driver_sql(f"DELETE FROM {name} WHERE marker = 'duplicate'")
-            m._entfernen(conn, "pg_temp." + name, m.DISPOSITION_ALT)
-            assert conn.execute(sa.text("SELECT to_regclass(:name)"), {"name": "pg_temp." + name}).scalar() is None
-            _create(conn, name, DISPO)
-            _insert(conn, name, "unknown", DISPO)
-            with pytest.raises(RuntimeError):
-                m._entfernen(conn, "pg_temp." + name, None)
-            assert conn.execute(sa.text(f"SELECT count(*) FROM {name}")).scalar_one() == 1
+            # Beide ausgemusterten Tabellen duerfen mit vorhandenen Testzeilen weg;
+            # SAVEPOINT belegt, dass der DROP zurueckgerollt werden kann.
+            for name in ("seed_guard_disposition", "seed_guard_zertifikate_api"):
+                _create(conn, name, DISPO)
+                _insert(conn, name, "seed", DISPO)
+                _insert(conn, name, "changed", dict(DISPO, bestand=121))
+                _insert(conn, name, "null", dict(DISPO, artikel_id=None))
+                conn.exec_driver_sql(f"CREATE TEMP VIEW {name}_view AS SELECT * FROM {name}")
+                dependent = conn.begin_nested()
+                with pytest.raises(sa.exc.DBAPIError):
+                    m._entfernen(conn, "pg_temp." + name)
+                dependent.rollback()
+                assert conn.execute(sa.text(f"SELECT count(*) FROM {name}")).scalar_one() == 3
+                conn.exec_driver_sql(f"DROP VIEW {name}_view")
+                drop = conn.begin_nested()
+                m._entfernen(conn, "pg_temp." + name)
+                assert conn.execute(sa.text("SELECT to_regclass(:name)"), {"name": "pg_temp." + name}).scalar() is None
+                drop.rollback()
+                assert conn.execute(sa.text(f"SELECT count(*) FROM {name}")).scalar_one() == 3
+                m._entfernen(conn, "pg_temp." + name)
+                m._entfernen(conn, "pg_temp." + name)  # fehlende Tabelle ist idempotent
         finally:
             tx.rollback()
     engine.dispose()

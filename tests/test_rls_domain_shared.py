@@ -269,7 +269,13 @@ def test_fachkette_pos_rabatte_nur_eigener_mandant(owner_session):
     konditionen = f"{SH}.zu_abschlag_konditionen"
     listed = {r["id"] for r in bridges.list_pos_rabatte(tenant_id=A, db=session)}
     assert rows[konditionen, A] in listed and rows[konditionen, B] not in listed
-    assert bridges.preise_konditionen(tenant_id=B, db=session)["id"] in {rows[konditionen, B], "default"}
+    listed_b = {r["id"] for r in bridges.list_pos_rabatte(tenant_id=B, db=session)}
+    assert rows[konditionen, B] in listed_b and rows[konditionen, A] not in listed_b
+    # Kundenpreise sind keine Zu-/Abschlaege: ohne passenden Quellenvertrag kein Ersatzwert.
+    for tenant in (A, B):
+        with pytest.raises(HTTPException) as caught:
+            bridges.preise_konditionen(tenant_id=tenant, db=session)
+        assert caught.value.status_code == 404
 
 
 # --- ohne Datenbank -----------------------------------------------------------------------------

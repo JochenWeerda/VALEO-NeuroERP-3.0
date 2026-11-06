@@ -13,16 +13,18 @@
    "position": 7,
    "referenzdaten": 15,
    "mandant_nullbar": 12,
-   "standardmandant": 11,
-   "identitaet": 2
+   "standardmandant": 7,
+   "identitaet": 2,
+   "abnahme_ausstehend": 4
   },
   "nach_domain": {
    "agrar": {
+    "abnahme_ausstehend": 3,
     "dienst": 1,
     "mandant_nullbar": 6,
     "position": 1,
     "referenzdaten": 6,
-    "standardmandant": 7
+    "standardmandant": 4
    },
    "crm": {
     "dienst": 5
@@ -62,10 +64,11 @@
     "position": 1
    },
    "shared": {
+    "abnahme_ausstehend": 1,
     "dienst": 1,
     "identitaet": 1,
     "mandant_nullbar": 2,
-    "standardmandant": 3
+    "standardmandant": 2
    }
   }
  },
@@ -213,7 +216,7 @@
     "token": 5
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/compliance.py:828",
+    "app/api/v1/endpoints/compliance.py:797",
     "app/seeds/inventory_seed.py:20"
    ],
    "null_stellen": [],
@@ -287,7 +290,7 @@
     "token": 7
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/compliance.py:828",
+    "app/api/v1/endpoints/compliance.py:797",
     "app/seeds/inventory_seed.py:20"
    ],
    "null_stellen": [
@@ -343,7 +346,7 @@
     "token": 2
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/compliance.py:828",
+    "app/api/v1/endpoints/compliance.py:797",
     "app/services/calendar_projection_service.py:911"
    ],
    "null_stellen": [],
@@ -773,9 +776,9 @@
    "class": "A",
    "tenant_type": "character varying",
    "eltern": [],
-   "ursache": "standardmandant",
+   "ursache": "abnahme_ausstehend",
    "gruende": [
-    "standardmandant"
+    "abnahme_ausstehend"
    ],
    "modell": [
     "app/infrastructure/models/agrar_models.py"
@@ -796,12 +799,9 @@
    ],
    "worker": [],
    "identitaet": {
-    "standardmandant": 1,
     "token": 5
    },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py:905"
-   ],
+   "standardmandant_stellen": [],
    "null_stellen": [],
    "gemeinsam_stellen": [],
    "daten": {
@@ -814,7 +814,7 @@
    "bereinigung": [
     "1 Zeilen mit 'default': Herkunft klaeren (blockiert die Migration)"
    ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
+   "policy": "keine Aktivierung vor begruendeter Domain-Migration und Verhaltenstestabnahme (rls-exceptions.json: rollout_abnahme)"
   },
   {
    "table": "domain_agrar.harvest_acceptances",
@@ -860,9 +860,9 @@
    "class": "A",
    "tenant_type": "character varying",
    "eltern": [],
-   "ursache": "standardmandant",
+   "ursache": "abnahme_ausstehend",
    "gruende": [
-    "standardmandant"
+    "abnahme_ausstehend"
    ],
    "modell": [],
    "leser": [],
@@ -871,12 +871,9 @@
    ],
    "worker": [],
    "identitaet": {
-    "standardmandant": 1,
     "token": 1
    },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py:905"
-   ],
+   "standardmandant_stellen": [],
    "null_stellen": [],
    "gemeinsam_stellen": [],
    "daten": {
@@ -887,7 +884,7 @@
     "mandanten": 0
    },
    "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
+   "policy": "keine Aktivierung vor begruendeter Domain-Migration und Verhaltenstestabnahme (rls-exceptions.json: rollout_abnahme)"
   },
   {
    "table": "domain_agrar.silo_bewegungen",
@@ -934,9 +931,9 @@
    "class": "A",
    "tenant_type": "character varying",
    "eltern": [],
-   "ursache": "standardmandant",
+   "ursache": "abnahme_ausstehend",
    "gruende": [
-    "standardmandant"
+    "abnahme_ausstehend"
    ],
    "modell": [],
    "leser": [],
@@ -946,12 +943,9 @@
    ],
    "worker": [],
    "identitaet": {
-    "standardmandant": 1,
     "token": 2
    },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py:905"
-   ],
+   "standardmandant_stellen": [],
    "null_stellen": [],
    "gemeinsam_stellen": [],
    "daten": {
@@ -962,7 +956,7 @@
     "mandanten": 0
    },
    "bereinigung": [],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
+   "policy": "keine Aktivierung vor begruendeter Domain-Migration und Verhaltenstestabnahme (rls-exceptions.json: rollout_abnahme)"
   },
   {
    "table": "domain_crm.crm_opportunities",
@@ -972,8 +966,7 @@
    "eltern": [],
    "ursache": "dienst",
    "gruende": [
-    "dienst",
-    "standardmandant"
+    "dienst"
    ],
    "modell": [
     "app/domains/crm/models.py"
@@ -1008,12 +1001,9 @@
    "identitaet": {
     "dienst": 3,
     "nutzlast": 1,
-    "standardmandant": 1,
     "token": 6
    },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py:905"
-   ],
+   "standardmandant_stellen": [],
    "null_stellen": [],
    "gemeinsam_stellen": [],
    "daten": {
@@ -1161,11 +1151,10 @@
    "identitaet": {
     "dienst": 14,
     "nutzlast": 9,
-    "standardmandant": 7,
+    "standardmandant": 6,
     "token": 24
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py:905",
     "app/integrations/adapters/superglue/tool_sync.py:427",
     "services/crm-core/app/api/v1/endpoints/activities.py:20",
     "services/crm-core/app/api/v1/endpoints/contacts.py:20",
@@ -1618,8 +1607,7 @@
    "ursache": "referenzdaten",
    "gruende": [
     "referenzdaten",
-    "mandant_nullbar",
-    "standardmandant"
+    "mandant_nullbar"
    ],
    "modell": [],
    "leser": [
@@ -1675,12 +1663,9 @@
    "identitaet": {
     "kopfzeile": 2,
     "nutzlast": 2,
-    "standardmandant": 1,
     "token": 22
    },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py:905"
-   ],
+   "standardmandant_stellen": [],
    "null_stellen": [
     "app/api/v1/endpoints/compat.py:1829",
     "app/api/v1/endpoints/compat.py:1836",
@@ -1820,8 +1805,7 @@
    "ursache": "referenzdaten",
    "gruende": [
     "referenzdaten",
-    "mandant_nullbar",
-    "standardmandant"
+    "mandant_nullbar"
    ],
    "modell": [
     "app/infrastructure/models/l3c_models.py"
@@ -1851,12 +1835,9 @@
    ],
    "worker": [],
    "identitaet": {
-    "standardmandant": 1,
     "token": 6
    },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py:905"
-   ],
+   "standardmandant_stellen": [],
    "null_stellen": [
     "app/services/mcp_execution_service.py:3153"
    ],
@@ -2813,7 +2794,7 @@
     "token": 14
    },
    "standardmandant_stellen": [
-    "app/api/v1/endpoints/compliance.py:828",
+    "app/api/v1/endpoints/compliance.py:797",
     "app/api/v1/endpoints/reklamation_api.py:121",
     "app/infrastructure/models/futtermittel_models.py:92"
    ],
@@ -3103,9 +3084,9 @@
    "class": "A",
    "tenant_type": "character varying",
    "eltern": [],
-   "ursache": "standardmandant",
+   "ursache": "abnahme_ausstehend",
    "gruende": [
-    "standardmandant"
+    "abnahme_ausstehend"
    ],
    "modell": [
     "app/infrastructure/models/__init__.py"
@@ -3140,12 +3121,9 @@
     "app/workers/cleanup_worker.py"
    ],
    "identitaet": {
-    "standardmandant": 1,
     "token": 10
    },
-   "standardmandant_stellen": [
-    "app/api/v1/endpoints/mask_frontend_bridges.py:905"
-   ],
+   "standardmandant_stellen": [],
    "null_stellen": [
     "app/api/v1/endpoints/compat.py:1829",
     "app/api/v1/endpoints/compat.py:1836",
@@ -3163,7 +3141,7 @@
    "bereinigung": [
     "1 'system'-Zeilen: gemeinsame Referenzdaten begruenden oder zuordnen"
    ],
-   "policy": "getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant"
+   "policy": "keine Aktivierung vor begruendeter Domain-Migration und Verhaltenstestabnahme (rls-exceptions.json: rollout_abnahme)"
   },
   {
    "table": "domain_shared.calendar_ics_tokens",

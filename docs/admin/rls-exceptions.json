@@ -23,11 +23,11 @@
   "domain_agrar.feeding_nutrient_definitions": "referenzdaten",
   "domain_agrar.feeding_reference_revisions": "mandant_nullbar",
   "domain_agrar.feeding_unit_definitions": "referenzdaten",
-  "domain_agrar.feldbuch_schlaege": "standardmandant",
+  "domain_agrar.feldbuch_schlaege": "abnahme_ausstehend",
   "domain_agrar.harvest_acceptances": "mandant_nullbar",
-  "domain_agrar.seed_orders": "standardmandant",
+  "domain_agrar.seed_orders": "abnahme_ausstehend",
   "domain_agrar.silo_bewegungen": "position",
-  "domain_agrar.waagen_vorlagen": "standardmandant",
+  "domain_agrar.waagen_vorlagen": "abnahme_ausstehend",
   "domain_crm.crm_opportunities": "dienst",
   "domain_crm.customers": "dienst",
   "domain_crm.farm_profiles": "dienst",
@@ -65,10 +65,16 @@
   "domain_portal.customer_order_items": "position",
   "domain_shared.admin_api_keys": "identitaet",
   "domain_shared.api_keys": "standardmandant",
-  "domain_shared.audit_logs": "referenzdaten",
+  "domain_shared.audit_logs": "abnahme_ausstehend",
   "domain_shared.calendar_ics_tokens": "standardmandant",
   "domain_shared.policy_rules": "mandant_nullbar",
   "domain_shared.users": "dienst",
   "public.outbox_events": "mandant_nullbar"
+ },
+ "rollout_abnahme": {
+  "domain_agrar.feldbuch_schlaege": "Datierter Datenbefund 2026-10-28 enthaelt eine default-Zeile; Herkunft und bestehende Feldbuch-Verbraucher vor RLS-Migration pruefen. Kein Freigabenachweis durch entfernten Preis-Default.",
+  "domain_agrar.seed_orders": "Noch keine RLS-Migration oder Verhaltenstestabnahme fuer die Bestellschreibwege dieser Tabelle; Preisbereinigung ist kein Domain-Rollout.",
+  "domain_agrar.waagen_vorlagen": "Noch keine RLS-Migration oder Verhaltenstestabnahme fuer Vorlagenlesen und -schreiben; Preisbereinigung ist kein Domain-Rollout.",
+  "domain_shared.audit_logs": "Datierter Datenbefund 2026-10-28 enthaelt eine system-Zeile. Audit-Herkunft und Schreibwege vor RLS-Migration klaeren; keine gemeinsame system-Lesbarkeit freigegeben."
  }
 }

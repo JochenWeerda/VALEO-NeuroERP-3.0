@@ -30,9 +30,9 @@ from rls_domain_support import A, B, SYSTEM
 ROOT = Path(__file__).resolve().parents[1]
 OPS = "domain_ops"
 TABELLEN = tuple(f"{OPS}.{t}" for t in (
-    "ops_compliance_items", "ops_enni_meldungen", "ops_qs_checks", "ops_zulassungen_register", "ops_sachkunde_register",
+    "ops_compliance_items", "ops_enni_meldungen", "ops_qs_checks", "ops_sachkunde_register",
     "ops_saatgut_nachbau", "ops_vvvo_register", "ops_zertifikate"))
-REGISTERWEGE = ("list_cross_compliance", "list_enni_meldungen", "list_qs_checkliste", "list_zulassungen",
+REGISTERWEGE = ("list_cross_compliance", "list_enni_meldungen", "list_qs_checkliste",
                 "list_sachkunde", "list_saatgut_nachbau", "list_vvvo", "get_compliance_stats", "get_compliance_report_pdf",
                 "export_gefahrstoffdoku", "export_gefahrstoffdoku_csv", "export_naehrstoffstrom", "export_chargen_trace_report")
 
@@ -107,7 +107,7 @@ def test_mandantengrenze_je_tabelle(db, table):
 
 def test_entfernte_tabellen(db):
     conn, _ = db
-    for table in ("ops_disposition", "ops_zertifikate_api"):
+    for table in ("ops_disposition", "ops_zertifikate_api", "ops_zulassungen_register"):
         assert conn.execute(sa.text(f"SELECT to_regclass('{OPS}.{table}')")).scalar() is None, table
 
 
