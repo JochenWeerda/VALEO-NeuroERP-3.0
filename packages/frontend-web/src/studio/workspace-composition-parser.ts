@@ -4,7 +4,6 @@
  */
 
 import {
-  SPECIALIZED_COMPONENT_KINDS,
   type FachaktionScope,
   type SpecializedComponentKind,
   type WorkspaceComposition,
@@ -111,9 +110,7 @@ function parseSpecialized(
       continue
     }
     const kindRaw = asString(item.kind) ?? ''
-    const kind = SPECIALIZED_COMPONENT_KINDS.includes(kindRaw as SpecializedComponentKind)
-      ? (kindRaw as SpecializedComponentKind)
-      : (kindRaw as SpecializedComponentKind)
+    const kind = kindRaw as SpecializedComponentKind
 
     let props: Record<string, string | number | boolean> | undefined
     if (item.props !== undefined) {

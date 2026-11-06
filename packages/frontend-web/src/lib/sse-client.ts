@@ -34,7 +34,7 @@ export function appendSseAuthToken(
   }
   try {
     if (url.startsWith('/')) {
-      const relative = new URL(url, 'http://sse.local')
+      const relative = new URL(url, 'https://sse.local')
       relative.searchParams.set(param, token)
       return `${relative.pathname}${relative.search}${relative.hash}`
     }
