@@ -20529,3 +20529,6 @@ Ziel: doppelte OpenAPI-Driftpruefung im selben Backendjob entfernen. Besitz: .gi
 Besitz: list-navigation.ts, sse-client.ts (nur synthetische URL-Basis), workspace-composition-parser.ts und QA. Reine URL-Aufloesung auf HTTPS-Basis und redundante Typkonvertierung bereinigen. Bestehende Tests, keine DB, keine Ausnahmen am Sonar-Gate.
 
 SONAR-CONTRACTS-20261106: Drei gezielte Korrekturen lokal geprueft, 16 bestehende Tests gruen. QA sonar-contracts-20261106.md. Sonar-Gesamtbefunde und SSE-Herkunftsvertrag bleiben offen.
+
+## SSE-TOKEN-ZIEL-20261106 — reserviert, Codex Lead
+Besitz sse-client.ts und gezielter Regressionstest. Token nur an eigene Origin oder explizite Buildkonfiguration VITE_MCP_EVENTS_URL; ungueltige Ziele fail closed. SSEClient nutzt denselben Vertrag. Lokale explizite HTTP-Konfiguration beruecksichtigen. Keine DB.
