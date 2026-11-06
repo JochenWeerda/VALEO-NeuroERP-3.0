@@ -20532,3 +20532,6 @@ SONAR-CONTRACTS-20261106: Drei gezielte Korrekturen lokal geprueft, 16 bestehend
 
 ## SSE-TOKEN-ZIEL-20261106 — reserviert, Codex Lead
 Besitz sse-client.ts und gezielter Regressionstest. Token nur an eigene Origin oder explizite Buildkonfiguration VITE_MCP_EVENTS_URL; ungueltige Ziele fail closed. SSEClient nutzt denselben Vertrag. Lokale explizite HTTP-Konfiguration beruecksichtigen. Keine DB.
+
+## STUDIO-ZEILENKATALOG-20261106 — reserviert, Codex Subagent read_view_cli_tests
+Ziel Zeilenaktionen im Sprach-/Aktionskatalog vollstaendig aus bestehender Definition ableiten. Besitz app/core/screen_action_catalog.py, tests/test_screen_action_catalog.py, eigene QA. Kein zweites Register, keine neuen Rechte, keine Tests parallel zum Lead. Generierte Artefakte und Integration beim Lead.
