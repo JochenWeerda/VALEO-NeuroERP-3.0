@@ -20541,3 +20541,6 @@ STUDIO-ZEILENKATALOG Abnahme: 6 Tests, Katalog- und Handbuch-Driftcheck gruen; 6
 Integrationsnachlauf 06.11.: #113/#114 in main, main konfliktfrei nach develop uebernommen (fc93d03fa). Develop-Gesamtlauf 42185134615 erfolgreich. Main-Lauf 42184961273 ausschliesslich Sonar rot; keine Gesamtfreigabe behauptet.
 
 SSE-TOKEN-ZIEL Abnahme: 15 Tests und vollstaendige Typpruefung gruen. Herkunft, Downgrade, spaeterer Token, stop und relative Pfade geprueft. Handshake sonar-studio-katalog-20261106.md.
+
+## SONAR-STUDIO-SORT-20261106 — reserviert, Codex Subagent
+Ziel: explizite locale-unabhaengige Zeichenkettenordnung statt implizitem sort in compile-context.ts, overlay.ts und twin-geometry.ts. Bestehende Semantik erhalten, keine numerische Sortierung von IDs, keine neue Registry. Besitz diese drei Dateien und zugehoerige bestehende Tests, eigene QA. Keine DB.
