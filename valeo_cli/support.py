@@ -35,6 +35,16 @@ class Support:
 
 def support(action: dict[str, Any]) -> Support:
     """Kann die CLI diese Aktion so ausfuehren wie die Maske? Sonst: warum nicht."""
+    if "readView" in action:
+        view = action["readView"]
+        endpoint = view.get("endpoint") if isinstance(view, dict) else None
+        safe = (isinstance(endpoint, str) and re.fullmatch(r"/api/v1/(?:[A-Za-z0-9_-]+|\{[A-Za-z_][A-Za-z0-9_]*\})(?:/(?:[A-Za-z0-9_-]+|\{[A-Za-z_][A-Za-z0-9_]*\}))*/?", endpoint)
+                and len(re.findall(r"\{([^{}]+)\}", endpoint)) <= 1
+                and action.get("localEffect") == "view" and action.get("method", "GET") == "GET"
+                and not any(key in action for key in ("commandEndpoint", "inputFlow", "download", "commandBinding", "command"))
+                and not any(re.search(r"(?:^|_)(tenant|mandant|actor|user|agent)(?:_|$)", key, re.I)
+                            for key in re.findall(r"\{([^{}]+)\}", endpoint)))
+        return Support(bool(safe), None if safe else "leseansicht_ungueltig")
     flow = action.get("inputFlow")
     if flow:
         # Eingabefluss der Maske: Ein Mensch sendet die Formularfelder an denselben Fachweg (nur ``execute``).
@@ -62,6 +72,7 @@ def support(action: dict[str, Any]) -> Support:
 
 REASON_TEXT = {
     "eingabe_in_maske": "Diese Aktion erfordert die Eingabe und Bestaetigung in der Maske (kein Sendeweg deklariert).",
+    "leseansicht_ungueltig": "Die deklarierte Leseansicht ist nicht gültig.",
     "kein_endpunkt": "Die Aktion hat keinen Kommando-Endpunkt; die Maske verdrahtet sie selbst.",
     "docflow_ohne_adapter": "DocFlow-Aktionen brauchen den versionierten Command-Adapter.",
 }
@@ -81,6 +92,9 @@ def input_flow_endpoint(action: dict[str, Any]) -> str | None:
 
 
 def requires_entity(action: dict[str, Any]) -> bool:
+    view = action.get("readView")
+    if isinstance(view, dict):
+        return bool(_PLACEHOLDER.search(view.get("endpoint", "")))
     return "{entity_id}" in (action.get("commandEndpoint") or input_flow_endpoint(action) or "")
 
 

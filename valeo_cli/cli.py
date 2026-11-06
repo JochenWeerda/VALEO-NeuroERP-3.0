@@ -131,10 +131,11 @@ def cmd_aktionen(args, http, token, out) -> int:
 def cmd_zeigen(args, http, token, out) -> int:
     action = _action(_definition(http, token, args.maske), args.aktion)
     checked = support.support(action)
+    read_view = action.get("readView") if isinstance(action.get("readView"), dict) else None
     out(json.dumps({
         "aktion": action["key"], "bezeichnung": action.get("label"),
         "cli": checked.supported, "grund": None if checked.supported else support.reason_text(checked.reason),
-        "methode": action.get("method", "POST"), "endpunkt": action.get("commandEndpoint"),
+        "methode": "GET" if read_view else action.get("method", "POST"), "endpunkt": read_view.get("endpoint") if read_view else action.get("commandEndpoint"),
         "braucht_id": support.requires_entity(action), "recht": action.get("permission"),
         "gefahr": action.get("dangerLevel", "safe"), "bestaetigung": support.needs_confirmation(action),
         "begruendung_pflicht": bool(action.get("auditReasonRequired")),
@@ -147,6 +148,30 @@ def cmd_zeigen(args, http, token, out) -> int:
 
 def cmd_ausfuehren(args, http, token, out, ask: Callable[[str], str], stdin) -> int:
     action = _action(_definition(http, token, args.maske), args.aktion)
+    read_view = action.get("readView")
+    if read_view is not None:
+        blocked = support.policy_block(action, is_agent=_is_agent(token))
+        if blocked:
+            out(blocked)
+            return 1
+        if (not isinstance(read_view, dict) or action.get("localEffect") != "view"
+                or any(k in action for k in ("commandEndpoint", "command", "commandBinding", "inputFlow", "download"))
+                or action.get("method", "GET") != "GET"):
+            raise UsageError("Ungueltiger Lesevertrag.")
+        endpoint = read_view.get("endpoint")
+        if not isinstance(endpoint, str) or not re.fullmatch(r"/api/v1/(?:[A-Za-z0-9_-]+|\{[A-Za-z_][A-Za-z0-9_]*\})(?:/(?:[A-Za-z0-9_-]+|\{[A-Za-z_][A-Za-z0-9_]*\}))*/*", endpoint):
+            raise UsageError("Ungueltiger Lesepfad.")
+        placeholders = re.findall(r"\{([^{}]+)\}", endpoint)
+        if len(placeholders) > 1 or any(re.search(r"(?:^|_)(?:tenant|mandant|actor|user|agent)(?:_|$)", name, re.I) for name in placeholders):
+            raise UsageError("Ungueltiger Lesepfadparameter.")
+        if placeholders and (not args.id or args.id in {".", ".."}):
+            raise UsageError("Diese Aktion braucht eine Objektkennung (--id).")
+        if args.daten or args.feld or args.modus != "execute":
+            raise UsageError("Eine Leseansicht akzeptiert keine Eingabedaten oder Ausfuehrungsmodi.")
+        path = endpoint.replace("{" + placeholders[0] + "}", quote(args.id, safe="")) if placeholders else endpoint
+        result = _request(http, token, "GET", path)
+        out(json.dumps(result, ensure_ascii=False, indent=2))
+        return 0
     checked = support.support(action)
     if not checked.supported:
         out(f"Nicht per CLI ausfuehrbar: {support.reason_text(checked.reason)}")

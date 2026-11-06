@@ -18,6 +18,8 @@ def _registry_actions():
     from app.core.screen_definitions import SCREEN_DEFINITION_BUILDERS, get_screen_definition
     from app.core.screen_definitions_beleg import BELEGARTEN, build_beleg_screen_definition, screen_id
 
+    from app.core.stamm_object_page_parent import ensure_stamm_screen_registry
+    ensure_stamm_screen_registry()
     defs = {sid: get_screen_definition(sid) or {} for sid in SCREEN_DEFINITION_BUILDERS}
     defs.update({screen_id(art): build_beleg_screen_definition(art) for art in BELEGARTEN})
     return [(sid, action) for sid, d in sorted(defs.items()) for action in mm.iter_actions(d)]
@@ -37,7 +39,7 @@ def test_paritaet_mit_der_cli_regel():
 
 def _agent_action():
     for sid, action in _registry_actions():
-        if mm.agent_block(action) is None and "{entity_id}" in action["commandEndpoint"] and not action.get("auditReasonRequired"):
+        if mm.agent_block(action) is None and "{entity_id}" in (action.get("commandEndpoint") or "") and not action.get("auditReasonRequired"):
             return sid, action
     raise AssertionError("keine agentenfaehige Maskenaktion mit Objektbezug in der Registry")
 

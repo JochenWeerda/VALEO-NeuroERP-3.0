@@ -409,11 +409,12 @@
       "version": "1.0.0"
     },
     "admin/webhooks-liste": {
-      "definition_hash": "9eff6e4b887a642d4d419585b3859bb9a36e33460e933eb33e1615f27391e6ce",
+      "definition_hash": "893bebd9188610264a49f039bcfa8896268584d92f23c3943dd7c7998dbd8238",
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
       "studio_draft_clean": true,
       "version": "1.0.0"

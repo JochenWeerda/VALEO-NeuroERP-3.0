@@ -1,5 +1,5 @@
-import { IntakeWeighingPage } from '@/components/mask-builder/specialized/intake/domain-runtime'
+import { NativeListPage } from '@/components/mask-builder/NativeListPage'
 
 export default function WebhooksPage(): JSX.Element {
-  return <IntakeWeighingPage screenId="admin/webhooks-liste" />
+  return <NativeListPage screenId="admin/webhooks-liste" testId="native-webhooks" />
 }

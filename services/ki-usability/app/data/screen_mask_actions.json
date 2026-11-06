@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 544,
+    "actions": 543,
     "screens_with_actions": 374,
     "domains": 50
   },
@@ -303,30 +303,10 @@
       "source": {
         "screenId": "admin/webhooks-liste",
         "actionKey": "register",
-        "commandEndpoint": null,
+        "commandEndpoint": "/api/v1/webhooks/",
         "navigationRoute": null,
         "command": null,
-        "method": null
-      }
-    },
-    {
-      "id": "mask:admin/webhooks-liste:unregister",
-      "label": "Abmelden",
-      "description": "Abmelden (admin/webhooks-liste)",
-      "category": "mask-action",
-      "domain": "admin",
-      "mask": "admin/webhooks-liste",
-      "intent_phrases": [
-        "Abmelden"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "admin/webhooks-liste",
-        "actionKey": "unregister",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": null,
-        "method": null
+        "method": "POST"
       }
     },
     {
