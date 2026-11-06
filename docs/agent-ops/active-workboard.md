@@ -20524,3 +20524,6 @@ STUDIO-WEBHOOKS-NATIVE Zwischenstand: NativeListPage plus zentrale readView-Lese
 
 ## CI-DEDUP-20261106 — reserviert, Codex Lead
 Ziel: doppelte OpenAPI-Driftpruefung im selben Backendjob entfernen. Besitz: .github/workflows/quality-gate.yml und eigener QA-Nachweis. Der Meta-Check muss dieselbe Pruefung verbindlich genau einmal ausfuehren. Keine Testauswahl oder Coverage-Grenze abschwaechen. Speicherursachen gesondert anhand Laufprotokollen untersuchen.
+
+## SONAR-CONTRACTS-20261106 — reserviert, Codex Lead
+Besitz: list-navigation.ts, sse-client.ts (nur synthetische URL-Basis), workspace-composition-parser.ts und QA. Reine URL-Aufloesung auf HTTPS-Basis und redundante Typkonvertierung bereinigen. Bestehende Tests, keine DB, keine Ausnahmen am Sonar-Gate.
