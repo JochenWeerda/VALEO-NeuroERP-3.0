@@ -11,6 +11,7 @@ import { apiClient, getAxiosErrorMessage } from '@/lib/api-client'
 import { exportToCSV, printTable } from '@/lib/export-utils'
 import { UniversalNativeCockpitPage } from './UniversalNativeCockpitPage'
 import { ActionInputDialog } from './renderers/ActionInputDialog'
+import { ReadViewDialog, useReadViewIdentity } from './renderers/ReadViewDialog'
 import { useScreenPermissions } from './runtime/screen-permissions'
 import { readDownload, saveReadDownload, type ReadDownloadResult } from './runtime/read-download'
 import type { ScreenActionDefinition, ScreenDefinition } from './schema'
@@ -38,6 +39,7 @@ function ListKeyboardNavigation({ onNew, surface }: { onNew: () => void; surface
 
 type Aktion = Pick<ScreenActionDefinition, 'key' | 'label'> & {
   permission?: string
+  readView?: ScreenActionDefinition['readView']
   requiresExpectedVersion?: boolean
   commandEndpoint?: string
   method?: 'POST' | 'PUT' | 'PATCH' | 'DELETE'
@@ -86,6 +88,9 @@ export function NativeListPage({ screenId, testId }: { screenId: string; testId?
   const { toast } = useToast()
   const schema = useScreenDefinition(screenId).data
   const permissions = useScreenPermissions(schema)
+  const readIdentity = useReadViewIdentity()
+  const [readView, setReadView] = useState<{ action: Aktion; row: Row; identity: string } | null>(null)
+  const currentReadAction = readView ? findeAktion(schema, readView.action.key) : undefined
   const surface = useRef<HTMLDivElement | null>(null)
   const listData = useRef<{ screen: string; rows: Row[] } | null>(null)
   const workflowQuery = useRef(new URLSearchParams())
@@ -215,6 +220,10 @@ export function NativeListPage({ screenId, testId }: { screenId: string; testId?
   function handleAction(key: string, payload: Row): void {
     const aktion = findeAktion(schema, key)
     if (!aktion || (aktion.permission && !permissions.includes(aktion.permission))) return
+    if (aktion.readView) {
+      if (readIdentity) setReadView({ action: aktion, row: payload, identity: readIdentity })
+      return
+    }
     if (aktion.download) {
       setAuftrag({ aktion, row: payload, werte: {} })
       setStufe('eingabe')
@@ -297,6 +306,12 @@ export function NativeListPage({ screenId, testId }: { screenId: string; testId?
           </DialogContent>
         </Dialog>
       )}
+      {readView && <ReadViewDialog screenId={screenId} action={readView.action as ScreenActionDefinition}
+        row={readView.row} identity={readView.identity}
+        allowed={Boolean(currentReadAction?.readView &&
+          JSON.stringify(currentReadAction.readView) === JSON.stringify(readView.action.readView) &&
+          (!currentReadAction.permission || permissions.includes(currentReadAction.permission)))}
+        onClose={() => setReadView(null)} />}
       {aktion && auftrag && stufe === 'bestaetigung' && (
         <Dialog open onOpenChange={(offen) => { if (!offen && !sendet) schliessen() }}>
           <DialogContent aria-describedby="liste-bestaetigung">
@@ -304,7 +319,7 @@ export function NativeListPage({ screenId, testId }: { screenId: string; testId?
               <DialogTitle>{aktion.label}</DialogTitle>
               <DialogDescription id="liste-bestaetigung">
                 {ernst.has(aktion.dangerLevel ?? '')
-                  ? 'Diese Aktion aendert den Vorgang und wird protokolliert.'
+                  ? 'Diese Aktion aendert den Vorgang. Bitte bestaetigen Sie die Ausfuehrung.'
                   : 'Aktion fuer den gewaehlten Eintrag ausfuehren?'}
               </DialogDescription>
             </DialogHeader>

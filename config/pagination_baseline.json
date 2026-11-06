@@ -72,14 +72,12 @@
     "app/api/v1/endpoints/compliance.py::list_saatgut_nachbau": 1,
     "app/api/v1/endpoints/compliance.py::list_sachkunde": 1,
     "app/api/v1/endpoints/compliance.py::list_vvvo": 1,
-    "app/api/v1/endpoints/compliance.py::list_zulassungen": 1,
     "app/api/v1/endpoints/compliance_whistleblower_lksg.py::list_lksg_supplier_risk_assessments": 1,
     "app/api/v1/endpoints/compliance_whistleblower_lksg.py::list_whistleblower_reports": 1,
     "app/api/v1/endpoints/compliance_whistleblower_lksg.py::lksg_annual_report_preview": 1,
     "app/api/v1/endpoints/crm_kim.py::_safe": 1,
     "app/api/v1/endpoints/crm_partner_suche.py::_safe": 1,
     "app/api/v1/endpoints/customer_extensions.py::customer_geo_search": 1,
-    "app/api/v1/endpoints/disposition.py::get_disposition_stats": 1,
     "app/api/v1/endpoints/dms_images.py::list_dms_documents": 1,
     "app/api/v1/endpoints/dms_images.py::list_dms_images": 1,
     "app/api/v1/endpoints/dms_images.py::search_dms_documents": 1,
@@ -238,10 +236,6 @@
     "app/api/v1/endpoints/warehouse_transfers.py::list_bin_locations": 1,
     "app/api/v1/endpoints/warehouse_transfers.py::post_transfer": 1,
     "app/api/v1/endpoints/wartung.py::list_protokolle": 1,
-    "app/api/v1/endpoints/weighing_tickets.py::list_article_groups": 1,
-    "app/api/v1/endpoints/zertifikate.py::get_zertifikate_stats": 1,
-    "app/api/v1/endpoints/zertifikate.py::list_zertifikate": 1,
-    "app/api/v1/endpoints/zertifikate_api.py::get_ablaufend": 1,
-    "app/api/v1/endpoints/zertifikate_api.py::get_by_tenant": 1
+    "app/api/v1/endpoints/weighing_tickets.py::list_article_groups": 1
   }
 }

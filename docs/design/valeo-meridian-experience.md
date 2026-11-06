@@ -437,3 +437,13 @@ Details stehen im [Abnahmenachweis](../quality-assurance/studio-functional-lists
 Liste, Details und Neuanlage verwenden dieselbe ScreenDefinition-/RenderPlan-Runtime. Bearbeiten und Entfernen binden Version und Wiederholungsschluessel; Themen, besprochene Bestellungen und naechste Schritte sind atomare Stringlisten. Eine besprochene Bestellung erzeugt keinen Auftrag. Zentrale readonly-Auswahlfelder behalten lesbaren Kontrast; die zentrale Ladegrenze verhindert einen leeren Bearbeitungsdialog vor Abschluss des Datensatzabrufs.
 
 24 synthetische Komponentenansichten dokumentieren Hell/Dunkel bei drei Desktopgroessen einschliesslich Erreichbarkeit der letzten Eingabefelder. Sie ersetzen keine angemeldete End-to-End-Abnahme. [Nachweis und Bilder](../quality-assurance/crm-activity-canonical-20261029.md).
+
+
+### PSM-Zulassungen (04.11.2026)
+
+Die native Studio-Liste `compliance/zulassungen-liste` nutzt den typisierten, mandantengebundenen lokalen PSM-Leseweg. Sie zeigt BVL-Nummer und Ablaufdatum als Stammdaten; ein Ablaufdatum belegt weder einen behoerdlichen Widerruf noch einen Sperrstatus. Die Darstellung bleibt Teil der zentralen ScreenDefinition- und RenderPlan-Kette.
+
+
+### Deklarative Zustellhistorie (05.11.2026)
+
+ScreenActionDefinition.readView beschreibt eine rein lesende, objektbezogene Tabellenansicht. Der gemeinsame Dialog verwendet ScreenDefinition, RenderPlan, UniversalMaskRuntime und UniversalMaskRenderer mit zentralen Theme-Tokens. Benutzer-/Mandantenwechsel und entzogene Aktionsrechte blenden Ergebnisse aus; Abfrageschluessel trennen Identitaeten. Ziel-GET und Rollenmodell bleiben verbindlich. Komponentenpruefungen ersetzen keine authentifizierte Browser- und Kontrastabnahme.

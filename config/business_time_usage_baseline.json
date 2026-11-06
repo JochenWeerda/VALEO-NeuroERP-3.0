@@ -99,7 +99,7 @@
       "date.today": 1
     },
     "app/api/v1/endpoints/mask_frontend_bridges.py": {
-      "date.today": 7
+      "date.today": 4
     },
     "app/api/v1/endpoints/periodische_buchungen.py": {
       "date.today": 1
@@ -144,9 +144,6 @@
       "date.today": 1
     },
     "app/api/v1/endpoints/xrechnung.py": {
-      "date.today": 2
-    },
-    "app/api/v1/endpoints/zertifikate_api.py": {
       "date.today": 2
     },
     "app/api/v1/endpoints/zu_abschlaggruppen.py": {
@@ -231,7 +228,7 @@
       "date.today": 1
     },
     "app/services/compliance_vvvo_sachkunde_service.py": {
-      "date.today": 5
+      "date.today": 3
     },
     "app/services/contract_engagement_service.py": {
       "date.today": 1

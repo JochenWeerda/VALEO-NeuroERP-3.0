@@ -14,11 +14,11 @@ import time
 import math
 
 from ....core.config import settings
-from ....core.business_time import business_today
+from ....core.business_time import business_today, business_timezone
 from ....core.database import get_db
 from ....core.tenant import get_tenant_id
 from ....infrastructure.models import PSM as PSMModel
-from ....api.v1.schemas.base import PaginatedResponse
+from ....api.v1.schemas.base import BaseSchema, PaginatedResponse
 from ....api.v1.schemas.agrar import PSM, PSMCreate, PSMUpdate
 from ....integrations.dms_client import upload_document, is_configured as dms_configured
 from ....integrations.bvl_psm_client import BVLPSMClient, map_bvl_mittel_to_psm_payload, psm_api_metrics
@@ -260,6 +260,48 @@ async def list_psm(
         size=limit,
         has_next=(skip + limit) < total,
         has_prev=skip > 0,
+    )
+
+
+class PSMZulassung(BaseSchema):
+    """Zulassungsdaten aus dem mandanteneigenen PSM-Stamm."""
+    id: str
+    artikelnummer: str
+    name: str
+    wirkstoff: str
+    mittel_typ: str
+    bvl_nummer: str
+    zulassung_ablauf: datetime
+    ist_aktiv: Optional[bool]
+
+
+class PSMZulassungen(PaginatedResponse[PSMZulassung]):
+    abgelaufen: int
+
+
+@router.get("/zulassungen", response_model=PSMZulassungen, summary="PSM-Zulassungen auflisten")
+def list_psm_zulassungen(
+    tenant_id: str = Depends(get_tenant_id),
+    search: Optional[str] = Query(None),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(25, ge=1, le=200),
+    db: Session = Depends(get_db),
+) -> PSMZulassungen:
+    """Lokaler PSM-Stamm; Ablaufzaehler bezieht sich auf alle Mandantenzeilen."""
+    query = db.query(PSMModel).filter(PSMModel.tenant_id == tenant_id)
+    if search:
+        like = f"%{search}%"
+        query = query.filter(or_(PSMModel.artikelnummer.ilike(like), PSMModel.name.ilike(like),
+                                 PSMModel.wirkstoff.ilike(like), PSMModel.mittel_typ.ilike(like),
+                                 PSMModel.bvl_nummer.ilike(like)))
+    total = query.count()
+    abgelaufen = query.filter(func.date(func.timezone(business_timezone().key, PSMModel.zulassung_ablauf)) < business_today()).count()
+    items = query.order_by(PSMModel.artikelnummer, PSMModel.id).offset(skip).limit(limit).all()
+    return PSMZulassungen(
+        items=[PSMZulassung.model_validate(item) for item in items], total=total,
+        abgelaufen=abgelaufen, page=skip // limit + 1, size=limit,
+        pages=(total + limit - 1) // limit if total else 1,
+        has_next=skip + limit < total, has_prev=skip > 0,
     )
 
 

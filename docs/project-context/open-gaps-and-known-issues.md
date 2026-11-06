@@ -11,6 +11,9 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+**Einordnung 05.11.2026:** Die Zahlen vom 29.10. und frueher sind historische Messungen ihres jeweiligen Umfangs. Der operative Stand steht im [Workboard](../agent-ops/active-workboard.md), der aktuelle strukturelle Katalog in [Studio-Screenversionen](../../config/studio_screen_versions.json). Der PSM-Zweig ist gezielt geprueft und vor Integration; Browser- und Gesamtfreigabe sind damit nicht belegt.
+
+
 ## UIX-RUNTIME: Migrationsnachweise und Fachparitaet (2026-10-22)
 
 **CRM-Aktivitaeten 2026-10-29:** Zentrale Listenpresets/Vollabruf vorbereitet und
@@ -29,7 +32,7 @@ Komponentenmatrix fuer beide Themes sind gruen. Fuer die verbleibenden
 Familien werden fehlende zentrale Bedienprimitive ergaenzt; siehe
 [Listenabnahme](../quality-assurance/studio-functional-lists-20261028.md) und
 [Prozessraumplan](../quality-assurance/studio-workflow-migration-plan-20261028.md).
-Der aktuelle Bericht ist fuehrend, die folgenden Messwerte sind historisch.
+Dieser Bericht dokumentiert den damaligen Messstand.
 
 **Nachlauf 2026-10-27:** 848 native Katalogeintraege synchron; 79 gezielte Tests
 in elf Dateien und vollstaendige Frontend-Typpruefung gruen. Das ist keine

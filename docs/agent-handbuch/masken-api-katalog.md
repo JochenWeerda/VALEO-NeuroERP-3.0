@@ -4,14 +4,14 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-04
+last_reviewed: 2026-11-05
 version: 3.0.0
 description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions.
 ---
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (775 Masken).
+> Generiert aus `app/core/screen_definitions.py` (771 Masken).
 
 ## Übersicht
 
@@ -274,11 +274,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `compliance/schadstoff-monitoring` | Schadstoff monitoring | compliance | niedrig | — | `GET /api/v1/masks/compliance/schadstoff-monitoring/agent-contract` |
 | `compliance/stichtagsmeldung-bestaende` | Stichtagsmeldung bestaende | compliance | niedrig | — | `GET /api/v1/masks/compliance/stichtagsmeldung-bestaende/agent-contract` |
 | `compliance/tierwohl-dokumentation` | Tierwohl dokumentation | compliance | niedrig | — | `GET /api/v1/masks/compliance/tierwohl-dokumentation/agent-contract` |
-| `compliance/usp-konformitaet` | Usp konformitaet | compliance | niedrig | — | `GET /api/v1/masks/compliance/usp-konformitaet/agent-contract` |
 | `compliance/vvvo-liste` | VVVO-Register | compliance | niedrig | — | `GET /api/v1/masks/compliance/vvvo-liste/agent-contract` |
 | `compliance/wasserschutz-auflagen` | Wasserschutz auflagen | compliance | niedrig | — | `GET /api/v1/masks/compliance/wasserschutz-auflagen/agent-contract` |
 | `compliance/zertifikate` | Zertifikate | compliance | niedrig | — | `GET /api/v1/masks/compliance/zertifikate/agent-contract` |
-| `compliance/zulassungen-liste` | Zulassungsregister | compliance | niedrig | — | `GET /api/v1/masks/compliance/zulassungen-liste/agent-contract` |
+| `compliance/zulassungen-liste` | PSM-Zulassungen | compliance | niedrig | — | `GET /api/v1/masks/compliance/zulassungen-liste/agent-contract` |
 | `contracts-v2` | Contracts v2 | workspace | niedrig | — | `GET /api/v1/masks/contracts-v2/agent-contract` |
 | `contracts/contract` | Contract | contracts | niedrig | — | `GET /api/v1/masks/contracts/contract/agent-contract` |
 | `controlling/abweichungsanalyse` | Abweichungsanalyse | controlling | niedrig | — | `GET /api/v1/masks/controlling/abweichungsanalyse/agent-contract` |
@@ -363,14 +362,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `dashboard/verkauf` | Verkaufs-Dashboard | sales | niedrig | — | `GET /api/v1/masks/dashboard/verkauf/agent-contract` |
 | `dashboards/geschaeftsfuehrung` | Geschaeftsfuehrung | management | niedrig | — | `GET /api/v1/masks/dashboards/geschaeftsfuehrung/agent-contract` |
 | `disposition/bestell-vorschlag` | Bestellvorschlag | logistics | niedrig | — | `GET /api/v1/masks/disposition/bestell-vorschlag/agent-contract` |
-| `disposition/engpass-monitor` | Engpass-Monitor | logistics | niedrig | — | `GET /api/v1/masks/disposition/engpass-monitor/agent-contract` |
 | `disposition/kontrakt-abruf` | Kontrakt-Abruf | logistics | niedrig | — | `GET /api/v1/masks/disposition/kontrakt-abruf/agent-contract` |
 | `disposition/lager-reichweite` | Lager-Reichweite | logistics | niedrig | — | `GET /api/v1/masks/disposition/lager-reichweite/agent-contract` |
-| `disposition/liste` | Disposition | lager | niedrig | — | `GET /api/v1/masks/disposition/liste/agent-contract` |
 | `disposition/saison-planung` | Saison-Planung | logistics | niedrig | — | `GET /api/v1/masks/disposition/saison-planung/agent-contract` |
 | `disposition/strecken-disposition` | Strecken-Disposition | logistics | niedrig | — | `GET /api/v1/masks/disposition/strecken-disposition/agent-contract` |
 | `disposition/touren-disposition` | Touren-Disposition | logistics | niedrig | — | `GET /api/v1/masks/disposition/touren-disposition/agent-contract` |
-| `disposition/umlagerungs-vorschlag` | Umlagerungs-Vorschlag | logistics | niedrig | — | `GET /api/v1/masks/disposition/umlagerungs-vorschlag/agent-contract` |
 | `dms/archiv-suche` | Archiv-Suche | documents | niedrig | — | `GET /api/v1/masks/dms/archiv-suche/agent-contract` |
 | `dms/beleg-erkennung` | Beleg-Erkennung | documents | niedrig | — | `GET /api/v1/masks/dms/beleg-erkennung/agent-contract` |
 | `dms/dokument-detail` | Dokument | documents | niedrig | — | `GET /api/v1/masks/dms/dokument-detail/agent-contract` |
@@ -1594,7 +1590,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ### `admin/webhooks-liste` — Webhook-Verwaltung
 
-**Zweck:** Webhook-Registrierungen und Zustellversuche verwalten
+**Zweck:** Webhook-Registrierungen und echte Zustellversuche im angemeldeten Mandanten verwalten.
 
 | | |
 |---|---|
@@ -1604,9 +1600,14 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/admin__webhooks-liste/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
+**Data Sources:**
+
+- `list` → `/api/v1/webhooks`
+
 **Beispiel-Prompts:**
 
 - Welche Webhooks sind registriert?
+- Zeige die Zustellversuche dieser Registrierung.
 
 **Sensible Felder:** `secret`
 
@@ -1614,9 +1615,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `register` | Neuer Webhook | safe | nein | `—` |
-| `history` | Zustellversuche | safe | nein | `—` |
-| `unregister` | Abmelden | moderate | nein | `—` |
+| `register` | Neuer Webhook | moderate | nein | `/api/v1/webhooks/` |
 
 ---
 
@@ -7726,35 +7725,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `compliance/usp-konformitaet` — Usp konformitaet
-
-**Zweck:** Usp konformitaet mandantensicher als Kontroll-Worklist abarbeiten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/compliance/usp-konformitaet/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/compliance/usp-konformitaet/agent-contract` |
-| Readiness | `GET /api/v1/masks/compliance/usp-konformitaet/readiness` |
-| Rollout-Route | `/mask-rollout/compliance__usp-konformitaet/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `entity` → `/api/v1/compliance/zulassungen-register`
-- `items` → `/api/v1/compliance/zulassungen-register`
-
-**MCP-Tools (Domäne):**
-
-- `compliance.gate.status` — scope `compliance:read`, Risiko niedrig
-- `compliance.sanctions.check` — scope `compliance:write`, Risiko mittel
-
-**Beispiel-Prompts:**
-
-- Zeige offene Usp konformitaet.
-- Was ist in Usp konformitaet faellig?
-
----
-
 ### `compliance/vvvo-liste` — VVVO-Register
 
 **Zweck:** VVVO-registrierte Betriebe finden und pruefen.
@@ -7847,9 +7817,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `compliance/zulassungen-liste` — Zulassungsregister
+### `compliance/zulassungen-liste` — PSM-Zulassungen
 
-**Zweck:** Produktzulassungen und Ablaufdaten im Blick behalten.
+**Zweck:** PSM-Zulassungsnummern und Ablaufdaten im eigenen Stamm pruefen.
 
 | | |
 |---|---|
@@ -7861,7 +7831,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `list` → `/api/v1/compliance/zulassungen-register`
+- `list` → `/api/v1/agrar/psm/zulassungen`
 
 **MCP-Tools (Domäne):**
 
@@ -7870,8 +7840,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Beispiel-Prompts:**
 
-- Welche Zulassungen laufen ab?
-- Welche Produkte sind widerrufen?
+- Welche PSM-Zulassungen laufen ab?
 
 **Actions:**
 
@@ -18867,43 +18836,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `disposition/liste` — Disposition
-
-**Zweck:** Unterdeckte Artikel finden und Bestellvorschlaege ausloesen.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/disposition/liste/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/disposition/liste/agent-contract` |
-| Readiness | `GET /api/v1/masks/disposition/liste/readiness` |
-| Rollout-Route | `/mask-rollout/disposition__liste/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/disposition`
-
-**MCP-Tools (Domäne):**
-
-- `lager.bestand.get` — scope `lager:read`, Risiko niedrig
-- `lager.inventur.status` — scope `lager:read`, Risiko niedrig
-- `lager.inventur.propose_opening` — scope `lager:write`, Risiko hoch
-- `lager.stock_movement.stornieren` — scope `lager:write`, Risiko mittel
-
-**Beispiel-Prompts:**
-
-- Welche Artikel liegen unter Mindestbestand?
-- Wo ist Bedarf hoch?
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `neu` | Bestellvorschlaege | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
 ### `etiketten/druck-liste` — Etikettendruck
 
 **Zweck:** Etikettendruck-Auftraege finden.
@@ -19991,45 +19923,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `disposition/engpass-monitor` — Engpass-Monitor
-
-**Zweck:** Engpass-Monitor als Read-Model-Cockpit.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/disposition/engpass-monitor/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/disposition/engpass-monitor/agent-contract` |
-| Readiness | `GET /api/v1/masks/disposition/engpass-monitor/readiness` |
-| Rollout-Route | `/mask-rollout/disposition__engpass-monitor/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `entity` → `/api/v1/disposition/stats`
-
-**MCP-Tools (Domäne):**
-
-- `logistik.frachttabelle.anlegen` — scope `logistics:write`, Risiko mittel
-- `logistik.tour.anlegen` — scope `logistics:write`, Risiko mittel
-- `logistik.fahrzeug.speichern` — scope `logistics:write`, Risiko mittel
-- `logistik.fahrzeug.loeschen` — scope `logistics:write`, Risiko hoch
-- `logistik.terminart.speichern` — scope `logistics:write`, Risiko mittel
-- `logistik.rechnung.speichern` — scope `logistics:write`, Risiko mittel
-- `logistik.ausgehendes_dokument.speichern` — scope `logistics:write`, Risiko mittel
-
-**Beispiel-Prompts:**
-
-- Zeige Engpass-Monitor.
-- Was ist der aktuelle Stand?
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `refresh` | Aktualisieren | safe | nein | `—` |
-
----
-
 ### `disposition/kontrakt-abruf` — Kontrakt-Abruf
 
 **Zweck:** Kontrakt-Abruf als Read-Model-Cockpit.
@@ -20215,45 +20108,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **Beispiel-Prompts:**
 
 - Zeige Touren-Disposition.
-- Was ist der aktuelle Stand?
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `refresh` | Aktualisieren | safe | nein | `—` |
-
----
-
-### `disposition/umlagerungs-vorschlag` — Umlagerungs-Vorschlag
-
-**Zweck:** Umlagerungs-Vorschlag als Read-Model-Cockpit.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/disposition/umlagerungs-vorschlag/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/disposition/umlagerungs-vorschlag/agent-contract` |
-| Readiness | `GET /api/v1/masks/disposition/umlagerungs-vorschlag/readiness` |
-| Rollout-Route | `/mask-rollout/disposition__umlagerungs-vorschlag/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `entity` → `/api/v1/disposition`
-
-**MCP-Tools (Domäne):**
-
-- `logistik.frachttabelle.anlegen` — scope `logistics:write`, Risiko mittel
-- `logistik.tour.anlegen` — scope `logistics:write`, Risiko mittel
-- `logistik.fahrzeug.speichern` — scope `logistics:write`, Risiko mittel
-- `logistik.fahrzeug.loeschen` — scope `logistics:write`, Risiko hoch
-- `logistik.terminart.speichern` — scope `logistics:write`, Risiko mittel
-- `logistik.rechnung.speichern` — scope `logistics:write`, Risiko mittel
-- `logistik.ausgehendes_dokument.speichern` — scope `logistics:write`, Risiko mittel
-
-**Beispiel-Prompts:**
-
-- Zeige Umlagerungs-Vorschlag.
 - Was ist der aktuelle Stand?
 
 **Actions:**

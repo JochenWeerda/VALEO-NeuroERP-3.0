@@ -13,6 +13,9 @@
   "mask:admin/postfaecher:entfernen",
   "mask:admin/postfaecher:speichern",
   "mask:admin/postfaecher:testen",
+  "mask:admin/webhooks-liste:history",
+  "mask:admin/webhooks-liste:register",
+  "mask:admin/webhooks-liste:unregister",
   "mask:agrar/duenger-liste:deaktivieren",
   "mask:agrar/feed-controlling:record_observation",
   "mask:agrar/feed-readiness:create_handoff",
@@ -320,7 +323,7 @@
   "mask:waage/wiegungen:create"
  ],
  "nicht_unterstuetzt": {
-  "kein_endpunkt": 849,
-  "pfadparameter": 8
+  "kein_endpunkt": 843,
+  "pfadparameter": 6
  }
 }

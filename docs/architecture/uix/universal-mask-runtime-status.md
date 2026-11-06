@@ -11,6 +11,9 @@ description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-02
 
 # Universal Mask Runtime — Plattformstatus
 
+**Einordnung 05.11.2026:** Die Zahlen vom 29.10. und frueher sind historische Messungen ihres jeweiligen Umfangs. Der operative Stand steht im [Workboard](../../agent-ops/active-workboard.md), der aktuelle strukturelle Katalog in [Studio-Screenversionen](../../../config/studio_screen_versions.json). Der PSM-Zweig ist gezielt geprueft und vor Integration; Browser- und Gesamtfreigabe sind damit nicht belegt.
+
+
 **Aktueller Artefaktabgleich 2026-10-29:**851 registrierte Definitionen,
 Gate A/B/C jeweils851,E804(47 Runtime-Punkte);842 native
 Katalogeintraege und5 strukturell freigabefaehige Draft-Projektionen.
@@ -28,7 +31,7 @@ Kontraktprotokoll und Kampagnenvorlage sind zusaetzlich funktional migriert;
 58 gezielte Faelle einschliesslich signierter SQL-Kanaele, Typpruefung, Build
 und12 synthetische Browser-Komponentenansichten sind geprueft.
 [Abnahme](../../quality-assurance/studio-audit-template-20261028.md).
-Diese Werte sind fuehrend; nachfolgende fruehere Zahlen sind historisch.
+Diese Werte dokumentieren den damaligen Messstand.
 
 **Verbindliches Ziel (Nutzer 2026-10-27):** Alle fachlichen Masken werden ueber
 Studio gebaut, versioniert und ueber die gemeinsame Runtime betrieben.

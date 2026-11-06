@@ -95,13 +95,22 @@ def guard_psm_approval_valid(payload: dict) -> tuple[bool, str]:
     Returns:
         (ok, reason)
     """
-    from datetime import datetime
-    psm = payload.get("psm", {})
-    ablauf = psm.get("zulassung_ablauf")
-    if ablauf and isinstance(ablauf, str):
-        ablauf_date = datetime.fromisoformat(ablauf.replace('Z', '+00:00'))
-        if ablauf_date < datetime.now():
-            return (False, "PSM approval has expired")
+    from datetime import date, datetime
+    from app.core.business_time import business_date_at, business_today
+
+    psm = payload.get("psm")
+    ablauf = psm.get("zulassung_ablauf") if isinstance(psm, dict) else None
+    if isinstance(ablauf, str):
+        try:
+            ablauf = datetime.fromisoformat(ablauf.replace("Z", "+00:00"))
+        except ValueError:
+            return (False, "PSM approval expiry is unknown")
+    if isinstance(ablauf, datetime):
+        ablauf = business_date_at(ablauf)
+    if not isinstance(ablauf, date):
+        return (False, "PSM approval expiry is unknown")
+    if ablauf < business_today():
+        return (False, "PSM approval has expired")
     return (True, "ok")
 
 

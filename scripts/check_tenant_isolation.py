@@ -40,7 +40,6 @@ SHARED_DATA: set[str] = {
     "foerderung.py",           # FoerderAntrag — no tenant_id in model
     "zertifikate.py",          # ZertifikatEintrag — no tenant_id in model
     "labor.py",                # LaborProbe/LaborAuftragEntry — no tenant_id in model
-    "disposition.py",          # DispositionPosition — no tenant_id in model
     "ruestliste.py",           # operational list — no tenant_id in model
     "transporte.py",           # transport records — no tenant_id in model
     "dms_inbox.py",            # DmsInboxEntry in domain_shared — shared inbox by design

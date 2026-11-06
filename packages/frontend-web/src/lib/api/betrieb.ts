@@ -21,8 +21,8 @@ export type QSItem = { id: string; bereich: string; pruefpunkt: string; erfuellt
 export type SaatgutNachbau = { id: string; betrieb: string; sorte: string; kultur: string; flaeche: number; erntejahr: number; gebuehr: number; status: 'offen' | 'bezahlt' | 'befreit' }
 export type Sachkundenachweis = { id: string; kunde: string; kundennr: string; nachweisNr: string; ausstellungsdatum: string; gueltigBis: string; ausstellendeStelle: string; status: 'gueltig' | 'ablaufend' | 'abgelaufen' }
 export type VVVOBetrieb = { id: string; betriebsname: string; vvvo: string; bundesland: string; tierart: string; status: 'aktiv' | 'inaktiv'; letzteAktualisierung: string }
-export type Zulassung = { id: string; produkt: string; typ: string; nummer: string; behoerde: string; gueltigBis: string; status: 'aktiv' | 'auslaufend' | 'abgelaufen' }
-export type DispoPosition = { id: string; artikel: string; bestand: number; mindestbestand: number; bedarf: number; empfehlung: string; prioritaet: 'hoch' | 'mittel' | 'niedrig' }
+export type Zulassung = { id: string; artikelnummer: string; name: string; wirkstoff: string; mittel_typ: string; bvl_nummer: string; zulassung_ablauf: string; ist_aktiv: boolean | null }
+export type ZulassungenRegister = { items: Zulassung[]; total: number; abgelaufen: number; page: number; size: number; pages: number; has_next: boolean; has_prev: boolean }
 export type Dokument = { id: string; name: string; typ: string; kategorie: string; groesse: number; hochgeladen: string; benutzer: string }
 export type Fahrzeug = { id: string; kennzeichen: string; typ: string; kilometerstand: number; naechsteInspektion: string; status: 'verfuegbar' | 'unterwegs' | 'werkstatt' }
 export type Antrag = { id: string; nummer: string; programm: string; antragsdatum: string; flaeche: number; betrag: number; status: 'entwurf' | 'eingereicht' | 'bewilligt' | 'abgelehnt' }
@@ -125,8 +125,12 @@ export const useQSCheckliste = makeHook<QSItem[]>(['compliance', 'qs'], '/api/v1
 export const useSaatgutNachbau = makeHook<SaatgutNachbau[]>(['compliance', 'nachbau'], '/api/v1/compliance/saatgut-nachbau', [])
 export const useSachkundeRegister = makeHook<Sachkundenachweis[]>(['compliance', 'sachkunde'], '/api/v1/compliance/sachkunde-register', [])
 export const useVVVORegister = makeHook<VVVOBetrieb[]>(['compliance', 'vvvo'], '/api/v1/compliance/vvvo-register', [])
-export const useZulassungenRegister = makeHook<Zulassung[]>(['compliance', 'zulassungen'], '/api/v1/compliance/zulassungen-register', [])
-export const useDisposition = makeHook<DispoPosition[]>(['disposition'], '/api/v1/disposition', [])
+export function useZulassungenRegister() {
+  return useQuery({
+    queryKey: ['compliance', 'zulassungen'],
+    queryFn: async () => (await apiClient.get<ZulassungenRegister>('/api/v1/agrar/psm/zulassungen')).data,
+  })
+}
 export const useDokumenteAblage = makeHook<Dokument[]>(['dokumente'], '/api/v1/dokumente', [])
 export const useFahrzeuge = makeHook<Fahrzeug[]>(['fuhrpark', 'fahrzeuge'], '/api/v1/fuhrpark/fahrzeuge', [])
 export const useFoerderAntraege = makeHook<Antrag[]>(['foerderung'], '/api/v1/foerderung/antraege', [])

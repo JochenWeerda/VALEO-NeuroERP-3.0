@@ -9,7 +9,7 @@ from __future__ import annotations
 import logging
 import os
 import time
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Any, Dict, Optional, Tuple
 
 import httpx
@@ -107,14 +107,14 @@ class BVLPSMClient:
         return items[0]
 
 
-def parse_bvl_datetime(value: Optional[str]) -> datetime:
-    if not value:
-        return datetime.now(timezone.utc)
+def parse_bvl_datetime(value: object) -> Optional[datetime]:
+    if not isinstance(value, str) or not value:
+        return None
     try:
         # BVL returns e.g. 2035-01-29T23:00:00Z
         return datetime.fromisoformat(value.replace("Z", "+00:00"))
     except ValueError:
-        return datetime.now(timezone.utc)
+        return None
 
 
 def map_bvl_mittel_to_psm_payload(item: dict[str, Any], tenant_id: str) -> dict[str, Any]:
@@ -132,24 +132,25 @@ def map_bvl_mittel_to_psm_payload(item: dict[str, Any], tenant_id: str) -> dict[
         "mittel_typ": mittel_typ,
         "bvl_nummer": kennr,
         "zulassung_ablauf": parse_bvl_datetime(item.get("zul_ende")),
-        "eu_zulassung": False,
-        "kulturen": [],
-        "indikationen": [],
+        "eu_zulassung": None,
+        "kulturen": None,
+        "indikationen": None,
         "dosierung_min": None,
         "dosierung_max": None,
         "wartezeit": None,
-        "bienenschutz": False,
-        "wasserschutz_gebiet": False,
+        "bienenschutz": None,
+        "wasserschutz_gebiet": None,
         "abstand_wohngebaeude": None,
         "abstand_gewaesser": None,
-        "auflagen": [],
-        "ausgangsstoff_explosivstoffe": False,
-        "erklaerung_landwirt_erforderlich": False,
+        "auflagen": None,
+        "ausgangsstoff_explosivstoffe": None,
+        "erklaerung_landwirt_erforderlich": None,
         "erklaerung_landwirt_status": None,
         "wirkstoff_gruppe": None,
         "rotations_empfehlung": None,
         "ek_preis": None,
         "vk_preis": None,
-        "waehrung": "EUR",
-        "lagerbestand": 0,
+        "waehrung": None,
+        "lagerbestand": None,
+        "ist_aktiv": item.get("is_active") if isinstance(item.get("is_active"), bool) else None,
     }

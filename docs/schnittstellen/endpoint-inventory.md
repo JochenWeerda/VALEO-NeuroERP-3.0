@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-04
+last_reviewed: 2026-11-05
 version: 3.0.0
 description: Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -148,7 +148,6 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `dauerauftraege` | Daueraufträge [DAU] — Wiederkehrende Aufträge/Rechnungen. |
 | `debtors` | Debtor (Debitoren) master data management endpoints |
 | `direct_debits` | Direct debit endpoints used by finance UI masks. |
-| `disposition` | Disposition API - DB-backed endpoints. |
 | `dms_images` | Tenant-safe DMS metadata search and article-document links. |
 | `dms_inbox` | DMS Inbox Endpoints |
 | `doc_nachweisraum_actions` | DOM-DOC-004 — Nachweisraum: Dokument-Upload, Freigabe, Wiedervorlage, GoBD-Export. |
@@ -488,7 +487,6 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `workflow_template_marketplace` | — |
 | `xrechnung` | INT-XRECHNUNG-001: XRechnung / ZUGFeRD E-Rechnung Export. |
 | `zahlungsbedingungen` | Zahlungsbedingungen [ZABD] — Zahlungsziel, Skonto, Zahlungsart. |
-| `zertifikate` | Zertifikate API - DB-backed endpoints. |
-| `zertifikate_api` | — |
+| `zertifikate` | Zertifikate (Bio, QS, GlobalG.A.P. ...) im Mandanten. |
 | `zinsabrechnung` | Zinsabrechnung — Zinsen auf Rohware-Einlagerungskontrakte. |
 | `zu_abschlaggruppen` | Zu-/Abschlaggruppen [ZAGR] und Zu-/Abschlagklassen [ZAKL] — Konditionsstammdaten. |

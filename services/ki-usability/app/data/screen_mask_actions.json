@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 546,
-    "screens_with_actions": 375,
+    "actions": 543,
+    "screens_with_actions": 374,
     "domains": 50
   },
   "actions": [
@@ -303,30 +303,10 @@
       "source": {
         "screenId": "admin/webhooks-liste",
         "actionKey": "register",
-        "commandEndpoint": null,
+        "commandEndpoint": "/api/v1/webhooks/",
         "navigationRoute": null,
         "command": null,
-        "method": null
-      }
-    },
-    {
-      "id": "mask:admin/webhooks-liste:unregister",
-      "label": "Abmelden",
-      "description": "Abmelden (admin/webhooks-liste)",
-      "category": "mask-action",
-      "domain": "admin",
-      "mask": "admin/webhooks-liste",
-      "intent_phrases": [
-        "Abmelden"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "admin/webhooks-liste",
-        "actionKey": "unregister",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": null,
-        "method": null
+        "method": "POST"
       }
     },
     {
@@ -4022,46 +4002,6 @@
         "commandEndpoint": null,
         "navigationRoute": null,
         "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:disposition/liste:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (disposition/liste)",
-      "category": "mask-action",
-      "domain": "lager",
-      "mask": "disposition/liste",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "disposition/liste",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null
-      }
-    },
-    {
-      "id": "mask:disposition/liste:neu",
-      "label": "Bestellvorschlaege",
-      "description": "Bestellvorschlaege (disposition/liste)",
-      "category": "mask-action",
-      "domain": "lager",
-      "mask": "disposition/liste",
-      "intent_phrases": [
-        "Bestellvorschlaege"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "disposition/liste",
-        "actionKey": "neu",
-        "commandEndpoint": null,
-        "navigationRoute": "/einkauf/bestellvorschlaege",
-        "command": null,
         "method": null
       }
     },

@@ -1,0 +1,109 @@
+{
+  "schemaId": "compliance/zulassungen-liste",
+  "schemaHash": "3739f19b44e5e34251f0235c05c3b28f59a9a70e8c671dc8b0cacf20a014bfd1",
+  "scope": "synthetic native component; not authenticated end-to-end",
+  "cases": [
+    {
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "theme": "light",
+      "image": "1366x768-light.png",
+      "contrastViolations": 0,
+      "contrastIncomplete": 0,
+      "runtimeErrors": [],
+      "externalRequests": [],
+      "sizes": {
+        "width": 1366,
+        "scroll": 1366,
+        "dark": false
+      }
+    },
+    {
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "theme": "dark",
+      "image": "1366x768-dark.png",
+      "contrastViolations": 0,
+      "contrastIncomplete": 0,
+      "runtimeErrors": [],
+      "externalRequests": [],
+      "sizes": {
+        "width": 1366,
+        "scroll": 1366,
+        "dark": true
+      }
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "light",
+      "image": "1440x900-light.png",
+      "contrastViolations": 0,
+      "contrastIncomplete": 0,
+      "runtimeErrors": [],
+      "externalRequests": [],
+      "sizes": {
+        "width": 1440,
+        "scroll": 1440,
+        "dark": false
+      }
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "dark",
+      "image": "1440x900-dark.png",
+      "contrastViolations": 0,
+      "contrastIncomplete": 0,
+      "runtimeErrors": [],
+      "externalRequests": [],
+      "sizes": {
+        "width": 1440,
+        "scroll": 1440,
+        "dark": true
+      }
+    },
+    {
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "theme": "light",
+      "image": "1920x1080-light.png",
+      "contrastViolations": 0,
+      "contrastIncomplete": 0,
+      "runtimeErrors": [],
+      "externalRequests": [],
+      "sizes": {
+        "width": 1920,
+        "scroll": 1920,
+        "dark": false
+      }
+    },
+    {
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "theme": "dark",
+      "image": "1920x1080-dark.png",
+      "contrastViolations": 0,
+      "contrastIncomplete": 0,
+      "runtimeErrors": [],
+      "externalRequests": [],
+      "sizes": {
+        "width": 1920,
+        "scroll": 1920,
+        "dark": true
+      }
+    }
+  ]
+}

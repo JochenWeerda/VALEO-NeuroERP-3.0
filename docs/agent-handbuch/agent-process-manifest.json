@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-04",
+  "generatedAt": "2026-11-05",
   "schemaVersion": 1,
   "sources": [
     "app/core/flow_spine_registry.py",
@@ -1494,34 +1494,12 @@
         {
           "key": "register",
           "label": "Neuer Webhook",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "studio.admin-webhooks.register",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        },
-        {
-          "key": "history",
-          "label": "Zustellversuche",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        },
-        {
-          "key": "unregister",
-          "label": "Abmelden",
           "dangerLevel": "moderate",
           "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "studio.admin-webhooks.unregister",
-          "commandEndpoint": null,
-          "method": null,
+          "requiresConfirmation": true,
+          "permission": "studio.admin-webhooks.register",
+          "commandEndpoint": "/api/v1/webhooks/",
+          "method": "POST",
           "stubReason": null
         }
       ],
@@ -7140,23 +7118,6 @@
       ]
     },
     {
-      "mask_id": "compliance/usp-konformitaet",
-      "title": "Usp konformitaet",
-      "domain": "compliance",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/compliance__usp-konformitaet/:entityId",
-      "agent_contract_url": "/api/v1/masks/compliance/usp-konformitaet/agent-contract",
-      "screen_definition_url": "/api/v1/masks/compliance/usp-konformitaet/screen-definition",
-      "readiness_url": "/api/v1/masks/compliance/usp-konformitaet/readiness",
-      "risk_summary": "low",
-      "actions": [],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "compliance.gate.status",
-        "compliance.sanctions.check"
-      ]
-    },
-    {
       "mask_id": "compliance/vvvo-liste",
       "title": "VVVO-Register",
       "domain": "compliance",
@@ -7221,7 +7182,7 @@
     },
     {
       "mask_id": "compliance/zulassungen-liste",
-      "title": "Zulassungsregister",
+      "title": "PSM-Zulassungen",
       "domain": "compliance",
       "process_keys": [],
       "rollout_route": "/mask-rollout/compliance__zulassungen-liste/:entityId",
@@ -17645,48 +17606,6 @@
       ]
     },
     {
-      "mask_id": "disposition/liste",
-      "title": "Disposition",
-      "domain": "lager",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/disposition__liste/:entityId",
-      "agent_contract_url": "/api/v1/masks/disposition/liste/agent-contract",
-      "screen_definition_url": "/api/v1/masks/disposition/liste/screen-definition",
-      "readiness_url": "/api/v1/masks/disposition/liste/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "neu",
-          "label": "Bestellvorschlaege",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
-        },
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "lager.bestand.get",
-        "lager.inventur.status",
-        "lager.inventur.propose_opening",
-        "lager.stock_movement.stornieren"
-      ]
-    },
-    {
       "mask_id": "etiketten/druck-liste",
       "title": "Etikettendruck",
       "domain": "lager",
@@ -18627,40 +18546,6 @@
       ]
     },
     {
-      "mask_id": "disposition/engpass-monitor",
-      "title": "Engpass-Monitor",
-      "domain": "logistics",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/disposition__engpass-monitor/:entityId",
-      "agent_contract_url": "/api/v1/masks/disposition/engpass-monitor/agent-contract",
-      "screen_definition_url": "/api/v1/masks/disposition/engpass-monitor/screen-definition",
-      "readiness_url": "/api/v1/masks/disposition/engpass-monitor/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "refresh",
-          "label": "Aktualisieren",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "logistics.read",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "logistik.frachttabelle.anlegen",
-        "logistik.tour.anlegen",
-        "logistik.fahrzeug.speichern",
-        "logistik.fahrzeug.loeschen",
-        "logistik.terminart.speichern",
-        "logistik.rechnung.speichern",
-        "logistik.ausgehendes_dokument.speichern"
-      ]
-    },
-    {
       "mask_id": "disposition/kontrakt-abruf",
       "title": "Kontrakt-Abruf",
       "domain": "logistics",
@@ -18805,40 +18690,6 @@
       "agent_contract_url": "/api/v1/masks/disposition/touren-disposition/agent-contract",
       "screen_definition_url": "/api/v1/masks/disposition/touren-disposition/screen-definition",
       "readiness_url": "/api/v1/masks/disposition/touren-disposition/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "refresh",
-          "label": "Aktualisieren",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "logistics.read",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "logistik.frachttabelle.anlegen",
-        "logistik.tour.anlegen",
-        "logistik.fahrzeug.speichern",
-        "logistik.fahrzeug.loeschen",
-        "logistik.terminart.speichern",
-        "logistik.rechnung.speichern",
-        "logistik.ausgehendes_dokument.speichern"
-      ]
-    },
-    {
-      "mask_id": "disposition/umlagerungs-vorschlag",
-      "title": "Umlagerungs-Vorschlag",
-      "domain": "logistics",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/disposition__umlagerungs-vorschlag/:entityId",
-      "agent_contract_url": "/api/v1/masks/disposition/umlagerungs-vorschlag/agent-contract",
-      "screen_definition_url": "/api/v1/masks/disposition/umlagerungs-vorschlag/screen-definition",
-      "readiness_url": "/api/v1/masks/disposition/umlagerungs-vorschlag/readiness",
       "risk_summary": "low",
       "actions": [
         {

@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, qa]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-04
+last_reviewed: 2026-11-05
 version: 3.0.0
 description: Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -324,6 +324,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `studio_native_import` | Version native masks through the existing Studio store, without activation. |
 | `studio_process_simulation` | Real domain-service simulation on the shared probe, always rolled back. |
 | `studio_propose` | Deterministic ScreenDefinition proposals for humans and agents. |
+| `studio_read_view_contracts` | Strict contracts for declarative related-row reads; grants no write access. |
 | `studio_runtime_surface_contracts` | Fixed bindings for domain surfaces rendered inside the universal runtime. |
 | `studio_semantic` | Versioned business vocabulary and side-effect-free Studio reference contract. |
 | `studio_semantic_model` | Budgeted intent interpretation; model output can only select a known contract. |

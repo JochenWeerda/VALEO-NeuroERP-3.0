@@ -409,11 +409,12 @@
       "version": "1.0.0"
     },
     "admin/webhooks-liste": {
-      "definition_hash": "9eff6e4b887a642d4d419585b3859bb9a36e33460e933eb33e1615f27391e6ce",
+      "definition_hash": "893bebd9188610264a49f039bcfa8896268584d92f23c3943dd7c7998dbd8238",
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
       "studio_draft_clean": true,
       "version": "1.0.0"
@@ -2827,17 +2828,6 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "compliance/usp-konformitaet": {
-      "definition_hash": "0dc1d83f3d00a41c2e823cba1e533f41aac6a21072e67f60efb3ae2e1759fb2e",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "compliance/vvvo-liste": {
       "definition_hash": "91b10953df68b864849f7790a204da539c12d4c06046e43a446a58f4877e297c",
       "gates_passed": [
@@ -2872,7 +2862,7 @@
       "version": "1.0.0"
     },
     "compliance/zulassungen-liste": {
-      "definition_hash": "82b18d17823dcb35586688d7948ba97109e543be1660350b36c76e1780521133",
+      "definition_hash": "cbaa007cd8cc398eb55d2f248d0234db04998d9e593823a7094827a747496c9e",
       "gates_passed": [
         "A",
         "B",
@@ -3806,17 +3796,6 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "disposition/engpass-monitor": {
-      "definition_hash": "97f56d8606236960b024b2b81748c6a1d6e67da6864f12c1d5c89cb07daef47c",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "disposition/kontrakt-abruf": {
       "definition_hash": "f9421d55782c17c0d134775b4e7dd42f4bbf309ca7c3dc3fa5c6b95b3cadec5c",
       "gates_passed": [
@@ -3830,17 +3809,6 @@
     },
     "disposition/lager-reichweite": {
       "definition_hash": "211b3e95ea86072915710aada7eccea13134ffb427e53b106a7afabc030b8e3d",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "disposition/liste": {
-      "definition_hash": "e5446843f726c3ab31ff3d11426000813e91441d125b1edab2c978cd35f35e56",
       "gates_passed": [
         "A",
         "B",
@@ -3874,17 +3842,6 @@
     },
     "disposition/touren-disposition": {
       "definition_hash": "16337928638917c2a8ed17a22ce870a58fbac07dbe52b04f139b0b9393bea4dd",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "disposition/umlagerungs-vorschlag": {
-      "definition_hash": "94c06de2fa91b48bf4867944f85d25e259546755692f1917ca94fd83b8ed6b95",
       "gates_passed": [
         "A",
         "B",

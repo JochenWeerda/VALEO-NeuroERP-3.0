@@ -152,3 +152,16 @@ describe('compileDataBindingPlan', () => {
     expect(result.tableBindings['orphan'].requiresServerQuery).toBe(false)
   })
 })
+
+// Related-row read views have no server-registered mask source.
+it('loads a root read table directly, without fabricating a mask source', () => {
+  const plan = makeMockPlan({ tablesByKey: { history: {
+    key: 'history', label: 'History', columns: [], pageSize: 25,
+    virtualized: true, rowHeight: 40, serverPagination: false,
+  } } })
+  const binding = compileDataBindingPlan(plan, undefined, { history: '/api/v1/webhooks/wh-1/zustellversuche' })
+  expect(binding.tableBindings.history).toMatchObject({
+    endpoint: '/api/v1/webhooks/wh-1/zustellversuche', sourceKey: undefined,
+    clientQuery: true, requiresServerQuery: true,
+  })
+})

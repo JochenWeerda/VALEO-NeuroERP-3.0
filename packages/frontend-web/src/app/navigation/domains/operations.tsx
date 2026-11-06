@@ -881,7 +881,7 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
       },
       {
         id: 'zulassungen',
-        label: 'Zulassungen',
+        label: 'PSM-Zulassungen',
         icon: FileText,
         module: '@/pages/compliance/zulassungen-register',
         path: '/compliance/zulassungen-register',

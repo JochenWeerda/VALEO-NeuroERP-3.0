@@ -11,6 +11,15 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## BATCH8-SEED-SCHUTZ-20261104 — abgeschlossen, Codex
+
+**Owner:** Codex. **Ziel:** Irreversible Batch-8-Seedbereinigung gegen Datenverlust absichern. **Dateibesitz:** Migration scheinwege_mandant_20261103, zugehoerige Tests und eigene QA; Workboard-Integration mit Lead. **Abnahme:** unveraenderte Seeds eindeutig nachweisbar, fremde/geaenderte/NULL-Daten bleiben erhalten oder blockieren. **Ergebnis:** vollständige Seed-Geschäftswerte geprüft, abweichende Marketingdaten blockieren, ungesicherte Testreste und Befunde bleiben erhalten. PostgreSQL-Gegenproben 2/2; QA `docs/quality-assurance/batch8-seed-schutz-20261104.md`. **Risiko:** identische Geschäftsdatensätze ohne Herkunftsnachweis sind nicht unterscheidbar; abweichender Marketingbestand erfordert Klärung.
+
+## PREISE-OHNE-SCHEINWERTE-20261104 — lokal abgenommen, Codex
+
+**Owner:** Codex (Slice Preisquellen). **Stand:** reserviert 2026-11-04. **Ziel:** Historie und Kundenpreis nur aus fachlich passenden Quellen oder mit ausdruecklichem 404 liefern. **Dateibesitz:** ausschliesslich die zwei Preis-Endpunkte in `mask_frontend_bridges.py`, zugehoerige Tests und eigene QA; Workboard-Integration durch Lead. **Abnahme:** keine erfundenen Preise, Kunden oder Daten; Mandanten-/Auth-Vertrag unveraendert; negative Vertragstests ohne DB-Abfragen. **Stand:** Implementierung und HTTP-/OpenAPI-Vertragstest mit produktivem Fehlerhandler geprueft (1 passed, Exit 0, ohne DB); generierte Projektionen synchronisiert; alle Doc-Generator-Checks, Pagination, Godfile, SQL-Fstrings und fuenf Feldvertraege gruen; Doc-Drift 0. **Ergebnis:** Beide Wege liefern 404 ohne erfundene Daten und ohne DB-Abfrage. Tagespreishistorie und Kundenvereinbarungen erfordern Artikel bzw. Kunde und Artikel; ein passender parameterloser Vertrag fehlt. **Offen:** fachlicher Auswahl- und Aggregationsvertrag sowie Gesamt-CI im PR. QA: `docs/quality-assurance/preise-ohne-scheinwerte-20261104.md`.
+
+
 ## ADAPTIVE-WORKSPACE-20261022 — reserviert, Cursor Grok (Phase-1 Lead)
 
 **Owner:** Cursor Grok. **Stand:** reserviert 2026-10-22. **Ziel:** Adaptive Workspace Framework INNERHALB von VALEO, Phase 1 — zentrale Registry fuer Module/Views/typisierte Fachaktionen/User-Context; Command Center (Strg+K) auf berechtigte Fachaktionen; deterministische Priorisierung (KI nur leerer Hook); Pin/Fixieren der Startseite. **Dateibesitz (exklusiv):** `packages/frontend-web/src/workspace/**`, `packages/frontend-web/src/app/navigation/**`, Command-Palette-Mapping (`command-palette-model.ts` / `CommandPalette.tsx`), `docs/architecture/adaptive-workspace-framework.md`, Slice-YAML, Workboard, eigene Tests. **Nicht anfassen:** Inbox/Documents/CaptureScreenHost; Touren/Dispo/Fuhrpark-Godfiles; `mcp_execution_service.py` / `mask_action_runtime_service.py` / NATS-Core; Geschwister-Docs `adaptive-workspace-inbox.md`, `-disposition.md`, `-events-mcp.md`, `-erpclow-lessons.md`; Codex STUDIO-*, Touren, Training, Bestellvorschlag. **Abnahme Phase 1:** Registry + Priorisierung + Command-Mapping testbar; Overlay-Pin; keine Fake-100% fuer Phase 2–5. **Slice:** `docs/agent-ops/slices/ADAPTIVE-WORKSPACE-20261022.yaml`.
@@ -20371,11 +20380,147 @@ Kampagnen fuehrt domain_crm.crm_campaigns). Branch claude/batch8-scheinwege-2026
   crm/kampagne-detail, crm/kampagne-erstellen (Doppel zu crm/campaign) samt Seiten entfernt; Navigation
   marketing/kampagne/neu und /:id auf die CRM-Kampagnenmaske.
 - Foerderung und Labor (Studio-Masken vorhanden): kein _seed, Mandant aus der Anmeldung, RLS je Befehl
-  (scheinwege_mandant_20261103). Seed-Zeilen und Testreste (TEST-CHARGE-* bei Test-Labor samt Befunden) per exakter
-  Signatur geloescht; uebrige Altzeilen an den Default-Mandanten (28.10.). Aendern/Loeschen nahmen Text-Kennungen als
+  (scheinwege_mandant_20261103). Vollstaendige historische Seed-Signaturen geloescht; Testreste und Befunde bleiben mangels sicherem Herkunftsnachweis erhalten; uebrige Altzeilen an den Default-Mandanten (28.10.). Aendern/Loeschen nahmen Text-Kennungen als
   Zahl (immer 422); Antragsnummer je Mandant eindeutig; Laborauftrag nur zu eigener Charge; Befund speichert
   Analysewerte, Grenzwerte, Bemerkung; Antworten typisiert, annahme/labor und qualitaet/labor-detail repariert.
 Offen (Folgeauftrag): die uebrigen neun mandantenlosen domain_ops-Tabellen mit Live-Zeilen nach derselben Regel
 pruefen (Compliance-Register mit Seed in compliance.py, ops_disposition, ops_zertifikate); preise/historie errechnet
 Verlaeufe, preise/konditionen fuellt Standardwerte auf; Marketing-/Communication-Dienste (services/crm-*) sollen
 CRM-Kampagnen konsumieren statt eigene zu fuehren.
+
+## BATCH9-COMPLIANCE-REGISTER-20261104 — in Arbeit, Claude
+
+Nutzerentscheidung 04.11.2026 (Seeds/Altbestand wegraeumen) auf die uebrigen mandantenlosen domain_ops-Tabellen.
+Branch claude/batch9-compliance-register-20261104 auf Batch 8. Gewachsene DB: alle Zeilen Seed oder Testrest.
+- Entfernt (Ersatz vorhanden): ops_disposition (handgepflegte Bestandsliste; /disposition und der Engpass-Monitor
+  zeigen den Bestellvorschlag einkauf/bestellvorschlaege-liste; Umlagerungs-Vorschlag ohne Quelle samt Seite/Route
+  entfernt); zertifikate_api.py + ops_zertifikate_api (POST ueberdeckt, Mandant aus dem Pfad bzw. alle Mandanten).
+- Im Mandanten (Studio-Masken vorhanden): Cross-Compliance, ENNI, QS-Checkliste, Zulassungen, Kunden-Sachkunde,
+  Saatgut-Nachbau, VVVO, Zertifikate - kein Seed, Mandant aus der Anmeldung, RLS je Befehl
+  (compliance_register_mandant_20261104); Seed/Testreste per Signatur geloescht; Zertifikate: Text-Kennung statt int.
+- Mitbehoben: Gefahrstoffdoku, Naehrstoffstrom und Chargenbericht lasen Lieferscheine aller Mandanten.
+Offen (Folge): Die Register haben keinen Erfassungsweg (nur der Seed schrieb) - sie zeigen jetzt ehrlich leer.
+Zulassungen auf den PSM-Stamm (agrar_psm: bvl_nummer, zulassung_ablauf) umstellen (neue Studio-Maske);
+VVVO (ops vs domain_compliance) und Sachkunde (Kunden/Mitarbeitende/Feldbuch) fachlich zusammenfuehren.
+
+## PSM-ZULASSUNGEN-20261104 — in Arbeit, Codex
+
+Ziel: PSM-Zulassungen ueber mandantengebundenen echten PSM-Leseweg und native Studio-Liste; ersetztes Register nur nach sicherer Datenpruefung entfernen.
+Dateibesitz: PSM-Projektion und Schema, betroffene Studio-Definitionen und UI-Verbraucher, zugehoerige Migration, gezielte Tests sowie QA/Meridian-Doku. Integration nach Batch 8/9 durch Lead.
+Abnahme: typisierter Feldvertrag, Mandant aus Anmeldung, keine erfundenen Werte, native Maske, Entfernung der ersetzten Tabelle ohne CASCADE, gezielte Tests und Generatoren im koordinierten Fenster.
+Risiken: Verbraucher vor Tabellenentfernung vollstaendig pruefen; ungemergte Migration ausschliesslich transaktional pruefen; keine neue Testdatenbank.
+
+
+PSM-ZULASSUNGEN Zwischenstand: lokale PSM-Projektion und native Liste vorbereitet. Der Ablaufzaehler betrachtet alle Seiten in der Betriebszeitzone. Nach vorrangiger Nutzerentscheidung vom 04.11.2026 („vorhandene zeilen sin nur testdaten. tabelle kann entfernt werden, wenn nicht mehr passend“) wird das ersetzte Altregister nach Verbraucherpruefung auch mit Testzeilen ohne CASCADE entfernt. Generatoren und Dokumentgeneratorpruefung liefen vor der neuen Entscheidung; aktueller Migrationsvertrag und PostgreSQL-Rollback stehen unter Lead-Koordination noch aus.
+
+Pruefnachweis: 5 reine PSM-Vertragstests mit deaktiviertem Plugin-Autoload bestanden (Exitcode 0; beim Interpreterende abgefangener pyreadline3-Destructorfehler); auf valeo_probe bei null fremden aktiven Clients zwei eigene PSM-Testmandanten, Suchergebnis und Ablaufzahlen transaktional geprueft und zurueckgerollt. Kein Schema geaendert oder gestempelt. Offen: migrationsbezogene PG-Pruefung nach Batch-8/9-Schutz, Generatoren und Gates durch Lead.
+## BATCH9-SEED-SCHUTZ-20261104 — abgeschlossen, Codex (historischer Stand; Drop-Regel ersetzt)
+
+Ziel: Batch-9-Migration schuetzt abweichende und NULL-haltige Daten vor Seed-Loeschung und Tabellen-Drop. Dateibesitz: alembic/versions/compliance_register_mandant_20261104.py, eigene fokussierte Tests, QA-Nachweis und dieser Workboard-Anhang im separaten Branch. Abnahme: Original-Seeds vollstaendig anhand belegbarer Geschaeftsfelder, unbekannte Reste erhalten; DROP bei unbekannten Zeilen abgebrochen; PostgreSQL-Test in zurueckgerollter Transaktion mit temporaeren Tabellen nach Freigabe des Prueffensters, kein Reset oder Migrationsstempel. Risiko: Original-Seedwerte mit zeitabhaengigen Feldern lassen sich nicht sicher rekonstruieren und muessen erhalten bleiben.
+
+**Abschluss BATCH9-SEED-SCHUTZ-20261104:** Volle deterministische Seed-Geschaeftsfelder, keine Seed-Loeschung bei vorhandener Mandantenspalte, NULL-sicherer Drop-Schutz und Abbruch bei doppelten Dispositionssignaturen. Unbekannte Testreste erhalten. PostgreSQL TEMP-Test 1 passed, Revision unveraendert; Grenzen und Datenrisiko siehe docs/quality-assurance/batch9-seed-schutz-20261104.md.
+
+PSM-ZULASSUNGEN Nachtrag: Neuer Migrationsvertrag und Rollback-Test vorbereitet; Ausfuehrung wartet auf das koordinierte Prueffenster und aktualisierte B8/B9-Guards. Folgeauftrag B separat: VVVO-Liste liest ops_vvvo_register, der Pruefweg schreibt domain_compliance.compliance_vvvo_register; Service-UPDATE/Detail ohne Tenant-WHERE und ohne Audit, Faelligkeitsabfrage schliesst Ueberfaellige und NULL aus. Weitere Erfassungswege brauchen eigene Claims und Fachkommandos.
+## BATCH8-ALTTABELLE-TESTDATEN-20261104 — abgeschlossen, Codex
+
+Neue Nutzerentscheidung 04.11.2026: "vorhandene zeilen sin nur testdaten. tabelle kann entfernt werden, wenn nicht mehr passend".
+Die ersetzte ops_marketing_kampagnen darf nach dem bereits belegten Verbraucherabbau auch mit Testzeilen
+entfernt werden. Dies ersetzt fuer diese ausgemusterte Tabelle die vorherige Seed-/Leerheitspruefung.
+Dateibesitz: scheinwege_mandant_20261103.py, gezielter Batch8-Test, QA und dieser Nachtrag.
+Abnahme: DROP ohne CASCADE nach vorhandener Tabellensperre; PostgreSQL-Nachweis ausschliesslich temporaer
+und zurueckgerollt. Weiter verwendete Foerder-/Labortabellen und deren Mandanten-/RLS-Vertraege bleiben erhalten.
+
+Abnahme 05.11.2026: zwei Batch-8- und ein Batch-9-PostgreSQL-Test gemeinsam sequentiell bestanden (3 passed, Exit 0).
+Belegte Alttabelle entfernt und via Savepoint-Rollback wiederhergestellt. Rolle valeo_agent, Revision vorher/nachher
+ruestlisten_tabelle_20261103, fremde Clients jeweils 0. Keine persistente Schemaaenderung, kein Reset oder Stamp.
+## BATCH9-RETIRE-TESTDATEN-20261104 — abgeschlossen, Codex
+
+Nutzerentscheidung: vorhandene Zeilen in ausgemusterten Tabellen sind Testdaten; nicht mehr passende Tabellen duerfen entfernt werden. Scope ausschliesslich ops_disposition und ops_zertifikate_api in alembic/versions/compliance_register_mandant_20261104.py, zugehoeriger TEMP-Test tests/test_batch9_seed_schutz_pg.py, QA und dieser Anhang. Abnahme: Verbraucherabbau belegt, Existenzpruefung und LOCK bleiben, DROP ohne CASCADE auch bei Zeilen; die acht weiter genutzten Register behalten Seed-Schutz und Mandanten-/RLS-Verhalten. Pruefung im exklusiven Prueffenster abgeschlossen. Risiko: Die Nutzerentscheidung bezieht sich ausschliesslich auf die beiden ausgemusterten Tabellen.
+
+**Abschluss BATCH9-RETIRE-TESTDATEN-20261104 (05.11.2026):** Neue Nutzerentscheidung erlaubt die Entfernung der ausgemusterten ops_disposition und ops_zertifikate_api samt Testzeilen; ohne CASCADE, nach Verbraucherabbau, Existenzpruefung und LOCK. Acht verbleibende Register unveraendert geschuetzt. PostgreSQL-TEMP-Test zusammen mit Batch 8: 3 passed (davon 1 Batch 9), vollstaendig zurueckgerollt; Revision unveraendert, fremde Clients jeweils null. Gesamt-CI offen. Einzelheiten: docs/quality-assurance/batch9-seed-schutz-20261104.md.
+
+PSM-READ-NULL-20261105 — reserviert, Codex: Erweiterung des PSM-Slices fuer den bestehenden lokalen und BVL-Lesevertrag. Besitz: PSM-Readschema, BVL-Mapping, gezielte Schema-/Verbrauchertests und erzeugte OpenAPI. Create-/Updatevalidierung bleibt unveraendert. Abnahme: nullable ORM-Werte bleiben null, ist_aktiv und is_active spiegeln den selben echten Wert, unbekannte BVL-Felder bleiben unbekannt; keine erfundenen Werte.
+
+PSM-READ-NULL Nachlauf: lokales/BVL-Readschema behaelt nullable Werte, beide Aktivfelder spiegeln den echten Status; ungueltige oder fehlende BVL-Ablaufdaten bleiben unbekannt. Der Zulassungsguard lehnt unbekannten/abgelaufenen Ablauf ab. Neun fokussierte Backendtests bestanden; getrennte Create-/Updatevalidierung unveraendert. Feldvertrag und OpenAPI-Schlusspruefung folgen.
+
+PSM-ZULASSUNGEN / PSM-READ-NULL Abnahme 05.11.: Backendfokus 9 bestanden, Feldvertrag 5 bestanden, PostgreSQL 2 bestanden (DROP/Rollback und SQL-Mandantenpraedikat, kein JWT-/valeo_app-RLS-Nachweis), native UI-Vertraege 147 bestanden plus ein erwarteter Altlastfall, Hook-Test bestanden, vollstaendige Frontend-Typpruefung bestanden. Ein Alembic-Kopf; vollstaendige Pending-Kette transaktional geprueft und zurueckgerollt, Katalog/RLS daraus aktualisiert, Revision unveraendert. Generatorgesamtcheck und Ratschen gruen, Doku-Drift 0. Browser-/visuelle und CI-Integration bleiben offen; Details QA psm-zulassungen-20261104.md.
+
+## PSM-VISUAL-20261105 — Komponentenabnahme bestanden, Codex Lead
+
+Ziel: die echte kanonische PSM-ScreenDefinition ueber NativeListPage, RenderPlan und UniversalMaskRuntime
+in einem isolierten automatisierten Browser mit ausschliesslich synthetischen Daten pruefen.
+Dateibesitz: packages/frontend-web/tests/visual/psm-*, zugehoerige PNG-/JSON-Nachweise unter
+docs/quality-assurance/evidence/psm-zulassungen-20261105, QA und dieser Anhang.
+Abnahme: 1366x768, 1440x900 und 1920x1080 in Hell/Dunkel; echte Spalten/Datums-/NULL-Werte,
+keine unkontrollierte Seitenueberbreite, lesbare Texte/Konturen und keine externen oder schreibenden Aufrufe.
+Keine Anmeldung, Buchung, Datenbank oder Produktivfreigabe durch diesen Komponenten-Nachweis.
+Die direkte Browser-Use-Verbindung scheitert vor Start am fehlenden Kernel-Assetpfad (ein Reset erfolglos);
+der Repository-Browsertest ist davon getrennt und umgeht keine Anmeldung oder Sicherheitsfreigabe.
+
+## PSM-SORTSYMBOLE-20261105 — abgeschlossen, Codex Lead
+
+Enger Folgeclaim aus der visuellen Pruefung: gemeinsame VirtualDataTable-Sortierzeichen (30 Prozent Deckkraft, nicht automatisch bewertbare Sonderzeichen) durch klare SVG-Symbole mit Vordergrundfarbe ersetzen. Dateibesitz nur VirtualDataTable.tsx; keine parallele Maske. Abnahme: bestehende Tabellentests und sechs PSM-Rendereransichten mit Kontrastpruefung.
+
+Abnahme 05.11.2026: sechs Rendereransichten Hell/Dunkel bestanden, Kontrast ohne Verstoesse oder unbewertete Befunde; vier bestehende Tabellentests gruen. Sechs Screenshots gesichtet. Authentifizierte Gesamtansicht und neuer CI-Nachlauf bleiben offen; QA psm-zulassungen-20261104.md.
+
+## GESAMTINTEGRATION-20261105 — lokal abgenommen, Codex Lead
+
+Ziel: die vollstaendig gruenen PR-Staende 104/106/108/110/111/112 in einem eigenen pruefbaren Integrationszweig zusammenfuehren. Basis PSM 2a43fd5dc einschliesslich der Tabellenstilllegungen; zusaetzlich Omnibox 29c5e8ea0, Preis 059c7e744 und VVVO d991345d7. Besitz: Konfliktaufloesung dieser eigenen Slices, generierte Projektionen, gemeinsame gezielte Pruefung und eigener QA/Handshake. Keine fremden Hauptbaumdateien uebernehmen, keine Live-Migration oder Rechtevergabe. Abnahme: gemeinsame Verträge, Artefaktabgleich und Gesamt-CI; Branch-Schutz bleibt aktiv, reguläre Review erforderlich.
+
+## CODEX-ROLLOUT-INTEGRATION-20261104 — reserviert, Codex
+
+Ziel: Nutzerauftrag aus codex-uebergabe-20261104 umsetzen. Zuerst PR #102 mit gruenen
+Pruefungen integrieren, main nach develop; danach #103 auf main nachziehen, Generatoren
+und CI pruefen, integrieren und main erneut nach develop. Anschliessend A bis F der
+Uebergabe fachlich schliessen, ohne bestehende Nachweise erneut zu implementieren.
+Dateibesitz dieses Integrationsclaims: eigener Worktree artifacts/rollout-integration-20261104,
+Integrationsnachweise und dieser Workboard-Anhang; kein fremder Hauptbaum-Dateibesitz.
+Abnahme: Commit-genaue CI-Nachweise, keine abgeschwaechten Tests, keine neue Testdatenbank,
+keine ungemergte Migration auf dem Pruefstand gestempelt. Fachslices werden vor Umsetzung
+separat mit Dateien und Abnahme reserviert. Stand: #102 Security/Frontend/Smoke gruen,
+Backend und Test & Lint laufen; #103 basiert noch auf #102. A/B/C/E/F im Code bestaetigt offen.
+
+## OMNIBOX-REGISTRY-F-20261104 — abgeschlossen, Codex (Slice F)
+
+Ziel: Omnibox-Katalog beim ersten Aufruf vollstaendig und wiederholt stabil, veroeffentlichte Masken mandantenisoliert. Dateibesitz: app/api/v1/endpoints/mask_registry.py, tests/test_omnibox_catalog_lazy_registry.py, docs/quality-assurance/omnibox-registry-f-20261104.md und dieser Workboard-Anhang; Integrations-Worktree gemeinsam mit Lead, keine anderen Dateien. Abnahme: reiner Regressionstest fuer initiale Registry, Wiederholung und veroeffentlichte Mandantenmasken, bestehende Tests nicht abschwaechen. Keine Datenbank oder parallelen Tests; Testlauf vorher mit Lead abstimmen. Risiko: Lazy-Registrierung kann waehrend Katalogaufbau weitere IDs erzeugen.
+
+**Abschluss OMNIBOX-REGISTRY-F-20261104:** Stammregistrierung vor dem Kopieren der nativen Katalog-IDs; erster und wiederholter Aufruf vollstaendig, Mandantenpublikationen getrennt. Reiner Regressionstest 1 passed, keine Datenbank; HTTP-/Gesamtsuite bleibt CI-Nachweis. Details: docs/quality-assurance/omnibox-registry-f-20261104.md.
+
+Gegenprobe F: alte Funktionsfassung nur im Prozessspeicher, derselbe Regressionstest scheitert erwartungsgemaess an fehlenden Stamm-IDs; Fixlauf gruen. QA-Nachweis ergaenzt.
+
+Integrationsabgleich 05.11.2026: #102 und #103 sind auf main; #105 hat den damaligen main nach develop uebernommen. Omnibox-Commit 50c264e4b hatte 76 abgeschlossene Checks ohne fehlerhaften, abgebrochenen oder ausstehenden Status. Der neue Merge bewahrt die Batch-8/9- und Codex-Anhaenge gemeinsam und benoetigt einen frischen CI-Nachlauf. Ein Admin-Merge wurde vom automatischen Sicherheitsreview abgelehnt und nicht ausgefuehrt; der regulaere PR-Weg bleibt massgeblich. Die spaetere Nutzerfreigabe erlaubt die Entfernung ersetzter Tabellen samt Testzeilen; Umsetzung/Nachweise in #106 und #108.
+
+## PREISE-CI-NACHLAUF-20261105 — lokal geprueft, Codex Lead
+
+Eigener Folgeslice zu PR111: Vollsuite meldet alten Testvertrag der entfernten Preisersatzwerte sowie RLS-Matrix-Drift und vier durch Heuristik als bereit markierte, noch nicht RLS-abgenommene Tabellen. Besitz: gezielte Preisassertion in tests/test_rls_domain_shared.py, erforderliche RLS-Generator-/Projektionskorrektur nach Ursachenanalyse und gezielte Regressionstests, eigene QA/Handshake/Workboard. Keine Policy ohne Abnahme aktivieren, keine Gates abschwaechen oder Ausnahme ohne konkreten Grund erfinden. Abnahme: fehlende Preisquelle bleibt ehrlicher 404, POS-Mandantentest bleibt bestehen; Projektionen reproduzierbar, kein automatisches Freigeben von Tabellen durch entfernte sachfremde Defaultwerte.
+
+PREISE-CI-NACHLAUF Abnahme: alter Preisersatzwert-Test auf 404, POS-Mandantentest auf beide Mandanten erweitert. Vier bestehende RLS-Ausnahmen mit konkreter Domain-Abnahmebegruendung statt zufaelligem Preis-Defaulttreffer; keine neue Ausnahme/Policy. Generatorfolge Rollout vor Matrix. 15 gezielte Tests im ersten Lauf, nach zusaetzlichem Freigabevorrang 9 im Nachlauf bestanden. Neun Verbesserungsscanner gruen, Snapshot stabil; grosse Shared-RLS-Fixture-Pruefung folgt in CI. QA und Handshake preise-ci-nachlauf-20261105.md bzw. preise-ohne-scheinwerte-20261104.md.
+
+## VVVO-MANDANTENFILTER-20261105 — lokal abgenommen, Codex Lead
+
+Ziel: VVVO-Pruefung und Sachkunde-Status nur per ID und Mandant lesen; das VVVO-Update eigenstaendig mandantenfiltern und Erfolg nur bei tatsaechlich aktualisierter Zeile melden. Fremde und unbekannte IDs antworten gleich. Dateibesitz: app/services/compliance_vvvo_sachkunde_service.py, eigener PostgreSQL-TEMP-Verhaltenstest, QA/Handshake und dieser Anhang im Branch codex/vvvo-mandantenfilter-20261105. Abnahme: eigene Aenderung, fremde/fehlende ID, unveraenderte Fremddaten und simuliertes Umhaengen zwischen Lesen/Schreiben; bestehende Service-Tests. Keine Registerzusammenfuehrung, Rollenfreigabe, produktive Migration oder neue DB. Pruefstand valeo_probe nach Statuspruefung, nur eigene TEMP-Daten mit Rollback; dies beweist SQL-Praedikate, keine JWT-/RLS-Gesamtfreigabe.
+
+Abnahme VVVO-MANDANTENFILTER: 21 Tests bestanden, Gegenprobe alter Service 3 gezielt rot/1 gruen. Eigene TEMP-Daten zurueckgerollt, Revision unveraendert und fremde Clients 0. Generatorgesamtcheck und neun Verbesserungsscanner gruen, Doku-Drift 0. QA docs/quality-assurance/vvvo-mandantenfilter-20261105.md; Gesamt-CI folgt im PR.
+
+## VVVO-FAELLIGKEIT-20261105 — lokal abgenommen, Codex Lead
+
+Folgeslice im eigenen VVVO-Zweig: Faelligkeitsliste muss ueberfaellige und heute/bis Stichtag faellige eigene Eintraege sowie offene Eintraege ohne Prueftermin zeigen. NULL bedeutet Klaerungsbedarf, keine behauptete erfolgte Pruefung. Mandantenfilter bleibt fuer die gesamte ODER-Gruppe verbindlich; Stichtag aus business_today statt Serverdatum. Dateibesitz: list_faellige_vvvo_pruefungen im vorhandenen Service, zugehoeriger PostgreSQL-TEMP-Test, abgesenkte Business-Time-Baseline und eigene QA/Handshake. Abnahme: Grenzen 0/30 Tage, NULL, Ueberfaelligkeit, Fremdmandant und Gegenprobe; keine neue API/Maske/Migration.
+
+VVVO-FAELLIGKEIT Recherche-Nachtrag: Nutzer fragt nach Einsatzpflicht der VVVO-Nummer. Besitz zusaetzlich eigene Fachnotiz docs/quality-assurance/vvvo-nummer-fachgrundlagen-20261105.md. Primaerquellen ViehVerkV §26, QS Futtermittelwirtschaft 2026 §4.20.1, Niedersaechsische Tierseuchenkasse und LAVES. Bestehende 365-Tage-Wiedervorlage ist keine belegte gesetzliche Nummern-Laufzeit; keine neue Liefersperre oder generelle Kundennummernpflicht ableiten.
+
+Abnahme VVVO-FAELLIGKEIT: 23 Tests bestanden, alter Stand faellt in beiden neuen Faelligkeitsfaellen durch (4 Schutzfaelle weiterhin gruen). Geschaeftstag statt Serverdatum; Baseline nur um zwei entfernte Quellen gesenkt. TEMP-Daten zurueckgerollt, Revision unveraendert, fremde Clients 0. Neun Scanner und Doku-Governance gruen. Recherche in vvvo-nummer-fachgrundlagen-20261105.md: Standortzuordnung und QS-Lieferpflicht von interner Wiedervorlage trennen; keine jaehrliche gesetzliche Nummernerneuerung behauptet.
+
+## LISTENROUTEN-DETERMINISMUS-20261105 — abgeschlossen, Codex Lead
+
+Befund bei gemeinsamer Integration: generate_screen_list_routes.erzeugen behandelt nach vorheriger Stamm-Initialisierung 107 zusaetzliche Routen als kuratiert und laesst sie aus der Datei weg. Ziel: explizite, unveraenderliche Menge urspruenglich kuratierter IDs am kanonischen Registry-Ort; Generator muss vor/nach Lazy-Initialisierung denselben Inhalt liefern. Besitz: Kennzeichnung in app/core/screen_definitions.py, scripts/generate_screen_list_routes.py, eigener Regressionstest und bestehende Integrations-QA. Keine zweite Maskenregistry, keine fachliche Route entfernen. Abnahme: kalter/warmer/wiederholter Lauf identisch; vorhandene Stammrouten erhalten; Generator-/Gesamt-CI.
+
+GESAMTINTEGRATION / LISTENROUTEN Abnahme: Alle vier Quellstaende mit enthaltenen B8/B9-Stilllegungen zusammengefuehrt. 46 gemeinsame Vertrags-/Feldtests bestanden; zusaetzlicher Generator-/Omnibox-Fokus 2 bestanden. Gegenprobe alter Listenrouten-Generator gezielt rot. 447 Zuordnungen reproduzierbar; 65 weiterhin offen. Zwoelf Generatoren, neun Integritaetsscanner und vollstaendiger unabhaengiger Doc-Generator-Check gruen. Kein DB-/Container-/Rollen-/Live-Migrationszugriff. Neue gemeinsame Gesamt-CI noch erforderlich, main weiterhin regulaer reviewpflichtig. QA/Handshake gesamtintegration-20261105.md.
+
+## STUDIO-WEBHOOKS-NATIVE-20261105 — in Arbeit, Codex Lead
+
+Nutzerauftrag: restliche Masken auf Studio-made, fehlende Funktionen zentral im Designer ergaenzen, CLI/MCP nutzen. Erste Familie Webhooks: echte native Worklist statt Intake-Spezialhost; Anlage, Suche, Abmeldung, Zustellprotokoll und Rollen-/Mandantengrenzen erhalten. Zentrale neue Deklaration readView fuer rein lesende zeilenbezogene Tabellen im Dialog; kein seitenspezifisches Formular. Lead besitzt schema.ts, NativeListPage, neuen zentralen Renderer/Frontendtests, Admin-Builder/Webhook-Seite, Ratschen und Generatoren/QA. Unterclaim readView-Vertrag besitzt nur neue enge Backendvalidierung samt Anbindung in studio_validation.py, CLI-Leseadapter und eigene Tests; keine anderen Dateien oder DB. Agentenwrites bleiben ausdruecklich gesperrt. Abnahme: gleicher GET fuer UI/CLI/MCP, keine Identitaets-/Fremd-URLs, stale Antworten verwerfen, Aktionenrechte vor Aufruf, Geheimnis als Passwort, Themen-/Bediennachweis und streng gesenkte Altlasten. Keine Schema-/DB-Migration, keine neue Testdatenbank/Container.
+
+STUDIO-WEBHOOKS-NATIVE Zwischenstand: NativeListPage plus zentrale readView-Leseansicht, CLI-/MCP-GET-Vertrag und menschliche Anlage-/Abmeldedialoge implementiert. 108 Backend-/Vertragsfaelle, 54 Frontendfaelle, Typpruefung und neun Scanner gruen. Generierte Register aktualisiert. Sicht-/Kontrast- und authentifizierte Browserabnahme sowie Rueckbau der alten Spezialoberflaeche offen; Kopfaktions-only-Sprachkatalog bleibt ein expliziter Folgebefund. QA/Handshake studio-webhooks-native-20261105.md.
+
+## CI-DEDUP-20261106 — reserviert, Codex Lead
+Ziel: doppelte OpenAPI-Driftpruefung im selben Backendjob entfernen. Besitz: .github/workflows/quality-gate.yml und eigener QA-Nachweis. Der Meta-Check muss dieselbe Pruefung verbindlich genau einmal ausfuehren. Keine Testauswahl oder Coverage-Grenze abschwaechen. Speicherursachen gesondert anhand Laufprotokollen untersuchen.

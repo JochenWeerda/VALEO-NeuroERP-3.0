@@ -3,25 +3,52 @@ from typing import Any
 
 
 def build_webhooks_workbench() -> dict[str, Any]:
-    screen_id = "admin/webhooks-liste"
-    names = [("id", "ID"), ("nr", "Nummer"), ("url", "Ziel-URL"), ("bereich", "Ereignis"), ("is_active", "Aktiv"), ("erstellt_am", "Erstellt"), ("letzte_auslosung_am", "Letzter Versuch"), ("fehler_count", "Fehlversuche"), ("signiert", "Signiert"), ("secret", "Geheimnis"), ("versucht_am", "Zeitpunkt"), ("erfolgreich", "Erfolg"), ("status_code", "Statuscode"), ("dauer_ms", "Dauer"), ("fehler", "Fehler")]
-    fields = [{"key": key, "label": label, "type": "text", "readOnly": key not in {"url", "bereich", "secret"}} for key, label in names]
-    return {
-        "schemaVersion": 1, "id": screen_id, "domain": "admin", "mode": "cockpit",
-        "title": "Webhook-Verwaltung", "subtitle": "Ausgehende Webhooks verwalten",
-        "adapter": {"type": "native", "sourceId": screen_id, "temporary": False},
-        "layout": {"floorplan": "cockpit", "density": "compact", "contextRail": "audit", "tableProfile": "audit"},
-        "fields": fields,
-        "actions": [
-            {"key": "register", "label": "Neuer Webhook", "kind": "primary", "dangerLevel": "safe", "forbiddenForAgents": True, "permission": "studio.admin-webhooks.register", "inputFlow": {"kind": "humanForm", "submitEndpoint": "/api/v1/webhooks/bereiche/{bereich}", "method": "POST"}},
-            {"key": "history", "label": "Zustellversuche", "kind": "secondary", "dangerLevel": "safe", "forbiddenForAgents": True, "localEffect": "view", "surfaceOnly": True},
-            {"key": "unregister", "label": "Abmelden", "kind": "secondary", "dangerLevel": "moderate", "forbiddenForAgents": True, "permission": "studio.admin-webhooks.unregister", "inputFlow": {"kind": "humanForm", "submitEndpoint": "/api/v1/webhooks/abmelden/{nr}", "method": "DELETE"}, "surfaceOnly": True},
+    """Declarative list and guarded actions; no private administrative React surface."""
+    from app.core.stamm_list_parent import build_stamm_list_screen
+    definition = build_stamm_list_screen(
+        screen_id="admin/webhooks-liste", domain="admin", title="Webhook-Verwaltung",
+        subtitle="Registrierungen und Zustellversuche", endpoint="/api/v1/webhooks", row_route=None,
+        columns=[
+            {"key": "nr", "label": "Nummer", "numeric": True, "sortable": True, "priority": "primary"},
+            {"key": "bereich", "label": "Ereignis", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "url", "label": "Ziel-URL", "filterable": True, "priority": "primary"},
+            {"key": "is_active", "label": "Aktiv", "renderKind": "boolean"},
+            {"key": "signiert", "label": "Signiert", "renderKind": "boolean"},
+            {"key": "erstellt_am", "label": "Erstellt", "renderKind": "datetime"},
+            {"key": "letzte_auslosung_am", "label": "Letzter Versuch", "renderKind": "datetime"},
+            {"key": "fehler_count", "label": "Fehlversuche", "numeric": True, "renderKind": "number"},
         ],
-        "dataSources": [], "specialized": {"type": "admin_workbench", "id": screen_id},
-        "workflow": {"processKey": "admin-webhooks", "status": "operator-workspace", "auditRequired": True},
-        "performance": {"initialPayloadBudgetKb": 100, "requiresLazyTabs": True, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "admin"},
-        "agentContract": {"businessPurpose": "Webhook-Registrierungen und Zustellversuche verwalten", "examplePrompts": ["Welche Webhooks sind registriert?"], "sensitiveFields": ["secret"], "forbiddenAgentTasks": ["Webhooks ändern"], "testSelectors": {"screenRoot": "[data-testid='native-cockpit-admin-webhooks-liste']"}},
-    }
+        actions=[{
+            "key": "register", "label": "Neuer Webhook", "kind": "primary", "dangerLevel": "moderate",
+            "permission": "studio.admin-webhooks.register", "commandEndpoint": "/api/v1/webhooks/",
+            "method": "POST", "forbiddenForAgents": True, "requiresConfirmation": True,
+            "inputFields": [
+                {"key": "event_area", "label": "Ereignis", "type": "select", "required": True,
+                 "optionsSource": {"endpoint": "/api/v1/webhooks/areas", "valueKey": "name", "labelKey": "name"}},
+                {"key": "url", "label": "Ziel-URL", "type": "text", "required": True},
+                {"key": "secret", "label": "Signiergeheimnis (optional)", "type": "password"},
+            ],
+        }],
+        row_actions=[
+            {"key": "history", "label": "Zustellversuche", "dangerLevel": "safe", "localEffect": "view",
+             "readView": {"endpoint": "/api/v1/webhooks/{id}/zustellversuche", "columns": [
+                 {"key": "versucht_am", "label": "Zeitpunkt", "renderKind": "datetime"},
+                 {"key": "erfolgreich", "label": "Erfolg", "renderKind": "boolean"},
+                 {"key": "status_code", "label": "HTTP-Status", "renderKind": "number"},
+                 {"key": "dauer_ms", "label": "Dauer (ms)", "renderKind": "number"},
+                 {"key": "fehler", "label": "Fehler"},
+             ]}},
+            {"key": "unregister", "label": "Abmelden", "dangerLevel": "moderate", "method": "DELETE",
+             "commandEndpoint": "/api/v1/webhooks/{entity_id}", "requiresConfirmation": True,
+             "permission": "studio.admin-webhooks.unregister", "forbiddenForAgents": True},
+        ],
+        purpose="Webhook-Registrierungen und echte Zustellversuche im angemeldeten Mandanten verwalten.",
+        prompts=["Welche Webhooks sind registriert?", "Zeige die Zustellversuche dieser Registrierung."],
+        bundle="admin", table_profile="audit", no_workflow="Administrativer Stammdatenprozess ohne eigenen Belegablauf.",
+    )
+    definition["agentContract"]["sensitiveFields"] = ["secret"]
+    definition["agentContract"]["forbiddenAgentTasks"] = ["Webhooks registrieren oder abmelden"]
+    return definition
 
 
 def build_control_center_workbench() -> dict[str, Any]:

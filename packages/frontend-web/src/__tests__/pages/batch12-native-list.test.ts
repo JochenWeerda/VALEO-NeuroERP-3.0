@@ -83,7 +83,7 @@ const BATCH12: Array<[string, string, string]> = [
   ['compliance/schadstoff-monitoring.tsx', 'compliance/schadstoff-monitoring', 'NativeListPage'],
   ['compliance/stichtagsmeldung-bestaende.tsx', 'compliance/stichtagsmeldung-bestaende', 'NativeListPage'],
   ['compliance/tierwohl-dokumentation.tsx', 'compliance/tierwohl-dokumentation', 'NativeListPage'],
-  ['compliance/usp-konformitaet.tsx', 'compliance/usp-konformitaet', 'NativeListPage'],
+  ['compliance/usp-konformitaet.tsx', 'compliance/zulassungen-liste', 'NativeListPage'],
   ['compliance/wasserschutz-auflagen.tsx', 'compliance/wasserschutz-auflagen', 'NativeListPage'],
   ['compliance/zertifikate.tsx', 'compliance/zertifikate', 'NativeListPage'],
   ['contracts/ContractPage.tsx', 'contracts/contract', 'NativeListPage'],
@@ -133,7 +133,10 @@ describe('Batch 12 route inventory (source-level evidence only)', () => {
     expect(src).toContain(component)
     expect(src).toContain(`screenId="${screenId}"`)
     expect(src).toContain(`testId="screen-${screenId}"`)
-    if (component === 'NativeListPage' && !KONTROLLE_DEF_EXCLUDE.has(screenId)) {
+    if (screenId === 'compliance/zulassungen-liste') {
+      const listen = readFileSync(resolve(__dirname, '../../../../../app/core/screen_definitions_listen.py'), 'utf8')
+      expect(listen).toContain(`"${screenId}"`)
+    } else if (component === 'NativeListPage' && !KONTROLLE_DEF_EXCLUDE.has(screenId)) {
       expect(kontrolleBatch12).toContain(`"${screenId}"`)
     }
   })

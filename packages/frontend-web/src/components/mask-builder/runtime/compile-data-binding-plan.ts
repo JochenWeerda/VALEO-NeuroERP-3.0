@@ -44,8 +44,8 @@ export function compileDataBindingPlan(
     const ds = tablePlan.dataSourceKey ? dsMap.get(tablePlan.dataSourceKey) : undefined
     let endpoint = ds ? resolveEndpoint(ds.endpoint, vars) : undefined
 
-    if (!endpoint && tablePlan.tabKey) {
-      const tabEndpoint = tabEndpoints?.[tablePlan.tabKey] ?? tabEndpoints?.[tableKey]
+    if (!endpoint) {
+      const tabEndpoint = (tablePlan.tabKey ? tabEndpoints?.[tablePlan.tabKey] : undefined) ?? tabEndpoints?.[tableKey]
       if (tabEndpoint) endpoint = tabEndpoint
     }
 

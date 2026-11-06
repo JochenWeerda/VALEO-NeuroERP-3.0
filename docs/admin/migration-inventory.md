@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-04
+last_reviewed: 2026-11-05
 version: 3.0.0
 description: Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Beschreibungen sind aus den Datei-Docstrings extrahiert.
 ---
@@ -134,6 +134,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `calendar_items_uix063` | UIX-063: Planungskalender Read-Model und ICS-Token. |
 | `comp_artikel_sperren_20260618` | COMP-SPERR-001: Artikel-Sperr-Engine (artikel_sperren) |
 | `compliance_pcn_audit_20260623` | DOM-COMPLIANCE-004: compliance_pcn_meldungen, pcn_status_log, vvvo/sachkunde registers, artikel_sperre_audit |
+| `compliance_register_mandant_20261104` | Batch 9: Compliance-Register und Zertifikate im Mandanten, Disposition und zertifikate_api entfernt. |
 | `con_fixing_matif_20260611` | DOM-CON-004.2 — Fixierungs-Arbeitsraum + MATIF-Marktnotierung. |
 | `con_reminder_20260611` | DOM-CON-004.3 — Kontraktmahnung (append-only Mahnungs-Log). |
 | `con_settlement_storno_20260611` | DOM-CON-004.4 — Settlement-Übergabe + Storno (Bewegungs-Felder). |
@@ -412,6 +413,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `production_control_20260821` | Production control worklist and audit. |
 | `produktgruppen_kaeufer_20260604` | Käuferlogik je Produktgruppe + echte Signal-Herkunft. |
 | `projektion_cursor_20260930` | Die Projektionsbuchhaltung bekommt eine Migration. |
+| `psm_zulassungen_register_entfernen_20261104` | Entfernt das ersetzte Zulassungsregister einschliesslich Testdaten. |
 | `query_center_20260821` | Safe query-center definitions and audit. |
 | `quittung_ohne_vorgang_20261006` | Vier Tabellen fuer drei Wege, die bisher nur quittiert haben. |
 | `rahmenauftrag_afa_tabellen_20261102` | Tabellen, die Rahmenauftraege und AfA-Laeufe schon benutzen, auf frischen Installationen anlegen. |
