@@ -558,7 +558,7 @@ const SaatgutStammPage: React.FC = () => {
                   <Input
                     value={(formData.lagerbestand - formData.reserviert).toFixed(2)}
                     readOnly
-                    className={readOnlyMode ? 'bg-muted' : 'bg-muted'}
+                    className="bg-muted"
                   />
                 </div>
 

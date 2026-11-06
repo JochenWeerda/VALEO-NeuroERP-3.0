@@ -2344,9 +2344,10 @@ export default function OrderEditorLegacyPage(): JSX.Element {
           </DialogHeader>
           <div className="space-y-2 max-h-60 overflow-auto">
             {branchesList.map((b) => (
-              <div
+              <button
+                type="button"
                 key={b.id}
-                className="flex items-center justify-between p-2 rounded border cursor-pointer hover:bg-muted/50"
+                className="flex w-full items-center justify-between p-2 rounded border cursor-pointer hover:bg-muted/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring"
                 onClick={() => {
                   setState((prev) => ({ ...prev, niederlassung: b.branch_number }))
                   setShowNiederlassungDialog(false)
@@ -2354,7 +2355,7 @@ export default function OrderEditorLegacyPage(): JSX.Element {
               >
                 <span className="font-medium">{b.branch_number}</span>
                 <span className="text-sm text-muted-foreground">{b.name}</span>
-              </div>
+              </button>
             ))}
             {branchesList.length === 0 && (
               <p className="text-sm text-muted-foreground">Keine Niederlassungen geladen. Bitte manuell eintragen.</p>

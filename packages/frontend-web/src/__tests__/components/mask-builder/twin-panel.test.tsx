@@ -173,3 +173,11 @@ describe('TwinReadModelRenderer', () => {
     expect(mockNavigate).toHaveBeenCalledWith('/lager/silo-zellen/cell-1')
   })
 })
+
+
+it('orders keyboard IDs lexically, not numerically or by locale', () => {
+  const ids = ['ä', '2', 'z', '10', 'A']
+  const cells = ids.map(id => ({ id, shape: { kind: 'rect' as const, x: 0, y: 0, w: 1, h: 1 } }))
+  expect(keyboardOrder(cells)).toEqual(['10', '2', 'A', 'z', 'ä'])
+  expect(cells.map(cell => cell.id)).toEqual(ids)
+})

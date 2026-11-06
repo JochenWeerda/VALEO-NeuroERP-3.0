@@ -20542,7 +20542,7 @@ Integrationsnachlauf 06.11.: #113/#114 in main, main konfliktfrei nach develop u
 
 SSE-TOKEN-ZIEL Abnahme: 15 Tests und vollstaendige Typpruefung gruen. Herkunft, Downgrade, spaeterer Token, stop und relative Pfade geprueft. Handshake sonar-studio-katalog-20261106.md.
 
-## SONAR-STUDIO-SORT-20261106 — reserviert, Codex Subagent
+## SONAR-STUDIO-SORT-20261106 — abgeschlossen, Codex Subagent
 Ziel: explizite locale-unabhaengige Zeichenkettenordnung statt implizitem sort in compile-context.ts, overlay.ts und twin-geometry.ts. Bestehende Semantik erhalten, keine numerische Sortierung von IDs, keine neue Registry. Besitz diese drei Dateien und zugehoerige bestehende Tests, eigene QA. Keine DB.
 
 ## SONAR-RESTVERTRAEGE-20261106 — reserviert, Codex Lead
@@ -20550,3 +20550,5 @@ Besitz Regex-Alternativen mask_screen_definition.py/made_by_studio_gates.py; red
 
 ## SONAR-ASYNC-20261106 — reserviert, Codex Subagent
 Besitz gemeldete Promise-Behandlung in pages/crm/*-legacy.tsx, pages/einkauf/*-legacy.tsx, pages/fibu/zahlungsmeldungen-legacy.tsx, pages/finance/{debitoren-stamm,zahlungslauf-kreditoren}-legacy.tsx, mask-builder/Wizard.tsx und hooks/useMaskData.ts samt gezielter Tests. Keine pauschalen void-Unterdrueckungen: Fehlerpfad und Ablauf erhalten. Keine DB.
+
+SONAR-STUDIO-SORT Abnahme: 45 Tests in drei Suiten gruen, UTF-16-Reihenfolge und unveraenderte Cache-Semantik geprueft. SONAR-RESTVERTRAEGE: 31 Backend-Vertragsfaelle gruen; gemeinsame Typpruefung nach Async-Slice.
