@@ -16,8 +16,9 @@ def _capability(name: str, endpoint: str, screen_id: str, action_key: str) -> di
     entries = _entries()
     matches = [entry for entry in entries if entry.get("domain_command") == name and entry.get("endpoint") == endpoint
                and entry.get("screen_id") == screen_id and entry.get("action") == action_key]
-    if (len(matches) != 1 or sum(entry.get("endpoint") == endpoint for entry in entries) != 1
-            or sum(entry.get("domain_command") == name for entry in entries) != 1
+    # Explicit screen aliases may share a domain command and endpoint. The
+    # screen/action binding itself must still be unique, including conflicts.
+    if (len(matches) != 1
             or sum(entry.get("screen_id") == screen_id and entry.get("action") == action_key for entry in entries) != 1):
         return None
     return matches[0]
@@ -26,7 +27,7 @@ def _capability(name: str, endpoint: str, screen_id: str, action_key: str) -> di
 def capability_enabled(name: str, endpoint: str, screen_id: str, action_key: str) -> bool:
     capability = _capability(name, endpoint, screen_id, action_key)
     roles = capability.get("agent_roles") if capability else None
-    return bool(capability and capability.get("agent_write_enabled") is True
+    return bool(isinstance(name, str) and name.endswith(".v1") and capability and capability.get("agent_write_enabled") is True
                 and type(capability.get("command_version")) is int and capability["command_version"] == 1
                 and isinstance(roles, list) and roles and all(isinstance(role, str) and role for role in roles))
 

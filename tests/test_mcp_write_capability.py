@@ -45,7 +45,7 @@ def test_approved_exact_command_forwarded_with_caller_token(monkeypatch):
 
 
 @pytest.mark.parametrize('entries', [[], [{**CAPABILITY, 'agent_write_enabled': False}],
-    [{**CAPABILITY, 'command_version': 2}], [CAPABILITY, CAPABILITY],
+    [{**CAPABILITY, 'command_version': 2}], [{**CAPABILITY, 'domain_command': 'test.delete.v2'}], [CAPABILITY, CAPABILITY],
     [{**CAPABILITY, 'screen_id': 'other'}], [{**CAPABILITY, 'action': 'other'}],
     [{**CAPABILITY, 'endpoint': '/api/v1/other'}], [{**CAPABILITY, 'domain_command': 'wrong'}],
     [CAPABILITY, {**CAPABILITY, 'domain_command': 'other', 'endpoint': '/api/v1/other'}],
@@ -68,3 +68,18 @@ def test_even_human_bearer_needs_capability_role_and_scope_before_forward(monkey
 def test_read_and_write_contract_cannot_be_combined():
     conflicting = {**ACTION, 'localEffect': 'view', 'readView': {'endpoint': '/api/v1/test'}}
     assert mm.agent_block(conflicting, SCREEN) == 'leseansicht_ungueltig'
+
+
+def test_command_name_version_must_match_registry_version(monkeypatch):
+    from app.services.mcp_write_capability import capability_enabled
+    altered = {**CAPABILITY, 'domain_command': 'test.delete.v2'}
+    monkeypatch.setattr(mcp_tool_registry_service, 'get_tool', lambda _: {'write_capabilities': [altered]})
+    assert not capability_enabled('test.delete.v2', ENDPOINT, SCREEN, 'delete')
+
+
+def test_explicit_screen_alias_may_share_command_and_endpoint(monkeypatch):
+    alias = {**CAPABILITY, 'screen_id': 'test/alias'}
+    monkeypatch.setattr(mcp_tool_registry_service, 'get_tool', lambda _: {'write_capabilities': [CAPABILITY, alias]})
+    from app.services.mcp_write_capability import capability_enabled
+    assert capability_enabled('test.delete.v1', ENDPOINT, SCREEN, 'delete')
+    assert capability_enabled('test.delete.v1', ENDPOINT, 'test/alias', 'delete')
