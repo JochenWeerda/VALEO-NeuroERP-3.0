@@ -4139,6 +4139,9 @@ Fuehrt eine Maskenaktion ueber ihren deklarierten Kommando-Endpunkt aus (gleiche
     "audit_reason": {
       "type": "string",
       "nullable": true
+    },
+    "confirm": {
+      "type": "boolean"
     }
   },
   "required": [
