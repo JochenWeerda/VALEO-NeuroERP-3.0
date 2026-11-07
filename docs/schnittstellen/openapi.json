@@ -85318,6 +85318,52 @@
         "title": "HrDeleteBody",
         "type": "object"
       },
+      "HrDeleteResult": {
+        "properties": {
+          "auditEntryId": {
+            "title": "Auditentryid",
+            "type": "string"
+          },
+          "entity_id": {
+            "title": "Entity Id",
+            "type": "string"
+          },
+          "outboxEventId": {
+            "title": "Outboxeventid",
+            "type": "string"
+          },
+          "replayed": {
+            "title": "Replayed",
+            "type": "boolean"
+          },
+          "success": {
+            "title": "Success",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "success",
+          "replayed",
+          "entity_id",
+          "auditEntryId",
+          "outboxEventId"
+        ],
+        "title": "HrDeleteResult",
+        "type": "object"
+      },
+      "HrLegacyDeleteError": {
+        "properties": {
+          "detail": {
+            "title": "Detail",
+            "type": "string"
+          }
+        },
+        "required": [
+          "detail"
+        ],
+        "title": "HrLegacyDeleteError",
+        "type": "object"
+      },
       "HrmOperatingSystemModuleOut": {
         "properties": {
           "apiContracts": {
@@ -172640,6 +172686,47 @@
           "_auditReason"
         ],
         "title": "VersandprofilDeactivateInput",
+        "type": "object"
+      },
+      "VersandprofilDeactivateResult": {
+        "properties": {
+          "auditEntryId": {
+            "title": "Auditentryid",
+            "type": "string"
+          },
+          "profile_id": {
+            "title": "Profile Id",
+            "type": "string"
+          },
+          "replayed": {
+            "title": "Replayed",
+            "type": "boolean"
+          },
+          "success": {
+            "title": "Success",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "success",
+          "replayed",
+          "profile_id",
+          "auditEntryId"
+        ],
+        "title": "VersandprofilDeactivateResult",
+        "type": "object"
+      },
+      "VersandprofilLegacyDeleteError": {
+        "properties": {
+          "detail": {
+            "title": "Detail",
+            "type": "string"
+          }
+        },
+        "required": [
+          "detail"
+        ],
+        "title": "VersandprofilLegacyDeleteError",
         "type": "object"
       },
       "VersandprofilOut": {
@@ -342576,13 +342663,15 @@
           }
         ],
         "responses": {
-          "200": {
+          "410": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/VersandprofilLegacyDeleteError"
+                }
               }
             },
-            "description": "Successful Response"
+            "description": "Versionierter Deaktivierungsweg erforderlich"
           },
           "422": {
             "content": {
@@ -342643,7 +342732,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/VersandprofilDeactivateResult"
+                }
               }
             },
             "description": "Successful Response"
@@ -409232,13 +409323,15 @@
           }
         ],
         "responses": {
-          "200": {
+          "409": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/HrLegacyDeleteError"
+                }
               }
             },
-            "description": "Successful Response"
+            "description": "Versionierter Loeschauftrag erforderlich"
           },
           "422": {
             "content": {
@@ -409353,7 +409446,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/HrDeleteResult"
+                }
               }
             },
             "description": "Successful Response"
@@ -410269,13 +410364,15 @@
           }
         ],
         "responses": {
-          "200": {
+          "409": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/HrLegacyDeleteError"
+                }
               }
             },
-            "description": "Successful Response"
+            "description": "Versionierter Loeschauftrag erforderlich"
           },
           "422": {
             "content": {
@@ -410390,7 +410487,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/HrDeleteResult"
+                }
               }
             },
             "description": "Successful Response"
@@ -410648,13 +410747,15 @@
           }
         ],
         "responses": {
-          "200": {
+          "409": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/HrLegacyDeleteError"
+                }
               }
             },
-            "description": "Successful Response"
+            "description": "Versionierter Loeschauftrag erforderlich"
           },
           "422": {
             "content": {
@@ -410769,7 +410870,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/HrDeleteResult"
+                }
               }
             },
             "description": "Successful Response"
