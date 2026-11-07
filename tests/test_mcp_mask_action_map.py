@@ -92,3 +92,24 @@ def test_mcp_mask_action_map_covers_top_writes_and_blocks_fin_close():
                          for bau in {**LISTEN_SCREEN_BUILDERS, **CLUSTER_SCREEN_BUILDERS}.values())
     # 16 = 15 + "Neue Gutschrift" (sales/credit-notes, form_reset); + Anlage-Navigation je Studio-Liste
     assert data["stats"]["by_coverage"].get("local_ui", 0) == 16 + listen_anlagen
+
+
+def test_row_commands_without_endpoints_are_not_generic_mcp_writes():
+    """A UI command string alone never authorizes a generic MCP mutation."""
+    from app.core.screen_definitions import get_screen_definition
+    from app.services.mcp_mask_actions import agent_block, iter_actions
+    from scripts.generate_mcp_mask_action_map import _generic_coverage
+
+    expected = {
+        "logistik/versandprofile": "versand.deleteProfile",
+        "personal/onboarding": "personal.deleteOnboarding",
+        "personal/qualifikationen": "personal.deleteQualifikation",
+        "personal/schulungen": "personal.deleteSchulung",
+    }
+    for screen, command in expected.items():
+        definition = get_screen_definition(screen)
+        action = next(a for a in iter_actions(definition) if a["key"] == "loeschen")
+        assert action["command"] == command
+        assert not action.get("commandEndpoint")
+        assert agent_block(action) == "kein_endpunkt"
+        assert _generic_coverage({"mask": screen, "source": {"actionKey": "loeschen"}}) is None
