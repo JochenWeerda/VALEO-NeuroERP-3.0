@@ -20570,3 +20570,6 @@ Besitz neuer isolierter Verhaltenstest und QA. Echte Signaturpruefung am MCP-Ada
 MCP-IMPORT-SIGNATUR: 2 Negativtests mit echter Signaturpruefung bestanden; keine Schreibwirkung/Erfolgsaufzeichnung, Rollback belegt. QA mcp-query-import-signature-20261107.md.
 
 MCP-POSTFACH-REPLAY Abnahme: HMAC mit bestehendem VALEO_SECRET_KEY bindet vollstaendigen Auftrag/Mandant/Aktion. IdentischerReplay, geaendertesKennwort409, fehlenderSchluessel503vorDB, redigierteVorschau. Leadpruefung4Tests inklSignaturNegativfaellen gruen. Commit3bf8d411f. GroesserehaengendeAltsuitekeinebehaupteteAbnahme.
+
+## MCP-ROW-CLI-20261107 — reserviert, Codex Subagent mailbox_replay
+Besitz valeo_cli/cli.py, support.py, gezielte neue CLI-Vertragstests und QA. Ziel volle CLI-Paritaet der vier Zeilencommands: versionierte Eingaben, Idempotenzschluessel bei ungewissem Ausgang erhalten, keine Identitaets-/Mandantenoverrides, bestehende Rollen/Agentenfreigabe beachten. Zentrale Register und ScreenDefinitions verbleiben beim MCP-ROW-COMMANDS-Owner. Keine DB.
