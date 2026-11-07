@@ -3019,7 +3019,9 @@
        "pageSize": 50,
        "rowActions": [
         {
+         "auditReasonRequired": true,
          "command": "versand.deleteProfile",
+         "commandEndpoint": "/api/v1/logistik/versand/profile/{entity_id}/actions/deactivate",
          "dangerLevel": "moderate",
          "disabledWhen": {
           "field": "gesperrt",
@@ -3027,9 +3029,20 @@
            true
           ]
          },
+         "domainCommand": "logistik.versandprofil.deactivate.v1",
+         "inputFields": [
+          {
+           "key": "expected_active",
+           "label": "Aktiver Stand",
+           "required": true,
+           "type": "boolean"
+          }
+         ],
          "key": "loeschen",
          "label": "Löschen",
+         "method": "POST",
          "permission": "logistics.versandprofil.delete",
+         "requiresConfirmation": true,
          "stubReason": "Entfernt das Versandprofil in der Maske; der Serverweg folgt dem Profil-Register."
         }
        ],
@@ -3839,6 +3852,7 @@
      "rowActions": [
       {
        "command": "personal.deleteOnboarding",
+       "commandEndpoint": "/api/v1/training/onboarding/runs/{entity_id}/actions/loeschen",
        "dangerLevel": "moderate",
        "disabledWhen": {
         "field": "gesperrt",
@@ -3846,9 +3860,20 @@
          true
         ]
        },
+       "domainCommand": "hr.onboarding.delete.v1",
+       "inputFields": [
+        {
+         "key": "expected_revision",
+         "label": "Gelesene Revision",
+         "required": true,
+         "type": "text"
+        }
+       ],
        "key": "loeschen",
        "label": "Löschen",
+       "method": "POST",
        "permission": "personal.onboarding.delete",
+       "requiresConfirmation": true,
        "stubReason": "Entfernt den Onboarding-Eintrag in der Maske."
       }
      ],
@@ -4016,6 +4041,7 @@
      "rowActions": [
       {
        "command": "personal.deleteQualifikation",
+       "commandEndpoint": "/api/v1/training/qualifications/{entity_id}/actions/loeschen",
        "dangerLevel": "moderate",
        "disabledWhen": {
         "field": "gesperrt",
@@ -4023,9 +4049,20 @@
          true
         ]
        },
+       "domainCommand": "hr.qualification.delete.v1",
+       "inputFields": [
+        {
+         "key": "expected_revision",
+         "label": "Gelesene Revision",
+         "required": true,
+         "type": "text"
+        }
+       ],
        "key": "loeschen",
        "label": "Löschen",
+       "method": "POST",
        "permission": "personal.qualifikation.delete",
+       "requiresConfirmation": true,
        "stubReason": "Entfernt das Qualifikationsprofil in der Maske."
       }
      ],
@@ -4173,6 +4210,7 @@
      "rowActions": [
       {
        "command": "personal.deleteSchulung",
+       "commandEndpoint": "/api/v1/training/assignments/{entity_id}/actions/loeschen",
        "dangerLevel": "moderate",
        "disabledWhen": {
         "field": "gesperrt",
@@ -4180,9 +4218,20 @@
          true
         ]
        },
+       "domainCommand": "hr.assignment.delete.v1",
+       "inputFields": [
+        {
+         "key": "expected_revision",
+         "label": "Gelesene Revision",
+         "required": true,
+         "type": "text"
+        }
+       ],
        "key": "loeschen",
        "label": "Löschen",
+       "method": "POST",
        "permission": "personal.schulung.delete",
+       "requiresConfirmation": true,
        "stubReason": "Entfernt den Schulungseintrag in der Maske."
       }
      ],
