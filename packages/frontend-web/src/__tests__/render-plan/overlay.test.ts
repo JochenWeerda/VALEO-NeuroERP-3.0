@@ -126,3 +126,11 @@ describe('hashOverlay', () => {
     expect(hashOverlay(null)).toBe('no-overlay')
   })
 })
+
+
+it('hashes nested keys deterministically in UTF-16 order', () => {
+  const first = { tables: { z: {}, ä: {}, A: {}, k2: {}, k10: {} } }
+  const second = { tables: { k10: {}, k2: {}, A: {}, ä: {}, z: {} } }
+  expect(hashOverlay(first)).toBe(hashOverlay(second))
+  expect(hashOverlay(first)).toBe('{"tables":{"A":{},"k10":{},"k2":{},"z":{},"ä":{}}}')
+})

@@ -789,7 +789,7 @@ export default function FrmKontraktDetail(): JSX.Element {
             </div>
           </div>
 
-          <Tabs defaultValue={state.contract_type === 'VERKAUF' ? 'partner' : 'partner'}>
+          <Tabs defaultValue="partner">
             <TabsList variant="register" className="flex flex-wrap overflow-x-auto" aria-label="Kontraktakte">
               <TabsTrigger value="partner" className="min-h-11">Partner</TabsTrigger>
               <TabsTrigger value="lieferanschrift" className="min-h-11">Lieferanschrift</TabsTrigger>

@@ -20522,5 +20522,51 @@ Nutzerauftrag: restliche Masken auf Studio-made, fehlende Funktionen zentral im 
 
 STUDIO-WEBHOOKS-NATIVE Zwischenstand: NativeListPage plus zentrale readView-Leseansicht, CLI-/MCP-GET-Vertrag und menschliche Anlage-/Abmeldedialoge implementiert. 108 Backend-/Vertragsfaelle, 54 Frontendfaelle, Typpruefung und neun Scanner gruen. Generierte Register aktualisiert. Sicht-/Kontrast- und authentifizierte Browserabnahme sowie Rueckbau der alten Spezialoberflaeche offen; Kopfaktions-only-Sprachkatalog bleibt ein expliziter Folgebefund. QA/Handshake studio-webhooks-native-20261105.md.
 
-## CI-DEDUP-20261106 — reserviert, Codex Lead
+## CI-DEDUP-20261106 — abgeschlossen, Codex Lead
 Ziel: doppelte OpenAPI-Driftpruefung im selben Backendjob entfernen. Besitz: .github/workflows/quality-gate.yml und eigener QA-Nachweis. Der Meta-Check muss dieselbe Pruefung verbindlich genau einmal ausfuehren. Keine Testauswahl oder Coverage-Grenze abschwaechen. Speicherursachen gesondert anhand Laufprotokollen untersuchen.
+
+## SONAR-CONTRACTS-20261106 — abgeschlossen, Codex Lead
+Besitz: list-navigation.ts, sse-client.ts (nur synthetische URL-Basis), workspace-composition-parser.ts und QA. Reine URL-Aufloesung auf HTTPS-Basis und redundante Typkonvertierung bereinigen. Bestehende Tests, keine DB, keine Ausnahmen am Sonar-Gate.
+
+SONAR-CONTRACTS-20261106: Drei gezielte Korrekturen lokal geprueft, 16 bestehende Tests gruen. QA sonar-contracts-20261106.md. Sonar-Gesamtbefunde und SSE-Herkunftsvertrag bleiben offen.
+
+## SSE-TOKEN-ZIEL-20261106 — abgeschlossen, Codex Lead
+Besitz sse-client.ts und gezielter Regressionstest. Token nur an eigene Origin oder explizite Buildkonfiguration VITE_MCP_EVENTS_URL; ungueltige Ziele fail closed. SSEClient nutzt denselben Vertrag. Lokale explizite HTTP-Konfiguration beruecksichtigen. Keine DB.
+
+## STUDIO-ZEILENKATALOG-20261106 — abgeschlossen, Codex Subagent read_view_cli_tests
+Ziel Zeilenaktionen im Sprach-/Aktionskatalog vollstaendig aus bestehender Definition ableiten. Besitz app/core/screen_action_catalog.py, tests/test_screen_action_catalog.py, eigene QA. Kein zweites Register, keine neuen Rechte, keine Tests parallel zum Lead. Generierte Artefakte und Integration beim Lead.
+
+STUDIO-ZEILENKATALOG Abnahme: 6 Tests, Katalog- und Handbuch-Driftcheck gruen; 638 Aktionen/381 Masken. Metadaten verleihen keine Ausfuehrungsrechte. QA studio-zeilenkatalog-20261106.md.
+
+Integrationsnachlauf 06.11.: #113/#114 in main, main konfliktfrei nach develop uebernommen (fc93d03fa). Develop-Gesamtlauf 42185134615 erfolgreich. Main-Lauf 42184961273 ausschliesslich Sonar rot; keine Gesamtfreigabe behauptet.
+
+SSE-TOKEN-ZIEL Abnahme: 15 Tests und vollstaendige Typpruefung gruen. Herkunft, Downgrade, spaeterer Token, stop und relative Pfade geprueft. Handshake sonar-studio-katalog-20261106.md.
+
+## SONAR-STUDIO-SORT-20261106 — abgeschlossen, Codex Subagent
+Ziel: explizite locale-unabhaengige Zeichenkettenordnung statt implizitem sort in compile-context.ts, overlay.ts und twin-geometry.ts. Bestehende Semantik erhalten, keine numerische Sortierung von IDs, keine neue Registry. Besitz diese drei Dateien und zugehoerige bestehende Tests, eigene QA. Keine DB.
+
+## SONAR-RESTVERTRAEGE-20261106 — abgeschlossen, Codex Lead
+Besitz Regex-Alternativen mask_screen_definition.py/made_by_studio_gates.py; redundante Zweige in agrar/duenger-stamm-legacy.tsx, saatgut-stamm-legacy.tsx, kontrakte/FrmKontraktDetail-legacy.tsx, adapters/l3-mask-adapter.ts; Tastaturbedienung sales/OrderEditorLegacyPage-legacy.tsx und URL-Platzhalter admin-suite/connectoren-legacy.tsx. Semantik anhand Verbraucher erhalten, keine Gateabsenkung.
+
+## SONAR-ASYNC-20261106 — abgeschlossen, Codex Subagent
+Besitz gemeldete Promise-Behandlung in pages/crm/*-legacy.tsx, pages/einkauf/*-legacy.tsx, pages/fibu/zahlungsmeldungen-legacy.tsx, pages/finance/{debitoren-stamm,zahlungslauf-kreditoren}-legacy.tsx, mask-builder/Wizard.tsx und hooks/useMaskData.ts samt gezielter Tests. Keine pauschalen void-Unterdrueckungen: Fehlerpfad und Ablauf erhalten. Keine DB.
+
+SONAR-STUDIO-SORT Abnahme: 45 Tests in drei Suiten gruen, UTF-16-Reihenfolge und unveraenderte Cache-Semantik geprueft. SONAR-RESTVERTRAEGE: 31 Backend-Vertragsfaelle gruen; gemeinsame Typpruefung nach Async-Slice.
+
+SONAR-ASYNC: vorhandene Loader-Fehlerbehandlung explizit, Nachladungen abgewartet. Nebenbefund IBAN: keine automatische Anlage/Speicherung mehr, stale Antworten ignoriert, Snapshot schuetzt manuelle Bankdaten; Zahlungslauf-Neuanlage ohne /new-Pseudodatensatz. Sieben gezielte IBAN-Tests plus Bankkonto-Vertrag gruen. Finale vollstaendige Typpruefung gruen; Gesamt-Sonar-Coverage bleibt offener eigenstaendiger Befund.
+
+## MCP-ROW-COMMANDS-20261107 — reserviert, Codex Subagent
+
+**Ziel:** Vier Zeilenaktionen mit lokalem Command im MCP-Inventar korrekt und sicher einordnen; CI-Vertrag wiederherstellen ohne abgesenkte Gates. **Dateibesitz:** Generator `scripts/generate_mcp_mask_action_map.py`, belegte fachliche Adapter falls erforderlich, zugehörige Tests, generierte Projektionen, eigene QA/Handshake und dieser Workboard-Eintrag. **Abnahme:** reale Ausführbarkeit und Rechte belegt, Generator- und Vertragstests grün. **Risiko:** `command` allein garantiert keinen MCP-Endpunkt. Keine DB oder Container.
+
+MCP-ROW-COMMANDS-20261107 Erweiterung: HR-Subslice besitzt `app/api/v1/endpoints/training.py`, neuen HR-Fachservice, drei HR-UI-Seiten und zugehörige Tests; Lead des Slices integriert `screen_definitions_capture.py` und Projektionen. Versand: `app/api/v1/endpoints/versandprofile.py`, kanonischer Versandservice, Versand-UI/Tests. Bestehender `valeo_probe` nur nach Status und Nutzungskontrolle, ohne Reset; Entwicklungsdatenbank bleibt unangetastet. MCP-Schreibfreigabe je Capability und Rolle erst nach vollständig belegten MCP-WRITE-Gates; bis dahin gesperrt. Versandprofil besitzt keine Versionsspalte; nur wenn alle Schreibwege geprüft sind kann ein objekt- und zustandsgebundener Vergleich gleichwertige Nebenläufigkeit nachweisen.
+
+## MCP-POSTFACH-REPLAY-20261107 — abgeschlossen, Codex Lead
+Ziel: unterschiedliche geheime Postfach-Eingaben bei gleichem Idempotenzschluessel sicher unterscheiden, ohne Geheimnisse in Audit/Antwort/Fingerprint offenzulegen. Besitz ausschliesslich _postfach_speichern in mcp_execution_service.py, neuer enger Fingerprinthelper und Tests/QA. Abstimmung mit Zeilencommand-Slice: keine konkurrierenden Registrierungs-/Dispatch-Edits. Abnahme: identische Wiederholung replay, geaendertes Geheimnis 409, keine geheimen Ausgaben; bestehende Schluesselkonfiguration nutzen.
+
+## MCP-IMPORT-SIGNATUR-20261107 — abgeschlossen, Codex Lead
+Besitz neuer isolierter Verhaltenstest und QA. Echte Signaturpruefung am MCP-Adapter: manipulierte Signatur fuehrt vor Import/Audit/Replay zu 422 und Rollback. Keine DB.
+
+MCP-IMPORT-SIGNATUR: 2 Negativtests mit echter Signaturpruefung bestanden; keine Schreibwirkung/Erfolgsaufzeichnung, Rollback belegt. QA mcp-query-import-signature-20261107.md.
+
+MCP-POSTFACH-REPLAY Abnahme: HMAC mit bestehendem VALEO_SECRET_KEY bindet vollstaendigen Auftrag/Mandant/Aktion. IdentischerReplay, geaendertesKennwort409, fehlenderSchluessel503vorDB, redigierteVorschau. Leadpruefung4Tests inklSignaturNegativfaellen gruen. Commit3bf8d411f. GroesserehaengendeAltsuitekeinebehaupteteAbnahme.

@@ -27,7 +27,7 @@ export interface CompileContext {
 }
 
 export function buildPermissionHash(permissions: string[]): string {
-  return [...permissions].sort().join('|')
+  return [...permissions].sort((a, b) => a < b ? -1 : a > b ? 1 : 0).join('|')
 }
 
 export function buildFeatureFlagHash(flags: Record<string, boolean> | undefined): string {

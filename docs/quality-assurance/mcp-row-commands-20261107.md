@@ -1,0 +1,7 @@
+# MCP-Zeilenaktionen: sichere Ausführungswege, Zwischenstand 2026-11-07
+
+Der Zeilenkatalog macht vier bestehende Mutationseinstiege sichtbar. Die drei Personalaktionen löschen Datensätze, die Versandaktion deaktiviert ein Profil. Ihre Maskendefinitionen deklarieren lokale Commands ohne CommandEndpoint; der generische MCP-Ausführer weist sie als `kein_endpunkt` ab. Das Inventar weist sie korrekt als `open_medium` aus. Die CI-Nullgrenze ist damit nicht erfüllt und wird nicht abgesenkt.
+
+Für Versand liegt ein noch nicht angebundener und nicht für Agenten freigegebener Fachcommand mit Objekt-/Mandantenbindung, bestehender Logistikrolle, Wiederholungsschutz, Audit und Outbox vor. Sein Zustandsvergleich verwendet die unveränderliche Profil-ID und den erwarteten Aktivzustand. Die Gleichwertigkeit dieses Vergleichs muss vor Freigabe gegen sämtliche Schreibwege und mögliche parallele Änderungen belegt werden. Der bestehende REST-/UI-Weg ist noch nicht umgestellt. Die Agentenfreigabe bleibt gesperrt.
+
+Der fokussierte Negativvertrag bestätigt für alle vier Aktionen das Fehlen eines generischen MCP-Wegs. Sieben isolierte Versand-Unit-Tests prüfen unter anderem Rechte, Rollback und Wiederholungskonflikt. Der gemeinsame Prüfstand existiert; eine transaktionale Abnahme, die UI-/REST-Parität und die rollenbezogene Capability-Freigabe stehen aus. Keine neue Datenbank, kein Container und kein Reset.

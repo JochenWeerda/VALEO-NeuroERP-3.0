@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
 import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
@@ -554,9 +554,9 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Zahlungslauf Kreditoren')
   const zahlungslaufConfig = createZahlungslaufConfig(t, entityTypeLabel)
 
-  const { data, loading, saveData, updateData } = useMaskData({
+  const { data, loading, saveData } = useMaskData({
     apiUrl: zahlungslaufConfig.api.baseUrl,
-    id: 'new',
+    id: undefined,
     transformResponse: (response: unknown): Record<string, unknown> => {
       // Transform API response to match frontend format
       const responseRecord = isRecord(response) ? response : {}
@@ -592,43 +592,26 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
     toast.error(`${Object.keys(errors).length} Feld(er) muessen korrigiert werden.`)
   }
 
-  // IBAN Lookup for Auftraggeber-IBAN
-  const handleAuftraggeberIbanChange = async (iban: string) => {
-    const normalized = iban.replace(/\s/g, '').replace(/-/g, '').toUpperCase()
-    if (normalized.length >= 15 && normalized.length <= 34 && validateIBAN(normalized)) {
-      try {
-        const result = await lookupIBAN(normalized)
-        if (result.valid && result.bic) {
-          const updatedData = { ...formData, ...data }
-          updatedData.auftraggeberIban = formatIBAN(normalized)
-          if (result.bic && !updatedData.auftraggeberBic) {
-            updatedData.auftraggeberBic = result.bic
-          }
-          setFormData(updatedData)
-          updateData?.(updatedData)
-          toast.success(t('crud.messages.ibanLookupSuccess', {
-            defaultValue: 'BIC automatisch ausgefüllt',
-            bankName: result.bank_name || 'Bank'
-          }))
-        }
-      } catch (error) {
-        // Silent error for auto-lookup
-      }
-    }
-  }
+  // Nur das aktuelle Formular anreichern; spaete Antworten nach IBAN-Wechsel ignorieren.
+  const normalized = String(formData.auftraggeberIban ?? '').replace(/\s/g, '').replace(/-/g, '').toUpperCase()
+  useEffect(() => {
+    if (normalized.length < 15 || normalized.length > 34 || !validateIBAN(normalized)) return
+    let cancelled = false
+    const bicSnapshot = formData.auftraggeberBic
+    const timer = setTimeout(() => {
+      void lookupIBAN(normalized).then(result => {
+        if (cancelled || !result.valid || !result.bic) return
+        setFormData(prev => ({ ...prev, auftraggeberIban: formatIBAN(normalized),
+          auftraggeberBic: prev.auftraggeberBic === bicSnapshot ? result.bic : prev.auftraggeberBic }))
+        setIsDirty(true)
+      }).catch(() => { /* Lookup bleibt optional; Eingaben bleiben erhalten. */ })
+    }, 1000)
+    return () => { cancelled = true; clearTimeout(timer) }
+  }, [normalized])
 
-  // Handle form data changes
   const handleFormChange = (newData: Record<string, unknown>) => {
     setFormData(newData)
     setIsDirty(true)
-    
-    // Auto-lookup Auftraggeber-IBAN
-    if (newData?.auftraggeberIban) {
-      const timer = setTimeout(() => {
-        handleAuftraggeberIbanChange(String(newData.auftraggeberIban))
-      }, 1000)
-      return () => clearTimeout(timer)
-    }
   }
 
   const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: Record<string, unknown>) => {

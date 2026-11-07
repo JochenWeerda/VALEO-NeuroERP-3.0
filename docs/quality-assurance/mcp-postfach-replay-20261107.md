@@ -1,0 +1,7 @@
+# MCP-Postfach Replay-Sicherheit — 2026-11-07
+
+`admin.postfach.speichern` bindet den vollstaendigen validierten Auftrag einschliesslich Passwort mit HMAC-SHA256 an Mandant und Aktion. Der bestehende `VALEO_SECRET_KEY` der Mail-Geheimnisverwaltung ist erforderlich; Execute ohne gueltigen Schluessel schlaegt vor Datenbankzugriff mit 503 fehl. Vorschau, Ergebnis und Audit enthalten weiterhin kein Passwort. Alte ungeschluesselte Replay-Abdruecke und vor einer Schluesselrotation erzeugte Abdruecke stimmen bewusst nicht ueberein: ein erneuter Execute mit demselben Idempotenzschluessel wird mit 409 abgewiesen; fuer einen neuen Auftrag ist ein neuer Schluessel erforderlich.
+
+Abnahme ohne Datenbank: `python -m pytest tests/test_mcp_postfach_replay_security.py --no-cov --noconftest -q` — 2 bestanden. Der groessere Lauf einschliesslich `test_mcp_mask_ce_batch3_hr_postfach.py` wurde nach den zwei erfolgreichen neuen Tests wegen haengender bestehender Tests abgebrochen und ist nicht als bestanden zu werten. `--noconftest` vermeidet die globale datenbankbezogene Session-Fixture.
+
+Nachpruefung durch Lead: bestehende HTTP-TestClient-Suite test_mcp_mask_ce_batch3_hr_postfach.py zusammen mit den neuen Replaytests unter erforderlichen lokalen Prozessrechten vollstaendig ausgefuehrt: 10 bestanden in 4,90 Sekunden, eine bestehende Starlette-Abkuendigungswarnung. Kein Datenbank- oder Containerzugriff. Das vorherige Haengen ist damit kein offener Nachweisfehler mehr; die eingeschraenkte Ausfuehrungsumgebung war fuer den vorigen Lauf nicht ausreichend.

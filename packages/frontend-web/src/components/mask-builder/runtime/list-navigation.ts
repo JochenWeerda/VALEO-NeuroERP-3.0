@@ -8,7 +8,7 @@ export function listNavigationTarget(targetPath: string, query: URLSearchParams,
     throw new Error('Navigation muss innerhalb der Anwendung bleiben.')
   }
   const context = readWorkflowEntryContext(query)
-  const target = new URL(targetPath, 'http://valeo.invalid')
+  const target = new URL(targetPath, 'https://valeo.invalid')
   if (context) query.forEach((value, key) => target.searchParams.set(key, value))
   const url = target.pathname + target.search + target.hash
   return {

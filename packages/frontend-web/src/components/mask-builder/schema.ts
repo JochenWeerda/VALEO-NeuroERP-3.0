@@ -279,6 +279,8 @@ export interface ScreenActionDefinition {
   permission?: string
   disabled?: boolean
   // Action Runtime (Phase 026)
+  /** Versioned capability identifier checked by MCP before agent execution. */
+  domainCommand?: string
   commandEndpoint?: string
   /** Versioned transport only; domain authorization/approvals remain server-side. */
   commandBinding?: {

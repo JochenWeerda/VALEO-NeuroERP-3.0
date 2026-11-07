@@ -33,17 +33,21 @@ export function appendSseAuthToken(
     return null
   }
   try {
-    if (url.startsWith('/')) {
-      const relative = new URL(url, 'http://sse.local')
-      relative.searchParams.set(param, token)
-      return `${relative.pathname}${relative.search}${relative.hash}`
+    const origin = getWindow()?.location.origin ?? 'https://sse.local'
+    const target = new URL(url, getWindow()?.location.href ?? origin)
+    let trustedOrigin = origin
+    if (target.origin !== origin) {
+      const configured = import.meta.env.VITE_MCP_EVENTS_URL
+      if (typeof configured === 'string' && configured) trustedOrigin = new URL(configured, origin).origin
     }
-    const absolute = new URL(url)
-    absolute.searchParams.set(param, token)
-    return absolute.toString()
+    if (!['http:', 'https:'].includes(target.protocol) || target.username || target.password
+        || ![origin, trustedOrigin].includes(target.origin)
+        || (origin.startsWith('https:') && target.protocol !== 'https:')) return null
+    target.searchParams.set(param, token)
+    return url.startsWith('/') && !url.startsWith('//')
+      ? `${target.pathname}${target.search}${target.hash}` : target.toString()
   } catch {
-    const separator = url.includes('?') ? '&' : '?'
-    return `${url}${separator}${param}=${encodeURIComponent(token)}`
+    return null
   }
 }
 
@@ -59,6 +63,7 @@ export class SSEClient {
   private closed = false
   private retry = 0
   private hbTimer: number | undefined
+  private retryTimer: number | undefined
   private readonly url: string
   private readonly opts: Required<Omit<SSEOptions, 'url' | 'getToken' | 'tokenQueryParam'>> & {
     getToken?: () => string | undefined
@@ -120,6 +125,9 @@ export class SSEClient {
 
   stop(): void {
     this.closed = true
+    const win = getWindow()
+    if (win && this.retryTimer !== undefined) win.clearTimeout(this.retryTimer)
+    this.retryTimer = undefined
     this.cleanupES()
     this.retry = 0
   }
@@ -128,7 +136,14 @@ export class SSEClient {
     if (this.es) {
       return
     }
-    const connectionUrl = this.buildUrl()
+    const token = this.opts.getToken?.()
+    if (this.opts.getToken && !token) {
+      this.scheduleReconnect()
+      return
+    }
+    const connectionUrl = this.opts.getToken
+      ? appendSseAuthToken(this.url, token, this.opts.tokenQueryParam) : this.url
+    if (connectionUrl === null) return
     this.es = new win.EventSource(connectionUrl, { withCredentials: this.opts.withCredentials })
     this.es.addEventListener('open', this.boundOpenHandler as EventListener)
     this.es.addEventListener('error', this.boundErrorHandler as EventListener)
@@ -155,11 +170,12 @@ export class SSEClient {
 
   private scheduleReconnect(): void {
     const win = getWindow()
-    if (!win) {
+    if (!win || this.closed || this.retryTimer !== undefined) {
       return
     }
     const delay = Math.min(this.opts.retryBaseMs * Math.pow(2, this.retry++), this.opts.maxRetryMs)
-    win.setTimeout(() => {
+    this.retryTimer = win.setTimeout(() => {
+      this.retryTimer = undefined
       if (this.closed) {
         return
       }
@@ -186,18 +202,4 @@ export class SSEClient {
     this.registeredTypes.clear()
   }
 
-  private buildUrl(): string {
-    const token = this.opts.getToken?.()
-    if (token == null || token.length === 0) {
-      return this.url
-    }
-    try {
-      const target = new URL(this.url, window.location.href)
-      target.searchParams.set(this.opts.tokenQueryParam, token)
-      return target.toString()
-    } catch {
-      const separator = this.url.includes('?') ? '&' : '?'
-      return `${this.url}${separator}${this.opts.tokenQueryParam}=${encodeURIComponent(token)}`
-    }
-  }
 }

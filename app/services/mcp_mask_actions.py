@@ -33,7 +33,7 @@ _ENVELOPE = {"_mode", "_auditReason", "_idempotencyKey"}
 _IDENTITY_KEYS = {"tenant_id", "mandanten_id", "bediener", "approval_granted", "actor", "user_id", "performed_by"}
 
 
-def agent_block(action: dict[str, Any]) -> str | None:
+def agent_block(action: dict[str, Any], screen_id: str | None = None) -> str | None:
     """Warum ein Agent diese Aktion nicht ausfuehren darf — oder ``None``."""
     if "readView" in action:
         from app.services.studio_read_view_contracts import validate_read_view
@@ -59,6 +59,9 @@ def agent_block(action: dict[str, Any]) -> str | None:
         return "fuer_agenten_gesperrt"
     if action.get("humanApprovalRequired"):
         return "menschliche_genehmigung"
+    from app.services.mcp_write_capability import capability_enabled
+    if not capability_enabled(action.get("domainCommand") or "", endpoint, screen_id or "", action.get("key") or ""):
+        return "capability_nicht_freigegeben"
     return None
 
 
@@ -98,7 +101,7 @@ def list_actions(parameters: dict[str, Any], tenant: str) -> dict[str, Any]:
     definition = _definition(parameters.get("screen_id"), tenant)
     rows = []
     for action in iter_actions(definition):
-        block = agent_block(action)
+        block = agent_block(action, definition.get("id"))
         rows.append({"key": action["key"], "label": action.get("label"), "agent_ausfuehrbar": block is None,
                      "grund": block, "danger_level": action.get("dangerLevel", "safe"),
                      "requires_confirmation": bool(action.get("requiresConfirmation")),
@@ -202,7 +205,7 @@ def execute(request: Any, tenant: str, authorization: str | None, *, transport: 
     action = next((a for a in iter_actions(definition) if a["key"] == action_key), None)
     if action is None:
         raise HTTPException(404, "Die Maske hat diese Aktion nicht")
-    block = agent_block(action)
+    block = agent_block(action, definition.get("id"))
     if block:
         raise HTTPException(403, f"Aktion fuer MCP-Agenten nicht freigegeben: {block}")
     if "readView" in action:
@@ -221,6 +224,10 @@ def execute(request: Any, tenant: str, authorization: str | None, *, transport: 
             raise HTTPException(response.status_code, "Leseansicht abgelehnt")
         return {"success": True, "screen_id": definition["id"], "action": action["key"],
                 "mode": "execute", "result": response.json()}
+    from app.core.identity_context import current_identity
+    from app.services.mcp_write_capability import authorize_agent
+    authorize_agent(current_identity(), action.get("domainCommand") or "", action.get("commandEndpoint") or "",
+                    definition.get("id") or "", action.get("key") or "")
     if request.mode == "execute" and not (request.idempotency_key or "").strip():
         raise HTTPException(422, "execute requires an idempotency_key")
     if request.mode == "execute" and action.get("auditReasonRequired") and not (audit_reason or "").strip():
