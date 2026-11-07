@@ -20573,3 +20573,7 @@ MCP-POSTFACH-REPLAY Abnahme: HMAC mit bestehendem VALEO_SECRET_KEY bindet vollst
 
 ## MCP-ROW-CLI-20261107 — reserviert, Codex Subagent mailbox_replay
 Besitz valeo_cli/cli.py, support.py, gezielte neue CLI-Vertragstests und QA. Ziel volle CLI-Paritaet der vier Zeilencommands: versionierte Eingaben, Idempotenzschluessel bei ungewissem Ausgang erhalten, keine Identitaets-/Mandantenoverrides, bestehende Rollen/Agentenfreigabe beachten. Zentrale Register und ScreenDefinitions verbleiben beim MCP-ROW-COMMANDS-Owner. Keine DB.
+
+## MCP-INVENTUR-COUNT-RELEASE-20261107 — reserviert, Codex Subagent inventory_count_sheet
+
+**Ziel:** Inventur-Zählblatt aus bestehender Maskenaktion nur über einen gemeinsamen, versionierten und sicher freigegebenen Fachcommand für UI, REST, CLI und MCP bereitstellen. **Dateibesitz:** zugehörige Inventur-Nebenlauf-Services/Endpoints, `packages/frontend-web/src/pages/lager/inventur-nebenlaeufe.tsx`, passende Tests und eigene QA; zentrale ScreenDefinition, MCP-Registry und Projektionen beim Lead des Slices. **Abnahme:** Mandant/Rollen, atomarer Audit/Outbox, akteur-/payloadgebundene Wiederholung und Kanalparität geprüft; keine DDL oder neue Datenbank, geteilter Prüfstand nur nach Slotkoordination. **Risiko:** bisheriger UI- und Command-Weg unterscheiden sich; bestehender Replayvertrag bindet weder Akteur noch Payload.
