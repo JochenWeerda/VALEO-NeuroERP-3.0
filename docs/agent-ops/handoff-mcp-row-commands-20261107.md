@@ -1,0 +1,9 @@
+# MCP-Zeilencommands: Fortsetzung nach Nutzungslimit
+
+Stand `e60f7f097` auf `codex/sonar-contracts-20261106`: Versand- und Personal-Fachservices sind vorbereitet, aber nicht an REST/UI/MCP gebunden. Vier `open_medium` und das CI-Gate bleiben offen. Die Agentenfreigabe ist nicht erteilt. Die zuletzt geprüften Tests der vorbereiteten Versionen stehen in den jeweiligen QA-Dokumenten; PostgreSQL-/RLS- und Kanalabnahme fehlen.
+
+Eine begonnene, ungeprüfte Versand-Anbindung wurde aus dem Arbeitsbaum zurückgenommen. Ein unfertiger Personal-Änderungssatz wurde vor Rücknahme lokal als `artifacts/mcp-row-commands-hr-wip-20261107.patch` gesichert (gitignored, nicht im Remote). Er verändert Identitätsübergabe und Routen, lässt aber die Oberfläche auf dem alten DELETE-Weg; er darf nicht ungeprüft angewendet oder freigeschaltet werden. Agent meldete 23 Unit-/SQLite-Tests für diesen Zwischenstand; sie sind kein PostgreSQL-Nachweis.
+
+Der vorhandene `valeo_probe` war beim Statusleseversuch erreichbar; die Abfrage aktiver Sitzungen zeigte zu diesem Zeitpunkt keine weiteren Sitzungen. Vor erneuten Tests Status und laufende Nutzung erneut prüfen, `PGAPPNAME` setzen und ausschließlich eigene transaktional isolierte Daten verwenden. Keine Migration oder Reset ohne abgestimmten Claim. Den vorhandenen Prüfstand nicht durch eine zweite Datenbank ersetzen.
+
+Fortsetzung: geschützte versionierte Domain-Commands, gemeinsame REST-/UI-Wege und registrierte Capability mit bestehenden Rollen integrieren; Token-Identität durchgängig serverseitig prüfen, Replay/Audit/Outbox atomar halten, Nebenläufigkeitsvertrag und echte PostgreSQL-Mandanten-/Rollbacktests nachweisen. Erst danach pro Capability und Agentenrolle freigeben und Projektionen/Gates prüfen. Keine Klassifizierung oder Testschwelle zum bloßen Begrünen ändern.
