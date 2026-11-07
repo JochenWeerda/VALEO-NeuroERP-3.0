@@ -36,6 +36,18 @@ class Payload(BaseModel):
     data: dict[str, Any] = Field(default_factory=dict)
 
 
+class HrDeleteResult(BaseModel):
+    success: bool
+    replayed: bool
+    entity_id: str
+    auditEntryId: str
+    outboxEventId: str
+
+
+class HrLegacyDeleteError(BaseModel):
+    detail: str
+
+
 class HrDeleteBody(BaseModel):
     model_config = _ConfigDict(extra="forbid", populate_by_name=True)
     expected_revision: str = Field(pattern=r"^[0-9a-f]{64}$")
@@ -449,12 +461,12 @@ async def update_assignment(item_id: str, payload: Payload, tenant_id: str = Dep
     return _clean(dict(row))
 
 
-@router.delete("/assignments/{item_id}", dependencies=SCHREIBEN["PERSONAL"])
-async def legacy_delete_assignment(item_id: str):
+@router.delete("/assignments/{item_id}", status_code=409, response_model=HrLegacyDeleteError, responses={409: {"description": "Versionierter Loeschauftrag erforderlich"}}, dependencies=SCHREIBEN["PERSONAL"])
+async def legacy_delete_assignment(item_id: str) -> None:
     raise HTTPException(status_code=409, detail="Versionierter Loeschauftrag erforderlich")
 
 
-@router.post("/assignments/{item_id}/actions/loeschen", dependencies=SCHREIBEN["PERSONAL"])
+@router.post("/assignments/{item_id}/actions/loeschen", response_model=HrDeleteResult, dependencies=SCHREIBEN["PERSONAL"])
 async def delete_assignment_command(item_id: str, body: HrDeleteBody,
         tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     return _execute_hr_delete(db, tenant_id, "assignment", item_id, body)
@@ -640,12 +652,12 @@ async def update_qualification(item_id: str, payload: Payload, tenant_id: str = 
     return _clean(dict(row))
 
 
-@router.delete("/qualifications/{item_id}", dependencies=SCHREIBEN["PERSONAL"])
-async def legacy_delete_qualification(item_id: str):
+@router.delete("/qualifications/{item_id}", status_code=409, response_model=HrLegacyDeleteError, responses={409: {"description": "Versionierter Loeschauftrag erforderlich"}}, dependencies=SCHREIBEN["PERSONAL"])
+async def legacy_delete_qualification(item_id: str) -> None:
     raise HTTPException(status_code=409, detail="Versionierter Loeschauftrag erforderlich")
 
 
-@router.post("/qualifications/{item_id}/actions/loeschen", dependencies=SCHREIBEN["PERSONAL"])
+@router.post("/qualifications/{item_id}/actions/loeschen", response_model=HrDeleteResult, dependencies=SCHREIBEN["PERSONAL"])
 async def delete_qualification_command(item_id: str, body: HrDeleteBody,
         tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     return _execute_hr_delete(db, tenant_id, "qualification", item_id, body)
@@ -833,12 +845,12 @@ async def update_run(item_id: str, payload: Payload, tenant_id: str = Depends(ge
     return _clean(dict(row))
 
 
-@router.delete("/onboarding/runs/{item_id}", dependencies=SCHREIBEN["PERSONAL"])
-async def legacy_delete_onboarding(item_id: str):
+@router.delete("/onboarding/runs/{item_id}", status_code=409, response_model=HrLegacyDeleteError, responses={409: {"description": "Versionierter Loeschauftrag erforderlich"}}, dependencies=SCHREIBEN["PERSONAL"])
+async def legacy_delete_onboarding(item_id: str) -> None:
     raise HTTPException(status_code=409, detail="Versionierter Loeschauftrag erforderlich")
 
 
-@router.post("/onboarding/runs/{item_id}/actions/loeschen", dependencies=SCHREIBEN["PERSONAL"])
+@router.post("/onboarding/runs/{item_id}/actions/loeschen", response_model=HrDeleteResult, dependencies=SCHREIBEN["PERSONAL"])
 async def delete_onboarding_command(item_id: str, body: HrDeleteBody,
         tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     return _execute_hr_delete(db, tenant_id, "onboarding", item_id, body)
