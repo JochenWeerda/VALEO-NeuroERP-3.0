@@ -20587,3 +20587,6 @@ Besitz training.py und versandprofile.py, enge Antwortmodell-/Routentests und ei
 
 ## CI-SCREEN-PROJECTION-EARLY-20261107 — abgeschlossen, Codex Lead
 Ziel: Capture- und Registry-Snapshot-Drift vor teuren Gesamtsuiten erkennen. Besitz scripts/check_all_doc_generators.sh und eigene QA. Bestehende Generatorchecks unveraendert ergaenzen; keine Testauswahl oder Schwelle abschwaechen.
+
+## ROW-SERVICE-DOMAIN-MAPPING-20261107 — reserviert, Codex Lead
+Besitz architecture-domain-prefixes.yaml und erzeugter architecture-index.yaml. Neue Dienste command_idempotency→platform, hr_row_delete_commands→hr, versandprofil_commands→logistics im kanonischen Mapping ergaenzen; Vollstaendigkeitsgate unveraendert.
