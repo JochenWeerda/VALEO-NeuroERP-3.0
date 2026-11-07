@@ -20561,10 +20561,12 @@ SONAR-ASYNC: vorhandene Loader-Fehlerbehandlung explizit, Nachladungen abgewarte
 
 MCP-ROW-COMMANDS-20261107 Erweiterung: HR-Subslice besitzt `app/api/v1/endpoints/training.py`, neuen HR-Fachservice, drei HR-UI-Seiten und zugehörige Tests; Lead des Slices integriert `screen_definitions_capture.py` und Projektionen. Versand: `app/api/v1/endpoints/versandprofile.py`, kanonischer Versandservice, Versand-UI/Tests. Bestehender `valeo_probe` nur nach Status und Nutzungskontrolle, ohne Reset; Entwicklungsdatenbank bleibt unangetastet. MCP-Schreibfreigabe je Capability und Rolle erst nach vollständig belegten MCP-WRITE-Gates; bis dahin gesperrt. Versandprofil besitzt keine Versionsspalte; nur wenn alle Schreibwege geprüft sind kann ein objekt- und zustandsgebundener Vergleich gleichwertige Nebenläufigkeit nachweisen.
 
-## MCP-POSTFACH-REPLAY-20261107 — reserviert, Codex Lead
+## MCP-POSTFACH-REPLAY-20261107 — abgeschlossen, Codex Lead
 Ziel: unterschiedliche geheime Postfach-Eingaben bei gleichem Idempotenzschluessel sicher unterscheiden, ohne Geheimnisse in Audit/Antwort/Fingerprint offenzulegen. Besitz ausschliesslich _postfach_speichern in mcp_execution_service.py, neuer enger Fingerprinthelper und Tests/QA. Abstimmung mit Zeilencommand-Slice: keine konkurrierenden Registrierungs-/Dispatch-Edits. Abnahme: identische Wiederholung replay, geaendertes Geheimnis 409, keine geheimen Ausgaben; bestehende Schluesselkonfiguration nutzen.
 
 ## MCP-IMPORT-SIGNATUR-20261107 — abgeschlossen, Codex Lead
 Besitz neuer isolierter Verhaltenstest und QA. Echte Signaturpruefung am MCP-Adapter: manipulierte Signatur fuehrt vor Import/Audit/Replay zu 422 und Rollback. Keine DB.
 
 MCP-IMPORT-SIGNATUR: 2 Negativtests mit echter Signaturpruefung bestanden; keine Schreibwirkung/Erfolgsaufzeichnung, Rollback belegt. QA mcp-query-import-signature-20261107.md.
+
+MCP-POSTFACH-REPLAY Abnahme: HMAC mit bestehendem VALEO_SECRET_KEY bindet vollstaendigen Auftrag/Mandant/Aktion. IdentischerReplay, geaendertesKennwort409, fehlenderSchluessel503vorDB, redigierteVorschau. Leadpruefung4Tests inklSignaturNegativfaellen gruen. Commit3bf8d411f. GroesserehaengendeAltsuitekeinebehaupteteAbnahme.
