@@ -197,6 +197,8 @@ export interface ScreenTableDefinition {
     visibleWhen?: { field: string; values: Array<string | number | boolean> }
     disabledWhen?: { field: string; values: Array<string | number | boolean> }
     /** Kommando-Weg der Zeile ({entity_id} = Zeilenkennung); dieselben Wege rufen CLI und MCP. */
+    /** Versioned domain command shared by UI, CLI and MCP. */
+    domainCommand?: string
     commandEndpoint?: string
     method?: 'POST' | 'PUT' | 'PATCH' | 'DELETE'
     auditReasonRequired?: boolean

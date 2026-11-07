@@ -16,3 +16,7 @@ Die drei Personal-Tabellen verwenden TIMESTAMPTZ. Die API-Serialisierung erhaelt
 ## Alias- und Versionskorrektur
 
 Lead hat den weiterhin vorhandenen globalen Eindeutigkeitszwang fuer Endpunkt/Command entfernt: explizite Screen-Aliase duerfen dieselbe Fachaktion teilen. Die Bindung je Screen und Aktion muss weiterhin eindeutig sein; widerspruechliche Eintraege sperren. Der Commandname muss zur freigegebenen Version v1 passen. Die bestehende Negativsuite samt neuem Alias-/Versionstest besteht mit 19 Tests. Dieser Nachweis ist keine pauschale Freigabe der noch deaktivierten Fachaktionen.
+
+## Gemeinsame Typpruefung
+
+Der erste volle Lauf meldete vier TS2353-Fehler in der generierten capture-screens.ts: domainCommand fehlte im separat definierten Typ der Tabellen-Zeilenaktionen, obwohl es bereits bei Kopfaktionen deklariert war. Der zentrale Zeilenaktionstyp ist ergaenzt; generierte Masken werden nicht einzeln angepasst. Erneute vollstaendige Typpruefung laeuft, Ergebnis noch offen.
