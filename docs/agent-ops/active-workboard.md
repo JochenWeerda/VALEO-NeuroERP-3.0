@@ -20554,3 +20554,7 @@ Besitz gemeldete Promise-Behandlung in pages/crm/*-legacy.tsx, pages/einkauf/*-l
 SONAR-STUDIO-SORT Abnahme: 45 Tests in drei Suiten gruen, UTF-16-Reihenfolge und unveraenderte Cache-Semantik geprueft. SONAR-RESTVERTRAEGE: 31 Backend-Vertragsfaelle gruen; gemeinsame Typpruefung nach Async-Slice.
 
 SONAR-ASYNC: vorhandene Loader-Fehlerbehandlung explizit, Nachladungen abgewartet. Nebenbefund IBAN: keine automatische Anlage/Speicherung mehr, stale Antworten ignoriert, Snapshot schuetzt manuelle Bankdaten; Zahlungslauf-Neuanlage ohne /new-Pseudodatensatz. Sieben gezielte IBAN-Tests plus Bankkonto-Vertrag gruen. Finale vollstaendige Typpruefung gruen; Gesamt-Sonar-Coverage bleibt offener eigenstaendiger Befund.
+
+## MCP-ROW-COMMANDS-20261107 — reserviert, Codex Subagent
+
+**Ziel:** Vier Zeilenaktionen mit lokalem Command im MCP-Inventar korrekt und sicher einordnen; CI-Vertrag wiederherstellen ohne abgesenkte Gates. **Dateibesitz:** Generator `scripts/generate_mcp_mask_action_map.py`, belegte fachliche Adapter falls erforderlich, zugehörige Tests, generierte Projektionen, eigene QA/Handshake und dieser Workboard-Eintrag. **Abnahme:** reale Ausführbarkeit und Rechte belegt, Generator- und Vertragstests grün. **Risiko:** `command` allein garantiert keinen MCP-Endpunkt. Keine DB oder Container.
