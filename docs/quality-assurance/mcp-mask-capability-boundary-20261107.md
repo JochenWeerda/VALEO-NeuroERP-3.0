@@ -6,3 +6,7 @@ Die vier neuen Capabilities sind vor ihrer vollständigen fachlichen Abnahme dea
 
 Gezielte lokale Tests: `tests/test_mcp_write_capability.py` und `tests/test_versandprofil_commands.py`, 25 Tests bestanden. Die Tests decken insbesondere fehlende/duplizierte/falsche Capabilities, Version, Rolle und Scope sowie menschlichen Bearer und sichere GET-/Schreibtrennung ab. PostgreSQL-, vollständige RLS-, konkurrierende Wiederholungs-, UI-/CLI- und kanalübergreifende Tests bleiben vor den jeweiligen Schreibfreigaben erforderlich.
 
+
+## Auswirkungsabnahme bestehender Maskenvertraege
+
+Leadlauf tests/test_mcp_mask_actions.py unter erforderlichen lokalen Prozessrechten: 16 bestanden, 12 fehlgeschlagen (6,82 Sekunden). Alle zwoelf Fehler entstehen, weil der bisherige Registry-basierte Positivpfad keine freigegebene Schreibaktion mehr findet. Das ist ein belegter funktionaler Zwischenstand und kein vollstaendiger Abschluss der MCP-Paritaet. Keine Tests uebersprungen oder zu erwarteten Fehlern umdeklariert. Wiederfreigabe muss echte kanonische Fachcommands samt expliziten Rollen/Versionen und Kanalnachweisen herstellen; blosse Testfixtures duerfen reale Funktionsverluste nicht verdecken.
