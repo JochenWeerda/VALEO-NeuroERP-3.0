@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, qa]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-05
+last_reviewed: 2026-11-07
 version: 3.0.0
 description: Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -60,6 +60,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `closing_checklists_service` | Schemas and helpers for the Closing Checklists domain (FIBU-CLS-01). |
 | `command_handlers_finance` | AP kernel transport delegates to the same tenant-bound domain commands. |
 | `command_handlers_procurement` | Domain-Mutationen fuer Process-Kernel-Commands (Einkauf). |
+| `command_idempotency` | Transaction-bound replay helpers for versioned domain commands. |
 | `compat_helpers` | Shared helpers for compat service classes. |
 | `compensation_engine` | Compensation Engine — NC-006 |
 | `competitor_monitor` | Competitor Price & Image Monitoring Service |
@@ -174,6 +175,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `geo_pipeline` | Geo-Pipeline – Betriebsadressen → Koordinaten für den Außendienst-Viewer. |
 | `guardrails` | Guardrails Service — NC-C3 |
 | `harvest_acceptance_service` | Service layer for Harvest Acceptance (Ernte-Annahme) CRUD operations. |
+| `hr_row_delete_commands` | Versioned, transaction-bound deletion for HR rows; no transport registration. |
 | `hrm_abwesenheit_service` | — |
 | `hrm_zeiterfassung_service` | DOM-HRM-004.2 — HRM Zeiterfassung Lifecycle (Einstempeln/Ausstempeln/Korrektur). |
 | `integration_bootstrap` | — |
@@ -184,6 +186,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `inventory_compat_service` | Service layer for compat inventory (lager) and futter domain routes. |
 | `inventory_correction_service` | DOM-INV-004.4 — Bestandskorrektur-Storno-Service. |
 | `inventory_count_close_service` | DOM-INV-004.3 — Inventur-Differenzbeleg-Service. |
+| `inventory_count_sheet_command` | Versioned count-sheet creation shared by REST, UI, CLI and MCP. |
 | `inventory_document_reference` | Belegbezug einer Bestandsbewegung — kanonisch und historisch. |
 | `inventory_lot_trace_service` | DOM-INV-004.2 — Chargen-/MHD-Traceability Service (FEFO). |
 | `inventory_movement_direction` | DOM-INV-005: kanonische Bewegungsrichtung fuer inventory_stock_movements. |
@@ -228,6 +231,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `mcp_studio_authoring` | Studio-Authoring fuer Agenten (MCP/CLI): ein LLM baut Masken nur ueber Studio, nie daran vorbei. |
 | `mcp_studio_plans` | Versioned Studio-authoring capability; only the registered HTTP command writes. |
 | `mcp_tool_registry_service` | MCP-ERP-TOOLS-001 — Rollenbasierter ERP-Tool-Katalog fuer Agent-Zugriff. |
+| `mcp_write_capability` | Explicit registry release for generic MCP writes; all other writes fail closed. |
 | `meldewesen_lifecycle_service` | DOM-MEL-004.2 — Meldewesen Lifecycle (Intrastat/ELSTER/ATLAS — extern gegated). |
 | `milchvieh_crosssell_service` | Cross-Sell-Auswertung Milchvieh: Hygiene-Bedarf + Kraftfutter-Potenzial. |
 | `mobile_sync_service` | MOB-SYNC-001: Mobile Offline-Sync Service. |
@@ -336,6 +340,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `tank_adapter_service` | Idempotent tank-system intake, validation and delivery-note handover. |
 | `tenant_lifecycle_service` | Explicit tenant administration; preserve every journal entry before deletion. |
 | `tse_fiskaly_service` | Compatibility facade for the canonical fiscalization provider layer. |
+| `versandprofil_commands` | Versandprofil-Deaktivierung: vorbereiteter transaktionaler Fachcommand v1. |
 | `vies_service` | VIES Service |
 | `voice_adapter` | Voice Adapter Layer — NC-003 |
 | `waage_import_service` | Tenant-bound ASCII import into the canonical weighing-ticket aggregate. |
