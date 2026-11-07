@@ -342689,7 +342689,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Delete Versandprofil",
+        "summary": "Versandprofil nur versioniert deaktivieren",
         "tags": [
           "Logistik - Versandprofile & Avise"
         ]
@@ -342755,7 +342755,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Deactivate Versandprofil",
+        "summary": "Versandprofil zustandsgebunden deaktivieren",
         "tags": [
           "Logistik - Versandprofile & Avise"
         ]
@@ -409349,7 +409349,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Legacy Delete Assignment",
+        "summary": "Schulungszuordnung nur versioniert loeschen",
         "tags": [
           "training",
           "hr",
@@ -409469,7 +409469,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Delete Assignment Command",
+        "summary": "Schulungszuordnung revisionsgebunden loeschen",
         "tags": [
           "training",
           "hr",
@@ -410390,7 +410390,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Legacy Delete Onboarding",
+        "summary": "Onboarding-Lauf nur versioniert loeschen",
         "tags": [
           "training",
           "hr",
@@ -410510,7 +410510,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Delete Onboarding Command",
+        "summary": "Onboarding-Lauf revisionsgebunden loeschen",
         "tags": [
           "training",
           "hr",
@@ -410773,7 +410773,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Legacy Delete Qualification",
+        "summary": "Qualifikationsprofil nur versioniert loeschen",
         "tags": [
           "training",
           "hr",
@@ -410893,7 +410893,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Delete Qualification Command",
+        "summary": "Qualifikationsprofil revisionsgebunden loeschen",
         "tags": [
           "training",
           "hr",

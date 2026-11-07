@@ -173,7 +173,7 @@ class VersandprofilLegacyDeleteError(BaseModel):
     detail: str
 
 
-@router.post("/profile/{profile_id}/actions/deactivate", response_model=VersandprofilDeactivateResult, dependencies=SCHREIBEN["LOGISTIK"])
+@router.post("/profile/{profile_id}/actions/deactivate", summary="Versandprofil zustandsgebunden deaktivieren", response_model=VersandprofilDeactivateResult, dependencies=SCHREIBEN["LOGISTIK"])
 def deactivate_versandprofil(profile_id: str, payload: VersandprofilDeactivateInput,
                              db=Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
     from app.services.versandprofil_commands import DeactivateProfileV1, deactivate_profile
@@ -190,7 +190,7 @@ def deactivate_versandprofil(profile_id: str, payload: VersandprofilDeactivateIn
         raise
 
 
-@router.delete("/profile/{profil_nr}", status_code=410, response_model=VersandprofilLegacyDeleteError, responses={410: {"description": "Versionierter Deaktivierungsweg erforderlich"}}, dependencies=SCHREIBEN["LOGISTIK"])
+@router.delete("/profile/{profil_nr}", summary="Versandprofil nur versioniert deaktivieren", status_code=410, response_model=VersandprofilLegacyDeleteError, responses={410: {"description": "Versionierter Deaktivierungsweg erforderlich"}}, dependencies=SCHREIBEN["LOGISTIK"])
 def delete_versandprofil(profil_nr: str) -> None:
     raise HTTPException(410, "Bitte den versionierten Deaktivierungsweg verwenden")
 
