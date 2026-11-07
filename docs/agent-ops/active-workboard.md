@@ -20585,5 +20585,5 @@ Ziel: versionierte Studio-Domaincommands und ausdrueckliche Deployment-Capabilit
 ## RESPONSE-CONTRACTS-HR-VERSAND-20261107 — reserviert, Codex Subagent row_response_contracts
 Besitz training.py und versandprofile.py, enge Antwortmodell-/Routentests und eigene QA. Acht untypisierte Routen mit realen Antwortvertraegen absichern, keine Gateausnahmen. OpenAPI-Regeneration beim Lead. Keine DB.
 
-## CI-SCREEN-PROJECTION-EARLY-20261107 — reserviert, Codex Lead
+## CI-SCREEN-PROJECTION-EARLY-20261107 — abgeschlossen, Codex Lead
 Ziel: Capture- und Registry-Snapshot-Drift vor teuren Gesamtsuiten erkennen. Besitz scripts/check_all_doc_generators.sh und eigene QA. Bestehende Generatorchecks unveraendert ergaenzen; keine Testauswahl oder Schwelle abschwaechen.

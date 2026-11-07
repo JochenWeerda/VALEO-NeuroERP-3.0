@@ -15,6 +15,10 @@ fi
 echo "== OpenAPI"
 python scripts/generate_openapi.py --check
 
+echo "== Capture- und Registry-Screen-Projektionen"
+python scripts/generate_capture_screens.py --check
+python scripts/generate_screen_registry_snapshot.py --check
+
 echo "== Code-Inventare"
 python scripts/generate_code_inventories.py --check
 
