@@ -20595,3 +20595,8 @@ STUDIO-CHANNEL-RELEASE-20261107 Abnahme: Default-Deny bleibt erhalten; explizite
 
 ## STUDIO-INVOICE-RUNTIME-20261107 — reserviert, Codex Subagent invoice_studio_runtime
 Ziel: Eingangs-/Ausgangsrechnung vollstaendig ueber zentrale Studio-Runtime mit Fach-/Positions-/CLI-/MCP-Paritaet. Besitz Finance-Capture-Definitionen, InvoiceCapturePage und enge bestehende Rechnungs-Einstiege, zentrale Erweiterungen nur nach Koordination; fremder Inbox-Claim bleibt geschuetzt. Kein blosser DocFlow-Alias ohne Aggregat-/Steuer-/Fachkettennachweis, keine Gateaufweichung. Eigener Worktree; keine neue Datenbank/Container. Abnahme A/C/E plus echte fachliche Bedien- und Transportnachweise, Theme/Browser gesondert.
+
+## INVENTUR-KONTROLLLAUF-FREIGABE-20261107 — reserviert, Codex
+
+**Owner:** inventory_control_release. **Ziel:** versionierter Kontrolllauf-Command mit Tenant-, Rollen-, Snapshot-, Idempotenz- und Auditvertrag; keine Bestandsbuchung. **Dateibesitz:** inventory_auxiliary Endpoint/Service, neuer Fachcommand, eigene Tests und QA. **Integration:** Registry/CLI durch Lead. **Risiko:** gemeinsamer Pruefstand nur nach Abstimmung; keine Migration oder Reset.
+
