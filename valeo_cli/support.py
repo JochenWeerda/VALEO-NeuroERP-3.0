@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import json
 import re
-from datetime import datetime
 from dataclasses import dataclass
 from typing import Any
 from urllib.parse import quote
@@ -27,9 +26,9 @@ _PLACEHOLDER = re.compile(r"\{[^}]+\}")
 _DOCFLOW = re.compile(r"^/api/v1/docflow(?:/|$)")
 _IDENTITY_BUDGET = re.compile(r"^/api/v1/identity/budgets/actions/(root|allocate)$")
 _ROW_COMMANDS = {
-    "/api/v1/training/onboarding/runs/{entity_id}/actions/loeschen": "expected_updated_at",
-    "/api/v1/training/qualifications/{entity_id}/actions/loeschen": "expected_updated_at",
-    "/api/v1/training/assignments/{entity_id}/actions/loeschen": "expected_updated_at",
+    "/api/v1/training/onboarding/runs/{entity_id}/actions/loeschen": "expected_revision",
+    "/api/v1/training/qualifications/{entity_id}/actions/loeschen": "expected_revision",
+    "/api/v1/training/assignments/{entity_id}/actions/loeschen": "expected_revision",
     "/api/v1/logistik/versand/profile/{entity_id}/actions/deactivate": "expected_active",
 }
 
@@ -159,12 +158,8 @@ def build_request(action: dict[str, Any], *, screen_id: str, entity_id: str | No
             if not audit_reason or not audit_reason.strip():
                 raise ValueError("Diese Aktion verlangt eine Begruendung (--grund).")
         else:
-            try:
-                version = datetime.fromisoformat(value.replace("Z", "+00:00")) if isinstance(value, str) else None
-                if version is None or version.utcoffset() is None:
-                    raise ValueError()
-            except ValueError as exc:
-                raise ValueError("Gelesene Version als ISO-Zeitstempel mit Zeitzone erforderlich.") from exc
+            if not isinstance(value, str) or not re.fullmatch(r"[0-9a-f]{64}", value):
+                raise ValueError("Gelesene Revision als 64 kleingeschriebene Hexzeichen erforderlich.")
             if audit_reason:
                 raise ValueError("Dieser Zeilenbefehl akzeptiert keine Begruendung.")
         body = {row_field: value, "_idempotencyKey": idempotency_key}

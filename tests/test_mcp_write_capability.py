@@ -83,3 +83,27 @@ def test_explicit_screen_alias_may_share_command_and_endpoint(monkeypatch):
     from app.services.mcp_write_capability import capability_enabled
     assert capability_enabled('test.delete.v1', ENDPOINT, SCREEN, 'delete')
     assert capability_enabled('test.delete.v1', ENDPOINT, 'test/alias', 'delete')
+
+
+@pytest.mark.parametrize('confirmation', [None, False, 'true'])
+def test_confirmation_required_before_write_forward(monkeypatch, confirmation):
+    action = {**ACTION, 'requiresConfirmation': True}
+    run, calls = execute(monkeypatch, [CAPABILITY], action=action)
+    # Recreate the call so its parameters include the candidate confirmation.
+    original = mm.execute
+    def call_with_confirmation(req, tenant, auth, *, transport):
+        req.parameters['confirm'] = confirmation
+        return original(req, tenant, auth, transport=transport)
+    monkeypatch.setattr(mm, 'execute', call_with_confirmation)
+    with pytest.raises(HTTPException) as error:
+        run()
+    assert error.value.status_code == 422 and not calls
+
+
+def test_invalid_endpoint_type_and_unreadable_registry_fail_closed(monkeypatch):
+    from app.services.mcp_write_capability import capability_enabled
+    assert mm.agent_block({**ACTION, 'commandEndpoint': ['not', 'a', 'path']}, SCREEN) == 'ungueltiger_endpunkt'
+    def broken(_):
+        raise OSError('synthetic unavailable')
+    monkeypatch.setattr(mcp_tool_registry_service, 'get_tool', broken)
+    assert not capability_enabled('test.delete.v1', ENDPOINT, SCREEN, 'delete')

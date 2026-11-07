@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { MadeByStudioListRuntimeWire } from '@/components/mask-builder/made-by-studio-runtime-wire'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Skeleton } from '@/components/ui/skeleton'
 import { UniversalMaskRenderer } from '@/components/mask-builder/UniversalMaskRenderer'
 import { useScreenPermissions } from '@/components/mask-builder/runtime/screen-permissions'
@@ -42,6 +43,7 @@ type ChecklistApi = { id: string; checklist_code: string; title: string }
 
 type RunApi = {
   id: string
+  revision?: string
   checklist_id: string
   checklist_code?: string
   checklist_title?: string
@@ -52,9 +54,10 @@ type RunApi = {
   progress_percent?: number
 }
 
-function toRun(item: RunApi): OnboardingRun {
+function toRun(item: RunApi): OnboardingRun & { revision?: string } {
   return {
     id: item.id,
+    revision: item.revision,
     checklistId: item.checklist_id,
     checklistCode: item.checklist_code || undefined,
     checklistTitle: item.checklist_title || undefined,
@@ -85,6 +88,9 @@ export default function PersonalOnboardingPage(): JSX.Element {
   const createMutation = useCreateOnboardingRun()
   const [saving, setSaving] = useState(false)
   const [pendingDeletes, setPendingDeletes] = useState<Set<string>>(new Set())
+  const [deleteCandidate, setDeleteCandidate] = useState<{ id: string; name: string; version: string } | null>(null)
+  const deleteKeys = useRef(new Map<string, string>())
+  const deleting = useRef(new Set<string>())
 
   useEffect(() => {
     if (!laeufe.isError && !checklisten.isError) return
@@ -181,23 +187,32 @@ export default function PersonalOnboardingPage(): JSX.Element {
     }
   }, [createMutation, form.values, leeren, queryClient, saving])
 
-  const loeschen = useCallback(async (id: string, name: string) => {
-    if (!id || pendingDeletes.has(id)) return
+  const loeschen = useCallback(async (id: string, name: string, version: string) => {
+    if (!id || deleting.current.has(id)) return
+    if (!version) { toast.error('Löschen nicht möglich', { description: 'Version fehlt. Bitte Liste neu laden.' }); return }
+    const intent = `${id}:${version}`
+    const key = deleteKeys.current.get(intent) ?? crypto.randomUUID()
+    deleteKeys.current.set(intent, key)
+    deleting.current.add(id)
     setPendingDeletes((prev) => new Set(prev).add(id))
     try {
-      await apiClient.delete(`/api/v1/training/onboarding/runs/${id}`)
+      await apiClient.post(`/api/v1/training/onboarding/runs/${encodeURIComponent(id)}/actions/loeschen`, {
+        expected_revision: version, _idempotencyKey: key,
+      })
+      deleteKeys.current.delete(intent)
       toast.success('Lauf gelöscht', { description: name })
       await queryClient.invalidateQueries({ queryKey: personalKeys.onboardingRuns() })
     } catch (error) {
       toast.error('Lauf nicht gelöscht', { description: getAxiosErrorMessage(error) })
     } finally {
+      deleting.current.delete(id)
       setPendingDeletes((prev) => {
         const next = new Set(prev)
         next.delete(id)
         return next
       })
     }
-  }, [pendingDeletes, queryClient])
+  }, [queryClient])
 
   const handleAction = useCallback(async (key: string, payload: Record<string, unknown>) => {
     if (key === 'speichern') {
@@ -208,8 +223,8 @@ export default function PersonalOnboardingPage(): JSX.Element {
       leeren()
       return
     }
-    if (key === 'loeschen') await loeschen(text(payload.id), text(payload.employee_ref))
-  }, [leeren, loeschen, speichern])
+    if (key === 'loeschen') setDeleteCandidate({ id: text(payload.id), name: text(payload.employee_ref), version: text(payload.revision) })
+  }, [leeren, speichern])
 
   const screenContext = useMemo(() => createScreenContext({
     data: { laeufe: rows },
@@ -234,6 +249,18 @@ export default function PersonalOnboardingPage(): JSX.Element {
 
   return (
     <div className="space-y-6 p-3 md:p-6">
+      <AlertDialog open={deleteCandidate !== null} onOpenChange={(open) => { if (!open) setDeleteCandidate(null) }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Eintrag löschen?</AlertDialogTitle>
+            <AlertDialogDescription>Der ausgewählte Eintrag {deleteCandidate?.name} wird gelöscht.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+            <AlertDialogAction onClick={() => { if (deleteCandidate) void loeschen(deleteCandidate.id, deleteCandidate.name, deleteCandidate.version) }}>Löschen bestätigen</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <UniversalMaskRenderer
         plan={plan}
         formState={form}
@@ -243,6 +270,7 @@ export default function PersonalOnboardingPage(): JSX.Element {
         tables={{
           laeufe: rows.map((row) => ({
             id: row.id,
+            revision: row.revision,
             employee_ref: row.employeeRef,
             checkliste: row.checklistTitle || row.checklistCode || row.checklistId,
             status: STAND[row.status] ?? 'Nicht gestartet',

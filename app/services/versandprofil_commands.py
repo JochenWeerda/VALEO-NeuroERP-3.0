@@ -22,6 +22,7 @@ from app.core.business_time import business_now
 from app.domains.shared.events import IntegrationEvent
 from app.infrastructure.eventbus.outbox import OutboxEvent
 from app.services.mask_action_runtime_service import _write_audit
+from app.services.command_idempotency import lock_and_replay, store_execution
 
 
 class DeactivateProfileV1(BaseModel):
@@ -33,38 +34,36 @@ class DeactivateProfileV1(BaseModel):
 
 
 def deactivate_profile(db: Session, tenant: str, command: DeactivateProfileV1) -> dict:
-    """Lock, authorize, compare identity/state, audit and replay atomically."""
+    """Lock, authorize, compare state, audit and replay; caller owns the transaction."""
     principal = current_identity()
     if principal.tenant_id != tenant or not principal.roles.intersection(LOGISTIK):
         raise HTTPException(403, "Versandprofil-Schreibrecht erforderlich")
-    if principal.claims.get("identity_type") != "human" or principal.claims.get("act") or principal.claims.get("agent_id"):
-        raise HTTPException(403, "Agentenfreigabe fuer diesen Command fehlt")
+    identity_type = principal.claims.get("identity_type")
+    if principal.claims.get("act") or (identity_type == "human" and principal.claims.get("agent_id")):
+        raise HTTPException(403, "Delegierte Identitaet ist nicht freigeschaltet")
+    if identity_type != "human":
+        if identity_type not in {"agent", "service"}:
+            raise HTTPException(403, "Deklarierter Identitaetstyp erforderlich")
+        from app.services.mcp_write_capability import authorize_agent
+        authorize_agent(principal, "logistik.versandprofil.deactivate.v1",
+                        "/api/v1/logistik/versand/profile/{entity_id}/actions/deactivate",
+                        "logistik/versandprofile", "loeschen")
     actor = principal.subject
     if not actor or not command.idempotency_key.strip() or not command.reason.strip():
         raise HTTPException(422, "Akteur, Wiederholungsschluessel und Grund sind erforderlich")
     action = "logistik.versandprofil.deactivate.v1"
     fingerprint = hashlib.sha256(json.dumps(command.model_dump(exclude={"idempotency_key"}),
                                             sort_keys=True, ensure_ascii=False).encode()).hexdigest()
-    lock = int.from_bytes(hashlib.sha256(json.dumps([tenant, action, command.idempotency_key]).encode()).digest()[:8],
-                          "big", signed=True)
     try:
-        db.execute(text("SELECT pg_advisory_xact_lock(:key)"), {"key": lock})
+        replayed = lock_and_replay(db, tenant=tenant, command=action, key=command.idempotency_key,
+                                   actor=actor, fingerprint=fingerprint)
+        if replayed is not None:
+            return replayed
         row = db.execute(text("SELECT id, aktiv FROM domain_shared.versandprofile "
                               "WHERE tenant_id=:tenant AND id=:id FOR UPDATE"),
                          {"tenant": tenant, "id": command.profile_id}).mappings().first()
         if not row:
             raise HTTPException(404, "Versandprofil nicht gefunden")
-        previous = db.execute(text("SELECT actor_id, payload_hash, result FROM public.mcp_tool_executions "
-                                   "WHERE tenant_id=:tenant AND tool_name=:tool AND idempotency_key=:key"),
-                              {"tenant": tenant, "tool": action, "key": command.idempotency_key}).mappings().first()
-        if previous:
-            if previous["actor_id"] != actor or previous["payload_hash"] != fingerprint:
-                raise HTTPException(409, "Wiederholungsschluessel gehoert zu einem anderen Auftrag")
-            result = previous["result"]
-            if isinstance(result, str):
-                result = json.loads(result)
-            db.commit()
-            return {**result, "replayed": True}
         if row["aktiv"] is not True:
             raise HTTPException(409, "Versandprofil wurde bereits geaendert")
         db.execute(text("UPDATE domain_shared.versandprofile SET aktiv=false WHERE tenant_id=:tenant AND id=:id"),
@@ -81,16 +80,10 @@ def deactivate_profile(db: Session, tenant: str, command: DeactivateProfileV1) -
                            tenant_id=tenant, timestamp=now, payload=json.dumps(asdict(event), default=str),
                            published=False))
         result = {"success": True, "profile_id": command.profile_id, "auditEntryId": audit_id, "replayed": False}
-        db.execute(text("INSERT INTO public.mcp_tool_executions "
-                        "(tenant_id, tool_name, idempotency_key, actor_id, payload_hash, result) "
-                        "VALUES (:tenant, :tool, :key, :actor, :fingerprint, CAST(:result AS jsonb))"),
-                   {"tenant": tenant, "tool": action, "key": command.idempotency_key, "actor": actor,
-                    "fingerprint": fingerprint, "result": json.dumps(result)})
-        db.commit()
+        store_execution(db, tenant=tenant, command=action, key=command.idempotency_key,
+                        actor=actor, fingerprint=fingerprint, result=result)
         return result
     except HTTPException:
-        db.rollback()
         raise
     except Exception as exc:
-        db.rollback()
         raise HTTPException(503, "Versandprofil konnte nicht sicher deaktiviert werden") from exc

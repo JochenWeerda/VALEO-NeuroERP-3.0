@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { MadeByStudioListRuntimeWire } from '@/components/mask-builder/made-by-studio-runtime-wire'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Skeleton } from '@/components/ui/skeleton'
 import { UniversalMaskRenderer } from '@/components/mask-builder/UniversalMaskRenderer'
 import { useScreenPermissions } from '@/components/mask-builder/runtime/screen-permissions'
@@ -30,6 +31,7 @@ type CourseApi = { id: string; course_code: string; title: string; is_active: bo
 
 type AssignmentApi = {
   id: string
+  revision?: string
   course_id: string
   course_code?: string
   course_title?: string
@@ -41,6 +43,7 @@ type AssignmentApi = {
 
 type SchulungRow = {
   id: string
+  revision?: string
   employeeRef: string
   courseId: string
   courseCode?: string
@@ -82,6 +85,7 @@ function toRow(item: AssignmentApi): SchulungRow {
   const label = stand(item)
   return {
     id: item.id,
+    revision: item.revision,
     employeeRef: item.employee_ref,
     courseId: item.course_id,
     courseCode: item.course_code || undefined,
@@ -111,6 +115,9 @@ export default function PersonalSchulungenPage(): JSX.Element {
   const offen = rows.filter((row) => row.ablaufend || row.abgelaufen).length
   const [saving, setSaving] = useState(false)
   const [pendingDeletes, setPendingDeletes] = useState<Set<string>>(new Set())
+  const [deleteCandidate, setDeleteCandidate] = useState<{ id: string; name: string; version: string } | null>(null)
+  const deleteKeys = useRef(new Map<string, string>())
+  const deleting = useRef(new Set<string>())
 
   useEffect(() => {
     if (!schulungen.isError && !kurse.isError) return
@@ -210,23 +217,32 @@ export default function PersonalSchulungenPage(): JSX.Element {
     }
   }, [form.values, leeren, queryClient, saving])
 
-  const loeschen = useCallback(async (id: string, name: string) => {
-    if (!id || pendingDeletes.has(id)) return
+  const loeschen = useCallback(async (id: string, name: string, version: string) => {
+    if (!id || deleting.current.has(id)) return
+    if (!version) { toast.error('Löschen nicht möglich', { description: 'Version fehlt. Bitte Liste neu laden.' }); return }
+    const intent = `${id}:${version}`
+    const key = deleteKeys.current.get(intent) ?? crypto.randomUUID()
+    deleteKeys.current.set(intent, key)
+    deleting.current.add(id)
     setPendingDeletes((prev) => new Set(prev).add(id))
     try {
-      await apiClient.delete(`/api/v1/training/assignments/${id}`)
+      await apiClient.post(`/api/v1/training/assignments/${encodeURIComponent(id)}/actions/loeschen`, {
+        expected_revision: version, _idempotencyKey: key,
+      })
+      deleteKeys.current.delete(intent)
       toast.success('Schulung gelöscht', { description: name })
       await queryClient.invalidateQueries({ queryKey: personalKeys.schulungen() })
     } catch (error) {
       toast.error('Schulung nicht gelöscht', { description: getAxiosErrorMessage(error) })
     } finally {
+      deleting.current.delete(id)
       setPendingDeletes((prev) => {
         const next = new Set(prev)
         next.delete(id)
         return next
       })
     }
-  }, [pendingDeletes, queryClient])
+  }, [queryClient])
 
   const handleAction = useCallback(async (key: string, payload: Record<string, unknown>) => {
     if (key === 'speichern') {
@@ -237,8 +253,8 @@ export default function PersonalSchulungenPage(): JSX.Element {
       leeren()
       return
     }
-    if (key === 'loeschen') await loeschen(text(payload.id), text(payload.employee_ref))
-  }, [leeren, loeschen, speichern])
+    if (key === 'loeschen') setDeleteCandidate({ id: text(payload.id), name: text(payload.employee_ref), version: text(payload.revision) })
+  }, [leeren, speichern])
 
   const screenContext = useMemo(() => createScreenContext({
     data: { schulungen: rows },
@@ -263,6 +279,18 @@ export default function PersonalSchulungenPage(): JSX.Element {
 
   return (
     <div className="space-y-6 p-3 md:p-6">
+      <AlertDialog open={deleteCandidate !== null} onOpenChange={(open) => { if (!open) setDeleteCandidate(null) }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Eintrag löschen?</AlertDialogTitle>
+            <AlertDialogDescription>Der ausgewählte Eintrag {deleteCandidate?.name} wird gelöscht.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+            <AlertDialogAction onClick={() => { if (deleteCandidate) void loeschen(deleteCandidate.id, deleteCandidate.name, deleteCandidate.version) }}>Löschen bestätigen</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <UniversalMaskRenderer
         plan={plan}
         formState={form}
@@ -272,6 +300,7 @@ export default function PersonalSchulungenPage(): JSX.Element {
         tables={{
           schulungen: rows.map((row) => ({
             id: row.id,
+            revision: row.revision,
             employee_ref: row.employeeRef,
             kurs: row.courseTitle || row.courseCode || row.courseId,
             status: row.statusLabel,

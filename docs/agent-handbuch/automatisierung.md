@@ -4,7 +4,7 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-05
+last_reviewed: 2026-11-07
 version: 3.0.0
 description: MCP-Tools, Domain-Events und Automatisierungsregeln für Agenten.
 ---
@@ -171,6 +171,7 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 
 | Event-ID | Kanal | Quelle |
 |---|---|---|
+| `inventory.count_sheet.reused.v1` | outbox | `app/services/inventory_count_sheet_command.py` |
 | `inventory.material_flow.edge_created` | outbox | `app/services/agri_silo_material_flow_service.py` |
 | `inventory.material_flow.edge_updated` | outbox | `app/services/agri_silo_material_flow_service.py` |
 | `inventory.material_flow.flush_charge_booked` | outbox | `app/services/agri_flush_booking.py` |

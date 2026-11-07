@@ -38,7 +38,8 @@ class InventoryAuxiliaryService:
         """), {"id": count_id, "tid": self.tenant_id}).first() is not None
 
     def create(self, *, count_id: str, batch_type: str, actor: str, reason: str,
-               import_rows: list[dict[str, Any]] | None = None, declared_hash: str | None = None) -> dict[str, Any]:
+               import_rows: list[dict[str, Any]] | None = None, declared_hash: str | None = None,
+               commit: bool = True) -> dict[str, Any]:
         if batch_type not in BATCH_TYPES:
             raise InventoryAuxiliaryError("Unbekannter Inventur-Nebenlauf")
         count = self.db.execute(text("""
@@ -87,7 +88,8 @@ class InventoryAuxiliaryService:
                  "difference_count": difference_count, "value": value, "maker": actor,
                  "route": f"/lager/inventur?count={count_id}", "notes": reason})
         self._audit(batch_id, "generated", None, "generated", actor, reason)
-        self.db.commit()
+        if commit:
+            self.db.commit()
         return {"id": batch_id, "status": "generated", "duplicate": False, "source_hash": digest,
                 "line_count": len(rows), "difference_count": difference_count, "preliminary_value": round(value, 2)}
 

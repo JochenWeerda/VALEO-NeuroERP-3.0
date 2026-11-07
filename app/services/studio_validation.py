@@ -24,6 +24,7 @@ from typing import Any
 
 import yaml
 import json
+import re
 
 _CONFIG_PATH = Path(__file__).resolve().parents[2] / "config" / "studio_data_sources.yaml"
 
@@ -287,6 +288,10 @@ def validate_studio_draft(
                     violations.append(f"belegaktionsvertrag_geaendert:{key}")
             except (ValueError, TypeError):
                 violations.append(f"belegaktionsvertrag_geaendert:{key}")
+        command_name = action.get("domainCommand")
+        if command_name is not None and (not isinstance(command_name, str) or
+                not re.fullmatch(r"[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]*)+\.v[1-9][0-9]*", command_name)):
+            violations.append(f"action_ungueltiger_domainCommand:{key}")
         if action.get("domainCommand") != base.get("domainCommand"):
             violations.append(f"action_fremder_domainCommand:{key}")
         if action.get("readView") != base.get("readView"):

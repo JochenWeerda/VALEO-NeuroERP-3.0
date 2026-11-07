@@ -3,7 +3,7 @@
 from typing import Any, Literal
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Path, Query
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationError
 from sqlalchemy.orm import Session
 
 from app.api.v1.schemas.inventory_bundle_schemas import (
@@ -30,6 +30,8 @@ class BatchIn(BaseModel):
     reason: str = Field(min_length=5, max_length=500)
     import_rows: list[dict[str, Any]] | None = None
     declared_hash: str | None = Field(default=None, min_length=64, max_length=64)
+    expected_revision: str | None = None
+    idempotency_key: str | None = Field(default=None, alias="_idempotencyKey")
 
 
 class TransitionIn(BaseModel):
@@ -48,6 +50,24 @@ def actor(user: dict) -> str:
 @router.post("/batches", response_model=AuxiliaryBatchCreatedOut, status_code=201, summary="Nebenbuch-Stapel anlegen")
 def create_batch(body: BatchIn, user: dict = Depends(lager_write), db: Session = Depends(get_db),
                  tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
+    if body.batch_type == "count_sheet":
+        from app.services.inventory_count_sheet_command import CountSheetCommand, create_count_sheet
+        try:
+            command = CountSheetCommand(inventory_count_id=body.inventory_count_id,
+                                        expected_revision=body.expected_revision,
+                                        idempotency_key=body.idempotency_key, reason=body.reason)
+            result = create_count_sheet(db, tenant_id, command)
+            db.commit()
+            return result
+        except ValidationError as exc:
+            db.rollback()
+            raise HTTPException(422, "Inventurstand und Wiederholungsschluessel erforderlich") from exc
+        except HTTPException:
+            db.rollback()
+            raise
+        except Exception as exc:
+            db.rollback()
+            raise HTTPException(503, "Zaehlliste konnte nicht sicher erzeugt werden") from exc
     try:
         return InventoryAuxiliaryService(db, tenant_id).create(count_id=body.inventory_count_id,
             batch_type=body.batch_type, actor=actor(user), reason=body.reason,
@@ -65,6 +85,13 @@ def list_batches(page: int = Query(1, ge=1), page_size: int = Query(50, ge=1, le
                  tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
     return InventoryAuxiliaryService(db, tenant_id).list_page(page=page, page_size=page_size,
         batch_type=batch_type, status=status, count_id=inventory_count_id)
+
+
+@router.get("/counts/{count_id}/count-sheet-snapshot", summary="Gelesenen Zaehllistenstand bestimmen")
+def count_sheet_snapshot(count_id: str, user: dict = Depends(lager_write), db: Session = Depends(get_db),
+                         tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
+    from app.services.inventory_count_sheet_command import snapshot
+    return snapshot(db, tenant_id, count_id)
 
 
 @router.get("/summary", response_model=AuxiliarySummaryOut, summary="Kennzahlen der Nebenbuch-Stapel")
@@ -144,6 +171,41 @@ async def run_create_action(
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
     """Derselbe Fachweg wie ``POST /batches``; die Inventur (``inventory_count_id``) steht im Auftrag."""
+    if action_key == "create_count_sheet":
+        from app.services.inventory_count_sheet_command import CountSheetCommand, create_count_sheet, snapshot
+        allowed = {"inventory_count_id", "expected_revision", "_auditReason", "_idempotencyKey", "_mode"}
+        if set(body) - allowed:
+            raise HTTPException(422, "Unbekannte Eingabe im Zaehllistenauftrag")
+        mode = body.get("_mode", "execute")
+        if mode not in {"execute", "dryRun", "validate"}:
+            raise HTTPException(422, "Ungueltiger Ausfuehrungsmodus")
+        try:
+            command = CountSheetCommand(inventory_count_id=body.get("inventory_count_id"),
+                                        expected_revision=body.get("expected_revision"),
+                                        idempotency_key=body.get("_idempotencyKey") if mode == "execute" else "preview",
+                                        reason=body.get("_auditReason"))
+            if mode != "execute":
+                current = snapshot(db, tenant_id, command.inventory_count_id)
+                db.rollback()
+                if current["revision"] != command.expected_revision:
+                    raise HTTPException(409, "Inventurstand geaendert; bitte neu laden")
+                return MaskActionResultOut(actionKey=action_key, mode=mode, success=True,
+                                           summary="Pruefung erfolgreich; keine Aenderungen.").model_dump()
+            result = create_count_sheet(db, tenant_id, command)
+            db.commit()
+            return MaskActionResultOut(actionKey=action_key, mode=mode, success=True,
+                summary="Zaehlliste bereits erzeugt" if result.get("replayed") or result.get("duplicate") else "Zaehlliste erzeugt",
+                affectedIds=[result["id"]], auditEntryId=result["auditEntryId"],
+                outboxEventId=result["outboxEventId"]).model_dump()
+        except ValidationError as exc:
+            db.rollback()
+            raise HTTPException(422, "Ungueltiger oder unvollstaendiger Zaehllistenauftrag") from exc
+        except HTTPException:
+            db.rollback()
+            raise
+        except Exception as exc:
+            db.rollback()
+            raise HTTPException(503, "Zaehlliste konnte nicht sicher erzeugt werden") from exc
     bearbeiter = actor(user)
     reason = begruendung(body)
     count_id = str(body.get("inventory_count_id") or "").strip()

@@ -7,8 +7,8 @@ from __future__ import annotations
 
 import hashlib
 import json
-from datetime import datetime, timezone
 from typing import Literal
+from uuid import uuid4
 
 from fastapi import HTTPException
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -16,16 +16,16 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.auth.bereich_roles import PERSONAL
-from app.auth.deps import effective_roles
 from app.services.mask_action_runtime_service import _write_audit, _write_outbox
-from app.services.mcp_execution_service import _advisory_lock, _store_execution, _tenant_from_claims
+from app.core.identity_context import current_identity
+from app.services.command_idempotency import lock_and_replay, store_execution
 
 
 class HrDeleteCommand(BaseModel):
     model_config = ConfigDict(extra="forbid")
     kind: Literal["onboarding", "qualification", "assignment"]
     entity_id: str = Field(min_length=1, max_length=120)
-    expected_updated_at: datetime
+    expected_revision: str = Field(pattern=r"^[0-9a-f]{64}$")
     idempotency_key: str = Field(min_length=1, max_length=120)
 
     @field_validator("entity_id", "idempotency_key")
@@ -35,86 +35,71 @@ class HrDeleteCommand(BaseModel):
             raise ValueError("non-empty canonical value required")
         return value
 
-    @field_validator("expected_updated_at")
-    @classmethod
-    def require_timezone(cls, value: datetime) -> datetime:
-        if value.tzinfo is None or value.utcoffset() is None:
-            raise ValueError("timezone required")
-        return value.astimezone(timezone.utc)
 
 
 _SELECT = {
-    "onboarding": text("SELECT updated_at FROM domain_hr.onboarding_runs WHERE tenant_id=:tenant AND id=:id FOR UPDATE"),
-    "qualification": text("SELECT updated_at FROM domain_hr.qualification_profiles WHERE tenant_id=:tenant AND id=:id FOR UPDATE"),
-    "assignment": text("SELECT updated_at FROM domain_hr.training_assignments WHERE tenant_id=:tenant AND id=:id FOR UPDATE"),
+    "onboarding": text("SELECT encode(sha256(convert_to(to_jsonb(r)::text, 'UTF8')), 'hex') AS revision FROM domain_hr.onboarding_runs r WHERE tenant_id=:tenant AND id=:id FOR UPDATE"),
+    "qualification": text("SELECT encode(sha256(convert_to(to_jsonb(r)::text, 'UTF8')), 'hex') AS revision FROM domain_hr.qualification_profiles r WHERE tenant_id=:tenant AND id=:id FOR UPDATE"),
+    "assignment": text("SELECT encode(sha256(convert_to(to_jsonb(r)::text, 'UTF8')), 'hex') AS revision FROM domain_hr.training_assignments r WHERE tenant_id=:tenant AND id=:id FOR UPDATE"),
 }
 _DELETE = {
-    "onboarding": text("DELETE FROM domain_hr.onboarding_runs WHERE tenant_id=:tenant AND id=:id AND updated_at=:version"),
-    "qualification": text("DELETE FROM domain_hr.qualification_profiles WHERE tenant_id=:tenant AND id=:id AND updated_at=:version"),
-    "assignment": text("DELETE FROM domain_hr.training_assignments WHERE tenant_id=:tenant AND id=:id AND updated_at=:version"),
+    "onboarding": text("DELETE FROM domain_hr.onboarding_runs WHERE tenant_id=:tenant AND id=:id"),
+    "qualification": text("DELETE FROM domain_hr.qualification_profiles WHERE tenant_id=:tenant AND id=:id"),
+    "assignment": text("DELETE FROM domain_hr.training_assignments WHERE tenant_id=:tenant AND id=:id"),
 }
 
 
+_SCREENS = {"onboarding": "personal/onboarding", "qualification": "personal/qualifikationen",
+            "assignment": "personal/schulungen"}
+_ENDPOINTS = {
+    "onboarding": "/api/v1/training/onboarding/runs/{entity_id}/actions/loeschen",
+    "qualification": "/api/v1/training/qualifications/{entity_id}/actions/loeschen",
+    "assignment": "/api/v1/training/assignments/{entity_id}/actions/loeschen",
+}
 
-def _replay_or_none(db: Session, tenant: str, name: str, key: str, actor: str, fingerprint: str) -> dict | None:
-    # Do not roll back the caller's transaction merely to read a replay.
-    row = db.execute(text("""
-        SELECT actor_id, payload_hash, result FROM public.mcp_tool_executions
-        WHERE tenant_id=:tenant AND tool_name=:tool AND idempotency_key=:key
-    """), {"tenant": tenant, "tool": name, "key": key}).mappings().first()
-    if row is None:
-        return None
-    if row["actor_id"] != actor or row["payload_hash"] != fingerprint:
-        raise HTTPException(409, "Idempotency key is already bound to another request")
-    result = json.loads(row["result"]) if isinstance(row["result"], str) else row["result"]
-    return {**result, "replayed": True}
 
-def delete_hr_row(db: Session, command: HrDeleteCommand, *, user: dict, tenant: str) -> dict:
-    """Delete only the reviewed version; caller commits the entire transaction.
-
-    Authorization is checked before even replay lookup. Identity and tenant must
-    be verified by the caller's authentication middleware; no request body may
-    choose them. Human-only until a per-capability agent policy is approved.
-    """
-    actor = user.get("sub")
-    raw = user.get("raw")
-    verified_tenant = _tenant_from_claims(raw)
-    roles = user.get("roles") or []
-    if not isinstance(roles, (list, tuple, set)):
-        roles = []
-    if (not isinstance(actor, str) or not actor.strip() or not tenant or verified_tenant != tenant
-            or not effective_roles(roles) & set(PERSONAL)):
+def delete_hr_row(db: Session, command: HrDeleteCommand, *, tenant: str) -> dict:
+    """Use the verified request principal; caller commits or rolls back atomically."""
+    principal = current_identity()
+    if principal.tenant_id != tenant or not principal.roles.intersection(PERSONAL) or not principal.subject:
         raise HTTPException(403, "Verified subject, tenant and personnel write role required")
-    if (not isinstance(raw, dict) or raw.get("identity_type") != "human"
-            or raw.get("act") or raw.get("agent_id")):
-        raise HTTPException(403, "HR deletion capability is not enabled for agents")
-
     name = f"hr.{command.kind}.delete.v1"
+    identity_type = principal.claims.get("identity_type")
+    if principal.claims.get("act") or (identity_type == "human" and principal.claims.get("agent_id")):
+        raise HTTPException(403, "Delegated identity is not enabled for HR deletion")
+    if identity_type != "human":
+        if identity_type not in {"agent", "service"}:
+            raise HTTPException(403, "Declared execution identity required")
+        from app.services.mcp_write_capability import authorize_agent
+        authorize_agent(principal, name, _ENDPOINTS[command.kind], _SCREENS[command.kind], "loeschen")
+    actor = principal.subject
     payload = {"kind": command.kind, "entity_id": command.entity_id,
-               "expected_updated_at": command.expected_updated_at.isoformat()}
+               "expected_revision": command.expected_revision}
     fingerprint = hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
-    _advisory_lock(db, tenant, name, command.idempotency_key)
-    replay = _replay_or_none(db, tenant, name, command.idempotency_key, actor, fingerprint)
+    replay = lock_and_replay(db, tenant=tenant, command=name, key=command.idempotency_key,
+                             actor=actor, fingerprint=fingerprint)
     if replay is not None:
         return replay
 
+    # Canonicalize timestamptz serialization in to_jsonb for every database session.
+    db.execute(text("SET LOCAL TIME ZONE 'UTC'"))
     params = {"tenant": tenant, "id": command.entity_id}
     row = db.execute(_SELECT[command.kind], params).mappings().first()
     if row is None:
         raise HTTPException(404, "HR record not found")
-    current = row["updated_at"]
-    if not isinstance(current, datetime) or current.tzinfo is None or current != command.expected_updated_at:
+    if row["revision"] != command.expected_revision:
         raise HTTPException(409, "HR record changed; reload before deleting")
-    deleted = db.execute(_DELETE[command.kind], {**params, "version": command.expected_updated_at})
+    deleted = db.execute(_DELETE[command.kind], params)
     if deleted.rowcount != 1:
         raise HTTPException(409, "HR record changed; reload before deleting")
     audit_id = _write_audit(db, tenant_id=tenant, action_key=name, entity_type=f"hr_{command.kind}",
                             entity_id=command.entity_id, audit_reason=None, idempotency_key=command.idempotency_key,
                             summary=f"HR {command.kind} deleted", performed_by=actor)
     outbox_id = _write_outbox(db, tenant_id=tenant, event_type=name, aggregate_id=command.entity_id,
-                               payload={"id": command.entity_id, "tenant_id": tenant})
+                               payload={"id": command.entity_id, "tenant_id": tenant, "actor_id": actor,
+                                        "audit_id": audit_id, "correlation_id": str(uuid4())})
     result = {"success": True, "replayed": False, "entity_id": command.entity_id,
               "auditEntryId": audit_id, "outboxEventId": outbox_id}
-    _store_execution(db, tenant=tenant, tool=name, key=command.idempotency_key, actor=actor,
-                     fingerprint=fingerprint, result=result)
+    store_execution(db, tenant=tenant, command=name, key=command.idempotency_key,
+                    actor=actor, fingerprint=fingerprint, result=result)
     return result

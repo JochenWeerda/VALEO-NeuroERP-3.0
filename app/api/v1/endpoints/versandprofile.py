@@ -154,19 +154,34 @@ def create_versandprofil(
     return VersandprofilOut(**dict(row._mapping))
 
 
-@router.delete("/profile/{profil_nr}", summary="Versandprofil löschen",
-    response_model=None, dependencies=SCHREIBEN["LOGISTIK"])
-def delete_versandprofil(
-    profil_nr: str,
-    db=Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
-):
-    db.execute(text("""
-        UPDATE domain_shared.versandprofile SET aktiv = false
-        WHERE tenant_id = :tid AND profil_nr = :nr
-    """), {"tid": tenant_id, "nr": profil_nr})
-    db.commit()
-    return Response(status_code=204)
+class VersandprofilDeactivateInput(BaseModel):
+    model_config = {"extra": "forbid", "populate_by_name": True}
+    expected_active: bool
+    idempotency_key: str = Field(alias="_idempotencyKey", min_length=1, max_length=120)
+    audit_reason: str = Field(alias="_auditReason", min_length=1, max_length=500)
+    mode: str = Field(default="execute", alias="_mode")
+
+
+@router.post("/profile/{profile_id}/actions/deactivate", dependencies=SCHREIBEN["LOGISTIK"])
+def deactivate_versandprofil(profile_id: str, payload: VersandprofilDeactivateInput,
+                             db=Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
+    from app.services.versandprofil_commands import DeactivateProfileV1, deactivate_profile
+    if payload.mode != "execute" or payload.expected_active is not True:
+        raise HTTPException(422, "Aktiver Profilstand und execute sind erforderlich")
+    try:
+        result = deactivate_profile(db, tenant_id, DeactivateProfileV1(
+            profile_id=profile_id, expected_active=True, idempotency_key=payload.idempotency_key,
+            reason=payload.audit_reason))
+        db.commit()
+        return result
+    except Exception:
+        db.rollback()
+        raise
+
+
+@router.delete("/profile/{profil_nr}", dependencies=SCHREIBEN["LOGISTIK"])
+def delete_versandprofil(profil_nr: str):
+    raise HTTPException(410, "Bitte den versionierten Deaktivierungsweg verwenden")
 
 
 # ── Lieferavise ───────────────────────────────────────────────────────────────

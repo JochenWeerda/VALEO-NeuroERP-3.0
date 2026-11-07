@@ -85296,6 +85296,28 @@
         "title": "HoflisteOut",
         "type": "object"
       },
+      "HrDeleteBody": {
+        "additionalProperties": false,
+        "properties": {
+          "_idempotencyKey": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Idempotencykey",
+            "type": "string"
+          },
+          "expected_revision": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Expected Revision",
+            "type": "string"
+          }
+        },
+        "required": [
+          "expected_revision",
+          "_idempotencyKey"
+        ],
+        "title": "HrDeleteBody",
+        "type": "object"
+      },
       "HrmOperatingSystemModuleOut": {
         "properties": {
           "apiContracts": {
@@ -172587,6 +172609,39 @@
         "title": "VersandprofilCreate",
         "type": "object"
       },
+      "VersandprofilDeactivateInput": {
+        "additionalProperties": false,
+        "properties": {
+          "_auditReason": {
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Auditreason",
+            "type": "string"
+          },
+          "_idempotencyKey": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Idempotencykey",
+            "type": "string"
+          },
+          "_mode": {
+            "default": "execute",
+            "title": "Mode",
+            "type": "string"
+          },
+          "expected_active": {
+            "title": "Expected Active",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "expected_active",
+          "_idempotencyKey",
+          "_auditReason"
+        ],
+        "title": "VersandprofilDeactivateInput",
+        "type": "object"
+      },
       "VersandprofilOut": {
         "properties": {
           "absender_email": {
@@ -186185,6 +186240,17 @@
       },
       "app__api__v1__endpoints__inventory_auxiliary__BatchIn": {
         "properties": {
+          "_idempotencyKey": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Idempotencykey"
+          },
           "batch_type": {
             "enum": [
               "count_sheet",
@@ -186208,6 +186274,17 @@
               }
             ],
             "title": "Declared Hash"
+          },
+          "expected_revision": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Revision"
           },
           "import_rows": {
             "anyOf": [
@@ -324644,6 +324721,56 @@
         ]
       }
     },
+    "/api/v1/inventory/auxiliary/counts/{count_id}/count-sheet-snapshot": {
+      "get": {
+        "operationId": "count_sheet_snapshot_api_v1_inventory_auxiliary_counts__count_id__count_sheet_snapshot_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "count_id",
+            "required": true,
+            "schema": {
+              "title": "Count Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Count Sheet Snapshot Api V1 Inventory Auxiliary Counts  Count Id  Count Sheet Snapshot Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Gelesenen Zaehllistenstand bestimmen",
+        "tags": [
+          "inventory",
+          "inventory-auxiliary"
+        ]
+      }
+    },
     "/api/v1/inventory/auxiliary/summary": {
       "get": {
         "operationId": "summary_api_v1_inventory_auxiliary_summary_get",
@@ -342446,15 +342573,6 @@
               "title": "Profil Nr",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -342482,7 +342600,71 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Versandprofil löschen",
+        "summary": "Delete Versandprofil",
+        "tags": [
+          "Logistik - Versandprofile & Avise"
+        ]
+      }
+    },
+    "/api/v1/logistik/versand/profile/{profile_id}/actions/deactivate": {
+      "post": {
+        "operationId": "deactivate_versandprofil_api_v1_logistik_versand_profile__profile_id__actions_deactivate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "profile_id",
+            "required": true,
+            "schema": {
+              "title": "Profile Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": true,
+            "schema": {
+              "title": "X-Tenant-Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VersandprofilDeactivateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Deactivate Versandprofil",
         "tags": [
           "Logistik - Versandprofile & Avise"
         ]
@@ -409037,7 +409219,7 @@
     },
     "/api/v1/training/assignments/{item_id}": {
       "delete": {
-        "operationId": "delete_assignment_api_v1_training_assignments__item_id__delete",
+        "operationId": "legacy_delete_assignment_api_v1_training_assignments__item_id__delete",
         "parameters": [
           {
             "in": "path",
@@ -409050,7 +409232,12 @@
           }
         ],
         "responses": {
-          "204": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "description": "Successful Response"
           },
           "422": {
@@ -409069,7 +409256,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Assignment lÃ¶schen",
+        "summary": "Legacy Delete Assignment",
         "tags": [
           "training",
           "hr",
@@ -409129,6 +409316,65 @@
           }
         ],
         "summary": "Assignment aktualisieren",
+        "tags": [
+          "training",
+          "hr",
+          "onboarding",
+          "training",
+          "hr"
+        ]
+      }
+    },
+    "/api/v1/training/assignments/{item_id}/actions/loeschen": {
+      "post": {
+        "operationId": "delete_assignment_command_api_v1_training_assignments__item_id__actions_loeschen_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "title": "Item Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HrDeleteBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Delete Assignment Command",
         "tags": [
           "training",
           "hr",
@@ -410010,7 +410256,7 @@
     },
     "/api/v1/training/onboarding/runs/{item_id}": {
       "delete": {
-        "operationId": "delete_run_api_v1_training_onboarding_runs__item_id__delete",
+        "operationId": "legacy_delete_onboarding_api_v1_training_onboarding_runs__item_id__delete",
         "parameters": [
           {
             "in": "path",
@@ -410023,7 +410269,12 @@
           }
         ],
         "responses": {
-          "204": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "description": "Successful Response"
           },
           "422": {
@@ -410042,7 +410293,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Run lÃ¶schen",
+        "summary": "Legacy Delete Onboarding",
         "tags": [
           "training",
           "hr",
@@ -410102,6 +410353,65 @@
           }
         ],
         "summary": "Run aktualisieren",
+        "tags": [
+          "training",
+          "hr",
+          "onboarding",
+          "training",
+          "hr"
+        ]
+      }
+    },
+    "/api/v1/training/onboarding/runs/{item_id}/actions/loeschen": {
+      "post": {
+        "operationId": "delete_onboarding_command_api_v1_training_onboarding_runs__item_id__actions_loeschen_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "title": "Item Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HrDeleteBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Delete Onboarding Command",
         "tags": [
           "training",
           "hr",
@@ -410325,7 +410635,7 @@
     },
     "/api/v1/training/qualifications/{item_id}": {
       "delete": {
-        "operationId": "delete_qualification_api_v1_training_qualifications__item_id__delete",
+        "operationId": "legacy_delete_qualification_api_v1_training_qualifications__item_id__delete",
         "parameters": [
           {
             "in": "path",
@@ -410338,7 +410648,12 @@
           }
         ],
         "responses": {
-          "204": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
             "description": "Successful Response"
           },
           "422": {
@@ -410357,7 +410672,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Qualification lÃ¶schen",
+        "summary": "Legacy Delete Qualification",
         "tags": [
           "training",
           "hr",
@@ -410417,6 +410732,65 @@
           }
         ],
         "summary": "Qualification aktualisieren",
+        "tags": [
+          "training",
+          "hr",
+          "onboarding",
+          "training",
+          "hr"
+        ]
+      }
+    },
+    "/api/v1/training/qualifications/{item_id}/actions/loeschen": {
+      "post": {
+        "operationId": "delete_qualification_command_api_v1_training_qualifications__item_id__actions_loeschen_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "title": "Item Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HrDeleteBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Delete Qualification Command",
         "tags": [
           "training",
           "hr",

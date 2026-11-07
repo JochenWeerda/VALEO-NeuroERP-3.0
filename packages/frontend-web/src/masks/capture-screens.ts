@@ -2274,6 +2274,19 @@ export const versandprofileScreen = {
               "key": "loeschen",
               "label": "Löschen",
               "command": "versand.deleteProfile",
+              "domainCommand": "logistik.versandprofil.deactivate.v1",
+              "requiresConfirmation": true,
+              "commandEndpoint": "/api/v1/logistik/versand/profile/{entity_id}/actions/deactivate",
+              "method": "POST",
+              "auditReasonRequired": true,
+              "inputFields": [
+                {
+                  "key": "expected_active",
+                  "label": "Aktiver Stand",
+                  "type": "boolean",
+                  "required": true
+                }
+              ],
               "dangerLevel": "moderate",
               "permission": "logistics.versandprofil.delete",
               "disabledWhen": {
@@ -3533,6 +3546,18 @@ export const personalQualifikationenScreen = {
           "key": "loeschen",
           "label": "Löschen",
           "command": "personal.deleteQualifikation",
+          "domainCommand": "hr.qualification.delete.v1",
+          "commandEndpoint": "/api/v1/training/qualifications/{entity_id}/actions/loeschen",
+          "method": "POST",
+          "requiresConfirmation": true,
+          "inputFields": [
+            {
+              "key": "expected_revision",
+              "label": "Gelesene Revision",
+              "type": "text",
+              "required": true
+            }
+          ],
           "dangerLevel": "moderate",
           "permission": "personal.qualifikation.delete",
           "disabledWhen": {
@@ -3692,6 +3717,18 @@ export const personalOnboardingScreen = {
           "key": "loeschen",
           "label": "Löschen",
           "command": "personal.deleteOnboarding",
+          "domainCommand": "hr.onboarding.delete.v1",
+          "commandEndpoint": "/api/v1/training/onboarding/runs/{entity_id}/actions/loeschen",
+          "method": "POST",
+          "requiresConfirmation": true,
+          "inputFields": [
+            {
+              "key": "expected_revision",
+              "label": "Gelesene Revision",
+              "type": "text",
+              "required": true
+            }
+          ],
           "dangerLevel": "moderate",
           "permission": "personal.onboarding.delete",
           "disabledWhen": {
@@ -3855,6 +3892,18 @@ export const personalSchulungenScreen = {
           "key": "loeschen",
           "label": "Löschen",
           "command": "personal.deleteSchulung",
+          "domainCommand": "hr.assignment.delete.v1",
+          "commandEndpoint": "/api/v1/training/assignments/{entity_id}/actions/loeschen",
+          "method": "POST",
+          "requiresConfirmation": true,
+          "inputFields": [
+            {
+              "key": "expected_revision",
+              "label": "Gelesene Revision",
+              "type": "text",
+              "required": true
+            }
+          ],
           "dangerLevel": "moderate",
           "permission": "personal.schulung.delete",
           "disabledWhen": {

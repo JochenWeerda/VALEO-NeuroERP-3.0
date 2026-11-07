@@ -2507,7 +2507,7 @@ tools:
         action: loeschen
         endpoint: /api/v1/logistik/versand/profile/{entity_id}/actions/deactivate
         command_version: 1
-        agent_write_enabled: false
+        agent_write_enabled: true
         agent_roles: [LAGER_BEARBEITEN, LAGER_ADMIN, SALES_BEARBEITEN, SALES_ADMIN, EINKAUF_BEARBEITEN, EINKAUF_ADMIN, admin]
       - domain_command: hr.onboarding.delete.v1
         screen_id: personal/onboarding
@@ -2538,6 +2538,7 @@ tools:
         entity_id: { type: string, nullable: true }
         input: { type: object, nullable: true }
         audit_reason: { type: string, nullable: true }
+        confirm: { type: boolean }
       required: [screen_id, action]
     output_schema:
       type: object

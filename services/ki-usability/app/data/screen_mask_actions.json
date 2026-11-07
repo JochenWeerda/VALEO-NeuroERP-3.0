@@ -10790,11 +10790,14 @@
       "source": {
         "screenId": "logistik/versandprofile",
         "actionKey": "loeschen",
-        "commandEndpoint": null,
+        "commandEndpoint": "/api/v1/logistik/versand/profile/{entity_id}/actions/deactivate",
         "navigationRoute": null,
         "command": "versand.deleteProfile",
-        "method": null,
+        "domainCommand": "logistik.versandprofil.deactivate.v1",
+        "method": "POST",
         "permission": "logistics.versandprofil.delete",
+        "requiresConfirmation": true,
+        "auditReasonRequired": true,
         "dangerLevel": "moderate"
       }
     },
@@ -11255,11 +11258,13 @@
       "source": {
         "screenId": "personal/onboarding",
         "actionKey": "loeschen",
-        "commandEndpoint": null,
+        "commandEndpoint": "/api/v1/training/onboarding/runs/{entity_id}/actions/loeschen",
         "navigationRoute": null,
         "command": "personal.deleteOnboarding",
-        "method": null,
+        "domainCommand": "hr.onboarding.delete.v1",
+        "method": "POST",
         "permission": "personal.onboarding.delete",
+        "requiresConfirmation": true,
         "dangerLevel": "moderate"
       }
     },
@@ -11343,11 +11348,13 @@
       "source": {
         "screenId": "personal/qualifikationen",
         "actionKey": "loeschen",
-        "commandEndpoint": null,
+        "commandEndpoint": "/api/v1/training/qualifications/{entity_id}/actions/loeschen",
         "navigationRoute": null,
         "command": "personal.deleteQualifikation",
-        "method": null,
+        "domainCommand": "hr.qualification.delete.v1",
+        "method": "POST",
         "permission": "personal.qualifikation.delete",
+        "requiresConfirmation": true,
         "dangerLevel": "moderate"
       }
     },
@@ -11410,11 +11417,13 @@
       "source": {
         "screenId": "personal/schulungen",
         "actionKey": "loeschen",
-        "commandEndpoint": null,
+        "commandEndpoint": "/api/v1/training/assignments/{entity_id}/actions/loeschen",
         "navigationRoute": null,
         "command": "personal.deleteSchulung",
-        "method": null,
+        "domainCommand": "hr.assignment.delete.v1",
+        "method": "POST",
         "permission": "personal.schulung.delete",
+        "requiresConfirmation": true,
         "dangerLevel": "moderate"
       }
     },
