@@ -10,3 +10,5 @@ Gezielte lokale Tests: `tests/test_mcp_write_capability.py` und `tests/test_vers
 ## Auswirkungsabnahme bestehender Maskenvertraege
 
 Leadlauf tests/test_mcp_mask_actions.py unter erforderlichen lokalen Prozessrechten: 16 bestanden, 12 fehlgeschlagen (6,82 Sekunden). Alle zwoelf Fehler entstehen, weil der bisherige Registry-basierte Positivpfad keine freigegebene Schreibaktion mehr findet. Das ist ein belegter funktionaler Zwischenstand und kein vollstaendiger Abschluss der MCP-Paritaet. Keine Tests uebersprungen oder zu erwarteten Fehlern umdeklariert. Wiederfreigabe muss echte kanonische Fachcommands samt expliziten Rollen/Versionen und Kanalnachweisen herstellen; blosse Testfixtures duerfen reale Funktionsverluste nicht verdecken.
+
+Studio-Roundtrip: versionierte `domainCommand`-Kennungen werden im Maskenaktionskatalog erhalten und sind Teil des unveränderlichen nativen sowie Beleg-Transportvertrags. Der Draft-Validator weist Weglassen oder Austausch gegenüber der kanonischen Quelle ab. Drei gezielte Manipulationsvarianten und die bestehenden nativen Policy-Verträge ergeben 17 bestandene Tests (`tests/test_studio_native_policy_binding.py`).

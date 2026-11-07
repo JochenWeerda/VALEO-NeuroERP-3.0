@@ -54,3 +54,26 @@ def test_local_classification_cannot_hide_mutation_without_permission():
     assert is_local_view_action(action)
     for key in ("commandEndpoint", "inputFlow", "command", "commandBinding", "kommando", "download"):
         assert not is_local_view_action({**action, key: {"method": "POST"}})
+
+
+@pytest.mark.parametrize("change", ["omit", "foreign", "unversioned"])
+def test_native_domain_command_is_immutable(monkeypatch, change):
+    screen = "sales/angebote-liste"
+    builder = SCREEN_DEFINITION_BUILDERS[screen]
+    def with_command():
+        definition = builder()
+        action = next(a for a in definition["actions"] if a["key"] == "import_csv")
+        action["domainCommand"] = "test.import.v1"
+        return definition
+    monkeypatch.setitem(SCREEN_DEFINITION_BUILDERS, screen, with_command)
+    value = draft(screen)
+    action = next(a for a in value["actions"] if a["key"] == "import_csv")
+    assert action["domainCommand"] == "test.import.v1"
+    assert violations(value) == []
+    if change == "omit":
+        del action["domainCommand"]
+    elif change == "foreign":
+        action["domainCommand"] = "test.other.v1"
+    else:
+        action["domainCommand"] = "test.import"
+    assert violations(value)

@@ -82,6 +82,7 @@ def screen_action_to_catalog_entry(
             "commandEndpoint": action.get("commandEndpoint"),
             "navigationRoute": action.get("navigationRoute"),
             "command": action.get("command"),
+            **({"domainCommand": action["domainCommand"]} if "domainCommand" in action else {}),
             "method": "GET" if read_view else action.get("method"),
             **({"readView": read_view} if read_view else {}),
             **{name: action[name] for name in ("permission", "forbiddenForAgents",
