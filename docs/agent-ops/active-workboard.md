@@ -20577,3 +20577,7 @@ Besitz valeo_cli/cli.py, support.py, gezielte neue CLI-Vertragstests und QA. Zie
 ## MCP-INVENTUR-COUNT-RELEASE-20261107 — reserviert, Codex Subagent inventory_count_sheet
 
 **Ziel:** Inventur-Zählblatt aus bestehender Maskenaktion nur über einen gemeinsamen, versionierten und sicher freigegebenen Fachcommand für UI, REST, CLI und MCP bereitstellen. **Dateibesitz:** zugehörige Inventur-Nebenlauf-Services/Endpoints, `packages/frontend-web/src/pages/lager/inventur-nebenlaeufe.tsx`, passende Tests und eigene QA; zentrale ScreenDefinition, MCP-Registry und Projektionen beim Lead des Slices. **Abnahme:** Mandant/Rollen, atomarer Audit/Outbox, akteur-/payloadgebundene Wiederholung und Kanalparität geprüft; keine DDL oder neue Datenbank, geteilter Prüfstand nur nach Slotkoordination. **Risiko:** bisheriger UI- und Command-Weg unterscheiden sich; bestehender Replayvertrag bindet weder Akteur noch Payload.
+
+## STUDIO-CHANNEL-RELEASE-20261107 — reserviert, Codex Subagent studio_channel_release
+Ziel: versionierte Studio-Domaincommands und ausdrueckliche Deployment-Capabilityfreigabe fuer Kanalparitaet korrekt ableiten; Default-Deny erhalten. Besitz: app/services/studio_entity_compiler.py, falls erforderlich mcp_tool_registry_service.py, betroffene Studio-Tests und eigene QA. Abnahme: Freigabe-, Rollen-, Tenant- und Replay-Vertrag sowie gezielte Tests. Risiko: bestehende Registrierung nicht duplizieren; keine globale Write-Freigabe. Gemeinsamer Pruefstand nur nach Status und Koordination, ohne Reset.
+
