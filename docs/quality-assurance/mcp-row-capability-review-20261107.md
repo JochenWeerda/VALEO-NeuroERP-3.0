@@ -8,3 +8,7 @@ Der laufende Arbeitsstand ist noch nicht abgenommen. Zwei konkrete Sicherheitsbe
 Erforderliche Negativnachweise: unbekanntes Ziel, doppelte Registrierung, falsche Version, deaktivierte Freigabe, fehlende spezifische Rolle trotz globalem Scope und menschlichem Token. Jeder dieser Faelle muss vor HTTP-Weiterleitung abgewiesen werden. Lesende readView-Aktionen bleiben getrennt; widerspruechliche Schreib-/Lesedeklarationen sind bereits bei Definition/Validierung abzuweisen.
 
 Dieser Bericht dokumentiert Reviewanforderungen und ist kein bestandener Ausfuehrungsnachweis. Der verantwortliche Slice ist MCP-ROW-COMMANDS-20261107; Implementierung und Tests laufen dort weiter.
+
+## Zweites lesendes Review: Personal-Versionierung
+
+Die drei Personal-Tabellen verwenden TIMESTAMPTZ. Die API-Serialisierung erhaelt Mikrosekunden; die Masken geben updated_at als Originalstring weiter und wandeln ihn nicht durch JavaScript Date in Millisekunden um. Der Command normalisiert die Zeitzone und vergleicht unter Zeilensperre. Der Replayvertrag bindet Mandant, Aktion, Schluessel, Akteur und normalisierten Payload. Im gelesenen Zwischenstand wurde hierbei kein konkreter Fehler gefunden. Dies ersetzt weder PostgreSQL- noch HTTP-/Oberflaechentests. Die vorhandenen PostgreSQL-Fixtures ohne ausdrueckliche Anwendungsrolle belegen SQL-Mandantenpraedikate, keine RLS-Wirkung.
