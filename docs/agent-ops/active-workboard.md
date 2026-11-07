@@ -20581,3 +20581,6 @@ Besitz valeo_cli/cli.py, support.py, gezielte neue CLI-Vertragstests und QA. Zie
 ## STUDIO-CHANNEL-RELEASE-20261107 — reserviert, Codex Subagent studio_channel_release
 Ziel: versionierte Studio-Domaincommands und ausdrueckliche Deployment-Capabilityfreigabe fuer Kanalparitaet korrekt ableiten; Default-Deny erhalten. Besitz: app/services/studio_entity_compiler.py, falls erforderlich mcp_tool_registry_service.py, betroffene Studio-Tests und eigene QA. Abnahme: Freigabe-, Rollen-, Tenant- und Replay-Vertrag sowie gezielte Tests. Risiko: bestehende Registrierung nicht duplizieren; keine globale Write-Freigabe. Gemeinsamer Pruefstand nur nach Status und Koordination, ohne Reset.
 
+
+## RESPONSE-CONTRACTS-HR-VERSAND-20261107 — reserviert, Codex Subagent row_response_contracts
+Besitz training.py und versandprofile.py, enge Antwortmodell-/Routentests und eigene QA. Acht untypisierte Routen mit realen Antwortvertraegen absichern, keine Gateausnahmen. OpenAPI-Regeneration beim Lead. Keine DB.
