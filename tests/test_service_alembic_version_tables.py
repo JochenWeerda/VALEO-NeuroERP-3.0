@@ -22,7 +22,7 @@ SERVICES = ROOT / "services"
 
 # Ratsche: Dienste ohne eigene Versionstabelle. Laufen derzeit nicht (crm-ai nur in Compose
 # definiert, die uebrigen gar nicht); ihre Ketten sind ungeprueft. Liste darf nur schrumpfen.
-OHNE_EIGENE_VERSIONSTABELLE = {"crm-ai", "crm-consent", "crm-gdpr", "crm-marketing"}
+OHNE_EIGENE_VERSIONSTABELLE = {"crm-ai"}
 
 VERSION_NUM_MAX = 32  # alembic_version.version_num ist varchar(32)
 
@@ -85,7 +85,7 @@ def _service_envs() -> list[Path]:
 
 
 def _service_revisions() -> list[Path]:
-    # Ketten der Ratschen-Dienste sind ungeprueft (crm-marketing legt Enums doppelt an) und
+    # Ketten der Ratschen-Dienste sind ungeprueft (ungeprueft) und
     # werden mit ihrer Versionstabelle zusammen behoben.
     return sorted(
         p

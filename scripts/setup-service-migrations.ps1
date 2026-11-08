@@ -19,9 +19,6 @@ $Services = @(
     @{ Name = "crm-communication"; Port = 6100 }
     @{ Name = "crm-ai"; Port = 6200 }
     @{ Name = "crm-multichannel"; Port = 6300 }
-    @{ Name = "crm-marketing"; Port = 6400 }
-    @{ Name = "crm-consent"; Port = 6500 }
-    @{ Name = "crm-gdpr"; Port = 6600 }
     @{ Name = "inventory"; Port = 5400 }
 )
 
