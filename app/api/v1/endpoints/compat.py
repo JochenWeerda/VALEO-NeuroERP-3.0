@@ -25,7 +25,6 @@ from app.core.data_quality_enforcement import (
 )
 from app.core.database import get_db
 from app.core.uuid7 import uuid7
-from app.core.logging import get_correlation_id
 from app.auth.deps import get_current_user
 from app.core.tenant import get_tenant_id
 from app.infrastructure.models import AuditLog, LkwAnnahmeQueue

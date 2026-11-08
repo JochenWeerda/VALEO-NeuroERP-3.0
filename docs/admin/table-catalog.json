@@ -17094,6 +17094,7 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/pos_payments.py",
+            "app/api/v1/endpoints/pos_retoure.py",
             "app/services/fiscalization/service.py"
           ],
           "written_by": [
@@ -23893,7 +23894,8 @@
             "app/finance/tax_resolver.py",
             "app/finance/ustva.py",
             "app/services/docflow_service.py",
-            "app/services/finance_freigabe.py"
+            "app/services/finance_freigabe.py",
+            "app/services/fiscalization/service.py"
           ],
           "written_by": [
             "app/api/v1/endpoints/tax_keys.py",
@@ -33349,6 +33351,7 @@
             "app/api/v1/endpoints/inventory_counts.py",
             "app/api/v1/endpoints/inventory_operations.py",
             "app/api/v1/endpoints/mask_actions.py",
+            "app/api/v1/endpoints/pos_retoure.py",
             "app/domains/inventory/api/storage_fees.py",
             "app/infrastructure/models/__init__.py",
             "app/infrastructure/models/l3c_models.py",
