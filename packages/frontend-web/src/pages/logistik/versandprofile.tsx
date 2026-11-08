@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { MadeByStudioListRuntimeWire } from '@/components/mask-builder/made-by-studio-runtime-wire'
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
+import { RowDeleteConfirmDialog, type RowDeleteCandidate, useGuardedRowDelete } from '@/hooks/useGuardedRowDelete'
 import { Skeleton } from '@/components/ui/skeleton'
 import { UniversalMaskRenderer } from '@/components/mask-builder/UniversalMaskRenderer'
 import { useScreenPermissions } from '@/components/mask-builder/runtime/screen-permissions'
@@ -48,9 +48,14 @@ export default function VersandprofilePage(): JSX.Element {
   const createAvis = useCreateLieferavis()
   const profile = profileQuery.data ?? []
   const avise = avisQuery.data ?? []
-  const deleteKeys = useRef(new Map<string, string>())
-  const [deleteCandidate, setDeleteCandidate] = useState<{ id: string; profilNr: string } | null>(null)
-  const [pendingDeletes, setPendingDeletes] = useState<Set<string>>(new Set())
+  const deleteMutateAsync = deleteProfil.mutateAsync
+  const rowDelete = useMemo(() => ({
+    entityLabel: 'Versandprofil',
+    requireVersion: false,
+    perform: ({ id }: RowDeleteCandidate, key: string) => deleteMutateAsync({ id, key }),
+    successDescription: ({ name }: RowDeleteCandidate) => `Profil ${name} wurde deaktiviert.`,
+  }), [deleteMutateAsync])
+  const { pendingDeletes, deleteCandidate, setDeleteCandidate, loeschen } = useGuardedRowDelete(rowDelete)
   const [savingProfil, setSavingProfil] = useState(false)
   const [savingAvis, setSavingAvis] = useState(false)
 
@@ -190,26 +195,6 @@ export default function VersandprofilePage(): JSX.Element {
     }
   }, [createAvis, form, savingAvis])
 
-  const loeschen = useCallback(async (id: string, profilNr: string) => {
-    if (!id || pendingDeletes.has(id)) return
-    setPendingDeletes((prev) => new Set(prev).add(id))
-    try {
-      const key = deleteKeys.current.get(id) ?? crypto.randomUUID()
-      deleteKeys.current.set(id, key)
-      await deleteProfil.mutateAsync({ id, key })
-      deleteKeys.current.delete(id)
-      toast.success('Versandprofil gelöscht', { description: `Profil ${profilNr} wurde deaktiviert.` })
-    } catch (error) {
-      toast.error('Profil nicht gelöscht', { description: getAxiosErrorMessage(error) })
-    } finally {
-      setPendingDeletes((prev) => {
-        const next = new Set(prev)
-        next.delete(id)
-        return next
-      })
-    }
-  }, [deleteProfil, pendingDeletes])
-
   const handleAction = useCallback(async (key: string, payload: Record<string, unknown>) => {
     if (key === 'profil') {
       await speichern()
@@ -220,7 +205,7 @@ export default function VersandprofilePage(): JSX.Element {
       return
     }
     if (key === 'loeschen') {
-      setDeleteCandidate({ id: text(payload.id), profilNr: text(payload.profil_nr) })
+      setDeleteCandidate({ id: text(payload.id), name: text(payload.profil_nr) })
     }
   }, [avisSpeichern, speichern])
 
@@ -247,16 +232,14 @@ export default function VersandprofilePage(): JSX.Element {
 
   return (
     <div className="space-y-6 p-3 md:p-6">
-      <AlertDialog open={deleteCandidate !== null} onOpenChange={(open) => { if (!open) setDeleteCandidate(null) }}>
-        <AlertDialogContent>
-          <AlertDialogHeader><AlertDialogTitle>Versandprofil deaktivieren?</AlertDialogTitle>
-            <AlertDialogDescription>Das Profil {deleteCandidate?.profilNr} wird deaktiviert.</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter><AlertDialogCancel>Abbrechen</AlertDialogCancel>
-            <AlertDialogAction onClick={() => { if (deleteCandidate) void loeschen(deleteCandidate.id, deleteCandidate.profilNr) }}>Deaktivieren bestätigen</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <RowDeleteConfirmDialog
+        candidate={deleteCandidate}
+        onCancel={() => setDeleteCandidate(null)}
+        onConfirm={(candidate) => { void loeschen(candidate) }}
+        title="Versandprofil deaktivieren?"
+        description={(candidate) => `Das Profil ${candidate?.name ?? ''} wird deaktiviert.`}
+        confirmLabel="Deaktivieren bestätigen"
+      />
       <UniversalMaskRenderer
         plan={plan}
         formState={form}
