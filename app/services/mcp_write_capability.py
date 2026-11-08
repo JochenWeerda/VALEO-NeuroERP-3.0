@@ -1,15 +1,41 @@
-"""Explicit registry release for generic MCP writes; all other writes fail closed."""
+"""Freigabe generischer Agenten-Schreibwege (MCP ``mask.action.execute`` und Kommandowege mit Agentenpruefung).
+
+Zwei Phasen, gewaehlt in ``config/mcp_erp_tools.yaml`` am Werkzeug ``mask.action.execute``:
+
+``agent_write_phase: entwicklung``
+    Nutzerentscheidung 08.11.2026: Waehrend der Softwareerstellung sind alle MCP- und CLI-Schreibzugriffe
+    freigegeben. Jeder deklarierte Kommandoweg ist fuer Agenten mit ``masks:write`` offen; Rechte, Mandant,
+    Audit und Wiederholungsschutz prueft weiter der Ziel-Endpunkt. Fachregeln der Maske (``forbiddenForAgents``,
+    ``humanApprovalRequired``, Belegadapter) bleiben unberuehrt.
+sonst (Produktivbetrieb)
+    Nur ausdruecklich je Aktion freigegebene ``write_capabilities``; alles andere scheitert geschlossen.
+    Vor dem Go-Live den Schalter entfernen.
+
+Ist die Registry nicht lesbar, gilt der Produktivbetrieb (geschlossen).
+"""
 from fastapi import HTTPException
 import yaml
 
+DEVELOPMENT_PHASE = "entwicklung"
 
-def _entries() -> list[dict]:
+
+def _registry() -> dict:
     from app.services.mcp_tool_registry_service import mcp_tool_registry_service
     try:
         registry = mcp_tool_registry_service.get_tool("mask.action.execute")
     except (KeyError, TypeError, AttributeError, OSError, ValueError, yaml.YAMLError):
-        return []
-    entries = registry.get("write_capabilities") if isinstance(registry, dict) else None
+        return {}
+    return registry if isinstance(registry, dict) else {}
+
+
+def development_release() -> bool:
+    """Sind waehrend der Entwicklung alle Agenten-Schreibwege freigegeben?"""
+    return _registry().get("agent_write_phase") == DEVELOPMENT_PHASE
+
+
+def _entries() -> list[dict]:
+    registry = _registry()
+    entries = registry.get("write_capabilities") if registry else None
     return entries if isinstance(entries, list) and all(isinstance(x, dict) for x in entries) else []
 
 
@@ -26,6 +52,8 @@ def _capability(name: str, endpoint: str, screen_id: str, action_key: str) -> di
 
 
 def capability_enabled(name: str, endpoint: str, screen_id: str, action_key: str) -> bool:
+    if development_release():
+        return isinstance(endpoint, str) and endpoint.startswith("/api/v1/")
     capability = _capability(name, endpoint, screen_id, action_key)
     roles = capability.get("agent_roles") if capability else None
     return bool(isinstance(name, str) and name.endswith(".v1") and capability and capability.get("agent_write_enabled") is True
@@ -34,6 +62,11 @@ def capability_enabled(name: str, endpoint: str, screen_id: str, action_key: str
 
 
 def authorize_agent(principal, name: str, endpoint: str, screen_id: str, action_key: str) -> None:
+    scopes = getattr(principal, "scopes", None)
+    if development_release():
+        if not isinstance(scopes, (set, frozenset)) or "masks:write" not in scopes:
+            raise HTTPException(403, "Agenten-Schreibzugriff braucht masks:write")
+        return
     capability = _capability(name, endpoint, screen_id, action_key)
     scopes = getattr(principal, "scopes", None)
     roles = getattr(principal, "roles", None)

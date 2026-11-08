@@ -11,6 +11,9 @@ from test_studio_entity_generation import specification
 
 
 def test_studio_capability_requires_deployment_switch_and_roles(tmp_path, monkeypatch):
+    # Produktivbetrieb: die Entwicklungsfreigabe (agent_write_phase) ist hier bewusst aus.
+    import app.services.mcp_write_capability as gate
+    monkeypatch.setattr(gate, 'development_release', lambda: False)
     spec = specification()
     bundle = compile_entity(spec)
     definition = json.loads(bundle['files']['screen.json'])

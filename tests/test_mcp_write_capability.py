@@ -107,3 +107,42 @@ def test_invalid_endpoint_type_and_unreadable_registry_fail_closed(monkeypatch):
         raise OSError('synthetic unavailable')
     monkeypatch.setattr(mcp_tool_registry_service, 'get_tool', broken)
     assert not capability_enabled('test.delete.v1', ENDPOINT, SCREEN, 'delete')
+
+
+# --- Entwicklungsphase (Nutzerentscheidung 08.11.2026: alle MCP-/CLI-Schreibzugriffe frei) -----------------
+
+
+def test_entwicklungsphase_gibt_jeden_deklarierten_kommandoweg_frei(monkeypatch):
+    run, calls = execute(monkeypatch, [])
+    monkeypatch.setattr(mcp_tool_registry_service, 'get_tool',
+                        lambda _: {'agent_write_phase': 'entwicklung', 'write_capabilities': []})
+    assert run()['success'] and len(calls) == 1
+    assert mm.agent_block({**ACTION, 'domainCommand': None}, SCREEN) is None
+
+
+def test_entwicklungsphase_laesst_fachregeln_der_maske_stehen(monkeypatch):
+    monkeypatch.setattr(mcp_tool_registry_service, 'get_tool', lambda _: {'agent_write_phase': 'entwicklung'})
+    assert mm.agent_block({**ACTION, 'forbiddenForAgents': True}, SCREEN) == 'fuer_agenten_gesperrt'
+    assert mm.agent_block({**ACTION, 'humanApprovalRequired': True}, SCREEN) == 'menschliche_genehmigung'
+    assert mm.agent_block({**ACTION, 'commandBinding': {'adapter': 'docflow.v1'}}, SCREEN) == 'adapter_nur_mensch'
+
+
+def test_entwicklungsphase_braucht_weiter_masks_write(monkeypatch):
+    from app.services.mcp_write_capability import authorize_agent
+    monkeypatch.setattr(mcp_tool_registry_service, 'get_tool', lambda _: {'agent_write_phase': 'entwicklung'})
+    authorize_agent(principal(roles=[]), '', ENDPOINT, SCREEN, 'delete')
+    with pytest.raises(HTTPException) as error:
+        authorize_agent(principal(scopes=[]), '', ENDPOINT, SCREEN, 'delete')
+    assert error.value.status_code == 403
+
+
+@pytest.mark.parametrize('phase', [None, 'Entwicklung', 'produktiv', True])
+def test_ohne_genau_entwicklung_bleibt_es_geschlossen(monkeypatch, phase):
+    from app.services.mcp_write_capability import capability_enabled
+    monkeypatch.setattr(mcp_tool_registry_service, 'get_tool', lambda _: {'agent_write_phase': phase})
+    assert not capability_enabled('test.delete.v1', ENDPOINT, SCREEN, 'delete')
+
+
+def test_registry_schaltet_die_entwicklungsphase_sichtbar():
+    from app.services.mcp_write_capability import development_release
+    assert development_release(), 'config/mcp_erp_tools.yaml: agent_write_phase: entwicklung (vor Go-Live entfernen)'
