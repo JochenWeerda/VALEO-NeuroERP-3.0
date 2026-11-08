@@ -3,22 +3,11 @@
  "handgebaut_routen": [
   "admin/control-center",
   "annahme/abrechnung",
-  "annahme/lkw-registrierung",
-  "annahme/qualitaets-check",
-  "annahme/warteschlange",
-  "finance/bank-abgleich",
-  "finance/dunning",
-  "finance/mahnlauf",
-  "finance/mahnwesen",
   "lager/materialfluss",
-  "mahnwesen/mahnlauf",
   "studio/workspace-composition-preview",
   "verkauf/kunde/:id",
   "verkauf/kunde/neu",
-  "verkauf/kunden-stamm/:id",
-  "waage",
-  "waage/neu",
-  "waage/wiegungen"
+  "verkauf/kunden-stamm/:id"
  ],
  "altmuster_routen": [
   "admin/control-center/agent-ops",

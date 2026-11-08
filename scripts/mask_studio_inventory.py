@@ -246,8 +246,12 @@ def classify_page(entry: Path, *, beleg_prefix: str, studio_ids: frozenset[str],
     sources = _page_sources(entry)
     texts = {p: p.read_text(encoding="utf-8", errors="replace") for p in sources}
     screen_ids = sorted({sid for t in texts.values() for sid in _screen_ids_from_text(t)})
-    from app.core.mask_runtime_evidence import has_visible_runtime
-    builder = any(has_visible_runtime(t) for t in texts.values())
+    from app.core.mask_runtime_evidence import bound_domain_runtime_ids, has_visible_runtime
+    # Fach-Host (IntakeWeighingPage -> UniversalNativeCockpitPage + registrierter Fach-Renderer): derselbe Nachweis
+    # wie Gate E, sonst stuende eine Builder-Maske hier als "handgebaut".
+    fachhost = {sid for t in texts.values() for sid in bound_domain_runtime_ids(t, root=ROOT)}
+    screen_ids = sorted(set(screen_ids) | fachhost)
+    builder = bool(fachhost) or any(has_visible_runtime(t) for t in texts.values())
     altmuster = any(_ALTMUSTER.search(t) for t in texts.values())
     entry_text = texts[entry]
     if "createLegacyMaskPage" in entry_text:
