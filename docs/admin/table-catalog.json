@@ -12180,6 +12180,7 @@
             "app/infrastructure/models/__init__.py",
             "app/infrastructure/models/einkauf_models.py",
             "app/infrastructure/models/l3c_models.py",
+            "app/services/beleg_liste.py",
             "app/services/business_partner_service.py",
             "app/services/crm_segment_service.py",
             "app/services/customer_reference.py",
@@ -13691,6 +13692,7 @@
             "app/infrastructure/models/__init__.py",
             "app/infrastructure/models/agrar_models.py",
             "app/infrastructure/models/l3c_models.py",
+            "app/services/beleg_liste.py",
             "app/services/business_partner_service.py",
             "app/services/crm_activity_service.py",
             "app/services/crm_lead_service.py",
@@ -15910,6 +15912,7 @@
             "app/api/v1/endpoints/gobd_archiv.py",
             "app/core/dms_ocr_contracts.py",
             "app/core/gobd_artifact.py",
+            "app/services/beleg_liste.py",
             "app/services/docflow_artifact_service.py",
             "app/services/docflow_belegadapter.py",
             "app/services/docflow_evidence_service.py",
@@ -15919,7 +15922,6 @@
             "app/services/docflow_service.py",
             "app/services/finance_freigabe.py",
             "app/services/kontrollkorb.py",
-            "app/services/mcp_beleg_tools.py",
             "app/services/settlement_document_archive_service.py"
           ],
           "written_by": [
@@ -19631,6 +19633,7 @@
             "app/api/v1/endpoints/crm_partner_suche.py",
             "app/api/v1/endpoints/stammdaten_bearbeiten.py",
             "app/infrastructure/models/einkauf_models.py",
+            "app/services/beleg_liste.py",
             "app/services/bestell_kommunikation_service.py",
             "app/services/customer_reference.py",
             "app/services/docflow_belegadapter.py",
@@ -39286,6 +39289,7 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/crm_360_reads.py",
+            "app/api/v1/endpoints/kontrakt_vorgang.py",
             "app/api/v1/endpoints/stammdaten_bearbeiten.py",
             "app/documents/inbox_service.py",
             "app/domains/operations/models.py",
@@ -39298,6 +39302,11 @@
             "app/services/kontrakt_disposition_service.py",
             "app/services/preisfindung_service.py",
             "app/workspace/agrar_chain.py"
+          ],
+          "screens": [
+            "kontrakt/abrechnung",
+            "kontrakt/erfuellung",
+            "kontrakt/fixierung"
           ]
         },
         "kon_contract_fixing": {
@@ -39391,8 +39400,14 @@
             "fixing_id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/kontrakt_vorgang.py",
             "app/services/contract_fixing_service.py",
             "app/services/contract_settlement_service.py"
+          ],
+          "screens": [
+            "kontrakt/abrechnung",
+            "kontrakt/erfuellung",
+            "kontrakt/fixierung"
           ],
           "written_by": [
             "app/services/contract_fixing_service.py",
@@ -39641,11 +39656,17 @@
             "movement_id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/kontrakt_vorgang.py",
             "app/domains/operations/models.py",
             "app/services/contract_engagement_service.py",
             "app/services/contract_fulfillment_service.py",
             "app/services/contract_settlement_service.py",
             "app/services/docflow_source_proposals.py"
+          ],
+          "screens": [
+            "kontrakt/abrechnung",
+            "kontrakt/erfuellung",
+            "kontrakt/fixierung"
           ],
           "written_by": [
             "app/services/contract_settlement_service.py"
@@ -56304,8 +56325,6 @@
             "agrar/kontrakte/formular",
             "agrar/vertraege/formular",
             "disposition/kontrakt-abruf",
-            "kontrakte/KontraktAlarmDashboard",
-            "kontrakte/LstKontraktUebersicht",
             "kontrakte/mengenzeitraeume"
           ],
           "written_by": [
@@ -56513,8 +56532,6 @@
             "agrar/kontrakte/formular",
             "agrar/vertraege/formular",
             "disposition/kontrakt-abruf",
-            "kontrakte/KontraktAlarmDashboard",
-            "kontrakte/LstKontraktUebersicht",
             "kontrakte/mengenzeitraeume"
           ],
           "written_by": [
@@ -56575,8 +56592,6 @@
             "agrar/kontrakte/formular",
             "agrar/vertraege/formular",
             "disposition/kontrakt-abruf",
-            "kontrakte/KontraktAlarmDashboard",
-            "kontrakte/LstKontraktUebersicht",
             "kontrakte/mengenzeitraeume"
           ],
           "written_by": [
