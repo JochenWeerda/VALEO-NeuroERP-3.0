@@ -375,6 +375,7 @@ domains:
       - kontrollkorb
       - docflow_
       - beleg_liste
+      - beleg_druck
       - doc_nachweisraum_
       - audit_hardening
       - atlas_customs_

@@ -118,3 +118,36 @@ def test_mcp_suche_liest_dieselbe_quelle(satz):
         ergebnis = beleg_suchen(db, anfrage, "agent", satz["mandant"], {"roles": ["admin"]})
     erwartet = {b["id"] for b in satz["belege"] if b["doc_type"] == "sales_invoice"}
     assert {z["beleg_id"] for z in ergebnis["items"]} == erwartet
+
+
+# ── Belegdruck (BELEG-052 Stufe 2b) ────────────────────────────────────────────
+
+def test_belegdruck_liefert_ein_pdf_des_belegs(app_und_client, satz):
+    import base64
+
+    beleg = next(b for b in satz["belege"] if b["doc_type"] == "sales_invoice")
+    app, client = app_und_client
+    ersetze_nutzer(app, "admin")
+    antwort = client.get(f"/belege/sales_invoice/{beleg['id']}/druck")
+    assert antwort.status_code == 200, antwort.text
+    daten = antwort.json()
+    assert daten["dateiname"].startswith("sales_invoice_") and daten["dateiname"].endswith(".pdf")
+    assert base64.b64decode(daten["pdf"]).startswith(b"%PDF")
+
+
+def test_belegdruck_braucht_das_leserecht(app_und_client, satz):
+    beleg = next(b for b in satz["belege"] if b["doc_type"] == "purchase_order")
+    app, client = app_und_client
+    ersetze_nutzer(app, "SALES_LESEN")
+    assert client.get(f"/belege/purchase_order/{beleg['id']}/druck").status_code == 403
+
+
+def test_jede_belegvariante_kann_drucken():
+    from app.core.belegvertrag import BELEGARTEN
+    from app.core.screen_definitions import get_screen_definition
+
+    for art in BELEGARTEN:
+        definition = get_screen_definition(f"beleg/{art.replace('_', '-')}", tenant_id="t-druck")
+        aktion = next(a for a in definition["actions"] if a["key"] == "drucken")
+        assert aktion["download"]["endpoint"] == f"/api/v1/belege/{art}/{{entity_id}}/druck"
+        assert aktion["download"]["mediaType"] == "application/pdf"

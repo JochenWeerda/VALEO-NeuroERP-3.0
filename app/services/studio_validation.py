@@ -215,6 +215,10 @@ def validate_studio_draft(
     if document_template is not None:
         allowed_endpoints = {source["endpoint"] for source in document_template["dataSources"]}
         allowed_endpoints.update(source['endpoint'] for source in (document_template.get('creation') or {}).get('dataSources', []))
+        # Lese-Downloads der festgelegten Belegvariante (Belegdruck); nur genau diese Wege, keine eigenen.
+        allowed_endpoints.update(action['download']['endpoint'] for action in document_template.get('actions') or []
+                                 if isinstance(action.get('download'), dict)
+                                 and isinstance(action['download'].get('endpoint'), str))
     if native_template is not None:
         allowed_endpoints = {node[key] for node in _nodes(native_template)
                              for key in ("endpoint", "summaryEndpoint", "countEndpoint")

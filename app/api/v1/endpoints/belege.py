@@ -8,6 +8,7 @@ from __future__ import annotations
 from typing import Any, Optional
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.auth.beleg_roles import darf, verlange
@@ -65,6 +66,25 @@ def beleg_partner_auswahl(
 
 def _lies(belegart: str, beleg_id: str, tenant_id: str, db: Session, nutzer: Any) -> Beleg:
     return beleg_lesen(belegart, beleg_id, tenant_id, db, nutzer)
+
+
+class BelegDruckOut(BaseModel):
+    dateiname: str
+    pdf: str
+
+
+@router.get("/{belegart}/{beleg_id}/druck", response_model=BelegDruckOut, summary="Beleg als PDF (Belegdruck)")
+def beleg_druck(
+    belegart: str,
+    beleg_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+    nutzer: Any = Depends(get_current_user),
+) -> dict[str, str]:
+    """Derselbe Beleg und dieselben Rechte wie der Belegvertrag; ohne Preisrecht ohne Preise. Schreibt nichts."""
+    from app.services.beleg_druck import beleg_druck as drucken
+
+    return drucken(_lies(belegart, beleg_id, tenant_id, db, nutzer))
 
 
 @router.get("/{belegart}/{beleg_id}/kopf", response_model=TypedObjectOut, summary="Belegkopf fuer die Belegmaske")

@@ -372,6 +372,14 @@ def beleg_aktionen(variante: Belegvariante) -> list[dict[str, Any]]:
                 )
             )
 
+    # Belegdruck (BELEG-052 Stufe 2b): PDF aus dem Belegvertrag, ein Leseweg ohne Schreibwirkung.
+    liste.append({
+        "key": "drucken", "label": "Drucken", "kind": "secondary", "dangerLevel": "safe",
+        "permission": "belege.lesen", "localEffect": "download",
+        "download": {"endpoint": _pfad(variante.belegart, "/druck"), "contentField": "pdf",
+                     "filenameField": "dateiname", "mediaType": "application/pdf", "contentEncoding": "base64"},
+    })
+
     haupt = "buchen" if variante.bucht else (f"umwandeln:{variante.folgebelege[0]}" if variante.folgebelege else "freigeben")
     for aktion in liste:
         if aktion["key"] == haupt:

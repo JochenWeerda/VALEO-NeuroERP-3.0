@@ -20644,3 +20644,7 @@ wurden von keinem Code aufgerufen und sind im Backend gefuehrt (crm_consents.py,
 crm_campaigns.py/crm_segments.py; Nutzerentscheidung 04.11.: crm_campaigns fuehrt). Entfernt statt Ketten repariert; #54
 geschlossen. Ratsche OHNE_EIGENE_VERSIONSTABELLE = {crm-ai}; Migrationsskripte, Sonar-Ausnahmen e4/e15, RLS-Inventar/-Matrix
 nachgezogen.
+BELEG-052 Stufe 2b (09.11.2026): Belegdruck fuer alle 9 Varianten (Aktion drucken, GET /belege/{art}/{id}/druck,
+PDF aus dem Belegvertrag mit Preisrecht; Belegfamilie 1.4.0). Builder: Download-Vertrag mit {entity_id} und PDF
+(base64) auch in der Objektseite. Offen: Bestellung versenden, Rechnungspruefung, Bestellung aus Auftrag/Anfrage/
+Kontrakt, Bedarfsvorschlag, Lieferschein-Zusatzfelder, CSV-Import Angebote (Fachfrage).

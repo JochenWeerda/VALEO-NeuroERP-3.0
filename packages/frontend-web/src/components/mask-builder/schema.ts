@@ -312,7 +312,14 @@ export interface ScreenActionDefinition {
    */
   localEffect?: 'form_reset' | 'navigation' | 'print' | 'download' | 'edit_mode' | 'refresh' | 'view' | 'load_row'
   /** Read-only server-produced file; never a domain write command. */
-  download?: { endpoint: string; contentField: string; filenameField: string; mediaType: 'text/csv;charset=utf-8' }
+  /** Lese-Download; `{entity_id}` im Weg setzt die Objektseite ein. PDF kommt base64-codiert (`contentEncoding`). */
+  download?: {
+    endpoint: string
+    contentField: string
+    filenameField: string
+    mediaType: 'text/csv;charset=utf-8' | 'application/pdf'
+    contentEncoding?: 'base64'
+  }
   method?: 'POST' | 'PUT' | 'PATCH' | 'DELETE'
   requiresConfirmation?: boolean
   dangerLevel?: ActionDangerLevel

@@ -22323,6 +22323,24 @@
         "title": "Beleg",
         "type": "object"
       },
+      "BelegDruckOut": {
+        "properties": {
+          "dateiname": {
+            "title": "Dateiname",
+            "type": "string"
+          },
+          "pdf": {
+            "title": "Pdf",
+            "type": "string"
+          }
+        },
+        "required": [
+          "dateiname",
+          "pdf"
+        ],
+        "title": "BelegDruckOut",
+        "type": "object"
+      },
       "BelegListe": {
         "properties": {
           "items": {
@@ -244694,6 +244712,63 @@
           }
         ],
         "summary": "Aktion der Belegmaske ausfuehren (Masken-CommandEndpoint)",
+        "tags": [
+          "belege"
+        ]
+      }
+    },
+    "/api/v1/belege/{belegart}/{beleg_id}/druck": {
+      "get": {
+        "description": "Derselbe Beleg und dieselben Rechte wie der Belegvertrag; ohne Preisrecht ohne Preise. Schreibt nichts.",
+        "operationId": "beleg_druck_api_v1_belege__belegart___beleg_id__druck_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "belegart",
+            "required": true,
+            "schema": {
+              "title": "Belegart",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "beleg_id",
+            "required": true,
+            "schema": {
+              "title": "Beleg Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BelegDruckOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Beleg als PDF (Belegdruck)",
         "tags": [
           "belege"
         ]
