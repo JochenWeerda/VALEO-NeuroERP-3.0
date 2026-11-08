@@ -34,7 +34,7 @@
       "1.0.0": {
         "baseHash": "0472e1817831f20cfec4ff6434bedb95fd89a4a5efc389fa9ba1377a01c98429",
         "baseVersion": "1.0.0",
-        "definitionHash": "62b947d73ccd26bcb0874f8c6dfba275899b5a72d6b2c8905516da8fe3497d01",
+        "definitionHash": "82a7f77dbfd364a94d5f2a010dfa21d74c4310b121e080e9b1235cfe4b4fedf3",
         "patch": {
           "actions": [
             {
@@ -62,7 +62,6 @@
               "key": "print",
               "label": "Drucken",
               "localEffect": "print",
-              "stubReason": "Druckt die sichtbare Liste; keine Serverwirkung.",
               "zone": "header"
             },
             {
@@ -346,14 +345,14 @@
             "id": "goods_receipt"
           }
         },
-        "patchHash": "6bf199b02893cf1896963bfa34ec481f0dfa92328cc7f058c317309ecaad4695"
+        "patchHash": "0770a43f25b1d43651f352a4f250cba8d3d86e75b0414b2a97d235208d19f2af"
       }
     },
     "purchase_credit_memo": {
       "1.0.0": {
         "baseHash": "0472e1817831f20cfec4ff6434bedb95fd89a4a5efc389fa9ba1377a01c98429",
         "baseVersion": "1.0.0",
-        "definitionHash": "86b6c3bf2d334b73b64f497ba7a15515e6e001c254b99ad7f8235a60510289f4",
+        "definitionHash": "db7eea44ef4eb957d0423e74f466f8356c4a814cdb8239c358f5d1386599cb18",
         "patch": {
           "actions": [
             {
@@ -381,7 +380,6 @@
               "key": "print",
               "label": "Drucken",
               "localEffect": "print",
-              "stubReason": "Druckt die sichtbare Liste; keine Serverwirkung.",
               "zone": "header"
             },
             {
@@ -718,14 +716,14 @@
             "id": "purchase_credit_memo"
           }
         },
-        "patchHash": "64a01d390d6ac6817072cac134fd429d197b193f5e6e78987254c60c39038a99"
+        "patchHash": "80cde883330926a923a2c4516938f9dfb4f2c6e9927b888df76c3e8c2a218d0f"
       }
     },
     "purchase_invoice": {
       "1.0.0": {
         "baseHash": "0472e1817831f20cfec4ff6434bedb95fd89a4a5efc389fa9ba1377a01c98429",
         "baseVersion": "1.0.0",
-        "definitionHash": "0eabc7a29822b036e0f6131a5d472dbe5333dc59bf4c27be45628483a1c072d7",
+        "definitionHash": "c68e673025b9e5b56a7d5fa175b6fc1d56e8421d78c5600792bfca9091e43d5b",
         "patch": {
           "actions": [
             {
@@ -753,7 +751,6 @@
               "key": "print",
               "label": "Drucken",
               "localEffect": "print",
-              "stubReason": "Druckt die sichtbare Liste; keine Serverwirkung.",
               "zone": "header"
             },
             {
@@ -1090,14 +1087,14 @@
             "id": "purchase_invoice"
           }
         },
-        "patchHash": "c28c9ebb4338275e60880c8333f61180779a57408f3678007cb353515ec0ac95"
+        "patchHash": "99edea4c1ecde3365991a7e89653c9277b4a027768cc9d7fa019ee0618138cf0"
       }
     },
     "purchase_order": {
       "1.0.0": {
         "baseHash": "0472e1817831f20cfec4ff6434bedb95fd89a4a5efc389fa9ba1377a01c98429",
         "baseVersion": "1.0.0",
-        "definitionHash": "ab31fcdb8f9399bb7d6a0fc5fe0ad4b81b29a62ef1f228fa68dc843a928687b9",
+        "definitionHash": "171e42c906bc7d83f03e6af9b99f317b0c6017d60d29a42409e51539c3c60efe",
         "patch": {
           "actions": [
             {
@@ -1125,7 +1122,6 @@
               "key": "print",
               "label": "Drucken",
               "localEffect": "print",
-              "stubReason": "Druckt die sichtbare Liste; keine Serverwirkung.",
               "zone": "header"
             },
             {
@@ -1451,14 +1447,14 @@
             "id": "purchase_order"
           }
         },
-        "patchHash": "914899c34fce24b7a36460028436d3039b8cd0ac19f0da653a9cbe00193c20fc"
+        "patchHash": "059b9548909a413186819f599715409d59726d1bf0b06e68e3f99c7846968e59"
       }
     },
     "sales_credit_memo": {
       "1.0.0": {
         "baseHash": "0472e1817831f20cfec4ff6434bedb95fd89a4a5efc389fa9ba1377a01c98429",
         "baseVersion": "1.0.0",
-        "definitionHash": "ad93c877562e6d48f7af9a9ba95751fa0943162cd7cc24bcbe713fa18397b0f6",
+        "definitionHash": "885f24184d0ff901aa52f68921116948fad18041641933f0f982e18d1c74f8ba",
         "patch": {
           "actions": [
             {
@@ -1486,7 +1482,6 @@
               "key": "print",
               "label": "Drucken",
               "localEffect": "print",
-              "stubReason": "Druckt die sichtbare Liste; keine Serverwirkung.",
               "zone": "header"
             },
             {
@@ -1840,14 +1835,14 @@
             "id": "sales_credit_memo"
           }
         },
-        "patchHash": "2e31ca4424270882e19c58d9f3177d8be5fb746578508fe3e8ab3a05343508f9"
+        "patchHash": "63d48ef3f21b2a17376174d8d649c7f0400f0a73eb437565ca4270012a0a7b45"
       }
     },
     "sales_delivery": {
       "1.0.0": {
         "baseHash": "0472e1817831f20cfec4ff6434bedb95fd89a4a5efc389fa9ba1377a01c98429",
         "baseVersion": "1.0.0",
-        "definitionHash": "b1a802c20ec2516fb2259c8ef493fb2f24e9197f19fd17b8e6956da747e2cd36",
+        "definitionHash": "0484f0351a67cd979a71bffcff5d4e81ebfdf451424c990411709c3123ea98af",
         "patch": {
           "actions": [
             {
@@ -1875,7 +1870,6 @@
               "key": "print",
               "label": "Drucken",
               "localEffect": "print",
-              "stubReason": "Druckt die sichtbare Liste; keine Serverwirkung.",
               "zone": "header"
             },
             {
@@ -2176,14 +2170,14 @@
             "id": "sales_delivery"
           }
         },
-        "patchHash": "048fde9f995eca975e4a4cd186993681850cec2c2d637bdbaf800dfb37f165be"
+        "patchHash": "e3cb3733d70f13a523a9cd8f429eb8dc240c4df0b243a4ea74a77c11df67deb1"
       }
     },
     "sales_invoice": {
       "1.0.0": {
         "baseHash": "0472e1817831f20cfec4ff6434bedb95fd89a4a5efc389fa9ba1377a01c98429",
         "baseVersion": "1.0.0",
-        "definitionHash": "dc159931d0b1671e464cd674dae17eee0f1cf792a872aa68eb59b054c25fd676",
+        "definitionHash": "badd9b40b07f3e31a8e65994b5563aecccd181e03b27a1981250bb6653a745f7",
         "patch": {
           "actions": [
             {
@@ -2211,7 +2205,6 @@
               "key": "print",
               "label": "Drucken",
               "localEffect": "print",
-              "stubReason": "Druckt die sichtbare Liste; keine Serverwirkung.",
               "zone": "header"
             },
             {
@@ -2565,14 +2558,14 @@
             "id": "sales_invoice"
           }
         },
-        "patchHash": "a3b5106edf45c450ea739b88af981893900e8325f8478365c33f1b5d33feaa07"
+        "patchHash": "1c08eee999278ab503bdb8ba45dcedb4d187cd41e247d2f24f224f869bcdcbe1"
       }
     },
     "sales_offer": {
       "1.0.0": {
         "baseHash": "0472e1817831f20cfec4ff6434bedb95fd89a4a5efc389fa9ba1377a01c98429",
         "baseVersion": "1.0.0",
-        "definitionHash": "51df8f587086a8a8808b73ac18d452b89c84dd58914bc7a21c9e8a3ed5cfcdc7",
+        "definitionHash": "2b346bbb5b9920b9426bbecac47d125e3121cc2f23ef088c2329da86c40e262c",
         "patch": {
           "actions": [
             {
@@ -2600,7 +2593,6 @@
               "key": "print",
               "label": "Drucken",
               "localEffect": "print",
-              "stubReason": "Druckt die sichtbare Liste; keine Serverwirkung.",
               "zone": "header"
             },
             {
@@ -2943,14 +2935,14 @@
             "id": "sales_offer"
           }
         },
-        "patchHash": "7085d21fc577160ede758ebddd299f5eacd9b221edeb3a6fbe75b43080e1ca31"
+        "patchHash": "0b60670843dbf75770f2dfbda8525aed0531548b2513e16fe7475482dd6821b3"
       }
     },
     "sales_order": {
       "1.0.0": {
         "baseHash": "0472e1817831f20cfec4ff6434bedb95fd89a4a5efc389fa9ba1377a01c98429",
         "baseVersion": "1.0.0",
-        "definitionHash": "94ca8f0f5ce0e1f547fff910d53a488b2c0deaf903ec9632b00f3b1ce684ae36",
+        "definitionHash": "65f966f8e4030bd53dbcd4b3e0f8be0dcb282601d4180a316b851b7f51c40d25",
         "patch": {
           "actions": [
             {
@@ -2978,7 +2970,6 @@
               "key": "print",
               "label": "Drucken",
               "localEffect": "print",
-              "stubReason": "Druckt die sichtbare Liste; keine Serverwirkung.",
               "zone": "header"
             },
             {
@@ -3321,7 +3312,7 @@
             "id": "sales_order"
           }
         },
-        "patchHash": "6982b258f5a9638ab324c43789f81e002d076f8b85d01af62cf4d74c191a3406"
+        "patchHash": "872cc4c7ec9201ec62041456871bad6c5feb8799c2e5baf2e316078267c13378"
       }
     }
   }

@@ -11647,7 +11647,7 @@
           "permission": null,
           "commandEndpoint": null,
           "method": null,
-          "stubReason": "Druckt die sichtbare Liste; keine Serverwirkung."
+          "stubReason": null
         },
         {
           "key": "ansicht_purchase_order",
@@ -11735,7 +11735,7 @@
           "permission": null,
           "commandEndpoint": null,
           "method": null,
-          "stubReason": "Druckt die sichtbare Liste; keine Serverwirkung."
+          "stubReason": null
         },
         {
           "key": "ansicht_purchase_order",
@@ -11823,7 +11823,7 @@
           "permission": null,
           "commandEndpoint": null,
           "method": null,
-          "stubReason": "Druckt die sichtbare Liste; keine Serverwirkung."
+          "stubReason": null
         },
         {
           "key": "ansicht_purchase_order",
@@ -11911,7 +11911,7 @@
           "permission": null,
           "commandEndpoint": null,
           "method": null,
-          "stubReason": "Druckt die sichtbare Liste; keine Serverwirkung."
+          "stubReason": null
         },
         {
           "key": "ansicht_goods_receipt",
@@ -23715,7 +23715,7 @@
           "permission": null,
           "commandEndpoint": null,
           "method": null,
-          "stubReason": "Druckt die sichtbare Liste; keine Serverwirkung."
+          "stubReason": null
         },
         {
           "key": "ansicht_sales_offer",
@@ -23814,7 +23814,7 @@
           "permission": null,
           "commandEndpoint": null,
           "method": null,
-          "stubReason": "Druckt die sichtbare Liste; keine Serverwirkung."
+          "stubReason": null
         },
         {
           "key": "ansicht_sales_offer",
@@ -23913,7 +23913,7 @@
           "permission": null,
           "commandEndpoint": null,
           "method": null,
-          "stubReason": "Druckt die sichtbare Liste; keine Serverwirkung."
+          "stubReason": null
         },
         {
           "key": "ansicht_sales_offer",
@@ -24012,7 +24012,7 @@
           "permission": null,
           "commandEndpoint": null,
           "method": null,
-          "stubReason": "Druckt die sichtbare Liste; keine Serverwirkung."
+          "stubReason": null
         },
         {
           "key": "ansicht_sales_order",
@@ -24111,7 +24111,7 @@
           "permission": null,
           "commandEndpoint": null,
           "method": null,
-          "stubReason": "Druckt die sichtbare Liste; keine Serverwirkung."
+          "stubReason": null
         },
         {
           "key": "ansicht_sales_offer",
