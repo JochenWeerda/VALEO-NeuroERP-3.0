@@ -27,10 +27,14 @@ from sqlalchemy.orm import Session
 from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
-from app.services.fiscalization.contracts import DSFINVK_UST_SAETZE, FinishTransactionCommand, FiscalLine, PaymentLine
+from app.services.fiscalization.contracts import FinishTransactionCommand, FiscalLine, PaymentLine
 from app.services.fiscalization.providers import FiscalProviderError
-from app.services.fiscalization.service import FiscalizationService, FiscalNotConfiguredError
-from app.finance.steuerschluessel import Steuerklaerung, satz_des_schluessels, schluessel_auswahl
+from app.services.fiscalization.service import (
+    FiscalizationService,
+    FiscalNotConfiguredError,
+    FiscalTaxRateError,
+)
+from app.finance.steuerschluessel import Steuerklaerung, satz_des_schluessels
 
 router = APIRouter()
 
@@ -127,19 +131,6 @@ def _steuersatz_aus_stamm(db: Session, tenant_id: str, artikelnr: Optional[str])
         raise HTTPException(422, f"Artikel {artikelnr}: {grund}") from grund
 
 
-def _kassensatz(satz: Decimal) -> Decimal:
-    if satz not in DSFINVK_UST_SAETZE:
-        raise HTTPException(422, f"Steuersatz {satz.normalize():f} % kann an der Kasse nicht signiert werden.")
-    return satz
-
-
-def _satz_des_mandanten(db: Session, tenant_id: str, satz: Decimal) -> Decimal:
-    """Ein vom Terminal gemeldeter Satz gilt nur, wenn ein gueltiger Verkaufs-Steuerschluessel des Mandanten ihn fuehrt."""
-    if not any(wahl.steuersatz == satz for wahl in schluessel_auswahl(db, tenant_id, "verkauf")):
-        raise HTTPException(422, f"Steuersatz {satz.normalize():f} % hat keinen gueltigen Verkaufs-Steuerschluessel.")
-    return satz
-
-
 def _zahlart(art: str) -> str:
     methode = ZAHLART.get((art or "").strip().lower())
     if methode is None:
@@ -172,6 +163,8 @@ def _signiere(service: FiscalizationService, command: FinishTransactionCommand):
     try:
         service.start(command)
         ergebnis = service.finish(command)
+    except FiscalTaxRateError as exc:
+        raise HTTPException(422, str(exc)) from exc
     except (FiscalProviderError, RuntimeError, ValueError) as exc:
         raise HTTPException(503, f"Signatur nicht moeglich: {exc}") from exc
     if ergebnis.state != "FINISHED":
@@ -190,7 +183,7 @@ async def create_retoure(
     zeilen: list[FiscalLine] = []
     summe = Decimal("0")
     for pos in data.positionen:
-        satz = _kassensatz(_steuersatz_aus_stamm(db, tenant_id, pos.artikelnr))
+        satz = _steuersatz_aus_stamm(db, tenant_id, pos.artikelnr)
         brutto = (pos.einzelpreis * pos.menge).quantize(CENT)
         summe += brutto
         zeilen.append(FiscalLine(text=pos.bezeichnung, quantity=Decimal(pos.menge), gross_amount=-brutto, vat_rate=satz))
@@ -303,8 +296,8 @@ async def pos_checkout(
     zeilen: list[FiscalLine] = []
     summe = Decimal("0")
     for pos in data.cart:
-        satz = _kassensatz(_satz_des_mandanten(db, tenant_id, pos.vat_rate) if pos.vat_rate is not None
-                           else _steuersatz_aus_stamm(db, tenant_id, pos.artikelnr))
+        # Den Satz vom Terminal prueft der Fiskalisierungsdienst gegen die Steuerschluessel des Mandanten.
+        satz = pos.vat_rate if pos.vat_rate is not None else _steuersatz_aus_stamm(db, tenant_id, pos.artikelnr)
         brutto = (pos.preis * (Decimal("1") - pos.rabatt_pct / Decimal("100")) * pos.menge).quantize(CENT)
         summe += brutto
         zeilen.append(FiscalLine(text=pos.bezeichnung, quantity=pos.menge, gross_amount=brutto, vat_rate=satz))

@@ -9,7 +9,10 @@ from uuid import uuid4
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.finance.steuerschluessel import schluessel_auswahl
+
 from .contracts import (
+    DSFINVK_UST_SAETZE,
     CashPointClosingCommand,
     ExportCommand,
     FinishTransactionCommand,
@@ -27,6 +30,10 @@ from .providers import (
 )
 
 _SECRET_SETTING_TOKENS = ("secret", "token", "password", "credential", "api_key", "apikey")
+
+
+class FiscalTaxRateError(ValueError):
+    """Ein Positionssatz ist kein gueltiger Verkaufs-Steuerschluessel des Mandanten oder nicht nach DSFinV-K meldbar."""
 
 
 class FiscalNotConfiguredError(RuntimeError):
@@ -191,10 +198,29 @@ class FiscalizationService:
             if not cls._secret_paths({key: value}, prefix="settings")
         }
 
+    def check_vat_rates(self, command: StartTransactionCommand) -> None:
+        """Signiert wird nur ein Satz, den ein gueltiger Verkaufs-Steuerschluessel des Mandanten fuehrt.
+
+        Saetze sind laender- und mandantenbezogen und kommen aus ``domain_erp.tax_keys`` — nie vom Client.
+        """
+        saetze = {line.vat_rate for line in command.lines}
+        if not saetze:
+            return
+        nicht_meldbar = sorted(satz for satz in saetze if satz not in DSFINVK_UST_SAETZE)
+        if nicht_meldbar:
+            raise FiscalTaxRateError(
+                f"Steuersatz {nicht_meldbar[0].normalize():f} % kann an der Kasse nicht signiert werden.")
+        gueltig = {wahl.steuersatz for wahl in schluessel_auswahl(self.db, self.tenant_id, "verkauf")}
+        ohne_schluessel = sorted(saetze - gueltig)
+        if ohne_schluessel:
+            raise FiscalTaxRateError(
+                f"Steuersatz {ohne_schluessel[0].normalize():f} % hat keinen gueltigen Verkaufs-Steuerschluessel.")
+
     def start(self, command: StartTransactionCommand) -> FiscalTransactionResult:
         existing = self.stored_transaction(command.transaction_id)
         if existing and existing["state"] in {"ACTIVE", "FINISHED"}:
             return self._stored_result(existing)
+        self.check_vat_rates(command)
         result = self.provider().start(command)
         self._persist_transaction(command, result)
         self.db.commit()
@@ -204,6 +230,7 @@ class FiscalizationService:
         existing = self.stored_transaction(command.transaction_id)
         if existing and existing["state"] == "FINISHED":
             return self._stored_result(existing)
+        self.check_vat_rates(command)
         result = self.provider().finish(command)
         self._persist_transaction(command, result)
         self.db.commit()
