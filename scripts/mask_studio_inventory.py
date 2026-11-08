@@ -256,7 +256,7 @@ def classify_page(entry: Path, *, beleg_prefix: str, studio_ids: frozenset[str],
     else:
         stufe = "handgebaut"
     return {"stufe": stufe, "screen_ids": screen_ids,
-            "legacy_creation": "createStammNativeDetailPage" in entry_text,
+            "legacy_creation": "createStammNativeDetailPage" in entry_text and "-legacy" in entry_text,
             "dateien": [p.relative_to(ROOT).as_posix() for p in sources]}
 
 
