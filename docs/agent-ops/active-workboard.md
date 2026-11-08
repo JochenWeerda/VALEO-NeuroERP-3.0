@@ -20602,3 +20602,11 @@ Besitz docs/admin/table-catalog.json und .md, eigene QA. CI-Artefakt13589076577 
 ## CI-PR115-UEBERNAHME-20261108 — abgeschlossen, Claude Code (uebernimmt Codex Lead)
 Codex hat das Nutzungslimit erreicht; Claude Code bringt PR #115 (`codex/sonar-contracts-20261106`) nach main. Quality-Gate-Lauf 42464912905 rot: (1) drei Postgres-Testdateien verlangten lokales `PGAPPNAME` — Verbindungsname jetzt per `application_name` in der Verbindung (DDL-Protokoll bleibt). (2) Masken-Ratsche: Standard-Sperre `capability_nicht_freigegeben` (ef1c1219c) zaehlt als gesperrt statt unklassifiziert; Baseline nur geschrumpft. (3) Aktionsrechte, Studio-Katalog und RLS-Matrix neu erzeugt. SBOM-Fehler war GitHub-HTTP-504, laeuft mit dem neuen Push erneut. Dateibesitz: nur die genannten Projektionen/Tests, `scripts/mask_studio_inventory.py`, Workboard.
 Nachtrag: `better-sqlite3` (+ Typen) aus der Wurzel-`package.json` entfernt — kein Code nutzt es, das einzige Skript `scripts/seed-policies.ts` importierte ein nicht existierendes `store-sqlite` (Policies liegen in PostgreSQL `domain_shared.policy_rules`); der Frontend-Docker-Build kompilierte es trotzdem nativ. `expo-sqlite` (Mobile-Offline) bleibt. Zeilen-Loeschen der Personal- und Versandprofilmasken als `hooks/useGuardedRowDelete.tsx` zusammengefuehrt; generiertes `capture-screens.ts` aus der Sonar-Duplikatpruefung genommen (Quelle bleibt gemessen).
+
+## CRM-DIENSTKOPIEN-ENTFERNEN-20261108 — abgeschlossen, Claude Code
+
+Duplikatpruefung vor dem Merge von #54: services/crm-consent, crm-gdpr und crm-marketing liefen nie (nicht in Compose),
+wurden von keinem Code aufgerufen und sind im Backend gefuehrt (crm_consents.py, gdpr.py/gdpr_requests.py/compliance_dsgvo.py,
+crm_campaigns.py/crm_segments.py; Nutzerentscheidung 04.11.: crm_campaigns fuehrt). Entfernt statt Ketten repariert; #54
+geschlossen. Ratsche OHNE_EIGENE_VERSIONSTABELLE = {crm-ai}; Migrationsskripte, Sonar-Ausnahmen e4/e15, RLS-Inventar/-Matrix
+nachgezogen.
