@@ -246,7 +246,7 @@ function convertActions(l3Actions: Array<{ id: string; label: string; type: stri
   return l3Actions.map(action => ({
     key: action.id,
     label: action.label,
-    type: action.type === 'primary' ? 'primary' : action.type === 'menu' ? 'secondary' : 'secondary',
+    type: action.type === 'primary' ? 'primary' : 'secondary',
     onClick: () => {
       const event = new CustomEvent('mask-action', {
         detail: { actionId: action.id, actionType: action.type, label: action.label },

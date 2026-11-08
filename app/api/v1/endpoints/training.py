@@ -36,6 +36,43 @@ class Payload(BaseModel):
     data: dict[str, Any] = Field(default_factory=dict)
 
 
+class HrDeleteResult(BaseModel):
+    success: bool
+    replayed: bool
+    entity_id: str
+    auditEntryId: str
+    outboxEventId: str
+
+
+class HrLegacyDeleteError(BaseModel):
+    detail: str
+
+
+class HrDeleteBody(BaseModel):
+    model_config = _ConfigDict(extra="forbid", populate_by_name=True)
+    expected_revision: str = Field(pattern=r"^[0-9a-f]{64}$")
+    idempotency_key: str = Field(alias="_idempotencyKey", min_length=1, max_length=120)
+
+
+def _execute_hr_delete(db: Session, tenant_id: str, kind: str, item_id: str, body: HrDeleteBody) -> dict:
+    from app.services.hr_row_delete_commands import HrDeleteCommand, delete_hr_row
+    try:
+        command = HrDeleteCommand(kind=kind, entity_id=item_id, expected_revision=body.expected_revision,
+                                  idempotency_key=body.idempotency_key)
+        result = delete_hr_row(db, command, tenant=tenant_id)
+        db.commit()
+        return result
+    except HTTPException:
+        db.rollback()
+        raise
+    except ValueError as exc:
+        db.rollback()
+        raise HTTPException(422, "Ungueltiger Loeschauftrag") from exc
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(503, "Loeschauftrag konnte nicht sicher ausgefuehrt werden") from exc
+
+
 class OnboardingWorkspaceRequest(BaseModel):
     rolle: str
     employee_ref: str | None = None
@@ -359,10 +396,12 @@ async def list_assignments(
     if status:
         where.append("a.status = :status")
         params["status"] = status
+    db.execute(text("SET LOCAL TIME ZONE 'UTC'"))
     return _list(
         db,
         f"""
-        SELECT a.*, c.course_code, c.title AS course_title
+        SELECT a.*, c.course_code, c.title AS course_title,
+               encode(sha256(convert_to(to_jsonb(a)::text, 'UTF8')), 'hex') AS revision
         FROM domain_hr.training_assignments a
         JOIN domain_hr.training_courses c ON c.id = a.course_id AND c.tenant_id = a.tenant_id
         WHERE {' AND '.join(where)}
@@ -422,16 +461,15 @@ async def update_assignment(item_id: str, payload: Payload, tenant_id: str = Dep
     return _clean(dict(row))
 
 
-@router.delete("/assignments/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Assignment lÃ¶schen", dependencies=SCHREIBEN["PERSONAL"])
-async def delete_assignment(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
-    deleted = db.execute(
-        text("DELETE FROM domain_hr.training_assignments WHERE tenant_id=:tenant_id AND id=:id"),
-        {"tenant_id": tenant_id, "id": item_id},
-    ).rowcount
-    if not deleted:
-        raise HTTPException(status_code=404, detail="Assignment not found")
-    db.commit()
-    return None
+@router.delete("/assignments/{item_id}", summary="Schulungszuordnung nur versioniert loeschen", status_code=409, response_model=HrLegacyDeleteError, responses={409: {"description": "Versionierter Loeschauftrag erforderlich"}}, dependencies=SCHREIBEN["PERSONAL"])
+async def legacy_delete_assignment(item_id: str) -> None:
+    raise HTTPException(status_code=409, detail="Versionierter Loeschauftrag erforderlich")
+
+
+@router.post("/assignments/{item_id}/actions/loeschen", summary="Schulungszuordnung revisionsgebunden loeschen", response_model=HrDeleteResult, dependencies=SCHREIBEN["PERSONAL"])
+async def delete_assignment_command(item_id: str, body: HrDeleteBody,
+        tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    return _execute_hr_delete(db, tenant_id, "assignment", item_id, body)
 
 
 @router.get("/certificates", response_model=list[TrainingOut], summary="Certificates auflisten")
@@ -559,9 +597,10 @@ async def list_qualifications(
     if employee_ref:
         where.append("employee_ref = :employee_ref")
         params["employee_ref"] = employee_ref
+    db.execute(text("SET LOCAL TIME ZONE 'UTC'"))
     return _list(
         db,
-        f"SELECT * FROM domain_hr.qualification_profiles WHERE {' AND '.join(where)} ORDER BY employee_ref ASC, role_code ASC",  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
+        f"SELECT q.*, encode(sha256(convert_to(to_jsonb(q)::text, 'UTF8')), 'hex') AS revision FROM domain_hr.qualification_profiles q WHERE {' AND '.join(where)} ORDER BY employee_ref ASC, role_code ASC",  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
         params,
     )
 
@@ -613,16 +652,15 @@ async def update_qualification(item_id: str, payload: Payload, tenant_id: str = 
     return _clean(dict(row))
 
 
-@router.delete("/qualifications/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Qualification lÃ¶schen", dependencies=SCHREIBEN["PERSONAL"])
-async def delete_qualification(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
-    deleted = db.execute(
-        text("DELETE FROM domain_hr.qualification_profiles WHERE tenant_id=:tenant_id AND id=:id"),
-        {"tenant_id": tenant_id, "id": item_id},
-    ).rowcount
-    if not deleted:
-        raise HTTPException(status_code=404, detail="Qualification not found")
-    db.commit()
-    return None
+@router.delete("/qualifications/{item_id}", summary="Qualifikationsprofil nur versioniert loeschen", status_code=409, response_model=HrLegacyDeleteError, responses={409: {"description": "Versionierter Loeschauftrag erforderlich"}}, dependencies=SCHREIBEN["PERSONAL"])
+async def legacy_delete_qualification(item_id: str) -> None:
+    raise HTTPException(status_code=409, detail="Versionierter Loeschauftrag erforderlich")
+
+
+@router.post("/qualifications/{item_id}/actions/loeschen", summary="Qualifikationsprofil revisionsgebunden loeschen", response_model=HrDeleteResult, dependencies=SCHREIBEN["PERSONAL"])
+async def delete_qualification_command(item_id: str, body: HrDeleteBody,
+        tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    return _execute_hr_delete(db, tenant_id, "qualification", item_id, body)
 
 
 @router.get("/onboarding/checklists", response_model=list[TrainingOut], summary="Checklists auflisten")
@@ -742,10 +780,12 @@ async def list_runs(
     if status:
         where.append("r.status = :status")
         params["status"] = status
+    db.execute(text("SET LOCAL TIME ZONE 'UTC'"))
     return _list(
         db,
         f"""
-        SELECT r.*, c.checklist_code, c.title AS checklist_title
+        SELECT r.*, c.checklist_code, c.title AS checklist_title,
+               encode(sha256(convert_to(to_jsonb(r)::text, 'UTF8')), 'hex') AS revision
         FROM domain_hr.onboarding_runs r
         JOIN domain_hr.onboarding_checklists c ON c.id = r.checklist_id AND c.tenant_id = r.tenant_id
         WHERE {' AND '.join(where)}
@@ -805,16 +845,15 @@ async def update_run(item_id: str, payload: Payload, tenant_id: str = Depends(ge
     return _clean(dict(row))
 
 
-@router.delete("/onboarding/runs/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Run lÃ¶schen", dependencies=SCHREIBEN["PERSONAL"])
-async def delete_run(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
-    deleted = db.execute(
-        text("DELETE FROM domain_hr.onboarding_runs WHERE tenant_id=:tenant_id AND id=:id"),
-        {"tenant_id": tenant_id, "id": item_id},
-    ).rowcount
-    if not deleted:
-        raise HTTPException(status_code=404, detail="Onboarding run not found")
-    db.commit()
-    return None
+@router.delete("/onboarding/runs/{item_id}", summary="Onboarding-Lauf nur versioniert loeschen", status_code=409, response_model=HrLegacyDeleteError, responses={409: {"description": "Versionierter Loeschauftrag erforderlich"}}, dependencies=SCHREIBEN["PERSONAL"])
+async def legacy_delete_onboarding(item_id: str) -> None:
+    raise HTTPException(status_code=409, detail="Versionierter Loeschauftrag erforderlich")
+
+
+@router.post("/onboarding/runs/{item_id}/actions/loeschen", summary="Onboarding-Lauf revisionsgebunden loeschen", response_model=HrDeleteResult, dependencies=SCHREIBEN["PERSONAL"])
+async def delete_onboarding_command(item_id: str, body: HrDeleteBody,
+        tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    return _execute_hr_delete(db, tenant_id, "onboarding", item_id, body)
 
 
 @router.post("/onboarding/workspaces", response_model=TrainingOut, summary="Onboarding workspace anlegen", dependencies=SCHREIBEN["PERSONAL"])

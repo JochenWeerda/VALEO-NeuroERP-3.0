@@ -1,7 +1,7 @@
-# Architecture Index — generiert 2026-11-05
+# Architecture Index — generiert 2026-11-07
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-11-05T20:02:19Z'
+generated_at: '2026-11-07T20:02:11Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -1549,6 +1549,7 @@ domains:
     - bewerbung_einwilligung_service
     - bewerbung_loeschlauf_service
     - bewerbung_service
+    - hr_row_delete_commands
     - hrm_abwesenheit_service
     - hrm_zeiterfassung_service
     - lohn_service
@@ -1672,6 +1673,7 @@ domains:
     - inventory_compat_service
     - inventory_correction_service
     - inventory_count_close_service
+    - inventory_count_sheet_command
     - inventory_document_reference
     - inventory_lot_trace_service
     - inventory_movement_direction
@@ -1813,6 +1815,7 @@ domains:
     - lkv_pipeline
     - logistics_disposition_service
     - logistics_epod_service
+    - versandprofil_commands
     - webfleet_connect
     backend_endpoints:
     - fuhrpark
@@ -2016,6 +2019,7 @@ domains:
     - ai_engineering_metrics_service
     - article_image_enrichment
     - calendar_projection_service
+    - command_idempotency
     - compat_helpers
     - compensation_engine
     - document_allocation_service
@@ -2047,6 +2051,7 @@ domains:
     - mcp_studio_authoring
     - mcp_studio_plans
     - mcp_tool_registry_service
+    - mcp_write_capability
     - mobile_sync_service
     - nats_event_handlers
     - neuro_decision_protocol
@@ -2363,8 +2368,8 @@ domains:
 mapping_stats:
   frontend_routes_total: 1138
   frontend_routes_mapped: 1138
-  backend_services_total: 335
-  backend_services_mapped: 335
+  backend_services_total: 340
+  backend_services_mapped: 340
   backend_endpoints_total: 471
   backend_endpoints_mapped: 471
 unmapped:

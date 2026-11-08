@@ -501,10 +501,15 @@ def _generic_coverage(action: dict[str, Any]) -> dict[str, Any] | None:
     if not sd_action:
         return None
     if sd_action.get("readView"):
-        block = agent_block(sd_action)
-        return {"coverage": "mapped_generic" if block is None else "blocked_human_only",
-                "mcp_tool_id": "mask.action.execute" if block is None else None,
-                "notes": "Deklarierte Leseansicht: ausschliesslich GET, gleiche Zielautorisierung wie UI/CLI."}
+        block = agent_block(sd_action, screen_id)
+        if block is None:
+            return {"coverage": "mapped_generic", "mcp_tool_id": "mask.action.execute",
+                    "notes": "Deklarierte Leseansicht: ausschliesslich GET, gleiche Zielautorisierung wie UI/CLI."}
+        if block in {"fuer_agenten_gesperrt", "menschliche_genehmigung"}:
+            return {"coverage": "blocked_human_only", "mcp_tool_id": None,
+                    "notes": "Deklarierte Leseansicht ist Agenten laut Maskenvertrag untersagt."}
+        return {"coverage": "blocked_invalid_contract", "mcp_tool_id": None,
+                "notes": "Lesevertrag ungueltig; kein MCP-Aufruf freigegeben."}
     if not sd_action.get("commandEndpoint") and not sd_action.get("inputFlow") and (
             sd_action.get("localEffect") or sd_action.get("navigationRoute")):
         # Deklarierte Oberflaechenwirkung (Navigation, Anzeige) ohne Serverwirkung — kein MCP-Write noetig.
@@ -516,10 +521,13 @@ def _generic_coverage(action: dict[str, Any]) -> dict[str, Any] | None:
                 "notes": "Eingabefluss der Maske (humanForm); Menschen per Maske oder CLI, fuer Agenten gesperrt."}
     if not sd_action.get("commandEndpoint"):
         return None
-    block = agent_block(sd_action)
+    block = agent_block(sd_action, screen_id)
     if block is None:
         return {"mcp_tool_id": "mask.action.execute", "coverage": "mapped_generic",
                 "notes": "Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske."}
+    if block == "capability_nicht_freigegeben":
+        return {"mcp_tool_id": None, "coverage": "blocked_unreleased",
+                "notes": "MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt."}
     if block in {"fuer_agenten_gesperrt", "menschliche_genehmigung"}:
         return {"mcp_tool_id": None, "coverage": "blocked_human_only",
                 "notes": f"Maske behaelt die Aktion Menschen vor ({block}); CLI und Maske nutzen denselben Endpunkt."}

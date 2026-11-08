@@ -465,7 +465,7 @@ def _resolve_page_module(module: str) -> Path | None:
 def _screen_ids_from_source(text: str) -> set[str]:
     ids: set[str] = set()
     consts: dict[str, str] = {}
-    for match in re.finditer(r"const\s+(SCREEN_ID|[A-Z_]+)\s*=\s*['\"]([^'\"]+)['\"]", text):
+    for match in re.finditer(r"const\s+([A-Z_]+)\s*=\s*['\"]([^'\"]+)['\"]", text):
         consts[match.group(1)] = match.group(2)
     for match in _SCREEN_ID_IN_SOURCE.finditer(text):
         sid = match.group(1) or match.group(2)

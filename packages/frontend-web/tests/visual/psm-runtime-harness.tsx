@@ -45,6 +45,8 @@ const route = createRoute({ getParentRoute: () => rootRoute, path: '/', componen
   </main>
 ) })
 const router = createRouter({ routeTree: rootRoute.addChildren([route]), history: createMemoryHistory({ initialEntries: ['/'] }) })
-createRoot(document.getElementById('root')!).render(
+const container = document.getElementById('root')
+if (!container) throw new Error('Harness braucht #root')
+createRoot(container).render(
   <QueryClientProvider client={client}><RouterProvider router={router} /></QueryClientProvider>,
 )

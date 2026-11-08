@@ -1,6 +1,8 @@
 """MCP-MASK-GENERIC — generische MCP-Werkzeuge rufen denselben Kommandoweg wie Maske und CLI."""
 from __future__ import annotations
 
+from types import SimpleNamespace
+
 import json
 
 import httpx
@@ -28,7 +30,7 @@ def _registry_actions():
 def test_paritaet_mit_der_cli_regel():
     """Was ein Agent per MCP darf, kann auch die CLI — und nur der generische Weg ohne Adapter ist fuer Agenten."""
     for sid, action in _registry_actions():
-        block = mm.agent_block(action)
+        block = mm.agent_block(action, sid)
         cli = support(action)
         if block is None:
             assert cli.supported and not action.get("commandBinding"), (sid, action["key"])
@@ -38,20 +40,35 @@ def test_paritaet_mit_der_cli_regel():
 
 
 def _agent_action():
-    for sid, action in _registry_actions():
-        if mm.agent_block(action) is None and "{entity_id}" in (action.get("commandEndpoint") or "") and not action.get("auditReasonRequired"):
+    candidates = [(sid, action) for sid, action in _registry_actions()
+                  if mm.agent_block(action, sid) is None and "{entity_id}" in (action.get("commandEndpoint") or "")]
+    for sid, action in candidates:
+        if not action.get("auditReasonRequired"):
             return sid, action
+    if candidates:
+        return candidates[0]
     raise AssertionError("keine agentenfaehige Maskenaktion mit Objektbezug in der Registry")
 
 
 def _blocked_action():
     for sid, action in _registry_actions():
-        if mm.agent_block(action) == "fuer_agenten_gesperrt":
+        if mm.agent_block(action, sid) == "fuer_agenten_gesperrt":
             return sid, action
     raise AssertionError("keine fuer Agenten gesperrte Aktion in der Registry")
 
 
+@pytest.fixture(autouse=True)
+def verified_principal(monkeypatch):
+    from app.core import identity_context
+    principal = SimpleNamespace(subject="agent-1", tenant_id=TENANT,
+                                roles={"PERSONAL_BEARBEITEN", "LAGER_BEARBEITEN"},
+                                scopes={"masks:write"}, claims={"identity_type": "service"})
+    monkeypatch.setattr(identity_context, "current_identity", lambda: principal)
+
+
 def req(parameters, mode="dryRun", key=None):
+    if mode == "execute":
+        parameters = {"confirm": True, "audit_reason": "Vertragstest", **parameters}
     return ToolExecutionRequest(tool_name="mask.action.execute", parameters=parameters, mode=mode, idempotency_key=key)
 
 
@@ -95,7 +112,7 @@ def test_execute_braucht_wiederholungsschluessel_und_gibt_ihn_weiter():
     target = Target()
     mm.execute(req({"screen_id": sid, "action": action["key"], "entity_id": "1"}, mode="execute", key="k-1"),
                TENANT, "Bearer t", transport=httpx.MockTransport(target))
-    assert json.loads(target.calls[0].content) == {"_idempotencyKey": "k-1"}
+    assert json.loads(target.calls[0].content) == {"_idempotencyKey": "k-1", "_auditReason": "Vertragstest"}
 
 
 @pytest.mark.parametrize("parameters,status", [

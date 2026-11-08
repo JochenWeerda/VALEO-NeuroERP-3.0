@@ -1580,6 +1580,19 @@
         ]
       ]
     },
+    "logistik/versandprofile": {
+      "logistics.versandprofil.delete": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "personal/bewerbungen": {
       "personal.bewerbung.write": [
         [
@@ -1610,6 +1623,13 @@
           "PERSONAL_BEARBEITEN",
           "admin"
         ]
+      ],
+      "personal.onboarding.delete": [
+        [
+          "PERSONAL_ADMIN",
+          "PERSONAL_BEARBEITEN",
+          "admin"
+        ]
       ]
     },
     "personal/qualifikationen": {
@@ -1619,10 +1639,24 @@
           "PERSONAL_BEARBEITEN",
           "admin"
         ]
+      ],
+      "personal.qualifikation.delete": [
+        [
+          "PERSONAL_ADMIN",
+          "PERSONAL_BEARBEITEN",
+          "admin"
+        ]
       ]
     },
     "personal/schulungen": {
       "hr:write": [
+        [
+          "PERSONAL_ADMIN",
+          "PERSONAL_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "personal.schulung.delete": [
         [
           "PERSONAL_ADMIN",
           "PERSONAL_BEARBEITEN",

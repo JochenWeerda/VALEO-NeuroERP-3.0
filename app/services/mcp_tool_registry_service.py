@@ -89,7 +89,27 @@ class McpToolRegistryService:
     def get_tool(self, tool_id: str) -> dict[str, Any]:
         for tool in self._registry().get("tools", []):
             if tool.get("tool_id") == tool_id:
-                return tool
+                if tool_id != "mask.action.execute":
+                    return tool
+                # Project only trusted Studio deployment registrations into the
+                # existing capability registry. Invalid configuration fails closed.
+                from app.services import studio_validation
+                from app.services.studio_entity_contracts import registrations
+                from app.services.studio_entity_compiler import entity_action_binding
+                try:
+                    data = yaml.safe_load(studio_validation._CONFIG_PATH.read_text(encoding="utf-8")) or {}
+                    entries = registrations(data)
+                    projected = []
+                    for entry in entries:
+                        if not entry.writes_enabled or not entry.agent_roles:
+                            continue
+                        for operation in ("create", "update", "delete"):
+                            projected.append({**entity_action_binding(entry.spec, operation),
+                                "agent_write_enabled": True, "command_version": 1,
+                                "agent_roles": list(entry.agent_roles)})
+                except (OSError, ValueError, TypeError, KeyError, yaml.YAMLError):
+                    projected = []
+                return {**tool, "write_capabilities": [*tool.get("write_capabilities", []), *projected]}
         raise KeyError(f"Tool not found: {tool_id}")
 
     def validate_all(self) -> list[str]:

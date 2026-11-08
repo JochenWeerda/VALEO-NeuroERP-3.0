@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { MadeByStudioListRuntimeWire } from '@/components/mask-builder/made-by-studio-runtime-wire'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { RowDeleteConfirmDialog, useGuardedRowDelete } from '@/hooks/useGuardedRowDelete'
 import { Skeleton } from '@/components/ui/skeleton'
 import { UniversalMaskRenderer } from '@/components/mask-builder/UniversalMaskRenderer'
 import { useScreenPermissions } from '@/components/mask-builder/runtime/screen-permissions'
@@ -14,6 +15,12 @@ import { apiClient, getAxiosErrorMessage } from '@/lib/api-client'
 import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { personalKeys } from '@/lib/api/personal'
 import { personalSchulungenScreen } from '@/masks/capture-screens'
+
+const ROW_DELETE = {
+  endpoint: (id: string) => `/api/v1/training/assignments/${id}/actions/loeschen`,
+  queryKey: personalKeys.schulungen(),
+  entityLabel: 'Schulung',
+}
 
 const leer = {
   employee_ref: '',
@@ -30,6 +37,7 @@ type CourseApi = { id: string; course_code: string; title: string; is_active: bo
 
 type AssignmentApi = {
   id: string
+  revision?: string
   course_id: string
   course_code?: string
   course_title?: string
@@ -41,6 +49,7 @@ type AssignmentApi = {
 
 type SchulungRow = {
   id: string
+  revision?: string
   employeeRef: string
   courseId: string
   courseCode?: string
@@ -82,6 +91,7 @@ function toRow(item: AssignmentApi): SchulungRow {
   const label = stand(item)
   return {
     id: item.id,
+    revision: item.revision,
     employeeRef: item.employee_ref,
     courseId: item.course_id,
     courseCode: item.course_code || undefined,
@@ -110,7 +120,7 @@ export default function PersonalSchulungenPage(): JSX.Element {
   const ablaufend = rows.filter((row) => row.ablaufend).length
   const offen = rows.filter((row) => row.ablaufend || row.abgelaufen).length
   const [saving, setSaving] = useState(false)
-  const [pendingDeletes, setPendingDeletes] = useState<Set<string>>(new Set())
+  const { pendingDeletes, deleteCandidate, setDeleteCandidate, loeschen } = useGuardedRowDelete(ROW_DELETE)
 
   useEffect(() => {
     if (!schulungen.isError && !kurse.isError) return
@@ -210,24 +220,6 @@ export default function PersonalSchulungenPage(): JSX.Element {
     }
   }, [form.values, leeren, queryClient, saving])
 
-  const loeschen = useCallback(async (id: string, name: string) => {
-    if (!id || pendingDeletes.has(id)) return
-    setPendingDeletes((prev) => new Set(prev).add(id))
-    try {
-      await apiClient.delete(`/api/v1/training/assignments/${id}`)
-      toast.success('Schulung gelöscht', { description: name })
-      await queryClient.invalidateQueries({ queryKey: personalKeys.schulungen() })
-    } catch (error) {
-      toast.error('Schulung nicht gelöscht', { description: getAxiosErrorMessage(error) })
-    } finally {
-      setPendingDeletes((prev) => {
-        const next = new Set(prev)
-        next.delete(id)
-        return next
-      })
-    }
-  }, [pendingDeletes, queryClient])
-
   const handleAction = useCallback(async (key: string, payload: Record<string, unknown>) => {
     if (key === 'speichern') {
       await speichern()
@@ -237,8 +229,8 @@ export default function PersonalSchulungenPage(): JSX.Element {
       leeren()
       return
     }
-    if (key === 'loeschen') await loeschen(text(payload.id), text(payload.employee_ref))
-  }, [leeren, loeschen, speichern])
+    if (key === 'loeschen') setDeleteCandidate({ id: text(payload.id), name: text(payload.employee_ref), version: text(payload.revision) })
+  }, [leeren, speichern])
 
   const screenContext = useMemo(() => createScreenContext({
     data: { schulungen: rows },
@@ -263,6 +255,7 @@ export default function PersonalSchulungenPage(): JSX.Element {
 
   return (
     <div className="space-y-6 p-3 md:p-6">
+      <RowDeleteConfirmDialog candidate={deleteCandidate} onCancel={() => setDeleteCandidate(null)} onConfirm={(candidate) => { void loeschen(candidate) }} />
       <UniversalMaskRenderer
         plan={plan}
         formState={form}
@@ -272,6 +265,7 @@ export default function PersonalSchulungenPage(): JSX.Element {
         tables={{
           schulungen: rows.map((row) => ({
             id: row.id,
+            revision: row.revision,
             employee_ref: row.employeeRef,
             kurs: row.courseTitle || row.courseCode || row.courseId,
             status: row.statusLabel,

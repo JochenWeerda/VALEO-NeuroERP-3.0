@@ -5,6 +5,8 @@
     ".storybook/**/*",
     "scripts/**/*",
     "tests/e2e/**/*.ts",
+    "tests/visual/**/*.ts",
+    "tests/visual/**/*.tsx",
     "playwright.config.ts",
     "vite.config.ts"
   ],

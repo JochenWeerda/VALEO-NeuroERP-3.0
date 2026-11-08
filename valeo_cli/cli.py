@@ -88,7 +88,8 @@ def _action(definition: dict, key: str) -> dict:
 
 def _is_agent(token: str) -> bool:
     """Fail closed: Nur ein Token mit ``identity_type=human`` gilt als Mensch."""
-    return auth.claims(token).get("identity_type") != "human"
+    claims = auth.claims(token)
+    return claims.get("identity_type") != "human" or bool(claims.get("act") or claims.get("agent_id"))
 
 
 def _parse_fields(pairs: list[str]) -> dict[str, str]:
@@ -217,21 +218,24 @@ def cmd_ausfuehren(args, http, token, out, ask: Callable[[str], str], stdin) -> 
         if "idempotency_key" in body:
             result["idempotenz"] = key
     else:
+        row_command = support.row_command(action)
+        if row_command and args.version is not None:
+            raise UsageError('Zeilenbefehle verwenden den gelesenen Stand per --feld, nicht --version.')
         generated = bool(re.fullmatch(r'/api/v1/studio/entities/studio_[a-z0-9_]+/(?:\{entity_id\}/)?actions/(?:create|update|delete)', action.get('commandEndpoint', '')))
-        if action.get('requiresExpectedVersion') or (generated and action['commandEndpoint'].endswith(('/update', '/delete'))):
+        if not row_command and (action.get('requiresExpectedVersion') or (generated and action['commandEndpoint'].endswith(('/update', '/delete')))):
             version = args.version if args.version is not None else payload.get('expected_version')
             if type(version) is not int or version < 1:
                 raise UsageError('Diese Aktion braucht die gelesene Version (--version).')
             if 'expected_version' in payload and payload['expected_version'] != version:
                 raise UsageError('Widerspruechliche Versionsangaben.')
             payload = {**payload, 'expected_version': version}
-        key = args.idempotenz or (str(uuid.uuid4()) if generated or action.get('requiresIdempotencyKey') else None)
+        key = args.idempotenz or (str(uuid.uuid4()) if row_command or generated or action.get('requiresIdempotencyKey') else None)
         method, path, body = support.build_request(
             action, screen_id=args.maske, entity_id=args.id, payload=payload, mode=args.modus,
             audit_reason=args.grund, idempotency_key=key)
         result = (_send_retryable(http, token, method, path, body, key, out) if key
                   else _request(http, token, method, path, body))
-        if generated and not args.idempotenz and isinstance(result, dict):
+        if (row_command or generated) and not args.idempotenz and isinstance(result, dict):
             result = {**result, 'idempotenz': key}
     if args.json:
         out(json.dumps(result, ensure_ascii=False, indent=2))

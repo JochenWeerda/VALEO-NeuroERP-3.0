@@ -251,7 +251,7 @@ function GDPRRequestHistoryTab({ requestId }: { requestId: string }) {
       }
     }
     if (requestId) {
-      loadHistory()
+      void loadHistory()
     }
   }, [requestId])
 

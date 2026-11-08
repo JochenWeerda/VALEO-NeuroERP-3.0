@@ -75,12 +75,11 @@ const Wizard: React.FC<WizardProps> = ({
   }
 
   const onSubmit = async () => {
-    if (!isLastStep) {
-      handleNext()
-      return
-    }
-
     try {
+      if (!isLastStep) {
+        await handleNext()
+        return
+      }
       // Collect all step data
       const allData = getValues()
       await onComplete(allData)

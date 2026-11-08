@@ -345,7 +345,7 @@ export default function BestellungStammPage(): JSX.Element {
       
       // Refresh Audit Trail
       if (id) {
-        refetchAudit()
+        await refetchAudit()
       }
 
       toast({

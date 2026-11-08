@@ -281,12 +281,16 @@
   "mask:logistik/frachttabellen:loeschen",
   "mask:logistik/tourenplanung:anlegen",
   "mask:logistik/tourenplanung:storno",
+  "mask:logistik/versandprofile:loeschen",
   "mask:mahnwesen/mahnlauf:run",
   "mask:personal/bewerbungen:loeschen",
   "mask:personal/bewerbungen:speichern",
   "mask:personal/einwilligungserklaerungen:anlegen",
+  "mask:personal/onboarding:loeschen",
   "mask:personal/onboarding:speichern",
+  "mask:personal/qualifikationen:loeschen",
   "mask:personal/qualifikationen:speichern",
+  "mask:personal/schulungen:loeschen",
   "mask:personal/schulungen:speichern",
   "mask:planung/kalender:reproject",
   "mask:produktion/produktionsleitstand:sync",
@@ -323,7 +327,7 @@
   "mask:waage/wiegungen:create"
  ],
  "nicht_unterstuetzt": {
-  "kein_endpunkt": 843,
+  "kein_endpunkt": 839,
   "pfadparameter": 6
  }
 }

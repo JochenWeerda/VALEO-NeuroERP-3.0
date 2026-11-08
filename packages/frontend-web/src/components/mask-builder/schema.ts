@@ -197,6 +197,8 @@ export interface ScreenTableDefinition {
     visibleWhen?: { field: string; values: Array<string | number | boolean> }
     disabledWhen?: { field: string; values: Array<string | number | boolean> }
     /** Kommando-Weg der Zeile ({entity_id} = Zeilenkennung); dieselben Wege rufen CLI und MCP. */
+    /** Versioned domain command shared by UI, CLI and MCP. */
+    domainCommand?: string
     commandEndpoint?: string
     method?: 'POST' | 'PUT' | 'PATCH' | 'DELETE'
     auditReasonRequired?: boolean
@@ -279,6 +281,8 @@ export interface ScreenActionDefinition {
   permission?: string
   disabled?: boolean
   // Action Runtime (Phase 026)
+  /** Versioned capability identifier checked by MCP before agent execution. */
+  domainCommand?: string
   commandEndpoint?: string
   /** Versioned transport only; domain authorization/approvals remain server-side. */
   commandBinding?: {

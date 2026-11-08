@@ -24,11 +24,12 @@ from typing import Any
 
 import yaml
 import json
+import re
 
 _CONFIG_PATH = Path(__file__).resolve().parents[2] / "config" / "studio_data_sources.yaml"
 
 _DANGER_RANK = {"safe": 0, "moderate": 1, "high": 2, "critical": 3}
-_DOCUMENT_TRANSPORT_FIELDS = ("commandEndpoint", "method", "commandBinding", "kommando", "permission",
+_DOCUMENT_TRANSPORT_FIELDS = ("domainCommand", "commandEndpoint", "method", "commandBinding", "kommando", "permission",
                               "enabledWhen", "inputFields", "folgebelegart")
 _DOCUMENT_POLICY_FIELDS = (*_DOCUMENT_TRANSPORT_FIELDS, "dangerLevel", "forbiddenForAgents",
                            "requiresConfirmation", "auditReasonRequired", "humanApprovalRequired",
@@ -287,6 +288,12 @@ def validate_studio_draft(
                     violations.append(f"belegaktionsvertrag_geaendert:{key}")
             except (ValueError, TypeError):
                 violations.append(f"belegaktionsvertrag_geaendert:{key}")
+        command_name = action.get("domainCommand")
+        if command_name is not None and (not isinstance(command_name, str) or
+                not re.fullmatch(r"[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]*)+\.v[1-9][0-9]*", command_name)):
+            violations.append(f"action_ungueltiger_domainCommand:{key}")
+        if action.get("domainCommand") != base.get("domainCommand"):
+            violations.append(f"action_fremder_domainCommand:{key}")
         if action.get("readView") != base.get("readView"):
             violations.append(f"action_fremder_readView:{key}")
         # eigener/fremder commandEndpoint

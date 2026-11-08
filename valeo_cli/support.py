@@ -25,6 +25,16 @@ GENERIC_PATH_PARAMETERS = {"{entity_id}", "{screen_id}"}
 _PLACEHOLDER = re.compile(r"\{[^}]+\}")
 _DOCFLOW = re.compile(r"^/api/v1/docflow(?:/|$)")
 _IDENTITY_BUDGET = re.compile(r"^/api/v1/identity/budgets/actions/(root|allocate)$")
+_ROW_COMMANDS = {
+    "/api/v1/training/onboarding/runs/{entity_id}/actions/loeschen": "expected_revision",
+    "/api/v1/training/qualifications/{entity_id}/actions/loeschen": "expected_revision",
+    "/api/v1/training/assignments/{entity_id}/actions/loeschen": "expected_revision",
+    "/api/v1/logistik/versand/profile/{entity_id}/actions/deactivate": "expected_active",
+}
+
+
+def row_command(action: dict[str, Any]) -> str | None:
+    return _ROW_COMMANDS.get(action.get("commandEndpoint"))
 
 
 @dataclass(frozen=True)
@@ -133,6 +143,29 @@ def build_request(action: dict[str, Any], *, screen_id: str, entity_id: str | No
     if requires_entity(action) and not entity_id:
         raise ValueError("Diese Aktion braucht eine Objektkennung (--id).")
     path = endpoint.replace("{entity_id}", quote(entity_id or "", safe="")).replace("{screen_id}", screen_id)
+    row_field = row_command(action)
+    if row_field:
+        if mode != "execute":
+            raise ValueError("Dieser Zeilenbefehl unterstuetzt keinen Trockenlauf.")
+        if not idempotency_key or not idempotency_key.strip():
+            raise ValueError("Wiederholungsschluessel erforderlich.")
+        if set(payload) != {row_field}:
+            raise ValueError(f"Genau {row_field} als gelesenen Stand angeben.")
+        value = payload[row_field]
+        if row_field == "expected_active":
+            if value is not True:
+                raise ValueError("Der gelesene Profilstand muss aktiv sein.")
+            if not audit_reason or not audit_reason.strip():
+                raise ValueError("Diese Aktion verlangt eine Begruendung (--grund).")
+        else:
+            if not isinstance(value, str) or not re.fullmatch(r"[0-9a-f]{64}", value):
+                raise ValueError("Gelesene Revision als 64 kleingeschriebene Hexzeichen erforderlich.")
+            if audit_reason:
+                raise ValueError("Dieser Zeilenbefehl akzeptiert keine Begruendung.")
+        body = {row_field: value, "_idempotencyKey": idempotency_key}
+        if row_field == "expected_active":
+            body["_auditReason"] = audit_reason
+        return "POST", path, body
     body: dict[str, Any] = dict(identity_budget_input(endpoint, payload))
     if mode != "execute":
         body["_mode"] = mode

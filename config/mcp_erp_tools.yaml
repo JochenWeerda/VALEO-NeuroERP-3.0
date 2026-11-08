@@ -2500,6 +2500,36 @@ tools:
     idempotent: true
     risk_class: medium
     data_classification: LOCAL_ONLY
+    # Per-action release; each endpoint and version must match the canonical command.
+    write_capabilities:
+      - domain_command: logistik.versandprofil.deactivate.v1
+        screen_id: logistik/versandprofile
+        action: loeschen
+        endpoint: /api/v1/logistik/versand/profile/{entity_id}/actions/deactivate
+        command_version: 1
+        agent_write_enabled: true
+        agent_roles: [LAGER_BEARBEITEN, LAGER_ADMIN, SALES_BEARBEITEN, SALES_ADMIN, EINKAUF_BEARBEITEN, EINKAUF_ADMIN, admin]
+      - domain_command: hr.onboarding.delete.v1
+        screen_id: personal/onboarding
+        action: loeschen
+        endpoint: /api/v1/training/onboarding/runs/{entity_id}/actions/loeschen
+        command_version: 1
+        agent_write_enabled: false
+        agent_roles: [PERSONAL_BEARBEITEN, PERSONAL_ADMIN, admin]
+      - domain_command: hr.qualification.delete.v1
+        screen_id: personal/qualifikationen
+        action: loeschen
+        endpoint: /api/v1/training/qualifications/{entity_id}/actions/loeschen
+        command_version: 1
+        agent_write_enabled: false
+        agent_roles: [PERSONAL_BEARBEITEN, PERSONAL_ADMIN, admin]
+      - domain_command: hr.assignment.delete.v1
+        screen_id: personal/schulungen
+        action: loeschen
+        endpoint: /api/v1/training/assignments/{entity_id}/actions/loeschen
+        command_version: 1
+        agent_write_enabled: false
+        agent_roles: [PERSONAL_BEARBEITEN, PERSONAL_ADMIN, admin]
     input_schema:
       type: object
       properties:
@@ -2508,6 +2538,7 @@ tools:
         entity_id: { type: string, nullable: true }
         input: { type: object, nullable: true }
         audit_reason: { type: string, nullable: true }
+        confirm: { type: boolean }
       required: [screen_id, action]
     output_schema:
       type: object

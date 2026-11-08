@@ -6,6 +6,13 @@ from app.services.studio_entity_commands import tables
 from app.services.studio_migration import _head
 
 
+def entity_action_binding(spec: EntitySpec, operation: str):
+    endpoint = '/api/v1/studio/entities/' + spec.name
+    return {'screen_id': 'tenant/' + spec.name, 'action': f'{spec.name}_{operation}',
+            'domain_command': f'{spec.name}.{operation}.v1',
+            'endpoint': endpoint + ('' if operation == 'create' else '/{entity_id}') + '/actions/' + operation}
+
+
 def compile_entity(spec: EntitySpec, *, catalog_only=False):
     from sqlalchemy.schema import CreateTable
     from sqlalchemy.dialects import postgresql
@@ -37,14 +44,16 @@ def compile_entity(spec: EntitySpec, *, catalog_only=False):
         'required': not c.nullable} for c in spec.columns]
     actions = []
     for operation, label in [('create', 'Anlegen'), ('update', 'Ändern'), ('delete', 'Deaktivieren')]:
-        actions.append({'key': f'{spec.name}_{operation}', 'label': label,
-            'commandEndpoint': endpoint + ('' if operation == 'create' else '/{entity_id}') + '/actions/' + operation,
+        binding = entity_action_binding(spec, operation)
+        actions.append({'key': binding['action'], 'label': label,
+            'commandEndpoint': binding['endpoint'],
             'dangerLevel': 'moderate', 'requiresConfirmation': True, 'auditReasonRequired': True,
             'forbiddenForAgents': True, 'disabled': True,
-            'command': f'{spec.name}.{operation}.v1',
+            'command': binding['domain_command'],
+            'domainCommand': binding['domain_command'],
             'permission': f'studio.entity.{spec.domain}.write',
             'inputFields': input_fields if operation != 'delete' else []})
-    screen_id = 'tenant/' + spec.name
+    screen_id = entity_action_binding(spec, 'create')['screen_id']
     definition = {'schemaVersion': 1, 'id': screen_id, 'domain': spec.domain, 'mode': 'list', 'title': spec.label,
         'processSimulation': {'profile':'studio.entity.v1','entity':spec.name,'contractHash':spec_hash},
         'adapter': {'type': 'native', 'sourceId': screen_id, 'temporary': True},

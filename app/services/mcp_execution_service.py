@@ -2441,16 +2441,22 @@ def _postfach_speichern(db: Session, request: ToolExecutionRequest, actor: str, 
         opened = PostfachSpeichernInput.model_validate(request.parameters)
     except ValidationError as exc:
         raise HTTPException(422, "Invalid admin.postfach.speichern parameters") from exc
-    # Fingerprint ohne Klartext-Passwort.
+    # Nur die Vorschau ist redigiert; der Replay-Abdruck muss alle Eingaben binden.
     parameters = opened.model_dump(mode="json", exclude={"passwort"})
     parameters["hat_passwort"] = bool(opened.passwort)
     if request.mode == "execute" and not (request.idempotency_key or "").strip():
         raise HTTPException(422, "execute requires an idempotency_key")
-    fingerprint = hashlib.sha256(json.dumps(parameters, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
     try:
         from app.services import mailkonto_service as konto
 
         if request.mode == "execute":
+            from app.core import geheimnis
+
+            fingerprint = geheimnis.signieren(json.dumps(
+                {"domain": "mcp-postfach-replay-v1", "tenant": tenant,
+                 "action": request.tool_name, "parameters": opened.model_dump(mode="json")},
+                sort_keys=True, ensure_ascii=False, separators=(",", ":"),
+            ))
             _advisory_lock(db, tenant, request.tool_name, request.idempotency_key)  # type: ignore[arg-type]
             replayed = _replay_or_none(
                 db, tenant, request.tool_name, request.idempotency_key, actor, fingerprint  # type: ignore[arg-type]

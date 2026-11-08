@@ -92,3 +92,38 @@ def test_mcp_mask_action_map_covers_top_writes_and_blocks_fin_close():
                          for bau in {**LISTEN_SCREEN_BUILDERS, **CLUSTER_SCREEN_BUILDERS}.values())
     # 16 = 15 + "Neue Gutschrift" (sales/credit-notes, form_reset); + Anlage-Navigation je Studio-Liste
     assert data["stats"]["by_coverage"].get("local_ui", 0) == 16 + listen_anlagen
+
+
+def test_row_commands_reflect_explicit_capability_release():
+    """Each row write uses its exact registered, versioned capability."""
+    from app.core.screen_definitions import get_screen_definition
+    from app.services.mcp_mask_actions import agent_block, iter_actions
+    from scripts.generate_mcp_mask_action_map import _generic_coverage
+
+    actions = {
+        "logistik/versandprofile": ("versand.deleteProfile", "/api/v1/logistik/versand/profile/{entity_id}/actions/deactivate"),
+        "personal/onboarding": ("personal.deleteOnboarding", "/api/v1/training/onboarding/runs/{entity_id}/actions/loeschen"),
+        "personal/qualifikationen": ("personal.deleteQualifikation", "/api/v1/training/qualifications/{entity_id}/actions/loeschen"),
+        "personal/schulungen": ("personal.deleteSchulung", "/api/v1/training/assignments/{entity_id}/actions/loeschen"),
+    }
+    for screen, (command, endpoint) in actions.items():
+        action = next(a for a in iter_actions(get_screen_definition(screen)) if a["key"] == "loeschen")
+        assert action["command"] == command and action["commandEndpoint"] == endpoint
+        assert action["domainCommand"].endswith(".v1")
+        coverage = _generic_coverage({"mask": screen, "source": {"actionKey": "loeschen"}})
+        if screen == "logistik/versandprofile":
+            assert agent_block(action, screen) is None
+            assert coverage["coverage"] == "mapped_generic" and coverage["mcp_tool_id"] == "mask.action.execute"
+        else:
+            assert agent_block(action, screen) == "capability_nicht_freigegeben"
+            assert coverage["coverage"] == "blocked_unreleased" and coverage["mcp_tool_id"] is None
+
+
+def test_invalid_read_view_is_not_misclassified_as_human_policy(monkeypatch):
+    from app.core import screen_definitions
+    from scripts.generate_mcp_mask_action_map import _generic_coverage
+    definition = {"id": "test/mixed", "actions": [{"key": "history", "localEffect": "view",
+        "readView": {"endpoint": "/api/v1/test"}, "commandEndpoint": "/api/v1/test"}]}
+    monkeypatch.setattr(screen_definitions, "get_screen_definition", lambda *_: definition)
+    result = _generic_coverage({"mask": "test/mixed", "source": {"actionKey": "history"}})
+    assert result["coverage"] == "blocked_invalid_contract" and result["mcp_tool_id"] is None

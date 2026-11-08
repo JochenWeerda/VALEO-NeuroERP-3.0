@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { MadeByStudioListRuntimeWire } from '@/components/mask-builder/made-by-studio-runtime-wire'
+import { RowDeleteConfirmDialog, type RowDeleteCandidate, useGuardedRowDelete } from '@/hooks/useGuardedRowDelete'
 import { Skeleton } from '@/components/ui/skeleton'
 import { UniversalMaskRenderer } from '@/components/mask-builder/UniversalMaskRenderer'
 import { useScreenPermissions } from '@/components/mask-builder/runtime/screen-permissions'
@@ -47,7 +48,14 @@ export default function VersandprofilePage(): JSX.Element {
   const createAvis = useCreateLieferavis()
   const profile = profileQuery.data ?? []
   const avise = avisQuery.data ?? []
-  const [pendingDeletes, setPendingDeletes] = useState<Set<string>>(new Set())
+  const deleteMutateAsync = deleteProfil.mutateAsync
+  const rowDelete = useMemo(() => ({
+    entityLabel: 'Versandprofil',
+    requireVersion: false,
+    perform: ({ id }: RowDeleteCandidate, key: string) => deleteMutateAsync({ id, key }),
+    successDescription: ({ name }: RowDeleteCandidate) => `Profil ${name} wurde deaktiviert.`,
+  }), [deleteMutateAsync])
+  const { pendingDeletes, deleteCandidate, setDeleteCandidate, loeschen } = useGuardedRowDelete(rowDelete)
   const [savingProfil, setSavingProfil] = useState(false)
   const [savingAvis, setSavingAvis] = useState(false)
 
@@ -187,23 +195,6 @@ export default function VersandprofilePage(): JSX.Element {
     }
   }, [createAvis, form, savingAvis])
 
-  const loeschen = useCallback(async (profilNr: string) => {
-    if (!profilNr || pendingDeletes.has(profilNr)) return
-    setPendingDeletes((prev) => new Set(prev).add(profilNr))
-    try {
-      await deleteProfil.mutateAsync(profilNr)
-      toast.success('Versandprofil gelöscht', { description: `Profil ${profilNr} wurde deaktiviert.` })
-    } catch (error) {
-      toast.error('Profil nicht gelöscht', { description: getAxiosErrorMessage(error) })
-    } finally {
-      setPendingDeletes((prev) => {
-        const next = new Set(prev)
-        next.delete(profilNr)
-        return next
-      })
-    }
-  }, [deleteProfil, pendingDeletes])
-
   const handleAction = useCallback(async (key: string, payload: Record<string, unknown>) => {
     if (key === 'profil') {
       await speichern()
@@ -214,9 +205,9 @@ export default function VersandprofilePage(): JSX.Element {
       return
     }
     if (key === 'loeschen') {
-      await loeschen(text(payload.profil_nr))
+      setDeleteCandidate({ id: text(payload.id), name: text(payload.profil_nr) })
     }
-  }, [avisSpeichern, loeschen, speichern])
+  }, [avisSpeichern, speichern])
 
   const screenContext = useMemo(() => createScreenContext({
     data: { profile, avise },
@@ -241,6 +232,14 @@ export default function VersandprofilePage(): JSX.Element {
 
   return (
     <div className="space-y-6 p-3 md:p-6">
+      <RowDeleteConfirmDialog
+        candidate={deleteCandidate}
+        onCancel={() => setDeleteCandidate(null)}
+        onConfirm={(candidate) => { void loeschen(candidate) }}
+        title="Versandprofil deaktivieren?"
+        description={(candidate) => `Das Profil ${candidate?.name ?? ''} wird deaktiviert.`}
+        confirmLabel="Deaktivieren bestätigen"
+      />
       <UniversalMaskRenderer
         plan={plan}
         formState={form}
@@ -254,7 +253,7 @@ export default function VersandprofilePage(): JSX.Element {
             bezeichnung: eintrag.bezeichnung,
             versandart: eintrag.versandart,
             absender_email: eintrag.absender_email ?? '',
-            gesperrt: pendingDeletes.has(eintrag.profil_nr),
+            gesperrt: pendingDeletes.has(eintrag.id),
           })),
           avise: avise.map((eintrag) => ({
             id: eintrag.id,

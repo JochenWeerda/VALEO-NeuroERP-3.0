@@ -26,7 +26,7 @@ from test_gdpr_subject_boundary import subject_data, keys, probe  # noqa: F401
 pytestmark = [pytest.mark.integration, pytest.mark.needs_live_db]
 
 
-def test_signed_http_cli_mcp_share_versioned_sql_command(subject_data, monkeypatch):
+def test_signed_http_cli_mcp_share_versioned_sql_command(subject_data, monkeypatch, tmp_path):
     client, db, provider, tenant, foreign, *_ = subject_data
     spec = specification()
     bundle = compile_entity(spec)
@@ -38,11 +38,14 @@ def test_signed_http_cli_mcp_share_versioned_sql_command(subject_data, monkeypat
     client.app.include_router(mask_screen_definition.router, prefix='/api/v1')
     client.app.include_router(mcp_tool_registry.router, prefix='/api/v1')
     install_tenant_bindings(client.app, public_paths=BearerAuthMiddleware.PUBLIC_PATHS)
-    definition = json.loads(bundle['files']['screen.json'])
-    # Explicit synthetic deployment only. Never change the generated default-deny bundle.
-    for action in mcp_mask_actions.iter_actions(definition):
-        action['disabled'] = False
-        action['forbiddenForAgents'] = False
+    from app.services import studio_validation
+    from app.services.studio_entity_contracts import registration_for
+    from app.services.studio_entity_compiler import registered_definition
+    config = tmp_path / 'studio-deployment.json'
+    config.write_text(json.dumps({'generated_entities': [{'spec': spec.model_dump(),
+        'writes_enabled': True, 'agent_roles': ['CRM_BEARBEITEN']}]}), encoding='utf-8')
+    monkeypatch.setattr(studio_validation, '_CONFIG_PATH', config)
+    definition = registered_definition(registration_for(spec.name))
     screen = definition['id']
     monkeypatch.setitem(SCREEN_DEFINITION_BUILDERS, screen, lambda: copy.deepcopy(definition))
     url = '/api/v1/studio/entities/' + spec.name
@@ -78,7 +81,7 @@ def test_signed_http_cli_mcp_share_versioned_sql_command(subject_data, monkeypat
     update_key = str(uuid4())
     request = {'tool_name':'mask.action.execute','mode':'execute','idempotency_key':update_key,
         'parameters':{'screen_id':screen,'action':spec.name+'_update','entity_id':row['id'],
-            'audit_reason':'Synthetische Kanalabnahme','input':{**values(),'quantity':'2.5000','expected_version':1}}}
+            'audit_reason':'Synthetische Kanalabnahme','confirm':True,'input':{**values(),'quantity':'2.5000','expected_version':1}}}
     agent = token('synthetic-channel-agent','agent')
     def call(bearer, payload=request):
         return client.post('/api/v1/mcp/tools/call',headers={'Authorization':'Bearer '+bearer},json=payload)
@@ -86,6 +89,9 @@ def test_signed_http_cli_mcp_share_versioned_sql_command(subject_data, monkeypat
     assert call(token('synthetic-channel-agent','agent',scope=False)).status_code == 403
     assert len(calls) == before  # Scope denied by the real MCP engine before forwarding.
     assert call(token('synthetic-channel-agent','agent',role=False)).status_code == 403
+    unconfirmed = copy.deepcopy(request); unconfirmed['parameters']['confirm'] = False
+    assert call(agent, unconfirmed).status_code == 422
+    assert len(calls) == before
     updated = call(agent)
     assert updated.status_code == 200, updated.text
     assert updated.json()['result']['result']['version'] == 2

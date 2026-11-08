@@ -7,9 +7,8 @@ import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
-import { validateIBAN, formatIBAN } from '@/lib/utils/iban-validator'
+import { validateIBAN, formatIBAN, lookupIBAN } from '@/lib/utils/iban-validator'
 import { validateVatIdFormat } from '@/lib/utils/vat-validator'
-import { useIbanLookup } from '@/hooks/useIbanLookup'
 import { useTenant } from '@/hooks/useTenant'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { LeaveConfirmDialog } from '@/components/LeaveConfirmDialog'
@@ -277,84 +276,36 @@ export default function DebitorenStammPage(): JSX.Element {
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Debitor')
   const debitorenConfig = createDebitorenConfig(t, entityTypeLabel)
 
-  const { data, loading, saveData, updateData } = useMaskData({
+  const { data, loading, saveData } = useMaskData({
     apiUrl: debitorenConfig.api.baseUrl,
     id: undefined
   })
 
 
-  // IBAN Lookup Hook
-  const { performLookup, isLoading: isIbanLoading, lookupData } = useIbanLookup({
-    onSuccess: (result) => {
-      if (result.valid && result.bank_name) {
-        const updatedData = { ...formData }
-        if (result.bank_name) {
-          updatedData.bank_name = result.bank_name
-        }
-        if (result.bic) {
-          updatedData.bic = result.bic
-        }
-        setFormData(updatedData)
-        updateData?.(updatedData)
-        
-        toast.success(t('crud.messages.ibanLookupSuccess', { 
-          defaultValue: 'Bankinformationen automatisch ausgefüllt',
-          bankName: result.bank_name 
-        }))
-      }
-    },
-    onError: (error) => {
-    },
-    autoLookup: false
-  })
-
-  // Auto-lookup IBAN when it changes and seems complete
+  const [isIbanLoading, setIsIbanLoading] = useState(false)
+  const iban = stringValue(formData.iban)
   useEffect(() => {
-    const iban = stringValue(formData?.iban)
-    if (iban && iban.replace(/\s/g, '').length >= 15) {
-      const normalized = iban.replace(/\s/g, '').replace(/-/g, '').toUpperCase()
-      if (normalized.length >= 15 && normalized.length <= 34 && validateIBAN(normalized)) {
-        const timer = setTimeout(() => {
-          performLookup(normalized)
-        }, 1000)
-        
-        return () => clearTimeout(timer)
-      }
-    }
-  }, [formData?.iban, performLookup])
+    const normalized = iban.replace(/\s/g, '').replace(/-/g, '').toUpperCase()
+    if (normalized.length < 15 || normalized.length > 34 || !validateIBAN(normalized)) return
+    let cancelled = false
+    const bankSnapshot = formData.bank_name
+    const bicSnapshot = formData.bic
+    const timer = setTimeout(() => {
+      setIsIbanLoading(true)
+      void lookupIBAN(normalized).then(result => {
+        if (cancelled || !result.valid) return
+        setFormData(prev => ({ ...prev, ...(result.bank_name && prev.bank_name === bankSnapshot ? { bank_name: result.bank_name } : {}),
+          ...(result.bic && prev.bic === bicSnapshot ? { bic: result.bic } : {}) }))
+        setIsDirty(true)
+      }).catch(() => { /* Lookup bleibt optional; Eingaben bleiben erhalten. */ })
+        .finally(() => { if (!cancelled) setIsIbanLoading(false) })
+    }, 1000)
+    return () => { cancelled = true; clearTimeout(timer); setIsIbanLoading(false) }
+  }, [iban])
 
-  // Update form data when IBAN lookup succeeds
-  useEffect(() => {
-    if (lookupData?.valid && lookupData.bank_name && formData) {
-      const updatedData = { ...formData }
-      if (lookupData.bank_name && !updatedData.bank_name) {
-        updatedData.bank_name = lookupData.bank_name
-      }
-      if (lookupData.bic && !updatedData.bic) {
-        updatedData.bic = lookupData.bic
-      }
-      setFormData(updatedData)
-      updateData?.(updatedData)
-    }
-  }, [lookupData, formData, updateData])
-
-  // Handle form data changes for IBAN lookup
   const handleFormChange = (newData: Record<string, unknown>) => {
     setFormData(newData)
     setIsDirty(true)
-    
-    // Auto-lookup IBAN when it changes
-    const iban = stringValue(newData?.iban)
-    if (iban && iban.replace(/\s/g, '').length >= 15) {
-      const normalized = iban.replace(/\s/g, '').replace(/-/g, '').toUpperCase()
-      if (normalized.length >= 15 && normalized.length <= 34 && validateIBAN(normalized)) {
-        const timer = setTimeout(() => {
-          performLookup(normalized)
-        }, 1000)
-        
-        return () => clearTimeout(timer)
-      }
-    }
   }
 
   const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: Record<string, unknown>) => {

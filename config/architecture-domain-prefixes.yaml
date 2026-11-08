@@ -593,6 +593,9 @@ domains:
 
 # Explizite Stem-Overrides (exakter Match, hoechste Prioritaet)
 exact_service_stems:
+  command_idempotency: platform
+  hr_row_delete_commands: hr
+  versandprofil_commands: logistics
   mask_commands: platform
   tenant_lifecycle_service: platform
   ebilanz_xbrl_service: finance

@@ -17,7 +17,7 @@ concurrency:
 jobs:
   e2e-critical:
     name: "E2E @critical Kern-Pfade"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04  # Playwright 1.60 unterstuetzt ubuntu-26.04 (neues ubuntu-latest) noch nicht
     timeout-minutes: 15
 
     services:

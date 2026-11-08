@@ -7,7 +7,7 @@ import {
   invalidateRenderPlanCache,
 } from '@/components/mask-builder/render-plan/schema-compiler'
 import { globalRenderPlanCache } from '@/components/mask-builder/render-plan/cache'
-import { buildRenderPlanCacheKey } from '@/components/mask-builder/render-plan/compile-context'
+import { buildPermissionHash, buildRenderPlanCacheKey } from '@/components/mask-builder/render-plan/compile-context'
 
 const legacyMask: MaskConfig = {
   title: 'Kundenstamm',
@@ -485,4 +485,10 @@ it('defaults audit tables to one work area and respects explicit column choices'
   expect(compileRenderPlanFromScreenDefinition({ ...definition, layout: {
     ...definition.layout, columnNavigation: 'listDetail' as const,
   } }).shell.columnNavigation).toBe('listDetail')
+})
+
+
+it('keeps permission signatures in UTF-16 order independent of input order', () => {
+  expect(buildPermissionHash(['ä', '2', 'z', '10', 'A'])).toBe('10|2|A|z|ä')
+  expect(buildPermissionHash(['A', 'z', '10', 'ä', '2'])).toBe('10|2|A|z|ä')
 })
