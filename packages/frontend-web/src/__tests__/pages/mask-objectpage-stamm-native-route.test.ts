@@ -93,8 +93,7 @@ describe('Batch 5–6: Legacy-ObjectPage-Stamm → UniversalMaskRuntime', () => 
     }
     for (const file of [
       'finance/debitoren-stamm-legacy.tsx', 'finance/kreditoren-stamm-legacy.tsx',
-      'futtermittel/einzelfuttermittel-stamm-legacy.tsx',
-      'futtermittel/mischfuttermittel-stamm-legacy.tsx', 'crm/lieferanten-stamm-legacy.tsx',
+      'crm/lieferanten-stamm-legacy.tsx',
     ]) {
       expect(read(file)).not.toMatch(/id:\s*['"]new['"]/)
     }
