@@ -64,6 +64,10 @@ class TestRfqIntegration:
         assert body["status"] == "ABGESCHLOSSEN"
         assert body["total_amount"] == pytest.approx(100 * 205.5)
         assert body["purchase_order_id"]
+        # Seit BELEG-052 (DocFlow einziger Belegspeicher): Der Zuschlag legt einen Bestellentwurf in DocFlow an.
+        beleg = client.get(f"/api/v1/belege/purchase_order/{body['purchase_order_id']}", headers=HEADERS)
+        assert beleg.status_code == 200, beleg.text
+        assert beleg.json()["status"] == "draft" and float(beleg.json()["positionen"][0]["menge"]) == 100
 
         detail = client.get(f"/api/v1/einkauf/rfq/{rfq_id}", headers=HEADERS)
         assert detail.json()["status"] == "ABGESCHLOSSEN"

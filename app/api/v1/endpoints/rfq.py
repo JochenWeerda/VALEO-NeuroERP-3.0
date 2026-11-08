@@ -162,9 +162,12 @@ def accept_quote(
     quote_id: int,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
+    nutzer: Any = Depends(get_current_user),
 ) -> dict[str, Any]:
+    from app.core.akteur import gepruefter_akteur
+
     try:
-        return _service(db, tenant_id).accept_quote(rfq_id, quote_id)
+        return _service(db, tenant_id).accept_quote(rfq_id, quote_id, akteur=gepruefter_akteur(nutzer))
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except Exception as exc:
