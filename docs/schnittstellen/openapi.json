@@ -244969,6 +244969,74 @@
         ]
       }
     },
+    "/api/v1/belege/{belegart}/{entity_id}/actions/versenden": {
+      "post": {
+        "operationId": "beleg_versenden_api_v1_belege__belegart___entity_id__actions_versenden_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "belegart",
+            "required": true,
+            "schema": {
+              "title": "Belegart",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Beleg als PDF per E-Mail an den Partner senden",
+        "tags": [
+          "belege",
+          "mask-actions"
+        ]
+      }
+    },
     "/api/v1/benachrichtigungen": {
       "get": {
         "description": "Benachrichtigungen fuer den aktuellen Mandanten.",

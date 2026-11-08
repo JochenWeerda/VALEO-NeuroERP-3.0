@@ -387,6 +387,7 @@ domains:
       - approvals
       - kontrolle
       - belege
+      - beleg_versand
       - docflow
       - dokumente
       - doc_nachweisraum

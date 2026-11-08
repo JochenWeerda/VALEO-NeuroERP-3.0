@@ -75,6 +75,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `banken` | Bank Accounts API - Bankkonto Management (SQLAlchemy) |
 | `batch` | OData-style $batch endpoint for bundling multiple read requests. |
 | `bedarfsdeckung` | Bedarfsdeckungs-Cockpit (Durchdringungs-CRM) — Lücke je Betrieb × Produktgruppe. |
+| `beleg_versand` | Beleg versenden: der Beleg als PDF per E-Mail an seinen Partner (BELEG-052 Stufe 2b, 09.11.2026). |
 | `beleg_vordrucke` | Belegformular-Vordruck-Editor (Admin) — Druckvorlagen für Papier/PDF-Ausdrucke. |
 | `belege` | Lesender Belegweg: jeder Beleg in der Form des Belegvertrags (BELEG-011). |
 | `benchmark_api` | — |

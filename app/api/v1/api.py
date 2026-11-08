@@ -1073,6 +1073,11 @@ api_router.include_router(
     tags=["belege"]
 )
 
+# Beleg versenden (PDF per E-Mail, BELEG-052 Stufe 2b); eigener Router, Pfad /belege/{art}/{id}/actions/versenden
+from app.api.v1.endpoints import beleg_versand  # noqa: E402
+
+api_router.include_router(beleg_versand.router)
+
 from app.api.v1.endpoints import docflow_evidence  # noqa: E402
 
 api_router.include_router(

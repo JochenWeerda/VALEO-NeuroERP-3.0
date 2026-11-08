@@ -372,6 +372,17 @@ def beleg_aktionen(variante: Belegvariante) -> list[dict[str, Any]]:
                 )
             )
 
+    # Versenden (BELEG-052 Stufe 2b): PDF per E-Mail an den Partner, eigener Kommandoweg (kein DocFlow-Kommando).
+    liste.append({
+        "key": "versenden", "label": "Per E-Mail versenden", "kind": "secondary", "dangerLevel": "moderate",
+        "permission": "belege.ausstellen", "commandEndpoint": f"/api/v1/belege/{variante.belegart}/{{entity_id}}/actions/versenden",
+        "method": "POST", "requiresConfirmation": True, "forbiddenForAgents": True,
+        "inputFields": [
+            {"key": "empfaenger", "label": "Empfänger (E-Mail)", "type": "text",
+             "helpText": "Leer = Adresse aus dem Partnerstamm."},
+            {"key": "nachricht", "label": "Nachricht", "type": "textarea"},
+        ],
+    })
     # Belegdruck (BELEG-052 Stufe 2b): PDF aus dem Belegvertrag, ein Leseweg ohne Schreibwirkung.
     liste.append({
         "key": "drucken", "label": "Drucken", "kind": "secondary", "dangerLevel": "safe",

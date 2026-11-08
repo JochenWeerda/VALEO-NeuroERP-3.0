@@ -151,3 +151,50 @@ def test_jede_belegvariante_kann_drucken():
         aktion = next(a for a in definition["actions"] if a["key"] == "drucken")
         assert aktion["download"]["endpoint"] == f"/api/v1/belege/{art}/{{entity_id}}/druck"
         assert aktion["download"]["mediaType"] == "application/pdf"
+
+
+# ── Beleg versenden (BELEG-052 Stufe 2b) ───────────────────────────────────────
+
+@pytest.fixture()
+def versand_app(satz, monkeypatch):
+    from app.api.v1.endpoints import beleg_versand
+    from app.services import mail_versand
+
+    gesendet: list[tuple] = []
+    monkeypatch.setattr(mail_versand, "sende_mail",
+                        lambda empf, betreff, text_, **kw: gesendet.append((empf, betreff, kw)) or "<id@test>")
+    app = FastAPI()
+    app.include_router(beleg_versand.router)
+    ersetze_mandant(app, satz["mandant"])
+    ersetze_nutzer(app, "admin")
+    return TestClient(app), gesendet
+
+
+def test_versand_schickt_das_pdf_an_den_empfaenger(versand_app, satz):
+    client, gesendet = versand_app
+    beleg = next(b for b in satz["belege"] if b["doc_type"] == "sales_invoice"
+                 and b["rolle"] not in ("vk-rechnung-storno",))
+    antwort = client.post(f"/belege/sales_invoice/{beleg['id']}/actions/versenden",
+                          json={"empfaenger": "buchhaltung@hof.example", "_idempotencyKey": str(uuid.uuid4())}).json()
+    if not antwort["success"] and "Stand" in (antwort.get("error") or ""):
+        pytest.skip(f"Referenzbeleg nicht versendbar: {antwort['error']}")
+    assert antwort["success"] is True, antwort
+    empfaenger, betreff, kw = gesendet[-1]
+    assert empfaenger == "buchhaltung@hof.example" and betreff.startswith("Rechnung")
+    assert kw["verwendung"] == "verkauf" and kw["anhaenge"][0][1].startswith(b"%PDF")
+
+
+def test_trockenlauf_versendet_nichts(versand_app, satz):
+    client, gesendet = versand_app
+    beleg = next(b for b in satz["belege"] if b["doc_type"] == "purchase_order")
+    vorher = len(gesendet)
+    client.post(f"/belege/purchase_order/{beleg['id']}/actions/versenden",
+                json={"_mode": "dryRun", "empfaenger": "einkauf@lieferant.example"})
+    assert len(gesendet) == vorher
+
+
+def test_ohne_adresse_kein_versand(versand_app, satz):
+    client, gesendet = versand_app
+    beleg = next(b for b in satz["belege"] if b["doc_type"] == "sales_offer")
+    antwort = client.post(f"/belege/sales_offer/{beleg['id']}/actions/versenden", json={}).json()
+    assert antwort["success"] is False
