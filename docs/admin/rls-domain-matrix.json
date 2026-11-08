@@ -1043,6 +1043,7 @@
     "app/api/v1/endpoints/crm_partner_klaerfaelle.py",
     "app/api/v1/endpoints/debtors.py",
     "app/api/v1/endpoints/finance_invoices.py",
+    "app/api/v1/endpoints/kunden_stamm_pflege.py",
     "app/api/v1/endpoints/portal_kundenzugaenge.py",
     "app/api/v1/endpoints/prospecting.py",
     "app/api/v1/endpoints/rag.py",
@@ -1154,7 +1155,7 @@
     "dienst": 14,
     "nutzlast": 9,
     "standardmandant": 6,
-    "token": 25
+    "token": 26
    },
    "standardmandant_stellen": [
     "app/integrations/adapters/superglue/tool_sync.py:427",

@@ -1,7 +1,7 @@
-# Architecture Index — generiert 2026-11-08
+# Architecture Index — generiert 2026-11-09
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-11-08T22:43:12Z'
+generated_at: '2026-11-08T23:11:02Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -883,6 +883,7 @@ domains:
     - debtors
     - dunning
     - kaeufergruppe
+    - kunden_stamm_pflege
     - leads
     - mail_workspace
     - messages
@@ -2378,8 +2379,8 @@ mapping_stats:
   frontend_routes_mapped: 1141
   backend_services_total: 343
   backend_services_mapped: 343
-  backend_endpoints_total: 473
-  backend_endpoints_mapped: 473
+  backend_endpoints_total: 474
+  backend_endpoints_mapped: 474
 unmapped:
   frontend_routes: []
   backend_services: []

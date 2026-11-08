@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-08
+last_reviewed: 2026-11-09
 version: 3.0.0
 description: Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -278,6 +278,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `kontrakte` | Kontrakte endpoints — contract CRUD, movements, amendments, dispositionen. |
 | `kontrolle` | Pruefkorb des Controllers (FIN-CONTROL-001). |
 | `kostenrechnung` | Kostenrechnung: Kostenstellen, Kostenarten, Kostenstellen-Buchungen. |
+| `kunden_stamm_pflege` | Partnerstamm-Pflege in der Studio-Maske ``crm/customer-360`` (09.11.2026). |
 | `kundenbanken` | Kundenbanken — IBAN/BIC-Bankverbindungen pro Kunde. |
 | `l3_report_catalog` | Prioritized fixed L3 report catalog API. |
 | `labor` | Laborproben, Laborauftraege und Befunde im Mandanten. |

@@ -4,10 +4,7 @@
   "admin/control-center",
   "annahme/abrechnung",
   "lager/materialfluss",
-  "studio/workspace-composition-preview",
-  "verkauf/kunde/:id",
-  "verkauf/kunde/neu",
-  "verkauf/kunden-stamm/:id"
+  "studio/workspace-composition-preview"
  ],
  "altmuster_routen": [
   "admin/control-center/agent-ops",

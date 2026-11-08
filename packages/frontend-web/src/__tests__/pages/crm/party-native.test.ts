@@ -48,7 +48,7 @@ describe('Party native entry', () => {
   it('sends existing Stamm-IDs into the native Akte', () => {
     const stamm = readFileSync(resolve(__dirname, '../../../pages/verkauf/kunden-stamm.tsx'), 'utf8')
     expect(stamm).toContain('/crm/kunden/')
-    expect(stamm).toContain("searchParams.get('pflege')")
+    expect(stamm).toContain('readQueryParam')  // Pflege laeuft seit 09.11.2026 in der Kundenakte selbst
     const popup = readFileSync(resolve(__dirname, '../../../components/telefonie/IncomingCallPopup.tsx'), 'utf8')
     expect(popup).toContain('/crm/kunden/')
     expect(popup).not.toContain('/crm/kunden-cockpit')

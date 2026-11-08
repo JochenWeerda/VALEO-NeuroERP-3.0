@@ -48,6 +48,7 @@ domains:
       - kaeufergruppe
     endpoint_prefixes:
       - crm
+      - kunden_stamm_pflege
       - business_partner
       - verkauf
       - sales_

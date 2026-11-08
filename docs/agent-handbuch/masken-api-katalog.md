@@ -4,7 +4,7 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-08
+last_reviewed: 2026-11-09
 version: 3.0.0
 description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions.
 ---
@@ -9804,8 +9804,13 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `bearbeiten` | Bearbeiten | safe | nein | `/api/v1/crm/customers/{entity_id}/actions/bearbeiten` |
-| `edit` | Erweiterte Pflege | safe | nein | `—` |
 | `create_activity` | Aktivitaet anlegen | safe | nein | `/api/v1/crm/customers/{entity_id}/actions/create_activity` |
+| `ansprechpartner_anlegen` | Ansprechpartner anlegen | safe | nein | `/api/v1/crm/customers/{entity_id}/actions/ansprechpartner_anlegen` |
+| `anweisung_anlegen` | Chef-Anweisung anlegen | safe | nein | `/api/v1/crm/customers/{entity_id}/actions/anweisung_anlegen` |
+| `anschrift_anlegen` | Anschrift anlegen | safe | nein | `/api/v1/crm/customers/{entity_id}/actions/anschrift_anlegen` |
+| `cpd_anlegen` | CPD-Konto anlegen | safe | nein | `/api/v1/crm/customers/{entity_id}/actions/cpd_anlegen` |
+| `rabatt_anlegen` | Rabatt anlegen | safe | nein | `/api/v1/crm/customers/{entity_id}/actions/rabatt_anlegen` |
+| `preis_anlegen` | Preisvereinbarung anlegen | safe | nein | `/api/v1/crm/customers/{entity_id}/actions/preis_anlegen` |
 
 ---
 
@@ -10504,8 +10509,13 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `bearbeiten` | Bearbeiten | safe | nein | `/api/v1/crm/customers/{entity_id}/actions/bearbeiten` |
-| `edit` | Erweiterte Pflege | safe | nein | `—` |
 | `create_activity` | Aktivitaet anlegen | safe | nein | `/api/v1/crm/customers/{entity_id}/actions/create_activity` |
+| `ansprechpartner_anlegen` | Ansprechpartner anlegen | safe | nein | `/api/v1/crm/customers/{entity_id}/actions/ansprechpartner_anlegen` |
+| `anweisung_anlegen` | Chef-Anweisung anlegen | safe | nein | `/api/v1/crm/customers/{entity_id}/actions/anweisung_anlegen` |
+| `anschrift_anlegen` | Anschrift anlegen | safe | nein | `/api/v1/crm/customers/{entity_id}/actions/anschrift_anlegen` |
+| `cpd_anlegen` | CPD-Konto anlegen | safe | nein | `/api/v1/crm/customers/{entity_id}/actions/cpd_anlegen` |
+| `rabatt_anlegen` | Rabatt anlegen | safe | nein | `/api/v1/crm/customers/{entity_id}/actions/rabatt_anlegen` |
+| `preis_anlegen` | Preisvereinbarung anlegen | safe | nein | `/api/v1/crm/customers/{entity_id}/actions/preis_anlegen` |
 
 ---
 

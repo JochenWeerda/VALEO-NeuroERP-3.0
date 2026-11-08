@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-08",
+  "generatedAt": "2026-11-09",
   "schemaVersion": 1,
   "sources": [
     "app/core/flow_spine_registry.py",
@@ -9580,17 +9580,6 @@
           "stubReason": null
         },
         {
-          "key": "edit",
-          "label": "Erweiterte Pflege",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "crm.customer.update",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        },
-        {
           "key": "create_activity",
           "label": "Aktivitaet anlegen",
           "dangerLevel": "safe",
@@ -9598,6 +9587,72 @@
           "requiresConfirmation": false,
           "permission": "crm.activity.create",
           "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/create_activity",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "ansprechpartner_anlegen",
+          "label": "Ansprechpartner anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.customer.update",
+          "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/ansprechpartner_anlegen",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "anweisung_anlegen",
+          "label": "Chef-Anweisung anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.customer.update",
+          "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/anweisung_anlegen",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "anschrift_anlegen",
+          "label": "Anschrift anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.customer.update",
+          "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/anschrift_anlegen",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "cpd_anlegen",
+          "label": "CPD-Konto anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.customer.update",
+          "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/cpd_anlegen",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "rabatt_anlegen",
+          "label": "Rabatt anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.customer.update",
+          "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/rabatt_anlegen",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "preis_anlegen",
+          "label": "Preisvereinbarung anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.customer.update",
+          "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/preis_anlegen",
           "method": "POST",
           "stubReason": null
         }
@@ -10279,17 +10334,6 @@
           "stubReason": null
         },
         {
-          "key": "edit",
-          "label": "Erweiterte Pflege",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "crm.customer.update",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        },
-        {
           "key": "create_activity",
           "label": "Aktivitaet anlegen",
           "dangerLevel": "safe",
@@ -10297,6 +10341,72 @@
           "requiresConfirmation": false,
           "permission": "crm.activity.create",
           "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/create_activity",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "ansprechpartner_anlegen",
+          "label": "Ansprechpartner anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.customer.update",
+          "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/ansprechpartner_anlegen",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "anweisung_anlegen",
+          "label": "Chef-Anweisung anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.customer.update",
+          "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/anweisung_anlegen",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "anschrift_anlegen",
+          "label": "Anschrift anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.customer.update",
+          "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/anschrift_anlegen",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "cpd_anlegen",
+          "label": "CPD-Konto anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.customer.update",
+          "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/cpd_anlegen",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "rabatt_anlegen",
+          "label": "Rabatt anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.customer.update",
+          "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/rabatt_anlegen",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "preis_anlegen",
+          "label": "Preisvereinbarung anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.customer.update",
+          "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/preis_anlegen",
           "method": "POST",
           "stubReason": null
         }

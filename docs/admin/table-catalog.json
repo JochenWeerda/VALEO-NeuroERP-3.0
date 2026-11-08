@@ -13683,6 +13683,7 @@
             "app/api/v1/endpoints/finance_invoices.py",
             "app/api/v1/endpoints/finance_stammdaten.py",
             "app/api/v1/endpoints/finance_stammdaten_kommandos.py",
+            "app/api/v1/endpoints/kunden_stamm_pflege.py",
             "app/api/v1/endpoints/mask_frontend_bridges.py",
             "app/api/v1/endpoints/portal_kundenzugaenge.py",
             "app/api/v1/endpoints/sales_offers.py",

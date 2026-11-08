@@ -1,11 +1,11 @@
 schema_version: '1.0'
 slice_id: MCP-MASK-WRITE-PARITY-20261008
-generated_on: '2026-11-08'
+generated_on: '2026-11-09'
 sources:
   screen_mask_actions: services/ki-usability/app/data/screen_mask_actions.json
   mcp_erp_tools: config/mcp_erp_tools.yaml
   action_stats:
-    actions: 726
+    actions: 740
     screens_with_actions: 387
     domains: 50
 mcp_write_tools:
@@ -86,17 +86,17 @@ fin_close:
   notes: FIN-CLOSE absichtlich nicht als MCP-Tool. Kein Adapter, kein Scheinabschluss. Bleibt offener
     Fachvertrag ausserhalb Mask-Write-Parität.
 stats:
-  mask_actions_considered: 173
-  mask_mutations_considered: 113
+  mask_actions_considered: 184
+  mask_mutations_considered: 124
   by_coverage:
     adjacent: 1
     blocked_human_only: 40
     blocked_unreleased: 2
     local_ui: 60
     mapped: 42
-    mapped_generic: 21
+    mapped_generic: 33
     mapped_propose_only: 1
-    mapped_read: 2
+    mapped_read: 1
     open_high: 4
 mappings:
 - mask_action_id: mask:admin/postfaecher:neu
@@ -627,6 +627,46 @@ mappings:
   coverage: blocked_human_only
   notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
     Endpunkt.
+- mask_action_id: mask:crm/customer-360:anschrift_anlegen
+  mask: crm/customer-360
+  domain: crm
+  action_key: anschrift_anlegen
+  label: Anschrift anlegen
+  command_endpoint: /api/v1/crm/customers/{entity_id}/actions/anschrift_anlegen
+  command: null
+  mcp_tool_id: mask.action.execute
+  coverage: mapped_generic
+  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+- mask_action_id: mask:crm/customer-360:ansprechpartner_anlegen
+  mask: crm/customer-360
+  domain: crm
+  action_key: ansprechpartner_anlegen
+  label: Ansprechpartner anlegen
+  command_endpoint: /api/v1/crm/customers/{entity_id}/actions/ansprechpartner_anlegen
+  command: null
+  mcp_tool_id: mask.action.execute
+  coverage: mapped_generic
+  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+- mask_action_id: mask:crm/customer-360:anweisung_anlegen
+  mask: crm/customer-360
+  domain: crm
+  action_key: anweisung_anlegen
+  label: Chef-Anweisung anlegen
+  command_endpoint: /api/v1/crm/customers/{entity_id}/actions/anweisung_anlegen
+  command: null
+  mcp_tool_id: mask.action.execute
+  coverage: mapped_generic
+  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+- mask_action_id: mask:crm/customer-360:cpd_anlegen
+  mask: crm/customer-360
+  domain: crm
+  action_key: cpd_anlegen
+  label: CPD-Konto anlegen
+  command_endpoint: /api/v1/crm/customers/{entity_id}/actions/cpd_anlegen
+  command: null
+  mcp_tool_id: mask.action.execute
+  coverage: mapped_generic
+  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
 - mask_action_id: mask:crm/customer-360:create_activity
   mask: crm/customer-360
   domain: crm
@@ -637,16 +677,26 @@ mappings:
   mcp_tool_id: crm.activity.create
   coverage: mapped
   notes: Top-Write MCP-WRITE-20261008; Kunden-Aktivität aus Token-Mandant.
-- mask_action_id: mask:crm/customer-360:edit
+- mask_action_id: mask:crm/customer-360:preis_anlegen
   mask: crm/customer-360
   domain: crm
-  action_key: edit
-  label: Erweiterte Pflege
-  command_endpoint: null
+  action_key: preis_anlegen
+  label: Preisvereinbarung anlegen
+  command_endpoint: /api/v1/crm/customers/{entity_id}/actions/preis_anlegen
   command: null
-  mcp_tool_id: crm.customer.open
-  coverage: mapped_read
-  notes: Kein Write-Tool; Deep-Link/open + summary360 für Agent-Navigation.
+  mcp_tool_id: mask.action.execute
+  coverage: mapped_generic
+  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+- mask_action_id: mask:crm/customer-360:rabatt_anlegen
+  mask: crm/customer-360
+  domain: crm
+  action_key: rabatt_anlegen
+  label: Rabatt anlegen
+  command_endpoint: /api/v1/crm/customers/{entity_id}/actions/rabatt_anlegen
+  command: null
+  mcp_tool_id: mask.action.execute
+  coverage: mapped_generic
+  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
 - mask_action_id: mask:crm/dsgvo-anfragen-liste:neu
   mask: crm/dsgvo-anfragen-liste
   domain: crm
@@ -719,6 +769,46 @@ mappings:
   coverage: local_ui
   mcp_tool_id: null
   notes: Reine Oberflaechenwirkung (localEffect/navigationRoute) ohne Serverwirkung.
+- mask_action_id: mask:crm/kunden-cockpit:anschrift_anlegen
+  mask: crm/kunden-cockpit
+  domain: crm
+  action_key: anschrift_anlegen
+  label: Anschrift anlegen
+  command_endpoint: /api/v1/crm/customers/{entity_id}/actions/anschrift_anlegen
+  command: null
+  mcp_tool_id: mask.action.execute
+  coverage: mapped_generic
+  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+- mask_action_id: mask:crm/kunden-cockpit:ansprechpartner_anlegen
+  mask: crm/kunden-cockpit
+  domain: crm
+  action_key: ansprechpartner_anlegen
+  label: Ansprechpartner anlegen
+  command_endpoint: /api/v1/crm/customers/{entity_id}/actions/ansprechpartner_anlegen
+  command: null
+  mcp_tool_id: mask.action.execute
+  coverage: mapped_generic
+  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+- mask_action_id: mask:crm/kunden-cockpit:anweisung_anlegen
+  mask: crm/kunden-cockpit
+  domain: crm
+  action_key: anweisung_anlegen
+  label: Chef-Anweisung anlegen
+  command_endpoint: /api/v1/crm/customers/{entity_id}/actions/anweisung_anlegen
+  command: null
+  mcp_tool_id: mask.action.execute
+  coverage: mapped_generic
+  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+- mask_action_id: mask:crm/kunden-cockpit:cpd_anlegen
+  mask: crm/kunden-cockpit
+  domain: crm
+  action_key: cpd_anlegen
+  label: CPD-Konto anlegen
+  command_endpoint: /api/v1/crm/customers/{entity_id}/actions/cpd_anlegen
+  command: null
+  mcp_tool_id: mask.action.execute
+  coverage: mapped_generic
+  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
 - mask_action_id: mask:crm/kunden-cockpit:create_activity
   mask: crm/kunden-cockpit
   domain: crm
@@ -730,6 +820,26 @@ mappings:
   coverage: blocked_human_only
   notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
     Endpunkt.
+- mask_action_id: mask:crm/kunden-cockpit:preis_anlegen
+  mask: crm/kunden-cockpit
+  domain: crm
+  action_key: preis_anlegen
+  label: Preisvereinbarung anlegen
+  command_endpoint: /api/v1/crm/customers/{entity_id}/actions/preis_anlegen
+  command: null
+  mcp_tool_id: mask.action.execute
+  coverage: mapped_generic
+  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+- mask_action_id: mask:crm/kunden-cockpit:rabatt_anlegen
+  mask: crm/kunden-cockpit
+  domain: crm
+  action_key: rabatt_anlegen
+  label: Rabatt anlegen
+  command_endpoint: /api/v1/crm/customers/{entity_id}/actions/rabatt_anlegen
+  command: null
+  mcp_tool_id: mask.action.execute
+  coverage: mapped_generic
+  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
 - mask_action_id: mask:crm/kunden-liste:neu
   mask: crm/kunden-liste
   domain: crm

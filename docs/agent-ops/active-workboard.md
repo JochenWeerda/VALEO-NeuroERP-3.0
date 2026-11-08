@@ -20656,3 +20656,8 @@ Rechnungserfassung des Dokumentspeichers; tote Frontend-API-Clients entfernt. Of
 sales/delivery-note, einkauf/purchase-order, finance/ap-invoice, sales/gutschrift (13-28 Verweise je Maske),
 Schreibwege der Altspeicher (sales_offers, sales_orders, sales_delivery_notes, collective_documents,
 einkauf_lieferschein, einkauf router Rechnungseingang), danach Tabellen-Abbau per Migration.
+Partnerstamm (09.11.2026): crm/customer-360 pflegt Anschriften, Ansprechpartner, CPD-Konten, Rabatte, Preise und
+Chef-Anweisungen selbst (kunden_stamm_pflege: Anlegen am Kunden, Aendern/Entfernen an der Zeile, Entfernen mit Grund);
+der handgebaute Kundenstamm verkauf/kunden-stamm (2.506 Zeilen) leitet auf die Kundenakte weiter. Behoben: die sechs
+ORM-Modelle der Partner-Untertabellen hatten kein tenant_id, obwohl Tabelle und Dienst es verlangen - jedes Anlegen
+und Lesen ueber BusinessPartnerService scheiterte. Offen: Rechnungsdaten (billing-config) in der Kundenakte.
