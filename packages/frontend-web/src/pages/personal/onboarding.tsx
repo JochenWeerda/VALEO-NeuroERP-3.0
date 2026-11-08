@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { MadeByStudioListRuntimeWire } from '@/components/mask-builder/made-by-studio-runtime-wire'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
+import { RowDeleteConfirmDialog, useGuardedRowDelete } from '@/hooks/useGuardedRowDelete'
 import { Skeleton } from '@/components/ui/skeleton'
 import { UniversalMaskRenderer } from '@/components/mask-builder/UniversalMaskRenderer'
 import { useScreenPermissions } from '@/components/mask-builder/runtime/screen-permissions'
@@ -20,6 +20,12 @@ import {
   type OnboardingStatus,
 } from '@/lib/api/personal'
 import { personalOnboardingScreen } from '@/masks/capture-screens'
+
+const ROW_DELETE = {
+  endpoint: (id: string) => `/api/v1/training/onboarding/runs/${id}/actions/loeschen`,
+  queryKey: personalKeys.onboardingRuns(),
+  entityLabel: 'Lauf',
+}
 
 const STAND: Record<OnboardingStatus, string> = {
   not_started: 'Nicht gestartet',
@@ -87,10 +93,7 @@ export default function PersonalOnboardingPage(): JSX.Element {
   const offen = rows.filter((row) => row.status !== 'completed').length
   const createMutation = useCreateOnboardingRun()
   const [saving, setSaving] = useState(false)
-  const [pendingDeletes, setPendingDeletes] = useState<Set<string>>(new Set())
-  const [deleteCandidate, setDeleteCandidate] = useState<{ id: string; name: string; version: string } | null>(null)
-  const deleteKeys = useRef(new Map<string, string>())
-  const deleting = useRef(new Set<string>())
+  const { pendingDeletes, deleteCandidate, setDeleteCandidate, loeschen } = useGuardedRowDelete(ROW_DELETE)
 
   useEffect(() => {
     if (!laeufe.isError && !checklisten.isError) return
@@ -187,33 +190,6 @@ export default function PersonalOnboardingPage(): JSX.Element {
     }
   }, [createMutation, form.values, leeren, queryClient, saving])
 
-  const loeschen = useCallback(async (id: string, name: string, version: string) => {
-    if (!id || deleting.current.has(id)) return
-    if (!version) { toast.error('Löschen nicht möglich', { description: 'Version fehlt. Bitte Liste neu laden.' }); return }
-    const intent = `${id}:${version}`
-    const key = deleteKeys.current.get(intent) ?? crypto.randomUUID()
-    deleteKeys.current.set(intent, key)
-    deleting.current.add(id)
-    setPendingDeletes((prev) => new Set(prev).add(id))
-    try {
-      await apiClient.post(`/api/v1/training/onboarding/runs/${encodeURIComponent(id)}/actions/loeschen`, {
-        expected_revision: version, _idempotencyKey: key,
-      })
-      deleteKeys.current.delete(intent)
-      toast.success('Lauf gelöscht', { description: name })
-      await queryClient.invalidateQueries({ queryKey: personalKeys.onboardingRuns() })
-    } catch (error) {
-      toast.error('Lauf nicht gelöscht', { description: getAxiosErrorMessage(error) })
-    } finally {
-      deleting.current.delete(id)
-      setPendingDeletes((prev) => {
-        const next = new Set(prev)
-        next.delete(id)
-        return next
-      })
-    }
-  }, [queryClient])
-
   const handleAction = useCallback(async (key: string, payload: Record<string, unknown>) => {
     if (key === 'speichern') {
       await speichern()
@@ -249,18 +225,7 @@ export default function PersonalOnboardingPage(): JSX.Element {
 
   return (
     <div className="space-y-6 p-3 md:p-6">
-      <AlertDialog open={deleteCandidate !== null} onOpenChange={(open) => { if (!open) setDeleteCandidate(null) }}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Eintrag löschen?</AlertDialogTitle>
-            <AlertDialogDescription>Der ausgewählte Eintrag {deleteCandidate?.name} wird gelöscht.</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Abbrechen</AlertDialogCancel>
-            <AlertDialogAction onClick={() => { if (deleteCandidate) void loeschen(deleteCandidate.id, deleteCandidate.name, deleteCandidate.version) }}>Löschen bestätigen</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <RowDeleteConfirmDialog candidate={deleteCandidate} onCancel={() => setDeleteCandidate(null)} onConfirm={(candidate) => { void loeschen(candidate) }} />
       <UniversalMaskRenderer
         plan={plan}
         formState={form}
