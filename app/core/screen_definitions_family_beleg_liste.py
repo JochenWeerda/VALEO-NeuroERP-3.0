@@ -10,7 +10,8 @@ from __future__ import annotations
 from typing import Any
 
 from app.core.belegvertrag import BELEGARTEN
-from app.core.cluster_spalten import betrag, datum, status, text
+from app.core.cluster_spalten import betrag, datum, status
+from app.core.cluster_spalten import text as textspalte  # nicht sqlalchemy.text (Pruefung SQL-f-Strings)
 from app.core.stamm_list_parent import build_stamm_list_screen, stamm_list_export_action, stamm_list_neu_action
 
 FAMILIE = "beleg-liste"
@@ -35,8 +36,8 @@ def _ansichten(belegart: str) -> list[dict[str, Any]]:
 def _spalten(belegart: str) -> list[dict[str, Any]]:
     variante = BELEGARTEN[belegart]
     partner = "Lieferant" if variante.partnerrolle == "lieferant" else "Kunde"
-    spalten = [text("beleg_nr", "Beleg-Nr.", "primary"), datum("belegdatum", "Belegdatum", "primary"),
-               text("partner_name", partner, "primary"), text("partner_nummer", f"{partner}-Nr.", "secondary"),
+    spalten = [textspalte("beleg_nr", "Beleg-Nr.", "primary"), datum("belegdatum", "Belegdatum", "primary"),
+               textspalte("partner_name", partner, "primary"), textspalte("partner_nummer", f"{partner}-Nr.", "secondary"),
                status()]
     if variante.mit_preisen:
         spalten += [betrag("netto", "Netto", currencyField="waehrung", prioritaet="secondary"),
@@ -44,7 +45,7 @@ def _spalten(belegart: str) -> list[dict[str, Any]]:
                     betrag("brutto", "Brutto", currencyField="waehrung")]
     if variante.bucht:
         spalten.append(datum("buchungsdatum", "Buchungsdatum", "tertiary"))
-    spalten.append(text("referenz", "Referenz", "tertiary"))
+    spalten.append(textspalte("referenz", "Referenz", "tertiary"))
     return spalten
 
 

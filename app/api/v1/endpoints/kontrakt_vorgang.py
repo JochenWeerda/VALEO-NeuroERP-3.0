@@ -98,12 +98,16 @@ class _Partner:
         return self._cache[party_id]
 
 
-def _kontrakt_ids(db: Session, tenant_id: str) -> dict[str, str]:
-    """contract_no -> contract_id: die Dienste liefern Nummern, die Maske braucht die stabile Kennung."""
+def _kontrakt_ids(db: Session, tenant_id: str, nummern: set[str]) -> dict[str, str]:
+    """contract_no -> contract_id fuer genau die Nummern einer Liste (die Dienste liefern Nummern, die Maske braucht
+    die stabile Kennung)."""
+    if not nummern:
+        return {}
     rows = db.execute(
-        text("SELECT contract_no, contract_id::text AS cid FROM domain_ops.kon_contract WHERE tenant_id = :t"),
-        {"t": tenant_id},
-    ).mappings().all()
+        text("SELECT contract_no, contract_id::text AS cid FROM domain_ops.kon_contract "
+             "WHERE tenant_id = :t AND contract_no = ANY(:n) LIMIT :lim"),
+        {"t": tenant_id, "n": sorted(nummern), "lim": len(nummern)},
+    ).mappings().fetchmany(len(nummern))
     return {r["contract_no"]: r["cid"] for r in rows}
 
 
@@ -208,10 +212,11 @@ def erfuellungsstand(typ: str = Query("alle", pattern="^(alle|einkauf|verkauf|EI
                      db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id),
                      user: User = Depends(get_current_user)) -> dict:
     _lesen(user)
-    ids = _kontrakt_ids(db, tenant_id)
+    vertraege = ContractFulfillmentService(db, tenant_id).list_contracts(typ=typ, limit=500)
+    ids = _kontrakt_ids(db, tenant_id, {row["contract_no"] for row in vertraege})
     partner = _Partner(db)
     zeilen = []
-    for row in ContractFulfillmentService(db, tenant_id).list_contracts(typ=typ, limit=500):
+    for row in vertraege:
         kontrakt_id = ids.get(row["contract_no"])
         if kontrakt_id is None:
             continue
@@ -226,10 +231,11 @@ def erfuellungsstand(typ: str = Query("alle", pattern="^(alle|einkauf|verkauf|EI
 def mahnkandidaten(db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id),
                    user: User = Depends(get_current_user)) -> dict:
     _lesen(user)
-    ids = _kontrakt_ids(db, tenant_id)
+    kandidaten = ContractEngagementService(db, tenant_id).dunning_candidates()
+    ids = _kontrakt_ids(db, tenant_id, {row["contract_no"] for row in kandidaten})
     partner = _Partner(db)
     zeilen = [{**row, "id": ids[row["contract_no"]], "partner_name": partner.name(row.get("party_id"))}
-              for row in ContractEngagementService(db, tenant_id).dunning_candidates() if row["contract_no"] in ids]
+              for row in kandidaten if row["contract_no"] in ids]
     return _liste(zeilen)
 
 
@@ -513,8 +519,9 @@ async def aktion_mahnen(entity_id: str, body: dict[str, Any] = Body(default_fact
         fehlt = _kontrakt_da(session, tid, eid)
         if fehlt:
             return fehlt
-        ids = _kontrakt_ids(session, tid)
-        faellig = {ids.get(row["contract_no"]) for row in ContractEngagementService(session, tid).dunning_candidates()}
+        kandidaten = ContractEngagementService(session, tid).dunning_candidates()
+        ids = _kontrakt_ids(session, tid, {row["contract_no"] for row in kandidaten})
+        faellig = {ids.get(row["contract_no"]) for row in kandidaten}
         if eid not in faellig:
             return _blockiert("Kontrakt ist nicht überfällig oder vollständig erfüllt — keine Mahnung nötig.")
         return []
