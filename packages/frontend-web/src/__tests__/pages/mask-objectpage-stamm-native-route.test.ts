@@ -34,11 +34,9 @@ describe('Batch 5–6: Legacy-ObjectPage-Stamm → UniversalMaskRuntime', () => 
     { file: 'einkauf/angebot-stamm.tsx', screenId: 'einkauf/angebot', kind: 'factory' },
     { file: 'einkauf/anlieferavis.tsx', screenId: 'einkauf/anlieferavis', kind: 'factory' },
     { file: 'einkauf/auftragsbestaetigung.tsx', screenId: 'einkauf/auftragsbestaetigung', kind: 'native' },
-    { file: 'einkauf/rechnungseingang.tsx', screenId: 'finance/ap-invoice', kind: 'factory' },
     { file: 'crm/lieferanten-stamm.tsx', screenId: 'einkauf/supplier', kind: 'native' },
     { file: 'crm/kunden-stamm.tsx', screenId: 'crm/customer-360', kind: 'native' },
     { file: 'qualitaet/reklamation-detail.tsx', screenId: 'qualitaet/reklamation', kind: 'factory' },
-    { file: 'einkauf/bestellung-stamm.tsx', screenId: 'einkauf/purchase-order', kind: 'factory' },
   ]
 
   it('CRM-Kunden- und Lieferanten-Listen laufen ueber NativeListPage', () => {
@@ -63,9 +61,9 @@ describe('Batch 5–6: Legacy-ObjectPage-Stamm → UniversalMaskRuntime', () => 
     }
   })
 
-  it('alle 19 Page-Wrapper sind in der produktiven Routenregistry eingetragen', () => {
+  it('alle 17 Page-Wrapper sind in der produktiven Routenregistry eingetragen (Bestellung und Eingangsrechnung seit BELEG-052 in der Belegmaske)', () => {
     const routeTree = readFileSync(resolve(__dirname, '../../app/routing/route-tree.gen.tsx'), 'utf8')
-    expect(migrated).toHaveLength(19)
+    expect(migrated).toHaveLength(17)
     for (const { file } of migrated) {
       expect(routeTree).toContain(`renderPage("@/pages/${file.replace(/\.tsx$/, '')}")`)
     }
@@ -81,6 +79,9 @@ describe('Batch 5–6: Legacy-ObjectPage-Stamm → UniversalMaskRuntime', () => 
       ['einkauf/lieferant/neu', 'einkauf/lieferanten-stamm'],
       ['einkauf/rechnungseingang/neu', 'einkauf/rechnungseingang'],
     ] as const
+    // Eingangsrechnung und Bestellung legen seit BELEG-052 (08.11.2026) ueber die Belegmaske an (DocFlow).
+    expect(read('einkauf/rechnungseingang.tsx')).toContain("belegSeite('purchase_invoice')")
+    expect(read('einkauf/bestellung-stamm.tsx')).toContain("belegSeite('purchase_order')")
     for (const [route, page] of declaredCreateRoutes) {
       expect(routeTree).toContain(`path: "${route}"`)
       expect(routeTree).toContain(`"module":"@/pages/${page}","legacyPath":"/${route}"`)
@@ -90,8 +91,7 @@ describe('Batch 5–6: Legacy-ObjectPage-Stamm → UniversalMaskRuntime', () => 
       'crm/opportunity-detail-legacy.tsx',
       'einkauf/anfrage-stamm-legacy.tsx', 'einkauf/angebot-stamm-legacy.tsx',
       'einkauf/anlieferavis-legacy.tsx',
-      'einkauf/rechnungseingang-legacy.tsx', 'einkauf/lieferanten-stamm-legacy.tsx',
-      'einkauf/bestellung-stamm-legacy.tsx',
+      'einkauf/lieferanten-stamm-legacy.tsx',
     ]) {
       expect(read(file)).toContain('isStammCreationEntityId')
     }

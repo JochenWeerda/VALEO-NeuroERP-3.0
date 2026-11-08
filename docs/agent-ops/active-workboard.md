@@ -20631,3 +20631,9 @@ sales/invoices (+ Alias verkauf/rechnungen), einkauf/bestellungen, finance/ap-in
 einkauf/rechnungseingaenge-liste; sales/lieferungen/neu legt jetzt ueber die Belegmaske an. Offen: Bestellung versenden,
 Rechnungspruefung (BELEG-043), CSV-Import Angebote (Altimport legt Koepfe ohne Positionen an - Fachfrage);
 Stufe 2 Detail-/Erfassungsseiten umhaengen, Stufe 3 Altspeicher abbauen.
+BELEG-052 Stufe 2 (09.11.2026): 21 alte Beleg-Erfassungs-/Detailseiten (Angebot, Auftrag-Editor, Lieferschein-
+Erfassung VK/EK, Rechnungs-Editor, Rechnungserfassung FiBu, Gutschrift-Editor, Bestellung anlegen/Stamm/Native,
+Eingangsrechnung, Einkaufsgutschrift) oeffnen ueber belegSeite(art) die Belegmaske (DocFlow); 6 tote Altseiten
+(InvoiceCapturePage, OrderEditorLegacyPage, *-legacy) entfernt. Fehlende Fachfunktionen der Altseiten (Bestellung aus
+Auftrag/Anfrage/Kontrakt, Bedarfsvorschlag; Lieferschein: Kontrakt, Kostenstelle, Gebinde, Serien-Nr.,
+Zwischenhaendler, Druck) sind Ausbau der Varianten (Stufe 2b).

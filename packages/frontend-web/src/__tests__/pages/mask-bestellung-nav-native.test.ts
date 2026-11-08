@@ -38,12 +38,7 @@ describe('MASK-BESTELLUNG-NAV-NATIVE-20261022', () => {
     )
   })
 
-  it('Bestellung-Anlegen resumed auf native Detailroute', () => {
-    const src = read('einkauf/bestellung-anlegen.tsx')
-    expect(src).toContain('`/einkauf/bestellung/${encodeURIComponent(purchaseOrderId)}')
-    expect(src).toContain('`/einkauf/bestellung/${encodeURIComponent(pendingLink.purchaseOrderId)}')
-    expect(src).not.toMatch(
-      /navigate\(\s*`\/einkauf\/bestellungen\/\$\{encodeURIComponent\(purchaseOrderId\)\}/,
-    )
+  it('Bestellung-Anlegen legt ueber die Belegmaske an (DocFlow, BELEG-052)', () => {
+    expect(read('einkauf/bestellung-anlegen.tsx')).toContain("belegSeite('purchase_order')")
   })
 })

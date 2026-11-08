@@ -1,13 +1,4 @@
-import { UniversalNativeCockpitPage } from '@/components/mask-builder/UniversalNativeCockpitPage'
+import { belegSeite } from '@/pages/belege/beleg-seite'
 
-const SCREEN_ID = 'einkauf/gutschrift-belastung'
-
-export default function Page(): JSX.Element {
-  return (
-    <UniversalNativeCockpitPage
-      screenId={SCREEN_ID}
-      testId="einkauf-gutschrift-belastung"
-      permissions={['procurement.read']}
-    />
-  )
-}
+/** Belegmaske, Variante `purchase_credit_memo` (DocFlow einziger Belegspeicher, BELEG-052). */
+export default belegSeite('purchase_credit_memo')

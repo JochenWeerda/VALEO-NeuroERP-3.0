@@ -1,9 +1,4 @@
-import { useParams, useSearchParams } from '@/app/routing/typed-router'
-import { UniversalNativeDetailPage } from '@/components/mask-builder/UniversalNativeDetailPage'
+import { belegSeite } from '@/pages/belege/beleg-seite'
 
-export default function SalesOrderNativePage(): JSX.Element {
-  const { id: routeId } = useParams<{ id?: string }>()
-  const [searchParams] = useSearchParams()
-  const id = routeId ?? searchParams.get('id') ?? undefined
-  return <UniversalNativeDetailPage screenId="sales/sales-order" entityId={id} testId="sales-sales-order" />
-}
+/** Belegmaske, Variante `sales_order` (DocFlow einziger Belegspeicher, BELEG-052). */
+export default belegSeite('sales_order')

@@ -1,7 +1,4 @@
-import { useParams } from '@/app/routing/typed-router'
-import { UniversalNativeDetailPage } from '@/components/mask-builder/UniversalNativeDetailPage'
+import { belegSeite } from '@/pages/belege/beleg-seite'
 
-export default function BestellungNativePage(): JSX.Element {
-  const { id } = useParams<{ id?: string }>()
-  return <UniversalNativeDetailPage screenId="einkauf/purchase-order" entityId={id} testId="einkauf-purchase-order" />
-}
+/** Belegmaske, Variante `purchase_order` (DocFlow einziger Belegspeicher, BELEG-052). */
+export default belegSeite('purchase_order')

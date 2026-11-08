@@ -6,7 +6,6 @@
   "annahme/lkw-registrierung",
   "annahme/qualitaets-check",
   "annahme/warteschlange",
-  "einkauf/lieferschein-erfassung",
   "finance/bank-abgleich",
   "finance/dunning",
   "finance/mahnlauf",
@@ -47,7 +46,6 @@
   "agrar/sammelabrechnung",
   "agrar/wetterwarnung",
   "annahme/rohware",
-  "einkauf/bestellungen/neu",
   "monitoring/alerts"
  ],
  "aktionen_nicht_deklariert": [
