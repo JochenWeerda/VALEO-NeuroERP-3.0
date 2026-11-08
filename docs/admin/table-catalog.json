@@ -27878,10 +27878,12 @@
             "id"
           ],
           "read_by": [
-            "app/api/v1/endpoints/training.py"
+            "app/api/v1/endpoints/training.py",
+            "app/services/hr_row_delete_commands.py"
           ],
           "written_by": [
-            "app/api/v1/endpoints/training.py"
+            "app/api/v1/endpoints/training.py",
+            "app/services/hr_row_delete_commands.py"
           ]
         },
         "org_units": {
@@ -28132,10 +28134,12 @@
             "id"
           ],
           "read_by": [
-            "app/api/v1/endpoints/training.py"
+            "app/api/v1/endpoints/training.py",
+            "app/services/hr_row_delete_commands.py"
           ],
           "written_by": [
-            "app/api/v1/endpoints/training.py"
+            "app/api/v1/endpoints/training.py",
+            "app/services/hr_row_delete_commands.py"
           ]
         },
         "shifts": {
@@ -28481,10 +28485,12 @@
             "id"
           ],
           "read_by": [
-            "app/api/v1/endpoints/training.py"
+            "app/api/v1/endpoints/training.py",
+            "app/services/hr_row_delete_commands.py"
           ],
           "written_by": [
-            "app/api/v1/endpoints/training.py"
+            "app/api/v1/endpoints/training.py",
+            "app/services/hr_row_delete_commands.py"
           ]
         },
         "training_courses": {
@@ -31001,6 +31007,7 @@
             "app/services/customer_reference.py",
             "app/services/feed_inventory_link_service.py",
             "app/services/inventory_auxiliary_service.py",
+            "app/services/inventory_count_sheet_command.py",
             "app/services/ist_aggregation_service.py",
             "app/services/mask_rollout_summary_service.py",
             "app/services/mcp_execution_service.py",
@@ -32793,6 +32800,7 @@
             "app/infrastructure/models/l3c_models.py",
             "app/services/inventory_auxiliary_service.py",
             "app/services/inventory_count_close_service.py",
+            "app/services/inventory_count_sheet_command.py",
             "app/services/mcp_execution_service.py"
           ],
           "written_by": [
@@ -32896,6 +32904,7 @@
             "app/infrastructure/models/l3c_models.py",
             "app/services/inventory_auxiliary_service.py",
             "app/services/inventory_count_close_service.py",
+            "app/services/inventory_count_sheet_command.py",
             "app/services/mcp_execution_service.py"
           ]
         },
@@ -60680,10 +60689,12 @@
             "id"
           ],
           "read_by": [
-            "app/api/v1/endpoints/versandprofile.py"
+            "app/api/v1/endpoints/versandprofile.py",
+            "app/services/versandprofil_commands.py"
           ],
           "written_by": [
-            "app/api/v1/endpoints/versandprofile.py"
+            "app/api/v1/endpoints/versandprofile.py",
+            "app/services/versandprofil_commands.py"
           ]
         },
         "vertreter_provisionsgruppen": {
