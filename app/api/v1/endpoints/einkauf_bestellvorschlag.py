@@ -548,9 +548,13 @@ async def vorschlag_freigeben(
     vorschlag_id: str,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
+    nutzer: Any = Depends(get_current_user),
 ) -> dict[str, Any]:
+    from app.core.akteur import gepruefter_akteur
+
     try:
-        return _svc(db, tenant_id).freigebe_vorschlag(vorschlag_id)
+        # Bestellentwuerfe entstehen in DocFlow (BELEG-052); der Bearbeiter kommt aus dem Token.
+        return _svc(db, tenant_id).freigebe_vorschlag(vorschlag_id, freigegeben_von=gepruefter_akteur(nutzer))
     except EntityNotFoundError:
         raise HTTPException(404, "Vorschlag nicht gefunden")
 
