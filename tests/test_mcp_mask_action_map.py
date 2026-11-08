@@ -90,8 +90,9 @@ def test_mcp_mask_action_map_covers_top_writes_and_blocks_fin_close():
 
     listen_anlagen = sum(any(a["key"] == "neu" and a.get("navigationRoute") for a in bau()["actions"])
                          for bau in {**LISTEN_SCREEN_BUILDERS, **CLUSTER_SCREEN_BUILDERS}.values())
-    # 16 = 15 + "Neue Gutschrift" (sales/credit-notes, form_reset); + Anlage-Navigation je Studio-Liste
-    assert data["stats"]["by_coverage"].get("local_ui", 0) == 16 + listen_anlagen
+    # 15 lokale Formular-Resets (die Gutschrift-Erfassung sales/credit-notes entfiel 09.11.2026 - Belegmaske, BELEG-052)
+    # + Anlage-Navigation je Studio-Liste
+    assert data["stats"]["by_coverage"].get("local_ui", 0) == 15 + listen_anlagen
 
 
 def test_row_commands_reflect_explicit_capability_release():

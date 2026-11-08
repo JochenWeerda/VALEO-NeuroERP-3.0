@@ -8853,41 +8853,6 @@
       ]
     },
     {
-      "mask_id": "crm/angebot-erstellen",
-      "title": "Angebot erstellen",
-      "domain": "crm",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/crm__angebot-erstellen/:entityId",
-      "agent_contract_url": "/api/v1/masks/crm/angebot-erstellen/agent-contract",
-      "screen_definition_url": "/api/v1/masks/crm/angebot-erstellen/screen-definition",
-      "readiness_url": "/api/v1/masks/crm/angebot-erstellen/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "refresh",
-          "label": "Aktualisieren",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "crm.read",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "crm.customer.search",
-        "crm.customer.summary360",
-        "crm.customer.open",
-        "crm.contact.log",
-        "crm.activity.create",
-        "crm.activity.update",
-        "crm.activity.delete",
-        "crm.lead.qualify"
-      ]
-    },
-    {
       "mask_id": "crm/anruf-protokoll",
       "title": "Anruf-Protokoll",
       "domain": "crm",
@@ -12691,39 +12656,6 @@
       ]
     },
     {
-      "mask_id": "einkauf/gutschrift-belastung",
-      "title": "Gutschrift/Belastung",
-      "domain": "einkauf",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/einkauf__gutschrift-belastung/:entityId",
-      "agent_contract_url": "/api/v1/masks/einkauf/gutschrift-belastung/agent-contract",
-      "screen_definition_url": "/api/v1/masks/einkauf/gutschrift-belastung/screen-definition",
-      "readiness_url": "/api/v1/masks/einkauf/gutschrift-belastung/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "refresh",
-          "label": "Aktualisieren",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "procurement.read",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
-        "einkauf.bestellung.list",
-        "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
-        "einkauf.angebot.bestellen",
-        "einkauf.anlieferavis.wareneingang"
-      ]
-    },
-    {
       "mask_id": "einkauf/kontrakt-anlage",
       "title": "Kontrakt-Anlage",
       "domain": "einkauf",
@@ -12966,39 +12898,6 @@
       ]
     },
     {
-      "mask_id": "einkauf/lieferschein-erfassen",
-      "title": "Lieferschein erfassen",
-      "domain": "einkauf",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/einkauf__lieferschein-erfassen/:entityId",
-      "agent_contract_url": "/api/v1/masks/einkauf/lieferschein-erfassen/agent-contract",
-      "screen_definition_url": "/api/v1/masks/einkauf/lieferschein-erfassen/screen-definition",
-      "readiness_url": "/api/v1/masks/einkauf/lieferschein-erfassen/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "refresh",
-          "label": "Aktualisieren",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "procurement.read",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
-        "einkauf.bestellung.list",
-        "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
-        "einkauf.angebot.bestellen",
-        "einkauf.anlieferavis.wareneingang"
-      ]
-    },
-    {
       "mask_id": "einkauf/mahnwesen-lieferanten",
       "title": "Mahnwesen Lieferanten",
       "domain": "einkauf",
@@ -13114,50 +13013,6 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
-        "einkauf.bestellung.list",
-        "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
-        "einkauf.angebot.bestellen",
-        "einkauf.anlieferavis.wareneingang"
-      ]
-    },
-    {
-      "mask_id": "einkauf/rechnungseingang/neu",
-      "title": "Eingangsrechnung erfassen",
-      "domain": "einkauf",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/einkauf__rechnungseingang__neu/:entityId",
-      "agent_contract_url": "/api/v1/masks/einkauf/rechnungseingang/neu/agent-contract",
-      "screen_definition_url": "/api/v1/masks/einkauf/rechnungseingang/neu/screen-definition",
-      "readiness_url": "/api/v1/masks/einkauf/rechnungseingang/neu/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "position",
-          "label": "Position übernehmen",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "finance.ap.invoice.create",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        },
-        {
-          "key": "save",
-          "label": "Als Entwurf speichern",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "finance.ap.invoice.create",
-          "commandEndpoint": "/api/v1/finance/ap/invoices/",
-          "method": "POST",
-          "stubReason": null
         }
       ],
       "sensitive_fields": [],
@@ -15443,77 +15298,6 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "finance.ap_invoice.propose",
-        "fibu.open_items.list",
-        "fibu.dunning.status"
-      ]
-    },
-    {
-      "mask_id": "finance/invoices-list",
-      "title": "Invoices list",
-      "domain": "finance",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/finance__invoices-list/:entityId",
-      "agent_contract_url": "/api/v1/masks/finance/invoices-list/agent-contract",
-      "screen_definition_url": "/api/v1/masks/finance/invoices-list/screen-definition",
-      "readiness_url": "/api/v1/masks/finance/invoices-list/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "finance.ap_invoice.propose",
-        "fibu.open_items.list",
-        "fibu.dunning.status"
-      ]
-    },
-    {
-      "mask_id": "finance/invoices/new",
-      "title": "Ausgangsrechnung erfassen",
-      "domain": "finance",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/finance__invoices__new/:entityId",
-      "agent_contract_url": "/api/v1/masks/finance/invoices/new/agent-contract",
-      "screen_definition_url": "/api/v1/masks/finance/invoices/new/screen-definition",
-      "readiness_url": "/api/v1/masks/finance/invoices/new/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "position",
-          "label": "Position übernehmen",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "finance.invoice.create",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        },
-        {
-          "key": "save",
-          "label": "Als Entwurf speichern",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "finance.invoice.create",
-          "commandEndpoint": "/api/v1/finance/invoices",
-          "method": "POST",
-          "stubReason": null
         }
       ],
       "sensitive_fields": [],
@@ -24341,39 +24125,6 @@
       ]
     },
     {
-      "mask_id": "sales/angebote/neu",
-      "title": "Angebot erstellen",
-      "domain": "sales",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/sales__angebote__neu/:entityId",
-      "agent_contract_url": "/api/v1/masks/sales/angebote/neu/agent-contract",
-      "screen_definition_url": "/api/v1/masks/sales/angebote/neu/screen-definition",
-      "readiness_url": "/api/v1/masks/sales/angebote/neu/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "sales.order.status",
-        "sales.gutschrift.speichern",
-        "sales.gutschrift.propose",
-        "sales.gutschrift.buchen",
-        "sales.invoice.propose",
-        "sales.invoice.post"
-      ]
-    },
-    {
       "mask_id": "sales/auftrag-lieferschein-abgleich",
       "title": "Auftrag lieferschein abgleich",
       "domain": "sales",
@@ -24427,160 +24178,6 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "sales.order.status",
-        "sales.gutschrift.speichern",
-        "sales.gutschrift.propose",
-        "sales.gutschrift.buchen",
-        "sales.invoice.propose",
-        "sales.invoice.post"
-      ]
-    },
-    {
-      "mask_id": "sales/credit-notes",
-      "title": "Gutschrift",
-      "domain": "sales",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/sales__credit-notes/:entityId",
-      "agent_contract_url": "/api/v1/masks/sales/credit-notes/agent-contract",
-      "screen_definition_url": "/api/v1/masks/sales/credit-notes/screen-definition",
-      "readiness_url": "/api/v1/masks/sales/credit-notes/readiness",
-      "risk_summary": "medium",
-      "actions": [
-        {
-          "key": "position",
-          "label": "Position übernehmen",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Stellt die Positionseingabe in die Positionsliste der Maske; gespeichert wird erst mit Speichern."
-        },
-        {
-          "key": "speichern",
-          "label": "Als Entwurf speichern",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "sales.gutschrift.write",
-          "commandEndpoint": "/api/v1/sales/credit-notes/actions/speichern",
-          "method": "POST",
-          "stubReason": null
-        },
-        {
-          "key": "buchen",
-          "label": "Buchen",
-          "dangerLevel": "moderate",
-          "humanApprovalRequired": true,
-          "requiresConfirmation": true,
-          "permission": "sales.gutschrift.post",
-          "commandEndpoint": "/api/v1/sales/credit-notes/{entity_id}/actions/buchen",
-          "method": "POST",
-          "stubReason": null
-        },
-        {
-          "key": "vorschlag_freigeben",
-          "label": "Vorschlag freigeben",
-          "dangerLevel": "moderate",
-          "humanApprovalRequired": true,
-          "requiresConfirmation": true,
-          "permission": "sales.gutschrift.post",
-          "commandEndpoint": "/api/v1/sales/credit-notes/buchungsvorschlaege/{entity_id}/actions/freigeben",
-          "method": "POST",
-          "stubReason": null
-        },
-        {
-          "key": "vorschlag_ablehnen",
-          "label": "Vorschlag ablehnen",
-          "dangerLevel": "moderate",
-          "humanApprovalRequired": true,
-          "requiresConfirmation": false,
-          "permission": "sales.gutschrift.post",
-          "commandEndpoint": "/api/v1/sales/credit-notes/buchungsvorschlaege/{entity_id}/actions/ablehnen",
-          "method": "POST",
-          "stubReason": null
-        },
-        {
-          "key": "neu",
-          "label": "Neue Gutschrift",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Leert die Eingabe fuer eine neue Gutschrift."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "sales.order.status",
-        "sales.gutschrift.speichern",
-        "sales.gutschrift.propose",
-        "sales.gutschrift.buchen",
-        "sales.invoice.propose",
-        "sales.invoice.post"
-      ]
-    },
-    {
-      "mask_id": "sales/delivery-editor",
-      "title": "Delivery editor",
-      "domain": "sales",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/sales__delivery-editor/:entityId",
-      "agent_contract_url": "/api/v1/masks/sales/delivery-editor/agent-contract",
-      "screen_definition_url": "/api/v1/masks/sales/delivery-editor/screen-definition",
-      "readiness_url": "/api/v1/masks/sales/delivery-editor/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "edit",
-          "label": "Bearbeiten",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "sales.write",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "sales.order.status",
-        "sales.gutschrift.speichern",
-        "sales.gutschrift.propose",
-        "sales.gutschrift.buchen",
-        "sales.invoice.propose",
-        "sales.invoice.post"
-      ]
-    },
-    {
-      "mask_id": "sales/delivery-editor-new",
-      "title": "Delivery editor new",
-      "domain": "sales",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/sales__delivery-editor-new/:entityId",
-      "agent_contract_url": "/api/v1/masks/sales/delivery-editor-new/agent-contract",
-      "screen_definition_url": "/api/v1/masks/sales/delivery-editor-new/screen-definition",
-      "readiness_url": "/api/v1/masks/sales/delivery-editor-new/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "edit",
-          "label": "Bearbeiten",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "sales.write",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
         }
       ],
       "sensitive_fields": [],
@@ -25612,58 +25209,6 @@
       "agent_contract_url": "/api/v1/masks/verkauf/kunden-stamm-enhanced/agent-contract",
       "screen_definition_url": "/api/v1/masks/verkauf/kunden-stamm-enhanced/screen-definition",
       "readiness_url": "/api/v1/masks/verkauf/kunden-stamm-enhanced/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "edit",
-          "label": "Bearbeiten",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "verkauf.write",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "verkauf/lieferschein-erfassung",
-      "title": "Lieferschein erfassung",
-      "domain": "verkauf",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/verkauf__lieferschein-erfassung/:entityId",
-      "agent_contract_url": "/api/v1/masks/verkauf/lieferschein-erfassung/agent-contract",
-      "screen_definition_url": "/api/v1/masks/verkauf/lieferschein-erfassung/screen-definition",
-      "readiness_url": "/api/v1/masks/verkauf/lieferschein-erfassung/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "verkauf/rechnungen/neu",
-      "title": "Invoice editor",
-      "domain": "verkauf",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/verkauf__rechnungen__neu/:entityId",
-      "agent_contract_url": "/api/v1/masks/verkauf/rechnungen/neu/agent-contract",
-      "screen_definition_url": "/api/v1/masks/verkauf/rechnungen/neu/screen-definition",
-      "readiness_url": "/api/v1/masks/verkauf/rechnungen/neu/readiness",
       "risk_summary": "low",
       "actions": [
         {

@@ -231,7 +231,6 @@
   "mask:einkauf/auftragsbestaetigungen:pruefen",
   "mask:einkauf/purchase-order:speichern",
   "mask:einkauf/purchase-order:versenden",
-  "mask:einkauf/rechnungseingang/neu:save",
   "mask:einkauf/supplier:bearbeiten",
   "mask:einkauf/supplier:entsperren",
   "mask:einkauf/supplier:sperren",
@@ -251,7 +250,6 @@
   "mask:finance/debitoren-liste:entsperren",
   "mask:finance/debitoren-liste:sperren",
   "mask:finance/debitoren/new:edit",
-  "mask:finance/invoices/new:save",
   "mask:finance/kreditor:bearbeiten",
   "mask:finance/payment-run:freigeben",
   "mask:finance/steuerschluessel:speichern",
@@ -307,10 +305,6 @@
   "mask:produktion/produktionsleitstand:sync",
   "mask:qualitaet/reklamation:abschliessen",
   "mask:qualitaet/reklamation:bearbeiten",
-  "mask:sales/credit-notes:buchen",
-  "mask:sales/credit-notes:speichern",
-  "mask:sales/credit-notes:vorschlag_ablehnen",
-  "mask:sales/credit-notes:vorschlag_freigeben",
   "mask:sales/delivery-note:drucken",
   "mask:sales/gutschrift:buchen",
   "mask:sales/gutschrift:speichern",
@@ -337,7 +331,7 @@
   "mask:waage/wiegungen:create"
  ],
  "nicht_unterstuetzt": {
-  "kein_endpunkt": 956,
+  "kein_endpunkt": 938,
   "pfadparameter": 6
  }
 }

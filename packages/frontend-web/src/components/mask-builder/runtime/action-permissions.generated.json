@@ -1078,15 +1078,6 @@
         ]
       ]
     },
-    "einkauf/rechnungseingang/neu": {
-      "finance.ap.invoice.create": [
-        [
-          "FINANCE_ADMIN",
-          "FINANCE_BEARBEITEN",
-          "admin"
-        ]
-      ]
-    },
     "einkauf/supplier": {
       "einkauf.lieferant.update": [
         [
@@ -1241,19 +1232,6 @@
         [
           "FINANCE_ADMIN",
           "FINANCE_BEARBEITEN",
-          "admin"
-        ]
-      ]
-    },
-    "finance/invoices/new": {
-      "finance.invoice.create": [
-        [
-          "EINKAUF_ADMIN",
-          "EINKAUF_BEARBEITEN",
-          "FINANCE_ADMIN",
-          "FINANCE_BEARBEITEN",
-          "SALES_ADMIN",
-          "SALES_BEARBEITEN",
           "admin"
         ]
       ]
@@ -1728,30 +1706,6 @@
           "FUTTERMITTEL_BEARBEITEN",
           "LAGER_ADMIN",
           "LAGER_BEARBEITEN",
-          "SALES_ADMIN",
-          "SALES_BEARBEITEN",
-          "admin"
-        ]
-      ]
-    },
-    "sales/credit-notes": {
-      "sales.gutschrift.write": [
-        [
-          "EINKAUF_ADMIN",
-          "EINKAUF_BEARBEITEN",
-          "FINANCE_ADMIN",
-          "FINANCE_BEARBEITEN",
-          "SALES_ADMIN",
-          "SALES_BEARBEITEN",
-          "admin"
-        ]
-      ],
-      "sales.gutschrift.post": [
-        [
-          "EINKAUF_ADMIN",
-          "EINKAUF_BEARBEITEN",
-          "FINANCE_ADMIN",
-          "FINANCE_BEARBEITEN",
           "SALES_ADMIN",
           "SALES_BEARBEITEN",
           "admin"

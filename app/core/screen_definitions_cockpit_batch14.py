@@ -556,25 +556,6 @@ def build_crm_activity_detail_screen_definition() -> dict[str, Any]:
     )
 
 
-def build_crm_angebot_erstellen_screen_definition() -> dict[str, Any]:
-    return build_cockpit_overview_screen(
-        screen_id="crm/angebot-erstellen",
-        domain="crm",
-        title="Angebot erstellen",
-        subtitle="Vertriebsangebot anlegen",
-        business_purpose="Angebot erstellen als Read-Model-Cockpit.",
-        example_prompts=["Zeige Angebot erstellen.", "Was ist der aktuelle Stand?"],
-        test_id="crm-angebot-erstellen",
-        summary=[
-            {"key": "total", "label": "Anzahl", "tone": "neutral"},
-            {"key": "open", "label": "Offen", "tone": "warning"},
-        ],
-        data_sources=[cockpit_entity_source("/api/v1/einkauf/angebote")],
-        tiles=[cockpit_nav_tile("overview", "Uebersicht", target_route="/crm/angebot-erstellen")],
-        actions=[cockpit_refresh_action(permission="crm.read")],
-        context_rail="combined",
-    )
-
 
 def build_crm_anruf_protokoll_screen_definition() -> dict[str, Any]:
     return build_cockpit_overview_screen(
@@ -1465,26 +1446,6 @@ def build_einkauf_bestellvorschlag_verbrauch_screen_definition() -> dict[str, An
     )
 
 
-def build_einkauf_gutschrift_belastung_screen_definition() -> dict[str, Any]:
-    return build_cockpit_overview_screen(
-        screen_id="einkauf/gutschrift-belastung",
-        domain="einkauf",
-        title="Gutschrift/Belastung",
-        subtitle="Einkaufs-Gutschrift",
-        business_purpose="Gutschrift/Belastung als Read-Model-Cockpit.",
-        example_prompts=["Zeige Gutschrift/Belastung.", "Was ist der aktuelle Stand?"],
-        test_id="einkauf-gutschrift-belastung",
-        summary=[
-            {"key": "total", "label": "Anzahl", "tone": "neutral"},
-            {"key": "open", "label": "Offen", "tone": "warning"},
-        ],
-        data_sources=[cockpit_entity_source("/api/v1/einkauf/lieferscheine")],
-        tiles=[cockpit_nav_tile("overview", "Uebersicht", target_route="/einkauf/gutschrift-belastung")],
-        table_profile="financial",
-        actions=[cockpit_refresh_action(permission="procurement.read")],
-        context_rail="combined",
-    )
-
 
 def build_einkauf_kontrakt_anlage_screen_definition() -> dict[str, Any]:
     return build_cockpit_overview_screen(
@@ -1591,26 +1552,6 @@ def build_einkauf_lieferanten_reklamationen_screen_definition() -> dict[str, Any
     )
 
 
-def build_einkauf_lieferschein_erfassen_screen_definition() -> dict[str, Any]:
-    return build_cockpit_overview_screen(
-        screen_id="einkauf/lieferschein-erfassen",
-        domain="einkauf",
-        title="Lieferschein erfassen",
-        subtitle="Einkauf-Lieferschein",
-        business_purpose="Lieferschein erfassen als Read-Model-Cockpit.",
-        example_prompts=["Zeige Lieferschein erfassen.", "Was ist der aktuelle Stand?"],
-        test_id="einkauf-lieferschein-erfassen",
-        summary=[
-            {"key": "total", "label": "Anzahl", "tone": "neutral"},
-            {"key": "open", "label": "Offen", "tone": "warning"},
-        ],
-        data_sources=[cockpit_entity_source("/api/v1/einkauf/lieferscheine")],
-        tiles=[cockpit_nav_tile("overview", "Uebersicht", target_route="/einkauf/lieferschein-erfassen")],
-        table_profile="financial",
-        actions=[cockpit_refresh_action(permission="procurement.read")],
-        context_rail="combined",
-    )
-
 
 def build_einkauf_mahnwesen_lieferanten_screen_definition() -> dict[str, Any]:
     return build_cockpit_overview_screen(
@@ -1662,7 +1603,6 @@ BATCH14_BUILDERS: dict[str, Any] = {
     "charge/zusammenfuehrung": build_charge_zusammenfuehrung_screen_definition,
     "crm/activities": build_crm_activities_screen_definition,
     "crm/activity-detail": build_crm_activity_detail_screen_definition,
-    "crm/angebot-erstellen": build_crm_angebot_erstellen_screen_definition,
     "crm/anruf-protokoll": build_crm_anruf_protokoll_screen_definition,
     "crm/besuchsberichte": build_crm_besuchsberichte_screen_definition,
     "crm/betreuungsgebiet": build_crm_betreuungsgebiet_screen_definition,
@@ -1706,13 +1646,11 @@ BATCH14_BUILDERS: dict[str, Any] = {
     "einkauf/bestellvorschlag-lager": build_einkauf_bestellvorschlag_lager_screen_definition,
     "einkauf/bestellvorschlag-kontrakt": build_einkauf_bestellvorschlag_kontrakt_screen_definition,
     "einkauf/bestellvorschlag-verbrauch": build_einkauf_bestellvorschlag_verbrauch_screen_definition,
-    "einkauf/gutschrift-belastung": build_einkauf_gutschrift_belastung_screen_definition,
     "einkauf/kontrakt-anlage": build_einkauf_kontrakt_anlage_screen_definition,
     "einkauf/lieferanten-angebote": build_einkauf_lieferanten_angebote_screen_definition,
     "einkauf/lieferanten-dokumente": build_einkauf_lieferanten_dokumente_screen_definition,
     "einkauf/lieferanten-konditionen": build_einkauf_lieferanten_konditionen_screen_definition,
     "einkauf/lieferanten-reklamationen": build_einkauf_lieferanten_reklamationen_screen_definition,
-    "einkauf/lieferschein-erfassen": build_einkauf_lieferschein_erfassen_screen_definition,
     "einkauf/mahnwesen-lieferanten": build_einkauf_mahnwesen_lieferanten_screen_definition,
 }
 

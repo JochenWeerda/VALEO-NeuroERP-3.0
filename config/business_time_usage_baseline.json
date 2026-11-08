@@ -308,9 +308,6 @@
     "app/services/rations_readiness_service.py": {
       "date.today": 1
     },
-    "app/services/rfq_service.py": {
-      "date.today": 2
-    },
     "app/workers/price_monitoring_worker.py": {
       "date.today": 2
     }

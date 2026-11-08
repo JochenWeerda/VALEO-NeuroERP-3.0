@@ -309,8 +309,6 @@
   "mask:qualitaet/ausnahmen:open_source",
   "mask:qualitaet/labor-detail:edit",
   "mask:rezepte/rezept:edit",
-  "mask:sales/delivery-editor-new:edit",
-  "mask:sales/delivery-editor:edit",
   "mask:sales/kreditlimit-pruefung:open_source",
   "mask:schnittstelle/legacy-adapter-monitor:approve",
   "mask:schnittstelle/legacy-adapter-monitor:reconcile",
@@ -340,7 +338,6 @@
   "mask:verkauf/kunde:edit",
   "mask:verkauf/kunden-stamm-enhanced:edit",
   "mask:verkauf/kunden-stamm:edit",
-  "mask:verkauf/rechnungen/neu:edit",
   "mask:waage/wiegeschein:edit",
   "mask:workflow/workflow-monitoring:open_source",
   "mask:workspace/letzte-dokumente:open",
@@ -366,8 +363,6 @@
   "mask:personal/bewerbung-einwilligung:widerrufen",
   "mask:personal/bewerbung-einwilligung:zurueck",
   "mask:personal/bewerbungen:erklaerungen",
-  "mask:sales/credit-notes:entfernen",
-  "mask:sales/credit-notes:position",
   "mask:sales/gutschrift:entfernen",
   "mask:sales/gutschrift:position",
   "mask:stammdaten/individuelle-artikelnummer:edit",
@@ -376,21 +371,12 @@
   "mask:transporte/fahrer:touren",
   "mask:transporte/fahrer:verfuegbar"
  ],
- "aktionen_ohne_mcp_klassifikation": [
-  "mask:einkauf/rechnungseingang/neu:position",
-  "mask:einkauf/rechnungseingang/neu:remove",
-  "mask:finance/invoices/new:position",
-  "mask:finance/invoices/new:remove"
- ],
+ "aktionen_ohne_mcp_klassifikation": [],
  "aktionen_ohne_cli": [
   "mask:admin/control-center:escalate",
   "mask:admin/control-center:resolve",
   "mask:admin/control-center:retry",
-  "mask:einkauf/rechnungseingang/neu:position",
-  "mask:einkauf/rechnungseingang/neu:remove",
   "mask:finance/bank-abgleich:validate",
-  "mask:finance/invoices/new:position",
-  "mask:finance/invoices/new:remove",
   "mask:mahnwesen/mahnlauf:sendEmail",
   "mask:mahnwesen/mahnlauf:sendPost"
  ],

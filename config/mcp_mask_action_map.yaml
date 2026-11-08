@@ -5,8 +5,8 @@ sources:
   screen_mask_actions: services/ki-usability/app/data/screen_mask_actions.json
   mcp_erp_tools: config/mcp_erp_tools.yaml
   action_stats:
-    actions: 744
-    screens_with_actions: 393
+    actions: 726
+    screens_with_actions: 387
     domains: 50
 mcp_write_tools:
 - crm.contact.log
@@ -86,15 +86,15 @@ fin_close:
   notes: FIN-CLOSE absichtlich nicht als MCP-Tool. Kein Adapter, kein Scheinabschluss. Bleibt offener
     Fachvertrag ausserhalb Mask-Write-Parität.
 stats:
-  mask_actions_considered: 179
-  mask_mutations_considered: 118
+  mask_actions_considered: 173
+  mask_mutations_considered: 113
   by_coverage:
     adjacent: 1
-    blocked_human_only: 42
+    blocked_human_only: 40
     blocked_unreleased: 2
-    local_ui: 61
+    local_ui: 60
     mapped: 42
-    mapped_generic: 24
+    mapped_generic: 21
     mapped_propose_only: 1
     mapped_read: 2
     open_high: 4
@@ -965,16 +965,6 @@ mappings:
   mcp_tool_id: einkauf.bestellung.versenden
   coverage: mapped
   notes: MCP-MASK-WRITES-TOP-20261008; Versand ohne Obligo-Journal.
-- mask_action_id: mask:einkauf/rechnungseingang/neu:save
-  mask: einkauf/rechnungseingang/neu
-  domain: einkauf
-  action_key: save
-  label: Als Entwurf speichern
-  command_endpoint: /api/v1/finance/ap/invoices/
-  command: finance.invoiceSpeichern
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
 - mask_action_id: mask:einkauf/supplier:neue_bestellung
   mask: einkauf/supplier
   domain: einkauf
@@ -1057,16 +1047,6 @@ mappings:
   coverage: local_ui
   mcp_tool_id: null
   notes: Reine Oberflaechenwirkung (localEffect/navigationRoute) ohne Serverwirkung.
-- mask_action_id: mask:finance/invoices/new:save
-  mask: finance/invoices/new
-  domain: finance
-  action_key: save
-  label: Als Entwurf speichern
-  command_endpoint: /api/v1/finance/invoices
-  command: finance.invoiceSpeichern
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
 - mask_action_id: mask:finance/kreditoren-liste:neu
   mask: finance/kreditoren-liste
   domain: finance
@@ -1716,48 +1696,6 @@ mappings:
   coverage: local_ui
   mcp_tool_id: null
   notes: Reine Oberflaechenwirkung (localEffect/navigationRoute) ohne Serverwirkung.
-- mask_action_id: mask:sales/credit-notes:buchen
-  mask: sales/credit-notes
-  domain: sales
-  action_key: buchen
-  label: Buchen
-  command_endpoint: /api/v1/sales/credit-notes/{entity_id}/actions/buchen
-  command: sales.gutschriftBuchen
-  mcp_tool_id: null
-  coverage: blocked_human_only
-  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
-    Endpunkt.
-- mask_action_id: mask:sales/credit-notes:neu
-  mask: sales/credit-notes
-  domain: sales
-  action_key: neu
-  label: Neue Gutschrift
-  command_endpoint: null
-  command: sales.gutschriftNeu
-  coverage: local_ui
-  mcp_tool_id: null
-  notes: Reine Oberflaechenwirkung (localEffect/navigationRoute) ohne Serverwirkung.
-- mask_action_id: mask:sales/credit-notes:speichern
-  mask: sales/credit-notes
-  domain: sales
-  action_key: speichern
-  label: Als Entwurf speichern
-  command_endpoint: /api/v1/sales/credit-notes/actions/speichern
-  command: sales.gutschriftSpeichern
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
-- mask_action_id: mask:sales/credit-notes:vorschlag_freigeben
-  mask: sales/credit-notes
-  domain: sales
-  action_key: vorschlag_freigeben
-  label: Vorschlag freigeben
-  command_endpoint: /api/v1/sales/credit-notes/buchungsvorschlaege/{entity_id}/actions/freigeben
-  command: sales.gutschriftVorschlagFreigeben
-  mcp_tool_id: null
-  coverage: blocked_human_only
-  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
-    Endpunkt.
 - mask_action_id: mask:sales/delivery-note:drucken
   mask: sales/delivery-note
   domain: sales
@@ -1956,5 +1894,5 @@ mappings:
 next_medium_candidates: []
 classification_complete: true
 classification_notes: 'FUHRPARK-TENANT-CE-20261009: Fuhrpark 5× mapped (tenant_id+CE+MCP Isolation); blocked_missing_tenant
-  0. Rest: open_high 4; open_medium 0; blocked_human_only 42; blocked_no_endpoint 0; local_ui 61; FIN-CLOSE
+  0. Rest: open_high 4; open_medium 0; blocked_human_only 40; blocked_no_endpoint 0; local_ui 60; FIN-CLOSE
   blocked_adr_076.'

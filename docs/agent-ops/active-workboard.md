@@ -20648,3 +20648,11 @@ BELEG-052 Stufe 2b (09.11.2026): Belegdruck fuer alle 9 Varianten (Aktion drucke
 PDF aus dem Belegvertrag mit Preisrecht; Belegfamilie 1.4.0). Builder: Download-Vertrag mit {entity_id} und PDF
 (base64) auch in der Objektseite. Offen: Bestellung versenden, Rechnungspruefung, Bestellung aus Auftrag/Anfrage/
 Kontrakt, Bedarfsvorschlag, Lieferschein-Zusatzfelder, CSV-Import Angebote (Fachfrage).
+BELEG-052 Stufe 3a (09.11.2026): RFQ-Zuschlag und Webshop-Auftrag legen in DocFlow an (beleg_anlage); 12 alte
+Beleg-ScreenDefinitions ohne Route entfernt (crm/angebot-erstellen, finance/invoices-list, finance/invoices/new,
+einkauf/rechnungseingang/neu, einkauf/gutschrift-belastung, einkauf/lieferschein-erfassen, sales/angebote/neu,
+sales/credit-notes, sales/delivery-editor(-new), verkauf/lieferschein-erfassung, verkauf/rechnungen/neu) samt
+Rechnungserfassung des Dokumentspeichers; tote Frontend-API-Clients entfernt. Offen: sales/invoice, sales/sales-order,
+sales/delivery-note, einkauf/purchase-order, finance/ap-invoice, sales/gutschrift (13-28 Verweise je Maske),
+Schreibwege der Altspeicher (sales_offers, sales_orders, sales_delivery_notes, collective_documents,
+einkauf_lieferschein, einkauf router Rechnungseingang), danach Tabellen-Abbau per Migration.

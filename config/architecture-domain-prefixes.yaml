@@ -376,6 +376,7 @@ domains:
       - docflow_
       - beleg_liste
       - beleg_druck
+      - beleg_anlage
       - doc_nachweisraum_
       - audit_hardening
       - atlas_customs_

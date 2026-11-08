@@ -3158,17 +3158,6 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "crm/angebot-erstellen": {
-      "definition_hash": "baba28d2169a3c8ff79a6d54f74b1891cc48b78283e9c48836843a9a653edb9e",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "crm/anruf-protokoll": {
       "definition_hash": "cfac61ec5bfdd9f7359dc1826be069b7c2e3700ffc73ffe5286fe4053374eaa9",
       "gates_passed": [
@@ -4291,16 +4280,6 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "einkauf/gutschrift-belastung": {
-      "definition_hash": "7b27a331f3a1ab52cb3394db7fed9f82521e1152cca3bbf7eed61c670010f3f3",
-      "gates_passed": [
-        "A",
-        "B",
-        "C"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "einkauf/kontrakt-anlage": {
       "definition_hash": "35d86a1909fdce0817ea31106603148995432db929fab320e8a538c29f687ec9",
       "gates_passed": [
@@ -4378,16 +4357,6 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "einkauf/lieferschein-erfassen": {
-      "definition_hash": "39d1c023a5924cb51d028e23300522aa8669af9186f1c3fb4b4dfee6d1cd9b8a",
-      "gates_passed": [
-        "A",
-        "B",
-        "C"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "einkauf/mahnwesen-lieferanten": {
       "definition_hash": "aa88145029b2bb6139cdd10aeaf9de3bee46d824c27765ab162b1b3b8bc929d1",
       "gates_passed": [
@@ -4417,14 +4386,6 @@
         "B",
         "C",
         "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "einkauf/rechnungseingang/neu": {
-      "definition_hash": "7381d1db0c71e30e0f85510ea3f4236ce364437d8fe47cd18cab97fcc733e605",
-      "gates_passed": [
-        "B"
       ],
       "studio_draft_clean": true,
       "version": "1.0.0"
@@ -5150,24 +5111,6 @@
         "B",
         "C",
         "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "finance/invoices-list": {
-      "definition_hash": "65d66771dd82a26929d088f0c6bcc8e6c74b7bc66798d720961991bc1622afe6",
-      "gates_passed": [
-        "A",
-        "B",
-        "C"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "finance/invoices/new": {
-      "definition_hash": "4fa511e29dfaf41e43ec69aa0fbc942cdeef720d4ca813cfd4b42791dd8fbe54",
-      "gates_passed": [
-        "B"
       ],
       "studio_draft_clean": true,
       "version": "1.0.0"
@@ -7097,16 +7040,6 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "sales/angebote/neu": {
-      "definition_hash": "acc056cce1b0bdc87c9abdaf9f09ddf9442db9119de352193ffcad9b4223fdaf",
-      "gates_passed": [
-        "A",
-        "B",
-        "C"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "sales/auftrag-lieferschein-abgleich": {
       "definition_hash": "326765cc34a93a1adef050e39d2dfcceeed073e35af6c0f9aaecb823f43ec657",
       "gates_passed": [
@@ -7120,38 +7053,6 @@
     },
     "sales/auftragskette": {
       "definition_hash": "00f7cf4cbd60afb1dba4a290cc5087dbaf9100734de26de820fa9a5838ded28a",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "sales/credit-notes": {
-      "definition_hash": "81f87916b000b1b39f67d606956b8b0dca0eccd69e9a82e1496cfa80585d0c46",
-      "gates_passed": [
-        "A",
-        "B",
-        "C"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "sales/delivery-editor": {
-      "definition_hash": "7a93d679d6f0635e81be01b822702bc6596740ea13dc1da41ac2358ba3fc4f85",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "sales/delivery-editor-new": {
-      "definition_hash": "1fd161a9e588023790e2eb77acd200807dedac0dba98e1fb4ff0cb3cd20f19d2",
       "gates_passed": [
         "A",
         "B",
@@ -7801,26 +7702,6 @@
         "B",
         "C",
         "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "verkauf/lieferschein-erfassung": {
-      "definition_hash": "15654da6b9c23b9d40782787713bc448c48ecc1b74731eef55feb22d9dea307a",
-      "gates_passed": [
-        "A",
-        "B",
-        "C"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "verkauf/rechnungen/neu": {
-      "definition_hash": "e4022fe3dab6cedc8e7b33e66748be6ed7c4732480901b41765231e16ab7d36b",
-      "gates_passed": [
-        "A",
-        "B",
-        "C"
       ],
       "studio_draft_clean": true,
       "version": "1.0.0"

@@ -11,7 +11,7 @@ version: 3.0.0
 
 # Action-Matrix-Report
 
-> Generiert via `scripts/generate_action_matrix_report.py` · 2026-11-08 22:12:29 UTC
+> Generiert via `scripts/generate_action_matrix_report.py` · 2026-11-08 22:37:15 UTC
 
 ## Übersicht
 
@@ -159,4 +159,4 @@ version: 3.0.0
 
 - wms-003/004/005: QS-Freigabe und Auslagerung ohne E2E
 
-*Stand: 2026-11-08 22:12:29 UTC · 38 Aktionen · Slice: SEMANTIC-ACTION-MATRIX-002*
+*Stand: 2026-11-08 22:37:15 UTC · 38 Aktionen · Slice: SEMANTIC-ACTION-MATRIX-002*

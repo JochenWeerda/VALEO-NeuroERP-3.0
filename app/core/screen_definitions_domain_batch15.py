@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import Any
 
 from app.core.screen_definitions_finance_workbench import build_bank_workbench, build_dunning_workbench
-from app.core.screen_definitions_finance_capture import build_debtor_capture, build_invoice_capture
+from app.core.screen_definitions_finance_capture import build_debtor_capture
 from app.core.screen_definitions_feed_workbench import build_feed_workbench
 from app.core.screen_definitions_stamm import build_feed_einzel_create, build_feed_misch_create
 
@@ -25,9 +25,6 @@ from app.core.stamm_object_page_parent import (
 
 
 
-
-def build_einkauf_rechnungseingang_neu_screen_definition() -> dict[str, Any]:
-    return build_invoice_capture(purchase=True)
 
 
 def build_einkauf_reports_screen_definition() -> dict[str, Any]:
@@ -454,27 +451,6 @@ def build_finance_dunning_editor_screen_definition() -> dict[str, Any]:
     )
 
 
-def build_finance_invoices_list_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="finance/invoices-list",
-        domain="finance",
-        title="Invoices list",
-        subtitle="finance",
-        endpoint="/api/v1/finance/abstimmung/nebenbuch",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Invoices list im finance-Bereich finden und auswerten.",
-        prompts=["Zeige Invoices list.", "Filtere die Liste."],
-        bundle="finance",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-def build_finance_invoices_new_screen_definition() -> dict[str, Any]:
-    return build_invoice_capture(purchase=False)
 
 
 def build_finance_kasse_screen_definition() -> dict[str, Any]:
@@ -1790,24 +1766,6 @@ def build_rezepte_editor_screen_definition() -> dict[str, Any]:
     )
 
 
-def build_sales_angebote_neu_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="sales/angebote/neu",
-        domain="sales",
-        title="Angebot erstellen",
-        subtitle="sales",
-        endpoint="/api/v1/sales/offers/",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Angebot erstellen im sales-Bereich finden und auswerten.",
-        prompts=["Zeige Angebot erstellen.", "Filtere die Liste."],
-        bundle="sales",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
 
 def build_sales_auftrag_lieferschein_abgleich_screen_definition() -> dict[str, Any]:
     columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
@@ -1847,52 +1805,6 @@ def build_sales_auftragskette_screen_definition() -> dict[str, Any]:
     )
 
 
-def build_sales_credit_notes_screen_definition() -> dict[str, Any]:
-    from app.core.screen_definitions_capture import build_sales_gutschrift_screen_definition
-    definition = build_sales_gutschrift_screen_definition()
-    definition["id"] = "sales/credit-notes"
-    definition["adapter"] = {"type": "native", "sourceId": "sales/credit-notes", "temporary": False}
-    # These row controls only select a fetched record or edit an unsaved position.
-    # Read and mutation authorization remains on the actual server endpoints.
-    for table in definition.get("tables", []):
-        for action in table.get("rowActions", []):
-            if action.get("key") in {"laden", "pruefen", "entfernen"}:
-                action.pop("permission", None)
-    return definition
-
-
-def build_sales_delivery_editor_screen_definition() -> dict[str, Any]:
-    return build_stamm_object_page(
-        screen_id="sales/delivery-editor",
-        domain="sales",
-        title="Delivery editor",
-        subtitle="sales",
-        identity_field="create",
-        data_sources=[stamm_entity_source("/api/v1/sales/blanket-orders/{entity_id}")],
-        tabs=[stamm_kopf_tab([{"key": "create", "label": "Create", "type": "text"}, {"key": "read", "label": "Read", "type": "text"}, {"key": "update", "label": "Update", "type": "text"}, {"key": "approve", "label": "Approve", "type": "text"}, {"key": "audit", "label": "Audit", "type": "text"}])],
-        edit_permission="sales.write",
-        no_workflow_reason="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-        business_purpose="Delivery editor als Stammblatt pflegen.",
-        example_prompts=["Oeffne Delivery editor.", "Bearbeite Stammdaten."],
-        test_id="sales-delivery-editor",
-    )
-
-
-def build_sales_delivery_editor_new_screen_definition() -> dict[str, Any]:
-    return build_stamm_object_page(
-        screen_id="sales/delivery-editor-new",
-        domain="sales",
-        title="Delivery editor new",
-        subtitle="sales",
-        identity_field="id",
-        data_sources=[stamm_entity_source("/api/v1/sales/blanket-orders/{entity_id}")],
-        tabs=[stamm_kopf_tab([{"key": "id", "label": "Id", "type": "text"}, {"key": "name", "label": "Name", "type": "text"}, {"key": "status", "label": "Status", "type": "text"}, {"key": "updated_at", "label": "Updated At", "type": "text"}])],
-        edit_permission="sales.write",
-        no_workflow_reason="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-        business_purpose="Delivery editor new als Stammblatt pflegen.",
-        example_prompts=["Oeffne Delivery editor new.", "Bearbeite Stammdaten."],
-        test_id="sales-delivery-editor-new",
-    )
 
 
 def build_sales_kalkulationen_neu_screen_definition() -> dict[str, Any]:
@@ -2376,42 +2288,6 @@ def build_verkauf_kunden_stamm_enhanced_screen_definition() -> dict[str, Any]:
     )
 
 
-def build_verkauf_lieferschein_erfassung_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="verkauf/lieferschein-erfassung",
-        domain="verkauf",
-        title="Lieferschein erfassung",
-        subtitle="verkauf",
-        endpoint="/api/v1/admin/branches",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Lieferschein erfassung im verkauf-Bereich finden und auswerten.",
-        prompts=["Zeige Lieferschein erfassung.", "Filtere die Liste."],
-        bundle="verkauf",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
-
-
-
-
-def build_verkauf_rechnungen_neu_screen_definition() -> dict[str, Any]:
-    return build_stamm_object_page(
-        screen_id="verkauf/rechnungen/neu",
-        domain="verkauf",
-        title="Invoice editor",
-        subtitle="verkauf",
-        identity_field="id",
-        data_sources=[stamm_entity_source("/api/v1/verkauf/kunden/{entity_id}")],
-        tabs=[stamm_kopf_tab([{"key": "id", "label": "Id", "type": "text"}, {"key": "name", "label": "Name", "type": "text"}, {"key": "status", "label": "Status", "type": "text"}, {"key": "updated_at", "label": "Updated At", "type": "text"}])],
-        edit_permission="verkauf.write",
-        no_workflow_reason="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-        business_purpose="Invoice editor als Stammblatt pflegen.",
-        example_prompts=["Oeffne Invoice editor.", "Bearbeite Stammdaten."],
-        test_id="verkauf-rechnungen-neu",
-    )
 
 
 def build_verkauf_unerledigte_auftrags_positionen_screen_definition() -> dict[str, Any]:
@@ -2722,7 +2598,6 @@ def build_zertifikate_neu_screen_definition() -> dict[str, Any]:
 
 
 BATCH15_SCREEN_BUILDERS: dict[str, Any] = {
-    "einkauf/rechnungseingang/neu": build_einkauf_rechnungseingang_neu_screen_definition,
     "einkauf/reports": build_einkauf_reports_screen_definition,
     "einkauf/service-entry-sheets": build_einkauf_service_entry_sheets_screen_definition,
     "einkauf/wareneingangsabgleich": build_einkauf_wareneingangsabgleich_screen_definition,
@@ -2748,8 +2623,6 @@ BATCH15_SCREEN_BUILDERS: dict[str, Any] = {
     "finance/datev-export": build_finance_datev_export_screen_definition,
     "finance/debitoren/new": build_finance_debitoren_new_screen_definition,
     "finance/dunning-editor": build_finance_dunning_editor_screen_definition,
-    "finance/invoices-list": build_finance_invoices_list_screen_definition,
-    "finance/invoices/new": build_finance_invoices_new_screen_definition,
     "finance/kasse": build_finance_kasse_screen_definition,
     "finance/lastschriften-debitoren": build_finance_lastschriften_debitoren_screen_definition,
     "finance/op-debitoren": build_finance_op_debitoren_screen_definition,
@@ -2824,12 +2697,8 @@ BATCH15_SCREEN_BUILDERS: dict[str, Any] = {
     "reports/ReportsDashboardCharts": build_reports_reportsdashboardcharts_screen_definition,
     "reports/deckungsbeitrag": build_reports_deckungsbeitrag_screen_definition,
     "rezepte/editor": build_rezepte_editor_screen_definition,
-    "sales/angebote/neu": build_sales_angebote_neu_screen_definition,
     "sales/auftrag-lieferschein-abgleich": build_sales_auftrag_lieferschein_abgleich_screen_definition,
     "sales/auftragskette": build_sales_auftragskette_screen_definition,
-    "sales/credit-notes": build_sales_credit_notes_screen_definition,
-    "sales/delivery-editor": build_sales_delivery_editor_screen_definition,
-    "sales/delivery-editor-new": build_sales_delivery_editor_new_screen_definition,
     "sales/kalkulationen/neu": build_sales_kalkulationen_neu_screen_definition,
     "sales/lieferung-storno": build_sales_lieferung_storno_screen_definition,
     "service/abschluss": build_service_abschluss_screen_definition,
@@ -2857,8 +2726,6 @@ BATCH15_SCREEN_BUILDERS: dict[str, Any] = {
     "verkauf/kunde-neu": build_verkauf_kunde_neu_screen_definition,
     "verkauf/kunden-stamm": build_verkauf_kunden_stamm_screen_definition,
     "verkauf/kunden-stamm-enhanced": build_verkauf_kunden_stamm_enhanced_screen_definition,
-    "verkauf/lieferschein-erfassung": build_verkauf_lieferschein_erfassung_screen_definition,
-    "verkauf/rechnungen/neu": build_verkauf_rechnungen_neu_screen_definition,
     "verkauf/unerledigte-auftrags-positionen": build_verkauf_unerledigte_auftrags_positionen_screen_definition,
     "verladung/lkw-beladung": build_verladung_lkw_beladung_screen_definition,
     "vertrag/neu": build_vertrag_neu_screen_definition,

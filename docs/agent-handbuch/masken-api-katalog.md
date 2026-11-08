@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (779 Masken).
+> Generiert aus `app/core/screen_definitions.py` (767 Masken).
 
 ## Übersicht
 
@@ -313,7 +313,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `crm/activity-detail` | Aktivitaet | crm | niedrig | — | `GET /api/v1/masks/crm/activity-detail/agent-contract` |
 | `crm/aktivitaet` | Aktivitaet | crm | hoch | — | `GET /api/v1/masks/crm/aktivitaet/agent-contract` |
 | `crm/aktivitaeten-liste` | Aktivitaeten | crm | niedrig | — | `GET /api/v1/masks/crm/aktivitaeten-liste/agent-contract` |
-| `crm/angebot-erstellen` | Angebot erstellen | crm | niedrig | — | `GET /api/v1/masks/crm/angebot-erstellen/agent-contract` |
 | `crm/anruf-protokoll` | Anruf-Protokoll | crm | niedrig | — | `GET /api/v1/masks/crm/anruf-protokoll/agent-contract` |
 | `crm/bedarfsdeckung-cockpit` | Bedarfsdeckung | crm | niedrig | — | `GET /api/v1/masks/crm/bedarfsdeckung-cockpit/agent-contract` |
 | `crm/bestell-inbox` | Bestell-Inbox | crm | niedrig | — | `GET /api/v1/masks/crm/bestell-inbox/agent-contract` |
@@ -416,7 +415,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `einkauf/dienstleistungen-haltung-liste` | Dienstleistungen Haltung | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/dienstleistungen-haltung-liste/agent-contract` |
 | `einkauf/einkauf-vorgang-liste` | Einkaufsvorgaenge | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/einkauf-vorgang-liste/agent-contract` |
 | `einkauf/frachtauftraege-liste` | Frachtauftraege | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/frachtauftraege-liste/agent-contract` |
-| `einkauf/gutschrift-belastung` | Gutschrift/Belastung | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/gutschrift-belastung/agent-contract` |
 | `einkauf/kontrakt-anlage` | Kontrakt-Anlage | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/kontrakt-anlage/agent-contract` |
 | `einkauf/kontrakte-service-liste` | Kontrakte Service | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/kontrakte-service-liste/agent-contract` |
 | `einkauf/lieferanten` | Lieferanten | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/lieferanten/agent-contract` |
@@ -424,11 +422,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `einkauf/lieferanten-dokumente` | Lieferanten-Dokumente | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/lieferanten-dokumente/agent-contract` |
 | `einkauf/lieferanten-konditionen` | Lieferanten-Konditionen | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/lieferanten-konditionen/agent-contract` |
 | `einkauf/lieferanten-reklamationen` | Lieferanten-Reklamationen | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/lieferanten-reklamationen/agent-contract` |
-| `einkauf/lieferschein-erfassen` | Lieferschein erfassen | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/lieferschein-erfassen/agent-contract` |
 | `einkauf/mahnwesen-lieferanten` | Mahnwesen Lieferanten | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/mahnwesen-lieferanten/agent-contract` |
 | `einkauf/purchase-order` | Bestellung | einkauf | mittel | `procure-to-pay` | `GET /api/v1/masks/einkauf/purchase-order/agent-contract` |
 | `einkauf/rechnung-abgleich-liste` | Rechnungsabgleich | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/rechnung-abgleich-liste/agent-contract` |
-| `einkauf/rechnungseingang/neu` | Eingangsrechnung erfassen | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/rechnungseingang/neu/agent-contract` |
 | `einkauf/reports` | Reports | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/reports/agent-contract` |
 | `einkauf/retouren-liste` | Retouren | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/retouren-liste/agent-contract` |
 | `einkauf/service-entry-sheets` | Service entry sheets | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/service-entry-sheets/agent-contract` |
@@ -495,8 +491,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `finance/debitoren-liste` | Debitoren | finance | niedrig | — | `GET /api/v1/masks/finance/debitoren-liste/agent-contract` |
 | `finance/debitoren/new` | Debitor | finance | niedrig | — | `GET /api/v1/masks/finance/debitoren/new/agent-contract` |
 | `finance/dunning-editor` | Mahnvorgang | finance | niedrig | — | `GET /api/v1/masks/finance/dunning-editor/agent-contract` |
-| `finance/invoices-list` | Invoices list | finance | niedrig | — | `GET /api/v1/masks/finance/invoices-list/agent-contract` |
-| `finance/invoices/new` | Ausgangsrechnung erfassen | finance | niedrig | — | `GET /api/v1/masks/finance/invoices/new/agent-contract` |
 | `finance/kasse` | Kasse | finance | niedrig | — | `GET /api/v1/masks/finance/kasse/agent-contract` |
 | `finance/kreditor` | Kreditor | finance | mittel | — | `GET /api/v1/masks/finance/kreditor/agent-contract` |
 | `finance/kreditoren-liste` | Kreditoren | finance | niedrig | — | `GET /api/v1/masks/finance/kreditoren-liste/agent-contract` |
@@ -683,12 +677,8 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `reports/deckungsbeitrag` | Deckungsbeitrag | reports | niedrig | — | `GET /api/v1/masks/reports/deckungsbeitrag/agent-contract` |
 | `rezepte/editor` | Grunddaten | rezepte | niedrig | — | `GET /api/v1/masks/rezepte/editor/agent-contract` |
 | `rezepte/rezept` | Rezept | produktion | niedrig | — | `GET /api/v1/masks/rezepte/rezept/agent-contract` |
-| `sales/angebote/neu` | Angebot erstellen | sales | niedrig | — | `GET /api/v1/masks/sales/angebote/neu/agent-contract` |
 | `sales/auftrag-lieferschein-abgleich` | Auftrag lieferschein abgleich | sales | niedrig | — | `GET /api/v1/masks/sales/auftrag-lieferschein-abgleich/agent-contract` |
 | `sales/auftragskette` | Auftragskette | sales | niedrig | — | `GET /api/v1/masks/sales/auftragskette/agent-contract` |
-| `sales/credit-notes` | Gutschrift | sales | mittel | — | `GET /api/v1/masks/sales/credit-notes/agent-contract` |
-| `sales/delivery-editor` | Delivery editor | sales | niedrig | — | `GET /api/v1/masks/sales/delivery-editor/agent-contract` |
-| `sales/delivery-editor-new` | Delivery editor new | sales | niedrig | — | `GET /api/v1/masks/sales/delivery-editor-new/agent-contract` |
 | `sales/delivery-note` | Lieferschein | sales | niedrig | `order-to-cash` | `GET /api/v1/masks/sales/delivery-note/agent-contract` |
 | `sales/gutschrift` | Gutschrift | sales | mittel | — | `GET /api/v1/masks/sales/gutschrift/agent-contract` |
 | `sales/invoice` | Ausgangsrechnung | sales | niedrig | — | `GET /api/v1/masks/sales/invoice/agent-contract` |
@@ -748,8 +738,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `verkauf/kunde-neu` | Kunde neu | verkauf | niedrig | — | `GET /api/v1/masks/verkauf/kunde-neu/agent-contract` |
 | `verkauf/kunden-stamm` | Vorlage übernommen | verkauf | niedrig | — | `GET /api/v1/masks/verkauf/kunden-stamm/agent-contract` |
 | `verkauf/kunden-stamm-enhanced` | Kunden stamm enhanced | verkauf | niedrig | — | `GET /api/v1/masks/verkauf/kunden-stamm-enhanced/agent-contract` |
-| `verkauf/lieferschein-erfassung` | Lieferschein erfassung | verkauf | niedrig | — | `GET /api/v1/masks/verkauf/lieferschein-erfassung/agent-contract` |
-| `verkauf/rechnungen/neu` | Invoice editor | verkauf | niedrig | — | `GET /api/v1/masks/verkauf/rechnungen/neu/agent-contract` |
 | `verkauf/unerledigte-auftrags-positionen` | Unerledigte auftrags positionen | verkauf | niedrig | — | `GET /api/v1/masks/verkauf/unerledigte-auftrags-positionen/agent-contract` |
 | `verladung/liste` | Verladungen | logistik | niedrig | — | `GET /api/v1/masks/verladung/liste/agent-contract` |
 | `verladung/lkw-beladung` | Lkw beladung | verladung | niedrig | — | `GET /api/v1/masks/verladung/lkw-beladung/agent-contract` |
@@ -9114,46 +9102,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `crm/angebot-erstellen` — Angebot erstellen
-
-**Zweck:** Angebot erstellen als Read-Model-Cockpit.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/crm/angebot-erstellen/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/crm/angebot-erstellen/agent-contract` |
-| Readiness | `GET /api/v1/masks/crm/angebot-erstellen/readiness` |
-| Rollout-Route | `/mask-rollout/crm__angebot-erstellen/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `entity` → `/api/v1/einkauf/angebote`
-
-**MCP-Tools (Domäne):**
-
-- `crm.customer.search` — scope `crm:read`, Risiko niedrig
-- `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
-- `crm.customer.open` — scope `crm:read`, Risiko niedrig
-- `crm.contact.log` — scope `crm:write`, Risiko mittel
-- `crm.activity.create` — scope `crm:write`, Risiko niedrig
-- `crm.activity.update` — scope `crm:write`, Risiko mittel
-- `crm.activity.delete` — scope `crm:write`, Risiko mittel
-- `crm.lead.qualify` — scope `crm:write`, Risiko mittel
-
-**Beispiel-Prompts:**
-
-- Zeige Angebot erstellen.
-- Was ist der aktuelle Stand?
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `refresh` | Aktualisieren | safe | nein | `—` |
-
----
-
 ### `crm/anruf-protokoll` — Anruf-Protokoll
 
 **Zweck:** Anruf-Protokoll als Read-Model-Cockpit.
@@ -12840,44 +12788,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `einkauf/gutschrift-belastung` — Gutschrift/Belastung
-
-**Zweck:** Gutschrift/Belastung als Read-Model-Cockpit.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/einkauf/gutschrift-belastung/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/einkauf/gutschrift-belastung/agent-contract` |
-| Readiness | `GET /api/v1/masks/einkauf/gutschrift-belastung/readiness` |
-| Rollout-Route | `/mask-rollout/einkauf__gutschrift-belastung/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `entity` → `/api/v1/einkauf/lieferscheine`
-
-**MCP-Tools (Domäne):**
-
-- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
-- `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
-- `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
-- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
-- `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
-- `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
-
-**Beispiel-Prompts:**
-
-- Zeige Gutschrift/Belastung.
-- Was ist der aktuelle Stand?
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `refresh` | Aktualisieren | safe | nein | `—` |
-
----
-
 ### `einkauf/kontrakt-anlage` — Kontrakt-Anlage
 
 **Zweck:** Kontrakt-Anlage als Read-Model-Cockpit.
@@ -13144,44 +13054,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `einkauf/lieferschein-erfassen` — Lieferschein erfassen
-
-**Zweck:** Lieferschein erfassen als Read-Model-Cockpit.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/einkauf/lieferschein-erfassen/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/einkauf/lieferschein-erfassen/agent-contract` |
-| Readiness | `GET /api/v1/masks/einkauf/lieferschein-erfassen/readiness` |
-| Rollout-Route | `/mask-rollout/einkauf__lieferschein-erfassen/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `entity` → `/api/v1/einkauf/lieferscheine`
-
-**MCP-Tools (Domäne):**
-
-- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
-- `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
-- `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
-- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
-- `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
-- `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
-
-**Beispiel-Prompts:**
-
-- Zeige Lieferschein erfassen.
-- Was ist der aktuelle Stand?
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `refresh` | Aktualisieren | safe | nein | `—` |
-
----
-
 ### `einkauf/mahnwesen-lieferanten` — Mahnwesen Lieferanten
 
 **Zweck:** Mahnwesen Lieferanten als Read-Model-Cockpit.
@@ -13302,46 +13174,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
-### `einkauf/rechnungseingang/neu` — Eingangsrechnung erfassen
-
-**Zweck:** Eingangsrechnung mit Positionen und mandantenspezifischen Steuerschlüsseln erfassen.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/einkauf/rechnungseingang/neu/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/einkauf/rechnungseingang/neu/agent-contract` |
-| Readiness | `GET /api/v1/masks/einkauf/rechnungseingang/neu/readiness` |
-| Rollout-Route | `/mask-rollout/einkauf__rechnungseingang__neu/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `partners` → `/api/v1/finance/ap/invoices/supplier-lookup`
-- `tax_keys` → `/api/v1/finance/tax-keys/auswahl`
-- `tax_preview` → `/api/v1/finance/ap/invoices/steuer-vorschau`
-
-**MCP-Tools (Domäne):**
-
-- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
-- `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
-- `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
-- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
-- `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
-- `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
-
-**Beispiel-Prompts:**
-
-- Erfasse eine Eingangsrechnung.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `position` | Position übernehmen | safe | nein | `—` |
-| `save` | Als Entwurf speichern | safe | nein | `/api/v1/finance/ap/invoices/` |
 
 ---
 
@@ -15852,78 +15684,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
-### `finance/invoices-list` — Invoices list
-
-**Zweck:** Invoices list im finance-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/finance/invoices-list/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/finance/invoices-list/agent-contract` |
-| Readiness | `GET /api/v1/masks/finance/invoices-list/readiness` |
-| Rollout-Route | `/mask-rollout/finance__invoices-list/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/finance/abstimmung/nebenbuch`
-
-**MCP-Tools (Domäne):**
-
-- `finance.ap_invoice.propose` — scope `finance:write`, Risiko hoch
-- `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
-- `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
-
-**Beispiel-Prompts:**
-
-- Zeige Invoices list.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
-### `finance/invoices/new` — Ausgangsrechnung erfassen
-
-**Zweck:** Ausgangsrechnung mit Positionen und mandantenspezifischen Steuerschlüsseln erfassen.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/finance/invoices/new/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/finance/invoices/new/agent-contract` |
-| Readiness | `GET /api/v1/masks/finance/invoices/new/readiness` |
-| Rollout-Route | `/mask-rollout/finance__invoices__new/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `partners` → `/api/v1/finance/invoices/customer-lookup`
-- `tax_keys` → `/api/v1/finance/tax-keys/auswahl`
-- `tax_preview` → `/api/v1/finance/invoices/steuer-vorschau`
-
-**MCP-Tools (Domäne):**
-
-- `finance.ap_invoice.propose` — scope `finance:write`, Risiko hoch
-- `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
-- `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
-
-**Beispiel-Prompts:**
-
-- Erfasse eine Ausgangsrechnung.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `position` | Position übernehmen | safe | nein | `—` |
-| `save` | Als Entwurf speichern | safe | nein | `/api/v1/finance/invoices` |
 
 ---
 
@@ -25007,44 +24767,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `sales/angebote/neu` — Angebot erstellen
-
-**Zweck:** Angebot erstellen im sales-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/sales/angebote/neu/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/sales/angebote/neu/agent-contract` |
-| Readiness | `GET /api/v1/masks/sales/angebote/neu/readiness` |
-| Rollout-Route | `/mask-rollout/sales__angebote__neu/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/sales/offers/`
-
-**MCP-Tools (Domäne):**
-
-- `sales.order.status` — scope `sales:read`, Risiko niedrig
-- `sales.gutschrift.speichern` — scope `sales:write`, Risiko mittel
-- `sales.gutschrift.propose` — scope `sales:write`, Risiko hoch
-- `sales.gutschrift.buchen` — scope `sales:write`, Risiko hoch
-- `sales.invoice.propose` — scope `sales:write`, Risiko hoch
-- `sales.invoice.post` — scope `sales:write`, Risiko hoch
-
-**Beispiel-Prompts:**
-
-- Zeige Angebot erstellen.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
 ### `sales/auftrag-lieferschein-abgleich` — Auftrag lieferschein abgleich
 
 **Zweck:** Auftrag lieferschein abgleich im sales-Bereich finden und auswerten.
@@ -25118,129 +24840,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
-### `sales/credit-notes` — Gutschrift
-
-**Zweck:** Gutschrift an den Kunden (Rechnungskorrektur) erfassen und buchen: Positionen mit Steuerschluessel, Erloes netto, Umsatzsteuer getrennt, Forderung brutto; ohne eindeutige Steuerangabe wird nicht gebucht, sondern der Pruefgrund genannt.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/sales/credit-notes/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/sales/credit-notes/agent-contract` |
-| Readiness | `GET /api/v1/masks/sales/credit-notes/readiness` |
-| Rollout-Route | `/mask-rollout/sales__credit-notes/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `gutschriften` → `/api/v1/sales/credit-notes`
-- `steuerschluessel` → `/api/v1/finance/tax-keys`
-- `steuer` → `/api/v1/sales/credit-notes/steuer-vorschau`
-- `vorschlaege` → `/api/v1/sales/credit-notes/buchungsvorschlaege`
-
-**MCP-Tools (Domäne):**
-
-- `sales.order.status` — scope `sales:read`, Risiko niedrig
-- `sales.gutschrift.speichern` — scope `sales:write`, Risiko mittel
-- `sales.gutschrift.propose` — scope `sales:write`, Risiko hoch
-- `sales.gutschrift.buchen` — scope `sales:write`, Risiko hoch
-- `sales.invoice.propose` — scope `sales:write`, Risiko hoch
-- `sales.invoice.post` — scope `sales:write`, Risiko hoch
-
-**Beispiel-Prompts:**
-
-- Lege eine Gutschrift ueber 1.000 EUR netto mit Steuerschluessel 3 zur Rechnung RE-1001 an.
-- Warum wurde Gutschrift {entity_id} nicht gebucht?
-- Welche Gutschriften sind noch Entwurf?
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `position` | Position übernehmen | safe | nein | `Stellt die Positionseingabe in die Positionsliste der Maske; gespeichert wird erst mit Speichern.` |
-| `speichern` | Als Entwurf speichern | safe | nein | `/api/v1/sales/credit-notes/actions/speichern` |
-| `buchen` | Buchen | moderate | ja | `/api/v1/sales/credit-notes/{entity_id}/actions/buchen` |
-| `vorschlag_freigeben` | Vorschlag freigeben | moderate | ja | `/api/v1/sales/credit-notes/buchungsvorschlaege/{entity_id}/actions/freigeben` |
-| `vorschlag_ablehnen` | Vorschlag ablehnen | moderate | ja | `/api/v1/sales/credit-notes/buchungsvorschlaege/{entity_id}/actions/ablehnen` |
-| `neu` | Neue Gutschrift | safe | nein | `Leert die Eingabe fuer eine neue Gutschrift.` |
-
----
-
-### `sales/delivery-editor` — Delivery editor
-
-**Zweck:** Delivery editor als Stammblatt pflegen.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/sales/delivery-editor/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/sales/delivery-editor/agent-contract` |
-| Readiness | `GET /api/v1/masks/sales/delivery-editor/readiness` |
-| Rollout-Route | `/mask-rollout/sales__delivery-editor/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `entity` → `/api/v1/sales/blanket-orders/{entity_id}`
-
-**MCP-Tools (Domäne):**
-
-- `sales.order.status` — scope `sales:read`, Risiko niedrig
-- `sales.gutschrift.speichern` — scope `sales:write`, Risiko mittel
-- `sales.gutschrift.propose` — scope `sales:write`, Risiko hoch
-- `sales.gutschrift.buchen` — scope `sales:write`, Risiko hoch
-- `sales.invoice.propose` — scope `sales:write`, Risiko hoch
-- `sales.invoice.post` — scope `sales:write`, Risiko hoch
-
-**Beispiel-Prompts:**
-
-- Oeffne Delivery editor.
-- Bearbeite Stammdaten.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `edit` | Bearbeiten | safe | nein | `—` |
-
----
-
-### `sales/delivery-editor-new` — Delivery editor new
-
-**Zweck:** Delivery editor new als Stammblatt pflegen.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/sales/delivery-editor-new/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/sales/delivery-editor-new/agent-contract` |
-| Readiness | `GET /api/v1/masks/sales/delivery-editor-new/readiness` |
-| Rollout-Route | `/mask-rollout/sales__delivery-editor-new/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `entity` → `/api/v1/sales/blanket-orders/{entity_id}`
-
-**MCP-Tools (Domäne):**
-
-- `sales.order.status` — scope `sales:read`, Risiko niedrig
-- `sales.gutschrift.speichern` — scope `sales:write`, Risiko mittel
-- `sales.gutschrift.propose` — scope `sales:write`, Risiko hoch
-- `sales.gutschrift.buchen` — scope `sales:write`, Risiko hoch
-- `sales.invoice.propose` — scope `sales:write`, Risiko hoch
-- `sales.invoice.post` — scope `sales:write`, Risiko hoch
-
-**Beispiel-Prompts:**
-
-- Oeffne Delivery editor new.
-- Bearbeite Stammdaten.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `edit` | Bearbeiten | safe | nein | `—` |
 
 ---
 
@@ -26382,64 +25981,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **Beispiel-Prompts:**
 
 - Oeffne Kunden stamm enhanced.
-- Bearbeite Stammdaten.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `edit` | Bearbeiten | safe | nein | `—` |
-
----
-
-### `verkauf/lieferschein-erfassung` — Lieferschein erfassung
-
-**Zweck:** Lieferschein erfassung im verkauf-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/verkauf/lieferschein-erfassung/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/verkauf/lieferschein-erfassung/agent-contract` |
-| Readiness | `GET /api/v1/masks/verkauf/lieferschein-erfassung/readiness` |
-| Rollout-Route | `/mask-rollout/verkauf__lieferschein-erfassung/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/admin/branches`
-
-**Beispiel-Prompts:**
-
-- Zeige Lieferschein erfassung.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
-### `verkauf/rechnungen/neu` — Invoice editor
-
-**Zweck:** Invoice editor als Stammblatt pflegen.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/verkauf/rechnungen/neu/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/verkauf/rechnungen/neu/agent-contract` |
-| Readiness | `GET /api/v1/masks/verkauf/rechnungen/neu/readiness` |
-| Rollout-Route | `/mask-rollout/verkauf__rechnungen__neu/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `entity` → `/api/v1/verkauf/kunden/{entity_id}`
-
-**Beispiel-Prompts:**
-
-- Oeffne Invoice editor.
 - Bearbeite Stammdaten.
 
 **Actions:**
