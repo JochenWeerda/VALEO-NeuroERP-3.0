@@ -49,9 +49,11 @@ def test_unknown_changed_or_wrong_document_kind_rejected(screen,case):
         resolve_screen_context(DocflowScreenContextIn(**body),'purchase_order' if case=='type' else 'sales_offer','own')
 
 
-def test_real_registry_does_not_grant_native_test_mask_to_other_tenant():
+def test_real_registry_requires_a_tenant_and_the_exact_hash():
+    # Rollout 08.11.2026: jeder Mandant bekommt die Belegmaske; ohne Mandant keine, mit falschem Hash ein Konflikt.
     context=DocflowScreenContextIn(screen_id='beleg/sales-offer',definition_hash='0'*64)
-    with pytest.raises(ValidationFailedError):resolve_screen_context(context,'sales_offer','synthetic-unapproved-tenant')
+    with pytest.raises(ValidationFailedError):resolve_screen_context(context,'sales_offer','')
+    with pytest.raises(ConflictError):resolve_screen_context(context,'sales_offer','synthetic-other-tenant')
 
 
 def test_provenance_persists_and_replays_after_registry_changes(context,screen,client,partners):

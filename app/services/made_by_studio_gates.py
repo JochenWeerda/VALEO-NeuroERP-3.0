@@ -622,12 +622,12 @@ def load_registered_definitions() -> dict[str, dict[str, Any]]:
     ensure_stamm_screen_registry()
     ids = list(SCREEN_DEFINITION_BUILDERS)
     defs = {sid: get_screen_definition(sid) or {} for sid in ids}
-    from app.core.screen_definitions_beleg import NATIVE_BELEG_TENANTS
+    from app.core.screen_definitions_beleg import SICHTPRUEFUNG_MANDANT
     for art in BELEGARTEN:
         # Measure the pinned definition actually returned by the restricted
         # native release, not its unversioned parent-builder precursor.
         defs[beleg_screen_id(art)] = get_screen_definition(
-            beleg_screen_id(art), tenant_id=sorted(NATIVE_BELEG_TENANTS)[0]) or {}
+            beleg_screen_id(art), tenant_id=SICHTPRUEFUNG_MANDANT) or {}
     return defs
 
 

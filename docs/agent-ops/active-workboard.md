@@ -20618,3 +20618,10 @@ der Feldvertrag sieht es nicht. MCP-Map stuft Mutationen nach dem Aktionsnamen e
 Aktionen mit Kommandoweg fallen so heraus (eigener Auftrag).
 Naechste Familien (Reihenfolge Nutzer): Belegfamilie erweitern, Annahme/Waage, Partnerstamm, Bestellvorschlag,
 Kalender; ~70 Seiten mit screenId ohne ScreenDefinition (config/frontend_seiten_ohne_maske.json).
+
+Beleg-Rollout (08.11.2026, Nutzerfreigabe „rollout ist frei gegeben“, Branch claude/beleg-rollout-20261108 auf #120):
+Belegfamilie beleg/* fuer jeden Mandanten (beleg_freigegeben statt NATIVE_BELEG_TENANTS; ohne Mandant weiter keine
+Maske, immer die versionierte Fassung). Offen nach Paritaetspruefung (BELEG-050): alte Einstiege schreiben in eigene
+Speicher (/einkauf/lieferscheine, /purchase-orders, /sales/delivery-notes, /finance/ap/invoices, /finance/invoices),
+die Belegmaske liest nur DocFlow; vier Listen oeffnen AP-Rechnungs-IDs in /belege/purchase_invoice/{id}, die DocFlow
+nicht kennt. Speicherentscheidung BELEG-052 beim Nutzer.

@@ -10,8 +10,8 @@ from app.services.studio_validation import validate_studio_draft
 
 def candidate(variant='sales_invoice'):
     from app.services.studio_native_import import source_definition
-    from app.core.screen_definitions_beleg import NATIVE_BELEG_TENANTS, screen_id
-    definition = source_definition(next(iter(NATIVE_BELEG_TENANTS)), screen_id(variant))
+    from app.core.screen_definitions_beleg import SICHTPRUEFUNG_MANDANT, screen_id
+    definition = source_definition(SICHTPRUEFUNG_MANDANT, screen_id(variant))
     definition.update(id=f'tenant/{variant}', adapter={
         'type': 'native', 'sourceId': f'tenant/{variant}', 'temporary': True})
     return definition

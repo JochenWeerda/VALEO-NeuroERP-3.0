@@ -3,7 +3,7 @@ from copy import deepcopy
 from hashlib import sha256
 
 from app.core.screen_definitions import SCREEN_DEFINITION_BUILDERS, get_screen_definition
-from app.core.screen_definitions_beleg import BELEGARTEN, NATIVE_BELEG_TENANTS, screen_id
+from app.core.screen_definitions_beleg import BELEGARTEN, beleg_freigegeben, screen_id
 from app.core.studio_release import definition_hash
 from app.services import studio_draft_store
 from app.services.studio_validation import validate_studio_draft
@@ -11,7 +11,7 @@ from app.services.studio_validation import validate_studio_draft
 
 def source_ids(tenant_id):
     ids = set(SCREEN_DEFINITION_BUILDERS)
-    if tenant_id in NATIVE_BELEG_TENANTS:
+    if beleg_freigegeben(tenant_id):
         ids.update(screen_id(art) for art in BELEGARTEN)
     return sorted(ids)
 
