@@ -1514,6 +1514,50 @@
         ]
       ]
     },
+    "kontrakt-liste/mahnung": {
+      "kontrakt.update": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "KONTRAKT_ADMIN",
+          "KONTRAKT_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "kontrakt/abrechnung": {
+      "kontrakt.update": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "KONTRAKT_ADMIN",
+          "KONTRAKT_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "kontrakt/erfuellung": {
+      "kontrakt.update": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "KONTRAKT_ADMIN",
+          "KONTRAKT_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "kontrakt/fixierung": {
+      "kontrakt.update": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "KONTRAKT_ADMIN",
+          "KONTRAKT_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "lager/inventur-nebenlaeufe": {
       "inventory.aux.write": [
         [

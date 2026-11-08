@@ -2872,17 +2872,6 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "contracts-v2": {
-      "definition_hash": "79dc38139722a1eab53659a8061eb401e75bfb93cd135d835d20bc6ec34de5af",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "contracts/contract": {
       "definition_hash": "0e6042b6077ac50fe454a099ae5cd31f8a8ac0155fcfe4b8d419a8ff30659639",
       "gates_passed": [
@@ -5902,28 +5891,6 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "kontrakte/KontraktAlarmDashboard": {
-      "definition_hash": "3ee50b171689d5d3a3eceeebc2e1457bef5392d91e1ec8619eee9c1b34352c3d",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "kontrakte/LstKontraktUebersicht": {
-      "definition_hash": "3ca5bb71e4fc73ea1eabd5fc2054381831c96a394f9264d492ca098783ba253e",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "kontrakte/kontraktklassen": {
       "definition_hash": "8837912a9ee72aa2e9c3e8588a41ba1cd713e8bbf01cd5b32410ebfdd6177843",
       "gates_passed": [
@@ -5937,17 +5904,6 @@
     },
     "kontrakte/kontraktklassen-liste": {
       "definition_hash": "e22ba929432fa93a4aa57a4a4f7732b196f3833b5e149dec0819749fb987ac8d",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "kontrakte/liste": {
-      "definition_hash": "d3f106447bb6ae4fb8cefa02fed598beb3dafa64c79677affbc5e9567e17256d",
       "gates_passed": [
         "A",
         "B",

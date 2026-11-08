@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 638,
-    "screens_with_actions": 381,
-    "domains": 51
+    "actions": 713,
+    "screens_with_actions": 390,
+    "domains": 50
   },
   "actions": [
     {
@@ -3405,27 +3405,6 @@
       "required_data": [],
       "source": {
         "screenId": "compliance/zulassungen-liste",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null,
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:contracts-v2:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (contracts-v2)",
-      "category": "mask-action",
-      "domain": "workspace",
-      "mask": "contracts-v2",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "contracts-v2",
         "actionKey": "export",
         "commandEndpoint": null,
         "navigationRoute": null,
@@ -9829,6 +9808,1692 @@
       }
     },
     {
+      "id": "mask:kontrakt-liste/abrechnung:ansicht_alarme",
+      "label": "Kontrakt-Alarme",
+      "description": "Kontrakt-Alarme (kontrakt-liste/abrechnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/abrechnung",
+      "intent_phrases": [
+        "Kontrakt-Alarme"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/abrechnung",
+        "actionKey": "ansicht_alarme",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/alarme",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/abrechnung:ansicht_engagement_artikel",
+      "label": "Engagement je Artikel",
+      "description": "Engagement je Artikel (kontrakt-liste/abrechnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/abrechnung",
+      "intent_phrases": [
+        "Engagement je Artikel"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/abrechnung",
+        "actionKey": "ansicht_engagement_artikel",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/engagement-artikel",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/abrechnung:ansicht_engagement_partei",
+      "label": "Engagement je Partner",
+      "description": "Engagement je Partner (kontrakt-liste/abrechnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/abrechnung",
+      "intent_phrases": [
+        "Engagement je Partner"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/abrechnung",
+        "actionKey": "ansicht_engagement_partei",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/engagement-partei",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/abrechnung:ansicht_erfuellung",
+      "label": "Erfüllungsstand",
+      "description": "Erfüllungsstand (kontrakt-liste/abrechnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/abrechnung",
+      "intent_phrases": [
+        "Erfüllungsstand"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/abrechnung",
+        "actionKey": "ansicht_erfuellung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/erfuellung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/abrechnung:ansicht_fixierung",
+      "label": "Fixierung",
+      "description": "Fixierung (kontrakt-liste/abrechnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/abrechnung",
+      "intent_phrases": [
+        "Fixierung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/abrechnung",
+        "actionKey": "ansicht_fixierung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/fixierung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/abrechnung:ansicht_mahnung",
+      "label": "Kontraktmahnung",
+      "description": "Kontraktmahnung (kontrakt-liste/abrechnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/abrechnung",
+      "intent_phrases": [
+        "Kontraktmahnung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/abrechnung",
+        "actionKey": "ansicht_mahnung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/mahnung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/abrechnung:ansicht_uebersicht",
+      "label": "Kontrakte",
+      "description": "Kontrakte (kontrakt-liste/abrechnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/abrechnung",
+      "intent_phrases": [
+        "Kontrakte"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/abrechnung",
+        "actionKey": "ansicht_uebersicht",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/uebersicht",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/abrechnung:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (kontrakt-liste/abrechnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/abrechnung",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/abrechnung",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/alarme:ansicht_abrechnung",
+      "label": "Abrechnung",
+      "description": "Abrechnung (kontrakt-liste/alarme)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/alarme",
+      "intent_phrases": [
+        "Abrechnung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/alarme",
+        "actionKey": "ansicht_abrechnung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/abrechnung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/alarme:ansicht_engagement_artikel",
+      "label": "Engagement je Artikel",
+      "description": "Engagement je Artikel (kontrakt-liste/alarme)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/alarme",
+      "intent_phrases": [
+        "Engagement je Artikel"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/alarme",
+        "actionKey": "ansicht_engagement_artikel",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/engagement-artikel",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/alarme:ansicht_engagement_partei",
+      "label": "Engagement je Partner",
+      "description": "Engagement je Partner (kontrakt-liste/alarme)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/alarme",
+      "intent_phrases": [
+        "Engagement je Partner"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/alarme",
+        "actionKey": "ansicht_engagement_partei",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/engagement-partei",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/alarme:ansicht_erfuellung",
+      "label": "Erfüllungsstand",
+      "description": "Erfüllungsstand (kontrakt-liste/alarme)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/alarme",
+      "intent_phrases": [
+        "Erfüllungsstand"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/alarme",
+        "actionKey": "ansicht_erfuellung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/erfuellung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/alarme:ansicht_fixierung",
+      "label": "Fixierung",
+      "description": "Fixierung (kontrakt-liste/alarme)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/alarme",
+      "intent_phrases": [
+        "Fixierung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/alarme",
+        "actionKey": "ansicht_fixierung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/fixierung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/alarme:ansicht_mahnung",
+      "label": "Kontraktmahnung",
+      "description": "Kontraktmahnung (kontrakt-liste/alarme)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/alarme",
+      "intent_phrases": [
+        "Kontraktmahnung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/alarme",
+        "actionKey": "ansicht_mahnung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/mahnung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/alarme:ansicht_uebersicht",
+      "label": "Kontrakte",
+      "description": "Kontrakte (kontrakt-liste/alarme)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/alarme",
+      "intent_phrases": [
+        "Kontrakte"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/alarme",
+        "actionKey": "ansicht_uebersicht",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/uebersicht",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/alarme:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (kontrakt-liste/alarme)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/alarme",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/alarme",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/engagement-artikel:ansicht_abrechnung",
+      "label": "Abrechnung",
+      "description": "Abrechnung (kontrakt-liste/engagement-artikel)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/engagement-artikel",
+      "intent_phrases": [
+        "Abrechnung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/engagement-artikel",
+        "actionKey": "ansicht_abrechnung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/abrechnung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/engagement-artikel:ansicht_alarme",
+      "label": "Kontrakt-Alarme",
+      "description": "Kontrakt-Alarme (kontrakt-liste/engagement-artikel)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/engagement-artikel",
+      "intent_phrases": [
+        "Kontrakt-Alarme"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/engagement-artikel",
+        "actionKey": "ansicht_alarme",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/alarme",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/engagement-artikel:ansicht_engagement_partei",
+      "label": "Engagement je Partner",
+      "description": "Engagement je Partner (kontrakt-liste/engagement-artikel)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/engagement-artikel",
+      "intent_phrases": [
+        "Engagement je Partner"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/engagement-artikel",
+        "actionKey": "ansicht_engagement_partei",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/engagement-partei",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/engagement-artikel:ansicht_erfuellung",
+      "label": "Erfüllungsstand",
+      "description": "Erfüllungsstand (kontrakt-liste/engagement-artikel)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/engagement-artikel",
+      "intent_phrases": [
+        "Erfüllungsstand"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/engagement-artikel",
+        "actionKey": "ansicht_erfuellung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/erfuellung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/engagement-artikel:ansicht_fixierung",
+      "label": "Fixierung",
+      "description": "Fixierung (kontrakt-liste/engagement-artikel)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/engagement-artikel",
+      "intent_phrases": [
+        "Fixierung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/engagement-artikel",
+        "actionKey": "ansicht_fixierung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/fixierung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/engagement-artikel:ansicht_mahnung",
+      "label": "Kontraktmahnung",
+      "description": "Kontraktmahnung (kontrakt-liste/engagement-artikel)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/engagement-artikel",
+      "intent_phrases": [
+        "Kontraktmahnung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/engagement-artikel",
+        "actionKey": "ansicht_mahnung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/mahnung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/engagement-artikel:ansicht_uebersicht",
+      "label": "Kontrakte",
+      "description": "Kontrakte (kontrakt-liste/engagement-artikel)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/engagement-artikel",
+      "intent_phrases": [
+        "Kontrakte"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/engagement-artikel",
+        "actionKey": "ansicht_uebersicht",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/uebersicht",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/engagement-artikel:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (kontrakt-liste/engagement-artikel)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/engagement-artikel",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/engagement-artikel",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/engagement-partei:ansicht_abrechnung",
+      "label": "Abrechnung",
+      "description": "Abrechnung (kontrakt-liste/engagement-partei)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/engagement-partei",
+      "intent_phrases": [
+        "Abrechnung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/engagement-partei",
+        "actionKey": "ansicht_abrechnung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/abrechnung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/engagement-partei:ansicht_alarme",
+      "label": "Kontrakt-Alarme",
+      "description": "Kontrakt-Alarme (kontrakt-liste/engagement-partei)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/engagement-partei",
+      "intent_phrases": [
+        "Kontrakt-Alarme"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/engagement-partei",
+        "actionKey": "ansicht_alarme",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/alarme",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/engagement-partei:ansicht_engagement_artikel",
+      "label": "Engagement je Artikel",
+      "description": "Engagement je Artikel (kontrakt-liste/engagement-partei)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/engagement-partei",
+      "intent_phrases": [
+        "Engagement je Artikel"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/engagement-partei",
+        "actionKey": "ansicht_engagement_artikel",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/engagement-artikel",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/engagement-partei:ansicht_erfuellung",
+      "label": "Erfüllungsstand",
+      "description": "Erfüllungsstand (kontrakt-liste/engagement-partei)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/engagement-partei",
+      "intent_phrases": [
+        "Erfüllungsstand"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/engagement-partei",
+        "actionKey": "ansicht_erfuellung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/erfuellung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/engagement-partei:ansicht_fixierung",
+      "label": "Fixierung",
+      "description": "Fixierung (kontrakt-liste/engagement-partei)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/engagement-partei",
+      "intent_phrases": [
+        "Fixierung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/engagement-partei",
+        "actionKey": "ansicht_fixierung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/fixierung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/engagement-partei:ansicht_mahnung",
+      "label": "Kontraktmahnung",
+      "description": "Kontraktmahnung (kontrakt-liste/engagement-partei)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/engagement-partei",
+      "intent_phrases": [
+        "Kontraktmahnung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/engagement-partei",
+        "actionKey": "ansicht_mahnung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/mahnung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/engagement-partei:ansicht_uebersicht",
+      "label": "Kontrakte",
+      "description": "Kontrakte (kontrakt-liste/engagement-partei)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/engagement-partei",
+      "intent_phrases": [
+        "Kontrakte"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/engagement-partei",
+        "actionKey": "ansicht_uebersicht",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/uebersicht",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/engagement-partei:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (kontrakt-liste/engagement-partei)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/engagement-partei",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/engagement-partei",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/erfuellung:ansicht_abrechnung",
+      "label": "Abrechnung",
+      "description": "Abrechnung (kontrakt-liste/erfuellung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/erfuellung",
+      "intent_phrases": [
+        "Abrechnung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/erfuellung",
+        "actionKey": "ansicht_abrechnung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/abrechnung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/erfuellung:ansicht_alarme",
+      "label": "Kontrakt-Alarme",
+      "description": "Kontrakt-Alarme (kontrakt-liste/erfuellung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/erfuellung",
+      "intent_phrases": [
+        "Kontrakt-Alarme"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/erfuellung",
+        "actionKey": "ansicht_alarme",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/alarme",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/erfuellung:ansicht_engagement_artikel",
+      "label": "Engagement je Artikel",
+      "description": "Engagement je Artikel (kontrakt-liste/erfuellung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/erfuellung",
+      "intent_phrases": [
+        "Engagement je Artikel"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/erfuellung",
+        "actionKey": "ansicht_engagement_artikel",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/engagement-artikel",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/erfuellung:ansicht_engagement_partei",
+      "label": "Engagement je Partner",
+      "description": "Engagement je Partner (kontrakt-liste/erfuellung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/erfuellung",
+      "intent_phrases": [
+        "Engagement je Partner"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/erfuellung",
+        "actionKey": "ansicht_engagement_partei",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/engagement-partei",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/erfuellung:ansicht_fixierung",
+      "label": "Fixierung",
+      "description": "Fixierung (kontrakt-liste/erfuellung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/erfuellung",
+      "intent_phrases": [
+        "Fixierung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/erfuellung",
+        "actionKey": "ansicht_fixierung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/fixierung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/erfuellung:ansicht_mahnung",
+      "label": "Kontraktmahnung",
+      "description": "Kontraktmahnung (kontrakt-liste/erfuellung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/erfuellung",
+      "intent_phrases": [
+        "Kontraktmahnung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/erfuellung",
+        "actionKey": "ansicht_mahnung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/mahnung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/erfuellung:ansicht_uebersicht",
+      "label": "Kontrakte",
+      "description": "Kontrakte (kontrakt-liste/erfuellung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/erfuellung",
+      "intent_phrases": [
+        "Kontrakte"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/erfuellung",
+        "actionKey": "ansicht_uebersicht",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/uebersicht",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/erfuellung:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (kontrakt-liste/erfuellung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/erfuellung",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/erfuellung",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/fixierung:ansicht_abrechnung",
+      "label": "Abrechnung",
+      "description": "Abrechnung (kontrakt-liste/fixierung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/fixierung",
+      "intent_phrases": [
+        "Abrechnung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/fixierung",
+        "actionKey": "ansicht_abrechnung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/abrechnung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/fixierung:ansicht_alarme",
+      "label": "Kontrakt-Alarme",
+      "description": "Kontrakt-Alarme (kontrakt-liste/fixierung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/fixierung",
+      "intent_phrases": [
+        "Kontrakt-Alarme"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/fixierung",
+        "actionKey": "ansicht_alarme",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/alarme",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/fixierung:ansicht_engagement_artikel",
+      "label": "Engagement je Artikel",
+      "description": "Engagement je Artikel (kontrakt-liste/fixierung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/fixierung",
+      "intent_phrases": [
+        "Engagement je Artikel"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/fixierung",
+        "actionKey": "ansicht_engagement_artikel",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/engagement-artikel",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/fixierung:ansicht_engagement_partei",
+      "label": "Engagement je Partner",
+      "description": "Engagement je Partner (kontrakt-liste/fixierung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/fixierung",
+      "intent_phrases": [
+        "Engagement je Partner"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/fixierung",
+        "actionKey": "ansicht_engagement_partei",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/engagement-partei",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/fixierung:ansicht_erfuellung",
+      "label": "Erfüllungsstand",
+      "description": "Erfüllungsstand (kontrakt-liste/fixierung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/fixierung",
+      "intent_phrases": [
+        "Erfüllungsstand"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/fixierung",
+        "actionKey": "ansicht_erfuellung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/erfuellung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/fixierung:ansicht_mahnung",
+      "label": "Kontraktmahnung",
+      "description": "Kontraktmahnung (kontrakt-liste/fixierung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/fixierung",
+      "intent_phrases": [
+        "Kontraktmahnung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/fixierung",
+        "actionKey": "ansicht_mahnung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/mahnung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/fixierung:ansicht_uebersicht",
+      "label": "Kontrakte",
+      "description": "Kontrakte (kontrakt-liste/fixierung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/fixierung",
+      "intent_phrases": [
+        "Kontrakte"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/fixierung",
+        "actionKey": "ansicht_uebersicht",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/uebersicht",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/fixierung:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (kontrakt-liste/fixierung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/fixierung",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/fixierung",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/mahnung:ansicht_abrechnung",
+      "label": "Abrechnung",
+      "description": "Abrechnung (kontrakt-liste/mahnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/mahnung",
+      "intent_phrases": [
+        "Abrechnung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/mahnung",
+        "actionKey": "ansicht_abrechnung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/abrechnung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/mahnung:ansicht_alarme",
+      "label": "Kontrakt-Alarme",
+      "description": "Kontrakt-Alarme (kontrakt-liste/mahnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/mahnung",
+      "intent_phrases": [
+        "Kontrakt-Alarme"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/mahnung",
+        "actionKey": "ansicht_alarme",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/alarme",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/mahnung:ansicht_engagement_artikel",
+      "label": "Engagement je Artikel",
+      "description": "Engagement je Artikel (kontrakt-liste/mahnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/mahnung",
+      "intent_phrases": [
+        "Engagement je Artikel"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/mahnung",
+        "actionKey": "ansicht_engagement_artikel",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/engagement-artikel",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/mahnung:ansicht_engagement_partei",
+      "label": "Engagement je Partner",
+      "description": "Engagement je Partner (kontrakt-liste/mahnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/mahnung",
+      "intent_phrases": [
+        "Engagement je Partner"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/mahnung",
+        "actionKey": "ansicht_engagement_partei",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/engagement-partei",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/mahnung:ansicht_erfuellung",
+      "label": "Erfüllungsstand",
+      "description": "Erfüllungsstand (kontrakt-liste/mahnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/mahnung",
+      "intent_phrases": [
+        "Erfüllungsstand"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/mahnung",
+        "actionKey": "ansicht_erfuellung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/erfuellung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/mahnung:ansicht_fixierung",
+      "label": "Fixierung",
+      "description": "Fixierung (kontrakt-liste/mahnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/mahnung",
+      "intent_phrases": [
+        "Fixierung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/mahnung",
+        "actionKey": "ansicht_fixierung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/fixierung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/mahnung:ansicht_uebersicht",
+      "label": "Kontrakte",
+      "description": "Kontrakte (kontrakt-liste/mahnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/mahnung",
+      "intent_phrases": [
+        "Kontrakte"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/mahnung",
+        "actionKey": "ansicht_uebersicht",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/uebersicht",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/mahnung:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (kontrakt-liste/mahnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/mahnung",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/mahnung",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/mahnung:mahnen",
+      "label": "Mahnen",
+      "description": "Mahnen (kontrakt-liste/mahnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/mahnung",
+      "intent_phrases": [
+        "Mahnen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "kontrakt-liste/mahnung",
+        "actionKey": "mahnen",
+        "commandEndpoint": "/api/v1/kontrakt-vorgang/{entity_id}/actions/mahnen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "kontrakt.update",
+        "requiresConfirmation": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/uebersicht:ansicht_abrechnung",
+      "label": "Abrechnung",
+      "description": "Abrechnung (kontrakt-liste/uebersicht)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/uebersicht",
+      "intent_phrases": [
+        "Abrechnung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/uebersicht",
+        "actionKey": "ansicht_abrechnung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/abrechnung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/uebersicht:ansicht_alarme",
+      "label": "Kontrakt-Alarme",
+      "description": "Kontrakt-Alarme (kontrakt-liste/uebersicht)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/uebersicht",
+      "intent_phrases": [
+        "Kontrakt-Alarme"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/uebersicht",
+        "actionKey": "ansicht_alarme",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/alarme",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/uebersicht:ansicht_engagement_artikel",
+      "label": "Engagement je Artikel",
+      "description": "Engagement je Artikel (kontrakt-liste/uebersicht)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/uebersicht",
+      "intent_phrases": [
+        "Engagement je Artikel"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/uebersicht",
+        "actionKey": "ansicht_engagement_artikel",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/engagement-artikel",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/uebersicht:ansicht_engagement_partei",
+      "label": "Engagement je Partner",
+      "description": "Engagement je Partner (kontrakt-liste/uebersicht)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/uebersicht",
+      "intent_phrases": [
+        "Engagement je Partner"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/uebersicht",
+        "actionKey": "ansicht_engagement_partei",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/engagement-partei",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/uebersicht:ansicht_erfuellung",
+      "label": "Erfüllungsstand",
+      "description": "Erfüllungsstand (kontrakt-liste/uebersicht)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/uebersicht",
+      "intent_phrases": [
+        "Erfüllungsstand"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/uebersicht",
+        "actionKey": "ansicht_erfuellung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/erfuellung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/uebersicht:ansicht_fixierung",
+      "label": "Fixierung",
+      "description": "Fixierung (kontrakt-liste/uebersicht)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/uebersicht",
+      "intent_phrases": [
+        "Fixierung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/uebersicht",
+        "actionKey": "ansicht_fixierung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/fixierung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/uebersicht:ansicht_mahnung",
+      "label": "Kontraktmahnung",
+      "description": "Kontraktmahnung (kontrakt-liste/uebersicht)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/uebersicht",
+      "intent_phrases": [
+        "Kontraktmahnung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/uebersicht",
+        "actionKey": "ansicht_mahnung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/mahnung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/uebersicht:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (kontrakt-liste/uebersicht)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/uebersicht",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/uebersicht",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt/abrechnung:abrechnen",
+      "label": "Abrechnen",
+      "description": "Abrechnen (kontrakt/abrechnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt/abrechnung",
+      "intent_phrases": [
+        "Abrechnen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "kontrakt/abrechnung",
+        "actionKey": "abrechnen",
+        "commandEndpoint": "/api/v1/kontrakt-vorgang/bewegungen/{entity_id}/actions/abrechnen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "kontrakt.update",
+        "requiresConfirmation": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:kontrakt/abrechnung:abrechnung_uebergeben",
+      "label": "An Abrechnung übergeben",
+      "description": "An Abrechnung übergeben (kontrakt/abrechnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt/abrechnung",
+      "intent_phrases": [
+        "An Abrechnung übergeben"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "kontrakt/abrechnung",
+        "actionKey": "abrechnung_uebergeben",
+        "commandEndpoint": "/api/v1/kontrakt-vorgang/{entity_id}/actions/abrechnung_uebergeben",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "kontrakt.update",
+        "requiresConfirmation": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:kontrakt/abrechnung:ansicht_erfuellung",
+      "label": "Kontrakterfüllung",
+      "description": "Kontrakterfüllung (kontrakt/abrechnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt/abrechnung",
+      "intent_phrases": [
+        "Kontrakterfüllung"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "kontrakt/abrechnung",
+        "actionKey": "ansicht_erfuellung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/vorgang/erfuellung/{entity_id}",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt/abrechnung:ansicht_fixierung",
+      "label": "Kontraktfixierung",
+      "description": "Kontraktfixierung (kontrakt/abrechnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt/abrechnung",
+      "intent_phrases": [
+        "Kontraktfixierung"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "kontrakt/abrechnung",
+        "actionKey": "ansicht_fixierung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/vorgang/fixierung/{entity_id}",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt/abrechnung:stornieren",
+      "label": "Stornieren",
+      "description": "Stornieren (kontrakt/abrechnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt/abrechnung",
+      "intent_phrases": [
+        "Stornieren"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "kontrakt/abrechnung",
+        "actionKey": "stornieren",
+        "commandEndpoint": "/api/v1/kontrakt-vorgang/bewegungen/{entity_id}/actions/stornieren",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "kontrakt.update",
+        "forbiddenForAgents": true,
+        "requiresConfirmation": true,
+        "auditReasonRequired": true,
+        "dangerLevel": "critical"
+      }
+    },
+    {
+      "id": "mask:kontrakt/erfuellung:ansicht_abrechnung",
+      "label": "Kontraktabrechnung",
+      "description": "Kontraktabrechnung (kontrakt/erfuellung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt/erfuellung",
+      "intent_phrases": [
+        "Kontraktabrechnung"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "kontrakt/erfuellung",
+        "actionKey": "ansicht_abrechnung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/vorgang/abrechnung/{entity_id}",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt/erfuellung:ansicht_fixierung",
+      "label": "Kontraktfixierung",
+      "description": "Kontraktfixierung (kontrakt/erfuellung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt/erfuellung",
+      "intent_phrases": [
+        "Kontraktfixierung"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "kontrakt/erfuellung",
+        "actionKey": "ansicht_fixierung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/vorgang/fixierung/{entity_id}",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt/erfuellung:mahnen",
+      "label": "Mahnen",
+      "description": "Mahnen (kontrakt/erfuellung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt/erfuellung",
+      "intent_phrases": [
+        "Mahnen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "kontrakt/erfuellung",
+        "actionKey": "mahnen",
+        "commandEndpoint": "/api/v1/kontrakt-vorgang/{entity_id}/actions/mahnen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "kontrakt.update",
+        "requiresConfirmation": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:kontrakt/fixierung:ansicht_abrechnung",
+      "label": "Kontraktabrechnung",
+      "description": "Kontraktabrechnung (kontrakt/fixierung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt/fixierung",
+      "intent_phrases": [
+        "Kontraktabrechnung"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "kontrakt/fixierung",
+        "actionKey": "ansicht_abrechnung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/vorgang/abrechnung/{entity_id}",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt/fixierung:ansicht_erfuellung",
+      "label": "Kontrakterfüllung",
+      "description": "Kontrakterfüllung (kontrakt/fixierung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt/fixierung",
+      "intent_phrases": [
+        "Kontrakterfüllung"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "kontrakt/fixierung",
+        "actionKey": "ansicht_erfuellung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/vorgang/erfuellung/{entity_id}",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt/fixierung:fixieren",
+      "label": "Fixieren",
+      "description": "Fixieren (kontrakt/fixierung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt/fixierung",
+      "intent_phrases": [
+        "Fixieren"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "kontrakt/fixierung",
+        "actionKey": "fixieren",
+        "commandEndpoint": "/api/v1/kontrakt-vorgang/{entity_id}/actions/fixieren",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "kontrakt.update",
+        "requiresConfirmation": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:kontrakt/fixierung:notierung_erfassen",
+      "label": "Notierung erfassen",
+      "description": "Notierung erfassen (kontrakt/fixierung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt/fixierung",
+      "intent_phrases": [
+        "Notierung erfassen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "kontrakt/fixierung",
+        "actionKey": "notierung_erfassen",
+        "commandEndpoint": "/api/v1/kontrakt-vorgang/{entity_id}/actions/notierung_erfassen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "kontrakt.update",
+        "requiresConfirmation": false,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt/fixierung:stornieren",
+      "label": "Stornieren",
+      "description": "Stornieren (kontrakt/fixierung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt/fixierung",
+      "intent_phrases": [
+        "Stornieren"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "kontrakt/fixierung",
+        "actionKey": "stornieren",
+        "commandEndpoint": "/api/v1/kontrakt-vorgang/fixierungen/{entity_id}/actions/stornieren",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "kontrakt.update",
+        "forbiddenForAgents": true,
+        "requiresConfirmation": true,
+        "auditReasonRequired": true,
+        "dangerLevel": "critical"
+      }
+    },
+    {
       "id": "mask:kontrakte/kontraktklassen-liste:export",
       "label": "CSV-Export",
       "description": "CSV-Export (kontrakte/kontraktklassen-liste)",
@@ -9866,48 +11531,6 @@
         "commandEndpoint": null,
         "navigationRoute": null,
         "command": "list.exportCsv",
-        "method": null,
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:kontrakte/liste:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (kontrakte/liste)",
-      "category": "mask-action",
-      "domain": "agrar",
-      "mask": "kontrakte/liste",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "kontrakte/liste",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null,
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:kontrakte/liste:neu",
-      "label": "Neuer Kontrakt",
-      "description": "Neuer Kontrakt (kontrakte/liste)",
-      "category": "mask-action",
-      "domain": "agrar",
-      "mask": "kontrakte/liste",
-      "intent_phrases": [
-        "Neuer Kontrakt"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "kontrakte/liste",
-        "actionKey": "neu",
-        "commandEndpoint": null,
-        "navigationRoute": "/kontrakte/neu",
-        "command": null,
         "method": null,
         "dangerLevel": "safe"
       }

@@ -160,7 +160,10 @@ class ContractEngagementService:
         contracts = self.db.execute(
             text(
                 "SELECT contract_id, contract_no, contract_type, party_id, unit, valid_to "
-                "FROM domain_ops.kon_contract WHERE tenant_id = :t AND COALESCE(status,'') <> 'storniert' "
+                "FROM domain_ops.kon_contract WHERE tenant_id = :t "
+                # Status ist gross geschrieben (OFFEN/ERLEDIGT/STORNIERT/GELOESCHT); der Vergleich mit 'storniert'
+                # traf nie, stornierte und geloeschte Kontrakte erschienen als Mahnkandidaten.
+                "AND UPPER(COALESCE(status,'')) NOT IN ('STORNIERT', 'GELOESCHT', 'ERLEDIGT') "
                 "AND valid_to IS NOT NULL AND valid_to < :today ORDER BY valid_to"
             ),
             {"t": self.tenant_id, "today": datetime.now()},

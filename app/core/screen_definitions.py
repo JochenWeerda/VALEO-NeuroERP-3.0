@@ -6045,7 +6045,6 @@ _SCREEN_LIST_ROUTE: dict[str, str] = {
     "start-dashboard": "/start-dashboard",
     "finance/bookings/new": "/finance/bookings/new",
     "fibu/kostenstellenrechnung": "/fibu/kostenstellenrechnung",
-    "kontrakte/liste": "/kontrakte/LstKontraktUebersicht",
     "transporte/fahrer/neu": "/transporte/fahrer/neu",
     "auswertungen/l3-berichtskatalog": "/auswertungen/l3-berichtskatalog",
     "auswertungen/dms-volltext": "/auswertungen/dms-volltext",

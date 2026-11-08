@@ -24,23 +24,6 @@ from app.core.stamm_object_page_parent import (
 )
 
 
-def build_contracts_v2_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="contracts-v2",
-        domain="workspace",
-        title="Contracts v2",
-        subtitle="workspace",
-        endpoint="/api/v1/kontrakte",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Contracts v2 im workspace-Bereich finden und auswerten.",
-        prompts=["Zeige Contracts v2.", "Filtere die Liste."],
-        bundle="workspace",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
 
 
 def build_einkauf_rechnungseingang_neu_screen_definition() -> dict[str, Any]:
@@ -910,38 +893,8 @@ def build_kontrakte_frmkontraktprotokoll_screen_definition() -> dict[str, Any]:
     )
 
 
-def build_kontrakte_kontraktalarmdashboard_screen_definition() -> dict[str, Any]:
-    cols = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_cockpit_overview_screen(
-        screen_id="kontrakte/KontraktAlarmDashboard",
-        domain="kontrakte",
-        title="KontraktAlarmDashboard",
-        subtitle="kontrakte",
-        business_purpose="KontraktAlarmDashboard mandantensicher als Cockpit bereitstellen.",
-        example_prompts=["Zeige KontraktAlarmDashboard.", "Aktualisiere die Kennzahlen."],
-        test_id="kontrakte-KontraktAlarmDashboard",
-        data_sources=[cockpit_entity_source("/api/v1/kontrakte")],
-        tables=[cockpit_summary_table(table_key="list", label="KontraktAlarmDashboard", columns=cols)],
-        actions=[cockpit_refresh_action(permission="kontrakte.read")],
-        context_rail="combined",
-    )
 
 
-def build_kontrakte_lstkontraktuebersicht_screen_definition() -> dict[str, Any]:
-    cols = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_cockpit_overview_screen(
-        screen_id="kontrakte/LstKontraktUebersicht",
-        domain="kontrakte",
-        title="LstKontraktUebersicht",
-        subtitle="kontrakte",
-        business_purpose="LstKontraktUebersicht mandantensicher als Cockpit bereitstellen.",
-        example_prompts=["Zeige LstKontraktUebersicht.", "Aktualisiere die Kennzahlen."],
-        test_id="kontrakte-LstKontraktUebersicht",
-        data_sources=[cockpit_entity_source("/api/v1/kontrakte")],
-        tables=[cockpit_summary_table(table_key="list", label="LstKontraktUebersicht", columns=cols)],
-        actions=[cockpit_refresh_action(permission="kontrakte.read")],
-        context_rail="combined",
-    )
 
 
 def build_kontrakte_mengenzeitraeume_screen_definition() -> dict[str, Any]:
@@ -2772,7 +2725,6 @@ def build_zertifikate_neu_screen_definition() -> dict[str, Any]:
 
 
 BATCH15_SCREEN_BUILDERS: dict[str, Any] = {
-    "contracts-v2": build_contracts_v2_screen_definition,
     "einkauf/rechnungseingang/neu": build_einkauf_rechnungseingang_neu_screen_definition,
     "einkauf/reports": build_einkauf_reports_screen_definition,
     "einkauf/service-entry-sheets": build_einkauf_service_entry_sheets_screen_definition,
@@ -2827,8 +2779,6 @@ BATCH15_SCREEN_BUILDERS: dict[str, Any] = {
     "inventory/epcis": build_inventory_epcis_screen_definition,
     "kasse/tagesabschluss": build_kasse_tagesabschluss_screen_definition,
     "kontrakte/FrmKontraktProtokoll": build_kontrakte_frmkontraktprotokoll_screen_definition,
-    "kontrakte/KontraktAlarmDashboard": build_kontrakte_kontraktalarmdashboard_screen_definition,
-    "kontrakte/LstKontraktUebersicht": build_kontrakte_lstkontraktuebersicht_screen_definition,
     "kontrakte/mengenzeitraeume": build_kontrakte_mengenzeitraeume_screen_definition,
     "kontrakte/positionen": build_kontrakte_positionen_screen_definition,
     "lager/auslagerung": build_lager_auslagerung_screen_definition,

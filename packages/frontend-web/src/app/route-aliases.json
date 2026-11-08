@@ -3471,6 +3471,14 @@
     {
       "module": "@/pages/fibu/kassenbuch",
       "path": "fibu/kassenbuch"
+    },
+    {
+      "module": "@/pages/kontrakte/vorgang",
+      "path": "kontrakte/vorgang/:variante/:id"
+    },
+    {
+      "module": "@/pages/kontrakte/listen",
+      "path": "kontrakte/listen/:variante"
     }
   ]
 }

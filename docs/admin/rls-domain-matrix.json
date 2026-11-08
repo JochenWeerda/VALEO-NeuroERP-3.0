@@ -3262,6 +3262,7 @@
     "app/api/v1/endpoints/foreign_goods_worklist.py",
     "app/api/v1/endpoints/futter_read.py",
     "app/api/v1/endpoints/inventory_auxiliary.py",
+    "app/api/v1/endpoints/kontrakt_vorgang.py",
     "app/api/v1/endpoints/l3_report_catalog.py",
     "app/api/v1/endpoints/legacy_interface_adapters.py",
     "app/api/v1/endpoints/mail_workspace.py",
@@ -3392,7 +3393,7 @@
     "kopfzeile": 2,
     "nutzlast": 11,
     "standardmandant": 4,
-    "token": 68
+    "token": 69
    },
    "standardmandant_stellen": [
     "app/api/v1/endpoints/rations_optimization.py:6336",

@@ -64058,6 +64058,66 @@
         "title": "EngagementArticleOut",
         "type": "object"
       },
+      "EngagementArtikelListe": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/EngagementArtikelZeile"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "EngagementArtikelListe",
+        "type": "object"
+      },
+      "EngagementArtikelZeile": {
+        "additionalProperties": false,
+        "properties": {
+          "artikel": {
+            "title": "Artikel",
+            "type": "string"
+          },
+          "einkauf_offen": {
+            "default": 0,
+            "title": "Einkauf Offen",
+            "type": "number"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "kontrakte": {
+            "default": 0,
+            "title": "Kontrakte",
+            "type": "integer"
+          },
+          "netto": {
+            "default": 0,
+            "title": "Netto",
+            "type": "number"
+          },
+          "verkauf_offen": {
+            "default": 0,
+            "title": "Verkauf Offen",
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "artikel"
+        ],
+        "title": "EngagementArtikelZeile",
+        "type": "object"
+      },
       "EngagementOut": {
         "description": "``GET /contracts/engagement``",
         "properties": {
@@ -64087,6 +64147,67 @@
           }
         },
         "title": "EngagementOut",
+        "type": "object"
+      },
+      "EngagementParteiListe": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/EngagementParteiZeile"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "EngagementParteiListe",
+        "type": "object"
+      },
+      "EngagementParteiZeile": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "kontrakte": {
+            "default": 0,
+            "title": "Kontrakte",
+            "type": "integer"
+          },
+          "offen": {
+            "default": 0,
+            "title": "Offen",
+            "type": "number"
+          },
+          "partner_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Partner Name"
+          },
+          "party_id": {
+            "title": "Party Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "party_id"
+        ],
+        "title": "EngagementParteiZeile",
         "type": "object"
       },
       "EngagementPartyOut": {
@@ -93250,6 +93371,227 @@
         "title": "Kontovorschlag",
         "type": "object"
       },
+      "KontraktAlarmListe": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/KontraktAlarmZeile"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "KontraktAlarmListe",
+        "type": "object"
+      },
+      "KontraktAlarmZeile": {
+        "additionalProperties": false,
+        "properties": {
+          "alarm": {
+            "title": "Alarm",
+            "type": "string"
+          },
+          "contract_no": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contract No"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "kontrakt_id": {
+            "title": "Kontrakt Id",
+            "type": "string"
+          },
+          "partner_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Partner Name"
+          },
+          "prioritaet": {
+            "title": "Prioritaet",
+            "type": "integer"
+          },
+          "rest_quantity": {
+            "default": 0,
+            "title": "Rest Quantity",
+            "type": "number"
+          },
+          "tage_bis_ablauf": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tage Bis Ablauf"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit"
+          },
+          "valid_to": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valid To"
+          }
+        },
+        "required": [
+          "id",
+          "kontrakt_id",
+          "alarm",
+          "prioritaet",
+          "text"
+        ],
+        "title": "KontraktAlarmZeile",
+        "type": "object"
+      },
+      "KontraktBewegungListe": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/KontraktBewegungZeile"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "KontraktBewegungListe",
+        "type": "object"
+      },
+      "KontraktBewegungZeile": {
+        "additionalProperties": false,
+        "properties": {
+          "datum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datum"
+          },
+          "einheit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Einheit"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "invoice_no": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Invoice No"
+          },
+          "menge": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Menge"
+          },
+          "settled_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Settled At"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "storno_grund": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Storno Grund"
+          }
+        },
+        "required": [
+          "id",
+          "status"
+        ],
+        "title": "KontraktBewegungZeile",
+        "type": "object"
+      },
       "KontraktCreate": {
         "properties": {
           "bezeichnung": {
@@ -93349,6 +93691,338 @@
           "lieferant_id"
         ],
         "title": "KontraktCreate",
+        "type": "object"
+      },
+      "KontraktErfuellungListe": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/KontraktErfuellungZeile"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "KontraktErfuellungListe",
+        "type": "object"
+      },
+      "KontraktErfuellungZeile": {
+        "additionalProperties": false,
+        "properties": {
+          "abgerufen": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Abgerufen"
+          },
+          "contract_no": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contract No"
+          },
+          "einheit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Einheit"
+          },
+          "erfuellung_pct": {
+            "default": 0,
+            "title": "Erfuellung Pct",
+            "type": "number"
+          },
+          "erfuellung_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erfuellung Status"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "menge_kontrakt": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Menge Kontrakt"
+          },
+          "offen": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Offen"
+          },
+          "partner_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Partner Name"
+          },
+          "party_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Party Id"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "typ": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Typ"
+          },
+          "ueberfaellig": {
+            "default": false,
+            "title": "Ueberfaellig",
+            "type": "boolean"
+          },
+          "valid_to": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valid To"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "KontraktErfuellungZeile",
+        "type": "object"
+      },
+      "KontraktFixierungListe": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/KontraktFixierungZeile"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "KontraktFixierungListe",
+        "type": "object"
+      },
+      "KontraktFixierungZeile": {
+        "additionalProperties": false,
+        "properties": {
+          "bediener": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bediener"
+          },
+          "datum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datum"
+          },
+          "effektiv_preis": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Effektiv Preis"
+          },
+          "einheit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Einheit"
+          },
+          "fixing_no": {
+            "title": "Fixing No",
+            "type": "integer"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "matif_price": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Matif Price"
+          },
+          "menge": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Menge"
+          },
+          "notiz": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notiz"
+          },
+          "position_no": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Position No"
+          },
+          "praemie": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Praemie"
+          },
+          "referenz": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Referenz"
+          },
+          "status": {
+            "default": "aktiv",
+            "title": "Status",
+            "type": "string"
+          },
+          "storno_grund": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Storno Grund"
+          }
+        },
+        "required": [
+          "id",
+          "fixing_no"
+        ],
+        "title": "KontraktFixierungZeile",
         "type": "object"
       },
       "KontraktKlasseCreate": {
@@ -93478,6 +94152,268 @@
         "title": "KontraktKlasseOut",
         "type": "object"
       },
+      "KontraktLueckeListe": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/KontraktLueckeZeile"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "KontraktLueckeListe",
+        "type": "object"
+      },
+      "KontraktLueckeZeile": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "schwere": {
+            "title": "Schwere",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "schwere",
+          "text"
+        ],
+        "title": "KontraktLueckeZeile",
+        "type": "object"
+      },
+      "KontraktMahnkandidatListe": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/KontraktMahnkandidatZeile"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "KontraktMahnkandidatListe",
+        "type": "object"
+      },
+      "KontraktMahnkandidatZeile": {
+        "additionalProperties": false,
+        "properties": {
+          "contract_no": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contract No"
+          },
+          "einheit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Einheit"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "letzte_mahnstufe": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Letzte Mahnstufe"
+          },
+          "naechste_mahnstufe": {
+            "default": 1,
+            "title": "Naechste Mahnstufe",
+            "type": "integer"
+          },
+          "offen": {
+            "default": 0,
+            "title": "Offen",
+            "type": "number"
+          },
+          "partner_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Partner Name"
+          },
+          "party_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Party Id"
+          },
+          "tage_ueberfaellig": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tage Ueberfaellig"
+          },
+          "typ": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Typ"
+          },
+          "valid_to": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valid To"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "KontraktMahnkandidatZeile",
+        "type": "object"
+      },
+      "KontraktMahnungListe": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/KontraktMahnungZeile"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "KontraktMahnungListe",
+        "type": "object"
+      },
+      "KontraktMahnungZeile": {
+        "additionalProperties": false,
+        "properties": {
+          "bediener": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bediener"
+          },
+          "datum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datum"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "mahnstufe": {
+            "title": "Mahnstufe",
+            "type": "integer"
+          },
+          "offen": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Offen"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          }
+        },
+        "required": [
+          "id",
+          "mahnstufe"
+        ],
+        "title": "KontraktMahnungZeile",
+        "type": "object"
+      },
       "KontraktOut": {
         "additionalProperties": true,
         "description": "Typed response schema for KontraktOut endpoints (extra fields forwarded).",
@@ -93590,6 +94526,27 @@
           "menge"
         ],
         "title": "KontraktPosCreate",
+        "type": "object"
+      },
+      "KontraktPositionListe": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/KontraktPositionZeile"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "KontraktPositionListe",
         "type": "object"
       },
       "KontraktPositionRowOut": {
@@ -93732,6 +94689,221 @@
         "title": "KontraktPositionRowOut",
         "type": "object"
       },
+      "KontraktPositionZeile": {
+        "additionalProperties": false,
+        "properties": {
+          "abgerufen": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Abgerufen"
+          },
+          "abweichung": {
+            "default": false,
+            "title": "Abweichung",
+            "type": "boolean"
+          },
+          "artikel": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artikel"
+          },
+          "avg_fixpreis_effektiv": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg Fixpreis Effektiv"
+          },
+          "bewertung_fixiert_eur": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bewertung Fixiert Eur"
+          },
+          "bezeichnung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bezeichnung"
+          },
+          "einheit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Einheit"
+          },
+          "erfuellung_pct": {
+            "default": 0,
+            "title": "Erfuellung Pct",
+            "type": "number"
+          },
+          "erfuellung_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erfuellung Status"
+          },
+          "fixiert": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fixiert"
+          },
+          "fixierungsgrad_pct": {
+            "default": 0,
+            "title": "Fixierungsgrad Pct",
+            "type": "number"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "is_matif": {
+            "default": false,
+            "title": "Is Matif",
+            "type": "boolean"
+          },
+          "markt_effektiv": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Markt Effektiv"
+          },
+          "marktwert_offen_eur": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Marktwert Offen Eur"
+          },
+          "menge_kontrakt": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Menge Kontrakt"
+          },
+          "notierung_datum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notierung Datum"
+          },
+          "notierung_preis": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notierung Preis"
+          },
+          "offen": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Offen"
+          },
+          "offen_zu_fixieren": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Offen Zu Fixieren"
+          },
+          "position_no": {
+            "title": "Position No",
+            "type": "integer"
+          },
+          "symbol": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Symbol"
+          }
+        },
+        "required": [
+          "id",
+          "position_no"
+        ],
+        "title": "KontraktPositionZeile",
+        "type": "object"
+      },
       "KontraktPositionenTabOut": {
         "additionalProperties": true,
         "properties": {
@@ -93771,6 +94943,188 @@
           "table_key"
         ],
         "title": "KontraktPositionenTabOut",
+        "type": "object"
+      },
+      "KontraktUebersichtListe": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/KontraktUebersichtZeile"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "KontraktUebersichtListe",
+        "type": "object"
+      },
+      "KontraktUebersichtZeile": {
+        "additionalProperties": false,
+        "properties": {
+          "alarme": {
+            "default": 0,
+            "title": "Alarme",
+            "type": "integer"
+          },
+          "artikel": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artikel"
+          },
+          "contract_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contract Date"
+          },
+          "contract_no": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contract No"
+          },
+          "contract_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contract Type"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "partner_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Partner Name"
+          },
+          "party_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Party Id"
+          },
+          "preis": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preis"
+          },
+          "pricing_model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pricing Model"
+          },
+          "rest_quantity": {
+            "default": 0,
+            "title": "Rest Quantity",
+            "type": "number"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "total_quantity": {
+            "default": 0,
+            "title": "Total Quantity",
+            "type": "number"
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit"
+          },
+          "valid_from": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valid From"
+          },
+          "valid_to": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valid To"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "KontraktUebersichtZeile",
         "type": "object"
       },
       "KontraktUmsaetzeTabOut": {
@@ -93931,6 +95285,256 @@
         ],
         "title": "KontraktVariante",
         "type": "string"
+      },
+      "KontraktVorgangKopf": {
+        "additionalProperties": false,
+        "description": "Ein Kopf fuer alle Vorgangsvarianten: Erfuellung, Fixierung, Abrechnung.",
+        "properties": {
+          "abgerechnet": {
+            "default": 0,
+            "title": "Abgerechnet",
+            "type": "number"
+          },
+          "abgerufen": {
+            "default": 0,
+            "title": "Abgerufen",
+            "type": "number"
+          },
+          "basis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Basis"
+          },
+          "bewertbar": {
+            "default": false,
+            "title": "Bewertbar",
+            "type": "boolean"
+          },
+          "bewertung_fixiert_eur": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bewertung Fixiert Eur"
+          },
+          "contract_no": {
+            "title": "Contract No",
+            "type": "string"
+          },
+          "contract_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contract Type"
+          },
+          "einheit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Einheit"
+          },
+          "erfuellung_pct": {
+            "default": 0,
+            "title": "Erfuellung Pct",
+            "type": "number"
+          },
+          "erfuellung_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erfuellung Status"
+          },
+          "fixiert": {
+            "default": 0,
+            "title": "Fixiert",
+            "type": "number"
+          },
+          "fixiert_aktiv": {
+            "default": 0,
+            "title": "Fixiert Aktiv",
+            "type": "number"
+          },
+          "fixierungsgrad_pct": {
+            "default": 0,
+            "title": "Fixierungsgrad Pct",
+            "type": "number"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "marktwert_offen_eur": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Marktwert Offen Eur"
+          },
+          "menge_kontrakt": {
+            "default": 0,
+            "title": "Menge Kontrakt",
+            "type": "number"
+          },
+          "mindestpreis": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mindestpreis"
+          },
+          "offen": {
+            "default": 0,
+            "title": "Offen",
+            "type": "number"
+          },
+          "offen_abruf": {
+            "default": 0,
+            "title": "Offen Abruf",
+            "type": "number"
+          },
+          "offen_zu_fixieren": {
+            "default": 0,
+            "title": "Offen Zu Fixieren",
+            "type": "number"
+          },
+          "offene_luecken": {
+            "default": 0,
+            "title": "Offene Luecken",
+            "type": "integer"
+          },
+          "partner_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Partner Name"
+          },
+          "party_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Party Id"
+          },
+          "praemie_typ": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Praemie Typ"
+          },
+          "praemie_wert": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Praemie Wert"
+          },
+          "preismodell": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preismodell"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "ueberfaellig": {
+            "default": false,
+            "title": "Ueberfaellig",
+            "type": "boolean"
+          },
+          "valid_from": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valid From"
+          },
+          "valid_to": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valid To"
+          }
+        },
+        "required": [
+          "id",
+          "contract_no"
+        ],
+        "title": "KontraktVorgangKopf",
+        "type": "object"
       },
       "KonvertierungResult": {
         "properties": {
@@ -329676,6 +331280,933 @@
         "summary": "Kontrakt klasse aktualisieren",
         "tags": [
           "kontrakt-klassen"
+        ]
+      }
+    },
+    "/api/v1/kontrakt-vorgang/alarme": {
+      "get": {
+        "operationId": "alarme_api_v1_kontrakt_vorgang_alarme_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KontraktAlarmListe"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Alarme offener Kontrakte (Ablauf, Mahnung, Hedge …)",
+        "tags": [
+          "kontrakte",
+          "kontrakt-vorgang"
+        ]
+      }
+    },
+    "/api/v1/kontrakt-vorgang/bewegungen/{entity_id}/actions/abrechnen": {
+      "post": {
+        "operationId": "aktion_bewegung_abrechnen_api_v1_kontrakt_vorgang_bewegungen__entity_id__actions_abrechnen_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Eine Abrufbewegung an die Abrechnung uebergeben",
+        "tags": [
+          "kontrakte",
+          "kontrakt-vorgang"
+        ]
+      }
+    },
+    "/api/v1/kontrakt-vorgang/bewegungen/{entity_id}/actions/stornieren": {
+      "post": {
+        "operationId": "aktion_bewegung_stornieren_api_v1_kontrakt_vorgang_bewegungen__entity_id__actions_stornieren_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Abrufbewegung mit Begruendung stornieren",
+        "tags": [
+          "kontrakte",
+          "kontrakt-vorgang"
+        ]
+      }
+    },
+    "/api/v1/kontrakt-vorgang/engagement/artikel": {
+      "get": {
+        "operationId": "engagement_artikel_api_v1_kontrakt_vorgang_engagement_artikel_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EngagementArtikelListe"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Offene Kontraktmenge je Artikel (Netto Einkauf gegen Verkauf)",
+        "tags": [
+          "kontrakte",
+          "kontrakt-vorgang"
+        ]
+      }
+    },
+    "/api/v1/kontrakt-vorgang/engagement/partei": {
+      "get": {
+        "operationId": "engagement_partei_api_v1_kontrakt_vorgang_engagement_partei_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EngagementParteiListe"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Offene Kontraktmenge je Geschaeftspartner",
+        "tags": [
+          "kontrakte",
+          "kontrakt-vorgang"
+        ]
+      }
+    },
+    "/api/v1/kontrakt-vorgang/erfuellungsstand": {
+      "get": {
+        "operationId": "erfuellungsstand_api_v1_kontrakt_vorgang_erfuellungsstand_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "typ",
+            "required": false,
+            "schema": {
+              "default": "alle",
+              "pattern": "^(alle|einkauf|verkauf|EINKAUF|VERKAUF)$",
+              "title": "Typ",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KontraktErfuellungListe"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Kontrakte mit Erfuellungsgrad (kontrahiert gegen abgerufen)",
+        "tags": [
+          "kontrakte",
+          "kontrakt-vorgang"
+        ]
+      }
+    },
+    "/api/v1/kontrakt-vorgang/fixierungen/{entity_id}/actions/stornieren": {
+      "post": {
+        "operationId": "aktion_fixierung_stornieren_api_v1_kontrakt_vorgang_fixierungen__entity_id__actions_stornieren_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Fixierung mit Begruendung stornieren",
+        "tags": [
+          "kontrakte",
+          "kontrakt-vorgang"
+        ]
+      }
+    },
+    "/api/v1/kontrakt-vorgang/mahnkandidaten": {
+      "get": {
+        "operationId": "mahnkandidaten_api_v1_kontrakt_vorgang_mahnkandidaten_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KontraktMahnkandidatListe"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Ueberfaellige, untererfuellte Kontrakte (Kontraktmahnung)",
+        "tags": [
+          "kontrakte",
+          "kontrakt-vorgang"
+        ]
+      }
+    },
+    "/api/v1/kontrakt-vorgang/uebersicht": {
+      "get": {
+        "operationId": "uebersicht_api_v1_kontrakt_vorgang_uebersicht_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "include_done",
+            "required": false,
+            "schema": {
+              "default": true,
+              "title": "Include Done",
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "z. B. matif",
+            "in": "query",
+            "name": "preismodell",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 40,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "z. B. matif",
+              "title": "Preismodell"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KontraktUebersichtListe"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Kontrakte mit Restmenge und Alarmzahl",
+        "tags": [
+          "kontrakte",
+          "kontrakt-vorgang"
+        ]
+      }
+    },
+    "/api/v1/kontrakt-vorgang/{entity_id}/actions/abrechnung_uebergeben": {
+      "post": {
+        "operationId": "aktion_abrechnung_api_v1_kontrakt_vorgang__entity_id__actions_abrechnung_uebergeben_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Alle offenen Abrufbewegungen an die Abrechnung uebergeben",
+        "tags": [
+          "kontrakte",
+          "kontrakt-vorgang"
+        ]
+      }
+    },
+    "/api/v1/kontrakt-vorgang/{entity_id}/actions/fixieren": {
+      "post": {
+        "operationId": "aktion_fixieren_api_v1_kontrakt_vorgang__entity_id__actions_fixieren_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Teilfixierung anlegen (Menge zu MATIF-Preis und Praemie)",
+        "tags": [
+          "kontrakte",
+          "kontrakt-vorgang"
+        ]
+      }
+    },
+    "/api/v1/kontrakt-vorgang/{entity_id}/actions/mahnen": {
+      "post": {
+        "operationId": "aktion_mahnen_api_v1_kontrakt_vorgang__entity_id__actions_mahnen_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Kontraktmahnung erfassen (naechste Stufe)",
+        "tags": [
+          "kontrakte",
+          "kontrakt-vorgang"
+        ]
+      }
+    },
+    "/api/v1/kontrakt-vorgang/{entity_id}/actions/notierung_erfassen": {
+      "post": {
+        "operationId": "aktion_notierung_api_v1_kontrakt_vorgang__entity_id__actions_notierung_erfassen_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "MATIF-Notierung erfassen (Bewertungsbasis)",
+        "tags": [
+          "kontrakte",
+          "kontrakt-vorgang"
+        ]
+      }
+    },
+    "/api/v1/kontrakt-vorgang/{kontrakt}": {
+      "get": {
+        "operationId": "kopf_api_v1_kontrakt_vorgang__kontrakt__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "kontrakt",
+            "required": true,
+            "schema": {
+              "title": "Kontrakt",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KontraktVorgangKopf"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Kopf eines Kontrakts mit Erfuellungs-, Fixier- und Abrechnungsstand",
+        "tags": [
+          "kontrakte",
+          "kontrakt-vorgang"
+        ]
+      }
+    },
+    "/api/v1/kontrakt-vorgang/{kontrakt}/bewegungen": {
+      "get": {
+        "operationId": "bewegungen_api_v1_kontrakt_vorgang__kontrakt__bewegungen_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "kontrakt",
+            "required": true,
+            "schema": {
+              "title": "Kontrakt",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KontraktBewegungListe"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Abrufbewegungen eines Kontrakts mit Abrechnungsstand",
+        "tags": [
+          "kontrakte",
+          "kontrakt-vorgang"
+        ]
+      }
+    },
+    "/api/v1/kontrakt-vorgang/{kontrakt}/fixierungen": {
+      "get": {
+        "operationId": "fixierungen_api_v1_kontrakt_vorgang__kontrakt__fixierungen_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "kontrakt",
+            "required": true,
+            "schema": {
+              "title": "Kontrakt",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KontraktFixierungListe"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Fixierungen eines Kontrakts mit Preis, Status und Storno",
+        "tags": [
+          "kontrakte",
+          "kontrakt-vorgang"
+        ]
+      }
+    },
+    "/api/v1/kontrakt-vorgang/{kontrakt}/luecken": {
+      "get": {
+        "operationId": "luecken_api_v1_kontrakt_vorgang__kontrakt__luecken_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "kontrakt",
+            "required": true,
+            "schema": {
+              "title": "Kontrakt",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KontraktLueckeListe"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Erfuellungsluecken eines Kontrakts",
+        "tags": [
+          "kontrakte",
+          "kontrakt-vorgang"
+        ]
+      }
+    },
+    "/api/v1/kontrakt-vorgang/{kontrakt}/mahnungen": {
+      "get": {
+        "operationId": "mahnungen_api_v1_kontrakt_vorgang__kontrakt__mahnungen_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "kontrakt",
+            "required": true,
+            "schema": {
+              "title": "Kontrakt",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KontraktMahnungListe"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Mahnungen eines Kontrakts",
+        "tags": [
+          "kontrakte",
+          "kontrakt-vorgang"
+        ]
+      }
+    },
+    "/api/v1/kontrakt-vorgang/{kontrakt}/positionen": {
+      "get": {
+        "operationId": "positionen_api_v1_kontrakt_vorgang__kontrakt__positionen_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "kontrakt",
+            "required": true,
+            "schema": {
+              "title": "Kontrakt",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KontraktPositionListe"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Positionen mit Erfuellung und Fixierung",
+        "tags": [
+          "kontrakte",
+          "kontrakt-vorgang"
         ]
       }
     },

@@ -14,6 +14,13 @@ _VERSION = re.compile(r"[1-9][0-9]*\.[0-9]+\.[0-9]+\Z")
 _REQUIRED_GATES = ("A", "B", "C", "E")
 
 
+def _family_screen(screen_id: str) -> bool:
+    """Beleg- und andere Familienvarianten fuehren ihre eigene Registry (config/mask_families)."""
+    from app.core.mask_family_versions import is_family_screen
+
+    return is_family_screen(screen_id)
+
+
 def _read_raw() -> dict[str, Any]:
     if not REGISTRY_PATH.is_file():
         return {"schemaVersion": 1, "releaseVersion": "0.0.0", "screens": {}}
@@ -53,7 +60,7 @@ def check_registry(registry: dict[str, Any], *, definitions: dict[str, dict[str,
         if not isinstance(screens, dict):
             raise ValueError("studio_screen_registry_invalid")
         for screen_id, entry in screens.items():
-            if not isinstance(screen_id, str) or screen_id.startswith("beleg/"):
+            if not isinstance(screen_id, str) or _family_screen(screen_id):
                 raise ValueError("studio_screen_id_invalid")
             definition = definitions.get(screen_id) if definitions else None
             _validate_entry(screen_id, entry, definition)
@@ -100,7 +107,7 @@ def catalog_summary() -> dict[str, Any]:
 
 def current_matches(registry: dict[str, Any], definitions: dict[str, dict[str, Any]]) -> bool:
     """True when every native ScreenDefinition is catalogued with the current builder hash."""
-    native = {sid: definition for sid, definition in definitions.items() if not sid.startswith("beleg/")}
+    native = {sid: definition for sid, definition in definitions.items() if not _family_screen(sid)}
     try:
         check_registry(registry, definitions=native)
     except ValueError:

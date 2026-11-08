@@ -125,6 +125,11 @@ def _screen_ids_from_text(text: str) -> set[str]:
         bound = consts.get(match.group(1))
         if bound:
             ids.add(bound)
+    # Familienseiten rendern alle Varianten ihrer Familie (`<familie>/${variante}`).
+    if "${variante}" in text:
+        from app.core.mask_family_versions import versioned_screen_ids
+
+        ids.update(sid for sid, (family, _v) in versioned_screen_ids().items() if f"{family}/${{variante}}" in text)
     return ids
 
 
@@ -182,8 +187,12 @@ def _studio_versioned_ids() -> frozenset[str]:
     from app.services.made_by_studio_gates import load_registered_definitions
     entries = load_registry().get("screens", {})
     definitions = load_registered_definitions()
-    return frozenset(sid for sid in released_screen_ids() if sid in definitions
-                     and definition_hash(definitions[sid]) == entries[sid].get("definition_hash"))
+    from app.core.mask_family_versions import versioned_screen_ids
+
+    native = {sid for sid in released_screen_ids() if sid in definitions
+              and definition_hash(definitions[sid]) == entries[sid].get("definition_hash")}
+    # Maskenfamilien sind ueber ihre eigene, gehashte Registry versioniert (config/mask_families).
+    return frozenset(native | set(versioned_screen_ids()))
 
 
 def _expand_screen_ids(screen_ids: list[str]) -> set[str]:
@@ -406,6 +415,12 @@ def catalog() -> dict:
 
 # --------------------------------------------------------------------------------------------- Auswertung
 
+def _weitere_familien() -> dict:
+    from app.core.mask_family_versions import family_names, load_registry
+
+    return {family: load_registry(family)["current"] for family in family_names()}
+
+
 def inventory() -> dict:
     families = json.loads(FAMILIES.read_text(encoding="utf-8"))
     beleg_prefix = families["family"] + "/"
@@ -427,7 +442,7 @@ def inventory() -> dict:
         }
     return {
         "stand": date.today().isoformat(),
-        "familien": {families["family"]: families["current"], "native_studio": native_studio},
+        "familien": {families["family"]: families["current"], **_weitere_familien(), "native_studio": native_studio},
         "seiten": page_rows,
         "aktionen": action_rows,
         "studio_katalog": catalog(),

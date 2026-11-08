@@ -57,7 +57,6 @@ _RUNTIME_LIST_WIRE_ALIASES: dict[str, str] = {
     "lager/lagerbewegungen-liste": "lager/stock-movement",
     "sales/invoices": "sales/invoice",
     "fibu/kostenstellenrechnung": "fibu/kostenstellen-liste",
-    "kontrakte/liste": "kontrakte/LstKontraktUebersicht",
     "agrar/feldbuch-massnahmen-liste": "agrar/feldbuch/massnahmen",
     "agrar/saatzucht-partien-liste": "agrar/saatzucht",
     "finance/ap/invoices": "finance/ap-invoices-liste",
@@ -509,6 +508,13 @@ def _screen_ids_from_source(text: str) -> set[str]:
         from app.core.screen_definitions_beleg import screen_id as beleg_screen_id
 
         ids.update(beleg_screen_id(art) for art in BELEGARTEN)
+    # Maskenfamilien: eine Seite rendert alle Varianten ihrer Familie (`<familie>/${variante}`).
+    if "${variante}" in text:
+        from app.core.mask_family_versions import versioned_screen_ids
+
+        for sid, (family, _variant) in versioned_screen_ids().items():
+            if f"{family}/${{variante}}" in text:
+                ids.add(sid)
     return ids
 
 

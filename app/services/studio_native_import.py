@@ -38,6 +38,10 @@ def native_release_metadata(source_id: str) -> dict:
             "studio_draft_clean": True,
             "family": "beleg",
         }
+    from app.core.mask_family_versions import is_family_screen, release_metadata
+
+    if is_family_screen(source_id):
+        return release_metadata(source_id)
     from app.core.studio_screen_versions import release_entry
 
     return release_entry(source_id)

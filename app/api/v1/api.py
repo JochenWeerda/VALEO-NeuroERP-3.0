@@ -1245,6 +1245,11 @@ api_router.include_router(
     tags=["contracts", "kontrakte", "agrar"]
 )
 
+# Kontrakt-Vorgang: Lese- und Kommandowege der Maskenfamilien kontrakt / kontrakt-liste (08.11.2026)
+from app.api.v1.endpoints import kontrakt_vorgang  # noqa: E402
+
+api_router.include_router(kontrakt_vorgang.router)
+
 from app.api.v1.endpoints import kaeufergruppe as kaeufergruppe_ep  # noqa: E402
 
 api_router.include_router(

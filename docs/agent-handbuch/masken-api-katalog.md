@@ -4,14 +4,14 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-07
+last_reviewed: 2026-11-08
 version: 3.0.0
 description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions.
 ---
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (771 Masken).
+> Generiert aus `app/core/screen_definitions.py` (778 Masken).
 
 ## Übersicht
 
@@ -278,7 +278,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `compliance/wasserschutz-auflagen` | Wasserschutz auflagen | compliance | niedrig | — | `GET /api/v1/masks/compliance/wasserschutz-auflagen/agent-contract` |
 | `compliance/zertifikate` | Zertifikate | compliance | niedrig | — | `GET /api/v1/masks/compliance/zertifikate/agent-contract` |
 | `compliance/zulassungen-liste` | PSM-Zulassungen | compliance | niedrig | — | `GET /api/v1/masks/compliance/zulassungen-liste/agent-contract` |
-| `contracts-v2` | Contracts v2 | workspace | niedrig | — | `GET /api/v1/masks/contracts-v2/agent-contract` |
 | `contracts/contract` | Contract | contracts | niedrig | — | `GET /api/v1/masks/contracts/contract/agent-contract` |
 | `controlling/abweichungsanalyse` | Abweichungsanalyse | controlling | niedrig | — | `GET /api/v1/masks/controlling/abweichungsanalyse/agent-contract` |
 | `controlling/agrarkalkulation` | Agrarkalkulation | controlling | niedrig | — | `GET /api/v1/masks/controlling/agrarkalkulation/agent-contract` |
@@ -553,12 +552,20 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `inventory-reports` | Inventory reports | workspace | niedrig | — | `GET /api/v1/masks/inventory-reports/agent-contract` |
 | `inventory/epcis` | Index | inventory | niedrig | — | `GET /api/v1/masks/inventory/epcis/agent-contract` |
 | `kasse/tagesabschluss` | Tagesabschluss | kasse | niedrig | — | `GET /api/v1/masks/kasse/tagesabschluss/agent-contract` |
+| `kontrakt-liste/abrechnung` | Abrechnung | agrar | niedrig | — | `GET /api/v1/masks/kontrakt-liste/abrechnung/agent-contract` |
+| `kontrakt-liste/alarme` | Kontrakt-Alarme | agrar | niedrig | — | `GET /api/v1/masks/kontrakt-liste/alarme/agent-contract` |
+| `kontrakt-liste/engagement-artikel` | Engagement je Artikel | agrar | niedrig | — | `GET /api/v1/masks/kontrakt-liste/engagement-artikel/agent-contract` |
+| `kontrakt-liste/engagement-partei` | Engagement je Partner | agrar | niedrig | — | `GET /api/v1/masks/kontrakt-liste/engagement-partei/agent-contract` |
+| `kontrakt-liste/erfuellung` | Erfüllungsstand | agrar | niedrig | — | `GET /api/v1/masks/kontrakt-liste/erfuellung/agent-contract` |
+| `kontrakt-liste/fixierung` | Fixierung | agrar | niedrig | — | `GET /api/v1/masks/kontrakt-liste/fixierung/agent-contract` |
+| `kontrakt-liste/mahnung` | Kontraktmahnung | agrar | niedrig | — | `GET /api/v1/masks/kontrakt-liste/mahnung/agent-contract` |
+| `kontrakt-liste/uebersicht` | Kontrakte | agrar | niedrig | — | `GET /api/v1/masks/kontrakt-liste/uebersicht/agent-contract` |
+| `kontrakt/abrechnung` | Kontraktabrechnung | agrar | mittel | — | `GET /api/v1/masks/kontrakt/abrechnung/agent-contract` |
+| `kontrakt/erfuellung` | Kontrakterfüllung | agrar | mittel | — | `GET /api/v1/masks/kontrakt/erfuellung/agent-contract` |
+| `kontrakt/fixierung` | Kontraktfixierung | agrar | mittel | — | `GET /api/v1/masks/kontrakt/fixierung/agent-contract` |
 | `kontrakte/FrmKontraktProtokoll` | Kontraktprotokoll | kontrakte | niedrig | — | `GET /api/v1/masks/kontrakte/FrmKontraktProtokoll/agent-contract` |
-| `kontrakte/KontraktAlarmDashboard` | KontraktAlarmDashboard | kontrakte | niedrig | — | `GET /api/v1/masks/kontrakte/KontraktAlarmDashboard/agent-contract` |
-| `kontrakte/LstKontraktUebersicht` | LstKontraktUebersicht | kontrakte | niedrig | — | `GET /api/v1/masks/kontrakte/LstKontraktUebersicht/agent-contract` |
 | `kontrakte/kontraktklassen` | Kontraktklassen | agrar | niedrig | — | `GET /api/v1/masks/kontrakte/kontraktklassen/agent-contract` |
 | `kontrakte/kontraktklassen-liste` | Kontraktklassen | agrar | niedrig | — | `GET /api/v1/masks/kontrakte/kontraktklassen-liste/agent-contract` |
-| `kontrakte/liste` | Kontrakte | agrar | niedrig | — | `GET /api/v1/masks/kontrakte/liste/agent-contract` |
 | `kontrakte/mengenzeitraeume` | Kontrakt wählen | kontrakte | niedrig | — | `GET /api/v1/masks/kontrakte/mengenzeitraeume/agent-contract` |
 | `kontrakte/positionen` | KontraktPositionsmonitor | kontrakte | niedrig | — | `GET /api/v1/masks/kontrakte/positionen/agent-contract` |
 | `labor/proben-liste` | Laborproben | qualitaet | niedrig | — | `GET /api/v1/masks/labor/proben-liste/agent-contract` |
@@ -5960,6 +5967,501 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
+### `kontrakt-liste/abrechnung` — Abrechnung
+
+**Zweck:** Kontrakte mit Abrufen finden und ihre Bewegungen an die Abrechnung uebergeben.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/kontrakt-liste/abrechnung/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/kontrakt-liste/abrechnung/agent-contract` |
+| Readiness | `GET /api/v1/masks/kontrakt-liste/abrechnung/readiness` |
+| Rollout-Route | `/mask-rollout/kontrakt-liste__abrechnung/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/kontrakt-vorgang/erfuellungsstand`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche Kontrakte haben noch nicht abgerechnete Abrufe?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+| `ansicht_uebersicht` | Kontrakte | safe | nein | `Wechselt zur Variante Kontrakte derselben Kontraktliste.` |
+| `ansicht_erfuellung` | Erfüllungsstand | safe | nein | `Wechselt zur Variante Erfüllungsstand derselben Kontraktliste.` |
+| `ansicht_fixierung` | Fixierung | safe | nein | `Wechselt zur Variante Fixierung derselben Kontraktliste.` |
+| `ansicht_mahnung` | Kontraktmahnung | safe | nein | `Wechselt zur Variante Kontraktmahnung derselben Kontraktliste.` |
+| `ansicht_alarme` | Kontrakt-Alarme | safe | nein | `Wechselt zur Variante Kontrakt-Alarme derselben Kontraktliste.` |
+| `ansicht_engagement_artikel` | Engagement je Artikel | safe | nein | `Wechselt zur Variante Engagement je Artikel derselben Kontraktliste.` |
+| `ansicht_engagement_partei` | Engagement je Partner | safe | nein | `Wechselt zur Variante Engagement je Partner derselben Kontraktliste.` |
+
+---
+
+### `kontrakt-liste/alarme` — Kontrakt-Alarme
+
+**Zweck:** Kontrakte mit Handlungsbedarf nach Dringlichkeit abarbeiten.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/kontrakt-liste/alarme/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/kontrakt-liste/alarme/agent-contract` |
+| Readiness | `GET /api/v1/masks/kontrakt-liste/alarme/readiness` |
+| Rollout-Route | `/mask-rollout/kontrakt-liste__alarme/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/kontrakt-vorgang/alarme`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche Kontrakte laufen in den naechsten 30 Tagen aus?
+- Wo fehlt die Absicherung?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+| `ansicht_uebersicht` | Kontrakte | safe | nein | `Wechselt zur Variante Kontrakte derselben Kontraktliste.` |
+| `ansicht_erfuellung` | Erfüllungsstand | safe | nein | `Wechselt zur Variante Erfüllungsstand derselben Kontraktliste.` |
+| `ansicht_fixierung` | Fixierung | safe | nein | `Wechselt zur Variante Fixierung derselben Kontraktliste.` |
+| `ansicht_abrechnung` | Abrechnung | safe | nein | `Wechselt zur Variante Abrechnung derselben Kontraktliste.` |
+| `ansicht_mahnung` | Kontraktmahnung | safe | nein | `Wechselt zur Variante Kontraktmahnung derselben Kontraktliste.` |
+| `ansicht_engagement_artikel` | Engagement je Artikel | safe | nein | `Wechselt zur Variante Engagement je Artikel derselben Kontraktliste.` |
+| `ansicht_engagement_partei` | Engagement je Partner | safe | nein | `Wechselt zur Variante Engagement je Partner derselben Kontraktliste.` |
+
+---
+
+### `kontrakt-liste/engagement-artikel` — Engagement je Artikel
+
+**Zweck:** Die offene Netto-Position je Artikel pruefen (Long/Short aus Kontrakten).
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/kontrakt-liste/engagement-artikel/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/kontrakt-liste/engagement-artikel/agent-contract` |
+| Readiness | `GET /api/v1/masks/kontrakt-liste/engagement-artikel/readiness` |
+| Rollout-Route | `/mask-rollout/kontrakt-liste__engagement-artikel/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/kontrakt-vorgang/engagement/artikel`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Wie hoch ist die Netto-Position bei Raps?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+| `ansicht_uebersicht` | Kontrakte | safe | nein | `Wechselt zur Variante Kontrakte derselben Kontraktliste.` |
+| `ansicht_erfuellung` | Erfüllungsstand | safe | nein | `Wechselt zur Variante Erfüllungsstand derselben Kontraktliste.` |
+| `ansicht_fixierung` | Fixierung | safe | nein | `Wechselt zur Variante Fixierung derselben Kontraktliste.` |
+| `ansicht_abrechnung` | Abrechnung | safe | nein | `Wechselt zur Variante Abrechnung derselben Kontraktliste.` |
+| `ansicht_mahnung` | Kontraktmahnung | safe | nein | `Wechselt zur Variante Kontraktmahnung derselben Kontraktliste.` |
+| `ansicht_alarme` | Kontrakt-Alarme | safe | nein | `Wechselt zur Variante Kontrakt-Alarme derselben Kontraktliste.` |
+| `ansicht_engagement_partei` | Engagement je Partner | safe | nein | `Wechselt zur Variante Engagement je Partner derselben Kontraktliste.` |
+
+---
+
+### `kontrakt-liste/engagement-partei` — Engagement je Partner
+
+**Zweck:** Pruefen, bei welchen Partnern wie viel kontrahierte Menge offen ist.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/kontrakt-liste/engagement-partei/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/kontrakt-liste/engagement-partei/agent-contract` |
+| Readiness | `GET /api/v1/masks/kontrakt-liste/engagement-partei/readiness` |
+| Rollout-Route | `/mask-rollout/kontrakt-liste__engagement-partei/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/kontrakt-vorgang/engagement/partei`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Bei welchem Partner ist am meisten offen?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+| `ansicht_uebersicht` | Kontrakte | safe | nein | `Wechselt zur Variante Kontrakte derselben Kontraktliste.` |
+| `ansicht_erfuellung` | Erfüllungsstand | safe | nein | `Wechselt zur Variante Erfüllungsstand derselben Kontraktliste.` |
+| `ansicht_fixierung` | Fixierung | safe | nein | `Wechselt zur Variante Fixierung derselben Kontraktliste.` |
+| `ansicht_abrechnung` | Abrechnung | safe | nein | `Wechselt zur Variante Abrechnung derselben Kontraktliste.` |
+| `ansicht_mahnung` | Kontraktmahnung | safe | nein | `Wechselt zur Variante Kontraktmahnung derselben Kontraktliste.` |
+| `ansicht_alarme` | Kontrakt-Alarme | safe | nein | `Wechselt zur Variante Kontrakt-Alarme derselben Kontraktliste.` |
+| `ansicht_engagement_artikel` | Engagement je Artikel | safe | nein | `Wechselt zur Variante Engagement je Artikel derselben Kontraktliste.` |
+
+---
+
+### `kontrakt-liste/erfuellung` — Erfüllungsstand
+
+**Zweck:** Erfuellungsgrad je Kontrakt pruefen und untererfuellte oder ueberfaellige Kontrakte finden.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/kontrakt-liste/erfuellung/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/kontrakt-liste/erfuellung/agent-contract` |
+| Readiness | `GET /api/v1/masks/kontrakt-liste/erfuellung/readiness` |
+| Rollout-Route | `/mask-rollout/kontrakt-liste__erfuellung/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/kontrakt-vorgang/erfuellungsstand`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche Kontrakte sind ueberfaellig und noch offen?
+- Wie weit ist Kontrakt K-1001 erfuellt?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+| `ansicht_uebersicht` | Kontrakte | safe | nein | `Wechselt zur Variante Kontrakte derselben Kontraktliste.` |
+| `ansicht_fixierung` | Fixierung | safe | nein | `Wechselt zur Variante Fixierung derselben Kontraktliste.` |
+| `ansicht_abrechnung` | Abrechnung | safe | nein | `Wechselt zur Variante Abrechnung derselben Kontraktliste.` |
+| `ansicht_mahnung` | Kontraktmahnung | safe | nein | `Wechselt zur Variante Kontraktmahnung derselben Kontraktliste.` |
+| `ansicht_alarme` | Kontrakt-Alarme | safe | nein | `Wechselt zur Variante Kontrakt-Alarme derselben Kontraktliste.` |
+| `ansicht_engagement_artikel` | Engagement je Artikel | safe | nein | `Wechselt zur Variante Engagement je Artikel derselben Kontraktliste.` |
+| `ansicht_engagement_partei` | Engagement je Partner | safe | nein | `Wechselt zur Variante Engagement je Partner derselben Kontraktliste.` |
+
+---
+
+### `kontrakt-liste/fixierung` — Fixierung
+
+**Zweck:** Offene Kontrakte waehlen, um Teilmengen gegen die MATIF-Notierung zu fixieren.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/kontrakt-liste/fixierung/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/kontrakt-liste/fixierung/agent-contract` |
+| Readiness | `GET /api/v1/masks/kontrakt-liste/fixierung/readiness` |
+| Rollout-Route | `/mask-rollout/kontrakt-liste__fixierung/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/kontrakt-vorgang/uebersicht?include_done=false&preismodell=matif`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche MATIF-Kontrakte sind noch nicht fixiert?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+| `ansicht_uebersicht` | Kontrakte | safe | nein | `Wechselt zur Variante Kontrakte derselben Kontraktliste.` |
+| `ansicht_erfuellung` | Erfüllungsstand | safe | nein | `Wechselt zur Variante Erfüllungsstand derselben Kontraktliste.` |
+| `ansicht_abrechnung` | Abrechnung | safe | nein | `Wechselt zur Variante Abrechnung derselben Kontraktliste.` |
+| `ansicht_mahnung` | Kontraktmahnung | safe | nein | `Wechselt zur Variante Kontraktmahnung derselben Kontraktliste.` |
+| `ansicht_alarme` | Kontrakt-Alarme | safe | nein | `Wechselt zur Variante Kontrakt-Alarme derselben Kontraktliste.` |
+| `ansicht_engagement_artikel` | Engagement je Artikel | safe | nein | `Wechselt zur Variante Engagement je Artikel derselben Kontraktliste.` |
+| `ansicht_engagement_partei` | Engagement je Partner | safe | nein | `Wechselt zur Variante Engagement je Partner derselben Kontraktliste.` |
+
+---
+
+### `kontrakt-liste/mahnung` — Kontraktmahnung
+
+**Zweck:** Ueberfaellige Kontrakte mit offener Menge mahnen; jede Mahnung haelt Stufe und offene Menge fest.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/kontrakt-liste/mahnung/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/kontrakt-liste/mahnung/agent-contract` |
+| Readiness | `GET /api/v1/masks/kontrakt-liste/mahnung/readiness` |
+| Rollout-Route | `/mask-rollout/kontrakt-liste__mahnung/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/kontrakt-vorgang/mahnkandidaten`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche Kontrakte muessen gemahnt werden?
+- Mahne Kontrakt K-1001.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+| `ansicht_uebersicht` | Kontrakte | safe | nein | `Wechselt zur Variante Kontrakte derselben Kontraktliste.` |
+| `ansicht_erfuellung` | Erfüllungsstand | safe | nein | `Wechselt zur Variante Erfüllungsstand derselben Kontraktliste.` |
+| `ansicht_fixierung` | Fixierung | safe | nein | `Wechselt zur Variante Fixierung derselben Kontraktliste.` |
+| `ansicht_abrechnung` | Abrechnung | safe | nein | `Wechselt zur Variante Abrechnung derselben Kontraktliste.` |
+| `ansicht_alarme` | Kontrakt-Alarme | safe | nein | `Wechselt zur Variante Kontrakt-Alarme derselben Kontraktliste.` |
+| `ansicht_engagement_artikel` | Engagement je Artikel | safe | nein | `Wechselt zur Variante Engagement je Artikel derselben Kontraktliste.` |
+| `ansicht_engagement_partei` | Engagement je Partner | safe | nein | `Wechselt zur Variante Engagement je Partner derselben Kontraktliste.` |
+
+---
+
+### `kontrakt-liste/uebersicht` — Kontrakte
+
+**Zweck:** Alle Kontrakte mit Restmenge, Laufzeit und offenen Alarmen finden und den Vorgang oeffnen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/kontrakt-liste/uebersicht/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/kontrakt-liste/uebersicht/agent-contract` |
+| Readiness | `GET /api/v1/masks/kontrakt-liste/uebersicht/readiness` |
+| Rollout-Route | `/mask-rollout/kontrakt-liste__uebersicht/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/kontrakt-vorgang/uebersicht`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche Verkaufskontrakte laufen diesen Monat aus?
+- Wie viel Restmenge Weizen ist offen?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+| `ansicht_erfuellung` | Erfüllungsstand | safe | nein | `Wechselt zur Variante Erfüllungsstand derselben Kontraktliste.` |
+| `ansicht_fixierung` | Fixierung | safe | nein | `Wechselt zur Variante Fixierung derselben Kontraktliste.` |
+| `ansicht_abrechnung` | Abrechnung | safe | nein | `Wechselt zur Variante Abrechnung derselben Kontraktliste.` |
+| `ansicht_mahnung` | Kontraktmahnung | safe | nein | `Wechselt zur Variante Kontraktmahnung derselben Kontraktliste.` |
+| `ansicht_alarme` | Kontrakt-Alarme | safe | nein | `Wechselt zur Variante Kontrakt-Alarme derselben Kontraktliste.` |
+| `ansicht_engagement_artikel` | Engagement je Artikel | safe | nein | `Wechselt zur Variante Engagement je Artikel derselben Kontraktliste.` |
+| `ansicht_engagement_partei` | Engagement je Partner | safe | nein | `Wechselt zur Variante Engagement je Partner derselben Kontraktliste.` |
+
+---
+
+### `kontrakt/abrechnung` — Kontraktabrechnung
+
+**Zweck:** Abrufbewegungen an die Abrechnung uebergeben und Bewegungen oder Fixierungen stornieren.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/kontrakt/abrechnung/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/kontrakt/abrechnung/agent-contract` |
+| Readiness | `GET /api/v1/masks/kontrakt/abrechnung/readiness` |
+| Rollout-Route | `/mask-rollout/kontrakt__abrechnung/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/kontrakt-vorgang/{entity_id}`
+- `positionen` → `/api/v1/kontrakt-vorgang/{entity_id}/positionen`
+- `bewegungen` → `/api/v1/kontrakt-vorgang/{entity_id}/bewegungen`
+- `fixierungen` → `/api/v1/kontrakt-vorgang/{entity_id}/fixierungen`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Uebergib die offenen Abrufe von K-1001 an die Abrechnung.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `abrechnung_uebergeben` | An Abrechnung übergeben | moderate | nein | `/api/v1/kontrakt-vorgang/{entity_id}/actions/abrechnung_uebergeben` |
+| `ansicht_erfuellung` | Kontrakterfüllung | safe | nein | `Wechselt zur Variante Kontrakterfüllung desselben Kontrakts.` |
+| `ansicht_fixierung` | Kontraktfixierung | safe | nein | `Wechselt zur Variante Kontraktfixierung desselben Kontrakts.` |
+
+---
+
+### `kontrakt/erfuellung` — Kontrakterfüllung
+
+**Zweck:** Erfuellungsstand eines Kontrakts pruefen, Luecken sehen und ueberfaellige Kontrakte mahnen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/kontrakt/erfuellung/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/kontrakt/erfuellung/agent-contract` |
+| Readiness | `GET /api/v1/masks/kontrakt/erfuellung/readiness` |
+| Rollout-Route | `/mask-rollout/kontrakt__erfuellung/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/kontrakt-vorgang/{entity_id}`
+- `positionen` → `/api/v1/kontrakt-vorgang/{entity_id}/positionen`
+- `luecken` → `/api/v1/kontrakt-vorgang/{entity_id}/luecken`
+- `mahnungen` → `/api/v1/kontrakt-vorgang/{entity_id}/mahnungen`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Wie viel ist von Kontrakt K-1001 noch offen?
+- Mahne Kontrakt K-1001.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `mahnen` | Mahnen | moderate | nein | `/api/v1/kontrakt-vorgang/{entity_id}/actions/mahnen` |
+| `ansicht_fixierung` | Kontraktfixierung | safe | nein | `Wechselt zur Variante Kontraktfixierung desselben Kontrakts.` |
+| `ansicht_abrechnung` | Kontraktabrechnung | safe | nein | `Wechselt zur Variante Kontraktabrechnung desselben Kontrakts.` |
+
+---
+
+### `kontrakt/fixierung` — Kontraktfixierung
+
+**Zweck:** Teilmengen eines MATIF-Kontrakts fixieren, Notierungen erfassen und Fixierungen stornieren.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/kontrakt/fixierung/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/kontrakt/fixierung/agent-contract` |
+| Readiness | `GET /api/v1/masks/kontrakt/fixierung/readiness` |
+| Rollout-Route | `/mask-rollout/kontrakt__fixierung/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/kontrakt-vorgang/{entity_id}`
+- `positionen` → `/api/v1/kontrakt-vorgang/{entity_id}/positionen`
+- `fixierungen` → `/api/v1/kontrakt-vorgang/{entity_id}/fixierungen`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Fixiere 50 t von K-1001 zu 215 EUR/t.
+- Welche Fixierungen hat K-1001?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `fixieren` | Fixieren | moderate | nein | `/api/v1/kontrakt-vorgang/{entity_id}/actions/fixieren` |
+| `notierung_erfassen` | Notierung erfassen | safe | nein | `/api/v1/kontrakt-vorgang/{entity_id}/actions/notierung_erfassen` |
+| `ansicht_erfuellung` | Kontrakterfüllung | safe | nein | `Wechselt zur Variante Kontrakterfüllung desselben Kontrakts.` |
+| `ansicht_abrechnung` | Kontraktabrechnung | safe | nein | `Wechselt zur Variante Kontraktabrechnung desselben Kontrakts.` |
+
+---
+
 ### `kontrakte/kontraktklassen` — Kontraktklassen
 
 **Zweck:** Kontraktklassen und ihre Lieferbedingungen pruefen.
@@ -6033,46 +6535,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
-### `kontrakte/liste` — Kontrakte
-
-**Zweck:** Kontrakte: Eintraege finden und Details oeffnen.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/kontrakte/liste/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/kontrakte/liste/agent-contract` |
-| Readiness | `GET /api/v1/masks/kontrakte/liste/readiness` |
-| Rollout-Route | `/mask-rollout/kontrakte__liste/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/kontrakte`
-
-**MCP-Tools (Domäne):**
-
-- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
-- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
-- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
-- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
-- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
-- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
-- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
-
-**Beispiel-Prompts:**
-
-- Welche offenen Kontrakte?
-- Zeige aktuelle Kontrakte.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `neu` | Neuer Kontrakt | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
 | `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
@@ -17972,64 +18434,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `kontrakte/KontraktAlarmDashboard` — KontraktAlarmDashboard
-
-**Zweck:** KontraktAlarmDashboard mandantensicher als Cockpit bereitstellen.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/kontrakte/KontraktAlarmDashboard/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/kontrakte/KontraktAlarmDashboard/agent-contract` |
-| Readiness | `GET /api/v1/masks/kontrakte/KontraktAlarmDashboard/readiness` |
-| Rollout-Route | `/mask-rollout/kontrakte__KontraktAlarmDashboard/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `entity` → `/api/v1/kontrakte`
-
-**Beispiel-Prompts:**
-
-- Zeige KontraktAlarmDashboard.
-- Aktualisiere die Kennzahlen.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `refresh` | Aktualisieren | safe | nein | `—` |
-
----
-
-### `kontrakte/LstKontraktUebersicht` — LstKontraktUebersicht
-
-**Zweck:** LstKontraktUebersicht mandantensicher als Cockpit bereitstellen.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/kontrakte/LstKontraktUebersicht/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/kontrakte/LstKontraktUebersicht/agent-contract` |
-| Readiness | `GET /api/v1/masks/kontrakte/LstKontraktUebersicht/readiness` |
-| Rollout-Route | `/mask-rollout/kontrakte__LstKontraktUebersicht/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `entity` → `/api/v1/kontrakte`
-
-**Beispiel-Prompts:**
-
-- Zeige LstKontraktUebersicht.
-- Aktualisiere die Kennzahlen.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `refresh` | Aktualisieren | safe | nein | `—` |
-
----
-
 ### `kontrakte/mengenzeitraeume` — Kontrakt wählen
 
 **Zweck:** Kontrakt wählen als Stammblatt pflegen.
@@ -26563,40 +26967,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 ---
 
 ## Domäne: workspace
-
-### `contracts-v2` — Contracts v2
-
-**Zweck:** Contracts v2 im workspace-Bereich finden und auswerten.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/contracts-v2/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/contracts-v2/agent-contract` |
-| Readiness | `GET /api/v1/masks/contracts-v2/readiness` |
-| Rollout-Route | `/mask-rollout/contracts-v2/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/kontrakte`
-
-**MCP-Tools (Domäne):**
-
-- `workspace.fachaktion.katalog` — scope `agent:read`, Risiko niedrig
-- `workspace.fachaktion.resolve` — scope `agent:read`, Risiko niedrig
-
-**Beispiel-Prompts:**
-
-- Zeige Contracts v2.
-- Filtere die Liste.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
 
 ### `inventory-reports` — Inventory reports
 

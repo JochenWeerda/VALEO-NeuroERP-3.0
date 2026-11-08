@@ -1761,22 +1761,6 @@ def build_kontrakte_kontraktklassen_liste() -> dict[str, Any]:
         no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
     )
 
-def build_kontrakte_liste() -> dict[str, Any]:
-    return _liste(
-        screen_id="kontrakte/liste", domain="agrar", title="Kontrakte", subtitle="Einkaufs- und Verkaufskontrakte",
-        endpoint="/api/v1/kontrakte", row_route="/kontrakte/{id}", bundle="agrar",
-        columns=[
-            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
-            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
-            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
-            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
-        ],
-        actions=[_neu("Neuer Kontrakt", "/kontrakte/neu"), _EXPORT],
-        row_actions=[],
-        purpose="Kontrakte: Eintraege finden und Details oeffnen.",
-        prompts=["Welche offenen Kontrakte?", "Zeige aktuelle Kontrakte."],
-        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
-    )
 
 def build_lager_lagerbewegungen_liste() -> dict[str, Any]:
     return _liste(
@@ -3324,7 +3308,6 @@ LISTEN_SCREEN_BUILDERS = {
     "fuhrpark/rechnungen-liste": build_fuhrpark_rechnungen_liste,
     "genossenschaft/mitglieder-liste": build_genossenschaft_mitglieder_liste,
     "kontrakte/kontraktklassen-liste": build_kontrakte_kontraktklassen_liste,
-    "kontrakte/liste": build_kontrakte_liste,
     "lager/inventur-liste": build_lager_inventur_liste,
     "lager/lagerbewegungen-liste": build_lager_lagerbewegungen_liste,
     "lager/partiestamm-liste": build_lager_partiestamm_liste,
@@ -3398,7 +3381,6 @@ LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/
                 "finance/ap-invoices-liste": "/finance/ap-invoices-list",
                 "finance/payment-matching-liste": "/finance/payment-matching",
                 "finance/bookings/new": "/finance/bookings/new",
-                "kontrakte/liste": "/kontrakte/LstKontraktUebersicht",
                 "dokumente/ablage-liste": "/dokumente/ablage",
                 "vertrag/rahmenvertraege-liste": "/vertrag/rahmenvertraege",
                 "tankstelle/zapfungen-liste": "/tankstelle/zapfungen",

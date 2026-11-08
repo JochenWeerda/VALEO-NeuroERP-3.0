@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-07
+last_reviewed: 2026-11-08
 version: 3.0.0
 description: Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -273,6 +273,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `kontrakt_hedging` | Kontrakt-Hedging und MATIF-Preisbindung. |
 | `kontrakt_klassen` | Kontrakt-Klassen und Kontraktvarianten (Agrar-Spezialsoftware Feature). |
 | `kontrakt_mengenzeitraum` | Kontraktmengenzeitraum — Ratierliche Lieferpläne für Rohwarenkontrakte. |
+| `kontrakt_vorgang` | Kontrakt-Vorgang: Lese- und Kommandowege der Maskenfamilien ``kontrakt`` und ``kontrakt-liste`` (08.11.2026). |
 | `kontrakte` | Kontrakte endpoints — contract CRUD, movements, amendments, dispositionen. |
 | `kontrolle` | Pruefkorb des Controllers (FIN-CONTROL-001). |
 | `kostenrechnung` | Kostenrechnung: Kostenstellen, Kostenarten, Kostenstellen-Buchungen. |

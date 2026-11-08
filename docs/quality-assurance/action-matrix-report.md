@@ -5,13 +5,13 @@ type: reference
 audience: [qa, entwickler]
 owner: Claude Code
 status: aktiv
-last_reviewed: 2026-11-05
+last_reviewed: 2026-11-08
 version: 3.0.0
 ---
 
 # Action-Matrix-Report
 
-> Generiert via `scripts/generate_action_matrix_report.py` · 2026-11-05 19:56:53 UTC
+> Generiert via `scripts/generate_action_matrix_report.py` · 2026-11-08 18:25:12 UTC
 
 ## Übersicht
 
@@ -159,4 +159,4 @@ version: 3.0.0
 
 - wms-003/004/005: QS-Freigabe und Auslagerung ohne E2E
 
-*Stand: 2026-11-05 19:56:53 UTC · 38 Aktionen · Slice: SEMANTIC-ACTION-MATRIX-002*
+*Stand: 2026-11-08 18:25:12 UTC · 38 Aktionen · Slice: SEMANTIC-ACTION-MATRIX-002*
