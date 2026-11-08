@@ -146,6 +146,10 @@ _IDENTITAET = {
     "agrar/feeding-plan": "name",
     "agrar/harvest-settlement": "settlement_number",
     "agrar/kontrakte": "contract_no",
+    # Familie kontrakt (08.11.2026): ein Kopf fuer Erfuellung, Fixierung, Abrechnung.
+    "kontrakt/abrechnung": "contract_no",
+    "kontrakt/erfuellung": "contract_no",
+    "kontrakt/fixierung": "contract_no",
     "crm/customer-360": "firma",
     "agrar/ration": "name",
     "agrar/saatgut": "artikelnummer",
