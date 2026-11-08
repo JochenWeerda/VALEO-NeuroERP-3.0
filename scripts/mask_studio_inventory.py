@@ -311,7 +311,10 @@ def _cli_commands() -> set[str]:
 
 
 #: Bewusst Menschen vorbehalten: so deklariert die ScreenDefinition (oder ein Adapter/Eingabefluss der Maske).
-AGENT_GESPERRT = {"fuer_agenten_gesperrt", "menschliche_genehmigung", "adapter_nur_mensch", "eingabe_in_maske"}
+#: ``capability_nicht_freigegeben``: Standard-Sperre fuer Masken-Schreibwege ohne Freigabe in
+#: ``config/mcp_erp_tools.yaml`` (mcp_write_capability) — der Agent kommt nicht durch, also gesperrt.
+AGENT_GESPERRT = {"fuer_agenten_gesperrt", "menschliche_genehmigung", "adapter_nur_mensch", "eingabe_in_maske",
+                  "capability_nicht_freigegeben"}
 
 
 def actions() -> list[dict]:

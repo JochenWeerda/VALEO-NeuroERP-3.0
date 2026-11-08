@@ -6343,7 +6343,7 @@
       "version": "1.0.0"
     },
     "logistik/versandprofile": {
-      "definition_hash": "dde70f15dbee438558f08a434059e3205ce45985b39db299aecb733cdefb8908",
+      "definition_hash": "0a675c3d2dfc50ebbddd2c313796cba83d87037e5e35b302f0445ad4e8058d44",
       "gates_passed": [
         "A",
         "B",
@@ -6475,7 +6475,7 @@
       "version": "1.0.0"
     },
     "personal/onboarding": {
-      "definition_hash": "8e0f1d7b1496fd092d00335ae88419b9889d3c7338043e8932a5f53bc8dcf137",
+      "definition_hash": "58f31849e6a3119da6c879abe1163fea34c24e25d533d30537a4023e229c0f83",
       "gates_passed": [
         "A",
         "B",
@@ -6497,7 +6497,7 @@
       "version": "1.0.0"
     },
     "personal/qualifikationen": {
-      "definition_hash": "6fdbe171d9407668b61f1bea1f29547eaf0804e8ae15195709aa6743648069ce",
+      "definition_hash": "4f4dfba18e24d1e3cc92803cea86b38ec944b14c206d705a5a72bc23cefd3d7a",
       "gates_passed": [
         "A",
         "B",
@@ -6519,7 +6519,7 @@
       "version": "1.0.0"
     },
     "personal/schulungen": {
-      "definition_hash": "08aeea66516ca4d576091bc70fed64f3c4180f3e2ae67c9fdcfd3f1195e0e0bf",
+      "definition_hash": "c1edd980dd5e8d0a4314f3175b3334f7a16a0b3a74f16c59662e7204a96f36ea",
       "gates_passed": [
         "A",
         "B",

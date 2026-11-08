@@ -605,10 +605,10 @@
    },
    "standardmandant_stellen": [],
    "null_stellen": [
-    "app/services/mcp_execution_service.py:3153"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3153"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "daten": {
     "zeilen": 1298,
@@ -1184,11 +1184,11 @@
     "app/api/v1/endpoints/compat.py:1843",
     "app/api/v1/endpoints/compat.py:1866",
     "app/api/v1/endpoints/finance_invoices.py:114",
-    "app/services/mcp_execution_service.py:3153"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "gemeinsam_stellen": [
     "app/api/v1/endpoints/finance_invoices.py:114",
-    "app/services/mcp_execution_service.py:3153"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "daten": {
     "zeilen": 6,
@@ -1344,10 +1344,10 @@
     "app/api/v1/endpoints/compat.py:1836",
     "app/api/v1/endpoints/compat.py:1843",
     "app/api/v1/endpoints/compat.py:1866",
-    "app/services/mcp_execution_service.py:3153"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3153"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "daten": {
     "zeilen": 0,
@@ -1452,10 +1452,10 @@
     "app/api/v1/endpoints/compat.py:1836",
     "app/api/v1/endpoints/compat.py:1843",
     "app/api/v1/endpoints/compat.py:1866",
-    "app/services/mcp_execution_service.py:3153"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3153"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "daten": {
     "zeilen": 97,
@@ -1672,12 +1672,12 @@
     "app/api/v1/endpoints/compat.py:1843",
     "app/api/v1/endpoints/compat.py:1866",
     "app/api/v1/endpoints/finance_invoices.py:114",
-    "app/services/mcp_execution_service.py:3153"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "gemeinsam_stellen": [
     "app/api/v1/endpoints/finance_invoices.py:114",
     "app/api/v1/endpoints/sales_credit_notes.py:563",
-    "app/services/mcp_execution_service.py:3153"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "daten": {
     "zeilen": 25,
@@ -1839,10 +1839,10 @@
    },
    "standardmandant_stellen": [],
    "null_stellen": [
-    "app/services/mcp_execution_service.py:3153"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3153"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "daten": {
     "zeilen": 3,
@@ -1882,10 +1882,10 @@
    "identitaet": {},
    "standardmandant_stellen": [],
    "null_stellen": [
-    "app/services/mcp_execution_service.py:3153"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3153"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "daten": {
     "zeilen": 0,
@@ -1925,10 +1925,10 @@
    "identitaet": {},
    "standardmandant_stellen": [],
    "null_stellen": [
-    "app/services/mcp_execution_service.py:3153"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3153"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "daten": {
     "zeilen": 0,
@@ -1977,10 +1977,10 @@
    },
    "standardmandant_stellen": [],
    "null_stellen": [
-    "app/services/mcp_execution_service.py:3153"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3153"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "daten": {
     "zeilen": 0,
@@ -2025,10 +2025,10 @@
    },
    "standardmandant_stellen": [],
    "null_stellen": [
-    "app/services/mcp_execution_service.py:3153"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3153"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "daten": {
     "zeilen": 0,
@@ -2078,10 +2078,10 @@
    },
    "standardmandant_stellen": [],
    "null_stellen": [
-    "app/services/mcp_execution_service.py:3153"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3153"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "daten": {
     "zeilen": 3,
@@ -2162,10 +2162,10 @@
    },
    "standardmandant_stellen": [],
    "null_stellen": [
-    "app/services/mcp_execution_service.py:3153"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3153"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "daten": {
     "zeilen": 4,
@@ -2223,10 +2223,10 @@
    },
    "standardmandant_stellen": [],
    "null_stellen": [
-    "app/services/mcp_execution_service.py:3153"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3153"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "daten": {
     "zeilen": 50,
@@ -2619,10 +2619,10 @@
    "standardmandant_stellen": [],
    "null_stellen": [
     "app/api/v1/endpoints/logistics_freight.py:7",
-    "app/services/mcp_execution_service.py:3153"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3153"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "daten": {
     "zeilen": 0,
@@ -2921,10 +2921,10 @@
    },
    "standardmandant_stellen": [],
    "null_stellen": [
-    "app/services/mcp_execution_service.py:3153"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3153"
+    "app/services/mcp_execution_service.py:3159"
    ],
    "daten": {
     "zeilen": 1,
@@ -3449,6 +3449,7 @@
     "app/services/studio_entity_commands.py",
     "app/services/studio_entity_simulation.py",
     "app/services/tenant_lifecycle_service.py",
+    "app/services/versandprofil_commands.py",
     "app/services/waage_import_service.py"
    ],
    "worker": [],

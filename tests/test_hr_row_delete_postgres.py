@@ -23,8 +23,7 @@ def probe(monkeypatch):
         pytest.skip("explicit shared probe URL required")
     url = make_url(raw)
     assert url.database == "valeo_probe"
-    assert os.environ.get("PGAPPNAME") == "agent:hr-row-delete"
-    engine = create_engine(url, connect_args={"connect_timeout": 5})
+    engine = create_engine(url, connect_args={"connect_timeout": 5, "application_name": "agent:hr-row-delete"})
     identity = SimpleNamespace(subject="hr-row-delete-test", tenant_id=TENANT,
                                roles={"PERSONAL_BEARBEITEN"}, claims={"identity_type": "human"})
     monkeypatch.setattr(service, "current_identity", lambda: identity)

@@ -20598,3 +20598,6 @@ Besitz acht HR-/Versand-Routendeklarationen, Summary-Gate und OpenAPI/QA. Expliz
 
 ## KATALOG-LINEAGE-20261108 — reserviert, Codex Subagent row_response_contracts
 Besitz docs/admin/table-catalog.json und .md, eigene QA. CI-Artefakt13589076577 aus Lauf42410114687/Job128516616359/Head525d3b212 uebernehmen; physische Gleichheit31Schemata/700Tabellen belegt, ausschliesslichLineage. KeineDB/Migration, keineGateaufweichung.
+
+## CI-PR115-UEBERNAHME-20261108 — abgeschlossen, Claude Code (uebernimmt Codex Lead)
+Codex hat das Nutzungslimit erreicht; Claude Code bringt PR #115 (`codex/sonar-contracts-20261106`) nach main. Quality-Gate-Lauf 42464912905 rot: (1) drei Postgres-Testdateien verlangten lokales `PGAPPNAME` — Verbindungsname jetzt per `application_name` in der Verbindung (DDL-Protokoll bleibt). (2) Masken-Ratsche: Standard-Sperre `capability_nicht_freigegeben` (ef1c1219c) zaehlt als gesperrt statt unklassifiziert; Baseline nur geschrumpft. (3) Aktionsrechte, Studio-Katalog und RLS-Matrix neu erzeugt. SBOM-Fehler war GitHub-HTTP-504, laeuft mit dem neuen Push erneut. Dateibesitz: nur die genannten Projektionen/Tests, `scripts/mask_studio_inventory.py`, Workboard.

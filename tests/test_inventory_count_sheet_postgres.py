@@ -23,8 +23,7 @@ def probe(monkeypatch):
         pytest.skip('explicit shared probe URL required')
     url = make_url(raw)
     assert url.database == 'valeo_probe'
-    assert os.environ.get('PGAPPNAME') == 'agent:inventory-count-sheet'
-    engine = create_engine(url, connect_args={'connect_timeout': 5})
+    engine = create_engine(url, connect_args={'connect_timeout': 5, 'application_name': 'agent:inventory-count-sheet'})
     identity = SimpleNamespace(subject='inventory-count-sheet-test', tenant_id=TENANT,
                                roles={'LAGER_BEARBEITEN'}, scopes={'masks:write'},
                                claims={'identity_type': 'human'})

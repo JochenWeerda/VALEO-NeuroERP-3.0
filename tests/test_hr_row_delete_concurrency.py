@@ -21,8 +21,7 @@ ACTION = "hr.qualification.delete.v1"
 def test_parallel_identical_hr_commands_produce_one_effect_and_one_replay(monkeypatch):
     url = make_url(os.environ["TEST_DATABASE_URL"])
     assert url.database == "valeo_probe"
-    assert os.environ.get("PGAPPNAME") == "agent:hr-row-delete-concurrency"
-    engine = create_engine(url, poolclass=NullPool, connect_args={"connect_timeout": 5})
+    engine = create_engine(url, poolclass=NullPool, connect_args={"connect_timeout": 5, "application_name": "agent:hr-row-delete-concurrency"})
     row_id, key = str(uuid4()), f"hr-race-{uuid4()}"
     actor = f"hr-race-{uuid4()}"
     principal = SimpleNamespace(subject=actor, tenant_id=TENANT, roles={"PERSONAL_BEARBEITEN"},
