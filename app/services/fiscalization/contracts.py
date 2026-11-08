@@ -10,6 +10,18 @@ from pydantic import BaseModel, Field
 ProviderName = Literal["fiskaly", "swissbit_cloud", "swissbit_gateway", "simulation"]
 
 
+#: Umsatzsteuersaetze, die eine deutsche Kasse nach DSFinV-K signieren kann (§ 146a AO, ``amounts_per_vat_rate``).
+#: Das ist Kassenrecht des Landes, keine Steuerregel: welcher Satz gilt, kommt aus den Steuerschluesseln
+#: des Mandanten (``app.finance.steuerschluessel``); hier steht nur, wie die Kasse ihn meldet.
+DSFINVK_UST_SAETZE: dict[Decimal, str] = {
+    Decimal("19"): "NORMAL",
+    Decimal("7"): "REDUCED_1",
+    Decimal("10.7"): "SPECIAL_RATE_1",
+    Decimal("5.5"): "SPECIAL_RATE_2",
+    Decimal("0"): "NULL",
+}
+
+
 class FiscalLine(BaseModel):
     text: str
     quantity: Decimal = Decimal("1")

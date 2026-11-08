@@ -27,10 +27,10 @@ from sqlalchemy.orm import Session
 from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
-from app.services.fiscalization.contracts import FinishTransactionCommand, FiscalLine, PaymentLine
+from app.services.fiscalization.contracts import DSFINVK_UST_SAETZE, FinishTransactionCommand, FiscalLine, PaymentLine
 from app.services.fiscalization.providers import FiscalProviderError
 from app.services.fiscalization.service import FiscalizationService, FiscalNotConfiguredError
-from app.finance.steuerschluessel import Steuerklaerung, satz_des_schluessels
+from app.finance.steuerschluessel import Steuerklaerung, satz_des_schluessels, schluessel_auswahl
 
 router = APIRouter()
 
@@ -39,8 +39,6 @@ CENT = Decimal("0.01")
 #: Zahlarten der Kasse -> Zahlart der Fiskalisierung (wie ``payMap`` im Terminal).
 ZAHLART = {"bar": "CASH", "ec": "NON_CASH", "paypal": "NON_CASH", "b2b": "INTERNAL", "gift_card": "INTERNAL"}
 
-#: Steuersaetze, die die Kasse signieren kann (DSFinV-K ``amounts_per_vat_rate``).
-KASSEN_STEUERSAETZE = frozenset({Decimal("19"), Decimal("7"), Decimal("10.7"), Decimal("5.5"), Decimal("0")})
 
 
 class RetourPosition(BaseModel):
@@ -130,8 +128,15 @@ def _steuersatz_aus_stamm(db: Session, tenant_id: str, artikelnr: Optional[str])
 
 
 def _kassensatz(satz: Decimal) -> Decimal:
-    if satz not in KASSEN_STEUERSAETZE:
+    if satz not in DSFINVK_UST_SAETZE:
         raise HTTPException(422, f"Steuersatz {satz.normalize():f} % kann an der Kasse nicht signiert werden.")
+    return satz
+
+
+def _satz_des_mandanten(db: Session, tenant_id: str, satz: Decimal) -> Decimal:
+    """Ein vom Terminal gemeldeter Satz gilt nur, wenn ein gueltiger Verkaufs-Steuerschluessel des Mandanten ihn fuehrt."""
+    if not any(wahl.steuersatz == satz for wahl in schluessel_auswahl(db, tenant_id, "verkauf")):
+        raise HTTPException(422, f"Steuersatz {satz.normalize():f} % hat keinen gueltigen Verkaufs-Steuerschluessel.")
     return satz
 
 
@@ -293,10 +298,12 @@ async def pos_checkout(
     db: Session = Depends(get_db),
 ):
     """Abgleich der Offline-Warteschlange: derselbe signierte Kassenbeleg wie beim Online-Verkauf."""
+    service = FiscalizationService(db, tenant_id)
+    kasse = _kasse(service)
     zeilen: list[FiscalLine] = []
     summe = Decimal("0")
     for pos in data.cart:
-        satz = _kassensatz(pos.vat_rate if pos.vat_rate is not None
+        satz = _kassensatz(_satz_des_mandanten(db, tenant_id, pos.vat_rate) if pos.vat_rate is not None
                            else _steuersatz_aus_stamm(db, tenant_id, pos.artikelnr))
         brutto = (pos.preis * (Decimal("1") - pos.rabatt_pct / Decimal("100")) * pos.menge).quantize(CENT)
         summe += brutto
@@ -306,9 +313,6 @@ async def pos_checkout(
     zahlungen = [PaymentLine(method=_zahlart(z.art), amount=z.betrag) for z in data.zahlungen]
     if not _gleich(sum((z.amount for z in zahlungen), Decimal("0")), summe):
         raise HTTPException(422, "Die Zahlungen decken den Gesamtbetrag nicht genau.")
-
-    service = FiscalizationService(db, tenant_id)
-    kasse = _kasse(service)
     signiert = _signiere(service, FinishTransactionCommand(
         terminal_id=(kasse.get("settings") or {}).get("terminal_id") or kasse["client_id"],
         cash_register_id=kasse["cash_register_id"],

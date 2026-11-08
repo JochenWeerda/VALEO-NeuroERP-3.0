@@ -135,6 +135,17 @@ def test_steuersatz_nie_angenommen(pruefstand, artikel):
     assert fehler.status_code == 422
 
 
+def test_terminalsatz_nur_mit_steuerschluessel_des_mandanten(pruefstand):
+    """10,7 % kann die Kasse melden, der Mandant fuehrt dafuer aber keinen Schluessel — der Satz kommt nicht vom Terminal."""
+    session, sql, ids = pruefstand
+    offline_id = f"offline-{uuid4()}"
+    fehler = _fehler(lambda: _checkout(session, ids["a"], offline_id=offline_id, gesamt="5",
+                                       zahlungen=[{"art": "bar", "betrag": "5"}],
+                                       cart=[{"bezeichnung": "x", "preis": "5", "menge": 1, "vat_rate": "10.7"}]))
+    assert fehler.status_code == 422
+    assert _fiskal(sql, ids["a"], offline_id) == []
+
+
 def test_ohne_kasse_des_mandanten_kein_erfolg(pruefstand):
     """Mandant b hat keine Fiskalisierung — die Kasse von a gilt nicht fuer ihn."""
     session, sql, ids = pruefstand
