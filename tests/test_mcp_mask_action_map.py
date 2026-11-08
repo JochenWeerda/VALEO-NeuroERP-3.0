@@ -95,7 +95,7 @@ def test_mcp_mask_action_map_covers_top_writes_and_blocks_fin_close():
 
 
 def test_row_commands_reflect_explicit_capability_release():
-    """Each row write uses its exact registered, versioned capability."""
+    """Each row write carries its versioned domain command; release follows the registry phase."""
     from app.core.screen_definitions import get_screen_definition
     from app.services.mcp_mask_actions import agent_block, iter_actions
     from scripts.generate_mcp_mask_action_map import _generic_coverage
@@ -111,12 +111,9 @@ def test_row_commands_reflect_explicit_capability_release():
         assert action["command"] == command and action["commandEndpoint"] == endpoint
         assert action["domainCommand"].endswith(".v1")
         coverage = _generic_coverage({"mask": screen, "source": {"actionKey": "loeschen"}})
-        if screen == "logistik/versandprofile":
-            assert agent_block(action, screen) is None
-            assert coverage["coverage"] == "mapped_generic" and coverage["mcp_tool_id"] == "mask.action.execute"
-        else:
-            assert agent_block(action, screen) == "capability_nicht_freigegeben"
-            assert coverage["coverage"] == "blocked_unreleased" and coverage["mcp_tool_id"] is None
+        # Entwicklungsphase (agent_write_phase: entwicklung): jeder deklarierte Kommandoweg ist freigegeben.
+        assert agent_block(action, screen) is None
+        assert coverage["coverage"] == "mapped_generic" and coverage["mcp_tool_id"] == "mask.action.execute"
 
 
 def test_invalid_read_view_is_not_misclassified_as_human_policy(monkeypatch):
