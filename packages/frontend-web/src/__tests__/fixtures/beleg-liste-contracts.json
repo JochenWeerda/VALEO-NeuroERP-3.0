@@ -26,7 +26,6 @@
     "key": "print",
     "label": "Drucken",
     "localEffect": "print",
-    "stubReason": "Druckt die sichtbare Liste; keine Serverwirkung.",
     "zone": "header"
    },
    {
@@ -273,8 +272,8 @@
    "baseHash": "0472e1817831f20cfec4ff6434bedb95fd89a4a5efc389fa9ba1377a01c98429",
    "baseVersion": "1.0.0",
    "family": "beleg-liste",
-   "materializedHash": "b1a802c20ec2516fb2259c8ef493fb2f24e9197f19fd17b8e6956da747e2cd36",
-   "variantHash": "048fde9f995eca975e4a4cd186993681850cec2c2d637bdbaf800dfb37f165be",
+   "materializedHash": "0484f0351a67cd979a71bffcff5d4e81ebfdf451424c990411709c3123ea98af",
+   "variantHash": "e3cb3733d70f13a523a9cd8f429eb8dc240c4df0b243a4ea74a77c11df67deb1",
    "variantId": "sales_delivery",
    "variantVersion": "1.0.0"
   },
@@ -522,7 +521,6 @@
     "key": "print",
     "label": "Drucken",
     "localEffect": "print",
-    "stubReason": "Druckt die sichtbare Liste; keine Serverwirkung.",
     "zone": "header"
    },
    {
@@ -787,8 +785,8 @@
    "baseHash": "0472e1817831f20cfec4ff6434bedb95fd89a4a5efc389fa9ba1377a01c98429",
    "baseVersion": "1.0.0",
    "family": "beleg-liste",
-   "materializedHash": "dc159931d0b1671e464cd674dae17eee0f1cf792a872aa68eb59b054c25fd676",
-   "variantHash": "a3b5106edf45c450ea739b88af981893900e8325f8478365c33f1b5d33feaa07",
+   "materializedHash": "badd9b40b07f3e31a8e65994b5563aecccd181e03b27a1981250bb6653a745f7",
+   "variantHash": "1c08eee999278ab503bdb8ba45dcedb4d187cd41e247d2f24f224f869bcdcbe1",
    "variantId": "sales_invoice",
    "variantVersion": "1.0.0"
   },
@@ -1073,7 +1071,6 @@
     "key": "print",
     "label": "Drucken",
     "localEffect": "print",
-    "stubReason": "Druckt die sichtbare Liste; keine Serverwirkung.",
     "zone": "header"
    },
    {
@@ -1332,8 +1329,8 @@
    "baseHash": "0472e1817831f20cfec4ff6434bedb95fd89a4a5efc389fa9ba1377a01c98429",
    "baseVersion": "1.0.0",
    "family": "beleg-liste",
-   "materializedHash": "51df8f587086a8a8808b73ac18d452b89c84dd58914bc7a21c9e8a3ed5cfcdc7",
-   "variantHash": "7085d21fc577160ede758ebddd299f5eacd9b221edeb3a6fbe75b43080e1ca31",
+   "materializedHash": "2b346bbb5b9920b9426bbecac47d125e3121cc2f23ef088c2329da86c40e262c",
+   "variantHash": "0b60670843dbf75770f2dfbda8525aed0531548b2513e16fe7475482dd6821b3",
    "variantId": "sales_offer",
    "variantVersion": "1.0.0"
   },
