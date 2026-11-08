@@ -18,10 +18,7 @@ $SERVICES = @(
     "crm-analytics"
     "crm-communication"
     "crm-multichannel"
-    "crm-marketing"
     "crm-ai"
-    "crm-consent"
-    "crm-gdpr"
     "inventory"
 )
 

@@ -20617,3 +20617,11 @@ tests/test_rls_domain_inventory.py (Retoure mit vorgang_id, Steuerschluessel und
 durch). Nachweis valeo_probe: test_pos_checkout_wahrheit 18/18, POS-Faelle aus RLS/Honest-Outcomes 9/9;
 OpenAPI und Code-Inventare nachgezogen, Doc-Generatoren gruen.
 Offen: Die POS-Studio-Masken lesen fast alle /pos/dsfinvk/export (Scheinweg) - eigener Batch.
+
+## CRM-DIENSTKOPIEN-ENTFERNEN-20261108 — abgeschlossen, Claude Code
+
+Duplikatpruefung vor dem Merge von #54: services/crm-consent, crm-gdpr und crm-marketing liefen nie (nicht in Compose),
+wurden von keinem Code aufgerufen und sind im Backend gefuehrt (crm_consents.py, gdpr.py/gdpr_requests.py/compliance_dsgvo.py,
+crm_campaigns.py/crm_segments.py; Nutzerentscheidung 04.11.: crm_campaigns fuehrt). Entfernt statt Ketten repariert; #54
+geschlossen. Ratsche OHNE_EIGENE_VERSIONSTABELLE = {crm-ai}; Migrationsskripte, Sonar-Ausnahmen e4/e15, RLS-Inventar/-Matrix
+nachgezogen.
