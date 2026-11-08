@@ -20631,3 +20631,10 @@ sales/invoices (+ Alias verkauf/rechnungen), einkauf/bestellungen, finance/ap-in
 einkauf/rechnungseingaenge-liste; sales/lieferungen/neu legt jetzt ueber die Belegmaske an. Offen: Bestellung versenden,
 Rechnungspruefung (BELEG-043), CSV-Import Angebote (Altimport legt Koepfe ohne Positionen an - Fachfrage);
 Stufe 2 Detail-/Erfassungsseiten umhaengen, Stufe 3 Altspeicher abbauen.
+## CRM-DIENSTKOPIEN-ENTFERNEN-20261108 — abgeschlossen, Claude Code
+
+Duplikatpruefung vor dem Merge von #54: services/crm-consent, crm-gdpr und crm-marketing liefen nie (nicht in Compose),
+wurden von keinem Code aufgerufen und sind im Backend gefuehrt (crm_consents.py, gdpr.py/gdpr_requests.py/compliance_dsgvo.py,
+crm_campaigns.py/crm_segments.py; Nutzerentscheidung 04.11.: crm_campaigns fuehrt). Entfernt statt Ketten repariert; #54
+geschlossen. Ratsche OHNE_EIGENE_VERSIONSTABELLE = {crm-ai}; Migrationsskripte, Sonar-Ausnahmen e4/e15, RLS-Inventar/-Matrix
+nachgezogen.

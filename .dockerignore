@@ -71,3 +71,5 @@ docs/admin/**
 !docs/admin/table-catalog.json
 *.md
 !README.md
+!.oss-scanner/README.md
+!.oss-scanner/threat_model.md
