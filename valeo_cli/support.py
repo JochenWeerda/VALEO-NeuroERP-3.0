@@ -246,18 +246,19 @@ def missing_required(action: dict[str, Any], payload: dict[str, Any]) -> list[st
 
 
 def creation_request(definition: dict[str, Any], payload: dict[str, Any], *, idempotency_key: str | None,
-                     is_agent: bool) -> tuple[str, dict[str, Any]]:
+                     is_agent: bool = False) -> tuple[str, dict[str, Any]]:
     """Anlage ueber den ``creation``-Block der ScreenDefinition — wie ``UniversalNativeCreatePage``.
 
     Es zaehlen nur die nicht schreibgeschuetzten Anlagefelder; Vorgaben der Maske gelten, leere Werte fallen weg.
     Belegfamilien (``docflow.create.v1``) legt ``ausfuehren`` ueber ihren Adapter an, nicht diese Anlage.
-    Agenten legen hier nichts an: Wie bei MCP gilt ohne ausdrueckliche Freigabe die Sperre.
+    Agenten duerfen anlegen (Entwicklungsphase, Nutzerentscheidung 08.11.2026, wie ``mask.action.execute``); Rechte,
+    Mandant und Validierung prueft der Server. Eine fachliche Sperre der Anlage (``forbiddenForAgents``) gilt weiter.
     """
     creation = definition.get("creation")
     if not isinstance(creation, dict) or not isinstance(creation.get("endpoint"), str):
         raise ValueError("Fuer diese Maske ist keine Neuanlage freigegeben.")
-    if is_agent:
-        raise PermissionError("Anlage nur durch Menschen (keine Agenten-Freigabe).")
+    if is_agent and creation.get("forbiddenForAgents"):
+        raise PermissionError("Diese Anlage ist Menschen vorbehalten (forbiddenForAgents).")
     if creation.get("adapter"):
         raise ValueError(f"Anlage ueber Adapter {creation['adapter']} nicht per CLI.")
     endpoint = creation["endpoint"]

@@ -77,8 +77,8 @@ python -m valeo_cli anlegen crm/customer-360 --daten kunde.json --json
 (`UniversalNativeCreatePage`): nur die nicht schreibgeschuetzten Anlagefelder, Vorgaben der Maske, Pflichtfelder
 vor dem Senden, Wiederholungsschluessel, wenn die Anlage ihn verlangt (`--idempotenz` wiederholt). Unbekannte
 Felder (auch `tenant_id`) lehnt die CLI ab, bevor sie etwas sendet. Erfolg nur mit Datensatz-ID in der Antwort.
-Belegfamilien (`docflow.create.v1`) legen nicht hier an. Agenten legen nicht an: Wie bei MCP gilt ohne
-ausdrueckliche Freigabe die Sperre.
+Belegfamilien (`docflow.create.v1`) legen nicht hier an. Agenten duerfen anlegen (Entwicklungsphase,
+Nutzerentscheidung 08.11.2026); Rechte prueft der Server.
 
 ## Masken im Studio erzeugen
 

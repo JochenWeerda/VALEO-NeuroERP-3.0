@@ -233,7 +233,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `mcp_studio_authoring` | Studio-Authoring fuer Agenten (MCP/CLI): ein LLM baut Masken nur ueber Studio, nie daran vorbei. |
 | `mcp_studio_plans` | Versioned Studio-authoring capability; only the registered HTTP command writes. |
 | `mcp_tool_registry_service` | MCP-ERP-TOOLS-001 — Rollenbasierter ERP-Tool-Katalog fuer Agent-Zugriff. |
-| `mcp_write_capability` | Explicit registry release for generic MCP writes; all other writes fail closed. |
+| `mcp_write_capability` | Freigabe generischer Agenten-Schreibwege (MCP ``mask.action.execute`` und Kommandowege mit Agentenpruefung). |
 | `meldewesen_lifecycle_service` | DOM-MEL-004.2 — Meldewesen Lifecycle (Intrastat/ELSTER/ATLAS — extern gegated). |
 | `milchvieh_crosssell_service` | Cross-Sell-Auswertung Milchvieh: Hygiene-Bedarf + Kraftfutter-Potenzial. |
 | `mobile_sync_service` | MOB-SYNC-001: Mobile Offline-Sync Service. |
