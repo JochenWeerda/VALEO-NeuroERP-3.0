@@ -246,6 +246,31 @@ def cmd_ausfuehren(args, http, token, out, ask: Callable[[str], str], stdin) -> 
     return 1 if isinstance(result, dict) and result.get("success") is False else 0
 
 
+def cmd_anlegen(args, http, token, out, stdin) -> int:
+    """Neuanlage ueber den ``creation``-Block der ScreenDefinition — derselbe Weg wie die native Anlagemaske."""
+    definition = _definition(http, token, args.maske)
+    creation = definition.get("creation") or {}
+    fields = {"inputFields": creation.get("fields") or []}
+    payload = {**_read_data(args.daten, stdin), **support.coerce_fields(fields, _parse_fields(args.feld))}
+    key = args.idempotenz or (str(uuid.uuid4()) if creation.get("requiresIdempotencyKey") else None)
+    try:
+        path, body = support.creation_request(definition, payload, idempotency_key=key, is_agent=_is_agent(token))
+    except PermissionError as exc:
+        out(str(exc))
+        return 1
+    result = _send_retryable(http, token, "POST", path, body, key, out) if key else _request(http, token, "POST", path, body)
+    entity_id = result.get("id") if isinstance(result, dict) else None
+    if not entity_id:
+        out("ABGELEHNT: Anlageantwort enthaelt keine Datensatz-ID.")
+        return 1
+    if args.json:
+        out(json.dumps(result if not key else {**result, "idempotenz": key}, ensure_ascii=False, indent=2))
+    else:
+        route = str(creation.get("detailRoute") or "").replace("{entity_id}", quote(str(entity_id), safe=""))
+        out(f"Angelegt: {entity_id}" + (f" ({route})" if route else ""))
+    return 0
+
+
 def _send_retryable(http, token, method, path, body, key, out):
     """Unsicherer Ausgang (Netz oder 5xx nach dem Absenden): Schluessel nennen, damit die Wiederholung derselbe
     Auftrag bleibt - wie die Maske, die nach einem unsicheren Ergebnis denselben Schluessel wiederverwendet."""
@@ -349,6 +374,12 @@ def parser() -> argparse.ArgumentParser:
     x.add_argument("--regel", metavar="VERSIONSKENNUNG", help="Regelfassung (Ernte-Steuerung)")
     x.add_argument("--version", type=int, help="Gesehene Belegversion (Belege); sonst die aktuelle")
     x.add_argument("--json", action="store_true", help="Antwort vollstaendig als JSON")
+    n = sub.add_parser("anlegen", help="Datensatz ueber die Anlage der Maske (creation) neu anlegen")
+    n.add_argument("maske")
+    n.add_argument("--feld", action="append", default=[], metavar="NAME=WERT")
+    n.add_argument("--daten", metavar="DATEI|-", help="Eingabe als JSON-Objekt")
+    n.add_argument("--idempotenz", metavar="SCHLUESSEL", help="Wiederholung mit demselben Schluessel")
+    n.add_argument("--json", action="store_true", help="Antwort vollstaendig als JSON")
     studio.add_parser(sub)
     return p
 
@@ -417,6 +448,8 @@ def main(argv: list[str] | None = None, *, http: httpx.Client | None = None, out
             return cmd_aktionen(args, http, token, out)
         if args.befehl == "zeigen":
             return cmd_zeigen(args, http, token, out)
+        if args.befehl == "anlegen":
+            return cmd_anlegen(args, http, token, out, stdin)
         return cmd_ausfuehren(args, http, token, out, ask, stdin)
     except Conflict as exc:
         out(f"Abgelehnt: {exc}")

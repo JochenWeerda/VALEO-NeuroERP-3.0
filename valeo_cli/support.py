@@ -243,3 +243,42 @@ def coerce_fields(action: dict[str, Any], raw: dict[str, str]) -> dict[str, Any]
 def missing_required(action: dict[str, Any], payload: dict[str, Any]) -> list[str]:
     return [f["key"] for f in action.get("inputFields") or []
             if isinstance(f, dict) and f.get("required") and payload.get(f["key"]) in (None, "")]
+
+
+def creation_request(definition: dict[str, Any], payload: dict[str, Any], *, idempotency_key: str | None,
+                     is_agent: bool) -> tuple[str, dict[str, Any]]:
+    """Anlage ueber den ``creation``-Block der ScreenDefinition — wie ``UniversalNativeCreatePage``.
+
+    Es zaehlen nur die nicht schreibgeschuetzten Anlagefelder; Vorgaben der Maske gelten, leere Werte fallen weg.
+    Belegfamilien (``docflow.create.v1``) legt ``ausfuehren`` ueber ihren Adapter an, nicht diese Anlage.
+    Agenten legen hier nichts an: Wie bei MCP gilt ohne ausdrueckliche Freigabe die Sperre.
+    """
+    creation = definition.get("creation")
+    if not isinstance(creation, dict) or not isinstance(creation.get("endpoint"), str):
+        raise ValueError("Fuer diese Maske ist keine Neuanlage freigegeben.")
+    if is_agent:
+        raise PermissionError("Anlage nur durch Menschen (keine Agenten-Freigabe).")
+    if creation.get("adapter"):
+        raise ValueError(f"Anlage ueber Adapter {creation['adapter']} nicht per CLI.")
+    endpoint = creation["endpoint"]
+    if not re.fullmatch(r"/api/v1(?:/[A-Za-z0-9_-]+)+/?", endpoint):
+        raise ValueError("Ungueltiger Anlageweg.")
+    fields = [f for f in creation.get("fields") or [] if isinstance(f, dict) and f.get("key")]
+    if not fields:
+        fields = [f for f in [*(definition.get("fields") or []),
+                              *(f for tab in definition.get("tabs") or [] for f in tab.get("fields") or [])]
+                  if isinstance(f, dict) and f.get("key")]
+    allowed = {f["key"] for f in fields if not f.get("readOnly")}
+    unknown = sorted(set(payload) - allowed)
+    if unknown:
+        raise ValueError("Unbekannte Anlagefelder: " + ", ".join(unknown))
+    body = {key: value for key, value in {**(creation.get("defaults") or {}), **payload}.items()
+            if key in allowed and value is not None and value != ""}
+    missing = [f["key"] for f in fields if f.get("required") and not f.get("readOnly") and body.get(f["key"]) in (None, "")]
+    if missing:
+        raise ValueError("Pflichtfelder fehlen: " + ", ".join(missing))
+    if creation.get("requiresIdempotencyKey"):
+        if not idempotency_key:
+            raise ValueError("Diese Anlage braucht einen Wiederholungsschluessel.")
+        body["idempotency_key"] = idempotency_key
+    return endpoint, body
