@@ -11,7 +11,7 @@ from typing import Optional
 
 from fastapi import Response, APIRouter, Depends, HTTPException, Query
 from sqlalchemy import text
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -23,6 +23,7 @@ from app.core.gobd_artifact import register_artifact, sha256_hex
 from app.core.tenant import get_tenant_id
 from app.finance.steuerschluessel import Steuergruppe, Steuerklaerung, steuergruppen
 from app.documents.models import SalesInvoice, DocLine
+from app.documents.repository import DocumentAlreadyExists
 from pydantic import BaseModel
 from app.documents.router_helpers import (
     delete_from_store,
@@ -240,15 +241,20 @@ async def create_invoice(
             invoice_date = datetime.strptime(invoice.date, "%Y-%m-%d")
             invoice.dueDate = (invoice_date + timedelta(days=payment_days)).strftime("%Y-%m-%d")
 
+        # Serialize simultaneous creates of this number before checking for an existing row.
+        db.execute(text("SELECT pg_advisory_xact_lock(hashtextextended(:scope, 0))"),
+                   {"scope": "sales_invoice.create:" + invoice.number})
         vorhanden = get_from_store("sales_invoice", invoice.number, repo)
-        if vorhanden and str(vorhanden.get("tenantId") or "") != tenant_id:
+        if vorhanden:
             raise HTTPException(status_code=409, detail=f"Die Rechnungsnummer {invoice.number} ist bereits vergeben.")
         doc_data = invoice.model_dump()
         doc_data["tenantId"] = tenant_id
         # Beleg, Buchung, offener Posten, Archiv und Lieferscheinbezug: ein Commit am
         # Ende. Bis 08.10.2026 committete der Dokumentspeicher zuerst; scheiterte die
         # Buchung, stand die Rechnung ohne Buchung und ohne offenen Posten da.
-        result = _beleg_speichern(repo, invoice.number, doc_data)
+        if repo is None:
+            raise HTTPException(status_code=503, detail="Rechnung benoetigt den Dokumentspeicher")
+        result = repo.save_document("sales_invoice", invoice.number, doc_data, commit=False, create_only=True)
 
         if invoice.status != "ENTWURF":
             _post_sales_invoice_financials(db, invoice, tenant_id, gruppen)
@@ -301,6 +307,12 @@ async def create_invoice(
     except HTTPException:
         db.rollback()
         raise
+    except DocumentAlreadyExists:
+        db.rollback()
+        raise HTTPException(status_code=409, detail="Die Rechnungsnummer ist bereits vergeben.") from None
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=503, detail="Rechnung konnte nicht gespeichert werden.") from None
     except Exception as e:
         db.rollback()
         logger.error("Error creating invoice: %s", str(e), exc_info=True)
