@@ -92,12 +92,13 @@ def test_bedienfehler_senden_nichts(monkeypatch, argv, meldung):
     assert server.calls == []
 
 
-def test_agenten_legen_nicht_an(monkeypatch):
+def test_agenten_legen_in_der_entwicklungsphase_an(monkeypatch):
+    """Nutzerentscheidung 08.11.2026: alle MCP-/CLI-Schreibzugriffe frei; Rechte prueft der Server."""
     server = Server()
     code, text = run(["anlegen", "einkauf/supplier", "--feld", "lieferantennummer=L-7", "--feld", "firmenname=Hof"],
                      server, monkeypatch, token=AGENT)
-    assert code == 1 and "keine Agenten-Freigabe" in text
-    assert server.calls == []
+    assert code == 0, text
+    assert len(server.calls) == 1
 
 
 def test_ohne_creation_keine_anlage(monkeypatch):
@@ -128,4 +129,4 @@ def test_antwort_ohne_id_ist_kein_erfolg(monkeypatch):
 ])
 def test_adapter_und_fremde_wege_abgelehnt(creation, meldung):
     with pytest.raises(ValueError, match=meldung):
-        support.creation_request({"creation": creation}, {}, idempotency_key=None, is_agent=False)
+        support.creation_request({"creation": creation}, {}, idempotency_key=None)

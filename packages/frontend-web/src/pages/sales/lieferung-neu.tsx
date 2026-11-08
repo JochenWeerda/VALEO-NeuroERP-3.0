@@ -1,6 +1,4 @@
-import { UniversalNativeDetailPage } from '@/components/mask-builder/UniversalNativeDetailPage'
+import { belegSeite } from '@/pages/belege/beleg-seite'
 
-/** Neuer Lieferschein: Anlage ueber den creation-Block der Belegvariante (DocFlow). Vorher zeigte die Route die Liste. */
-export default function LieferungNeuPage(): JSX.Element {
-  return <UniversalNativeDetailPage screenId="beleg/sales-delivery" entityId="neu" testId="beleg-sales-delivery" />
-}
+/** Neuer Lieferschein: Belegmaske, Variante `sales_delivery` (DocFlow). Vorher zeigte die Route die Liste. */
+export default belegSeite('sales_delivery')
