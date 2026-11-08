@@ -72,7 +72,7 @@ jobs:
           REDIS_URL: redis://localhost:6379
 
       - name: Upload coverage reports
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           files: packages/procurement-domain/coverage/lcov.info
           flags: procurement-domain

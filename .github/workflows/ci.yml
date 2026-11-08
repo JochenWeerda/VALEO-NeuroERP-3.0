@@ -84,7 +84,7 @@ jobs:
             --deselect tests/test_rls_inventory_contract.py::test_tabellen_entsprechen_dem_frischen_schema
       
       - name: Upload coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v6
         with:
           files: ./coverage.xml
       
