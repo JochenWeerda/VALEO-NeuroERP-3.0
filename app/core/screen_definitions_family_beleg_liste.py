@@ -60,8 +60,8 @@ _ROLLEN = {
                 ("finance", "Finance", ["leitung"]), ("management", "Leitung", ["leitung"])],
 }
 
-_DRUCKEN = {"key": "print", "label": "Drucken", "dangerLevel": "safe", "zone": "header", "localEffect": "print",
-            "stubReason": "Druckt die sichtbare Liste; keine Serverwirkung."}
+# Druck der sichtbaren Liste (lokale Wirkung, wie bei den abgeloesten Listen).
+_DRUCKEN = {"key": "print", "label": "Drucken", "dangerLevel": "safe", "zone": "header", "localEffect": "print"}
 
 
 def _listenerlebnis(belegart: str, spalten: list[dict[str, Any]]) -> dict[str, Any]:

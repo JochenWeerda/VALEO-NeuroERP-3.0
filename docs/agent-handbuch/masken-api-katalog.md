@@ -4,7 +4,7 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-08
+last_reviewed: 2026-11-09
 version: 3.0.0
 description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions.
 ---
@@ -11822,7 +11822,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 |---|---|---|---|---|
 | `neu` | Wareneingang anlegen | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
 | `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-| `print` | Drucken | safe | nein | `Druckt die sichtbare Liste; keine Serverwirkung.` |
+| `print` | Drucken | safe | nein | `—` |
 | `ansicht_purchase_order` | Bestellungen | safe | nein | `Wechselt zur Belegliste Bestellungen.` |
 | `ansicht_purchase_invoice` | Eingangsrechnungen | safe | nein | `Wechselt zur Belegliste Eingangsrechnungen.` |
 | `ansicht_purchase_credit_memo` | Einkaufsgutschriften | safe | nein | `Wechselt zur Belegliste Einkaufsgutschriften.` |
@@ -11865,7 +11865,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 |---|---|---|---|---|
 | `neu` | Einkaufsgutschrift anlegen | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
 | `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-| `print` | Drucken | safe | nein | `Druckt die sichtbare Liste; keine Serverwirkung.` |
+| `print` | Drucken | safe | nein | `—` |
 | `ansicht_purchase_order` | Bestellungen | safe | nein | `Wechselt zur Belegliste Bestellungen.` |
 | `ansicht_goods_receipt` | Wareneingänge | safe | nein | `Wechselt zur Belegliste Wareneingänge.` |
 | `ansicht_purchase_invoice` | Eingangsrechnungen | safe | nein | `Wechselt zur Belegliste Eingangsrechnungen.` |
@@ -11908,7 +11908,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 |---|---|---|---|---|
 | `neu` | Eingangsrechnung anlegen | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
 | `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-| `print` | Drucken | safe | nein | `Druckt die sichtbare Liste; keine Serverwirkung.` |
+| `print` | Drucken | safe | nein | `—` |
 | `ansicht_purchase_order` | Bestellungen | safe | nein | `Wechselt zur Belegliste Bestellungen.` |
 | `ansicht_goods_receipt` | Wareneingänge | safe | nein | `Wechselt zur Belegliste Wareneingänge.` |
 | `ansicht_purchase_credit_memo` | Einkaufsgutschriften | safe | nein | `Wechselt zur Belegliste Einkaufsgutschriften.` |
@@ -11951,7 +11951,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 |---|---|---|---|---|
 | `neu` | Bestellung anlegen | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
 | `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-| `print` | Drucken | safe | nein | `Druckt die sichtbare Liste; keine Serverwirkung.` |
+| `print` | Drucken | safe | nein | `—` |
 | `ansicht_goods_receipt` | Wareneingänge | safe | nein | `Wechselt zur Belegliste Wareneingänge.` |
 | `ansicht_purchase_invoice` | Eingangsrechnungen | safe | nein | `Wechselt zur Belegliste Eingangsrechnungen.` |
 | `ansicht_purchase_credit_memo` | Einkaufsgutschriften | safe | nein | `Wechselt zur Belegliste Einkaufsgutschriften.` |
@@ -24747,7 +24747,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 |---|---|---|---|---|
 | `neu` | Gutschrift anlegen | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
 | `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-| `print` | Drucken | safe | nein | `Druckt die sichtbare Liste; keine Serverwirkung.` |
+| `print` | Drucken | safe | nein | `—` |
 | `ansicht_sales_offer` | Angebote | safe | nein | `Wechselt zur Belegliste Angebote.` |
 | `ansicht_sales_order` | Aufträge | safe | nein | `Wechselt zur Belegliste Aufträge.` |
 | `ansicht_sales_delivery` | Lieferscheine | safe | nein | `Wechselt zur Belegliste Lieferscheine.` |
@@ -24791,7 +24791,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 |---|---|---|---|---|
 | `neu` | Lieferschein anlegen | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
 | `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-| `print` | Drucken | safe | nein | `Druckt die sichtbare Liste; keine Serverwirkung.` |
+| `print` | Drucken | safe | nein | `—` |
 | `ansicht_sales_offer` | Angebote | safe | nein | `Wechselt zur Belegliste Angebote.` |
 | `ansicht_sales_order` | Aufträge | safe | nein | `Wechselt zur Belegliste Aufträge.` |
 | `ansicht_sales_invoice` | Ausgangsrechnungen | safe | nein | `Wechselt zur Belegliste Ausgangsrechnungen.` |
@@ -24835,7 +24835,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 |---|---|---|---|---|
 | `neu` | Rechnung anlegen | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
 | `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-| `print` | Drucken | safe | nein | `Druckt die sichtbare Liste; keine Serverwirkung.` |
+| `print` | Drucken | safe | nein | `—` |
 | `ansicht_sales_offer` | Angebote | safe | nein | `Wechselt zur Belegliste Angebote.` |
 | `ansicht_sales_order` | Aufträge | safe | nein | `Wechselt zur Belegliste Aufträge.` |
 | `ansicht_sales_delivery` | Lieferscheine | safe | nein | `Wechselt zur Belegliste Lieferscheine.` |
@@ -24879,7 +24879,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 |---|---|---|---|---|
 | `neu` | Angebot anlegen | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
 | `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-| `print` | Drucken | safe | nein | `Druckt die sichtbare Liste; keine Serverwirkung.` |
+| `print` | Drucken | safe | nein | `—` |
 | `ansicht_sales_order` | Aufträge | safe | nein | `Wechselt zur Belegliste Aufträge.` |
 | `ansicht_sales_delivery` | Lieferscheine | safe | nein | `Wechselt zur Belegliste Lieferscheine.` |
 | `ansicht_sales_invoice` | Ausgangsrechnungen | safe | nein | `Wechselt zur Belegliste Ausgangsrechnungen.` |
@@ -24923,7 +24923,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 |---|---|---|---|---|
 | `neu` | Auftrag anlegen | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
 | `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-| `print` | Drucken | safe | nein | `Druckt die sichtbare Liste; keine Serverwirkung.` |
+| `print` | Drucken | safe | nein | `—` |
 | `ansicht_sales_offer` | Angebote | safe | nein | `Wechselt zur Belegliste Angebote.` |
 | `ansicht_sales_delivery` | Lieferscheine | safe | nein | `Wechselt zur Belegliste Lieferscheine.` |
 | `ansicht_sales_invoice` | Ausgangsrechnungen | safe | nein | `Wechselt zur Belegliste Ausgangsrechnungen.` |
