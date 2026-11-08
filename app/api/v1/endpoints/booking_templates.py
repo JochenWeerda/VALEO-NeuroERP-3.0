@@ -5,6 +5,8 @@ FIBU-GL-07: Automatische Buchungsschemata
 
 from typing import List, Optional, Dict, Any
 from fastapi import Response, APIRouter, Depends, HTTPException, Query, Request
+from app.core.exceptions import kontosperre_meldung
+from app.auth.finance_roles import finance_admin, finance_read, finance_write
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from decimal import Decimal
@@ -14,6 +16,7 @@ import logging
 from app.core.uuid7 import uuid7
 
 from ....core.database import get_db
+from app.core.tenant import get_tenant_id
 from ....core.fibu_audit import log_fibu_audit
 
 logger = logging.getLogger(__name__)
@@ -22,6 +25,10 @@ from app.api.v1.schemas.base import BaseSchema
 
 
 router = APIRouter(prefix="/booking-templates", tags=["finance", "templates"])
+
+# Gemeinsame Vorlagen stehen allen Mandanten zur Verfuegung (Nutzerentscheidung 27.10.2026,
+# docs/admin/rls-exceptions.json -> system_lesbar). Lesen und Anwenden ja, Aendern nein.
+SHARED_TENANT = "system"
 
 
 class BookingTemplateLine(BaseModel):
@@ -78,6 +85,7 @@ class BookingTemplateResponse(BaseModel):
     active: bool
     created_at: datetime
     updated_at: datetime
+    shared: bool = Field(default=False, description="Gemeinsame Vorlage fuer alle Mandanten (nur lesen und anwenden)")
 
 
 class ApplyTemplateRequest(BaseModel):
@@ -99,11 +107,21 @@ class ApplyTemplateResponse(BaseModel):
     applied_at: datetime
 
 
-@router.get("", response_model=List[BookingTemplateResponse], summary="Booking templates auflisten")
+def _reject_shared(db: Session, template_id: str) -> None:
+    """A shared template is visible but belongs to no tenant: changing it is refused, not 'not found'."""
+    shared = db.execute(
+        text("SELECT 1 FROM domain_erp.booking_templates WHERE id = :template_id AND tenant_id = :shared"),
+        {"template_id": template_id, "shared": SHARED_TENANT},
+    ).fetchone()
+    if shared:
+        raise HTTPException(status_code=403, detail="Gemeinsame Buchungsvorlage: nur lesen und anwenden, nicht aendern")
+
+
+@router.get("", response_model=List[BookingTemplateResponse], summary="Booking templates auflisten", dependencies=[Depends(finance_read)])
 async def list_booking_templates(
     category: Optional[str] = Query(None, description="Filter by category"),
     active_only: bool = Query(True, description="Show only active templates"),
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -112,12 +130,12 @@ async def list_booking_templates(
     try:
         query = text("""
             SELECT id, name, description, category, trigger_type, trigger_config, lines,
-                   default_amount, currency, active, created_at, updated_at
+                   default_amount, currency, active, created_at, updated_at, tenant_id = :shared
             FROM domain_erp.booking_templates
-            WHERE tenant_id = :tenant_id
+            WHERE tenant_id IN (:tenant_id, :shared)
         """)
         
-        params = {"tenant_id": tenant_id}
+        params = {"tenant_id": tenant_id, "shared": SHARED_TENANT}
         
         conditions = []
         
@@ -155,20 +173,23 @@ async def list_booking_templates(
                 currency=str(row[8]),
                 active=bool(row[9]),
                 created_at=row[10],
-                updated_at=row[11]
+                updated_at=row[11],
+                shared=bool(row[12]),
             ))
         
         return result
         
     except Exception as e:
+        # Bis 20.10.2026 wurde jeder Fehler zur leeren Liste — nicht von "keine Vorlagen" unterscheidbar.
+        db.rollback()
         logger.error("Error listing booking templates: %s", e, exc_info=True)
-        return []
+        raise HTTPException(status_code=503, detail="Buchungsvorlagen derzeit nicht verfuegbar") from e
 
 
-@router.get("/{template_id}", response_model=BookingTemplateResponse, summary="Booking template abrufen")
+@router.get("/{template_id}", response_model=BookingTemplateResponse, summary="Booking template abrufen", dependencies=[Depends(finance_read)])
 async def get_booking_template(
     template_id: str,
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -177,14 +198,17 @@ async def get_booking_template(
     try:
         query = text("""
             SELECT id, name, description, category, trigger_type, trigger_config, lines,
-                   default_amount, currency, active, created_at, updated_at
+                   default_amount, currency, active, created_at, updated_at, tenant_id = :shared
             FROM domain_erp.booking_templates
-            WHERE id = :template_id AND tenant_id = :tenant_id
+            WHERE id = :template_id AND tenant_id IN (:tenant_id, :shared)
+            ORDER BY tenant_id = :shared
+            LIMIT 1
         """)
         
         row = db.execute(query, {
             "template_id": template_id,
-            "tenant_id": tenant_id
+            "tenant_id": tenant_id,
+            "shared": SHARED_TENANT,
         }).fetchone()
         
         if not row:
@@ -208,7 +232,8 @@ async def get_booking_template(
             currency=str(row[8]),
             active=bool(row[9]),
             created_at=row[10],
-            updated_at=row[11]
+            updated_at=row[11],
+            shared=bool(row[12]),
         )
         
     except HTTPException:
@@ -218,10 +243,10 @@ async def get_booking_template(
         raise HTTPException(status_code=500, detail=f"Failed to get booking template: {str(e)}")
 
 
-@router.post("", response_model=BookingTemplateResponse, status_code=201, summary="Booking template anlegen")
+@router.post("", response_model=BookingTemplateResponse, status_code=201, summary="Booking template anlegen", dependencies=[Depends(finance_write)])
 async def create_booking_template(
     template: BookingTemplateCreate,
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -272,7 +297,8 @@ async def create_booking_template(
         
         db.commit()
         
-        lines_data = json.loads(row[6]) if row[6] else []
+        # JSONB kommt von psycopg2 schon als Liste; json.loads darauf liess jede Anlage mit 500 scheitern (20.10.2026).
+        lines_data = json.loads(row[6]) if isinstance(row[6], str) else (row[6] or [])
         
         return BookingTemplateResponse(
             id=str(row[0]),
@@ -297,11 +323,11 @@ async def create_booking_template(
         raise HTTPException(status_code=500, detail=f"Failed to create booking template: {str(e)}")
 
 
-@router.post("/{template_id}/apply", response_model=ApplyTemplateResponse, summary="Booking template apply")
+@router.post("/{template_id}/apply", response_model=ApplyTemplateResponse, summary="Booking template apply", dependencies=[Depends(finance_write)])
 async def apply_booking_template(
     template_id: str,
     request: ApplyTemplateRequest,
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
     http_request: Request = None,
 ):
@@ -358,6 +384,11 @@ async def apply_booking_template(
             elif line.fixed_credit:
                 total_credit += line.fixed_credit
         
+        # Ein Buchungsentwurf muss ausgeglichen sein; vorher entstand er bei fehlerhafter Vorlage mit Soll != Haben.
+        if round(total_debit, 2) != round(total_credit, 2):
+            raise HTTPException(status_code=422, detail=(
+                f"Vorlage ergibt keinen ausgeglichenen Beleg (Soll {total_debit:.2f} / Haben {total_credit:.2f})"))
+
         db.execute(journal_entry_insert, {
             "id": entry_id,
             "tenant_id": tenant_id,
@@ -375,15 +406,19 @@ async def apply_booking_template(
         # Create journal entry lines
         for line in template.lines:
             # Get account ID
+            # Eigenes Konto vor dem gemeinsamen Kontenrahmen (wie sales_credit_notes/steuerschluessel):
+            # gemeinsame Vorlagen nennen Konten des Standardkontenrahmens.
             account_query = text("""
                 SELECT id FROM domain_erp.chart_of_accounts
-                WHERE account_number = :account_number AND tenant_id = :tenant_id
+                WHERE account_number = :account_number AND tenant_id IN (:tenant_id, :shared)
+                ORDER BY tenant_id = :shared
                 LIMIT 1
             """)
             
             account_row = db.execute(account_query, {
                 "account_number": line.account_number,
-                "tenant_id": tenant_id
+                "tenant_id": tenant_id,
+                "shared": SHARED_TENANT,
             }).fetchone()
             
             if not account_row:
@@ -462,15 +497,18 @@ async def apply_booking_template(
         raise
     except Exception as e:
         db.rollback()
+        sperre = kontosperre_meldung(e)
+        if sperre:
+            raise HTTPException(status_code=409, detail=sperre)
         logger.error(f"Error applying booking template: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to apply booking template: {str(e)}")
 
 
-@router.put("/{template_id}", response_model=BookingTemplateResponse, summary="Booking template aktualisieren")
+@router.put("/{template_id}", response_model=BookingTemplateResponse, summary="Booking template aktualisieren", dependencies=[Depends(finance_write)])
 async def update_booking_template(
     template_id: str,
     template: BookingTemplateUpdate,
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -535,6 +573,7 @@ async def update_booking_template(
         row = db.execute(update_query, params).fetchone()
         
         if not row:
+            _reject_shared(db, template_id)
             raise HTTPException(status_code=404, detail="Booking template not found")
         
         db.commit()
@@ -568,10 +607,10 @@ async def update_booking_template(
         raise HTTPException(status_code=500, detail=f"Failed to update booking template: {str(e)}")
 
 
-@router.delete("/{template_id}", status_code=204, response_class=Response, response_model=None, summary="Booking template löschen")
+@router.delete("/{template_id}", status_code=204, response_class=Response, response_model=None, summary="Booking template löschen", dependencies=[Depends(finance_admin)])
 async def delete_booking_template(
     template_id: str,
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -590,6 +629,7 @@ async def delete_booking_template(
         })
         
         if result.rowcount == 0:
+            _reject_shared(db, template_id)
             raise HTTPException(status_code=404, detail="Booking template not found")
         
         db.commit()

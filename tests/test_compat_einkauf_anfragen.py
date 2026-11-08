@@ -1,8 +1,6 @@
 from app.api.v1.endpoints import compat
-from app.core import security
-from app.core.config import settings
 from fastapi.testclient import TestClient
-from main import app
+from app.main import app
 
 
 client = TestClient(app, raise_server_exceptions=False, base_url="http://localhost")
@@ -11,8 +9,8 @@ TENANT_HEADER = {"X-Tenant-ID": "default"}
 
 
 def _disable_dev_token(monkeypatch) -> None:
-    monkeypatch.setattr(settings, "API_DEV_TOKEN", None)
-    monkeypatch.setattr(security, "_validate_jwt", lambda token: {"sub": "test-user"})
+    """Geprueft wird die Compat-Weiterleitung, nicht die Anmeldung: Test-App app.main mit der Testidentitaet des
+    conftest (Mandant aus dem Kopf). Die Anmeldung pruefen die Identitaetsvertraege."""
 
 
 def test_get_einkauf_anfrage_returns_contract_payload(monkeypatch):

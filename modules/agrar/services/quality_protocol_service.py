@@ -101,6 +101,10 @@ class QualityProtocolUpdate:
 
 class QualityProtocolRepository(Protocol):
     """Protocol für Quality Protocol Repository."""
+
+    def ensure_acceptance_owned(self, acceptance_id: str | None, *, lock: bool = False) -> None:
+        """Check the referenced acceptance in the active tenant, optionally locking it for version allocation."""
+        ...
     
     def create(self, protocol: QualityProtocol) -> QualityProtocol:
         """Erstellt ein neues Qualitätsprotokoll."""
@@ -155,6 +159,12 @@ def create_quality_protocol(
     )
     if not dq_result.bestanden:
         raise DQValidationException("Qualitaetsprotokoll", dq_result)
+
+    # Lock the tenant-owned acceptance before reading existing versions. The lock
+    # is held through repo.create()'s commit, so concurrent requests allocate
+    # distinct versions instead of racing on the same maximum.
+    if create_input.harvest_acceptance_id:
+        repo.ensure_acceptance_owned(create_input.harvest_acceptance_id, lock=True)
 
     # Prüfe bestehende Protokolle für Versionsnummer
     version = 1

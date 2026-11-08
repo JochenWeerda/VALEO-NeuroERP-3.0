@@ -19,12 +19,15 @@ function getPackageName(id: string): string | null {
 }
 
 function getVendorChunk(id: string): string | undefined {
+  // Keep CommonJS interop with the React foundation, never in a consumer chunk.
+  if (id.includes('commonjsHelpers.js')) return 'vendor-react'
   if (!id.includes('node_modules')) return undefined
 
   const pkg = getPackageName(id)
   if (!pkg) return 'vendor-misc'
 
-  if (['react', 'react-dom', '@tanstack/react-router'].includes(pkg)) return 'vendor-react'
+  // Router/store consumers must depend on React, not share its initialization chunk.
+  if (['react', 'react-dom', 'scheduler', 'react-is'].includes(pkg)) return 'vendor-react'
   if (pkg.startsWith('@radix-ui/')) return 'vendor-radix'
   if (['lucide-react', '@radix-ui/react-icons'].includes(pkg)) return 'vendor-icons'
   if (['@tanstack/react-query', 'axios'].includes(pkg)) return 'vendor-data'
@@ -122,7 +125,11 @@ export default defineConfig(({ mode }) => {
     port: DEV_PORT,
     host: '0.0.0.0',
     strictPort: true,
-    allowedHosts: 'all',
+    allowedHosts: [
+      'localhost', 'frontend-web',
+      ...(process.env.VITE_ALLOWED_HOSTS || env.VITE_ALLOWED_HOSTS || '').split(',')
+        .map((host) => host.trim()).filter(Boolean),
+    ],
     warmup: {
       clientFiles: [
         'index.html',

@@ -1,4 +1,5 @@
 import { useScreenPermissions } from '@/components/mask-builder/runtime/screen-permissions'
+import { MadeByStudioListRuntimeWire } from '@/components/mask-builder/made-by-studio-runtime-wire'
 import { useCallback, useMemo, useState } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { UniversalMaskRenderer } from '@/components/mask-builder/UniversalMaskRenderer'
@@ -236,3 +237,8 @@ export default function FrachttabellenPage(): JSX.Element {
     </div>
   )
 }
+function madeByStudioRuntimeWireDeclaration(): JSX.Element {
+  return <MadeByStudioListRuntimeWire screenId="logistik/frachttabellen" />
+}
+void madeByStudioRuntimeWireDeclaration
+

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -15,6 +15,7 @@ from app.api.v1.schemas.crm_bundle_schemas import (
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.crm_kontakt_service import CrmKontaktService
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/crm/kunden-kontakte", tags=["crm", "kontakte"])
 
@@ -49,7 +50,7 @@ def list_kontakte(
     return CrmKontaktService(db, tenant_id).list_by_kunde(kunden_nr)
 
 
-@router.post("", response_model=KontaktOut, summary="Kontakt anlegen")
+@router.post("", response_model=KontaktOut, summary="Kontakt anlegen", dependencies=SCHREIBEN["CRM"])
 def create_kontakt(
     body: KontaktIn,
     db: Session = Depends(get_db),
@@ -62,13 +63,16 @@ class ErledigtIn(BaseModel):
     ergebnis: Optional[str] = None  # Serviceabschluss-Ergebnis (optional)
 
 
-@router.post("/{kontakt_id}/erledigt", response_model=KontaktOut, summary="Wiedervorlage erledigen (mit optionalem Ergebnis)")
+@router.post("/{kontakt_id}/erledigt", response_model=KontaktOut, summary="Wiedervorlage erledigen (mit optionalem Ergebnis)", dependencies=SCHREIBEN["CRM"])
 def erledigt(
     kontakt_id: str,
     body: ErledigtIn | None = None,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
-    return CrmKontaktService(db, tenant_id).set_erledigt(
+    kontakt = CrmKontaktService(db, tenant_id).set_erledigt(
         kontakt_id, True, ergebnis=(body.ergebnis if body else None)
     )
+    if not kontakt:
+        raise HTTPException(status_code=404, detail="Kontakt nicht gefunden")
+    return kontakt

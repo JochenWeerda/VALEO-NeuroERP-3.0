@@ -11,6 +11,7 @@ Fachlicher Hintergrund (Referenz-ERP Wissensbasis, Domain 03 FIBU):
 
   Direktsprung: [FORG] = Forderungsgruppenpflege.
 """
+from app.auth.finance_roles import finance_admin, finance_write
 from datetime import datetime
 from typing import Optional
 
@@ -83,7 +84,7 @@ def get_forderungsgruppe(
     return ForderungsgruppeOut(**dict(row._mapping))
 
 
-@router.post("", response_model=ForderungsgruppeOut, status_code=201, summary="Forderungsgruppe anlegen")
+@router.post("", response_model=ForderungsgruppeOut, status_code=201, summary="Forderungsgruppe anlegen", dependencies=[Depends(finance_write)])
 def create_forderungsgruppe(
     payload: ForderungsgruppeCreate,
     db=Depends(get_db),
@@ -112,7 +113,7 @@ def create_forderungsgruppe(
     return ForderungsgruppeOut(**dict(row._mapping))
 
 
-@router.put("/{gruppe_nr}", response_model=ForderungsgruppeOut, summary="Forderungsgruppe aktualisieren")
+@router.put("/{gruppe_nr}", response_model=ForderungsgruppeOut, summary="Forderungsgruppe aktualisieren", dependencies=[Depends(finance_write)])
 def update_forderungsgruppe(
     gruppe_nr: str,
     payload: ForderungsgruppeCreate,
@@ -145,8 +146,7 @@ def update_forderungsgruppe(
 
 
 @router.delete("/{gruppe_nr}", summary="Forderungsgruppe löschen",
-    response_model=None
-)
+    response_model=None, dependencies=[Depends(finance_admin)])
 def delete_forderungsgruppe(
     gruppe_nr: str,
     db=Depends(get_db),

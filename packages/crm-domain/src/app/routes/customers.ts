@@ -3,10 +3,10 @@ import { z } from 'zod';
 import { CustomerService } from '../../domain/services';
 import {
   CreateCustomerContractSchema,
-  UpdateCustomerContractSchema,
-  CustomerResponseContractSchema,
+  CustomerListResponseContractSchema,
   CustomerQueryContractSchema,
-  CustomerListResponseContractSchema
+  CustomerResponseContractSchema,
+  UpdateCustomerContractSchema
 } from '../../contracts';
 
 // Request/Response schemas
@@ -85,7 +85,7 @@ export async function registerCustomerRoutes(
       tags: ['Customers'],
       summary: 'Get customer',
       params: z.object({
-        id: z.string().uuid()
+        id: z.string().guid()
       }),
       response: {
         200: CustomerResponseSchema,
@@ -178,7 +178,7 @@ export async function registerCustomerRoutes(
       tags: ['Customers'],
       summary: 'Update customer',
       params: z.object({
-        id: z.string().uuid()
+        id: z.string().guid()
       }),
       body: UpdateCustomerRequestSchema,
       response: {
@@ -234,7 +234,7 @@ export async function registerCustomerRoutes(
       tags: ['Customers'],
       summary: 'Delete customer',
       params: z.object({
-        id: z.string().uuid()
+        id: z.string().guid()
       }),
       response: {
         204: z.null(),
@@ -285,7 +285,7 @@ export async function registerCustomerRoutes(
       tags: ['Customers'],
       summary: 'Change customer status',
       params: z.object({
-        id: z.string().uuid()
+        id: z.string().guid()
       }),
       body: z.object({
         status: z.enum(['Active', 'Prospect', 'Blocked'])
@@ -344,7 +344,7 @@ export async function registerCustomerRoutes(
       tags: ['Customers'],
       summary: 'Add customer tag',
       params: z.object({
-        id: z.string().uuid()
+        id: z.string().guid()
       }),
       body: z.object({
         tag: z.string().min(1)
@@ -398,7 +398,7 @@ export async function registerCustomerRoutes(
       tags: ['Customers'],
       summary: 'Remove customer tag',
       params: z.object({
-        id: z.string().uuid(),
+        id: z.string().guid(),
         tag: z.string().min(1)
       }),
       response: {

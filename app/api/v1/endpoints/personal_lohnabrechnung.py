@@ -17,6 +17,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from app.core.tenant import get_tenant_id
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/personal", tags=["personal", "hr", "lohn"])
 
@@ -80,8 +81,7 @@ class PayrollCloseoutPreviewOut(BaseModel):
 @router.post(
     "/lohn/berechnung",
     summary="Brutto-Netto-Berechnung als Payroll-Preview",
-    response_model=LohnBerechnungResponse,
-)
+    response_model=LohnBerechnungResponse, dependencies=SCHREIBEN["PERSONAL"])
 async def berechne_lohn(
     payload: LohnBerechnungRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -113,8 +113,7 @@ async def berechne_lohn(
 @router.post(
     "/lohn/closeout-preview",
     summary="Payroll Monats-Closeout als DATEV-/FIBU-Uebergabevertrag vorbereiten",
-    response_model=PayrollCloseoutPreviewOut,
-)
+    response_model=PayrollCloseoutPreviewOut, dependencies=SCHREIBEN["PERSONAL"])
 async def preview_payroll_closeout(
     payload: PayrollCloseoutPreviewIn,
     tenant_id: str = Depends(get_tenant_id),

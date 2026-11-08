@@ -2,7 +2,7 @@
 
 from uuid import UUID
 from typing import List
-import random
+import secrets
 from sqlalchemy import select, and_, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -38,7 +38,7 @@ class ABTesting:
         variant_names = [v.variant_name for v in variants]
         
         # Random assignment
-        assigned_variant = random.choice(variant_names)
+        assigned_variant = secrets.choice(variant_names)
         
         # Update recipient
         recipient = await self.db.get(CampaignRecipient, recipient_id)

@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
 from fastapi.testclient import TestClient
 
 from app.api.v1.endpoints.ki_usability import router as ki_usability_router
@@ -7,6 +8,7 @@ from app.core.ki_action_registry import resolve_actions_for_context
 
 def _build_client() -> TestClient:
     app = FastAPI()
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(ki_usability_router, prefix="/api/v1")
     return TestClient(app)
 

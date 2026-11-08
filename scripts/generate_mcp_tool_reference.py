@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -105,19 +106,33 @@ def render(registry: dict) -> str:
     return "\n".join(lines).rstrip("\n") + "\n"
 
 
-def main() -> int:
+def _read_source(path: Path, staged: bool) -> str:
+    if staged:
+        relative = path.relative_to(REPO_ROOT).as_posix()
+        return subprocess.check_output(
+            ["git", "show", f":{relative}"], cwd=REPO_ROOT,
+        ).decode("utf-8").replace("\r\n", "\n")
+    return path.read_text(encoding="utf-8")
+
+
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="MCP-Tool-Referenz generieren")
     parser.add_argument("--check", action="store_true", help="Drift-Pruefung (Exit 1 bei Abweichung).")
-    args = parser.parse_args()
+    parser.add_argument("--staged", action="store_true", help="Registry und Referenz aus dem Git-Index pruefen.")
+    args = parser.parse_args(argv)
+    if args.staged and not args.check:
+        parser.error("--staged erfordert --check; der Index wird nicht veraendert.")
 
-    registry = yaml.safe_load(REGISTRY.read_text(encoding="utf-8"))
+    registry = yaml.safe_load(_read_source(REGISTRY, args.staged))
     content = render(registry)
 
     if args.check:
-        if not OUTPUT.exists():
+        try:
+            actual = _read_source(OUTPUT, args.staged)
+        except (FileNotFoundError, subprocess.CalledProcessError):
             print(f"FEHLT: {OUTPUT} existiert nicht.", file=sys.stderr)
             return 1
-        if OUTPUT.read_text(encoding="utf-8") != content:
+        if actual != content:
             print(
                 f"DRIFT: {OUTPUT} ist nicht aktuell. Bitte "
                 "'python scripts/generate_mcp_tool_reference.py' ausfuehren.",

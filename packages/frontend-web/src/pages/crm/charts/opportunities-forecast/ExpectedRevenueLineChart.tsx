@@ -1,15 +1,7 @@
-import { SimpleLineChart } from '@/components/charts/SimpleLineChart'
-import { chartSeriesColor } from '@/components/charts/chart-palette'
-import { formatCurrency } from '@/components/mask-builder/utils/formatting'
+import { NativeListPage } from '@/components/mask-builder/NativeListPage'
 
-type ChartPoint = { period?: string; total_expected_revenue: number }
-
-export default function ExpectedRevenueLineChart({ chartData, label }: { chartData: ChartPoint[]; label: string }): JSX.Element {
+export default function Page(): JSX.Element {
   return (
-    <SimpleLineChart
-      data={chartData.map((item) => ({ label: item.period ?? '', total_expected_revenue: item.total_expected_revenue }))}
-      series={[{ key: 'total_expected_revenue', color: chartSeriesColor(0), label }]}
-      height={300}
-    />
+    <NativeListPage screenId="crm/charts/opportunities-forecast/ExpectedRevenueLineChart" testId="screen-crm/charts/opportunities-forecast/ExpectedRevenueLineChart" />
   )
 }

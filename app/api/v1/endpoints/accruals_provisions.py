@@ -3,6 +3,7 @@ Accruals and Provisions API
 FIBU-CLS-03: Abgrenzungen / Rückstellungen
 """
 
+from app.auth.finance_roles import finance_admin, finance_read, finance_write
 from typing import List, Optional
 from datetime import date, datetime
 from decimal import Decimal
@@ -42,7 +43,7 @@ class AccrualItem(AccrualItemBase):
     created_at: Optional[datetime] = None
 
 
-@router.get("", response_model=List[AccrualItem], summary="Accruals provisions auflisten")
+@router.get("", response_model=List[AccrualItem], summary="Accruals provisions auflisten", dependencies=[Depends(finance_read)])
 async def list_accruals_provisions(
     period: Optional[str] = Query(None, description="Filter by period YYYY-MM"),
     accrual_type: Optional[str] = Query(None, description="Filter: rechnungsabgrenzungsposten or rueckstellung"),
@@ -50,16 +51,6 @@ async def list_accruals_provisions(
     db: Session = Depends(get_db),
 ):
     """List accruals and provisions for a period."""
-    try:
-        db.execute(text("CREATE TABLE IF NOT EXISTS domain_erp.accruals_provisions ("
-                        "id VARCHAR(36) PRIMARY KEY, tenant_id VARCHAR(64), description VARCHAR(500), "
-                        "amount NUMERIC(18,4), account_number VARCHAR(20), counterpart_account VARCHAR(20), "
-                        "period VARCHAR(7), accrual_type VARCHAR(50), status VARCHAR(20) DEFAULT 'draft', "
-                        "created_at TIMESTAMPTZ DEFAULT NOW())"))
-        db.commit()
-    except Exception:
-        db.rollback()
-
     where = ["tenant_id = :tid"]
     params: dict = {"tid": tenant_id}
     if period:
@@ -89,23 +80,13 @@ async def list_accruals_provisions(
     ]
 
 
-@router.post("", response_model=AccrualItem, status_code=201, summary="Accrual provision anlegen")
+@router.post("", response_model=AccrualItem, status_code=201, summary="Accrual provision anlegen", dependencies=[Depends(finance_write)])
 async def create_accrual_provision(
     item: AccrualItemCreate,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Create accrual or provision entry (draft)."""
-    try:
-        db.execute(text("CREATE TABLE IF NOT EXISTS domain_erp.accruals_provisions ("
-                        "id VARCHAR(36) PRIMARY KEY, tenant_id VARCHAR(64), description VARCHAR(500), "
-                        "amount NUMERIC(18,4), account_number VARCHAR(20), counterpart_account VARCHAR(20), "
-                        "period VARCHAR(7), accrual_type VARCHAR(50), status VARCHAR(20) DEFAULT 'draft', "
-                        "created_at TIMESTAMPTZ DEFAULT NOW())"))
-        db.commit()
-    except Exception:
-        db.rollback()
-
     item_id = uuid7()
     db.execute(
         text("""
@@ -146,7 +127,7 @@ def _fetch_accrual_or_404(db: Session, item_id: str, tenant_id: str) -> AccrualI
     )
 
 
-@router.get("/{item_id}", response_model=AccrualItem, summary="Accrual provision abrufen")
+@router.get("/{item_id}", response_model=AccrualItem, summary="Accrual provision abrufen", dependencies=[Depends(finance_read)])
 async def get_accrual_provision(
     item_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -165,7 +146,7 @@ class AccrualItemUpdate(BaseModel):
     accrual_type: Optional[str] = None
 
 
-@router.put("/{item_id}", response_model=AccrualItem, summary="Accrual provision aktualisieren")
+@router.put("/{item_id}", response_model=AccrualItem, summary="Accrual provision aktualisieren", dependencies=[Depends(finance_write)])
 async def update_accrual_provision(
     item_id: str,
     payload: AccrualItemUpdate,
@@ -191,7 +172,7 @@ async def update_accrual_provision(
     return _fetch_accrual_or_404(db, item_id, tenant_id)
 
 
-@router.delete("/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Accrual provision löschen")
+@router.delete("/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Accrual provision löschen", dependencies=[Depends(finance_admin)])
 async def delete_accrual_provision(
     item_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -208,7 +189,7 @@ async def delete_accrual_provision(
     db.commit()
 
 
-@router.post("/{item_id}/post", response_model=StatusResponse, summary="Accrual provision erstellen")
+@router.post("/{item_id}/post", response_model=StatusResponse, summary="Accrual provision erstellen", dependencies=[Depends(finance_write)])
 async def post_accrual_provision(
     item_id: str,
     tenant_id: str = Depends(get_tenant_id),

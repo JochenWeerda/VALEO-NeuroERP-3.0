@@ -133,7 +133,7 @@ function LeadMaskDetailPage(): JSX.Element {
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm text-muted-foreground mb-1">CRM &gt; Leads</p>
-          <h1 className="text-3xl font-bold">
+          <h1 className="text-xl font-semibold tracking-tight">
             {existingLead?.company ?? (isNew ? 'Neuen Lead anlegen' : 'Lead bearbeiten')}
           </h1>
           <p className="text-muted-foreground">Mask Builder Formular (Beta)</p>

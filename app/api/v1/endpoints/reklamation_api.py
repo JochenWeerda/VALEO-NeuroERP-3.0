@@ -4,7 +4,7 @@ import uuid
 from datetime import date, datetime
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import Response
 from pydantic import BaseModel, Field
 from sqlalchemy import text
@@ -20,6 +20,8 @@ from app.services.customer_reference import resolve_reference
 
 from app.api.v1.schemas.base import BaseSchema
 from pydantic import ConfigDict as _ConfigDict
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
+from app.core.akteur import gepruefter_akteur_aus_request  # Bearbeiter aus dem Token, nie aus dem Body
 
 
 class ReklamationOut(BaseSchema):
@@ -81,17 +83,14 @@ class ReklamationCreateRequest(BaseModel):
     crm_referenz: Optional[ReklamationsCRMReferenzRequest] = None
     dms_referenzen: list[ReklamationsDMSReferenzRequest] = Field(default_factory=list)
     gobd_beleg_id: Optional[str] = None
-    aktor_id: str = "system"
 
 
 class ReklamationTransitionRequest(BaseModel):
     neuer_status: str
-    aktor_id: str = "system"
     kommentar: Optional[str] = None
 
 
 class ReklamationReferenzUpdateRequest(BaseModel):
-    aktor_id: str = "system"
     crm_referenz: Optional[ReklamationsCRMReferenzRequest] = None
     dms_referenzen: list[ReklamationsDMSReferenzRequest] = Field(default_factory=list)
 
@@ -103,7 +102,6 @@ class ReklamationLaborBefundRequest(BaseModel):
     analysewerte: dict[str, Any] = Field(default_factory=dict)
     grenzwerte: dict[str, Any] = Field(default_factory=dict)
     bemerkung: Optional[str] = None
-    aktor_id: str = "system"
 
 
 def _sla_status(row: ReklamationDB) -> str:
@@ -270,13 +268,14 @@ def _add_audit(
 
 
 @router.post("", status_code=201, summary="Reklamation anlegen",
-    response_model=ReklamationOut
-)
+    response_model=ReklamationOut, dependencies=SCHREIBEN["QUALITAET"])
 def create_reklamation(
     req: ReklamationCreateRequest,
+    request: Request,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
+    aktor = gepruefter_akteur_aus_request(request)
     tenant_id = _effective_tenant_id(req.tenant_id, tenant_id)
     ReklamationsTyp(req.typ)  # validate
     dms = [d.model_dump() for d in req.dms_referenzen]
@@ -297,11 +296,11 @@ def create_reklamation(
         gobd_beleg_id=gobd,
         audit_trail=[],
     )
-    _add_audit(row, "erstellt", req.aktor_id)
+    _add_audit(row, "erstellt", aktor)
     if req.crm_referenz:
-        _add_audit(row, "crm_referenz_gesetzt", req.aktor_id)
+        _add_audit(row, "crm_referenz_gesetzt", aktor)
     if dms:
-        _add_audit(row, "dms_referenzen_hinzugefuegt", req.aktor_id)
+        _add_audit(row, "dms_referenzen_hinzugefuegt", aktor)
     db.add(row)
     db.commit()
     db.refresh(row)
@@ -361,63 +360,67 @@ def get_e2e_overview(reklamation_id: str, db: Session = Depends(get_db), tenant_
     }
 
 
-@router.post("/{reklamation_id}/transition", summary="Status transition",
-    response_model=ReklamationOut
-)
-def transition_status(
-    reklamation_id: str,
-    req: ReklamationTransitionRequest,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
-):
+def wechsle_status(
+    db: Session, tenant_id: str, reklamation_id: str, neuer_status: str, *, aktor: str, kommentar: Optional[str] = None,
+) -> dict:
+    """Statuswechsel nach der Zustandsmaschine mit Audit; ``aktor`` ist der gepruefte Bearbeiter (REST, Maske, MCP)."""
     row = _query_reklamation(db, reklamation_id, tenant_id)
     try:
         aktueller_status = ReklamationsStatus(row.status)
-        neuer_status = ReklamationsStatus(req.neuer_status)
-        ReklamationZustandsmaschine.pruefe_statuswechsel(aktueller_status, neuer_status)
+        ziel = ReklamationsStatus(neuer_status)
+        ReklamationZustandsmaschine.pruefe_statuswechsel(aktueller_status, ziel)
     except ValueError as e:
         raise HTTPException(422, str(e))
-    _add_audit(
-        row,
-        "status_geaendert",
-        req.aktor_id,
-        req.kommentar,
-        {"vor_status": row.status, "nach_status": neuer_status.value},
-    )
-    row.status = neuer_status.value
+    _add_audit(row, "status_geaendert", aktor, kommentar, {"vor_status": row.status, "nach_status": ziel.value})
+    row.status = ziel.value
     db.commit()
     db.refresh(row)
     return _to_dict(row)
 
 
-@router.post("/{reklamation_id}/crm-reference", summary="Crm reference aktualisieren",
-    response_model=ReklamationOut
-)
-def update_crm_reference(
+@router.post("/{reklamation_id}/transition", summary="Status transition",
+    response_model=ReklamationOut, dependencies=SCHREIBEN["QUALITAET"])
+def transition_status(
     reklamation_id: str,
-    req: ReklamationReferenzUpdateRequest,
+    req: ReklamationTransitionRequest,
+    request: Request,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
+    return wechsle_status(db, tenant_id, reklamation_id, req.neuer_status,
+                          aktor=gepruefter_akteur_aus_request(request), kommentar=req.kommentar)
+
+
+@router.post("/{reklamation_id}/crm-reference", summary="Crm reference aktualisieren",
+    response_model=ReklamationOut, dependencies=SCHREIBEN["QUALITAET"])
+def update_crm_reference(
+    reklamation_id: str,
+    req: ReklamationReferenzUpdateRequest,
+    request: Request,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
+    aktor = gepruefter_akteur_aus_request(request)
     row = _query_reklamation(db, reklamation_id, tenant_id)
     if req.crm_referenz is None:
         raise HTTPException(422, "crm_referenz ist erforderlich")
     row.crm_referenz = req.crm_referenz.model_dump()
-    _add_audit(row, "crm_referenz_gesetzt", req.aktor_id)
+    _add_audit(row, "crm_referenz_gesetzt", aktor)
     db.commit()
     db.refresh(row)
     return _to_dict(row)
 
 
 @router.post("/{reklamation_id}/dms-referenzen", summary="Dms referenzen hinzufügen",
-    response_model=ReklamationOut
-)
+    response_model=ReklamationOut, dependencies=SCHREIBEN["QUALITAET"])
 def add_dms_referenzen(
     reklamation_id: str,
     req: ReklamationReferenzUpdateRequest,
+    request: Request,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
+    aktor = gepruefter_akteur_aus_request(request)
     row = _query_reklamation(db, reklamation_id, tenant_id)
     if not req.dms_referenzen:
         raise HTTPException(422, "dms_referenzen ist erforderlich")
@@ -430,21 +433,22 @@ def add_dms_referenzen(
         row.gobd_beleg_id = new_refs[0].get("dokument_id")
     elif new_refs:
         row.gobd_beleg_id = new_refs[0].get("dokument_id")
-    _add_audit(row, "dms_referenzen_hinzugefuegt", req.aktor_id)
+    _add_audit(row, "dms_referenzen_hinzugefuegt", aktor)
     db.commit()
     db.refresh(row)
     return _to_dict(row)
 
 
 @router.post("/{reklamation_id}/labor-befund", summary="Laborbefund uebernehmen",
-    response_model=ReklamationOut
-)
+    response_model=ReklamationOut, dependencies=SCHREIBEN["QUALITAET"])
 def uebernehme_labor_befund(
     reklamation_id: str,
     req: ReklamationLaborBefundRequest,
+    request: Request,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
+    aktor = gepruefter_akteur_aus_request(request)
     row = _query_reklamation(db, reklamation_id, tenant_id)
     metadaten = {
         "labor_auftrag_id": req.labor_auftrag_id,
@@ -454,10 +458,10 @@ def uebernehme_labor_befund(
         "grenzwerte": req.grenzwerte,
         "folgeaktion": "charge_sperren" if req.entscheidung == "sperren" else "qs_freigeben" if req.entscheidung == "freigeben" else "nachpruefung_anlegen",
     }
-    _add_audit(row, "labor_befund_uebernommen", req.aktor_id, req.bemerkung, metadaten)
+    _add_audit(row, "labor_befund_uebernommen", aktor, req.bemerkung, metadaten)
     if row.status == ReklamationsStatus.OFFEN.value:
         row.status = ReklamationsStatus.IN_PRUEFUNG.value
-        _add_audit(row, "status_geaendert", req.aktor_id, "Laborbefund uebernommen", {
+        _add_audit(row, "status_geaendert", aktor, "Laborbefund uebernommen", {
             "vor_status": ReklamationsStatus.OFFEN.value,
             "nach_status": ReklamationsStatus.IN_PRUEFUNG.value,
         })

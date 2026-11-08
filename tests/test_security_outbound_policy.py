@@ -68,6 +68,6 @@ def test_external_tool_execution_rejects_private_base_url():
         context={"external_base_url": "http://127.0.0.1:9000"},
     )
 
-    assert result["mode"] == "fallback_contract"
-    assert result["fallback_reason"].startswith("transport_error:")
-    assert "nicht erlaubt" in result["fallback_reason"]
+    assert result["mode"] == "execution_rejected"
+    assert result["http_status"] == 401
+    assert result["rejection_reason"] == "authenticated_token_required"

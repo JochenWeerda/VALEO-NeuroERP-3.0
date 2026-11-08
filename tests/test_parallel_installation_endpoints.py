@@ -1,6 +1,7 @@
+import uuid
 from fastapi.testclient import TestClient
 
-from main import app
+from app.main import app
 
 
 client = TestClient(app, raise_server_exceptions=False)
@@ -56,7 +57,8 @@ def test_schaeden_and_etiketten_endpoints_work():
 
     drucker = client.post(
         "/api/v1/etiketten/drucker",
-        json={"name": "Zebra ZT230 (Parallelinstallation)", "standort": "Annahme"},
+        # Druckernamen sind je Mandant eindeutig: je Lauf ein eigener.
+        json={"name": f"Zebra ZT230 (Parallelinstallation {uuid.uuid4().hex[:6]})", "standort": "Annahme"},
         headers=AUTH_HEADERS,
     )
     assert drucker.status_code == 201, drucker.text

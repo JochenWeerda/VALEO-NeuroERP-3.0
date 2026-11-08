@@ -253,7 +253,7 @@ def build_strecke_disposition_screen_definition() -> dict[str, Any]:
                     {"key": "notes", "label": "Notiz"},
                 ],
                 "rowActions": [
-                    {"key": "loeschen", "label": "Löschen", "dangerLevel": "moderate"},
+                    {"key": "loeschen", "label": "Löschen", "dangerLevel": "moderate", "permission": "logistics.strecke.delete"},
                 ],
             },
         ],
@@ -509,6 +509,57 @@ def build_fuhrpark_uebersicht_screen_definition() -> dict[str, Any]:
             _nav_tile("rechnungen", "Rechnungen", "/fuhrpark/fuhrpark-rechnungen"),
             _nav_tile("auswertung", "Auswertungen", "/fuhrpark/fuhrpark-auswertung-kosten-pro-fahrzeug"),
             _nav_tile("belege", "Ausgehende Belege und Dokumente", "/fuhrpark/ausgehende-belege-dokumente"),
+        ],
+    )
+
+
+def build_errors_not_found_screen_definition() -> dict[str, Any]:
+    """404-Seite als Studio-Einstieg: keine Daten, nur Wege zurueck (vorher eine Maske, die es nicht gab)."""
+    return _capture_cockpit(
+        screen_id="errors/NotFound",
+        domain="platform",
+        title="Seite nicht gefunden",
+        subtitle="Die angeforderte Seite existiert nicht oder wurde verschoben.",
+        purpose="Von einer unbekannten Adresse zur Startseite oder in die Kundenliste zurueckfinden.",
+        reason="Die Seite hat keinen Vorgang. Jede Kachel oeffnet eine bestehende Maske.",
+        tiles=[
+            _nav_tile("start", "Zur Startseite", "/"),
+            _nav_tile("kunden", "Zu Kunden", "/verkauf/kunden-liste"),
+        ],
+    )
+
+
+def build_strecke_menu_screen_definition() -> dict[str, Any]:
+    return _capture_cockpit(
+        screen_id="strecke/menu",
+        domain="logistics",
+        title="Streckengeschäft",
+        subtitle="Einstieg",
+        purpose="Vom Streckengeschaeft in Disposition, Geschaefte, NaWaRo, Qualitaet und Belegdruck springen.",
+        reason="Der Einstieg hat keinen eigenen Vorgang. Jede Kachel oeffnet die bestehende Maske.",
+        tiles=[
+            _nav_tile("disposition", "Strecken-Disposition", "/strecke/disposition"),
+            _nav_tile("geschaeft", "Streckengeschäft", "/strecke/streckengeschaeft"),
+            _nav_tile("vorlaeufig", "Vorläufige Streckengeschäfte", "/strecke/vorlaeufige-streckengeschaefte"),
+            _nav_tile("nawaro", "NaWaRo", "/strecke/nawaro-uebersicht"),
+            _nav_tile("qualitaet", "Qualitätsabweichung", "/strecke/qualitaets-abweichung"),
+            _nav_tile("drucken", "Strecken-Dokumente drucken", "/strecke/dokumente-drucken"),
+        ],
+    )
+
+
+def build_strecke_nawaro_uebersicht_screen_definition() -> dict[str, Any]:
+    return _capture_cockpit(
+        screen_id="strecke/nawaro-uebersicht",
+        domain="agrar",
+        title="NaWaRo",
+        subtitle="Nachwachsende Rohstoffe: Lieferungen, Vertraege, Ernteerklaerung",
+        purpose="Von NaWaRo in Lieferungen, Vertragspruefung und Ernteerklaerung springen.",
+        reason="Der Einstieg hat keinen eigenen Vorgang. Jede Kachel oeffnet die bestehende Maske.",
+        tiles=[
+            _nav_tile("lieferungen", "NaWaRo-Lieferungen", "/strecke/nawaro-lieferungen"),
+            _nav_tile("vertraege", "NaWaRo-Verträge prüfen", "/strecke/nawaro-vertraege-pruefen"),
+            _nav_tile("ernteerklaerung", "Ernteerklärung drucken", "/strecke/nawaro-ernterklaerung-drucken"),
         ],
     )
 
@@ -816,15 +867,20 @@ def build_logistik_tourenplanung_screen_definition() -> dict[str, Any]:
                 "rowHeight": 44,
                 "rowDetail": False,
                 "rowActions": [
-                    {"key": "beladung", "label": "Beladung", "command": "tour.openLoading", "dangerLevel": "safe"},
-                    {"key": "hinweise", "label": "Hinweise", "command": "tour.showHints", "dangerLevel": "safe"},
+                    {"key": "beladung", "label": "Beladung", "command": "tour.openLoading", "dangerLevel": "safe", "permission": "logistics.tour.loading",
+                     "stubReason": "Oeffnet die Beladungsansicht der Tour in der Maske."},
+                    {"key": "hinweise", "label": "Hinweise", "command": "tour.showHints", "dangerLevel": "safe", "permission": "logistics.tour.read",
+                     "stubReason": "Zeigt die Hinweise zur Tour in der Maske."},
                     {
                         "key": "storno",
                         "label": "Stornieren",
                         "command": "tour.cancel",
                         "dangerLevel": "moderate",
+                        "permission": "logistics.tour.cancel",
                         "requiresConfirmation": True,
                         "visibleWhen": {"field": "status", "values": ["geplant"]},
+                        "commandEndpoint": "/api/v1/logistik/tours/{entity_id}/cancel",
+                        "method": "POST",
                     },
                 ],
                 "columns": [
@@ -1037,6 +1093,7 @@ def build_logistik_tour_fracht_arbeitsraum_screen_definition() -> dict[str, Any]
                 "command": "fracht.calculateProbe",
                 "permission": "logistics:read",
                 "forbiddenForAgents": True,
+                "stubReason": "Berechnet die Frachtprobe aus den Feldern des Arbeitsraums.",
             },
         ],
         "tables": [
@@ -1086,6 +1143,7 @@ def build_logistik_tour_fracht_arbeitsraum_screen_definition() -> dict[str, Any]
                         "key": "storno",
                         "label": "Stornieren",
                         "dangerLevel": "moderate",
+                        "permission": "logistics.fracht.storno",
                         "visibleWhen": {"field": "stornierbar", "values": [True]},
                     },
                 ],
@@ -1181,6 +1239,7 @@ def build_logistik_frachttabellen_screen_definition() -> dict[str, Any]:
                 "command": "fracht.addPosition",
                 "permission": "logistics:write",
                 "forbiddenForAgents": True,
+                "stubReason": "Erfasst eine Staffelposition in der Maske; gespeichert wird mit der Tabelle.",
             },
         ],
         "tables": [
@@ -1198,6 +1257,12 @@ def build_logistik_frachttabellen_screen_definition() -> dict[str, Any]:
                         "key": "loeschen",
                         "label": "Löschen",
                         "dangerLevel": "destructive",
+                        "permission": "logistics.frachttabelle.delete",
+                        "commandEndpoint": "/api/v1/logistik/frachttabellen/{entity_id}",
+                        "method": "DELETE",
+                        "requiresConfirmation": True,
+                        "auditReasonRequired": True,
+                        "forbiddenForAgents": True,
                         "disabledWhen": {"field": "gesperrt", "values": [True]},
                     },
                 ],
@@ -1329,8 +1394,16 @@ def build_logistik_versandprofile_screen_definition() -> dict[str, Any]:
                                 "key": "loeschen",
                                 "label": "Löschen",
                                 "command": "versand.deleteProfile",
+                                "domainCommand": "logistik.versandprofil.deactivate.v1",
+                                "requiresConfirmation": True,
+                                "commandEndpoint": "/api/v1/logistik/versand/profile/{entity_id}/actions/deactivate",
+                                "method": "POST",
+                                "auditReasonRequired": True,
+                                "inputFields": [{"key": "expected_active", "label": "Aktiver Stand", "type": "boolean", "required": True}],
                                 "dangerLevel": "moderate",
+                                "permission": "logistics.versandprofil.delete",
                                 "disabledWhen": {"field": "gesperrt", "values": [True]},
+                                "stubReason": "Entfernt das Versandprofil in der Maske; der Serverweg folgt dem Profil-Register.",
                             },
                         ],
                         "columns": [
@@ -1435,6 +1508,7 @@ def build_fuhrpark_terminarten_screen_definition() -> dict[str, Any]:
                 "key": "speichern",
                 "label": "Speichern",
                 "command": "fuhrpark.saveTerminart",
+                "permission": "logistics:write",
                 "kind": "primary",
                 "dangerLevel": "safe",
                 "zone": "header",
@@ -1467,7 +1541,11 @@ def build_fuhrpark_terminarten_screen_definition() -> dict[str, Any]:
                         "label": "Löschen",
                         "command": "fuhrpark.deleteTerminart",
                         "dangerLevel": "moderate",
+                        "permission": "fuhrpark.terminart.delete",
                         "disabledWhen": {"field": "gesperrt", "values": [True]},
+                        "commandEndpoint": "/api/v1/fuhrpark/terminarten/{entity_id}",
+                        "method": "DELETE",
+                        "requiresConfirmation": True,
                     },
                 ],
                 "columns": [
@@ -1541,6 +1619,7 @@ def build_fuhrpark_rechnungen_screen_definition() -> dict[str, Any]:
                 "key": "speichern",
                 "label": "Speichern",
                 "command": "fuhrpark.saveRechnung",
+                "permission": "logistics:write",
                 "kind": "primary",
                 "dangerLevel": "safe",
                 "zone": "header",
@@ -1573,7 +1652,11 @@ def build_fuhrpark_rechnungen_screen_definition() -> dict[str, Any]:
                         "label": "Löschen",
                         "command": "fuhrpark.deleteRechnung",
                         "dangerLevel": "moderate",
+                        "permission": "fuhrpark.rechnung.delete",
                         "disabledWhen": {"field": "gesperrt", "values": [True]},
+                        "commandEndpoint": "/api/v1/fuhrpark/rechnungen/{entity_id}",
+                        "method": "DELETE",
+                        "requiresConfirmation": True,
                     },
                 ],
                 "columns": [
@@ -1649,6 +1732,7 @@ def build_fuhrpark_ausgehende_dokumente_screen_definition() -> dict[str, Any]:
                 "key": "speichern",
                 "label": "Speichern",
                 "command": "fuhrpark.saveDokument",
+                "permission": "logistics:write",
                 "kind": "primary",
                 "dangerLevel": "safe",
                 "zone": "header",
@@ -1681,7 +1765,11 @@ def build_fuhrpark_ausgehende_dokumente_screen_definition() -> dict[str, Any]:
                         "label": "Löschen",
                         "command": "fuhrpark.deleteDokument",
                         "dangerLevel": "moderate",
+                        "permission": "fuhrpark.dokument.delete",
                         "disabledWhen": {"field": "gesperrt", "values": [True]},
+                        "commandEndpoint": "/api/v1/fuhrpark/ausgehende-dokumente/{entity_id}",
+                        "method": "DELETE",
+                        "requiresConfirmation": True,
                     },
                 ],
                 "columns": [
@@ -1745,7 +1833,7 @@ def build_fuhrpark_fahrzeug_stamm_screen_definition() -> dict[str, Any]:
         "identityField": "kennzeichen",
         "adapter": {"type": "native", "sourceId": "fuhrpark/fahrzeug-stamm", "temporary": False},
         "dataSources": [
-            {"key": "fahrzeug", "endpoint": "/api/v1/fuhrpark/fahrzeuge", "pageSize": 1},
+            {"key": "entity", "endpoint": "/api/v1/fuhrpark/fahrzeuge/{entity_id}", "pageSize": 1},
         ],
         "summary": [
             {"key": "kilometerstand", "label": "Km-Stand", "value": "0"},
@@ -1757,6 +1845,7 @@ def build_fuhrpark_fahrzeug_stamm_screen_definition() -> dict[str, Any]:
                 "key": "speichern",
                 "label": "Speichern",
                 "command": "fuhrpark.saveFahrzeug",
+                "permission": "logistics:write",
                 "kind": "primary",
                 "dangerLevel": "safe",
                 "zone": "header",
@@ -1803,6 +1892,7 @@ def build_fuhrpark_fahrzeug_stamm_screen_definition() -> dict[str, Any]:
                 "key": "loeschen",
                 "label": "Fahrzeug löschen",
                 "command": "fuhrpark.deleteFahrzeug",
+                "permission": "logistics:write",
                 "kind": "secondary",
                 "dangerLevel": "high",
                 "zone": "footer",
@@ -1976,11 +2066,11 @@ def build_personal_qualifikationen_screen_definition() -> dict[str, Any]:
                 "key": "speichern",
                 "label": "Speichern",
                 "command": "personal.saveQualifikation",
+                "permission": "hr:write",
                 "commandEndpoint": "/api/v1/training/qualifications/actions/speichern",
                 "kind": "primary",
                 "dangerLevel": "safe",
                 "zone": "header",
-                "stubReason": "Legt ein Qualifikationsprofil an.",
             },
             {
                 "key": "neu",
@@ -2007,8 +2097,15 @@ def build_personal_qualifikationen_screen_definition() -> dict[str, Any]:
                         "key": "loeschen",
                         "label": "Löschen",
                         "command": "personal.deleteQualifikation",
+                        "domainCommand": "hr.qualification.delete.v1",
+                        "commandEndpoint": "/api/v1/training/qualifications/{entity_id}/actions/loeschen",
+                        "method": "POST",
+                        "requiresConfirmation": True,
+                        "inputFields": [{"key": "expected_revision", "label": "Gelesene Revision", "type": "text", "required": True}],
                         "dangerLevel": "moderate",
+                        "permission": "personal.qualifikation.delete",
                         "disabledWhen": {"field": "gesperrt", "values": [True]},
+                        "stubReason": "Entfernt das Qualifikationsprofil in der Maske.",
                     },
                 ],
                 "columns": [
@@ -2081,11 +2178,11 @@ def build_personal_onboarding_screen_definition() -> dict[str, Any]:
                 "key": "speichern",
                 "label": "Speichern",
                 "command": "personal.saveOnboarding",
+                "permission": "hr:write",
                 "commandEndpoint": "/api/v1/training/onboarding/runs/actions/speichern",
                 "kind": "primary",
                 "dangerLevel": "safe",
                 "zone": "header",
-                "stubReason": "Legt einen Einarbeitungslauf an.",
             },
             {
                 "key": "neu",
@@ -2112,8 +2209,15 @@ def build_personal_onboarding_screen_definition() -> dict[str, Any]:
                         "key": "loeschen",
                         "label": "Löschen",
                         "command": "personal.deleteOnboarding",
+                        "domainCommand": "hr.onboarding.delete.v1",
+                        "commandEndpoint": "/api/v1/training/onboarding/runs/{entity_id}/actions/loeschen",
+                        "method": "POST",
+                        "requiresConfirmation": True,
+                        "inputFields": [{"key": "expected_revision", "label": "Gelesene Revision", "type": "text", "required": True}],
                         "dangerLevel": "moderate",
+                        "permission": "personal.onboarding.delete",
                         "disabledWhen": {"field": "gesperrt", "values": [True]},
+                        "stubReason": "Entfernt den Onboarding-Eintrag in der Maske.",
                     },
                 ],
                 "columns": [
@@ -2187,11 +2291,11 @@ def build_personal_schulungen_screen_definition() -> dict[str, Any]:
                 "key": "speichern",
                 "label": "Speichern",
                 "command": "personal.saveSchulung",
+                "permission": "hr:write",
                 "commandEndpoint": "/api/v1/training/assignments/actions/speichern",
                 "kind": "primary",
                 "dangerLevel": "safe",
                 "zone": "header",
-                "stubReason": "Legt eine Schulungszuweisung an.",
             },
             {
                 "key": "neu",
@@ -2218,8 +2322,15 @@ def build_personal_schulungen_screen_definition() -> dict[str, Any]:
                         "key": "loeschen",
                         "label": "Löschen",
                         "command": "personal.deleteSchulung",
+                        "domainCommand": "hr.assignment.delete.v1",
+                        "commandEndpoint": "/api/v1/training/assignments/{entity_id}/actions/loeschen",
+                        "method": "POST",
+                        "requiresConfirmation": True,
+                        "inputFields": [{"key": "expected_revision", "label": "Gelesene Revision", "type": "text", "required": True}],
                         "dangerLevel": "moderate",
+                        "permission": "personal.schulung.delete",
                         "disabledWhen": {"field": "gesperrt", "values": [True]},
+                        "stubReason": "Entfernt den Schulungseintrag in der Maske.",
                     },
                 ],
                 "columns": [
@@ -2340,13 +2451,20 @@ def build_personal_bewerbungen_screen_definition() -> dict[str, Any]:
                         "label": "Einwilligung",
                         "command": "personal.openEinwilligung",
                         "dangerLevel": "safe",
+                        # Die Einwilligung erteilt/widerruft personal_write; ein Recht ohne Rolle blendete die Zeile aus.
+                        "permission": "personal.bewerbung.write",
+                        "navigationRoute": "/personal/bewerbungen/{entity_id}/einwilligung",
                     },
                     {
                         "key": "loeschen",
                         "label": "Löschen",
                         "command": "personal.deleteBewerbung",
                         "dangerLevel": "moderate",
+                        "permission": "personal.bewerbung.delete",
                         "disabledWhen": {"field": "gesperrt", "values": [True]},
+                        "commandEndpoint": "/api/v1/personal/applications/{entity_id}",
+                        "method": "DELETE",
+                        "requiresConfirmation": True,
                     },
                 ],
                 "columns": [
@@ -2416,7 +2534,7 @@ def build_personal_bewerbung_einwilligung_screen_definition() -> dict[str, Any]:
         "identityField": "applicant_name",
         "adapter": {"type": "native", "sourceId": "personal/bewerbung-einwilligung", "temporary": False},
         "dataSources": [
-            {"key": "bewerbung", "endpoint": "/api/v1/personal/applications/{entity_id}", "pageSize": 1},
+            {"key": "entity", "endpoint": "/api/v1/personal/applications/{entity_id}", "pageSize": 1},
             {"key": "einwilligung", "endpoint": "/api/v1/personal/applications/{entity_id}/einwilligung", "pageSize": 200},
             {"key": "fassungen", "endpoint": "/api/v1/personal/applications/einwilligungserklaerungen", "pageSize": 200},
         ],
@@ -2488,7 +2606,6 @@ def build_personal_bewerbung_einwilligung_screen_definition() -> dict[str, Any]:
                      "helpText": "Höchstens drei Jahre ab heute."},
                     {"key": "kanal", "label": "Eingegangen über", "type": "select", "required": True,
                      "options": _EINWILLIGUNG_KANAELE},
-                    {"key": "erfasst_durch", "label": "Erfasst durch", "type": "text"},
                     {"key": "wortlaut", "label": "Wortlaut der Fassung", "type": "textarea", "readOnly": True},
                 ],
             },
@@ -2577,7 +2694,6 @@ def build_personal_einwilligungserklaerungen_screen_definition() -> dict[str, An
         "fields": [
             {"key": "wortlaut", "label": "Wortlaut", "type": "textarea", "required": True,
              "helpText": "Genau der Text, der unterschrieben wird. Nach dem Anlegen nicht mehr änderbar."},
-            {"key": "erstellt_durch", "label": "Erstellt durch", "type": "text"},
         ],
         "workflow": {"processKey": "personal.einwilligungserklaerungen"},
         "actions": [
@@ -2594,7 +2710,6 @@ def build_personal_einwilligungserklaerungen_screen_definition() -> dict[str, An
                 "method": "POST",
                 "inputFields": [
                     {"key": "wortlaut", "label": "Wortlaut", "type": "textarea", "required": True},
-                    {"key": "erstellt_durch", "label": "Erstellt durch", "type": "text"},
                 ],
             },
             {
@@ -2776,9 +2891,12 @@ def build_admin_postfaecher_screen_definition() -> dict[str, Any]:
                 ],
                 "rowActions": [
                     {"key": "bearbeiten", "label": "Bearbeiten", "command": "admin.postfachBearbeiten",
-                     "dangerLevel": "safe"},
+                     "dangerLevel": "safe", "permission": "admin.postfach.update",
+                     "localEffect": "load_row",
+                     "stubReason": "Laedt die Zeile in die Postfach-Eingabe."},
                     {"key": "entfernen", "label": "Entfernen", "command": "admin.postfachEntfernen",
-                     "dangerLevel": "high", "requiresConfirmation": True},
+                     "dangerLevel": "high", "permission": "admin.postfach.delete", "requiresConfirmation": True,
+                     "commandEndpoint": "/api/v1/admin/postfaecher/{entity_id}", "method": "DELETE"},
                 ],
             },
         ],
@@ -2813,5 +2931,438 @@ def build_admin_postfaecher_screen_definition() -> dict[str, Any]:
             "requiresVirtualTables": False,
             "lookupMinChars": 2,
             "bundleGroup": "platform",
+        },
+    }
+
+
+def build_sales_gutschrift_screen_definition() -> dict[str, Any]:
+    """Gutschrift (kaufmaennische Rechnungskorrektur) erfassen und buchen. Die Seite speichert, der Builder zeichnet.
+
+    Die Umsatzsteuer kommt aus dem **Steuerschluessel** der Position (``domain_erp.tax_keys``) — die
+    Maske hat kein Prozentfeld und keinen Vorgabewert. Netto, Umsatzsteuer und Brutto rechnet der Server
+    (``/sales/credit-notes/steuer-vorschau``, dieselbe Stelle wie die Buchung); die Maske zeigt sie nur.
+    Gebucht wird Erloes netto, Umsatzsteuer getrennt, Forderung brutto. Lehnt die Buchung ab, nennt die
+    Antwort den Pruefgrund, und die Gutschrift bleibt Entwurf.
+    """
+    return {
+        "schemaVersion": 1,
+        "id": "sales/gutschrift",
+        "domain": "sales",
+        "mode": "list",
+        "title": "Gutschrift",
+        "subtitle": "Verkauf / Rechnungskorrektur",
+        "adapter": {"type": "native", "sourceId": "sales/gutschrift", "temporary": False},
+        "dataSources": [
+            {"key": "gutschriften", "endpoint": "/api/v1/sales/credit-notes", "pageSize": 200,
+             "table": "domain_sales.sales_credit_notes"},
+            {"key": "steuerschluessel", "endpoint": "/api/v1/finance/tax-keys", "pageSize": 200,
+             "table": "domain_erp.tax_keys"},
+            {"key": "steuer", "endpoint": "/api/v1/sales/credit-notes/steuer-vorschau", "method": "POST"},
+            {"key": "vorschlaege", "endpoint": "/api/v1/sales/credit-notes/buchungsvorschlaege", "pageSize": 200},
+        ],
+        "summary": [
+            {"key": "netto", "label": "Netto", "value": "0,00 €"},
+            {"key": "steuer", "label": "Umsatzsteuer", "value": "offen"},
+            {"key": "brutto", "label": "Brutto", "value": "offen"},
+        ],
+        "fields": [
+            {"key": "credit_note_number", "label": "Gutschriftnummer", "type": "text", "required": True},
+            {"key": "customer_id", "label": "Kunde (Nr.)", "type": "text", "required": True},
+            {"key": "customer_name", "label": "Kundenname", "type": "text"},
+            {"key": "invoice_reference", "label": "Rechnungsnummer (Bezug)", "type": "text",
+             "helpText": "Der offene Posten dieser Rechnung wird um den Bruttobetrag gemindert. "
+                         "Ohne Bezug wird kein Posten gemindert."},
+            {"key": "correction_type", "label": "Art", "type": "select", "required": True,
+             "options": [
+                 {"value": "rechnungskorrektur", "label": "Rechnungskorrektur (Erlösminderung)"},
+                 {"value": "gutschrift_14_ustg", "label": "Gutschrift nach § 14 UStG (Abrechnung durch den Leistungsempfänger)"},
+             ],
+             "helpText": "Eine Gutschrift nach § 14 UStG ist keine Erlösminderung und wird hier nicht gebucht."},
+            {"key": "reason", "label": "Grund", "type": "select", "required": True,
+             "options": [
+                 {"value": "Retoure", "label": "Retoure"},
+                 {"value": "Preisnachlass", "label": "Preisnachlass"},
+                 {"value": "Rechnungsfehler", "label": "Rechnungsfehler"},
+                 {"value": "Reklamation", "label": "Reklamation"},
+                 {"value": "Sonstiges", "label": "Sonstiges"},
+             ]},
+            {"key": "reason_text", "label": "Erläuterung", "type": "text"},
+            {"key": "notes", "label": "Notizen", "type": "textarea"},
+            # Positionserfassung: Die Eingabe wird mit „Position übernehmen“ in die Liste gestellt.
+            {"key": "pos_description", "label": "Position: Bezeichnung", "type": "text"},
+            {"key": "pos_quantity", "label": "Position: Menge", "type": "number"},
+            {"key": "pos_unit_price", "label": "Position: Einzelpreis netto", "type": "currency"},
+            {"key": "pos_tax_code", "label": "Position: Steuerschlüssel", "type": "select", "options": [],
+             "dataSourceKey": "steuerschluessel",
+             "helpText": "Aus der Maske Steuerschlüssel. Es gibt keinen Vorgabewert: "
+                         "Ohne Steuerschlüssel wird die Gutschrift nicht gebucht."},
+        ],
+        "workflow": {
+            "processKey": "order-to-cash",
+            "documentType": "sales_credit_note",
+            "phases": [
+                {"key": "erfassen", "label": "Erfassen"},
+                {"key": "entwurf", "label": "Entwurf"},
+                {"key": "gebucht", "label": "Gebucht"},
+            ],
+        },
+        "actions": [
+            {"key": "position", "label": "Position übernehmen", "command": "sales.gutschriftPosition",
+             "kind": "secondary", "dangerLevel": "safe", "zone": "header",
+             "stubReason": "Stellt die Positionseingabe in die Positionsliste der Maske; gespeichert wird erst mit Speichern."},
+            {"key": "speichern", "label": "Als Entwurf speichern", "command": "sales.gutschriftSpeichern",
+             "kind": "primary", "dangerLevel": "safe", "zone": "header",
+             "permission": "sales.gutschrift.write",
+             "commandEndpoint": "/api/v1/sales/credit-notes/actions/speichern",
+             "method": "POST",
+             "inputFields": [
+                 {"key": "credit_note_number", "label": "Gutschriftnummer", "type": "text", "required": True},
+                 {"key": "customer_id", "label": "Kunde (Nr.)", "type": "text", "required": True},
+                 {"key": "reason", "label": "Grund", "type": "text", "required": True},
+                 {"key": "invoice_reference", "label": "Rechnungsnummer (Bezug)", "type": "text"},
+                 {"key": "correction_type", "label": "Art", "type": "select"},
+                 {"key": "lines", "label": "Positionen (description, quantity, unit_price, tax_code)", "type": "table",
+                  "required": True},
+             ]},
+            {"key": "buchen", "label": "Buchen", "command": "sales.gutschriftBuchen",
+             "kind": "secondary", "dangerLevel": "moderate", "zone": "header",
+             "requiresConfirmation": True,
+             "humanApprovalRequired": True,
+             "forbiddenForAgents": True,
+             "permission": "sales.gutschrift.post",
+             "commandEndpoint": "/api/v1/sales/credit-notes/{entity_id}/actions/buchen",
+             "method": "POST"},
+            {"key": "vorschlag_freigeben", "label": "Vorschlag freigeben", "command": "sales.gutschriftVorschlagFreigeben",
+             "kind": "secondary", "dangerLevel": "moderate", "zone": "header",
+             "requiresConfirmation": True,
+             "humanApprovalRequired": True,
+             "forbiddenForAgents": True,
+             "permission": "sales.gutschrift.post",
+             "commandEndpoint": "/api/v1/sales/credit-notes/buchungsvorschlaege/{entity_id}/actions/freigeben",
+             "method": "POST"},
+            {"key": "vorschlag_ablehnen", "label": "Vorschlag ablehnen", "command": "sales.gutschriftVorschlagAblehnen",
+             "kind": "secondary", "dangerLevel": "moderate", "zone": "header",
+             "humanApprovalRequired": True,
+             "forbiddenForAgents": True,
+             "auditReasonRequired": True,
+             "permission": "sales.gutschrift.post",
+             "commandEndpoint": "/api/v1/sales/credit-notes/buchungsvorschlaege/{entity_id}/actions/ablehnen",
+             "method": "POST",
+             "inputFields": [{"key": "grund", "label": "Grund der Ablehnung", "type": "text", "required": True}]},
+            {"key": "neu", "label": "Neue Gutschrift", "command": "sales.gutschriftNeu",
+             "kind": "secondary", "dangerLevel": "safe", "zone": "footer",
+             "localEffect": "form_reset",
+             "stubReason": "Leert die Eingabe fuer eine neue Gutschrift."},
+        ],
+        "tables": [
+            {
+                "key": "positionen",
+                "label": "Positionen",
+                "serverPagination": False,
+                "pageSize": 50,
+                "virtualized": False,
+                "rowHeight": 44,
+                "rowDetail": False,
+                "columns": [
+                    {"key": "nr", "label": "Nr.", "width": 60, "sortable": True, "priority": "primary"},
+                    {"key": "description", "label": "Bezeichnung", "filterable": True, "priority": "primary"},
+                    {"key": "quantity", "label": "Menge", "numeric": True, "renderKind": "number", "priority": "secondary"},
+                    {"key": "unit_price", "label": "Einzelpreis netto", "numeric": True, "renderKind": "currency",
+                     "priority": "secondary"},
+                    {"key": "tax_code_text", "label": "Steuerschlüssel", "priority": "primary"},
+                    {"key": "netto", "label": "Netto", "numeric": True, "renderKind": "currency", "priority": "primary"},
+                ],
+                "rowActions": [
+                    {"key": "entfernen", "label": "Entfernen", "command": "sales.gutschriftPositionEntfernen",
+                     "dangerLevel": "safe", "permission": "sales.credit_note.position.delete",
+                     "stubReason": "Entfernt die Position aus der Liste in der Maske."},
+                ],
+            },
+            {
+                "key": "steuer",
+                "label": "Steuerausweis",
+                "dataSourceKey": "steuer",
+                "serverPagination": False,
+                "pageSize": 25,
+                "virtualized": False,
+                "rowHeight": 44,
+                "rowDetail": False,
+                "columns": [
+                    {"key": "tax_code_text", "label": "Steuerschlüssel", "filterable": True, "sortable": True, "priority": "primary"},
+                    {"key": "netto", "label": "Netto", "numeric": True, "renderKind": "currency", "priority": "primary"},
+                    {"key": "steuer", "label": "Umsatzsteuer", "numeric": True, "renderKind": "currency", "priority": "primary"},
+                    {"key": "brutto", "label": "Brutto", "numeric": True, "renderKind": "currency", "priority": "primary"},
+                ],
+            },
+            {
+                "key": "gutschriften",
+                "label": "Gutschriften",
+                "dataSourceKey": "gutschriften",
+                "serverPagination": False,
+                "pageSize": 50,
+                "virtualized": False,
+                "rowHeight": 44,
+                "rowDetail": False,
+                "columns": [
+                    {"key": "credit_note_number", "label": "Nummer", "sortable": True, "filterable": True,
+                     "priority": "primary"},
+                    {"key": "customer_text", "label": "Kunde", "filterable": True, "priority": "primary"},
+                    {"key": "invoice_reference", "label": "Rechnung", "priority": "secondary"},
+                    {"key": "net_amount", "label": "Netto", "numeric": True, "renderKind": "currency", "priority": "secondary"},
+                    {"key": "tax_amount", "label": "Umsatzsteuer", "numeric": True, "renderKind": "currency",
+                     "priority": "secondary"},
+                    {"key": "total_amount", "label": "Brutto", "numeric": True, "renderKind": "currency", "priority": "primary"},
+                    {"key": "status_text", "label": "Status", "renderKind": "status", "priority": "primary"},
+                ],
+                "rowActions": [
+                    {"key": "laden", "label": "Öffnen", "command": "sales.gutschriftLaden", "dangerLevel": "safe", "permission": "sales.credit_note.read",
+                     "localEffect": "load_row", "stubReason": "Laedt die Gutschrift in die Eingabe."},
+                ],
+            },
+            {
+                # Ein Agent hat vorgeschlagen, eine Gutschrift zu buchen. Ein Mensch oeffnet sie, prueft
+                # Positionen und Steuer und gibt frei oder lehnt ab. Freigeben bucht nicht.
+                "key": "vorschlaege",
+                "label": "Buchungsvorschläge von Agenten",
+                "dataSourceKey": "vorschlaege",
+                "serverPagination": False,
+                "pageSize": 50,
+                "virtualized": False,
+                "rowHeight": 44,
+                "rowDetail": False,
+                "columns": [
+                    {"key": "credit_note_number", "label": "Gutschrift", "sortable": True, "filterable": True,
+                     "priority": "primary"},
+                    {"key": "vorgeschlagen_von", "label": "Vorgeschlagen von", "filterable": True, "priority": "secondary"},
+                    {"key": "netto", "label": "Netto", "numeric": True, "renderKind": "currency", "priority": "secondary"},
+                    {"key": "steuer", "label": "Umsatzsteuer", "numeric": True, "renderKind": "currency",
+                     "priority": "secondary"},
+                    {"key": "brutto", "label": "Brutto", "numeric": True, "renderKind": "currency", "priority": "primary"},
+                    {"key": "status_text", "label": "Stand", "renderKind": "status", "priority": "primary"},
+                ],
+                "rowActions": [
+                    {"key": "pruefen", "label": "Prüfen", "command": "sales.gutschriftVorschlagPruefen",
+                     "dangerLevel": "safe", "permission": "sales.credit_note.review",
+                     "localEffect": "load_row", "stubReason": "Oeffnet den Buchungsvorschlag zur menschlichen Pruefung."},
+                ],
+            },
+        ],
+        "agentContract": {
+            "businessPurpose": (
+                "Gutschrift an den Kunden (Rechnungskorrektur) erfassen und buchen: Positionen mit "
+                "Steuerschluessel, Erloes netto, Umsatzsteuer getrennt, Forderung brutto; ohne eindeutige "
+                "Steuerangabe wird nicht gebucht, sondern der Pruefgrund genannt."
+            ),
+            "examplePrompts": [
+                "Lege eine Gutschrift ueber 1.000 EUR netto mit Steuerschluessel 3 zur Rechnung RE-1001 an.",
+                "Warum wurde Gutschrift {entity_id} nicht gebucht?",
+                "Welche Gutschriften sind noch Entwurf?",
+            ],
+            "dangerousActions": [
+                {
+                    "key": "buchen",
+                    "reason": "Buchung ins Hauptbuch mit Umsatzsteuerberichtigung und OP-Minderung: Die Maskenaktion "
+                              "ist forbiddenForAgents. Ein Agent schlaegt die Buchung vor (sales.gutschrift.propose), "
+                              "ein Mensch prueft und gibt frei, erst dann bucht der Agent (sales.gutschrift.buchen).",
+                },
+                {
+                    "key": "vorschlag_freigeben",
+                    "reason": "Die Freigabe ist die Pruefung durch einen Menschen (Vier Augen) — nie durch einen Agenten.",
+                },
+                {
+                    "key": "vorschlag_ablehnen",
+                    "reason": "Die Ablehnung ist die Entscheidung eines Menschen — nie die eines Agenten.",
+                },
+            ],
+            "sensitiveFields": [],
+            "testSelectors": {
+                "screenRoot": "[data-testid='screen-sales/gutschrift']",
+                "primaryAction": "[data-testid='action-speichern']",
+            },
+        },
+        "layout": {
+            "floorplan": "worklist",
+            "density": "compact",
+            # Stand, naechster Schritt und Pruefgrund stehen im Prozessbereich neben der Maske.
+            "contextRail": "workflow",
+            "tableProfile": "financial",
+            "columnNavigation": "single",
+            "preferredMode": "desktopDense",
+            "mobileMode": "mobileStack",
+            "touchTargetPx": 44,
+            "summaryPlacement": "footer",
+            "statusPlacement": "afterFields",
+        },
+        "performance": {
+            "initialPayloadBudgetKb": 24,
+            "requiresLazyTabs": False,
+            "requiresVirtualTables": False,
+            "lookupMinChars": 2,
+            "bundleGroup": "sales",
+        },
+    }
+
+
+def build_finance_steuerschluessel_screen_definition() -> dict[str, Any]:
+    """Steuerschluessel des Mandanten pflegen. Die Seite speichert, der Builder zeichnet.
+
+    Die Tabelle ``domain_erp.tax_keys`` ist die eine Quelle, aus der Belege Satz und Konten nehmen
+    (``app/finance/steuerschluessel.py``). Die Maske hat deshalb keinen Vorgabewert — weder fuer den
+    Satz noch fuer ein Konto — und zeigt je Schluessel, wofuer er automatisch bucht oder warum nicht.
+    Speichern ist Menschen vorbehalten: Ein Agent darf eine Steuerregel vorschlagen, nie in Kraft setzen.
+    """
+    return {
+        "schemaVersion": 1,
+        "id": "finance/steuerschluessel",
+        "domain": "finance",
+        "mode": "list",
+        "title": "Steuerschlüssel",
+        "subtitle": "Finanzbuchhaltung / Stammdaten",
+        "adapter": {"type": "native", "sourceId": "finance/steuerschluessel", "temporary": False},
+        "dataSources": [
+            {"key": "steuerschluessel", "endpoint": "/api/v1/finance/tax-keys", "pageSize": 200,
+             "table": "domain_erp.tax_keys"},
+            # Konten der passenden Art aus dem Kontenplan, die fachlich naechsten zuerst.
+            {"key": "konten", "endpoint": "/api/v1/finance/tax-keys/kontenvorschlaege",
+             "table": "domain_erp.chart_of_accounts"},
+        ],
+        "summary": [
+            {"key": "anzahl", "label": "Steuerschlüssel", "value": "0"},
+            {"key": "ohne_buchung", "label": "Buchen nicht automatisch", "value": "0"},
+        ],
+        "fields": [
+            {"key": "code", "label": "Schlüssel", "type": "text", "required": True,
+             "helpText": "Ein oder zwei Ziffern. Ein vorhandener Schlüssel wird geändert, ein neuer angelegt."},
+            {"key": "bezeichnung", "label": "Bezeichnung", "type": "text", "required": True},
+            {"key": "steuersatz", "label": "Steuersatz in %", "type": "number", "required": True,
+             "helpText": "Es gibt keinen Vorgabewert. Steuerfrei ist 0."},
+            # Die Auswahl kommt aus dem Kontenplan: je Feld nur Konten der passenden Art, zum Satz passende
+            # zuerst. Vorgeschlagen wird, gewaehlt wird nicht — es gibt keinen Vorgabewert.
+            {"key": "credit_account", "label": "Umsatzsteuerkonto", "type": "select", "options": [],
+             "dataSourceKey": "konten",
+             "helpText": "Verbindlichkeitskonto aus dem Kontenplan, für Verkaufsbelege. "
+                         "Bei einem Satz über 0 Pflicht, damit gebucht wird."},
+            {"key": "revenue_account", "label": "Erlöskonto", "type": "select", "options": [],
+             "dataSourceKey": "konten",
+             "helpText": "Erlöskonto aus dem Kontenplan. Ohne Erlöskonto wird mit dem Schlüssel kein "
+                         "Verkaufsbeleg automatisch gebucht."},
+            {"key": "debit_account", "label": "Vorsteuerkonto", "type": "select", "options": [],
+             "dataSourceKey": "konten",
+             "helpText": "Aktivkonto aus dem Kontenplan, für Eingangsbelege."},
+            {"key": "expense_account", "label": "Aufwandskonto", "type": "select", "options": [],
+             "dataSourceKey": "konten",
+             "helpText": "Aufwandskonto aus dem Kontenplan, für Eingangsbelege. Leer = die Position der "
+                         "Eingangsrechnung nennt es; fehlt beides, wird nicht gebucht."},
+            {"key": "par_24_ustg", "label": "Durchschnittssatz nach § 24 UStG", "type": "boolean"},
+            {"key": "reverse_charge", "label": "Reverse Charge (§ 13b UStG)", "type": "boolean",
+             "helpText": "Verlangt den Steuersatz 0; wird nicht automatisch gebucht."},
+            {"key": "intracom", "label": "Innergemeinschaftlich", "type": "boolean"},
+            {"key": "export", "label": "Ausfuhr", "type": "boolean"},
+            {"key": "ustva_position", "label": "UStVA-Kennzahl", "type": "text"},
+            {"key": "ustva_bezeichnung", "label": "UStVA-Text", "type": "text"},
+            {"key": "gueltig_von", "label": "Gültig von", "type": "date", "required": True},
+            {"key": "gueltig_bis", "label": "Gültig bis", "type": "date"},
+            {"key": "active", "label": "Aktiv", "type": "boolean",
+             "helpText": "Ein inaktiver Schlüssel steht in keiner Auswahl und bucht nicht."},
+            {"key": "notizen", "label": "Notizen", "type": "textarea"},
+        ],
+        "workflow": {"processKey": "finance.steuerschluessel"},
+        "actions": [
+            {"key": "speichern", "label": "Steuerschlüssel speichern", "command": "finance.steuerschluesselSpeichern",
+             "kind": "primary", "dangerLevel": "moderate", "zone": "header",
+             "requiresConfirmation": True,
+             "humanApprovalRequired": True,
+             "forbiddenForAgents": True,
+             "permission": "finance.steuerschluessel.write",
+             "commandEndpoint": "/api/v1/finance/tax-keys/actions/speichern",
+             "method": "POST",
+             "inputFields": [
+                 {"key": "code", "label": "Schlüssel", "type": "text", "required": True},
+                 {"key": "bezeichnung", "label": "Bezeichnung", "type": "text", "required": True},
+                 {"key": "steuersatz", "label": "Steuersatz in %", "type": "number", "required": True},
+                 {"key": "gueltig_von", "label": "Gültig von", "type": "date", "required": True},
+                 {"key": "credit_account", "label": "Umsatzsteuerkonto", "type": "text"},
+                 {"key": "revenue_account", "label": "Erlöskonto", "type": "text"},
+                 {"key": "debit_account", "label": "Vorsteuerkonto", "type": "text"},
+                 {"key": "expense_account", "label": "Aufwandskonto", "type": "text"},
+             ]},
+            {"key": "neu", "label": "Neuer Steuerschlüssel", "command": "finance.steuerschluesselNeu",
+             "kind": "secondary", "dangerLevel": "safe", "zone": "footer",
+             "localEffect": "form_reset",
+             "stubReason": "Leert die Eingabe fuer einen neuen Steuerschluessel."},
+        ],
+        "tables": [
+            {
+                "key": "steuerschluessel",
+                "label": "Steuerschlüssel",
+                "dataSourceKey": "steuerschluessel",
+                "serverPagination": False,
+                "pageSize": 50,
+                "virtualized": False,
+                "rowHeight": 44,
+                "rowDetail": False,
+                "columns": [
+                    {"key": "code", "label": "Schlüssel", "width": 90, "sortable": True, "filterable": True,
+                     "priority": "primary"},
+                    {"key": "bezeichnung", "label": "Bezeichnung", "filterable": True, "priority": "primary"},
+                    {"key": "satz_text", "label": "Satz", "priority": "primary"},
+                    {"key": "credit_account", "label": "Umsatzsteuerkonto", "priority": "secondary"},
+                    {"key": "revenue_account", "label": "Erlöskonto", "priority": "secondary"},
+                    {"key": "debit_account", "label": "Vorsteuerkonto", "priority": "secondary"},
+                    {"key": "expense_account", "label": "Aufwandskonto", "priority": "secondary"},
+                    {"key": "kennzeichen_text", "label": "Kennzeichen", "priority": "secondary"},
+                    {"key": "verwendung", "label": "Bucht automatisch für", "priority": "primary"},
+                    {"key": "status_text", "label": "Status", "renderKind": "status", "priority": "primary"},
+                ],
+                "rowActions": [
+                    {"key": "bearbeiten", "label": "Bearbeiten", "command": "finance.steuerschluesselBearbeiten",
+                     "dangerLevel": "safe", "permission": "finance.tax_key.update",
+                     "localEffect": "load_row",
+                     "stubReason": "Laedt den Steuerschluessel in die Eingabe."},
+                ],
+            },
+        ],
+        "noWorkflowReason": "Steuerschluessel sind Stammdaten; sie werden gepflegt, es gibt keinen Belegablauf.",
+        "agentContract": {
+            "businessPurpose": (
+                "Steuerschluessel des Mandanten pflegen: Satz, Umsatzsteuer-, Vorsteuer- und Erloeskonto, "
+                "Paragraf 24 UStG, Reverse Charge, Gueltigkeit. Aus ihnen nehmen alle Belege ihre Umsatzsteuer."
+            ),
+            "examplePrompts": [
+                "Welche Steuerschluessel buchen nicht automatisch und warum?",
+                "Auf welches Konto bucht Steuerschluessel 3 die Umsatzsteuer?",
+            ],
+            "dangerousActions": [
+                {
+                    "key": "speichern",
+                    "reason": "Ein Steuerschluessel bestimmt Satz und Konten aller kuenftigen Belege. Ein Agent darf "
+                              "eine Aenderung vorschlagen, in Kraft setzt sie ein Mensch — die Aktion ist "
+                              "forbiddenForAgents und hat kein MCP-Werkzeug.",
+                },
+            ],
+            "sensitiveFields": [],
+            "testSelectors": {
+                "screenRoot": "[data-testid='screen-finance/steuerschluessel']",
+                "primaryAction": "[data-testid='action-speichern']",
+            },
+        },
+        "layout": {
+            "floorplan": "worklist",
+            "density": "compact",
+            "contextRail": "none",
+            "tableProfile": "financial",
+            "columnNavigation": "single",
+            "preferredMode": "desktopDense",
+            "mobileMode": "mobileStack",
+            "touchTargetPx": 44,
+            "summaryPlacement": "footer",
+            "statusPlacement": "afterFields",
+        },
+        "performance": {
+            "initialPayloadBudgetKb": 24,
+            "requiresLazyTabs": False,
+            "requiresVirtualTables": False,
+            "lookupMinChars": 2,
+            "bundleGroup": "finance",
         },
     }

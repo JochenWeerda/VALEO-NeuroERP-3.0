@@ -1,13 +1,7 @@
-import { SimpleLineChart } from '@/components/charts/SimpleLineChart'
+import { NativeListPage } from '@/components/mask-builder/NativeListPage'
 
-type TrendPoint = { date: string; sales: number }
-
-export default function SalesTrendLineChart({ trends }: { trends: TrendPoint[] }): JSX.Element {
+export default function Page(): JSX.Element {
   return (
-    <SimpleLineChart
-      data={trends.map((item) => ({ label: item.date, sales: item.sales }))}
-      series={[{ key: 'sales', label: 'Umsatz' }]}
-      height={250}
-    />
+    <NativeListPage screenId="analytics/charts/SalesTrendLineChart" testId="screen-analytics/charts/SalesTrendLineChart" />
   )
 }

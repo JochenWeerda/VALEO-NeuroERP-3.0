@@ -8,6 +8,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from typing import Any
+from app.core.tenant_context import SHARED_TENANT_ID
 
 
 class KnowledgeObjectTyp(str, Enum):
@@ -75,7 +76,8 @@ class KnowledgeObject:
     titel: str
     typ: KnowledgeObjectTyp
     status: KnowledgeStatus
-    tenant_id: str = "system"
+    # Pflicht: das mitgelieferte Produktwissen nennt SHARED_TENANT_ID ausdruecklich.
+    tenant_id: str
     beschreibung: str = ""
     tags: list[str] = field(default_factory=list)
     zielrollen: list[str] = field(default_factory=list)
@@ -197,6 +199,7 @@ class KnowledgeContextPack:
 def _default_knowledge_objects() -> list[KnowledgeObject]:
     return [
         KnowledgeObject(
+            tenant_id=SHARED_TENANT_ID,
             knowledge_id="KNW-SOP-001",
             titel="SOP Angebotsfreigabe",
             typ=KnowledgeObjectTyp.SOP,
@@ -227,6 +230,7 @@ def _default_knowledge_objects() -> list[KnowledgeObject]:
             ],
         ),
         KnowledgeObject(
+            tenant_id=SHARED_TENANT_ID,
             knowledge_id="KNW-COM-001",
             titel="Kommunikationsrichtlinie Vertrieb",
             typ=KnowledgeObjectTyp.KOMMUNIKATIONSRICHTLINIE,
@@ -247,6 +251,7 @@ def _default_knowledge_objects() -> list[KnowledgeObject]:
             ],
         ),
         KnowledgeObject(
+            tenant_id=SHARED_TENANT_ID,
             knowledge_id="KNW-PROD-001",
             titel="VALEO NeuroERP Produktwissen",
             typ=KnowledgeObjectTyp.PRODUKTWISSEN,
@@ -267,6 +272,7 @@ def _default_knowledge_objects() -> list[KnowledgeObject]:
             ],
         ),
         KnowledgeObject(
+            tenant_id=SHARED_TENANT_ID,
             knowledge_id="KNW-SUP-001",
             titel="Supportwissen OIDC Anmeldung",
             typ=KnowledgeObjectTyp.SUPPORTWISSEN,
@@ -287,6 +293,7 @@ def _default_knowledge_objects() -> list[KnowledgeObject]:
             ],
         ),
         KnowledgeObject(
+            tenant_id=SHARED_TENANT_ID,
             knowledge_id="KNW-KPI-001",
             titel="Kennzahl Umsatz Quartal",
             typ=KnowledgeObjectTyp.KENNZAHL,
@@ -307,6 +314,7 @@ def _default_knowledge_objects() -> list[KnowledgeObject]:
             ],
         ),
         KnowledgeObject(
+            tenant_id=SHARED_TENANT_ID,
             knowledge_id="KNW-MKT-001",
             titel="Marktdaten Getreidepreise",
             typ=KnowledgeObjectTyp.MARKTDATEN,

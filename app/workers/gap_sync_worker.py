@@ -26,7 +26,7 @@ from typing import Any, Dict, Optional
 
 from sqlalchemy import text
 
-from .base_worker import BaseWorker
+from .base_worker import BaseWorker, cross_tenant_job
 
 logger = logging.getLogger(__name__)
 
@@ -109,6 +109,7 @@ async def run_gap_annual_sync(
         await worker.cleanup()
 
 
+@cross_tenant_job("gap-annual-sync")
 def execute_gap_annual_sync(
     year: Optional[int] = None, force: bool = False, plz_filter: Optional[list[str]] = None
 ) -> Dict[str, Any]:

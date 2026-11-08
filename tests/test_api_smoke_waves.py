@@ -24,11 +24,20 @@ def _client(router, *, existing_row: bool = False, rowcount: int = 1) -> TestCli
         db.execute.return_value = result
         yield db
 
+    from app.auth.deps import get_current_user
     from app.core.database import get_db
     from app.core.dependencies import get_tenant_id
 
     app.dependency_overrides[get_db] = _db
     app.dependency_overrides[get_tenant_id] = lambda: "test-tenant"
+    # Schreibwege pruefen seit 19.10.2026 ihre Bereichsrolle; der Rauchtest prueft die Verdrahtung, nicht den Zugang.
+    from testgrenze import ALLE_FACHROLLEN, ersetze_mandant
+
+    # Die meisten Wege nehmen den Mandanten inzwischen aus der Anmeldung (app.core.tenant.get_tenant_id).
+    ersetze_mandant(app, "test-tenant")
+
+    app.dependency_overrides[get_current_user] = lambda: {"sub": "5f0c2a9e", "name": "t.de-vries",
+                                                          "roles": list(ALLE_FACHROLLEN)}
     app.include_router(router)
     return TestClient(app)
 

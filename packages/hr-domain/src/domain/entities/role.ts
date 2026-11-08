@@ -12,8 +12,8 @@ const ROLE_NAME_MIN_LENGTH = 1;
 const ROLE_NAME_MAX_LENGTH = 200;
 
 export const RoleSchema = z.object({
-  id: z.string().uuid(),
-  tenantId: z.string().uuid(),
+  id: z.string().guid(),
+  tenantId: z.string().guid(),
   key: z.string().min(ROLE_KEY_MIN_LENGTH).max(ROLE_KEY_MAX_LENGTH),
   name: z.string().min(ROLE_NAME_MIN_LENGTH).max(ROLE_NAME_MAX_LENGTH),
   permissions: z.array(z.string()),

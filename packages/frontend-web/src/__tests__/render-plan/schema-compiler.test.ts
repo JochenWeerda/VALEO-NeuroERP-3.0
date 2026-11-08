@@ -7,7 +7,7 @@ import {
   invalidateRenderPlanCache,
 } from '@/components/mask-builder/render-plan/schema-compiler'
 import { globalRenderPlanCache } from '@/components/mask-builder/render-plan/cache'
-import { buildRenderPlanCacheKey } from '@/components/mask-builder/render-plan/compile-context'
+import { buildPermissionHash, buildRenderPlanCacheKey } from '@/components/mask-builder/render-plan/compile-context'
 
 const legacyMask: MaskConfig = {
   title: 'Kundenstamm',
@@ -39,6 +39,15 @@ const legacyMask: MaskConfig = {
   ],
   api: { baseUrl: '/api/v1/crm/customers', endpoints: {} },
 }
+
+it('does not reuse a previous title for the same screen after renaming', () => {
+  invalidateRenderPlanCache()
+  const definition = crmSchema()
+  const original = compileRenderPlanFromScreenDefinition(definition)
+  const renamed = compileRenderPlanFromScreenDefinition({ ...definition, title: 'Geprüfte neue Bezeichnung' })
+  expect(renamed).not.toBe(original)
+  expect(renamed.shell.title).toBe('Geprüfte neue Bezeichnung')
+})
 
 function crmSchema() {
   return adaptMaskConfigToScreenDefinition(legacyMask, {
@@ -438,4 +447,48 @@ describe('schema-compiler', () => {
     expect(second).toBe(first)
     expect(compileSpy).toHaveBeenCalledTimes(1)
   })
+})
+
+
+it('recompiles Studio field, table and layout edits under the same screen revision', () => {
+  const schema = { ...crmSchema(), id: 'tenant/cache-structure', fields: [{ key: 'menge', label: 'Menge', type: 'number' as const }] }
+  const first = compileRenderPlanFromScreenDefinition(schema)
+  expect(first.fieldsByKey.menge).toBeDefined()
+  const changed = compileRenderPlanFromScreenDefinition({ ...schema, fields: [{ key: 'preis', label: 'Preis', type: 'currency' }] })
+  expect(changed).not.toBe(first)
+  expect(changed.fieldsByKey.menge).toBeUndefined()
+  expect(changed.fieldsByKey.preis).toBeDefined()
+  const layout = compileRenderPlanFromScreenDefinition({ ...schema, layout: { ...schema.layout, density: 'expertDense' } })
+  expect(layout.shell.density).toBe('expertDense')
+  const table = compileRenderPlanFromScreenDefinition({ ...schema, tables: [{ key: 'probe', label: 'Probe', columns: [{ key: 'summe', label: 'Summe', numeric: true }] }] })
+  expect(table.tablesByKey.probe).toBeDefined()
+})
+
+
+it('keeps action targets inside dense rows while retaining compact read-only rows', () => {
+  const definition = {
+    ...crmSchema(), layout: { density: 'expertDense' as const, tableProfile: 'audit' as const },
+    tables: [{ key: 'history', label: 'History', rowHeight: 36,
+      columns: [{ key: 'actor', label: 'Actor' }],
+      rowActions: [{ key: 'compare', label: 'Compare', permission: 'history.read' }] }],
+  }
+  const withActions = compileRenderPlanFromScreenDefinition(definition, { permissions: ['history.read'] })
+  const reader = compileRenderPlanFromScreenDefinition(definition, { permissions: [] })
+  expect(withActions.tablesByKey.history.rowHeight).toBeGreaterThanOrEqual(52)
+  expect(reader.tablesByKey.history.rowHeight).toBe(36)
+  expect(reader.tablesByKey.history.rowActions).toEqual([])
+})
+
+it('defaults audit tables to one work area and respects explicit column choices', () => {
+  const definition = { ...crmSchema(), layout: { floorplan: 'worklist' as const, tableProfile: 'audit' as const } }
+  expect(compileRenderPlanFromScreenDefinition(definition).shell.columnNavigation).toBe('single')
+  expect(compileRenderPlanFromScreenDefinition({ ...definition, layout: {
+    ...definition.layout, columnNavigation: 'listDetail' as const,
+  } }).shell.columnNavigation).toBe('listDetail')
+})
+
+
+it('keeps permission signatures in UTF-16 order independent of input order', () => {
+  expect(buildPermissionHash(['ä', '2', 'z', '10', 'A'])).toBe('10|2|A|z|ä')
+  expect(buildPermissionHash(['A', 'z', '10', 'ä', '2'])).toBe('10|2|A|z|ä')
 })

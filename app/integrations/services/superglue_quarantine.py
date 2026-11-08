@@ -69,12 +69,13 @@ def append_quarantine_entry(
 
 def resolve_quarantine_entry(
     *,
+    tenant_id: str,
     entry_id: str,
     resolved_by: str,
     note: str | None = None,
 ) -> dict[str, Any]:
     entries = _fold_events()
-    if entry_id not in entries:
+    if entry_id not in entries or entries[entry_id].get("tenant_id") != tenant_id:
         raise KeyError(entry_id)
     current = entries[entry_id]
     event = SuperglueQuarantineEntry(
@@ -99,13 +100,14 @@ def resolve_quarantine_entry(
 
 def retry_quarantine_entry(
     *,
+    tenant_id: str,
     entry_id: str,
     retried_by: str,
     note: str | None = None,
     dead_letter: bool = False,
 ) -> dict[str, Any]:
     entries = _fold_events()
-    if entry_id not in entries:
+    if entry_id not in entries or entries[entry_id].get("tenant_id") != tenant_id:
         raise KeyError(entry_id)
     current = entries[entry_id]
     retry_count = int(current.get("retry_count") or 0) + 1
@@ -131,8 +133,8 @@ def retry_quarantine_entry(
     return updated
 
 
-def list_quarantine_entries(*, limit: int = 50, status: str = "all") -> list[dict[str, Any]]:
-    entries = list(_fold_events().values())
+def list_quarantine_entries(*, tenant_id: str, limit: int = 50, status: str = "all") -> list[dict[str, Any]]:
+    entries = [entry for entry in _fold_events().values() if entry.get("tenant_id") == tenant_id]
     if status != "all":
         entries = [entry for entry in entries if entry.get("status") == status]
     entries.sort(key=lambda item: str(item.get("timestamp", "")))
@@ -196,12 +198,13 @@ def _append_event(entry: dict[str, Any]) -> None:
         handle.write("\n")
 
 
-def build_quarantine_summary() -> dict[str, Any]:
-    all_entries = list_quarantine_entries(limit=500, status="all")
+def build_quarantine_summary(*, tenant_id: str) -> dict[str, Any]:
+    all_entries = list_quarantine_entries(tenant_id=tenant_id, limit=500, status="all")
     open_entries = [entry for entry in all_entries if entry.get("status") == "open"]
     resolved_entries = [entry for entry in all_entries if entry.get("status") == "resolved"]
     dead_letter_entries = [entry for entry in all_entries if entry.get("dead_letter")]
     return {
+        "tenant_id": tenant_id,
         "entry_count": len(all_entries),
         "open_count": len(open_entries),
         "resolved_count": len(resolved_entries),

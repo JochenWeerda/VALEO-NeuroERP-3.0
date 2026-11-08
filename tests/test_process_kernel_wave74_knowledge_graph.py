@@ -6,12 +6,24 @@ from __future__ import annotations
 
 import pytest
 from fastapi import FastAPI
+from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
 from fastapi.testclient import TestClient
 
 from app.api.v1.endpoints import channel_work_surfaces
+from app.core.tenant import get_tenant_id
 from app.core.database import get_db
 from app.core.knowledge_core_contracts import get_default_knowledge_objects
 from app.core.knowledge_graph import build_runtime_knowledge_graph
+
+
+@pytest.fixture(autouse=True)
+def _mandantenkontext():
+    """Dienste ohne ausdruecklichen Mandanten nehmen den des Kontexts; seit 27.10.2026 gibt es keinen Rueckfall "system"."""
+    from app.core.tenant_context import tenant_scope
+
+    with tenant_scope("test-mandant", "unit test"):
+        yield
+
 
 
 class _DummyDb:
@@ -21,8 +33,10 @@ class _DummyDb:
 @pytest.fixture
 def client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
     app = FastAPI()
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(channel_work_surfaces.router)
     app.dependency_overrides[get_db] = lambda: _DummyDb()
+    app.dependency_overrides[get_tenant_id] = lambda: "t1"  # Mandant aus der Anmeldung
     monkeypatch.setattr(
         "app.core.knowledge_graph.load_runtime_knowledge_objects",
         lambda db: get_default_knowledge_objects(),

@@ -20,6 +20,7 @@ from ....services.customer_reference import resolve_reference
 from ....services.inventory_movement_direction import signed_quantity
 from modules.bootstrap import initialize_module_registry
 from .inventory_auth import get_current_tenant_id, require_inventory_access
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter()
 
@@ -179,7 +180,7 @@ async def get_stock_movement(
     return _to_schema(movement).model_copy(update={"warehouse_name": lager.name or lager.number})
 
 
-@router.post("/", response_model=StockMovement, status_code=201)
+@router.post("/", response_model=StockMovement, status_code=201, dependencies=SCHREIBEN["LAGER"])
 async def create_stock_movement(
     movement_data: StockMovementCreate,
     db: Session = Depends(get_db),
@@ -270,7 +271,7 @@ async def create_stock_movement(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.put("/{movement_id}", response_model=StockMovement)
+@router.put("/{movement_id}", response_model=StockMovement, dependencies=SCHREIBEN["LAGER"])
 async def update_stock_movement(
     movement_id: str,
     movement_data: StockMovementUpdate,
@@ -308,7 +309,7 @@ async def update_stock_movement(
     return _to_schema(movement)
 
 
-@router.delete("/{movement_id}", status_code=409, response_class=Response)
+@router.delete("/{movement_id}", status_code=409, response_class=Response, dependencies=SCHREIBEN["LAGER"])
 async def delete_stock_movement(
     movement_id: str,
     db: Session = Depends(get_db),

@@ -114,4 +114,6 @@ def test_finance_invoice_endpoint_delegates_to_shared_posting_service(monkeypatc
         tax_amount=0.0,
         gross_amount=20.0,
         due_date="2026-07-09",
+        # Ohne Steuergruppen: der Aufrufer hat keine uebergeben (der Rechnungsweg uebergibt sie).
+        steuergruppen=None,
     )

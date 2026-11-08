@@ -189,15 +189,8 @@ def test_contact_write_lookup_is_token_tenant_scoped(client):
     db.commit.assert_not_called()
 
 
-def test_activity_write_lookup_is_token_tenant_scoped(client):
-    http, db = _as_scopes(client, ["crm:write"])
-    db.execute.return_value.mappings.return_value.first.return_value = None
-    response = http.post(
-        "/mcp/tools/call",
-        json={"tool_name": "crm.activity.create", "parameters": ACTIVITY},
-    )
-    assert response.status_code == 404
-    db.commit.assert_not_called()
+# crm.activity.create: Mandant aus der signierten Identitaet, fremder Kunde 404 - tests/test_crm_activity_canonical_sql.py
+# (test_foreign_customer_is_blocked_by_command_and_database_fk).
 
 
 def test_fracht_dry_run_duplicate_check_uses_token_tenant(client):

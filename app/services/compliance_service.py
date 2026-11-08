@@ -9,15 +9,8 @@ from typing import Optional
 
 from sqlalchemy.orm import Session
 
-from app.documents.router_helpers import get_repository, list_from_store
 from app.domains.operations.models import (
-    ComplianceEintrag,
-    ENNIMeldung,
-    QSCheckEintrag,
-    ZulassungRegister,
-    SachkundeEintrag,
-    SaatgutNachbauEintrag,
-    VVVOEintrag,
+    PCNMeldung,
     Charge,
 )
 
@@ -26,10 +19,12 @@ def dt(v: Optional[datetime]) -> Optional[str]:
     return v.date().isoformat() if v else None
 
 
-def list_sales_deliveries(db: Session) -> list[dict]:
-    repo = get_repository(db)
-    payload = list_from_store("sales_delivery", skip=0, limit=10_000, repo=repo)
-    return payload.get("data", []) if isinstance(payload, dict) else []
+def list_sales_deliveries(db: Session, tenant_id: str) -> list[dict]:
+    """Lieferscheine des Mandanten; bis 04.11.2026 lasen Gefahrstoffdoku, Naehrstoffstrom und Chargenbericht die
+    Lieferscheine aller Mandanten."""
+    from app.services.compat_helpers import list_docs
+
+    return list_docs(db, "sales_delivery", limit=10_000, tenant_id=tenant_id)
 
 
 def extract_hazard_export_rows(deliveries: list[dict], year: Optional[int] = None) -> list[dict]:
@@ -132,60 +127,6 @@ def build_lot_trace_report(lot: Charge, deliveries: list[dict]) -> dict:
         "linkedDeliveries": linked_deliveries,
         "deliveryCount": len(linked_deliveries),
     }
-
-
-def seed_compliance_data(db: Session) -> None:
-    if db.query(ComplianceEintrag).count() == 0:
-        db.add_all([
-            ComplianceEintrag(bereich="Gewaesserschutz", anforderung="Gewaesserrandstreifen 5m", erfuellt=True, nachweis="Feldprotokoll", frist=datetime(2026, 12, 31)),
-            ComplianceEintrag(bereich="Duengeverordnung", anforderung="Naehrstoffbilanz erstellt", erfuellt=True, nachweis="Bilanz 2025/26", frist=datetime(2026, 3, 31)),
-            ComplianceEintrag(bereich="PSM-Dokumentation", anforderung="Anwendungsprotokolle vollstaendig", erfuellt=False, nachweis="", frist=datetime(2026, 3, 15)),
-        ])
-    if db.query(ENNIMeldung).count() == 0:
-        db.add_all([
-            ENNIMeldung(typ="DBE", betrieb="Landwirtschaft Mueller", vvvo="03-276-1234", datum=datetime(2026, 1, 15), status="bestaetigt", naehrstoff_n=180, naehrstoff_p=60, naehrstoff_k=120),
-            ENNIMeldung(typ="WDE", betrieb="Agrar Schmidt", vvvo="03-276-5678", datum=datetime(2026, 2, 1), status="gesendet", naehrstoff_n=150, naehrstoff_p=45, naehrstoff_k=90),
-        ])
-    if db.query(QSCheckEintrag).count() == 0:
-        db.add_all([
-            QSCheckEintrag(bereich="Wareneingangskontrolle", pruefpunkt="Lieferschein-Pruefung", erfuellt=True, bemerkung="Vollstaendig", geprueft_am=datetime(2026, 2, 10)),
-            QSCheckEintrag(bereich="Temperaturkontrolle", pruefpunkt="Lagerungstemperatur dokumentiert", erfuellt=True, bemerkung="Im Normbereich", geprueft_am=datetime(2026, 2, 10)),
-        ])
-    if db.query(ZulassungRegister).count() == 0:
-        db.add_all([
-            ZulassungRegister(produkt="Roundup PowerFlex", typ="PSM", nummer="024567-00", behoerde="BVL", gueltig_bis=datetime(2026, 12, 31), status="aktiv"),
-            ZulassungRegister(produkt="Fungizid X", typ="PSM", nummer="024568-00", behoerde="BVL", gueltig_bis=datetime(2025, 6, 30), status="auslaufend"),
-        ])
-    if db.query(SachkundeEintrag).count() == 0:
-        db.add(SachkundeEintrag(
-            kunde="Landwirtschaft Mueller",
-            kundennr="K-10023",
-            nachweis_nr="SK-NDS-2022-4567",
-            ausstellungsdatum=datetime(2022, 3, 15),
-            gueltig_bis=datetime(2025, 3, 15),
-            ausstellende_stelle="LWK Niedersachsen",
-            status="ablaufend",
-        ))
-    if db.query(SaatgutNachbauEintrag).count() == 0:
-        db.add(SaatgutNachbauEintrag(
-            betrieb="Landwirtschaft Mueller",
-            sorte="Weichweizen Eltan",
-            kultur="Weichweizen",
-            flaeche=45.5,
-            erntejahr=2024,
-            gebuehr=682.50,
-            status="bezahlt",
-        ))
-    if db.query(VVVOEintrag).count() == 0:
-        db.add(VVVOEintrag(
-            betriebsname="Landwirtschaft Mueller",
-            vvvo="03-276-123456",
-            bundesland="Niedersachsen",
-            tierart="Rind (Milch)",
-            status="aktiv",
-            letzte_aktualisierung=datetime(2026, 1, 15),
-        ))
-    db.commit()
 
 
 def _pdf_escape(s: str) -> str:
@@ -338,3 +279,18 @@ def build_compliance_pdf_bytes(stats: dict, cross_items: list[dict]) -> bytes:
     out.write(str(xref_start).encode())
     out.write(b"\n%%EOF\n")
     return out.getvalue()
+
+
+def pcn_to_dict(m: PCNMeldung) -> dict:
+    return {
+        "meldung_id": m.id,
+        "produktname": m.produktname,
+        "ufi": m.ufi or "",
+        "cas_nummern": m.cas_nummern or "",
+        "gefahrenklassen": m.gefahrenklassen or [],
+        "verwendungskategorie": m.verwendungskategorie or "",
+        "pcnStatus": m.pcn_status,
+        "tenant_id": m.tenant_id,
+        "created_at": m.created_at.isoformat() if m.created_at else None,
+        "schema_version": 1,
+    }

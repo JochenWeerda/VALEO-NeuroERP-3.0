@@ -3,7 +3,9 @@ Finance Invoices API Endpoints
 Spezifische Endpoints für Finance-Modul Invoices
 """
 
+from app.auth.finance_roles import beleg_read, beleg_write, finance_admin
 from datetime import datetime, timedelta
+from decimal import Decimal
 import logging
 from typing import Optional
 
@@ -19,9 +21,12 @@ from app.services.finance_transaction_service import FinanceTransactionService
 from app.core.fibu_audit import log_fibu_audit
 from app.core.gobd_artifact import register_artifact, sha256_hex
 from app.core.tenant import get_tenant_id
-from app.documents.models import SalesInvoice
+from app.finance.steuerschluessel import Steuergruppe, Steuerklaerung, steuergruppen
+from app.documents.models import SalesInvoice, DocLine
+from pydantic import BaseModel
 from app.documents.router_helpers import (
     delete_from_store,
+    eigener_beleg,
     get_from_store,
     get_repository,
     list_from_store,
@@ -35,6 +40,47 @@ from app.api.v1.schemas.finance_invoices_schemas import FinanceInvoicesOut
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/finance/invoices", tags=["finance", "invoices"])
+
+
+@router.get("/customer-lookup", summary="Rechnungskunden suchen", dependencies=[Depends(beleg_read)])
+def invoice_customer_lookup(
+    q: str = Query("", min_length=2),
+    limit: int = Query(25, ge=1, le=25),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> list[dict[str, str]]:
+    rows = db.execute(text("""
+        SELECT id, company_name, customer_number FROM domain_crm.customers
+        WHERE tenant_id = :tid AND deleted_at IS NULL
+          AND (company_name ILIKE :query OR customer_number ILIKE :query)
+        ORDER BY customer_number LIMIT :limit
+    """), {"tid": tenant_id, "query": f"%{q.strip()}%", "limit": limit}).fetchall()
+    return [{"value": str(row[0]), "label": f"{row[1]} ({row[2]})"} for row in rows]
+
+
+class InvoiceTaxPreviewIn(BaseModel):
+    lines: list[DocLine]
+
+
+@router.post("/steuer-vorschau", summary="Ausgangsrechnung Steuer vorschauen", dependencies=[Depends(beleg_read)])
+def preview_invoice_tax(
+    body: InvoiceTaxPreviewIn,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Use the exact calculation used by invoice posting; no client tax estimate."""
+    try:
+        groups = steuergruppen(db, tenant_id, [
+            (index, line.taxCode, line.vatRate, Decimal(str(line.qty)) * Decimal(str(line.price or 0)))
+            for index, line in enumerate(body.lines, 1)
+        ])
+    except Steuerklaerung as error:
+        return {"geklaert": False, "pruefgrund": str(error), "netto": None, "steuer": None, "brutto": None,
+                "gruppen": []}
+    netto = sum((group.netto for group in groups), Decimal("0"))
+    steuer = sum((group.steuer for group in groups), Decimal("0"))
+    return {"geklaert": True, "pruefgrund": None, "netto": netto, "steuer": steuer,
+            "brutto": netto + steuer, "gruppen": [group.model_dump(mode="json") for group in groups]}
 
 
 def _resolve_open_items_table(db: Session) -> str:
@@ -78,12 +124,61 @@ def _resolve_customer_name(db: Session, customer_id: str, tenant_id: str | None 
     return customer_name
 
 
+def _steuer(db: Session, tenant_id: str, invoice: SalesInvoice, *, wird_gebucht: bool) -> Optional[list[Steuergruppe]]:
+    """Netto, Umsatzsteuer und Brutto der Rechnung aus den Steuerschluesseln ihrer Positionen.
+
+    Bis zum 13.10.2026 kamen die Summen aus der Anfrage, und wo sie fehlten, rechnete der Server mit
+    ``vatRate or 0.19`` geteilt durch 100 — also mit 0,19 Promille. Gebucht wurde jede Steuer auf 1776 und
+    jeder Erloes auf 8400, gleich welcher Satz.
+
+    Jetzt: Die Position nennt ihren Steuerschluessel, die Summen rechnet der Server. Laesst sich die Steuer
+    nicht eindeutig bestimmen, wird eine Rechnung nicht gebucht (409 mit Pruefgrund). Ein Entwurf wird
+    gespeichert und traegt den Pruefgrund; seine Steuer bleibt offen.
+    """
+    zeilen = [
+        (nr, line.taxCode, line.vatRate, Decimal(str(line.qty)) * Decimal(str(line.price or 0)))
+        for nr, line in enumerate(invoice.lines, 1)
+    ]
+    try:
+        gruppen = steuergruppen(db, tenant_id, zeilen)
+    except Steuerklaerung as klaerung:
+        if wird_gebucht:
+            raise HTTPException(
+                status_code=409,
+                detail=f"Rechnung {invoice.number} nicht gebucht, bitte prüfen: {klaerung}",
+            ) from klaerung
+        invoice.steuerPruefgrund = str(klaerung)
+        if invoice.lines:
+            # Netto steht fest, die Steuer nicht: kein Brutto unterstellen, das es so nicht gibt.
+            invoice.subtotalNet = float(sum(z[3] for z in zeilen))
+            invoice.totalTax = 0.0
+            invoice.totalGross = invoice.subtotalNet
+        return None
+    saetze = {g.tax_code: g.satz for g in gruppen}
+    for line in invoice.lines:
+        line.taxCode = str(line.taxCode).strip()
+        line.vatRate = float(saetze[line.taxCode])
+    invoice.steuerPruefgrund = None
+    invoice.subtotalNet = float(sum(g.netto for g in gruppen))
+    invoice.totalTax = float(sum(g.steuer for g in gruppen))
+    invoice.totalGross = invoice.subtotalNet + invoice.totalTax
+    return gruppen
+
+
 def _post_sales_invoice_financials(
     db: Session,
     invoice: SalesInvoice,
     tenant_id: str,
+    gruppen: Optional[list[Steuergruppe]] = None,
 ) -> dict[str, str]:
-    """Buchung + offener Posten in der Transaktion des Aufrufers (kein eigener Commit)."""
+    """Buchung + offener Posten in der Transaktion des Aufrufers (kein eigener Commit).
+
+    Dieser Weg legt an und bucht in einem Schritt und kann keine Freigabe einholen: Er bucht nur, was die
+    Freigabematrix dem Rollenrecht ueberlaesst (APPROVAL-001).
+    """
+    from app.services import finance_freigabe
+
+    finance_freigabe.nur_mit_rollenrecht(db, tenant_id, "sales_invoice", "post", brutto=invoice.totalGross, gebucht=False)
     return SalesPostingService(db, tenant_id, commit=False).post_ausgangsrechnung_with_op(
         invoice_number=invoice.number,
         invoice_date=invoice.date,
@@ -92,7 +187,20 @@ def _post_sales_invoice_financials(
         tax_amount=invoice.totalTax,
         gross_amount=invoice.totalGross,
         due_date=invoice.dueDate,
+        steuergruppen=gruppen,
     )
+
+
+def _rechnung_des_mandanten(repo, number: str, tenant_id: str) -> dict:
+    """Die Rechnung dieses Mandanten — fremd oder mandantenlos ist 404.
+
+    Bis 13.10.2026 trug der Beleg keinen Mandanten: Wer Belege lesen durfte, las die Rechnungen aller Mandanten,
+    und Aendern, Loeschen oder Anlegen unter einer vergebenen Nummer traf den Beleg eines anderen.
+    """
+    beleg = get_from_store("sales_invoice", number, repo)
+    if not beleg or str(beleg.get("tenantId") or "") != tenant_id:
+        raise HTTPException(status_code=404, detail=f"Invoice {number} not found")
+    return beleg
 
 
 def _beleg_speichern(repo, number: str, data: dict) -> dict:
@@ -102,7 +210,7 @@ def _beleg_speichern(repo, number: str, data: dict) -> dict:
     return repo.save_document("sales_invoice", number, data, commit=False)
 
 
-@router.post("", response_model=FinanceInvoicesOut, summary="Invoice anlegen")
+@router.post("", response_model=FinanceInvoicesOut, summary="Invoice anlegen", dependencies=[Depends(beleg_write)])
 async def create_invoice(
     invoice: SalesInvoice,
     tenant_id: str = Depends(get_tenant_id),
@@ -111,20 +219,16 @@ async def create_invoice(
     """Erstellt eine neue Rechnung im Finance-Modul."""
     try:
         if invoice.customerId:
+            customer_exists = db.execute(text("""
+                SELECT 1 FROM domain_crm.customers
+                WHERE id = :id AND tenant_id = :tid AND deleted_at IS NULL
+            """), {"id": invoice.customerId, "tid": tenant_id}).scalar()
+            if not customer_exists:
+                raise HTTPException(status_code=404, detail="Kunde nicht gefunden")
             assert_customer_allowed_for_invoice(db, tenant_id, str(invoice.customerId))
         repo = get_repository(db)
 
-        if invoice.subtotalNet == 0.0 and invoice.lines:
-            invoice.subtotalNet = sum(line.qty * (line.price or 0.0) for line in invoice.lines)
-
-        if invoice.totalTax == 0.0 and invoice.lines:
-            invoice.totalTax = sum(
-                line.qty * (line.price or 0.0) * (line.vatRate or 0.19) / 100
-                for line in invoice.lines
-            )
-
-        if invoice.totalGross == 0.0:
-            invoice.totalGross = invoice.subtotalNet + invoice.totalTax
+        gruppen = _steuer(db, tenant_id, invoice, wird_gebucht=invoice.status != "ENTWURF")
 
         if not invoice.dueDate:
             payment_days = 30
@@ -136,14 +240,18 @@ async def create_invoice(
             invoice_date = datetime.strptime(invoice.date, "%Y-%m-%d")
             invoice.dueDate = (invoice_date + timedelta(days=payment_days)).strftime("%Y-%m-%d")
 
+        vorhanden = get_from_store("sales_invoice", invoice.number, repo)
+        if vorhanden and str(vorhanden.get("tenantId") or "") != tenant_id:
+            raise HTTPException(status_code=409, detail=f"Die Rechnungsnummer {invoice.number} ist bereits vergeben.")
         doc_data = invoice.model_dump()
+        doc_data["tenantId"] = tenant_id
         # Beleg, Buchung, offener Posten, Archiv und Lieferscheinbezug: ein Commit am
         # Ende. Bis 08.10.2026 committete der Dokumentspeicher zuerst; scheiterte die
         # Buchung, stand die Rechnung ohne Buchung und ohne offenen Posten da.
         result = _beleg_speichern(repo, invoice.number, doc_data)
 
         if invoice.status != "ENTWURF":
-            _post_sales_invoice_financials(db, invoice, tenant_id)
+            _post_sales_invoice_financials(db, invoice, tenant_id, gruppen)
             canonical = f"{invoice.number}|{invoice.date}|{invoice.totalGross}|{invoice.customerId}"
             content_hash = sha256_hex(canonical.encode("utf-8"))
             register_artifact(
@@ -199,18 +307,17 @@ async def create_invoice(
         raise HTTPException(status_code=500, detail=f"Failed to create invoice: {str(e)}")
 
 
-@router.get("/{invoice_number}", response_model=StatusResponse, summary="Invoice abrufen")
+# Antwortmodell: bis 13.10.2026 ``StatusResponse`` (Pflichtfeld ``success``) — der Weg antwortete immer mit 500.
+@router.get("/{invoice_number}", response_model=FinanceInvoicesOut, summary="Invoice abrufen", dependencies=[Depends(beleg_read)])
 async def get_invoice(
     invoice_number: str,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ) -> dict:
-    """Ruft eine Rechnung anhand der Rechnungsnummer ab."""
+    """Ruft eine Rechnung des Mandanten anhand der Rechnungsnummer ab."""
     try:
         repo = get_repository(db)
-        invoice = get_from_store("sales_invoice", invoice_number, repo)
-        if not invoice:
-            raise HTTPException(status_code=404, detail=f"Invoice {invoice_number} not found")
-        return {"ok": True, "invoice": invoice}
+        return {"ok": True, "invoice": _rechnung_des_mandanten(repo, invoice_number, tenant_id)}
     except HTTPException:
         raise
     except Exception as e:
@@ -218,7 +325,7 @@ async def get_invoice(
         raise HTTPException(status_code=500, detail=f"Failed to get invoice: {str(e)}")
 
 
-@router.put("/{invoice_number}", response_model=FinanceInvoicesOut, summary="Invoice aktualisieren")
+@router.put("/{invoice_number}", response_model=FinanceInvoicesOut, summary="Invoice aktualisieren", dependencies=[Depends(beleg_write)])
 async def update_invoice(
     invoice_number: str,
     invoice: SalesInvoice,
@@ -228,27 +335,19 @@ async def update_invoice(
     """Aktualisiert eine bestehende Rechnung."""
     try:
         repo = get_repository(db)
-        existing = get_from_store("sales_invoice", invoice_number, repo)
-        if not existing:
-            raise HTTPException(status_code=404, detail=f"Invoice {invoice_number} not found")
-
-        if invoice.subtotalNet == 0.0 and invoice.lines:
-            invoice.subtotalNet = sum(line.qty * (line.price or 0.0) for line in invoice.lines)
-
-        if invoice.totalTax == 0.0 and invoice.lines:
-            invoice.totalTax = sum(
-                line.qty * (line.price or 0.0) * (line.vatRate or 0.19) / 100
-                for line in invoice.lines
-            )
-
-        if invoice.totalGross == 0.0:
-            invoice.totalGross = invoice.subtotalNet + invoice.totalTax
-
-        result = _beleg_speichern(repo, invoice_number, invoice.model_dump())
+        existing = _rechnung_des_mandanten(repo, invoice_number, tenant_id)
 
         old_status = existing.get("status", "ENTWURF")
+        # Eine gebuchte Rechnung wird nicht neu gerechnet; nur der Entwurf nimmt die Steuer aus den Schluesseln.
+        gruppen = (
+            _steuer(db, tenant_id, invoice, wird_gebucht=invoice.status != "ENTWURF")
+            if old_status == "ENTWURF" else None
+        )
+
+        result = _beleg_speichern(repo, invoice_number, {**invoice.model_dump(), "tenantId": tenant_id})
+
         if old_status == "ENTWURF" and invoice.status != "ENTWURF":
-            _post_sales_invoice_financials(db, invoice, tenant_id)
+            _post_sales_invoice_financials(db, invoice, tenant_id, gruppen)
         # Beleg und Buchung gemeinsam (wie beim Anlegen).
         db.commit()
 
@@ -269,15 +368,16 @@ async def update_invoice(
         raise HTTPException(status_code=500, detail=f"Failed to update invoice: {str(e)}")
 
 
-@router.get("", response_model=FinanceInvoicesOut, summary="Invoices auflisten")
+@router.get("", response_model=FinanceInvoicesOut, summary="Invoices auflisten", dependencies=[Depends(beleg_read)])
 async def list_invoices(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
     status: Optional[str] = None,
     customer_id: Optional[str] = None,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ) -> dict:
-    """Listet alle Rechnungen auf mit Filterung."""
+    """Listet die Rechnungen des Mandanten auf, mit Filterung."""
     try:
         repo = get_repository(db)
         payload = list_from_store(
@@ -285,7 +385,8 @@ async def list_invoices(
         )
         all_invoices = payload.get("data") or []
 
-        filtered = all_invoices
+        # Ein Beleg ohne Mandant gehoert niemandem und wird nicht ausgeliefert.
+        filtered = [inv for inv in all_invoices if str(inv.get("tenantId") or "") == tenant_id]
         if status:
             filtered = [inv for inv in filtered if inv.get("status") == status]
         if customer_id:
@@ -309,7 +410,7 @@ async def list_invoices(
 
 
 
-@router.delete("/{invoice_number}", status_code=204, response_class=Response, response_model=None, summary="Invoice löschen")
+@router.delete("/{invoice_number}", status_code=204, response_class=Response, response_model=None, summary="Invoice löschen", dependencies=[Depends(finance_admin)])
 async def delete_invoice(
     invoice_number: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -318,9 +419,7 @@ async def delete_invoice(
     """Löscht eine Rechnung im Entwurfsstatus."""
     try:
         repo = get_repository(db)
-        existing = get_from_store("sales_invoice", invoice_number, repo)
-        if not existing:
-            raise HTTPException(status_code=404, detail=f"Invoice {invoice_number} not found")
+        existing = _rechnung_des_mandanten(repo, invoice_number, tenant_id)
         if existing.get("status", "ENTWURF") not in ("ENTWURF", "DRAFT", "draft"):
             raise HTTPException(status_code=400, detail="Only draft invoices can be deleted")
         delete_from_store("sales_invoice", invoice_number, repo)
@@ -332,11 +431,12 @@ async def delete_invoice(
         raise HTTPException(status_code=500, detail=f"Failed to delete invoice: {str(e)}")
 
 
-@router.post("/{invoice_number}/storno", response_model=StatusResponse, summary="Invoice storno")
+@router.post("/{invoice_number}/storno", response_model=StatusResponse, summary="Invoice storno", dependencies=[Depends(beleg_write)])
 async def storno_invoice(
     invoice_number: str,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
+    nutzer: dict = Depends(beleg_write),
 ) -> dict:
     """Storniert eine gebuchte Rechnung: erzeugt Gegenbuchung (Reversal) via GoBD-Hashkette.
 
@@ -361,6 +461,11 @@ async def storno_invoice(
         if not row:
             raise HTTPException(status_code=404, detail=f"Keine Buchung für Rechnung {invoice_number} gefunden")
 
+        # Zentrale Freigabe (APPROVAL-001); eine DocFlow-Rechnung storniert dieser Weg nicht.
+        from app.services import finance_freigabe
+
+        akteur = str(nutzer.get("sub") or "") if isinstance(nutzer, dict) else None
+        finance_freigabe.verlange_storno_ausgangsrechnung(db, tenant_id, invoice_number, akteur)
         je_id = str(row[0])
         fin = FinanceTransactionService(db, tenant_id)
         from app.core.exceptions import ValidationFailedError as _VFE
@@ -388,7 +493,7 @@ async def storno_invoice(
         # Belegbruch schließen: Rechnungsdokument im Store auf STORNIERT setzen
         try:
             repo = get_repository(db)
-            inv = get_from_store("sales_invoice", invoice_number, repo)
+            inv = eigener_beleg("sales_invoice", invoice_number, tenant_id, repo)
             if inv:
                 inv["status"] = "STORNIERT"
                 save_to_store("sales_invoice", invoice_number, inv, repo)
@@ -400,7 +505,8 @@ async def storno_invoice(
             {"invoice_number": invoice_number, "reversal_id": str(reversal.id)},
         )
         logger.info("Invoice storno: %s → reversal %s", invoice_number, reversal.id)
-        return {"ok": True, "original_entry_id": je_id, "reversal_entry_id": str(reversal.id)}
+        # ``success`` verlangt das Antwortmodell; ohne es stornierte der Weg und antwortete 500.
+        return {"success": True, "ok": True, "original_entry_id": je_id, "reversal_entry_id": str(reversal.id)}
     except HTTPException:
         raise
     except Exception as e:

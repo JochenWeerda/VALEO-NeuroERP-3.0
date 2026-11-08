@@ -163,7 +163,7 @@ export function useAuth() {
   const [loading, setLoading] = React.useState(true)
 
   React.useEffect(() => {
-    oidcClient.getUser().then((user) => {
+    void oidcClient.getUser().then((user) => {
       setUser(user)
       setLoading(false)
     })

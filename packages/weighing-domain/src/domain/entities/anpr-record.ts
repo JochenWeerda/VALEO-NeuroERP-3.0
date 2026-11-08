@@ -21,7 +21,7 @@ export type ANPRStatusValue = typeof ANPRStatus[keyof typeof ANPRStatus];
 
 // Schema
 export const ANPRRecordSchema = z.object({
-  id: z.string().uuid().optional(),
+  id: z.string().guid().optional(),
   tenantId: z.string(),
   licensePlate: z.string(),
   confidence: z.number().min(0).max(100),
@@ -34,13 +34,13 @@ export const ANPRRecordSchema = z.object({
   // Processing
   status: z.enum([ANPRStatus.DETECTED, ANPRStatus.PROCESSED, ANPRStatus.ASSIGNED, ANPRStatus.REJECTED, ANPRStatus.ERROR]).default(ANPRStatus.DETECTED),
   processedAt: z.string().datetime().optional(),
-  ticketSuggestionId: z.string().uuid().optional(),
-  assignedTicketId: z.string().uuid().optional(),
+  ticketSuggestionId: z.string().guid().optional(),
+  assignedTicketId: z.string().guid().optional(),
 
   // Vehicle data (from lookup)
-  vehicleId: z.string().uuid().optional(),
-  contractId: z.string().uuid().optional(),
-  orderId: z.string().uuid().optional(),
+  vehicleId: z.string().guid().optional(),
+  contractId: z.string().guid().optional(),
+  orderId: z.string().guid().optional(),
   commodity: z.string().optional(),
 
   // Error handling
@@ -260,7 +260,7 @@ export class ANPRRecord implements ANPRRecordEntity {
     return Math.round((now.getTime() - this.capturedAt.getTime()) / (1000 * 60));
   }
 
-  isStale(maxAgeMinutes: number = 30): boolean {
+  isStale(maxAgeMinutes = 30): boolean {
     return this.getAgeMinutes() > maxAgeMinutes;
   }
 

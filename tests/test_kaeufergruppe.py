@@ -4,7 +4,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.api.v1.endpoints import kaeufergruppe as kaeufer_endpoint
-from main import app
+from app.main import app
 from app.services.kaeufergruppe import (
     BuyingGroup,
     Klassifikation,

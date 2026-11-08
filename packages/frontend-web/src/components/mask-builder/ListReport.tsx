@@ -13,6 +13,7 @@ import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { TouchRecordStack } from '@/components/list/TouchRecordStack'
 import { ListConfig, ListColumn, Action, Field } from './types'
+import { businessToday } from '@/lib/business-time'
 
 function inputValue(value: unknown): string | number {
   return typeof value === 'string' || typeof value === 'number' ? value : ''
@@ -270,7 +271,7 @@ const ListReport = <TItem extends object = Record<string, unknown>>({
   }
 
   return (
-    <div className="space-y-6 p-3 md:p-8">
+    <div className="space-y-4">
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-4 rounded-(--radius) border border-border bg-card p-4 shadow-sm md:p-6">
         <div>
@@ -373,7 +374,7 @@ const ListReport = <TItem extends object = Record<string, unknown>>({
                     placeholder={getFilterPlaceholder(filter)}
                     value={inputValue(filters[filterName])}
                     onChange={(e) => handleFilterChange(filterName, e.target.value)}
-                    max={(filter['maxDate'] as string | undefined) || new Date().toISOString().split('T')[0]}
+                    max={(filter['maxDate'] as string | undefined) || businessToday()}
                     min={filter['minDate'] as string | undefined}
                     lang="de-DE"
                     className="min-h-touch"

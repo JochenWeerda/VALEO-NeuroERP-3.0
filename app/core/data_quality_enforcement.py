@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from dataclasses import replace
 from typing import Any
 
@@ -138,7 +139,7 @@ def evaluate_journal_import_datensatz(
         credit_amount = float(datensatz.get("credit_amount") or 0)
     except (TypeError, ValueError):
         return result
-    if debit_amount == 0.0 and credit_amount == 0.0:
+    if math.isclose(debit_amount, 0.0, abs_tol=1e-9) and math.isclose(credit_amount, 0.0, abs_tol=1e-9):
         result.verletzungen.append(
             DQViolation(
                 regel_id="JI-007",

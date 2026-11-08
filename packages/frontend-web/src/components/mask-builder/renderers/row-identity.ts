@@ -18,7 +18,7 @@ export function resolveRowRoute(template: string | undefined, row: Record<string
     // Whole-template token is already a route (`{source_route}`). Encoding
     // would turn `/verkauf/auftrag/1` into `%2Fverkauf%2F...`.
     if (match === template) {
-      if (!value.startsWith('/') || value.startsWith('//')) return ''
+      if (!value.startsWith('/') || value.startsWith('//') || value.includes('\\') || [...value].some(char => char.charCodeAt(0) <= 0x20 || char.charCodeAt(0) === 0x7f)) return ''
       return value
     }
     return encodeURIComponent(value)

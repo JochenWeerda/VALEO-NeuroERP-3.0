@@ -9,6 +9,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
+from testgrenze import ALLE_FACHROLLEN, ersetze_bearer, ersetze_mandant
 
 
 # ---------------------------------------------------------------------------
@@ -59,6 +60,10 @@ def test_gs1_batch_parse_liste():
     from app.api.v1.endpoints.gs1_barcode import router
 
     app = FastAPI()
+
+    ersetze_mandant(app)
+
+    ersetze_bearer(app, *ALLE_FACHROLLEN)
     app.include_router(router, prefix="/gs1")
     client = TestClient(app)
 
@@ -83,6 +88,10 @@ def test_webhook_bereiche_liste():
     from app.api.v1.endpoints.webhook_system import router, VALID_BEREICHE
 
     app = FastAPI()
+
+    ersetze_mandant(app)
+
+    ersetze_bearer(app, *ALLE_FACHROLLEN)
     app.include_router(router, prefix="/webhooks")
     client = TestClient(app)
 
@@ -98,6 +107,10 @@ def test_webhook_register_https_only():
     from app.api.v1.endpoints.webhook_system import router
 
     app = FastAPI()
+
+    ersetze_mandant(app)
+
+    ersetze_bearer(app, *ALLE_FACHROLLEN)
     app.include_router(router, prefix="/webhooks")
     client = TestClient(app, raise_server_exceptions=False)
 
@@ -113,6 +126,10 @@ def test_webhook_register_ungueltig_bereich():
     from app.api.v1.endpoints.webhook_system import router
 
     app = FastAPI()
+
+    ersetze_mandant(app)
+
+    ersetze_bearer(app, *ALLE_FACHROLLEN)
     app.include_router(router, prefix="/webhooks")
     client = TestClient(app, raise_server_exceptions=False)
 
@@ -127,6 +144,10 @@ def test_webhook_register_success():
     from app.api.v1.endpoints.webhook_system import router
 
     app = FastAPI()
+
+    ersetze_mandant(app)
+
+    ersetze_bearer(app, *ALLE_FACHROLLEN)
     app.include_router(router, prefix="/webhooks")
 
     mock_db = MagicMock()
@@ -150,6 +171,10 @@ def test_webhook_delete():
     from app.api.v1.endpoints.webhook_system import router
 
     app = FastAPI()
+
+    ersetze_mandant(app)
+
+    ersetze_bearer(app, *ALLE_FACHROLLEN)
     app.include_router(router, prefix="/webhooks")
 
     mock_db = MagicMock()
@@ -195,6 +220,10 @@ def test_umkreissuche_missing_geo_graceful():
     from app.api.v1.endpoints import customers as cmod
 
     app = FastAPI()
+
+    ersetze_mandant(app)
+
+    ersetze_bearer(app, *ALLE_FACHROLLEN)
     app.include_router(cmod.router, prefix="/customers")
 
     mock_db = MagicMock()
@@ -220,6 +249,8 @@ def _make_ruestliste_app():
     from fastapi import FastAPI
     from app.api.v1.endpoints import ruestliste as rmod
     app = FastAPI()
+    ersetze_mandant(app)
+    ersetze_bearer(app, *ALLE_FACHROLLEN)
     app.include_router(rmod.router, prefix="/lager/ruestliste")
     return app
 

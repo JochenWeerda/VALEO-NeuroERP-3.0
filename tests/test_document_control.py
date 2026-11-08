@@ -10,7 +10,7 @@ from app.services.document_control_service import (
     DocumentControlService,
     valid_status_transition,
 )
-from main import app
+from app.main import app
 
 pytestmark = pytest.mark.unit
 

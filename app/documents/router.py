@@ -26,10 +26,52 @@ from .router_helpers import (
 )
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
+from .inbox_router import inbox_router
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/mcp/documents", tags=["documents"])
+# Inbox vor dem variablen Belegtyp registrieren.
+router.include_router(inbox_router)
+
+
+# Belegnummern sind im Dokumentspeicher systemweit eindeutig; der Speicher selbst kennt beim Einzelabruf keinen
+# Mandanten. Bis 14.10.2026 trafen Lesen, Aendern und Loeschen hier jeden Beleg jedes Mandanten.
+
+
+def _eigener_beleg(doc_type: str, doc_number: str, repo, tenant_id: str) -> Optional[dict]:
+    """Der Beleg dieses Mandanten oder nichts — ein fremder oder mandantenloser Beleg ist hier nicht vorhanden."""
+    doc = get_from_store(doc_type, doc_number, repo)
+    if doc is None or doc.get("tenantId") != tenant_id:
+        return None
+    return doc
+
+
+# Belegarten, die allein ueber diesen Router gefuehrt werden. Nur sie aendert und loescht er (Nutzerentscheidung
+# 14.10.2026). Finanzbelege — Ausgangs- und Eingangsrechnung, Zahlungseingang, Gutschrift, Belastung — laufen
+# ausschliesslich ueber ihre Fachwege mit Rollenpruefung; bis dahin konnte hier jede angemeldete Person des
+# Mandanten sie anlegen, aendern und loeschen.
+ROUTER_BELEGARTEN = frozenset({
+    "customer_inquiry", "sales_offer", "sales_order", "sales_delivery",
+    "purchase_request", "purchase_offer", "purchase_order",
+})
+
+
+def _nur_router_belegart(doc_type: str) -> None:
+    if doc_type not in ROUTER_BELEGARTEN:
+        raise HTTPException(
+            status_code=403,
+            detail=f"Belegart {doc_type} wird nicht ueber den allgemeinen Belegweg geschrieben, sondern ueber ihren Fachweg.",
+        )
+
+
+def _bestand_fuer_anlage(doc_type: str, doc_number: str, repo, tenant_id: str) -> Optional[dict]:
+    """Der eigene Bestand zur Nummer; gehoert sie einem anderen oder keinem Mandanten, wird nichts ueberschrieben."""
+    doc = get_from_store(doc_type, doc_number, repo)
+    if doc is not None and doc.get("tenantId") != tenant_id:
+        raise HTTPException(status_code=409, detail="Belegnummer bereits vergeben")
+    return doc
 
 
 def _enrich_delivery_sustainability(doc_data: dict[str, Any]) -> dict[str, Any]:
@@ -133,9 +175,11 @@ def _compute_sales_delivery_sustainability(
     year: int,
     customer_id: Optional[str],
     db: Session,
+    tenant_id: str,
 ) -> dict[str, Any]:
     repo = get_repository(db)
-    listed = list_from_store("sales_delivery", skip=0, limit=10_000, repo=repo)
+    # Nur der Mandant der Anmeldung — bis 14.10.2026 rechnete die Auswertung ueber alle Mandanten.
+    listed = list_from_store("sales_delivery", skip=0, limit=10_000, filters={"tenantId": tenant_id}, repo=repo)
     deliveries = listed.get("data", [])
 
     filtered: list[dict[str, Any]] = []
@@ -191,13 +235,15 @@ def _compute_sales_delivery_sustainability(
 # --- CRUD Endpoints ---
 
 
-@router.post("/customer_inquiry")
-async def upsert_customer_inquiry(doc: CustomerInquiry, db: Session = Depends(get_db)) -> dict:
+@router.post("/customer_inquiry", dependencies=SCHREIBEN["FACHLICH"])
+async def upsert_customer_inquiry(
+    doc: CustomerInquiry, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
+) -> dict:
     """Erstellt oder aktualisiert Kundenanfrage"""
     try:
         repo = get_repository(db)
         # Status-Transition-Logik
-        existing = get_from_store("customer_inquiry", doc.number, repo)
+        existing = _bestand_fuer_anlage("customer_inquiry", doc.number, repo, tenant_id)
         if existing:
             old_status = existing.get("status", "OFFEN")
             new_status = doc.status
@@ -216,7 +262,7 @@ async def upsert_customer_inquiry(doc: CustomerInquiry, db: Session = Depends(ge
                     detail=f"Invalid status transition: {old_status} → {new_status}"
                 )
 
-        result = save_to_store("customer_inquiry", doc.number, doc.model_dump(), repo)
+        result = save_to_store("customer_inquiry", doc.number, {**doc.model_dump(), "tenantId": tenant_id}, repo)
         logger.info(f"Saved customer inquiry: {doc.number} (status: {doc.status})")
         return result
     except HTTPException:
@@ -226,8 +272,10 @@ async def upsert_customer_inquiry(doc: CustomerInquiry, db: Session = Depends(ge
         raise HTTPException(status_code=500, detail="Interner Fehler bei Dokumentverarbeitung")
 
 
-@router.post("/sales_offer")
-async def upsert_sales_offer(doc: SalesOffer, db: Session = Depends(get_db)) -> dict:
+@router.post("/sales_offer", dependencies=SCHREIBEN["FACHLICH"])
+async def upsert_sales_offer(
+    doc: SalesOffer, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
+) -> dict:
     """Erstellt oder aktualisiert Verkaufsangebot"""
     try:
         repo = get_repository(db)
@@ -243,7 +291,7 @@ async def upsert_sales_offer(doc: SalesOffer, db: Session = Depends(get_db)) -> 
             doc_data["totalGross"] = doc_data["subtotalNet"] + doc_data["totalTax"]
 
         # Status-Transition-Logik
-        existing = get_from_store("sales_offer", doc.number, repo)
+        existing = _bestand_fuer_anlage("sales_offer", doc.number, repo, tenant_id)
         if existing:
             old_status = existing.get("status", "ENTWURF")
             new_status = doc.status
@@ -262,7 +310,7 @@ async def upsert_sales_offer(doc: SalesOffer, db: Session = Depends(get_db)) -> 
                     detail=f"Invalid status transition: {old_status} → {new_status}"
                 )
 
-        result = save_to_store("sales_offer", doc.number, doc_data, repo)
+        result = save_to_store("sales_offer", doc.number, {**doc_data, "tenantId": tenant_id}, repo)
         logger.info(f"Saved sales offer: {doc.number} (status: {doc.status})")
         return result
     except HTTPException:
@@ -272,34 +320,47 @@ async def upsert_sales_offer(doc: SalesOffer, db: Session = Depends(get_db)) -> 
         raise HTTPException(status_code=500, detail="Interner Fehler bei Dokumentverarbeitung")
 
 
-@router.post("/sales_order")
-async def upsert_sales_order(doc: SalesOrder, db: Session = Depends(get_db)) -> dict:
+@router.post("/sales_order", dependencies=SCHREIBEN["FACHLICH"])
+async def upsert_sales_order(
+    doc: SalesOrder, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
+) -> dict:
     """Erstellt oder aktualisiert Verkaufsauftrag"""
     try:
         repo = get_repository(db)
-        return save_to_store("sales_order", doc.number, doc.model_dump(), repo)
+        _bestand_fuer_anlage("sales_order", doc.number, repo, tenant_id)
+        return save_to_store("sales_order", doc.number, {**doc.model_dump(), "tenantId": tenant_id}, repo)
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Failed to save sales order: {e}")
         raise HTTPException(status_code=500, detail="Interner Fehler bei Dokumentverarbeitung")
 
 
-@router.post("/sales_delivery")
-async def upsert_sales_delivery(doc: SalesDelivery, db: Session = Depends(get_db)) -> dict:
+@router.post("/sales_delivery", dependencies=SCHREIBEN["FACHLICH"])
+async def upsert_sales_delivery(
+    doc: SalesDelivery, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
+) -> dict:
     """Erstellt oder aktualisiert Lieferschein"""
     try:
         repo = get_repository(db)
+        _bestand_fuer_anlage("sales_delivery", doc.number, repo, tenant_id)
         doc_data = _enrich_delivery_sustainability(doc.model_dump())
-        save_to_store("sales_delivery", doc.number, doc_data, repo)
+        save_to_store("sales_delivery", doc.number, {**doc_data, "tenantId": tenant_id}, repo)
         logger.info(f"Saved sales delivery: {doc.number}")
         return {"ok": True, "number": doc.number}
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Failed to save sales delivery: {e}")
         raise HTTPException(status_code=500, detail="Interner Fehler bei Dokumentverarbeitung")
 
 
-@router.post("/sales_invoice")
-async def upsert_sales_invoice(doc: SalesInvoice, db: Session = Depends(get_db)) -> dict:
-    """Erstellt oder aktualisiert Rechnung"""
+@router.post("/sales_invoice", dependencies=SCHREIBEN["FACHLICH"])
+async def upsert_sales_invoice(
+    doc: SalesInvoice, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
+) -> dict:
+    """Geschlossen: Rechnungen entstehen ueber ``/api/v1/finance/invoices`` (Rollenpruefung, Buchung, Archiv)."""
+    _nur_router_belegart("sales_invoice")
     try:
         repo = get_repository(db)
         # Berechne Gesamtbeträge falls nicht gesetzt
@@ -314,7 +375,7 @@ async def upsert_sales_invoice(doc: SalesInvoice, db: Session = Depends(get_db))
             doc_data["totalGross"] = doc_data["subtotalNet"] + doc_data["totalTax"]
 
         # Status-Transition-Logik
-        existing = get_from_store("sales_invoice", doc.number, repo)
+        existing = _bestand_fuer_anlage("sales_invoice", doc.number, repo, tenant_id)
         if existing:
             old_status = existing.get("status", "ENTWURF")
             new_status = doc.status
@@ -333,7 +394,7 @@ async def upsert_sales_invoice(doc: SalesInvoice, db: Session = Depends(get_db))
                     detail=f"Invalid status transition: {old_status} → {new_status}"
                 )
 
-        result = save_to_store("sales_invoice", doc.number, doc_data, repo)
+        result = save_to_store("sales_invoice", doc.number, {**doc_data, "tenantId": tenant_id}, repo)
         logger.info(f"Saved sales invoice: {doc.number} (status: {doc.status})")
         return result
     except HTTPException:
@@ -343,13 +404,16 @@ async def upsert_sales_invoice(doc: SalesInvoice, db: Session = Depends(get_db))
         raise HTTPException(status_code=500, detail="Interner Fehler bei Dokumentverarbeitung")
 
 
-@router.post("/payment_received")
-async def upsert_payment_received(doc: PaymentReceived, db: Session = Depends(get_db)) -> dict:
-    """Erstellt oder aktualisiert Zahlungseingang"""
+@router.post("/payment_received", dependencies=SCHREIBEN["FACHLICH"])
+async def upsert_payment_received(
+    doc: PaymentReceived, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
+) -> dict:
+    """Geschlossen: Zahlungseingaenge laufen ueber den Fachweg der Finanzbuchhaltung (Rollenpruefung, Auszifferung)."""
+    _nur_router_belegart("payment_received")
     try:
         repo = get_repository(db)
         # Status-Transition-Logik
-        existing = get_from_store("payment_received", doc.number, repo)
+        existing = _bestand_fuer_anlage("payment_received", doc.number, repo, tenant_id)
         if existing:
             old_status = existing.get("status", "EINGEGANGEN")
             new_status = doc.status
@@ -367,7 +431,7 @@ async def upsert_payment_received(doc: PaymentReceived, db: Session = Depends(ge
                     detail=f"Invalid status transition: {old_status} → {new_status}"
                 )
 
-        result = save_to_store("payment_received", doc.number, doc.model_dump(), repo)
+        result = save_to_store("payment_received", doc.number, {**doc.model_dump(), "tenantId": tenant_id}, repo)
         logger.info(f"Saved payment received: {doc.number} (status: {doc.status})")
         return result
     except HTTPException:
@@ -380,13 +444,15 @@ async def upsert_payment_received(doc: PaymentReceived, db: Session = Depends(ge
 # --- Purchase Endpoints ---
 
 
-@router.post("/purchase_request")
-async def upsert_purchase_request(doc: PurchaseRequest, db: Session = Depends(get_db)) -> dict:
+@router.post("/purchase_request", dependencies=SCHREIBEN["FACHLICH"])
+async def upsert_purchase_request(
+    doc: PurchaseRequest, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
+) -> dict:
     """Erstellt oder aktualisiert Einkaufsanfrage"""
     try:
         repo = get_repository(db)
         # Status-Transition-Logik
-        existing = get_from_store("purchase_request", doc.number, repo)
+        existing = _bestand_fuer_anlage("purchase_request", doc.number, repo, tenant_id)
         if existing:
             old_status = existing.get("status", "OFFEN")
             new_status = doc.status
@@ -405,7 +471,7 @@ async def upsert_purchase_request(doc: PurchaseRequest, db: Session = Depends(ge
                     detail=f"Invalid status transition: {old_status} → {new_status}"
                 )
 
-        result = save_to_store("purchase_request", doc.number, doc.model_dump(), repo)
+        result = save_to_store("purchase_request", doc.number, {**doc.model_dump(), "tenantId": tenant_id}, repo)
         logger.info(f"Saved purchase request: {doc.number} (status: {doc.status})")
         return result
     except HTTPException:
@@ -415,8 +481,10 @@ async def upsert_purchase_request(doc: PurchaseRequest, db: Session = Depends(ge
         raise HTTPException(status_code=500, detail="Interner Fehler bei Dokumentverarbeitung")
 
 
-@router.post("/purchase_offer")
-async def upsert_purchase_offer(doc: PurchaseOffer, db: Session = Depends(get_db)) -> dict:
+@router.post("/purchase_offer", dependencies=SCHREIBEN["FACHLICH"])
+async def upsert_purchase_offer(
+    doc: PurchaseOffer, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
+) -> dict:
     """Erstellt oder aktualisiert Einkaufsangebot"""
     try:
         repo = get_repository(db)
@@ -432,7 +500,7 @@ async def upsert_purchase_offer(doc: PurchaseOffer, db: Session = Depends(get_db
             doc_data["totalGross"] = doc_data["subtotalNet"] + doc_data["totalTax"]
 
         # Status-Transition-Logik
-        existing = get_from_store("purchase_offer", doc.number, repo)
+        existing = _bestand_fuer_anlage("purchase_offer", doc.number, repo, tenant_id)
         if existing:
             old_status = existing.get("status", "ENTWURF")
             new_status = doc.status
@@ -451,7 +519,7 @@ async def upsert_purchase_offer(doc: PurchaseOffer, db: Session = Depends(get_db
                     detail=f"Invalid status transition: {old_status} → {new_status}"
                 )
 
-        result = save_to_store("purchase_offer", doc.number, doc_data, repo)
+        result = save_to_store("purchase_offer", doc.number, {**doc_data, "tenantId": tenant_id}, repo)
         logger.info(f"Saved purchase offer: {doc.number} (status: {doc.status})")
         return result
     except HTTPException:
@@ -461,8 +529,10 @@ async def upsert_purchase_offer(doc: PurchaseOffer, db: Session = Depends(get_db
         raise HTTPException(status_code=500, detail="Interner Fehler bei Dokumentverarbeitung")
 
 
-@router.post("/purchase_order")
-async def upsert_purchase_order(doc: PurchaseOrder, db: Session = Depends(get_db)) -> dict:
+@router.post("/purchase_order", dependencies=SCHREIBEN["FACHLICH"])
+async def upsert_purchase_order(
+    doc: PurchaseOrder, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
+) -> dict:
     """Erstellt oder aktualisiert Kaufauftrag"""
     try:
         repo = get_repository(db)
@@ -478,7 +548,7 @@ async def upsert_purchase_order(doc: PurchaseOrder, db: Session = Depends(get_db
             doc_data["totalGross"] = doc_data["subtotalNet"] + doc_data["totalTax"]
 
         # Status-Transition-Logik
-        existing = get_from_store("purchase_order", doc.number, repo)
+        existing = _bestand_fuer_anlage("purchase_order", doc.number, repo, tenant_id)
         if existing:
             old_status = existing.get("status", "ENTWURF")
             new_status = doc.status
@@ -498,7 +568,7 @@ async def upsert_purchase_order(doc: PurchaseOrder, db: Session = Depends(get_db
                     detail=f"Invalid status transition: {old_status} → {new_status}"
                 )
 
-        result = save_to_store("purchase_order", doc.number, doc_data, repo)
+        result = save_to_store("purchase_order", doc.number, {**doc_data, "tenantId": tenant_id}, repo)
         logger.info(f"Saved purchase order: {doc.number} (status: {doc.status})")
         return result
     except HTTPException:
@@ -512,51 +582,33 @@ async def upsert_purchase_order(doc: PurchaseOrder, db: Session = Depends(get_db
 
 
 @router.get("/{doc_type}")
-async def list_documents(doc_type: str, skip: int = 0, limit: int = 100) -> dict:
-    """Holt Liste aller Belege eines Typs"""
+async def list_documents(
+    doc_type: str,
+    skip: int = 0,
+    limit: int = 100,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Belege eines Typs im Mandanten der Anmeldung.
+
+    Bis 14.10.2026 las dieser Weg nur den Prozessspeicher — bei konfigurierter Datenbank also nichts, sonst
+    die fluechtigen Belege aller Mandanten.
+    """
     try:
-        # Filtere nach Dokumenttyp
-        filtered_docs = []
-        for key, value in _DB.items():
-            # Prüfe ob Dokumentnummer dem Typ entspricht (z.B. "PO-" für purchase_order)
-            type_prefixes = {
-                "customer_inquiry": ["INQ-"],
-                "sales_offer": ["SO-", "ANG-"],
-                "sales_order": ["SO-"],
-                "sales_delivery": ["DL-"],
-                "sales_invoice": ["INV-"],
-                "payment_received": ["PAY-"],
-                "purchase_request": ["PR-"],
-                "purchase_offer": ["POF-"],
-                "purchase_order": ["PO-", "EK-"],
-            }
-            
-            prefixes = type_prefixes.get(doc_type, [])
-            if any(key.startswith(prefix) for prefix in prefixes) or doc_type in str(value.get("type", "")):
-                filtered_docs.append(value)
-        
-        # Pagination
-        total = len(filtered_docs)
-        paginated_docs = filtered_docs[skip:skip + limit]
-        
-        return {
-            "ok": True,
-            "data": paginated_docs,
-            "total": total,
-            "skip": skip,
-            "limit": limit
-        }
+        return list_from_store(doc_type, skip, limit, {"tenantId": tenant_id}, repo=get_repository(db))
     except Exception as e:
         logger.error(f"Failed to list documents: {e}")
         raise HTTPException(status_code=500, detail="Interner Fehler bei Dokumentverarbeitung")
 
 
 @router.get("/{doc_type}/{doc_number}")
-async def get_document(doc_type: str, doc_number: str, db: Session = Depends(get_db)) -> dict:
+async def get_document(
+    doc_type: str, doc_number: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+) -> dict:
     """Holt einzelnen Beleg nach Typ und Nummer"""
     try:
         repo = get_repository(db)
-        doc = get_from_store(doc_type, doc_number, repo)
+        doc = _eigener_beleg(doc_type, doc_number, repo, tenant_id)
         if not doc:
             raise HTTPException(status_code=404, detail="Document not found")
         return {"ok": True, "data": doc}
@@ -567,12 +619,19 @@ async def get_document(doc_type: str, doc_number: str, db: Session = Depends(get
         raise HTTPException(status_code=500, detail="Interner Fehler bei Dokumentverarbeitung")
 
 
-@router.put("/{doc_type}/{doc_number}")
-async def update_document(doc_type: str, doc_number: str, doc: dict, db: Session = Depends(get_db)) -> dict:
+@router.put("/{doc_type}/{doc_number}", dependencies=SCHREIBEN["FACHLICH"])
+async def update_document(
+    doc_type: str,
+    doc_number: str,
+    doc: dict,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict:
     """Aktualisiert einen Beleg"""
+    _nur_router_belegart(doc_type)
     try:
         repo = get_repository(db)
-        existing = get_from_store(doc_type, doc_number, repo)
+        existing = _eigener_beleg(doc_type, doc_number, repo, tenant_id)
         if not existing:
             raise HTTPException(status_code=404, detail="Document not found")
         
@@ -586,7 +645,7 @@ async def update_document(doc_type: str, doc_number: str, doc: dict, db: Session
             pass
         
         # Aktualisiere Dokument
-        updated_data = {**existing, **doc, "number": doc_number}
+        updated_data = {**existing, **doc, "number": doc_number, "tenantId": tenant_id}
         result = save_to_store(doc_type, doc_number, updated_data, repo)
         logger.info(f"Updated document: {doc_number}")
         return result
@@ -597,12 +656,15 @@ async def update_document(doc_type: str, doc_number: str, doc: dict, db: Session
         raise HTTPException(status_code=500, detail="Interner Fehler bei Dokumentverarbeitung")
 
 
-@router.delete("/{doc_type}/{doc_number}")
-async def delete_document(doc_type: str, doc_number: str, db: Session = Depends(get_db)) -> dict:
+@router.delete("/{doc_type}/{doc_number}", dependencies=SCHREIBEN["FACHLICH"])
+async def delete_document(
+    doc_type: str, doc_number: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+) -> dict:
     """Löscht einen Beleg"""
+    _nur_router_belegart(doc_type)
     try:
         repo = get_repository(db)
-        doc = get_from_store(doc_type, doc_number, repo)
+        doc = _eigener_beleg(doc_type, doc_number, repo, tenant_id)
         if not doc:
             raise HTTPException(status_code=404, detail="Document not found")
         
@@ -630,19 +692,26 @@ async def delete_document(doc_type: str, doc_number: str, db: Session = Depends(
         raise HTTPException(status_code=500, detail="Interner Fehler bei Dokumentverarbeitung")
 
 
-@router.delete("/{doc_type}")
-async def bulk_delete_documents(doc_type: str, numbers: List[str] = Query(...)) -> dict:
-    """Löscht mehrere Belege gleichzeitig"""
+@router.delete("/{doc_type}", dependencies=SCHREIBEN["FACHLICH"])
+async def bulk_delete_documents(
+    doc_type: str,
+    numbers: List[str] = Query(...),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Löscht mehrere Belege gleichzeitig — nur eigene. Bis 14.10.2026 nur im Prozessspeicher und ohne Mandant."""
+    _nur_router_belegart(doc_type)
     try:
         deleted = []
         failed = []
-        
+        repo = get_repository(db)
+
         for doc_number in numbers:
-            if doc_number not in _DB:
+            doc = _eigener_beleg(doc_type, doc_number, repo, tenant_id)
+            if doc is None:
                 failed.append({"number": doc_number, "error": "Not found"})
                 continue
-            
-            doc = _DB[doc_number]
+
             status = doc.get("status", "")
             
             # Finale Status erlauben keine Löschung
@@ -651,7 +720,9 @@ async def bulk_delete_documents(doc_type: str, numbers: List[str] = Query(...)) 
                 failed.append({"number": doc_number, "error": f"Cannot delete with status: {status}"})
                 continue
             
-            del _DB[doc_number]
+            if not delete_from_store(doc_type, doc_number, repo):
+                failed.append({"number": doc_number, "error": "Not found"})
+                continue
             deleted.append(doc_number)
         
         return {
@@ -814,7 +885,7 @@ FLOW: Dict[tuple[str, str], Callable[[dict], dict]] = {
 }
 
 
-@router.post("/follow")
+@router.post("/follow", dependencies=SCHREIBEN["FACHLICH"])
 async def create_follow_up(req: FollowRequest) -> dict:
     """
     Erstellt Folgebeleg aus Quell-Beleg
@@ -930,7 +1001,7 @@ async def search_articles(
 # --- Due-Date Berechnung ---
 
 
-@router.post("/due-date/calculate")
+@router.post("/due-date/calculate", dependencies=SCHREIBEN["BERECHNEN"])
 async def calculate_due_date(
     data: dict,
     db: Session = Depends(get_db)
@@ -1239,6 +1310,7 @@ async def get_sales_delivery_sustainability(
     year: int = Query(..., ge=2000, le=2100, description="Reporting year (YYYY)"),
     customer_id: Optional[str] = Query(None, description="Optional customer filter"),
     db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ) -> dict:
     """
     Aggregated sustainability figures from sales delivery notes.
@@ -1247,7 +1319,9 @@ async def get_sales_delivery_sustainability(
     sustainability reporting requested by farms and downstream processors.
     """
     try:
-        data = _compute_sales_delivery_sustainability(year=year, customer_id=customer_id, db=db)
+        data = _compute_sales_delivery_sustainability(
+            year=year, customer_id=customer_id, db=db, tenant_id=tenant_id
+        )
 
         return {
             "ok": True,
@@ -1263,10 +1337,13 @@ async def export_sales_delivery_sustainability_csv(
     year: int = Query(..., ge=2000, le=2100, description="Reporting year (YYYY)"),
     customer_id: Optional[str] = Query(None, description="Optional customer filter"),
     db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """Export yearly delivery sustainability analytics as CSV."""
     try:
-        data = _compute_sales_delivery_sustainability(year=year, customer_id=customer_id, db=db)
+        data = _compute_sales_delivery_sustainability(
+            year=year, customer_id=customer_id, db=db, tenant_id=tenant_id
+        )
 
         buffer = io.StringIO()
         writer = csv.writer(buffer, delimiter=";")
@@ -1310,10 +1387,13 @@ async def export_sales_delivery_sustainability_pdf(
     year: int = Query(..., ge=2000, le=2100, description="Reporting year (YYYY)"),
     customer_id: Optional[str] = Query(None, description="Optional customer filter"),
     db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """Export yearly delivery sustainability analytics as PDF."""
     try:
-        data = _compute_sales_delivery_sustainability(year=year, customer_id=customer_id, db=db)
+        data = _compute_sales_delivery_sustainability(
+            year=year, customer_id=customer_id, db=db, tenant_id=tenant_id
+        )
 
         pdf_buffer = io.BytesIO()
         c = canvas.Canvas(pdf_buffer, pagesize=A4)

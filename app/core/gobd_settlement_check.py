@@ -9,6 +9,7 @@ Rechtsgrundlage: §§ 146, 147 AO, GoBD Rz. 83-89, 102-112
 """
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Optional
@@ -126,7 +127,7 @@ def check_gobd_settlement(ctx: GoBDSettlementContext) -> GoBDSettlementCheckResu
             gobd_ref="§146 AO",
         ))
 
-    if ctx.gross_amount is None or ctx.gross_amount == 0.0:
+    if ctx.gross_amount is None or math.isclose(ctx.gross_amount, 0.0, abs_tol=1e-9):
         violations.append(GoBDViolation(
             code=GoBDViolationCode.MISSING_BETRAG,
             field_name="gross_amount",

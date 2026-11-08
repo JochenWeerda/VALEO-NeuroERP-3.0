@@ -40,8 +40,8 @@ export function KeyboardShortcutBar({
       role="status"
       aria-label="Keyboard Shortcuts"
       className={cn(
-        'flex items-center gap-1 border-t border-slate-200 bg-slate-50 px-4 py-2',
-        'text-xs text-slate-500',
+        'flex items-center gap-1 border-t border-border bg-muted px-4 py-2',
+        'text-xs text-muted-foreground',
         className,
       )}
     >
@@ -49,7 +49,7 @@ export function KeyboardShortcutBar({
       <div className="flex flex-wrap gap-x-4 gap-y-1">
         {visible.map((sc) => (
           <span key={`${sc.key}-${sc.ctrl}-${sc.alt}`} className="flex items-center gap-1">
-            <kbd className="inline-flex items-center rounded border border-slate-300 bg-white px-1.5 py-0.5 font-mono text-xs text-slate-600 shadow-sm">
+            <kbd className="inline-flex items-center rounded border border-border bg-background px-1.5 py-0.5 font-mono text-xs text-foreground shadow-sm">
               {formatShortcutLabel(sc)}
             </kbd>
             <span>{sc.label}</span>

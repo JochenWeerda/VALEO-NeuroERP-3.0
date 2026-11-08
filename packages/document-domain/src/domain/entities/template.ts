@@ -5,7 +5,7 @@ export const TemplateEngineEnum = z.enum(['handlebars', 'liquid']);
 export const PaperFormatEnum = z.enum(['A4', 'A5', 'Letter', 'Label']);
 
 export const TemplateSchema = z.object({
-  id: z.string().uuid().optional(),
+  id: z.string().guid().optional(),
   tenantId: z.string().min(1),
   key: z.string().min(1), // z.B. "invoice_v1_de"
   name: z.string().min(1),

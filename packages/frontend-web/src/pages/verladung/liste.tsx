@@ -1,19 +1,6 @@
-import { useNavigate } from '@/app/routing/typed-router'
-import { CaptureScreenHost } from '@/masks/capture-screen-host'
-import { logistikVerladungScreen } from '@/masks/capture-screens'
+import { NativeListPage } from '@/components/mask-builder/NativeListPage'
 
-/** Verladung aus der ScreenDefinition `logistik/verladung`. */
-export default function VerladungListePage(): JSX.Element {
-  const navigate = useNavigate()
-  return (
-    <CaptureScreenHost
-      screenId="logistik/verladung"
-      fallback={logistikVerladungScreen}
-      loading="Verladungen werden geladen…"
-      error="Verladungen konnten nicht geladen werden."
-      onAction={async (key) => {
-        if (key === 'neu') navigate('/verladung/lkw-beladung')
-      }}
-    />
-  )
+/** Listenmaske `verladung/liste` (StammListenParent). */
+export default function Page(): JSX.Element {
+  return <NativeListPage screenId="verladung/liste" testId="screen-verladung/liste" />
 }

@@ -10,7 +10,7 @@ from app.services.foreign_goods_worklist_service import (
     ForeignGoodsError,
     ForeignGoodsWorklistService,
 )
-from main import app
+from app.main import app
 
 pytestmark = pytest.mark.unit
 HEADERS = {

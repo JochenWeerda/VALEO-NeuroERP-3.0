@@ -6,16 +6,21 @@
   - neue_ernte_frei_lager:   Neue Ernte, frei Lager Handel (angeliefert)
   - neue_ernte_ab_hof:       Neue Ernte, ab Hof (i.d.R. Monat nach Ernte)
 
-Preisbasis: manuell gepflegte Handelskurse + optionaler MATIF-Aufschlag.
-Preise werden tenant-isoliert gepflegt.
+Preisbasis: vom Innendienst gepflegte Handelskurse + optionaler MATIF-Aufschlag, mandantengenau in
+``domain_shared.portal_preise``. Bis 20.10.2026 zeigte der Dienst Portalkunden erfundene Kurse aus einer
+Saat-Liste ("fiktiv, aber plausibel") als Richtpreise; ein Preis lag nur im Arbeitsspeicher. Ohne gepflegten Preis
+bleibt der Preisspiegel jetzt leer.
 """
 from __future__ import annotations
 
 import uuid
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass
 from datetime import date, datetime
 from enum import Enum
 from typing import Any
+
+from sqlalchemy import text
+from sqlalchemy.orm import Session
 
 
 class PreisVariante(str, Enum):
@@ -48,8 +53,9 @@ class Preis:
     gueltig_ab: date
     gueltig_bis: date | None
     hinweis: str | None
-    erstellt_am: datetime = field(default_factory=datetime.utcnow)
-    aktualisiert_am: datetime = field(default_factory=datetime.utcnow)
+    gepflegt_von: str
+    erstellt_am: datetime
+    aktualisiert_am: datetime
 
     def to_dict(self) -> dict[str, Any]:
         d = asdict(self)
@@ -63,91 +69,35 @@ class Preis:
         return d
 
 
-# In-memory store (tenant-isoliert); Produktiv: DB-Tabelle domain_portal.preisspiegel
-_STORE: dict[str, list[Preis]] = {}
-
-# Seed-Daten: realistische Sommergetreide-Preise 2026 (fiktiv, aber plausibel)
-_SEED: list[dict[str, Any]] = [
-    # Weizen
-    dict(artikel_id="WEI-001", artikel_name="Brotweizen", frucht_gruppe="Getreide",
-         variante=PreisVariante.ALTWARE_AB_HOF, preis_eur_dt=21.50, basis_qualitaet="EU 2 / 14% Feuchte",
-         ernte_jahr=2025, liefermonat=None, aufschlag_eur_dt=0.0, hinweis="Abholung koordinieren"),
-    dict(artikel_id="WEI-001", artikel_name="Brotweizen", frucht_gruppe="Getreide",
-         variante=PreisVariante.ALTWARE_FREI_LAGER, preis_eur_dt=22.30, basis_qualitaet="EU 2 / 14% Feuchte",
-         ernte_jahr=2025, liefermonat=None, aufschlag_eur_dt=0.50, hinweis="Transportkostenpauschale inklusive"),
-    dict(artikel_id="WEI-001", artikel_name="Brotweizen", frucht_gruppe="Getreide",
-         variante=PreisVariante.NEUE_ERNTE_FREI_LAGER, preis_eur_dt=20.80, basis_qualitaet="EU 2 / 14% Feuchte",
-         ernte_jahr=2026, liefermonat="2026-07", aufschlag_eur_dt=0.30, hinweis="Erntepreis ex Kontrakt"),
-    dict(artikel_id="WEI-001", artikel_name="Brotweizen", frucht_gruppe="Getreide",
-         variante=PreisVariante.NEUE_ERNTE_AB_HOF, preis_eur_dt=19.90, basis_qualitaet="EU 2 / 14% Feuchte",
-         ernte_jahr=2026, liefermonat="2026-08", aufschlag_eur_dt=0.0, hinweis="Ab Hof August nach Ernte"),
-    # Futterweizen
-    dict(artikel_id="FWE-001", artikel_name="Futterweizen", frucht_gruppe="Getreide",
-         variante=PreisVariante.ALTWARE_AB_HOF, preis_eur_dt=20.20, basis_qualitaet="Futter / 14% Feuchte",
-         ernte_jahr=2025, liefermonat=None, aufschlag_eur_dt=0.0, hinweis=None),
-    dict(artikel_id="FWE-001", artikel_name="Futterweizen", frucht_gruppe="Getreide",
-         variante=PreisVariante.NEUE_ERNTE_FREI_LAGER, preis_eur_dt=19.50, basis_qualitaet="Futter / 14% Feuchte",
-         ernte_jahr=2026, liefermonat="2026-07", aufschlag_eur_dt=0.20, hinweis=None),
-    # Gerste
-    dict(artikel_id="GER-001", artikel_name="Wintergerste", frucht_gruppe="Getreide",
-         variante=PreisVariante.ALTWARE_AB_HOF, preis_eur_dt=19.00, basis_qualitaet="Futter / 14% Feuchte",
-         ernte_jahr=2025, liefermonat=None, aufschlag_eur_dt=0.0, hinweis=None),
-    dict(artikel_id="GER-001", artikel_name="Wintergerste", frucht_gruppe="Getreide",
-         variante=PreisVariante.ALTWARE_FREI_LAGER, preis_eur_dt=19.80, basis_qualitaet="Futter / 14% Feuchte",
-         ernte_jahr=2025, liefermonat=None, aufschlag_eur_dt=0.40, hinweis=None),
-    dict(artikel_id="GER-001", artikel_name="Wintergerste", frucht_gruppe="Getreide",
-         variante=PreisVariante.NEUE_ERNTE_FREI_LAGER, preis_eur_dt=18.50, basis_qualitaet="Futter / 14% Feuchte",
-         ernte_jahr=2026, liefermonat="2026-07", aufschlag_eur_dt=0.20, hinweis="Frühlieferungsprämie +0,20"),
-    dict(artikel_id="GER-001", artikel_name="Wintergerste", frucht_gruppe="Getreide",
-         variante=PreisVariante.NEUE_ERNTE_AB_HOF, preis_eur_dt=17.80, basis_qualitaet="Futter / 14% Feuchte",
-         ernte_jahr=2026, liefermonat="2026-08", aufschlag_eur_dt=0.0, hinweis=None),
-    # Raps
-    dict(artikel_id="RAP-001", artikel_name="Raps", frucht_gruppe="Ölsaaten",
-         variante=PreisVariante.ALTWARE_AB_HOF, preis_eur_dt=45.00, basis_qualitaet="00 / 9% Feuchte",
-         ernte_jahr=2025, liefermonat=None, aufschlag_eur_dt=0.0, hinweis=None),
-    dict(artikel_id="RAP-001", artikel_name="Raps", frucht_gruppe="Ölsaaten",
-         variante=PreisVariante.NEUE_ERNTE_FREI_LAGER, preis_eur_dt=43.50, basis_qualitaet="00 / 9% Feuchte",
-         ernte_jahr=2026, liefermonat="2026-07", aufschlag_eur_dt=0.50, hinweis="MATIF July-Basis"),
-    dict(artikel_id="RAP-001", artikel_name="Raps", frucht_gruppe="Ölsaaten",
-         variante=PreisVariante.NEUE_ERNTE_AB_HOF, preis_eur_dt=42.00, basis_qualitaet="00 / 9% Feuchte",
-         ernte_jahr=2026, liefermonat="2026-08", aufschlag_eur_dt=0.0, hinweis=None),
-    # Mais
-    dict(artikel_id="MAI-001", artikel_name="Körnermais", frucht_gruppe="Getreide",
-         variante=PreisVariante.ALTWARE_AB_HOF, preis_eur_dt=18.50, basis_qualitaet="Futter / 14% Feuchte",
-         ernte_jahr=2025, liefermonat=None, aufschlag_eur_dt=0.0, hinweis=None),
-    dict(artikel_id="MAI-001", artikel_name="Körnermais", frucht_gruppe="Getreide",
-         variante=PreisVariante.NEUE_ERNTE_FREI_LAGER, preis_eur_dt=18.00, basis_qualitaet="Futter / 14% Feuchte",
-         ernte_jahr=2026, liefermonat="2026-10", aufschlag_eur_dt=0.20, hinweis="Ernte Oktober"),
-]
+_SPALTEN = (
+    "preis_id, tenant_id, artikel_id, artikel_name, frucht_gruppe, variante, preis_eur_dt, basis_qualitaet, "
+    "ernte_jahr, liefermonat, aufschlag_eur_dt, quelle, gueltig_ab, gueltig_bis, hinweis, gepflegt_von, "
+    "erstellt_am, aktualisiert_am"
+)
 
 
-def _seeded(tenant_id: str) -> list[Preis]:
-    if tenant_id not in _STORE:
-        today = date.today()
-        _STORE[tenant_id] = [
-            Preis(
-                preis_id=str(uuid.uuid4()),
-                tenant_id=tenant_id,
-                quelle=PreisQuelle.MANUELL,
-                gueltig_ab=today,
-                gueltig_bis=None,
-                **{k: v for k, v in s.items()},
-            )
-            for s in _SEED
-        ]
-    return _STORE[tenant_id]
+def _aus_zeile(row: Any) -> Preis:
+    d = dict(row)
+    d["variante"] = PreisVariante(d["variante"])
+    d["quelle"] = PreisQuelle(d["quelle"])
+    d["preis_eur_dt"] = float(d["preis_eur_dt"])
+    d["aufschlag_eur_dt"] = float(d["aufschlag_eur_dt"])
+    return Preis(**d)
 
 
 class PortalPreisspiegel:
-    def __init__(self, tenant_id: str) -> None:
+    def __init__(self, db: Session, tenant_id: str) -> None:
+        self.db = db
         self.tenant_id = tenant_id
 
     def _aktuelle(self) -> list[Preis]:
-        today = date.today()
-        return [
-            p for p in _seeded(self.tenant_id)
-            if p.gueltig_ab <= today and (p.gueltig_bis is None or p.gueltig_bis >= today)
-        ]
+        """Nicht abgeloeste Preise, deren Gueltigkeit heute laeuft."""
+        rows = self.db.execute(text(
+            f"SELECT {_SPALTEN} FROM domain_shared.portal_preise "  # nosec B608 - feste Spaltenliste
+            "WHERE tenant_id = :tid AND abgeloest_am IS NULL AND gueltig_ab <= CURRENT_DATE "
+            "AND (gueltig_bis IS NULL OR gueltig_bis >= CURRENT_DATE) ORDER BY artikel_name, variante"
+        ), {"tid": self.tenant_id}).mappings().all()
+        return [_aus_zeile(r) for r in rows]
 
     def preise_alle(
         self,
@@ -165,12 +115,11 @@ class PortalPreisspiegel:
             result = [p for p in result if p.variante == variante]
         if ernte_jahr:
             result = [p for p in result if p.ernte_jahr == ernte_jahr]
-        return [p.to_dict() for p in sorted(result, key=lambda x: (x.artikel_name, x.variante.value))]
+        return [p.to_dict() for p in result]
 
-    def preisspiegel_fuer_kunde(self, artikel_ids: list[str]) -> dict[str, Any]:
-        """Liefert alle 4 Varianten für die Früchte des Kunden, gruppiert nach Artikel."""
-        aktuelle = self._aktuelle()
-        gefiltert = [p for p in aktuelle if p.artikel_id in artikel_ids]
+    def preisspiegel_fuer_kunde(self, artikel_ids: list[str] | None) -> dict[str, Any]:
+        """Liefert alle Varianten je Artikel, gruppiert; ohne Artikelauswahl alle aktuellen Kurse."""
+        gefiltert = [p for p in self._aktuelle() if artikel_ids is None or p.artikel_id in artikel_ids]
         grouped: dict[str, dict[str, Any]] = {}
         for p in gefiltert:
             if p.artikel_id not in grouped:
@@ -196,43 +145,46 @@ class PortalPreisspiegel:
         preis_eur_dt: float,
         basis_qualitaet: str,
         ernte_jahr: int,
+        *,
+        gepflegt_von: str,
         liefermonat: str | None = None,
         aufschlag_eur_dt: float = 0.0,
         quelle: PreisQuelle = PreisQuelle.MANUELL,
         gueltig_bis: date | None = None,
         hinweis: str | None = None,
     ) -> dict[str, Any]:
-        _seeded(self.tenant_id)
-        # Ältere Einträge für diese Kombination deaktivieren
-        today = date.today()
-        for p in _STORE[self.tenant_id]:
-            if p.artikel_id == artikel_id and p.variante == variante and p.ernte_jahr == ernte_jahr:
-                p.gueltig_bis = today
-        neuer = Preis(
-            preis_id=str(uuid.uuid4()),
-            tenant_id=self.tenant_id,
-            artikel_id=artikel_id,
-            artikel_name=artikel_name,
-            frucht_gruppe=frucht_gruppe,
-            variante=variante,
-            preis_eur_dt=preis_eur_dt,
-            basis_qualitaet=basis_qualitaet,
-            ernte_jahr=ernte_jahr,
-            liefermonat=liefermonat,
-            aufschlag_eur_dt=aufschlag_eur_dt,
-            quelle=quelle,
-            gueltig_ab=today,
-            gueltig_bis=gueltig_bis,
-            hinweis=hinweis,
-        )
-        _STORE[self.tenant_id].append(neuer)
-        return neuer.to_dict()
+        if preis_eur_dt <= 0:
+            raise ValueError("Preis muss groesser als null sein")
+        if gueltig_bis is not None and gueltig_bis < date.today():
+            raise ValueError("Gueltig-bis liegt in der Vergangenheit")
+        neu = uuid.uuid4().hex
+        try:
+            # Der bisherige Preis derselben Kombination wird abgeloest, nicht ueberschrieben (Nachweis der Kurse).
+            self.db.execute(text(
+                "UPDATE domain_shared.portal_preise SET abgeloest_am = NOW(), aktualisiert_am = NOW() "
+                "WHERE tenant_id = :tid AND artikel_id = :a AND variante = :v AND ernte_jahr = :j "
+                "AND abgeloest_am IS NULL"
+            ), {"tid": self.tenant_id, "a": artikel_id, "v": variante.value, "j": ernte_jahr})
+            self.db.execute(text("""
+                INSERT INTO domain_shared.portal_preise
+                    (preis_id, tenant_id, artikel_id, artikel_name, frucht_gruppe, variante, preis_eur_dt,
+                     basis_qualitaet, ernte_jahr, liefermonat, aufschlag_eur_dt, quelle, gueltig_ab, gueltig_bis,
+                     hinweis, gepflegt_von)
+                VALUES (:id, :tid, :a, :name, :gruppe, :v, :preis, :basis, :j, :monat, :aufschlag, :quelle,
+                        CURRENT_DATE, :bis, :hinweis, :von)
+            """), {"id": neu, "tid": self.tenant_id, "a": artikel_id, "name": artikel_name, "gruppe": frucht_gruppe,
+                   "v": variante.value, "preis": preis_eur_dt, "basis": basis_qualitaet, "j": ernte_jahr,
+                   "monat": liefermonat, "aufschlag": aufschlag_eur_dt, "quelle": quelle.value, "bis": gueltig_bis,
+                   "hinweis": hinweis, "von": gepflegt_von})
+            self.db.commit()
+        except Exception:
+            self.db.rollback()
+            raise
+        row = self.db.execute(text(
+            f"SELECT {_SPALTEN} FROM domain_shared.portal_preise WHERE tenant_id = :tid AND preis_id = :id"  # nosec B608
+        ), {"tid": self.tenant_id, "id": neu}).mappings().one()
+        return _aus_zeile(row).to_dict()
 
 
-_SVC_CACHE: dict[str, PortalPreisspiegel] = {}
-
-
-def get_preisspiegel_service(tenant_id: str) -> PortalPreisspiegel:
-    if tenant_id not in _SVC_CACHE:
-        _SVC_CACHE[tenant_id] = PortalPreisspiegel(tenant_id)
-    return _SVC_CACHE[tenant_id]
+def get_preisspiegel_service(db: Session, tenant_id: str) -> PortalPreisspiegel:
+    return PortalPreisspiegel(db, tenant_id)

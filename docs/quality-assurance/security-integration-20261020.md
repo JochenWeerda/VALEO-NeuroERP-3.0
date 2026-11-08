@@ -1,0 +1,9 @@
+# Sicherheitsintegration20.10.2026
+
+72e21039e ist nach main gepusht. Beide parallelen GitHub-Lieferungen bis570d92fd4 und alle eigenen Sicherheitsmeilensteine sind Vorfahren. Keine gemeinsamen Arbeitsdateien oder fremder Index ersetzt.
+
+Nach finaler Integration60 Personalakten-Vertraege erneut bestanden; Anwendungsmodule ausschliesslich aus exportiertem Git-Stand, vollstaendige OpenAPI exakt identisch zur committeten Fassung. Rollenbereitstellung36 Tests/36 Unterfaelle, Git-Historienschutz drei echte Git-Vertraege, Migrationsmerge ein DAG-Vertrag. Regulaere Integrationsguards fuer356 und105 Dateien bestanden. Zwei vorhandene Leerraumfehler in route-aliases.json und Stammdaten-Test behoben. Rollenvertrags-CI auf diesem Commit erfolgreich; weitere CI-Suiten noch laufend/wartend, kein Gesamtgruen behauptet.
+
+Lokaler Keycloak42 Rollenbeschreibungen verifiziert,17 aktualisiert; manager-Mappings in belege:read/write entfernt (16/9 verbleibend). Wiederholung null Updates. Keine Benutzer- oder Kennwortzuweisung. HR-/Steuermigration auf bestehendem valeo_probe zusammengefuehrt, keine weitere Datenbank/Container/Reset.
+
+Offene getrennte Befunde: Neun katalogisierte Tabellen fehlen physisch im Probe; Eintraege bewusst erhalten. Alte AP-Freigaben muessen Antragstelleridentitaet, konkrete Freigaberollen, Vier-Augen-/Nebenlaeufigkeits- und Fehlerverhalten vereinheitlichen. Laufender Backendmount enthaelt aeltere Arbeitsdateien; dieser Code ist noch nicht als live abgenommen. Acht bestehende GitHub-Abhaengigkeitswarnungen: ChromaDB dreimal, node-forge, http-cache-semantics, stream-json zweimal, sprintf-js. Bestehende Risikoausnahmen ersetzen keine erneute technische Abnahme. Zehn bestehende Storybook-PNG-Dateien melden beim Export LFS-Zuordnungsdrift; kein Datenverlust, separater Metadatenbefund.

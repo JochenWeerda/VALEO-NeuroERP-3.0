@@ -6,7 +6,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.services.inventory_auxiliary_service import InventoryAuxiliaryError, InventoryAuxiliaryService, payload_hash
-from main import app
+from app.main import app
 
 pytestmark = pytest.mark.unit
 HEADERS = {"Authorization": "Bearer dev-token", "X-Tenant-ID": "00000000-0000-0000-0000-000000000001", "X-User-ID": "inventory-test-user"}

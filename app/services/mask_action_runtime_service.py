@@ -4,6 +4,7 @@ commandEndpoint → validate/dryRun/propose/execute → Service-Mutation → Out
 """
 from __future__ import annotations
 
+import inspect
 import json
 import logging
 import uuid
@@ -61,9 +62,26 @@ def _write_audit(
     audit_reason: str | None,
     idempotency_key: str | None,
     summary: str,
+    performed_by: str | None = None,
 ) -> str:
+    """``performed_by``: die Kennung aus dem geprueften Token. Nur wer sie uebergibt, schreibt
+    die Spalte (Migration ``audit_urheber_20261011``); alle anderen Wege bleiben, wie sie waren."""
     audit_id = str(uuid.uuid4())
     now = datetime.now(timezone.utc).isoformat()
+    if performed_by is not None:
+        db.execute(
+            text("""
+                INSERT INTO domain_crm.crm_action_audit_log
+                  (id, tenant_id, action_key, entity_type, entity_id, idempotency_key,
+                   audit_reason, performed_at, result_summary, performed_by)
+                VALUES
+                  (:id, :tid, :akey, :etype, :eid, :ikey, :areason, :now, :summary, :durch)
+            """),
+            {"id": audit_id, "tid": tenant_id, "akey": action_key, "etype": entity_type, "eid": entity_id,
+             "ikey": idempotency_key, "areason": audit_reason, "now": now, "summary": summary,
+             "durch": performed_by},
+        )
+        return audit_id
     db.execute(
         text("""
             INSERT INTO domain_crm.crm_action_audit_log
@@ -86,6 +104,71 @@ def _write_audit(
     )
 
     return audit_id
+
+
+def frueherer_lauf(
+    db: Session, *, tenant_id: str, action_key: str, entity_type: str, idempotency_key: str,
+) -> dict[str, Any] | None:
+    """Sperrt den Idempotenzschluessel bis zum Ende der Transaktion und liefert den frueheren Lauf.
+
+    Die Sperre legt zwei gleichzeitige Laeufe hintereinander: Der zweite wartet, bis der erste
+    abgeschlossen ist, und findet dann dessen Auditeintrag.
+    """
+    db.execute(
+        text("SELECT pg_advisory_xact_lock(hashtextextended(:s, 0))"),
+        {"s": f"mask_action:{tenant_id}:{entity_type}:{action_key}:{idempotency_key}"},
+    )
+    zeile = db.execute(
+        text(
+            "SELECT id, entity_id FROM domain_crm.crm_action_audit_log "
+            "WHERE tenant_id = :t AND action_key = :a AND entity_type = :e AND idempotency_key = :k "
+            "ORDER BY performed_at LIMIT 1"
+        ),
+        {"t": tenant_id, "a": action_key, "e": entity_type, "k": idempotency_key},
+    ).mappings().first()
+    return dict(zeile) if zeile else None
+
+
+def wiederholter_auftrag(
+    db: Session,
+    *,
+    tenant_id: str,
+    action_key: str,
+    entity_type: str,
+    idempotency_key: Any,
+    mode: str,
+    entity_id: str | None = None,
+) -> MaskActionResult | None:
+    """Die Antwort auf einen Schluessel, der schon gelaufen ist — sonst ``None``.
+
+    Bis zum 11.10.2026 wurde ``_idempotencyKey`` nur ins Audit geschrieben: Wer einen Auftrag
+    nach einem Zeitlimit mit demselben Schluessel wiederholte, fuehrte ihn ein zweites Mal aus.
+    Jeder Schreibweg ruft das hier am Beginn seiner Transaktion; ohne Schluessel aendert sich
+    nichts. ``entity_id`` uebergibt, wer auf einem bestehenden Objekt arbeitet: Derselbe
+    Schluessel fuer ein anderes Objekt ist kein Erfolg, sondern ein Fehler des Aufrufers.
+    """
+    schluessel = str(idempotency_key).strip() if idempotency_key is not None else ""
+    if not schluessel:
+        return None
+    frueher = frueherer_lauf(
+        db, tenant_id=tenant_id, action_key=action_key, entity_type=entity_type, idempotency_key=schluessel,
+    )
+    if frueher is None:
+        return None
+    db.rollback()
+    if entity_id is not None and str(frueher["entity_id"]) != str(entity_id):
+        return MaskActionResult(
+            actionKey=action_key, mode=mode, success=False,
+            error="Dieser Idempotenzschluessel gehoert zu einem frueheren Auftrag fuer ein anderes Objekt; "
+                  "nichts ausgefuehrt.",
+            validationErrors=[{"field": "_idempotencyKey", "message": "Schluessel bereits verwendet",
+                               "severity": "blocking"}],
+        )
+    return MaskActionResult(
+        actionKey=action_key, mode=mode, success=True,
+        summary="Dieser Auftrag wurde bereits ausgefuehrt — nichts erneut ausgefuehrt.",
+        affectedIds=[str(frueher["entity_id"])], auditEntryId=str(frueher["id"]),
+    )
 
 
 def _write_outbox(
@@ -116,8 +199,13 @@ def _write_outbox(
     return event_id
 
 
-CheckFn = Callable[[Session, dict[str, Any], str, str], Awaitable[list[dict[str, Any]]]]
-DelegateFn = Callable[[Session, dict[str, Any], str, str], Awaitable[str]]
+#: Pruef- und Fachweg-Rueckrufe duerfen synchron oder asynchron sein (``_ergebnis`` wartet nur auf Awaitables).
+CheckFn = Callable[[Session, dict[str, Any], str, str], Awaitable[list[dict[str, Any]]] | list[dict[str, Any]]]
+DelegateFn = Callable[[Session, dict[str, Any], str, str], Awaitable[str] | str]
+
+
+async def _ergebnis(wert: Any) -> Any:
+    return await wert if inspect.isawaitable(wert) else wert
 
 
 def _fehlertext(exc: Exception) -> str:
@@ -174,8 +262,22 @@ async def run_delegated_mask_action(
             validationErrors=[{"field": "_auditReason", "message": "Pflichtfeld", "severity": "blocking"}],
         )
 
+    # Eine Wiederholung wird beantwortet, bevor der Zustand geprueft wird: Nach dem ersten Lauf
+    # passt er nicht mehr ("schon freigegeben"), und das waere die falsche Antwort.
+    if mode == "execute":
+        try:
+            wiederholt = wiederholter_auftrag(
+                db, tenant_id=tenant_id, action_key=action_key, entity_type=entity_type,
+                idempotency_key=idempotency_key, mode=mode, entity_id=entity_id,
+            )
+        except Exception as exc:  # noqa: BLE001 — kein Erfolg ohne gepruefte Wiederholung
+            db.rollback()
+            return MaskActionResult(actionKey=action_key, mode=mode, success=False, error=_fehlertext(exc))
+        if wiederholt is not None:
+            return wiederholt
+
     try:
-        fehler = await check_fn(db, payload, entity_id, tenant_id)
+        fehler = await _ergebnis(check_fn(db, payload, entity_id, tenant_id))
     except Exception as exc:  # noqa: BLE001 — Pruefung als Antwort, nicht als 500
         db.rollback()
         fehler = [{"field": "_entity", "message": _fehlertext(exc), "severity": "blocking"}]
@@ -199,6 +301,13 @@ async def run_delegated_mask_action(
         )
 
     try:
+        # Noch einmal in der Schreibtransaktion: Die Sperre von oben endete mit der Pruefung.
+        wiederholt = wiederholter_auftrag(
+            db, tenant_id=tenant_id, action_key=action_key, entity_type=entity_type,
+            idempotency_key=idempotency_key, mode=mode, entity_id=entity_id,
+        )
+        if wiederholt is not None:
+            return wiederholt
         audit_id = _write_audit(
             db, tenant_id=tenant_id, action_key=action_key, entity_type=entity_type,
             entity_id=entity_id, audit_reason=audit_reason, idempotency_key=idempotency_key,
@@ -215,11 +324,11 @@ async def run_delegated_mask_action(
         # Der produktive get_db-Vertrag liefert eine SQLAlchemy-Session.
         if isinstance(db, Session):
             with Session(bind=db.connection(), join_transaction_mode="create_savepoint") as delegate_db:
-                summary = await delegate_fn(delegate_db, payload, entity_id, tenant_id)
+                summary = await _ergebnis(delegate_fn(delegate_db, payload, entity_id, tenant_id))
                 delegate_db.commit()  # Auch Fachwege ohne eigenen Commit geben den Savepoint frei.
         else:
             # Kleine In-Memory-Adapter in den isolierten Vertragspruefungen.
-            summary = await delegate_fn(db, payload, entity_id, tenant_id)
+            summary = await _ergebnis(delegate_fn(db, payload, entity_id, tenant_id))
         db.commit()
     except Exception as exc:  # noqa: BLE001 — der Grund geht an die Maske
         db.rollback()

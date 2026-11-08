@@ -90,11 +90,11 @@ export const entries: AliasGroupRouteEntry[] = [
     "path": "kasse"
   },
   {
-    "module": "@/pages/finance/kontenplan",
+    "module": "@/pages/finance/chart-of-accounts",
     "path": "kontenplan"
   },
   {
-    "module": "@/pages/finance/kreditoren-stamm",
+    "module": "@/pages/finance/kreditoren-liste",
     "path": "kreditoren"
   },
   {
@@ -102,7 +102,7 @@ export const entries: AliasGroupRouteEntry[] = [
     "path": "lastschriften-debitoren"
   },
   {
-    "module": "@/pages/finance/mahnwesen",
+    "module": "@/pages/finance/mahnlauf",
     "path": "mahnwesen"
   },
   {

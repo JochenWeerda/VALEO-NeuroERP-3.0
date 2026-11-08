@@ -7,7 +7,7 @@ from fastapi.testclient import TestClient
 
 from app.api.v1.endpoints.personal import DriverTimeEventOut, _build_driver_time_summary
 from app.core.database import get_db
-from main import app
+from app.main import app
 
 
 _HEADERS = {"Authorization": "Bearer dev-token", "X-Tenant-ID": "tenant-absence"}

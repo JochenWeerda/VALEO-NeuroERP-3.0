@@ -3,7 +3,8 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { MemoryRouter } from '@/app/routing/test-router'
-import WebhooksPage from '@/pages/admin/webhooks'
+import WebhooksSurface from '@/components/mask-builder/specialized/admin/webhooks-surface'
+import type { RenderPlan } from '@/components/mask-builder/render-plan/types'
 
 /**
  * Die Maske erwartete bis zum 01.10.2026 `name`, `events[]`, `aktiv` und
@@ -15,6 +16,15 @@ import WebhooksPage from '@/pages/admin/webhooks'
 const getMock = vi.hoisted(() => vi.fn())
 const postMock = vi.hoisted(() => vi.fn())
 const deleteMock = vi.hoisted(() => vi.fn())
+
+vi.mock('@/components/mask-builder/specialized/intake/domain-data', () => ({
+  useDomainIdentity: () => ({ tenantId: 'tenant-a', actor: 'actor-a' }),
+}))
+
+const plan = {
+  actions: ['register', 'history', 'unregister'].map(key => ({ key, disabled: false })),
+  fieldsByKey: Object.fromEntries(['url', 'bereich', 'secret'].map(key => [key, { visible: true, readOnly: false }])),
+} as unknown as RenderPlan
 
 vi.mock('@/lib/api-client', () => ({
   apiClient: {
@@ -69,7 +79,7 @@ function renderPage(): void {
   render(
     <MemoryRouter>
       <QueryClientProvider client={queryClient}>
-        <WebhooksPage />
+        <WebhooksSurface plan={plan} />
       </QueryClientProvider>
     </MemoryRouter>,
   )
@@ -77,6 +87,7 @@ function renderPage(): void {
 
 describe('WebhooksPage', () => {
   beforeEach(() => {
+    vi.spyOn(window, 'confirm').mockReturnValue(true)
     getMock.mockReset()
     postMock.mockReset()
     deleteMock.mockReset()
@@ -112,6 +123,7 @@ describe('WebhooksPage', () => {
   it('registriert einen Webhook und meldet den Erfolg', async () => {
     antworten([])
     renderPage()
+    await screen.findByText('Webhooks (0)')
 
     await userEvent.click(screen.getByRole('button', { name: /Neuer Webhook/ }))
     await userEvent.selectOptions(await screen.findByLabelText('Ereignis'), 'WIEGUNG_NEU')
@@ -138,6 +150,7 @@ describe('WebhooksPage', () => {
   it('der Registrieren-Knopf bleibt ohne Ereignis und URL gesperrt', async () => {
     antworten([])
     renderPage()
+    await screen.findByText('Webhooks (0)')
 
     await userEvent.click(screen.getByRole('button', { name: /Neuer Webhook/ }))
     expect(await screen.findByRole('button', { name: 'Registrieren' })).toBeDisabled()
@@ -147,6 +160,7 @@ describe('WebhooksPage', () => {
     antworten([])
     postMock.mockRejectedValue({ response: { data: { detail: 'URL muss mit https:// beginnen' } } })
     renderPage()
+    await screen.findByText('Webhooks (0)')
 
     await userEvent.click(screen.getByRole('button', { name: /Neuer Webhook/ }))
     await userEvent.selectOptions(await screen.findByLabelText('Ereignis'), 'WIEGUNG_NEU')

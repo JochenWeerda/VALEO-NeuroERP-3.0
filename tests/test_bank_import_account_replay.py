@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 
 from app.api.v1.endpoints import bank_statement_import, payment_matching
 from app.core.database import get_db
+from testgrenze import ersetze_mandant, ersetze_nutzer
 
 
 class ImportSession(Session):
@@ -71,6 +72,8 @@ def import_case():
     app.include_router(bank_statement_import.router)
     app.include_router(payment_matching.router, prefix="/payments")
     app.dependency_overrides[get_db] = lambda: db
+    ersetze_mandant(app)
+    ersetze_nutzer(app, "FINANCE_ADMIN")
     with TestClient(app, headers={"X-Tenant-ID": tenant}) as client:
         yield db, client, tenant
     db.rollback()
@@ -213,6 +216,8 @@ def test_parallel_cross_route_uploads_store_one_statement(import_case):
             app.include_router(bank_statement_import.router)
             app.include_router(payment_matching.router, prefix='/payments')
             app.dependency_overrides[get_db] = lambda: session
+            ersetze_mandant(app)
+            ersetze_nutzer(app, "FINANCE_ADMIN")
             with TestClient(app, headers={'X-Tenant-ID': tenant}) as client:
                 barrier.wait(timeout=10)
                 return upload((session, client, tenant), route=route)

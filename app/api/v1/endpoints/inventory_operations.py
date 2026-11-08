@@ -11,6 +11,7 @@ from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
+from app.core.exceptions import kontosperre_meldung
 from app.core.tenant import get_tenant_id
 from pydantic import BaseModel, Field
 from sqlalchemy import text
@@ -31,6 +32,7 @@ from app.api.v1.schemas.inventory_lot_bundle_schemas import (
     LotConsumeOut,
     StornoKorrekturOut,
 )
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter()
@@ -140,17 +142,21 @@ def _ensure_account(db, tenant_id: str, account_number: str, account_name: str, 
 def _get_account_mapping(db, tenant_id: str, article_id: str):
     """Look up LagerKontenzuordnung for the article's group; fall back to SKR03 defaults."""
     try:
-        row = db.execute(
-            text("""
-                SELECT lkz.bestandskonto, lkz.gegenkonto_zugang, lkz.gegenkonto_abgang
-                FROM domain_einkauf.lager_kontenzuordnung lkz
-                JOIN domain_inventory.articles a ON a.article_group = lkz.artikelgruppe
-                WHERE lkz.tenant_id = :tenant_id AND a.id = :article_id AND lkz.aktiv = true
-                ORDER BY lkz.niederlassung_id NULLS LAST
-                LIMIT 1
-            """),
-            {"tenant_id": tenant_id, "article_id": article_id},
-        ).mappings().first()
+        # Im Sicherungspunkt: Scheitert die Abfrage, bleibt die Transaktion der Bestandskorrektur heil.
+        # Bis 12.10.2026 fragte sie die Spalte ``article_group`` ab, die es nicht gibt; der verschluckte
+        # Fehler brach die Transaktion ab, und jede Korrektur meldete "gebucht", ohne etwas zu speichern.
+        with db.begin_nested():
+            row = db.execute(
+                text("""
+                    SELECT lkz.bestandskonto, lkz.gegenkonto_zugang, lkz.gegenkonto_abgang
+                    FROM domain_einkauf.lager_kontenzuordnung lkz
+                    JOIN domain_inventory.articles a ON a.warengruppe = lkz.artikelgruppe
+                    WHERE lkz.tenant_id = :tenant_id AND a.id = :article_id AND lkz.aktiv = true
+                    ORDER BY lkz.niederlassung_id NULLS LAST
+                    LIMIT 1
+                """),
+                {"tenant_id": tenant_id, "article_id": article_id},
+            ).mappings().first()
         if row:
             return {
                 "bestandskonto": row["bestandskonto"],
@@ -257,7 +263,7 @@ async def list_reason_codes():
     return [{"code": k, "label": v} for k, v in REASON_CODES.items()]
 
 
-@router.post("/bestandskorrektur", response_model=BestandskorrekturOut, status_code=201, tags=["lager"], summary="Bestandskorrektur anlegen")
+@router.post("/bestandskorrektur", response_model=BestandskorrekturOut, status_code=201, tags=["lager"], summary="Bestandskorrektur anlegen", dependencies=SCHREIBEN["LAGER"])
 async def create_bestandskorrektur(
     payload: BestandskorrekturIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -274,7 +280,7 @@ async def create_bestandskorrektur(
     korrektur_id = str(uuid4())
     movement_id = str(uuid4())
     posting_date = payload.buchungsdatum or date.today()
-    movement_type = "adjustment" if payload.menge >= 0 else "adjustment"
+    movement_type = "adjustment"
     ref_number = f"KORR-{korrektur_id[:8].upper()}"
 
     # Insert stock movement
@@ -357,8 +363,14 @@ async def create_bestandskorrektur(
                 reference=ref_number,
             )
     except Exception as exc:
-        # Nicht blockierend: die Bestandskorrektur bleibt bestehen. Die
-        # ausgefallene GL-Buchung wird gemeldet statt verschluckt.
+        # Bestand und Buchung teilen eine Transaktion: Lehnt die Kontosperre die Buchungszeile ab,
+        # ist auch die Bestandsaenderung verloren. Das wird gesagt statt als Erfolg gemeldet.
+        sperre = kontosperre_meldung(exc)
+        if sperre:
+            db.rollback()
+            raise HTTPException(status_code=409, detail=sperre) from exc
+        # Auch jeder andere Fehler der Buchung verwirft die Bestandskorrektur; gemeldet wird er
+        # als Fehler, nicht als Erfolg.
         from app.core.metrics import critical_data_path_errors_total
 
         critical_data_path_errors_total.labels(
@@ -368,6 +380,11 @@ async def create_bestandskorrektur(
             "GL-Buchung fuer Bestandskorrektur %s fehlgeschlagen: %s",
             ref_number, exc, exc_info=True,
         )
+        db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail="Bestandskorrektur nicht gebucht: Die Buchung im Hauptbuch ist fehlgeschlagen.",
+        ) from exc
 
     db.commit()
 
@@ -387,7 +404,7 @@ async def create_bestandskorrektur(
     )
 
 
-@router.post("/schwund", response_model=BestandskorrekturOut, status_code=201, tags=["lager"], summary="Schwund anlegen")
+@router.post("/schwund", response_model=BestandskorrekturOut, status_code=201, tags=["lager"], summary="Schwund anlegen", dependencies=SCHREIBEN["LAGER"])
 async def create_schwund(
     payload: SchwundBuchungIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -409,7 +426,7 @@ async def create_schwund(
     return await create_bestandskorrektur(korrektur, tenant_id, db)
 
 
-@router.post("/mhd-abschreibung", response_model=BestandskorrekturOut, status_code=201, tags=["lager"], summary="Mhd abschreibung anlegen")
+@router.post("/mhd-abschreibung", response_model=BestandskorrekturOut, status_code=201, tags=["lager"], summary="Mhd abschreibung anlegen", dependencies=SCHREIBEN["LAGER"])
 async def create_mhd_abschreibung(
     payload: MhdAbschreibungIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -572,8 +589,7 @@ class LotConsumeIn(BaseModel):
     status_code=201,
     response_model=InventoryLotOut,
     tags=["lager", "inventory", "lots"],
-    summary="Inventory-Lot anlegen (DOM-INV-004.2)",
-)
+    summary="Inventory-Lot anlegen (DOM-INV-004.2)", dependencies=SCHREIBEN["LAGER"])
 async def create_inventory_lot(
     body: LotCreateIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -629,8 +645,7 @@ async def list_inventory_lots(
     "/lots/{lot_id}/consume",
     response_model=LotConsumeOut,
     tags=["lager", "inventory", "lots"],
-    summary="Lot-Verbrauch (FEFO, fail-closed) (DOM-INV-004.2)",
-)
+    summary="Lot-Verbrauch (FEFO, fail-closed) (DOM-INV-004.2)", dependencies=SCHREIBEN["LAGER"])
 async def consume_inventory_lot(
     lot_id: str,
     body: LotConsumeIn,
@@ -663,8 +678,7 @@ async def consume_inventory_lot(
     response_model=InventurDifferenzOut,
     status_code=201,
     tags=["lager", "inventory", "inventur"],
-    summary="Inventur-Differenzbeleg automatisch erzeugen (DOM-INV-004.3)",
-)
+    summary="Inventur-Differenzbeleg automatisch erzeugen (DOM-INV-004.3)", dependencies=SCHREIBEN["LAGER"])
 async def inventur_differenz_buchen(
     count_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -696,8 +710,7 @@ class StornoIn(BaseModel):
     response_model=StornoKorrekturOut,
     status_code=201,
     tags=["lager", "inventory", "korrekturen"],
-    summary="Bestandskorrektur stornieren (idempotent) (DOM-INV-004.4)",
-)
+    summary="Bestandskorrektur stornieren (idempotent) (DOM-INV-004.4)", dependencies=SCHREIBEN["LAGER"])
 async def storno_bestandskorrektur(
     korrektur_id: str,
     body: StornoIn,
@@ -861,8 +874,7 @@ class LagerbewegungOut(BaseModel):
     response_model=LagerbewegungOut,
     status_code=201,
     tags=["lager"],
-    summary="Lagerbewegung buchen",
-)
+    summary="Lagerbewegung buchen", dependencies=SCHREIBEN["LAGER"])
 async def create_lagerbewegung(
     payload: LagerbewegungIn,
     tenant_id: str = Depends(get_tenant_id),

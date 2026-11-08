@@ -1,20 +1,7 @@
-﻿import { useNavigate } from '@/app/routing/typed-router'
+import { NativeListPage } from '@/components/mask-builder/NativeListPage'
 
-export default function NawaroErnterklaerungDruckenPage(): JSX.Element {
-  const navigate = useNavigate()
-
+export default function Page(): JSX.Element {
   return (
-    <div data-page="nawaro-ernterklaerung-drucken" className="min-h-full bg-[#ececec] p-4 text-[11px] text-black">
-      <div className="mb-2 text-[12px] font-semibold uppercase">NaWaRo-Ernterklaerung drucken</div>
-      <div className="max-w-[520px] border border-[#bdbdbd] bg-white p-3">
-        <p className="mb-2">Die Ernterklaerung wird ueber den NaWaRo-Mitteilungsdruck ausgegeben.</p>
-        <button
-          onClick={() => navigate('/nawaro/mitteilung-drucken')}
-          className="h-6 border border-[#9b9b9b] bg-[#ececec] px-4"
-        >
-          NaWaRo-Mitteilung drucken oeffnen
-        </button>
-      </div>
-    </div>
+    <NativeListPage screenId="strecke/nawaro-ernterklaerung-drucken" testId="screen-strecke/nawaro-ernterklaerung-drucken" />
   )
 }

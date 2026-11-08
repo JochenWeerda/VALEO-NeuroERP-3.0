@@ -5,6 +5,7 @@ Datenqualitäts-API (Gap 040): Validierung von Dubletten, Pflichtfeldern und Ref
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from app.auth.deps import require_roles
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -33,6 +34,8 @@ class DataQualityOut(BaseSchema):
 
 
 router = APIRouter(prefix="/data-quality", tags=["admin", "data-quality"])
+
+_NUR_ADMIN = [Depends(require_roles("admin"))]  # Konfiguration: wie admin_core
 
 
 class RuleOut(BaseModel):
@@ -123,7 +126,7 @@ def _run_duplicate_check(db: Session, rule: DuplicateRule, tenant_id: str) -> li
         f"""
         SELECT {cols}, COUNT(*) as cnt, array_agg({rule.id_column}) as ids
         FROM {full_table}
-        WHERE tenant_id = :tenant_id OR (:tenant_id = 'system' AND tenant_id IS NULL)
+        WHERE tenant_id = :tenant_id
         GROUP BY {cols}
         HAVING COUNT(*) > 1
         """  # nosec B608  # reviewed-safe: Bezeichner stammen aus einer Allowlist im Code, Werte sind gebunden
@@ -169,7 +172,7 @@ def _run_required_check(db: Session, rule: RequiredFieldRule, tenant_id: str) ->
         f"""
         SELECT id
         FROM {full_table}
-        WHERE (tenant_id = :tenant_id OR (:tenant_id = 'system' AND tenant_id IS NULL))
+        WHERE tenant_id = :tenant_id
           AND ({cond})
         LIMIT 100
         """  # nosec B608  # reviewed-safe: Bezeichner stammen aus einer Allowlist im Code, Werte sind gebunden
@@ -202,7 +205,7 @@ def _run_reference_check(db: Session, rule: ReferenceRule, tenant_id: str) -> li
         LEFT JOIN {tgt} t ON s."{rule.fk_column}" = t."{rule.target_pk}"
         WHERE s."{rule.fk_column}" IS NOT NULL
           AND t."{rule.target_pk}" IS NULL
-          AND (s.tenant_id = :tenant_id OR (:tenant_id = 'system' AND s.tenant_id IS NULL))
+          AND s.tenant_id = :tenant_id
         LIMIT 100
         """  # nosec B608  # reviewed-safe: Bezeichner stammen aus einer Allowlist im Code, Werte sind gebunden
     )
@@ -227,7 +230,7 @@ class ValidateRequest(BaseModel):
     entity_types: list[str] | None = Field(default=None, description="Entity-Typen zu prüfen; leer = alle")
 
 
-@router.post("/validate", response_model=list[ValidationResultOut], summary="Data quality validieren")
+@router.post("/validate", response_model=list[ValidationResultOut], summary="Data quality validieren", dependencies=_NUR_ADMIN)
 async def validate_data_quality(
     body: ValidateRequest | None = None,
     db: Session = Depends(get_db),

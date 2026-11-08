@@ -48,8 +48,10 @@ def test_delete_draft_document_is_tenant_scoped_and_soft_deletes():
 
     service.delete_draft_document("doc-1")
 
-    update_sql, update_params = db.calls[2]
+    # Vor dem Loeschen nennt der Dienst der Statushistorie das Kommando; danach schreibt er das Protokoll.
+    update_sql, update_params = next(c for c in db.calls if "SET deleted_at = NOW()" in c[0])
     assert "SET deleted_at = NOW()" in update_sql
+    assert any("document_command_log" in sql for sql, _ in db.calls)
     assert "tenant_id = :tenant_id" in update_sql
     assert update_params == {"tenant_id": "tenant-a", "id": "doc-1"}
     assert db.committed is True

@@ -12,7 +12,7 @@ version: 3.0.0
 
 > Automatisch generiert aus `config/mcp_erp_tools.yaml` via `python scripts/generate_mcp_tool_reference.py`. **Nicht manuell bearbeiten.**
 
-Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 51 Tools in 18 Domaenen.
+Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 73 Tools in 22 Domaenen.
 
 ## Uebersicht
 
@@ -27,9 +27,14 @@ Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 51 Tools in 18 Domaenen.
 | `agrar.feeding.supply_handoff` | agrar | `agrar:write` | ja | mittel | nein |
 | `agrar.ration.transition` | agrar | `agrar:write` | ja | mittel | nein |
 | `agrar.weighing_ticket.list` | agrar | `agrar:read` | ja | niedrig | nein |
+| `beleg.arten` | belege | `belege:read` | ja | niedrig | nein |
+| `beleg.lesen` | belege | `belege:read` | ja | niedrig | nein |
+| `beleg.suchen` | belege | `belege:read` | ja | niedrig | nein |
 | `compliance.gate.status` | compliance | `compliance:read` | ja | niedrig | nein |
 | `compliance.sanctions.check` | compliance | `compliance:write` | ja | mittel | nein |
-| `crm.activity.create` | crm | `crm:write` | ja | mittel | nein |
+| `crm.activity.create` | crm | `crm:write` | ja | niedrig | nein |
+| `crm.activity.delete` | crm | `crm:write` | ja | mittel | nein |
+| `crm.activity.update` | crm | `crm:write` | ja | mittel | nein |
 | `crm.contact.log` | crm | `crm:write` | ja | mittel | nein |
 | `crm.customer.open` | crm | `crm:read` | ja | niedrig | nein |
 | `crm.customer.search` | crm | `crm:read` | ja | niedrig | nein |
@@ -45,7 +50,6 @@ Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 51 Tools in 18 Domaenen.
 | `einkauf.bestellung.versenden` | einkauf | `einkauf:write` | ja | mittel | nein |
 | `fibu.dunning.status` | finance | `finance:read` | ja | niedrig | nein |
 | `fibu.open_items.list` | finance | `finance:read` | ja | niedrig | nein |
-| `finance.ap_invoice.freigeben` | finance | `finance:write` | ja | hoch | ja |
 | `finance.ap_invoice.propose` | finance | `finance:write` | nein | hoch | ja |
 | `hr.bewerbung.speichern` | hr | `hr:write` | ja | mittel | nein |
 | `hr.einwilligung.anlegen` | hr | `hr:write` | ja | mittel | nein |
@@ -56,19 +60,37 @@ Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 51 Tools in 18 Domaenen.
 | `lager.inventur.propose_opening` | lager | `lager:write` | nein | hoch | ja |
 | `lager.inventur.status` | lager | `lager:read` | ja | niedrig | nein |
 | `lager.stock_movement.stornieren` | lager | `lager:write` | ja | mittel | nein |
+| `logistik.ausgehendes_dokument.speichern` | logistics | `logistics:write` | ja | mittel | nein |
+| `logistik.fahrzeug.loeschen` | logistics | `logistics:write` | ja | hoch | nein |
+| `logistik.fahrzeug.speichern` | logistics | `logistics:write` | ja | mittel | nein |
 | `logistik.frachttabelle.anlegen` | logistics | `logistics:write` | ja | mittel | nein |
+| `logistik.rechnung.speichern` | logistics | `logistics:write` | ja | mittel | nein |
+| `logistik.terminart.speichern` | logistics | `logistics:write` | ja | mittel | nein |
 | `logistik.tour.anlegen` | logistics | `logistics:write` | ja | mittel | nein |
+| `mask.action.execute` | masks | `masks:write` | ja | mittel | nein |
+| `mask.actions.list` | masks | `masks:read` | ja | niedrig | nein |
+| `mask.data.read` | masks | `masks:read` | ja | niedrig | nein |
 | `mobile.sync.process_pending` | mobile | `mobile:write` | ja | mittel | nein |
 | `planung.calendar.reproject` | planung | `planung:write` | ja | mittel | nein |
 | `produktion.control.sync` | produktion | `ops:write` | ja | mittel | nein |
 | `qualitaet.reklamation.abschliessen` | qualitaet | `quality:write` | ja | mittel | nein |
 | `reporting.bonus.calculate` | reporting | `reporting:write` | ja | mittel | nein |
 | `reporting.query.import_signed` | reporting | `reporting:write` | ja | mittel | nein |
+| `sales.gutschrift.buchen` | sales | `sales:write` | ja | hoch | ja |
+| `sales.gutschrift.propose` | sales | `sales:write` | nein | hoch | ja |
+| `sales.gutschrift.speichern` | sales | `sales:write` | ja | mittel | nein |
 | `sales.invoice.post` | sales | `sales:write` | ja | hoch | ja |
 | `sales.invoice.propose` | sales | `sales:write` | nein | hoch | ja |
 | `sales.order.status` | sales | `sales:read` | ja | niedrig | nein |
+| `studio.catalog.read` | studio | `masks:read` | ja | niedrig | nein |
+| `studio.definition.validate` | studio | `masks:read` | ja | niedrig | nein |
+| `studio.draft.save` | studio | `belege:write` | ja | niedrig | nein |
+| `studio.draft.submit_review` | studio | `belege:write` | ja | niedrig | nein |
+| `studio.migration.plan` | studio | `belege:write` | ja | niedrig | nein |
 | `wms.cell.status` | inventory | `inventory:read` | ja | niedrig | nein |
 | `wms.lot.trace` | inventory | `inventory:read` | ja | niedrig | nein |
+| `workspace.fachaktion.katalog` | workspace | `agent:read` | ja | niedrig | nein |
+| `workspace.fachaktion.resolve` | workspace | `agent:read` | ja | niedrig | nein |
 
 ## Domaene: agent
 
@@ -598,6 +620,188 @@ Listet Wiegescheine des Authentifizierungs-Mandanten optional nach ticket_id, Ko
 }
 ```
 
+## Domaene: belege
+
+### `beleg.arten` — Belegarten und Belegkommandos beschreiben
+
+Beschreibt die Belegarten des Belegvertrags (Bezeichnung, Partnerrolle, Steuerrichtung, mit oder ohne Preise, ob Finance bucht, Folgebelege) und das Verzeichnis der Belegkommandos (schreibend, Risiko, Freigabe, Idempotenz, Adresse). Keine Parameter. HTTP tool_name=beleg.arten. Scope belege:read; nur Lesen.
+
+- **Scope:** `belege:read`
+- **Idempotent:** ja
+- **Risikoklasse:** niedrig
+- **Audit:** read
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {},
+  "required": []
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "vertragsversion": {
+      "type": "string"
+    },
+    "status": {
+      "type": "array"
+    },
+    "preisfelder": {
+      "type": "array"
+    },
+    "belegarten": {
+      "type": "array"
+    },
+    "kommandos": {
+      "type": "array"
+    }
+  }
+}
+```
+
+### `beleg.lesen` — Beleg lesen
+
+Liefert einen Beleg des Authentifizierungs-Mandanten in der Form des Belegvertrags (docs/schnittstellen/contracts/belegvertrag.schema.json): Kopf, Partner, Positionen mit offener Menge, Summen je Steuerschluessel, Buchungsstand mit Grund, Belegkette, Statushistorie und die im Zustand moeglichen Aktionen mit Kommando und Sperrgrund. Dieselbe Antwort wie GET /api/v1/belege/{belegart}/{beleg_id}. HTTP tool_name=beleg.lesen. Scope belege:read; nur Lesen.
+
+- **Scope:** `belege:read`
+- **Idempotent:** ja
+- **Risikoklasse:** niedrig
+- **Audit:** read
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "belegart": {
+      "type": "string",
+      "enum": [
+        "sales_offer",
+        "sales_order",
+        "sales_delivery",
+        "sales_invoice",
+        "sales_credit_memo",
+        "purchase_order",
+        "goods_receipt",
+        "purchase_invoice",
+        "purchase_credit_memo"
+      ]
+    },
+    "beleg_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "belegart",
+    "beleg_id"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "beleg": {
+      "type": "object"
+    }
+  }
+}
+```
+
+### `beleg.suchen` — Belege suchen
+
+Sucht Belege im Authentifizierungs-Mandanten nach Belegart, Status, Teil der Belegnummer oder Partnernummer; neueste zuerst, hoechstens 50. Belegarten ohne Preise (Lieferschein, Wareneingang) kommen ohne Betrag. HTTP tool_name=beleg.suchen. Scope belege:read; nur Lesen.
+
+- **Scope:** `belege:read`
+- **Idempotent:** ja
+- **Risikoklasse:** niedrig
+- **Audit:** read
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "belegart": {
+      "type": "string",
+      "nullable": true,
+      "enum": [
+        "sales_offer",
+        "sales_order",
+        "sales_delivery",
+        "sales_invoice",
+        "sales_credit_memo",
+        "purchase_order",
+        "goods_receipt",
+        "purchase_invoice",
+        "purchase_credit_memo"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "nullable": true,
+      "enum": [
+        "draft",
+        "open",
+        "released",
+        "posted",
+        "reversed",
+        "cancelled"
+      ]
+    },
+    "beleg_nr": {
+      "type": "string",
+      "nullable": true,
+      "description": "Teil der Belegnummer"
+    },
+    "partner_nr": {
+      "type": "string",
+      "nullable": true,
+      "description": "Kunden- bzw. Lieferantennummer"
+    },
+    "limit": {
+      "type": "integer",
+      "default": 20
+    }
+  },
+  "required": []
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "items": {
+      "type": "array"
+    },
+    "count": {
+      "type": "integer"
+    }
+  }
+}
+```
+
 ## Domaene: compliance
 
 ### `compliance.gate.status` — Externe Gate-Status abfragen
@@ -723,7 +927,435 @@ Prueft einen Namen gegen die aktive Sanktionsliste und protokolliert bei execute
 
 ### `crm.activity.create` — CRM-Aktivitaet anlegen
 
-Legt eine CRM-Aktivitaet zum Kunden an (gleicher Fachpfad wie ActionRuntime create_activity). HTTP-Aufruf mit tool_name=crm.activity.create. Default dryRun; execute erfordert idempotency_key. OIDC-Token mit crm:write und tenant_id erforderlich.
+Kanonischer CRM-Aktivitaetencommand v1. Gleiche Fachregeln wie REST, Studio und CLI. Execute verlangt einen Idempotenzschluessel im MCP-Umschlag, Aendern und Loeschen die gelesene Version. Nur gepruefte menschliche Identitaet mit CRM-/SALES-Bearbeitungsrolle; Agenten nicht freigeschaltet.
+
+- **Scope:** `crm:write`
+- **Idempotent:** ja
+- **Risikoklasse:** niedrig
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "additionalProperties": false,
+  "properties": {
+    "type": {
+      "enum": [
+        "meeting",
+        "call",
+        "email",
+        "note",
+        "visit",
+        "task"
+      ],
+      "title": "Type",
+      "type": "string"
+    },
+    "title": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Title",
+      "type": "string"
+    },
+    "customer": {
+      "default": "",
+      "maxLength": 100,
+      "title": "Customer",
+      "type": "string"
+    },
+    "contact_person": {
+      "default": "",
+      "maxLength": 100,
+      "title": "Contact Person",
+      "type": "string"
+    },
+    "date": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Date"
+    },
+    "status": {
+      "default": "planned",
+      "enum": [
+        "planned",
+        "completed",
+        "cancelled"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "assigned_to": {
+      "default": "",
+      "maxLength": 100,
+      "title": "Assigned To",
+      "type": "string"
+    },
+    "description": {
+      "anyOf": [
+        {
+          "maxLength": 10000,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Description"
+    },
+    "customer_id": {
+      "anyOf": [
+        {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Customer Id"
+    },
+    "contact_id": {
+      "anyOf": [
+        {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Contact Id"
+    },
+    "opportunity_id": {
+      "anyOf": [
+        {
+          "maxLength": 36,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Opportunity Id"
+    },
+    "main_topics": {
+      "items": {
+        "maxLength": 200,
+        "type": "string"
+      },
+      "maxItems": 100,
+      "title": "Main Topics",
+      "type": "array"
+    },
+    "orders_placed": {
+      "items": {
+        "maxLength": 200,
+        "type": "string"
+      },
+      "maxItems": 100,
+      "title": "Orders Placed",
+      "type": "array"
+    },
+    "follow_up_actions": {
+      "items": {
+        "maxLength": 200,
+        "type": "string"
+      },
+      "maxItems": 100,
+      "title": "Follow Up Actions",
+      "type": "array"
+    },
+    "audit_reason": {
+      "anyOf": [
+        {
+          "maxLength": 2000,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Audit Reason"
+    },
+    "correlation_id": {
+      "anyOf": [
+        {
+          "maxLength": 200,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Correlation Id"
+    }
+  },
+  "required": [
+    "type",
+    "title"
+  ],
+  "type": "object"
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "success": {
+      "type": "boolean"
+    },
+    "activity_id": {
+      "type": "string"
+    },
+    "version": {
+      "type": "integer"
+    },
+    "activity": {
+      "properties": {
+        "type": {
+          "enum": [
+            "meeting",
+            "call",
+            "email",
+            "note",
+            "visit",
+            "task"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "customer": {
+          "default": "",
+          "maxLength": 100,
+          "title": "Customer",
+          "type": "string"
+        },
+        "contact_person": {
+          "default": "",
+          "maxLength": 100,
+          "title": "Contact Person",
+          "type": "string"
+        },
+        "date": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Date"
+        },
+        "status": {
+          "default": "planned",
+          "enum": [
+            "planned",
+            "completed",
+            "cancelled"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "assigned_to": {
+          "default": "",
+          "maxLength": 100,
+          "title": "Assigned To",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "maxLength": 10000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "customer_id": {
+          "anyOf": [
+            {
+              "maxLength": 64,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Customer Id"
+        },
+        "contact_id": {
+          "anyOf": [
+            {
+              "maxLength": 64,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Contact Id"
+        },
+        "opportunity_id": {
+          "anyOf": [
+            {
+              "maxLength": 36,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Opportunity Id"
+        },
+        "main_topics": {
+          "items": {
+            "maxLength": 200,
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Main Topics",
+          "type": "array"
+        },
+        "orders_placed": {
+          "items": {
+            "maxLength": 200,
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Orders Placed",
+          "type": "array"
+        },
+        "follow_up_actions": {
+          "items": {
+            "maxLength": 200,
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Follow Up Actions",
+          "type": "array"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "version": {
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        },
+        "created_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Created At"
+        },
+        "updated_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Updated At"
+        },
+        "created_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Created By"
+        },
+        "updated_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Updated By"
+        },
+        "overdue": {
+          "readOnly": true,
+          "title": "Overdue",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "type",
+        "title",
+        "id",
+        "version",
+        "overdue"
+      ],
+      "title": "ActivityRead",
+      "type": "object"
+    }
+  }
+}
+```
+
+### `crm.activity.delete` — CRM-Aktivitaet loeschen
+
+Kanonischer CRM-Aktivitaetencommand v1. Gleiche Fachregeln wie REST, Studio und CLI. Execute verlangt einen Idempotenzschluessel im MCP-Umschlag, Aendern und Loeschen die gelesene Version. Nur gepruefte menschliche Identitaet mit CRM-/SALES-Bearbeitungsrolle; Agenten nicht freigeschaltet.
 
 - **Scope:** `crm:write`
 - **Idempotent:** ja
@@ -736,44 +1368,50 @@ Legt eine CRM-Aktivitaet zum Kunden an (gleicher Fachpfad wie ActionRuntime crea
 
 ```json
 {
-  "type": "object",
+  "additionalProperties": false,
   "properties": {
-    "kunden_nr": {
-      "type": "string"
+    "expected_version": {
+      "minimum": 1,
+      "title": "Expected Version",
+      "type": "integer"
     },
-    "betreff": {
-      "type": "string"
+    "audit_reason": {
+      "anyOf": [
+        {
+          "maxLength": 2000,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Audit Reason"
     },
-    "typ": {
+    "correlation_id": {
+      "anyOf": [
+        {
+          "maxLength": 200,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Correlation Id"
+    },
+    "activity_id": {
       "type": "string",
-      "enum": [
-        "Anruf",
-        "Besuch",
-        "E-Mail",
-        "Aufgabe",
-        "Meeting",
-        "Sonstiges"
-      ]
-    },
-    "datum": {
-      "type": "string",
-      "format": "date",
-      "nullable": true
-    },
-    "notiz": {
-      "type": "string",
-      "nullable": true
-    },
-    "verantwortlich": {
-      "type": "string",
-      "nullable": true
+      "minLength": 1,
+      "maxLength": 64
     }
   },
   "required": [
-    "kunden_nr",
-    "betreff",
-    "typ"
-  ]
+    "expected_version",
+    "activity_id"
+  ],
+  "type": "object"
 }
 ```
 
@@ -783,11 +1421,737 @@ Legt eine CRM-Aktivitaet zum Kunden an (gleicher Fachpfad wie ActionRuntime crea
 {
   "type": "object",
   "properties": {
+    "success": {
+      "type": "boolean"
+    },
     "activity_id": {
       "type": "string"
     },
-    "erfasst_am": {
+    "version": {
+      "type": "integer"
+    },
+    "activity": {
+      "properties": {
+        "type": {
+          "enum": [
+            "meeting",
+            "call",
+            "email",
+            "note",
+            "visit",
+            "task"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "customer": {
+          "default": "",
+          "maxLength": 100,
+          "title": "Customer",
+          "type": "string"
+        },
+        "contact_person": {
+          "default": "",
+          "maxLength": 100,
+          "title": "Contact Person",
+          "type": "string"
+        },
+        "date": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Date"
+        },
+        "status": {
+          "default": "planned",
+          "enum": [
+            "planned",
+            "completed",
+            "cancelled"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "assigned_to": {
+          "default": "",
+          "maxLength": 100,
+          "title": "Assigned To",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "maxLength": 10000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "customer_id": {
+          "anyOf": [
+            {
+              "maxLength": 64,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Customer Id"
+        },
+        "contact_id": {
+          "anyOf": [
+            {
+              "maxLength": 64,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Contact Id"
+        },
+        "opportunity_id": {
+          "anyOf": [
+            {
+              "maxLength": 36,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Opportunity Id"
+        },
+        "main_topics": {
+          "items": {
+            "maxLength": 200,
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Main Topics",
+          "type": "array"
+        },
+        "orders_placed": {
+          "items": {
+            "maxLength": 200,
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Orders Placed",
+          "type": "array"
+        },
+        "follow_up_actions": {
+          "items": {
+            "maxLength": 200,
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Follow Up Actions",
+          "type": "array"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "version": {
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        },
+        "created_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Created At"
+        },
+        "updated_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Updated At"
+        },
+        "created_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Created By"
+        },
+        "updated_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Updated By"
+        },
+        "overdue": {
+          "readOnly": true,
+          "title": "Overdue",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "type",
+        "title",
+        "id",
+        "version",
+        "overdue"
+      ],
+      "title": "ActivityRead",
+      "type": "object"
+    }
+  }
+}
+```
+
+### `crm.activity.update` — CRM-Aktivitaet bearbeiten
+
+Kanonischer CRM-Aktivitaetencommand v1. Gleiche Fachregeln wie REST, Studio und CLI. Execute verlangt einen Idempotenzschluessel im MCP-Umschlag, Aendern und Loeschen die gelesene Version. Nur gepruefte menschliche Identitaet mit CRM-/SALES-Bearbeitungsrolle; Agenten nicht freigeschaltet.
+
+- **Scope:** `crm:write`
+- **Idempotent:** ja
+- **Risikoklasse:** mittel
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "additionalProperties": false,
+  "properties": {
+    "type": {
+      "anyOf": [
+        {
+          "enum": [
+            "meeting",
+            "call",
+            "email",
+            "note",
+            "visit",
+            "task"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Type"
+    },
+    "title": {
+      "anyOf": [
+        {
+          "maxLength": 200,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Title"
+    },
+    "customer": {
+      "anyOf": [
+        {
+          "maxLength": 100,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Customer"
+    },
+    "contact_person": {
+      "anyOf": [
+        {
+          "maxLength": 100,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Contact Person"
+    },
+    "date": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Date"
+    },
+    "status": {
+      "anyOf": [
+        {
+          "enum": [
+            "planned",
+            "completed",
+            "cancelled"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Status"
+    },
+    "assigned_to": {
+      "anyOf": [
+        {
+          "maxLength": 100,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Assigned To"
+    },
+    "description": {
+      "anyOf": [
+        {
+          "maxLength": 10000,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Description"
+    },
+    "customer_id": {
+      "anyOf": [
+        {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Customer Id"
+    },
+    "contact_id": {
+      "anyOf": [
+        {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Contact Id"
+    },
+    "opportunity_id": {
+      "anyOf": [
+        {
+          "maxLength": 36,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Opportunity Id"
+    },
+    "main_topics": {
+      "anyOf": [
+        {
+          "items": {
+            "maxLength": 200,
+            "type": "string"
+          },
+          "maxItems": 100,
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Main Topics"
+    },
+    "orders_placed": {
+      "anyOf": [
+        {
+          "items": {
+            "maxLength": 200,
+            "type": "string"
+          },
+          "maxItems": 100,
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Orders Placed"
+    },
+    "follow_up_actions": {
+      "anyOf": [
+        {
+          "items": {
+            "maxLength": 200,
+            "type": "string"
+          },
+          "maxItems": 100,
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Follow Up Actions"
+    },
+    "expected_version": {
+      "minimum": 1,
+      "title": "Expected Version",
+      "type": "integer"
+    },
+    "audit_reason": {
+      "anyOf": [
+        {
+          "maxLength": 2000,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Audit Reason"
+    },
+    "correlation_id": {
+      "anyOf": [
+        {
+          "maxLength": 200,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Correlation Id"
+    },
+    "activity_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    }
+  },
+  "required": [
+    "expected_version",
+    "activity_id"
+  ],
+  "type": "object"
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "success": {
+      "type": "boolean"
+    },
+    "activity_id": {
       "type": "string"
+    },
+    "version": {
+      "type": "integer"
+    },
+    "activity": {
+      "properties": {
+        "type": {
+          "enum": [
+            "meeting",
+            "call",
+            "email",
+            "note",
+            "visit",
+            "task"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "customer": {
+          "default": "",
+          "maxLength": 100,
+          "title": "Customer",
+          "type": "string"
+        },
+        "contact_person": {
+          "default": "",
+          "maxLength": 100,
+          "title": "Contact Person",
+          "type": "string"
+        },
+        "date": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Date"
+        },
+        "status": {
+          "default": "planned",
+          "enum": [
+            "planned",
+            "completed",
+            "cancelled"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "assigned_to": {
+          "default": "",
+          "maxLength": 100,
+          "title": "Assigned To",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "maxLength": 10000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "customer_id": {
+          "anyOf": [
+            {
+              "maxLength": 64,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Customer Id"
+        },
+        "contact_id": {
+          "anyOf": [
+            {
+              "maxLength": 64,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Contact Id"
+        },
+        "opportunity_id": {
+          "anyOf": [
+            {
+              "maxLength": 36,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Opportunity Id"
+        },
+        "main_topics": {
+          "items": {
+            "maxLength": 200,
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Main Topics",
+          "type": "array"
+        },
+        "orders_placed": {
+          "items": {
+            "maxLength": 200,
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Orders Placed",
+          "type": "array"
+        },
+        "follow_up_actions": {
+          "items": {
+            "maxLength": 200,
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Follow Up Actions",
+          "type": "array"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "version": {
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        },
+        "created_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Created At"
+        },
+        "updated_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Updated At"
+        },
+        "created_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Created By"
+        },
+        "updated_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Updated By"
+        },
+        "overdue": {
+          "readOnly": true,
+          "title": "Overdue",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "type",
+        "title",
+        "id",
+        "version",
+        "overdue"
+      ],
+      "title": "ActivityRead",
+      "type": "object"
     }
   }
 }
@@ -1615,65 +2979,9 @@ Listet offene Forderungen oder Verbindlichkeiten im Authentifizierungs-Mandanten
 }
 ```
 
-### `finance.ap_invoice.freigeben` — AP-Rechnung aus freigegebenem Vorschlag freigeben
-
-Ruft den echten CommandEndpoint POST /api/v1/finance/ap/invoices/{id}/actions/freigeben nur nach freigegebenem agent_proposals-Datensatz (ap_invoice_freigabe) auf. Parameter nur proposal_id. Default dryRun. execute erfordert idempotency_key und approval_status=approved. Kein Freigabe-Boolean im Aufruf. Kein Journal-Post/FIN-CLOSE (fibu_journal=false). OIDC-Token mit finance:write und tenant_id erforderlich.
-
-- **Scope:** `finance:write`
-- **Idempotent:** ja
-- **Risikoklasse:** hoch
-- **Audit:** write
-- **Human-Approval erforderlich:** ja
-- **Endpoint:** `POST /api/v1/mcp/tools/call`
-
-**Eingabe-Schema:**
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "proposal_id": {
-      "type": "string",
-      "description": "entwurf_id aus finance.ap_invoice.propose"
-    }
-  },
-  "required": [
-    "proposal_id"
-  ]
-}
-```
-
-**Ausgabe-Schema:**
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "invoice_id": {
-      "type": "string"
-    },
-    "invoice_number": {
-      "type": "string"
-    },
-    "status": {
-      "type": "string"
-    },
-    "approved": {
-      "type": "boolean"
-    },
-    "route_path": {
-      "type": "string"
-    },
-    "screen_id": {
-      "type": "string"
-    }
-  }
-}
-```
-
 ### `finance.ap_invoice.propose` — AP-Freigabe vorschlagen
 
-Legt einen ausstehenden Freigabe-Vorschlag fuer eine Eingangsrechnung im Authentifizierungs-Mandanten an. HTTP-Aufruf mit tool_name=finance.ap_invoice.propose, parameters.invoice_id. Default dryRun liest nur Status/Brutto/route_path. propose speichert agent_proposals (ap_invoice_freigabe) mit approval_status pending und ruft den Freigabe-Endpoint nicht auf. execute ist nicht angebunden (nutze finance.ap_invoice.freigeben nach Freigabe). Ein Freigabe-Boolean im Aufruf wird abgewiesen. OIDC-Token mit finance:write und tenant_id erforderlich. Kein Journal/FIN-CLOSE.
+Legt einen ausstehenden Freigabe-Vorschlag fuer eine Eingangsrechnung im Authentifizierungs-Mandanten an. HTTP-Aufruf mit tool_name=finance.ap_invoice.propose, parameters.invoice_id. Default dryRun liest nur Status/Brutto/route_path. propose speichert agent_proposals (ap_invoice_freigabe) mit approval_status pending und ruft den Freigabe-Endpoint nicht auf. execute ist deaktiviert; die verbindliche Entscheidung trifft eine berechtigte unabhaengige Person in der AP-Maske. Ein freigegebener Vorschlag ist keine Belegfreigabe. Ein Freigabe-Boolean im Aufruf wird abgewiesen. OIDC-Token mit finance:write und tenant_id erforderlich. Kein Journal/FIN-CLOSE.
 
 - **Scope:** `finance:write`
 - **Idempotent:** nein
@@ -2400,6 +3708,166 @@ Storniert eine Lagerbewegung des Authentifizierungs-Mandanten per Gegenbuchung (
 
 ## Domaene: logistics
 
+### `logistik.ausgehendes_dokument.speichern` — Ausgehendes Dokument speichern
+
+Legt einen ausgehenden Belegtyp im Authentifizierungs-Mandanten an oder aktualisiert ihn (Maske fuhrpark/ausgehende-dokumente:speichern; CE /api/v1/fuhrpark/ausgehende-dokumente/actions/speichern). parameters.beleg_typ, optional id/formular, reason. Default dryRun; execute erfordert idempotency_key. Scope logistics:write.
+
+- **Scope:** `logistics:write`
+- **Idempotent:** ja
+- **Risikoklasse:** mittel
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "beleg_typ": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "formular": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 3
+    }
+  },
+  "required": [
+    "beleg_typ",
+    "reason"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "dokument_id": {
+      "type": "string"
+    },
+    "auditEntryId": {
+      "type": "string"
+    }
+  }
+}
+```
+
+### `logistik.fahrzeug.loeschen` — Fahrzeug loeschen
+
+Loescht ein Fahrzeug im Authentifizierungs-Mandanten (Maske fuhrpark/fahrzeug-stamm:loeschen; CE /api/v1/fuhrpark/fahrzeuge/{entity_id}/actions/loeschen). parameters.fahrzeug_id, reason. Cross-Tenant → 404. Default dryRun; execute erfordert idempotency_key. Scope logistics:write.
+
+- **Scope:** `logistics:write`
+- **Idempotent:** ja
+- **Risikoklasse:** hoch
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "fahrzeug_id": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 3
+    }
+  },
+  "required": [
+    "fahrzeug_id",
+    "reason"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "fahrzeug_id": {
+      "type": "string"
+    },
+    "auditEntryId": {
+      "type": "string"
+    }
+  }
+}
+```
+
+### `logistik.fahrzeug.speichern` — Fahrzeug speichern
+
+Legt ein Fahrzeug im Authentifizierungs-Mandanten an oder aktualisiert es (Maske fuhrpark/fahrzeug-stamm:speichern; CE /api/v1/fuhrpark/fahrzeuge/actions/speichern). parameters.kennzeichen, typ, optional id, reason. Token-Mandant; Cross-Tenant-ID → 404. Default dryRun; execute erfordert idempotency_key. Scope logistics:write.
+
+- **Scope:** `logistics:write`
+- **Idempotent:** ja
+- **Risikoklasse:** mittel
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "kennzeichen": {
+      "type": "string"
+    },
+    "typ": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 3
+    }
+  },
+  "required": [
+    "kennzeichen",
+    "typ",
+    "reason"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "fahrzeug_id": {
+      "type": "string"
+    },
+    "kennzeichen": {
+      "type": "string"
+    },
+    "auditEntryId": {
+      "type": "string"
+    }
+  }
+}
+```
+
 ### `logistik.frachttabelle.anlegen` — Frachttabelle anlegen
 
 Legt eine mandantengebundene Frachttabelle an (Maske logistik/frachttabellen:anlegen; CE /api/v1/logistik/frachttabellen/actions/anlegen). parameters.tabelle_nr, bezeichnung, optional einheit/waehrung. Default dryRun; execute erfordert idempotency_key. Scope logistics:write. Kein FIBU.
@@ -2450,6 +3918,122 @@ Legt eine mandantengebundene Frachttabelle an (Maske logistik/frachttabellen:anl
       "type": "string"
     },
     "tabelle_nr": {
+      "type": "string"
+    },
+    "auditEntryId": {
+      "type": "string"
+    }
+  }
+}
+```
+
+### `logistik.rechnung.speichern` — Fuhrpark-Rechnung speichern
+
+Legt eine Fuhrpark-Rechnung im Authentifizierungs-Mandanten an oder aktualisiert sie (Maske fuhrpark/rechnungen:speichern; CE /api/v1/fuhrpark/rechnungen/actions/speichern). parameters.rechnungs_nr, datum, betrag_eur, optional id, reason. Default dryRun; execute erfordert idempotency_key. Scope logistics:write.
+
+- **Scope:** `logistics:write`
+- **Idempotent:** ja
+- **Risikoklasse:** mittel
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "rechnungs_nr": {
+      "type": "string"
+    },
+    "datum": {
+      "type": "string"
+    },
+    "betrag_eur": {
+      "type": "number"
+    },
+    "id": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 3
+    }
+  },
+  "required": [
+    "rechnungs_nr",
+    "datum",
+    "betrag_eur",
+    "reason"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "rechnung_id": {
+      "type": "string"
+    },
+    "auditEntryId": {
+      "type": "string"
+    }
+  }
+}
+```
+
+### `logistik.terminart.speichern` — Terminart speichern
+
+Legt eine Fuhrpark-Terminart im Authentifizierungs-Mandanten an oder aktualisiert sie (Maske fuhrpark/terminarten:speichern; CE /api/v1/fuhrpark/terminarten/actions/speichern). parameters.terminart, optional id/intervall_*, reason. Default dryRun; execute erfordert idempotency_key. Scope logistics:write.
+
+- **Scope:** `logistics:write`
+- **Idempotent:** ja
+- **Risikoklasse:** mittel
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "terminart": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "intervall_monate": {
+      "type": "integer"
+    },
+    "intervall_km": {
+      "type": "integer"
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 3
+    }
+  },
+  "required": [
+    "terminart",
+    "reason"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "terminart_id": {
       "type": "string"
     },
     "auditEntryId": {
@@ -2514,6 +4098,270 @@ Legt eine Tour im Authentifizierungs-Mandanten an (Maske logistik/tourenplanung:
     },
     "auditEntryId": {
       "type": "string"
+    }
+  }
+}
+```
+
+## Domaene: masks
+
+### `mask.action.execute` — Maskenaktion ausfuehren
+
+Fuehrt eine Maskenaktion ueber ihren deklarierten Kommando-Endpunkt aus (gleicher Umschlag wie die Maske). Gesperrt sind forbiddenForAgents, humanApprovalRequired, Command-Adapter und Eingabefluesse. Default dryRun; execute erfordert idempotency_key.
+
+- **Scope:** `masks:write`
+- **Idempotent:** ja
+- **Risikoklasse:** mittel
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "screen_id": {
+      "type": "string"
+    },
+    "action": {
+      "type": "string"
+    },
+    "entity_id": {
+      "type": "string",
+      "nullable": true
+    },
+    "input": {
+      "type": "object",
+      "nullable": true
+    },
+    "audit_reason": {
+      "type": "string",
+      "nullable": true
+    },
+    "confirm": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "screen_id",
+    "action"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "screen_id": {
+      "type": "string"
+    },
+    "action": {
+      "type": "string"
+    },
+    "mode": {
+      "type": "string"
+    },
+    "result": {
+      "type": "object"
+    }
+  }
+}
+```
+
+### `mask.actions.list` — Maskenaktionen auflisten
+
+Liest die Aktionen einer Maske aus der mandantengenauen ScreenDefinition, mit Eingabefeldern und Befund, ob ein Agent sie ausfuehren darf. Nur Lesen.
+
+- **Scope:** `masks:read`
+- **Idempotent:** ja
+- **Risikoklasse:** niedrig
+- **Audit:** read
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "screen_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "screen_id"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "screen_id": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string",
+      "nullable": true
+    },
+    "actions": {
+      "type": "array"
+    }
+  }
+}
+```
+
+### `mask.data.read` — Maskendaten lesen
+
+Liest eine deklarierte GET-Datenquelle derselben mandantengenauen Maske wie Human-UI und CLI. Fachrollen und Objektzugriff prueft der Ziel-Endpunkt erneut mit dem Token des Aufrufers; keine freie URL oder Mandantenangabe.
+
+- **Scope:** `masks:read`
+- **Idempotent:** ja
+- **Risikoklasse:** niedrig
+- **Audit:** read
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "screen_id": {
+      "type": "string"
+    },
+    "source_key": {
+      "type": "string"
+    },
+    "entity_id": {
+      "type": "string",
+      "nullable": true
+    },
+    "page": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1000000
+    },
+    "limit": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100
+    },
+    "q": {
+      "type": "string",
+      "nullable": true,
+      "maxLength": 200
+    },
+    "table_key": {
+      "type": "string"
+    },
+    "sort": {
+      "type": "string"
+    },
+    "sort_dir": {
+      "type": "string",
+      "enum": [
+        "asc",
+        "desc"
+      ]
+    },
+    "complete": {
+      "type": "boolean",
+      "default": false
+    },
+    "preset_filters": {
+      "type": "object",
+      "maxProperties": 8,
+      "propertyNames": {
+        "minLength": 1,
+        "maxLength": 200
+      },
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 200
+      }
+    },
+    "filter_plan": {
+      "type": "object",
+      "maxProperties": 20,
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "op",
+          "value"
+        ],
+        "properties": {
+          "op": {
+            "type": "string",
+            "enum": [
+              "eq",
+              "neq",
+              "contains",
+              "lt",
+              "lte",
+              "gt",
+              "gte",
+              "in",
+              "between"
+            ]
+          },
+          "value": {},
+          "label": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 200
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "screen_id",
+    "source_key"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "screen_id": {
+      "type": "string"
+    },
+    "source_key": {
+      "type": "string"
+    },
+    "page": {
+      "type": "integer"
+    },
+    "limit": {
+      "type": "integer"
+    },
+    "data": {
+      "oneOf": [
+        {
+          "type": "object"
+        },
+        {
+          "type": "array"
+        }
+      ]
     }
   }
 }
@@ -3050,6 +4898,248 @@ Importiert eine HMAC-signierte Abfragedefinition (Maske auswertungen/abfrage-cen
 
 ## Domaene: sales
 
+### `sales.gutschrift.buchen` — Gutschrift aus freigegebenem Vorschlag buchen
+
+Bucht eine Gutschrift (Erloes netto, Umsatzsteuer getrennt, Forderung brutto, OP-Minderung der bezogenen Rechnung) nur aus einem agent_proposals-Datensatz (sales_credit_note_buchung), den ein Mensch freigegeben hat. Parameter nur proposal_id. Default dryRun. execute erfordert idempotency_key und approval_status=approved; hat sich die Gutschrift seit der Freigabe geaendert, HTTP 409 und neuer Vorschlag noetig. Kein Freigabe-Boolean im Aufruf. Scope sales:write. Kein tenant_id-Parameter.
+
+- **Scope:** `sales:write`
+- **Idempotent:** ja
+- **Risikoklasse:** hoch
+- **Audit:** write
+- **Human-Approval erforderlich:** ja
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "proposal_id": {
+      "type": "string",
+      "description": "entwurf_id aus sales.gutschrift.propose"
+    }
+  },
+  "required": [
+    "proposal_id"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "credit_note_id": {
+      "type": "string"
+    },
+    "credit_note_number": {
+      "type": "string"
+    },
+    "netto": {
+      "type": "number"
+    },
+    "steuer": {
+      "type": "number"
+    },
+    "brutto": {
+      "type": "number"
+    },
+    "posted": {
+      "type": "boolean"
+    },
+    "approved_by": {
+      "type": "string"
+    },
+    "auditEntryId": {
+      "type": "string"
+    }
+  }
+}
+```
+
+### `sales.gutschrift.propose` — Buchung einer Gutschrift vorschlagen
+
+Legt einen ausstehenden Buchungsvorschlag fuer eine Gutschrift (Entwurf) im Authentifizierungs-Mandanten an. parameters.credit_note_id. Default dryRun liest, was gebucht wuerde (Erloes netto, Umsatzsteuer, Forderung brutto, Buchungszeilen) oder den Pruefgrund (HTTP 409), wenn sich die Gutschrift nicht buchen laesst. propose (mit idempotency_key) speichert agent_proposals (sales_credit_note_buchung) mit approval_status pending und bucht nicht. execute ist nicht angebunden. Ein Mensch prueft und gibt in der Maske sales/gutschrift frei; danach sales.gutschrift.buchen. Ein Freigabe-Boolean im Aufruf wird abgewiesen. Scope sales:write. Kein tenant_id-Parameter.
+
+- **Scope:** `sales:write`
+- **Idempotent:** nein
+- **Risikoklasse:** hoch
+- **Audit:** write
+- **Human-Approval erforderlich:** ja
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "credit_note_id": {
+      "type": "string",
+      "description": "ID der Gutschrift (Entwurf)"
+    }
+  },
+  "required": [
+    "credit_note_id"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "entwurf_id": {
+      "type": "string",
+      "description": "proposal_id fuer sales.gutschrift.buchen"
+    },
+    "credit_note_id": {
+      "type": "string"
+    },
+    "credit_note_number": {
+      "type": "string"
+    },
+    "netto": {
+      "type": "number"
+    },
+    "steuer": {
+      "type": "number"
+    },
+    "brutto": {
+      "type": "number"
+    },
+    "buchungszeilen": {
+      "type": "array"
+    },
+    "route_path": {
+      "type": "string"
+    },
+    "screen_id": {
+      "type": "string"
+    },
+    "approval_status": {
+      "type": "string"
+    }
+  }
+}
+```
+
+### `sales.gutschrift.speichern` — Gutschrift als Entwurf speichern
+
+Legt eine Gutschrift (kaufmaennische Rechnungskorrektur) als Entwurf im Authentifizierungs-Mandanten an (Maske sales/gutschrift:speichern; CE /api/v1/sales/credit-notes/actions/speichern). parameters.credit_note_number, customer_id, grund, lines[] mit description, quantity, unit_price und tax_code (Steuerschluessel des Mandanten aus finance/tax-keys; kein Prozentsatz, kein Vorgabewert), optional invoice_reference, reason. Default dryRun liefert Netto/Umsatzsteuer/Brutto oder den Pruefgrund. execute erfordert idempotency_key. Gebucht wird NICHT: Buchen geht nur ueber sales.gutschrift.propose, menschliche Freigabe und sales.gutschrift.buchen. Scope sales:write. Kein tenant_id-Parameter.
+
+- **Scope:** `sales:write`
+- **Idempotent:** ja
+- **Risikoklasse:** mittel
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "credit_note_number": {
+      "type": "string"
+    },
+    "customer_id": {
+      "type": "string"
+    },
+    "customer_name": {
+      "type": "string"
+    },
+    "invoice_reference": {
+      "type": "string",
+      "description": "Rechnungsnummer, deren offener Posten beim Buchen gemindert wird"
+    },
+    "grund": {
+      "type": "string",
+      "description": "Grund der Gutschrift, z. B. Retoure"
+    },
+    "lines": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "unit_price": {
+            "type": "number",
+            "description": "Einzelpreis netto"
+          },
+          "tax_code": {
+            "type": "string",
+            "description": "Steuerschluessel des Mandanten"
+          }
+        },
+        "required": [
+          "description",
+          "quantity",
+          "unit_price"
+        ]
+      }
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 3
+    }
+  },
+  "required": [
+    "credit_note_number",
+    "customer_id",
+    "grund",
+    "lines",
+    "reason"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "credit_note_id": {
+      "type": "string"
+    },
+    "credit_note_number": {
+      "type": "string"
+    },
+    "netto": {
+      "type": "number"
+    },
+    "steuer": {
+      "type": "number",
+      "nullable": true
+    },
+    "brutto": {
+      "type": "number",
+      "nullable": true
+    },
+    "pruefgrund": {
+      "type": "string",
+      "nullable": true
+    },
+    "auditEntryId": {
+      "type": "string"
+    }
+  }
+}
+```
+
 ### `sales.invoice.post` — Rechnung aus freigegebenem Vorschlag anlegen
 
 Legt eine Verkaufsrechnung (Status entwurf) aus einem freigegebenen agent_proposals-Datensatz (rechnung_vorschlag) an. Parameter nur proposal_id. Default dryRun. execute erfordert idempotency_key und approval_status=approved. Kein Freigabe-Boolean im Aufruf. FIBU-Journal/OP bleiben im UI-Pfad create-invoice. OIDC-Token mit sales:write und tenant_id erforderlich.
@@ -3208,6 +5298,412 @@ Gibt Lifecycle-Status, offene Positionen, naechsten Schritt und kanonische Maske
     },
     "screen_id": {
       "type": "string"
+    }
+  }
+}
+```
+
+## Domaene: studio
+
+### `studio.catalog.read` — Studio-Katalog lesen
+
+Floorplans, Feldtypen, Formate, Datenquellen und Aktionen, aus denen eine Studio-Maske bestehen darf. Grundlage, bevor ein Agent eine ScreenDefinition entwirft. Nur Lesen.
+
+- **Scope:** `masks:read`
+- **Idempotent:** ja
+- **Risikoklasse:** niedrig
+- **Audit:** read
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {}
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object"
+}
+```
+
+### `studio.definition.validate` — Studio-Maske pruefen
+
+Prueft eine ScreenDefinition gegen Katalog und Studio-Gates (Feldvertrag, Meridian-Layout, Rechte, rechnende Felder, Formate) und liefert Verletzungen und Reifegrad. Speichert nichts.
+
+- **Scope:** `masks:read`
+- **Idempotent:** ja
+- **Risikoklasse:** niedrig
+- **Audit:** read
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "definition": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "definition"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "violations": {
+      "type": "array"
+    },
+    "readiness": {
+      "type": "object"
+    }
+  }
+}
+```
+
+### `studio.draft.save` — Studio-Entwurf speichern
+
+Legt einen Studio-Entwurf an oder schreibt ihn mit draft_id und expected_revision fort. Nur Entwurf: dieselben Gates wie im Studio, keine Freigabe. Ohne mode=execute wird nur geprueft.
+
+- **Scope:** `belege:write`
+- **Idempotent:** ja
+- **Risikoklasse:** niedrig
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "definition": {
+      "type": "object"
+    },
+    "draft_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "expected_revision": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  },
+  "required": [
+    "definition"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object"
+}
+```
+
+### `studio.draft.submit_review` — Studio-Entwurf zur Pruefung geben
+
+Gibt einen Entwurf in die Vier-Augen-Pruefung. Freigeben und Zurueckziehen bleiben Menschen vorbehalten; dafuer gibt es kein Agentenwerkzeug.
+
+- **Scope:** `belege:write`
+- **Idempotent:** ja
+- **Risikoklasse:** niedrig
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "draft_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "expected_revision": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  },
+  "required": [
+    "draft_id",
+    "expected_revision"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object"
+}
+```
+
+### `studio.migration.plan` — Studio-Aenderungsplan festhalten
+
+Versionierter Authoring-Command: erzeugt nur einen revisionsgebundenen Plan in der vorhandenen Historie; keine Freigabe, Schemaausfuehrung oder Geschaeftsbuchung. Fachrollen prueft derselbe HTTP-Endpunkt wie Human-UI/CLI.
+
+- **Scope:** `belege:write`
+- **Idempotent:** ja
+- **Risikoklasse:** niedrig
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "$defs": {
+    "StudioColumnIn": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "pattern": "^[a-z][a-z0-9_]{0,47}$",
+          "title": "Name",
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "text",
+            "integer",
+            "boolean",
+            "date",
+            "datetime",
+            "decimal",
+            "uuid"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "nullable": {
+          "default": true,
+          "title": "Nullable",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "name",
+        "type"
+      ],
+      "title": "StudioColumnIn",
+      "type": "object"
+    },
+    "StudioSchemaChangeIn": {
+      "additionalProperties": false,
+      "properties": {
+        "operation": {
+          "enum": [
+            "create_table",
+            "add_columns"
+          ],
+          "title": "Operation",
+          "type": "string"
+        },
+        "schema_name": {
+          "pattern": "^domain_[a-z][a-z0-9_]{0,35}$",
+          "title": "Schema Name",
+          "type": "string"
+        },
+        "table": {
+          "pattern": "^[a-z][a-z0-9_]{0,47}$",
+          "title": "Table",
+          "type": "string"
+        },
+        "columns": {
+          "items": {
+            "$ref": "#/$defs/StudioColumnIn"
+          },
+          "maxItems": 50,
+          "minItems": 1,
+          "title": "Columns",
+          "type": "array"
+        }
+      },
+      "required": [
+        "operation",
+        "schema_name",
+        "table",
+        "columns"
+      ],
+      "title": "StudioSchemaChangeIn",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "draft_id": {
+      "format": "uuid",
+      "title": "Draft Id",
+      "type": "string"
+    },
+    "expected_revision": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Expected Revision",
+      "type": "string"
+    },
+    "schema_changes": {
+      "items": {
+        "$ref": "#/$defs/StudioSchemaChangeIn"
+      },
+      "maxItems": 20,
+      "title": "Schema Changes",
+      "type": "array"
+    }
+  },
+  "required": [
+    "draft_id",
+    "expected_revision"
+  ],
+  "title": "StudioPlanParameters",
+  "type": "object"
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object"
+}
+```
+
+## Domaene: workspace
+
+### `workspace.fachaktion.katalog` — Fachaktionskatalog Adaptive Workspace
+
+Liefert den typisierten Fachaktionskatalog (permission, idempotency, audit, event-out, Aliase) aus config/adaptive_workspace_fachaktionen.yaml. Nur Lesen. parameters.access optional read|write. Scope agent:read. Kein tenant_id-Parameter.
+
+- **Scope:** `agent:read`
+- **Idempotent:** ja
+- **Risikoklasse:** niedrig
+- **Audit:** read
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "access": {
+      "type": "string",
+      "enum": [
+        "read",
+        "write"
+      ],
+      "description": "Optionaler Filter"
+    }
+  },
+  "required": []
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "registry_id": {
+      "type": "string"
+    },
+    "count": {
+      "type": "integer"
+    },
+    "actions": {
+      "type": "array"
+    },
+    "lead_contract": {
+      "type": "object"
+    },
+    "event_gaps": {
+      "type": "array"
+    }
+  }
+}
+```
+
+### `workspace.fachaktion.resolve` — Kurzkommando auf Fachaktion aufloesen
+
+Mappt ein natuerliches Kurzkommando deterministisch (Alias/Action-ID, kein LLM) auf eine typisierte Fachaktion und prueft Scope sowie Agenten-/Vier-Augen-Grenze. Nur Lesen, keine Ausfuehrung. parameters.command. Scope agent:read; die Zielaktion hat zusaetzlich ihre Fach-Scope. Writes werden nicht ausgeloest.
+
+- **Scope:** `agent:read`
+- **Idempotent:** ja
+- **Risikoklasse:** niedrig
+- **Audit:** read
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "command": {
+      "type": "string",
+      "description": "Kurzkommando oder Action-ID"
+    }
+  },
+  "required": [
+    "command"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "action_id": {
+      "type": "string",
+      "nullable": true
+    },
+    "authorized": {
+      "type": "boolean"
+    },
+    "reason": {
+      "type": "string"
+    },
+    "mcp_tool_id": {
+      "type": "string",
+      "nullable": true
+    },
+    "four_eyes": {
+      "type": "boolean"
+    },
+    "command_endpoint": {
+      "type": "string",
+      "nullable": true
     }
   }
 }

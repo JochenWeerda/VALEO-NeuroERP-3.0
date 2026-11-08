@@ -62,7 +62,7 @@ export const employees = pgTable('employees', {
   updatedBy: uuid('updated_by')
 }, (table) => ({
   tenantEmployeeNumberIdx: index('tenant_employee_number_idx').on(table.tenantId, table.employeeNumber),
-  tenantStatusIdx: index('tenant_status_idx').on(table.tenantId, table.status),
+  tenantStatusIdx: index('employees_tenant_status_idx').on(table.tenantId, table.status),
   tenantDepartmentIdx: index('tenant_department_idx').on(table.tenantId, table.departmentId),
   tenantManagerIdx: index('tenant_manager_idx').on(table.tenantId, table.managerId)
 }));
@@ -111,13 +111,13 @@ export const timeEntries = pgTable('time_entries', {
   createdBy: uuid('created_by'),
   updatedBy: uuid('updated_by')
 }, (table) => ({
-  tenantEmployeeIdx: index('tenant_employee_idx').on(table.tenantId, table.employeeId),
-  tenantDateIdx: index('tenant_date_idx').on(table.tenantId, table.date),
-  tenantStatusIdx: index('tenant_status_idx').on(table.tenantId, table.status),
-  tenantProjectIdx: index('tenant_project_idx').on(table.tenantId, table.projectId),
-  tenantStartIdx: index('tenant_start_idx').on(table.tenantId, table.start),
-  employeeDateRangeIdx: index('employee_date_range_idx').on(table.employeeId, table.start, table.end),
-  tenantEmployeeStartUk: uniqueIndex('tenant_employee_start_uk').on(table.tenantId, table.employeeId, table.start)
+  tenantEmployeeIdx: index('time_entries_tenant_employee_idx').on(table.tenantId, table.employeeId),
+  tenantDateIdx: index('time_entries_tenant_date_idx').on(table.tenantId, table.date),
+  tenantStatusIdx: index('time_entries_tenant_status_idx').on(table.tenantId, table.status),
+  tenantProjectIdx: index('time_entries_tenant_project_idx').on(table.tenantId, table.projectId),
+  tenantStartIdx: index('time_entries_tenant_start_idx').on(table.tenantId, table.start),
+  employeeDateRangeIdx: index('time_entries_employee_date_range_idx').on(table.employeeId, table.start, table.end),
+  tenantEmployeeStartUk: uniqueIndex('time_entries_tenant_employee_start_uk').on(table.tenantId, table.employeeId, table.start)
 }));
 
 // Shifts table
@@ -161,10 +161,10 @@ export const leaveRequests = pgTable('leave_requests', {
   createdBy: uuid('created_by'),
   updatedBy: uuid('updated_by')
 }, (table) => ({
-  tenantEmployeeIdx: index('tenant_employee_idx').on(table.tenantId, table.employeeId),
-  tenantStatusIdx: index('tenant_status_idx').on(table.tenantId, table.status),
+  tenantEmployeeIdx: index('leave_requests_tenant_employee_idx').on(table.tenantId, table.employeeId),
+  tenantStatusIdx: index('leave_requests_tenant_status_idx').on(table.tenantId, table.status),
   tenantDateRangeIdx: index('tenant_date_range_idx').on(table.tenantId, table.from, table.to),
-  employeeDateRangeIdx: index('employee_date_range_idx').on(table.employeeId, table.from, table.to)
+  employeeDateRangeIdx: index('leave_requests_employee_date_range_idx').on(table.employeeId, table.from, table.to)
 }));
 
 // Payroll runs table
@@ -185,7 +185,7 @@ export const payrollRuns = pgTable('payroll_runs', {
   updatedBy: uuid('updated_by')
 }, (table) => ({
   tenantPeriodIdx: index('tenant_period_idx').on(table.tenantId, table.periodFrom, table.periodTo),
-  tenantStatusIdx: index('tenant_status_idx').on(table.tenantId, table.status)
+  tenantStatusIdx: index('payroll_runs_tenant_status_idx').on(table.tenantId, table.status)
 }));
 
 // Domain events table (for event sourcing and audit trail)

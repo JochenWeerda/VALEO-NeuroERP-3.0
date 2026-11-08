@@ -10,6 +10,7 @@ from fastapi.testclient import TestClient
 
 from app.api.v1.api import api_router
 from app.api.v1.endpoints import report_print
+from testgrenze import ersetze_nutzer
 
 
 def _client() -> TestClient:
@@ -18,6 +19,7 @@ def _client() -> TestClient:
     app.dependency_overrides[report_print.get_db] = lambda: db
     app.dependency_overrides[report_print.get_tenant_id] = lambda: "test-tenant"
     app.include_router(report_print.router)
+    ersetze_nutzer(app, "SALES_BEARBEITEN")  # Schreibwege pruefen die Bereichsrolle
     return TestClient(app)
 
 

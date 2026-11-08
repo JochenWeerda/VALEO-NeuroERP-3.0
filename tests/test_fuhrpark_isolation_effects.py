@@ -16,6 +16,7 @@ from app.core.database import get_db
 from app.domains.operations import models, repository
 from app.services import mcp_execution_service as mcp
 from app.services.mcp_tool_registry_service import mcp_tool_registry_service as registry
+from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
 
 CASES = [
     ("fahrzeuge", models.Fahrzeug, repository.FahrzeugRepository, {"kennzeichen":"TEST-01", "typ":"LKW"}, "logistik.fahrzeug.speichern"),
@@ -24,9 +25,19 @@ CASES = [
     ("ausgehende-dokumente", models.FuhrparkAusgehendesDokument, repository.FuhrparkAusgehendesDokumentRepository, {"beleg_typ":"TEST-PDF"}, "logistik.ausgehendes_dokument.speichern"),
 ]
 
-@pytest.fixture
-def db():
+@pytest.fixture(scope="module")
+def pruefstand():
+    """Eine Verbindung je Modul mit den ausstehenden Migrationen in einer offenen Transaktion.
+
+    Der frische Pruefstand steht auf einem aelteren Stand; wie ``rls_domain_support.probe`` werden die
+    ausstehenden Migrationen eingespielt und am Modulende zurueckgerollt (voll migriert ein No-op). Je Modul,
+    nicht je Prozess: die Migrationen halten Tabellensperren bis zum Rollback.
+    """
     from sqlalchemy.engine import make_url
+
+    import rls_domain_support  # noqa: F401 - setzt den scripts-Pfad
+    import rls_inventory
+
     is_github_job = os.environ.get("GITHUB_ACTIONS") == "true"
     raw = os.environ.get("TEST_DATABASE_URL") or (
         os.environ.get("DATABASE_URL") if is_github_job else None
@@ -38,13 +49,24 @@ def db():
         any(k in url.database for k in ("test", "probe", "pruefstand"))
         or (is_github_job and url.database == "valeo_neuro_erp")
     ), "Use only the shared probe or the database already provided by the GitHub job"
-    engine=create_engine(url, connect_args={"connect_timeout":5})
+    engine = create_engine(url, connect_args={"connect_timeout": 5})
     with engine.connect() as connection:
-        transaction=connection.begin()
-        with Session(bind=connection, join_transaction_mode="create_savepoint") as session:
-            yield session
-        transaction.rollback()
+        transaction = connection.begin()
+        try:
+            rls_inventory._pending_upgrade(connection)
+            yield connection
+        finally:
+            transaction.rollback()
     engine.dispose()
+
+
+@pytest.fixture
+def db(pruefstand):
+    savepoint = pruefstand.begin_nested()
+    with Session(bind=pruefstand, join_transaction_mode="create_savepoint") as session:
+        yield session
+    if savepoint.is_active:
+        savepoint.rollback()
 
 @pytest.fixture
 def seeded(db):
@@ -59,6 +81,7 @@ def seeded(db):
 
 def client(db, tenant):
     app=FastAPI();app.include_router(fuhrpark.router,prefix="/api/v1")
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)  # Schreibwege pruefen die Bereichsrolle (19.10.2026)
     app.dependency_overrides[get_db]=lambda:db
     app.dependency_overrides[get_current_user]=lambda:{"sub":"isolation-test", "scopes":["logistics:read","logistics:write"], "raw":{"tenant_id":tenant}}
     return TestClient(app)
@@ -185,7 +208,8 @@ def test_repository_cannot_change_primary_key_or_tenant(db,seeded,case):
 @pytest.mark.parametrize("mode", ["validate","dryRun","propose","execute"])
 def test_mcp_delete_rejects_actual_foreign_vehicle(db,seeded,mode):
     tenant,foreign,ids=seeded
-    user={"sub":"test", "scopes":["logistics:write"],"raw":{"tenant_id":tenant}}
+    # Mensch: Loeschen verlangt laut Maske menschliche Genehmigung; geprueft wird hier die Mandantentrennung.
+    user={"sub":"test", "scopes":["logistics:write"],"raw":{"tenant_id":tenant,"identity_type":"human"}}
     with pytest.raises(HTTPException) as error:
         mcp.execute_mcp_tool(db,mcp.ToolExecutionRequest(tool_name="logistik.fahrzeug.loeschen",parameters={"fahrzeug_id":ids["fahrzeuge"],"reason":"isolation"},mode=mode,idempotency_key="delete-test"),user,None)
     assert error.value.status_code==404

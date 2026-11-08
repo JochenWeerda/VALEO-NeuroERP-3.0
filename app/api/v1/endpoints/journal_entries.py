@@ -10,6 +10,7 @@ from typing import Optional, Any
 from datetime import datetime
 from fastapi import Response, APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -30,6 +31,8 @@ from app.api.v1.schemas.journal_entries_schemas import JournalEntriesOut
 from app.core import finance_periods
 
 
+from app.auth.finance_roles import finance_admin, finance_read, finance_write
+
 router = APIRouter()
 
 JOURNAL_ENTRY_ODATA_FIELDS = {
@@ -49,7 +52,7 @@ def _serialize_value(v: Any) -> Any:
     return v
 
 
-@router.get("/new", response_model=JournalEntriesOut, summary="New journal entry template abrufen")
+@router.get("/new", response_model=JournalEntriesOut, summary="New journal entry template abrufen", dependencies=[Depends(finance_read)])
 async def get_new_journal_entry_template(tenant_id: str = Depends(get_tenant_id)):
     """Return default values for the manual booking form."""
     now = datetime.utcnow()
@@ -69,7 +72,7 @@ async def get_new_journal_entry_template(tenant_id: str = Depends(get_tenant_id)
     }
 
 
-@router.post("/", response_model=JournalEntry, status_code=201, summary="Journal entry anlegen")
+@router.post("/", response_model=JournalEntry, status_code=201, summary="Journal entry anlegen", dependencies=[Depends(finance_write)])
 async def create_journal_entry(
     entry_data: JournalEntryCreate,
     request: Request,
@@ -109,6 +112,21 @@ async def create_journal_entry(
                     detail=finance_periods.meldung(period, gesperrt),
                 )
 
+        # Die Sperre setzt die Datenbank durch (Trigger an den Buchungszeilen). Hier nur, damit die
+        # Buchhaltung einen Satz liest statt eines Datenbankfehlers.
+        gesperrte = db.execute(
+            text(
+                "SELECT string_agg(account_number, ', ' ORDER BY account_number) "
+                "FROM domain_erp.chart_of_accounts WHERE id = ANY(:ids) AND posting_blocked"
+            ),
+            {"ids": sorted({line.account_id for line in entry_data.lines})},
+        ).scalar_one()
+        if gesperrte:
+            raise HTTPException(
+                status_code=409,
+                detail=f"Konto {gesperrte} ist fuer Buchungen gesperrt.",
+            )
+
         entry_repo = container.resolve(JournalEntryRepository)
 
         # Create the entry data
@@ -130,7 +148,7 @@ async def create_journal_entry(
         raise HTTPException(status_code=500, detail=f"Failed to create journal entry: {str(e)}")
 
 
-@router.get("/", response_model=PaginatedResponse[JournalEntry], summary="Journal entries auflisten")
+@router.get("/", response_model=PaginatedResponse[JournalEntry], summary="Journal entries auflisten", dependencies=[Depends(finance_read)])
 async def list_journal_entries(
     request: Request,
     tenant_id: str = Depends(get_tenant_id),
@@ -243,7 +261,7 @@ async def list_journal_entries(
         raise HTTPException(status_code=500, detail=f"Failed to list journal entries: {str(e)}")
 
 
-@router.get("/{entry_id}", response_model=JournalEntry, summary="Journal entry abrufen")
+@router.get("/{entry_id}", response_model=JournalEntry, summary="Journal entry abrufen", dependencies=[Depends(finance_read)])
 async def get_journal_entry(
     entry_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -266,7 +284,7 @@ async def get_journal_entry(
         raise HTTPException(status_code=500, detail=f"Failed to retrieve journal entry: {str(e)}")
 
 
-@router.put("/{entry_id}", response_model=JournalEntry, summary="Journal entry aktualisieren")
+@router.put("/{entry_id}", response_model=JournalEntry, summary="Journal entry aktualisieren", dependencies=[Depends(finance_write)])
 async def update_journal_entry(
     entry_id: str,
     entry_data: JournalEntryUpdate,
@@ -304,12 +322,13 @@ async def update_journal_entry(
         raise HTTPException(status_code=500, detail=f"Failed to update journal entry: {str(e)}")
 
 
-@router.post("/{entry_id}/post", response_model=JournalEntry, summary="Journal entry erstellen")
+@router.post("/{entry_id}/post", response_model=JournalEntry, summary="Journal entry erstellen", dependencies=[Depends(finance_write)])
 async def post_journal_entry(
     entry_id: str,
     request: Request,
     tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    nutzer: dict = Depends(finance_write),
 ):
     """
     Post a journal entry.
@@ -320,6 +339,11 @@ async def post_journal_entry(
     try:
         from app.core.blockchain_anchor_runtime import anchor_journal_entry_event
 
+        # Eine manuelle Hauptbuchbuchung braucht die Freigabe einer zweiten Person (APPROVAL-001).
+        from app.services import finance_freigabe
+
+        akteur = str(nutzer.get("sub") or "") if isinstance(nutzer, dict) else None
+        finance_freigabe.verlange_hauptbuchbuchung(db, tenant_id, entry_id, akteur)
         entry_repo = container.resolve(JournalEntryRepository)
         success = await entry_repo.post_entry(entry_id, tenant_id)
         if not success:
@@ -347,13 +371,14 @@ async def post_journal_entry(
         raise HTTPException(status_code=500, detail=f"Failed to post journal entry: {str(e)}")
 
 
-@router.post("/{entry_id}/reverse", response_model=None, summary="Journal entry reverse")
+@router.post("/{entry_id}/reverse", response_model=None, summary="Journal entry reverse", dependencies=[Depends(finance_write)])
 async def reverse_journal_entry(
     entry_id: str,
     request: Request,
     reason: str = Query(..., description="Reason for reversal"),
     tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    nutzer: dict = Depends(finance_write),
 ):
     """
     Create a reversal entry.
@@ -363,6 +388,12 @@ async def reverse_journal_entry(
     try:
         from app.core.blockchain_anchor_runtime import anchor_journal_entry_event
 
+        # Storno einer gebuchten Buchung: zweite Person mit erhoehter Berechtigung; die Buchung eines Belegs wird
+        # ueber den Beleg storniert (APPROVAL-001).
+        from app.services import finance_freigabe
+
+        akteur = str(nutzer.get("sub") or "") if isinstance(nutzer, dict) else None
+        finance_freigabe.verlange_hauptbuchstorno(db, tenant_id, entry_id, akteur)
         entry_repo = container.resolve(JournalEntryRepository)
         reversal_entry = await entry_repo.reverse_entry(entry_id, reason, tenant_id)
         if not reversal_entry:
@@ -391,7 +422,7 @@ async def reverse_journal_entry(
         raise HTTPException(status_code=500, detail=f"Failed to reverse journal entry: {str(e)}")
 
 
-@router.delete("/{entry_id}", status_code=204, response_class=Response, response_model=None, summary="Journal entry löschen")
+@router.delete("/{entry_id}", status_code=204, response_class=Response, response_model=None, summary="Journal entry löschen", dependencies=[Depends(finance_admin)])
 async def delete_journal_entry(
     entry_id: str,
     request: Request,

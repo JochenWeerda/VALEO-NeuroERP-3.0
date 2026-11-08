@@ -1,7 +1,4 @@
 import { z } from 'zod';
-import { extendZodWithOpenApi } from 'zod-openapi';
-
-extendZodWithOpenApi(z);
 
 // Enums for contracts
 export const ContractTypeEnum = z.enum(['Buy', 'Sell']);
@@ -44,7 +41,7 @@ export const DeliveryTermsSchema = z.object({
 export const CreateContractSchema = z.object({
   type: ContractTypeEnum,
   commodity: CommodityTypeEnum,
-  counterpartyId: z.string().uuid(),
+  counterpartyId: z.string().guid(),
   incoterm: z.string().optional(),
   deliveryWindow: z.object({
     from: z.string().datetime(),
@@ -76,7 +73,7 @@ export const UpdateContractSchema = z.object({
 
 // Contract Response Schema
 export const ContractResponseSchema = z.object({
-  id: z.string().uuid(),
+  id: z.string().guid(),
   tenantId: z.string(),
   contractNo: z.string(),
   type: ContractTypeEnum,
@@ -105,7 +102,7 @@ export const ContractListQuerySchema = z.object({
   type: ContractTypeEnum.optional(),
   commodity: CommodityTypeEnum.optional(),
   status: ContractStatusEnum.optional(),
-  counterpartyId: z.string().uuid().optional(),
+  counterpartyId: z.string().guid().optional(),
   deliveryFrom: z.string().datetime().optional(),
   deliveryTo: z.string().datetime().optional(),
   page: z.coerce.number().min(1).default(1),

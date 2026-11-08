@@ -107,11 +107,19 @@ Standardabläufe für **Programm-Updates** (Patch, Minor, Major, Hotfix, Migrati
    - Integration-Tests: ✅ passing
    - E2E-Tests: ✅ passing
 
-4. ✅ **Audit-Log**
+4. ✅ **Sicherung vor dem Release** (Pflicht, sobald das Release Migrationen enthält)
+   ```bash
+   # je betroffene Datenbank; Ziel und Zugang aus der Betriebsumgebung
+   DB_HOST=... DB_NAME=... DB_USER=... BACKUP_DIR=... bash scripts/backup-db.sh
+   ```
+   - Dateiname der Sicherung im Release-Log festhalten; sie ist der einzige
+     Rueckweg fuer Daten (siehe Phase 5).
+
+5. ✅ **Audit-Log**
    - Release als Draft protokolliert
    - Event: `audit.release.planned`
 
-**Checkpoint:** ✅ Alle Tests grün, Changelog genehmigt
+**Checkpoint:** ✅ Alle Tests grün, Changelog genehmigt, Sicherung erstellt
 
 ---
 
@@ -128,10 +136,18 @@ Standardabläufe für **Programm-Updates** (Patch, Minor, Major, Hotfix, Migrati
    curl http://audit-domain:3090/health
    ```
 
-2. ✅ **DB-Migrationen Dry-Run**
+2. ✅ **DB-Migrationen pruefen** (drizzle-kit kennt kein `--dry-run`; `generate` schreibt Dateien)
    ```bash
-   npm run migrate:gen --dry-run
+   pnpm --filter @valero-neuroerp/<domain> exec drizzle-kit check     # Journal/Snapshots konsistent
+   pnpm --filter @valero-neuroerp/<domain> exec drizzle-kit generate  # muss "No schema changes" melden
    ```
+   - Meldet `generate` Aenderungen, fehlt eine eingecheckte Migration: Release stoppen.
+   - `pnpm --filter @valero-neuroerp/<domain> run migrate:check` gegen die Zieldatenbank:
+     verweigert Ziele, die keine Domaenendatenbank sind (z. B. die Backend-Datenbank ueber den
+     `DATABASE_URL`-Rueckfall) und Kettentabellen ohne Journal (Altbestand aus `push`).
+   - Die SQL der Kette laesst sich ohne bleibende Aenderung auf dem Pruefstand
+     abnehmen: `node scripts/verify_drizzle_migrations_probe.cjs packages/<domain>`
+     (eine Transaktion, eigenes Schema, immer Rollback).
 
 3. ✅ **Schema-Kompatibilität prüfen**
    - Events (NATS-Schemas)
@@ -251,7 +267,7 @@ GET /analytics/api/v1/kpis/realtime?metric=error_rate,p95_latency,consumer_lag
    - Stakeholder informieren
 
 2. ⚠️ **Rollback ausführen**
-   
+
    **Rolling Update:**
    ```bash
    kubectl rollout undo deployment/document-domain
@@ -269,10 +285,35 @@ GET /analytics/api/v1/kpis/realtime?metric=error_rate,p95_latency,consumer_lag
    kubectl set weight canary-service 0
    ```
 
-3. ⚠️ **Down-Migrationen** (falls DB geändert)
+3. ⚠️ **Datenbank** (falls das Release Migrationen enthielt)
+
+   drizzle-kit hat **keine Down-Migrationen**; ein Befehl `migrate:down` existiert nicht.
+   Den Weg nach Schadensbild waehlen und im Release-Log festhalten:
+
+   **a) Nur Anwendung zurueck, Schema bleibt (Regelfall).** Weil Migrationen nach
+   Expand → Migrate → Contract (siehe unten) erweitern statt brechen, laeuft die
+   Vorversion auf dem neuen Schema. Nichts an der Datenbank tun.
+
+   **b) Migration fehlerhaft, Daten intakt: Vorwaertskorrektur.**
    ```bash
-   npm run migrate:down
+   # Schema im Paket korrigieren, dann
+   pnpm --filter @valero-neuroerp/<domain> run migrate:gen    # neue SQL, im Review pruefen
+   node scripts/verify_drizzle_migrations_probe.cjs packages/<domain>
+   pnpm --filter @valero-neuroerp/<domain> run migrate:apply  # drizzle-kit migrate
    ```
+   Eingespielte Migrationen nie loeschen oder umschreiben; das Journal
+   (`migrations/meta/_journal.json`) und die Tabelle `__drizzle_migrations__`
+   muessen dieselbe Kette beschreiben.
+
+   **c) Daten oder Schema beschaedigt: Wiederherstellung aus der Sicherung aus Phase 1.**
+   ```bash
+   DB_HOST=... DB_NAME=... DB_USER=... bash scripts/restore-db.sh <sicherung>.sql.gz
+   ```
+   Das Skript legt vorher eine Sicherheitskopie an, ersetzt die Datenbank und
+   prueft die Tabellenzahl. Danach `drizzle-kit check` und die Anwendung der
+   Vorversion starten. Aenderungen seit der Sicherung gehen verloren und muessen
+   fachlich nachgetragen werden. Wiederanlaufzeit und Nachweis:
+   [Backup & Restore](docs/admin/backup-restore.md) (Restore-Drill, 15-min-RTO).
 
 4. ⚠️ **Feature Flags deaktivieren**
    ```bash
@@ -342,7 +383,8 @@ GET /analytics/api/v1/kpis/realtime?metric=error_rate,p95_latency,consumer_lag
 - [ ] Changelog vollständig
 - [ ] Version korrekt (Git-Tag + Docker-Image)
 - [ ] Alle Tests grün (Unit, Integration, E2E)
-- [ ] DB-Migrationen geprüft (Dry-Run)
+- [ ] DB-Migrationen geprüft (`drizzle-kit check`, `generate` ohne Änderungen)
+- [ ] Sicherung vor dem Release erstellt und im Release-Log vermerkt
 - [ ] Schema-Breaking-Changes dokumentiert
 - [ ] Rollback-Plan bereit
 - [ ] Stakeholder informiert (24h vorher)
@@ -370,7 +412,7 @@ GET /analytics/api/v1/kpis/realtime?metric=error_rate,p95_latency,consumer_lag
 ### Bei Rollback
 
 - [ ] Rollback-Grund dokumentiert
-- [ ] Down-Migrationen ausgeführt
+- [ ] DB-Weg gewählt und protokolliert (a: keine Aktion, b: Vorwärtskorrektur, c: Restore aus Sicherung)
 - [ ] Feature Flags deaktiviert
 - [ ] Incident-Report erstellt
 - [ ] Stakeholder informiert
@@ -544,7 +586,7 @@ COMMIT;
 
 ---
 
-**Version:** 1.0  
-**Wartung:** Bei jedem Major-Release aktualisieren  
+**Version:** 1.0
+**Wartung:** Bei jedem Major-Release aktualisieren
 **Owner:** DevOps + Release Management
 

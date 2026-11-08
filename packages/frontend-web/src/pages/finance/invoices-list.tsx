@@ -1,7 +1,7 @@
-/**
- * Finance Invoices List
- * Liste aller Rechnungen im Finance-Modul
- */
+import { NativeListPage } from '@/components/mask-builder/NativeListPage'
 
-export { default } from "@/pages/sales/rechnungen-liste";
-
+export default function Page(): JSX.Element {
+  return (
+    <NativeListPage screenId="finance/invoices-list" testId="screen-finance/invoices-list" />
+  )
+}

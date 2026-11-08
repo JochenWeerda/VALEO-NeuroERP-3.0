@@ -17,14 +17,14 @@ const MAX_SHIFT_DURATION_HOURS = 24;
 const MIN_SHIFT_DURATION_HOURS = 0.5;
 
 export const ShiftSchema = z.object({
-  id: z.string().uuid(),
-  tenantId: z.string().uuid(),
+  id: z.string().guid(),
+  tenantId: z.string().guid(),
   name: z.string().min(SHIFT_NAME_MIN_LENGTH).max(SHIFT_NAME_MAX_LENGTH),
   location: z.string().optional(),
   startsAt: z.string().datetime(),
   endsAt: z.string().datetime(),
   requiredHeadcount: z.number().int().min(MIN_REQUIRED_HEADCOUNT),
-  assigned: z.array(z.string().uuid()),
+  assigned: z.array(z.string().guid()),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
   createdBy: z.string().optional(),

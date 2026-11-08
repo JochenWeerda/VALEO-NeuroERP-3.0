@@ -83,7 +83,7 @@ export const DeliveryTermsSchema = z.object({
 });
 
 export const ContractSchema = z.object({
-  id: z.string().uuid().optional(),
+  id: z.string().guid().optional(),
   tenantId: z.string(),
   contractNo: z.string(),
   type: z.enum([ContractType.BUY, ContractType.SELL]),

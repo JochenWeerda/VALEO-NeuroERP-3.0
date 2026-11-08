@@ -17,10 +17,11 @@ class EpodError(Exception):
     """Raised when ePOD lifecycle constraints are violated."""
 
 
-def _get_stop(db: Session, stop_id: str) -> Optional[Dict[str, Any]]:
+def _get_stop(db: Session, stop_id: str, tenant_id: str) -> Optional[Dict[str, Any]]:
+    """Stopp im Mandanten; bis 28.10.2026 nur nach ID (Stopps anderer Mandanten liessen sich abrechnen)."""
     row = db.execute(
-        text("SELECT * FROM domain_logistics.tour_stops WHERE id = :sid"),
-        {"sid": stop_id},
+        text("SELECT * FROM domain_logistics.tour_stops WHERE id = :sid AND tenant_id = :tid"),
+        {"sid": stop_id, "tid": tenant_id},
     ).mappings().first()
     return dict(row) if row else None
 
@@ -38,11 +39,11 @@ def settle_epod(
 
     Idempotent: if a settlement already exists for this stop_id, returns it.
     """
-    stop = _get_stop(db, stop_id)
+    stop = _get_stop(db, stop_id, tenant_id)
     if not stop:
         raise EpodError(f"Stopp {stop_id} nicht gefunden")
 
-    if stop.get("tour_id") and str(stop["tour_id"]) != tour_id:
+    if str(stop.get("tour_id") or "") != tour_id:
         raise EpodError(f"Stopp {stop_id} gehört nicht zu Tour {tour_id}")
 
     # fail-closed: only allow settlement for delivered/signed stops
@@ -56,8 +57,8 @@ def settle_epod(
 
     # idempotency: check existing settlement
     existing = db.execute(
-        text("SELECT * FROM domain_logistics.epod_settlements WHERE stop_id = :sid"),
-        {"sid": stop_id},
+        text("SELECT * FROM domain_logistics.epod_settlements WHERE stop_id = :sid AND tenant_id = :tid"),
+        {"sid": stop_id, "tid": tenant_id},
     ).mappings().first()
     if existing:
         logger.info("epod: settlement already exists for stop %s — returning existing", stop_id)
@@ -84,9 +85,9 @@ def settle_epod(
     # update stop epod_status
     db.execute(
         text(
-            "UPDATE domain_logistics.tour_stops SET epod_status = 'SETTLED' WHERE id = :sid"
+            "UPDATE domain_logistics.tour_stops SET epod_status = 'SETTLED' WHERE id = :sid AND tenant_id = :tid"
         ),
-        {"sid": stop_id},
+        {"sid": stop_id, "tid": tenant_id},
     )
     db.commit()
     logger.info("epod: settled stop %s (tour %s)", stop_id, tour_id)

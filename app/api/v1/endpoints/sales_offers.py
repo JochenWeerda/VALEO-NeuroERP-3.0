@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+import hashlib
 from decimal import Decimal
 from typing import Optional
 from uuid import uuid4
@@ -17,6 +18,7 @@ from ....core.database import get_db
 from ....core.tenant import get_tenant_id
 from ....services.customer_sales_eligibility import assert_customer_allowed_for_sales_order
 from ..schemas.base import PaginatedResponse
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter()
 
@@ -250,16 +252,13 @@ async def get_sales_offer(
     return _row_to_offer(row, _fetch_items(db, offer_id, tenant_id))
 
 
-@router.post("/", response_model=SalesOffer, status_code=status.HTTP_201_CREATED, summary="Sales offer anlegen")
-async def create_sales_offer(
-    payload: SalesOfferCreate,
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-):
+def persist_sales_offer(db: Session, tenant_id: str, payload: SalesOfferCreate) -> SalesOffer:
     effective_tenant = _resolve_tenant_scope(payload.tenant_id, tenant_id)
     offer_id = str(uuid4())
     now = datetime.now(timezone.utc)
 
+    lock = int.from_bytes(hashlib.sha256(f"offer-number:{effective_tenant}:{payload.offer_number}".encode()).digest()[:8], "big", signed=True)
+    db.execute(text("SELECT pg_advisory_xact_lock(:key)"), {"key": lock})
     duplicate = db.execute(
         text(
             """
@@ -276,6 +275,11 @@ async def create_sales_offer(
         raise HTTPException(status_code=409, detail="offer_number already exists")
 
     if payload.customer_id:
+        customer = db.execute(text("SELECT id FROM domain_crm.customers "
+                                   "WHERE id=:id AND tenant_id=:tenant AND deleted_at IS NULL FOR KEY SHARE"),
+                              {"id": payload.customer_id, "tenant": effective_tenant}).first()
+        if customer is None:
+            raise HTTPException(404, "Customer not found")
         assert_customer_allowed_for_sales_order(db, effective_tenant, payload.customer_id)
 
     # Compute totals from items
@@ -347,7 +351,6 @@ async def create_sales_offer(
             },
         )
 
-    db.commit()
     return _row_to_offer(
         {
             "id": offer_id,
@@ -373,7 +376,49 @@ async def create_sales_offer(
     )
 
 
-@router.patch("/{offer_id}", response_model=SalesOffer, summary="Sales offer aktualisieren")
+
+class SalesOfferImportCommand(BaseModel):
+    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+    csv_content: str = Field(min_length=1)
+    idempotency_key: str = Field(alias="_idempotencyKey", min_length=1, max_length=200)
+    audit_reason: Optional[str] = Field(default=None, alias="_auditReason", max_length=1000)
+    mode: Optional[str] = Field(default=None, alias="_mode")
+
+
+class SalesOfferImportOut(BaseModel):
+    """Ergebnis von ``sales_offer_import.import_offers``; ``replayed`` bei wiederholtem Idempotenzschluessel."""
+    success: bool
+    count: int
+    offer_ids: list[str]
+    auditEntryId: Optional[str] = None
+    replayed: bool = False
+
+
+@router.post("/actions/import-csv", response_model=SalesOfferImportOut, summary="Sales offers aus CSV importieren",
+             dependencies=SCHREIBEN["VERKAUF"])
+async def import_sales_offers(payload: SalesOfferImportCommand, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    from app.services.sales_offer_import import import_offers
+    if payload.mode not in (None, "execute"):
+        raise HTTPException(422, "Unsupported import mode")
+    return import_offers(db, tenant_id, payload.csv_content, payload.idempotency_key, payload.audit_reason)
+
+
+@router.post("/", response_model=SalesOffer, status_code=status.HTTP_201_CREATED, summary="Sales offer anlegen", dependencies=SCHREIBEN["VERKAUF"])
+async def create_sales_offer(
+    payload: SalesOfferCreate,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    try:
+        result = persist_sales_offer(db, tenant_id, payload)
+        db.commit()
+        return result
+    except Exception:
+        db.rollback()
+        raise
+
+
+@router.patch("/{offer_id}", response_model=SalesOffer, summary="Sales offer aktualisieren", dependencies=SCHREIBEN["VERKAUF"])
 async def update_sales_offer(
     offer_id: str,
     payload: SalesOfferUpdate,
@@ -460,8 +505,7 @@ async def update_sales_offer(
 
 
 @router.delete("/{offer_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Sales offer löschen",
-    response_model=None
-)
+    response_model=None, dependencies=SCHREIBEN["VERKAUF"])
 async def delete_sales_offer(
     offer_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -484,8 +528,7 @@ async def delete_sales_offer(
 
 
 @router.post("/{offer_id}/convert-to-order", status_code=status.HTTP_200_OK, summary="Offer to order umwandeln",
-    response_model=SalesOfferConversionOut
-)
+    response_model=SalesOfferConversionOut, dependencies=SCHREIBEN["VERKAUF"])
 async def convert_offer_to_order(
     offer_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -582,8 +625,7 @@ class SalesOfferPrintOut(BaseSchema):
 @router.post(
     "/{offer_id}/print",
     response_model=SalesOfferPrintOut,
-    summary="Sales offer drucken",
-)
+    summary="Sales offer drucken", dependencies=SCHREIBEN["VERKAUF"])
 async def print_sales_offer(
     offer_id: str,
     template: Optional[str] = Query(default=None, max_length=60, description="Formatvorlage"),
@@ -640,8 +682,7 @@ async def print_sales_offer(
 @router.post(
     "/{offer_id}/post",
     response_model=SalesOffer,
-    summary="Sales offer buchen",
-)
+    summary="Sales offer buchen", dependencies=SCHREIBEN["VERKAUF"])
 async def post_sales_offer(
     offer_id: str,
     tenant_id: str = Depends(get_tenant_id),

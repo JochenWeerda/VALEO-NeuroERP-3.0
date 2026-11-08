@@ -26,6 +26,7 @@ from urllib.parse import urljoin
 from sqlalchemy import text
 
 from app.core.database import SessionLocal
+from app.core.schema_guard import require_tables
 
 logger = logging.getLogger("lkv.pipeline")
 
@@ -432,34 +433,8 @@ def resolve_postal_codes(rows: list[dict], city_plz_map: dict[str, str]) -> dict
 
 
 def ensure_lkv_schema(db) -> None:
-    db.execute(
-        text(
-            """
-            CREATE TABLE IF NOT EXISTS dairy_herd_performance (
-                id                BIGSERIAL PRIMARY KEY,
-                ref_year          SMALLINT     NOT NULL,
-                region            TEXT         NOT NULL,
-                besitzer_raw      TEXT         NOT NULL,
-                name_norm         TEXT         NOT NULL,
-                postal_code       TEXT,
-                postal_code_source TEXT,
-                ort               TEXT,
-                herd_size_group   TEXT,
-                alter_monate      NUMERIC(5,1),
-                milch_kg          NUMERIC(8,1),
-                fett_pct          NUMERIC(4,2),
-                fett_kg           NUMERIC(7,1),
-                eiw_pct           NUMERIC(4,2),
-                eiw_kg            NUMERIC(7,1),
-                fett_eiweiss_kg   NUMERIC(7,1),
-                loaded_at         TIMESTAMPTZ  NOT NULL DEFAULT NOW()
-            )
-            """
-        )
-    )
-    db.execute(text("CREATE INDEX IF NOT EXISTS idx_dairy_year ON dairy_herd_performance (ref_year)"))
-    db.execute(text("CREATE INDEX IF NOT EXISTS idx_dairy_name_plz ON dairy_herd_performance (name_norm, postal_code)"))
-    db.commit()
+    """Tabelle und Indizes kommen aus Migrationen; hier nur pruefen (Anwendung ohne DDL-Recht)."""
+    require_tables(db, ('dairy_herd_performance',), "runtime_ddl_to_migrations_20261026")
 
 
 def persist_herd_performance(db, rows: list[dict], region: str, year: int) -> int:
@@ -535,28 +510,8 @@ def build_kunden_lookup(db) -> dict[tuple, str]:
 
 
 def ensure_dairy_match_schema(db) -> None:
-    db.execute(
-        text(
-            """
-            CREATE TABLE IF NOT EXISTS dairy_kunden_match (
-                id              BIGSERIAL PRIMARY KEY,
-                ref_year        SMALLINT     NOT NULL,
-                kunden_nr       TEXT         NOT NULL,
-                region          TEXT,
-                dairy_besitzer  TEXT,
-                name_norm       TEXT,
-                postal_code     TEXT,
-                milch_kg        NUMERIC(8,1),
-                fett_eiweiss_kg NUMERIC(7,1),
-                herd_size_group TEXT,
-                match_method    TEXT,
-                matched_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW()
-            )
-            """
-        )
-    )
-    db.execute(text("CREATE INDEX IF NOT EXISTS idx_dkm_kunde ON dairy_kunden_match (kunden_nr, ref_year)"))
-    db.commit()
+    """Tabelle und Index kommen aus Migrationen; hier nur pruefen (Anwendung ohne DDL-Recht)."""
+    require_tables(db, ('dairy_kunden_match',), "runtime_ddl_to_migrations_20261026")
 
 
 def match_dairy_to_kunden(db=None, year: int = 2025) -> dict:

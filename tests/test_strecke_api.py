@@ -13,7 +13,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from fastapi.testclient import TestClient
 
-from main import app
+from app.main import app
 from conftest import skip_if_db_unavailable
 from app.api.v1.endpoints.strecke import (
     _parse_datum,

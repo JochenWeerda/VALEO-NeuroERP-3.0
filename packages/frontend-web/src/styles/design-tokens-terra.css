@@ -207,13 +207,13 @@
   --muted-foreground:      var(--palette-gray-600);     /* 40  5% 36% */
 
   --accent:                var(--color-harvest-400);  /* 45 93% 47% */
-  --accent-foreground:     var(--color-harvest-700);  /* 45 93% 20% */
+  --accent-foreground:     var(--palette-gray-900);  /* 45 93% 20% */
 
   --destructive:           0 70% 48%;
   --destructive-foreground: 0 0% 100%;
 
   --border:                var(--palette-gray-200);     /* 40 10% 86% */
-  --input:                 var(--palette-gray-200);
+  --input:                 40 5% 36%;
   --ring:                  var(--color-primary-500);  /* 158 64% 28% */
 
   /* ----------------------------------------------------------------
@@ -286,11 +286,11 @@
   --muted:                 40 12% 92%;
   --muted-foreground:      40  5% 36%;
   --accent:                45 93% 47%;
-  --accent-foreground:     45 93% 20%;
+  --accent-foreground:     40 10% 10%;
   --destructive:           0 70% 48%;
   --destructive-foreground: 0 0% 100%;
   --border:                40 10% 86%;
-  --input:                 40 10% 86%;
+  --input:                 40 5% 36%;
   --ring:                  158 64% 28%;
 
   --radius: 6px;
@@ -324,8 +324,10 @@
   --muted-foreground:   40  6% 58%;
   --accent:             45 88% 60%;   /* Helleres Gold auf dunkel */
   --accent-foreground:  45 88% 12%;
+  --destructive:        0 65% 65%;
+  --destructive-foreground: 0 0% 0%;
   --border:             40  8% 22%;
-  --input:              40  8% 22%;
+  --input:              40 8% 65%;
   --ring:               158 60% 48%;
 }
 

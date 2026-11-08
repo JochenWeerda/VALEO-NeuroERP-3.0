@@ -17,8 +17,11 @@ export interface ActionRequest {
   entityId?: string
   payload?: Record<string, unknown>
   mode: ActionExecutionMode
-  /** Agent-supplied idempotency key (ignored for human-triggered execute) */
+  /** Stable intent key, reused after an uncertain outcome. */
   idempotencyKey?: string
+  expectedVersion?: number
+  approvalId?: string
+  bindingSnapshot?: string
   /** Required when auditReasonRequired: true */
   auditReason?: string
   /** Herkunft des Ausloesers (Default 'mask') — fuers Audit (UIX-070). */
@@ -26,6 +29,7 @@ export interface ActionRequest {
 }
 
 export interface ActionResult {
+  resourceId?: string
   actionKey: string
   mode: ActionExecutionMode
   success: boolean
@@ -38,10 +42,13 @@ export interface ActionResult {
   /** Downstream entity IDs created/modified */
   affectedIds?: string[]
   error?: string
+  /** Typed adapters may expose their server receipt to the owning controller. */
+  data?: Record<string, unknown>
 }
 
 export interface ActionPolicy {
   actionKey: string
+  permission?: string
   dangerLevel: ActionDangerLevel
   requiresConfirmation: boolean
   requiresHumanApproval: boolean
@@ -56,6 +63,7 @@ export interface ActionRuntimeOptions {
   entityId?: string
   permissions: string[]
   isAgentCaller?: boolean
+  entityData?: Record<string, unknown>
 }
 
 /**
@@ -66,6 +74,9 @@ export function checkActionPolicy(
   policy: ActionPolicy,
   opts: ActionRuntimeOptions,
 ): string | undefined {
+  if (policy.permission && !opts.permissions.includes(policy.permission)) {
+    return `Keine Berechtigung fuer Aktion "${policy.actionKey}".`
+  }
   if (opts.isAgentCaller && policy.forbiddenForAgents) {
     return `Action "${policy.actionKey}" ist für Agent-Aufrufe gesperrt.`
   }
@@ -81,6 +92,7 @@ export function checkActionPolicy(
  */
 export function buildActionPolicy(actionDef: {
   key: string
+  permission?: string
   dangerLevel?: ActionDangerLevel
   requiresConfirmation?: boolean
   humanApprovalRequired?: boolean
@@ -90,6 +102,7 @@ export function buildActionPolicy(actionDef: {
 }): ActionPolicy {
   return {
     actionKey: actionDef.key,
+    permission: actionDef.permission,
     dangerLevel: actionDef.dangerLevel ?? 'safe',
     requiresConfirmation: actionDef.requiresConfirmation ?? false,
     requiresHumanApproval: actionDef.humanApprovalRequired ?? false,

@@ -34,12 +34,12 @@ class TestARClearingBelegbruch:
         body.bediener = None
 
         svc_result = {"voll_ausgeziffert": True, "neu_offen": 0.0, "rechnungsnr": "RG-2026-001"}
-        inv_doc = {"number": "RG-2026-001", "status": "GEBUCHT", "totalGross": 1190.0}
+        inv_doc = {"number": "RG-2026-001", "status": "GEBUCHT", "totalGross": 1190.0, "tenantId": TENANT}
 
         with (
             patch("app.api.v1.endpoints.finance_clearing.FinanceClearingService") as MockSvc,
             patch("app.api.v1.endpoints.finance_clearing.get_repository", return_value=None),
-            patch("app.api.v1.endpoints.finance_clearing.get_from_store", return_value=inv_doc) as mock_get,
+            patch("app.documents.router_helpers.get_from_store", return_value=inv_doc) as mock_get,
             patch("app.api.v1.endpoints.finance_clearing.save_to_store") as mock_save,
         ):
             MockSvc.return_value.record_payment.return_value = svc_result
@@ -67,7 +67,7 @@ class TestARClearingBelegbruch:
         with (
             patch("app.api.v1.endpoints.finance_clearing.FinanceClearingService") as MockSvc,
             patch("app.api.v1.endpoints.finance_clearing.get_repository", return_value=None),
-            patch("app.api.v1.endpoints.finance_clearing.get_from_store") as mock_get,
+            patch("app.documents.router_helpers.get_from_store") as mock_get,
             patch("app.api.v1.endpoints.finance_clearing.save_to_store") as mock_save,
         ):
             MockSvc.return_value.record_payment.return_value = svc_result
@@ -135,11 +135,11 @@ class TestSkontoAuszifferungBelegbruch:
         payload.skonto_konto = "8736"
 
         db = self._make_db(op_ausgeziffert=True)
-        inv_doc = {"number": "RG-2026-003", "status": "GEBUCHT"}
+        inv_doc = {"number": "RG-2026-003", "status": "GEBUCHT", "tenantId": TENANT}
 
         with (
             patch("app.api.v1.endpoints.op_skonto_auszifferung.get_repository", return_value=None),
-            patch("app.api.v1.endpoints.op_skonto_auszifferung.get_from_store", return_value=inv_doc),
+            patch("app.documents.router_helpers.get_from_store", return_value=inv_doc),
             patch("app.api.v1.endpoints.op_skonto_auszifferung.save_to_store") as mock_save,
         ):
             create_auszifferung(payload=payload, db=db, tenant_id=TENANT)

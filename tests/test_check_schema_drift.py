@@ -230,8 +230,11 @@ def test_der_abgleich_findet_eine_echte_abweichung() -> None:
     """
     from sqlalchemy import create_engine, text
 
-    url = os.environ.get(
-        "DATABASE_URL",
+    from app.core.migration_session import migration_database_url
+
+    # Der Test legt Schemata an wie ein Migrationswerkzeug: mit getrennten Rollen
+    # ueber den Migrator (MIGRATION_DATABASE_URL fuer dieselbe Datenbank).
+    url = migration_database_url(
         "postgresql://valeo_dev:valeo_dev_2024@127.0.0.1:5432/valeo_neuro_erp",
     )
     # Auch dieser Test legt Schemata an und wieder ab. Bricht er dazwischen

@@ -25,6 +25,7 @@ from app.infrastructure.models import (
 )
 
 from app.api.v1.schemas.base import BaseSchema, StatusResponse
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter()
@@ -380,7 +381,7 @@ async def get_raps_profile(
     return _profile_out(db, item)
 
 
-@router.post('/raps-profiles', response_model=RapsProfileOut, status_code=201, summary="Raps profile anlegen")
+@router.post('/raps-profiles', response_model=RapsProfileOut, status_code=201, summary="Raps profile anlegen", dependencies=SCHREIBEN["AGRAR"])
 async def create_raps_profile(
     payload: RapsProfileIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -410,7 +411,7 @@ async def create_raps_profile(
     return _profile_out(db, item)
 
 
-@router.put('/raps-profiles/{profile_id}', response_model=RapsProfileOut, summary="Raps profile aktualisieren")
+@router.put('/raps-profiles/{profile_id}', response_model=RapsProfileOut, summary="Raps profile aktualisieren", dependencies=SCHREIBEN["AGRAR"])
 async def update_raps_profile(
     profile_id: str,
     payload: RapsProfileIn,
@@ -444,7 +445,7 @@ async def update_raps_profile(
     return _profile_out(db, item)
 
 
-@router.delete('/raps-profiles/{profile_id}', response_model=StatusResponse, summary="Raps profile löschen")
+@router.delete('/raps-profiles/{profile_id}', response_model=StatusResponse, summary="Raps profile löschen", dependencies=SCHREIBEN["AGRAR"])
 async def delete_raps_profile(
     profile_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -471,7 +472,7 @@ async def delete_raps_profile(
     return {'ok': True, 'id': profile_id}
 
 
-@router.post('/raps-profiles/{profile_id}/derive-from-ops', response_model=RapsDeriveOut, summary="Raps profile from ops derive")
+@router.post('/raps-profiles/{profile_id}/derive-from-ops', response_model=RapsDeriveOut, summary="Raps profile from ops derive", dependencies=SCHREIBEN["AGRAR"])
 async def derive_raps_profile_from_ops(
     profile_id: str,
     period: str | None = None,

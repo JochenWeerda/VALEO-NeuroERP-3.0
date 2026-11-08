@@ -13,6 +13,8 @@ class DocLine(BaseModel):
     article: str
     qty: float
     price: Optional[float] = None
+    # Steuerschluessel des Mandanten (``tax_keys.code``). Angegeben wird der Schluessel; ``vatRate`` ist sein Abbild.
+    taxCode: Optional[str] = None
     vatRate: Optional[float] = None
     nutrientNKgPerUnit: Optional[float] = None
     nutrientP2o5KgPerUnit: Optional[float] = None
@@ -112,6 +114,8 @@ class SalesInvoice(BaseModel):
     subtotalNet: float = 0.0  # Netto-Summe
     totalTax: float = 0.0     # Steuer-Summe
     totalGross: float = 0.0   # Brutto-Summe
+    # Warum sich die Umsatzsteuer aus den Positionen nicht bestimmen liess (nur Entwurf); sonst leer.
+    steuerPruefgrund: Optional[str] = None
 
 
 class PaymentReceived(BaseModel):

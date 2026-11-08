@@ -51,6 +51,7 @@ from app.services.sales_invoice_service import (
     SalesInvoiceService,
     SourceLine,
 )
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter()
 
@@ -321,8 +322,7 @@ def _delivery_note_sources(db: Session, tenant_id: str, ls_ids: list[str]) -> li
     "/invoices/from-delivery-notes",
     response_model=SalesInvoiceOut,
     status_code=201,
-    summary="Rechnung aus Lieferscheinen anlegen",
-)
+    summary="Rechnung aus Lieferscheinen anlegen", dependencies=SCHREIBEN["VERKAUF"])
 def create_from_delivery_notes(
     body: CreateFromDeliveryNotes,
     db: Session = Depends(get_db),

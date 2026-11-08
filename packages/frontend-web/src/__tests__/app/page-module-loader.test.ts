@@ -9,3 +9,9 @@ describe('page-module-loader', () => {
     expect(second).toBe(first)
   })
 })
+
+
+it('loads the published document pilot page through the existing page groups', async () => {
+  const page = await getPageModuleLoader('@/pages/belege/beleg')()
+  expect(typeof page.default).toBe('function')
+}, 20000)

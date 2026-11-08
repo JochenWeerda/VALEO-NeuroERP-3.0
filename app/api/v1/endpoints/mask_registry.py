@@ -119,8 +119,10 @@ def _omnibox_entry(screen_id: str, sd: dict) -> dict:
 
 def _build_omnibox_catalog(tenant_id: str | None = None) -> list[dict]:
     from app.core.screen_definitions import _SCREEN_DEFINITIONS, get_screen_definition
+    from app.core.stamm_object_page_parent import ensure_stamm_screen_registry
     from app.services.studio_draft_store import list_published_definitions
 
+    ensure_stamm_screen_registry()
     entries: list[dict] = []
     native_ids = set(_SCREEN_DEFINITIONS.keys())
     for screen_id in sorted(native_ids):

@@ -322,63 +322,6 @@ class FutterCompatService:
         return {"ration_id": ration_id, "naehrwerte": totals,
                 "komponenten_count": len(komponenten), "calculated_at": now_iso()}
 
-    # ── ArticleModel-backed lists ─────────────────────────────────────────────
-
-    def list_einzelfuttermittel(self) -> list:
-        items = self.db.query(ArticleModel).filter(ArticleModel.tenant_id == self.tenant_id, ArticleModel.is_active == True).limit(500).all()  # noqa: E712
-        return [
-            {
-                "id": i.id,
-                "name": i.name,
-                "artikelnummer": i.article_number,
-                "kategorie": i.category,
-                "protein": float((getattr(i, "custom_properties", None) or {}).get("protein", 0)),
-                "energie": float((getattr(i, "custom_properties", None) or {}).get("energie", 0)),
-                "preis": float(i.sales_price or 0),
-                "einheit": i.unit,
-            }
-            for i in items
-        ]
-
-    def list_mischfuttermittel(self) -> list:
-        items = self.db.query(ArticleModel).filter(ArticleModel.tenant_id == self.tenant_id, ArticleModel.is_active == True).limit(200).all()  # noqa: E712
-        return [
-            {
-                "id": i.id,
-                "name": i.name,
-                "artikelnummer": i.article_number,
-                "komponenten": int((getattr(i, "custom_properties", None) or {}).get("komponenten", 0)),
-                "preis": float(i.sales_price or 0),
-                "einheit": i.unit,
-            }
-            for i in items
-        ]
-
-    def soft_delete_artikel(self, ids: list) -> dict:
-        if not self.tenant_id:
-            raise ValidationFailedError("Mandant fuer Futtermittel-Loeschung fehlt")
-        if not ids:
-            raise ValidationFailedError("Keine Futtermittel-IDs übergeben")
-        query = self.db.query(ArticleModel).filter(
-            ArticleModel.id.in_(ids), ArticleModel.tenant_id == self.tenant_id,
-        )
-        articles = query.all()
-        articles_by_id = {str(a.id): a for a in articles}
-        deleted, errors, missing_ids = 0, [], []
-        for item_id in ids:
-            article = articles_by_id.get(item_id)
-            if article is None:
-                missing_ids.append(item_id)
-                continue
-            try:
-                article.is_active = False
-                deleted += 1
-            except Exception as exc:
-                errors.append({"id": item_id, "detail": str(exc)})
-        if deleted > 0:
-            self.db.commit()
-        return {"requested": len(ids), "deleted": deleted, "missing_ids": missing_ids, "errors": errors}
-
     # ── Charge-backed lists ───────────────────────────────────────────────────
 
     def list_chargen(self) -> list:

@@ -1,5 +1,6 @@
 import {
   resolveContextRailSections,
+  validateScreenDefinition,
   type ScreenActionDefinition,
   type ScreenDefinition,
   type ScreenFieldDefinition,
@@ -13,6 +14,8 @@ import { defaultColumnNavigation, FLOORPLAN_RULES, resolveSectionNavigation, ROW
 import { compileProcessRibbon, type ProcessChain } from '../renderers/process-ribbon'
 import { buildRenderPlanCacheKey, type CompileContext } from './compile-context'
 import { globalRenderPlanCache } from './cache'
+import { validTextFileDefinitions } from '../runtime/text-file-contract'
+import { columnExtras, fieldExtras } from './field-extras'
 import { fieldTypeToComponentKind, type RenderActionPlan, type RenderCalendarPlan, type RenderFieldPlan, type RenderPlan, type RenderProcessRibbonPlan, type RenderTabContentPlan, type RenderTabPlan, type RenderTablePlan, type RenderTilePlan, type RenderTwinPlan } from './types'
 
 const DEFAULT_LOOKUP_MIN_CHARS = 2
@@ -31,12 +34,13 @@ function compileField(
   return {
     key: field.key,
     label: field.label,
-    componentKind: fieldTypeToComponentKind(field.type),
+    componentKind: fieldTypeToComponentKind(field.type, field.rowFields !== undefined || field.tableEditing !== undefined),
     dataPath: field.key,
     tabKey,
     order,
     required: field.required ?? false,
-    readOnly: field.readOnly ?? false,
+    // Ein rechnendes Feld ist nie eingebbar.
+    readOnly: (field.readOnly ?? false) || field.computed !== undefined,
     visible: true,
     placeholder: field.placeholder,
     helpText: field.helpText,
@@ -44,6 +48,11 @@ function compileField(
     dataSourceKey: field.dataSourceKey,
     minSearchChars: field.minSearchChars ?? performanceLookupMinChars,
     renderHint: field.renderHint,
+    currencyField: field.currencyField,
+    ...fieldExtras(field),
+    rowFields: field.rowFields,
+    tableEditing: field.tableEditing,
+    ...(field.fileContent !== undefined ? { fileContent: field.fileContent } : {}),
   }
 }
 
@@ -63,15 +72,19 @@ function compileTable(
   tableProfile: ScreenTableProfile,
   density: ScreenDensity,
   onePage: boolean,
+  permissions: string[],
   tabKey?: string,
 ): RenderTablePlan {
   const pageSize = Math.min(table.pageSize ?? DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE)
   const declaredRowHeight = table.rowHeight ?? (density === 'expertDense' ? 36 : density === 'compact' ? 44 : 52)
-  const rowHeight = density === 'expertDense'
+  const denseRowHeight = density === 'expertDense'
     ? Math.min(declaredRowHeight, 36)
     : density === 'compact'
       ? Math.min(declaredRowHeight, 44)
       : Math.max(declaredRowHeight, 52)
+  const rowActions = table.rowActions?.filter((action) => !action.permission || permissions.includes(action.permission))
+  // A 44px action target plus cell padding must fit inside its virtual row.
+  const rowHeight = rowActions?.length ? Math.max(denseRowHeight, 52) : denseRowHeight
   return {
     key: table.key,
     label: table.label,
@@ -84,6 +97,8 @@ function compileTable(
       sortable: column.sortable,
       filterable: column.filterable,
       renderKind: column.renderKind,
+      currencyField: column.currencyField,
+      ...columnExtras(column),
       defaultSort: column.defaultSort,
       priority: column.priority,
     })),
@@ -94,7 +109,8 @@ function compileTable(
     serverPagination: table.serverPagination ?? true,
     tableProfile,
     rowRouteTemplate: table.rowRouteTemplate,
-    rowActions: table.rowActions,
+    // Zeilenaktionen wie Kopfaktionen nur mit Recht (Rollen-Projektion der Kommandowege).
+    rowActions,
     bulkActions: table.bulkActions,
     rowDetail: compileRowDetail(table, onePage),
   }
@@ -120,9 +136,12 @@ function filterActionsByPermission(
       label: action.label,
       kind: action.kind ?? 'secondary',
       disabled: action.disabled ?? false,
+      surfaceOnly: action.surfaceOnly,
       dangerLevel: action.dangerLevel,
       requiresConfirmation: action.requiresConfirmation,
       auditReasonRequired: action.auditReasonRequired,
+      requiresExpectedVersion: action.requiresExpectedVersion,
+      requiresIdempotencyKey: action.requiresIdempotencyKey,
       humanApprovalRequired: action.humanApprovalRequired,
       zone: action.zone ?? 'header',
       keyboardShortcut: action.keyboardShortcut,
@@ -211,18 +230,33 @@ export function compileTwin(schema: ScreenDefinition): RenderTwinPlan | undefine
 }
 
 function schemaVolatility(schema: ScreenDefinition): string {
+  // Studio edits retain the same screen ID/version until they are saved. All
+  // editable field/table/tab/layout contracts must participate in this cache.
+  const structure = JSON.stringify({ title: schema.title, subtitle: schema.subtitle, flowSpineCatalog: schema.flowSpineCatalog, flowSpineWorkspace: schema.flowSpineWorkspace, listExperience: schema.listExperience, actions: schema.actions, documentVariant: schema.documentVariant, fields: schema.fields, tables: schema.tables, tabs: schema.tabs, layout: schema.layout, dataSources: schema.dataSources, specialized: schema.specialized })
   const summary = (schema.summary ?? []).map((item) => `${item.key}:${String(item.value)}`).join(',')
   const options = (schema.fields ?? []).map((field) => (
-    field.options ? `${field.key}=${field.options.map((option) => String(option.value)).join('|')}` : ''
+    // Auch die Beschriftung: Eine Auswahl kann bei gleichen Werten neu beschriftet werden (Vorschlagshinweis).
+    field.options ? `${field.key}=${field.options.map((option) => `${String(option.value)}~${option.label}`).join('|')}` : ''
   )).join(';')
-  const actions = (schema.actions ?? []).map((action) => `${action.key}${action.disabled ? '!' : ''}`).join(',')
-  return `${summary}#${options}#${actions}#${schema.layout?.density ?? ''}`
+  const actions = (schema.actions ?? []).map((action) => `${action.key}${action.disabled ? '!' : ''}${action.surfaceOnly ? ':surface' : ''}`).join(',')
+  // Schreibschutz und Untertitel aendern sich zur Laufzeit (ein geladener Datensatz sperrt sein
+  // Schluesselfeld). Ohne sie im Schluessel lieferte der Cache den Plan des vorigen Zustands.
+  const readOnly = (schema.fields ?? []).filter((field) => field.readOnly).map((field) => field.key).join(',')
+  return `${JSON.stringify(schema.title)}#${summary}#${options}#${actions}#${schema.layout?.density ?? ''}#${readOnly}#${schema.subtitle ?? ''}#${structure}`
 }
 
 export function compileRenderPlan(
   schema: ScreenDefinition,
   context: CompileContext,
 ): RenderPlan {
+  if (!validTextFileDefinitions(schema)) throw new Error('Invalid text file content contract')
+  if (schema.listExperience !== undefined && validateScreenDefinition(schema).includes('listExperience is invalid')) {
+    throw new Error('Invalid declarative list experience')
+  }
+  if (validateScreenDefinition(schema).includes('fileContent is invalid')) throw new Error('Invalid text file contract')
+  if (schema.specialized && validateScreenDefinition(schema).some(error => error.startsWith('specialized'))) throw new Error('Invalid native specialized contract')
+  if (schema.flowSpineWorkspace !== undefined && validateScreenDefinition(schema).includes('flowSpineWorkspace is invalid')) throw new Error('Invalid process workspace contract')
+  if (schema.flowSpineCatalog !== undefined && validateScreenDefinition(schema).includes('flowSpineCatalog is invalid')) throw new Error('Invalid process catalog contract')
   const cacheKey = `${buildRenderPlanCacheKey(context)}::${schemaVolatility(schema)}`
   const cached = globalRenderPlanCache.get(cacheKey)
   if (cached && cached.screenId === schema.id) {
@@ -271,11 +305,12 @@ export function compileRenderPlan(
   }
 
   const hasTables = (schema.tables?.length ?? 0) > 0 || (schema.tabs ?? []).some((tab) => (tab.tables?.length ?? 0) > 0)
-  const columnNavigation = defaultColumnNavigation(floorplan, hasTables, schema.layout?.columnNavigation)
+  const columnNavigation = defaultColumnNavigation(floorplan, hasTables,
+    schema.layout?.columnNavigation ?? (schema.layout?.tableProfile === 'audit' ? 'single' : undefined))
   const sectionNavigation = resolveSectionNavigation(floorplan, columnNavigation, schema.layout?.sectionNavigation)
   const onePage = sectionNavigation === 'anchors'
 
-  const rootTables = (schema.tables ?? []).map((table) => compileTable(table, tableProfile, density, onePage))
+  const rootTables = (schema.tables ?? []).map((table) => compileTable(table, tableProfile, density, onePage, context.auth.permissions))
   for (const table of rootTables) {
     tablesByKey[table.key] = table
   }
@@ -298,7 +333,7 @@ export function compileRenderPlan(
       fieldsByKey[field.key] = field
     }
 
-    const tabTables = (tab.tables ?? []).map((table) => compileTable(table, tableProfile, density, onePage, tab.key))
+    const tabTables = (tab.tables ?? []).map((table) => compileTable(table, tableProfile, density, onePage, context.auth.permissions, tab.key))
     tablesByTab[tab.key] = tabTables
     for (const table of tabTables) {
       tablesByKey[table.key] = table
@@ -314,6 +349,10 @@ export function compileRenderPlan(
   const processRibbon = compileProcessRibbonPlan(schema)
 
   const plan: RenderPlan = {
+    flowSpineCatalog: schema.flowSpineCatalog,
+    flowSpineWorkspace: schema.flowSpineWorkspace,
+    listExperience: schema.listExperience,
+    documentVariant: schema.documentVariant ? { ...schema.documentVariant } : undefined,
     cacheKey,
     screenId: schema.id,
     schemaVersion: context.schemaVersion,
@@ -356,6 +395,7 @@ export function compileRenderPlan(
     calendar: compileCalendar(schema),
     twin: compileTwin(schema),
     sourceProposals: schema.sourceProposals ? { ...schema.sourceProposals } : undefined,
+    specialized: schema.specialized ? { ...schema.specialized, events: schema.specialized.events ? [...schema.specialized.events] : undefined, permissions: schema.specialized.permissions ? [...schema.specialized.permissions] : undefined } : undefined,
     visibleTabs,
     tabContent,
     rootFieldKeys: rootFields.map((field) => field.key),

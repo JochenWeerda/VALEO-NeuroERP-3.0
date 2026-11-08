@@ -5,8 +5,14 @@ from __future__ import annotations
 import re
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Header, Query, Request
 
+from pydantic import ValidationError
+from sqlalchemy.orm import Session
+from app.auth.deps import get_current_user
+from app.api.v1.schemas.mask_data_contracts import MaskDataReadIn, MaskDataReadOut
+from app.services import mask_data_read
+from ....core.database import get_db
 from ....core.screen_definitions import get_screen_definition
 from ....core.tenant import get_tenant_id
 from app.api.v1.schemas.base import TypedObjectOut
@@ -123,6 +129,9 @@ async def get_mask_screen_definition(
     definition = get_screen_definition(normalized, tenant_id=tenant_id)
     if definition is None:
         raise HTTPException(status_code=404, detail=f"Keine ScreenDefinition fuer Maske {mask_id}")
+    if (definition.get('creation') or {}).get('adapter') == 'docflow.create.v1':
+        from app.core.studio_release import definition_hash
+        return {**definition, 'creationContext': {'screen_id': definition['id'], 'definition_hash': definition_hash(definition)}}
     return definition
 
 
@@ -146,8 +155,8 @@ async def get_agent_mask_contract(
 _TRIVIAL_KEYS = frozenset({"id", "pk", "uuid", "key", "name", "bezeichnung"})
 _GENERIC_KEY_PATTERN = re.compile(r"^(col|column|field|item)\d+$", re.IGNORECASE)
 _DETAIL_FLOORPLANS = frozenset({"objectPage", "transaction", "cockpit", "wizard"})
-_FINANCIAL_SCREEN_PATTERN = re.compile(r"(^finance/|invoice|open-item|journal|payment|debitor|kreditor|bankkonto)", re.IGNORECASE)
-_INVENTORY_SCREEN_PATTERN = re.compile(r"(^lager/|stock|inventory|article)", re.IGNORECASE)
+_FINANCIAL_SCREEN_PATTERN = re.compile(r"((?:^finance/)|invoice|open-item|journal|payment|debitor|kreditor|bankkonto)", re.IGNORECASE)
+_INVENTORY_SCREEN_PATTERN = re.compile(r"((?:^lager/)|stock|inventory|article)", re.IGNORECASE)
 
 
 def _check_readiness(definition: dict[str, Any]) -> dict[str, Any]:
@@ -259,7 +268,8 @@ def _check_readiness(definition: dict[str, Any]) -> dict[str, Any]:
 
     # 6. actions_classified — every action has dangerLevel + permission (or stubReason)
     actions = definition.get("actions") or []
-    unclassified = [a_["key"] for a_ in actions if not a_.get("dangerLevel") or (not a_.get("permission") and not a_.get("stubReason"))]
+    from app.core.screen_governance import is_local_view_action
+    unclassified = [a_["key"] for a_ in actions if not a_.get("dangerLevel") or (not a_.get("permission") and not a_.get("stubReason") and not is_local_view_action(a_))]
     m("actions_classified",
       not actions or not unclassified,
       f"actions missing dangerLevel or permission: {', '.join(unclassified)}" if unclassified else
@@ -282,9 +292,9 @@ def _check_readiness(definition: dict[str, Any]) -> dict[str, Any]:
     screen_id = definition.get("id", "")
     expected_profile = (
         "financial"
-        if definition.get("domain") == "finance" or _FINANCIAL_SCREEN_PATTERN.search(screen_id)
+        if definition.get("domain") == "finance" or screen_id.lower().startswith("finance/") or _FINANCIAL_SCREEN_PATTERN.search(screen_id)
         else "inventory"
-        if definition.get("domain") == "inventory" or _INVENTORY_SCREEN_PATTERN.search(screen_id)
+        if definition.get("domain") == "inventory" or screen_id.lower().startswith("lager/") or _INVENTORY_SCREEN_PATTERN.search(screen_id)
         else None
     )
     has_table_profile = not all_tables or bool(layout.get("tableProfile"))
@@ -494,28 +504,12 @@ _LEERE_BRUECKEN_TABS: tuple[tuple[str, type, str, str, str, str], ...] = (
         "get_finance_bankkonto_buchungen_tab",
     ),
     (
-        "/finance/debitoren/entity/{entity_id}/tabs/offene-posten",
-        FinanceOffenePostenTabOut,
-        "Debitor: Offene Posten (leerer Stub)",
-        "finance/debitor",
-        "offene_posten",
-        "get_finance_debitor_offene_posten_tab",
-    ),
-    (
         "/finance/debitoren/entity/{entity_id}/tabs/umsaetze",
         FinanceDebitorUmsatzTabOut,
         "Debitor: Umsaetze (leerer Stub)",
         "finance/debitor",
         "umsaetze",
         "get_finance_debitor_umsaetze_tab",
-    ),
-    (
-        "/finance/kreditoren/entity/{entity_id}/tabs/offene-posten",
-        FinanceOffenePostenTabOut,
-        "Kreditor: Offene Posten (leerer Stub)",
-        "finance/kreditor",
-        "offene_posten",
-        "get_finance_kreditor_offene_posten_tab",
     ),
     (
         "/finance/kreditoren/entity/{entity_id}/tabs/bestellungen",
@@ -645,6 +639,35 @@ def _register_leere_bruecken_tabs() -> None:
 _register_leere_bruecken_tabs()
 
 
+def _offene_posten_register(konto_typ: str):
+    async def get_offene_posten_tab(
+        entity_id: str,
+        page: int = 1,
+        page_size: int = 25,
+        db: Session = Depends(get_db),
+        tenant_id: str = Depends(get_tenant_id),
+    ) -> dict[str, Any]:
+        from app.api.v1.endpoints.finance_stammdaten import offene_posten_registerseite
+
+        return offene_posten_registerseite(db, tenant_id, konto_typ, entity_id, page=max(page, 1),
+                                           page_size=min(max(page_size, 1), 200))
+
+    return get_offene_posten_tab
+
+
+# Offene Posten je Debitor/Kreditor (Stufe 4 Geschaeftspartnerstamm); bis 01.11.2026 leere Stubs.
+for _pfad, _konto, _name, _text in (
+    ("/finance/debitoren/entity/{entity_id}/tabs/offene-posten", "debitoren", "get_finance_debitor_offene_posten_tab",
+     "Debitor: Offene Posten"),
+    ("/finance/kreditoren/entity/{entity_id}/tabs/offene-posten", "kreditoren", "get_finance_kreditor_offene_posten_tab",
+     "Kreditor: Offene Posten"),
+):
+    _handler = _offene_posten_register(_konto)
+    _handler.__name__ = _handler.__qualname__ = _name
+    router.add_api_route(_pfad, _handler, methods=["GET"], response_model=FinanceOffenePostenTabOut,
+                         summary=_text, name=_name)
+
+
 @router.get(
     "/{mask_id:path}/entity/{entity_id}/tabs/{tab_key}",
     response_model=TypedObjectOut,
@@ -677,3 +700,36 @@ async def get_mask_tab_stub(
         "_entity_id": entity_id,
         "_tab_key": tab_key,
     }
+
+
+@router.get("/{mask_id:path}/data/{source_key}", response_model=MaskDataReadOut,
+            summary="Deklarierte Maskendaten mit Fachrechten des Aufrufers lesen")
+async def get_mask_source_data(request: Request, mask_id: str, source_key: str,
+                               entity_id: str | None = None,
+                               page: int = Query(1, ge=1, le=1000000),
+                               limit: int = Query(50, ge=1, le=100),
+                               q: str | None = Query(None, max_length=200),
+                               table_key: str | None = None,
+                               sort: str | None = None,
+                               sort_dir: str = "asc",
+                               filter_plan: str | None = Query(None, max_length=50000),
+                               preset_filters: str | None = Query(None, max_length=5000),
+                               complete: bool = False,
+                               authorization: str | None = Header(None),
+                               tenant_id: str = Depends(get_tenant_id),
+                               user: dict = Depends(get_current_user)) -> MaskDataReadOut:
+    if set(request.query_params) - {"entity_id", "page", "limit", "q", "table_key", "sort", "sort_dir", "filter_plan", "preset_filters", "complete"}:
+        raise HTTPException(422, "Unbekannter Parameter im Maskendatenabruf")
+    try:
+        import json
+        filters = json.loads(filter_plan, object_pairs_hook=mask_data_read._json_object,
+                             parse_constant=mask_data_read._json_constant) if filter_plan is not None else {}
+        presets = json.loads(preset_filters, object_pairs_hook=mask_data_read._json_object,
+                             parse_constant=mask_data_read._json_constant) if preset_filters is not None else {}
+        body = MaskDataReadIn(screen_id=_normalize_mask_id(mask_id), source_key=source_key,
+                              entity_id=entity_id, page=page, limit=limit, q=q,
+                              table_key=table_key, sort=sort, sort_dir=sort_dir, filter_plan=filters,
+                              preset_filters=presets, complete=complete)
+    except (ValidationError, ValueError) as error:
+        raise HTTPException(422, "Ungueltiger Maskendatenauftrag") from error
+    return await mask_data_read.read_async(body, tenant_id, authorization)

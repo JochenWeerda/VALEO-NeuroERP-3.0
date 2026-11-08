@@ -4,6 +4,8 @@ FIBU-BNK-01: Bankstamm-UI – CRUD für Bankkonten inkl. Verknüpfung zum Konten
 """
 
 from typing import List, Optional
+from app.auth.finance_roles import finance_admin, finance_read, finance_write, kontenplan_read
+
 from fastapi import Response, APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -46,7 +48,7 @@ def _validate_iban(iban: Optional[str]) -> None:
 router = APIRouter(prefix="/bank-accounts", tags=["finance", "bank-accounts"])
 
 
-@router.get("/new", response_model=BankAccountsOut, summary="New bank account template abrufen")
+@router.get("/new", response_model=BankAccountsOut, summary="New bank account template abrufen", dependencies=[Depends(finance_read)])
 async def get_new_bank_account_template(tenant_id: str = Depends(get_tenant_id)):
     """Return default values for bank account create forms."""
     return {
@@ -75,7 +77,7 @@ def _validate_gl_account(db: Session, tenant_id: str, account_id: Optional[str])
         raise HTTPException(409, "Hauptbuchkonto muss ein aktives buchbares Aktivkonto sein")
 
 
-@router.get("", response_model=List[BankAccountResponse], summary="Bank accounts auflisten")
+@router.get("", response_model=List[BankAccountResponse], summary="Bank accounts auflisten", dependencies=[Depends(finance_read)])
 async def list_bank_accounts(
     tenant_id: str = Depends(get_tenant_id),
     is_active: Optional[bool] = Query(None),
@@ -121,7 +123,7 @@ async def list_bank_accounts(
         raise HTTPException(status_code=500, detail="Bankkonto konnte nicht verlaesslich verarbeitet werden")
 
 
-@router.get("/ledger-options", response_model=List[BankLedgerOption], summary="Own bookable bank ledger accounts")
+@router.get("/ledger-options", response_model=List[BankLedgerOption], summary="Own bookable bank ledger accounts", dependencies=[Depends(kontenplan_read)])
 async def list_ledger_options(tenant_id: str = Depends(get_tenant_id),
     limit: int = Query(100, ge=1, le=200), offset: int = Query(0, ge=0), db: Session = Depends(get_db)):
     rows = db.execute(text("""
@@ -133,7 +135,7 @@ async def list_ledger_options(tenant_id: str = Depends(get_tenant_id),
     return [BankLedgerOption(**row) for row in rows]
 
 
-@router.get("/{account_id}", response_model=BankAccountResponse, summary="Bank account abrufen")
+@router.get("/{account_id}", response_model=BankAccountResponse, summary="Bank account abrufen", dependencies=[Depends(finance_read)])
 async def get_bank_account(
     account_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -164,7 +166,7 @@ async def get_bank_account(
     )
 
 
-@router.post("", response_model=BankAccountResponse, status_code=201, summary="Bank account anlegen")
+@router.post("", response_model=BankAccountResponse, status_code=201, summary="Bank account anlegen", dependencies=[Depends(finance_write)])
 async def create_bank_account(
     payload: BankAccountCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -206,7 +208,7 @@ async def create_bank_account(
         raise HTTPException(status_code=500, detail="Bankkonto konnte nicht verlaesslich verarbeitet werden")
 
 
-@router.put("/{account_id}", response_model=BankAccountResponse, summary="Bank account aktualisieren")
+@router.put("/{account_id}", response_model=BankAccountResponse, summary="Bank account aktualisieren", dependencies=[Depends(finance_write)])
 async def update_bank_account(
     account_id: str,
     payload: BankAccountUpdate,
@@ -264,7 +266,7 @@ async def update_bank_account(
         raise HTTPException(status_code=500, detail="Bankkonto konnte nicht verlaesslich verarbeitet werden")
 
 
-@router.delete("/{account_id}", status_code=204, response_class=Response, response_model=None, summary="Bank account löschen")
+@router.delete("/{account_id}", status_code=204, response_class=Response, response_model=None, summary="Bank account löschen", dependencies=[Depends(finance_admin)])
 async def delete_bank_account(
     account_id: str,
     tenant_id: str = Depends(get_tenant_id),

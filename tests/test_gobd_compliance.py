@@ -4,7 +4,11 @@ Tests für revisionssichere Buchhaltung, Hash-Chain, Audit-Trail
 """
 
 from fastapi.testclient import TestClient
-from main import app
+from fastapi import FastAPI
+
+from app.finance.gobd import router as gobd_router
+from testgrenze import ersetze_mandant, ersetze_nutzer
+
 import pytest
 from sqlalchemy import text
 
@@ -13,7 +17,15 @@ from app.core.fibu_audit import SYSTEM_USER_ID
 from app.core.uuid7 import uuid7
 from app.infrastructure.models import Tenant, User
 
+# /api/gobd haengt main.py ein; geprueft wird der Router in einer Mini-App mit ausdruecklicher Testgrenze (die
+# Produktions-Middleware prueft echte Provider-Token und wird hier nicht umgangen).
+app = FastAPI()
+app.include_router(gobd_router, prefix="/api")
+ersetze_mandant(app, "00000000-0000-0000-0000-000000000001")
+ersetze_nutzer(app, "admin")
+
 _client = TestClient(app, raise_server_exceptions=False)
+
 
 
 @pytest.fixture
@@ -233,6 +245,12 @@ class TestAuditIntegration:
     """Integrationstests: Buchungspfade schreiben Audit-Log (GoBD-Nachvollziehbarkeit)."""
 
     _headers = {"Authorization": "Bearer dev-token"}
+
+    @pytest.fixture
+    def client(self):
+        """/api/v1-Wege: die Test-App app.main mit der Testidentitaet aus conftest."""
+        from app.main import app as test_app
+        return TestClient(test_app, raise_server_exceptions=False)
 
     def test_audit_logs_filter_by_journal_entry(self, client):
         """Audit-Log-API liefert Einträge für entity_type=journal_entry."""

@@ -4,6 +4,7 @@ Tabellen: domain_finance.budget_plans, domain_finance.budget_lines
 """
 from __future__ import annotations
 
+from app.auth.finance_roles import finance_admin, finance_read, finance_write
 import logging
 from decimal import Decimal
 from typing import List, Optional
@@ -76,8 +77,7 @@ class BudgetLineUpdate(BaseModel):
 # ---------------------------------------------------------------------------
 
 @router.get("", tags=["finance", "budget-planning"], summary="Budget plans auflisten",
-    response_model=BudgetPlanningOut
-)
+    response_model=BudgetPlanningOut, dependencies=[Depends(finance_read)])
 def list_budget_plans(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -97,8 +97,7 @@ def list_budget_plans(
 
 
 @router.post("", status_code=201, tags=["finance", "budget-planning"], summary="Budget plan anlegen",
-    response_model=BudgetPlanningOut
-)
+    response_model=BudgetPlanningOut, dependencies=[Depends(finance_write)])
 def create_budget_plan(
     body: BudgetPlanCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -132,8 +131,7 @@ def create_budget_plan(
 # ---------------------------------------------------------------------------
 
 @router.get("/summary", tags=["finance", "budget-planning"], summary="Summary budget",
-    response_model=BudgetPlanningOut
-)
+    response_model=BudgetPlanningOut, dependencies=[Depends(finance_read)])
 def budget_summary(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -198,8 +196,7 @@ def budget_summary(
 # ---------------------------------------------------------------------------
 
 @router.get("/{plan_id}", tags=["finance", "budget-planning"], summary="Budget plan abrufen",
-    response_model=BudgetPlanningOut
-)
+    response_model=BudgetPlanningOut, dependencies=[Depends(finance_read)])
 def get_budget_plan(
     plan_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -228,8 +225,7 @@ def get_budget_plan(
 
 
 @router.post("/{plan_id}/approve", tags=["finance", "budget-planning"], summary="Budget plan genehmigen",
-    response_model=BudgetPlanningOut
-)
+    response_model=BudgetPlanningOut, dependencies=[Depends(finance_admin)])
 def approve_budget_plan(
     plan_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -260,8 +256,7 @@ def approve_budget_plan(
 
 
 @router.get("/{plan_id}/vs-actual", tags=["finance", "budget-planning"], summary="Vs actual budget",
-    response_model=BudgetPlanningOut
-)
+    response_model=BudgetPlanningOut, dependencies=[Depends(finance_read)])
 def budget_vs_actual(
     plan_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -337,8 +332,7 @@ def budget_vs_actual(
 
 
 @router.post("/{plan_id}/lines", status_code=201, tags=["finance", "budget-planning"], summary="Budget line hinzufügen",
-    response_model=BudgetPlanningOut
-)
+    response_model=BudgetPlanningOut, dependencies=[Depends(finance_write)])
 def add_budget_line(
     plan_id: str,
     body: BudgetLineCreate,
@@ -385,8 +379,7 @@ def add_budget_line(
 
 
 @router.patch("/{plan_id}/lines/{line_id}", tags=["finance", "budget-planning"], summary="Budget line aktualisieren",
-    response_model=BudgetPlanningOut
-)
+    response_model=BudgetPlanningOut, dependencies=[Depends(finance_write)])
 def update_budget_line(
     plan_id: str,
     line_id: str,

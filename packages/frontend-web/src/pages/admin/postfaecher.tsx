@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { MadeByStudioListRuntimeWire } from '@/components/mask-builder/made-by-studio-runtime-wire'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -69,6 +70,10 @@ function alsFormular(postfach: Postfach): Record<string, unknown> {
   }
 }
 
+// Die Seite ist nur fuer die Administration erreichbar; der Server prueft die Rolle.
+// Ohne diese Rechte blendet der Mask Builder die Aktionen der Screen Definition aus.
+const POSTFACH_RECHTE = ['admin.postfach.write', 'admin.postfach.testen', 'admin.postfach.update', 'admin.postfach.delete']
+
 export default function AdminPostfaecherPage(): JSX.Element {
   const isTouch = useTouchDevice()
   const queryClient = useQueryClient()
@@ -126,7 +131,7 @@ export default function AdminPostfaecherPage(): JSX.Element {
     })),
   }), [aktuell, geladen, isTouch, laeuft, postfaecher, rollen.data, standard])
 
-  const plan = useMemo(() => compileRenderPlanFromScreenDefinition(schema, { permissions: ['admin.postfach.testen'] }), [schema])
+  const plan = useMemo(() => compileRenderPlanFromScreenDefinition(schema, { permissions: POSTFACH_RECHTE }), [schema])
   const form = useUniversalFormState({ screen: schema, initialValues: leer })
   const { resetForm } = form
 
@@ -229,7 +234,7 @@ export default function AdminPostfaecherPage(): JSX.Element {
   const screenContext = useMemo(() => createScreenContext({
     data: { postfaecher },
     // Die Rolle prueft das Backend (admin); hier nur die Freigabe der Aktion im Builder.
-    permissions: { granted: ['admin.postfach.testen'] },
+    permissions: { granted: POSTFACH_RECHTE },
     state: { values: form.values, policies: {} },
     actions: {
       'admin.postfachSpeichern': () => speichern(),
@@ -337,3 +342,8 @@ export default function AdminPostfaecherPage(): JSX.Element {
     </div>
   )
 }
+function madeByStudioRuntimeWireDeclaration(): JSX.Element {
+  return <MadeByStudioListRuntimeWire screenId="admin/postfaecher" />
+}
+void madeByStudioRuntimeWireDeclaration
+

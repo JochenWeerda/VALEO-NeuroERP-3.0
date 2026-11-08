@@ -23,10 +23,10 @@ class BestellungLifecycleError(Exception):
     """Raised when Bestellung lifecycle constraints are violated."""
 
 
-def _fetch_bestellung(db: Session, bestellung_id: str) -> Optional[Dict[str, Any]]:
+def _fetch_bestellung(db: Session, bestellung_id: str, tenant_id: str) -> Optional[Dict[str, Any]]:
     row = db.execute(
-        text("SELECT * FROM domain_procurement.proc_purchase_orders WHERE id = :id"),
-        {"id": bestellung_id},
+        text("SELECT * FROM domain_procurement.proc_purchase_orders WHERE id = :id AND tenant_id = :tid"),
+        {"id": bestellung_id, "tid": tenant_id},
     ).mappings().first()
     return dict(row) if row else None
 
@@ -67,11 +67,10 @@ def transition_bestellung_status(
     reason: Optional[str] = None,
 ) -> Dict[str, Any]:
     """Wechselt Bestellungs-Status (fail-closed Statusmaschine)."""
-    bestellung = _fetch_bestellung(db, bestellung_id)
+    # Nur Bestellungen des eigenen Mandanten; bis 27.10.2026 kamen auch Zeilen ohne Mandant durch.
+    bestellung = _fetch_bestellung(db, bestellung_id, tenant_id)
     if not bestellung:
         raise BestellungLifecycleError(f"Bestellung {bestellung_id} nicht gefunden")
-    if bestellung.get("tenant_id") and bestellung["tenant_id"] != tenant_id:
-        raise BestellungLifecycleError(f"Bestellung {bestellung_id} gehört nicht zu Tenant {tenant_id}")
 
     current = (bestellung.get("status") or "DRAFT").upper()
     target = new_status.upper()
@@ -86,8 +85,8 @@ def transition_bestellung_status(
         raise BestellungLifecycleError("Freigabe-Operator ist Pflicht")
 
     db.execute(
-        text("UPDATE domain_procurement.proc_purchase_orders SET status = :status WHERE id = :id"),
-        {"status": target, "id": bestellung_id},
+        text("UPDATE domain_procurement.proc_purchase_orders SET status = :status WHERE id = :id AND tenant_id = :tid"),
+        {"status": target, "id": bestellung_id, "tid": tenant_id},
     )
     _log_bestellung_transition(db, bestellung_id, current, target, tenant_id, operator, reason)
     db.commit()

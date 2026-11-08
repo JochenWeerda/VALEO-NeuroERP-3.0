@@ -41,7 +41,7 @@ export class RequestValidatorMiddleware {
         if (error instanceof ZodError) {
           const validationError = createValidationError(
             'Request validation failed',
-            error.errors.map(err => ({
+            error.issues.map(err => ({
               field: err.path.join('.'),
               message: err.message,
               value: 'received' in err ? err.received : undefined

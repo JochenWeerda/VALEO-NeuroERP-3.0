@@ -96,46 +96,46 @@ def test_categories_have_required_fields() -> None:
 
 
 # ---------------------------------------------------------------------------
-# neuro_tool_execution — validate_outbound_http_target  (pure security helper)
+# outbound_security — validate_outbound_http_target  (pure security helper; frueher neuro_tool_execution)
 # ---------------------------------------------------------------------------
 
 @pytest.mark.unit
 def test_validate_https_url_ok() -> None:
-    from app.services.neuro_tool_execution import validate_outbound_http_target
+    from app.core.outbound_security import validate_outbound_http_target
     url = validate_outbound_http_target("https://api.example.com/v1/data")
     assert url == "https://api.example.com/v1/data"
 
 
 @pytest.mark.unit
 def test_validate_http_url_ok() -> None:
-    from app.services.neuro_tool_execution import validate_outbound_http_target
+    from app.core.outbound_security import validate_outbound_http_target
     url = validate_outbound_http_target("http://partner.example.com/webhook")
     assert url.startswith("http://")
 
 
 @pytest.mark.unit
 def test_validate_ftp_scheme_rejected() -> None:
-    from app.services.neuro_tool_execution import validate_outbound_http_target
+    from app.core.outbound_security import validate_outbound_http_target
     with pytest.raises(Exception):
         validate_outbound_http_target("ftp://evil.com/file")
 
 
 @pytest.mark.unit
 def test_validate_loopback_rejected() -> None:
-    from app.services.neuro_tool_execution import validate_outbound_http_target
+    from app.core.outbound_security import validate_outbound_http_target
     with pytest.raises(Exception):
         validate_outbound_http_target("https://127.0.0.1/admin")
 
 
 @pytest.mark.unit
 def test_validate_localhost_rejected() -> None:
-    from app.services.neuro_tool_execution import validate_outbound_http_target
+    from app.core.outbound_security import validate_outbound_http_target
     with pytest.raises(Exception):
         validate_outbound_http_target("http://localhost:8080/api")
 
 
 @pytest.mark.unit
 def test_validate_loopback_allowed_when_flag_set() -> None:
-    from app.services.neuro_tool_execution import validate_outbound_http_target
+    from app.core.outbound_security import validate_outbound_http_target
     url = validate_outbound_http_target("http://localhost:8080/test", allow_loopback_hosts=True)
     assert "localhost" in url

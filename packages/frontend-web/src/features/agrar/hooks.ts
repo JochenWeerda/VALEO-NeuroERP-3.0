@@ -1,13 +1,12 @@
-import { type UseMutationResult, type UseQueryResult, useMutation, useQuery } from '@tanstack/react-query'
-import { mutationKeys, queryKeys } from '@/lib/query'
+import { type UseQueryResult, useQuery } from '@tanstack/react-query'
+import { queryKeys } from '@/lib/query'
 import {
   fetchFertilizerProductById,
   fetchFertilizerProducts,
   fetchSeedProductById,
   fetchSeedProducts,
-  submitSeedOrder,
 } from './api'
-import { type FertilizerProduct, type SeedOrderPayload, type SeedProduct } from './types'
+import { type FertilizerProduct, type SeedProduct } from './types'
 
 export const useSeedProducts = (): UseQueryResult<SeedProduct[]> =>
   useQuery<SeedProduct[]>({
@@ -33,10 +32,4 @@ export const useFertilizerProduct = (productId: string): UseQueryResult<Fertiliz
     queryKey: queryKeys.agrar.fertilizers.detail(productId),
     queryFn: () => fetchFertilizerProductById(productId),
     enabled: productId.length > 0,
-  })
-
-export const useSubmitSeedOrder = (): UseMutationResult<{ orderId: string }, Error, SeedOrderPayload> =>
-  useMutation<{ orderId: string }, Error, SeedOrderPayload>({
-    mutationKey: mutationKeys.agrar.seedOrders.create,
-    mutationFn: submitSeedOrder,
   })

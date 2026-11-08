@@ -25,6 +25,7 @@ from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/stammdaten/betriebsstaetten",
@@ -118,7 +119,7 @@ def get_betriebsstaette(
     return BetriebsstaetteOut(**d)
 
 
-@router.post("", response_model=BetriebsstaetteOut, status_code=201, summary="Betriebsstaette anlegen")
+@router.post("", response_model=BetriebsstaetteOut, status_code=201, summary="Betriebsstaette anlegen", dependencies=SCHREIBEN["STAMMDATEN"])
 def create_betriebsstaette(
     payload: BetriebsstaetteCreate,
     db=Depends(get_db),
@@ -162,7 +163,7 @@ def create_betriebsstaette(
     return BetriebsstaetteOut(**d)
 
 
-@router.put("/{filial_nr}", response_model=BetriebsstaetteOut, summary="Betriebsstaette aktualisieren")
+@router.put("/{filial_nr}", response_model=BetriebsstaetteOut, summary="Betriebsstaette aktualisieren", dependencies=SCHREIBEN["STAMMDATEN"])
 def update_betriebsstaette(
     filial_nr: str,
     payload: BetriebsstaetteCreate,
@@ -199,8 +200,7 @@ def update_betriebsstaette(
 
 
 @router.delete("/{filial_nr}", summary="Betriebsstaette löschen",
-    response_model=None
-)
+    response_model=None, dependencies=SCHREIBEN["STAMMDATEN"])
 def delete_betriebsstaette(
     filial_nr: str,
     db=Depends(get_db),

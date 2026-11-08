@@ -40,14 +40,12 @@ async def check_postgresql() -> tuple[bool, str]:
 async def check_sse_hub() -> tuple[bool, str]:
     """Check SSE Hub status"""
     try:
-        # Check if hub is responsive
-        total_connections = sum(
-            sse_hub.get_connection_count(ch) 
-            for ch in ["workflow", "sales", "inventory", "policy"]
-        )
-        return True, f"{total_connections} active connections"
-    except Exception as e:
-        return False, str(e)
+        await asyncio.wait_for(sse_hub.ping(), timeout=1.0)
+        return True, "SSE hub responsive"
+    except asyncio.TimeoutError:
+        return False, "SSE hub probe timed out"
+    except Exception:
+        return False, "SSE hub probe failed"
 
 
 async def readiness_check() -> Dict[str, Any]:

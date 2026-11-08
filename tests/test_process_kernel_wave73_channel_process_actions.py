@@ -5,10 +5,13 @@ Wave 73 - Channel-native process execution, approvals and audit.
 from __future__ import annotations
 
 import pytest
+from collections.abc import Iterator
 from fastapi import FastAPI
+from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
 from fastapi.testclient import TestClient
 
 from app.api.v1.endpoints import channel_work_surfaces
+from app.core.tenant import get_tenant_id
 from app.core.action_idempotency import get_action_idempotency_store
 from app.core.channel_process_actions import get_channel_process_thread_store
 
@@ -41,10 +44,32 @@ def clear_channel_state():
 
 
 @pytest.fixture
-def client(require_db) -> TestClient:
+def client(require_db) -> Iterator[TestClient]:
     app = FastAPI()
+    ersetze_nutzer(app, *ALLE_FACHROLLEN, "teamleiter")
     app.include_router(channel_work_surfaces.router)
-    return TestClient(app)
+    from sqlalchemy import text
+    from sqlalchemy.orm import Session
+    from app.core.database import engine, get_db
+    from testgrenze import pruefstand_erlaubt
+    assert pruefstand_erlaubt(engine.url)
+    with engine.connect() as connection:
+        outer = connection.begin()
+        session = Session(bind=connection, join_transaction_mode="create_savepoint")
+        session.execute(text("INSERT INTO domain_shared.tenants(id,name,domain) "
+                             "VALUES ('t1','Synthetic Wave73','wave73.example.invalid') "
+                             "ON CONFLICT (id) DO NOTHING"))
+        session.commit()
+        app.dependency_overrides[get_db] = lambda: session
+        # Der Mandant kommt aus der Anmeldung (bis 28.10.2026 aus Rumpf/Query bzw. Nachrichten-Metadaten).
+        app.dependency_overrides[get_tenant_id] = lambda: "t1"
+        try:
+            with TestClient(app) as test_client:
+                yield test_client
+        finally:
+            session.close()
+            assert outer.is_active
+            outer.rollback()
 
 
 def test_channel_process_execute_accepts_direct_approval_flow(client: TestClient):
@@ -57,7 +82,7 @@ def test_channel_process_execute_accepts_direct_approval_flow(client: TestClient
             "aggregate_type": "ap_invoice",
             "aggregate_id": "INV-71",
             "payload": {"status": "ZUR_FREIGABE"},
-            "issuer_role": "ap_approver",
+            "issuer_role": "FINANCE_ADMIN",
             "issuer_type": "human",
             "idempotency_key": "wave73-1",
         },
@@ -173,7 +198,7 @@ def test_channel_process_thread_lookup_returns_current_snapshot(client: TestClie
             "aggregate_type": "ap_invoice",
             "aggregate_id": "INV-72",
             "payload": {"status": "ZUR_FREIGABE"},
-            "issuer_role": "finance_manager",
+            "issuer_role": "FINANCE_ADMIN",
             "issuer_type": "human",
             "idempotency_key": "wave73-5",
         },
@@ -208,7 +233,7 @@ def test_channel_process_thread_list_can_filter_pending_backlog(client: TestClie
             "aggregate_type": "ap_invoice",
             "aggregate_id": "INV-75",
             "payload": {"status": "ZUR_FREIGABE"},
-            "issuer_role": "finance_manager",
+            "issuer_role": "FINANCE_ADMIN",
             "issuer_type": "human",
             "idempotency_key": "wave73-7b",
         },
@@ -270,7 +295,7 @@ def test_channel_process_decision_requires_pending_thread(client: TestClient):
             "aggregate_type": "ap_invoice",
             "aggregate_id": "INV-73",
             "payload": {"status": "ZUR_FREIGABE"},
-            "issuer_role": "finance_manager",
+            "issuer_role": "FINANCE_ADMIN",
             "issuer_type": "human",
             "idempotency_key": "wave73-6",
         },
@@ -298,7 +323,7 @@ def test_channel_process_execute_rejects_unsupported_channel(client: TestClient)
             "aggregate_type": "ap_invoice",
             "aggregate_id": "INV-74",
             "payload": {"status": "ZUR_FREIGABE"},
-            "issuer_role": "ap_approver",
+            "issuer_role": "FINANCE_ADMIN",
             "issuer_type": "human",
             "idempotency_key": "wave73-7",
         },

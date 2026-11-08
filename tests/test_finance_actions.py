@@ -9,6 +9,8 @@ from fastapi.testclient import TestClient
 from app.api.v1.endpoints import finance_actions
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
+from app.auth.deps import get_current_user
+from testgrenze import setze_identitaet
 
 
 class _FakeResult:
@@ -207,6 +209,8 @@ def _build_client(db: FakeDb) -> TestClient:
     app.include_router(finance_actions.router, prefix="/finance")
     app.dependency_overrides[get_tenant_id] = lambda: "tenant-a"
     app.dependency_overrides[get_db] = lambda: db
+    app.dependency_overrides[get_current_user] = lambda: {"sub": "finance-test", "roles": ["FINANCE_ADMIN"]}
+    setze_identitaet(app, "finance-test", "FINANCE_ADMIN")  # gepruefte Claims: Bearbeiter kommt aus dem Token
     return TestClient(app)
 
 

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from fastapi import FastAPI
+from testgrenze import ALLE_FACHROLLEN, ersetze_mandant, ersetze_nutzer
 from fastapi.testclient import TestClient
 import pytest
 
@@ -12,6 +13,9 @@ from app.integrations.services.superglue_quarantine import append_quarantine_ent
 
 def _client() -> TestClient:
     app = FastAPI()
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
+    # Seit 27.10.2026 nehmen die Ops-Wege den Mandanten aus dem Token, nicht mehr aus ?tenant_id= mit Vorgabe "system".
+    ersetze_mandant(app, "test-mandant")
     app.include_router(agents.router, prefix="/api/v1/agents")
     return TestClient(app)
 
@@ -56,7 +60,7 @@ def test_neuroassist_capabilities_endpoint_lists_productive_capabilities():
 def test_neuroassist_run_endpoint_surfaces_bestellvorschlag_runtime_projection(
     monkeypatch: pytest.MonkeyPatch,
 ):
-    async def _fake_run(capability_key: str, tenant_id: str = "system", parameters: dict | None = None):
+    async def _fake_run(capability_key: str, tenant_id: str = "test-mandant", parameters: dict | None = None):
         return {
             "run_id": "wf-1",
             "correlation_id": "wf-1",
@@ -156,7 +160,7 @@ def test_neuroassist_run_status_endpoint_surfaces_persisted_bestellvorschlag_sta
 
 
 def test_neuroassist_runs_endpoint_dispatches_generic_capability(monkeypatch: pytest.MonkeyPatch):
-    async def _fake_run(capability_key: str, tenant_id: str = "system", parameters: dict | None = None):
+    async def _fake_run(capability_key: str, tenant_id: str = "test-mandant", parameters: dict | None = None):
         return {
             "run_id": "run-1",
             "correlation_id": "run-1",
@@ -314,7 +318,7 @@ def test_neuroassist_gate_endpoint_rejects_bestellvorschlag_via_generic_contract
 
 
 def test_neuroassist_runs_endpoint_rejects_invalid_input_contract(monkeypatch: pytest.MonkeyPatch):
-    async def _fake_run(capability_key: str, tenant_id: str = "system", parameters: dict | None = None):
+    async def _fake_run(capability_key: str, tenant_id: str = "test-mandant", parameters: dict | None = None):
         raise ValueError("available_cash\n  Field required")
 
     monkeypatch.setattr(agents.neuroassist_service, "run_capability", _fake_run)
@@ -333,7 +337,7 @@ def test_neuroassist_runs_endpoint_rejects_invalid_input_contract(monkeypatch: p
 
 
 def test_neuroassist_ops_overview_endpoint_surfaces_budgeting_and_tickets(monkeypatch: pytest.MonkeyPatch):
-    async def _fake_run(capability_key: str, tenant_id: str = "system", parameters: dict | None = None):
+    async def _fake_run(capability_key: str, tenant_id: str = "test-mandant", parameters: dict | None = None):
         return {
             "run_id": "run-1",
             "correlation_id": "run-1",
@@ -368,7 +372,7 @@ def test_neuroassist_ops_overview_endpoint_surfaces_budgeting_and_tickets(monkey
     service = get_neuroassist_service()
     service._record_agent_ops(
         run_id="run-1",
-        tenant_id="system",
+        tenant_id="test-mandant",
         capability_key="finance_skonto_assistant",
         status="pending_approval",
         runtime=run_response.json()["runtime"],
@@ -389,7 +393,7 @@ def test_neuroassist_ops_overview_endpoint_surfaces_budgeting_and_tickets(monkey
 def test_neuroassist_ops_budget_update_and_ticket_listing_endpoints():
     ops = get_agent_ops_service()
     ops.record_run(
-        tenant_id="system",
+        tenant_id="test-mandant",
         run_id="run-ops",
         capability_key="operations_exception_assistant",
         role_key="operations_exception_assistant",
@@ -402,7 +406,7 @@ def test_neuroassist_ops_budget_update_and_ticket_listing_endpoints():
 
     budget_response = client.post(
         "/api/v1/agents/neuroassist/ops/budgets/finance_skonto_assistant",
-        json={"tenant_id": "system", "monthly_budget_cents": 999},
+        json={"tenant_id": "test-mandant", "monthly_budget_cents": 999},
     )
     tickets_response = client.get("/api/v1/agents/neuroassist/ops/tickets")
 
@@ -415,7 +419,7 @@ def test_neuroassist_ops_budget_update_and_ticket_listing_endpoints():
 def test_neuroassist_ops_dashboard_intervention_template_and_boundary_endpoints():
     ops = get_agent_ops_service()
     ops.record_run(
-        tenant_id="system",
+        tenant_id="test-mandant",
         run_id="run-ops",
         capability_key="operations_exception_assistant",
         role_key="operations_exception_assistant",
@@ -424,12 +428,12 @@ def test_neuroassist_ops_dashboard_intervention_template_and_boundary_endpoints(
         runtime={"current_stage_key": "approval", "stage_runs": [], "gate_decisions": []},
         result={"exception_summary": "needs review"},
     )
-    ticket_id = ops.list_tickets()[0].ticket_id
+    ticket_id = ops.list_tickets("test-mandant")[0].ticket_id
     client = _client()
 
     intervention_response = client.post(
         f"/api/v1/agents/neuroassist/ops/tickets/{ticket_id}/interventions",
-        json={"tenant_id": "system", "action": "pause", "requested_by": "tester", "note": "hold"},
+        json={"tenant_id": "test-mandant", "action": "pause", "requested_by": "tester", "note": "hold"},
     )
     dashboard_response = client.get("/api/v1/agents/neuroassist/ops/dashboard")
     mobile_response = client.get("/api/v1/agents/neuroassist/ops/mobile-overview")
@@ -457,7 +461,7 @@ def test_neuroassist_ops_dashboard_intervention_template_and_boundary_endpoints(
 def test_neuroassist_control_center_and_config_revision_endpoints():
     ops = get_agent_ops_service()
     ops.record_run(
-        tenant_id="system",
+        tenant_id="test-mandant",
         run_id="run-control-center",
         capability_key="finance_skonto_assistant",
         role_key="finance_action_assistant",
@@ -474,16 +478,16 @@ def test_neuroassist_control_center_and_config_revision_endpoints():
 
     budget_response = client.post(
         "/api/v1/agents/neuroassist/ops/budgets/finance_skonto_assistant",
-        json={"tenant_id": "system", "monthly_budget_cents": 1100, "changed_by": "ops-admin"},
+        json={"tenant_id": "test-mandant", "monthly_budget_cents": 1100, "changed_by": "ops-admin"},
     )
     heartbeat_response = client.post(
         "/api/v1/agents/neuroassist/ops/heartbeats/finance_skonto_assistant",
-        json={"tenant_id": "system", "cadence": "hourly", "stale_after_hours": 2, "changed_by": "ops-admin"},
+        json={"tenant_id": "test-mandant", "cadence": "hourly", "stale_after_hours": 2, "changed_by": "ops-admin"},
     )
     profile_response = client.post(
         "/api/v1/agents/neuroassist/ops/profiles/finance_skonto_assistant",
         json={
-            "tenant_id": "system",
+            "tenant_id": "test-mandant",
             "review_sla_hours": 2,
             "stale_after_hours": 2,
             "allowed_actions": ["approve", "pause", "escalate"],
@@ -493,7 +497,7 @@ def test_neuroassist_control_center_and_config_revision_endpoints():
     skill_pack_response = client.post(
         "/api/v1/agents/neuroassist/ops/skill-packs/finance_action_assistant.pack",
         json={
-            "tenant_id": "system",
+            "tenant_id": "test-mandant",
             "skills": ["policy_guardrails", "cost_control"],
             "changed_by": "ops-admin",
         },
@@ -523,7 +527,7 @@ def test_neuroassist_control_center_and_config_revision_endpoints():
 def test_neuroassist_persistence_status_endpoint_persists_snapshot():
     ops = get_agent_ops_service()
     ops.record_run(
-        tenant_id="system",
+        tenant_id="test-mandant",
         run_id="run-persisted",
         capability_key="finance_skonto_assistant",
         role_key="finance_action_assistant",
@@ -549,7 +553,7 @@ def test_neuroassist_control_center_planning_and_incidents(tmp_path, monkeypatch
 
     ops = get_agent_ops_service()
     ops.record_run(
-        tenant_id="system",
+        tenant_id="test-mandant",
         run_id="run-incident",
         capability_key="finance_skonto_assistant",
         role_key="finance_action_assistant",
@@ -559,7 +563,7 @@ def test_neuroassist_control_center_planning_and_incidents(tmp_path, monkeypatch
         result={"current_stage_key": "analysis"},
     )
     append_quarantine_entry(
-        tenant_id="system",
+        tenant_id="test-mandant",
         tool_id="system.sg.document.search",
         execution_mode="read",
         outcome="degraded",
@@ -570,7 +574,7 @@ def test_neuroassist_control_center_planning_and_incidents(tmp_path, monkeypatch
     upsert_response = client.post(
         "/api/v1/agents/neuroassist/ops/planning/items",
         json={
-            "tenant_id": "system",
+            "tenant_id": "test-mandant",
             "plan_id": "manual:test-slot",
             "title": "Daily Review",
             "kind": "manual_ops",
@@ -596,12 +600,12 @@ def test_neuroassist_control_center_planning_and_incidents(tmp_path, monkeypatch
     quarantine_incident = next(item for item in incidents["incidents"] if item["source"] == "superglue_quarantine")
     resolve_response = client.post(
         f"/api/v1/agents/neuroassist/ops/incidents/{quarantine_incident['incident_id']}/actions",
-        json={"tenant_id": "system", "action": "resolve", "requested_by": "ops-admin"},
+        json={"tenant_id": "test-mandant", "action": "resolve", "requested_by": "ops-admin"},
     )
     agent_incident = next(item for item in incidents["incidents"] if item["source"] == "agent_ops")
     escalate_response = client.post(
         f"/api/v1/agents/neuroassist/ops/incidents/{agent_incident['incident_id']}/actions",
-        json={"tenant_id": "system", "action": "escalate", "requested_by": "ops-admin"},
+        json={"tenant_id": "test-mandant", "action": "escalate", "requested_by": "ops-admin"},
     )
 
     assert resolve_response.status_code == 200

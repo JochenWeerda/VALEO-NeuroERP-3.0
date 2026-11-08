@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "id": "kontrakte/FrmKontraktProtokoll",
+  "domain": "kontrakte",
+  "mode": "list",
+  "title": "Kontraktprotokoll",
+  "subtitle": "Änderungen am Kontrakt",
+  "adapter": {
+    "type": "native",
+    "sourceId": "kontrakte/FrmKontraktProtokoll",
+    "temporary": false
+  },
+  "dataSources": [
+    {
+      "key": "list",
+      "endpoint": "/api/v1/kontrakte/{entity_id}/audit",
+      "pageSize": 100
+    }
+  ],
+  "actions": [],
+  "tables": [
+    {
+      "key": "list",
+      "label": "Kontraktprotokoll",
+      "dataSourceKey": "list",
+      "serverPagination": false,
+      "pageSize": 50,
+      "virtualized": true,
+      "rowHeight": 40,
+      "columns": [
+        {
+          "key": "changed_at",
+          "label": "Wann",
+          "renderKind": "datetime",
+          "filterable": false,
+          "width": 220
+        },
+        {
+          "key": "changed_by",
+          "label": "Benutzer",
+          "filterable": true
+        },
+        {
+          "key": "field_name",
+          "label": "Feld",
+          "filterable": true
+        },
+        {
+          "key": "old_value",
+          "label": "Alt",
+          "renderKind": "text",
+          "filterable": false
+        },
+        {
+          "key": "new_value",
+          "label": "Neu",
+          "renderKind": "text",
+          "filterable": false
+        },
+        {
+          "key": "action",
+          "label": "Aktion",
+          "filterable": false
+        }
+      ],
+      "rowActions": []
+    }
+  ],
+  "noWorkflowReason": "Das unveränderliche Protokoll ist eine lesende Ansicht.",
+  "agentContract": {
+    "businessPurpose": "Änderungen eines Kontrakts nachvollziehen.",
+    "examplePrompts": [
+      "Zeige das Kontraktprotokoll."
+    ],
+    "sensitiveFields": [],
+    "testSelectors": {
+      "screenRoot": "[data-testid='screen-kontrakte/FrmKontraktProtokoll']"
+    }
+  },
+  "layout": {
+    "floorplan": "worklist",
+    "density": "compact",
+    "contextRail": "none",
+    "preferredMode": "desktopDense",
+    "mobileMode": "mobileStack",
+    "touchTargetPx": 44,
+    "tableProfile": "audit"
+  },
+  "performance": {
+    "initialPayloadBudgetKb": 60,
+    "requiresLazyTabs": false,
+    "requiresVirtualTables": true,
+    "lookupMinChars": 2,
+    "bundleGroup": "kontrakte"
+  }
+}

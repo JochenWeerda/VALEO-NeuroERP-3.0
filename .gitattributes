@@ -15,3 +15,5 @@
 *.jpg filter=lfs diff=lfs merge=lfs -text
 *.jpeg filter=lfs diff=lfs merge=lfs -text
 *.png filter=lfs diff=lfs merge=lfs -text
+# Unified diff context prefixes precede original tab indentation.
+config/security/npm-patches/*.patch whitespace=-space-before-tab

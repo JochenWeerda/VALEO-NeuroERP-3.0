@@ -1,0 +1,375 @@
+{
+  "ok": true,
+  "booking_allowed": false,
+  "item": {
+    "id": "SYNTH-INBOX-1",
+    "dms_document_id": null,
+    "dms_url": null,
+    "linked_document_id": null,
+    "status": "pending",
+    "created_at": null,
+    "ocr_excerpt": "Synthetische Rechnung invoice Rechnungsnummer SYNTH-RE-1 MwSt Steuer Zahlungsziel",
+    "parsed_fields": {
+      "document_kind": "EINGANGSRECHNUNG",
+      "invoice_number": "SYNTH-RE-1",
+      "supplier": "Testlieferant",
+      "supplier_id": "TEST-L-1",
+      "total": "10.00"
+    },
+    "match_values": {
+      "supplierId": "TEST-L-1",
+      "supplierNumber": "TEST-L-1",
+      "invoiceNumber": "SYNTH-RE-1",
+      "total": "10.00",
+      "supplierName": "Testlieferant"
+    },
+    "match": {
+      "kind": "business_partner",
+      "status": "matched",
+      "matched_by": "partner_number",
+      "partner_id": "TEST-L-1",
+      "partner_number": "TEST-L-1",
+      "name": "Testlieferant"
+    },
+    "contract_match": null,
+    "confidence": 0.9935,
+    "confidence_band": "high",
+    "source": "parsed-or-ocr-hint",
+    "proposal": {
+      "policy_id": "incoming-supplier-invoice",
+      "label": "Rechnungseingang erfassen",
+      "document_type": "supplier_invoice",
+      "document_kind": "EINGANGSRECHNUNG",
+      "direction": "incoming",
+      "target_route": "/einkauf/rechnung-eingang-erfassung",
+      "belegart": "purchase_invoice",
+      "can_open": true,
+      "reason": "Deterministische Klassifikation aus OCR-/Parserfeldern. Keine Buchung, nur Einstieg in die bestehende Belegmaske."
+    },
+    "duplicates": [],
+    "uncertainties": [
+      {
+        "code": "pflicht_date",
+        "detail": "Pflichtfeld date fehlt im Extrakt."
+      },
+      {
+        "code": "pflicht_tax",
+        "detail": "Pflichtfeld tax fehlt im Extrakt."
+      },
+      {
+        "code": "keine_positionszeilen_im_extrakt",
+        "detail": "Keine Positionszeilen in parsed_fields (dms_parser nur Kopf; Claude-Zeilen nur bei EINKAUF_OCR_ENGINE=claude + Key/PDF/OCR). Artikel-Vorschlag wird nicht erfunden. Lieferanten-Header-Vorschlag bleibt unabhaengig davon moeglich."
+      }
+    ],
+    "blockers": [],
+    "master_data_proposals": {
+      "booking": false,
+      "executable": false,
+      "line_item_count": 0,
+      "supplier": null,
+      "articles": [
+        {
+          "kind": "article_create",
+          "status": "blocked",
+          "booking": false,
+          "executable": false,
+          "code": "keine_positionszeilen_im_extrakt",
+          "detail": "Keine Positionszeilen in parsed_fields (dms_parser nur Kopf; Claude-Zeilen nur bei EINKAUF_OCR_ENGINE=claude + Key/PDF/OCR). Artikel-Vorschlag wird nicht erfunden. Lieferanten-Header-Vorschlag bleibt unabhaengig davon moeglich.",
+          "domain_api": "POST /api/v1/articles/",
+          "target_route": "/artikel/neu",
+          "fachaktion_catalog_id": "artikel.stamm.create"
+        }
+      ]
+    },
+    "actions": [
+      {
+        "key": "open_mask",
+        "label": "Beleg öffnen",
+        "kind": "primary",
+        "href": "/einkauf/rechnung-eingang-erfassung?inbox=SYNTH-INBOX-1",
+        "enabled": true,
+        "booking": false
+      },
+      {
+        "key": "prepare",
+        "label": "Vorschlag pruefen",
+        "kind": "secondary",
+        "booking": false,
+        "enabled": true,
+        "command": "document.capture.open"
+      }
+    ],
+    "command": {
+      "command": "document.capture.open",
+      "executable": false,
+      "booking": false,
+      "reason": "Buchungen laufen ausschliesslich ueber autorisierte Domaenendienste. Die Inbox oeffnet die bestehende Belegmaske und bereitet einen Vorschlag vor.",
+      "policy_id": "incoming-supplier-invoice",
+      "document_type": "supplier_invoice",
+      "target_route": "/einkauf/rechnung-eingang-erfassung",
+      "prefill": {
+        "schema": "valeo.inbox.prefill.v1",
+        "documentId": "SYNTH-INBOX-1",
+        "documentNumber": "SYNTH-RE-1",
+        "partner": {
+          "id": "TEST-L-1",
+          "number": "TEST-L-1",
+          "name": "Testlieferant",
+          "role": "supplier"
+        },
+        "amounts": {
+          "total": "10.00",
+          "tax": null,
+          "currency": "EUR"
+        },
+        "source": {
+          "kind": "dms_inbox",
+          "id": "SYNTH-INBOX-1",
+          "dmsDocumentId": null,
+          "classification": "parsed-or-ocr-hint"
+        },
+        "confidence": 0.9935,
+        "confidenceBand": "high",
+        "policyId": "incoming-supplier-invoice",
+        "documentType": "supplier_invoice",
+        "targetRoute": "/einkauf/rechnung-eingang-erfassung",
+        "booking": false,
+        "matchValues": {
+          "supplierId": "TEST-L-1",
+          "supplierNumber": "TEST-L-1",
+          "invoiceNumber": "SYNTH-RE-1",
+          "total": "10.00",
+          "supplierName": "Testlieferant"
+        },
+        "match": {
+          "kind": "business_partner",
+          "status": "matched",
+          "matched_by": "partner_number",
+          "partner_id": "TEST-L-1",
+          "partner_number": "TEST-L-1",
+          "name": "Testlieferant"
+        },
+        "contractMatch": null,
+        "duplicates": [],
+        "uncertainties": [
+          {
+            "code": "pflicht_date",
+            "detail": "Pflichtfeld date fehlt im Extrakt."
+          },
+          {
+            "code": "pflicht_tax",
+            "detail": "Pflichtfeld tax fehlt im Extrakt."
+          },
+          {
+            "code": "keine_positionszeilen_im_extrakt",
+            "detail": "Keine Positionszeilen in parsed_fields (dms_parser nur Kopf; Claude-Zeilen nur bei EINKAUF_OCR_ENGINE=claude + Key/PDF/OCR). Artikel-Vorschlag wird nicht erfunden. Lieferanten-Header-Vorschlag bleibt unabhaengig davon moeglich."
+          }
+        ],
+        "storageKey": "valeo.inbox.prefill",
+        "maskConsumesPrefill": true
+      },
+      "confidence": 0.9935,
+      "confidence_band": "high",
+      "blockers": [],
+      "match": {
+        "kind": "business_partner",
+        "status": "matched",
+        "matched_by": "partner_number",
+        "partner_id": "TEST-L-1",
+        "partner_number": "TEST-L-1",
+        "name": "Testlieferant"
+      },
+      "contract_match": null,
+      "duplicates": [],
+      "uncertainties": [
+        {
+          "code": "pflicht_date",
+          "detail": "Pflichtfeld date fehlt im Extrakt."
+        },
+        {
+          "code": "pflicht_tax",
+          "detail": "Pflichtfeld tax fehlt im Extrakt."
+        },
+        {
+          "code": "keine_positionszeilen_im_extrakt",
+          "detail": "Keine Positionszeilen in parsed_fields (dms_parser nur Kopf; Claude-Zeilen nur bei EINKAUF_OCR_ENGINE=claude + Key/PDF/OCR). Artikel-Vorschlag wird nicht erfunden. Lieferanten-Header-Vorschlag bleibt unabhaengig davon moeglich."
+        }
+      ],
+      "source": {
+        "kind": "dms_inbox",
+        "id": "SYNTH-INBOX-1",
+        "dmsDocumentId": null,
+        "classification": "parsed-or-ocr-hint"
+      },
+      "gaps": [
+        "create_from_inbox_bucht_nicht",
+        "keine_ki_klassifikation_an_dms_inbox",
+        "kontrakt_abgleich_nur_bei_kontraktnummer_im_extrakt",
+        "linked_document_id_nur_bei_eindeutigem_documents_treffer",
+        "artikel_abgleich_nur_bei_positionszeilen",
+        "dms_parser_ohne_positionszeilen",
+        "positionsextraktion_engine_nicht_claude",
+        "positionsextraktion_ohne_llm_key",
+        "positionsextraktion_regex_keine_zeilen",
+        "dubletten_nur_ueber_belegnummer"
+      ],
+      "can_open": true,
+      "master_data_proposals": {
+        "booking": false,
+        "executable": false,
+        "line_item_count": 0,
+        "supplier": null,
+        "articles": [
+          {
+            "kind": "article_create",
+            "status": "blocked",
+            "booking": false,
+            "executable": false,
+            "code": "keine_positionszeilen_im_extrakt",
+            "detail": "Keine Positionszeilen in parsed_fields (dms_parser nur Kopf; Claude-Zeilen nur bei EINKAUF_OCR_ENGINE=claude + Key/PDF/OCR). Artikel-Vorschlag wird nicht erfunden. Lieferanten-Header-Vorschlag bleibt unabhaengig davon moeglich.",
+            "domain_api": "POST /api/v1/articles/",
+            "target_route": "/artikel/neu",
+            "fachaktion_catalog_id": "artikel.stamm.create"
+          }
+        ]
+      }
+    },
+    "can_open": true,
+    "booking_allowed": false
+  },
+  "command": {
+    "command": "document.capture.open",
+    "executable": false,
+    "booking": false,
+    "reason": "Buchungen laufen ausschliesslich ueber autorisierte Domaenendienste. Die Inbox oeffnet die bestehende Belegmaske und bereitet einen Vorschlag vor.",
+    "policy_id": "incoming-supplier-invoice",
+    "document_type": "supplier_invoice",
+    "target_route": "/einkauf/rechnung-eingang-erfassung",
+    "prefill": {
+      "schema": "valeo.inbox.prefill.v1",
+      "documentId": "SYNTH-INBOX-1",
+      "documentNumber": "SYNTH-RE-1",
+      "partner": {
+        "id": "TEST-L-1",
+        "number": "TEST-L-1",
+        "name": "Testlieferant",
+        "role": "supplier"
+      },
+      "amounts": {
+        "total": "10.00",
+        "tax": null,
+        "currency": "EUR"
+      },
+      "source": {
+        "kind": "dms_inbox",
+        "id": "SYNTH-INBOX-1",
+        "dmsDocumentId": null,
+        "classification": "parsed-or-ocr-hint"
+      },
+      "confidence": 0.9935,
+      "confidenceBand": "high",
+      "policyId": "incoming-supplier-invoice",
+      "documentType": "supplier_invoice",
+      "targetRoute": "/einkauf/rechnung-eingang-erfassung",
+      "booking": false,
+      "matchValues": {
+        "supplierId": "TEST-L-1",
+        "supplierNumber": "TEST-L-1",
+        "invoiceNumber": "SYNTH-RE-1",
+        "total": "10.00",
+        "supplierName": "Testlieferant"
+      },
+      "match": {
+        "kind": "business_partner",
+        "status": "matched",
+        "matched_by": "partner_number",
+        "partner_id": "TEST-L-1",
+        "partner_number": "TEST-L-1",
+        "name": "Testlieferant"
+      },
+      "contractMatch": null,
+      "duplicates": [],
+      "uncertainties": [
+        {
+          "code": "pflicht_date",
+          "detail": "Pflichtfeld date fehlt im Extrakt."
+        },
+        {
+          "code": "pflicht_tax",
+          "detail": "Pflichtfeld tax fehlt im Extrakt."
+        },
+        {
+          "code": "keine_positionszeilen_im_extrakt",
+          "detail": "Keine Positionszeilen in parsed_fields (dms_parser nur Kopf; Claude-Zeilen nur bei EINKAUF_OCR_ENGINE=claude + Key/PDF/OCR). Artikel-Vorschlag wird nicht erfunden. Lieferanten-Header-Vorschlag bleibt unabhaengig davon moeglich."
+        }
+      ],
+      "storageKey": "valeo.inbox.prefill",
+      "maskConsumesPrefill": true
+    },
+    "confidence": 0.9935,
+    "confidence_band": "high",
+    "blockers": [],
+    "match": {
+      "kind": "business_partner",
+      "status": "matched",
+      "matched_by": "partner_number",
+      "partner_id": "TEST-L-1",
+      "partner_number": "TEST-L-1",
+      "name": "Testlieferant"
+    },
+    "contract_match": null,
+    "duplicates": [],
+    "uncertainties": [
+      {
+        "code": "pflicht_date",
+        "detail": "Pflichtfeld date fehlt im Extrakt."
+      },
+      {
+        "code": "pflicht_tax",
+        "detail": "Pflichtfeld tax fehlt im Extrakt."
+      },
+      {
+        "code": "keine_positionszeilen_im_extrakt",
+        "detail": "Keine Positionszeilen in parsed_fields (dms_parser nur Kopf; Claude-Zeilen nur bei EINKAUF_OCR_ENGINE=claude + Key/PDF/OCR). Artikel-Vorschlag wird nicht erfunden. Lieferanten-Header-Vorschlag bleibt unabhaengig davon moeglich."
+      }
+    ],
+    "source": {
+      "kind": "dms_inbox",
+      "id": "SYNTH-INBOX-1",
+      "dmsDocumentId": null,
+      "classification": "parsed-or-ocr-hint"
+    },
+    "gaps": [
+      "create_from_inbox_bucht_nicht",
+      "keine_ki_klassifikation_an_dms_inbox",
+      "kontrakt_abgleich_nur_bei_kontraktnummer_im_extrakt",
+      "linked_document_id_nur_bei_eindeutigem_documents_treffer",
+      "artikel_abgleich_nur_bei_positionszeilen",
+      "dms_parser_ohne_positionszeilen",
+      "positionsextraktion_engine_nicht_claude",
+      "positionsextraktion_ohne_llm_key",
+      "positionsextraktion_regex_keine_zeilen",
+      "dubletten_nur_ueber_belegnummer"
+    ],
+    "can_open": true,
+    "master_data_proposals": {
+      "booking": false,
+      "executable": false,
+      "line_item_count": 0,
+      "supplier": null,
+      "articles": [
+        {
+          "kind": "article_create",
+          "status": "blocked",
+          "booking": false,
+          "executable": false,
+          "code": "keine_positionszeilen_im_extrakt",
+          "detail": "Keine Positionszeilen in parsed_fields (dms_parser nur Kopf; Claude-Zeilen nur bei EINKAUF_OCR_ENGINE=claude + Key/PDF/OCR). Artikel-Vorschlag wird nicht erfunden. Lieferanten-Header-Vorschlag bleibt unabhaengig davon moeglich.",
+          "domain_api": "POST /api/v1/articles/",
+          "target_route": "/artikel/neu",
+          "fachaktion_catalog_id": "artikel.stamm.create"
+        }
+      ]
+    }
+  }
+}

@@ -147,14 +147,13 @@ export function Wizard({
 
   const mergedOverflowActions = useMemo<ToolbarAction[]>(() => {
     const fromProps = overflowActions ?? []
-    const hasPrimaryFromProps = Array.isArray(primaryActions) && primaryActions.length > 0
-    const quickOverflow = hasPrimaryFromProps ? contextualToolbarActions.overflow : contextualToolbarActions.overflow
+    const quickOverflow = contextualToolbarActions.overflow
     const byId = new Map<string, ToolbarAction>()
     for (const action of [...fromProps, ...quickOverflow]) {
       byId.set(action.id, action)
     }
     return Array.from(byId.values())
-  }, [contextualToolbarActions.overflow, overflowActions, primaryActions])
+  }, [contextualToolbarActions.overflow, overflowActions])
 
   const validateActiveStep = async (): Promise<boolean> => {
     if (typeof getStepValidationError !== 'function') {

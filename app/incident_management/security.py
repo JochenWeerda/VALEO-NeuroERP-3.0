@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 import logging
 from app.core.uuid7 import uuid7
+from app.core.tenant_context import get_current_tenant_id
 
 logger = logging.getLogger(__name__)
 
@@ -700,9 +701,10 @@ class ISO27001IncidentManagement:
         logger.info(f"Incident {incident_id} closed. Resolution time: {incident.resolution_time}")
         return True
 
-    def get_incident_dashboard(self, tenant_id: str = "system") -> Dict[str, Any]:
+    def get_incident_dashboard(self, tenant_id: str | None = None) -> Dict[str, Any]:
         """Generate incident management dashboard"""
         # Current incidents by status
+        tenant_id = tenant_id or get_current_tenant_id()
         status_counts = {}
         for incident in self.incidents.values():
             status = incident.status.value
@@ -788,8 +790,9 @@ class ISO27001IncidentManagement:
             }
         }
 
-    def check_incident_management_compliance(self, tenant_id: str = "system") -> Dict[str, Any]:
+    def check_incident_management_compliance(self, tenant_id: str | None = None) -> Dict[str, Any]:
         """Check ISO 27001 incident management compliance"""
+        tenant_id = tenant_id or get_current_tenant_id()
         incidents = list(self.incidents.values())
         playbooks = list(self.incident_playbooks.values())
         team_members = list(self.response_team.values())

@@ -1,0 +1,7 @@
+# Tabellenkatalog: CI-Lineage-Abgleich
+
+Stand 2026-11-08. Der Backend-Job 128516616359 des Quality-Gate-Laufs 42410114687 zu Source-Head `525d3b212` meldete Katalogdrift. Die beiden Katalogdateien stammen unverändert aus dessen nach dem fehlgeschlagenen Check geerntetem Artefakt `fresh-schema-table-catalog` (Artefakt-ID 13589076577).
+
+Ein struktureller JSON-Vergleich mit dem zuvor versionierten Katalog ergab jeweils 31 Schemas und 700 Tabellen; keine Änderungen an Tabellenmenge, Spalten, Primär- oder Fremdschlüsseln, Ownership oder sonstigen Daten. Ausschließlich Verbraucherinformationen änderten sich: HR-Löschservice für drei HR-Tabellen (Lesen und Schreiben), Versandprofilservice für Versandprofile (Lesen und Schreiben), Inventurzählbogenservice für drei Inventartabellen (Lesen). Markdown enthält dieselben sieben Verbraucherzeilen und das generierte Prüfdatum.
+
+Die aktuelle lokale Code-Lineage wurde ohne Datenbank gegen das Artefakt neu ermittelt: beide Renderings stimmen überein, 700 Tabellen und keine fehlenden nativen Entity-Tabellen. `python -m pytest --noconftest --no-cov -q -m "not integration" tests/test_generate_table_catalog.py tests/test_table_lineage.py tests/test_table_lineage_registry_stability.py`: 17 bestanden, 1 datenbankabhängiger Test abgewählt. Ein erster ungezielter Lauf ergab 17 bestandene Tests und 5 Setup-Fehler durch absichtlich nicht konfigurierte Datenbank-Fixtures; es fand kein Datenbankzugriff statt. Der vollständige CI-Check auf einem frisch migrierten Schema bleibt der abschließende Nachweis.

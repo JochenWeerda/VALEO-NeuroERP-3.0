@@ -402,7 +402,11 @@ def test_trocknungs_regelsets_endpoint(client):
 def test_workflow_migration_check_safe(client):
     resp = client.post(
         "/api/v1/process/workflow-migration/check",
-        json={},  # leerer Body → Demo-Snapshot SAFE
+        json={
+            "prozess_key": "agrar_settlement", "von_version": "1.0", "zu_version": "1.1",
+            "alt_schritte": [{"schritt_id": "S1", "terminal": True}],
+            "neu_schritte": [{"schritt_id": "S1", "terminal": True}],
+        },
         headers={"X-Tenant-ID": "tenant-test"},
     )
     assert resp.status_code == 200

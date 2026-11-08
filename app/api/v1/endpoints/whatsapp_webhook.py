@@ -16,6 +16,7 @@ from app.services.whatsapp_agent_service import (
     get_order_log,
     process_whatsapp_message,
 )
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 logger = logging.getLogger("whatsapp.webhook")
 
@@ -51,8 +52,7 @@ class WebhookReceiveResponse(BaseModel):
     response_model=WebhookReceiveResponse,
     status_code=200,
     tags=["WhatsApp"],
-    summary="WhatsApp Webhook-Nachricht empfangen",
-)
+    summary="WhatsApp Webhook-Nachricht empfangen", dependencies=SCHREIBEN["GERAET"])
 async def webhook_receive(
     request: Request,
     x_hub_signature_256: str = Header(None),
@@ -126,8 +126,7 @@ class OrdersResponse(BaseModel):
     "/dev/simulate",
     response_model=SimulatorResponse,
     tags=["WhatsApp Dev-Simulator"],
-    summary="Simuliert eine eingehende WhatsApp-Nachricht",
-)
+    summary="Simuliert eine eingehende WhatsApp-Nachricht", dependencies=SCHREIBEN["PLATTFORM"])
 async def simulate_message(body: SimulatorRequest) -> SimulatorResponse:
     """
     Test-Endpunkt ohne Meta-Authentifizierung.
@@ -166,8 +165,7 @@ async def get_orders(tenant_id: str = "dev-tenant") -> OrdersResponse:
     response_class=Response,
     response_model=None,
     tags=["WhatsApp Dev-Simulator"],
-    summary="Gesprächsverlauf zurücksetzen",
-)
+    summary="Gesprächsverlauf zurücksetzen", dependencies=SCHREIBEN["PLATTFORM"])
 async def reset_conversation(phone: str, tenant_id: str = "dev-tenant") -> Response:
     from app.services.whatsapp_agent_service import _reset_conv
     _reset_conv(tenant_id, phone)

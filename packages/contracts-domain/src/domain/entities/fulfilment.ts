@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 // Enhanced schema with quality and delivery tracking
 export const FulfilmentSchema = z.object({
-  contractId: z.string().uuid(),
+  contractId: z.string().guid(),
   tenantId: z.string(),
   deliveredQty: z.number().default(0),
   pricedQty: z.number().default(0),
@@ -295,7 +295,7 @@ export class Fulfilment implements FulfilmentEntity {
       }));
   }
 
-  getUpcomingDeliveries(daysAhead: number = 7): Array<{ plannedDate: Date; qty: number }> {
+  getUpcomingDeliveries(daysAhead = 7): Array<{ plannedDate: Date; qty: number }> {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() + daysAhead);
 

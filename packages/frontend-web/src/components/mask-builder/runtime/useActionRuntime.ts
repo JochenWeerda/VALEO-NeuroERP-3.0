@@ -1,6 +1,10 @@
+import { checkResourceAction, resourceActionResult, resourceActionPayload } from './resource-response-adapter'
+import { identityBudgetInput } from './identity-budget-command-adapter'
 import { useCallback, useRef, useState } from 'react'
 import { apiClient } from '@/lib/api-client'
 import type { ScreenActionDefinition } from '../schema'
+import { prepareDocflowCommand, docflowCommandResult, docflowErrorResult } from './docflow-command-adapter'
+import { prepareHarvestControl, harvestControlResult } from './harvest-control-command-adapter'
 import {
   buildActionPolicy,
   checkActionPolicy,
@@ -29,6 +33,7 @@ export function useActionRuntime(
   const [loadingActionKey, setLoadingActionKey] = useState<string | null>(null)
   const [lastResult, setLastResult] = useState<ActionResult | null>(null)
   const pendingRef = useRef(false)
+  const intentRef = useRef<{ signature: string; key: string } | null>(null)
 
   const executeAction = useCallback(
     async (req: ActionRequest): Promise<ActionResult> => {
@@ -53,6 +58,23 @@ export function useActionRuntime(
           error: 'Diese Aktion erfordert die Eingabe und Bestaetigung in der Maske.' }
       }
 
+      if (actionDef.responseAdapter) {
+        try { checkResourceAction(actionDef, req, opts) } catch {
+          return { actionKey: req.actionKey, mode: req.mode, success: false, error: 'REST-Ressourcenaktion ist für diesen Aufruf gesperrt.' }
+        }
+      }
+
+      // DocFlow exposes domain-command bodies, not the generic _mode envelope.
+      // Until a versioned adapter is registered, a preview must never mutate a document.
+      if (req.mode !== 'execute' && !actionDef.commandBinding && /^\/api\/v1\/docflow(?:\/|$)/.test(actionDef.commandEndpoint ?? '')) {
+        return { actionKey: req.actionKey, mode: req.mode, success: false,
+          error: 'DocFlow-Vorschau ist ohne passenden Command-Adapter gesperrt.' }
+      }
+
+      if (req.mode === 'execute' && !actionDef.commandBinding && /^\/api\/v1\/docflow(?:\/|$)/.test(actionDef.commandEndpoint ?? '')) {
+        return { actionKey: req.actionKey, mode: req.mode, success: false, error: 'DocFlow-Command-Adapter fehlt.' }
+      }
+
       if (!actionDef.commandEndpoint) {
         // No endpoint — stub result for actions not yet fully wired
         const result: ActionResult = {
@@ -72,16 +94,43 @@ export function useActionRuntime(
       setLoadingActionKey(req.actionKey)
 
       try {
+        if (actionDef.commandBinding) {
+          const signature = JSON.stringify([opts.screenId, opts.entityId, req.actionKey,
+            req.expectedVersion ?? opts.entityData?.version, req.payload ?? {}, req.auditReason ?? '', actionDef.commandBinding,
+            actionDef.commandBinding.adapter === 'harvest.control.v1' ? opts.entityData : undefined])
+          if (intentRef.current?.signature !== signature) {
+            intentRef.current = { signature, key: crypto.randomUUID() }
+          }
+          const harvest = actionDef.commandBinding.adapter === 'harvest.control.v1'
+          const prepared = harvest ? { ...prepareHarvestControl(actionDef, req, opts, req.idempotencyKey ?? intentRef.current.key), method: 'POST' as const }
+            : prepareDocflowCommand(actionDef, req, opts, req.idempotencyKey ?? intentRef.current.key)
+          const response = await apiClient.request<unknown>({ method: prepared.method, url: prepared.url, data: prepared.body })
+          const result = harvest ? harvestControlResult(req, response.data) : docflowCommandResult(actionDef, req, opts, response.data)
+          setLastResult(result)
+          return result
+        }
         const method = actionDef.method ?? 'POST'
         const endpoint = actionDef.commandEndpoint
-          .replace('{entity_id}', opts.entityId ?? '')
+          .replace('{entity_id}', actionDef.responseAdapter ? encodeURIComponent(opts.entityId ?? '') : opts.entityId ?? '')
           .replace('{screen_id}', opts.screenId)
 
+        const expectedVersion = req.expectedVersion ?? opts.entityData?.version
+        if (actionDef.requiresExpectedVersion && (!Number.isInteger(expectedVersion) || Number(expectedVersion) < 1)) {
+          throw new Error('Die aktuelle Version fehlt. Bitte den Vorgang erneut laden.')
+        }
+        let intentKey = req.idempotencyKey
+        if (actionDef.requiresIdempotencyKey) {
+          const signature = JSON.stringify([opts.screenId, opts.entityId, req.actionKey, expectedVersion, req.payload ?? {}, req.auditReason ?? ''])
+          if (intentRef.current?.signature !== signature) intentRef.current = {signature, key: crypto.randomUUID()}
+          intentKey = intentKey ?? intentRef.current.key
+        }
         const body: Record<string, unknown> = {
-          ...(req.payload ?? {}),
+          ...(actionDef.responseAdapter ? resourceActionPayload(actionDef, req.payload ?? {}) : identityBudgetInput(endpoint, req.payload ?? {})),
+          ...((actionDef.requiresExpectedVersion || /^\/api\/v1\/studio\/entities\/studio_[a-z0-9_]+\/[^/]+\/actions\/(update|delete)$/.test(endpoint))
+            && typeof expectedVersion === 'number' ? { expected_version: expectedVersion } : {}),
           ...(req.mode !== 'execute' ? { _mode: req.mode } : {}),
           ...(req.auditReason ? { _auditReason: req.auditReason } : {}),
-          ...(req.idempotencyKey ? { _idempotencyKey: req.idempotencyKey } : {}),
+          ...(intentKey ? { _idempotencyKey: intentKey } : {}),
         }
 
         const response = await apiClient.request<ActionResult>({
@@ -90,10 +139,15 @@ export function useActionRuntime(
           data: body,
         })
 
-        const result: ActionResult = response.data
+        const result: ActionResult = actionDef.responseAdapter ? resourceActionResult(actionDef, req, opts, response.data, response.httpStatus) : response.data
         setLastResult(result)
         return result
       } catch (err) {
+        if (actionDef.commandBinding) {
+          const result = docflowErrorResult(req, err)
+          setLastResult(result)
+          return result
+        }
         const errorMessage = err instanceof Error ? err.message : 'Unbekannter Fehler'
         const result: ActionResult = { actionKey: req.actionKey, mode: req.mode, success: false, error: errorMessage }
         setLastResult(result)

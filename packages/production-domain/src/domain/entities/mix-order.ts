@@ -28,16 +28,16 @@ const MixStepSchema = z.object({
 
 // Main Mix Order Schema
 export const MixOrderSchema = z.object({
-  id: z.string().uuid(),
-  tenantId: z.string().uuid(),
+  id: z.string().guid(),
+  tenantId: z.string().guid(),
   orderNumber: z.string().min(1).max(100),
   type: z.enum(['Plant', 'Mobile']),
-  recipeId: z.string().uuid(),
+  recipeId: z.string().guid(),
   targetQtyKg: z.number().positive(),
   plannedAt: z.string().datetime(),
   location: LocationSchema.optional(),
-  customerId: z.string().uuid().optional(),
-  mobileUnitId: z.string().uuid().optional(),
+  customerId: z.string().guid().optional(),
+  mobileUnitId: z.string().guid().optional(),
   status: z.enum(['Draft', 'Staged', 'Running', 'Hold', 'Completed', 'Aborted']).default('Draft'),
   notes: z.string().optional(),
   steps: z.array(MixStepSchema).default([]),

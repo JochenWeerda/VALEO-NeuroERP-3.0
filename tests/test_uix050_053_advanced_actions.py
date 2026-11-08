@@ -70,7 +70,7 @@ class TestUIX051DryRunFormat:
         db = MagicMock()
         db.query.return_value.filter.return_value.first.return_value = None
         result = await mask_actions.action_reklamation_abschliessen(
-            "gibt-es-nicht", body={"_mode": "dryRun"}, db=db, tenant_id="test"
+            "gibt-es-nicht", request=None, body={"_mode": "dryRun"}, db=db, tenant_id="test"
         )
         assert result.success is False
         assert result.proposedChanges is None

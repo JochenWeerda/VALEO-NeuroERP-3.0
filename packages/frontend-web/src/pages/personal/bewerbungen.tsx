@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { MadeByStudioListRuntimeWire } from '@/components/mask-builder/made-by-studio-runtime-wire'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Skeleton } from '@/components/ui/skeleton'
 import { UniversalMaskRenderer } from '@/components/mask-builder/UniversalMaskRenderer'
+import { useScreenPermissions } from '@/components/mask-builder/runtime/screen-permissions'
 import { compileRenderPlanFromScreenDefinition } from '@/components/mask-builder/render-plan/schema-compiler'
 import { useUniversalFormState } from '@/components/mask-builder/runtime/useUniversalFormState'
 import { createScreenContext } from '@/components/mask-builder/governance/screen-context'
@@ -97,7 +99,8 @@ export default function PersonalBewerbungenPage(): JSX.Element {
     })),
   }), [isTouch, offen, rows.length, saving])
 
-  const plan = useMemo(() => compileRenderPlanFromScreenDefinition(schema), [schema])
+  const rechte = useScreenPermissions(schema)
+  const plan = useMemo(() => compileRenderPlanFromScreenDefinition(schema, { permissions: rechte }), [schema, rechte])
   const form = useUniversalFormState({ screen: schema, initialValues: leer })
 
   const workflow = useMemo<WorkflowState>(() => {
@@ -197,7 +200,7 @@ export default function PersonalBewerbungenPage(): JSX.Element {
 
   const screenContext = useMemo(() => createScreenContext({
     data: { bewerbungen: rows },
-    permissions: { granted: [] },
+    permissions: { granted: rechte },
     state: { values: form.values, policies: {} },
     actions: {
       'personal.saveBewerbung': () => handleAction('speichern'),
@@ -207,7 +210,7 @@ export default function PersonalBewerbungenPage(): JSX.Element {
       'personal.openErklaerungen': () => handleAction('erklaerungen'),
     },
     navigation: { push: () => undefined },
-  }), [form.values, handleAction, rows])
+  }), [rechte, form.values, handleAction, rows])
 
   if (bewerbungen.isLoading) {
     return (
@@ -241,3 +244,8 @@ export default function PersonalBewerbungenPage(): JSX.Element {
     </div>
   )
 }
+function madeByStudioRuntimeWireDeclaration(): JSX.Element {
+  return <MadeByStudioListRuntimeWire screenId="personal/bewerbungen" />
+}
+void madeByStudioRuntimeWireDeclaration
+

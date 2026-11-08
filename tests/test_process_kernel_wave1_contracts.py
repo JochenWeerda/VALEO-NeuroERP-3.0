@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from types import SimpleNamespace
+
 import asyncio
 import importlib.util
 from datetime import date, datetime
@@ -7,6 +9,7 @@ from decimal import Decimal
 from pathlib import Path
 from typing import Any
 
+from test_ap_workflow_security_contract import case, subject_data, keys, probe  # noqa: F401
 from app.core import endpoint_gateways
 from app.core.ap_approval_status import build_approval_status_response
 from app.api.v1.endpoints import (
@@ -325,197 +328,37 @@ def test_ap_approval_audit_workflow_instance_ref_uses_tenant_override_when_rule_
     assert ref.status == "completed"
 
 
-def test_ap_invoice_legacy_approve_facade_delegates_to_workflow(monkeypatch):
-    monkeypatch.setattr(ap_invoices, "get_repository", lambda db: object())
-    monkeypatch.setattr(
-        ap_invoices,
-        "get_from_store",
-        lambda doc_type, invoice_id, repo: {"number": invoice_id, "tenantId": "tenant-wave1", "status": "ENTWURF"},
-    )
-    # Der Test setzt ein nacktes object() als Repository ein. save_to_store hat
-    # dessen AttributeError frueher verschluckt und in den Prozessspeicher
-    # ausgewichen - seit SILENT-FAILURE-20260914 meldet es den Fehlschlag. Der
-    # Schreibvorgang ist fuer diesen Vertrag ohnehin Beiwerk; er wird deshalb
-    # ausdruecklich mitgestellt statt sich auf ein verschlucktes Scheitern zu
-    # verlassen.
-    monkeypatch.setattr(
-        ap_invoices,
-        "save_to_store",
-        lambda doc_type, doc_number, data, repo=None: {"ok": True, "number": doc_number},
-    )
-
-    async def fake_get_approval_status(invoice_id, tenant_id, db):
-        return build_approval_status_response(
-            invoice_id=invoice_id,
-            tenant_id=tenant_id,
-            status="not_requested",
-            required_approvals=0,
-            approvals=[],
-            rejections=[],
-            applicable_rule=None,
-        )
-
-    async def fake_request_approval(request, tenant_id, db):
-        return build_approval_status_response(
-            invoice_id=request.invoice_id,
-            tenant_id=tenant_id,
-            status="pending",
-            required_approvals=1,
-            approvals=[],
-            rejections=[],
-            applicable_rule=None,
-        )
-
-    async def fake_approve_invoice(action, tenant_id, db, user=None):
-        return build_approval_status_response(
-            invoice_id=action.invoice_id,
-            tenant_id=tenant_id,
-            status="approved",
-            required_approvals=1,
-            approvals=[{"approved_by": action.approved_by}],
-            rejections=[],
-            applicable_rule=None,
-        )
-
-    endpoint_gateways.register_approval_workflow_gateway(
-        endpoint_gateways.ApprovalWorkflowGateway(
-            get_status=fake_get_approval_status,
-            request_approval=lambda invoice_id, tenant_id, requested_by, comment, db: fake_request_approval(
-                ap_approval_workflow.ApprovalRequest(
-                    invoice_id=invoice_id,
-                    requested_by=requested_by,
-                    comment=comment,
-                ),
-                tenant_id,
-                db,
-            ),
-            approve_invoice=lambda invoice_id, tenant_id, approved_by, action, comment, db: fake_approve_invoice(
-                ap_approval_workflow.ApprovalAction(
-                    invoice_id=invoice_id,
-                    approved_by=approved_by,
-                    action=action,
-                    comment=comment,
-                ),
-                tenant_id,
-                db,
-            ),
-        )
-    )
-
-    response = asyncio.run(ap_invoices.approve_ap_invoice(
-        "inv-legacy", approved_by=None, db=None, tenant_id="tenant-wave1", user={"sub": "lead", "roles": ["FINANCE_ADMIN"]}
-    ))
-
-    assert response["status"] == "ok"
-    assert response["data"]["status"] == "approved"
-    assert response["data"]["override_resolution"]["rule_id"] == "ap.approval.default"
-    assert response["data"]["explainability"]["status"] == "allowed"
+def test_ap_invoice_legacy_approve_facade_delegates_to_workflow(case):
+    from test_ap_workflow_security_contract import request, headers
+    pending = request(case)
+    result = case[0].post('/api/v1/finance/ap/invoices/'+case[5]+'/approve',
+        headers=headers(case, 'human-b'), json={'approval_request_id':pending['approval_request_id']})
+    assert result.status_code == 200, result.text
+    response = result.json()
+    assert response['data']['status'] == 'approved'
+    assert response['data']['explainability']['status'] == 'allowed'
+    assert response['data']['approval_request_id'] == pending['approval_request_id']
 
 
-def test_ap_approval_request_syncs_invoice_to_zur_freigabe(monkeypatch):
-    stored_invoice = {
-        "number": "inv-request",
-        "tenantId": "tenant-wave1",
-        "status": "ENTWURF",
-    }
-
-    async def fake_list_approval_rules(active_only, tenant_id, db):
-        return []
-
-    class DummyResult:
-        def fetchone(self):
-            return ("req-1", "inv-request", "pending", 1, None, datetime(2026, 3, 11, 9, 0, 0), datetime(2026, 3, 11, 9, 0, 0))
-
-    class DummyDb:
-        def execute(self, _query, _params):
-            return DummyResult()
-
-        def add(self, _entry):
-            return None
-
-        def commit(self):
-            return None
-
-        def rollback(self):
-            raise AssertionError("rollback should not be called")
-
-    monkeypatch.setattr(ap_approval_workflow, "list_approval_rules", fake_list_approval_rules)
-    monkeypatch.setattr(ap_approval_workflow, "uuid7", lambda: "req-1")
-    monkeypatch.setattr(router_helpers, "get_repository", lambda db: object())
-    monkeypatch.setattr(router_helpers, "get_from_store", lambda doc_type, invoice_id, repo: stored_invoice)
-    monkeypatch.setattr(
-        router_helpers,
-        "save_to_store",
-        lambda doc_type, invoice_id, invoice, repo: stored_invoice.update(invoice) or stored_invoice,
-    )
-
-    response = asyncio.run(
-        ap_approval_workflow.request_approval(
-            ap_approval_workflow.ApprovalRequest(invoice_id="inv-request", requested_by="lead"),
-            tenant_id="tenant-wave1",
-            db=DummyDb(),
-        )
-    )
-
-    assert response.status == "pending"
-    assert stored_invoice["status"] == "ZUR_FREIGABE"
-    assert stored_invoice["approvalRequestId"] == "req-1"
+def test_ap_approval_request_syncs_invoice_to_zur_freigabe(case):
+    from test_ap_workflow_security_contract import request
+    from app.documents.repository import DocumentRepository
+    response = request(case)
+    stored = DocumentRepository(case[1]).get_document('ap_invoice',case[5])
+    assert response['status'] == 'pending'
+    assert stored['status'] == 'ZUR_FREIGABE'
+    assert stored['approvalRequestId'] == response['approval_request_id']
 
 
-def test_ap_approval_reject_syncs_invoice_to_abgelehnt(monkeypatch):
-    stored_invoice = {
-        "number": "inv-reject",
-        "tenantId": "tenant-wave1",
-        "status": "ZUR_FREIGABE",
-    }
-    approvals_rows: list[tuple[str, datetime, str | None]] = []
-    rejections_rows: list[tuple[str, datetime, str | None]] = []
-
-    class DummyDb:
-        def execute(self, query, params):
-            query_str = str(query)
-            if "FROM domain_erp.ap_approval_requests" in query_str:
-                return type("Result", (), {"fetchone": lambda self: ("req-1", "inv-reject", 2, None, "pending")})()
-            if "SELECT approved_by, created_at, comment" in query_str and "action = 'approve'" in query_str:
-                return type("Result", (), {"fetchall": lambda self: approvals_rows})()
-            if "SELECT approved_by, created_at, comment" in query_str and "action = 'reject'" in query_str:
-                return type("Result", (), {"fetchall": lambda self: rejections_rows})()
-            if "SELECT id FROM domain_erp.ap_approvals" in query_str:
-                return type("Result", (), {"fetchone": lambda self: None})()
-            if "INSERT INTO domain_erp.ap_approvals" in query_str:
-                rejections_rows.append((params["approved_by"], datetime(2026, 3, 11, 9, 30, 0), params.get("comment")))
-                return type("Result", (), {})()
-            if "UPDATE domain_erp.ap_approval_requests" in query_str:
-                return type("Result", (), {})()
-            raise AssertionError(query_str)
-
-        def add(self, _entry):
-            return None
-
-        def commit(self):
-            return None
-
-        def rollback(self):
-            raise AssertionError("rollback should not be called")
-
-    monkeypatch.setattr(router_helpers, "get_repository", lambda db: object())
-    monkeypatch.setattr(router_helpers, "get_from_store", lambda doc_type, invoice_id, repo: stored_invoice)
-    monkeypatch.setattr(
-        router_helpers,
-        "save_to_store",
-        lambda doc_type, invoice_id, invoice, repo: stored_invoice.update(invoice) or stored_invoice,
-    )
-
-    response = asyncio.run(
-        ap_approval_workflow.approve_invoice(
-            ap_approval_workflow.ApprovalAction(invoice_id="inv-reject", approved_by="finance", action="reject", comment="threshold"),
-            tenant_id="tenant-wave1",
-            db=DummyDb(),
-        )
-    )
-
-    assert response.status == "rejected"
-    assert stored_invoice["status"] == "ABGELEHNT"
+def test_ap_approval_reject_syncs_invoice_to_abgelehnt(case):
+    from test_ap_workflow_security_contract import request, decide
+    from app.documents.repository import DocumentRepository
+    pending = request(case)
+    response = decide(case,pending['approval_request_id'], action='reject', comment='Synthetic rejection')
+    assert response.status_code == 200, response.text
+    assert response.json()['status'] == 'rejected'
+    stored = DocumentRepository(case[1]).get_document('ap_invoice',case[5])
+    assert stored['status'] == 'ABGELEHNT'
 
 
 def test_ap_invoice_detail_returns_workflow_snapshot(monkeypatch):
@@ -697,33 +540,19 @@ def test_store_payment_run_event_in_outbox_uses_real_event_type(monkeypatch):
     assert captured["payload"]["status"] == "executed"
 
 
-def test_store_ap_invoice_posted_event_in_outbox_uses_process_event(monkeypatch):
-    captured: dict[str, Any] = {}
-
-    class FakeOutbox:
-        async def store_event(self, event, tenant_id=None):
-            captured["event_type"] = event.__class__.__name__
-            captured["aggregate_id"] = event.aggregate_id
-            captured["tenant_id"] = tenant_id
-            captured["journal_entry_id"] = event.journal_entry_id
-
-    monkeypatch.setattr(ap_invoices, "OutboxPublisher", lambda db, publisher: FakeOutbox())
-    monkeypatch.setattr(ap_invoices, "get_event_publisher", lambda: object())
-
-    asyncio.run(
-        ap_invoices._store_ap_invoice_posted_event_in_outbox(
-            db=object(),
-            tenant_id="tenant-wave1",
-            invoice_id="inv-1",
-            posted_by="finance@example.com",
-            journal_entry_id="je-1",
-        )
-    )
-
-    assert captured["event_type"] == "APInvoicePosted"
-    assert captured["aggregate_id"] == "inv-1"
-    assert captured["tenant_id"] == "tenant-wave1"
-    assert captured["journal_entry_id"] == "je-1"
+def test_store_ap_invoice_posted_event_in_outbox_uses_process_event():
+    from app.services.ap_invoice_approval_service import APApprovalWorkflowService
+    import json
+    events = []
+    class Db:
+        def add(self, event):
+            events.append(event)
+    APApprovalWorkflowService._post_event(Db(), tenant_id="tenant-wave1", invoice_id="inv-1",
+        posted_by="synthetic-human", journal_entry_id="je-1")
+    assert len(events) == 1
+    assert events[0].event_type == "APInvoicePosted"
+    assert events[0].tenant_id == "tenant-wave1" and events[0].aggregate_id == "inv-1"
+    assert json.loads(events[0].payload)["journal_entry_id"] == "je-1"
 
 
 def test_payment_run_approve_accepts_empty_body_with_authenticated_actor_and_distinct_creator(monkeypatch):
@@ -777,6 +606,25 @@ def test_payment_run_approve_accepts_empty_body_with_authenticated_actor_and_dis
 
     monkeypatch.setattr(payment_runs, "get_payment_run", fake_get_payment_run)
 
+    class FakeFreigabe:
+        """Die zentrale Approval Engine (APPROVAL-001) hat eigene Vertragstests gegen die Datenbank
+        (tests/test_freigabe_hauptbuch_zahlung.py); hier wird nur ihr Aufruf geprueft."""
+
+        def __init__(self, db, tenant_id):
+            captured["engine_tenant"] = tenant_id
+
+        def vorgang(self, run_id, aktion):
+            return type("Vorgang", (), {"ersteller": "maker"})()
+
+        def beantrage(self, run_id, aktion, ersteller, art):
+            captured["beantragt_von"] = ersteller
+            return {"status": "requested", "id": "freigabe-1"}
+
+        def entscheide(self, run_id, anfrage_id, user, genehmigt):
+            captured["entschieden"] = (anfrage_id, user["sub"], genehmigt)
+
+    monkeypatch.setattr("app.services.finance_freigabe.ZahlungslaufFreigabe", FakeFreigabe)
+
     request = payment_runs.ApprovePaymentRunRequest.model_validate({})
     # Seit 07.10.2026 ist der Freigeber der angemeldete Nutzer, nicht ein Rumpf-Default.
     response = asyncio.run(payment_runs.approve_payment_run(
@@ -786,6 +634,7 @@ def test_payment_run_approve_accepts_empty_body_with_authenticated_actor_and_dis
     assert captured["approved_by"] == "api"
     assert captured["committed"] is True
     assert response.approved_by == "api"
+    assert captured["beantragt_von"] == "maker" and captured["entschieden"] == ("freigabe-1", "api", True)
 
 
 def test_return_payment_persists_outbox_event(monkeypatch):
@@ -1005,6 +854,8 @@ def test_finance_actions_closing_approve_delegates_to_checklist_workspace(monkey
                 closing_type="monatsabschluss",
                 actor="controller@example.com",
             ),
+            # Der Bearbeiter kommt aus den geprueften Claims, nicht aus ``actor`` im Body (19.10.2026).
+            request=SimpleNamespace(state=SimpleNamespace(token_claims={"sub": "controller@example.com"})),
             tenant_id="tenant-wave1",
             db=None,
         )
@@ -1019,91 +870,64 @@ def test_finance_actions_closing_approve_delegates_to_checklist_workspace(monkey
     assert response["approval_status"] == "approved"
 
 
+def _vat_return_row(status: str, **mehr) -> dict:
+    zeile = {
+        "id": "vat-1", "period": "2026-03", "return_type": "monthly", "taxpayer_name": "Valero GmbH",
+        "tax_id": None, "vat_id": "DE123", "total_sales_net": 1000.0, "total_input_tax": 190.0,
+        "total_output_tax": 190.0, "vat_payable": 0.0, "positions": [], "status": status,
+        "calculated_at": datetime(2026, 3, 11, 9, 0, 0), "calculated_by": "rechner",
+        "validated_at": datetime(2026, 3, 11, 10, 0, 0), "validated_by": "pruefer",
+        "approved_at": None, "approved_by": None, "submitted_at": None, "submitted_by": None,
+        "elster_transferticket": None, "notes": None,
+        "created_at": datetime(2026, 3, 11, 8, 0, 0), "updated_at": datetime(2026, 3, 11, 10, 0, 0),
+    }
+    zeile.update(mehr)
+    return zeile
+
+
+def _vat_request(sub: str):
+    return SimpleNamespace(state=SimpleNamespace(token_claims={"sub": sub}))
+
+
+class _VatDb:
+    def __init__(self):
+        self.updates: list[dict] = []
+
+    def execute(self, query, params):
+        self.updates.append(dict(params))
+
+    def commit(self):
+        return None
+
+    def rollback(self):
+        return None
+
+
 def test_vat_return_response_returns_structured_approval_snapshot():
-    row = (
-        "vat-1",
-        "2026-03",
-        "monthly",
-        "Valero GmbH",
-        None,
-        "DE123",
-        1000.0,
-        190.0,
-        190.0,
-        0.0,
-        [],
-        "approved",
-        datetime(2026, 3, 11, 9, 0, 0),
-        datetime(2026, 3, 11, 10, 0, 0),
-        None,
-        None,
-        datetime(2026, 3, 11, 8, 0, 0),
-        datetime(2026, 3, 11, 10, 0, 0),
-    )
-    response = vat_return_export._build_vat_return_response(row, positions_data=[])
+    response = vat_return_export._build_vat_return_response(
+        _vat_return_row("approved", approved_by="chefin", approved_at=datetime(2026, 3, 11, 11, 0, 0)), positions_data=[])
 
     assert response.approval_status == "approved"
     assert response.approval_can_submit is True
+    assert response.approved_by == "chefin"
     assert response.approval_override_resolution.rule_id == "finance.vat_return.submission"
     assert response.approval_explainability.status == "allowed"
 
 
-def test_vat_return_approve_promotes_validated_return(monkeypatch):
-    async def fake_get_vat_return(return_id, tenant_id, db):
-        status = getattr(db, "status", "validated")
-        return vat_return_export.VATReturnResponse(
-            id=return_id,
-            period="2026-03",
-            return_type="monthly",
-            taxpayer_name="Valero GmbH",
-            tax_id=None,
-            vat_id="DE123",
-            total_sales_net=1000,
-            total_input_tax=190,
-            total_output_tax=190,
-            vat_payable=0,
-            positions=[],
-            status=status,
-            calculated_at=None,
-            validated_at=datetime(2026, 3, 11, 9, 0, 0),
-            approved_at=None,
-            approved_by=None,
-            submitted_at=None,
-            elster_reference=None,
-            approval_status=status,
-            approval_can_submit=status == "approved",
-            approval_override_resolution=vat_return_export.PolicyOverrideResolution(rule_id="finance.vat_return.submission"),
-            approval_explainability=vat_return_export.ExplainabilityView(status="approval-required", summary="pending"),
-            notes=None,
-            created_at=datetime(2026, 3, 11, 8, 0, 0),
-            updated_at=datetime(2026, 3, 11, 9, 0, 0),
-        )
-
-    class DummyDb:
-        status = "validated"
-
-        def execute(self, _query, _params):
-            self.status = "approved"
-            return None
-
-        def commit(self):
-            return None
-
-        def rollback(self):
-            raise AssertionError("rollback should not be called")
-
-    monkeypatch.setattr(vat_return_export, "get_vat_return", fake_get_vat_return)
-    response = asyncio.run(
-        vat_return_export.approve_vat_return(
-            "vat-1",
-            vat_return_export.VATReturnApprovalRequest(approved_by="tax@example.com"),
-            tenant_id="tenant-wave1",
-            db=DummyDb(),
-        )
-    )
+def test_vat_return_approve_takes_the_approver_from_the_token(monkeypatch):
+    """Der Freigebende kam aus dem Rumpf und wurde nicht gespeichert; jetzt kommt er aus der Anmeldung."""
+    zeilen = [_vat_return_row("validated"),
+              _vat_return_row("approved", approved_by="tax@example.com", approved_at=datetime(2026, 3, 11, 11, 0, 0))]
+    monkeypatch.setattr(vat_return_export, "_lies", lambda db, rid, tid, sperren=False: zeilen.pop(0))
+    monkeypatch.setattr(vat_return_export, "_stand", lambda db, tid, zeitraum: SimpleNamespace(klaerungen=[], offene_entwuerfe=0))
+    monkeypatch.setattr(vat_return_export, "_abweichungen", lambda gespeichert, stand: [])
+    db = _VatDb()
+    response = asyncio.run(vat_return_export.approve_vat_return(
+        "vat-1", _vat_request("tax@example.com"), tenant_id="tenant-wave1", db=db))
 
     assert response.status == "approved"
     assert response.approved_by == "tax@example.com"
+    assert db.updates == [{"return_id": "vat-1", "tenant_id": "tenant-wave1", "akteur": "tax@example.com"}]
 
 
 def test_ap_invoice_semantic_status_normalizes_document_and_workflow_status():
@@ -1248,62 +1072,26 @@ def test_ap_invoice_list_filter_uses_semantic_status(monkeypatch):
     assert response[0]["semantic_status"] == "FREIGEGEBEN"
 
 
-def test_vat_return_submit_requires_and_returns_submitted_snapshot(monkeypatch):
-    async def fake_get_vat_return(return_id, tenant_id, db):
-        status = getattr(db, "status", "approved")
-        return vat_return_export.VATReturnResponse(
-            id=return_id,
-            period="2026-03",
-            return_type="monthly",
-            taxpayer_name="Valero GmbH",
-            tax_id=None,
-            vat_id="DE123",
-            total_sales_net=1000,
-            total_input_tax=190,
-            total_output_tax=190,
-            vat_payable=0,
-            positions=[],
-            status=status,
-            calculated_at=None,
-            validated_at=datetime(2026, 3, 11, 9, 0, 0),
-            approved_at=datetime(2026, 3, 11, 10, 0, 0),
-            approved_by="tax@example.com",
-            submitted_at=None,
-            elster_reference=None,
-            approval_status=status,
-            approval_can_submit=status == "approved",
-            approval_override_resolution=vat_return_export.PolicyOverrideResolution(rule_id="finance.vat_return.submission"),
-            approval_explainability=vat_return_export.ExplainabilityView(status="allowed", summary="ready"),
-            notes=None,
-            created_at=datetime(2026, 3, 11, 8, 0, 0),
-            updated_at=datetime(2026, 3, 11, 10, 0, 0),
-        )
-
-    class DummyDb:
-        status = "approved"
-
-        def execute(self, _query, _params):
-            self.status = "submitted"
-            return None
-
-        def commit(self):
-            return None
-
-        def rollback(self):
-            raise AssertionError("rollback should not be called")
-
-    monkeypatch.setattr(vat_return_export, "get_vat_return", fake_get_vat_return)
-    response = asyncio.run(
-        vat_return_export.submit_vat_return(
-            "vat-1",
-            vat_return_export.VATReturnSubmitRequest(submitted_by="tax@example.com"),
-            tenant_id="tenant-wave1",
-            db=DummyDb(),
-        )
-    )
+def test_vat_return_submit_records_the_elster_transfer_ticket(monkeypatch):
+    """Ohne Transferticket keine Uebermittlung; eine Referenz wird nicht mehr erfunden."""
+    zeilen = [_vat_return_row("approved", approved_by="chefin", approved_at=datetime(2026, 3, 11, 11, 0, 0)),
+              _vat_return_row("submitted", approved_by="chefin", approved_at=datetime(2026, 3, 11, 11, 0, 0),
+                              submitted_by="tax@example.com", submitted_at=datetime(2026, 3, 12, 9, 0, 0),
+                              elster_transferticket="et1234567890")]
+    monkeypatch.setattr(vat_return_export, "_lies", lambda db, rid, tid, sperren=False: zeilen.pop(0))
+    db = _VatDb()
+    response = asyncio.run(vat_return_export.submit_vat_return(
+        "vat-1", vat_return_export.VATReturnSubmitRequest(transferticket="et1234567890"),
+        _vat_request("tax@example.com"), tenant_id="tenant-wave1", db=db))
 
     assert response.status == "submitted"
-    assert response.elster_reference == "ELSTER-2026-03-vat-1"
+    assert response.elster_reference == "et1234567890"
+    assert db.updates[0]["ticket"] == "et1234567890" and db.updates[0]["akteur"] == "tax@example.com"
+    import pydantic
+    import pytest
+
+    with pytest.raises(pydantic.ValidationError):
+        vat_return_export.VATReturnSubmitRequest(submitted_by="tax@example.com")
 
 
 def test_ap_invoice_semantic_status_preserves_extended_document_states():
@@ -1313,22 +1101,12 @@ def test_ap_invoice_semantic_status_preserves_extended_document_states():
     assert compute({"status": "BEZAHLT", "approval_status": "not_requested"}) == "BEZAHLT"
 
 
-def test_ap_approval_status_fallback_reads_document_semantics_without_request(monkeypatch):
-    monkeypatch.setattr(router_helpers, "get_repository", lambda db: object())
-    monkeypatch.setattr(
-        router_helpers,
-        "get_from_store",
-        lambda doc_type, invoice_id, repo: {"number": invoice_id, "tenantId": "tenant-wave1", "status": "ABGELEHNT"},
-    )
-
-    class DummyDb:
-        def execute(self, _query, _params):
-            return type("Result", (), {"fetchone": lambda self: None})()
-
-    response = asyncio.run(ap_approval_workflow.get_approval_status("inv-fallback", tenant_id="tenant-wave1", db=DummyDb()))
-
-    assert response.status == "rejected"
-    assert response.can_post is False
+def test_ap_approval_status_without_request_never_fabricates_review(case):
+    from test_ap_workflow_security_contract import headers, PREFIX
+    result = case[0].get(PREFIX+'/status/'+case[5],headers=headers(case))
+    assert result.status_code == 200
+    assert result.json()['status'] == 'not_requested'
+    assert result.json()['can_post'] is False
 
 
 def test_cash_closings_read_model_returns_structured_snapshot():

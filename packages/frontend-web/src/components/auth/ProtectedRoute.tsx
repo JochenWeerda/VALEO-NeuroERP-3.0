@@ -22,10 +22,6 @@ export function ProtectedRoute({
   const { isAuthenticated, loading, hasScope, hasRole, user } = useAuth()
   const isLoading = loading === true
   const authenticated = isAuthenticated === true
-  // Check if OIDC is actually configured (not just placeholder)
-  const discoveryUrl = (import.meta.env.VITE_OIDC_DISCOVERY_URL ?? '')
-  const placeholderPatterns = ['your-oidc-provider.com', 'example.com', 'keycloak.example.com', '{tenant-id}', '{domain}', '{application-id}', '{client-id}']
-  const oidcConfigured = discoveryUrl.length > 0 && !placeholderPatterns.some(pattern => discoveryUrl.includes(pattern))
 
   if (isLoading) {
     return (
@@ -35,15 +31,8 @@ export function ProtectedRoute({
     )
   }
 
-  // Only redirect to login if OIDC is configured and user is not authenticated
-  if (!authenticated && oidcConfigured) {
+  if (!authenticated) {
     return <Navigate to="/login" replace />
-  }
-
-  // In dev mode without OIDC, allow access even if not "authenticated" (dev token will be used)
-  if (!authenticated && !oidcConfigured) {
-    // Allow access - dev token will be used automatically
-    return <>{children}</>
   }
 
   if (requiredScopes.length > 0) {

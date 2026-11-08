@@ -36,6 +36,7 @@ from .workflows.compliance_copilot import check_compliance
 from .workflows.data_quality_assistant import run_data_quality_assistant
 from .workflows.operations_exception_assistant import run_operations_exception_assistant
 from .workflows.skonto_optimizer import optimize_skonto
+from app.core.tenant_context import get_current_tenant_id
 
 
 class NeuroAssistInputContractError(ValueError):
@@ -571,9 +572,10 @@ class NeuroAssistService:
         self,
         capability_key: str,
         *,
-        tenant_id: str = "system",
+        tenant_id: str | None = None,
         parameters: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
+        tenant_id = tenant_id or get_current_tenant_id()
         correlation_id = str(uuid4())
         started_at = datetime.utcnow().isoformat()
         try:

@@ -1,4 +1,5 @@
 import { useMemo, useRef, type ReactNode } from 'react'
+import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { cn } from '@/lib/utils'
 import { useTouchDevice } from '@/hooks/useTouchDevice'
@@ -100,7 +101,12 @@ export function VirtualDataTable<T extends Record<string, unknown>>({
 
   if (data.length === 0) {
     return (
-      <div className="flex items-center justify-center rounded-md border border-border p-8 text-sm text-muted-foreground" style={{ height: emptyHeight }}>
+      <div
+        role="status"
+        data-testid="empty-state"
+        className="flex items-center justify-center rounded-md border border-border p-8 text-sm text-muted-foreground"
+        style={{ height: emptyHeight }}
+      >
         {emptyMessage}
       </div>
     )
@@ -161,12 +167,22 @@ export function VirtualDataTable<T extends Record<string, unknown>>({
   return (
     <div className="rounded-md border border-border" data-testid="virtual-data-table">
       <div className="overflow-x-auto">
-        <div className="min-w-full" style={{ width: 'max-content' }}>
+        {/* Tabellensemantik fuer Screenreader: Kopf- und Datenzeilen in einer (virtualisierten) Tabelle.
+            Klickbare Zeilen machen daraus ein Raster (grid), damit Zeilen fokussierbar und auswaehlbar sind. */}
+        <div
+          className="min-w-full"
+          style={{ width: 'max-content' }}
+          role={onRowClick ? 'grid' : 'table'}
+          aria-rowcount={data.length + 1}
+          aria-colcount={columns.length}
+        >
           {/* Header and body reserve the same scrollbar gutter: columns stay aligned and the
               body's vertical scrollbar cannot push the rows into a second horizontal scrollbar. */}
           <div
             className="grid overflow-y-hidden border-b bg-muted text-[11px] font-semibold uppercase tracking-normal text-muted-foreground"
             style={{ gridTemplateColumns, scrollbarGutter: 'stable' }}
+            role="row"
+            aria-rowindex={1}
           >
             {columns.map((column) => {
               const colKey = String(column.key)
@@ -175,6 +191,8 @@ export function VirtualDataTable<T extends Record<string, unknown>>({
               return (
                 <div
                   key={colKey}
+                  role="columnheader"
+                  aria-sort={isActive ? (sortDir === 'asc' ? 'ascending' : 'descending') : undefined}
                   className={cn(
                     'px-3 py-3',
                     column.numeric && 'text-right',
@@ -187,11 +205,13 @@ export function VirtualDataTable<T extends Record<string, unknown>>({
                   }
                 >
                   {column.label}
-                  {canSort && isActive ? (
-                    <span className="ml-1">{sortDir === 'asc' ? '↑' : '↓'}</span>
-                  ) : canSort ? (
-                    <span className="ml-1 opacity-30">⇅</span>
-                  ) : null}
+                  {canSort && (
+                    isActive
+                      ? sortDir === 'asc'
+                        ? <ArrowUp aria-hidden="true" className="ml-1 inline-block size-3 text-foreground" />
+                        : <ArrowDown aria-hidden="true" className="ml-1 inline-block size-3 text-foreground" />
+                      : <ArrowUpDown aria-hidden="true" className="ml-1 inline-block size-3 text-foreground" />
+                  )}
                 </div>
               )
             })}
@@ -200,6 +220,7 @@ export function VirtualDataTable<T extends Record<string, unknown>>({
             ref={parentRef}
             className="relative overflow-y-auto overflow-x-hidden"
             style={{ height: bodyHeight, scrollbarGutter: 'stable' }}
+            role="rowgroup"
           >
             <div style={{ height: virtualizer.getTotalSize(), position: 'relative' }}>
               {renderedItems.map((virtualRow) => {
@@ -219,8 +240,9 @@ export function VirtualDataTable<T extends Record<string, unknown>>({
                       transform: `translateY(${virtualRow.start}px)`,
                     }}
                     onClick={() => onRowClick?.(row)}
-                    role={onRowClick ? 'button' : 'row'}
-                    aria-selected={selected || undefined}
+                    role="row"
+                    aria-rowindex={virtualRow.index + 2}
+                    aria-selected={onRowClick ? selected : undefined}
                     data-selected={selected || undefined}
                     tabIndex={onRowClick ? 0 : undefined}
                     onKeyDown={onRowClick ? (event) => {
@@ -233,6 +255,7 @@ export function VirtualDataTable<T extends Record<string, unknown>>({
                     {columns.map((column) => (
                       <span
                         key={String(column.key)}
+                        role={onRowClick ? 'gridcell' : 'cell'}
                         className={cn('truncate px-3 py-3', column.numeric && 'text-right tabular-nums')}
                       >
                         {renderCell(column, row)}

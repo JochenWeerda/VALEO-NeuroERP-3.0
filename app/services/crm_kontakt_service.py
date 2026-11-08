@@ -8,7 +8,6 @@ from typing import Optional
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-_DEFAULT_TENANT = "00000000-0000-0000-0000-000000000001"
 _COLS = (
     "id, kunden_nr, richtung, art, kurzinfo, notiz, wiedervorlage, "
     "weiterleitung_an, bediener, verweis, erledigt, created_at"
@@ -18,7 +17,9 @@ _COLS = (
 class CrmKontaktService:
     def __init__(self, db: Session, tenant_id: Optional[str] = None) -> None:
         self.db = db
-        self.tenant_id = tenant_id or _DEFAULT_TENANT
+        if not tenant_id:  # kein Rueckfall auf den Standardmandanten (bis 28.10.2026)
+            raise ValueError("Mandant fehlt")
+        self.tenant_id = tenant_id
 
     def _row(self, r) -> dict:
         d = dict(r)
@@ -88,8 +89,9 @@ class CrmKontaktService:
                 {"e": erledigt, "id": kontakt_id, "t": self.tenant_id},
             )
         self.db.commit()
-        # reviewed-safe: _COLS is a module-owned constant; the contact id is bound.
-        r = self.db.execute(text(f"SELECT {_COLS} FROM public.kunden_kontakte WHERE id = :id"), {"id": kontakt_id}).mappings().first()  # nosec B608  # reviewed-safe: Bezeichner stammen aus Modulkonstanten, Werte sind gebunden
+        # Nur im eigenen Mandanten lesen: bis 20.10.2026 lieferte eine fremde ID den fremden Kontakt (ohne Aenderung).
+        r = self.db.execute(text(f"SELECT {_COLS} FROM public.kunden_kontakte WHERE id = :id AND tenant_id = :t"),  # nosec B608
+                            {"id": kontakt_id, "t": self.tenant_id}).mappings().first()
         return self._row(r) if r else {}
 
     def wiedervorlagen_offen(self, tage: int = 14) -> list[dict]:

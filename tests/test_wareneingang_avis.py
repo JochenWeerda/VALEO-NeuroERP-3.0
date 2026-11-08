@@ -123,8 +123,8 @@ def avis_mit_bestellung(engine, stamm, *, mit_artikel: bool = True, geliefert: f
                   {"i": bestellung, "h": HAUS_A, "n": nummer, "l": LIEFERANT})
         for nr, (artikel, menge) in enumerate(zip(stamm["artikel"], (12, 30)), start=1):
             v.execute(text("INSERT INTO domain_einkauf.bestellung_positionen (id, bestellung_id, pos_nr, article_id, "
-                           " artikel_nr, artikel_bezeichnung, menge, menge_geliefert, menge_offen, einheit, status) "
-                           "VALUES (:i, :b, :p, :a, :nr, :bez, :m, :g, :o, 't', 'offen')"),
+                           " artikel_nr, artikel_bezeichnung, menge, menge_geliefert, menge_offen, einheit, status, tenant_id) "
+                           "VALUES (:i, :b, :p, :a, :nr, :bez, :m, :g, :o, 't', 'offen', (SELECT tenant_id FROM domain_einkauf.bestellungen WHERE id = :b))"),
                       {"i": str(uuid.uuid4()), "b": bestellung, "p": nr, "a": artikel if mit_artikel else None,
                        "nr": f"WE-{artikel[:6]}", "bez": f"KAS Sorte {nr}", "m": menge, "g": geliefert,
                        "o": menge - geliefert})

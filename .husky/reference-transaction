@@ -1,0 +1,20 @@
+#!/bin/sh
+# Shared main history must survive parallel private-index deliveries.
+[ "$1" = "prepared" ] || exit 0
+while read -r old new ref; do
+    [ "$ref" = "refs/heads/main" ] || continue
+    case "$new" in
+        *[!0]*) ;;
+        *) echo "main history guard: deleting main is not permitted" >&2; exit 1 ;;
+    esac
+    # Unconditional update-ref may report a zero old OID for an existing ref.
+    # Read the protected current ref while the transaction is prepared.
+    current=$(git rev-parse --verify --quiet "$ref") || current=
+    [ -n "$current" ] || continue
+    old=$current
+    if ! git merge-base --is-ancestor "$old" "$new"; then
+        echo "main history guard: preserve current HEAD; integrate parallel commits before delivery" >&2
+        exit 1
+    fi
+done
+exit 0

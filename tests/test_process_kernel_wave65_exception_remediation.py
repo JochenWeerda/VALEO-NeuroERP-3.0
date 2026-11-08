@@ -847,6 +847,8 @@ def test_endpoint_ausnahme_signaturen():
     from app.api.v1.endpoints.process_kernel_api import router
     from fastapi import FastAPI
     app = FastAPI()
+    from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(router)
     client = TestClient(app)
     resp = client.get("/process/exception/signaturen")
@@ -860,6 +862,8 @@ def test_endpoint_signaturen_fields():
     from app.api.v1.endpoints.process_kernel_api import router
     from fastapi import FastAPI
     app = FastAPI()
+    from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(router)
     client = TestClient(app)
     resp = client.get("/process/exception/signaturen")
@@ -874,6 +878,8 @@ def test_endpoint_klassifiziere_timeout():
     from app.api.v1.endpoints.process_kernel_api import router
     from fastapi import FastAPI
     app = FastAPI()
+    from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(router)
     client = TestClient(app)
     resp = client.post("/process/exception/klassifiziere",
@@ -887,6 +893,8 @@ def test_endpoint_klassifiziere_unbekannt():
     from app.api.v1.endpoints.process_kernel_api import router
     from fastapi import FastAPI
     app = FastAPI()
+    from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(router)
     client = TestClient(app)
     resp = client.post("/process/exception/klassifiziere",
@@ -900,6 +908,8 @@ def test_endpoint_remediation_playbooks():
     from app.api.v1.endpoints.process_kernel_api import router
     from fastapi import FastAPI
     app = FastAPI()
+    from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(router)
     client = TestClient(app)
     resp = client.get("/process/remediation/playbooks")
@@ -912,6 +922,8 @@ def test_endpoint_remediation_playbooks_fields():
     from app.api.v1.endpoints.process_kernel_api import router
     from fastapi import FastAPI
     app = FastAPI()
+    from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(router)
     client = TestClient(app)
     resp = client.get("/process/remediation/playbooks")
@@ -926,6 +938,8 @@ def test_endpoint_pruefe_playbook_found():
     from app.api.v1.endpoints.process_kernel_api import router
     from fastapi import FastAPI
     app = FastAPI()
+    from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(router)
     client = TestClient(app)
     resp = client.post("/process/remediation/pruefe-playbook", json={"playbook_id": "PB-001"})
@@ -939,6 +953,8 @@ def test_endpoint_pruefe_playbook_not_found():
     from app.api.v1.endpoints.process_kernel_api import router
     from fastapi import FastAPI
     app = FastAPI()
+    from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(router)
     client = TestClient(app)
     resp = client.post("/process/remediation/pruefe-playbook", json={"playbook_id": "PB-999"})
@@ -951,6 +967,8 @@ def test_endpoint_pruefe_pb001_auto_schritte():
     from app.api.v1.endpoints.process_kernel_api import router
     from fastapi import FastAPI
     app = FastAPI()
+    from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(router)
     client = TestClient(app)
     resp = client.post("/process/remediation/pruefe-playbook", json={"playbook_id": "PB-001"})
@@ -965,6 +983,8 @@ def test_endpoint_klassifiziere_returns_konfidenz():
     from app.api.v1.endpoints.process_kernel_api import router
     from fastapi import FastAPI
     app = FastAPI()
+    from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(router)
     client = TestClient(app)
     resp = client.post("/process/exception/klassifiziere",

@@ -34,8 +34,8 @@ export type GHGMethod = z.infer<typeof GHGMethodEnum>;
  * GHG Pathway Entity
  */
 export const GHGPathwaySchema = z.object({
-  id: z.string().uuid(),
-  tenantId: z.string().uuid(),
+  id: z.string().guid(),
+  tenantId: z.string().guid(),
   commodity: z.string(),
   method: GHGMethodEnum,
   

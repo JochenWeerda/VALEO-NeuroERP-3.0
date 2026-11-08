@@ -22,7 +22,10 @@ from __future__ import annotations
 
 import os
 import uuid
-from datetime import date
+
+# Geschaeftstag (Europe/Berlin) wie der Code; date.today() ist auf dem Runner UTC und kippte um
+# Mitternacht deutscher Zeit die Erwartung (CI 20./21.10.2026).
+from app.core.business_time import business_today
 
 import pytest
 
@@ -140,16 +143,28 @@ def bestand(engine):
 def client(engine):
     from fastapi.testclient import TestClient
 
+    from app.main import app
+
+    mandant = TestClient(app, raise_server_exceptions=False)
+    yield mandant
+
+
+_PRUEFER = {"sub": "pruefer", "roles": ["KONTRAKT_BEARBEITEN", "KONTRAKT_LESEN", "KONTRAKT_ADMIN"]}
+
+
+@pytest.fixture(autouse=True)
+def _pruefer():
+    """Je Test nach der conftest-Identitaet (admin) setzen — sonst ueberschreibt diese die Kontraktrollen."""
     from app.auth.deps import get_current_user
     from app.main import app
 
-    app.dependency_overrides[get_current_user] = lambda: {
-        "sub": "pruefer",
-        "roles": ["KONTRAKT_BEARBEITEN", "KONTRAKT_LESEN", "KONTRAKT_ADMIN"],
-    }
-    mandant = TestClient(app, raise_server_exceptions=False)
-    yield mandant
-    app.dependency_overrides.pop(get_current_user, None)
+    vorher = app.dependency_overrides.get(get_current_user)
+    app.dependency_overrides[get_current_user] = lambda: dict(_PRUEFER)
+    yield
+    if vorher is None:
+        app.dependency_overrides.pop(get_current_user, None)
+    else:
+        app.dependency_overrides[get_current_user] = vorher
 
 
 def kopf(haus: str) -> dict[str, str]:
@@ -404,7 +419,7 @@ class TestLieferbeleg:
         assert antwort.status_code == 200, antwort.text
         daten = antwort.json()
         assert daten["status"] == "GELIEFERT"
-        assert daten["lieferdatum"] == date.today().isoformat()
+        assert daten["lieferdatum"] == business_today().isoformat()
         with engine.connect() as c:
             nummer = c.execute(
                 text(f"SELECT ticket_number FROM {SCHEINE} WHERE id = :id"),
@@ -516,3 +531,34 @@ class TestFehlerIstKeinLeererZustand:
             headers=kopf(HAUS_A),
         )
         assert antwort.status_code == 422
+
+
+# ── Wer handelt, sagt die Anmeldung (ANMELDEKENNUNG-UEBRIGE-20261011) ───────────
+# Bis zum 11.10.2026 kam ``erfasst_durch`` aus dem Rumpf. Kein Frontend hatte ein Feld
+# dafuer: die Angabe blieb leer, oder ein Aufrufer schrieb hinein, was er wollte.
+
+
+def _als_personalbuero():
+    """Anmeldung mit UUID als Kennung und lesbarem Anmeldenamen, wie Keycloak sie liefert."""
+    from contextlib import contextmanager
+
+    from app.auth import deps
+    from app.main import app
+
+    @contextmanager
+    def angemeldet():
+        app.dependency_overrides[deps.get_current_user] = lambda: {
+            "sub": "5f0c2a9e-0b7d-4e55-9d0e-1c2a3b4c5d6e", "name": "t.de-vries", "roles": ["KONTRAKT_BEARBEITEN", "KONTRAKT_LESEN", "KONTRAKT_ADMIN"]}
+        try:
+            yield
+        finally:
+            app.dependency_overrides.pop(deps.get_current_user, None)
+
+    return angemeldet()
+
+
+def test_abruf_traegt_die_anmeldung(client):
+    with _als_personalbuero():
+        antwort = abrufen(client, HAUS_A, KONTRAKT_OFFEN, 1, erfasst_durch="jemand anderes")
+    assert antwort.status_code in (200, 201), antwort.text
+    assert antwort.json()["erfasst_durch"] == "t.de-vries"

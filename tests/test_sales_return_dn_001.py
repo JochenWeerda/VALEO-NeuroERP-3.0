@@ -43,7 +43,7 @@ class TestSalesReturnBelegbruch:
         with (
             patch("app.api.v1.endpoints.sales_credit_notes.assert_customer_allowed_for_delivery"),
             patch("app.api.v1.endpoints.sales_credit_notes.get_repository", return_value=None),
-            patch("app.api.v1.endpoints.sales_credit_notes.get_from_store", return_value={"status": "delivered"}),
+            patch("app.documents.router_helpers.get_from_store", return_value={"status": "delivered"}),
             patch("app.api.v1.endpoints.sales_credit_notes.save_to_store"),
             patch("app.api.v1.endpoints.sales_credit_notes.uuid7", return_value="RET-UUID-001"),
         ):
@@ -59,12 +59,12 @@ class TestSalesReturnBelegbruch:
         from app.api.v1.endpoints.sales_credit_notes import create_return
 
         db = MagicMock()
-        invoice_data = {"status": "OFFEN"}
+        invoice_data = {"status": "OFFEN", "tenantId": TENANT}
 
         with (
             patch("app.api.v1.endpoints.sales_credit_notes.assert_customer_allowed_for_delivery"),
             patch("app.api.v1.endpoints.sales_credit_notes.get_repository", return_value=None),
-            patch("app.api.v1.endpoints.sales_credit_notes.get_from_store", return_value=invoice_data),
+            patch("app.documents.router_helpers.get_from_store", return_value=invoice_data),
             patch("app.api.v1.endpoints.sales_credit_notes.save_to_store") as mock_save,
             patch("app.api.v1.endpoints.sales_credit_notes.uuid7", return_value="RET-UUID-002"),
         ):

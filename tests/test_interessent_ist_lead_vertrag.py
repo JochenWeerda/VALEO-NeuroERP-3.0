@@ -86,7 +86,8 @@ def haeuser(engine):
     yield
     with engine.begin() as v:
         v.execute(text(f"DELETE FROM {LEADS} WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
-        for tabelle in ("domain_crm.customers", "domain_crm.business_partners"):
+        # Seit Stufe 3b legt die Kundenanlage den Nummernkreis des Mandanten an.
+        for tabelle in ("domain_crm.customers", "domain_crm.business_partners", "domain_shared.number_ranges"):
             v.execute(
                 text(f"DELETE FROM {tabelle} WHERE tenant_id = ANY(:h)"),
                 {"h": [HAUS_A, HAUS_B]},

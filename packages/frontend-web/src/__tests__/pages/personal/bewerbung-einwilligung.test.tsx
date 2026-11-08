@@ -31,6 +31,8 @@ vi.mock('@/app/routing/typed-router', () => ({
 }))
 vi.mock('sonner', () => ({ toast: { success: mocks.toastSuccess, error: mocks.toastError } }))
 vi.mock('@/hooks/useTouchDevice', () => ({ useTouchDevice: () => false }))
+// Die Seiten blenden Aktionen nach den Rechten des Benutzers aus (useScreenPermissions); hier: Personalleitung.
+vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ user: { sub: 'hr', roles: ['PERSONAL_ADMIN'], scopes: [] } }) }))
 vi.mock('@/lib/api-client', () => ({
   apiClient: { get: mocks.apiGet, post: vi.fn(), delete: vi.fn() },
   getAxiosErrorMessage: (error: unknown) => (error instanceof Error ? error.message : String(error)),
@@ -130,7 +132,7 @@ describe('Einwilligung zur Aufbewahrung', () => {
     await waitFor(() => expect(knopf).toBeDisabled())
     expect(mocks.erteileEinwilligung).toHaveBeenCalledTimes(1)
     expect(mocks.erteileEinwilligung).toHaveBeenCalledWith('bew-1', {
-      fassung: 2, gueltig_bis: '2027-10-01', kanal: 'PAPIER', erfasst_durch: null,
+      fassung: 2, gueltig_bis: '2027-10-01', kanal: 'PAPIER',
     })
     await act(async () => { fertig({ fassung: 2, gueltig_bis: '2027-10-01' }) })
     await waitFor(() => expect(mocks.toastSuccess).toHaveBeenCalledWith('Einwilligung erteilt', expect.anything()))
@@ -150,7 +152,7 @@ describe('Einwilligung zur Aufbewahrung', () => {
     await waitFor(() => expect(mocks.toastError).toHaveBeenCalledWith('Einwilligung unvollständig', expect.anything()))
     expect(mocks.erteileEinwilligung).not.toHaveBeenCalled()
     // Jetzt zeigt die Maske, was fehlt.
-    expect(Object.keys(mocks.form?.visibleFieldErrors ?? {}).sort()).toEqual(['gueltig_bis', 'kanal'])
+    expect(Object.keys(mocks.form?.visibleFieldErrors ?? {}).sort((a, b) => a.localeCompare(b))).toEqual(['gueltig_bis', 'kanal'])
   })
 
   it('zeigt den Grund, wenn das Erteilen scheitert', async () => {
@@ -228,7 +230,7 @@ describe('Fassungen der Einwilligungserklaerung', () => {
     expect(mocks.legeErklaerungAn).not.toHaveBeenCalled()
     await screen.findByRole('alertdialog')
     fireEvent.click(screen.getByRole('button', { name: 'Anlegen' }))
-    await waitFor(() => expect(mocks.legeErklaerungAn).toHaveBeenCalledWith('Neuer Text', null))
+    await waitFor(() => expect(mocks.legeErklaerungAn).toHaveBeenCalledWith('Neuer Text'))
     await waitFor(() => expect(mocks.toastSuccess).toHaveBeenCalledWith('Fassung 3 angelegt', expect.anything()))
   })
 

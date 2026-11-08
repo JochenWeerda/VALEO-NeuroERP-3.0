@@ -1,8 +1,4 @@
 import { z } from 'zod';
-import { extendZodWithOpenApi } from 'zod-openapi';
-
-// Extend Zod with OpenAPI
-extendZodWithOpenApi(z);
 
 // Contract Position Cube Schema
 export const ContractPositionCubeSchema = z.object({
@@ -14,7 +10,7 @@ export const ContractPositionCubeSchema = z.object({
   netPosition: z.number(),
   hedgingRatio: z.number().optional(),
   lastUpdated: z.string().datetime(),
-}).openapi({
+}).meta({
   title: 'Contract Position Cube',
   description: 'Aggregated contract positions by commodity and month',
 });
@@ -32,7 +28,7 @@ export const WeighingVolumeCubeSchema = z.object({
   withinTolerance: z.number(),
   outsideTolerance: z.number(),
   lastUpdated: z.string().datetime(),
-}).openapi({
+}).meta({
   title: 'Weighing Volume Cube',
   description: 'Aggregated weighing volumes by various dimensions',
 });
@@ -50,7 +46,7 @@ export const QualityCubeSchema = z.object({
   avgMoisture: z.number().optional(),
   avgProtein: z.number().optional(),
   lastUpdated: z.string().datetime(),
-}).openapi({
+}).meta({
   title: 'Quality Cube',
   description: 'Aggregated quality metrics by commodity and period',
 });
@@ -66,7 +62,7 @@ export const RegulatoryCubeSchema = z.object({
   eligibilityRate: z.number(),
   ineligibilityRate: z.number(),
   lastUpdated: z.string().datetime(),
-}).openapi({
+}).meta({
   title: 'Regulatory Cube',
   description: 'Aggregated regulatory compliance metrics',
 });
@@ -84,7 +80,7 @@ export const FinanceCubeSchema = z.object({
   outstandingInvoices: z.number(),
   overdueInvoices: z.number(),
   lastUpdated: z.string().datetime(),
-}).openapi({
+}).meta({
   title: 'Finance Cube',
   description: 'Aggregated financial metrics by commodity and period',
 });
@@ -99,7 +95,7 @@ export const CubeQueryBaseSchema = z.object({
   siteId: z.string().optional(),
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(1000).default(100),
-}).openapi({
+}).meta({
   title: 'Cube Query Base Parameters',
   description: 'Base query parameters for cube operations',
 });
@@ -107,7 +103,7 @@ export const CubeQueryBaseSchema = z.object({
 // Contract Position Query Schema
 export const ContractPositionQuerySchema = CubeQueryBaseSchema.extend({
   month: z.string().optional(), // YYYY-MM format
-}).openapi({
+}).meta({
   title: 'Contract Position Query',
   description: 'Query parameters for contract position cube',
 });
@@ -121,7 +117,7 @@ export const ContractPositionResponseSchema = z.object({
     netExposure: z.number(),
     avgHedgingRatio: z.number().optional(),
   }).optional(),
-}).openapi({
+}).meta({
   title: 'Contract Position Response',
   description: 'Contract position cube data with summary',
 });
@@ -130,7 +126,7 @@ export const ContractPositionResponseSchema = z.object({
 export const WeighingVolumeQuerySchema = CubeQueryBaseSchema.extend({
   period: z.string().optional(), // YYYY-MM-DD or YYYY-MM
   groupBy: z.enum(['day', 'week', 'month']).default('month'),
-}).openapi({
+}).meta({
   title: 'Weighing Volume Query',
   description: 'Query parameters for weighing volume cube',
 });
@@ -144,7 +140,7 @@ export const WeighingVolumeResponseSchema = z.object({
     avgWeightPerTicket: z.number(),
     overallToleranceRate: z.number(),
   }).optional(),
-}).openapi({
+}).meta({
   title: 'Weighing Volume Response',
   description: 'Weighing volume cube data with summary',
 });
@@ -152,7 +148,7 @@ export const WeighingVolumeResponseSchema = z.object({
 // Quality Query Schema
 export const QualityQuerySchema = CubeQueryBaseSchema.extend({
   period: z.string().optional(), // YYYY-MM format
-}).openapi({
+}).meta({
   title: 'Quality Query',
   description: 'Query parameters for quality cube',
 });
@@ -166,7 +162,7 @@ export const QualityResponseSchema = z.object({
     avgMoisture: z.number().optional(),
     avgProtein: z.number().optional(),
   }).optional(),
-}).openapi({
+}).meta({
   title: 'Quality Response',
   description: 'Quality cube data with summary',
 });
@@ -175,7 +171,7 @@ export const QualityResponseSchema = z.object({
 export const RegulatoryQuerySchema = CubeQueryBaseSchema.extend({
   labelType: z.string().optional(),
   period: z.string().optional(), // YYYY-MM format
-}).openapi({
+}).meta({
   title: 'Regulatory Query',
   description: 'Query parameters for regulatory cube',
 });
@@ -188,7 +184,7 @@ export const RegulatoryResponseSchema = z.object({
     totalIneligible: z.number(),
     overallEligibilityRate: z.number(),
   }).optional(),
-}).openapi({
+}).meta({
   title: 'Regulatory Response',
   description: 'Regulatory cube data with summary',
 });
@@ -196,7 +192,7 @@ export const RegulatoryResponseSchema = z.object({
 // Finance Query Schema
 export const FinanceQuerySchema = CubeQueryBaseSchema.extend({
   period: z.string().optional(), // YYYY-MM format
-}).openapi({
+}).meta({
   title: 'Finance Query',
   description: 'Query parameters for finance cube',
 });
@@ -212,7 +208,7 @@ export const FinanceResponseSchema = z.object({
     totalOutstanding: z.number(),
     totalOverdue: z.number(),
   }).optional(),
-}).openapi({
+}).meta({
   title: 'Finance Response',
   description: 'Finance cube data with summary',
 });
@@ -221,7 +217,7 @@ export const FinanceResponseSchema = z.object({
 export const CubeRefreshRequestSchema = z.object({
   cubeNames: z.array(z.string()).optional(),
   force: z.boolean().default(false),
-}).openapi({
+}).meta({
   title: 'Cube Refresh Request',
   description: 'Request to refresh materialized view cubes',
 });
@@ -234,7 +230,7 @@ export const CubeRefreshResultSchema = z.object({
   executionTimeMs: z.number(),
   error: z.string().optional(),
   refreshedAt: z.string().datetime(),
-}).openapi({
+}).meta({
   title: 'Cube Refresh Result',
   description: 'Result of a cube refresh operation',
 });
@@ -246,7 +242,7 @@ export const BulkCubeRefreshResponseSchema = z.object({
   failed: z.number(),
   results: z.array(CubeRefreshResultSchema),
   totalExecutionTimeMs: z.number(),
-}).openapi({
+}).meta({
   title: 'Bulk Cube Refresh Response',
   description: 'Response for bulk cube refresh operation',
 });

@@ -50,6 +50,25 @@ def client(engine):
     return TestClient(app, raise_server_exceptions=False)
 
 
+KUNDE = f"kunde-{HAUS}"
+
+
+@pytest.fixture(scope="module", autouse=True)
+def kunde_im_haus(engine):
+    """Die Rechnung prueft den Kunden im Mandanten (tests/stammsaetze.py)."""
+    from sqlalchemy import text
+
+    from stammsaetze import entferne_stammsaetze, lege_kunden_an
+
+    with engine.begin() as v:
+        v.execute(text("INSERT INTO domain_shared.tenants (id, name) VALUES (:t, :t) ON CONFLICT (id) DO NOTHING"),
+                  {"t": HAUS})
+        lege_kunden_an(v, HAUS, KUNDE)
+    yield
+    with engine.begin() as v:
+        entferne_stammsaetze(v, HAUS, KUNDE)
+
+
 @pytest.fixture(autouse=True)
 def ohne_kundenpruefung(monkeypatch):
     from app.api.v1.endpoints import finance_invoices as modul
@@ -75,7 +94,7 @@ def gespeichert(engine, nr: str) -> int:
 
 
 def rechnung(nr: str, status: str = "VERSENDET") -> dict:
-    return {"number": nr, "date": "2026-10-08", "customerId": str(uuid.uuid4()), "dueDate": "2026-11-07",
+    return {"number": nr, "date": "2026-10-08", "customerId": KUNDE, "dueDate": "2026-11-07",
             "status": status, "subtotalNet": 100.0, "totalTax": 19.0, "totalGross": 119.0}
 
 
@@ -90,6 +109,8 @@ def test_scheitert_die_buchung_bleibt_keine_rechnung_zurueck(engine, client, num
     def buchung_scheitert(*_a, **_k):
         raise ValidationFailedError("Konto 1400 fehlt")
 
+    # Die Steuer ist hier nicht der Gegenstand; ohne Positionen wuerde die Rechnung vorher abgelehnt.
+    monkeypatch.setattr(modul, "_steuer", lambda *_a, **_k: [])
     monkeypatch.setattr(modul, "_post_sales_invoice_financials", buchung_scheitert)
     antwort = client.post(WEG, headers=kopf(), json=rechnung(nummer))
     assert antwort.status_code >= 400
@@ -100,6 +121,7 @@ def test_scheitert_das_archiv_bleibt_keine_rechnung_zurueck(engine, client, numm
     from app.api.v1.endpoints import finance_invoices as modul
     from app.core.gobd_artifact import GobdArtifactError
 
+    monkeypatch.setattr(modul, "_steuer", lambda *_a, **_k: [])
     monkeypatch.setattr(modul, "_post_sales_invoice_financials", lambda *_a, **_k: {})
 
     def archiv_scheitert(*_a, **_k):
@@ -125,6 +147,9 @@ def test_buchung_ohne_eigenen_commit(monkeypatch):
             return {}
 
     monkeypatch.setattr(modul, "SalesPostingService", Dienst)
+    # Hier geht es um den Commit; die Freigabematrix prueft tests/test_freigabe_zweitwege.py.
+    from app.services import finance_freigabe
+    monkeypatch.setattr(finance_freigabe, "nur_mit_rollenrecht", lambda *_a, **_k: None)
     from app.documents.models import SalesInvoice
 
     modul._post_sales_invoice_financials(None, SalesInvoice(**rechnung("RE-X")), HAUS)

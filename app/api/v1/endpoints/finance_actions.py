@@ -6,7 +6,9 @@ Minimal action endpoints that execute a short logic or stub and return { success
 import io
 from datetime import date, datetime, timezone
 from typing import Any, List, Optional
-from fastapi import APIRouter, Depends, Header, HTTPException, Query
+from app.auth.finance_roles import finance_admin, finance_read, finance_write, open_items_read
+
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -39,6 +41,7 @@ from app.api.v1.schemas.finance_schemas import (
     BuchungsuebergabeExportOut,
     CloseReadinessOut,
 )
+from app.core.akteur import gepruefter_akteur_aus_request  # Bearbeiter aus dem Token
 
 
 router = APIRouter(tags=["finance", "actions"])
@@ -70,7 +73,7 @@ class ClosingActionRequest(BaseModel):
 
 # ── Bank reconciliation run ─────────────────────────────────────────────────────
 
-@router.post("/bank-reconciliation/run", response_model=ActionResponse, summary="Bank reconciliation ausführen")
+@router.post("/bank-reconciliation/run", response_model=ActionResponse, summary="Bank reconciliation ausführen", dependencies=[Depends(finance_read)])
 async def run_bank_reconciliation(
     body: BankReconciliationRunRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -107,7 +110,7 @@ async def run_bank_reconciliation(
 
 # ── Journal entry post ─────────────────────────────────────────────────────────
 
-@router.post("/journal-entries/post", response_model=ActionResponse, summary="Journal entry action erstellen")
+@router.post("/journal-entries/post", response_model=ActionResponse, summary="Journal entry action erstellen", dependencies=[Depends(finance_write)])
 async def post_journal_entry_action(
     body: JournalEntryPostRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -172,8 +175,7 @@ async def post_journal_entry_action(
 @router.post(
     "/cash/close-day", status_code=409, response_model=None,
     summary="Kassenabschluss ohne Bewertungsmodell gesperrt",
-    responses={409: {"description": "Kein belegter Kassenbestand und keine Gegenkontierung; keine Journalbuchung."}},
-)
+    responses={409: {"description": "Kein belegter Kassenbestand und keine Gegenkontierung; keine Journalbuchung."}}, dependencies=[Depends(finance_admin)])
 async def cash_close_day(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -190,7 +192,7 @@ async def cash_close_day(
 
 # ── Direct debit run ───────────────────────────────────────────────────────────
 
-@router.post("/direct-debit/run", response_model=ActionResponse, summary="Direct debit ausführen")
+@router.post("/direct-debit/run", response_model=ActionResponse, summary="Direct debit ausführen", dependencies=[Depends(finance_admin)])
 async def run_direct_debit(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -216,7 +218,8 @@ async def run_direct_debit(
                     NOW()
                 FROM domain_shared.open_items oi
                 JOIN domain_shared.sepa_mandates sm
-                    ON sm.debitor_id = oi.partner_id AND sm.tenant_id = oi.tenant_id
+                    ON (sm.partner_id = oi.partner_id OR sm.debitor_id = oi.partner_id)
+                    AND sm.tenant_id = oi.tenant_id
                     AND sm.mandate_valid = true
                     AND (sm.mandate_expired_at IS NULL OR sm.mandate_expired_at > NOW())
                 WHERE oi.tenant_id = :tid
@@ -250,7 +253,7 @@ class ClosingRunRequest(BaseModel):
     closing_type: str = Field("month", description="month | quarter | year")
 
 
-@router.post("/closing/calculate", response_model=ClosingCalculateOut, summary="Closing berechnen")
+@router.post("/closing/calculate", response_model=ClosingCalculateOut, summary="Closing berechnen", dependencies=[Depends(finance_read)])
 async def calculate_closing(
     body: ClosingRunRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -276,7 +279,7 @@ async def calculate_closing(
         raise HTTPException(status_code=500, detail=f"Berechnung fehlgeschlagen: {exc}")
 
 
-@router.post("/closing/lock", response_model=ActionResponse, summary="Closing sperren")
+@router.post("/closing/lock", response_model=ActionResponse, summary="Closing sperren", dependencies=[Depends(finance_admin)])
 async def lock_closing(
     body: ClosingRunRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -302,7 +305,7 @@ async def lock_closing(
         raise HTTPException(status_code=500, detail=f"Sperre fehlgeschlagen: {exc}") from exc
 
 
-@router.post("/closing/run", response_model=ActionResponse, summary="Closing ausführen")
+@router.post("/closing/run", response_model=ActionResponse, summary="Closing ausführen", dependencies=[Depends(finance_admin)])
 async def run_closing(
     body: Optional[ClosingRunRequest] = None,
     tenant_id: str = Depends(get_tenant_id),
@@ -328,9 +331,10 @@ async def run_closing(
         raise HTTPException(status_code=500, detail=f"Abschluss fehlgeschlagen: {exc}") from exc
 
 
-@router.post("/closing/approve", response_model=ClosingApproveOut, summary="Closing genehmigen")
+@router.post("/closing/approve", response_model=ClosingApproveOut, summary="Closing genehmigen", dependencies=[Depends(finance_admin)])
 async def approve_closing(
     body: ClosingActionRequest,
+    request: Request,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
@@ -347,14 +351,14 @@ async def approve_closing(
         tenant_id=tenant_id,
         period=body.period,
         closing_type=body.closing_type,
-        actor=body.actor,
+        actor=gepruefter_akteur_aus_request(request),
     )
     return await gateway.approve(request, db)
 
 
 # ── Credit limits ─────────────────────────────────────────────────────────────
 
-@router.get("/credit-limits", response_model=list[CreditLimitOut], summary="Credit limits auflisten")
+@router.get("/credit-limits", response_model=list[CreditLimitOut], summary="Credit limits auflisten", dependencies=[Depends(open_items_read)])
 async def list_credit_limits(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -377,7 +381,7 @@ async def list_credit_limits(
 
 # ── Collaterals ───────────────────────────────────────────────────────────────
 
-@router.get("/collaterals", response_model=list[CollateralOut], summary="Collaterals auflisten")
+@router.get("/collaterals", response_model=list[CollateralOut], summary="Collaterals auflisten", dependencies=[Depends(finance_read)])
 async def list_collaterals(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -398,7 +402,7 @@ async def list_collaterals(
 
 # ── Payment suggestions ────────────────────────────────────────────────────────
 
-@router.get("/payment-suggestions", response_model=list[PaymentSuggestionOut], summary="Payment suggestions auflisten")
+@router.get("/payment-suggestions", response_model=list[PaymentSuggestionOut], summary="Payment suggestions auflisten", dependencies=[Depends(finance_read)])
 async def list_payment_suggestions(
     days_ahead: int = Query(14, ge=1, le=365),
     tenant_id: str = Depends(get_tenant_id),
@@ -453,10 +457,10 @@ class BuchungsuebergabeExportSummary(BaseModel):
 
 
 @router.post("/buchungsuebergabe-export", summary="Export buchungsuebergabe",
-    response_model=BuchungsuebergabeExportOut
-)
+    response_model=BuchungsuebergabeExportOut, dependencies=[Depends(finance_read)])
 async def buchungsuebergabe_export(
     body: BuchungsuebergabeExportRequest,
+    request: Request,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
@@ -552,7 +556,7 @@ async def buchungsuebergabe_export(
         content_hash,
         storage_key_export,
         file_name=dateiname,
-        created_by=body.bediener,
+        created_by=gepruefter_akteur_aus_request(request),  # wer exportiert; bediener ist nur der Filter
         doc_type="fibu_export",
         content=content_bytes,
     )
@@ -579,8 +583,7 @@ async def buchungsuebergabe_export(
 # ── Period-Close Readiness ────────────────────────────────────────────────────
 
 @router.get("/close-readiness", tags=["finance", "closing"], summary="Close readiness abrufen",
-    response_model=CloseReadinessOut
-)
+    response_model=CloseReadinessOut, dependencies=[Depends(finance_read)])
 async def get_close_readiness(
     tenant_id: str = Depends(get_tenant_id),
 ):
@@ -646,14 +649,13 @@ class MahnstufeIn(_BM):
     operator: _Opt[str] = "system"
 
 
-@router.post("/sepa/mandate", response_model=SepaMandatOut, status_code=201, summary="SEPA-Mandat anlegen")
+@router.post("/sepa/mandate", response_model=SepaMandatOut, status_code=201, summary="SEPA-Mandat anlegen", dependencies=[Depends(finance_write)])
 def create_sepa_mandat_endpoint(
     body: SEPAMandatIn,
-    x_tenant_id: _Opt[str] = Header(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     from app.services.finance_sepa_service import create_sepa_mandat, SEPAError
-    tenant_id = x_tenant_id or "default"
     try:
         return create_sepa_mandat(db, tenant_id, body.glaeubiger_id, body.iban,
                                    body.bic or "", body.typ or "CORE", body.erteilung_am)
@@ -661,28 +663,26 @@ def create_sepa_mandat_endpoint(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/sepa/mandate/{mandat_id}/widerruf", response_model=SepaMandatOut, summary="SEPA-Mandat widerrufen")
+@router.post("/sepa/mandate/{mandat_id}/widerruf", response_model=SepaMandatOut, summary="SEPA-Mandat widerrufen", dependencies=[Depends(finance_write)])
 def widerruf_sepa_mandat_endpoint(
     mandat_id: str,
-    x_tenant_id: _Opt[str] = Header(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     from app.services.finance_sepa_service import widerruf_sepa_mandat, SEPAError
-    tenant_id = x_tenant_id or "default"
     try:
         return widerruf_sepa_mandat(db, mandat_id, tenant_id)
     except SEPAError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/sepa/batches", response_model=SepaBatchOut, status_code=201, summary="SEPA-Lastschrift-Batch erstellen")
+@router.post("/sepa/batches", response_model=SepaBatchOut, status_code=201, summary="SEPA-Lastschrift-Batch erstellen", dependencies=[Depends(finance_admin)])
 def create_sepa_batch_endpoint(
     body: SEPABatchIn,
-    x_tenant_id: _Opt[str] = Header(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     from app.services.finance_sepa_service import create_sepa_batch, SEPAError
-    tenant_id = x_tenant_id or "default"
     try:
         return create_sepa_batch(db, tenant_id, body.faellig_am,
                                   [e.model_dump() for e in body.eintraege])
@@ -690,14 +690,13 @@ def create_sepa_batch_endpoint(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/ratenzahlung/plaene", response_model=RatenzahlungsplanOut, status_code=201, summary="Ratenzahlungsplan anlegen")
+@router.post("/ratenzahlung/plaene", response_model=RatenzahlungsplanOut, status_code=201, summary="Ratenzahlungsplan anlegen", dependencies=[Depends(finance_write)])
 def create_ratenzahlungsplan_endpoint(
     body: RatenzahlungPlanIn,
-    x_tenant_id: _Opt[str] = Header(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     from app.services.finance_ratenzahlung_service import create_ratenzahlungsplan, RatenzahlungError
-    tenant_id = x_tenant_id or "default"
     try:
         return create_ratenzahlungsplan(db, tenant_id, body.op_id, body.gesamt_eur,
                                         body.anzahl_raten, body.erste_faelligkeit)
@@ -705,43 +704,41 @@ def create_ratenzahlungsplan_endpoint(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/ratenzahlung/raten/{rate_id}/buchen", response_model=RateOut, summary="Rate als bezahlt buchen")
+@router.post("/ratenzahlung/raten/{rate_id}/buchen", response_model=RateOut, summary="Rate als bezahlt buchen", dependencies=[Depends(finance_write)])
 def buche_rate_endpoint(
     rate_id: str,
     body: RateBuchenIn,
-    x_tenant_id: _Opt[str] = Header(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     from app.services.finance_ratenzahlung_service import buche_rate, RatenzahlungError
-    tenant_id = x_tenant_id or "default"
     try:
         return buche_rate(db, rate_id, tenant_id, body.bezahlt_am)
     except RatenzahlungError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/mahnstufe/{rechnungsnr}/eskalieren", response_model=MahnstufeOut, status_code=201, summary="Mahnstufe eskalieren")
+@router.post("/mahnstufe/{rechnungsnr}/eskalieren", response_model=MahnstufeOut, status_code=201, summary="Mahnstufe eskalieren", dependencies=[Depends(finance_write)])
 def eskaliere_mahnstufe_endpoint(
     rechnungsnr: str,
     body: MahnstufeIn,
-    x_tenant_id: _Opt[str] = Header(None),
+    request: Request,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     from app.services.finance_mahnstufe_service import eskaliere_mahnstufe, MahnstufeError
-    tenant_id = x_tenant_id or "default"
     try:
-        return eskaliere_mahnstufe(db, rechnungsnr, tenant_id, body.operator or "system")
+        return eskaliere_mahnstufe(db, rechnungsnr, tenant_id, gepruefter_akteur_aus_request(request))
     except MahnstufeError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.get("/mahnstufe/{rechnungsnr}/trail", response_model=MahnstufenTrailOut, summary="Mahnstufen-Trail abrufen")
+@router.get("/mahnstufe/{rechnungsnr}/trail", response_model=MahnstufenTrailOut, summary="Mahnstufen-Trail abrufen", dependencies=[Depends(finance_read)])
 def get_mahnstufe_trail_endpoint(
     rechnungsnr: str,
-    x_tenant_id: _Opt[str] = Header(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     from app.services.finance_mahnstufe_service import get_mahnstufen_trail
-    tenant_id = x_tenant_id or "default"
     trail = get_mahnstufen_trail(db, rechnungsnr, tenant_id)
     return {"rechnungsnr": rechnungsnr, "trail": trail, "count": len(trail)}

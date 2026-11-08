@@ -4,8 +4,12 @@
  */
 import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse, isAxiosError } from 'axios'
 import { auth } from './auth'
+import { assertTrustedApiDestination } from './api-destination'
+import { rollenHinweis } from './role-hint'
+import { tenantFromToken } from './tenant-from-token'
+import { toast } from 'sonner'
+import { aktivesKundenkonto, KUNDENKONTO_KOPF } from '@/lib/portal-konto'
 
-const DEV_TOKEN = import.meta.env.VITE_API_DEV_TOKEN as string | undefined || 'dev-token'
 
 function normalizeApiBaseUrl(value: string | undefined): string {
   const raw = value?.trim() ?? ''
@@ -29,7 +33,6 @@ function normalizeApiBaseUrl(value: string | undefined): string {
 }
 
 const API_BASE_URL = normalizeApiBaseUrl(import.meta.env.VITE_API_BASE_URL)
-const DEFAULT_TENANT_ID = import.meta.env.VITE_TENANT_ID || '00000000-0000-0000-0000-000000000001'
 
 export type ApiResult<T> = T & {
   data: T
@@ -101,16 +104,20 @@ class APIClient {
 
     // Request Interceptor (Auth Token)
     this.client.interceptors.request.use(
-      (config) => {
-        const token = auth.getAccessToken() ?? DEV_TOKEN
+      async (config) => {
+        assertTrustedApiDestination(config.url, config.baseURL, API_BASE_URL,
+          typeof window === 'undefined' ? undefined : window.location.href)
+        const token = await auth.getFreshAccessToken()
         if (token) {
           config.headers.Authorization = `Bearer ${token}`
         }
-        const tenantId =
-          window.localStorage.getItem('tenant_id')
-          || window.sessionStorage.getItem('tenant_id')
-          || DEFAULT_TENANT_ID
-        config.headers['X-Tenant-ID'] = tenantId
+        const tenantId = tenantFromToken(token)
+        if (tenantId) config.headers['X-Tenant-ID'] = tenantId
+        // Portalwege: das gewaehlte Kundenkonto (PORTAL-CONTEXT-001); der Server prueft es gegen die Zuordnung.
+        const konto = aktivesKundenkonto()
+        if (konto && config.url?.includes('/portal/') && !config.headers[KUNDENKONTO_KOPF]) {
+          config.headers[KUNDENKONTO_KOPF] = konto
+        }
         return config
       },
       (error) => Promise.reject(error),
@@ -121,17 +128,17 @@ class APIClient {
       (response) => response,
       (error) => {
         if (error.response?.status === 401) {
-          // Only redirect to login if OIDC is configured
-          // Check if OIDC is actually configured (not just placeholder)
-          const discoveryUrl = import.meta.env.VITE_OIDC_DISCOVERY_URL ?? ''
-          const placeholderPatterns = ['your-oidc-provider.com', 'example.com', 'keycloak.example.com', '{tenant-id}', '{domain}', '{application-id}', '{client-id}']
-          const oidcConfigured = discoveryUrl.length > 0 && !placeholderPatterns.some(pattern => discoveryUrl.includes(pattern))
-          if (oidcConfigured) {
-            auth.clearTokens()
-            window.location.href = '/login'
-          } else {
-            // In dev mode without OIDC, just log the error
-            console.warn('API request returned 401 Unauthorized. In dev mode without OIDC, this might be expected.')
+          auth.clearTokens()
+          window.location.href = '/login'
+        }
+        if (error.response?.status === 403) {
+          // Fehlt nur eine Rolle, sagt die Maske das — an dieser einen Stelle statt in jeder Maske.
+          // Die Meldung ersetzt auch `detail`: Masken, die den Fehlertext selbst zeigen, zeigen denselben Satz.
+          const daten = error.response.data as { detail?: unknown } | undefined
+          const hinweis = rollenHinweis(daten?.detail)
+          if (hinweis && daten) {
+            daten.detail = hinweis
+            toast.error(hinweis, { id: 'fehlende-berechtigung' })
           }
         }
         return Promise.reject(error)

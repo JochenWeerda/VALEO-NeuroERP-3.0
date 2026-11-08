@@ -9,12 +9,14 @@ from typing import Any, Optional
 
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
+from app.core.security import require_bearer_token
 from app.agents.neuro_intent_engine import classify, get_supported_intents
 from app.agents.neuro_planner import generate_plan, verify_plan
 from app.agents.neuro_pipeline import run_pipeline
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.neuro_pipeline_schemas import NeuroPipelineOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/neuro", tags=["neuro-core", "pipeline"])
@@ -32,8 +34,7 @@ class PipelineRequest(BaseModel):
 
 
 @router.post("/classify", summary="Classify do",
-    response_model=NeuroPipelineOut
-)
+    response_model=NeuroPipelineOut, dependencies=SCHREIBEN["BERECHNEN"])
 async def do_classify(request: ClassifyRequest):
     """Intent aus User-Input klassifizieren."""
     result = classify(request.user_input, request.context)
@@ -49,8 +50,7 @@ async def list_intents():
 
 
 @router.post("/plan", summary="Plan do",
-    response_model=NeuroPipelineOut
-)
+    response_model=NeuroPipelineOut, dependencies=SCHREIBEN["FACHLICH"])
 async def do_plan(
     request: ClassifyRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -67,17 +67,18 @@ async def do_plan(
 
 
 @router.post("/execute", summary="Execute do",
-    response_model=NeuroPipelineOut
-)
+    response_model=NeuroPipelineOut, dependencies=SCHREIBEN["FACHLICH"])
 async def do_execute(
     request: PipelineRequest,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
+    auth_token: str = Depends(require_bearer_token),
 ):
     """Vollstaendige Pipeline: Classify -> Plan -> Verify -> Execute."""
     return run_pipeline(
         user_input=request.user_input,
-        context=request.context,
+        context={key: value for key, value in (request.context or {}).items() if key != "auth_token"},
+        auth_token=auth_token,
         tenant_id=tenant_id,
         db=db,
         dry_run=request.dry_run,

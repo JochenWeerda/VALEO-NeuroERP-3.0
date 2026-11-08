@@ -6,7 +6,7 @@ from datetime import date
 import pytest
 from fastapi.testclient import TestClient
 
-from main import app
+from app.main import app
 from app.services.hrm_abwesenheit_service import (
     AbwesenheitKonfliktError,
     AbwesenheitStatus,

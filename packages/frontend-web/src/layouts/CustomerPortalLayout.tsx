@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { clsx } from 'clsx'
 import { Outlet, Link, useLocation, useNavigate } from '@/app/routing/typed-router'
 import { Button } from '@/components/ui/button'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import {
   Home,
@@ -27,35 +27,31 @@ import {
 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { isTerraAgrarPortalPath } from '@/lib/portal-theme'
+import { INNENDIENST_ROLLEN, kontoDarf, usePortalKonto } from '@/lib/portal-konto'
+import { PortalKontoGate, PortalKontoWahl } from '@/components/portal/PortalKontoWahl'
 
 interface NavItem {
   label: string
   path: string
   icon: LucideIcon
   badge?: string | number
+  /** Portalrecht des aktiven Kontos (app/auth/portal_kunde.PORTAL_RECHTE); ohne: fuer alle. */
+  recht?: string
 }
 
 const customerNavItems: NavItem[] = [
-  { label: 'Uebersicht', path: '/portal', icon: Home },
-  { label: 'Bestellportal', path: '/portal/shop', icon: ShoppingCart, badge: 'NEU' },
-  { label: 'Meine Bestellungen', path: '/portal/bestellungen', icon: Package },
-  { label: 'Anfragen', path: '/portal/anfragen', icon: ClipboardList },
-  { label: 'Vertraege', path: '/portal/vertraege', icon: FileText },
-  { label: 'Rechnungen', path: '/portal/rechnungen', icon: Receipt },
-  { label: 'Dokumente', path: '/portal/dokumente', icon: Download },
-  { label: 'Zertifikate', path: '/portal/zertifikate', icon: Award },
-  { label: 'Ackerschlagkartei', path: '/portal/feldbuch', icon: Leaf },
-  { label: 'Naehrstoffbilanzen', path: '/portal/naehrstoffbilanzen', icon: BarChart3 },
-  { label: 'Rationsoptimierung', path: '/portal/rationsoptimierung', icon: Calculator },
+  { label: 'Uebersicht', path: '/portal', icon: Home, recht: 'uebersicht' },
+  { label: 'Bestellportal', path: '/portal/shop', icon: ShoppingCart, badge: 'NEU', recht: 'verkauf' },
+  { label: 'Meine Bestellungen', path: '/portal/bestellungen', icon: Package, recht: 'verkauf' },
+  { label: 'Anfragen', path: '/portal/anfragen', icon: ClipboardList, recht: 'verkauf' },
+  { label: 'Vertraege', path: '/portal/vertraege', icon: FileText, recht: 'kontrakte' },
+  { label: 'Rechnungen', path: '/portal/rechnungen', icon: Receipt, recht: 'finanzen' },
+  { label: 'Dokumente', path: '/portal/dokumente', icon: Download, recht: 'finanzen' },
+  { label: 'Zertifikate', path: '/portal/zertifikate', icon: Award, recht: 'auswertungen' },
+  { label: 'Ackerschlagkartei', path: '/portal/feldbuch', icon: Leaf, recht: 'feldbuch_lesen' },
+  { label: 'Naehrstoffbilanzen', path: '/portal/naehrstoffbilanzen', icon: BarChart3, recht: 'auswertungen' },
+  { label: 'Rationsoptimierung', path: '/portal/rationsoptimierung', icon: Calculator, recht: 'auswertungen' },
 ]
-
-const mockCustomer = {
-  name: 'Musterhof GmbH',
-  email: 'info@musterhof.de',
-  initials: 'MH',
-  avatar: '',
-  kundennummer: 'K-2024-001',
-}
 
 function PortalNavLink({
   item,
@@ -117,6 +113,11 @@ export default function CustomerPortalLayout() {
 
   const isAnwender = hasRole('admin') || hasRole('user') || hasRole('manager')
   const isTerraAgrar = isTerraAgrarPortalPath(location.pathname)
+  // Kunde und Rechte kommen aus der Anmeldung und der gewaehlten Zuordnung (PORTAL-CONTEXT-001), kein Demo-Kunde.
+  const konto = usePortalKonto((state) => state.aktiv)
+  const navItems = customerNavItems.filter((item) => kontoDarf(konto, item.recht))
+  const kontoName = konto?.name ?? 'Kundenportal'
+  const kontoKuerzel = kontoName.split(/\s+/).map((teil) => teil[0] ?? '').join('').slice(0, 2).toUpperCase()
 
   const navActiveClass = isTerraAgrar
     ? 'bg-primary/10 text-primary'
@@ -208,7 +209,7 @@ export default function CustomerPortalLayout() {
           </div>
 
           <nav className="hidden items-center gap-1 lg:flex">
-            {customerNavItems.slice(0, 5).map((item) => {
+            {navItems.slice(0, 5).map((item) => {
               const Icon = item.icon
               return (
                 <Link
@@ -240,7 +241,7 @@ export default function CustomerPortalLayout() {
               </Button>
               {moreMenuOpen && (
                 <div className="absolute right-0 top-full z-50 mt-2 w-64 rounded-lg border bg-white p-2 shadow-lg">
-                  {customerNavItems.slice(5).map((item) => (
+                  {navItems.slice(5).map((item) => (
                     <PortalNavLink
                       key={item.path}
                       item={item}
@@ -256,6 +257,7 @@ export default function CustomerPortalLayout() {
           </nav>
 
           <div className="flex items-center gap-2">
+            <PortalKontoWahl />
             <Button variant="ghost" size="icon" className="relative">
               <Bell className="h-5 w-5" />
               {notifications > 0 && (
@@ -272,22 +274,21 @@ export default function CustomerPortalLayout() {
                 onClick={() => setUserMenuOpen((open) => !open)}
               >
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src={mockCustomer.avatar} />
                   <AvatarFallback
                     className={isTerraAgrar ? 'bg-primary/10 text-primary' : 'bg-emerald-100 text-emerald-700'}
                   >
-                    {mockCustomer.initials}
+                    {kontoKuerzel}
                   </AvatarFallback>
                 </Avatar>
                 <span className="hidden text-sm font-medium md:block">
-                  {mockCustomer.name}
+                  {kontoName}
                 </span>
               </Button>
               {userMenuOpen && (
                 <div className="absolute right-0 top-full z-50 mt-2 w-56 rounded-lg border bg-white p-2 shadow-lg">
                   <div className="border-b px-3 py-2">
-                    <div className="font-medium">{mockCustomer.name}</div>
-                    <div className="text-xs text-muted-foreground">{mockCustomer.kundennummer}</div>
+                    <div className="font-medium">{kontoName}</div>
+                    <div className="text-xs text-muted-foreground">{konto?.customer_number ?? ''}</div>
                   </div>
                   {/*
                     „Mein Profil" führte auf `/portal/profil` — und diese Route
@@ -295,14 +296,11 @@ export default function CustomerPortalLayout() {
                     Der Kunde klickte sein Profil an und bekam die Startseite;
                     eine `profil.tsx` gibt es nicht.
 
-                    Eine echte Profilseite zu bauen ist keine Verdrahtungsfrage:
-                    Das Portal kennt seinen Kunden bisher nur als Konstante im
-                    Quelltext, und zwar in zwei Fassungen (hier `K-2024-001`,
-                    in der Übersicht `K-10001`). Solange nicht entschieden ist,
-                    woher das Portal seine Kundenidentität nimmt, wäre jede
-                    Profilseite eine erfundene Seite — schlimmer als der Fehler.
-                    Deshalb steht hier kein Link, statt einer, der woanders
-                    hinführt.
+                    Seit 14.10.2026 kommt der Kunde aus der Anmeldung und der
+                    Kontowahl (PORTAL-CONTEXT-001), nicht mehr aus Konstanten.
+                    Eine Profilseite (Stammdaten des Betriebs, eigene Zugänge)
+                    ist noch nicht gebaut; deshalb steht hier kein Link, statt
+                    einer, der woanders hinführt.
                   */}
                   <button
                     type="button"
@@ -351,7 +349,7 @@ export default function CustomerPortalLayout() {
                   <ChevronRight className="h-4 w-4 text-status-success" />
                 </Link>
               )}
-              {customerNavItems.map((item) => (
+              {navItems.map((item) => (
                 <PortalNavLink
                   key={item.path}
                   item={item}
@@ -366,7 +364,9 @@ export default function CustomerPortalLayout() {
       )}
 
       <main className="mx-auto max-w-7xl px-4 py-6">
-        <Outlet />
+        <PortalKontoGate intern={INNENDIENST_ROLLEN.some((rolle) => hasRole(rolle))}>
+          <Outlet />
+        </PortalKontoGate>
       </main>
 
       <nav
@@ -376,7 +376,7 @@ export default function CustomerPortalLayout() {
         )}
       >
         <div className="flex justify-around py-2">
-          {customerNavItems.slice(0, 5).map((item) => {
+          {navItems.slice(0, 5).map((item) => {
             const Icon = item.icon
             return (
               <Link

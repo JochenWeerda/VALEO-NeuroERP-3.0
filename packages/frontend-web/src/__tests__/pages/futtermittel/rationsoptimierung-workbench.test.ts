@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { applyRationPatch } from '@/pages/futtermittel/rationsoptimierung'
+import { applyRationPatch } from '@/components/mask-builder/specialized/feed/ration-optimization-surface'
 
 type WizardState = Parameters<typeof applyRationPatch>[0]
 

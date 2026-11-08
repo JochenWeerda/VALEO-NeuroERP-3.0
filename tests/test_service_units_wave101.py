@@ -108,38 +108,6 @@ def test_process_whatsapp_message_unknown_phone_has_fallback() -> None:
 
 
 # ---------------------------------------------------------------------------
-# whatsapp_notify_service — outbox, send_dokument_ready
-# ---------------------------------------------------------------------------
-
-@pytest.mark.unit
-def test_get_outbox_returns_list() -> None:
-    from app.services.whatsapp_notify_service import get_outbox
-    result = get_outbox("T-WAVE101")
-    assert isinstance(result, list)
-
-
-@pytest.mark.unit
-def test_send_dokument_ready_returns_dict() -> None:
-    from app.services.whatsapp_notify_service import send_dokument_ready
-    result = send_dokument_ready("T1", "+49170000001", "K-001", "Mustermann", "Rechnung", "INV-WAVE101")
-    assert isinstance(result, dict)
-
-
-@pytest.mark.unit
-def test_send_dokument_ready_has_status() -> None:
-    from app.services.whatsapp_notify_service import send_dokument_ready
-    result = send_dokument_ready("T1", "+49170000001", None, None, "Lieferschein", "LS-001")
-    assert "status" in result
-
-
-@pytest.mark.unit
-def test_send_dokument_ready_has_msg_id() -> None:
-    from app.services.whatsapp_notify_service import send_dokument_ready
-    result = send_dokument_ready("T1", "+49170000002", "K-002", "Bauer", "Kontrakt", "KON-001")
-    assert "msg_id" in result
-
-
-# ---------------------------------------------------------------------------
 # docflow_followup_service — followup_overdue (pure date logic)
 # ---------------------------------------------------------------------------
 

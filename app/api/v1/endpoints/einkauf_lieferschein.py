@@ -23,6 +23,7 @@ from app.core.tenant import get_tenant_id
 
 
 from app.api.v1.schemas.base import BaseSchema
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/einkauf", tags=["einkauf", "lieferschein", "frachtauftrag"])
@@ -194,7 +195,7 @@ async def list_lieferscheine(
     return result
 
 
-@router.post("/lieferscheine", response_model=Lieferschein, status_code=201, summary="Lieferschein anlegen")
+@router.post("/lieferscheine", response_model=Lieferschein, status_code=201, summary="Lieferschein anlegen", dependencies=SCHREIBEN["EINKAUF"])
 async def create_lieferschein(
     payload: LieferscheinCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -271,7 +272,7 @@ async def get_lieferschein(ls_id: str, tenant_id: str = Depends(get_tenant_id), 
     return Lieferschein(**dict(row), positionen=_list_positions(db, ls_id))
 
 
-@router.patch("/lieferscheine/{ls_id}", response_model=Lieferschein, summary="Lieferschein aktualisieren")
+@router.patch("/lieferscheine/{ls_id}", response_model=Lieferschein, summary="Lieferschein aktualisieren", dependencies=SCHREIBEN["EINKAUF"])
 async def patch_lieferschein(ls_id: str, payload: LieferscheinUpdate, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     _get_lieferschein_or_404(db, ls_id, tenant_id)
     values = payload.model_dump(exclude_unset=True)
@@ -284,7 +285,7 @@ async def patch_lieferschein(ls_id: str, payload: LieferscheinUpdate, tenant_id:
     return Lieferschein(**dict(row), positionen=_list_positions(db, ls_id))
 
 
-@router.delete("/lieferscheine/{ls_id}", status_code=204, response_class=Response, response_model=None, summary="Lieferschein löschen")
+@router.delete("/lieferscheine/{ls_id}", status_code=204, response_class=Response, response_model=None, summary="Lieferschein löschen", dependencies=SCHREIBEN["EINKAUF"])
 async def delete_lieferschein(ls_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     _get_lieferschein_or_404(db, ls_id, tenant_id)
     db.execute(text("DELETE FROM einkauf_lieferscheine WHERE id = :id AND tenant_id = :tenant_id"), {"id": ls_id, "tenant_id": tenant_id})
@@ -292,7 +293,7 @@ async def delete_lieferschein(ls_id: str, tenant_id: str = Depends(get_tenant_id
     return None
 
 
-@router.post("/lieferscheine/{ls_id}/positionen", response_model=LieferscheinPosition, status_code=201, summary="Lieferschein position hinzufügen")
+@router.post("/lieferscheine/{ls_id}/positionen", response_model=LieferscheinPosition, status_code=201, summary="Lieferschein position hinzufügen", dependencies=SCHREIBEN["EINKAUF"])
 async def add_lieferschein_position(ls_id: str, payload: LieferscheinPositionCreate, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     _get_lieferschein_or_404(db, ls_id, tenant_id)
     pos_id = uuid7()
@@ -317,7 +318,7 @@ async def add_lieferschein_position(ls_id: str, payload: LieferscheinPositionCre
     return LieferscheinPosition(**dict(row))
 
 
-@router.patch("/lieferscheine/{ls_id}/positionen/{pos_id}", response_model=LieferscheinPosition, summary="Lieferschein position aktualisieren")
+@router.patch("/lieferscheine/{ls_id}/positionen/{pos_id}", response_model=LieferscheinPosition, summary="Lieferschein position aktualisieren", dependencies=SCHREIBEN["EINKAUF"])
 async def patch_lieferschein_position(
     ls_id: str,
     pos_id: str,
@@ -337,7 +338,7 @@ async def patch_lieferschein_position(
     return LieferscheinPosition(**dict(updated))
 
 
-@router.delete("/lieferscheine/{ls_id}/positionen/{pos_id}", status_code=204, response_class=Response, response_model=None, summary="Lieferschein position löschen")
+@router.delete("/lieferscheine/{ls_id}/positionen/{pos_id}", status_code=204, response_class=Response, response_model=None, summary="Lieferschein position löschen", dependencies=SCHREIBEN["EINKAUF"])
 async def delete_lieferschein_position(ls_id: str, pos_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     _get_lieferschein_or_404(db, ls_id, tenant_id)
     row = db.execute(text("SELECT id FROM einkauf_lieferschein_positionen WHERE id = :id AND lieferschein_id = :ls_id"), {"id": pos_id, "ls_id": ls_id}).first()
@@ -361,7 +362,7 @@ async def list_frachtauftraege(tenant_id: str = Depends(get_tenant_id), db: Sess
     return [Frachtauftrag(**dict(r)) for r in rows]
 
 
-@router.post("/frachtauftraege", response_model=Frachtauftrag, status_code=201, summary="Frachtauftrag anlegen")
+@router.post("/frachtauftraege", response_model=Frachtauftrag, status_code=201, summary="Frachtauftrag anlegen", dependencies=SCHREIBEN["EINKAUF"])
 async def create_frachtauftrag(payload: FrachtauftragCreate, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     fa_id = uuid7()
     db.execute(
@@ -383,7 +384,7 @@ async def create_frachtauftrag(payload: FrachtauftragCreate, tenant_id: str = De
     return Frachtauftrag(**dict(row))
 
 
-@router.patch("/frachtauftraege/{fa_id}", response_model=Frachtauftrag, summary="Frachtauftrag aktualisieren")
+@router.patch("/frachtauftraege/{fa_id}", response_model=Frachtauftrag, summary="Frachtauftrag aktualisieren", dependencies=SCHREIBEN["EINKAUF"])
 async def patch_frachtauftrag(
     fa_id: str,
     payload: FrachtauftragUpdate,
@@ -405,7 +406,7 @@ async def patch_frachtauftrag(
     return Frachtauftrag(**dict(updated))
 
 
-@router.delete("/frachtauftraege/{fa_id}", status_code=204, response_class=Response, response_model=None, summary="Frachtauftrag löschen")
+@router.delete("/frachtauftraege/{fa_id}", status_code=204, response_class=Response, response_model=None, summary="Frachtauftrag löschen", dependencies=SCHREIBEN["EINKAUF"])
 async def delete_frachtauftrag(fa_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     row = db.execute(text("SELECT id FROM einkauf_frachtauftraege WHERE id = :id AND tenant_id = :tenant_id"), {"id": fa_id, "tenant_id": tenant_id}).first()
     if not row:
@@ -465,7 +466,7 @@ class EinbuchenResult(BaseModel):
 
 
 @router.post("/lieferscheine/{ls_id}/einbuchen", response_model=EinbuchenResult, status_code=200,
-             summary="Wareneingang in Lager einbuchen (Belegbruch-Fix)")
+             summary="Wareneingang in Lager einbuchen (Belegbruch-Fix)", dependencies=SCHREIBEN["EINKAUF"])
 async def einbuchen_lieferschein(
     ls_id: str,
     payload: EinbuchenPayload,
@@ -612,7 +613,7 @@ class AbgleichResult(BaseModel):
 
 
 @router.post("/lieferscheine/{ls_id}/bestellung-abgleich", response_model=AbgleichResult,
-             summary="Eingangslieferschein gegen Bestellung abgleichen")
+             summary="Eingangslieferschein gegen Bestellung abgleichen", dependencies=SCHREIBEN["EINKAUF"])
 async def abgleich_lieferschein_bestellung(
     ls_id: str,
     payload: AbgleichPayload,

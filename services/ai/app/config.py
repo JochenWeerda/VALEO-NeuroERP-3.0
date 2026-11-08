@@ -42,10 +42,6 @@ class Settings(BaseSettings):
     OPENAI_MODEL: str = "gpt-4o-mini"
     OPENAI_EMBEDDING_MODEL: str = "text-embedding-3-small"
     
-    # Vector Store Configuration
-    CHROMA_PERSIST_DIR: str = "/app/data/chroma"
-    CHROMA_COLLECTION_NAME: str = "valeo_erp_knowledge"
-    
     # Redis Configuration
     REDIS_URL: str = "redis://redis:6379/1"
     REDIS_CACHE_TTL: int = 3600

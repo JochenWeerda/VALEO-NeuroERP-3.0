@@ -31,5 +31,5 @@ async def test_preference_service_calculates_ratio():
 
     result = await service.calculate(payload)
     assert result.qualifies is True
-    assert result.originating_value_percent == 60.0
+    assert result.originating_value_percent == pytest.approx(60.0)
 

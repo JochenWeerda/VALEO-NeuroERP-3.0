@@ -1,0 +1,415 @@
+{
+  "adapter": "harvest.control.v1",
+  "paths": {
+    "approve_calculation": "/api/v1/agrar/harvest-acceptance/settlement-controls/acceptances/{acceptance_id}/approve-calculation",
+    "approve_rule": "/api/v1/agrar/harvest-acceptance/settlement-controls/rules/{version_id}/approve",
+    "attest": "/api/v1/agrar/harvest-acceptance/settlement-controls/acceptances/{acceptance_id}/attest-measurement",
+    "bind_rule": "/api/v1/agrar/harvest-acceptance/settlement-controls/acceptances/{acceptance_id}/bind-rule",
+    "calculate": "/api/v1/agrar/harvest-acceptance/{acceptance_id}/calculate",
+    "create_rule": "/api/v1/agrar/harvest-acceptance/settlement-controls/rules",
+    "release": "/api/v1/agrar/harvest-acceptance/{acceptance_id}/release?release_status=final&create_stock_movement=true&create_credit_note=true",
+    "revoke_rule": "/api/v1/agrar/harvest-acceptance/settlement-controls/rules/{version_id}/revoke"
+  },
+  "request_schemas": {
+    "approve_calculation": {
+      "additionalProperties": false,
+      "properties": {
+        "acknowledge_quality_exception": {
+          "default": false,
+          "title": "Acknowledge Quality Exception",
+          "type": "boolean"
+        },
+        "expected_calculation_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Expected Calculation Hash",
+          "type": "string"
+        },
+        "expires_at": {
+          "format": "date-time",
+          "title": "Expires At",
+          "type": "string"
+        },
+        "idempotency_key": {
+          "format": "uuid",
+          "title": "Idempotency Key",
+          "type": "string"
+        },
+        "reason": {
+          "maxLength": 2000,
+          "minLength": 3,
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "idempotency_key",
+        "expected_calculation_hash",
+        "expires_at",
+        "reason"
+      ],
+      "title": "CalculationApproveIn",
+      "type": "object"
+    },
+    "approve_rule": {
+      "additionalProperties": false,
+      "properties": {
+        "expected_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Expected Hash",
+          "type": "string"
+        },
+        "expires_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expires At"
+        },
+        "idempotency_key": {
+          "format": "uuid",
+          "title": "Idempotency Key",
+          "type": "string"
+        },
+        "reason": {
+          "maxLength": 2000,
+          "minLength": 3,
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "idempotency_key",
+        "expected_hash",
+        "reason"
+      ],
+      "title": "RuleDecisionIn",
+      "type": "object"
+    },
+    "attest": {
+      "additionalProperties": false,
+      "properties": {
+        "expected_context_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Expected Context Hash",
+          "type": "string"
+        },
+        "expected_protocol_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Expected Protocol Hash",
+          "type": "string"
+        },
+        "idempotency_key": {
+          "format": "uuid",
+          "title": "Idempotency Key",
+          "type": "string"
+        },
+        "measurement_method": {
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Measurement Method",
+          "type": "string"
+        },
+        "measurement_method_version": {
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Measurement Method Version",
+          "type": "string"
+        },
+        "protocol_id": {
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Protocol Id",
+          "type": "string"
+        },
+        "source_reference": {
+          "maxLength": 255,
+          "minLength": 1,
+          "title": "Source Reference",
+          "type": "string"
+        }
+      },
+      "required": [
+        "idempotency_key",
+        "expected_context_hash",
+        "protocol_id",
+        "expected_protocol_hash",
+        "measurement_method",
+        "measurement_method_version",
+        "source_reference"
+      ],
+      "title": "MeasurementAttestIn",
+      "type": "object"
+    },
+    "bind_rule": {
+      "additionalProperties": false,
+      "properties": {
+        "expected_context_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Expected Context Hash",
+          "type": "string"
+        },
+        "idempotency_key": {
+          "format": "uuid",
+          "title": "Idempotency Key",
+          "type": "string"
+        },
+        "rule_version_id": {
+          "format": "uuid",
+          "title": "Rule Version Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "idempotency_key",
+        "expected_context_hash",
+        "rule_version_id"
+      ],
+      "title": "RuleBindIn",
+      "type": "object"
+    },
+    "calculate": {
+      "additionalProperties": false,
+      "properties": {
+        "expected_context_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Expected Context Hash",
+          "type": "string"
+        },
+        "idempotency_key": {
+          "format": "uuid",
+          "title": "Idempotency Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "idempotency_key",
+        "expected_context_hash"
+      ],
+      "title": "ContextCommandIn",
+      "type": "object"
+    },
+    "create_rule": {
+      "$defs": {
+        "HarvestDeductionTermsV1": {
+          "additionalProperties": false,
+          "properties": {
+            "article_id": {
+              "maxLength": 100,
+              "minLength": 1,
+              "title": "Article Id",
+              "type": "string"
+            },
+            "contract_id": {
+              "anyOf": [
+                {
+                  "maxLength": 100,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Contract Id"
+            },
+            "customer_id": {
+              "maxLength": 100,
+              "minLength": 1,
+              "title": "Customer Id",
+              "type": "string"
+            },
+            "deduction_basis": {
+              "const": "delivered_quantity_kg",
+              "default": "delivered_quantity_kg",
+              "title": "Deduction Basis",
+              "type": "string"
+            },
+            "impurities_free_pct": {
+              "anyOf": [
+                {
+                  "maximum": 100.0,
+                  "minimum": 0.0,
+                  "type": "number"
+                },
+                {
+                  "type": "string"
+                }
+              ],
+              "title": "Impurities Free Pct"
+            },
+            "measurement_method": {
+              "maxLength": 100,
+              "minLength": 1,
+              "title": "Measurement Method",
+              "type": "string"
+            },
+            "measurement_method_version": {
+              "maxLength": 100,
+              "minLength": 1,
+              "title": "Measurement Method Version",
+              "type": "string"
+            },
+            "quality_limit_pct": {
+              "anyOf": [
+                {
+                  "maximum": 100.0,
+                  "minimum": 0.0,
+                  "type": "number"
+                },
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Quality Limit Pct"
+            },
+            "quantity_rounding": {
+              "const": "0.001_HALF_UP",
+              "default": "0.001_HALF_UP",
+              "title": "Quantity Rounding",
+              "type": "string"
+            },
+            "source_reference": {
+              "maxLength": 255,
+              "minLength": 1,
+              "title": "Source Reference",
+              "type": "string"
+            },
+            "valid_from": {
+              "format": "date",
+              "title": "Valid From",
+              "type": "string"
+            },
+            "valid_until": {
+              "format": "date",
+              "title": "Valid Until",
+              "type": "string"
+            },
+            "windage_mode": {
+              "const": "informative",
+              "default": "informative",
+              "title": "Windage Mode",
+              "type": "string"
+            }
+          },
+          "required": [
+            "customer_id",
+            "article_id",
+            "valid_from",
+            "valid_until",
+            "source_reference",
+            "measurement_method",
+            "measurement_method_version",
+            "impurities_free_pct"
+          ],
+          "title": "HarvestDeductionTermsV1",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "expected_version": {
+          "minimum": 0,
+          "title": "Expected Version",
+          "type": "integer"
+        },
+        "idempotency_key": {
+          "format": "uuid",
+          "title": "Idempotency Key",
+          "type": "string"
+        },
+        "rule_id": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "^[\\w.:-]+$",
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "terms": {
+          "$ref": "#/$defs/HarvestDeductionTermsV1"
+        }
+      },
+      "required": [
+        "idempotency_key",
+        "rule_id",
+        "expected_version",
+        "terms"
+      ],
+      "title": "RuleCreateIn",
+      "type": "object"
+    },
+    "release": {
+      "additionalProperties": false,
+      "properties": {
+        "expected_calculation_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Expected Calculation Hash",
+          "type": "string"
+        },
+        "idempotency_key": {
+          "format": "uuid",
+          "title": "Idempotency Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "idempotency_key",
+        "expected_calculation_hash"
+      ],
+      "title": "FinancialReleaseIn",
+      "type": "object"
+    },
+    "revoke_rule": {
+      "additionalProperties": false,
+      "properties": {
+        "expected_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Expected Hash",
+          "type": "string"
+        },
+        "expires_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expires At"
+        },
+        "idempotency_key": {
+          "format": "uuid",
+          "title": "Idempotency Key",
+          "type": "string"
+        },
+        "reason": {
+          "maxLength": 2000,
+          "minLength": 3,
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "idempotency_key",
+        "expected_hash",
+        "reason"
+      ],
+      "title": "RuleDecisionIn",
+      "type": "object"
+    }
+  },
+  "schema_version": 1
+}

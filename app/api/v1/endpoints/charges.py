@@ -21,6 +21,8 @@ from sqlalchemy import text
 
 from app.api.v1.schemas.base import BaseSchema, TypedObjectOut
 from pydantic import ConfigDict as _ConfigDict
+from app.core.akteur import gepruefter_akteur_aus_request
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 class ChargeOut(BaseSchema):
@@ -253,7 +255,7 @@ async def get_charge(
     return _to_dict(charge)
 
 
-@router.post("", response_model=ChargeOut, status_code=201, summary="Charge anlegen")
+@router.post("", response_model=ChargeOut, status_code=201, summary="Charge anlegen", dependencies=SCHREIBEN["LAGER"])
 async def create_charge(
     data: ChargeCreate,
     db: Session = Depends(get_db),
@@ -276,7 +278,7 @@ async def create_charge(
     return _to_dict(charge)
 
 
-@router.patch("/{charge_id}", response_model=ChargeOut, summary="Charge aktualisieren")
+@router.patch("/{charge_id}", response_model=ChargeOut, summary="Charge aktualisieren", dependencies=SCHREIBEN["LAGER"])
 async def update_charge(
     charge_id: str,
     data: ChargeUpdate,
@@ -297,7 +299,7 @@ async def update_charge(
     return _to_dict(charge)
 
 
-@router.put("/{charge_id}", response_model=ChargeOut, summary="Charge replace")
+@router.put("/{charge_id}", response_model=ChargeOut, summary="Charge replace", dependencies=SCHREIBEN["LAGER"])
 async def replace_charge(
     charge_id: str,
     data: ChargeUpdate,
@@ -309,8 +311,7 @@ async def replace_charge(
 
 
 @router.post(
-    "/{charge_id}/freigabe", response_model=ChargeOut, summary="Charge freigabe"
-)
+    "/{charge_id}/freigabe", response_model=ChargeOut, summary="Charge freigabe", dependencies=SCHREIBEN["LAGER"])
 async def freigabe_charge(
     charge_id: str,
     db: Session = Depends(get_db),
@@ -338,8 +339,7 @@ async def freigabe_charge(
 @router.post(
     "/operator/bulk-release",
     response_model=TypedObjectOut,
-    summary="Chargen geprueft massenfreigeben",
-)
+    summary="Chargen geprueft massenfreigeben", dependencies=SCHREIBEN["LAGER"])
 async def bulk_release_charges(
     body: ChargeBulkReleaseIn,
     request: Request,
@@ -366,7 +366,7 @@ async def bulk_release_charges(
             status_code=409,
             detail={"message": "Qualitaetsfreigabe fehlt", "charge_ids": blocked},
         )
-    actor = request.headers.get("X-User-ID") or "charge-operator"
+    actor = gepruefter_akteur_aus_request(request)
     released_at = datetime.utcnow()
     for row in rows:
         old_status = row.status
@@ -400,8 +400,7 @@ async def bulk_release_charges(
     status_code=204,
     response_class=Response,
     response_model=None,
-    summary="Charge löschen",
-)
+    summary="Charge löschen", dependencies=SCHREIBEN["LAGER"])
 async def delete_charge(
     charge_id: str,
     db: Session = Depends(get_db),

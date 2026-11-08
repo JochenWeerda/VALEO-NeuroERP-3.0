@@ -20,15 +20,15 @@ const leaveTypeSchema = z.enum(['Vacation', 'Sick', 'Unpaid', 'Other']);
 const leaveStatusSchema = z.enum(['Pending', 'Approved', 'Rejected']);
 
 export const LeaveRequestSchema = z.object({
-  id: z.string().uuid(),
-  tenantId: z.string().uuid(),
-  employeeId: z.string().uuid(),
+  id: z.string().guid(),
+  tenantId: z.string().guid(),
+  employeeId: z.string().guid(),
   type: leaveTypeSchema,
   from: z.string().date(),
   to: z.string().date(),
   days: z.number().positive(),
   status: leaveStatusSchema,
-  approvedBy: z.string().uuid().optional(),
+  approvedBy: z.string().guid().optional(),
   note: z.string().optional(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),

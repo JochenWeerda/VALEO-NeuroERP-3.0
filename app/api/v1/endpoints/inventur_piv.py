@@ -25,6 +25,7 @@ from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.inventur_piv_schemas import InventurPivOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/inventur/piv", tags=["Lager - Permanente Inventur (PIV)"])
@@ -106,7 +107,7 @@ def list_piv_abschluesse(
     return [PIVAbschlussOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("", response_model=PIVAbschlussOut, status_code=201, summary="Piv abschluss anlegen")
+@router.post("", response_model=PIVAbschlussOut, status_code=201, summary="Piv abschluss anlegen", dependencies=SCHREIBEN["LAGER"])
 def create_piv_abschluss(
     payload: PIVAbschlussCreate,
     db=Depends(get_db),
@@ -134,7 +135,7 @@ def create_piv_abschluss(
 
 
 @router.post("/{abschluss_id}/positionen",
-             response_model=PIVPositionOut, status_code=201, summary="Piv position hinzufügen")
+             response_model=PIVPositionOut, status_code=201, summary="Piv position hinzufügen", dependencies=SCHREIBEN["LAGER"])
 def add_piv_position(
     abschluss_id: str,
     payload: PIVPositionCreate,
@@ -196,7 +197,7 @@ def list_piv_positionen(
 
 
 @router.patch("/{abschluss_id}/positionen/{pos_id}/zaehlen",
-              response_model=PIVPositionOut, summary="Zaehlen")
+              response_model=PIVPositionOut, summary="Zaehlen", dependencies=SCHREIBEN["LAGER"])
 def zaehlen(
     abschluss_id: str,
     pos_id: str,
@@ -239,7 +240,7 @@ def zaehlen(
     return PIVPositionOut(**dict(row._mapping))
 
 
-@router.post("/{abschluss_id}/abschliessen", response_model=PIVAbschlussOut, summary="Abschliessen")
+@router.post("/{abschluss_id}/abschliessen", response_model=PIVAbschlussOut, summary="Abschliessen", dependencies=SCHREIBEN["LAGER"])
 def abschliessen(
     abschluss_id: str,
     abgeschlossen_von: Optional[str] = None,

@@ -21,6 +21,7 @@ from app.services.sales_invoice_service import InvoiceCreationError, SalesInvoic
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.collective_documents_schemas import CollectiveDocumentsOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter()
@@ -103,7 +104,7 @@ def _next_delivery_note_number(db: Session) -> str:
 # Endpoints
 # ---------------------------------------------------------------------------
 
-@router.post("/collective-invoice", response_model=CollectiveInvoiceOut, status_code=status.HTTP_201_CREATED, summary="Collective invoice anlegen")
+@router.post("/collective-invoice", response_model=CollectiveInvoiceOut, status_code=status.HTTP_201_CREATED, summary="Collective invoice anlegen", dependencies=SCHREIBEN["VERKAUF"])
 async def create_collective_invoice(
     payload: CollectiveInvoiceCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -254,7 +255,7 @@ async def create_collective_invoice(
     )
 
 
-@router.post("/collective-delivery", response_model=CollectiveDeliveryOut, status_code=status.HTTP_201_CREATED, summary="Collective delivery anlegen")
+@router.post("/collective-delivery", response_model=CollectiveDeliveryOut, status_code=status.HTTP_201_CREATED, summary="Collective delivery anlegen", dependencies=SCHREIBEN["VERKAUF"])
 async def create_collective_delivery(
     payload: CollectiveDeliveryCreate,
     tenant_id: str = Depends(get_tenant_id),

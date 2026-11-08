@@ -10,11 +10,13 @@ from app.api.v1.endpoints import fuhrpark
 from app.api.v1.endpoints.mcp_tool_registry import get_current_user, get_db as mcp_get_db, router as mcp_router
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
+from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
 
 
 def _client_fuhrpark():
     app = FastAPI()
     app.include_router(fuhrpark.router, prefix="/api/v1")
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)  # Schreibwege pruefen die Bereichsrolle (19.10.2026)
     db = Mock()
     app.dependency_overrides[get_db] = lambda: db
     app.dependency_overrides[fuhrpark.get_tenant_id] = lambda: "tenant-a"

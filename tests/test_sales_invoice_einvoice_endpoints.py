@@ -32,6 +32,8 @@ def _seed_invoice() -> str:
     number = f"INV-Q-{uuid.uuid4().hex[:8].upper()}"
     payload = {
         "number": number,
+        # Ohne Mandant gehoert die Rechnung niemandem und ist nicht exportierbar (DOC-EINZELABRUF-MANDANT).
+        "tenantId": HEADERS["X-Tenant-Id"],
         "date": "2026-03-01",
         "dueDate": "2026-03-31",
         "paymentTerms": "net14",

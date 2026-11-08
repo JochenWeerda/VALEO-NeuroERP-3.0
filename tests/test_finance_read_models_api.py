@@ -21,7 +21,7 @@ from typing import Any
 import pytest
 from fastapi.testclient import TestClient
 
-from main import app
+from app.main import app
 from conftest import skip_if_db_unavailable
 
 from app.api.v1.endpoints.finance_read_models import (

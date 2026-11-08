@@ -17,7 +17,7 @@ const CalibrationCheckSchema = z.object({
 
 // Cleaning Sequence Schema
 const CleaningSequenceSchema = z.object({
-  id: z.string().uuid(),
+  id: z.string().guid(),
   type: z.enum(['DryClean', 'Vacuum', 'Flush', 'WetClean']),
   startedAt: z.string().datetime(),
   endedAt: z.string().datetime().optional(),
@@ -29,13 +29,13 @@ const CleaningSequenceSchema = z.object({
 
 // Main Mobile Run Schema
 export const MobileRunSchema = z.object({
-  id: z.string().uuid(),
-  tenantId: z.string().uuid(),
-  mobileUnitId: z.string().uuid(),
-  vehicleId: z.string().uuid().optional(),
-  operatorId: z.string().uuid(),
+  id: z.string().guid(),
+  tenantId: z.string().guid(),
+  mobileUnitId: z.string().guid(),
+  vehicleId: z.string().guid().optional(),
+  operatorId: z.string().guid(),
   site: z.object({
-    customerId: z.string().uuid(),
+    customerId: z.string().guid(),
     location: z.object({
       lat: z.number().min(-90).max(90),
       lng: z.number().min(-180).max(180),
@@ -46,7 +46,7 @@ export const MobileRunSchema = z.object({
   calibrationCheck: CalibrationCheckSchema,
   startAt: z.string().datetime(),
   endAt: z.string().datetime().optional(),
-  cleaningSequenceId: z.string().uuid().optional(),
+  cleaningSequenceId: z.string().guid().optional(),
   cleaningSequences: z.array(CleaningSequenceSchema).default([]),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),

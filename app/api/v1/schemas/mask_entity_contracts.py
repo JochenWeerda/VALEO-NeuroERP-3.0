@@ -146,23 +146,62 @@ class EinkaufBestellungOut(_MaskEntityOut):
 
 class FinanceDebitorOut(_MaskEntityOut):
     id: Optional[str] = None
+    #: Konto am Geschaeftspartner (Stufe 3b); die Kundennummer steht in ``kundennummer``.
     debitoren_nr: Optional[str] = None
+    kundennummer: Optional[str] = None
     name: Optional[str] = None
     kreditlimit: Optional[float] = None
     zahlungsbedingungen: Optional[str] = None
     steuernummer: Optional[str] = None
     ust_id: Optional[str] = None
     status: Optional[str] = None
+    # Rollenfelder am Geschaeftspartner (Stufe 3).
+    geschaeftspartner_nr: Optional[str] = None
+    iban: Optional[str] = None
+    bic: Optional[str] = None
+    bank: Optional[str] = None
+    kontoinhaber: Optional[str] = None
+    skonto_tage: Optional[int] = None
+    skonto_prozent: Optional[float] = None
+    # Schluessel der Erfassung finance/debitoren/new (Bearbeitungsmodus liest dieses Detail).
+    debtor_number: Optional[str] = None
+    company_name: Optional[str] = None
+    contact_person: Optional[str] = None
+    street: Optional[str] = None
+    postal_code: Optional[str] = None
+    city: Optional[str] = None
+    country: Optional[str] = None
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    vat_id: Optional[str] = None
+    tax_number: Optional[str] = None
+    bank_name: Optional[str] = None
+    account_holder: Optional[str] = None
+    payment_terms_days: Optional[int] = None
+    discount_days: Optional[int] = None
+    discount_percent: Optional[float] = None
+    credit_limit: Optional[float] = None
+    is_active: Optional[bool] = None
 
 
 class FinanceKreditorOut(_MaskEntityOut):
     id: Optional[str] = None
+    #: Konto am Geschaeftspartner (Stufe 3b); die Lieferantennummer steht in ``lieferantennummer``.
     kreditoren_nr: Optional[str] = None
+    lieferantennummer: Optional[str] = None
     name: Optional[str] = None
     zahlungsbedingungen: Optional[str] = None
     steuernummer: Optional[str] = None
     ust_id: Optional[str] = None
     status: Optional[str] = None
+    # Rollenfelder am Geschaeftspartner (Stufe 3).
+    geschaeftspartner_nr: Optional[str] = None
+    iban: Optional[str] = None
+    bic: Optional[str] = None
+    bank: Optional[str] = None
+    kontoinhaber: Optional[str] = None
+    skonto_tage: Optional[int] = None
+    skonto_prozent: Optional[float] = None
 
 
 class FinanceBankkontoOut(_MaskEntityOut):
@@ -179,6 +218,8 @@ class FinanceApInvoiceOut(_MaskEntityOut):
     """Englische Belegfelder plus deutsche Masken-Aliase."""
 
     id: Optional[str] = None
+    approval_request_id: Optional[str] = None
+    approval_can_decide: bool = False
     number: Optional[str] = None
     beleg_nr: Optional[str] = None
     kreditor: Optional[str] = None

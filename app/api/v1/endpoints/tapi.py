@@ -19,6 +19,7 @@ from sqlalchemy.orm import Session
 from app.api.v1.schemas.crm_channel_bundle_schemas import TapiAckOut, TapiCallOut
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/crm/tapi", tags=["crm", "tapi"])
 
@@ -71,7 +72,7 @@ def _row(r) -> dict:
     return d
 
 
-@router.post("/incoming", response_model=TapiCallOut, summary="Eingehenden Anruf melden (TAPI-Bridge)")
+@router.post("/incoming", response_model=TapiCallOut, summary="Eingehenden Anruf melden (TAPI-Bridge)", dependencies=SCHREIBEN["CRM"])
 def incoming(body: IncomingIn, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
     kunde = _resolve_kunde(db, body.caller)
     new_id = str(uuid.uuid4())
@@ -101,7 +102,7 @@ def pending(db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_i
     return [_row(r) for r in rows]
 
 
-@router.post("/{call_id}/ack", response_model=TapiAckOut, summary="Anruf quittieren")
+@router.post("/{call_id}/ack", response_model=TapiAckOut, summary="Anruf quittieren", dependencies=SCHREIBEN["CRM"])
 def ack(call_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
     db.execute(
         text("UPDATE public.tapi_calls SET acked = TRUE, status = 'erledigt', updated_at = now() WHERE id = :id AND tenant_id = :t"),
@@ -121,7 +122,7 @@ class DialIn(BaseModel):
     caller: Optional[str] = None
 
 
-@router.post("/dial", response_model=TapiCallOut, summary="Ausgehende Wahl anfordern (Click-to-Dial)")
+@router.post("/dial", response_model=TapiCallOut, summary="Ausgehende Wahl anfordern (Click-to-Dial)", dependencies=SCHREIBEN["CRM"])
 def dial(body: DialIn, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
     if len(_norm_phone(body.called)) < 3:
         raise HTTPException(status_code=422, detail="Ungueltige Zielrufnummer")
@@ -164,7 +165,7 @@ def dial_pending(db: Session = Depends(get_db), tenant_id: str = Depends(get_ten
     return [_row(r) for r in rows]
 
 
-@router.post("/dial/{call_id}/done", response_model=TapiAckOut, summary="Wahl ausgefuehrt quittieren")
+@router.post("/dial/{call_id}/done", response_model=TapiAckOut, summary="Wahl ausgefuehrt quittieren", dependencies=SCHREIBEN["CRM"])
 def dial_done(call_id: str, status: str = "dialed", db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
     db.execute(
         text("UPDATE public.tapi_calls SET status = :s, acked = TRUE, updated_at = now() WHERE id = :id AND tenant_id = :t"),

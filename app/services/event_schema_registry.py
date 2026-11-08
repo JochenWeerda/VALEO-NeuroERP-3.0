@@ -11,6 +11,7 @@ from typing import Any, Optional
 from uuid import uuid4
 
 from pydantic import BaseModel, Field
+from app.core.tenant_context import get_current_tenant_id
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +21,7 @@ class EventHeader(BaseModel):
     event_type: str
     version: str = "1.0"
     timestamp: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
-    tenant_id: str = "system"
+    tenant_id: str = Field(default_factory=get_current_tenant_id)
     correlation_id: Optional[str] = None
     source: str = "valeo-neuro-erp"
 
@@ -64,7 +65,8 @@ EVENT_REGISTRY: dict[str, type[DomainEvent]] = {
 }
 
 
-def create_event(event_type: str, payload: dict, tenant_id: str = "system", correlation_id: Optional[str] = None) -> DomainEvent:
+def create_event(event_type: str, payload: dict, tenant_id: str | None = None, correlation_id: Optional[str] = None) -> DomainEvent:
+    tenant_id = tenant_id or get_current_tenant_id()
     event_class = EVENT_REGISTRY.get(event_type, DomainEvent)
     header = EventHeader(
         event_type=event_type,

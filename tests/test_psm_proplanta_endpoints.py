@@ -189,10 +189,11 @@ def test_import_to_local_starts_background_task(configured, monkeypatch):
     calls = []
     monkeypatch.setattr(psm_module, "_perform_psm_import",
                         lambda tenant_id, update_existing, db: calls.append(tenant_id))
-    resp = client.post(f"{BASE}/import-to-local?tenant_id=t1", headers=HEADERS)
+    # Der Mandant kommt aus der geprueften Identitaet; bis 27.10.2026 waehlte ?tenant_id= ihn (Vorgabe "system").
+    resp = client.post(f"{BASE}/import-to-local", headers=HEADERS)
     assert resp.status_code == 200
     assert resp.json()["status"] == "running"
-    assert calls == ["t1"]
+    assert calls == [HEADERS["X-Tenant-Id"]]
 
 
 def test_import_to_local_not_configured_returns_503():

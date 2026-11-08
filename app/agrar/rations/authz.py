@@ -11,9 +11,9 @@ from fastapi import HTTPException
 
 from app.auth.deps import User
 
-READ_ROLES = {"FUTTERMITTEL_LESEN", "FUTTERMITTEL_BEARBEITEN", "FUTTERMITTEL_ADMIN", "admin", "manager"}
-WRITE_ROLES = {"FUTTERMITTEL_BEARBEITEN", "FUTTERMITTEL_ADMIN", "admin", "manager"}
-APPROVE_ROLES = {"FUTTERMITTEL_ADMIN", "admin", "manager"}
+READ_ROLES = {"FUTTERMITTEL_LESEN", "FUTTERMITTEL_BEARBEITEN", "FUTTERMITTEL_ADMIN", "admin"}
+WRITE_ROLES = {"FUTTERMITTEL_BEARBEITEN", "FUTTERMITTEL_ADMIN", "admin"}
+APPROVE_ROLES = {"FUTTERMITTEL_ADMIN", "admin"}
 # Connector-Verwaltung traegt Vertrags-/Consent-/Secret-Konfiguration -> Admin-Level.
 CONNECTOR_ADMIN_ROLES = APPROVE_ROLES
 

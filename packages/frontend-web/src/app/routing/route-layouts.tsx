@@ -17,13 +17,6 @@ export function RootRouteLayout(): JSX.Element {
 }
 
 export function AppRouteLayout(): JSX.Element {
-  const authRequired =
-    String((import.meta.env as Record<string, string | undefined>).VITE_AUTH_REQUIRED ?? '').toLowerCase() === 'true'
-
-  if (!authRequired) {
-    return <DashboardLayout />
-  }
-
   return (
     <ProtectedRoute>
       <DashboardLayout />

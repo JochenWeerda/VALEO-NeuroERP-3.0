@@ -6,6 +6,7 @@ Every fixture owns unique records; never reset a shared database.
 from __future__ import annotations
 
 import os
+import json
 from concurrent.futures import ThreadPoolExecutor
 from decimal import Decimal
 from uuid import uuid4
@@ -15,6 +16,7 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from app.auth.deps import get_current_user
+from testgrenze import ersetze_mandant
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import make_url
 from sqlalchemy.orm import Session
@@ -42,7 +44,7 @@ class ObservedSession(Session):
 
     def execute(self, statement, *args, **kwargs):
         sql = str(statement)
-        if "SELECT id, run_number" in sql:
+        if "SELECT id, run_number, execution_date, initiator_name" in " ".join(sql.split()):
             self.response_reads += 1
             if self.fail_response and self.response_reads == 2:
                 return super().execute(text("SELECT 1 / 0"))
@@ -92,8 +94,16 @@ def execution_case():
     DocumentRepository(db).save_document("ap_invoice", ids["invoice"], {
         "status": "GEBUCHT", "tenantId": ids["tenant"],
     })
-    db.commits = db.rollbacks = 0
+    # Freigabe durch die echte Engine und eine zweite Person; kein Status-Bypass.
+    from app.services.finance_freigabe import ZahlungslaufFreigabe
+    approval_engine = ZahlungslaufFreigabe(db, ids["tenant"])
+    approval = approval_engine.beantrage(ids["run"], "post", "test", "Pruefstand")
+    approval_engine.entscheide(ids["run"], str(approval["id"]),
+                             {"sub": "second-person", "roles": ["FINANCE_ADMIN"]}, True, "Geprueft")
+    ids["approval"] = str(approval["id"])
+    db.commits = db.rollbacks = db.response_reads = 0
     app = FastAPI()
+    ersetze_mandant(app)
     app.include_router(payment_runs.router, prefix="/finance")
     app.dependency_overrides[get_db] = lambda: db
     # Seit 07.10.2026: Mandant aus dem Header, Ausfuehrung nur FINANCE_ADMIN.
@@ -129,6 +139,7 @@ def test_full_settlement_commits_once_and_repetition_cannot_debit(execution_case
     assert execute(execution_case).status_code == 200
     assert db.commits == 1
     assert state(db, ids) == ("executed", Decimal("0"), "BEZAHLT")
+    assert db.execute(text("SELECT status FROM domain_docflow.approvals WHERE id=:approval"), ids).scalar_one() == "consumed"
     assert execute(execution_case).status_code == 400
     assert db.commits == 1
     assert state(db, ids) == ("executed", Decimal("0"), "BEZAHLT")
@@ -153,6 +164,7 @@ def test_real_sql_failure_rolls_back_every_write(execution_case, failure):
     assert response.json()["detail"] == "Failed to execute payment run"
     assert db.commits == 0
     assert db.rollbacks >= 1
+    assert db.execute(text("SELECT status FROM domain_docflow.approvals WHERE id=:approval"), ids).scalar_one() == "granted"
     assert state(db, ids) == ("approved", Decimal("500"), "GEBUCHT")
     assert db.execute(text("SELECT status FROM domain_erp.payment_run_items WHERE id=:item"), ids).scalar_one() == "pending"
 
@@ -179,7 +191,14 @@ def test_invalid_invoice_rolls_back_open_item(execution_case, invalid_doc):
     db, _, ids = execution_case
     doc = DocumentRepository(db).get_document("ap_invoice", ids["invoice"])
     doc.update(invalid_doc)
-    DocumentRepository(db).save_document("ap_invoice", ids["invoice"], doc)
+    if "tenantId" in invalid_doc:
+        # Deliberate own-row corruption for this payment-boundary test. The normal
+        # repository correctly forbids moving an existing document between tenants.
+        db.execute(text("UPDATE documents SET data=CAST(:data AS jsonb) WHERE doc_type='ap_invoice' AND doc_number=:id"),
+                   {"data":json.dumps(doc), "id":ids["invoice"]})
+        db.commit()
+    else:
+        DocumentRepository(db).save_document("ap_invoice", ids["invoice"], doc)
     db.commits = 0
     assert execute(execution_case).status_code == 409
     assert db.commits == 0
@@ -223,6 +242,7 @@ def test_concurrent_requests_only_execute_once(execution_case):
     def request():
         with ObservedSession(engine) as own_db:
             app = FastAPI()
+            ersetze_mandant(app)
             app.include_router(payment_runs.router, prefix="/finance")
             app.dependency_overrides[get_db] = lambda: own_db
             app.dependency_overrides[get_current_user] = lambda: {"sub": "test", "roles": ["FINANCE_ADMIN"]}
@@ -237,3 +257,18 @@ def test_concurrent_requests_only_execute_once(execution_case):
     assert sorted(status for status, _ in results) == [200, 400]
     assert sum(commits for _, commits in results) == 1
     assert state(db, ids) == ("executed", Decimal("0"), "BEZAHLT")
+
+
+@pytest.mark.parametrize("approval_change", [
+    "UPDATE domain_docflow.approvals SET status='invalidated' WHERE id=:approval",
+    "UPDATE domain_docflow.approvals SET expires_at=NOW()-INTERVAL '1 second' WHERE id=:approval",
+])
+def test_missing_valid_approval_never_settles(execution_case, approval_change):
+    db, _, ids = execution_case
+    db.execute(text(approval_change), ids)
+    db.commit()
+    db.commits = 0
+    response = execute(execution_case)
+    assert response.status_code == 409, response.text
+    assert db.commits == 0
+    assert state(db, ids) == ("approved", Decimal("500"), "GEBUCHT")

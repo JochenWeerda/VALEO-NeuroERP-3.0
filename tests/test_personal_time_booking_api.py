@@ -6,7 +6,7 @@ from typing import Any
 from fastapi.testclient import TestClient
 
 from app.core.database import get_db
-from main import app
+from app.main import app
 
 
 _HEADERS = {"Authorization": "Bearer dev-token", "X-Tenant-ID": "tenant-booking"}

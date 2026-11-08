@@ -9,6 +9,16 @@ from sqlalchemy.engine import Engine
 
 
 @pytest.fixture(autouse=True)
+def _mandantenkontext():
+    """Dienste ohne ausdruecklichen Mandanten nehmen den des Kontexts; seit 27.10.2026 gibt es keinen Rueckfall "system"."""
+    from app.core.tenant_context import tenant_scope
+
+    with tenant_scope("test-mandant", "unit test"):
+        yield
+
+
+
+@pytest.fixture(autouse=True)
 def prohibit_database_connections(monkeypatch):
     def forbidden(*args, **kwargs):
         raise AssertionError("These runtime contracts must not connect to a database")

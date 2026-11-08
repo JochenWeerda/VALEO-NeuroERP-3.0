@@ -5,7 +5,7 @@ import httpx
 import pytest
 from sqlalchemy.exc import SQLAlchemyError
 
-from app.api.v1.endpoints import activities, cases, einkauf_bestellvorschlag, journal_entries, opportunities
+from app.api.v1.endpoints import cases, einkauf_bestellvorschlag, journal_entries, opportunities
 from app.domains.inventory.application.services.replenishment_service import ReplenishmentService
 from app.finance.gobd import BelegnummernLuecke, _count_missing_belegnummern
 from app.infrastructure.models import NawaroPrintNotification
@@ -79,30 +79,40 @@ def test_nawaro_print_notification_model_matches_router_contract():
         assert hasattr(NawaroPrintNotification, column_name)
 
 
-@pytest.mark.asyncio
-async def test_crm_activity_list_degrades_when_downstream_unreachable(monkeypatch):
-    async def _raise_downstream(**_kwargs):
-        raise httpx.ConnectError("crm-core unavailable")
-
-    monkeypatch.setattr(activities.crm_core_client, "list_activities", _raise_downstream)
-
-    response = await activities.list_activities(skip=0, limit=50)
-
-    assert response.total == 0
-    assert response.items == []
+# Die Aktivitaetsliste liest seit Runtime46 lokal (domain_crm.activities) statt aus crm-core; ein
+# Ausfall von crm-core betrifft sie nicht mehr (tests/test_crm_activity_canonical_sql.py, Liste und Detail).
 
 
-@pytest.mark.asyncio
-async def test_crm_case_list_degrades_when_downstream_unreachable(monkeypatch):
-    async def _raise_downstream(**_kwargs):
+@pytest.mark.parametrize("tenant", ["outage-house-a", "outage-house-b"])
+def test_crm_case_list_degrades_when_downstream_unreachable(monkeypatch, tenant):
+    # Router dependencies establish request context; a direct handler call skips them.
+    from fastapi import FastAPI
+    from fastapi.testclient import TestClient
+    from testgrenze import ersetze_mandant
+
+    forwarded = []
+
+    async def _raise_downstream(**kwargs):
+        forwarded.append(kwargs)
         raise httpx.ConnectError("crm-service unavailable")
 
     monkeypatch.setattr(cases, "crm_list_cases", _raise_downstream)
+    app = FastAPI()
+    app.include_router(cases.router, prefix="/api/v1/crm/cases")
+    ersetze_mandant(app, tenant)
+    with TestClient(app) as client:
+        response = client.get("/api/v1/crm/cases/", params={"skip": 0, "limit": 50})
 
-    response = await cases.list_cases(skip=0, limit=50)
-
-    assert response.total == 0
-    assert response.items == []
+    assert response.status_code == 200, response.text
+    payload = response.json()
+    assert payload["total"] == 0
+    assert payload["items"] == []
+    assert payload["page"] == 1 and payload["pages"] == 1
+    assert payload["size"] == 50
+    assert payload["has_next"] is False and payload["has_prev"] is False
+    assert len(forwarded) == 1
+    assert forwarded[0]["tenant_id"] == tenant
+    assert forwarded[0]["skip"] == 0 and forwarded[0]["limit"] == 50
 
 
 @pytest.mark.asyncio

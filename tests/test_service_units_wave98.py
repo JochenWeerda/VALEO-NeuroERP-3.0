@@ -7,6 +7,16 @@ import asyncio
 import pytest
 
 
+@pytest.fixture(autouse=True)
+def _mandantenkontext():
+    """Dienste ohne ausdruecklichen Mandanten nehmen den des Kontexts; seit 27.10.2026 gibt es keinen Rueckfall "system"."""
+    from app.core.tenant_context import tenant_scope
+
+    with tenant_scope("test-mandant", "unit test"):
+        yield
+
+
+
 def _run(coro):
     return asyncio.new_event_loop().run_until_complete(coro)
 
@@ -94,15 +104,29 @@ def test_validate_eu_vat_has_required_fields() -> None:
     assert hasattr(result, "country_code")
 
 
+@pytest.fixture()
+def vies_offline(monkeypatch):
+    """Kein Netz: VIES nicht erreichbar - der Fall, in dem die Nummer frueher ohne Laenderkennung zurueckkam."""
+    import httpx
+
+    from app.services import vies_service as modul
+
+    async def nicht_erreichbar(*_a, **_k):
+        raise httpx.ConnectError("VIES nicht erreichbar")
+
+    monkeypatch.setattr(modul.vies_service.client, "get", nicht_erreichbar)
+
+
+
 @pytest.mark.unit
-def test_validate_eu_vat_preserves_vat_number() -> None:
+def test_validate_eu_vat_preserves_vat_number(vies_offline) -> None:
     from app.services.vies_service import validate_eu_vat
     result = _run(validate_eu_vat("DE123456789"))
     assert result.vat_number == "DE123456789"
 
 
 @pytest.mark.unit
-def test_validate_eu_vat_country_code_extracted() -> None:
+def test_validate_eu_vat_country_code_extracted(vies_offline) -> None:
     from app.services.vies_service import validate_eu_vat
     result = _run(validate_eu_vat("DE123456789"))
     assert result.country_code == "DE"

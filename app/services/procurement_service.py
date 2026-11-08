@@ -6,11 +6,11 @@ from datetime import date, datetime
 from decimal import Decimal
 from typing import Any, Optional
 from sqlalchemy import func as sqlfunc, text as sqltext
-from sqlalchemy.exc import DataError
+from sqlalchemy.exc import DataError, IntegrityError
 from sqlalchemy.orm import Session, selectinload
 
 from app.core.business_time import business_today
-from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
+from app.core.exceptions import ConflictError, DomainError, EntityNotFoundError, ValidationFailedError
 from app.core.uuid7 import uuid7
 from app.infrastructure.models.einkauf_models import (
     ArtikelLagerParameter,
@@ -260,6 +260,33 @@ def position_to_mask(p: EinkaufBestellungPosition) -> dict[str, Any]:
     }
 
 
+class VersandNichtMoeglich(DomainError):
+    """Die Bestellung ging nicht raus: 503 ohne Einrichtung, 422 ohne Empfaenger, sonst 502."""
+
+    error_code = "VERSAND_NICHT_MOEGLICH"
+
+    def __init__(self, ergebnis: dict[str, Any]) -> None:
+        super().__init__(ergebnis.get("fehler") or "Versand nicht moeglich")
+        self.ergebnis = ergebnis
+        if ergebnis.get("status") == "nicht_eingerichtet":
+            self.http_status = 503
+        elif not ergebnis.get("empfaenger") and ergebnis.get("versand_art") == "email":
+            self.http_status = 422
+        else:
+            self.http_status = 502
+
+
+def _im_mandanten(tenant_id: str):
+    """Mandantenkontext fuer Schreibvorgaenge; ein schon gesetzter Kontext desselben Mandanten bleibt."""
+    from contextlib import nullcontext
+
+    from app.core.tenant_context import current_tenant_or_none, tenant_scope
+
+    if current_tenant_or_none() == tenant_id:
+        return nullcontext()
+    return tenant_scope(tenant_id, "ProcurementService schreibt Positionen")
+
+
 class ProcurementService:
     def __init__(self, db: Session, tenant_id: str) -> None:
         self.db = db
@@ -466,10 +493,38 @@ class ProcurementService:
             for lf in q.order_by(EinkaufLieferant.firmenname).all()
         ]
 
-    def create_lieferant(self, data: dict) -> dict:
+    def create_lieferant(self, data: dict, rollenfelder: Optional[dict] = None) -> dict:
+        # Keine Datenbankregel haelt die Nummer eindeutig (Stand 20.10.2026); doppelte Lieferanten-Nummern im
+        # Mandanten waren moeglich.
+        vorhanden = self.db.query(EinkaufLieferant.id).filter(
+            EinkaufLieferant.tenant_id == self.tenant_id,
+            EinkaufLieferant.lieferantennummer == data.get("lieferantennummer"),
+        ).first()
+        if vorhanden:
+            raise ConflictError("Lieferantennummer existiert bereits.")
+        # Partnerbruecke (Stufe 1): jeder neue Lieferant haengt an einem Geschaeftspartner des Mandanten.
+        from app.services.business_partner_service import BusinessPartnerService
+
+        data = {**data, "partner_id": BusinessPartnerService(self.db, self.tenant_id).partner_fuer_rolle(
+            "lieferant",
+            name=data.get("firmenname") or "",
+            vat_id=data.get("ust_id"),
+            street=data.get("strasse"),
+            postal_code=data.get("plz"),
+            city=data.get("ort"),
+            country=data.get("land"),
+            email=data.get("email"),
+            phone=data.get("telefon"),
+            partner_id=data.get("partner_id") or None,
+            rollenfelder=rollenfelder,
+        )}
         lf = EinkaufLieferant(id=uuid7(), tenant_id=self.tenant_id, **data)
         self.db.add(lf)
-        self.db.commit()
+        try:
+            self.db.commit()
+        except IntegrityError as exc:
+            self.db.rollback()
+            raise ConflictError("Lieferantennummer existiert bereits.") from exc
         self.db.refresh(lf)
         return {"id": str(lf.id), "lieferantennummer": lf.lieferantennummer, "firmenname": lf.firmenname}
 
@@ -923,7 +978,10 @@ class ProcurementService:
                 }},
             )
             self.db.add(pos)
-        self.db.flush()
+        # Positionen holen tenant_id per Vorgabe aus rls_current_tenant(); auch ausserhalb eines Requests
+        # (Dienstaufruf, Auftrag -> Bestellung) gilt der Mandant dieses Dienstes.
+        with _im_mandanten(self.tenant_id):
+            self.db.flush()
         _summen_rechnen(bestellung)
         if commit:
             self.db.commit()
@@ -973,13 +1031,20 @@ class ProcurementService:
         self.db.commit()
         return {"id": str(b.id), "status": b.status, "bestellfall": b.bestellfall}
 
-    def versende_bestellung_svc(self, bestellung_id: str, versand_art: str, empfaenger=None) -> dict:
+    def versende_bestellung_svc(self, bestellung_id: str, versand_art: str, empfaenger=None, *,
+                                nutzer: Optional[dict] = None) -> dict:
+        """Versendet die Bestellung; gilt erst als versandt, wenn der Versand geklappt hat
+        (oder Post bewusst gewaehlt wurde). Sonst ``VersandNichtMoeglich`` mit dem Grund."""
         b = self.db.query(EinkaufBestellung).filter(
             EinkaufBestellung.id == bestellung_id, EinkaufBestellung.tenant_id == self.tenant_id,
         ).first()
         if not b:
             raise EntityNotFoundError("EinkaufBestellung", bestellung_id)
-        result = versende_bestellung(self.db, b, versand_art=versand_art, empfaenger_override=empfaenger)
+        result = versende_bestellung(self.db, b, versand_art=versand_art, empfaenger_override=empfaenger,
+                                     nutzer=nutzer)
+        if result["status"] not in ("gesendet", "manuell"):
+            self.db.rollback()
+            raise VersandNichtMoeglich(result)
         self.db.commit()
         return {"bestellung_id": str(b.id), "bestellnummer": b.bestellnummer, "versand": result}
 

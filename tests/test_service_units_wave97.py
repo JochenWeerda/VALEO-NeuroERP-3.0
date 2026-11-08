@@ -7,6 +7,16 @@ import pytest
 from decimal import Decimal
 
 
+@pytest.fixture(autouse=True)
+def _mandantenkontext():
+    """Dienste ohne ausdruecklichen Mandanten nehmen den des Kontexts; seit 27.10.2026 gibt es keinen Rueckfall "system"."""
+    from app.core.tenant_context import tenant_scope
+
+    with tenant_scope("test-mandant", "unit test"):
+        yield
+
+
+
 # ---------------------------------------------------------------------------
 # workflow_guards — guard_* functions  (pure payload checks)
 # ---------------------------------------------------------------------------
@@ -57,7 +67,7 @@ def test_guard_price_not_below_cost_ok() -> None:
 @pytest.mark.unit
 def test_guard_psm_approval_valid_true() -> None:
     from app.services.workflow_guards import guard_psm_approval_valid
-    ok, _ = guard_psm_approval_valid({"psm_approved": True})
+    ok, _ = guard_psm_approval_valid({"psm": {"zulassung_ablauf": "2099-01-01T12:00:00Z"}})
     assert ok is True
 
 

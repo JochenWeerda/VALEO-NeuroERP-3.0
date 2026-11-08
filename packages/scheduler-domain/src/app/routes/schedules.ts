@@ -103,7 +103,7 @@ export async function registerScheduleRoutes(
         });
 
         // Calculate next fire time
-        const nextFireAt = await schedulingService.calculateNextFireTime(schedule);
+        const nextFireAt = schedulingService.calculateNextFireTime(schedule);
 
         const created = await scheduleRepository.create(
           scheduleRepository.toDatabaseRecord({
@@ -433,27 +433,18 @@ export async function registerScheduleRoutes(
     handler: async (request, reply) => {
       const body = request.body as any;
 
-      try {
-        const schedule = new ScheduleEntity({
-          tenantId: body.tenantId,
-          name: body.name,
-          description: body.description,
-          tz: body.tz || 'Europe/Berlin',
-          trigger: body.trigger,
-          target: body.target,
-          payload: body.payload,
-          calendar: body.calendar,
-          enabled: body.enabled ?? true,
-        });
-
-        const validation = await schedulingService.validateSchedule(schedule);
-        reply.send(validation);
-      } catch (error) {
-        reply.send({
-          valid: false,
-          errors: [error instanceof Error ? error.message : 'Validation failed'],
-        });
-      }
+      const validation = schedulingService.validateScheduleInput({
+        tenantId: body.tenantId,
+        name: body.name,
+        description: body.description,
+        tz: body.tz || 'Europe/Berlin',
+        trigger: body.trigger,
+        target: body.target,
+        payload: body.payload,
+        calendar: body.calendar,
+        enabled: body.enabled ?? true,
+      });
+      reply.send(validation);
     },
   });
 }

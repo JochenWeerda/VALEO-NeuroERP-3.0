@@ -397,5 +397,3 @@ async def list_kulturen(
     if search:
         kulturen = [k for k in kulturen if search.lower() in k["name"].lower()]
     return kulturen
-
-    return result

@@ -9,10 +9,12 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.tenant import get_tenant_id
 from app.domains.operations.repository import RahmenvertragRepository
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.vertraege_schemas import VertraegeOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/vertrag", tags=["Verträge"])
@@ -69,9 +71,10 @@ async def list_rahmenvertraege(
     status: Optional[str] = Query(None, description="Filter by status"),
     typ: Optional[str] = Query(None, description="Filter by type"),
     limit: int = Query(100, ge=1, le=1000),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
-    repo = RahmenvertragRepository(db)
+    repo = RahmenvertragRepository(db, tenant_id)
     items = repo.get_all(limit=limit, status=status, typ=typ)
     gesamt_menge = sum(float(v.menge) for v in items)
     rest_menge = sum(float(v.restmenge) for v in items)
@@ -84,17 +87,17 @@ async def list_rahmenvertraege(
 
 
 @router.get("/rahmenvertraege/{vertrag_id}", response_model=VertraegeOut, summary="Rahmenvertrag abrufen")
-async def get_rahmenvertrag(vertrag_id: str, db: Session = Depends(get_db)) -> dict:
-    repo = RahmenvertragRepository(db)
+async def get_rahmenvertrag(vertrag_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
+    repo = RahmenvertragRepository(db, tenant_id)
     vertrag = repo.get_by_id(vertrag_id)
     if not vertrag:
         raise HTTPException(status_code=404, detail="Rahmenvertrag not found")
     return _to_dict(vertrag)
 
 
-@router.post("/rahmenvertraege", response_model=VertraegeOut, status_code=201, summary="Rahmenvertrag anlegen")
-async def create_rahmenvertrag(data: VertragCreate, db: Session = Depends(get_db)) -> dict:
-    repo = RahmenvertragRepository(db)
+@router.post("/rahmenvertraege", response_model=VertraegeOut, status_code=201, summary="Rahmenvertrag anlegen", dependencies=SCHREIBEN["KONTRAKT"])
+async def create_rahmenvertrag(data: VertragCreate, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
+    repo = RahmenvertragRepository(db, tenant_id)
     if repo.get_by_nummer(data.nummer):
         raise HTTPException(status_code=409, detail="Vertragsnummer already exists")
 
@@ -104,9 +107,9 @@ async def create_rahmenvertrag(data: VertragCreate, db: Session = Depends(get_db
     return _to_dict(vertrag)
 
 
-@router.patch("/rahmenvertraege/{vertrag_id}", response_model=VertraegeOut, summary="Rahmenvertrag aktualisieren")
-async def update_rahmenvertrag(vertrag_id: str, data: VertragUpdate, db: Session = Depends(get_db)) -> dict:
-    repo = RahmenvertragRepository(db)
+@router.patch("/rahmenvertraege/{vertrag_id}", response_model=VertraegeOut, summary="Rahmenvertrag aktualisieren", dependencies=SCHREIBEN["KONTRAKT"])
+async def update_rahmenvertrag(vertrag_id: str, data: VertragUpdate, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
+    repo = RahmenvertragRepository(db, tenant_id)
     payload = data.model_dump(exclude_unset=True)
     if "laufzeit_bis" in payload and payload["laufzeit_bis"]:
         payload["laufzeit_bis"] = datetime.fromisoformat(payload["laufzeit_bis"])
@@ -116,8 +119,8 @@ async def update_rahmenvertrag(vertrag_id: str, data: VertragUpdate, db: Session
     return _to_dict(vertrag)
 
 
-@router.delete("/rahmenvertraege/{vertrag_id}", status_code=204, response_class=Response, response_model=None, summary="Rahmenvertrag löschen")
-async def delete_rahmenvertrag(vertrag_id: str, db: Session = Depends(get_db)):
-    repo = RahmenvertragRepository(db)
+@router.delete("/rahmenvertraege/{vertrag_id}", status_code=204, response_class=Response, response_model=None, summary="Rahmenvertrag löschen", dependencies=SCHREIBEN["KONTRAKT"])
+async def delete_rahmenvertrag(vertrag_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    repo = RahmenvertragRepository(db, tenant_id)
     if not repo.delete(vertrag_id):
         raise HTTPException(status_code=404, detail="Rahmenvertrag not found")

@@ -8,9 +8,7 @@ Klassifikator zurück — die UI markiert die Quelle (rule_based | ai_suggested)
 
 from __future__ import annotations
 
-import json
 import logging
-import re
 from typing import Protocol, Tuple
 
 from app.services.kaeufergruppe import (
@@ -20,7 +18,7 @@ from app.services.kaeufergruppe import (
     Verhaltenssignale,
     klassifiziere,
 )
-from app.services.llm_gateway import LLMGateway
+from app.services.llm_gateway import LLMGateway, parse_json_object
 
 logger = logging.getLogger(__name__)
 
@@ -75,14 +73,13 @@ class LLMKlassifikator:
         if not out:
             return self._fallback.klassifiziere(s)
         try:
-            cleaned = re.sub(r"^```(?:json)?|```$", "", out.strip()).strip()
-            data = json.loads(cleaned)
+            data = parse_json_object(out)
             gruppe = BuyingGroup(data["gruppe"]) if data.get("gruppe") in {g.value for g in BuyingGroup} else BuyingGroup.UNBEKANNT
             conf = max(0.0, min(1.0, float(data.get("confidence", 0.6))))
             reason = str(data.get("begruendung") or "").strip() or "KI-Einschätzung ohne Begründung."
             return Klassifikation(gruppe, conf, f"KI: {reason}")
-        except Exception as exc:  # pragma: no cover - Parsing
-            logger.warning("llm_klassifikation_parse_fehler: %s — fallback rule_based", exc)
+        except Exception:
+            logger.warning("llm_klassifikation_parse_fehler — fallback rule_based")
             return self._fallback.klassifiziere(s)
 
 

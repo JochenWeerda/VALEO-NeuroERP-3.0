@@ -1,6 +1,7 @@
 """FAN precision formulas from DLG Information 01|2025, chapters 4.3 and 6.2."""
 from __future__ import annotations
 
+import math
 from dataclasses import asdict, dataclass
 from math import exp
 from typing import Literal
@@ -72,7 +73,7 @@ def me_at_fani(*, me_fan1: float, ge_mj_kgdm: float | None, ash_g_kgdm: float | 
     def calculated_me(omd: float, current_fan: float) -> float:
         de = ge_om * (omd - 3.3) / 100.0
         ch4_fan1 = 0.7 + 0.014 * omd1
-        ch4 = ch4_fan1 if current_fan == 1.0 else (ch4_fan1 + 0.9 * (current_fan - 1.0)) / current_fan
+        ch4 = ch4_fan1 if math.isclose(current_fan, 1.0) else (ch4_fan1 + 0.9 * (current_fan - 1.0)) / current_fan
         urine = 0.0037 * cp_om
         return (de - ch4 - urine) * om_fraction
 

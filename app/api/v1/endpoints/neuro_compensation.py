@@ -10,6 +10,7 @@ from app.services.compensation_engine import compensate, get_compensation_run
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.neuro_compensation_schemas import NeuroCompensationOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/neuro/compensate", tags=["neuro-core", "compensation"])
@@ -23,8 +24,7 @@ class CompensateRequest(BaseModel):
 
 
 @router.post("", summary="Compensate do",
-    response_model=NeuroCompensationOut
-)
+    response_model=NeuroCompensationOut, dependencies=SCHREIBEN["FACHLICH"])
 async def do_compensate(request: CompensateRequest):
     run = await compensate(
         error_context={"error": request.error, **(request.context or {})},
@@ -45,8 +45,7 @@ async def get_run(run_id: str):
 
 
 @router.post("/{run_id}/retry", summary="Retry manual",
-    response_model=NeuroCompensationOut
-)
+    response_model=NeuroCompensationOut, dependencies=SCHREIBEN["FACHLICH"])
 async def manual_retry(run_id: str):
     run = get_compensation_run(run_id)
     if not run:

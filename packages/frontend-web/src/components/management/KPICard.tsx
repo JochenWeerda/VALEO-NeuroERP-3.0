@@ -15,6 +15,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 
+import { tastenKlick } from '@/lib/tastenklick'
 export interface KPICardProps {
   title: string
   value: string | number
@@ -132,6 +133,9 @@ export function KPICard({
 
   const content = (
     <div
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={tastenKlick}
       className={cn(
         'rounded-xl border transition-all',
         colors.bg,

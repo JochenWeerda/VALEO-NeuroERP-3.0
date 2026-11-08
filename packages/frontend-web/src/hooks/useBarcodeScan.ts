@@ -140,7 +140,7 @@ export function useBarcodeScan(options: UseBarcodeScanOptions): UseBarcodeScanRe
         setCameraSupported(false)
       }
     }
-    checkCamera()
+    void checkCamera()
   }, [])
 
   // Verarbeite gescannten Barcode
@@ -304,8 +304,8 @@ export function useBarcodeScan(options: UseBarcodeScanOptions): UseBarcodeScanRe
       }
 
       video.onloadedmetadata = () => {
-        video.play()
-        scanLoop()
+        void video.play()
+        void scanLoop()
       }
     } catch (error) {
       onError?.(error instanceof Error ? error : new Error('Kamera-Zugriff verweigert'))

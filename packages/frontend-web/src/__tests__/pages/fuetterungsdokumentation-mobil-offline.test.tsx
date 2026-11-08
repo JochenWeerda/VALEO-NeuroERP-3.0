@@ -7,12 +7,16 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import MobileFuetterungsdokumentation from '@/pages/futtermittel/fuetterungsdokumentation-mobil'
+import MobileFuetterungsdokumentation from '@/components/mask-builder/specialized/feed/mobile-feeding-surface'
 import { FEEDING_OFFLINE_QUEUE_KEY } from '@/lib/offline/feeding-offline-queue'
 
 const recordActualFeedingMock = vi.hoisted(() => vi.fn())
 const fetchActualFeedingsMock = vi.hoisted(() => vi.fn())
 const fetchCurrentFeedingPlansMock = vi.hoisted(() => vi.fn())
+
+vi.mock('@/components/mask-builder/specialized/intake/domain-data', () => ({
+  useDomainIdentity: () => ({ tenantId: 'test-tenant', actor: 'test-actor' }),
+}))
 
 vi.mock('@/lib/api/feeding-actual', () => ({
   fetchActualFeedings: fetchActualFeedingsMock,
@@ -62,14 +66,14 @@ describe('Mobile Ist-Dokumentation offline (FEED-MOB-045)', () => {
     await userEvent.click(screen.getByRole('button', { name: /Ist-Fütterung speichern/ }))
 
     expect(await screen.findByText(/Offline gespeichert/)).toBeInTheDocument()
-    const stored = JSON.parse(localStorage.getItem(FEEDING_OFFLINE_QUEUE_KEY) ?? '[]')
+    const stored = JSON.parse(localStorage.getItem(`${FEEDING_OFFLINE_QUEUE_KEY}:${encodeURIComponent("test-tenant/test-actor")}`) ?? '[]')
     expect(stored).toHaveLength(1)
     expect(stored[0].payload.plan_version_id).toBe('pv-1')
     expect(stored[0].payload.idempotency_key).toMatch(/^mobile-actual-/)
   })
 
   it('replayt beim Mount ausstehende Eintraege ueber dieselbe API', async () => {
-    localStorage.setItem(FEEDING_OFFLINE_QUEUE_KEY, JSON.stringify([{
+    localStorage.setItem(`${FEEDING_OFFLINE_QUEUE_KEY}:${encodeURIComponent('test-tenant/test-actor')}`, JSON.stringify([{
       id: 'q-1', kind: 'actual_feeding', status: 'pending', attempts: 0,
       enqueued_at: '2026-07-17T05:00:00Z',
       payload: { plan_version_id: 'pv-1', idempotency_key: 'mobile-actual-old',
@@ -86,12 +90,12 @@ describe('Mobile Ist-Dokumentation offline (FEED-MOB-045)', () => {
         expect.objectContaining({ idempotency_key: 'mobile-actual-old' }))
     })
     await waitFor(() => {
-      expect(JSON.parse(localStorage.getItem(FEEDING_OFFLINE_QUEUE_KEY) ?? '[]')).toHaveLength(0)
+      expect(JSON.parse(localStorage.getItem(`${FEEDING_OFFLINE_QUEUE_KEY}:${encodeURIComponent("test-tenant/test-actor")}`) ?? '[]')).toHaveLength(0)
     })
   })
 
   it('zeigt Konflikte (Plan veraltet) sichtbar an statt blind erneut zu senden', async () => {
-    localStorage.setItem(FEEDING_OFFLINE_QUEUE_KEY, JSON.stringify([{
+    localStorage.setItem(`${FEEDING_OFFLINE_QUEUE_KEY}:${encodeURIComponent('test-tenant/test-actor')}`, JSON.stringify([{
       id: 'q-1', kind: 'actual_feeding', status: 'conflict', attempts: 1,
       enqueued_at: '2026-07-17T05:00:00Z', last_error: 'Planversion ist veraltet.',
       payload: { plan_version_id: 'pv-0', idempotency_key: 'mobile-actual-stale',

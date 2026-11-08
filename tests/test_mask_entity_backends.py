@@ -7,7 +7,7 @@ from app.core import security
 from app.core.config import settings
 from app.core.screen_definitions import get_screen_definition
 from fastapi.testclient import TestClient
-from main import app
+from app.main import app
 
 client = TestClient(app, raise_server_exceptions=False, base_url="http://localhost")
 AUTH_HEADERS = {"Authorization": "Bearer jwt-token"}

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { MadeByStudioListRuntimeWire } from '@/components/mask-builder/made-by-studio-runtime-wire'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -13,6 +14,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { UniversalMaskRenderer } from '@/components/mask-builder/UniversalMaskRenderer'
+import { useScreenPermissions } from '@/components/mask-builder/runtime/screen-permissions'
 import { compileRenderPlanFromScreenDefinition } from '@/components/mask-builder/render-plan/schema-compiler'
 import { useUniversalFormState } from '@/components/mask-builder/runtime/useUniversalFormState'
 import { createScreenContext } from '@/components/mask-builder/governance/screen-context'
@@ -23,7 +25,7 @@ import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { personalEinwilligungserklaerungenScreen } from '@/masks/capture-screens'
 import { legeErklaerungAn, listErklaerungen, vorhandeneFassung } from '@/lib/api/bewerbung-einwilligung'
 
-const leer = { wortlaut: '', erstellt_durch: '' }
+const leer = { wortlaut: '' }
 
 function text(value: unknown): string {
   return String(value ?? '').trim()
@@ -59,7 +61,8 @@ export default function PersonalEinwilligungserklaerungenPage(): JSX.Element {
     })),
   }), [fassungen.length, isTouch, neueste, saving])
 
-  const plan = useMemo(() => compileRenderPlanFromScreenDefinition(schema), [schema])
+  const rechte = useScreenPermissions(schema)
+  const plan = useMemo(() => compileRenderPlanFromScreenDefinition(schema, { permissions: rechte }), [schema, rechte])
   const form = useUniversalFormState({ screen: schema, initialValues: leer })
   const { resetForm } = form
 
@@ -73,7 +76,7 @@ export default function PersonalEinwilligungserklaerungenPage(): JSX.Element {
     if (!wortlaut) return
     setSaving(true)
     try {
-      const erklaerung = await legeErklaerungAn(wortlaut, text(form.values.erstellt_durch) || null)
+      const erklaerung = await legeErklaerungAn(wortlaut)
       toast.success(`Fassung ${erklaerung.fassung} angelegt`, {
         description: 'Sie ist ab jetzt unveränderlich und kann beim Erteilen gewählt werden.',
       })
@@ -131,14 +134,14 @@ export default function PersonalEinwilligungserklaerungenPage(): JSX.Element {
 
   const screenContext = useMemo(() => createScreenContext({
     data: { fassungen },
-    permissions: { granted: [] },
+    permissions: { granted: rechte },
     state: { values: form.values, policies: {} },
     actions: {
       'personal.saveErklaerung': () => handleAction('anlegen'),
       'personal.newErklaerung': () => handleAction('neu'),
     },
     navigation: { push: () => undefined },
-  }), [fassungen, form.values, handleAction])
+  }), [rechte, fassungen, form.values, handleAction])
 
   if (erklaerungen.isLoading) {
     return (
@@ -194,3 +197,8 @@ export default function PersonalEinwilligungserklaerungenPage(): JSX.Element {
     </div>
   )
 }
+function madeByStudioRuntimeWireDeclaration(): JSX.Element {
+  return <MadeByStudioListRuntimeWire screenId="personal/einwilligungserklaerungen" />
+}
+void madeByStudioRuntimeWireDeclaration
+

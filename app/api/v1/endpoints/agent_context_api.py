@@ -16,6 +16,7 @@ from app.domains.operations.models import AgentContextDB
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.agent_context_api_schemas import AgentContextApiOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/agent-context", tags=["agent-context"])
@@ -67,8 +68,7 @@ def _get_active_context(context_id: str, db: Session) -> AgentContextDB:
 
 
 @router.post("", status_code=201, summary="Context anlegen",
-    response_model=AgentContextApiOut
-)
+    response_model=AgentContextApiOut, dependencies=SCHREIBEN["FACHLICH"])
 def create_context(req: AgentContextCreateRequest, db: Session = Depends(get_db)):
     expires = datetime.now(tz=timezone.utc) + timedelta(seconds=req.ttl_sekunden)
     row = AgentContextDB(
@@ -85,7 +85,7 @@ def create_context(req: AgentContextCreateRequest, db: Session = Depends(get_db)
     return _row_to_context(row).model_dump()
 
 
-@router.delete("/{context_id}", status_code=204, response_class=Response, response_model=None, summary="Widerrufen")
+@router.delete("/{context_id}", status_code=204, response_class=Response, response_model=None, summary="Widerrufen", dependencies=SCHREIBEN["FACHLICH"])
 def widerrufen(context_id: str, db: Session = Depends(get_db)):
     row = db.query(AgentContextDB).filter(AgentContextDB.context_id == context_id).first()
     if not row:
@@ -96,8 +96,7 @@ def widerrufen(context_id: str, db: Session = Depends(get_db)):
 
 
 @router.post("/{context_id}/dispatch", summary="Dispatch",
-    response_model=None
-)
+    response_model=None, dependencies=SCHREIBEN["FACHLICH"])
 def dispatch(context_id: str, req: AgentDispatchRequest, db: Session = Depends(get_db)):
     row = _get_active_context(context_id, db)
     context = _row_to_context(row)
@@ -112,8 +111,7 @@ def dispatch(context_id: str, req: AgentDispatchRequest, db: Session = Depends(g
 
 
 @router.post("/{context_id}/knowledge-pack", summary="Pack knowledge",
-    response_model=AgentContextApiOut
-)
+    response_model=AgentContextApiOut, dependencies=SCHREIBEN["FACHLICH"])
 def knowledge_pack(context_id: str, req: AgentKnowledgePackRequest, db: Session = Depends(get_db)):
     from app.core.knowledge_core_contracts import KnowledgeChannel
     from app.core.knowledge_runtime import build_runtime_context_pack

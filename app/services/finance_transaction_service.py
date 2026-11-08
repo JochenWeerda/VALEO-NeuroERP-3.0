@@ -259,11 +259,11 @@ class FinanceTransactionService:
                 """
                 SELECT id
                 FROM domain_shared.users
-                WHERE id = :user_id
+                  WHERE id = :user_id AND tenant_id = :tenant_id
                 LIMIT 1
                 """
             ),
-            {"user_id": user_id},
+              {"user_id": user_id, "tenant_id": self.tenant_id},
         ).first()
         return str(row[0]) if row and str(row[0]) == user_id else None
 

@@ -1,7 +1,4 @@
 import { z } from 'zod';
-import { extendZodWithOpenApi } from 'zod-openapi';
-
-extendZodWithOpenApi(z);
 
 export const AmendmentTypeEnum = z.enum(['QtyChange', 'WindowChange', 'PriceRuleChange', 'CounterpartyChange', 'DeliveryTermsChange', 'Other']);
 export const AmendmentStatusEnum = z.enum(['Pending', 'Approved', 'Rejected', 'Cancelled']);
@@ -9,17 +6,17 @@ export const AmendmentStatusEnum = z.enum(['Pending', 'Approved', 'Rejected', 'C
 export const CreateAmendmentSchema = z.object({
   type: AmendmentTypeEnum,
   reason: z.string(),
-  changes: z.record(z.any()),
+  changes: z.record(z.string(), z.any()),
   notes: z.string().optional(),
 });
 
 export const AmendmentResponseSchema = z.object({
-  id: z.string().uuid(),
-  contractId: z.string().uuid(),
+  id: z.string().guid(),
+  contractId: z.string().guid(),
   tenantId: z.string(),
   type: AmendmentTypeEnum,
   reason: z.string(),
-  changes: z.record(z.any()),
+  changes: z.record(z.string(), z.any()),
   approvedBy: z.string().optional(),
   approvedAt: z.string().datetime().optional(),
   status: AmendmentStatusEnum,

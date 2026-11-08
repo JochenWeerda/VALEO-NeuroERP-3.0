@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from fastapi import FastAPI
+from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
 from fastapi.testclient import TestClient
 import pytest
 from sqlalchemy import create_engine
@@ -44,6 +45,7 @@ def store(sqlite_snapshot_db: Session) -> ReadModelSnapshotStore:
 @pytest.fixture()
 def client(sqlite_snapshot_db: Session):
     app = FastAPI()
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(reporting_api.router, prefix="/api/v1")
 
     def _override_get_db():

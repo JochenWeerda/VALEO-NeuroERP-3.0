@@ -338,10 +338,11 @@ def test_warenabgang_is_nonblocking_on_finance_error():
 
 # ── HarvestAcceptanceService._book_self_billing_credit_note ──────────────────
 
-def _make_harvest_svc():
+def _make_harvest_svc(*, configured=False):
     from app.services.harvest_acceptance_service import HarvestAcceptanceService
     db = MagicMock()
     db.execute.return_value.fetchone.return_value = (1,)
+    db.execute.return_value.scalar.return_value = "8" if configured else None
     svc = HarvestAcceptanceService(db, TENANT)
     return svc
 
@@ -352,19 +353,35 @@ def _make_invoice(net=100, vat=19, gross=119, number="SB-2026-001"):
     inv.total_net_amount_eur = Decimal(str(net))
     inv.total_vat_amount_eur = Decimal(str(vat))
     inv.total_gross_amount_eur = Decimal(str(gross))
+    inv.vat_rate_percent = Decimal("19") if vat else Decimal("0")
     return inv
 
 
-def test_self_billing_skips_zero_gross():
+@pytest.fixture
+def self_billing_tax_contract(monkeypatch):
+    from app.finance import steuerschluessel as taxes
+    from app.services import finance_eingangsrechnung_buchung as accounting
+    def groups(db, tenant, positions):
+        assert tenant == TENANT and len(positions) == 1
+        _, code, rate, net, _ = positions[0]
+        assert code == "8"
+        return [taxes.Vorsteuergruppe(tax_code=code, satz=rate, netto=net,
+                steuer=net * rate / 100, aufwandskonto="4000", vorsteuerkonto="1576")]
+    monkeypatch.setattr(taxes, "vorsteuergruppen", groups)
+    monkeypatch.setattr(accounting, "kreditorenkonto", lambda *args: "3100")
+
+
+def test_self_billing_requires_tax_config_even_for_zero_gross():
     svc = _make_harvest_svc()
     inv = _make_invoice(net=0, vat=0, gross=0)
     with patch.object(FinanceTransactionService, "create") as mock_create:
-        svc._book_self_billing_credit_note(inv, date(2026, 3, 1))
+        with pytest.raises(ValidationFailedError):
+            svc._book_self_billing_credit_note(inv, date(2026, 3, 1))
         mock_create.assert_not_called()
 
 
-def test_self_billing_creates_three_lines_with_vat():
-    svc = _make_harvest_svc()
+def test_self_billing_creates_three_lines_with_vat(self_billing_tax_contract):
+    svc = _make_harvest_svc(configured=True)
     inv = _make_invoice(net=100, vat=19, gross=119)
     with patch.object(FinanceTransactionService, "create", return_value=MagicMock(id="j-sb")) as mock_create:
         svc._book_self_billing_credit_note(inv, date(2026, 3, 15))
@@ -382,19 +399,20 @@ def test_self_billing_creates_three_lines_with_vat():
         assert "id-1576" in accounts   # Vorsteuer
 
 
-def test_self_billing_debit_equals_gross():
-    svc = _make_harvest_svc()
+def test_self_billing_liability_credit_equals_gross(self_billing_tax_contract):
+    svc = _make_harvest_svc(configured=True)
     inv = _make_invoice(net=500, vat=95, gross=595)
     with patch.object(FinanceTransactionService, "create", return_value=MagicMock(id="j-sb2")) as mock_create:
         svc._book_self_billing_credit_note(inv, date(2026, 4, 1))
         lines = mock_create.call_args.kwargs["lines"]
-        debit = next(line for line in lines if line["debit_amount"] > 0)
-        assert debit["account_id"] == "id-3100"
-        assert debit["debit_amount"] == pytest.approx(595.0)
+        credit = next(line for line in lines if line["credit_amount"] > 0)
+        assert credit["account_id"] == "id-3100"
+        assert credit["credit_amount"] == Decimal("595")
+        assert sum(line["debit_amount"] for line in lines) == Decimal("595")
 
 
-def test_self_billing_two_lines_without_vat():
-    svc = _make_harvest_svc()
+def test_self_billing_two_lines_without_vat(self_billing_tax_contract):
+    svc = _make_harvest_svc(configured=True)
     inv = _make_invoice(net=200, vat=0, gross=200)
     with patch.object(FinanceTransactionService, "create", return_value=MagicMock(id="j-sb3")) as mock_create:
         svc._book_self_billing_credit_note(inv, date(2026, 5, 1))
@@ -403,8 +421,8 @@ def test_self_billing_two_lines_without_vat():
         assert not any(line["account_id"] == "id-1576" for line in lines)
 
 
-def test_self_billing_uses_business_day_when_no_delivery_date():
-    svc = _make_harvest_svc()
+def test_self_billing_uses_business_day_when_no_delivery_date(self_billing_tax_contract):
+    svc = _make_harvest_svc(configured=True)
     inv = _make_invoice(net=100, vat=0, gross=100)
     with patch.object(FinanceTransactionService, "create", return_value=MagicMock(id="j-sb4")) as mock_create:
         svc._book_self_billing_credit_note(inv, None)
@@ -413,12 +431,13 @@ def test_self_billing_uses_business_day_when_no_delivery_date():
         assert kwargs["period"] == business_today().strftime("%Y-%m")
 
 
-def test_self_billing_is_nonblocking_on_error():
-    svc = _make_harvest_svc()
+def test_self_billing_propagates_error_without_commit(self_billing_tax_contract):
+    svc = _make_harvest_svc(configured=True)
     inv = _make_invoice()
     with patch.object(FinanceTransactionService, "create", side_effect=RuntimeError("DB down")):
-        # Must not raise — non-blocking
-        svc._book_self_billing_credit_note(inv, date(2026, 3, 1))
+        with pytest.raises(RuntimeError, match="DB down"):
+            svc._book_self_billing_credit_note(inv, date(2026, 3, 1))
+    svc.db.commit.assert_not_called()
 
 
 # ── FinanceTransactionService.reverse — storno round-trip ────────────────────

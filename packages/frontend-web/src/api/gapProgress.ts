@@ -81,7 +81,7 @@ export class PipelineProgressMonitor {
     }
 
     // Erste Abfrage sofort
-    poll()
+    void poll()
 
     // Dann regelmäßig pollen
     this.intervalId = window.setInterval(poll, intervalMs)

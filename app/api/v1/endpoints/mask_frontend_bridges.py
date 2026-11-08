@@ -8,27 +8,31 @@ den Feldschluesseln, die die Maske bereits verwendet.
 
 from __future__ import annotations
 
+from app.auth.finance_roles import beleg_read, beleg_write, finance_admin, finance_read, finance_write
 import json
 import uuid
 from datetime import date, datetime, timezone
-from typing import Any, Optional
+from typing import Any, NoReturn, Optional
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Path, Query
-from fastapi.responses import Response
+from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import text
 from sqlalchemy.exc import OperationalError, ProgrammingError
 from sqlalchemy.orm import Session
 
 from app.api.v1.schemas.base import BaseSchema
+from app.auth.deps import get_current_user
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.infrastructure.models import Customer
 from app.infrastructure.models.agrar_models import FeldbuchSchlag
 from app.services.customer_reference import resolve_reference
+from app.services.pricing_condition_read import read_pricing_conditions
 from app.services.finance_datev_service import FinanceDatevService
 from app.services.finance_period_service import FinancePeriodService, PeriodError
 from app.services.vies_service import vies_service
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(tags=["mask-frontend-bridges"])
 
@@ -44,15 +48,6 @@ class SeedOrderIn(BaseModel):
 class AskIn(BaseModel):
     prompt: str = Field(..., min_length=1, max_length=4000)
     context: dict[str, Any] | None = None
-
-
-class PreisBerechnenIn(BaseModel):
-    model_config = ConfigDict(extra="allow")
-    artikel_id: str | None = None
-    menge_kg: float | None = None
-    kundengruppe: str | None = None
-    sorte_klasse: str | None = None
-    kontrakt_id: str | None = None
 
 
 class EpcisEventIn(BaseModel):
@@ -221,7 +216,7 @@ def get_agrar_kunde(
         return _kunde_payload(customer, 0, 0.0)
 
 
-@router.post("/agrar/seed-orders", response_model=BridgeOut, status_code=201, summary="Saatgutbestellung anlegen")
+@router.post("/agrar/seed-orders", response_model=BridgeOut, status_code=201, summary="Saatgutbestellung anlegen", dependencies=SCHREIBEN["AGRAR"])
 def create_seed_order(
     body: SeedOrderIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -278,71 +273,11 @@ def list_opportunity_quotes(
     ]
 
 
-@router.get("/crm/segments/{segment_id}/members", response_model=list[BridgeOut], summary="Segmentmitglieder auflisten")
-def list_segment_members(
-    segment_id: str,
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-) -> list[dict[str, Any]]:
-    stored = _safe_rows(
-        db,
-        "SELECT m.partner_id AS contact_id, m.added_at "
-        "FROM domain_crm.crm_segment_members m "
-        "JOIN domain_crm.crm_segments s ON s.id = m.segment_id "
-        "WHERE s.tenant_id = :t AND m.segment_id = :s "
-        "ORDER BY m.added_at DESC LIMIT 500",
-        {"t": tenant_id, "s": segment_id},
-    )
-    if stored:
-        return [{"contact_id": r["contact_id"], "added_at": _iso(r["added_at"]), "segment_id": segment_id} for r in stored]
-    customers = (
-        db.query(Customer)
-        .filter(Customer.tenant_id == tenant_id, Customer.deleted_at.is_(None), Customer.is_active.is_(True))
-        .order_by(Customer.company_name.asc())
-        .limit(50)
-        .all()
-    )
-    return [
-        {
-            "contact_id": c.id,
-            "added_at": _iso(c.created_at),
-            "name": c.company_name,
-            "segment_id": segment_id,
-        }
-        for c in customers
-    ]
-
-
-@router.get("/crm/segments/{segment_id}/performance", response_model=BridgeOut, summary="Segment-Performance")
-def get_segment_performance(
-    segment_id: str,
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-) -> dict[str, Any]:
-    members = list_segment_members(segment_id, tenant_id, db)
-    return {
-        "segment_id": segment_id,
-        "member_count": len(members),
-        "coverage": min(1.0, len(members) / 50) if members else 0.0,
-        "updated_at": _now().isoformat(),
-    }
-
-
-@router.post("/crm/segments/{segment_id}/calculate", response_model=BridgeOut, summary="Segment neu berechnen")
-def calculate_segment(
-    segment_id: str,
-    body: SegmentCalculateIn,
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-) -> dict[str, Any]:
-    members = list_segment_members(segment_id, tenant_id, db)
-    return {
-        "segment_id": segment_id,
-        "calculated": True,
-        "force_full": body.force_full,
-        "member_count": len(members),
-        "calculated_at": _now().isoformat(),
-    }
+# Canonical segment members, evaluation and truthful counts are owned by crm_segments.
+from app.api.v1.endpoints.crm_segments import (  # noqa: E402,F401
+    segment_members as list_segment_members, segment_performance as get_segment_performance,
+    recalculate_segment as calculate_segment,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -350,31 +285,20 @@ def calculate_segment(
 # ---------------------------------------------------------------------------
 
 
-@router.post("/einkauf/anfragen/{anfrage_id}/send", response_model=BridgeOut, summary="Anfrage an Lieferanten senden")
+@router.post("/einkauf/anfragen/{anfrage_id}/send", response_model=BridgeOut, summary="Anfrage an Lieferanten senden", dependencies=SCHREIBEN["EINKAUF"])
 def send_anfrage(
     anfrage_id: str,
     body: AnfrageSendIn,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
+    nutzer: dict = Depends(get_current_user),
 ) -> dict[str, Any]:
-    from app.api.v1.endpoints.compat import _load_einkauf_anfrage
-
-    doc = _load_einkauf_anfrage(db, anfrage_id)
-    if doc is None:
-        raise HTTPException(status_code=404, detail="Anfrage not found")
-    suppliers = body.supplierIds
-    return {
-        "id": anfrage_id,
-        "status": "ANGEBOTSPHASE",
-        "sent": True,
-        "supplierIds": suppliers,
-        "method": body.method or "email",
-        "sent_at": _now().isoformat(),
-        "count": len(suppliers),
-    }
+    """Mail an jeden Lieferanten, dann ANGEBOTSPHASE; sonst 4xx/5xx mit Grund (RfqVersandFehler)."""
+    from app.services.rfq_service import versende_einkauf_anfrage
+    return versende_einkauf_anfrage(db, tenant_id, anfrage_id, body.supplierIds, body.method, nutzer)
 
 
-@router.post("/einkauf/lieferscheine/{ls_id}/print", response_model=BridgeOut, summary="Einkauf-Lieferschein drucken")
+@router.post("/einkauf/lieferscheine/{ls_id}/print", response_model=BridgeOut, summary="Einkauf-Lieferschein drucken", dependencies=SCHREIBEN["EINKAUF"])
 def print_einkauf_lieferschein(
     ls_id: str,
     template: Optional[str] = Query(default=None, max_length=60),
@@ -429,7 +353,7 @@ def _rechnung_out(row: dict[str, Any], positionen: list[dict[str, Any]] | None =
     }
 
 
-@router.get("/einkauf/rechnungen", response_model=list[BridgeOut], summary="Eingangsrechnungen auflisten")
+@router.get("/einkauf/rechnungen", response_model=list[BridgeOut], summary="Eingangsrechnungen auflisten", dependencies=[Depends(beleg_read)])
 def list_einkauf_rechnungen(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -443,7 +367,7 @@ def list_einkauf_rechnungen(
     return [_rechnung_out(dict(r)) for r in rows]
 
 
-@router.post("/einkauf/rechnungen", response_model=BridgeOut, status_code=201, summary="Eingangsrechnung anlegen")
+@router.post("/einkauf/rechnungen", response_model=BridgeOut, status_code=201, summary="Eingangsrechnung anlegen", dependencies=[Depends(beleg_write)])
 def create_einkauf_rechnung(
     body: dict[str, Any] = Body(default={}),
     tenant_id: str = Depends(get_tenant_id),
@@ -501,7 +425,7 @@ def create_einkauf_rechnung(
     return _rechnung_out({"id": rechnung_id, **body, "rechnungs_nummer": body.get("rechnung_nr")}, body.get("positionen") or [])
 
 
-@router.get("/einkauf/rechnungen/{rechnung_id}", response_model=BridgeOut, summary="Eingangsrechnung abrufen")
+@router.get("/einkauf/rechnungen/{rechnung_id}", response_model=BridgeOut, summary="Eingangsrechnung abrufen", dependencies=[Depends(beleg_read)])
 def get_einkauf_rechnung(
     rechnung_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -522,7 +446,7 @@ def get_einkauf_rechnung(
     return _rechnung_out(dict(rows[0]), [dict(p) for p in positionen])
 
 
-@router.patch("/einkauf/rechnungen/{rechnung_id}", response_model=BridgeOut, summary="Eingangsrechnung aktualisieren")
+@router.patch("/einkauf/rechnungen/{rechnung_id}", response_model=BridgeOut, summary="Eingangsrechnung aktualisieren", dependencies=[Depends(beleg_write)])
 def patch_einkauf_rechnung(
     rechnung_id: str,
     body: dict[str, Any] = Body(default={}),
@@ -557,7 +481,7 @@ def patch_einkauf_rechnung(
     return {**existing, **body, "id": rechnung_id, "beleg_nr": existing.get("beleg_nr") or rechnung_id}
 
 
-@router.delete("/einkauf/rechnungen/{rechnung_id}", status_code=204, response_class=Response, summary="Eingangsrechnung löschen")
+@router.delete("/einkauf/rechnungen/{rechnung_id}", status_code=204, response_class=Response, summary="Eingangsrechnung löschen", dependencies=[Depends(finance_admin)])
 def delete_einkauf_rechnung(
     rechnung_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -578,7 +502,7 @@ def delete_einkauf_rechnung(
 # ---------------------------------------------------------------------------
 
 
-@router.post("/finance/direct-debits/{run_id}/approve", response_model=BridgeOut, summary="Lastschriftlauf freigeben")
+@router.post("/finance/direct-debits/{run_id}/approve", response_model=BridgeOut, summary="Lastschriftlauf freigeben", dependencies=[Depends(finance_admin)])
 def approve_direct_debit(
     run_id: str,
     body: DirectDebitActionIn,
@@ -604,7 +528,7 @@ def approve_direct_debit(
     }
 
 
-@router.post("/finance/direct-debits/{run_id}/execute", response_model=BridgeOut, summary="Lastschriftlauf ausführen")
+@router.post("/finance/direct-debits/{run_id}/execute", response_model=BridgeOut, summary="Lastschriftlauf ausführen", dependencies=[Depends(finance_admin)])
 def execute_direct_debit(
     run_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -636,7 +560,7 @@ def execute_direct_debit(
     }
 
 
-@router.get("/finance/export/datev", response_model=BridgeOut, summary="DATEV-Export")
+@router.get("/finance/export/datev", response_model=BridgeOut, summary="DATEV-Export", dependencies=[Depends(finance_read)])
 def export_datev(
     typ: str = Query("alle"),
     datum_von: Optional[str] = Query(None),
@@ -677,7 +601,7 @@ def _anlage_from_row(row: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-@router.get("/finance/fixed-assets", response_model=list[BridgeOut], summary="Anlagen auflisten")
+@router.get("/finance/fixed-assets", response_model=list[BridgeOut], summary="Anlagen auflisten", dependencies=[Depends(finance_read)])
 def list_fixed_assets(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -690,7 +614,7 @@ def list_fixed_assets(
     return [_anlage_from_row(dict(r)) for r in rows]
 
 
-@router.post("/finance/fixed-assets", response_model=BridgeOut, status_code=201, summary="Anlage anlegen")
+@router.post("/finance/fixed-assets", response_model=BridgeOut, status_code=201, summary="Anlage anlegen", dependencies=[Depends(finance_write)])
 def create_fixed_asset(
     body: AnlageIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -731,7 +655,7 @@ def create_fixed_asset(
     })
 
 
-@router.get("/finance/fixed-assets/detail", response_model=list[BridgeOut], summary="Anlagen-Detailauflistung")
+@router.get("/finance/fixed-assets/detail", response_model=list[BridgeOut], summary="Anlagen-Detailauflistung", dependencies=[Depends(finance_read)])
 def list_fixed_assets_detail(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -739,7 +663,7 @@ def list_fixed_assets_detail(
     return list_fixed_assets(tenant_id, db)
 
 
-@router.get("/finance/fixed-assets/{asset_id}/depreciation", response_model=BridgeOut, summary="AfA einer Anlage")
+@router.get("/finance/fixed-assets/{asset_id}/depreciation", response_model=BridgeOut, summary="AfA einer Anlage", dependencies=[Depends(finance_read)])
 def get_fixed_asset_depreciation(
     asset_id: str,
     year: int = Query(date.today().year),
@@ -765,7 +689,7 @@ def get_fixed_asset_depreciation(
     }
 
 
-@router.get("/finance/stats", response_model=BridgeOut, summary="Fibu-Kennzahlen")
+@router.get("/finance/stats", response_model=BridgeOut, summary="Fibu-Kennzahlen", dependencies=[Depends(finance_read)])
 def finance_stats(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -791,7 +715,7 @@ def finance_stats(
     }
 
 
-@router.get("/finance/followup/fibu/cockpit", response_model=BridgeOut, summary="Fibu-Cockpit")
+@router.get("/finance/followup/fibu/cockpit", response_model=BridgeOut, summary="Fibu-Cockpit", dependencies=[Depends(finance_read)])
 def fibu_cockpit(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -845,7 +769,7 @@ def fibu_cockpit(
     }
 
 
-@router.post("/finance/periods/{period_id}/close", response_model=BridgeOut, summary="Buchungsperiode abschliessen")
+@router.post("/finance/periods/{period_id}/close", response_model=BridgeOut, summary="Buchungsperiode abschliessen", dependencies=[Depends(finance_admin)])
 def close_finance_period(
     period_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -892,11 +816,7 @@ def list_pos_rabatte(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> list[dict[str, Any]]:
-    rows = _safe_rows(
-        db,
-        "SELECT * FROM domain_shared.zu_abschlag_konditionen ORDER BY id LIMIT 200",
-        {},
-    )
+    rows = read_pricing_conditions(db, tenant_id, limit=200)
     return [
         {
             "id": str(r.get("id")),
@@ -936,88 +856,49 @@ def list_tse_journal(
     ]
 
 
-@router.post("/preise/berechnen", response_model=BridgeOut, summary="Preis kalkulieren")
-def preise_berechnen(body: PreisBerechnenIn) -> dict[str, Any]:
-    menge = float(body.menge_kg or 1)
-    basis = 100.0
-    if body.kundengruppe and body.kundengruppe.upper() == "GROSSHANDEL":
-        rabatt = 8.0
-    else:
-        rabatt = 0.0
-    netto = round(basis * menge * (1 - rabatt / 100.0), 2)
-    mwst = round(netto * 0.19, 2)
-    return {
-        "netto_preis": netto,
-        "brutto_preis": round(netto + mwst, 2),
-        "mwst_betrag": mwst,
-        "kalkulationsweg": [
-            {"schritt": "Basispreis", "wert": round(basis * menge, 2), "delta": 0},
-            {"schritt": f"Kundengruppe {body.kundengruppe or '-'}", "wert": netto, "delta": -round(basis * menge * rabatt / 100.0, 2)},
-            {"schritt": "MwSt 19%", "wert": round(netto + mwst, 2), "delta": mwst},
-        ],
-    }
+class PreisansichtNichtVerfuegbar(BaseModel):
+    type: str
+    title: str
+    status: int
+    detail: str
+    instance: str
+    error: str
 
 
-@router.get("/preise/historie", response_model=BridgeOut, summary="Preishistorie")
+class PreisProblemResponse(JSONResponse):
+    media_type = "application/problem+json"
+
+
+@router.get(
+    "/preise/historie",
+    status_code=404,
+    response_model=PreisansichtNichtVerfuegbar,
+    response_class=PreisProblemResponse,
+    summary="Preishistorie derzeit nicht verfuegbar",
+    description="Der parameterlose Maskenvertrag ist nicht an eine passende Preishistorie angebunden.",
+    responses={404: {"model": PreisansichtNichtVerfuegbar, "description": "Keine passende Preishistorie angebunden"}},
+)
 def preise_historie(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
-) -> dict[str, Any]:
-    rows = _safe_rows(
-        db,
-        """
-        SELECT name, sales_price, updated_at
-        FROM domain_inventory.articles
-        WHERE tenant_id = :t AND is_active = TRUE
-        ORDER BY updated_at DESC NULLS LAST
-        LIMIT 1
-        """,
-        {"t": tenant_id},
-    )
-    aktuell = _dec(rows[0]["sales_price"]) if rows else 0.0
-    name = rows[0]["name"] if rows else "Kein Artikel"
-    verlauf = [
-        {"datum": (date.today().replace(day=max(1, date.today().day - i))).isoformat(), "preis": round(aktuell * (1 - i * 0.01), 2)}
-        for i in range(7, -1, -1)
-    ]
-    vorwoche = verlauf[0]["preis"] if verlauf else aktuell
-    vormonat = round(aktuell * 0.97, 2)
-    return {
-        "artikel": name,
-        "aktuell": aktuell,
-        "vorwoche": vorwoche,
-        "vormonat": vormonat,
-        "veraenderung": {
-            "woche": round(((aktuell - vorwoche) / vorwoche * 100) if vorwoche else 0, 2),
-            "monat": round(((aktuell - vormonat) / vormonat * 100) if vormonat else 0, 2),
-        },
-        "verlauf": verlauf,
-    }
+) -> NoReturn:
+    raise HTTPException(status_code=404, detail="Fuer diese Ansicht ist keine passende Preishistorie angebunden.")
 
 
-@router.get("/preise/konditionen", response_model=BridgeOut, summary="Preiskondition")
+@router.get(
+    "/preise/konditionen",
+    status_code=404,
+    response_model=PreisansichtNichtVerfuegbar,
+    response_class=PreisProblemResponse,
+    summary="Kundenpreiskondition derzeit nicht verfuegbar",
+    description="Der parameterlose Maskenvertrag ist nicht an eine passende Kundenpreiskondition angebunden.",
+    responses={404: {"model": PreisansichtNichtVerfuegbar, "description": "Keine passende Kundenpreiskondition angebunden"}},
+)
 def preise_konditionen(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
-) -> dict[str, Any]:
-    rows = _safe_rows(
-        db,
-        "SELECT * FROM domain_shared.zu_abschlag_konditionen ORDER BY id LIMIT 1",
-        {},
-    )
-    row = dict(rows[0]) if rows else {}
-    today = date.today()
-    return {
-        "id": str(row.get("id") or "default"),
-        "kunde": row.get("kunde") or "Standardkunde",
-        "artikel": row.get("artikel") or "Standardartikel",
-        "basispreis": _dec(row.get("basispreis") or row.get("betrag") or 100),
-        "rabatt": _dec(row.get("prozent") or row.get("rabatt") or 0),
-        "skonto": _dec(row.get("skonto") or 0),
-        "gueltigAb": _iso(row.get("gueltig_von")) or today.replace(month=1, day=1).isoformat(),
-        "gueltigBis": _iso(row.get("gueltig_bis")) or today.replace(month=12, day=31).isoformat(),
-        "status": "aktiv",
-    }
+) -> NoReturn:
+    raise HTTPException(status_code=404, detail="Fuer diese Ansicht ist keine passende Kundenpreiskondition angebunden.")
 
 
 @router.get("/qualitaet/reklamationen", response_model=list[BridgeOut], summary="Reklamationen auflisten")
@@ -1025,47 +906,9 @@ def list_qualitaet_reklamationen(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> list[dict[str, Any]]:
-    rows = _safe_rows(
-        db,
-        "SELECT * FROM domain_ops.reklamationen WHERE tenant_id = :t ORDER BY erstellt_am DESC LIMIT 200",
-        {"t": tenant_id},
-    )
-    # Die Liste kennt vier Stufen; die Zustandsmaschine (ReklamationsStatus) sechs.
-    status_map = {
-        "offen": "neu",
-        "in_pruefung": "in-bearbeitung",
-        "teilweise_anerkannt": "in-bearbeitung",
-        "anerkannt": "in-bearbeitung",
-        "geschlossen": "geloest",
-        "abgelehnt": "abgelehnt",
-    }
-    lieferanten: dict[str, str] = {}
-    result = []
-    for r in rows:
-        lieferant_ref = str(r.get("lieferant_id") or "")
-        if lieferant_ref not in lieferanten:
-            lieferant = resolve_reference(db, tenant_id, "supplier", lieferant_ref)
-            lieferanten[lieferant_ref] = lieferant.name or lieferant.number or ""
-        positionen = r.get("positionen") or []
-        if isinstance(positionen, str):
-            try:
-                positionen = json.loads(positionen)
-            except json.JSONDecodeError:
-                positionen = []
-        first = positionen[0] if isinstance(positionen, list) and positionen else {}
-        result.append(
-            {
-                "id": r.get("reklamation_id") or r.get("id"),
-                "nummer": r.get("reklamation_nr") or "",
-                "kunde": lieferanten[lieferant_ref],
-                "artikel": first.get("artikel") or first.get("bezeichnung") or r.get("typ") or "",
-                "grund": r.get("typ") or "",
-                "datum": _iso(r.get("erstellt_am") or r.get("frist_datum")) or "",
-                "prioritaet": "normal",
-                "status": status_map.get(str(r.get("status") or "offen"), "neu"),
-            }
-        )
-    return result
+    from app.services.complaint_list_read import read_complaint_list
+
+    return read_complaint_list(db, tenant_id, iso=_iso)
 
 
 @router.get("/operations/exceptions", response_model=list[BridgeOut], summary="Betriebsausnahmen auflisten")
@@ -1136,7 +979,7 @@ def list_waage_vorlagen(
     ]
 
 
-@router.post("/waage/vorlagen", response_model=BridgeOut, status_code=201, summary="Waagenvorlage anlegen")
+@router.post("/waage/vorlagen", response_model=BridgeOut, status_code=201, summary="Waagenvorlage anlegen", dependencies=SCHREIBEN["LAGER"])
 def create_waage_vorlage(
     body: WaageVorlageIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -1166,7 +1009,7 @@ def create_waage_vorlage(
 # ---------------------------------------------------------------------------
 
 
-@router.post("/personal/work-plan/assignments", response_model=BridgeOut, status_code=201, summary="Dienstplan-Zuweisung anlegen")
+@router.post("/personal/work-plan/assignments", response_model=BridgeOut, status_code=201, summary="Dienstplan-Zuweisung anlegen", dependencies=SCHREIBEN["PERSONAL"])
 def create_work_plan_assignment(
     body: WorkPlanAssignmentIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -1238,7 +1081,7 @@ def list_epcis_events(
     return {"items": items, "total": len(items)}
 
 
-@router.post("/inventory/epcis/events", response_model=BridgeOut, status_code=201, summary="EPCIS-Ereignis anlegen")
+@router.post("/inventory/epcis/events", response_model=BridgeOut, status_code=201, summary="EPCIS-Ereignis anlegen", dependencies=SCHREIBEN["GERAET"])
 def create_epcis_event(
     body: EpcisEventIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -1317,7 +1160,7 @@ def analytics_contract_positions(
     return {"data": data}
 
 
-@router.post("/ai/ask", response_model=BridgeOut, summary="Fachfrage beantworten")
+@router.post("/ai/ask", response_model=BridgeOut, summary="Fachfrage beantworten", dependencies=SCHREIBEN["BERECHNEN"])
 def ai_ask(body: AskIn) -> dict[str, Any]:
     prompt = body.prompt.strip()
     domain = ""
@@ -1452,25 +1295,4 @@ def audit_trail(
     return {"data": data}
 
 
-@router.post("/futter/{kategorie}/bulk-delete", response_model=BridgeOut, summary="Futtermittel sammeln löschen")
-def futter_bulk_delete(
-    kategorie: str,
-    body: dict[str, Any] = Body(default={}),
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-) -> dict[str, Any]:
-    ids = [str(x) for x in (body.get("ids") or []) if x]
-    if not ids:
-        return {"deleted": 0, "kategorie": kategorie, "ids": []}
-    table = {
-        "einzelfuttermittel": "domain_shared.einzelfuttermittel",
-        "mischfuttermittel": "domain_shared.mischfuttermittel",
-    }.get(kategorie, "domain_shared.einzelfuttermittel")
-    deleted = 0
-    for item_id in ids:
-        deleted += _safe_execute(
-            db,
-            f"DELETE FROM {table} WHERE id = :id AND tenant_id = :t",  # nosec B608
-            {"id": item_id, "t": tenant_id},
-        )
-    return {"deleted": deleted, "kategorie": kategorie, "ids": ids}
+# /futter/{kategorie}/bulk-delete entfernt (20.10.2026): loeschte hart aus Tabellen, die es nicht gibt.

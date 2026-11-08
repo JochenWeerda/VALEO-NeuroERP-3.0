@@ -18,6 +18,7 @@ from app.finance.schemas import (
     AbschlussChecklisteResponse, NebenbuchAbstimmungCreate, NebenbuchAbstimmungResponse,
     IntercompanyBuchungCreate, IntercompanyBuchungResponse,
 )
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/finance", tags=["Finance Advanced"])
 
@@ -80,7 +81,7 @@ async def get_wechselkurs(
     return result
 
 
-@router.post("/wechselkurse", response_model=WechselkursResponse)
+@router.post("/wechselkurse", response_model=WechselkursResponse, dependencies=SCHREIBEN["FINANZ"])
 async def create_wechselkurs(
     data: WechselkursCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -102,7 +103,7 @@ async def create_wechselkurs(
     return wk
 
 
-@router.delete("/wechselkurse/{id}")
+@router.delete("/wechselkurse/{id}", dependencies=SCHREIBEN["FINANZ"])
 async def delete_wechselkurs(
     id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -112,7 +113,7 @@ async def delete_wechselkurs(
     return {"message": "Deleted", "id": id}
 
 
-@router.post("/wechselkurse/ezb/import")
+@router.post("/wechselkurse/ezb/import", dependencies=SCHREIBEN["FINANZ"])
 async def import_ezb_rates(
     tenant_id: str = Depends(get_tenant_id),
     historic: bool = False,
@@ -150,7 +151,7 @@ async def import_ezb_rates(
         raise HTTPException(status_code=500, detail=f"Import failed: {str(e)}")
 
 
-@router.post("/wechselkurse/convert")
+@router.post("/wechselkurse/convert", dependencies=SCHREIBEN["FINANZ"])
 async def convert_currency(
     betrag: float,
     waehrung_von: str,
@@ -247,7 +248,7 @@ async def get_buchungsschema(
     return result
 
 
-@router.post("/buchungsschemata", response_model=BuchungsschemaResponse)
+@router.post("/buchungsschemata", response_model=BuchungsschemaResponse, dependencies=SCHREIBEN["FINANZ"])
 async def create_buchungsschema(
     data: BuchungsschemaCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -270,7 +271,7 @@ async def create_buchungsschema(
     return schema
 
 
-@router.put("/buchungsschemata/{id}", response_model=BuchungsschemaResponse)
+@router.put("/buchungsschemata/{id}", response_model=BuchungsschemaResponse, dependencies=SCHREIBEN["FINANZ"])
 async def update_buchungsschema(
     id: str,
     data: BuchungsschemaCreate,
@@ -301,7 +302,7 @@ async def update_buchungsschema(
     return result
 
 
-@router.delete("/buchungsschemata/{id}")
+@router.delete("/buchungsschemata/{id}", dependencies=SCHREIBEN["FINANZ"])
 async def delete_buchungsschema(
     id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -311,7 +312,7 @@ async def delete_buchungsschema(
     return {"message": "Deleted", "id": id}
 
 
-@router.post("/buchungsschemata/vorschlag", response_model=Buchungsvorschlag)
+@router.post("/buchungsschemata/vorschlag", response_model=Buchungsvorschlag, dependencies=SCHREIBEN["FINANZ"])
 async def get_buchungsvorschlag(
     belegart: str,
     betrag: float,
@@ -404,7 +405,7 @@ async def get_kostenstelle(
     return result
 
 
-@router.post("/kostenstellen", response_model=KostenstelleResponse)
+@router.post("/kostenstellen", response_model=KostenstelleResponse, dependencies=SCHREIBEN["FINANZ"])
 async def create_kostenstelle(
     data: KostenstelleCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -421,7 +422,7 @@ async def create_kostenstelle(
     return ks
 
 
-@router.put("/kostenstellen/{id}", response_model=KostenstelleResponse)
+@router.put("/kostenstellen/{id}", response_model=KostenstelleResponse, dependencies=SCHREIBEN["FINANZ"])
 async def update_kostenstelle(
     id: str,
     data: KostenstelleCreate,
@@ -432,7 +433,7 @@ async def update_kostenstelle(
     raise HTTPException(status_code=404, detail="Kostenstelle nicht gefunden")
 
 
-@router.delete("/kostenstellen/{id}")
+@router.delete("/kostenstellen/{id}", dependencies=SCHREIBEN["FINANZ"])
 async def delete_kostenstelle(
     id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -540,7 +541,7 @@ async def get_checkliste(
     return result
 
 
-@router.post("/checklisten", response_model=AbschlussChecklisteResponse)
+@router.post("/checklisten", response_model=AbschlussChecklisteResponse, dependencies=SCHREIBEN["FINANZ"])
 async def create_checkliste(
     data: AbschlussChecklisteCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -564,7 +565,7 @@ async def create_checkliste(
     return cl
 
 
-@router.put("/checklisten/{id}", response_model=AbschlussChecklisteResponse)
+@router.put("/checklisten/{id}", response_model=AbschlussChecklisteResponse, dependencies=SCHREIBEN["FINANZ"])
 async def update_checkliste(
     id: str,
     data: AbschlussChecklisteUpdate,
@@ -595,7 +596,7 @@ async def update_checkliste(
     return result
 
 
-@router.delete("/checklisten/{id}")
+@router.delete("/checklisten/{id}", dependencies=SCHREIBEN["FINANZ"])
 async def delete_checkliste(
     id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -657,7 +658,7 @@ async def get_abstimmung(
     return result
 
 
-@router.post("/abstimmung/nebenbuch", response_model=NebenbuchAbstimmungResponse)
+@router.post("/abstimmung/nebenbuch", response_model=NebenbuchAbstimmungResponse, dependencies=SCHREIBEN["FINANZ"])
 async def create_abstimmung(
     data: NebenbuchAbstimmungCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -686,7 +687,7 @@ async def create_abstimmung(
     return abstimmung
 
 
-@router.post("/abstimmung/nebenbuch/{id}/ausfuehren")
+@router.post("/abstimmung/nebenbuch/{id}/ausfuehren", dependencies=SCHREIBEN["FINANZ"])
 async def execute_abstimmung(
     id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -798,7 +799,7 @@ async def get_intercompany_buchung(
     return result
 
 
-@router.post("/intercompany", response_model=IntercompanyBuchungResponse)
+@router.post("/intercompany", response_model=IntercompanyBuchungResponse, dependencies=SCHREIBEN["FINANZ"])
 async def create_intercompany_buchung(
     data: IntercompanyBuchungCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -823,7 +824,7 @@ async def create_intercompany_buchung(
     return ic
 
 
-@router.post("/intercompany/{id}/gegenbuchung")
+@router.post("/intercompany/{id}/gegenbuchung", dependencies=SCHREIBEN["FINANZ"])
 async def create_gegenbuchung(
     id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -871,7 +872,7 @@ async def create_gegenbuchung(
     return {"message": "Gegenbuchung erstellt", "original_id": id, "gegenbuchung_id": gb_id, "buchungsnr": gb_nr}
 
 
-@router.post("/intercompany/{id}/buchen")
+@router.post("/intercompany/{id}/buchen", dependencies=SCHREIBEN["FINANZ"])
 async def buche_intercompany(
     id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -1008,7 +1009,7 @@ async def get_verfahrensdokumentation(
     }
 
 
-@router.post("/gobd/verfahrensdokumentation")
+@router.post("/gobd/verfahrensdokumentation", dependencies=SCHREIBEN["FINANZ"])
 async def create_verfahrensdokumentation(
     data: dict,
     tenant_id: str = Depends(get_tenant_id),
@@ -1041,7 +1042,7 @@ async def create_verfahrensdokumentation(
     return {"id": doc.id, "message": "Verfahrensdokumentation erstellt"}
 
 
-@router.put("/gobd/verfahrensdokumentation/{id}/freigabe")
+@router.put("/gobd/verfahrensdokumentation/{id}/freigabe", dependencies=SCHREIBEN["FINANZ"])
 async def release_verfahrensdokumentation(
     id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -1276,7 +1277,7 @@ async def list_document_holds(
     ) for r in result]
 
 
-@router.post("/gobd/loeschsperren")
+@router.post("/gobd/loeschsperren", dependencies=SCHREIBEN["FINANZ"])
 async def create_document_hold(
     data: dict,
     tenant_id: str = Depends(get_tenant_id),
@@ -1305,7 +1306,7 @@ async def create_document_hold(
     return {"id": hold.id, "message": "Löschsperre erstellt"}
 
 
-@router.put("/gobd/loeschsperren/{id}/freigabe")
+@router.put("/gobd/loeschsperren/{id}/freigabe", dependencies=SCHREIBEN["FINANZ"])
 async def release_document_hold(
     id: str,
     tenant_id: str = Depends(get_tenant_id),

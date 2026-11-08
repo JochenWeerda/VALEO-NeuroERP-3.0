@@ -97,6 +97,13 @@ class DMSParser:
         
         # Post-Processing
         result["fields"] = self._post_process(result["fields"])
+        # Shared deterministic extraction only; optional PDF/LLM enrichment
+        # belongs to the inbox pipeline and preserves these existing rows.
+        from app.documents.position_extraction import extract_table_line_items
+
+        positions = extract_table_line_items(ocr_text)
+        if positions:
+            result["fields"]["positionen"] = positions
         
         logger.info(f"Parsed OCR: {matches} fields, confidence: {result['confidence']:.2f}")
         

@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 import logging
 from app.core.uuid7 import uuid7
+from app.core.tenant_context import get_current_tenant_id
 
 logger = logging.getLogger(__name__)
 
@@ -498,9 +499,10 @@ class ISO27001SecurityIncidentResponseTeam:
         logger.info(f"Incident communication sent: {communication_type.value} to {recipient}")
         return comm_id
 
-    def get_team_performance_metrics(self, tenant_id: str = "system") -> Dict[str, Any]:
+    def get_team_performance_metrics(self, tenant_id: str | None = None) -> Dict[str, Any]:
         """Get security incident response team performance metrics"""
         # Filter data by tenant
+        tenant_id = tenant_id or get_current_tenant_id()
         tenant_members = [m for m in self.team_members.values() if m.id.startswith(tenant_id)]
         tenant_assignments = [a for a in self.incident_assignments.values() if a.id.startswith(tenant_id)]
 
@@ -624,8 +626,9 @@ class ISO27001SecurityIncidentResponseTeam:
             'training_compliance': training_compliance / len(members) * 100 if members else 0
         }
 
-    def check_team_compliance(self, tenant_id: str = "system") -> Dict[str, Any]:
+    def check_team_compliance(self, tenant_id: str | None = None) -> Dict[str, Any]:
         """Check ISO 27001 security incident response team compliance"""
+        tenant_id = tenant_id or get_current_tenant_id()
         members = [m for m in self.team_members.values() if m.id.startswith(tenant_id)]
         assignments = [a for a in self.incident_assignments.values() if a.id.startswith(tenant_id)]
 

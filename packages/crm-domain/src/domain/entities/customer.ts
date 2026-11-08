@@ -23,8 +23,8 @@ export type Address = z.infer<typeof AddressSchema>;
 
 // Customer Entity Schema
 export const CustomerSchema = z.object({
-  id: z.string().uuid(),
-  tenantId: z.string().uuid(),
+  id: z.string().guid(),
+  tenantId: z.string().guid(),
   number: z.string().min(1),
   name: z.string().min(1),
   vatId: z.string().optional(),
@@ -34,7 +34,7 @@ export const CustomerSchema = z.object({
   phone: z.string().optional(),
   tags: z.array(z.string()).default([]),
   status: z.enum([CustomerStatus.ACTIVE, CustomerStatus.PROSPECT, CustomerStatus.BLOCKED]),
-  ownerUserId: z.string().uuid().optional(),
+  ownerUserId: z.string().guid().optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
   version: z.number().int().nonnegative()
@@ -64,7 +64,7 @@ export const UpdateCustomerInputSchema = z.object({
   phone: z.string().nullish(),
   tags: z.array(z.string()).optional(),
   status: z.enum([CustomerStatus.ACTIVE, CustomerStatus.PROSPECT, CustomerStatus.BLOCKED]).optional(),
-  ownerUserId: z.string().uuid().nullish()
+  ownerUserId: z.string().guid().nullish()
 });
 
 export type UpdateCustomerInput = z.infer<typeof UpdateCustomerInputSchema>;

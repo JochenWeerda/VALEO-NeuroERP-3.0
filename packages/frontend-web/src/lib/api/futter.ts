@@ -6,38 +6,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { apiClient } from '../api-client'
 
-export type FutterBulkDeleteResult = {
-  requested: number
-  deleted: number
-  missing_ids: string[]
-  errors: Array<{ id: string; detail: string }>
-}
-
-export type Einzelfutter = {
-  id: string
-  artikelnummer: string
-  name: string
-  kategorie: string
-  rohprotein: number
-  rohfaser: number
-  energie: number
-  preis: number
-  bestand: number
-  status: 'verfuegbar' | 'knapp' | 'ausverkauft'
-}
-
-export type Mischfutter = {
-  id: string
-  artikelnummer: string
-  name: string
-  tierart: string
-  phase: string
-  komponenten: number
-  preis: number
-  bestand: number
-  status: 'verfuegbar' | 'in-produktion' | 'ausverkauft'
-}
-
 export type FutterCharge = {
   id: string
   chargenId: string
@@ -70,30 +38,6 @@ const EMPTY_FUTTER_STATISTIK: FutterStatistik = {
   gesamtAbsatz: 0,
   durchschnittsPreis: 0,
   topProdukte: [],
-}
-
-export function useEinzelfutter() {
-  return useQuery({
-    queryKey: ['futter', 'einzel'],
-    queryFn: async () => (await apiClient.get<Einzelfutter[]>('/api/v1/futter/einzelfuttermittel')).data,
-    initialData: [],
-    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
-    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
-    initialDataUpdatedAt: 0,
-    staleTime: 2 * 60 * 1000,
-  })
-}
-
-export function useMischfutter() {
-  return useQuery({
-    queryKey: ['futter', 'misch'],
-    queryFn: async () => (await apiClient.get<Mischfutter[]>('/api/v1/futter/mischfuttermittel')).data,
-    initialData: [],
-    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
-    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
-    initialDataUpdatedAt: 0,
-    staleTime: 2 * 60 * 1000,
-  })
 }
 
 export function useFutterChargen() {
@@ -204,30 +148,4 @@ export function useRezeptDetail(id: string) {
     enabled: !!id,
     staleTime: 2 * 60 * 1000,
   })
-}
-
-export async function bulkDeleteFutterItems(
-  kind: 'einzelfuttermittel' | 'mischfuttermittel',
-  ids: string[],
-): Promise<FutterBulkDeleteResult> {
-  const chunks: string[][] = []
-  for (let index = 0; index < ids.length; index += 50) {
-    chunks.push(ids.slice(index, index + 50))
-  }
-
-  const result: FutterBulkDeleteResult = {
-    requested: ids.length,
-    deleted: 0,
-    missing_ids: [],
-    errors: [],
-  }
-
-  for (const chunk of chunks) {
-    const response = await apiClient.post<FutterBulkDeleteResult>(`/api/v1/futter/${kind}/bulk-delete`, { ids: chunk })
-    result.deleted += response.data.deleted
-    result.missing_ids.push(...response.data.missing_ids)
-    result.errors.push(...response.data.errors)
-  }
-
-  return result
 }

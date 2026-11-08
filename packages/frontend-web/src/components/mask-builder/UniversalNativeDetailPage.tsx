@@ -1,3 +1,4 @@
+import { prefillDeclaredInputs } from './runtime/resource-response-adapter'
 /**
  * Generic page wrapper for native ScreenDefinitions (temporary=False).
  * Replaces legacy handcrafted detail pages when a non-temporary SD is available.
@@ -36,6 +37,7 @@ import {
 import { UniversalMaskRenderer, useHumanActionDispatch, useUniversalMaskRuntime } from '@/components/mask-builder'
 import { UniversalNativeCreatePage } from './UniversalNativeCreatePage'
 import { useScreenPermissions } from './runtime/screen-permissions'
+import { actionIsEnabled } from './governance/screen-context'
 import { nativeDetailLoadState } from '@/components/mask-builder/native-detail-load-state'
 import { resolveNavigationRoute } from '@/components/mask-builder/runtime/navigation-route'
 import { useMaskPilotState } from '@/features/mask-pilot/use-mask-pilot-state'
@@ -44,6 +46,7 @@ import { useScreenDefinition } from '@/lib/api/masks'
 import { useToast } from '@/hooks/use-toast'
 import type { ActionResult } from '@/components/mask-builder/runtime/useActionRuntime'
 import { ActionInputDialog } from '@/components/mask-builder/renderers/ActionInputDialog'
+import { docflowEditInput, isDocflowEdit } from './runtime/docflow-edit-input'
 
 interface UniversalNativeDetailPageProps {
   screenId: string
@@ -60,6 +63,9 @@ interface PendingAction {
   requiresConfirmation: boolean
   auditReasonRequired: boolean
   hasDryRun: boolean
+  expectedVersion?: number
+  approvalId?: string
+  bindingSnapshot?: string
 }
 
 interface ProposedChange {
@@ -116,6 +122,14 @@ function NativeExistingDetailPage({
   const [stage, setStage] = useState<'input' | 'confirm' | 'preview' | 'audit' | null>(null)
   const [dryRunResult, setDryRunResult] = useState<ActionResult | null>(null)
   const [auditReason, setAuditReason] = useState('')
+  const inputLoadRef = useRef(false)
+  const inputContextRef = useRef('')
+  inputContextRef.current = `${screenId}:${entityId}`
+  useEffect(() => {
+    setPendingAction(null)
+    setStage(null)
+  }, [screenId, entityId])
+  useEffect(() => () => { inputContextRef.current = '' }, [])
 
   const permissions = useScreenPermissions(schemaQuery.data)
   const runtime = useUniversalMaskRuntime({
@@ -154,17 +168,40 @@ function NativeExistingDetailPage({
     screenId,
     entityId,
     permissions,
+    entityData: runtime.entityData,
   })
 
+  function actionIsAvailable(actionKey: string): boolean {
+    const action = schemaQuery.data?.actions?.find(candidate => candidate.key === actionKey)
+    return Boolean(!runtime.isEntityLoading && !runtime.entityError && action && (!action.permission || permissions.includes(action.permission))
+      && actionIsEnabled(action, runtime.entityData))
+  }
+
+  function reportUnavailableAction(): void {
+    const reason = runtime.entityData.aktionshinweis
+    setActionError(typeof reason === 'string' && reason ? reason : 'Diese Aktion ist im aktuellen Belegzustand gesperrt.')
+    setValidationErrors([])
+  }
+
   // --- Worker: final execute (no UI state ownership) ---
-  async function doExecute(actionKey: string, payload: Record<string, unknown>, reason?: string): Promise<void> {
+  async function doExecute(pending: PendingAction, reason?: string): Promise<void> {
+    const context = inputContextRef.current
+    const { actionKey, payload, expectedVersion, approvalId, bindingSnapshot } = pending
+    if (!actionIsAvailable(actionKey)) {
+      reportUnavailableAction()
+      return
+    }
     const result = await actionRuntime.executeAction({
       actionKey,
       entityId,
       payload,
       mode: 'execute',
       auditReason: reason,
+      expectedVersion,
+      approvalId,
+      bindingSnapshot,
     })
+    if (inputContextRef.current !== context) return
     if (!result.success) {
       const errs = result.validationErrors ?? []
       if (errs.length > 0) {
@@ -174,19 +211,40 @@ function NativeExistingDetailPage({
         setActionError(result.error ?? `Aktion "${actionKey}" fehlgeschlagen.`)
         setValidationErrors([])
       }
+      if (isDocflowEdit(schemaQuery.data?.actions?.find(action => action.key === actionKey))) {
+        setPendingAction(pending)
+        setStage('input')
+      }
       return
     }
     setActionError(null)
     setValidationErrors([])
     const label = schemaQuery.data?.actions?.find((a: { key: string }) => a.key === actionKey)?.label ?? actionKey
     toast({ title: `${label} erfolgreich`, description: result.summary })
+    const action = schemaQuery.data?.actions?.find(candidate => candidate.key === actionKey)
+    if (action?.responseAdapter === 'resource.v1' && action.resultNavigationRoute === '/crm/campaign-template/{result_id}' && result.resourceId) {
+      void navigate({ to: action.resultNavigationRoute.replace('{result_id}', encodeURIComponent(result.resourceId)) as never })
+      return
+    }
+    if (action?.responseAdapter === 'resource.v1' && action.method === 'DELETE' &&
+        ((screenId === 'crm/campaign' && action.resultNavigationRoute === '/crm/campaigns') ||
+         (screenId === 'crm/campaign-template' && action.resultNavigationRoute === '/crm/campaign-templates') ||
+         (screenId === 'crm/segment' && action.resultNavigationRoute === '/crm/segments'))) {
+      void navigate({ to: action.resultNavigationRoute as never })
+      return
+    }
     await runtime.refetch()
   }
 
   // --- Handler: called by UniversalMaskRenderer ---
   async function handleAction(actionKey: string, payload: Record<string, unknown>): Promise<void> {
+    if (inputLoadRef.current) return
     setActionError(null)
     setValidationErrors([])
+    if (!actionIsAvailable(actionKey)) {
+      reportUnavailableAction()
+      return
+    }
     const actionDef = schemaQuery.data?.actions?.find((a) => a.key === actionKey)
     const routeTemplate = actionDef?.navigationRoute
     if (routeTemplate) {
@@ -209,21 +267,48 @@ function NativeExistingDetailPage({
     }
     const hasDryRun = Boolean(
       actionDef?.commandEndpoint &&
+      actionDef.responseAdapter !== 'resource.v1' &&
       !actionDef?.stubReason &&
-      MODERATE_OR_ABOVE.has(actionDef?.dangerLevel ?? 'safe'),
+      (actionDef.commandBinding ? actionDef.commandBinding.preview : MODERATE_OR_ABOVE.has(actionDef?.dangerLevel ?? 'safe')),
     )
+    const serverActions = runtime.entityData.aktionen as { key: string; approval_id?: string }[] | undefined
+    const approvalId = serverActions?.find(action => action.key === (actionDef?.commandBinding?.stateAction ?? actionKey))?.approval_id
     const pending: PendingAction = {
       actionKey,
-      payload,
+      // Renderer payload is document context; bound commands collect only declared inputs.
+      payload: actionDef?.commandBinding ? {} : payload,
       label: actionDef?.label ?? actionKey,
       dangerLevel: actionDef?.dangerLevel ?? 'safe',
       requiresConfirmation: actionDef?.requiresConfirmation ?? false,
       auditReasonRequired: actionDef?.auditReasonRequired ?? false,
       hasDryRun,
+      expectedVersion: typeof runtime.entityData.version === 'number' ? runtime.entityData.version : undefined,
+      approvalId,
+      bindingSnapshot: actionDef?.commandBinding ? JSON.stringify(actionDef.commandBinding) : undefined,
     }
 
     // Deklarierte Eingaben zuerst (Screen Definition -> ActionInputDialog).
     if (actionDef?.inputFields?.length) {
+      pending.payload = prefillDeclaredInputs(actionDef, runtime.entityData, pending.payload)
+      if (isDocflowEdit(actionDef)) {
+        if (!entityId || !permissions.includes('belege.preise')) {
+          reportUnavailableAction()
+          return
+        }
+        const context = inputContextRef.current
+        inputLoadRef.current = true
+        try {
+          const response = await apiClient.get<unknown>(`/api/v1/docflow/${encodeURIComponent(entityId)}`)
+          if (inputContextRef.current !== context) return
+          pending.payload = docflowEditInput(actionDef, response.data, entityId,
+            pending.expectedVersion, schemaQuery.data?.documentVariant?.variantId ?? runtime.entityData.belegart)
+        } catch (error) {
+          if (inputContextRef.current === context) setActionError(getAxiosErrorMessage(error))
+          return
+        } finally {
+          inputLoadRef.current = false
+        }
+      }
       setPendingAction(pending)
       setStage('input')
       return
@@ -249,7 +334,16 @@ function NativeExistingDetailPage({
         entityId,
         payload: pending.payload,
         mode: 'dryRun',
+        expectedVersion: pending.expectedVersion,
+        bindingSnapshot: pending.bindingSnapshot,
       })
+      if (!result.success) {
+        setStage(null)
+        setPendingAction(null)
+        setActionError(result.error ?? 'Die Vorschau ist fehlgeschlagen. Keine Ausfuehrung.')
+        setValidationErrors(result.validationErrors ?? [])
+        return
+      }
       if (result.proposedChanges && result.proposedChanges.length > 0) {
         setDryRunResult(result)
         setPendingAction(pending)
@@ -268,22 +362,28 @@ function NativeExistingDetailPage({
       setStage('audit')
       return
     }
-    await doExecute(pending.actionKey, pending.payload)
-    resetDialogs()
+    closeDialogs()
+    await doExecute(pending)
   }
 
   // --- Step 3: after AuditReasonDialog ---
   async function advanceFromAudit(): Promise<void> {
     if (!pendingAction) return
-    await doExecute(pendingAction.actionKey, pendingAction.payload, auditReason)
-    resetDialogs()
+    const pending = pendingAction
+    const reason = auditReason
+    closeDialogs()
+    await doExecute(pending, reason)
   }
 
-  function resetDialogs(): void {
+  function closeDialogs(): void {
     setPendingAction(null)
     setStage(null)
     setDryRunResult(null)
     setAuditReason('')
+  }
+
+  function resetDialogs(): void {
+    closeDialogs()
     setActionError(null)
     setValidationErrors([])
   }
@@ -292,6 +392,7 @@ function NativeExistingDetailPage({
     entityId,
     schemaError: schemaQuery.error,
     entityError: runtime.entityError,
+    entityLoading: runtime.isEntityLoading,
     hasPlan: Boolean(runtime.plan),
     schemaFetching: schemaQuery.isFetching,
     hasSchema: Boolean(schemaQuery.data),
@@ -378,6 +479,13 @@ function NativeExistingDetailPage({
         <UniversalMaskRenderer
           plan={runtime.plan}
           allowedPermissions={permissions}
+          screenContext={{
+            data: runtime.entityData,
+            permissions: { granted: permissions },
+            state: { values: {}, policies: {} },
+            actions: {},
+            navigation: { push: route => { void navigate({ to: route as never }) } },
+          }}
           data={runtime.entityData}
           entityId={entityId}
           tables={runtime.tableRows}
@@ -405,6 +513,9 @@ function NativeExistingDetailPage({
         return actionDef ? (
           <ActionInputDialog
             action={actionDef}
+            initialValues={pendingAction.payload}
+            error={actionError ?? undefined}
+            submitLabel={isDocflowEdit(actionDef) ? 'Entwurf speichern' : undefined}
             open
             onCancel={resetDialogs}
             onSubmit={(werte) => { void advanceFromInput({ ...pendingAction, payload: { ...pendingAction.payload, ...werte } }) }}
@@ -453,7 +564,10 @@ function NativeExistingDetailPage({
                   ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90'
                   : ''
               }
-              onClick={() => {
+              onClick={(event) => {
+                // The action advances the controlled flow. Radix must not close it
+                // afterwards and reset the newly opened preview or audit stage.
+                event.preventDefault()
                 if (pendingAction) void advanceFromConfirm(pendingAction)
               }}
             >

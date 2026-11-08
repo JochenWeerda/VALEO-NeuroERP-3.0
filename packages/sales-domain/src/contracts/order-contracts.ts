@@ -1,17 +1,15 @@
 import { z } from 'zod';
-import { extendZodWithOpenApi } from 'zod-openapi';
 
-extendZodWithOpenApi(z);
 import {
-  OrderSchema,
   CreateOrderInputSchema,
-  UpdateOrderInputSchema,
   OrderLineSchema,
-  OrderStatus
+  OrderSchema,
+  OrderStatus,
+  UpdateOrderInputSchema
 } from '../domain/entities';
 
 // OpenAPI schema for Order Line
-export const OrderLineContractSchema = OrderLineSchema.openapi({
+export const OrderLineContractSchema = OrderLineSchema.meta({
   description: 'Order line item',
   example: {
     id: '550e8400-e29b-41d4-a716-446655440001',
@@ -32,13 +30,13 @@ export const OrderStatusContractSchema = z.enum([
   OrderStatus.CONFIRMED,
   OrderStatus.INVOICED,
   OrderStatus.CANCELLED
-]).openapi({
+]).meta({
   description: 'Order status',
   example: OrderStatus.CONFIRMED
 });
 
 // OpenAPI schema for Create Order
-export const CreateOrderContractSchema = CreateOrderInputSchema.openapi({
+export const CreateOrderContractSchema = CreateOrderInputSchema.meta({
   description: 'Order creation data',
   example: {
     tenantId: 'tenant-001',
@@ -63,7 +61,7 @@ export const CreateOrderContractSchema = CreateOrderInputSchema.openapi({
 });
 
 // OpenAPI schema for Update Order
-export const UpdateOrderContractSchema = UpdateOrderInputSchema.openapi({
+export const UpdateOrderContractSchema = UpdateOrderInputSchema.meta({
   description: 'Order update data',
   example: {
     status: OrderStatus.CONFIRMED,
@@ -72,7 +70,7 @@ export const UpdateOrderContractSchema = UpdateOrderInputSchema.openapi({
 });
 
 // OpenAPI schema for Order Response
-export const OrderResponseContractSchema = OrderSchema.omit({ tenantId: true }).openapi({
+export const OrderResponseContractSchema = OrderSchema.omit({ tenantId: true }).meta({
   description: 'Order information',
   example: {
     id: '550e8400-e29b-41d4-a716-446655440003',
@@ -108,7 +106,7 @@ export const OrderResponseContractSchema = OrderSchema.omit({ tenantId: true }).
 
 // Query parameters for listing orders
 export const OrderQueryContractSchema = z.object({
-  customerId: z.string().uuid().optional(),
+  customerId: z.string().guid().optional(),
   status: z.enum([
     OrderStatus.DRAFT,
     OrderStatus.CONFIRMED,
@@ -118,9 +116,9 @@ export const OrderQueryContractSchema = z.object({
   search: z.string().optional().describe('Search term for order number or customer'),
   expectedDeliveryDateFrom: z.string().datetime().optional(),
   expectedDeliveryDateTo: z.string().datetime().optional(),
-  page: z.string().transform(Number).optional().default('1'),
-  pageSize: z.string().transform(Number).optional().default('20')
-}).openapi({
+  page: z.string().transform(Number).optional().prefault('1'),
+  pageSize: z.string().transform(Number).optional().prefault('20')
+}).meta({
   description: 'Query parameters for order listing'
 });
 
@@ -133,6 +131,6 @@ export const OrderListResponseContractSchema = z.object({
     total: z.number(),
     totalPages: z.number()
   })
-}).openapi({
+}).meta({
   description: 'Paginated order list response'
 });

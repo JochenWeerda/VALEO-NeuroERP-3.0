@@ -13,7 +13,7 @@ import pytest
 pytestmark = pytest.mark.integration
 
 # Hinweis: Importiere die App aus main
-# from main import app
+# from app.main import app
 
 # client = TestClient(app, raise_server_exceptions=False)
 # AUTH_HEADERS = {"Authorization": "Bearer dev-token"}

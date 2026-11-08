@@ -29,6 +29,7 @@ from app.api.v1.schemas.eudr_register_schemas import (
     ChargenbindungIn,
     ChargenbindungOut,
 )
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/eudr/sorgfaltserklaerungen", tags=["EUDR", "Compliance"])
 logger = logging.getLogger(__name__)
@@ -41,8 +42,7 @@ logger = logging.getLogger(__name__)
     "/{erklaerung_id}/chargen",
     response_model=ChargenbindungOut,
     status_code=http_status.HTTP_201_CREATED,
-    summary="Charge an die Erklärung binden (Art. 4)",
-)
+    summary="Charge an die Erklärung binden (Art. 4)", dependencies=SCHREIBEN["AGRAR"])
 def charge_binden(
     erklaerung_id: str,
     payload: ChargenbindungIn,

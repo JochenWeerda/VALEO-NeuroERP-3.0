@@ -17,6 +17,10 @@ from app.crm.models import Base as CRMBase
 
 def main():
     """Main seed function"""
+    # Ausdruecklicher Mandant statt "default" (RLS-DOMAIN-CRM): Platzhalter-Mandanten sperren die RLS-Migrationen.
+    tenant_id = os.environ.get("SEED_TENANT_ID")
+    if not tenant_id:
+        sys.exit("SEED_TENANT_ID setzen (Mandant der Seed-Daten)")
     print("🌱 VALEO-NeuroERP - Seed-Script für ALLE Domains")
     print("=" * 60)
     
@@ -35,7 +39,7 @@ def main():
     try:
         # CRM
         print("\n📋 CRM-Domain:")
-        seed_crm_data(db, tenant_id="default")
+        seed_crm_data(db, tenant_id=tenant_id)
         
         # TODO: Agrar
         # print("\n🌾 Agrar-Domain:")

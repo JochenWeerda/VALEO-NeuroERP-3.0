@@ -38,6 +38,7 @@ def run_migrations_offline() -> None:
         url=url,
         target_metadata=target_metadata,
         literal_binds=True,
+        version_table="crm_service_alembic_version",
         dialect_opts={"paramstyle": "named"},
     )
 

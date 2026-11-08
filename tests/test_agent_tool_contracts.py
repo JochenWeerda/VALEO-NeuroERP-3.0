@@ -4,12 +4,57 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from app.api.v1.endpoints import agent_tool_contracts
+from app.core.agent_tool_contract_manifest import _build_entry
+from app.core.mcp_tool_contracts import MCPToolContract, MCPToolKategorie
+from app.core import agent_tool_contract_manifest
+from app.core.mcp_tool_contracts import MCPToolRegistry
 
 
 def _client() -> TestClient:
     app = FastAPI()
     app.include_router(agent_tool_contracts.router)
     return TestClient(app)
+
+
+def test_external_contract_preserves_nondefault_source_version():
+    contract = MCPToolContract(
+        tool_name="valeo_process_version_probe",
+        domain="process",
+        operation="version_probe",
+        beschreibung="Version regression probe",
+        kategorie=MCPToolKategorie.LESEN,
+        api_endpoint="GET /api/v1/process/version-probe",
+        schema_version=7,
+    )
+    entry = _build_entry(contract)
+    assert contract.as_dict()["schema_version"] == 7
+    assert entry.schema_version == 7
+    assert entry.mcp_definition["_meta"]["valeo/schemaVersion"] == 7
+
+
+def test_transport_views_preserve_nondefault_source_version(monkeypatch):
+    contract = MCPToolContract(
+        tool_name="valeo_process_version_probe",
+        domain="process",
+        operation="version_probe",
+        beschreibung="Version regression probe",
+        kategorie=MCPToolKategorie.LESEN,
+        api_endpoint="GET /api/v1/process/version-probe",
+        schema_version=7,
+    )
+    monkeypatch.setattr(
+        agent_tool_contract_manifest, "get_process_kernel_mcp_tools",
+        lambda: MCPToolRegistry(tools=[contract]),
+    )
+    client = _client()
+    for path in ("/agent/tool-contracts", "/agent/tool-contracts/openapi"):
+        response = client.get(path)
+        assert response.status_code == 200
+        assert response.json()["tools"][0]["schema_version"] == 7
+    response = client.get("/agent/tool-contracts/mcp")
+    assert response.status_code == 200
+    assert response.json()["tools"][0]["_meta"]["valeo/schemaVersion"] == 7
+    assert response.json()["tool_views"][0]["schema_version"] == 7
 
 
 def test_agent_tool_contract_manifest_exposes_multiple_external_tools():

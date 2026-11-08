@@ -82,7 +82,8 @@ def test_supplier_gets_explicit_non_document_reason():
     sd = get_screen_definition("einkauf/supplier")
     assert sd is not None
     assert "processChain" not in sd
-    assert sd["noProcessChainReason"] == "Stammdatenmaske ohne Belegkette"
+    # Der Grund nennt, wo der Prozess stattdessen liegt (seit Runtime46 ausfuehrlicher).
+    assert "Bestellungen" in sd["noProcessChainReason"] and "Stamm" in sd["noProcessChainReason"]
     report = _check_readiness(sd)
     gate = next(item for item in report["gates"] if item["gate"] == "missing_process_chain")
     assert gate["passed"] is True

@@ -12,6 +12,7 @@ Fachlicher Hintergrund (Referenz-ERP Wissensbasis, Domain 03 FIBU):
   für Warenhändler. Der Skontobetrag wird auf ein separates Skontokonto gebucht.
   Wichtig für korrekte GuV-Darstellung und periodengerechte Buchung.
 """
+from app.auth.finance_roles import finance_read, finance_write
 from datetime import date, datetime
 from decimal import Decimal
 from typing import Optional
@@ -21,12 +22,12 @@ from pydantic import BaseModel, Field, model_validator
 from sqlalchemy import text
 
 from app.core.database import get_db
-from app.core.dependencies import get_tenant_id
+from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.op_skonto_auszifferung_schemas import OpSkontoAuszifferungOut
-from app.documents.router_helpers import get_repository, get_from_store, save_to_store
+from app.documents.router_helpers import eigener_beleg, get_repository, save_to_store
 
 
 router = APIRouter(prefix="/fibu/op-auszifferung", tags=["FIBU - OP Skonto-Auszifferung"])
@@ -83,8 +84,7 @@ class SkontoBerechnung(BaseModel):
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
 @router.post("/berechnen", summary="Skonto berechne",
-    response_model=OpSkontoAuszifferungOut
-)
+    response_model=OpSkontoAuszifferungOut, dependencies=[Depends(finance_write)])
 def berechne_skonto(payload: SkontoBerechnung):
     """Skontobetrag aus Rechnungsbetrag und Prozentsatz berechnen.
 
@@ -112,7 +112,7 @@ def berechne_skonto(payload: SkontoBerechnung):
     }
 
 
-@router.get("", response_model=list[SkontoAuszifferungOut], summary="Auszifferungen auflisten")
+@router.get("", response_model=list[SkontoAuszifferungOut], summary="Auszifferungen auflisten", dependencies=[Depends(finance_read)])
 def list_auszifferungen(
     op_id: Optional[str] = Query(None),
     von_datum: Optional[date] = Query(None),
@@ -139,7 +139,18 @@ def list_auszifferungen(
     return [SkontoAuszifferungOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("", response_model=SkontoAuszifferungOut, status_code=201, summary="Auszifferung anlegen")
+@router.get("/{auszifferung_id}", response_model=SkontoAuszifferungOut, summary="Auszifferung abrufen", dependencies=[Depends(finance_read)])
+def get_auszifferung(auszifferung_id: str, db=Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
+    row = db.execute(text("""
+        SELECT * FROM domain_shared.op_auszifferungen
+        WHERE tenant_id = :tid AND id = :id AND NOT storniert
+    """), {"tid": tenant_id, "id": auszifferung_id}).fetchone()
+    if row is None:
+        raise HTTPException(404, "Auszifferung nicht gefunden.")
+    return SkontoAuszifferungOut(**dict(row._mapping))
+
+
+@router.post("", response_model=SkontoAuszifferungOut, status_code=201, summary="Auszifferung anlegen", dependencies=[Depends(finance_write)])
 def create_auszifferung(
     payload: SkontoAuszifferungCreate,
     db=Depends(get_db),
@@ -191,7 +202,7 @@ def create_auszifferung(
             rnr = payload.rechnungsnr or settled[0]
             if rnr:
                 repo = get_repository(db)
-                inv = get_from_store("sales_invoice", rnr, repo)
+                inv = eigener_beleg("sales_invoice", rnr, tenant_id, repo)
                 if inv and inv.get("status") not in ("BEZAHLT", "STORNIERT"):
                     inv["status"] = "BEZAHLT"
                     save_to_store("sales_invoice", rnr, inv, repo)
@@ -205,7 +216,7 @@ def create_auszifferung(
     return SkontoAuszifferungOut(**dict(row._mapping))
 
 
-@router.post("/{auszifferung_id}/stornieren", response_model=SkontoAuszifferungOut, summary="Auszifferung storniere")
+@router.post("/{auszifferung_id}/stornieren", response_model=SkontoAuszifferungOut, summary="Auszifferung storniere", dependencies=[Depends(finance_write)])
 def storniere_auszifferung(
     auszifferung_id: str,
     db=Depends(get_db),

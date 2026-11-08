@@ -21,6 +21,7 @@ from app.core.tenant import get_tenant_id
 
 from app.api.v1.schemas.base import BaseSchema
 from pydantic import ConfigDict as _ConfigDict
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 class TrainingOut(BaseSchema):
@@ -33,6 +34,43 @@ router = APIRouter(prefix="/training", tags=["training", "hr"])
 
 class Payload(BaseModel):
     data: dict[str, Any] = Field(default_factory=dict)
+
+
+class HrDeleteResult(BaseModel):
+    success: bool
+    replayed: bool
+    entity_id: str
+    auditEntryId: str
+    outboxEventId: str
+
+
+class HrLegacyDeleteError(BaseModel):
+    detail: str
+
+
+class HrDeleteBody(BaseModel):
+    model_config = _ConfigDict(extra="forbid", populate_by_name=True)
+    expected_revision: str = Field(pattern=r"^[0-9a-f]{64}$")
+    idempotency_key: str = Field(alias="_idempotencyKey", min_length=1, max_length=120)
+
+
+def _execute_hr_delete(db: Session, tenant_id: str, kind: str, item_id: str, body: HrDeleteBody) -> dict:
+    from app.services.hr_row_delete_commands import HrDeleteCommand, delete_hr_row
+    try:
+        command = HrDeleteCommand(kind=kind, entity_id=item_id, expected_revision=body.expected_revision,
+                                  idempotency_key=body.idempotency_key)
+        result = delete_hr_row(db, command, tenant=tenant_id)
+        db.commit()
+        return result
+    except HTTPException:
+        db.rollback()
+        raise
+    except ValueError as exc:
+        db.rollback()
+        raise HTTPException(422, "Ungueltiger Loeschauftrag") from exc
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(503, "Loeschauftrag konnte nicht sicher ausgefuehrt werden") from exc
 
 
 class OnboardingWorkspaceRequest(BaseModel):
@@ -238,7 +276,17 @@ async def list_courses(
     )
 
 
-@router.post("/courses", response_model=TrainingOut, status_code=201, summary="Course anlegen")
+@router.get("/courses/{item_id}", response_model=TrainingOut, summary="Course abrufen")
+async def get_course(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    return _load_optional_row(
+        db,
+        "SELECT * FROM domain_hr.training_courses WHERE tenant_id=:tenant_id AND id=:id",
+        {"tenant_id": tenant_id, "id": item_id},
+        not_found_detail="Schulung nicht gefunden",
+    )
+
+
+@router.post("/courses", response_model=TrainingOut, status_code=201, summary="Course anlegen", dependencies=SCHREIBEN["PERSONAL"])
 async def create_course(payload: Payload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     d = payload.data
     for key in ("course_code", "title"):
@@ -280,7 +328,7 @@ async def create_course(payload: Payload, tenant_id: str = Depends(get_tenant_id
     return _clean(dict(row))
 
 
-@router.put("/courses/{item_id}", response_model=TrainingOut, summary="Course aktualisieren")
+@router.put("/courses/{item_id}", response_model=TrainingOut, summary="Course aktualisieren", dependencies=SCHREIBEN["PERSONAL"])
 async def update_course(item_id: str, payload: Payload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     d = payload.data
     for key in ("course_code", "title"):
@@ -321,7 +369,7 @@ async def update_course(item_id: str, payload: Payload, tenant_id: str = Depends
     return _clean(dict(row))
 
 
-@router.delete("/courses/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Course lÃ¶schen")
+@router.delete("/courses/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Course lÃ¶schen", dependencies=SCHREIBEN["PERSONAL"])
 async def delete_course(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     deleted = db.execute(
         text("DELETE FROM domain_hr.training_courses WHERE tenant_id=:tenant_id AND id=:id"),
@@ -348,10 +396,12 @@ async def list_assignments(
     if status:
         where.append("a.status = :status")
         params["status"] = status
+    db.execute(text("SET LOCAL TIME ZONE 'UTC'"))
     return _list(
         db,
         f"""
-        SELECT a.*, c.course_code, c.title AS course_title
+        SELECT a.*, c.course_code, c.title AS course_title,
+               encode(sha256(convert_to(to_jsonb(a)::text, 'UTF8')), 'hex') AS revision
         FROM domain_hr.training_assignments a
         JOIN domain_hr.training_courses c ON c.id = a.course_id AND c.tenant_id = a.tenant_id
         WHERE {' AND '.join(where)}
@@ -361,7 +411,7 @@ async def list_assignments(
     )
 
 
-@router.post("/assignments", response_model=TrainingOut, status_code=201, summary="Assignment anlegen")
+@router.post("/assignments", response_model=TrainingOut, status_code=201, summary="Assignment anlegen", dependencies=SCHREIBEN["PERSONAL"])
 async def create_assignment(payload: Payload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     try:
         created = insert_assignment(db, tenant_id, payload.data)
@@ -372,7 +422,7 @@ async def create_assignment(payload: Payload, tenant_id: str = Depends(get_tenan
     return created
 
 
-@router.put("/assignments/{item_id}", response_model=TrainingOut, summary="Assignment aktualisieren")
+@router.put("/assignments/{item_id}", response_model=TrainingOut, summary="Assignment aktualisieren", dependencies=SCHREIBEN["PERSONAL"])
 async def update_assignment(item_id: str, payload: Payload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     d = payload.data
     for key in ("course_id", "employee_ref"):
@@ -411,16 +461,15 @@ async def update_assignment(item_id: str, payload: Payload, tenant_id: str = Dep
     return _clean(dict(row))
 
 
-@router.delete("/assignments/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Assignment lÃ¶schen")
-async def delete_assignment(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
-    deleted = db.execute(
-        text("DELETE FROM domain_hr.training_assignments WHERE tenant_id=:tenant_id AND id=:id"),
-        {"tenant_id": tenant_id, "id": item_id},
-    ).rowcount
-    if not deleted:
-        raise HTTPException(status_code=404, detail="Assignment not found")
-    db.commit()
-    return None
+@router.delete("/assignments/{item_id}", summary="Schulungszuordnung nur versioniert loeschen", status_code=409, response_model=HrLegacyDeleteError, responses={409: {"description": "Versionierter Loeschauftrag erforderlich"}}, dependencies=SCHREIBEN["PERSONAL"])
+async def legacy_delete_assignment(item_id: str) -> None:
+    raise HTTPException(status_code=409, detail="Versionierter Loeschauftrag erforderlich")
+
+
+@router.post("/assignments/{item_id}/actions/loeschen", summary="Schulungszuordnung revisionsgebunden loeschen", response_model=HrDeleteResult, dependencies=SCHREIBEN["PERSONAL"])
+async def delete_assignment_command(item_id: str, body: HrDeleteBody,
+        tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    return _execute_hr_delete(db, tenant_id, "assignment", item_id, body)
 
 
 @router.get("/certificates", response_model=list[TrainingOut], summary="Certificates auflisten")
@@ -445,7 +494,7 @@ async def list_certificates(
     )
 
 
-@router.post("/certificates", response_model=TrainingOut, status_code=201, summary="Certificate anlegen")
+@router.post("/certificates", response_model=TrainingOut, status_code=201, summary="Certificate anlegen", dependencies=SCHREIBEN["PERSONAL"])
 async def create_certificate(payload: Payload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     d = payload.data
     for key in ("employee_ref", "certificate_type", "certificate_name"):
@@ -484,7 +533,7 @@ async def create_certificate(payload: Payload, tenant_id: str = Depends(get_tena
     return _clean(dict(row))
 
 
-@router.put("/certificates/{item_id}", response_model=TrainingOut, summary="Certificate aktualisieren")
+@router.put("/certificates/{item_id}", response_model=TrainingOut, summary="Certificate aktualisieren", dependencies=SCHREIBEN["PERSONAL"])
 async def update_certificate(item_id: str, payload: Payload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     d = payload.data
     for key in ("employee_ref", "certificate_type", "certificate_name"):
@@ -525,7 +574,7 @@ async def update_certificate(item_id: str, payload: Payload, tenant_id: str = De
     return _clean(dict(row))
 
 
-@router.delete("/certificates/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Certificate lÃ¶schen")
+@router.delete("/certificates/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Certificate lÃ¶schen", dependencies=SCHREIBEN["PERSONAL"])
 async def delete_certificate(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     deleted = db.execute(
         text("DELETE FROM domain_hr.employee_certificates WHERE tenant_id=:tenant_id AND id=:id"),
@@ -548,14 +597,15 @@ async def list_qualifications(
     if employee_ref:
         where.append("employee_ref = :employee_ref")
         params["employee_ref"] = employee_ref
+    db.execute(text("SET LOCAL TIME ZONE 'UTC'"))
     return _list(
         db,
-        f"SELECT * FROM domain_hr.qualification_profiles WHERE {' AND '.join(where)} ORDER BY employee_ref ASC, role_code ASC",  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
+        f"SELECT q.*, encode(sha256(convert_to(to_jsonb(q)::text, 'UTF8')), 'hex') AS revision FROM domain_hr.qualification_profiles q WHERE {' AND '.join(where)} ORDER BY employee_ref ASC, role_code ASC",  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
         params,
     )
 
 
-@router.post("/qualifications", response_model=TrainingOut, status_code=201, summary="Qualification anlegen")
+@router.post("/qualifications", response_model=TrainingOut, status_code=201, summary="Qualification anlegen", dependencies=SCHREIBEN["PERSONAL"])
 async def create_qualification(payload: Payload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     try:
         created = insert_qualification(db, tenant_id, payload.data)
@@ -566,7 +616,7 @@ async def create_qualification(payload: Payload, tenant_id: str = Depends(get_te
     return created
 
 
-@router.put("/qualifications/{item_id}", response_model=TrainingOut, summary="Qualification aktualisieren")
+@router.put("/qualifications/{item_id}", response_model=TrainingOut, summary="Qualification aktualisieren", dependencies=SCHREIBEN["PERSONAL"])
 async def update_qualification(item_id: str, payload: Payload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     d = payload.data
     for key in ("employee_ref", "role_code"):
@@ -602,16 +652,15 @@ async def update_qualification(item_id: str, payload: Payload, tenant_id: str = 
     return _clean(dict(row))
 
 
-@router.delete("/qualifications/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Qualification lÃ¶schen")
-async def delete_qualification(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
-    deleted = db.execute(
-        text("DELETE FROM domain_hr.qualification_profiles WHERE tenant_id=:tenant_id AND id=:id"),
-        {"tenant_id": tenant_id, "id": item_id},
-    ).rowcount
-    if not deleted:
-        raise HTTPException(status_code=404, detail="Qualification not found")
-    db.commit()
-    return None
+@router.delete("/qualifications/{item_id}", summary="Qualifikationsprofil nur versioniert loeschen", status_code=409, response_model=HrLegacyDeleteError, responses={409: {"description": "Versionierter Loeschauftrag erforderlich"}}, dependencies=SCHREIBEN["PERSONAL"])
+async def legacy_delete_qualification(item_id: str) -> None:
+    raise HTTPException(status_code=409, detail="Versionierter Loeschauftrag erforderlich")
+
+
+@router.post("/qualifications/{item_id}/actions/loeschen", summary="Qualifikationsprofil revisionsgebunden loeschen", response_model=HrDeleteResult, dependencies=SCHREIBEN["PERSONAL"])
+async def delete_qualification_command(item_id: str, body: HrDeleteBody,
+        tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    return _execute_hr_delete(db, tenant_id, "qualification", item_id, body)
 
 
 @router.get("/onboarding/checklists", response_model=list[TrainingOut], summary="Checklists auflisten")
@@ -630,7 +679,7 @@ async def list_checklists(
     )
 
 
-@router.post("/onboarding/checklists", response_model=TrainingOut, status_code=201, summary="Checklist anlegen")
+@router.post("/onboarding/checklists", response_model=TrainingOut, status_code=201, summary="Checklist anlegen", dependencies=SCHREIBEN["PERSONAL"])
 async def create_checklist(payload: Payload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     d = payload.data
     for key in ("checklist_code", "title"):
@@ -668,7 +717,7 @@ async def create_checklist(payload: Payload, tenant_id: str = Depends(get_tenant
     return _clean(dict(row))
 
 
-@router.put("/onboarding/checklists/{item_id}", response_model=TrainingOut, summary="Checklist aktualisieren")
+@router.put("/onboarding/checklists/{item_id}", response_model=TrainingOut, summary="Checklist aktualisieren", dependencies=SCHREIBEN["PERSONAL"])
 async def update_checklist(item_id: str, payload: Payload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     d = payload.data
     for key in ("checklist_code", "title"):
@@ -704,7 +753,7 @@ async def update_checklist(item_id: str, payload: Payload, tenant_id: str = Depe
     return _clean(dict(row))
 
 
-@router.delete("/onboarding/checklists/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Checklist lÃ¶schen")
+@router.delete("/onboarding/checklists/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Checklist lÃ¶schen", dependencies=SCHREIBEN["PERSONAL"])
 async def delete_checklist(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     deleted = db.execute(
         text("DELETE FROM domain_hr.onboarding_checklists WHERE tenant_id=:tenant_id AND id=:id"),
@@ -731,10 +780,12 @@ async def list_runs(
     if status:
         where.append("r.status = :status")
         params["status"] = status
+    db.execute(text("SET LOCAL TIME ZONE 'UTC'"))
     return _list(
         db,
         f"""
-        SELECT r.*, c.checklist_code, c.title AS checklist_title
+        SELECT r.*, c.checklist_code, c.title AS checklist_title,
+               encode(sha256(convert_to(to_jsonb(r)::text, 'UTF8')), 'hex') AS revision
         FROM domain_hr.onboarding_runs r
         JOIN domain_hr.onboarding_checklists c ON c.id = r.checklist_id AND c.tenant_id = r.tenant_id
         WHERE {' AND '.join(where)}
@@ -744,7 +795,7 @@ async def list_runs(
     )
 
 
-@router.post("/onboarding/runs", response_model=TrainingOut, status_code=201, summary="Run anlegen")
+@router.post("/onboarding/runs", response_model=TrainingOut, status_code=201, summary="Run anlegen", dependencies=SCHREIBEN["PERSONAL"])
 async def create_run(payload: Payload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     try:
         created = insert_onboarding_run(db, tenant_id, payload.data)
@@ -755,7 +806,7 @@ async def create_run(payload: Payload, tenant_id: str = Depends(get_tenant_id), 
     return created
 
 
-@router.put("/onboarding/runs/{item_id}", response_model=TrainingOut, summary="Run aktualisieren")
+@router.put("/onboarding/runs/{item_id}", response_model=TrainingOut, summary="Run aktualisieren", dependencies=SCHREIBEN["PERSONAL"])
 async def update_run(item_id: str, payload: Payload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     d = payload.data
     for key in ("checklist_id", "employee_ref"):
@@ -794,19 +845,18 @@ async def update_run(item_id: str, payload: Payload, tenant_id: str = Depends(ge
     return _clean(dict(row))
 
 
-@router.delete("/onboarding/runs/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Run lÃ¶schen")
-async def delete_run(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
-    deleted = db.execute(
-        text("DELETE FROM domain_hr.onboarding_runs WHERE tenant_id=:tenant_id AND id=:id"),
-        {"tenant_id": tenant_id, "id": item_id},
-    ).rowcount
-    if not deleted:
-        raise HTTPException(status_code=404, detail="Onboarding run not found")
-    db.commit()
-    return None
+@router.delete("/onboarding/runs/{item_id}", summary="Onboarding-Lauf nur versioniert loeschen", status_code=409, response_model=HrLegacyDeleteError, responses={409: {"description": "Versionierter Loeschauftrag erforderlich"}}, dependencies=SCHREIBEN["PERSONAL"])
+async def legacy_delete_onboarding(item_id: str) -> None:
+    raise HTTPException(status_code=409, detail="Versionierter Loeschauftrag erforderlich")
 
 
-@router.post("/onboarding/workspaces", response_model=TrainingOut, summary="Onboarding workspace anlegen")
+@router.post("/onboarding/runs/{item_id}/actions/loeschen", summary="Onboarding-Lauf revisionsgebunden loeschen", response_model=HrDeleteResult, dependencies=SCHREIBEN["PERSONAL"])
+async def delete_onboarding_command(item_id: str, body: HrDeleteBody,
+        tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    return _execute_hr_delete(db, tenant_id, "onboarding", item_id, body)
+
+
+@router.post("/onboarding/workspaces", response_model=TrainingOut, summary="Onboarding workspace anlegen", dependencies=SCHREIBEN["PERSONAL"])
 async def create_onboarding_workspace(
     payload: OnboardingWorkspaceRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -862,8 +912,7 @@ async def create_onboarding_workspace(
 @router.post(
     "/onboarding/runs/actions/speichern",
     response_model=MaskActionResult,
-    summary="Onboarding-Lauf speichern als Masken-CommandEndpoint",
-)
+    summary="Onboarding-Lauf speichern als Masken-CommandEndpoint", dependencies=SCHREIBEN["PERSONAL"])
 def action_onboarding_speichern(
     request: Request,
     body: dict[str, Any] = Body(default_factory=dict),
@@ -877,8 +926,7 @@ def action_onboarding_speichern(
 @router.post(
     "/qualifications/actions/speichern",
     response_model=MaskActionResult,
-    summary="Qualifikation speichern als Masken-CommandEndpoint",
-)
+    summary="Qualifikation speichern als Masken-CommandEndpoint", dependencies=SCHREIBEN["PERSONAL"])
 def action_qualification_speichern(
     request: Request,
     body: dict[str, Any] = Body(default_factory=dict),
@@ -892,8 +940,7 @@ def action_qualification_speichern(
 @router.post(
     "/assignments/actions/speichern",
     response_model=MaskActionResult,
-    summary="Schulungszuweisung speichern als Masken-CommandEndpoint",
-)
+    summary="Schulungszuweisung speichern als Masken-CommandEndpoint", dependencies=SCHREIBEN["PERSONAL"])
 def action_assignment_speichern(
     request: Request,
     body: dict[str, Any] = Body(default_factory=dict),

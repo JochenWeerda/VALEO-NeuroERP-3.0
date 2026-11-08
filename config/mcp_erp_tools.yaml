@@ -119,30 +119,802 @@ tools:
 
   - tool_id: crm.activity.create
     domain: crm
-    name: "CRM-Aktivitaet anlegen"
-    description: "Legt eine CRM-Aktivitaet zum Kunden an (gleicher Fachpfad wie ActionRuntime create_activity). HTTP-Aufruf mit tool_name=crm.activity.create. Default dryRun; execute erfordert idempotency_key. OIDC-Token mit crm:write und tenant_id erforderlich."
+    name: CRM-Aktivitaet anlegen
+    description: Kanonischer CRM-Aktivitaetencommand v1. Gleiche Fachregeln wie REST, Studio und CLI. Execute verlangt einen
+      Idempotenzschluessel im MCP-Umschlag, Aendern und Loeschen die gelesene Version. Nur gepruefte menschliche Identitaet
+      mit CRM-/SALES-Bearbeitungsrolle; Agenten nicht freigeschaltet.
+    scope: crm:write
+    idempotent: true
+    risk_class: low
+    data_classification: LOCAL_ONLY
+    input_schema:
+      additionalProperties: false
+      properties:
+        type:
+          enum:
+          - meeting
+          - call
+          - email
+          - note
+          - visit
+          - task
+          title: Type
+          type: string
+        title:
+          maxLength: 200
+          minLength: 1
+          title: Title
+          type: string
+        customer:
+          default: ''
+          maxLength: 100
+          title: Customer
+          type: string
+        contact_person:
+          default: ''
+          maxLength: 100
+          title: Contact Person
+          type: string
+        date:
+          anyOf:
+          - format: date-time
+            type: string
+          - type: 'null'
+          default: null
+          title: Date
+        status:
+          default: planned
+          enum:
+          - planned
+          - completed
+          - cancelled
+          title: Status
+          type: string
+        assigned_to:
+          default: ''
+          maxLength: 100
+          title: Assigned To
+          type: string
+        description:
+          anyOf:
+          - maxLength: 10000
+            type: string
+          - type: 'null'
+          default: null
+          title: Description
+        customer_id:
+          anyOf:
+          - maxLength: 64
+            minLength: 1
+            type: string
+          - type: 'null'
+          default: null
+          title: Customer Id
+        contact_id:
+          anyOf:
+          - maxLength: 64
+            minLength: 1
+            type: string
+          - type: 'null'
+          default: null
+          title: Contact Id
+        opportunity_id:
+          anyOf:
+          - maxLength: 36
+            type: string
+          - type: 'null'
+          default: null
+          title: Opportunity Id
+        main_topics:
+          items:
+            maxLength: 200
+            type: string
+          maxItems: 100
+          title: Main Topics
+          type: array
+        orders_placed:
+          items:
+            maxLength: 200
+            type: string
+          maxItems: 100
+          title: Orders Placed
+          type: array
+        follow_up_actions:
+          items:
+            maxLength: 200
+            type: string
+          maxItems: 100
+          title: Follow Up Actions
+          type: array
+        audit_reason:
+          anyOf:
+          - maxLength: 2000
+            type: string
+          - type: 'null'
+          default: null
+          title: Audit Reason
+        correlation_id:
+          anyOf:
+          - maxLength: 200
+            type: string
+          - type: 'null'
+          default: null
+          title: Correlation Id
+      required:
+      - type
+      - title
+      type: object
+    output_schema:
+      type: object
+      properties:
+        success:
+          type: boolean
+        activity_id:
+          type: string
+        version:
+          type: integer
+        activity:
+          properties:
+            type:
+              enum:
+              - meeting
+              - call
+              - email
+              - note
+              - visit
+              - task
+              title: Type
+              type: string
+            title:
+              maxLength: 200
+              minLength: 1
+              title: Title
+              type: string
+            customer:
+              default: ''
+              maxLength: 100
+              title: Customer
+              type: string
+            contact_person:
+              default: ''
+              maxLength: 100
+              title: Contact Person
+              type: string
+            date:
+              anyOf:
+              - format: date-time
+                type: string
+              - type: 'null'
+              default: null
+              title: Date
+            status:
+              default: planned
+              enum:
+              - planned
+              - completed
+              - cancelled
+              title: Status
+              type: string
+            assigned_to:
+              default: ''
+              maxLength: 100
+              title: Assigned To
+              type: string
+            description:
+              anyOf:
+              - maxLength: 10000
+                type: string
+              - type: 'null'
+              default: null
+              title: Description
+            customer_id:
+              anyOf:
+              - maxLength: 64
+                minLength: 1
+                type: string
+              - type: 'null'
+              default: null
+              title: Customer Id
+            contact_id:
+              anyOf:
+              - maxLength: 64
+                minLength: 1
+                type: string
+              - type: 'null'
+              default: null
+              title: Contact Id
+            opportunity_id:
+              anyOf:
+              - maxLength: 36
+                type: string
+              - type: 'null'
+              default: null
+              title: Opportunity Id
+            main_topics:
+              items:
+                maxLength: 200
+                type: string
+              maxItems: 100
+              title: Main Topics
+              type: array
+            orders_placed:
+              items:
+                maxLength: 200
+                type: string
+              maxItems: 100
+              title: Orders Placed
+              type: array
+            follow_up_actions:
+              items:
+                maxLength: 200
+                type: string
+              maxItems: 100
+              title: Follow Up Actions
+              type: array
+            id:
+              title: Id
+              type: string
+            version:
+              minimum: 1
+              title: Version
+              type: integer
+            created_at:
+              anyOf:
+              - format: date-time
+                type: string
+              - type: 'null'
+              default: null
+              title: Created At
+            updated_at:
+              anyOf:
+              - format: date-time
+                type: string
+              - type: 'null'
+              default: null
+              title: Updated At
+            created_by:
+              anyOf:
+              - type: string
+              - type: 'null'
+              default: null
+              title: Created By
+            updated_by:
+              anyOf:
+              - type: string
+              - type: 'null'
+              default: null
+              title: Updated By
+            overdue:
+              readOnly: true
+              title: Overdue
+              type: boolean
+          required:
+          - type
+          - title
+          - id
+          - version
+          - overdue
+          title: ActivityRead
+          type: object
+    audit: write
+    endpoint: POST /api/v1/mcp/tools/call
+    human_approval_required: false
+    agent_write_enabled: false
+    domain_command: crm.activity.create.v1
+    command_version: 1
+  - tool_id: crm.activity.update
+    domain: crm
+    name: CRM-Aktivitaet bearbeiten
+    description: Kanonischer CRM-Aktivitaetencommand v1. Gleiche Fachregeln wie REST, Studio und CLI. Execute verlangt einen
+      Idempotenzschluessel im MCP-Umschlag, Aendern und Loeschen die gelesene Version. Nur gepruefte menschliche Identitaet
+      mit CRM-/SALES-Bearbeitungsrolle; Agenten nicht freigeschaltet.
     scope: crm:write
     idempotent: true
     risk_class: medium
     data_classification: LOCAL_ONLY
     input_schema:
-      type: object
+      additionalProperties: false
       properties:
-        kunden_nr: { type: string }
-        betreff: { type: string }
-        typ: { type: string, enum: [Anruf, Besuch, E-Mail, Aufgabe, Meeting, Sonstiges] }
-        datum: { type: string, format: date, nullable: true }
-        notiz: { type: string, nullable: true }
-        verantwortlich: { type: string, nullable: true }
-      required: [kunden_nr, betreff, typ]
+        type:
+          anyOf:
+          - enum:
+            - meeting
+            - call
+            - email
+            - note
+            - visit
+            - task
+            type: string
+          - type: 'null'
+          default: null
+          title: Type
+        title:
+          anyOf:
+          - maxLength: 200
+            minLength: 1
+            type: string
+          - type: 'null'
+          default: null
+          title: Title
+        customer:
+          anyOf:
+          - maxLength: 100
+            type: string
+          - type: 'null'
+          default: null
+          title: Customer
+        contact_person:
+          anyOf:
+          - maxLength: 100
+            type: string
+          - type: 'null'
+          default: null
+          title: Contact Person
+        date:
+          anyOf:
+          - format: date-time
+            type: string
+          - type: 'null'
+          default: null
+          title: Date
+        status:
+          anyOf:
+          - enum:
+            - planned
+            - completed
+            - cancelled
+            type: string
+          - type: 'null'
+          default: null
+          title: Status
+        assigned_to:
+          anyOf:
+          - maxLength: 100
+            type: string
+          - type: 'null'
+          default: null
+          title: Assigned To
+        description:
+          anyOf:
+          - maxLength: 10000
+            type: string
+          - type: 'null'
+          default: null
+          title: Description
+        customer_id:
+          anyOf:
+          - maxLength: 64
+            minLength: 1
+            type: string
+          - type: 'null'
+          default: null
+          title: Customer Id
+        contact_id:
+          anyOf:
+          - maxLength: 64
+            minLength: 1
+            type: string
+          - type: 'null'
+          default: null
+          title: Contact Id
+        opportunity_id:
+          anyOf:
+          - maxLength: 36
+            type: string
+          - type: 'null'
+          default: null
+          title: Opportunity Id
+        main_topics:
+          anyOf:
+          - items:
+              maxLength: 200
+              type: string
+            maxItems: 100
+            type: array
+          - type: 'null'
+          default: null
+          title: Main Topics
+        orders_placed:
+          anyOf:
+          - items:
+              maxLength: 200
+              type: string
+            maxItems: 100
+            type: array
+          - type: 'null'
+          default: null
+          title: Orders Placed
+        follow_up_actions:
+          anyOf:
+          - items:
+              maxLength: 200
+              type: string
+            maxItems: 100
+            type: array
+          - type: 'null'
+          default: null
+          title: Follow Up Actions
+        expected_version:
+          minimum: 1
+          title: Expected Version
+          type: integer
+        audit_reason:
+          anyOf:
+          - maxLength: 2000
+            type: string
+          - type: 'null'
+          default: null
+          title: Audit Reason
+        correlation_id:
+          anyOf:
+          - maxLength: 200
+            type: string
+          - type: 'null'
+          default: null
+          title: Correlation Id
+        activity_id:
+          type: string
+          minLength: 1
+          maxLength: 64
+      required:
+      - expected_version
+      - activity_id
+      type: object
     output_schema:
       type: object
       properties:
-        activity_id: { type: string }
-        erfasst_am: { type: string }
+        success:
+          type: boolean
+        activity_id:
+          type: string
+        version:
+          type: integer
+        activity:
+          properties:
+            type:
+              enum:
+              - meeting
+              - call
+              - email
+              - note
+              - visit
+              - task
+              title: Type
+              type: string
+            title:
+              maxLength: 200
+              minLength: 1
+              title: Title
+              type: string
+            customer:
+              default: ''
+              maxLength: 100
+              title: Customer
+              type: string
+            contact_person:
+              default: ''
+              maxLength: 100
+              title: Contact Person
+              type: string
+            date:
+              anyOf:
+              - format: date-time
+                type: string
+              - type: 'null'
+              default: null
+              title: Date
+            status:
+              default: planned
+              enum:
+              - planned
+              - completed
+              - cancelled
+              title: Status
+              type: string
+            assigned_to:
+              default: ''
+              maxLength: 100
+              title: Assigned To
+              type: string
+            description:
+              anyOf:
+              - maxLength: 10000
+                type: string
+              - type: 'null'
+              default: null
+              title: Description
+            customer_id:
+              anyOf:
+              - maxLength: 64
+                minLength: 1
+                type: string
+              - type: 'null'
+              default: null
+              title: Customer Id
+            contact_id:
+              anyOf:
+              - maxLength: 64
+                minLength: 1
+                type: string
+              - type: 'null'
+              default: null
+              title: Contact Id
+            opportunity_id:
+              anyOf:
+              - maxLength: 36
+                type: string
+              - type: 'null'
+              default: null
+              title: Opportunity Id
+            main_topics:
+              items:
+                maxLength: 200
+                type: string
+              maxItems: 100
+              title: Main Topics
+              type: array
+            orders_placed:
+              items:
+                maxLength: 200
+                type: string
+              maxItems: 100
+              title: Orders Placed
+              type: array
+            follow_up_actions:
+              items:
+                maxLength: 200
+                type: string
+              maxItems: 100
+              title: Follow Up Actions
+              type: array
+            id:
+              title: Id
+              type: string
+            version:
+              minimum: 1
+              title: Version
+              type: integer
+            created_at:
+              anyOf:
+              - format: date-time
+                type: string
+              - type: 'null'
+              default: null
+              title: Created At
+            updated_at:
+              anyOf:
+              - format: date-time
+                type: string
+              - type: 'null'
+              default: null
+              title: Updated At
+            created_by:
+              anyOf:
+              - type: string
+              - type: 'null'
+              default: null
+              title: Created By
+            updated_by:
+              anyOf:
+              - type: string
+              - type: 'null'
+              default: null
+              title: Updated By
+            overdue:
+              readOnly: true
+              title: Overdue
+              type: boolean
+          required:
+          - type
+          - title
+          - id
+          - version
+          - overdue
+          title: ActivityRead
+          type: object
     audit: write
-    endpoint: "POST /api/v1/mcp/tools/call"
+    endpoint: POST /api/v1/mcp/tools/call
     human_approval_required: false
+    agent_write_enabled: false
+    domain_command: crm.activity.update.v1
+    command_version: 1
+  - tool_id: crm.activity.delete
+    domain: crm
+    name: CRM-Aktivitaet loeschen
+    description: Kanonischer CRM-Aktivitaetencommand v1. Gleiche Fachregeln wie REST, Studio und CLI. Execute verlangt einen
+      Idempotenzschluessel im MCP-Umschlag, Aendern und Loeschen die gelesene Version. Nur gepruefte menschliche Identitaet
+      mit CRM-/SALES-Bearbeitungsrolle; Agenten nicht freigeschaltet.
+    scope: crm:write
+    idempotent: true
+    risk_class: medium
+    data_classification: LOCAL_ONLY
+    input_schema:
+      additionalProperties: false
+      properties:
+        expected_version:
+          minimum: 1
+          title: Expected Version
+          type: integer
+        audit_reason:
+          anyOf:
+          - maxLength: 2000
+            type: string
+          - type: 'null'
+          default: null
+          title: Audit Reason
+        correlation_id:
+          anyOf:
+          - maxLength: 200
+            type: string
+          - type: 'null'
+          default: null
+          title: Correlation Id
+        activity_id:
+          type: string
+          minLength: 1
+          maxLength: 64
+      required:
+      - expected_version
+      - activity_id
+      type: object
+    output_schema:
+      type: object
+      properties:
+        success:
+          type: boolean
+        activity_id:
+          type: string
+        version:
+          type: integer
+        activity:
+          properties:
+            type:
+              enum:
+              - meeting
+              - call
+              - email
+              - note
+              - visit
+              - task
+              title: Type
+              type: string
+            title:
+              maxLength: 200
+              minLength: 1
+              title: Title
+              type: string
+            customer:
+              default: ''
+              maxLength: 100
+              title: Customer
+              type: string
+            contact_person:
+              default: ''
+              maxLength: 100
+              title: Contact Person
+              type: string
+            date:
+              anyOf:
+              - format: date-time
+                type: string
+              - type: 'null'
+              default: null
+              title: Date
+            status:
+              default: planned
+              enum:
+              - planned
+              - completed
+              - cancelled
+              title: Status
+              type: string
+            assigned_to:
+              default: ''
+              maxLength: 100
+              title: Assigned To
+              type: string
+            description:
+              anyOf:
+              - maxLength: 10000
+                type: string
+              - type: 'null'
+              default: null
+              title: Description
+            customer_id:
+              anyOf:
+              - maxLength: 64
+                minLength: 1
+                type: string
+              - type: 'null'
+              default: null
+              title: Customer Id
+            contact_id:
+              anyOf:
+              - maxLength: 64
+                minLength: 1
+                type: string
+              - type: 'null'
+              default: null
+              title: Contact Id
+            opportunity_id:
+              anyOf:
+              - maxLength: 36
+                type: string
+              - type: 'null'
+              default: null
+              title: Opportunity Id
+            main_topics:
+              items:
+                maxLength: 200
+                type: string
+              maxItems: 100
+              title: Main Topics
+              type: array
+            orders_placed:
+              items:
+                maxLength: 200
+                type: string
+              maxItems: 100
+              title: Orders Placed
+              type: array
+            follow_up_actions:
+              items:
+                maxLength: 200
+                type: string
+              maxItems: 100
+              title: Follow Up Actions
+              type: array
+            id:
+              title: Id
+              type: string
+            version:
+              minimum: 1
+              title: Version
+              type: integer
+            created_at:
+              anyOf:
+              - format: date-time
+                type: string
+              - type: 'null'
+              default: null
+              title: Created At
+            updated_at:
+              anyOf:
+              - format: date-time
+                type: string
+              - type: 'null'
+              default: null
+              title: Updated At
+            created_by:
+              anyOf:
+              - type: string
+              - type: 'null'
+              default: null
+              title: Created By
+            updated_by:
+              anyOf:
+              - type: string
+              - type: 'null'
+              default: null
+              title: Updated By
+            overdue:
+              readOnly: true
+              title: Overdue
+              type: boolean
+          required:
+          - type
+          - title
+          - id
+          - version
+          - overdue
+          title: ActivityRead
+          type: object
+    audit: write
+    endpoint: POST /api/v1/mcp/tools/call
+    human_approval_required: false
+    agent_write_enabled: false
+    domain_command: crm.activity.delete.v1
+    command_version: 1
 
   - tool_id: crm.lead.qualify
     domain: crm
@@ -197,6 +969,107 @@ tools:
     endpoint: "POST /api/v1/mcp/tools/call"
     human_approval_required: false
 
+  - tool_id: sales.gutschrift.speichern
+    domain: sales
+    name: "Gutschrift als Entwurf speichern"
+    description: "Legt eine Gutschrift (kaufmaennische Rechnungskorrektur) als Entwurf im Authentifizierungs-Mandanten an (Maske sales/gutschrift:speichern; CE /api/v1/sales/credit-notes/actions/speichern). parameters.credit_note_number, customer_id, grund, lines[] mit description, quantity, unit_price und tax_code (Steuerschluessel des Mandanten aus finance/tax-keys; kein Prozentsatz, kein Vorgabewert), optional invoice_reference, reason. Default dryRun liefert Netto/Umsatzsteuer/Brutto oder den Pruefgrund. execute erfordert idempotency_key. Gebucht wird NICHT: Buchen geht nur ueber sales.gutschrift.propose, menschliche Freigabe und sales.gutschrift.buchen. Scope sales:write. Kein tenant_id-Parameter."
+    scope: sales:write
+    idempotent: true
+    risk_class: medium
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      properties:
+        credit_note_number: { type: string }
+        customer_id: { type: string }
+        customer_name: { type: string }
+        invoice_reference: { type: string, description: "Rechnungsnummer, deren offener Posten beim Buchen gemindert wird" }
+        grund: { type: string, description: "Grund der Gutschrift, z. B. Retoure" }
+        lines:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            properties:
+              description: { type: string }
+              quantity: { type: number }
+              unit_price: { type: number, description: "Einzelpreis netto" }
+              tax_code: { type: string, description: "Steuerschluessel des Mandanten" }
+            required: [description, quantity, unit_price]
+        reason: { type: string, minLength: 3 }
+      required: [credit_note_number, customer_id, grund, lines, reason]
+    output_schema:
+      type: object
+      properties:
+        credit_note_id: { type: string }
+        credit_note_number: { type: string }
+        netto: { type: number }
+        steuer: { type: number, nullable: true }
+        brutto: { type: number, nullable: true }
+        pruefgrund: { type: string, nullable: true }
+        auditEntryId: { type: string }
+    audit: write
+    endpoint: "POST /api/v1/mcp/tools/call"
+    human_approval_required: false
+
+  - tool_id: sales.gutschrift.propose
+    domain: sales
+    name: "Buchung einer Gutschrift vorschlagen"
+    description: "Legt einen ausstehenden Buchungsvorschlag fuer eine Gutschrift (Entwurf) im Authentifizierungs-Mandanten an. parameters.credit_note_id. Default dryRun liest, was gebucht wuerde (Erloes netto, Umsatzsteuer, Forderung brutto, Buchungszeilen) oder den Pruefgrund (HTTP 409), wenn sich die Gutschrift nicht buchen laesst. propose (mit idempotency_key) speichert agent_proposals (sales_credit_note_buchung) mit approval_status pending und bucht nicht. execute ist nicht angebunden. Ein Mensch prueft und gibt in der Maske sales/gutschrift frei; danach sales.gutschrift.buchen. Ein Freigabe-Boolean im Aufruf wird abgewiesen. Scope sales:write. Kein tenant_id-Parameter."
+    scope: sales:write
+    idempotent: false
+    risk_class: high
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      properties:
+        credit_note_id: { type: string, description: "ID der Gutschrift (Entwurf)" }
+      required: [credit_note_id]
+    output_schema:
+      type: object
+      properties:
+        entwurf_id: { type: string, description: "proposal_id fuer sales.gutschrift.buchen" }
+        credit_note_id: { type: string }
+        credit_note_number: { type: string }
+        netto: { type: number }
+        steuer: { type: number }
+        brutto: { type: number }
+        buchungszeilen: { type: array }
+        route_path: { type: string }
+        screen_id: { type: string }
+        approval_status: { type: string }
+    audit: write
+    endpoint: "POST /api/v1/mcp/tools/call"
+    human_approval_required: true
+
+  - tool_id: sales.gutschrift.buchen
+    domain: sales
+    name: "Gutschrift aus freigegebenem Vorschlag buchen"
+    description: "Bucht eine Gutschrift (Erloes netto, Umsatzsteuer getrennt, Forderung brutto, OP-Minderung der bezogenen Rechnung) nur aus einem agent_proposals-Datensatz (sales_credit_note_buchung), den ein Mensch freigegeben hat. Parameter nur proposal_id. Default dryRun. execute erfordert idempotency_key und approval_status=approved; hat sich die Gutschrift seit der Freigabe geaendert, HTTP 409 und neuer Vorschlag noetig. Kein Freigabe-Boolean im Aufruf. Scope sales:write. Kein tenant_id-Parameter."
+    scope: sales:write
+    idempotent: true
+    risk_class: high
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      properties:
+        proposal_id: { type: string, description: "entwurf_id aus sales.gutschrift.propose" }
+      required: [proposal_id]
+    output_schema:
+      type: object
+      properties:
+        credit_note_id: { type: string }
+        credit_note_number: { type: string }
+        netto: { type: number }
+        steuer: { type: number }
+        brutto: { type: number }
+        posted: { type: boolean }
+        approved_by: { type: string }
+        auditEntryId: { type: string }
+    audit: write
+    endpoint: "POST /api/v1/mcp/tools/call"
+    human_approval_required: true
+
   - tool_id: sales.invoice.propose
     domain: sales
     name: "Rechnungsvorschlag aus Lieferschein"
@@ -250,7 +1123,7 @@ tools:
   - tool_id: finance.ap_invoice.propose
     domain: finance
     name: "AP-Freigabe vorschlagen"
-    description: "Legt einen ausstehenden Freigabe-Vorschlag fuer eine Eingangsrechnung im Authentifizierungs-Mandanten an. HTTP-Aufruf mit tool_name=finance.ap_invoice.propose, parameters.invoice_id. Default dryRun liest nur Status/Brutto/route_path. propose speichert agent_proposals (ap_invoice_freigabe) mit approval_status pending und ruft den Freigabe-Endpoint nicht auf. execute ist nicht angebunden (nutze finance.ap_invoice.freigeben nach Freigabe). Ein Freigabe-Boolean im Aufruf wird abgewiesen. OIDC-Token mit finance:write und tenant_id erforderlich. Kein Journal/FIN-CLOSE."
+    description: "Legt einen ausstehenden Freigabe-Vorschlag fuer eine Eingangsrechnung im Authentifizierungs-Mandanten an. HTTP-Aufruf mit tool_name=finance.ap_invoice.propose, parameters.invoice_id. Default dryRun liest nur Status/Brutto/route_path. propose speichert agent_proposals (ap_invoice_freigabe) mit approval_status pending und ruft den Freigabe-Endpoint nicht auf. execute ist deaktiviert; die verbindliche Entscheidung trifft eine berechtigte unabhaengige Person in der AP-Maske. Ein freigegebener Vorschlag ist keine Belegfreigabe. Ein Freigabe-Boolean im Aufruf wird abgewiesen. OIDC-Token mit finance:write und tenant_id erforderlich. Kein Journal/FIN-CLOSE."
     scope: finance:write
     idempotent: false
     risk_class: high
@@ -275,33 +1148,6 @@ tools:
     endpoint: "POST /api/v1/mcp/tools/call"
     human_approval_required: true
 
-  - tool_id: finance.ap_invoice.freigeben
-    domain: finance
-    name: "AP-Rechnung aus freigegebenem Vorschlag freigeben"
-    description: "Ruft den echten CommandEndpoint POST /api/v1/finance/ap/invoices/{id}/actions/freigeben nur nach freigegebenem agent_proposals-Datensatz (ap_invoice_freigabe) auf. Parameter nur proposal_id. Default dryRun. execute erfordert idempotency_key und approval_status=approved. Kein Freigabe-Boolean im Aufruf. Kein Journal-Post/FIN-CLOSE (fibu_journal=false). OIDC-Token mit finance:write und tenant_id erforderlich."
-    scope: finance:write
-    idempotent: true
-    risk_class: high
-    data_classification: LOCAL_ONLY
-    input_schema:
-      type: object
-      properties:
-        proposal_id: { type: string, description: "entwurf_id aus finance.ap_invoice.propose" }
-      required: [proposal_id]
-    output_schema:
-      type: object
-      properties:
-        invoice_id: { type: string }
-        invoice_number: { type: string }
-        status: { type: string }
-        approved: { type: boolean }
-        route_path: { type: string }
-        screen_id: { type: string }
-    audit: write
-    endpoint: "POST /api/v1/mcp/tools/call"
-    human_approval_required: true
-
-  # ── FIBU ───────────────────────────────────────────────────────────────────
   - tool_id: fibu.open_items.list
     domain: finance
     name: "Offene Posten auflisten"
@@ -468,6 +1314,79 @@ tools:
         pruefprotokoll: { type: string, nullable: true }
         route_path: { type: string }
         screen_id: { type: string }
+    audit: read
+    endpoint: "POST /api/v1/mcp/tools/call"
+    human_approval_required: false
+
+  # ── Belege (BELEG-013): nur lesend ─────────────────────────────────────────
+  - tool_id: beleg.arten
+    domain: belege
+    name: "Belegarten und Belegkommandos beschreiben"
+    description: "Beschreibt die Belegarten des Belegvertrags (Bezeichnung, Partnerrolle, Steuerrichtung, mit oder ohne Preise, ob Finance bucht, Folgebelege) und das Verzeichnis der Belegkommandos (schreibend, Risiko, Freigabe, Idempotenz, Adresse). Keine Parameter. HTTP tool_name=beleg.arten. Scope belege:read; nur Lesen."
+    scope: belege:read
+    idempotent: true
+    risk_class: low
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      properties: {}
+      required: []
+    output_schema:
+      type: object
+      properties:
+        vertragsversion: { type: string }
+        status: { type: array }
+        preisfelder: { type: array }
+        belegarten: { type: array }
+        kommandos: { type: array }
+    audit: read
+    endpoint: "POST /api/v1/mcp/tools/call"
+    human_approval_required: false
+
+  - tool_id: beleg.suchen
+    domain: belege
+    name: "Belege suchen"
+    description: "Sucht Belege im Authentifizierungs-Mandanten nach Belegart, Status, Teil der Belegnummer oder Partnernummer; neueste zuerst, hoechstens 50. Belegarten ohne Preise (Lieferschein, Wareneingang) kommen ohne Betrag. HTTP tool_name=beleg.suchen. Scope belege:read; nur Lesen."
+    scope: belege:read
+    idempotent: true
+    risk_class: low
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      properties:
+        belegart: { type: string, nullable: true, enum: [sales_offer, sales_order, sales_delivery, sales_invoice, sales_credit_memo, purchase_order, goods_receipt, purchase_invoice, purchase_credit_memo] }
+        status: { type: string, nullable: true, enum: [draft, open, released, posted, reversed, cancelled] }
+        beleg_nr: { type: string, nullable: true, description: "Teil der Belegnummer" }
+        partner_nr: { type: string, nullable: true, description: "Kunden- bzw. Lieferantennummer" }
+        limit: { type: integer, default: 20 }
+      required: []
+    output_schema:
+      type: object
+      properties:
+        items: { type: array }
+        count: { type: integer }
+    audit: read
+    endpoint: "POST /api/v1/mcp/tools/call"
+    human_approval_required: false
+
+  - tool_id: beleg.lesen
+    domain: belege
+    name: "Beleg lesen"
+    description: "Liefert einen Beleg des Authentifizierungs-Mandanten in der Form des Belegvertrags (docs/schnittstellen/contracts/belegvertrag.schema.json): Kopf, Partner, Positionen mit offener Menge, Summen je Steuerschluessel, Buchungsstand mit Grund, Belegkette, Statushistorie und die im Zustand moeglichen Aktionen mit Kommando und Sperrgrund. Dieselbe Antwort wie GET /api/v1/belege/{belegart}/{beleg_id}. HTTP tool_name=beleg.lesen. Scope belege:read; nur Lesen."
+    scope: belege:read
+    idempotent: true
+    risk_class: low
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      properties:
+        belegart: { type: string, enum: [sales_offer, sales_order, sales_delivery, sales_invoice, sales_credit_memo, purchase_order, goods_receipt, purchase_invoice, purchase_credit_memo] }
+        beleg_id: { type: string }
+      required: [belegart, beleg_id]
+    output_schema:
+      type: object
+      properties:
+        beleg: { type: object }
     audit: read
     endpoint: "POST /api/v1/mcp/tools/call"
     human_approval_required: false
@@ -1489,6 +2408,396 @@ tools:
       properties:
         items: { type: array }
         count: { type: integer }
+    audit: read
+    endpoint: "POST /api/v1/mcp/tools/call"
+    human_approval_required: false
+
+  # ── Generische Maskenaktionen (MCP-MASK-GENERIC-20261019) ───
+  # Derselbe Kommando-Endpunkt wie die Maske, mit dem Token des Aufrufers. Agentensperren der
+  # ScreenDefinition gelten unveraendert; Rechte und Mandant prueft der Ziel-Endpunkt.
+  - tool_id: mask.actions.list
+    domain: masks
+    name: "Maskenaktionen auflisten"
+    description: "Liest die Aktionen einer Maske aus der mandantengenauen ScreenDefinition, mit Eingabefeldern und Befund, ob ein Agent sie ausfuehren darf. Nur Lesen."
+    scope: masks:read
+    idempotent: true
+    risk_class: low
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      properties:
+        screen_id: { type: string }
+      required: [screen_id]
+    output_schema:
+      type: object
+      properties:
+        screen_id: { type: string }
+        title: { type: string, nullable: true }
+        actions: { type: array }
+    audit: read
+    endpoint: "POST /api/v1/mcp/tools/call"
+    human_approval_required: false
+
+  - tool_id: mask.data.read
+    domain: masks
+    name: "Maskendaten lesen"
+    description: "Liest eine deklarierte GET-Datenquelle derselben mandantengenauen Maske wie Human-UI und CLI. Fachrollen und Objektzugriff prueft der Ziel-Endpunkt erneut mit dem Token des Aufrufers; keine freie URL oder Mandantenangabe."
+    scope: masks:read
+    idempotent: true
+    risk_class: low
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      additionalProperties: false
+      properties:
+        screen_id: { type: string }
+        source_key: { type: string }
+        entity_id: { type: string, nullable: true }
+        page: { type: integer, minimum: 1, maximum: 1000000 }
+        limit: { type: integer, minimum: 1, maximum: 100 }
+        q: { type: string, nullable: true, maxLength: 200 }
+        table_key: { type: string }
+        sort: { type: string }
+        sort_dir: { type: string, enum: [asc, desc] }
+        complete: { type: boolean, default: false }
+        preset_filters:
+          type: object
+          maxProperties: 8
+          propertyNames: { minLength: 1, maxLength: 200 }
+          additionalProperties: { type: string, minLength: 1, maxLength: 200 }
+        filter_plan:
+          type: object
+          maxProperties: 20
+          additionalProperties:
+            type: object
+            additionalProperties: false
+            required: [op, value]
+            properties:
+              op: { type: string, enum: [eq, neq, contains, lt, lte, gt, gte, in, between] }
+              value: {}
+              label: { type: string, nullable: true, maxLength: 200 }
+      required: [screen_id, source_key]
+    output_schema:
+      type: object
+      properties:
+        screen_id: { type: string }
+        source_key: { type: string }
+        page: { type: integer }
+        limit: { type: integer }
+        data:
+          oneOf:
+            - { type: object }
+            - { type: array }
+    audit: read
+    endpoint: "POST /api/v1/mcp/tools/call"
+    human_approval_required: false
+
+  - tool_id: mask.action.execute
+    domain: masks
+    name: "Maskenaktion ausfuehren"
+    description: "Fuehrt eine Maskenaktion ueber ihren deklarierten Kommando-Endpunkt aus (gleicher Umschlag wie die Maske). Gesperrt sind forbiddenForAgents, humanApprovalRequired, Command-Adapter und Eingabefluesse. Default dryRun; execute erfordert idempotency_key."
+    scope: masks:write
+    idempotent: true
+    risk_class: medium
+    data_classification: LOCAL_ONLY
+    # Per-action release; each endpoint and version must match the canonical command.
+    write_capabilities:
+      - domain_command: logistik.versandprofil.deactivate.v1
+        screen_id: logistik/versandprofile
+        action: loeschen
+        endpoint: /api/v1/logistik/versand/profile/{entity_id}/actions/deactivate
+        command_version: 1
+        agent_write_enabled: true
+        agent_roles: [LAGER_BEARBEITEN, LAGER_ADMIN, SALES_BEARBEITEN, SALES_ADMIN, EINKAUF_BEARBEITEN, EINKAUF_ADMIN, admin]
+      - domain_command: hr.onboarding.delete.v1
+        screen_id: personal/onboarding
+        action: loeschen
+        endpoint: /api/v1/training/onboarding/runs/{entity_id}/actions/loeschen
+        command_version: 1
+        agent_write_enabled: false
+        agent_roles: [PERSONAL_BEARBEITEN, PERSONAL_ADMIN, admin]
+      - domain_command: hr.qualification.delete.v1
+        screen_id: personal/qualifikationen
+        action: loeschen
+        endpoint: /api/v1/training/qualifications/{entity_id}/actions/loeschen
+        command_version: 1
+        agent_write_enabled: false
+        agent_roles: [PERSONAL_BEARBEITEN, PERSONAL_ADMIN, admin]
+      - domain_command: hr.assignment.delete.v1
+        screen_id: personal/schulungen
+        action: loeschen
+        endpoint: /api/v1/training/assignments/{entity_id}/actions/loeschen
+        command_version: 1
+        agent_write_enabled: false
+        agent_roles: [PERSONAL_BEARBEITEN, PERSONAL_ADMIN, admin]
+    input_schema:
+      type: object
+      properties:
+        screen_id: { type: string }
+        action: { type: string }
+        entity_id: { type: string, nullable: true }
+        input: { type: object, nullable: true }
+        audit_reason: { type: string, nullable: true }
+        confirm: { type: boolean }
+      required: [screen_id, action]
+    output_schema:
+      type: object
+      properties:
+        screen_id: { type: string }
+        action: { type: string }
+        mode: { type: string }
+        result: { type: object }
+    audit: write
+    endpoint: "POST /api/v1/mcp/tools/call"
+    human_approval_required: false
+
+  - tool_id: studio.catalog.read
+    domain: studio
+    name: Studio-Katalog lesen
+    description: 'Floorplans, Feldtypen, Formate, Datenquellen und Aktionen, aus denen eine Studio-Maske bestehen
+      darf. Grundlage, bevor ein Agent eine ScreenDefinition entwirft. Nur Lesen.'
+    scope: masks:read
+    idempotent: true
+    risk_class: low
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      additionalProperties: false
+      properties: {}
+    output_schema:
+      type: object
+    audit: read
+    endpoint: POST /api/v1/mcp/tools/call
+    human_approval_required: false
+
+  - tool_id: studio.definition.validate
+    domain: studio
+    name: Studio-Maske pruefen
+    description: 'Prueft eine ScreenDefinition gegen Katalog und Studio-Gates (Feldvertrag, Meridian-Layout,
+      Rechte, rechnende Felder, Formate) und liefert Verletzungen und Reifegrad. Speichert nichts.'
+    scope: masks:read
+    idempotent: true
+    risk_class: low
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      additionalProperties: false
+      properties:
+        definition: { type: object }
+      required: [definition]
+    output_schema:
+      type: object
+      properties:
+        violations: { type: array }
+        readiness: { type: object }
+    audit: read
+    endpoint: POST /api/v1/mcp/tools/call
+    human_approval_required: false
+
+  - tool_id: studio.draft.save
+    domain: studio
+    name: Studio-Entwurf speichern
+    description: 'Legt einen Studio-Entwurf an oder schreibt ihn mit draft_id und expected_revision fort. Nur
+      Entwurf: dieselben Gates wie im Studio, keine Freigabe. Ohne mode=execute wird nur geprueft.'
+    scope: belege:write
+    idempotent: true
+    risk_class: low
+    data_classification: LOCAL_ONLY
+    audit: write
+    endpoint: POST /api/v1/mcp/tools/call
+    human_approval_required: false
+    agent_write_enabled: true
+    domain_command: studio.draft.save
+    command_version: 1
+    role_policy: beleg_write
+    input_schema:
+      type: object
+      additionalProperties: false
+      properties:
+        definition: { type: object }
+        draft_id: { type: string, format: uuid }
+        expected_revision: { type: string, pattern: '^[0-9a-f]{64}$' }
+      required: [definition]
+    output_schema:
+      type: object
+
+  - tool_id: studio.draft.submit_review
+    domain: studio
+    name: Studio-Entwurf zur Pruefung geben
+    description: 'Gibt einen Entwurf in die Vier-Augen-Pruefung. Freigeben und Zurueckziehen bleiben Menschen
+      vorbehalten; dafuer gibt es kein Agentenwerkzeug.'
+    scope: belege:write
+    idempotent: true
+    risk_class: low
+    data_classification: LOCAL_ONLY
+    audit: write
+    endpoint: POST /api/v1/mcp/tools/call
+    human_approval_required: false
+    agent_write_enabled: true
+    domain_command: studio.draft.submit_review
+    command_version: 1
+    role_policy: beleg_write
+    input_schema:
+      type: object
+      additionalProperties: false
+      properties:
+        draft_id: { type: string, format: uuid }
+        expected_revision: { type: string, pattern: '^[0-9a-f]{64}$' }
+      required: [draft_id, expected_revision]
+    output_schema:
+      type: object
+
+  - tool_id: studio.migration.plan
+    domain: studio
+    name: Studio-Aenderungsplan festhalten
+    description: 'Versionierter Authoring-Command: erzeugt nur einen revisionsgebundenen
+      Plan in der vorhandenen Historie; keine Freigabe, Schemaausfuehrung oder Geschaeftsbuchung.
+      Fachrollen prueft derselbe HTTP-Endpunkt wie Human-UI/CLI.'
+    scope: belege:write
+    idempotent: true
+    risk_class: low
+    data_classification: LOCAL_ONLY
+    audit: write
+    endpoint: POST /api/v1/mcp/tools/call
+    human_approval_required: false
+    agent_write_enabled: true
+    domain_command: studio.migration_plan.prepare
+    command_version: 1
+    role_policy: beleg_write
+    input_schema:
+      $defs:
+        StudioColumnIn:
+          additionalProperties: false
+          properties:
+            name:
+              pattern: ^[a-z][a-z0-9_]{0,47}$
+              title: Name
+              type: string
+            type:
+              enum:
+              - text
+              - integer
+              - boolean
+              - date
+              - datetime
+              - decimal
+              - uuid
+              title: Type
+              type: string
+            nullable:
+              default: true
+              title: Nullable
+              type: boolean
+          required:
+          - name
+          - type
+          title: StudioColumnIn
+          type: object
+        StudioSchemaChangeIn:
+          additionalProperties: false
+          properties:
+            operation:
+              enum:
+              - create_table
+              - add_columns
+              title: Operation
+              type: string
+            schema_name:
+              pattern: ^domain_[a-z][a-z0-9_]{0,35}$
+              title: Schema Name
+              type: string
+            table:
+              pattern: ^[a-z][a-z0-9_]{0,47}$
+              title: Table
+              type: string
+            columns:
+              items:
+                $ref: '#/$defs/StudioColumnIn'
+              maxItems: 50
+              minItems: 1
+              title: Columns
+              type: array
+          required:
+          - operation
+          - schema_name
+          - table
+          - columns
+          title: StudioSchemaChangeIn
+          type: object
+      additionalProperties: false
+      properties:
+        draft_id:
+          format: uuid
+          title: Draft Id
+          type: string
+        expected_revision:
+          pattern: ^[0-9a-f]{64}$
+          title: Expected Revision
+          type: string
+        schema_changes:
+          items:
+            $ref: '#/$defs/StudioSchemaChangeIn'
+          maxItems: 20
+          title: Schema Changes
+          type: array
+      required:
+      - draft_id
+      - expected_revision
+      title: StudioPlanParameters
+      type: object
+    output_schema:
+      type: object
+
+  # ── Adaptive Workspace Fachaktionen (AW-FACHAKTIONEN-001) ───
+  # Nur Lesen: Katalog und deterministische Alias-Aufloesung. Kein DB-Write.
+  # Writes bleiben bei den vorhandenen Domain-Commands (MCP-WRITE-001 bis 015).
+  - tool_id: workspace.fachaktion.katalog
+    domain: workspace
+    name: "Fachaktionskatalog Adaptive Workspace"
+    description: "Liefert den typisierten Fachaktionskatalog (permission, idempotency, audit, event-out, Aliase) aus config/adaptive_workspace_fachaktionen.yaml. Nur Lesen. parameters.access optional read|write. Scope agent:read. Kein tenant_id-Parameter."
+    scope: agent:read
+    idempotent: true
+    risk_class: low
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      properties:
+        access: { type: string, enum: [read, write], description: "Optionaler Filter" }
+      required: []
+    output_schema:
+      type: object
+      properties:
+        registry_id: { type: string }
+        count: { type: integer }
+        actions: { type: array }
+        lead_contract: { type: object }
+        event_gaps: { type: array }
+    audit: read
+    endpoint: "POST /api/v1/mcp/tools/call"
+    human_approval_required: false
+
+  - tool_id: workspace.fachaktion.resolve
+    domain: workspace
+    name: "Kurzkommando auf Fachaktion aufloesen"
+    description: "Mappt ein natuerliches Kurzkommando deterministisch (Alias/Action-ID, kein LLM) auf eine typisierte Fachaktion und prueft Scope sowie Agenten-/Vier-Augen-Grenze. Nur Lesen, keine Ausfuehrung. parameters.command. Scope agent:read; die Zielaktion hat zusaetzlich ihre Fach-Scope. Writes werden nicht ausgeloest."
+    scope: agent:read
+    idempotent: true
+    risk_class: low
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      properties:
+        command: { type: string, description: "Kurzkommando oder Action-ID" }
+      required: [command]
+    output_schema:
+      type: object
+      properties:
+        action_id: { type: string, nullable: true }
+        authorized: { type: boolean }
+        reason: { type: string }
+        mcp_tool_id: { type: string, nullable: true }
+        four_eyes: { type: boolean }
+        command_endpoint: { type: string, nullable: true }
     audit: read
     endpoint: "POST /api/v1/mcp/tools/call"
     human_approval_required: false

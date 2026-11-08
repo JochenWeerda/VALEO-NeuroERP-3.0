@@ -15,6 +15,7 @@ import logging
 import time
 import asyncio
 import contextlib
+from jwt import PyJWTError
 from contextlib import asynccontextmanager
 
 from app.core.config import settings
@@ -51,6 +52,7 @@ from app.routers.translations_router import router as translations_router  # Üb
 from app.routers.vies_router import router as vies_router  # VIES USt-IdNr.-Prüfung (/api/vies)
 from app.routers.contracts_router import router as contracts_router  # Verträge (contracts-v2 Maske)
 from app.api.v1.endpoints import opportunities as opportunities_endpoints  # CRM-Sales (Frontend /api/crm-sales)
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 # Import domain-specific routers with error handling
 try:
@@ -123,6 +125,16 @@ async def lifespan(app: FastAPI):
                 "WARNING: API_DEV_TOKEN nicht gesetzt - Dev-Token 'dev-token' aktiv. "
                 "In Produktion APP_ENV=production setzen!"
             )
+
+    # RLS plan P7: refuse (production) or flag (development) a connection that bypasses RLS.
+    try:
+        from app.core.database import engine as _rls_engine
+        from app.core.rls_guard import enforce_rls_effective
+        enforce_rls_effective(_rls_engine, settings.APP_ENV)
+    except RuntimeError:
+        raise
+    except Exception as exc:  # database unreachable at startup: readiness reports it separately
+        logger.warning("RLS-Pruefung beim Start nicht moeglich: %s", exc)
 
     # Startup
     logger.info("Starting VALEO-NeuroERP API server...")
@@ -295,6 +307,8 @@ class BearerAuthMiddleware:
         f"{settings.API_V1_STR}/health",
         f"{settings.API_V1_STR}/health/live",
         f"{settings.API_V1_STR}/health/startup",
+        f"{settings.API_V1_STR}/health/ready",
+        f"{settings.API_V1_STR}/health/database",
         f"{settings.API_V1_STR}/openapi.json",
     }
 
@@ -302,6 +316,66 @@ class BearerAuthMiddleware:
         self.app = app
 
     async def __call__(self, scope, receive, send):
+        if scope["type"] == "websocket":
+            from fastapi import WebSocket, WebSocketDisconnect
+            from app.core.security import verified_websocket_context
+            websocket = WebSocket(scope, receive, send)
+            try:
+                context = verified_websocket_context(websocket, websocket.query_params.get("token"))
+            except (HTTPException, PyJWTError):
+                await websocket.close(code=1008, reason="Verified identity and tenant required")
+                return
+            context_token = set_current_tenant_id(context["tenant_id"])
+            expiry = websocket.state.token_claims["exp"]
+
+            async def guarded_receive():
+                from app.core.identity_session import validate
+                incoming = asyncio.create_task(receive())
+                try:
+                    while True:
+                        await asyncio.to_thread(validate, websocket.state.token_claims, websocket.state.authenticated_token, touch=False)
+                        remaining = expiry - time.time()
+                        if remaining <= 0:
+                            raise HTTPException(401, "Session expired")
+                        done, _ = await asyncio.wait([incoming], timeout=min(remaining, settings.IDENTITY_REVOCATION_POLL_SECONDS))
+                        if done:
+                            message = incoming.result()
+                            if message["type"] == "websocket.receive":
+                                if time.time() >= expiry:
+                                    raise HTTPException(401, "Session expired")
+                                await asyncio.to_thread(validate, websocket.state.token_claims, websocket.state.authenticated_token, touch=True)
+                            return message
+                except HTTPException:
+                    await send({"type": "websocket.close", "code": 1008, "reason": "Session expired or revoked"})
+                    raise WebSocketDisconnect(1008)
+                finally:
+                    if not incoming.done():
+                        incoming.cancel()
+                        with contextlib.suppress(asyncio.CancelledError):
+                            await incoming
+
+            async def guarded_send(message):
+                from app.core.identity_session import validate
+                if message["type"] in {"websocket.accept", "websocket.send"}:
+                    try:
+                        await asyncio.to_thread(validate, websocket.state.token_claims, websocket.state.authenticated_token, touch=False)
+                    except HTTPException:
+                        await send({"type": "websocket.close", "code": 1008, "reason": "Session expired or revoked"})
+                        raise WebSocketDisconnect(1008)
+                if message["type"] in {"websocket.accept", "websocket.send"} and time.time() >= expiry:
+                    await send({"type": "websocket.close", "code": 1008, "reason": "Session expired"})
+                    raise WebSocketDisconnect(1008)
+                await send(message)
+
+            try:
+                from app.core.identity_context import set_current_identity, reset_current_identity
+                identity_token = set_current_identity(websocket.state.token_claims, websocket.state.authenticated_token)
+                await self.app(scope, guarded_receive, guarded_send)
+            finally:
+                if 'identity_token' in locals():
+                    reset_current_identity(identity_token)
+                reset_current_tenant_id(context_token)
+            return
         if scope["type"] != "http":
             await self.app(scope, receive, send)
             return
@@ -320,20 +394,32 @@ class BearerAuthMiddleware:
             return
 
         try:
-            await require_bearer_token(request)
+            authenticated_token = await require_bearer_token(request)
+        except PyJWTError:
+            response = JSONResponse(status_code=401, content={"detail": "Invalid bearer token"})
+            _apply_cors_headers(response, request)
+            await response(scope, receive, send)
+            return
         except HTTPException as exc:
             response = JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
             _apply_cors_headers(response, request)
             await response(scope, receive, send)
             return
 
-        header_tenant = (request.headers.get("X-Tenant-ID") or "").strip()
-        claims = getattr(request.state, "token_claims", {}) or {}
-        token_tenant = str(claims.get("tenant_id") or claims.get("tid") or "").strip()
-        resolved_tenant = header_tenant or token_tenant or settings.DEFAULT_TENANT_ID
+        from app.core.tenant_binding import checked_tenant, bind_headers
+        try:
+            resolved_tenant = checked_tenant(getattr(request.state, "token_claims", None))
+            bind_headers(scope, resolved_tenant)
+        except HTTPException as exc:
+            response = JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+            _apply_cors_headers(response, request)
+            await response(scope, receive, send)
+            return
 
         token = set_current_tenant_id(resolved_tenant)
         request.state.tenant_id = resolved_tenant
+        request.state.tenant_verified = True
+        request.state.authenticated_token = authenticated_token
 
         async def send_wrapper(message):
             if message["type"] == "http.response.start":
@@ -341,12 +427,16 @@ class BearerAuthMiddleware:
             await send(message)
 
         try:
+            from app.core.identity_context import set_current_identity, reset_current_identity
+            identity_token = set_current_identity(request.state.token_claims, authenticated_token)
             await self.app(scope, receive, send_wrapper)
         finally:
+            if 'identity_token' in locals():
+                reset_current_identity(identity_token)
             reset_current_tenant_id(token)
 
     def _is_public_path(self, path: str) -> bool:
-        return path in self.PUBLIC_PATHS or path.startswith("/docs/") or path.startswith("/metrics")
+        return path in self.PUBLIC_PATHS or path.startswith("/docs/") or path == "/metrics"
 
 
 class RequestLoggingMiddleware:
@@ -494,17 +584,18 @@ if purchase_workflow_router:
 # Inventory and Agrar are mounted once through api_router.
 
 # Lightweight stubs for missing MCP/stream endpoints to avoid frontend 404s during development
-@app.post("/api/mcp/analytics/kpis")
+from app.auth.bereich_roles import SCHREIBEN  # Lesende Stubs: Fach- oder Leserolle (WRITE-ROLES)
+@app.post("/api/mcp/analytics/kpis", dependencies=SCHREIBEN["BERECHNEN"])
 async def mcp_kpis_stub():
     return {"ok": True, "data": []}
 
 
-@app.post("/api/mcp/analytics/trends")
+@app.post("/api/mcp/analytics/trends", dependencies=SCHREIBEN["BERECHNEN"])
 async def mcp_trends_stub():
     return {"ok": True, "data": []}
 
 
-@app.post("/api/mcp/copilot/forecast")
+@app.post("/api/mcp/copilot/forecast", dependencies=SCHREIBEN["BERECHNEN"])
 async def mcp_copilot_forecast_stub():
     return {"ok": True, "data": {"forecast": None}}
 
@@ -539,8 +630,10 @@ app.include_router(websocket_router, prefix="/api/v1", tags=["WebSocket"])
 from app.api.v1.endpoints.copilot_ws import router as copilot_ws_router
 app.include_router(copilot_ws_router, prefix="/api/v1", tags=["WebSocket", "copilot"])
 
-# Include Authentication Router (⚠️ NUR FÜR ENTWICKLUNG!)
-app.include_router(auth_router)
+# Demo-Anmeldung stellt Tokens mit beliebigen Rollen aus (HS256, JWT_SECRET). Nur lokal eingehaengt: Seit 19.10.2026
+# nicht mehr in jeder Nicht-Produktionsumgebung (Staging), wo ein geteiltes JWT_SECRET Nebendienste oeffnen wuerde.
+if settings.APP_ENV == "development":
+    app.include_router(auth_router)
 
 # Include Policy Manager (direkt, ohne prefix - hat eigenen prefix)
 app.include_router(policy_router)
@@ -593,6 +686,9 @@ try:
         logger.info("OpenTelemetry: Instrumentierung aktiv")
 except Exception as _otel_exc:
     logger.debug("OpenTelemetry-Setup übersprungen: %s", _otel_exc)
+
+from app.core.tenant_binding import install_tenant_bindings
+install_tenant_bindings(app, public_paths=BearerAuthMiddleware.PUBLIC_PATHS)
 
 if __name__ == "__main__":
     uvicorn.run(

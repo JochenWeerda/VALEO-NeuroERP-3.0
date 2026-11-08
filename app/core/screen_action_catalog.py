@@ -16,6 +16,9 @@ from app.core.screen_definitions import SCREEN_DEFINITION_BUILDERS, get_screen_d
 def action_has_execution_path(action: dict[str, Any]) -> bool:
     if not isinstance(action, dict):
         return False
+    if "readView" in action:
+        from app.services.studio_read_view_contracts import validate_read_view
+        return not validate_read_view(action)
     if action.get("commandEndpoint") or action.get("navigationRoute") or action.get("command"):
         return True
     flow = action.get("inputFlow")
@@ -34,6 +37,8 @@ def screen_action_to_catalog_entry(
     screen_id: str,
     domain: str | None,
     action: dict[str, Any],
+    *,
+    row_action: bool = False,
 ) -> dict[str, Any] | None:
     key = action.get("key")
     label = action.get("label")
@@ -56,6 +61,12 @@ def screen_action_to_catalog_entry(
             seen.add(cleaned.casefold())
             intent_phrases.append(cleaned)
 
+    read_view = action.get("readView") or {}
+    flow = action.get("inputFlow") if isinstance(action.get("inputFlow"), dict) else {}
+    paths = (action.get("commandEndpoint"), action.get("navigationRoute"),
+             flow.get("submitEndpoint"), read_view.get("endpoint"))
+    needs_entity = row_action or any("{entity_id}" in path or "{id}" in path
+                                     for path in paths if isinstance(path, str))
     entry: dict[str, Any] = {
         "id": mask_action_id(screen_id, key),
         "label": label,
@@ -64,17 +75,34 @@ def screen_action_to_catalog_entry(
         "domain": domain,
         "mask": screen_id,
         "intent_phrases": intent_phrases,
-        "required_data": ["entity_id"] if "{entity_id}" in str(action.get("commandEndpoint") or "") else [],
+        "required_data": ["entity_id"] if needs_entity else [],
         "source": {
             "screenId": screen_id,
             "actionKey": key,
             "commandEndpoint": action.get("commandEndpoint"),
             "navigationRoute": action.get("navigationRoute"),
             "command": action.get("command"),
-            "method": action.get("method"),
+            **({"domainCommand": action["domainCommand"]} if "domainCommand" in action else {}),
+            "method": "GET" if read_view else action.get("method"),
+            **({"readView": read_view} if read_view else {}),
+            **{name: action[name] for name in ("permission", "forbiddenForAgents",
+                "humanApprovalRequired", "requiresConfirmation", "auditReasonRequired", "dangerLevel")
+               if name in action},
         },
     }
     return entry
+
+
+def _screen_actions(definition: dict[str, Any]):
+    """Top-level actions win duplicate keys, then root tables, then tab tables."""
+    for action in definition.get("actions") or []:
+        yield action, False
+    containers = [definition, *(tab for tab in definition.get("tabs") or [] if isinstance(tab, dict))]
+    for container in containers:
+        for table in container.get("tables") or []:
+            if isinstance(table, dict):
+                for action in table.get("rowActions") or []:
+                    yield action, True
 
 
 def build_screen_action_catalog(
@@ -82,16 +110,21 @@ def build_screen_action_catalog(
     screen_ids: list[str] | None = None,
 ) -> list[dict[str, Any]]:
     """Return catalog entries for all (or selected) screen definitions."""
+    if screen_ids is None:
+        # Stamm-Masken registrieren sich erst beim ersten Bedarf; ohne das haengt der Umfang an der Aufrufreihenfolge.
+        from app.core.stamm_object_page_parent import ensure_stamm_screen_registry
+
+        ensure_stamm_screen_registry()
     ids = screen_ids if screen_ids is not None else sorted(SCREEN_DEFINITION_BUILDERS.keys())
     catalog: list[dict[str, Any]] = []
     seen_ids: set[str] = set()
     for screen_id in ids:
         sd = get_screen_definition(screen_id)
         domain = sd.get("domain") if isinstance(sd.get("domain"), str) else None
-        for action in sd.get("actions") or []:
+        for action, row_action in _screen_actions(sd):
             if not isinstance(action, dict):
                 continue
-            entry = screen_action_to_catalog_entry(screen_id, domain, action)
+            entry = screen_action_to_catalog_entry(screen_id, domain, action, row_action=row_action)
             if entry is None:
                 continue
             if entry["id"] in seen_ids:

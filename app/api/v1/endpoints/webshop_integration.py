@@ -11,10 +11,11 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
-from app.services.webshop_integration_service import WebshopIntegrationService
+from app.services.webshop_integration_service import WebshopBestellungUnbekannt, WebshopIntegrationService
 
 from app.api.v1.schemas.base import BaseSchema, TypedObjectOut
 from app.api.v1.schemas.webshop_integration_schemas import WebshopIntegrationOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/webshop", tags=["webshop", "integration"])
@@ -102,7 +103,7 @@ def list_connectors(
     ]
 
 
-@router.post("/orders/import", response_model=TypedObjectOut, summary="Orders importieren (Frontend-Alias)")
+@router.post("/orders/import", response_model=TypedObjectOut, summary="Orders importieren (Frontend-Alias)", dependencies=SCHREIBEN["VERKAUF"])
 def import_orders_alias(
     body: dict = None,  # type: ignore[assignment]
     db: Session = Depends(get_db),
@@ -121,7 +122,7 @@ def list_konfigurationen(
     return _svc(db, tenant_id).list_configurations()
 
 
-@router.post("/konfigurationen", response_model=WebshopKonfigurationOut, status_code=201, summary="Konfiguration anlegen")
+@router.post("/konfigurationen", response_model=WebshopKonfigurationOut, status_code=201, summary="Konfiguration anlegen", dependencies=SCHREIBEN["VERKAUF"])
 def create_konfiguration(
     payload: WebshopKonfiguration,
     db: Session = Depends(get_db),
@@ -131,7 +132,7 @@ def create_konfiguration(
     return _svc(db, tenant_id).create_configuration(payload.model_dump())
 
 
-@router.delete("/konfigurationen/{id}", status_code=204, response_class=Response, response_model=None, summary="Konfiguration löschen")
+@router.delete("/konfigurationen/{id}", status_code=204, response_class=Response, response_model=None, summary="Konfiguration löschen", dependencies=SCHREIBEN["VERKAUF"])
 def delete_konfiguration(
     id: str,
     db: Session = Depends(get_db),
@@ -164,7 +165,7 @@ def get_bestellung(
     return order
 
 
-@router.post("/bestellungen/import", response_model=WebshopSyncResult, summary="Bestellungen importieren")
+@router.post("/bestellungen/import", response_model=WebshopSyncResult, summary="Bestellungen importieren", dependencies=SCHREIBEN["VERKAUF"])
 def import_bestellungen(
     bestellungen: list[WebshopBestellung],
     db: Session = Depends(get_db),
@@ -175,15 +176,17 @@ def import_bestellungen(
 
 
 @router.post("/bestellungen/{id}/verarbeiten", summary="Verarbeiten",
-    response_model=WebshopIntegrationOut
-)
+    response_model=WebshopIntegrationOut, dependencies=SCHREIBEN["VERKAUF"])
 def verarbeiten(
     id: str,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
     """Convert a clean shop order to an ERP-visible order reference."""
-    return _svc(db, tenant_id).process_order(id)
+    try:
+        return _svc(db, tenant_id).process_order(id)
+    except WebshopBestellungUnbekannt as exc:
+        raise HTTPException(status_code=404, detail="Webshop-Bestellung nicht gefunden") from exc
 
 
 @router.get("/sync-status", summary="Status synchronisieren",
@@ -214,7 +217,7 @@ class ConvertOrderResult(BaseModel):
     positionen_count: int
 
 
-@router.post("/orders/{order_id}/convert", response_model=ConvertOrderResult, summary="Order umwandeln")
+@router.post("/orders/{order_id}/convert", response_model=ConvertOrderResult, summary="Order umwandeln", dependencies=SCHREIBEN["VERKAUF"])
 def convert_order(
     order_id: str,
     db: Session = Depends(get_db),
@@ -236,6 +239,11 @@ def convert_order(
             detail={"message": "Bestellung hat fachliche Blocker", "blockers": blockers},
         )
     result = svc.process_order(order_id)
+    if not result.get("verarbeitet"):
+        raise HTTPException(
+            status_code=422,
+            detail={"message": result.get("hinweis"), "blockers": result.get("blockers") or []},
+        )
     auftrag_nr = result.get("auftrag_nr") or ""
     return ConvertOrderResult(
         auftrag_id=str(order.get("id") or order_id),

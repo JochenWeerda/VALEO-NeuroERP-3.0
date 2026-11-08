@@ -38,14 +38,7 @@ async def lifespan(app: FastAPI):
     """Application lifespan context manager"""
     logger.info("Starting VALEO-NeuroERP AI Service...")
     
-    # Initialize Vector Store
-    try:
-        from app.services.vector_store import initialize_vector_store
-        await initialize_vector_store()
-        logger.info("Vector store initialized successfully")
-    except Exception as e:
-        logger.warning(f"Vector store initialization failed (will retry on first use): {e}")
-    
+    # RAG has no implemented backend. Never bootstrap an unused vulnerable store.
     yield
     
     logger.info("Shutting down VALEO-NeuroERP AI Service...")

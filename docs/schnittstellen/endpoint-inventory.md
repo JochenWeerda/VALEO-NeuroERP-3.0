@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-09
+last_reviewed: 2026-11-07
 version: 3.0.0
 description: Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -22,7 +22,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `accounting_periods` | Accounting Period Management API |
 | `accounts` | Finance Account management endpoints |
 | `accruals_provisions` | Accruals and Provisions API |
-| `activities` | CRM activity endpoints proxied via crm-core. |
+| `activities` | Canonical tenant-bound CRM activity resources and versioned commands. |
 | `admin_core` | Core admin endpoints used by the settings/admin frontend. |
 | `admin_devices` | Admin device mapping and output/form settings. |
 | `admin_dms` | Admin DMS Endpoints |
@@ -40,6 +40,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `agrar_maschinen` | Agrar Maschinen — CRUD für Maschinenpark (Landhandel + Lohnunternehmer) |
 | `agrar_p0` | — |
 | `agrar_settlements` | Agrar self-billing settlements with deduction and posting workflow (AGRAR-SET-01). |
+| `agrar_stammdaten_kommandos` | Zeilenaktionen der Agrar- und Futtermittel-Stammdatenlisten als Fachaktion fuer Maske, CLI und MCP. |
 | `agrar_varieties` | Agrar Sorten/Varieties API fuer Ernte-Annahme. |
 | `agrar_wetter` | Agrar Wetter — Wetter-Proxy für BrightSky (DWD) + Open-Meteo (ICON-D2) |
 | `agri_lot_link_booking` | WM-AGRI-LOT-LINK-001 endpoint: Annahme/Waage-Lot in Silozelle buchen. |
@@ -53,6 +54,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `annahme` | Annahme — Eingangs-Warteschlange (Ernte-Annahme / Wareneingang) |
 | `ap_approval_workflow` | AP Approval Workflow API |
 | `ap_invoices` | Accounts Payable (AP) Invoices API |
+| `approvals` | Der gemeinsame Freigabeweg (APPROVAL-001): anfragen, entscheiden, einsehen — fuer jeden Bereich gleich. |
 | `article_extensions` | Article extension endpoints (l3c-artikel extras) |
 | `articles` | Inventory Articles management endpoints. |
 | `artikel_bestandteile` | Artikel-Bestandteile — Qualitätsmerkmale und Inhaltsstoffe. |
@@ -74,6 +76,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `batch` | OData-style $batch endpoint for bundling multiple read requests. |
 | `bedarfsdeckung` | Bedarfsdeckungs-Cockpit (Durchdringungs-CRM) — Lücke je Betrieb × Produktgruppe. |
 | `beleg_vordrucke` | Belegformular-Vordruck-Editor (Admin) — Druckvorlagen für Papier/PDF-Ausdrucke. |
+| `belege` | Lesender Belegweg: jeder Beleg in der Form des Belegvertrags (BELEG-011). |
 | `benchmark_api` | — |
 | `benchmark_cockpit` | — |
 | `betriebsstaetten` | Betriebsstätten/Filialen — Filialsystem-Stammdaten. |
@@ -131,11 +134,13 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `crm_kontakte` | Kunden-Kontakte (Kontakthistorie + Wiedervorlage) — Kunden-Cockpit. |
 | `crm_kunden_map` | CRM-Kundenkarte — alle Kunden als GeoJSON (Karte + Hover-Kennzahlen). |
 | `crm_lead_gen` | CRM Lead-Generierung — region-universale Lead-Kandidaten (GAP/LKV). |
+| `crm_listen_kommandos` | Zeilenaktionen der CRM-Listen als Fachaktion fuer Maske, CLI und MCP (MASK-STUDIO-ROLLOUT, Welle 1). |
 | `crm_mail_capture` | KIM E-Mail-Connector — ein-/ausgehende Mails als Kontakt erfassen. |
 | `crm_ownership` | Kunden-Ownership (DOM-CRM-004.3) — Zuordnung/Übergabe Außendienst/Innendienst. |
+| `crm_partner_klaerfaelle` | Klaerliste der Partnerzuordnung (ADR Geschaeftspartnerstamm, Stufe 2). |
 | `crm_partner_suche` | Einheitliche Partner-Suche über Kunden, Lieferanten und Leads (Multi-Rolle). |
 | `crm_reports` | CRM Reports and Analytics endpoints. |
-| `crm_segments` | CRM Kundensegmente — CRUD-Stub |
+| `crm_segments` | Canonical persistent CRM segments; all routes use the verified tenant. |
 | `customer_extensions` | Customer extension endpoints (l3c-kunde extras) |
 | `customers` | CRM Customer endpoints backed by the crm-core service. |
 | `daily_prices` | Daily Price API endpoints. |
@@ -143,7 +148,6 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `dauerauftraege` | Daueraufträge [DAU] — Wiederkehrende Aufträge/Rechnungen. |
 | `debtors` | Debtor (Debitoren) master data management endpoints |
 | `direct_debits` | Direct debit endpoints used by finance UI masks. |
-| `disposition` | Disposition API - DB-backed endpoints. |
 | `dms_images` | Tenant-safe DMS metadata search and article-document links. |
 | `dms_inbox` | DMS Inbox Endpoints |
 | `doc_nachweisraum_actions` | DOM-DOC-004 — Nachweisraum: Dokument-Upload, Freigabe, Wiedervorlage, GoBD-Export. |
@@ -160,6 +164,11 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `e2e_chain` | — |
 | `ebilanz_elster` | eBilanz / ELSTER export and ERiC submission endpoint. |
 | `edi_api` | — |
+| `einkauf_ab_erfassung` | Erfassung eingehender Auftragsbestaetigungen (STAMMDATEN-BEARBEITEN-20261019, Folgepunkt). |
+| `einkauf_anfrage_kommandos` | Zeilenaktionen der Anfragen-Liste als Fachaktion fuer Maske, CLI und MCP (MASK-STUDIO-ROLLOUT, Welle 1). |
+| `einkauf_angebot_kommandos` | Zeilenaktionen der Angebots-Liste als Fachaktion fuer Maske, CLI und MCP (MASK-STUDIO-ROLLOUT, Welle 1). |
+| `einkauf_avis_kommandos` | Zeilenaktionen der Anlieferavis-Liste als Fachaktion fuer Maske, CLI und MCP (MASK-STUDIO-ROLLOUT, Welle 1). |
+| `einkauf_bestellung_kommandos` | Zeilenaktionen der Bestell-Liste als Fachaktion fuer Maske, CLI und MCP (MASK-STUDIO-ROLLOUT, Welle 1). |
 | `einkauf_bestellvorschlag` | Einkauf â€” Bestell-Vorschlag Endpoints |
 | `einkauf_kpis` | Einkauf — KPIs |
 | `einkauf_lieferschein` | Einkauf Lieferschein + Frachtauftrag CRUD endpoints. |
@@ -213,9 +222,10 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `finance_period` | Periodenabschluss & Storno-Konsistenz (DOM-FIN-004.4). |
 | `finance_read_models` | Finance Read-Models — Wave 2 AP2 |
 | `finance_stammdaten` | Finance-Stamm fuer Debitoren und Kreditoren — Maskengenerator und Listen. |
+| `finance_stammdaten_kommandos` | Zeilenaktionen der Finance-Stammdatenlisten als Fachaktion fuer Maske, CLI und MCP (MASK-STUDIO-ROLLOUT, Welle 1). |
 | `financial_reports` | Financial Reports API |
 | `flow_spines` | — |
-| `foerderung` | Foerderung API - DB-backed endpoints. |
+| `foerderung` | Foerderantraege (Agrarfoerderung) im Mandanten. |
 | `forderungsgruppen` | Forderungsgruppen [FORG] — Kundensegmentierung für Bestandskontenzuordnung. |
 | `foreign_goods_worklist` | Foreign-goods operator worklist API. |
 | `fuhrpark` | Fuhrpark API Endpoints - zvoove style master data mask. |
@@ -237,12 +247,14 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `gs1_barcode` | GS1 Barcode Parse Service |
 | `gs1_parser` | GS1 barcode parser endpoint (l3c-gs1) |
 | `harvest_acceptance` | Harvest Acceptance (Ernte-Annahme) API endpoints. |
+| `harvest_rules` | Transport adapter for versioned harvest domain commands, never direct CRUD. |
 | `hausbankenstamm` | Hausbankenstamm — Eigene Bankverbindungen des Mandanten. |
 | `hofliste` | Hofliste — Fahrzeugvormeldungen und Status am Waagenterminal. |
 | `hrm_abwesenheit` | HRM-ABWESENHEIT-ANTRAG-001 — Abwesenheitsantrag API. |
 | `hrm_lifecycle_actions` | DOM-HRM-004 — HRM Lifecycle: Zeiterfassung, Abwesenheit, Arbeitszeitkonto. |
 | `iban_lookup` | IBAN Lookup Service |
 | `idempotency_monitoring` | — |
+| `identity_management` | Server-side session management in the shared identity boundary. |
 | `import_pipeline` | Import Pipeline Endpoints — Wave 3 AP6 |
 | `individualpreise` | Individualpreise [PRI/PRIE] — Kunden-/Lieferanten-spezifische Preise. |
 | `individuelle_artikelnummern` | Individuelle Artikelnummern [INDIVART] — Kunden-/Lieferanten-spezifische Artikelnummern. |
@@ -262,10 +274,11 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `kontrakt_klassen` | Kontrakt-Klassen und Kontraktvarianten (Agrar-Spezialsoftware Feature). |
 | `kontrakt_mengenzeitraum` | Kontraktmengenzeitraum — Ratierliche Lieferpläne für Rohwarenkontrakte. |
 | `kontrakte` | Kontrakte endpoints — contract CRUD, movements, amendments, dispositionen. |
+| `kontrolle` | Pruefkorb des Controllers (FIN-CONTROL-001). |
 | `kostenrechnung` | Kostenrechnung: Kostenstellen, Kostenarten, Kostenstellen-Buchungen. |
 | `kundenbanken` | Kundenbanken — IBAN/BIC-Bankverbindungen pro Kunde. |
 | `l3_report_catalog` | Prioritized fixed L3 report catalog API. |
-| `labor` | Labor API - DB-backed endpoints. |
+| `labor` | Laborproben, Laborauftraege und Befunde im Mandanten. |
 | `leads` | Tenant-bound lead CRUD and qualification on public.crm_leads. |
 | `legacy_interface_adapters` | Governed L3 Standard and Unimet adapter API. |
 | `liquidity` | Liquidity Planning API -- Liquiditaetsplanung |
@@ -277,7 +290,6 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `lohn_connector` | Lohn-Connector API – Lohn-Import-Läufe (LEXWARE / externe Lohnbuchhaltung). |
 | `mail_workspace` | Role-scoped ERP mail workspace API. |
 | `mailkonto` | Postfaecher des Mandanten — Einrichtung, Freigaben, Testmail, Anmeldung bei Google/Microsoft. |
-| `marketing` | Marketing API - DB-backed endpoints. |
 | `mask_actions` | SPEC-P1-04 / UIX-053+: Mask Action CommandEndpoints mit ActionRuntime. |
 | `mask_frontend_bridges` | Frontend-Pfade, die der Maskengenerator und die Fachmasken schon rufen. |
 | `mask_registry` | Mask Registry API — Wave 3 AP1 |
@@ -332,6 +344,8 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `portal_innendienst` | PORTAL-INNENDIENST-001 — Innendienst-Sicht auf Kundenschlaege und Potentialanalyse. |
 | `portal_intelligence` | — |
 | `portal_interessent` | — |
+| `portal_kundenwege` | Portalwege des Kundenportals: Uebersicht, Anfragen, Bestellungen, Rechnungen, Unterlagen, Feldbuchliste, |
+| `portal_kundenzugaenge` | Kundenzugaenge des Portals: welche Anmeldung welche Kundenkonten mit welcher Portalrolle sieht (TENANT-DOC-001, |
 | `portal_lohndienst` | — |
 | `portal_preisspiegel` | PORTAL-PREISSPIEGEL-001 — Getreidekurs-API fuer Kundenportal und Innendienst. |
 | `portal_shop` | Kundenportal Shop API Endpunkte |
@@ -343,6 +357,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `pos_tagesabschluss_actions` | DOM-POS-004 — POS Tagesabschluss: Z-Bon, TSE-Simulation, DSFinV-K. |
 | `position_overrides` | Commodity Position Override API (Freigabe anfordern / genehmigen / ablehnen). |
 | `position_rules` | Commodity Position Rules API (No-Speculation Guard Regeln). |
+| `preis_kalkulation_bridge` | Preiskalkulation der Maske ``preise/kalkulation`` (aus ``mask_frontend_bridges`` herausgeloest, 19.10.2026). |
 | `preis_rabattgruppen` | Rabattgruppen und Rabattklassen — Stammdaten für die Rabattpflege. |
 | `preparation_lists` | Preparation list endpoints (l3c-lager Rüstlisten) |
 | `price_calculation` | Preis-Kalkulations-Engine (dynamisch). |
@@ -397,6 +412,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `sales_invoices` | Die Ausgangsrechnung mit ihren Positionen. |
 | `sales_match` | Auftrag-↔-Lieferschein-Positions-Match (DOM-SALES-004.2) — read-only. |
 | `sales_offers` | Domain sales offers (Angebote) CRUD endpoints. |
+| `sales_order_commands` | Auftrag stornieren als Kommando-Weg (Studio-Katalog ``stornieren``, MASK-COMMANDS-ROLLOUT-20261019). |
 | `sales_orders` | Domain sales orders CRUD endpoints. |
 | `sales_reports` | Sales Reports and Dashboards endpoints. |
 | `sales_shipping_ext` | Sales shipping extension endpoints (l3c-verkaufslieferschein extras) |
@@ -412,10 +428,12 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `silo_operations_api` | — |
 | `silo_target_cell` | WM-SILO-RULE-ENGINE-001 — Zielzellen-Vorschlag API. |
 | `sla_escalation_api` | SLA-Eskalation API — Wave 12 |
+| `stammdaten_bearbeiten` | Bearbeiten nativer Objektmasken als Fachaktion fuer Maske, CLI und MCP (STAMMDATEN-BEARBEITEN-20261019). |
 | `stmd_duplikat` | STMD-DUP-001: Cross-Domain-Dublettenprüfung für Stammdaten. |
 | `strecke` | Strecke – Streckengeschaefte CRUD |
 | `strecke_speditionen` | Strecke – Speditionen / Frachttarife nach PLZ |
 | `studio_drafts` | ScreenDefinition Studio API — catalog, validate, propose, drafts. |
+| `studio_native_import` | Authenticated native-mask baselines; no activation or release shortcut. |
 | `stuecklisten` | Stücklisten / Rezepturen [ARTSTLI] — Artikelkomponenten-Stammdaten. |
 | `subsidiary_ledger_reconciliation` | Subsidiary Ledger Reconciliation API |
 | `supplier_portal` | — |
@@ -429,7 +447,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `tax_keys` | Tax Keys API |
 | `tenant_governance` | Tenant Governance API — Wave 2 AP3-AP6 |
 | `tenant_limits` | Tenant-isolated cache and rate-limit API. |
-| `tenants` | Tenant API endpoints |
+| `tenants` | Tenant lifecycle with explicit platform authority and journal preservation. |
 | `terminology` | Terminology API for the Landhandel bilingual terminology registry. |
 | `tours` | Tours API - Verladung/Tour Management |
 | `training` | Training, qualification and onboarding CRUD endpoints. |
@@ -437,7 +455,6 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `users` | User API endpoints |
 | `ux_overlays` | User-scoped ScreenDefinition overlays (UIX-071). |
 | `ux_telemetry` | UX-Telemetrie — Omnibox-Intent-Signale (UIX-060). |
-| `vat_codes` | VAT Tax Codes Admin API |
 | `vat_return_export` | VAT Return Export API |
 | `verladung` | Verladung — vollständiges CRUD. |
 | `vermehrungsvertrag` | Vermehrungsvertrag [SAATV] — Saatgut-Anbauverträge mit Vermehrern. |
@@ -470,7 +487,6 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `workflow_template_marketplace` | — |
 | `xrechnung` | INT-XRECHNUNG-001: XRechnung / ZUGFeRD E-Rechnung Export. |
 | `zahlungsbedingungen` | Zahlungsbedingungen [ZABD] — Zahlungsziel, Skonto, Zahlungsart. |
-| `zertifikate` | Zertifikate API - DB-backed endpoints. |
-| `zertifikate_api` | — |
+| `zertifikate` | Zertifikate (Bio, QS, GlobalG.A.P. ...) im Mandanten. |
 | `zinsabrechnung` | Zinsabrechnung — Zinsen auf Rohware-Einlagerungskontrakte. |
 | `zu_abschlaggruppen` | Zu-/Abschlaggruppen [ZAGR] und Zu-/Abschlagklassen [ZAKL] — Konditionsstammdaten. |

@@ -74,10 +74,6 @@ export const entries: AutoGroupRouteEntry[] = [
     "path": "kasse"
   },
   {
-    "module": "@/pages/finance/kontenplan",
-    "path": "kontenplan"
-  },
-  {
     "module": "@/pages/finance/kreditoren-stamm",
     "path": "kreditoren-stamm"
   },
@@ -86,7 +82,7 @@ export const entries: AutoGroupRouteEntry[] = [
     "path": "lastschriften-debitoren"
   },
   {
-    "module": "@/pages/finance/mahnwesen",
+    "module": "@/pages/finance/mahnlauf",
     "path": "mahnwesen"
   },
   {

@@ -3,6 +3,7 @@ Liquiditätsplanung — 13-Wochen-Rolling-Forecast, thin-router pattern
 """
 from __future__ import annotations
 
+from app.auth.finance_roles import finance_read, finance_write
 import logging
 from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal
@@ -154,8 +155,7 @@ class ScenarioCreate(BaseModel):
 # ---------------------------------------------------------------------------
 
 @router.get("/forecast", tags=["finance", "liquidity"], summary="Forecast liquidity",
-    response_model=LiquidityPlanningOut
-)
+    response_model=LiquidityPlanningOut, dependencies=[Depends(finance_read)])
 def liquidity_forecast(
     weeks: int = Query(13, ge=1, le=52),
     tenant_id: str = Depends(get_tenant_id),
@@ -206,8 +206,7 @@ def liquidity_forecast(
 # ---------------------------------------------------------------------------
 
 @router.get("/cash-position", tags=["finance", "liquidity"], summary="Position cash",
-    response_model=LiquidityPlanningOut
-)
+    response_model=LiquidityPlanningOut, dependencies=[Depends(finance_read)])
 def cash_position(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -231,8 +230,7 @@ def cash_position(
 # ---------------------------------------------------------------------------
 
 @router.post("/scenarios", status_code=201, tags=["finance", "liquidity"], summary="Liquidity scenario anlegen",
-    response_model=LiquidityPlanningOut
-)
+    response_model=LiquidityPlanningOut, dependencies=[Depends(finance_write)])
 def create_liquidity_scenario(
     body: ScenarioCreate,
     tenant_id: str = Depends(get_tenant_id),

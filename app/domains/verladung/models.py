@@ -2,7 +2,7 @@
 Verladung Domain Models - Tours, Stops, Delivery Notes, Events
 """
 
-from sqlalchemy import Column, String, Integer, Float, DateTime, Text, ForeignKey, JSON
+from sqlalchemy import Column, String, Integer, Float, DateTime, Text, ForeignKey, JSON, UniqueConstraint, CheckConstraint, Index, ForeignKeyConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 import enum
@@ -73,12 +73,20 @@ class Tour(Base):
     Tour Model for Tour Management
     """
     __tablename__ = "log_touren"
-    __table_args__ = {"schema": "domain_log", "extend_existing": True}
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "tour_no", name="uq_log_touren_tenant_tour_no"),
+        CheckConstraint("trim(tenant_id) <> ''", name="ck_log_touren_tenant_nonblank"),
+        Index("ix_log_touren_tenant_date", "tenant_id", "date"),
+        Index("ix_log_touren_tenant_status", "tenant_id", "status"),
+        {"schema": "domain_log", "extend_existing": True},
+    )
 
     id = Column(String, primary_key=True, default=default_prefixed_id("TOUR"))
     
+    tenant_id = Column(String(120), nullable=False)
+
     # Tour identification
-    tour_no = Column(String(50), nullable=False, unique=True)
+    tour_no = Column(String(50), nullable=False)
     date = Column(DateTime(timezone=True), nullable=False)
     week = Column(String(10))  # 2026-W07
     
@@ -118,7 +126,7 @@ class TourStop(Base):
     Tour Stop / Abladestelle
     """
     __tablename__ = "log_tour_stops"
-    __table_args__ = {"schema": "domain_log", "extend_existing": True}
+    __table_args__ = (UniqueConstraint("tour_id", "id", name="uq_log_tour_stops_tour_id_id"), {"schema": "domain_log", "extend_existing": True})
 
     id = Column(String, primary_key=True, default=default_prefixed_id("STOP"))
     
@@ -159,7 +167,7 @@ class TourStop(Base):
     
     # Relationships
     tour = relationship("Tour", back_populates="stops")
-    delivery_notes = relationship("TourDeliveryNote", back_populates="stop", cascade="all, delete-orphan")
+    delivery_notes = relationship("TourDeliveryNote", back_populates="stop", cascade="all, delete-orphan", foreign_keys="[TourDeliveryNote.tour_id, TourDeliveryNote.stop_id]", primaryjoin="and_(TourStop.id == TourDeliveryNote.stop_id, TourStop.tour_id == TourDeliveryNote.tour_id)", overlaps="tour")
 
 
 class TourDeliveryNote(Base):
@@ -167,7 +175,11 @@ class TourDeliveryNote(Base):
     Delivery Note / Lieferschein on Tour
     """
     __tablename__ = "log_tour_delivery_notes"
-    __table_args__ = {"schema": "domain_log", "extend_existing": True}
+    __table_args__ = (
+        CheckConstraint("stop_id IS NULL OR tour_id IS NOT NULL", name="ck_log_tour_dn_stop_requires_tour"),
+        ForeignKeyConstraint(["tour_id", "stop_id"], ["domain_log.log_tour_stops.tour_id", "domain_log.log_tour_stops.id"], name="fk_log_tour_dn_same_tour_stop", ondelete="CASCADE"),
+        {"schema": "domain_log", "extend_existing": True},
+    )
 
     id = Column(String, primary_key=True, default=default_prefixed_id("DN"))
     
@@ -198,8 +210,8 @@ class TourDeliveryNote(Base):
     created_at_record = Column(DateTime(timezone=True), server_default=func.now())
     
     # Relationships
-    tour = relationship("Tour")
-    stop = relationship("TourStop", back_populates="delivery_notes")
+    tour = relationship("Tour", foreign_keys=[tour_id], overlaps="delivery_notes,stop")
+    stop = relationship("TourStop", back_populates="delivery_notes", foreign_keys=[tour_id, stop_id], primaryjoin="and_(TourDeliveryNote.stop_id == TourStop.id, TourDeliveryNote.tour_id == TourStop.tour_id)", overlaps="tour")
 
 
 class TourEvent(Base):

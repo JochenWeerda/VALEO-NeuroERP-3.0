@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { type User, auth } from '@/lib/auth'
+import { toast } from 'sonner'
 
 interface AuthHook {
   user: User | null
@@ -21,12 +22,27 @@ const safeRedirect = (target: string): void => {
 
 export function useAuth(): AuthHook {
   const [user, setUser] = useState<User | null>(auth.getUser())
-  const [loading, setLoading] = useState<boolean>(false)
+  const [loading, setLoading] = useState<boolean>(() => !auth.isAuthenticated() && auth.canRefresh())
   const isMountedRef = useRef(true)
 
   useEffect(() => {
-    setUser(auth.getUser())
+    isMountedRef.current = true
+    const sync = (): void => setUser(auth.getUser())
+    sync()
+    window.addEventListener('valeo-auth-changed', sync)
+    let active = true
+    if (!auth.isAuthenticated() && auth.canRefresh()) {
+      setLoading(true)
+      void auth.getFreshAccessToken().finally(() => {
+        if (active) {
+          sync()
+          setLoading(false)
+        }
+      })
+    }
     return () => {
+      active = false
+      window.removeEventListener('valeo-auth-changed', sync)
       isMountedRef.current = false
     }
   }, [])
@@ -56,17 +72,10 @@ export function useAuth(): AuthHook {
   }
 
   const logout = (): void => {
-    setSafeLoading(false)
-    // Check if OIDC is actually configured (not just placeholder)
-    const discoveryUrl = (import.meta.env.VITE_OIDC_DISCOVERY_URL ?? '')
-    const placeholderPatterns = ['your-oidc-provider.com', 'example.com', 'keycloak.example.com', '{tenant-id}', '{domain}', '{application-id}', '{client-id}']
-    const oidcConfigured = discoveryUrl.length > 0 && !placeholderPatterns.some(pattern => discoveryUrl.includes(pattern))
-    auth.logout()
     setSafeUser(null)
-    // Only redirect to login if OIDC is configured
-    if (oidcConfigured) {
-      safeRedirect(LOGIN_PATH)
-    }
+    void auth.logout().catch(() => {
+      toast.error('Lokal abgemeldet. Der vollstaendige Widerruf konnte nicht bestaetigt werden.', { id: 'session-revocation' })
+    }).finally(() => safeRedirect(LOGIN_PATH))
   }
 
   const handleCallback = async (_code: string, _state: string): Promise<void> => {

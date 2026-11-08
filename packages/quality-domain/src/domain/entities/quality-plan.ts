@@ -22,14 +22,14 @@ export type QualityPlanRule = z.infer<typeof QualityPlanRuleSchema>;
  * Quality Plan - Prüfplan für Qualitätssicherung
  */
 export const QualityPlanSchema = z.object({
-  id: z.string().uuid().optional(),
+  id: z.string().guid().optional(),
   tenantId: z.string().min(1, 'Tenant ID is required'),
   name: z.string().min(1, 'Name is required'),
   description: z.string().optional(),
   
   // Context: Wo gilt dieser Plan?
   commodity: z.string().optional(), // Commodity-Code
-  contractId: z.string().uuid().optional(), // Spezifischer Vertrag
+  contractId: z.string().guid().optional(), // Spezifischer Vertrag
   productionContext: z.string().optional(), // z.B. "Line-A", "Supplier-XYZ"
   
   // Status

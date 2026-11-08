@@ -13,8 +13,8 @@ export type CallOffStatusValue = typeof CallOffStatus[keyof typeof CallOffStatus
 
 // Schema
 export const CallOffSchema = z.object({
-  id: z.string().uuid().optional(),
-  contractId: z.string().uuid(),
+  id: z.string().guid().optional(),
+  contractId: z.string().guid(),
   tenantId: z.string(),
   qty: z.number().positive(),
   window: z.object({

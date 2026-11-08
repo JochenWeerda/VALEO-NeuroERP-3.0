@@ -6,14 +6,13 @@ WebSocket-Endpoint fuer Echtzeit-AI-Streaming mit Neuro-Core Pipeline Integratio
 from __future__ import annotations
 
 import json
+import asyncio
 import logging
 from datetime import datetime, timezone
 from uuid import uuid4
 
 from fastapi import APIRouter, Query, WebSocket, WebSocketDisconnect, status
 
-from app.auth.jwt import decode_token
-from app.core.config import settings
 
 from app.api.v1.schemas.base import BaseSchema
 
@@ -24,49 +23,9 @@ logger = logging.getLogger(__name__)
 _SESSIONS: dict[str, dict] = {}
 
 
-def _extract_websocket_token(websocket: WebSocket, query_token: str | None) -> str:
-    if query_token:
-        return query_token.strip()
-
-    auth_header = (websocket.headers.get("authorization") or "").strip()
-    if auth_header.lower().startswith("bearer "):
-        return auth_header[7:].strip()
-
-    return auth_header
-
-
-def _resolve_authenticated_context(
-    websocket: WebSocket,
-    query_token: str | None,
-    query_tenant_id: str | None,
-) -> dict:
-    token = _extract_websocket_token(websocket, query_token)
-    if not token:
-        raise ValueError("Missing bearer token")
-
-    if settings.API_DEV_TOKEN and token == settings.API_DEV_TOKEN:
-        user_id = "dev"
-        roles: list[str] = ["admin"]
-    else:
-        claims = decode_token(token)
-        user_id = (claims.get("sub") or "").strip()
-        roles = claims.get("roles") or []
-        if not isinstance(roles, list):
-            roles = []
-        if not user_id:
-            raise ValueError("Invalid or expired token")
-
-    tenant_id = (
-        (query_tenant_id or "").strip()
-        or (websocket.headers.get("x-tenant-id") or "").strip()
-        or "system"
-    )
-
-    return {
-        "user_id": user_id,
-        "tenant_id": tenant_id,
-        "roles": roles,
-    }
+def _resolve_authenticated_context(websocket: WebSocket, query_token: str | None, query_tenant_id: str | None) -> dict:
+    from app.core.security import verified_websocket_context
+    return verified_websocket_context(websocket, query_token, query_tenant_id)
 
 
 def _run_pipeline_sync(user_text: str, session_context: dict) -> dict:
@@ -76,7 +35,7 @@ def _run_pipeline_sync(user_text: str, session_context: dict) -> dict:
         return run_pipeline(
             user_input=user_text,
             context=session_context,
-            tenant_id=session_context.get("tenant_id", "system"),
+            tenant_id=session_context["tenant_id"],  # verified_websocket_context liefert ihn immer
             db=None,
             dry_run=False,
         )
@@ -198,7 +157,7 @@ async def copilot_chat(
                 "state": "engaged",
             })
 
-            pipeline_result = _run_pipeline_sync(user_text, session_ctx)
+            pipeline_result = await asyncio.to_thread(_run_pipeline_sync, user_text, session_ctx)
 
             await websocket.send_json({
                 "type": "pipeline_result",

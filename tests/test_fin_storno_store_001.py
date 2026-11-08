@@ -22,7 +22,7 @@ class TestFinStornoStoreBelegbruch:
         je_row.__iter__ = lambda self: iter(("JE-001", "booked"))
         db.execute.return_value.fetchone.return_value = (je_row[0], "booked")
 
-        invoice_data = {"status": "GEBUCHT", "number": "RG-2026-200"}
+        invoice_data = {"status": "GEBUCHT", "number": "RG-2026-200", "tenantId": TENANT}
 
         reversal_mock = MagicMock()
         reversal_mock.id = "REV-001"
@@ -31,12 +31,16 @@ class TestFinStornoStoreBelegbruch:
             patch("app.api.v1.endpoints.finance_invoices.FinanceTransactionService") as mock_svc,
             patch("app.api.v1.endpoints.finance_invoices._resolve_open_items_table", return_value="domain_erp.offene_posten"),
             patch("app.api.v1.endpoints.finance_invoices.get_repository", return_value=None),
-            patch("app.api.v1.endpoints.finance_invoices.get_from_store", return_value=invoice_data),
+            patch("app.documents.router_helpers.get_from_store", return_value=invoice_data),
             patch("app.api.v1.endpoints.finance_invoices.save_to_store") as mock_save,
             patch("app.api.v1.endpoints.finance_invoices.log_fibu_audit"),
+            # Nachgestellte Datenbank: Die Freigabe des Stornos prueft tests/test_freigabe_zweitwege.py an der echten.
+            patch("app.services.finance_freigabe.verlange_storno_ausgangsrechnung") as freigabe,
         ):
             mock_svc.return_value.reverse.return_value = (MagicMock(id="JE-001"), reversal_mock)
-            result = await storno_invoice(invoice_number="RG-2026-200", tenant_id=TENANT, db=db)
+            result = await storno_invoice(invoice_number="RG-2026-200", tenant_id=TENANT, db=db, nutzer={"sub": "b-1"})
+
+        freigabe.assert_called_once_with(db, TENANT, "RG-2026-200", "b-1")
 
         assert result["ok"] is True
         assert mock_save.called

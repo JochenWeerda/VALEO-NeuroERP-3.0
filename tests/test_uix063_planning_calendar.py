@@ -19,7 +19,7 @@ from app.services.calendar_projection_service import (
     PeriodischeBuchungenProjector,
     SaisonKalenderProjector,
 )
-from main import app
+from app.main import app
 
 
 HEADERS = {"Authorization": "Bearer dev-token", "X-Tenant-ID": "tenant-calendar-uix063"}

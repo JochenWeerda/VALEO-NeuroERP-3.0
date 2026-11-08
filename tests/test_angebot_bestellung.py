@@ -112,8 +112,8 @@ def angebot(engine, haus: str, status: str = "offen", positionen: int = 2) -> st
         for nr in range(1, positionen + 1):
             v.execute(text(
                 "INSERT INTO einkauf_angebote_positionen (id, angebot_id, pos_nr, artikel_nr, bezeichnung, "
-                " menge, einheit, einheitspreis, gesamtpreis, lieferzeit_tage) "
-                "VALUES (:i, :a, :p, :art, :bez, :m, 'dt', 25, :g, :lz)"
+                " menge, einheit, einheitspreis, gesamtpreis, lieferzeit_tage, tenant_id) "
+                "VALUES (:i, :a, :p, :art, :bez, :m, 'dt', 25, :g, :lz, (SELECT tenant_id FROM public.einkauf_angebote WHERE id = :a))"
             ), {"i": str(uuid.uuid4()), "a": kennung, "p": nr, "art": f"ART-{nr}", "bez": f"Saatweizen Sorte {nr}",
                 "m": 10 * nr, "g": 250 * nr, "lz": 5 + nr})
     return kennung

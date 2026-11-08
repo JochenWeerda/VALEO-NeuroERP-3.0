@@ -37,6 +37,7 @@ import {
   showPage,
 } from '@/app/navigation/launchpad-personalization'
 import { useLaunchpadPersonalization } from '@/hooks/useLaunchpadPersonalization'
+import { prioritizeLaunchpadSpaces } from '@/workspace/prioritize-spaces'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -72,6 +73,7 @@ type LaunchpadBoardProps = {
   onSpaceIdChange: (spaceId: string) => void
   pageBySpace: Record<string, string>
   onPageBySpaceChange: (pages: Record<string, string>) => void
+  rankedTileIds?: string[]
 }
 
 export function LaunchpadBoard({
@@ -80,6 +82,7 @@ export function LaunchpadBoard({
   onSpaceIdChange,
   pageBySpace,
   onPageBySpaceChange,
+  rankedTileIds,
 }: LaunchpadBoardProps): JSX.Element {
   const { overlay, setOverlay } = useLaunchpadPersonalization()
   const [personalize, setPersonalize] = useState(false)
@@ -96,10 +99,16 @@ export function LaunchpadBoard({
   const [settingsDescription, setSettingsDescription] = useState('')
   const [moveTarget, setMoveTarget] = useState('')
 
-  const spaces = useMemo(
-    () => applyLaunchpadOverlay(catalogSpaces, overlay, { includeHidden: personalize }),
-    [catalogSpaces, overlay, personalize],
-  )
+  const spaces = useMemo(() => {
+    const applied = applyLaunchpadOverlay(catalogSpaces, overlay, { includeHidden: personalize })
+    if (personalize) {
+      return applied
+    }
+    return prioritizeLaunchpadSpaces(applied, rankedTileIds ?? [], {
+      pinned: overlay.pinnedTileIds ?? [],
+      surfaceLocked: overlay.surfaceLocked === true,
+    })
+  }, [catalogSpaces, overlay, personalize, rankedTileIds])
   const activeSpaceId = spaces.some((space) => space.id === spaceId) ? spaceId : (spaces[0]?.id ?? '')
   const activeSpace = spaces.find((space) => space.id === activeSpaceId) ?? spaces[0]
   const activePageId = activeSpace
@@ -182,6 +191,7 @@ export function LaunchpadBoard({
             <Button
               type="button"
               variant="outline"
+              className="h-11"
               onClick={() => setFinderOpen(true)}
               aria-label="App-Katalog öffnen"
             >

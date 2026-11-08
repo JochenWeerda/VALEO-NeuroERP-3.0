@@ -104,7 +104,7 @@ class TestRollenpruefung:
         assert (PRAEFIX + "/backup", "POST") in vorhanden
         assert (PRAEFIX + "/backup", "GET") not in vorhanden
 
-    @pytest.mark.parametrize("pfad,methode", [("/list", "GET"), ("/test", "POST")])
+    @pytest.mark.parametrize("pfad,methode", [("/list", "GET")])
     def test_lesende_routen_bleiben_ohne_rollenpruefung(
         self, policy_routes, pfad, methode
     ):
@@ -112,3 +112,9 @@ class TestRollenpruefung:
         festgehalten, damit eine Aenderung eine Entscheidung bleibt."""
         route = policy_routes[(PRAEFIX + pfad, (methode,))][0]
         assert not _hat_rollenpruefung(route)
+
+    def test_policy_test_verlangt_fach_oder_leserolle(self, policy_routes):
+        """Entscheid 19.10.2026 (WRITE-ROLES): jeder Schreib-/POST-Weg braucht ein ausdrueckliches Recht; die
+        Probe-Auswertung schreibt nichts und verlangt deshalb nur eine Fach- oder Leserolle."""
+        route = policy_routes[(PRAEFIX + "/test", ("POST",))][0]
+        assert _hat_rollenpruefung(route)

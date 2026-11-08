@@ -27,6 +27,7 @@ from ....core.tenant import get_tenant_id
 from ....services import webhook_service as dienst
 
 from app.api.v1.schemas.base import BaseSchema
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter()
@@ -122,7 +123,7 @@ def list_bereiche() -> list[str]:
     return dienst.BEREICHE
 
 
-@router.post("/bereiche/{bereich}", response_model=WebhookOut, status_code=201, tags=["webhooks"], summary="Webhook registrieren")
+@router.post("/bereiche/{bereich}", response_model=WebhookOut, status_code=201, tags=["webhooks"], summary="Webhook registrieren", dependencies=SCHREIBEN["PLATTFORM"])
 def register_webhook(
     bereich: str,
     payload: WebhookCreate,
@@ -174,7 +175,7 @@ def list_zustellversuche(
         raise HTTPException(status_code=503, detail=str(fehler)) from fehler
 
 
-@router.delete("/abmelden/{nr}", status_code=204, response_class=Response, tags=["webhooks"], response_model=None, summary="Webhook abmelden")
+@router.delete("/abmelden/{nr}", status_code=204, response_class=Response, tags=["webhooks"], response_model=None, summary="Webhook abmelden", dependencies=SCHREIBEN["PLATTFORM"])
 def unregister_webhook(
     nr: int,
     tenant_id: str = Depends(get_tenant_id),

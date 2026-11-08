@@ -21,33 +21,177 @@
     "realm": [
       {
         "name": "admin",
-        "description": "System Administrator - Full Access",
+        "description": "Technische Administration",
         "composite": false
       },
       {
         "name": "user",
-        "description": "Standard User - Basic Access",
+        "description": "Angemeldeter Standardnutzer",
         "composite": false
       },
       {
         "name": "auditor",
-        "description": "Auditor - Read-Only Access + Audit Logs",
+        "description": "Pruefender Zugang",
         "composite": false
       },
       {
         "name": "finance_manager",
-        "description": "Finance Manager - Finance Module Access",
+        "description": "Historische Finanzrolle",
         "composite": false
       },
       {
         "name": "inventory_manager",
-        "description": "Inventory Manager - Inventory Module Access",
+        "description": "Historische Lagerrolle",
         "composite": false
       },
       {
         "name": "crm_manager",
-        "description": "CRM Manager - CRM Module Access",
+        "description": "Historische CRM-Rolle",
         "composite": false
+      },
+      {
+        "name": "AGRAR_ADMIN",
+        "description": "Agrar: fachliche Leitung; Freigaben und Abschluesse nur gemaess Aktionsvertrag, keine technische Administration"
+      },
+      {
+        "name": "AGRAR_BEARBEITEN",
+        "description": "Agrar: anlegen und aendern"
+      },
+      {
+        "name": "AGRAR_LESEN",
+        "description": "Agrar: ansehen"
+      },
+      {
+        "name": "CRM_ADMIN",
+        "description": "Vertrieb und Kundenpflege: fachliche Leitung; Freigaben und Abschluesse nur gemaess Aktionsvertrag, keine technische Administration"
+      },
+      {
+        "name": "CRM_BEARBEITEN",
+        "description": "Vertrieb und Kundenpflege: anlegen und aendern"
+      },
+      {
+        "name": "CRM_LESEN",
+        "description": "Vertrieb und Kundenpflege: ansehen"
+      },
+      {
+        "name": "EINKAUF_ADMIN",
+        "description": "Einkauf: fachliche Leitung; Freigaben und Abschluesse nur gemaess Aktionsvertrag, keine technische Administration"
+      },
+      {
+        "name": "EINKAUF_BEARBEITEN",
+        "description": "Einkauf: anlegen und aendern"
+      },
+      {
+        "name": "EINKAUF_LESEN",
+        "description": "Einkauf: ansehen"
+      },
+      {
+        "name": "FINANCE_ADMIN",
+        "description": "Finanzbuchhaltung: fachliche Leitung; Freigaben und Abschluesse nur gemaess Aktionsvertrag, keine technische Administration"
+      },
+      {
+        "name": "FINANCE_BEARBEITEN",
+        "description": "Finanzbuchhaltung: anlegen und aendern"
+      },
+      {
+        "name": "FINANCE_LESEN",
+        "description": "Finanzbuchhaltung: ansehen"
+      },
+      {
+        "name": "FUTTERMITTEL_ADMIN",
+        "description": "Futtermittel: fachliche Leitung; Freigaben und Abschluesse nur gemaess Aktionsvertrag, keine technische Administration"
+      },
+      {
+        "name": "FUTTERMITTEL_BEARBEITEN",
+        "description": "Futtermittel: anlegen und aendern"
+      },
+      {
+        "name": "FUTTERMITTEL_LESEN",
+        "description": "Futtermittel: ansehen"
+      },
+      {
+        "name": "HARVEST_ADMIN",
+        "description": "Ernteannahme: fachliche Leitung; Freigaben und Abschluesse nur gemaess Aktionsvertrag, keine technische Administration"
+      },
+      {
+        "name": "HARVEST_BEARBEITEN",
+        "description": "Ernteannahme: anlegen und aendern"
+      },
+      {
+        "name": "HARVEST_LESEN",
+        "description": "Ernteannahme: ansehen"
+      },
+      {
+        "name": "KONTENPLAN_PFLEGE",
+        "description": "Kontenplan: pflegen (delegierbar, unabhaengig von der Leitungsrolle)"
+      },
+      {
+        "name": "KONTENRAHMEN_PFLEGE",
+        "description": "Gemeinsamer Kontenrahmen: pflegen (delegierbar, unabhaengig von der Leitungsrolle)"
+      },
+      {
+        "name": "KONTRAKT_ADMIN",
+        "description": "Kontrakte: fachliche Leitung; Freigaben und Abschluesse nur gemaess Aktionsvertrag, keine technische Administration"
+      },
+      {
+        "name": "KONTRAKT_BEARBEITEN",
+        "description": "Kontrakte: anlegen und aendern"
+      },
+      {
+        "name": "KONTRAKT_LESEN",
+        "description": "Kontrakte: ansehen"
+      },
+      {
+        "name": "KONTRAKT_LOESCHEN",
+        "description": "Kontrakte: loeschen"
+      },
+      {
+        "name": "LAGER_ADMIN",
+        "description": "Lager: fachliche Leitung; Freigaben und Abschluesse nur gemaess Aktionsvertrag, keine technische Administration"
+      },
+      {
+        "name": "LAGER_BEARBEITEN",
+        "description": "Lager: anlegen und aendern"
+      },
+      {
+        "name": "LAGER_LESEN",
+        "description": "Lager: ansehen"
+      },
+      {
+        "name": "PERSONAL_ADMIN",
+        "description": "Personal: fachliche Leitung; Freigaben und Abschluesse nur gemaess Aktionsvertrag, keine technische Administration"
+      },
+      {
+        "name": "PERSONAL_BEARBEITEN",
+        "description": "Personal: anlegen und aendern"
+      },
+      {
+        "name": "PERSONAL_LESEN",
+        "description": "Personal: ansehen"
+      },
+      {
+        "name": "QUALITAET_LESEN",
+        "description": "Qualitaetssicherung: ansehen"
+      },
+      {
+        "name": "SALES_ADMIN",
+        "description": "Verkauf: fachliche Leitung; Freigaben und Abschluesse nur gemaess Aktionsvertrag, keine technische Administration"
+      },
+      {
+        "name": "SALES_BEARBEITEN",
+        "description": "Verkauf: anlegen und aendern"
+      },
+      {
+        "name": "SALES_LESEN",
+        "description": "Verkauf: ansehen"
+      },
+      {
+        "name": "SETTLEMENT_LESEN",
+        "description": "Abrechnung: ansehen"
+      },
+      {
+        "name": "manager",
+        "description": "Historische Managementrolle ohne eigene Rechte; nicht neu vergeben"
       }
     ]
   },
@@ -67,12 +211,14 @@
       "redirectUris": [
         "http://localhost:3000/*",
         "http://localhost:5173/*",
-        "http://localhost:8000/auth/callback"
+        "http://localhost:8000/auth/callback",
+        "http://localhost:3001/auth/callback"
       ],
       "webOrigins": [
         "http://localhost:3000",
         "http://localhost:5173",
-        "http://localhost:8000"
+        "http://localhost:8000",
+        "http://localhost:3001"
       ],
       "attributes": {
         "pkce.code.challenge.method": "S256"
@@ -81,6 +227,110 @@
         "email",
         "profile",
         "roles"
+      ],
+      "protocolMappers": [
+        {
+          "name": "erp-api-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "valeo-neuro-erp-backend",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        },
+        {
+          "name": "erp-identity-type",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "identity_type",
+            "claim.name": "identity_type",
+            "jsonType.label": "String",
+            "access.token.claim": "true",
+            "id.token.claim": "true"
+          }
+        },
+        {
+          "name": "erp-permissions",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "erp_scopes",
+            "claim.name": "erp_scopes",
+            "jsonType.label": "String",
+            "multivalued": "true",
+            "access.token.claim": "true",
+            "id.token.claim": "true"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "valeo-neuro-erp-cli",
+      "name": "VALEO NeuroERP CLI",
+      "description": "Kommandozeile fuer Maskenaktionen; nur Device-Anmeldung der Person, kein Dienstkonto",
+      "enabled": true,
+      "publicClient": true,
+      "protocol": "openid-connect",
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "authorizationServicesEnabled": false,
+      "redirectUris": [],
+      "webOrigins": [],
+      "attributes": {
+        "oauth2.device.authorization.grant.enabled": "true",
+        "pkce.code.challenge.method": "S256"
+      },
+      "defaultClientScopes": [
+        "email",
+        "profile",
+        "roles"
+      ],
+      "protocolMappers": [
+        {
+          "name": "erp-api-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "valeo-neuro-erp-backend",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        },
+        {
+          "name": "erp-identity-type",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "identity_type",
+            "claim.name": "identity_type",
+            "jsonType.label": "String",
+            "access.token.claim": "true",
+            "id.token.claim": "true"
+          }
+        },
+        {
+          "name": "erp-permissions",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "erp_scopes",
+            "claim.name": "erp_scopes",
+            "jsonType.label": "String",
+            "multivalued": "true",
+            "access.token.claim": "true",
+            "id.token.claim": "true"
+          }
+        }
       ]
     },
     {
@@ -94,7 +344,6 @@
       "serviceAccountsEnabled": true,
       "authorizationServicesEnabled": true,
       "clientAuthenticatorType": "client-secret",
-      "secret": "valeo-backend-secret-dev-change-in-prod",
       "redirectUris": [
         "http://localhost:8000/auth/callback"
       ],
@@ -102,68 +351,52 @@
         "email",
         "profile",
         "roles"
+      ],
+      "directAccessGrantsEnabled": false,
+      "implicitFlowEnabled": false,
+      "protocolMappers": [
+        {
+          "name": "erp-api-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "valeo-neuro-erp-backend",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        },
+        {
+          "name": "erp-identity-type",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "identity_type",
+            "claim.name": "identity_type",
+            "jsonType.label": "String",
+            "access.token.claim": "true",
+            "id.token.claim": "true"
+          }
+        },
+        {
+          "name": "erp-permissions",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "erp_scopes",
+            "claim.name": "erp_scopes",
+            "jsonType.label": "String",
+            "multivalued": "true",
+            "access.token.claim": "true",
+            "id.token.claim": "true"
+          }
+        }
       ]
     }
   ],
-  "users": [
-    {
-      "username": "admin",
-      "enabled": true,
-      "emailVerified": true,
-      "email": "admin@valeo-erp.local",
-      "firstName": "System",
-      "lastName": "Administrator",
-      "credentials": [
-        {
-          "type": "password",
-          "value": "admin123",
-          "temporary": false
-        }
-      ],
-      "realmRoles": ["admin", "user"],
-      "attributes": {
-        "tenant_id": ["system"]
-      }
-    },
-    {
-      "username": "user",
-      "enabled": true,
-      "emailVerified": true,
-      "email": "user@valeo-erp.local",
-      "firstName": "Test",
-      "lastName": "User",
-      "credentials": [
-        {
-          "type": "password",
-          "value": "user123",
-          "temporary": false
-        }
-      ],
-      "realmRoles": ["user"],
-      "attributes": {
-        "tenant_id": ["demo-tenant"]
-      }
-    },
-    {
-      "username": "finance",
-      "enabled": true,
-      "emailVerified": true,
-      "email": "finance@valeo-erp.local",
-      "firstName": "Finance",
-      "lastName": "Manager",
-      "credentials": [
-        {
-          "type": "password",
-          "value": "finance123",
-          "temporary": false
-        }
-      ],
-      "realmRoles": ["user", "finance_manager"],
-      "attributes": {
-        "tenant_id": ["demo-tenant"]
-      }
-    }
-  ],
+  "users": [],
   "clientScopes": [
     {
       "name": "roles",
@@ -203,7 +436,121 @@
           }
         }
       ]
+    },
+    {
+      "name": "profile",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "true"
+      },
+      "protocolMappers": [
+        {
+          "name": "username",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-property-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "username",
+            "claim.name": "preferred_username",
+            "jsonType.label": "String",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        },
+        {
+          "name": "given name",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-property-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "firstName",
+            "claim.name": "given_name",
+            "jsonType.label": "String",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        },
+        {
+          "name": "family name",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-property-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "lastName",
+            "claim.name": "family_name",
+            "jsonType.label": "String",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        }
+      ]
+    },
+    {
+      "name": "email",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "true"
+      },
+      "protocolMappers": [
+        {
+          "name": "email",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-property-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "email",
+            "claim.name": "email",
+            "jsonType.label": "String",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        },
+        {
+          "name": "email verified",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-property-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "emailVerified",
+            "claim.name": "email_verified",
+            "jsonType.label": "boolean",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        }
+      ]
+    },
+    {
+      "name": "web-origins",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "true"
+      },
+      "protocolMappers": [
+        {
+          "name": "allowed web origins",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-allowed-origins-mapper",
+          "consentRequired": false,
+          "config": {
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        }
+      ]
     }
-  ]
+  ],
+  "accessTokenLifespan": 300,
+  "ssoSessionIdleTimeout": 900,
+  "ssoSessionMaxLifespan": 28800,
+  "revokeRefreshToken": true,
+  "refreshTokenMaxReuse": 0
 }
-

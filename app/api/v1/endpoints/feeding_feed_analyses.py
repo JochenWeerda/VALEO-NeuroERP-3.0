@@ -390,3 +390,25 @@ def reject_action(analysis_id: str, body: AnalysisActionIn, db: Session = Depend
                            service=_service(db, tenant_id, user))
     except Exception as exc:
         raise _translate(exc) from exc
+
+
+@router.post("/{analysis_id}/actions/validate", response_model=TypedObjectOut,
+             summary="Analyse via ActionRuntime plausibilisieren")
+def validate_action(analysis_id: str, body: AnalysisActionIn, db: Session = Depends(get_db),
+                    tenant_id: str = Depends(get_tenant_id), user: User = Depends(get_current_user)) -> dict[str, Any]:
+    """Derselbe Fachweg wie ``/validate`` auf dem aktuellen Stand der Analyse (Maske, CLI, MCP)."""
+    require_roles(user, WRITE_ROLES)
+    try:
+        service = _service(db, tenant_id, user)
+        current = service.get_analysis(analysis_id)
+        if body.mode in {"validate", "dryRun", "propose"}:
+            return {"success": True, "mode": body.mode, "entityId": analysis_id,
+                    "summary": "Plausibilitaetspruefung wuerde die Befunde neu berechnen; nichts geschrieben.",
+                    "blockingReasons": [finding["message"] for finding in current["findings"]
+                                        if finding["severity"] == "blocker"]}
+        checked = service.validate(analysis_id, int(current["revision"]))
+        return {"success": True, "mode": "execute", "entityId": analysis_id,
+                "summary": "Plausibilitaetspruefung abgeschlossen.", "status": checked["status"],
+                "revision": checked["revision"]}
+    except Exception as exc:
+        raise _translate(exc) from exc

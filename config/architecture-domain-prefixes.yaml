@@ -354,8 +354,10 @@ domains:
 
   dms-compliance:
     route_segments:
+      - betrieb
       - compliance
       - dms
+      - belege
       - docflow
       - dokumente
       - document
@@ -369,6 +371,8 @@ domains:
       - archive_
       - dms_
       - connector_
+      - freigabe_
+      - kontrollkorb
       - docflow_
       - doc_nachweisraum_
       - audit_hardening
@@ -378,6 +382,9 @@ domains:
       - compliance
       - dms
       - archive
+      - approvals
+      - kontrolle
+      - belege
       - docflow
       - dokumente
       - doc_nachweisraum
@@ -410,7 +417,10 @@ domains:
 
   platform:
     route_segments:
+      - aktien
+      - analysis
       - schnittstelle
+      - studio
       - admin
       - admin-suite
       - auth
@@ -507,6 +517,8 @@ domains:
       - mask_registry
       - mask_actions
       - mask_frontend_bridges
+      - preis_kalkulation_bridge
+      - stammdaten_bearbeiten
       - mask_rollout_
       - mask_screen_
       - beleg_vordrucke
@@ -581,6 +593,11 @@ domains:
 
 # Explizite Stem-Overrides (exakter Match, hoechste Prioritaet)
 exact_service_stems:
+  command_idempotency: platform
+  hr_row_delete_commands: hr
+  versandprofil_commands: logistics
+  mask_commands: platform
+  tenant_lifecycle_service: platform
   ebilanz_xbrl_service: finance
   bewerbung_service: hr
   bewerbung_loeschlauf_service: hr
@@ -599,6 +616,24 @@ exact_service_stems:
   document_allocation_service: platform
   studio_draft_store: platform
   studio_propose: platform
+  studio_semantic: platform
+  studio_semantic_model: platform
+  mask_table_query: platform
+  mask_data_read: platform
+  made_by_studio_gates: platform
+  studio_entity_compiler: platform
+  studio_entity_contracts: platform
+  studio_entity_commands: platform
+  studio_entity_router: platform
+  studio_entity_evolution: platform
+  studio_entity_simulation: platform
+  mcp_studio_plans: platform
+  studio_migration_store: platform
+  studio_migration: platform
+  studio_native_import: platform
+  studio_history_view: platform
+  studio_process_simulation: platform
+  sepa_xml_generator: finance
   billing_batch_service: finance
   document_control_projection: dms-compliance
   document_control_service: dms-compliance
@@ -625,19 +660,35 @@ exact_service_stems:
   workflow_guards: platform
   workflow_cockpit_service: platform
   einkauf_compat_service: procurement
+  ordrsp_service: procurement
   wareneingang_avis_service: procurement
   bestell_kommunikation_service: procurement
   mail_versand: platform
   mailkonto_service: platform
   kaeufergruppe: crm
+  # Runtime46 (ca50c46f7)
+  complaint_list_read: agrar
+  gdpr_request_processor: crm
+  list_experience_metrics: platform
+  list_presets: platform
+  open_item_read_source: finance
+  pricing_condition_read: finance
+  studio_catalog_contracts: platform
+  studio_file_content_contracts: platform
+  studio_list_contracts: platform
+  studio_runtime_surface_contracts: platform
+  studio_read_view_contracts: platform
+  waage_import_service: agrar
 
 exact_endpoint_stems:
+  identity_management: platform
   eudr_anbindung: dms-compliance
   eudr_chargen: dms-compliance
   eudr_register: dms-compliance
   document_allocations: platform
   mailkonto: platform
   studio_drafts: platform
+  studio_native_import: platform
   billing_batch: finance
   document_control: dms-compliance
   foreign_goods_worklist: inventory

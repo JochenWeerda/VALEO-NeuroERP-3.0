@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 import logging
 from app.core.uuid7 import uuid7
+from app.core.tenant_context import get_current_tenant_id
 
 logger = logging.getLogger(__name__)
 
@@ -763,9 +764,10 @@ class ISO22301CrisisCommunicationPlan:
 
         return report_id
 
-    def get_communication_status(self, incident_id: str = None, tenant_id: str = "system") -> Dict[str, Any]:
+    def get_communication_status(self, incident_id: str = None, tenant_id: str | None = None) -> Dict[str, Any]:
         """Get comprehensive communication status"""
         # Filter data by incident or tenant
+        tenant_id = tenant_id or get_current_tenant_id()
         if incident_id:
             relevant_logs = [log for log in self.communication_logs.values() if log.incident_id == incident_id]
             relevant_media = [resp for resp in self.media_responses if resp.incident_id == incident_id]
@@ -957,8 +959,9 @@ class ISO22301CrisisCommunicationPlan:
 
         return recommendations
 
-    def check_crisis_communication_compliance(self, tenant_id: str = "system") -> Dict[str, Any]:
+    def check_crisis_communication_compliance(self, tenant_id: str | None = None) -> Dict[str, Any]:
         """Check ISO 22301 crisis communication compliance"""
+        tenant_id = tenant_id or get_current_tenant_id()
         templates = [t for t in self.communication_templates.values() if t.id.startswith(tenant_id)]
         contacts = [c for c in self.stakeholder_contacts.values() if c.id.startswith(tenant_id)]
         logs = [log for log in self.communication_logs.values() if log.id.startswith(tenant_id)]

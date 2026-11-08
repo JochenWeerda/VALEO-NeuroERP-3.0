@@ -1,12 +1,7 @@
-import { SimpleVerticalBars } from '@/components/charts/SimpleVerticalBars'
+import { NativeListPage } from '@/components/mask-builder/NativeListPage'
 
-type TrendPoint = { date: string; inventory: number }
-
-export default function InventoryBarChart({ trends }: { trends: TrendPoint[] }): JSX.Element {
+export default function Page(): JSX.Element {
   return (
-    <SimpleVerticalBars
-      data={trends.map((item) => ({ label: item.date, value: item.inventory }))}
-      height={250}
-    />
+    <NativeListPage screenId="analytics/charts/InventoryBarChart" testId="screen-analytics/charts/InventoryBarChart" />
   )
 }

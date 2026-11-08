@@ -14,7 +14,7 @@ import pytest
 from pydantic import ValidationError
 from fastapi.testclient import TestClient
 
-from main import app
+from app.main import app
 from app.api.v1.endpoints.inventory_counts import (
     InventoryCountCreate,
     InventoryCountLineCreate,

@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { MadeByStudioListRuntimeWire } from '@/components/mask-builder/made-by-studio-runtime-wire'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { RowDeleteConfirmDialog, useGuardedRowDelete } from '@/hooks/useGuardedRowDelete'
 import { Skeleton } from '@/components/ui/skeleton'
 import { UniversalMaskRenderer } from '@/components/mask-builder/UniversalMaskRenderer'
+import { useScreenPermissions } from '@/components/mask-builder/runtime/screen-permissions'
 import { compileRenderPlanFromScreenDefinition } from '@/components/mask-builder/render-plan/schema-compiler'
 import { useUniversalFormState } from '@/components/mask-builder/runtime/useUniversalFormState'
 import { createScreenContext } from '@/components/mask-builder/governance/screen-context'
@@ -17,6 +20,12 @@ import {
   type OnboardingStatus,
 } from '@/lib/api/personal'
 import { personalOnboardingScreen } from '@/masks/capture-screens'
+
+const ROW_DELETE = {
+  endpoint: (id: string) => `/api/v1/training/onboarding/runs/${id}/actions/loeschen`,
+  queryKey: personalKeys.onboardingRuns(),
+  entityLabel: 'Lauf',
+}
 
 const STAND: Record<OnboardingStatus, string> = {
   not_started: 'Nicht gestartet',
@@ -40,6 +49,7 @@ type ChecklistApi = { id: string; checklist_code: string; title: string }
 
 type RunApi = {
   id: string
+  revision?: string
   checklist_id: string
   checklist_code?: string
   checklist_title?: string
@@ -50,9 +60,10 @@ type RunApi = {
   progress_percent?: number
 }
 
-function toRun(item: RunApi): OnboardingRun {
+function toRun(item: RunApi): OnboardingRun & { revision?: string } {
   return {
     id: item.id,
+    revision: item.revision,
     checklistId: item.checklist_id,
     checklistCode: item.checklist_code || undefined,
     checklistTitle: item.checklist_title || undefined,
@@ -82,7 +93,7 @@ export default function PersonalOnboardingPage(): JSX.Element {
   const offen = rows.filter((row) => row.status !== 'completed').length
   const createMutation = useCreateOnboardingRun()
   const [saving, setSaving] = useState(false)
-  const [pendingDeletes, setPendingDeletes] = useState<Set<string>>(new Set())
+  const { pendingDeletes, deleteCandidate, setDeleteCandidate, loeschen } = useGuardedRowDelete(ROW_DELETE)
 
   useEffect(() => {
     if (!laeufe.isError && !checklisten.isError) return
@@ -117,7 +128,8 @@ export default function PersonalOnboardingPage(): JSX.Element {
     })),
   }), [checklisten.data, isTouch, offen, rows.length, saving])
 
-  const plan = useMemo(() => compileRenderPlanFromScreenDefinition(schema), [schema])
+  const rechte = useScreenPermissions(schema)
+  const plan = useMemo(() => compileRenderPlanFromScreenDefinition(schema, { permissions: rechte }), [schema, rechte])
   const form = useUniversalFormState({ screen: schema, initialValues: leer })
 
   const workflow = useMemo<WorkflowState>(() => {
@@ -178,24 +190,6 @@ export default function PersonalOnboardingPage(): JSX.Element {
     }
   }, [createMutation, form.values, leeren, queryClient, saving])
 
-  const loeschen = useCallback(async (id: string, name: string) => {
-    if (!id || pendingDeletes.has(id)) return
-    setPendingDeletes((prev) => new Set(prev).add(id))
-    try {
-      await apiClient.delete(`/api/v1/training/onboarding/runs/${id}`)
-      toast.success('Lauf gelöscht', { description: name })
-      await queryClient.invalidateQueries({ queryKey: personalKeys.onboardingRuns() })
-    } catch (error) {
-      toast.error('Lauf nicht gelöscht', { description: getAxiosErrorMessage(error) })
-    } finally {
-      setPendingDeletes((prev) => {
-        const next = new Set(prev)
-        next.delete(id)
-        return next
-      })
-    }
-  }, [pendingDeletes, queryClient])
-
   const handleAction = useCallback(async (key: string, payload: Record<string, unknown>) => {
     if (key === 'speichern') {
       await speichern()
@@ -205,12 +199,12 @@ export default function PersonalOnboardingPage(): JSX.Element {
       leeren()
       return
     }
-    if (key === 'loeschen') await loeschen(text(payload.id), text(payload.employee_ref))
-  }, [leeren, loeschen, speichern])
+    if (key === 'loeschen') setDeleteCandidate({ id: text(payload.id), name: text(payload.employee_ref), version: text(payload.revision) })
+  }, [leeren, speichern])
 
   const screenContext = useMemo(() => createScreenContext({
     data: { laeufe: rows },
-    permissions: { granted: [] },
+    permissions: { granted: rechte },
     state: { values: form.values, policies: {} },
     actions: {
       'personal.saveOnboarding': () => handleAction('speichern', {}),
@@ -218,7 +212,7 @@ export default function PersonalOnboardingPage(): JSX.Element {
       'personal.deleteOnboarding': (payload) => handleAction('loeschen', payload),
     },
     navigation: { push: () => undefined },
-  }), [form.values, handleAction, rows])
+  }), [rechte, form.values, handleAction, rows])
 
   if (laeufe.isLoading || checklisten.isLoading) {
     return (
@@ -231,6 +225,7 @@ export default function PersonalOnboardingPage(): JSX.Element {
 
   return (
     <div className="space-y-6 p-3 md:p-6">
+      <RowDeleteConfirmDialog candidate={deleteCandidate} onCancel={() => setDeleteCandidate(null)} onConfirm={(candidate) => { void loeschen(candidate) }} />
       <UniversalMaskRenderer
         plan={plan}
         formState={form}
@@ -240,6 +235,7 @@ export default function PersonalOnboardingPage(): JSX.Element {
         tables={{
           laeufe: rows.map((row) => ({
             id: row.id,
+            revision: row.revision,
             employee_ref: row.employeeRef,
             checkliste: row.checklistTitle || row.checklistCode || row.checklistId,
             status: STAND[row.status] ?? 'Nicht gestartet',
@@ -254,3 +250,8 @@ export default function PersonalOnboardingPage(): JSX.Element {
     </div>
   )
 }
+function madeByStudioRuntimeWireDeclaration(): JSX.Element {
+  return <MadeByStudioListRuntimeWire screenId="personal/onboarding" />
+}
+void madeByStudioRuntimeWireDeclaration
+

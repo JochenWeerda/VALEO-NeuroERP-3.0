@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 // Common schemas used across all domains
 
-export const UUID = z.string().uuid();
+export const UUID = z.string().guid();
 export const Email = z.string().email();
 export const PhoneNumber = z.string().regex(/^\+?[1-9]\d{1,14}$/);
 export const URL = z.string().url();

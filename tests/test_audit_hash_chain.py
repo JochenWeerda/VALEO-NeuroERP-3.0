@@ -13,6 +13,16 @@ from datetime import datetime, timezone
 from app.services.audit_hardening import _compute_hash, validate_hash_chain
 
 
+@pytest.fixture(autouse=True)
+def _mandantenkontext():
+    """Dienste ohne ausdruecklichen Mandanten nehmen den des Kontexts; seit 27.10.2026 gibt es keinen Rueckfall "system"."""
+    from app.core.tenant_context import tenant_scope
+
+    with tenant_scope("test-mandant", "unit test"):
+        yield
+
+
+
 class TestComputeHash:
     def test_deterministic(self):
         payload = {"action": "create", "entity_type": "order", "entity_id": "ORD-001"}

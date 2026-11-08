@@ -1,10 +1,10 @@
 import { z } from 'zod';
 import {
-  CustomerSchema,
-  CreateCustomerInputSchema,
-  UpdateCustomerInputSchema,
   AddressSchema,
-  CustomerStatus
+  CreateCustomerInputSchema,
+  CustomerSchema,
+  CustomerStatus,
+  UpdateCustomerInputSchema
 } from '../domain/entities';
 
 // OpenAPI schema for Address
@@ -14,7 +14,7 @@ export const AddressContractSchema = z.object({
   postalCode: z.string(),
   country: z.string(),
   state: z.string().optional()
-}).openapi({
+}).meta({
   description: 'Physical address information',
   example: {
     street: '123 Main St',
@@ -26,13 +26,13 @@ export const AddressContractSchema = z.object({
 });
 
 // OpenAPI schema for Customer Status
-export const CustomerStatusContractSchema = z.enum([CustomerStatus.ACTIVE, CustomerStatus.PROSPECT, CustomerStatus.BLOCKED]).openapi({
+export const CustomerStatusContractSchema = z.enum([CustomerStatus.ACTIVE, CustomerStatus.PROSPECT, CustomerStatus.BLOCKED]).meta({
   description: 'Customer status',
   example: CustomerStatus.ACTIVE
 });
 
 // OpenAPI schema for Create Customer
-export const CreateCustomerContractSchema = CreateCustomerInputSchema.openapi({
+export const CreateCustomerContractSchema = CreateCustomerInputSchema.meta({
   description: 'Customer creation data',
   example: {
     tenantId: 'default',
@@ -56,7 +56,7 @@ export const CreateCustomerContractSchema = CreateCustomerInputSchema.openapi({
 });
 
 // OpenAPI schema for Update Customer
-export const UpdateCustomerContractSchema = UpdateCustomerInputSchema.openapi({
+export const UpdateCustomerContractSchema = UpdateCustomerInputSchema.meta({
   description: 'Customer update data',
   example: {
     name: 'Updated Company Name',
@@ -66,7 +66,7 @@ export const UpdateCustomerContractSchema = UpdateCustomerInputSchema.openapi({
 });
 
 // OpenAPI schema for Customer Response
-export const CustomerResponseContractSchema = CustomerSchema.omit({ tenantId: true }).openapi({
+export const CustomerResponseContractSchema = CustomerSchema.omit({ tenantId: true }).meta({
   description: 'Customer information',
   example: {
     id: '550e8400-e29b-41d4-a716-446655440000',
@@ -97,10 +97,10 @@ export const CustomerQueryContractSchema = z.object({
   search: z.string().optional().describe('Search term for name or number'),
   status: z.enum([CustomerStatus.ACTIVE, CustomerStatus.PROSPECT, CustomerStatus.BLOCKED]).optional(),
   tags: z.string().optional().describe('Comma-separated list of tags'),
-  ownerUserId: z.string().uuid().optional(),
-  page: z.string().transform(Number).optional().default('1'),
-  pageSize: z.string().transform(Number).optional().default('20')
-}).openapi({
+  ownerUserId: z.string().guid().optional(),
+  page: z.string().transform(Number).optional().prefault('1'),
+  pageSize: z.string().transform(Number).optional().prefault('20')
+}).meta({
   description: 'Query parameters for customer listing'
 });
 
@@ -113,6 +113,6 @@ export const CustomerListResponseContractSchema = z.object({
     total: z.number(),
     totalPages: z.number()
   })
-}).openapi({
+}).meta({
   description: 'Paginated customer list response'
 });

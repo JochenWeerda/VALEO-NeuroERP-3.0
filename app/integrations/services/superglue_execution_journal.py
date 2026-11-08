@@ -56,7 +56,7 @@ def append_execution_journal_entry(
     return entry
 
 
-def list_execution_journal_entries(limit: int = 50) -> list[dict[str, Any]]:
+def list_execution_journal_entries(limit: int = 50, *, tenant_id: str) -> list[dict[str, Any]]:
     path = _storage_path()
     if not path.exists():
         return []
@@ -70,13 +70,13 @@ def list_execution_journal_entries(limit: int = 50) -> list[dict[str, Any]]:
                 data = json.loads(payload)
             except json.JSONDecodeError:
                 continue
-            if isinstance(data, dict):
+            if isinstance(data, dict) and data.get("tenant_id") == tenant_id:
                 entries.append(data)
     return entries[-limit:]
 
 
-def build_execution_journal_summary(limit: int = 20) -> dict[str, Any]:
-    entries = list_execution_journal_entries(limit=500)
+def build_execution_journal_summary(limit: int = 20, *, tenant_id: str) -> dict[str, Any]:
+    entries = list_execution_journal_entries(limit=500, tenant_id=tenant_id)
     success_entries = [entry for entry in entries if entry.get("result_status") == "success"]
     error_entries = [entry for entry in entries if entry.get("result_status") != "success"]
     replay_entries = [entry for entry in entries if entry.get("replayed_from_correlation_id")]
@@ -89,6 +89,7 @@ def build_execution_journal_summary(limit: int = 20) -> dict[str, Any]:
         by_tool[str(entry.get("tool_id") or "unknown")] = by_tool.get(str(entry.get("tool_id") or "unknown"), 0) + 1
         by_tenant[str(entry.get("tenant_id") or "unknown")] = by_tenant.get(str(entry.get("tenant_id") or "unknown"), 0) + 1
     return {
+        "tenant_id": tenant_id,
         "entry_count": len(entries),
         "success_count": len(success_entries),
         "error_count": len(error_entries),
@@ -109,7 +110,7 @@ def find_latest_execution_by_idempotency_key(*, tenant_id: str, tool_id: str, id
     normalized_key = str(idempotency_key or "").strip()
     if not normalized_key:
         return None
-    for entry in reversed(list_execution_journal_entries(limit=2000)):
+    for entry in reversed(list_execution_journal_entries(limit=2000, tenant_id=tenant_id)):
         if (
             str(entry.get("tenant_id")) == tenant_id
             and str(entry.get("tool_id")) == tool_id

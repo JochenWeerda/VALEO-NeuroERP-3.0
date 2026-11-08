@@ -5,6 +5,7 @@ Profile CRUD, Import-Runs: Upload → Parse → Validate → Post → Cancel/Rev
 
 from __future__ import annotations
 
+from app.auth.finance_roles import finance_admin, finance_read, finance_write
 import json
 from typing import List, Optional
 from uuid import uuid4
@@ -27,32 +28,32 @@ from app.api.v1.schemas.fibu_connectors import (
 )
 
 from app.api.v1.schemas.base import BaseSchema
+from app.core.akteur import akteur_aus_request
 
 
 router = APIRouter(prefix="/connectors", tags=["finance", "fibu-connectors"])
 
 
 def _user_from_request(request: Optional[Request]) -> Optional[str]:
-    if not request:
-        return None
-    return request.headers.get("X-User-ID") or request.headers.get("X-User-Email")
+    """Urheber aus dem geprueften Token (bis 19.10.2026 zuerst aus dem Client-Header ``X-User-ID``)."""
+    return akteur_aus_request(request)
 
 
 # ---------- Profiles ----------
 
-@router.get("/profiles", response_model=List[ConnectorProfile], summary="Profiles auflisten")
+@router.get("/profiles", response_model=List[ConnectorProfile], summary="Profiles auflisten", dependencies=[Depends(finance_read)])
 async def list_profiles(
-    type: str = Query(..., pattern="^(PAYROLL|ASSET_LEDGER)$"),
+    type: Optional[str] = Query(None, pattern="^(PAYROLL|ASSET_LEDGER)$"),
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    """Profile pro Mandant und Connector-Typ."""
+    """Profile pro Mandant, wahlweise je Connector-Typ (die Liste fibu/schnittstelle-fibu-liste zeigt alle)."""
     rows = db.execute(
         text("""
             SELECT id, tenant_id, connector_type, name, is_default, settings, mapping, version, created_at, updated_at, created_by, updated_by
             FROM domain_erp.fibu_connector_profiles
-            WHERE tenant_id = :tid AND connector_type = :ct
-            ORDER BY is_default DESC, name
+            WHERE tenant_id = :tid AND (CAST(:ct AS text) IS NULL OR connector_type = :ct)
+            ORDER BY connector_type, is_default DESC, name
         """),
         {"tid": tenant_id, "ct": type},
     ).fetchall()
@@ -75,7 +76,7 @@ async def list_profiles(
     ]
 
 
-@router.post("/profiles", response_model=ConnectorProfile, status_code=201, summary="Profile anlegen")
+@router.post("/profiles", response_model=ConnectorProfile, status_code=201, summary="Profile anlegen", dependencies=[Depends(finance_admin)])
 async def create_profile(
     payload: ConnectorProfileCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -108,8 +109,8 @@ async def create_profile(
         )
     db.commit()
     row = db.execute(
-        text("SELECT id, tenant_id, connector_type, name, is_default, settings, mapping, version, created_at, updated_at, created_by, updated_by FROM domain_erp.fibu_connector_profiles WHERE id = :id"),
-        {"id": profile_id},
+        text("SELECT id, tenant_id, connector_type, name, is_default, settings, mapping, version, created_at, updated_at, created_by, updated_by FROM domain_erp.fibu_connector_profiles WHERE id = :id AND tenant_id = :tid"),
+        {"id": profile_id, "tid": tenant_id},
     ).fetchone()
     return ConnectorProfile(
         id=row[0], tenant_id=row[1], connector_type=row[2], name=row[3], is_default=row[4] is True,
@@ -118,7 +119,7 @@ async def create_profile(
     )
 
 
-@router.get("/profiles/{profile_id}", response_model=ConnectorProfile, summary="Profile abrufen")
+@router.get("/profiles/{profile_id}", response_model=ConnectorProfile, summary="Profile abrufen", dependencies=[Depends(finance_read)])
 async def get_profile(
     profile_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -140,7 +141,7 @@ async def get_profile(
     )
 
 
-@router.put("/profiles/{profile_id}", response_model=ConnectorProfile, summary="Profile aktualisieren")
+@router.put("/profiles/{profile_id}", response_model=ConnectorProfile, summary="Profile aktualisieren", dependencies=[Depends(finance_admin)])
 async def update_profile(
   profile_id: str,
   payload: ConnectorProfileUpdate,
@@ -172,7 +173,8 @@ async def update_profile(
         params["mapping"] = json.dumps(payload.mapping)
     db.execute(text(f"UPDATE domain_erp.fibu_connector_profiles SET {', '.join(updates)} WHERE id = :id AND tenant_id = :tenant_id"), params)  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
     if payload.is_default is True:
-        prof = db.execute(text("SELECT connector_type FROM domain_erp.fibu_connector_profiles WHERE id = :id"), {"id": profile_id}).fetchone()
+        prof = db.execute(text("SELECT connector_type FROM domain_erp.fibu_connector_profiles WHERE id = :id AND tenant_id = :tid"),
+                          {"id": profile_id, "tid": tenant_id}).fetchone()
         if prof:
             db.execute(
                 text("UPDATE domain_erp.fibu_connector_profiles SET is_default = false WHERE tenant_id = :tid AND connector_type = :ct AND id != :id"),
@@ -182,7 +184,7 @@ async def update_profile(
     return await get_profile(profile_id, tenant_id, db)
 
 
-@router.delete("/profiles/{profile_id}", status_code=204, response_class=Response, response_model=None, summary="Profile löschen")
+@router.delete("/profiles/{profile_id}", status_code=204, response_class=Response, response_model=None, summary="Profile löschen", dependencies=[Depends(finance_admin)])
 async def delete_profile(
   profile_id: str,
   tenant_id: str = Depends(get_tenant_id),
@@ -205,7 +207,7 @@ async def delete_profile(
 
 # ---------- Imports (Runs) ----------
 
-@router.post("/{connector_type}/imports", response_model=ImportUploadResponse, status_code=201, summary="Import run anlegen")
+@router.post("/{connector_type}/imports", response_model=ImportUploadResponse, status_code=201, summary="Import run anlegen", dependencies=[Depends(finance_write)])
 async def create_import_run(
     connector_type: str,
     request: Request,
@@ -220,6 +222,17 @@ async def create_import_run(
     content = await file.read()
     if not content:
         raise HTTPException(status_code=400, detail="Datei ist leer")
+    if profile_id and not db.execute(
+        text("SELECT 1 FROM domain_erp.fibu_connector_profiles WHERE id = :id AND tenant_id = :tid AND connector_type = :ct"),
+        {"id": profile_id, "tid": tenant_id, "ct": connector_type},
+    ).fetchone():
+        raise HTTPException(status_code=404, detail="Connector-Profil nicht gefunden")
+    # Gleicher Schluessel = derselbe Lauf, unveraendert. Bis 28.10.2026 wurde er neu geparst: doppelte
+    # Positionen, Status zurueck auf PARSED -- ein gebuchter Lauf liess sich ein zweites Mal buchen.
+    vorhanden = workflow.find_run(db, tenant_id, connector_type, idempotency_key) if idempotency_key else None
+    if vorhanden:
+        return ImportUploadResponse(run_id=vorhanden[0], status=vorhanden[1],
+                                    message="Lauf mit diesem Idempotenzschluessel besteht bereits; nicht neu eingelesen.")
     created_by = _user_from_request(request)
     run_id = workflow.create_run(db, tenant_id, connector_type, profile_id, idempotency_key, created_by)
     storage_key = f"fibu/connectors/{connector_type.lower()}/{run_id}"
@@ -231,7 +244,7 @@ async def create_import_run(
     return ImportUploadResponse(run_id=run_id, status="PARSED", message="Upload und Parse erfolgreich.")
 
 
-@router.get("/imports/{run_id}", response_model=ConnectorRunSummary, summary="Import run abrufen")
+@router.get("/imports/{run_id}", response_model=ConnectorRunSummary, summary="Import run abrufen", dependencies=[Depends(finance_read)])
 async def get_import_run(
     run_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -257,7 +270,7 @@ async def get_import_run(
     )
 
 
-@router.get("/imports/{run_id}/items", response_model=List[ConnectorRunItem], summary="Run items auflisten")
+@router.get("/imports/{run_id}/items", response_model=List[ConnectorRunItem], summary="Run items auflisten", dependencies=[Depends(finance_read)])
 async def list_run_items(
     run_id: str,
     only_errors: bool = Query(False),
@@ -273,9 +286,9 @@ async def list_run_items(
         raise HTTPException(status_code=404, detail="Import-Lauf nicht gefunden")
     q = """
         SELECT id, run_id, line_no, item_type, payload, validation_errors, posted_entity_id, status
-        FROM domain_erp.fibu_connector_run_items WHERE run_id = :run_id
+        FROM domain_erp.fibu_connector_run_items WHERE run_id = :run_id AND tenant_id = :tid
     """
-    params: dict = {"run_id": run_id}
+    params: dict = {"run_id": run_id, "tid": tenant_id}
     if only_errors:
         q += " AND status = 'ERROR'"
     q += " ORDER BY line_no LIMIT :limit"
@@ -290,7 +303,7 @@ async def list_run_items(
     ]
 
 
-@router.post("/imports/{run_id}/validate", response_model=ConnectorRunSummary, summary="Import run validieren")
+@router.post("/imports/{run_id}/validate", response_model=ConnectorRunSummary, summary="Import run validieren", dependencies=[Depends(finance_write)])
 async def validate_import_run(
     run_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -303,7 +316,7 @@ async def validate_import_run(
     return await get_import_run(run_id, tenant_id, db)
 
 
-@router.post("/imports/{run_id}/post", response_model=ConnectorRunSummary, summary="Import run erstellen")
+@router.post("/imports/{run_id}/post", response_model=ConnectorRunSummary, summary="Import run erstellen", dependencies=[Depends(finance_admin)])
 async def post_import_run(
     run_id: str,
     request: Request,
@@ -317,7 +330,7 @@ async def post_import_run(
     return await get_import_run(run_id, tenant_id, db)
 
 
-@router.post("/imports/{run_id}/cancel", response_model=ConnectorRunSummary, summary="Import run stornieren")
+@router.post("/imports/{run_id}/cancel", response_model=ConnectorRunSummary, summary="Import run stornieren", dependencies=[Depends(finance_write)])
 async def cancel_import_run(
     run_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -330,7 +343,7 @@ async def cancel_import_run(
     return await get_import_run(run_id, tenant_id, db)
 
 
-@router.post("/imports/{run_id}/reverse", response_model=ConnectorRunSummary, summary="Import run reverse")
+@router.post("/imports/{run_id}/reverse", response_model=ConnectorRunSummary, summary="Import run reverse", dependencies=[Depends(finance_admin)])
 async def reverse_import_run(
     run_id: str,
     request: Request,

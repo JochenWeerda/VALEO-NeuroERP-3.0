@@ -5,7 +5,6 @@ Persisted workflow endpoints (no in-memory runtime state).
 
 from __future__ import annotations
 
-import asyncio
 import logging
 import time
 from typing import Literal
@@ -17,13 +16,24 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.metrics import workflow_transitions_total
 from app.core.sse import sse_hub
+from app.core.tenant_context import get_current_tenant_id
 from app.models.documents import WorkflowAudit, WorkflowStatus
 from app.repositories.workflow_repository import WorkflowRepository
 from app.services.workflow_service import workflow
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/workflow", tags=["workflow"])
+
+
+async def _publish_workflow_event(event: dict) -> None:
+    # Broadcast only enqueues in the local SSE hub; no detached task is needed.
+    # A notification failure must not undo an already persisted transition.
+    try:
+        await sse_hub.broadcast("workflow", event, tenant_id=get_current_tenant_id())
+    except Exception:
+        logger.warning("Workflow notification delivery failed")
 
 
 def get_workflow_repo(db: Session = Depends(get_db)) -> WorkflowRepository:
@@ -48,7 +58,7 @@ async def get_status(
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
-@router.post("/{domain}/{number}/migrate")
+@router.post("/{domain}/{number}/migrate", dependencies=SCHREIBEN["FACHLICH"])
 async def migrate_workflow(
     domain: Literal["sales", "purchase"],
     number: str,
@@ -65,7 +75,7 @@ async def migrate_workflow(
     return {"ok": True, "state": state, "workflow_version": version}
 
 
-@router.post("/{domain}/{number}/transition")
+@router.post("/{domain}/{number}/transition", dependencies=SCHREIBEN["FACHLICH"])
 async def do_transition(
     domain: Literal["sales", "purchase"],
     number: str,
@@ -88,21 +98,18 @@ async def do_transition(
 
         workflow_transitions_total.labels(domain=domain, action=resolved_action, status=nxt).inc()
 
-        asyncio.create_task(
-            sse_hub.broadcast(
-                "workflow",
-                {
-                    "id": f"workflow-{domain}-{number}-{int(time.time())}",
-                    "ts": time.time(),
-                    "source": "db",
-                    "topic": "workflow",
-                    "domain": domain,
-                    "number": number,
-                    "action": resolved_action,
-                    "fromState": cur,
-                    "toState": nxt,
-                },
-            )
+        await _publish_workflow_event(
+            {
+                "id": f"workflow-{domain}-{number}-{int(time.time())}",
+                "ts": time.time(),
+                "source": "db",
+                "topic": "workflow",
+                "domain": domain,
+                "number": number,
+                "action": resolved_action,
+                "fromState": cur,
+                "toState": nxt,
+            },
         )
 
         return {"ok": True, "state": nxt}
@@ -133,20 +140,17 @@ async def audit(
             for item in items
         ]
 
-        asyncio.create_task(
-            sse_hub.broadcast(
-                "workflow",
-                {
-                    "id": f"audit-{domain}-{number}-{int(time.time())}",
-                    "ts": time.time(),
-                    "source": "db",
-                    "topic": "workflow",
-                    "type": "audit_access",
-                    "domain": domain,
-                    "number": number,
-                    "count": len(payload_items),
-                },
-            )
+        await _publish_workflow_event(
+            {
+                "id": f"audit-{domain}-{number}-{int(time.time())}",
+                "ts": time.time(),
+                "source": "db",
+                "topic": "workflow",
+                "type": "audit_access",
+                "domain": domain,
+                "number": number,
+                "count": len(payload_items),
+            },
         )
 
         return {"ok": True, "items": payload_items}

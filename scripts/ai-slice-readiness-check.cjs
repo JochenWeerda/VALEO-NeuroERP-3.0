@@ -96,9 +96,12 @@ function sliceIdFromContent(filePath, content) {
 
 function syntaxText(content) {
   let coordinationSeen = false;
+  // Alte Slices fuehrten die Kennung als `id`; `slice_id` mit demselben Wert ist eine Syntaxreparatur.
+  const legacyId = content.match(/^id:\s*(.+?)\s*$/m)?.[1];
   return content
     .split(/\r?\n/)
     .filter((line) => line.trim() !== "---")
+    .filter((line) => !(legacyId && line.trim() === `slice_id: ${legacyId}`))
     .map((line) => {
       if (/^coordination:/.test(line)) {
         if (coordinationSeen) return line.replace(/^coordination:\s*/, "");
@@ -122,8 +125,8 @@ function closedLegacySyntaxRepair(filePath, content, args) {
   const closedStatus = (source) => source.match(/^status:\s*(done|completed|abgeschlossen)\s*$/m)?.[1];
   const status = closedStatus(before);
   if (!status || closedStatus(content) !== status) return false;
-  // Vollstaendige alte Slices brauchen keine Ausnahme; substantielle Aenderungen auch nicht.
-  if (requiredTopLevel.every((key) => yamlHas(before, key)) && yamlHas(before, "ai_harness")) return false;
+  // Substantielle Aenderungen brauchen keine Ausnahme: Nur ein inhaltlich unveraenderter, abgeschlossener Vertrag
+  // wird nicht neu bewertet (auch wenn ihm Felder des spaeteren Harness-Standards fehlen).
   return syntaxText(before) === syntaxText(content);
 }
 

@@ -1,5 +1,8 @@
 import { createRouter } from '@tanstack/react-router'
-import { routeTree } from '@/app/routing/route-tree.gen'
+import { appLayoutRoute, routeTree } from '@/app/routing/route-tree.gen'
+import { attachStudioPreviewRoute } from '@/workspace/studio-preview-route'
+
+attachStudioPreviewRoute(appLayoutRoute)
 
 export const router = createRouter({
   routeTree,

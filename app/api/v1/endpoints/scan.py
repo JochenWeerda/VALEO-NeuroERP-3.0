@@ -17,6 +17,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.inventory_stock_balance import current_stock
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/scan", tags=["scan", "mobile"])
 
@@ -59,8 +60,7 @@ class BarcodeScanResponse(BaseModel):
     "/barcode",
     response_model=BarcodeScanResponse,
     status_code=200,
-    summary="Barcode scannen und Artikel identifizieren",
-)
+    summary="Barcode scannen und Artikel identifizieren", dependencies=SCHREIBEN["LAGER"])
 async def scan_barcode(
     payload: BarcodeScanRequest,
     tenant_id: str = Depends(get_tenant_id),

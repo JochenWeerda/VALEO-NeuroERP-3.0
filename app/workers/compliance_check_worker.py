@@ -10,7 +10,7 @@ from sqlalchemy import and_, or_
 from ..core.config import settings
 from app.infrastructure.models import BusinessPartner
 
-from .base_worker import BaseWorker
+from .base_worker import BaseWorker, cross_tenant_job
 
 logger = logging.getLogger(__name__)
 
@@ -182,6 +182,7 @@ async def run_compliance_checks() -> Dict[str, Any]:
         await worker.cleanup()
 
 
+@cross_tenant_job("compliance-check")
 def execute_compliance_checks() -> Dict[str, Any]:
     try:
         loop = asyncio.new_event_loop()

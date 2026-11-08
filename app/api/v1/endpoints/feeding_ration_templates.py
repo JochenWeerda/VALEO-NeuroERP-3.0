@@ -27,6 +27,7 @@ from app.services.rations_lifecycle_service import (
     RationLifecycleNotFound,
     RationLifecycleService,
 )
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/feeding", tags=["feeding-ration-templates"])
 
@@ -250,3 +251,20 @@ async def business_findings(business_id: str, db: Session = Depends(get_db), ten
                             user: User = Depends(get_current_user)) -> list[dict[str, Any]]:
     require_roles(user, READ_ROLES); _require_business(db, tenant_id, user, business_id, "read")
     return _template_service(db, tenant_id, user).list_business_findings(business_id)
+
+
+class TemplateApplyFormIn(TemplateApplyIn):
+    template_id: str = Field(min_length=1, max_length=64)
+
+
+@router.post("/ration-templates/actions/apply_template", response_model=VersionCopyOut, status_code=201,
+             summary="Rationsvorlage anwenden (Eingabefluss der Maske; Vorlage im Formular)", dependencies=SCHREIBEN["AGRAR"])
+async def apply_template_form(body: TemplateApplyFormIn, db: Session = Depends(get_db),
+                              tenant_id: str = Depends(get_tenant_id),
+                              user: User = Depends(get_current_user)) -> dict[str, Any]:
+    """Derselbe Fachweg wie ``/ration-templates/{template_id}/apply``; die Vorlage waehlt das Formular.
+
+    So hat der Eingabefluss einen Sendeweg ohne fremden Pfadparameter, den auch die CLI bedienen kann.
+    """
+    return await apply_template(body.template_id, TemplateApplyIn(**body.model_dump(exclude={"template_id"})),
+                                db=db, tenant_id=tenant_id, user=user)

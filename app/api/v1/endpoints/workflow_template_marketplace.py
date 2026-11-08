@@ -16,6 +16,7 @@ from app.core.workflow_template_marketplace import (
 
 from app.api.v1.schemas.base import BaseSchema
 from pydantic import ConfigDict as _ConfigDict
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 class WorkflowTemplateOut(BaseSchema):
@@ -75,8 +76,7 @@ def get_workflow_template(
 
 
 @router.post("/{template_id}/preview", summary="Workflow-Template vor Installation previewen",
-    response_model=WorkflowTemplateOut
-)
+    response_model=WorkflowTemplateOut, dependencies=SCHREIBEN["BERECHNEN"])
 def preview_workflow_template(
     template_id: str,
     payload: dict,
@@ -100,8 +100,7 @@ def preview_workflow_template(
 
 
 @router.post("/{template_id}/publish-preview", summary="Workflow-Template fuer Publikation previewen",
-    response_model=WorkflowTemplateOut
-)
+    response_model=WorkflowTemplateOut, dependencies=SCHREIBEN["BERECHNEN"])
 def publish_preview_workflow_template(
     template_id: str,
     payload: dict,
@@ -125,8 +124,7 @@ def publish_preview_workflow_template(
 
 
 @router.post("/{template_id}/clone", summary="Workflow-Template klonen",
-    response_model=WorkflowTemplateOut
-)
+    response_model=WorkflowTemplateOut, dependencies=SCHREIBEN["FACHLICH"])
 def clone_workflow_template_endpoint(
     template_id: str,
     payload: dict,
@@ -149,8 +147,7 @@ def clone_workflow_template_endpoint(
 
 
 @router.post("/{template_id}/install", summary="Workflow-Template intern installieren",
-    response_model=WorkflowTemplateOut
-)
+    response_model=WorkflowTemplateOut, dependencies=SCHREIBEN["FACHLICH"])
 def install_workflow_template_endpoint(
     template_id: str,
     payload: dict,

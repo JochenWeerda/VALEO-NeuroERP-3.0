@@ -1,5 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import { ProcessStatusPanel } from '@/components/workflow/ProcessStatusPanel'
+
+const context = vi.hoisted(() => ({ roles: ['user'], tenantId: 'tenant-density-test' }))
+vi.mock('@/lib/auth', () => ({ auth: { getUser: () => ({ roles: context.roles }) } }))
+vi.mock('@/hooks/useTenant', () => ({
+  useTenant: () => ({ tenantId: context.tenantId, setTenantId: vi.fn() }),
+}))
 
 const view = {
   statusLabel: 'Freigegeben',
@@ -9,24 +16,14 @@ const view = {
 }
 
 async function renderPanelForRoles(roles: string[]) {
-  vi.resetModules()
-  vi.doMock('@/lib/auth', () => ({
-    auth: {
-      getUser: () => ({ roles }),
-    },
-  }))
-  vi.doMock('@/hooks/useTenant', () => ({
-    useTenant: () => ({ tenantId: '00000000-0000-0000-0000-000000000001', setTenantId: vi.fn() }),
-  }))
-
-  const { ProcessStatusPanel } = await import('@/components/workflow/ProcessStatusPanel')
-
+  context.roles = roles
   render(<ProcessStatusPanel view={view} title="Prozessstatus" />)
 }
 
 describe('ProcessStatusPanel role density', () => {
   beforeEach(() => {
-    vi.resetModules()
+    context.roles = ['user']
+    context.tenantId = 'tenant-density-test'
   })
 
   it('zeigt fuer fokussierte Rollen nur den ersten Detailpunkt', async () => {
@@ -44,17 +41,7 @@ describe('ProcessStatusPanel role density', () => {
   })
 
   it('zieht Approval-Kontexte auch fuer einfache Rollen auf mehr Details hoch', async () => {
-    vi.resetModules()
-    vi.doMock('@/lib/auth', () => ({
-      auth: {
-        getUser: () => ({ roles: ['user'] }),
-      },
-    }))
-    vi.doMock('@/hooks/useTenant', () => ({
-      useTenant: () => ({ tenantId: 'tenant-finance-01', setTenantId: vi.fn() }),
-    }))
-
-    const { ProcessStatusPanel } = await import('@/components/workflow/ProcessStatusPanel')
+    context.tenantId = 'tenant-finance-01'
 
     render(
       <ProcessStatusPanel

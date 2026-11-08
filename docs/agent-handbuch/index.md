@@ -4,7 +4,7 @@ type: explanation
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-09
+last_reviewed: 2026-11-07
 version: 3.0.0
 description: Maschinenlesbare Bedienungsanleitung für KI-Agenten — Prozessketten, Masken-APIs, Automatisierung.
 ---
@@ -20,8 +20,8 @@ Ergänzt das [Endnutzer-Benutzerhandbuch](../benutzerhandbuch/index.md) um die *
 | Dokument | Inhalt |
 |---|---|
 | [Prozessketten](prozessketten.md) | 9 Flow-Spine E2E-Ketten mit Knoten, Deep-Links, Instanz-API |
-| [Masken-API-Katalog](masken-api-katalog.md) | 100 ScreenDefinitions mit AgentContract, Endpoints, Actions |
-| [Automatisierung](automatisierung.md) | 56 MCP-Tools, 91 Domain-Events, ActionRuntime-Modi |
+| [Masken-API-Katalog](masken-api-katalog.md) | 771 ScreenDefinitions mit AgentContract, Endpoints, Actions |
+| [Automatisierung](automatisierung.md) | 73 MCP-Tools, 140 Domain-Events, ActionRuntime-Modi |
 | [agent-process-manifest.json](agent-process-manifest.json) | JSON-Manifest für SDK/Agent-Router |
 
 ## Entscheidungsbaum für Agenten

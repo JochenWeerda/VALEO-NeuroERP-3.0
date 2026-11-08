@@ -22,6 +22,9 @@ def _make_payload(invoice_ref: str | None = "RG-2026-100"):
     p.notes = ""
     p.lines = []
     p.credit_note_number = "GS-2026-001"
+    p.correction_type = "rechnungskorrektur"
+    p.tax_amount = 0
+    p.net_amount = 0
     return p
 
 
@@ -33,12 +36,12 @@ class TestSalesCnInvBelegbruch:
 
         db = MagicMock()
         request = MagicMock()
-        invoice_data = {"status": "OFFEN", "number": "RG-2026-100"}
+        invoice_data = {"status": "OFFEN", "number": "RG-2026-100", "tenantId": TENANT}
 
         with (
             patch("app.api.v1.endpoints.sales_credit_notes.assert_customer_allowed_for_invoice"),
             patch("app.api.v1.endpoints.sales_credit_notes.get_repository", return_value=None),
-            patch("app.api.v1.endpoints.sales_credit_notes.get_from_store", return_value=invoice_data),
+            patch("app.documents.router_helpers.get_from_store", return_value=invoice_data),
             patch("app.api.v1.endpoints.sales_credit_notes.save_to_store") as mock_save,
             patch("app.api.v1.endpoints.sales_credit_notes.log_fibu_audit"),
             patch("app.api.v1.endpoints.sales_credit_notes.uuid7", return_value="CN-UUID-001"),
@@ -60,7 +63,7 @@ class TestSalesCnInvBelegbruch:
         with (
             patch("app.api.v1.endpoints.sales_credit_notes.assert_customer_allowed_for_invoice"),
             patch("app.api.v1.endpoints.sales_credit_notes.get_repository", return_value=None),
-            patch("app.api.v1.endpoints.sales_credit_notes.get_from_store", return_value=None),
+            patch("app.documents.router_helpers.get_from_store", return_value=None),
             patch("app.api.v1.endpoints.sales_credit_notes.save_to_store") as mock_save,
             patch("app.api.v1.endpoints.sales_credit_notes.log_fibu_audit"),
             patch("app.api.v1.endpoints.sales_credit_notes.uuid7", return_value="CN-UUID-002"),

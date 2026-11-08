@@ -9,6 +9,7 @@ from uuid import uuid4
 import pytest
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import make_url
+from testgrenze import pruefstand_erlaubt
 
 ROOT = Path(__file__).resolve().parents[1]
 REVISION = ROOT / 'alembic/versions/bank_legacy_retirement_20261001.py'
@@ -48,7 +49,7 @@ def retirement_db():
     if not raw:
         pytest.skip('Shared migrated PostgreSQL required')
     url = make_url(raw)
-    assert url.database == 'valeo_probe', 'Only existing shared probe; never create databases'
+    assert pruefstand_erlaubt(url), "Nur Pruefstand oder CI-Testdatenbank"
     engine = create_engine(url)
     schema = 'bank_retirement_contract_' + uuid4().hex
     with engine.begin() as conn:

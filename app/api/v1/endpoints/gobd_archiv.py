@@ -11,21 +11,24 @@ from datetime import date, datetime, timezone
 from typing import Any, Optional
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Request
+
+from app.core.tenant import get_tenant_id  # Mandant aus dem Token (bis 27.10.2026 ?tenant_id= mit Standardmandant)
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from app.core.config import settings
 from app.core.database import get_db
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.gobd_archiv_schemas import GobdArchivOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
+from app.core.akteur import gepruefter_akteur_aus_request  # Bearbeiter aus dem Token
 
 
 router = APIRouter(prefix="/gobd", tags=["GoBD", "Archiv"])
-DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
+
 
 
 # ---------- Document Artifacts (Archiv mit Content-Hash) ----------
@@ -37,7 +40,6 @@ class DocumentArtifactCreate(BaseModel):
     content_hash_sha256: str = Field(..., min_length=64, max_length=64)
     storage_key: str = Field(..., min_length=1, max_length=500)
     file_name: Optional[str] = Field(default=None, max_length=255)
-    created_by: Optional[str] = Field(default=None, max_length=100)
 
 
 class DocumentArtifactOut(BaseModel):
@@ -52,10 +54,11 @@ class DocumentArtifactOut(BaseModel):
     created_by: Optional[str]
 
 
-@router.post("/artifacts", response_model=DocumentArtifactOut, summary="Document artifact registrieren")
+@router.post("/artifacts", response_model=DocumentArtifactOut, summary="Document artifact registrieren", dependencies=SCHREIBEN["FINANZ"])
 async def register_document_artifact(
     payload: DocumentArtifactCreate,
-    tenant_id: Optional[str] = Query(None),
+    request: Request,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Belegartefakt registrieren (PDF/XML) mit Content-Hash für GoBD-Aufbewahrung."""
@@ -63,7 +66,7 @@ async def register_document_artifact(
 
     from app.core.blockchain_anchor_runtime import anchor_document_artifact
 
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
     art_id = str(uuid4())
     db.execute(
         text(
@@ -81,7 +84,7 @@ async def register_document_artifact(
             "content_hash_sha256": payload.content_hash_sha256,
             "storage_key": payload.storage_key,
             "file_name": payload.file_name,
-            "created_by": payload.created_by,
+            "created_by": gepruefter_akteur_aus_request(request),
         },
     )
     db.commit()
@@ -113,7 +116,7 @@ async def register_document_artifact(
         content_hash_sha256=payload.content_hash_sha256,
         storage_key=payload.storage_key,
         file_name=payload.file_name,
-        created_by=payload.created_by,
+        created_by=gepruefter_akteur_aus_request(request),
     ).as_dict()
     return JSONResponse(content=body)
 
@@ -121,12 +124,12 @@ async def register_document_artifact(
 @router.get("/artifacts", response_model=list[DocumentArtifactOut], summary="Document artifacts auflisten")
 async def list_document_artifacts(
     header_id: Optional[str] = Query(None),
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     limit: int = Query(100, ge=1, le=500),
     db: Session = Depends(get_db),
 ):
     """Artifacts nach header_id oder Tenant auflisten."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
     if header_id:
         rows = db.execute(
             text(
@@ -173,11 +176,11 @@ class ArtifactVeri4Out(BaseModel):
 @router.get("/artifacts/{art_id}/veri4", response_model=Optional[ArtifactVeri4Out], summary="Artifact veri4 abrufen")
 async def get_artifact_veri4(
     art_id: str,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Integritätsprüfung: Liefert Artifact-Metadaten (Hash, storage_key) für Verifikation (z. B. Veri4)."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
     row = db.execute(
         text(
             "SELECT id, tenant_id, header_id, artifact_type, content_hash_sha256, storage_key, file_name "
@@ -206,7 +209,6 @@ class InvoiceXmlCreate(BaseModel):
     content_hash_sha256: str = Field(..., min_length=64, max_length=64)
     storage_key: str = Field(..., min_length=1, max_length=500)
     format_type: str = Field(default="XRechnung", max_length=40)
-    created_by: Optional[str] = Field(default=None, max_length=100)
 
 
 class InvoiceXmlOut(BaseModel):
@@ -222,14 +224,15 @@ class InvoiceXmlOut(BaseModel):
     created_by: Optional[str]
 
 
-@router.post("/e-invoice-xml", response_model=InvoiceXmlOut, summary="Invoice xml store")
+@router.post("/e-invoice-xml", response_model=InvoiceXmlOut, summary="Invoice xml store", dependencies=SCHREIBEN["FINANZ"])
 async def store_invoice_xml(
     payload: InvoiceXmlCreate,
-    tenant_id: Optional[str] = Query(None),
+    request: Request,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """E-Rechnung XML als führendes Original speichern (XRechnung/ZUGFeRD)."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
     rec_id = str(uuid4())
     db.execute(
         text(
@@ -249,7 +252,7 @@ async def store_invoice_xml(
             "content_hash_sha256": payload.content_hash_sha256,
             "storage_key": payload.storage_key,
             "format_type": payload.format_type,
-            "created_by": payload.created_by,
+            "created_by": gepruefter_akteur_aus_request(request),
         },
     )
     db.commit()
@@ -283,11 +286,11 @@ async def store_invoice_xml(
 @router.get("/e-invoice-xml/{header_id}", response_model=Optional[InvoiceXmlOut], summary="Invoice xml abrufen")
 async def get_invoice_xml(
     header_id: str,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """E-Rechnung XML-Metadaten zu einem Docflow-Header abrufen."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
     row = db.execute(
         text(
             "SELECT id, tenant_id, header_id, content_hash_sha256, storage_key, format_type, validation_status, validation_errors, created_at, created_by "
@@ -528,11 +531,11 @@ def _sha256_hex(content: bytes) -> str:
 async def get_audit_package(
     from_date: Optional[date] = Query(None, description="Von-Datum (inkl.)"),
     to_date: Optional[date] = Query(None, description="Bis-Datum (inkl.)"),
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Betriebsprüfung: ZIP mit Z1/Z2/Z3-Struktur und Integrity-Manifest."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
     manifest_entries: list[tuple[str, str]] = []  # (path, sha256_hex)
 
     zip_buf = io.BytesIO()
@@ -639,7 +642,7 @@ async def verify_artifact_hash(
         max_length=64,
         description="SHA-256 des Inhalts zum Abgleich mit dem gespeicherten Hash",
     ),
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """
@@ -652,7 +655,7 @@ async def verify_artifact_hash(
     """
     from fastapi import HTTPException as _HTTPException
 
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
     row = db.execute(
         text(
             "SELECT id, content_hash_sha256 "
@@ -691,11 +694,11 @@ class InvoiceXmlValidateIn(BaseModel):
     validation_errors: Optional[dict[str, Any]] = None
 
 
-@router.patch("/e-invoice-xml/{header_id}/validate", response_model=InvoiceXmlOut, summary="Invoice xml validation setzen")
+@router.patch("/e-invoice-xml/{header_id}/validate", response_model=InvoiceXmlOut, summary="Invoice xml validation setzen", dependencies=SCHREIBEN["FINANZ"])
 async def set_invoice_xml_validation(
     header_id: str,
     payload: InvoiceXmlValidateIn,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """
@@ -707,7 +710,7 @@ async def set_invoice_xml_validation(
     import json as _json
     from fastapi import HTTPException as _HTTPException
 
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
     errors_json = _json.dumps(payload.validation_errors) if payload.validation_errors else None
 
     result = db.execute(

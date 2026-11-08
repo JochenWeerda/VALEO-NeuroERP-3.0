@@ -1,0 +1,7 @@
+# Studio-Kanalfreigabe 2026-11-07
+
+Generierte Studio-Entity-Aktionen tragen ihren versionierten Domain-Command. Der Compiler und die Projektion in die bestehende MCP-Tool-Registry verwenden dasselbe Binding. Ausschliesslich vertrauenswuerdige Studio-Deploymentregistrierungen mit `writes_enabled` und expliziten, zur bestehenden Domaenenpolicy passenden `agent_roles` liefern Capability-Eintraege. Jede Pruefung liest die Deploymentkonfiguration erneut; fehlerhafte Konfiguration liefert keine Studio-Freigabe. Das generierte Bundle bleibt deaktiviert. Es gibt keine globale Write-Freigabe.
+
+Der enge Capability-Test prueft Default-Deny, beide Deployment-Schalter, passende und unpassende Rollen, Scope, fremde Bindung und Widerruf. Der signierte HTTP-/CLI-/MCP-SQL-Test verwendet eine ausdrueckliche synthetische Deploymentregistrierung und prueft weiter Rollen, Scope, fremden Mandanten, manipulierte Eingaben, Version und Replay. Ein erster Testlauf scheiterte vor dem Fachtest an einer globalen Entwicklungsdatenbank-Fixture; der isolierte Lauf verwendet ausschliesslich den gemeinsamen Pruefstand und Rollback.
+
+Abnahme: Capability-Test 1 passed; signierter Kanaltest 1 passed (37,05 s) mit ausdruecklicher Bestaetigung und Negativprobe. Vor und nach dem rollback-isolierten Lauf meldete `valeo_probe` Revision `ruestlisten_tabelle_20261103` und keine anderen Sitzungen. Kein Reset, keine neue Datenbank. `py_compile` erfolgreich.

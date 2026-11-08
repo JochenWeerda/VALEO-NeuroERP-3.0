@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import axios from 'axios'
+import { useTranslation } from 'react-i18next'
 import { apiClient } from '@/lib/api-client'
 import i18n from '@/i18n/config'
 
@@ -340,8 +341,8 @@ export function getFlowSpineFetchErrorMessage(err: unknown): string {
   return String(err)
 }
 
-export async function fetchFlowSpineWorkspace(processKey: string, instanceId?: string): Promise<FlowSpineWorkspace> {
-  const lang = encodeURIComponent(getActiveLanguage())
+export async function fetchFlowSpineWorkspace(processKey: string, instanceId?: string, language = getActiveLanguage()): Promise<FlowSpineWorkspace> {
+  const lang = language
   const query = new URLSearchParams({ lang })
   if (instanceId) {
     query.set('instance_id', instanceId)
@@ -355,11 +356,14 @@ export async function fetchFlowSpineWorkspace(processKey: string, instanceId?: s
   return body
 }
 
-export async function fetchFlowSpineCatalog(): Promise<FlowSpineCatalog> {
-  const lang = encodeURIComponent(getActiveLanguage())
+export async function fetchFlowSpineCatalog(language = getActiveLanguage()): Promise<FlowSpineCatalog> {
+  const lang = encodeURIComponent(language)
   const response = await apiClient.get<FlowSpineCatalog>(`/api/v1/process/flow-spines/catalog?lang=${lang}`)
   const body = normalizeFlowSpineBody<FlowSpineCatalog>(response.data)
-  if (!Array.isArray(body.processes)) {
+  if (!Array.isArray(body.processes) || body.processes.length > 500
+    || body.processes.some(item => !item || typeof item !== 'object'
+      || ['key', 'label', 'route_path', 'summary', 'domain'].some(key => typeof (item as unknown as Record<string, unknown>)[key] !== 'string'))
+    || new Set(body.processes.map(item => item.key)).size !== body.processes.length) {
     throw new Error('Flow-Spine Katalog: Feld processes fehlt oder ist kein Array (Backend-Vertrag pruefen).')
   }
   return body
@@ -383,17 +387,18 @@ export function useFlowSpineWorkspace(processKey: string, instanceId?: string) {
   const lang = getActiveLanguage()
   return useQuery<FlowSpineWorkspace>({
     queryKey: getFlowSpineWorkspaceQueryKey(processKey, instanceId, lang),
-    queryFn: () => fetchFlowSpineWorkspace(processKey, instanceId),
+    queryFn: () => fetchFlowSpineWorkspace(processKey, instanceId, lang),
     staleTime: 30_000,
     retry: false,
   })
 }
 
 export function useFlowSpineCatalogHook(options?: { enabled?: boolean }) {
-  const lang = getActiveLanguage()
+  const { i18n: translation } = useTranslation()
+  const lang = translation.resolvedLanguage ?? translation.language ?? 'de'
   return useQuery<FlowSpineCatalog>({
     queryKey: ['workflow', 'flow-spine', 'catalog', lang],
-    queryFn: fetchFlowSpineCatalog,
+    queryFn: () => fetchFlowSpineCatalog(lang),
     staleTime: 60_000,
     retry: false,
     enabled: options?.enabled !== false,
@@ -583,7 +588,7 @@ export function prefetchFlowSpineWorkspace(
   const lang = getActiveLanguage()
   return queryClient.prefetchQuery({
     queryKey: getFlowSpineWorkspaceQueryKey(processKey, instanceId, lang),
-    queryFn: () => fetchFlowSpineWorkspace(processKey, instanceId),
+    queryFn: () => fetchFlowSpineWorkspace(processKey, instanceId, lang),
     staleTime: 5 * 60_000,
   })
 }
@@ -607,16 +612,18 @@ const ALL_PROCESS_KEYS = [
  */
 export function warmFlowSpineCache(
   queryClient: ReturnType<typeof useQueryClient>,
-): void {
-  const lang = getActiveLanguage()
+  language = getActiveLanguage(),
+): () => void {
+  const lang = language
   // Stagger the prefetches to avoid a burst of 9 parallel requests
-  ALL_PROCESS_KEYS.forEach((key, index) => {
-    setTimeout(() => {
+  const timers = ALL_PROCESS_KEYS.map((key, index) => {
+    return setTimeout(() => {
       void queryClient.prefetchQuery({
         queryKey: getFlowSpineWorkspaceQueryKey(key, undefined, lang),
-        queryFn: () => fetchFlowSpineWorkspace(key),
+        queryFn: () => fetchFlowSpineWorkspace(key, undefined, lang),
         staleTime: 5 * 60_000,
       })
     }, index * 300) // 300ms stagger between each prefetch
   })
+  return () => timers.forEach(clearTimeout)
 }

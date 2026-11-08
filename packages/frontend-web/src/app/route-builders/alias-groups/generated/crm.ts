@@ -46,6 +46,10 @@ export const entries: AliasGroupRouteEntry[] = [
     "path": "consents"
   },
   {
+    "module": "@/pages/crm/partner-klaerfaelle",
+    "path": "partner-klaerfaelle"
+  },
+  {
     "module": "@/pages/crm/consent-detail",
     "path": "consent/:id"
   },

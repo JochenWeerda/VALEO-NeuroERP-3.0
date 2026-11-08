@@ -5,6 +5,7 @@ CRUD für Connector-Konfiguration (domain_erp.connector_configs), Sync-Handler (
 
 from __future__ import annotations
 
+from app.auth.finance_roles import finance_admin, finance_read
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 from uuid import uuid4
@@ -64,7 +65,7 @@ def _row_to_config(row) -> ConnectorConfig:
     )
 
 
-@router.get("/config", response_model=Optional[ConnectorConfig], summary="Quadriga config abrufen")
+@router.get("/config", response_model=Optional[ConnectorConfig], summary="Quadriga config abrufen", dependencies=[Depends(finance_read)])
 async def get_quadriga_config(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -83,7 +84,7 @@ async def get_quadriga_config(
     return _row_to_config(row)
 
 
-@router.put("/config", response_model=ConnectorConfig, summary="Quadriga config put")
+@router.put("/config", response_model=ConnectorConfig, summary="Quadriga config put", dependencies=[Depends(finance_admin)])
 async def put_quadriga_config(
     payload: ConnectorConfigUpdate,
     tenant_id: str = Depends(get_tenant_id),
@@ -151,7 +152,7 @@ async def put_quadriga_config(
     return _row_to_config(row)
 
 
-@router.post("/sync", response_model=QuadrigaConnectorOut, summary="Sync quadriga")
+@router.post("/sync", response_model=QuadrigaConnectorOut, summary="Sync quadriga", dependencies=[Depends(finance_admin)])
 async def quadriga_sync(
     payload: QuadrigaSyncRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -182,7 +183,7 @@ async def quadriga_sync(
     }
 
 
-@router.get("/config/list", response_model=List[ConnectorConfig], summary="Connector configs auflisten")
+@router.get("/config/list", response_model=List[ConnectorConfig], summary="Connector configs auflisten", dependencies=[Depends(finance_read)])
 async def list_connector_configs(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),

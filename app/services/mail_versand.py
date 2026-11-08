@@ -31,6 +31,9 @@ from email.message import EmailMessage
 from email.utils import formataddr, make_msgid
 from typing import Any, Optional
 
+#: Anhang: (Dateiname, Inhalt, MIME-Typ), z. B. ("Bestellung_EK-1.pdf", pdf, "application/pdf").
+Anhang = tuple[str, bytes, str]
+
 from app.core.config import settings
 
 
@@ -113,13 +116,14 @@ def sende_mail(
     verwendung: Optional[str] = None,
     nutzer: Optional[dict] = None,
     postfach_id: Optional[str] = None,
+    anhaenge: Optional[list[Anhang]] = None,
 ) -> str:
     """Versendet eine Nachricht und liefert ihre Message-ID; wirft bei jedem Scheitern."""
     if not empfaenger or "@" not in empfaenger:
         raise MailVersandFehler(f"Ungueltige Empfaengeradresse: {empfaenger!r}")
     e = zugang(db, tenant_id, verwendung=verwendung, nutzer=nutzer, postfach_id=postfach_id)
     if e.transport == "graph":
-        return _sende_ueber_graph(e, empfaenger, betreff, text, html)
+        return _sende_ueber_graph(e, empfaenger, betreff, text, html, anhaenge or [])
     nachricht = EmailMessage()
     nachricht["From"] = formataddr((e.absender_name, e.absender)) if e.absender_name else e.absender
     nachricht["To"] = empfaenger
@@ -128,6 +132,9 @@ def sende_mail(
     nachricht.set_content(text or "")
     if html:
         nachricht.add_alternative(html, subtype="html")
+    for name, inhalt, mime in anhaenge or []:
+        haupt, _, unter = (mime or "application/octet-stream").partition("/")
+        nachricht.add_attachment(inhalt, maintype=haupt, subtype=unter or "octet-stream", filename=name)
     anmelden = bool(e.oauth_token or (e.benutzer and e.passwort))
     try:
         if e.sicherheit == "ssl":
@@ -157,7 +164,8 @@ def sende_mail(
     return str(nachricht["Message-ID"])
 
 
-def _sende_ueber_graph(e: SmtpEinrichtung, empfaenger: str, betreff: str, text: str, html: str | None) -> str:
+def _sende_ueber_graph(e: SmtpEinrichtung, empfaenger: str, betreff: str, text: str, html: str | None,
+                       anhaenge: list[Anhang]) -> str:
     """Microsoft 365: ``POST /me/sendMail``. Ein abweichender Absender (Alias) braucht in
     Exchange "Senden als" fuer das angemeldete Postfach, sonst lehnt Graph ab."""
     import uuid
@@ -171,6 +179,14 @@ def _sende_ueber_graph(e: SmtpEinrichtung, empfaenger: str, betreff: str, text: 
         "body": {"contentType": "HTML", "content": html} if html else {"contentType": "Text", "content": text or ""},
         "toRecipients": [{"emailAddress": {"address": empfaenger}}],
     }
+    if anhaenge:
+        import base64
+
+        nachricht["attachments"] = [
+            {"@odata.type": "#microsoft.graph.fileAttachment", "name": name, "contentType": mime,
+             "contentBytes": base64.b64encode(inhalt).decode("ascii")}
+            for name, inhalt, mime in anhaenge
+        ]
     if e.benutzer and e.absender.lower() != e.benutzer.lower():
         nachricht["from"] = {"emailAddress": {"address": e.absender, "name": e.absender_name or e.absender}}
     try:

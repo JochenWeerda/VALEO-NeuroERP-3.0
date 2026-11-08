@@ -1,82 +1,40 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from '@/app/routing/typed-router'
 import { useAuth } from '@/hooks/useAuth'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Loader2, XCircle } from 'lucide-react'
+import { UniversalMaskRenderer } from '@/components/mask-builder/UniversalMaskRenderer'
+import { useUniversalMaskRuntime } from '@/components/mask-builder/runtime/useUniversalMaskRuntime'
+import { callbackScreen } from '@/masks/public-auth.generated'
 
-const isNonEmptyString = (value: unknown): value is string => {
-  return typeof value === 'string' && value.trim().length > 0
-}
-
-const LOGIN_PATH = '/login'
+const isNonEmptyString = (value: unknown): value is string => typeof value === 'string' && value.trim().length > 0
 
 export default function CallbackPage(): JSX.Element {
   const [searchParams] = useSearchParams()
   const { handleCallback } = useAuth()
   const [error, setError] = useState<string | null>(null)
-
+  const started = useRef(false)
+  const schema = useMemo(() => ({ ...callbackScreen, title: error ? 'Anmeldung fehlgeschlagen' : callbackScreen.title,
+    subtitle: error ? 'Der Anmeldevorgang wurde nicht abgeschlossen.' : callbackScreen.subtitle }), [error])
+  const runtime = useUniversalMaskRuntime({ screenId: 'auth/callback', schema })
   useEffect(() => {
-    const processCallback = async (): Promise<void> => {
-      const codeParam = searchParams.get('code')
-      const stateParam = searchParams.get('state')
-      const errorParam = searchParams.get('error')
-
-      if (isNonEmptyString(errorParam)) {
-        setError(`Authentication failed: ${errorParam}`)
-        return
-      }
-
-      const code = isNonEmptyString(codeParam) ? codeParam : null
-      const state = isNonEmptyString(stateParam) ? stateParam : null
-
-      if (code == null || state == null) {
-        setError('Missing code or state parameter')
-        return
-      }
-
-      try {
-        await handleCallback(code, state)
-      } catch (callbackError) {
-        setError(callbackError instanceof Error ? callbackError.message : 'Authentication failed')
+    // PKCE/state consumption remains single-use under StrictMode and rerenders.
+    if (started.current) return
+    started.current = true
+    async function finish(): Promise<void> {
+      const code = searchParams.get('code'), state = searchParams.get('state'), providerError = searchParams.get('error')
+      if (isNonEmptyString(providerError)) { setError(`Authentication failed: ${providerError}`); return }
+      if (!isNonEmptyString(code) || !isNonEmptyString(state)) { setError('Missing code or state parameter'); return }
+      try { await handleCallback(code, state) } catch (failure) {
+        setError(failure instanceof Error ? failure.message : 'Authentication failed')
       }
     }
-
-    void processCallback()
+    void finish()
   }, [handleCallback, searchParams])
-
-  if (error != null) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <Card className="w-full max-w-md border-red-200">
-          <CardHeader>
-            <div className="flex items-center gap-3">
-              <XCircle className="h-8 w-8 text-status-error" />
-              <CardTitle className="text-status-error">Anmeldung fehlgeschlagen</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-status-error">{error}</p>
-            <div className="mt-4">
-              <a href={LOGIN_PATH} className="text-sm text-blue-600 hover:underline">
-                Zurueck zur Anmeldung
-              </a>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
-      <Card className="w-full max-w-md">
-        <CardContent className="pt-6">
-          <div className="flex flex-col items-center gap-4">
-            <Loader2 className="h-12 w-12 animate-spin text-muted-foreground" />
-            <p className="text-gray-600">Anmeldung wird abgeschlossen...</p>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  )
+  return <main className="mx-auto max-w-2xl" data-testid="auth-callback">
+    <UniversalMaskRenderer plan={runtime.plan} data={{ hasError: error !== null }}
+      screenContext={{data: {hasError: error !== null}, permissions: {granted: []},
+        state: {values: {}, policies: {}}, actions: {}, navigation: {push: route => { window.location.href = route }} }}
+      messages={error ? [{ key: 'callback', severity: 'error', message: error }]
+        : [{ key: 'callback', severity: 'info', message: 'Anmeldung wird abgeschlossen...' }]}
+      onAction={key => { if (key === 'back' && error) window.location.href = '/login' }} />
+  </main>
 }

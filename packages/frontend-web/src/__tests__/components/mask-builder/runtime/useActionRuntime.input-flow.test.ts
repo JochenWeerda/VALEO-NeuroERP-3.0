@@ -30,3 +30,45 @@ describe('human input flow dispatch', () => {
     expect(apiClient.request).not.toHaveBeenCalled()
   })
 })
+
+describe('generated master-data concurrency contract', () => {
+  it('sends the displayed version to generated update commands', async () => {
+    vi.mocked(apiClient.request).mockClear()
+    vi.mocked(apiClient.request).mockResolvedValueOnce({ data: { success: true } })
+    const { result } = renderHook(() => useActionRuntime([
+      { key: 'update', label: 'Ändern', commandEndpoint: '/api/v1/studio/entities/studio_silos/{entity_id}/actions/update' },
+    ], { screenId: 'tenant/studio_silos', entityId: 'synthetic-record', permissions: [] }))
+    await result.current.executeAction({ actionKey: 'update', mode: 'execute', expectedVersion: 7,
+      auditReason: 'Korrektur', idempotencyKey: 'stable-key', payload: { name: 'Silo' } })
+    expect(apiClient.request).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({ expected_version: 7, name: 'Silo' }),
+    }))
+  })
+})
+
+
+describe('DocFlow execution boundary', () => {
+  const post: ScreenActionDefinition = { key: 'post', label: 'Buchen', permission: 'belege.buchen',
+    commandEndpoint: '/api/v1/docflow/{entity_id}/post', method: 'POST' }
+  it.each(['dryRun', 'validate', 'propose'] as const)('does not mutate DocFlow in %s', async (mode) => {
+    vi.mocked(apiClient.request).mockClear()
+    const { result } = renderHook(() => useActionRuntime([post], {
+      screenId: 'beleg/purchase-invoice', entityId: 'test-document', permissions: ['belege.buchen'],
+    }))
+    const response = await result.current.executeAction({ actionKey: 'post', mode,
+      payload: { idempotency_key: 'synthetic-idempotency-key' } })
+    expect(response.success).toBe(false)
+    expect(response.error).toContain('Command-Adapter')
+    expect(apiClient.request).not.toHaveBeenCalled()
+  })
+  it('does not send an execute request without its permission', async () => {
+    vi.mocked(apiClient.request).mockClear()
+    const { result } = renderHook(() => useActionRuntime([post], {
+      screenId: 'beleg/purchase-invoice', entityId: 'test-document', permissions: [],
+    }))
+    const response = await result.current.executeAction({ actionKey: 'post', mode: 'execute' })
+    expect(response.success).toBe(false)
+    expect(response.error).toContain('Berechtigung')
+    expect(apiClient.request).not.toHaveBeenCalled()
+  })
+})

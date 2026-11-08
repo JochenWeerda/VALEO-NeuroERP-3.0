@@ -1,4 +1,6 @@
 import { ScheduleEntity, TargetType, TriggerType } from '../entities';
+
+export type ScheduleProps = ConstructorParameters<typeof ScheduleEntity>[0];
 import { ScheduleRepository } from '../../infra/repo/schedule-repository';
 import { EventPublisher } from '../../infra/messaging/publisher';
 import { v4 as uuidv4 } from 'uuid';
@@ -31,9 +33,9 @@ export class SchedulingService {
   ) {}
 
   /**
-   * Calculate next fire time for a schedule
+   * Calculate next fire time for a schedule (pure calculation, no I/O)
    */
-  async calculateNextFireTime(schedule: ScheduleEntity): Promise<Date | null> {
+  calculateNextFireTime(schedule: ScheduleEntity): Date | null {
     const now = new Date();
 
     switch (schedule.trigger.type) {
@@ -78,25 +80,30 @@ export class SchedulingService {
       let success = false;
       let error: string | undefined;
 
-      switch (schedule.target.kind) {
-        case 'EVENT':
-          success = await this.executeEventTarget(schedule, runId, correlationId, context);
-          break;
+      // A failing target still records the fire attempt below and reports its reason
+      try {
+        switch (schedule.target.kind) {
+          case 'EVENT':
+            success = await this.executeEventTarget(schedule, runId, correlationId, context);
+            break;
 
-        case 'HTTP':
-          success = await this.executeHttpTarget(schedule, runId, correlationId, context);
-          break;
+          case 'HTTP':
+            success = await this.executeHttpTarget(schedule, runId, correlationId, context);
+            break;
 
-        case 'QUEUE':
-          success = await this.executeQueueTarget(schedule, runId, correlationId, context);
-          break;
+          case 'QUEUE':
+            success = await this.executeQueueTarget(schedule, runId, correlationId, context);
+            break;
 
-        default:
-          error = `Unsupported target type: ${schedule.target.kind}`;
+          default:
+            error = `Unsupported target type: ${schedule.target.kind}`;
+        }
+      } catch (targetError) {
+        error = targetError instanceof Error ? targetError.message : 'Unknown target error';
       }
 
       // Calculate next fire time
-      const nextFireAt = success ? await this.calculateNextFireTime(schedule) : null;
+      const nextFireAt = success ? this.calculateNextFireTime(schedule) : null;
 
       // Update schedule with next fire time
       const updateData: any = {
@@ -139,7 +146,7 @@ export class SchedulingService {
       throw new Error(`Schedule ${scheduleId} not found`);
     }
 
-    const nextFireAt = enabled ? await this.calculateNextFireTime(schedule) : null;
+    const nextFireAt = enabled ? this.calculateNextFireTime(schedule) : null;
 
     await this.scheduleRepository.update(scheduleId, {
       enabled,
@@ -148,59 +155,28 @@ export class SchedulingService {
   }
 
   /**
-   * Validate schedule configuration
+   * Validate raw schedule input. Required trigger/target fields are invariants of
+   * ScheduleEntity, so an input that cannot be constructed is reported here instead
+   * of being duplicated in validateSchedule.
    */
-  async validateSchedule(schedule: ScheduleEntity): Promise<{ valid: boolean; errors: string[] }> {
+  validateScheduleInput(props: ScheduleProps): { valid: boolean; errors: string[] } {
+    let schedule: ScheduleEntity;
+    try {
+      schedule = new ScheduleEntity(props);
+    } catch (error) {
+      return { valid: false, errors: [error instanceof Error ? error.message : 'Validation failed'] };
+    }
+    return this.validateSchedule(schedule);
+  }
+
+  /**
+   * Validate the configuration of a constructed schedule beyond its invariants
+   */
+  validateSchedule(schedule: ScheduleEntity): { valid: boolean; errors: string[] } {
     const errors: string[] = [];
 
-    // Validate trigger
-    switch (schedule.trigger.type) {
-      case 'CRON':
-        if (!schedule.trigger.cron) {
-          errors.push('CRON expression is required');
-        } else if (!this.isValidCronExpression(schedule.trigger.cron)) {
-          errors.push('Invalid CRON expression');
-        }
-        break;
-
-      case 'RRULE':
-        if (!schedule.trigger.rrule) {
-          errors.push('RRULE is required');
-        }
-        break;
-
-      case 'FIXED_DELAY':
-        if (!schedule.trigger.delaySec || schedule.trigger.delaySec <= 0) {
-          errors.push('Delay must be positive');
-        }
-        break;
-
-      case 'ONE_SHOT':
-        if (!schedule.trigger.startAt) {
-          errors.push('Start time is required for one-shot schedules');
-        }
-        break;
-    }
-
-    // Validate target
-    switch (schedule.target.kind) {
-      case 'EVENT':
-        if (!schedule.target.eventTopic) {
-          errors.push('Event topic is required');
-        }
-        break;
-
-      case 'HTTP':
-        if (!schedule.target.http?.url) {
-          errors.push('HTTP URL is required');
-        }
-        break;
-
-      case 'QUEUE':
-        if (!schedule.target.queue?.topic) {
-          errors.push('Queue topic is required');
-        }
-        break;
+    if (schedule.trigger.type === 'CRON' && !this.isValidCronExpression(schedule.trigger.cron!)) {
+      errors.push('Invalid CRON expression');
     }
 
     return {
@@ -227,27 +203,23 @@ export class SchedulingService {
     correlationId: string,
     context: ScheduleExecutionContext
   ): Promise<boolean> {
-    try {
-      const event = {
-        eventId: uuidv4(),
-        eventType: schedule.target.eventTopic!,
-        eventVersion: 1,
-        occurredAt: new Date().toISOString(),
-        tenantId: schedule.tenantId,
-        correlationId,
-        payload: {
-          scheduleId: schedule.id,
-          runId,
-          firedAt: new Date().toISOString(),
-        },
-      };
+    // Publish failures propagate so executeSchedule can report their reason
+    const event = {
+      eventId: uuidv4(),
+      eventType: schedule.target.eventTopic!,
+      eventVersion: 1,
+      occurredAt: new Date().toISOString(),
+      tenantId: schedule.tenantId,
+      correlationId,
+      payload: {
+        scheduleId: schedule.id,
+        runId,
+        firedAt: new Date().toISOString(),
+      },
+    };
 
-      await this.eventPublisher.publish(event);
-      return true;
-    } catch (error) {
-      console.error('Failed to publish event:', error);
-      return false;
-    }
+    await this.eventPublisher.publish(event);
+    return true;
   }
 
   private async executeHttpTarget(

@@ -9,6 +9,7 @@ from __future__ import annotations
 from unittest.mock import MagicMock
 
 from fastapi import FastAPI
+from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
 from fastapi.testclient import TestClient
 
 from app.api.v1.endpoints import process_kernel_api
@@ -19,10 +20,13 @@ from app.core.action_execution import (
     ActionExecutionStatus,
 )
 from app.core.action_idempotency import get_action_idempotency_store
+from test_ap_kernel_security_contract import kernel, case, subject_data, keys, probe
+from test_ap_workflow_security_contract import request as request_review
 
 
 def _make_client() -> TestClient:
     app = FastAPI()
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(process_kernel_api.router)
     mock_session = MagicMock()
 
@@ -39,7 +43,7 @@ def test_action_execution_request_to_business_command_carries_wave18_process_met
         aggregate_type="ap_invoice",
         aggregate_id="INV-1",
         tenant_id="t1",
-        issuer_role="ap_approver",
+        issuer_role="FINANCE_ADMIN",
         issuer_type="human",
         idempotency_key="idem-wave18-1",
         process_definition_key="settlement_to_finance",
@@ -61,7 +65,7 @@ def test_action_execution_service_enriches_active_workflow_metadata_when_only_pr
             aggregate_id="INV-1",
             payload={"status": "ZUR_FREIGABE"},
             tenant_id="t1",
-            issuer_role="ap_approver",
+            issuer_role="FINANCE_ADMIN",
             issuer_type="human",
             idempotency_key="idem-wave18-2",
             process_definition_key="settlement_to_finance",
@@ -82,7 +86,7 @@ def test_action_execution_service_rejects_command_not_registered_for_process_def
             aggregate_id="INV-1",
             payload={"status": "ZUR_FREIGABE"},
             tenant_id="t1",
-            issuer_role="ap_approver",
+            issuer_role="FINANCE_ADMIN",
             issuer_type="human",
             idempotency_key="idem-wave18-3",
             process_definition_key="quality_to_settlement",
@@ -102,7 +106,7 @@ def test_action_execution_service_rejects_non_active_workflow_version():
             aggregate_id="INV-1",
             payload={"status": "ZUR_FREIGABE"},
             tenant_id="t1",
-            issuer_role="ap_approver",
+            issuer_role="FINANCE_ADMIN",
             issuer_type="human",
             idempotency_key="idem-wave18-4",
             process_definition_key="settlement_to_finance",
@@ -139,25 +143,12 @@ def test_action_execute_api_returns_wave18_process_metadata_in_snapshot():
     assert data["workflow_version_number"] == 1
 
 
-def test_action_execute_api_replays_same_process_metadata_on_idempotent_lookup():
-    store = get_action_idempotency_store()
-    store.clear()
-    body = {
-        "command_name": "ApproveAPInvoice",
-        "aggregate_type": "ap_invoice",
-        "aggregate_id": "INV-1",
-        "payload": {"status": "ZUR_FREIGABE"},
-        "tenant_id": "t1",
-        "issuer_role": "ap_approver",
-        "issuer_type": "human",
-        "idempotency_key": "idem-wave18-6",
-        "process_definition_key": "settlement_to_finance",
-    }
-    with _make_client() as client:
-        first = client.post("/process/actions/execute", json=body)
-        second = client.post("/process/actions/execute", json=body)
-    assert first.status_code == 200
-    assert second.status_code == 200
+def test_action_execute_api_replays_same_process_metadata_on_idempotent_lookup(case, kernel):
+    ref = request_review(case)["approval_request_id"]
+    first = kernel(ref, process_definition_key="settlement_to_finance")
+    second = kernel(ref, process_definition_key="settlement_to_finance")
+    assert first.status_code == 200, first.text
+    assert second.status_code == 200, second.text
     assert second.json()["status"] == "duplicate"
     assert second.json()["process_definition_key"] == "settlement_to_finance"
     assert second.json()["workflow_key"] == "ap_invoice_approval"

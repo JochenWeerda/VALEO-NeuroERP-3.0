@@ -20,6 +20,7 @@ import { apiClient } from '@/lib/api-client'
 import { FileText, Globe, ShoppingCart, Truck, ChevronDown, ChevronRight } from 'lucide-react'
 import { isRecord, numberValue, recordArrayFromResponse, stringValue } from '@/lib/record-utils'
 
+import { tastenKlick } from '@/lib/tastenklick'
 // ── Types ──────────────────────────────────────────────────────────────────────
 
 export type BelegfolgePosition = {
@@ -310,6 +311,9 @@ export function BelegfolgePositionenDialog({ open, onClose, onConfirm, customerI
               <div key={beleg.id} className="border rounded-md overflow-hidden">
                 {/* Beleg-Header */}
                 <div
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={tastenKlick}
                   className="flex items-center gap-3 px-3 py-2 bg-muted/40 cursor-pointer hover:bg-muted/60 select-none"
                   onClick={() => toggleExpand(beleg)}
                 >
@@ -354,6 +358,9 @@ export function BelegfolgePositionenDialog({ open, onClose, onConfirm, customerI
                         {/* Positions-Zeilen */}
                         {loadedPositionen.map((pos, idx) => (
                           <div
+                            role="button"
+                            tabIndex={0}
+                            onKeyDown={tastenKlick}
                             key={idx}
                             className={`flex items-center gap-2 py-1 px-1 rounded text-xs cursor-pointer hover:bg-muted/40 ${selectedKeys.has(posKey(beleg.id, idx)) ? 'bg-primary/5' : ''}`}
                             onClick={() => togglePosition(beleg.id, idx)}

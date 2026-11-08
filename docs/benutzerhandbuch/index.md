@@ -129,3 +129,8 @@ Manifest: `docs/benutzerhandbuch/screenshot-manifest.json`.
 Reverse-Pflege: Wenn neue Benutzerhandbuchseiten angelegt, umbenannt oder
 archiviert werden, diese Startseite und `mkdocs.yml` im gleichen Slice
 aktualisieren.
+
+
+## Studio im Fachgespraech
+
+[Masken erstellen und interaktiv testen](studio-fachdialog.md) beschreibt die abgenommene manuelle Referenzmaske mit echten Bildern und verbleibenden Grenzen. [Vier-Augen-Freigabe](studio-freigabe.md) erklaert die gesonderte Freigabe bereits abgenommener Prozessvarianten.

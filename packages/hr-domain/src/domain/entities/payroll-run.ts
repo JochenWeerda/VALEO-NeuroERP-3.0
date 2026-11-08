@@ -18,7 +18,7 @@ const ZERO = 0;
 const payrollStatusSchema = z.enum(['Draft', 'Locked', 'Exported']);
 
 const PayrollItemSchema = z.object({
-  employeeId: z.string().uuid(),
+  employeeId: z.string().guid(),
   hours: z.number().positive(),
   allowances: z.number().min(0).optional(),
   deductions: z.number().min(0).optional(),
@@ -31,13 +31,13 @@ const PayrollPeriodSchema = z.object({
 });
 
 export const PayrollRunSchema = z.object({
-  id: z.string().uuid(),
-  tenantId: z.string().uuid(),
+  id: z.string().guid(),
+  tenantId: z.string().guid(),
   period: PayrollPeriodSchema,
   status: payrollStatusSchema,
   items: z.array(PayrollItemSchema),
   exportedAt: z.string().datetime().optional(),
-  exportedBy: z.string().uuid().optional(),
+  exportedBy: z.string().guid().optional(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
   createdBy: z.string().optional(),

@@ -313,7 +313,7 @@ def sqlite_snapshot_db() -> Session:
 
 @pytest.fixture(scope="module")
 def client():
-    from main import app
+    from app.main import app
     with TestClient(app, raise_server_exceptions=True) as c:
         yield c
 
@@ -322,6 +322,9 @@ def client():
 def snapshot_client(sqlite_snapshot_db: Session):
     app = FastAPI()
     app.include_router(snapshot_endpoints.router, prefix="/api/v1")
+    from testgrenze import ersetze_mandant, ersetze_nutzer
+    ersetze_mandant(app, "tenant-db")
+    ersetze_nutzer(app, "admin")
 
     def _override_get_db():
         try:

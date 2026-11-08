@@ -11,7 +11,7 @@ export type CreditNoteStatusType = typeof CreditNoteStatus[keyof typeof CreditNo
 
 // Credit Note Line Item Schema
 export const CreditNoteLineSchema = z.object({
-  id: z.string().uuid(),
+  id: z.string().guid(),
   sku: z.string().min(1),
   name: z.string().min(1),
   description: z.string().optional(),
@@ -26,10 +26,10 @@ export type CreditNoteLine = z.infer<typeof CreditNoteLineSchema>;
 
 // Credit Note Entity Schema
 export const CreditNoteSchema = z.object({
-  id: z.string().uuid(),
-  tenantId: z.string().uuid(),
-  customerId: z.string().uuid(),
-  invoiceId: z.string().uuid(),
+  id: z.string().guid(),
+  tenantId: z.string().guid(),
+  customerId: z.string().guid(),
+  invoiceId: z.string().guid(),
   creditNumber: z.string().min(1),
   lines: z.array(CreditNoteLineSchema),
   subtotalNet: z.number().nonnegative(),

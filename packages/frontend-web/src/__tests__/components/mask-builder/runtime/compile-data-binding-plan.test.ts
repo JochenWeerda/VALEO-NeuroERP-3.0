@@ -33,6 +33,20 @@ function makeMockPlan(overrides: Partial<RenderPlan> = {}): RenderPlan {
 }
 
 describe('compileDataBindingPlan', () => {
+  it('routes projected entity reads through the shared mask source for form prefill', () => {
+    const plan = makeMockPlan({ screenId: 'fibu/anlage' })
+    const result = compileDataBindingPlan(
+      plan,
+      [{ key: 'entity', endpoint: '/api/v1/finance/asset-accounting/assets/{entity_id}' }],
+      undefined,
+      'asset-42',
+      'tenant-a',
+      { id: 'asset.id', asset_number: 'asset.asset_number' },
+    )
+    expect(result.entityBinding.entityEndpoint).toBe('/api/v1/finance/asset-accounting/assets/asset-42')
+    expect(result.entityBinding.sharedEntityEndpoint).toBe('/api/v1/masks/fibu%2Fanlage/data/entity?entity_id=asset-42')
+  })
+
   it('resolves entity binding from dataSources', () => {
     const plan = makeMockPlan()
     const result = compileDataBindingPlan(
@@ -43,6 +57,7 @@ describe('compileDataBindingPlan', () => {
     )
     expect(result.entityBinding.entityEndpoint).toBe('/api/v1/crm/customers/42')
     expect(result.entityBinding.entityId).toBe('42')
+    expect(result.entityBinding.sharedEntityEndpoint).toBeUndefined()
   })
 
   it('resolves table bindings from dataSourceKey', () => {
@@ -135,5 +150,18 @@ describe('compileDataBindingPlan', () => {
     })
     const result = compileDataBindingPlan(plan, [], undefined, 'cust-1')
     expect(result.tableBindings['orphan'].requiresServerQuery).toBe(false)
+  })
+})
+
+// Related-row read views have no server-registered mask source.
+it('loads a root read table directly, without fabricating a mask source', () => {
+  const plan = makeMockPlan({ tablesByKey: { history: {
+    key: 'history', label: 'History', columns: [], pageSize: 25,
+    virtualized: true, rowHeight: 40, serverPagination: false,
+  } } })
+  const binding = compileDataBindingPlan(plan, undefined, { history: '/api/v1/webhooks/wh-1/zustellversuche' })
+  expect(binding.tableBindings.history).toMatchObject({
+    endpoint: '/api/v1/webhooks/wh-1/zustellversuche', sourceKey: undefined,
+    clientQuery: true, requiresServerQuery: true,
   })
 })

@@ -73,11 +73,9 @@ export async function listErklaerungen(): Promise<Erklaerung[]> {
   return (await apiClient.get<Erklaerung[]>(`${WEG}/einwilligungserklaerungen`)).data
 }
 
-export async function legeErklaerungAn(wortlaut: string, erstelltDurch?: string | null): Promise<Erklaerung> {
-  return (await apiClient.post<Erklaerung>(`${WEG}/einwilligungserklaerungen`, {
-    wortlaut,
-    erstellt_durch: erstelltDurch || null,
-  })).data
+/** Wer die Fassung anlegt, traegt der Server aus der Anmeldung ein. */
+export async function legeErklaerungAn(wortlaut: string): Promise<Erklaerung> {
+  return (await apiClient.post<Erklaerung>(`${WEG}/einwilligungserklaerungen`, { wortlaut })).data
 }
 
 /** Bei 409 nennt das Backend die Fassung, die diesen Wortlaut schon traegt. */

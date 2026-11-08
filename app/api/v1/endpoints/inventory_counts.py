@@ -13,16 +13,17 @@ from pydantic import BaseModel
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from ....core.config import settings
+from app.core.exceptions import kontosperre_meldung
 from ....core.database import get_db
+from ....core.tenant import get_tenant_id
 from ....infrastructure.models import InventoryCount, InventoryCountLine
 from ..schemas.base import PaginatedResponse, BaseSchema
 import logging
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
-DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 
 # ── Schemas ──────────────────────────────────────────────────────
@@ -67,15 +68,26 @@ class InventoryCountOut(BaseSchema):
 
 # ── Routes ───────────────────────────────────────────────────────
 
+def _inventur(db: Session, tenant_id: str, count_id: str):
+    """Die Inventur des angemeldeten Mandanten — eine fremde gibt es fuer ihn nicht.
+
+    Bis 12.10.2026 kam der Mandant aus dem Query-Parameter, und lesen, loeschen und verbuchen
+    einer einzelnen Inventur filterten gar nicht.
+    """
+    return db.query(InventoryCount).filter(
+        InventoryCount.id == count_id, InventoryCount.tenant_id == tenant_id
+    ).first()
+
+
 @router.get("/", response_model=PaginatedResponse[InventoryCountOut], summary="Inventory counts auflisten")
 async def list_inventory_counts(
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     skip: int = Query(0, ge=0),
     limit: int = Query(25, ge=1, le=200),
     db: Session = Depends(get_db),
 ):
     """GET Inventur Übersicht"""
-    tid = tenant_id or DEFAULT_TENANT
+    tid = tenant_id
     q = db.query(InventoryCount).filter(InventoryCount.tenant_id == tid)
     total = q.count()
     items = q.offset(skip).limit(limit).all()
@@ -88,15 +100,15 @@ async def list_inventory_counts(
     )
 
 
-@router.post("/", response_model=InventoryCountOut, status_code=201, summary="Inventory count anlegen")
+@router.post("/", response_model=InventoryCountOut, status_code=201, summary="Inventory count anlegen", dependencies=SCHREIBEN["LAGER"])
 async def create_inventory_count(
     payload: InventoryCountCreate,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Inventur-Kopf anlegen."""
     from app.core.uuid7 import uuid7
-    tid = tenant_id or DEFAULT_TENANT
+    tid = tenant_id
     obj = InventoryCount(
         id=uuid7(),
         warehouse_id=payload.warehouse_id,
@@ -114,18 +126,22 @@ async def create_inventory_count(
 
 
 @router.get("/{count_id}", response_model=InventoryCountOut, summary="Inventory count abrufen")
-async def get_inventory_count(count_id: str, db: Session = Depends(get_db)):
+async def get_inventory_count(
+    count_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
+):
     """Inventur-Kopf Detail."""
-    obj = db.query(InventoryCount).filter(InventoryCount.id == count_id).first()
+    obj = _inventur(db, tenant_id, count_id)
     if not obj:
         raise HTTPException(404, "Inventory count not found")
     return InventoryCountOut.model_validate(obj)
 
 
-@router.delete("/{count_id}", status_code=204, response_class=Response, response_model=None, summary="Inventory count löschen")
-async def delete_inventory_count(count_id: str, db: Session = Depends(get_db)):
+@router.delete("/{count_id}", status_code=204, response_class=Response, response_model=None, summary="Inventory count löschen", dependencies=SCHREIBEN["LAGER"])
+async def delete_inventory_count(
+    count_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
+):
     """Inventur-Kopf loeschen."""
-    obj = db.query(InventoryCount).filter(InventoryCount.id == count_id).first()
+    obj = _inventur(db, tenant_id, count_id)
     if not obj:
         raise HTTPException(404, "Inventory count not found")
     db.query(InventoryCountLine).filter(InventoryCountLine.inventory_count_id == count_id).delete()
@@ -134,24 +150,30 @@ async def delete_inventory_count(count_id: str, db: Session = Depends(get_db)):
 
 
 @router.get("/{count_id}/lines", response_model=list[InventoryCountLineOut], summary="Count lines abrufen")
-async def get_count_lines(count_id: str, db: Session = Depends(get_db)):
+async def get_count_lines(
+    count_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
+):
     """GET Inventur Positionen"""
+    if not _inventur(db, tenant_id, count_id):
+        raise HTTPException(404, "Inventory count not found")
     lines = db.query(InventoryCountLine).filter(
         InventoryCountLine.inventory_count_id == count_id
     ).all()
     return [InventoryCountLineOut.model_validate(line_item) for line_item in lines]
 
 
-@router.post("/lines", response_model=InventoryCountLineOut, status_code=201, summary="Count line anlegen")
+@router.post("/lines", response_model=InventoryCountLineOut, status_code=201, summary="Count line anlegen", dependencies=SCHREIBEN["LAGER"])
 async def create_count_line(
     payload: InventoryCountLineCreate,
     count_id: str = Query(...),
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """POST Inventur Daten anlegen"""
     from app.core.uuid7 import uuid7
-    tid = tenant_id or DEFAULT_TENANT
+    tid = tenant_id
+    if not _inventur(db, tid, count_id):
+        raise HTTPException(404, "Inventory count not found")
     line = InventoryCountLine(
         id=uuid7(),
         inventory_count_id=count_id,
@@ -170,14 +192,17 @@ async def create_count_line(
     return InventoryCountLineOut.model_validate(line)
 
 
-@router.patch("/lines/{line_id}", response_model=InventoryCountLineOut, summary="Count line aktualisieren")
+@router.patch("/lines/{line_id}", response_model=InventoryCountLineOut, summary="Count line aktualisieren", dependencies=SCHREIBEN["LAGER"])
 async def update_count_line(
     line_id: str,
     payload: InventoryCountLineUpdate,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """PATCH Inventur Daten ändern"""
-    line = db.query(InventoryCountLine).filter(InventoryCountLine.id == line_id).first()
+    line = db.query(InventoryCountLine).filter(
+        InventoryCountLine.id == line_id, InventoryCountLine.tenant_id == tenant_id
+    ).first()
     if not line:
         raise HTTPException(404, "Inventory count line not found")
     if payload.counted_qty is not None:
@@ -190,10 +215,14 @@ async def update_count_line(
     return InventoryCountLineOut.model_validate(line)
 
 
-@router.delete("/lines/{line_id}", status_code=204, response_class=Response, response_model=None, summary="Count line löschen")
-async def delete_count_line(line_id: str, db: Session = Depends(get_db)):
+@router.delete("/lines/{line_id}", status_code=204, response_class=Response, response_model=None, summary="Count line löschen", dependencies=SCHREIBEN["LAGER"])
+async def delete_count_line(
+    line_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
+):
     """POST Inventur Daten löschen"""
-    line = db.query(InventoryCountLine).filter(InventoryCountLine.id == line_id).first()
+    line = db.query(InventoryCountLine).filter(
+        InventoryCountLine.id == line_id, InventoryCountLine.tenant_id == tenant_id
+    ).first()
     if not line:
         raise HTTPException(404, "Inventory count line not found")
     db.delete(line)
@@ -210,10 +239,10 @@ class InventurPostResult(BaseModel):
     status: str
 
 
-@router.post("/{count_id}/post", response_model=InventurPostResult, tags=["inventory"], summary="Inventory count erstellen")
+@router.post("/{count_id}/post", response_model=InventurPostResult, tags=["inventory"], summary="Inventory count erstellen", dependencies=SCHREIBEN["LAGER"])
 async def post_inventory_count(
     count_id: str,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Inventur-Differenzen verbuchen.
@@ -224,8 +253,8 @@ async def post_inventory_count(
     - Am Ende eine aggregierte GL-Buchung erstellt
     Der Inventur-Status wechselt auf 'posted'.
     """
-    tid = tenant_id or DEFAULT_TENANT
-    count = db.query(InventoryCount).filter(InventoryCount.id == count_id).first()
+    tid = tenant_id
+    count = _inventur(db, tid, count_id)
     if not count:
         raise HTTPException(404, "Inventur nicht gefunden")
     if hasattr(count, 'status') and count.status == "posted":
@@ -332,7 +361,19 @@ async def post_inventory_count(
                     reference=f"INVENTUR-{count_id[:8].upper()}",
                 )
     except Exception as e:  # noqa: BLE001
-        logger.warning("Journal-Buchungen für Inventur konnten nicht erstellt werden: %s", e)
+        # Bestand und Buchung teilen eine Transaktion: Lehnt die Kontosperre die Buchungszeile ab,
+        # ist auch die Bestandsaenderung verloren. Das wird gesagt statt als Erfolg gemeldet.
+        sperre = kontosperre_meldung(e)
+        if sperre:
+            db.rollback()
+            raise HTTPException(status_code=409, detail=sperre) from e
+        # Auch jeder andere Fehler der Buchung verwirft die Bestandsaenderungen der Inventur.
+        logger.error("Journal-Buchungen für Inventur konnten nicht erstellt werden: %s", e, exc_info=True)
+        db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail="Inventur nicht verbucht: Die Buchung im Hauptbuch ist fehlgeschlagen.",
+        ) from e
 
     # Update count status
     count.status = "posted"
@@ -357,10 +398,10 @@ class PeriodCloseResult(BaseModel):
     status: str
 
 
-@router.post("/period-close", response_model=PeriodCloseResult, tags=["inventory"], summary="Close period")
+@router.post("/period-close", response_model=PeriodCloseResult, tags=["inventory"], summary="Close period", dependencies=SCHREIBEN["LAGER"])
 async def period_close(
     period: str = Query(..., description="Periode z.B. 2026-Q1 oder 2026-12"),
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Perioden-Abschluss — Inventur-Zusammenfassung für eine Periode.
@@ -368,7 +409,7 @@ async def period_close(
     Erzeugt eine Bestandsübersicht aller Lagerorte und prüft auf
     offene Inventuren oder ungebuchte Differenzen.
     """
-    tid = tenant_id or DEFAULT_TENANT
+    tid = tenant_id
 
     # Count warehouses with stock
     wh_count = db.execute(

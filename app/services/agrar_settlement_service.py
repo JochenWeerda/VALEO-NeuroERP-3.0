@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from app.core.tenant_context import current_tenant_or_none
+
 import logging
 from datetime import date, datetime
 from decimal import Decimal
@@ -162,7 +164,8 @@ class AgrarSettlementService:
 
         inp = TrocknungsInput(
             settlement_id=payload.settlement_id,
-            tenant_id=payload.tenant_id,
+            # Vorschau ohne Speicherung: Mandant des Kontexts (bis 27.10.2026 Feld mit Vorgabe "system")
+            tenant_id=current_tenant_or_none() or "ohne-mandant",
             crop_code=payload.crop_code,
             rule_set_id=payload.rule_set_id,
             rule_set_version=payload.rule_set_version,
@@ -219,7 +222,8 @@ class AgrarSettlementService:
             raise ValidationFailedError(str(exc)) from exc
         request = SettlementApprovalRequest(
             settlement_id="preview",
-            tenant_id="system",
+            # reine Berechnung, nichts wird gespeichert: kein Rueckfall auf einen Mandanten
+            tenant_id=current_tenant_or_none() or "ohne-mandant",
             actor_id=payload.actor_id,
             actor_type=actor_type,
             target_status=target_status,
@@ -744,8 +748,8 @@ class AgrarSettlementService:
 
         supplier_name = None
         try:
-            from app.documents.router_helpers import get_from_store, get_repository
-            partner = get_from_store("partner", settlement.supplier_id, get_repository(self.db))
+            from app.documents.router_helpers import eigener_beleg, get_repository
+            partner = eigener_beleg("partner", settlement.supplier_id, self.tenant_id, get_repository(self.db))
             if partner:
                 supplier_name = partner.get("name")
         except Exception:  # noqa: BLE001 — Lieferantenname nicht abrufbar; bleibt None

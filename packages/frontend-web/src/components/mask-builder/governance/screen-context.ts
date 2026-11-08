@@ -47,7 +47,8 @@ export function actionIsEnabled(
   root: Record<string, unknown> | undefined,
 ): boolean {
   if (action.disabled) return false
-  if (!action.enabledWhen || !root) return true
+  if (!action.enabledWhen) return true
+  if (!root) return false
   return evaluateCondition(action.enabledWhen, root)
 }
 

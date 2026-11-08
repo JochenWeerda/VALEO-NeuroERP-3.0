@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 import logging
 from app.core.uuid7 import uuid7
+from app.core.tenant_context import get_current_tenant_id
 
 logger = logging.getLogger(__name__)
 
@@ -460,9 +461,10 @@ class ISO9001ContinuousImprovement:
         logger.info(f"Process performance updated: {process_name} - {performance.current_value}")
         return performance_id
 
-    def get_improvement_dashboard(self, tenant_id: str = "system") -> Dict[str, Any]:
+    def get_improvement_dashboard(self, tenant_id: str | None = None) -> Dict[str, Any]:
         """Get comprehensive improvement dashboard"""
         # Filter data by tenant
+        tenant_id = tenant_id or get_current_tenant_id()
         tenant_metrics = [m for m in self.quality_metrics.values() if m.id.startswith(tenant_id)]
         tenant_initiatives = [i for i in self.improvement_initiatives.values() if i.id.startswith(tenant_id)]
         tenant_reviews = [r for r in self.management_reviews if r.id.startswith(tenant_id)]
@@ -679,8 +681,9 @@ class ISO9001ContinuousImprovement:
 
         return alerts
 
-    def check_continuous_improvement_compliance(self, tenant_id: str = "system") -> Dict[str, Any]:
+    def check_continuous_improvement_compliance(self, tenant_id: str | None = None) -> Dict[str, Any]:
         """Check ISO 9001 continuous improvement compliance"""
+        tenant_id = tenant_id or get_current_tenant_id()
         metrics = [m for m in self.quality_metrics.values() if m.id.startswith(tenant_id)]
         initiatives = [i for i in self.improvement_initiatives.values() if i.id.startswith(tenant_id)]
         reviews = [r for r in self.management_reviews if r.id.startswith(tenant_id)]

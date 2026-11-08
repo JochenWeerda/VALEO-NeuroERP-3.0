@@ -11,6 +11,7 @@ from __future__ import annotations
 import sys
 import os
 import pytest
+from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
 
 # ---------------------------------------------------------------------------
 # Microservice-Modul zum Python-Pfad hinzufügen (nur für diese Tests)
@@ -219,6 +220,7 @@ from unittest.mock import patch
 def proxy_client() -> TestClient:
     app = FastAPI()
     app.include_router(rations_optimization.router)
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)  # Schreibwege pruefen die Bereichsrolle (19.10.2026)
     return TestClient(app)
 
 
@@ -314,6 +316,7 @@ def test_proxy_error_returns_503_when_configured_but_unreachable():
 
     app = FastAPI()
     app.include_router(rations_optimization.router)
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)  # Schreibwege pruefen die Bereichsrolle (19.10.2026)
     client = TestClient(app)
 
     async def _fail(*_args, **_kwargs):

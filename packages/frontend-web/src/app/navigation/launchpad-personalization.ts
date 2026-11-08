@@ -3,6 +3,62 @@ import type { LaunchpadAppTile, LaunchpadPage, LaunchpadSpace } from '@/app/navi
 export const LAUNCHPAD_OVERLAY_STORAGE_KEY = 'valeo.launchpad.overlay'
 export const CUSTOM_PAGE_PLACEHOLDER = 'Neue Gruppe'
 
+function scopePart(value?: string | null): string {
+  return typeof value === 'string' ? value.trim() : ''
+}
+
+/**
+ * Ohne sub der globale Key. Mit sub `valeo.launchpad.overlay.<sub>`.
+ * Mit Mandant und sub `valeo.launchpad.overlay.<tenant>.<sub>`.
+ */
+export function launchpadOverlayStorageKey(sub?: string | null, tenantId?: string | null): string {
+  const id = scopePart(sub)
+  if (!id) return LAUNCHPAD_OVERLAY_STORAGE_KEY
+  const tenant = scopePart(tenantId)
+  if (!tenant) return `${LAUNCHPAD_OVERLAY_STORAGE_KEY}.${id}`
+  return `${LAUNCHPAD_OVERLAY_STORAGE_KEY}.${tenant}.${id}`
+}
+
+/** Aktivster Key zuerst, danach je der nächst allgemeinere. */
+function launchpadOverlayReadKeys(sub?: string | null, tenantId?: string | null): string[] {
+  const active = launchpadOverlayStorageKey(sub, tenantId)
+  const keys = [active]
+  const userKey = launchpadOverlayStorageKey(sub)
+  if (userKey !== active) keys.push(userKey)
+  if (LAUNCHPAD_OVERLAY_STORAGE_KEY !== keys[keys.length - 1]) {
+    keys.push(LAUNCHPAD_OVERLAY_STORAGE_KEY)
+  }
+  return keys
+}
+
+/**
+ * Liest den aktiven Key. Ist er leer, wird der nächst allgemeinere Key
+ * mit Inhalt einmal gelesen. Geschrieben wird nur der aktive Key.
+ */
+export function readLaunchpadOverlayRaw(
+  storage: Pick<Storage, 'getItem'>,
+  sub?: string | null,
+  tenantId?: string | null,
+): string | null {
+  const keys = launchpadOverlayReadKeys(sub, tenantId)
+  let emptyActive: string | null = null
+  for (let index = 0; index < keys.length; index += 1) {
+    const value = storage.getItem(keys[index] ?? '')
+    if (value != null && value.trim() !== '') return value
+    if (index === 0) emptyActive = value
+  }
+  return emptyActive
+}
+
+export function writeLaunchpadOverlayRaw(
+  storage: Pick<Storage, 'setItem'>,
+  raw: string,
+  sub?: string | null,
+  tenantId?: string | null,
+): void {
+  storage.setItem(launchpadOverlayStorageKey(sub, tenantId), raw)
+}
+
 export type LaunchpadOverlay = {
   version: 1
   hiddenPageIds: string[]
@@ -12,6 +68,8 @@ export type LaunchpadOverlay = {
   removedTiles: Record<string, string[]>
   tileLabels: Record<string, string>
   tileDescriptions: Record<string, string>
+  pinnedTileIds: string[]
+  surfaceLocked: boolean
   customPages: Array<{
     id: string
     spaceId: string
@@ -29,6 +87,8 @@ export const EMPTY_LAUNCHPAD_OVERLAY: LaunchpadOverlay = {
   removedTiles: {},
   tileLabels: {},
   tileDescriptions: {},
+  pinnedTileIds: [],
+  surfaceLocked: false,
   customPages: [],
 }
 
@@ -55,6 +115,8 @@ export function parseLaunchpadOverlay(raw: unknown): LaunchpadOverlay {
     removedTiles: stringRecordList(value.removedTiles),
     tileLabels: stringRecord(value.tileLabels),
     tileDescriptions: stringRecord(value.tileDescriptions),
+    pinnedTileIds: stringList(value.pinnedTileIds),
+    surfaceLocked: value.surfaceLocked === true,
     customPages: parseCustomPages(value.customPages),
   }
 }
@@ -277,6 +339,27 @@ export function reorderTiles(
     }
   }
   return { ...overlay, tileOrder: { ...overlay.tileOrder, [key]: next } }
+}
+
+export function pinTile(overlay: LaunchpadOverlay, tileId: string): LaunchpadOverlay {
+  if (!tileId || overlay.pinnedTileIds.includes(tileId)) {
+    return overlay
+  }
+  return { ...overlay, pinnedTileIds: [...overlay.pinnedTileIds, tileId] }
+}
+
+export function unpinTile(overlay: LaunchpadOverlay, tileId: string): LaunchpadOverlay {
+  if (!overlay.pinnedTileIds.includes(tileId)) {
+    return overlay
+  }
+  return { ...overlay, pinnedTileIds: overlay.pinnedTileIds.filter((id) => id !== tileId) }
+}
+
+export function setSurfaceLocked(overlay: LaunchpadOverlay, locked: boolean): LaunchpadOverlay {
+  if (overlay.surfaceLocked === locked) {
+    return overlay
+  }
+  return { ...overlay, surfaceLocked: locked }
 }
 
 export function setTileAppearance(

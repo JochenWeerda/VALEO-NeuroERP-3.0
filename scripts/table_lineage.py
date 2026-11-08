@@ -100,8 +100,10 @@ def load_native_screens() -> list[dict[str, Any]]:
         from app.core.screen_definitions import SCREEN_DEFINITION_BUILDERS, get_screen_definition
     except Exception:  # noqa: BLE001 — Generator darf ohne Maskenmodul weiterlaufen
         return []
+    from app.core.stamm_object_page_parent import ensure_stamm_screen_registry
+    ensure_stamm_screen_registry()
     screens: list[dict[str, Any]] = []
-    for screen_id in SCREEN_DEFINITION_BUILDERS:
+    for screen_id in sorted(tuple(SCREEN_DEFINITION_BUILDERS)):
         definition = get_screen_definition(screen_id)
         if not definition:
             continue

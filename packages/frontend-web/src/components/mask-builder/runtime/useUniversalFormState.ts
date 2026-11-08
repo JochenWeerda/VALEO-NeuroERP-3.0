@@ -1,3 +1,6 @@
+import { validTableInputValues } from './table-input-contract'
+import { validTextFileValue } from './text-file-contract'
+import { FORMAT_MESSAGE, validPeriod, validTextFormat } from './text-format'
 import { useCallback, useMemo, useRef, useState } from 'react'
 import type { ScreenDefinition, ScreenFieldDefinition } from '../schema'
 import type { DirtyState, FieldError, SubmitState, UniversalFormState, ValidationPlan, ValidationRule } from './FormState'
@@ -5,7 +8,24 @@ import type { DirtyState, FieldError, SubmitState, UniversalFormState, Validatio
 function buildValidationRules(fields: ScreenFieldDefinition[]): ValidationRule[] {
   const rules: ValidationRule[] = []
   for (const field of fields) {
-    if (field.required) {
+    if (Object.prototype.hasOwnProperty.call(field, 'fileContent')) {
+      rules.push({ fieldKey: field.key, message: `${field.label}: Bitte eine gültige UTF-8-Datei innerhalb der Größengrenze auswählen.`,
+        severity: 'blocking', validate: value => !validTextFileValue(field, value) })
+    }
+    if (field.type === 'table' && (field.rowFields !== undefined || field.tableEditing !== undefined)) {
+      rules.push({ fieldKey: field.key, message: `${field.label}: Bitte Tabellenstruktur, Pflichtfelder und Zahlen prüfen.`,
+        severity: 'blocking', validate: value => !validTableInputValues(field, value) })
+    }
+    if (field.format) {
+      const format = field.format
+      rules.push({ fieldKey: field.key, message: `${field.label}: ${FORMAT_MESSAGE[format]}`,
+        severity: 'blocking', validate: value => !validTextFormat(format, value) })
+    }
+    if (field.type === 'period') {
+      rules.push({ fieldKey: field.key, message: `${field.label}: bitte eine Periode als JJJJ-MM wählen.`,
+        severity: 'blocking', validate: value => !validPeriod(value) })
+    }
+    if (field.required && !field.computed) {
       rules.push({
         fieldKey: field.key,
         message: `${field.label} ist ein Pflichtfeld.`,

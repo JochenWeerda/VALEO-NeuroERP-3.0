@@ -35,6 +35,7 @@ from app.core.tenant import get_tenant_id
 logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/gdpr/art33", tags=["gdpr", "compliance", "art33"])
@@ -209,7 +210,7 @@ def list_breaches(
     return rows
 
 
-@router.post("/breaches", response_model=BreachOut, status_code=201, summary="Datenpanne erfassen")
+@router.post("/breaches", response_model=BreachOut, status_code=201, summary="Datenpanne erfassen", dependencies=SCHREIBEN["QUALITAET"])
 def create_breach(
     payload: BreachIn,
     db: Session = Depends(get_db),
@@ -253,7 +254,7 @@ def get_breach(
     return row
 
 
-@router.put("/breaches/{breach_id}", response_model=BreachOut, summary="Datenpanne aktualisieren")
+@router.put("/breaches/{breach_id}", response_model=BreachOut, summary="Datenpanne aktualisieren", dependencies=SCHREIBEN["QUALITAET"])
 def update_breach(
     breach_id: str,
     payload: BreachIn,
@@ -291,7 +292,7 @@ def get_deadline(
     return _compute_deadline(row)
 
 
-@router.post("/breaches/{breach_id}/notify", response_model=BreachOut, summary="Als behördengemeldet markieren")
+@router.post("/breaches/{breach_id}/notify", response_model=BreachOut, summary="Als behördengemeldet markieren", dependencies=SCHREIBEN["QUALITAET"])
 def notify_authority(
     breach_id: str,
     payload: NotifyIn,

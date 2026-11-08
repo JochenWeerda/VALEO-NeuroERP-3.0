@@ -13,6 +13,7 @@ from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFa
 from app.core.tenant import get_tenant_id
 from app.infrastructure.models.l3c_models import AgrarContract, AgrarContractAllocation  # noqa: F401
 from app.services.agrar_contract_service import AgrarContractService
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter()
 
@@ -171,7 +172,7 @@ async def get_agrar_contract(
         raise _svc_errors(exc)
 
 
-@router.post("/", response_model=AgrarContractOut, status_code=201, summary="Agrar contract anlegen")
+@router.post("/", response_model=AgrarContractOut, status_code=201, summary="Agrar contract anlegen", dependencies=SCHREIBEN["AGRAR"])
 async def create_agrar_contract(
     payload: AgrarContractCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -183,7 +184,7 @@ async def create_agrar_contract(
         raise _svc_errors(exc)
 
 
-@router.patch("/{contract_id}", response_model=AgrarContractOut, summary="Agrar contract aktualisieren")
+@router.patch("/{contract_id}", response_model=AgrarContractOut, summary="Agrar contract aktualisieren", dependencies=SCHREIBEN["AGRAR"])
 async def update_agrar_contract(
     contract_id: str,
     payload: AgrarContractUpdate,
@@ -196,7 +197,7 @@ async def update_agrar_contract(
         raise _svc_errors(exc)
 
 
-@router.post("/{contract_id}/allocations", response_model=ContractAllocationOut, status_code=201, summary="Contract quantity zuweisen")
+@router.post("/{contract_id}/allocations", response_model=ContractAllocationOut, status_code=201, summary="Contract quantity zuweisen", dependencies=SCHREIBEN["AGRAR"])
 async def allocate_contract_quantity(
     contract_id: str,
     payload: ContractAllocationCreate,
@@ -231,7 +232,7 @@ async def list_contract_allocations(
     return [_to_alloc_out(r) for r in rows]
 
 
-@router.delete("/{contract_id}", status_code=204, response_class=Response, response_model=None, summary="Contract löschen")
+@router.delete("/{contract_id}", status_code=204, response_class=Response, response_model=None, summary="Contract löschen", dependencies=SCHREIBEN["AGRAR"])
 async def delete_contract(
     contract_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -243,7 +244,7 @@ async def delete_contract(
         raise _svc_errors(exc)
 
 
-@router.post("/{contract_id}/cancel", response_model=AgrarContractOut, summary="Contract stornieren")
+@router.post("/{contract_id}/cancel", response_model=AgrarContractOut, summary="Contract stornieren", dependencies=SCHREIBEN["AGRAR"])
 async def cancel_contract(
     contract_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -255,7 +256,7 @@ async def cancel_contract(
         raise _svc_errors(exc)
 
 
-@router.post("/{contract_id}/close", response_model=AgrarContractOut, summary="Contract abschließen")
+@router.post("/{contract_id}/close", response_model=AgrarContractOut, summary="Contract abschließen", dependencies=SCHREIBEN["AGRAR"])
 async def close_contract(
     contract_id: str,
     tenant_id: str = Depends(get_tenant_id),

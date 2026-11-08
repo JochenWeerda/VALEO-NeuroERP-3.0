@@ -20,29 +20,13 @@ from app.services.audit_hardening import append_audit_entry
 
 from app.api.v1.schemas.base import BaseSchema, IDResponse
 from app.api.v1.schemas.compliance_dsgvo_schemas import ComplianceDsgvoOut
+from app.core.akteur import akteur_aus_request
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 def _benutzer_aus_anfrage(request: Request | None) -> str | None:
-    """Wer handelt hier? Ohne Namen ist eine Attestierung nur eine Huerde.
-
-    Dieselbe Form wie im Druckpfad des Lieferscheins: erst der Kopf
-    ``X-User-ID``, dann das ``sub`` des Bearer-Tokens.
-    """
-    if request is None:
-        return None
-    kopf = request.headers.get("X-User-ID")
-    if kopf:
-        return kopf
-    auth = request.headers.get("Authorization", "")
-    if auth.startswith("Bearer "):
-        try:
-            import base64
-            nutzlast = auth[7:].split(".")[1]
-            nutzlast += "=" * (4 - len(nutzlast) % 4)
-            return json.loads(base64.urlsafe_b64decode(nutzlast)).get("sub")
-        except Exception:  # noqa: BLE001 — kein lesbares Token, dann kein Name
-            pass
-    return None
+    """Urheber aus dem geprueften Token (bis 19.10.2026 zuerst aus dem Client-Header ``X-User-ID``)."""
+    return akteur_aus_request(request)
 
 
 router = APIRouter(prefix="/compliance/dsgvo", tags=["compliance", "dsgvo"])
@@ -159,9 +143,10 @@ def _anonymize_subject(db: Session, subject_type: str, subject_id: str, tenant_i
     abhaengt, in welcher der Kunde liegt.
     """
     log: list[dict] = []
+    # Vor dem Anonymisieren lesen: danach traegt der Stamm den Namen nicht mehr.
+    namen = _namen_des_betroffenen(db, subject_type, subject_id, tenant_id)
     anon_name = "ANONYM (DSGVO Art.17)"
     anon_email = "geloescht@dsgvo.invalid"
-    namen = _namen_des_betroffenen(db, subject_type, subject_id, tenant_id)
 
     def anweisungen(typ: str) -> list[tuple[str, str, dict]]:
         basis = {"anon_name": anon_name, "anon_email": anon_email,
@@ -184,7 +169,8 @@ def _anonymize_subject(db: Session, subject_type: str, subject_id: str, tenant_i
                 ("domain_crm.contacts",
                  # Kein tenant_id in der Tabelle — der Mandant haengt am Kunden,
                  # der oben bereits mandantenrein geprueft wurde.
-                 "DELETE FROM domain_crm.contacts WHERE customer_id::text = :sid", basis),
+                 "DELETE FROM domain_crm.contacts c USING domain_crm.customers p"
+                 " WHERE c.customer_id=p.id AND p.id::text=:sid AND p.tenant_id::text=:tid", basis),
             ]
         elif typ == "LEAD":
             # Bis zum 06.10.2026 stand hier ein UPDATE auf
@@ -214,12 +200,15 @@ def _anonymize_subject(db: Session, subject_type: str, subject_id: str, tenant_i
         else:
             return []
 
-        for name in namen:
+        if typ == "CUSTOMER":
+            # Only activities bound by the canonical customer reference are erased.
+            # Free-text name matches are not proof of identity; they stay for
+            # separate review and are reported as unlinked by the GDPR processor.
             schritte.append((
                 "domain_crm.activities",
                 "DELETE FROM domain_crm.activities"
-                " WHERE customer = :kunde AND (tenant_id IS NULL OR tenant_id::text = :tid)",
-                {**basis, "kunde": name},
+                " WHERE tenant_id::text = :tid AND customer_id::text = :sid",
+                basis,
             ))
         return schritte
 
@@ -266,8 +255,33 @@ def _anonymize_subject(db: Session, subject_type: str, subject_id: str, tenant_i
                 log.append({"table": table, "rows_affected": 0, "error": str(exc)})
         except Exception as exc:  # noqa: BLE001 — jeder Fehlschlag muss sichtbar bleiben
             log.append({"table": table, "rows_affected": 0, "error": str(exc)})
+    if namen:
+        log.append(_klarnamen_anonymisieren(db, namen, subject_id, tenant_id, anon_name))
     return log
 
+
+def _klarnamen_anonymisieren(db: Session, namen: list[str], subject_id: str, tenant_id: str, anon_name: str) -> dict:
+    """Klarname des Betroffenen in Aktivitaeten ohne Kunden-ID entfernen (Art. 17 DSGVO).
+
+    Personenbezogen ist der Name im Freitext, nicht der Vorgang. Er wird durch den Anonymisierungsvermerk
+    ersetzt (``customer``, ``contact_person``); danach ist die Zeile nicht mehr personenbezogen
+    (Erwaegungsgrund 26) und bleibt als Geschaeftsvorgang stehen. Gilt nur im Mandanten des Antrags und nur bei
+    exakt gleichem Namen. Ueber die Kunden-ID gebundene Aktivitaeten loescht der Lauf vorher ganz.
+    """
+    try:
+        # RETURNING liefert genau die geaenderten Zeilen; eine Loeschung nach Art. 17 wird nicht seitenweise begrenzt.
+        with db.begin_nested():
+            kennungen = [str(k) for k in db.execute(text(
+                "UPDATE domain_crm.activities SET "
+                "customer = CASE WHEN customer = ANY(:namen) THEN :anon ELSE customer END, "
+                "contact_person = CASE WHEN contact_person = ANY(:namen) THEN :anon ELSE contact_person END "
+                "WHERE tenant_id::text = :tid AND (customer_id IS NULL OR customer_id::text <> :sid) "
+                "AND (customer = ANY(:namen) OR contact_person = ANY(:namen)) RETURNING id"),
+                {"tid": tenant_id, "sid": subject_id, "namen": namen, "anon": anon_name}).scalars()]
+    except Exception as exc:  # noqa: BLE001 - jeder Fehlschlag muss sichtbar bleiben und den Antrag offen halten
+        return {"table": "domain_crm.activities (Klarname)", "rows_affected": 0, "error": str(exc)}
+    return {"table": "domain_crm.activities (Klarname)", "rows_affected": len(kennungen),
+            "action": "name_anonymized", "ids": sorted(kennungen)}
 
 def _loeschung_ist_vollstaendig(log: list[dict]) -> bool:
     """Kein Eintrag mit Fehler — sonst ist der Antrag nicht abgeschlossen."""
@@ -275,8 +289,7 @@ def _loeschung_ist_vollstaendig(log: list[dict]) -> bool:
 
 
 @router.post("/erasure-requests", status_code=201, summary="Erasure request anlegen",
-    response_model=IDResponse
-)
+    response_model=IDResponse, dependencies=SCHREIBEN["QUALITAET"])
 async def create_erasure_request(
     payload: ErasureRequestIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -360,8 +373,7 @@ async def get_erasure_request(
 
 
 @router.post("/erasure-requests/{request_id}/process", summary="Erasure request verarbeiten",
-    response_model=ErasureProcessOut
-)
+    response_model=ErasureProcessOut, dependencies=SCHREIBEN["QUALITAET"])
 async def process_erasure_request(
     request_id: str,
     payload: ErasureProcessIn,
@@ -472,8 +484,7 @@ async def process_erasure_request(
 
 
 @router.post("/erasure-requests/{request_id}/reject", summary="Erasure request ablehnen",
-    response_model=IDResponse
-)
+    response_model=IDResponse, dependencies=SCHREIBEN["QUALITAET"])
 async def reject_erasure_request(
     request_id: str,
     payload: ErasureRejectIn,

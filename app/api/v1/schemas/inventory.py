@@ -27,6 +27,10 @@ class ArticleBase(BaseSchema):
     mhd_erforderlich: bool = Field(default=False, description="Best-before date required")
     lagerartikel: bool = Field(default=True, description="Is stock-managed article")
     mehrwertsteuer_prozent: Optional[Decimal] = Field(None, ge=0, le=100, description="VAT percentage")
+    steuerschluessel_verkauf: Optional[str] = Field(
+        None, max_length=2, description="Steuerschlüssel für Verkaufsbelege (tax_keys.code des Mandanten)")
+    steuerschluessel_einkauf: Optional[str] = Field(
+        None, max_length=2, description="Steuerschlüssel für Eingangsbelege (tax_keys.code des Mandanten)")
     warengruppe: Optional[str] = Field(None, max_length=80, description="Product group")
     # Dangerous goods
     gefahrgutklasse: Optional[str] = Field(None, max_length=40, description="Dangerous goods class")
@@ -104,8 +108,11 @@ class ArticleBase(BaseSchema):
 
 
 class ArticleCreate(ArticleBase):
-    """Schema for creating an article"""
-    tenant_id: str = Field(..., description="Tenant ID")
+    """Schema for creating an article.
+
+    Der Mandant kommt aus dem geprueften Kontext; ein abweichender Wert wird mit 403 abgewiesen. Bis 20.10.2026 war das
+    Feld Pflicht, und die Artikelmaske schickte einen eingebauten Mandanten mit — Anlage scheiterte in jedem anderen."""
+    tenant_id: Optional[str] = Field(None, description="Optional; Mandant aus dem Kontext")
 
 
 class ArticleUpdate(BaseSchema):
@@ -123,6 +130,10 @@ class ArticleUpdate(BaseSchema):
     mhd_erforderlich: Optional[bool] = Field(None, description="Best-before date required")
     lagerartikel: Optional[bool] = Field(None, description="Is stock-managed article")
     mehrwertsteuer_prozent: Optional[Decimal] = Field(None, ge=0, le=100, description="VAT percentage")
+    steuerschluessel_verkauf: Optional[str] = Field(
+        None, max_length=2, description="Steuerschlüssel für Verkaufsbelege (tax_keys.code des Mandanten)")
+    steuerschluessel_einkauf: Optional[str] = Field(
+        None, max_length=2, description="Steuerschlüssel für Eingangsbelege (tax_keys.code des Mandanten)")
     warengruppe: Optional[str] = Field(None, max_length=80, description="Product group")
     # Dangerous goods
     gefahrgutklasse: Optional[str] = Field(None, max_length=40, description="Dangerous goods class")

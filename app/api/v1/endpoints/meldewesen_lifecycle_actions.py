@@ -4,11 +4,13 @@ from __future__ import annotations
 import logging
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, Depends, Header, HTTPException
+from fastapi import APIRouter, Depends, Header, HTTPException, Request
 from pydantic import BaseModel
 
 from app.core.database import get_db
 from app.api.v1.schemas.base import TypedObjectOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
+from app.core.akteur import gepruefter_akteur_aus_request  # Bearbeiter aus dem Token
 
 router = APIRouter(prefix="/meldewesen/lifecycle", tags=["meldewesen-lifecycle"])
 logger = logging.getLogger(__name__)
@@ -20,19 +22,18 @@ class MeldungCreateRequest(BaseModel):
     betrag_eur: float
     waehrung: str = "EUR"
     referenz_ids: List[str] = []
-    operator: str = "system"
 
 
 class MeldungTransitionRequest(BaseModel):
     new_status: str
-    operator: str = "system"
     fehler_grund: str = ""
     externe_referenz: str = ""
 
 
-@router.post("", response_model=TypedObjectOut, summary="Meldewesen-Meldung anlegen")
+@router.post("", response_model=TypedObjectOut, summary="Meldewesen-Meldung anlegen", dependencies=SCHREIBEN["FINANZ"])
 def create_meldung(
     req: MeldungCreateRequest,
+    request: Request,
     x_tenant_id: str = Header(...),
     db=Depends(get_db),
 ):
@@ -46,7 +47,7 @@ def create_meldung(
             betrag_eur=req.betrag_eur,
             waehrung=req.waehrung,
             referenz_ids=req.referenz_ids,
-            operator=req.operator,
+            operator=gepruefter_akteur_aus_request(request),
         )
     except MeldungError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -55,11 +56,11 @@ def create_meldung(
 @router.post(
     "/{meldung_id}/transition",
     response_model=TypedObjectOut,
-    summary="Meldewesen-Meldungsstatus wechseln",
-)
+    summary="Meldewesen-Meldungsstatus wechseln", dependencies=SCHREIBEN["FINANZ"])
 def transition_meldung(
     meldung_id: str,
     req: MeldungTransitionRequest,
+    request: Request,
     x_tenant_id: str = Header(...),
     db=Depends(get_db),
 ):
@@ -73,7 +74,7 @@ def transition_meldung(
             meldung_id=meldung_id,
             new_status=req.new_status,
             tenant_id=x_tenant_id,
-            operator=req.operator,
+            operator=gepruefter_akteur_aus_request(request),
             fehler_grund=req.fehler_grund,
             externe_referenz=req.externe_referenz,
         )
@@ -84,8 +85,7 @@ def transition_meldung(
 @router.post(
     "/simulate-uebermittlung",
     response_model=TypedObjectOut,
-    summary="Meldewesen-Uebermittlung simulieren",
-)
+    summary="Meldewesen-Uebermittlung simulieren", dependencies=SCHREIBEN["FINANZ"])
 def simulate_uebermittlung(
     meldung_typ: str,
     periode: str,

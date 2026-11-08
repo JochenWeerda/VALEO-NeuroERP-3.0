@@ -8,21 +8,21 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, desc, func, case
 
-from ....core.config import settings
 from ....core.business_time import business_today
 from ....core.database import get_db
+from ....core.tenant import get_tenant_id
 from ....infrastructure.models import Saatgut as SaatgutModel
 from ....api.v1.schemas.base import PaginatedResponse
 from ....api.v1.schemas.agrar import Saatgut, SaatgutCreate, SaatgutUpdate
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter()
 
-DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 
 @router.get("/", response_model=PaginatedResponse[Saatgut], summary="Saatgut auflisten")
 async def list_saatgut(
-    tenant_id: Optional[str] = Query(None, description="Filter by tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     search: Optional[str] = Query(None, description="Search in name, article number, variety"),
     art: Optional[str] = Query(None, description="Filter by type (Weizen, Gerste, etc.)"),
     zuechter: Optional[str] = Query(None, description="Filter by breeder"),
@@ -34,7 +34,7 @@ async def list_saatgut(
     db: Session = Depends(get_db),
 ):
     """Return a paginated list of Saatgut."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
 
     query = db.query(SaatgutModel).filter(SaatgutModel.tenant_id == effective_tenant)
 
@@ -85,11 +85,11 @@ async def list_saatgut(
 async def search_saatgut(
     q: str = Query(..., min_length=2, description="Search term"),
     limit: int = Query(10, ge=1, le=50, description="Maximum number of results"),
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Lightweight search endpoint for Saatgut."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
     like = f"%{q}%"
 
     query = (
@@ -113,11 +113,11 @@ async def search_saatgut(
 @router.get("/{saatgut_id}", response_model=Saatgut, summary="Saatgut abrufen")
 async def get_saatgut(
     saatgut_id: str,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Get a single Saatgut by ID."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
 
     saatgut = (
         db.query(SaatgutModel)
@@ -134,14 +134,14 @@ async def get_saatgut(
     return Saatgut.model_validate(saatgut)
 
 
-@router.post("/", response_model=Saatgut, status_code=201, summary="Saatgut anlegen")
+@router.post("/", response_model=Saatgut, status_code=201, summary="Saatgut anlegen", dependencies=SCHREIBEN["AGRAR"])
 async def create_saatgut(
     saatgut_data: SaatgutCreate,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Create a new Saatgut."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
 
     # Check if artikelnummer already exists
     existing = (
@@ -178,16 +178,16 @@ async def create_saatgut(
     return Saatgut.model_validate(saatgut)
 
 
-@router.put("/{saatgut_id}", response_model=Saatgut, summary="Saatgut aktualisieren")
-@router.patch("/{saatgut_id}", response_model=Saatgut, summary="Saatgut aktualisieren")
+@router.put("/{saatgut_id}", response_model=Saatgut, summary="Saatgut aktualisieren", dependencies=SCHREIBEN["AGRAR"])
+@router.patch("/{saatgut_id}", response_model=Saatgut, summary="Saatgut aktualisieren", dependencies=SCHREIBEN["AGRAR"])
 async def update_saatgut(
     saatgut_id: str,
     saatgut_data: SaatgutUpdate,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Update an existing Saatgut."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
 
     saatgut = (
         db.query(SaatgutModel)
@@ -237,14 +237,14 @@ async def update_saatgut(
     return Saatgut.model_validate(saatgut)
 
 
-@router.delete("/{saatgut_id}", status_code=204, summary="Saatgut deaktivieren")
+@router.delete("/{saatgut_id}", status_code=204, summary="Saatgut deaktivieren", dependencies=SCHREIBEN["AGRAR"])
 async def delete_saatgut(
     saatgut_id: str,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Delete a Saatgut (soft delete)."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
 
     saatgut = (
         db.query(SaatgutModel)
@@ -266,11 +266,11 @@ async def delete_saatgut(
 
 @router.get("/stats/overview", summary="Saatgut-Kennzahlen")
 async def get_saatgut_stats(
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Get Saatgut statistics overview."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
 
     # Count by type
     type_stats = {}

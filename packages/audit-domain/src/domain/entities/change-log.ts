@@ -6,7 +6,7 @@
 import { z } from 'zod';
 import { randomUUID } from 'crypto';
 
-export const ChangeActionType = z.enum([
+export const ChangeActionTypeSchema = z.enum([
   'CREATE',
   'UPDATE',
   'DELETE',
@@ -15,17 +15,17 @@ export const ChangeActionType = z.enum([
   'RESTORE',
 ]);
 
-export type ChangeActionType = z.infer<typeof ChangeActionType>;
+export type ChangeActionType = z.infer<typeof ChangeActionTypeSchema>;
 
 export const ChangeLogSchema = z.object({
-  id: z.string().uuid(),
+  id: z.string().guid(),
   tenantId: z.string().min(1),
   entityType: z.string(), // e.g., "Farmer", "Contract", "Batch"
   entityId: z.string(),
-  action: ChangeActionType,
+  action: ChangeActionTypeSchema,
   reason: z.string().optional(), // Required for DELETE, CANCEL, AMEND
-  oldValue: z.record(z.unknown()).optional(), // Previous state (JSON)
-  newValue: z.record(z.unknown()).optional(), // New state (JSON)
+  oldValue: z.record(z.string(), z.unknown()).optional(), // Previous state (JSON)
+  newValue: z.record(z.string(), z.unknown()).optional(), // New state (JSON)
   changedFields: z.array(z.string()).optional(), // List of changed field names
   userId: z.string(),
   userName: z.string().optional(),
@@ -33,7 +33,7 @@ export const ChangeLogSchema = z.object({
   ipAddress: z.string().optional(),
   userAgent: z.string().optional(),
   timestamp: z.date(),
-  metadata: z.record(z.unknown()).optional(), // Additional metadata
+  metadata: z.record(z.string(), z.unknown()).optional(), // Additional metadata
 });
 
 export type ChangeLog = z.infer<typeof ChangeLogSchema>;
@@ -83,7 +83,7 @@ export class ChangeLogEntity {
 
     // Detect changed fields if not provided
     const changedFields =
-      input.changedFields ||
+      input.changedFields ??
       this.detectChangedFields(input.oldValue, input.newValue);
 
     return {

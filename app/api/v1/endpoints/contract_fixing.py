@@ -21,6 +21,7 @@ from app.api.v1.schemas.contract_spine_schemas import (
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.contract_fixing_service import ContractFixingService, FixingActionError
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/contracts", tags=["contracts", "kontrakte", "agrar"])
 
@@ -54,7 +55,7 @@ class FixingIn(BaseModel):
     bediener: Optional[str] = None
 
 
-@router.post("/fixing", response_model=FixingCreatedOut, summary="Teilfixierung anlegen (Menge zu MATIF-Preis + Prämie)")
+@router.post("/fixing", response_model=FixingCreatedOut, summary="Teilfixierung anlegen (Menge zu MATIF-Preis + Prämie)", dependencies=SCHREIBEN["KONTRAKT"])
 def create_fixing(
     body: FixingIn,
     db: Session = Depends(get_db),
@@ -78,7 +79,7 @@ class QuoteIn(BaseModel):
     quelle: Optional[str] = None
 
 
-@router.post("/matif-quote", response_model=QuoteUpsertOut, summary="MATIF-Notierung erfassen/aktualisieren (Bewertungsbasis)")
+@router.post("/matif-quote", response_model=QuoteUpsertOut, summary="MATIF-Notierung erfassen/aktualisieren (Bewertungsbasis)", dependencies=SCHREIBEN["KONTRAKT"])
 def upsert_quote(
     body: QuoteIn,
     db: Session = Depends(get_db),

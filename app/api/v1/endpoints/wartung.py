@@ -4,15 +4,18 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Any, Optional
 
-from fastapi import Response, APIRouter, Depends, HTTPException, Query
+from fastapi import Response, APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
+from app.core.akteur import gepruefter_akteur_aus_request
 from app.core.database import get_db
+from app.core.tenant import get_tenant_id
 from app.domains.operations.models import WartungAnlage, WartungsProtokoll, WartungStatus
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.wartung_schemas import WartungOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/wartung", tags=["Wartung"])
@@ -47,7 +50,6 @@ class AnlagePayload(BaseModel):
     verantwortlicher: Optional[str] = None
     notiz: Optional[str] = None
     status: str = WartungStatus.AKTIV.value
-    tenant_id: str = "default"
 
 
 class AnlagePatch(BaseModel):
@@ -68,9 +70,10 @@ def list_anlagen(
     status: Optional[str] = None,
     skip: int = Query(0, ge=0),
     limit: int = Query(100, le=500),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    q = db.query(WartungAnlage)
+    q = db.query(WartungAnlage).filter(WartungAnlage.tenant_id == tenant_id)
     if status:
         q = q.filter(WartungAnlage.status == status)
     return [_to_dict(a) for a in q.order_by(WartungAnlage.name).offset(skip).limit(limit).all()]
@@ -79,8 +82,8 @@ def list_anlagen(
 @router.get("/anlagen/{anlage_id}", summary="Anlage abrufen",
     response_model=WartungOut
 )
-def get_anlage(anlage_id: str, db: Session = Depends(get_db)):
-    obj = db.query(WartungAnlage).filter(WartungAnlage.id == anlage_id).first()
+def get_anlage(anlage_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    obj = db.query(WartungAnlage).filter(WartungAnlage.tenant_id == tenant_id).filter(WartungAnlage.id == anlage_id).first()
     if not obj:
         raise HTTPException(404, "Anlage nicht gefunden")
     data = _to_dict(obj)
@@ -89,10 +92,10 @@ def get_anlage(anlage_id: str, db: Session = Depends(get_db)):
 
 
 @router.post("/anlagen", status_code=201, summary="Anlage anlegen",
-    response_model=WartungOut
-)
-def create_anlage(payload: AnlagePayload, db: Session = Depends(get_db)):
-    obj = WartungAnlage(**payload.model_dump())
+    response_model=WartungOut, dependencies=SCHREIBEN["FACHLICH"])
+def create_anlage(payload: AnlagePayload, request: Request, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    obj = WartungAnlage(**payload.model_dump(), tenant_id=tenant_id,
+        created_by=gepruefter_akteur_aus_request(request))
     db.add(obj)
     db.commit()
     db.refresh(obj)
@@ -100,23 +103,23 @@ def create_anlage(payload: AnlagePayload, db: Session = Depends(get_db)):
 
 
 @router.patch("/anlagen/{anlage_id}", summary="Anlage aktualisieren",
-    response_model=WartungOut
-)
-def update_anlage(anlage_id: str, payload: AnlagePatch, db: Session = Depends(get_db)):
-    obj = db.query(WartungAnlage).filter(WartungAnlage.id == anlage_id).first()
+    response_model=WartungOut, dependencies=SCHREIBEN["FACHLICH"])
+def update_anlage(anlage_id: str, payload: AnlagePatch, request: Request, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    obj = db.query(WartungAnlage).filter(WartungAnlage.tenant_id == tenant_id).filter(WartungAnlage.id == anlage_id).first()
     if not obj:
         raise HTTPException(404, "Anlage nicht gefunden")
     for field, value in payload.model_dump(exclude_unset=True).items():
         setattr(obj, field, value)
+    obj.updated_by = gepruefter_akteur_aus_request(request)
     obj.updated_at = datetime.utcnow()
     db.commit()
     db.refresh(obj)
     return _to_dict(obj)
 
 
-@router.delete("/anlagen/{anlage_id}", status_code=204, response_class=Response, response_model=None, summary="Anlage löschen")
-def delete_anlage(anlage_id: str, db: Session = Depends(get_db)):
-    obj = db.query(WartungAnlage).filter(WartungAnlage.id == anlage_id).first()
+@router.delete("/anlagen/{anlage_id}", status_code=204, response_class=Response, response_model=None, summary="Anlage löschen", dependencies=SCHREIBEN["FACHLICH"])
+def delete_anlage(anlage_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    obj = db.query(WartungAnlage).filter(WartungAnlage.tenant_id == tenant_id).filter(WartungAnlage.id == anlage_id).first()
     if not obj:
         raise HTTPException(404, "Anlage nicht gefunden")
     db.delete(obj)
@@ -132,16 +135,15 @@ class ProtokollPayload(BaseModel):
     techniker: Optional[str] = None
     kosten: Optional[float] = None
     naechste_faellig: Optional[datetime] = None
-    tenant_id: str = "default"
 
 
 @router.get("/anlagen/{anlage_id}/protokolle", summary="Protokolle auflisten",
     response_model=list[WartungOut]
 )
-def list_protokolle(anlage_id: str, db: Session = Depends(get_db)):
+def list_protokolle(anlage_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     return [
         _to_dict(p)
-        for p in db.query(WartungsProtokoll)
+        for p in db.query(WartungsProtokoll).filter(WartungsProtokoll.tenant_id == tenant_id)
         .filter(WartungsProtokoll.anlage_id == anlage_id)
         .order_by(WartungsProtokoll.datum.desc())
         .all()
@@ -149,13 +151,13 @@ def list_protokolle(anlage_id: str, db: Session = Depends(get_db)):
 
 
 @router.post("/anlagen/{anlage_id}/protokolle", status_code=201, summary="Protokoll anlegen",
-    response_model=WartungOut
-)
-def create_protokoll(anlage_id: str, payload: ProtokollPayload, db: Session = Depends(get_db)):
-    anlage = db.query(WartungAnlage).filter(WartungAnlage.id == anlage_id).first()
+    response_model=WartungOut, dependencies=SCHREIBEN["FACHLICH"])
+def create_protokoll(anlage_id: str, payload: ProtokollPayload, request: Request, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    anlage = db.query(WartungAnlage).filter(WartungAnlage.tenant_id == tenant_id).filter(WartungAnlage.id == anlage_id).first()
     if not anlage:
         raise HTTPException(404, "Anlage nicht gefunden")
-    proto = WartungsProtokoll(anlage_id=anlage_id, **payload.model_dump())
+    proto = WartungsProtokoll(anlage_id=anlage_id, **payload.model_dump(), tenant_id=tenant_id,
+        created_by=gepruefter_akteur_aus_request(request))
     db.add(proto)
     # Letzte Wartung + nächste Fälligkeit aktualisieren
     anlage.letzte_wartung = payload.datum

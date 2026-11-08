@@ -12,34 +12,32 @@ import logging
 from app.core.uuid7 import uuid7
 
 from sqlalchemy import text
+from app.auth.beleg_roles import verlange
+from app.auth.deps import get_current_user
 from app.core.database import get_db
-from app.documents.router_helpers import get_repository, save_to_store, get_from_store, list_from_store
+from app.core.tenant import get_tenant_id
+from app.services import finance_freigabe
+from app.documents.router_helpers import eigener_beleg, get_repository, save_to_store, get_from_store, list_from_store
 
 logger = logging.getLogger(__name__)
 from app.api.v1.schemas.base import BaseSchema, StatusResponse
 from app.api.v1.schemas.credit_debit_memos_schemas import CreditDebitMemosOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/einkauf", tags=["procurement", "ap", "memos"])
 
 
-def _get_user_id_from_request(request: Request | None) -> str | None:
-    if request is None:
-        return None
-    uid = request.headers.get("X-User-ID")
-    if uid:
-        return uid
-    auth = request.headers.get("Authorization", "")
-    if auth.startswith("Bearer "):
-        try:
-            import base64 as _b64
-            import json as _json
-            payload = auth[7:].split(".")[1]
-            payload += "=" * (4 - len(payload) % 4)
-            return _json.loads(_b64.urlsafe_b64decode(payload)).get("sub")
-        except Exception:  # noqa: BLE001 — JWT decode failed; caller handles None return
-            pass
-    return None
+def _akteur(nutzer) -> str:
+    """Die Kennung der geprueften Anmeldung — nicht der Kopf ``X-User-ID``, den jeder setzen kann."""
+    return str(nutzer.get("sub") or "").strip() if isinstance(nutzer, dict) else ""
+
+
+def _memo_des_mandanten(memo_type: str, memo_id: str, repo, tenant_id: str) -> dict:
+    memo = get_from_store(memo_type, memo_id, repo)
+    if not memo or str(memo.get("tenantId") or "") != tenant_id:
+        raise HTTPException(status_code=404, detail=f"{memo_type} not found")
+    return memo
 
 
 # Pydantic Models
@@ -147,11 +145,11 @@ def calculate_memo_totals(items: List[MemoItem]) -> tuple[float, float, float]:
     return round(net_amount, 2), round(tax_amount, 2), round(gross_amount, 2)
 
 
-def get_supplier_name(supplier_id: str, db: Session) -> str:
-    """Holt Lieferantennamen aus der Datenbank."""
+def get_supplier_name(supplier_id: str, db: Session, tenant_id: str) -> str:
+    """Holt Lieferantennamen aus der Datenbank (nur Partner des eigenen Mandanten)."""
     try:
         repo = get_repository(db)
-        supplier = get_from_store("partner", supplier_id, repo)
+        supplier = eigener_beleg("partner", supplier_id, tenant_id, repo)
         if supplier:
             return supplier.get("name", supplier_id)
     except Exception as e:
@@ -159,11 +157,11 @@ def get_supplier_name(supplier_id: str, db: Session) -> str:
     return supplier_id
 
 
-def get_invoice_number(invoice_id: str, db: Session) -> Optional[str]:
-    """Holt Rechnungsnummer aus der Datenbank."""
+def get_invoice_number(invoice_id: str, db: Session, tenant_id: str) -> Optional[str]:
+    """Holt Rechnungsnummer aus der Datenbank (nur Rechnungen des eigenen Mandanten)."""
     try:
         repo = get_repository(db)
-        invoice = get_from_store("ap_invoice", invoice_id, repo)
+        invoice = eigener_beleg("ap_invoice", invoice_id, tenant_id, repo)
         if invoice:
             return invoice.get("number", invoice_id)
     except Exception as e:
@@ -171,13 +169,16 @@ def get_invoice_number(invoice_id: str, db: Session) -> Optional[str]:
     return None
 
 
-@router.post("/credit-memos", response_model=CreditMemoResponse, summary="Credit memo anlegen")
+@router.post("/credit-memos", response_model=CreditMemoResponse, summary="Credit memo anlegen", dependencies=SCHREIBEN["EINKAUF"])
 async def create_credit_memo(
     memo: CreditMemoCreate,
     db: Session = Depends(get_db),
     request: Request = None,
+    tenant_id: str = Depends(get_tenant_id),
+    nutzer: dict = Depends(get_current_user),
 ) -> CreditMemoResponse:
     """Erstellt eine neue Gutschrift (Credit Memo)."""
+    verlange(nutzer, "bearbeiten", "purchase_credit_memo")
     logger.info(f"Creating credit memo for supplier {memo.supplierId}")
     try:
         repo = get_repository(db)
@@ -190,12 +191,12 @@ async def create_credit_memo(
         memo_number = f"CM-{datetime.now().strftime('%Y')}-{memo_id[:8].upper()}"
         
         # Hole Lieferantennamen
-        supplier_name = get_supplier_name(memo.supplierId, db)
+        supplier_name = get_supplier_name(memo.supplierId, db, tenant_id)
         
         # Hole Rechnungsnummer falls vorhanden
         invoice_number = None
         if memo.invoiceId:
-            invoice_number = get_invoice_number(memo.invoiceId, db)
+            invoice_number = get_invoice_number(memo.invoiceId, db, tenant_id)
         
         # Erstelle Credit Memo Objekt
         credit_memo = {
@@ -222,11 +223,14 @@ async def create_credit_memo(
             # Gap 004: Korrektur zu Settlement → Freigabe vor Buchung
             "approvalStatus": "FREIGEGEBEN" if not memo.settlementId else "ENTWURF",
             "approvedAt": datetime.now().isoformat() if not memo.settlementId else None,
-            "approvedBy": (_get_user_id_from_request(request) or "system") if not memo.settlementId else None,
+            "approvedBy": _akteur(nutzer) if not memo.settlementId else None,
             "createdAt": datetime.now().isoformat(),
-            "createdBy": _get_user_id_from_request(request) or "system",
+            "createdBy": _akteur(nutzer),
         }
 
+        # Mandant und Ersteller aus der Anmeldung (bis 13.10.2026: kein Mandant, Ersteller aus einem Kopf).
+        credit_memo["tenantId"] = tenant_id
+        credit_memo["createdBy"] = _akteur(nutzer) or credit_memo["createdBy"]
         # Speichere in Store
         save_to_store("credit_memo", memo_id, credit_memo, repo)
         
@@ -237,13 +241,16 @@ async def create_credit_memo(
         raise HTTPException(status_code=500, detail=f"Failed to create credit memo: {str(e)}")
 
 
-@router.post("/debit-memos", response_model=DebitMemoResponse, summary="Debit memo anlegen")
+@router.post("/debit-memos", response_model=DebitMemoResponse, summary="Debit memo anlegen", dependencies=SCHREIBEN["EINKAUF"])
 async def create_debit_memo(
     memo: DebitMemoCreate,
     db: Session = Depends(get_db),
     request: Request = None,
+    tenant_id: str = Depends(get_tenant_id),
+    nutzer: dict = Depends(get_current_user),
 ) -> DebitMemoResponse:
     """Erstellt eine neue Belastung (Debit Memo)."""
+    verlange(nutzer, "bearbeiten", "purchase_credit_memo")
     logger.info(f"Creating debit memo for supplier {memo.supplierId}")
     try:
         repo = get_repository(db)
@@ -256,12 +263,12 @@ async def create_debit_memo(
         memo_number = f"DM-{datetime.now().strftime('%Y')}-{memo_id[:8].upper()}"
         
         # Hole Lieferantennamen
-        supplier_name = get_supplier_name(memo.supplierId, db)
+        supplier_name = get_supplier_name(memo.supplierId, db, tenant_id)
         
         # Hole Rechnungsnummer falls vorhanden
         invoice_number = None
         if memo.invoiceId:
-            invoice_number = get_invoice_number(memo.invoiceId, db)
+            invoice_number = get_invoice_number(memo.invoiceId, db, tenant_id)
         
         # Erstelle Debit Memo Objekt
         debit_memo = {
@@ -287,11 +294,14 @@ async def create_debit_memo(
             "journalRef": None,
             "approvalStatus": "FREIGEGEBEN" if not memo.settlementId else "ENTWURF",
             "approvedAt": datetime.now().isoformat() if not memo.settlementId else None,
-            "approvedBy": (_get_user_id_from_request(request) or "system") if not memo.settlementId else None,
+            "approvedBy": _akteur(nutzer) if not memo.settlementId else None,
             "createdAt": datetime.now().isoformat(),
-            "createdBy": _get_user_id_from_request(request) or "system",
+            "createdBy": _akteur(nutzer),
         }
 
+        # Mandant und Ersteller aus der Anmeldung (bis 13.10.2026: kein Mandant, Ersteller aus einem Kopf).
+        debit_memo["tenantId"] = tenant_id
+        debit_memo["createdBy"] = _akteur(nutzer) or debit_memo["createdBy"]
         # Speichere in Store
         save_to_store("debit_memo", memo_id, debit_memo, repo)
         
@@ -308,9 +318,12 @@ async def list_credit_memos(
     limit: int = 100,
     supplier_id: Optional[str] = None,
     settled: Optional[bool] = None,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    nutzer: dict = Depends(get_current_user),
 ) -> List[CreditMemoResponse]:
-    """Listet alle Gutschriften auf."""
+    """Listet die Gutschriften des Mandanten auf (bis 13.10.2026: aller Mandanten, ohne Rolle)."""
+    verlange(nutzer, "preise", "purchase_credit_memo")
     logger.info(f"Listing credit memos with skip={skip}, limit={limit}, supplier_id={supplier_id}, settled={settled}")
     try:
         repo = get_repository(db)
@@ -322,6 +335,8 @@ async def list_credit_memos(
         # Filter
         filtered_memos = []
         for memo in all_memos:
+            if str(memo.get("tenantId") or "") != tenant_id:
+                continue
             if supplier_id and memo.get("supplierId") != supplier_id:
                 continue
             if settled is not None and memo.get("settled") != settled:
@@ -347,9 +362,12 @@ async def list_debit_memos(
     limit: int = 100,
     supplier_id: Optional[str] = None,
     settled: Optional[bool] = None,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    nutzer: dict = Depends(get_current_user),
 ) -> List[DebitMemoResponse]:
-    """Listet alle Belastungen auf."""
+    """Listet die Belastungen des Mandanten auf (bis 13.10.2026: aller Mandanten, ohne Rolle)."""
+    verlange(nutzer, "preise", "purchase_credit_memo")
     logger.info(f"Listing debit memos with skip={skip}, limit={limit}, supplier_id={supplier_id}, settled={settled}")
     try:
         repo = get_repository(db)
@@ -361,6 +379,8 @@ async def list_debit_memos(
         # Filter
         filtered_memos = []
         for memo in all_memos:
+            if str(memo.get("tenantId") or "") != tenant_id:
+                continue
             if supplier_id and memo.get("supplierId") != supplier_id:
                 continue
             if settled is not None and memo.get("settled") != settled:
@@ -383,16 +403,16 @@ async def list_debit_memos(
 @router.get("/credit-memos/{memo_id}", response_model=CreditMemoResponse, summary="Credit memo abrufen")
 async def get_credit_memo(
     memo_id: str,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    nutzer: dict = Depends(get_current_user),
 ) -> CreditMemoResponse:
     """Ruft eine Gutschrift anhand ihrer ID ab."""
     logger.info(f"Fetching credit memo: {memo_id}")
     try:
+        verlange(nutzer, "preise", "purchase_credit_memo")
         repo = get_repository(db)
-        memo = get_from_store("credit_memo", memo_id, repo)
-        if not memo:
-            raise HTTPException(status_code=404, detail="Credit memo not found")
-        return CreditMemoResponse(**memo)
+        return CreditMemoResponse(**_memo_des_mandanten("credit_memo", memo_id, repo, tenant_id))
     except HTTPException:
         raise
     except Exception as e:
@@ -403,16 +423,16 @@ async def get_credit_memo(
 @router.get("/debit-memos/{memo_id}", response_model=DebitMemoResponse, summary="Debit memo abrufen")
 async def get_debit_memo(
     memo_id: str,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    nutzer: dict = Depends(get_current_user),
 ) -> DebitMemoResponse:
     """Ruft eine Belastung anhand ihrer ID ab."""
     logger.info(f"Fetching debit memo: {memo_id}")
     try:
+        verlange(nutzer, "preise", "purchase_credit_memo")
         repo = get_repository(db)
-        memo = get_from_store("debit_memo", memo_id, repo)
-        if not memo:
-            raise HTTPException(status_code=404, detail="Debit memo not found")
-        return DebitMemoResponse(**memo)
+        return DebitMemoResponse(**_memo_des_mandanten("debit_memo", memo_id, repo, tenant_id))
     except HTTPException:
         raise
     except Exception as e:
@@ -421,15 +441,21 @@ async def get_debit_memo(
 
 
 @router.post("/credit-memos/{memo_id}/settle", summary="Credit memo settle",
-    response_model=CreditDebitMemosOut
-)
+    response_model=CreditDebitMemosOut, dependencies=SCHREIBEN["EINKAUF"])
 async def settle_credit_memo(
     memo_id: str,
     settlement: SettlementRequest,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    nutzer: dict = Depends(get_current_user),
 ) -> dict:
     """Verrechnet eine Gutschrift mit offenen Rechnungen."""
+    verlange(nutzer, "buchen", "purchase_credit_memo")
     logger.info(f"Settling credit memo {memo_id} with invoices {settlement.invoiceIds}")
+    # Die Verrechnung mindert offene Posten: nur mit Freigabe einer zweiten Person (APPROVAL-001).
+    _repo = get_repository(db)
+    finance_freigabe.verlange_einkaufsmemo(
+        db, tenant_id, "credit_memo", memo_id, _memo_des_mandanten("credit_memo", memo_id, _repo, tenant_id), _akteur(nutzer))
     try:
         repo = get_repository(db)
         
@@ -443,7 +469,8 @@ async def settle_credit_memo(
         
         # Validiere Rechnungen
         for invoice_id in settlement.invoiceIds:
-            invoice = get_from_store("ap_invoice", invoice_id, repo)
+            # Bis 14.10.2026 ohne Mandant: die Verrechnung minderte offene Betraege und Posten fremder Rechnungen.
+            invoice = eigener_beleg("ap_invoice", invoice_id, tenant_id, repo)
             if not invoice:
                 raise HTTPException(status_code=404, detail=f"Invoice {invoice_id} not found")
             if invoice.get("supplierId") != memo.get("supplierId"):
@@ -464,7 +491,7 @@ async def settle_credit_memo(
         memo_amount = memo.get("amount", 0)
         per_invoice = memo_amount / len(settlement.invoiceIds) if settlement.invoiceIds else 0
         for invoice_id in settlement.invoiceIds:
-            invoice = get_from_store("ap_invoice", invoice_id, repo)
+            invoice = eigener_beleg("ap_invoice", invoice_id, tenant_id, repo)
             if invoice:
                 invoice["openAmount"] = max(0, (invoice.get("openAmount") or invoice.get("totalGross") or 0) - per_invoice)
                 save_to_store("ap_invoice", invoice_id, invoice, repo)
@@ -479,7 +506,7 @@ async def settle_credit_memo(
                                     updated_at = NOW()
                                 WHERE rechnungsnr = :inv_nr AND tenant_id = :tid AND konto_typ = 'kreditoren'
                             """),
-                            {"amt": per_invoice, "inv_nr": invoice_id, "tid": invoice.get("tenantId", "system")},
+                            {"amt": per_invoice, "inv_nr": invoice_id, "tid": tenant_id},
                         )
                         db.commit()
                     except Exception:  # noqa: BLE001 — OP-Update nicht kritisch für Gutschrift-Verrechnung
@@ -500,15 +527,21 @@ async def settle_credit_memo(
 
 
 @router.post("/debit-memos/{memo_id}/settle", summary="Debit memo settle",
-    response_model=CreditDebitMemosOut
-)
+    response_model=CreditDebitMemosOut, dependencies=SCHREIBEN["EINKAUF"])
 async def settle_debit_memo(
     memo_id: str,
     settlement: SettlementRequest,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    nutzer: dict = Depends(get_current_user),
 ) -> dict:
     """Verrechnet eine Belastung mit offenen Rechnungen."""
+    verlange(nutzer, "buchen", "purchase_credit_memo")
     logger.info(f"Settling debit memo {memo_id} with invoices {settlement.invoiceIds}")
+    # Die Verrechnung mindert offene Posten: nur mit Freigabe einer zweiten Person (APPROVAL-001).
+    _repo = get_repository(db)
+    finance_freigabe.verlange_einkaufsmemo(
+        db, tenant_id, "debit_memo", memo_id, _memo_des_mandanten("debit_memo", memo_id, _repo, tenant_id), _akteur(nutzer))
     try:
         repo = get_repository(db)
         
@@ -522,7 +555,8 @@ async def settle_debit_memo(
         
         # Validiere Rechnungen
         for invoice_id in settlement.invoiceIds:
-            invoice = get_from_store("ap_invoice", invoice_id, repo)
+            # Bis 14.10.2026 ohne Mandant: die Verrechnung minderte offene Betraege und Posten fremder Rechnungen.
+            invoice = eigener_beleg("ap_invoice", invoice_id, tenant_id, repo)
             if not invoice:
                 raise HTTPException(status_code=404, detail=f"Invoice {invoice_id} not found")
             if invoice.get("supplierId") != memo.get("supplierId"):
@@ -543,7 +577,7 @@ async def settle_debit_memo(
         memo_amount = memo.get("amount", 0)
         per_invoice = memo_amount / len(settlement.invoiceIds) if settlement.invoiceIds else 0
         for invoice_id in settlement.invoiceIds:
-            invoice = get_from_store("ap_invoice", invoice_id, repo)
+            invoice = eigener_beleg("ap_invoice", invoice_id, tenant_id, repo)
             if invoice:
                 invoice["openAmount"] = (invoice.get("openAmount") or invoice.get("totalGross") or 0) + per_invoice
                 save_to_store("ap_invoice", invoice_id, invoice, repo)
@@ -567,15 +601,14 @@ def _approve_memo_for_booking(
     memo_type: str,
     memo_id: str,
     repo,
-    request: Request | None,
+    tenant_id: str,
+    akteur: str,
 ) -> dict:
     """Gap 004: Freigabe für Buchung (Pflicht bei settlement-verknüpften Memos)."""
-    memo = get_from_store(memo_type, memo_id, repo)
-    if not memo:
-        raise HTTPException(status_code=404, detail=f"{memo_type} not found")
+    memo = _memo_des_mandanten(memo_type, memo_id, repo, tenant_id)
     if memo.get("booked") is True:
         raise HTTPException(status_code=400, detail="Memo bereits gebucht")
-    uid = _get_user_id_from_request(request) or "system"
+    uid = akteur
     memo["approvalStatus"] = "FREIGEGEBEN"
     memo["approvedAt"] = datetime.now().isoformat()
     memo["approvedBy"] = uid
@@ -584,17 +617,19 @@ def _approve_memo_for_booking(
 
 
 @router.post("/credit-memos/{memo_id}/freigabe", summary="Credit memo for booking genehmigen",
-    response_model=CreditDebitMemosOut
-)
+    response_model=CreditDebitMemosOut, dependencies=SCHREIBEN["EINKAUF"])
 async def approve_credit_memo_for_booking(
     memo_id: str,
     db: Session = Depends(get_db),
-    request: Request = None,
+    tenant_id: str = Depends(get_tenant_id),
+    nutzer: dict = Depends(get_current_user),
 ) -> dict:
     """Gap 004: Gutschrift zur Fibu-Buchung freigeben."""
     try:
+        verlange(nutzer, "buchen", "purchase_credit_memo")
         repo = get_repository(db)
-        _approve_memo_for_booking(memo_type="credit_memo", memo_id=memo_id, repo=repo, request=request)
+        _approve_memo_for_booking(memo_type="credit_memo", memo_id=memo_id, repo=repo, tenant_id=tenant_id,
+                                  akteur=_akteur(nutzer))
         return {"status": "ok", "memoId": memo_id, "approvalStatus": "FREIGEGEBEN"}
     except HTTPException:
         raise
@@ -604,17 +639,19 @@ async def approve_credit_memo_for_booking(
 
 
 @router.post("/debit-memos/{memo_id}/freigabe", summary="Debit memo for booking genehmigen",
-    response_model=CreditDebitMemosOut
-)
+    response_model=CreditDebitMemosOut, dependencies=SCHREIBEN["EINKAUF"])
 async def approve_debit_memo_for_booking(
     memo_id: str,
     db: Session = Depends(get_db),
-    request: Request = None,
+    tenant_id: str = Depends(get_tenant_id),
+    nutzer: dict = Depends(get_current_user),
 ) -> dict:
     """Gap 004: Belastung zur Fibu-Buchung freigeben."""
     try:
+        verlange(nutzer, "buchen", "purchase_credit_memo")
         repo = get_repository(db)
-        _approve_memo_for_booking(memo_type="debit_memo", memo_id=memo_id, repo=repo, request=request)
+        _approve_memo_for_booking(memo_type="debit_memo", memo_id=memo_id, repo=repo, tenant_id=tenant_id,
+                                  akteur=_akteur(nutzer))
         return {"status": "ok", "memoId": memo_id, "approvalStatus": "FREIGEGEBEN"}
     except HTTPException:
         raise
@@ -628,7 +665,7 @@ def _book_memo_to_store(
     memo_type: str,
     memo_id: str,
     repo,
-    request: Request | None,
+    akteur: str,
 ) -> dict:
     memo = get_from_store(memo_type, memo_id, repo)
     if not memo:
@@ -646,6 +683,8 @@ def _book_memo_to_store(
     journal_ref = f"JRN-{datetime.now().strftime('%Y%m%d')}-{memo_id[:8].upper()}"
     booking = {
         "id": uuid7(),
+        # Der Buchungsbeleg gehoert dem Mandanten des Memos (ohne Mandant nimmt der Belegspeicher nichts an).
+        "tenantId": memo.get("tenantId"),
         "memoId": memo_id,
         "memoType": memo_type,
         "journalRef": journal_ref,
@@ -653,7 +692,7 @@ def _book_memo_to_store(
         "supplierId": memo.get("supplierId"),
         "reason": memo.get("reason"),
         "bookedAt": datetime.now().isoformat(),
-        "bookedBy": _get_user_id_from_request(request) or "system",
+        "bookedBy": akteur,
     }
     save_to_store("ap_memo_booking", booking["id"], booking, repo)
 
@@ -666,21 +705,26 @@ def _book_memo_to_store(
 
 
 @router.post("/credit-memos/{memo_id}/buchung", summary="Credit memo book",
-    response_model=CreditDebitMemosOut
-)
+    response_model=CreditDebitMemosOut, dependencies=SCHREIBEN["EINKAUF"])
 async def book_credit_memo(
     memo_id: str,
     db: Session = Depends(get_db),
     request: Request = None,
+    tenant_id: str = Depends(get_tenant_id),
+    nutzer: dict = Depends(get_current_user),
 ) -> dict:
     """Fuehrt eine Journal-/Fibu-Buchung fuer eine Gutschrift aus."""
     try:
         repo = get_repository(db)
+        verlange(nutzer, "buchen", "purchase_credit_memo")
+        # Jede Gutschrift und Belastung braucht die Freigabe einer zweiten Person (APPROVAL-001).
+        finance_freigabe.verlange_einkaufsmemo(
+            db, tenant_id, "credit_memo", memo_id, _memo_des_mandanten("credit_memo", memo_id, repo, tenant_id), _akteur(nutzer))
         booking = _book_memo_to_store(
             memo_type="credit_memo",
             memo_id=memo_id,
             repo=repo,
-            request=request,
+            akteur=_akteur(nutzer),
         )
         return {
             "status": "ok",
@@ -697,21 +741,26 @@ async def book_credit_memo(
 
 
 @router.post("/debit-memos/{memo_id}/buchung", summary="Debit memo book",
-    response_model=CreditDebitMemosOut
-)
+    response_model=CreditDebitMemosOut, dependencies=SCHREIBEN["EINKAUF"])
 async def book_debit_memo(
     memo_id: str,
     db: Session = Depends(get_db),
     request: Request = None,
+    tenant_id: str = Depends(get_tenant_id),
+    nutzer: dict = Depends(get_current_user),
 ) -> dict:
     """Fuehrt eine Journal-/Fibu-Buchung fuer eine Belastung aus."""
     try:
         repo = get_repository(db)
+        verlange(nutzer, "buchen", "purchase_credit_memo")
+        # Jede Gutschrift und Belastung braucht die Freigabe einer zweiten Person (APPROVAL-001).
+        finance_freigabe.verlange_einkaufsmemo(
+            db, tenant_id, "debit_memo", memo_id, _memo_des_mandanten("debit_memo", memo_id, repo, tenant_id), _akteur(nutzer))
         booking = _book_memo_to_store(
             memo_type="debit_memo",
             memo_id=memo_id,
             repo=repo,
-            request=request,
+            akteur=_akteur(nutzer),
         )
         return {
             "status": "ok",

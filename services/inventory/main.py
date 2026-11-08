@@ -7,6 +7,7 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from sqlalchemy.ext.asyncio import create_async_engine
 from fastapi.middleware.cors import CORSMiddleware
 from prometheus_client import make_asgi_app
 
@@ -39,9 +40,13 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     logger.info("Inventory Service startet…")
-    engine = get_engine()
-    async with engine.begin() as conn:
+    # Tabellen ohne Migration legt der Migrator an; die Anwendung (valeo_app) hat kein DDL-Recht.
+    migration_url = os.getenv("MIGRATION_DATABASE_URL")
+    schema_engine = create_async_engine(migration_url) if migration_url else get_engine()
+    async with schema_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+    if migration_url:
+        await schema_engine.dispose()
     await init_event_bus()
     await register_inventory_workflow()
     try:

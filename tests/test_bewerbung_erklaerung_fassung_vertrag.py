@@ -207,7 +207,9 @@ class TestFassungen:
         daten = antwort.json()
         assert daten["fassung"] == 1
         assert daten["wortlaut"] == WORTLAUT_1
-        assert daten["erstellt_durch"] == "Personalbuero"
+        # Der Urheber ist die Kennung der Anmeldung (Dev-Token: "dev"), nicht der Wert im Rumpf
+        # (BEWERBUNG-COMMAND-URHEBER-20261011).
+        assert daten["erstellt_durch"] == "dev"
         assert daten["erstellt_am"]
 
     def test_ein_neuer_wortlaut_ist_die_naechste_fassung(self, client):
@@ -497,6 +499,7 @@ class TestMontage:
                 methoden.setdefault(pfad, set()).update(getattr(r, "methods", set()))
         assert methoden == {
             ERKLAERUNGEN_WEG: {"GET", "POST"},
+            f"{ERKLAERUNGEN_WEG}/actions/anlegen": {"POST"},
             f"{ERKLAERUNGEN_WEG}/{{fassung}}": {"GET"},
         }
 

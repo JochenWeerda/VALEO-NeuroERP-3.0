@@ -21,6 +21,7 @@ from pydantic import BaseModel, Field
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.customers_schemas import CustomersOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter()
@@ -75,7 +76,6 @@ class InteressentOut(BaseModel):
 
 
 
-DEFAULT_TENANT = "00000000-0000-0000-0000-000000000001"
 
 
 def _svc(db: Session, tenant_id: str) -> CustomerService:
@@ -96,14 +96,20 @@ def _to_http_exception(error: httpx.HTTPStatusError) -> HTTPException:
 
 
 
-@router.post("/", response_model=Customer, status_code=status.HTTP_201_CREATED, summary="Customer anlegen")
+@router.post("/", response_model=Customer, status_code=status.HTTP_201_CREATED, summary="Customer anlegen", dependencies=SCHREIBEN["CRM"])
 async def create_customer(
     customer_data: CustomerCreate,
     db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ) -> Customer:
-    """Create a new customer via crm-core, or in PostgreSQL if crm-core is unreachable."""
+    """Create a new customer via crm-core, or in PostgreSQL if crm-core is unreachable.
+
+    Mandant aus dem geprueften Kontext. Bis 20.10.2026 kam er aus dem Body (Standard: Dev-Mandant) — jede
+    CRM-Rolle konnte Kunden in fremden Mandanten anlegen, ohne Angabe landeten sie im Dev-Mandanten."""
+    if customer_data.tenant_id is not None and str(customer_data.tenant_id) != tenant_id:
+        raise HTTPException(status_code=403, detail="Customer payload belongs to a different tenant")
     try:
-        d = await _svc(db, str(customer_data.tenant_id)).create_customer(customer_data)  # type: ignore[arg-type]
+        d = await _svc(db, tenant_id).create_customer(customer_data)  # type: ignore[arg-type]
     except ValidationFailedError as exc:
         raise HTTPException(status_code=422, detail=exc.detail)
     except ConflictError as exc:
@@ -115,13 +121,13 @@ async def create_customer(
 
 @router.get("/", response_model=PaginatedResponse[Customer], summary="Customers auflisten")
 async def list_customers(
-    tenant_id: Optional[str] = Query(None, description="Filter by tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     skip: int = Query(0, ge=0, description="Number of items to skip"),
     limit: int = Query(50, ge=1, le=200, description="Maximum number of items to return"),
     search: Optional[str] = Query(None, description="Search in display name"),
     db: Session = Depends(get_db),
 ) -> PaginatedResponse[Customer]:
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
     items_raw, total = await _svc(db, effective_tenant).list_customers(skip=skip, limit=limit, search=search)
     items = [Customer.model_validate(d) for d in items_raw]
     pages = ceil(total / limit) if total else 1
@@ -151,7 +157,7 @@ def quick_search_customers(
     danach Trigram-Ähnlichkeit. Nutzt pg_trgm GIN-Indizes
     (siehe Migration crm_customers_search_index_20260414).
     """
-    return _svc(db, tenant_id or DEFAULT_TENANT).quick_search(q or "", limit=limit)
+    return _svc(db, tenant_id).quick_search(q or "", limit=limit)
 
 
 @router.get("/recent", summary="Customers recent",
@@ -163,7 +169,7 @@ def recent_customers(
     tenant_id: str = Depends(get_tenant_id),
 ) -> list[dict[str, Any]]:
     """Zuletzt aktualisierte Kunden des Mandanten — MVP-Prefetch fuer die Combobox."""
-    return _svc(db, tenant_id or DEFAULT_TENANT).recent(limit=limit)
+    return _svc(db, tenant_id).recent(limit=limit)
 
 
 class KundenLookupItem(BaseSchema):
@@ -193,7 +199,7 @@ def customer_lookup(
     """Schmale Such-/Listen-Auswahl aus der kunden_lookup-View; Detaildaten on-demand."""
     from ....services.business_partner_service import BusinessPartnerService
 
-    return BusinessPartnerService(db, tenant_id or DEFAULT_TENANT).search_lookup(q, limit)
+    return BusinessPartnerService(db, tenant_id).search_lookup(q, limit)
 
 
 class KundenDetail(BaseSchema):
@@ -223,7 +229,7 @@ def customer_lookup_detail(
     """
     from ....services.business_partner_service import BusinessPartnerService
 
-    return BusinessPartnerService(db, tenant_id or DEFAULT_TENANT).get_customer_detail(kunden_nr)
+    return BusinessPartnerService(db, tenant_id).get_customer_detail(kunden_nr)
 
 
 class KundenIdentitaet(BaseSchema):
@@ -256,7 +262,7 @@ def customer_identity_resolve(
         raise HTTPException(status_code=400, detail="Mindestens ein Schlüssel erforderlich.")
     from ....services.business_partner_service import BusinessPartnerService
 
-    return BusinessPartnerService(db, tenant_id or DEFAULT_TENANT).resolve_customer_identity(
+    return BusinessPartnerService(db, tenant_id).resolve_customer_identity(
         kunden_nr=kunden_nr,
         business_partner_id=business_partner_id,
         crm_customer_id=crm_customer_id,
@@ -281,7 +287,7 @@ def customer_detail_by_partner(
     """
     from ....services.business_partner_service import BusinessPartnerService
 
-    svc = BusinessPartnerService(db, tenant_id or DEFAULT_TENANT)
+    svc = BusinessPartnerService(db, tenant_id)
     kunden_nr = svc.kunden_nr_for_partner(business_partner_id)
     if not kunden_nr:
         raise HTTPException(
@@ -345,7 +351,7 @@ async def get_customer(
     return Customer.model_validate(d)
 
 
-@router.put("/{customer_id}", response_model=Customer, summary="Customer aktualisieren")
+@router.put("/{customer_id}", response_model=Customer, summary="Customer aktualisieren", dependencies=SCHREIBEN["CRM"])
 async def update_customer(
     customer_id: str,
     customer_data: CustomerUpdate,
@@ -367,8 +373,7 @@ async def update_customer(
     "/{customer_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     response_class=Response,
-    summary="Customer löschen",
-)
+    summary="Customer löschen", dependencies=SCHREIBEN["CRM"])
 async def delete_customer(
     customer_id: str,
     db: Session = Depends(get_db),
@@ -376,6 +381,8 @@ async def delete_customer(
 ) -> Response:
     try:
         await _svc(db, tenant_id).delete_customer(customer_id)
+    except EntityNotFoundError:
+        raise HTTPException(404, "Customer not found")
     except httpx.HTTPStatusError as exc:
         raise _to_http_exception(exc) from exc
     return Response(status_code=status.HTTP_204_NO_CONTENT)
@@ -425,8 +432,7 @@ class UmkreissucheErgebnis(_BaseModel):
 
 
 @router.post("/umkreissuche", summary="Umkreissuche",
-    response_model=CustomersOut
-)
+    response_model=CustomersOut, dependencies=SCHREIBEN["CRM"])
 def umkreissuche(
     payload: UmkreissucheInput,
     db: Session = Depends(get_db),
@@ -472,8 +478,7 @@ class KonvertierungResult(_BaseModel):
 
 
 @router.post("/interessenten", status_code=201, summary="Interessent anlegen",
-    response_model=InteressentOut
-)
+    response_model=InteressentOut, dependencies=SCHREIBEN["CRM"])
 def create_interessent(
     payload: InteressentCreate,
     db: Session = Depends(get_db),
@@ -505,7 +510,7 @@ def create_interessent(
     return ergebnis
 
 
-@router.post("/interessenten/{interessent_id}/konvertieren", response_model=KonvertierungResult, summary="Konvertieren")
+@router.post("/interessenten/{interessent_id}/konvertieren", response_model=KonvertierungResult, summary="Konvertieren", dependencies=SCHREIBEN["CRM"])
 def konvertieren(
     interessent_id: str,
     db: Session = Depends(get_db),

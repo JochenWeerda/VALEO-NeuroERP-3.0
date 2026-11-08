@@ -50,9 +50,9 @@ const CreateEmployeeSchema = z.object({
     type: z.enum(['Full', 'Part', 'Temp'])
   }),
   org: z.object({
-    departmentId: z.string().uuid().optional(),
+    departmentId: z.string().guid().optional(),
     position: z.string().optional(),
-    managerId: z.string().uuid().optional()
+    managerId: z.string().guid().optional()
   }).optional(),
   payroll: z.object({
     taxClass: z.string().optional(),
@@ -68,16 +68,16 @@ const UpdateEmployeeSchema = z.object({
     phone: z.string().optional()
   }).optional(),
   org: z.object({
-    departmentId: z.string().uuid().optional(),
+    departmentId: z.string().guid().optional(),
     position: z.string().optional(),
-    managerId: z.string().uuid().optional()
+    managerId: z.string().guid().optional()
   }).optional()
 });
 
 const EmployeeFiltersSchema = z.object({
   status: z.string().optional(),
-  departmentId: z.string().uuid().optional(),
-  managerId: z.string().uuid().optional(),
+  departmentId: z.string().guid().optional(),
+  managerId: z.string().guid().optional(),
   roleId: z.string().optional(),
   search: z.string().optional(),
   hireDateFrom: z.string().date().optional(),

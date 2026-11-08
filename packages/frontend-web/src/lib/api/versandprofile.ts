@@ -66,8 +66,10 @@ export async function createVersandprofil(payload: VersandprofilPayload): Promis
   return (await apiClient.post<VersandprofilOut>('/api/v1/logistik/versand/profile', payload)).data
 }
 
-export async function deleteVersandprofil(profil_nr: string): Promise<void> {
-  await apiClient.delete(`/api/v1/logistik/versand/profile/${encodeURIComponent(profil_nr)}`)
+export async function deleteVersandprofil(profileId: string, key: string): Promise<void> {
+  await apiClient.post(`/api/v1/logistik/versand/profile/${encodeURIComponent(profileId)}/actions/deactivate`, {
+    expected_active: true, _idempotencyKey: key, _auditReason: 'Deaktivierung aus der Versandprofilverwaltung',
+  })
 }
 
 export async function listLieferavise(): Promise<LieferavisOut[]> {
@@ -96,7 +98,7 @@ export function useCreateVersandprofil() {
 export function useDeleteVersandprofil() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (profil_nr: string) => deleteVersandprofil(profil_nr),
+    mutationFn: ({ id, key }: { id: string; key: string }) => deleteVersandprofil(id, key),
     onSuccess: () => { void qc.invalidateQueries({ queryKey: ['versandprofile'] }) },
   })
 }

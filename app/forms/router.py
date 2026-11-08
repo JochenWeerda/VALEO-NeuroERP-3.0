@@ -11,6 +11,9 @@ from pydantic import BaseModel
 import logging
 from app.core.dependency_container import container
 from app.infrastructure.repositories import CustomerRepository, ArticleRepository
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
+from app.core.tenant import get_tenant_id
+from fastapi import Depends
 
 class FollowRequest(BaseModel):
     source_id: str
@@ -286,7 +289,7 @@ async def get_schema(schema_id: str) -> dict:
     return {"ok": True, "data": s}
 
 
-@router.post("/follow")
+@router.post("/follow", dependencies=SCHREIBEN["FACHLICH"])
 async def create_follow_up(req: FollowRequest) -> dict:
     """
     Erstellt Folgebeleg aus Quell-Beleg
@@ -325,7 +328,7 @@ async def create_follow_up(req: FollowRequest) -> dict:
 
 
 @router.get("/customers/search")
-async def search_customers(q: str = "", tenant_id: str = "system") -> dict:
+async def search_customers(q: str = "", tenant_id: str = Depends(get_tenant_id)) -> dict:
     """Sucht Kunden (Autocomplete)"""
     try:
         customer_repo = container.resolve(CustomerRepository)
@@ -348,7 +351,7 @@ async def search_customers(q: str = "", tenant_id: str = "system") -> dict:
 
 
 @router.get("/articles/search")
-async def search_articles(q: str = "", tenant_id: str = "system") -> dict:
+async def search_articles(q: str = "", tenant_id: str = Depends(get_tenant_id)) -> dict:
     """Sucht Artikel (Autocomplete)"""
     try:
         article_repo = container.resolve(ArticleRepository)

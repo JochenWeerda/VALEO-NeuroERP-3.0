@@ -17,6 +17,7 @@ Fachlicher Hintergrund (Referenz-ERP Wissensbasis, Domain 03 FIBU):
   Buchungsablauf: WaWi-Vorgang → Artikel-EKZ-Nr + Steuerschlüssel + Erlösklasse
   → Erlöskontenzuordnung → FIBU-Buchung auf Erlös-/Aufwandskonto.
 """
+from app.auth.finance_roles import finance_admin, finance_write
 from datetime import date, datetime
 from typing import Optional
 
@@ -101,7 +102,7 @@ def list_erloeskennziffern(
     return [ErloeskennzifferOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("", response_model=ErloeskennzifferOut, status_code=201, summary="Erloeskennziffer anlegen")
+@router.post("", response_model=ErloeskennzifferOut, status_code=201, summary="Erloeskennziffer anlegen", dependencies=[Depends(finance_write)])
 def create_erloeskennziffer(
     payload: ErloeskennzifferCreate,
     db=Depends(get_db),
@@ -124,7 +125,7 @@ def create_erloeskennziffer(
     return ErloeskennzifferOut(**dict(row._mapping))
 
 
-@router.put("/{ekz_nr}", response_model=ErloeskennzifferOut, summary="Erloeskennziffer aktualisieren")
+@router.put("/{ekz_nr}", response_model=ErloeskennzifferOut, summary="Erloeskennziffer aktualisieren", dependencies=[Depends(finance_write)])
 def update_erloeskennziffer(
     ekz_nr: str,
     payload: ErloeskennzifferCreate,
@@ -145,8 +146,7 @@ def update_erloeskennziffer(
 
 
 @router.delete("/{ekz_nr}", summary="Erloeskennziffer löschen",
-    response_model=None
-)
+    response_model=None, dependencies=[Depends(finance_admin)])
 def delete_erloeskennziffer(
     ekz_nr: str,
     db=Depends(get_db),
@@ -186,7 +186,7 @@ def list_zuordnungen(
     return [ErloeskontenzuordnungOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/zuordnungen", response_model=ErloeskontenzuordnungOut, status_code=201, summary="Zuordnung anlegen")
+@router.post("/zuordnungen", response_model=ErloeskontenzuordnungOut, status_code=201, summary="Zuordnung anlegen", dependencies=[Depends(finance_write)])
 def create_zuordnung(
     payload: ErloeskontenzuordnungCreate,
     db=Depends(get_db),

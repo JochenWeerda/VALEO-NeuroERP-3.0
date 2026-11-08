@@ -41,12 +41,6 @@ ROLE_SCOPES: Dict[str, List[str]] = {
         "docs:export", "docs:print", "docs:archive",
         "policy:read", "policy:write",
     ],
-    "manager": [
-        "sales:read", "sales:write", "sales:approve",
-        "purchase:read", "purchase:write", "purchase:approve",
-        "docs:export", "docs:print",
-        "policy:read",
-    ],
     "controller": [
         "sales:read", "sales:approve", "sales:post",
         "purchase:read", "purchase:approve", "purchase:post",

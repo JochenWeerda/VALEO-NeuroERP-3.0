@@ -7,7 +7,7 @@ from typing import Any, Dict
 
 from sqlalchemy import text
 
-from .base_worker import BaseWorker
+from .base_worker import BaseWorker, cross_tenant_job
 
 logger = logging.getLogger(__name__)
 
@@ -61,6 +61,7 @@ async def run_weekly_reports() -> Dict[str, Any]:
         await worker.cleanup()
 
 
+@cross_tenant_job("weekly-reports")
 def execute_weekly_reports() -> Dict[str, Any]:
     try:
         loop = asyncio.new_event_loop()

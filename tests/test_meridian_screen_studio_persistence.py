@@ -1,27 +1,33 @@
 """Postgres persistence for Masken-Studio drafts (require_db)."""
 
 from __future__ import annotations
+from studio_review_helper import publish_reviewed, simulation_ready_definition
 
 import pytest
+from uuid import uuid4
+from app.auth.deps import get_current_user
 from fastapi.testclient import TestClient
 from sqlalchemy import text
+from sqlalchemy.orm import Session
 
 from app.core.database import SessionLocal, engine
 from app.core.screen_definitions import get_screen_definition
 from app.infrastructure.models.studio_models import ScreenDefinitionDraft
 from app.main import app
 from app.services.studio_draft_store import (
-    clear_sql_studio_drafts,
     invalidate_studio_table_cache,
     reset_studio_drafts,
     use_sql_studio_drafts,
 )
-from app.services.studio_propose import propose_studio_draft
+from app.services.studio_propose import propose_studio_draft as original_proposal
+
+def propose_studio_draft(intent):
+    return simulation_ready_definition(original_proposal(intent))
 
 pytestmark = pytest.mark.integration
 
-_TENANT_A = "00000000-0000-0000-0000-000000000001"
-_TENANT_B = "00000000-0000-0000-0000-000000000002"
+_TENANT_A = "studio-a-" + uuid4().hex
+_TENANT_B = "studio-b-" + uuid4().hex
 _HEADERS_A = {
     "Authorization": "Bearer dev-token",
     "X-Tenant-ID": _TENANT_A,
@@ -32,16 +38,41 @@ _HEADERS_B = {
 }
 
 
+_USER: dict = {}
+
+
 @pytest.fixture
-def studio_db(require_db):
+def studio_db(require_db, monkeypatch):
+    from testgrenze import pruefstand_erlaubt
+    assert pruefstand_erlaubt(engine.url)
+    _USER.clear()
+    _USER.update(sub="anna", roles=["admin"], raw={"identity_type": "human"})
+    previous_user = app.dependency_overrides.get(get_current_user)
+    app.dependency_overrides[get_current_user] = lambda: _USER
     with engine.begin() as conn:
         conn.execute(text("CREATE SCHEMA IF NOT EXISTS domain_shared"))
     ScreenDefinitionDraft.__table__.create(bind=engine, checkfirst=True)
     invalidate_studio_table_cache()
     use_sql_studio_drafts()
-    clear_sql_studio_drafts()
+    with engine.begin() as conn:
+        for tenant in (_TENANT_A, _TENANT_B):
+            conn.execute(text("INSERT INTO domain_shared.tenants(id,name) VALUES (:id,'Studio Test') ON CONFLICT(id) DO NOTHING"), {"id": tenant})
+    connection = engine.connect()
+    transaction = connection.begin()
+    factory = lambda: Session(bind=connection, join_transaction_mode="create_savepoint")
+    from app.services import studio_draft_store
+    monkeypatch.setattr(studio_draft_store, "_sql_session", factory)
+    monkeypatch.setattr(__import__(__name__), "SessionLocal", factory)
     yield
-    clear_sql_studio_drafts()
+    transaction.rollback()
+    connection.close()
+    if previous_user is None:
+        app.dependency_overrides.pop(get_current_user, None)
+    else:
+        app.dependency_overrides[get_current_user] = previous_user
+    with engine.begin() as conn:
+        conn.execute(text("DELETE FROM domain_shared.screen_definition_drafts WHERE tenant_id IN (:a,:b)"), {"a": _TENANT_A, "b": _TENANT_B})
+        conn.execute(text("DELETE FROM domain_shared.tenants WHERE id IN (:a,:b)"), {"a": _TENANT_A, "b": _TENANT_B})
     reset_studio_drafts()
 
 
@@ -55,7 +86,7 @@ def test_sql_save_survives_process_memory_reset(studio_db) -> None:
     created = client.post(
         "/api/v1/studio/drafts",
         headers={**_HEADERS_A, "X-Actor-ID": "anna"},
-        json={"definition": draft},
+        json={"definition": draft, 'idempotency_key': str(uuid4())},
     )
     assert created.status_code == 200, created.text
     draft_id = created.json()["id"]
@@ -78,19 +109,21 @@ def test_sql_tenant_isolation_and_four_eyes(studio_db) -> None:
     created = client.post(
         "/api/v1/studio/drafts",
         headers={**_HEADERS_A, "X-Actor-ID": "anna"},
-        json={"definition": draft},
+        json={"definition": draft, 'idempotency_key': str(uuid4())},
     )
     assert created.status_code == 200, created.text
     draft_id = created.json()["id"]
     other = client.get("/api/v1/studio/drafts", headers=_HEADERS_B)
     assert other.json()["drafts"] == []
-    forbidden = client.post(
-        f"/api/v1/studio/drafts/{draft_id}/publish",
+    assert client.get(f"/api/v1/studio/drafts/{draft_id}", headers=_HEADERS_B).status_code == 404
+    forbidden = publish_reviewed(
+        client, f"/api/v1/studio/drafts/{draft_id}/publish",
         headers={**_HEADERS_A, "X-Actor-ID": "anna"},
     )
     assert forbidden.status_code == 403
-    published = client.post(
-        f"/api/v1/studio/drafts/{draft_id}/publish",
+    _USER["sub"] = "berta"
+    published = publish_reviewed(
+        client, f"/api/v1/studio/drafts/{draft_id}/publish",
         headers={**_HEADERS_A, "X-Actor-ID": "berta"},
     )
     assert published.status_code == 200, published.text

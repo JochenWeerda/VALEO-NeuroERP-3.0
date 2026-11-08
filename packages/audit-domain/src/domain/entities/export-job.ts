@@ -12,7 +12,7 @@ export const ExportFiltersSchema = z.object({
 });
 
 export const ExportJobSchema = z.object({
-  id: z.string().uuid().optional(),
+  id: z.string().guid().optional(),
   tenantId: z.string().min(1),
   requestedBy: z.string(),
   filters: ExportFiltersSchema,

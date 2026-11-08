@@ -209,7 +209,7 @@ export const TelemetryRecord = z.object({
 
   // Metadata
   recordedAt: z.string().datetime(),
-  meta: z.record(z.any()).optional()
+  meta: z.record(z.string(), z.any()).optional()
 });
 
 export type TelemetryRecord = z.infer<typeof TelemetryRecord>;

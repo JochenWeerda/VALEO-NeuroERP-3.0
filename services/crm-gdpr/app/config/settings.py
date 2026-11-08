@@ -30,7 +30,9 @@ class Settings(BaseSettings):
     DEFAULT_TENANT_ID: str = Field(default="00000000-0000-0000-0000-000000000001")
 
     # Export
-    EXPORT_STORAGE_PATH: str = Field(default="/tmp/gdpr-exports")
+    # Eigenes Datenverzeichnis des Dienstes (im Container /app, gehoert dem Dienstbenutzer) statt des allgemein
+    # beschreibbaren /tmp: DSGVO-Exporte enthalten personenbezogene Daten.
+    EXPORT_STORAGE_PATH: str = Field(default="data/gdpr-exports")
     EXPORT_RETENTION_DAYS: int = Field(default=30)
     SUPPORTED_EXPORT_FORMATS: list[str] = Field(default_factory=lambda: ["json", "csv", "pdf"])
 

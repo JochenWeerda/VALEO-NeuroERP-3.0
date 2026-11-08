@@ -27,6 +27,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.auth.deps import anmeldename, get_current_user
 from app.api.v1.schemas.genossenschaft_schemas import (
     AnteilsbewegungCreate,
     AnteilsbewegungGebucht,
@@ -42,6 +43,7 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
 from app.services import genossenschaft_service as dienst
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 logger = logging.getLogger(__name__)
 
@@ -95,9 +97,10 @@ def list_mitglieder(
 
 
 @router.post("/mitglieder", status_code=201, response_model=MitgliedAngelegt,
-             summary="Mitglied aufnehmen (§ 15 GenG)")
+             summary="Mitglied aufnehmen (§ 15 GenG)", dependencies=SCHREIBEN["AGRAR"])
 def create_mitglied(
     payload: MitgliedCreate,
+    nutzer: dict = Depends(get_current_user),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict:
@@ -149,7 +152,7 @@ def create_mitglied(
                 payload.genossenschaftsanteile, wert, payload.eintrittsdatum,
                 bemerkung="Erstzeichnung beim Beitritt",
                 journal_entry_id=journal_id,
-                erfasst_durch=payload.erfasst_durch,
+                erfasst_durch=anmeldename(nutzer) or None,
             )
         db.commit()
     except HTTPException:
@@ -204,7 +207,7 @@ def get_mitglied(
 
 
 @router.patch("/mitglieder/{mitglied_id}", response_model=MitgliedGeaendert,
-              summary="Mitgliedsstammdaten aendern")
+              summary="Mitgliedsstammdaten aendern", dependencies=SCHREIBEN["AGRAR"])
 def patch_mitglied(
     mitglied_id: str,
     payload: MitgliedPatch,
@@ -367,10 +370,11 @@ def _hauptbuch_buchen(
 
 
 @router.post("/mitglieder/{mitglied_id}/anteilsbewegung", status_code=201,
-             response_model=AnteilsbewegungGebucht, summary="Anteilsbewegung buchen")
+             response_model=AnteilsbewegungGebucht, summary="Anteilsbewegung buchen", dependencies=SCHREIBEN["AGRAR"])
 def create_anteilsbewegung(
     mitglied_id: str,
     payload: AnteilsbewegungCreate,
+    nutzer: dict = Depends(get_current_user),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict:
@@ -428,7 +432,7 @@ def create_anteilsbewegung(
             bemerkung=payload.bemerkung,
             gegen_mitglieds_id=payload.gegen_mitglieds_id,
             journal_entry_id=journal_id,
-            erfasst_durch=payload.erfasst_durch,
+            erfasst_durch=anmeldename(nutzer) or None,
         )
         if gegenseite is not None:
             gegenbewegung_id = str(uuid7())
@@ -438,7 +442,7 @@ def create_anteilsbewegung(
                 payload.wert_eur, payload.datum,
                 bemerkung=f"Gegenbuchung zu {bewegung_id}",
                 gegen_mitglieds_id=mitglied_id,
-                erfasst_durch=payload.erfasst_durch,
+                erfasst_durch=anmeldename(nutzer) or None,
             )
         bestand_nachher = verfuegbar + dienst.VORZEICHEN[payload.bewegungstyp] * payload.anzahl_anteile
         db.commit()

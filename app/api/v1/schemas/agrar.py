@@ -6,7 +6,7 @@ Pydantic schemas for Saatgut, Dünger, PSM, and other agricultural products
 from datetime import datetime
 from typing import Optional, List, Dict, Any
 from decimal import Decimal
-from pydantic import Field
+from pydantic import AliasChoices, Field
 
 from .base import BaseSchema, TimestampMixin, SoftDeleteMixin
 
@@ -293,9 +293,22 @@ class PSMUpdate(BaseSchema):
 
 
 class PSM(PSMBase, TimestampMixin, SoftDeleteMixin):
-    """Full PSM schema"""
+    """Read contract: nullable ORM values stay unknown; write validation is unchanged."""
     id: str = Field(..., description="PSM ID")
     tenant_id: str = Field(..., description="Tenant ID")
+    zulassung_ablauf: Optional[datetime] = None
+    eu_zulassung: Optional[bool] = None
+    kulturen: Optional[List[str]] = None
+    indikationen: Optional[List[str]] = None
+    bienenschutz: Optional[bool] = None
+    wasserschutz_gebiet: Optional[bool] = None
+    auflagen: Optional[List[str]] = None
+    ausgangsstoff_explosivstoffe: Optional[bool] = None
+    erklaerung_landwirt_erforderlich: Optional[bool] = None
+    waehrung: Optional[str] = None
+    lagerbestand: Optional[Decimal] = None
+    ist_aktiv: Optional[bool] = Field(default=None, validation_alias=AliasChoices("ist_aktiv", "is_active"))
+    is_active: Optional[bool] = Field(default=None, validation_alias=AliasChoices("ist_aktiv", "is_active"))
 
 
 class SachkundeBase(BaseSchema):
@@ -342,7 +355,7 @@ class BiostimulanzBase(BaseSchema):
     ek_preis: Optional[Decimal] = Field(None, ge=0, description="Purchase price")
     vk_preis: Optional[Decimal] = Field(None, ge=0, description="Sales price")
     waehrung: str = Field(default="EUR", max_length=3, description="Currency")
-    lagerbestand: Decimal = Field(default=0, ge=0, description="Stock quantity")
+    lagerbestand: Decimal = Field(default=Decimal("0"), ge=0, description="Stock quantity")
 
 
 class BiostimulanzCreate(BiostimulanzBase):

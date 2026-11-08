@@ -5,6 +5,7 @@ FIBU-CLS-02: Nebenbuch-Abstimmung implementieren
 
 from __future__ import annotations
 
+from app.auth.finance_roles import finance_read
 import csv
 import io
 import logging
@@ -106,7 +107,7 @@ def _sum_gl_balance(
     return (total_credit - total_debit) if liability_mode else (total_debit - total_credit)
 
 
-@router.get("/ar", response_model=ReconciliationResult, summary="Ar reconcile")
+@router.get("/ar", response_model=ReconciliationResult, summary="Ar reconcile", dependencies=[Depends(finance_read)])
 async def reconcile_ar(
     period: str = Query(..., description="Accounting period (YYYY-MM)"),
     tenant_id: str = Depends(get_tenant_id),
@@ -197,7 +198,7 @@ async def reconcile_ar(
         raise HTTPException(status_code=500, detail=f"Failed to reconcile AR: {str(e)}")
 
 
-@router.get("/ap", response_model=ReconciliationResult, summary="Ap reconcile")
+@router.get("/ap", response_model=ReconciliationResult, summary="Ap reconcile", dependencies=[Depends(finance_read)])
 async def reconcile_ap(
     period: str = Query(..., description="Accounting period (YYYY-MM)"),
     tenant_id: str = Depends(get_tenant_id),
@@ -288,7 +289,7 @@ async def reconcile_ap(
         raise HTTPException(status_code=500, detail=f"Failed to reconcile AP: {str(e)}")
 
 
-@router.get("/bank", response_model=ReconciliationResult, summary="Bank reconcile")
+@router.get("/bank", response_model=ReconciliationResult, summary="Bank reconcile", dependencies=[Depends(finance_read)])
 async def reconcile_bank(
     period: str = Query(..., description="Accounting period (YYYY-MM)"),
     tenant_id: str = Depends(get_tenant_id),
@@ -383,7 +384,7 @@ async def reconcile_bank(
         raise HTTPException(status_code=500, detail=f"Failed to reconcile BANK: {str(e)}")
 
 
-@router.get("/{ledger_type}/details", response_model=List[ReconciliationDetail], summary="Reconciliation details abrufen")
+@router.get("/{ledger_type}/details", response_model=List[ReconciliationDetail], summary="Reconciliation details abrufen", dependencies=[Depends(finance_read)])
 async def get_reconciliation_details(
     ledger_type: str,
     account_number: str = Query(..., description="Account number"),
@@ -497,8 +498,7 @@ async def get_reconciliation_details(
 
 
 @router.get("/{ledger_type}/export", summary="Reconciliation csv exportieren",
-    response_model=SubsidiaryLedgerReconciliationOut
-)
+    response_model=SubsidiaryLedgerReconciliationOut, dependencies=[Depends(finance_read)])
 async def export_reconciliation_csv(
     ledger_type: str,
     period: str = Query(..., description="Accounting period (YYYY-MM)"),
@@ -561,7 +561,7 @@ async def export_reconciliation_csv(
         raise HTTPException(status_code=500, detail=f"Failed to export reconciliation CSV: {str(e)}")
 
 
-@router.get("/summary", response_model=SubsidiaryLedgerReconciliationOut, summary="Reconciliation summary abrufen")
+@router.get("/summary", response_model=SubsidiaryLedgerReconciliationOut, summary="Reconciliation summary abrufen", dependencies=[Depends(finance_read)])
 async def get_reconciliation_summary(
     period: str = Query(..., description="Accounting period (YYYY-MM)"),
     tenant_id: str = Depends(get_tenant_id),

@@ -21,11 +21,12 @@ from pydantic import BaseModel, Field
 from sqlalchemy import text
 
 from app.core.database import get_db
-from app.core.dependencies import get_tenant_id
+from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.individuelle_artikelnummern_schemas import IndividuelleArtikelNrOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/artikel/individuelle-nummern",
@@ -83,7 +84,7 @@ def list_individuelle_nummern(
     return [IndivArtikelNrOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("", response_model=IndivArtikelNrOut, status_code=201, summary="Individuelle nummer anlegen")
+@router.post("", response_model=IndivArtikelNrOut, status_code=201, summary="Individuelle nummer anlegen", dependencies=SCHREIBEN["STAMMDATEN"])
 def create_individuelle_nummer(
     payload: IndivArtikelNrCreate,
     db=Depends(get_db),
@@ -144,8 +145,7 @@ def lookup_interne_nummer(
 
 
 @router.delete("/{indiv_id}", summary="Individuelle nummer löschen",
-    response_model=None
-)
+    response_model=None, dependencies=SCHREIBEN["STAMMDATEN"])
 def delete_individuelle_nummer(
     indiv_id: str,
     db=Depends(get_db),
@@ -157,3 +157,19 @@ def delete_individuelle_nummer(
     """), {"id": indiv_id, "tid": tenant_id})
     db.commit()
     return Response(status_code=204)
+
+
+@router.get("/{indiv_id}", response_model=IndivArtikelNrOut, summary="Individuelle Artikelnummer lesen")
+def get_individuelle_nummer(
+    indiv_id: str,
+    db=Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
+    """Single record for the shared Human/CLI/MCP screen data source."""
+    row = db.execute(text("""
+        SELECT * FROM domain_shared.individuelle_artikelnummern
+        WHERE tenant_id = :tid AND id = :key AND aktiv = true
+    """), {"tid": tenant_id, "key": indiv_id}).fetchone()
+    if row is None:
+        raise HTTPException(404, "Individuelle Artikelnummer nicht gefunden.")
+    return IndivArtikelNrOut(**dict(row._mapping))

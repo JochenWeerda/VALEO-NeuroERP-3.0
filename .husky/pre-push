@@ -1,0 +1,1 @@
+node scripts/private-identity-push-guard.cjs

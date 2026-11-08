@@ -15,6 +15,7 @@ from .agent_ops_persistence import (
     save_agent_ops_tenant_snapshot,
 )
 from .neuroassist import get_productive_neuroassist_capabilities
+from app.core.tenant_context import get_current_tenant_id
 
 
 def _utcnow() -> str:
@@ -734,7 +735,8 @@ class AgentOpsService:
             goal.active_ticket_count = counts.get(goal.goal_key, 0)
 
     @classmethod
-    def build_overview(cls, tenant_id: str = "system") -> AgentOpsOverview:
+    def build_overview(cls, tenant_id: str | None = None) -> AgentOpsOverview:
+        tenant_id = tenant_id or get_current_tenant_id()
         cls._ensure_tenant(tenant_id)
         budgets = list(cls._budgets[tenant_id].values())
         ledger = list(cls._ledger[tenant_id])[-10:]
@@ -759,7 +761,8 @@ class AgentOpsService:
         )
 
     @classmethod
-    def list_tickets(cls, tenant_id: str = "system", *, include_closed: bool = False) -> list[AgentTicket]:
+    def list_tickets(cls, tenant_id: str | None = None, *, include_closed: bool = False) -> list[AgentTicket]:
+        tenant_id = tenant_id or get_current_tenant_id()
         cls._ensure_tenant(tenant_id)
         tickets = [cls._hydrate_ticket(tenant_id, ticket) for ticket in cls._tickets[tenant_id].values()]
         if not include_closed:
@@ -767,7 +770,8 @@ class AgentOpsService:
         return sorted(tickets, key=lambda item: item.updated_at, reverse=True)
 
     @classmethod
-    def list_interventions(cls, tenant_id: str = "system") -> list[AgentInterventionRecord]:
+    def list_interventions(cls, tenant_id: str | None = None) -> list[AgentInterventionRecord]:
+        tenant_id = tenant_id or get_current_tenant_id()
         cls._ensure_tenant(tenant_id)
         return sorted(cls._interventions[tenant_id], key=lambda item: item.created_at, reverse=True)
 
@@ -816,12 +820,14 @@ class AgentOpsService:
         return intervention
 
     @classmethod
-    def list_skill_packs(cls, tenant_id: str = "system") -> list[AgentSkillPack]:
+    def list_skill_packs(cls, tenant_id: str | None = None) -> list[AgentSkillPack]:
+        tenant_id = tenant_id or get_current_tenant_id()
         cls._ensure_tenant(tenant_id)
         return sorted(cls._skill_packs[tenant_id].values(), key=lambda item: item.skill_pack_key)
 
     @classmethod
-    def export_template(cls, tenant_id: str = "system", *, template_key: str = "default") -> AgentTemplateExport:
+    def export_template(cls, tenant_id: str | None = None, *, template_key: str = "default") -> AgentTemplateExport:
+        tenant_id = tenant_id or get_current_tenant_id()
         cls._ensure_tenant(tenant_id)
         return AgentTemplateExport(
             tenant_id=tenant_id,
@@ -854,7 +860,8 @@ class AgentOpsService:
         return cls.export_template(tenant_id, template_key=template.template_key)
 
     @classmethod
-    def build_dashboard(cls, tenant_id: str = "system") -> AgentOpsDashboard:
+    def build_dashboard(cls, tenant_id: str | None = None) -> AgentOpsDashboard:
+        tenant_id = tenant_id or get_current_tenant_id()
         overview = cls.build_overview(tenant_id)
         blocked = [item.capability_key for item in overview.budget_summaries if item.blocked]
         budget_health = "blocked" if blocked else ("watch" if overview.spent_total_cents > (overview.budget_total_cents * 0.7) else "healthy")
@@ -881,7 +888,8 @@ class AgentOpsService:
         )
 
     @classmethod
-    def build_mobile_overview(cls, tenant_id: str = "system") -> AgentMobileOpsOverview:
+    def build_mobile_overview(cls, tenant_id: str | None = None) -> AgentMobileOpsOverview:
+        tenant_id = tenant_id or get_current_tenant_id()
         overview = cls.build_overview(tenant_id)
         interventions = cls.list_interventions(tenant_id)
         return AgentMobileOpsOverview(
@@ -899,12 +907,14 @@ class AgentOpsService:
         )
 
     @classmethod
-    def list_config_revisions(cls, tenant_id: str = "system") -> list[AgentConfigRevision]:
+    def list_config_revisions(cls, tenant_id: str | None = None) -> list[AgentConfigRevision]:
+        tenant_id = tenant_id or get_current_tenant_id()
         cls._ensure_tenant(tenant_id)
         return sorted(cls._config_revisions[tenant_id], key=lambda item: item.changed_at, reverse=True)
 
     @classmethod
-    def build_control_center(cls, tenant_id: str = "system") -> AgentControlCenter:
+    def build_control_center(cls, tenant_id: str | None = None) -> AgentControlCenter:
+        tenant_id = tenant_id or get_current_tenant_id()
         overview = cls.build_overview(tenant_id)
         return AgentControlCenter(
             tenant_id=tenant_id,
@@ -916,7 +926,8 @@ class AgentOpsService:
         )
 
     @classmethod
-    def build_plugin_boundary_review(cls, tenant_id: str = "system") -> AgentPluginBoundaryReview:
+    def build_plugin_boundary_review(cls, tenant_id: str | None = None) -> AgentPluginBoundaryReview:
+        tenant_id = tenant_id or get_current_tenant_id()
         cls._ensure_tenant(tenant_id)
         return AgentPluginBoundaryReview(
             tenant_id=tenant_id,
@@ -954,7 +965,8 @@ class AgentOpsService:
         cls._config_revisions.clear()
 
     @classmethod
-    def build_persistence_status(cls, tenant_id: str = "system") -> dict[str, Any]:
+    def build_persistence_status(cls, tenant_id: str | None = None) -> dict[str, Any]:
+        tenant_id = tenant_id or get_current_tenant_id()
         cls._ensure_tenant(tenant_id)
         return build_agent_ops_persistence_status(tenant_id)
 

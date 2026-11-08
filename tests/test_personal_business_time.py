@@ -18,7 +18,9 @@ def test_hr_date_fallbacks_use_configured_business_day(monkeypatch):
 
     assert personal._to_iso(None) == "2026-10-01"
     assert personal_service.PersonalService._add_years(None, 1) == "2027-10-01"
-    assert personal_service.PersonalService._add_years("ungueltig", 2) == "2028-10-01"
+    with pytest.raises(ValueError):
+        personal_service.PersonalService._add_years("ungueltig", 2)
+    assert personal_service.PersonalService._add_years("2024-02-29", 1) == "2025-02-28"
 
 
 @pytest.mark.asyncio

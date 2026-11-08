@@ -18,6 +18,7 @@ from __future__ import annotations
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from sqlalchemy.exc import IntegrityError
 
 _BASE_URI = "https://valeo-erp.de/errors"
 
@@ -112,6 +113,19 @@ _HTTP_CODES: dict[int, tuple[str, str]] = {
 }
 
 
+def kontosperre_meldung(exc: BaseException) -> str | None:
+    """Satz fuer die Buchhaltung, wenn die Kontosperre eine Buchungszeile abgelehnt hat — sonst ``None``.
+
+    Die Sperre setzt die Datenbank durch (Trigger an ``journal_entry_lines``, Kennung ``konto_sperre``).
+    Erkannt wird sie an dieser Kennung, nicht am Wortlaut der Meldung.
+    """
+    diag = getattr(getattr(exc, "orig", exc), "diag", None)
+    if getattr(diag, "constraint_name", None) != "konto_sperre":
+        return None
+    meldung = (getattr(diag, "message_primary", None) or "Konto ist fuer Buchungen gesperrt").strip()
+    return meldung if meldung.endswith(".") else meldung + "."
+
+
 def register_domain_exception_handlers(app: FastAPI) -> None:
     """Wire all exceptions → RFC 7807 Problem Details (application/problem+json).
 
@@ -129,6 +143,18 @@ def register_domain_exception_handlers(app: FastAPI) -> None:
                 detail=exc.detail,
                 instance=str(request.url.path),
             ),
+            media_type="application/problem+json",
+        )
+
+    @app.exception_handler(IntegrityError)
+    async def _handle_integrity(request: Request, exc: IntegrityError) -> JSONResponse:
+        # Nur die Kontosperre wird uebersetzt. Jeder andere Integritaetsfehler bleibt, was er war.
+        meldung = kontosperre_meldung(exc)
+        if meldung is None:
+            raise exc
+        return JSONResponse(
+            status_code=409,
+            content=_problem(status=409, code="KONTO_GESPERRT", detail=meldung, instance=str(request.url.path)),
             media_type="application/problem+json",
         )
 

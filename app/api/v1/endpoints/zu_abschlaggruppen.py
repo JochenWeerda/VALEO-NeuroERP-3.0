@@ -21,6 +21,7 @@ from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/preise/zu-abschlaege",
@@ -115,7 +116,7 @@ def list_zu_abschlaggruppen(
     return [ZuAbschlaggruppeOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/gruppen", response_model=ZuAbschlaggruppeOut, status_code=201, summary="Zu abschlaggruppe anlegen")
+@router.post("/gruppen", response_model=ZuAbschlaggruppeOut, status_code=201, summary="Zu abschlaggruppe anlegen", dependencies=SCHREIBEN["VERKAUF"])
 def create_zu_abschlaggruppe(
     payload: ZuAbschlaggruppeCreate,
     db=Depends(get_db),
@@ -139,8 +140,7 @@ def create_zu_abschlaggruppe(
 
 
 @router.delete("/gruppen/{gruppe_nr}", summary="Zu abschlaggruppe löschen",
-    response_model=None
-)
+    response_model=None, dependencies=SCHREIBEN["VERKAUF"])
 def delete_zu_abschlaggruppe(
     gruppe_nr: str,
     richtung: str = Query("vk"),
@@ -173,7 +173,7 @@ def list_zu_abschlagklassen(
     return [ZuAbschlagklasseOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/klassen", response_model=ZuAbschlagklasseOut, status_code=201, summary="Zu abschlagklasse anlegen")
+@router.post("/klassen", response_model=ZuAbschlagklasseOut, status_code=201, summary="Zu abschlagklasse anlegen", dependencies=SCHREIBEN["VERKAUF"])
 def create_zu_abschlagklasse(
     payload: ZuAbschlagklasseCreate,
     db=Depends(get_db),
@@ -197,8 +197,7 @@ def create_zu_abschlagklasse(
 
 
 @router.delete("/klassen/{klasse_nr}", summary="Zu abschlagklasse löschen",
-    response_model=None
-)
+    response_model=None, dependencies=SCHREIBEN["VERKAUF"])
 def delete_zu_abschlagklasse(
     klasse_nr: str,
     richtung: str = Query("vk"),
@@ -243,7 +242,7 @@ def list_zu_abschlag_konditionen(
     return [ZuAbschlagKonditionOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/konditionen", response_model=ZuAbschlagKonditionOut, status_code=201, summary="Zu abschlag kondition anlegen")
+@router.post("/konditionen", response_model=ZuAbschlagKonditionOut, status_code=201, summary="Zu abschlag kondition anlegen", dependencies=SCHREIBEN["VERKAUF"])
 def create_zu_abschlag_kondition(
     payload: ZuAbschlagKonditionCreate,
     db=Depends(get_db),

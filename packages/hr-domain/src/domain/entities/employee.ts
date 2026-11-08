@@ -34,9 +34,9 @@ const EmploymentSchema = z.object({
 });
 
 const OrganizationSchema = z.object({
-  departmentId: z.string().uuid().optional(),
+  departmentId: z.string().guid().optional(),
   position: z.string().optional(),
-  managerId: z.string().uuid().optional()
+  managerId: z.string().guid().optional()
 });
 
 const PayrollSchema = z.object({
@@ -47,8 +47,8 @@ const PayrollSchema = z.object({
 
 // Main Employee Schema
 export const EmployeeSchema = z.object({
-  id: z.string().uuid(),
-  tenantId: z.string().uuid(),
+  id: z.string().guid(),
+  tenantId: z.string().guid(),
   employeeNumber: z.string().min(EMPLOYEE_NUMBER_MIN_LENGTH).max(EMPLOYEE_NUMBER_MAX_LENGTH),
   person: PersonSchema,
   contact: ContactSchema,

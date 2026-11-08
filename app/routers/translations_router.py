@@ -11,6 +11,7 @@ from pydantic import BaseModel
 
 from app.core.database import get_db
 from app.models.translation import Translation, TranslationValue, create_translation
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/api/translations", tags=["translations"])
@@ -120,7 +121,7 @@ async def get_contexts(
 
 # --- POST-Endpoints ---
 
-@router.post("/")
+@router.post("/", dependencies=SCHREIBEN["PLATTFORM"])
 async def create_new_translation(
     translation: TranslationCreate,
     db: Session = Depends(get_db)
@@ -157,7 +158,7 @@ async def create_new_translation(
     }
 
 
-@router.put("/{translation_key}")
+@router.put("/{translation_key}", dependencies=SCHREIBEN["PLATTFORM"])
 async def update_translation(
     translation_key: str,
     update: TranslationUpdate,
@@ -211,7 +212,7 @@ async def update_translation(
 
 # --- Bulk-Operations ---
 
-@router.post("/bulk/seed")
+@router.post("/bulk/seed", dependencies=SCHREIBEN["PLATTFORM"])
 async def bulk_seed_translations(
     translations: List[TranslationCreate],
     db: Session = Depends(get_db)

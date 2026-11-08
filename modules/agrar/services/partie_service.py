@@ -8,7 +8,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Optional
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, text
 
 from app.infrastructure.models import HarvestAcceptance, HarvestAcceptanceLine
 from app.core.uuid7 import uuid7
@@ -35,6 +35,8 @@ def generate_lot_number(
     Returns:
         lot_number: Generierte Partie-Nummer
     """
+    db.execute(text("SELECT pg_advisory_xact_lock(hashtextextended(:key, 0))"),
+               {"key": "valeo.harvest.release:" + tenant_id})
     acceptance = db.query(HarvestAcceptance).filter(
         HarvestAcceptance.id == acceptance_id,
         HarvestAcceptance.tenant_id == tenant_id,
@@ -50,8 +52,11 @@ def generate_lot_number(
         date_str = datetime.now().strftime("%Y%m%d")
     
     # Zähle bestehende Partien für dieses Datum
-    count = db.query(func.count(HarvestAcceptanceLine.id)).filter(
-        HarvestAcceptanceLine.tenant_id == tenant_id,
+    count = db.query(func.count(HarvestAcceptanceLine.id)).join(
+        HarvestAcceptance,
+        HarvestAcceptanceLine.harvest_acceptance_id == HarvestAcceptance.id,
+    ).filter(
+        HarvestAcceptance.tenant_id == tenant_id,
         HarvestAcceptanceLine.lot_id.like(f"{prefix}-{date_str}-%"),
     ).scalar() or 0
     
@@ -79,6 +84,8 @@ def create_harvest_acceptance_lines(
     Returns:
         lines: Liste der erstellten HarvestAcceptanceLine Objekte
     """
+    db.execute(text("SELECT pg_advisory_xact_lock(hashtextextended(:key, 0))"),
+               {"key": "valeo.harvest.release:" + tenant_id})
     acceptance = db.query(HarvestAcceptance).filter(
         HarvestAcceptance.id == acceptance_id,
         HarvestAcceptance.tenant_id == tenant_id,
@@ -98,7 +105,6 @@ def create_harvest_acceptance_lines(
         
         line = HarvestAcceptanceLine(
             id=uuid7(),
-            tenant_id=tenant_id,
             harvest_acceptance_id=acceptance_id,
             line_number=line_number,
             silo_id=allocation.get("silo_id"),

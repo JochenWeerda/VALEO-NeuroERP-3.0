@@ -17,14 +17,10 @@ from sqlalchemy.orm import Session
 from app.agrar.rations.actual_measures import DeviationPolicyError
 from app.agrar.rations.feed_analysis import AnalysisStatus
 from app.agrar.rations.lifecycle import RationStatus, TransitionError, validate_transition
-from app.api.v1.endpoints.reklamation_api import (
-    ReklamationTransitionRequest,
-    _query_reklamation,
-    transition_status,
-)
+from app.api.v1.endpoints.reklamation_api import _query_reklamation, wechsle_status
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
 from app.core.reklamation import ReklamationsStatus, ReklamationZustandsmaschine
-from app.services import crm_lead_service
+from app.services import crm_lead_service, mcp_beleg_tools, mcp_mask_actions, mcp_studio_authoring
 from app.services.crm_kontakt_service import CrmKontaktService
 from app.services.document_allocation_service import LineToRegister
 from app.services.einkauf_compat_service import EinkaufCompatService, _NICHT_BESTELLBAR
@@ -93,14 +89,6 @@ class ContactLogInput(BaseModel):
     wiedervorlage_datum: date | None = None
 
 
-class ActivityCreateInput(BaseModel):
-    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
-    kunden_nr: str = Field(min_length=1, max_length=20)
-    betreff: str = Field(min_length=1, max_length=200)
-    typ: Literal["Anruf", "Besuch", "E-Mail", "Aufgabe", "Meeting", "Sonstiges"]
-    datum: date | None = None
-    notiz: str | None = Field(default=None, max_length=10000)
-    verantwortlich: str | None = Field(default=None, max_length=100)
 
 
 class LeadQualifyInput(BaseModel):
@@ -285,6 +273,36 @@ class EinwilligungAnlegenInput(BaseModel):
     reason: str = Field(min_length=3, max_length=500)
 
 
+class GutschriftZeileInput(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    description: str = Field(min_length=1, max_length=500)
+    quantity: Decimal = Field(gt=0)
+    unit_price: Decimal = Field(ge=0)
+    # Steuerschluessel des Mandanten. Kein Vorgabewert: ohne ihn bleibt die Steuer offen.
+    tax_code: str | None = Field(default=None, max_length=50)
+
+
+class GutschriftSpeichernInput(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    credit_note_number: str = Field(min_length=1, max_length=64)
+    customer_id: str = Field(min_length=1, max_length=64)
+    customer_name: str | None = Field(default=None, max_length=200)
+    invoice_reference: str | None = Field(default=None, max_length=64)
+    grund: str = Field(min_length=1, max_length=500)
+    lines: list[GutschriftZeileInput] = Field(min_length=1, max_length=200)
+    reason: str = Field(min_length=3, max_length=500)
+
+
+class GutschriftProposeInput(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    credit_note_id: str = Field(min_length=1, max_length=64)
+
+
+class GutschriftBuchenInput(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    proposal_id: str = Field(min_length=1, max_length=36)
+
+
 class PostfachSpeichernInput(BaseModel):
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
     kennung: str = Field(min_length=1, max_length=80)
@@ -397,9 +415,6 @@ class ApInvoiceProposeInput(BaseModel):
     invoice_id: str = Field(min_length=1, max_length=64)
 
 
-class ApInvoiceFreigebenInput(BaseModel):
-    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
-    proposal_id: str = Field(min_length=1, max_length=36)
 
 
 class InventurOpeningProposeInput(BaseModel):
@@ -618,7 +633,16 @@ def _rows_or_empty(db: Session, sql: str, params: dict) -> list[dict]:
         return []
 
 
-def execute_mcp_tool(db: Session, request: ToolExecutionRequest, user: dict, tenant_header: str | None) -> dict:
+# Lesende Belegwerkzeuge (BELEG-013): derselbe Belegvertrag wie die Maske.
+_BELEG_TOOLS = {
+    "beleg.arten": mcp_beleg_tools.beleg_arten,
+    "beleg.suchen": mcp_beleg_tools.beleg_suchen,
+    "beleg.lesen": mcp_beleg_tools.beleg_lesen,
+}
+
+
+def execute_mcp_tool(db: Session, request: ToolExecutionRequest, user: dict, tenant_header: str | None,
+                     authorization: str | None = None) -> dict:
     """Use the verified identity, never a tenant or actor from tool arguments."""
     actor = user.get("sub")
     tenant = _tenant_from_claims(user.get("raw"))
@@ -636,6 +660,17 @@ def execute_mcp_tool(db: Session, request: ToolExecutionRequest, user: dict, ten
     if tool["scope"] not in user.get("scopes", []):
         raise HTTPException(403, "Required tool scope is missing")
     # A catalog flag or a client boolean never posts. Only an explicit adapter may write.
+    if request.mode == "execute" and not tool.get("human_approval_required"):
+        # Die Agentengrenze der Maske gilt fuer jeden Zugang: humanApprovalRequired/forbiddenForAgents
+        # verlangen eine menschliche Identitaet, auch ueber ein Spezialwerkzeug (MCP-MASK-GENERIC).
+        # Ausgenommen sind Werkzeuge mit eigenem deklariertem Freigabeschritt (Mensch gibt frei, Agent fuehrt aus).
+        locked = mcp_mask_actions.human_only_tool_call(request.tool_name, request.parameters)
+        if locked and (user.get("raw") or {}).get("identity_type") != "human":
+            raise HTTPException(403, f"Nur menschliche Bedienung: {locked}")
+    if request.tool_name in mcp_studio_authoring.TOOLS:
+        return mcp_studio_authoring.dispatch(request, authorization)
+    if request.tool_name in mcp_mask_actions.TOOLS:
+        return mcp_mask_actions.dispatch(request, tenant, authorization)
     if request.tool_name == "crm.customer.search":
         return _search_customers(db, request, actor, tenant)
     if request.tool_name == "crm.customer.summary360":
@@ -644,8 +679,8 @@ def execute_mcp_tool(db: Session, request: ToolExecutionRequest, user: dict, ten
         return _open_customer(db, request, actor, tenant)
     if request.tool_name == "crm.contact.log":
         return _log_contact(db, request, actor, tenant)
-    if request.tool_name == "crm.activity.create":
-        return _create_activity(db, request, actor, tenant)
+    if request.tool_name in {"crm.activity.create","crm.activity.update","crm.activity.delete"}:
+        return _activity_command(db, request, actor, tenant)
     if request.tool_name == "crm.lead.qualify":
         return _qualify_lead(db, request, actor, tenant)
     if request.tool_name == "sales.order.status":
@@ -656,8 +691,6 @@ def execute_mcp_tool(db: Session, request: ToolExecutionRequest, user: dict, ten
         return _post_invoice(db, request, actor, tenant)
     if request.tool_name == "finance.ap_invoice.propose":
         return _propose_ap_freigabe(db, request, actor, tenant)
-    if request.tool_name == "finance.ap_invoice.freigeben":
-        return _freigeben_ap_invoice(db, request, actor, tenant)
     if request.tool_name == "fibu.open_items.list":
         return _list_open_items(db, request, actor, tenant)
     if request.tool_name == "fibu.dunning.status":
@@ -670,6 +703,8 @@ def execute_mcp_tool(db: Session, request: ToolExecutionRequest, user: dict, ten
         return _document_search(db, request, actor, tenant)
     if request.tool_name == "dms.gobd.export_status":
         return _gobd_export_status(db, request, actor, tenant)
+    if request.tool_name in _BELEG_TOOLS:
+        return _BELEG_TOOLS[request.tool_name](db, request, actor, tenant, user)
     if request.tool_name == "compliance.gate.status":
         return _compliance_gate_status(db, request, actor, tenant)
     if request.tool_name == "compliance.sanctions.check":
@@ -706,6 +741,12 @@ def execute_mcp_tool(db: Session, request: ToolExecutionRequest, user: dict, ten
         return _schulung_speichern(db, request, actor, tenant)
     if request.tool_name == "admin.postfach.speichern":
         return _postfach_speichern(db, request, actor, tenant)
+    if request.tool_name == "sales.gutschrift.speichern":
+        return _gutschrift_speichern(db, request, actor, tenant)
+    if request.tool_name == "sales.gutschrift.propose":
+        return _gutschrift_propose(db, request, actor, tenant)
+    if request.tool_name == "sales.gutschrift.buchen":
+        return _gutschrift_buchen(db, request, actor, tenant)
     if request.tool_name == "agrar.contract.get":
         return _agrar_contract_get(db, request, actor, tenant)
     if request.tool_name == "agrar.weighing_ticket.list":
@@ -748,6 +789,10 @@ def execute_mcp_tool(db: Session, request: ToolExecutionRequest, user: dict, ten
         return _stock_movement_stornieren(db, request, actor, tenant)
     if request.tool_name == "agent.proposal.list":
         return _proposal_list(db, request, actor, tenant)
+    if request.tool_name in {"workspace.fachaktion.katalog", "workspace.fachaktion.resolve"}:
+        from app.workspace.fachaktionen import execute_mcp as _workspace_execute_mcp
+
+        return _workspace_execute_mcp(request, actor, tenant, user)
     raise HTTPException(501, "No verified execution adapter is connected for this tool")
 
 
@@ -1886,10 +1931,10 @@ def _einwilligung_anlegen(db: Session, request: ToolExecutionRequest, actor: str
         if request.mode != "execute":
             db.rollback()
             return {"success": True, "mode": request.mode, "proposedChanges": {
-                "wortlaut": opened.wortlaut[:120], "erstellt_durch": opened.erstellt_durch or actor,
+                "wortlaut": opened.wortlaut[:120], "erstellt_durch": actor,
             }}
         created = einwilligung.erklaerung_anlegen(
-            db, tenant, str(uuid7()), opened.wortlaut, opened.erstellt_durch or actor,
+            db, tenant, str(uuid7()), opened.wortlaut, actor,  # Urheber ist der gepruefte Akteur, nie der Rumpf
         )
         entity_id = str(created.get("id") or created.get("fassung") or "")
         audit_id = _write_audit(
@@ -2101,22 +2146,317 @@ def _schulung_speichern(db: Session, request: ToolExecutionRequest, actor: str, 
         raise HTTPException(503, "ERP tool transaction failed; no success confirmed") from exc
 
 
+def _gutschrift_speichern(db: Session, request: ToolExecutionRequest, actor: str, tenant: str) -> dict:
+    """Mask-parity write: Gutschrift als Entwurf im Authentifizierungs-Mandanten. Gebucht wird hier nie."""
+    from app.api.v1.endpoints.sales_credit_notes import CreditNoteCreate, _lege_an, _zeilen
+    from app.finance.steuerschluessel import CENT, Steuerklaerung, steuergruppen
+
+    try:
+        opened = GutschriftSpeichernInput.model_validate(request.parameters)
+    except ValidationError as exc:
+        raise HTTPException(422, "Invalid sales.gutschrift.speichern parameters") from exc
+    parameters = opened.model_dump(mode="json", exclude_none=True)
+    if request.mode == "execute" and not (request.idempotency_key or "").strip():
+        raise HTTPException(422, "execute requires an idempotency_key")
+    fingerprint = hashlib.sha256(json.dumps(parameters, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+    try:
+        if request.mode == "execute":
+            _advisory_lock(db, tenant, request.tool_name, request.idempotency_key)  # type: ignore[arg-type]
+            replayed = _replay_or_none(
+                db, tenant, request.tool_name, request.idempotency_key, actor, fingerprint  # type: ignore[arg-type]
+            )
+            if replayed is not None:
+                return replayed
+        if db.execute(
+            text("SELECT 1 FROM domain_sales.sales_credit_notes WHERE tenant_id = :tid AND credit_note_number = :nr"),
+            {"tid": tenant, "nr": opened.credit_note_number},
+        ).first():
+            raise HTTPException(409, f"Credit note number {opened.credit_note_number} already exists")
+        eingabe = CreditNoteCreate.model_validate({
+            "credit_note_number": opened.credit_note_number, "customer_id": opened.customer_id,
+            "customer_name": opened.customer_name, "invoice_reference": opened.invoice_reference,
+            "reason": opened.grund, "status": "draft",
+            "lines": [zeile.model_dump() for zeile in opened.lines],
+        })
+        # Dieselbe Stelle wie die Buchung: Netto, Steuer, Brutto — oder der Grund, warum nicht.
+        zeilen = _zeilen(eingabe.lines)
+        netto = sum((z[3] for z in zeilen), Decimal("0")).quantize(CENT)
+        steuer: Decimal | None = None
+        pruefgrund: str | None = None
+        try:
+            steuer = sum((g.steuer for g in steuergruppen(db, tenant, zeilen)), Decimal("0"))
+        except Steuerklaerung as klaerung:
+            pruefgrund = str(klaerung)
+            if "widerspricht" in pruefgrund:
+                raise HTTPException(422, pruefgrund) from klaerung
+        betraege = {
+            "netto": float(netto),
+            "steuer": None if steuer is None else float(steuer),
+            "brutto": None if steuer is None else float(netto + steuer),
+            "pruefgrund": pruefgrund,
+        }
+        if request.mode != "execute":
+            db.rollback()
+            return {"success": True, "mode": request.mode, "proposedChanges": {**parameters, **betraege}}
+        angelegt = _lege_an(db, tenant, eingabe)
+        entity_id = str(angelegt["id"])
+        audit_id = _write_audit(
+            db, tenant_id=tenant, action_key=request.tool_name,
+            entity_type="sales_credit_note", entity_id=entity_id,
+            audit_reason=opened.reason, idempotency_key=request.idempotency_key,
+            summary=f"Gutschrift {opened.credit_note_number} als Entwurf gespeichert by {actor}",
+        )
+        result = {
+            "success": True, "mode": "execute", "replayed": False,
+            "credit_note_id": entity_id, "credit_note_number": opened.credit_note_number,
+            **betraege, "auditEntryId": audit_id,
+        }
+        _store_execution(
+            db, tenant=tenant, tool=request.tool_name, key=request.idempotency_key,  # type: ignore[arg-type]
+            actor=actor, fingerprint=fingerprint, result=result,
+        )
+        db.commit()
+        return result
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(503, "ERP tool transaction failed; no success confirmed") from exc
+
+
+_GUTSCHRIFT_VORSCHLAG_ART = "sales_credit_note_buchung"
+_GUTSCHRIFT_ROUTE = "/sales/credit-notes"
+_GUTSCHRIFT_SCREEN_ID = "sales/gutschrift"
+
+
+def _gutschrift_plan_vorschau(plan: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "credit_note_id": str(plan["id"]),
+        "credit_note_number": str(plan["nummer"]),
+        "netto": float(plan["netto"]),
+        "steuer": float(plan["steuer"]),
+        "brutto": float(plan["brutto"]),
+        "buchungszeilen": [
+            {"text": z["text"], "soll": float(z["soll"]), "haben": float(z["haben"]), "tax_code": z["code"]}
+            for z in plan["zeilen"]
+        ],
+        "route_path": _GUTSCHRIFT_ROUTE,
+        "screen_id": _GUTSCHRIFT_SCREEN_ID,
+    }
+
+
+def _gutschrift_propose(db: Session, request: ToolExecutionRequest, actor: str, tenant: str) -> dict:
+    """Schlaegt die Buchung einer Gutschrift vor. Bucht nie; ein Mensch prueft und gibt frei."""
+    from app.api.v1.endpoints.sales_credit_notes import _buchungsplan
+
+    try:
+        opened = GutschriftProposeInput.model_validate(request.parameters)
+    except ValidationError as exc:
+        raise HTTPException(422, "Invalid sales.gutschrift.propose parameters") from exc
+    if request.mode == "execute":
+        raise HTTPException(501, "Booking is not an MCP execution on propose; use sales.gutschrift.buchen")
+    parameters = opened.model_dump(mode="json")
+    if request.mode == "propose" and not (request.idempotency_key or "").strip():
+        raise HTTPException(422, "propose requires an idempotency_key")
+    fingerprint = hashlib.sha256(json.dumps(parameters, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+    try:
+        if request.mode == "propose":
+            _advisory_lock(db, tenant, request.tool_name, request.idempotency_key)  # type: ignore[arg-type]
+            replayed = _replay_or_none(
+                db, tenant, request.tool_name, request.idempotency_key, actor, fingerprint  # type: ignore[arg-type]
+            )
+            if replayed is not None:
+                return replayed
+        # Dieselbe Pruefung wie die Buchung: Laesst sich die Gutschrift nicht buchen (fehlender
+        # Steuerschluessel, Widerspruch, fehlendes Konto), gibt es keinen Vorschlag, sondern den Grund.
+        vorschau = _gutschrift_plan_vorschau(_buchungsplan(db, tenant, opened.credit_note_id))
+        if request.mode != "propose":
+            db.rollback()
+            return {"success": True, "mode": request.mode, "approved": False, **vorschau}
+        offen = db.execute(text("""
+            SELECT proposal_id FROM public.agent_proposals
+            WHERE tenant_id = :tenant AND action_type = :art AND approval_status = 'pending'
+              AND context_snapshot ->> 'credit_note_id' = :cn
+        """), {"tenant": tenant, "art": _GUTSCHRIFT_VORSCHLAG_ART, "cn": opened.credit_note_id}).first()
+        if offen:
+            raise HTTPException(409, f"A pending booking proposal already exists: {offen[0]}")
+        proposal_id = str(uuid4())
+        now = datetime.now(timezone.utc).isoformat()
+        db.execute(text("""
+            INSERT INTO public.agent_proposals
+                (proposal_id, tenant_id, action_type, risk_level, approval_status,
+                 context_snapshot, rationale, idempotency_key, created_at)
+            VALUES
+                (:id, :tenant, :art, 'high', 'pending', CAST(:snapshot AS json), :rationale, :key, :now)
+        """), {
+            "id": proposal_id,
+            "tenant": tenant,
+            "art": _GUTSCHRIFT_VORSCHLAG_ART,
+            "snapshot": json.dumps({
+                "context_summary": f"Gutschrift {vorschau['credit_note_number']} buchen",
+                "proposed_action": (
+                    f"Erloes netto {vorschau['netto']:.2f}, Umsatzsteuer {vorschau['steuer']:.2f}, "
+                    f"Forderung brutto {vorschau['brutto']:.2f} (nach menschlicher Freigabe)"
+                ),
+                "human_approval_required": True,
+                "audit_events": [{"event": "proposal_created", "by": actor, "occurred_at": now}],
+                "actor_id": actor,
+                "payload_hash": fingerprint,
+                **vorschau,
+            }),
+            "rationale": "MCP sales.gutschrift.propose",
+            "key": hashlib.sha256(f"{tenant}|{request.tool_name}|{request.idempotency_key}".encode()).hexdigest(),
+            "now": now,
+        })
+        audit_id = _write_audit(
+            db, tenant_id=tenant, action_key=request.tool_name,
+            entity_type="sales_credit_note_proposal", entity_id=proposal_id,
+            audit_reason="MCP Gutschrift-Buchungsvorschlag", idempotency_key=request.idempotency_key,
+            summary=f"Buchungsvorschlag fuer Gutschrift {vorschau['credit_note_number']} by {actor}",
+        )
+        result = {
+            "success": True, "mode": "propose", "replayed": False, "approved": False,
+            "entwurf_id": proposal_id, "approval_status": "pending", "auditEntryId": audit_id,
+            **vorschau,
+        }
+        _store_execution(
+            db, tenant=tenant, tool=request.tool_name, key=request.idempotency_key,  # type: ignore[arg-type]
+            actor=actor, fingerprint=fingerprint, result=result,
+        )
+        db.commit()
+        return result
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(503, "ERP tool transaction failed; no success confirmed") from exc
+
+
+def _gutschrift_buchen(db: Session, request: ToolExecutionRequest, actor: str, tenant: str) -> dict:
+    """Bucht eine Gutschrift — nur aus einem Vorschlag, den ein Mensch freigegeben hat."""
+    from sqlalchemy.exc import IntegrityError
+
+    from app.api.v1.endpoints.sales_credit_notes import _buche, _buchungsplan
+    from app.core.exceptions import kontosperre_meldung
+
+    try:
+        payload = GutschriftBuchenInput.model_validate(request.parameters)
+    except ValidationError as exc:
+        raise HTTPException(422, "Invalid sales.gutschrift.buchen parameters") from exc
+    if request.mode == "propose":
+        raise HTTPException(422, "sales.gutschrift.buchen does not accept propose; use sales.gutschrift.propose")
+    parameters = payload.model_dump(mode="json")
+    if request.mode == "execute" and not (request.idempotency_key or "").strip():
+        raise HTTPException(422, "execute requires an idempotency_key")
+    fingerprint = hashlib.sha256(json.dumps(parameters, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+    try:
+        if request.mode == "execute":
+            _advisory_lock(db, tenant, request.tool_name, request.idempotency_key)  # type: ignore[arg-type]
+            replayed = _replay_or_none(
+                db, tenant, request.tool_name, request.idempotency_key, actor, fingerprint  # type: ignore[arg-type]
+            )
+            if replayed is not None:
+                return replayed
+        proposal = db.execute(text("""
+            SELECT proposal_id, action_type, approval_status, context_snapshot, execution_result, reviewed_by
+            FROM public.agent_proposals
+            WHERE proposal_id = :id AND tenant_id = :tenant
+            FOR UPDATE OF agent_proposals
+        """), {"id": payload.proposal_id, "tenant": tenant}).mappings().first()
+        if not proposal:
+            raise HTTPException(404, "Proposal not found in the authenticated tenant")
+        if proposal["action_type"] != _GUTSCHRIFT_VORSCHLAG_ART:
+            raise HTTPException(409, "Proposal is not a credit note booking proposal")
+        if proposal["approval_status"] != "approved":
+            raise HTTPException(409, "Proposal is not approved")
+        if proposal["execution_result"] is not None:
+            raise HTTPException(409, "Proposal was already executed")
+        snapshot = proposal["context_snapshot"] or {}
+        if isinstance(snapshot, str):
+            snapshot = json.loads(snapshot)
+        credit_note_id = snapshot.get("credit_note_id") if isinstance(snapshot, dict) else None
+        if not isinstance(credit_note_id, str) or not credit_note_id.strip():
+            raise HTTPException(409, "Proposal snapshot lacks credit_note_id")
+        plan = _buchungsplan(db, tenant, credit_note_id)
+        vorschau = _gutschrift_plan_vorschau(plan)
+        # Gebucht wird, was freigegeben wurde — nicht, was die Gutschrift inzwischen geworden ist.
+        if round(float(snapshot.get("brutto") or 0), 2) != round(vorschau["brutto"], 2):
+            raise HTTPException(409, "Credit note changed after approval; a new proposal is required")
+        if request.mode != "execute":
+            db.rollback()
+            return {"success": True, "mode": request.mode, "approved": True,
+                    "proposal_id": payload.proposal_id, **vorschau}
+        try:
+            meldung = _buche(db, plan, tenant)
+        except IntegrityError as fehler:
+            sperre = kontosperre_meldung(fehler)
+            if sperre:
+                raise HTTPException(409, sperre) from fehler
+            raise
+        execution_result = {
+            "credit_note_id": credit_note_id,
+            "credit_note_number": vorschau["credit_note_number"],
+            "brutto": vorschau["brutto"],
+            "executed_by": actor,
+            "approved_by": proposal["reviewed_by"],
+            "executed_at": datetime.now(timezone.utc).isoformat(),
+        }
+        db.execute(text("""
+            UPDATE public.agent_proposals
+            SET execution_result = CAST(:result AS json)
+            WHERE proposal_id = :id AND tenant_id = :tenant
+        """), {"result": json.dumps(execution_result), "id": payload.proposal_id, "tenant": tenant})
+        audit_id = _write_audit(
+            db, tenant_id=tenant, action_key=request.tool_name,
+            entity_type="sales_credit_note", entity_id=credit_note_id,
+            audit_reason=f"MCP Gutschrift gebucht aus freigegebenem Vorschlag (Freigabe: {proposal['reviewed_by']})",
+            idempotency_key=request.idempotency_key,
+            summary=f"Gutschrift {vorschau['credit_note_number']} gebucht aus Vorschlag {payload.proposal_id} by {actor}",
+        )
+        result = {
+            "success": True, "mode": "execute", "replayed": False, "approved": True,
+            "proposal_id": payload.proposal_id, "auditEntryId": audit_id, "posted": True,
+            "approved_by": proposal["reviewed_by"], "message": meldung,
+            **vorschau,
+        }
+        _store_execution(
+            db, tenant=tenant, tool=request.tool_name, key=request.idempotency_key,  # type: ignore[arg-type]
+            actor=actor, fingerprint=fingerprint, result=result,
+        )
+        db.commit()
+        return result
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(503, "ERP tool transaction failed; no success confirmed") from exc
+
+
 def _postfach_speichern(db: Session, request: ToolExecutionRequest, actor: str, tenant: str) -> dict:
     """Mask-parity write: create/update mailbox in authenticated tenant (no password in audit)."""
     try:
         opened = PostfachSpeichernInput.model_validate(request.parameters)
     except ValidationError as exc:
         raise HTTPException(422, "Invalid admin.postfach.speichern parameters") from exc
-    # Fingerprint ohne Klartext-Passwort.
+    # Nur die Vorschau ist redigiert; der Replay-Abdruck muss alle Eingaben binden.
     parameters = opened.model_dump(mode="json", exclude={"passwort"})
     parameters["hat_passwort"] = bool(opened.passwort)
     if request.mode == "execute" and not (request.idempotency_key or "").strip():
         raise HTTPException(422, "execute requires an idempotency_key")
-    fingerprint = hashlib.sha256(json.dumps(parameters, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
     try:
         from app.services import mailkonto_service as konto
 
         if request.mode == "execute":
+            from app.core import geheimnis
+
+            fingerprint = geheimnis.signieren(json.dumps(
+                {"domain": "mcp-postfach-replay-v1", "tenant": tenant,
+                 "action": request.tool_name, "parameters": opened.model_dump(mode="json")},
+                sort_keys=True, ensure_ascii=False, separators=(",", ":"),
+            ))
             _advisory_lock(db, tenant, request.tool_name, request.idempotency_key)  # type: ignore[arg-type]
             replayed = _replay_or_none(
                 db, tenant, request.tool_name, request.idempotency_key, actor, fingerprint  # type: ignore[arg-type]
@@ -3299,7 +3639,7 @@ def _propose_ap_freigabe(db: Session, request: ToolExecutionRequest, actor: str,
     except ValidationError as exc:
         raise HTTPException(422, "Invalid AP invoice propose parameters") from exc
     if request.mode == "execute":
-        raise HTTPException(501, "AP freigabe is not an MCP execution on propose; use finance.ap_invoice.freigeben")
+        raise HTTPException(501, "AP sign-off requires the human review screen; proposals do not approve invoices")
     parameters = opened.model_dump(mode="json")
     if request.mode == "propose" and not (request.idempotency_key or "").strip():
         raise HTTPException(422, "propose requires an idempotency_key")
@@ -3384,116 +3724,6 @@ def _propose_ap_freigabe(db: Session, request: ToolExecutionRequest, actor: str,
         raise HTTPException(503, "ERP tool transaction failed; no success confirmed") from exc
 
 
-def _freigeben_ap_invoice(db: Session, request: ToolExecutionRequest, actor: str, tenant: str) -> dict:
-    """Call the real AP freigeben CommandEndpoint only after an approved proposal."""
-    try:
-        payload = ApInvoiceFreigebenInput.model_validate(request.parameters)
-    except ValidationError as exc:
-        raise HTTPException(422, "Invalid AP invoice freigeben parameters") from exc
-    if request.mode == "propose":
-        raise HTTPException(422, "finance.ap_invoice.freigeben does not accept propose; use finance.ap_invoice.propose")
-    parameters = payload.model_dump(mode="json")
-    if request.mode == "execute" and not (request.idempotency_key or "").strip():
-        raise HTTPException(422, "execute requires an idempotency_key")
-    fingerprint = hashlib.sha256(json.dumps(parameters, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
-    try:
-        if request.mode == "execute":
-            _advisory_lock(db, tenant, request.tool_name, request.idempotency_key)  # type: ignore[arg-type]
-            replayed = _replay_or_none(
-                db, tenant, request.tool_name, request.idempotency_key, actor, fingerprint  # type: ignore[arg-type]
-            )
-            if replayed is not None:
-                return replayed
-        proposal = db.execute(text("""
-            SELECT proposal_id, action_type, approval_status, risk_level,
-                   context_snapshot, execution_result
-            FROM public.agent_proposals
-            WHERE proposal_id=:id AND tenant_id=:tenant
-            FOR UPDATE OF agent_proposals
-        """), {"id": payload.proposal_id, "tenant": tenant}).mappings().first()
-        if not proposal:
-            raise HTTPException(404, "Proposal not found in the authenticated tenant")
-        if proposal["action_type"] != _AP_FREIGABE_ACTION_TYPE:
-            raise HTTPException(409, "Proposal is not an AP freigabe proposal")
-        if proposal["approval_status"] != "approved":
-            raise HTTPException(409, "Proposal is not approved")
-        if proposal["execution_result"] is not None:
-            existing = proposal["execution_result"]
-            if isinstance(existing, str):
-                existing = json.loads(existing)
-            if isinstance(existing, dict) and existing.get("invoice_id"):
-                if request.mode != "execute":
-                    return {
-                        "success": True, "mode": request.mode, "approved": False,
-                        "already_executed": True,
-                        **{k: existing[k] for k in ("invoice_id", "invoice_number", "status") if k in existing},
-                    }
-                raise HTTPException(409, "Proposal was already executed")
-        snapshot = proposal["context_snapshot"] or {}
-        if isinstance(snapshot, str):
-            snapshot = json.loads(snapshot)
-        if not isinstance(snapshot, dict):
-            raise HTTPException(409, "Proposal snapshot is unusable")
-        invoice_id = snapshot.get("invoice_id")
-        if not isinstance(invoice_id, str) or not invoice_id.strip():
-            raise HTTPException(409, "Proposal snapshot lacks invoice_id")
-        invoice = _load_ap_invoice(db, invoice_id, tenant)
-        preview = _ap_invoice_preview(invoice, invoice_id)
-        preview["proposal_id"] = payload.proposal_id
-        if request.mode != "execute":
-            return {"success": True, "mode": request.mode, "approved": False, **preview}
-        from app.api.v1.endpoints.ap_invoices import approve_ap_invoice
-
-        user = {"sub": actor}
-        with Session(bind=db.connection(), join_transaction_mode="create_savepoint") as child:
-            asyncio.run(
-                approve_ap_invoice(
-                    invoice_id,
-                    approved_by=None,
-                    db=child,
-                    tenant_id=tenant,
-                    user=user,
-                )
-            )
-        refreshed = _load_ap_invoice(db, invoice_id, tenant)
-        final_preview = _ap_invoice_preview(refreshed, invoice_id)
-        execution_result = {
-            "invoice_id": invoice_id,
-            "invoice_number": final_preview["invoice_number"],
-            "status": final_preview["status"],
-            "executed_by": actor,
-            "executed_at": datetime.now(timezone.utc).isoformat(),
-        }
-        db.execute(text("""
-            UPDATE public.agent_proposals
-            SET execution_result = CAST(:result AS json)
-            WHERE proposal_id = :id AND tenant_id = :tenant
-        """), {"result": json.dumps(execution_result), "id": payload.proposal_id, "tenant": tenant})
-        audit_id = _write_audit(
-            db, tenant_id=tenant, action_key=request.tool_name,
-            entity_type="ap_invoice", entity_id=invoice_id,
-            audit_reason="MCP AP freigabe from approved proposal",
-            idempotency_key=request.idempotency_key,
-            summary=f"AP freigabe {invoice_id} from proposal {payload.proposal_id} by {actor}",
-        )
-        result = {
-            "success": True, "mode": "execute", "replayed": False, "approved": True,
-            "proposal_id": payload.proposal_id, "auditEntryId": audit_id,
-            "fibu_journal": False,
-            **final_preview,
-        }
-        _store_execution(
-            db, tenant=tenant, tool=request.tool_name, key=request.idempotency_key,  # type: ignore[arg-type]
-            actor=actor, fingerprint=fingerprint, result=result,
-        )
-        db.commit()
-        return result
-    except HTTPException:
-        db.rollback()
-        raise
-    except Exception as exc:
-        db.rollback()
-        raise HTTPException(503, "ERP tool transaction failed; no success confirmed") from exc
 
 
 def _propose_invoice(db: Session, request: ToolExecutionRequest, actor: str, tenant: str) -> dict:
@@ -3601,69 +3831,26 @@ def _propose_invoice(db: Session, request: ToolExecutionRequest, actor: str, ten
         raise HTTPException(503, "ERP tool transaction failed; no success confirmed") from exc
 
 
-def _create_activity(db: Session, request: ToolExecutionRequest, actor: str, tenant: str) -> dict:
+def _activity_command(db: Session, request: ToolExecutionRequest, actor: str, tenant: str) -> dict:
+    from app.domains.crm.activity_contracts import ActivityCreateCommand, ActivityUpdateCommand, ActivityDeleteCommand, ActivityRead
+    from app.services.crm_activity_service import execute_activity, preview_activity
+    action=request.tool_name.rsplit(".",1)[-1]
+    command_type={"create":ActivityCreateCommand,"update":ActivityUpdateCommand,"delete":ActivityDeleteCommand}[action]
+    values=dict(request.parameters)
+    if "idempotency_key" in values or "_idempotencyKey" in values:
+        raise HTTPException(422,"Use the MCP envelope idempotency key")
+    activity_id=values.pop("activity_id",None)
+    if (action=="create" and activity_id is not None) or (action!="create" and (not isinstance(activity_id,str) or not 1<=len(activity_id)<=64)):
+        raise HTTPException(422,"Invalid activity target")
     try:
-        activity = ActivityCreateInput.model_validate(request.parameters)
-    except ValidationError as exc:
-        raise HTTPException(422, "Invalid activity parameters") from exc
-    parameters = activity.model_dump(mode="json")
-    if request.mode == "execute" and not (request.idempotency_key or "").strip():
-        raise HTTPException(422, "execute requires an idempotency_key")
-    fingerprint = hashlib.sha256(json.dumps(parameters, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
-    try:
-        if request.mode == "execute":
-            _advisory_lock(db, tenant, request.tool_name, request.idempotency_key)  # type: ignore[arg-type]
-            replayed = _replay_or_none(
-                db, tenant, request.tool_name, request.idempotency_key, actor, fingerprint  # type: ignore[arg-type]
-            )
-            if replayed is not None:
-                return replayed
-        customer = _customer_in_tenant(db, kunden_nr=activity.kunden_nr, tenant=tenant)
-        if not customer:
-            raise HTTPException(404, "Customer not found in the authenticated tenant")
-        if request.mode != "execute":
-            return {"success": True, "mode": request.mode, "proposedChanges": parameters}
-        activity_id = str(uuid4())
-        now = datetime.now(timezone.utc)
-        verantwortlich = (activity.verantwortlich or actor)[:100]
-        db.execute(text("""
-            INSERT INTO domain_crm.activities
-              (id, type, title, customer, contact_person, date, status, assigned_to, description, tenant_id)
-            VALUES
-              (:aid, :typ, :titel, :kunde, :person, :datum, 'offen', :verantwortlich, :notiz, :tid)
-        """), {
-            "aid": activity_id,
-            "typ": activity.typ[:20],
-            "titel": activity.betreff[:200],
-            "kunde": str(customer["name"] or customer["kunden_nr"] or activity.kunden_nr)[:100],
-            "person": verantwortlich,
-            "datum": parameters["datum"] or now.date().isoformat(),
-            "verantwortlich": verantwortlich,
-            "notiz": activity.notiz,
-            "tid": tenant,
-        })
-        audit_id = _write_audit(
-            db, tenant_id=tenant, action_key=request.tool_name,
-            entity_type="crm_activity", entity_id=activity_id,
-            audit_reason="MCP activity create", idempotency_key=request.idempotency_key,
-            summary=f"Activity '{activity.betreff}' by {actor}",
-        )
-        result = {
-            "success": True, "mode": "execute", "replayed": False,
-            "activity_id": activity_id, "erfasst_am": now.isoformat(), "auditEntryId": audit_id,
-        }
-        _store_execution(
-            db, tenant=tenant, tool=request.tool_name, key=request.idempotency_key,  # type: ignore[arg-type]
-            actor=actor, fingerprint=fingerprint, result=result,
-        )
-        db.commit()
-        return result
-    except HTTPException:
-        db.rollback()
-        raise
-    except Exception as exc:
-        db.rollback()
-        raise HTTPException(503, "ERP tool transaction failed; no success confirmed") from exc
+        command=command_type.model_validate({**values,"idempotency_key":request.idempotency_key or ("preview" if request.mode!="execute" else "")})
+    except ValidationError as error:
+        raise HTTPException(422,"Invalid activity parameters") from error
+    if request.mode!="execute":
+        return {"success":True,"mode":request.mode,"proposedChanges":preview_activity(db,tenant,action,command,activity_id)}
+    result=execute_activity(db,tenant,action,command,activity_id)
+    result["activity"]=ActivityRead.model_validate(result["activity"]).model_dump(mode="json")
+    return {key:value for key,value in result.items() if key!="previous_activity"}
 
 
 def _resolve_customer_id(db: Session, *, tenant: str, customer_id: str | None, kunden_nr: str | None) -> str:
@@ -3784,7 +3971,7 @@ def _bestellung_versenden(db: Session, request: ToolExecutionRequest, actor: str
         # ProcurementService commits; confine to SAVEPOINT so audit/replay stay atomic.
         with Session(bind=db.connection(), join_transaction_mode="create_savepoint") as child:
             sent = ProcurementService(child, tenant).versende_bestellung_svc(
-                bestellung_id, opened.versand_art, opened.empfaenger,
+                bestellung_id, opened.versand_art, opened.empfaenger, nutzer={"sub": actor},
             )
         versand = sent.get("versand") if isinstance(sent, dict) else None
         versand_status = (
@@ -4312,16 +4499,8 @@ def _reklamation_abschliessen(db: Session, request: ToolExecutionRequest, actor:
                 },
             }
         with Session(bind=db.connection(), join_transaction_mode="create_savepoint") as child:
-            transition_status(
-                opened.reklamation_id,
-                ReklamationTransitionRequest(
-                    neuer_status=ReklamationsStatus.GESCHLOSSEN.value,
-                    aktor_id=actor,
-                    kommentar=opened.kommentar,
-                ),
-                db=child,
-                tenant_id=tenant,
-            )
+            wechsle_status(child, tenant, opened.reklamation_id, ReklamationsStatus.GESCHLOSSEN.value,
+                           aktor=actor, kommentar=opened.kommentar)
         audit_id = _write_audit(
             db, tenant_id=tenant, action_key=request.tool_name,
             entity_type="reklamation", entity_id=opened.reklamation_id,

@@ -37,7 +37,10 @@ def engine():
     from sqlalchemy import create_engine, text
 
     try:
-        e = create_engine(DB_URL)
+        from app.core.rls_session import install_tenant_setting
+
+        # Wie die App-Engine: der Mandantenkontext erreicht die Datenbank (Vorgaben, Policies).
+        e = install_tenant_setting(create_engine(DB_URL))
         with e.connect() as c:
             c.execute(text("SELECT 1"))
     except Exception as fehler:  # noqa: BLE001

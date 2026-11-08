@@ -7,20 +7,20 @@ import { z } from 'zod';
 
 // Base Domain Event Schema
 const BaseDomainEventSchema = z.object({
-  eventId: z.string().uuid(),
+  eventId: z.string().guid(),
   eventType: z.string(),
   eventVersion: z.number().int().min(1),
   occurredAt: z.string().datetime(),
-  tenantId: z.string().uuid(),
-  correlationId: z.string().uuid().optional(),
-  causationId: z.string().uuid().optional()
+  tenantId: z.string().guid(),
+  correlationId: z.string().guid().optional(),
+  causationId: z.string().guid().optional()
 });
 
 // Recipe Events
 export const RecipeCreatedEventSchema = BaseDomainEventSchema.extend({
   eventType: z.literal('production.recipe.created'),
   payload: z.object({
-    id: z.string().uuid(),
+    id: z.string().guid(),
     code: z.string(),
     name: z.string(),
     version: z.number(),
@@ -32,7 +32,7 @@ export const RecipeCreatedEventSchema = BaseDomainEventSchema.extend({
 export const RecipeUpdatedEventSchema = BaseDomainEventSchema.extend({
   eventType: z.literal('production.recipe.updated'),
   payload: z.object({
-    id: z.string().uuid(),
+    id: z.string().guid(),
     code: z.string(),
     name: z.string(),
     version: z.number(),
@@ -43,7 +43,7 @@ export const RecipeUpdatedEventSchema = BaseDomainEventSchema.extend({
 export const RecipeArchivedEventSchema = BaseDomainEventSchema.extend({
   eventType: z.literal('production.recipe.archived'),
   payload: z.object({
-    id: z.string().uuid(),
+    id: z.string().guid(),
     code: z.string(),
     reason: z.string().optional()
   })
@@ -53,23 +53,23 @@ export const RecipeArchivedEventSchema = BaseDomainEventSchema.extend({
 export const MixOrderCreatedEventSchema = BaseDomainEventSchema.extend({
   eventType: z.literal('production.mix_order.created'),
   payload: z.object({
-    id: z.string().uuid(),
+    id: z.string().guid(),
     orderNumber: z.string(),
     type: z.enum(['Plant', 'Mobile']),
-    recipeId: z.string().uuid(),
+    recipeId: z.string().guid(),
     targetQtyKg: z.number(),
-    customerId: z.string().uuid().optional(),
-    mobileUnitId: z.string().uuid().optional()
+    customerId: z.string().guid().optional(),
+    mobileUnitId: z.string().guid().optional()
   })
 });
 
 export const MixOrderStagedEventSchema = BaseDomainEventSchema.extend({
   eventType: z.literal('production.mix_order.staged'),
   payload: z.object({
-    id: z.string().uuid(),
+    id: z.string().guid(),
     orderNumber: z.string(),
     type: z.enum(['Plant', 'Mobile']),
-    recipeId: z.string().uuid(),
+    recipeId: z.string().guid(),
     plannedAt: z.string().datetime()
   })
 });
@@ -77,18 +77,18 @@ export const MixOrderStagedEventSchema = BaseDomainEventSchema.extend({
 export const MixOrderStartedEventSchema = BaseDomainEventSchema.extend({
   eventType: z.literal('production.mix_order.started'),
   payload: z.object({
-    id: z.string().uuid(),
+    id: z.string().guid(),
     orderNumber: z.string(),
     type: z.enum(['Plant', 'Mobile']),
     startedAt: z.string().datetime(),
-    operatorId: z.string().uuid().optional()
+    operatorId: z.string().guid().optional()
   })
 });
 
 export const MixOrderCompletedEventSchema = BaseDomainEventSchema.extend({
   eventType: z.literal('production.mix_order.completed'),
   payload: z.object({
-    id: z.string().uuid(),
+    id: z.string().guid(),
     orderNumber: z.string(),
     type: z.enum(['Plant', 'Mobile']),
     completedAt: z.string().datetime(),
@@ -101,7 +101,7 @@ export const MixOrderCompletedEventSchema = BaseDomainEventSchema.extend({
 export const MixOrderAbortedEventSchema = BaseDomainEventSchema.extend({
   eventType: z.literal('production.mix_order.aborted'),
   payload: z.object({
-    id: z.string().uuid(),
+    id: z.string().guid(),
     orderNumber: z.string(),
     reason: z.string(),
     abortedAt: z.string().datetime()
@@ -112,11 +112,11 @@ export const MixOrderAbortedEventSchema = BaseDomainEventSchema.extend({
 export const BatchCreatedEventSchema = BaseDomainEventSchema.extend({
   eventType: z.literal('production.batch.created'),
   payload: z.object({
-    id: z.string().uuid(),
+    id: z.string().guid(),
     batchNumber: z.string(),
-    mixOrderId: z.string().uuid(),
+    mixOrderId: z.string().guid(),
     producedQtyKg: z.number(),
-    recipeId: z.string().uuid(),
+    recipeId: z.string().guid(),
     medicated: z.boolean()
   })
 });
@@ -124,9 +124,9 @@ export const BatchCreatedEventSchema = BaseDomainEventSchema.extend({
 export const BatchReleasedEventSchema = BaseDomainEventSchema.extend({
   eventType: z.literal('production.batch.released'),
   payload: z.object({
-    id: z.string().uuid(),
+    id: z.string().guid(),
     batchNumber: z.string(),
-    mixOrderId: z.string().uuid(),
+    mixOrderId: z.string().guid(),
     releasedAt: z.string().datetime(),
     outputLots: z.array(z.object({
       lotNumber: z.string(),
@@ -139,7 +139,7 @@ export const BatchReleasedEventSchema = BaseDomainEventSchema.extend({
 export const BatchQuarantinedEventSchema = BaseDomainEventSchema.extend({
   eventType: z.literal('production.batch.quarantined'),
   payload: z.object({
-    id: z.string().uuid(),
+    id: z.string().guid(),
     batchNumber: z.string(),
     reason: z.string(),
     quarantinedAt: z.string().datetime()
@@ -149,7 +149,7 @@ export const BatchQuarantinedEventSchema = BaseDomainEventSchema.extend({
 export const BatchRejectedEventSchema = BaseDomainEventSchema.extend({
   eventType: z.literal('production.batch.rejected'),
   payload: z.object({
-    id: z.string().uuid(),
+    id: z.string().guid(),
     batchNumber: z.string(),
     reason: z.string(),
     rejectedAt: z.string().datetime(),
@@ -161,10 +161,10 @@ export const BatchRejectedEventSchema = BaseDomainEventSchema.extend({
 export const MobileRunStartedEventSchema = BaseDomainEventSchema.extend({
   eventType: z.literal('production.mobile_run.started'),
   payload: z.object({
-    id: z.string().uuid(),
-    mobileUnitId: z.string().uuid(),
-    operatorId: z.string().uuid(),
-    customerId: z.string().uuid(),
+    id: z.string().guid(),
+    mobileUnitId: z.string().guid(),
+    operatorId: z.string().guid(),
+    customerId: z.string().guid(),
     location: z.object({
       lat: z.number(),
       lng: z.number(),
@@ -178,9 +178,9 @@ export const MobileRunStartedEventSchema = BaseDomainEventSchema.extend({
 export const MobileRunFinishedEventSchema = BaseDomainEventSchema.extend({
   eventType: z.literal('production.mobile_run.finished'),
   payload: z.object({
-    id: z.string().uuid(),
-    mobileUnitId: z.string().uuid(),
-    operatorId: z.string().uuid(),
+    id: z.string().guid(),
+    mobileUnitId: z.string().guid(),
+    operatorId: z.string().guid(),
     durationHours: z.number(),
     totalFlushMassKg: z.number(),
     finishedAt: z.string().datetime()
@@ -191,8 +191,8 @@ export const MobileRunFinishedEventSchema = BaseDomainEventSchema.extend({
 export const CleaningPerformedEventSchema = BaseDomainEventSchema.extend({
   eventType: z.literal('production.cleaning.performed'),
   payload: z.object({
-    id: z.string().uuid(),
-    mobileRunId: z.string().uuid().optional(),
+    id: z.string().guid(),
+    mobileRunId: z.string().guid().optional(),
     type: z.enum(['DryClean', 'Vacuum', 'Flush', 'WetClean']),
     usedMaterialSku: z.string().optional(),
     flushMassKg: z.number().optional(),
@@ -205,8 +205,8 @@ export const CleaningPerformedEventSchema = BaseDomainEventSchema.extend({
 export const FlushPerformedEventSchema = BaseDomainEventSchema.extend({
   eventType: z.literal('production.flush.performed'),
   payload: z.object({
-    id: z.string().uuid(),
-    mobileRunId: z.string().uuid(),
+    id: z.string().guid(),
+    mobileRunId: z.string().guid(),
     usedMaterialSku: z.string(),
     flushMassKg: z.number(),
     reason: z.enum(['Sequencing', 'MedicatedTransition', 'ContaminationPrevention']),
@@ -219,8 +219,8 @@ export const FlushPerformedEventSchema = BaseDomainEventSchema.extend({
 export const CalibrationCheckedEventSchema = BaseDomainEventSchema.extend({
   eventType: z.literal('production.calibration.checked'),
   payload: z.object({
-    id: z.string().uuid(),
-    mobileRunId: z.string().uuid().optional(),
+    id: z.string().guid(),
+    mobileRunId: z.string().guid().optional(),
     deviceType: z.enum(['Scale', 'Moisture', 'Temperature']),
     deviceId: z.string(),
     result: z.enum(['Pass', 'Fail']),
@@ -234,8 +234,8 @@ export const CalibrationCheckedEventSchema = BaseDomainEventSchema.extend({
 export const SamplingAddedEventSchema = BaseDomainEventSchema.extend({
   eventType: z.literal('production.sampling.added'),
   payload: z.object({
-    id: z.string().uuid(),
-    batchId: z.string().uuid(),
+    id: z.string().guid(),
+    batchId: z.string().guid(),
     sampleCode: z.string(),
     analyte: z.string(),
     takenAt: z.string().datetime(),
@@ -247,15 +247,15 @@ export const SamplingAddedEventSchema = BaseDomainEventSchema.extend({
 export const SamplingResultRecordedEventSchema = BaseDomainEventSchema.extend({
   eventType: z.literal('production.sampling.result_recorded'),
   payload: z.object({
-    id: z.string().uuid(),
-    batchId: z.string().uuid(),
+    id: z.string().guid(),
+    batchId: z.string().guid(),
     sampleCode: z.string(),
     analyte: z.string(),
     value: z.number(),
     unit: z.string(),
     limitType: z.enum(['Action', 'Reject']),
     decision: z.enum(['Pass', 'Investigate', 'Reject']),
-    labId: z.string().uuid().optional(),
+    labId: z.string().guid().optional(),
     recordedAt: z.string().datetime(),
     recordedBy: z.string()
   })
@@ -264,9 +264,9 @@ export const SamplingResultRecordedEventSchema = BaseDomainEventSchema.extend({
 export const NonConformityCreatedEventSchema = BaseDomainEventSchema.extend({
   eventType: z.literal('production.nc.created'),
   payload: z.object({
-    id: z.string().uuid(),
+    id: z.string().guid(),
     refType: z.enum(['batchId', 'mixOrderId', 'mobileRunId']),
-    refId: z.string().uuid(),
+    refId: z.string().guid(),
     type: z.enum(['Contamination', 'SpecOut', 'Equipment', 'Process']),
     severity: z.enum(['Low', 'Medium', 'High', 'Critical']),
     action: z.enum(['Block', 'Rework', 'Dispose']),
@@ -279,12 +279,12 @@ export const NonConformityCreatedEventSchema = BaseDomainEventSchema.extend({
 export const CAPACreatedEventSchema = BaseDomainEventSchema.extend({
   eventType: z.literal('production.capa.created'),
   payload: z.object({
-    id: z.string().uuid(),
-    ncId: z.string().uuid().optional(),
+    id: z.string().guid(),
+    ncId: z.string().guid().optional(),
     title: z.string(),
     type: z.enum(['Correction', 'CorrectiveAction', 'PreventiveAction']),
     priority: z.enum(['Low', 'Medium', 'High', 'Critical']),
-    assignedTo: z.string().uuid().optional(),
+    assignedTo: z.string().guid().optional(),
     dueDate: z.string().datetime().optional(),
     createdBy: z.string()
   })
@@ -293,7 +293,7 @@ export const CAPACreatedEventSchema = BaseDomainEventSchema.extend({
 export const CAPAClosedEventSchema = BaseDomainEventSchema.extend({
   eventType: z.literal('production.capa.closed'),
   payload: z.object({
-    id: z.string().uuid(),
+    id: z.string().guid(),
     effectiveness: z.enum(['Effective', 'NotEffective', 'NotEvaluated']),
     closedAt: z.string().datetime(),
     closedBy: z.string(),

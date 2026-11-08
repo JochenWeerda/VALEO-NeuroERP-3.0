@@ -12,6 +12,7 @@ from typing import Optional
 from uuid import uuid4
 
 from app.services.neuro_verification_engine import verify_plan
+from app.core.tenant_context import get_current_tenant_id
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +39,8 @@ class SimulationResult:
 _results: dict[str, SimulationResult] = {}
 
 
-def simulate_dry_run(plan: dict, tenant_id: str = "system") -> SimulationResult:
+def simulate_dry_run(plan: dict, tenant_id: str | None = None) -> SimulationResult:
+    tenant_id = tenant_id or get_current_tenant_id()
     verification = verify_plan(plan, tenant_id)
     result = SimulationResult(
         mode="dry_run",
@@ -59,7 +61,8 @@ def simulate_dry_run(plan: dict, tenant_id: str = "system") -> SimulationResult:
     return result
 
 
-def simulate_what_if(plan: dict, current_state: dict, tenant_id: str = "system") -> SimulationResult:
+def simulate_what_if(plan: dict, current_state: dict, tenant_id: str | None = None) -> SimulationResult:
+    tenant_id = tenant_id or get_current_tenant_id()
     result = simulate_dry_run(plan, tenant_id)
     result.mode = "what_if"
 

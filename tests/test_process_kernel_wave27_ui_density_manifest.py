@@ -3,10 +3,13 @@ from fastapi.testclient import TestClient
 
 from app.api.v1.endpoints.command_catalog import router as command_catalog_router
 from app.core.ui_density_manifest import build_ui_density_manifest, get_ui_density_entry
+from testgrenze import ALLE_FACHROLLEN, ersetze_bearer, ersetze_mandant
 
 
 def _build_client() -> TestClient:
     app = FastAPI()
+    ersetze_mandant(app)
+    ersetze_bearer(app, *ALLE_FACHROLLEN)
     app.include_router(command_catalog_router, prefix="/api/v1")
     return TestClient(app)
 

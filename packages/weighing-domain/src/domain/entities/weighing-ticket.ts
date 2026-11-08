@@ -49,7 +49,7 @@ export const WeighingDataSchema = z.object({
 });
 
 export const WeighingTicketSchema = z.object({
-  id: z.string().uuid().optional(),
+  id: z.string().guid().optional(),
   tenantId: z.string(),
   ticketNumber: z.string(),
   type: z.enum([WeighingType.VEHICLE, WeighingType.CONTAINER, WeighingType.SILO, WeighingType.MANUAL]),
@@ -76,17 +76,17 @@ export const WeighingTicketSchema = z.object({
   isWithinTolerance: z.boolean().optional(),
 
   // References
-  contractId: z.string().uuid().optional(),
-  orderId: z.string().uuid().optional(),
-  deliveryNoteId: z.string().uuid().optional(),
+  contractId: z.string().guid().optional(),
+  orderId: z.string().guid().optional(),
+  deliveryNoteId: z.string().guid().optional(),
 
   // ANPR & Automation
-  anprRecordId: z.string().uuid().optional(),
+  anprRecordId: z.string().guid().optional(),
   autoAssigned: z.boolean().default(false),
 
   // Gate & Logistics
   gateId: z.string().optional(),
-  slotId: z.string().uuid().optional(),
+  slotId: z.string().guid().optional(),
 
   // Metadata
   createdAt: z.date().optional(),

@@ -14,6 +14,7 @@ PREFIX = "/api/v1/personal/applications"
 CASES = [
     ("GET", "", "read"),
     ("POST", "", "write"),
+    ("POST", "/actions/speichern", "write"),
     ("GET", "/aufbewahrung", "read"),
     ("PUT", "/aufbewahrung", "admin"),
     ("GET", "/loeschlauf/faellig", "read"),
@@ -21,6 +22,7 @@ CASES = [
     ("POST", "/loeschlauf", "admin"),
     ("GET", "/einwilligungserklaerungen", "read"),
     ("POST", "/einwilligungserklaerungen", "admin"),
+    ("POST", "/einwilligungserklaerungen/actions/anlegen", "admin"),
     ("GET", "/einwilligungserklaerungen/1", "read"),
     ("GET", "/candidate", "read"),
     ("PATCH", "/candidate/stage", "write"),
@@ -31,8 +33,8 @@ CASES = [
 ]
 ROLES = [None, "user", "FUTTERMITTEL_ADMIN", "PERSONAL_LESEN", "PERSONAL_BEARBEITEN", "PERSONAL_ADMIN", "admin", "manager"]
 ALLOWED = {
-    "read": {"PERSONAL_LESEN", "PERSONAL_BEARBEITEN", "PERSONAL_ADMIN", "admin", "manager"},
-    "write": {"PERSONAL_BEARBEITEN", "PERSONAL_ADMIN", "admin", "manager"},
+    "read": {"PERSONAL_LESEN", "PERSONAL_BEARBEITEN", "PERSONAL_ADMIN", "admin"},
+    "write": {"PERSONAL_BEARBEITEN", "PERSONAL_ADMIN", "admin"},
     "admin": {"PERSONAL_ADMIN", "admin"},
 }
 
@@ -45,6 +47,8 @@ def api():
         calls.append("database")
         raise HTTPException(418, "authorized database boundary")
     app.dependency_overrides[get_db] = database_boundary
+    from app.core.tenant import get_tenant_id
+    app.dependency_overrides[get_tenant_id] = lambda: 'haus-a'  # isolated role contract, not provider/tenant proof
     with TestClient(app) as client:
         yield app, client, calls
 

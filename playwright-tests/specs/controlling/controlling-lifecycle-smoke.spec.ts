@@ -2,10 +2,11 @@
  * DOM-CONTROLLING-004.5 — Controlling Lifecycle @smoke Tests
  */
 import { test, expect, request } from '@playwright/test'
+import { apiToken, E2E_MANDANT } from '../../helpers/anmeldung'
 
 const BASE = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:8000'
-const TENANT = 'test-tenant-ctrl-001'
-const HEADERS = { 'X-Tenant-ID': TENANT, 'Content-Type': 'application/json' }
+const TENANT = E2E_MANDANT
+const HEADERS = { Authorization: `Bearer ${apiToken()}`, 'X-Tenant-ID': TENANT, 'Content-Type': 'application/json' }
 
 test.describe('@smoke Controlling Lifecycle', () => {
   test('1 — Budget anlegen (ENTWURF)', async () => {

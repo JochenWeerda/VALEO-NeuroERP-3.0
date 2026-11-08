@@ -122,6 +122,8 @@ def to_article_schema(row: ArticleModel) -> Article:
             "mhd_erforderlich": bool(row.mhd_erforderlich),
             "lagerartikel": bool(row.lagerartikel),
             "mehrwertsteuer_prozent": row.mehrwertsteuer_prozent,
+            "steuerschluessel_verkauf": getattr(row, "steuerschluessel_verkauf", None),
+            "steuerschluessel_einkauf": getattr(row, "steuerschluessel_einkauf", None),
             "warengruppe": row.warengruppe,
             "gefahrgutklasse": row.gefahrgutklasse,
             "gefahrgut_un_nummer": getattr(row, "gefahrgut_un_nummer", None),

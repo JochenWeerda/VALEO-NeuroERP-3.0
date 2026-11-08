@@ -5,9 +5,10 @@
     ".storybook/**/*",
     "scripts/**/*",
     "tests/e2e/**/*.ts",
+    "tests/visual/**/*.ts",
+    "tests/visual/**/*.tsx",
     "playwright.config.ts",
-    "vite.config.ts",
-    "vite.config.performance.ts"
+    "vite.config.ts"
   ],
   "exclude": ["node_modules", "dist", "test-results"]
 }

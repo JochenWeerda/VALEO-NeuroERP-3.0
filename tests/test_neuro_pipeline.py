@@ -4,10 +4,21 @@ import pytest
 from app.agents.neuro_pipeline import run_pipeline
 
 
+@pytest.fixture(autouse=True)
+def _mandantenkontext():
+    """Dienste ohne ausdruecklichen Mandanten nehmen den des Kontexts; seit 27.10.2026 gibt es keinen Rueckfall "system"."""
+    from app.core.tenant_context import tenant_scope
+
+    with tenant_scope("test-mandant", "unit test"):
+        yield
+
+
+
 class TestPipelineClassification:
     def test_known_intent_returns_plan(self):
         result = run_pipeline("Bestellung anlegen fuer Mais")
-        assert result["status"] in ("executed", "awaiting_approval")
+        assert result["status"] == "failed"
+        assert result["tool_trace"][0]["result"]["rejection_reason"] == "authenticated_token_required"
         assert result["intent"]["intent"] == "bestellung_anlegen"
         assert result["plan"] is not None
         assert result["plan"]["step_count"] >= 1
@@ -72,9 +83,10 @@ class TestPipelineApproval:
 
 
 class TestPipelineExecution:
-    def test_low_risk_executes(self):
+    def test_low_risk_without_identity_is_rejected(self):
         result = run_pipeline("Lagerbestand abfragen")
-        assert result["status"] == "executed"
+        assert result["status"] == "failed"
+        assert result["tool_trace"][0]["result"]["http_status"] == 401
         assert "executed_steps" in result
         assert "tool_trace" in result
         assert len(result["executed_steps"]) >= 1
@@ -103,9 +115,10 @@ class TestPipelineContext:
         )
         assert result["plan"] is not None
 
-    def test_tenant_id_defaults(self):
+    def test_default_tenant_without_identity_does_not_authorize(self):
         result = run_pipeline("Lagerbestand abfragen")
-        assert result["status"] == "executed"
+        assert result["status"] == "failed"
+        assert result["tool_trace"][0]["result"]["http_status"] == 401
 
 
 class TestPipelineResultStructure:
@@ -115,13 +128,14 @@ class TestPipelineResultStructure:
             assert "intent" in result
             assert "status" in result
 
-    def test_executed_result_includes_broker_trace(self):
+    def test_rejected_result_includes_broker_trace(self):
         result = run_pipeline("Lagerbestand abfragen")
         assert result["tool_trace"][0]["binding_target"] == "valeo_inventory_bestand_get"
-        assert result["tool_trace"][0]["result"]["mode"] == "openapi_internal"
+        assert result["tool_trace"][0]["result"]["mode"] == "execution_rejected"
         assert "state_summary" in result
 
-    def test_medium_risk_step_level_approval_is_visible(self):
+    def test_missing_identity_stops_before_medium_risk_approval(self):
         result = run_pipeline("Bestellung anlegen")
-        assert result["status"] == "awaiting_approval"
-        assert result["tool_trace"][-1]["status"] == "pending_approval"
+        assert result["status"] == "failed"
+        assert result["tool_trace"][-1]["status"] == "failed"
+        assert result["tool_trace"][-1]["result"]["rejection_reason"] == "authenticated_token_required"

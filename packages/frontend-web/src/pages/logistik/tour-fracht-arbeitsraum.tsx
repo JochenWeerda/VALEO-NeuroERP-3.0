@@ -1,4 +1,5 @@
 import { useScreenPermissions } from '@/components/mask-builder/runtime/screen-permissions'
+import { MadeByStudioCockpitRuntimeWire } from '@/components/mask-builder/made-by-studio-runtime-wire'
 /**
  * Kombinierter Dispo-Arbeitsraum Tour + Frachtbrief.
  * Die Definition zeichnet die Lage. Die Seite laedt Daten und loest Aktionen aus.
@@ -327,3 +328,8 @@ export default function TourFrachtArbeitsraumPage(): JSX.Element {
     </div>
   )
 }
+function madeByStudioRuntimeWireDeclaration(): JSX.Element {
+  return <MadeByStudioCockpitRuntimeWire screenId="logistik/tour-fracht-arbeitsraum" />
+}
+void madeByStudioRuntimeWireDeclaration
+

@@ -13,10 +13,11 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from main import app
+from app.main import app
 from conftest import skip_if_db_unavailable
 from app.api.v1.endpoints import warehouses as wh_mod
 from app.core.database import get_db
+from testgrenze import ersetze_mandant, ersetze_nutzer
 
 client = TestClient(app, raise_server_exceptions=False)
 AUTH = {"Authorization": "Bearer dev-token", "X-Tenant-ID": "test-tenant"}
@@ -153,6 +154,8 @@ class TestWarehouseUnitPagination:
         from app.api.v1.schemas.inventory import Warehouse
 
         _app = FastAPI()
+        ersetze_mandant(_app)
+        ersetze_nutzer(_app, "admin")
         _app.include_router(wh_router, prefix="/warehouses")
         db = _FakeDb(items)
         _app.dependency_overrides[get_db] = lambda: db
@@ -199,6 +202,8 @@ class TestSuperglueRolloutUnit:
         from app.api.v1.endpoints.warehouses import router as wh_router
 
         _app = FastAPI()
+        ersetze_mandant(_app)
+        ersetze_nutzer(_app, "admin")
         _app.include_router(wh_router, prefix="/warehouses")
         _app.dependency_overrides[get_db] = lambda: _FakeDb()
         c = TestClient(_app)
@@ -215,6 +220,8 @@ class TestSuperglueRolloutUnit:
         from app.api.v1.endpoints.warehouses import router as wh_router
 
         _app = FastAPI()
+        ersetze_mandant(_app)
+        ersetze_nutzer(_app, "admin")
         _app.include_router(wh_router, prefix="/warehouses")
         _app.dependency_overrides[get_db] = lambda: _FakeDb()
         c = TestClient(_app)

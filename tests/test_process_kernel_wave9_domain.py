@@ -18,6 +18,7 @@ from app.core.frontend_process_binding import (
     TriggerEvent,
     build_default_bindings,
 )
+from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
 
 
 def make_ziel(
@@ -187,6 +188,7 @@ def test_api_ernte_kampagne_create_and_list():
 
     app = FastAPI()
     app.include_router(ernte_router, prefix="/api/v1")
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)  # Schreibwege pruefen die Bereichsrolle (19.10.2026)
     client = TestClient(app, raise_server_exceptions=True)
 
     create_resp = client.post(
@@ -214,6 +216,7 @@ def test_api_ernte_kampagne_start_and_finish():
 
     app = FastAPI()
     app.include_router(ernte_router, prefix="/api/v1")
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)  # Schreibwege pruefen die Bereichsrolle (19.10.2026)
     client = TestClient(app, raise_server_exceptions=True)
 
     create_resp = client.post(

@@ -12,6 +12,7 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Optional
 from uuid import uuid4
+from app.core.tenant_context import get_current_tenant_id
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +33,7 @@ class ChannelMessage:
     message_id: str = field(default_factory=lambda: str(uuid4()))
     timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     metadata: dict[str, Any] = field(default_factory=dict)
-    tenant_id: str = "system"
+    tenant_id: str = field(default_factory=get_current_tenant_id)
     reply_to: Optional[str] = None
 
     def to_dict(self) -> dict:

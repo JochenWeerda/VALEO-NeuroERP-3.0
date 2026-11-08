@@ -24,6 +24,7 @@ from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/massebilanz", tags=["Massebilanz"])
@@ -138,7 +139,7 @@ def list_massebilanzen(
     return [MassebilanzOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("", response_model=MassebilanzOut, status_code=201, summary="Massebilanz anlegen")
+@router.post("", response_model=MassebilanzOut, status_code=201, summary="Massebilanz anlegen", dependencies=SCHREIBEN["AGRAR"])
 def create_massebilanz(
     payload: MassebilanzCreate,
     db=Depends(get_db),
@@ -190,7 +191,7 @@ def get_massebilanz(
     return MassebilanzOut(**dict(row._mapping))
 
 
-@router.post("/{bilanz_id}/bewegungen", response_model=BewegungOut, status_code=201, summary="Bewegung hinzufügen")
+@router.post("/{bilanz_id}/bewegungen", response_model=BewegungOut, status_code=201, summary="Bewegung hinzufügen", dependencies=SCHREIBEN["AGRAR"])
 def add_bewegung(
     bilanz_id: str,
     payload: BewegungCreate,
@@ -245,7 +246,7 @@ def list_bewegungen(
     return [BewegungOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/{bilanz_id}/festschreiben", response_model=MassebilanzOut, summary="Festschreiben")
+@router.post("/{bilanz_id}/festschreiben", response_model=MassebilanzOut, summary="Festschreiben", dependencies=SCHREIBEN["AGRAR"])
 def festschreiben(
     bilanz_id: str,
     db=Depends(get_db),

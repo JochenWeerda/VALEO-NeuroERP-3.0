@@ -75,12 +75,11 @@ const Wizard: React.FC<WizardProps> = ({
   }
 
   const onSubmit = async () => {
-    if (!isLastStep) {
-      handleNext()
-      return
-    }
-
     try {
+      if (!isLastStep) {
+        await handleNext()
+        return
+      }
       // Collect all step data
       const allData = getValues()
       await onComplete(allData)
@@ -125,7 +124,7 @@ const Wizard: React.FC<WizardProps> = ({
                     id={fieldName}
                     type={field.type}
                     placeholder={field.placeholder}
-                    className={error ? 'border-red-500' : ''}
+                    className={error ? 'border-status-error' : ''}
                   />
                 )
 
@@ -136,7 +135,7 @@ const Wizard: React.FC<WizardProps> = ({
                     value={fieldValue}
                     id={fieldName}
                     placeholder={field.placeholder}
-                    className={error ? 'border-red-500' : ''}
+                    className={error ? 'border-status-error' : ''}
                   />
                 )
 
@@ -169,7 +168,7 @@ const Wizard: React.FC<WizardProps> = ({
                     onValueChange={controllerField.onChange}
                     options={selectField.options ?? []}
                     placeholder={field.placeholder}
-                    className={error ? 'border-red-500' : ''}
+                    className={error ? 'border-status-error' : ''}
                   />
                 )
               }
@@ -181,7 +180,7 @@ const Wizard: React.FC<WizardProps> = ({
                     value={fieldValue}
                     id={fieldName}
                     type="date"
-                    className={error ? 'border-red-500' : ''}
+                    className={error ? 'border-status-error' : ''}
                   />
                 )
 
@@ -192,7 +191,7 @@ const Wizard: React.FC<WizardProps> = ({
                     value={fieldValue}
                     id={fieldName}
                     type="datetime-local"
-                    className={error ? 'border-red-500' : ''}
+                    className={error ? 'border-status-error' : ''}
                   />
                 )
 
@@ -203,7 +202,7 @@ const Wizard: React.FC<WizardProps> = ({
                     value={fieldValue}
                     id={fieldName}
                     placeholder={field.placeholder}
-                    className={error ? 'border-red-500' : ''}
+                    className={error ? 'border-status-error' : ''}
                   />
                 )
             }
@@ -234,11 +233,11 @@ const Wizard: React.FC<WizardProps> = ({
   }
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">{config.title}</h1>
+          <h1 className="text-xl font-semibold tracking-tight">{config.title}</h1>
           {config.subtitle && (
             <p className="text-muted-foreground">{config.subtitle}</p>
           )}
@@ -255,9 +254,9 @@ const Wizard: React.FC<WizardProps> = ({
             <span className="text-sm font-medium">Schritt {currentStep + 1} von {config.steps.length}</span>
             <span className="text-sm text-muted-foreground">{currentStepConfig.title}</span>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
+          <div className="w-full bg-muted rounded-full h-2 mb-4">
             <div
-              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+              className="bg-status-info h-2 rounded-full transition-all duration-300"
               style={{ width: `${((currentStep + 1) / config.steps.length) * 100}%` }}
             ></div>
           </div>
@@ -276,18 +275,18 @@ const Wizard: React.FC<WizardProps> = ({
                   disabled={!isClickable}
                   className={`flex flex-col items-center p-2 rounded-lg transition-colors ${
                     isCurrent
-                      ? 'bg-blue-100 border-2 border-blue-500'
+                      ? 'bg-primary/10 border-2 border-primary'
                       : isCompleted
-                      ? 'bg-green-100 border-2 border-green-500'
-                      : 'bg-gray-100 border-2 border-gray-300'
+                      ? 'bg-status-success/10 border-2 border-status-success'
+                      : 'bg-muted border-2 border-border'
                   } ${isClickable ? 'cursor-pointer hover:brightness-105' : 'cursor-not-allowed opacity-50'}`}
                 >
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium mb-1 ${
                     isCurrent
-                      ? 'bg-blue-500 text-white'
+                      ? 'bg-primary text-primary-foreground'
                       : isCompleted
-                      ? 'bg-green-500 text-white'
-                      : 'bg-gray-300 text-gray-600'
+                      ? 'bg-status-success text-primary-foreground'
+                      : 'bg-muted text-muted-foreground'
                   }`}>
                     {isCompleted ? <CheckCircle className="h-4 w-4" /> : index + 1}
                   </div>

@@ -129,14 +129,8 @@ class SelfBillingRepository(Protocol):
 
 
 def _generate_invoice_number(tenant_id: str, harvest_acceptance_id: Optional[str] = None) -> str:
-    """Generiert eine Gutschrifts-Nummer."""
-    prefix = "GS"  # Gutschrift
-    year = datetime.now().strftime("%Y")
-    sequence = uuid7().replace("-", "")[:8].upper()
-    
-    if harvest_acceptance_id:
-        return f"{prefix}-{year}-{harvest_acceptance_id[:8]}-{sequence}"
-    return f"{prefix}-{year}-{sequence}"
+    """Unique standalone draft reference; harvest posting uses its configured range."""
+    return f"GS-{datetime.now().year}-{uuid7().replace('-', '')}"
 
 
 def _get_mandatory_texts_for_taxation(taxation_type: str, vat_rate_percent: Decimal) -> list[dict]:
@@ -207,7 +201,7 @@ def create_credit_note(
         mandatory_texts = _get_mandatory_texts_for_taxation(taxation_type, create_input.vat_rate_percent)
     
     invoice = SelfBillingInvoice(
-        id=f"sb_{uuid7().replace('-', '')[:16]}",
+        id=f"sb_{uuid7().replace('-', '')}",
         tenant_id=create_input.tenant_id,
         harvest_acceptance_id=create_input.harvest_acceptance_id,
         invoice_number=invoice_number,

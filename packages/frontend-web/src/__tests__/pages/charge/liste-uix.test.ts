@@ -8,13 +8,10 @@ const src = readFileSync(
 )
 
 describe('Chargen-Liste UIX', () => {
-  it('stellt Chargen-ID 44 px, Export wirkt, KPI nur Desktop', () => {
-    expect(src).toContain('useTouchDevice')
-    expect(src).toContain('{!isTouch ? (')
-    expect(src).toContain('min-h-11 font-medium font-mono text-primary')
-    expect(src).toContain('Suche Chargen')
-    expect(src).toContain('onClick={() => {')
-    expect(src).not.toContain('text-blue-600')
-    expect(src).not.toContain('bg-orange-50')
+  it('ist eine Studio-Liste aus der ScreenDefinition charge/liste', () => {
+    // MASK-STUDIO-ROLLOUT: 44-px-Zeilen, Suche, Export und Touch-Verhalten liefert der universelle Renderer.
+    expect(src).toContain('NativeListPage')
+    expect(src).toContain('screenId="charge/liste"')
+    expect(src).not.toContain('apiClient')
   })
 })

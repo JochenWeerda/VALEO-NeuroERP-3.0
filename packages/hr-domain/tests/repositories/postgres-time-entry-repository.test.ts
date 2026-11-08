@@ -1,23 +1,30 @@
-import { beforeAll, afterAll, beforeEach, describe, expect, it } from 'vitest';
-import { Client } from 'pg';
+import { randomUUID } from 'node:crypto';
+import { beforeAll, afterAll, afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { startPostgresContainer, stopPostgresContainer, type PostgresTestContext } from '../setup/testcontainers';
-import { runMigrations } from '../setup/migrations';
+import {
+  closeProbeTransaction,
+  finishTestCase,
+  openProbeTransaction,
+  startTestCase,
+  type ProbeTestContext,
+} from '../setup/probe-database';
 import { PostgresTimeEntryRepository } from '../../src/infra/repo/postgres-time-entry-repository';
 import { TimeEntry } from '../../src/domain/entities/time-entry';
 
 const formatDate = (iso: Date): string => iso.toISOString().split('T')[0] ?? '';
 const addHours = (date: Date, hours: number): Date => new Date(date.getTime() + hours * 60 * 60 * 1000);
-const randomId = () => 'id-' + Math.random().toString(16).slice(2, 10);
+// Own test records: the time_entries id, tenant and employee columns are UUIDs
+const testTenantId = randomUUID();
+const testActorId = randomUUID();
 
 const createTimeEntry = (overrides: Partial<TimeEntry> = {}): TimeEntry => {
   const start = overrides.start ? new Date(overrides.start) : new Date();
   const end = overrides.end ? new Date(overrides.end) : addHours(start, 2);
 
   const base: TimeEntry = {
-    id: randomId(),
-    tenantId: 'tenant-default',
-    employeeId: randomId(),
+    id: randomUUID(),
+    tenantId: testTenantId,
+    employeeId: randomUUID(),
     date: formatDate(start),
     start: start.toISOString(),
     end: end.toISOString(),
@@ -30,33 +37,32 @@ const createTimeEntry = (overrides: Partial<TimeEntry> = {}): TimeEntry => {
     createdAt: start.toISOString(),
     updatedAt: start.toISOString(),
     version: 1,
-    createdBy: 'system',
-    updatedBy: 'system',
+    createdBy: testActorId,
+    updatedBy: testActorId,
   };
 
   return { ...base, ...overrides };
 };
 
 describe('PostgresTimeEntryRepository (integration)', () => {
-  let context: PostgresTestContext;
-  let client: Client;
+  let context: ProbeTestContext | undefined;
   let repository: PostgresTimeEntryRepository;
 
   beforeAll(async () => {
-    context = await startPostgresContainer();
-    client = new Client({ connectionString: context.connectionString });
-    await client.connect();
-    await runMigrations(client);
-    repository = new PostgresTimeEntryRepository(client);
+    context = await openProbeTransaction();
+    repository = new PostgresTimeEntryRepository(context.client);
   });
 
   afterAll(async () => {
-    await client.end();
-    await stopPostgresContainer(context);
+    await closeProbeTransaction(context);
   });
 
   beforeEach(async () => {
-    await client.query('TRUNCATE TABLE time_entries RESTART IDENTITY CASCADE;');
+    await startTestCase(context!);
+  });
+
+  afterEach(async () => {
+    await finishTestCase(context!);
   });
 
   it('persists and retrieves a time entry', async () => {

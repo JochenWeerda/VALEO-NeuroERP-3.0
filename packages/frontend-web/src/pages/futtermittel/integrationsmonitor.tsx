@@ -1,10 +1,7 @@
-import { ImportMonitor } from '@/features/feed-advice/ImportMonitor'
+import { NativeListPage } from '@/components/mask-builder/NativeListPage'
 
-/** Integrationsmonitor-Route (FEED-INT-034, Maskenvertrag FEED-MASK-014). */
-export default function IntegrationsmonitorPage(): JSX.Element {
+export default function Page(): JSX.Element {
   return (
-    <div className="p-6">
-      <ImportMonitor />
-    </div>
+    <NativeListPage screenId="futtermittel/integrationsmonitor" testId="screen-futtermittel/integrationsmonitor" />
   )
 }

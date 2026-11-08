@@ -17,7 +17,6 @@ from typing import Any, Optional
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-_DEFAULT_TENANT = "00000000-0000-0000-0000-000000000001"
 _WARN_PCT = 80.0
 _BLOCK_PCT = 100.0
 
@@ -56,7 +55,9 @@ def credit_check(limit, exposure, betrag: float = 0.0,
 class SalesCreditService:
     def __init__(self, db: Session, tenant_id: Optional[str] = None) -> None:
         self.db = db
-        self.tenant_id = tenant_id or _DEFAULT_TENANT
+        if not tenant_id:  # kein Rueckfall auf den Standardmandanten (bis 28.10.2026)
+            raise ValueError("Mandant fehlt")
+        self.tenant_id = tenant_id
 
     def _limit(self, customer_id: str) -> float:
         row = self.db.execute(

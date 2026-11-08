@@ -8,6 +8,7 @@ from typing import Any
 from uuid import UUID, uuid4
 
 from fastapi import Response, APIRouter, Depends, HTTPException, Query
+from app.auth.deps import require_roles
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -19,6 +20,8 @@ from app.api.v1.schemas.base import BaseSchema
 
 
 router = APIRouter()
+
+_NUR_ADMIN = [Depends(require_roles("admin"))]  # Konfiguration: wie admin_core
 
 
 class ReportPermissionIn(BaseModel):
@@ -100,7 +103,7 @@ def get_report_permission(
     return ReportPermissionOut(**_jsonable(dict(row)))
 
 
-@router.post("/report-permissions", response_model=ReportPermissionOut, status_code=201, summary="Report permission anlegen")
+@router.post("/report-permissions", response_model=ReportPermissionOut, status_code=201, summary="Report permission anlegen", dependencies=_NUR_ADMIN)
 def create_report_permission(
     payload: ReportPermissionIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -137,7 +140,7 @@ def create_report_permission(
     return ReportPermissionOut(**_jsonable(dict(row)))
 
 
-@router.put("/report-permissions/{permission_id}", response_model=ReportPermissionOut, summary="Report permission aktualisieren")
+@router.put("/report-permissions/{permission_id}", response_model=ReportPermissionOut, summary="Report permission aktualisieren", dependencies=_NUR_ADMIN)
 def update_report_permission(
     permission_id: str,
     payload: ReportPermissionIn,
@@ -177,7 +180,7 @@ def update_report_permission(
     return get_report_permission(permission_id, tenant_id, db)
 
 
-@router.delete("/report-permissions/{permission_id}", status_code=204, response_class=Response, response_model=None, summary="Report permission löschen")
+@router.delete("/report-permissions/{permission_id}", status_code=204, response_class=Response, response_model=None, summary="Report permission löschen", dependencies=_NUR_ADMIN)
 def delete_report_permission(
     permission_id: str,
     tenant_id: str = Depends(get_tenant_id),

@@ -104,7 +104,6 @@ async def test_create_delivery_from_order_scopes_final_update_by_tenant():
             ),
             _FakeResult(fetchone_row=_eligibility_fetchone_ok()),
             _FakeResult(),
-            _FakeResult(),
             _FakeResult(
                 [
                     {
@@ -131,8 +130,9 @@ async def test_create_delivery_from_order_scopes_final_update_by_tenant():
     )
 
     update_statement, update_params = db.calls[-1]
-    insert_header_statement, insert_header_params = db.calls[3]
-    insert_position_statement, insert_position_params = db.calls[5]
+    # No CREATE SCHEMA before the header insert any more (schema comes from migrations)
+    insert_header_statement, insert_header_params = db.calls[2]
+    insert_position_statement, insert_position_params = db.calls[4]
     assert result["order_id"] == "so-1"
     assert "delivery_note_number" in insert_header_statement
     assert "customer_id" in insert_header_statement

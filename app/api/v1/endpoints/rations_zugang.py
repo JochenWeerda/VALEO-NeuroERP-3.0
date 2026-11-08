@@ -23,14 +23,16 @@ import string
 from datetime import datetime, timezone
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Header, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from pydantic import BaseModel, ConfigDict, EmailStr
 from sqlalchemy.orm import Session
 
+from app.core.akteur import gepruefte_email, gepruefter_name
 from app.core.database import get_db
 from app.infrastructure.models.futtermittel_models import RationsZugang
 
 from app.api.v1.schemas.base import BaseSchema
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter()
@@ -124,12 +126,16 @@ def _gen_token(length: int = 48) -> str:
     return ''.join(secrets.choice(alphabet) for _ in range(length))
 
 
-def _caller_info(
-    x_user_email: Optional[str] = None,
-    x_user_name: Optional[str] = None,
-) -> tuple[str, Optional[str]]:
-    """Liest Caller-Identität aus Dev-/Auth-Headern."""
-    return (x_user_email or "system@valeo.local", x_user_name)
+def _caller_info(request: Request) -> tuple[str, Optional[str]]:
+    """Aufrufer aus den geprueften Token-Claims.
+
+    Bis 27.10.2026 kamen E-Mail und Name aus den Kopfzeilen X-User-Email/X-User-Name (Rueckfall
+    "system@valeo.local"): Wer eine E-Mail mit Verwaltungsrecht kannte, konnte sich Zugaenge selbst vergeben.
+    """
+    email = gepruefte_email(request)
+    if email is None:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Gepruefte E-Mail des Aufrufers fehlt.")
+    return email, gepruefter_name(request)
 
 
 def _require_manage_access(
@@ -161,12 +167,12 @@ def _require_manage_access(
     summary="Zugangs-Liste eines Mandanten abrufen",
 )
 def list_zugang(
+    request: Request,
     tenant_id: str,
     aktiv_only: bool = Query(True),
-    x_user_email: Optional[str] = Header(default=None),
     db: Session = Depends(get_db),
 ):
-    caller_email, _ = _caller_info(x_user_email)
+    caller_email, _ = _caller_info(request)
     _require_manage_access(tenant_id, caller_email, db)
 
     q = db.query(RationsZugang).filter(RationsZugang.tenant_id == tenant_id)
@@ -179,17 +185,15 @@ def list_zugang(
     "/{tenant_id}/zugang",
     response_model=ZugangOut,
     status_code=status.HTTP_201_CREATED,
-    summary="Zugang anlegen",
-)
+    summary="Zugang anlegen", dependencies=SCHREIBEN["AGRAR"])
 def create_zugang(
+    request: Request,
     tenant_id: str,
     payload: ZugangCreate,
-    x_user_email: Optional[str] = Header(default=None),
-    x_user_name: Optional[str] = Header(default=None),
     db: Session = Depends(get_db),
 ):
     import uuid
-    caller_email, caller_name = _caller_info(x_user_email, x_user_name)
+    caller_email, caller_name = _caller_info(request)
     _require_manage_access(tenant_id, caller_email, db)
 
     entry = RationsZugang(
@@ -218,17 +222,15 @@ def create_zugang(
 @router.patch(
     "/{tenant_id}/zugang/{eintrag_id}",
     response_model=ZugangOut,
-    summary="Zugang bearbeiten / sperren / entsperren",
-)
+    summary="Zugang bearbeiten / sperren / entsperren", dependencies=SCHREIBEN["AGRAR"])
 def patch_zugang(
+    request: Request,
     tenant_id: str,
     eintrag_id: str,
     payload: ZugangPatch,
-    x_user_email: Optional[str] = Header(default=None),
-    x_user_name: Optional[str] = Header(default=None),
     db: Session = Depends(get_db),
 ):
-    caller_email, caller_name = _caller_info(x_user_email, x_user_name)
+    caller_email, caller_name = _caller_info(request)
     _require_manage_access(tenant_id, caller_email, db)
 
     entry = db.query(RationsZugang).filter(
@@ -257,15 +259,14 @@ def patch_zugang(
     "/{tenant_id}/zugang/{eintrag_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Zugang widerrufen (löschen)",
-    response_model=None,
-)
+    response_model=None, dependencies=SCHREIBEN["AGRAR"])
 def delete_zugang(
+    request: Request,
     tenant_id: str,
     eintrag_id: str,
-    x_user_email: Optional[str] = Header(default=None),
     db: Session = Depends(get_db),
 ):
-    caller_email, _ = _caller_info(x_user_email)
+    caller_email, _ = _caller_info(request)
     _require_manage_access(tenant_id, caller_email, db)
 
     entry = db.query(RationsZugang).filter(
@@ -285,17 +286,15 @@ def delete_zugang(
     "/{tenant_id}/zugang/share-link",
     response_model=ShareLinkOut,
     status_code=status.HTTP_201_CREATED,
-    summary="Share-Link mit einmaligem Token generieren",
-)
+    summary="Share-Link mit einmaligem Token generieren", dependencies=SCHREIBEN["AGRAR"])
 def create_share_link(
+    request: Request,
     tenant_id: str,
     payload: ShareLinkCreate,
-    x_user_email: Optional[str] = Header(default=None),
-    x_user_name: Optional[str] = Header(default=None),
     db: Session = Depends(get_db),
 ):
     import uuid
-    caller_email, caller_name = _caller_info(x_user_email, x_user_name)
+    caller_email, caller_name = _caller_info(request)
     _require_manage_access(tenant_id, caller_email, db)
 
     token = _gen_token(48)

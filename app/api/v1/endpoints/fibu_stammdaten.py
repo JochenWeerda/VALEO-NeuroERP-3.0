@@ -16,6 +16,7 @@ Fachlicher Hintergrund (Referenz-ERP Wissensbasis, Domain 03 FIBU):
     Artikel, die als Leergut/Pfand fungieren, werden über die Artikelklasse
     als Leergut gekennzeichnet. Leergutarten: Palette, Big-Bag, Fass, Flasche.
 """
+from app.auth.finance_roles import finance_admin, finance_write
 from datetime import datetime
 from decimal import Decimal
 from typing import Optional
@@ -25,7 +26,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import text
 
 from app.core.database import get_db
-from app.core.dependencies import get_tenant_id
+from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
@@ -136,7 +137,18 @@ def list_zahlungsformulare(
     return [ZahlungsformularOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/zahlungsformulare", response_model=ZahlungsformularOut, status_code=201, summary="Zahlungsformular anlegen")
+@router.get("/zahlungsformulare/{formular_id}", response_model=ZahlungsformularOut, summary="Zahlungsformular abrufen")
+def get_zahlungsformular(formular_id: str, db=Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
+    row = db.execute(text("""
+        SELECT * FROM domain_shared.zahlungsformulare
+        WHERE tenant_id = :tid AND (id::text = :ref OR formular_nr = :ref) AND aktiv = true
+    """), {"tid": tenant_id, "ref": formular_id}).fetchone()
+    if row is None:
+        raise HTTPException(404, "Zahlungsformular nicht gefunden.")
+    return ZahlungsformularOut(**dict(row._mapping))
+
+
+@router.post("/zahlungsformulare", response_model=ZahlungsformularOut, status_code=201, summary="Zahlungsformular anlegen", dependencies=[Depends(finance_write)])
 def create_zahlungsformular(
     payload: ZahlungsformularCreate,
     db=Depends(get_db),
@@ -166,8 +178,7 @@ def create_zahlungsformular(
 
 
 @router.delete("/zahlungsformulare/{formular_nr}", summary="Zahlungsformular löschen",
-    response_model=None
-)
+    response_model=None, dependencies=[Depends(finance_admin)])
 def delete_zahlungsformular(
     formular_nr: str,
     db=Depends(get_db),
@@ -195,7 +206,7 @@ def list_zinsgruppen(
     return [ZinsgruppeOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/zinsgruppen", response_model=ZinsgruppeOut, status_code=201, summary="Zinsgruppe anlegen")
+@router.post("/zinsgruppen", response_model=ZinsgruppeOut, status_code=201, summary="Zinsgruppe anlegen", dependencies=[Depends(finance_write)])
 def create_zinsgruppe(
     payload: ZinsgruppeCreate,
     db=Depends(get_db),
@@ -225,8 +236,7 @@ def create_zinsgruppe(
 
 
 @router.delete("/zinsgruppen/{gruppe_nr}", summary="Zinsgruppe löschen",
-    response_model=None
-)
+    response_model=None, dependencies=[Depends(finance_admin)])
 def delete_zinsgruppe(
     gruppe_nr: str,
     db=Depends(get_db),
@@ -254,7 +264,7 @@ def list_leergutarten(
     return [LeergutArtOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/leergutarten", response_model=LeergutArtOut, status_code=201, summary="Leergutart anlegen")
+@router.post("/leergutarten", response_model=LeergutArtOut, status_code=201, summary="Leergutart anlegen", dependencies=[Depends(finance_write)])
 def create_leergutart(
     payload: LeergutArtCreate,
     db=Depends(get_db),
@@ -282,8 +292,7 @@ def create_leergutart(
 
 
 @router.delete("/leergutarten/{art_nr}", summary="Leergutart löschen",
-    response_model=None
-)
+    response_model=None, dependencies=[Depends(finance_admin)])
 def delete_leergutart(
     art_nr: str,
     db=Depends(get_db),

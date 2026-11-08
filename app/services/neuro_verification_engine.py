@@ -21,6 +21,7 @@ from uuid import uuid4
 
 from sqlalchemy import text
 from sqlalchemy.orm import Session
+from app.core.tenant_context import get_current_tenant_id
 
 logger = logging.getLogger(__name__)
 
@@ -335,7 +336,7 @@ def _verify_single(plan: dict, tenant_id: str, db: Optional[Session] = None, **k
     return violations
 
 
-def verify_plan(plan: dict, tenant_id: str = "system", db: Optional[Session] = None) -> VerificationResult:
+def verify_plan(plan: dict, tenant_id: str | None = None, db: Optional[Session] = None) -> VerificationResult:
     """
     Wave 2: Verifies the plan and optionally each step individually.
 
@@ -343,6 +344,7 @@ def verify_plan(plan: dict, tenant_id: str = "system", db: Optional[Session] = N
     results are collected in step_results. The overall status is the worst
     across all steps.
     """
+    tenant_id = tenant_id or get_current_tenant_id()
     result = VerificationResult(plan_summary=f"{plan.get('action', '?')} on {plan.get('entity_type', '?')}")
 
     # Verify the plan-level dict

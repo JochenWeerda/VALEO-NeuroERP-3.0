@@ -12,6 +12,7 @@ from fastapi import APIRouter, Depends, Path, Body
 
 from app.core.tenant import get_tenant_id
 from app.api.v1.schemas.base import TypedObjectOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/annahme", tags=["annahme", "warteschlange"])
 
@@ -24,7 +25,7 @@ async def list_warteschlange(
     return []
 
 
-@router.post("/warteschlange", response_model=TypedObjectOut, status_code=201, summary="Anlieferung in Warteschlange aufnehmen")
+@router.post("/warteschlange", response_model=TypedObjectOut, status_code=201, summary="Anlieferung in Warteschlange aufnehmen", dependencies=SCHREIBEN["ERNTE"])
 async def create_warteschlange_entry(
     body: dict[str, Any] = Body(default={}),
     tenant_id: str = Depends(get_tenant_id),
@@ -33,7 +34,7 @@ async def create_warteschlange_entry(
     return {"id": "stub", "status": "wartend", **body}
 
 
-@router.post("/warteschlange/{entry_id}/repair-article", response_model=TypedObjectOut, summary="Artikel-Nummer reparieren")
+@router.post("/warteschlange/{entry_id}/repair-article", response_model=TypedObjectOut, summary="Artikel-Nummer reparieren", dependencies=SCHREIBEN["ERNTE"])
 async def repair_article(
     entry_id: str = Path(...),
     body: dict[str, Any] = Body(default={}),

@@ -59,7 +59,7 @@ def test_lohn_berechnung_endpoint_uses_payroll_response_model():
     from fastapi.testclient import TestClient
 
     from app.core.database import get_db
-    from main import app
+    from app.main import app
 
     def override_db():
         yield object()
@@ -86,7 +86,7 @@ def test_closeout_preview_endpoint_returns_datev_and_fibu_contract():
     from fastapi.testclient import TestClient
 
     from app.core.database import get_db
-    from main import app
+    from app.main import app
 
     def override_db():
         yield object()

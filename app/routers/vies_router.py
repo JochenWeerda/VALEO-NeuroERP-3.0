@@ -8,6 +8,7 @@ from pydantic import BaseModel
 import logging
 
 from app.services.vies_service import validate_eu_vat, ViesResult
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +32,7 @@ class VatValidationResponse(BaseModel):
     error: str = None
 
 
-@router.post("/validate", response_model=VatValidationResponse)
+@router.post("/validate", response_model=VatValidationResponse, dependencies=SCHREIBEN["BERECHNEN"])
 async def validate_vat(request: VatValidationRequest):
     """
     Validate VAT number using VIES

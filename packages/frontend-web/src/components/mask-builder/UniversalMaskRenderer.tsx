@@ -1,5 +1,8 @@
+import { lazy, Suspense, useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react'
+const FlowSpineWorkspaceSurface = lazy(() => import('./runtime/FlowSpineWorkspaceSurface'))
+import { FlowSpineCatalogRenderer } from './renderers/FlowSpineCatalogRenderer'
+import type { FlowSpineCatalogState } from './runtime/useFlowSpineCatalogRuntime'
 import { SourceProposalRenderer } from './renderers/SourceProposalRenderer'
-import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import { ColumnLayoutRenderer, type NavigationColumn } from './renderers/ColumnLayoutRenderer'
 import { getValue, repeatsCaption } from './renderers/render-utils'
 import { DerivedColumnLayout, shouldDeriveColumns } from './renderers/DerivedColumnLayout'
@@ -32,7 +35,9 @@ import {
   type PageSection,
 } from './renderers'
 import { UnsavedChangesGuard } from './renderers/UnsavedChangesGuard'
+import { SpecializedComponentHost } from './specialized/SpecializedComponentHost'
 import { conditionRoot, dispatchScreenAction, type ScreenContext } from './governance/screen-context'
+import { fieldExtras } from './render-plan/field-extras'
 
 const PROCESS_FLOW_SECTION_KEY = 'belegfluss'
 
@@ -53,6 +58,7 @@ function documentIdentity(identityField: string | undefined, payload: Record<str
 }
 
 interface UniversalMaskRendererProps {
+  flowSpineCatalog?: FlowSpineCatalogState
   columns?: NavigationColumn[]
   messages?: ScreenMessage[]
   onRetry?: () => void
@@ -158,11 +164,11 @@ function renderLegacyFields(
           {
             key: field.key,
             label: field.label,
-            componentKind: field.type === 'table' ? 'text' : field.type,
+            componentKind: field.type === 'table' && field.rowFields === undefined && field.tableEditing === undefined ? 'text' : field.type,
             dataPath: field.key,
             order: index,
             required: field.required ?? false,
-            readOnly: field.readOnly ?? false,
+            readOnly: (field.readOnly ?? false) || field.computed !== undefined,
             visible: true,
             placeholder: field.placeholder,
             helpText: field.helpText,
@@ -170,6 +176,11 @@ function renderLegacyFields(
             dataSourceKey: field.dataSourceKey,
             minSearchChars: field.minSearchChars ?? 2,
             renderHint: field.renderHint,
+            rowFields: field.rowFields,
+            tableEditing: field.tableEditing,
+            currencyField: field.currencyField,
+            ...fieldExtras(field),
+            ...(field.fileContent !== undefined ? { fileContent: field.fileContent } : {}),
           },
         ]),
       )}
@@ -180,12 +191,13 @@ function renderLegacyFields(
 }
 
 function RenderFromPlan({
+  flowSpineCatalog,
   columns,
   messages = [],
   onRetry,
   plan,
   payload,
-  tables,
+  tables: sourceTables,
   tableQueryStates,
   tableTotals,
   onTableQueryChange,
@@ -204,6 +216,7 @@ function RenderFromPlan({
   columns?: NavigationColumn[]
   messages?: ScreenMessage[]
   onRetry?: () => void
+  flowSpineCatalog?: FlowSpineCatalogState
   plan: RenderPlan
   payload: Record<string, unknown>
   entityId?: string
@@ -223,6 +236,24 @@ function RenderFromPlan({
   screenContext?: ScreenContext
 }): JSX.Element {
   const container = useRef<HTMLDivElement>(null)
+  const [localRows, setLocalRows] = useState<Record<string, Record<string, Record<string, unknown>>>>({})
+  useEffect(() => { setLocalRows({}) }, [plan.screenId])
+  const tables = Object.fromEntries(Object.entries(sourceTables).map(([tableKey, rows]) => [
+    tableKey, rows.map(row => {
+      const patches = localRows[tableKey]
+      if (!patches) return row
+      const identityFields = new Set((plan.tablesByKey[tableKey]?.rowActions ?? [])
+        .map(action => action.localRowPatch?.identityField).filter((field): field is string => Boolean(field)))
+      let result = row
+      for (const field of identityFields) {
+        const id = row[field]
+        if (typeof id !== 'string' && typeof id !== 'number') continue
+        const patch = patches[JSON.stringify([field, id])]
+        if (patch) result = { ...result, ...patch }
+      }
+      return result
+    }),
+  ]))
   const [activeTab, setActiveTab] = useState<string | undefined>(requestedSectionKey)
   const [locateField, setLocateField] = useState<string | undefined>(undefined)
   useEffect(() => {
@@ -281,9 +312,19 @@ function RenderFromPlan({
   const deriveColumns = shouldDeriveColumns(plan, columns)
   const onePage = plan.shell.sectionNavigation === 'anchors' && !deriveColumns && !columns
   const boundRoot = conditionRoot(screenContext)
-  const dispatchAction = (key: string, actionPayload: Record<string, unknown>) => (
-    dispatchScreenAction(screenContext, declaredAction(plan, key), actionPayload, onAction)
-  )
+  const dispatchAction = (key: string, actionPayload: Record<string, unknown>) => {
+    for (const [tableKey, table] of Object.entries(plan.tablesByKey)) {
+      const patch = table.rowActions?.find(action => action.key === key)?.localRowPatch
+      if (!patch) continue
+      const id = actionPayload[patch.identityField]
+      if ((typeof id !== 'string' && typeof id !== 'number') || id === '') return
+      const identity = JSON.stringify([patch.identityField, id])
+      setLocalRows(current => ({ ...current, [tableKey]: { ...current[tableKey],
+        [identity]: { ...current[tableKey]?.[identity], [patch.field]: patch.value } } }))
+      return
+    }
+    return dispatchScreenAction(screenContext, declaredAction(plan, key), actionPayload, onAction)
+  }
 
   const renderHeader = (condensed: boolean, sticky: boolean): JSX.Element => (
     <ActionBarRenderer
@@ -402,12 +443,15 @@ function RenderFromPlan({
 
       {statusAfterFields ? null : workflowNode}
       {!statusAfterFields && plan.shell.summaryPlacement === 'header' ? <FastSummaryRenderer items={plan.summaryItems} /> : null}
+      {plan.flowSpineCatalog && <FlowSpineCatalogRenderer state={flowSpineCatalog} />}
+      {plan.flowSpineWorkspace && <Suspense fallback={<p role="status">Prozessraum wird geladen…</p>}><FlowSpineWorkspaceSurface contract={plan.flowSpineWorkspace} /></Suspense>}
       <TileGridRenderer tiles={plan.tiles} />
       <CalendarRenderer calendar={plan.calendar} />
       <TwinReadModelRenderer twin={plan.twin} />
+      <SpecializedComponentHost specialized={plan.specialized} plan={plan} onAction={dispatchAction} />
       {plan.sourceProposals ? <SourceProposalRenderer context={effectivePayload[plan.sourceProposals.contextKey]} /> : null}
 
-      {deriveColumns ? null : (
+      {deriveColumns || plan.specialized?.type === 'intake' || plan.specialized?.type === 'weighing' || plan.specialized?.type === 'finance_workbench' || plan.specialized?.type === 'feed_workbench' || plan.specialized?.type === 'admin_workbench' ? null : (
         <>
       <FastFormRenderer
         fieldKeys={plan.rootFieldKeys}
@@ -459,6 +503,10 @@ function RenderFromPlan({
       className={classes.root}
       onKeyDown={(event) => handleScreenKeyDown(event, plan, effectivePayload, dispatchAction)}
       data-screen-definition={plan.screenId}
+      data-document-base-version={plan.documentVariant?.baseVersion}
+      data-document-variant-id={plan.documentVariant?.variantId}
+      data-document-variant-version={plan.documentVariant?.variantVersion}
+      data-document-materialized-hash={plan.documentVariant?.materializedHash}
       data-testid={`screen-${plan.screenId}`}
       data-layout-mode={plan.shell.layoutMode}
       data-mobile-layout={plan.shell.mobileMode}
@@ -578,6 +626,10 @@ function RenderFromScreen({
     <div
       className={classes.root}
       data-screen-definition={screen.id}
+      data-document-base-version={screen.documentVariant?.baseVersion}
+      data-document-variant-id={screen.documentVariant?.variantId}
+      data-document-variant-version={screen.documentVariant?.variantVersion}
+      data-document-materialized-hash={screen.documentVariant?.materializedHash}
       data-testid={`screen-${screen.id}`}
       data-layout-mode={screen.layout?.preferredMode ?? 'desktopDense'}
       data-mobile-layout={screen.layout?.mobileMode ?? 'mobileStack'}
@@ -673,6 +725,7 @@ function RenderFromScreen({
 }
 
 export function UniversalMaskRenderer({
+  flowSpineCatalog,
   columns,
   messages,
   onRetry,
@@ -709,6 +762,7 @@ export function UniversalMaskRenderer({
     return (
       <LookupBindingContext.Provider value={lookupBindings ?? {}}>
         <RenderFromPlan
+          flowSpineCatalog={flowSpineCatalog}
           columns={columns}
           messages={messages}
           onRetry={onRetry}

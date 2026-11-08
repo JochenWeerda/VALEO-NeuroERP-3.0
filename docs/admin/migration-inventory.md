@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-09
+last_reviewed: 2026-11-07
 version: 3.0.0
 description: Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Beschreibungen sind aus den Datei-Docstrings extrahiert.
 ---
@@ -102,11 +102,16 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `agri_silo_lot_link_20260619` | WM-AGRI-LOT-LINK: silo_cells.legacy_silo_id → domain_inventory.silos |
 | `agri_silo_material_flow_20260612` | Agrar: Siloanlagen, Silozellen, Materialfluss-Knoten/Kanten (domain_inventory). |
 | `agribusiness_farmers_table_20260525` | Agribusiness farmers table |
+| `approval_engine_20261013` | Freigaben fuer buchungs- und stornorelevante Vorgaenge (APPROVAL-001). |
+| `approval_log_20261013` | Unveraenderliches Freigabeprotokoll fuer alle Bereiche (APPROVAL-001). |
 | `articles_image_url_20260322` | Add image_url to articles |
 | `articles_master_fields_gap_83_20260215` | Close 8.3 article master-data field gaps. |
 | `articles_model_alignment_20260214` | align domain_inventory.articles with Article model |
+| `artikel_steuerschluessel_20261013` | Artikel tragen Steuerschluessel statt eines Prozentsatzes. |
 | `artikelnummer_mandant_20261008` | Artikelnummer je Mandant eindeutig statt systemweit. |
 | `audit_attestations_20260917` | Die Attestierung bekommt ihre Tabelle. |
+| `audit_evidence_20261020` | GoBD-Belegnachweise: Tabelle ``domain_shared.audit_evidence`` anlegen. |
+| `audit_urheber_20261011` | Masken-Audit: gepruefter Urheber. |
 | `b38680c2f581_add_harvest_acceptance_with_nuts2_` | add_harvest_acceptance_with_nuts2_20260217 |
 | `bank_gl_binding_20261001` | Persist an explicit tenant-bound bank-to-ledger link; no inferred backfill. |
 | `bank_legacy_retirement_20261001` | Remove the competing bank model and its development-only legacy records. |
@@ -129,15 +134,18 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `calendar_items_uix063` | UIX-063: Planungskalender Read-Model und ICS-Token. |
 | `comp_artikel_sperren_20260618` | COMP-SPERR-001: Artikel-Sperr-Engine (artikel_sperren) |
 | `compliance_pcn_audit_20260623` | DOM-COMPLIANCE-004: compliance_pcn_meldungen, pcn_status_log, vvvo/sachkunde registers, artikel_sperre_audit |
+| `compliance_register_mandant_20261104` | Batch 9: Compliance-Register und Zertifikate im Mandanten, Disposition und zertifikate_api entfernt. |
 | `con_fixing_matif_20260611` | DOM-CON-004.2 — Fixierungs-Arbeitsraum + MATIF-Marktnotierung. |
 | `con_reminder_20260611` | DOM-CON-004.3 — Kontraktmahnung (append-only Mahnungs-Log). |
 | `con_settlement_storno_20260611` | DOM-CON-004.4 — Settlement-Übergabe + Storno (Bewegungs-Felder). |
 | `config_openitems_tables_20260412` | Create connectors, reporting_units, schedules, and open_items tables in domain_shared |
 | `connectors_lohn_quadriga_20260301` | Connectors: Lohn-Import-Läufe und Quadriga/Connector-Konfiguration (domain_erp) |
 | `consignment_storage_fee_engine_20260215` | add consignment storage fee run and charge tables |
+| `control_findings_20261013` | Pruefkorb des Controllers: Befunde der Kontroll-Engine (FIN-CONTROL-001). |
 | `controlling_budget_abschluss_20260623` | DOM-CONTROLLING-004 — controlling_budgets, ist_werte, kst_abschluss. |
 | `controlling_module_initial_20260215` | controlling module initial tables |
 | `crm360_o2c_delivery_20260608` | Repair canonical sales delivery-note tables for CRM360 O2C. |
+| `crm_activity_canonical_20261029` | Unify the existing domain_crm.activities aggregate; preserve source provenance. |
 | `crm_campaigns_20260524` | CRM: campaign_templates, campaigns, campaign_recipients |
 | `crm_capture_inbox_kim_20260609` | crm_capture_inbox — Klärfall-Inbox für nicht zuordenbare Auto-Captures (KIM) |
 | `crm_consent_segments_20260305` | CRM: consent, segments and segment_members tables |
@@ -148,21 +156,26 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `crm_gifts_kim_s3_20260609` | crm_gifts — Kunden-Präsente (KIM-S3) |
 | `crm_kim_perf_indexes_20260612` | CRM/KIM Cockpit-Performance — fehlende Indizes. |
 | `crm_kreditlimite_20260917` | Kreditlimite und Freigaben je Kunde. |
+| `crm_leads_spalten_20261028` | Zehn Spalten von domain_crm.leads, die das Modell liest und keine Migration anlegt. |
 | `crm_merge_20260610` | crm_merge — Kunden-Zusammenführung (DOM-CRM-004.2) |
 | `crm_notifications_kim_l3_backend_20260609` | crm_notifications — internes Benachrichtigungs-/Postfach-System fuer KIM (KIM-L3-BACKEND-001) |
 | `crm_ownership_log_20260610` | crm_ownership_log — Übergabe-/Zuordnungs-Audit (DOM-CRM-004.3) |
 | `crm_phase4_opportunity_links_20260305` | CRM Phase 4: Opportunity links to offer/order, loss_reason |
 | `desktop_runtime_repair_20260909` | Repair missing historical tables in a database already stamped at head. |
+| `dms_inbox_tenant_20261022` | dms_inbox: additive tenant_id fuer Queue-Isolation. |
 | `doc_allocations_20260915` | FSX-MENGENMODELL: positionsbezogene n:m-Zuordnung zwischen Belegen |
 | `doc_artifact_version_20260611` | DOM-DOC-004.2 — Artefakt-Versionierung + Freigabe-Status. |
 | `doc_followup_20260611` | DOM-DOC-004.3 — Bescheid/Rückmeldung + Wiedervorlage am Vorgang. |
 | `doc_nachweisraum_lifecycle_20260623` | DOM-DOC-004 — Nachweisraum Dokument-Lifecycle + GoBD-Export Tabellen |
 | `docflow_core_20260215` | docflow core tables and command idempotency |
 | `docflow_create_idempotency_and_links_unique_20260301` | Docflow: Create-Idempotency-Tabelle + Docflow-Link UNIQUE (GoBD Schritt 3) |
+| `docflow_einkauf_20261013` | DocFlow-Positionen tragen ein Aufwandskonto (Einkaufsbelege). |
 | `docflow_pos_admin_dsfinvk_20260215` | docflow pos admin and dsfinvk export tables |
 | `docflow_pos_tse_compliance_20260215` | docflow pos tse compliance table |
 | `docflow_print_event_20260301` | Docflow: Druck/Export als Ereignis (printed_at, print_count) — GoBD Schritt 3 |
 | `docflow_returns_20260821` | Document return worklist and immutable status audit. |
+| `docflow_steuerschluessel_20261013` | DocFlow-Positionen tragen ihren Steuerschluessel. |
+| `docflow_teilmengen_statushistorie_20261013` | DocFlow: mehrere Folgebelege je Quelle, Statushistorie aus der Datenbank. |
 | `document_control_20260821` | Document control exception worklist and audit. |
 | `domain_schemas_baseline_20260409` | domain_* PostgreSQL-Schemas: idempotent anlegen (Baseline fuer ORM/create_all) |
 | `driver_time_events_20260516` | add driver_time_events table |
@@ -262,13 +275,19 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `fuhrpark_tenant_ce_20261009` | Fuhrpark: additive tenant_id fuer Masken-CRUD (CE+MCP Isolation). |
 | `fuhrpark_vertiefung_20260616` | Fuhrpark Vertiefung: Statushistorie, Schaeden, Bussgeld |
 | `futtermittel_sorten_produktion_20260410` | Futtermittel-Stammdaten, Rezepte, Produktionsaufträge und Sortenregister |
+| `gdpr_request_processing_20261031` | Explicit CRM subject type and processing receipts; no guessed legacy identity. |
 | `genossenschaft_mitgliederregister_20261005` | Das Mitgliederregister einer eingetragenen Genossenschaft. |
 | `gis_geojson_schlag_20260527` | GIS: geometry_geojson column on feldbuch_schlaege for polygon capture. |
 | `gobd_archiv_erechnung_20260301` | GoBD: Archiv (document_artifacts) + E-Rechnung XML-Speicher |
 | `gobd_aufbewahrungsfristen_20260301` | GoBD: domain_finance.aufbewahrungsfristen (operative Fristentabelle) |
 | `gobd_journal_hash_chain_trigger_20260303` | GoBD Hash-Chain: Trigger für journal_entries (sequence_number, hash_prev, hash_current) |
+| `governance_ddl_log_20261026` | Record every schema change (DDL) independent of the tool that issues it. |
+| `governance_ddl_log_roles_20261026` | Prepare governance.ddl_events for separated database roles. |
 | `grundfutteranalysen_20260419` | Grundfutter-Laboranalysen: LUFA/VDLUFA-Prüfberichts-Schema (GfE-2023) |
+| `gutschrift_ust_20261012` | Gutschrift: Umsatzsteuer je Position, Netto/Steuer/Brutto getrennt, Erloeskonto je Steuerschluessel. |
+| `harvest_rule_store_20261015` | Append-only harvest rule, measurement, calculation and approval journal. |
 | `hr_applications_table_20260702` | hr: applications-Tabelle für Bewerbungs-Pipeline |
+| `hr_employee_files_20261019` | Canonical tenant-bound personal file metadata; no pilot persistence. |
 | `hr_personal_time_tracking_20260215` | hr personal time tracking tables |
 | `hr_planning_tables_20260625` | HR planning tables — employee_time_profiles, calendar_events, payroll_exports, |
 | `hr_training_onboarding_module_20260215` | hr training/qualification/onboarding module |
@@ -280,12 +299,14 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `inventory_auxiliary_20260821` | Inventory auxiliary batch governance. |
 | `inventory_charge_lineage_20260215` | inventory charge lineage links |
 | `inventory_operations_20260409` | Add source_document fields to stock_movements |
+| `inventory_service_shape_20261026` | Bring the public inventory compatibility tables into the inventory service's shape. |
 | `inventory_stock_movements_consignment_ownership_20260215` | add ownership/consignment fields to inventory_stock_movements |
 | `inventory_stock_movements_l3_fields_20260214` | extend inventory_stock_movements with l3 migration fields |
 | `job_runner_tables_repair_20260625` | Repair job runner tables for runtime sweep category A. |
 | `journal_entries_document_type_20260408` | domain_erp.journal_entries: document_type ergaenzen (GoBD Belegart) |
 | `journal_entries_unify_20260301` | Journal: Eine Tabelle für List + Connector (domain_erp.journal_entries) |
 | `journal_number_tenant_20261005` | Journal numbers identify entries within a tenant, never across tenants. |
+| `konto_sperre_20261012` | Kontosperre: ein gesperrtes Konto nimmt keine neue Buchungszeile an. |
 | `kontrakt_disposition_20261005` | Der Abruf einer kontrahierten Menge — als Tabelle, nicht als Laufzeit-DDL. |
 | `kontrakt_lifecycle_fixing_20260623` | DOM-CON-004 — Kontrakt Lifecycle, Fixing, Settlement Tabellen |
 | `kontrakt_ordnung_20261001` | Der Kontrakt-Overlay ohne Vertragsbezug wird stillgelegt. |
@@ -303,6 +324,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `kunden_lookup_view_20260602` | kunden_lookup View für schnelle Kundenauswahl (Phase 2D, Decomposition). |
 | `kunden_milchvieh_profil_20260602` | Milchvieh-Profil je Kunde (Herde/Leistung/Zellzahl) — Agrar-Anreicherung. |
 | `kunden_produktgruppen_bezug_20260603` | Ist-Bezug je Betrieb × Produktgruppe (rollierend 12 M) — Durchdringungs-CRM. |
+| `kundennummer_mandant_20261101` | Kundennummer (= Debitorennummer) je Mandant eindeutig statt systemweit. |
 | `l3_deep_mask_parity_20260822` | Tenant-safe L3 deep-mask parity foundations. |
 | `l3_legacy_interfaces_20260821` | Governed L3 Standard and Unimet adapter contracts. |
 | `l3_recent_documents_20260821` | Personal authorized recent-document projection. |
@@ -315,6 +337,8 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `lieferschein_status_bedingung_20260929` | Die Statusbedingung des Lieferscheins kennt die Zustaende, die es gibt. |
 | `lkw_annahme_queue_article_reference_20260328` | LKW-Annahme-Queue article reference |
 | `lkw_annahme_queue_klaerung_20260328` | LKW-Annahme-Queue Klaerungsdaten |
+| `loading_stop_fk_20261023` | Enforce delivery notes and stops belonging to the same tour. |
+| `loading_tenant_20261023` | Isolate legacy loading tours through their owning tenant. |
 | `log_carrier_invoices_20260618` | LOG-FRACHT-001: Spediteur-Rechnungen (carrier_invoices) |
 | `log_disposition_20260623` | DOM-LOG-004.2/.3: tour_disposition_checks + epod_settlements |
 | `log_frachtbriefe_20260626` | LOG-FRACHTBRIEF-001: Frachtbrief-Tabelle fuer /api/v1/logistik/frachtbriefe. |
@@ -340,6 +364,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `merge_heads_20260522` | Merge: agrar_ernte_planung_20260520 + fachliche_vertiefung_wave13_20260522 |
 | `merge_heads_docflow_agrar_einkauf_20260301` | Merge heads: Agrar, Einkauf RE-Workflow, Docflow GoBD Schritt 3 |
 | `merge_heads_ops_and_erp_20260304` | merge heads: domain_ops (missing_ops) and domain_erp (finance tables) |
+| `merge_hr_tax_20261019` | Join the independently delivered HR and tax-account migration branches. |
 | `merge_l3c_and_procurement_indexes_20260213` | Merge Alembic heads l3c_gap_001 and optimize_procurement_indexes_20260213. |
 | `merge_log_agent_20260626` | Merge Alembic heads: log_frachtbriefe + merge_agent_job_runner. |
 | `merge_log_agri_heads_20260623` | Merge log_disposition and agri_silo_lot_link heads (DOM-INV-004 pre-step). |
@@ -351,6 +376,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `neuro_step_audit_einkauf_tenant_20260405` | neuro_step_audit_trace + einkauf_bestellungen.tenant_id |
 | `neuroassist_state_graph_confidence_ledger_20260329` | Neuro State Graph + Confidence Ledger tables |
 | `normalize_finance_hr_contracts_20260610` | Normalize finance account values and restore HR shift schema. |
+| `nummernkreis_mandant_cascade_20261102` | Nummernkreise gehoeren dem Mandanten: Fremdschluessel mit ON DELETE CASCADE. |
 | `offene_posten_fields_crud_20260214` | Extend offene_posten with L3 fields for full CRUD. |
 | `offenes_schliessen_20261008` | Bestellkommunikation mit Inhalt; Bankkonten im Mandanten. |
 | `ops_chargen_add_mhd_20260215` | add mhd to ops_chargen |
@@ -359,12 +385,18 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `ops_wave106_operations_crud_20260519` | Wave 106: Operations CRUD — Versicherungen, Wartung/Anlagen, Tankstelle/Zapfungen, |
 | `ops_wave107_remaining_stubs_20260520` | ops_wave107_remaining_stubs — DB tables for critical in-memory stores |
 | `optimize_procurement_indexes_20260213` | Optimize indexes for documents/procurement frequent query paths. |
+| `partner_kontonummern_20261102` | Stufe 3b Geschaeftspartnerstamm: eigene Debitoren- und Kreditorennummer je Partner. |
+| `partner_rueckfuellung_20261101` | Stufe 2 Geschaeftspartnerstamm: bestehende Kunden und Lieferanten Partnern zuordnen. |
 | `pcn_meldungen_20260326` | PCN-Meldungen Persistenz-Tabelle (Wave 104 Gap-D) |
 | `perf_indexes_apply_20260602` | Catch-up: Performance-Indizes auf bereits migrierten DBs anlegen. |
 | `perf_indexes_multitenant_20260408` | perf: add missing database indexes for multi-tenant queries |
 | `performance_indexes_20260526` | Performance indexes for high-frequency query patterns. |
 | `periode_statuswoerterbuch_20261001` | Eine Buchungsperiode hat einen Zustand, nicht drei Vokabulare. |
 | `personal_organisation_zeitkonto_20261006` | Organisationseinheiten und Zeitkontokorrekturen — zwei fehlende Tabellen. |
+| `portal_interessenten_preise_20261020` | Kundenportal: Interessenten und Preisspiegel als Tabellen statt Arbeitsspeicher. |
+| `portal_kundenzugaenge_20261014` | Portal: gepruefte Zuordnung einer Anmeldung zu Kundenkonten (TENANT-DOC-001). |
+| `portal_lohndienst_persistenz_20261014` | Portal: Lohndienst-Auftraege und Empfehlungen in PostgreSQL; Portalrollen (PORTAL-CONTEXT-001). |
+| `portal_order_idempotency_20261014` | Portal-Bestellungen: Spalte idempotency_key, eindeutig je Mandant und Kunde. |
 | `pos_fiscal_providers_20260609` | POS fiscal provider abstraction and evidence tables. |
 | `pos_tagesabschluss_lifecycle_20260623` | DOM-POS-004 — POS Tagesabschluss Lifecycle Tabellen |
 | `pos_zahlarten_aktionen_20260930` | Zahlarten und Kassenaktionen bekommen eine Migration. |
@@ -381,8 +413,10 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `production_control_20260821` | Production control worklist and audit. |
 | `produktgruppen_kaeufer_20260604` | Käuferlogik je Produktgruppe + echte Signal-Herkunft. |
 | `projektion_cursor_20260930` | Die Projektionsbuchhaltung bekommt eine Migration. |
+| `psm_zulassungen_register_entfernen_20261104` | Entfernt das ersetzte Zulassungsregister einschliesslich Testdaten. |
 | `query_center_20260821` | Safe query-center definitions and audit. |
 | `quittung_ohne_vorgang_20261006` | Vier Tabellen fuer drei Wege, die bisher nur quittiert haben. |
+| `rahmenauftrag_afa_tabellen_20261102` | Tabellen, die Rahmenauftraege und AfA-Laeufe schon benutzen, auf frischen Installationen anlegen. |
 | `rations_feeding_control_20260711` | Persisted feeding-control logs (DLG 01/2025 F1). |
 | `rations_integrations_20260712` | Rations integration import journal. |
 | `rations_zugang_dsgvo_20260420` | rations_zugang DSGVO access control table |
@@ -394,6 +428,32 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `repair_runtime_contract_columns_20260610` | Repair runtime columns required by current ORM and domain checks. |
 | `repair_runtime_model_alignment_20260610` | Align fresh installations with current CRM and article runtime models. |
 | `repair_runtime_schema_20260610` | Bring runtime models that predate Alembic under the migration contract. |
+| `rls_booking_templates_shared_20261027` | Shared booking templates: 'system' templates readable for every tenant. |
+| `rls_docflow_child_keys_20261027` | Tenant-bound keys for the children of the document backbone (P5 tables). |
+| `rls_domain_audit_compliance_20261027` | Row-level security for audit attestations and compliance records (RLS domain slice). |
+| `rls_domain_crm_20261027` | Row-level security for the CRM master data (RLS domain slice crm). |
+| `rls_domain_docflow_20261027` | Row-level security for the document backbone (RLS domain slice docflow). |
+| `rls_domain_einkauf_20261027` | Row-level security for purchasing (RLS domain slice einkauf). |
+| `rls_domain_erp_20261028` | Row-level security for domain_erp part 1 (bank accounts, creditors, debitors, dunning notices, gift cards, |
+| `rls_domain_hr_20261027` | Row-level security for domain_hr master data (RLS domain slice hr). |
+| `rls_domain_inventory_20261027` | Row-level security for the inventory master data and stock documents (RLS domain slice inventory). |
+| `rls_domain_ki_20261027` | Row-level security for the AI domain: agent proposals, tool executions, knowledge versions. |
+| `rls_domain_logistics_20261028` | Row-level security for domain_logistics (tours, stops, events, disposition checks, ePOD settlements, freight |
+| `rls_domain_nachweisraum_20261027` | Row-level security for the evidence room (RLS domain slice nachweisraum). |
+| `rls_domain_ops_20261028` | Row-level security for domain_ops, part 1 (schema only, no data change). |
+| `rls_domain_ops_teil2_20261028` | Row-level security for domain_ops part 2: the eight tables without a tenant column that are empty live. |
+| `rls_domain_pricing_20261027` | Row-level security for domain_pricing (RLS domain slice, first after P0-P7). |
+| `rls_domain_sales_20261027` | Row-level security for the sales documents (RLS domain slice sales). |
+| `rls_domain_shared_20261027` | Row-level security for tenant tables in domain_shared (RLS domain slice shared). |
+| `rls_knowledge_objects_shared_20261027` | Row-level security for knowledge objects: own objects plus shared product knowledge. |
+| `rls_nutrient_compositions_20261028` | Row-level security for domain_agrar.nutrient_compositions (Naehrstoffgehalte der Duengemittel). |
+| `rls_pilot_finance_20261026` | Row-level security pilot: domain_finance and the posting journal (RLS plan P3). |
+| `rls_rollout_20261026` | Roll row-level security out to the class-A tables cleared by the analysis (RLS plan P5). |
+| `rls_system_read_justified_20261027` | Shared 'system' rows readable only where justified (RLS, system-wide). |
+| `rls_system_role_20261026` | Row-level security for tables freed by the valeo_system connection (RLS plan P6). |
+| `rls_verified_agrar_20261027` | RLS for two Agrar tables whose API tenant fallbacks have been removed. |
+| `ruestlisten_tabelle_20261103` | Rüstlisten (Kommissioniervorbereitung): Tabelle, die der Weg /lager/ruestliste schon benutzt. |
+| `runtime_ddl_to_migrations_20261026` | Move schema objects that the application created at request time into the migration chain. |
 | `runtime_sweep_repair_20260702` | RUNTIME-SWEEP-REPAIR-001: Fresh-DB-Drift schliessen (SPEC-P0-02). |
 | `sales_ab_preisabweichung_20260623` | DOM-SALES-004: sales_ab_status_log, lieferschein_close_log, sales_preisabweichungen |
 | `sales_angebot_auftrag_tables_20260225` | Add sales_offers, sales_offer_items, sales_orders, sales_order_items to domain_crm |
@@ -403,23 +463,36 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `sales_delivery_storno_20260611` | DOM-SALES-004.4 — Lieferungs-Storno (Grund am Lieferschein). |
 | `sales_invoice_lines_20260915` | Ausgangsrechnung und Rechnungsposition als eigene Objekte |
 | `sales_o2c_link_20260610` | sales O2C-Link — Auftrag→Lieferschein-Verknüpfung (DOM-SALES-004.1) |
+| `sales_offer_number_tenant_20261031` | Scope active offer numbers to their tenant without changing historical data. |
 | `sales_orders_items_shipping_20260215` | Add sales_order_items relation and shipping_method on sales_orders. |
+| `scheinwege_mandant_20261103` | Batch 8 Scheinwege: Seeds und Testreste weg, Foerderung und Labor im Mandanten, Marketingtabelle entfernt. |
 | `screen_definition_drafts_20260916` | Studio ScreenDefinition drafts for Masken-Studio persistency. |
 | `seed_anlage1_abzugstabelle_template_20260303` | seed Anlage 1 (Abzugstabelle Qualität) amendment template |
 | `seed_default_tenant_20260214` | seed default tenant for foreign-key constrained domain tables |
+| `service_anfragen_20261027` | Service-Anfragen und ihre Rueckmeldungen liegen in der Datenbank. |
 | `steuernachweis_mandant_20261001` | Steuerliche Nachweise bekommen eine Migration — und einen Mandanten. |
+| `steuerschluessel_aufwandskonto_20261013` | Steuerschluessel tragen ein Aufwandskonto fuer Eingangsbelege. |
+| `steuerschluessel_einheit_20261012` | Steuerschluessel: eine Quelle. Erloeskonto und Paragraf-24-Kennzeichen an ``tax_keys``. |
 | `streckengeschaefte_table_merge_20260424` | Streckengeschaefte persistent (public.streckengeschaefte); merge mehrerer Alembic-Heads. |
+| `studio_history_20261014` | Transactional append-only Studio revision history. |
 | `supply_chain_events_20260610` | supply_chain_events — append-only Ketten-Ereignis-Log (DOM-SUPPLY-004.2) |
 | `tank_adapter_20260821` | Tank adapter inbox and delivery-note handover. |
 | `tapi_calls_20260603` | TAPI/Telefonie — eingehende Anrufe für Click-to-Customer-Popup. |
+| `tax_account_category_20261019` | Steuerkonten: Kategorie ``tax`` auf die Kategorien des Kontenplan-Schemas umstellen. |
 | `team_calendar_20260821` | Team calendar ownership and privacy model. |
 | `user_screen_overlays_uix071` | UIX-071 user screen overlays. |
 | `ustva_voranmeldungen_20260527` | UStVA Voranmeldungen Tabelle (§ 18 UStG ELSTER-Übertragung). |
+| `vat_codes_entfernt_20261012` | vat_codes entfaellt: Steuerschluessel kommen allein aus domain_erp.tax_keys. |
+| `vat_return_bearbeiter_20261027` | UStVA-Anmeldungen speichern, wer berechnet, geprueft, freigegeben und uebermittelt hat. |
 | `verkauf_fehlende_spalten_20260929` | Fuenf Spalten, die der Code schreibt und keine Migration anlegt. |
+| `versandwege_echt_20261008` | Versandwege: Anfragen mit Mandant, Mahnungen mit Versandweg. |
+| `waage_tenant_20261030` | Bind operations scales to verified tenant; leave unknown legacy ownership unassigned. |
+| `waagen_wiegungen_mandant_20261103` | Waagen und Alt-Wiegungen im selben Mandantenmuster wie die uebrigen domain_ops-Tabellen. |
 | `warehouse_schema_repair_20260626` | WAREHOUSE-REPAIR-001: domain_inventory.warehouses fehlende Spalten nachziehen. |
 | `warehouse_wms_structure_20260517` | WMS warehouse zones, bins, bin_stock, pick_lists and pick_list_lines |
 | `wave3_wf_trigger_log_20260618` | wave3: wf_trigger_log + bank_statements + bank_statement_lines + waagen_quittungen |
 | `webhook_zustellprotokoll_20261001` | Ein Zustellversuch braucht einen Nachweis. |
+| `webshop_tabellen_20261020` | Webshop-Anbindung: Konfigurationen, Bestellungen und Synchronisationsprotokoll als Tabellen. |
 | `wf_cockpit_persist_20260625` | WF-COCKPIT-PERSIST-001: Persistente Workflow-Cockpit-Tabellen. |
 | `whatsapp_bestell_inbox_20260603` | WhatsApp Bestell-Inbox — eingehende Freitext-Bestellungen + AI-Extraktion. |
 | `whistleblower_eine_tabelle_20260930` | Hinweisgebermeldungen bekommen eine Migration, eine Form und einen Mandanten. |

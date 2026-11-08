@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from app.auth.finance_roles import finance_read, finance_write
 from datetime import date
 from typing import Any, Optional
 
@@ -12,13 +13,13 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.finance_clearing_service import ClearingError, FinanceClearingService
-from app.documents.router_helpers import get_repository, get_from_store, save_to_store
+from app.documents.router_helpers import eigener_beleg, get_repository, save_to_store
 from app.api.v1.schemas.base import TypedObjectOut
 
 router = APIRouter(prefix="/finance", tags=["finance", "fibu", "op"])
 
 
-@router.get("/zahlungseingang/clearings", response_model=TypedObjectOut, summary="Auszifferungen je OP")
+@router.get("/zahlungseingang/clearings", response_model=TypedObjectOut, summary="Auszifferungen je OP", dependencies=[Depends(finance_read)])
 def clearings(
     rechnungsnr: str = Query(..., description="Rechnungsnummer des OP"),
     db: Session = Depends(get_db),
@@ -36,7 +37,7 @@ class PaymentIn(BaseModel):
     bediener: Optional[str] = None
 
 
-@router.post("/zahlungseingang", response_model=TypedObjectOut, summary="Zahlungseingang erfassen (OP ausziffern)")
+@router.post("/zahlungseingang", response_model=TypedObjectOut, summary="Zahlungseingang erfassen (OP ausziffern)", dependencies=[Depends(finance_write)])
 def record_payment(
     body: PaymentIn,
     db: Session = Depends(get_db),
@@ -60,7 +61,9 @@ def record_payment(
     if result.get("voll_ausgeziffert"):
         try:
             repo = get_repository(db)
-            inv = get_from_store("sales_invoice", body.rechnungsnr, repo)
+            # Nur die eigene Rechnung: die Nummer ist im Speicher systemweit eindeutig, ein fremder Beleg gleicher Nummer
+            # wurde bis 14.10.2026 mit auf BEZAHLT gesetzt.
+            inv = eigener_beleg("sales_invoice", body.rechnungsnr, tenant_id, repo)
             if inv and inv.get("status") not in ("BEZAHLT", "STORNIERT"):
                 inv["status"] = "BEZAHLT"
                 save_to_store("sales_invoice", body.rechnungsnr, inv, repo)

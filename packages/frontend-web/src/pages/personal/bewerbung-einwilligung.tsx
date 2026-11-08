@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { MadeByStudioDetailRuntimeWire } from '@/components/mask-builder/made-by-studio-runtime-wire'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { useNavigate, useParams } from '@/app/routing/typed-router'
@@ -15,6 +16,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { UniversalMaskRenderer } from '@/components/mask-builder/UniversalMaskRenderer'
 import { formatReadOnlyValue } from '@/components/mask-builder/renderers/FieldRenderer'
+import { useScreenPermissions } from '@/components/mask-builder/runtime/screen-permissions'
 import { compileRenderPlanFromScreenDefinition } from '@/components/mask-builder/render-plan/schema-compiler'
 import { useUniversalFormState } from '@/components/mask-builder/runtime/useUniversalFormState'
 import { createScreenContext } from '@/components/mask-builder/governance/screen-context'
@@ -49,7 +51,6 @@ const leer = {
   fassung: '',
   gueltig_bis: '',
   kanal: '',
-  erfasst_durch: '',
   wortlaut: '',
 }
 
@@ -127,7 +128,8 @@ export default function PersonalBewerbungEinwilligungPage(): JSX.Element {
     })),
   }), [fassungen, hatEinwilligung, isTouch, laeuft, pending, stand.data?.gueltig_bis])
 
-  const plan = useMemo(() => compileRenderPlanFromScreenDefinition(schema), [schema])
+  const rechte = useScreenPermissions(schema)
+  const plan = useMemo(() => compileRenderPlanFromScreenDefinition(schema, { permissions: rechte }), [schema, rechte])
   const form = useUniversalFormState({ screen: schema, initialValues: leer })
   const { setValue } = form
 
@@ -171,14 +173,13 @@ export default function PersonalBewerbungEinwilligungPage(): JSX.Element {
         fassung,
         gueltig_bis: gueltigBis,
         kanal,
-        erfasst_durch: text(form.values.erfasst_durch) || null,
       })
       toast.success('Einwilligung erteilt', {
         description: `Fassung ${vorgang.fassung ?? fassung}, gültig bis ${anzeige(vorgang.gueltig_bis ?? gueltigBis)}`,
       })
       // Leeren ohne die Felder als bearbeitet zu markieren — sonst meldet eine
       // gelungene Erteilung "Pflichtfeld".
-      form.resetForm({ ...form.values, fassung: '', gueltig_bis: '', erfasst_durch: '', wortlaut: '' })
+      form.resetForm({ ...form.values, fassung: '', gueltig_bis: '', wortlaut: '' })
       await neuLaden()
     } catch (error) {
       toast.error('Einwilligung nicht erteilt', { description: getAxiosErrorMessage(error) })
@@ -253,7 +254,7 @@ export default function PersonalBewerbungEinwilligungPage(): JSX.Element {
 
   const screenContext = useMemo(() => createScreenContext({
     data: { bewerbung: kopf.data ?? null, vorgaenge },
-    permissions: { granted: [] },
+    permissions: { granted: rechte },
     state: { values: form.values, policies: {} },
     actions: {
       'personal.erteileEinwilligung': () => handleAction('erteilen'),
@@ -262,7 +263,7 @@ export default function PersonalBewerbungEinwilligungPage(): JSX.Element {
       'personal.openErklaerungen': () => handleAction('erklaerungen'),
     },
     navigation: { push: () => undefined },
-  }), [form.values, handleAction, kopf.data, vorgaenge])
+  }), [rechte, form.values, handleAction, kopf.data, vorgaenge])
 
   if (!id) {
     return (
@@ -320,3 +321,8 @@ export default function PersonalBewerbungEinwilligungPage(): JSX.Element {
     </div>
   )
 }
+function madeByStudioRuntimeWireDeclaration(): JSX.Element {
+  return <MadeByStudioDetailRuntimeWire screenId="personal/bewerbung-einwilligung" />
+}
+void madeByStudioRuntimeWireDeclaration
+

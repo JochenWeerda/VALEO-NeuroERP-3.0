@@ -19,6 +19,7 @@ from ....core.iot_telemetry import (
 )
 
 from app.api.v1.schemas.base import BaseSchema
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/iot", tags=["iot", "telemetry"])
@@ -52,7 +53,7 @@ async def list_devices(tenant_id: str = Depends(get_tenant_id)):
     return list(store.values())
 
 
-@router.post("/devices", response_model=DeviceManifest, status_code=201, summary="Device registrieren")
+@router.post("/devices", response_model=DeviceManifest, status_code=201, summary="Device registrieren", dependencies=SCHREIBEN["FACHLICH"])
 async def register_device(
     manifest: DeviceManifest,
     tenant_id: str = Depends(get_tenant_id),
@@ -83,7 +84,7 @@ async def get_readings(
     return readings[-limit:]
 
 
-@router.post("/devices/{device_id}/readings", response_model=TelemetryReading, status_code=201, summary="Reading ingest")
+@router.post("/devices/{device_id}/readings", response_model=TelemetryReading, status_code=201, summary="Reading ingest", dependencies=SCHREIBEN["FACHLICH"])
 async def ingest_reading(
     device_id: str,
     reading: TelemetryReading,

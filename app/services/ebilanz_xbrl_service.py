@@ -14,11 +14,11 @@ CORE_FIELDS = (
     "de-gcd:genInfo.report.period.fiscalYearBegin", "de-gcd:genInfo.report.period.fiscalYearEnd",
 )
 NS = {
-    "xbrli": "http://www.xbrl.org/2003/instance", "link": "http://www.xbrl.org/2003/linkbase",
+    "xbrli": "http://www.xbrl.org/2003/instance", "link": "http://www.xbrl.org/2003/linkbase",  # NOSONAR - XBRL-Namensraum/Taxonomie-Kennung (E-Bilanz verlangt die http-Form), kein Netzzugriff
     "xlink": "http://www.w3.org/1999/xlink", "xsi": "http://www.w3.org/2001/XMLSchema-instance",
-    "iso4217": "http://www.xbrl.org/2003/iso4217",
-    "de-gcd": "http://www.xbrl.de/taxonomies/de-gcd-2025-04-01",
-    "de-gaap-ci": "http://www.xbrl.de/taxonomies/de-gaap-ci-2025-04-01",
+    "iso4217": "http://www.xbrl.org/2003/iso4217",  # NOSONAR - XBRL-Namensraum/Taxonomie-Kennung (E-Bilanz verlangt die http-Form), kein Netzzugriff
+    "de-gcd": "http://www.xbrl.de/taxonomies/de-gcd-2025-04-01",  # NOSONAR - XBRL-Namensraum/Taxonomie-Kennung (E-Bilanz verlangt die http-Form), kein Netzzugriff
+    "de-gaap-ci": "http://www.xbrl.de/taxonomies/de-gaap-ci-2025-04-01",  # NOSONAR - XBRL-Namensraum/Taxonomie-Kennung (E-Bilanz verlangt die http-Form), kein Netzzugriff
 }
 _NUMERIC = {"monetaryItemType", "decimalItemType", "integerItemType", "nonNegativeIntegerItemType",
             "positiveIntegerItemType", "sharesItemType", "pureItemType", "percentItemType"}
@@ -97,7 +97,7 @@ def build_draft(facts: dict[str, str | None], start: date, end: date, identifier
     for prefix, suffix in [("de-gcd", "shell"), ("de-gaap-ci", "shell-fiscal")]:
         stem = f"{prefix}-2025-04-01"
         ET.SubElement(root, "link:schemaRef", {"xlink:type": "simple", "xlink:href":
-            f"http://www.xbrl.de/taxonomies/{stem}/{stem}-{suffix}.xsd"})
+            f"http://www.xbrl.de/taxonomies/{stem}/{stem}-{suffix}.xsd"})  # NOSONAR - XBRL-Namensraum/Taxonomie-Kennung (E-Bilanz verlangt die http-Form), kein Netzzugriff
     for context_id, instant in [("duration", False), ("instant", True)]:
         context = ET.SubElement(root, "xbrli:context", {"id": context_id})
         entity = ET.SubElement(context, "xbrli:entity")

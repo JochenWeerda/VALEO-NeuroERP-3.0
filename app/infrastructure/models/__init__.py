@@ -151,11 +151,21 @@ class Activity(Base):
     title = Column(String(200), nullable=False)
     customer = Column(String(100), nullable=False)
     contact_person = Column(String(100), nullable=False)
-    date = Column(DateTime(timezone=True), nullable=False)
+    date = Column(DateTime(timezone=True), nullable=True)
     status = Column(String(20), nullable=False)  # planned, completed, overdue
     assigned_to = Column(String(100), nullable=False)
     description = Column(Text, nullable=True)
-    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=True)
+    customer_id = Column(String(64), nullable=True)
+    contact_id = Column(String(64), nullable=True)
+    opportunity_id = Column(String(36), nullable=True)
+    version = Column(Integer, nullable=False, default=1)
+    main_topics = Column(postgresql.JSONB, nullable=False, default=list)
+    orders_placed = Column(postgresql.JSONB, nullable=False, default=list)
+    follow_up_actions = Column(postgresql.JSONB, nullable=False, default=list)
+    origin = Column(postgresql.JSONB, nullable=False, default=dict)
+    created_by = Column(String(120), nullable=True)
+    updated_by = Column(String(120), nullable=True)
+    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
@@ -779,7 +789,10 @@ class Article(Base):
     naehrwertangaben = Column(Text, nullable=True)
     mhd_erforderlich = Column(Boolean, nullable=False, default=False)
     lagerartikel = Column(Boolean, nullable=False, default=True)
+    # Abbild des Satzes von ``steuerschluessel_verkauf``; angegeben wird der Schluessel.
     mehrwertsteuer_prozent = Column(DECIMAL(5, 2), nullable=True)
+    steuerschluessel_verkauf = Column(String(2), nullable=True)
+    steuerschluessel_einkauf = Column(String(2), nullable=True)
     warengruppe = Column(String(80), nullable=True)
     # Dangerous goods
     gefahrgutklasse = Column(String(40), nullable=True)
@@ -1166,6 +1179,9 @@ class Account(Base):
     tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
     parent_account_id = Column(String, ForeignKey("domain_erp.chart_of_accounts.id"), nullable=True)
     is_active = Column(Boolean, default=True)
+    # Gesperrt: bleibt im Kontenplan sichtbar, nimmt aber keine neue Buchungszeile an
+    # (Trigger an journal_entry_lines, Migration konto_sperre_20261012).
+    posting_blocked = Column(Boolean, nullable=False, default=False, server_default="false")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     deleted_at = Column(DateTime(timezone=True), nullable=True)
@@ -1203,9 +1219,9 @@ class AuditLog(Base):
 
     id = Column(String, primary_key=True)
     timestamp = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
-    user_id = Column(String, ForeignKey("domain_shared.users.id"), nullable=False)
+    user_id = Column(String, nullable=False)
     user_email = Column(String(100), nullable=False)
-    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
+    tenant_id = Column(String, nullable=False)
     action = Column(String(50), nullable=False)
     entity_type = Column(String(50), nullable=False)
     entity_id = Column(String, nullable=False)
@@ -1316,3 +1332,6 @@ from app.infrastructure.models.wms_models import (  # noqa: E402,F401
     MaterialFlowNode,
     MaterialFlowEdge,
 )
+
+# Register persisted read models during regular database initialization.
+from .read_model_snapshots import ReadModelSnapshotRecord  # noqa: F401

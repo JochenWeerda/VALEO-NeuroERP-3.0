@@ -8,10 +8,11 @@
  * Externe Gates (DATEV, ELSTER) bleiben simuliert / nicht beruehrt.
  */
 import { test, expect, request } from '@playwright/test'
+import { apiToken, E2E_MANDANT } from '../../helpers/anmeldung'
 
 const BASE = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:8000'
-const TENANT = 'e2e-o2c-001'
-const AUTH = process.env.API_DEV_TOKEN ?? 'dev-token'
+const TENANT = E2E_MANDANT
+const AUTH = apiToken()
 const HEADERS = {
   'X-Tenant-ID': TENANT,
   'Content-Type': 'application/json',
@@ -210,11 +211,11 @@ test.describe.serial('O2C — Order-to-Cash Prozesskette @smoke @e2e-matrix', ()
 // Nur Schritte die gegen eine grüne API laufen (201/200 erwartet, kein 503-Fallback).
 test.describe('O2C @critical Kern-Pfad', () => {
   const BASE_CRIT = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:8000'
-  const TENANT_CRIT = 'e2e-crit-o2c'
+  const TENANT_CRIT = E2E_MANDANT
   const HEADERS_CRIT = {
     'X-Tenant-ID': TENANT_CRIT,
     'Content-Type': 'application/json',
-    'Authorization': `Bearer ${process.env.API_DEV_TOKEN ?? 'dev-token'}`,
+    'Authorization': `Bearer ${apiToken()}`,
   }
 
   test('O2C @critical — Auftrag-Endpunkt antwortet (Health)', async () => {

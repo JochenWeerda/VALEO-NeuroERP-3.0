@@ -1,5 +1,6 @@
 import type { ScreenDefinition, ScreenFieldDefinition, ScreenTabDefinition } from '../schema'
 import type { RenderPlan } from './types'
+import { fieldExtras } from './field-extras'
 
 /** Übergangshilfe: RenderPlan → ScreenDefinition für Legacy-Renderer und Tests. */
 export function renderPlanToScreenDefinition(plan: RenderPlan): ScreenDefinition {
@@ -19,6 +20,9 @@ export function renderPlanToScreenDefinition(plan: RenderPlan): ScreenDefinition
         dataSourceKey: field.dataSourceKey,
         minSearchChars: field.minSearchChars,
         renderHint: field.renderHint,
+        currencyField: field.currencyField,
+        ...fieldExtras(field),
+        ...(field.fileContent !== undefined ? { fileContent: field.fileContent } : {}),
       }))
 
   const tabs: ScreenTabDefinition[] = plan.visibleTabs.map((tab) => ({

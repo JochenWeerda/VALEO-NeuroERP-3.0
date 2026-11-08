@@ -14,32 +14,59 @@ from app.core.uuid7 import uuid7
 logger = logging.getLogger(__name__)
 
 
+class BelegOhneMandant(ValueError):
+    """Ein Beleg ohne Mandant gehoert niemandem (TENANT-DOC-001): kein Lese- oder Schreibweg findet ihn wieder.
+
+    Bis 14.10.2026 nahm der Speicher solche Belege an; die sieben Testbelege der gewachsenen Datenbank sind nach
+    Sicherung und Freigabe geloescht. Dies ist der einzige Schreibweg der Anwendung in ``documents``.
+    """
+
+
+class DocumentAlreadyExists(ValueError):
+    """An insert-only business operation must never become an update."""
+
+
+class DocumentOwnershipError(ValueError):
+    """An existing document's tenant is immutable, including under concurrency."""
+
+
 class DocumentRepository:
     """Repository für Dokument-Verwaltung"""
     
     def __init__(self, db: Session):
         self.db = db
     
-    def save(self, doc_type: str, doc_number: str, data: dict, *, commit: bool = True) -> dict:
+    def save(self, doc_type: str, doc_number: str, data: dict, *, commit: bool = True, create_only: bool = False) -> dict:
         """Kurzform von :meth:`save_document`.
 
         42 Aufrufe in neun Diensten (Bestellungen, Annahme, Aussendienst, …) rufen
         seit dem 15.05.2026 ``repo.save`` — eine Methode, die es nie gab; jeder dieser
         Wege scheiterte mit ``AttributeError``. Gefunden am 07.10.2026.
         """
-        return self.save_document(doc_type, doc_number, data, commit=commit)
+        options = {"create_only": True} if create_only else {}
+        return self.save_document(doc_type, doc_number, data, commit=commit, **options)
 
-    def save_document(self, doc_type: str, doc_number: str, data: dict, *, commit: bool = True) -> dict:
+    def save_document(self, doc_type: str, doc_number: str, data: dict, *, commit: bool = True, create_only: bool = False) -> dict:
         """Speichert ein Dokument; commit=False belässt die Transaktion beim Aufrufer."""
+        if not str((data or {}).get("tenantId") or "").strip():
+            raise BelegOhneMandant(f"{doc_type}/{doc_number}: Beleg ohne Mandant (tenantId) wird nicht gespeichert")
         try:
             # Prüfe ob Dokument existiert
             existing = self.db.execute(
                 text("""
                     SELECT id, data FROM documents 
-                    WHERE doc_type = :doc_type AND doc_number = :doc_number
+                    WHERE doc_type = :doc_type AND doc_number = :doc_number FOR UPDATE
                 """),
                 {"doc_type": doc_type, "doc_number": doc_number}
             ).fetchone()
+
+            if existing:
+                if create_only:
+                    raise DocumentAlreadyExists("Belegnummer ist bereits vergeben")
+                stored = existing.data if isinstance(existing.data, dict) else json.loads(existing.data)
+                tenant = str(stored.get("tenantId") or stored.get("tenant_id") or "")
+                if tenant != str(data["tenantId"]):
+                    raise DocumentOwnershipError("Bestehender Beleg gehoert nicht zum Speichermandanten")
             
             # Stelle sicher, dass number im data enthalten ist
             data["number"] = doc_number
@@ -79,10 +106,10 @@ class DocumentRepository:
                 self.db.commit()
             logger.info(f"Saved document: {doc_type}/{doc_number}")
             return {"ok": True, "number": doc_number}
-        except Exception as e:
+        except Exception:
             if commit:
                 self.db.rollback()
-            logger.error(f"Failed to save document: {e}")
+            logger.error("Failed to save document; transaction was not completed")
             raise
     
     def get_document(self, doc_type: str, doc_number: str) -> Optional[dict]:
@@ -131,7 +158,8 @@ class DocumentRepository:
                     query += " AND data::jsonb->>'customerId' = :customerId"
                     params["customerId"] = filters["customerId"]
                 if "tenantId" in filters:
-                    query += " AND (data::jsonb->>'tenantId' = :tenantId OR data::jsonb->>'tenantId' IS NULL)"
+                    # Streng: ein Beleg ohne Mandant gehoert niemandem (bis 14.10.2026 „oder ohne Mandant“).
+                    query += " AND data::jsonb->>'tenantId' = :tenantId"
                     params["tenantId"] = filters["tenantId"]
                 if "supplierId" in filters:
                     query += " AND data::jsonb->>'supplierId' = :supplierId"
@@ -179,7 +207,8 @@ class DocumentRepository:
                     query += " AND data::jsonb->>'status' = :status"
                     params["status"] = filters["status"]
                 if "tenantId" in filters:
-                    query += " AND (data::jsonb->>'tenantId' = :tenantId OR data::jsonb->>'tenantId' IS NULL)"
+                    # Streng: ein Beleg ohne Mandant gehoert niemandem (bis 14.10.2026 „oder ohne Mandant“).
+                    query += " AND data::jsonb->>'tenantId' = :tenantId"
                     params["tenantId"] = filters["tenantId"]
                 if "supplierId" in filters:
                     query += " AND data::jsonb->>'supplierId' = :supplierId"

@@ -46,4 +46,3 @@ ai_harness:
     Keine Rechteausweitung durch umbenannte Kacheln.
   betriebs_vertrag: >
     Rollback = Overlay loeschen oder Commit revertieren.
----

@@ -7,7 +7,7 @@ Covers /api/v1/finance/chart-of-accounts — CRUD, validate, DATEV export.
 import pytest
 from fastapi.testclient import TestClient
 
-from main import app
+from app.main import app
 from conftest import skip_if_db_unavailable
 
 client = TestClient(app, raise_server_exceptions=False)

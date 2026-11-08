@@ -4,7 +4,7 @@ CRUD für Contacts, Leads, Activities, Betriebsprofile, Opportunities, Consent, 
 """
 
 import logging
-from fastapi import APIRouter, Depends, HTTPException, Header, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from typing import List, Optional
@@ -12,21 +12,19 @@ from datetime import datetime
 from app.core.uuid7 import uuid7
 
 from app.core.database import get_db
+# Mandant nur aus der verifizierten Identitaet; vorher X-Tenant-Header mit Rueckfall "default" (RLS-DOMAIN-CRM).
+from app.core.tenant import get_tenant_id
 from . import models, schemas
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/crm", tags=["CRM"])
 
 
-def get_tenant_id(x_tenant: Optional[str] = Header(None)) -> str:
-    """Extract Tenant ID from Header"""
-    return x_tenant or "default"
-
-
 # --- CONTACTS ---
 
-@router.post("/contacts", response_model=schemas.Contact, status_code=201)
+@router.post("/contacts", response_model=schemas.Contact, status_code=201, dependencies=SCHREIBEN["CRM"])
 async def create_contact(
     contact: schemas.ContactCreate,
     db: Session = Depends(get_db),
@@ -86,7 +84,7 @@ async def get_contact(
     return contact
 
 
-@router.put("/contacts/{contact_id}", response_model=schemas.Contact)
+@router.put("/contacts/{contact_id}", response_model=schemas.Contact, dependencies=SCHREIBEN["CRM"])
 async def update_contact(
     contact_id: str,
     contact_update: schemas.ContactUpdate,
@@ -111,7 +109,7 @@ async def update_contact(
     return db_contact
 
 
-@router.delete("/contacts/{contact_id}", status_code=204)
+@router.delete("/contacts/{contact_id}", status_code=204, dependencies=SCHREIBEN["CRM"])
 async def delete_contact(
     contact_id: str,
     db: Session = Depends(get_db),
@@ -140,24 +138,16 @@ async def get_contact_timeline(
     tenant_id: str = Depends(get_tenant_id),
 ):
     """CRM-360-01: Customer Timeline — all activities for contact chronologically."""
-    query = db.query(models.Activity).filter(
-        models.Activity.contact_id == contact_id,
-        models.Activity.tenant_id == tenant_id,
-    )
+    from app.infrastructure.models import Activity
+    from app.domains.crm.activity_contracts import normalize_legacy_activity_type
+    query=db.query(Activity).filter(Activity.contact_id==contact_id,Activity.tenant_id==tenant_id)
     if activity_type:
-        query = query.filter(models.Activity.type == activity_type)
-    activities = query.order_by(models.Activity.date.desc()).limit(limit).all()
-    return [
-        {
-            "id": str(a.id),
-            "type": a.type.value if hasattr(a.type, "value") else str(a.type),
-            "date": a.date.isoformat() if a.date else None,
-            "subject": a.subject,
-            "notes": a.notes,
-            "status": a.status.value if hasattr(a.status, "value") else str(a.status),
-        }
-        for a in activities
-    ]
+        try:query=query.filter(Activity.type==normalize_legacy_activity_type(activity_type))
+        except ValueError as error:raise HTTPException(422,"Unknown activity type") from error
+    return [{"id":str(a.id),"type":a.type,"date":a.date.isoformat() if a.date else None,
+             "subject":a.title,"notes":a.description,"status":a.status}
+            for a in query.order_by(Activity.date.desc().nullslast(),Activity.id).limit(min(max(limit,1),200)).all()]
+
 
 
 # --- LEADS ---
@@ -166,7 +156,7 @@ async def get_contact_timeline(
 
 
 
-@router.post("/leads/route", response_model=dict)
+@router.post("/leads/route", response_model=dict, dependencies=SCHREIBEN["CRM"])
 async def route_unassigned_leads(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -192,7 +182,7 @@ async def route_unassigned_leads(
 
 
 
-@router.post("/leads/{lead_id}/assign", response_model=schemas.Lead)
+@router.post("/leads/{lead_id}/assign", response_model=schemas.Lead, dependencies=SCHREIBEN["CRM"])
 async def assign_lead(
     lead_id: str,
     body: schemas.LeadAssignBody,
@@ -213,114 +203,9 @@ async def assign_lead(
     return db_lead
 
 
-# --- ACTIVITIES ---
-
-@router.post("/activities", response_model=schemas.Activity, status_code=201)
-async def create_activity(
-    activity: schemas.ActivityCreate,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id)
-):
-    """Create new activity"""
-    db_activity = models.Activity(
-        id=uuid7(),
-        **activity.model_dump(),
-        tenant_id=tenant_id
-    )
-    db.add(db_activity)
-    db.commit()
-    db.refresh(db_activity)
-    return db_activity
-
-
-@router.get("/activities", response_model=List[schemas.Activity])
-async def list_activities(
-    contact_id: Optional[str] = None,
-    type: Optional[schemas.ActivityType] = None,
-    status: Optional[schemas.ActivityStatus] = None,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id)
-):
-    """List all activities"""
-    query = db.query(models.Activity).filter(models.Activity.tenant_id == tenant_id)
-    
-    if contact_id:
-        query = query.filter(models.Activity.contact_id == contact_id)
-    
-    if type:
-        query = query.filter(models.Activity.type == type)
-    
-    if status:
-        query = query.filter(models.Activity.status == status)
-    
-    return query.order_by(models.Activity.date.desc()).all()
-
-
-@router.get("/activities/{activity_id}", response_model=schemas.Activity)
-async def get_activity(
-    activity_id: str,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id)
-):
-    """Get activity by ID"""
-    activity = db.query(models.Activity).filter(
-        models.Activity.id == activity_id,
-        models.Activity.tenant_id == tenant_id
-    ).first()
-    
-    if not activity:
-        raise HTTPException(status_code=404, detail="Activity not found")
-    
-    return activity
-
-
-@router.put("/activities/{activity_id}", response_model=schemas.Activity)
-async def update_activity(
-    activity_id: str,
-    activity_update: schemas.ActivityUpdate,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id)
-):
-    """Update activity"""
-    db_activity = db.query(models.Activity).filter(
-        models.Activity.id == activity_id,
-        models.Activity.tenant_id == tenant_id
-    ).first()
-    
-    if not db_activity:
-        raise HTTPException(status_code=404, detail="Activity not found")
-    
-    for field, value in activity_update.model_dump(exclude_unset=True).items():
-        setattr(db_activity, field, value)
-    
-    db.commit()
-    db.refresh(db_activity)
-    return db_activity
-
-
-@router.delete("/activities/{activity_id}", status_code=204)
-async def delete_activity(
-    activity_id: str,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id)
-):
-    """Delete activity"""
-    db_activity = db.query(models.Activity).filter(
-        models.Activity.id == activity_id,
-        models.Activity.tenant_id == tenant_id
-    ).first()
-    
-    if not db_activity:
-        raise HTTPException(status_code=404, detail="Activity not found")
-    
-    db.delete(db_activity)
-    db.commit()
-    return None
-
-
 # --- BETRIEBSPROFILE ---
 
-@router.post("/betriebsprofile", response_model=schemas.BetriebsProfil, status_code=201)
+@router.post("/betriebsprofile", response_model=schemas.BetriebsProfil, status_code=201, dependencies=SCHREIBEN["CRM"])
 async def create_betriebsprofil(
     profil: schemas.BetriebsProfilCreate,
     db: Session = Depends(get_db),
@@ -367,7 +252,7 @@ async def get_betriebsprofil(
     return profil
 
 
-@router.put("/betriebsprofile/{profil_id}", response_model=schemas.BetriebsProfil)
+@router.put("/betriebsprofile/{profil_id}", response_model=schemas.BetriebsProfil, dependencies=SCHREIBEN["CRM"])
 async def update_betriebsprofil(
     profil_id: str,
     profil_update: schemas.BetriebsProfilUpdate,
@@ -391,7 +276,7 @@ async def update_betriebsprofil(
     return db_profil
 
 
-@router.delete("/betriebsprofile/{profil_id}", status_code=204)
+@router.delete("/betriebsprofile/{profil_id}", status_code=204, dependencies=SCHREIBEN["CRM"])
 async def delete_betriebsprofil(
     profil_id: str,
     db: Session = Depends(get_db),
@@ -436,7 +321,7 @@ async def get_opportunity_stages():
     return PIPELINE_STAGES
 
 
-@router.post("/opportunities", response_model=schemas.Opportunity, status_code=201)
+@router.post("/opportunities", response_model=schemas.Opportunity, status_code=201, dependencies=SCHREIBEN["CRM"])
 async def create_opportunity(
     opp: schemas.OpportunityCreate,
     db: Session = Depends(get_db),
@@ -504,7 +389,7 @@ async def get_opportunity(
     return opp
 
 
-@router.put("/opportunities/{opp_id}", response_model=schemas.Opportunity)
+@router.put("/opportunities/{opp_id}", response_model=schemas.Opportunity, dependencies=SCHREIBEN["CRM"])
 async def update_opportunity(
     opp_id: str,
     update: schemas.OpportunityUpdate,
@@ -530,7 +415,7 @@ async def update_opportunity(
     return opp
 
 
-@router.patch("/opportunities/{opp_id}/link", response_model=schemas.Opportunity)
+@router.patch("/opportunities/{opp_id}/link", response_model=schemas.Opportunity, dependencies=SCHREIBEN["CRM"])
 async def link_opportunity_to_documents(
     opp_id: str,
     body: schemas.OpportunityLinkBody,
@@ -574,7 +459,7 @@ async def get_opportunity_belegkette(
     return chain
 
 
-@router.delete("/opportunities/{opp_id}", status_code=204)
+@router.delete("/opportunities/{opp_id}", status_code=204, dependencies=SCHREIBEN["CRM"])
 async def delete_opportunity(
     opp_id: str,
     db: Session = Depends(get_db),
@@ -628,7 +513,7 @@ async def get_pipeline_summary(
 # CONSENT MANAGEMENT (CRM-CNS-01)
 # ---------------------------------------------------------------------------
 
-@router.post("/consents", response_model=schemas.ConsentResponse, status_code=201)
+@router.post("/consents", response_model=schemas.ConsentResponse, status_code=201, dependencies=SCHREIBEN["CRM"])
 async def create_consent(
     consent: schemas.ConsentCreate,
     db: Session = Depends(get_db),
@@ -704,7 +589,7 @@ async def list_consents(
     ]
 
 
-@router.post("/consents/{consent_id}/revoke", response_model=dict)
+@router.post("/consents/{consent_id}/revoke", response_model=dict, dependencies=SCHREIBEN["CRM"])
 async def revoke_consent(
     consent_id: str,
     db: Session = Depends(get_db),
@@ -735,14 +620,18 @@ async def gdpr_data_export(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
-    """DSGVO Art. 15: Auskunftsrecht – export all data for a partner."""
-    result: dict = {"partner_id": partner_id, "tenant_id": tenant_id}
+    """DSGVO Art. 15: Auskunftsrecht – export all data for a partner.
 
+    Las bis 27.10.2026 ``domain_shared.business_partners`` ohne Mandant; die Tabelle gibt es nicht,
+    die Auskunft endete mit 500. Gefuehrt werden Partner in ``domain_crm.business_partners``.
+    """
     bp_row = db.execute(
-        text("SELECT * FROM domain_shared.business_partners WHERE partner_id = :pid LIMIT 1"),
-        {"pid": partner_id},
+        text("SELECT * FROM domain_crm.business_partners WHERE partner_id = :pid AND tenant_id = :tid"),
+        {"pid": partner_id, "tid": tenant_id},
     ).mappings().first()
-    result["business_partner"] = dict(bp_row) if bp_row else None
+    if bp_row is None:
+        raise HTTPException(status_code=404, detail="Partner not found")
+    result: dict = {"partner_id": partner_id, "tenant_id": tenant_id, "business_partner": dict(bp_row)}
 
     consent_rows = db.execute(
         text("SELECT * FROM domain_crm.crm_consents WHERE partner_id = :pid AND tenant_id = :tid"),
@@ -750,274 +639,45 @@ async def gdpr_data_export(
     ).mappings().all()
     result["consents"] = [dict(r) for r in consent_rows]
 
-    try:
-        activity_rows = db.execute(
-            text("SELECT * FROM domain_crm.crm_activities WHERE contact_id = :pid AND tenant_id = :tid"),
-            {"pid": partner_id, "tid": tenant_id},
-        ).mappings().all()
-        result["activities"] = [dict(r) for r in activity_rows]
-    except Exception:
-        result["activities"] = []
-
-    try:
-        op_rows = db.execute(
-            text("SELECT * FROM domain_erp.offene_posten WHERE kunde_id = :pid AND tenant_id = :tid"),
-            {"pid": partner_id, "tid": tenant_id},
-        ).mappings().all()
-        result["open_items"] = [dict(r) for r in op_rows]
-    except Exception:
-        result["open_items"] = []
+    # Aktivitaeten und offene Posten fehlen in manchen Installationen; der Savepoint haelt die
+    # Transaktion fuer die naechste Abfrage am Leben.
+    for key, sql in (
+        ("activities", "SELECT * FROM domain_crm.activities WHERE contact_id = :pid AND tenant_id = :tid"),
+        ("open_items", "SELECT * FROM domain_erp.offene_posten WHERE kunde_id = :pid AND tenant_id = :tid"),
+    ):
+        try:
+            with db.begin_nested():
+                rows = db.execute(text(sql), {"pid": partner_id, "tid": tenant_id}).mappings().all()
+            result[key] = [dict(r) for r in rows]
+        except Exception as exc:  # noqa: BLE001 — optionale Quelle, Auskunft bleibt vollstaendig fuer den Rest
+            logger.warning("DSGVO-Auskunft %s nicht lesbar: %s", key, type(exc).__name__)
+            result[key] = []
 
     return result
 
 
-@router.post("/gdpr/anonymize/{partner_id}", response_model=dict)
+@router.post("/gdpr/anonymize/{partner_id}", response_model=dict, dependencies=SCHREIBEN["CRM"])
 async def gdpr_anonymize(
     partner_id: str,
     reason: str = Query(..., min_length=10, description="Reason for anonymization"),
-    db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
-    """DSGVO Art. 17: Recht auf Löschung – anonymize partner data."""
-    try:
-        db.execute(
-            text("""
-                UPDATE domain_shared.business_partners
-                SET name = 'ANONYMISIERT', email = NULL, phone = NULL,
-                    address = NULL, anonymized_at = NOW()
-                WHERE partner_id = :pid
-            """),
-            {"pid": partner_id},
-        )
-    except Exception as e:  # noqa: BLE001
-        logger.warning("DSGVO-Löschoperation fehlgeschlagen (best-effort): %s", e)
+    """DSGVO Art. 17: Loeschung laeuft ueber den protokollierten Loeschantrag.
 
-    try:
-        db.execute(
-            text("UPDATE domain_crm.crm_consents SET granted = FALSE, revoked_at = NOW() WHERE partner_id = :pid AND tenant_id = :tid"),
-            {"pid": partner_id, "tid": tenant_id},
-        )
-    except Exception as e:  # noqa: BLE001
-        logger.warning("DSGVO-Löschoperation fehlgeschlagen (best-effort): %s", e)
-
-    db.commit()
-    logger.info("GDPR anonymization for partner %s by tenant %s: %s", partner_id, tenant_id, reason)
-    return {"ok": True, "message": f"Partner {partner_id} anonymisiert", "reason": reason}
-
-
-# ---------------------------------------------------------------------------
-# SEGMENTS / ZIELGRUPPEN (MKT-SEG-01)
-# ---------------------------------------------------------------------------
-
-@router.post("/segments", response_model=schemas.Segment, status_code=201)
-async def create_segment(
-    seg: schemas.SegmentCreate,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
-):
-    """Create a new marketing segment."""
-    seg_id = uuid7()
-    now = datetime.utcnow()
-    db.execute(
-        text("""
-            INSERT INTO domain_crm.crm_segments
-            (id, tenant_id, name, description, criteria, segment_type, member_count, created_at, updated_at)
-            VALUES (:id, :tid, :name, :desc, CAST(:criteria AS jsonb), :stype, 0, :now, :now)
-        """),
-        {
-            "id": seg_id, "tid": tenant_id, "name": seg.name,
-            "desc": seg.description,
-            "criteria": __import__("json").dumps(seg.criteria) if seg.criteria else "{}",
-            "stype": seg.segment_type, "now": now,
-        },
-    )
-    db.commit()
-    return schemas.Segment(
-        id=seg_id, tenant_id=tenant_id, name=seg.name,
-        description=seg.description, criteria=seg.criteria,
-        segment_type=seg.segment_type, member_count=0,
-        created_at=now, updated_at=now,
+    Bis 27.10.2026 schrieb dieser Weg in ``domain_shared.business_partners`` (gibt es nicht) ohne
+    Mandant, schluckte den Fehler, die Transaktion war tot, und die Antwort meldete
+    "anonymisiert". Eine Rechtspflicht galt als erfuellt, ohne dass ein Datensatz angefasst war.
+    """
+    logger.info("DSGVO-Kurzweg abgewiesen fuer Partner %s (Mandant %s)", partner_id, tenant_id)
+    raise HTTPException(
+        status_code=409,
+        detail="Loeschung nach Art. 17 nur ueber den Loeschantrag: POST /api/v1/compliance/dsgvo/erasure-requests",
     )
 
 
-@router.get("/segments", response_model=List[schemas.Segment])
-async def list_segments(
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
-):
-    """List all segments for a tenant."""
-    rows = db.execute(
-        text("""
-            SELECT id, tenant_id, name, description, criteria, segment_type, member_count, created_at, updated_at
-            FROM domain_crm.crm_segments
-            WHERE tenant_id = :tid
-            ORDER BY name
-        """),
-        {"tid": tenant_id},
-    ).fetchall()
-    return [
-        schemas.Segment(
-            id=str(r[0]), tenant_id=r[1], name=r[2], description=r[3],
-            criteria=r[4], segment_type=r[5], member_count=r[6] or 0,
-            created_at=r[7], updated_at=r[8],
-        )
-        for r in rows
-    ]
-
-
-@router.get("/segments/{seg_id}", response_model=schemas.Segment)
-async def get_segment(
-    seg_id: str,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
-):
-    """Get segment by ID."""
-    row = db.execute(
-        text("""
-            SELECT id, tenant_id, name, description, criteria, segment_type, member_count, created_at, updated_at
-            FROM domain_crm.crm_segments
-            WHERE id = :id AND tenant_id = :tid
-        """),
-        {"id": seg_id, "tid": tenant_id},
-    ).fetchone()
-    if not row:
-        raise HTTPException(status_code=404, detail="Segment not found")
-    return schemas.Segment(
-        id=str(row[0]), tenant_id=row[1], name=row[2], description=row[3],
-        criteria=row[4], segment_type=row[5], member_count=row[6] or 0,
-        created_at=row[7], updated_at=row[8],
-    )
-
-
-@router.post("/segments/{seg_id}/recalculate", response_model=dict)
-async def recalculate_segment(
-    seg_id: str,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
-):
-    """MKT-SEG-02: Recalculate dynamic segment members from criteria."""
-    row = db.execute(
-        text("SELECT id, criteria FROM domain_crm.crm_segments WHERE id = :id AND tenant_id = :tid"),
-        {"id": seg_id, "tid": tenant_id},
-    ).fetchone()
-    if not row:
-        raise HTTPException(status_code=404, detail="Segment not found")
-    cnt = db.execute(
-        text("SELECT COUNT(*) FROM domain_crm.crm_segment_members WHERE segment_id = :id"),
-        {"id": seg_id},
-    ).scalar() or 0
-    db.execute(
-        text("UPDATE domain_crm.crm_segments SET member_count = :cnt, updated_at = NOW() WHERE id = :id"),
-        {"id": seg_id, "cnt": cnt},
-    )
-    db.commit()
-    return {"ok": True, "segment_id": seg_id, "member_count": cnt}
-
-
-@router.put("/segments/{seg_id}", response_model=schemas.Segment)
-async def update_segment(
-    seg_id: str,
-    update: schemas.SegmentUpdate,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
-):
-    """Update segment."""
-    existing = db.execute(
-        text("SELECT id FROM domain_crm.crm_segments WHERE id = :id AND tenant_id = :tid"),
-        {"id": seg_id, "tid": tenant_id},
-    ).fetchone()
-    if not existing:
-        raise HTTPException(status_code=404, detail="Segment not found")
-
-    set_parts = ["updated_at = NOW()"]
-    params: dict = {"id": seg_id}
-    if update.name is not None:
-        set_parts.append("name = :name")
-        params["name"] = update.name
-    if update.description is not None:
-        set_parts.append("description = :desc")
-        params["desc"] = update.description
-    if update.criteria is not None:
-        set_parts.append("criteria = CAST(:criteria AS jsonb)")
-        params["criteria"] = __import__("json").dumps(update.criteria)
-    if update.segment_type is not None:
-        set_parts.append("segment_type = :stype")
-        params["stype"] = update.segment_type
-
-    db.execute(
-        text(f"UPDATE domain_crm.crm_segments SET {', '.join(set_parts)} WHERE id = :id"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
-        params,
-    )
-    db.commit()
-    return await get_segment(seg_id, db, tenant_id)
-
-
-@router.delete("/segments/{seg_id}", status_code=204)
-async def delete_segment(
-    seg_id: str,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
-):
-    """Delete segment."""
-    existing = db.execute(
-        text("SELECT id FROM domain_crm.crm_segments WHERE id = :id AND tenant_id = :tid"),
-        {"id": seg_id, "tid": tenant_id},
-    ).fetchone()
-    if not existing:
-        raise HTTPException(status_code=404, detail="Segment not found")
-    db.execute(text("DELETE FROM domain_crm.crm_segments WHERE id = :id"), {"id": seg_id})
-    db.commit()
-    return None
-
-
-@router.post("/segments/{seg_id}/members", response_model=dict)
-async def add_segment_member(
-    seg_id: str,
-    partner_id: str = Query(..., description="Partner ID to add"),
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
-):
-    """Add a partner to a segment."""
-    existing = db.execute(
-        text("SELECT id FROM domain_crm.crm_segments WHERE id = :id AND tenant_id = :tid"),
-        {"id": seg_id, "tid": tenant_id},
-    ).fetchone()
-    if not existing:
-        raise HTTPException(status_code=404, detail="Segment not found")
-
-    member_id = uuid7()
-    db.execute(
-        text("""
-            INSERT INTO domain_crm.crm_segment_members (id, segment_id, partner_id, added_at)
-            VALUES (:id, :sid, :pid, NOW())
-            ON CONFLICT (segment_id, partner_id) DO NOTHING
-        """),
-        {"id": member_id, "sid": seg_id, "pid": partner_id},
-    )
-    db.execute(
-        text("UPDATE domain_crm.crm_segments SET member_count = (SELECT COUNT(*) FROM domain_crm.crm_segment_members WHERE segment_id = :sid) WHERE id = :sid"),
-        {"sid": seg_id},
-    )
-    db.commit()
-    return {"ok": True, "segment_id": seg_id, "partner_id": partner_id}
-
-
-@router.get("/segments/{seg_id}/members", response_model=List[dict])
-async def list_segment_members(
-    seg_id: str,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
-):
-    """List members of a segment."""
-    rows = db.execute(
-        text("""
-            SELECT m.partner_id, m.added_at, bp.name
-            FROM domain_crm.crm_segment_members m
-            LEFT JOIN domain_shared.business_partners bp ON bp.partner_id = m.partner_id
-            WHERE m.segment_id = :sid
-            ORDER BY m.added_at DESC
-        """),
-        {"sid": seg_id},
-    ).fetchall()
-    return [{"partner_id": r[0], "added_at": r[1], "name": r[2]} for r in rows]
-
+# Segment endpoints are registered once by app.api.v1.endpoints.crm_segments.
+# Retain import-level names for internal callers; no duplicate router ownership.
+from app.api.v1.endpoints.crm_segments import (  # noqa: E402,F401
+    create_segment, list_segments, get_segment, update_segment, delete_segment,
+    recalculate_segment, add_segment_member, segment_members as list_segment_members,
+)

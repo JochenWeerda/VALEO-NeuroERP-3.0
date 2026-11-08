@@ -6,7 +6,8 @@ import uuid
 from datetime import datetime
 from typing import Any, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+from sqlalchemy import and_, or_
 from sqlalchemy.orm import Session
 
 
@@ -14,7 +15,7 @@ class SnapshotCursor(BaseModel):
     """Cursor fuer seitenweise Abfrage von Read-Model-Snapshots."""
 
     last_snapshot_id: Optional[str] = None
-    limit: int = 20
+    limit: int = Field(default=20, ge=1, le=100)
     schema_version: int = 1
 
 
@@ -159,13 +160,16 @@ class ReadModelSnapshotStore:
                 ReadModelSnapshotRecord.snapshot_id.asc(),
             )
         )
-        records = list(query.all())
         if cursor.last_snapshot_id:
-            snapshot_ids = [record.snapshot_id for record in records]
-            if cursor.last_snapshot_id in snapshot_ids:
-                start = snapshot_ids.index(cursor.last_snapshot_id) + 1
-                records = records[start:]
-        return [self._from_record(record) for record in records[: cursor.limit]]
+            anchor = self.db_session.get(ReadModelSnapshotRecord, cursor.last_snapshot_id)
+            if anchor is not None and anchor.tenant_id == tenant_id and anchor.model_name == model_name:
+                query = query.filter(or_(
+                    ReadModelSnapshotRecord.created_at > anchor.created_at,
+                    and_(ReadModelSnapshotRecord.created_at == anchor.created_at,
+                         ReadModelSnapshotRecord.snapshot_id > anchor.snapshot_id),
+                ))
+        records = query.limit(cursor.limit).all()
+        return [self._from_record(record) for record in records]
 
     def count(self, model_name: str, tenant_id: str) -> int:
         if self.db_session is None:

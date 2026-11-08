@@ -16,6 +16,7 @@ from app.core.security import get_user_id_from_request
 from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
 from app.services.compat_helpers import enqueue_event
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/collab/notes", tags=["collab"])
 
@@ -202,7 +203,7 @@ async def list_notes(
     return [_row_to_note(row) for row in result.mappings().all()]
 
 
-@router.post("", response_model=NoteOut, status_code=status.HTTP_201_CREATED, summary="Collab-Notiz anlegen")
+@router.post("", response_model=NoteOut, status_code=status.HTTP_201_CREATED, summary="Collab-Notiz anlegen", dependencies=SCHREIBEN["CRM"])
 async def create_note(
     payload: NoteCreate,
     request: Request,
@@ -269,7 +270,7 @@ async def create_note(
     return _row_to_note(row)
 
 
-@router.patch("/{note_id}", response_model=NoteOut, summary="Collab-Notiz aktualisieren")
+@router.patch("/{note_id}", response_model=NoteOut, summary="Collab-Notiz aktualisieren", dependencies=SCHREIBEN["CRM"])
 async def update_note(
     note_id: str,
     payload: NotePatch,
@@ -319,7 +320,7 @@ async def update_note(
     return _row_to_note(row)
 
 
-@router.delete("/{note_id}", status_code=status.HTTP_204_NO_CONTENT, response_class=Response, summary="Collab-Notiz loeschen")
+@router.delete("/{note_id}", status_code=status.HTTP_204_NO_CONTENT, response_class=Response, summary="Collab-Notiz loeschen", dependencies=SCHREIBEN["CRM"])
 async def delete_note(
     note_id: str,
     request: Request,

@@ -80,6 +80,9 @@ class Settings(BaseSettings):
     # HINWEIS: In Docker-Umgebung muss host="postgres" sein (Service-Name aus docker-compose.yml)
     # In lokalen Umgebung ohne Docker kann 127.0.0.1 verwendet werden
     DATABASE_URL: str = Field(default_factory=_default_database_url)
+    # RLS plan P6: login of valeo_system (BYPASSRLS) for deliberate cross-tenant workers only.
+    # Unset: cross-tenant work uses the application login and sees no tenant rows (fail-closed).
+    SYSTEM_DATABASE_URL: Optional[str] = None
     DATABASE_CONNECT_ARGS: dict = {}
 
     # Redis Configuration
@@ -94,6 +97,10 @@ class Settings(BaseSettings):
     OIDC_CLIENT_ID: Optional[str] = None
     OIDC_ISSUER_URL: Optional[str] = None
     OIDC_JWKS_URL: Optional[str] = None
+    # Mandantenbindung: Traegt das Token einen Mandanten (``tenant_id``/``mandanten_id``), muss die Anfrage
+    # denselben nennen — immer. Dieser Schalter verlangt zusaetzlich, dass JEDES Token einen traegt.
+    # Erst einschalten, wenn jeder Benutzer im Anmeldedienst das Attribut ``tenant_id`` hat.
+    OIDC_TENANT_CLAIM_REQUIRED: bool = False
 
     # Logging Configuration
     LOG_LEVEL: str = "INFO"
@@ -260,9 +267,15 @@ class Settings(BaseSettings):
     MAX_PAGE_SIZE: int = 1000
 
     # API Authentication
-    # SC-AUTH-002: In Produktion MUSS API_DEV_TOKEN=None sein (Startup-Guard in main.py).
-    # In Entwicklung: API_DEV_TOKEN=dev-token in .env setzen.
+    # Legacy configuration for isolated compatibility tests; provider auth never accepts it.
     API_DEV_TOKEN: Optional[str] = None
+    IDENTITY_SESSION_IDLE_SECONDS: int = Field(default=900, gt=0)
+    IDENTITY_SESSION_MAX_SECONDS: int = Field(default=28800, gt=0)
+    IDENTITY_REVOCATION_POLL_SECONDS: int = Field(default=5, gt=0)
+    IDENTITY_MAX_PARALLEL_JOBS: int = Field(default=3, gt=0)
+    IDENTITY_MAX_JOB_SECONDS: int = Field(default=300, gt=0)
+    IDENTITY_MAX_JOB_CALLS: int = Field(default=100, gt=0)
+    IDENTITY_MAX_JOB_TOKEN_UNITS: int = Field(default=100000, gt=0)
     CHANNEL_SLACK_SIGNING_SECRET: Optional[str] = None
     CHANNEL_SLACK_BOT_TOKEN: Optional[str] = None
     CHANNEL_TEAMS_WEBHOOK_SECRET: Optional[str] = None

@@ -17,6 +17,7 @@ from app.core.supply_chain_tracking import LieferkettenPhase, TrackingStatusGesa
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.supply_chain_blockchain_schemas import SupplyChainBlockchainOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/supply-chain/blockchain", tags=["supply-chain", "blockchain", "integrations"])
@@ -78,15 +79,13 @@ async def get_supply_chain_blockchain_profiles() -> dict[str, Any]:
 
 
 @router.post("/prepare", summary="Supply chain blockchain event prepare",
-    response_model=SupplyChainBlockchainOut
-)
+    response_model=SupplyChainBlockchainOut, dependencies=SCHREIBEN["LOGISTIK"])
 async def prepare_supply_chain_blockchain_event(body: SupplyChainBlockchainPrepareBody) -> dict[str, Any]:
     return build_supply_chain_blockchain_envelope(_to_request(body), body.profil).as_dict()
 
 
 @router.post("/dispatch", summary="Supply chain blockchain event dispatch",
-    response_model=SupplyChainBlockchainOut
-)
+    response_model=SupplyChainBlockchainOut, dependencies=SCHREIBEN["LOGISTIK"])
 async def dispatch_supply_chain_blockchain_event(body: SupplyChainBlockchainDispatchBody) -> dict[str, Any]:
     envelope = build_supply_chain_blockchain_envelope(_to_request(body), body.profil)
     result = await dispatch_supply_chain_blockchain_envelope(

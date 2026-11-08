@@ -47,11 +47,8 @@ export const test = base.extend<UATFixtures>({
     });
     const page = await context.newPage();
 
-    try {
-      await loginToPage(page, TEST_USERS.admin, baseURL ?? 'http://127.0.0.1:4173');
-    } catch (error) {
-      console.warn('Admin login failed, continuing without auth:', error);
-    }
+    // Ohne Anmeldung landet jede Seite auf /login; ein Fehlschlag soll den Test sichtbar beenden.
+    await loginToPage(page, TEST_USERS.admin, baseURL ?? 'http://127.0.0.1:4173');
     
     await use(page);
     await context.close();
@@ -66,11 +63,8 @@ export const test = base.extend<UATFixtures>({
     });
     const page = await context.newPage();
 
-    try {
-      await loginToPage(page, TEST_USERS.powerUser, baseURL ?? 'http://127.0.0.1:4173');
-    } catch (error) {
-      console.warn('Power-User login failed, continuing without auth:', error);
-    }
+    // Ohne Anmeldung landet jede Seite auf /login; ein Fehlschlag soll den Test sichtbar beenden.
+    await loginToPage(page, TEST_USERS.powerUser, baseURL ?? 'http://127.0.0.1:4173');
     
     await use(page);
     await context.close();
@@ -85,11 +79,8 @@ export const test = base.extend<UATFixtures>({
     });
     const page = await context.newPage();
 
-    try {
-      await loginToPage(page, TEST_USERS.readonly, baseURL ?? 'http://127.0.0.1:4173');
-    } catch (error) {
-      console.warn('Readonly login failed, continuing without auth:', error);
-    }
+    // Ohne Anmeldung landet jede Seite auf /login; ein Fehlschlag soll den Test sichtbar beenden.
+    await loginToPage(page, TEST_USERS.readonly, baseURL ?? 'http://127.0.0.1:4173');
     
     await use(page);
     await context.close();

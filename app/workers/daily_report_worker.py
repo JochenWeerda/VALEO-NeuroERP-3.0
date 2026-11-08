@@ -4,7 +4,7 @@ import asyncio
 import logging
 from typing import Any, Dict
 
-from .base_worker import BaseWorker
+from .base_worker import BaseWorker, cross_tenant_job
 from ..domains.crm.services.daily_report_service import DailyReportService
 
 logger = logging.getLogger(__name__)
@@ -59,6 +59,7 @@ async def run_daily_reports() -> Dict[str, Any]:
         await worker.cleanup()
 
 
+@cross_tenant_job("daily-reports")
 def execute_daily_reports() -> Dict[str, Any]:
     try:
         loop = asyncio.new_event_loop()

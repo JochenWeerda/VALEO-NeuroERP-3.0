@@ -31,13 +31,13 @@ export type SampleStatus = z.infer<typeof SampleStatusEnum>;
  * Sample - Probe zur Qualitätsprüfung
  */
 export const SampleSchema = z.object({
-  id: z.string().uuid().optional(),
+  id: z.string().guid().optional(),
   tenantId: z.string().min(1, 'Tenant ID is required'),
   
   // Context
-  batchId: z.string().uuid().optional(), // Referenz zu production-domain
-  contractId: z.string().uuid().optional(), // Referenz zu contracts-domain
-  lotId: z.string().uuid().optional(), // Referenz zu inventory-domain
+  batchId: z.string().guid().optional(), // Referenz zu production-domain
+  contractId: z.string().guid().optional(), // Referenz zu contracts-domain
+  lotId: z.string().guid().optional(), // Referenz zu inventory-domain
   source: SampleSourceEnum,
   
   // Identifikation
@@ -50,7 +50,7 @@ export const SampleSchema = z.object({
   takenLocation: z.string().optional(), // z.B. "Silo 3, Top"
   
   // Prüfplan
-  planId: z.string().uuid().optional(),
+  planId: z.string().guid().optional(),
   
   // Rückstellprobe
   retained: z.boolean().default(false),
@@ -82,9 +82,9 @@ export const SampleResultStatusEnum = z.enum([
 export type SampleResultStatus = z.infer<typeof SampleResultStatusEnum>;
 
 export const SampleResultSchema = z.object({
-  id: z.string().uuid().optional(),
+  id: z.string().guid().optional(),
   tenantId: z.string().min(1, 'Tenant ID is required'),
-  sampleId: z.string().uuid(),
+  sampleId: z.string().guid(),
   
   // Analyse
   analyte: z.string().min(1, 'Analyte is required'), // z.B. "Moisture", "Protein"

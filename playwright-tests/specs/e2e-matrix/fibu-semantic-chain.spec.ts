@@ -7,10 +7,11 @@
  * Externe Gates: DATEV, ELSTER/eBilanz simuliert.
  */
 import { test, expect, request } from '@playwright/test'
+import { apiToken, E2E_MANDANT } from '../../helpers/anmeldung'
 
 const BASE = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:8000'
-const TENANT = 'e2e-fibu-001'
-const AUTH = process.env.API_DEV_TOKEN ?? 'dev-token'
+const TENANT = E2E_MANDANT
+const AUTH = apiToken()
 const HEADERS = {
   'X-Tenant-ID': TENANT,
   'Content-Type': 'application/json',
@@ -247,11 +248,11 @@ test.describe.serial('FIBU — OP bis DATEV-Export Prozesskette @smoke @e2e-matr
 // SEMANTIC-E2E-STRICT-001 — @critical Kern-Pfad FIBU
 test.describe('FIBU @critical Kern-Pfad', () => {
   const BASE_CRIT = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:8000'
-  const TENANT_CRIT = 'e2e-crit-fibu'
+  const TENANT_CRIT = E2E_MANDANT
   const HEADERS_CRIT = {
     'X-Tenant-ID': TENANT_CRIT,
     'Content-Type': 'application/json',
-    'Authorization': `Bearer ${process.env.API_DEV_TOKEN ?? 'dev-token'}`,
+    'Authorization': `Bearer ${apiToken()}`,
   }
 
   test('FIBU @critical — Offene-Posten-Endpunkt antwortet (Health)', async () => {

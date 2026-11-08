@@ -20,7 +20,7 @@ DEFAULT_TENANT = "00000000-0000-0000-0000-000000000001"
 
 @pytest.fixture(scope="module")
 def client():
-    from main import app
+    from app.main import app
     from app.core.config import settings
     from app.core import security
     # Dev-Token muss gesetzt sein bevor TestClient den OIDC-Check macht
@@ -154,7 +154,7 @@ class TestDocumentArtifacts:
 
 class TestArtifactVerify:
 
-    @pytest.fixture(scope="class")
+    @pytest.fixture
     def artifact_id_and_hash(self, client: TestClient, test_header_id: str):
         """Registriert ein Artefakt und gibt (artifact_id, stored_hash) zurück."""
         content = "pdf-bytes-for-verify-test"

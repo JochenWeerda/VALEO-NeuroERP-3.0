@@ -10,6 +10,8 @@ from app.core.policy_decisions import PolicyOverrideResolution
 
 class ApprovalStatusResponse(BaseModel):
     invoice_id: str
+    approval_request_id: str | None = None
+    can_decide: bool = False
     status: str
     required_approvals: int
     current_approvals: int
@@ -138,6 +140,7 @@ def build_approval_status_response(
     approvals: list[dict[str, Any]],
     rejections: list[dict[str, Any]],
     applicable_rule: dict[str, Any] | None,
+    approval_request_id: str | None = None,
 ) -> ApprovalStatusResponse:
     resolution = build_approval_override_resolution(invoice_id, tenant_id, applicable_rule)
     explainability = build_approval_explainability(
@@ -150,6 +153,7 @@ def build_approval_status_response(
     )
     return ApprovalStatusResponse(
         invoice_id=invoice_id,
+        approval_request_id=approval_request_id,
         status=status,
         required_approvals=required_approvals,
         current_approvals=len(approvals),

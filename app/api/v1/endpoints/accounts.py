@@ -20,10 +20,12 @@ from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.accounts_schemas import AccountsOut
 
 
+from app.auth.finance_roles import finance_read, kontenpflege
+
 router = APIRouter()
 
 
-@router.post("/", response_model=Account, status_code=201, summary="Account anlegen")
+@router.post("/", response_model=Account, status_code=201, summary="Account anlegen", dependencies=[Depends(kontenpflege)])
 async def create_account(
     account_data: AccountCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -42,7 +44,7 @@ async def create_account(
         raise HTTPException(status_code=500, detail=f"Failed to create account: {str(e)}")
 
 
-@router.get("/", response_model=PaginatedResponse[Account], summary="Accounts auflisten")
+@router.get("/", response_model=PaginatedResponse[Account], summary="Accounts auflisten", dependencies=[Depends(finance_read)])
 async def list_accounts(
     tenant_id: str = Depends(get_tenant_id),
     account_type: Optional[str] = Query(None, description="Filter by account type"),
@@ -85,7 +87,7 @@ async def list_accounts(
         raise HTTPException(status_code=500, detail=f"Failed to list accounts: {str(e)}")
 
 
-@router.get("/hierarchy", response_model=List[AccountHierarchy], summary="Accounts hierarchy abrufen")
+@router.get("/hierarchy", response_model=List[AccountHierarchy], summary="Accounts hierarchy abrufen", dependencies=[Depends(finance_read)])
 async def get_accounts_hierarchy(
     tenant_id: str = Depends(get_tenant_id),
     account_type: Optional[str] = Query(None, description="Filter by account type"),
@@ -98,24 +100,24 @@ async def get_accounts_hierarchy(
     """
     try:
         from ....infrastructure.models import Account as AccountModel
-        
+
         # Query all accounts for the tenant
         query = db.query(AccountModel).filter(
             AccountModel.tenant_id == tenant_id,
             AccountModel.is_active == True,
             AccountModel.deleted_at.is_(None)
         )
-        
+
         if account_type:
             query = query.filter(AccountModel.account_type == account_type)
-        
+
         all_accounts = query.all()
-        
+
         # Build account map by id and by account_number (for prefix fallback)
         account_map: Dict[str, AccountHierarchy] = {}
         number_to_node: Dict[str, AccountHierarchy] = {}
         root_accounts: List[AccountHierarchy] = []
-        
+
         # First pass: create all account objects
         from datetime import datetime
         for acc in all_accounts:
@@ -138,7 +140,7 @@ async def get_accounts_hierarchy(
             account_hierarchy = AccountHierarchy(**account_dict)
             account_map[str(acc.id)] = account_hierarchy
             number_to_node[acc.account_number] = account_hierarchy
-        
+
         # Second pass: build hierarchy (parent_account_id or fallback: longest account_number prefix)
         for acc in all_accounts:
             account_hierarchy = account_map[str(acc.id)]
@@ -159,20 +161,20 @@ async def get_accounts_hierarchy(
                 parent.children.append(account_hierarchy)
             else:
                 root_accounts.append(account_hierarchy)
-        
+
         # Sort roots and children by account_number for consistent display
         def sort_children(nodes: List[AccountHierarchy]) -> None:
             nodes.sort(key=lambda n: n.account_number)
             for n in nodes:
                 sort_children(n.children)
         sort_children(root_accounts)
-        
+
         return root_accounts
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to retrieve account hierarchy: {str(e)}")
 
 
-@router.get("/{account_id}", response_model=Account, summary="Account abrufen")
+@router.get("/{account_id}", response_model=Account, summary="Account abrufen", dependencies=[Depends(finance_read)])
 async def get_account(
     account_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -195,7 +197,7 @@ async def get_account(
         raise HTTPException(status_code=500, detail=f"Failed to retrieve account: {str(e)}")
 
 
-@router.get("/number/{account_number}", response_model=Account, summary="Account by number abrufen")
+@router.get("/number/{account_number}", response_model=Account, summary="Account by number abrufen", dependencies=[Depends(finance_read)])
 async def get_account_by_number(
     account_number: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -218,7 +220,7 @@ async def get_account_by_number(
         raise HTTPException(status_code=500, detail=f"Failed to retrieve account: {str(e)}")
 
 
-@router.put("/{account_id}", response_model=Account, summary="Account aktualisieren")
+@router.put("/{account_id}", response_model=Account, summary="Account aktualisieren", dependencies=[Depends(kontenpflege)])
 async def update_account(
     account_id: str,
     account_data: AccountUpdate,
@@ -242,7 +244,7 @@ async def update_account(
         raise HTTPException(status_code=500, detail=f"Failed to update account: {str(e)}")
 
 
-@router.delete("/{account_id}", status_code=204, response_class=Response, response_model=None, summary="Account löschen")
+@router.delete("/{account_id}", status_code=204, response_class=Response, response_model=None, summary="Account löschen", dependencies=[Depends(kontenpflege)])
 async def delete_account(
     account_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -264,7 +266,7 @@ async def delete_account(
         raise HTTPException(status_code=500, detail=f"Failed to delete account: {str(e)}")
 
 
-@router.get("/{account_id}/balance", response_model=AccountsOut, summary="Account balance abrufen")
+@router.get("/{account_id}/balance", response_model=AccountsOut, summary="Account balance abrufen", dependencies=[Depends(finance_read)])
 async def get_account_balance(
     account_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -281,5 +283,3 @@ async def get_account_balance(
         return {"account_id": account_id, "balance": balance}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to retrieve account balance: {str(e)}")
-
-

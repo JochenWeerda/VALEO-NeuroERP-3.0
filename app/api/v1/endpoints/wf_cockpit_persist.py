@@ -16,6 +16,7 @@ from app.api.v1.schemas.wf_cockpit_persist_schemas import (
 )
 from app.core.database import get_db
 from app.services.wf_cockpit_persist_service import WorkflowCockpitPersistService
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/workflow/cockpit-db", tags=["workflow", "cockpit"])
 
@@ -62,7 +63,7 @@ def dead_letter(
     return svc.dead_letter_view(limit=limit)
 
 
-@router.post("/instances", response_model=InstanceUpsertOut, summary="Cockpit-Instanz manuell anlegen/aktualisieren")
+@router.post("/instances", response_model=InstanceUpsertOut, summary="Cockpit-Instanz manuell anlegen/aktualisieren", dependencies=SCHREIBEN["FACHLICH"])
 def upsert_instance(
     body: dict[str, Any],
     svc: WorkflowCockpitPersistService = Depends(_svc),
@@ -85,8 +86,7 @@ def upsert_instance(
 @router.post(
     "/instances/{process_instance_id}/blockers/{blocker_id}/resolve",
     response_model=BlockerResolvedOut,
-    summary="Blocker als resolved markieren",
-)
+    summary="Blocker als resolved markieren", dependencies=SCHREIBEN["FACHLICH"])
 def resolve_blocker(
     process_instance_id: str,
     blocker_id: str,
@@ -101,8 +101,7 @@ def resolve_blocker(
 @router.post(
     "/instances/{process_instance_id}/retry",
     response_model=InstanceStatusOut,
-    summary="FAILED/blocked Instanz kontrolliert neu starten (WF-COCKPIT-RETRY-001)",
-)
+    summary="FAILED/blocked Instanz kontrolliert neu starten (WF-COCKPIT-RETRY-001)", dependencies=SCHREIBEN["FACHLICH"])
 def retry_instance(
     process_instance_id: str,
     body: dict[str, Any],
@@ -124,8 +123,7 @@ def retry_instance(
 @router.post(
     "/instances/{process_instance_id}/compensate",
     response_model=InstanceStatusOut,
-    summary="Instanz als kompensiert/storniert markieren (Kompensationspfad)",
-)
+    summary="Instanz als kompensiert/storniert markieren (Kompensationspfad)", dependencies=SCHREIBEN["FACHLICH"])
 def compensate_instance(
     process_instance_id: str,
     body: dict[str, Any],

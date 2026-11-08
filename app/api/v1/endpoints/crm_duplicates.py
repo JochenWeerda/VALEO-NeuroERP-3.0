@@ -17,6 +17,7 @@ from app.core.tenant import get_tenant_id
 from app.services.crm_duplicate_service import CrmDuplicateService
 from app.services.crm_merge_service import CrmMergeService, MergeError
 from app.api.v1.schemas.base import TypedObjectOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/crm", tags=["crm", "dubletten"])
 
@@ -36,7 +37,7 @@ class MergeIn(BaseModel):
     bediener: str | None = None
 
 
-@router.post("/duplicates/merge-preview", response_model=TypedObjectOut, summary="Zusammenführung vorschauen (read-only)")
+@router.post("/duplicates/merge-preview", response_model=TypedObjectOut, summary="Zusammenführung vorschauen (read-only)", dependencies=SCHREIBEN["CRM"])
 def merge_preview(
     body: MergeIn,
     db: Session = Depends(get_db),
@@ -48,7 +49,7 @@ def merge_preview(
         raise HTTPException(status_code=422, detail=str(exc))
 
 
-@router.post("/duplicates/merge", response_model=TypedObjectOut, summary="Dublette in Master zusammenführen")
+@router.post("/duplicates/merge", response_model=TypedObjectOut, summary="Dublette in Master zusammenführen", dependencies=SCHREIBEN["CRM"])
 def merge(
     body: MergeIn,
     db: Session = Depends(get_db),

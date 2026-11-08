@@ -16,6 +16,7 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.docflow_artifact_service import ArtifactError, DocflowArtifactService
 from app.api.v1.schemas.base import TypedObjectOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/docflow/evidence", tags=["docflow", "dms", "gobd"])
 
@@ -38,7 +39,7 @@ class UploadIn(BaseModel):
     bediener: Optional[str] = None
 
 
-@router.post("/artifacts", response_model=TypedObjectOut, summary="Artefakt hochladen (neue Version, SHA-256)")
+@router.post("/artifacts", response_model=TypedObjectOut, summary="Artefakt hochladen (neue Version, SHA-256)", dependencies=SCHREIBEN["BELEGE"])
 def upload_artifact(
     body: UploadIn,
     db: Session = Depends(get_db),
@@ -59,7 +60,7 @@ class FreigabeIn(BaseModel):
     bediener: Optional[str] = None
 
 
-@router.post("/artifacts/{artifact_id}/freigabe", response_model=TypedObjectOut, summary="Freigabe-Status setzen (Transition)")
+@router.post("/artifacts/{artifact_id}/freigabe", response_model=TypedObjectOut, summary="Freigabe-Status setzen (Transition)", dependencies=SCHREIBEN["BELEGE"])
 def set_freigabe(
     artifact_id: str,
     body: FreigabeIn,

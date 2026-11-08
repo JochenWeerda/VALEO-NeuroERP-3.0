@@ -8,7 +8,6 @@ from pydantic import BaseModel as PydanticBaseModel
 from sqlalchemy import or_, text
 from sqlalchemy.orm import Session
 
-from ....core.config import settings
 from ....core.data_quality_enforcement import build_dq_error_detail, evaluate_article_datensatz
 from ....core.database import get_db
 from ....core.tenant import get_tenant_id
@@ -17,6 +16,7 @@ from ....infrastructure.models import BusinessPartnerDiscountItem, BusinessPartn
 from ....infrastructure.models import StockMovement
 from ..schemas.base import PaginatedResponse
 from ..schemas.inventory import Article, ArticleCreate, ArticleUpdate
+from app.finance.steuerschluessel import Steuerklaerung, satz_des_schluessels
 from app.services.inventory_movement_direction import direction_sql
 from app.services.articles_service import (
     resolve_article_tenant as _resolve_article_tenant,
@@ -27,12 +27,17 @@ from app.services.articles_service import (
 )
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.articles_schemas import ArticlesOut
+from app.api.v1.schemas.articles_schemas import (
+    ArticlesOut,
+    ArtikelDokumenteOut,
+    ArtikelLieferantenOut,
+    ArtikelPreiseOut,
+)
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter()
 
-DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 
 @router.get("/", response_model=PaginatedResponse[Article], summary="Articles auflisten")
@@ -118,7 +123,33 @@ async def get_article(
     return _to_article_schema(article)
 
 
-@router.post("/", response_model=Article, status_code=status.HTTP_201_CREATED, summary="Article anlegen")
+def _steuerschluessel_pruefen(db: Session, tenant_id: str, werte: dict) -> None:
+    """Die Steuerschlüssel des Artikels müssen dem Mandanten gehören und zur Richtung passen.
+
+    Der Satz in ``mehrwertsteuer_prozent`` ist nur noch das Abbild des Verkaufsschlüssels: Mit einem
+    Schlüssel wird er daraus gesetzt, ein abweichend mitgeschickter Satz wird abgelehnt.
+    """
+    for feld, richtung in (("steuerschluessel_verkauf", "verkauf"), ("steuerschluessel_einkauf", "einkauf")):
+        if feld not in werte:
+            continue
+        werte[feld] = (werte[feld] or "").strip() or None
+        if werte[feld] is None:
+            continue
+        try:
+            satz = satz_des_schluessels(db, tenant_id, werte[feld], richtung)
+        except Steuerklaerung as klaerung:
+            raise HTTPException(status_code=422, detail=str(klaerung)) from klaerung
+        if richtung == "verkauf":
+            angegeben = werte.get("mehrwertsteuer_prozent")
+            if angegeben is not None and angegeben != satz:
+                raise HTTPException(
+                    status_code=422,
+                    detail=f"Steuersatz {angegeben} % widerspricht dem Steuerschlüssel {werte[feld]} ({satz.normalize():f} %).",
+                )
+            werte["mehrwertsteuer_prozent"] = satz
+
+
+@router.post("/", response_model=Article, status_code=status.HTTP_201_CREATED, summary="Article anlegen", dependencies=SCHREIBEN["STAMMDATEN"])
 async def create_article(
     article_data: ArticleCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -142,6 +173,13 @@ async def create_article(
     if duplicate:
         raise HTTPException(status_code=409, detail="Article number already exists")
 
+    steuer = {
+        "steuerschluessel_verkauf": article_data.steuerschluessel_verkauf,
+        "steuerschluessel_einkauf": article_data.steuerschluessel_einkauf,
+        "mehrwertsteuer_prozent": article_data.mehrwertsteuer_prozent,
+    }
+    _steuerschluessel_pruefen(db, effective_tenant, steuer)
+
     article = ArticleModel(
         tenant_id=effective_tenant,
         article_number=article_data.article_number,
@@ -156,7 +194,9 @@ async def create_article(
         naehrwertangaben=article_data.naehrwertangaben,
         mhd_erforderlich=article_data.mhd_erforderlich,
         lagerartikel=article_data.lagerartikel,
-        mehrwertsteuer_prozent=article_data.mehrwertsteuer_prozent,
+        mehrwertsteuer_prozent=steuer["mehrwertsteuer_prozent"],
+        steuerschluessel_verkauf=steuer["steuerschluessel_verkauf"],
+        steuerschluessel_einkauf=steuer["steuerschluessel_einkauf"],
         warengruppe=article_data.warengruppe,
         gefahrgutklasse=article_data.gefahrgutklasse,
         gefahrgut_un_nummer=article_data.gefahrgut_un_nummer,
@@ -232,7 +272,7 @@ async def create_article(
     return _to_article_schema(article)
 
 
-@router.put("/{article_id}", response_model=Article, summary="Article aktualisieren")
+@router.put("/{article_id}", response_model=Article, summary="Article aktualisieren", dependencies=SCHREIBEN["STAMMDATEN"])
 async def update_article(
     article_id: str,
     article_data: ArticleUpdate,
@@ -271,6 +311,12 @@ async def update_article(
     if not dq_result.bestanden:
         raise HTTPException(status_code=422, detail=build_dq_error_detail("Artikel", dq_result))
 
+    # Ein neuer Satz ohne neuen Schluessel wird gegen den hinterlegten Verkaufsschluessel geprueft.
+    if "mehrwertsteuer_prozent" in payload and "steuerschluessel_verkauf" not in payload \
+            and getattr(article, "steuerschluessel_verkauf", None):
+        payload["steuerschluessel_verkauf"] = article.steuerschluessel_verkauf
+    _steuerschluessel_pruefen(db, effective_tenant, payload)
+
     for key, value in payload.items():
         setattr(article, key, value)
 
@@ -283,8 +329,7 @@ async def update_article(
     "/{article_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     response_class=Response,
-    summary="Article löschen",
-)
+    summary="Article löschen", dependencies=SCHREIBEN["STAMMDATEN"])
 async def delete_article(
     article_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -306,20 +351,20 @@ async def delete_article(
 from ....infrastructure.models import BusinessPartnerDiscountItem, BusinessPartnerPriceAgreement  # noqa: F811
 
 
-@router.get("/{article_id}/suppliers", response_model=ArticlesOut, summary="Article suppliers abrufen")
+@router.get("/{article_id}/suppliers", response_model=ArtikelLieferantenOut, summary="Article suppliers abrufen")
 async def get_article_suppliers(
     article_id: str,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Get suppliers for an article."""
-    _get_article_or_404(db, article_id, tenant_id)
+    # Ueber die aufgeloeste ID: der Pfad darf auch die Artikelnummer tragen (vorher blieb das Register leer).
+    article = _get_article_or_404(db, article_id, tenant_id)
     
     # Query article suppliers
-    suppliers = db.query(ArticleSupplier).filter(
-        ArticleSupplier.article_id == article_id,
-        ArticleSupplier.tenant_id == tenant_id,
-    ).all()
+    # Der Artikel ist mandantengeprueft; seine Lieferanten haengen per (article_id, tenant_id) daran.
+    # Das Modell kennt tenant_id nicht: der Filter darauf brach jeden Abruf mit 500 ab.
+    suppliers = db.query(ArticleSupplier).filter(ArticleSupplier.article_id == article.id).all()
     
     return {
         "items": [
@@ -378,7 +423,7 @@ async def get_article_discounts(
     }
 
 
-@router.get("/{article_id}/prices", response_model=ArticlesOut, summary="Article prices abrufen")
+@router.get("/{article_id}/prices", response_model=ArtikelPreiseOut, summary="Article prices abrufen")
 async def get_article_prices(
     article_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -413,18 +458,18 @@ async def get_article_prices(
     }
 
 
-@router.get("/{article_id}/documents", response_model=ArticlesOut, summary="Article documents abrufen")
+@router.get("/{article_id}/documents", response_model=ArtikelDokumenteOut, summary="Article documents abrufen")
 async def get_article_documents(
     article_id: str,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Get documents for an article."""
-    _get_article_or_404(db, article_id, tenant_id)
+    article = _get_article_or_404(db, article_id, tenant_id)
     
     # Query article documents
     documents = db.query(ArticleDocument).filter(
-        ArticleDocument.article_id == article_id,
+        ArticleDocument.article_id == article.id,
         ArticleDocument.tenant_id == tenant_id,
     ).all()
     
@@ -892,7 +937,7 @@ async def _do_enrich(article_ids: list[str], db: Session, tenant_id: str) -> Enr
     return EnrichImagesResponse(enriched=enriched, skipped=skipped, failed=failed, results=results)
 
 
-@router.post("/{article_id}/fetch-image", response_model=ImageEnrichResult, summary="Article image abrufen")
+@router.post("/{article_id}/fetch-image", response_model=ImageEnrichResult, summary="Article image abrufen", dependencies=SCHREIBEN["STAMMDATEN"])
 async def fetch_article_image(
     article_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -912,7 +957,7 @@ async def fetch_article_image(
     return ImageEnrichResult(article_id=article_id, image_url=url, source=source)
 
 
-@router.post("/enrich-images", response_model=EnrichImagesResponse, summary="Article images anreichern")
+@router.post("/enrich-images", response_model=EnrichImagesResponse, summary="Article images anreichern", dependencies=SCHREIBEN["STAMMDATEN"])
 async def enrich_article_images(
     article_ids: Optional[list[str]] = None,
     tenant_id: str = Depends(get_tenant_id),

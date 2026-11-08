@@ -1,0 +1,1346 @@
+{
+  "source_commit": "8086c464fdd35ba8550c2e54ebc4d7397d04a1cb",
+  "screens": [
+    {
+      "screen_id": "crm/customer-360",
+      "missing_actions": [
+        "bearbeiten"
+      ],
+      "creation_changed": true,
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "kind": "primary",
+          "dangerLevel": "safe",
+          "permission": "crm.customer.update",
+          "zone": "commit",
+          "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/bearbeiten",
+          "method": "POST",
+          "inputFields": [
+            {
+              "key": "firma",
+              "label": "Firma",
+              "type": "text"
+            },
+            {
+              "key": "strasse",
+              "label": "Strasse",
+              "type": "text"
+            },
+            {
+              "key": "plz",
+              "label": "PLZ",
+              "type": "text"
+            },
+            {
+              "key": "ort",
+              "label": "Ort",
+              "type": "text"
+            },
+            {
+              "key": "land",
+              "label": "Land",
+              "type": "text"
+            },
+            {
+              "key": "telefon",
+              "label": "Telefon",
+              "type": "text"
+            },
+            {
+              "key": "email",
+              "label": "E-Mail",
+              "type": "email"
+            },
+            {
+              "key": "branche",
+              "label": "Branche",
+              "type": "text"
+            }
+          ]
+        },
+        {
+          "key": "edit",
+          "label": "Erweiterte Pflege",
+          "kind": "secondary",
+          "dangerLevel": "safe",
+          "permission": "crm.customer.update",
+          "zone": "commit",
+          "navigationRoute": "/verkauf/kunden-stamm/{business_partner_id}?pflege=1"
+        },
+        {
+          "key": "create_activity",
+          "label": "Aktivitaet anlegen",
+          "kind": "secondary",
+          "dangerLevel": "safe",
+          "permission": "crm.activity.create",
+          "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/create_activity",
+          "method": "POST",
+          "requiresConfirmation": false,
+          "humanApprovalRequired": false,
+          "auditReasonRequired": false,
+          "forbiddenForAgents": false,
+          "zone": "footer"
+        }
+      ],
+      "creation": {
+        "endpoint": "/api/v1/crm/customers/",
+        "permission": "crm.customer.create",
+        "detailRoute": "/crm/kunden/{entity_id}",
+        "defaults": {
+          "country": "DE"
+        },
+        "fields": [
+          {
+            "key": "customer_number",
+            "label": "Kunden-Nr.",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "company_name",
+            "label": "Firma",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "contact_person",
+            "label": "Ansprechpartner",
+            "type": "text"
+          },
+          {
+            "key": "address",
+            "label": "Strasse",
+            "type": "text"
+          },
+          {
+            "key": "postal_code",
+            "label": "PLZ",
+            "type": "text"
+          },
+          {
+            "key": "city",
+            "label": "Ort",
+            "type": "text"
+          },
+          {
+            "key": "country",
+            "label": "Land",
+            "type": "text"
+          },
+          {
+            "key": "phone",
+            "label": "Telefon",
+            "type": "text"
+          },
+          {
+            "key": "email",
+            "label": "E-Mail",
+            "type": "email"
+          },
+          {
+            "key": "industry",
+            "label": "Branche",
+            "type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "screen_id": "sales/sales-order",
+      "missing_actions": [
+        "bearbeiten"
+      ],
+      "creation_changed": false,
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "kind": "secondary",
+          "dangerLevel": "safe",
+          "permission": "sales.order.update",
+          "commandEndpoint": "/api/v1/sales/orders/{entity_id}/actions/bearbeiten",
+          "method": "POST",
+          "inputFields": [
+            {
+              "key": "subject",
+              "label": "Betreff",
+              "type": "text"
+            },
+            {
+              "key": "delivery_date",
+              "label": "Liefertermin",
+              "type": "date"
+            },
+            {
+              "key": "contact_person",
+              "label": "Ansprechpartner",
+              "type": "text"
+            },
+            {
+              "key": "shipping_method",
+              "label": "Versandart",
+              "type": "text"
+            },
+            {
+              "key": "payment_terms",
+              "label": "Zahlungsbedingung",
+              "type": "text"
+            },
+            {
+              "key": "delivery_address",
+              "label": "Lieferanschrift",
+              "type": "textarea"
+            },
+            {
+              "key": "notes",
+              "label": "Notizen",
+              "type": "textarea"
+            }
+          ]
+        }
+      ],
+      "creation": null
+    },
+    {
+      "screen_id": "agrar/kontrakte",
+      "missing_actions": [
+        "bearbeiten"
+      ],
+      "creation_changed": false,
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "kind": "secondary",
+          "dangerLevel": "moderate",
+          "permission": "kontrakt.update",
+          "commandEndpoint": "/api/v1/kontrakte/{entity_id}/actions/bearbeiten",
+          "method": "POST",
+          "auditReasonRequired": true,
+          "requiresConfirmation": true,
+          "forbiddenForAgents": true,
+          "inputFields": [
+            {
+              "key": "contract_date",
+              "label": "Kontraktdatum",
+              "type": "date"
+            },
+            {
+              "key": "valid_from",
+              "label": "Gueltig ab",
+              "type": "date"
+            },
+            {
+              "key": "valid_to",
+              "label": "Gueltig bis",
+              "type": "date"
+            },
+            {
+              "key": "total_quantity",
+              "label": "Gesamtmenge",
+              "type": "number"
+            },
+            {
+              "key": "unit",
+              "label": "Einheit",
+              "type": "text"
+            },
+            {
+              "key": "payment_terms",
+              "label": "Zahlungsbedingung",
+              "type": "text"
+            },
+            {
+              "key": "notes",
+              "label": "Notizen",
+              "type": "textarea"
+            }
+          ]
+        }
+      ],
+      "creation": null
+    },
+    {
+      "screen_id": "einkauf/supplier",
+      "missing_actions": [
+        "bearbeiten",
+        "sperren",
+        "entsperren"
+      ],
+      "creation_changed": true,
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "kind": "primary",
+          "dangerLevel": "safe",
+          "permission": "einkauf.lieferant.update",
+          "commandEndpoint": "/api/v1/einkauf/lieferanten/{entity_id}/actions/bearbeiten",
+          "method": "POST",
+          "inputFields": [
+            {
+              "key": "firmenname",
+              "label": "Firma",
+              "type": "text"
+            },
+            {
+              "key": "strasse",
+              "label": "Strasse",
+              "type": "text"
+            },
+            {
+              "key": "plz",
+              "label": "PLZ",
+              "type": "text"
+            },
+            {
+              "key": "ort",
+              "label": "Ort",
+              "type": "text"
+            },
+            {
+              "key": "land",
+              "label": "Land",
+              "type": "text"
+            },
+            {
+              "key": "telefon",
+              "label": "Telefon",
+              "type": "text"
+            },
+            {
+              "key": "email",
+              "label": "E-Mail",
+              "type": "email"
+            },
+            {
+              "key": "zahlungsbedingungen",
+              "label": "Zahlungsbedingungen",
+              "type": "text"
+            },
+            {
+              "key": "lieferzeit_tage",
+              "label": "Lieferzeit (Tage)",
+              "type": "number"
+            }
+          ]
+        },
+        {
+          "key": "neue_bestellung",
+          "label": "Bestellung anlegen",
+          "kind": "secondary",
+          "dangerLevel": "safe",
+          "permission": "einkauf.bestellung.create",
+          "navigationRoute": "/einkauf/bestellungen/neu"
+        },
+        {
+          "key": "sperren",
+          "label": "Sperren",
+          "kind": "secondary",
+          "dangerLevel": "high",
+          "permission": "einkauf.lieferant.update",
+          "requiresConfirmation": true,
+          "auditReasonRequired": true,
+          "commandEndpoint": "/api/v1/einkauf/lieferanten/{entity_id}/actions/sperren",
+          "method": "POST"
+        },
+        {
+          "key": "entsperren",
+          "label": "Entsperren",
+          "kind": "secondary",
+          "dangerLevel": "high",
+          "permission": "einkauf.lieferant.update",
+          "requiresConfirmation": true,
+          "auditReasonRequired": true,
+          "commandEndpoint": "/api/v1/einkauf/lieferanten/{entity_id}/actions/entsperren",
+          "method": "POST"
+        }
+      ],
+      "creation": {
+        "endpoint": "/api/v1/einkauf/lieferanten",
+        "permission": "einkauf.lieferant.create",
+        "detailRoute": "/einkauf/lieferanten/{entity_id}",
+        "defaults": {
+          "land": "Deutschland"
+        },
+        "fields": [
+          {
+            "key": "lieferantennummer",
+            "label": "Lieferanten-Nr.",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "firmenname",
+            "label": "Firma",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "ansprechpartner",
+            "label": "Ansprechpartner",
+            "type": "text"
+          },
+          {
+            "key": "strasse",
+            "label": "Strasse",
+            "type": "text"
+          },
+          {
+            "key": "plz",
+            "label": "PLZ",
+            "type": "text"
+          },
+          {
+            "key": "ort",
+            "label": "Ort",
+            "type": "text"
+          },
+          {
+            "key": "land",
+            "label": "Land",
+            "type": "text"
+          },
+          {
+            "key": "telefon",
+            "label": "Telefon",
+            "type": "text"
+          },
+          {
+            "key": "email",
+            "label": "E-Mail",
+            "type": "email"
+          },
+          {
+            "key": "ust_id",
+            "label": "USt-IdNr.",
+            "type": "text"
+          },
+          {
+            "key": "zahlungsbedingungen",
+            "label": "Zahlungsbedingungen",
+            "type": "text"
+          },
+          {
+            "key": "zahlungsziel_tage",
+            "label": "Zahlungsziel (Tage)",
+            "type": "number"
+          },
+          {
+            "key": "lieferzeit_tage",
+            "label": "Lieferzeit (Tage)",
+            "type": "number"
+          }
+        ]
+      }
+    },
+    {
+      "screen_id": "crm/opportunity",
+      "missing_actions": [
+        "bearbeiten"
+      ],
+      "creation_changed": false,
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "kind": "secondary",
+          "dangerLevel": "safe",
+          "permission": "crm.opportunity.update",
+          "commandEndpoint": "/api/v1/crm/opportunities/{entity_id}/actions/bearbeiten",
+          "method": "POST",
+          "inputFields": [
+            {
+              "key": "name",
+              "label": "Bezeichnung",
+              "type": "text"
+            },
+            {
+              "key": "assigned_to",
+              "label": "Zustaendig",
+              "type": "text"
+            },
+            {
+              "key": "stage",
+              "label": "Phase",
+              "type": "text"
+            },
+            {
+              "key": "amount",
+              "label": "Wert",
+              "type": "number"
+            },
+            {
+              "key": "probability",
+              "label": "Wahrscheinlichkeit %",
+              "type": "number"
+            },
+            {
+              "key": "expected_close_date",
+              "label": "Erwarteter Abschluss",
+              "type": "date"
+            },
+            {
+              "key": "lead_source",
+              "label": "Quelle",
+              "type": "text"
+            }
+          ]
+        },
+        {
+          "key": "create_activity",
+          "label": "Aktivitaet anlegen",
+          "kind": "secondary",
+          "dangerLevel": "safe",
+          "permission": "crm.activity.create",
+          "commandEndpoint": "/api/v1/crm/opportunities/{entity_id}/actions/create_activity",
+          "method": "POST",
+          "inputFields": [
+            {
+              "key": "subject",
+              "label": "Betreff",
+              "type": "text",
+              "required": true
+            },
+            {
+              "key": "activity_type",
+              "label": "Typ",
+              "type": "select",
+              "required": true,
+              "options": [
+                {
+                  "value": "CALL",
+                  "label": "Anruf"
+                },
+                {
+                  "value": "EMAIL",
+                  "label": "E-Mail"
+                },
+                {
+                  "value": "MEETING",
+                  "label": "Termin"
+                },
+                {
+                  "value": "NOTE",
+                  "label": "Notiz"
+                }
+              ]
+            },
+            {
+              "key": "notes",
+              "label": "Notiz",
+              "type": "textarea"
+            }
+          ]
+        }
+      ],
+      "creation": null
+    },
+    {
+      "screen_id": "finance/ap-invoice",
+      "missing_actions": [
+        "freigeben"
+      ],
+      "creation_changed": false,
+      "actions": [
+        {
+          "key": "freigeben",
+          "label": "Freigeben",
+          "kind": "primary",
+          "dangerLevel": "moderate",
+          "permission": "finance.ap.freigabe",
+          "enabledWhen": "approval_can_decide",
+          "humanApprovalRequired": true,
+          "forbiddenForAgents": true,
+          "requiresConfirmation": true,
+          "commandEndpoint": "/api/v1/finance/ap/invoices/{entity_id}/actions/freigeben",
+          "method": "POST"
+        }
+      ],
+      "creation": null
+    },
+    {
+      "screen_id": "finance/ar-open-item",
+      "missing_actions": [
+        "mahnen"
+      ],
+      "creation_changed": false,
+      "actions": [
+        {
+          "key": "mahnen",
+          "label": "Mahnung erstellen",
+          "kind": "primary",
+          "dangerLevel": "moderate",
+          "permission": "finance.ar.mahnung",
+          "requiresConfirmation": true,
+          "commandEndpoint": "/api/v1/finance/open-items/{entity_id}/actions/mahnen",
+          "method": "POST",
+          "forbiddenForAgents": true
+        }
+      ],
+      "creation": null
+    },
+    {
+      "screen_id": "finance/debitor",
+      "missing_actions": [
+        "bearbeiten"
+      ],
+      "creation_changed": false,
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "kind": "secondary",
+          "dangerLevel": "moderate",
+          "permission": "finance.debitor.update",
+          "commandEndpoint": "/api/v1/finance/debitoren/{entity_id}/actions/bearbeiten",
+          "method": "POST",
+          "auditReasonRequired": true,
+          "requiresConfirmation": true,
+          "forbiddenForAgents": true,
+          "inputFields": [
+            {
+              "key": "credit_limit",
+              "label": "Kreditlimit",
+              "type": "number"
+            },
+            {
+              "key": "is_active",
+              "label": "Aktiv (nicht gesperrt)",
+              "type": "boolean"
+            }
+          ]
+        }
+      ],
+      "creation": null
+    },
+    {
+      "screen_id": "finance/kreditor",
+      "missing_actions": [
+        "bearbeiten"
+      ],
+      "creation_changed": false,
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "kind": "secondary",
+          "dangerLevel": "moderate",
+          "permission": "finance.kreditor.update",
+          "commandEndpoint": "/api/v1/finance/kreditoren/{entity_id}/actions/bearbeiten",
+          "method": "POST",
+          "auditReasonRequired": true,
+          "requiresConfirmation": true,
+          "forbiddenForAgents": true,
+          "inputFields": [
+            {
+              "key": "company_name",
+              "label": "Firma",
+              "type": "text"
+            },
+            {
+              "key": "contact_person",
+              "label": "Ansprechpartner",
+              "type": "text"
+            },
+            {
+              "key": "street",
+              "label": "Strasse",
+              "type": "text"
+            },
+            {
+              "key": "postal_code",
+              "label": "PLZ",
+              "type": "text"
+            },
+            {
+              "key": "city",
+              "label": "Ort",
+              "type": "text"
+            },
+            {
+              "key": "country",
+              "label": "Land",
+              "type": "text"
+            },
+            {
+              "key": "phone",
+              "label": "Telefon",
+              "type": "text"
+            },
+            {
+              "key": "email",
+              "label": "E-Mail",
+              "type": "email"
+            },
+            {
+              "key": "vat_id",
+              "label": "USt-IdNr.",
+              "type": "text"
+            },
+            {
+              "key": "tax_number",
+              "label": "Steuernummer",
+              "type": "text"
+            },
+            {
+              "key": "payment_terms_days",
+              "label": "Zahlungsziel (Tage)",
+              "type": "number"
+            },
+            {
+              "key": "is_active",
+              "label": "Aktiv",
+              "type": "boolean"
+            },
+            {
+              "key": "notes",
+              "label": "Notiz",
+              "type": "textarea"
+            }
+          ]
+        }
+      ],
+      "creation": null
+    },
+    {
+      "screen_id": "finance/bankkonto",
+      "missing_actions": [
+        "bearbeiten"
+      ],
+      "creation_changed": false,
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "kind": "secondary",
+          "dangerLevel": "moderate",
+          "permission": "finance.bankkonto.update",
+          "commandEndpoint": "/api/v1/banken/konten/{entity_id}/actions/bearbeiten",
+          "method": "POST",
+          "auditReasonRequired": true,
+          "requiresConfirmation": true,
+          "forbiddenForAgents": true,
+          "inputFields": [
+            {
+              "key": "bank",
+              "label": "Bank",
+              "type": "text"
+            },
+            {
+              "key": "kontoart",
+              "label": "Kontoart",
+              "type": "text"
+            },
+            {
+              "key": "ist_aktiv",
+              "label": "Aktiv",
+              "type": "boolean"
+            }
+          ]
+        }
+      ],
+      "creation": null
+    },
+    {
+      "screen_id": "einkauf/anfrage",
+      "missing_actions": [
+        "bearbeiten"
+      ],
+      "creation_changed": false,
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "kind": "secondary",
+          "dangerLevel": "safe",
+          "permission": "einkauf.anfrage.update",
+          "commandEndpoint": "/api/v1/einkauf/anfragen/{entity_id}/actions/bearbeiten",
+          "method": "POST",
+          "inputFields": [
+            {
+              "key": "anforderer",
+              "label": "Anforderer",
+              "type": "text"
+            },
+            {
+              "key": "abteilung",
+              "label": "Abteilung",
+              "type": "text"
+            },
+            {
+              "key": "prioritaet",
+              "label": "Prioritaet",
+              "type": "text"
+            },
+            {
+              "key": "artikel",
+              "label": "Artikel",
+              "type": "text"
+            },
+            {
+              "key": "menge",
+              "label": "Menge",
+              "type": "number"
+            },
+            {
+              "key": "einheit",
+              "label": "Einheit",
+              "type": "text"
+            },
+            {
+              "key": "begruendung",
+              "label": "Begruendung",
+              "type": "textarea"
+            },
+            {
+              "key": "notizen",
+              "label": "Notizen",
+              "type": "textarea"
+            }
+          ]
+        }
+      ],
+      "creation": null
+    },
+    {
+      "screen_id": "einkauf/auftragsbestaetigung",
+      "missing_actions": [
+        "pruefen",
+        "bestaetigen"
+      ],
+      "creation_changed": true,
+      "actions": [
+        {
+          "key": "pruefen",
+          "label": "Pruefen",
+          "kind": "secondary",
+          "dangerLevel": "safe",
+          "permission": "einkauf.auftragsbestaetigung.review",
+          "commandEndpoint": "/api/v1/einkauf/auftragsbestaetigungen/{entity_id}/actions/pruefen",
+          "method": "POST"
+        },
+        {
+          "key": "bestaetigen",
+          "label": "Bestaetigen",
+          "kind": "secondary",
+          "dangerLevel": "moderate",
+          "permission": "einkauf.auftragsbestaetigung.confirm",
+          "commandEndpoint": "/api/v1/einkauf/auftragsbestaetigungen/{entity_id}/actions/bestaetigen",
+          "method": "POST"
+        }
+      ],
+      "creation": {
+        "endpoint": "/api/v1/einkauf/auftragsbestaetigungen",
+        "permission": "einkauf.auftragsbestaetigung.create",
+        "detailRoute": "/einkauf/auftragsbestaetigung/{entity_id}",
+        "fields": [
+          {
+            "key": "bestellung",
+            "label": "Bestellung (Nummer)",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "ab_nummer",
+            "label": "AB-Nummer des Lieferanten",
+            "type": "text",
+            "required": true
+          },
+          {
+            "key": "datum",
+            "label": "AB-Datum",
+            "type": "date"
+          },
+          {
+            "key": "lieferdatum",
+            "label": "Bestaetigter Liefertermin",
+            "type": "date"
+          },
+          {
+            "key": "gesamtbetrag",
+            "label": "Gesamtbetrag",
+            "type": "number"
+          },
+          {
+            "key": "abweichungen",
+            "label": "Abweichungen zur Bestellung",
+            "type": "textarea"
+          },
+          {
+            "key": "notizen",
+            "label": "Notizen",
+            "type": "textarea"
+          }
+        ]
+      }
+    },
+    {
+      "screen_id": "qualitaet/reklamation",
+      "missing_actions": [
+        "bearbeiten"
+      ],
+      "creation_changed": false,
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Zustaendigkeit/Frist",
+          "kind": "secondary",
+          "dangerLevel": "safe",
+          "permission": "qualitaet.reklamation.update",
+          "commandEndpoint": "/api/v1/reklamationen/{entity_id}/actions/bearbeiten",
+          "method": "POST",
+          "inputFields": [
+            {
+              "key": "zustaendiger",
+              "label": "Zustaendig",
+              "type": "text"
+            },
+            {
+              "key": "frist_datum",
+              "label": "Frist",
+              "type": "date"
+            }
+          ]
+        },
+        {
+          "key": "abschliessen",
+          "label": "Abschliessen",
+          "kind": "secondary",
+          "dangerLevel": "moderate",
+          "permission": "qualitaet.reklamation.close",
+          "requiresConfirmation": true,
+          "commandEndpoint": "/api/v1/reklamationen/{entity_id}/actions/abschliessen",
+          "method": "POST"
+        }
+      ],
+      "creation": null
+    },
+    {
+      "screen_id": "futtermittel/analysen",
+      "missing_actions": [
+        "import_analysis"
+      ],
+      "creation_changed": false,
+      "actions": [
+        {
+          "key": "import_analysis",
+          "label": "Analyse erfassen",
+          "kind": "primary",
+          "dangerLevel": "safe",
+          "permission": "futtermittel.analyse.create",
+          "inputFlow": {
+            "kind": "humanForm",
+            "submitEndpoint": "/api/v1/agrar/rations-optimization/feed-analyses",
+            "method": "POST"
+          },
+          "forbiddenForAgents": true
+        }
+      ],
+      "creation": null
+    },
+    {
+      "screen_id": "futtermittel/analyse",
+      "missing_actions": [
+        "validate"
+      ],
+      "creation_changed": false,
+      "actions": [
+        {
+          "key": "validate",
+          "label": "Plausibilitaet pruefen",
+          "kind": "primary",
+          "dangerLevel": "safe",
+          "permission": "futtermittel.analyse.validate",
+          "commandEndpoint": "/api/v1/agrar/rations-optimization/feed-analyses/{entity_id}/actions/validate",
+          "method": "POST"
+        },
+        {
+          "key": "release",
+          "label": "Analyse freigeben",
+          "kind": "primary",
+          "dangerLevel": "high",
+          "permission": "futtermittel.analyse.release",
+          "requiresConfirmation": true,
+          "humanApprovalRequired": true,
+          "auditReasonRequired": true,
+          "commandEndpoint": "/api/v1/agrar/rations-optimization/feed-analyses/{entity_id}/actions/release",
+          "method": "POST"
+        },
+        {
+          "key": "reject",
+          "label": "Zurueckweisen",
+          "kind": "secondary",
+          "dangerLevel": "moderate",
+          "permission": "futtermittel.analyse.reject",
+          "requiresConfirmation": true,
+          "auditReasonRequired": true,
+          "commandEndpoint": "/api/v1/agrar/rations-optimization/feed-analyses/{entity_id}/actions/reject",
+          "method": "POST"
+        }
+      ],
+      "creation": null
+    },
+    {
+      "screen_id": "futtermittel/mischfuttermittel",
+      "missing_actions": [
+        "bearbeiten"
+      ],
+      "creation_changed": false,
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "kind": "secondary",
+          "dangerLevel": "safe",
+          "permission": "futtermittel.mischfutter.update",
+          "commandEndpoint": "/api/v1/futter/mischfuttermittel/{entity_id}/actions/bearbeiten",
+          "method": "POST",
+          "inputFields": [
+            {
+              "key": "name",
+              "label": "Bezeichnung",
+              "type": "text"
+            },
+            {
+              "key": "tierart",
+              "label": "Tierart",
+              "type": "text"
+            },
+            {
+              "key": "leistungsstufe",
+              "label": "Leistungsstufe",
+              "type": "text"
+            },
+            {
+              "key": "protein",
+              "label": "Rohprotein %",
+              "type": "number"
+            },
+            {
+              "key": "energie",
+              "label": "Energie (MJ)",
+              "type": "number"
+            },
+            {
+              "key": "beschreibung",
+              "label": "Beschreibung",
+              "type": "textarea"
+            }
+          ]
+        }
+      ],
+      "creation": null
+    },
+    {
+      "screen_id": "crm/lead",
+      "missing_actions": [
+        "bearbeiten"
+      ],
+      "creation_changed": false,
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "kind": "secondary",
+          "dangerLevel": "safe",
+          "permission": "crm.lead.update",
+          "commandEndpoint": "/api/v1/crm/leads/{entity_id}/actions/bearbeiten",
+          "method": "POST",
+          "inputFields": [
+            {
+              "key": "company_name",
+              "label": "Unternehmen",
+              "type": "text"
+            },
+            {
+              "key": "contact_person",
+              "label": "Ansprechpartner",
+              "type": "text"
+            },
+            {
+              "key": "email",
+              "label": "E-Mail",
+              "type": "email"
+            },
+            {
+              "key": "phone",
+              "label": "Telefon",
+              "type": "text"
+            },
+            {
+              "key": "source",
+              "label": "Quelle",
+              "type": "text"
+            },
+            {
+              "key": "estimated_value",
+              "label": "Geschaetzter Wert",
+              "type": "number"
+            },
+            {
+              "key": "priority",
+              "label": "Prioritaet",
+              "type": "text"
+            },
+            {
+              "key": "assigned_to",
+              "label": "Zustaendig",
+              "type": "text"
+            }
+          ]
+        },
+        {
+          "key": "qualifizieren",
+          "label": "Als Opportunity qualifizieren",
+          "kind": "secondary",
+          "dangerLevel": "safe",
+          "permission": "crm.lead.qualify",
+          "commandEndpoint": "/api/v1/crm/leads/{entity_id}/actions/qualifizieren",
+          "method": "POST",
+          "inputFields": [
+            {
+              "key": "customer_id",
+              "label": "Kunde",
+              "type": "select",
+              "required": true,
+              "optionsSource": {
+                "endpoint": "/api/v1/crm/customers/",
+                "valueKey": "id",
+                "labelKey": "company_name"
+              }
+            }
+          ]
+        }
+      ],
+      "creation": {
+        "endpoint": "/api/v1/crm/leads",
+        "permission": "crm.lead.create",
+        "detailRoute": "/crm/lead/{entity_id}",
+        "defaults": {
+          "source": "unknown",
+          "status": "NEW",
+          "priority": "medium"
+        }
+      }
+    },
+    {
+      "screen_id": "agrar/rations-lifecycle",
+      "missing_actions": [
+        "create_group"
+      ],
+      "creation_changed": false,
+      "actions": [
+        {
+          "key": "plan_ration",
+          "label": "Neue Ration planen",
+          "kind": "primary",
+          "dangerLevel": "safe",
+          "permission": "futtermittel.rations.update",
+          "navigationRoute": "/portal/rationsoptimierung?mode=expert"
+        },
+        {
+          "key": "create_group",
+          "label": "Tiergruppe anlegen",
+          "kind": "secondary",
+          "dangerLevel": "safe",
+          "permission": "futtermittel.rations.update",
+          "inputFlow": {
+            "kind": "humanForm",
+            "submitEndpoint": "/api/v1/agrar/rations-optimization/lifecycle/groups",
+            "method": "POST"
+          },
+          "forbiddenForAgents": true
+        }
+      ],
+      "creation": null
+    },
+    {
+      "screen_id": "agrar/feeding-businesses",
+      "missing_actions": [
+        "create_business"
+      ],
+      "creation_changed": false,
+      "actions": [
+        {
+          "key": "create_business",
+          "label": "Betrieb anlegen",
+          "kind": "primary",
+          "dangerLevel": "safe",
+          "permission": "futtermittel.rations.update",
+          "inputFlow": {
+            "kind": "humanForm",
+            "submitEndpoint": "/api/v1/agrar/rations-optimization/feeding/businesses",
+            "method": "POST"
+          },
+          "forbiddenForAgents": true
+        }
+      ],
+      "creation": null
+    },
+    {
+      "screen_id": "agrar/feeding-business",
+      "missing_actions": [
+        "create_template",
+        "apply_template"
+      ],
+      "creation_changed": false,
+      "actions": [
+        {
+          "key": "create_template",
+          "label": "Vorlage anlegen",
+          "kind": "primary",
+          "dangerLevel": "safe",
+          "permission": "futtermittel.rations.update",
+          "inputFlow": {
+            "kind": "humanForm",
+            "submitEndpoint": "/api/v1/agrar/rations-optimization/feeding/ration-templates",
+            "method": "POST"
+          },
+          "forbiddenForAgents": true
+        },
+        {
+          "key": "apply_template",
+          "label": "Vorlage anwenden",
+          "kind": "secondary",
+          "dangerLevel": "safe",
+          "permission": "futtermittel.rations.update",
+          "inputFlow": {
+            "kind": "humanForm",
+            "submitEndpoint": "/api/v1/agrar/rations-optimization/feeding/ration-templates/actions/apply_template",
+            "method": "POST"
+          },
+          "forbiddenForAgents": true
+        }
+      ],
+      "creation": null
+    },
+    {
+      "screen_id": "agrar/feeding-group",
+      "missing_actions": [
+        "edit_group"
+      ],
+      "creation_changed": false,
+      "actions": [
+        {
+          "key": "edit_group",
+          "label": "Tiergruppe bearbeiten",
+          "kind": "primary",
+          "dangerLevel": "safe",
+          "permission": "futtermittel.rations.update",
+          "inputFlow": {
+            "kind": "humanForm",
+            "submitEndpoint": "/api/v1/agrar/rations-optimization/lifecycle/groups/{entity_id}",
+            "method": "PATCH"
+          },
+          "forbiddenForAgents": true
+        }
+      ],
+      "creation": null
+    },
+    {
+      "screen_id": "agrar/feed-controlling",
+      "missing_actions": [
+        "record_observation"
+      ],
+      "creation_changed": false,
+      "actions": [
+        {
+          "key": "record_observation",
+          "label": "Tageswerte erfassen",
+          "kind": "primary",
+          "dangerLevel": "safe",
+          "permission": "futtermittel.rations.update",
+          "inputFlow": {
+            "kind": "humanForm",
+            "submitEndpoint": "/api/v1/agrar/rations-optimization/controlling/observations",
+            "method": "POST"
+          },
+          "forbiddenForAgents": true
+        }
+      ],
+      "creation": null
+    },
+    {
+      "screen_id": "lager/inventur-nebenlaeufe",
+      "missing_actions": [
+        "create_count_sheet",
+        "create_control",
+        "create_valuation"
+      ],
+      "creation_changed": false,
+      "actions": [
+        {
+          "key": "create_count_sheet",
+          "label": "Zaehlliste",
+          "kind": "secondary",
+          "permission": "inventory.aux.write",
+          "dangerLevel": "low",
+          "commandEndpoint": "/api/v1/inventory/auxiliary/actions/create_count_sheet",
+          "method": "POST",
+          "auditReasonRequired": true
+        },
+        {
+          "key": "create_control",
+          "label": "Kontrolllauf",
+          "kind": "secondary",
+          "permission": "inventory.aux.write",
+          "dangerLevel": "low",
+          "commandEndpoint": "/api/v1/inventory/auxiliary/actions/create_control",
+          "method": "POST",
+          "auditReasonRequired": true
+        },
+        {
+          "key": "create_valuation",
+          "label": "Vorlaeufig bewerten",
+          "kind": "secondary",
+          "permission": "inventory.aux.write",
+          "dangerLevel": "low",
+          "commandEndpoint": "/api/v1/inventory/auxiliary/actions/create_valuation",
+          "method": "POST",
+          "auditReasonRequired": true
+        },
+        {
+          "key": "create_opening",
+          "label": "Bestandsvortrag",
+          "inputFlow": {
+            "kind": "humanForm",
+            "submitEndpoint": "/api/v1/inventory/auxiliary/batches",
+            "method": "POST"
+          },
+          "forbiddenForAgents": true,
+          "kind": "primary",
+          "permission": "inventory.aux.write",
+          "dangerLevel": "high",
+          "requiresConfirmation": true
+        }
+      ],
+      "creation": null
+    },
+    {
+      "screen_id": "crm/mail-arbeitsplatz",
+      "missing_actions": [
+        "draft"
+      ],
+      "creation_changed": false,
+      "actions": [
+        {
+          "key": "draft",
+          "label": "Neue Mail",
+          "kind": "primary",
+          "permission": "crm.mail.write",
+          "dangerLevel": "low",
+          "inputFlow": {
+            "kind": "humanForm",
+            "submitEndpoint": "/api/v1/mail-workspace/drafts",
+            "method": "POST"
+          },
+          "forbiddenForAgents": true
+        }
+      ],
+      "creation": null
+    }
+  ]
+}

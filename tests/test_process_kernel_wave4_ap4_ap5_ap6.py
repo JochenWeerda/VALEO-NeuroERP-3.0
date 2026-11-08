@@ -6,6 +6,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 
 from fastapi import FastAPI
+from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
 from fastapi.testclient import TestClient
 
 from app.core.operational_governance import (
@@ -333,6 +334,7 @@ def test_runtime_health_endpoint_includes_finance_projection_component():
     finance_read_models.rebuild_finance_projection_store("t1", db=None)
 
     app = FastAPI()
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(runtime_operations.router)
 
     from app.core.tenant import get_tenant_id
@@ -375,6 +377,7 @@ def test_runtime_components_endpoint_exposes_finance_projection_metrics():
     finance_read_models._load_projection("t1", "missing-projection", finance_read_models.APInvoiceCockpitReadModel)
 
     app = FastAPI()
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(runtime_operations.router)
 
     from app.core.tenant import get_tenant_id
@@ -428,6 +431,7 @@ def test_replay_request_persists_projection_cursor_when_db_available():
     fake_db = FakeDb()
 
     app = FastAPI()
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(runtime_operations.router)
 
     from app.core.tenant import get_tenant_id
@@ -498,6 +502,7 @@ def test_runtime_components_expose_last_processed_event_from_cursor_metadata():
             return None
 
     app = FastAPI()
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(runtime_operations.router)
 
     from app.core.tenant import get_tenant_id

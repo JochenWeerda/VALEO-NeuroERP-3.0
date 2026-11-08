@@ -6,10 +6,11 @@ from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
-from app.auth.deps import get_current_user, get_tenant_id
+from app.auth.deps import get_tenant_id
 from app.core.database import get_db
 from app.finance.models import NebenbuchAbstimmung
 from app.finance.router import router
+from testgrenze import ersetze_nutzer
 
 
 @pytest.fixture(scope="module")
@@ -32,7 +33,7 @@ def api(store):
         with Session(connection, join_transaction_mode="create_savepoint") as session:
             assert session.execute(select(NebenbuchAbstimmung)).scalars().all() == []
             application.dependency_overrides[get_db] = lambda: session
-            application.dependency_overrides[get_current_user] = lambda: {"id": "test-user"}
+            ersetze_nutzer(application, "FINANCE_BEARBEITEN")
             application.dependency_overrides[get_tenant_id] = lambda: "tenant-a"
             with TestClient(application) as client:
                 yield client, session, application

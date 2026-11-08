@@ -10,6 +10,7 @@ from fastapi.testclient import TestClient
 from app.api.v1.endpoints import collab_notes
 from app.core.database import get_db
 from app.core.security import require_bearer_token
+from testgrenze import ersetze_bearer, ersetze_mandant
 
 
 HEADERS = {"Authorization": "Bearer dev-token", "X-Tenant-ID": "tenant-collab-a"}
@@ -35,8 +36,8 @@ class _CollabDb:
         self.notes: dict[str, dict[str, Any]] = {}
         self.messages: list[dict[str, Any]] = []
         self.users: dict[str, set[str]] = {
-            "tenant-collab-a": {"dev-user", "u-mentioned"},
-            "tenant-collab-b": {"dev-user", "u-mentioned"},
+            "tenant-collab-a": {"5f0c2a9e", "u-mentioned"},
+            "tenant-collab-b": {"5f0c2a9e", "u-mentioned"},
         }
         self.commits = 0
         self.rollbacks = 0
@@ -48,7 +49,7 @@ class _CollabDb:
         tenant_id: str = "tenant-collab-a",
         entity_type: str = "crm/customer-360",
         entity_id: str = "cust-1",
-        created_by: str = "dev-user",
+        created_by: str = "5f0c2a9e",
         body: str = "Bestehende Notiz",
     ) -> dict[str, Any]:
         row = {
@@ -142,6 +143,8 @@ class _CollabDb:
 def _client_with_db(db: _CollabDb, monkeypatch):
     events: list[dict[str, Any]] = []
     app = FastAPI()
+    ersetze_mandant(app)
+    ersetze_bearer(app, "admin")
     app.include_router(collab_notes.router, prefix="/api/v1", dependencies=[Depends(require_bearer_token)])
 
     async def fake_enqueue_event(*args: Any, **kwargs: Any) -> None:
@@ -175,7 +178,7 @@ def test_create_note_writes_message_and_outbox(monkeypatch) -> None:
     assert response.status_code == 201, response.text
     body = response.json()
     assert body["tenant_id"] == "tenant-collab-a"
-    assert body["created_by"] == "dev-user"
+    assert body["created_by"] == "5f0c2a9e"
     assert body["mentions"][0]["user_id"] == "u-mentioned"
     assert len(db.messages) == 1
     assert db.messages[0]["recipient_id"] == "u-mentioned"

@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session, selectinload
 from typing import List
 from app.core.database import get_db
 from app.verkauf import models, schemas
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter()
 
@@ -86,7 +87,7 @@ async def get_kundenstamm_full(kunden_nr: str, db: Session = Depends(get_db)):
     )
 
 
-@router.post("/kunden", response_model=schemas.KundeResponse)
+@router.post("/kunden", response_model=schemas.KundeResponse, dependencies=SCHREIBEN["VERKAUF"])
 async def create_kunde(kunde_data: schemas.KundeCreate, db: Session = Depends(get_db)):
     """Neuen Kunden erstellen"""
     # Prüfe ob Kunde bereits existiert
@@ -106,7 +107,7 @@ async def create_kunde(kunde_data: schemas.KundeCreate, db: Session = Depends(ge
     return kunde
 
 
-@router.put("/kunden/{kunden_nr}", response_model=schemas.KundeResponse)
+@router.put("/kunden/{kunden_nr}", response_model=schemas.KundeResponse, dependencies=SCHREIBEN["VERKAUF"])
 async def update_kunde(
     kunden_nr: str,
     kunde_data: schemas.KundeUpdate,
@@ -131,7 +132,7 @@ async def update_kunde(
     return kunde
 
 
-@router.delete("/kunden/{kunden_nr}")
+@router.delete("/kunden/{kunden_nr}", dependencies=SCHREIBEN["VERKAUF"])
 async def delete_kunde(kunden_nr: str, db: Session = Depends(get_db)):
     """Kunde löschen (Soft Delete)"""
     kunde = db.query(models.Kunde).filter(
@@ -159,7 +160,7 @@ async def list_ansprechpartner(kunden_nr: str, db: Session = Depends(get_db)):
     return ansprechpartner
 
 
-@router.post("/kunden/{kunden_nr}/ansprechpartner", response_model=schemas.KundenAnsprechpartnerResponse)
+@router.post("/kunden/{kunden_nr}/ansprechpartner", response_model=schemas.KundenAnsprechpartnerResponse, dependencies=SCHREIBEN["VERKAUF"])
 async def create_ansprechpartner(
     kunden_nr: str,
     ansprechpartner_data: schemas.KundenAnsprechpartnerCreate,
@@ -190,7 +191,7 @@ async def get_profil(kunden_nr: str, db: Session = Depends(get_db)):
     return profil
 
 
-@router.post("/kunden/{kunden_nr}/profil", response_model=schemas.KundenProfilResponse)
+@router.post("/kunden/{kunden_nr}/profil", response_model=schemas.KundenProfilResponse, dependencies=SCHREIBEN["VERKAUF"])
 async def create_profil(
     kunden_nr: str,
     profil_data: schemas.KundenProfilCreate,

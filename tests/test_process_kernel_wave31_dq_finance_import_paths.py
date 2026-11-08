@@ -56,7 +56,9 @@ def test_bulk_journal_import_rejects_invalid_row_before_period_or_db_work():
             import_journal_entries_csv(
                 file=file,
                 period="2026-03",
+                tenant_wahl=None,
                 tenant_id="tenant-1",
+                nutzer={"sub": "t", "roles": ["admin"]},
                 delimiter=",",
                 dry_run=True,
                 db=FailImportDB(),

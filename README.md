@@ -1,436 +1,94 @@
 # VALEO NeuroERP 3.0
 
-![Quality Gate](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/workflows/quality-gate.yml/badge.svg?branch=main)
-![Security Scan](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/workflows/security-scan.yml/badge.svg?branch=main)
-![Universal Mask CI](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/workflows/universal-mask-ci.yml/badge.svg?branch=main)
-![Runtime Sweep](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/workflows/runtime-sweep.yml/badge.svg?branch=main)
-![Deploy Staging](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/workflows/deploy-staging.yml/badge.svg)
-![License](https://img.shields.io/badge/license-MIT-blue)
-![Version](https://img.shields.io/badge/version-3.0.0--beta-orange)
+[Deutsch](#deutsch) · [English](#english)
 
----
+## Deutsch
 
-> 🇩🇪 [Deutsche Version](#deutsch) | 🇬🇧 [English Version](#english)
+**VALEO NeuroERP verbindet Agrar- und Landhandelsprozesse mit einer Plattform für nachvollziehbare digitale Zusammenarbeit.** Das Projekt entwickelt ein ERP für Agrargenossenschaften und Landhandelsunternehmen: vom fachlichen Vorgang über die Oberfläche bis zu kontrollierten Schnittstellen für Automatisierung und KI-Agenten.
 
----
+### Die Produktidee
 
-<a name="deutsch"></a>
-## 🇩🇪 Deutsch
+- **Agrar im Mittelpunkt:** Kontrakte, Ernte und Abrechnung, Einkauf, Verkauf, Lager, Wiegen und Logistik gehören zum fachlichen Zielbild; Finanzbuchhaltung, CRM, Personal und Dokumente ergänzen es.
+- **Ein gemeinsamer Prozesskern:** Fachaktionen, Regeln und Nachweise sollen über Oberflächen und agentenfähige Kanäle zusammenwirken. Mandanten- und Berechtigungsgrenzen sind Teil der Verträge.
+- **Studio und wiederverwendbare Oberflächen:** Versionierte Definitionen und eine gemeinsame Masken-Runtime bilden die Grundlage für konsistente Arbeitsoberflächen. Das Ziel ist, fachliche Funktionen für Menschen und geeignete Automatisierungskanäle zugänglich zu machen.
+- **Nachvollziehbare Automatisierung:** MCP und CLI erweitern die Bedienwege. Schreibaktionen benötigen die jeweils vorgesehenen Rollen, Prüfungen und Freigaben; der [MCP-Schreibstandard](docs/architecture/mcp-write-standard.md) beschreibt die Regeln.
 
-VALEO NeuroERP 3.0 ist ein mehrdomäniges ERP-System für Agrargenossenschaften und Landhandelsunternehmen. Der Fokus liegt auf prozessdurchgängiger Landhandels-Exzellenz, agentenfähiger Facharchitektur und schneller Prozess-UX — kein generisches Horizontal-ERP.
+### Unser Anspruch
 
----
+VALEO verfolgt den Anspruch einer Premium-Plattform für den Agrarhandel: fachliche Tiefe in Agrarprozessen, durchgängige beleggebundene Agentenaktionen, versionierte Oberflächen und adaptive Arbeitsräume sollen zu einem gemeinsamen Arbeitsumfeld zusammenwachsen. Das ist das Produktziel; die Umsetzung und Freigabe erfolgen schrittweise je Prozess und Kanal.
 
-### Aktueller Status
+### Mehrwert für den Agrarhandel
 
-| Kennzahl | Stand |
-|----------|-------|
-| Doku-Stand | `2026-07-06` |
-| Produktreife | **Beta** — Kernprozesse operativ, externe Go-Live-Gates offen |
-| CI (GitHub Actions, `main`) | **quality-gate, security-scan, universal-mask-ci, runtime-sweep grün** (2026-07-06, Run 28788983957 auf `c2df41595`) — Evidenz: `artifacts/ci-green-evidence.md` |
-| Doku-Code-Drift | **0 Items** (`python scripts/doc_drift_report.py --fail-over 0`, 2026-07-06) |
-| Release-Evidence | **WARN** — 4 PASS / 2 WARN / 0 FAIL (`artifacts/release_evidence.json`, SHA `1772798e0`) |
-| Mask-CommandEndpoints | **26 native SDs, 0 stubReason** (SPEC-P1-04, Inventur-Skript) |
-| Frontend TypeScript | 0 Fehler (`tsc --noEmit`) |
-| Backend-Tests | **11 943 passed** im CI-Volllauf (2026-07-06), 0 Fehler |
-| Kritische Coverage-Ratchets | grün, **only-up-Politik** (`config/coverage_ratchet_baseline.json`, Absenkung = CI-Fehler) |
-| Backend-Gesamtabdeckung | 65,66 % (Ziel langfristig ≥ 80 %) |
-| OpenAPI-Routen | **2 537 Pfade** / 3 274 Operationen mit `summary=` (100 %) |
-| Alembic | 1 Head (`inv_lot_depth_spec_p1_08`), Fresh-DB-Drift geschlossen |
-| Runtime-API-Sweep | **Nightly-Gate 0×5xx** über alle parameterlosen GET-Routen gegen frisch migrierte DB (`scripts/api_runtime_sweep.py`) |
-| Audit-Readiness | ISO-27001 Annex A 93/93 + SOC-2-TSC-Matrix (`config/audit/`), Orchestrator `audit-simulation.yml` |
-| Domänentiefe | DOM-\*-004 abgeschlossen: Kontrakte, O2C, FIBU, P2P, Nachweisraum, Lieferkette |
-| Architektur-Doku | arc42 (12 Kapitel), C4 Context/Container/Components, 42 ADRs |
-| Workflow-Cockpit | MVP + Retry/Kompensation + NATS-Projektor + Dead-Letter-Sicht |
+Unser Ziel ist, die bewährte Transaktionsstärke eines Premium-ERP um einen durchgängigen Arbeits- und Anpassungsraum zu erweitern:
 
----
+- **Vom Kontrakt bis zur Abrechnung:** Waage, Qualitätsbewertung, Lager, Logistik und Finanzwirkung im fachlichen Zusammenhang bearbeiten.
+- **Vom Anliegen zum Arbeitsablauf:** Im Dialog mit einem Agenten passende Masken und Prozessvorschläge entwickeln, versionieren, simulieren und gezielt freigeben.
+- **Eine Fachaktion, mehrere Bedienwege:** Menschen, CLI und MCP sollen dieselben geprüften Domain-Commands mit denselben Mandanten- und Rollenregeln nutzen.
+- **Arbeit nach Relevanz bündeln:** Adaptive Arbeitsräume sollen Belege, Freigaben, operative Ereignisse und nächste Schritte im jeweiligen Kontext zusammenführen.
 
-### Reifegrad: Was fehlt bis Production?
+Diese Kombination aus Agrarspezialisierung und kontrollierter Anpassbarkeit ist der angestrebte Mehrwert von VALEO. Konkrete Zeit-, Kosten- und Qualitätsvorteile werden anhand der jeweiligen Prozessabnahme bewertet.
 
-#### Repo-seitig bereit ✅
-- Breiter Domänenschnitt über 12+ ERP-Bereiche mit operativer Endlogik
-- OIDC-Auth, Multi-Tenancy, Bearer-Token-Enforcement, RFC-7807 Fehlermodell
-- Harte CI-Gates: TypeScript, ESLint, pytest-Ratchet, Security-Scan, SBOM
-- Unveränderliche SHA-Images, Helm-Rollout, `/healthz`/`/readyz`-Smoke
-- Alembic single head, idempotente Migrationen, Keycloak-DB-Bootstrap
-- GoBD-Nachweisraum, DATEV-Export, UStVA-Übermittlungs-Client
-- POS mit TSE-Simulation (Fiskaly-Anbindung vorbereitet)
-- Vollständige UAT-Dokumentation, Playwright-E2E-Evidence, Traceability-Matrix
+### Plattform und nächste Entwicklungsziele
 
-#### Externe Go-Live-Gates ⏳ (Betriebsverantwortung)
-| Gate | Zuständigkeit |
-|------|--------------|
-| Produktive Keycloak-/OIDC-Credentials | Betrieb |
-| TSE-Hardware-Abnahme & DSFinV-K-Zertifizierung | Betrieb / Fiskalisierungs-Provider |
-| ERiC/ELSTER-Live-Übermittlung | Steuerberater + DATEV-Cutover-Mapping |
-| DMS Paperless-ngx Live-Probe | Betrieb |
-| Staging-Domain + DNS + TLS-Zertifikat | Betrieb |
-| Backup-/Restore-Drill (15-min RTO) | Betrieb |
-| Erntepeak-Lasttest auf Staging | Betrieb (k6, `load-test.yml`) |
-| Reale UAT-Unterschriften | Fachbereich + Geschäftsführung |
-| DSGVO-DSB-Freigabe | Datenschutzbeauftragter |
+VALEO ist eine aktiv entwickelte Suite mit einem Python/FastAPI-Backend, einer React/TypeScript-Weboberfläche und Fachpaketen. Der [Process Kernel Status](docs/architecture/process-kernel/STATUS.md) dokumentiert gelieferte Prozesswellen. Die Roadmap umfasst unter anderem die fachliche Parität und Freigabe weiterer Studio-Masken, den adaptiven Arbeitsplatz sowie den Ausbau kontrollierter Agentenaktionen. Funktionsumfang und Reife unterscheiden sich je Prozess; externe Betriebs- und Fachfreigaben benötigen eigene Nachweise.
 
-Die vollständige Gate-Liste: [`docs/operations/production-readiness-runbook.md`](docs/operations/production-readiness-runbook.md)
+| Einblick | Quelle |
+| --- | --- |
+| Lieferstand und Prozesswellen | [Process Kernel Status](docs/architecture/process-kernel/STATUS.md) |
+| Laufende Arbeit | [Active Workboard](docs/agent-ops/active-workboard.md) |
+| Masken, Studio und Parität | [Universal Mask Runtime Status](docs/architecture/uix/universal-mask-runtime-status.md) · [Reparaturnachweis](docs/quality-assurance/migration-parity-repair-20261022.md) |
+| Entwicklungsplanung und nächste Ausbauschritte | [Entwicklungsübersicht](docs/project-context/open-gaps-and-known-issues.md) |
+| Betriebs- und externe Freigaben | [Production Readiness Runbook](docs/operations/production-readiness-runbook.md) |
+| Architektur und Agenten | [Architekturindex](config/architecture-index.yaml) · [Agent-Handbuch](docs/agent-handbuch/index.md) |
 
----
+### Lokal entwickeln
 
-### Was das System heute abdeckt
+Voraussetzungen sind Python 3.11, Node.js mit Corepack und pnpm 9.12.0 sowie eine konfigurierte PostgreSQL-Entwicklungsumgebung. Umgebungsvariablen und Zugangsdaten anhand von [.env.example](.env.example) und der [Frontend-Vorlage](packages/frontend-web/.env.example) einrichten; Schema und Authentifizierung müssen zur Konfiguration passen.
 
-**12+ Fachdomänen mit operativer Tiefe:**
+Im Repository-Stamm mit einer bereits eingerichteten Entwicklungsdatenbank:
 
-| Domäne | Tiefe |
-|--------|-------|
-| Agrar | Ernteannahme, Waage, Kontrakte (MATIF/Fixing), Trocknungsregeln, Selbstabrechnung, Partie-Aggregation |
-| Verkauf (O2C) | Angebot → Auftrag → Lieferschein → Rechnung, Positions-Match, Kreditlimit, Storno/Gutschrift |
-| Einkauf (P2P) | RFQ → Bestellung → Wareneingang → 3-Wege-Match, ERS, Rechnungsprüfung |
-| Lager/WMS | Bestandsführung, Silozellen, Materialfluss, Chargen-Rückverfolgung, QS-Leitstand |
-| FIBU | Mahnlauf, OP-Auszifferung, Periodenabschluss, DATEV-Export, UStVA, Atlas/Zoll |
-| CRM / KIM | 360°-Cockpit (KIM), Kaufverhalten-Klassifikation, Auto-Capture (E-Mail/Telefon), TAPI |
-| Logistik | Frachtbriefe, Tourenplanung, ePOD, Fahrerzeiterfassung |
-| Compliance | GoBD-Nachweisraum, LkSG, DSGVO Art. 30/33, Gefahrgut, Zoll/Atlas, VVVO |
-| HRM | Personalakte, Abwesenheit (ArbZG), Zeiterfassung, Lohnabrechnung (DE), Planungswizard |
-| POS | Kassenabschluss, TSE-Simulation, DSFinV-K-Vorbereitung, Retoure |
-| Futtermittel | Rezeptur, Rationsoptimierung (Tierwohl), Produktionsfreigabe, Inventory-Link |
-| Agent-Ops / KI | Workflow-Cockpit, MCP-Tool-Registry, LLM-Gateway, Voice-Adapter, WhatsApp-Bestellassistent, RAG/Wissensbase |
-
----
-
-### Architektur
-
-| Schicht | Technologie |
-|---------|-------------|
-| Frontend | React 18, TypeScript 5.5, Vite 5.4, Tailwind CSS, Radix UI, Zustand, TanStack Query |
-| Backend | Python 3.11+, FastAPI, SQLAlchemy 2.0, Alembic, Pydantic 2.x |
-| Datenbank | PostgreSQL 15+ (Multi-Schema), Redis 7 |
-| Authentifizierung | OIDC / Keycloak / Azure AD / Auth0, JWT RS256/JWKS |
-| Eventing | NATS JetStream (Outbox-Pattern, Workflow-Cockpit-Projektor) |
-| Infrastruktur | Docker Compose, Helm/Kubernetes, GitHub Actions CI/CD |
-| KI / Wissen | ChromaDB/RAG, MCP-Tool-Contracts, Superglue, LLM-Gateway (anbieterunabhängig) |
-| Design | Meridian UI (Navy-Sidebar, tokenisierte Farben, Mask-Builder-Framework) |
-
-**Wichtige Verzeichnisse:**
-
-```
-app/                    FastAPI-Backend (Services, Modelle, Endpoints, Agent-Ops)
-app/services/           ~160 Domain-Service-Module (thin-router pattern)
-packages/frontend-web/  React-Frontend (Mask-Builder, Meridian-Shell)
-modules/agrar/          Agrar-Vertikalmodul
-alembic/                Datenbankmigrationen (single head)
-docs/                   Architektur (arc42, C4, ADRs), Handbuch, QA, Runbooks
-scripts/                Bootstrap-, Smoke-, Governance- und Prüfskripte
+```sh
+python -m venv .venv
+# Windows PowerShell: .\.venv\Scripts\Activate.ps1
+# Linux/macOS: source .venv/bin/activate
+python -m pip install -r requirements.txt
+python -m uvicorn main:app --host 127.0.0.1 --port 8000 --reload
 ```
 
-**PostgreSQL-Schemas:**
-`domain_shared` · `domain_crm` · `domain_erp` · `domain_inventory` · `domain_einkauf` · `domain_sales` · `domain_finance` · `domain_ops` · `domain_docflow` · `domain_agrar` · `domain_controlling` · `domain_hr` · `domain_logistics` · `domain_workflow`
+In einem zweiten Terminal:
 
----
-
-### Schnellstart mit Docker
-
-**Voraussetzungen:** Docker Desktop, Git
-
-```bash
-# Vollständiger Stack (Postgres, Redis, NATS, Keycloak, Backend, Frontend)
-docker compose up -d
-
-# Nur Backend + Postgres (leichtgewichtig für Entwicklung)
-docker compose -f docker-compose.dev.yml up -d
+```sh
+corepack enable
+pnpm install --frozen-lockfile
+pnpm --filter @valero-neuroerp/frontend-web dev --host 127.0.0.1 --port 3000
 ```
 
-Lokale Endpunkte nach `up`:
+Frontend: `http://localhost:3000`; API-Dokumentation: `http://localhost:8000/docs`. API-Basis oder Proxy richten sich nach Vite-Modus und Frontend-Umgebung. Alternativ beschreibt [docker-compose.dev.yml](docker-compose.dev.yml) einen Entwicklungsstack; sein [Backend-Einstieg](entrypoint.sh) initialisiert die Datenbank. Vor Verwendung Ressourcen, Datenbankbesitz und Migrationsstand prüfen.
 
-| Dienst | URL |
-|--------|-----|
-| Frontend | http://localhost:3001 |
-| Backend API | http://localhost:8000 |
-| OpenAPI Docs | http://localhost:8000/docs |
-| Keycloak | http://localhost:8080 |
-| pgAdmin | http://localhost:5050 |
+### Qualität und Zusammenarbeit
 
----
+Für Änderungen gelten [AGENTS.md](AGENTS.md), [Startcheckliste](docs/agent-ops/session-start-checklist.md) und Workboard. Prüfungen und deren Ergebnisse gehören zum jeweiligen Lieferstand. Für datenbankabhängige Tests gilt der [gemeinsame Prüfstand](docs/quality-assurance/test-database-resource-policy-20261001.md): `valeo_probe` oder `TEST_DATABASE_URL` wiederverwenden und zunächst `python scripts/pruefstand_db.py --status` ausführen. Der Aufruf ohne Option setzt den Prüfstand zurück.
 
-### Lokale Entwicklung (ohne Docker)
+Weitere Einstiege: [Dokumentation](docs/README.md) · [Benutzerhandbuch](docs/benutzerhandbuch/index.md) · [Architektur](docs/architecture/index.md) · [MIT-Lizenz](LICENSE).
 
-```bash
-# Backend starten
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+## English
 
-# Datenbankmigrationen (Erstinstallation: alle Tabellen anlegen)
-alembic upgrade head
+**VALEO NeuroERP brings agricultural and trading processes together with a platform for accountable digital collaboration.** It is an ERP project for agricultural cooperatives and agricultural trading businesses, connecting domain workflows, user interfaces and controlled interfaces for automation and AI agents.
 
-# Tests
-pytest -m unit --no-cov          # Nur reine Logik-Unit-Tests (schnell, kein DB)
-pytest                            # Vollständige Suite
-pytest --cov=app --cov-report=term
+### Product direction
 
-# Frontend
-cd packages/frontend-web
-npm install
-npm run dev                       # Port 3001, proxied → Backend :8000
-npm run build
-npm run lint
-```
+The domain vision spans contracts, harvest and settlement, procurement, sales, inventory, weighing and logistics, complemented by accounting, CRM, HR and documents. A shared process kernel, tenant and permission contracts, and versioned Studio screen definitions provide the foundations for consistent workflows. MCP and CLI extend the ways users and agents can interact with selected functions; write actions remain subject to their applicable authorization and approval rules.
 
----
+### Our ambition
 
-### Erstinstallation und Migrations-Sicherheit
+VALEO aims to become a premium platform for agricultural trade by bringing together domain depth in agriculture, end-to-end document-linked agent actions, versioned interfaces and adaptive workspaces. This is the product direction; implementation and release proceed incrementally by process and channel.
 
-```bash
-# DB initialisieren
-python scripts/init_db.py
+### Value for agricultural trade
 
-# Qualitäts-Gates prüfen
-python scripts/check_alembic_single_head.py
-python scripts/check_required_domain_schemas.py
-python scripts/check_critical_backend_coverage.py
-python scripts/check_toolchain_pins.py
+Our goal is to extend the transaction strength expected from premium ERP with a connected workspace for execution and adaptation: contract-to-settlement agricultural workflows; conversational design of versioned screens and processes with simulation and approval; the same governed domain commands for people, CLI and MCP; and contextual workspaces connecting documents, approvals, operational events and next actions. This combination of agricultural specialization and controlled adaptability is VALEO's intended value proposition. Time, cost and quality benefits are assessed per accepted workflow.
 
-# TypeScript-Typen prüfen
-pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false
-```
+### Platform and next development goals
 
-Docker-Smoke (Windows):
-```powershell
-powershell -ExecutionPolicy Bypass -File scripts/smoke_first_install_docker.ps1 -HostPort 55434
-```
+VALEO is an actively developed suite with a Python/FastAPI backend, a React/TypeScript frontend and domain packages. The [Process Kernel Status](docs/architecture/process-kernel/STATUS.md) documents delivered process waves. The roadmap includes functional parity and release of further Studio screens, the adaptive workspace and expanded controlled agent actions. Scope and maturity vary by workflow; external operational and domain approvals require separate evidence. See the [runtime status](docs/architecture/uix/universal-mask-runtime-status.md), [development roadmap](docs/project-context/open-gaps-and-known-issues.md), [workboard](docs/agent-ops/active-workboard.md) and [production readiness runbook](docs/operations/production-readiness-runbook.md).
 
----
-
-### Architektur-Dokumentation
-
-| Dokument | Inhalt |
-|----------|--------|
-| [arc42](docs/architecture/arc42/) | 12-Kapitel-Architekturbeschreibung (ISO 42010) |
-| [C4-Diagramme](docs/architecture/c4/) | Context, Container, Components (Mermaid) |
-| [ADR-001…036](docs/adr/) | Architecture Decision Records |
-| [Benutzerhandbuch](docs/user-manual/) | Vollständiges deutsches Handbuch (Wave 17) |
-| [Admin-Dokumentation](docs/admin/) | Deployment, RBAC, Monitoring, Backup |
-| [Open Gaps](docs/project-context/open-gaps-and-known-issues.md) | Offene Punkte, technische Schulden |
-| [Production Readiness Runbook](docs/operations/production-readiness-runbook.md) | Go-Live-Checkliste + externe Gates |
-| [Process Kernel Status](docs/architecture/process-kernel/STATUS.md) | Wave-Übersicht Waves 1–104+ |
-| [Active Workboard](docs/agent-ops/active-workboard.md) | Laufende Arbeitsstände |
-| [MASKEN.md](docs/MASKEN.md) | UX-Standard Dokument-Konsistenzprinzip |
-
----
-
-### Drittlizenzen
-
-Dieses Repository enthält Integrations-Support für `superglue-ai/superglue` (Lizenz: `FSL-1.1-Apache-2.0`).
-Lokaler Hinweis: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)
-
----
-
-### Lizenz
-
-[MIT License](LICENSE) — sofern in Teilbereichen nicht abweichend dokumentiert.
-
----
-
-<a name="english"></a>
-## 🇬🇧 English
-
-VALEO NeuroERP 3.0 is a multi-domain ERP system for agricultural cooperatives and grain trading companies. The focus is on end-to-end agricultural trading excellence, agent-capable domain architecture, and fast process UX — not a generic horizontal ERP.
-
----
-
-### Current Status
-
-| Metric | As of |
-|--------|-------|
-| Docs date | `2026-07-06` |
-| Maturity | **Beta** — core processes operational, external go-live gates open |
-| Doc-code drift | **0 items** (`doc_drift_report.py --fail-over 0`, 2026-07-06) |
-| Release evidence | **WARN** — 4 PASS / 2 WARN / 0 FAIL (`artifacts/release_evidence.json`) |
-| Mask commandEndpoints | **26 native SDs, 0 stubReason** (SPEC-P1-04 inventory script) |
-| Frontend TypeScript | 0 errors (`tsc --noEmit`) |
-| Backend tests | **11,810 passed** in CI full run (2026-07-05) |
-| Critical coverage ratchets | only-up policy green in CI |
-| Backend overall coverage | 65.66 % (long-term target ≥ 80 %) |
-| OpenAPI routes | **2,537 paths** with `summary=` (100 %) |
-| Alembic | 1 head (`inv_lot_depth_spec_p1_08`) |
-| Domain depth | DOM-\*-004 completed: contracts, O2C, accounting, P2P, evidence room, supply chain |
-| Architecture docs | arc42 (12 chapters), C4 Context/Container/Components, 036 ADRs |
-| User manual | DOC-USER-MANUAL-004 Wave 17 — complete (German) |
-| Runtime API sweep | 1,059 GET endpoints live tested; known 5xx closed repo-side |
-| Workflow Cockpit | MVP + retry/compensation + NATS projector + dead-letter view |
-
----
-
-### Maturity: What's Missing for Production?
-
-#### Repo-side ready ✅
-- Broad domain coverage across 12+ ERP areas with operational end-logic
-- OIDC auth, multi-tenancy, bearer token enforcement, RFC-7807 error model
-- Hard CI gates: TypeScript, ESLint, pytest ratchet, security scan, SBOM
-- Immutable SHA images, Helm rollout, `/healthz`/`/readyz` smoke
-- Alembic single head, idempotent migrations, Keycloak DB bootstrap
-- GoBD evidence room, DATEV export, UStVA submission client
-- POS with TSE simulation (Fiskaly integration prepared)
-- Full UAT documentation, Playwright E2E evidence, traceability matrix
-
-#### External go-live gates ⏳ (operations responsibility)
-| Gate | Owner |
-|------|-------|
-| Production Keycloak/OIDC credentials | Operations |
-| TSE hardware acceptance & DSFinV-K certification | Operations / fiscal provider |
-| ERiC/ELSTER live submission | Tax advisor + DATEV cutover mapping |
-| DMS Paperless-ngx live probe | Operations |
-| Staging domain + DNS + TLS certificate | Operations |
-| Backup/restore drill (15-min RTO) | Operations |
-| Harvest-peak load test on staging | Operations (k6, `load-test.yml`) |
-| Real UAT signatures | Business + management |
-| GDPR data-protection-officer sign-off | DPO |
-
-Full gate list: [`docs/operations/production-readiness-runbook.md`](docs/operations/production-readiness-runbook.md)
-
----
-
-### What the System Covers Today
-
-**12+ business domains with operational depth:**
-
-| Domain | Depth |
-|--------|-------|
-| Agrar | Harvest acceptance, weighing, contracts (MATIF/fixing), drying rules, self-billing, batch aggregation |
-| Sales (O2C) | Quote → order → delivery note → invoice, position match, credit limit, cancellation/credit note |
-| Procurement (P2P) | RFQ → PO → goods receipt → three-way match, ERS, invoice verification |
-| Inventory/WMS | Stock management, silo cells, material flow, lot traceability, QS control board |
-| Accounting | Dunning run, OP clearing, period close, DATEV export, UStVA, Atlas/customs |
-| CRM / KIM | 360° cockpit (KIM), buyer classification, auto-capture (email/phone), TAPI |
-| Logistics | Freight documents, route planning, ePOD, driver time tracking |
-| Compliance | GoBD evidence room, LkSG, GDPR Art. 30/33, hazmat, customs/Atlas, VVVO |
-| HRM | Personnel file, absence (ArbZG), time tracking, payroll (DE), planning wizard |
-| POS | Day-end closing, TSE simulation, DSFinV-K preparation, returns |
-| Feed/Rations | Recipe, ration optimization (animal welfare), production approval, inventory link |
-| Agent-Ops / AI | Workflow cockpit, MCP tool registry, LLM gateway, voice adapter, WhatsApp order assistant, RAG/knowledge base |
-
----
-
-### Architecture
-
-| Layer | Technology |
-|-------|------------|
-| Frontend | React 18, TypeScript 5.5, Vite 5.4, Tailwind CSS, Radix UI, Zustand, TanStack Query |
-| Backend | Python 3.11+, FastAPI, SQLAlchemy 2.0, Alembic, Pydantic 2.x |
-| Database | PostgreSQL 15+ (multi-schema), Redis 7 |
-| Auth | OIDC / Keycloak / Azure AD / Auth0, JWT RS256/JWKS |
-| Eventing | NATS JetStream (outbox pattern, workflow cockpit projector) |
-| Infrastructure | Docker Compose, Helm/Kubernetes, GitHub Actions CI/CD |
-| AI / Knowledge | ChromaDB/RAG, MCP tool contracts, Superglue, LLM gateway (provider-agnostic) |
-| Design | Meridian UI (navy sidebar, tokenized colors, Mask Builder Framework) |
-
-**Key directories:**
-
-```
-app/                    FastAPI backend (services, models, endpoints, agent-ops)
-app/services/           ~160 domain service modules (thin-router pattern)
-packages/frontend-web/  React frontend (Mask Builder, Meridian shell)
-modules/agrar/          Agrar vertical module
-alembic/                Database migrations (single head)
-docs/                   Architecture (arc42, C4, ADRs), manual, QA, runbooks
-scripts/                Bootstrap, smoke, governance and validation scripts
-```
-
-**PostgreSQL schemas:**
-`domain_shared` · `domain_crm` · `domain_erp` · `domain_inventory` · `domain_einkauf` · `domain_sales` · `domain_finance` · `domain_ops` · `domain_docflow` · `domain_agrar` · `domain_controlling` · `domain_hr` · `domain_logistics` · `domain_workflow`
-
----
-
-### Quick Start with Docker
-
-**Prerequisites:** Docker Desktop, Git
-
-```bash
-# Full stack (Postgres, Redis, NATS, Keycloak, backend, frontend)
-docker compose up -d
-
-# Backend + Postgres only (lightweight for development)
-docker compose -f docker-compose.dev.yml up -d
-```
-
-Local endpoints after `up`:
-
-| Service | URL |
-|---------|-----|
-| Frontend | http://localhost:3001 |
-| Backend API | http://localhost:8000 |
-| OpenAPI Docs | http://localhost:8000/docs |
-| Keycloak | http://localhost:8080 |
-| pgAdmin | http://localhost:5050 |
-
----
-
-### Local Development (without Docker)
-
-```bash
-# Start backend
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-
-# Database migrations (first install: create all tables)
-alembic upgrade head
-
-# Tests
-pytest -m unit --no-cov          # Pure logic unit tests only (fast, no DB)
-pytest                            # Full suite
-pytest --cov=app --cov-report=term
-
-# Frontend
-cd packages/frontend-web
-npm install
-npm run dev                       # Port 3001, proxied → backend :8000
-npm run build
-npm run lint
-```
-
----
-
-### First Install & Migration Safety
-
-```bash
-# Initialize DB
-python scripts/init_db.py
-
-# Validate quality gates
-python scripts/check_alembic_single_head.py
-python scripts/check_required_domain_schemas.py
-python scripts/check_critical_backend_coverage.py
-python scripts/check_toolchain_pins.py
-
-# Check TypeScript types
-pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false
-```
-
-Docker smoke test (Windows):
-```powershell
-powershell -ExecutionPolicy Bypass -File scripts/smoke_first_install_docker.ps1 -HostPort 55434
-```
-
----
-
-### Architecture Documentation
-
-| Document | Contents |
-|----------|----------|
-| [arc42](docs/architecture/arc42/) | 12-chapter architecture description (ISO 42010) |
-| [C4 diagrams](docs/architecture/c4/) | Context, Container, Components (Mermaid) |
-| [ADR-001…036](docs/adr/) | Architecture Decision Records |
-| [User Manual](docs/user-manual/) | Complete German user manual (Wave 17) |
-| [Admin Documentation](docs/admin/) | Deployment, RBAC, monitoring, backup |
-| [Open Gaps](docs/project-context/open-gaps-and-known-issues.md) | Open items, technical debt |
-| [Production Readiness Runbook](docs/operations/production-readiness-runbook.md) | Go-live checklist + external gates |
-| [Process Kernel Status](docs/architecture/process-kernel/STATUS.md) | Wave overview Waves 1–104+ |
-| [Active Workboard](docs/agent-ops/active-workboard.md) | Current work in progress |
-| [MASKEN.md](docs/MASKEN.md) | UX standard: document consistency principle |
-
----
-
-### Third-Party Licenses
-
-This repository includes integration support for `superglue-ai/superglue` (license: `FSL-1.1-Apache-2.0`).
-Local attribution: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)
-
----
-
-### License
-
-[MIT License](LICENSE) — unless documented otherwise in specific sub-areas.
+For local setup, use the [commands above](#lokal-entwickeln) with Python 3.11, Node.js/Corepack, pnpm 9.12.0 and an already configured PostgreSQL development database. Configure the supplied environment templates first. For database tests, reuse the shared environment and follow the [resource policy](docs/quality-assurance/test-database-resource-policy-20261001.md). Start contributions with [AGENTS.md](AGENTS.md) and the [documentation overview](docs/README.md).

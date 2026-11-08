@@ -27,19 +27,6 @@ class LeadStatus(str, enum.Enum):
     LOST = "lost"
 
 
-class ActivityType(str, enum.Enum):
-    CALL = "call"
-    EMAIL = "email"
-    MEETING = "meeting"
-    VISIT = "visit"
-
-
-class ActivityStatus(str, enum.Enum):
-    PLANNED = "planned"
-    COMPLETED = "completed"
-    CANCELLED = "cancelled"
-
-
 class Contact(Base):
     __tablename__ = "crm_contacts"
 
@@ -83,23 +70,6 @@ class Lead(Base):
     # Audit
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
-    tenant_id = Column(String(36), nullable=False, index=True)
-
-
-class Activity(Base):
-    __tablename__ = "crm_activities"
-
-    id = Column(String(36), primary_key=True)
-    contact_id = Column(String(36), ForeignKey("crm_contacts.id"), nullable=True, index=True)
-    type = Column(Enum(ActivityType), nullable=False)
-    date = Column(DateTime(timezone=True), nullable=False, index=True)
-    subject = Column(String(255))
-    notes = Column(Text)
-    status = Column(Enum(ActivityStatus), default=ActivityStatus.PLANNED)
-    created_by = Column(String(100))
-    
-    # Audit
-    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     tenant_id = Column(String(36), nullable=False, index=True)
 
 

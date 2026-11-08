@@ -56,3 +56,12 @@
 /config/security/dependency-decisions.json @JochenWeerda
 /scripts/security_dependency_gate.py @JochenWeerda
 /scripts/audit_service_dependencies.py @JochenWeerda
+
+# RLS-Mandantenkernel (docs/architecture/rls-mandantenkernel-plan.md, P7): Aenderungen an
+# Verbindungen, Mandantenkontext, Policies und Rollen nur mit Review.
+/app/core/database.py                   @JochenWeerda
+/app/core/rls_*                         @JochenWeerda
+/app/workers/base_worker.py             @JochenWeerda
+/scripts/rls_*                          @JochenWeerda
+/scripts/provision_db_roles.py          @JochenWeerda
+/docs/admin/rls-*.json                  @JochenWeerda

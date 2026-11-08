@@ -19,6 +19,7 @@ from app.core.database import get_db
 from app.auth.deps import get_tenant_id
 from app.einkauf import schemas
 from app.einkauf.ocr_invoice import extract_invoice_pdf
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +43,7 @@ def _safe_update_data(raw: dict, whitelist: frozenset) -> dict:
 # ============================================================================
 
 
-@router.delete("/lieferanten/{lieferant_id}")
+@router.delete("/lieferanten/{lieferant_id}", dependencies=SCHREIBEN["EINKAUF"])
 async def delete_lieferant(
     lieferant_id: int,
     db: Session = Depends(get_db),
@@ -75,7 +76,7 @@ async def delete_lieferant(
 # ============================================================================
 
 
-@router.delete("/bestellungen/{bestellung_id}")
+@router.delete("/bestellungen/{bestellung_id}", dependencies=SCHREIBEN["EINKAUF"])
 async def delete_bestellung(
     bestellung_id: int,
     db: Session = Depends(get_db),
@@ -170,7 +171,7 @@ async def get_anfrage(
         raise HTTPException(status_code=500, detail="Datenbankfehler beim Laden der Anfrage")
 
 
-@router.post("/anfragen", status_code=201)
+@router.post("/anfragen", status_code=201, dependencies=SCHREIBEN["EINKAUF"])
 async def create_anfrage(
     anfrage: schemas.AnfrageCreate,
     db: Session = Depends(get_db),
@@ -248,7 +249,7 @@ async def create_anfrage(
         raise HTTPException(status_code=500, detail="Fehler beim Erstellen der Anfrage")
 
 
-@router.put("/anfragen/{anfrage_id}")
+@router.put("/anfragen/{anfrage_id}", dependencies=SCHREIBEN["EINKAUF"])
 async def update_anfrage(
     anfrage_id: str,
     anfrage: schemas.AnfrageUpdate,
@@ -287,7 +288,7 @@ async def update_anfrage(
         raise HTTPException(status_code=500, detail="Fehler beim Aktualisieren der Anfrage")
 
 
-@router.delete("/anfragen/{anfrage_id}")
+@router.delete("/anfragen/{anfrage_id}", dependencies=SCHREIBEN["EINKAUF"])
 async def delete_anfrage(
     anfrage_id: str,
     db: Session = Depends(get_db),
@@ -316,35 +317,8 @@ async def delete_anfrage(
         raise HTTPException(status_code=500, detail="Fehler beim Loeschen der Anfrage")
 
 
-@router.post("/anfragen/{anfrage_id}/send")
-async def send_anfrage(
-    anfrage_id: str,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
-):
-    """Versendet Anfrage an Lieferanten / setzt Status auf FREIGEGEBEN"""
-    try:
-        existing = db.execute(
-            text("SELECT id, status FROM einkauf_anfragen WHERE (id = :id OR anfrage_nummer = :id) AND tenant_id = :tenant_id"),
-            {"id": anfrage_id, "tenant_id": tenant_id},
-        ).fetchone()
-        if not existing:
-            raise HTTPException(status_code=404, detail="Anfrage nicht gefunden")
-
-        real_id = existing[0]
-        db.execute(
-            text("UPDATE einkauf_anfragen SET status = 'FREIGEGEBEN', updated_at = now() WHERE id = :id AND tenant_id = :tenant_id"),
-            {"id": real_id, "tenant_id": tenant_id},
-        )
-        db.commit()
-        return {"message": "Anfrage erfolgreich freigegeben", "status": "FREIGEGEBEN"}
-
-    except HTTPException:
-        raise
-    except Exception:
-        db.rollback()
-        logger.exception("Anfrage freigeben fehlgeschlagen")
-        raise HTTPException(status_code=500, detail="Fehler beim Freigeben der Anfrage")
+# POST /anfragen/{id}/send: die Maskenbruecke (mask_frontend_bridges) versendet wirklich;
+# der fruehere Weg hier war verdeckt und setzte nur FREIGEGEBEN.
 
 
 # ============================================================================
@@ -360,7 +334,7 @@ async def send_anfrage(
 
 EINKAUF_OCR_ENGINE = os.getenv("EINKAUF_OCR_ENGINE", "stub")
 
-@router.post("/rechnungseingaenge/import/pdf", status_code=201)
+@router.post("/rechnungseingaenge/import/pdf", status_code=201, dependencies=SCHREIBEN["EINKAUF"])
 async def import_rechnung_pdf(
     file_id: str,
     bestellung_id: Optional[str] = None,
@@ -395,7 +369,7 @@ async def import_rechnung_pdf(
         raise HTTPException(status_code=500, detail="Fehler beim OCR-Import")
 
 
-@router.post("/rechnungseingaenge/import/pdf-upload", status_code=201)
+@router.post("/rechnungseingaenge/import/pdf-upload", status_code=201, dependencies=SCHREIBEN["EINKAUF"])
 async def import_rechnung_pdf_upload(
     file: UploadFile = File(...),
     bestellung_id: Optional[str] = None,
@@ -430,7 +404,7 @@ async def import_rechnung_pdf_upload(
         raise HTTPException(status_code=500, detail="Fehler beim OCR-Upload")
 
 
-@router.post("/rechnungseingaenge/import/confirm", status_code=201)
+@router.post("/rechnungseingaenge/import/confirm", status_code=201, dependencies=SCHREIBEN["EINKAUF"])
 async def confirm_ocr_import(
     data: dict,
     bestellung_id: Optional[str] = None,
@@ -479,11 +453,12 @@ async def confirm_ocr_import(
             db.execute(
                 text("""
                     INSERT INTO einkauf_rechnungseingang_positionen (
-                        id, rechnungseingang_id, artikel_name, menge, einzelpreis, gesamtpreis, mwst_satz
-                    ) VALUES (:id, :re_id, :art_name, :menge, :epreis, :gpreis, :mwst)
+                        id, tenant_id, rechnungseingang_id, artikel_name, menge, einzelpreis, gesamtpreis, mwst_satz
+                    ) VALUES (:id, :tenant_id, :re_id, :art_name, :menge, :epreis, :gpreis, :mwst)
                 """),
                 {
                     "id": pos_id,
+                    "tenant_id": tenant_id,
                     "re_id": rechnung_id,
                     "art_name": pos.get("artikel_name"),
                     "menge": pos.get("menge"),
@@ -579,7 +554,7 @@ async def get_zahlungslauf(
         raise HTTPException(status_code=500, detail="Datenbankfehler beim Laden des Zahlungslaufs")
 
 
-@router.post("/zahlungslaeufe", status_code=201)
+@router.post("/zahlungslaeufe", status_code=201, dependencies=SCHREIBEN["EINKAUF"])
 async def create_zahlungslauf(
     data: dict,
     db: Session = Depends(get_db),
@@ -749,7 +724,7 @@ async def create_zahlungslauf(
         raise HTTPException(status_code=500, detail="Fehler beim Erstellen des Zahlungslaufs")
 
 
-@router.post("/zahlungslaeufe/{lauf_id}/execute")
+@router.post("/zahlungslaeufe/{lauf_id}/execute", dependencies=SCHREIBEN["EINKAUF"])
 async def execute_zahlungslauf(
     lauf_id: str,
     db: Session = Depends(get_db),
@@ -872,7 +847,7 @@ def _get_audit_user(request: Request) -> str:
     return claims.get("sub") or claims.get("preferred_username") or "system"
 
 
-@router.post("/rechnungseingaenge/{rechnung_id}/pruefen")
+@router.post("/rechnungseingaenge/{rechnung_id}/pruefen", dependencies=SCHREIBEN["EINKAUF"])
 async def rechnungseingang_pruefen(
     rechnung_id: str,
     request: Request,
@@ -906,7 +881,7 @@ async def rechnungseingang_pruefen(
     return {"message": "Rechnungseingang geprüft", "status": "GEPRUEFT"}
 
 
-@router.post("/rechnungseingaenge/{rechnung_id}/freigeben")
+@router.post("/rechnungseingaenge/{rechnung_id}/freigeben", dependencies=SCHREIBEN["EINKAUF"])
 async def rechnungseingang_freigeben(
     rechnung_id: str,
     request: Request,
@@ -939,7 +914,7 @@ async def rechnungseingang_freigeben(
     return {"message": "Rechnungseingang freigegeben", "status": "FREIGEGEBEN"}
 
 
-@router.post("/rechnungseingaenge/{rechnung_id}/verbuchen")
+@router.post("/rechnungseingaenge/{rechnung_id}/verbuchen", dependencies=SCHREIBEN["EINKAUF"])
 async def rechnungseingang_verbuchen(
     rechnung_id: str,
     request: Request,
@@ -972,7 +947,7 @@ async def rechnungseingang_verbuchen(
     return {"message": "Rechnungseingang verbucht", "status": "VERBUCHT"}
 
 
-@router.post("/rechnungseingaenge", status_code=201)
+@router.post("/rechnungseingaenge", status_code=201, dependencies=SCHREIBEN["EINKAUF"])
 async def create_rechnungseingang(
     rechnung: schemas.RechnungseingangCreate,
     db: Session = Depends(get_db),
@@ -1022,15 +997,16 @@ async def create_rechnungseingang(
                 db.execute(
                     text("""
                         INSERT INTO einkauf_rechnungseingang_positionen (
-                            id, rechnungseingang_id, artikel_id, artikel_name,
+                            id, tenant_id, rechnungseingang_id, artikel_id, artikel_name,
                             menge, einzelpreis, gesamtpreis, mwst_satz
                         ) VALUES (
-                            :id, :re_id, :art_id, :art_name,
+                            :id, :tenant_id, :re_id, :art_id, :art_name,
                             :menge, :epreis, :gpreis, :mwst
                         )
                     """),
                     {
                         "id": pos_id,
+                        "tenant_id": tenant_id,
                         "re_id": rechnung_id,
                         "art_id": pos.artikelId,
                         "art_name": pos.artikelName,
@@ -1060,7 +1036,7 @@ _RECHNUNGSEINGANG_UPDATABLE_COLS = frozenset({
 })
 
 
-@router.put("/rechnungseingaenge/{rechnung_id}")
+@router.put("/rechnungseingaenge/{rechnung_id}", dependencies=SCHREIBEN["EINKAUF"])
 async def update_rechnungseingang(
     rechnung_id: str,
     rechnung: schemas.RechnungseingangUpdate,
@@ -1122,7 +1098,7 @@ async def update_rechnungseingang(
         raise HTTPException(status_code=500, detail="Fehler beim Aktualisieren des Rechnungseingangs")
 
 
-@router.delete("/rechnungseingaenge/{rechnung_id}")
+@router.delete("/rechnungseingaenge/{rechnung_id}", dependencies=SCHREIBEN["EINKAUF"])
 async def delete_rechnungseingang(
     rechnung_id: str,
     db: Session = Depends(get_db),

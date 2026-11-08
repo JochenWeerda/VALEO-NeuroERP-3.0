@@ -133,15 +133,13 @@ export function ListReport<T>({
 
   const mergedOverflowActions = useMemo<ToolbarAction[]>(() => {
     const fromProps = overflowActions ?? [];
-    const quickOverflow = Array.isArray(primaryActions) && primaryActions.length > 0
-      ? contextualToolbarActions.overflow
-      : contextualToolbarActions.overflow;
+    const quickOverflow = contextualToolbarActions.overflow;
     const byId = new Map<string, ToolbarAction>();
     for (const action of [...fromProps, ...quickOverflow]) {
       byId.set(action.id, action);
     }
     return Array.from(byId.values());
-  }, [contextualToolbarActions.overflow, overflowActions, primaryActions]);
+  }, [contextualToolbarActions.overflow, overflowActions]);
   const availableActions = [
     ...(mergedPrimaryActions.map((action) => action.id)),
     ...(mergedOverflowActions.map((action) => action.id)),

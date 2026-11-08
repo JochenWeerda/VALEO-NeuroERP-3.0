@@ -18,6 +18,7 @@ from app.core.finance_projection_status import ProjectionStatusEntry, Projection
 from app.core.iot_telemetry import DeviceManifest, DeviceStatus, DeviceType, TelemetryReading
 from app.core.process_mining import build_process_mining_report
 from app.core.runtime_operations import ComponentHealth, RuntimeComponent, RuntimeHealthReport
+from testgrenze import ALLE_FACHROLLEN, ersetze_bearer, ersetze_mandant
 
 
 def make_projection_status(*entries: ProjectionStatusEntry) -> ProjectionStatusReadModel:
@@ -227,6 +228,10 @@ def test_api_finance_report_returns_projection_trace(monkeypatch):
     monkeypatch.setattr(_gw, "_telemetry_reading_store", {"tenant-a": {}})
 
     app = FastAPI()
+
+    ersetze_mandant(app)
+
+    ersetze_bearer(app, *ALLE_FACHROLLEN)
     app.include_router(process_mining_api.router, prefix="/api/v1")
     app.dependency_overrides[get_db] = _override_get_db
 
@@ -279,6 +284,10 @@ def test_api_finance_bottlenecks_returns_lagging_entries(monkeypatch):
     monkeypatch.setattr(_gw, "_telemetry_reading_store", {"tenant-a": {}})
 
     app = FastAPI()
+
+    ersetze_mandant(app)
+
+    ersetze_bearer(app, *ALLE_FACHROLLEN)
     app.include_router(process_mining_api.router, prefix="/api/v1")
     app.dependency_overrides[get_db] = _override_get_db
 
@@ -330,6 +339,10 @@ def test_reporting_process_mining_report_endpoint(monkeypatch):
     monkeypatch.setattr(_gw, "_telemetry_reading_store", {"tenant-a": {}})
 
     app = FastAPI()
+
+    ersetze_mandant(app)
+
+    ersetze_bearer(app, *ALLE_FACHROLLEN)
     app.include_router(reporting_api.router, prefix="/api/v1")
     app.dependency_overrides[get_db] = _override_get_db
 
@@ -364,6 +377,10 @@ def test_benchmark_process_mining_endpoint(monkeypatch):
     monkeypatch.setattr(_gw, "_telemetry_reading_store", {"tenant-a": {}, "tenant-b": {}})
 
     app = FastAPI()
+
+    ersetze_mandant(app)
+
+    ersetze_bearer(app, *ALLE_FACHROLLEN)
     app.include_router(benchmark_api.router, prefix="/api/v1")
 
     with TestClient(app, raise_server_exceptions=True) as client:

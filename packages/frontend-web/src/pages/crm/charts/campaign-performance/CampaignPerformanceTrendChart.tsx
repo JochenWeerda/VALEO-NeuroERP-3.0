@@ -1,31 +1,7 @@
-import { SimpleLineChart } from '@/components/charts/SimpleLineChart'
-import { chartSeriesColor } from '@/components/charts/chart-palette'
+import { NativeListPage } from '@/components/mask-builder/NativeListPage'
 
-type MetricPoint = { date: string; sent: number; opened: number; clicked: number; converted: number }
-
-export default function CampaignPerformanceTrendChart({
-  chartData,
-  labels,
-}: {
-  chartData: MetricPoint[]
-  labels: { sent: string; opened: string; clicked: string; converted: string }
-}): JSX.Element {
+export default function Page(): JSX.Element {
   return (
-    <SimpleLineChart
-      data={chartData.map((item) => ({
-        label: item.date,
-        sent: item.sent,
-        opened: item.opened,
-        clicked: item.clicked,
-        converted: item.converted,
-      }))}
-      series={[
-        { key: 'sent', color: chartSeriesColor(0), label: labels.sent },
-        { key: 'opened', color: chartSeriesColor(1), label: labels.opened },
-        { key: 'clicked', color: chartSeriesColor(2), label: labels.clicked },
-        { key: 'converted', color: chartSeriesColor(3), label: labels.converted },
-      ]}
-      height={300}
-    />
+    <NativeListPage screenId="crm/charts/campaign-performance/CampaignPerformanceTrendChart" testId="screen-crm/charts/campaign-performance/CampaignPerformanceTrendChart" />
   )
 }

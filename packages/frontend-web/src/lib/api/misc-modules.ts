@@ -266,8 +266,8 @@ export type Reklamation = {
   artikel: string
   grund: string
   datum: string
-  prioritaet: 'hoch' | 'normal' | 'niedrig'
-  status: 'neu' | 'in-bearbeitung' | 'geloest' | 'abgelehnt'
+  prioritaet: 'hoch' | 'normal' | 'niedrig' | null
+  status: string
 }
 
 export function useReklamationen() {

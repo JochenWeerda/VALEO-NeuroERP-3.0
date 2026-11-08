@@ -10,6 +10,9 @@ import { navigateRowRoute, rowIdentity } from './row-identity'
 import { columnsForWidth } from './column-priority'
 import { evaluateCondition, matchesValueList } from '../governance/condition-engine'
 import { statusLabel } from './status-labels'
+import { formatBusinessDate, formatBusinessDateTime } from '@/lib/business-time'
+import { computeValue, sumColumn } from '../runtime/computed-fields'
+import { convertQuantity, convertUnitPrice, sumQuantities } from '../runtime/units'
 
 interface FastTableRendererProps {
   table: RenderTablePlan
@@ -32,18 +35,29 @@ interface FastTableRendererProps {
   suppressHeading?: boolean
 }
 
-export function formatCellValue(value: unknown, renderKind: RenderColumnKind | undefined): ReactNode {
+export function formatCellValue(value: unknown, renderKind: RenderColumnKind | undefined, currency = 'EUR', unit?: string): ReactNode {
   if (value == null) return '–'
   switch (renderKind) {
+    case 'quantity': {
+      const menge = Number(value)
+      return Number.isFinite(menge) ? `${new Intl.NumberFormat('de-DE').format(menge)}${unit ? ` ${unit}` : ''}` : String(value)
+    }
+    case 'percentage': {
+      const anteil = Number(value)
+      return Number.isFinite(anteil) ? `${new Intl.NumberFormat('de-DE', { maximumFractionDigits: 2 }).format(anteil)} %` : String(value)
+    }
+    case 'number': {
+      const zahl = Number(value)
+      return Number.isFinite(zahl) ? new Intl.NumberFormat('de-DE').format(zahl) : String(value)
+    }
     case 'currency':
-      return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(Number(value))
+      return /^[A-Z]{3}$/.test(currency) ? new Intl.NumberFormat('de-DE', { style: 'currency', currency }).format(Number(value)) : 'Währung fehlt'
     case 'date':
     case 'datetime': {
+      // Geschaeftstag: ein Kalendertag wird nie als UTC-Zeitpunkt gelesen, Zeitpunkte in der Betriebszeitzone.
       const raw = String(value).trim()
       if (!raw) return '–'
-      const date = new Date(raw)
-      if (Number.isNaN(date.getTime())) return '–'
-      return renderKind === 'date' ? date.toLocaleDateString('de-DE') : date.toLocaleString('de-DE')
+      return (renderKind === 'date' ? formatBusinessDate(raw) : formatBusinessDateTime(raw)) ?? '–'
     }
     case 'boolean':
       return value ? 'Ja' : 'Nein'
@@ -58,8 +72,45 @@ export function formatCellValue(value: unknown, renderKind: RenderColumnKind | u
   }
 }
 
+/** Wert einer Zelle; eine rechnende Spalte rechnet aus derselben Zeile (Vorschau, der Server bleibt massgeblich). */
+function cellValue(column: RenderTablePlan['columns'][number], row: Record<string, unknown>, value: unknown): unknown {
+  return column.computed ? computeValue(column.computed, (key) => row[key]) : value
+}
+
+function columnUnit(column: RenderTablePlan['columns'][number], row: Record<string, unknown>): string | undefined {
+  return column.unitField ? String(row[column.unitField] ?? '') || column.unit : column.unit
+}
+
+/** Menge in der Anzeigeeinheit; nicht umrechenbar (Zaehleinheit) bleibt sie in ihrer eigenen Einheit stehen. */
+function displayQuantity(column: RenderTablePlan['columns'][number], row: Record<string, unknown>, value: unknown): [unknown, string | undefined] {
+  const einheit = columnUnit(column, row)
+  if (column.renderKind === 'currency' && column.pricePer && column.displayPricePer && value != null && value !== '') {
+    const preis = convertUnitPrice(Number(value), column.pricePer, column.displayPricePer)
+    return [preis === null ? value : Math.round((preis + Number.EPSILON) * 100) / 100, einheit]
+  }
+  if (column.renderKind !== 'quantity' || !column.displayUnit || value == null || value === '') return [value, einheit]
+  const umgerechnet = convertQuantity(Number(value), einheit, column.displayUnit)
+  return umgerechnet === null ? [value, einheit] : [umgerechnet, column.displayUnit]
+}
+
+/** Summenzeile einer Mengenspalte: gemischte Masse/Volumen umgerechnet (Masse in dt), sonst keine Summe. */
+function quantityTotal(column: RenderTablePlan['columns'][number], rows: Record<string, unknown>[]): ReactNode {
+  const summe = sumQuantities(rows.map((row) => {
+    const roh = cellValue(column, row, row[column.key])
+    const zahl = roh == null || roh === '' ? null : Number(roh)
+    return { wert: zahl !== null && Number.isFinite(zahl) ? zahl : null, einheit: columnUnit(column, row) }
+  }), column.displayUnit)
+  return summe ? formatCellValue(summe.wert, 'quantity', 'EUR', summe.einheit || undefined) : 'Einheiten nicht umrechenbar'
+}
+
+/** Einheit/Waehrung der Summenzeile nur, wenn alle Zeilen dieselbe tragen; sonst keine (gemischte Summe). */
+function einheitlich(rows: Record<string, unknown>[], key: string): string | undefined {
+  const werte = new Set(rows.map((row) => String(row[key] ?? '')))
+  return werte.size === 1 ? [...werte][0] || undefined : undefined
+}
+
 function isProfileNumeric(table: RenderTablePlan, column: RenderTablePlan['columns'][number]): boolean {
-  if (column.numeric || column.renderKind === 'currency' || column.renderKind === 'number') return true
+  if (column.numeric || column.computed || ['currency', 'number', 'quantity', 'percentage'].includes(column.renderKind ?? '')) return true
   if (table.tableProfile === 'financial') return /betrag|saldo|soll|haben|steuer|skonto|summe|differenz|amount|debit|credit/i.test(column.key)
   if (table.tableProfile === 'inventory') return /menge|bestand|reserv|verfueg|block|quantity|qty|stock|unit/i.test(column.key)
   return false
@@ -131,7 +182,8 @@ export const FastTableRenderer = memo(function FastTableRenderer({
   onRowSelect,
   suppressHeading = false,
 }: FastTableRendererProps): JSX.Element {
-  const isServerPaged = table.serverPagination && Boolean(onQueryChange)
+  // Blaettern am Server oder, ohne Serverblaetterung, in der Laufzeit (die dann `total` liefert und die Seite schneidet).
+  const isServerPaged = Boolean(onQueryChange) && (table.serverPagination || total !== undefined)
   const visibleRows = isServerPaged ? rows : rows.slice(0, table.pageSize)
   const totalPages = total !== undefined ? Math.ceil(total / table.pageSize) : undefined
   const activeFilterPlan = filterPlan && Object.keys(filterPlan).length > 0 ? filterPlan : undefined
@@ -172,10 +224,15 @@ export const FastTableRenderer = memo(function FastTableRenderer({
     width: column.width,
     numeric: isProfileNumeric(table, column),
     sortable: column.sortable,
-    render: column.renderKind
-      ? (value: unknown) => formatCellValue(value, column.renderKind)
+    render: column.renderKind || column.computed
+      ? (value: unknown, row: Record<string, unknown>) => {
+        const [wert, einheit] = displayQuantity(column, row, cellValue(column, row, value))
+        return formatCellValue(wert, column.renderKind ?? 'number',
+          column.currencyField ? String(row[column.currencyField] ?? '') : 'EUR', einheit)
+      }
       : undefined,
   }))
+  const summen = priorityColumns.filter((column) => column.aggregate === 'sum')
   const selectableColumns = table.bulkActions?.length && onRowAction
     ? [{
         key: '__selected',
@@ -447,6 +504,21 @@ export const FastTableRenderer = memo(function FastTableRenderer({
             columns={renderedColumns}
           />
         )}
+        {summen.length > 0 && visibleRows.length > 0 ? (
+          <dl className="flex flex-wrap justify-end gap-x-6 gap-y-1 border-t pt-2 text-sm" data-table-totals={table.key}>
+            {summen.map((column) => (
+              <div key={column.key} className="flex gap-2">
+                <dt className="text-muted-foreground">Summe {column.label}</dt>
+                <dd className="font-medium tabular-nums">
+                  {column.currencyField && !einheitlich(visibleRows, column.currencyField) ? 'Währungen gemischt'
+                    : column.renderKind === 'quantity' ? quantityTotal(column, visibleRows) : formatCellValue(sumColumn(visibleRows, (row) => cellValue(column, row, row[column.key])),
+                    column.renderKind ?? 'number', column.currencyField ? einheitlich(visibleRows, column.currencyField) : 'EUR',
+                    column.unitField ? einheitlich(visibleRows, column.unitField) : column.unit)}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        ) : null}
         {isServerPaged && totalPages !== undefined && totalPages > 1 ? (
           <div className="flex items-center justify-end gap-2 pt-2">
             <Button

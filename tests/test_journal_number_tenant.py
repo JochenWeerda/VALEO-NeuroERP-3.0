@@ -11,6 +11,7 @@ from sqlalchemy.exc import IntegrityError
 
 from app.infrastructure.models.journal import JournalEntry
 from scripts.check_journal_identity import violations
+from testgrenze import pruefstand_erlaubt
 
 spec = importlib.util.spec_from_file_location("journal_number_migration", Path("alembic/versions/journal_number_tenant_20261005.py"))
 migration = importlib.util.module_from_spec(spec)
@@ -23,7 +24,7 @@ def store():
     if not raw:
         pytest.skip("Existing shared PostgreSQL required")
     url = make_url(raw)
-    assert url.database == "valeo_probe" or "test" in url.database.lower()
+    assert pruefstand_erlaubt(url), "Nur Pruefstand oder CI-Testdatenbank"
     engine = create_engine(url)
     schema = "journalnumber_" + uuid4().hex
     try:

@@ -28,6 +28,7 @@ from app.core.uuid7 import uuid7
 from app.services.mask_action_runtime_service import MaskActionResult, parse_action_body
 
 from app.api.v1.schemas.base import BaseSchema
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/logistik/frachttabellen",
@@ -142,7 +143,7 @@ def insert_frachttabelle(
     return dict(row._mapping)
 
 
-@router.post("", response_model=FrachttabelleOut, status_code=201, summary="Frachttabelle anlegen")
+@router.post("", response_model=FrachttabelleOut, status_code=201, summary="Frachttabelle anlegen", dependencies=SCHREIBEN["LOGISTIK"])
 def create_frachttabelle(
     payload: FrachttabelleCreate,
     db=Depends(get_db),
@@ -162,8 +163,7 @@ def create_frachttabelle(
 @router.post(
     "/actions/anlegen",
     response_model=MaskActionResult,
-    summary="Frachttabelle anlegen als Masken-CommandEndpoint",
-)
+    summary="Frachttabelle anlegen als Masken-CommandEndpoint", dependencies=SCHREIBEN["LOGISTIK"])
 def action_anlegen(
     body: dict[str, Any] = Body(default_factory=dict),
     db=Depends(get_db),
@@ -238,7 +238,14 @@ def action_anlegen(
         )
 
     try:
-        from app.services.mask_action_runtime_service import _write_audit, _write_outbox
+        from app.services.mask_action_runtime_service import _write_audit, _write_outbox, wiederholter_auftrag
+
+        wiederholt = wiederholter_auftrag(
+            db, tenant_id=tenant_id, action_key="anlegen", entity_type="frachttabelle",
+            idempotency_key=idempotency_key, mode=mode,
+        )
+        if wiederholt is not None:
+            return wiederholt
 
         row = insert_frachttabelle(
             db,
@@ -296,8 +303,7 @@ def action_anlegen(
 
 
 @router.delete("/{tabelle_nr}", summary="Frachttabelle löschen",
-    response_model=None
-)
+    response_model=None, dependencies=SCHREIBEN["LOGISTIK"])
 def delete_frachttabelle(
     tabelle_nr: str,
     db=Depends(get_db),
@@ -329,7 +335,7 @@ def list_positionen(
 
 
 @router.post("/{tabelle_nr}/positionen",
-             response_model=FrachttabellePositionOut, status_code=201, summary="Position anlegen")
+             response_model=FrachttabellePositionOut, status_code=201, summary="Position anlegen", dependencies=SCHREIBEN["LOGISTIK"])
 def create_position(
     tabelle_nr: str,
     payload: FrachttabellePositionCreate,
@@ -361,8 +367,7 @@ def create_position(
 
 
 @router.delete("/{tabelle_nr}/positionen/{pos_id}", summary="Position löschen",
-    response_model=None
-)
+    response_model=None, dependencies=SCHREIBEN["LOGISTIK"])
 def delete_position(
     tabelle_nr: str,
     pos_id: str,
@@ -407,7 +412,7 @@ def list_zuordnungen(
 
 
 @router.post("/zuordnungen",
-             response_model=FrachttabelleZuordnungOut, status_code=201, summary="Zuordnung anlegen")
+             response_model=FrachttabelleZuordnungOut, status_code=201, summary="Zuordnung anlegen", dependencies=SCHREIBEN["LOGISTIK"])
 def create_zuordnung(
     payload: FrachttabelleZuordnungCreate,
     db=Depends(get_db),
@@ -433,8 +438,7 @@ def create_zuordnung(
 
 
 @router.delete("/zuordnungen/{zuordnung_id}", summary="Zuordnung löschen",
-    response_model=None
-)
+    response_model=None, dependencies=SCHREIBEN["LOGISTIK"])
 def delete_zuordnung(
     zuordnung_id: str,
     db=Depends(get_db),

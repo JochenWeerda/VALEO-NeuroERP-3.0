@@ -1,7 +1,4 @@
 import { z } from 'zod';
-import { extendZodWithOpenApi } from 'zod-openapi';
-
-extendZodWithOpenApi(z);
 
 export const CallOffStatusEnum = z.enum(['Planned', 'Scheduled', 'Delivered', 'Invoiced', 'Cancelled']);
 
@@ -30,8 +27,8 @@ export const UpdateCallOffSchema = z.object({
 });
 
 export const CallOffResponseSchema = z.object({
-  id: z.string().uuid(),
-  contractId: z.string().uuid(),
+  id: z.string().guid(),
+  contractId: z.string().guid(),
   tenantId: z.string(),
   qty: z.number(),
   window: z.object({

@@ -4,7 +4,7 @@ type: explanation
 audience: [entwickler, agent, product, qa]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-07
+last_reviewed: 2026-10-28
 version: 3.1.0
 description: Verbindlicher Einstiegspunkt für die Projektdokumentation — Alias für docs/index.md.
 ---
@@ -14,6 +14,10 @@ description: Verbindlicher Einstiegspunkt für die Projektdokumentation — Alia
 Diese Datei ist der **verbindliche Einstieg** für Agenten und Bearbeiter (referenziert in `AGENTS.md`).
 
 Die vollständige Startseite mit Diátaxis-Navigation liegt unter **[index.md](index.md)**.
+
+## Produkt und Entwicklungsziele
+
+VALEO verbindet Agrarhandel, versionierte Studio-Oberflächen und kontrollierte Agentenaktionen in einem gemeinsamen Prozesskern. Die [Produktübersicht](../README.md) erläutert den Premium-Anspruch, den fachlichen Mehrwert und die nächsten Entwicklungsziele. Diese Dokumentation liefert dazu Architektur, Bedienwege und nachvollziehbare Abnahmen.
 
 ## Schnellstart
 

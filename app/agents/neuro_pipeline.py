@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 from app.agents.neuro_intent_engine import classify, IntentResult
 from app.agents.neuro_planner import generate_plan, verify_plan, ExecutionPlan
 from app.services.neuro_tool_broker import execute_plan as execute_plan_via_broker
+from app.core.tenant_context import get_current_tenant_id
 
 logger = logging.getLogger(__name__)
 
@@ -21,11 +22,13 @@ logger = logging.getLogger(__name__)
 def run_pipeline(
     user_input: str,
     context: Optional[dict] = None,
-    tenant_id: str = "system",
+    tenant_id: str | None = None,
     db: Optional[Session] = None,
     dry_run: bool = False,
+    auth_token: Optional[str] = None,
 ) -> dict:
-    ctx = context or {}
+    tenant_id = tenant_id or get_current_tenant_id()
+    ctx = {key: value for key, value in (context or {}).items() if key != "auth_token"}
 
     # 1. Intent Classification
     intent_result: IntentResult = classify(user_input, ctx)
@@ -101,7 +104,7 @@ def run_pipeline(
     broker_result = execute_plan_via_broker(
         plan,
         tenant_id=tenant_id,
-        context=ctx,
+        context={**ctx, "auth_token": auth_token},
         db=db,
     )
 

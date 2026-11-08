@@ -22,6 +22,8 @@ export interface FilterPlan {
 }
 
 export interface TableQueryState {
+  presetFilters?: Record<string, string>
+  complete?: boolean
   page: number
   pageSize: number
   sort?: string
@@ -33,8 +35,12 @@ export interface TableQueryState {
 
 export interface TableBinding {
   tableKey: string
+  sourceKey?: string
   endpoint: string
   requiresServerQuery: boolean
+  /** Ohne Serverblaetterung: einmal bis `fetchLimit` laden, Suche/Filter/Sortierung/Seite im Browser. */
+  clientQuery?: boolean
+  fetchLimit?: number
   staleTimeMs?: number
 }
 
@@ -50,6 +56,7 @@ export interface LookupBinding {
 export interface EntityBinding {
   entityId?: string
   entityEndpoint?: string
+  sharedEntityEndpoint?: string
 }
 
 export interface ActionBinding {

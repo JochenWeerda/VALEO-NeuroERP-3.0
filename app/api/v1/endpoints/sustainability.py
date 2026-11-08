@@ -35,6 +35,8 @@ from app.integrations.bvl_psm_client import BVLPSMClient
 
 from app.api.v1.schemas.base import BaseSchema
 from pydantic import ConfigDict as _ConfigDict
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
+from app.core.tenant import get_tenant_id  # Mandant aus dem Token (bis 27.10.2026 ?tenant_id=system)
 
 
 class SustainabilityOut(BaseSchema):
@@ -133,7 +135,7 @@ async def get_sustainability_read_model(
 )
 async def get_psm_runtime(
     zulassungsnummer: str,
-    tenant_id: str = Query("system", description="Tenant context for mapping"),
+    tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
     """Fetch a single PSM entry live from BVL by approval number."""
     try:
@@ -159,8 +161,7 @@ async def get_psm_runtime(
 
 
 @router.post("/emissions/estimate", summary="Emissions estimate",
-    response_model=SustainabilityOut
-)
+    response_model=SustainabilityOut, dependencies=SCHREIBEN["AGRAR"])
 async def estimate_emissions(payload: EmissionsEstimateRequest) -> dict[str, Any]:
     """
     Estimate CO2 emissions via Climatiq.

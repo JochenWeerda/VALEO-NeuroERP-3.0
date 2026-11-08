@@ -7,8 +7,8 @@ import { z } from 'zod';
 
 // Sampling Plan Schema
 export const SamplingPlanSchema = z.object({
-  id: z.string().uuid(),
-  tenantId: z.string().uuid(),
+  id: z.string().guid(),
+  tenantId: z.string().guid(),
   name: z.string().min(1).max(200),
   for: z.enum(['mobile', 'plant']),
   frequency: z.enum(['perBatch', 'perN']),
@@ -23,12 +23,12 @@ export const SamplingPlanSchema = z.object({
 
 // Sampling Result Schema
 export const SamplingResultSchema = z.object({
-  id: z.string().uuid(),
-  tenantId: z.string().uuid(),
-  batchId: z.string().uuid(),
+  id: z.string().guid(),
+  tenantId: z.string().guid(),
+  batchId: z.string().guid(),
   sampleCode: z.string().min(1).max(100),
   takenAt: z.string().datetime(),
-  labId: z.string().uuid().optional(),
+  labId: z.string().guid().optional(),
   analyte: z.string().min(1).max(100),
   value: z.number(),
   unit: z.string().min(1).max(20),
@@ -44,9 +44,9 @@ export const SamplingResultSchema = z.object({
 
 // Retained Sample Schema
 export const RetainedSampleSchema = z.object({
-  id: z.string().uuid(),
-  tenantId: z.string().uuid(),
-  batchId: z.string().uuid(),
+  id: z.string().guid(),
+  tenantId: z.string().guid(),
+  batchId: z.string().guid(),
   sampleCode: z.string().min(1).max(100),
   storageLoc: z.string().min(1).max(200),
   expiryAt: z.string().datetime(),
@@ -60,15 +60,15 @@ export const RetainedSampleSchema = z.object({
 
 // Non-Conformity Schema
 export const NonConformitySchema = z.object({
-  id: z.string().uuid(),
-  tenantId: z.string().uuid(),
+  id: z.string().guid(),
+  tenantId: z.string().guid(),
   refType: z.enum(['batchId', 'mixOrderId', 'mobileRunId']),
-  refId: z.string().uuid(),
+  refId: z.string().guid(),
   type: z.enum(['Contamination', 'SpecOut', 'Equipment', 'Process']),
   severity: z.enum(['Low', 'Medium', 'High', 'Critical']),
   description: z.string().min(1).max(1000),
   action: z.enum(['Block', 'Rework', 'Dispose']),
-  capaId: z.string().uuid().optional(),
+  capaId: z.string().guid().optional(),
   status: z.enum(['Open', 'InProgress', 'Closed']).default('Open'),
   discoveredAt: z.string().datetime(),
   closedAt: z.string().datetime().optional(),
@@ -80,15 +80,15 @@ export const NonConformitySchema = z.object({
 
 // CAPA Schema
 export const CAPASchema = z.object({
-  id: z.string().uuid(),
-  tenantId: z.string().uuid(),
-  ncId: z.string().uuid().optional(),
+  id: z.string().guid(),
+  tenantId: z.string().guid(),
+  ncId: z.string().guid().optional(),
   title: z.string().min(1).max(200),
   description: z.string().min(1).max(2000),
   type: z.enum(['Correction', 'CorrectiveAction', 'PreventiveAction']),
   priority: z.enum(['Low', 'Medium', 'High', 'Critical']),
   status: z.enum(['Open', 'InProgress', 'Closed']).default('Open'),
-  assignedTo: z.string().uuid().optional(),
+  assignedTo: z.string().guid().optional(),
   dueDate: z.string().datetime().optional(),
   closedAt: z.string().datetime().optional(),
   effectiveness: z.enum(['Effective', 'NotEffective', 'NotEvaluated']).optional(),

@@ -18,7 +18,7 @@ export type PSMApprovalStatus = z.infer<typeof PSMApprovalStatusEnum>;
  * PSM Product Reference (BVL-Datenbank)
  */
 export const PSMProductRefSchema = z.object({
-  id: z.string().uuid().optional(),
+  id: z.string().guid().optional(),
   tenantId: z.string().min(1, 'Tenant ID is required'),
   
   // BVL-Referenz
@@ -61,8 +61,8 @@ export const PSMCheckInputSchema = z.object({
     quantity: z.number().optional(),
     unit: z.string().optional(),
   })).min(1, 'At least one PSM item is required'),
-  batchId: z.string().uuid().optional(),
-  contractId: z.string().uuid().optional(),
+  batchId: z.string().guid().optional(),
+  contractId: z.string().guid().optional(),
 });
 
 export type PSMCheckInput = z.infer<typeof PSMCheckInputSchema>;

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from app.auth.finance_roles import finance_read
 from typing import Any
 
 from fastapi import APIRouter, Depends, Query
@@ -15,7 +16,7 @@ from app.api.v1.schemas.base import TypedObjectOut
 router = APIRouter(prefix="/finance", tags=["finance", "fibu", "op"])
 
 
-@router.get("/offene-posten", response_model=TypedObjectOut, summary="Offene Posten mit Aging/Mahnstufe/Skonto")
+@router.get("/offene-posten", response_model=TypedObjectOut, summary="Offene Posten mit Aging/Mahnstufe/Skonto", dependencies=[Depends(finance_read)])
 def offene_posten(
     typ: str = Query("alle", description="debitor | kreditor | alle"),
     limit: int = Query(500, ge=1, le=2000),

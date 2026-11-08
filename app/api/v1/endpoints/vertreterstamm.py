@@ -22,6 +22,7 @@ from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/crm/vertreter", tags=["CRM - Vertreterstamm"])
@@ -85,7 +86,7 @@ def list_vertretergruppen(
     return [VertretergruppeOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/gruppen", response_model=VertretergruppeOut, status_code=201, summary="Vertretergruppe anlegen")
+@router.post("/gruppen", response_model=VertretergruppeOut, status_code=201, summary="Vertretergruppe anlegen", dependencies=SCHREIBEN["CRM"])
 def create_vertretergruppe(
     payload: VertretergruppeCreate,
     db=Depends(get_db),
@@ -112,8 +113,7 @@ def create_vertretergruppe(
 
 
 @router.delete("/gruppen/{gruppe_nr}", summary="Vertretergruppe löschen",
-    response_model=None
-)
+    response_model=None, dependencies=SCHREIBEN["CRM"])
 def delete_vertretergruppe(
     gruppe_nr: str,
     db=Depends(get_db),
@@ -163,7 +163,7 @@ def get_vertreter(
     return VertreterOut(**dict(row._mapping))
 
 
-@router.post("", response_model=VertreterOut, status_code=201, summary="Vertreter anlegen")
+@router.post("", response_model=VertreterOut, status_code=201, summary="Vertreter anlegen", dependencies=SCHREIBEN["CRM"])
 def create_vertreter(
     payload: VertreterCreate,
     db=Depends(get_db),
@@ -196,7 +196,7 @@ def create_vertreter(
     return VertreterOut(**dict(row._mapping))
 
 
-@router.put("/{vertreter_nr}", response_model=VertreterOut, summary="Vertreter aktualisieren")
+@router.put("/{vertreter_nr}", response_model=VertreterOut, summary="Vertreter aktualisieren", dependencies=SCHREIBEN["CRM"])
 def update_vertreter(
     vertreter_nr: str,
     payload: VertreterCreate,
@@ -232,8 +232,7 @@ def update_vertreter(
 
 
 @router.delete("/{vertreter_nr}", summary="Vertreter löschen",
-    response_model=None
-)
+    response_model=None, dependencies=SCHREIBEN["CRM"])
 def delete_vertreter(
     vertreter_nr: str,
     db=Depends(get_db),

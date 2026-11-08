@@ -17,6 +17,7 @@ from .inventory_auth import get_current_tenant_id, require_inventory_admin
 from ....infrastructure.models import Warehouse as WarehouseModel
 from ....api.v1.schemas.base import PaginatedResponse
 from ....api.v1.schemas.inventory import Warehouse, WarehouseCreate, WarehouseUpdate
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter()
 
@@ -81,7 +82,7 @@ async def get_warehouse(
     return Warehouse.model_validate(warehouse)
 
 
-@router.post("/", response_model=Warehouse, status_code=201)
+@router.post("/", response_model=Warehouse, status_code=201, dependencies=SCHREIBEN["LAGER"])
 async def create_warehouse(
     warehouse_data: WarehouseCreate,
     db: Session = Depends(get_db),
@@ -102,7 +103,7 @@ async def create_warehouse(
     return Warehouse.model_validate(warehouse)
 
 
-@router.put("/{warehouse_id}", response_model=Warehouse)
+@router.put("/{warehouse_id}", response_model=Warehouse, dependencies=SCHREIBEN["LAGER"])
 async def update_warehouse(
     warehouse_id: str,
     warehouse_data: WarehouseUpdate,
@@ -134,7 +135,7 @@ async def update_warehouse(
     return Warehouse.model_validate(warehouse)
 
 
-@router.delete("/{warehouse_id}", status_code=204)
+@router.delete("/{warehouse_id}", status_code=204, dependencies=SCHREIBEN["LAGER"])
 async def delete_warehouse(
     warehouse_id: str,
     db: Session = Depends(get_db),

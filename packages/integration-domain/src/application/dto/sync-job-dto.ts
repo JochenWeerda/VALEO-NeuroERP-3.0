@@ -12,18 +12,18 @@ const TargetTypeSchema = z.enum(['database', 'api', 'file', 'message-queue']);
 // Request DTOs
 export const CreateSyncJobRequestSchema = z.object({
   name: z.string().min(1).max(255),
-  integrationId: z.string().uuid(),
+  integrationId: z.string().guid(),
   config: z.object({
     source: z.object({
       type: SourceTypeSchema,
-      connection: z.record(z.unknown()),
+      connection: z.record(z.string(), z.unknown()),
       query: z.string().optional(),
-      filters: z.record(z.unknown()).optional()
+      filters: z.record(z.string(), z.unknown()).optional()
     }),
     target: z.object({
       type: TargetTypeSchema,
-      connection: z.record(z.unknown()),
-      mapping: z.record(z.string()).optional(),
+      connection: z.record(z.string(), z.unknown()),
+      mapping: z.record(z.string(), z.string()).optional(),
       batchSize: z.number().min(1).max(10000).default(100)
     }),
     schedule: z.object({
@@ -45,14 +45,14 @@ export const UpdateSyncJobRequestSchema = z.object({
   config: z.object({
     source: z.object({
       type: SourceTypeSchema,
-      connection: z.record(z.unknown()),
+      connection: z.record(z.string(), z.unknown()),
       query: z.string().optional(),
-      filters: z.record(z.unknown()).optional()
+      filters: z.record(z.string(), z.unknown()).optional()
     }),
     target: z.object({
       type: TargetTypeSchema,
-      connection: z.record(z.unknown()),
-      mapping: z.record(z.string()).optional(),
+      connection: z.record(z.string(), z.unknown()),
+      mapping: z.record(z.string(), z.string()).optional(),
       batchSize: z.number().min(1).max(10000).default(100)
     }),
     schedule: z.object({
@@ -81,7 +81,7 @@ export const SyncJobQuerySchema = z.object({
   limit: z.number().min(1).max(100).default(10),
   sortBy: z.string().optional(),
   sortOrder: z.enum(['asc', 'desc']).default('desc'),
-  integrationId: z.string().uuid().optional(),
+  integrationId: z.string().guid().optional(),
   status: SyncJobStatusSchema.optional(),
   isActive: z.boolean().optional()
 });
@@ -91,7 +91,7 @@ export const SyncJobResponseSchema = z.object({
   id: z.string(),
   name: z.string(),
   integrationId: z.string(),
-  config: z.record(z.unknown()),
+  config: z.record(z.string(), z.unknown()),
   status: SyncJobStatusSchema,
   lastRun: z.string().nullable(),
   nextRun: z.string().nullable(),

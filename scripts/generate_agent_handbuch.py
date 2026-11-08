@@ -18,7 +18,10 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import sys
+import tempfile
+import time
 from datetime import date
 from pathlib import Path
 from typing import Any
@@ -556,13 +559,62 @@ def build_manifest(
     }
 
 
+def _sanitize_output_text(content: str) -> str:
+    """Normalisiert Markdown/JSON-Text für deterministische, Windows-sichere Writes.
+
+    Windows-Textmodus kann bei NUL-Bytes oder bestimmten Control-Chars mit
+    ``OSError: [Errno 22] Invalid argument`` scheitern; parallel geöffnete
+    Editor-/Indexer-Handles liefern oft PermissionError. Deshalb: säubern,
+    LF erzwingen, atomar schreiben (siehe ``_atomic_write_text``).
+    """
+    # splitlines() verwirft bereits \r; rstrip entfernt trailing whitespace
+    sanitized = "\n".join(line.rstrip() for line in content.splitlines())
+    if not sanitized.endswith("\n"):
+        sanitized += "\n"
+    # NUL und übrige C0-Controls (außer Tab) entfernen — Errno 22 auf Windows
+    return "".join(
+        ch for ch in sanitized if ch in "\t\n" or ord(ch) >= 32
+    )
+
+
+def _atomic_write_text(path: Path, text: str, *, retries: int = 5) -> None:
+    """Schreibt atomar über Tempdatei + ``os.replace``, mit kurzem Retry."""
+    last_err: OSError | None = None
+    for attempt in range(retries):
+        tmp_path: Path | None = None
+        try:
+            fd, tmp_name = tempfile.mkstemp(
+                prefix=f".{path.name}.",
+                suffix=".tmp",
+                dir=path.parent,
+            )
+            tmp_path = Path(tmp_name)
+            with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as handle:
+                handle.write(text)
+                handle.flush()
+                os.fsync(handle.fileno())
+            os.replace(tmp_path, path)
+            return
+        except OSError as exc:
+            last_err = exc
+            if tmp_path is not None:
+                try:
+                    tmp_path.unlink(missing_ok=True)
+                except OSError:
+                    pass
+            time.sleep(0.05 * (attempt + 1))
+    assert last_err is not None
+    raise OSError(
+        last_err.errno,
+        f"{last_err.strerror} (nach {retries} Versuchen): {path}",
+        str(path),
+    ) from last_err
+
+
 def write_outputs(outputs: dict[Path, str]) -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     for path, content in outputs.items():
-        sanitized = "\n".join(line.rstrip() for line in content.splitlines())
-        if not sanitized.endswith("\n"):
-            sanitized += "\n"
-        path.write_text(sanitized, encoding="utf-8")
+        _atomic_write_text(path, _sanitize_output_text(content))
 
 
 def content_fingerprint(outputs: dict[Path, str]) -> str:

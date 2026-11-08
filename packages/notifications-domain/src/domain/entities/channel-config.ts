@@ -23,7 +23,7 @@ export const RetryPolicySchema = z.object({
 });
 
 export const ChannelConfigSchema = z.object({
-  id: z.string().uuid().optional(),
+  id: z.string().guid().optional(),
   tenantId: z.string().min(1),
   channel: ChannelEnum,
   provider: ProviderEnum,

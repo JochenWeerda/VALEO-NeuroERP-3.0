@@ -8,15 +8,27 @@ import os
 
 import pytest
 from fastapi import FastAPI
+from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
 from fastapi.testclient import TestClient
 
 from app.api.v1.endpoints import agent_context_api, process_kernel_api
 from app.core.knowledge_core_contracts import KnowledgeChannel, build_context_pack
 
 
+@pytest.fixture(autouse=True)
+def _mandantenkontext():
+    """Dienste ohne ausdruecklichen Mandanten nehmen den des Kontexts; seit 27.10.2026 gibt es keinen Rueckfall "system"."""
+    from app.core.tenant_context import tenant_scope
+
+    with tenant_scope("test-mandant", "unit test"):
+        yield
+
+
+
 @pytest.fixture
 def client(require_db) -> TestClient:
     app = FastAPI()
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(process_kernel_api.router)
     app.include_router(agent_context_api.router)
     return TestClient(app)

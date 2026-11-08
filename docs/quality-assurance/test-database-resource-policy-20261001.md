@@ -53,3 +53,21 @@ Prüfung auf null laufende Verbindungen entfernt. Sein zuvor gemessener
 Datenbankbestand betrug 43.578.159 Bytes. Andere vorhandene Prüfstände wurden
 nicht gelöscht. Historische Abnahmeberichte behalten ihren damaligen
 Prüfstand als Nachweis; ab dieser Vorgabe wird er nicht neu angelegt.
+
+
+## Globale Fixture-Grenze seit 2026-10-13
+
+Lokale PostgreSQL-Fachtests brauchen eine ausdrueckliche `TEST_DATABASE_URL`.
+Die effektive `DATABASE_URL` muss dieselbe bestehende Testdatenbank ansprechen.
+Die in `.env` bzw. `DEVELOPMENT_DATABASE_URL` benannte Entwicklungsdatenbank
+bleibt ausgeschlossen, auch wenn sie als Test-URL umbenannt wird.
+
+Ohne diese Freigabe oeffnet die globale Tenant-Seed-Fixture keine Verbindung.
+`require_db` ueberspringt solche lokalen Faelle; bei
+`PYTEST_REQUIRE_DB_STRICT=1` bricht sie stattdessen mit einem Fehler ab.
+Reine Unit-Tests brauchen keine Datenbankkonfiguration.
+CI verwendet die ausdruecklich vom Job bereitgestellte URL; eine explizite
+Test-URL hat Vorrang und muss dort ebenfalls zur effektiven Verbindung passen.
+Die Regeln erzeugen keine Testdatenbank und ersetzen keine koordinierte Migration.
+
+Nachweis: [CI-Identitaet und Testdatenisolation](ci-identity-test-isolation-20261013.md).

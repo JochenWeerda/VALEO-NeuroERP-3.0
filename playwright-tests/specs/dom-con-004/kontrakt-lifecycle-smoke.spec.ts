@@ -2,9 +2,10 @@
  * DOM-CON-004 Playwright Smoke — Kontrakt-Lifecycle API-Vertrag.
  */
 import { test, expect } from "@playwright/test";
+import { apiToken } from "../../helpers/anmeldung";
 
 const API = process.env.PLAYWRIGHT_API_URL ?? "http://localhost:8000/api/v1";
-const H = { "X-Tenant-ID": "smoke-tenant", Authorization: "Bearer dev-token", "Content-Type": "application/json" };
+const H = { "X-Tenant-ID": "00000000-0000-0000-0000-000000000001", Authorization: `Bearer ${apiToken()}`, "Content-Type": "application/json" };
 
 test("@smoke Kontrakt-Lifecycle ENTWURF→FREIGEGEBEN→AKTIV", async ({ request }) => {
   const kid = `K-SMOKE-${Date.now()}`;

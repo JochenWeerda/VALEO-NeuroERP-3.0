@@ -25,6 +25,7 @@ from app.services.fiscalization.contracts import (
 )
 from app.services.fiscalization.providers import FiscalProviderError
 from app.services.fiscalization.service import FiscalizationService
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/pos/fiscalization", tags=["pos", "fiscalization"])
@@ -55,7 +56,7 @@ async def get_config(
     return _service(db, tenant_id).get_config()
 
 
-@router.put("/config", response_model=FiscalConfigOut, summary="Fiskalisierungsprovider konfigurieren")
+@router.put("/config", response_model=FiscalConfigOut, summary="Fiskalisierungsprovider konfigurieren", dependencies=SCHREIBEN["VERKAUF"])
 async def put_config(
     payload: FiscalProviderConfigIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -75,7 +76,7 @@ async def readiness(
     return _service(db, tenant_id).readiness()
 
 
-@router.post("/transactions/start", response_model=FiscalTransactionResult, summary="Fiskaltransaktion idempotent starten")
+@router.post("/transactions/start", response_model=FiscalTransactionResult, summary="Fiskaltransaktion idempotent starten", dependencies=SCHREIBEN["VERKAUF"])
 async def start_transaction(
     payload: StartTransactionCommand,
     tenant_id: str = Depends(get_tenant_id),
@@ -87,7 +88,7 @@ async def start_transaction(
         raise _provider_error(exc) from exc
 
 
-@router.post("/transactions/finish", response_model=FiscalTransactionResult, summary="Fiskaltransaktion idempotent abschliessen")
+@router.post("/transactions/finish", response_model=FiscalTransactionResult, summary="Fiskaltransaktion idempotent abschliessen", dependencies=SCHREIBEN["VERKAUF"])
 async def finish_transaction(
     payload: FinishTransactionCommand,
     tenant_id: str = Depends(get_tenant_id),
@@ -109,7 +110,7 @@ async def daily_summary(
     return _service(db, tenant_id).daily_summary(business_date, terminal_id)
 
 
-@router.post("/cash-point-closings", response_model=ProviderResult, summary="DSFinV-K Cash Point Closing uebertragen")
+@router.post("/cash-point-closings", response_model=ProviderResult, summary="DSFinV-K Cash Point Closing uebertragen", dependencies=SCHREIBEN["VERKAUF"])
 async def close_cash_point(
     payload: CashPointClosingCommand,
     tenant_id: str = Depends(get_tenant_id),
@@ -121,7 +122,7 @@ async def close_cash_point(
         raise _provider_error(exc) from exc
 
 
-@router.post("/exports", response_model=ProviderResult, summary="TSE- oder DSFinV-K-Export anfordern")
+@router.post("/exports", response_model=ProviderResult, summary="TSE- oder DSFinV-K-Export anfordern", dependencies=SCHREIBEN["VERKAUF"])
 async def request_export(
     payload: ExportCommand,
     tenant_id: str = Depends(get_tenant_id),
@@ -133,7 +134,7 @@ async def request_export(
         raise _provider_error(exc) from exc
 
 
-@router.post("/exports/{export_type}", response_model=ProviderResult, summary="Export mit generierter ID anfordern")
+@router.post("/exports/{export_type}", response_model=ProviderResult, summary="Export mit generierter ID anfordern", dependencies=SCHREIBEN["VERKAUF"])
 async def request_generated_export(
     export_type: Literal["tse", "dsfinvk"],
     cash_register_id: str,

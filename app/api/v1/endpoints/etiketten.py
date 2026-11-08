@@ -22,14 +22,27 @@ from typing import List, Literal, Optional
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from pydantic import BaseModel, ConfigDict, Field
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
 
+from app.auth.deps import anmeldename, get_current_user
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
 from app.services import etikettendruck_service as dienst
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 logger = logging.getLogger(__name__)
+
+def _grund(fehler: Exception) -> str:
+    """Fachliche Meldungen gehen an den Client, Datenbankfehler nicht: bis 14.10.2026 stand hier das rohe SQL samt
+    Parametern in der Antwort."""
+    if isinstance(fehler, IntegrityError) and "ux_drucker_name" in str(fehler.orig):
+        return "Ein Drucker mit diesem Namen besteht bereits"
+    if isinstance(fehler, SQLAlchemyError):
+        return "Speichern in der Datenbank fehlgeschlagen"
+    return str(fehler)
+
 
 router = APIRouter(prefix="/etiketten", tags=["etiketten", "druck"])
 
@@ -115,7 +128,7 @@ async def list_drucker(
         raise dienst.nicht_lesbar(db, fehler, "Drucker", tenant_id) from fehler
 
 
-@router.post("/drucker", status_code=201, response_model=DruckerOut, summary="Drucker anlegen")
+@router.post("/drucker", status_code=201, response_model=DruckerOut, summary="Drucker anlegen", dependencies=SCHREIBEN["LAGER"])
 async def create_drucker(
     payload: DruckerIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -132,7 +145,7 @@ async def create_drucker(
         logger.exception("Drucker nicht anlegbar (Mandant %s)", tenant_id)
         raise HTTPException(
             status_code=409,
-            detail={"error": "Drucker nicht angelegt", "grund": str(fehler),
+            detail={"error": "Drucker nicht angelegt", "grund": _grund(fehler),
                     "migration_hint": dienst.MIGRATIONS_HINWEIS["X-Migration-Hint"]},
             headers=dienst.MIGRATIONS_HINWEIS,
         ) from fehler
@@ -160,9 +173,10 @@ async def list_druckauftraege(
 
 
 @router.post("/druckauftrag", response_model=DruckauftragOut, status_code=201,
-             summary="Druckauftrag anlegen")
+             summary="Druckauftrag anlegen", dependencies=SCHREIBEN["LAGER"])
 async def create_druckauftrag(
     payload: DruckauftragIn,
+    nutzer: dict = Depends(get_current_user),
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
@@ -177,7 +191,9 @@ async def create_druckauftrag(
         drucker_satz = dienst.drucker_holen(db, tenant_id, payload.drucker_id)
         nummer = dienst.naechste_auftragsnummer(db, tenant_id)
         ergebnis = dienst.auftrag_anlegen(
-            db, tenant_id, str(uuid7()), nummer, payload, drucker_satz
+            db, tenant_id, str(uuid7()), nummer,
+            payload.model_copy(update={"erfasst_durch": anmeldename(nutzer) or None}),  # wer druckt, sagt die Anmeldung
+            drucker_satz,
         )
         db.commit()
     except HTTPException:
@@ -188,7 +204,7 @@ async def create_druckauftrag(
         logger.exception("Druckauftrag nicht anlegbar (Mandant %s)", tenant_id)
         raise HTTPException(
             status_code=409,
-            detail={"error": "Druckauftrag nicht angelegt", "grund": str(fehler),
+            detail={"error": "Druckauftrag nicht angelegt", "grund": _grund(fehler),
                     "migration_hint": dienst.MIGRATIONS_HINWEIS["X-Migration-Hint"]},
             headers=dienst.MIGRATIONS_HINWEIS,
         ) from fehler
@@ -196,7 +212,7 @@ async def create_druckauftrag(
 
 
 @router.delete("/druckauftrag/{auftrag_id}", response_model=DruckauftragOut,
-               summary="Druckauftrag abbrechen")
+               summary="Druckauftrag abbrechen", dependencies=SCHREIBEN["LAGER"])
 async def cancel_druckauftrag(
     auftrag_id: str,
     grund: str = Body(..., embed=True, min_length=1),
@@ -214,6 +230,6 @@ async def cancel_druckauftrag(
     except Exception as fehler:  # noqa: BLE001
         db.rollback()
         raise HTTPException(
-            status_code=409, detail={"error": "Abbruch abgewiesen", "grund": str(fehler)}
+            status_code=409, detail={"error": "Abbruch abgewiesen", "grund": _grund(fehler)}
         ) from fehler
     return ergebnis

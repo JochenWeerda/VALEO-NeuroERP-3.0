@@ -17,6 +17,7 @@ from sqlalchemy.orm import Session
 from ....core.database import engine, get_db
 from ....core.fibu_audit import log_fibu_audit
 from .inventory_auth import get_current_tenant_id, require_inventory_access, require_inventory_admin
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter()
 
@@ -320,7 +321,7 @@ def _post_storage_fee_journal(
     return entry_id
 
 
-@router.post("/run", response_model=StorageFeeRunOut)
+@router.post("/run", response_model=StorageFeeRunOut, dependencies=SCHREIBEN["LAGER"])
 async def run_storage_fee_engine(
     payload: StorageFeeRunRequest,
     db: Session = Depends(get_db),

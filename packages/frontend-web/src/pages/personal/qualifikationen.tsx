@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { MadeByStudioListRuntimeWire } from '@/components/mask-builder/made-by-studio-runtime-wire'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { RowDeleteConfirmDialog, useGuardedRowDelete } from '@/hooks/useGuardedRowDelete'
 import { Skeleton } from '@/components/ui/skeleton'
 import { UniversalMaskRenderer } from '@/components/mask-builder/UniversalMaskRenderer'
+import { useScreenPermissions } from '@/components/mask-builder/runtime/screen-permissions'
 import { compileRenderPlanFromScreenDefinition } from '@/components/mask-builder/render-plan/schema-compiler'
 import { useUniversalFormState } from '@/components/mask-builder/runtime/useUniversalFormState'
 import { createScreenContext } from '@/components/mask-builder/governance/screen-context'
@@ -17,6 +20,12 @@ import {
   type Qualifikation,
 } from '@/lib/api/personal'
 import { personalQualifikationenScreen } from '@/masks/capture-screens'
+
+const ROW_DELETE = {
+  endpoint: (id: string) => `/api/v1/training/qualifications/${id}/actions/loeschen`,
+  queryKey: personalKeys.qualifikationen(),
+  entityLabel: 'Qualifikation',
+}
 
 const STUFEN: Record<QualificationLevel, string> = {
   basic: 'Grundkenntnis',
@@ -43,6 +52,7 @@ function stufe(value: string): QualificationLevel {
 
 type QualificationApi = {
   id: string
+  revision?: string
   employee_ref: string
   role_code: string
   qualification_level: QualificationLevel
@@ -50,9 +60,10 @@ type QualificationApi = {
   valid_until?: string | null
 }
 
-function toRow(item: QualificationApi): Qualifikation {
+function toRow(item: QualificationApi): Qualifikation & { revision?: string } {
   return {
     id: item.id,
+    revision: item.revision,
     employeeRef: item.employee_ref,
     roleCode: item.role_code,
     qualificationLevel: stufe(item.qualification_level),
@@ -75,7 +86,7 @@ export default function QualifikationenPage(): JSX.Element {
   const ohneGueltigkeit = rows.filter((row) => !row.validUntil).length
   const createMutation = useCreateQualifikation()
   const [saving, setSaving] = useState(false)
-  const [pendingDeletes, setPendingDeletes] = useState<Set<string>>(new Set())
+  const { pendingDeletes, deleteCandidate, setDeleteCandidate, loeschen } = useGuardedRowDelete(ROW_DELETE)
 
   useEffect(() => {
     if (!liste.isError) return
@@ -98,7 +109,8 @@ export default function QualifikationenPage(): JSX.Element {
     })),
   }), [isTouch, ohneGueltigkeit, rows.length, saving])
 
-  const plan = useMemo(() => compileRenderPlanFromScreenDefinition(schema), [schema])
+  const rechte = useScreenPermissions(schema)
+  const plan = useMemo(() => compileRenderPlanFromScreenDefinition(schema, { permissions: rechte }), [schema, rechte])
   const form = useUniversalFormState({ screen: schema, initialValues: leer })
 
   const workflow = useMemo<WorkflowState>(() => {
@@ -162,24 +174,6 @@ export default function QualifikationenPage(): JSX.Element {
     }
   }, [createMutation, form.values, leeren, queryClient, saving])
 
-  const loeschen = useCallback(async (id: string, name: string) => {
-    if (!id || pendingDeletes.has(id)) return
-    setPendingDeletes((prev) => new Set(prev).add(id))
-    try {
-      await apiClient.delete(`/api/v1/training/qualifications/${id}`)
-      toast.success('Qualifikation gelöscht', { description: name })
-      await queryClient.invalidateQueries({ queryKey: personalKeys.qualifikationen() })
-    } catch (error) {
-      toast.error('Qualifikation nicht gelöscht', { description: getAxiosErrorMessage(error) })
-    } finally {
-      setPendingDeletes((prev) => {
-        const next = new Set(prev)
-        next.delete(id)
-        return next
-      })
-    }
-  }, [pendingDeletes, queryClient])
-
   const handleAction = useCallback(async (key: string, payload: Record<string, unknown>) => {
     if (key === 'speichern') {
       await speichern()
@@ -190,13 +184,13 @@ export default function QualifikationenPage(): JSX.Element {
       return
     }
     if (key === 'loeschen') {
-      await loeschen(text(payload.id), `${text(payload.employee_ref)} / ${text(payload.role_code)}`)
+      setDeleteCandidate({ id: text(payload.id), name: `${text(payload.employee_ref)} / ${text(payload.role_code)}`, version: text(payload.revision) })
     }
-  }, [leeren, loeschen, speichern])
+  }, [leeren, speichern])
 
   const screenContext = useMemo(() => createScreenContext({
     data: { qualifikationen: rows },
-    permissions: { granted: [] },
+    permissions: { granted: rechte },
     state: { values: form.values, policies: {} },
     actions: {
       'personal.saveQualifikation': () => handleAction('speichern', {}),
@@ -204,7 +198,7 @@ export default function QualifikationenPage(): JSX.Element {
       'personal.deleteQualifikation': (payload) => handleAction('loeschen', payload),
     },
     navigation: { push: () => undefined },
-  }), [form.values, handleAction, rows])
+  }), [rechte, form.values, handleAction, rows])
 
   if (liste.isLoading) {
     return (
@@ -217,6 +211,7 @@ export default function QualifikationenPage(): JSX.Element {
 
   return (
     <div className="space-y-6 p-3 md:p-6">
+      <RowDeleteConfirmDialog candidate={deleteCandidate} onCancel={() => setDeleteCandidate(null)} onConfirm={(candidate) => { void loeschen(candidate) }} />
       <UniversalMaskRenderer
         plan={plan}
         formState={form}
@@ -226,6 +221,7 @@ export default function QualifikationenPage(): JSX.Element {
         tables={{
           qualifikationen: rows.map((row) => ({
             id: row.id,
+            revision: row.revision,
             employee_ref: row.employeeRef,
             role_code: row.roleCode,
             qualification_level: STUFEN[row.qualificationLevel],
@@ -239,3 +235,8 @@ export default function QualifikationenPage(): JSX.Element {
     </div>
   )
 }
+function madeByStudioRuntimeWireDeclaration(): JSX.Element {
+  return <MadeByStudioListRuntimeWire screenId="personal/qualifikationen" />
+}
+void madeByStudioRuntimeWireDeclaration
+

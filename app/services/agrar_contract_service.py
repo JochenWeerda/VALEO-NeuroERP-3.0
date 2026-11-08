@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 from app.core.data_quality_enforcement import build_dq_error_detail, evaluate_contract_datensatz
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
 from app.core.uuid7 import uuid7
-from app.infrastructure.models import AgrarContract, AgrarContractAllocation
+from app.infrastructure.models import AgrarContract, AgrarContractAllocation, WeighingTicket
 
 ContractStatus = str  # "open" | "partially_allocated" | "fulfilled" | "cancelled" | "closed"
 
@@ -170,9 +170,18 @@ class AgrarContractService:
             raise ValidationFailedError("Contract already fulfilled")
 
         quantity = Decimal(str(allocation_quantity_kg))
+        if not quantity.is_finite() or quantity <= 0:
+            raise ValidationFailedError("Allocation quantity must be positive")
         remaining = Decimal(str(contract.remaining_quantity_kg))
         if quantity > remaining:
             raise ValidationFailedError("Allocation exceeds remaining quantity")
+        if ticket_id is not None:
+            ticket = self.db.query(WeighingTicket).filter(
+                WeighingTicket.id == ticket_id,
+                WeighingTicket.tenant_id == self.tenant_id,
+            ).first()
+            if ticket is None:
+                raise EntityNotFoundError("WeighingTicket", ticket_id)
 
         contract.remaining_quantity_kg = remaining - quantity
         contract.status = _compute_status(

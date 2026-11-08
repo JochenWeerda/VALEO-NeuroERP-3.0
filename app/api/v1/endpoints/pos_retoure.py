@@ -1,13 +1,14 @@
 """POS Retoure (Return) Endpoint"""
 from typing import Optional, List
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from ....core.database import get_db
-from ....core.config import settings
+from app.core.tenant import get_tenant_id
 
 from app.api.v1.schemas.base import BaseSchema
 from pydantic import ConfigDict as _ConfigDict
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 class PosRetourOut(BaseSchema):
@@ -15,8 +16,6 @@ class PosRetourOut(BaseSchema):
 
 
 router = APIRouter()
-
-DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 
 class RetourPosition(BaseModel):
@@ -34,7 +33,6 @@ class RetourRequest(BaseModel):
     positionen: List[RetourPosition]
     zahlungsrueckerstattung: str = "bar"  # bar | ec | gift_card
     gesamt: float
-    tenant_id: Optional[str] = None
 
 
 class RetourResponse(BaseModel):
@@ -45,23 +43,23 @@ class RetourResponse(BaseModel):
     message: str
 
 
-@router.post("/retoure", response_model=RetourResponse, summary="Retoure anlegen")
+@router.post("/retoure", response_model=RetourResponse, summary="Retoure anlegen", dependencies=SCHREIBEN["VERKAUF"])
 async def create_retoure(
     data: RetourRequest,
     db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ):
-    """Warenrückgabe / Retoure buchen."""
+    """Warenrückgabe / Retoure buchen (Mandant aus dem Token, bis 27.10.2026 aus dem Rumpf)."""
     import uuid
     from datetime import datetime, timezone
+    from sqlalchemy import text
 
-    tenant_id = data.tenant_id or DEFAULT_TENANT
     retoure_id = str(uuid.uuid4())
     bon_nr = f"RET-{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}"
 
     try:
-        from sqlalchemy import text
         for pos in data.positionen:
-            db.execute(
+            gebucht = db.execute(
                 text("""
                     INSERT INTO domain_inventory.inventory_stock_movements
                         (id, tenant_id, article_id, warehouse_id, movement_type, quantity, unit,
@@ -104,6 +102,8 @@ async def create_retoure(
                     "artikelnr": pos.artikelnr,
                 }
             )
+            if gebucht.rowcount == 0:
+                raise HTTPException(status_code=422, detail=f"Artikel {pos.artikelnr} nicht gefunden")
             # Bestandsfortschreibung: bin_stock aktualisieren (erster passender Bin des Lagers)
             db.execute(
                 text("""
@@ -127,9 +127,13 @@ async def create_retoure(
                 {"qty": pos.menge, "artikelnr": pos.artikelnr, "tenant_id": tenant_id},
             )
         db.commit()
-    except Exception:
+    except HTTPException:
         db.rollback()
-        # Retoure-Buchung gescheitert; Dokument trotzdem zurückgeben (Fail-soft)
+        raise
+    except Exception as exc:
+        # Bis 27.10.2026 meldete der Weg hier trotzdem "erfolgreich gebucht" (Fail-soft ohne Buchung).
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Retoure konnte nicht gebucht werden") from exc
 
     return RetourResponse(
         retoure_id=retoure_id,
@@ -141,23 +145,10 @@ async def create_retoure(
 
 
 @router.post("/checkout", summary="Checkout pos",
-    response_model=PosRetourOut
-)
+    response_model=PosRetourOut, dependencies=SCHREIBEN["VERKAUF"])
 async def pos_checkout(
     data: dict,
     db: Session = Depends(get_db),
 ):
-    """POS Checkout — empfängt auch Offline-Queue-Transaktionen."""
-    import uuid
-    from datetime import datetime, timezone
-
-    # Offline-ID tracking (Idempotenz)
-    offline_id = data.get("offline_id")
-    bon_nr = f"BON-{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}-{str(uuid.uuid4())[:4].upper()}"
-
-    return {
-        "bon_nr": bon_nr,
-        "status": "completed",
-        "offline_id": offline_id,
-        "gesamt": data.get("gesamt", 0),
-    }
+    """Checkout ist bis zur Anbindung einer echten Buchung nicht verfuegbar."""
+    raise HTTPException(status_code=501, detail="POS-Checkout ist noch nicht angebunden.")

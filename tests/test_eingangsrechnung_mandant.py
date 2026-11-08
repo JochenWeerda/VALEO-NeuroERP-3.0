@@ -18,16 +18,16 @@ import pytest
 from fastapi import FastAPI, HTTPException
 from fastapi.testclient import TestClient
 
-DB_URL = os.environ.get(
-    "TEST_DATABASE_URL",
-    os.environ.get("DATABASE_URL", "postgresql://valeo_dev:valeo_dev_2024@127.0.0.1:5432/valeo_probe"),
-)
-os.environ.setdefault("DATABASE_URL", DB_URL)
-os.environ.setdefault("API_DEV_TOKEN", "dev-token")
+DB_URL = os.environ.get("TEST_DATABASE_URL") or os.environ.get("DATABASE_URL")
+if DB_URL:
+    os.environ.setdefault("DATABASE_URL", DB_URL)
 
 from app.api.v1.endpoints import ap_approval_workflow as workflow  # noqa: E402
 from app.api.v1.endpoints import ap_invoices as endpoint  # noqa: E402
 from app.auth.deps import get_current_user  # noqa: E402
+from stammsaetze import entferne_stammsaetze, lege_lieferanten_an
+from testgrenze import ersetze_mandant
+from app.core.tenant import get_tenant_id
 from app.core.database import get_db  # noqa: E402
 
 PREFIX = "/api/v1/finance/ap/invoices"
@@ -35,8 +35,9 @@ WORKFLOW = "/api/v1/finance/ap/approval-workflow"
 
 ROLES = [None, "user", "PERSONAL_ADMIN", "FINANCE_LESEN", "FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin", "manager"]
 ALLOWED = {
-    "read": {"FINANCE_LESEN", "FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin", "manager"},
-    "write": {"FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin", "manager"},
+    # ``manager`` bleibt Negativfall: abgeloest seit MANAGER-ROLE-ENFORCEMENT-20261019, gewaehrt nichts.
+    "read": {"FINANCE_LESEN", "FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin"},
+    "write": {"FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin"},
     "admin": {"FINANCE_ADMIN", "admin"},
 }
 CASES = [
@@ -59,6 +60,7 @@ CASES = [
 @pytest.fixture
 def grenze():
     app = FastAPI()
+    ersetze_mandant(app)
     app.include_router(endpoint.router, prefix="/api/v1/finance")
     app.include_router(workflow.router, prefix="/api/v1/finance")
     aufrufe = []
@@ -113,7 +115,14 @@ NUMMERN: list[str] = []
 @pytest.fixture(scope="module")
 def engine():
     from sqlalchemy import create_engine, text
+    from sqlalchemy.engine import make_url
 
+    if not DB_URL:
+        pytest.skip("Explicit shared PostgreSQL test database required")
+    database = make_url(DB_URL).database or ""
+    from testgrenze import pruefstand_erlaubt
+    if not pruefstand_erlaubt(make_url(DB_URL)):
+        pytest.fail("Never write finance test data into a development database")
     try:
         motor = create_engine(DB_URL)
         with motor.connect() as v:
@@ -133,12 +142,18 @@ def client(engine):
         for haus in (HAUS_A, HAUS_B):
             v.execute(text("INSERT INTO domain_shared.tenants (id, name) VALUES (:i, :n) ON CONFLICT (id) DO NOTHING"),
                       {"i": haus, "n": f"Pruefbetrieb {haus}"})
+            # Eingangsrechnungen pruefen den Lieferanten im Mandanten (tests/stammsaetze.py).
+            lege_lieferanten_an(v, haus, f"supplier-{haus}")
+    ersetze_mandant(app)
     nutzer = {"sub": "kasse", "roles": ["FINANCE_ADMIN"]}
     app.dependency_overrides[get_current_user] = lambda: nutzer
     yield TestClient(app)
     app.dependency_overrides.pop(get_current_user, None)
+    app.dependency_overrides.pop(get_tenant_id, None)
     with engine.begin() as v:
         v.execute(text("DELETE FROM documents WHERE doc_type = 'ap_invoice' AND doc_number = ANY(:n)"), {"n": NUMMERN})
+        for haus in (HAUS_A, HAUS_B):
+            entferne_stammsaetze(v, haus, f"supplier-{haus}")
 
 
 def kopf(haus: str) -> dict[str, str]:
@@ -149,7 +164,7 @@ def anlegen(client, haus: str, nummer: str | None = None):
     nummer = nummer or f"RE-{uuid.uuid4().hex[:8]}"
     NUMMERN.append(nummer)
     return nummer, client.post(f"{PREFIX}/", headers=kopf(haus), json={
-        "number": nummer, "date": "2026-10-07", "customerId": "supplier-1", "dueDate": "2026-11-06",
+        "number": nummer, "date": "2026-10-07", "customerId": f"supplier-{haus}", "dueDate": "2026-11-06",
         "lines": [{"article": "Weizen", "qty": 1, "price": 100.0, "vatRate": 19.0}],
     })
 
@@ -175,7 +190,8 @@ class TestMandant:
         assert client.get(f"{PREFIX}/{nummer}", headers=kopf(HAUS_A)).status_code == 200
         assert client.get(f"{PREFIX}/{nummer}", headers=kopf(HAUS_B)).status_code == 404
         assert client.delete(f"{PREFIX}/{nummer}", headers=kopf(HAUS_B)).status_code == 404
-        assert client.post(f"{PREFIX}/{nummer}/approve", headers=kopf(HAUS_B)).status_code == 404
+        assert client.post(f"{PREFIX}/{nummer}/approve", headers=kopf(HAUS_B),
+                           json={"approval_request_id": "foreign-request"}).status_code == 404
         assert client.post(f"{PREFIX}/{nummer}/post?posted_by=x", headers=kopf(HAUS_B)).status_code == 404
         nummern_b = [r.get("number") for r in client.get(f"{PREFIX}/", headers=kopf(HAUS_B)).json()]
         assert nummer not in nummern_b
@@ -212,19 +228,26 @@ class TestMandant:
             antrag = client.post(f"{WORKFLOW}/request", headers=kopf(HAUS_A),
                                  json={"invoice_id": nummer, "requested_by": "einkauf"})
             assert antrag.status_code == 200, antrag.text
+            from app.main import app
+            # Antragsteller ist kasse aus dem Token, ungeachtet des Rumpfes.
+            selbst = client.post(f"{WORKFLOW}/approve", headers=kopf(HAUS_A), json={
+                "invoice_id": nummer, "approval_request_id": antrag.json()["approval_request_id"], "action": "approve"})
+            assert selbst.status_code == 403, selbst.text
+            app.dependency_overrides[get_current_user] = lambda: {"sub":"pruefer", "roles":["FINANCE_ADMIN"]}
             erste = client.post(f"{WORKFLOW}/approve", headers=kopf(HAUS_A), json={
-                "invoice_id": nummer, "approved_by": "Frau A", "action": "approve"})
+                "invoice_id": nummer, "approval_request_id": antrag.json()["approval_request_id"], "approved_by": "Frau A", "action": "approve"})
             assert erste.status_code == 200, erste.text
             # Derselbe angemeldete Nutzer, ein anderer Name im Rumpf: keine zweite Stufe.
             zweite = client.post(f"{WORKFLOW}/approve", headers=kopf(HAUS_A), json={
-                "invoice_id": nummer, "approved_by": "Herr B", "action": "approve"})
-            assert zweite.status_code == 400, zweite.text
+                "invoice_id": nummer, "approval_request_id": antrag.json()["approval_request_id"], "approved_by": "Herr B", "action": "approve"})
+            assert zweite.status_code == 200, zweite.text
             with engine.connect() as v:
                 freigeber = [z[0] for z in v.execute(text(
                     "SELECT a.approved_by FROM domain_erp.ap_approvals a "
                     "JOIN domain_erp.ap_approval_requests r ON r.id = a.request_id "
                     "WHERE r.invoice_id = :n AND r.tenant_id = :h"), {"n": nummer, "h": HAUS_A})]
-            assert freigeber == ["kasse"]
+            assert freigeber == ["pruefer"]
+            assert zweite.json()["status"] == "partially_approved"
         finally:
             with engine.begin() as v:
                 v.execute(text(

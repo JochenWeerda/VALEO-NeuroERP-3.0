@@ -29,6 +29,7 @@ from app.services.rations_lifecycle_service import (
     RationLifecycleNotFound,
     RationLifecycleService,
 )
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/lifecycle", tags=["rations-lifecycle"])
 
@@ -289,7 +290,7 @@ def _translate_error(exc: Exception) -> HTTPException:
     return HTTPException(status_code=500, detail="Rations-Lifecycle konnte nicht verarbeitet werden.")
 
 
-@router.post("/groups", response_model=FeedingGroupOut, status_code=201, summary="Fuetterungsgruppe anlegen")
+@router.post("/groups", response_model=FeedingGroupOut, status_code=201, summary="Fuetterungsgruppe anlegen", dependencies=SCHREIBEN["AGRAR"])
 async def create_feeding_group(
     body: FeedingGroupIn,
     db: Session = Depends(get_db),
@@ -336,7 +337,7 @@ async def get_feeding_group(
         raise _translate_error(exc) from exc
 
 
-@router.patch("/groups/{group_id}", response_model=FeedingGroupOut, summary="Fuetterungsgruppe versioniert aktualisieren")
+@router.patch("/groups/{group_id}", response_model=FeedingGroupOut, summary="Fuetterungsgruppe versioniert aktualisieren", dependencies=SCHREIBEN["AGRAR"])
 async def update_feeding_group(
     group_id: str,
     body: FeedingGroupUpdateIn,
@@ -373,7 +374,7 @@ async def list_feeding_group_history(
         raise _translate_error(exc) from exc
 
 
-@router.post("/rations", response_model=RationDetailOut, status_code=201, summary="Ration mit Version 1 anlegen")
+@router.post("/rations", response_model=RationDetailOut, status_code=201, summary="Ration mit Version 1 anlegen", dependencies=SCHREIBEN["AGRAR"])
 async def create_ration(
     body: RationCreateIn,
     db: Session = Depends(get_db),
@@ -425,7 +426,7 @@ async def get_ration(
         raise _translate_error(exc) from exc
 
 
-@router.post("/rations/{ration_id}/versions", response_model=RationVersionOut, status_code=201, summary="Neue unveraenderliche Rationsversion anlegen")
+@router.post("/rations/{ration_id}/versions", response_model=RationVersionOut, status_code=201, summary="Neue unveraenderliche Rationsversion anlegen", dependencies=SCHREIBEN["AGRAR"])
 async def create_ration_version(
     ration_id: str,
     body: RationVersionCreateIn,
@@ -455,7 +456,7 @@ async def list_ration_versions(
         raise _translate_error(exc) from exc
 
 
-@router.post("/versions/{version_id}/transitions", response_model=RationTransitionOut, summary="Rationsstatus kontrolliert wechseln")
+@router.post("/versions/{version_id}/transitions", response_model=RationTransitionOut, summary="Rationsstatus kontrolliert wechseln", dependencies=SCHREIBEN["AGRAR"])
 async def transition_ration_version(
     version_id: str,
     body: RationTransitionIn,
@@ -480,8 +481,7 @@ async def transition_ration_version(
 @router.post(
     "/rations/{ration_id}/actions/{action_key}",
     response_model=MaskActionResult,
-    summary="Rations-Lifecycle ueber die Mask ActionRuntime ausfuehren",
-)
+    summary="Rations-Lifecycle ueber die Mask ActionRuntime ausfuehren", dependencies=SCHREIBEN["AGRAR"])
 async def run_ration_action(
     ration_id: str,
     action_key: RationActionKey,

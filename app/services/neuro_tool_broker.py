@@ -27,6 +27,7 @@ from app.core.neuro_state_graph import StateGraphService, StateNode, StateNodeTy
 from app.integrations.services.superglue_capability_service import SuperglueCapabilityService
 from app.services.neuro_tool_execution import NeuroToolExecutionService
 from app.services.neuro_verification_engine import verify_plan
+from app.core.tenant_context import get_current_tenant_id
 
 logger = logging.getLogger(__name__)
 
@@ -180,10 +181,11 @@ _GATE_BINDING = ToolBinding(
 def execute_plan(
     plan: ExecutionPlan,
     *,
-    tenant_id: str = "system",
+    tenant_id: str | None = None,
     context: Optional[dict[str, Any]] = None,
     db: Optional[Session] = None,
 ) -> dict[str, Any]:
+    tenant_id = tenant_id or get_current_tenant_id()
     broker = NeuroToolBroker()
     return broker.execute_plan(plan, tenant_id=tenant_id, context=context, db=db)
 
@@ -205,10 +207,11 @@ class NeuroToolBroker:
         self,
         plan: ExecutionPlan,
         *,
-        tenant_id: str = "system",
+        tenant_id: str | None = None,
         context: Optional[dict[str, Any]] = None,
         db: Optional[Session] = None,
     ) -> dict[str, Any]:
+        tenant_id = tenant_id or get_current_tenant_id()
         ctx = context or {}
         tool_trace: list[dict[str, Any]] = []
         executed_steps: list[dict[str, Any]] = []
@@ -513,6 +516,32 @@ class NeuroToolBroker:
             },
         }
 
+    @staticmethod
+    def _dq_entity_type(value: Any) -> str | None:
+        from app.core.data_quality_rules import get_default_dq_rulesets
+        if not isinstance(value, str) or not value.strip():
+            return None
+        aliases = {"supplier": "Lieferant", "customer": "Debitor", "article": "Artikel",
+                   "master_data": "Artikel", "invoice": "APRechnung",
+                   "purchase_order": "Artikel", "sales_order": "Debitor"}
+        text = value.strip()
+        canonical = {name.casefold(): name for name in get_default_dq_rulesets()}
+        return aliases.get(text.casefold(), canonical.get(text.casefold(), text))
+
+    @staticmethod
+    def _dq_parameters(step: PlanStep, context: dict[str, Any]) -> dict[str, Any]:
+        # Broker plan attributes become an explicit REST request. Direct MCP
+        # callers must already provide the canonical object; no transport fallback.
+        if "datensatz" in step.parameters:
+            return dict(step.parameters)
+        return {
+            "entity_typ": NeuroToolBroker._dq_entity_type(
+                step.parameters.get("entity_typ") or step.parameters.get("entity_type") or step.entity_type
+            ),
+            "datensatz": dict(step.parameters),
+            "kontext_datensaetze": context.get("comparison_records"),
+        }
+
     def _execute_tool_contract(
         self,
         step: PlanStep,
@@ -529,9 +558,17 @@ class NeuroToolBroker:
                     "result": {"error": f"Unknown tool contract '{binding.target_name}'"},
                 },
             }
+        parameters = step.parameters
+        if contract.tool_name == "valeo_process_data_quality_validate":
+            parameters = self._dq_parameters(step, context)
+        if contract.tool_name in {"valeo_compliance_policy_evaluate", "valeo_workflow_approval_evaluate"}:
+            envelope = "prozess_key" if contract.tool_name == "valeo_compliance_policy_evaluate" else "aktions_typ"
+            if "kontext" not in parameters:
+                parameters = {envelope: parameters.get(envelope) or (context.get("process_key") if envelope == "prozess_key" else step.action),
+                              "kontext": {**dict(context.get("policy_context", {})), **dict(step.parameters), "tenant_id": tenant_id}}
         payload = self._tool_execution_service.execute_contract(
             contract,
-            parameters=step.parameters,
+            parameters=parameters,
             tenant_id=tenant_id,
             context={
                 **context,
@@ -553,9 +590,14 @@ class NeuroToolBroker:
 
         # NC-A7: distinguish real execution from fallback
         mode = payload.get("mode", "unknown")
+        if mode == "execution_rejected":
+            return {
+                "step_status": "failed",
+                "trace": {"status": "failed", "result": payload},
+            }
         if mode == "fallback_contract":
             http_status = payload.get("http_status")
-            if http_status and http_status >= 500:
+            if http_status and (http_status in {401, 403} or http_status >= 500):
                 return {
                     "step_status": "failed",
                     "trace": {"status": "failed", "result": payload},

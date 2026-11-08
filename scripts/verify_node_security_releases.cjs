@@ -110,3 +110,69 @@ require('./verify_node_dependency_security.cjs');
 require('./verify_node_high_backports.cjs');
 require('./test_npm_backport_audit.cjs');
 require('./verify_handlebars_security_release.cjs');
+require('./verify_dependency_advisories_20261025.cjs');
+
+test('seroval ignores untrusted typed-array constructor names and retains bytes', () => {
+  const { serialize, deserialize } = patched('seroval');
+  const input = new Uint8Array([7, 8]);
+  input.constructor = { name: 'VALEO_FORGED_TYPED_ARRAY' };
+  const output = serialize(input);
+  assert.equal(output.includes('VALEO_FORGED_TYPED_ARRAY'), false);
+  assert.deepEqual(Array.from(deserialize(output)), [7, 8]);
+});
+
+test('translation query URLs reject language parameter injection before any request', async () => {
+  const Backend = patched('i18next-http-backend');
+  const requests = [];
+  const backend = new Backend({ interpolator: { interpolate: (template, vars) =>
+    template.replace(/\{\{(lng|ns)\}\}/g, (_, key) => vars[key]) } }, {
+    loadPath: '/locales/resources.json?lng={{lng}}&ns={{ns}}',
+    request: (_options, url, _payload, done) => {
+      requests.push(url); done(null, { status: 200, data: '{}' });
+    },
+  });
+  const read = (lng) => new Promise(resolve => backend.read(lng, 'common', (error) => resolve(error)));
+  for (const language of ['de&ns=private', 'de=private']) assert.ok(await read(language));
+  assert.deepEqual(requests, []);
+  assert.equal(await read('de'), null);
+  assert.deepEqual(requests, ['/locales/resources.json?lng=de&ns=common']);
+});
+
+test('malformed percent runs are decoded within a bounded subprocess', () => {
+  const { spawnSync } = require('node:child_process');
+  const entry = patched.resolve('decode-uri-component');
+  const code = `import(${JSON.stringify(require('node:url').pathToFileURL(entry).href)}).then(({default: decode}) => {
+    let input = '';
+    for (let i = 0; i < 32000; i++) input += '%' + (i >> 8).toString(16).padStart(2, '0') + '%' + (i & 255).toString(16).padStart(2, '0') + 'x';
+    input += '%zz';
+    if (!decode(input).endsWith('%zz') || decode('hello%20world') !== 'hello world') process.exit(2);
+  });`;
+  const result = spawnSync(process.execPath, ['-e', code], { timeout: 5000, encoding: 'utf8' });
+  assert.equal(result.error, undefined, result.error?.message);
+  assert.equal(result.status, 0, result.stderr);
+});
+
+test('Vite denies sensitive files even with raw and inline query parameters', async () => {
+  const fs = require('node:fs');
+  const os = require('node:os');
+  const { pathToFileURL } = require('node:url');
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'valeo-vite-deny-'));
+  fs.writeFileSync(path.join(root, '.env'), 'VALEO_PRIVATE_MARKER=secret');
+  fs.writeFileSync(path.join(root, 'public.txt'), 'public marker');
+  let server;
+  try {
+    const { createServer } = await import(pathToFileURL(patched.resolve('vite')).href);
+    server = await createServer({ root, configFile: false, server: { host: '127.0.0.1', port: 0, fs: { allow: [root] } }, logLevel: 'silent' });
+    await server.listen(0);
+    const port = server.httpServer.address().port;
+    for (const query of ['?raw', '?import&raw', '?import&url&inline']) {
+      const response = await fetch(`http://127.0.0.1:${port}/.env${query}`);
+      assert.notEqual(response.status, 200, query);
+      assert.ok(!(await response.text()).includes('VALEO_PRIVATE_MARKER'));
+    }
+    assert.equal(await (await fetch(`http://127.0.0.1:${port}/public.txt`)).text(), 'public marker');
+  } finally {
+    if (server) await server.close();
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});

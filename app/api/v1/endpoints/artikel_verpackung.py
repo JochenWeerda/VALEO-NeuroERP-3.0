@@ -27,6 +27,7 @@ from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/artikel/verpackungen",
@@ -118,7 +119,7 @@ def get_verpackung(
     return ArtikelVerpackungOut(**dict(row._mapping))
 
 
-@router.post("", response_model=ArtikelVerpackungOut, status_code=201, summary="Verpackung anlegen")
+@router.post("", response_model=ArtikelVerpackungOut, status_code=201, summary="Verpackung anlegen", dependencies=SCHREIBEN["STAMMDATEN"])
 def create_verpackung(
     payload: ArtikelVerpackungCreate,
     db=Depends(get_db),
@@ -158,7 +159,7 @@ def create_verpackung(
     return ArtikelVerpackungOut(**dict(row._mapping))
 
 
-@router.put("/{verpackungs_nr}", response_model=ArtikelVerpackungOut, summary="Verpackung aktualisieren")
+@router.put("/{verpackungs_nr}", response_model=ArtikelVerpackungOut, summary="Verpackung aktualisieren", dependencies=SCHREIBEN["STAMMDATEN"])
 def update_verpackung(
     verpackungs_nr: str,
     payload: ArtikelVerpackungCreate,
@@ -199,8 +200,7 @@ def update_verpackung(
 
 
 @router.delete("/{verpackungs_nr}", summary="Verpackung löschen",
-    response_model=None
-)
+    response_model=None, dependencies=SCHREIBEN["STAMMDATEN"])
 def delete_verpackung(
     verpackungs_nr: str,
     db=Depends(get_db),

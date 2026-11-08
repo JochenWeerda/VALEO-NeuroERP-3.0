@@ -110,6 +110,44 @@ def resolve_customer_ref(entry: dict) -> Optional[str]:
     return entry.get("business_partner_id") or entry.get("partner_number") or entry.get("kunden_nr")
 
 
+_ROLLEN_FLAG = {"kunde": "is_customer", "lieferant": "is_supplier"}
+#: Stufe 3b: je Rolle ein Konto am Partner. Ohne eingerichteten Kreis gilt der DATEV-Standard je Mandant
+#: (Debitoren 10000-69999, Kreditoren 70000-99999); ``range_type`` in ``domain_shared.number_ranges``.
+KONTOKREISE = {"is_customer": ("debtor_account", 10000, 69999), "is_supplier": ("creditor_account", 70000, 99999)}
+#: Rollenfelder, die seit Stufe 3 am Geschaeftspartner liegen (Bank, Skonto, Steuernummer).
+PARTNER_ROLLENFELDER = ("iban", "bic", "bank_name", "account_holder", "cash_discount_days", "cash_discount_percent",
+                        "tax_number")
+_LAENDER_ISO2 = {"deutschland": "DE", "germany": "DE", "oesterreich": "AT", "österreich": "AT", "austria": "AT",
+                 "niederlande": "NL", "netherlands": "NL", "schweiz": "CH", "frankreich": "FR", "polen": "PL",
+                 "belgien": "BE", "daenemark": "DK", "dänemark": "DK", "luxemburg": "LU"}
+
+
+def _land_iso2(land: Optional[str]) -> Optional[str]:
+    """business_partners.country ist ISO-2; Kunden und Lieferanten fuehren oft 'Deutschland'."""
+    wert = (land or "").strip()
+    if len(wert) == 2 and wert.isalpha():
+        return wert.upper()
+    return _LAENDER_ISO2.get(wert.lower())
+
+
+# Pflicht-Boolean-Spalten ohne Default je Datenbank. Frisch migriert haben alle einen Default; die gewachsene
+# Entwicklungsdatenbank hat 34 davon verloren, dort scheiterte jede Partneranlage ohne ausdrueckliche Werte.
+_FLAGS_OHNE_DEFAULT: dict[str, tuple[str, ...]] = {}
+
+
+def _feldwert(feld: str, wert: Any) -> Any:
+    """Vergleichsform eines Rollenfelds: Zahlen als Decimal, IBAN/BIC ohne Leerzeichen und gross."""
+    if feld in ("cash_discount_days", "cash_discount_percent"):
+        return Decimal(str(wert))
+    if feld in ("iban", "bic"):
+        return re.sub(r"\s", "", str(wert)).upper()
+    return str(wert).strip()
+
+
+def _ust_id_norm(vat_id: Optional[str]) -> str:
+    return re.sub(r"[\s.-]", "", vat_id or "").upper()
+
+
 class BusinessPartnerService:
     """Facade over BusinessPartnerRepository with additional aggregate operations."""
 
@@ -670,20 +708,200 @@ class BusinessPartnerService:
         Behebt das frühere Fehl-Mapping (kunden_nr/name/telefon/erstellt_am existieren nicht).
         """
         try:
+            partner = self.partner_fuer_rolle("kunde", name=name, email=email, phone=phone)
             self.db.execute(
                 text(
                     "INSERT INTO domain_crm.customers "
-                    "(id, tenant_id, customer_number, company_name, email, phone, is_active, created_at, updated_at) "
-                    "VALUES (:id, :tid, :cnum, :name, :email, :phone, TRUE, NOW(), NOW())"
+                    "(id, tenant_id, customer_number, company_name, email, phone, business_partner_id, is_active, "
+                    "created_at, updated_at) "
+                    "VALUES (:id, :tid, :cnum, :name, :email, :phone, :bp, TRUE, NOW(), NOW())"
                 ),
                 {"id": customer_id, "tid": self.tenant_id, "cnum": customer_number,
-                 "name": name, "email": email, "phone": phone},
+                 "name": name, "email": email, "phone": phone, "bp": partner},
             )
             self.db.commit()
             return True
         except (OperationalError, ProgrammingError, IntegrityError):
             self.db.rollback()
             return False
+
+    def partner_fuer_rolle(
+        self,
+        rolle: str,
+        *,
+        name: str,
+        vat_id: Optional[str] = None,
+        street: Optional[str] = None,
+        postal_code: Optional[str] = None,
+        city: Optional[str] = None,
+        country: Optional[str] = None,
+        email: Optional[str] = None,
+        phone: Optional[str] = None,
+        partner_id: Optional[str] = None,
+        neu_erzwingen: bool = False,
+        rollenfelder: Optional[dict[str, Any]] = None,
+    ) -> str:
+        """Partnerbruecke (ADR Geschaeftspartnerstamm, Stufe 1): Partner-ID fuer eine neue Kunden- oder
+        Lieferantenrolle.
+
+        Mit ``partner_id`` muss der Partner im Mandanten liegen. Sonst wird ein vorhandener Partner nur
+        wiederverwendet, wenn USt-IdNr. **und** Name im Mandanten eindeutig passen; ein Name allein ordnet
+        nie zu. Ohne Treffer (oder mit ``neu_erzwingen``, Entscheidung eines Klaerfalls) entsteht ein neuer
+        Partner. Die Rolle wird am Partner gesetzt. ``rollenfelder`` (Stufe 3, ``PARTNER_ROLLENFELDER``) fuellen
+        leere Felder des Partners; ein abweichender Wert in einem schon gefuellten Feld wird abgelehnt statt
+        ueberschrieben. Kein commit: der Partner gehoert zur Transaktion der Anlage, die ihn ausloest.
+        """
+        flag = _ROLLEN_FLAG[rolle]  # Schluessel aus der festen Rollenliste
+        if partner_id:
+            self.ensure_partner_belongs_to_tenant(partner_id)
+        elif not neu_erzwingen:
+            ust = _ust_id_norm(vat_id)
+            if ust:
+                treffer = self.db.execute(
+                    text("SELECT partner_id FROM domain_crm.business_partners WHERE tenant_id = :tid "
+                         "AND upper(regexp_replace(coalesce(vat_id, ''), '[[:space:].-]', '', 'g')) = :ust "
+                         "AND lower(trim(name_1)) = lower(trim(:name)) LIMIT 2"),
+                    {"tid": self.tenant_id, "ust": ust, "name": name},
+                ).fetchall()
+                if len(treffer) == 1:
+                    partner_id = str(treffer[0][0])
+        if partner_id:
+            self.db.execute(
+                text(f"UPDATE domain_crm.business_partners SET {flag} = TRUE, updated_at = NOW() "  # nosec B608
+                     "WHERE partner_id = :pid AND tenant_id = :tid"),  # reviewed-safe: Spalte aus _ROLLEN_FLAG
+                {"pid": partner_id, "tid": self.tenant_id},
+            )
+            self._rollenfelder_setzen(partner_id, rollenfelder)
+            self._konto_vergeben(partner_id, flag)
+            return partner_id
+        neu = str(uuid7())
+        flags = [f for f in self._flags_ohne_default() if f != flag]
+        spalten = "".join(f", {f}" for f in flags)  # Spaltennamen aus information_schema
+        werte = ", FALSE" * len(flags)
+        self.db.execute(
+            text(f"INSERT INTO domain_crm.business_partners (partner_id, tenant_id, partner_number, name_1, "  # nosec B608
+                 f"street, postal_code, city, country, vat_id, email, phone, status, {flag}, created_at, updated_at"
+                 f"{spalten}) VALUES (:pid, :tid, :nr, :name, :street, :plz, :ort, :land, :ust, :email, :tel, "
+                 f"'active', TRUE, NOW(), NOW(){werte})"),  # reviewed-safe: Spalten aus _ROLLEN_FLAG/Katalog
+            {"pid": neu, "tid": self.tenant_id, "nr": "GP-" + neu.replace("-", "").upper()[:20],
+             "name": (name or "").strip()[:255] or "Geschaeftspartner", "street": (street or None) and street[:120],
+             "plz": (postal_code or None) and postal_code[:20], "ort": (city or None) and city[:120],
+             "land": _land_iso2(country), "ust": (vat_id or None) and vat_id.strip()[:50],
+             "email": email or None, "tel": phone or None},
+        )
+        self._rollenfelder_setzen(neu, rollenfelder)
+        self._konto_vergeben(neu, flag)
+        return neu
+
+    def naechste_kontonummer(self, flag: str) -> str:
+        """Naechste freie Debitoren- oder Kreditorennummer des Mandanten (Stufe 3b); kein commit.
+
+        Der Kreis wird beim ersten Bedarf mit dem DATEV-Standard angelegt. Eine schon (etwa von Hand)
+        vergebene Nummer wird uebersprungen; ist der Standardkreis voll, wird abgelehnt statt in den
+        anderen Kreis zu laufen.
+        """
+        spalte, start, ende = KONTOKREISE[flag]  # Schluessel aus der festen Rollenliste
+        self.db.execute(
+            text("INSERT INTO domain_shared.number_ranges (id, tenant_id, range_type, prefix, start_number, "
+                 "current_value, digit_count, reserved_prefix_digits, is_active) "
+                 "VALUES (:id, :tid, :typ, '', :start, :start, 5, 1, TRUE) "
+                 "ON CONFLICT (tenant_id, range_type) DO NOTHING"),
+            {"id": str(uuid7()), "tid": self.tenant_id, "typ": spalte, "start": start},
+        )
+        kreis = self.db.execute(
+            text("SELECT prefix, start_number, current_value, digit_count, is_active FROM domain_shared.number_ranges "
+                 "WHERE tenant_id = :tid AND range_type = :typ FOR UPDATE"),
+            {"tid": self.tenant_id, "typ": spalte},
+        ).one()
+        if not kreis.is_active:
+            raise ConflictError(f"Der Nummernkreis {spalte} ist gesperrt.")
+        # Die Obergrenze gilt nur fuer den Standardkreis; ein eingerichteter Kreis traegt seine eigene Logik.
+        bis = ende if kreis.start_number == start and not kreis.prefix else kreis.current_value + 100000
+        frei = self.db.execute(
+            text(f"SELECT n FROM generate_series(CAST(:von AS bigint), CAST(:bis AS bigint)) AS n "  # nosec B608
+                 "WHERE NOT EXISTS (SELECT 1 FROM domain_crm.business_partners WHERE tenant_id = :tid "
+                 f"AND {spalte} = :prefix || lpad(n::text, :stellen, '0')) "  # reviewed-safe: Spalte aus KONTOKREISE
+                 "ORDER BY n LIMIT 1"),
+            {"von": kreis.current_value, "bis": bis, "tid": self.tenant_id, "prefix": kreis.prefix,
+             "stellen": kreis.digit_count},
+        ).scalar()
+        if frei is None:
+            raise ConflictError(f"Der Nummernkreis {spalte} ist ausgeschoepft ({start}-{ende}).")
+        self.db.execute(
+            text("UPDATE domain_shared.number_ranges SET current_value = :n, updated_at = NOW() "
+                 "WHERE tenant_id = :tid AND range_type = :typ"),
+            {"n": frei + 1, "tid": self.tenant_id, "typ": spalte},
+        )
+        return f"{kreis.prefix}{frei:0{kreis.digit_count}d}"
+
+    def _konto_vergeben(self, partner_id: str, flag: str) -> None:
+        """Konto der Rolle vergeben, wenn der Partner noch keins hat; ein vorhandenes bleibt unveraendert."""
+        spalte = KONTOKREISE[flag][0]
+        vorhanden = self.db.execute(
+            text(f"SELECT {spalte} FROM domain_crm.business_partners "  # nosec B608
+                 "WHERE partner_id = :pid AND tenant_id = :tid FOR UPDATE"),  # reviewed-safe: Spalte aus KONTOKREISE
+            {"pid": partner_id, "tid": self.tenant_id},
+        ).scalar()
+        if vorhanden:
+            return
+        self.db.execute(
+            text(f"UPDATE domain_crm.business_partners SET {spalte} = :nr, updated_at = NOW() "  # nosec B608
+                 "WHERE partner_id = :pid AND tenant_id = :tid"),  # reviewed-safe: Spalte aus KONTOKREISE
+            {"nr": self.naechste_kontonummer(flag), "pid": partner_id, "tid": self.tenant_id},
+        )
+
+    def _rollenfelder_setzen(self, partner_id: str, rollenfelder: Optional[dict[str, Any]]) -> None:
+        werte = {k: (_feldwert(k, v) if k in ("iban", "bic") else v) for k, v in (rollenfelder or {}).items()
+                 if k in PARTNER_ROLLENFELDER and v not in (None, "")}
+        if not werte:
+            return
+        spalten = ", ".join(werte)  # Spaltennamen aus PARTNER_ROLLENFELDER
+        bisher = self.db.execute(
+            text(f"SELECT {spalten} FROM domain_crm.business_partners "  # nosec B608
+                 "WHERE partner_id = :pid AND tenant_id = :tid"),  # reviewed-safe: Spalten aus fester Liste
+            {"pid": partner_id, "tid": self.tenant_id},
+        ).mappings().first() or {}
+        abweichend = [k for k, v in werte.items()
+                      if bisher.get(k) not in (None, "") and _feldwert(k, bisher[k]) != _feldwert(k, v)]
+        if abweichend:
+            raise ConflictError("Der Geschaeftspartner fuehrt fuer diese Felder schon andere Werte: "
+                                + ", ".join(abweichend) + ". Aenderung am Partner vornehmen.")
+        # Erreicht wird diese Stelle nur, wenn jedes Feld leer ist oder schon denselben Wert traegt.
+        zuweisung = ", ".join(f"{k} = :{k}" for k in werte)
+        self.db.execute(
+            text(f"UPDATE domain_crm.business_partners SET {zuweisung}, updated_at = NOW() "  # nosec B608
+                 "WHERE partner_id = :pid AND tenant_id = :tid"),  # reviewed-safe: Spalten aus fester Liste
+            {**werte, "pid": partner_id, "tid": self.tenant_id},
+        )
+
+    def _flags_ohne_default(self) -> tuple[str, ...]:
+        bind = self.db.get_bind()
+        key = str(getattr(bind, "engine", bind).url)
+        if key not in _FLAGS_OHNE_DEFAULT:
+            _FLAGS_OHNE_DEFAULT[key] = tuple(self.db.execute(text(
+                "SELECT column_name FROM information_schema.columns WHERE table_schema = 'domain_crm' "
+                "AND table_name = 'business_partners' AND data_type = 'boolean' AND is_nullable = 'NO' "
+                "AND column_default IS NULL ORDER BY column_name")).scalars().all())
+        return _FLAGS_OHNE_DEFAULT[key]
+
+    def importkunden_anlegen(
+        self, customer_id: str, customer_number: str, firma: str, *, email: str, telefon: str, plz: str, ort: str,
+        land: Optional[str], ust_id: str, is_active: bool,
+    ) -> None:
+        """Kunde aus dem CSV-Import samt Geschaeftspartner anlegen; kein commit (der Import fuehrt die Transaktion)."""
+        partner = self.partner_fuer_rolle(
+            "kunde", name=firma, vat_id=ust_id or None, postal_code=plz or None, city=ort or None,
+            country=land, email=email or None, phone=telefon or None,
+        )
+        self.db.execute(
+            text("INSERT INTO domain_crm.customers (id, tenant_id, customer_number, company_name, email, phone, "
+                 "postal_code, city, country, tax_id, business_partner_id, is_active, created_at, updated_at) "
+                 "VALUES (:id, :tid, :cn, :cname, :email, :phone, :plz, :ort, :land, :tx, :bp, :is_active, "
+                 "NOW(), NOW())"),
+            {"id": customer_id, "tid": self.tenant_id, "cn": customer_number, "cname": firma[:255],
+             "email": email or None, "phone": telefon or None, "plz": plz or None, "ort": ort or None,
+             "land": land, "tx": ust_id or None, "bp": partner, "is_active": is_active},
+        )
 
     def ensure_partner_belongs_to_tenant(self, partner_id: str) -> None:
         """Validiert, dass der BusinessPartner im Mandanten existiert (sonst ValidationFailedError).
@@ -1329,20 +1547,18 @@ class BusinessPartnerService:
 
     # ── envelope create / update (with number-range assignment) ─────────────
 
-    def assign_account_numbers(self, row: BusinessPartner) -> None:
-        """Assign debtor/creditor account from number range if not set."""
-        from app.services.number_range_service import NumberRangeService
-        nrs = NumberRangeService(self.db)
-        if row.is_customer and not row.debtor_account:
-            try:
-                row.debtor_account = nrs.next_number("debtor_account", self.tenant_id)
-            except ValueError:
-                pass
-        if row.is_supplier and not row.creditor_account:
-            try:
-                row.creditor_account = nrs.next_number("creditor_account", self.tenant_id)
-            except ValueError:
-                pass
+    def assign_account_numbers(self, row: BusinessPartner, bisher: Optional[dict[str, Any]] = None) -> None:
+        """Konten je Rolle (Stufe 3b): fehlende aus dem Kreis vergeben, vergebene nie aendern.
+
+        ``bisher`` sind die Kontonummern vor einer Aenderung; eine abweichende oder geleerte Nummer wird
+        abgelehnt, weil Buchungen und offene Posten sie fuehren.
+        """
+        for flag, (spalte, _start, _ende) in KONTOKREISE.items():
+            alt = (bisher or {}).get(spalte)
+            if alt and getattr(row, spalte) != alt:
+                raise ConflictError(f"Die Kontonummer {alt} ({spalte}) ist vergeben und bleibt unveraendert.")
+            if getattr(row, flag) and not getattr(row, spalte):
+                setattr(row, spalte, self.naechste_kontonummer(flag))
 
     def persist_new_partner(self, row: BusinessPartner) -> BusinessPartner:
         """Add, commit, and refresh a newly constructed BusinessPartner row."""
@@ -1357,7 +1573,11 @@ class BusinessPartnerService:
 
     def persist_updated_partner(self, row: BusinessPartner) -> BusinessPartner:
         """Commit and refresh an existing BusinessPartner row after field mutations."""
-        self.db.commit()
+        try:
+            self.db.commit()
+        except IntegrityError as exc:
+            self.db.rollback()
+            raise ConflictError("Business partner number or account already exists") from exc
         self.db.refresh(row)
         return row
 

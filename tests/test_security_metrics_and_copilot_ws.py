@@ -13,20 +13,19 @@ from main import app
 client = TestClient(app)
 
 
+from test_system_tenant_binding import keys, probe
+
+
 @pytest.fixture()
-def dev_token(monkeypatch: pytest.MonkeyPatch) -> str:
-    token = "sec-test-token"
-    monkeypatch.setattr(settings, "API_DEV_TOKEN", token)
-    monkeypatch.setattr(security.settings, "API_DEV_TOKEN", token)
-    monkeypatch.setattr(copilot_ws.settings, "API_DEV_TOKEN", token)
-    return token
+def provider_token(probe) -> str:
+    return probe.token('tenant-secure', changes={'roles': ['admin']})
 
 
-def test_system_metrics_return_authenticated_tenant_context(dev_token: str) -> None:
+def test_system_metrics_return_authenticated_tenant_context(provider_token: str) -> None:
     response = client.get(
         "/api/v1/metrics/system",
         headers={
-            "Authorization": f"Bearer {dev_token}",
+            "Authorization": f"Bearer {provider_token}",
             "X-Tenant-ID": "tenant-secure",
         },
     )
@@ -34,7 +33,7 @@ def test_system_metrics_return_authenticated_tenant_context(dev_token: str) -> N
     assert response.status_code == 200
     body = response.json()
     assert body["tenant_id"] == "tenant-secure"
-    assert body["user_id"] == "dev"
+    assert body["user_id"] == "human-a"
 
 
 def test_copilot_websocket_rejects_missing_token() -> None:
@@ -47,7 +46,7 @@ def test_copilot_websocket_rejects_missing_token() -> None:
 
 def test_copilot_websocket_binds_session_to_authenticated_tenant(
     monkeypatch: pytest.MonkeyPatch,
-    dev_token: str,
+    provider_token: str,
 ) -> None:
     captured_contexts: list[dict] = []
 
@@ -70,7 +69,7 @@ def test_copilot_websocket_binds_session_to_authenticated_tenant(
     monkeypatch.setattr(copilot_ws, "_run_pipeline_sync", _fake_run_pipeline_sync)
 
     with client.websocket_connect(
-        f"/api/v1/copilot/chat?token={dev_token}&tenant_id=tenant-secure"
+        f"/api/v1/copilot/chat?token={provider_token}&tenant_id=tenant-secure"
     ) as websocket:
         session_start = websocket.receive_json()
         assert session_start["type"] == "session_start"
@@ -94,6 +93,6 @@ def test_copilot_websocket_binds_session_to_authenticated_tenant(
 
     assert captured_contexts
     assert captured_contexts[0]["tenant_id"] == "tenant-secure"
-    assert captured_contexts[0]["user_id"] == "dev"
+    assert captured_contexts[0]["user_id"] == "human-a"
     assert captured_contexts[0]["roles"] == ["admin"]
     assert captured_contexts[0]["scope"] == "copilot"

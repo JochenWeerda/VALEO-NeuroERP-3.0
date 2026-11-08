@@ -59,6 +59,21 @@ def get_from_store(doc_type: str, doc_number: str, repo: Optional[DocumentReposi
     return _DB.get(doc_number)
 
 
+def eigener_beleg(
+    doc_type: str, doc_number: str, tenant_id: str, repo: Optional[DocumentRepository] = None
+) -> Optional[dict]:
+    """Der Beleg dieses Mandanten oder ``None`` — ein fremder oder mandantenloser gilt als nicht vorhanden.
+
+    Die Belegnummer ist im Speicher systemweit eindeutig: Wer nur per Nummer liest, trifft auch den Beleg eines
+    anderen Mandanten. Bis 14.10.2026 gaben so E-Rechnung, Gutschrift, Memo-Verrechnung und Statusnachtraege
+    fremde Belege aus oder veraenderten sie.
+    """
+    beleg = get_from_store(doc_type, doc_number, repo)
+    if not beleg or not tenant_id or str(beleg.get("tenantId") or beleg.get("tenant_id") or "") != str(tenant_id):
+        return None
+    return beleg
+
+
 def list_from_store(
     doc_type: str, 
     skip: int = 0, 
@@ -112,14 +127,8 @@ def list_from_store(
         if any(key.startswith(prefix) for prefix in prefixes):
             if not filters:
                 filtered_docs.append(value)
-            else:
-                def _match(item_key: str, item_value: object) -> bool:
-                    if item_key == "tenantId":
-                        # Backward compatibility for legacy docs without tenant
-                        return value.get(item_key) in {item_value, None, ""}
-                    return value.get(item_key) == item_value
-
-                if all(_match(k, v) for k, v in filters.items()):
+            # Wie im Datenbankspeicher streng: ein Beleg ohne Mandant gehoert niemandem.
+            elif all(value.get(k) == v for k, v in filters.items()):
                     filtered_docs.append(value)
     
     total = len(filtered_docs)
@@ -135,14 +144,15 @@ def list_from_store(
 
 
 def delete_from_store(doc_type: str, doc_number: str, repo: Optional[DocumentRepository] = None) -> bool:
-    """Löscht Dokument aus DB oder In-Memory Store"""
+    """Löscht Dokument aus DB oder In-Memory Store.
+
+    Wie beim Speichern und Lesen kein stiller Rueckfall bei konfigurierter Datenbank: ein gescheitertes Loeschen
+    meldete bis 14.10.2026 "nicht gefunden" bzw. loeschte nur eine fluechtige Kopie.
+    """
     if repo:
-        try:
-            return repo.delete_document(doc_type, doc_number)
-        except Exception as e:
-            logger.warning(f"DB delete failed, using in-memory: {e}")
-    
-    # Fallback zu In-Memory
+        return repo.delete_document(doc_type, doc_number)
+
+    # Ohne Datenbank: Prozessspeicher
     if doc_number in _DB:
         del _DB[doc_number]
         return True

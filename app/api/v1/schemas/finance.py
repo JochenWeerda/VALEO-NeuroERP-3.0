@@ -54,6 +54,7 @@ class AccountUpdate(BaseModel):
     category: Optional[str] = None
     currency: Optional[str] = Field(None, min_length=3, max_length=3)
     allow_manual_entries: Optional[bool] = None
+    posting_blocked: Optional[bool] = Field(None, description="Konto fuer neue Buchungen sperren")
 
 
 class Account(AccountBase):
@@ -64,6 +65,7 @@ class Account(AccountBase):
     tenant_id: str
     balance: Decimal = Field(default=Decimal('0.00'), description="Current balance")
     is_active: bool = Field(default=True, description="Account status")
+    posting_blocked: bool = Field(default=False, description="Fuer neue Buchungen gesperrt")
     parent_account_id: Optional[str] = Field(None, description="Parent account ID for hierarchy")
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
@@ -339,7 +341,7 @@ class DebtorBase(BaseModel):
 
 class DebtorCreate(DebtorBase):
     """Schema for creating debtors"""
-    tenant_id: str = Field(..., description="Tenant ID")
+    tenant_id: Optional[str] = Field(None, description="Deprecated: must match the verified tenant")
 
 
 class DebtorUpdate(BaseModel):

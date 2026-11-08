@@ -9,6 +9,17 @@ import { FastFormRenderer } from './FastFormRenderer'
 import { FastTabRenderer } from './FastTabRenderer'
 import { FastTableRenderer } from './FastTableRenderer'
 import { layoutClasses, repeatsCaption } from './render-utils'
+
+const ROW_CAPTION_KEYS = ['bezeichnung', 'name', 'nr', 'nummer', 'kennzeichen', 'probe_nr', 'order_number', 'tour_no', 'invoice_number', 'strecke_nr', 'avis_nr', 'subject']
+
+function rowCaption(row: Record<string, unknown> | undefined, fallback: string): string {
+  if (!row) return fallback
+  for (const key of ROW_CAPTION_KEYS) {
+    const value = row[key]
+    if (value != null && String(value).trim()) return String(value)
+  }
+  return fallback
+}
 import { rowIdentity } from './row-identity'
 import { SelectedRecordPanel } from './SelectedRecordPanel'
 
@@ -107,9 +118,8 @@ export function DerivedColumnLayout({
   const hideTableKeys = new Set([listKey, ...(childKey ? [childKey] : [])])
   const listFields = listFloor ? plan.rootFieldKeys : []
   const objectFields = listFloor ? [] : plan.rootFieldKeys
-  const objectTitle = selectedRow
-    ? String(selectedRow.bezeichnung ?? selectedRow.name ?? selectedRow.nr ?? selectedRow.probe_nr ?? plan.shell.title)
-    : plan.shell.title
+  const listTitle = repeatsCaption(listTable.label, plan.shell.title) ? 'Liste' : listTable.label
+  const objectTitle = rowCaption(selectedRow, plan.shell.title)
 
   function renderTable(
     tableKey: string,
@@ -121,7 +131,6 @@ export function DerivedColumnLayout({
       <FastTableRenderer
         key={tableKey}
         table={tablePlan}
-        suppressHeading={repeatsCaption(tablePlan.label, plan.shell.title)}
         rows={tables[tableKey] ?? []}
         page={tableQueryStates?.[tableKey]?.page}
         sort={tableQueryStates?.[tableKey]?.sort}
@@ -135,6 +144,7 @@ export function DerivedColumnLayout({
         onRowAction={onAction}
         errorMessage={tableLoadError(tableKey)}
         onRetry={onRetry}
+        suppressHeading={repeatsCaption(tablePlan.label, plan.shell.title)}
         selectedRowKey={options?.selectedRowKey}
         onRowSelect={options?.onRowSelect}
       />
@@ -144,7 +154,7 @@ export function DerivedColumnLayout({
   const columns: NavigationColumn[] = [
     {
       key: 'list',
-      title: listTable.label,
+      title: listTitle,
       content: (
         <div className="space-y-3">
           {listFields.length > 0 ? (

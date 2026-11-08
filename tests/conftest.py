@@ -1,8 +1,8 @@
 """
 Zentrale Test-Fixtures für VALEO NeuroERP 3.0.
 
-- Setzt API_DEV_TOKEN automatisch für alle Tests (kein Keycloak nötig).
-- Bypassed require_bearer_token via dependency_overrides (kein Authorization-Header nötig).
+- Setzt die alte Token-Konfiguration nur fuer isolierte Kompatibilitaetstests.
+- Ersetzt Anmeldung ausschliesslich in app.main; Produktionsauth bleibt unveraendert.
 - Stellt skip_if_db_unavailable() als Hilfsfunktion bereit.
 - Marker needs_live_db: wird Tests zugewiesen, die die Fixture require_db nutzen
   (für CI: pytest -m needs_live_db mit PYTEST_REQUIRE_DB_STRICT=1).
@@ -56,20 +56,41 @@ def mocker(monkeypatch):
 
 @pytest.fixture(autouse=True)
 def _enable_dev_token(monkeypatch):
-    """Aktiviert den Dev-Token-Bypass und bypassed require_bearer_token in allen Tests.
+    """Explizite Identitaetsattrappe der separaten Kompatibilitaets-App.
 
-    Zwei-Schicht-Ansatz:
-    1. API_DEV_TOKEN setzen — für Tests die selbst 'Authorization: Bearer dev-token' senden
-    2. dependency_overrides — für Tests die keine Auth-Header senden (Großteil der Suite)
+    Diese Fixture beweist keine Signatur- oder Mandantensicherheit. Die echte
+    Produktions-App main:app behaelt ihre Provider- und Mandantenpruefung.
     """
     monkeypatch.setattr(settings, "API_DEV_TOKEN", "dev-token")
     monkeypatch.setattr(security.settings, "API_DEV_TOKEN", "dev-token")
 
-    # Bypass require_bearer_token für alle TestClient-Anfragen ohne Authorization-Header
+    # Authentifizierung nur fuer die Kompatibilitaets-App ersetzen.
     from app.main import app as _app
-    _app.dependency_overrides[security.require_bearer_token] = lambda: "dev-token"
+    from fastapi import Request
+    def declared_test_identity(request: Request):
+        # Only the documented compatibility app uses this explicit auth double.
+        # Production main:app and its RSA/JWKS contract are not overridden.
+        tenant = request.headers.get("X-Tenant-ID") or settings.DEFAULT_TENANT_ID
+        request.state.tenant_id = tenant
+        request.state.tenant_verified = True
+        request.state.token_claims = {"sub": "dev", "tenant_id": tenant, "roles": ["admin"], "scope": "admin:all"}
+        request.state.authenticated_token = "dev-token"
+        return "dev-token"
+    _app.dependency_overrides[security.require_bearer_token] = declared_test_identity
+    from app.auth.deps import get_current_user
+    previous_user = _app.dependency_overrides.get(get_current_user)
+
+    def declared_test_user(request: Request):
+        declared_test_identity(request)
+        return {"sub": "dev", "roles": ["admin"], "raw": request.state.token_claims}
+
+    _app.dependency_overrides[get_current_user] = declared_test_user
     yield
     _app.dependency_overrides.pop(security.require_bearer_token, None)
+    if previous_user is None:
+        _app.dependency_overrides.pop(get_current_user, None)
+    else:
+        _app.dependency_overrides[get_current_user] = previous_user
 
 
 def skip_if_db_unavailable(response):
@@ -96,10 +117,39 @@ def _is_db_reachable() -> bool:
         return False
 
 
+def _test_database_authorized(effective_url: str) -> bool:
+    """No implicit development DB; CI reuses only its declared job database."""
+    from sqlalchemy.engine import make_url
+    from sqlalchemy.exc import ArgumentError
+    from dotenv import dotenv_values
+
+    ci = os.environ.get("CI", "").lower() == "true"
+    declared = os.environ.get("TEST_DATABASE_URL")
+    if ci:
+        declared = declared or os.environ.get("DATABASE_URL")
+    if not declared:
+        return False
+    try:
+        effective, test = make_url(effective_url), make_url(declared)
+        if effective != test:
+            return False
+        if ci:
+            return True
+        development = os.environ.get("DEVELOPMENT_DATABASE_URL") or dotenv_values(".env").get("DATABASE_URL")
+        return not development or test.database != make_url(development).database
+    except (ArgumentError, ValueError, TypeError):
+        return False
+
+
+def _database_fixtures_authorized() -> bool:
+    from app.core.database import engine
+    return _test_database_authorized(engine.url.render_as_string(hide_password=False))
+
+
 @pytest.fixture(scope="session", autouse=True)
 def _seed_contract_test_tenants():
     """Ensure tenant fixtures referenced by DB integration tests exist."""
-    if not _is_db_reachable():
+    if not _database_fixtures_authorized() or not _is_db_reachable():
         yield
         return
 
@@ -135,6 +185,11 @@ def _seed_contract_test_tenants():
 @pytest.fixture
 def require_db():
     """Fixture: skipt den Test wenn die Datenbank nicht erreichbar ist."""
+    if not _database_fixtures_authorized():
+        message = "Explicit TEST_DATABASE_URL must match DATABASE_URL and must not select the development database."
+        if os.environ.get("PYTEST_REQUIRE_DB_STRICT") == "1":
+            pytest.fail(message)
+        pytest.skip(message)
     if not _is_db_reachable():
         if os.environ.get("PYTEST_REQUIRE_DB_STRICT") == "1":
             pytest.fail(

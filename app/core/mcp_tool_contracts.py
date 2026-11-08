@@ -13,6 +13,7 @@ Naming Convention: valeo_{domain}_{operation}
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from copy import deepcopy
 from enum import Enum
 from typing import Any, Optional
 
@@ -112,6 +113,7 @@ class MCPToolContract:
     api_endpoint: Optional[str] = None     # REST-Endpunkt der das Tool implementiert
     request_payload_mode: MCPRequestPayloadMode = MCPRequestPayloadMode.DEFAULT
     schema_version: int = MCP_CONTRACT_SCHEMA_VERSION
+    input_schema: Optional[dict[str, Any]] = None
 
     def validate_name(self) -> bool:
         """Prueft ob tool_name der valeo_{domain}_{operation}-Konvention entspricht."""
@@ -138,7 +140,8 @@ class MCPToolContract:
         return {
             "name": self.tool_name,
             "description": self.beschreibung,
-            "inputSchema": {
+            "_meta": {"valeo/schemaVersion": self.schema_version},
+            "inputSchema": deepcopy(self.input_schema) if self.input_schema is not None else {
                 "type": "object",
                 "properties": props,
                 "required": required,
@@ -240,6 +243,10 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
     Mindestens 20 Tools in 6 Domains:
       agrar (6), finance (5), workflow (4), compliance (3), process (3), inventory (2)
     """
+    from app.api.v1.schemas.workflow_migration_input import WorkflowMigrationCheckIn
+    from app.api.v1.schemas.data_quality_input import DataQualityCheckIn
+    from app.api.v1.schemas.slo_input import SloCheckIn
+    from app.api.v1.schemas.advisory_input import PolicyEvaluationIn, ApprovalEvaluationIn
     tools: list[MCPToolContract] = [
 
         # ---------------------------------------------------------------
@@ -247,6 +254,7 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
         # ---------------------------------------------------------------
         MCPToolContract(
             tool_name="valeo_agrar_settlement_list",
+            schema_version=2,
             domain="agrar",
             operation="settlement_list",
             beschreibung="Listet Agrar-Settlement-Instanzen mit optionalem Status-Filter",
@@ -255,10 +263,10 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
             output_beschreibung="Liste von Settlement-Summaries (id, status, betrag, menge)",
             parameter=[
                 _p_enum("status", "Filter nach Prozessstatus",
-                        ["OFFEN", "IN_PRUEFUNG", "FREIGEGEBEN", "VERBUCHT", "STORNIERT"],
+                        ["draft", "posted", "cancelled"],
                         pflicht=False),
-                _p_str("kampagne", "Erntekampagne-Filter z.B. '2024'", pflicht=False),
-                _p_int("limit", "Max. Ergebnisse (default 50, max 500)", False, 50),
+                _p_str("campaign_id", "Erntekampagnen-ID", pflicht=False),
+                _p_str("supplier_id", "Lieferanten-ID", pflicht=False),
             ],
         ),
 
@@ -307,25 +315,24 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
 
         MCPToolContract(
             tool_name="valeo_agrar_kampagne_list",
+            schema_version=2,
             domain="agrar",
             operation="kampagne_list",
             beschreibung="Listet verfuegbare Kampagnen-Vorlagen und aktive Kampagnen",
             kategorie=MCPToolKategorie.LESEN,
             api_endpoint="GET /api/v1/process/kampagnen/vorlagen",
             output_beschreibung="Liste von KampagnenVorlagen (typ, cn8_code, meilensteine)",
-            parameter=[
-                _p_enum("typ", "Kampagnen-Typ Filter",
-                        ["WINTERWEIZEN", "SOMMERGERSTE", "RAPS", "KOERNERMAIS", "ZUCKERRUEBEN"],
-                        pflicht=False),
-            ],
+            parameter=[],
         ),
 
         MCPToolContract(
             tool_name="valeo_agrar_quality_protocol_approve",
+            schema_version=2,
             domain="agrar",
             operation="quality_protocol_approve",
             beschreibung="Finalisiert ein Qualitaetsprotokoll fuer den weiteren Prozesslauf",
-            kategorie=MCPToolKategorie.VALIDIEREN,
+            kategorie=MCPToolKategorie.SCHREIBEN,
+            requires_approval=True,
             api_endpoint="POST /api/v1/agrar/quality-protocols/{protocol_id}/approve",
             output_beschreibung="Finalisiertes Qualitaetsprotokoll mit Freigabedaten",
             parameter=[
@@ -339,6 +346,7 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
         # ---------------------------------------------------------------
         MCPToolContract(
             tool_name="valeo_finance_ap_invoice_list",
+            schema_version=2,
             domain="finance",
             operation="ap_invoice_list",
             beschreibung="Listet Kreditorenrechnungen mit Status-Filter fuer Genehmigungsworkflow",
@@ -349,8 +357,10 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
                 _p_enum("status", "Genehmigungsstatus-Filter",
                         ["EINGEGANGEN", "IN_PRUEFUNG", "FREIGEGEBEN", "ABGELEHNT", "BEZAHLT"],
                         pflicht=False),
-                _p_str("lieferant_id", "Filter nach Lieferant-ID", False),
-                _p_bool("faellig_heute", "Nur heute faellige Rechnungen"),
+                _p_str("supplier_id", "Filter nach Lieferanten-ID", False),
+                _p_str("query", "Suchbegriff", False),
+                _p_int("skip", "Listenoffset", False),
+                _p_int("limit", "Seitengroesse", False),
             ],
         ),
 
@@ -373,6 +383,7 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
 
         MCPToolContract(
             tool_name="valeo_finance_open_items_get",
+            schema_version=2,
             domain="finance",
             operation="open_items_get",
             beschreibung="Ruft offene Posten (Debitoren oder Kreditoren) ab",
@@ -380,18 +391,22 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
             api_endpoint="GET /api/v1/finance/open-items",
             output_beschreibung="Liste offener Posten mit Betrag, Faelligkeit, Mahnstufe",
             parameter=[
-                _p_enum("typ", "Debitor oder Kreditor", ["debitor", "kreditor"], True),
-                _p_str("partner_id", "Geschaeftspartner-ID", False),
-                _p_bool("nur_ueberfaellig", "Nur ueberfaellige Posten"),
+                _p_str("konto_typ", "Kontotypfilter", False),
+                _p_str("konto_nr", "Kontonummerfilter", False),
+                _p_str("op_status", "Statusfilter", False),
+                _p_str("search", "Suchbegriff", False),
+                MCPToolParameter("limit", MCPParameterTyp.INTEGER, "Maximale Treffer", False, minimum=1, maximum=5000),
             ],
         ),
 
         MCPToolContract(
             tool_name="valeo_finance_dunning_run",
+            schema_version=2,
             domain="finance",
             operation="dunning_run",
             beschreibung="Startet einen Mahnlauf fuer ueberfaellige Posten",
-            kategorie=MCPToolKategorie.BERECHNEN,
+            kategorie=MCPToolKategorie.SCHREIBEN,
+            requires_approval=True,
             api_endpoint="POST /api/v1/finance/dunning/run",
             output_beschreibung="Run-ID und Anzahl erzeugter Mahnungen fuer den Stichtag",
             parameter=[
@@ -402,6 +417,8 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
 
         MCPToolContract(
             tool_name="valeo_finance_sla_check",
+            schema_version=2,
+            input_schema=SloCheckIn.model_json_schema(),
             domain="finance",
             operation="sla_check",
             beschreibung="Prueft SLO-Compliance fuer einen Finance-Dienst",
@@ -419,14 +436,16 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
         # ---------------------------------------------------------------
         MCPToolContract(
             tool_name="valeo_workflow_instance_status",
+            schema_version=2,
             domain="workflow",
             operation="instance_status",
-            beschreibung="Ruft aktuellen Status einer Workflow-Instanz ab",
+            beschreibung="Listet Workflow-Definitionen und deren Versionen; kein Instanzstatus",
             kategorie=MCPToolKategorie.LESEN,
             api_endpoint="GET /api/v1/process/workflows",
-            output_beschreibung="Instanz-Status, aktueller Schritt, SLA-Stufe, History",
+            output_beschreibung="Workflow-Definitionsversionen und Anzahl",
             parameter=[
-                _p_str("instance_id", "Workflow-Instanz-ID", True, "inst-20240901-0042"),
+                _p_str("process_definition_key", "Prozessdefinitionsfilter", False),
+                _p_bool("active_only", "Nur aktive Definitionsversionen"),
             ],
         ),
 
@@ -448,6 +467,8 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
 
         MCPToolContract(
             tool_name="valeo_workflow_approval_evaluate",
+            schema_version=2,
+            input_schema=ApprovalEvaluationIn.model_json_schema(),
             domain="workflow",
             operation="approval_evaluate",
             beschreibung="Bewertet ob eine Agent-Aktion menschliche Freigabe erfordert",
@@ -456,14 +477,15 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
             request_payload_mode=MCPRequestPayloadMode.APPROVAL_CONTEXT,
             output_beschreibung="Risikostufe, requires_human_approval, Freigabe-Rolle",
             parameter=[
-                _p_str("aktions_typ", "Typ der geplanten Aktion", True, "SETTLEMENT_FREIGABE"),
-                _p_num("betrag_eur", "Transaktionsbetrag fuer Schwellenwert-Bewertung",
-                        False, minimum=0),
+                _p_str("aktions_typ", "Auszuwertende Aktion", True),
+                MCPToolParameter("kontext", MCPParameterTyp.OBJECT, "Auswertungskontext", True),
             ],
         ),
 
         MCPToolContract(
             tool_name="valeo_workflow_migration_check",
+            schema_version=2,
+            input_schema=WorkflowMigrationCheckIn.model_json_schema(),
             domain="workflow",
             operation="migration_check",
             beschreibung="Prueft Breaking Changes eines Workflow-Migrationspfads",
@@ -474,6 +496,10 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
                 _p_str("prozess_key", "Workflow-Prozess-Key", True, "agrar_settlement"),
                 _p_str("von_version", "Quell-Version", True, "1.0.0"),
                 _p_str("zu_version", "Ziel-Version", True, "1.1.0"),
+                MCPToolParameter("alt_schritte", MCPParameterTyp.ARRAY, "Gepruefter Ausgangsstand", True),
+                MCPToolParameter("neu_schritte", MCPParameterTyp.ARRAY, "Zu pruefender Zielstand", True),
+                _p_int("alt_schema_version", "Ausgangsschema", False),
+                _p_int("neu_schema_version", "Zielschema", False),
             ],
         ),
 
@@ -486,7 +512,7 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
             operation="intrastat_validate",
             beschreibung="Validiert eine Intrastat-Meldung vor der Einreichung",
             kategorie=MCPToolKategorie.VALIDIEREN,
-            api_endpoint="GET /api/v1/compliance/intrastat/meldungen/{meldung_id}/validate",
+            api_endpoint="GET /api/v1/intrastat/meldungen/{meldung_id}/validate",
             output_beschreibung="Validierungsergebnis: valid/invalid, Violations-Liste",
             parameter=[
                 _p_str("meldung_id", "Intrastat-Meldungs-ID", True),
@@ -495,6 +521,8 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
 
         MCPToolContract(
             tool_name="valeo_compliance_policy_evaluate",
+            schema_version=2,
+            input_schema=PolicyEvaluationIn.model_json_schema(),
             domain="compliance",
             operation="policy_evaluate",
             beschreibung="Wertet Policy-Regelset gegen einen Prozesskontext aus",
@@ -503,10 +531,9 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
             request_payload_mode=MCPRequestPayloadMode.POLICY_CONTEXT,
             output_beschreibung="Wirksame Aktion (ERLAUBT/ABGELEHNT/WARNUNG/ESKALATION) + Treffer-Liste",
             parameter=[
-                _p_str("prozess_key", "Prozess-Key fuer Policy-Lookup", True, "agrar_settlement"),
-                _p_num("brutto_eur", "Transaktionsbetrag EUR", False, minimum=0),
-                _p_num("netto_tonnen", "Nettogewicht Tonnen", False, minimum=0),
-                _p_str("lieferant_typ", "Lieferantentyp (MITGLIED/FREMDBETRIEB)", False),
+                _p_str("prozess_key", "Prozessdefinition", True),
+                MCPToolParameter("kontext", MCPParameterTyp.OBJECT, "Auswertungskontext", True),
+                _p_str("policy_set_id", "Regelset-Auswahl", False),
             ],
         ),
 
@@ -545,6 +572,8 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
 
         MCPToolContract(
             tool_name="valeo_process_slo_check",
+            schema_version=2,
+            input_schema=SloCheckIn.model_json_schema(),
             domain="process",
             operation="slo_check",
             beschreibung="Prueft Einhaltung eines Service-Level-Objectives",
@@ -559,6 +588,8 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
 
         MCPToolContract(
             tool_name="valeo_process_data_quality_validate",
+            schema_version=2,
+            input_schema=DataQualityCheckIn.model_json_schema(),
             domain="process",
             operation="data_quality_validate",
             beschreibung="Prueft Stammdaten-Datensatz gegen Qualitaetsregeln",
@@ -567,8 +598,9 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
             request_payload_mode=MCPRequestPayloadMode.DATASET_VALIDATION,
             output_beschreibung="Validierungsergebnis: valid/invalid, Violations mit Code und Feld",
             parameter=[
-                _p_str("entity_typ", "Entitaetstyp (LIEFERANT/KONTRAKT/WIEGESCHEIN/ARTIKEL)", True),
-                _p_str("datensatz_json", "JSON-serialisierter Datensatz", True),
+                _p_str("entity_typ", "Kanonischer Name aus dem DQ-Regelsetregister", True),
+                MCPToolParameter("datensatz", MCPParameterTyp.OBJECT, "Zu pruefendes Fachobjekt", True),
+                MCPToolParameter("kontext_datensaetze", MCPParameterTyp.ARRAY, "Vergleichsobjekte", False),
             ],
         ),
 

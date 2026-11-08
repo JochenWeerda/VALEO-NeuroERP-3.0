@@ -9,22 +9,29 @@ Versendet Bestellungen, Anfragen und Auftragsbestätigungen via:
 
 Alle Methoden geben einen VersandResult-Dict zurück:
   {
-    "status": "gesendet" | "fehler" | "manuell",
+    "status": "gesendet" | "fehler" | "nicht_eingerichtet" | "manuell",
     "versand_art": "email" | "fax" | "edi" | "post",
     "empfaenger": str,
     "zeitstempel": ISO-Datetime,
     "fehler": str | None,
   }
+
+Seit 08.10.2026:
+
+* E-Mail geht ueber das Einkaufs-Postfach des Mandanten (``mail_versand``,
+  Verwendung ``einkauf``). Vorher sendete dieser Dienst ohne ``SMTP_HOST`` nichts,
+  protokollierte "DEV-MODE simuliert" und meldete ``gesendet`` — die Bestellung
+  stand auf "versandt", obwohl der Lieferant nie etwas bekam.
+* Fax und EDI ohne Einrichtung melden ``nicht_eingerichtet`` statt ``manuell``;
+  die Bestellung bleibt unversandt. ``manuell`` gibt es nur fuer die bewusst
+  gewaehlte Versandart Post.
+* Jeder Versand steht in ``domain_einkauf.bestellung_kommunikation`` (Reiter
+  Kommunikation der Bestellmaske).
 """
 from __future__ import annotations
 
-import io
 import os
-import smtplib
 from datetime import datetime
-from email.mime.application import MIMEApplication
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 from typing import Any
 
 from sqlalchemy.orm import Session
@@ -39,12 +46,6 @@ from app.infrastructure.models.einkauf_models import (
 # Config (aus Umgebungsvariablen)
 # ─────────────────────────────────────────────────────────────────────────────
 
-_SMTP_HOST     = os.getenv("SMTP_HOST", "localhost")
-_SMTP_PORT     = int(os.getenv("SMTP_PORT", "587"))
-_SMTP_USER     = os.getenv("SMTP_USER", "")
-_SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
-_SMTP_FROM     = os.getenv("SMTP_FROM", "erp@valeo-landhandel.de")
-_SMTP_TLS      = os.getenv("SMTP_TLS", "true").lower() == "true"
 
 _TWILIO_SID    = os.getenv("TWILIO_ACCOUNT_SID", "")
 _TWILIO_TOKEN  = os.getenv("TWILIO_AUTH_TOKEN", "")
@@ -140,70 +141,29 @@ def versende_email(
     *,
     empfaenger_override: str | None = None,
     anhang_pdf: bytes | None = None,
+    nutzer: dict | None = None,
 ) -> dict[str, Any]:
-    """Versendet eine Bestellung per E-Mail."""
+    """Versendet eine Bestellung ueber das Einkaufs-Postfach; ``gesendet`` erst nach Serverannahme."""
+    from app.services.mail_versand import MailVersandFehler, MailVersandNichtEingerichtet, sende_mail
+
     lf = bestellung.lieferant or db.query(EinkaufLieferant).get(bestellung.lieferant_id)
-    empfaenger = empfaenger_override or (lf.email_bestellung if lf else None)
-
+    empfaenger = empfaenger_override or (lf.email_bestellung if lf else None) or (getattr(lf, "email", None) if lf else None)
+    betreff = f"Bestellung {bestellung.bestellnummer}"
+    ergebnis: dict[str, Any] = {"versand_art": "email", "empfaenger": empfaenger, "betreff": betreff,
+                                "zeitstempel": datetime.now().isoformat(), "fehler": None}
     if not empfaenger:
-        return {
-            "status": "fehler",
-            "versand_art": "email",
-            "empfaenger": None,
-            "zeitstempel": datetime.now().isoformat(),
-            "fehler": "Keine E-Mail-Adresse für Lieferant konfiguriert",
-        }
+        return {**ergebnis, "status": "fehler", "fehler": "Keine E-Mail-Adresse für Lieferant konfiguriert"}
 
-    betreff = f"Bestellung {bestellung.bestellnummer} — {_VALEO_SENDER_NAME}"
-    html_body = _render_bestellung_html(bestellung)
-
-    msg = MIMEMultipart("alternative")
-    msg["Subject"] = betreff
-    msg["From"]    = f"{_VALEO_SENDER_NAME} <{_SMTP_FROM}>"
-    msg["To"]      = empfaenger
-
-    msg.attach(MIMEText(html_body, "html", "utf-8"))
-
-    if anhang_pdf:
-        pdf_part = MIMEApplication(anhang_pdf, _subtype="pdf")
-        pdf_part.add_header(
-            "Content-Disposition", "attachment",
-            filename=f"Bestellung_{bestellung.bestellnummer}.pdf"
-        )
-        msg.attach(pdf_part)
-
+    anhaenge = [(f"Bestellung_{bestellung.bestellnummer}.pdf", anhang_pdf, "application/pdf")] if anhang_pdf else None
     try:
-        if _SMTP_HOST and _SMTP_HOST != "localhost":
-            smtp = smtplib.SMTP(_SMTP_HOST, _SMTP_PORT, timeout=15)
-            if _SMTP_TLS:
-                smtp.starttls()
-            if _SMTP_USER:
-                smtp.login(_SMTP_USER, _SMTP_PASSWORD)
-            smtp.sendmail(_SMTP_FROM, [empfaenger], msg.as_string())
-            smtp.quit()
-            status = "gesendet"
-            fehler = None
-        else:
-            # Dev-Modus: nur Logging, kein echter Versand
-            import logging
-            logging.getLogger("einkauf.versand").info(
-                "DEV-MODE: E-Mail an %s simuliert (Bestellung %s)",
-                empfaenger, bestellung.bestellnummer
-            )
-            status = "gesendet"
-            fehler = None
-    except Exception as e:
-        status = "fehler"
-        fehler = str(e)
-
-    return {
-        "status":       status,
-        "versand_art":  "email",
-        "empfaenger":   empfaenger,
-        "zeitstempel":  datetime.now().isoformat(),
-        "fehler":       fehler,
-        "betreff":      betreff,
-    }
+        sende_mail(empfaenger, betreff, f"Bestellung {bestellung.bestellnummer} — Details im HTML-Teil.",
+                   html=_render_bestellung_html(bestellung), db=db, tenant_id=str(bestellung.tenant_id),
+                   verwendung="einkauf", nutzer=nutzer, anhaenge=anhaenge)
+    except MailVersandNichtEingerichtet as fehler:
+        return {**ergebnis, "status": "nicht_eingerichtet", "fehler": str(fehler)}
+    except MailVersandFehler as fehler:
+        return {**ergebnis, "status": "fehler", "fehler": str(fehler)}
+    return {**ergebnis, "status": "gesendet"}
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -236,9 +196,10 @@ def versende_fax(
         }
 
     if not _TWILIO_SID or not _TWILIO_TOKEN:
-        # Stub: nur Status-Update, kein echter Versand
+        # Kein Faxdienst: nichts versendet. Bis 08.10.2026 "manuell" — und die
+        # Bestellung stand trotzdem auf "versandt".
         return {
-            "status":      "manuell",
+            "status":      "nicht_eingerichtet",
             "versand_art": "fax",
             "empfaenger":  faxnummer,
             "zeitstempel": datetime.now().isoformat(),
@@ -265,7 +226,7 @@ def versende_fax(
         }
     except ImportError:
         return {
-            "status":      "manuell",
+            "status":      "nicht_eingerichtet",
             "versand_art": "fax",
             "empfaenger":  faxnummer,
             "zeitstempel": datetime.now().isoformat(),
@@ -368,7 +329,7 @@ def versende_edi(
             bestellung.bestellnummer, edifact_msg[:500]
         )
         return {
-            "status":      "manuell",
+            "status":      "nicht_eingerichtet",
             "versand_art": "edi",
             "empfaenger":  lf.edi_kennung,
             "zeitstempel": datetime.now().isoformat(),
@@ -407,7 +368,7 @@ def versende_edi(
         }
     except ImportError:
         return {
-            "status":      "manuell",
+            "status":      "nicht_eingerichtet",
             "versand_art": "edi",
             "empfaenger":  lf.edi_kennung,
             "zeitstempel": datetime.now().isoformat(),
@@ -436,15 +397,16 @@ def versende_bestellung(
     empfaenger_override: str | None = None,
     anhang_pdf: bytes | None = None,
     pdf_url: str | None = None,
+    nutzer: dict | None = None,
 ) -> dict[str, Any]:
     """
     Haupt-Dispatcher: wählt die richtige Versand-Methode und aktualisiert
-    den Bestellungs-Status.
+    den Bestellungs-Status — nur bei ``gesendet`` oder bewusst gewähltem Postversand.
     """
     if versand_art == "email":
         result = versende_email(db, bestellung,
                                 empfaenger_override=empfaenger_override,
-                                anhang_pdf=anhang_pdf)
+                                anhang_pdf=anhang_pdf, nutzer=nutzer)
     elif versand_art == "fax":
         result = versende_fax(db, bestellung,
                               faxnummer_override=empfaenger_override,
@@ -453,7 +415,7 @@ def versende_bestellung(
     elif versand_art == "edi":
         result = versende_edi(db, bestellung)
     else:
-        # post / manuell
+        # post / manuell: bewusst gewaehlt — der Mensch versendet.
         result = {
             "status":      "manuell",
             "versand_art": versand_art,
@@ -469,5 +431,24 @@ def versende_bestellung(
         if bestellung.status == "entwurf":
             bestellung.status = "versandt"
         db.flush()
+        _kommunikation_eintragen(db, bestellung, result, nutzer)
 
     return result
+
+
+def _kommunikation_eintragen(db: Session, bestellung: EinkaufBestellung, result: dict[str, Any],
+                             nutzer: dict | None) -> None:
+    """Der Versand erscheint im Reiter Kommunikation der Bestellmaske."""
+    import uuid
+
+    from sqlalchemy import text
+
+    db.execute(text(
+        "INSERT INTO domain_einkauf.bestellung_kommunikation "
+        "(id, tenant_id, bestellung_id, kanal, empfaenger, betreff, status, versendet_am, erfasst_von) "
+        "VALUES (:id, :t, :b, :k, :e, :betreff, :s, CASE WHEN :versendet THEN NOW() END, :von)"
+    ), {"id": str(uuid.uuid4()), "t": str(bestellung.tenant_id), "b": str(bestellung.id),
+        "k": result.get("versand_art"), "e": result.get("empfaenger"),
+        "betreff": result.get("betreff") or f"Bestellung {bestellung.bestellnummer}",
+        "s": "versendet" if result["status"] == "gesendet" else "erfasst",
+        "versendet": result["status"] == "gesendet", "von": (nutzer or {}).get("sub")})

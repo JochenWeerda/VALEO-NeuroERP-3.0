@@ -210,23 +210,14 @@ class NotificationService:
         config = self.channels['teams'].config
 
         try:
-            # Format for Teams
-            if message_type == 'markdown':
-                teams_message = {
-                    "@type": "MessageCard",
-                    "@context": "http://schema.org/extensions",
-                    "themeColor": "0076D7",
-                    "title": "VALEO NeuroERP - Tagesprotokoll",
-                    "text": message
-                }
-            else:
-                teams_message = {
-                    "@type": "MessageCard",
-                    "@context": "http://schema.org/extensions",
-                    "themeColor": "0076D7",
-                    "title": "VALEO NeuroERP - Tagesprotokoll",
-                    "text": message
-                }
+            # Format for Teams (MessageCard rendert Markdown und Text gleich)
+            teams_message = {
+                "@type": "MessageCard",
+                "@context": "http://schema.org/extensions",  # NOSONAR - JSON-LD-Kennung, kein Netzzugriff
+                "themeColor": "0076D7",
+                "title": "VALEO NeuroERP - Tagesprotokoll",
+                "text": message
+            }
 
             response = requests.post(
                 config['webhook_url'],

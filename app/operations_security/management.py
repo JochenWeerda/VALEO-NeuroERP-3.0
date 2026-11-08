@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 import logging
 from app.core.uuid7 import uuid7
+from app.core.tenant_context import get_current_tenant_id
 
 logger = logging.getLogger(__name__)
 
@@ -745,9 +746,10 @@ class ISO27001OperationsSecurity:
         logger.info(f"Maintenance window created: {window.name}")
         return window_id
 
-    def get_operations_dashboard(self, tenant_id: str = "system") -> Dict[str, Any]:
+    def get_operations_dashboard(self, tenant_id: str | None = None) -> Dict[str, Any]:
         """Generate comprehensive operations dashboard"""
         # Get current system health
+        tenant_id = tenant_id or get_current_tenant_id()
         system_health = self._calculate_system_health()
 
         # Get capacity metrics summary
@@ -950,8 +952,9 @@ class ISO27001OperationsSecurity:
 
         return recommendations
 
-    def check_operations_security_compliance(self, tenant_id: str = "system") -> Dict[str, Any]:
+    def check_operations_security_compliance(self, tenant_id: str | None = None) -> Dict[str, Any]:
         """Check ISO 27001 operations security compliance"""
+        tenant_id = tenant_id or get_current_tenant_id()
         compliance_checks = {
             'change_management': self._check_change_management_compliance(),
             'backup_operations': self._check_backup_operations_compliance(),

@@ -9,13 +9,15 @@ from __future__ import annotations
 import json
 import logging
 import uuid
+from datetime import datetime, timezone
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 
 from ....core.database import get_db
+from ....core.akteur import akteur_aus_request
 from ....core.tenant import get_tenant_id
 from ....core.audit_evidence import (
     AuditEvidenceEntry,
@@ -29,16 +31,16 @@ logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.audit_evidence_schemas import AuditEvidenceOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/audit-evidence", tags=["audit", "evidence", "gobd"])
 
-# In-memory fallback if DB table does not exist yet
-_STORE: dict[str, dict[str, Any]] = {}   # tenant_id → {audit_entry_id → AuditEvidenceEntry}
-
-
-def _tenant_store(tenant_id: str) -> dict[str, Any]:
-    return _STORE.setdefault(tenant_id, {})
+# Kein Arbeitsspeicher-Ersatz: Bis 20.10.2026 fielen Nachweise ohne Tabelle in einen Speicher, gobd-check meldete
+# "konform" daraus, nach einem Neustart waren sie weg. Die Tabelle legt ``audit_evidence_20261020`` an.
+def _nicht_verfuegbar(exc: Exception) -> HTTPException:
+    logger.error("audit_evidence nicht verfuegbar: %s", exc, exc_info=True)
+    return HTTPException(status_code=503, detail="GoBD-Belegnachweise sind nicht verfuegbar (Datenbank).")
 
 
 # ---------------------------------------------------------------------------
@@ -87,15 +89,9 @@ async def list_evidence_entries(
                 "gobd_compliant": len(refs) > 0,
             })
         return entries
-    except Exception:
-        logger.debug("audit_evidence table not available, falling back to in-memory store")
-        store = _tenant_store(tenant_id)
-        entries = [e.model_dump(mode="json") for e in store.values()]
-        if aggregate_type:
-            entries = [e for e in entries if e.get("aggregate_type") == aggregate_type]
-        if aggregate_id:
-            entries = [e for e in entries if e.get("aggregate_id") == aggregate_id]
-        return entries
+    except Exception as exc:
+        db.rollback()
+        raise _nicht_verfuegbar(exc) from exc
 
 
 @router.get("/{audit_entry_id}", response_model=AuditEvidenceOut, summary="Evidence entry abrufen")
@@ -126,17 +122,13 @@ async def get_evidence_entry(
                 "schema_version": row.schema_version,
                 "gobd_compliant": len(refs) > 0,
             }
-    except Exception:
-        logger.debug("audit_evidence table not available, falling back to in-memory store")
-
-    store = _tenant_store(tenant_id)
-    entry = store.get(audit_entry_id)
-    if not entry:
-        raise HTTPException(status_code=404, detail=f"Audit evidence entry {audit_entry_id} not found")
-    return entry.model_dump(mode="json")
+    except Exception as exc:
+        db.rollback()
+        raise _nicht_verfuegbar(exc) from exc
+    raise HTTPException(status_code=404, detail=f"Audit evidence entry {audit_entry_id} not found")
 
 
-@router.post("", response_model=AuditEvidenceOut, status_code=201, summary="Evidence entry anlegen")
+@router.post("", response_model=AuditEvidenceOut, status_code=201, summary="Evidence entry anlegen", dependencies=SCHREIBEN["QUALITAET"])
 async def create_evidence_entry(
     body: dict,
     tenant_id: str = Depends(get_tenant_id),
@@ -169,18 +161,17 @@ async def create_evidence_entry(
             "sv": 1,
         })
         db.commit()
-    except Exception:
+    except Exception as exc:
         db.rollback()
-        logger.debug("audit_evidence table not available, falling back to in-memory store")
-        store = _tenant_store(tenant_id)
-        store[entry.audit_entry_id] = entry
+        raise _nicht_verfuegbar(exc) from exc
     return entry.model_dump(mode="json")
 
 
-@router.post("/{audit_entry_id}/evidence-refs", response_model=AuditEvidenceOut, status_code=201, summary="Evidence ref attach")
+@router.post("/{audit_entry_id}/evidence-refs", response_model=AuditEvidenceOut, status_code=201, summary="Evidence ref attach", dependencies=SCHREIBEN["QUALITAET"])
 async def attach_evidence_ref(
     audit_entry_id: str,
     body: dict,
+    request: Request,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
@@ -193,9 +184,10 @@ async def attach_evidence_ref(
         filename=body.get("filename"),
         page_count=body.get("page_count"),
         ocr_confidence=body.get("ocr_confidence"),
-        verified=body.get("verified", False),
-        verified_by=body.get("verified_by"),
-        verified_at=body.get("verified_at"),
+        verified=bool(body.get("verified", False)),
+        # Wer prueft, kommt aus dem Token (bis 20.10.2026 frei im Body), der Zeitpunkt vom Server.
+        verified_by=akteur_aus_request(request) if body.get("verified") else None,
+        verified_at=datetime.now(timezone.utc).isoformat() if body.get("verified") else None,
     )
     ref_dict = ref.model_dump(mode="json")
 
@@ -226,18 +218,9 @@ async def attach_evidence_ref(
         }
     except HTTPException:
         raise
-    except Exception:
+    except Exception as exc:
         db.rollback()
-        logger.debug("audit_evidence table not available, falling back to in-memory store")
-
-    # Fallback to in-memory
-    store = _tenant_store(tenant_id)
-    entry = store.get(audit_entry_id)
-    if not entry:
-        raise HTTPException(status_code=404, detail=f"Audit evidence entry {audit_entry_id} not found")
-    entry.add_evidence(ref)
-    store[audit_entry_id] = entry
-    return entry.model_dump(mode="json")
+        raise _nicht_verfuegbar(exc) from exc
 
 
 # ---------------------------------------------------------------------------
@@ -283,18 +266,6 @@ async def check_gobd_compliance(
             "evidence_count": evidence_count,
             "audit_entries_count": audit_entries_count,
         }
-    except Exception:
-        logger.debug("audit_evidence table not available, falling back to in-memory store")
-
-    store = _tenant_store(tenant_id)
-    entries = [e for e in store.values()
-               if e.aggregate_type == aggregate_type and e.aggregate_id == aggregate_id]
-    compliant = any(e.gobd_compliant for e in entries)
-    evidence_count = sum(len(e.evidence_refs) for e in entries)
-    return {
-        "aggregate_type": aggregate_type,
-        "aggregate_id": aggregate_id,
-        "gobd_compliant": compliant,
-        "evidence_count": evidence_count,
-        "audit_entries_count": len(entries),
-    }
+    except Exception as exc:
+        db.rollback()
+        raise _nicht_verfuegbar(exc) from exc

@@ -65,6 +65,7 @@ def get_openapi_tool_contracts(
         "tools": [
             {
                 "tool_name": tool.tool_name,
+                "schema_version": tool.schema_version,
                 "method": tool.method,
                 "path": tool.path,
                 "operation_id": tool.openapi_ref.operation_id,

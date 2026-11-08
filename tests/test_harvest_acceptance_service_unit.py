@@ -1,6 +1,13 @@
 """Unit tests for HarvestAcceptanceService."""
 from unittest.mock import MagicMock, patch, PropertyMock
 import pytest
+
+
+@pytest.fixture(autouse=True)
+def _enable_dev_token():
+    """Pure mocked services require no compatibility-app initialization."""
+    yield
+
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
 
 
@@ -12,6 +19,7 @@ def _make_svc(tenant_id="t1"):
 
 def _mock_obj(**kwargs):
     obj = MagicMock()
+    obj.invoice_id = None
     for k, v in kwargs.items():
         setattr(obj, k, v)
     return obj
@@ -26,6 +34,8 @@ def _stub_get(db, return_val):
     # Use a flexible mock that returns the same thing for any filter chain
     q = MagicMock()
     q.filter.return_value = q
+    q.with_for_update.return_value = q
+    q.populate_existing.return_value = q
     q.first.return_value = return_val
     q.order_by.return_value = q
     q.limit.return_value = q
@@ -92,12 +102,12 @@ def test_cancel_already_cancelled_raises():
 
 def test_cancel_success():
     svc, db = _make_svc()
-    obj = _mock_obj(release_status="draft", notes="")
+    obj = _mock_obj(release_status="draft", remarks="")
     _stub_get(db, obj)
     with patch("app.services.harvest_acceptance_service._to_dict_with_positions", return_value={"id": "id-1"}):
         result = svc.cancel("id-1", "test reason")
     assert obj.release_status == "cancelled"
-    assert "STORNIERT" in obj.notes
+    assert "STORNIERT" in obj.remarks
     db.commit.assert_called_once()
 
 
@@ -157,3 +167,31 @@ def test_calculate_frachtkosten_basic():
     result = svc.calculate_frachtkosten("id-1", data)
     assert "frachtkosten_eur" in result
     assert result["gewicht_kg"] == 20000
+
+
+@pytest.mark.parametrize("tenant", ["harvest-tenant-a", "harvest-tenant-b"])
+def test_create_position_inherits_service_tenant(tenant):
+    from datetime import date
+    from app.api.v1.endpoints.harvest_acceptance import HarvestAcceptanceCreate
+    from app.infrastructure.models.l3c_models import HarvestAcceptance, HarvestAcceptancePosition
+
+    service, db = _make_svc(tenant)
+    query = _stub_get(db, None)
+    query.first.side_effect = [object(), None]  # own customer, no duplicate acceptance
+    payload = HarvestAcceptanceCreate(
+        acceptance_number="SYNTH-TENANT-POSITION",
+        customer_id="own-customer",
+        delivery_date=date(2026, 10, 28),
+        positions=[{"position_number": 10, "description": "Synthetisches Getreide", "quantity_kg": 100}],
+    )
+    with patch("app.services.harvest_acceptance_service._to_dict_with_positions", return_value={}):
+        service.create_acceptance(payload, "synthetic-actor")
+
+    added = [call.args[0] for call in db.add.call_args_list]
+    head = next(row for row in added if isinstance(row, HarvestAcceptance))
+    position = next(row for row in added if isinstance(row, HarvestAcceptancePosition))
+    assert head.tenant_id == tenant
+    assert position.tenant_id == tenant
+    assert position.harvest_acceptance_id == head.id
+    assert position.quantity_kg == 100
+    db.commit.assert_called_once()

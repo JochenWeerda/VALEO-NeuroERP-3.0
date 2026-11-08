@@ -1,8 +1,4 @@
 import { z } from 'zod';
-import { extendZodWithOpenApi } from 'zod-openapi';
-
-// Extend Zod with OpenAPI
-extendZodWithOpenApi(z);
 
 // Report Type Enum
 export const ReportTypeSchema = z.enum([
@@ -14,7 +10,7 @@ export const ReportTypeSchema = z.enum([
   'Production',
   'Regulatory',
   'Custom'
-]).openapi({
+]).meta({
   title: 'Report Type',
   description: 'Type of report to generate',
 });
@@ -25,7 +21,7 @@ export const ReportFormatSchema = z.enum([
   'csv',
   'excel',
   'pdf'
-]).openapi({
+]).meta({
   title: 'Report Format',
   description: 'Output format for the report',
 });
@@ -40,8 +36,8 @@ export const ReportParametersSchema = z.object({
   supplierId: z.string().optional(),
   siteId: z.string().optional(),
   status: z.string().optional(),
-  filters: z.record(z.any()).optional(),
-}).openapi({
+  filters: z.record(z.string(), z.any()).optional(),
+}).meta({
   title: 'Report Parameters',
   description: 'Parameters for report generation',
 });
@@ -53,7 +49,7 @@ export const ReportMetadataSchema = z.object({
   dataSource: z.string().optional(),
   generatedBy: z.string().optional(),
   checksum: z.string().optional(),
-}).openapi({
+}).meta({
   title: 'Report Metadata',
   description: 'Metadata about report generation',
 });
@@ -63,14 +59,14 @@ export const GenerateReportRequestSchema = z.object({
   type: ReportTypeSchema,
   parameters: ReportParametersSchema,
   format: ReportFormatSchema.default('json'),
-}).openapi({
+}).meta({
   title: 'Generate Report Request',
   description: 'Request payload for generating a report',
 });
 
 // Report Response Schema
 export const ReportResponseSchema = z.object({
-  id: z.string().uuid(),
+  id: z.string().guid(),
   tenantId: z.string(),
   type: ReportTypeSchema,
   parameters: ReportParametersSchema,
@@ -79,7 +75,7 @@ export const ReportResponseSchema = z.object({
   format: ReportFormatSchema,
   metadata: ReportMetadataSchema.optional(),
   version: z.number(),
-}).openapi({
+}).meta({
   title: 'Report Response',
   description: 'Report data response',
 });
@@ -92,7 +88,7 @@ export const ReportQuerySchema = z.object({
   format: ReportFormatSchema.optional(),
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
-}).openapi({
+}).meta({
   title: 'Report Query Parameters',
   description: 'Query parameters for report filtering and pagination',
 });
@@ -106,7 +102,7 @@ export const ReportListResponseSchema = z.object({
     total: z.number(),
     totalPages: z.number(),
   }),
-}).openapi({
+}).meta({
   title: 'Report List Response',
   description: 'Paginated list of reports',
 });
@@ -117,7 +113,7 @@ export const ReportContentResponseSchema = z.object({
   content: z.any(), // The actual report data/content
   contentType: z.string(),
   contentLength: z.number(),
-}).openapi({
+}).meta({
   title: 'Report Content Response',
   description: 'Report with its content data',
 });
@@ -128,21 +124,21 @@ export const ReportGenerationStatusSchema = z.enum([
   'processing',
   'completed',
   'failed'
-]).openapi({
+]).meta({
   title: 'Report Generation Status',
   description: 'Status of report generation process',
 });
 
 // Report Generation Result Schema
 export const ReportGenerationResultSchema = z.object({
-  reportId: z.string().uuid(),
+  reportId: z.string().guid(),
   status: ReportGenerationStatusSchema,
   progress: z.number().min(0).max(100).optional(),
   message: z.string().optional(),
   uri: z.string().optional(),
   error: z.string().optional(),
   executionTimeMs: z.number().optional(),
-}).openapi({
+}).meta({
   title: 'Report Generation Result',
   description: 'Result of report generation operation',
 });

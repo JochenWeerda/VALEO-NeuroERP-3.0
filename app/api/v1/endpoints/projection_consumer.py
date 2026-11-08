@@ -20,6 +20,7 @@ from app.core.projection_consumer import (
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.projection_consumer_schemas import ProjectionConsumerOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/projections", tags=["projections", "read-models"])
@@ -88,8 +89,7 @@ async def get_projection(
 
 
 @router.post("/{projection_name}/rebuild", status_code=202, summary="Rebuild request",
-    response_model=ProjectionConsumerOut
-)
+    response_model=ProjectionConsumerOut, dependencies=SCHREIBEN["FACHLICH"])
 async def request_rebuild(
     projection_name: str,
     body: RebuildRequestBody,

@@ -1,4 +1,7 @@
 import type {
+  ScreenDefinition,
+  DocumentScreenVariantRef,
+  ListExperience,
   ScreenDomain,
   ScreenColumnNavigation,
   ScreenCalendarView,
@@ -6,6 +9,7 @@ import type {
   ScreenContextRailSection,
   ScreenDensity,
   ScreenFieldType,
+  ScreenFieldDefinition,
   ScreenFloorplan,
   ScreenLayoutMode,
   ScreenMode,
@@ -17,9 +21,11 @@ import type {
   ScreenTableProfile,
   ScreenTwinMetricKind,
   ScreenVoiceProvider,
+  ScreenSpecializedComponent,
 } from '../schema'
 
 export type RenderComponentKind =
+  | 'table'
   | 'text'
   | 'number'
   | 'date'
@@ -28,10 +34,13 @@ export type RenderComponentKind =
   | 'select'
   | 'multiselect'
   | 'textarea'
+  | 'stringList'
   | 'file'
   | 'lookup'
   | 'currency'
   | 'percentage'
+  | 'quantity'
+  | 'period'
   | 'password'
 
 export interface RenderShellPlan {
@@ -144,6 +153,11 @@ export interface RenderTabContentPlan {
 }
 
 export interface RenderFieldPlan {
+  currencyField?: string
+  unit?: string
+  unitField?: string
+  format?: ScreenFieldDefinition['format']
+  computed?: ScreenFieldDefinition['computed']
   key: string
   label: string
   componentKind: RenderComponentKind
@@ -158,6 +172,9 @@ export interface RenderFieldPlan {
   options?: Array<{ value: string | number; label: string }>
   dataSourceKey?: string
   minSearchChars: number
+  rowFields?: ScreenFieldDefinition[]
+  tableEditing?: ScreenFieldDefinition['tableEditing']
+  fileContent?: ScreenFieldDefinition['fileContent']
   renderHint?: 'singleLine' | 'multiLine' | 'compact' | 'touch'
 }
 
@@ -169,6 +186,8 @@ export type RenderColumnKind =
   | 'datetime'
   | 'status'
   | 'boolean'
+  | 'quantity'
+  | 'percentage'
 
 export type RenderColumnPriority = 'primary' | 'secondary' | 'tertiary'
 
@@ -180,6 +199,14 @@ export interface RenderTableColumnPlan {
   sortable?: boolean
   filterable?: boolean
   renderKind?: RenderColumnKind
+  currencyField?: string
+  unit?: string
+  unitField?: string
+  displayUnit?: string
+  pricePer?: string
+  displayPricePer?: string
+  computed?: ScreenFieldDefinition['computed']
+  aggregate?: 'sum'
   defaultSort?: 'asc' | 'desc'
   priority?: RenderColumnPriority
 }
@@ -213,6 +240,7 @@ export interface RenderTablePlan {
     enabledWhen?: ScreenCondition
     visibleWhen?: { field: string; values: Array<string | number | boolean> }
     disabledWhen?: { field: string; values: Array<string | number | boolean> }
+    localRowPatch?: { identityField: string; field: string; value: string | number | boolean }
   }>
   bulkActions?: Array<{
     key: string
@@ -228,6 +256,9 @@ export interface RenderTablePlan {
 }
 
 export interface RenderActionPlan {
+  surfaceOnly?: boolean
+  requiresExpectedVersion?: boolean
+  requiresIdempotencyKey?: boolean
   key: string
   label: string
   kind: 'primary' | 'secondary' | 'danger' | 'workflow'
@@ -269,6 +300,10 @@ export interface RenderPerformancePlan {
 }
 
 export interface RenderPlan {
+  flowSpineCatalog?: ScreenDefinition['flowSpineCatalog']
+  flowSpineWorkspace?: ScreenDefinition['flowSpineWorkspace']
+  listExperience?: ListExperience
+  documentVariant?: DocumentScreenVariantRef
   cacheKey: string
   screenId: string
   schemaVersion: number
@@ -278,6 +313,7 @@ export interface RenderPlan {
   tiles: RenderTilePlan[]
   calendar?: RenderCalendarPlan
   sourceProposals?: { contextKey: string }
+  specialized?: ScreenSpecializedComponent
   twin?: RenderTwinPlan
   visibleTabs: RenderTabPlan[]
   tabContent: Record<string, RenderTabContentPlan>
@@ -297,7 +333,7 @@ export interface RenderPlan {
   overlayInvalidPaths?: string[]
 }
 
-export function fieldTypeToComponentKind(type: ScreenFieldType): RenderComponentKind {
-  if (type === 'table') return 'text'
+export function fieldTypeToComponentKind(type: ScreenFieldType, structuredTable = false): RenderComponentKind {
+  if (type === 'table' && !structuredTable) return 'text'
   return type
 }

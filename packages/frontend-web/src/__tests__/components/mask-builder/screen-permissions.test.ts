@@ -34,3 +34,87 @@ describe('authenticated mask permission projection', () => {
     expect(getScreenPermissions(lead, user([], ['CRM_BEARBEITEN']))).toEqual(['crm.lead.create'])
   })
 })
+
+
+describe('platform capacity remains explicit', () => {
+  const administration: ScreenDefinition = { ...screen, id: 'admin/identity-budgets', domain: 'platform',
+    actions: [
+      { key: 'root', label: 'Mandantenbudget', permission: 'platform:quota:manage' },
+      { key: 'read', label: 'Eigene Kontingente', permission: 'identity:quota:read' },
+      { key: 'allocate', label: 'Vergeben', permission: 'identity:quota:allocate' },
+    ] }
+  it('does not project platform capacity from tenant admin or admin:all', () => {
+    expect(getScreenPermissions(administration, user(['admin:all'], ['admin'])))
+      .toEqual(['identity:quota:read', 'identity:quota:allocate'])
+    expect(getScreenPermissions(administration, user(['platform:quota:manage'])))
+      .toEqual(['platform:quota:manage', 'identity:quota:read'])
+  })
+  it('keeps own quota navigation available without granting allocation rights', () => {
+    expect(getScreenPermissions(administration, user())).toEqual(['identity:quota:read'])
+    expect(getScreenPermissions(administration, null)).toEqual([])
+  })
+})
+
+
+describe('canonical document permission projection', () => {
+  const documentScreen = (id: string): ScreenDefinition => ({ ...screen, id, domain: 'einkauf',
+    actions: ['lesen', 'preise', 'bearbeiten', 'ausstellen', 'buchen', 'stornieren'].map(right => ({
+      key: right, label: right, permission: `belege.${right}`,
+    })) })
+  it('keeps purchase and sales rights separate for the existing buyer role', () => {
+    expect(getScreenPermissions(documentScreen('beleg/purchase-invoice'), user([], ['EINKAUF_BEARBEITEN'])))
+      .toEqual(['belege.lesen', 'belege.preise', 'belege.bearbeiten', 'belege.ausstellen', 'belege.buchen'])
+    expect(getScreenPermissions(documentScreen('beleg/sales-invoice'), user([], ['EINKAUF_BEARBEITEN'])))
+      .toEqual([])
+  })
+  it('lets warehouse readers read without prices or mutations', () => {
+    expect(getScreenPermissions(documentScreen('beleg/goods-receipt'), user(['belege:read'], ['LAGER_LESEN'])))
+      .toEqual(['belege.lesen'])
+  })
+  it('keeps finance reversal distinct from buyer editing and manager access', () => {
+    expect(getScreenPermissions(documentScreen('beleg/purchase-invoice'), user([], ['FINANCE_BEARBEITEN'])))
+      .toEqual(['belege.lesen', 'belege.preise', 'belege.buchen', 'belege.stornieren'])
+    expect(getScreenPermissions(documentScreen('beleg/purchase-invoice'), user([], ['manager'])))
+      .not.toContain('belege.stornieren')
+  })
+  it('does not grant document actions from transport scopes or schema declarations', () => {
+    expect(getScreenPermissions(documentScreen('beleg/purchase-invoice'), user(['belege:write', 'admin:all'])))
+      .toEqual([])
+    expect(getScreenPermissions(documentScreen('beleg/unknown'), user([], ['admin']))).toEqual([])
+  })
+})
+
+
+describe('controller supervises document exceptions without posting rights', () => {
+  const controlledScreen: ScreenDefinition = { ...screen, id: 'beleg/purchase-invoice', domain: 'einkauf',
+    actions: ['lesen', 'preise', 'bearbeiten', 'ausstellen', 'buchen', 'stornieren', 'freigeben', 'freigeben_erhoeht']
+      .map(right => ({ key: right, label: right, permission: `belege.${right}` })) }
+  it.each(['controller', 'CONTROLLING'])('projects approval only for %s', role => {
+    expect(getScreenPermissions(controlledScreen, user([], [role])))
+      .toEqual(['belege.freigeben', 'belege.freigeben_erhoeht'])
+    expect(getScreenPermissions(controlledScreen, user(['belege:write', 'admin:all'], [role])))
+      .toEqual(['belege.freigeben', 'belege.freigeben_erhoeht'])
+  })
+  it.each(['controller', 'CONTROLLING'])('combines %s with finance reading without granting posting', role => {
+    expect(getScreenPermissions(controlledScreen, user([], [role, 'FINANCE_LESEN'])))
+      .toEqual(['belege.lesen', 'belege.preise', 'belege.freigeben', 'belege.freigeben_erhoeht'])
+  })
+})
+
+
+describe('action permissions follow the command route roles', () => {
+  const order: ScreenDefinition = { ...screen, id: 'sales/sales-order', domain: 'sales',
+    actions: [{ key: 'bearbeiten', label: 'Bearbeiten', permission: 'sales.order.update' }] }
+  const contract: ScreenDefinition = { ...screen, id: 'agrar/kontrakte', domain: 'agrar',
+    actions: [{ key: 'bearbeiten', label: 'Bearbeiten', permission: 'kontrakt.update' }] }
+  it('grants the edit action to the area role without a scope attribute', () => {
+    expect(getScreenPermissions(order, user([], ['SALES_BEARBEITEN']))).toEqual(['sales.order.update'])
+    expect(getScreenPermissions(order, user([], ['SALES_LESEN']))).toEqual([])
+  })
+  it('a scope attribute cannot outvote the server roles', () => {
+    expect(getScreenPermissions(order, user(['sales.order.update'], ['CRM_BEARBEITEN']))).toEqual([])
+    // Kontraktaenderung verlangt die Kontraktrolle selbst; admin allein reicht dort auch serverseitig nicht.
+    expect(getScreenPermissions(contract, user(['admin:all'], ['admin']))).toEqual([])
+    expect(getScreenPermissions(contract, user([], ['KONTRAKT_BEARBEITEN']))).toEqual(['kontrakt.update'])
+  })
+})

@@ -11,7 +11,7 @@ import uuid
 import pytest
 from fastapi.testclient import TestClient
 
-from main import app
+from app.main import app
 from conftest import skip_if_db_unavailable
 from app.api.v1.endpoints.ap_invoices import (
     _compute_ap_invoice_semantic_status,
@@ -80,7 +80,7 @@ def _make_invoice(lines=None) -> SalesInvoice:
 
 def test_calculate_totals_empty():
     doc = _make_invoice()
-    result = calculate_invoice_totals(doc)
+    result = calculate_invoice_totals(doc, None, "tenant-1")
     assert result.subtotalNet == 0.0
     assert result.totalTax == 0.0
     assert result.totalGross == 0.0
@@ -89,16 +89,18 @@ def test_calculate_totals_empty():
 def test_calculate_totals_single_line():
     line = DocLine(article="Weizen", qty=10, price=100.0, vatRate=19.0)
     doc = _make_invoice([line])
-    result = calculate_invoice_totals(doc)
+    result = calculate_invoice_totals(doc, None, "tenant-1")
     assert result.subtotalNet == pytest.approx(1000.0)
-    assert result.totalTax == pytest.approx(190.0)
-    assert result.totalGross == pytest.approx(1190.0)
+    # Ein Satz ohne Steuerschluessel: Die Vorsteuer bleibt offen, es wird kein Brutto unterstellt.
+    assert result.totalTax == pytest.approx(0.0)
+    assert result.totalGross == pytest.approx(1000.0)
+    assert "keinen Steuerschlüssel" in result.steuerPruefgrund
 
 
 def test_calculate_totals_zero_vat():
     line = DocLine(article="Weizen", qty=5, price=200.0, vatRate=0.0)
     doc = _make_invoice([line])
-    result = calculate_invoice_totals(doc)
+    result = calculate_invoice_totals(doc, None, "tenant-1")
     assert result.totalTax == pytest.approx(0.0)
     assert result.totalGross == pytest.approx(1000.0)
 
@@ -120,7 +122,22 @@ def test_get_nonexistent_ap_invoice_returns_404():
     assert resp.status_code == 404
 
 
-def test_create_ap_invoice_minimal():
+@pytest.fixture
+def lieferant(require_db):
+    """Die Eingangsrechnung verlangt einen aktiven Lieferanten des Mandanten (tests/stammsaetze.py)."""
+    from app.core.database import SessionLocal
+    from stammsaetze import entferne_stammsaetze, lege_lieferanten_an
+
+    with SessionLocal() as db:
+        lege_lieferanten_an(db, _TENANT, "supplier-1")
+        db.commit()
+    yield "supplier-1"
+    with SessionLocal() as db:
+        entferne_stammsaetze(db, _TENANT, "supplier-1")
+        db.commit()
+
+
+def test_create_ap_invoice_minimal(lieferant):
     payload = {
         # Eindeutig je Lauf: Seit 07.10.2026 ueberschreibt Anlegen keine vorhandene
         # Rechnung mehr (409); die feste Nummer liess den zweiten Lauf scheitern.

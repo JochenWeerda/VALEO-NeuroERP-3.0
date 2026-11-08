@@ -201,6 +201,12 @@ def _app_with_repo_and_settlement(monkeypatch, settlement: _FakeSettlement):
     app.include_router(process_kernel_api.router)
     app.dependency_overrides[get_db] = lambda: fake_db
     app.dependency_overrides[agrar_settlements.get_tenant_id] = lambda: "tenant-1"
+    # Gutschriften und Belastungen des Einkaufs verlangen seit 13.10.2026 Mandant, Recht und zentrale Freigabe.
+    # Hier laeuft eine nachgestellte Datenbank; die Freigabe prueft tests/test_freigabe_import_einkaufsmemo.py an
+    # der echten.
+    app.dependency_overrides[credit_debit_memos.get_tenant_id] = lambda: "tenant-1"
+    app.dependency_overrides[credit_debit_memos.get_current_user] = lambda: {"sub": "t-1", "roles": ["admin"]}
+    monkeypatch.setattr(credit_debit_memos.finance_freigabe, "verlange_einkaufsmemo", lambda *_a, **_k: None)
     return app, repo, fake_db
 
 

@@ -2,7 +2,7 @@ import type { AliasGroupRouteEntry } from '@/app/route-builders/types'
 
 export const entries: AliasGroupRouteEntry[] = [
   {
-    "module": "@/pages/mahnwesen/mahnlauf",
+    "module": "@/pages/finance/mahnlauf",
     "path": "mahnlauf"
   }
 ]

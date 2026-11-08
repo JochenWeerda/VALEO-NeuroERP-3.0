@@ -25,6 +25,7 @@ from app.core.business_time import business_date_after, business_today
 
 from app.api.v1.schemas.base import BaseSchema, IDResponse
 from app.api.v1.schemas.purchase_invoice_verification_schemas import PurchaseInvoiceVerificationOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/einkauf/invoice-verification", tags=["einkauf", "3-wege-match"])
@@ -156,8 +157,7 @@ def _compute_match_status(
 # ─────────────────────────────────────────────────────────────────────────────
 
 @router.post("/match", summary="Invoice match",
-    response_model=PurchaseInvoiceVerificationOut
-)
+    response_model=PurchaseInvoiceVerificationOut, dependencies=SCHREIBEN["EINKAUF"])
 def match_invoice(
     body: MatchRequest,
     db: Session = Depends(get_db),
@@ -261,8 +261,7 @@ def list_pending(
 
 
 @router.patch("/{verification_id}/approve", summary="Verification genehmigen",
-    response_model=PurchaseInvoiceVerificationOut
-)
+    response_model=PurchaseInvoiceVerificationOut, dependencies=SCHREIBEN["EINKAUF"])
 def approve_verification(
     verification_id: int,
     body: ApproveRequest,
@@ -343,8 +342,7 @@ def approve_verification(
 
 
 @router.patch("/{verification_id}/block", summary="Verification blockieren",
-    response_model=IDResponse
-)
+    response_model=IDResponse, dependencies=SCHREIBEN["EINKAUF"])
 def block_verification(
     verification_id: int,
     body: BlockRequest,

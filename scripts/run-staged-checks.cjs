@@ -33,6 +33,16 @@ if (stagedFiles.length === 0) {
   process.exit(0)
 }
 
+// Registry und Referenz muessen im publizierten Index zusammenpassen.
+// Arbeitsbaum-WIP darf einen veralteten staged Stand nicht verdecken.
+if (stagedFiles.some((file) => [
+  'config/mcp_erp_tools.yaml',
+  'docs/schnittstellen/mcp-tools.md',
+  'scripts/generate_mcp_tool_reference.py',
+].includes(file))) {
+  run('python', ['scripts/generate_mcp_tool_reference.py', '--check', '--staged'])
+}
+
 // PII-/Lead-Daten-Guard (DSGVO): blockiert Personen-/GAP-Lead-Daten vor dem Commit.
 // python/python3-Fallback; wenn kein Interpreter gefunden wird, warnen (CI ist Backstop).
 ;(function runPiiGuard() {
@@ -59,9 +69,18 @@ const scriptLikeFiles = stagedFiles.filter(
 )
 const markdownFiles = stagedFiles.filter((file) => /\.md$/i.test(file))
 
+const ESLINT_BATCH = 40
+
+function runEslintInBatches(files, extraArgs = []) {
+  for (let i = 0; i < files.length; i += ESLINT_BATCH) {
+    const batch = files.slice(i, i + ESLINT_BATCH)
+    run(process.execPath, [eslintBin, ...extraArgs, ...batch])
+  }
+}
+
 if (scriptLikeFiles.length > 0) {
-  run(process.execPath, [eslintBin, '--fix', ...scriptLikeFiles])
-  run(process.execPath, [eslintBin, ...scriptLikeFiles])
+  runEslintInBatches(scriptLikeFiles, ['--fix'])
+  runEslintInBatches(scriptLikeFiles)
 }
 
 if (markdownFiles.length > 0) {

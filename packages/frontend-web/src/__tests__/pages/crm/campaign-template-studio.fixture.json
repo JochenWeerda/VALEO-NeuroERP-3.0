@@ -1,0 +1,307 @@
+{
+  "schemaVersion": 1,
+  "id": "crm/campaign-template",
+  "domain": "crm",
+  "mode": "detail",
+  "title": "Kampagnenvorlage",
+  "subtitle": "Vorlage",
+  "adapter": {
+    "type": "native",
+    "sourceId": "crm/campaign-template",
+    "temporary": false
+  },
+  "dataSources": [
+    {
+      "key": "entity",
+      "endpoint": "/api/v1/crm/campaigns/templates/{entity_id}"
+    }
+  ],
+  "tabs": [
+    {
+      "key": "kopf",
+      "label": "Stammdaten",
+      "lazy": false,
+      "keepAlive": true,
+      "dataSourceKey": "entity",
+      "fields": [
+        {
+          "key": "name",
+          "label": "Name",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "description",
+          "label": "Beschreibung",
+          "type": "textarea"
+        },
+        {
+          "key": "campaign_type",
+          "label": "Kampagnentyp",
+          "type": "select",
+          "required": true,
+          "options": [
+            {
+              "value": "email",
+              "label": "E-Mail"
+            },
+            {
+              "value": "sms",
+              "label": "SMS"
+            },
+            {
+              "value": "post",
+              "label": "Post"
+            },
+            {
+              "value": "event",
+              "label": "Veranstaltung"
+            },
+            {
+              "value": "webinar",
+              "label": "Webinar"
+            },
+            {
+              "value": "push",
+              "label": "Push"
+            }
+          ]
+        },
+        {
+          "key": "subject_line",
+          "label": "Betreff",
+          "type": "text"
+        },
+        {
+          "key": "message_body",
+          "label": "Nachricht",
+          "type": "textarea"
+        },
+        {
+          "key": "is_active",
+          "label": "Aktiv",
+          "type": "boolean"
+        },
+        {
+          "key": "created_by",
+          "label": "Erstellt von",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "created_at",
+          "label": "Erstellt am",
+          "type": "datetime",
+          "readOnly": true
+        },
+        {
+          "key": "updated_at",
+          "label": "Geändert am",
+          "type": "datetime",
+          "readOnly": true
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "key": "edit",
+      "label": "Bearbeiten",
+      "kind": "primary",
+      "dangerLevel": "safe",
+      "permission": "crm.campaign.update",
+      "commandEndpoint": "/api/v1/crm/campaigns/templates/{entity_id}",
+      "method": "PUT",
+      "forbiddenForAgents": true,
+      "responseAdapter": "resource.v1",
+      "inputPrefill": "entity",
+      "inputFields": [
+        {
+          "key": "name",
+          "label": "Name",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "description",
+          "label": "Beschreibung",
+          "type": "textarea"
+        },
+        {
+          "key": "campaign_type",
+          "label": "Kampagnentyp",
+          "type": "select",
+          "required": true,
+          "options": [
+            {
+              "value": "email",
+              "label": "E-Mail"
+            },
+            {
+              "value": "sms",
+              "label": "SMS"
+            },
+            {
+              "value": "post",
+              "label": "Post"
+            },
+            {
+              "value": "event",
+              "label": "Veranstaltung"
+            },
+            {
+              "value": "webinar",
+              "label": "Webinar"
+            },
+            {
+              "value": "push",
+              "label": "Push"
+            }
+          ]
+        },
+        {
+          "key": "subject_line",
+          "label": "Betreff",
+          "type": "text"
+        },
+        {
+          "key": "message_body",
+          "label": "Nachricht",
+          "type": "textarea"
+        },
+        {
+          "key": "is_active",
+          "label": "Aktiv",
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "key": "duplicate",
+      "label": "Duplizieren",
+      "kind": "secondary",
+      "dangerLevel": "safe",
+      "permission": "crm.campaign.update",
+      "forbiddenForAgents": true,
+      "commandEndpoint": "/api/v1/crm/campaigns/templates/{entity_id}/duplicate",
+      "method": "POST",
+      "responseAdapter": "resource.v1",
+      "resultNavigationRoute": "/crm/campaign-template/{result_id}"
+    },
+    {
+      "key": "back",
+      "label": "Zurück",
+      "kind": "secondary",
+      "dangerLevel": "safe",
+      "localEffect": "navigation",
+      "stubReason": "Oeffnet die Liste; keine Serverwirkung.",
+      "navigationRoute": "/crm/campaign-templates"
+    }
+  ],
+  "agentContract": {
+    "businessPurpose": "Wiederverwendbare Kampagnenvorlage.",
+    "examplePrompts": [
+      "Welchen Typ nutzt Vorlage {entity_id}?"
+    ],
+    "sensitiveFields": [],
+    "testSelectors": {
+      "screenRoot": "[data-testid='crm-campaign-template-stamm']",
+      "primaryAction": "[data-testid='action-edit']",
+      "summaryArea": "[data-testid='mask-summary']"
+    }
+  },
+  "layout": {
+    "preferredMode": "desktopDense",
+    "mobileMode": "mobileStack",
+    "touchTargetPx": 44,
+    "floorplan": "objectPage",
+    "columnNavigation": "single",
+    "sectionNavigation": "anchors",
+    "density": "compact",
+    "contextRail": "combined",
+    "summaryPlacement": "header",
+    "stickyHeader": true,
+    "stickyFooter": true
+  },
+  "performance": {
+    "initialPayloadBudgetKb": 36,
+    "requiresLazyTabs": true,
+    "requiresVirtualTables": false,
+    "lookupMinChars": 2,
+    "bundleGroup": "crm"
+  },
+  "identityField": "name",
+  "creation": {
+    "endpoint": "/api/v1/crm/campaigns/templates",
+    "permission": "crm.campaign.update",
+    "detailRoute": "/crm/campaign-template/{entity_id}",
+    "cancelRoute": "/crm/campaign-templates",
+    "defaults": {
+      "campaign_type": "email",
+      "is_active": true
+    },
+    "fields": [
+      {
+        "key": "name",
+        "label": "Name",
+        "type": "text",
+        "required": true
+      },
+      {
+        "key": "description",
+        "label": "Beschreibung",
+        "type": "textarea"
+      },
+      {
+        "key": "campaign_type",
+        "label": "Kampagnentyp",
+        "type": "select",
+        "required": true,
+        "options": [
+          {
+            "value": "email",
+            "label": "E-Mail"
+          },
+          {
+            "value": "sms",
+            "label": "SMS"
+          },
+          {
+            "value": "post",
+            "label": "Post"
+          },
+          {
+            "value": "event",
+            "label": "Veranstaltung"
+          },
+          {
+            "value": "webinar",
+            "label": "Webinar"
+          },
+          {
+            "value": "push",
+            "label": "Push"
+          }
+        ]
+      },
+      {
+        "key": "subject_line",
+        "label": "Betreff",
+        "type": "text"
+      },
+      {
+        "key": "message_body",
+        "label": "Nachricht",
+        "type": "textarea"
+      },
+      {
+        "key": "is_active",
+        "label": "Aktiv",
+        "type": "boolean"
+      }
+    ]
+  },
+  "noWorkflowReason": "Kampagnenvorlage ist ein Verwaltungsobjekt ohne Beleg-Lebenszyklus.",
+  "noProcessChainReason": "Kampagnenvorlage ist ein Verwaltungsobjekt ohne Beleg-Lebenszyklus.",
+  "summary": []
+}

@@ -3,6 +3,7 @@ Financial Reports API
 FIBU-REP-01: Standardreports (Bilanz/GuV/BWA) Backend-Integration
 """
 
+from app.auth.finance_roles import finance_read
 from typing import List, Optional, Dict, Any, Tuple
 import io
 import logging
@@ -24,6 +25,7 @@ logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema, TypedObjectOut
 from app.api.v1.schemas.financial_reports_schemas import FinancialReportsOut
+from app.core.tenant import get_tenant_id  # Mandant aus dem Token (bis 27.10.2026 ?tenant_id=system)
 
 
 router = APIRouter(prefix="/financial-reports", tags=["finance", "reports"])
@@ -144,11 +146,11 @@ class BWA(BaseModel):
     net_result: Decimal
 
 
-@router.get("/balance-sheet", response_model=BalanceSheet, summary="Balance sheet abrufen")
+@router.get("/balance-sheet", response_model=BalanceSheet, summary="Balance sheet abrufen", dependencies=[Depends(finance_read)])
 async def get_balance_sheet(
     period: str = Query(..., description="Accounting period (YYYY-MM)"),
     as_of_date: Optional[date] = Query(None, description="As of date (defaults to end of period)"),
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -253,10 +255,10 @@ async def get_balance_sheet(
         return _empty_balance_sheet(period, as_of_date)
 
 
-@router.get("/profit-loss", response_model=ProfitLoss, summary="Profit loss abrufen")
+@router.get("/profit-loss", response_model=ProfitLoss, summary="Profit loss abrufen", dependencies=[Depends(finance_read)])
 async def get_profit_loss(
     period: str = Query(..., description="Accounting period (YYYY-MM)"),
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -373,10 +375,10 @@ async def get_profit_loss(
         return _empty_profit_loss(period)
 
 
-@router.get("/bwa", response_model=BWA, summary="Bwa abrufen")
+@router.get("/bwa", response_model=BWA, summary="Bwa abrufen", dependencies=[Depends(finance_read)])
 async def get_bwa(
     period: str = Query(..., description="Accounting period (YYYY-MM)"),
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -492,11 +494,11 @@ async def get_bwa(
         return _empty_bwa(period)
 
 
-@router.get("/drilldown", response_model=list[FinancialReportsOut], summary="Report drilldown abrufen")
+@router.get("/drilldown", response_model=list[FinancialReportsOut], summary="Report drilldown abrufen", dependencies=[Depends(finance_read)])
 async def get_report_drilldown(
     account_number: str = Query(..., description="Account number to drill into"),
     period: str = Query(..., description="Accounting period (YYYY-MM)"),
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     limit: int = Query(100, ge=1, le=500),
     db: Session = Depends(get_db),
 ):
@@ -585,13 +587,12 @@ def _report_to_rows(report_type: str, data: Any) -> List[List[str]]:
 
 
 @router.get("/export/{report_type}", summary="Report exportieren",
-    response_model=FinancialReportsOut
-)
+    response_model=FinancialReportsOut, dependencies=[Depends(finance_read)])
 async def export_report(
     report_type: str,
     period: str = Query(..., description="Accounting period (YYYY-MM)"),
     format: str = Query("pdf", description="Export format (pdf, excel)"),
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """
@@ -684,13 +685,12 @@ async def export_report(
 @router.get(
     "/periodenvergleich",
     response_model=TypedObjectOut,
-    summary="Konten-Saldenliste mit Periodenvergleich (BI-DRILL-001)",
-)
+    summary="Konten-Saldenliste mit Periodenvergleich (BI-DRILL-001)", dependencies=[Depends(finance_read)])
 async def get_periodenvergleich(
     periode_aktuell: str = Query(..., description="Aktuelle Periode YYYY-MM"),
     periode_vergleich: str = Query(..., description="Vergleichsperiode YYYY-MM (Vormonat/Vorjahr)"),
     konto_klasse: str = Query(None, description="Kontoklasse-Präfix (z.B. '4' für Erlöse)"),
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     limit: int = Query(200, ge=1, le=1000),
     db: Session = Depends(get_db),
 ) -> dict:
@@ -775,11 +775,10 @@ async def get_periodenvergleich(
 
 @router.get(
     "/beleg-drilldown/{journal_entry_id}", response_model=TypedObjectOut,
-    summary="Beleg-Drilldown: JournalEntry → Quelldokument + Zeilen",
-)
+    summary="Beleg-Drilldown: JournalEntry → Quelldokument + Zeilen", dependencies=[Depends(finance_read)])
 async def get_beleg_drilldown(
     journal_entry_id: str,
-    tenant_id: str = Query("system"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     """Vollständiger Drilldown eines JournalEntry: Header + Zeilen + Quelldokument-Link.

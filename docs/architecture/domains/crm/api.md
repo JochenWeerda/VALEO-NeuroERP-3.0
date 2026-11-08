@@ -35,6 +35,32 @@ Siehe [C4 Container](../../views/c4-02-containers.md) — CRM-Cluster-Tabelle.
 
 ## Authentifizierung
 
+### WhatsApp-Benachrichtigungsvorbereitung (2026-10-11)
+
+Die zwei POST-Wege unter /api/v1/whatsapp/dev/notify verlangen crm:write,
+verifizierten OIDC-Mandanten/Urheber und idempotency_key (1 bis 120 Zeichen,
+mindestens ein Nicht-Leerzeichen). Gleicher Auftrag liefert dieselbe Kennung;
+anderer Inhalt oder Urheber zum selben Schluessel liefert 409. Request-Mandant
+ist nur Konsistenzpruefung. GET /api/v1/whatsapp/dev/outbox verlangt crm:read,
+listet ausschliesslich den Token-Mandanten und begrenzt limit auf 1 bis 200
+(Default 50). pending_browser ist kein Versandnachweis.
+
+Persistenz/Audit verwenden bestehende Kanal-Tabellen; generische
+Prozess-/Freigabeansichten schliessen diesen reservierten Namensraum aus.
+Entscheidung: [ADR-081](../../../adr/adr-081-whatsapp-browser-notification-persistence.md).
+
+## WhatsApp-Bestell-Inbox: Zugriffsschutz (2026-10-12)
+
+Alle fuenf Wege unter /api/v1/crm/bestell-inbox verwenden verifizierten OIDC-
+Mandantenkontext. GET benoetigt crm:read, POST crm:write; admin:all erlaubt
+keinen fremden Kontext. Rumpf-Mandanten und Rumpf-Urheber sind nicht erlaubt.
+Aktive Kundenreferenz ueber public.kunden.business_partner_id zum eigenen
+domain_crm.business_partners; Artikel im eigenen domain_inventory.articles.
+Mehrere Matches bleiben unaufgeloest. Bestaetigung prueft Referenzen erneut
+und nutzt Token-sub als Kontakt-Bediener. Replay-/Korrektur-Audit bleibt offen.
+[Abnahme](../../../quality-assurance/whatsapp-inbox-access-20261012.md),
+[Lernvertrag](../../../workflows/whatsapp-order-learning.md).
+
 ### Ausfuehrbarer MCP-Kontaktadapter (2026-09-21)
 
 `POST /api/v1/mcp/tools/call` verbindet `crm.contact.log` mit demselben
@@ -48,3 +74,11 @@ Weitere Tools sind dadurch nicht automatisch ausfuehrbar.
 Vertrag und Nachweise: [MCP-Ausfuehrung](../../../quality-assurance/mcp-execution-crm-20260921.md).
 
 Bearer Token + `X-Tenant-ID` — [ADR-032](../../../adr/adr-032-auth-enforcement-router-global-dependency.md)
+
+## Aktivitaeten: Vertragsabgleich 2026-10-29
+
+Sammlungsrouten mit und ohne abschliessenden Slash liefern unterschiedliche
+Modelle. Vor der Studio-Listenfreigabe muessen Collection, Detail und Anlage
+auf denselben vorhandenen Fachvertrag ausgerichtet werden; die zentrale
+Listenpreset-Erweiterung allein entscheidet diese Quellfrage nicht.
+[Nachweis und Integrationsgrenzen](../../../quality-assurance/studio-list-presets-20261029.md).

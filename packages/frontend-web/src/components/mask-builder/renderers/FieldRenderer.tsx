@@ -1,11 +1,15 @@
 import { type ChangeEvent, useMemo, useRef } from 'react'
 import { Checkbox } from '@/components/ui/checkbox'
+import { TableFieldRenderer } from './TableFieldRenderer'
+import { TextFileField } from './TextFileField'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { NativeSelect } from '@/components/ui/native-select'
 import type { ScreenFieldDefinition } from '../schema'
 import { renderValue } from './render-utils'
+import { formatPeriod, formatTextValue } from '../runtime/text-format'
+import { formatBusinessDateTime } from '@/lib/business-time'
 import { statusLabel } from './status-labels'
 import { VoiceBar } from './VoiceBar'
 import { createDefaultSttProvider, type SttProvider } from '@/lib/voice/stt-provider'
@@ -22,14 +26,22 @@ function alsListe(value: unknown): string[] {
  * Anzeige eines Nur-Lese-Werts im deutschen Format. Ohne Formatregel oder bei
  * unlesbarem Wert bleibt der Rohwert stehen, damit nichts verschluckt wird.
  */
-export function formatReadOnlyValue(type: ScreenFieldDefinition['type'], value: unknown): string {
+export function formatReadOnlyValue(
+  type: ScreenFieldDefinition['type'], value: unknown, currency = 'EUR', unit?: string, format?: ScreenFieldDefinition['format'],
+): string {
   const raw = renderValue(value)
   if (raw === '') return ''
   const number = Number(raw)
   switch (type) {
+    case 'quantity':
+      return Number.isFinite(number) ? `${new Intl.NumberFormat('de-DE').format(number)}${unit ? ` ${unit}` : ''}` : raw
+    case 'text':
+      return formatTextValue(format, raw)
+    case 'period':
+      return formatPeriod(raw)
     case 'currency':
       return Number.isFinite(number)
-        ? new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(number)
+        ? /^[A-Z]{3}$/.test(currency) ? new Intl.NumberFormat('de-DE', { style: 'currency', currency }).format(number) : `${raw} (Währung fehlt)`
         : raw
     case 'number':
       return Number.isFinite(number) ? new Intl.NumberFormat('de-DE').format(number) : raw
@@ -40,10 +52,8 @@ export function formatReadOnlyValue(type: ScreenFieldDefinition['type'], value: 
       const match = ISO_DATE.exec(raw)
       return match ? `${match[3]}.${match[2]}.${match[1]}` : raw
     }
-    case 'datetime': {
-      const date = new Date(raw)
-      return Number.isNaN(date.getTime()) ? raw : date.toLocaleString('de-DE')
-    }
+    case 'datetime':
+      return formatBusinessDateTime(raw) ?? raw
     case 'boolean':
       if (raw === 'true') return 'Ja'
       if (raw === 'false') return 'Nein'
@@ -59,9 +69,14 @@ export function FieldRenderer({
   onChange,
   voiceEnabled = true,
   voiceProvider,
+  currency = 'EUR',
+  unit,
 }: {
   field: ScreenFieldDefinition
   value: unknown
+  currency?: string
+  /** Aufgeloeste Einheit einer Menge (fest oder aus dem Datensatz). */
+  unit?: string
   onChange?: (_value: unknown) => void
   voiceEnabled?: boolean
   voiceProvider?: SttProvider | null
@@ -87,15 +102,51 @@ export function FieldRenderer({
     })
   }
 
+  if (Object.prototype.hasOwnProperty.call(field, 'fileContent')) {
+    return <TextFileField field={field} value={value} onChange={isReadOnly ? undefined : onChange} />
+  }
+  if (field.type === 'table' && (field.rowFields !== undefined || field.tableEditing !== undefined)) {
+    return <TableFieldRenderer field={field} value={value} onChange={isReadOnly ? undefined : onChange}
+      renderCell={(column, cellValue, change) => <FieldRenderer field={column} value={cellValue}
+        onChange={change} voiceEnabled={false} />} />
+  }
+
   const commonProps = {
     id: field.key,
     value: renderValue(value),
     placeholder: field.placeholder,
     readOnly: isReadOnly,
     'aria-label': field.label,
-    onChange: onChange
+    onChange: onChange && !isReadOnly
       ? (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => onChange(e.target.value)
       : undefined,
+  }
+
+
+  if (field.type === 'stringList') {
+    const listValue = value === undefined ? [] : value
+    const valid = Array.isArray(listValue) && listValue.every((item) => typeof item === 'string')
+    const errorId = `${field.key}-invalid-list`
+    return (
+      <div className="space-y-2">
+        <Label htmlFor={field.key}>
+          {field.label}
+          {field.required && <span className="ml-1 text-destructive">*</span>}
+        </Label>
+        <Textarea
+          id={field.key}
+          aria-label={field.label}
+          aria-invalid={!valid}
+          aria-describedby={valid ? undefined : errorId}
+          value={valid ? listValue.join('\n') : ''}
+          placeholder={field.placeholder}
+          readOnly={isReadOnly || !valid}
+          onChange={valid && !isReadOnly && onChange ? (event) => onChange(event.target.value === '' ? [] : event.target.value.split('\n')) : undefined}
+        />
+        {!valid && <p id={errorId} role="alert" className="text-xs text-destructive">Ungültiger Listenwert: Eine Liste aus Texten wird erwartet.</p>}
+        {field.helpText && <p className="text-xs text-muted-foreground">{field.helpText}</p>}
+      </div>
+    )
   }
 
   if (field.type === 'multiselect' && field.options?.length) {
@@ -156,6 +207,9 @@ export function FieldRenderer({
       </Label>
       {field.type === 'textarea' ? (
         <Textarea {...commonProps} ref={textareaRef} />
+      ) : field.type === 'select' && isReadOnly ? (
+        <Input {...commonProps} ref={inputRef} type="text"
+          value={field.options?.find(option => String(option.value) === renderValue(value))?.label ?? renderValue(value)} />
       ) : field.type === 'select' ? (
         <NativeSelect
           id={field.key}
@@ -183,7 +237,7 @@ export function FieldRenderer({
           {...commonProps}
           ref={inputRef}
           type="text"
-          value={field.key === 'status' ? statusLabel(renderValue(value)) : formatReadOnlyValue(field.type, value)}
+          value={field.key === 'status' ? statusLabel(renderValue(value)) : formatReadOnlyValue(field.type, value, currency, unit ?? field.unit, field.format)}
         />
       ) : field.type === 'boolean' ? (
         <Checkbox
@@ -193,11 +247,20 @@ export function FieldRenderer({
           onCheckedChange={(checked) => onChange?.(checked === true)}
         />
       ) : (
-        <Input
-          {...commonProps}
-          ref={inputRef}
-          type={field.type === 'number' ? 'number' : field.type === 'date' ? 'date' : 'text'}
-        />
+        <div className={field.type === 'quantity' ? 'flex items-center gap-2' : undefined}>
+          <Input
+            {...commonProps}
+            ref={inputRef}
+            type={field.type === 'number' ? 'number' : field.type === 'date' ? 'date' : field.type === 'period' ? 'month'
+              : field.format === 'email' ? 'email' : field.format === 'phone' ? 'tel' : 'text'}
+            inputMode={field.type === 'quantity' || field.type === 'currency' || field.type === 'percentage' ? 'decimal' : undefined}
+            autoComplete={field.format === 'email' ? 'email' : field.format === 'phone' ? 'tel' : undefined}
+            spellCheck={field.format === 'iban' ? false : undefined}
+          />
+          {field.type === 'quantity' && (unit ?? field.unit) ? (
+            <span className="text-sm text-muted-foreground" data-field-unit={field.key}>{unit ?? field.unit}</span>
+          ) : null}
+        </div>
       )}
       {canDictate ? (
         <VoiceBar

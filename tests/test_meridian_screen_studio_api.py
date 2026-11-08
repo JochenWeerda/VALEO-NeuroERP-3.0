@@ -1,14 +1,20 @@
 """Studio API: catalog, propose, validate, four-eyes publish."""
 
 from __future__ import annotations
+from uuid import uuid4
+from studio_review_helper import publish_reviewed, simulation_ready_definition
 
 import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
+from app.auth.deps import get_current_user
 from app.core.screen_definitions import get_screen_definition
 from app.services.studio_draft_store import reset_studio_drafts, save_draft, set_status
-from app.services.studio_propose import propose_studio_draft
+from app.services.studio_propose import propose_studio_draft as original_proposal
+
+def propose_studio_draft(intent):
+    return simulation_ready_definition(original_proposal(intent))
 from app.services.studio_validation import validate_studio_draft
 
 pytestmark = pytest.mark.unit
@@ -19,10 +25,21 @@ _HEADERS = {
 }
 
 
+_USER = {"sub": "anna", "roles": ["admin"], "raw": {"identity_type": "human"}}
+
+
 @pytest.fixture(autouse=True)
 def _reset_drafts():
+    _USER.clear()
+    _USER.update(sub="anna", roles=["admin"], raw={"identity_type": "human"})
+    previous_user = app.dependency_overrides.get(get_current_user)
+    app.dependency_overrides[get_current_user] = lambda: _USER
     reset_studio_drafts()
     yield
+    if previous_user is None:
+        app.dependency_overrides.pop(get_current_user, None)
+    else:
+        app.dependency_overrides[get_current_user] = previous_user
     reset_studio_drafts()
 
 
@@ -46,13 +63,15 @@ def test_propose_builds_tenant_worklist() -> None:
     assert body["definition"]["id"].startswith("tenant/")
     assert body["definition"]["layout"]["columnNavigation"] == "listDetail"
     assert body["violations"] == []
-    assert body["canPublish"] is True
+    assert body["definitionReady"] is True
+    assert body["canPublish"] is False
+    assert body["requiresSimulation"] is True
 
 
 def test_validate_rejects_foreign_endpoint() -> None:
     draft = propose_studio_draft("Lieferanten")
     draft["dataSources"][0]["endpoint"] = "https://evil.example/x"
-    response = _client().post("/api/v1/studio/validate", headers=_HEADERS, json={"definition": draft})
+    response = _client().post("/api/v1/studio/validate", headers=_HEADERS, json={"definition": draft, 'idempotency_key': str(uuid4())})
     assert response.status_code == 200
     assert any(item.startswith("datenquelle_nicht_im_katalog") for item in response.json()["violations"])
 
@@ -63,17 +82,18 @@ def test_save_and_same_actor_cannot_publish() -> None:
     created = client.post(
         "/api/v1/studio/drafts",
         headers={**_HEADERS, "X-Actor-ID": "anna"},
-        json={"definition": draft},
+        json={"definition": draft, 'idempotency_key': str(uuid4())},
     )
     assert created.status_code == 200, created.text
     draft_id = created.json()["id"]
-    forbidden = client.post(
-        f"/api/v1/studio/drafts/{draft_id}/publish",
+    forbidden = publish_reviewed(
+        client, f"/api/v1/studio/drafts/{draft_id}/publish",
         headers={**_HEADERS, "X-Actor-ID": "anna"},
     )
     assert forbidden.status_code == 403
-    published = client.post(
-        f"/api/v1/studio/drafts/{draft_id}/publish",
+    _USER["sub"] = "berta"
+    published = publish_reviewed(
+        client, f"/api/v1/studio/drafts/{draft_id}/publish",
         headers={**_HEADERS, "X-Actor-ID": "berta"},
     )
     assert published.status_code == 200, published.text
@@ -86,7 +106,7 @@ def test_tenant_isolation() -> None:
     created = client.post(
         "/api/v1/studio/drafts",
         headers={**_HEADERS, "X-Actor-ID": "anna"},
-        json={"definition": draft},
+        json={"definition": draft, 'idempotency_key': str(uuid4())},
     )
     draft_id = created.json()["id"]
     other = client.get(
@@ -114,11 +134,12 @@ def _publish_sample(client: TestClient, intent: str = "Lieferanten bewerten") ->
     created = client.post(
         "/api/v1/studio/drafts",
         headers={**_HEADERS, "X-Actor-ID": "anna"},
-        json={"definition": draft},
+        json={"definition": draft, 'idempotency_key': str(uuid4())},
     )
     assert created.status_code == 200, created.text
-    published = client.post(
-        f"/api/v1/studio/drafts/{created.json()['id']}/publish",
+    _USER["sub"] = "berta"
+    published = publish_reviewed(
+        client, f"/api/v1/studio/drafts/{created.json()['id']}/publish",
         headers={**_HEADERS, "X-Actor-ID": "berta"},
     )
     assert published.status_code == 200, published.text
@@ -150,7 +171,9 @@ def test_native_screen_is_never_shadowed_by_studio_draft() -> None:
         "anna",
         {**propose_studio_draft("Kunden"), "id": "crm/customer-360"},
     )
-    set_status(tenant_id, poisoned["id"], "berta", "published_temp")
+    set_status(tenant_id, poisoned["id"], "anna", "review")
+    with pytest.raises(ValueError, match="studio_definition_nicht_freigabefaehig"):
+        set_status(tenant_id, poisoned["id"], "berta", "published_temp")
     still_native = get_screen_definition("crm/customer-360", tenant_id=tenant_id)
     assert still_native is not None
     assert still_native["adapter"]["temporary"] is False
@@ -172,6 +195,7 @@ def test_retire_removes_mask_from_runtime_catalog() -> None:
     record = _publish_sample(client)
     retired = client.post(
         f"/api/v1/studio/drafts/{record['id']}/retire",
+        json={"expected_revision": record["revision"], 'idempotency_key': str(uuid4())},
         headers={**_HEADERS, "X-Actor-ID": "clara"},
     )
     assert retired.status_code == 200, retired.text

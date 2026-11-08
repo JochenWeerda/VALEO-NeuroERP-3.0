@@ -3,7 +3,9 @@ from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+from app.core.tenant import get_tenant_id
 
+from testgrenze import ALLE_FACHROLLEN, ersetze_mandant, ersetze_nutzer
 from app.api.v1.endpoints import external_agent_integrations
 from app.integrations.adapters.superglue.tool_sync import build_superglue_sync_history, refresh_superglue_sync_snapshot
 from app.integrations.services.superglue_execution_journal import append_execution_journal_entry, build_execution_journal_summary
@@ -38,14 +40,14 @@ def test_superglue_quarantine_summary_surfaces_latest(monkeypatch, tmp_path: Pat
         outcome="degraded",
         reason="temporary outage",
     )
-    summary = build_quarantine_summary()
+    summary = build_quarantine_summary(tenant_id="tenant-a")
 
     assert summary["entry_count"] == 1
     assert summary["latest"]["tool_id"] == "sg.document.search"
-    retried = retry_quarantine_entry(entry_id=entry.entry_id, retried_by="tester", note="retry once")
+    retried = retry_quarantine_entry(tenant_id="tenant-a", entry_id=entry.entry_id, retried_by="tester", note="retry once")
     assert retried["retry_count"] == 1
-    resolve_quarantine_entry(entry_id=entry.entry_id, resolved_by="tester", note="reviewed")
-    resolved = build_quarantine_summary()
+    resolve_quarantine_entry(tenant_id="tenant-a", entry_id=entry.entry_id, resolved_by="tester", note="reviewed")
+    resolved = build_quarantine_summary(tenant_id="tenant-a")
     assert resolved["open_count"] == 0
     assert resolved["resolved_count"] == 1
 
@@ -67,7 +69,7 @@ def test_superglue_execution_journal_summary(monkeypatch, tmp_path: Path):
         finished_at=datetime.now(timezone.utc),
         detail={"provider_key": "superglue"},
     )
-    summary = build_execution_journal_summary()
+    summary = build_execution_journal_summary(tenant_id="tenant-a")
     assert summary["entry_count"] == 1
     assert summary["success_count"] == 1
     assert "average_latency_ms" in summary
@@ -91,6 +93,10 @@ def test_external_agent_integrations_surface_refresh_config_and_quarantine(monke
 
     app = FastAPI()
     app.include_router(external_agent_integrations.router)
+    # Der Mandant kommt aus dem Token; hier steht der gepruefte Mandant fuer die Anmeldung.
+    app.dependency_overrides[get_tenant_id] = lambda: "tenant-a"
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
+    ersetze_mandant(app, "tenant-a")
     client = TestClient(app)
 
     refresh = client.post("/agent/integrations/providers/superglue/sync-status/refresh")
@@ -98,8 +104,8 @@ def test_external_agent_integrations_surface_refresh_config_and_quarantine(monke
     config = client.get("/agent/integrations/providers/superglue/config-summary")
     quarantine = client.get("/agent/integrations/providers/superglue/quarantine")
     entry_id = quarantine.json()["open_entries"][0]["entry_id"]
-    resolve = client.post(f"/agent/integrations/providers/superglue/quarantine/{entry_id}/resolve?resolved_by=tester")
-    retry = client.post(f"/agent/integrations/providers/superglue/quarantine/{entry_id}/retry?retried_by=tester")
+    resolve = client.post(f"/agent/integrations/providers/superglue/quarantine/{entry_id}/resolve")
+    retry = client.post(f"/agent/integrations/providers/superglue/quarantine/{entry_id}/retry")
     journal = client.get("/agent/integrations/providers/superglue/execution-journal")
     monitoring = client.get("/agent/integrations/providers/superglue/monitoring")
     admin_overview = client.get("/agent/integrations/providers/superglue/admin-overview?tenant_id=tenant-a")
@@ -130,6 +136,9 @@ def test_provision_superglue_pilot_tools_route(monkeypatch):
 
     app = FastAPI()
     app.include_router(external_agent_integrations.router)
+    # Der Mandant kommt aus dem Token; hier steht der gepruefte Mandant fuer die Anmeldung.
+    app.dependency_overrides[get_tenant_id] = lambda: "tenant-a"
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     client = TestClient(app)
 
     response = client.post("/agent/integrations/providers/superglue/pilot-tools/provision")
@@ -146,6 +155,9 @@ def test_superglue_pilot_smoke_route(monkeypatch):
 
     app = FastAPI()
     app.include_router(external_agent_integrations.router)
+    # Der Mandant kommt aus dem Token; hier steht der gepruefte Mandant fuer die Anmeldung.
+    app.dependency_overrides[get_tenant_id] = lambda: "tenant-a"
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     client = TestClient(app)
 
     response = client.post("/agent/integrations/providers/superglue/pilot-tools/smoke-run")

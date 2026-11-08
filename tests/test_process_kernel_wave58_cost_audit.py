@@ -519,7 +519,8 @@ class TestAuditEintragHash:
 
     def test_hash_deterministic(self):
         e = self._make_eintrag()
-        assert e.berechne_hash() == e.berechne_hash()
+        # Historical wire format serializes the enum name, not only its value.
+        assert e.berechne_hash() == "f1a382ca5ec8fdada3e5ec9dea61f293044dbf9b4fc972c2677b15eed9f8eaef"
 
     def test_different_id_different_hash(self):
         e1 = self._make_eintrag(eintrag_id="AE-1")

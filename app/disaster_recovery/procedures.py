@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 import logging
 from app.core.uuid7 import uuid7
+from app.core.tenant_context import get_current_tenant_id
 
 logger = logging.getLogger(__name__)
 
@@ -601,9 +602,10 @@ class ISO22301DisasterRecovery:
             'preventive_measures': resolution_data.get('preventive_measures', [])
         }
 
-    def get_disaster_recovery_status(self, tenant_id: str = "system") -> Dict[str, Any]:
+    def get_disaster_recovery_status(self, tenant_id: str | None = None) -> Dict[str, Any]:
         """Get comprehensive disaster recovery status"""
         # Filter data by tenant
+        tenant_id = tenant_id or get_current_tenant_id()
         tenant_disasters = [d for d in self.disaster_declarations.values() if d.id.startswith(tenant_id)]
         tenant_executions = [e for e in self.recovery_executions.values() if e.id.startswith(tenant_id)]
         tenant_resources = [r for r in self.recovery_resources.values() if r.id.startswith(tenant_id)]
@@ -740,8 +742,9 @@ class ISO22301DisasterRecovery:
             'recently_tested': recent_tests
         }
 
-    def check_disaster_recovery_compliance(self, tenant_id: str = "system") -> Dict[str, Any]:
+    def check_disaster_recovery_compliance(self, tenant_id: str | None = None) -> Dict[str, Any]:
         """Check ISO 22301 disaster recovery compliance"""
+        tenant_id = tenant_id or get_current_tenant_id()
         disasters = [d for d in self.disaster_declarations.values() if d.id.startswith(tenant_id)]
         procedures = [p for p in self.recovery_procedures.values() if p.id.startswith(tenant_id)]
         executions = [e for e in self.recovery_executions.values() if e.id.startswith(tenant_id)]

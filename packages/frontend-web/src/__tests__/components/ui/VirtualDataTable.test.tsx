@@ -90,4 +90,21 @@ describe('VirtualDataTable', () => {
     const fixed = render(<VirtualDataTable height={220} rowHeight={44} data={rows(2)} columns={columns} />)
     expect(body(fixed.container)?.style.height).toBe('220px')
   })
+
+  it('zeichnet am Desktop eine Tabelle mit Kopf-, Daten- und Zellrollen fuer Screenreader', () => {
+    const rows = [{ id: 'a', name: 'Weizen' }, { id: 'b', name: 'Gerste' }]
+    const { rerender } = render(
+      <VirtualDataTable height={220} rowHeight={44} data={rows} columns={[{ key: 'name', label: 'Name', width: 180 }]} />,
+    )
+    const tabelle = screen.getByRole('table')
+    expect(tabelle.getAttribute('aria-rowcount')).toBe('3')
+    expect(screen.getByRole('columnheader', { name: 'Name' })).toBeInTheDocument()
+    expect(screen.getAllByRole('cell').length).toBeGreaterThan(0)
+    rerender(
+      <VirtualDataTable height={220} rowHeight={44} data={rows} columns={[{ key: 'name', label: 'Name', width: 180 }]}
+        onRowClick={() => undefined} />,
+    )
+    expect(screen.getByRole('grid')).toBeInTheDocument()
+    expect(screen.getAllByRole('gridcell').length).toBeGreaterThan(0)
+  })
 })

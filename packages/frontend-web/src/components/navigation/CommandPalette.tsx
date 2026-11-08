@@ -3,7 +3,7 @@
  * Ersetzt Ribbon-Overload durch beschreibbare Aktionen.
  */
 
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from '@/app/routing/typed-router'
 import { Command as CommandIcon, HelpCircle, Search, Zap } from 'lucide-react'
@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/command'
 import { createMCPMetadata } from '@/design/mcp-schemas/component-metadata'
 import { useActionDispatch } from '@/features/ki-usability/context/ActionDispatchHooks'
+import { useAuth } from '@/hooks/useAuth'
 import { useFeature } from '@/hooks/useFeature'
 import {
   fetchMaskRegistry,
@@ -28,6 +29,8 @@ import {
   sha256Hex,
 } from '@/lib/api/mask-registry'
 import { useNavigationShortcuts } from '@/app/navigation/nav-runtime'
+import { mapFachaktionToCommand } from '@/workspace/command-mapping'
+import { resolveCatalogIdFromCommand, resolveFachaktionCommand } from '@/workspace/fachaktion-resolve'
 import { compileIntents, normalize } from '@/lib/omnibox/intent-compiler'
 import { detectCommandIntent } from '@/lib/omnibox/command-compiler'
 import type { CommandDraftIntent, FormPrefillIntent, NavigateIntent } from '@/lib/omnibox/types'
@@ -66,12 +69,39 @@ export const commandPaletteMCP = createMCPMetadata('CommandPalette', 'navigation
 
 export function CommandPalette({ open, onOpenChange }: CommandPaletteProps): JSX.Element {
   const agrarEnabled = useFeature('agrar')
+  const { user } = useAuth()
   const navigationShortcuts = useNavigationShortcuts()
   const { dispatch } = useActionDispatch()
   const navigate = useNavigate()
   const [search, setSearch] = useState<string>('')
+  const [debouncedFachaktionSearch, setDebouncedFachaktionSearch] = useState('')
   const [lastVoiceQuery, setLastVoiceQuery] = useState<string | null>(null)
   const voiceProvider = useMemo(() => createDefaultSttProvider(), [])
+
+  useEffect(() => {
+    const value = search.trim()
+    if (!open || !resolveCatalogIdFromCommand(value)) {
+      setDebouncedFachaktionSearch('')
+      return
+    }
+    const timer = setTimeout(() => setDebouncedFachaktionSearch(value), 250)
+    return () => clearTimeout(timer)
+  }, [open, search])
+
+  const fachaktionQuery = useQuery({
+    queryKey: ['workspace', 'fachaktion-resolve', debouncedFachaktionSearch],
+    queryFn: () => resolveFachaktionCommand(debouncedFachaktionSearch),
+    enabled: open && debouncedFachaktionSearch.length > 0,
+    staleTime: 30_000,
+    retry: false,
+  })
+  const resolvedFachaktion = debouncedFachaktionSearch === search.trim()
+    && fachaktionQuery.data?.source !== 'blocked'
+    ? fachaktionQuery.data?.action
+    : undefined
+  const resolvedFachaktionCommand = resolvedFachaktion
+    ? mapFachaktionToCommand(resolvedFachaktion)
+    : undefined
 
   const dataSearchQuery = useQuery({
     queryKey: ['global-search', search],
@@ -102,9 +132,10 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps): JSX
       agrarEnabled,
       navigationShortcuts,
       maskRegistry: maskRegistryQuery.data?.masks,
+      userScopes: user?.scopes,
     })
     return enrichCommandsWithOmniboxCatalog(base, omniboxCatalogQuery.data, agrarEnabled)
-  }, [agrarEnabled, maskRegistryQuery.data?.masks, navigationShortcuts, omniboxCatalogQuery.data])
+  }, [agrarEnabled, maskRegistryQuery.data?.masks, navigationShortcuts, omniboxCatalogQuery.data, user?.scopes])
 
   // UIX-060 Omnibox: Mehrwort-Eingaben werden zu Navigations-Plänen mit
   // Filter-Vorschau kompiliert ("Verstanden als") — Enter navigiert nur.
@@ -252,6 +283,27 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps): JSX
         </div>
       ) : null}
       <CommandList className="max-h-[400px]">
+        {resolvedFachaktion && resolvedFachaktionCommand ? (
+          <CommandGroup heading="Fachaktion">
+            <CommandItem
+              value={`${search} fachaktion:${resolvedFachaktion.id}`}
+              onSelect={() => {
+                const path = resolvedFachaktionCommand.actionParams.path
+                if (typeof path !== 'string') return
+                navigate(path)
+                onOpenChange(false)
+              }}
+              data-catalog-id={resolvedFachaktion.catalogId}
+              data-mcp-intent={resolvedFachaktion.mcpIntent}
+            >
+              <Search className="mr-2 h-4 w-4" />
+              <span>{resolvedFachaktion.label}</span>
+              {resolvedFachaktion.kind === 'prepare-command' ? (
+                <span className="ml-2 text-xs text-muted-foreground">vorbereiten</span>
+              ) : null}
+            </CommandItem>
+          </CommandGroup>
+        ) : null}
         <CommandEmpty>
           {search.trim().length > 0
             ? `Keine Ergebnisse für "${search.trim()}"`

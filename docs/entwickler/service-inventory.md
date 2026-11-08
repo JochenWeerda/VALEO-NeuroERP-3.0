@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, qa]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-08
+last_reviewed: 2026-11-07
 version: 3.0.0
 description: Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -28,6 +28,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `agrar_selbstabrechnung_lifecycle_service` | DOM-AGRAR-004.4 — Selbstabrechnung-Lifecycle-Service (Status-Maschine + Storno). |
 | `agrar_settlement_service` | Service layer for Agrar self-billing settlements (AGRAR-SET-01). |
 | `agrar_trocknung_abrechnung_service` | DOM-AGRAR-004.3 — Trocknungsabrechnung-Service. |
+| `agri_flush_booking` | Physical flush transfer, sharing the caller's transaction and trusted tenant. |
 | `agri_lot_link_booking_service` | WM-AGRI-LOT-LINK-001: Waage/WE-Lot in Materialfluss-Silozelle buchen. |
 | `agri_material_flow_trace_integration` | WM-AGRI-CHAIN-002 — Materialfluss ↔ Lieferketten-Log + Outbox. |
 | `agri_qs_workflow_service` | WM-AGRI-QS-003: QS-Workflow fuer Silo-Lots mit Audit-Rueckkopplung. |
@@ -37,7 +38,8 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `ai_data_classification_service` | P2.3 — Lokale KI-Datenklassen fuer VALEO NeuroERP. |
 | `ai_engineering_metrics_service` | P2.2 — Produktivitaetsmetriken fuer AI-Engineering in VALEO. |
 | `annahme_service` | Service layer for compat Annahme (goods intake) and LKW queue routes. |
-| `ap_invoice_kernel_posting` | Kernel PostAPInvoice: gleiche Fachlogik wie POST /ap/invoices/{id}/post, aber ohne |
+| `ap_invoice_approval_service` | AP review before posting; every adapter uses the same locked transaction. |
+| `ap_invoice_kernel_posting` | Kernel adapter: same AP posting command, transaction owned by caller. |
 | `archive_service` | Archive Service |
 | `article_image_enrichment` | Article Image Enrichment Service |
 | `article_import` | FSX-ARTIKEL-IMPORT — kanonisches Zwischenformat fuer den Artikelstamm. |
@@ -54,12 +56,15 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `business_partner_service` | Service layer for BusinessPartner aggregate management. |
 | `calendar_projection_service` | UIX-063 planning calendar projections. |
 | `case_management` | Case Management Service — NC-08 |
+| `closing_checklist_validation` | Server-owned closing checks; persisted template text is never executable SQL. |
 | `closing_checklists_service` | Schemas and helpers for the Closing Checklists domain (FIBU-CLS-01). |
-| `command_handlers_finance` | Domain-Mutationen fuer Process-Kernel-Commands (Finance / AP). |
+| `command_handlers_finance` | AP kernel transport delegates to the same tenant-bound domain commands. |
 | `command_handlers_procurement` | Domain-Mutationen fuer Process-Kernel-Commands (Einkauf). |
+| `command_idempotency` | Transaction-bound replay helpers for versioned domain commands. |
 | `compat_helpers` | Shared helpers for compat service classes. |
 | `compensation_engine` | Compensation Engine — NC-006 |
 | `competitor_monitor` | Competitor Price & Image Monitoring Service |
+| `complaint_list_read` | Tenant-scoped projection for the complaint list. |
 | `compliance_pcn_lifecycle_service` | DOM-COMPLIANCE-004.2 — PCN-Meldung Lifecycle Service (Status-Maschine). |
 | `compliance_service` | Helpers and PDF builder for the Compliance domain. |
 | `compliance_sperre_audit_service` | DOM-COMPLIANCE-004.4 — Artikel-Sperre Audit-Trail Service (append-only). |
@@ -74,6 +79,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `controlling_budget_lifecycle_service` | DOM-CONTROLLING-004.2 — Budget Lifecycle Service (Statusmaschine). |
 | `controlling_kostenstellen_abschluss_service` | DOM-CONTROLLING-004.4 — Kostenstellen-Abschluss Service. |
 | `controlling_service` | Service layer for Controlling module (KPIs, Dashboards, Widgets, Timeseries, Actions). |
+| `crm_activity_service` | Canonical CRM activity commands v1; transports never own business writes. |
 | `crm_auto_capture_service` | Automatische Kontakt-Erfassung (KIM-AUTOCAPTURE). |
 | `crm_capture_inbox_service` | Klärfall-Inbox für nicht zuordenbare Auto-Captures (KIM). |
 | `crm_compat_service` | Service layer for compat CRM domain routes. |
@@ -86,18 +92,27 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `crm_lead_service` | The lead mask and qualification use the INTERESSENT-IST-LEAD register. |
 | `crm_merge_service` | Kunden-Zusammenführung (DOM-CRM-004.2). |
 | `crm_notification_service` | CRM-Benachrichtigungen — internes In-App-Postfach + externe Fachberater-Mail. |
+| `crm_opportunity_reference` | Shared tenant-checked opportunity reference resolution for every activity adapter. |
 | `crm_ownership_service` | Kunden-Ownership (DOM-CRM-004.3) — Zuordnung & Übergabe. |
+| `crm_segment_service` | Canonical, tenant-scoped CRM segment data and bounded membership evaluation. |
 | `customer_reference` | Referenzen in Maskenkoepfen lesbar machen. |
 | `customer_sales_eligibility` | CRM-Kunde ↔ Business-Partner: Sperr- und Lieferfähigkeit für Verkaufsbelege. |
 | `customer_service` | Service layer for CRM Customer management (crm-core + monolith bridge). |
 | `doc_nachweisraum_lifecycle_service` | DOM-DOC-004.2 — Dokumenten-Nachweisraum Lifecycle (Upload/Freigabe/GoBD). |
 | `docflow_artifact_service` | Artefakt-Upload, Versionierung & Freigabe (DOM-DOC-004.2). |
+| `docflow_belegadapter` | DocFlow-Belege in der Form des Belegvertrags (BELEG-011). |
+| `docflow_belegaktionen` | Aktionen der Belegmaske auf den Kommandos von DocFlow und der Approval Engine (BELEG-021). |
+| `docflow_create_command` | Atomic, actor/content-bound DocFlow creation using existing replay storage. |
+| `docflow_creation_context` | Tenant-bound partner references for registered document creation screens. |
 | `docflow_evidence_service` | Dokument-Nachweisraum (DOM-DOC-004) — GoBD-Artefakt-/Vorgangs-Sicht. |
 | `docflow_followup_service` | Bescheid/Rückmeldung & Wiedervorlage am Vorgang (DOM-DOC-004.3). |
+| `docflow_freigabe` | DocFlow-Belege an der zentralen Approval Engine (APPROVAL-001). |
 | `docflow_gobd_service` | GoBD-Exportpaket & DMS-/Paperless-Liveprobe (DOM-DOC-004.4). |
 | `docflow_return_service` | Document-return worklist on top of canonical Docflow headers and artifacts. |
+| `docflow_screen_provenance` | Verified screen provenance stored in the existing immutable document command log. |
 | `docflow_service` | Service layer for the canonical Docflow command pipeline (DOCFLOW-P0-01..03). |
 | `docflow_source_proposals` | Read-only source proposals over existing contracts and customer-owned stock. |
+| `docflow_update_command` | Versioned, replay-safe DocFlow editing in the existing document transaction. |
 | `document_allocation_service` | FSX-MENGENMODELL — Zuordnen von Teilmengen zwischen Belegpositionen. |
 | `document_control_projection` | Project document-control exceptions from canonical source documents. |
 | `document_control_service` | Central document-control exception worklist (Beleg-Kontrolle). |
@@ -133,10 +148,13 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `feeding_reports_service` | Revisionssichere Berichte (FEED-REP-039). |
 | `feeding_requirements_service` | Bewertungssysteme, Bedarfsprofile und Solverlauf-Dokumentation (FEED-CORE-020). |
 | `feeding_supply_service` | Plan-bound supply projection and controlled procurement handoff. |
+| `finance_belegbuchung` | Finance bucht, was die belegfuehrenden Domaenen freigeben: Gutschriften und Storno der Eingangsrechnung. |
 | `finance_clearing_service` | Zahlungseingang / OP-Auszifferung (DOM-FIN-004.3). |
 | `finance_closing_service` | FIN-ABSCHLUSS-STUBS-001 — GoBD-taugliche Periodenabschluss-Fachlogik. |
 | `finance_datev_service` | DATEV-Export (DOM-FIN-004.5). |
 | `finance_dunning_service` | Mahnlauf & Mahnstufen-Eskalation (DOM-FIN-004.2). |
+| `finance_eingangsrechnung_buchung` | Eingangsrechnung buchen: Aufwand und Vorsteuer je Steuerschluessel im Soll, Kreditor brutto im Haben. |
+| `finance_freigabe` | Die Buchungswege neben DocFlow an der zentralen Approval Engine (APPROVAL-001). |
 | `finance_mahnstufe_service` | DOM-FINANCE-004.4 — Mahnstufen-Eskalation-Trail Service (append-only). |
 | `finance_op_service` | Offene-Posten-Cockpit / OP-Aging (DOM-FIN-004). |
 | `finance_period_service` | Periodenabschluss & Storno-Konsistenz (DOM-FIN-004.4). |
@@ -147,14 +165,17 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `fints_connector` | FinTS/HBCI Bank-API Connector (§ 25a KWG, PSD2). |
 | `foreign_goods_worklist_service` | Governed operator projection over canonical foreign-goods storage records. |
 | `frachtbrief_service` | Frachtbrief als Transportbeleg der Sendung, nicht als Lieferschein. |
+| `freigabe_engine` | Die zentrale Approval Engine (APPROVAL-001). |
 | `gap_analytics` | GAP-Analytik: Trend-/Wachstumsabschätzung aus mehreren Jahrgängen. |
 | `gap_pipeline` | GAP (Gemeinsame Agrarpolitik) ETL-Engine. |
 | `gap_pipeline_service` | Service layer for the GAP (Gemeinsame Agrarpolitik) ETL pipeline endpoints. |
 | `gap_progress` | In-process job- and progress-tracking for the GAP ETL pipeline. |
+| `gdpr_request_processor` | Explicit CRM-subject processing; never substitutes a system-user lookup. |
 | `genossenschaft_service` | Mitgliederregister einer eG — eine Wahrheit uber den Anteilsbestand. |
 | `geo_pipeline` | Geo-Pipeline – Betriebsadressen → Koordinaten für den Außendienst-Viewer. |
 | `guardrails` | Guardrails Service — NC-C3 |
 | `harvest_acceptance_service` | Service layer for Harvest Acceptance (Ernte-Annahme) CRUD operations. |
+| `hr_row_delete_commands` | Versioned, transaction-bound deletion for HR rows; no transport registration. |
 | `hrm_abwesenheit_service` | — |
 | `hrm_zeiterfassung_service` | DOM-HRM-004.2 — HRM Zeiterfassung Lifecycle (Einstempeln/Ausstempeln/Korrektur). |
 | `integration_bootstrap` | — |
@@ -165,6 +186,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `inventory_compat_service` | Service layer for compat inventory (lager) and futter domain routes. |
 | `inventory_correction_service` | DOM-INV-004.4 — Bestandskorrektur-Storno-Service. |
 | `inventory_count_close_service` | DOM-INV-004.3 — Inventur-Differenzbeleg-Service. |
+| `inventory_count_sheet_command` | Versioned count-sheet creation shared by REST, UI, CLI and MCP. |
 | `inventory_document_reference` | Belegbezug einer Bestandsbewegung — kanonisch und historisch. |
 | `inventory_lot_trace_service` | DOM-INV-004.2 — Chargen-/MHD-Traceability Service (FEFO). |
 | `inventory_movement_direction` | DOM-INV-005: kanonische Bewegungsrichtung fuer inventory_stock_movements. |
@@ -179,25 +201,37 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `kontrakt_position_service` | Rohwaren-Positionsmonitor: Long/Short-Berechnung pro Artikel. |
 | `kontrakte_adapters` | — |
 | `kontrakte_service` | — |
+| `kontrollkorb` | Lesemodell des Pruefkorbs (FIN-CONTROL-002): Arbeitsliste und Lagebild fuer den Controller. |
 | `kunden_backfill` | Phase 2D Schritt 3: Backfill public.kunden -> Domänensatelliten. |
 | `kunden_geocode_service` | Befüllt public.kunden_geo mit präzisen Koordinaten je Kunde. |
 | `kunden_merge` | Kunden/Business-Partner-Merge — Dry-Run / Reconciliation (Phase 2A). |
 | `l3_report_catalog_service` | Fixed L3 report catalog with shared sums, export and document drilldown. |
 | `legacy_interface_adapter_service` | Versioned, non-executing adapter framework for L3 Standard and Unimet. |
 | `lieferschein_pdf` | Lieferschein PDF Generator |
+| `list_experience_metrics` | Read-only list metrics shared across registered human/MCP/CLI projections. |
+| `list_presets` | Registered read-only list selectors, shared by REST, MCP and CLI. |
 | `lkv_pipeline` | LKV-Pipeline – Download der LKV-Weser-Ems-Jahresberichte (Milchleistungsprüfung). |
 | `llm_gateway` | Anbieterunabhängiges LLM-Gateway. |
 | `logistics_disposition_service` | DOM-LOG-004.2 — Tour-Dispositions-Service (Kapazität + Zeitfenster). |
 | `logistics_epod_service` | DOM-LOG-004.3 — ePOD-Lifecycle-Service (Ablieferungsbeleg → Settlement). |
 | `lohn_service` | Payroll calculation and closeout contracts. |
+| `made_by_studio_gates` | Made-by-Studio Qualitätsgates A–C und E für registrierte ScreenDefinitions. |
 | `mail_ingest_service` | Server-seitiger IMAP-Mail-Ingest (per Tenant konfiguriert). |
 | `mail_versand` | E-Mail-Versand ueber SMTP — wirklich, oder mit klarer Absage. |
 | `mail_workspace_service` | Role-scoped ERP mail workspace on top of the canonical IMAP ingest. |
 | `mailkonto_service` | Postfaecher des Mandanten: ausgehende E-Mails ueber seinen eigenen Dienst. |
 | `mask_action_runtime_service` | SPEC-P1-04 — gemeinsame ActionRuntime für Mask-CommandEndpoints. |
+| `mask_commands` | Statusaktionen einer Maske als Kommando-Weg (MASK-COMMANDS-ROLLOUT-20261019). |
+| `mask_data_read` | Shared GET-source access for Human, CLI and MCP; no SQL or alternate business rights. |
 | `mask_rollout_summary_service` | Data service for batch mask rollout screen-summary endpoints (Waves 42–51). |
+| `mask_table_query` | Deterministic table projection; all channels share this implementation. |
+| `mcp_beleg_tools` | Lesende MCP-Werkzeuge fuer Belege (BELEG-013). |
 | `mcp_execution_service` | Authenticated ERP adapters; a catalog entry alone never enables execution. |
+| `mcp_mask_actions` | Generische MCP-Werkzeuge fuer Maskenaktionen — eine Fachaktion, derselbe Kommandoweg wie die Maske. |
+| `mcp_studio_authoring` | Studio-Authoring fuer Agenten (MCP/CLI): ein LLM baut Masken nur ueber Studio, nie daran vorbei. |
+| `mcp_studio_plans` | Versioned Studio-authoring capability; only the registered HTTP command writes. |
 | `mcp_tool_registry_service` | MCP-ERP-TOOLS-001 — Rollenbasierter ERP-Tool-Katalog fuer Agent-Zugriff. |
+| `mcp_write_capability` | Explicit registry release for generic MCP writes; all other writes fail closed. |
 | `meldewesen_lifecycle_service` | DOM-MEL-004.2 — Meldewesen Lifecycle (Intrastat/ELSTER/ATLAS — extern gegated). |
 | `milchvieh_crosssell_service` | Cross-Sell-Auswertung Milchvieh: Hygiene-Bedarf + Kraftfutter-Potenzial. |
 | `mobile_sync_service` | MOB-SYNC-001: Mobile Offline-Sync Service. |
@@ -212,7 +246,9 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `numbering_service` | Numbering Service |
 | `numbering_service_pg` | Numbering Service (PostgreSQL) |
 | `o2c_chain_service` | Order-to-Cash-Kette (DOM-SALES-004) — Angebot → Auftrag → Lieferschein → Rechnung. |
+| `open_item_read_source` | Canonical open-item read source shared by the API and Studio detail summaries. |
 | `operator_agent_service` | OPERATOR-AGENT-001 — ERP-Operator-Agent: Proposal + kontrollierte LOW-Schreibaktionen. |
+| `ordrsp_service` | EDIFACT ORDRSP (Bestellantwort, D.96A) lesen und gegen die Bestellung abgleichen. |
 | `payment_run_freigabe` | Freigabe eines Zahlungslaufs: Mandant und Vier-Augen-Prinzip. |
 | `pdf_service` | PDF Service |
 | `pdf_template_service` | PDF Template Service |
@@ -234,6 +270,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `position_service` | Commodity Position Calculation Service. |
 | `position_snapshot_service` | Commodity Position Snapshot Service (optional cache for matrix performance). |
 | `preisfindung_service` | Die Preiskaskade — jede Stufe wird ausgewertet, jeder Fehlschlag gemeldet. |
+| `pricing_condition_read` | Tenant-bound read shared by the existing pricing and POS adapters. |
 | `proc_bestellung_lifecycle_service` | DOM-PROC-004.2 — Bestellung Lifecycle Service (Statusmaschine). |
 | `proc_rechnungspruefung_service` | DOM-PROC-004.4 — Rechnungsprüfung + ERS (Evaluated Receipt Settlement) Service. |
 | `proc_wareneingang_service` | DOM-PROC-004.3 — Wareneingangs-Buchung + QS Service. |
@@ -259,6 +296,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `sales_invoice_service` | Aus Lieferscheinpositionen wird eine Rechnung mit eigenen Positionen. |
 | `sales_lieferschein_close_service` | DOM-SALES-004.3 — Lieferschein-Closing-Flow Service. |
 | `sales_match_service` | Auftrag-↔-Lieferschein-Positions-Match (DOM-SALES-004.2). |
+| `sales_offer_import` | Atomic, idempotent import of explicitly specified sales offers. |
 | `sales_posting_service` | Service for creating FIBU journal entries along the Auftrag → Lieferschein → Rechnung chain. |
 | `sales_preisabweichung_service` | DOM-SALES-004.4 — Preisabweichungs-Prüfung + Eskalation/Freigabe Service. |
 | `sales_storno_service` | Lieferungs-Storno & Gutschrift-Übersicht (DOM-SALES-004.4) — durchgängig. |
@@ -267,23 +305,45 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `secrets_vault` | Secrets Vault Service — NC-15 |
 | `security_observability` | Central observability for security-relevant block and violation events. |
 | `semantic_e2e_chain_service` | SEMANTIC-E2E-MATRIX-001 — Semantische Prozessketten-Validierung. |
+| `sepa_xml_generator` | SEPA pain.001.001.03 — XML einer Ueberweisungs-Sammeldatei fuer Zahlungslaeufe. |
 | `settlement_approval_service` | Approval workflow service for Agrar settlements (AGRAR-SET-FREIGABE). |
 | `settlement_document_archive_service` | Persistent settlement PDF versions in the existing PostgreSQL Docflow archive. |
 | `settlement_drying_service` | Drying calculation service for Agrar settlements (AGRAR-SET-TROCKNUNG). |
 | `settlement_pdf_service` | PDF generation and GoBD archiving for Agrar settlement self-billing documents. |
 | `silo_rule_engine_service` | WM-SILO-RULE-ENGINE-001 — Automatische Zielzellen-Vorschlaege fuer Einlagerung. |
 | `stt_client` | Speech-to-Text-Client (anbieterunabhängig, OpenAI-kompatibel). |
+| `studio_catalog_contracts` | Bounded metadata for the registered Flow Spine catalog cockpit. |
 | `studio_draft_store` | Studio drafts with tenant isolation, four-eyes publish, and optional Postgres. |
+| `studio_entity_commands` | Generated domain-command implementation. Only deployment-owned EntitySpec selects tables. |
+| `studio_entity_compiler` | Deterministic deployable entity bundle. Does not execute DDL or activate writes. |
+| `studio_entity_contracts` | Compile-time contracts for new Studio-owned master data, never existing ledgers. |
+| `studio_entity_evolution` | Reviewable additive evolution from trusted registered Studio master-data contracts. |
+| `studio_entity_router` | One authenticated HTTP command adapter for generated master-data contracts. |
+| `studio_entity_simulation` | Real rollback-only CRUD simulation for an exact registered Studio entity definition. |
+| `studio_file_content_contracts` | Pure validation of bounded local UTF-8 file-content field declarations. |
+| `studio_history_view` | Read-only, type-preserving comparison of immutable Studio snapshots. |
+| `studio_list_contracts` | Bounded declarative list behavior; no commands or executable expressions. |
+| `studio_migration` | Studio migration compiler: catalog wiring and reviewable additive Alembic artifacts. |
+| `studio_migration_store` | Revision-bound plans in the existing append-only Studio history, never DDL. |
+| `studio_native_import` | Version native masks through the existing Studio store, without activation. |
+| `studio_process_simulation` | Real domain-service simulation on the shared probe, always rolled back. |
 | `studio_propose` | Deterministic ScreenDefinition proposals for humans and agents. |
+| `studio_read_view_contracts` | Strict contracts for declarative related-row reads; grants no write access. |
+| `studio_runtime_surface_contracts` | Fixed bindings for domain surfaces rendered inside the universal runtime. |
+| `studio_semantic` | Versioned business vocabulary and side-effect-free Studio reference contract. |
+| `studio_semantic_model` | Budgeted intent interpretation; model output can only select a known contract. |
 | `studio_validation` | SD-Studio Draft-Validierung (UIX-090) — harte Sicherheitsregeln. |
 | `supply_chain_event_service` | Append-only Ketten-Ereignis-Log + kanonischer Übergabestatus (DOM-SUPPLY-004.2). |
 | `supply_chain_lot_service` | Lager-Lot-Folgeaktionen mit Abweichungsgrund (DOM-SUPPLY-004.3). |
 | `supply_chain_trace_service` | Supply-Chain-Traceability (DOM-SUPPLY-004) — durchgängige, prüfbare Kette. |
 | `sync_scheduler` | Advanced Sync Scheduler Service |
 | `tank_adapter_service` | Idempotent tank-system intake, validation and delivery-note handover. |
+| `tenant_lifecycle_service` | Explicit tenant administration; preserve every journal entry before deletion. |
 | `tse_fiskaly_service` | Compatibility facade for the canonical fiscalization provider layer. |
+| `versandprofil_commands` | Versandprofil-Deaktivierung: vorbereiteter transaktionaler Fachcommand v1. |
 | `vies_service` | VIES Service |
 | `voice_adapter` | Voice Adapter Layer — NC-003 |
+| `waage_import_service` | Tenant-bound ASCII import into the canonical weighing-ticket aggregate. |
 | `warehouse_service` | — |
 | `wareneingang_avis_service` | Wareneingang aus dem Anlieferavis — Bestellung beliefert, Ware im Lager. |
 | `webfleet_connect` | Aktuelle Fahrzeugpositionen über WEBFLEET.connect. |

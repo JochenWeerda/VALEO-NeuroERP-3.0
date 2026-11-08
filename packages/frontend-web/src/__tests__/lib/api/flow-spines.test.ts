@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import i18n from '@/i18n/config'
+import { apiClient } from '@/lib/api-client'
 import {
   getFlowSpineWorkspaceQueryKey,
   prefetchFlowSpineWorkspace,
@@ -80,4 +81,27 @@ describe('flow spine query keys', () => {
       'de',
     ])
   })
+  it('cancels pending warmup on unmount and keeps staggered reads bounded', () => {
+    vi.useFakeTimers()
+    const prefetchQuery = vi.fn().mockResolvedValue(undefined)
+    const cancel = warmFlowSpineCache({ prefetchQuery } as never)
+    vi.advanceTimersByTime(299)
+    expect(prefetchQuery).toHaveBeenCalledTimes(1)
+    cancel()
+    vi.runAllTimers()
+    expect(prefetchQuery).toHaveBeenCalledTimes(1)
+  })
+  it('uses the same captured language for delayed requests and cache keys', async () => {
+    vi.useFakeTimers()
+    const read = vi.spyOn(apiClient, 'get').mockResolvedValue({ data: { nodes: [] } })
+    const prefetchQuery = vi.fn().mockResolvedValue(undefined)
+    const cancel = warmFlowSpineCache({ prefetchQuery } as never, 'de')
+    Object.defineProperty(i18n, 'resolvedLanguage', { value: 'en', configurable: true })
+    vi.advanceTimersByTime(301)
+    await prefetchQuery.mock.calls[1][0].queryFn()
+    expect(prefetchQuery.mock.calls[1][0].queryKey.at(-1)).toBe('de')
+    expect(read).toHaveBeenCalledWith('/api/v1/process/flow-spines/procure-to-pay?lang=de')
+    cancel()
+  })
+
 })

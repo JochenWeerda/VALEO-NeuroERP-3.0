@@ -1,8 +1,4 @@
 import { z } from 'zod';
-import { extendZodWithOpenApi } from 'zod-openapi';
-
-// Extend Zod with OpenAPI
-extendZodWithOpenApi(z);
 
 // Forecast Model Enum
 export const ForecastModelSchema = z.enum([
@@ -13,7 +9,7 @@ export const ForecastModelSchema = z.enum([
   'NeuralNetwork',
   'RuleBased',
   'External'
-]).openapi({
+]).meta({
   title: 'Forecast Model',
   description: 'Machine learning or statistical model for forecasting',
 });
@@ -25,7 +21,7 @@ export const ForecastHorizonSchema = z.enum([
   'months',
   'quarters',
   'years'
-]).openapi({
+]).meta({
   title: 'Forecast Horizon',
   description: 'Time unit for forecast horizon',
 });
@@ -37,7 +33,7 @@ export const ForecastValueSchema = z.object({
   lowerBound: z.number().optional(),
   upperBound: z.number().optional(),
   confidence: z.number().min(0).max(1).optional(),
-}).openapi({
+}).meta({
   title: 'Forecast Value',
   description: 'Individual forecast data point',
 });
@@ -45,7 +41,7 @@ export const ForecastValueSchema = z.object({
 // Forecast Metadata Schema
 export const ForecastMetadataSchema = z.object({
   trainingDataPoints: z.number().optional(),
-  modelParameters: z.record(z.any()).optional(),
+  modelParameters: z.record(z.string(), z.any()).optional(),
   accuracyMetrics: z.object({
     mse: z.number().optional(),
     rmse: z.number().optional(),
@@ -55,7 +51,7 @@ export const ForecastMetadataSchema = z.object({
   }).optional(),
   lastTrainedAt: z.date().optional(),
   dataSource: z.string().optional(),
-}).openapi({
+}).meta({
   title: 'Forecast Metadata',
   description: 'Metadata about forecast model and training',
 });
@@ -67,14 +63,14 @@ export const CreateForecastRequestSchema = z.object({
   horizonUnit: ForecastHorizonSchema,
   model: ForecastModelSchema,
   confidenceInterval: z.number().min(0).max(1).optional(),
-}).openapi({
+}).meta({
   title: 'Create Forecast Request',
   description: 'Request payload for creating a forecast',
 });
 
 // Forecast Response Schema
 export const ForecastResponseSchema = z.object({
-  id: z.string().uuid(),
+  id: z.string().guid(),
   tenantId: z.string(),
   metricName: z.string(),
   horizon: z.number(),
@@ -91,7 +87,7 @@ export const ForecastResponseSchema = z.object({
   createdAt: z.string().datetime(),
   metadata: ForecastMetadataSchema.optional(),
   version: z.number(),
-}).openapi({
+}).meta({
   title: 'Forecast Response',
   description: 'Forecast data response',
 });
@@ -104,7 +100,7 @@ export const ForecastQuerySchema = z.object({
   to: z.string().datetime().optional(),
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
-}).openapi({
+}).meta({
   title: 'Forecast Query Parameters',
   description: 'Query parameters for forecast filtering and pagination',
 });
@@ -118,14 +114,14 @@ export const ForecastListResponseSchema = z.object({
     total: z.number(),
     totalPages: z.number(),
   }),
-}).openapi({
+}).meta({
   title: 'Forecast List Response',
   description: 'Paginated list of forecasts',
 });
 
 // Forecast Accuracy Schema
 export const ForecastAccuracySchema = z.object({
-  forecastId: z.string().uuid(),
+  forecastId: z.string().guid(),
   metricName: z.string(),
   accuracy: z.number().min(0).max(1),
   mse: z.number().optional(),
@@ -133,7 +129,7 @@ export const ForecastAccuracySchema = z.object({
   mae: z.number().optional(),
   mape: z.number().optional(),
   r2: z.number().optional(),
-}).openapi({
+}).meta({
   title: 'Forecast Accuracy',
   description: 'Accuracy metrics for a forecast',
 });
@@ -151,7 +147,7 @@ export const ForecastComparisonSchema = z.object({
     upperBound: z.number().optional(),
   })),
   accuracy: ForecastAccuracySchema,
-}).openapi({
+}).meta({
   title: 'Forecast Comparison',
   description: 'Comparison between actual and forecast values',
 });

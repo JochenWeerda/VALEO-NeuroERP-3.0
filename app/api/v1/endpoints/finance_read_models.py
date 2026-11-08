@@ -4,6 +4,7 @@ Server-side pre-aggregated cockpit KPIs for stable query contracts.
 """
 from __future__ import annotations
 
+from app.auth.finance_roles import finance_admin, finance_read
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -104,7 +105,7 @@ router = APIRouter(prefix="/finance/read-models", tags=["finance", "read-models"
 register_projection_status_loader(get_projection_status)
 
 
-@router.get("/ap-invoice-cockpit", response_model=APInvoiceCockpitReadModel, summary="Ap invoice cockpit abrufen")
+@router.get("/ap-invoice-cockpit", response_model=APInvoiceCockpitReadModel, summary="Ap invoice cockpit abrufen", dependencies=[Depends(finance_read)])
 async def get_ap_invoice_cockpit(
     tenant_id: str = Depends(get_tenant_id),
 ) -> APInvoiceCockpitReadModel:
@@ -118,7 +119,7 @@ async def get_ap_invoice_cockpit(
     )
 
 
-@router.get("/payment-run-cockpit", response_model=PaymentRunCockpitReadModel, summary="Payment run cockpit abrufen")
+@router.get("/payment-run-cockpit", response_model=PaymentRunCockpitReadModel, summary="Payment run cockpit abrufen", dependencies=[Depends(finance_read)])
 async def get_payment_run_cockpit(
     tenant_id: str = Depends(get_tenant_id),
 ) -> PaymentRunCockpitReadModel:
@@ -132,7 +133,7 @@ async def get_payment_run_cockpit(
     )
 
 
-@router.get("/process-observation", response_model=ProcessObservationReadModel, summary="Process observation abrufen")
+@router.get("/process-observation", response_model=ProcessObservationReadModel, summary="Process observation abrufen", dependencies=[Depends(finance_read)])
 async def get_process_observation(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -150,7 +151,7 @@ async def get_process_observation(
     )
 
 
-@router.get("/cash-closings", response_model=CashClosingReadModel, summary="Cash closings abrufen")
+@router.get("/cash-closings", response_model=CashClosingReadModel, summary="Cash closings abrufen", dependencies=[Depends(finance_read)])
 async def get_cash_closings(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -162,7 +163,7 @@ async def get_cash_closings(
     return cache_projection(tenant_id, "cash-closings", build_cash_closing_read_model(db, tenant_id))
 
 
-@router.get("/cash-closings/analysis", response_model=CashClosingAnalysisReadModel, summary="Cash closing analysis abrufen")
+@router.get("/cash-closings/analysis", response_model=CashClosingAnalysisReadModel, summary="Cash closing analysis abrufen", dependencies=[Depends(finance_read)])
 async def get_cash_closing_analysis(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -171,7 +172,7 @@ async def get_cash_closing_analysis(
     return cache_projection(tenant_id, "cash-closings/analysis", project_cash_closing_analysis(snapshot))
 
 
-@router.get("/cash-closings/reporting", response_model=CashClosingReportingReadModel, summary="Cash closing reporting abrufen")
+@router.get("/cash-closings/reporting", response_model=CashClosingReportingReadModel, summary="Cash closing reporting abrufen", dependencies=[Depends(finance_read)])
 async def get_cash_closing_reporting(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -180,7 +181,7 @@ async def get_cash_closing_reporting(
     return cache_projection(tenant_id, "cash-closings/reporting", project_cash_closing_reporting(snapshot))
 
 
-@router.post("/_rebuild", response_model=ProjectionRebuildResult, summary="Finance read model projections rebuild")
+@router.post("/_rebuild", response_model=ProjectionRebuildResult, summary="Finance read model projections rebuild", dependencies=[Depends(finance_admin)])
 async def rebuild_finance_read_model_projections(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -188,7 +189,7 @@ async def rebuild_finance_read_model_projections(
     return rebuild_finance_projection_store(tenant_id=tenant_id, db=db)
 
 
-@router.get("/_status", response_model=ProjectionStatusReadModel, summary="Finance read model projection status abrufen")
+@router.get("/_status", response_model=ProjectionStatusReadModel, summary="Finance read model projection status abrufen", dependencies=[Depends(finance_read)])
 async def get_finance_read_model_projection_status(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -196,7 +197,7 @@ async def get_finance_read_model_projection_status(
     return get_projection_status(tenant_id=tenant_id, db=db)
 
 
-@router.get("/cash-closings/{closing_id}", response_model=CashClosingSnapshot, summary="Cash closing detail abrufen")
+@router.get("/cash-closings/{closing_id}", response_model=CashClosingSnapshot, summary="Cash closing detail abrufen", dependencies=[Depends(finance_read)])
 async def get_cash_closing_detail(
     closing_id: str,
     tenant_id: str = Depends(get_tenant_id),

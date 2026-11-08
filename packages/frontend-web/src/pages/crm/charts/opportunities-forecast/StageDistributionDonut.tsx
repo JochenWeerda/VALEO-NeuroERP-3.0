@@ -1,7 +1,7 @@
-import { SimpleDonutChart } from '@/components/charts/SimpleDonutChart'
+import { NativeListPage } from '@/components/mask-builder/NativeListPage'
 
-type StageDistributionPoint = { name: string; value: number }
-
-export default function StageDistributionDonut({ data }: { data: StageDistributionPoint[] }): JSX.Element {
-  return <SimpleDonutChart data={data} valueFormatter={(value) => `${value.toLocaleString('de-DE')} EUR`} />
+export default function Page(): JSX.Element {
+  return (
+    <NativeListPage screenId="crm/charts/opportunities-forecast/StageDistributionDonut" testId="screen-crm/charts/opportunities-forecast/StageDistributionDonut" />
+  )
 }

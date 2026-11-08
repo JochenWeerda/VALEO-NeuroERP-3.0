@@ -84,6 +84,7 @@ const candidates = [
 // Native mask aliases are the rollout switch for UniversalMaskRuntime pages and
 // must win over legacy auto detail routes on the same URL.
 const byPath = new Map()
+const publicPaths = new Set(['login', 'auth/login', 'auth/callback'])
 function candidatePriority(entry) {
   if (entry.source === 'alias' && entry.module?.endsWith('-native')) return -1
   return { auto: 0, alias: 1, navigation: 2 }[entry.source] ?? 3
@@ -91,6 +92,9 @@ function candidatePriority(entry) {
 for (const entry of candidates.sort(
   (a, b) => candidatePriority(a) - candidatePriority(b),
 )) {
+  // Matching is case-insensitive: only the canonical public entries may own
+  // these URLs. Auto/alias variants must never place login behind _app.
+  if (publicPaths.has(entry.path.toLowerCase())) continue
   if (entry.path && !byPath.has(entry.path)) byPath.set(entry.path, entry)
 }
 
@@ -101,7 +105,9 @@ byPath.set('auth/callback', { module: '@/pages/auth/Callback', path: 'auth/callb
 byPath.set('fibu-suite/$', { module: '@runtime/fibu-suite', path: 'fibu-suite/$', source: 'system' })
 
 const entries = [...byPath.values()].sort((a, b) => a.path.localeCompare(b.path))
-const searchKeys = [...collectSearchKeys(sourceDir)].sort()
+// Published deep links remain part of the closed contract even after page migration.
+const publicSearchKeys = ['search']
+const searchKeys = [...new Set([...publicSearchKeys, ...collectSearchKeys(sourceDir)])].sort()
 const paramKeys = [
   ...new Set(
     entries.flatMap((entry) =>
@@ -109,7 +115,6 @@ const paramKeys = [
     ),
   ),
 ].sort()
-const publicPaths = new Set(['login', 'auth/login', 'auth/callback'])
 const publicEntries = entries.filter((entry) => publicPaths.has(entry.path))
 const appEntries = entries.filter(
   (entry) =>

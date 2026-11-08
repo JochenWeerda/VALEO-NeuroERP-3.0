@@ -35,6 +35,12 @@ class PortalEmpfehlungOut(BaseSchema):
     gueltig_bis: Optional[str] = None
     gesehen: Optional[bool] = None
     erstellt_am: Optional[str] = None
+    customer_id: Optional[str] = None
+    # Herkunft: ``regel`` (feste Regeln) oder ``ki`` (mit Modell) — eine Empfehlung ist ein Vorschlag, kein Auftrag.
+    herkunft: Optional[str] = None
+    modell: Optional[str] = None
+    ki_generiert: Optional[bool] = None
+    gesehen_am: Optional[str] = None
 
 
 class PortalEmpfehlungListOut(BaseSchema):
@@ -120,8 +126,31 @@ class PortalLohndienstAuftragOut(BaseSchema):
     erstellt_am: Optional[str] = None
     aktualisiert_am: Optional[str] = None
     abgeschlossen: Optional[bool] = None
+    customer_id: Optional[str] = None
+    # Optimistische Version: ein Statuswechsel nennt sie als ``erwartete_version``.
+    version: Optional[int] = None
+    angelegt_von: Optional[str] = None
+    geaendert_von: Optional[str] = None
+    dienstleister_zugewiesen: Optional[bool] = None
+    # Nur fuer den Innendienst; Portalnutzer sehen nur, ob ein Lohndienstleister zugewiesen ist.
+    dienstleister_subject: Optional[str] = None
+    # True, wenn dieselbe Anfrage (Idempotenzschluessel) schon ausgefuehrt war und hier nur wiederholt wurde.
+    wiederholung: Optional[bool] = None
+    # Fuer die Ausfuehrung noetige Schlagangaben (Einzelabruf).
+    schlaege: list[dict[str, Any]] = Field(default_factory=list)
 
 
 class PortalLohndienstListOut(BaseSchema):
     items: list[PortalLohndienstAuftragOut] = Field(default_factory=list)
     count: Optional[int] = None
+
+
+class PortalLohndienstEreignisOut(BaseSchema):
+    id: str
+    aktion: str
+    von_status: Optional[str] = None
+    nach_status: str
+    version: int
+    akteur: str
+    kanal: str
+    erfasst_am: str

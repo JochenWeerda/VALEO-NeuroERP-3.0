@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 import logging
 from app.core.uuid7 import uuid7
+from app.core.tenant_context import get_current_tenant_id
 
 logger = logging.getLogger(__name__)
 
@@ -74,7 +75,7 @@ class AccessEvent:
     access_granted: bool
     reason: str
     location_details: Dict[str, Any]
-    tenant_id: str = "system"
+    tenant_id: str = field(default_factory=get_current_tenant_id)
 
 
 @dataclass
@@ -546,9 +547,10 @@ class ISO27001PhysicalSecurity:
 
         return True
 
-    def get_physical_security_status(self, tenant_id: str = "system") -> Dict[str, Any]:
+    def get_physical_security_status(self, tenant_id: str | None = None) -> Dict[str, Any]:
         """Get comprehensive physical security status"""
         # Filter data by tenant
+        tenant_id = tenant_id or get_current_tenant_id()
         tenant_assets = [a for a in self.physical_assets.values() if a.tenant_id == tenant_id]
         tenant_events = [e for e in self.access_events if e.tenant_id == tenant_id]
         tenant_incidents = [i for i in self.security_incidents if i.tenant_id == tenant_id]
@@ -732,8 +734,9 @@ class ISO27001PhysicalSecurity:
 
         return alerts
 
-    def check_physical_security_compliance(self, tenant_id: str = "system") -> Dict[str, Any]:
+    def check_physical_security_compliance(self, tenant_id: str | None = None) -> Dict[str, Any]:
         """Check ISO 27001 physical security compliance"""
+        tenant_id = tenant_id or get_current_tenant_id()
         issues = []
 
         # Check access control compliance

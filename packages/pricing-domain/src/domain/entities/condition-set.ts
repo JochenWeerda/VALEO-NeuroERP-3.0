@@ -88,7 +88,7 @@ export type ConditionRule = z.infer<typeof ConditionRuleSchema>;
  * Condition Set - Konditionspaket (Kunde/Segment)
  */
 export const ConditionSetSchema = z.object({
-  id: z.string().uuid().optional(),
+  id: z.string().guid().optional(),
   tenantId: z.string().min(1, 'Tenant ID is required'),
   
   // Identifikation

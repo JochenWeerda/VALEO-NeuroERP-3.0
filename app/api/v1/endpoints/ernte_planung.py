@@ -12,10 +12,12 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.tenant import get_tenant_id
 from app.domains.operations.models import ErnteDB
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.ernte_planung_schemas import ErntePlanungOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/agrar/ernte", tags=["agrar", "ernte", "ernteplanung"])
@@ -28,7 +30,6 @@ class ErntePayload(BaseModel):
     menge: float = 0
     ertrag: float = 0
     status: str = "geplant"
-    tenant_id: str = "default"
 
 
 class ErntePatch(BaseModel):
@@ -60,9 +61,10 @@ def list_ernten(
     status: Optional[str] = None,
     skip: int = Query(0, ge=0),
     limit: int = Query(200, le=500),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    q = db.query(ErnteDB)
+    q = db.query(ErnteDB).filter(ErnteDB.tenant_id == tenant_id)
     if status:
         q = q.filter(ErnteDB.status == status)
     return [_to_dict(r) for r in q.order_by(ErnteDB.datum.desc()).offset(skip).limit(limit).all()]
@@ -71,20 +73,19 @@ def list_ernten(
 @router.get("/{ernte_id}", summary="Ernte abrufen",
     response_model=ErntePlanungOut
 )
-def get_ernte(ernte_id: str, db: Session = Depends(get_db)):
-    row = db.query(ErnteDB).filter(ErnteDB.id == ernte_id).first()
+def get_ernte(ernte_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    row = db.query(ErnteDB).filter(ErnteDB.tenant_id == tenant_id).filter(ErnteDB.id == ernte_id).first()
     if not row:
         raise HTTPException(404, "Ernte nicht gefunden")
     return _to_dict(row)
 
 
 @router.post("", status_code=201, summary="Ernte anlegen",
-    response_model=ErntePlanungOut
-)
-def create_ernte(payload: ErntePayload, db: Session = Depends(get_db)):
+    response_model=ErntePlanungOut, dependencies=SCHREIBEN["AGRAR"])
+def create_ernte(payload: ErntePayload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     datum = date.fromisoformat(payload.datum) if payload.datum else date.today()
     row = ErnteDB(
-        tenant_id=payload.tenant_id,
+        tenant_id=tenant_id,
         schlag=payload.schlag,
         kultur=payload.kultur,
         datum=datum,
@@ -99,10 +100,9 @@ def create_ernte(payload: ErntePayload, db: Session = Depends(get_db)):
 
 
 @router.patch("/{ernte_id}", summary="Ernte aktualisieren",
-    response_model=ErntePlanungOut
-)
-def update_ernte(ernte_id: str, payload: ErntePatch, db: Session = Depends(get_db)):
-    row = db.query(ErnteDB).filter(ErnteDB.id == ernte_id).first()
+    response_model=ErntePlanungOut, dependencies=SCHREIBEN["AGRAR"])
+def update_ernte(ernte_id: str, payload: ErntePatch, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    row = db.query(ErnteDB).filter(ErnteDB.tenant_id == tenant_id).filter(ErnteDB.id == ernte_id).first()
     if not row:
         raise HTTPException(404, "Ernte nicht gefunden")
     data = payload.model_dump(exclude_unset=True)
@@ -116,9 +116,9 @@ def update_ernte(ernte_id: str, payload: ErntePatch, db: Session = Depends(get_d
     return _to_dict(row)
 
 
-@router.delete("/{ernte_id}", status_code=204, response_class=Response, response_model=None, summary="Ernte löschen")
-def delete_ernte(ernte_id: str, db: Session = Depends(get_db)):
-    row = db.query(ErnteDB).filter(ErnteDB.id == ernte_id).first()
+@router.delete("/{ernte_id}", status_code=204, response_class=Response, response_model=None, summary="Ernte löschen", dependencies=SCHREIBEN["AGRAR"])
+def delete_ernte(ernte_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    row = db.query(ErnteDB).filter(ErnteDB.tenant_id == tenant_id).filter(ErnteDB.id == ernte_id).first()
     if not row:
         raise HTTPException(404, "Ernte nicht gefunden")
     db.delete(row)

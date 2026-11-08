@@ -7,7 +7,7 @@ Regressionstests für Einkauf-Bestellungen-API (E4: Bestellung(en) importieren i
 import pytest
 from fastapi.testclient import TestClient
 
-from main import app
+from app.main import app
 
 client = TestClient(app, raise_server_exceptions=False, base_url="http://localhost")
 AUTH_HEADERS = {"Authorization": "Bearer dev-token"}

@@ -161,7 +161,7 @@ def test_versions_hash_length_and_hex():
 
 # 12 — versions_hash is deterministic
 def test_versions_hash_deterministic():
-    assert _schema(payload_felder=["x", "y"]).versions_hash == _schema(payload_felder=["x", "y"]).versions_hash
+    assert _schema(payload_felder=["x", "y"]).versions_hash == "973dcbfd1692"
 
 
 # 13 — versions_hash is field-order-independent

@@ -27,7 +27,11 @@ from __future__ import annotations
 
 import os
 import uuid
-from datetime import date, timedelta
+from datetime import timedelta
+
+# Geschaeftstag (Europe/Berlin) wie der Code; date.today() ist auf dem Runner UTC und kippte um
+# Mitternacht deutscher Zeit die Erwartung (CI 20./21.10.2026).
+from app.core.business_time import business_today
 from pathlib import Path
 
 import pytest
@@ -143,7 +147,7 @@ def bewerbung_anlegen(engine, haus: str, status: str = "ABGELEHNT", tage_her: in
     from sqlalchemy import text
 
     kennung = str(uuid.uuid4())
-    entschieden = None if status in ("EINGANG", "VORAUSWAHL") else date.today() - timedelta(days=tage_her)
+    entschieden = None if status in ("EINGANG", "VORAUSWAHL") else business_today() - timedelta(days=tage_her)
     with engine.begin() as v:
         v.execute(
             text(
@@ -183,7 +187,7 @@ def fassung_sicherstellen(client, haus: str) -> int:
 def erteilen(client, haus: str, bewerbung_id: str, **felder):
     nutzlast = {
         "gueltig_bis": felder.pop(
-            "gueltig_bis", (date.today() + timedelta(days=365)).isoformat()
+            "gueltig_bis", (business_today() + timedelta(days=365)).isoformat()
         ),
         "kanal": felder.pop("kanal", "WEB"),
     }
@@ -256,7 +260,7 @@ def erklaerung_id(client, engine, haus: str) -> str:
 class TestErteilen:
     def test_stand_und_verzeichnis_in_einem(self, client, engine):
         kennung = bewerbung_anlegen(engine, HAUS_A)
-        bis = (date.today() + timedelta(days=200)).isoformat()
+        bis = (business_today() + timedelta(days=200)).isoformat()
         antwort = erteilen(client, HAUS_A, kennung, gueltig_bis=bis)
         assert antwort.status_code == 201
         daten = antwort.json()
@@ -289,27 +293,27 @@ class TestErteilen:
 
     def test_ende_in_der_vergangenheit_abgewiesen(self, client, engine):
         kennung = bewerbung_anlegen(engine, HAUS_A)
-        vergangen = (date.today() - timedelta(days=1)).isoformat()
+        vergangen = (business_today() - timedelta(days=1)).isoformat()
         antwort = erteilen(client, HAUS_A, kennung, gueltig_bis=vergangen)
         assert antwort.status_code == 422
         assert spalte(engine, kennung, "aufbewahrung_einwilligung_bis") is None
 
     def test_heute_ist_kein_ende(self, client, engine):
         kennung = bewerbung_anlegen(engine, HAUS_A)
-        antwort = erteilen(client, HAUS_A, kennung, gueltig_bis=date.today().isoformat())
+        antwort = erteilen(client, HAUS_A, kennung, gueltig_bis=business_today().isoformat())
         assert antwort.status_code == 422
 
     def test_erlaubnis_ohne_nahes_ende_abgewiesen(self, client, engine):
         # Eine Erlaubnis ohne nahes Ende ist ein Vorrat, keine Einwilligung.
         kennung = bewerbung_anlegen(engine, HAUS_A)
-        weit = (date.today() + timedelta(days=1096)).isoformat()
+        weit = (business_today() + timedelta(days=1096)).isoformat()
         antwort = erteilen(client, HAUS_A, kennung, gueltig_bis=weit)
         assert antwort.status_code == 422
         assert "Vorrat" in str(antwort.json()["detail"])
 
     def test_grenze_selbst_ist_erlaubt(self, client, engine):
         kennung = bewerbung_anlegen(engine, HAUS_A)
-        genau = (date.today() + timedelta(days=1095)).isoformat()
+        genau = (business_today() + timedelta(days=1095)).isoformat()
         assert erteilen(client, HAUS_A, kennung, gueltig_bis=genau).status_code == 201
 
     @pytest.mark.parametrize("kanal", ["POST", "telefon", "", "web"])

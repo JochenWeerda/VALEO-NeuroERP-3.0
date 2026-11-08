@@ -12,6 +12,8 @@ on:
       - "requirements.txt"
       - "docs/schnittstellen/openapi.json"
       - "scripts/generate_openapi.py"
+      - "scripts/check_mcp_rest_bindings.py"
+      - "tests/test_mcp_rest_bindings.py"
       - ".github/workflows/openapi-drift.yml"
   workflow_dispatch:
 
@@ -68,3 +70,6 @@ jobs:
 
       - name: OpenAPI-Spec prüfen
         run: python scripts/generate_openapi.py --check
+
+      - name: MCP-Lesevertraege gegen produktive REST-Schemas pruefen
+        run: python scripts/check_mcp_rest_bindings.py

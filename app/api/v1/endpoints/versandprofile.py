@@ -24,6 +24,7 @@ from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.versandprofile_schemas import VersandprofileOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/logistik/versand",
@@ -115,7 +116,7 @@ def list_versandprofile(
     return [VersandprofilOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/profile", response_model=VersandprofilOut, status_code=201, summary="Versandprofil anlegen")
+@router.post("/profile", response_model=VersandprofilOut, status_code=201, summary="Versandprofil anlegen", dependencies=SCHREIBEN["LOGISTIK"])
 def create_versandprofil(
     payload: VersandprofilCreate,
     db=Depends(get_db),
@@ -153,20 +154,45 @@ def create_versandprofil(
     return VersandprofilOut(**dict(row._mapping))
 
 
-@router.delete("/profile/{profil_nr}", summary="Versandprofil löschen",
-    response_model=None
-)
-def delete_versandprofil(
-    profil_nr: str,
-    db=Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
-):
-    db.execute(text("""
-        UPDATE domain_shared.versandprofile SET aktiv = false
-        WHERE tenant_id = :tid AND profil_nr = :nr
-    """), {"tid": tenant_id, "nr": profil_nr})
-    db.commit()
-    return Response(status_code=204)
+class VersandprofilDeactivateInput(BaseModel):
+    model_config = {"extra": "forbid", "populate_by_name": True}
+    expected_active: bool
+    idempotency_key: str = Field(alias="_idempotencyKey", min_length=1, max_length=120)
+    audit_reason: str = Field(alias="_auditReason", min_length=1, max_length=500)
+    mode: str = Field(default="execute", alias="_mode")
+
+
+class VersandprofilDeactivateResult(BaseModel):
+    success: bool
+    replayed: bool
+    profile_id: str
+    auditEntryId: str
+
+
+class VersandprofilLegacyDeleteError(BaseModel):
+    detail: str
+
+
+@router.post("/profile/{profile_id}/actions/deactivate", summary="Versandprofil zustandsgebunden deaktivieren", response_model=VersandprofilDeactivateResult, dependencies=SCHREIBEN["LOGISTIK"])
+def deactivate_versandprofil(profile_id: str, payload: VersandprofilDeactivateInput,
+                             db=Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
+    from app.services.versandprofil_commands import DeactivateProfileV1, deactivate_profile
+    if payload.mode != "execute" or payload.expected_active is not True:
+        raise HTTPException(422, "Aktiver Profilstand und execute sind erforderlich")
+    try:
+        result = deactivate_profile(db, tenant_id, DeactivateProfileV1(
+            profile_id=profile_id, expected_active=True, idempotency_key=payload.idempotency_key,
+            reason=payload.audit_reason))
+        db.commit()
+        return result
+    except Exception:
+        db.rollback()
+        raise
+
+
+@router.delete("/profile/{profil_nr}", summary="Versandprofil nur versioniert deaktivieren", status_code=410, response_model=VersandprofilLegacyDeleteError, responses={410: {"description": "Versionierter Deaktivierungsweg erforderlich"}}, dependencies=SCHREIBEN["LOGISTIK"])
+def delete_versandprofil(profil_nr: str) -> None:
+    raise HTTPException(410, "Bitte den versionierten Deaktivierungsweg verwenden")
 
 
 # ── Lieferavise ───────────────────────────────────────────────────────────────
@@ -195,7 +221,7 @@ def list_avise(
     return [LieferavisOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/avise", response_model=LieferavisOut, status_code=201, summary="Avis anlegen")
+@router.post("/avise", response_model=LieferavisOut, status_code=201, summary="Avis anlegen", dependencies=SCHREIBEN["LOGISTIK"])
 def create_avis(
     payload: LieferavisCreate,
     db=Depends(get_db),
@@ -231,8 +257,7 @@ def create_avis(
 
 
 @router.patch("/avise/{avis_nr}/status", summary="Status avis",
-    response_model=VersandprofileOut
-)
+    response_model=VersandprofileOut, dependencies=SCHREIBEN["LOGISTIK"])
 def avis_status(
     avis_nr: str,
     neuer_status: str = Query(...),

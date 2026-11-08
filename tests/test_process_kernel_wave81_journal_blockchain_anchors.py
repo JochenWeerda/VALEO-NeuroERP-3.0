@@ -6,6 +6,7 @@ import importlib
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
+from app.auth.deps import get_current_user
 from app.core.tenant import get_tenant_id
 
 journal_entries_module = importlib.import_module("app.api.v1.endpoints.journal_entries")
@@ -56,9 +57,14 @@ def _client(monkeypatch) -> TestClient:
     app = FastAPI()
     app.include_router(router)
     app.dependency_overrides[get_tenant_id] = lambda: "tenant-a"
+    app.dependency_overrides[get_current_user] = lambda: {"sub": "5f0c2a9e", "name": "t.de-vries", "roles": ["FINANCE_ADMIN"]}
     app.dependency_overrides[journal_entries_module.get_db] = lambda: object()
     monkeypatch.setattr(journal_entries_module.container, "resolve", lambda cls: _DummyRepo())
     monkeypatch.setattr(journal_entries_module, "log_fibu_audit", lambda *args, **kwargs: None)
+    # Geprueft wird hier nur der Anker in der Antwort. Die Vier-Augen-Freigabe vor Buchung und Storno hat eigene
+    # Vertragstests (tests/test_freigabe_hauptbuch_zahlung.py) gegen eine echte Datenbank.
+    monkeypatch.setattr("app.services.finance_freigabe.verlange_hauptbuchbuchung", lambda *a, **k: None)
+    monkeypatch.setattr("app.services.finance_freigabe.verlange_hauptbuchstorno", lambda *a, **k: None)
     monkeypatch.setattr(
         "app.core.blockchain_anchor_runtime.anchor_journal_entry_event",
         lambda db, tenant_id, entry_id, action, payload: _DummyAnchor(entry_id),

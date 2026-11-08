@@ -21,15 +21,62 @@ from __future__ import annotations
 
 import json
 import logging
+import math
 import os
 from dataclasses import dataclass
-from typing import Optional
+from typing import Any, Optional
 
 import httpx
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 logger = logging.getLogger("llm.gateway")
+
+
+@dataclass(frozen=True)
+class MeteredCompletion:
+    text: str
+    input_tokens: int
+    output_tokens: int
+
+
+def _completion(text: str, input_tokens: Any, output_tokens: Any) -> MeteredCompletion:
+    if not isinstance(text, str) or any(type(value) is not int or value < 0 for value in (input_tokens, output_tokens)):
+        raise LLMUnavailable("Anbieter liefert keinen gueltigen Tokenverbrauch")
+    return MeteredCompletion(text, input_tokens, output_tokens)
+
+
+def _finite_json_float(value: str) -> float:
+    number = float(value)
+    if not math.isfinite(number):
+        raise ValueError("LLM JSON numbers must be finite")
+    return number
+
+
+def _unique_json_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError("LLM JSON contains duplicate object keys")
+        result[key] = value
+    return result
+
+
+def parse_json_object(response: str) -> dict[str, Any]:
+    """Decode a plain JSON object or a complete JSON Markdown code block."""
+    cleaned = response.strip()
+    if cleaned.startswith("```"):
+        lines = cleaned.splitlines()
+        if len(lines) < 3 or lines[0].strip().lower() not in {"```", "```json"} or lines[-1].strip() != "```":
+            raise ValueError("LLM JSON code block is incomplete or unsupported")
+        cleaned = "\n".join(lines[1:-1])
+    data = json.loads(
+        cleaned, parse_float=_finite_json_float, parse_constant=_finite_json_float,
+        object_pairs_hook=_unique_json_object,
+    )
+    if not isinstance(data, dict):
+        raise ValueError("LLM response must be a JSON object")
+    return data
 
 SETTINGS_KEY = "llm_gateway"
 PROVIDERS = ("anthropic", "openai_compatible", "ollama")
@@ -156,6 +203,30 @@ class LLMGateway:
         except LLMUnavailable:
             return None
 
+    def complete_metered(self, prompt: str, system: Optional[str] = None,
+                         max_tokens: int = 512, timeout: float = 40.0) -> MeteredCompletion:
+        """Actual provider usage for reserved jobs; callers own quota settlement.
+
+        Missing usage is an unknown outcome, never guessed or refunded here.
+        Existing text-only consumers retain their previous contract.
+        """
+        if not self.available():
+            raise LLMUnavailable("Sprachmodell nicht verfuegbar")
+        handlers = {"anthropic": self._anthropic, "openai_compatible": self._openai_compatible, "ollama": self._ollama}
+        handler = handlers.get(self.config.provider)
+        if handler is None:
+            raise LLMUnavailable("Unbekannter Modellanbieter")
+        try:
+            result = handler(prompt, system, max_tokens, timeout, metered=True)
+            if not isinstance(result, MeteredCompletion):
+                raise LLMUnavailable("Anbieter-Verbrauch fehlt")
+            return result
+        except LLMUnavailable:
+            raise
+        except Exception as error:
+            # Do not propagate provider URLs, response bodies or credentials.
+            raise LLMUnavailable("Modellaufruf ohne gesicherten Abschluss") from error
+
     def test(self) -> dict:
         """Konfigurations-/Erreichbarkeitsprobe für die Admin-UI."""
         c = self.config
@@ -171,7 +242,7 @@ class LLMGateway:
                     "detail": f"Probe fehlgeschlagen: {exc}"}
 
     # ── Anbieter-Implementierungen ────────────────────────────────────────────
-    def _anthropic(self, prompt: str, system: Optional[str], max_tokens: int, timeout: float) -> str:
+    def _anthropic(self, prompt: str, system: Optional[str], max_tokens: int, timeout: float, *, metered: bool = False) -> str | MeteredCompletion:
         c = self.config
         body: dict = {"model": c.resolved_model(), "max_tokens": max_tokens,
                       "messages": [{"role": "user", "content": prompt}]}
@@ -184,9 +255,18 @@ class LLMGateway:
             json=body, timeout=timeout,
         )
         resp.raise_for_status()
-        return resp.json()["content"][0]["text"]
+        data = resp.json()
+        answer = data["content"][0]["text"]
+        usage = data.get("usage") or {}
+        if metered:
+            # Cached input is still consumed context and belongs in the ledger.
+            counts = [usage.get("input_tokens"), usage.get("cache_read_input_tokens", 0), usage.get("cache_creation_input_tokens", 0)]
+            if any(type(value) is not int or value < 0 for value in counts):
+                raise LLMUnavailable("Anbieter-Verbrauch fehlt")
+            return _completion(answer, sum(counts), usage.get("output_tokens"))
+        return answer
 
-    def _openai_compatible(self, prompt: str, system: Optional[str], max_tokens: int, timeout: float) -> str:
+    def _openai_compatible(self, prompt: str, system: Optional[str], max_tokens: int, timeout: float, *, metered: bool = False) -> str | MeteredCompletion:
         c = self.config
         messages = ([{"role": "system", "content": system}] if system else []) + \
                    [{"role": "user", "content": prompt}]
@@ -201,9 +281,12 @@ class LLMGateway:
             timeout=timeout,
         )
         resp.raise_for_status()
-        return resp.json()["choices"][0]["message"]["content"]
+        data = resp.json()
+        answer = data["choices"][0]["message"]["content"]
+        usage = data.get("usage") or {}
+        return _completion(answer, usage.get("prompt_tokens"), usage.get("completion_tokens")) if metered else answer
 
-    def _ollama(self, prompt: str, system: Optional[str], max_tokens: int, timeout: float) -> str:
+    def _ollama(self, prompt: str, system: Optional[str], max_tokens: int, timeout: float, *, metered: bool = False) -> str | MeteredCompletion:
         c = self.config
         messages = ([{"role": "system", "content": system}] if system else []) + \
                    [{"role": "user", "content": prompt}]
@@ -214,4 +297,6 @@ class LLMGateway:
             timeout=timeout,
         )
         resp.raise_for_status()
-        return resp.json()["message"]["content"]
+        data = resp.json()
+        answer = data["message"]["content"]
+        return _completion(answer, data.get("prompt_eval_count"), data.get("eval_count")) if metered else answer

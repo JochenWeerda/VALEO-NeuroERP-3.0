@@ -95,3 +95,14 @@ Jeder Agent hinterlaesst vor Abschluss oder Pause:
   - offene Risiken
   - betroffene Dateien
   - naechstem konkreten Schritt
+
+
+## Schutz der gemeinsamen main-Historie (2026-10-19)
+
+Private Indizes und Quellansichten duerfen neuere Commits anderer Agenten nicht verdraengen. Vor Lieferung aktuellen HEAD einlesen, parallele Historien integrieren und die Ref mit erwartetem bisherigen Commit aktualisieren (Compare-and-swap). Ein privater Index erlaubt keinen Ruecksprung von main.
+
+`python scripts/install_main_history_guard.py` installiert den versionierten Reference-Transaction-Schutz im bereits konfigurierten Hookverzeichnis und fixiert dessen lokalen absoluten Pfad. Andere Hooks bleiben erhalten; ein vorhandener fremder Reference-Transaction-Hook wird nicht ueberschrieben. Mit `--check` vor Lieferungen pruefen. Keine globale Git-Konfiguration aendern.
+
+Der Schutz liest den tatsaechlichen aktuellen main-Commit auch dann, wenn Git bei einem unbedingten update-ref einen Nullwert als vorherige Objektkennung meldet. Vorwaertsaktualisierung und Integrationsmerge bleiben erlaubt; Ruecksprung, divergierender Ersatz und Loeschen von main werden verweigert. Dies ersetzt weder Server-Branchschutz noch eine Berechtigungssperre gegen absichtliches Umkonfigurieren der lokalen Hooks.
+
+Abnahme: drei echte Git-Vertragstests in temporaeren Repositories bestanden, einschliesslich privatem GIT_WORK_TREE, Erhalt fremder Hooks und unveraenderten anderen Branches. Keine Testdatenbank oder Dockerinstanz.

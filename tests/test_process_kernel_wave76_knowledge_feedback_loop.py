@@ -4,6 +4,7 @@ Wave 76 - Knowledge feedback loop and standardization back into the knowledge co
 from __future__ import annotations
 
 from fastapi import FastAPI
+from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
 from fastapi.testclient import TestClient
 
 from app.api.v1.endpoints import process_kernel_api
@@ -139,6 +140,7 @@ class _DummyNeuroAssistService:
 
 def _create_client(monkeypatch) -> TestClient:
     app = FastAPI()
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(process_kernel_api.router)
     app.dependency_overrides[process_kernel_api.get_db] = lambda: object()
     monkeypatch.setattr("app.repositories.knowledge_repository.KnowledgeRepository", _DummyRepo)

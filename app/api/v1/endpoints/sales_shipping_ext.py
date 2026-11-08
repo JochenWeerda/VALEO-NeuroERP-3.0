@@ -7,6 +7,7 @@ from fastapi import APIRouter, Query, UploadFile, File
 from pydantic import BaseModel
 
 from app.api.v1.schemas.base import BaseSchema
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter()
@@ -18,7 +19,7 @@ class FileUploadResponse(BaseModel):
     message: str
 
 
-@router.post("/file-upload", response_model=FileUploadResponse, summary="Delivery note file hochladen")
+@router.post("/file-upload", response_model=FileUploadResponse, summary="Delivery note file hochladen", dependencies=SCHREIBEN["VERKAUF"])
 async def upload_delivery_note_file(
     delivery_note_id: str = Query(..., description="ID of the sales delivery note"),
     file: UploadFile = File(...),

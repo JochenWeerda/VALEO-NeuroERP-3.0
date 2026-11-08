@@ -1,5 +1,5 @@
-import FlowSpineWorkspace from '@/components/workflow/FlowSpineWorkspace'
+import { UniversalNativeCockpitPage } from '@/components/mask-builder/UniversalNativeCockpitPage'
 
-export default function FlowSpineFinanceToClosePage(): JSX.Element {
-  return <FlowSpineWorkspace processKey="finance-to-close" />
+export default function FlowSpinePage(): JSX.Element {
+  return <UniversalNativeCockpitPage screenId="workflow/flow-spine-finance-to-close" />
 }

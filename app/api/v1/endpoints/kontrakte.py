@@ -11,7 +11,7 @@ from pydantic import ConfigDict, Field
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.auth.deps import User, get_current_user
+from app.auth.deps import User, anmeldename, get_current_user
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
@@ -41,13 +41,11 @@ from app.api.v1.schemas.base import BaseSchema, TypedObjectOut
 # Backwards-compatible alias for tests
 _line_to_out = line_to_dict
 from app.services.position_guard_service import PositionGuardService
-
 from app.api.v1.schemas.kontrakte_schemas import (
     AmendmentCreate,
     AmendmentResponse,
     AmendmentStatusUpdate,
     AmendmentTemplateResponse,
-    DispositionCreate,
     KonContractIn,
     KonContractMovementIn,
     KonContractMovementOut,
@@ -61,6 +59,8 @@ from app.api.v1.schemas.kontrakt_disposition_schemas import (
     DispositionOut,
 )
 from app.services import kontrakt_disposition_service as dispo
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
+from app.core.akteur import gepruefter_akteur  # Bearbeiter aus dem Token
 
 router = APIRouter(prefix="/kontrakte", tags=["kontrakte"])
 
@@ -631,7 +631,7 @@ async def update_kontrakt(
     return await get_kontrakt(contract_id, db, tenant_id, user)
 
 
-@router.put("/{contract_id}", response_model=KontraktOut, summary="Kontrakt replace")
+@router.put("/{contract_id}", response_model=KontraktOut, summary="Kontrakt replace", dependencies=SCHREIBEN["KONTRAKT"])
 async def replace_kontrakt(
     contract_id: str,
     payload: KonContractIn,
@@ -888,7 +888,7 @@ async def create_amendment(
     amendment = ContractAmendment(
         id=uuid7(), contract_id=contract_id, type=payload.type, reason=payload.reason,
         status="pending", changes=payload.changes, tenant_id=tenant_id,
-        created_by=user.get("sub") or payload.created_by,
+        created_by=gepruefter_akteur(user),
     )
     db.add(amendment)
     db.flush()
@@ -1042,7 +1042,7 @@ async def create_disposition(
 ) -> dict:
     """Ruft eine Menge ab. Mehr als kontrahiert nur mit ``allow_overdelivery``."""
     _require_roles(user, KontraktSecurityService.ROLE_BEARBEITEN, KontraktSecurityService.ROLE_ADMIN)
-    return dispo.abrufen(db, tenant_id, kontrakt_id, payload)
+    return dispo.abrufen(db, tenant_id, kontrakt_id, payload.model_copy(update={"erfasst_durch": anmeldename(user) or None}))
 
 
 @router.patch("/{kontrakt_id}/dispositionen/{disp_id}/freigabe", response_model=DispositionOut,

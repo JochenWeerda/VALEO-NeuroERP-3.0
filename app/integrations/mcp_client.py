@@ -2,10 +2,11 @@
 MCP Client for calling Model Context Protocol tools
 """
 
+import asyncio
 import json
 import logging
+import math
 import os
-import subprocess
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -23,8 +24,72 @@ _MCP_SERVER_PATH: Optional[Path] = (
 class MCPClient:
     """Client for calling MCP server tools via stdio (JSON-RPC 2.0)."""
 
-    def __init__(self, server_path: Optional[Path] = None) -> None:
+    def __init__(self, server_path: Optional[Path] = None, *, timeout: float = 30.0) -> None:
+        if not math.isfinite(timeout) or timeout <= 0:
+            raise ValueError("MCP timeout must be finite and positive")
         self._server_path = server_path or _MCP_SERVER_PATH
+        self._timeout = timeout
+
+    @staticmethod
+    async def _discard_output(reader: asyncio.StreamReader) -> None:
+        while await reader.read(65536):
+            pass
+
+    @classmethod
+    async def _close_process(cls, process: asyncio.subprocess.Process) -> None:
+        # Drain stdout during shutdown as a full pipe can otherwise block wait().
+        drain = asyncio.create_task(cls._discard_output(process.stdout))
+        process.stdin.close()
+        try:
+            if process.returncode is None:
+                try:
+                    process.terminate()
+                except ProcessLookupError:
+                    pass
+            try:
+                await asyncio.wait_for(process.wait(), timeout=2.0)
+            except asyncio.TimeoutError:
+                try:
+                    process.kill()
+                except ProcessLookupError:
+                    pass
+                await process.wait()
+        finally:
+            await drain
+
+    async def _exchange(self, server_path: Path, call_message: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        process = await asyncio.create_subprocess_exec(
+            "node", str(server_path),
+            stdin=asyncio.subprocess.PIPE,
+            stdout=asyncio.subprocess.PIPE,
+            # MCP stderr is optional diagnostics; ignore it rather than expose
+            # credentials/applicant data or deadlock on an unread error pipe.
+            stderr=asyncio.subprocess.DEVNULL,
+            limit=1024 * 1024,
+        )
+        try:
+            async with asyncio.timeout(self._timeout):
+                process.stdin.write((json.dumps(call_message) + "\n").encode("utf-8"))
+                await process.stdin.drain()
+                while response_line := await process.stdout.readline():
+                    response = json.loads(response_line.decode("utf-8"))
+                    if not isinstance(response, dict) or response.get("jsonrpc") != "2.0":
+                        raise ValueError("Invalid MCP response envelope")
+                    if "id" not in response and isinstance(response.get("method"), str):
+                        continue  # Notifications may precede the response.
+                    if type(response.get("id")) is not int or response["id"] != call_message["id"]:
+                        raise ValueError("Unexpected MCP response ID")
+                    if "error" in response or not isinstance(response.get("result"), dict):
+                        raise ValueError("MCP call did not return a result object")
+                    return response["result"]
+                return None
+        finally:
+            cleanup = asyncio.create_task(self._close_process(process))
+            try:
+                await asyncio.shield(cleanup)
+            except asyncio.CancelledError:
+                await cleanup
+                raise
 
     async def call_tool(
         self,
@@ -50,38 +115,12 @@ class MCPClient:
         }
 
         try:
-            process = subprocess.Popen(  # noqa: S603 — args list, no shell expansion
-                ["node", str(server_path)],
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-                encoding="utf-8",
-                shell=False,
-            )
-
-            process.stdin.write(json.dumps(call_message) + "\n")
-            process.stdin.flush()
-
-            response_line = process.stdout.readline()
-            if response_line:
-                try:
-                    response = json.loads(response_line.strip())
-                    logger.info("MCP tool call successful: %s", tool_name)
-                    return response.get("result")
-                except json.JSONDecodeError as exc:
-                    logger.error("Failed to parse MCP response: %s", exc)
-                    return None
-
-            error_output = process.stderr.read()
-            if error_output:
-                logger.error("MCP server error: %s", error_output[:500])
-
-            process.terminate()
+            return await self._exchange(server_path, call_message)
+        except asyncio.TimeoutError:
+            logger.error("MCP tool call timed out")
             return None
-
-        except Exception as exc:  # noqa: BLE001
-            logger.error("Failed to call MCP tool %s: %s", tool_name, exc)
+        except Exception:  # noqa: BLE001 — retain the existing optional-result boundary
+            logger.error("MCP tool call failed")
             return None
 
 

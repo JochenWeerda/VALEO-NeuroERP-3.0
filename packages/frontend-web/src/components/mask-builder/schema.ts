@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react'
 import { FLOORPLAN_RULES } from './floorplans'
+import { validTextFileDefinitions } from './runtime/text-file-contract'
+import { computedDefinitionErrors } from './runtime/computed-fields'
 
 export { FLOORPLAN_IDS, FLOORPLAN_RULES, defaultColumnNavigation, resolveSectionNavigation } from './floorplans'
 
@@ -17,6 +19,7 @@ export type ScreenDomain =
   | 'logistics'
   | 'hr'
   | 'platform'
+  | 'identity'
 
 export type ScreenMode = 'list' | 'detail' | 'cockpit' | 'workflow' | 'wizard'
 export type ScreenLayoutMode = 'desktopDense' | 'tabletTouch' | 'mobileStack'
@@ -32,6 +35,20 @@ export type ScreenSummaryPlacement = 'header' | 'footer'
 export type ScreenActionZone = 'header' | 'footer' | 'commit'
 export type ScreenVoiceProvider = 'webspeech' | 'server'
 export type ScreenAdapterType = 'native' | 'maskConfig' | 'crmMaskJson' | 'formSchema' | 'specialized'
+/** Nur explizit registrierte Spezialkomponenten. Weitere Typen brauchen eigenen Dateibesitz. */
+export type SpecializedComponentType = 'disposition_board' | 'intake' | 'weighing' | 'finance_workbench' | 'feed_workbench' | 'admin_workbench'
+
+export interface ScreenSpecializedComponent {
+  type: SpecializedComponentType
+  /** Stabile Registry-ID, z. B. `lkw-disposition-board`. */
+  id: string
+  /** Domain- und UX-Events, die die Komponente emittieren darf. */
+  events?: string[]
+  permissions?: string[]
+  /** Live-Kanal (SSE/NATS-Projektion), z. B. `disposition.board`. */
+  liveChannel?: string
+}
+
 export type ScreenFieldType =
   | 'text'
   | 'number'
@@ -41,13 +58,34 @@ export type ScreenFieldType =
   | 'select'
   | 'multiselect'
   | 'textarea'
+  | 'stringList'
   | 'file'
   | 'lookup'
   | 'table'
   | 'currency'
   | 'percentage'
+  /** Menge mit Einheit (`unit` fest oder `unitField` aus den Daten). */
+  | 'quantity'
+  /** Buchungs- oder Meldeperiode JJJJ-MM (Monatsauswahl). */
+  | 'period'
   /** Geheimnis (Passwort, Token): wird verdeckt eingegeben und nie angezeigt. */
   | 'password'
+
+/**
+ * Rechnendes Feld oder rechnende Spalte: feste Operation ueber andere Felder (Schluessel in `of`).
+ * Nur Vorschau in der Maske; verbindlich rechnet der Server. `difference`, `ratio` und `percentOf`
+ * nehmen genau zwei Operanden (a - b, a / b, a / b * 100), `sum` und `product` mindestens zwei.
+ */
+export interface ScreenComputation {
+  op: 'sum' | 'product' | 'difference' | 'ratio' | 'percentOf'
+  of: string[]
+  /** Nachkommastellen (0-6), Vorgabe 2. */
+  round?: number
+}
+
+/** Pruef- und Anzeigeformat eines Textfelds. */
+export type ScreenTextFormat =
+  | 'email' | 'phone' | 'iban' | 'vatId' | 'gln' | 'gtin' | 'sscc' | 'hsCode' | 'currencyCode' | 'monthDay'
 
 export interface ScreenDataSource {
   key: string
@@ -61,7 +99,22 @@ export interface ScreenDataSource {
   minSearchChars?: number
 }
 
+export interface TextFileContentContract {
+  encoding: 'utf-8'
+  maxBytes: number
+  accept: ('.csv' | '.txt')[]
+}
+
 export interface ScreenFieldDefinition {
+  fileContent?: TextFileContentContract
+  currencyField?: string
+  /** Feste Einheit einer Menge (`kg`, `t`, `Stk`). */
+  unit?: string
+  /** Feld mit der Einheit je Datensatz; geht vor `unit`. */
+  unitField?: string
+  format?: ScreenTextFormat
+  /** Rechnendes Feld; immer nur lesend. */
+  computed?: ScreenComputation
   key: string
   label: string
   type: ScreenFieldType
@@ -72,6 +125,9 @@ export interface ScreenFieldDefinition {
   options?: Array<{ value: string | number; label: string }>
   dataSourceKey?: string
   minSearchChars?: number
+  /** Structured table input; adds no persistence or business command. */
+  rowFields?: ScreenFieldDefinition[]
+  tableEditing?: { allowAdd?: boolean; allowDelete?: boolean; maxRows?: number }
   renderHint?: 'singleLine' | 'multiLine' | 'compact' | 'touch'
 }
 
@@ -83,6 +139,8 @@ export type ScreenColumnRenderKind =
   | 'datetime'
   | 'status'
   | 'boolean'
+  | 'quantity'
+  | 'percentage'
 
 /** Schmälere Fenster blenden von hinten aus: tertiary zuerst, primary bleibt. */
 export type ScreenColumnPriority = 'primary' | 'secondary' | 'tertiary'
@@ -95,6 +153,19 @@ export interface ScreenTableColumn {
   sortable?: boolean
   filterable?: boolean
   renderKind?: ScreenColumnRenderKind
+  currencyField?: string
+  unit?: string
+  unitField?: string
+  /** Anzeige einer Menge in dieser Einheit (Landhandel: Masse in dt); nur Masse/Volumen, exakt umgerechnet. */
+  displayUnit?: string
+  /** Bezugseinheit eines Preises aus den Daten (z. B. `t` bei preis_pro_t); nur mit `displayPricePer`. */
+  pricePer?: string
+  /** Anzeige des Preises je dieser Einheit (Landhandel: je dt / 100 kg); exakt umgerechnet, nur Masse/Volumen. */
+  displayPricePer?: string
+  /** Rechnende Spalte aus anderen Werten derselben Zeile. */
+  computed?: ScreenComputation
+  /** Summenzeile unter der Tabelle (ueber die angezeigten Zeilen). */
+  aggregate?: 'sum'
   defaultSort?: 'asc' | 'desc'
   priority?: ScreenColumnPriority
   render?: (_value: unknown, _row: Record<string, unknown>) => ReactNode
@@ -116,11 +187,33 @@ export interface ScreenTableDefinition {
     key: string
     label: string
     command?: string
+    /** Authored explanation of a local action; no server execution permission. */
+    stubReason?: string
+    /** Recht wie bei Kopfaktionen; ohne Recht blendet der Plan die Aktion aus. */
+    permission?: string
     dangerLevel?: ActionDangerLevel
     requiresConfirmation?: boolean
     enabledWhen?: ScreenCondition
     visibleWhen?: { field: string; values: Array<string | number | boolean> }
     disabledWhen?: { field: string; values: Array<string | number | boolean> }
+    /** Kommando-Weg der Zeile ({entity_id} = Zeilenkennung); dieselben Wege rufen CLI und MCP. */
+    /** Versioned domain command shared by UI, CLI and MCP. */
+    domainCommand?: string
+    commandEndpoint?: string
+    method?: 'POST' | 'PUT' | 'PATCH' | 'DELETE'
+    auditReasonRequired?: boolean
+    humanApprovalRequired?: boolean
+    forbiddenForAgents?: boolean
+    /** Formular der Seite mit Sendeweg; nie automatisch abgeschickt (wie bei Kopfaktionen). */
+    inputFlow?: { kind: 'humanForm'; submitEndpoint: string; method: 'POST' | 'PUT' | 'PATCH' | 'DELETE' }
+    localEffect?: ScreenActionDefinition['localEffect']
+    readView?: ScreenActionDefinition['readView']
+    /** Fluechtige Projektion einer einzelnen Zeile; keine Serveraenderung. */
+    localRowPatch?: { identityField: string; field: string; value: string | number | boolean }
+    /** Deklarierte Eingaben vor dem Kommando (Dialog der Maske, nie automatisch abgeschickt). */
+    inputFields?: ScreenActionInputField[]
+    /** Reine Navigation; Platzhalter wie {id} kommen aus der Zeile. */
+    navigationRoute?: string
   }>
   /** Selection-based actions; payload contains selectedRows and selectedIds. */
   bulkActions?: Array<{
@@ -169,6 +262,15 @@ export interface ScreenActionInputField extends ScreenFieldDefinition {
 }
 
 export interface ScreenActionDefinition {
+  /** Read-only related rows, rendered by the shared Studio runtime. */
+  readView?: { endpoint: string; columns: Array<Pick<ScreenTableColumn, 'key' | 'label' | 'renderKind'>> }
+  /** Domain control supplies row/form context; keep compiled guards, omit generic toolbar. */
+  surfaceOnly?: boolean
+  requiresExpectedVersion?: boolean
+  requiresIdempotencyKey?: boolean
+  responseAdapter?: 'resource.v1'
+  resultNavigationRoute?: string
+  inputPrefill?: 'entity'
   key: string
   label: string
   kind?: 'primary' | 'secondary' | 'danger' | 'workflow'
@@ -179,7 +281,23 @@ export interface ScreenActionDefinition {
   permission?: string
   disabled?: boolean
   // Action Runtime (Phase 026)
+  /** Versioned capability identifier checked by MCP before agent execution. */
+  domainCommand?: string
   commandEndpoint?: string
+  /** Versioned transport only; domain authorization/approvals remain server-side. */
+  commandBinding?: {
+    adapter: 'docflow.v1'
+    command: 'update' | 'release' | 'post' | 'reverse' | 'convert' | 'approval_request' | 'approval_decide'
+    preview: boolean
+    defaults?: Record<string, unknown>
+    stateAction?: string
+  } | {
+    adapter: 'harvest.control.v1'
+    command: 'create_rule' | 'approve_rule' | 'revoke_rule' | 'bind_rule' | 'attest' | 'calculate' | 'approve_calculation' | 'release'
+    preview: false
+    defaults?: Record<string, unknown>
+    stateAction?: string
+  }
   /** Navigates instead of mutating. Placeholders: {entity_id}, {business_partner_id}. */
   navigationRoute?: string
   /** Eingaben, die die Aktion braucht — deklarativ, vom Mask-Builder gezeichnet. */
@@ -187,6 +305,14 @@ export interface ScreenActionDefinition {
   /** Opens an existing human input flow; submitEndpoint is documentation, never auto-dispatched. */
   inputFlow?: { kind: 'humanForm'; submitEndpoint: string; method: 'POST' | 'PUT' | 'PATCH' | 'DELETE' }
   stubReason?: string
+  /**
+   * Wirkt nur in der Maske (kein Fachbefehl, keine Serveraenderung): Eingabe leeren, woandershin fuehren,
+   * drucken, herunterladen (lesend), in den Bearbeitungsmodus wechseln, neu laden oder eine Ansicht oeffnen.
+   * CLI und MCP lesen dieselben Daten ueber die Datenquellen der Maske.
+   */
+  localEffect?: 'form_reset' | 'navigation' | 'print' | 'download' | 'edit_mode' | 'refresh' | 'view' | 'load_row'
+  /** Read-only server-produced file; never a domain write command. */
+  download?: { endpoint: string; contentField: string; filenameField: string; mediaType: 'text/csv;charset=utf-8' }
   method?: 'POST' | 'PUT' | 'PATCH' | 'DELETE'
   requiresConfirmation?: boolean
   dangerLevel?: ActionDangerLevel
@@ -409,16 +535,62 @@ export interface ScreenProcessChainCatalogEntry {
   steps: ScreenProcessChainStep[]
 }
 
+/** Immutable origin template. The full edited candidate has its own Studio revision. */
+export interface DocumentScreenVariantRef {
+  family: 'beleg'
+  baseVersion: string
+  baseHash: string
+  variantId: string
+  variantVersion: string
+  variantHash: string
+  materializedHash: string
+}
+
+export interface ListPreset {
+  key: string
+  label: string
+  field: string
+  kind: 'choice' | 'date' | 'actor'
+  options: { value: string; label: string }[]
+  completionField?: string
+  completionValue?: string
+  completionValues?: string[]
+}
+
+export interface ListExperience {
+  /** View context only; never grants permissions or filters business records. */
+  roleFocus?: { options: { key: string; label: string; description?: string; insightLineKeys?: string[] }[]; defaultKey?: string }
+  presets?: ListPreset[]
+  searchFields: string[]
+  aggregates: { key: string; label: string; kind?: 'count' | 'sum'; field?: string; format?: 'currency'; currencyField?: string; conditions: { field: string; op: 'eq' | 'neq'; value: string }[] }[]
+  export: { filenamePrefix: string; delimiter: ';'; columns: { key: string; label: string }[] }
+  workflowResume?: { resumeNodeId: string; businessStatus: string; actionLabelPrefix: string; createScreen: string; detailScreen: string }
+  notice?: { aggregate: string; text: string }
+  insightLines?: { key?: string; label: string; variants: { when?: { aggregate: string; op: 'gt'; value: number }; text: string }[] }[]
+}
+
 export interface ScreenDefinition {
+  flowSpineCatalog?: { enabled: true; warmWorkspaces: boolean }
+  flowSpineWorkspace?: { processKey: string }
+  listExperience?: ListExperience
+  documentVariant?: DocumentScreenVariantRef
   /** Declared native creation; new/neu are never fetched as entity IDs. */
   creation?: {
+    adapter?: 'docflow.create.v1'
+    requiresIdempotencyKey?: boolean
+    fields?: ScreenFieldDefinition[]
+    dataSources?: ScreenDataSource[]
     endpoint: string
     permission: string
     detailRoute: string
+    cancelRoute?: string
     defaults?: Record<string, unknown>
   }
+  creationContext?: { screen_id: string; definition_hash: string }
   schemaVersion: 1
   id: string
+  /** Canonical native binding of a server-validated tenant Studio clone. */
+  baseScreenId?: string
   domain: ScreenDomain
   mode: ScreenMode
   title: string
@@ -438,12 +610,16 @@ export interface ScreenDefinition {
   summaryEndpoint?: string
   summary?: ScreenSummaryItem[]
   dataSources?: ScreenDataSource[]
+  /** Registered scalar fields selected from the secured entity GET response. */
+  entityProjection?: Record<string, string>
   fields?: ScreenFieldDefinition[]
   tabs?: ScreenTabDefinition[]
   tables?: ScreenTableDefinition[]
   tiles?: ScreenTileDefinition[]
   calendar?: ScreenCalendarDefinition
   sourceProposals?: ScreenSourceProposals
+  /** Registrierte Spezialkomponente; derzeit nur `disposition_board`. */
+  specialized?: ScreenSpecializedComponent
   twin?: ScreenTwinDefinition
   processChain?: ScreenProcessChainRef
   processChains?: Record<string, ScreenProcessChainCatalogEntry>
@@ -459,6 +635,7 @@ export interface ScreenDefinition {
   }
   workflow?: ScreenWorkflowDefinition
   noWorkflowReason?: string
+  noProcessChainReason?: string
   layout?: {
     preferredMode?: ScreenLayoutMode
     mobileMode?: ScreenLayoutMode
@@ -483,17 +660,103 @@ export interface ScreenDefinition {
     lookupMinChars?: number
     bundleGroup?: string
   }
-  agentContract?: AgentMaskContract
+  /** Authoring metadata; the separate generated agent-contract endpoint returns the full contract. */
+  agentContract?: Partial<AgentMaskContract>
 }
 
 export function validateScreenDefinition(screen: ScreenDefinition): string[] {
   const errors: string[] = []
+  if (!validTextFileDefinitions(screen)) errors.push('fileContent is invalid')
 
   if (screen.schemaVersion !== 1) errors.push('schemaVersion must be 1')
   if (!screen.id) errors.push('id is required')
   if (!screen.domain) errors.push('domain is required')
   if (!screen.mode) errors.push('mode is required')
+  if (screen.documentVariant !== undefined) {
+    const binding = screen.documentVariant
+    const version = /^[1-9][0-9]*\.[0-9]+\.[0-9]+$/
+    const hash = /^[0-9a-f]{64}$/
+    if (!binding || binding.family !== 'beleg' || typeof binding.variantId !== 'string' || !binding.variantId.trim()
+      || !version.test(binding.baseVersion) || !version.test(binding.variantVersion)
+      || ![binding.baseHash, binding.variantHash, binding.materializedHash].every(value => hash.test(value))) {
+      errors.push('documentVariant requires an exact valid base and variant binding')
+    }
+  }
   if (!screen.title) errors.push('title is required')
+  errors.push(...computedDefinitionErrors(screen))
+
+  const surfaceScreenId = screen.id?.startsWith('tenant/') ? screen.baseScreenId : screen.id
+
+  for (const action of screen.actions ?? []) {
+    if (action.surfaceOnly !== undefined && (typeof action.surfaceOnly !== 'boolean'
+      || (action.surfaceOnly && (!['intake', 'weighing', 'finance_workbench', 'feed_workbench', 'admin_workbench'].includes(screen.specialized?.type ?? '') || (action.zone && action.zone !== 'header'))))) errors.push('surfaceOnly requires a registered domain action')
+  }
+  if (screen.flowSpineWorkspace !== undefined) {
+    const key = screen.flowSpineWorkspace.processKey
+    const keys = ['order-to-cash', 'procure-to-pay', 'inventory-to-settlement', 'harvest-to-settlement', 'contract-to-settlement', 'complaint-to-resolution', 'service-to-customer', 'finance-to-close', 'compliance-to-report']
+    if (!keys.includes(key) || surfaceScreenId !== `workflow/flow-spine-${key}` || screen.mode !== 'cockpit') errors.push('flowSpineWorkspace is invalid')
+  }
+  if (screen.flowSpineCatalog !== undefined) {
+    const c = screen.flowSpineCatalog
+    if (!c || typeof c !== 'object' || c.enabled !== true || typeof c.warmWorkspaces !== 'boolean'
+      || Object.keys(c).some(key => !['enabled', 'warmWorkspaces'].includes(key))
+      || screen.id !== 'workflow/flow-spine-studio' || screen.mode !== 'cockpit') {
+      errors.push('flowSpineCatalog is invalid')
+    }
+  }
+  if (screen.listExperience !== undefined) {
+    const x = screen.listExperience
+    const str = (v: unknown): v is string => typeof v === 'string' && v.length > 0 && v.length <= 200
+    const arr = (v: unknown): v is unknown[] => Array.isArray(v) && v.length <= 100
+    const key = (v: unknown): v is string => str(v) && !['__proto__', 'prototype', 'constructor'].includes(v.toLowerCase())
+    const obj = (v: unknown): v is Record<string, unknown> => v !== null && typeof v === 'object' && !Array.isArray(v)
+    let valid = obj(x) && arr(x.searchFields) && x.searchFields.length > 0 && x.searchFields.every(key)
+      && arr(x.aggregates) && x.aggregates.every(a => obj(a) && key(a.key) && str(a.label) && (a.kind === undefined || ['count', 'sum'].includes(a.kind)) && (a.kind !== 'sum' || key(a.field)) && (a.field === undefined || a.kind === 'sum') && (a.currencyField === undefined || (a.kind === 'sum' && key(a.currencyField))) && (a.format === undefined || (a.kind === 'sum' && a.format === 'currency')) && arr(a.conditions) && a.conditions.every(c => obj(c) && key(c.field) && ['eq', 'neq'].includes(c.op) && typeof c.value === 'string' && c.value.length <= 200))
+      && obj(x.export) && str(x.export.filenamePrefix) && x.export.delimiter === ';' && arr(x.export.columns) && x.export.columns.length > 0 && x.export.columns.every(c => obj(c) && key(c.key) && str(c.label))
+      && (x.workflowResume === undefined || (obj(x.workflowResume) && [x.workflowResume.resumeNodeId, x.workflowResume.businessStatus, x.workflowResume.actionLabelPrefix, x.workflowResume.createScreen, x.workflowResume.detailScreen].every(str)))
+    if (valid) {
+      const keys = new Set(x.aggregates.map(a => a.key))
+      valid = keys.size === x.aggregates.length && new Set(x.searchFields).size === x.searchFields.length && new Set(x.export.columns.map(c => c.key)).size === x.export.columns.length && (!x.notice || (obj(x.notice) && keys.has(x.notice.aggregate) && str(x.notice.text)))
+        && (!x.insightLines || (arr(x.insightLines) && x.insightLines.every(line => obj(line) && str(line.label) && arr(line.variants) && line.variants.every(v => obj(v) && str(v.text) && (!v.when || (obj(v.when) && keys.has(v.when.aggregate) && v.when.op === 'gt' && typeof v.when.value === 'number' && Number.isFinite(v.when.value)))))))
+    }
+    if (valid && x.presets !== undefined) {
+      valid = Array.isArray(x.presets) && x.presets.length <= 8
+        && x.presets.every(p => obj(p) && key(p.key) && str(p.label) && key(p.field)
+          && ['choice', 'date', 'actor'].includes(p.kind)
+          && Object.keys(p).every(k => ['key','label','field','kind','options','completionField','completionValue','completionValues'].includes(k))
+          && Array.isArray(p.options) && p.options.length >= 2 && p.options.length <= 20
+          && p.options.every(o => obj(o) && str(o.value) && str(o.label) && Object.keys(o).every(k => ['value','label'].includes(k)))
+          && new Set(p.options.map(o => o.value)).size === p.options.length
+          && p.options.some(o => o.value === 'all')
+          && (p.kind !== 'date' || p.options.every(o => ['all','today','week','overdue'].includes(o.value)))
+          && (p.kind !== 'actor' || p.options.every(o => ['all','mine'].includes(o.value)))
+          && (p.completionField === undefined || (p.kind === 'date' && key(p.completionField)))
+          && (p.completionValue === undefined || str(p.completionValue))
+          && (p.completionValues === undefined || (p.kind === 'date' && Array.isArray(p.completionValues) && p.completionValues.length > 0 && p.completionValues.length <= 20 && p.completionValues.every(str))))
+        && new Set(x.presets.map(p => p.key)).size === x.presets.length
+        && (!x.presets.length || screen.tables?.[0]?.serverPagination !== true)
+    }
+    const columns = new Set((screen.tables?.[0]?.columns ?? []).map(column => column.key))
+    if (valid) valid = screen.mode === 'list' && columns.size > 0
+      && [...(x.presets ?? []).flatMap(p => [p.field, ...(p.completionField ? [p.completionField] : [])]), ...x.searchFields, ...x.export.columns.map(column => column.key), ...x.aggregates.flatMap(a => [...a.conditions.map(c => c.field), ...(a.field ? [a.field] : []), ...(a.currencyField ? [a.currencyField] : [])])].every(field => columns.has(field))
+    if (valid && x.roleFocus !== undefined) {
+      const focus = x.roleFocus
+      const insightKeys = (x.insightLines ?? []).map(line => line.key)
+      valid = obj(focus) && Object.keys(focus).every(k => ['options', 'defaultKey'].includes(k))
+        && Array.isArray(focus.options) && focus.options.length >= 1 && focus.options.length <= 8
+        && insightKeys.every(key) && new Set(insightKeys).size === insightKeys.length
+        && focus.options.every(option => obj(option) && key(option.key) && str(option.label)
+          && Object.keys(option).every(k => ['key','label','description','insightLineKeys'].includes(k))
+          && (option.description === undefined || str(option.description))
+          && (option.insightLineKeys === undefined || arr(option.insightLineKeys)
+            && option.insightLineKeys.every(k => key(k) && insightKeys.includes(k))
+            && new Set(option.insightLineKeys).size === option.insightLineKeys.length))
+        && new Set(focus.options.map(option => option.key)).size === focus.options.length
+        && focus.options.some(option => option.key === (focus.defaultKey ?? 'all'))
+    }
+    if (!valid) errors.push('listExperience is invalid')
+  }
+
 
   if (screen.layout?.columnNavigation && screen.layout.columnNavigation !== 'single'
       && screen.layout.floorplan && FLOORPLAN_RULES[screen.layout.floorplan]?.allowsColumns === false) {
@@ -556,6 +819,23 @@ export function validateScreenDefinition(screen: ScreenDefinition): string[] {
   if (screen.twin && !screen.twin.endpoint) {
     errors.push('twin.endpoint is required')
   }
+  if (screen.specialized) {
+    if (!['disposition_board', 'intake', 'weighing', 'finance_workbench', 'feed_workbench', 'admin_workbench'].includes(screen.specialized.type)) {
+      errors.push(`specialized.type is invalid: ${String(screen.specialized.type)}`)
+    }
+    const nativeBindings: Record<string, string[]> = {
+      intake: ['annahme/lkw-registrierung', 'annahme/qualitaets-check', 'annahme/warteschlange'],
+      finance_workbench: ['finance/bank-abgleich', 'mahnwesen/mahnlauf'],
+      admin_workbench: ['admin/webhooks-liste', 'admin/control-center'],
+      feed_workbench: ['futtermittel/rationseditor', 'futtermittel/rationsoptimierung', 'portal/rationsoptimierung', 'futtermittel/fuetterungsdokumentation-mobil'],
+      weighing: ['waage/liste', 'waage/neu', 'waage/waagen-liste', 'waage/wiegungen', 'waage/wiegungen-liste'],
+    }
+    const allowed = nativeBindings[screen.specialized.type]
+    if (allowed && (!surfaceScreenId || !allowed.includes(surfaceScreenId) || screen.specialized.id !== surfaceScreenId)) errors.push('specialized native binding is invalid')
+    if (!screen.specialized.id?.trim()) {
+      errors.push('specialized.id is required')
+    }
+  }
   if (screen.processChain) {
     if (!screen.processChain.chainId?.trim()) errors.push('processChain.chainId is required')
     if (!screen.processChain.stepKey?.trim()) errors.push('processChain.stepKey is required')
@@ -600,6 +880,33 @@ export function validateScreenDefinition(screen: ScreenDefinition): string[] {
     ])
     if (!fieldKeys.has(screen.identityField)) {
       errors.push(`identityField ${screen.identityField} is not a declared field`)
+    }
+  }
+
+  if (screen.entityProjection !== undefined) {
+    const projection = screen.entityProjection
+    const entries = projection && typeof projection === 'object' && !Array.isArray(projection)
+      ? Object.entries(projection) : []
+    const safeSegment = /^[A-Za-z][A-Za-z0-9_]{0,63}$/
+    const forbidden = new Set(['__proto__', 'prototype', 'constructor', '__class__', '__dict__', '__globals__'])
+    const fields = new Set([
+      ...(screen.fields ?? []).map((field) => field.key),
+      ...(screen.tabs ?? []).flatMap((tab) => (tab.fields ?? []).map((field) => field.key)),
+    ])
+    if (!entries.length || entries.length > 64 || !Object.prototype.hasOwnProperty.call(projection, 'id')) {
+      errors.push('entityProjection requires a bounded id mapping')
+    }
+    const entitySources = (screen.dataSources ?? []).filter((source) => source.key === 'entity')
+    if (entitySources.length !== 1 || (entitySources[0]?.method ?? 'GET') !== 'GET') {
+      errors.push('entityProjection requires one declared entity GET source')
+    }
+    for (const [key, path] of entries) {
+      const segments = typeof path === 'string' ? path.split('.') : []
+      if (!safeSegment.test(key) || forbidden.has(key.toLowerCase()) || !fields.has(key)
+        || !segments.length || segments.length > 8
+        || segments.some((segment) => !safeSegment.test(segment) || forbidden.has(segment.toLowerCase()))) {
+        errors.push(`entityProjection has an invalid field or path: ${key}`)
+      }
     }
   }
 

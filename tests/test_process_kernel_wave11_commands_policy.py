@@ -5,6 +5,7 @@ Prozessreferenzen, Finance-Follow-up-Contracts, Explainability
 from __future__ import annotations
 
 from fastapi import FastAPI
+from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
 from fastapi.testclient import TestClient
 
 from app.api.v1.endpoints import process_kernel_api
@@ -66,6 +67,7 @@ def test_process_command_preview_is_idempotent_and_non_mutating():
 
 def test_process_command_catalog_schema_version_contract():
     app = FastAPI()
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(process_kernel_api.router)
     with TestClient(app) as client:
         response = client.get("/process/commands")
@@ -78,6 +80,7 @@ def test_process_command_catalog_schema_version_contract():
 
 def test_process_command_catalog_endpoint_includes_policy_evaluate():
     app = FastAPI()
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(process_kernel_api.router)
     with TestClient(app) as client:
         response = client.get("/process/commands")
@@ -126,6 +129,7 @@ def test_resolve_policy_override_empty_layers_has_no_effective_scope():
 
 def test_resolve_policy_override_api_endpoint_returns_schema_version():
     app = FastAPI()
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(process_kernel_api.router)
     with TestClient(app) as client:
         response = client.post("/process/policy/resolve", json={
@@ -166,6 +170,7 @@ def test_settlement_exception_complaint_is_policy_based():
 
 def test_exception_catalog_api_returns_settlement_catalog_with_schema_version():
     app = FastAPI()
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(process_kernel_api.router)
     with TestClient(app) as client:
         response = client.get("/process/exceptions/settlement")
@@ -178,6 +183,7 @@ def test_exception_catalog_api_returns_settlement_catalog_with_schema_version():
 
 def test_exception_catalog_api_returns_404_for_unknown_process():
     app = FastAPI()
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(process_kernel_api.router)
     with TestClient(app) as client:
         response = client.get("/process/exceptions/nonexistent-process")
@@ -218,6 +224,7 @@ def test_process_reference_context_partial_chain_is_valid():
 
 def test_process_reference_api_returns_schema_version():
     app = FastAPI()
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(process_kernel_api.router)
     with TestClient(app) as client:
         response = client.post("/process/references", json={
@@ -235,6 +242,7 @@ def test_process_reference_api_returns_schema_version():
 
 def test_process_reference_api_requires_mandatory_fields():
     app = FastAPI()
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(process_kernel_api.router)
     with TestClient(app) as client:
         response = client.post("/process/references", json={"process_key": "settlement"})
@@ -329,6 +337,7 @@ def test_explainability_allowed_when_no_override():
 
 def test_explainability_api_returns_schema_version():
     app = FastAPI()
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(process_kernel_api.router)
     with TestClient(app) as client:
         response = client.post("/process/explainability", json={
@@ -362,6 +371,7 @@ def test_agrar_settlement_reference_sets_correct_anchor_and_process_key():
 
 def test_agrar_settlement_reference_api_returns_full_chain():
     app = FastAPI()
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(process_kernel_api.router)
     with TestClient(app) as client:
         response = client.post("/process/references/agrar/settlement", json={

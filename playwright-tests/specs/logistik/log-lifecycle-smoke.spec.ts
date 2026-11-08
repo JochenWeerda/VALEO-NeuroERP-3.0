@@ -5,10 +5,11 @@
  * Setzt ein laufendes Backend voraus (BASE_URL oder PLAYWRIGHT_BASE_URL).
  */
 import { test, expect, request } from '@playwright/test'
+import { apiToken, E2E_MANDANT } from '../../helpers/anmeldung'
 
 const BASE = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:8000'
-const TENANT = 'test-tenant-log-001'
-const HEADERS = { 'X-Tenant-ID': TENANT, 'Content-Type': 'application/json' }
+const TENANT = E2E_MANDANT
+const HEADERS = { Authorization: `Bearer ${apiToken()}`, 'X-Tenant-ID': TENANT, 'Content-Type': 'application/json' }
 
 let tourId: string
 let stopId: string

@@ -7,7 +7,8 @@ Import these instead of defining locally.
 from __future__ import annotations
 
 from typing import Any
-from pydantic import BaseModel, ConfigDict, Field
+from datetime import date
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from app.api.v1.schemas.base import BaseSchema
 
@@ -206,7 +207,25 @@ class EmployeeFileDocumentCreateIn(BaseModel):
     dmsDocumentId: str | None = Field(default=None, max_length=160)
     visibility: str | None = Field(default=None, pattern="^(employee|manager|hr|payroll)$")
     notes: str | None = Field(default=None, max_length=500)
-    createdBy: str = Field(default="system", max_length=120)
+    createdBy: str = Field(default="system", max_length=120, deprecated=True, description="Kompatibilitaetsfeld; Urheber kommt ausschliesslich aus der geprueften Anmeldung")
+
+
+    @field_validator("issuedAt", "validUntil")
+    @classmethod
+    def calendar_date(cls, value: str | None) -> str | None:
+        if value is not None:
+            try:
+                if date.fromisoformat(value).isoformat() != value:
+                    raise ValueError
+            except ValueError:
+                raise ValueError("Datum muss ein gueltiger Kalendertag YYYY-MM-DD sein") from None
+        return value
+
+    @model_validator(mode="after")
+    def date_order(self):
+        if self.issuedAt and self.validUntil and self.validUntil < self.issuedAt:
+            raise ValueError("Gueltigkeitsende darf nicht vor Ausstellung liegen")
+        return self
 
 
 class EmployeeFileDocumentOut(BaseModel):

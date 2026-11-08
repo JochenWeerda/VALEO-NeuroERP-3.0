@@ -6,6 +6,12 @@ Prozessreferenz-Kontext und Explainability.
 """
 from __future__ import annotations
 
+from app.api.v1.schemas.workflow_migration_input import WorkflowMigrationCheckIn
+from app.api.v1.schemas.data_quality_input import DataQualityCheckIn
+from app.api.v1.schemas.data_quality_output import dq_ruleset_public as _dq_ruleset_public
+from app.api.v1.schemas.slo_input import SloCheckIn, reject_nonfinite_slo_json
+from app.api.v1.schemas.advisory_input import PolicyEvaluationIn, ApprovalEvaluationIn
+
 from datetime import datetime
 from typing import Any
 
@@ -338,6 +344,7 @@ from ....core.query_fallback_contracts import (
 
 from app.api.v1.schemas.base import BaseSchema
 from pydantic import ConfigDict as _ConfigDict
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/process", tags=["process-kernel", "commands"])
 
@@ -389,7 +396,7 @@ def get_commands() -> dict[str, Any]:
 # AP2: Policy-Override-Resolution
 # ---------------------------------------------------------------------------
 
-@router.post("/policy/resolve", response_model=ProcessKernelOut, summary="Policy resolve")
+@router.post("/policy/resolve", response_model=ProcessKernelOut, summary="Policy resolve", dependencies=SCHREIBEN["BERECHNEN"])
 def resolve_policy(body: dict) -> dict[str, Any]:
     """LÃ¶st Policy-Override-Schichten auf und gibt die wirksame Entscheidung zurÃ¼ck."""
     rule_id: str = body.get("rule_id", "")
@@ -423,7 +430,7 @@ def get_exception_catalog(process_key: str) -> dict[str, Any]:
 # AP4: Prozessreferenz-Kontext
 # ---------------------------------------------------------------------------
 
-@router.post("/references", response_model=ProcessKernelOut, summary="Reference build")
+@router.post("/references", response_model=ProcessKernelOut, summary="Reference build", dependencies=SCHREIBEN["FACHLICH"])
 def build_reference(body: dict) -> dict[str, Any]:
     """Baut einen Prozessreferenz-Kontext fÃ¼r den Kernprozess."""
     process_key: str = body.get("process_key", "")
@@ -451,7 +458,7 @@ def build_reference(body: dict) -> dict[str, Any]:
 # AP5: Finance Follow-up â€” Agrar Settlement Referenz
 # ---------------------------------------------------------------------------
 
-@router.post("/references/agrar/settlement", response_model=ProcessKernelOut, summary="Agrar settlement ref build")
+@router.post("/references/agrar/settlement", response_model=ProcessKernelOut, summary="Agrar settlement ref build", dependencies=SCHREIBEN["FACHLICH"])
 def build_agrar_settlement_ref(body: dict) -> dict[str, Any]:
     """Baut einen Prozessreferenz-Kontext verankert an einem Settlement."""
     settlement_id: str = body.get("settlement_id", "")
@@ -474,7 +481,7 @@ def build_agrar_settlement_ref(body: dict) -> dict[str, Any]:
 # AP6: Explainability aus Policy-Resolution
 # ---------------------------------------------------------------------------
 
-@router.post("/explainability", response_model=ProcessKernelOut, summary="Explainability build")
+@router.post("/explainability", response_model=ProcessKernelOut, summary="Explainability build", dependencies=SCHREIBEN["BERECHNEN"])
 def build_explainability(body: dict) -> dict[str, Any]:
     """Erzeugt eine Explainability-Sicht aus einer Policy-Override-Resolution."""
     rule_id: str = body.get("rule_id", "")
@@ -496,7 +503,7 @@ def build_explainability(body: dict) -> dict[str, Any]:
 # Wave 17: Action Execution Layer
 # ---------------------------------------------------------------------------
 
-@router.post("/actions/execute", response_model=ProcessKernelOut, summary="Action ausfÃ¼hren")
+@router.post("/actions/execute", response_model=ProcessKernelOut, summary="Action ausfÃ¼hren", dependencies=SCHREIBEN["FACHLICH"])
 def execute_action(body: ActionExecutionRequest, db: Session = Depends(get_db)) -> dict[str, Any]:
     """Fuehrt einen Process-Kernel-Command ueber den zentralen Action-Layer aus."""
     body.normalized_reference_context()
@@ -504,20 +511,20 @@ def execute_action(body: ActionExecutionRequest, db: Session = Depends(get_db)) 
         get_aggregate_definition(body.aggregate_type)
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
-
     store = get_action_idempotency_store()
     fingerprint = body.request_fingerprint()
     existing = store.get_by_key(body.tenant_id, body.idempotency_key)
-    if existing is not None:
+    if existing is not None and body.command_name not in {"ApproveAPInvoice", "RejectAPInvoice", "PostAPInvoice"}:
         if existing.request_fingerprint != fingerprint:
             error = build_action_conflict_error()
             raise HTTPException(status_code=409, detail=error.model_dump(mode="json"))
         replay = existing.result.as_idempotent_replay()
         return replay.model_dump(mode="json")
-
     service = ActionExecutionService()
     # Idempotenz-Persistenz erfolgt ausschliesslich in ActionExecutionService.execute
     result = service.execute(body, db=db)
+    if result.error and result.error.code == "IDEMPOTENCY_KEY_REUSED":
+        raise HTTPException(409, detail=result.error.model_dump(mode="json"))
     return result.model_dump(mode="json")
 
 
@@ -680,7 +687,7 @@ def get_settlement_approval_status(settlement_id: str) -> dict[str, Any]:
     }
 
 
-@router.post("/settlement/completion/evaluate", response_model=ProcessKernelOut, summary="Settlement completion contract evaluate")
+@router.post("/settlement/completion/evaluate", response_model=ProcessKernelOut, summary="Settlement completion contract evaluate", dependencies=SCHREIBEN["BERECHNEN"])
 def evaluate_settlement_completion_contract(
     payload: SettlementCompletionEvaluateRequest,
 ) -> dict[str, Any]:
@@ -747,7 +754,7 @@ def get_settlement_audit_chain(settlement_id: str) -> dict[str, Any]:
     return chain.as_dict()
 
 
-@router.post("/settlement/audit-chain/{settlement_id}/anchor", response_model=ProcessKernelOut, summary="Settlement audit chain anchor anlegen")
+@router.post("/settlement/audit-chain/{settlement_id}/anchor", response_model=ProcessKernelOut, summary="Settlement audit chain anchor anlegen", dependencies=SCHREIBEN["FACHLICH"])
 def create_settlement_audit_chain_anchor(settlement_id: str, payload: dict | None = None, db=Depends(get_db)) -> dict[str, Any]:
     from app.core.blockchain_anchor_runtime import anchor_settlement_audit_chain
 
@@ -1074,63 +1081,22 @@ def get_trocknungs_regelsets() -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 
-@router.post("/workflow-migration/check", response_model=ProcessKernelOut, summary="Workflow migration prüfen")
-def check_workflow_migration(body: dict) -> dict[str, Any]:
-    """
-    Prueft ob eine Workflow-Migrations-Definition sicher ist (Gap 011).
-
-    Body: { "prozess_key": str, "von_version": str, "zu_version": str,
-            "alt_schritte": [...], "neu_schritte": [...] }
-    """
-    prozess_key = body.get("prozess_key", "agrar_settlement")
-    von_version = body.get("von_version", "1.0")
-    zu_version = body.get("zu_version", "1.1")
-
-    def _parse_schritte(raw: list) -> list[WorkflowSchrittSnapshot]:
-        return [
-            WorkflowSchrittSnapshot(
-                schritt_id=s.get("schritt_id", ""),
-                pflicht=bool(s.get("pflicht", True)),
-                reihenfolge=int(s.get("reihenfolge", 0)),
-                terminal=bool(s.get("terminal", False)),
-                rolle=s.get("rolle", ""),
-            )
-            for s in raw
-            if s.get("schritt_id")
-        ]
-
-    alt_schritte = _parse_schritte(body.get("alt_schritte", []))
-    neu_schritte = _parse_schritte(body.get("neu_schritte", []))
-
-    # Defaults wenn keine Schritte uebergeben: agrar_settlement Demo
-    if not alt_schritte:
-        schritte = get_default_agrar_settlement_schritte()
-        alt_schritte = [
-            WorkflowSchrittSnapshot(
-                schritt_id=s.schritt_id,
-                pflicht=s.pflicht,
-                reihenfolge=s.reihenfolge,
-                terminal=(s.schritt_id == "AS-06-VERBUCHUNG"),
-                rolle=s.rolle,
-            )
-            for s in schritte
-        ]
-        neu_schritte = alt_schritte[:]  # identisch â†’ SAFE
-
+@router.post("/workflow-migration/check", response_model=ProcessKernelOut, summary="Workflow migration prüfen", dependencies=SCHREIBEN["BERECHNEN"])
+def check_workflow_migration(body: WorkflowMigrationCheckIn) -> dict[str, Any]:
+    """Compare the explicitly supplied versions; never substitute demo steps."""
     alt_snap = WorkflowDefinitionSnapshot(
-        prozess_key=prozess_key,
-        version=von_version,
-        schema_version=1,
-        schritte=alt_schritte,
+        prozess_key=body.prozess_key, version=body.von_version,
+        schema_version=body.alt_schema_version,
+        schritte=[WorkflowSchrittSnapshot(**step.model_dump()) for step in body.alt_schritte],
     )
     neu_snap = WorkflowDefinitionSnapshot(
-        prozess_key=prozess_key,
-        version=zu_version,
-        schema_version=1,
-        schritte=neu_schritte,
+        prozess_key=body.prozess_key, version=body.zu_version,
+        schema_version=body.neu_schema_version,
+        schritte=[WorkflowSchrittSnapshot(**step.model_dump()) for step in body.neu_schritte],
     )
-    result = validate_workflow_migration(alt_snap, neu_snap)
-    return result.as_dict()
+    result = validate_workflow_migration(alt_snap, neu_snap).as_dict()
+    result["comparison_revision"] = body.comparison_revision()
+    return result
 
 
 # ---------------------------------------------------------------------------
@@ -1238,21 +1204,12 @@ def get_policy_rules(prozess_key: str) -> dict[str, Any]:
     }
 
 
-@router.post("/policy-rules/evaluate", response_model=ProcessKernelOut, summary="Policy rules evaluate")
-def evaluate_policy_rules(body: dict) -> dict[str, Any]:
-    """
-    Wertet PolicySet gegen einen Kontext aus.
-
-    Body: { "prozess_key": str, "policy_set_id": str (optional), "kontext": dict }
-    Gibt PolicyEvaluationResult zurueck.
-    """
-    prozess_key: str = body.get("prozess_key", "")
-    policy_set_id: str = body.get("policy_set_id", "")
-    kontext: dict = body.get("kontext", {})
-
-    if not prozess_key:
-        raise HTTPException(status_code=422, detail="prozess_key ist erforderlich")
-
+@router.post("/policy-rules/evaluate", response_model=ProcessKernelOut, summary="Policy rules evaluate", dependencies=[*SCHREIBEN["BERECHNEN"], Depends(reject_nonfinite_slo_json)])
+def evaluate_policy_rules(body: PolicyEvaluationIn) -> dict[str, Any]:
+    """Evaluate explicit advisory context; never issue a command approval."""
+    prozess_key = body.prozess_key
+    policy_set_id = body.policy_set_id
+    kontext = body.kontext
     all_sets = get_default_agrar_policy_sets()
 
     if policy_set_id:
@@ -1266,7 +1223,7 @@ def evaluate_policy_rules(body: dict) -> dict[str, Any]:
     # Ersten passenden PolicySet auswerten
     policy_set = matched[0]
     result = evaluate_policy_set(policy_set, kontext)
-    return result.as_dict()
+    return {**result.as_dict(), "advisory_only": True}
 
 
 # ---------------------------------------------------------------------------
@@ -1307,20 +1264,14 @@ def get_agent_approval_rules() -> dict[str, Any]:
     }
 
 
-@router.post("/agent/approval-evaluate", response_model=ProcessKernelOut, summary="Agent approval evaluate")
-def evaluate_agent_approval(body: dict) -> dict[str, Any]:
-    """
-    Bewertet ob eine Agent-Aktion menschliche Freigabe erfordert.
-
-    Body: { "aktions_typ": str, "kontext": dict }
-    """
-    aktions_typ: str = body.get("aktions_typ", "")
-    kontext: dict = body.get("kontext", {})
-    if not aktions_typ:
-        raise HTTPException(status_code=422, detail="aktions_typ ist erforderlich")
+@router.post("/agent/approval-evaluate", response_model=ProcessKernelOut, summary="Agent approval evaluate", dependencies=[*SCHREIBEN["BERECHNEN"], Depends(reject_nonfinite_slo_json)])
+def evaluate_agent_approval(body: ApprovalEvaluationIn) -> dict[str, Any]:
+    """Evaluate explicit advisory context; never issue a command approval."""
+    aktions_typ = body.aktions_typ
+    kontext = body.kontext
     regeln = get_default_approval_rules()
     result = evaluate_approval_requirement(aktions_typ, kontext, regeln)
-    return result.as_dict()
+    return {**result.as_dict(), "advisory_only": True}
 
 
 # ---------------------------------------------------------------------------
@@ -1346,17 +1297,12 @@ def get_slo_registry(dienst: str = "") -> dict[str, Any]:
     return registry.as_dict()
 
 
-@router.post("/slo/check", response_model=ProcessKernelOut, summary="Slo prÃ¼fen")
-def check_slo(body: dict) -> dict[str, Any]:
-    """
-    Prueft ob ein Ist-Wert ein SLO erfuellt.
-
-    Body: { "slo_id": str, "ist_wert": float | null }
-    """
-    slo_id: str = body.get("slo_id", "")
-    ist_wert = body.get("ist_wert")
-    if not slo_id:
-        raise HTTPException(status_code=422, detail="slo_id ist erforderlich")
+@router.post("/slo/check", response_model=ProcessKernelOut, summary="Slo prÃ¼fen",
+             dependencies=[*SCHREIBEN["BERECHNEN"], Depends(reject_nonfinite_slo_json)])
+def check_slo(body: SloCheckIn) -> dict[str, Any]:
+    """Check the explicit measurement; null is unknown and never synthetic zero."""
+    slo_id = body.slo_id
+    ist_wert = body.ist_wert
     registry = get_process_kernel_slos()
     slo = registry.by_slo_id(slo_id)
     if slo is None:
@@ -1403,17 +1349,6 @@ def get_mcp_tool_registry(domain: str = "") -> dict[str, Any]:
 # Wave 31 AP6: Datenqualitaets-Endpoints
 # ---------------------------------------------------------------------------
 
-def _dq_ruleset_public(ruleset: "DQRuleSet") -> dict:
-    """Serialisiert ein DQRuleSet ohne interne Implementierungsdetails."""
-    d = ruleset.as_dict()
-    for regel in d.get("regeln", []):
-        # format_regex und unique_felder sind Implementierungsdetails,
-        # nicht fuer externe Konsumenten bestimmt.
-        regel.pop("format_regex", None)
-        regel.pop("unique_felder", None)
-    return d
-
-
 @router.get("/data-quality/rulesets", response_model=ProcessKernelOut, summary="Dq rulesets abrufen")
 def get_dq_rulesets() -> dict[str, Any]:
     """
@@ -1427,38 +1362,12 @@ def get_dq_rulesets() -> dict[str, Any]:
     }
 
 
-@router.post("/data-quality/validate", response_model=ProcessKernelOut, summary="Dq validieren")
-def validate_dq(body: dict) -> dict[str, Any]:
-    """
-    Validiert einen Datensatz gegen ein DQ-Regelset.
-
-    Body: { "entity_typ": str, "datensatz": dict, "kontext_datensaetze": list[dict] | null }
-    Optional: "ruleset_id" zum expliziten Regelset-Lookup (wird ignoriert, wenn entity_typ passt).
-    """
-    entity_typ: str = body.get("entity_typ", "")
-    datensatz: dict = body.get("datensatz", {})
-    kontext: list[dict] | None = body.get("kontext_datensaetze")
-
-    if not entity_typ:
-        raise HTTPException(status_code=422, detail="entity_typ ist erforderlich")
-    if not isinstance(datensatz, dict):
-        raise HTTPException(status_code=422, detail="datensatz muss ein Objekt sein")
-
-    # Eingabegrenzen: DoS-Schutz
-    _MAX_FELDER = 50
-    _MAX_FELDWERT_LEN = 1000
-    _MAX_KONTEXT = 100
-    if len(datensatz) > _MAX_FELDER:
-        raise HTTPException(status_code=422, detail=f"datensatz darf maximal {_MAX_FELDER} Felder enthalten")
-    for k, v in datensatz.items():
-        if isinstance(v, str) and len(v) > _MAX_FELDWERT_LEN:
-            raise HTTPException(
-                status_code=422,
-                detail=f"Feldwert '{k}' ueberschreitet maximale Laenge ({_MAX_FELDWERT_LEN} Zeichen)",
-            )
-    if kontext is not None:
-        if not isinstance(kontext, list) or len(kontext) > _MAX_KONTEXT:
-            raise HTTPException(status_code=422, detail=f"kontext_datensaetze darf maximal {_MAX_KONTEXT} Eintraege enthalten")
+@router.post("/data-quality/validate", response_model=ProcessKernelOut, summary="Dq validieren", dependencies=SCHREIBEN["BERECHNEN"])
+def validate_dq(body: DataQualityCheckIn) -> dict[str, Any]:
+    """Validate the explicit business dataset with bounded canonical input."""
+    entity_typ = body.entity_typ
+    datensatz = body.datensatz
+    kontext = body.kontext_datensaetze
 
     rulesets = get_default_dq_rulesets()
     ruleset = rulesets.get(entity_typ)
@@ -1495,7 +1404,7 @@ def get_dashboard_snapshots(typ: str = "") -> dict[str, Any]:
     return registry.as_dict()
 
 
-@router.post("/dashboards/rebuild", response_model=ProcessKernelOut, summary="Dashboard rebuild auslÃ¶sen")
+@router.post("/dashboards/rebuild", response_model=ProcessKernelOut, summary="Dashboard rebuild auslÃ¶sen", dependencies=SCHREIBEN["FACHLICH"])
 def trigger_dashboard_rebuild(body: dict) -> dict[str, Any]:
     """
     Loest einen manuellen Snapshot-Rebuild aus.
@@ -1557,7 +1466,7 @@ def get_query_fallbacks(domain: str = "") -> dict[str, Any]:
     }
 
 
-@router.post("/query-fallbacks/evaluate", response_model=ProcessKernelOut, summary="Query fallback evaluate")
+@router.post("/query-fallbacks/evaluate", response_model=ProcessKernelOut, summary="Query fallback evaluate", dependencies=SCHREIBEN["BERECHNEN"])
 def evaluate_query_fallback(body: dict) -> dict[str, Any]:
     """
     Bestimmt den Fallback fuer einen fehlgeschlagenen Query.
@@ -1616,7 +1525,7 @@ def get_bulk_limits(domain: str = "") -> dict[str, Any]:
     }
 
 
-@router.post("/bulk-operations/validate", response_model=ProcessKernelOut, summary="Bulk operation validieren")
+@router.post("/bulk-operations/validate", response_model=ProcessKernelOut, summary="Bulk operation validieren", dependencies=SCHREIBEN["BERECHNEN"])
 def validate_bulk_operation(body: dict = None) -> dict[str, Any]:
     """
     Validiert eine Bulk-Request strukturell gegen Domain-Limits.
@@ -1675,7 +1584,7 @@ def validate_bulk_operation(body: dict = None) -> dict[str, Any]:
     return result.as_dict()
 
 
-@router.post("/bulk-operations/evaluate", response_model=ProcessKernelOut, summary="Bulk operation with dq evaluate")
+@router.post("/bulk-operations/evaluate", response_model=ProcessKernelOut, summary="Bulk operation with dq evaluate", dependencies=SCHREIBEN["BERECHNEN"])
 def evaluate_bulk_operation_with_dq(body: dict | None = None) -> dict[str, Any]:
     """
     Evaluates a bulk request together with the active DQ rule set.
@@ -1792,7 +1701,7 @@ def list_job_types(
     }
 
 
-@router.post("/jobs/enqueue", response_model=ProcessKernelOut, summary="Job enqueue")
+@router.post("/jobs/enqueue", response_model=ProcessKernelOut, summary="Job enqueue", dependencies=SCHREIBEN["FACHLICH"])
 def enqueue_job(body: dict = None) -> dict[str, Any]:
     """
     Reiht einen Hintergrund-Job in die Queue ein (Contract-Ebene).
@@ -1953,7 +1862,7 @@ def get_rate_limit_policies(domain: str = "") -> dict[str, Any]:
     }
 
 
-@router.post("/rate-limits/check", response_model=ProcessKernelOut, summary="Rate limit prÃ¼fen")
+@router.post("/rate-limits/check", response_model=ProcessKernelOut, summary="Rate limit prÃ¼fen", dependencies=SCHREIBEN["BERECHNEN"])
 def check_rate_limit(body: dict = None) -> dict[str, Any]:
     """
     Prueft ob ein Request das Rate-Limit ueberschreitet.
@@ -2037,7 +1946,7 @@ def get_security_controls(kategorie: str = "") -> dict[str, Any]:
     }
 
 
-@router.post("/security/rbac-check", response_model=ProcessKernelOut, summary="Rbac permission prÃ¼fen")
+@router.post("/security/rbac-check", response_model=ProcessKernelOut, summary="Rbac permission prÃ¼fen", dependencies=SCHREIBEN["BERECHNEN"])
 def check_rbac_permission(body: dict = None) -> dict[str, Any]:
     """
     Prueft eine RBAC-Permission fuer eine Rolle.
@@ -2116,7 +2025,7 @@ def get_inline_validations(domain: str = "") -> dict[str, Any]:
     }
 
 
-@router.post("/inline-validations/validate", response_model=ProcessKernelOut, summary="Inline validation ausfÃ¼hren")
+@router.post("/inline-validations/validate", response_model=ProcessKernelOut, summary="Inline validation ausfÃ¼hren", dependencies=SCHREIBEN["BERECHNEN"])
 def run_inline_validation(body: dict = None) -> dict[str, Any]:
     """
     Validiert einen Eingabewert gegen die Regeln eines Feldes.
@@ -2179,7 +2088,7 @@ def get_error_guidance_rules(http_status: int = 0) -> dict[str, Any]:
     }
 
 
-@router.post("/error-guidance/evaluate", response_model=ProcessKernelOut, summary="Error guidance endpoint evaluate")
+@router.post("/error-guidance/evaluate", response_model=ProcessKernelOut, summary="Error guidance endpoint evaluate", dependencies=SCHREIBEN["BERECHNEN"])
 def evaluate_error_guidance_endpoint(body: dict = None) -> dict[str, Any]:
     """
     Wertet Error-Guidance fuer einen aufgetretenen Fehler aus.
@@ -2291,7 +2200,7 @@ def get_edi_nachrichtentypen() -> dict[str, Any]:
 # Wave 36 â€” AP3: POST /process/supply-chain/eta
 # ---------------------------------------------------------------------------
 
-@router.post("/supply-chain/eta", response_model=ProcessKernelOut, summary="Lieferung eta berechne")
+@router.post("/supply-chain/eta", response_model=ProcessKernelOut, summary="Lieferung eta berechne", dependencies=SCHREIBEN["FACHLICH"])
 def berechne_lieferung_eta(body: dict = None) -> dict[str, Any]:
     """
     Berechnet die ETA (voraussichtliche Ankunftszeit) einer Lieferung.
@@ -2368,7 +2277,7 @@ def berechne_lieferung_eta(body: dict = None) -> dict[str, Any]:
 # Wave 36 â€” AP4: POST /process/supply-chain/status
 # ---------------------------------------------------------------------------
 
-@router.post("/supply-chain/status", response_model=ProcessKernelOut, summary="Supply chain status bewerte")
+@router.post("/supply-chain/status", response_model=ProcessKernelOut, summary="Supply chain status bewerte", dependencies=SCHREIBEN["FACHLICH"])
 def bewerte_supply_chain_status(body: dict = None) -> dict[str, Any]:
     """
     Bewertet den Gesamtstatus einer Lieferkette und erkennt Abweichungen.
@@ -2484,7 +2393,7 @@ def get_dms_erkennungsregeln(dokument_typ: str = "") -> dict[str, Any]:
 # Wave 37 â€” AP2: POST /process/dms/classify
 # ---------------------------------------------------------------------------
 
-@router.post("/dms/classify", response_model=ProcessKernelOut, summary="Dokument classify")
+@router.post("/dms/classify", response_model=ProcessKernelOut, summary="Dokument classify", dependencies=SCHREIBEN["BERECHNEN"])
 def classify_dokument(body: dict = None) -> dict[str, Any]:
     """
     Klassifiziert ein Dokument automatisch anhand seines Volltexts.
@@ -2567,7 +2476,7 @@ def get_agent_tools(
 # Wave 37 â€” AP4: POST /process/agent-tools/match
 # ---------------------------------------------------------------------------
 
-@router.post("/agent-tools/match", response_model=ProcessKernelOut, summary="Agent capabilities match")
+@router.post("/agent-tools/match", response_model=ProcessKernelOut, summary="Agent capabilities match", dependencies=SCHREIBEN["FACHLICH"])
 def match_agent_capabilities(body: dict = None) -> dict[str, Any]:
     """
     Findet Agent-Tools, die eine Liste angefragter Capabilities abdecken.
@@ -2619,7 +2528,7 @@ def get_esg_bericht(
 # Wave 38 â€” AP2: POST /process/sustainability/co2-berechnen
 # ---------------------------------------------------------------------------
 
-@router.post("/sustainability/co2-berechnen", response_model=ProcessKernelOut, summary="Co2 position berechne")
+@router.post("/sustainability/co2-berechnen", response_model=ProcessKernelOut, summary="Co2 position berechne", dependencies=SCHREIBEN["FACHLICH"])
 def berechne_co2_position(body: dict = None) -> dict[str, Any]:
     """
     Berechnet CO2e fÃ¼r eine einzelne Transport- oder Energieposition.
@@ -2715,7 +2624,7 @@ def get_benchmark_report(
 # Wave 38 â€” AP4: POST /process/benchmark/perzentile
 # ---------------------------------------------------------------------------
 
-@router.post("/benchmark/perzentile", response_model=ProcessKernelOut, summary="Perzentile berechne")
+@router.post("/benchmark/perzentile", response_model=ProcessKernelOut, summary="Perzentile berechne", dependencies=SCHREIBEN["FACHLICH"])
 def berechne_perzentile(body: dict = None) -> dict[str, Any]:
     """
     Berechnet Branchenperzentile aus einer Werteverteilung.
@@ -2818,7 +2727,7 @@ def get_surfacing_regeln(
 # Wave 39 â€” AP2: POST /process/surfacing/manifest
 # ---------------------------------------------------------------------------
 
-@router.post("/surfacing/manifest", response_model=ProcessKernelOut, summary="Surfacing manifest berechne")
+@router.post("/surfacing/manifest", response_model=ProcessKernelOut, summary="Surfacing manifest berechne", dependencies=SCHREIBEN["FACHLICH"])
 def berechne_surfacing_manifest(body: dict = None) -> dict[str, Any]:
     """
     Berechnet das Command-Surfacing-Manifest fÃ¼r einen User/Kontext.
@@ -2921,7 +2830,7 @@ def get_notification_abonnements(
 # Wave 39 â€” AP4: POST /process/notifications/route
 # ---------------------------------------------------------------------------
 
-@router.post("/notifications/route", response_model=ProcessKernelOut, summary="Notification route")
+@router.post("/notifications/route", response_model=ProcessKernelOut, summary="Notification route", dependencies=SCHREIBEN["FACHLICH"])
 def route_notification(body: dict = None) -> dict[str, Any]:
     """
     Berechnet Routing fÃ¼r eine Benachrichtigung (EmpfÃ¤nger + KanÃ¤le).
@@ -3024,7 +2933,7 @@ def get_workflow_definitionen(
 # Wave 40 â€” AP2: POST /process/workflow-versioning/migration-pruefen
 # ---------------------------------------------------------------------------
 
-@router.post("/workflow-versioning/migration-pruefen", response_model=ProcessKernelOut, summary="Workflow migration pruefe")
+@router.post("/workflow-versioning/migration-pruefen", response_model=ProcessKernelOut, summary="Workflow migration pruefe", dependencies=SCHREIBEN["FACHLICH"])
 def pruefe_workflow_migration(body: dict = None) -> dict[str, Any]:
     """
     PrÃ¼ft ob eine Workflow-Instanz auf eine Ziel-Definition migriert werden kann.
@@ -3096,7 +3005,7 @@ def get_audit_trail_beispiel(
 # Wave 40 â€” AP4: POST /process/audit-trail/integritaet-pruefen
 # ---------------------------------------------------------------------------
 
-@router.post("/audit-trail/integritaet-pruefen", response_model=ProcessKernelOut, summary="Audit integritaet pruefe")
+@router.post("/audit-trail/integritaet-pruefen", response_model=ProcessKernelOut, summary="Audit integritaet pruefe", dependencies=SCHREIBEN["FACHLICH"])
 def pruefe_audit_integritaet(body: dict = None) -> dict[str, Any]:
     """
     PrÃ¼ft die IntegritÃ¤t einer Audit-Kette (Hash-Verkettung + GoBD-VollstÃ¤ndigkeit).
@@ -3162,8 +3071,7 @@ def get_kapazitaets_einheiten(
 
 
 @router.post("/capacity/pruefe-workflow", summary="Workflow kapazitaet endpoint pruefe",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def pruefe_workflow_kapazitaet_endpoint(body: dict | None = None):
     """
     PrÃ¼ft ob fÃ¼r eine Workflow-Instanz ausreichend KapazitÃ¤t vorhanden ist.
@@ -3215,8 +3123,7 @@ def get_replay_auftraege(
 
 
 @router.post("/event-replay/konsistenz-pruefen", summary="Event stream konsistenz pruefe",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def pruefe_event_stream_konsistenz(body: dict | None = None):
     """
     PrÃ¼ft die Konsistenz eines Event-Streams (LÃ¼cken und Duplikate).
@@ -3269,8 +3176,7 @@ def get_event_schemata(
 
 
 @router.post("/event-schema/validiere-payload", summary="Event payload validiere",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def validiere_event_payload(body: dict | None = None):
     """
     Validiert einen Payload gegen das aktive Schema eines Event-Typs.
@@ -3335,8 +3241,7 @@ def get_saga_definitionen(workflow_typ: str = ""):
 
 
 @router.post("/compensation/erstelle-kette", summary="Kompensationskette endpoint erstelle",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def erstelle_kompensationskette_endpoint(body: dict | None = None):
     """
     Erstellt eine Kompensationskette fÃ¼r eine Workflow-Instanz.
@@ -3386,8 +3291,7 @@ def get_checkpoint_regeln(workflow_typ: str = ""):
 
 
 @router.post("/checkpoints/erstelle", summary="Workflow checkpoint erstelle",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["BERECHNEN"])
 def erstelle_workflow_checkpoint(body: dict | None = None):
     """
     Erstellt einen Checkpoint fÃ¼r eine Workflow-Instanz.
@@ -3436,8 +3340,7 @@ def get_projektions_gesundheit(tenant_id: str = "TENANT-001"):
 
 
 @router.post("/projections/pruefe-lag", summary="Projektions lag pruefe",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def pruefe_projektions_lag(body: dict | None = None):
     """
     Berechnet die Lag-Stufe fÃ¼r einen gegebenen Lag-Wert in Sekunden.
@@ -3485,8 +3388,7 @@ def get_routing_regeln(workflow_typ: str = ""):
 
 
 @router.post("/routing/route", summary="Workflow nachricht route",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def route_workflow_nachricht(body: dict | None = None):
     """
     Routet eine Nachricht anhand der priorisierten Routing-Regeln.
@@ -3527,8 +3429,7 @@ def get_lineage_graph(tenant_id: str = "TENANT-001"):
 
 
 @router.post("/lineage/pfad", summary="Lineage pfad finde",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def finde_lineage_pfad(body: dict | None = None):
     """
     Findet den Pfad zwischen zwei Knoten im Lineage-Graphen (BFS).
@@ -3585,8 +3486,7 @@ def get_feature_flags(
 
 
 @router.post("/feature-flags/evaluiere", summary="Feature flags evaluiere",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def evaluiere_feature_flags(body: dict | None = None):
     """
     Evaluiert alle Feature-Flags fÃ¼r einen Tenant und eine Rolle.
@@ -3644,8 +3544,7 @@ def get_budget_ueberwachung(
 
 
 @router.post("/costs/erstelle-erfassung", summary="Prozess kostenerfassung erstelle",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def erstelle_prozess_kostenerfassung(body: dict | None = None):
     """
     Erstellt eine Kostenerfassung fÃ¼r eine Workflow-Instanz.
@@ -3719,8 +3618,7 @@ def get_quarantaene_eintraege(
 
 
 @router.post("/quarantine/retry-zeitpunkt", summary="Retry zeitpunkt berechne",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def berechne_retry_zeitpunkt(body: dict | None = None):
     """
     Berechnet den nÃ¤chsten Retry-Zeitpunkt fÃ¼r einen QuarantÃ¤ne-Eintrag.
@@ -3774,8 +3672,7 @@ def get_acl_regeln(ressource_id: str = "", subjekt_id: str = ""):
 
 
 @router.post("/acl/pruefe", summary="Acl zugang pruefe",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def pruefe_acl_zugang(body: dict | None = None):
     """
     PrÃ¼ft ob ein Subjekt eine Aktion auf einer Ressource ausfÃ¼hren darf.
@@ -3820,8 +3717,7 @@ def get_state_machine_definition():
 
 
 @router.post("/state-machine/uebergang", summary="Zustandsuebergang aus fuehre",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def fuehre_zustandsuebergang_aus(body: dict | None = None):
     """
     FÃ¼hrt einen ZustandsÃ¼bergang im Automaten aus.
@@ -3866,8 +3762,7 @@ def get_delegations_regeln():
 
 
 @router.post("/delegation/loeseauf", summary="Delegations verantwortung loeseauf",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def loeseauf_delegations_verantwortung(body: dict | None = None):
     """
     LÃ¶st die Delegation fÃ¼r ein Subjekt und einen Aufgabentyp auf.
@@ -3907,8 +3802,7 @@ def get_timeout_regeln():
 
 
 @router.post("/timeouts/pruefe", summary="Timeout instanz pruefe",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def pruefe_timeout_instanz(body: dict | None = None):
     """
     PrÃ¼ft den Timeout-Status einer Workflow-Instanz.
@@ -3963,8 +3857,7 @@ def get_batch_jobs():
 
 
 @router.post("/batch/erstelle-chunks", summary="Batch chunks erstelle",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def erstelle_batch_chunks(body: dict | None = None):
     """
     Berechnet die Chunk-Aufteilung fÃ¼r einen Batch-Job.
@@ -4009,8 +3902,7 @@ def get_notifikations_vorlagen():
 
 
 @router.post("/notifications/erstelle-zustellung", summary="Notifikations zustellung erstelle",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def erstelle_notifikations_zustellung(body: dict | None = None):
     """
     Erstellt eine Zustellung aus einer Vorlage.
@@ -4062,8 +3954,7 @@ def get_aktive_locks():
 
 
 @router.post("/locks/akquiriere", summary="Workflow lock akquiriere",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def akquiriere_workflow_lock(body: dict | None = None):
     """
     Versucht einen Lock zu akquirieren.
@@ -4122,8 +4013,7 @@ def get_archiv_eintraege():
 
 
 @router.post("/archiv/statistik", summary="Archiv statistik abrufen",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def get_archiv_statistik(body: dict | None = None):
     """
     Gibt Archiv-Statistik fuer einen Tenant zurueck.
@@ -4160,8 +4050,7 @@ def get_kpi_summaries():
 
 
 @router.post("/metrics/aggregiere", summary="Workflow messpunkte aggregiere",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def aggregiere_workflow_messpunkte(body: dict | None = None):
     """
     Aggregiert Messpunkte aus den KPI-Summaries.
@@ -4250,8 +4139,7 @@ def get_kapazitaets_regeln():
 
 
 @router.post("/kapazitaet/pruefe-auslastung", tags=["process-kernel"], summary="Kapazitaets auslastung pruefe",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def pruefe_kapazitaets_auslastung(payload: dict):
     """
     Payload: {"max_kapazitaet": float, "warnschwelle_pct": float, "kritisch_schwelle_pct": float, "aktuelle_auslastung": float}
@@ -4287,8 +4175,7 @@ def get_default_sagas():
 
 
 @router.post("/kompensation/erstelle-plan", tags=["process-kernel"], summary="Kompensations plan endpoint erstelle",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def erstelle_kompensations_plan_endpoint(payload: dict):
     """
     Payload: {"saga_id": str, "saga_typ": str, "tenant_id": str, "schritt_definitionen": list}
@@ -4341,8 +4228,7 @@ def get_circuit_breaker_konfigurationen():
 
 
 @router.post("/circuit-breaker/pruefe-zustand", tags=["process-kernel"], summary="Circuit breaker zustand pruefe",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def pruefe_circuit_breaker_zustand(payload: dict):
     """
     Payload: {"fehler_schwellwert": int, "wiederherstellungs_timeout_sekunden": int,
@@ -4386,8 +4272,7 @@ def get_ereignis_streams():
 
 
 @router.post("/event-sourcing/rekonstruiere", tags=["process-kernel"], summary="Workflow zustand rekonstruiere",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def rekonstruiere_workflow_zustand(payload: dict):
     """
     Payload: {"stream_id": str} - reconstructs state from default streams.
@@ -4431,8 +4316,7 @@ def get_rate_limit_regeln():
     ]
 
 @router.post("/rate-limit/pruefe", tags=["process-kernel"], summary="Rate limit pruefe",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def pruefe_rate_limit(payload: dict):
     """
     Payload: {"max_anfragen": int, "weich_limit": int, "fenster": str, "anfragen_im_fenster": int, "fenster_abgelaufen": bool}
@@ -4477,8 +4361,7 @@ def get_idempotenz_eintraege():
     ]
 
 @router.post("/idempotenz/pruefe", tags=["process-kernel"], summary="Idempotenz endpoint pruefe",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def pruefe_idempotenz_endpoint(payload: dict):
     """
     Payload: {"schluessel": str, "strategie": str}
@@ -4519,8 +4402,7 @@ def get_retry_regeln():
     ]
 
 @router.post("/retry/berechne-verzoegerung", tags=["process-kernel"], summary="Retry verzoegerung berechne",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def berechne_retry_verzoegerung(payload: dict):
     """
     Payload: {"strategie": str, "basis_sekunden": float, "max_verzoegerung_sekunden": float, "versuch_nummer": int}
@@ -4545,8 +4427,7 @@ def get_checkpoint_sequenzen():
     ]
 
 @router.post("/checkpoint/wiederherstellungspunkt", tags=["process-kernel"], summary="Wiederherstellungspunkt abrufen",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["BERECHNEN"])
 def get_wiederherstellungspunkt(payload: dict):
     """
     Payload: {"instanz_id": str, "ab_schritt": int}
@@ -4585,8 +4466,7 @@ def get_warteschlangen():
     ]
 
 @router.post("/prioritaet/sortiere", tags=["process-kernel"], summary="Aufgaben sortiere",
-    response_model=list[ProcessKernelOut]
-)
+    response_model=list[ProcessKernelOut], dependencies=SCHREIBEN["FACHLICH"])
 def sortiere_aufgaben(payload: dict):
     """
     Payload: {"aufgaben": [{"aufgabe_id": str, "prioritaet": str, "erstellt_am": str}]}
@@ -4625,8 +4505,7 @@ def get_rollback_plaene():
     ]
 
 @router.post("/rollback/pruefe-ausfuehrbarkeit", tags=["process-kernel"], summary="Rollback ausfuehrbarkeit pruefe",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def pruefe_rollback_ausfuehrbarkeit(payload: dict):
     """
     Payload: {"plan_id": str}
@@ -4669,8 +4548,7 @@ def get_prozess_graphen():
     ]
 
 @router.post("/abhaengigkeit/bereite-schritte", tags=["process-kernel"], summary="Bereite schritte berechne",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def berechne_bereite_schritte(payload: dict):
     """
     Payload: {"schritte": [{"schritt_id": str, "status": str}],
@@ -4703,8 +4581,7 @@ def get_signale():
     ]
 
 @router.post("/signal/verarbeite", tags=["process-kernel"], summary="Signal endpoint verarbeite",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def verarbeite_signal_endpoint(payload: dict):
     """
     Payload: {"signal_id": str}
@@ -4788,8 +4665,7 @@ def get_migrations_guards():
 
 
 @router.post("/versioning/pruefe-brechend", tags=["process-kernel"], summary="Brechende aenderung pruefe",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def pruefe_brechende_aenderung(payload: dict):
     """
     Payload: {"guard_id": str, "von_version": str, "zu_version": str}
@@ -4836,8 +4712,7 @@ def get_kosten_allokationen():
 
 
 @router.post("/kosten/verteile", tags=["process-kernel"], summary="Kosten endpoint verteile",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def verteile_kosten_endpoint(payload: dict):
     """
     Payload: {"gesamt_betrag": float, "methode": str,
@@ -4865,7 +4740,7 @@ def get_audit_trail():
 
 
 @router.post("/audit-trail/pruefe-integritaet", tags=["process-kernel"], summary="Audit integritaet pruefe",
-    response_model=ProcessKernelOut
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["BERECHNEN"]
 )
 def pruefe_audit_integritaet(payload: dict):  # noqa: F401,F811
     """
@@ -4919,8 +4794,7 @@ def get_consent_register():
 
 
 @router.post("/consent/pruefe", tags=["process-kernel"], summary="Einwilligung pruefe",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def pruefe_einwilligung(payload: dict):
     """
     Payload: {"subjekt_id": str, "typ": str}
@@ -4952,8 +4826,7 @@ def get_trigger_regeln():
 
 
 @router.post("/trigger/pruefe-bedingungen", tags=["process-kernel"], summary="Trigger bedingungen pruefe",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def pruefe_trigger_bedingungen(payload: dict):
     """
     Payload: {"trigger_id": str, "kontext": dict}
@@ -4997,8 +4870,7 @@ def get_prognose_ergebnisse():
 
 
 @router.post("/prognose/berechne", tags=["process-kernel"], summary="Prognose berechne",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def berechne_prognose(payload: dict):
     """
     Payload: {"methode": str, "werte": [float], "fenster": int}
@@ -5035,8 +4907,7 @@ def get_uebergabe_protokolle():
 
 
 @router.post("/handover/pruefe-offen", tags=["process-kernel"], summary="Offene handover pruefe",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def pruefe_offene_handover(payload: dict):
     """Payload: {"protokoll_id": str}"""
     protokoll_id = payload.get("protokoll_id", "")
@@ -5075,8 +4946,7 @@ def get_quota_uebersicht():
 
 
 @router.post("/quota/pruefe-verbrauch", tags=["process-kernel"], summary="Quota verbrauch pruefe",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def pruefe_quota_verbrauch(payload: dict):
     """
     Payload: {"limit": float, "warnung_schwelle_pct": float,
@@ -5114,8 +4984,7 @@ def get_pause_verlaeufe():
 
 
 @router.post("/pause/pruefe-ueberfaellig", tags=["process-kernel"], summary="Pause ueberfaellig pruefe",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def pruefe_pause_ueberfaellig(payload: dict):
     """Payload: {"verlauf_id": str}"""
     from datetime import datetime
@@ -5163,8 +5032,7 @@ def get_prozess_templates():
 
 
 @router.post("/template/instanziere", tags=["process-kernel"], summary="Template endpoint instanziere",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def instanziere_template_endpoint(payload: dict):
     """
     Payload: {"template_id": str, "parameter": dict, "neue_instanz_id": str}
@@ -5215,8 +5083,7 @@ def get_deadline_monitor():
 
 
 @router.post("/deadline/pruefe-eskalation", tags=["process-kernel"], summary="Deadline eskalation pruefe",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def pruefe_deadline_eskalation(payload: dict):
     """Payload: {"deadline_id": str}"""
     from datetime import datetime
@@ -5255,8 +5122,7 @@ def get_validierungs_regeln():
 
 
 @router.post("/validierung/pruefe", tags=["process-kernel"], summary="Validierung pruefe",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def pruefe_validierung(payload: dict):
     """Payload: {"daten": dict}"""
     ergebnis = validiere_daten(payload.get("daten", {}), get_default_validierungs_regeln())
@@ -5291,8 +5157,7 @@ def get_kollaborations_entscheidungen():
 
 
 @router.post("/kollaboration/pruefe-ergebnis", tags=["process-kernel"], summary="Kollaborations ergebnis pruefe",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def pruefe_kollaborations_ergebnis(payload: dict):
     """Payload: {"entscheidung_id": str}"""
     entscheidung_id = payload.get("entscheidung_id", "")
@@ -5335,8 +5200,7 @@ def get_lineage_graph_w64():
 
 
 @router.post("/lineage/w64/upstream", tags=["process-kernel"], summary="Upstream w64 abrufen",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def get_upstream_w64(payload: dict):
     """Payload: {"knoten_id": str}"""
     knoten_id = payload.get("knoten_id", "")
@@ -5363,8 +5227,7 @@ def get_simulations_laeufe_w64():
 
 
 @router.post("/simulation/w64/ergebnis", tags=["process-kernel"], summary="Simulations ergebnis w64 abrufen",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def get_simulations_ergebnis_w64(payload: dict):
     """Payload: {"lauf_id": str}"""
     lauf_id = payload.get("lauf_id", "")
@@ -5406,8 +5269,7 @@ def get_ausnahme_signaturen():
     ]
 
 @router.post("/exception/klassifiziere", tags=["process-kernel"], summary="Ausnahme endpoint klassifiziere",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def klassifiziere_ausnahme_endpoint(payload: dict):
     """Payload: {"fehler_text": str, "fehler_code": str}"""
     ergebnis = klassifiziere_ausnahme(
@@ -5431,8 +5293,7 @@ def get_remediation_playbooks():
     ]
 
 @router.post("/remediation/pruefe-playbook", tags=["process-kernel"], summary="Remediation playbook pruefe",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def pruefe_remediation_playbook(payload: dict):
     """Payload: {"playbook_id": str}"""
     playbook_id = payload.get("playbook_id", "")
@@ -5474,8 +5335,7 @@ def get_konkurrenz_waechter():
     ]
 
 @router.post("/konkurrenz/pruefe-ausfuehrbarkeit", tags=["process-kernel"], summary="Ausfuehrbarkeit pruefe",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def pruefe_ausfuehrbarkeit(payload: dict):
     """Payload: {"modus": str, "max_gleichzeitig": int, "aktive_ausfuehrungen": int}"""
     from datetime import datetime
@@ -5506,8 +5366,7 @@ def get_resource_locks():
     ]
 
 @router.post("/resource-lock/erkenne-deadlock", tags=["process-kernel"], summary="Deadlock endpoint erkenne",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def erkenne_deadlock_endpoint(payload: dict):
     """Payload: {"warte_relationen": [{"wartet": str, "auf": str}]}"""
     analyse = erkenne_deadlock(payload.get("warte_relationen", []))
@@ -5528,8 +5387,7 @@ def liste_cache_konfigurationen():
              "strategie": r.strategie.value} for r in CACHE_REGELN]
 
 @router.post("/cache/pruefe-status", summary="Cache status pruefe",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def pruefe_cache_status(payload: dict):
     from app.core.process_cache_contracts import CacheEintrag
     from datetime import datetime
@@ -5556,8 +5414,7 @@ def liste_schema_versionen():
             for v in SCHEMA_VERSIONEN]
 
 @router.post("/schema/pruefe-kompatibilitaet", summary="Schema kompatibilitaet pruefe",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def pruefe_schema_kompatibilitaet(payload: dict):  # noqa: F401,F811
     from app.core.workflow_schema_migration_contracts import (
         SchemaVersion, FeldAenderung, FeldAenderungsTyp, SchemaKompatibilitaet
@@ -5593,8 +5450,7 @@ def liste_health_schwellwerte():
             for s in STANDARD_SCHWELLWERTE]
 
 @router.post("/health-dashboard/pruefe-status", summary="Dashboard status pruefe",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def pruefe_dashboard_status(payload: dict):
     from app.core.process_health_dashboard_contracts import (
         HealthDashboard, DashboardKomponente, KomponentenMetrik, MetrikTyp,
@@ -5632,8 +5488,7 @@ def pruefe_dashboard_status(payload: dict):
     }
 
 @router.post("/visualisierung/graph/analyse", summary="Visualisierungs graph analysiere",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def analysiere_visualisierungs_graph(payload: dict):
     from app.core.workflow_dependency_visualization_contracts import (
         VisualisierungsGraph, VisualisierungsKnoten, VisualisierungsKante,
@@ -5706,8 +5561,7 @@ def hole_knowledge_objekt(knowledge_id: str, version: int | None = None, db=Depe
 
 
 @router.post("/knowledge/retrieve", tags=["process-kernel"], summary="Knowledge retrieve",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def retrieve_knowledge(payload: dict, db=Depends(get_db)):
     from app.core.knowledge_core_contracts import (
         KnowledgeObjectTyp,
@@ -5739,8 +5593,7 @@ def retrieve_knowledge(payload: dict, db=Depends(get_db)):
 
 
 @router.post("/knowledge/onboarding-bundle", tags=["process-kernel"], summary="Onboarding bundle knowledge",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def knowledge_onboarding_bundle(payload: dict, db=Depends(get_db)):
     from app.core.knowledge_runtime import build_runtime_onboarding_bundle
 
@@ -5756,8 +5609,7 @@ def knowledge_onboarding_bundle(payload: dict, db=Depends(get_db)):
 
 
 @router.post("/knowledge/context-pack", tags=["process-kernel"], summary="Context pack knowledge",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def knowledge_context_pack(payload: dict, db=Depends(get_db)):
     from app.core.knowledge_core_contracts import KnowledgeChannel
     from app.core.knowledge_runtime import build_runtime_context_pack
@@ -5803,9 +5655,9 @@ def hole_persistentes_knowledge_objekt(knowledge_id: str, version: int | None = 
 
 
 @router.post("/knowledge/store/objekte", status_code=201, tags=["process-kernel"], summary="Persistentes knowledge objekt erstelle",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def erstelle_persistentes_knowledge_objekt(payload: dict, db=Depends(get_db)):
+    from app.core.tenant_context import get_current_tenant_id
     from app.core.blockchain_anchor_runtime import anchor_knowledge_object
     from app.repositories.knowledge_repository import KnowledgeRepository
 
@@ -5822,7 +5674,8 @@ def erstelle_persistentes_knowledge_objekt(payload: dict, db=Depends(get_db)):
         titel=payload["titel"],
         typ=payload["typ"],
         status=payload.get("status", "ENTWURF"),
-        tenant_id=payload.get("tenant_id", "system"),
+        # Mandant aus dem geprueften Kontext; gemeinsames Wissen nur ueber zentrale Pflege.
+        tenant_id=get_current_tenant_id(),
         beschreibung=payload.get("beschreibung", ""),
         tags=list(payload.get("tags", [])),
         zielrollen=list(payload.get("zielrollen", [])),
@@ -5840,8 +5693,7 @@ def erstelle_persistentes_knowledge_objekt(payload: dict, db=Depends(get_db)):
 
 
 @router.post("/knowledge/store/objekte/{knowledge_id}/versionen", tags=["process-kernel"], summary="Persistente knowledge version hinzu fuege",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def fuege_persistente_knowledge_version_hinzu(knowledge_id: str, payload: dict, db=Depends(get_db)):
     from app.core.blockchain_anchor_runtime import anchor_knowledge_object
     from app.repositories.knowledge_repository import KnowledgeRepository
@@ -5858,8 +5710,7 @@ def fuege_persistente_knowledge_version_hinzu(knowledge_id: str, payload: dict, 
 
 
 @router.post("/knowledge/store/retrieve", tags=["process-kernel"], summary="Persisted knowledge retrieve",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def retrieve_persisted_knowledge(payload: dict, db=Depends(get_db)):
     from app.core.knowledge_core_contracts import KnowledgeObjectTyp, KnowledgeRetrievalRequest, KnowledgeStatus
     from app.repositories.knowledge_repository import KnowledgeRepository
@@ -5907,8 +5758,7 @@ def hole_knowledge_improvement_proposal(proposal_id: str, db=Depends(get_db)):
 
 
 @router.post("/knowledge/store/proposals", status_code=201, tags=["process-kernel"], summary="Knowledge improvement proposal erstelle",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def erstelle_knowledge_improvement_proposal(payload: dict, db=Depends(get_db)):
     from app.repositories.knowledge_repository import KnowledgeRepository
 
@@ -5939,8 +5789,7 @@ def erstelle_knowledge_improvement_proposal(payload: dict, db=Depends(get_db)):
 
 
 @router.post("/knowledge/store/proposals/from-neuroassist-run", status_code=201, tags=["process-kernel"], summary="Knowledge improvement proposal aus neuroassist run erstelle",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 async def erstelle_knowledge_improvement_proposal_aus_neuroassist_run(payload: dict, db=Depends(get_db)):
     from app.core.blockchain_anchor_runtime import anchor_governance_proposal
     from app.repositories.knowledge_repository import KnowledgeRepository
@@ -6039,8 +5888,7 @@ async def erstelle_knowledge_improvement_proposal_aus_neuroassist_run(payload: d
 
 
 @router.post("/knowledge/store/proposals/{proposal_id}/review", tags=["process-kernel"], summary="Knowledge improvement proposal review",
-    response_model=ProcessKernelOut
-)
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH"])
 def review_knowledge_improvement_proposal(proposal_id: str, payload: dict, db=Depends(get_db)):
     from app.core.blockchain_anchor_runtime import anchor_knowledge_object
     from app.repositories.knowledge_repository import KnowledgeRepository
@@ -6096,7 +5944,7 @@ def review_knowledge_improvement_proposal(proposal_id: str, payload: dict, db=De
 # Wave 36 Ã¢â‚¬â€ AP3b: POST /process/supply-chain/eta/alarm
 # ---------------------------------------------------------------------------
 
-@router.post("/supply-chain/eta/alarm", response_model=ProcessKernelOut, summary="Lieferung eta alarm bewerte")
+@router.post("/supply-chain/eta/alarm", response_model=ProcessKernelOut, summary="Lieferung eta alarm bewerte", dependencies=SCHREIBEN["FACHLICH"])
 def bewerte_lieferung_eta_alarm(body: dict = None) -> dict[str, Any]:
     """
     Bewertet eine ETA gegen eine Zielankunft und erzeugt bei Verzug einen Alarm.
@@ -6168,7 +6016,7 @@ def bewerte_lieferung_eta_alarm(body: dict = None) -> dict[str, Any]:
 # Wave 37 Ã¢â‚¬â€ AP2b: POST /process/dms/extract
 # ---------------------------------------------------------------------------
 
-@router.post("/dms/extract", response_model=ProcessKernelOut, summary="Dokument extract")
+@router.post("/dms/extract", response_model=ProcessKernelOut, summary="Dokument extract", dependencies=SCHREIBEN["FACHLICH"])
 def extract_dokument(body: dict = None) -> dict[str, Any]:
     """
     Extrahiert strukturierte Felder und baut einen Kernfluss-Contract fuer DMS -> Finance/Docflow.

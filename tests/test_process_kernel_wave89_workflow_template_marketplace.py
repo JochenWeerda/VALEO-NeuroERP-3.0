@@ -4,6 +4,7 @@ import json
 
 import pytest
 from fastapi import FastAPI
+from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
 from fastapi.testclient import TestClient
 from sqlalchemy import text
 
@@ -22,6 +23,7 @@ from app.core.workflow_template_marketplace import (
 
 def _client() -> TestClient:
     app = FastAPI()
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(workflow_template_marketplace.router)
     app.dependency_overrides[workflow_template_marketplace.get_tenant_id] = lambda: TEST_TENANT_ID
 

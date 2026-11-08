@@ -5,43 +5,23 @@ Die Einträge werden via Webhook (app/routers/dms_webhook_router.py) persistiert
 """
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Body, Response
+from fastapi import APIRouter, Depends, HTTPException, Response
 from pydantic import BaseModel, ConfigDict
-from sqlalchemy import Column, Float, Integer, String, Text, DateTime
-from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Session
-from sqlalchemy.sql import func
 
-from ....core.database import Base, get_db
-from ....core.uuid7 import uuid7
+from ....core.database import get_db
+from ....core.tenant import get_tenant_id
 
 logger = logging.getLogger(__name__)
 
-from app.api.v1.schemas.base import BaseSchema
+from app.auth.finance_roles import beleg_read
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
+from app.documents.dms_inbox_model import DmsInboxEntry, booking_not_from_inbox, verified_inbox_tenant
 
 
 router = APIRouter()
-
-
-# ---------------------------------------------------------------------------
-# Shared ORM model (extend_existing so webhook router and this file coexist)
-# ---------------------------------------------------------------------------
-
-class DmsInboxEntry(Base):
-    """Persistierter DMS-Inbox-Eintrag (domain_shared.dms_inbox)."""
-    __tablename__ = "dms_inbox"
-    __table_args__ = {"schema": "domain_shared", "extend_existing": True}
-
-    id = Column(String, primary_key=True, default=uuid7)
-    dms_document_id = Column(Integer, nullable=False)
-    dms_url = Column(String(500), nullable=True)
-    ocr_text = Column(Text, nullable=True)
-    parsed_fields = Column(JSONB, nullable=True)
-    confidence = Column(Float, default=0.0)
-    status = Column(String(20), default="pending")
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 
 # ---------------------------------------------------------------------------
@@ -86,13 +66,14 @@ class CreateFromInboxResponse(BaseModel):
 # Endpoints
 # ---------------------------------------------------------------------------
 
-@router.get("/inbox", response_model=InboxListResponse, tags=["dms"], summary="Inbox abrufen")
-async def get_inbox(db: Session = Depends(get_db)):
+@router.get("/inbox", response_model=InboxListResponse, tags=["dms"], summary="Inbox abrufen", dependencies=[Depends(beleg_read)])
+async def get_inbox(db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
     """Alle ausstehenden Inbox-Dokumente (status='pending')."""
+    mandant = verified_inbox_tenant(tenant_id)
     try:
         items = (
             db.query(DmsInboxEntry)
-            .filter(DmsInboxEntry.status == "pending")
+            .filter(DmsInboxEntry.tenant_id == mandant, DmsInboxEntry.status == "pending")
             .order_by(DmsInboxEntry.created_at.desc())
             .all()
         )
@@ -115,39 +96,33 @@ async def get_inbox(db: Session = Depends(get_db)):
         return InboxListResponse(ok=True, items=[], count=0, message="DMS-Inbox nicht verfügbar")
 
 
-@router.post("/inbox/{inbox_id}/create", response_model=CreateFromInboxResponse, tags=["dms"], summary="From inbox anlegen")
+@router.post("/inbox/{inbox_id}/create", response_model=CreateFromInboxResponse, tags=["dms"], summary="From inbox anlegen", dependencies=SCHREIBEN["BELEGE"])
 async def create_from_inbox(
     inbox_id: str,
-    overrides: Dict[str, Any] = Body(default={}),
     db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ):
-    """Erstellt einen Beleg aus einem Inbox-Dokument und markiert es als verarbeitet."""
-    entry = db.query(DmsInboxEntry).filter(DmsInboxEntry.id == inbox_id).first()
+    """OCR-Prefill is not a Beleg; submit the purchase invoice domain command."""
+    mandant = verified_inbox_tenant(tenant_id)
+    entry = db.query(DmsInboxEntry).filter(
+        DmsInboxEntry.id == inbox_id, DmsInboxEntry.tenant_id == mandant
+    ).first()
     if not entry:
         raise HTTPException(status_code=404, detail="Inbox-Dokument nicht gefunden")
-
-    fields = {**(entry.parsed_fields or {}), **overrides}
-    beleg_number = fields.get("invoice_number") or fields.get("number")
-
-    entry.status = "processed"
-    try:
-        db.commit()
-    except Exception as exc:
-        db.rollback()
-        logger.error("Failed to commit inbox create for %s: %s", inbox_id, exc)
-        raise HTTPException(status_code=500, detail=f"Datenbankfehler: {exc}")
-
-    logger.info("Created document from inbox: %s → %s", inbox_id, beleg_number)
-    return CreateFromInboxResponse(ok=True, number=beleg_number, message="Beleg erstellt")
+    raise booking_not_from_inbox(inbox_id)
 
 
-@router.delete("/inbox/{inbox_id}", status_code=204, response_class=Response, response_model=None, tags=["dms"], summary="Inbox document löschen")
+@router.delete("/inbox/{inbox_id}", status_code=204, response_class=Response, response_model=None, tags=["dms"], summary="Inbox document löschen", dependencies=SCHREIBEN["BELEGE"])
 async def delete_inbox_document(
     inbox_id: str,
     db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """Verwirft/löscht ein Inbox-Dokument."""
-    entry = db.query(DmsInboxEntry).filter(DmsInboxEntry.id == inbox_id).first()
+    mandant = verified_inbox_tenant(tenant_id)
+    entry = db.query(DmsInboxEntry).filter(
+        DmsInboxEntry.id == inbox_id, DmsInboxEntry.tenant_id == mandant
+    ).first()
     if not entry:
         raise HTTPException(status_code=404, detail="Inbox-Dokument nicht gefunden")
     try:

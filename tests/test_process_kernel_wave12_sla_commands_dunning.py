@@ -6,6 +6,7 @@ from __future__ import annotations
 from datetime import date, datetime, timedelta, timezone
 
 from fastapi import FastAPI
+from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
 from fastapi.testclient import TestClient
 
 from app.api.v1.endpoints import sla_escalation_api
@@ -171,6 +172,7 @@ def test_acknowledge_escalation_sets_acknowledged_true():
 
 def test_sla_scan_api_returns_schema_version():
     app = FastAPI()
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(sla_escalation_api.router)
     old = (datetime.now(timezone.utc) - timedelta(hours=80)).isoformat()
     with TestClient(app) as client:

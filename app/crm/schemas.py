@@ -27,19 +27,6 @@ class LeadStatus(str, Enum):
     lost = "lost"
 
 
-class ActivityType(str, Enum):
-    call = "call"
-    email = "email"
-    meeting = "meeting"
-    visit = "visit"
-
-
-class ActivityStatus(str, Enum):
-    planned = "planned"
-    completed = "completed"
-    cancelled = "cancelled"
-
-
 # --- Contact Schemas ---
 
 class ContactBase(BaseModel):
@@ -124,38 +111,6 @@ class Lead(LeadBase):
     id: str
     created_at: datetime
     updated_at: datetime
-
-
-# --- Activity Schemas ---
-
-class ActivityBase(BaseModel):
-    contact_id: Optional[str] = None
-    type: ActivityType
-    date: datetime
-    subject: Optional[str] = None
-    notes: Optional[str] = None
-    status: ActivityStatus = ActivityStatus.planned
-    created_by: Optional[str] = None
-
-
-class ActivityCreate(ActivityBase):
-    pass
-
-
-class ActivityUpdate(BaseModel):
-    contact_id: Optional[str] = None
-    type: Optional[ActivityType] = None
-    date: Optional[datetime] = None
-    subject: Optional[str] = None
-    notes: Optional[str] = None
-    status: Optional[ActivityStatus] = None
-
-
-class Activity(ActivityBase):
-    model_config = ConfigDict(from_attributes=True)
-
-    id: str
-    created_at: datetime
 
 
 # --- BetriebsProfil Schemas ---

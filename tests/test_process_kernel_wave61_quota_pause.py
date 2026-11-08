@@ -771,6 +771,8 @@ class TestProcessKernelApiWave61:
         from app.api.v1.endpoints.process_kernel_api import router
         from fastapi import FastAPI
         app = FastAPI()
+        from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
+        ersetze_nutzer(app, *ALLE_FACHROLLEN)
         app.include_router(router)
         self.client = TestClient(app)
 

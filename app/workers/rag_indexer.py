@@ -10,6 +10,8 @@ from sqlalchemy.orm import Session
 from datetime import datetime
 
 from app.core.database import SessionLocal
+from app.core.tenant_context import tenant_scope
+from app.core.tenant_registry import active_tenant_ids
 from app.infrastructure.rag.indexer import get_indexer
 
 logger = logging.getLogger(__name__)
@@ -52,20 +54,18 @@ class RAGIndexerWorker:
         db: Session = SessionLocal()
         
         try:
-            from sqlalchemy import text
-
             indexer = get_indexer()
 
-            tenant_rows = db.execute(
-                text("SELECT DISTINCT tenant_id FROM domain_shared.tenants WHERE active = true LIMIT 50")
-            ).fetchall()
-            tenant_ids = [r.tenant_id for r in tenant_rows] if tenant_rows else ["system"]
+            # The registry columns are id/is_active; the former query on tenant_id/active
+            # could never succeed (RLS plan P1).
+            tenant_ids = active_tenant_ids(db)
 
             total_articles = 0
             total_customers = 0
             for tenant_id in tenant_ids:
-                article_count = await indexer.index_articles(db, tenant_id)
-                customer_count = await indexer.index_customers(db, tenant_id)
+                with tenant_scope(tenant_id, "rag-indexer"):
+                    article_count = await indexer.index_articles(db, tenant_id)
+                    customer_count = await indexer.index_customers(db, tenant_id)
                 total_articles += article_count
                 total_customers += customer_count
                 logger.debug("Tenant %s: %d articles, %d customers", tenant_id, article_count, customer_count)

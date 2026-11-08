@@ -3,7 +3,7 @@ import os
 import uuid
 
 import pytest
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, event, text
 from sqlalchemy.exc import SQLAlchemyError
@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 from app.api.v1.endpoints import ebilanz_elster
 from app.auth.deps import get_current_user
 from app.core.database import get_db
+from app.core.tenant import get_tenant_id
 
 pytestmark = [pytest.mark.integration, pytest.mark.needs_live_db]
 PAYLOAD = {"wirtschaftsjahr": 2025, "bilanzart": "HGB", "berichtsperiode_von": "2025-01-01",
@@ -43,6 +44,11 @@ def context():
         app.include_router(ebilanz_elster.router)
         user = {'sub': 'export-test', 'roles': ['FINANCE_ADMIN']}
         app.dependency_overrides[get_db] = lambda: db
+        # This standalone business app already replaces get_current_user.
+        # Declare its tenant double too; production main:app is untouched.
+        def declared_test_tenant(request: Request) -> str:
+            return request.headers.get('X-Tenant-ID') or tenant
+        app.dependency_overrides[get_tenant_id] = declared_test_tenant
         app.dependency_overrides[get_current_user] = lambda: user
         with TestClient(app) as client:
             client.headers['X-Tenant-ID'] = tenant

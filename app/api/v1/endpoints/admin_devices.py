@@ -8,6 +8,7 @@ from typing import Any, Optional
 from uuid import UUID, uuid4
 
 from fastapi import Response, APIRouter, Depends, HTTPException, Query
+from app.auth.deps import require_roles
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -19,6 +20,8 @@ from app.api.v1.schemas.base import BaseSchema
 
 
 router = APIRouter()
+
+_NUR_ADMIN = [Depends(require_roles("admin"))]  # Konfiguration: wie admin_core
 
 
 class AdminDeviceIn(BaseModel):
@@ -162,7 +165,7 @@ async def list_devices(
     return [_row_to_model(row, AdminDeviceOut) for row in rows]
 
 
-@router.post("/devices", response_model=AdminDeviceOut, status_code=201, summary="Device anlegen")
+@router.post("/devices", response_model=AdminDeviceOut, status_code=201, summary="Device anlegen", dependencies=_NUR_ADMIN)
 async def create_device(
     payload: AdminDeviceIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -199,7 +202,7 @@ async def create_device(
     return _row_to_model(row, AdminDeviceOut)
 
 
-@router.put("/devices/{device_id}", response_model=AdminDeviceOut, summary="Device aktualisieren")
+@router.put("/devices/{device_id}", response_model=AdminDeviceOut, summary="Device aktualisieren", dependencies=_NUR_ADMIN)
 async def update_device(
     device_id: str,
     payload: AdminDeviceIn,
@@ -245,7 +248,7 @@ async def update_device(
     return _row_to_model(row, AdminDeviceOut)
 
 
-@router.delete("/devices/{device_id}", status_code=204, response_class=Response, response_model=None, summary="Device löschen")
+@router.delete("/devices/{device_id}", status_code=204, response_class=Response, response_model=None, summary="Device löschen", dependencies=_NUR_ADMIN)
 async def delete_device(
     device_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -294,7 +297,7 @@ async def list_device_mappings(
     return [_row_to_model(row, AdminDeviceMappingOut) for row in rows]
 
 
-@router.post("/device-mappings", response_model=AdminDeviceMappingOut, status_code=201, summary="Device mapping anlegen")
+@router.post("/device-mappings", response_model=AdminDeviceMappingOut, status_code=201, summary="Device mapping anlegen", dependencies=_NUR_ADMIN)
 async def create_device_mapping(
     payload: AdminDeviceMappingIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -360,7 +363,7 @@ async def create_device_mapping(
     return _row_to_model(row, AdminDeviceMappingOut)
 
 
-@router.put("/device-mappings/{mapping_id}", response_model=AdminDeviceMappingOut, summary="Device mapping aktualisieren")
+@router.put("/device-mappings/{mapping_id}", response_model=AdminDeviceMappingOut, summary="Device mapping aktualisieren", dependencies=_NUR_ADMIN)
 async def update_device_mapping(
     mapping_id: str,
     payload: AdminDeviceMappingIn,
@@ -431,7 +434,7 @@ async def update_device_mapping(
     return _row_to_model(row, AdminDeviceMappingOut)
 
 
-@router.delete("/device-mappings/{mapping_id}", status_code=204, response_class=Response, response_model=None, summary="Device mapping löschen")
+@router.delete("/device-mappings/{mapping_id}", status_code=204, response_class=Response, response_model=None, summary="Device mapping löschen", dependencies=_NUR_ADMIN)
 async def delete_device_mapping(
     mapping_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -476,7 +479,7 @@ async def list_output_templates(
     return [_row_to_model(row, AdminOutputTemplateOut) for row in rows]
 
 
-@router.post("/output-templates", response_model=AdminOutputTemplateOut, status_code=201, summary="Output template anlegen")
+@router.post("/output-templates", response_model=AdminOutputTemplateOut, status_code=201, summary="Output template anlegen", dependencies=_NUR_ADMIN)
 async def create_output_template(
     payload: AdminOutputTemplateCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -534,7 +537,7 @@ async def create_output_template(
     return _row_to_model(row, AdminOutputTemplateOut)
 
 
-@router.put("/output-templates/{template_id}", response_model=AdminOutputTemplateOut, summary="Output template aktualisieren")
+@router.put("/output-templates/{template_id}", response_model=AdminOutputTemplateOut, summary="Output template aktualisieren", dependencies=_NUR_ADMIN)
 async def update_output_template(
     template_id: str,
     payload: AdminOutputTemplateUpdate,
@@ -623,7 +626,7 @@ async def list_output_template_versions(
     return [_row_to_model(row, AdminOutputTemplateVersionOut) for row in rows]
 
 
-@router.delete("/output-templates/{template_id}", status_code=204, response_class=Response, response_model=None, summary="Output template löschen")
+@router.delete("/output-templates/{template_id}", status_code=204, response_class=Response, response_model=None, summary="Output template löschen", dependencies=_NUR_ADMIN)
 async def delete_output_template(
     template_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -674,7 +677,7 @@ async def list_output_profiles(
     return [_row_to_model(row, AdminOutputProfileOut) for row in rows]
 
 
-@router.post("/output-profiles", response_model=AdminOutputProfileOut, status_code=201, summary="Output profile anlegen")
+@router.post("/output-profiles", response_model=AdminOutputProfileOut, status_code=201, summary="Output profile anlegen", dependencies=_NUR_ADMIN)
 async def create_output_profile(
     payload: AdminOutputProfileIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -719,7 +722,7 @@ async def create_output_profile(
     return _row_to_model(row, AdminOutputProfileOut)
 
 
-@router.put("/output-profiles/{profile_id}", response_model=AdminOutputProfileOut, summary="Output profile aktualisieren")
+@router.put("/output-profiles/{profile_id}", response_model=AdminOutputProfileOut, summary="Output profile aktualisieren", dependencies=_NUR_ADMIN)
 async def update_output_profile(
     profile_id: str,
     payload: AdminOutputProfileIn,
@@ -771,7 +774,7 @@ async def update_output_profile(
     return _row_to_model(row, AdminOutputProfileOut)
 
 
-@router.delete("/output-profiles/{profile_id}", status_code=204, response_class=Response, response_model=None, summary="Output profile löschen")
+@router.delete("/output-profiles/{profile_id}", status_code=204, response_class=Response, response_model=None, summary="Output profile löschen", dependencies=_NUR_ADMIN)
 async def delete_output_profile(
     profile_id: str,
     tenant_id: str = Depends(get_tenant_id),

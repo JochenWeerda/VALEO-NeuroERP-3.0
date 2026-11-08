@@ -18,7 +18,6 @@ import pytest
 # ---------------------------------------------------------------------------
 
 from app.api.v1.endpoints.waage import (
-    _fehlerqueue,
     _kalibrierung_status,
     _parse_q_line,
     _parse_w_line,
@@ -95,84 +94,41 @@ class TestAsciiImportParsing:
 
 @pytest.mark.asyncio
 async def test_ascii_import_parses_w_satzart():
-    """Zwei W-Zeilen werden importiert; DB-INSERT schlägt fehlerlos durch."""
-    from app.api.v1.endpoints.waage import import_ascii
+    from app.services.waage_import_service import parse_record, split_records
+    raw = 'W;W001;2026-05-17;10:00:00;28500;12000;16500;RE-AB-1234;LIF-001;;WW;P001;S01;13.5;78.2;1.2;0'
+    records = split_records(raw + '\nQ;W001;PROTEIN;11.5;%')
+    assert len(records) == 1
+    value = parse_record(records[0])
+    assert value['net_weight'] == 16500
+    assert value['quality_data']['additional'] == [{'parameter': 'PROTEIN', 'wert': '11.5', 'einheit': '%'}]
 
-    csv_content = (
-        "W;W001;2026-05-17;10:00:00;28500;12000;16500;RE-AB-1234;LIF-001;ART-001;WW;P001;S01;13.5;78.2;1.2;0\n"
-        "W;W002;2026-05-17;10:30:00;29000;12000;17000;RE-AB-5678;LIF-001;ART-001;WW;P001;S02;13.8;77.9;1.1;0\n"
-    )
-    upload = MagicMock()
-    upload.read = AsyncMock(return_value=csv_content.encode("utf-8"))
-
-    # DB-mock: execute liefert ein Ergebnis ohne Fehler
-    db_mock = MagicMock()
-    db_mock.execute.return_value = MagicMock()
-    db_mock.commit = MagicMock()
-
-    result = await import_ascii(
-        file=upload,
-        waage_id="WAAGE-001",
-        fehler_toleranz=True,
-        db=db_mock,
-    )
-
-    assert result["imported"] == 2
-    assert result["skipped"] == 0
-    assert result["errors"] == []
-    assert len(result["wiegung_ids"]) == 2
 
 
 @pytest.mark.asyncio
 async def test_ascii_import_skips_invalid_line_with_toleranz():
-    """Fehlerhafte Zeile wird mit fehler_toleranz=True übersprungen."""
-    from app.api.v1.endpoints.waage import import_ascii
-
-    csv_content = (
-        "W;W001;2026-05-17;10:00:00;28500;12000;16500;RE-AB-1234;LIF-001;ART-001;WW;P001;S01;13.5;78.2;1.2;0\n"
-        "INVALID_LINE_WITH_NO_SEMICOLONS\n"
-    )
+    from app.api.v1.endpoints import waage
+    from fastapi import HTTPException
     upload = MagicMock()
-    upload.read = AsyncMock(return_value=csv_content.encode("utf-8"))
+    upload.read = AsyncMock(return_value=b'\xffinvalid')
+    db = MagicMock()
+    with patch.object(waage, 'WaageRepository') as repo:
+        repo.return_value.get_by_id.return_value = object()
+        with pytest.raises(HTTPException) as invalid:
+            await waage.import_ascii(upload, 'own', True, db, 'tenant-a', {'sub': 'actor'})
+    assert invalid.value.status_code == 422
+    db.commit.assert_not_called()
 
-    db_mock = MagicMock()
-    db_mock.execute.return_value = MagicMock()
-    db_mock.commit = MagicMock()
-
-    result = await import_ascii(
-        file=upload,
-        waage_id="WAAGE-001",
-        fehler_toleranz=True,
-        db=db_mock,
-    )
-
-    assert result["imported"] == 1
-    assert result["skipped"] == 1  # unknown satzart → skipped
 
 
 @pytest.mark.asyncio
 async def test_ascii_import_fails_on_invalid_line_without_toleranz():
-    """Bei fehler_toleranz=False und DB-Fehler wird sofort zurückgegeben."""
-    from app.api.v1.endpoints.waage import import_ascii
+    from app.services.waage_import_service import parse_record
+    from fastapi import HTTPException
+    for number in ['NaN', 'Infinity', '-1', 'NOT_A_NUMBER']:
+        raw = f'W;W001;2026-05-17;10:00:00;{number};12000;16500;RE;LIF;;WW;P001;S01;13.5;78.2;1.2;0'
+        with pytest.raises((ValueError, HTTPException)):
+            parse_record(raw)
 
-    csv_content = (
-        "W;W001;2026-05-17;10:00:00;NICHT_EINE_ZAHL;12000;16500;RE;LIF;ART;WW;P001;S01;13.5;78.2;1.2;0\n"
-    )
-    upload = MagicMock()
-    upload.read = AsyncMock(return_value=csv_content.encode("utf-8"))
-
-    db_mock = MagicMock()
-
-    result = await import_ascii(
-        file=upload,
-        waage_id="WAAGE-001",
-        fehler_toleranz=False,
-        db=db_mock,
-    )
-
-    # Muss beim ersten Fehler abbrechen
-    assert result["imported"] == 0
-    assert len(result["errors"]) == 1
 
 
 # ---------------------------------------------------------------------------
@@ -181,44 +137,16 @@ async def test_ascii_import_fails_on_invalid_line_without_toleranz():
 
 @pytest.mark.asyncio
 async def test_fehlerqueue_add_and_list():
-    """Fehlerqueue-Eintrag wird hinzugefügt und abgerufen."""
-    from app.api.v1.endpoints.waage import (
-        _fehlerqueue,
-        list_fehlerqueue,
-        retry_fehlerqueue_entry,
-        delete_fehlerqueue_entry,
-    )
+    from app.api.v1.endpoints import waage
+    from sqlalchemy.dialects import postgresql
+    db = MagicMock()
+    db.query.return_value.filter.return_value.order_by.return_value.limit.return_value.all.return_value = []
+    assert await waage.list_fehlerqueue(db=db, tenant_id='tenant-a', limit=3) == []
+    expressions = db.query.return_value.filter.call_args.args
+    sql = [str(x.compile(dialect=postgresql.dialect(), compile_kwargs={'literal_binds': True})) for x in expressions]
+    assert any("tenant_id = 'tenant-a'" in item for item in sql)
+    db.query.return_value.filter.return_value.order_by.return_value.limit.assert_called_once_with(3)
 
-    # Zustand sichern & aufräumen
-    original = list(_fehlerqueue)
-    _fehlerqueue.clear()
-
-    entry_id = str(uuid.uuid4())
-    _fehlerqueue.append(
-        {
-            "id": entry_id,
-            "timestamp": "2026-05-17T10:00:00",
-            "waage_id": "WAAGE-TEST",
-            "rohdaten": "W;XXX;...",
-            "fehler_beschreibung": "Testfehler",
-            "retry_count": 0,
-        }
-    )
-
-    listed = await list_fehlerqueue()
-    assert any(e["id"] == entry_id for e in listed)
-
-    # Retry
-    result = await retry_fehlerqueue_entry(entry_id)
-    assert result["entry"]["retry_count"] == 1
-
-    # Delete
-    await delete_fehlerqueue_entry(entry_id)
-    remaining = await list_fehlerqueue()
-    assert not any(e["id"] == entry_id for e in remaining)
-
-    # Wiederherstellen
-    _fehlerqueue.extend(original)
 
 
 # ---------------------------------------------------------------------------

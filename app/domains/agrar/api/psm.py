@@ -14,19 +14,22 @@ import time
 import math
 
 from ....core.config import settings
-from ....core.business_time import business_today
+from ....core.business_time import business_today, business_timezone
 from ....core.database import get_db
+from ....core.tenant import get_tenant_id
 from ....infrastructure.models import PSM as PSMModel
-from ....api.v1.schemas.base import PaginatedResponse
+from ....api.v1.schemas.base import BaseSchema, PaginatedResponse
 from ....api.v1.schemas.agrar import PSM, PSMCreate, PSMUpdate
 from ....integrations.dms_client import upload_document, is_configured as dms_configured
 from ....integrations.bvl_psm_client import BVLPSMClient, map_bvl_mittel_to_psm_payload, psm_api_metrics
 from ....services.sync_scheduler import sync_scheduler
 from ....services.competitor_monitor import competitor_monitor
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter()
 
-DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
+# Mandant aus der geprueften Anmeldung (get_tenant_id). Bis 27.10.2026 kam er aus ?tenant_id= mit dem
+# Standardmandanten als Rueckfall.
 logger = logging.getLogger(__name__)
 bvl_client = BVLPSMClient()
 
@@ -107,7 +110,7 @@ async def list_wasserschutz_zonen(
     lat: Optional[float] = Query(None, description="Breitengrad des Schlags"),
     lng: Optional[float] = Query(None, description="Längengrad des Schlags"),
     radius_km: float = Query(10.0, ge=0.1, le=50.0, description="Suchradius in km"),
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """
     Wasserschutz-Zonen abfragen (mit optionaler Nähe-Filterung).
@@ -168,7 +171,7 @@ async def get_psm_monitoring():
 @router.get("/", response_model=PaginatedResponse[PSM])
 async def list_psm(
     source: Literal["local", "bvl"] = Query("local", description="Data source"),
-    tenant_id: Optional[str] = Query(None, description="Filter by tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     search: Optional[str] = Query(None, description="Search in name, wirkstoff, bvl_nummer"),
     mittel_typ: Optional[str] = Query(None, description="Filter by type"),
     wirkstoff: Optional[str] = Query(None, description="Filter by active ingredient"),
@@ -182,7 +185,7 @@ async def list_psm(
     db: Session = Depends(get_db),
 ):
     """Return a paginated list of PSM."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
     if source == "bvl":
         try:
             bvl_result = await bvl_client.list_mittel(search=search, skip=skip, limit=limit)
@@ -260,15 +263,57 @@ async def list_psm(
     )
 
 
+class PSMZulassung(BaseSchema):
+    """Zulassungsdaten aus dem mandanteneigenen PSM-Stamm."""
+    id: str
+    artikelnummer: str
+    name: str
+    wirkstoff: str
+    mittel_typ: str
+    bvl_nummer: str
+    zulassung_ablauf: datetime
+    ist_aktiv: Optional[bool]
+
+
+class PSMZulassungen(PaginatedResponse[PSMZulassung]):
+    abgelaufen: int
+
+
+@router.get("/zulassungen", response_model=PSMZulassungen, summary="PSM-Zulassungen auflisten")
+def list_psm_zulassungen(
+    tenant_id: str = Depends(get_tenant_id),
+    search: Optional[str] = Query(None),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(25, ge=1, le=200),
+    db: Session = Depends(get_db),
+) -> PSMZulassungen:
+    """Lokaler PSM-Stamm; Ablaufzaehler bezieht sich auf alle Mandantenzeilen."""
+    query = db.query(PSMModel).filter(PSMModel.tenant_id == tenant_id)
+    if search:
+        like = f"%{search}%"
+        query = query.filter(or_(PSMModel.artikelnummer.ilike(like), PSMModel.name.ilike(like),
+                                 PSMModel.wirkstoff.ilike(like), PSMModel.mittel_typ.ilike(like),
+                                 PSMModel.bvl_nummer.ilike(like)))
+    total = query.count()
+    abgelaufen = query.filter(func.date(func.timezone(business_timezone().key, PSMModel.zulassung_ablauf)) < business_today()).count()
+    items = query.order_by(PSMModel.artikelnummer, PSMModel.id).offset(skip).limit(limit).all()
+    return PSMZulassungen(
+        items=[PSMZulassung.model_validate(item) for item in items], total=total,
+        abgelaufen=abgelaufen, page=skip // limit + 1, size=limit,
+        pages=(total + limit - 1) // limit if total else 1,
+        has_next=skip + limit < total, has_prev=skip > 0,
+    )
+
+
 @router.get("/{psm_id}", response_model=PSM)
 async def get_psm(
     psm_id: str,
     source: Literal["local", "bvl"] = Query("local", description="Data source"),
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Get a single PSM by ID."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
     if source == "bvl":
         try:
             item = await bvl_client.get_mittel_by_kennr(psm_id)
@@ -293,14 +338,14 @@ async def get_psm(
     return PSM.model_validate(psm)
 
 
-@router.post("/", response_model=PSM, status_code=201)
+@router.post("/", response_model=PSM, status_code=201, dependencies=SCHREIBEN["AGRAR"])
 async def create_psm(
     psm_data: PSMCreate,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Create a new PSM."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
 
     # Check if bvl_nummer already exists
     existing = (
@@ -344,15 +389,15 @@ async def create_psm(
     return PSM.model_validate(psm)
 
 
-@router.put("/{psm_id}", response_model=PSM)
+@router.put("/{psm_id}", response_model=PSM, dependencies=SCHREIBEN["AGRAR"])
 async def update_psm(
     psm_id: str,
     psm_data: PSMUpdate,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Update an existing PSM."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
 
     psm = (
         db.query(PSMModel)
@@ -416,14 +461,14 @@ async def update_psm(
     return PSM.model_validate(psm)
 
 
-@router.delete("/{psm_id}", status_code=204)
+@router.delete("/{psm_id}", status_code=204, dependencies=SCHREIBEN["AGRAR"])
 async def delete_psm(
     psm_id: str,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Delete a PSM (soft delete)."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
 
     psm = (
         db.query(PSMModel)
@@ -443,15 +488,15 @@ async def delete_psm(
     return None
 
 
-@router.post("/{psm_id}/erklaerung", response_model=PSM)
+@router.post("/{psm_id}/erklaerung", response_model=PSM, dependencies=SCHREIBEN["AGRAR"])
 async def upload_farmer_declaration(
     psm_id: str,
     erklaerung_data: dict = {"status": "eingegangen"},
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Upload farmer declaration for PSM."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
 
     psm = (
         db.query(PSMModel)
@@ -506,15 +551,15 @@ async def upload_farmer_declaration(
     return PSM.model_validate(psm)
 
 
-@router.put("/{psm_id}/erklaerung/status", response_model=PSM)
+@router.put("/{psm_id}/erklaerung/status", response_model=PSM, dependencies=SCHREIBEN["AGRAR"])
 async def update_farmer_declaration_status(
     psm_id: str,
     status_data: dict = {"status": "geprueft"},
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Update farmer declaration status."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
 
     psm = (
         db.query(PSMModel)
@@ -548,11 +593,11 @@ async def update_farmer_declaration_status(
 async def search_psm(
     q: str = Query(..., min_length=2, description="Search term"),
     limit: int = Query(10, ge=1, le=50, description="Maximum number of results"),
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Lightweight search endpoint for PSM."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
     like = f"%{q}%"
 
     query = (
@@ -575,11 +620,11 @@ async def search_psm(
 
 @router.get("/stats/overview")
 async def get_psm_stats(
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Get PSM statistics overview."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
 
     # Count by type
     type_stats = {}
@@ -666,18 +711,18 @@ async def get_psm_stats(
     }
 
 
-@router.post("/sync/proplanta", response_model=dict)
+@router.post("/sync/proplanta", response_model=dict, dependencies=SCHREIBEN["AGRAR"])
 async def sync_proplanta_psm(
     sync_config: dict = {
         "url": "https://www.proplanta.de/psm-database",
         "force_update": False,
         "max_items": 1000
     },
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Trigger automated PSM synchronization with Proplanta."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
 
     try:
         # Import MCP client for Proplanta scraping
@@ -744,10 +789,10 @@ async def sync_proplanta_psm(
 
 @router.get("/sync/status")
 async def get_sync_status(
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """Get current PSM synchronization status."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
 
     # Get comprehensive sync status from scheduler
     status = sync_scheduler.get_schedule_status()
@@ -760,7 +805,7 @@ async def get_sync_status(
     }
 
 
-@router.post("/sync/schedule")
+@router.post("/sync/schedule", dependencies=SCHREIBEN["AGRAR"])
 async def schedule_sync(
     schedule_config: dict = {
         "name": "custom_psm_sync",
@@ -769,11 +814,11 @@ async def schedule_sync(
         "article_groups": ["PSM"],
         "max_items": 1000
     },
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Schedule automated PSM synchronization."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
 
     # Add schedule to sync scheduler
     schedule = sync_scheduler.add_schedule(
@@ -798,13 +843,13 @@ async def schedule_sync(
     }
 
 
-@router.post("/sync/run-due")
+@router.post("/sync/run-due", dependencies=SCHREIBEN["AGRAR"])
 async def run_due_schedules(
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Execute all due sync schedules."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
 
     due_schedules = sync_scheduler.get_due_schedules()
     executed_jobs = []
@@ -863,14 +908,14 @@ async def run_due_schedules(
     }
 
 
-@router.put("/sync/schedule/{schedule_name}")
+@router.put("/sync/schedule/{schedule_name}", dependencies=SCHREIBEN["AGRAR"])
 async def update_sync_schedule(
     schedule_name: str,
     updates: dict,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """Update an existing sync schedule."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
 
     try:
         sync_scheduler.update_schedule(schedule_name, **updates)
@@ -886,13 +931,13 @@ async def update_sync_schedule(
         raise HTTPException(status_code=500, detail=f"Failed to update schedule: {str(e)}")
 
 
-@router.delete("/sync/schedule/{schedule_name}")
+@router.delete("/sync/schedule/{schedule_name}", dependencies=SCHREIBEN["AGRAR"])
 async def delete_sync_schedule(
     schedule_name: str,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """Delete a sync schedule."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
 
     try:
         if schedule_name in sync_scheduler.schedules:
@@ -909,15 +954,15 @@ async def delete_sync_schedule(
         raise HTTPException(status_code=500, detail=f"Failed to delete schedule: {str(e)}")
 
 
-@router.post("/competitor/search")
+@router.post("/competitor/search", dependencies=SCHREIBEN["AGRAR"])
 async def search_competitor_products(
     query: str = Query(..., description="Search query for products"),
     category: str = Query("psm", description="Product category"),
     max_results: int = Query(50, description="Maximum number of results"),
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """Search for competitor products using hybrid search-scraping approach"""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
 
     try:
         # Search for product URLs
@@ -937,13 +982,13 @@ async def search_competitor_products(
         raise HTTPException(status_code=500, detail=f"Competitor search failed: {str(e)}")
 
 
-@router.post("/competitor/scrape")
+@router.post("/competitor/scrape", dependencies=SCHREIBEN["AGRAR"])
 async def scrape_competitor_data(
     product_urls: List[str] = Query(..., description="List of product URLs to scrape"),
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """Scrape competitor product data from URLs"""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
 
     try:
         scraped_data = []
@@ -992,10 +1037,10 @@ async def scrape_competitor_data(
 @router.get("/competitor/alerts")
 async def get_price_alerts(
     threshold_percent: float = Query(15.0, description="Price change threshold for alerts"),
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """Get price change alerts"""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
 
     try:
         alerts = competitor_monitor.get_price_alerts(threshold_percent)
@@ -1018,10 +1063,10 @@ async def get_price_history(
     product_url: Optional[str] = Query(None, description="Filter by product URL"),
     shop_name: Optional[str] = Query(None, description="Filter by shop name"),
     days: int = Query(30, description="Number of days to look back"),
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """Get price history data"""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
 
     try:
         # This would typically query a database
@@ -1040,7 +1085,7 @@ async def get_price_history(
         raise HTTPException(status_code=500, detail=f"Failed to get price history: {str(e)}")
 
 
-@router.post("/competitor/monitor")
+@router.post("/competitor/monitor", dependencies=SCHREIBEN["AGRAR"])
 async def start_competitor_monitoring(
     config: dict = {
         "categories": ["psm", "duenger", "saatgut"],
@@ -1048,10 +1093,10 @@ async def start_competitor_monitoring(
         "alert_threshold": 15.0,
         "schedule_hours": 24
     },
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """Start automated competitor monitoring"""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
 
     try:
         # Add to sync scheduler as competitor monitoring job

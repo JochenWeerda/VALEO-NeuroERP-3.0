@@ -2,15 +2,17 @@
 
 from datetime import datetime
 from typing import Optional
+import logging
 import csv
 import io
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import Response, StreamingResponse
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.akteur import gepruefter_akteur_aus_request
 from app.core.tenant import get_tenant_id
 from app.domains.operations.models import (
     ComplianceEintrag,
@@ -18,23 +20,23 @@ from app.domains.operations.models import (
     Charge,
     PCNMeldung,
     QSCheckEintrag,
-    ZulassungRegister,
     SachkundeEintrag,
     SaatgutNachbauEintrag,
     VVVOEintrag,
 )
 from app.services.compliance_service import (
     dt as _dt,
+    pcn_to_dict as _pcn_to_dict,
     list_sales_deliveries as _list_sales_deliveries,
     extract_hazard_export_rows as _extract_hazard_export_rows,
     compute_nutrient_stream as _compute_nutrient_stream,
     build_lot_trace_report as _build_lot_trace_report,
-    seed_compliance_data as _seed,
     build_compliance_pdf_bytes as _build_compliance_pdf_bytes,
 )
 
 from app.api.v1.schemas.base import BaseSchema, TypedObjectOut
 from pydantic import ConfigDict as _ConfigDict
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 class ComplianceOut(BaseSchema):
@@ -42,13 +44,14 @@ class ComplianceOut(BaseSchema):
     model_config = _ConfigDict(extra="allow")
 
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter(prefix="/compliance", tags=["Compliance"])
 
 
 @router.get("/cross-compliance", response_model=ComplianceOut, summary="Cross compliance auflisten")
-async def list_cross_compliance(db: Session = Depends(get_db)) -> dict:
-    _seed(db)
-    items = db.query(ComplianceEintrag).all()
+async def list_cross_compliance(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
+    items = db.query(ComplianceEintrag).filter(ComplianceEintrag.tenant_id == tenant_id).all()
     payload = [
         {
             "id": i.id,
@@ -69,9 +72,8 @@ async def list_cross_compliance(db: Session = Depends(get_db)) -> dict:
 
 
 @router.get("/enni-meldungen", response_model=ComplianceOut, summary="Enni meldungen auflisten")
-async def list_enni_meldungen(db: Session = Depends(get_db)) -> dict:
-    _seed(db)
-    items = db.query(ENNIMeldung).all()
+async def list_enni_meldungen(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
+    items = db.query(ENNIMeldung).filter(ENNIMeldung.tenant_id == tenant_id).all()
     return {
         "items": [
             {
@@ -90,9 +92,8 @@ async def list_enni_meldungen(db: Session = Depends(get_db)) -> dict:
 
 
 @router.get("/qs-checkliste", response_model=ComplianceOut, summary="Qs checkliste auflisten")
-async def list_qs_checkliste(db: Session = Depends(get_db)) -> dict:
-    _seed(db)
-    items = db.query(QSCheckEintrag).all()
+async def list_qs_checkliste(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
+    items = db.query(QSCheckEintrag).filter(QSCheckEintrag.tenant_id == tenant_id).all()
     payload = [
         {
             "id": i.id,
@@ -113,41 +114,9 @@ async def list_qs_checkliste(db: Session = Depends(get_db)) -> dict:
     }
 
 
-@router.get("/zulassungen-register", response_model=ComplianceOut, summary="Zulassungen auflisten")
-async def list_zulassungen(
-    typ: Optional[str] = Query(None),
-    status: Optional[str] = Query(None),
-    db: Session = Depends(get_db),
-) -> dict:
-    _seed(db)
-    q = db.query(ZulassungRegister)
-    if typ:
-        q = q.filter(ZulassungRegister.typ == typ)
-    if status:
-        q = q.filter(ZulassungRegister.status == status)
-    items = q.all()
-    return {
-        "items": [
-            {
-                "id": i.id,
-                "produkt": i.produkt,
-                "typ": i.typ,
-                "nummer": i.nummer,
-                "behoerde": i.behoerde,
-                "gueltig_bis": _dt(i.gueltig_bis),
-                "gueltigBis": _dt(i.gueltig_bis),
-                "status": i.status,
-            }
-            for i in items
-        ],
-        "total": len(items),
-    }
-
-
 @router.get("/sachkunde-register", response_model=ComplianceOut, summary="Sachkunde auflisten")
-async def list_sachkunde(status: Optional[str] = Query(None), db: Session = Depends(get_db)) -> dict:
-    _seed(db)
-    q = db.query(SachkundeEintrag)
+async def list_sachkunde(status: Optional[str] = Query(None), tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
+    q = db.query(SachkundeEintrag).filter(SachkundeEintrag.tenant_id == tenant_id)
     if status:
         q = q.filter(SachkundeEintrag.status == status)
     items = q.all()
@@ -173,9 +142,8 @@ async def list_sachkunde(status: Optional[str] = Query(None), db: Session = Depe
 
 
 @router.get("/saatgut-nachbau", response_model=ComplianceOut, summary="Saatgut nachbau auflisten")
-async def list_saatgut_nachbau(db: Session = Depends(get_db)) -> dict:
-    _seed(db)
-    items = db.query(SaatgutNachbauEintrag).all()
+async def list_saatgut_nachbau(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
+    items = db.query(SaatgutNachbauEintrag).filter(SaatgutNachbauEintrag.tenant_id == tenant_id).all()
     return {
         "items": [
             {
@@ -195,9 +163,8 @@ async def list_saatgut_nachbau(db: Session = Depends(get_db)) -> dict:
 
 
 @router.get("/vvvo-register", response_model=ComplianceOut, summary="Vvvo auflisten")
-async def list_vvvo(db: Session = Depends(get_db)) -> dict:
-    _seed(db)
-    items = db.query(VVVOEintrag).all()
+async def list_vvvo(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
+    items = db.query(VVVOEintrag).filter(VVVOEintrag.tenant_id == tenant_id).all()
     return {
         "items": [
             {
@@ -221,12 +188,11 @@ async def list_vvvo(db: Session = Depends(get_db)) -> dict:
 )
 async def get_compliance_report_pdf(
     inline: bool = Query(False, description="Vorschau im Browser (inline) statt Download"),
-    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ) -> Response:
     """Liefert Compliance-Report als mehrseitiges PDF mit Zwischensummen und automatischen Seitenumbrüchen."""
-    _seed(db)
-    stats = await get_compliance_stats(db=db)
-    cross_payload = await list_cross_compliance(db=db)
+    stats = await get_compliance_stats(tenant_id=tenant_id, db=db)
+    cross_payload = await list_cross_compliance(tenant_id=tenant_id, db=db)
     cross_items = cross_payload.get("items", [])
     pdf_bytes = _build_compliance_pdf_bytes(stats, cross_items)
     disposition = "inline" if inline else "attachment"
@@ -238,13 +204,12 @@ async def get_compliance_report_pdf(
 
 
 @router.get("/stats", response_model=ComplianceOut, summary="Compliance stats abrufen")
-async def get_compliance_stats(db: Session = Depends(get_db)) -> dict:
-    _seed(db)
-    total_checks = db.query(ComplianceEintrag).count()
-    fulfilled = db.query(ComplianceEintrag).filter(ComplianceEintrag.erfuellt == True).count()  # noqa: E712
-    enni_total = db.query(ENNIMeldung).count()
-    enni_confirmed = db.query(ENNIMeldung).filter(ENNIMeldung.status == "bestaetigt").count()
-    avg_n = db.query(ENNIMeldung).with_entities(ENNIMeldung.naehrstoff_n).all()
+async def get_compliance_stats(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
+    total_checks = db.query(ComplianceEintrag).filter(ComplianceEintrag.tenant_id == tenant_id).count()
+    fulfilled = db.query(ComplianceEintrag).filter(ComplianceEintrag.tenant_id == tenant_id).filter(ComplianceEintrag.erfuellt == True).count()  # noqa: E712
+    enni_total = db.query(ENNIMeldung).filter(ENNIMeldung.tenant_id == tenant_id).count()
+    enni_confirmed = db.query(ENNIMeldung).filter(ENNIMeldung.tenant_id == tenant_id).filter(ENNIMeldung.status == "bestaetigt").count()
+    avg_n = db.query(ENNIMeldung).filter(ENNIMeldung.tenant_id == tenant_id).with_entities(ENNIMeldung.naehrstoff_n).all()
     avg_n_val = sum(float(x[0] or 0) for x in avg_n) / len(avg_n) if avg_n else 0
 
     return {
@@ -267,9 +232,9 @@ async def get_compliance_stats(db: Session = Depends(get_db)) -> dict:
 @router.get("/exports/gefahrstoffdoku", response_model=ComplianceOut, summary="Gefahrstoffdoku exportieren")
 async def export_gefahrstoffdoku(
     year: Optional[int] = Query(None, ge=2000, le=2100),
-    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ) -> dict:
-    deliveries = _list_sales_deliveries(db)
+    deliveries = _list_sales_deliveries(db, tenant_id)
     rows = _extract_hazard_export_rows(deliveries, year=year)
     return {
         "year": year,
@@ -284,9 +249,9 @@ async def export_gefahrstoffdoku(
 )
 async def export_gefahrstoffdoku_csv(
     year: Optional[int] = Query(None, ge=2000, le=2100),
-    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ):
-    payload = await export_gefahrstoffdoku(year=year, db=db)
+    payload = await export_gefahrstoffdoku(year=year, tenant_id=tenant_id, db=db)
     buffer = io.StringIO()
     writer = csv.writer(buffer, delimiter=";")
     writer.writerow(
@@ -333,9 +298,9 @@ async def export_gefahrstoffdoku_csv(
 @router.get("/exports/naehrstoffstrom", response_model=ComplianceOut, summary="Naehrstoffstrom exportieren")
 async def export_naehrstoffstrom(
     year: int = Query(..., ge=2000, le=2100),
-    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
 ) -> dict:
-    deliveries = _list_sales_deliveries(db)
+    deliveries = _list_sales_deliveries(db, tenant_id)
     data = _compute_nutrient_stream(deliveries, year=year)
     data["generated_at"] = datetime.utcnow().isoformat()
     return data
@@ -379,7 +344,7 @@ async def export_chargen_trace_report(
     ).first()
     if not lot:
         return {"error": "lot not found", "lot_id": lot_id}
-    deliveries = _list_sales_deliveries(db)
+    deliveries = _list_sales_deliveries(db, tenant_id)
     report = _build_lot_trace_report(lot, deliveries)
     report["generated_at"] = datetime.utcnow().isoformat()
     return report
@@ -389,87 +354,9 @@ async def export_chargen_trace_report(
 # Wave 23 AP4: Intrastat-Meldungen
 # ---------------------------------------------------------------------------
 
-from ....core.intrastat_model import (
-    IntrastatRichtung,
-    build_stub_intrastat_meldung,
-    validate_intrastat_meldung,
-)
-
-_INTRASTAT_STORE: dict[str, dict] = {}
-
-
-@router.get("/intrastat/meldungen", response_model=ComplianceOut, summary="Intrastat meldungen auflisten")
-async def list_intrastat_meldungen(
-    meldezeitraum: Optional[str] = None,
-    richtung: Optional[str] = None,
-) -> dict:
-    """
-    Liste aller Intrastat-Meldungen (Gap 042).
-
-    Optional filterbar nach Meldezeitraum (YYYY-MM) und Richtung (EINGANG/AUSGANG).
-    """
-    meldungen = list(_INTRASTAT_STORE.values())
-
-    if meldezeitraum:
-        meldungen = [m for m in meldungen if m.get("meldezeitraum") == meldezeitraum]
-    if richtung:
-        meldungen = [m for m in meldungen if m.get("richtung") == richtung.upper()]
-
-    return {
-        "meldungen": meldungen,
-        "count": len(meldungen),
-        "schema_version": 1,
-    }
-
-
-@router.post("/intrastat/meldungen", response_model=ComplianceOut, status_code=201, summary="Intrastat meldung anlegen")
-async def create_intrastat_meldung(
-    body: dict,
-) -> dict:
-    """
-    Anlage einer neuen Intrastat-Meldung (Gap 042).
-
-    Fuehrt direkt eine Vollstaendigkeitspruefung gemaess VO (EG) 638/2004 durch.
-    Gibt validation_result mit allen Violations zurueck.
-    """
-    meldung_id = body.get("meldung_id", f"INTRA-{len(_INTRASTAT_STORE) + 1:04d}")
-    tenant_id = body.get("tenant_id", "demo-tenant")
-    meldezeitraum = body.get("meldezeitraum", "2026-03")
-    richtung_raw = body.get("richtung", "EINGANG")
-
-    try:
-        richtung = IntrastatRichtung(richtung_raw)
-    except ValueError:
-        richtung = IntrastatRichtung.EINGANG
-
-    meldung = build_stub_intrastat_meldung(
-        meldung_id=meldung_id,
-        tenant_id=tenant_id,
-        meldezeitraum=meldezeitraum,
-        richtung=richtung,
-    )
-    validation = validate_intrastat_meldung(meldung)
-    meldung_dict = meldung.as_dict()
-    _INTRASTAT_STORE[meldung_id] = meldung_dict
-
-    return {
-        "meldung": meldung_dict,
-        "validation_result": validation.as_dict(),
-        "schema_version": 1,
-    }
-
-
-@router.get("/intrastat/meldungen/{meldung_id}/validate", response_model=ComplianceOut, summary="Intrastat meldung endpoint validieren")
-async def validate_intrastat_meldung_endpoint(meldung_id: str) -> dict:
-    """
-    Vollstaendigkeitspruefung einer einzelnen Intrastat-Meldung nach EU-VO 638/2004.
-    """
-    meldung = build_stub_intrastat_meldung(
-        meldung_id=meldung_id,
-        tenant_id="demo-tenant",
-    )
-    result = validate_intrastat_meldung(meldung)
-    return result.as_dict()
+# Intrastat liegt in ``endpoints/intrastat.py`` (``domain_compliance.intrastat_meldungen``). Bis 20.10.2026 standen
+# hier Wege, die erfundene Beispielmeldungen anlegten (Mandant aus dem Body, Standard "demo-tenant"), sie ohne
+# Mandantenfilter im Arbeitsspeicher listeten und jede Kennung als "gueltig" prueften.
 
 
 # ── PCN-Meldungen (Product Classification Notification / UFI) ────────────────
@@ -477,41 +364,11 @@ async def validate_intrastat_meldung_endpoint(meldung_id: str) -> dict:
 import re as _re
 _UFI_PATTERN = _re.compile(r"^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$")
 _PCN_STATUS_VALUES = {"entwurf", "validiert", "eingereicht", "angenommen", "abgelehnt"}
-_PCN_STORE: dict[str, dict] = {}
 
 
-def _pcn_to_dict(m: PCNMeldung) -> dict:
-    return {
-        "meldung_id": m.id,
-        "produktname": m.produktname,
-        "ufi": m.ufi or "",
-        "cas_nummern": m.cas_nummern or "",
-        "gefahrenklassen": m.gefahrenklassen or [],
-        "verwendungskategorie": m.verwendungskategorie or "",
-        "pcnStatus": m.pcn_status,
-        "tenant_id": m.tenant_id,
-        "created_at": m.created_at.isoformat() if m.created_at else None,
-        "schema_version": 1,
-    }
 
 
-def _pcn_store_payload(meldung_id: str, body: dict, tenant_id: str) -> dict:
-    return {
-        "meldung_id": meldung_id,
-        "produktname": str(body["produktname"]).strip(),
-        "ufi": str(body.get("ufi") or ""),
-        "cas_nummern": body.get("cas_nummern") or "",
-        "gefahrenklassen": body.get("gefahrenklassen") or [],
-        "verwendungskategorie": body.get("verwendungskategorie") or "",
-        "pcnStatus": body.get("pcnStatus", "entwurf"),
-        "tenant_id": tenant_id,
-        "created_at": datetime.utcnow().isoformat(),
-        "schema_version": 1,
-        "persistence": "memory_fallback",
-    }
-
-
-@router.post("/pcn-meldungen", response_model=ComplianceOut, status_code=201, summary="Pcn meldung anlegen")
+@router.post("/pcn-meldungen", response_model=ComplianceOut, status_code=201, summary="Pcn meldung anlegen", dependencies=SCHREIBEN["QUALITAET"])
 async def create_pcn_meldung(
     body: dict,
     db: Session = Depends(get_db),
@@ -551,15 +408,16 @@ async def create_pcn_meldung(
         pcn_status=pcn_status,
         tenant_id=tenant_id,
     )
+    # Bis 20.10.2026 meldete ein gescheitertes Speichern Erfolg und hielt die Meldung nur im Arbeitsspeicher
+    # (nach einem Neustart verloren). Eine PCN-Meldung (CLP-Anhang VIII) ist gespeichert oder nicht angelegt.
     try:
         db.add(meldung)
         db.commit()
         db.refresh(meldung)
-    except Exception:
+    except Exception as exc:
         db.rollback()
-        fallback = _pcn_store_payload(meldung.id, {**body, "pcnStatus": pcn_status}, tenant_id)
-        _PCN_STORE[meldung.id] = fallback
-        return fallback
+        logger.error("PCN-Meldung konnte nicht gespeichert werden: %s", exc, exc_info=True)
+        raise HTTPException(status_code=503, detail="PCN-Meldung konnte nicht gespeichert werden.") from exc
 
     return _pcn_to_dict(meldung)
 
@@ -572,20 +430,14 @@ async def list_pcn_meldungen(
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict:
     """Liste aller PCN-Meldungen (tenant-isoliert, paginiert)."""
-    try:
-        base_q = (
-            db.query(PCNMeldung)
-            .filter(PCNMeldung.tenant_id == tenant_id)
-            .order_by(PCNMeldung.created_at.desc())
-        )
-        total = base_q.count()
-        rows = base_q.offset(skip).limit(limit).all()
-        meldungen = [_pcn_to_dict(m) for m in rows]
-    except Exception:
-        db.rollback()
-        tenant_rows = [m for m in _PCN_STORE.values() if m.get("tenant_id") == tenant_id]
-        total = len(tenant_rows)
-        meldungen = tenant_rows[skip : skip + limit]
+    base_q = (
+        db.query(PCNMeldung)
+        .filter(PCNMeldung.tenant_id == tenant_id)
+        .order_by(PCNMeldung.created_at.desc())
+    )
+    total = base_q.count()
+    rows = base_q.offset(skip).limit(limit).all()
+    meldungen = [_pcn_to_dict(m) for m in rows]
     return {
         "total": total,
         "skip": skip,
@@ -656,81 +508,82 @@ async def get_eudr_status(
 
 @router.get("/ustva", response_model=ComplianceOut, summary="Ustva status abrufen")
 async def get_ustva_status(
-    tenant_id: Optional[str] = Query(None, description="Tenant context"),
-    periode: Optional[str] = Query(None, description="Meldezeitraum z.B. 2026-03"),
+    periode: Optional[str] = Query(None, description="Meldezeitraum z.B. 2026-03 oder 2026-Q1"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
-    """
-    UStVA-Bereitschaftsstatus — aggregiert aus gebuchten Journal-Einträgen der Periode.
+    """UStVA-Stand des Zeitraums: Zahlen aus dem Hauptbuch (``app.finance.ustva``), Uebermittlung aus der Anmeldung.
+
+    Bis 27.10.2026 stand hier ``EINGEREICHT``, sobald der Zeitraum keine Buchungsentwuerfe hatte — ohne dass
+    irgendetwas uebermittelt war; der Mandant kam aus ``?tenant_id=`` mit ``default`` als Rueckfall, und ein
+    Lesefehler wurde zu Nullen. Uebermittelt ist jetzt nur, was mit ELSTER-Transferticket festgehalten ist.
     """
     from datetime import timezone
-    from sqlalchemy import text as _text
-    current_period = periode or datetime.now(timezone.utc).strftime("%Y-%m")
-    tid = tenant_id or "default"
-    try:
-        row = db.execute(
-            _text("""
-                SELECT
-                    COALESCE(SUM(CASE WHEN jel.credit > 0 AND coa.account_type = 'revenue' THEN jel.credit ELSE 0 END), 0) AS umsatz,
-                    COALESCE(SUM(CASE WHEN jel.credit > 0 AND coa.account_number LIKE '17%' THEN jel.credit ELSE 0 END), 0) AS ust_soll,
-                    COALESCE(SUM(CASE WHEN jel.debit > 0 AND coa.account_number LIKE '15%' THEN jel.debit ELSE 0 END), 0) AS vorsteuer
-                FROM domain_erp.journal_entries je
-                JOIN domain_erp.journal_entry_lines jel ON jel.journal_entry_id = je.id
-                JOIN domain_erp.chart_of_accounts coa ON coa.id = jel.account_id
-                WHERE je.tenant_id = :tid
-                  AND je.status = 'posted'
-                  AND TO_CHAR(je.entry_date::date, 'YYYY-MM') = :period
-            """),
-            {"tid": tid, "period": current_period},
-        ).fetchone()
-        umsatz = float(row[0]) if row else 0.0
-        ust_soll = float(row[1]) if row else 0.0
-        vorsteuer = float(row[2]) if row else 0.0
-        zahllast = round(ust_soll - vorsteuer, 2)
-        offene = db.execute(
-            _text("""
-                SELECT COUNT(*) FROM domain_erp.journal_entries
-                WHERE tenant_id = :tid AND status = 'draft'
-                  AND TO_CHAR(entry_date::date, 'YYYY-MM') = :period
-            """),
-            {"tid": tid, "period": current_period},
-        ).scalar() or 0
-        readiness = min(100, int(100 * (1 - int(offene) / max(int(offene) + 1, 1))))
-        elster_status = "EINGEREICHT" if readiness == 100 else "AUSSTEHEND"
-    except Exception:
-        umsatz = ust_soll = vorsteuer = zahllast = 0.0
-        offene = 0
-        readiness = 0
-        elster_status = "AUSSTEHEND"
 
+    from sqlalchemy import text as _text
+    from sqlalchemy.exc import SQLAlchemyError
+
+    from app.finance.ustva import abgabefrist, berechne
+
+    current_period = periode or datetime.now(timezone.utc).strftime("%Y-%m")
+    try:
+        stand = berechne(db, tenant_id, current_period)
+        anmeldung = db.execute(
+            _text("""
+                SELECT status, elster_transferticket, submitted_at
+                FROM domain_erp.vat_returns
+                WHERE tenant_id = :tid AND period = :period
+                ORDER BY (status = 'submitted') DESC, updated_at DESC
+                LIMIT 1
+            """),
+            {"tid": tenant_id, "period": current_period},
+        ).mappings().first()
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except SQLAlchemyError as exc:
+        db.rollback()
+        raise HTTPException(status_code=503, detail="UStVA-Stand ist vorübergehend nicht verfügbar.") from exc
+
+    alle = stand.gebuchte_buchungen + stand.offene_entwuerfe
+    readiness = 100 if alle == 0 else int(100 * stand.gebuchte_buchungen / alle)
+    uebermittelt = bool(anmeldung and anmeldung["status"] == "submitted")
+    if uebermittelt:
+        status = "UEBERMITTELT"
+    elif stand.offene_entwuerfe == 0 and not stand.klaerungen:
+        status = "BEREIT"
+    else:
+        status = "IN_VORBEREITUNG"
     return {
         "periode": current_period,
-        "status": "BEREIT" if readiness >= 95 else "IN_VORBEREITUNG",
+        "status": status,
         "readiness_pct": readiness,
-        "steuerliche_bemessungsgrundlage": umsatz,
-        "ust_soll": ust_soll,
-        "vorsteuer": vorsteuer,
-        "zahllast": zahllast,
-        "offene_positionen": int(offene),
-        "elster_uebermittlung": elster_status,
-        "deadline": None,
-        "last_updated": datetime.utcnow().isoformat(),
+        "steuerliche_bemessungsgrundlage": float(stand.umsatz_netto),
+        "ust_soll": float(stand.umsatzsteuer),
+        "vorsteuer": float(stand.vorsteuer),
+        "zahllast": float(stand.zahllast),
+        "offene_positionen": stand.offene_entwuerfe,
+        "klaerungen": stand.klaerungen,
+        "anmeldung_status": anmeldung["status"] if anmeldung else None,
+        "elster_uebermittlung": "UEBERMITTELT" if uebermittelt else "NICHT_UEBERMITTELT",
+        "elster_transferticket": anmeldung["elster_transferticket"] if uebermittelt else None,
+        "deadline": abgabefrist(current_period).isoformat(),
+        "deadline_hinweis": "10. Tag nach Ablauf des Zeitraums, Wochenende verschoben; ohne Dauerfristverlängerung und Feiertage.",
+        "last_updated": datetime.now(timezone.utc).isoformat(),
     }
-
 
 # ── BVL-Umsatzmeldung (Pflanzenschutzmittel) ────────────────────────────────
 
 @router.get("/bvl-umsaetze", response_model=list[ComplianceOut], summary="Bvl umsaetze abrufen")
 async def get_bvl_umsaetze(
-    tenant_id: Optional[str] = Query(None, description="Tenant context"),
     db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ) -> list:
     """
     PSM-Umsaetze fuer BVL-Meldung aggregieren.
     Liefert Wirkstoffe mit Absatzmengen aus Lagerbewegungen/Rechnungen.
     """
     from sqlalchemy import text
-    tid = tenant_id or "default"
+    tid = tenant_id
     try:
         rows = db.execute(
             text("""
@@ -741,7 +594,7 @@ async def get_bvl_umsaetze(
                 JOIN domain_inventory.articles a ON a.id = sm.article_id
                 WHERE sm.tenant_id = :tid
                   AND sm.movement_type = 'out'
-                  AND a.article_group = 'PSM'
+                  AND a.pflanzenschutzmittel
                   AND EXTRACT(YEAR FROM sm.movement_date) = EXTRACT(YEAR FROM CURRENT_DATE) - 1
                 GROUP BY a.name, a.unit
                 ORDER BY menge DESC
@@ -749,8 +602,11 @@ async def get_bvl_umsaetze(
             {"tid": tid},
         ).fetchall()
         return [{"wirkstoff": r[0], "menge": float(r[1]), "einheit": r[2]} for r in rows]
-    except Exception:
-        return []
+    except Exception as exc:
+        # Bis 27.10.2026 lieferte ein Fehler (die Abfrage nannte die fehlende Spalte article_group) still eine leere
+        # Meldung; eine leere BVL-Meldung ist von "keine PSM verkauft" nicht zu unterscheiden.
+        logger.exception("BVL-Umsaetze konnten nicht ermittelt werden")
+        raise HTTPException(status_code=500, detail="BVL-Umsaetze konnten nicht ermittelt werden") from exc
 
 
 # ── COMP-SPERR-001: Artikel-Sperr-Engine ─────────────────────────────────────
@@ -775,7 +631,7 @@ _VALID_SPERRGRUENDE = {
 }
 
 
-@router.post("/artikel-sperre", response_model=TypedObjectOut, status_code=201, summary="Artikel sperren (COMP-SPERR-001)")
+@router.post("/artikel-sperre", response_model=TypedObjectOut, status_code=201, summary="Artikel sperren (COMP-SPERR-001)", dependencies=SCHREIBEN["QUALITAET"])
 async def sperre_artikel(
     body: ArtikelSperreIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -866,7 +722,7 @@ async def get_artikel_sperre(
     }
 
 
-@router.delete("/artikel-sperre/{artikel_id}", response_model=TypedObjectOut, summary="Artikel freigeben")
+@router.delete("/artikel-sperre/{artikel_id}", response_model=TypedObjectOut, summary="Artikel freigeben", dependencies=SCHREIBEN["QUALITAET"])
 async def freigabe_artikel(
     artikel_id: str,
     body: ArtikelFreigabeIn,
@@ -937,94 +793,68 @@ async def list_artikel_sperren(
 
 # ---------------------------------------------------------------------------
 # DOM-COMPLIANCE-004: PCN-Lifecycle / VVVO-Sachkunde / Sperre-Audit
+# Mandant aus der geprueften Anmeldung (get_tenant_id), Bearbeiter aus dem Token. Bis 19.10.2026 kamen sie aus
+# dem Kopf X-Tenant-ID (Rueckfall "default") und aus dem Feld "operator" im Body.
 # ---------------------------------------------------------------------------
 
 from pydantic import BaseModel as _BaseModel
 from typing import Optional as _Optional
 
 
-class PCNCreateIn(_BaseModel):
-    artikel_id: str
-    meldungstyp: str
-    operator: _Optional[str] = "system"
-    bemerkung: _Optional[str] = None
-
-
 class PCNTransitionIn(_BaseModel):
     new_status: str
-    operator: _Optional[str] = "system"
     reason: _Optional[str] = None
 
 
 class PCNWithdrawIn(_BaseModel):
     grund: str
-    operator: _Optional[str] = "system"
 
 
 class VVVOPruefungIn(_BaseModel):
     pruefung_am: str
-    operator: _Optional[str] = "system"
 
 
 class SperreIn(_BaseModel):
     grund: str
-    operator: _Optional[str] = "system"
     nachweis_ref: _Optional[str] = None
 
 
 class FreigabeIn(_BaseModel):
-    operator: _Optional[str] = "system"
     nachweis_ref: _Optional[str] = None
     bemerkung: _Optional[str] = None
 
 
 class SperreStornoIn(_BaseModel):
     grund: str
-    operator: _Optional[str] = "system"
 
 
-@router.post("/pcn-meldungen", status_code=201, response_model=ComplianceOut, summary="PCN-Meldung anlegen")
-def create_pcn_meldung_v2(
-    body: PCNCreateIn,
-    x_tenant_id: _Optional[str] = Header(None),
-    db: Session = Depends(get_db),
-) -> dict:
-    from app.services.compliance_pcn_lifecycle_service import create_pcn_meldung, PCNError
-    tenant_id = x_tenant_id or "default"
-    try:
-        return create_pcn_meldung(db, tenant_id, body.artikel_id, body.meldungstyp,
-                                   body.operator or "system", body.bemerkung)
-    except PCNError as exc:
-        raise HTTPException(status_code=422, detail=str(exc)) from exc
-
-
-@router.post("/pcn-meldungen/{meldung_id}/transition", response_model=ComplianceOut, summary="PCN-Status wechseln")
+@router.post("/pcn-meldungen/{meldung_id}/transition", response_model=ComplianceOut, summary="PCN-Status wechseln", dependencies=SCHREIBEN["QUALITAET"])
 def transition_pcn_meldung(
     meldung_id: str,
     body: PCNTransitionIn,
-    x_tenant_id: _Optional[str] = Header(None),
+    request: Request,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     from app.services.compliance_pcn_lifecycle_service import transition_pcn_status, PCNError
-    tenant_id = x_tenant_id or "default"
     try:
         return transition_pcn_status(db, meldung_id, tenant_id, body.new_status,
-                                      body.operator or "system", body.reason)
+                                      gepruefter_akteur_aus_request(request), body.reason)
     except PCNError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/pcn-meldungen/{meldung_id}/withdraw", response_model=ComplianceOut, summary="PCN-Meldung zurückziehen")
+@router.post("/pcn-meldungen/{meldung_id}/withdraw", response_model=ComplianceOut, summary="PCN-Meldung zurückziehen", dependencies=SCHREIBEN["QUALITAET"])
 def withdraw_pcn(
     meldung_id: str,
     body: PCNWithdrawIn,
-    x_tenant_id: _Optional[str] = Header(None),
+    request: Request,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     from app.services.compliance_pcn_lifecycle_service import withdraw_pcn_meldung, PCNError
-    tenant_id = x_tenant_id or "default"
     try:
-        return withdraw_pcn_meldung(db, meldung_id, tenant_id, body.grund, body.operator or "system")
+        return withdraw_pcn_meldung(db, meldung_id, tenant_id, body.grund, gepruefter_akteur_aus_request(request))
     except PCNError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
@@ -1032,26 +862,25 @@ def withdraw_pcn(
 @router.get("/vvvo/faellige-pruefungen", response_model=ComplianceOut, summary="Fällige VVVO-Prüfungen listen")
 def list_vvvo_faellig(
     within_days: int = Query(30),
-    x_tenant_id: _Optional[str] = Header(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     from app.services.compliance_vvvo_sachkunde_service import list_faellige_vvvo_pruefungen
-    tenant_id = x_tenant_id or "default"
     items = list_faellige_vvvo_pruefungen(db, tenant_id, within_days)
     return {"items": items, "count": len(items)}
 
 
-@router.post("/vvvo/{vvvo_id}/pruefung", response_model=ComplianceOut, summary="VVVO-Prüfung aktualisieren")
+@router.post("/vvvo/{vvvo_id}/pruefung", response_model=ComplianceOut, summary="VVVO-Prüfung aktualisieren", dependencies=SCHREIBEN["QUALITAET"])
 def update_vvvo_pruefung(
     vvvo_id: str,
     body: VVVOPruefungIn,
-    x_tenant_id: _Optional[str] = Header(None),
+    request: Request,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     from app.services.compliance_vvvo_sachkunde_service import berechne_naechste_vvvo_pruefung, VVVOError
-    tenant_id = x_tenant_id or "default"
     try:
-        return berechne_naechste_vvvo_pruefung(db, vvvo_id, tenant_id, body.pruefung_am, body.operator or "system")
+        return berechne_naechste_vvvo_pruefung(db, vvvo_id, tenant_id, body.pruefung_am, gepruefter_akteur_aus_request(request))
     except VVVOError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
@@ -1059,58 +888,57 @@ def update_vvvo_pruefung(
 @router.get("/sachkunde/ablaufend", response_model=ComplianceOut, summary="Ablaufende Sachkunde-Zertifikate")
 def list_sachkunde_ablaufend(
     within_days: int = Query(30),
-    x_tenant_id: _Optional[str] = Header(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     from app.services.compliance_vvvo_sachkunde_service import list_ablaufende_sachkunde
-    tenant_id = x_tenant_id or "default"
     items = list_ablaufende_sachkunde(db, tenant_id, within_days)
     return {"items": items, "count": len(items)}
 
 
-@router.post("/artikel/{artikel_id}/sperre", response_model=ComplianceOut, summary="Artikel sperren (Audit-Trail)")
+@router.post("/artikel/{artikel_id}/sperre", response_model=ComplianceOut, summary="Artikel sperren (Audit-Trail)", dependencies=SCHREIBEN["QUALITAET"])
 def sperre_artikel_audit(
     artikel_id: str,
     body: SperreIn,
-    x_tenant_id: _Optional[str] = Header(None),
+    request: Request,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     from app.services.compliance_sperre_audit_service import sperre_artikel, SperreAuditError
-    tenant_id = x_tenant_id or "default"
     try:
         return sperre_artikel(db, artikel_id, tenant_id, body.grund,
-                               body.operator or "system", body.nachweis_ref)
+                               gepruefter_akteur_aus_request(request), body.nachweis_ref)
     except SperreAuditError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/artikel/{artikel_id}/freigabe", response_model=ComplianceOut, summary="Artikel freigeben (Audit-Trail)")
+@router.post("/artikel/{artikel_id}/freigabe", response_model=ComplianceOut, summary="Artikel freigeben (Audit-Trail)", dependencies=SCHREIBEN["QUALITAET"])
 def freigabe_artikel_audit(
     artikel_id: str,
     body: FreigabeIn,
-    x_tenant_id: _Optional[str] = Header(None),
+    request: Request,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     from app.services.compliance_sperre_audit_service import freigabe_artikel, SperreAuditError
-    tenant_id = x_tenant_id or "default"
     try:
-        return freigabe_artikel(db, artikel_id, tenant_id, body.operator or "system",
+        return freigabe_artikel(db, artikel_id, tenant_id, gepruefter_akteur_aus_request(request),
                                  body.nachweis_ref, body.bemerkung)
     except SperreAuditError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/artikel/{artikel_id}/sperre-storno", response_model=ComplianceOut, summary="Artikelsperre stornieren")
+@router.post("/artikel/{artikel_id}/sperre-storno", response_model=ComplianceOut, summary="Artikelsperre stornieren", dependencies=SCHREIBEN["QUALITAET"])
 def storno_artikel_sperre(
     artikel_id: str,
     body: SperreStornoIn,
-    x_tenant_id: _Optional[str] = Header(None),
+    request: Request,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     from app.services.compliance_sperre_audit_service import storno_sperre, SperreAuditError
-    tenant_id = x_tenant_id or "default"
     try:
-        return storno_sperre(db, artikel_id, tenant_id, body.grund, body.operator or "system")
+        return storno_sperre(db, artikel_id, tenant_id, body.grund, gepruefter_akteur_aus_request(request))
     except SperreAuditError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
@@ -1118,10 +946,9 @@ def storno_artikel_sperre(
 @router.get("/artikel/{artikel_id}/sperre-audit", response_model=ComplianceOut, summary="Sperre-Audit-Trail abrufen")
 def get_artikel_sperre_audit(
     artikel_id: str,
-    x_tenant_id: _Optional[str] = Header(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     from app.services.compliance_sperre_audit_service import get_sperre_audit_trail
-    tenant_id = x_tenant_id or "default"
     trail = get_sperre_audit_trail(db, artikel_id, tenant_id)
     return {"artikel_id": artikel_id, "trail": trail, "count": len(trail)}

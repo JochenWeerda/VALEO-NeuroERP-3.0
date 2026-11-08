@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 import logging
 from app.core.uuid7 import uuid7
+from app.core.tenant_context import get_current_tenant_id
 
 logger = logging.getLogger(__name__)
 
@@ -566,9 +567,10 @@ class ISO27001RiskManagement:
 
         return recommendations
 
-    def get_risk_management_dashboard(self, tenant_id: str = "system") -> Dict[str, Any]:
+    def get_risk_management_dashboard(self, tenant_id: str | None = None) -> Dict[str, Any]:
         """Generate comprehensive risk management dashboard"""
         # Get current risk statistics
+        tenant_id = tenant_id or get_current_tenant_id()
         total_risks = len(self.risk_assessments)
         assessed_risks = len([r for r in self.risk_assessments.values() if r.status != RiskStatus.IDENTIFIED])
         treated_risks = len([r for r in self.risk_assessments.values() if r.status in [RiskStatus.TREATED, RiskStatus.MITIGATED]])
@@ -681,8 +683,9 @@ class ISO27001RiskManagement:
 
         return sorted(upcoming_reviews, key=lambda x: x['days_until_due'])
 
-    def check_risk_management_compliance(self, tenant_id: str = "system") -> Dict[str, Any]:
+    def check_risk_management_compliance(self, tenant_id: str | None = None) -> Dict[str, Any]:
         """Check ISO 27001 risk management compliance"""
+        tenant_id = tenant_id or get_current_tenant_id()
         assessments = list(self.risk_assessments.values())
         treatments = list(self.risk_treatments.values())
         monitoring_records = self.risk_monitoring[-50:]  # Last 50 monitoring records

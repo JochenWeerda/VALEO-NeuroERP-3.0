@@ -37,6 +37,12 @@ import { ACTION_SHORTCUTS } from '@/app/navigation/action-shortcuts'
 import { AI_SHORTCUTS } from '@/app/navigation/ai-shortcuts'
 import type { NavigationShortcut } from '@/app/navigation/types'
 import type { MaskRegistryEntry, OmniboxCatalogEntry } from '@/lib/api/mask-registry'
+import {
+  WORKSPACE_FACHAKTIONEN,
+  authorizeFachaktionen,
+  mapFachaktionToCommand,
+  type TypedFachaktion,
+} from '@/workspace'
 
 export interface PaletteCommand {
   id: string
@@ -59,6 +65,9 @@ interface BuildPaletteCommandsOptions {
   agrarEnabled: boolean
   navigationShortcuts: NavigationShortcut[]
   maskRegistry?: MaskRegistryEntry[]
+  /** Session-Scopes; fehlt der Wert, bleibt der Client-Filter aus (Server autorisiert). */
+  userScopes?: string[]
+  typedFachaktionen?: TypedFachaktion[]
 }
 
 const BASE_COMMANDS: PaletteCommand[] = [
@@ -994,6 +1003,8 @@ export function buildPaletteCommands({
   agrarEnabled,
   navigationShortcuts,
   maskRegistry,
+  userScopes,
+  typedFachaktionen,
 }: BuildPaletteCommandsOptions): PaletteCommand[] {
   const commands: PaletteCommand[] = [...BASE_COMMANDS]
 
@@ -1065,10 +1076,24 @@ export function buildPaletteCommands({
     },
   }))
 
+  const fachaktionCommands: PaletteCommand[] = authorizeFachaktionen(
+    typedFachaktionen ?? WORKSPACE_FACHAKTIONEN,
+    userScopes,
+  )
+    .filter((action) => agrarEnabled || action.businessDomain !== 'agrar')
+    .map((action) => {
+      const entry = mapFachaktionToCommand(action)
+      return {
+        ...entry,
+        icon: OMNIBOX_DOMAIN_ICONS[entry.mcp.businessDomain] ?? FileText,
+      }
+    })
+
   appendUniqueCommands(commands, navigationCommands)
   appendUniqueCommands(commands, actionCommands)
   appendUniqueCommands(commands, aiCommands)
   appendUniqueCommands(commands, buildMaskCommands(maskRegistry, agrarEnabled))
+  appendUniqueCommands(commands, fachaktionCommands)
 
   const visible = agrarEnabled ? commands : commands.filter(supportsAgrarCommand)
   return visible.map(withPathAlias)

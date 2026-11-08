@@ -208,14 +208,21 @@ def action_postfach_speichern(
             proposedChanges=[preview],
         )
     try:
-        from app.services.mask_action_runtime_service import _write_audit, _write_outbox
+        from app.services.mask_action_runtime_service import _write_audit, _write_outbox, wiederholter_auftrag
+
+        wiederholt = wiederholter_auftrag(
+            db, tenant_id=tenant_id, action_key="speichern", entity_type="mailkonto",
+            idempotency_key=idempotency_key, mode=mode,
+        )
+        if wiederholt is not None:
+            return wiederholt
 
         saved = konto.speichern(
             db,
             tenant_id,
             opened.model_dump(),
             postfach_id=postfach_id,
-            von=nutzer.get("sub") or request.headers.get("X-User-ID"),
+            von=nutzer.get("sub"),
         )
         entity_id = str(saved["id"])
         audit_id = _write_audit(

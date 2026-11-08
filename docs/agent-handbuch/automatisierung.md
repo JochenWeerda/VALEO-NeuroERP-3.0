@@ -4,7 +4,7 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-09
+last_reviewed: 2026-11-07
 version: 3.0.0
 description: MCP-Tools, Domain-Events und Automatisierungsregeln für Agenten.
 ---
@@ -38,9 +38,14 @@ Vollständige Referenz: [mcp-tools.md](../schnittstellen/mcp-tools.md)
 | `agrar.feeding.supply_handoff` | agrar | `agrar:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `agrar.ration.transition` | agrar | `agrar:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `agrar.weighing_ticket.list` | agrar | `agrar:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
+| `beleg.arten` | belege | `belege:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
+| `beleg.lesen` | belege | `belege:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
+| `beleg.suchen` | belege | `belege:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
 | `compliance.gate.status` | compliance | `compliance:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
 | `compliance.sanctions.check` | compliance | `compliance:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
-| `crm.activity.create` | crm | `crm:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
+| `crm.activity.create` | crm | `crm:write` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
+| `crm.activity.delete` | crm | `crm:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
+| `crm.activity.update` | crm | `crm:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `crm.contact.log` | crm | `crm:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `crm.customer.open` | crm | `crm:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
 | `crm.customer.search` | crm | `crm:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
@@ -56,7 +61,6 @@ Vollständige Referenz: [mcp-tools.md](../schnittstellen/mcp-tools.md)
 | `einkauf.bestellung.versenden` | einkauf | `einkauf:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `fibu.dunning.status` | finance | `finance:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
 | `fibu.open_items.list` | finance | `finance:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
-| `finance.ap_invoice.freigeben` | finance | `finance:write` | ja | hoch | ja | `POST /api/v1/mcp/tools/call` |
 | `finance.ap_invoice.propose` | finance | `finance:write` | nein | hoch | ja | `POST /api/v1/mcp/tools/call` |
 | `hr.bewerbung.speichern` | hr | `hr:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `hr.einwilligung.anlegen` | hr | `hr:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
@@ -74,17 +78,30 @@ Vollständige Referenz: [mcp-tools.md](../schnittstellen/mcp-tools.md)
 | `logistik.rechnung.speichern` | logistics | `logistics:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `logistik.terminart.speichern` | logistics | `logistics:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `logistik.tour.anlegen` | logistics | `logistics:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
+| `mask.action.execute` | masks | `masks:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
+| `mask.actions.list` | masks | `masks:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
+| `mask.data.read` | masks | `masks:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
 | `mobile.sync.process_pending` | mobile | `mobile:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `planung.calendar.reproject` | planung | `planung:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `produktion.control.sync` | produktion | `ops:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `qualitaet.reklamation.abschliessen` | qualitaet | `quality:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `reporting.bonus.calculate` | reporting | `reporting:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `reporting.query.import_signed` | reporting | `reporting:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
+| `sales.gutschrift.buchen` | sales | `sales:write` | ja | hoch | ja | `POST /api/v1/mcp/tools/call` |
+| `sales.gutschrift.propose` | sales | `sales:write` | nein | hoch | ja | `POST /api/v1/mcp/tools/call` |
+| `sales.gutschrift.speichern` | sales | `sales:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `sales.invoice.post` | sales | `sales:write` | ja | hoch | ja | `POST /api/v1/mcp/tools/call` |
 | `sales.invoice.propose` | sales | `sales:write` | nein | hoch | ja | `POST /api/v1/mcp/tools/call` |
 | `sales.order.status` | sales | `sales:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
+| `studio.catalog.read` | studio | `masks:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
+| `studio.definition.validate` | studio | `masks:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
+| `studio.draft.save` | studio | `belege:write` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
+| `studio.draft.submit_review` | studio | `belege:write` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
+| `studio.migration.plan` | studio | `belege:write` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
 | `wms.cell.status` | inventory | `inventory:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
 | `wms.lot.trace` | inventory | `inventory:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
+| `workspace.fachaktion.katalog` | workspace | `agent:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
+| `workspace.fachaktion.resolve` | workspace | `agent:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
 
 ## Domain-Events (Auszug)
 
@@ -97,6 +114,7 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | Event-ID | Kanal | Quelle |
 |---|---|---|
 | `agrar.contract.allocated` | outbox | `app/api/v1/endpoints/weighing_tickets.py` |
+| `agrar.duenger.deaktiviert` | outbox | `app/api/v1/endpoints/agrar_stammdaten_kommandos.py` |
 | `agrar.settlement.pdf_archived` | outbox | `app/api/v1/endpoints/mask_actions.py` |
 | `agrar.weighing_ticket.allocated` | outbox | `app/api/v1/endpoints/weighing_tickets.py` |
 
@@ -111,8 +129,14 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 
 | Event-ID | Kanal | Quelle |
 |---|---|---|
+| `crm.customer.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `crm.lead.qualified` | outbox | `app/api/v1/endpoints/leads.py` |
-| `crm.opportunity.activity_created` | outbox | `app/api/v1/endpoints/mask_actions.py` |
+| `crm.lead.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
+| `crm.mail_workspace.attachment_transfer` | outbox | `app/api/v1/endpoints/mail_workspace.py` |
+| `crm.mail_workspace.queue` | outbox | `app/api/v1/endpoints/mail_workspace.py` |
+| `crm.opportunity.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
+| `crm.partner_klaerfall.neuer_partner` | outbox | `app/api/v1/endpoints/crm_partner_klaerfaelle.py` |
+| `crm.partner_klaerfall.zugeordnet` | outbox | `app/api/v1/endpoints/crm_partner_klaerfaelle.py` |
 | `crm_case.created` | outbox | `app/services/crm_compat_service.py` |
 
 ### Einkauf
@@ -147,9 +171,10 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 
 | Event-ID | Kanal | Quelle |
 |---|---|---|
+| `inventory.count_sheet.reused.v1` | outbox | `app/services/inventory_count_sheet_command.py` |
 | `inventory.material_flow.edge_created` | outbox | `app/services/agri_silo_material_flow_service.py` |
 | `inventory.material_flow.edge_updated` | outbox | `app/services/agri_silo_material_flow_service.py` |
-| `inventory.material_flow.flush_charge_booked` | outbox | `app/services/agri_silo_material_flow_service.py` |
+| `inventory.material_flow.flush_charge_booked` | outbox | `app/services/agri_flush_booking.py` |
 | `inventory.material_flow.node_created` | outbox | `app/services/agri_silo_material_flow_service.py` |
 | `inventory.material_flow.node_updated` | outbox | `app/services/agri_silo_material_flow_service.py` |
 | `inventory.material_flow.silo_cell_created` | outbox | `app/services/agri_silo_material_flow_service.py` |
@@ -185,34 +210,45 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 |---|---|---|
 | `...` | outbox | `scripts/extract_events.py` |
 | `admin.postfach.saved` | outbox | `app/api/v1/endpoints/mailkonto.py` |
+| `article.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
+| `beleg.aktion.ausgefuehrt` | outbox | `app/api/v1/endpoints/belege.py` |
 | `cash_closing.posted` | outbox | `app/api/v1/endpoints/compat.py` |
 | `collab.note.created` | outbox | `app/api/v1/endpoints/collab_notes.py` |
 | `compliance.sanctions.checked` | outbox | `app/api/v1/endpoints/sanctions_compliance.py` |
 | `compliance.violations_detected` | outbox | `app/workers/compliance_monitor.py` |
+| `einkauf.anfrage.bestellt` | outbox | `app/api/v1/endpoints/einkauf_anfrage_kommandos.py` |
+| `einkauf.anfrage.geloescht` | outbox | `app/api/v1/endpoints/einkauf_anfrage_kommandos.py` |
+| `einkauf.anfrage.gesendet` | outbox | `app/api/v1/endpoints/einkauf_anfrage_kommandos.py` |
+| `einkauf.anfrage.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
+| `einkauf.auftragsbestaetigung.confirmed` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
+| `einkauf.auftragsbestaetigung.reviewed` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `einkauf.bestellung.created_from_angebot` | outbox | `app/api/v1/endpoints/mask_actions.py` |
+| `einkauf.bestellung.freigegeben` | outbox | `app/api/v1/endpoints/einkauf_bestellung_kommandos.py` |
+| `einkauf.bestellung.storniert` | outbox | `app/api/v1/endpoints/einkauf_bestellung_kommandos.py` |
 | `einkauf.bestellung.updated` | outbox | `app/api/v1/command_handlers/procurement.py` |
+| `einkauf.bestellung.versendet` | outbox | `app/api/v1/endpoints/einkauf_bestellung_kommandos.py` |
+| `einkauf.lieferant.entsperrt` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
+| `einkauf.lieferant.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `einkauf.wareneingang.gebucht` | outbox | `app/api/v1/endpoints/mask_actions.py` |
-| `finance.ap_invoice.approved` | outbox | `app/api/v1/endpoints/ap_invoices.py` |
+| `finance.ap_invoice.approval_decided` | outbox | `app/api/v1/endpoints/ap_invoices.py` |
 | `finance.ar_open_item.dunning_created` | outbox | `app/api/v1/endpoints/open_items.py` |
+| `finance.bankkonto.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
+| `finance.billing_batch_line.retry` | outbox | `app/api/v1/endpoints/billing_batch.py` |
+| `finance.control_finding.reviewed` | outbox | `app/api/v1/endpoints/kontrolle.py` |
+| `finance.debitor.entsperrt` | outbox | `app/api/v1/endpoints/finance_stammdaten_kommandos.py` |
+| `finance.debitor.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
+| `finance.kreditor.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `finance.payment_run.approved` | outbox | `app/api/v1/endpoints/mask_actions.py` |
+| `finance.tax_key.saved` | outbox | `app/api/v1/endpoints/tax_keys.py` |
+| `finance.wechselkurs.aktiviert` | outbox | `app/api/v1/endpoints/finance_stammdaten_kommandos.py` |
+| `finance.zahlungsbedingung.deaktiviert` | outbox | `app/api/v1/endpoints/finance_stammdaten_kommandos.py` |
+| `finance.zahlungsbedingung.updated` | outbox | `app/api/v1/endpoints/finance_stammdaten_kommandos.py` |
 | `fuhrpark.dokument.saved` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
 | `fuhrpark.fahrzeug.deleted` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
 | `fuhrpark.fahrzeug.saved` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
 | `fuhrpark.rechnung.saved` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
 | `fuhrpark.terminart.saved` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
-| `inventur.abgeschlossen` | outbox | `app/services/inventory_compat_service.py` |
-| `logistik.frachttabelle.created` | outbox | `app/api/v1/endpoints/logistik_frachttabellen.py` |
-| `logistik.tour.created` | outbox | `app/api/v1/command_handlers/logistics.py` |
-| `personal.bewerbung.created` | outbox | `app/api/v1/endpoints/personal_bewerbungen.py` |
-| `personal.einwilligungserklaerung.created` | outbox | `app/api/v1/endpoints/personal_bewerbungen.py` |
-| `personal.onboarding.created` | outbox | `app/api/v1/command_handlers/training.py` |
-| `personal.qualifikation.created` | outbox | `app/api/v1/command_handlers/training.py` |
-| `personal.schulung.created` | outbox | `app/api/v1/command_handlers/training.py` |
-| `qualitaet.reklamation.closed` | outbox | `app/api/v1/endpoints/mask_actions.py` |
-| `reporting.bonus_run.calculated` | outbox | `app/api/v1/endpoints/l3_report_catalog.py` |
-| `reporting.query_definition.imported` | outbox | `app/api/v1/endpoints/query_center.py` |
-| `sales.delivery_note.print_requested` | outbox | `app/api/v1/endpoints/mask_actions.py` |
-| `settlement.created` | outbox | `app/core/settlement_audit_chain.py` |
+| … | | 31 weitere |
 
 ### System
 

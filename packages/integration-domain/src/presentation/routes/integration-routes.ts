@@ -90,7 +90,7 @@ export class IntegrationRoutes {
       '/:id',
       this.validator.validate({
         params: z.object({
-          id: z.string().uuid()
+          id: z.string().guid()
         })
       }),
       this.wrapAsync(this.controller.getIntegration.bind(this.controller))
@@ -103,7 +103,7 @@ export class IntegrationRoutes {
         body: z.object({
           name: z.string().min(1).max(255),
           type: z.enum(['api', 'webhook', 'file', 'database', 'message-queue']),
-          config: z.record(z.unknown()),
+          config: z.record(z.string(), z.unknown()),
           description: z.string().optional(),
           tags: z.array(z.string()).default([])
         })
@@ -116,11 +116,11 @@ export class IntegrationRoutes {
       '/:id',
       this.validator.validate({
         params: z.object({
-          id: z.string().uuid()
+          id: z.string().guid()
         }),
         body: z.object({
           name: z.string().min(1).max(255).optional(),
-          config: z.record(z.unknown()).optional(),
+          config: z.record(z.string(), z.unknown()).optional(),
           description: z.string().optional(),
           tags: z.array(z.string()).optional(),
           status: z.enum(['active', 'inactive', 'pending', 'error']).optional(),
@@ -135,7 +135,7 @@ export class IntegrationRoutes {
       '/:id',
       this.validator.validate({
         params: z.object({
-          id: z.string().uuid()
+          id: z.string().guid()
         })
       }),
       this.wrapAsync(this.controller.deleteIntegration.bind(this.controller))
@@ -146,7 +146,7 @@ export class IntegrationRoutes {
       '/:id/activate',
       this.validator.validate({
         params: z.object({
-          id: z.string().uuid()
+          id: z.string().guid()
         })
       }),
       this.wrapAsync(this.controller.activateIntegration.bind(this.controller))
@@ -157,7 +157,7 @@ export class IntegrationRoutes {
       '/:id/deactivate',
       this.validator.validate({
         params: z.object({
-          id: z.string().uuid()
+          id: z.string().guid()
         })
       }),
       this.wrapAsync(this.controller.deactivateIntegration.bind(this.controller))

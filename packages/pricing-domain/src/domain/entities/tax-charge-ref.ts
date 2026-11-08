@@ -28,7 +28,7 @@ export type TaxChargeMethod = z.infer<typeof TaxChargeMethodEnum>;
  * Tatsächliche Steuerberechnung/Buchung erfolgt in finance-domain.
  */
 export const TaxChargeRefSchema = z.object({
-  id: z.string().uuid().optional(),
+  id: z.string().guid().optional(),
   tenantId: z.string().min(1, 'Tenant ID is required'),
   
   // Identifikation

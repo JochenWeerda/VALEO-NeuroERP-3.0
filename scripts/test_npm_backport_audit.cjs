@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
-const { assess, hash } = require('./check_npm_backport_audit.cjs');
+const { assess, hash, resolveExactPackage } = require('./check_npm_backport_audit.cjs');
 const ROOT = path.resolve(__dirname, '..');
 
 function fixture(t) {
@@ -29,7 +29,7 @@ function fixture(t) {
       review.installed_sha256[file] = hash(path.join(root, pkg, file));
     }
     advisories[review.advisory] = { github_advisory_id: review.advisory, module_name: review.package,
-      severity: 'high', findings: [{ version: review.version }] };
+      severity: 'high', findings: [{ version: review.version, paths: [`test > ${review.package}@${review.version}`] }] };
   }
   write('package.json', manifest); write('pnpm-lock.yaml', 'reviewed lock\n');
   for (const review of policy.reviews) {
@@ -38,13 +38,13 @@ function fixture(t) {
   }
   const save = () => write('config/security/npm-backport-reviews.json', policy);
   save();
-  const report = { advisories, muted: [], metadata: { dependencies: 2,
-    vulnerabilities: { info: 0, low: 0, moderate: 0, high: 2, critical: 0 } } };
+  const report = { advisories, muted: [], metadata: { dependencies: Math.max(1, policy.reviews.length),
+    vulnerabilities: { info: 0, low: 0, moderate: 0, high: policy.reviews.length, critical: 0 } } };
   return { root, write, policy, save, report, run: () => assess(report, root, '2026-10-08') };
 }
 test('exact source evidence passes without mutating raw findings', t => {
   const f = fixture(t), original = JSON.stringify(f.report);
-  assert.equal(f.run().source_backported, 2); assert.equal(f.run().release_allowed, true);
+  assert.equal(f.run().source_backported, f.policy.reviews.length); assert.equal(f.run().release_allowed, true);
   assert.equal(JSON.stringify(f.report), original);
 });
 test('unknown advisory blocks release', t => {
@@ -54,6 +54,46 @@ test('unknown advisory blocks release', t => {
 test('new affected version blocks release', t => {
   const f = fixture(t); Object.values(f.report.advisories)[0].findings[0].version = '1.4.1';
   assert.equal(f.run().release_allowed, false);
+});
+test('one advisory with two installed versions produces two findings and preserves the new block', t => {
+  const f = fixture(t);
+  f.report.advisories['new-zod'] = { github_advisory_id: 'GHSA-new-zod', module_name: 'zod', severity: 'high',
+    findings: [{ version: '3.25.76', paths: ['test > zod@3.25.76'] },
+      { version: '4.1.12', paths: ['test > zod@4.1.12'] }] };
+  f.report.metadata.vulnerabilities.high = f.policy.reviews.length + 2;
+  const result = f.run();
+  assert.equal(result.scanner_advisories, f.policy.reviews.length + 1);
+  assert.equal(result.scanner_findings, f.policy.reviews.length + 2);
+  assert.equal(result.source_backported, f.policy.reviews.length);
+  assert.equal(result.blocked, 2);
+  assert.equal(result.release_allowed, false);
+  assert.deepEqual(result.findings.filter(finding => finding.package === 'zod').map(finding => finding.version),
+    ['3.25.76', '4.1.12']);
+});
+test('a reviewed advisory never blesses an additional unreviewed version', t => {
+  const f = fixture(t), row = Object.values(f.report.advisories)[0];
+  row.findings.push({ version: '1.4.1', paths: ['test > node-forge@1.4.1'] });
+  f.report.metadata.vulnerabilities.high = f.policy.reviews.length + 1;
+  const result = f.run();
+  assert.equal(result.source_backported, f.policy.reviews.length);
+  assert.equal(result.blocked, 1);
+  assert.equal(result.findings.find(finding => finding.version === '1.4.1').decision, 'blocked');
+});
+test('advisory-row severity counts cannot replace installed-version counts', t => {
+  const f = fixture(t), row = Object.values(f.report.advisories)[0];
+  row.findings.push({ version: '1.4.1', paths: ['test > node-forge@1.4.1'] });
+  assert.throws(f.run, /severity counts/);
+});
+test('empty, duplicate or pathless version inventories fail closed', t => {
+  for (const mutation of [
+    row => { row.findings = []; },
+    row => { row.findings.push({ ...row.findings[0] }); },
+    row => { row.findings[0].paths = []; },
+  ]) {
+    const f = fixture(t), row = Object.values(f.report.advisories)[0];
+    mutation(row);
+    assert.throws(f.run, /Invalid audit finding/);
+  }
 });
 for (const change of ['expiry', 'future review', 'duplicate', 'missing source', 'malformed date']) {
   test(`${change} review blocks release`, t => {
@@ -70,7 +110,7 @@ for (const change of ['patch', 'lock', 'manifest', 'installed source']) {
   test(`${change} evidence drift blocks release`, t => {
     const f = fixture(t), review = f.policy.reviews[0];
     const file = change === 'patch' ? review.patch : change === 'lock' ? 'pnpm-lock.yaml' :
-      change === 'manifest' ? 'package.json' : `node_modules/.pnpm/node_modules/${review.package}/lib/rsa.js`;
+      change === 'manifest' ? 'package.json' : `node_modules/.pnpm/node_modules/${review.package}/${Object.keys(review.installed_sha256)[0]}`;
     if (change === 'manifest') f.write(file, { pnpm: { patchedDependencies: {} } });
     else f.write(file, 'changed source\n');
     assert.equal(f.run().release_allowed, false);
@@ -85,3 +125,30 @@ for (const change of ['counts', 'muted', 'missing inventory']) {
     assert.throws(f.run);
   });
 }
+
+
+test('retired vulnerable forge release cannot regain a source exception', t => {
+  const f = fixture(t);
+  f.report.advisories.forge = { github_advisory_id: 'GHSA-86w9-cpqp-85rv', module_name: 'node-forge', severity: 'high', findings: [{version: '1.4.0', paths: ['test > node-forge@1.4.0']}] };
+  f.report.metadata.vulnerabilities.high += 1;
+  const result = f.run();
+  assert.equal(result.release_allowed, false);
+  assert.equal(result.findings.find(finding => finding.package === 'node-forge').decision, 'blocked');
+});
+
+
+test('exact store resolution ignores an older hoisted package', t => {
+  const f = fixture(t), name = 'deepmerge';
+  f.write(`node_modules/.pnpm/node_modules/${name}/package.json`, { name, version: '3.3.0' });
+  const exact = 'node_modules/.pnpm/deepmerge@4.3.1_patch_hash=verified/node_modules/deepmerge/package.json';
+  f.write(exact, { name, version: '4.3.1' });
+  assert.equal(resolveExactPackage(f.root, name, '4.3.1'), fs.realpathSync(path.join(f.root, exact)));
+});
+test('missing or ambiguous exact installed versions fail closed', t => {
+  const f = fixture(t);
+  assert.throws(() => resolveExactPackage(f.root, 'deepmerge', '9.0.0'), /found 0/);
+  for (const suffix of ['first', 'second']) {
+    f.write(`node_modules/.pnpm/deepmerge@9.0.0_patch_hash=${suffix}/node_modules/deepmerge/package.json`, { name: 'deepmerge', version: '9.0.0' });
+  }
+  assert.throws(() => resolveExactPackage(f.root, 'deepmerge', '9.0.0'), /found 2/);
+});

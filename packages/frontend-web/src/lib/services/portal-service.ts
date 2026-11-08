@@ -161,8 +161,6 @@ export interface PortalInquiryCreate {
 // API Funktionen
 // ============================================
 
-const TENANT_ID = import.meta.env.VITE_TENANT_ID || '00000000-0000-0000-0000-000000000001'
-
 /**
  * Transformiert snake_case zu camelCase für Frontend-Kompatibilität
  */
@@ -216,8 +214,8 @@ export async function getPortalProducts(options?: {
   skip?: number
   limit?: number
 }): Promise<PortalProductList> {
+  // Mandant und Kundenkonto bestimmt der Server aus der Anmeldung (TENANT-DOC-001); kein tenant_id-Parameter.
   const params = new URLSearchParams({
-    tenant_id: TENANT_ID,
     ...(options?.kategorie && options.kategorie !== 'alle' ? { kategorie: options.kategorie } : {}),
     ...(options?.search ? { search: options.search } : {}),
     ...(options?.skip ? { skip: String(options.skip) } : {}),
@@ -234,8 +232,7 @@ export async function getPortalProducts(options?: {
  * Erstellt eine neue Bestellung
  */
 export async function createOrder(order: OrderCreate): Promise<OrderResponse> {
-  const params = new URLSearchParams({ tenant_id: TENANT_ID })
-  const response = await apiClient.post<OrderResponse>(`/api/v1/portal/orders?${params.toString()}`, order)
+  const response = await apiClient.post<OrderResponse>('/api/v1/portal/orders', order)
   return response.data
 }
 
@@ -249,7 +246,6 @@ export async function getOrders(options?: {
 }): Promise<{ items: OrderListItem[]; total: number }> {
   try {
     const params = new URLSearchParams({
-      tenant_id: TENANT_ID,
       ...(options?.status ? { status_filter: options.status } : {}),
       ...(options?.skip ? { skip: String(options.skip) } : {}),
       ...(options?.limit ? { limit: String(options.limit) } : {}),
@@ -267,8 +263,7 @@ export async function getOrders(options?: {
  */
 export async function getOrder(orderId: string): Promise<OrderResponse | null> {
   try {
-    const params = new URLSearchParams({ tenant_id: TENANT_ID })
-    const response = await apiClient.get<OrderResponse>(`/api/v1/portal/orders/${orderId}?${params.toString()}`)
+    const response = await apiClient.get<OrderResponse>(`/api/v1/portal/orders/${encodeURIComponent(orderId)}`)
     return response.data
   } catch {
     return null
@@ -280,8 +275,7 @@ export async function getOrder(orderId: string): Promise<OrderResponse | null> {
  */
 export async function getContracts(): Promise<Contract[]> {
   try {
-    const params = new URLSearchParams({ tenant_id: TENANT_ID })
-    const response = await apiClient.get<Contract[]>(`/api/v1/portal/contracts?${params.toString()}`)
+    const response = await apiClient.get<Contract[]>('/api/v1/portal/contracts')
     return response.data
   } catch {
     return []
@@ -293,8 +287,7 @@ export async function getContracts(): Promise<Contract[]> {
  */
 export async function getPrePurchases(): Promise<PrePurchase[]> {
   try {
-    const params = new URLSearchParams({ tenant_id: TENANT_ID })
-    const response = await apiClient.get<PrePurchase[]>(`/api/v1/portal/pre-purchases?${params.toString()}`)
+    const response = await apiClient.get<PrePurchase[]>('/api/v1/portal/pre-purchases')
     return response.data
   } catch {
     return []

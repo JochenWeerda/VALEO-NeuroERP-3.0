@@ -3,9 +3,9 @@ import { v4 as uuidv4 } from 'uuid';
 
 // Contact Entity Schema
 export const ContactSchema = z.object({
-  id: z.string().uuid(),
-  tenantId: z.string().uuid(),
-  customerId: z.string().uuid(),
+  id: z.string().guid(),
+  tenantId: z.string().guid(),
+  customerId: z.string().guid(),
   firstName: z.string().min(1),
   lastName: z.string().min(1),
   role: z.string().optional(),

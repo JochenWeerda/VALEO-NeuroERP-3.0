@@ -56,7 +56,7 @@ export default function GlobalStatusIndicator(): JSX.Element {
 
   // Initial check and periodic monitoring
   useEffect(() => {
-    checkHealth()
+    void checkHealth()
     const interval = setInterval(checkHealth, HEALTH_CHECK_INTERVAL_MS)
     return () => clearInterval(interval)
   }, [])

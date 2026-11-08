@@ -16,6 +16,7 @@ from app.api.v1.schemas.futtermittel_qs_schemas import (
     VlogStatusOut,
 )
 from app.core.database import get_db
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/futtermittel/qs", tags=["futtermittel", "qs"])
 
@@ -64,7 +65,7 @@ def get_haccp_plan(
     return dict(row)
 
 
-@router.post("/haccp-plaene", response_model=QsAnlageOut, status_code=201, summary="HACCP-Plan anlegen")
+@router.post("/haccp-plaene", response_model=QsAnlageOut, status_code=201, summary="HACCP-Plan anlegen", dependencies=SCHREIBEN["FUTTERMITTEL"])
 def create_haccp_plan(
     body: dict[str, Any],
     db: Session = Depends(get_db),
@@ -94,7 +95,7 @@ def create_haccp_plan(
     return {"id": plan_id, "ok": True}
 
 
-@router.patch("/haccp-plaene/{plan_id}", response_model=QsAnlageOut, summary="HACCP-Plan aktualisieren")
+@router.patch("/haccp-plaene/{plan_id}", response_model=QsAnlageOut, summary="HACCP-Plan aktualisieren", dependencies=SCHREIBEN["FUTTERMITTEL"])
 def update_haccp_plan(
     plan_id: str,
     body: dict[str, Any],
@@ -163,7 +164,7 @@ def list_vlog_meldungen(
         return []
 
 
-@router.post("/vlog-meldungen", response_model=QsAnlageOut, status_code=201, summary="VLOG-Meldung erstellen")
+@router.post("/vlog-meldungen", response_model=QsAnlageOut, status_code=201, summary="VLOG-Meldung erstellen", dependencies=SCHREIBEN["FUTTERMITTEL"])
 def create_vlog_meldung(
     body: dict[str, Any],
     db: Session = Depends(get_db),
@@ -192,7 +193,7 @@ def create_vlog_meldung(
     return {"id": meldung_id, "ok": True}
 
 
-@router.patch("/vlog-meldungen/{meldung_id}/status", response_model=VlogStatusOut, summary="VLOG-Meldung Status setzen")
+@router.patch("/vlog-meldungen/{meldung_id}/status", response_model=VlogStatusOut, summary="VLOG-Meldung Status setzen", dependencies=SCHREIBEN["FUTTERMITTEL"])
 def set_vlog_status(
     meldung_id: str,
     body: dict[str, Any],
@@ -237,7 +238,7 @@ def list_pruefpunkte(
         return []
 
 
-@router.post("/leitfaden-pruefpunkte", response_model=QsAnlageOut, status_code=201, summary="QS-Pruefpunkt anlegen")
+@router.post("/leitfaden-pruefpunkte", response_model=QsAnlageOut, status_code=201, summary="QS-Pruefpunkt anlegen", dependencies=SCHREIBEN["FUTTERMITTEL"])
 def create_pruefpunkt(
     body: dict[str, Any],
     db: Session = Depends(get_db),
@@ -263,7 +264,7 @@ def create_pruefpunkt(
     return {"id": punkt_id, "ok": True}
 
 
-@router.post("/leitfaden-pruefpunkte/{punkt_id}/bestaetigen", response_model=PruefpunktBestaetigtOut, summary="QS-Pruefpunkt bestaetigen")
+@router.post("/leitfaden-pruefpunkte/{punkt_id}/bestaetigen", response_model=PruefpunktBestaetigtOut, summary="QS-Pruefpunkt bestaetigen", dependencies=SCHREIBEN["FUTTERMITTEL"])
 def bestaetigen_pruefpunkt(
     punkt_id: str,
     body: dict[str, Any],

@@ -8,6 +8,7 @@ from decimal import Decimal
 from datetime import datetime, date, time
 from app.core.business_time import business_now, business_today
 from app.core.uuid7 import uuid7
+from app.core.hintergrund import starte
 from sqlalchemy.orm import Session
 
 from app.infrastructure.models import Article as ArticleModel, Warehouse as WarehouseModel, StockMovement as StockMovementModel
@@ -21,31 +22,17 @@ class InventoryService:
 
     def get_article_stock(self, article_id: str, warehouse_id: Optional[str] = None) -> Dict[str, Any]:
         """Get current stock levels for an article."""
-        query = self.db.query(ArticleModel).filter(ArticleModel.id == article_id)
-
-        if warehouse_id:
-            # Get stock for specific warehouse
-            article = query.first()
-            if not article:
-                return {"current_stock": 0, "available_stock": 0, "reserved_stock": 0}
-
-            # For now, return total stock (warehouse-specific stock tracking would need additional table)
-            return {
-                "current_stock": float(article.current_stock or 0),
-                "available_stock": float(article.available_stock or 0),
-                "reserved_stock": float(article.reserved_stock or 0)
-            }
-        else:
-            # Get total stock across all warehouses
-            article = query.first()
-            if not article:
-                return {"current_stock": 0, "available_stock": 0, "reserved_stock": 0}
-
-            return {
-                "current_stock": float(article.current_stock or 0),
-                "available_stock": float(article.available_stock or 0),
-                "reserved_stock": float(article.reserved_stock or 0)
-            }
+        # Der Artikel fuehrt nur den Gesamtbestand; ``warehouse_id`` kann ihn nicht je Lager aufteilen. Die Antwort
+        # sagt das ausdruecklich (``warehouse_scoped``), statt einen Lagerbestand vorzutaeuschen.
+        article = self.db.query(ArticleModel).filter(ArticleModel.id == article_id).first()
+        if not article:
+            return {"current_stock": 0, "available_stock": 0, "reserved_stock": 0, "warehouse_scoped": False}
+        return {
+            "current_stock": float(article.current_stock or 0),
+            "available_stock": float(article.available_stock or 0),
+            "reserved_stock": float(article.reserved_stock or 0),
+            "warehouse_scoped": False,
+        }
 
     def check_low_stock_alerts(self, tenant_id: str) -> List[Dict[str, Any]]:
         """Check for articles that are below minimum stock levels."""
@@ -218,7 +205,6 @@ class InventoryService:
         try:
             from app.core.event_publisher import get_event_publisher
             from app.domains.shared.events.inventory_events import StockMovementRecordedEvent
-            import asyncio
 
             event_publisher = get_event_publisher()
             resolved_tenant_id = tenant_id or article.tenant_id
@@ -236,7 +222,7 @@ class InventoryService:
                 reference_number=reference_number,
                 tenant_id=resolved_tenant_id
             )
-            asyncio.create_task(event_publisher.publish(event))
+            starte(event_publisher.publish(event))
         except Exception:  # noqa: BLE001 — Event-Publishing fehlgeschlagen; Haupttransaktion nicht betroffen
             pass
 

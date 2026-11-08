@@ -5,14 +5,27 @@ Schemas for customers, leads, and CRM-related entities
 
 from datetime import datetime
 from decimal import Decimal
-from typing import Any, Optional
+from typing import Annotated, Any, Optional
 from uuid import UUID
 
-from pydantic import ConfigDict, EmailStr, Field, ValidationInfo, field_validator, model_validator
+from pydantic import AfterValidator, ConfigDict, EmailStr, Field, ValidationInfo, field_validator, model_validator
 
 from .base import BaseSchema, TimestampMixin, SoftDeleteMixin
 
-_DEFAULT_TENANT_ID = UUID("00000000-0000-0000-0000-000000000001")
+
+def _echter_mandant(value: str) -> str:
+    """Eine Mandantenkennung, wie sie gespeichert ist (UUID oder Kennung wie ``valeo``) - nie leer, nie Platzhalter.
+
+    Bis 28.10.2026 verlangte das Modell eine UUID; der Dienst gab Kennungen wie ``valeo`` deshalb als Standardmandant
+    aus. Ein Platzhalter ist ein Mandantenproblem und soll auffallen.
+    """
+    if not value.strip() or value.strip() in {"default", "system", "legacy-unassigned"}:
+        raise ValueError(f"kein gueltiger Mandant: {value!r}")
+    return value
+
+
+Mandant = Annotated[str, AfterValidator(_echter_mandant)]
+
 
 # Customer Schemas
 class CustomerBase(BaseSchema):
@@ -54,7 +67,7 @@ class CustomerCreate(CustomerBase):
         max_length=36,
         description="Optional: Verknüpfung zum Business-Partner (Stammdaten Verkauf)",
     )
-    tenant_id: UUID = Field(default=_DEFAULT_TENANT_ID, description="Tenant ID (Default: Dev-Tenant)")
+    tenant_id: Optional[UUID] = Field(None, description="Optional; Mandant aus dem Kontext (abweichend: 403)")
     credit_limit: Optional[Decimal] = Field(None, ge=0, description="Credit limit")
     payment_terms: Optional[int] = Field(None, ge=0, description="Payment terms in days")
     tax_id: Optional[str] = Field(None, max_length=50, description="Tax identification number")
@@ -125,7 +138,7 @@ class Customer(CustomerBase, TimestampMixin, SoftDeleteMixin):
         max_length=36,
         description="Verknüpfter Business-Partner (Stammdaten), falls in DB gepflegt",
     )
-    tenant_id: UUID = Field(..., description="Tenant ID")
+    tenant_id: Mandant = Field(..., description="Tenant ID")
     credit_limit: Optional[Decimal] = Field(None, ge=0, description="Credit limit")
     payment_terms: Optional[int] = Field(None, ge=0, description="Payment terms in days")
     tax_id: Optional[str] = Field(None, max_length=50, description="Tax identification number")
@@ -199,7 +212,7 @@ class LeadBase(BaseSchema):
 
 class LeadCreate(LeadBase):
     """Schema for creating a lead"""
-    tenant_id: UUID = Field(..., description="Tenant ID")
+    tenant_id: Mandant = Field(..., description="Tenant ID")
     assigned_to: Optional[str] = Field(None, description="Assigned user ID")
 
 
@@ -219,7 +232,7 @@ class LeadUpdate(BaseSchema):
 class Lead(LeadBase, TimestampMixin, SoftDeleteMixin):
     """Full lead schema"""
     id: UUID = Field(..., description="Lead ID")
-    tenant_id: UUID = Field(..., description="Tenant ID")
+    tenant_id: Mandant = Field(..., description="Tenant ID")
     assigned_to: Optional[str] = Field(None, description="Assigned user ID")
     converted_at: Optional[datetime] = Field(None, description="Conversion timestamp")
     converted_to_customer_id: Optional[UUID] = Field(None, description="Converted customer ID")
@@ -258,37 +271,10 @@ class Contact(ContactBase, TimestampMixin, SoftDeleteMixin):
 
 
 # Activity Schemas
-class ActivityBase(BaseSchema):
-    """Base activity schema"""
-    type: str = Field(..., max_length=20, description="Activity type (meeting, call, email, note)")
-    title: str = Field(..., min_length=1, max_length=200, description="Activity title")
-    customer: str = Field(..., min_length=1, max_length=100, description="Customer name")
-    contact_person: str = Field(..., min_length=1, max_length=100, description="Contact person")
-    date: datetime = Field(..., description="Activity date")
-    status: str = Field(..., max_length=20, description="Activity status (planned, completed, overdue)")
-    assigned_to: str = Field(..., max_length=100, description="Assigned user")
-    description: Optional[str] = Field(None, description="Activity description")
-
-
-class ActivityCreate(ActivityBase):
-    """Schema for creating an activity"""
-
-
-class ActivityUpdate(BaseSchema):
-    """Schema for updating an activity"""
-    type: Optional[str] = Field(None, max_length=20, description="Activity type")
-    title: Optional[str] = Field(None, min_length=1, max_length=200, description="Activity title")
-    customer: Optional[str] = Field(None, min_length=1, max_length=100, description="Customer name")
-    contact_person: Optional[str] = Field(None, min_length=1, max_length=100, description="Contact person")
-    date: Optional[datetime] = Field(None, description="Activity date")
-    status: Optional[str] = Field(None, max_length=20, description="Activity status")
-    assigned_to: Optional[str] = Field(None, max_length=100, description="Assigned user")
-    description: Optional[str] = Field(None, description="Activity description")
-
-
-class Activity(ActivityBase, TimestampMixin):
-    """Full activity schema"""
-    id: UUID = Field(..., description="Activity ID")
+from app.domains.crm.activity_contracts import (
+    ActivityBase, ActivityCreateCommand as ActivityCreate,
+    ActivityUpdateCommand as ActivityUpdate, ActivityRead as Activity,
+)
 
 
 # Farm Profile Schemas

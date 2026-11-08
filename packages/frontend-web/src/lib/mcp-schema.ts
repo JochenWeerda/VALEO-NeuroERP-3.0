@@ -101,7 +101,7 @@ export function validateMcpRequest<T>(schema: z.ZodSchema<T>, data: unknown): T 
     return schema.parse(data)
   } catch (error) {
     if (error instanceof z.ZodError) {
-      throw new McpValidationError('Validation failed', 'VALIDATION_ERROR', error.errors)
+      throw new McpValidationError('Validation failed', 'VALIDATION_ERROR', error.issues)
     }
     throw error
   }
