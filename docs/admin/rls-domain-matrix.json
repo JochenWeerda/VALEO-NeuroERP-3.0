@@ -3339,11 +3339,6 @@
     "services/ai/app/api/v1/endpoints/autocomplete.py",
     "services/ai/app/services/openai_service.py",
     "services/crm-ai/app/db/models.py",
-    "services/crm-gdpr/app/db/models.py",
-    "services/crm-gdpr/app/schemas/gdpr.py",
-    "services/crm-marketing/app/api/deps.py",
-    "services/crm-marketing/app/config/settings.py",
-    "services/crm-marketing/app/db/models.py",
     "services/crm-sales/app/db/models.py",
     "services/crm-security/app/api/v1/endpoints/security.py",
     "services/finance/app/domains/finance/schemas.py",
@@ -3383,24 +3378,21 @@
     "app/services/personal_service.py",
     "app/services/position_guard_service.py",
     "app/services/studio_process_simulation.py",
-    "services/crm-consent/app/api/v1/endpoints/consents.py",
-    "services/crm-gdpr/app/api/v1/endpoints/gdpr.py",
     "services/crm-sales/app/api/v1/endpoints/opportunities.py",
     "services/crm-service/app/api/v1/endpoints/cases.py"
    ],
    "worker": [],
    "identitaet": {
-    "dienst": 18,
-    "kopfzeile": 2,
-    "nutzlast": 11,
-    "standardmandant": 4,
+    "dienst": 11,
+    "kopfzeile": 1,
+    "nutzlast": 9,
+    "standardmandant": 3,
     "token": 69
    },
    "standardmandant_stellen": [
     "app/api/v1/endpoints/rations_optimization.py:6336",
     "app/core/inventory_permissions.py:85",
-    "app/services/admin_core_service.py:1055",
-    "services/crm-marketing/app/config/settings.py:23"
+    "app/services/admin_core_service.py:1055"
    ],
    "null_stellen": [],
    "gemeinsam_stellen": [

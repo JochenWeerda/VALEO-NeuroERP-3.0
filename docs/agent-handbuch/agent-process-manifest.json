@@ -11564,6 +11564,17 @@
           "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
         },
         {
+          "key": "print",
+          "label": "Drucken",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Druckt die sichtbare Liste; keine Serverwirkung."
+        },
+        {
           "key": "ansicht_purchase_order",
           "label": "Bestellungen",
           "dangerLevel": "safe",
@@ -11639,6 +11650,17 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        },
+        {
+          "key": "print",
+          "label": "Drucken",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Druckt die sichtbare Liste; keine Serverwirkung."
         },
         {
           "key": "ansicht_purchase_order",
@@ -11718,6 +11740,17 @@
           "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
         },
         {
+          "key": "print",
+          "label": "Drucken",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Druckt die sichtbare Liste; keine Serverwirkung."
+        },
+        {
           "key": "ansicht_purchase_order",
           "label": "Bestellungen",
           "dangerLevel": "safe",
@@ -11793,6 +11826,17 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        },
+        {
+          "key": "print",
+          "label": "Drucken",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Druckt die sichtbare Liste; keine Serverwirkung."
         },
         {
           "key": "ansicht_goods_receipt",
@@ -23769,6 +23813,17 @@
           "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
         },
         {
+          "key": "print",
+          "label": "Drucken",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Druckt die sichtbare Liste; keine Serverwirkung."
+        },
+        {
           "key": "ansicht_sales_offer",
           "label": "Angebote",
           "dangerLevel": "safe",
@@ -23855,6 +23910,17 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        },
+        {
+          "key": "print",
+          "label": "Drucken",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Druckt die sichtbare Liste; keine Serverwirkung."
         },
         {
           "key": "ansicht_sales_offer",
@@ -23945,6 +24011,17 @@
           "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
         },
         {
+          "key": "print",
+          "label": "Drucken",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Druckt die sichtbare Liste; keine Serverwirkung."
+        },
+        {
           "key": "ansicht_sales_offer",
           "label": "Angebote",
           "dangerLevel": "safe",
@@ -24033,6 +24110,17 @@
           "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
         },
         {
+          "key": "print",
+          "label": "Drucken",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Druckt die sichtbare Liste; keine Serverwirkung."
+        },
+        {
           "key": "ansicht_sales_order",
           "label": "Aufträge",
           "dangerLevel": "safe",
@@ -24119,6 +24207,17 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        },
+        {
+          "key": "print",
+          "label": "Drucken",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Druckt die sichtbare Liste; keine Serverwirkung."
         },
         {
           "key": "ansicht_sales_offer",

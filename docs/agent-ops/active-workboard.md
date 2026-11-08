@@ -20637,3 +20637,10 @@ Eingangsrechnung, Einkaufsgutschrift) oeffnen ueber belegSeite(art) die Belegmas
 (InvoiceCapturePage, OrderEditorLegacyPage, *-legacy) entfernt. Fehlende Fachfunktionen der Altseiten (Bestellung aus
 Auftrag/Anfrage/Kontrakt, Bedarfsvorschlag; Lieferschein: Kontrakt, Kostenstelle, Gebinde, Serien-Nr.,
 Zwischenhaendler, Druck) sind Ausbau der Varianten (Stufe 2b).
+## CRM-DIENSTKOPIEN-ENTFERNEN-20261108 — abgeschlossen, Claude Code
+
+Duplikatpruefung vor dem Merge von #54: services/crm-consent, crm-gdpr und crm-marketing liefen nie (nicht in Compose),
+wurden von keinem Code aufgerufen und sind im Backend gefuehrt (crm_consents.py, gdpr.py/gdpr_requests.py/compliance_dsgvo.py,
+crm_campaigns.py/crm_segments.py; Nutzerentscheidung 04.11.: crm_campaigns fuehrt). Entfernt statt Ketten repariert; #54
+geschlossen. Ratsche OHNE_EIGENE_VERSIONSTABELLE = {crm-ai}; Migrationsskripte, Sonar-Ausnahmen e4/e15, RLS-Inventar/-Matrix
+nachgezogen.
