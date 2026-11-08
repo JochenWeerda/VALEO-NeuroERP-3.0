@@ -3753,7 +3753,7 @@
       "version": "1.0.0"
     },
     "dashboard/verkauf": {
-      "definition_hash": "8b7e3c49b322162456fa46d228346fa3f6e9d3b27db4579906e7af16079851d4",
+      "definition_hash": "adda8aedbafdfa7fc2f933940d2cfd0b4f5e6885db0925ca0e5e8e294cedd2d2",
       "gates_passed": [
         "A",
         "B",
@@ -4214,17 +4214,6 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "einkauf/bestellungen": {
-      "definition_hash": "3158a009e058e79bc58428ebb3dc6405d9347c1c26cb986b76eb00e2d9e733e0",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "einkauf/bestellvorschlaege-liste": {
       "definition_hash": "f8973523a5361b74d5fc9b2702448c67ba04226da1695dd1813ff08d501f8095",
       "gates_passed": [
@@ -4425,17 +4414,6 @@
     },
     "einkauf/rechnung-abgleich-liste": {
       "definition_hash": "7fb934bd318ca89e002584ab4251b4ea077c604a14738b9180af8fd13c76bdb2",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "einkauf/rechnungseingaenge-liste": {
-      "definition_hash": "59b29ec51d10fc0dcd00fca321232271752a63758c2622bc8402708d67754bf0",
       "gates_passed": [
         "A",
         "B",
@@ -5005,17 +4983,6 @@
     },
     "finance/ap-invoice": {
       "definition_hash": "0d4cf29c3d1f147f2b5badd93c461fb8cf5a757bddbb47acc2c5ada2e92747db",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "finance/ap-invoices-liste": {
-      "definition_hash": "aaeae073685d906e8fd468bc57d3ffd0d667d43d1d25171d671a5a1843b58c08",
       "gates_passed": [
         "A",
         "B",
@@ -7134,30 +7101,8 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "sales/angebote-liste": {
-      "definition_hash": "0464f2de0fecd77805b1402c5717334efeeb9a983875cc3b87c04f85b12fe137",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "sales/angebote/neu": {
       "definition_hash": "acc056cce1b0bdc87c9abdaf9f09ddf9442db9119de352193ffcad9b4223fdaf",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "sales/auftraege-liste": {
-      "definition_hash": "333dca6bb428be1ce1ac0dae5c7b62632ef841bcef79339255e4a529e732fee7",
       "gates_passed": [
         "A",
         "B",
@@ -7255,17 +7200,6 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "sales/invoices": {
-      "definition_hash": "5f83bdfe233a66858877b70602faae2fd6f3ecba3104e7d3fa8669e91063e0da",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "sales/kalkulationen/neu": {
       "definition_hash": "a9ff76711befd6ac77fb0cf6cc6a48193ebe1edad44bd0d2ad6809075f33137c",
       "gates_passed": [
@@ -7297,17 +7231,6 @@
         "E"
       ],
       "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "sales/lieferungen-liste": {
-      "definition_hash": "c3ba55546c9ef4ed2b6973b292e450995d8ad50b265756725b114f297240a069",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "sales/sales-order": {
@@ -7892,17 +7815,6 @@
     },
     "verkauf/lieferschein-erfassung": {
       "definition_hash": "15654da6b9c23b9d40782787713bc448c48ecc1b74731eef55feb22d9dea307a",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "verkauf/rechnungen": {
-      "definition_hash": "aa759923e6ff03fcdaa36d96904e7c744f31e27f5da189c240d04e09ef799546",
       "gates_passed": [
         "A",
         "B",

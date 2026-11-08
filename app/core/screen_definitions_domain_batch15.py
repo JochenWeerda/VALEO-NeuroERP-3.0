@@ -2395,9 +2395,6 @@ def build_verkauf_lieferschein_erfassung_screen_definition() -> dict[str, Any]:
     )
 
 
-def build_verkauf_rechnungen_screen_definition() -> dict[str, Any]:
-    from app.core.native_screen_aliases import build_native_alias
-    return build_native_alias("verkauf/rechnungen")
 
 
 def build_verkauf_rechnungen_neu_screen_definition() -> dict[str, Any]:
@@ -2861,7 +2858,6 @@ BATCH15_SCREEN_BUILDERS: dict[str, Any] = {
     "verkauf/kunden-stamm": build_verkauf_kunden_stamm_screen_definition,
     "verkauf/kunden-stamm-enhanced": build_verkauf_kunden_stamm_enhanced_screen_definition,
     "verkauf/lieferschein-erfassung": build_verkauf_lieferschein_erfassung_screen_definition,
-    "verkauf/rechnungen": build_verkauf_rechnungen_screen_definition,
     "verkauf/rechnungen/neu": build_verkauf_rechnungen_neu_screen_definition,
     "verkauf/unerledigte-auftrags-positionen": build_verkauf_unerledigte_auftrags_positionen_screen_definition,
     "verladung/lkw-beladung": build_verladung_lkw_beladung_screen_definition,

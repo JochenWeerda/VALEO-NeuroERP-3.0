@@ -11531,6 +11531,314 @@
       "mcp_tool_ids": []
     },
     {
+      "mask_id": "beleg-liste/goods-receipt",
+      "title": "Wareneingänge",
+      "domain": "einkauf",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/beleg-liste__goods-receipt/:entityId",
+      "agent_contract_url": "/api/v1/masks/beleg-liste/goods-receipt/agent-contract",
+      "screen_definition_url": "/api/v1/masks/beleg-liste/goods-receipt/screen-definition",
+      "readiness_url": "/api/v1/masks/beleg-liste/goods-receipt/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Wareneingang anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        },
+        {
+          "key": "ansicht_purchase_order",
+          "label": "Bestellungen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Bestellungen."
+        },
+        {
+          "key": "ansicht_purchase_invoice",
+          "label": "Eingangsrechnungen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Eingangsrechnungen."
+        },
+        {
+          "key": "ansicht_purchase_credit_memo",
+          "label": "Einkaufsgutschriften",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Einkaufsgutschriften."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "einkauf.bestellung.speichern",
+        "einkauf.bestellung.list",
+        "einkauf.bestellung.status",
+        "einkauf.bestellung.versenden",
+        "einkauf.angebot.bestellen",
+        "einkauf.anlieferavis.wareneingang"
+      ]
+    },
+    {
+      "mask_id": "beleg-liste/purchase-credit-memo",
+      "title": "Einkaufsgutschriften",
+      "domain": "einkauf",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/beleg-liste__purchase-credit-memo/:entityId",
+      "agent_contract_url": "/api/v1/masks/beleg-liste/purchase-credit-memo/agent-contract",
+      "screen_definition_url": "/api/v1/masks/beleg-liste/purchase-credit-memo/screen-definition",
+      "readiness_url": "/api/v1/masks/beleg-liste/purchase-credit-memo/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Einkaufsgutschrift anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        },
+        {
+          "key": "ansicht_purchase_order",
+          "label": "Bestellungen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Bestellungen."
+        },
+        {
+          "key": "ansicht_goods_receipt",
+          "label": "Wareneingänge",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Wareneingänge."
+        },
+        {
+          "key": "ansicht_purchase_invoice",
+          "label": "Eingangsrechnungen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Eingangsrechnungen."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "einkauf.bestellung.speichern",
+        "einkauf.bestellung.list",
+        "einkauf.bestellung.status",
+        "einkauf.bestellung.versenden",
+        "einkauf.angebot.bestellen",
+        "einkauf.anlieferavis.wareneingang"
+      ]
+    },
+    {
+      "mask_id": "beleg-liste/purchase-invoice",
+      "title": "Eingangsrechnungen",
+      "domain": "einkauf",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/beleg-liste__purchase-invoice/:entityId",
+      "agent_contract_url": "/api/v1/masks/beleg-liste/purchase-invoice/agent-contract",
+      "screen_definition_url": "/api/v1/masks/beleg-liste/purchase-invoice/screen-definition",
+      "readiness_url": "/api/v1/masks/beleg-liste/purchase-invoice/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Eingangsrechnung anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        },
+        {
+          "key": "ansicht_purchase_order",
+          "label": "Bestellungen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Bestellungen."
+        },
+        {
+          "key": "ansicht_goods_receipt",
+          "label": "Wareneingänge",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Wareneingänge."
+        },
+        {
+          "key": "ansicht_purchase_credit_memo",
+          "label": "Einkaufsgutschriften",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Einkaufsgutschriften."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "einkauf.bestellung.speichern",
+        "einkauf.bestellung.list",
+        "einkauf.bestellung.status",
+        "einkauf.bestellung.versenden",
+        "einkauf.angebot.bestellen",
+        "einkauf.anlieferavis.wareneingang"
+      ]
+    },
+    {
+      "mask_id": "beleg-liste/purchase-order",
+      "title": "Bestellungen",
+      "domain": "einkauf",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/beleg-liste__purchase-order/:entityId",
+      "agent_contract_url": "/api/v1/masks/beleg-liste/purchase-order/agent-contract",
+      "screen_definition_url": "/api/v1/masks/beleg-liste/purchase-order/screen-definition",
+      "readiness_url": "/api/v1/masks/beleg-liste/purchase-order/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Bestellung anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        },
+        {
+          "key": "ansicht_goods_receipt",
+          "label": "Wareneingänge",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Wareneingänge."
+        },
+        {
+          "key": "ansicht_purchase_invoice",
+          "label": "Eingangsrechnungen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Eingangsrechnungen."
+        },
+        {
+          "key": "ansicht_purchase_credit_memo",
+          "label": "Einkaufsgutschriften",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Einkaufsgutschriften."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "einkauf.bestellung.speichern",
+        "einkauf.bestellung.list",
+        "einkauf.bestellung.status",
+        "einkauf.bestellung.versenden",
+        "einkauf.angebot.bestellen",
+        "einkauf.anlieferavis.wareneingang"
+      ]
+    },
+    {
       "mask_id": "dashboard/einkauf",
       "title": "Einkaufs-Dashboard",
       "domain": "einkauf",
@@ -12095,50 +12403,6 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": null
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
-        "einkauf.bestellung.list",
-        "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
-        "einkauf.angebot.bestellen",
-        "einkauf.anlieferavis.wareneingang"
-      ]
-    },
-    {
-      "mask_id": "einkauf/bestellungen",
-      "title": "Bestellungen",
-      "domain": "einkauf",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/einkauf__bestellungen/:entityId",
-      "agent_contract_url": "/api/v1/masks/einkauf/bestellungen/agent-contract",
-      "screen_definition_url": "/api/v1/masks/einkauf/bestellungen/screen-definition",
-      "readiness_url": "/api/v1/masks/einkauf/bestellungen/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "neu",
-          "label": "Neue Bestellung",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
-        },
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
         }
       ],
       "sensitive_fields": [],
@@ -12796,50 +13060,6 @@
       "readiness_url": "/api/v1/masks/einkauf/rechnung-abgleich-liste/readiness",
       "risk_summary": "low",
       "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
-        "einkauf.bestellung.list",
-        "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
-        "einkauf.angebot.bestellen",
-        "einkauf.anlieferavis.wareneingang"
-      ]
-    },
-    {
-      "mask_id": "einkauf/rechnungseingaenge-liste",
-      "title": "Rechnungseingaenge",
-      "domain": "einkauf",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/einkauf__rechnungseingaenge-liste/:entityId",
-      "agent_contract_url": "/api/v1/masks/einkauf/rechnungseingaenge-liste/agent-contract",
-      "screen_definition_url": "/api/v1/masks/einkauf/rechnungseingaenge-liste/screen-definition",
-      "readiness_url": "/api/v1/masks/einkauf/rechnungseingaenge-liste/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "neu",
-          "label": "Rechnungseingang erfassen",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
-        },
         {
           "key": "export",
           "label": "CSV-Export",
@@ -14658,36 +14878,6 @@
         "mwst",
         "faellig_am"
       ],
-      "mcp_tool_ids": [
-        "finance.ap_invoice.propose",
-        "fibu.open_items.list",
-        "fibu.dunning.status"
-      ]
-    },
-    {
-      "mask_id": "finance/ap-invoices-liste",
-      "title": "AP-Rechnungen",
-      "domain": "finance",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/finance__ap-invoices-liste/:entityId",
-      "agent_contract_url": "/api/v1/masks/finance/ap-invoices-liste/agent-contract",
-      "screen_definition_url": "/api/v1/masks/finance/ap-invoices-liste/screen-definition",
-      "readiness_url": "/api/v1/masks/finance/ap-invoices-liste/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
         "fibu.open_items.list",
@@ -23546,6 +23736,446 @@
       "mcp_tool_ids": []
     },
     {
+      "mask_id": "beleg-liste/sales-credit-memo",
+      "title": "Gutschriften",
+      "domain": "sales",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/beleg-liste__sales-credit-memo/:entityId",
+      "agent_contract_url": "/api/v1/masks/beleg-liste/sales-credit-memo/agent-contract",
+      "screen_definition_url": "/api/v1/masks/beleg-liste/sales-credit-memo/screen-definition",
+      "readiness_url": "/api/v1/masks/beleg-liste/sales-credit-memo/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Gutschrift anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        },
+        {
+          "key": "ansicht_sales_offer",
+          "label": "Angebote",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Angebote."
+        },
+        {
+          "key": "ansicht_sales_order",
+          "label": "Aufträge",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Aufträge."
+        },
+        {
+          "key": "ansicht_sales_delivery",
+          "label": "Lieferscheine",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Lieferscheine."
+        },
+        {
+          "key": "ansicht_sales_invoice",
+          "label": "Ausgangsrechnungen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Ausgangsrechnungen."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "sales.order.status",
+        "sales.gutschrift.speichern",
+        "sales.gutschrift.propose",
+        "sales.gutschrift.buchen",
+        "sales.invoice.propose",
+        "sales.invoice.post"
+      ]
+    },
+    {
+      "mask_id": "beleg-liste/sales-delivery",
+      "title": "Lieferscheine",
+      "domain": "sales",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/beleg-liste__sales-delivery/:entityId",
+      "agent_contract_url": "/api/v1/masks/beleg-liste/sales-delivery/agent-contract",
+      "screen_definition_url": "/api/v1/masks/beleg-liste/sales-delivery/screen-definition",
+      "readiness_url": "/api/v1/masks/beleg-liste/sales-delivery/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Lieferschein anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        },
+        {
+          "key": "ansicht_sales_offer",
+          "label": "Angebote",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Angebote."
+        },
+        {
+          "key": "ansicht_sales_order",
+          "label": "Aufträge",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Aufträge."
+        },
+        {
+          "key": "ansicht_sales_invoice",
+          "label": "Ausgangsrechnungen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Ausgangsrechnungen."
+        },
+        {
+          "key": "ansicht_sales_credit_memo",
+          "label": "Gutschriften",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Gutschriften."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "sales.order.status",
+        "sales.gutschrift.speichern",
+        "sales.gutschrift.propose",
+        "sales.gutschrift.buchen",
+        "sales.invoice.propose",
+        "sales.invoice.post"
+      ]
+    },
+    {
+      "mask_id": "beleg-liste/sales-invoice",
+      "title": "Ausgangsrechnungen",
+      "domain": "sales",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/beleg-liste__sales-invoice/:entityId",
+      "agent_contract_url": "/api/v1/masks/beleg-liste/sales-invoice/agent-contract",
+      "screen_definition_url": "/api/v1/masks/beleg-liste/sales-invoice/screen-definition",
+      "readiness_url": "/api/v1/masks/beleg-liste/sales-invoice/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Rechnung anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        },
+        {
+          "key": "ansicht_sales_offer",
+          "label": "Angebote",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Angebote."
+        },
+        {
+          "key": "ansicht_sales_order",
+          "label": "Aufträge",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Aufträge."
+        },
+        {
+          "key": "ansicht_sales_delivery",
+          "label": "Lieferscheine",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Lieferscheine."
+        },
+        {
+          "key": "ansicht_sales_credit_memo",
+          "label": "Gutschriften",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Gutschriften."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "sales.order.status",
+        "sales.gutschrift.speichern",
+        "sales.gutschrift.propose",
+        "sales.gutschrift.buchen",
+        "sales.invoice.propose",
+        "sales.invoice.post"
+      ]
+    },
+    {
+      "mask_id": "beleg-liste/sales-offer",
+      "title": "Angebote",
+      "domain": "sales",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/beleg-liste__sales-offer/:entityId",
+      "agent_contract_url": "/api/v1/masks/beleg-liste/sales-offer/agent-contract",
+      "screen_definition_url": "/api/v1/masks/beleg-liste/sales-offer/screen-definition",
+      "readiness_url": "/api/v1/masks/beleg-liste/sales-offer/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Angebot anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        },
+        {
+          "key": "ansicht_sales_order",
+          "label": "Aufträge",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Aufträge."
+        },
+        {
+          "key": "ansicht_sales_delivery",
+          "label": "Lieferscheine",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Lieferscheine."
+        },
+        {
+          "key": "ansicht_sales_invoice",
+          "label": "Ausgangsrechnungen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Ausgangsrechnungen."
+        },
+        {
+          "key": "ansicht_sales_credit_memo",
+          "label": "Gutschriften",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Gutschriften."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "sales.order.status",
+        "sales.gutschrift.speichern",
+        "sales.gutschrift.propose",
+        "sales.gutschrift.buchen",
+        "sales.invoice.propose",
+        "sales.invoice.post"
+      ]
+    },
+    {
+      "mask_id": "beleg-liste/sales-order",
+      "title": "Aufträge",
+      "domain": "sales",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/beleg-liste__sales-order/:entityId",
+      "agent_contract_url": "/api/v1/masks/beleg-liste/sales-order/agent-contract",
+      "screen_definition_url": "/api/v1/masks/beleg-liste/sales-order/screen-definition",
+      "readiness_url": "/api/v1/masks/beleg-liste/sales-order/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Auftrag anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        },
+        {
+          "key": "ansicht_sales_offer",
+          "label": "Angebote",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Angebote."
+        },
+        {
+          "key": "ansicht_sales_delivery",
+          "label": "Lieferscheine",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Lieferscheine."
+        },
+        {
+          "key": "ansicht_sales_invoice",
+          "label": "Ausgangsrechnungen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Ausgangsrechnungen."
+        },
+        {
+          "key": "ansicht_sales_credit_memo",
+          "label": "Gutschriften",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Gutschriften."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "sales.order.status",
+        "sales.gutschrift.speichern",
+        "sales.gutschrift.propose",
+        "sales.gutschrift.buchen",
+        "sales.invoice.propose",
+        "sales.invoice.post"
+      ]
+    },
+    {
       "mask_id": "dashboard/sales-dashboard",
       "title": "Verkaufs-Dashboard",
       "domain": "sales",
@@ -23612,72 +24242,6 @@
       ]
     },
     {
-      "mask_id": "sales/angebote-liste",
-      "title": "Verkaufsangebote",
-      "domain": "sales",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/sales__angebote-liste/:entityId",
-      "agent_contract_url": "/api/v1/masks/sales/angebote-liste/agent-contract",
-      "screen_definition_url": "/api/v1/masks/sales/angebote-liste/screen-definition",
-      "readiness_url": "/api/v1/masks/sales/angebote-liste/readiness",
-      "risk_summary": "medium",
-      "actions": [
-        {
-          "key": "neu",
-          "label": "Neues Angebot",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
-        },
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        },
-        {
-          "key": "print",
-          "label": "Drucken",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        },
-        {
-          "key": "import_csv",
-          "label": "CSV importieren",
-          "dangerLevel": "moderate",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": true,
-          "permission": "sales.offer.import_csv",
-          "commandEndpoint": "/api/v1/sales/offers/actions/import-csv",
-          "method": "POST",
-          "stubReason": null
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "sales.order.status",
-        "sales.gutschrift.speichern",
-        "sales.gutschrift.propose",
-        "sales.gutschrift.buchen",
-        "sales.invoice.propose",
-        "sales.invoice.post"
-      ]
-    },
-    {
       "mask_id": "sales/angebote/neu",
       "title": "Angebot erstellen",
       "domain": "sales",
@@ -23688,50 +24252,6 @@
       "readiness_url": "/api/v1/masks/sales/angebote/neu/readiness",
       "risk_summary": "low",
       "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "sales.order.status",
-        "sales.gutschrift.speichern",
-        "sales.gutschrift.propose",
-        "sales.gutschrift.buchen",
-        "sales.invoice.propose",
-        "sales.invoice.post"
-      ]
-    },
-    {
-      "mask_id": "sales/auftraege-liste",
-      "title": "Verkaufsauftraege",
-      "domain": "sales",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/sales__auftraege-liste/:entityId",
-      "agent_contract_url": "/api/v1/masks/sales/auftraege-liste/agent-contract",
-      "screen_definition_url": "/api/v1/masks/sales/auftraege-liste/screen-definition",
-      "readiness_url": "/api/v1/masks/sales/auftraege-liste/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "neu",
-          "label": "Neuer Auftrag",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
-        },
         {
           "key": "export",
           "label": "CSV-Export",
@@ -24119,39 +24639,6 @@
       ]
     },
     {
-      "mask_id": "sales/invoices",
-      "title": "Ausgangsrechnungen",
-      "domain": "sales",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/sales__invoices/:entityId",
-      "agent_contract_url": "/api/v1/masks/sales/invoices/agent-contract",
-      "screen_definition_url": "/api/v1/masks/sales/invoices/screen-definition",
-      "readiness_url": "/api/v1/masks/sales/invoices/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "Liste exportieren",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "sales.rechnung.lesen",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "sales.order.status",
-        "sales.gutschrift.speichern",
-        "sales.gutschrift.propose",
-        "sales.gutschrift.buchen",
-        "sales.invoice.propose",
-        "sales.invoice.post"
-      ]
-    },
-    {
       "mask_id": "sales/kalkulationen/neu",
       "title": "Kalkulation",
       "domain": "sales",
@@ -24239,61 +24726,6 @@
       ]
     },
     {
-      "mask_id": "sales/lieferungen-liste",
-      "title": "Lieferscheine",
-      "domain": "sales",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/sales__lieferungen-liste/:entityId",
-      "agent_contract_url": "/api/v1/masks/sales/lieferungen-liste/agent-contract",
-      "screen_definition_url": "/api/v1/masks/sales/lieferungen-liste/screen-definition",
-      "readiness_url": "/api/v1/masks/sales/lieferungen-liste/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "neu",
-          "label": "Lieferschein erfassen",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
-        },
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        },
-        {
-          "key": "print",
-          "label": "Drucken",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "sales.order.status",
-        "sales.gutschrift.speichern",
-        "sales.gutschrift.propose",
-        "sales.gutschrift.buchen",
-        "sales.invoice.propose",
-        "sales.invoice.post"
-      ]
-    },
-    {
       "mask_id": "sales/sales-order",
       "title": "Verkaufsauftrag",
       "domain": "sales",
@@ -24342,39 +24774,6 @@
       "readiness_url": "/api/v1/masks/verkauf/betriebsauftrag/readiness",
       "risk_summary": "low",
       "actions": [],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "sales.order.status",
-        "sales.gutschrift.speichern",
-        "sales.gutschrift.propose",
-        "sales.gutschrift.buchen",
-        "sales.invoice.propose",
-        "sales.invoice.post"
-      ]
-    },
-    {
-      "mask_id": "verkauf/rechnungen",
-      "title": "Ausgangsrechnungen",
-      "domain": "sales",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/verkauf__rechnungen/:entityId",
-      "agent_contract_url": "/api/v1/masks/verkauf/rechnungen/agent-contract",
-      "screen_definition_url": "/api/v1/masks/verkauf/rechnungen/screen-definition",
-      "readiness_url": "/api/v1/masks/verkauf/rechnungen/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "Liste exportieren",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "sales.rechnung.lesen",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        }
-      ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "sales.order.status",

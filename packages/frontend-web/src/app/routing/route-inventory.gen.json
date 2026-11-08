@@ -1386,6 +1386,11 @@
       "source": "alias"
     },
     {
+      "module": "@/pages/belege/liste",
+      "path": "belege/:belegart",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/belege/beleg",
       "path": "belege/:belegart/:id",
       "source": "alias"
@@ -4986,7 +4991,7 @@
       "source": "auto"
     },
     {
-      "module": "@/pages/sales/lieferungen-liste",
+      "module": "@/pages/sales/lieferung-neu",
       "path": "sales/lieferungen/neu",
       "source": "alias"
     },

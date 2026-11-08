@@ -55,11 +55,9 @@ _RUNTIME_LIST_WIRE_ALIASES: dict[str, str] = {
     "fuhrpark/auswertung-kosten": "fuhrpark/fuhrpark-auswertung-kosten-pro-fahrzeug",
     "lager/leitstand": "lager/materialfluss-visualisierung",
     "lager/lagerbewegungen-liste": "lager/stock-movement",
-    "sales/invoices": "sales/invoice",
     "fibu/kostenstellenrechnung": "fibu/kostenstellen-liste",
     "agrar/feldbuch-massnahmen-liste": "agrar/feldbuch/massnahmen",
     "agrar/saatzucht-partien-liste": "agrar/saatzucht",
-    "finance/ap/invoices": "finance/ap-invoices-liste",
     "finance/payments": "finance/payment-matching-liste",
 }
 
@@ -136,19 +134,18 @@ def _screen_ids_from_runtime_routes() -> set[str]:
 
 def _gate_e_runtime_candidates(screen_id: str) -> set[str]:
     candidates = _screen_id_path_variants(screen_id)
-    # Two already deployed replacements, bound to their actual routed source.
-    # A declaration alone never proves a runtime migration.
-    if screen_id in {"verkauf/rechnungen", "crm/kunden-cockpit"}:
+    # An already deployed replacement, bound to its actual routed source.
+    # A declaration alone never proves a runtime migration. (verkauf/rechnungen rendert seit 08.11.2026 direkt
+    # die Variante beleg-liste/sales-invoice und braucht keinen Sonderfall mehr.)
+    if screen_id == "crm/kunden-cockpit":
         from app.core.native_screen_aliases import NATIVE_SCREEN_ALIASES
-        relative = ("verkauf/rechnungen-worklist.tsx" if screen_id == "verkauf/rechnungen" else "crm/kunden-cockpit.tsx")
         try:
-            source = (ROOT / "packages/frontend-web/src/pages" / relative).read_text(encoding="utf-8")
+            source = (ROOT / "packages/frontend-web/src/pages/crm/kunden-cockpit.tsx").read_text(encoding="utf-8")
         except OSError:
             source = ""
-        direct = screen_id == "verkauf/rechnungen" and _source_has_runtime_marker(source) and "useScreenDefinition('sales/invoices')" in source
-        redirect = (screen_id == "crm/kunden-cockpit" and "`/crm/kunden/${encodeURIComponent(customerId)}${tabQuery}`" in source
+        redirect = ("`/crm/kunden/${encodeURIComponent(customerId)}${tabQuery}`" in source
                     and "navigate(target, { replace: true })" in source and "'/verkauf/kunden-liste'" in source)
-        if direct or redirect:
+        if redirect:
             candidates.add(NATIVE_SCREEN_ALIASES[screen_id])
     mapped = _RUNTIME_LIST_WIRE_ALIASES.get(screen_id)
     if mapped:
@@ -385,6 +382,8 @@ def _openapi_endpoint_candidates(endpoint: str) -> list[str]:
         normalized = base.replace("{entity_id}", "{beleg_id}")
         for art in BELEGARTEN:
             normalized = normalized.replace(f"/belege/{art}/", "/belege/{belegart}/")
+            if normalized.endswith(f"/belege/{art}"):  # Belegliste (Familie beleg-liste)
+                normalized = normalized[: -len(art)] + "{belegart}"
         normalized = re.sub(
             r"/tabs/(positionen|kette|dokumente|historie)(?=/|$)",
             "/tabs/{reiter}",

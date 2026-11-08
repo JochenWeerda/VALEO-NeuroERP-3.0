@@ -1,0 +1,331 @@
+{
+ "actions": [
+  {
+   "dangerLevel": "safe",
+   "key": "neu",
+   "kind": "primary",
+   "label": "Neues Angebot",
+   "localEffect": "navigation",
+   "navigationRoute": "/sales/angebot/neu",
+   "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg.",
+   "zone": "header"
+  },
+  {
+   "command": "list.exportCsv",
+   "dangerLevel": "safe",
+   "key": "export",
+   "kind": "secondary",
+   "label": "CSV-Export",
+   "localEffect": "download",
+   "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung.",
+   "zone": "header"
+  },
+  {
+   "dangerLevel": "safe",
+   "key": "print",
+   "label": "Drucken",
+   "localEffect": "print",
+   "zone": "header"
+  },
+  {
+   "commandEndpoint": "/api/v1/sales/offers/actions/import-csv",
+   "dangerLevel": "moderate",
+   "forbiddenForAgents": true,
+   "inputFields": [
+    {
+     "fileContent": {
+      "accept": [
+       ".csv"
+      ],
+      "encoding": "utf-8",
+      "maxBytes": 1048576
+     },
+     "helpText": "UTF-8, Semikolon; Pflichtkopf: offer_number;subject;customer_id;total_amount;currency. Optional: valid_until (ISO-Datum). Alle Zeilen werden gemeinsam importiert.",
+     "key": "csv_content",
+     "label": "CSV-Datei",
+     "required": true,
+     "type": "file"
+    }
+   ],
+   "key": "import_csv",
+   "label": "CSV importieren",
+   "method": "POST",
+   "permission": "sales.offer.import_csv",
+   "requiresConfirmation": true,
+   "requiresIdempotencyKey": true,
+   "zone": "header"
+  }
+ ],
+ "adapter": {
+  "sourceId": "test/native-import-probe",
+  "temporary": false,
+  "type": "native"
+ },
+ "agentContract": {
+  "businessPurpose": "Verkaufsangebote nach Kunde und Status verfolgen.",
+  "examplePrompts": [
+   "Welche Angebote laufen diese Woche ab?",
+   "Welche Angebote sind offen?"
+  ],
+  "sensitiveFields": [],
+  "testSelectors": {
+   "screenRoot": "[data-testid='screen-sales/angebote-liste']"
+  }
+ },
+ "dataSources": [
+  {
+   "endpoint": "/api/v1/sales/offers/",
+   "key": "list",
+   "pageSize": 100
+  }
+ ],
+ "domain": "sales",
+ "id": "test/native-import-probe",
+ "layout": {
+  "contextRail": "none",
+  "density": "compact",
+  "floorplan": "worklist",
+  "mobileMode": "mobileStack",
+  "preferredMode": "desktopDense",
+  "tableProfile": "standard",
+  "touchTargetPx": 44
+ },
+ "listExperience": {
+  "aggregates": [
+   {
+    "conditions": [],
+    "key": "total",
+    "label": "Angebote"
+   },
+   {
+    "conditions": [
+     {
+      "field": "status",
+      "op": "eq",
+      "value": "offen"
+     }
+    ],
+    "key": "open",
+    "label": "Offen"
+   }
+  ],
+  "export": {
+   "columns": [
+    {
+     "key": "offer_number",
+     "label": "Angebot-Nr."
+    },
+    {
+     "key": "created_at",
+     "label": "Datum"
+    },
+    {
+     "key": "customer_name",
+     "label": "Kunde"
+    },
+    {
+     "key": "subject",
+     "label": "Betreff"
+    },
+    {
+     "key": "total_amount",
+     "label": "Betrag"
+    },
+    {
+     "key": "currency",
+     "label": "Währung"
+    },
+    {
+     "key": "valid_until",
+     "label": "Gültig bis"
+    },
+    {
+     "key": "status",
+     "label": "Status"
+    }
+   ],
+   "delimiter": ";",
+   "filenamePrefix": "Angebote_"
+  },
+  "insightLines": [
+   {
+    "key": "sales",
+    "label": "Vertrieb",
+    "variants": [
+     {
+      "text": "{open} offene Angebote in der aktuellen Sicht."
+     }
+    ]
+   },
+   {
+    "key": "management",
+    "label": "Leitung",
+    "variants": [
+     {
+      "text": "{total} Angebote in der aktuellen Sicht."
+     }
+    ]
+   }
+  ],
+  "presets": [
+   {
+    "field": "status",
+    "key": "status",
+    "kind": "choice",
+    "label": "Status",
+    "options": [
+     {
+      "label": "Alle Status",
+      "value": "all"
+     },
+     {
+      "label": "Offen",
+      "value": "offen"
+     },
+     {
+      "label": "Angenommen",
+      "value": "angenommen"
+     },
+     {
+      "label": "Abgelehnt",
+      "value": "abgelehnt"
+     },
+     {
+      "label": "Abgelaufen",
+      "value": "abgelaufen"
+     }
+    ]
+   }
+  ],
+  "roleFocus": {
+   "defaultKey": "all",
+   "options": [
+    {
+     "key": "all",
+     "label": "Alle Rollen"
+    },
+    {
+     "insightLineKeys": [
+      "sales"
+     ],
+     "key": "sales",
+     "label": "Vertrieb"
+    },
+    {
+     "insightLineKeys": [
+      "sales"
+     ],
+     "key": "inside-sales",
+     "label": "Innendienst"
+    },
+    {
+     "insightLineKeys": [
+      "sales"
+     ],
+     "key": "order-desk",
+     "label": "Auftragsabwicklung"
+    },
+    {
+     "insightLineKeys": [
+      "management"
+     ],
+     "key": "finance",
+     "label": "Finance"
+    },
+    {
+     "insightLineKeys": [
+      "management"
+     ],
+     "key": "management",
+     "label": "Leitung"
+    }
+   ]
+  },
+  "searchFields": [
+   "offer_number",
+   "customer_name"
+  ]
+ },
+ "mode": "list",
+ "noWorkflowReason": "Der Status steht am Angebot; die Liste führt keinen eigenen Ablauf.",
+ "performance": {
+  "bundleGroup": "sales",
+  "initialPayloadBudgetKb": 60,
+  "lookupMinChars": 2,
+  "requiresLazyTabs": false,
+  "requiresVirtualTables": true
+ },
+ "schemaVersion": 1,
+ "subtitle": "Angebote mit Kunde, Betrag und Gültigkeit",
+ "tables": [
+  {
+   "columns": [
+    {
+     "filterable": true,
+     "key": "offer_number",
+     "label": "Angebot-Nr.",
+     "priority": "primary",
+     "sortable": true
+    },
+    {
+     "filterable": true,
+     "key": "created_at",
+     "label": "Datum",
+     "priority": "secondary",
+     "renderKind": "date",
+     "sortable": true
+    },
+    {
+     "filterable": true,
+     "key": "customer_name",
+     "label": "Kunde",
+     "priority": "primary"
+    },
+    {
+     "filterable": true,
+     "key": "subject",
+     "label": "Betreff",
+     "priority": "secondary"
+    },
+    {
+     "currencyField": "currency",
+     "key": "total_amount",
+     "label": "Betrag",
+     "numeric": true,
+     "priority": "primary",
+     "renderKind": "currency",
+     "sortable": true
+    },
+    {
+     "key": "currency",
+     "label": "Währung",
+     "priority": "secondary"
+    },
+    {
+     "key": "valid_until",
+     "label": "Gültig bis",
+     "priority": "secondary",
+     "renderKind": "date",
+     "sortable": true
+    },
+    {
+     "filterable": true,
+     "key": "status",
+     "label": "Status",
+     "priority": "primary",
+     "renderKind": "status"
+    }
+   ],
+   "dataSourceKey": "list",
+   "key": "list",
+   "label": "Verkaufsangebote",
+   "pageSize": 50,
+   "rowActions": [],
+   "rowHeight": 40,
+   "rowRouteTemplate": "/sales/angebot/{id}",
+   "serverPagination": false,
+   "virtualized": true
+  }
+ ],
+ "title": "Verkaufsangebote"
+}

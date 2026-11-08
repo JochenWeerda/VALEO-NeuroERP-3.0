@@ -85,42 +85,16 @@ def beleg_suchen(db: Session, request: Any, actor: str, tenant: str, nutzer: Any
     if opened.belegart and not lesbar:
         raise HTTPException(403, "Missing role for this document type")
     try:
-        zeilen = db.execute(
-            text(
-                """
-                SELECT id, doc_type, doc_number, status, document_date, customer_id, supplier_id, currency, total_gross
-                FROM domain_docflow.document_headers
-                WHERE tenant_id = :tenant AND deleted_at IS NULL AND source_system <> 'gobd_artifact'
-                  AND doc_type = ANY(:arten)
-                  AND (CAST(:status AS text) IS NULL OR status = :status)
-                  AND (CAST(:nr AS text) IS NULL OR doc_number ILIKE '%' || :nr || '%')
-                  AND (CAST(:partner AS text) IS NULL OR customer_id = :partner OR supplier_id = :partner)
-                ORDER BY document_date DESC, doc_number DESC
-                LIMIT :lim
-                """
-            ),
-            {
-                "tenant": tenant, "arten": lesbar,
-                "status": opened.status, "nr": opened.beleg_nr, "partner": opened.partner_nr, "lim": opened.limit,
-            },
-        ).mappings().all()
-        items = []
-        for z in zeilen:
-            variante = BELEGARTEN[str(z["doc_type"])]
-            datum = z["document_date"]
-            mit_betrag = variante.mit_preisen and darf(nutzer, "preise", variante.belegart)
-            items.append({
-                "beleg_id": str(z["id"]),
-                "belegart": variante.belegart,
-                "bezeichnung": variante.bezeichnung,
-                "beleg_nr": str(z["doc_number"]),
-                "status": str(z["status"]),
-                "belegdatum": (datum.date() if hasattr(datum, "date") else datum).isoformat(),
-                "partner_nr": z["supplier_id"] if variante.partnerrolle == "lieferant" else z["customer_id"],
-                # Ohne Preise in der Variante oder ohne Preisrecht auch kein Betrag in der Trefferliste.
-                "brutto": str(z["total_gross"]) if mit_betrag else None,
-                "waehrung": str(z["currency"] or "EUR") if mit_betrag else None,
-            })
+        from app.services.beleg_liste import beleg_zeilen
+
+        zeilen = beleg_zeilen(db, tenant, lambda recht, art: darf(nutzer, recht, art), arten=lesbar,
+                              status=opened.status, beleg_nr=opened.beleg_nr, partner=opened.partner_nr,
+                              limit=opened.limit)
+        # Dieselbe Quelle wie die Belegliste der Maske; das Werkzeug behaelt seine Trefferform.
+        items = [{key: z[key] for key in ("beleg_id", "belegart", "bezeichnung", "beleg_nr", "status", "belegdatum",
+                                          "partner_nr")}
+                 | {"brutto": None if z["brutto"] is None else str(z["brutto"]), "waehrung": z["waehrung"]}
+                 for z in zeilen]
         result = {"success": True, "mode": request.mode, "items": items, "count": len(items)}
         db.rollback()
         return result

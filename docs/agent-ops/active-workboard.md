@@ -20625,3 +20625,9 @@ Maske, immer die versionierte Fassung). Offen nach Paritaetspruefung (BELEG-050)
 Speicher (/einkauf/lieferscheine, /purchase-orders, /sales/delivery-notes, /finance/ap/invoices, /finance/invoices),
 die Belegmaske liest nur DocFlow; vier Listen oeffnen AP-Rechnungs-IDs in /belege/purchase_invoice/{id}, die DocFlow
 nicht kennt. Speicherentscheidung BELEG-052 beim Nutzer.
+BELEG-052 Stufe 1 (08.11.2026): Familie beleg-liste (9 Varianten) liest GET /api/v1/belege/{belegart} (DocFlow; dieselbe
+Quelle wie MCP beleg.suchen). Ersetzt die Listen sales/angebote-liste, sales/auftraege-liste, sales/lieferungen-liste,
+sales/invoices (+ Alias verkauf/rechnungen), einkauf/bestellungen, finance/ap-invoices-liste,
+einkauf/rechnungseingaenge-liste; sales/lieferungen/neu legt jetzt ueber die Belegmaske an. Offen: Bestellung versenden,
+Rechnungspruefung (BELEG-043), CSV-Import Angebote (Altimport legt Koepfe ohne Positionen an - Fachfrage);
+Stufe 2 Detail-/Erfassungsseiten umhaengen, Stufe 3 Altspeicher abbauen.

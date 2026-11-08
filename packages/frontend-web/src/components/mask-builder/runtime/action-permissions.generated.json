@@ -1062,29 +1062,6 @@
         ]
       ]
     },
-    "einkauf/bestellungen": {
-      "einkauf.bestellung.approve": [
-        [
-          "EINKAUF_ADMIN",
-          "EINKAUF_BEARBEITEN",
-          "admin"
-        ]
-      ],
-      "einkauf.bestellung.send": [
-        [
-          "EINKAUF_ADMIN",
-          "EINKAUF_BEARBEITEN",
-          "admin"
-        ]
-      ],
-      "einkauf.bestellung.cancel": [
-        [
-          "EINKAUF_ADMIN",
-          "EINKAUF_BEARBEITEN",
-          "admin"
-        ]
-      ]
-    },
     "einkauf/purchase-order": {
       "einkauf.bestellung.update": [
         [
@@ -1094,29 +1071,6 @@
         ]
       ],
       "einkauf.bestellung.send": [
-        [
-          "EINKAUF_ADMIN",
-          "EINKAUF_BEARBEITEN",
-          "admin"
-        ]
-      ]
-    },
-    "einkauf/rechnungseingaenge-liste": {
-      "einkauf.rechnungseingang.pruefen": [
-        [
-          "EINKAUF_ADMIN",
-          "EINKAUF_BEARBEITEN",
-          "admin"
-        ]
-      ],
-      "einkauf.rechnungseingang.freigeben": [
-        [
-          "EINKAUF_ADMIN",
-          "EINKAUF_BEARBEITEN",
-          "admin"
-        ]
-      ],
-      "einkauf.rechnungseingang.verbuchen": [
         [
           "EINKAUF_ADMIN",
           "EINKAUF_BEARBEITEN",
@@ -1774,15 +1728,6 @@
           "FUTTERMITTEL_BEARBEITEN",
           "LAGER_ADMIN",
           "LAGER_BEARBEITEN",
-          "SALES_ADMIN",
-          "SALES_BEARBEITEN",
-          "admin"
-        ]
-      ]
-    },
-    "sales/angebote-liste": {
-      "sales.offer.import_csv": [
-        [
           "SALES_ADMIN",
           "SALES_BEARBEITEN",
           "admin"

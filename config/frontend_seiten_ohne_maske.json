@@ -73,7 +73,6 @@
     "einkauf/bestellvorschlag-rohware.tsx": "einkauf/bestellvorschlag-rohware",
     "einkauf/bestellvorschlag-verkauf.tsx": "einkauf/bestellvorschlag-verkauf",
     "einkauf/edi-portal.tsx": "einkauf/edi-portal",
-    "einkauf/gutschriften-belastungen.tsx": "einkauf/gutschriften-belastungen",
     "einkauf/lieferantenbewertung.tsx": "einkauf/lieferantenbewertung",
     "einkauf/lieferschein-frachtauftrag.tsx": "einkauf/lieferschein-frachtauftrag",
     "einstellungen/system.tsx": "einstellungen/system",

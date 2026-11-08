@@ -230,8 +230,8 @@ actions:
     command_endpoint: GET /api/v1/sales/offers
     related_endpoints:
       - POST /api/v1/mcp/tools/call  # crm.customer.open, crm.customer.search
-    screen_id: sales/angebote-liste
-    route_path: /sales/angebote-liste
+    screen_id: beleg-liste/sales-offer
+    route_path: /belege/sales_offer
     follow_up_writes:
       - sales.customer_quote.create
     aliases:

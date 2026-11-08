@@ -22323,6 +22323,181 @@
         "title": "Beleg",
         "type": "object"
       },
+      "BelegListe": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/BelegListenZeile"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "BelegListe",
+        "type": "object"
+      },
+      "BelegListenZeile": {
+        "additionalProperties": false,
+        "properties": {
+          "beleg_id": {
+            "title": "Beleg Id",
+            "type": "string"
+          },
+          "beleg_nr": {
+            "title": "Beleg Nr",
+            "type": "string"
+          },
+          "belegart": {
+            "title": "Belegart",
+            "type": "string"
+          },
+          "belegdatum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Belegdatum"
+          },
+          "bezeichnung": {
+            "title": "Bezeichnung",
+            "type": "string"
+          },
+          "brutto": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Brutto"
+          },
+          "buchungsdatum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Buchungsdatum"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "netto": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Netto"
+          },
+          "partner_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Partner Name"
+          },
+          "partner_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Partner Nr"
+          },
+          "partner_nummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Partner Nummer"
+          },
+          "referenz": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Referenz"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "steuer": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Steuer"
+          },
+          "version": {
+            "default": 1,
+            "title": "Version",
+            "type": "integer"
+          },
+          "waehrung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Waehrung"
+          }
+        },
+        "required": [
+          "id",
+          "beleg_id",
+          "belegart",
+          "bezeichnung",
+          "beleg_nr",
+          "status"
+        ],
+        "title": "BelegListenZeile",
+        "type": "object"
+      },
       "Belegaktion": {
         "additionalProperties": false,
         "description": "Was der Leser mit diesem Beleg jetzt tun darf — vom Server entschieden, nicht von der Maske.",
@@ -244206,6 +244381,117 @@
         "summary": "Salden abrufen",
         "tags": [
           "Banken"
+        ]
+      }
+    },
+    "/api/v1/belege/{belegart}": {
+      "get": {
+        "description": "Die Liste der Belegmaske: dieselben Rechte wie der Einzelbeleg, Betraege nur mit Preisrecht.",
+        "operationId": "beleg_liste_api_v1_belege__belegart__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "belegart",
+            "required": true,
+            "schema": {
+              "title": "Belegart",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 40,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "beleg_nr",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 60,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Beleg Nr"
+            }
+          },
+          {
+            "in": "query",
+            "name": "partner",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 80,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Partner"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 200,
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BelegListe"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Belege einer Belegart (DocFlow, einziger Belegspeicher)",
+        "tags": [
+          "belege"
         ]
       }
     },

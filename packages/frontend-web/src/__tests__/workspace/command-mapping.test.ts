@@ -36,7 +36,7 @@ describe('command center mapping', () => {
     const quotes = mapFachaktionToCommand(
       WORKSPACE_FACHAKTIONEN.find((action) => action.id === 'sales.customer-quotes-list')!,
     )
-    expect(quotes.actionParams.path).toBe('/sales/angebote-liste')
+    expect(quotes.actionParams.path).toBe('/belege/sales_offer')
     expect(quotes.actionParams.kind).toBe('open-worklist')
     expect(quotes.actionParams.catalogId).toBe('sales.customer_quote.list')
     expect(quotes.mcp.requiredScopes).toEqual(['sales:read'])

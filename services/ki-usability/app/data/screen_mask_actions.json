@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 713,
-    "screens_with_actions": 390,
+    "actions": 744,
+    "screens_with_actions": 393,
     "domains": 50
   },
   "actions": [
@@ -2968,6 +2968,1056 @@
         "commandEndpoint": null,
         "navigationRoute": null,
         "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/goods-receipt:ansicht_purchase_credit_memo",
+      "label": "Einkaufsgutschriften",
+      "description": "Einkaufsgutschriften (beleg-liste/goods-receipt)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "beleg-liste/goods-receipt",
+      "intent_phrases": [
+        "Einkaufsgutschriften"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/goods-receipt",
+        "actionKey": "ansicht_purchase_credit_memo",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/purchase_credit_memo",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/goods-receipt:ansicht_purchase_invoice",
+      "label": "Eingangsrechnungen",
+      "description": "Eingangsrechnungen (beleg-liste/goods-receipt)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "beleg-liste/goods-receipt",
+      "intent_phrases": [
+        "Eingangsrechnungen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/goods-receipt",
+        "actionKey": "ansicht_purchase_invoice",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/purchase_invoice",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/goods-receipt:ansicht_purchase_order",
+      "label": "Bestellungen",
+      "description": "Bestellungen (beleg-liste/goods-receipt)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "beleg-liste/goods-receipt",
+      "intent_phrases": [
+        "Bestellungen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/goods-receipt",
+        "actionKey": "ansicht_purchase_order",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/purchase_order",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/goods-receipt:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (beleg-liste/goods-receipt)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "beleg-liste/goods-receipt",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/goods-receipt",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/goods-receipt:neu",
+      "label": "Wareneingang anlegen",
+      "description": "Wareneingang anlegen (beleg-liste/goods-receipt)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "beleg-liste/goods-receipt",
+      "intent_phrases": [
+        "Wareneingang anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/goods-receipt",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/goods_receipt/neu",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/purchase-credit-memo:ansicht_goods_receipt",
+      "label": "Wareneingänge",
+      "description": "Wareneingänge (beleg-liste/purchase-credit-memo)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "beleg-liste/purchase-credit-memo",
+      "intent_phrases": [
+        "Wareneingänge"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/purchase-credit-memo",
+        "actionKey": "ansicht_goods_receipt",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/goods_receipt",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/purchase-credit-memo:ansicht_purchase_invoice",
+      "label": "Eingangsrechnungen",
+      "description": "Eingangsrechnungen (beleg-liste/purchase-credit-memo)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "beleg-liste/purchase-credit-memo",
+      "intent_phrases": [
+        "Eingangsrechnungen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/purchase-credit-memo",
+        "actionKey": "ansicht_purchase_invoice",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/purchase_invoice",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/purchase-credit-memo:ansicht_purchase_order",
+      "label": "Bestellungen",
+      "description": "Bestellungen (beleg-liste/purchase-credit-memo)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "beleg-liste/purchase-credit-memo",
+      "intent_phrases": [
+        "Bestellungen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/purchase-credit-memo",
+        "actionKey": "ansicht_purchase_order",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/purchase_order",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/purchase-credit-memo:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (beleg-liste/purchase-credit-memo)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "beleg-liste/purchase-credit-memo",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/purchase-credit-memo",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/purchase-credit-memo:neu",
+      "label": "Einkaufsgutschrift anlegen",
+      "description": "Einkaufsgutschrift anlegen (beleg-liste/purchase-credit-memo)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "beleg-liste/purchase-credit-memo",
+      "intent_phrases": [
+        "Einkaufsgutschrift anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/purchase-credit-memo",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/purchase_credit_memo/neu",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/purchase-invoice:ansicht_goods_receipt",
+      "label": "Wareneingänge",
+      "description": "Wareneingänge (beleg-liste/purchase-invoice)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "beleg-liste/purchase-invoice",
+      "intent_phrases": [
+        "Wareneingänge"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/purchase-invoice",
+        "actionKey": "ansicht_goods_receipt",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/goods_receipt",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/purchase-invoice:ansicht_purchase_credit_memo",
+      "label": "Einkaufsgutschriften",
+      "description": "Einkaufsgutschriften (beleg-liste/purchase-invoice)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "beleg-liste/purchase-invoice",
+      "intent_phrases": [
+        "Einkaufsgutschriften"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/purchase-invoice",
+        "actionKey": "ansicht_purchase_credit_memo",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/purchase_credit_memo",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/purchase-invoice:ansicht_purchase_order",
+      "label": "Bestellungen",
+      "description": "Bestellungen (beleg-liste/purchase-invoice)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "beleg-liste/purchase-invoice",
+      "intent_phrases": [
+        "Bestellungen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/purchase-invoice",
+        "actionKey": "ansicht_purchase_order",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/purchase_order",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/purchase-invoice:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (beleg-liste/purchase-invoice)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "beleg-liste/purchase-invoice",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/purchase-invoice",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/purchase-invoice:neu",
+      "label": "Eingangsrechnung anlegen",
+      "description": "Eingangsrechnung anlegen (beleg-liste/purchase-invoice)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "beleg-liste/purchase-invoice",
+      "intent_phrases": [
+        "Eingangsrechnung anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/purchase-invoice",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/purchase_invoice/neu",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/purchase-order:ansicht_goods_receipt",
+      "label": "Wareneingänge",
+      "description": "Wareneingänge (beleg-liste/purchase-order)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "beleg-liste/purchase-order",
+      "intent_phrases": [
+        "Wareneingänge"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/purchase-order",
+        "actionKey": "ansicht_goods_receipt",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/goods_receipt",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/purchase-order:ansicht_purchase_credit_memo",
+      "label": "Einkaufsgutschriften",
+      "description": "Einkaufsgutschriften (beleg-liste/purchase-order)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "beleg-liste/purchase-order",
+      "intent_phrases": [
+        "Einkaufsgutschriften"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/purchase-order",
+        "actionKey": "ansicht_purchase_credit_memo",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/purchase_credit_memo",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/purchase-order:ansicht_purchase_invoice",
+      "label": "Eingangsrechnungen",
+      "description": "Eingangsrechnungen (beleg-liste/purchase-order)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "beleg-liste/purchase-order",
+      "intent_phrases": [
+        "Eingangsrechnungen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/purchase-order",
+        "actionKey": "ansicht_purchase_invoice",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/purchase_invoice",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/purchase-order:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (beleg-liste/purchase-order)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "beleg-liste/purchase-order",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/purchase-order",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/purchase-order:neu",
+      "label": "Bestellung anlegen",
+      "description": "Bestellung anlegen (beleg-liste/purchase-order)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "beleg-liste/purchase-order",
+      "intent_phrases": [
+        "Bestellung anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/purchase-order",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/purchase_order/neu",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-credit-memo:ansicht_sales_delivery",
+      "label": "Lieferscheine",
+      "description": "Lieferscheine (beleg-liste/sales-credit-memo)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-credit-memo",
+      "intent_phrases": [
+        "Lieferscheine"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-credit-memo",
+        "actionKey": "ansicht_sales_delivery",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_delivery",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-credit-memo:ansicht_sales_invoice",
+      "label": "Ausgangsrechnungen",
+      "description": "Ausgangsrechnungen (beleg-liste/sales-credit-memo)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-credit-memo",
+      "intent_phrases": [
+        "Ausgangsrechnungen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-credit-memo",
+        "actionKey": "ansicht_sales_invoice",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_invoice",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-credit-memo:ansicht_sales_offer",
+      "label": "Angebote",
+      "description": "Angebote (beleg-liste/sales-credit-memo)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-credit-memo",
+      "intent_phrases": [
+        "Angebote"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-credit-memo",
+        "actionKey": "ansicht_sales_offer",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_offer",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-credit-memo:ansicht_sales_order",
+      "label": "Aufträge",
+      "description": "Aufträge (beleg-liste/sales-credit-memo)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-credit-memo",
+      "intent_phrases": [
+        "Aufträge"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-credit-memo",
+        "actionKey": "ansicht_sales_order",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_order",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-credit-memo:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (beleg-liste/sales-credit-memo)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-credit-memo",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-credit-memo",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-credit-memo:neu",
+      "label": "Gutschrift anlegen",
+      "description": "Gutschrift anlegen (beleg-liste/sales-credit-memo)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-credit-memo",
+      "intent_phrases": [
+        "Gutschrift anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-credit-memo",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_credit_memo/neu",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-delivery:ansicht_sales_credit_memo",
+      "label": "Gutschriften",
+      "description": "Gutschriften (beleg-liste/sales-delivery)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-delivery",
+      "intent_phrases": [
+        "Gutschriften"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-delivery",
+        "actionKey": "ansicht_sales_credit_memo",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_credit_memo",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-delivery:ansicht_sales_invoice",
+      "label": "Ausgangsrechnungen",
+      "description": "Ausgangsrechnungen (beleg-liste/sales-delivery)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-delivery",
+      "intent_phrases": [
+        "Ausgangsrechnungen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-delivery",
+        "actionKey": "ansicht_sales_invoice",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_invoice",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-delivery:ansicht_sales_offer",
+      "label": "Angebote",
+      "description": "Angebote (beleg-liste/sales-delivery)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-delivery",
+      "intent_phrases": [
+        "Angebote"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-delivery",
+        "actionKey": "ansicht_sales_offer",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_offer",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-delivery:ansicht_sales_order",
+      "label": "Aufträge",
+      "description": "Aufträge (beleg-liste/sales-delivery)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-delivery",
+      "intent_phrases": [
+        "Aufträge"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-delivery",
+        "actionKey": "ansicht_sales_order",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_order",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-delivery:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (beleg-liste/sales-delivery)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-delivery",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-delivery",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-delivery:neu",
+      "label": "Lieferschein anlegen",
+      "description": "Lieferschein anlegen (beleg-liste/sales-delivery)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-delivery",
+      "intent_phrases": [
+        "Lieferschein anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-delivery",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_delivery/neu",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-invoice:ansicht_sales_credit_memo",
+      "label": "Gutschriften",
+      "description": "Gutschriften (beleg-liste/sales-invoice)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-invoice",
+      "intent_phrases": [
+        "Gutschriften"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-invoice",
+        "actionKey": "ansicht_sales_credit_memo",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_credit_memo",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-invoice:ansicht_sales_delivery",
+      "label": "Lieferscheine",
+      "description": "Lieferscheine (beleg-liste/sales-invoice)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-invoice",
+      "intent_phrases": [
+        "Lieferscheine"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-invoice",
+        "actionKey": "ansicht_sales_delivery",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_delivery",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-invoice:ansicht_sales_offer",
+      "label": "Angebote",
+      "description": "Angebote (beleg-liste/sales-invoice)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-invoice",
+      "intent_phrases": [
+        "Angebote"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-invoice",
+        "actionKey": "ansicht_sales_offer",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_offer",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-invoice:ansicht_sales_order",
+      "label": "Aufträge",
+      "description": "Aufträge (beleg-liste/sales-invoice)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-invoice",
+      "intent_phrases": [
+        "Aufträge"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-invoice",
+        "actionKey": "ansicht_sales_order",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_order",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-invoice:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (beleg-liste/sales-invoice)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-invoice",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-invoice",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-invoice:neu",
+      "label": "Rechnung anlegen",
+      "description": "Rechnung anlegen (beleg-liste/sales-invoice)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-invoice",
+      "intent_phrases": [
+        "Rechnung anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-invoice",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_invoice/neu",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-offer:ansicht_sales_credit_memo",
+      "label": "Gutschriften",
+      "description": "Gutschriften (beleg-liste/sales-offer)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-offer",
+      "intent_phrases": [
+        "Gutschriften"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-offer",
+        "actionKey": "ansicht_sales_credit_memo",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_credit_memo",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-offer:ansicht_sales_delivery",
+      "label": "Lieferscheine",
+      "description": "Lieferscheine (beleg-liste/sales-offer)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-offer",
+      "intent_phrases": [
+        "Lieferscheine"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-offer",
+        "actionKey": "ansicht_sales_delivery",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_delivery",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-offer:ansicht_sales_invoice",
+      "label": "Ausgangsrechnungen",
+      "description": "Ausgangsrechnungen (beleg-liste/sales-offer)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-offer",
+      "intent_phrases": [
+        "Ausgangsrechnungen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-offer",
+        "actionKey": "ansicht_sales_invoice",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_invoice",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-offer:ansicht_sales_order",
+      "label": "Aufträge",
+      "description": "Aufträge (beleg-liste/sales-offer)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-offer",
+      "intent_phrases": [
+        "Aufträge"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-offer",
+        "actionKey": "ansicht_sales_order",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_order",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-offer:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (beleg-liste/sales-offer)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-offer",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-offer",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-offer:neu",
+      "label": "Angebot anlegen",
+      "description": "Angebot anlegen (beleg-liste/sales-offer)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-offer",
+      "intent_phrases": [
+        "Angebot anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-offer",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_offer/neu",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-order:ansicht_sales_credit_memo",
+      "label": "Gutschriften",
+      "description": "Gutschriften (beleg-liste/sales-order)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-order",
+      "intent_phrases": [
+        "Gutschriften"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-order",
+        "actionKey": "ansicht_sales_credit_memo",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_credit_memo",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-order:ansicht_sales_delivery",
+      "label": "Lieferscheine",
+      "description": "Lieferscheine (beleg-liste/sales-order)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-order",
+      "intent_phrases": [
+        "Lieferscheine"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-order",
+        "actionKey": "ansicht_sales_delivery",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_delivery",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-order:ansicht_sales_invoice",
+      "label": "Ausgangsrechnungen",
+      "description": "Ausgangsrechnungen (beleg-liste/sales-order)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-order",
+      "intent_phrases": [
+        "Ausgangsrechnungen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-order",
+        "actionKey": "ansicht_sales_invoice",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_invoice",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-order:ansicht_sales_offer",
+      "label": "Angebote",
+      "description": "Angebote (beleg-liste/sales-order)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-order",
+      "intent_phrases": [
+        "Angebote"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-order",
+        "actionKey": "ansicht_sales_offer",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_offer",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-order:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (beleg-liste/sales-order)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-order",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-order",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-order:neu",
+      "label": "Auftrag anlegen",
+      "description": "Auftrag anlegen (beleg-liste/sales-order)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-order",
+      "intent_phrases": [
+        "Auftrag anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-order",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_order/neu",
+        "command": null,
         "method": null,
         "dangerLevel": "safe"
       }
@@ -6077,129 +7127,6 @@
       }
     },
     {
-      "id": "mask:einkauf/bestellungen:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (einkauf/bestellungen)",
-      "category": "mask-action",
-      "domain": "einkauf",
-      "mask": "einkauf/bestellungen",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "einkauf/bestellungen",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null,
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:einkauf/bestellungen:freigeben",
-      "label": "Freigeben",
-      "description": "Freigeben (einkauf/bestellungen)",
-      "category": "mask-action",
-      "domain": "einkauf",
-      "mask": "einkauf/bestellungen",
-      "intent_phrases": [
-        "Freigeben"
-      ],
-      "required_data": [
-        "entity_id"
-      ],
-      "source": {
-        "screenId": "einkauf/bestellungen",
-        "actionKey": "freigeben",
-        "commandEndpoint": "/api/v1/einkauf/bestellungen/{entity_id}/actions/freigeben",
-        "navigationRoute": null,
-        "command": null,
-        "method": "POST",
-        "permission": "einkauf.bestellung.approve",
-        "forbiddenForAgents": true,
-        "humanApprovalRequired": true,
-        "requiresConfirmation": true,
-        "dangerLevel": "moderate"
-      }
-    },
-    {
-      "id": "mask:einkauf/bestellungen:neu",
-      "label": "Neue Bestellung",
-      "description": "Neue Bestellung (einkauf/bestellungen)",
-      "category": "mask-action",
-      "domain": "einkauf",
-      "mask": "einkauf/bestellungen",
-      "intent_phrases": [
-        "Neue Bestellung"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "einkauf/bestellungen",
-        "actionKey": "neu",
-        "commandEndpoint": null,
-        "navigationRoute": "/einkauf/bestellungen/neu",
-        "command": null,
-        "method": null,
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:einkauf/bestellungen:stornieren",
-      "label": "Stornieren",
-      "description": "Stornieren (einkauf/bestellungen)",
-      "category": "mask-action",
-      "domain": "einkauf",
-      "mask": "einkauf/bestellungen",
-      "intent_phrases": [
-        "Stornieren"
-      ],
-      "required_data": [
-        "entity_id"
-      ],
-      "source": {
-        "screenId": "einkauf/bestellungen",
-        "actionKey": "stornieren",
-        "commandEndpoint": "/api/v1/einkauf/bestellungen/{entity_id}/actions/stornieren",
-        "navigationRoute": null,
-        "command": null,
-        "method": "POST",
-        "permission": "einkauf.bestellung.cancel",
-        "forbiddenForAgents": true,
-        "requiresConfirmation": true,
-        "auditReasonRequired": true,
-        "dangerLevel": "high"
-      }
-    },
-    {
-      "id": "mask:einkauf/bestellungen:versenden",
-      "label": "Versenden",
-      "description": "Versenden (einkauf/bestellungen)",
-      "category": "mask-action",
-      "domain": "einkauf",
-      "mask": "einkauf/bestellungen",
-      "intent_phrases": [
-        "Versenden"
-      ],
-      "required_data": [
-        "entity_id"
-      ],
-      "source": {
-        "screenId": "einkauf/bestellungen",
-        "actionKey": "versenden",
-        "commandEndpoint": "/api/v1/einkauf/bestellungen/{entity_id}/actions/versenden",
-        "navigationRoute": null,
-        "command": null,
-        "method": "POST",
-        "permission": "einkauf.bestellung.send",
-        "forbiddenForAgents": true,
-        "humanApprovalRequired": true,
-        "requiresConfirmation": true,
-        "dangerLevel": "moderate"
-      }
-    },
-    {
       "id": "mask:einkauf/bestellvorschlaege-liste:export",
       "label": "CSV-Export",
       "description": "CSV-Export (einkauf/bestellvorschlaege-liste)",
@@ -6415,127 +7342,6 @@
         "command": "list.exportCsv",
         "method": null,
         "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:einkauf/rechnungseingaenge-liste:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (einkauf/rechnungseingaenge-liste)",
-      "category": "mask-action",
-      "domain": "einkauf",
-      "mask": "einkauf/rechnungseingaenge-liste",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "einkauf/rechnungseingaenge-liste",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null,
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:einkauf/rechnungseingaenge-liste:freigeben",
-      "label": "Freigeben",
-      "description": "Freigeben (einkauf/rechnungseingaenge-liste)",
-      "category": "mask-action",
-      "domain": "einkauf",
-      "mask": "einkauf/rechnungseingaenge-liste",
-      "intent_phrases": [
-        "Freigeben"
-      ],
-      "required_data": [
-        "entity_id"
-      ],
-      "source": {
-        "screenId": "einkauf/rechnungseingaenge-liste",
-        "actionKey": "freigeben",
-        "commandEndpoint": "/api/v1/einkauf/rechnungseingaenge/{entity_id}/freigeben",
-        "navigationRoute": null,
-        "command": null,
-        "method": "POST",
-        "permission": "einkauf.rechnungseingang.freigeben",
-        "forbiddenForAgents": true,
-        "humanApprovalRequired": true,
-        "requiresConfirmation": true,
-        "dangerLevel": "moderate"
-      }
-    },
-    {
-      "id": "mask:einkauf/rechnungseingaenge-liste:neu",
-      "label": "Rechnungseingang erfassen",
-      "description": "Rechnungseingang erfassen (einkauf/rechnungseingaenge-liste)",
-      "category": "mask-action",
-      "domain": "einkauf",
-      "mask": "einkauf/rechnungseingaenge-liste",
-      "intent_phrases": [
-        "Rechnungseingang erfassen"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "einkauf/rechnungseingaenge-liste",
-        "actionKey": "neu",
-        "commandEndpoint": null,
-        "navigationRoute": "/einkauf/rechnungseingang/neu",
-        "command": null,
-        "method": null,
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:einkauf/rechnungseingaenge-liste:pruefen",
-      "label": "Pruefen",
-      "description": "Pruefen (einkauf/rechnungseingaenge-liste)",
-      "category": "mask-action",
-      "domain": "einkauf",
-      "mask": "einkauf/rechnungseingaenge-liste",
-      "intent_phrases": [
-        "Pruefen"
-      ],
-      "required_data": [
-        "entity_id"
-      ],
-      "source": {
-        "screenId": "einkauf/rechnungseingaenge-liste",
-        "actionKey": "pruefen",
-        "commandEndpoint": "/api/v1/einkauf/rechnungseingaenge/{entity_id}/pruefen",
-        "navigationRoute": null,
-        "command": null,
-        "method": "POST",
-        "permission": "einkauf.rechnungseingang.pruefen",
-        "requiresConfirmation": true,
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:einkauf/rechnungseingaenge-liste:verbuchen",
-      "label": "Verbuchen",
-      "description": "Verbuchen (einkauf/rechnungseingaenge-liste)",
-      "category": "mask-action",
-      "domain": "einkauf",
-      "mask": "einkauf/rechnungseingaenge-liste",
-      "intent_phrases": [
-        "Verbuchen"
-      ],
-      "required_data": [
-        "entity_id"
-      ],
-      "source": {
-        "screenId": "einkauf/rechnungseingaenge-liste",
-        "actionKey": "verbuchen",
-        "commandEndpoint": "/api/v1/einkauf/rechnungseingaenge/{entity_id}/verbuchen",
-        "navigationRoute": null,
-        "command": null,
-        "method": "POST",
-        "permission": "einkauf.rechnungseingang.verbuchen",
-        "forbiddenForAgents": true,
-        "requiresConfirmation": true,
-        "auditReasonRequired": true,
-        "dangerLevel": "high"
       }
     },
     {
@@ -7715,27 +8521,6 @@
         "humanApprovalRequired": true,
         "requiresConfirmation": true,
         "dangerLevel": "moderate"
-      }
-    },
-    {
-      "id": "mask:finance/ap-invoices-liste:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (finance/ap-invoices-liste)",
-      "category": "mask-action",
-      "domain": "finance",
-      "mask": "finance/ap-invoices-liste",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "finance/ap-invoices-liste",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null,
-        "dangerLevel": "safe"
       }
     },
     {
@@ -14051,72 +14836,6 @@
       }
     },
     {
-      "id": "mask:sales/angebote-liste:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (sales/angebote-liste)",
-      "category": "mask-action",
-      "domain": "sales",
-      "mask": "sales/angebote-liste",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "sales/angebote-liste",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null,
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:sales/angebote-liste:import_csv",
-      "label": "CSV importieren",
-      "description": "CSV importieren (sales/angebote-liste)",
-      "category": "mask-action",
-      "domain": "sales",
-      "mask": "sales/angebote-liste",
-      "intent_phrases": [
-        "CSV importieren"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "sales/angebote-liste",
-        "actionKey": "import_csv",
-        "commandEndpoint": "/api/v1/sales/offers/actions/import-csv",
-        "navigationRoute": null,
-        "command": null,
-        "method": "POST",
-        "permission": "sales.offer.import_csv",
-        "forbiddenForAgents": true,
-        "requiresConfirmation": true,
-        "dangerLevel": "moderate"
-      }
-    },
-    {
-      "id": "mask:sales/angebote-liste:neu",
-      "label": "Neues Angebot",
-      "description": "Neues Angebot (sales/angebote-liste)",
-      "category": "mask-action",
-      "domain": "sales",
-      "mask": "sales/angebote-liste",
-      "intent_phrases": [
-        "Neues Angebot"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "sales/angebote-liste",
-        "actionKey": "neu",
-        "commandEndpoint": null,
-        "navigationRoute": "/sales/angebot/neu",
-        "command": null,
-        "method": null,
-        "dangerLevel": "safe"
-      }
-    },
-    {
       "id": "mask:sales/angebote/neu:export",
       "label": "CSV-Export",
       "description": "CSV-Export (sales/angebote/neu)",
@@ -14133,48 +14852,6 @@
         "commandEndpoint": null,
         "navigationRoute": null,
         "command": "list.exportCsv",
-        "method": null,
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:sales/auftraege-liste:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (sales/auftraege-liste)",
-      "category": "mask-action",
-      "domain": "sales",
-      "mask": "sales/auftraege-liste",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "sales/auftraege-liste",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null,
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:sales/auftraege-liste:neu",
-      "label": "Neuer Auftrag",
-      "description": "Neuer Auftrag (sales/auftraege-liste)",
-      "category": "mask-action",
-      "domain": "sales",
-      "mask": "sales/auftraege-liste",
-      "intent_phrases": [
-        "Neuer Auftrag"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "sales/auftraege-liste",
-        "actionKey": "neu",
-        "commandEndpoint": null,
-        "navigationRoute": "/sales/order-editor",
-        "command": null,
         "method": null,
         "dangerLevel": "safe"
       }
@@ -14714,71 +15391,6 @@
         "commandEndpoint": null,
         "navigationRoute": null,
         "command": "list.exportCsv",
-        "method": null,
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:sales/lieferungen-liste:auftrag_oeffnen",
-      "label": "Auftrag öffnen",
-      "description": "Auftrag öffnen (sales/lieferungen-liste)",
-      "category": "mask-action",
-      "domain": "sales",
-      "mask": "sales/lieferungen-liste",
-      "intent_phrases": [
-        "Auftrag öffnen"
-      ],
-      "required_data": [
-        "entity_id"
-      ],
-      "source": {
-        "screenId": "sales/lieferungen-liste",
-        "actionKey": "auftrag_oeffnen",
-        "commandEndpoint": null,
-        "navigationRoute": "/sales/order-editor?id={sales_order_id}",
-        "command": null,
-        "method": null,
-        "dangerLevel": "low"
-      }
-    },
-    {
-      "id": "mask:sales/lieferungen-liste:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (sales/lieferungen-liste)",
-      "category": "mask-action",
-      "domain": "sales",
-      "mask": "sales/lieferungen-liste",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "sales/lieferungen-liste",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null,
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:sales/lieferungen-liste:neu",
-      "label": "Lieferschein erfassen",
-      "description": "Lieferschein erfassen (sales/lieferungen-liste)",
-      "category": "mask-action",
-      "domain": "sales",
-      "mask": "sales/lieferungen-liste",
-      "intent_phrases": [
-        "Lieferschein erfassen"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "sales/lieferungen-liste",
-        "actionKey": "neu",
-        "commandEndpoint": null,
-        "navigationRoute": "/sales/delivery-editor",
-        "command": null,
         "method": null,
         "dangerLevel": "safe"
       }

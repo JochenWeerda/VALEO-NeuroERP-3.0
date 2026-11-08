@@ -372,14 +372,16 @@ def test_bestellimport_meldet_keine_scheinwirkung(client):
 
 
 def test_bestellliste_liest_die_quelle_der_objektmaske():
+    """Bestellliste und Belegmaske lesen denselben Speicher (DocFlow, BELEG-052); Freigeben, Umwandeln und
+    Stornieren laufen in der Belegmaske je Beleg, nicht als Zeilenkommando auf einen Eigenspeicher."""
     from app.core.screen_definitions import get_screen_definition
 
-    liste = get_screen_definition("einkauf/bestellungen")
-    objekt = get_screen_definition("einkauf/purchase-order")
+    liste = get_screen_definition("beleg-liste/purchase-order")
+    objekt = get_screen_definition("beleg/purchase-order", tenant_id="00000000-0000-0000-0000-000000000051")
     quelle = next(d["endpoint"] for d in objekt["dataSources"] if d["key"] == "entity")
-    assert quelle == liste["dataSources"][0]["endpoint"] + "/{entity_id}"
-    zeilen = {a["key"] for a in liste["tables"][0]["rowActions"]}
-    assert zeilen == {"freigeben", "versenden", "stornieren"}
+    assert quelle.startswith(liste["dataSources"][0]["endpoint"] + "/{entity_id}")
+    assert liste["tables"][0]["rowActions"] == []
+    assert {"freigeben", "stornieren"} <= {a["key"] for a in objekt["actions"]}
 
 
 def test_saatgutliste_bleibt_in_der_grenze_des_dienstes():

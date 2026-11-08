@@ -2209,7 +2209,7 @@
       "path": "sales/kalkulationen/neu"
     },
     {
-      "module": "@/pages/sales/lieferungen-liste",
+      "module": "@/pages/sales/lieferung-neu",
       "path": "sales/lieferungen/neu"
     },
     {
@@ -3479,6 +3479,10 @@
     {
       "module": "@/pages/kontrakte/listen",
       "path": "kontrakte/listen/:variante"
+    },
+    {
+      "module": "@/pages/belege/liste",
+      "path": "belege/:belegart"
     }
   ]
 }

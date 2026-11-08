@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (778 Masken).
+> Generiert aus `app/core/screen_definitions.py` (779 Masken).
 
 ## Übersicht
 
@@ -224,6 +224,15 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `banken/ueberweisungen` | Ueberweisungen | finance | niedrig | — | `GET /api/v1/masks/banken/ueberweisungen/agent-contract` |
 | `banken/zahlungsavise` | Zahlungsavise | finance | niedrig | — | `GET /api/v1/masks/banken/zahlungsavise/agent-contract` |
 | `banken/zahlungsvorschlaege` | Zahlungsvorschlaege | finance | niedrig | — | `GET /api/v1/masks/banken/zahlungsvorschlaege/agent-contract` |
+| `beleg-liste/goods-receipt` | Wareneingänge | einkauf | niedrig | — | `GET /api/v1/masks/beleg-liste/goods-receipt/agent-contract` |
+| `beleg-liste/purchase-credit-memo` | Einkaufsgutschriften | einkauf | niedrig | — | `GET /api/v1/masks/beleg-liste/purchase-credit-memo/agent-contract` |
+| `beleg-liste/purchase-invoice` | Eingangsrechnungen | einkauf | niedrig | — | `GET /api/v1/masks/beleg-liste/purchase-invoice/agent-contract` |
+| `beleg-liste/purchase-order` | Bestellungen | einkauf | niedrig | — | `GET /api/v1/masks/beleg-liste/purchase-order/agent-contract` |
+| `beleg-liste/sales-credit-memo` | Gutschriften | sales | niedrig | — | `GET /api/v1/masks/beleg-liste/sales-credit-memo/agent-contract` |
+| `beleg-liste/sales-delivery` | Lieferscheine | sales | niedrig | — | `GET /api/v1/masks/beleg-liste/sales-delivery/agent-contract` |
+| `beleg-liste/sales-invoice` | Ausgangsrechnungen | sales | niedrig | — | `GET /api/v1/masks/beleg-liste/sales-invoice/agent-contract` |
+| `beleg-liste/sales-offer` | Angebote | sales | niedrig | — | `GET /api/v1/masks/beleg-liste/sales-offer/agent-contract` |
+| `beleg-liste/sales-order` | Aufträge | sales | niedrig | — | `GET /api/v1/masks/beleg-liste/sales-order/agent-contract` |
 | `belege/belegfolge` | Belegfolge | documents | niedrig | — | `GET /api/v1/masks/belege/belegfolge/agent-contract` |
 | `benachrichtigungen/liste` | Benachrichtigungen | platform | niedrig | — | `GET /api/v1/masks/benachrichtigungen/liste/agent-contract` |
 | `betrieb/gefahrstoff-betriebsanweisung` | Gefahrstoff-Betriebsanweisung | operations | niedrig | — | `GET /api/v1/masks/betrieb/gefahrstoff-betriebsanweisung/agent-contract` |
@@ -400,7 +409,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `einkauf/auftragsbestaetigung-erfassen` | Auftragsbestaetigung | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/auftragsbestaetigung-erfassen/agent-contract` |
 | `einkauf/auftragsbestaetigungen` | Auftragsbestaetigungen | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/auftragsbestaetigungen/agent-contract` |
 | `einkauf/bestellung-freigabe` | Bestellfreigabe | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/bestellung-freigabe/agent-contract` |
-| `einkauf/bestellungen` | Bestellungen | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/bestellungen/agent-contract` |
 | `einkauf/bestellvorschlaege-liste` | Bestellvorschlaege | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/bestellvorschlaege-liste/agent-contract` |
 | `einkauf/bestellvorschlag-kontrakt` | Bestellvorschlag Kontrakt | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/bestellvorschlag-kontrakt/agent-contract` |
 | `einkauf/bestellvorschlag-lager` | Bestellvorschlag Lager | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/bestellvorschlag-lager/agent-contract` |
@@ -420,7 +428,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `einkauf/mahnwesen-lieferanten` | Mahnwesen Lieferanten | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/mahnwesen-lieferanten/agent-contract` |
 | `einkauf/purchase-order` | Bestellung | einkauf | mittel | `procure-to-pay` | `GET /api/v1/masks/einkauf/purchase-order/agent-contract` |
 | `einkauf/rechnung-abgleich-liste` | Rechnungsabgleich | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/rechnung-abgleich-liste/agent-contract` |
-| `einkauf/rechnungseingaenge-liste` | Rechnungseingaenge | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/rechnungseingaenge-liste/agent-contract` |
 | `einkauf/rechnungseingang/neu` | Eingangsrechnung erfassen | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/rechnungseingang/neu/agent-contract` |
 | `einkauf/reports` | Reports | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/reports/agent-contract` |
 | `einkauf/retouren-liste` | Retouren | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/retouren-liste/agent-contract` |
@@ -473,7 +480,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `fibu/zahlungsmeldungen` | Neue Zahlungsmeldung [KASSZAME] | fibu | niedrig | — | `GET /api/v1/masks/fibu/zahlungsmeldungen/agent-contract` |
 | `finance/abschluss` | Monats-/Jahresabschluss | finance | niedrig | — | `GET /api/v1/masks/finance/abschluss/agent-contract` |
 | `finance/ap-invoice` | Eingangsrechnung | finance | mittel | `procure-to-pay` | `GET /api/v1/masks/finance/ap-invoice/agent-contract` |
-| `finance/ap-invoices-liste` | AP-Rechnungen | finance | niedrig | — | `GET /api/v1/masks/finance/ap-invoices-liste/agent-contract` |
 | `finance/ar-open-item` | Offener Posten | finance | mittel | `order-to-cash` | `GET /api/v1/masks/finance/ar-open-item/agent-contract` |
 | `finance/audit-trail` | Finanz-Audit-Trail | finance | niedrig | — | `GET /api/v1/masks/finance/audit-trail/agent-contract` |
 | `finance/audit-trail-liste` | Audit-Trail | finance | niedrig | — | `GET /api/v1/masks/finance/audit-trail-liste/agent-contract` |
@@ -677,9 +683,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `reports/deckungsbeitrag` | Deckungsbeitrag | reports | niedrig | — | `GET /api/v1/masks/reports/deckungsbeitrag/agent-contract` |
 | `rezepte/editor` | Grunddaten | rezepte | niedrig | — | `GET /api/v1/masks/rezepte/editor/agent-contract` |
 | `rezepte/rezept` | Rezept | produktion | niedrig | — | `GET /api/v1/masks/rezepte/rezept/agent-contract` |
-| `sales/angebote-liste` | Verkaufsangebote | sales | mittel | — | `GET /api/v1/masks/sales/angebote-liste/agent-contract` |
 | `sales/angebote/neu` | Angebot erstellen | sales | niedrig | — | `GET /api/v1/masks/sales/angebote/neu/agent-contract` |
-| `sales/auftraege-liste` | Verkaufsauftraege | sales | niedrig | — | `GET /api/v1/masks/sales/auftraege-liste/agent-contract` |
 | `sales/auftrag-lieferschein-abgleich` | Auftrag lieferschein abgleich | sales | niedrig | — | `GET /api/v1/masks/sales/auftrag-lieferschein-abgleich/agent-contract` |
 | `sales/auftragskette` | Auftragskette | sales | niedrig | — | `GET /api/v1/masks/sales/auftragskette/agent-contract` |
 | `sales/credit-notes` | Gutschrift | sales | mittel | — | `GET /api/v1/masks/sales/credit-notes/agent-contract` |
@@ -688,11 +692,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `sales/delivery-note` | Lieferschein | sales | niedrig | `order-to-cash` | `GET /api/v1/masks/sales/delivery-note/agent-contract` |
 | `sales/gutschrift` | Gutschrift | sales | mittel | — | `GET /api/v1/masks/sales/gutschrift/agent-contract` |
 | `sales/invoice` | Ausgangsrechnung | sales | niedrig | — | `GET /api/v1/masks/sales/invoice/agent-contract` |
-| `sales/invoices` | Ausgangsrechnungen | sales | niedrig | — | `GET /api/v1/masks/sales/invoices/agent-contract` |
 | `sales/kalkulationen/neu` | Kalkulation | sales | niedrig | — | `GET /api/v1/masks/sales/kalkulationen/neu/agent-contract` |
 | `sales/kreditlimit-pruefung` | Kreditlimit-Pruefung | sales | niedrig | — | `GET /api/v1/masks/sales/kreditlimit-pruefung/agent-contract` |
 | `sales/lieferung-storno` | Lieferung storno | sales | niedrig | — | `GET /api/v1/masks/sales/lieferung-storno/agent-contract` |
-| `sales/lieferungen-liste` | Lieferscheine | sales | niedrig | — | `GET /api/v1/masks/sales/lieferungen-liste/agent-contract` |
 | `sales/sales-order` | Verkaufsauftrag | sales | niedrig | `order-to-cash` | `GET /api/v1/masks/sales/sales-order/agent-contract` |
 | `schaeden/liste` | Schadenmeldungen | finance | niedrig | — | `GET /api/v1/masks/schaeden/liste/agent-contract` |
 | `schaeden/meldung` | Schadensmeldungen | qualitaet | niedrig | — | `GET /api/v1/masks/schaeden/meldung/agent-contract` |
@@ -747,7 +749,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `verkauf/kunden-stamm` | Vorlage übernommen | verkauf | niedrig | — | `GET /api/v1/masks/verkauf/kunden-stamm/agent-contract` |
 | `verkauf/kunden-stamm-enhanced` | Kunden stamm enhanced | verkauf | niedrig | — | `GET /api/v1/masks/verkauf/kunden-stamm-enhanced/agent-contract` |
 | `verkauf/lieferschein-erfassung` | Lieferschein erfassung | verkauf | niedrig | — | `GET /api/v1/masks/verkauf/lieferschein-erfassung/agent-contract` |
-| `verkauf/rechnungen` | Ausgangsrechnungen | sales | niedrig | — | `GET /api/v1/masks/verkauf/rechnungen/agent-contract` |
 | `verkauf/rechnungen/neu` | Invoice editor | verkauf | niedrig | — | `GET /api/v1/masks/verkauf/rechnungen/neu/agent-contract` |
 | `verkauf/unerledigte-auftrags-positionen` | Unerledigte auftrags positionen | verkauf | niedrig | — | `GET /api/v1/masks/verkauf/unerledigte-auftrags-positionen/agent-contract` |
 | `verladung/liste` | Verladungen | logistik | niedrig | — | `GET /api/v1/masks/verladung/liste/agent-contract` |
@@ -11785,6 +11786,174 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ## Domäne: einkauf
 
+### `beleg-liste/goods-receipt` — Wareneingänge
+
+**Zweck:** Wareneingänge finden, ihren Stand pruefen und den Beleg oeffnen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/beleg-liste/goods-receipt/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/beleg-liste/goods-receipt/agent-contract` |
+| Readiness | `GET /api/v1/masks/beleg-liste/goods-receipt/readiness` |
+| Rollout-Route | `/mask-rollout/beleg-liste__goods-receipt/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/belege/goods_receipt`
+
+**MCP-Tools (Domäne):**
+
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
+- `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
+- `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
+- `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche Wareneingänge sind noch im Entwurf?
+- Zeige die Wareneingänge von heute.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `neu` | Wareneingang anlegen | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+| `ansicht_purchase_order` | Bestellungen | safe | nein | `Wechselt zur Belegliste Bestellungen.` |
+| `ansicht_purchase_invoice` | Eingangsrechnungen | safe | nein | `Wechselt zur Belegliste Eingangsrechnungen.` |
+| `ansicht_purchase_credit_memo` | Einkaufsgutschriften | safe | nein | `Wechselt zur Belegliste Einkaufsgutschriften.` |
+
+---
+
+### `beleg-liste/purchase-credit-memo` — Einkaufsgutschriften
+
+**Zweck:** Einkaufsgutschriften finden, ihren Stand pruefen und den Beleg oeffnen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/beleg-liste/purchase-credit-memo/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/beleg-liste/purchase-credit-memo/agent-contract` |
+| Readiness | `GET /api/v1/masks/beleg-liste/purchase-credit-memo/readiness` |
+| Rollout-Route | `/mask-rollout/beleg-liste__purchase-credit-memo/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/belege/purchase_credit_memo`
+
+**MCP-Tools (Domäne):**
+
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
+- `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
+- `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
+- `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche Einkaufsgutschriften sind noch im Entwurf?
+- Zeige die Einkaufsgutschriften von heute.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `neu` | Einkaufsgutschrift anlegen | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+| `ansicht_purchase_order` | Bestellungen | safe | nein | `Wechselt zur Belegliste Bestellungen.` |
+| `ansicht_goods_receipt` | Wareneingänge | safe | nein | `Wechselt zur Belegliste Wareneingänge.` |
+| `ansicht_purchase_invoice` | Eingangsrechnungen | safe | nein | `Wechselt zur Belegliste Eingangsrechnungen.` |
+
+---
+
+### `beleg-liste/purchase-invoice` — Eingangsrechnungen
+
+**Zweck:** Eingangsrechnungen finden, ihren Stand pruefen und den Beleg oeffnen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/beleg-liste/purchase-invoice/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/beleg-liste/purchase-invoice/agent-contract` |
+| Readiness | `GET /api/v1/masks/beleg-liste/purchase-invoice/readiness` |
+| Rollout-Route | `/mask-rollout/beleg-liste__purchase-invoice/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/belege/purchase_invoice`
+
+**MCP-Tools (Domäne):**
+
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
+- `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
+- `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
+- `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche Eingangsrechnungen sind noch im Entwurf?
+- Zeige die Eingangsrechnungen von heute.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `neu` | Eingangsrechnung anlegen | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+| `ansicht_purchase_order` | Bestellungen | safe | nein | `Wechselt zur Belegliste Bestellungen.` |
+| `ansicht_goods_receipt` | Wareneingänge | safe | nein | `Wechselt zur Belegliste Wareneingänge.` |
+| `ansicht_purchase_credit_memo` | Einkaufsgutschriften | safe | nein | `Wechselt zur Belegliste Einkaufsgutschriften.` |
+
+---
+
+### `beleg-liste/purchase-order` — Bestellungen
+
+**Zweck:** Bestellungen finden, ihren Stand pruefen und den Beleg oeffnen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/beleg-liste/purchase-order/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/beleg-liste/purchase-order/agent-contract` |
+| Readiness | `GET /api/v1/masks/beleg-liste/purchase-order/readiness` |
+| Rollout-Route | `/mask-rollout/beleg-liste__purchase-order/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/belege/purchase_order`
+
+**MCP-Tools (Domäne):**
+
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
+- `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
+- `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
+- `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche Bestellungen sind noch im Entwurf?
+- Zeige die Bestellungen von heute.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `neu` | Bestellung anlegen | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+| `ansicht_goods_receipt` | Wareneingänge | safe | nein | `Wechselt zur Belegliste Wareneingänge.` |
+| `ansicht_purchase_invoice` | Eingangsrechnungen | safe | nein | `Wechselt zur Belegliste Eingangsrechnungen.` |
+| `ansicht_purchase_credit_memo` | Einkaufsgutschriften | safe | nein | `Wechselt zur Belegliste Einkaufsgutschriften.` |
+
+---
+
 ### `dashboard/einkauf` — Einkaufs-Dashboard
 
 **Zweck:** Einkaufslage mit KPIs und Sprung in Bestell- und Avis-Masken.
@@ -12400,45 +12569,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `refresh` | Aktualisieren | safe | nein | `—` |
-
----
-
-### `einkauf/bestellungen` — Bestellungen
-
-**Zweck:** Bestellungen an Lieferanten finden, freigeben, versenden und stornieren.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/einkauf/bestellungen/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/einkauf/bestellungen/agent-contract` |
-| Readiness | `GET /api/v1/masks/einkauf/bestellungen/readiness` |
-| Rollout-Route | `/mask-rollout/einkauf__bestellungen/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/einkauf/bestellungen`
-
-**MCP-Tools (Domäne):**
-
-- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
-- `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
-- `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
-- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
-- `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
-- `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
-
-**Beispiel-Prompts:**
-
-- Welche Bestellungen sind noch Entwurf?
-- Welche Liefertermine sind ueberfaellig?
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `neu` | Neue Bestellung | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
 
@@ -13167,45 +13297,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
-### `einkauf/rechnungseingaenge-liste` — Rechnungseingaenge
-
-**Zweck:** Eingangsrechnungen vor Pruefung und Verbuchung finden.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/einkauf/rechnungseingaenge-liste/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/einkauf/rechnungseingaenge-liste/agent-contract` |
-| Readiness | `GET /api/v1/masks/einkauf/rechnungseingaenge-liste/readiness` |
-| Rollout-Route | `/mask-rollout/einkauf__rechnungseingaenge-liste/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/einkauf/rechnungseingaenge`
-
-**MCP-Tools (Domäne):**
-
-- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
-- `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
-- `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
-- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
-- `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
-- `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
-
-**Beispiel-Prompts:**
-
-- Welche Rechnungen warten auf Freigabe?
-- Welche Eingangsrechnungen sind offen?
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `neu` | Rechnungseingang erfassen | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
 | `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
@@ -15219,41 +15310,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `freigeben` | Freigeben | moderate | ja | `/api/v1/finance/ap/invoices/{entity_id}/actions/freigeben` |
-
----
-
-### `finance/ap-invoices-liste` — AP-Rechnungen
-
-**Zweck:** AP-Rechnungen: Eintraege finden und Details oeffnen.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/finance/ap-invoices-liste/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/finance/ap-invoices-liste/agent-contract` |
-| Readiness | `GET /api/v1/masks/finance/ap-invoices-liste/readiness` |
-| Rollout-Route | `/mask-rollout/finance__ap-invoices-liste/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/finance/ap/invoices/`
-
-**MCP-Tools (Domäne):**
-
-- `finance.ap_invoice.propose` — scope `finance:write`, Risiko hoch
-- `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
-- `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
-
-**Beispiel-Prompts:**
-
-- Welche offenen AP-Rechnungen?
-- Zeige aktuelle AP-Rechnungen.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
 
@@ -24651,6 +24707,221 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ## Domäne: sales
 
+### `beleg-liste/sales-credit-memo` — Gutschriften
+
+**Zweck:** Gutschriften finden, ihren Stand pruefen und den Beleg oeffnen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/beleg-liste/sales-credit-memo/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/beleg-liste/sales-credit-memo/agent-contract` |
+| Readiness | `GET /api/v1/masks/beleg-liste/sales-credit-memo/readiness` |
+| Rollout-Route | `/mask-rollout/beleg-liste__sales-credit-memo/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/belege/sales_credit_memo`
+
+**MCP-Tools (Domäne):**
+
+- `sales.order.status` — scope `sales:read`, Risiko niedrig
+- `sales.gutschrift.speichern` — scope `sales:write`, Risiko mittel
+- `sales.gutschrift.propose` — scope `sales:write`, Risiko hoch
+- `sales.gutschrift.buchen` — scope `sales:write`, Risiko hoch
+- `sales.invoice.propose` — scope `sales:write`, Risiko hoch
+- `sales.invoice.post` — scope `sales:write`, Risiko hoch
+
+**Beispiel-Prompts:**
+
+- Welche Gutschriften sind noch im Entwurf?
+- Zeige die Gutschriften von heute.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `neu` | Gutschrift anlegen | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+| `ansicht_sales_offer` | Angebote | safe | nein | `Wechselt zur Belegliste Angebote.` |
+| `ansicht_sales_order` | Aufträge | safe | nein | `Wechselt zur Belegliste Aufträge.` |
+| `ansicht_sales_delivery` | Lieferscheine | safe | nein | `Wechselt zur Belegliste Lieferscheine.` |
+| `ansicht_sales_invoice` | Ausgangsrechnungen | safe | nein | `Wechselt zur Belegliste Ausgangsrechnungen.` |
+
+---
+
+### `beleg-liste/sales-delivery` — Lieferscheine
+
+**Zweck:** Lieferscheine finden, ihren Stand pruefen und den Beleg oeffnen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/beleg-liste/sales-delivery/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/beleg-liste/sales-delivery/agent-contract` |
+| Readiness | `GET /api/v1/masks/beleg-liste/sales-delivery/readiness` |
+| Rollout-Route | `/mask-rollout/beleg-liste__sales-delivery/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/belege/sales_delivery`
+
+**MCP-Tools (Domäne):**
+
+- `sales.order.status` — scope `sales:read`, Risiko niedrig
+- `sales.gutschrift.speichern` — scope `sales:write`, Risiko mittel
+- `sales.gutschrift.propose` — scope `sales:write`, Risiko hoch
+- `sales.gutschrift.buchen` — scope `sales:write`, Risiko hoch
+- `sales.invoice.propose` — scope `sales:write`, Risiko hoch
+- `sales.invoice.post` — scope `sales:write`, Risiko hoch
+
+**Beispiel-Prompts:**
+
+- Welche Lieferscheine sind noch im Entwurf?
+- Zeige die Lieferscheine von heute.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `neu` | Lieferschein anlegen | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+| `ansicht_sales_offer` | Angebote | safe | nein | `Wechselt zur Belegliste Angebote.` |
+| `ansicht_sales_order` | Aufträge | safe | nein | `Wechselt zur Belegliste Aufträge.` |
+| `ansicht_sales_invoice` | Ausgangsrechnungen | safe | nein | `Wechselt zur Belegliste Ausgangsrechnungen.` |
+| `ansicht_sales_credit_memo` | Gutschriften | safe | nein | `Wechselt zur Belegliste Gutschriften.` |
+
+---
+
+### `beleg-liste/sales-invoice` — Ausgangsrechnungen
+
+**Zweck:** Ausgangsrechnungen finden, ihren Stand pruefen und den Beleg oeffnen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/beleg-liste/sales-invoice/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/beleg-liste/sales-invoice/agent-contract` |
+| Readiness | `GET /api/v1/masks/beleg-liste/sales-invoice/readiness` |
+| Rollout-Route | `/mask-rollout/beleg-liste__sales-invoice/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/belege/sales_invoice`
+
+**MCP-Tools (Domäne):**
+
+- `sales.order.status` — scope `sales:read`, Risiko niedrig
+- `sales.gutschrift.speichern` — scope `sales:write`, Risiko mittel
+- `sales.gutschrift.propose` — scope `sales:write`, Risiko hoch
+- `sales.gutschrift.buchen` — scope `sales:write`, Risiko hoch
+- `sales.invoice.propose` — scope `sales:write`, Risiko hoch
+- `sales.invoice.post` — scope `sales:write`, Risiko hoch
+
+**Beispiel-Prompts:**
+
+- Welche Ausgangsrechnungen sind noch im Entwurf?
+- Zeige die Ausgangsrechnungen von heute.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `neu` | Rechnung anlegen | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+| `ansicht_sales_offer` | Angebote | safe | nein | `Wechselt zur Belegliste Angebote.` |
+| `ansicht_sales_order` | Aufträge | safe | nein | `Wechselt zur Belegliste Aufträge.` |
+| `ansicht_sales_delivery` | Lieferscheine | safe | nein | `Wechselt zur Belegliste Lieferscheine.` |
+| `ansicht_sales_credit_memo` | Gutschriften | safe | nein | `Wechselt zur Belegliste Gutschriften.` |
+
+---
+
+### `beleg-liste/sales-offer` — Angebote
+
+**Zweck:** Angebote finden, ihren Stand pruefen und den Beleg oeffnen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/beleg-liste/sales-offer/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/beleg-liste/sales-offer/agent-contract` |
+| Readiness | `GET /api/v1/masks/beleg-liste/sales-offer/readiness` |
+| Rollout-Route | `/mask-rollout/beleg-liste__sales-offer/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/belege/sales_offer`
+
+**MCP-Tools (Domäne):**
+
+- `sales.order.status` — scope `sales:read`, Risiko niedrig
+- `sales.gutschrift.speichern` — scope `sales:write`, Risiko mittel
+- `sales.gutschrift.propose` — scope `sales:write`, Risiko hoch
+- `sales.gutschrift.buchen` — scope `sales:write`, Risiko hoch
+- `sales.invoice.propose` — scope `sales:write`, Risiko hoch
+- `sales.invoice.post` — scope `sales:write`, Risiko hoch
+
+**Beispiel-Prompts:**
+
+- Welche Angebote sind noch im Entwurf?
+- Zeige die Angebote von heute.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `neu` | Angebot anlegen | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+| `ansicht_sales_order` | Aufträge | safe | nein | `Wechselt zur Belegliste Aufträge.` |
+| `ansicht_sales_delivery` | Lieferscheine | safe | nein | `Wechselt zur Belegliste Lieferscheine.` |
+| `ansicht_sales_invoice` | Ausgangsrechnungen | safe | nein | `Wechselt zur Belegliste Ausgangsrechnungen.` |
+| `ansicht_sales_credit_memo` | Gutschriften | safe | nein | `Wechselt zur Belegliste Gutschriften.` |
+
+---
+
+### `beleg-liste/sales-order` — Aufträge
+
+**Zweck:** Aufträge finden, ihren Stand pruefen und den Beleg oeffnen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/beleg-liste/sales-order/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/beleg-liste/sales-order/agent-contract` |
+| Readiness | `GET /api/v1/masks/beleg-liste/sales-order/readiness` |
+| Rollout-Route | `/mask-rollout/beleg-liste__sales-order/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/belege/sales_order`
+
+**MCP-Tools (Domäne):**
+
+- `sales.order.status` — scope `sales:read`, Risiko niedrig
+- `sales.gutschrift.speichern` — scope `sales:write`, Risiko mittel
+- `sales.gutschrift.propose` — scope `sales:write`, Risiko hoch
+- `sales.gutschrift.buchen` — scope `sales:write`, Risiko hoch
+- `sales.invoice.propose` — scope `sales:write`, Risiko hoch
+- `sales.invoice.post` — scope `sales:write`, Risiko hoch
+
+**Beispiel-Prompts:**
+
+- Welche Aufträge sind noch im Entwurf?
+- Zeige die Aufträge von heute.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `neu` | Auftrag anlegen | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+| `ansicht_sales_offer` | Angebote | safe | nein | `Wechselt zur Belegliste Angebote.` |
+| `ansicht_sales_delivery` | Lieferscheine | safe | nein | `Wechselt zur Belegliste Lieferscheine.` |
+| `ansicht_sales_invoice` | Ausgangsrechnungen | safe | nein | `Wechselt zur Belegliste Ausgangsrechnungen.` |
+| `ansicht_sales_credit_memo` | Gutschriften | safe | nein | `Wechselt zur Belegliste Gutschriften.` |
+
+---
+
 ### `dashboard/sales-dashboard` — Verkaufs-Dashboard
 
 **Zweck:** Verkaufs-Dashboard als Read-Model-Cockpit.
@@ -24727,47 +24998,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `sales/angebote-liste` — Verkaufsangebote
-
-**Zweck:** Verkaufsangebote nach Kunde und Status verfolgen.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/sales/angebote-liste/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/sales/angebote-liste/agent-contract` |
-| Readiness | `GET /api/v1/masks/sales/angebote-liste/readiness` |
-| Rollout-Route | `/mask-rollout/sales__angebote-liste/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/sales/offers/`
-
-**MCP-Tools (Domäne):**
-
-- `sales.order.status` — scope `sales:read`, Risiko niedrig
-- `sales.gutschrift.speichern` — scope `sales:write`, Risiko mittel
-- `sales.gutschrift.propose` — scope `sales:write`, Risiko hoch
-- `sales.gutschrift.buchen` — scope `sales:write`, Risiko hoch
-- `sales.invoice.propose` — scope `sales:write`, Risiko hoch
-- `sales.invoice.post` — scope `sales:write`, Risiko hoch
-
-**Beispiel-Prompts:**
-
-- Welche Angebote laufen diese Woche ab?
-- Welche Angebote sind offen?
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `neu` | Neues Angebot | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-| `print` | Drucken | safe | nein | `—` |
-| `import_csv` | CSV importieren | moderate | nein | `/api/v1/sales/offers/actions/import-csv` |
-
----
-
 ### `sales/angebote/neu` — Angebot erstellen
 
 **Zweck:** Angebot erstellen im sales-Bereich finden und auswerten.
@@ -24802,45 +25032,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
-### `sales/auftraege-liste` — Verkaufsauftraege
-
-**Zweck:** Verkaufsauftraege nach Kunde und Lieferstatus steuern.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/sales/auftraege-liste/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/sales/auftraege-liste/agent-contract` |
-| Readiness | `GET /api/v1/masks/sales/auftraege-liste/readiness` |
-| Rollout-Route | `/mask-rollout/sales__auftraege-liste/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/sales/orders/`
-
-**MCP-Tools (Domäne):**
-
-- `sales.order.status` — scope `sales:read`, Risiko niedrig
-- `sales.gutschrift.speichern` — scope `sales:write`, Risiko mittel
-- `sales.gutschrift.propose` — scope `sales:write`, Risiko hoch
-- `sales.gutschrift.buchen` — scope `sales:write`, Risiko hoch
-- `sales.invoice.propose` — scope `sales:write`, Risiko hoch
-- `sales.invoice.post` — scope `sales:write`, Risiko hoch
-
-**Beispiel-Prompts:**
-
-- Welche Auftraege sind noch offen?
-- Welche Auftraege warten auf Lieferung?
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `neu` | Neuer Auftrag | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
 | `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
@@ -25172,45 +25363,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `sales/invoices` — Ausgangsrechnungen
-
-**Zweck:** Ausgangsrechnungen suchen, nach Faelligkeit und Status priorisieren und den Beleg oeffnen.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/sales/invoices/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/sales/invoices/agent-contract` |
-| Readiness | `GET /api/v1/masks/sales/invoices/readiness` |
-| Rollout-Route | `/mask-rollout/sales__invoices/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/sales/invoices`
-
-**MCP-Tools (Domäne):**
-
-- `sales.order.status` — scope `sales:read`, Risiko niedrig
-- `sales.gutschrift.speichern` — scope `sales:write`, Risiko mittel
-- `sales.gutschrift.propose` — scope `sales:write`, Risiko hoch
-- `sales.gutschrift.buchen` — scope `sales:write`, Risiko hoch
-- `sales.invoice.propose` — scope `sales:write`, Risiko hoch
-- `sales.invoice.post` — scope `sales:write`, Risiko hoch
-
-**Beispiel-Prompts:**
-
-- Welche Rechnungen sind noch im Entwurf?
-- Zeige die Rechnungen des Kunden K-100 aus diesem Monat.
-- Gibt es Rechnungen ohne Positionen?
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | Liste exportieren | safe | nein | `—` |
-
----
-
 ### `sales/kalkulationen/neu` — Kalkulation
 
 **Zweck:** Kalkulation im sales-Bereich finden und auswerten.
@@ -25318,46 +25470,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `sales/lieferungen-liste` — Lieferscheine
-
-**Zweck:** Lieferscheine und ihren dokumentierten Status nachverfolgen.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/sales/lieferungen-liste/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/sales/lieferungen-liste/agent-contract` |
-| Readiness | `GET /api/v1/masks/sales/lieferungen-liste/readiness` |
-| Rollout-Route | `/mask-rollout/sales__lieferungen-liste/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/sales/delivery-notes?limit=100`
-
-**MCP-Tools (Domäne):**
-
-- `sales.order.status` — scope `sales:read`, Risiko niedrig
-- `sales.gutschrift.speichern` — scope `sales:write`, Risiko mittel
-- `sales.gutschrift.propose` — scope `sales:write`, Risiko hoch
-- `sales.gutschrift.buchen` — scope `sales:write`, Risiko hoch
-- `sales.invoice.propose` — scope `sales:write`, Risiko hoch
-- `sales.invoice.post` — scope `sales:write`, Risiko hoch
-
-**Beispiel-Prompts:**
-
-- Welche Lieferscheine sind offen?
-- Welche Lieferungen sind zugestellt?
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `neu` | Lieferschein erfassen | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-| `print` | Drucken | safe | nein | `—` |
-
----
-
 ### `sales/sales-order` — Verkaufsauftrag
 
 **Zweck:** Verkaufsauftrag-Cockpit: Kopfdaten, Positionen, Lieferscheine und Dokumente fuer Auftragsabwicklung und Kundenkommunikation.
@@ -25432,45 +25544,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **Beispiel-Prompts:**
 
 - Welche Auftraege haben ein Lieferdatum?
-
----
-
-### `verkauf/rechnungen` — Ausgangsrechnungen
-
-**Zweck:** Ausgangsrechnungen suchen, nach Faelligkeit und Status priorisieren und den Beleg oeffnen.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/verkauf/rechnungen/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/verkauf/rechnungen/agent-contract` |
-| Readiness | `GET /api/v1/masks/verkauf/rechnungen/readiness` |
-| Rollout-Route | `/mask-rollout/verkauf__rechnungen/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/sales/invoices`
-
-**MCP-Tools (Domäne):**
-
-- `sales.order.status` — scope `sales:read`, Risiko niedrig
-- `sales.gutschrift.speichern` — scope `sales:write`, Risiko mittel
-- `sales.gutschrift.propose` — scope `sales:write`, Risiko hoch
-- `sales.gutschrift.buchen` — scope `sales:write`, Risiko hoch
-- `sales.invoice.propose` — scope `sales:write`, Risiko hoch
-- `sales.invoice.post` — scope `sales:write`, Risiko hoch
-
-**Beispiel-Prompts:**
-
-- Welche Rechnungen sind noch im Entwurf?
-- Zeige die Rechnungen des Kunden K-100 aus diesem Monat.
-- Gibt es Rechnungen ohne Positionen?
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | Liste exportieren | safe | nein | `—` |
 
 ---
 
