@@ -39,9 +39,12 @@ def test_checkout_never_claims_a_booking(monkeypatch):
     # Bis 27.10.2026 meldete /pos/checkout "completed", ohne zu speichern. Ohne Kasse des Mandanten kein Erfolg.
     from app.api.v1.endpoints import pos_retoure as kasse
 
+    from app.services.fiscalization.service import FiscalizationService
+
     class OhneKasse:
         def __init__(self, db, tenant_id): self.db, self.tenant_id = db, tenant_id
         def get_config(self): return {"configured": False}
+        require_config = FiscalizationService.require_config
 
     monkeypatch.setattr(kasse, "FiscalizationService", OhneKasse)
     daten = kasse.CheckoutRequest(

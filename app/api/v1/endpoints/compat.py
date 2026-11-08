@@ -2684,7 +2684,7 @@ async def create_tagesabschluss(
     from decimal import Decimal
     from app.services.fiscalization.contracts import CashPointClosingCommand, PaymentLine
     from app.services.fiscalization.providers import FiscalProviderError
-    from app.services.fiscalization.service import FiscalizationService
+    from app.services.fiscalization.service import FiscalizationService, FiscalNotConfiguredError
     from app.services.pos_accounting_service import PosClosingAmounts, build_pos_closing_lines
 
     amounts = PosClosingAmounts(
@@ -2705,9 +2705,10 @@ async def create_tagesabschluss(
         )
 
     fiscal = FiscalizationService(db, tenant_id)
-    config = fiscal.get_config()
-    if not config.get("configured"):
-        raise HTTPException(status_code=409, detail="Fiskalisierungsprovider ist nicht konfiguriert")
+    try:
+        config = fiscal.require_config()
+    except FiscalNotConfiguredError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
     summary = fiscal.daily_summary(payload.datum)
     if int(summary["incomplete_count"]) > 0:
         raise HTTPException(status_code=409, detail="Tagesabschluss blockiert: unvollstaendige TSE-Transaktionen")

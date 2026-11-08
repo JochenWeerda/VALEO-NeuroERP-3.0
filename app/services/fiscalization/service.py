@@ -29,10 +29,21 @@ from .providers import (
 _SECRET_SETTING_TOKENS = ("secret", "token", "password", "credential", "api_key", "apikey")
 
 
+class FiscalNotConfiguredError(RuntimeError):
+    """Der Mandant hat keine (vollstaendige) Fiskalisierung; der Aufrufer waehlt den HTTP-Status."""
+
+
 class FiscalizationService:
     def __init__(self, db: Session, tenant_id: str):
         self.db = db
         self.tenant_id = tenant_id
+
+    def require_config(self, *required: str) -> dict[str, Any]:
+        """Konfiguration des Mandanten — oder ``FiscalNotConfiguredError``, wenn sie fehlt oder ``required`` leer ist."""
+        config = self.get_config()
+        if not config.get("configured") or any(not config.get(key) for key in required):
+            raise FiscalNotConfiguredError("Fiskalisierungsprovider ist fuer diesen Mandanten nicht konfiguriert")
+        return config
 
     def get_config(self) -> dict[str, Any]:
         row = self.db.execute(
@@ -181,7 +192,7 @@ class FiscalizationService:
         }
 
     def start(self, command: StartTransactionCommand) -> FiscalTransactionResult:
-        existing = self._transaction(command.transaction_id)
+        existing = self.stored_transaction(command.transaction_id)
         if existing and existing["state"] in {"ACTIVE", "FINISHED"}:
             return self._stored_result(existing)
         result = self.provider().start(command)
@@ -190,7 +201,7 @@ class FiscalizationService:
         return result
 
     def finish(self, command: FinishTransactionCommand) -> FiscalTransactionResult:
-        existing = self._transaction(command.transaction_id)
+        existing = self.stored_transaction(command.transaction_id)
         if existing and existing["state"] == "FINISHED":
             return self._stored_result(existing)
         result = self.provider().finish(command)
@@ -323,7 +334,7 @@ class FiscalizationService:
         ).mappings().one()
         return dict(row)
 
-    def _transaction(self, transaction_id: str) -> Any:
+    def stored_transaction(self, transaction_id: str) -> Any:
         return self.db.execute(
             text(
                 """

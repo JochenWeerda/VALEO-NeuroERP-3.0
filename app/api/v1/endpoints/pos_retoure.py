@@ -29,7 +29,8 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.fiscalization.contracts import FinishTransactionCommand, FiscalLine, PaymentLine
 from app.services.fiscalization.providers import FiscalProviderError
-from app.services.fiscalization.service import FiscalizationService
+from app.services.fiscalization.service import FiscalizationService, FiscalNotConfiguredError
+from app.finance.steuerschluessel import Steuerklaerung, satz_des_schluessels
 
 router = APIRouter()
 
@@ -112,28 +113,20 @@ class CheckoutResponse(BaseModel):
 
 
 def _steuersatz_aus_stamm(db: Session, tenant_id: str, artikelnr: Optional[str]) -> Decimal:
-    """Steuersatz eines Artikels aus seinem Verkaufs-Steuerschluessel (``domain_erp.tax_keys``) — nie angenommen."""
+    """Steuersatz eines Artikels aus seinem Verkaufs-Steuerschluessel (``satz_des_schluessels``) — nie angenommen."""
     if not artikelnr:
         raise HTTPException(422, "Position ohne Artikelnummer und ohne Steuersatz: nicht signierbar.")
     row = db.execute(
-        text(
-            """
-            SELECT a.steuerschluessel_verkauf, tk.steuersatz
-            FROM domain_inventory.articles a
-            LEFT JOIN domain_erp.tax_keys tk
-              ON tk.tenant_id = a.tenant_id AND tk.code = a.steuerschluessel_verkauf AND tk.active
-             AND tk.gueltig_von <= CURRENT_DATE AND (tk.gueltig_bis IS NULL OR tk.gueltig_bis >= CURRENT_DATE)
-            WHERE a.tenant_id = :tid AND a.article_number = :nr
-            LIMIT 1
-            """
-        ),
+        text("SELECT steuerschluessel_verkauf FROM domain_inventory.articles "
+             "WHERE tenant_id = :tid AND article_number = :nr LIMIT 1"),
         {"tid": tenant_id, "nr": artikelnr},
     ).first()
     if row is None:
         raise HTTPException(422, f"Artikel {artikelnr} ist nicht bekannt.")
-    if row[1] is None:
-        raise HTTPException(422, f"Artikel {artikelnr} hat keinen gueltigen Verkaufs-Steuerschluessel.")
-    return Decimal(str(row[1]))
+    try:
+        return satz_des_schluessels(db, tenant_id, row[0] or "", "verkauf")
+    except Steuerklaerung as grund:
+        raise HTTPException(422, f"Artikel {artikelnr}: {grund}") from grund
 
 
 def _kassensatz(satz: Decimal) -> Decimal:
@@ -154,10 +147,11 @@ def _gleich(a: Decimal, b: Decimal) -> bool:
 
 
 def _kasse(service: FiscalizationService) -> dict[str, Any]:
-    config = service.get_config()
-    if not config.get("configured") or not config.get("cash_register_id") or not config.get("client_id"):
-        raise HTTPException(503, "Fiskalisierungsprovider ist fuer diesen Mandanten nicht konfiguriert.")
-    return config
+    try:
+        return service.require_config("cash_register_id", "client_id")
+    except FiscalNotConfiguredError as exc:
+        # 503 statt 409: Die Offline-Warteschlange behaelt den Bon und versucht es spaeter erneut.
+        raise HTTPException(503, str(exc)) from exc
 
 
 def _signiere(service: FiscalizationService, command: FinishTransactionCommand):
@@ -167,14 +161,8 @@ def _signiere(service: FiscalizationService, command: FinishTransactionCommand):
     waehrend der Aufrufer andere Positionen bucht.
     """
     brutto = sum((line.gross_amount for line in command.lines), Decimal("0"))
-    frueher = service.db.execute(
-        text(
-            "SELECT gross_total FROM domain_docflow.pos_fiscal_transactions "
-            "WHERE tenant_id = :tid AND transaction_id = :tx"
-        ),
-        {"tid": service.tenant_id, "tx": command.transaction_id},
-    ).first()
-    if frueher is not None and frueher[0] is not None and not _gleich(Decimal(str(frueher[0])), brutto):
+    frueher = service.stored_transaction(command.transaction_id)
+    if frueher is not None and frueher["gross_total"] is not None             and not _gleich(Decimal(str(frueher["gross_total"])), brutto):
         raise HTTPException(409, "Diese Vorgangskennung wurde bereits mit anderen Betraegen signiert.")
     try:
         service.start(command)
