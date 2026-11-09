@@ -341,7 +341,8 @@ def _aktionen_im_zustand(svc: DocflowService, doc_id: str, variante: Belegvarian
     if status == "draft":
         aktionen.append(_aktion("bearbeiten", "Bearbeiten", "docflow.update"))
         aktionen.append(_aktion("freigeben", "Freigeben", "docflow.release"))
-    if status != "draft":
+    if status not in _ENDE | {"draft"}:
+        # Druckvermerk (GoBD); ein Entwurf ist noch kein Beleg, ein stornierter bietet nichts mehr an.
         aktionen.append(_aktion("drucken", "Drucken", "docflow.record_print"))
     if variante.belegart == "sales_order" and status == "open":
         aktionen.append(_aktion("bestaetigen", "Auftrag bestätigen", "docflow.confirm"))

@@ -406,6 +406,7 @@ def beleg_aktionen(variante: Belegvariante) -> list[dict[str, Any]]:
         "permission": "belege.bearbeiten", "localEffect": "download",
         # Druckvermerk (GoBD): zuerst das Kommando (zaehlt, Nachdruck mit Begruendung), dann das PDF.
         "commandEndpoint": _pfad(variante.belegart, "/actions/drucken"), "method": "POST",
+        "enabledWhen": zustandsfeld("drucken"),
         "kommando": "docflow.record_print",
         "inputFields": [{"key": "grund", "label": "Begründung (Pflicht beim Nachdruck)", "type": "text"}],
         "download": {"endpoint": _pfad(variante.belegart, "/druck"), "contentField": "pdf",

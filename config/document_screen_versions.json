@@ -5729,7 +5729,7 @@
       "1.8.0": {
         "baseHash": "17a51e623ce1c00d819b52245bbc680fb9d952e470cd0b5b9967889c35c82218",
         "baseVersion": "1.8.0",
-        "definitionHash": "dab7f364d81b4c41f1cbdc2defab383b70139d251aa62d86d45aae6d2c25b957",
+        "definitionHash": "2b077997f52b2de404ed79a62d1eaad8f6219a4374f63f2e5c7942629678bee9",
         "patch": {
           "actions": [
             {
@@ -6064,6 +6064,7 @@
                 "filenameField": "dateiname",
                 "mediaType": "application/pdf"
               },
+              "enabledWhen": "aktion_drucken",
               "inputFields": [
                 {
                   "key": "grund",
@@ -6646,7 +6647,7 @@
             "partnerrolle": "lieferant"
           }
         },
-        "patchHash": "a3177d8ae3fac5fd6818dbf921aedd5d1678edd8d11f2cc1a3abafb48d32a32f"
+        "patchHash": "a0c4186221cab94811b088af9bba30cf1ffe9eaaff1d04224943d34386aedbe1"
       }
     },
     "purchase_credit_memo": {
@@ -13575,7 +13576,7 @@
       "1.8.0": {
         "baseHash": "17a51e623ce1c00d819b52245bbc680fb9d952e470cd0b5b9967889c35c82218",
         "baseVersion": "1.8.0",
-        "definitionHash": "ea9d779f55550bc491e6f081fe7cea25f5ea01c4b9ddde9d7e073f82518a42c0",
+        "definitionHash": "7839160e233b529971862a14026c948918cb2d43a6940ef09d8e81cd1cebf9d1",
         "patch": {
           "actions": [
             {
@@ -13995,6 +13996,7 @@
                 "filenameField": "dateiname",
                 "mediaType": "application/pdf"
               },
+              "enabledWhen": "aktion_drucken",
               "inputFields": [
                 {
                   "key": "grund",
@@ -14600,7 +14602,7 @@
             "partnerrolle": "lieferant"
           }
         },
-        "patchHash": "52176fad24e85700494690386f8e423db1345c3c3fc159de44cc1c17b847d7b9"
+        "patchHash": "ee02f66a8e7abd97876e70e24976f194709338680feafa88fa455ea58cf289a3"
       }
     },
     "purchase_invoice": {
@@ -21929,7 +21931,7 @@
       "1.8.0": {
         "baseHash": "17a51e623ce1c00d819b52245bbc680fb9d952e470cd0b5b9967889c35c82218",
         "baseVersion": "1.8.0",
-        "definitionHash": "d6d416b73aedc441dc66fa295ddd85527be0c7830958e229a5558f85dd4c97ef",
+        "definitionHash": "893ed364ee046b7eaaafac27505a97d9855ed5aad1cd09e9bbc032b75cb76070",
         "patch": {
           "actions": [
             {
@@ -22396,6 +22398,7 @@
                 "filenameField": "dateiname",
                 "mediaType": "application/pdf"
               },
+              "enabledWhen": "aktion_drucken",
               "inputFields": [
                 {
                   "key": "grund",
@@ -23061,7 +23064,7 @@
             "partnerrolle": "lieferant"
           }
         },
-        "patchHash": "92e0afe4f55e8ddf76829ae74a5609772039631efdecef4f074dc17b57c5307a"
+        "patchHash": "dd2d572feaad6fb90308a725f6dbd1ba11fa7347f461409c575408d635278e8c"
       }
     },
     "purchase_order": {
@@ -29894,7 +29897,7 @@
       "1.8.0": {
         "baseHash": "17a51e623ce1c00d819b52245bbc680fb9d952e470cd0b5b9967889c35c82218",
         "baseVersion": "1.8.0",
-        "definitionHash": "239e0099bcb342e2e2fa5bbe71a55ddafd7674e8e82c72f03983b90df27a63a2",
+        "definitionHash": "752309776445a532aa88d8a6c0227c81c77ae4d079be5dfd3e08821fe430c049",
         "patch": {
           "actions": [
             {
@@ -30320,6 +30323,7 @@
                 "filenameField": "dateiname",
                 "mediaType": "application/pdf"
               },
+              "enabledWhen": "aktion_drucken",
               "inputFields": [
                 {
                   "key": "grund",
@@ -31078,7 +31082,7 @@
             "partnerrolle": "lieferant"
           }
         },
-        "patchHash": "9a371a5a0c9daf50748b601eb2381253b6827841680e8dde78ce32850c69624e"
+        "patchHash": "7ed39630282b4d73ff032c7170bc52fcd7c55bf7bdd88b9fdbac9d2016f43559"
       }
     },
     "sales_credit_memo": {
@@ -37902,7 +37906,7 @@
       "1.8.0": {
         "baseHash": "17a51e623ce1c00d819b52245bbc680fb9d952e470cd0b5b9967889c35c82218",
         "baseVersion": "1.8.0",
-        "definitionHash": "c1c8afa6c19d9afb4ca4df0d303e463c1740932578ae247c1b6722e9be34296d",
+        "definitionHash": "d917d9d213cab068e24c714eaed1c178284ed89be4eddaedd016bed20502ed39",
         "patch": {
           "actions": [
             {
@@ -38317,6 +38321,7 @@
                 "filenameField": "dateiname",
                 "mediaType": "application/pdf"
               },
+              "enabledWhen": "aktion_drucken",
               "inputFields": [
                 {
                   "key": "grund",
@@ -38912,7 +38917,7 @@
             "partnerrolle": "kunde"
           }
         },
-        "patchHash": "cf28622b6bcdc4ef3adc3994cc239d989db781c3e9a8350f12803ed2aea4f3fd"
+        "patchHash": "ded99c3fdfc9f70d09e6e42136645ef89f46fa45ae02d9814ac89ec47b6c7b65"
       }
     },
     "sales_delivery": {
@@ -44599,7 +44604,7 @@
       "1.8.0": {
         "baseHash": "17a51e623ce1c00d819b52245bbc680fb9d952e470cd0b5b9967889c35c82218",
         "baseVersion": "1.8.0",
-        "definitionHash": "f9910f129ceefe2ffce3db8efa8549899167478a89350f92229ed619e6680f88",
+        "definitionHash": "da8d49ba8f00a6d0ecef88c04e5fb7034e446dd39b60f9afae373fca5744bfb6",
         "patch": {
           "actions": [
             {
@@ -44952,6 +44957,7 @@
                 "filenameField": "dateiname",
                 "mediaType": "application/pdf"
               },
+              "enabledWhen": "aktion_drucken",
               "inputFields": [
                 {
                   "key": "grund",
@@ -45573,7 +45579,7 @@
             "partnerrolle": "kunde"
           }
         },
-        "patchHash": "7e744dc6fceb67f442b046cb69a64c637990e14195e88158ca4d7f5754e6a0df"
+        "patchHash": "2c1a472c5a9a274344c4febaa6b3d17cd158e13c450f05bd3805c1d0a165b24d"
       }
     },
     "sales_invoice": {
@@ -52797,7 +52803,7 @@
       "1.8.0": {
         "baseHash": "17a51e623ce1c00d819b52245bbc680fb9d952e470cd0b5b9967889c35c82218",
         "baseVersion": "1.8.0",
-        "definitionHash": "391732e9d724236cabc947b999d03bdccaa589ed6b9e1a1ebf3be58204b2fdb2",
+        "definitionHash": "d546dd873e802ec2abcabd96b1397fc8da086e3eccb2ee0205c798a97bb10813",
         "patch": {
           "actions": [
             {
@@ -53259,6 +53265,7 @@
                 "filenameField": "dateiname",
                 "mediaType": "application/pdf"
               },
+              "enabledWhen": "aktion_drucken",
               "inputFields": [
                 {
                   "key": "grund",
@@ -53914,7 +53921,7 @@
             "partnerrolle": "kunde"
           }
         },
-        "patchHash": "3759bf05590915d2e6ab6c12bae23bb124453a6aa89d555a0b798ce9e8f58793"
+        "patchHash": "e777c6f3b8eb6b02e8ee907fca93ff95a6cb246743b3b6de9ea710a0313ef38a"
       }
     },
     "sales_offer": {
@@ -60450,7 +60457,7 @@
       "1.8.0": {
         "baseHash": "17a51e623ce1c00d819b52245bbc680fb9d952e470cd0b5b9967889c35c82218",
         "baseVersion": "1.8.0",
-        "definitionHash": "232555f5da541ee0dca676c9306426651c232e78917f917a243c39eeb9751dea",
+        "definitionHash": "9cba75223c49c9558fcfdd623dc723d319700d91b7346caab83527a9b4678e02",
         "patch": {
           "actions": [
             {
@@ -60848,6 +60855,7 @@
                 "filenameField": "dateiname",
                 "mediaType": "application/pdf"
               },
+              "enabledWhen": "aktion_drucken",
               "inputFields": [
                 {
                   "key": "grund",
@@ -61595,7 +61603,7 @@
             "partnerrolle": "kunde"
           }
         },
-        "patchHash": "ede64586b1501e35d27e090d2279c3f6c64f0df768cc078698f6986103c9aff9"
+        "patchHash": "9d3ce98fa1f886dba14b88853ec570036567eb2d9f152a655649fea6b900c2e7"
       }
     },
     "sales_order": {
@@ -68342,7 +68350,7 @@
       "1.8.0": {
         "baseHash": "17a51e623ce1c00d819b52245bbc680fb9d952e470cd0b5b9967889c35c82218",
         "baseVersion": "1.8.0",
-        "definitionHash": "d159835fed39f84d65807fe307e0ccefd121ecac67a82abe5e8289e164226b9f",
+        "definitionHash": "a39765cc87d5cf1180023dc5336ebc4c79124b32d2646a522ccf93669890a47c",
         "patch": {
           "actions": [
             {
@@ -68782,6 +68790,7 @@
                 "filenameField": "dateiname",
                 "mediaType": "application/pdf"
               },
+              "enabledWhen": "aktion_drucken",
               "inputFields": [
                 {
                   "key": "grund",
@@ -69530,7 +69539,7 @@
             "partnerrolle": "kunde"
           }
         },
-        "patchHash": "33520b6ce635b29ef27a19da66c2b8e21d91c2bc93b31c1206603e68d6cccc75"
+        "patchHash": "4730dcce656b6907b6c5d03d1d4100153180b62d4aabb9ae78aa0844c51c3498"
       }
     }
   }
