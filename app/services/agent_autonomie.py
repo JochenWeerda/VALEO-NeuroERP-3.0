@@ -20,12 +20,14 @@ from __future__ import annotations
 
 import hashlib
 import json
+from contextlib import contextmanager
+from contextvars import ContextVar
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Iterator, Optional
 from uuid import uuid4
 
 from sqlalchemy import text
@@ -35,6 +37,49 @@ from app.core.exceptions import ConflictError, ValidationFailedError
 
 POLITIK_PFAD = Path(__file__).resolve().parents[2] / "config" / "agent_autonomy_policy.yaml"
 QUALITAETS_ENTZUG = "qualitaetsmodell"
+
+
+# ── Wer handelt: Agentenkontext und Einzelfreigaben ──────────────────────────────────────────────────────────────
+
+_AGENT: ContextVar[Optional[str]] = ContextVar("valeo_handelnder_agent", default=None)
+_EINZELFREIGABEN: ContextVar[frozenset[str]] = ContextVar("valeo_einzelfreigaben", default=frozenset())
+
+
+@contextmanager
+def als_agent(agent_id: Optional[str]) -> Iterator[None]:
+    """Der Block laeuft fuer einen Agenten (MCP-Werkzeugaufruf). Ohne Kennung aendert sich nichts."""
+    marke = _AGENT.set(agent_id) if agent_id else None
+    try:
+        yield
+    finally:
+        if marke is not None:
+            _AGENT.reset(marke)
+
+
+@contextmanager
+def menschlich_freigegeben(vorgang: str) -> Iterator[None]:
+    """Ein Mensch hat genau diesen Vorgang im Einzelfall freigegeben (freigegebener Vorschlag): kein Autonomiefall."""
+    marke = _EINZELFREIGABEN.set(_EINZELFREIGABEN.get() | {vorgang})
+    try:
+        yield
+    finally:
+        _EINZELFREIGABEN.reset(marke)
+
+
+def handelnder_agent(akteur: Optional[str] = None) -> Optional[str]:
+    """Die Agentenkennung, wenn ein Agent handelt - aus dem MCP-Kontext oder der geprueften Identitaet."""
+    agent = _AGENT.get()
+    if agent:
+        return agent
+    try:
+        from app.core.identity_context import current_identity
+
+        claims = dict(current_identity().claims)
+    except Exception:  # noqa: BLE001 - keine gepruefte Identitaet (Hintergrundlauf, Test): kein Agent erkennbar
+        return None
+    if str(claims.get("identity_type") or "").lower() == "agent" or claims.get("agent_id") or claims.get("act"):
+        return str(claims.get("agent_id") or claims.get("sub") or akteur or "agent")
+    return None
 
 
 # ── Politik ──────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -295,7 +340,7 @@ class Entscheidung:
 
 def entscheide(db: Session, tenant: str, *, agent_id: str, faehigkeit: str, vorgang: Optional[str],
                brutto: Decimal, fachpruefung: Optional[str], risiko: Any, einwaende: list[str],
-               politik: Optional[Politik] = None) -> Entscheidung:
+               politik: Optional[Politik] = None, protokoll: str = "einheit") -> Entscheidung:
     """``fachpruefung``: ``None`` bestanden, sonst der Pruefgrund. ``risiko``: ``Anforderung`` der Risiko-Engine."""
     politik = politik or lade_politik()
     gruende: list[str] = []
@@ -306,32 +351,43 @@ def entscheide(db: Session, tenant: str, *, agent_id: str, faehigkeit: str, vorg
     elif regel is None:
         ergebnis, gruende = "freigabe", [f"Die Autonomiepolitik kennt {faehigkeit} nicht."]
     else:
-        if politik_freigabe(db, tenant, politik) is None:
-            gruende.append(f"Autonomiepolitik {politik.version} ist fuer diesen Mandanten nicht fachlich freigegeben.")
+        a0, a1, _q = a2_gruende(db, tenant, agent_id, faehigkeit, politik)  # Stufe A2 - dieselbe Quelle wie vertrauen
+        gruende += a0 + a1
         aktiv = delegation(db, tenant, agent_id, faehigkeit)
-        if aktiv is None:
-            gruende.append("Keine gueltige Delegation dieser Faehigkeit an den Agenten.")
-        else:
-            if aktiv["valid_until"] and aktiv["valid_until"] < datetime.now(timezone.utc):
-                gruende.append("Die Delegation ist abgelaufen.")
-            if aktiv["max_brutto"] is not None and brutto > Decimal(str(aktiv["max_brutto"])):
-                gruende.append(f"Betrag {brutto} EUR ueber der delegierten Grenze {aktiv['max_brutto']} EUR.")
+        if aktiv is not None and aktiv["max_brutto"] is not None and brutto > Decimal(str(aktiv["max_brutto"])):
+            gruende.append(f"Betrag {brutto} EUR ueber der delegierten Grenze {aktiv['max_brutto']} EUR.")
         if brutto > Decimal(str(regel.get("hoechstbetrag_brutto") or "0")):
             gruende.append(f"Betrag {brutto} EUR ueber der Politikgrenze {regel.get('hoechstbetrag_brutto')} EUR.")
-        q = pruefe_qualitaet_und_entziehe(db, tenant, agent_id, faehigkeit, politik)
-        gruende += [f"Qualitaet: {v}" for v in q.verletzungen]
         if getattr(risiko, "zweitfreigabe", True):
             gruende.append(f"Die Risiko-Engine verlangt eine unabhaengige Freigabe ({stufe}): "
                            f"{getattr(risiko, 'grund', '')}".strip())
         gruende += [f"Einwand Pruefagent: {e}" for e in einwaende]
         ergebnis = "freigabe" if gruende else "autonom"
-    db.execute(text(
-        "INSERT INTO domain_shared.agent_autonomy_decisions (id, tenant_id, agent_id, capability, subject_id, "
-        "policy_version, policy_hash, outcome, risk, reasons) VALUES (:id, :t, :a, :c, :s, :v, :h, :o, :r, "
-        "CAST(:g AS jsonb))"),
-        {"id": str(uuid4()), "t": tenant, "a": agent_id, "c": faehigkeit, "s": vorgang, "v": politik.version,
-         "h": politik.abdruck, "o": ergebnis, "r": stufe, "g": json.dumps(gruende, ensure_ascii=False)})
+    zeile = {"id": str(uuid4()), "t": tenant, "a": agent_id, "c": faehigkeit, "s": vorgang, "v": politik.version,
+             "h": politik.abdruck, "o": ergebnis, "r": stufe, "g": json.dumps(gruende, ensure_ascii=False)}
+    if protokoll == "getrennt" and ergebnis != "autonom":
+        _protokolliere_getrennt(db, tenant, zeile)
+    elif protokoll != "keins":
+        db.execute(text(_ENTSCHEIDUNG_SQL), zeile)
     return Entscheidung(ergebnis=ergebnis, gruende=gruende, risiko=stufe, politik_version=politik.version)
+
+
+_ENTSCHEIDUNG_SQL = (
+    "INSERT INTO domain_shared.agent_autonomy_decisions (id, tenant_id, agent_id, capability, subject_id, "
+    "policy_version, policy_hash, outcome, risk, reasons) VALUES (:id, :t, :a, :c, :s, :v, :h, :o, :r, CAST(:g AS jsonb))")
+
+
+def _protokolliere_getrennt(db: Session, tenant: str, zeile: dict[str, Any]) -> None:
+    """Eine Ablehnung bleibt protokolliert, auch wenn das Kommando danach zurueckrollt (eigene Verbindung, RLS)."""
+    bindung = db.get_bind()
+    maschine = getattr(bindung, "engine", bindung)
+    try:
+        with maschine.connect() as verbindung:
+            with verbindung.begin():
+                verbindung.execute(text("SELECT set_config('app.tenant_id', :t, true)"), {"t": tenant})
+                verbindung.execute(text(_ENTSCHEIDUNG_SQL), zeile)
+    except Exception:  # noqa: BLE001 - Tabelle nur in der offenen Transaktion (frische Migration im Test): dort eintragen
+        db.execute(text(_ENTSCHEIDUNG_SQL), zeile)
 
 
 # ── Vertrauensstufe (Agent Trust) ────────────────────────────────────────────────────────────────────────────────
@@ -344,6 +400,26 @@ STUFEN = {
 }
 
 
+def a2_gruende(db: Session, tenant: str, agent_id: str, faehigkeit: str,
+               politik: Optional[Politik] = None) -> tuple[list[str], list[str], Qualitaet]:
+    """Die eine Quelle fuer Stufe A2: (Gruende fuer A0, Gruende fuer A1, Qualitaet). Leer = A2.
+
+    ``vertrauen`` (Anzeige) und ``entscheide`` (Durchsetzung) lesen beide hier - die angezeigte Stufe und die
+    durchgesetzte Entscheidung koennen nicht auseinanderlaufen.
+    """
+    politik = politik or lade_politik()
+    a0: list[str] = []
+    if politik_freigabe(db, tenant, politik) is None:
+        a0.append(f"Autonomiepolitik {politik.version} ist fuer diesen Mandanten nicht fachlich freigegeben.")
+    aktiv = delegation(db, tenant, agent_id, faehigkeit)
+    if aktiv is None:
+        a0.append("Keine gueltige Delegation dieser Faehigkeit an den Agenten.")
+    elif aktiv["valid_until"] and aktiv["valid_until"] < datetime.now(timezone.utc):
+        a0.append("Die Delegation ist abgelaufen.")
+    q = pruefe_qualitaet_und_entziehe(db, tenant, agent_id, faehigkeit, politik)
+    return a0, [f"Qualitaet: {v}" for v in q.verletzungen], q
+
+
 def vertrauen(db: Session, tenant: str, agent_id: str, faehigkeit: str, politik: Optional[Politik] = None) -> dict:
     """Die Vertrauensstufe eines Agenten fuer eine Faehigkeit - abgeleitet, nie gesetzt (Agent Trust Engine).
 
@@ -351,16 +427,11 @@ def vertrauen(db: Session, tenant: str, agent_id: str, faehigkeit: str, politik:
     (die Risiko-Engine verlangt eine unabhaengige Freigabe). Ein Agent steht hoechstens auf A2.
     """
     politik = politik or lade_politik()
-    q = qualitaet(db, tenant, agent_id, faehigkeit, politik)
-    aktiv = delegation(db, tenant, agent_id, faehigkeit)
-    if politik_freigabe(db, tenant, politik) is None or aktiv is None:
-        stufe = "A0"
-    elif not q.im_rahmen:
-        stufe = "A1"
-    else:
-        stufe = "A2"
+    a0, a1, q = a2_gruende(db, tenant, agent_id, faehigkeit, politik)
+    stufe = "A0" if a0 else ("A1" if a1 else "A2")
     return {"agent_id": agent_id, "faehigkeit": faehigkeit, "stufe": stufe, "bedeutung": STUFEN[stufe],
-            "politik_version": politik.version, "delegation": aktiv, "qualitaet": q.als_dict()}
+            "gruende": a0 + a1, "politik_version": politik.version,
+            "delegation": delegation(db, tenant, agent_id, faehigkeit), "qualitaet": q.als_dict()}
 
 
 # ── Lernende Autonomie-Governance ────────────────────────────────────────────────────────────────────────────────
@@ -408,3 +479,87 @@ def lernvorschlaege(db: Session, tenant: str, politik: Optional[Politik] = None)
                 "begruendung": f"{knapp} Vorgaenge in 90 Tagen nur wegen der Politikgrenze an Menschen gegangen.",
                 "belege": {"vorgaenge_ueber_grenze": int(knapp)}})
     return vorschlaege
+
+
+
+# ── Zentrales Tor in der Freigabe-Engine ─────────────────────────────────────────────────────────────────────────
+
+class AutonomieVerweigert(ConflictError):
+    """Ein Agent darf diesen Vorgang nicht autonom ausfuehren; ``gruende`` nennt warum."""
+
+    def __init__(self, gruende: list[str], ergebnis: str = "freigabe") -> None:
+        self.gruende, self.ergebnis = gruende, ergebnis
+        super().__init__("Keine autonome Ausfuehrung durch einen Agenten: " + "; ".join(gruende))
+
+
+def faehigkeit_fuer(belegart: str, aktion: str, politik: Optional[Politik] = None) -> Optional[str]:
+    politik = politik or lade_politik()
+    for name, regel in (politik.inhalt.get("faehigkeiten") or {}).items():
+        if regel.get("belegart") == belegart and regel.get("aktion") == aktion:
+            return name
+    return None
+
+
+def tor(db: Session, tenant: str, vorgang: Any, aktion: str, bedarf: Any, akteur: Optional[str],
+        *, trocken: bool = False) -> None:
+    """Von ``FreigabeEngine.verlange_fuer`` vor jeder freigaberelevanten Ausfuehrung gerufen - gleich ueber welchen Weg.
+
+    * Kein Agent: nichts zu tun (FIN-CONTROL-001 unveraendert).
+    * Ein Mensch hat genau diesen Vorgang freigegeben (Vorschlag, Einzelfreigabe): kein Autonomiefall.
+    * Verlangt die Risiko-Engine eine unabhaengige Freigabe, prueft die Engine sie selbst (Mensch, verbraucht).
+    * Sonst Routine: Ein Agent braucht Stufe A2 fuer die passende Faehigkeit, Grenzen, keinen Pruefagenten-Einwand.
+      Fuer Belegart und Aktion ohne Faehigkeit in der Politik fuehrt kein Agent aus (fail-closed).
+    """
+    agent = handelnder_agent(akteur)
+    if agent is None or str(vorgang.subject_id) in _EINZELFREIGABEN.get() or getattr(bedarf, "zweitfreigabe", False):
+        return
+    from app.services import agent_pruefagenten
+
+    politik = lade_politik()
+    faehigkeit = faehigkeit_fuer(str(vorgang.belegart), aktion, politik)
+    if faehigkeit is None:
+        gruende = [f"Die Autonomiepolitik erlaubt Agenten {vorgang.belegart}/{aktion} nicht."]
+        if trocken:
+            raise AutonomieVerweigert(gruende, "abgelehnt")
+        _protokolliere_getrennt(db, tenant, {
+            "id": str(uuid4()), "t": tenant, "a": agent, "c": f"{vorgang.belegart}.{aktion}", "s": str(vorgang.subject_id),
+            "v": politik.version, "h": politik.abdruck, "o": "abgelehnt", "r": getattr(bedarf, "risiko", None),
+            "g": json.dumps(gruende, ensure_ascii=False)})
+        raise AutonomieVerweigert(gruende, "abgelehnt")
+    regel = politik.faehigkeit(faehigkeit) or {}
+    einwaende = agent_pruefagenten.pruefe(db, list(regel.get("pruefagenten") or []), agent_pruefagenten.Pruefkontext(
+        tenant=tenant, faehigkeit=faehigkeit, agent_id=agent, vorgang=str(vorgang.subject_id),
+        brutto=Decimal(str(vorgang.brutto)), daten=dict(vorgang.inhalt or {})))
+    entscheidung = entscheide(db, tenant, agent_id=agent, faehigkeit=faehigkeit, vorgang=str(vorgang.subject_id),
+                              brutto=Decimal(str(vorgang.brutto)), fachpruefung=None, risiko=bedarf,
+                              einwaende=einwaende, politik=politik, protokoll="keins" if trocken else "getrennt")
+    if trocken:
+        if not entscheidung.autonom:
+            raise AutonomieVerweigert(entscheidung.gruende)
+        return
+    if not entscheidung.autonom:
+        if einwaende:
+            _messpunkt_getrennt(db, tenant, agent, faehigkeit, "einwand", str(vorgang.subject_id), {"einwaende": einwaende})
+        raise AutonomieVerweigert(entscheidung.gruende)
+    erfasse(db, tenant, agent_id=agent, faehigkeit=faehigkeit, art="ausgefuehrt", durch="autonomie",
+            vorgang=str(vorgang.subject_id), detail={"brutto": str(vorgang.brutto), "risk": entscheidung.risiko})
+    for befund in getattr(bedarf, "warnungen", ()) or ():
+        erfasse(db, tenant, agent_id=agent, faehigkeit=faehigkeit, art="befund", durch="kontroll_engine",
+                vorgang=str(vorgang.subject_id), detail={"code": befund.code, "text": befund.text})
+
+
+def _messpunkt_getrennt(db: Session, tenant: str, agent: str, faehigkeit: str, art: str, vorgang: str,
+                        detail: dict[str, Any]) -> None:
+    bindung = db.get_bind()
+    maschine = getattr(bindung, "engine", bindung)
+    werte = {"id": str(uuid4()), "t": tenant, "a": agent, "c": faehigkeit, "k": art, "s": vorgang,
+             "d": json.dumps(detail, default=str), "by": "pruefagenten"}
+    sql = ("INSERT INTO domain_shared.agent_quality_events (id, tenant_id, agent_id, capability, kind, subject_id, "
+           "detail, recorded_by) VALUES (:id, :t, :a, :c, :k, :s, CAST(:d AS jsonb), :by)")
+    try:
+        with maschine.connect() as verbindung:
+            with verbindung.begin():
+                verbindung.execute(text("SELECT set_config('app.tenant_id', :t, true)"), {"t": tenant})
+                verbindung.execute(text(sql), werte)
+    except Exception:  # noqa: BLE001 - wie _protokolliere_getrennt
+        db.execute(text(sql), werte)

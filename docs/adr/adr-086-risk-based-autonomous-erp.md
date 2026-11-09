@@ -82,7 +82,32 @@ geschrieben und braucht eine neue fachliche Freigabe (`GET /api/v1/agenten/auton
 Ausweitung der Autonomie eine menschliche, dokumentierte Entscheidung - und jede Einschraenkung kann sofort durch
 Widerruf der Delegation oder Politik wirken.
 
-### 5. Erste Faehigkeit: `sales.gutschrift.buchen`
+### 5. Durchsetzung an genau einer Stelle: das Tor in der Freigabe-Engine
+
+Pruefung vom 09.11.2026 (Auftrag: "konsequente Durchsetzung durch die zentrale Policy Engine"). Befund im ersten
+Stand: Entschieden wurde nur im MCP-Werkzeug `sales.gutschrift.buchen`. Ein Agententoken mit Buchungsrolle haette ueber
+`POST /api/v1/docflow/{id}/post` (oder jeden anderen Buchungsweg) gebucht, ohne Politik, Delegation, Vertrauensstufe
+und Qualitaetsmodell - die Risiko-Engine allein haette die Routine erlaubt. Die Maskenaktionen der Belegmaske waren
+fuer Agenten gesperrt (`adapter_nur_mensch`), der REST-Weg nicht.
+
+Behoben: `agent_autonomie.tor` wird von `FreigabeEngine.verlange_fuer` gerufen, die jeder freigaberelevante Vorgang
+jedes Bereichs passiert (DocFlow, Eingangsrechnung, Hauptbuch, Zahlungslauf, Einkaufsbelege) - gleich ob REST, Maske,
+CLI, MCP oder Kernel.
+
+* **Wer handelt:** Ein Agent wird am MCP-Werkzeugkontext (jeder Werkzeugaufruf, ausser die Identitaet weist einen
+  Menschen aus) oder an seinem Token (`identity_type=agent`, `agent_id`, `act`) erkannt. Menschen: unveraendert.
+* **Routine (Risiko-Engine ohne Freigabebedarf):** Der Agent braucht Stufe A2 fuer die Faehigkeit der Belegart und
+  Aktion, Grenzen und keinen Pruefagenten-Einwand. **Belegart/Aktion ohne Faehigkeit in der Politik: kein Agent
+  fuehrt aus (fail-closed).**
+* **Kritisch (R3/R4):** wie bisher - die Engine verlangt und verbraucht die Freigabe einer unabhaengigen Person.
+* **Einzelfreigabe:** Ein von einem Menschen freigegebener Vorschlag (`menschlich_freigegeben`) ist kein
+  Autonomiefall.
+* **Eine Quelle:** Vertrauensstufe (`vertrauen`) und Durchsetzung (`entscheide`) lesen dieselben Voraussetzungen
+  (`a2_gruende`); angezeigte Stufe und Entscheidung koennen nicht auseinanderlaufen (Test).
+* **Protokoll:** Eine Ablehnung wird ueber eine eigene Verbindung protokolliert und bleibt, auch wenn das Kommando
+  zurueckrollt; eine autonome Ausfuehrung steht mit Messpunkt in derselben Transaktion wie die Buchung.
+
+### 6. Erste Faehigkeit: `sales.gutschrift.buchen`
 
 `sales.gutschrift.buchen` mit `credit_note_id` bucht autonom, wenn die Entscheidung "autonom" lautet; sonst 409 mit
 den Gruenden. Mit `proposal_id` bleibt der Weg aus menschlich freigegebenem Vorschlag unveraendert. Startwerte der
@@ -106,4 +131,6 @@ Politikfreigabe (Rolle, Person, nicht die Autorin); geaenderte Fassung nicht fre
 Rechts unter der Politikgrenze; Routinegutschrift autonom mit Protokoll und genau einer Buchung; Grenze, Risiko-Engine
 und Pruefagent fuehren zum Menschen; ausgefallener oder befangener Pruefagent ist ein Einwand; Korrekturen und
 fehlgeschlagene Tests entziehen die Delegation; kein Agent bewertet sich selbst; Protokoll unveraenderlich;
-Vertrauensstufe; Lernvorschlaege aendern die Politik nicht.
+Vertrauensstufe; Lernvorschlaege aendern die Politik nicht; der direkte Buchungsweg (ohne MCP) fragt das Tor; ohne
+Faehigkeit bucht kein Agent und die Ablehnung bleibt protokolliert; ein Mensch bucht wie bisher; ein freigegebener
+Vorschlag ist kein Autonomiefall; angezeigte Stufe und Durchsetzung stimmen ueberein; Agentenerkennung am Token.

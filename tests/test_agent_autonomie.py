@@ -147,7 +147,9 @@ def _bereit(welt, *, max_brutto: float | None = None, test: str = "test_bestande
 
 
 def _gruende(antwort) -> list[str]:
-    return antwort.json()["detail"]["gruende"]
+    """Gruende des zentralen Tors - oder die Meldung der Risiko-Engine, wenn sie selbst eine Freigabe verlangt."""
+    detail = antwort.json()["detail"]
+    return detail["gruende"] if isinstance(detail, dict) else [str(detail)]
 
 
 # ── Ohne Politikfreigabe keine Autonomie ─────────────────────────────────────────────────────────────────────────
@@ -240,7 +242,7 @@ def test_verlangt_die_risiko_engine_eine_freigabe_bucht_kein_agent(welt, monkeyp
     monkeypatch.setattr(DocflowFreigabe, "anforderung", lambda self, v, aktion: kritisch)
     gutschrift = _gutschrift(welt, 100)
     antwort = _buche(welt, gutschrift)
-    assert antwort.status_code == 409 and any("Risiko-Engine verlangt" in g for g in _gruende(antwort))
+    assert antwort.status_code == 409 and any("Freigabe erforderlich (R3)" in g for g in _gruende(antwort))
     assert _status(welt, gutschrift) == "draft"
 
 
@@ -366,3 +368,95 @@ def test_die_governance_lernt_aber_die_politik_aendert_sich_nicht_selbst(welt):
     # Kein Vorschlag wirkt: Politik und Freigabe bleiben, bis ein Mensch eine neue Fassung freigibt.
     assert agent_autonomie.lade_politik().abdruck == abdruck_vorher
     assert agent_autonomie.politik_freigabe(db, t) is not None
+
+
+# ── Durchsetzung an der zentralen Stelle (Freigabe-Engine) - nicht nur im MCP-Werkzeug ─────────────────────────
+
+
+def _direkt_buchen(welt, beleg: str, *, als: str | None):
+    """Der Buchungsweg ohne MCP-Werkzeug (wie REST /docflow/{id}/post): DocFlow -> Freigabe-Engine -> Tor."""
+    from app.api.v1.schemas.docflow_schemas import DocflowPostRequest
+    from app.services.agent_autonomie import als_agent
+    from app.services.docflow_service import DocflowService
+
+    with als_agent(als):
+        return DocflowService(welt["db"], welt["mandant"], als or "fibu-1").post_document(
+            beleg, DocflowPostRequest(idempotency_key=f"direkt-{beleg}", posted_by=als or "fibu-1"))
+
+
+def test_auch_der_direkte_buchungsweg_fragt_die_autonomiepolitik(welt):
+    from app.services.agent_autonomie import AutonomieVerweigert
+
+    gutschrift = _gutschrift(welt, 100)
+    with pytest.raises(AutonomieVerweigert) as fehler:
+        _direkt_buchen(welt, gutschrift, als=AGENT)  # z. B. ein Agententoken mit Buchungsrolle auf REST
+    assert any("nicht fachlich freigegeben" in g for g in fehler.value.gruende)
+    welt["db"].rollback()
+    assert _status(welt, gutschrift) == "draft"
+
+
+def test_ein_mensch_bucht_dieselbe_gutschrift_wie_bisher(welt):
+    gutschrift = _gutschrift(welt, 100)
+    _direkt_buchen(welt, gutschrift, als=None)  # FIN-CONTROL-001 unveraendert: Routine ohne zweite Person
+    assert _status(welt, gutschrift) == "posted"
+
+
+def test_ohne_faehigkeit_in_der_politik_bucht_kein_agent_und_die_ablehnung_bleibt(welt):
+    from app.services.agent_autonomie import AutonomieVerweigert
+
+    _bereit(welt)
+    rechnung = _rechnung(welt, "RE-AU-2", 119.0)  # Ausgangsrechnung: keine Faehigkeit in der Politik
+    with pytest.raises(AutonomieVerweigert) as fehler:
+        _direkt_buchen(welt, rechnung, als=AGENT)
+    assert fehler.value.ergebnis == "abgelehnt" and "sales_invoice/post" in fehler.value.gruende[0]
+    welt["db"].rollback()  # das Kommando rollt zurueck - das Protokoll der Ablehnung nicht
+    engine = sa.create_engine(DB_URL)
+    with engine.connect() as getrennt:
+        zahl = getrennt.execute(sa.text("SELECT count(*) FROM domain_shared.agent_autonomy_decisions WHERE "
+                                        "tenant_id = :t AND subject_id = :s AND outcome = 'abgelehnt'"),
+                                {"t": welt["mandant"], "s": rechnung}).scalar()
+    engine.dispose()
+    assert zahl == 1
+
+
+def test_ein_menschlich_freigegebener_vorgang_ist_kein_autonomiefall(welt):
+    from app.services.agent_autonomie import menschlich_freigegeben
+
+    gutschrift = _gutschrift(welt, 100)
+    with menschlich_freigegeben(gutschrift):
+        _direkt_buchen(welt, gutschrift, als=AGENT)  # ohne Politik und Delegation: ein Mensch hat es freigegeben
+    assert _status(welt, gutschrift) == "posted"
+
+
+def test_angezeigte_stufe_und_durchsetzung_stimmen_ueberein(welt):
+    from app.services.agent_autonomie import AutonomieVerweigert, vertrauen
+
+    def stufe() -> str:
+        return vertrauen(welt["db"], welt["mandant"], AGENT, "sales.gutschrift.buchen")["stufe"]
+
+    def darf() -> bool:
+        gutschrift = _gutschrift(welt, 100)
+        try:
+            with welt["db"].begin_nested():
+                _direkt_buchen(welt, gutschrift, als=AGENT)
+                raise RuntimeError("zurueck")  # nur pruefen, nicht behalten
+        except AutonomieVerweigert:
+            return False
+        except RuntimeError:
+            return True
+
+    assert (stufe(), darf()) == ("A0", False)
+    _bereit(welt)
+    assert (stufe(), darf()) == ("A2", True)
+
+
+def test_ein_agent_wird_auch_an_seinem_token_erkannt(monkeypatch):
+    from types import SimpleNamespace
+
+    import app.core.identity_context as kontext
+    from app.services.agent_autonomie import handelnder_agent
+
+    monkeypatch.setattr(kontext, "current_identity", lambda: SimpleNamespace(claims={"sub": "a-9", "identity_type": "agent"}))
+    assert handelnder_agent() == "a-9"
+    monkeypatch.setattr(kontext, "current_identity", lambda: SimpleNamespace(claims={"sub": "m-1", "identity_type": "human"}))
+    assert handelnder_agent() is None

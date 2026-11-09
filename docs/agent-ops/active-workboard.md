@@ -20738,3 +20738,11 @@ config/agent_autonomy_policy.yaml, wirksam nur mit fachlicher Freigabe je Mandan
 Pruefagenten (nur Einwaende, fail-closed), lernende Governance (Vorschlaege, nie selbst wirksam), unveraenderliches
 Entscheidungsprotokoll. Erste Faehigkeit sales.gutschrift.buchen (credit_note_id = autonom, proposal_id = wie bisher).
 Migration agent_autonomie_20261109 (frisch geprueft auf valeo_probe_claude). Offen: Studio-Masken dafuer.
+ADR-086 Durchsetzungspruefung (09.11.2026): Befund - die Autonomie wurde nur im MCP-Werkzeug entschieden; ein
+Agententoken mit Buchungsrolle haette ueber REST /docflow/{id}/post an Politik, Delegation und Vertrauensstufe vorbei
+gebucht. Behoben: zentrales Tor agent_autonomie.tor in FreigabeEngine.verlange_fuer (jeder Bereich, jeder Zugang);
+Agent erkannt am MCP-Kontext oder Token; ohne Faehigkeit in der Politik fail-closed; Einzelfreigabe fuer freigegebene
+Vorschlaege; Vertrauensstufe und Durchsetzung aus einer Quelle (a2_gruende); Ablehnungen getrennt protokolliert.
+Tests: test_agent_autonomie 24/24, Regression Freigabe/DocFlow/MCP 5478 gruen.
+Rettungsbranch rettung/hauptbaum-reste-20261109: LKW-Dispositionszuweisung vollstaendig (Code, Tests, Abnahmenotiz,
+Bestandsaufnahme RETTUNG-LKW-DISPOSITION.md); inhaltsgleich mit codex/wip-rescue-20261023, keine neuere Fassung.

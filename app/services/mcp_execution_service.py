@@ -2396,8 +2396,11 @@ def _gutschrift_buchen(db: Session, request: ToolExecutionRequest, actor: str, t
             return {"success": True, "mode": request.mode, "approved": True,
                     "proposal_id": payload.proposal_id, **vorschau}
         try:
-            gebucht = _buche_gutschrift(db, tenant, credit_note_id, akteur=actor,
-                                        idempotenz=f"mcp-gutschrift-buchen-{payload.proposal_id}"[:120])
+            from app.services.agent_autonomie import menschlich_freigegeben
+
+            with menschlich_freigegeben(credit_note_id):  # ein Mensch hat genau diesen Vorschlag freigegeben
+                gebucht = _buche_gutschrift(db, tenant, credit_note_id, akteur=actor,
+                                            idempotenz=f"mcp-gutschrift-buchen-{payload.proposal_id}"[:120])
             meldung = (f"Gutschrift {vorschau['credit_note_number']} gebucht: netto {vorschau['netto']:.2f}, "
                        f"Umsatzsteuer {vorschau['steuer']:.2f}, brutto {vorschau['brutto']:.2f} "
                        f"(Buchung {gebucht.get('journal_entry_id') or gebucht.get('posting_id') or ''}).")
@@ -2448,14 +2451,11 @@ def _gutschrift_buchen(db: Session, request: ToolExecutionRequest, actor: str, t
 
 def _gutschrift_autonom_buchen(db: Session, request: ToolExecutionRequest, actor: str, tenant: str,
                                credit_note_id: str) -> dict:
-    """Autonome Buchung einer Gutschrift nach ADR-086 - nur, wenn alle Voraussetzungen erfuellt sind.
-
-    Voraussetzungen (``agent_autonomie.entscheide``): fachlich freigegebene Politik, Delegation an den Agenten,
-    Qualitaetsmodell im Rahmen, bestandene Fachpruefung, die Risiko-Engine verlangt keine unabhaengige Freigabe,
-    kein Einwand eines Pruefagenten. Sonst 409 mit den Gruenden; dann gilt der Vorschlagsweg (propose + Freigabe).
-    Jede Entscheidung und jede Buchung ist protokolliert; ein Agent gibt dabei nie etwas frei.
+    """Autonome Buchung einer Gutschrift (ADR-086). Entschieden wird an einer Stelle: im zentralen Tor der
+    Freigabe-Engine (``agent_autonomie.tor``), das jeder Buchungsweg passiert. Dieses Werkzeug prueft vorab nur die
+    Fachpruefung (Vorschau) und meldet die Gruende einer Ablehnung (409); dann gilt der Vorschlagsweg.
     """
-    from app.services import agent_autonomie, agent_pruefagenten
+    from app.services import agent_autonomie
     from app.services.docflow_freigabe import DocflowFreigabe
     from app.services.gutschrift_docflow import buche as _buche_gutschrift
     from app.services.gutschrift_docflow import vorschau as _buchungsvorschau
@@ -2475,56 +2475,46 @@ def _gutschrift_autonom_buchen(db: Session, request: ToolExecutionRequest, actor
             )
             if replayed is not None:
                 return replayed
-        politik = agent_autonomie.lade_politik()
         try:
             vorschau = _gutschrift_plan_vorschau(_buchungsvorschau(db, tenant, credit_note_id, actor))
-            fachpruefung = None
         except HTTPException as fehler:
             if fehler.status_code != 409:
                 raise
-            vorschau, fachpruefung = {"brutto": 0.0, "credit_note_number": credit_note_id}, str(fehler.detail)
-        brutto = Decimal(str(vorschau["brutto"]))
-        risiko = None
-        if fachpruefung is None:
-            engine = DocflowFreigabe(db, tenant)
-            risiko = engine.anforderung(engine.vorgang(credit_note_id, "post"), "post")
-        regel = politik.faehigkeit(faehigkeit) or {}
-        einwaende = [] if fachpruefung else agent_pruefagenten.pruefe(
-            db, list(regel.get("pruefagenten") or []), agent_pruefagenten.Pruefkontext(
-                tenant=tenant, faehigkeit=faehigkeit, agent_id=actor, vorgang=credit_note_id, brutto=brutto,
-                daten=vorschau))
-        if einwaende:
-            agent_autonomie.erfasse(db, tenant, agent_id=actor, faehigkeit=faehigkeit, art="einwand",
-                                    durch="pruefagenten", vorgang=credit_note_id, detail={"einwaende": einwaende})
-        entscheidung = agent_autonomie.entscheide(
-            db, tenant, agent_id=actor, faehigkeit=faehigkeit, vorgang=credit_note_id, brutto=brutto,
-            fachpruefung=fachpruefung, risiko=risiko, einwaende=einwaende, politik=politik)
-        if not entscheidung.autonom:
-            if fachpruefung:
-                agent_autonomie.erfasse(db, tenant, agent_id=actor, faehigkeit=faehigkeit, art="abgelehnt",
-                                        durch="fachpruefung", vorgang=credit_note_id, detail={"grund": fachpruefung})
-            db.commit()  # Entscheidung und Messpunkte bleiben, auch wenn nicht gebucht wird
-            raise HTTPException(409, {"message": "Keine autonome Buchung; Vorschlag mit menschlicher Freigabe noetig",
-                                      "outcome": entscheidung.ergebnis, "gruende": entscheidung.gruende})
+            agent_autonomie.erfasse(db, tenant, agent_id=actor, faehigkeit=faehigkeit, art="abgelehnt",
+                                    durch="fachpruefung", vorgang=credit_note_id, detail={"grund": str(fehler.detail)})
+            db.commit()
+            raise HTTPException(409, {"message": "Keine autonome Buchung: Fachpruefung nicht bestanden",
+                                      "outcome": "abgelehnt", "gruende": [f"Fachpruefung: {fehler.detail}"]}) from fehler
+        politik = agent_autonomie.lade_politik()
         if request.mode != "execute":
+            engine = DocflowFreigabe(db, tenant)
+            vorgang = engine.vorgang(credit_note_id, "post")
+            bedarf = engine.anforderung(vorgang, "post")
+            try:
+                with agent_autonomie.als_agent(actor):
+                    if bedarf.zweitfreigabe:
+                        raise agent_autonomie.AutonomieVerweigert(
+                            [f"Die Risiko-Engine verlangt eine unabhaengige Freigabe ({bedarf.risiko}): {bedarf.grund}"])
+                    agent_autonomie.tor(db, tenant, vorgang, "post", bedarf, actor, trocken=True)
+            except agent_autonomie.AutonomieVerweigert as fehler:
+                db.rollback()
+                raise HTTPException(409, {"message": "Keine autonome Buchung; Vorschlag mit menschlicher Freigabe noetig",
+                                          "outcome": fehler.ergebnis, "gruende": fehler.gruende}) from fehler
             db.rollback()
-            return {"success": True, "mode": request.mode, "autonom": True, "risk": entscheidung.risiko,
-                    "policy_version": entscheidung.politik_version, **vorschau}
-        gebucht = _buche_gutschrift(db, tenant, credit_note_id, akteur=actor,
-                                    idempotenz=f"mcp-gutschrift-autonom-{request.idempotency_key}"[:120])
-        agent_autonomie.erfasse(db, tenant, agent_id=actor, faehigkeit=faehigkeit, art="ausgefuehrt",
-                                durch="autonomie", vorgang=credit_note_id,
-                                detail={"brutto": vorschau["brutto"], "risk": entscheidung.risiko})
+            return {"success": True, "mode": request.mode, "autonom": True, "risk": bedarf.risiko,
+                    "policy_version": politik.version, **vorschau}
+        with agent_autonomie.als_agent(actor):
+            gebucht = _buche_gutschrift(db, tenant, credit_note_id, akteur=actor,
+                                        idempotenz=f"mcp-gutschrift-autonom-{request.idempotency_key}"[:120])
         audit_id = _write_audit(
             db, tenant_id=tenant, action_key=request.tool_name, entity_type="sales_credit_note",
             entity_id=credit_note_id, idempotency_key=request.idempotency_key,
-            audit_reason=f"Autonome Agentenbuchung nach Autonomiepolitik {entscheidung.politik_version} "
-                         f"(Risiko {entscheidung.risiko})",
+            audit_reason=f"Autonome Agentenbuchung nach Autonomiepolitik {politik.version}",
             summary=f"Gutschrift {vorschau['credit_note_number']} autonom gebucht by {actor}",
         )
         result = {"success": True, "mode": "execute", "replayed": False, "autonom": True, "posted": True,
-                  "risk": entscheidung.risiko, "policy_version": entscheidung.politik_version,
-                  "auditEntryId": audit_id, "journal_entry_id": gebucht.get("journal_entry_id"), **vorschau}
+                  "policy_version": politik.version, "auditEntryId": audit_id,
+                  "journal_entry_id": gebucht.get("journal_entry_id"), **vorschau}
         _store_execution(
             db, tenant=tenant, tool=request.tool_name, key=request.idempotency_key,  # type: ignore[arg-type]
             actor=actor, fingerprint=fingerprint, result=result,

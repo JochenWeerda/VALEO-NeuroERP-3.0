@@ -252,6 +252,11 @@ class FreigabeEngine:
         """
         bedarf = self.anforderung(v, aktion)
         if not bedarf.zweitfreigabe:
+            # Handelt ein Agent, entscheidet die Autonomiepolitik (ADR-086) - hier, an der einen Stelle, die jeder
+            # Buchungsweg passiert (REST, Maske, CLI, MCP, DocFlow). FIN-CONTROL-001 fuer Menschen bleibt unveraendert.
+            from app.services.agent_autonomie import tor
+
+            tor(self.db, self.tenant_id, v, aktion, bedarf, akteur)
             # Zulaessig. Was auffaellt, geht in den Pruefkorb des Controllers.
             self._in_den_pruefkorb(v, aktion, bedarf, akteur, None)
             return None
