@@ -54,7 +54,7 @@ Jeder **Flow Spine** ist ein agentenfähiger Steuerraum für eine E2E-Kette. Age
 
 | Knoten | Status | Deep-Link | API (Primäraktion) |
 |---|---|---|---|
-| Auftrag | active | `/sales/orders/new` | `/api/v1/sales/orders` |
+| Auftrag | active | `/verkauf/auftraege/neu` | `/api/v1/belege/sales_order` |
 | Pruefung | ok | `/workflows/approval` | `/api/v1/process/approval-density/overview` |
 | Lieferung | warning | `/sales/lieferungen` | `/api/v1/sales-shipping/delivery-notes` |
 | Rechnung | warning | `/sales/invoices/new` | `/api/v1/finance/invoices` |
@@ -67,7 +67,7 @@ Jeder **Flow Spine** ist ein agentenfähiger Steuerraum für eine E2E-Kette. Age
 
 _Im Vertriebsinnendienst werden Kunde, Positionen, Mengen, Preise und Konditionen gepflegt._
 
-- **Auftrag erfassen** → `/sales/orders/new` (API: `/api/v1/sales/orders`, Variante: primary)
+- **Auftrag erfassen** → `/verkauf/auftraege/neu` (API: `/api/v1/belege/sales_order`, Variante: primary)
 - **Neukunde (Stammdaten)** → `/verkauf/kunde/neu` (API: `/api/v1/crm/customers`, Variante: secondary)
 - **Kundenliste** → `/crm/kunden` (API: `/api/v1/crm/customers`, Variante: secondary)
 - *Agent-Hinweis:* Mengen, Preise, Rabatte und Zusatzpositionen gehoeren in die Auftragsmaske, nicht in den Flow selbst.

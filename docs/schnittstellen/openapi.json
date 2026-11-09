@@ -49790,6 +49790,56 @@
         "title": "DelegationEntry",
         "type": "object"
       },
+      "DelegationIn": {
+        "additionalProperties": false,
+        "properties": {
+          "agent_id": {
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Agent Id",
+            "type": "string"
+          },
+          "faehigkeit": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Faehigkeit",
+            "type": "string"
+          },
+          "gueltig_bis": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gueltig Bis"
+          },
+          "max_brutto": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Brutto"
+          }
+        },
+        "required": [
+          "agent_id",
+          "faehigkeit"
+        ],
+        "title": "DelegationIn",
+        "type": "object"
+      },
       "DelegationPolicy": {
         "description": "Delegationsrichtlinie für einen Mandanten.",
         "properties": {
@@ -80060,6 +80110,22 @@
         ],
         "title": "GroupRiskLevel",
         "type": "string"
+      },
+      "GrundIn": {
+        "additionalProperties": false,
+        "properties": {
+          "grund": {
+            "maxLength": 1000,
+            "minLength": 3,
+            "title": "Grund",
+            "type": "string"
+          }
+        },
+        "required": [
+          "grund"
+        ],
+        "title": "GrundIn",
+        "type": "object"
       },
       "GrundfutterAnalyseIn": {
         "properties": {
@@ -111475,6 +111541,56 @@
         "title": "MessageOut",
         "type": "object"
       },
+      "MesspunktIn": {
+        "additionalProperties": false,
+        "properties": {
+          "agent_id": {
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Agent Id",
+            "type": "string"
+          },
+          "art": {
+            "enum": [
+              "korrigiert",
+              "test_bestanden",
+              "test_fehlgeschlagen"
+            ],
+            "title": "Art",
+            "type": "string"
+          },
+          "detail": {
+            "additionalProperties": true,
+            "title": "Detail",
+            "type": "object"
+          },
+          "faehigkeit": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Faehigkeit",
+            "type": "string"
+          },
+          "vorgang": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vorgang"
+          }
+        },
+        "required": [
+          "agent_id",
+          "faehigkeit",
+          "art"
+        ],
+        "title": "MesspunktIn",
+        "type": "object"
+      },
       "MetricDiffOut": {
         "properties": {
           "base": {
@@ -126902,6 +127018,76 @@
           "count"
         ],
         "title": "PolicyUpsertResponse",
+        "type": "object"
+      },
+      "PolitikOut": {
+        "properties": {
+          "abdruck": {
+            "title": "Abdruck",
+            "type": "string"
+          },
+          "adr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Adr"
+          },
+          "faehigkeiten": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Faehigkeiten",
+            "type": "array"
+          },
+          "freigegeben": {
+            "title": "Freigegeben",
+            "type": "boolean"
+          },
+          "freigegeben_am": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Freigegeben Am"
+          },
+          "freigegeben_von": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Freigegeben Von"
+          },
+          "policy_id": {
+            "title": "Policy Id",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "policy_id",
+          "version",
+          "abdruck",
+          "freigegeben",
+          "faehigkeiten"
+        ],
+        "title": "PolitikOut",
         "type": "object"
       },
       "PortalAnfrageZeile": {
@@ -209083,6 +209269,505 @@
           "agents",
           "mcp",
           "openapi"
+        ]
+      }
+    },
+    "/api/v1/agenten/autonomie/delegationen": {
+      "get": {
+        "operationId": "delegationen_api_v1_agenten_autonomie_delegationen_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response Delegationen Api V1 Agenten Autonomie Delegationen Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Delegationen des Mandanten",
+        "tags": [
+          "agenten",
+          "autonomie"
+        ]
+      }
+    },
+    "/api/v1/agenten/autonomie/delegationen/actions/anlegen": {
+      "post": {
+        "operationId": "delegation_anlegen_api_v1_agenten_autonomie_delegationen_actions_anlegen_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DelegationIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Delegation Anlegen Api V1 Agenten Autonomie Delegationen Actions Anlegen Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Faehigkeit an einen Agenten delegieren",
+        "tags": [
+          "agenten",
+          "autonomie"
+        ]
+      }
+    },
+    "/api/v1/agenten/autonomie/delegationen/{delegation_id}/actions/widerrufen": {
+      "post": {
+        "operationId": "delegation_widerrufen_api_v1_agenten_autonomie_delegationen__delegation_id__actions_widerrufen_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "delegation_id",
+            "required": true,
+            "schema": {
+              "title": "Delegation Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GrundIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Delegation Widerrufen Api V1 Agenten Autonomie Delegationen  Delegation Id  Actions Widerrufen Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Delegation widerrufen",
+        "tags": [
+          "agenten",
+          "autonomie"
+        ]
+      }
+    },
+    "/api/v1/agenten/autonomie/entscheidungen": {
+      "get": {
+        "operationId": "entscheidungen_api_v1_agenten_autonomie_entscheidungen_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response Entscheidungen Api V1 Agenten Autonomie Entscheidungen Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Protokoll der Autonomieentscheidungen",
+        "tags": [
+          "agenten",
+          "autonomie"
+        ]
+      }
+    },
+    "/api/v1/agenten/autonomie/lernvorschlaege": {
+      "get": {
+        "operationId": "lernvorschlaege_api_v1_agenten_autonomie_lernvorschlaege_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response Lernvorschlaege Api V1 Agenten Autonomie Lernvorschlaege Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Vorschlaege zur Weiterentwicklung der Politik (nie selbst wirksam)",
+        "tags": [
+          "agenten",
+          "autonomie"
+        ]
+      }
+    },
+    "/api/v1/agenten/autonomie/politik": {
+      "get": {
+        "operationId": "politik_api_v1_agenten_autonomie_politik_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PolitikOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Autonomiepolitik und ihr Freigabestand im Mandanten",
+        "tags": [
+          "agenten",
+          "autonomie"
+        ]
+      }
+    },
+    "/api/v1/agenten/autonomie/politik/actions/freigeben": {
+      "post": {
+        "operationId": "politik_freigeben_api_v1_agenten_autonomie_politik_actions_freigeben_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PolitikOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Diese Fassung fachlich freigeben",
+        "tags": [
+          "agenten",
+          "autonomie"
+        ]
+      }
+    },
+    "/api/v1/agenten/autonomie/politik/actions/widerrufen": {
+      "post": {
+        "operationId": "politik_widerrufen_api_v1_agenten_autonomie_politik_actions_widerrufen_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GrundIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PolitikOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Freigabe der Politik widerrufen",
+        "tags": [
+          "agenten",
+          "autonomie"
+        ]
+      }
+    },
+    "/api/v1/agenten/autonomie/qualitaet": {
+      "get": {
+        "operationId": "qualitaet_api_v1_agenten_autonomie_qualitaet_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "agent_id",
+            "required": true,
+            "schema": {
+              "maxLength": 100,
+              "title": "Agent Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "faehigkeit",
+            "required": true,
+            "schema": {
+              "maxLength": 120,
+              "title": "Faehigkeit",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Qualitaet Api V1 Agenten Autonomie Qualitaet Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Qualitaetsmodell eines Agenten fuer eine Faehigkeit",
+        "tags": [
+          "agenten",
+          "autonomie"
+        ]
+      }
+    },
+    "/api/v1/agenten/autonomie/qualitaet/actions/erfassen": {
+      "post": {
+        "operationId": "messpunkt_api_v1_agenten_autonomie_qualitaet_actions_erfassen_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MesspunktIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Messpunkt Api V1 Agenten Autonomie Qualitaet Actions Erfassen Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Qualitaetsmesspunkt erfassen (Korrektur, Testnachweis)",
+        "tags": [
+          "agenten",
+          "autonomie"
+        ]
+      }
+    },
+    "/api/v1/agenten/autonomie/vertrauen": {
+      "get": {
+        "operationId": "vertrauen_api_v1_agenten_autonomie_vertrauen_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "agent_id",
+            "required": true,
+            "schema": {
+              "maxLength": 100,
+              "title": "Agent Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "faehigkeit",
+            "required": true,
+            "schema": {
+              "maxLength": 120,
+              "title": "Faehigkeit",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Vertrauen Api V1 Agenten Autonomie Vertrauen Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Vertrauensstufe A0-A2 eines Agenten fuer eine Faehigkeit (Agent Trust)",
+        "tags": [
+          "agenten",
+          "autonomie"
         ]
       }
     },

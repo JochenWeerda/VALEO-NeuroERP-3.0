@@ -557,6 +557,9 @@ api_router.include_router(
 # Gutschrift-Buchungsvorschlaege (Agent schlaegt vor, Mensch gibt frei); die Gutschrift selbst liegt in DocFlow.
 from app.api.v1.endpoints import gutschrift_vorschlaege  # noqa: E402
 api_router.include_router(gutschrift_vorschlaege.router)
+# Agentenautonomie (ADR-086): Politikfreigabe, Delegation, Qualitaetsmodell, Entscheidungsprotokoll.
+from app.api.v1.endpoints import agent_autonomie  # noqa: E402
+api_router.include_router(agent_autonomie.router)
 
 api_router.include_router(
     sales_reports.router,

@@ -1,7 +1,7 @@
 """DocFlow fuehrt die Kopfbausteine des Belegvertrags (BELEG-052).
 
 Revision ID: docflow_kopfbausteine_20261109
-Revises: psm_register_entfernt_20261104
+Revises: agent_autonomie_20261109
 
 Lieferung, Zahlung, Texte, Kontakt und Referenzen standen bisher nur in den Eigenspeichern (z. B.
 ``domain_crm.sales_orders.delivery_date/payment_terms``); DocFlow als einziger Belegspeicher kannte sie nicht. Eine
@@ -12,7 +12,7 @@ from __future__ import annotations
 from alembic import op
 
 revision = "docflow_kopfbausteine_20261109"
-down_revision = "psm_register_entfernt_20261104"
+down_revision = "agent_autonomie_20261109"
 branch_labels = None
 depends_on = None
 

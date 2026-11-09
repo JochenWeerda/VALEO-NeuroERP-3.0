@@ -466,6 +466,8 @@ domains:
       - wf_
       - neuro_
       - operator_agent_
+      - agent_autonomie
+      - agent_pruefagenten
       - integration_bootstrap
       - event_schema_
       - scheduler_

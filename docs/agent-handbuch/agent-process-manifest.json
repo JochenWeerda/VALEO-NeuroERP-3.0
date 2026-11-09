@@ -25,8 +25,8 @@
           "actions": [
             {
               "label": "Auftrag erfassen",
-              "href": "/sales/orders/new",
-              "api_path": "/api/v1/sales/orders",
+              "href": "/verkauf/auftraege/neu",
+              "api_path": "/api/v1/belege/sales_order",
               "variant": "primary"
             },
             {

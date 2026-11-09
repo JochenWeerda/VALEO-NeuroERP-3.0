@@ -32,7 +32,13 @@ def call_tool(
         return execute_mcp_tool(db, body, user, tenant_header, authorization=authorization)  # lehnt mit 403 ab
     # Der Mandant der geprueften Identitaet gilt auch fuer rls_current_tenant() (Vorgaben, Policies), wie im
     # Request ueber main:app; ohne Kontext blieben tenant_id-Vorgaben der Positionen leer.
-    with tenant_scope(tenant.strip(), "MCP-Werkzeug der geprueften Identitaet"):
+    # Ein MCP-Aufruf ist ein Agentenaufruf, ausser die gepruefte Identitaet weist einen Menschen aus (ADR-086): Die
+    # Freigabe-Engine wendet dann die Autonomiepolitik an, gleich welchen Fachweg das Werkzeug nimmt.
+    from app.services.agent_autonomie import als_agent
+
+    roh = user.get("raw") if isinstance(user.get("raw"), dict) else {}
+    agent = None if str(roh.get("identity_type") or "").lower() == "human" else str(user.get("sub") or "") or None
+    with tenant_scope(tenant.strip(), "MCP-Werkzeug der geprueften Identitaet"), als_agent(agent):
         return execute_mcp_tool(db, body, user, tenant_header, authorization=authorization)
 
 

@@ -107,11 +107,15 @@ def buche(db: Session, tenant: str, doc_id: str, *, akteur: str, idempotenz: str
     from app.services.docflow_service import DocflowService
 
     from app.core.exceptions import DomainError
+    from app.services.agent_autonomie import AutonomieVerweigert
 
     with Session(bind=db.connection(), join_transaction_mode="create_savepoint") as innen:
         try:
             ergebnis = DocflowService(innen, tenant, akteur).post_document(
                 doc_id, DocflowPostRequest(idempotency_key=idempotenz, posted_by=akteur))
+        except AutonomieVerweigert as fehler:  # das zentrale Tor (ADR-086) mit seinen Gruenden
+            raise HTTPException(409, {"message": "Keine autonome Buchung; Vorschlag mit menschlicher Freigabe noetig",
+                                      "outcome": fehler.ergebnis, "gruende": fehler.gruende}) from fehler
         except DomainError as fehler:  # Pruefgrund oder Freigabe fehlt: als Antwort, nicht als 500
             raise HTTPException(409, str(fehler)) from fehler
         innen.commit()
