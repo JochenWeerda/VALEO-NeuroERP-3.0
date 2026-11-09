@@ -55,6 +55,7 @@ def beleg_pdf(beleg: Beleg) -> bytes:
     rolle = "Lieferant" if variante.partnerrolle == "lieferant" else "Kunde"
     teile: list[Any] = [
         Paragraph(f"{titel} {beleg.beleg_nr}", stile["Title"]),
+        *([Paragraph(f"NACHDRUCK – Druck {beleg.druck_anzahl}", stile["Heading3"])] if beleg.druck_anzahl > 1 else []),
         Paragraph(f"Belegdatum: {beleg.belegdatum.strftime('%d.%m.%Y')} &nbsp;&nbsp; Status: {beleg.status}",
                   stile["Normal"]),
         Paragraph(f"{rolle}: {(partner.name or '') if partner else ''} "

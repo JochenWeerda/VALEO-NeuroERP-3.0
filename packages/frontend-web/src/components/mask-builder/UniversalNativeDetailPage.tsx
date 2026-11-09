@@ -223,6 +223,14 @@ function NativeExistingDetailPage({
     const label = schemaQuery.data?.actions?.find((a: { key: string }) => a.key === actionKey)?.label ?? actionKey
     toast({ title: `${label} erfolgreich`, description: result.summary })
     const action = schemaQuery.data?.actions?.find(candidate => candidate.key === actionKey)
+    if (action?.download && action.commandEndpoint) {
+      try {
+        saveReadDownload(await readDownload(action, {}, entityId))
+      } catch (error) {
+        setActionError(error instanceof Error ? error.message : 'Der Download ist fehlgeschlagen.')
+      }
+      return
+    }
     if (action?.responseAdapter === 'resource.v1' && action.resultNavigationRoute === '/crm/campaign-template/{result_id}' && result.resourceId) {
       void navigate({ to: action.resultNavigationRoute.replace('{result_id}', encodeURIComponent(result.resourceId)) as never })
       return
@@ -247,8 +255,9 @@ function NativeExistingDetailPage({
       return
     }
     const actionDef = schemaQuery.data?.actions?.find((a) => a.key === actionKey)
-    // Lese-Download der Objektseite (z. B. Belegdruck als PDF): kein Kommando, kein Pending-Zustand.
-    if (actionDef?.download && !actionDef.inputFields?.length) {
+    // Lese-Download der Objektseite ohne Kommando: kein Pending-Zustand. Mit Kommando (Belegdruck mit Druckvermerk)
+    // laeuft der normale Aktionsweg und der Download folgt dem Erfolg.
+    if (actionDef?.download && !actionDef.commandEndpoint && !actionDef.inputFields?.length) {
       try {
         saveReadDownload(await readDownload(actionDef, {}, entityId))
       } catch (error) {

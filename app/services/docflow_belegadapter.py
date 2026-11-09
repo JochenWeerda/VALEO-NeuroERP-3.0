@@ -73,6 +73,7 @@ def lies_beleg(svc: DocflowService, doc_id: str, darf: Optional[Darf] = None,
         waehrung=str(header.get("currency") or "EUR"),
         version=int(header.get("version") or 1),
         bausteine=dict(header.get("bausteine") or {}),
+        druck_anzahl=int(header.get("print_count") or 0),
         partner=_partner(svc, variante, partner_nr),
         positionen=[
             Belegposition(
@@ -340,6 +341,8 @@ def _aktionen_im_zustand(svc: DocflowService, doc_id: str, variante: Belegvarian
     if status == "draft":
         aktionen.append(_aktion("bearbeiten", "Bearbeiten", "docflow.update"))
         aktionen.append(_aktion("freigeben", "Freigeben", "docflow.release"))
+    if status != "draft":
+        aktionen.append(_aktion("drucken", "Drucken", "docflow.record_print"))
     if variante.belegart == "sales_order" and status == "open":
         aktionen.append(_aktion("bestaetigen", "Auftrag bestätigen", "docflow.confirm"))
     if variante.bucht and status not in _ENDE | {"posted"}:

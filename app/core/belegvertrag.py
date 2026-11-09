@@ -254,6 +254,7 @@ class Beleg(_Teil):
     historie: list[Historieneintrag] = Field(default_factory=list)
     aktionen: list[Belegaktion] = Field(default_factory=list)
     freigaben: list[Freigabestand] = Field(default_factory=list)
+    druck_anzahl: int = Field(0, ge=0, description="Wie oft der Beleg gedruckt wurde (Druckvermerk, GoBD).")
     bausteine: dict[str, dict[str, Any]] = Field(default_factory=dict)
 
 

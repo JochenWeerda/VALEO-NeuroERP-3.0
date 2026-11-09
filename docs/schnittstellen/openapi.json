@@ -22260,6 +22260,13 @@
             "title": "Dokumente",
             "type": "array"
           },
+          "druck_anzahl": {
+            "default": 0,
+            "description": "Wie oft der Beleg gedruckt wurde (Druckvermerk, GoBD).",
+            "minimum": 0.0,
+            "title": "Druck Anzahl",
+            "type": "integer"
+          },
           "freigaben": {
             "items": {
               "$ref": "#/components/schemas/Freigabestand"

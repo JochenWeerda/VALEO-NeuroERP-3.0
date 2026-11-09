@@ -54,6 +54,8 @@ def pruefe(db: Session, tenant_id: str, belegart: str, beleg_id: str, aktion: st
     version = eingaben.get("version")
     if version not in (None, "") and int(version) != beleg.version:
         return fehler("Der Beleg wurde inzwischen geändert. Bitte neu laden.", "version")
+    if aktion == "drucken" and beleg.druck_anzahl > 0 and len(str(eingaben.get("grund") or "").strip()) < 3:
+        return fehler("Ein Nachdruck braucht eine Begründung.", "grund")
     if aktion == "stornieren" and len(str(eingaben.get("grund") or "").strip()) < 3:
         return fehler("Ein Storno braucht einen Grund.", "grund")
     return []
@@ -81,6 +83,13 @@ def fuehre_aus(db: Session, tenant_id: str, belegart: str, beleg_id: str, aktion
     if kern == "freigeben":
         ergebnis = svc.release(beleg_id, schluessel("freigeben"), version, None)
         return f"{bezeichnung} freigegeben: {ergebnis.get('doc_number') or kopf['doc_number']}."
+    if kern == "drucken":
+        if not akteur:
+            raise ValidationFailedError("Ohne geprüfte Identität kein Druckvermerk.")
+        nummer = svc.druck_vermerken(beleg_id, subjekt=akteur,
+                                     aussteller=nutzer.get("iss") if isinstance(nutzer, dict) else None,
+                                     grund=str(eingaben.get("grund") or ""))
+        return f"{bezeichnung} {kopf['doc_number']} gedruckt" + (f" (Nachdruck {nummer})." if nummer > 1 else ".")
     if kern == "bestaetigen":
         svc.confirm(beleg_id, schluessel("bestaetigen"), version)
         return f"{bezeichnung} {kopf['doc_number']} bestätigt."
