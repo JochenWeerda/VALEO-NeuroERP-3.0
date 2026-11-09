@@ -23,11 +23,8 @@
   "agrar/ernte-annahme-erfassung/:id",
   "agrar/ernte/:id",
   "agrar/erntefenster-konfig",
-  "agrar/maschinenauslastung",
   "agrar/sammelabrechnung",
-  "agrar/wetterwarnung",
-  "annahme/rohware",
-  "monitoring/alerts"
+  "annahme/rohware"
  ],
  "aktionen_nicht_deklariert": [
   "mask:admin/agenten-integration:bearbeiten",

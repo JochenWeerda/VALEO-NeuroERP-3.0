@@ -78,6 +78,7 @@
     "agrar/umwelt/nitrat": "/agrar/umwelt/nitrat",
     "agrar/vertraege/formular": "/agrar/vertraege/formular",
     "agrar/wetter": "/agrar/wetter/prognose",
+    "agrar/wetterwarnung": "/agrar/wetterwarnung",
     "agrar/wiegeschein-detail": "/agrar/wiegeschein-detail",
     "agribusiness/farmers": "/agribusiness/farmers",
     "aktien/dividenden": "/aktien/dividenden",

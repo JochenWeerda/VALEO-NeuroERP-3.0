@@ -18,10 +18,11 @@ from datetime import date, datetime, timedelta, timezone
 from typing import Any, Optional
 
 import httpx
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 
 from app.api.v1.schemas.base import BaseSchema, TypedObjectOut
+from app.core.tenant import get_tenant_id
 from pydantic import ConfigDict as _ConfigDict
 
 
@@ -30,6 +31,28 @@ class AgrarWetterOut(BaseSchema):
 
 
 router = APIRouter(tags=["agrar", "wetter"])
+
+
+def _standort(lat: Optional[float], lon: Optional[float], tenant_id: Optional[str]) -> tuple[float, float]:
+    """Koordinate der Anfrage oder der Betriebsstandort des Mandanten (``tenants.settings.standort``).
+
+    Bis 09.11.2026 verlangten die Wege lat/lon; die Studio-Masken (``agrar/wetter``) schickten keine und bekamen
+    422, die alte Seite setzte fest Emden fuer jeden Mandanten. Ohne Standort sagt die Antwort, was fehlt.
+    """
+    if lat is not None and lon is not None:
+        return lat, lon
+    if tenant_id:
+        from sqlalchemy import text
+
+        from app.core.database import SessionLocal
+
+        with SessionLocal() as db:
+            einstellung = db.execute(text("SELECT settings -> 'standort' FROM domain_shared.tenants WHERE id = :t"),
+                                     {"t": tenant_id}).scalar()
+        if isinstance(einstellung, dict) and einstellung.get("lat") is not None and einstellung.get("lon") is not None:
+            return float(einstellung["lat"]), float(einstellung["lon"])
+    raise HTTPException(status_code=422, detail="Kein Betriebsstandort hinterlegt: Koordinate angeben oder in den "
+                                                "Mandanten-Einstellungen standort.lat/standort.lon pflegen.")
 
 BRIGHTSKY_BASE = "https://api.brightsky.dev"
 OPEN_METEO_BASE = "https://api.open-meteo.com/v1"
@@ -156,10 +179,12 @@ class BodenDaten(BaseModel):
 
 @router.get("/wetter/aktuell", response_model=WetterAktuell, summary="Wetter aktuell abrufen")
 async def get_wetter_aktuell(
-    lat: float = Query(..., description="Breitengrad (WGS84)"),
-    lon: float = Query(..., description="Längengrad (WGS84)"),
+    lat: Optional[float] = Query(None, description="Breitengrad (WGS84)"),
+    lon: Optional[float] = Query(None, description="Längengrad (WGS84)"),
+    tenant_id: Optional[str] = Depends(get_tenant_id),
 ):
     """Aktuelles Wetter vom nächsten DWD-Messgerät (via BrightSky)."""
+    lat, lon = _standort(lat, lon, tenant_id)
     data = await _cached_get(
         f"{BRIGHTSKY_BASE}/current_weather",
         {"lat": lat, "lon": lon, "units": "dwd"},
@@ -191,10 +216,12 @@ async def get_wetter_aktuell(
 
 @router.get("/wetter/warnungen", response_model=list[WetterWarnung], summary="Wetter warnungen abrufen")
 async def get_wetter_warnungen(
-    lat: float = Query(..., description="Breitengrad"),
-    lon: float = Query(..., description="Längengrad"),
+    lat: Optional[float] = Query(None, description="Breitengrad"),
+    lon: Optional[float] = Query(None, description="Längengrad"),
+    tenant_id: Optional[str] = Depends(get_tenant_id),
 ):
     """DWD-Wetterwarnungen für eine Geokoordinate (via BrightSky)."""
+    lat, lon = _standort(lat, lon, tenant_id)
     data = await _cached_get(
         f"{BRIGHTSKY_BASE}/alerts",
         {"lat": lat, "lon": lon},
@@ -219,12 +246,14 @@ async def get_wetter_warnungen(
 
 @router.get("/wetter/stunden", response_model=list[AgrarWetterOut], summary="Wetter stunden abrufen")
 async def get_wetter_stunden(
-    lat: float = Query(..., description="Breitengrad"),
-    lon: float = Query(..., description="Längengrad"),
+    lat: Optional[float] = Query(None, description="Breitengrad"),
+    lon: Optional[float] = Query(None, description="Längengrad"),
+    tenant_id: Optional[str] = Depends(get_tenant_id),
     datum: str = Query(default=None, description="ISO-Datum (YYYY-MM-DD), Standard: heute"),
     bis: str = Query(default=None, description="End-Datum (YYYY-MM-DD), Standard: datum+1"),
 ):
     """Stündliche Wetterdaten (DWD-Stationsdaten via BrightSky)."""
+    lat, lon = _standort(lat, lon, tenant_id)
     if not datum:
         datum = date.today().isoformat()
     if not bis:
@@ -253,12 +282,14 @@ async def get_wetter_stunden(
 
 @router.get("/wetter/prognose", response_model=list[PrognoseTag], summary="Wetter prognose abrufen")
 async def get_wetter_prognose(
-    lat: float = Query(..., description="Breitengrad"),
-    lon: float = Query(..., description="Längengrad"),
+    lat: Optional[float] = Query(None, description="Breitengrad"),
+    lon: Optional[float] = Query(None, description="Längengrad"),
+    tenant_id: Optional[str] = Depends(get_tenant_id),
     tage: int = Query(default=7, ge=1, le=16, description="Prognosezeitraum in Tagen"),
     timezone: str = Query(default="Europe/Berlin"),
 ):
     """7-Tage-Wetterprognose mit Agrar-Variablen (Open-Meteo DWD ICON-D2)."""
+    lat, lon = _standort(lat, lon, tenant_id)
     start = date.today().isoformat()
     end = (date.today() + timedelta(days=tage - 1)).isoformat()
 
@@ -312,12 +343,14 @@ async def get_wetter_prognose(
 
 @router.get("/wetter/boden", response_model=list[BodenDaten], summary="Wetter boden abrufen")
 async def get_wetter_boden(
-    lat: float = Query(..., description="Breitengrad"),
-    lon: float = Query(..., description="Längengrad"),
+    lat: Optional[float] = Query(None, description="Breitengrad"),
+    lon: Optional[float] = Query(None, description="Längengrad"),
+    tenant_id: Optional[str] = Depends(get_tenant_id),
     stunden: int = Query(default=48, ge=1, le=240, description="Stunden Vorhersagezeitraum"),
     timezone: str = Query(default="Europe/Berlin"),
 ):
     """Bodenfeuchte, Bodentemperatur und Evapotranspiration (Open-Meteo ICON-D2)."""
+    lat, lon = _standort(lat, lon, tenant_id)
     start = datetime.now(tz=timezone_utc).strftime("%Y-%m-%d")
     end = (datetime.now(tz=timezone_utc) + timedelta(hours=stunden)).strftime("%Y-%m-%d")
 

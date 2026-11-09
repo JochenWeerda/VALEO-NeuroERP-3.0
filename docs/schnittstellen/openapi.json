@@ -235866,22 +235866,36 @@
             "description": "Breitengrad (WGS84)",
             "in": "query",
             "name": "lat",
-            "required": true,
+            "required": false,
             "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
               "description": "Breitengrad (WGS84)",
-              "title": "Lat",
-              "type": "number"
+              "title": "Lat"
             }
           },
           {
             "description": "Längengrad (WGS84)",
             "in": "query",
             "name": "lon",
-            "required": true,
+            "required": false,
             "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
               "description": "Längengrad (WGS84)",
-              "title": "Lon",
-              "type": "number"
+              "title": "Lon"
             }
           }
         ],
@@ -235930,22 +235944,36 @@
             "description": "Breitengrad",
             "in": "query",
             "name": "lat",
-            "required": true,
+            "required": false,
             "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
               "description": "Breitengrad",
-              "title": "Lat",
-              "type": "number"
+              "title": "Lat"
             }
           },
           {
             "description": "Längengrad",
             "in": "query",
             "name": "lon",
-            "required": true,
+            "required": false,
             "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
               "description": "Längengrad",
-              "title": "Lon",
-              "type": "number"
+              "title": "Lon"
             }
           },
           {
@@ -236022,22 +236050,36 @@
             "description": "Breitengrad",
             "in": "query",
             "name": "lat",
-            "required": true,
+            "required": false,
             "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
               "description": "Breitengrad",
-              "title": "Lat",
-              "type": "number"
+              "title": "Lat"
             }
           },
           {
             "description": "Längengrad",
             "in": "query",
             "name": "lon",
-            "required": true,
+            "required": false,
             "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
               "description": "Längengrad",
-              "title": "Lon",
-              "type": "number"
+              "title": "Lon"
             }
           },
           {
@@ -236114,22 +236156,36 @@
             "description": "Breitengrad",
             "in": "query",
             "name": "lat",
-            "required": true,
+            "required": false,
             "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
               "description": "Breitengrad",
-              "title": "Lat",
-              "type": "number"
+              "title": "Lat"
             }
           },
           {
             "description": "Längengrad",
             "in": "query",
             "name": "lon",
-            "required": true,
+            "required": false,
             "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
               "description": "Längengrad",
-              "title": "Lon",
-              "type": "number"
+              "title": "Lon"
             }
           },
           {
@@ -236204,22 +236260,36 @@
             "description": "Breitengrad",
             "in": "query",
             "name": "lat",
-            "required": true,
+            "required": false,
             "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
               "description": "Breitengrad",
-              "title": "Lat",
-              "type": "number"
+              "title": "Lat"
             }
           },
           {
             "description": "Längengrad",
             "in": "query",
             "name": "lon",
-            "required": true,
+            "required": false,
             "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
               "description": "Längengrad",
-              "title": "Lon",
-              "type": "number"
+              "title": "Lon"
             }
           }
         ],

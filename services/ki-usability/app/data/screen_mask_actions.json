@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 797,
-    "screens_with_actions": 403,
+    "actions": 798,
+    "screens_with_actions": 404,
     "domains": 50
   },
   "actions": [
@@ -2403,6 +2403,27 @@
       "required_data": [],
       "source": {
         "screenId": "agrar/vertrag-kontingente-liste",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:agrar/wetterwarnung:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (agrar/wetterwarnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/wetterwarnung",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "agrar/wetterwarnung",
         "actionKey": "export",
         "commandEndpoint": null,
         "navigationRoute": null,

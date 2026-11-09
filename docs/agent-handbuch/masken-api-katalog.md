@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (780 Masken).
+> Generiert aus `app/core/screen_definitions.py` (781 Masken).
 
 ## Übersicht
 
@@ -157,6 +157,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `agrar/vertraege/formular` | Formular | agrar | niedrig | — | `GET /api/v1/masks/agrar/vertraege/formular/agent-contract` |
 | `agrar/vertrag-kontingente-liste` | Vertrag-Kontingente | agrar | niedrig | — | `GET /api/v1/masks/agrar/vertrag-kontingente-liste/agent-contract` |
 | `agrar/wetter` | Wetter | agrar | niedrig | — | `GET /api/v1/masks/agrar/wetter/agent-contract` |
+| `agrar/wetterwarnung` | Wetterwarnungen | agrar | niedrig | — | `GET /api/v1/masks/agrar/wetterwarnung/agent-contract` |
 | `agrar/wiegeschein-detail` | Wiegeschein detail | agrar | niedrig | — | `GET /api/v1/masks/agrar/wiegeschein-detail/agent-contract` |
 | `agribusiness/farmers` | Landwirte | agrar | niedrig | — | `GET /api/v1/masks/agribusiness/farmers/agent-contract` |
 | `aktien/dividenden` | Dividenden | genossenschaft | niedrig | — | `GET /api/v1/masks/aktien/dividenden/agent-contract` |
@@ -5301,6 +5302,45 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - Zeige offene Wetter.
 - Was ist in Wetter faellig?
+
+---
+
+### `agrar/wetterwarnung` — Wetterwarnungen
+
+**Zweck:** Pruefen, welche Unwetterwarnungen fuer den Betriebsstandort gelten (Ernte, Duengung, Ausbringung).
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/agrar/wetterwarnung/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/agrar/wetterwarnung/agent-contract` |
+| Readiness | `GET /api/v1/masks/agrar/wetterwarnung/readiness` |
+| Rollout-Route | `/mask-rollout/agrar__wetterwarnung/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/agrar/wetter/warnungen`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Gibt es heute eine Unwetterwarnung?
+- Bis wann gilt die Sturmwarnung?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
 

@@ -275,6 +275,21 @@ def build_admin_webshop_bestellungen() -> dict[str, Any]:
     )
 
 
+def build_agrar_wetterwarnung() -> dict[str, Any]:
+    return _liste(
+        screen_id="agrar/wetterwarnung", domain="agrar", bundle="agrar", title="Wetterwarnungen",
+        subtitle="DWD-Warnungen fuer den Betriebsstandort (Mandanten-Einstellung standort)",
+        endpoint="/api/v1/agrar/wetter/warnungen",
+        columns=[text("event", "Ereignis", "primary"), status("severity", "Stufe"),
+                 text("headline", "Meldung", "primary"), datum("gueltig_von", "Gültig ab", "primary"),
+                 datum("gueltig_bis", "Gültig bis"), text("instruction", "Handlungsempfehlung", "tertiary"),
+                 text("urgency", "Dringlichkeit", "tertiary")],
+        purpose="Pruefen, welche Unwetterwarnungen fuer den Betriebsstandort gelten (Ernte, Duengung, Ausbringung).",
+        prompts=["Gibt es heute eine Unwetterwarnung?", "Bis wann gilt die Sturmwarnung?"],
+        no_workflow="Hinweisliste des DWD; ohne eigenen Ablauf.",
+    )
+
+
 CLUSTER_RESTSEITEN_SCREEN_BUILDERS: dict[str, Any] = {
     "nawaro/raps-profil": build_nawaro_raps_profile,
     "schichtplan/liste": build_schichtplan_liste,
@@ -288,4 +303,5 @@ CLUSTER_RESTSEITEN_SCREEN_BUILDERS: dict[str, Any] = {
     "admin/report-berechtigungen": build_admin_report_berechtigungen,
     "admin/webshop": build_admin_webshop,
     "admin/webshop-bestellungen": build_admin_webshop_bestellungen,
+    "agrar/wetterwarnung": build_agrar_wetterwarnung,
 }

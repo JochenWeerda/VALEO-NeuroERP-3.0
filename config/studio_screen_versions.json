@@ -1541,6 +1541,17 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
+    "agrar/wetterwarnung": {
+      "definition_hash": "039be5b30ddaf0c5e67d753c9149b5aff7cf5315d818088fb14b93d2cfcda177",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
     "agrar/wiegeschein-detail": {
       "definition_hash": "ef3487b2950d134de6f882d71097e5b37cf874a53c78743163260ab78639db32",
       "gates_passed": [

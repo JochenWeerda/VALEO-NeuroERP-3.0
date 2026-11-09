@@ -60425,6 +60425,7 @@
           "read_by": [
             "app/api/v1/endpoints/admin_monitoring.py",
             "app/api/v1/endpoints/admin_suite.py",
+            "app/api/v1/endpoints/agrar_wetter.py",
             "app/api/v1/endpoints/health.py",
             "app/api/v1/endpoints/sales_invoice_einvoice.py",
             "app/api/v1/endpoints/vat_return_export.py",
