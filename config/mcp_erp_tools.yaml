@@ -945,7 +945,7 @@ tools:
   - tool_id: sales.order.status
     domain: sales
     name: "Auftragsstatus pruefen"
-    description: "Gibt Lifecycle-Status, offene Positionen, naechsten Schritt und kanonische Masken-Route (/sales/order-editor/{id}, Screen sales/sales-order) eines Auftrags im Authentifizierungs-Mandanten zurueck. HTTP-Aufruf mit tool_name=sales.order.status, parameters.auftrag_nr (Auftragsnummer oder UUID). Default dryRun; execute ist ebenfalls nur Lesen. OIDC-Token mit sales:read und tenant_id erforderlich."
+    description: "Gibt Lifecycle-Status, offene Positionen, naechsten Schritt und kanonische Masken-Route (/belege/sales_order/{id}, Screen beleg/sales-order; Quelle DocFlow) eines Auftrags im Authentifizierungs-Mandanten zurueck. HTTP-Aufruf mit tool_name=sales.order.status, parameters.auftrag_nr (Auftragsnummer oder UUID). Default dryRun; execute ist ebenfalls nur Lesen. OIDC-Token mit sales:read und tenant_id erforderlich."
     scope: sales:read
     idempotent: true
     risk_class: low
