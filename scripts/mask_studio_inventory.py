@@ -399,6 +399,17 @@ def _route_key(path: str) -> str:
     return re.sub(r"\{[^}]+\}", "{}", path).rstrip("/")
 
 
+def _hat_route(endpoint: str, routes: set[str]) -> bool:
+    """Gibt es die Route? Ein Platzhalter der Schablone deckt ein festes Segment ab: Die Katalogaktion
+    ``/belege/sales_order/{id}/actions/stornieren`` liegt auf ``/belege/{belegart}/{beleg_id}/actions/{aktion}``."""
+    key = _route_key(endpoint)
+    if key in routes:
+        return True
+    teile = key.split("/")
+    return any(len(r.split("/")) == len(teile)
+               and all(v == "{}" or v == t for v, t in zip(r.split("/"), teile)) for r in routes)
+
+
 def catalog() -> dict:
     """Eine Studio-Maske kann nur Quellen und Aktionen aus dem Katalog tragen. Ist jede Katalogaktion per CLI
     und MCP bedienbar und zeigt jede Quelle auf eine echte Route, gilt das fuer jede Studio-Maske."""
@@ -422,10 +433,10 @@ def catalog() -> dict:
                 coverages = sorted({*coverages, "mapped_generic"})
             elif block in AGENT_GESPERRT:
                 coverages = sorted({*coverages, "blocked_human_only"})
-        rows.append({"aktion": action["key"], "endpunkt": endpoint, "route": _route_key(endpoint) in routes,
+        rows.append({"aktion": action["key"], "endpunkt": endpoint, "route": _hat_route(endpoint, routes),
                      "cli": support(action).supported, "mcp": coverages,
                      "mcp_bedienbar": bool(set(coverages) & MCP_BEDIENBAR)})
-    sources = [{"quelle": ds["key"], "endpunkt": ds["endpoint"], "route": _route_key(ds["endpoint"]) in routes}
+    sources = [{"quelle": ds["key"], "endpunkt": ds["endpoint"], "route": _hat_route(ds["endpoint"], routes)}
                for ds in data.get("data_sources") or []]
     return {"aktionen": rows, "quellen": sources}
 

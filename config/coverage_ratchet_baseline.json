@@ -61,7 +61,6 @@
     "api/v1/endpoints/quality_evidence.py": 0.7,
     "api/v1/endpoints/rohware_sammelabrechnung.py": 0.7,
     "api/v1/endpoints/sales_invoice_einvoice.py": 0.7,
-    "api/v1/endpoints/sales_orders.py": 0.38,
     "api/v1/endpoints/sanctions_compliance.py": 0.66,
     "api/v1/endpoints/security_monitoring.py": 0.69,
     "api/v1/endpoints/silo.py": 0.31,

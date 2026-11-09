@@ -174,6 +174,9 @@ async def beleg_aktion(
     if belegart not in BELEGARTEN:
         raise HTTPException(status_code=404, detail="Belegart nicht bekannt")
     verlange(nutzer, "lesen", belegart)
+    if aktion == "stornieren" and not str(body.get("grund") or "").strip() and body.get("_auditReason"):
+        # Studio-Katalogaktion ``stornieren``: Ihre Pflichtbegruendung ist der Stornogrund.
+        body = {**body, "grund": body["_auditReason"]}
 
     async def pruefe(pruef_db: Session, eingaben: dict[str, Any], entity_id: str, tid: str) -> list[dict[str, Any]]:
         return docflow_belegaktionen.pruefe(pruef_db, tid, belegart, entity_id, aktion, nutzer, eingaben)

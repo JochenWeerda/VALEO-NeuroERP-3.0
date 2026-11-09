@@ -103,16 +103,16 @@ describe('controller supervises document exceptions without posting rights', () 
 
 
 describe('action permissions follow the command route roles', () => {
-  const order: ScreenDefinition = { ...screen, id: 'sales/sales-order', domain: 'sales',
-    actions: [{ key: 'bearbeiten', label: 'Bearbeiten', permission: 'sales.order.update' }] }
+  const lead: ScreenDefinition = { ...screen, id: 'crm/lead', domain: 'crm',
+    actions: [{ key: 'bearbeiten', label: 'Bearbeiten', permission: 'crm.lead.update' }] }
   const contract: ScreenDefinition = { ...screen, id: 'agrar/kontrakte', domain: 'agrar',
     actions: [{ key: 'bearbeiten', label: 'Bearbeiten', permission: 'kontrakt.update' }] }
   it('grants the edit action to the area role without a scope attribute', () => {
-    expect(getScreenPermissions(order, user([], ['SALES_BEARBEITEN']))).toEqual(['sales.order.update'])
-    expect(getScreenPermissions(order, user([], ['SALES_LESEN']))).toEqual([])
+    expect(getScreenPermissions(lead, user([], ['CRM_BEARBEITEN']))).toEqual(['crm.lead.update'])
+    expect(getScreenPermissions(lead, user([], ['CRM_LESEN']))).toEqual([])
   })
   it('a scope attribute cannot outvote the server roles', () => {
-    expect(getScreenPermissions(order, user(['sales.order.update'], ['CRM_BEARBEITEN']))).toEqual([])
+    expect(getScreenPermissions(lead, user(['crm.lead.update'], ['SALES_BEARBEITEN']))).toEqual([])
     // Kontraktaenderung verlangt die Kontraktrolle selbst; admin allein reicht dort auch serverseitig nicht.
     expect(getScreenPermissions(contract, user(['admin:all'], ['admin']))).toEqual([])
     expect(getScreenPermissions(contract, user([], ['KONTRAKT_BEARBEITEN']))).toEqual(['kontrakt.update'])

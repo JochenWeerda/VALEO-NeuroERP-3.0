@@ -38,13 +38,14 @@ def test_load_flow_spine_catalog_has_nine_processes() -> None:
 def test_load_screen_definitions_count() -> None:
     masks = load_screen_definitions()
     assert len(masks) >= 26
-    assert "sales/sales-order" in masks
+    assert "einkauf/purchase-order" in masks
+    assert "sales/sales-order" not in masks  # BELEG-052: der Auftrag ist Belegmaske
 
 
 @pytest.mark.unit
 def test_derive_agent_contract_includes_actions() -> None:
     masks = load_screen_definitions()
-    order = masks["sales/sales-order"]
+    order = masks["einkauf/purchase-order"]
     contract = derive_agent_contract(order)
     assert contract["screenId"]
     assert isinstance(contract["readableFields"], list)

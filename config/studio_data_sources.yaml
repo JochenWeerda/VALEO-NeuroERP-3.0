@@ -71,6 +71,6 @@ command_actions:
     forbiddenForAgents: false
   - key: stornieren
     label: Stornieren
-    commandEndpoint: /api/v1/sales/orders/{entity_id}/actions/stornieren
+    commandEndpoint: /api/v1/belege/sales_order/{entity_id}/actions/stornieren
     dangerLevel: high
     forbiddenForAgents: true

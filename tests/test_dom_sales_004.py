@@ -1,4 +1,4 @@
-"""DOM-SALES-004 Unit Tests — AB-Lifecycle (.2), Lieferschein-Close (.3), Preisabweichung (.4)."""
+"""DOM-SALES-004 Unit Tests — Lieferschein-Close (.3), Preisabweichung (.4)."""
 from __future__ import annotations
 
 import pytest
@@ -26,46 +26,6 @@ def _mock_db(sql_map: dict):
 
     db.execute.side_effect = side_effect
     return db
-
-
-# ---------------------------------------------------------------------------
-# AB Lifecycle
-# ---------------------------------------------------------------------------
-
-class TestABLifecycle:
-    def _auftrag(self, status="DRAFT"):
-        return {"id": "a-1", "tenant_id": "t1", "status": status, "order_number": "AUF-2026-001"}
-
-    def test_versenden_aus_draft(self):
-        from app.services.sales_ab_lifecycle_service import transition_ab_status
-        db = _mock_db({"sales_orders": self._auftrag()})
-        result = transition_ab_status(db, "a-1", "t1", "VERSANDT")
-        assert result["status"] == "VERSANDT"
-        db.commit.assert_called_once()
-
-    def test_annehmen_aus_versandt(self):
-        from app.services.sales_ab_lifecycle_service import transition_ab_status
-        db = _mock_db({"sales_orders": self._auftrag(status="VERSANDT")})
-        result = transition_ab_status(db, "a-1", "t1", "ANGENOMMEN")
-        assert result["status"] == "ANGENOMMEN"
-
-    def test_ablehnen_ohne_grund_raises(self):
-        from app.services.sales_ab_lifecycle_service import transition_ab_status, ABLifecycleError
-        db = _mock_db({"sales_orders": self._auftrag()})
-        with pytest.raises(ABLifecycleError, match="Ablehnungsgrund"):
-            transition_ab_status(db, "a-1", "t1", "ABGELEHNT")
-
-    def test_ablehnen_mit_grund_ok(self):
-        from app.services.sales_ab_lifecycle_service import transition_ab_status
-        db = _mock_db({"sales_orders": self._auftrag()})
-        result = transition_ab_status(db, "a-1", "t1", "ABGELEHNT", reason="Preis nicht akzeptabel")
-        assert result["status"] == "ABGELEHNT"
-
-    def test_ungültiger_übergang_raises(self):
-        from app.services.sales_ab_lifecycle_service import transition_ab_status, ABLifecycleError
-        db = _mock_db({"sales_orders": self._auftrag(status="ANGENOMMEN")})
-        with pytest.raises(ABLifecycleError, match="Ungültiger"):
-            transition_ab_status(db, "a-1", "t1", "DRAFT")
 
 
 # ---------------------------------------------------------------------------

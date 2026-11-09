@@ -1,79 +1,29 @@
-"""Auftrag stornieren als Kommando-Weg (Studio-Katalog ``stornieren``, MASK-COMMANDS-ROLLOUT-20261019).
+"""Lieferschein-Status und Preisabweichung (DOM-SALES-004) unter ``/sales/orders``; Bearbeiter aus dem Token.
 
-Aus ``sales_orders.py`` herausgeloest, damit das Godfile nicht waechst: Storno-Kommando sowie AB-Lifecycle,
-Lieferschein-Status und Preisabweichung (DOM-SALES-004). Pfade unveraendert unter ``/sales/orders``; Bearbeiter
-aus dem Token (bis 19.10.2026 aus dem Feld ``operator`` im Body).
+Auftragsstorno und AB-Statuswechsel liefen hier auf den Eigenspeichern ``domain_crm.sales_orders`` und
+``domain_sales.sales_orders``. Seit BELEG-052 (09.11.2026) ist DocFlow der einzige Belegspeicher: Der Auftrag wird in
+der Belegmaske storniert (``/api/v1/belege/sales_order/{id}/actions/stornieren``).
 """
 from __future__ import annotations
 
-from typing import Any
+from typing import Optional as _Opt
 
-from fastapi import APIRouter, Body, Depends, HTTPException, Request
-from sqlalchemy import text
+from fastapi import APIRouter, Depends, HTTPException, Request
+from pydantic import BaseModel as _BM
 from sqlalchemy.orm import Session
 
 from app.auth.bereich_roles import SCHREIBEN
-from app.auth.deps import require_roles
-from app.core.akteur import gepruefter_akteur, gepruefter_akteur_aus_request
+from app.core.akteur import gepruefter_akteur_aus_request
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.api.v1.schemas.base import TypedObjectOut
-from app.services.mask_action_runtime_service import MaskActionResult as MaskActionResultOut
-from app.services.mask_commands import statusaktion
 
 router = APIRouter()
-
-#: Storno eines Auftrags ist Verkaufsarbeit: Sachbearbeitung oder Leitung des Verkaufs.
-_sales_write = require_roles("SALES_BEARBEITEN", "SALES_ADMIN", "admin")
-
-
-@router.post(
-    "/{entity_id}/actions/stornieren",
-    response_model=MaskActionResultOut,
-    summary="Auftrag stornieren (Maskenaktion: Begruendung, Trockenlauf, Wiederholungsschutz)",
-)
-async def stornieren_action(
-    entity_id: str,
-    body: dict[str, Any] = Body(default_factory=dict),
-    user: dict = Depends(_sales_write),
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-):
-    """Derselbe Zustandswechsel wie ``/cancel`` (offen/bestaetigt -> storniert), fuer Maske, Studio, CLI und MCP.
-
-    Die Begruendung ist Pflicht und steht mit dem Bearbeiter aus dem Token im Audit der Laufzeit.
-    Agenten sperrt die Maske (``forbiddenForAgents`` im Studio-Katalog).
-    """
-    gepruefter_akteur(user)
-
-    def ausfuehren(db_: Session, _payload: dict[str, Any]) -> str:
-        db_.execute(
-            text("UPDATE domain_crm.sales_orders SET status = 'cancelled', updated_at = NOW() "
-                 "WHERE id = :id AND tenant_id = :tid AND status NOT IN ('cancelled', 'completed')"),
-            {"id": entity_id, "tid": tenant_id},
-        )
-        return "Auftrag storniert."
-
-    result = await statusaktion(
-        db, action_key="stornieren", entity_type="sales_order", entity_id=entity_id, tenant_id=tenant_id,
-        body=body, erlaubt={"draft", "open", "confirmed", "in_delivery"}, ausfuehren=ausfuehren,
-        status_sql="SELECT status FROM domain_crm.sales_orders WHERE id::text = :id AND tenant_id = :tid",
-        event_type="sales.order.cancelled",
-    )
-    return result.model_dump()
-
 
 # ---------------------------------------------------------------------------
 # DOM-SALES-004: AB-Lifecycle / Lieferschein-Close / Preisabweichung
 # ---------------------------------------------------------------------------
 
-from pydantic import BaseModel as _BM
-from typing import Optional as _Opt
-
-
-class ABTransitionIn(_BM):
-    new_status: str
-    reason: _Opt[str] = None
 
 
 class LSAdvanceIn(_BM):
@@ -91,22 +41,6 @@ class PreisabweichungIn(_BM):
 class PreisabweichungFreigabeIn(_BM):
     entscheidung: str
     grund: _Opt[str] = None
-
-
-@router.post("/orders/{auftrag_id}/ab-transition", response_model=TypedObjectOut, summary="Auftragsbestätigung Status wechseln", dependencies=SCHREIBEN["VERKAUF"])
-def ab_transition_endpoint(
-    auftrag_id: str,
-    body: ABTransitionIn,
-    request: Request,
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-) -> dict:
-    from app.services.sales_ab_lifecycle_service import transition_ab_status, ABLifecycleError
-    try:
-        return transition_ab_status(db, auftrag_id, tenant_id, body.new_status,
-                                     gepruefter_akteur_aus_request(request), body.reason)
-    except ABLifecycleError as exc:
-        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
 @router.post("/delivery-notes/{ls_id}/advance", response_model=TypedObjectOut, summary="Lieferschein-Status vorwärts", dependencies=SCHREIBEN["VERKAUF"])

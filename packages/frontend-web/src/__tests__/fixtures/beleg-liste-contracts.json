@@ -329,7 +329,7 @@
       "key": "auftrag",
       "label": "Auftrag",
       "routePath": "/verkauf/auftraege",
-      "screenId": "sales/sales-order"
+      "screenId": "beleg-liste/sales-order"
      },
      {
       "key": "lieferschein",
@@ -842,7 +842,7 @@
       "key": "auftrag",
       "label": "Auftrag",
       "routePath": "/verkauf/auftraege",
-      "screenId": "sales/sales-order"
+      "screenId": "beleg-liste/sales-order"
      },
      {
       "key": "lieferschein",
@@ -1386,7 +1386,7 @@
       "key": "auftrag",
       "label": "Auftrag",
       "routePath": "/verkauf/auftraege",
-      "screenId": "sales/sales-order"
+      "screenId": "beleg-liste/sales-order"
      },
      {
       "key": "lieferschein",

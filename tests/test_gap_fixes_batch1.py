@@ -117,28 +117,6 @@ def test_close_nonexistent_contract_returns_404():
 
 
 # ===========================================================================
-# SALES ORDERS — confirm / complete / cancel workflow
-# ===========================================================================
-
-def test_confirm_nonexistent_order_returns_404():
-    resp = _client.post("/api/v1/sales/orders/does-not-exist/confirm", headers=_HEADERS)
-    skip_if_db_unavailable(resp)
-    assert resp.status_code == 404
-
-
-def test_complete_nonexistent_order_returns_404():
-    resp = _client.post("/api/v1/sales/orders/does-not-exist/complete", headers=_HEADERS)
-    skip_if_db_unavailable(resp)
-    assert resp.status_code == 404
-
-
-def test_cancel_nonexistent_order_returns_404():
-    resp = _client.post("/api/v1/sales/orders/does-not-exist/cancel", headers=_HEADERS)
-    skip_if_db_unavailable(resp)
-    assert resp.status_code == 404
-
-
-# ===========================================================================
 # COMPLIANCE — EUDR + UStVA (no longer hardcoded mocks)
 # ===========================================================================
 

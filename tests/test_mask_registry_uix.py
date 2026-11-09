@@ -18,15 +18,9 @@ def test_mask_registry_exposes_generator_metadata_for_crm_pilot() -> None:
     assert crm_pilot.summary_endpoint == "/api/v1/crm/customers/{customer_id}/screen-summary"
 
 
-def test_mask_registry_exposes_generator_metadata_for_sales_pilot() -> None:
-    registry = build_mask_registry()
-    sales_pilot = registry.get("sales/sales-order")
-
-    assert sales_pilot is not None
-    assert sales_pilot.generator_ready is True
-    assert sales_pilot.requires_lazy_tabs is True
-    assert sales_pilot.lookup_min_chars >= 2
-    assert sales_pilot.summary_endpoint == "/api/v1/sales/orders/{order_id}/screen-summary"
+def test_alte_auftragsmaske_ist_nicht_mehr_registriert() -> None:
+    """BELEG-052: Der Auftrag ist Belegmaske (DocFlow); die Eigenspeicher-Maske sales/sales-order kommt nicht zurueck."""
+    assert build_mask_registry().get("sales/sales-order") is None
 
 
 def test_mask_registry_exposes_generator_metadata_for_agrar_kontrakt_pilot() -> None:

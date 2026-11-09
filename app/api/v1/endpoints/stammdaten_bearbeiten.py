@@ -36,25 +36,6 @@ def _gleich(*felder: str) -> dict[str, str]:
 
 # --------------------------------------------------------------------------- Verkauf
 
-@router.post("/sales/orders/{entity_id}/actions/bearbeiten", response_model=MaskActionResult,
-             summary="Auftragskopf bearbeiten", dependencies=SCHREIBEN["VERKAUF"])
-async def auftrag_bearbeiten(entity_id: str, body: dict[str, Any] = Body(default_factory=dict),
-                             db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
-    from app.api.v1.endpoints.sales_orders import SalesOrderUpdate, update_sales_order
-
-    async def aendern(session: Session, werte: Any, eid: str, tid: str) -> None:
-        await update_sales_order(eid, werte, tenant_id=tid, db=session)
-
-    return await bearbeiten(
-        db, entity_type="sales_order", entity_id=entity_id, tenant_id=tenant_id, body=body,
-        felder=_gleich("subject", "delivery_date", "contact_person", "shipping_method", "payment_terms",
-                       "delivery_address", "notes"),
-        modell=SalesOrderUpdate, erlaubt={"open", "confirmed"},
-        lesen=zeile_per_sql("SELECT status FROM domain_crm.sales_orders "
-                            "WHERE id::text = :id AND tenant_id = :tid AND deleted_at IS NULL"),
-        aendern=aendern, event_type="sales.order.updated")
-
-
 # --------------------------------------------------------------------------- Kontrakt
 
 # Dieselben Rollen wie die Kontraktaenderung selbst (``kontrakte.update_kontrakt``: KONTRAKT_BEARBEITEN/_ADMIN).

@@ -29,7 +29,6 @@ from app.api.v1.endpoints import (
     accounts,
     journal_entries,
     articles,
-    sales_orders,
     sales_blanket_orders,
     credit_management,
     collective_documents,
@@ -491,11 +490,6 @@ api_router.include_router(
     tags=["crm", "reports"]
 )
 
-api_router.include_router(
-    sales_orders.router,
-    prefix="/sales/orders",
-    tags=["sales", "orders"]
-)
 from app.api.v1.endpoints import sales_order_commands  # noqa: E402
 
 api_router.include_router(sales_order_commands.router, prefix="/sales/orders", tags=["sales", "orders"])

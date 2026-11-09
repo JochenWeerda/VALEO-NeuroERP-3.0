@@ -32,7 +32,7 @@ class TestUIX050AuditReason:
     def test_only_critical_actions_require_audit_reason(self):
         """auditReasonRequired sollte nur bei critical/high gesetzt sein."""
         screen_ids = [
-            "crm/customer-360", "sales/sales-order", "einkauf/supplier",
+            "crm/customer-360", "einkauf/supplier",
             "finance/ar-open-item", "lager/stock-movement", "finance/payment-run",
         ]
         for sid in screen_ids:

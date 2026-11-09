@@ -2845,7 +2845,6 @@
    "schreiber": [
     "app/api/v1/endpoints/beleg_vordrucke.py",
     "app/api/v1/endpoints/personal.py",
-    "app/api/v1/endpoints/sales_orders.py",
     "app/api/v1/endpoints/transporte.py",
     "app/core/screen_definitions_listen.py",
     "app/domains/operations/repository.py",
@@ -2853,8 +2852,8 @@
    ],
    "worker": [],
    "identitaet": {
-    "nutzlast": 3,
-    "token": 4
+    "nutzlast": 2,
+    "token": 3
    },
    "standardmandant_stellen": [],
    "null_stellen": [],

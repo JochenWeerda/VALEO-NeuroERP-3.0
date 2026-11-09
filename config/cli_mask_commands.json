@@ -342,7 +342,6 @@
   "mask:qualitaet/reklamation:abschliessen",
   "mask:qualitaet/reklamation:bearbeiten",
   "mask:sales/delivery-note:drucken",
-  "mask:sales/sales-order:bearbeiten",
   "mask:schnittstelle/mde-inbox:process_pending",
   "mask:stammdaten/hausbank:edit",
   "mask:stammdaten/mengeneinheit:edit",

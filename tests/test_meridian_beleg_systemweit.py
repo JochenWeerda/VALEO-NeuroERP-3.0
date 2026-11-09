@@ -177,7 +177,6 @@ _IDENTITAET = {
     "qualitaet/reklamation": "reklamation_nr",
     "sales/delivery-note": "delivery_note_number",
     "sales/invoice": "invoice_number",
-    "sales/sales-order": "order_number",
 }
 
 
